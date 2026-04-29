@@ -338,7 +338,7 @@ export function MainWindow() {
       {view !== "settings" && (
         <nav className="tab-bar">
           <button className={`tab-btn ${view === "beat" ? "active" : ""}`} onClick={() => setView("beat")}>Metronome</button>
-          <button className={`tab-btn ${view === "train" ? "active" : ""}`} onClick={() => setView("train")}>Train</button>
+          <button className={`tab-btn ${view === "train" ? "active" : ""}`} onClick={() => setView("train")}>Drill</button>
           <button className={`tab-btn ${view === "track" ? "active" : ""}`} onClick={() => setView("track")}>Tap It!</button>
         </nav>
       )}
