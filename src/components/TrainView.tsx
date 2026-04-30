@@ -290,7 +290,7 @@ export function TrainView({ state, currentBeat }: TrainViewProps) {
   const isDownbeat = currentBeat?.isDownbeat ?? false;
 
   return (
-    <div className="train-view" data-highlight={highlightMode || undefined}>
+    <div className="train-view" data-highlight={!ramp.active ? highlightMode || undefined : undefined}>
       <div className="train-current">
         <span className="train-current-bpm">{ramp.active ? ramp.currentBpm : state.bpm}</span>
         <span className="train-current-label">BPM</span>

@@ -75,16 +75,17 @@ interface HotkeyEntry {
   action: string;
   key: string;
   id: HotkeyAction;
+  desc: string;
 }
 
 const HOTKEYS: HotkeyEntry[] = [
-  { id: "play", action: "Play / Stop", key: "⌘⇧Space" },
-  { id: "bpm-down", action: "BPM −5", key: "⌘⇧↓" },
-  { id: "bpm-up", action: "BPM +5", key: "⌘⇧↑" },
-  { id: "bpm-down-1", action: "BPM −1", key: "⌘⇧⌥↓" },
-  { id: "bpm-up-1", action: "BPM +1", key: "⌘⇧⌥↑" },
-  { id: "toggle-mode", action: "Toggle mode", key: "⌘⇧M" },
-  { id: "toggle-view", action: "Settings / Widget", key: "⌘⇧O" },
+  { id: "play", action: "Play / Stop", key: "⌘⇧Space", desc: "Start or stop the metronome" },
+  { id: "bpm-down", action: "BPM −5", key: "⌘⇧↓", desc: "Decrease tempo by 5 BPM" },
+  { id: "bpm-up", action: "BPM +5", key: "⌘⇧↑", desc: "Increase tempo by 5 BPM" },
+  { id: "bpm-down-1", action: "BPM −1", key: "⌘⇧⌥↓", desc: "Fine decrease tempo by 1 BPM" },
+  { id: "bpm-up-1", action: "BPM +1", key: "⌘⇧⌥↑", desc: "Fine increase tempo by 1 BPM" },
+  { id: "toggle-mode", action: "Toggle mode", key: "⌘⇧M", desc: "Switch between compact and comfortable widget" },
+  { id: "toggle-view", action: "Settings / Widget", key: "⌘⇧O", desc: "Switch between settings and floating widget" },
 ];
 
 export function MainWindow() {
@@ -112,6 +113,17 @@ export function MainWindow() {
     });
   }, []);
   const [subOpen, setSubOpen] = useState(false);
+
+  // Escape exits settings
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && view === "settings") {
+        setView(prevTab.current);
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [view, setView]);
   const [soundOpen, setSoundOpen] = useState(false);
   const [keyBindings, setKeyBindings] = useState<Record<string, string>>(() =>
     Object.fromEntries(HOTKEYS.map((hk) => [hk.id, hk.key]))
@@ -308,7 +320,7 @@ export function MainWindow() {
             data-tooltip={view === "settings" ? "Back" : "Settings"}
           >
             {view === "settings" ? (
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
             ) : (
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             )}
@@ -540,7 +552,7 @@ export function MainWindow() {
                 </div>
                 {HOTKEYS.map((hk) => (
                   <div key={hk.id} className="hotkey-row">
-                    <span className="hotkey-action">{hk.action}</span>
+                    <span className="hotkey-action" data-tooltip={hk.desc}>{hk.action}</span>
                     <button
                       className={`hotkey-bind-btn ${bindingFor?.id === hk.id && bindingFor.type === "key" ? "listening" : ""}`}
                       onClick={() => {

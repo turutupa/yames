@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { AppState, BeatEvent, Subdivision } from "../types";
 import { setBpm, togglePlayback, setSubdivision, setTimeSignature, stopSpeedRamp, startSpeedRamp, startSpeedRampFrom, configureSpeedRamp } from "../ipc";
+import { ZenEffects, type ZenStyle } from "./ZenEffects";
 import "../styles/fullscreen.css";
 
 interface FullscreenViewProps {
@@ -26,12 +27,25 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
 
   const exitFullscreen = () => onExit();
 
+  const [zenStyle, setZenStyle] = useState<ZenStyle>(() => {
+    return (localStorage.getItem("mustik-zen-style") as ZenStyle) || "focus";
+  });
+  const handleZenStyle = (s: ZenStyle) => {
+    setZenStyle(s);
+    localStorage.setItem("mustik-zen-style", s);
+  };
+
   // Use document-level listener so Escape works regardless of focus
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") exitFullscreen();
       if (e.key === " ") {
         e.preventDefault();
+        e.stopPropagation();
+        // Blur any focused button to prevent double-triggering
+        if (document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur();
+        }
         if (activeTab === "train") {
           handleRampToggle();
         } else {
@@ -39,8 +53,8 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
         }
       }
     };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
+    document.addEventListener("keydown", handler, true); // capture phase
+    return () => document.removeEventListener("keydown", handler, true);
   }, [onExit, activeTab, ramp.active, ramp.startBpm, ramp.targetBpm, ramp.increment, ramp.decrement, ramp.barsPerStep, ramp.beatsPerBar, ramp.mode, ramp.cyclic]);
 
   const handleRampToggle = () => {
@@ -67,6 +81,28 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
       data-playing={state.isPlaying}
       onDoubleClick={exitFullscreen}
     >
+      <ZenEffects style={zenStyle} currentBeat={currentBeat} isPlaying={state.isPlaying} activeTab={activeTab} beatsPerMeasure={beatsPerMeasure} />
+
+      {/* Zen style selector */}
+      <div className="zen-style-selector" onDoubleClick={(e) => e.stopPropagation()}>
+        {(["focus", "pulse", "gravity", "sweep", "cosmos"] as ZenStyle[]).map((s) => (
+          <button
+            key={s}
+            className={`zen-style-btn ${zenStyle === s ? "active" : ""}`}
+            onClick={() => handleZenStyle(s)}
+            onKeyDown={(e) => { if (e.key === " ") e.preventDefault(); }}
+            tabIndex={-1}
+            data-tooltip={s.charAt(0).toUpperCase() + s.slice(1)}
+          >
+            {s === "focus" && <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="5"/></svg>}
+            {s === "pulse" && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/></svg>}
+            {s === "gravity" && <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="3"/><line x1="12" y1="18" x2="12" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>}
+            {s === "sweep" && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="12" x2="12" y2="5"/></svg>}
+            {s === "cosmos" && <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="8" r="1.5"/><circle cx="18" cy="6" r="1"/><circle cx="12" cy="16" r="1.5"/><circle cx="4" cy="18" r="1"/><circle cx="19" cy="15" r="1.2"/></svg>}
+          </button>
+        ))}
+      </div>
+
       <div className="fs-content">
         {/* BPM display */}
         <div className="fs-center">

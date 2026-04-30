@@ -13,6 +13,19 @@
   outline: none;
   cursor: default;
   overflow: hidden;
+
+  /* Force light text colors regardless of theme (dark bg always) */
+  --text-primary: rgba(255, 255, 255, 0.95);
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-muted: rgba(255, 255, 255, 0.4);
+}
+
+/* Prevent buttons from capturing Space key (used for play/pause) */
+.fullscreen-view button {
+  -webkit-user-select: none;
+}
+.fullscreen-view button:focus {
+  outline: none;
 }
 
 /* Main content wrapper — always vertically centered */
@@ -197,9 +210,9 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.6);
   font-size: 0.8rem;
   font-weight: 600;
   display: flex;
@@ -210,9 +223,9 @@
 }
 
 .fs-ctrl-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--text-primary);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .fs-ctrl-sub {
@@ -262,3 +275,104 @@
 .fullscreen-view:hover .fs-exit-hint {
   opacity: 0.5;
 }
+
+/* =================== Zen Styles =================== */
+
+/* Zen style selector */
+.zen-style-selector {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.fullscreen-view:hover .zen-style-selector {
+  opacity: 0.7;
+}
+
+.fullscreen-view:hover .zen-style-selector:hover {
+  opacity: 1;
+}
+
+.zen-style-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.zen-style-btn[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  padding: 4px 8px;
+  border-radius: 5px;
+  background: rgba(20, 20, 30, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s, transform 0.15s;
+  z-index: 50;
+}
+
+.zen-style-btn[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.zen-style-btn:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.zen-style-btn.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+}
+
+/* ─── Pulse ──────────────────────────────────────── */
+.zen-pulse {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--accent) 12%, transparent) 0%,
+    transparent 60%
+  );
+  animation: zenPulseBreathe 4s ease-in-out infinite;
+}
+
+@keyframes zenPulseBreathe {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+
+
+

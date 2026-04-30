@@ -985,6 +985,32 @@
 .hotkey-action {
   font-size: 0.85rem;
   color: var(--text-primary);
+  position: relative;
+  cursor: default;
+}
+
+.hotkey-action[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 0.7rem;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.15s, transform 0.15s;
+  z-index: 50;
+}
+
+.hotkey-action[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .hotkey-row kbd {

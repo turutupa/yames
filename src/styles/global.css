@@ -108,6 +108,7 @@ kbd {
 /* Light theme: popovers, tooltips, tips */
 [data-theme-group="light"] .header-volume-popover { background: var(--bg-secondary); border-color: var(--border); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
 [data-theme-group="light"] .header-btn[data-tooltip]::after { background: var(--bg-secondary); border-color: var(--border); color: var(--text-primary); }
+[data-theme-group="light"] .hotkey-action[data-tooltip]::after { background: var(--bg-secondary); border-color: var(--border); color: var(--text-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 [data-theme-group="light"] .train-tip { background: var(--bg-secondary); border-color: var(--border); color: var(--text-secondary); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 [data-theme-group="light"] .track-stat-popover { background: var(--bg-secondary); border-color: var(--border); color: var(--text-secondary); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
 [data-theme-group="light"] .train-config { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.06); }
