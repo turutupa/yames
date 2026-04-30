@@ -10,9 +10,9 @@ interface Particle {
   hue: number;
 }
 
-const PARTICLE_THEMES: Record<string, { hues: number[]; count: number; glow: string; glowMid: string }> = {
-  aurora: { hues: [190, 210, 280], count: 25, glow: "rgba(0, 212, 255, 0.4)", glowMid: "rgba(0, 212, 255, 0.12)" },
-  prism:  { hues: [330, 280, 200, 30], count: 25, glow: "rgba(255, 61, 138, 0.35)", glowMid: "rgba(255, 61, 138, 0.1)" },
+const PARTICLE_THEMES: Record<string, { hues: number[]; count: number; glow: string; glowMid: string; blend: string; glowRadius: number; particleLightness: number; particleBaseOpacity: number }> = {
+  aurora: { hues: [190, 210, 280], count: 25, glow: "rgba(0, 212, 255, 0.4)", glowMid: "rgba(0, 212, 255, 0.12)", blend: "screen", glowRadius: 200, particleLightness: 70, particleBaseOpacity: 0.3 },
+  prism:  { hues: [330, 280, 200, 30], count: 30, glow: "rgba(255, 61, 138, 0.5)", glowMid: "rgba(255, 61, 138, 0.15)", blend: "multiply", glowRadius: 130, particleLightness: 45, particleBaseOpacity: 0.6 },
 };
 
 export function ThemeEffects({ themeId }: { themeId: string }) {
@@ -60,8 +60,8 @@ export function ThemeEffects({ themeId }: { themeId: string }) {
       y: Math.random() * canvas.height,
       vx: (Math.random() - 0.5) * 0.3,
       vy: (Math.random() - 0.5) * 0.3,
-      size: Math.random() * 2 + 1,
-      opacity: Math.random() * 0.3 + 0.1,
+      size: Math.random() * 2.5 + 1.5,
+      opacity: Math.random() * config.particleBaseOpacity + config.particleBaseOpacity * 0.3,
       hue: config.hues[Math.floor(Math.random() * config.hues.length)],
     }));
 
@@ -71,12 +71,13 @@ export function ThemeEffects({ themeId }: { themeId: string }) {
 
       // Cursor glow
       if (mx > 0 && my > 0) {
-        const gradient = ctx.createRadialGradient(mx, my, 0, mx, my, 200);
+        const r = config.glowRadius;
+        const gradient = ctx.createRadialGradient(mx, my, 0, mx, my, r);
         gradient.addColorStop(0, config.glow);
         gradient.addColorStop(0.4, config.glowMid);
         gradient.addColorStop(1, "transparent");
         ctx.fillStyle = gradient;
-        ctx.fillRect(mx - 200, my - 200, 400, 400);
+        ctx.fillRect(mx - r, my - r, r * 2, r * 2);
       }
 
       // Particles
@@ -105,14 +106,14 @@ export function ThemeEffects({ themeId }: { themeId: string }) {
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size + boost * 2, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${p.hue}, 80%, 70%, ${alpha})`;
+        ctx.fillStyle = `hsla(${p.hue}, 85%, ${config.particleLightness}%, ${alpha})`;
         ctx.fill();
 
         // Subtle glow ring
         if (alpha > 0.3) {
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.size * 3 + boost * 4, 0, Math.PI * 2);
-          ctx.fillStyle = `hsla(${p.hue}, 80%, 70%, ${alpha * 0.15})`;
+          ctx.fillStyle = `hsla(${p.hue}, 85%, ${config.particleLightness}%, ${alpha * 0.2})`;
           ctx.fill();
         }
       }
@@ -138,7 +139,7 @@ export function ThemeEffects({ themeId }: { themeId: string }) {
         inset: 0,
         zIndex: 9999,
         pointerEvents: "none",
-        mixBlendMode: "screen",
+        mixBlendMode: config.blend as any,
       }}
     />
   );

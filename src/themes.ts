@@ -142,7 +142,7 @@ const aurora: Theme = {
   preview: ["#0a0020", "#1a0a3a", "#00d4ff"],
   vars: {
     "--bg-primary": "linear-gradient(160deg, #0a0020 0%, #1a0a3a 35%, #002a3a 65%, #0a1a28 100%)",
-    "--bg-secondary": "#110a2a",
+    "--bg-secondary": "rgba(15, 8, 40, 0.85)",
     "--bg-card": "rgba(255, 255, 255, 0.05)",
     "--bg-widget": "linear-gradient(135deg, #0a0020, #1a0a3a, #002a3a)",
     "--accent": "#00d4ff",
@@ -279,8 +279,8 @@ const lavender: Theme = {
     "--surface-hover": "rgba(124, 58, 237, 0.05)",
     "--surface-active": "rgba(124, 58, 237, 0.1)",
     "--shadow": "0 8px 32px rgba(30, 19, 56, 0.08)",
-    "--font-family": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-    "--font-weight": "500",
+    "--font-family": "'Quicksand', 'Nunito', system-ui, sans-serif",
+    "--font-weight": "600",
   },
 };
 

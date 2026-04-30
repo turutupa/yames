@@ -35,10 +35,13 @@ export function TrainView({ state, currentBeat }: TrainViewProps) {
   // Ghost elements for smooth exit animations
   const prevStepsRef = useRef<number[]>([]);
   const prevBarsRef = useRef(barsPerStep);
+  const prevBeatsRef = useRef(beatsPerBar);
   const [ghostRows, setGhostRows] = useState<number[]>([]);
   const [ghostCols, setGhostCols] = useState(0);
+  const [ghostDots, setGhostDots] = useState(0);
   const ghostRowTimer = useRef<ReturnType<typeof setTimeout>>();
   const ghostColTimer = useRef<ReturnType<typeof setTimeout>>();
+  const ghostDotTimer = useRef<ReturnType<typeof setTimeout>>();
 
   // Sync local form with state when it changes from backend
   useEffect(() => {
@@ -159,6 +162,18 @@ export function TrainView({ state, currentBeat }: TrainViewProps) {
     }
     prevBarsRef.current = barsPerStep;
   }, [barsPerStep]);
+
+  useEffect(() => {
+    const prev = prevBeatsRef.current;
+    if (prev > beatsPerBar) {
+      setGhostDots(prev - beatsPerBar);
+      clearTimeout(ghostDotTimer.current);
+      ghostDotTimer.current = setTimeout(() => setGhostDots(0), 250);
+    } else {
+      setGhostDots(0);
+    }
+    prevBeatsRef.current = beatsPerBar;
+  }, [beatsPerBar]);
 
   // Auto-resize window to fit grid content
   const prevSize = useRef<{ width: number; height: number } | null>(null);
@@ -291,6 +306,9 @@ export function TrainView({ state, currentBeat }: TrainViewProps) {
               />
             );
           })}
+          {ghostDots > 0 && Array.from({ length: ghostDots }, (_, i) => (
+            <div key={`ghost-dot-${i}`} className="train-dot exiting" />
+          ))}
         </div>
         <span className="train-current-step" style={{ visibility: ramp.active || ramp.completed ? "visible" : "hidden" }}>
           {ramp.completed

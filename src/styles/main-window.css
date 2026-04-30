@@ -95,6 +95,7 @@
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  backdrop-filter: blur(12px);
   width: 140px;
   z-index: 100;
   opacity: 0;
@@ -115,12 +116,13 @@
   appearance: none;
   height: 4px;
   border-radius: 2px;
-  background: linear-gradient(
+  background: var(--bg-card, #1a1a2e);
+  background-image: linear-gradient(
     to right,
     var(--accent) 0%,
     var(--accent) var(--volume-pct, 80%),
-    var(--bg-primary) var(--volume-pct, 80%),
-    var(--bg-primary) 100%
+    transparent var(--volume-pct, 80%),
+    transparent 100%
   );
   outline: none;
   border: none;
