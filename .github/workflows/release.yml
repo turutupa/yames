@@ -49,8 +49,8 @@ jobs:
       - name: Install frontend dependencies
         shell: bash
         run: |
-          rm -f package-lock.json
-          npm install
+          npm ci || npm install
+          npx tauri --version || (npm install @tauri-apps/cli && npx tauri --version)
 
       - name: Extract version from commit message
         id: version
