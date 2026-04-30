@@ -312,8 +312,8 @@
   max-height: 0;
   overflow: hidden;
   padding: 0 12px;
-  background: var(--surface-2, #2a2a3e);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-secondary, #2a2a3e);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
   border-radius: 8px;
   font-size: 0.7rem;
   line-height: 1.5;

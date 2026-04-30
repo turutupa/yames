@@ -42,8 +42,7 @@
         "alwaysOnTop": true,
         "skipTaskbar": true,
         "visibleOnAllWorkspaces": true,
-        "x": 100,
-        "y": 40
+        "center": true
       }
     ],
     "trayIcon": {

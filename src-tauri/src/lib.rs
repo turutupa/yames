@@ -4,7 +4,7 @@ mod state;
 
 use commands::{
     get_state, get_active_tab, get_last_window, get_calibration_offset, save_window_position, save_window_size, set_accent_color, set_active_tab, set_always_on_top, set_bpm, set_calibration_offset, set_corner,
-    set_playing, set_sound_type, set_subdivision, set_time_signature, set_volume, set_widget_mode,
+    set_playing, set_sound_type, set_subdivision, set_theme, set_time_signature, set_volume, set_widget_mode,
     show_floating, show_main, toggle_playback, configure_speed_ramp, start_speed_ramp,
     start_speed_ramp_from, stop_speed_ramp, toggle_fullscreen, set_fullscreen, EngineState,
 };
@@ -47,6 +47,9 @@ pub fn run() {
                 }
                 if let Some(v) = store.get("accentColor").and_then(|v| v.as_str().map(String::from)) {
                     s.accent_color = v;
+                }
+                if let Some(v) = store.get("theme").and_then(|v| v.as_str().map(String::from)) {
+                    s.theme = v;
                 }
                 if let Some(v) = store.get("volume").and_then(|v| v.as_f64()) {
                     s.volume = (v as f32).clamp(0.0, 1.0);
@@ -179,6 +182,7 @@ pub fn run() {
             set_corner,
             set_always_on_top,
             set_accent_color,
+            set_theme,
             set_volume,
             show_main,
             show_floating,

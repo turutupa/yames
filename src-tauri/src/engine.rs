@@ -39,39 +39,46 @@ fn advance_ramp(
 ) -> (u16, String, bool) {
     match mode {
         "zigzag" => {
+            // Zigzag alternates every step: +increment, -decrement, +increment, -decrement...
+            // Net gain per pair = increment - decrement, so it crawls toward target.
             if direction == "up" {
                 let new_bpm = current_bpm.saturating_add(increment).min(300);
                 if new_bpm >= target_bpm {
-                    // Reached target, reverse direction
-                    (target_bpm, "down".to_string(), false)
+                    (target_bpm, "up".to_string(), true)
+                } else {
+                    // Next step will go down
+                    (new_bpm, "down".to_string(), false)
+                }
+            } else {
+                // Go down by decrement, but never below start_bpm
+                let new_bpm = current_bpm.saturating_sub(decrement).max(start_bpm);
+                // Next step will go up
+                (new_bpm, "up".to_string(), false)
+            }
+        }
+        _ => {
+            // Linear: go up in increments
+            if direction == "up" {
+                let new_bpm = current_bpm.saturating_add(increment).min(300);
+                if new_bpm >= target_bpm {
+                    if cyclic {
+                        // Cyclic: reached target, now come back down
+                        (target_bpm, "down".to_string(), false)
+                    } else {
+                        (target_bpm, "up".to_string(), true)
+                    }
                 } else {
                     (new_bpm, "up".to_string(), false)
                 }
             } else {
-                // Going down
-                let new_bpm = current_bpm.saturating_sub(decrement).max(20);
+                // Cyclic coming back down
+                let new_bpm = current_bpm.saturating_sub(increment).max(20);
                 if new_bpm <= start_bpm {
-                    if cyclic {
-                        (start_bpm, "up".to_string(), false)
-                    } else {
-                        (start_bpm, "down".to_string(), true)
-                    }
+                    // Completed one round-trip cycle
+                    (start_bpm, "up".to_string(), false)
                 } else {
                     (new_bpm, "down".to_string(), false)
                 }
-            }
-        }
-        _ => {
-            // linear
-            let new_bpm = current_bpm.saturating_add(increment).min(300);
-            if new_bpm >= target_bpm {
-                if cyclic {
-                    (start_bpm, "up".to_string(), false)
-                } else {
-                    (target_bpm, "up".to_string(), true)
-                }
-            } else {
-                (new_bpm, "up".to_string(), false)
             }
         }
     }

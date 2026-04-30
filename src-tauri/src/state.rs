@@ -60,6 +60,7 @@ pub struct AppState {
     pub always_on_top: bool,
     #[serde(rename = "accentColor")]
     pub accent_color: String,
+    pub theme: String,
     pub volume: f32,
     #[serde(rename = "soundType")]
     pub sound_type: String,
@@ -79,6 +80,7 @@ impl Default for AppState {
             corner: "top-right".to_string(),
             always_on_top: true,
             accent_color: "#e94560".to_string(),
+            theme: "mono".to_string(),
             volume: 0.8,
             sound_type: "click".to_string(),
             time_signature: 4,

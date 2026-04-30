@@ -30,10 +30,18 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") exitFullscreen();
+      if (e.key === " ") {
+        e.preventDefault();
+        if (activeTab === "train") {
+          handleRampToggle();
+        } else {
+          togglePlayback();
+        }
+      }
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [onExit]);
+  }, [onExit, activeTab, ramp.active, ramp.startBpm, ramp.targetBpm, ramp.increment, ramp.decrement, ramp.barsPerStep, ramp.beatsPerBar, ramp.mode, ramp.cyclic]);
 
   const handleRampToggle = () => {
     if (ramp.active) {
@@ -62,8 +70,8 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
       <div className="fs-content">
         {/* BPM display */}
         <div className="fs-center">
-          {activeTab === "train" && ramp.active && (
-            <div className="fs-ramp-info">
+          {activeTab === "train" && (
+            <div className="fs-ramp-info" style={{ visibility: ramp.active ? "visible" : "hidden" }}>
               <span className="fs-ramp-step">Step {ramp.currentStep + 1}</span>
               <span className="fs-ramp-target">→ {ramp.targetBpm}</span>
             </div>
@@ -106,54 +114,55 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
               let bpm = ramp.startBpm;
               let dir: "up" | "down" = "up";
               steps.push(bpm);
-              for (let i = 0; i < 100; i++) {
+              for (let i = 0; i < 200; i++) {
                 if (ramp.mode === "zigzag") {
                   if (dir === "up") {
                     bpm = Math.min(bpm + ramp.increment, ramp.targetBpm);
-                    if (bpm >= ramp.targetBpm) { dir = "down"; steps.push(bpm); continue; }
+                    if (bpm >= ramp.targetBpm) { steps.push(bpm); break; }
+                    dir = "down";
                   } else {
                     bpm = Math.max(bpm - ramp.decrement, ramp.startBpm);
-                    if (bpm <= ramp.startBpm) {
-                      if (ramp.cyclic) { dir = "up"; } else { steps.push(bpm); break; }
-                    }
+                    dir = "up";
                   }
                 } else {
-                  bpm = Math.min(bpm + ramp.increment, ramp.targetBpm);
-                  if (bpm >= ramp.targetBpm) {
-                    if (ramp.cyclic) { bpm = ramp.startBpm; } else { steps.push(bpm); break; }
+                  if (dir === "up") {
+                    bpm = Math.min(bpm + ramp.increment, ramp.targetBpm);
+                    if (bpm >= ramp.targetBpm) {
+                      steps.push(bpm);
+                      if (ramp.cyclic) { dir = "down"; continue; } else { break; }
+                    }
+                  } else {
+                    bpm = Math.max(bpm - ramp.increment, ramp.startBpm);
+                    if (bpm <= ramp.startBpm) { steps.push(bpm); break; }
                   }
                 }
                 steps.push(bpm);
               }
               return (
-                <>
-                  <div className="fs-ramp-grid">
-                    {steps.map((stepBpm, stepIdx) => {
-                      const isDone = stepIdx < ramp.currentStep;
-                      const isCurrent = stepIdx === ramp.currentStep && ramp.active;
-                      const pct = (stepBpm - ramp.startBpm) / Math.max(1, ramp.targetBpm - ramp.startBpm);
-                      return (
-                        <div
-                          key={stepIdx}
-                          className="fs-ramp-grid-col"
-                        >
-                          {Array.from({ length: ramp.barsPerStep }, (_, barIdx) => {
-                            const barDone = isDone || (isCurrent && barIdx < ramp.barsInStep);
-                            const barActive = isCurrent && barIdx === ramp.barsInStep;
-                            return (
-                              <div
-                                key={barIdx}
-                                className={`fs-ramp-grid-cell ${barDone ? "done" : ""} ${barActive ? "current" : ""}`}
-                                style={{ opacity: barDone || barActive ? 1 : 0.3 + pct * 0.4, cursor: "pointer" }}
-                                onClick={() => startSpeedRampFrom(stepIdx, stepBpm, barIdx)}
-                              />
-                            );
-                          })}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </>
+                <div className="fs-ramp-grid">
+                  {steps.map((stepBpm, stepIdx) => {
+                    const isDone = stepIdx < ramp.currentStep;
+                    const isCurrent = stepIdx === ramp.currentStep && ramp.active;
+                    const pct = steps.length > 1 ? stepIdx / (steps.length - 1) : 0;
+                    const rowOpacity = 0.15 + pct * 0.85;
+                    return (
+                      <div key={stepIdx} className="fs-ramp-grid-row">
+                        {Array.from({ length: ramp.barsPerStep }, (_, barIdx) => {
+                          const barDone = isDone || (isCurrent && barIdx < ramp.barsInStep);
+                          const barActive = isCurrent && barIdx === ramp.barsInStep;
+                          return (
+                            <div
+                              key={barIdx}
+                              className={`fs-ramp-grid-cell ${barDone ? "done" : ""} ${barActive ? "current" : ""}`}
+                              style={{ cursor: "pointer", opacity: barDone || barActive ? undefined : rowOpacity * 0.3 }}
+                              onClick={() => startSpeedRampFrom(stepIdx, stepBpm, barIdx)}
+                            />
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
+                </div>
               );
             })()}
           </div>
@@ -179,11 +188,17 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
 
         {activeTab === "train" ? (
           <button className={`fs-play-btn ${ramp.active ? "playing" : ""}`} onClick={handleRampToggle}>
-            {ramp.active ? "■" : "▶"}
+            {ramp.active
+              ? <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><rect x="2" y="2" width="14" height="14" rx="2"/></svg>
+              : <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M4 2.5v15l13-7.5z"/></svg>
+            }
           </button>
         ) : (
           <button className={`fs-play-btn ${state.isPlaying ? "playing" : ""}`} onClick={() => togglePlayback()}>
-            {state.isPlaying ? "■" : "▶"}
+            {state.isPlaying
+              ? <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><rect x="2" y="2" width="14" height="14" rx="2"/></svg>
+              : <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M4 2.5v15l13-7.5z"/></svg>
+            }
           </button>
         )}
 

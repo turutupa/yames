@@ -38,6 +38,10 @@ export async function setAccentColor(color: string): Promise<void> {
   return invoke("set_accent_color", { color });
 }
 
+export async function setTheme(theme: string): Promise<void> {
+  return invoke("set_theme", { theme });
+}
+
 export async function setVolume(volume: number): Promise<void> {
   return invoke("set_volume", { volume });
 }

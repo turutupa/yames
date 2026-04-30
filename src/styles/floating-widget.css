@@ -1,8 +1,8 @@
 .floating-widget {
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #14142a, #0c0c1c);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-widget, linear-gradient(135deg, #14142a, #0c0c1c));
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
   border-radius: 16px;
   padding: 14px 18px 12px;
   position: relative;

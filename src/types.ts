@@ -27,6 +27,7 @@ export type AppState = {
   corner: Corner;
   alwaysOnTop: boolean;
   accentColor: string;
+  theme: string;
   volume: number;
   soundType: string;
   timeSignature: number;

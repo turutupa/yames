@@ -18,7 +18,7 @@
 .train-current-bpm {
   font-size: 3rem;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--text-primary);
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
@@ -43,7 +43,7 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
   border: 2px solid rgba(255, 255, 255, 0.15);
-  transition: all 0.08s ease;
+  transition: all 0.08s ease, opacity 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
 }
 
 .train-dot.active {
@@ -90,17 +90,92 @@
   margin-bottom: -12px;
 }
 
-/* GitHub-style step grid */
-.train-grid {
+/* Rotated grid: rows = BPM steps, cols = repeats */
+.train-grid-wrapper {
   display: flex;
-  gap: 4px;
-  justify-content: center;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
 }
 
-.train-grid-col {
+.train-grid-legend-bottom {
   display: flex;
-  flex-direction: column-reverse;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  max-width: fit-content;
+  margin-top: 4px;
+}
+
+.train-grid-corner {
+  width: 40px;
+  flex-shrink: 0;
+}
+
+.train-grid-legend-label {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding-left: 2px;
+  transition: opacity 0.3s ease, color 0.3s ease;
+}
+
+.train-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.train-grid-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  animation: gridRowIn 0.25s ease;
+}
+
+@keyframes gridRowIn {
+  from { opacity: 0; transform: translateY(-4px); }
+}
+
+.train-grid-row.exiting {
+  animation: gridRowOut 0.25s ease forwards;
+}
+
+@keyframes gridRowOut {
+  to { opacity: 0; transform: translateY(4px) scaleY(0.6); max-height: 0; margin-top: -4px; }
+}
+
+.train-grid-cell.exiting {
+  animation: gridCellOut 0.2s ease forwards;
+}
+
+@keyframes gridCellOut {
+  to { opacity: 0 !important; transform: scale(0.3); }
+}
+
+.train-grid-bpm {
+  width: 40px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: right;
+  padding-right: 6px;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s ease, opacity 0.3s ease, transform 0.3s ease, text-shadow 0.3s ease;
+}
+
+.train-grid-bpm.current {
+  color: var(--accent);
+}
+
+.train-grid-bpm.done {
+  color: var(--text-secondary);
+}
+
+.train-grid-cells {
+  display: flex;
   gap: 4px;
 }
 
@@ -109,7 +184,13 @@
   height: 28px;
   border-radius: 4px;
   background: var(--accent);
-  transition: opacity 0.15s ease;
+  opacity: 0.2;
+  transition: opacity 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  animation: gridCellIn 0.2s ease;
+}
+
+@keyframes gridCellIn {
+  from { transform: scale(0.4); opacity: 0; }
 }
 
 .train-grid-cell.done {
@@ -120,6 +201,59 @@
 .train-grid-cell.current {
   opacity: 1 !important;
   box-shadow: 0 0 6px var(--accent-glow);
+}
+
+/* Spotlight: dim grid + dots, then boost targeted elements */
+.train-view[data-highlight] .train-grid-cell {
+  opacity: 0.06 !important;
+}
+.train-view[data-highlight] .train-grid-bpm {
+  opacity: 0.3;
+}
+.train-view[data-highlight] .train-grid-legend-label {
+  opacity: 0.3;
+}
+.train-view[data-highlight] .train-dot {
+  opacity: 0.15;
+}
+
+/* Beats spotlight: highlight the beat dots */
+.train-view[data-highlight="beats"] .train-dot {
+  opacity: 1;
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow), 0 0 24px var(--accent-glow);
+  transform: scale(1.2);
+}
+
+/* Repeats spotlight: highlight entire first row */
+.train-view[data-highlight="repeats"] [data-row-idx="0"] .train-grid-cell {
+  opacity: 0.9 !important;
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+.train-view[data-highlight="repeats"] [data-row-idx="0"] .train-grid-bpm {
+  opacity: 1;
+  color: var(--accent);
+}
+.train-view[data-highlight="repeats"] .train-grid-legend-label {
+  opacity: 1;
+  color: var(--accent);
+}
+
+/* Start BPM spotlight: highlight first row's BPM label */
+.train-view[data-highlight="startBpm"] [data-row-idx="0"] .train-grid-bpm {
+  opacity: 1;
+  color: var(--accent);
+  text-shadow: 0 0 8px var(--accent-glow);
+  transform: scale(1.15);
+}
+
+/* Target BPM spotlight: highlight last row's BPM label */
+.train-view[data-highlight="targetBpm"] [data-last-row] .train-grid-bpm {
+  opacity: 1;
+  color: var(--accent);
+  text-shadow: 0 0 8px var(--accent-glow);
+  transform: scale(1.15);
 }
 
 /* Config form */
@@ -145,7 +279,7 @@
 }
 
 .train-row label {
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   color: var(--text-secondary);
   flex-shrink: 0;
 }
@@ -165,10 +299,10 @@
   bottom: calc(100% + 8px);
   left: 0;
   width: 220px;
-  background: var(--bg-elevated, #2a2a3e);
+  background: var(--bg-secondary, #2a2a3e);
   border: 1px solid var(--border, rgba(255,255,255,0.1));
   border-radius: 8px;
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   line-height: 1.4;
   color: var(--text-secondary);
   z-index: 100;
@@ -191,7 +325,7 @@
   border: 1px solid var(--border);
   background: var(--surface-2);
   color: var(--text-primary);
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   text-align: center;
   font-variant-numeric: tabular-nums;
   -moz-appearance: textfield;
@@ -249,7 +383,7 @@
 
 .train-row .toggle-btn {
   padding: 6px 12px;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
 }
 
 /* Timer */
@@ -322,7 +456,7 @@
 }
 
 .tab-btn.active {
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.08);
+  color: var(--accent-text, #fff);
+  background: var(--accent);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }

@@ -16,6 +16,7 @@ fn persist_state(state: &SharedState, app_handle: &AppHandle) {
         store.set("corner", serde_json::json!(s.corner));
         store.set("alwaysOnTop", serde_json::json!(s.always_on_top));
         store.set("accentColor", serde_json::json!(s.accent_color));
+        store.set("theme", serde_json::json!(s.theme));
         store.set("volume", serde_json::json!(s.volume));
         store.set("soundType", serde_json::json!(s.sound_type));
         store.set("timeSignature", serde_json::json!(s.time_signature));
@@ -177,6 +178,16 @@ pub fn set_accent_color(color: String, state: State<SharedState>, app_handle: Ap
     {
         let mut s = state.lock().unwrap();
         s.accent_color = color;
+    }
+    let _ = app_handle.emit("state-changed", &*state.lock().unwrap());
+    persist_state(&state, &app_handle);
+}
+
+#[tauri::command]
+pub fn set_theme(theme: String, state: State<SharedState>, app_handle: AppHandle) {
+    {
+        let mut s = state.lock().unwrap();
+        s.theme = theme;
     }
     let _ = app_handle.emit("state-changed", &*state.lock().unwrap());
     persist_state(&state, &app_handle);

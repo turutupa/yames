@@ -1,11 +1,13 @@
 import { useMetronome } from "../hooks/useMetronome";
 import { useDrag } from "../hooks/useDrag";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { setBpm, setSubdivision, togglePlayback, setWidgetMode, setAlwaysOnTop, setAccentColor, setVolume, setSoundType, setTimeSignature, showFloating, onFullscreenChanged, setActiveTab, getActiveTab } from "../ipc";
+import { setBpm, setSubdivision, togglePlayback, setWidgetMode, setAlwaysOnTop, setVolume, setSoundType, setTimeSignature, showFloating, onFullscreenChanged, setActiveTab, getActiveTab, setTheme } from "../ipc";
 import type { Subdivision, WidgetMode } from "../types";
+import { THEMES } from "../themes";
 import { TrainView } from "./TrainView";
 import { TrackView } from "./TrackView";
 import { FullscreenView } from "./FullscreenView";
+import { ThemeEffects } from "./ThemeEffects";
 import "../styles/main-window.css";
 
 const SOUND_TYPES = [
@@ -24,25 +26,6 @@ const TIME_SIGNATURES = [
   { beats: 5, label: "5/4" },
   { beats: 6, label: "6/8" },
   { beats: 7, label: "7/8" },
-];
-
-const ACCENT_COLORS = [
-  { name: "Rose",      hex: "#e94560", beatAccent: "#ff9eb0" },
-  { name: "Coral",     hex: "#ff6b6b", beatAccent: "#ffb8b8" },
-  { name: "Peach",     hex: "#ff9a76", beatAccent: "#ffd4b8" },
-  { name: "Amber",     hex: "#f59e0b", beatAccent: "#fde68a" },
-  { name: "Lime",      hex: "#84cc16", beatAccent: "#d9f99d" },
-  { name: "Emerald",   hex: "#10b981", beatAccent: "#6ee7b7" },
-  { name: "Teal",      hex: "#14b8a6", beatAccent: "#5eead4" },
-  { name: "Cyan",      hex: "#06b6d4", beatAccent: "#67e8f9" },
-  { name: "Sky",       hex: "#0ea5e9", beatAccent: "#7dd3fc" },
-  { name: "Blue",      hex: "#3b82f6", beatAccent: "#93c5fd" },
-  { name: "Indigo",    hex: "#6366f1", beatAccent: "#a5b4fc" },
-  { name: "Violet",    hex: "#8b5cf6", beatAccent: "#c4b5fd" },
-  { name: "Purple",    hex: "#a855f7", beatAccent: "#d8b4fe" },
-  { name: "Fuchsia",   hex: "#d946ef", beatAccent: "#f0abfc" },
-  { name: "Pink",      hex: "#ec4899", beatAccent: "#f9a8d4" },
-  { name: "White",     hex: "#e2e8f0", beatAccent: "#ffffff" },
 ];
 
 const TEMPO_MARKINGS: [number, string][] = [
@@ -283,6 +266,7 @@ export function MainWindow() {
 
   return (
     <div className="main-window" data-playing={state.isPlaying}>
+      <ThemeEffects themeId={state.theme} />
       <header className="main-header" onDoubleClick={() => { if (view !== "settings" && view !== "track") setIsFullscreen(true); }}>
         <h1>mustik</h1>
         <div className="header-actions">
@@ -526,16 +510,22 @@ export function MainWindow() {
             </section>
 
             <section className="settings-section">
-              <h2>Accent color</h2>
-              <div className="accent-grid">
-                {ACCENT_COLORS.map((c) => (
+              <h2>Theme</h2>
+              <div className="theme-grid">
+                {THEMES.map((t) => (
                   <button
-                    key={c.hex}
-                    className={`accent-swatch ${state.accentColor === c.hex ? "active" : ""}`}
-                    style={{ "--swatch-color": c.hex } as React.CSSProperties}
-                    title={c.name}
-                    onClick={() => setAccentColor(c.hex)}
-                  />
+                    key={t.id}
+                    className={`theme-card ${state.theme === t.id ? "active" : ""}`}
+                    onClick={() => setTheme(t.id)}
+                    title={t.name}
+                  >
+                    <div className="theme-card-preview">
+                      {t.preview.map((color, i) => (
+                        <div key={i} className="theme-card-swatch" style={{ background: color }} />
+                      ))}
+                    </div>
+                    <span className="theme-card-name">{t.name}</span>
+                  </button>
                 ))}
               </div>
             </section>

@@ -19,7 +19,7 @@
   justify-content: space-between;
   padding: 48px 24px 12px;
   flex-shrink: 0;
-  background: var(--bg-primary);
+  background: transparent;
   z-index: 10;
 }
 
@@ -40,22 +40,22 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--accent-subtle, rgba(233, 69, 96, 0.15));
-  color: var(--accent);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary);
   font-size: 1.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
   position: relative;
-  border: 1px solid var(--accent-subtle-hover, rgba(233, 69, 96, 0.25));
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .header-btn:hover,
 .header-btn.active {
-  background: var(--accent);
-  color: var(--accent-text, white);
-  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .header-btn[data-tooltip]::after {
@@ -885,32 +885,63 @@
   color: var(--accent-text, white);
 }
 
-/* =================== Accent color grid =================== */
-.accent-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+/* =================== Theme picker =================== */
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
 }
 
-.accent-swatch {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--swatch-color);
+.theme-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 10px;
+  background: transparent;
   border: 2px solid transparent;
   cursor: pointer;
-  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
-  position: relative;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
 }
 
-.accent-swatch:hover {
-  transform: scale(1.2);
-  box-shadow: 0 0 12px var(--swatch-color);
+.theme-card:hover {
+  background: var(--surface-hover, rgba(255, 255, 255, 0.04));
+  transform: translateY(-1px);
 }
 
-.accent-swatch.active {
-  border-color: white;
-  box-shadow: 0 0 10px var(--swatch-color);
+.theme-card.active {
+  border-color: var(--accent);
+  background: var(--surface-active, rgba(255, 255, 255, 0.06));
+}
+
+.theme-card-preview {
+  display: flex;
+  width: 100%;
+  height: 28px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.theme-card-swatch {
+  flex: 1;
+}
+
+.theme-card-swatch:last-child {
+  flex: 0.6;
+  border-left: 2px solid rgba(128, 128, 128, 0.15);
+}
+
+.theme-card-name {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.theme-card.active .theme-card-name {
+  color: var(--accent);
 }
 
 /* =================== Hotkeys =================== */

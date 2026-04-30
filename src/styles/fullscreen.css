@@ -151,14 +151,13 @@
 
 .fs-ramp-grid {
   display: flex;
+  flex-direction: column;
   gap: 5px;
-  justify-content: center;
-  flex-wrap: wrap;
+  align-items: center;
 }
 
-.fs-ramp-grid-col {
+.fs-ramp-grid-row {
   display: flex;
-  flex-direction: column-reverse;
   gap: 5px;
 }
 
@@ -234,6 +233,8 @@
   border: none;
   box-shadow: 0 4px 20px var(--accent-glow);
   transition: all 0.15s ease;
+  line-height: 1;
+  padding: 0;
 }
 
 .fs-play-btn:hover {
