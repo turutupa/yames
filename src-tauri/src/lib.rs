@@ -421,5 +421,12 @@ fn setup_global_shortcuts(app: &tauri::App) -> Result<(), Box<dyn std::error::Er
         }
     })?;
 
+    // Cmd+Shift+F → Toggle zen mode (fullscreen)
+    let app_handle = app.handle().clone();
+    app.global_shortcut().on_shortcut("CmdOrCtrl+Shift+F", move |_app, _shortcut, event| {
+        if event.state != ShortcutState::Pressed { return; }
+        let _ = app_handle.emit("fullscreen-changed", ());
+    })?;
+
     Ok(())
 }

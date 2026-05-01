@@ -101,6 +101,7 @@ const HOTKEYS: HotkeyEntry[] = [
   { id: "bpm-up-1", action: "BPM +1", key: "⌘⇧⌥↑", desc: "Fine increase tempo by 1 BPM" },
   { id: "toggle-mode", action: "Toggle mode", key: "⌘⇧M", desc: "Switch between compact and comfortable widget" },
   { id: "toggle-view", action: "Settings / Widget", key: "⌘⇧O", desc: "Switch between settings and floating widget" },
+  { id: "fullscreen", action: "Zen mode", key: "⌘⇧F", desc: "Toggle fullscreen zen mode" },
 ];
 
 export function MainWindow() {
@@ -312,7 +313,6 @@ export function MainWindow() {
     <div className="main-window" data-playing={state.isPlaying}>
       <ThemeEffects themeId={state.theme} />
       <header className="main-header" onDoubleClick={() => { if (view !== "settings" && view !== "track") setIsFullscreen(true); }}>
-        <h1>yames <span className="header-subtitle">Yet Another Metronome Everyone Skips</span></h1>
         <div className="header-actions">
           <div className="header-volume-wrap">
             <button className="header-btn header-volume-btn">
@@ -371,7 +371,7 @@ export function MainWindow() {
         </nav>
       )}
 
-      <div className="main-content">
+      <div className="main-content" data-view={view}>
         {view === "beat" ? (
           <>
             <section className="bpm-section">

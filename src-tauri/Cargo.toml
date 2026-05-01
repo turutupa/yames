@@ -1,6 +1,6 @@
 [package]
 name = "yames"
-version = "0.4.0"
+version = "0.4.1"
 description = "Yet Another Metronome Everyone Skips — musician-grade floating metronome"
 authors = ["you"]
 edition = "2021"

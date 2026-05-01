@@ -17,8 +17,8 @@
 .main-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 48px 24px 12px;
+  justify-content: flex-end;
+  padding: 16px 24px 12px;
   flex-shrink: 0;
   background: transparent;
   z-index: 10;
@@ -162,6 +162,10 @@
   flex-direction: column;
   gap: 28px;
   justify-content: center;
+}
+
+.main-content[data-view="settings"] {
+  justify-content: flex-start;
 }
 
 .main-content::-webkit-scrollbar {
