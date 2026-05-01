@@ -72,8 +72,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: ${{ steps.version.outputs.tag }}
-          releaseName: 'Yam ${{ steps.version.outputs.tag }}'
-          releaseBody: 'Download Yam for your platform below.'
+          releaseName: 'Yames ${{ steps.version.outputs.tag }}'
+          releaseBody: 'Download Yames for your platform below.'
           releaseDraft: false
           prerelease: false
           tauriScript: npx tauri
