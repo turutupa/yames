@@ -93,8 +93,11 @@
               <span>Download for <span id="os-name">macOS</span></span>
             </a>
             <div class="platforms">
-              <button class="platform-pill active" data-os="macos">
-                macOS
+              <button class="platform-pill active" data-os="macos-silicon">
+                macOS (Apple Silicon)
+              </button>
+              <button class="platform-pill" data-os="macos-intel">
+                macOS (Intel)
               </button>
               <button class="platform-pill" data-os="windows">Windows</button>
               <button class="platform-pill" data-os="linux">Linux</button>
@@ -260,15 +263,50 @@
       // OS detection
       const osName = document.getElementById("os-name");
       const pills = document.querySelectorAll(".platform-pill");
+      const downloadBtn = document.getElementById("download-btn");
       const ua = navigator.userAgent.toLowerCase();
-      let detectedOS = "macos";
+      let detectedOS = "macos-silicon";
       if (ua.includes("win")) detectedOS = "windows";
       else if (ua.includes("linux")) detectedOS = "linux";
 
+      // Asset filename patterns to match from GitHub releases
+      const ASSET_PATTERNS = {
+        "macos-silicon": /aarch64\.dmg$/,
+        "macos-intel": /x64\.dmg$/,
+        "windows": /x64-setup\.exe$/,
+        "linux": /amd64\.deb$/,
+      };
+
+      const OS_LABELS = {
+        "macos-silicon": "macOS (Apple Silicon)",
+        "macos-intel": "macOS (Intel)",
+        "windows": "Windows",
+        "linux": "Linux",
+      };
+
+      // Fallback URL if API fails
+      const FALLBACK = "https://github.com/turutupa/yames/releases/latest";
+      let assetURLs = {};
+
+      // Fetch latest release assets from GitHub API
+      fetch("https://api.github.com/repos/turutupa/yames/releases/latest")
+        .then((r) => r.json())
+        .then((data) => {
+          if (!data.assets) return;
+          for (const [os, pattern] of Object.entries(ASSET_PATTERNS)) {
+            const asset = data.assets.find((a) => pattern.test(a.name));
+            if (asset) assetURLs[os] = asset.browser_download_url;
+          }
+          // Update button href with resolved URL
+          if (assetURLs[detectedOS]) downloadBtn.href = assetURLs[detectedOS];
+        })
+        .catch(() => {}); // Silently fall back to releases page
+
       function setOS(os) {
         pills.forEach((p) => p.classList.toggle("active", p.dataset.os === os));
-        osName.textContent =
-          os === "macos" ? "macOS" : os === "windows" ? "Windows" : "Linux";
+        osName.textContent = OS_LABELS[os] || "macOS (Apple Silicon)";
+        downloadBtn.href = assetURLs[os] || FALLBACK;
+        detectedOS = os;
       }
       setOS(detectedOS);
       pills.forEach((p) =>
