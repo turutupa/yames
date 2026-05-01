@@ -78,6 +78,7 @@ body {
 
 .feature {
   font-size: 0.95rem;
+  font-weight: 500;
   line-height: 1.5;
   color: var(--text-dim);
   transition: color 0.4s ease;
@@ -154,6 +155,297 @@ body {
   color: var(--accent);
 }
 
+/* ─── Install Note ─── */
+.install-note {
+  margin-top: 12px;
+  text-align: left;
+}
+
+.brew-install {
+  margin-bottom: 10px;
+}
+
+.brew-label {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  margin-bottom: 14px;
+  font-weight: 500;
+}
+
+.brew-cmd {
+  display: block;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-family: "SF Mono", "Menlo", "Consolas", monospace;
+  font-size: 0.88rem;
+  color: var(--accent);
+  cursor: pointer;
+  user-select: none;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+  position: relative;
+}
+
+.brew-cmd::selection,
+.brew-cmd *::selection {
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+  color: var(--accent);
+}
+
+.brew-cmd:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.brew-cmd.copied::after {
+  content: "Copied!";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  opacity: 1;
+  animation: fade-out 1.5s ease forwards;
+}
+
+@keyframes fade-out {
+  0%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.install-note details {
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 15%, transparent);
+  border-radius: 8px;
+  padding: 0;
+}
+
+.install-note summary {
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+
+.install-note summary::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: 8px;
+  transition: transform 0.2s;
+}
+
+.install-note details[open] summary::before {
+  content: "▾";
+}
+
+.install-note summary::-webkit-details-marker {
+  display: none;
+}
+
+.install-note summary:hover {
+  color: var(--text);
+}
+
+.install-note details[open] summary {
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 10%, transparent);
+  margin-bottom: 0;
+}
+
+.install-note details > p,
+.install-note details > ol,
+.install-note details > code {
+  padding: 0 14px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.install-note details > p:first-of-type {
+  margin-top: 10px;
+}
+
+.install-note details > ol {
+  padding-left: 32px;
+  margin: 6px 0;
+}
+
+.install-note details > code {
+  display: block;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 8px 14px;
+  font-family: "SF Mono", "Menlo", "Consolas", monospace;
+  font-size: 0.78rem;
+  color: var(--accent);
+  user-select: all;
+}
+
+.install-note .install-note-sub {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  padding-bottom: 12px;
+}
+
+.install-note .install-note-sub a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.install-note .install-note-sub a:hover {
+  text-decoration: underline;
+}
+
+/* ─── Install Note Bottom (after "Missing feature") ─── */
+.install-note-bottom {
+  margin-top: 16px;
+  text-align: left;
+}
+
+.collapsible {
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 15%, transparent);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.collapsible-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  background: none;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  text-align: left;
+  font-family: inherit;
+}
+
+.collapsible-trigger:hover {
+  color: var(--text);
+}
+
+.collapsible-chevron {
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+.collapsible.open .collapsible-chevron {
+  transform: rotate(90deg);
+}
+
+.collapsible.open .collapsible-trigger {
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.collapsible-content {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+}
+
+.collapsible.open .collapsible-content {
+  grid-template-rows: 1fr;
+}
+
+.collapsible-inner {
+  overflow: hidden;
+  padding: 0 14px;
+}
+
+.collapsible.open .collapsible-inner {
+  padding: 10px 14px 14px;
+}
+
+.collapsible-inner p,
+.collapsible-inner ol,
+.collapsible-inner code {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.collapsible-inner ol {
+  padding-left: 18px;
+  margin: 6px 0;
+}
+
+.collapsible-inner code {
+  display: block;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 8px 0;
+  font-family: "SF Mono", "Menlo", "Consolas", monospace;
+  font-size: 0.78rem;
+  color: var(--accent);
+  user-select: all;
+}
+
+.preferred-method {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin: 8px 0;
+}
+
+.preferred-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border-radius: 3px;
+  padding: 2px 6px;
+  margin-bottom: 6px;
+}
+
+.preferred-method ol {
+  margin: 4px 0 0;
+}
+
+.alt-method {
+  margin-top: 12px;
+  font-size: 0.78rem;
+  opacity: 0.8;
+}
+
+.install-note-bottom .install-note-sub {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin-top: 10px;
+}
+
+.install-note-bottom .install-note-sub a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.install-note-bottom .install-note-sub a:hover {
+  text-decoration: underline;
+}
+
 /* ─── Links ─── */
 .links {
   display: flex;
@@ -186,7 +478,7 @@ body {
 
 .note {
   font-size: 0.8rem;
-  color: color-mix(in srgb, var(--text) 20%, transparent);
+  color: color-mix(in srgb, var(--text) 50%, transparent);
 }
 
 .feature-request {

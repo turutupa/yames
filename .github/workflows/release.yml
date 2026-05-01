@@ -85,3 +85,178 @@ jobs:
         run: npx tauri build ${{ matrix.args }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  update-homebrew:
+    needs: build
+    if: startsWith(github.event.head_commit.message, 'release')
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Extract version
+        id: version
+        run: |
+          MSG="${{ github.event.head_commit.message }}"
+          VERSION=$(echo "$MSG" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for release assets
+        run: sleep 30
+
+      - name: Download DMGs and compute SHA256
+        id: sha
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          ARM_URL="https://github.com/turutupa/yames/releases/download/v${VERSION}/Yames_${VERSION}_aarch64.dmg"
+          INTEL_URL="https://github.com/turutupa/yames/releases/download/v${VERSION}/Yames_${VERSION}_x64.dmg"
+
+          echo "Downloading ARM DMG..."
+          curl -fSL -o arm.dmg "$ARM_URL" --retry 5 --retry-delay 10
+          ARM_SHA=$(shasum -a 256 arm.dmg | awk '{print $1}')
+          echo "arm_sha=$ARM_SHA" >> "$GITHUB_OUTPUT"
+
+          echo "Downloading Intel DMG..."
+          curl -fSL -o intel.dmg "$INTEL_URL" --retry 5 --retry-delay 10
+          INTEL_SHA=$(shasum -a 256 intel.dmg | awk '{print $1}')
+          echo "intel_sha=$INTEL_SHA" >> "$GITHUB_OUTPUT"
+
+          echo "ARM SHA256: $ARM_SHA"
+          echo "Intel SHA256: $INTEL_SHA"
+
+      - name: Update cask formula
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          ARM_SHA: ${{ steps.sha.outputs.arm_sha }}
+          INTEL_SHA: ${{ steps.sha.outputs.intel_sha }}
+        run: |
+          cat > Casks/yames.rb << EOF
+          cask "yames" do
+            version "$VERSION"
+
+            on_arm do
+              url "https://github.com/turutupa/yames/releases/download/v#{version}/Yames_#{version}_aarch64.dmg"
+              sha256 "$ARM_SHA"
+            end
+
+            on_intel do
+              url "https://github.com/turutupa/yames/releases/download/v#{version}/Yames_#{version}_x64.dmg"
+              sha256 "$INTEL_SHA"
+            end
+
+            name "Yames"
+            desc "Yet Another Metronome Everyone Skips — musician-grade floating metronome"
+            homepage "https://turutupa.github.io/yames/"
+
+            livecheck do
+              url :url
+              strategy :github_latest
+            end
+
+            app "Yames.app"
+
+            zap trash: [
+              "~/Library/Application Support/com.yames.metronome",
+              "~/Library/Caches/com.yames.metronome",
+              "~/Library/Preferences/com.yames.metronome.plist",
+            ]
+          end
+          EOF
+          # Remove leading whitespace from heredoc
+          sed -i '' 's/^          //' Casks/yames.rb
+
+      - name: Commit and push updated cask
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/yames.rb
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "chore: update homebrew cask to v${{ steps.version.outputs.version }}"
+          git push
+
+  update-winget:
+    needs: build
+    if: startsWith(github.event.head_commit.message, 'release')
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Extract version
+        id: version
+        shell: bash
+        run: |
+          MSG="${{ github.event.head_commit.message }}"
+          VERSION=$(echo "$MSG" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for release assets
+        shell: bash
+        run: sleep 30
+
+      - name: Download EXE and compute SHA256
+        id: sha
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          $url = "https://github.com/turutupa/yames/releases/download/v$env:VERSION/Yames_${env:VERSION}_x64-setup.exe"
+          Invoke-WebRequest -Uri $url -OutFile installer.exe -MaximumRetryCount 5
+          $hash = (Get-FileHash installer.exe -Algorithm SHA256).Hash
+          echo "sha256=$hash" >> $env:GITHUB_OUTPUT
+
+      - name: Update winget manifest
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          SHA256: ${{ steps.sha.outputs.sha256 }}
+        run: |
+          cat > winget/turutupa.yames.yaml << EOF
+          # yaml-language-server: \$schema=https://aka.ms/winget-manifest.singleton.1.6.0.schema.json
+          PackageIdentifier: turutupa.yames
+          PackageVersion: $VERSION
+          PackageLocale: en-US
+          Publisher: turutupa
+          PublisherUrl: https://github.com/turutupa
+          PackageName: Yames
+          PackageUrl: https://turutupa.github.io/yames/
+          License: MIT
+          LicenseUrl: https://github.com/turutupa/yames/blob/main/LICENSE
+          ShortDescription: Yet Another Metronome Everyone Skips — musician-grade floating metronome
+          Description: |-
+            A free, open-source desktop metronome with an always-on-top floating widget,
+            sub-millisecond audio precision, zen mode with immersive visuals, drill practice mode,
+            tap tempo, and 10 beautiful themes.
+          Tags:
+            - metronome
+            - music
+            - rhythm
+            - practice
+            - bpm
+            - tempo
+          Installers:
+            - Architecture: x64
+              InstallerType: nsis
+              InstallerUrl: https://github.com/turutupa/yames/releases/download/v${VERSION}/Yames_${VERSION}_x64-setup.exe
+              InstallerSha256: $SHA256
+          ManifestType: singleton
+          ManifestVersion: 1.6.0
+          EOF
+          sed -i 's/^          //' winget/turutupa.yames.yaml
+
+      - name: Commit and push updated winget manifest
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add winget/turutupa.yames.yaml
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "chore: update winget manifest to v${{ steps.version.outputs.version }}"
+          git push

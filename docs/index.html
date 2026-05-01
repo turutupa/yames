@@ -293,6 +293,12 @@
               <button class="platform-pill" data-os="windows">Windows</button>
               <button class="platform-pill" data-os="linux">Linux</button>
             </div>
+            <div class="install-note" id="install-note">
+              <div class="brew-install" id="cli-install">
+                <span class="brew-label">or install via terminal (recommended):</span>
+                <code class="brew-cmd" id="cli-cmd" onclick="navigator.clipboard.writeText(this.textContent).then(()=>{this.classList.add('copied');setTimeout(()=>this.classList.remove('copied'),1500)})">brew install --cask turutupa/tap/yames</code>
+              </div>
+            </div>
           </div>
 
           <div class="links">
@@ -327,6 +333,33 @@
               >Request it here →</a
             >
           </p>
+
+          <div class="install-note-bottom" id="install-note-bottom">
+            <div class="collapsible" id="macos-fix">
+              <button class="collapsible-trigger" onclick="this.parentElement.classList.toggle('open')">
+                <span class="collapsible-chevron">▸</span>
+                macOS: "app is damaged" or can't open?
+              </button>
+              <div class="collapsible-content">
+                <div class="collapsible-inner">
+                  <p>
+                    If you downloaded the DMG directly (not via Homebrew), macOS may block it since
+                    Yames isn't signed with a paid Apple certificate. To fix:
+                  </p>
+                  <div class="preferred-method">
+                    <span class="preferred-badge">Recommended</span>
+                    <ol>
+                      <li><strong>Right-click</strong> (or Control-click) the app → <strong>Open</strong></li>
+                      <li>Click <strong>"Open"</strong> in the dialog</li>
+                    </ol>
+                  </div>
+                  <p class="alt-method">Or run this in Terminal:</p>
+                  <code>xattr -cr /Applications/Yames.app</code>
+                  <p class="install-note-sub">This only needs to be done once. Homebrew installs don't have this issue. <a href="https://support.apple.com/en-us/102445" target="_blank" rel="noopener">Learn more →</a></p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Right: Theme showcase -->
@@ -493,11 +526,33 @@
         })
         .catch(() => {}); // Silently fall back to releases page
 
+      const CLI_COMMANDS = {
+        "macos-silicon": "brew install --cask turutupa/tap/yames",
+        "macos-intel": "brew install --cask turutupa/tap/yames",
+        "windows": "winget install turutupa.yames",
+        "linux": "flatpak install flathub io.github.turutupa.yames",
+      };
+
+      const CLI_LABELS = {
+        "macos-silicon": "or install via Homebrew (recommended):",
+        "macos-intel": "or install via Homebrew (recommended):",
+        "windows": "or install via winget (recommended):",
+        "linux": "or install via Flatpak (recommended):",
+      };
+
       function setOS(os) {
         pills.forEach((p) => p.classList.toggle("active", p.dataset.os === os));
         osName.textContent = OS_LABELS[os] || "macOS (Apple Silicon)";
         downloadBtn.href = assetURLs[os] || FALLBACK;
         detectedOS = os;
+        // Update CLI install command
+        const cliCmd = document.getElementById("cli-cmd");
+        const cliLabel = document.querySelector(".brew-label");
+        if (cliCmd) cliCmd.textContent = CLI_COMMANDS[os] || CLI_COMMANDS["macos-silicon"];
+        if (cliLabel) cliLabel.textContent = CLI_LABELS[os] || CLI_LABELS["macos-silicon"];
+        // Show macOS-specific notes only for macOS
+        const noteBottom = document.getElementById("install-note-bottom");
+        if (noteBottom) noteBottom.style.display = os.startsWith("macos") ? "" : "none";
       }
       setOS(detectedOS);
       pills.forEach((p) =>
