@@ -2,6 +2,13 @@
   "name": "yames",
   "private": true,
   "version": "0.4.1",
+  "description": "Yames — Free desktop metronome app for musicians. Always-on-top floating widget, sub-millisecond precision, zen mode, drill practice, tap tempo. macOS, Windows, Linux.",
+  "homepage": "https://turutupa.github.io/yames/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/turutupa/yames"
+  },
+  "keywords": ["metronome", "desktop-metronome", "music", "rhythm", "bpm", "tempo", "practice", "musician-tools", "tauri", "rust"],
   "type": "module",
   "scripts": {
     "dev": "vite",

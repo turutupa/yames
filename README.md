@@ -1,22 +1,22 @@
-# yames
+# Yames — Free Desktop Metronome for Musicians
 
 **Yet Another Metronome Everyone Skips** — but not just another metronome.
 
-Musicians deserve better than a beeping circle. Yames is a precision rhythm tool built for people who actually practice — fast, beautiful, and always within reach.
+A free, open-source desktop metronome app for macOS, Windows, and Linux. Sub-millisecond precision, always-on-top floating widget, zen mode, drill practice, tap tempo, and 10 beautiful themes. Built with Rust for musicians who actually practice.
 
 [Website](https://turutupa.github.io/yames) &nbsp;·&nbsp; [Download](https://github.com/turutupa/yames/releases/latest) &nbsp;·&nbsp; [Request a Feature](https://github.com/turutupa/yames/issues/new)
 
 <br>
 
 <p align="center">
-  <img src="docs/img/metronome/obsidian-metronome.png" alt="yames metronome" width="520">
+  <img src="docs/img/zen/obsidian-cosmos-zen.png" alt="Yames metronome zen mode" width="520">
 </p>
 
 <br>
 
-## Why yames?
+## Why Yames?
 
-Every metronome app feels like an afterthought. A clock face. A blinking dot. We're building something you actually *want* on screen while you play.
+Every metronome app feels like an afterthought. A clock face. A blinking dot. Yames is a musician-grade desktop metronome you actually *want* on screen while you play.
 
 - **Sub-millisecond precision** — Rust audio engine with hybrid sleep + spin-wait. No drift. No jitter.
 - **Always-on-top widget** — A floating mini-player that stays visible over your DAW, tabs, or sheet music.
@@ -25,6 +25,8 @@ Every metronome app feels like an afterthought. A clock face. A blinking dot. We
 - **Tap tempo** — Tap your way to the right BPM.
 - **10+ themes** — Dark, light, vibrant, minimal. Make it yours.
 - **Global hotkeys** — Play, stop, nudge BPM — all without switching windows.
+- **Cross-platform** — Native app for macOS (Apple Silicon & Intel), Windows, and Linux.
+- **Lightweight** — Native Rust + Tauri build, uses minimal CPU and memory.
 
 <br>
 

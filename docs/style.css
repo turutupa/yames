@@ -257,7 +257,8 @@ body {
   bottom: 10px;
   left: -16px;
   width: 280px;
-  filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.7)) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.7))
+    drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;

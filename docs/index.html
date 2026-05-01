@@ -3,11 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Yames — Yet Another Metronome Everyone Skips</title>
+    <title>Yames — Free Desktop Metronome App for Musicians | macOS, Windows, Linux</title>
     <meta
       name="description"
-      content="A musician-grade floating desktop metronome. Free, open-source, cross-platform."
+      content="Yames is a free, open-source desktop metronome app for macOS, Windows, and Linux. Always-on-top floating widget, sub-millisecond precision, zen mode, drill practice, and beautiful themes. Download now."
     />
+    <meta name="keywords" content="metronome, desktop metronome, free metronome app, metronome for musicians, yames, yames metronome, floating metronome, always on top metronome, practice metronome, BPM, tempo, rhythm practice, metronome macOS, metronome Windows, metronome Linux, open source metronome, musician tools, DAW metronome, drill practice, tap tempo" />
+    <meta name="author" content="turutupa" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://turutupa.github.io/yames/" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
@@ -16,33 +20,220 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://turutupa.github.io/yames/" />
-    <meta property="og:title" content="Yames — Yet Another Metronome Everyone Skips" />
+    <meta property="og:title" content="Yames — Free Desktop Metronome App for Musicians" />
     <meta
       property="og:description"
-      content="A musician-grade floating desktop metronome. Free, open-source, cross-platform."
+      content="Free, open-source desktop metronome with always-on-top floating widget, sub-millisecond precision, zen mode, and 10 beautiful themes. Available for macOS, Windows, and Linux."
     />
     <meta property="og:image" content="https://turutupa.github.io/yames/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Yames desktop metronome app screenshot showing the floating widget and drill practice mode" />
+    <meta property="og:site_name" content="Yames Metronome" />
+    <meta property="og:locale" content="en_US" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Yames — Yet Another Metronome Everyone Skips" />
+    <meta name="twitter:title" content="Yames — Free Desktop Metronome App for Musicians" />
     <meta
       name="twitter:description"
-      content="A musician-grade floating desktop metronome. Free, open-source, cross-platform."
+      content="Free, open-source desktop metronome with always-on-top floating widget, sub-millisecond precision, zen mode, and 10 beautiful themes. macOS, Windows, Linux."
     />
     <meta name="twitter:image" content="https://turutupa.github.io/yames/og-image.png" />
+    <meta name="twitter:image:alt" content="Yames desktop metronome app screenshot" />
 
     <!-- Additional meta -->
     <meta name="theme-color" content="#0a0a0f" />
+    <meta name="theme-color" content="#f5f0e8" media="(prefers-color-scheme: light)" />
+    <meta name="application-name" content="Yames Metronome" />
+    <meta name="apple-mobile-web-app-title" content="Yames Metronome" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta http-equiv="x-dns-prefetch-control" content="on" />
+    <link rel="dns-prefetch" href="https://api.github.com" />
+
+    <!-- Alternate language / locale -->
+    <link rel="alternate" hreflang="en" href="https://turutupa.github.io/yames/" />
+    <link rel="alternate" hreflang="x-default" href="https://turutupa.github.io/yames/" />
+
+    <!-- Structured Data: SoftwareApplication -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Yames",
+      "alternateName": ["Yames Metronome", "yames", "YAMES"],
+      "description": "A free, open-source desktop metronome app for musicians. Features an always-on-top floating widget, sub-millisecond audio precision, zen mode with immersive visuals, drill practice mode, tap tempo, and 10 beautiful themes. Available for macOS, Windows, and Linux.",
+      "url": "https://turutupa.github.io/yames/",
+      "downloadUrl": "https://github.com/turutupa/yames/releases/latest",
+      "applicationCategory": "MultimediaApplication",
+      "applicationSubCategory": "Music",
+      "operatingSystem": "macOS, Windows, Linux",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock"
+      },
+      "softwareVersion": "0.4.1",
+      "datePublished": "2024-01-01",
+      "author": {
+        "@type": "Person",
+        "name": "turutupa",
+        "url": "https://github.com/turutupa"
+      },
+      "publisher": {
+        "@type": "Person",
+        "name": "turutupa",
+        "url": "https://github.com/turutupa"
+      },
+      "license": "https://github.com/turutupa/yames/blob/main/LICENSE",
+      "screenshot": [
+        "https://turutupa.github.io/yames/og-image.png",
+        "https://turutupa.github.io/yames/img/drill/obsidian-drill.png",
+        "https://turutupa.github.io/yames/img/zen/obsidian-cosmos-zen.png",
+        "https://turutupa.github.io/yames/img/metronome/obsidian-metronome.png"
+      ],
+      "featureList": [
+        "Always-on-top floating metronome widget",
+        "Sub-millisecond audio precision timing",
+        "Zen mode with immersive fullscreen visuals",
+        "Drill practice mode with BPM progression",
+        "Tap tempo detection",
+        "10 beautiful color themes",
+        "Global keyboard shortcuts",
+        "Subdivision support (quarter, eighth, triplet, sixteenth)",
+        "Cross-platform: macOS, Windows, Linux",
+        "System tray integration"
+      ],
+      "releaseNotes": "https://github.com/turutupa/yames/releases",
+      "sameAs": [
+        "https://github.com/turutupa/yames"
+      ]
+    }
+    </script>
+
+    <!-- Structured Data: WebSite with SearchAction -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Yames Metronome",
+      "alternateName": ["Yames", "yames", "YAMES"],
+      "url": "https://turutupa.github.io/yames/",
+      "description": "Free, open-source desktop metronome app for musicians with always-on-top floating widget, zen mode, and drill practice."
+    }
+    </script>
+
+    <!-- Structured Data: FAQPage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Yames?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yames is a free, open-source desktop metronome application designed for musicians. It features an always-on-top floating widget that stays visible over your DAW, sheet music, or browser while you practice."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is Yames free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, Yames is completely free and open-source. You can download it for macOS, Windows, and Linux at no cost."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What platforms does Yames support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yames is available for macOS (Apple Silicon and Intel), Windows, and Linux. It is a native desktop application built with Rust and Tauri for optimal performance."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What makes Yames different from other metronomes?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yames is designed as a musician-grade system utility. It stays floating on top of all your windows, uses sub-millisecond precision timing, offers immersive Zen mode visuals, includes drill practice for progressive BPM training, and provides 10 beautiful themes — all in a lightweight native app."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Yames work with my DAW?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! Yames is designed to float on top of any application including DAWs like Ableton Live, Logic Pro, FL Studio, Pro Tools, and Reaper. It stays always-on-top so you can see the tempo while working in your DAW."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How accurate is Yames compared to online metronomes?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yames uses a dedicated Rust audio thread with hybrid sleep and spin-wait timing, achieving sub-millisecond precision. Browser-based metronomes rely on JavaScript timers which can drift by 10-50ms. Yames delivers the accuracy professional musicians need for serious practice."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is Zen mode in Yames?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Zen mode is a fullscreen immersive visual experience that responds to the beat. It helps musicians enter a focused, meditative practice state with beautiful animations synchronized to the tempo."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is Drill mode in Yames?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Drill mode is a progressive BPM training feature. Set a start BPM, target BPM, and step size — Yames automatically increases the tempo at set intervals, helping you gradually build speed and accuracy without manual adjustment."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- Structured Data: BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Yames Metronome",
+          "item": "https://turutupa.github.io/yames/"
+        }
+      ]
+    }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://api.github.com" />
+    <link
+      rel="preload"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      as="style"
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
+    <link rel="preload" href="style.css" as="style" />
     <link rel="stylesheet" href="style.css" />
+
+    <!-- Preload LCP image for faster first paint -->
+    <link rel="preload" href="img/drill/obsidian-drill.png" as="image" />
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="manifest.json" />
   </head>
   <body>
     <canvas id="particles-canvas"></canvas>

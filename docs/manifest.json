@@ -1,0 +1,22 @@
+{
+  "name": "Yames Metronome",
+  "short_name": "Yames",
+  "description": "Free, open-source desktop metronome app for musicians. Always-on-top floating widget, sub-millisecond precision, zen mode, drill practice, and beautiful themes.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#f59e0b",
+  "icons": [
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["music", "utilities"]
+}
