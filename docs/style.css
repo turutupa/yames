@@ -309,141 +309,160 @@ body {
   text-decoration: underline;
 }
 
-/* ─── Install Note Bottom (after "Missing feature") ─── */
-.install-note-bottom {
-  margin-top: 16px;
-  text-align: left;
-}
-
-.collapsible {
-  background: color-mix(in srgb, var(--accent) 5%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 15%, transparent);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.collapsible-trigger {
-  display: flex;
+/* ─── macOS Download Popover ─── */
+.macos-popover-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
   align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 10px 14px;
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--text-dim);
+  justify-content: center;
+}
+
+.macos-popover-backdrop.visible {
+  display: flex;
+}
+
+.macos-popover {
+  position: relative;
+  background: color-mix(in srgb, var(--bg) 95%, var(--text));
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-radius: 12px;
+  padding: 32px 32px;
+  max-width: 420px;
+  width: 90%;
+  text-align: left;
+  animation: popover-in 0.2s ease;
+}
+
+@keyframes popover-in {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.popover-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
   background: none;
   border: none;
+  font-size: 1.4rem;
+  color: var(--text-dim);
   cursor: pointer;
-  user-select: none;
-  text-align: left;
-  font-family: inherit;
+  line-height: 1;
 }
 
-.collapsible-trigger:hover {
+.popover-close:hover {
   color: var(--text);
 }
 
-.collapsible-chevron {
-  transition: transform 0.3s ease;
-  display: inline-block;
+.popover-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
 }
 
-.collapsible.open .collapsible-chevron {
-  transform: rotate(90deg);
-}
-
-.collapsible.open .collapsible-trigger {
-  border-bottom: 1px solid color-mix(in srgb, var(--accent) 10%, transparent);
-}
-
-.collapsible-content {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.3s ease;
-}
-
-.collapsible.open .collapsible-content {
-  grid-template-rows: 1fr;
-}
-
-.collapsible-inner {
-  overflow: hidden;
-  padding: 0 14px;
-}
-
-.collapsible.open .collapsible-inner {
-  padding: 10px 14px 14px;
-}
-
-.collapsible-inner p,
-.collapsible-inner ol,
-.collapsible-inner code {
-  font-size: 0.8rem;
+.popover-subtitle {
+  font-size: 0.95rem;
   color: var(--text-dim);
+  margin-bottom: 20px;
   line-height: 1.5;
 }
 
-.collapsible-inner ol {
-  padding-left: 18px;
-  margin: 6px 0;
-}
-
-.collapsible-inner code {
+.popover-brew-cmd {
   display: block;
-  background: color-mix(in srgb, var(--text) 8%, transparent);
-  border-radius: 4px;
-  padding: 8px 12px;
-  margin: 8px 0;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-radius: 6px;
+  padding: 14px 16px;
   font-family: "SF Mono", "Menlo", "Consolas", monospace;
   font-size: 0.78rem;
   color: var(--accent);
+  cursor: pointer;
   user-select: all;
+  white-space: nowrap;
+  transition: background 0.15s;
 }
 
-.preferred-method {
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
-  border-radius: 6px;
-  padding: 10px 12px;
-  margin: 8px 0;
-}
-
-.preferred-badge {
-  display: inline-block;
-  font-size: 0.68rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--accent);
+.popover-brew-cmd:hover {
   background: color-mix(in srgb, var(--accent) 15%, transparent);
-  border-radius: 3px;
-  padding: 2px 6px;
-  margin-bottom: 6px;
 }
 
-.preferred-method ol {
-  margin: 4px 0 0;
-}
-
-.alt-method {
-  margin-top: 12px;
-  font-size: 0.78rem;
-  opacity: 0.8;
-}
-
-.install-note-bottom .install-note-sub {
-  font-size: 0.75rem;
+.popover-brew-cmd.copied::after {
+  content: " ✔";
+  font-size: 0.72rem;
   opacity: 0.7;
-  margin-top: 10px;
 }
 
-.install-note-bottom .install-note-sub a {
+.popover-divider {
+  border-top: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+  margin: 24px 0;
+}
+
+.popover-manual-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.popover-manual-note {
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.popover-steps {
+  padding-left: 20px;
+  margin: 0 0 20px;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  line-height: 2;
+}
+
+.popover-steps strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.popover-alt {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin-bottom: 24px;
+}
+
+.popover-alt code {
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  border-radius: 4px;
+  padding: 3px 7px;
+  font-family: "SF Mono", "Menlo", "Consolas", monospace;
+  font-size: 0.8rem;
   color: var(--accent);
-  text-decoration: none;
 }
 
-.install-note-bottom .install-note-sub a:hover {
-  text-decoration: underline;
+.popover-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  justify-content: center;
+  padding: 14px 20px;
+  background: color-mix(in srgb, var(--text) 12%, transparent);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+  border: 1px solid color-mix(in srgb, var(--text) 20%, transparent);
+  transition: background 0.15s;
+}
+
+.popover-download-btn:hover {
+  background: color-mix(in srgb, var(--text) 18%, transparent);
 }
 
 /* ─── Links ─── */
