@@ -1,0 +1,37 @@
+name: yames
+version: '0.4.2'
+summary: Musician-grade desktop metronome with floating widget
+description: |
+  Yames (Yet Another Metronome Everyone Skips) is a free, open-source desktop
+  metronome with an always-on-top floating widget, sub-millisecond audio precision,
+  zen mode with immersive visuals, drill practice mode, tap tempo, and 10 beautiful
+  themes. Built with Rust + Tauri v2.
+
+grade: stable
+confinement: strict
+base: core22
+architectures:
+  - build-on: amd64
+
+apps:
+  yames:
+    command: usr/bin/yames
+    desktop: usr/share/applications/yames.desktop
+    extensions: [gnome]
+    plugs:
+      - audio-playback
+      - desktop
+      - desktop-legacy
+      - wayland
+      - x11
+      - opengl
+
+parts:
+  yames:
+    plugin: dump
+    source: https://github.com/turutupa/yames/releases/download/v0.4.2/Yames_0.4.2_amd64.deb
+    source-type: deb
+    stage-packages:
+      - libwebkit2gtk-4.1-0
+      - libgtk-3-0
+      - libayatana-appindicator3-1

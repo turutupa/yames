@@ -1,0 +1,29 @@
+name: Snap Store Publish
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'snap/**'
+
+jobs:
+  snap:
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      startsWith(github.event.head_commit.message, 'release')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build snap
+        uses: snapcore/action-build@v1
+        id: build
+
+      - name: Publish to Snap Store
+        uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAP_STORE_TOKEN }}
+        with:
+          snap: ${{ steps.build.outputs.snap }}
+          release: stable

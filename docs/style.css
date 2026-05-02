@@ -382,7 +382,6 @@ body {
   font-size: 0.78rem;
   color: var(--accent);
   cursor: pointer;
-  user-select: all;
   white-space: nowrap;
   transition: background 0.15s;
 }

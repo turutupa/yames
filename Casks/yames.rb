@@ -1,5 +1,5 @@
 cask "yames" do
-  version "0.4.1"
+  version "0.4.2"
 
   on_arm do
     url "https://github.com/turutupa/yames/releases/download/v#{version}/Yames_#{version}_aarch64.dmg"
