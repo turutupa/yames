@@ -984,7 +984,7 @@
 }
 
 .setting-hint {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: var(--text-secondary);
   opacity: 0.6;
 }
@@ -1140,7 +1140,9 @@
   letter-spacing: 0;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.15s, transform 0.15s;
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
   z-index: 50;
 }
 
@@ -1207,12 +1209,12 @@
 
 /* Binding buttons (keyboard + footswitch) */
 .hotkey-bind-btn {
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px dashed rgba(255, 255, 255, 0.12);
   color: var(--text-secondary);
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
   text-align: center;
@@ -1266,7 +1268,9 @@
   padding: 5px 14px;
   border-radius: 6px;
   cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
 }
 
 .hotkey-defaults-btn:hover {
@@ -1280,7 +1284,7 @@
 }
 
 .about-text {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--text-secondary);
   margin-bottom: 14px;
   line-height: 1.5;
@@ -1300,7 +1304,7 @@
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--text-secondary);
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 500;
   text-decoration: none;
   transition: all 0.15s;
@@ -1344,8 +1348,14 @@
 }
 
 @keyframes share-pop-in {
-  from { opacity: 0; transform: translateY(-4px) scale(0.96); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .header-share-option {
@@ -1361,7 +1371,9 @@
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
 }
 
 .header-share-option:hover {
@@ -1413,21 +1425,21 @@
 }
 
 .about-label {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--text-secondary);
   font-weight: 500;
   flex-shrink: 0;
 }
 
 .about-value {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
 
 .about-value-small {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
   word-break: break-all;
   max-width: 300px;

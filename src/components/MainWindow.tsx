@@ -248,11 +248,12 @@ export function MainWindow() {
     Object.fromEntries(HOTKEYS.filter((hk) => hk.globalAllowed).map((hk) => [hk.id, hk.globalKey || hk.key]))
   );
   const [bindingFor, setBindingFor] = useState<{ id: string; type: "key" | "global" | "foot" } | null>(null);
+  const bindingsLoaded = useRef(false);
 
-  // Persist bindings whenever they change
-  useEffect(() => { storeSave("keyBindings", keyBindings); }, [keyBindings]);
-  useEffect(() => { storeSave("globalBindings", globalBindings); }, [globalBindings]);
-  useEffect(() => { storeSave("footBindings", footBindings); }, [footBindings]);
+  // Persist bindings whenever they change — but only after initial restore
+  useEffect(() => { if (bindingsLoaded.current) storeSave("keyBindings", keyBindings); }, [keyBindings]);
+  useEffect(() => { if (bindingsLoaded.current) storeSave("globalBindings", globalBindings); }, [globalBindings]);
+  useEffect(() => { if (bindingsLoaded.current) storeSave("footBindings", footBindings); }, [footBindings]);
 
   // Restore bindings from store on mount, merging with defaults for any new hotkeys
   useEffect(() => {
@@ -265,6 +266,7 @@ export function MainWindow() {
       if (gb && typeof gb === "object") setGlobalBindings({ ...globalDefaults, ...gb });
       const fb = await storeLoad<Record<string, string>>("footBindings");
       if (fb && typeof fb === "object") setFootBindings(fb);
+      bindingsLoaded.current = true;
     })();
   }, []);
 
