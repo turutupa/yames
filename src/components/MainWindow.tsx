@@ -1054,7 +1054,7 @@ export function MainWindow() {
             <section className="settings-section about-section">
               <h2>About</h2>
               <div className="about-info">
-                <div className="about-row"><span className="about-label">Version</span><span className="about-value">0.4.6</span></div>
+                <div className="about-row"><span className="about-label">Version</span><span className="about-value">0.5.0</span></div>
                 <div className="about-row"><span className="about-label">Platform</span><span className="about-value">{navigator.platform}</span></div>
                 <div className="about-row"><span className="about-label">User Agent</span><span className="about-value about-value-small">{navigator.userAgent}</span></div>
               </div>
