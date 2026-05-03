@@ -1283,6 +1283,19 @@
   padding-bottom: 20px;
 }
 
+.support-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  padding: 24px;
+}
+
+.support-card,
+.support-card + .settings-section {
+  border-top: none;
+  padding-top: 0;
+}
+
 .about-text {
   font-size: 0.9rem;
   color: var(--text-secondary);

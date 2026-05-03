@@ -1015,7 +1015,7 @@ export function MainWindow() {
               </div>
             </section>
 
-            <section className="settings-section about-section">
+            <section className="settings-section about-section support-card">
               <h2>Support</h2>
               <p className="about-text">
                 Yames is free and open source. If it helps your practice, consider supporting development!
