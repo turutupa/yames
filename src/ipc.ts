@@ -1,6 +1,28 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import { load } from "@tauri-apps/plugin-store";
 import type { AppState, BeatEvent, SpeedRamp, Subdivision } from "./types";
+
+// Shared store instance (lazy singleton)
+let _store: Awaited<ReturnType<typeof load>> | null = null;
+async function getStore() {
+  if (!_store) _store = await load("settings.json", { autoSave: true, defaults: {} });
+  return _store;
+}
+
+export async function storeSave(key: string, value: unknown): Promise<void> {
+  const store = await getStore();
+  await store.set(key, value);
+}
+
+export async function storeLoad<T>(key: string): Promise<T | undefined> {
+  const store = await getStore();
+  return store.get<T>(key);
+}
+
+export async function openUrl(url: string): Promise<void> {
+  return invoke("open_url", { url });
+}
 
 export async function getState(): Promise<AppState> {
   return invoke<AppState>("get_state");
@@ -26,16 +48,12 @@ export async function setWidgetMode(mode: "compact" | "comfortable"): Promise<vo
   return invoke("set_widget_mode", { mode });
 }
 
-export async function setCorner(corner: string): Promise<void> {
-  return invoke("set_corner", { corner });
-}
-
 export async function setAlwaysOnTop(enabled: boolean): Promise<void> {
   return invoke("set_always_on_top", { enabled });
 }
 
-export async function setAccentColor(color: string): Promise<void> {
-  return invoke("set_accent_color", { color });
+export async function setWidgetAlwaysOnTop(enabled: boolean): Promise<void> {
+  return invoke("set_widget_always_on_top", { enabled });
 }
 
 export async function setTheme(theme: string): Promise<void> {
@@ -108,14 +126,6 @@ export function onRampStep(callback: (ramp: SpeedRamp) => void) {
   return listen<SpeedRamp>("ramp-step", (e) => callback(e.payload));
 }
 
-export async function toggleFullscreen(): Promise<void> {
-  return invoke("toggle_fullscreen");
-}
-
-export async function setFullscreen(fullscreen: boolean): Promise<void> {
-  return invoke("set_fullscreen", { fullscreen });
-}
-
 export function onFullscreenChanged(callback: (isFullscreen: boolean) => void) {
   return listen<boolean>("fullscreen-changed", (e) => callback(e.payload));
 }
@@ -126,10 +136,6 @@ export async function setActiveTab(tab: string): Promise<void> {
 
 export async function getActiveTab(): Promise<string> {
   return invoke<string>("get_active_tab");
-}
-
-export async function getLastWindow(): Promise<string> {
-  return invoke<string>("get_last_window");
 }
 
 export async function setCalibrationOffset(offset: number): Promise<void> {

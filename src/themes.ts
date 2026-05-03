@@ -322,8 +322,6 @@ export const THEMES: Theme[] = [
   ivory, arctic, sand, lavender, prism,
 ];
 
-export const DEFAULT_THEME_ID = "mono";
-
 export function getThemeById(id: string): Theme {
   return THEMES.find((t) => t.id === id) ?? mono;
 }

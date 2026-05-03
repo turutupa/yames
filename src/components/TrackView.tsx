@@ -1,7 +1,15 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import type { AppState, BeatEvent } from "../types";
-import { togglePlayback, setPlaying, onBeat, setCalibrationOffset, getCalibrationOffset } from "../ipc";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  getCalibrationOffset,
+  onBeat,
+  setCalibrationOffset,
+  setPlaying,
+  togglePlayback,
+  storeSave,
+  storeLoad,
+} from "../ipc";
 import "../styles/track-view.css";
+import type { AppState, BeatEvent } from "../types";
 
 interface TrackViewProps {
   state: AppState;
@@ -16,7 +24,13 @@ type TapResult = {
 
 type Rating = "metronomic" | "tight" | "solid" | "loose" | "miss";
 
-type SessionState = "idle" | "calibrating" | "playing" | "calibration-done" | "results" | "history";
+type SessionState =
+  | "idle"
+  | "calibrating"
+  | "playing"
+  | "calibration-done"
+  | "results"
+  | "history";
 
 type PerBeatDatum = { beat: number; offsetMs: number | null; rating: Rating };
 
@@ -36,18 +50,19 @@ type GameResult = {
   calibratedTaps: TapResult[];
 };
 
-const HISTORY_KEY = "yames-tapit-history";
 const MAX_HISTORY = 50;
 
-function loadHistory(): GameResult[] {
+async function loadHistory(): Promise<GameResult[]> {
   try {
-    const raw = localStorage.getItem(HISTORY_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch { return []; }
+    const h = await storeLoad<GameResult[]>("tapitHistory");
+    return h ?? [];
+  } catch {
+    return [];
+  }
 }
 
 function saveHistory(history: GameResult[]) {
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
+  storeSave("tapitHistory", history.slice(0, MAX_HISTORY));
 }
 
 function getOffsetRating(absMs: number): Rating {
@@ -75,11 +90,41 @@ const RATING_COLORS: Record<Rating, string> = {
 };
 
 const CATCH_PHRASES: Record<Rating, string[]> = {
-  metronomic: ["You ARE the metronome.", "Machine-level precision.", "Are you even human?", "Flawless rhythm.", "Tick-tock perfection."],
-  tight: ["Locked in the pocket.", "Studio-ready timing.", "Drummer approved.", "Right on the money.", "Groovy and precise."],
-  solid: ["Holding it down.", "Good foundation.", "Keep grinding!", "Getting there.", "Respectable rhythm."],
-  loose: ["Feeling a bit wobbly.", "Room to tighten up.", "The groove is... creative.", "Keep practicing!", "Almost there."],
-  miss: ["Were you even trying?", "The beat was lonely.", "Ghost notes only.", "Rhythm is optional, apparently.", "Let's pretend this didn't happen."],
+  metronomic: [
+    "You ARE the metronome.",
+    "Machine-level precision.",
+    "Are you even human?",
+    "Flawless rhythm.",
+    "Tick-tock perfection.",
+  ],
+  tight: [
+    "Locked in the pocket.",
+    "Studio-ready timing.",
+    "Drummer approved.",
+    "Right on the money.",
+    "Groovy and precise.",
+  ],
+  solid: [
+    "Holding it down.",
+    "Good foundation.",
+    "Keep grinding!",
+    "Getting there.",
+    "Respectable rhythm.",
+  ],
+  loose: [
+    "Feeling a bit wobbly.",
+    "Room to tighten up.",
+    "The groove is... creative.",
+    "Keep practicing!",
+    "Almost there.",
+  ],
+  miss: [
+    "Were you even trying?",
+    "The beat was lonely.",
+    "Ghost notes only.",
+    "Rhythm is optional, apparently.",
+    "Let's pretend this didn't happen.",
+  ],
 };
 
 function getRandomPhrase(rating: Rating): string {
@@ -92,7 +137,7 @@ export function TrackView({ state }: TrackViewProps) {
   const [taps, setTaps] = useState<TapResult[]>([]);
   const [beatCount, setBeatCount] = useState(0);
   const [savedOffset, setSavedOffset] = useState<number | null>(null);
-  const [history, setHistory] = useState<GameResult[]>(() => loadHistory());
+  const [history, setHistory] = useState<GameResult[]>([]);
   const [viewingResult, setViewingResult] = useState<GameResult | null>(null);
   const beatTimestamps = useRef<number[]>([]);
   const firstBeatTime = useRef<number>(0);
@@ -109,13 +154,15 @@ export function TrackView({ state }: TrackViewProps) {
     getCalibrationOffset().then((v) => setSavedOffset(v));
   }, []);
 
-  // On mount, if user has played before, show last result
+  // On mount, load history and show last result if available
   useEffect(() => {
-    const h = loadHistory();
-    if (h.length > 0) {
-      setViewingResult(h[0]);
-      setSession("results");
-    }
+    loadHistory().then((h) => {
+      setHistory(h);
+      if (h.length > 0) {
+        setViewingResult(h[0]);
+        setSession("results");
+      }
+    });
   }, []);
 
   // Stop playback when component unmounts (tab change)
@@ -148,7 +195,9 @@ export function TrackView({ state }: TrackViewProps) {
         setBeatCount((c) => c + 1);
       }
     });
-    return () => { unlisten.then((fn) => fn()); };
+    return () => {
+      unlisten.then((fn) => fn());
+    };
   }, [session, state.bpm]);
 
   // Auto-finish calibration
@@ -159,9 +208,10 @@ export function TrackView({ state }: TrackViewProps) {
       if (taps.length >= 2) {
         const sorted = [...taps].map((t) => t.offsetMs).sort((a, b) => a - b);
         const mid = Math.floor(sorted.length / 2);
-        const median = sorted.length % 2 === 0
-          ? (sorted[mid - 1] + sorted[mid]) / 2
-          : sorted[mid];
+        const median =
+          sorted.length % 2 === 0
+            ? (sorted[mid - 1] + sorted[mid]) / 2
+            : sorted[mid];
         setSavedOffset(median);
         setCalibrationOffset(median);
       }
@@ -172,10 +222,13 @@ export function TrackView({ state }: TrackViewProps) {
   // Auto-finish playing — delay so user can tap the last beat
   useEffect(() => {
     if (session === "playing" && beatCount >= maxBeats) {
-      const timer = setTimeout(() => {
-        setSession("results");
-        setPlaying(false);
-      }, 60000 / bpmAtStart.current * 0.75);
+      const timer = setTimeout(
+        () => {
+          setSession("results");
+          setPlaying(false);
+        },
+        (60000 / bpmAtStart.current) * 0.75,
+      );
       return () => clearTimeout(timer);
     }
   }, [beatCount, session]);
@@ -222,22 +275,11 @@ export function TrackView({ state }: TrackViewProps) {
       }
       if (closestBeatIdx < warmupBeats) return; // warmup beat, ignore
     }
-    setTaps((prev) => [...prev, { offsetMs: minOffset, timestamp: now, rating }]);
+    setTaps((prev) => [
+      ...prev,
+      { offsetMs: minOffset, timestamp: now, rating },
+    ]);
   }, [session, state.bpm]);
-
-  // Key listener for tap
-  useEffect(() => {
-    if (session !== "playing" && session !== "calibrating") return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.repeat) return;
-      if (e.code === "Space" || e.code === "KeyT") {
-        e.preventDefault();
-        handleTap();
-      }
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [session, handleTap]);
 
   const catchPhraseRef = useRef("");
 
@@ -270,28 +312,18 @@ export function TrackView({ state }: TrackViewProps) {
     setBeatCount(0);
     beatTimestamps.current = [];
     // Go back to last result if exists, otherwise idle
-    const h = loadHistory();
-    if (h.length > 0) {
-      setViewingResult(h[0]);
-      setSession("results");
-    } else {
-      setSession("idle");
-    }
+    loadHistory().then((h) => {
+      if (h.length > 0) {
+        setViewingResult(h[0]);
+        setSession("results");
+      } else {
+        setSession("idle");
+      }
+    });
   };
 
-  // Spacebar → start session when idle
-  useEffect(() => {
-    if (session !== "idle") return;
-    const handleSpace = (e: KeyboardEvent) => {
-      if (e.code !== "Space") return;
-      const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
-      e.preventDefault();
-      startSession();
-    };
-    document.addEventListener("keydown", handleSpace);
-    return () => document.removeEventListener("keydown", handleSpace);
-  }, [session, state.bpm, state.isPlaying]);
+  // Spacebar → start session when idle, results, or history
+  // (handled by MainWindow's unified dispatcher via "play" hotkey)
 
   // Apply saved calibration to scored taps
   const offset = savedOffset ?? 0;
@@ -301,25 +333,33 @@ export function TrackView({ state }: TrackViewProps) {
     rating: getOffsetRating(Math.abs(t.offsetMs - offset)),
   }));
   const validTaps = calibratedTaps.filter((t) => t.rating !== "miss");
-  const avgOffset = validTaps.length > 0
-    ? validTaps.reduce((sum, t) => sum + t.offsetMs, 0) / validTaps.length
-    : 0;
+  const avgOffset =
+    validTaps.length > 0
+      ? validTaps.reduce((sum, t) => sum + t.offsetMs, 0) / validTaps.length
+      : 0;
   const absOffsets = validTaps.map((t) => Math.abs(t.offsetMs));
-  const avgAbs = absOffsets.length > 0
-    ? absOffsets.reduce((a, b) => a + b, 0) / absOffsets.length
-    : 0;
-  const stdDev = validTaps.length > 1
-    ? Math.sqrt(validTaps.reduce((sum, t) => sum + (t.offsetMs - avgOffset) ** 2, 0) / (validTaps.length - 1))
-    : 0;
+  const avgAbs =
+    absOffsets.length > 0
+      ? absOffsets.reduce((a, b) => a + b, 0) / absOffsets.length
+      : 0;
+  const stdDev =
+    validTaps.length > 1
+      ? Math.sqrt(
+          validTaps.reduce((sum, t) => sum + (t.offsetMs - avgOffset) ** 2, 0) /
+            (validTaps.length - 1),
+        )
+      : 0;
   const scoredBeatCount = Math.max(0, beatCount - warmupBeats);
-  const hitRate = scoredBeatCount > 0 && session === "results"
-    ? Math.round((validTaps.length / scoredBeats) * 100)
-    : 0;
+  const hitRate =
+    scoredBeatCount > 0 && session === "results"
+      ? Math.round((validTaps.length / scoredBeats) * 100)
+      : 0;
   const overallRating: Rating = (() => {
     if (validTaps.length === 0) return "miss";
     const missCount = Math.max(0, scoredBeats - calibratedTaps.length);
     const totalBeats = validTaps.length + missCount;
-    const adjustedAvg = (avgAbs * validTaps.length + missCount * 100) / Math.max(totalBeats, 1);
+    const adjustedAvg =
+      (avgAbs * validTaps.length + missCount * 100) / Math.max(totalBeats, 1);
     return getOffsetRating(adjustedAvg);
   })();
 
@@ -330,10 +370,13 @@ export function TrackView({ state }: TrackViewProps) {
     catchPhraseRef.current = "";
   }
 
-  const breakdown = calibratedTaps.reduce((acc, t) => {
-    acc[t.rating] = (acc[t.rating] || 0) + 1;
-    return acc;
-  }, {} as Record<Rating, number>);
+  const breakdown = calibratedTaps.reduce(
+    (acc, t) => {
+      acc[t.rating] = (acc[t.rating] || 0) + 1;
+      return acc;
+    },
+    {} as Record<Rating, number>,
+  );
 
   // --- RESULTS DATA (must be before any early returns to satisfy hooks rules) ---
   const perBeatData: PerBeatDatum[] = (() => {
@@ -344,7 +387,7 @@ export function TrackView({ state }: TrackViewProps) {
     const data: PerBeatDatum[] = [];
     for (let b = warmupBeats; b < beats.length; b++) {
       const beatTime = beats[b];
-      let bestTap: typeof calibratedTaps[number] | null = null;
+      let bestTap: (typeof calibratedTaps)[number] | null = null;
       let bestDist = Infinity;
       for (const tap of calibratedTaps) {
         const dist = Math.abs(tap.timestamp - beatTime);
@@ -354,7 +397,11 @@ export function TrackView({ state }: TrackViewProps) {
         }
       }
       if (bestTap) {
-        data.push({ beat: b + 1, offsetMs: bestTap.offsetMs, rating: bestTap.rating });
+        data.push({
+          beat: b + 1,
+          offsetMs: bestTap.offsetMs,
+          rating: bestTap.rating,
+        });
       } else {
         data.push({ beat: b + 1, offsetMs: null, rating: "miss" });
       }
@@ -364,7 +411,12 @@ export function TrackView({ state }: TrackViewProps) {
 
   // Save fresh results to history
   useEffect(() => {
-    if (session === "results" && !viewingResult && perBeatData.length > 0 && !hasSavedRef.current) {
+    if (
+      session === "results" &&
+      !viewingResult &&
+      perBeatData.length > 0 &&
+      !hasSavedRef.current
+    ) {
       hasSavedRef.current = true;
       const result: GameResult = {
         id: crypto.randomUUID(),
@@ -373,7 +425,14 @@ export function TrackView({ state }: TrackViewProps) {
         scoredBeats,
         overallRating,
         catchPhrase: catchPhraseRef.current,
-        breakdown: { ...breakdown, metronomic: breakdown.metronomic || 0, tight: breakdown.tight || 0, solid: breakdown.solid || 0, loose: breakdown.loose || 0, miss: breakdown.miss || 0 },
+        breakdown: {
+          ...breakdown,
+          metronomic: breakdown.metronomic || 0,
+          tight: breakdown.tight || 0,
+          solid: breakdown.solid || 0,
+          loose: breakdown.loose || 0,
+          miss: breakdown.miss || 0,
+        },
         avgOffset,
         avgAbs,
         stdDev,
@@ -402,26 +461,44 @@ export function TrackView({ state }: TrackViewProps) {
         <div className="track-intro">
           <div className="track-intro-icon">🎯</div>
           <h3>Rhythm Accuracy</h3>
-          <p>Tap along with the metronome for {scoredBeats} beats. Press <kbd>Space</kbd> or tap the target to log each beat.</p>
+          <p>
+            Tap along with the metronome for {scoredBeats} beats. Click{" "}
+            the target to log each beat.
+          </p>
           {savedOffset !== null ? (
-            <p className="track-config-hint">Calibrated: {savedOffset >= 0 ? "+" : ""}{savedOffset.toFixed(1)}ms offset</p>
+            <p className="track-config-hint">
+              Calibrated: {savedOffset >= 0 ? "+" : ""}
+              {savedOffset.toFixed(1)}ms offset
+            </p>
           ) : (
-            <p className="track-config-hint">Calibrate first for best accuracy on your system.</p>
+            <p className="track-config-hint">
+              Calibrate first for best accuracy on your system.
+            </p>
           )}
           <div className="track-ratings-legend">
-            {(["metronomic", "tight", "solid", "loose", "miss"] as Rating[]).map((r) => (
+            {(
+              ["metronomic", "tight", "solid", "loose", "miss"] as Rating[]
+            ).map((r) => (
               <span key={r} className="track-legend-item">
-                <span className="track-legend-dot" style={{ background: RATING_COLORS[r] }} />
+                <span
+                  className="track-legend-dot"
+                  style={{ background: RATING_COLORS[r] }}
+                />
                 {RATING_LABELS[r]}
               </span>
             ))}
           </div>
         </div>
         <button className="play-btn full-width" onClick={startSession}>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2.5a.5.5 0 0 1 .77-.42l9 5.5a.5.5 0 0 1 0 .84l-9 5.5A.5.5 0 0 1 4 13.5z"/></svg>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M4 2.5a.5.5 0 0 1 .77-.42l9 5.5a.5.5 0 0 1 0 .84l-9 5.5A.5.5 0 0 1 4 13.5z" />
+          </svg>
           Start
         </button>
-        <button className="play-btn full-width secondary" onClick={startCalibration}>
+        <button
+          className="play-btn full-width secondary"
+          onClick={startCalibration}
+        >
           Calibrate
         </button>
       </div>
@@ -435,10 +512,23 @@ export function TrackView({ state }: TrackViewProps) {
         <div className="track-intro">
           <div className="track-intro-icon">✅</div>
           <h3>Calibrated!</h3>
-          <p>Your system offset: <strong>{savedOffset !== null ? `${savedOffset >= 0 ? "+" : ""}${savedOffset.toFixed(1)}ms` : "0ms"}</strong></p>
-          <p className="track-config-hint">This accounts for audio output latency and input lag on your system. You can recalibrate anytime.</p>
+          <p>
+            Your system offset:{" "}
+            <strong>
+              {savedOffset !== null
+                ? `${savedOffset >= 0 ? "+" : ""}${savedOffset.toFixed(1)}ms`
+                : "0ms"}
+            </strong>
+          </p>
+          <p className="track-config-hint">
+            This accounts for audio output latency and input lag on your system.
+            You can recalibrate anytime.
+          </p>
         </div>
-        <button className="play-btn full-width" onClick={() => setSession("idle")}>
+        <button
+          className="play-btn full-width"
+          onClick={() => setSession("idle")}
+        >
           Done
         </button>
       </div>
@@ -449,9 +539,18 @@ export function TrackView({ state }: TrackViewProps) {
   if (session === "calibrating") {
     const calProgress = beatCount / calibrationBeats;
     return (
-      <div className="track-view track-playing" onMouseDown={handleTap} onTouchStart={(e) => { e.preventDefault(); handleTap(); }}>
+      <div
+        className="track-view track-playing"
+        onMouseDown={handleTap}
+        onTouchStart={(e) => {
+          e.preventDefault();
+          handleTap();
+        }}
+      >
         <div className="track-live-header">
-          <span className="track-live-beats warmup">Calibrating {beatCount}/{calibrationBeats}</span>
+          <span className="track-live-beats warmup">
+            Calibrating {beatCount}/{calibrationBeats}
+          </span>
           <span className="track-live-taps">{taps.length} taps</span>
         </div>
 
@@ -459,7 +558,9 @@ export function TrackView({ state }: TrackViewProps) {
           <svg viewBox="0 0 100 100" className="track-ring-svg">
             <circle cx="50" cy="50" r="42" className="track-ring-bg" />
             <circle
-              cx="50" cy="50" r="42"
+              cx="50"
+              cy="50"
+              r="42"
               className="track-ring-warmup"
               style={{ strokeDashoffset: `${264 * (1 - calProgress)}` }}
             />
@@ -467,8 +568,12 @@ export function TrackView({ state }: TrackViewProps) {
           <div className="track-ring-center">
             <span className="track-ring-label warmup">TAP</span>
             {taps.length > 0 && (
-              <span className="track-last-offset" style={{ color: "var(--text-muted)" }}>
-                {taps[taps.length - 1].offsetMs >= 0 ? "+" : ""}{taps[taps.length - 1].offsetMs.toFixed(0)}ms
+              <span
+                className="track-last-offset"
+                style={{ color: "var(--text-muted)" }}
+              >
+                {taps[taps.length - 1].offsetMs >= 0 ? "+" : ""}
+                {taps[taps.length - 1].offsetMs.toFixed(0)}ms
               </span>
             )}
           </div>
@@ -478,8 +583,16 @@ export function TrackView({ state }: TrackViewProps) {
           Tap naturally along with the clicks
         </div>
 
-        <button className="play-btn full-width playing" onMouseDown={(e) => { e.stopPropagation(); stopSession(); }}>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="12" height="12" rx="1.5"/></svg>
+        <button
+          className="play-btn full-width playing"
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            stopSession();
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <rect x="2" y="2" width="12" height="12" rx="1.5" />
+          </svg>
           Cancel
         </button>
       </div>
@@ -490,12 +603,7 @@ export function TrackView({ state }: TrackViewProps) {
     // Use viewingResult data if viewing from history, otherwise use live computed data
     const r = viewingResult;
     const displayRating = r ? r.overallRating : overallRating;
-    const displayPhrase = r ? r.catchPhrase : catchPhraseRef.current;
     const displayBreakdown = r ? r.breakdown : breakdown;
-    const displayAvgOffset = r ? r.avgOffset : avgOffset;
-    const displayAvgAbs = r ? r.avgAbs : avgAbs;
-    const displayStdDev = r ? r.stdDev : stdDev;
-    const displayHitRate = r ? r.hitRate : hitRate;
     const displayPerBeat = r ? r.perBeatData : perBeatData;
     const displayTaps = r ? r.calibratedTaps : calibratedTaps;
     const displayBpm = r ? r.bpm : bpmAtStart.current;
@@ -503,8 +611,13 @@ export function TrackView({ state }: TrackViewProps) {
     const smoothed = displayPerBeat.map((_d, i) => {
       const window = 5;
       const half = Math.floor(window / 2);
-      let sum = 0, count = 0;
-      for (let j = Math.max(0, i - half); j <= Math.min(displayPerBeat.length - 1, i + half); j++) {
+      let sum = 0,
+        count = 0;
+      for (
+        let j = Math.max(0, i - half);
+        j <= Math.min(displayPerBeat.length - 1, i + half);
+        j++
+      ) {
         if (displayPerBeat[j].offsetMs !== null) {
           sum += displayPerBeat[j].offsetMs!;
           count++;
@@ -513,53 +626,76 @@ export function TrackView({ state }: TrackViewProps) {
       return count > 0 ? sum / count : null;
     });
 
-    const STAT_DESCRIPTIONS: Record<string, string> = {
-      "Avg Offset": "The average timing offset across all your taps. Negative = you tend to tap early, positive = late. Closer to 0 means more balanced timing.",
-      "Avg |Offset|": "The average absolute offset — ignores whether you were early or late, just measures how far off you were. Lower is better.",
-      "Std Dev": "Standard deviation of your tap offsets. Measures consistency — lower means more steady rhythm, higher means more erratic timing.",
-      "Hit Rate": "Percentage of beats you actually tapped. 100% means you hit every beat. Missed beats bring this down.",
-    };
-
     return (
       <div className="track-view track-results-view">
+        <div className="track-results-toolbar">
+          {history.length > 0 && (
+            <button
+              className="track-toolbar-btn"
+              onClick={() => setSession("history")}
+              data-tooltip="History"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="4" y="14" width="4" height="7" rx="1"/>
+                <rect x="10" y="8" width="4" height="13" rx="1"/>
+                <rect x="16" y="3" width="4" height="18" rx="1"/>
+              </svg>
+            </button>
+          )}
+          <button
+            className="track-toolbar-btn"
+            onClick={startCalibration}
+            data-tooltip="Calibrate"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="4" y1="8" x2="20" y2="8"/>
+              <line x1="4" y1="16" x2="20" y2="16"/>
+              <circle cx="9" cy="8" r="2.5" fill="currentColor"/>
+              <circle cx="15" cy="16" r="2.5" fill="currentColor"/>
+            </svg>
+          </button>
+        </div>
         <div className="track-results">
           <div className="track-result-header">
-            <div className="track-result-rating" style={{ color: RATING_COLORS[displayRating] }}>
-              {RATING_LABELS[displayRating]}
+            <div className="track-result-rating-wrap">
+              <span className="track-result-prefix">Your timing was</span>
+              <span
+                className="track-result-rating"
+                style={{ color: RATING_COLORS[displayRating] }}
+              >
+                {RATING_LABELS[displayRating]}
+              </span>
             </div>
-            <div className="track-result-phrase">{displayPhrase}</div>
-            {r && <div className="track-result-meta">{displayBpm} BPM · {new Date(r.date).toLocaleDateString()}</div>}
+            <div className="track-result-meta">
+              {displayBpm} BPM · {r ? new Date(r.date).toLocaleDateString() : new Date().toLocaleDateString()}
+            </div>
           </div>
 
           {/* Rating breakdown bars */}
           <div className="track-breakdown">
-            {(["metronomic", "tight", "solid", "loose", "miss"] as Rating[]).map((rating) => (
+            {(
+              ["metronomic", "tight", "solid", "loose", "miss"] as Rating[]
+            ).map((rating) => (
               <div key={rating} className="track-breakdown-row">
-                <span className="track-breakdown-dot" style={{ background: RATING_COLORS[rating] }} />
-                <span className="track-breakdown-label">{RATING_LABELS[rating]}</span>
-                <span className="track-breakdown-count">{displayBreakdown[rating] || 0}</span>
+                <span
+                  className="track-breakdown-dot"
+                  style={{ background: RATING_COLORS[rating] }}
+                />
+                <span className="track-breakdown-label">
+                  {RATING_LABELS[rating]}
+                </span>
+                <span className="track-breakdown-count">
+                  {displayBreakdown[rating] || 0}
+                </span>
                 <div className="track-breakdown-bar">
                   <div
                     className="track-breakdown-fill"
-                    style={{ width: `${displayTaps.length > 0 ? ((displayBreakdown[rating] || 0) / displayTaps.length) * 100 : 0}%`, background: RATING_COLORS[rating] }}
+                    style={{
+                      width: `${displayTaps.length > 0 ? ((displayBreakdown[rating] || 0) / displayTaps.length) * 100 : 0}%`,
+                      background: RATING_COLORS[rating],
+                    }}
                   />
                 </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Stats tiles */}
-          <div className="track-result-stats">
-            {[
-              { value: `${displayAvgOffset >= 0 ? "+" : ""}${displayAvgOffset.toFixed(1)}ms`, label: "Avg Offset" },
-              { value: `${displayAvgAbs.toFixed(1)}ms`, label: "Avg |Offset|" },
-              { value: `±${displayStdDev.toFixed(1)}ms`, label: "Std Dev" },
-              { value: `${displayHitRate}%`, label: "Hit Rate" },
-            ].map((stat) => (
-              <div key={stat.label} className="track-stat" tabIndex={0}>
-                <span className="track-stat-value">{stat.value}</span>
-                <span className="track-stat-label">{stat.label}</span>
-                <div className="track-stat-popover">{STAT_DESCRIPTIONS[stat.label]}</div>
               </div>
             ))}
           </div>
@@ -571,51 +707,124 @@ export function TrackView({ state }: TrackViewProps) {
               <span>0ms</span>
               <span>Late</span>
             </div>
-            <svg viewBox={`0 0 ${Math.max(displayPerBeat.length, 1) * 20} 120`} preserveAspectRatio="none" className="track-graph-svg">
-              <line x1="0" y1="60" x2={displayPerBeat.length * 20} y2="60" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+            <svg
+              viewBox={`0 0 ${Math.max(displayPerBeat.length, 1) * 20} 120`}
+              preserveAspectRatio="none"
+              className="track-graph-svg"
+            >
+              <line
+                x1="0"
+                y1="60"
+                x2={displayPerBeat.length * 20}
+                y2="60"
+                stroke="rgba(255,255,255,0.12)"
+                strokeWidth="1"
+              />
               {(() => {
                 const points = displayPerBeat
-                  .map((d, i) => d.offsetMs !== null ? { x: i * 20 + 10, y: 60 - (Math.max(-80, Math.min(80, d.offsetMs)) / 80) * 55 } : null)
+                  .map((d, i) =>
+                    d.offsetMs !== null
+                      ? {
+                          x: i * 20 + 10,
+                          y:
+                            60 -
+                            (Math.max(-80, Math.min(80, d.offsetMs)) / 80) * 55,
+                        }
+                      : null,
+                  )
                   .filter(Boolean) as { x: number; y: number }[];
                 if (points.length < 2) return null;
-                const pathD = points.map((p, i) => {
-                  if (i === 0) return `M ${p.x} ${p.y}`;
-                  const prev = points[i - 1];
-                  const cpx1 = prev.x + (p.x - prev.x) * 0.4;
-                  const cpx2 = p.x - (p.x - prev.x) * 0.4;
-                  return `C ${cpx1} ${prev.y} ${cpx2} ${p.y} ${p.x} ${p.y}`;
-                }).join(" ");
-                return <path d={pathD} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2" />;
+                const pathD = points
+                  .map((p, i) => {
+                    if (i === 0) return `M ${p.x} ${p.y}`;
+                    const prev = points[i - 1];
+                    const cpx1 = prev.x + (p.x - prev.x) * 0.4;
+                    const cpx2 = p.x - (p.x - prev.x) * 0.4;
+                    return `C ${cpx1} ${prev.y} ${cpx2} ${p.y} ${p.x} ${p.y}`;
+                  })
+                  .join(" ");
+                return (
+                  <path
+                    d={pathD}
+                    fill="none"
+                    stroke="rgba(255,255,255,0.2)"
+                    strokeWidth="2"
+                  />
+                );
               })()}
               {(() => {
                 const points = smoothed
-                  .map((val, i) => val !== null ? { x: i * 20 + 10, y: 60 - (Math.max(-80, Math.min(80, val)) / 80) * 55 } : null)
+                  .map((val, i) =>
+                    val !== null
+                      ? {
+                          x: i * 20 + 10,
+                          y: 60 - (Math.max(-80, Math.min(80, val)) / 80) * 55,
+                        }
+                      : null,
+                  )
                   .filter(Boolean) as { x: number; y: number }[];
                 if (points.length < 2) return null;
-                const pathD = points.map((p, i) => {
-                  if (i === 0) return `M ${p.x} ${p.y}`;
-                  const prev = points[i - 1];
-                  const cpx1 = prev.x + (p.x - prev.x) * 0.4;
-                  const cpx2 = p.x - (p.x - prev.x) * 0.4;
-                  return `C ${cpx1} ${prev.y} ${cpx2} ${p.y} ${p.x} ${p.y}`;
-                }).join(" ");
-                return <path d={pathD} fill="none" stroke="var(--accent)" strokeWidth="2.5" />;
+                const pathD = points
+                  .map((p, i) => {
+                    if (i === 0) return `M ${p.x} ${p.y}`;
+                    const prev = points[i - 1];
+                    const cpx1 = prev.x + (p.x - prev.x) * 0.4;
+                    const cpx2 = p.x - (p.x - prev.x) * 0.4;
+                    return `C ${cpx1} ${prev.y} ${cpx2} ${p.y} ${p.x} ${p.y}`;
+                  })
+                  .join(" ");
+                return (
+                  <path
+                    d={pathD}
+                    fill="none"
+                    stroke="var(--accent)"
+                    strokeWidth="2.5"
+                  />
+                );
               })()}
               {displayPerBeat.map((d, i) => {
                 const x = i * 20 + 10;
                 if (d.offsetMs === null) {
-                  return <g key={i}>
-                    <line x1={x - 4} y1="56" x2={x + 4} y2="64" stroke="#ff4444" strokeWidth="2" strokeLinecap="round" />
-                    <line x1={x + 4} y1="56" x2={x - 4} y2="64" stroke="#ff4444" strokeWidth="2" strokeLinecap="round" />
-                  </g>;
+                  return (
+                    <g key={i}>
+                      <line
+                        x1={x - 4}
+                        y1="56"
+                        x2={x + 4}
+                        y2="64"
+                        stroke="#ff4444"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                      <line
+                        x1={x + 4}
+                        y1="56"
+                        x2={x - 4}
+                        y2="64"
+                        stroke="#ff4444"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                    </g>
+                  );
                 }
                 return null;
               })}
               {displayPerBeat.map((d, i) => {
                 if (d.offsetMs === null) return null;
                 const x = i * 20 + 10;
-                const y = 60 - (Math.max(-80, Math.min(80, d.offsetMs)) / 80) * 55;
-                return <circle key={`dot-${i}`} cx={x} cy={y} r="3" fill={RATING_COLORS[d.rating]} opacity="0.35" />;
+                const y =
+                  60 - (Math.max(-80, Math.min(80, d.offsetMs)) / 80) * 55;
+                return (
+                  <circle
+                    key={`dot-${i}`}
+                    cx={x}
+                    cy={y}
+                    r="3"
+                    fill={RATING_COLORS[d.rating]}
+                    opacity="0.35"
+                  />
+                );
               })}
             </svg>
           </div>
@@ -628,7 +837,7 @@ export function TrackView({ state }: TrackViewProps) {
                 key={i}
                 className="track-scatter-dot"
                 style={{
-                  left: `${Math.min(100, Math.max(0, (t.offsetMs + 80) / 160 * 100))}%`,
+                  left: `${Math.min(100, Math.max(0, ((t.offsetMs + 80) / 160) * 100))}%`,
                   top: `${(i / Math.max(displayTaps.length - 1, 1)) * 100}%`,
                   background: RATING_COLORS[t.rating],
                 }}
@@ -639,20 +848,9 @@ export function TrackView({ state }: TrackViewProps) {
           </div>
         </div>
 
-        <div className="track-results-actions">
-          <button className="play-btn full-width" onClick={startSession}>
-            Try Again
-          </button>
-          {history.length > 0 && (
-            <button className="play-btn full-width secondary" onClick={() => setSession("history")}>
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1M2 8a6 6 0 1 1 12 0A6 6 0 0 1 2 8"/><path d="M8 3.5a.5.5 0 0 1 .5.5v4H12a.5.5 0 0 1 0 1H8a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 .5-.5"/></svg>
-              History
-            </button>
-          )}
-          <button className="play-btn full-width secondary" onClick={startCalibration}>
-            Recalibrate
-          </button>
-        </div>
+        <button className="play-btn full-width track-floating-cta" onClick={startSession}>
+          Try Again
+        </button>
       </div>
     );
   }
@@ -662,38 +860,69 @@ export function TrackView({ state }: TrackViewProps) {
     return (
       <div className="track-view track-history-view">
         <div className="track-history-header">
-          <button className="track-history-back" onClick={() => { setViewingResult(history[0] || null); setSession("results"); }}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path fillRule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/></svg>
+          <button
+            className="track-history-back"
+            onClick={() => {
+              setViewingResult(history[0] || null);
+              setSession("results");
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path
+                fillRule="evenodd"
+                d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"
+              />
+            </svg>
           </button>
           <h3>History</h3>
+          <button
+            className="track-toolbar-btn track-history-delete"
+            data-tooltip="Clear all"
+            onClick={() => {
+              if (window.confirm("Are you sure you want to delete all history?")) {
+                setHistory([]);
+                saveHistory([]);
+                setSession("idle");
+              }
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+          </button>
         </div>
         <div className="track-history-list">
           {history.map((game) => (
             <button
               key={game.id}
               className="track-history-item"
-              onClick={() => { setViewingResult(game); setSession("results"); }}
+              onClick={() => {
+                setViewingResult(game);
+                setSession("results");
+              }}
             >
-              <span className="track-history-rating" style={{ color: RATING_COLORS[game.overallRating] }}>
+              <span
+                className="track-history-rating"
+                style={{ color: RATING_COLORS[game.overallRating] }}
+              >
                 {RATING_LABELS[game.overallRating]}
               </span>
               <span className="track-history-detail">
                 {game.bpm} BPM · {game.hitRate}% hits
               </span>
               <span className="track-history-date">
-                {new Date(game.date).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                {new Date(game.date).toLocaleDateString(undefined, {
+                  month: "short",
+                  day: "numeric",
+                })}
               </span>
             </button>
           ))}
         </div>
-        <div className="track-results-actions">
-          <button className="play-btn full-width" onClick={startSession}>
-            Try Again
-          </button>
-          <button className="play-btn full-width secondary" onClick={startCalibration}>
-            Recalibrate
-          </button>
-        </div>
+        <button className="play-btn full-width track-floating-cta" onClick={startSession}>
+          Try Again
+        </button>
       </div>
     );
   }
@@ -702,12 +931,23 @@ export function TrackView({ state }: TrackViewProps) {
   const scoredProgress = Math.max(0, beatCount - warmupBeats) / scoredBeats;
   const warmupProgress = Math.min(beatCount / warmupBeats, 1);
   return (
-    <div className="track-view track-playing" onMouseDown={handleTap} onTouchStart={(e) => { e.preventDefault(); handleTap(); }}>
+    <div
+      className="track-view track-playing"
+      onMouseDown={handleTap}
+      onTouchStart={(e) => {
+        e.preventDefault();
+        handleTap();
+      }}
+    >
       <div className="track-live-header">
         {isWarmup ? (
-          <span className="track-live-beats warmup">Warm-up {beatCount}/{warmupBeats}</span>
+          <span className="track-live-beats warmup">
+            Warm-up {beatCount}/{warmupBeats}
+          </span>
         ) : (
-          <span className="track-live-beats">{Math.max(0, beatCount - warmupBeats)}/{scoredBeats}</span>
+          <span className="track-live-beats">
+            {Math.max(0, beatCount - warmupBeats)}/{scoredBeats}
+          </span>
         )}
         <span className="track-live-taps">{taps.length} taps</span>
       </div>
@@ -717,13 +957,17 @@ export function TrackView({ state }: TrackViewProps) {
           <circle cx="50" cy="50" r="42" className="track-ring-bg" />
           {isWarmup ? (
             <circle
-              cx="50" cy="50" r="42"
+              cx="50"
+              cy="50"
+              r="42"
               className="track-ring-warmup"
               style={{ strokeDashoffset: `${264 * (1 - warmupProgress)}` }}
             />
           ) : (
             <circle
-              cx="50" cy="50" r="42"
+              cx="50"
+              cy="50"
+              r="42"
               className="track-ring-fill"
               style={{ strokeDashoffset: `${264 * (1 - scoredProgress)}` }}
             />
@@ -735,15 +979,21 @@ export function TrackView({ state }: TrackViewProps) {
           ) : (
             <span className="track-ring-label">TAP</span>
           )}
-          {!isWarmup && taps.length > 0 && (() => {
-            const lastCal = taps[taps.length - 1].offsetMs - offset;
-            const lastRating = getOffsetRating(Math.abs(lastCal));
-            return (
-              <span className="track-last-offset" style={{ color: RATING_COLORS[lastRating] }}>
-                {lastCal >= 0 ? "+" : ""}{lastCal.toFixed(0)}ms
-              </span>
-            );
-          })()}
+          {!isWarmup &&
+            taps.length > 0 &&
+            (() => {
+              const lastCal = taps[taps.length - 1].offsetMs - offset;
+              const lastRating = getOffsetRating(Math.abs(lastCal));
+              return (
+                <span
+                  className="track-last-offset"
+                  style={{ color: RATING_COLORS[lastRating] }}
+                >
+                  {lastCal >= 0 ? "+" : ""}
+                  {lastCal.toFixed(0)}ms
+                </span>
+              );
+            })()}
         </div>
       </div>
 
@@ -751,7 +1001,11 @@ export function TrackView({ state }: TrackViewProps) {
         {(() => {
           const beatIntervalMs = 60000 / bpmAtStart.current;
           const beats = beatTimestamps.current;
-          const items: { type: "hit" | "miss" | "warmup"; rating?: Rating; color?: string }[] = [];
+          const items: {
+            type: "hit" | "miss" | "warmup";
+            rating?: Rating;
+            color?: string;
+          }[] = [];
           for (let b = 0; b < beats.length; b++) {
             const beatTime = beats[b];
             if (b < warmupBeats) {
@@ -763,7 +1017,11 @@ export function TrackView({ state }: TrackViewProps) {
               if (Math.abs(tap.timestamp - beatTime) < beatIntervalMs * 0.5) {
                 const calOffset = tap.offsetMs - offset;
                 const calRating = getOffsetRating(Math.abs(calOffset));
-                items.push({ type: "hit", rating: calRating, color: RATING_COLORS[calRating] });
+                items.push({
+                  type: "hit",
+                  rating: calRating,
+                  color: RATING_COLORS[calRating],
+                });
                 matched = true;
                 break;
               }
@@ -777,22 +1035,34 @@ export function TrackView({ state }: TrackViewProps) {
               }
             }
           }
-          return items.slice(-16).map((item, i) => (
-            <span
-              key={i}
-              className={`track-live-dot ${item.type === "miss" ? "miss" : ""} ${item.type === "warmup" ? "warmup" : ""}`}
-              style={item.type === "hit" ? { background: item.color } : undefined}
-            />
-          ));
+          return items
+            .slice(-16)
+            .map((item, i) => (
+              <span
+                key={i}
+                className={`track-live-dot ${item.type === "miss" ? "miss" : ""} ${item.type === "warmup" ? "warmup" : ""}`}
+                style={
+                  item.type === "hit" ? { background: item.color } : undefined
+                }
+              />
+            ));
         })()}
       </div>
 
       <div className="track-live-hint">
-        Press <kbd>Space</kbd> or tap anywhere
+        Click the target to tap along
       </div>
 
-      <button className="play-btn full-width playing" onMouseDown={(e) => { e.stopPropagation(); stopSession(); }}>
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="12" height="12" rx="1.5"/></svg>
+      <button
+        className="play-btn full-width playing"
+        onMouseDown={(e) => {
+          e.stopPropagation();
+          stopSession();
+        }}
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <rect x="2" y="2" width="12" height="12" rx="1.5" />
+        </svg>
         Stop
       </button>
     </div>

@@ -108,7 +108,11 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, #000));
+  background: linear-gradient(
+    135deg,
+    var(--accent),
+    color-mix(in srgb, var(--accent) 70%, #000)
+  );
   color: var(--accent-text, white);
   font-size: 0.9rem;
   font-family: system-ui, sans-serif;
@@ -143,7 +147,9 @@
   flex-shrink: 0;
   border: 1px solid var(--border, rgba(255, 255, 255, 0.06));
   opacity: 0.7;
-  transition: opacity 0.2s, background 0.2s;
+  transition:
+    opacity 0.2s,
+    background 0.2s;
 }
 
 .fw-settings:hover {
@@ -224,14 +230,19 @@
 
 .fw-beat-dot.active {
   background: var(--accent);
-  box-shadow: 0 0 10px var(--accent-glow), 0 0 4px var(--accent);
+  box-shadow:
+    0 0 10px var(--accent-glow),
+    0 0 4px var(--accent);
   transform: scale(1.25);
   border-color: transparent;
 }
 
 .fw-beat-dot.downbeat {
   background: var(--beat-accent, var(--accent));
-  box-shadow: 0 0 14px color-mix(in srgb, var(--beat-accent, var(--accent)) 40%, transparent), 0 0 4px var(--beat-accent, var(--accent));
+  box-shadow:
+    0 0 14px
+      color-mix(in srgb, var(--beat-accent, var(--accent)) 40%, transparent),
+    0 0 4px var(--beat-accent, var(--accent));
   transform: scale(1.4);
 }
 
@@ -260,6 +271,11 @@
 }
 
 @keyframes ramp-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }

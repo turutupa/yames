@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import type { AppState, BeatEvent } from "../types";
-import { configureSpeedRamp, startSpeedRamp, startSpeedRampFrom, stopSpeedRamp, onRampStep } from "../ipc";
-import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
-import "../styles/train-view.css";
+import { configureSpeedRamp, startSpeedRampFrom, onRampStep } from "../ipc";
+import "../styles/drill-view.css";
 
-const TRAIN_DESCRIPTIONS: Record<string, string> = {
+const DRILL_DESCRIPTIONS: Record<string, string> = {
   startBpm: "The tempo you begin practicing at. Start slow and build up.",
   targetBpm: "The goal tempo you're working toward.",
   increment: "BPM added each up-step. Bigger number = faster ramp.",
@@ -15,14 +14,17 @@ const TRAIN_DESCRIPTIONS: Record<string, string> = {
   cyclic: "Goes up to target then back down to start in the same increments (round-trip).",
 };
 
-interface TrainViewProps {
+interface DrillViewProps {
   state: AppState;
   currentBeat: BeatEvent | null;
+  autoCollapse?: boolean;
 }
 
-export function TrainView({ state, currentBeat }: TrainViewProps) {
+export function DrillView({ state, currentBeat, autoCollapse = true }: DrillViewProps) {
   const ramp = state.speedRamp;
   const [highlightMode, setHighlightMode] = useState<"beats" | "repeats" | "startBpm" | "targetBpm" | null>(null);
+  const [configCollapsed, setConfigCollapsed] = useState(false);
+  const [userToggledConfig, setUserToggledConfig] = useState(false);
   const [startBpm, setStartBpm] = useState(ramp.startBpm);
   const [targetBpm, setTargetBpm] = useState(ramp.targetBpm);
   const [increment, setIncrement] = useState(ramp.increment);
@@ -57,6 +59,17 @@ export function TrainView({ state, currentBeat }: TrainViewProps) {
     }
   }, [ramp.startBpm, ramp.targetBpm, ramp.increment, ramp.decrement, ramp.barsPerStep, ramp.beatsPerBar, ramp.mode, ramp.cyclic, ramp.active]);
 
+  // Auto-collapse config when playing, auto-expand on stop
+  useEffect(() => {
+    if (!autoCollapse || userToggledConfig) return;
+    setConfigCollapsed(ramp.active);
+  }, [ramp.active, userToggledConfig, autoCollapse]);
+
+  // Reset manual override when playback stops so next play auto-collapses again
+  useEffect(() => {
+    if (!ramp.active) setUserToggledConfig(false);
+  }, [ramp.active]);
+
   // Listen for ramp-step events (for future use / logging)
   useEffect(() => {
     const unlisten = onRampStep(() => {});
@@ -76,23 +89,7 @@ export function TrainView({ state, currentBeat }: TrainViewProps) {
     });
   };
 
-  // Spacebar → start/stop
-  useEffect(() => {
-    const handleSpace = (e: KeyboardEvent) => {
-      if (e.code !== "Space") return;
-      const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
-      e.preventDefault();
-      if (ramp.active) {
-        stopSpeedRamp();
-      } else {
-        saveWith({});
-        setTimeout(() => startSpeedRamp(), 50);
-      }
-    };
-    document.addEventListener("keydown", handleSpace);
-    return () => document.removeEventListener("keydown", handleSpace);
-  }, [ramp.active, startBpm, targetBpm, increment, decrement, barsPerStep, beatsPerBar, mode, cyclic]);
+  // Spacebar start/stop is handled by MainWindow's unified dispatcher via "play" hotkey
 
   // Calculate steps for the progress visualization
   const steps: number[] = [];
@@ -166,61 +163,6 @@ export function TrainView({ state, currentBeat }: TrainViewProps) {
     prevBeatsRef.current = beatsPerBar;
   }, [beatsPerBar]);
 
-  // Auto-resize window to fit grid content
-  const prevSize = useRef<{ width: number; height: number } | null>(null);
-
-  // Save original size on mount, restore on unmount
-  useEffect(() => {
-    const win = getCurrentWindow();
-    win.innerSize().then((size) => {
-      const scale = window.devicePixelRatio || 1;
-      prevSize.current = {
-        width: Math.round(size.width / scale),
-        height: Math.round(size.height / scale),
-      };
-    });
-    return () => {
-      if (prevSize.current) {
-        const { width, height } = prevSize.current;
-        getCurrentWindow().setSize(new LogicalSize(width, height));
-      }
-    };
-  }, []);
-
-  // Resize when grid dimensions change
-  const prevGridKey = useRef("");
-  useEffect(() => {
-    const gridKey = `${steps.length}-${barsPerStep}`;
-    if (gridKey === prevGridKey.current) return;
-    prevGridKey.current = gridKey;
-
-    const cellSize = 28;
-    const gap = 4;
-    const bpmLabelWidth = 40;
-    // Grid natural width: bpm label + cells (cols = barsPerStep) + gaps
-    const gridNaturalWidth = bpmLabelWidth + barsPerStep * (cellSize + gap) - gap;
-    // Window needs: grid + body padding (~24px each side) + some breathing room
-    const neededWidth = gridNaturalWidth + 80;
-    const minWidth = Math.max(480, neededWidth);
-
-    // Fixed height estimate: header(60) + tabs(50) + bpm area(130) + grid rows + config(~350) + button(70) + margins(80)
-    const gridHeight = steps.length * (cellSize + gap) - gap + 28; /* legend row */
-    const neededHeight = 60 + 50 + 130 + gridHeight + 350 + 70 + 80;
-    const minHeight = Math.max(820, neededHeight);
-
-    const win = getCurrentWindow();
-    win.innerSize().then((size) => {
-      const scale = window.devicePixelRatio || 1;
-      const curW = Math.round(size.width / scale);
-      const curH = Math.round(size.height / scale);
-      const newW = Math.max(curW, minWidth);
-      const newH = Math.max(curH, minHeight);
-      if (newW !== curW || newH !== curH) {
-        win.setSize(new LogicalSize(newW, newH));
-      }
-    });
-  }, [steps.length, barsPerStep]);
-
   // Calculate total time for the ramp using the ramp's own beats_per_bar
   const totalTimeSeconds = (() => {
     let total = 0;
@@ -281,27 +223,27 @@ export function TrainView({ state, currentBeat }: TrainViewProps) {
   const isDownbeat = currentBeat?.isDownbeat ?? false;
 
   return (
-    <div className="train-view" data-highlight={!ramp.active ? highlightMode || undefined : undefined}>
-      <div className="train-current">
-        <span className="train-current-bpm">{ramp.active ? ramp.currentBpm : startBpm}</span>
-        <span className="train-current-label">BPM</span>
+    <div className="drill-view" data-highlight={!ramp.active ? highlightMode || undefined : undefined}>
+      <div className="drill-current">
+        <span className="drill-current-bpm">{ramp.active ? ramp.currentBpm : startBpm}</span>
+        <span className="drill-current-label">BPM</span>
         {/* Beat dots */}
-        <div className="train-beat-dots">
+        <div className="drill-beat-dots">
           {Array.from({ length: beatsPerBar }, (_, beatIdx) => {
             const isBeatActive = ramp.active && activeBeat === beatIdx && isDownbeat;
             const isAccent = beatIdx === 0;
             return (
               <div
                 key={beatIdx}
-                className={`train-dot ${isBeatActive ? "active" : ""} ${isAccent && isBeatActive ? "accent" : ""}`}
+                className={`drill-dot ${isBeatActive ? "active" : ""} ${isAccent && isBeatActive ? "accent" : ""}`}
               />
             );
           })}
           {ghostDots > 0 && Array.from({ length: ghostDots }, (_, i) => (
-            <div key={`ghost-dot-${i}`} className="train-dot exiting" />
+            <div key={`ghost-dot-${i}`} className="drill-dot exiting" />
           ))}
         </div>
-        <span className="train-current-step" style={{ visibility: ramp.active || ramp.completed ? "visible" : "hidden" }}>
+        <span className="drill-current-step" style={{ visibility: ramp.active || ramp.completed ? "visible" : "hidden" }}>
           {ramp.completed
             ? "Done!"
             : ramp.active
@@ -310,10 +252,32 @@ export function TrainView({ state, currentBeat }: TrainViewProps) {
         </span>
       </div>
 
-      <div className="train-config">
-          <div className="train-row" onMouseEnter={() => setHighlightMode("startBpm")} onMouseLeave={() => setHighlightMode(null)}>
-            <label className="train-label-tip">Start BPM<span className="train-tip">{TRAIN_DESCRIPTIONS.startBpm}</span></label>
-            <div className="train-stepper">
+      <div className={`drill-config ${configCollapsed ? "collapsed" : ""}`}>
+        <button className="drill-config-toggle" onClick={() => { setUserToggledConfig(true); setConfigCollapsed(!configCollapsed); }}>
+          <span className="drill-config-summary">
+            {startBpm}
+            <svg className="drill-config-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+            {targetBpm}
+            <span className="drill-config-sep"><svg width="5" height="5" viewBox="0 0 5 5"><circle cx="2.5" cy="2.5" r="2.5" fill="currentColor"/></svg></span>
+            <svg className="drill-config-arrow up" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+            {increment}
+            {mode === "zigzag" && <>
+              <svg className="drill-config-arrow down" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+              {decrement}
+            </>}
+            <span className="drill-config-sep"><svg width="5" height="5" viewBox="0 0 5 5"><circle cx="2.5" cy="2.5" r="2.5" fill="currentColor"/></svg></span>
+            {beatsPerBar} beats
+            <span className="drill-config-sep"><svg width="5" height="5" viewBox="0 0 5 5"><circle cx="2.5" cy="2.5" r="2.5" fill="currentColor"/></svg></span>
+            {barsPerStep} reps
+          </span>
+          <svg className={`drill-config-chevron ${configCollapsed ? "" : "open"}`} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        <div className="drill-config-body">
+          <div className="drill-row" onMouseEnter={() => setHighlightMode("startBpm")} onMouseLeave={() => setHighlightMode(null)}>
+            <label className="drill-label-tip">Start BPM<span className="drill-tip">{DRILL_DESCRIPTIONS.startBpm}</span></label>
+            <div className="drill-stepper">
               <button className="stepper-btn" onClick={() => { const v = Math.max(20, startBpm - 5); setStartBpm(v); saveWith({ startBpm: v }); }}>−</button>
               <input
                 type="number"
@@ -326,9 +290,9 @@ export function TrainView({ state, currentBeat }: TrainViewProps) {
               <button className="stepper-btn" onClick={() => { const v = Math.min(300, startBpm + 5); setStartBpm(v); if (v > targetBpm) { setTargetBpm(v); saveWith({ startBpm: v, targetBpm: v }); } else { saveWith({ startBpm: v }); } }}>+</button>
             </div>
           </div>
-          <div className="train-row" onMouseEnter={() => setHighlightMode("targetBpm")} onMouseLeave={() => setHighlightMode(null)}>
-            <label className="train-label-tip">Target BPM<span className="train-tip">{TRAIN_DESCRIPTIONS.targetBpm}</span></label>
-            <div className="train-stepper">
+          <div className="drill-row" onMouseEnter={() => setHighlightMode("targetBpm")} onMouseLeave={() => setHighlightMode(null)}>
+            <label className="drill-label-tip">Target BPM<span className="drill-tip">{DRILL_DESCRIPTIONS.targetBpm}</span></label>
+            <div className="drill-stepper">
               <button className="stepper-btn" onClick={() => { const v = Math.max(startBpm, targetBpm - 5); setTargetBpm(v); saveWith({ targetBpm: v }); }}>−</button>
               <input
                 type="number"
@@ -341,9 +305,9 @@ export function TrainView({ state, currentBeat }: TrainViewProps) {
               <button className="stepper-btn" onClick={() => { const v = Math.min(300, targetBpm + 5); setTargetBpm(v); saveWith({ targetBpm: v }); }}>+</button>
             </div>
           </div>
-          <div className="train-row">
-            <label className="train-label-tip">Speed Up<span className="train-tip">{TRAIN_DESCRIPTIONS.increment}</span></label>
-            <div className="train-stepper">
+          <div className="drill-row">
+            <label className="drill-label-tip">Speed Up<span className="drill-tip">{DRILL_DESCRIPTIONS.increment}</span></label>
+            <div className="drill-stepper">
               <button className="stepper-btn" onClick={() => { const v = Math.max(1, increment - 1); setIncrement(v); saveWith({ increment: v }); }}>−</button>
               <input
                 type="number"
@@ -357,9 +321,9 @@ export function TrainView({ state, currentBeat }: TrainViewProps) {
             </div>
           </div>
           {mode === "zigzag" && (
-            <div className="train-row">
-              <label className="train-label-tip">Slow Down<span className="train-tip">{TRAIN_DESCRIPTIONS.decrement}</span></label>
-              <div className="train-stepper">
+            <div className="drill-row">
+              <label className="drill-label-tip">Slow Down<span className="drill-tip">{DRILL_DESCRIPTIONS.decrement}</span></label>
+              <div className="drill-stepper">
                 <button className="stepper-btn" onClick={() => { const v = Math.max(1, decrement - 1); setDecrement(v); saveWith({ decrement: v }); }}>−</button>
                 <input
                   type="number"
@@ -373,9 +337,9 @@ export function TrainView({ state, currentBeat }: TrainViewProps) {
               </div>
             </div>
           )}
-          <div className="train-row" onMouseEnter={() => setHighlightMode("beats")} onMouseLeave={() => setHighlightMode(null)}>
-            <label className="train-label-tip">Beats<span className="train-tip">{TRAIN_DESCRIPTIONS.beats}</span></label>
-            <div className="train-stepper">
+          <div className="drill-row" onMouseEnter={() => setHighlightMode("beats")} onMouseLeave={() => setHighlightMode(null)}>
+            <label className="drill-label-tip">Beats<span className="drill-tip">{DRILL_DESCRIPTIONS.beats}</span></label>
+            <div className="drill-stepper">
               <button className="stepper-btn" onClick={() => { const v = Math.max(1, beatsPerBar - 1); setBeatsPerBar(v); saveWith({ beatsPerBar: v }); }}>−</button>
               <input
                 type="number"
@@ -388,9 +352,9 @@ export function TrainView({ state, currentBeat }: TrainViewProps) {
               <button className="stepper-btn" onClick={() => { const v = Math.min(12, beatsPerBar + 1); setBeatsPerBar(v); saveWith({ beatsPerBar: v }); }}>+</button>
             </div>
           </div>
-          <div className="train-row" onMouseEnter={() => setHighlightMode("repeats")} onMouseLeave={() => setHighlightMode(null)}>
-            <label className="train-label-tip">Repeats<span className="train-tip">{TRAIN_DESCRIPTIONS.repeat}</span></label>
-            <div className="train-stepper">
+          <div className="drill-row" onMouseEnter={() => setHighlightMode("repeats")} onMouseLeave={() => setHighlightMode(null)}>
+            <label className="drill-label-tip">Repeats<span className="drill-tip">{DRILL_DESCRIPTIONS.repeat}</span></label>
+            <div className="drill-stepper">
               <button className="stepper-btn" onClick={() => { const v = Math.max(1, barsPerStep - 1); setBarsPerStep(v); saveWith({ barsPerStep: v }); }}>−</button>
               <input
                 type="number"
@@ -403,8 +367,8 @@ export function TrainView({ state, currentBeat }: TrainViewProps) {
               <button className="stepper-btn" onClick={() => { const v = Math.min(32, barsPerStep + 1); setBarsPerStep(v); saveWith({ barsPerStep: v }); }}>+</button>
             </div>
           </div>
-          <div className="train-row">
-            <label className="train-label-tip">Mode<span className="train-tip">{TRAIN_DESCRIPTIONS.mode}</span></label>
+          <div className="drill-row">
+            <label className="drill-label-tip">Mode<span className="drill-tip">{DRILL_DESCRIPTIONS.mode}</span></label>
             <div className="toggle-group">
               <button className={`toggle-btn ${mode === "linear" ? "active" : ""}`} onClick={() => { setMode("linear"); saveWith({ mode: "linear" }); }}>
                 Linear
@@ -414,8 +378,8 @@ export function TrainView({ state, currentBeat }: TrainViewProps) {
               </button>
             </div>
           </div>
-          <div className="train-row">
-            <label className="train-label-tip">Cyclic<span className="train-tip">{TRAIN_DESCRIPTIONS.cyclic}</span></label>
+          <div className="drill-row">
+            <label className="drill-label-tip">Cyclic<span className="drill-tip">{DRILL_DESCRIPTIONS.cyclic}</span></label>
             <button
               className={`toggle-btn ${cyclic ? "active" : ""}`}
               onClick={() => { const next = !cyclic; setCyclic(next); saveWith({ cyclic: next }); }}
@@ -425,30 +389,31 @@ export function TrainView({ state, currentBeat }: TrainViewProps) {
           </div>
 
         </div>
+      </div>
 
-      <div className="train-summary">
+      <div className="drill-summary">
         {beatsPerBar} beats · {steps.length} steps · {barsPerStep} repeats · {ramp.active ? `${formatTime(liveRemaining)} remaining` : formatTime(totalTimeSeconds)}
       </div>
 
-      <div className="train-grid-wrapper">
-        <div className="train-grid">
+      <div className="drill-grid-wrapper">
+        <div className="drill-grid">
           {steps.map((bpm, stepIdx) => {
             const effectiveStep = cyclic && steps.length > 0 ? ramp.currentStep % steps.length : ramp.currentStep;
-            const isDone = cyclic ? false : stepIdx < ramp.currentStep;
+            const isDone = ramp.active ? (cyclic ? false : stepIdx < ramp.currentStep) : false;
             const isCurrent = stepIdx === effectiveStep && ramp.active;
             const pct = steps.length > 1 ? stepIdx / (steps.length - 1) : 0;
             const rowOpacity = 0.15 + pct * 0.85;
             return (
-              <div key={stepIdx} className="train-grid-row" data-row-idx={stepIdx} data-last-row={stepIdx === steps.length - 1 && ghostRows.length === 0 ? "" : undefined}>
-                <span className={`train-grid-bpm ${isCurrent ? "current" : ""} ${isDone ? "done" : ""}`}>{bpm}</span>
-                <div className="train-grid-cells">
+              <div key={stepIdx} className="drill-grid-row" data-row-idx={stepIdx} data-last-row={stepIdx === steps.length - 1 && ghostRows.length === 0 ? "" : undefined}>
+                <span className={`drill-grid-bpm ${isCurrent ? "current" : ""} ${isDone ? "done" : ""}`}>{bpm}</span>
+                <div className="drill-grid-cells">
                   {Array.from({ length: barsPerStep }, (_, barIdx) => {
                     const barDone = isDone || (isCurrent && barIdx < ramp.barsInStep);
                     const barActive = isCurrent && barIdx === ramp.barsInStep;
                     return (
                       <div
                         key={barIdx}
-                        className={`train-grid-cell ${barDone ? "done" : ""} ${barActive ? "current" : ""}`}
+                        className={`drill-grid-cell ${barDone ? "done" : ""} ${barActive ? "current" : ""}`}
                         data-first-cell={stepIdx === 0 && barIdx === 0 ? "" : undefined}
                         style={{ cursor: "pointer", opacity: barDone || barActive ? undefined : rowOpacity * 0.3 }}
                         onClick={() => { startSpeedRampFrom(stepIdx, bpm, barIdx); startTimer(stepIdx, barIdx); }}
@@ -457,7 +422,7 @@ export function TrainView({ state, currentBeat }: TrainViewProps) {
                   })}
                   {/* Ghost cols exiting */}
                   {ghostCols > 0 && Array.from({ length: ghostCols }, (_, i) => (
-                    <div key={`ghost-col-${i}`} className="train-grid-cell exiting" style={{ opacity: rowOpacity * 0.3 }} />
+                    <div key={`ghost-col-${i}`} className="drill-grid-cell exiting" style={{ opacity: rowOpacity * 0.3 }} />
                   ))}
                 </div>
               </div>
@@ -469,20 +434,20 @@ export function TrainView({ state, currentBeat }: TrainViewProps) {
             const pct = steps.length > 1 ? ghostIdx / (steps.length + ghostRows.length - 1) : 1;
             const rowOpacity = 0.15 + pct * 0.85;
             return (
-              <div key={`ghost-row-${i}`} className="train-grid-row exiting">
-                <span className="train-grid-bpm">{bpm}</span>
-                <div className="train-grid-cells">
+              <div key={`ghost-row-${i}`} className="drill-grid-row exiting">
+                <span className="drill-grid-bpm">{bpm}</span>
+                <div className="drill-grid-cells">
                   {Array.from({ length: barsPerStep + ghostCols }, (_, barIdx) => (
-                    <div key={barIdx} className="train-grid-cell exiting" style={{ opacity: rowOpacity * 0.3 }} />
+                    <div key={barIdx} className="drill-grid-cell exiting" style={{ opacity: rowOpacity * 0.3 }} />
                   ))}
                 </div>
               </div>
             );
           })}
         </div>
-        <div className="train-grid-legend-bottom">
-          <span className="train-grid-corner"></span>
-          <span className="train-grid-legend-label">Repeats →</span>
+        <div className="drill-grid-legend-bottom">
+          <span className="drill-grid-corner"></span>
+          <span className="drill-grid-legend-label">Repeats →</span>
         </div>
       </div>
     </div>

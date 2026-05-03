@@ -34,7 +34,7 @@ impl Default for SpeedRamp {
             target_bpm: 120,
             increment: 5,
             decrement: 3,
-            bars_per_step: 10,
+            bars_per_step: 12,
             beats_per_bar: 4,
             mode: "linear".to_string(),
             cyclic: false,
@@ -58,6 +58,8 @@ pub struct AppState {
     pub corner: String,
     #[serde(rename = "alwaysOnTop")]
     pub always_on_top: bool,
+    #[serde(rename = "widgetAlwaysOnTop")]
+    pub widget_always_on_top: bool,
     #[serde(rename = "accentColor")]
     pub accent_color: String,
     pub theme: String,
@@ -79,6 +81,7 @@ impl Default for AppState {
             mode: "comfortable".to_string(),
             corner: "top-right".to_string(),
             always_on_top: true,
+            widget_always_on_top: true,
             accent_color: "#e94560".to_string(),
             theme: "mono".to_string(),
             volume: 0.8,

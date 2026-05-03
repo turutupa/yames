@@ -10,18 +10,34 @@
   position: relative;
 }
 
-.main-window[data-playing="true"] {
-  border-color: var(--accent-glow);
+.main-window[data-playing="true"][data-border="true"] {
+  border-color: var(--accent);
 }
 
 .main-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  padding: 16px 24px 12px;
-  flex-shrink: 0;
-  background: transparent;
+  gap: 12px;
+  padding: 10px 12px 30px 84px;
+  height: 72px;
   z-index: 10;
+}
+
+.main-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--bg-primary) 80%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  -webkit-mask-image: linear-gradient(to bottom, black 52px, transparent);
+  mask-image: linear-gradient(to bottom, black 52px, transparent);
+  z-index: -1;
+  pointer-events: none;
 }
 
 .main-header h1 {
@@ -44,6 +60,8 @@
 .header-actions {
   display: flex;
   gap: 6px;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .header-btn {
@@ -101,18 +119,17 @@
 .header-volume-popover {
   position: absolute;
   top: calc(100% + 8px);
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
   padding: 10px 14px;
   border-radius: 8px;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(12px);
   width: 140px;
   z-index: 100;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-4px);
   transition:
     opacity 0.15s,
     visibility 0.15s,
@@ -122,7 +139,7 @@
 .header-volume-wrap:hover .header-volume-popover {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
 }
 
 .header-volume-popover .volume-slider {
@@ -131,13 +148,13 @@
   appearance: none;
   height: 4px;
   border-radius: 2px;
-  background: var(--bg-card, #1a1a2e);
+  background: rgba(255, 255, 255, 0.1);
   background-image: linear-gradient(
     to right,
     var(--accent) 0%,
     var(--accent) var(--volume-pct, 80%),
-    transparent var(--volume-pct, 80%),
-    transparent 100%
+    rgba(255, 255, 255, 0.1) var(--volume-pct, 80%),
+    rgba(255, 255, 255, 0.1) 100%
   );
   outline: none;
   border: none;
@@ -157,7 +174,8 @@
 .main-content {
   flex: 1;
   overflow-y: auto;
-  padding: 20px 24px 64px;
+  overflow-x: hidden;
+  padding: 56px 24px 64px;
   display: flex;
   flex-direction: column;
   gap: 28px;
@@ -165,6 +183,17 @@
 }
 
 .main-content[data-view="settings"] {
+  justify-content: flex-start;
+}
+
+.main-content[data-view="settings"] > * {
+  max-width: 680px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.main-content[data-view="track"] {
   justify-content: flex-start;
 }
 
@@ -914,13 +943,25 @@
 }
 
 /* =================== Settings view =================== */
+.settings-section:first-child {
+  margin-top: 10px;
+}
+
 .settings-section h2,
 .hotkeys-section h2 {
   font-size: 1rem;
+  font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   margin-bottom: 12px;
+}
+
+.settings-section + .settings-section,
+.settings-section + .hotkeys-section,
+.hotkeys-section + .settings-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 28px;
 }
 
 /* Settings rows with helper text */
@@ -1039,26 +1080,86 @@
   overflow: hidden;
 }
 
+.hotkey-group {
+  margin-bottom: 16px;
+}
+
+.hotkey-group:last-child {
+  margin-bottom: 0;
+}
+
+.hotkey-group-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  padding: 0 0 6px 2px;
+}
+
 .hotkey-table-header {
   display: grid;
-  grid-template-columns: 1.2fr 1fr 1fr;
-  gap: 0 12px;
+  grid-template-columns: 1.2fr 1fr 1fr 1fr;
+  gap: 0 8px;
   padding: 8px 12px;
   background: var(--bg-secondary);
   font-size: 0.7rem;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--text-secondary);
   border-bottom: 1px solid var(--border);
 }
 
+.hotkey-table-header span:nth-child(2),
+.hotkey-table-header span:nth-child(3),
+.hotkey-table-header span:nth-child(4) {
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  position: relative;
+  cursor: default;
+}
+
+.hotkey-table-header span[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  white-space: nowrap;
+  text-transform: none;
+  letter-spacing: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s, transform 0.15s;
+  z-index: 50;
+}
+
+.hotkey-table-header span[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 .hotkey-row {
   display: grid;
-  grid-template-columns: 1.2fr 1fr 1fr;
-  gap: 0 12px;
+  grid-template-columns: 1.2fr 1fr 1fr 1fr;
+  gap: 0 8px;
   align-items: center;
   padding: 8px 12px;
   border-bottom: 1px solid var(--border);
+}
+
+.hotkey-row .hotkey-bind-btn {
+  justify-self: center;
 }
 
 .hotkey-row:last-child {
@@ -1067,6 +1168,7 @@
 
 .hotkey-action {
   font-size: 0.85rem;
+  font-weight: 500;
   color: var(--text-primary);
   position: relative;
   cursor: default;
@@ -1111,6 +1213,7 @@
   border: 1px dashed rgba(255, 255, 255, 0.12);
   color: var(--text-secondary);
   font-size: 0.75rem;
+  font-weight: 500;
   cursor: pointer;
   text-align: center;
   transition: all 0.15s;
@@ -1126,6 +1229,220 @@
   background: color-mix(in srgb, var(--accent) 15%, transparent);
   border-color: var(--accent);
   color: var(--accent);
+}
+
+.hotkey-bind-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+  border-style: solid;
+}
+
+.hotkey-soon-badge {
+  font-size: 0.55rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 2px;
+  line-height: 1.3;
+}
+
+.hotkey-defaults-row {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 12px 12px;
+}
+
+.hotkey-defaults-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 5px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.hotkey-defaults-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+/* =================== Support & About sections =================== */
+.about-section {
+  padding-bottom: 20px;
+}
+
+.about-text {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.about-links {
+  display: flex;
+  gap: 10px;
+}
+
+.about-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.about-link-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.about-link-btn.support-btn {
+  color: #ff6b8a;
+  border-color: rgba(255, 107, 138, 0.2);
+}
+
+.about-link-btn.support-btn:hover {
+  background: rgba(255, 107, 138, 0.1);
+  color: #ff8fa8;
+  border-color: rgba(255, 107, 138, 0.3);
+}
+
+.header-share-wrap {
+  position: relative;
+}
+
+.header-share-popover {
+  position: fixed;
+  padding: 6px;
+  border-radius: 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 160px;
+  animation: share-pop-in 0.15s ease-out;
+}
+
+@keyframes share-pop-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.header-share-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s, color 0.12s;
+}
+
+.header-share-option:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+}
+
+.header-share-option svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.header-share-option:hover svg {
+  opacity: 1;
+}
+
+.about-links.share-row {
+  flex-wrap: wrap;
+}
+
+.about-link-btn.share-btn {
+  color: #6bb5ff;
+  border-color: rgba(107, 181, 255, 0.2);
+}
+
+.about-link-btn.share-btn:hover {
+  background: rgba(107, 181, 255, 0.1);
+  color: #8fc8ff;
+  border-color: rgba(107, 181, 255, 0.3);
+}
+
+.about-link-btn.share-btn.copied {
+  color: #6bff8f;
+  border-color: rgba(107, 255, 143, 0.3);
+}
+
+.about-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.about-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.about-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.about-value {
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.about-value-small {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  word-break: break-all;
+  max-width: 300px;
+}
+
+.about-footer-divider {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 16px;
+}
+
+.about-footer {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding-top: 8px;
 }
 
 /* =================== Keybinding capture overlay (VSCode-style) =================== */

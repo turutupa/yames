@@ -7,7 +7,7 @@ interface ZenEffectsProps {
   style: ZenStyle;
   currentBeat: BeatEvent | null;
   isPlaying: boolean;
-  activeTab: "beat" | "train";
+  activeTab: "beat" | "drill";
   beatsPerMeasure: number;
 }
 
@@ -38,7 +38,7 @@ function hexToRgb(hex: string) {
 
 // ─── GRAVITY DROP ───────────────────────────────────────────────────────────
 // Drops fall from top of screen, timed to HIT each beat dot exactly on accent
-function GravityEffect({ currentBeat, isPlaying }: { currentBeat: BeatEvent | null; isPlaying: boolean; activeTab: "beat" | "train" }) {
+function GravityEffect({ currentBeat, isPlaying }: { currentBeat: BeatEvent | null; isPlaying: boolean; activeTab: "beat" | "drill" }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef(0);
   const prevBeatRef = useRef({ beat: -1, sub: -1 });
@@ -222,7 +222,7 @@ function GravityEffect({ currentBeat, isPlaying }: { currentBeat: BeatEvent | nu
 
 // ─── CLOCK SWEEP ────────────────────────────────────────────────────────────
 // A radius line sweeps around center, one revolution per measure
-function SweepEffect({ currentBeat, isPlaying, activeTab: _activeTab, beatsPerMeasure }: { currentBeat: BeatEvent | null; isPlaying: boolean; activeTab: "beat" | "train"; beatsPerMeasure: number }) {
+function SweepEffect({ currentBeat, isPlaying, activeTab: _activeTab, beatsPerMeasure }: { currentBeat: BeatEvent | null; isPlaying: boolean; activeTab: "beat" | "drill"; beatsPerMeasure: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef(0);
   const prevBeatRef = useRef(-1);

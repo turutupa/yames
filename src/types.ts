@@ -26,6 +26,7 @@ export type AppState = {
   mode: WidgetMode;
   corner: Corner;
   alwaysOnTop: boolean;
+  widgetAlwaysOnTop: boolean;
   accentColor: string;
   theme: string;
   volume: number;

@@ -10,6 +10,7 @@ const DEFAULT_STATE: AppState = {
   mode: "comfortable",
   corner: "top-right",
   alwaysOnTop: true,
+  widgetAlwaysOnTop: true,
   accentColor: "#e94560",
   theme: "mono",
   volume: 0.8,

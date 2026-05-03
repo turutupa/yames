@@ -91,10 +91,10 @@ kbd {
 [data-theme-group="light"] kbd { background: var(--bg-secondary); border-color: rgba(0,0,0,0.1); color: var(--text-primary); }
 [data-theme-group="light"] .theme-card:hover { background: rgba(0,0,0,0.04); }
 [data-theme-group="light"] .theme-card.active { background: rgba(0,0,0,0.06); }
-[data-theme-group="light"] .train-grid-cell { background: var(--accent); opacity: 0.15; }
-[data-theme-group="light"] .train-grid-cell.done { background: var(--accent); opacity: 0.8; }
-[data-theme-group="light"] .train-grid-cell.current { background: var(--accent); opacity: 1; }
-[data-theme-group="light"] .train-dot { background: rgba(0,0,0,0.1); border-color: rgba(0,0,0,0.18); }
+[data-theme-group="light"] .drill-grid-cell { background: var(--accent); opacity: 0.15; }
+[data-theme-group="light"] .drill-grid-cell.done { background: var(--accent); opacity: 0.8; }
+[data-theme-group="light"] .drill-grid-cell.current { background: var(--accent); opacity: 1; }
+[data-theme-group="light"] .drill-dot { background: rgba(0,0,0,0.1); border-color: rgba(0,0,0,0.18); }
 [data-theme-group="light"] .track-beat-dot { background: rgba(0,0,0,0.12); border-color: rgba(0,0,0,0.2); }
 [data-theme-group="light"] .floating-widget { border-color: rgba(0,0,0,0.1); }
 [data-theme-group="light"] .floating-widget[data-playing="true"] { border-color: var(--accent); }
@@ -111,8 +111,8 @@ kbd {
 [data-theme-group="light"] .header-volume-popover { background: var(--bg-secondary); border-color: var(--border); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
 [data-theme-group="light"] .header-btn[data-tooltip]::after { background: var(--bg-secondary); border-color: var(--border); color: var(--text-primary); }
 [data-theme-group="light"] .hotkey-action[data-tooltip]::after { background: var(--bg-secondary); border-color: var(--border); color: var(--text-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-[data-theme-group="light"] .train-tip { background: var(--bg-secondary); border-color: var(--border); color: var(--text-secondary); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+[data-theme-group="light"] .drill-tip { background: var(--bg-secondary); border-color: var(--border); color: var(--text-secondary); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 [data-theme-group="light"] .track-stat-popover { background: var(--bg-secondary); border-color: var(--border); color: var(--text-secondary); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
-[data-theme-group="light"] .train-config { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.06); }
+[data-theme-group="light"] .drill-config { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.06); }
 [data-theme-group="light"] .stepper-btn { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.08); color: var(--text-primary); }
 [data-theme-group="light"] .stepper-btn:hover { background: rgba(0,0,0,0.08); }

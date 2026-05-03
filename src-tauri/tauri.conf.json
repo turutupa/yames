@@ -18,7 +18,7 @@
         "title": "Yames",
         "url": "index.html?window=main",
         "width": 800,
-        "height": 820,
+        "height": 900,
         "minWidth": 480,
         "minHeight": 820,
         "resizable": true,

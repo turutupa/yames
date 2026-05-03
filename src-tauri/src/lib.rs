@@ -3,10 +3,10 @@ mod engine;
 mod state;
 
 use commands::{
-    get_state, get_active_tab, get_last_window, get_calibration_offset, save_window_position, save_window_size, set_accent_color, set_active_tab, set_always_on_top, set_bpm, set_calibration_offset, set_corner,
+    get_state, get_active_tab, get_calibration_offset, open_url, save_window_position, set_active_tab, set_always_on_top, set_bpm, set_calibration_offset,
     set_playing, set_sound_type, set_subdivision, set_theme, set_time_signature, set_volume, set_widget_mode,
-    show_floating, show_main, toggle_playback, configure_speed_ramp, start_speed_ramp,
-    start_speed_ramp_from, stop_speed_ramp, toggle_fullscreen, set_fullscreen, EngineState,
+    set_widget_always_on_top, show_floating, show_main, toggle_playback, configure_speed_ramp, start_speed_ramp,
+    start_speed_ramp_from, stop_speed_ramp, EngineState,
 };
 use engine::MetronomeEngine;
 use state::{create_shared_state, SharedState};
@@ -44,6 +44,9 @@ pub fn run() {
                 }
                 if let Some(v) = store.get("alwaysOnTop").and_then(|v| v.as_bool()) {
                     s.always_on_top = v;
+                }
+                if let Some(v) = store.get("widgetAlwaysOnTop").and_then(|v| v.as_bool()) {
+                    s.widget_always_on_top = v;
                 }
                 if let Some(v) = store.get("accentColor").and_then(|v| v.as_str().map(String::from)) {
                     s.accent_color = v;
@@ -154,6 +157,7 @@ pub fn run() {
                         }
                     }
                 }
+
             }
 
             // Restore saved floating widget position (and visibility)
@@ -163,6 +167,9 @@ pub fn run() {
                 } else {
                     let _ = float_win.hide();
                 }
+                // Apply saved widget always-on-top
+                let widget_aot = { app.state::<SharedState>().lock().unwrap().widget_always_on_top };
+                let _ = float_win.set_always_on_top(widget_aot);
                 let store = app.store("settings.json")?;
                 if let Some(pos) = store.get("window_position_floating") {
                     if let (Some(x), Some(y)) = (pos.get("x").and_then(|v| v.as_i64()), pos.get("y").and_then(|v| v.as_i64())) {
@@ -187,28 +194,24 @@ pub fn run() {
             toggle_playback,
             set_playing,
             set_widget_mode,
-            set_corner,
             set_always_on_top,
-            set_accent_color,
+            set_widget_always_on_top,
             set_theme,
             set_volume,
             show_main,
             show_floating,
             save_window_position,
-            save_window_size,
             set_sound_type,
             set_time_signature,
             configure_speed_ramp,
             start_speed_ramp,
             start_speed_ramp_from,
             stop_speed_ramp,
-            toggle_fullscreen,
-            set_fullscreen,
             set_active_tab,
             get_active_tab,
-            get_last_window,
             set_calibration_offset,
             get_calibration_offset,
+            open_url,
         ])
         .on_window_event(|window, event| {
             match event {
@@ -299,6 +302,7 @@ fn setup_global_shortcuts(app: &tauri::App) -> Result<(), Box<dyn std::error::Er
             store.set("mode", serde_json::json!(s.mode));
             store.set("corner", serde_json::json!(s.corner));
             store.set("alwaysOnTop", serde_json::json!(s.always_on_top));
+            store.set("widgetAlwaysOnTop", serde_json::json!(s.widget_always_on_top));
             store.set("accentColor", serde_json::json!(s.accent_color));
             store.set("theme", serde_json::json!(s.theme));
             store.set("volume", serde_json::json!(s.volume));
@@ -388,23 +392,6 @@ fn setup_global_shortcuts(app: &tauri::App) -> Result<(), Box<dyn std::error::Er
         persist(&app_handle, &state);
     })?;
 
-    // Cmd+Shift+M → Toggle compact/comfortable widget mode
-    let app_handle = app.handle().clone();
-    app.global_shortcut().on_shortcut("CmdOrCtrl+Shift+M", move |_app, _shortcut, event| {
-        if event.state != ShortcutState::Pressed { return; }
-        let state: tauri::State<state::SharedState> = app_handle.state();
-        {
-            let mut s = state.lock().unwrap();
-            s.mode = if s.mode == "compact" {
-                "comfortable".to_string()
-            } else {
-                "compact".to_string()
-            };
-        }
-        let _ = app_handle.emit("state-changed", &*state.lock().unwrap());
-        persist(&app_handle, &state);
-    })?;
-
     // Cmd+Shift+O → Toggle between main window and floating widget
     let app_handle = app.handle().clone();
     app.global_shortcut().on_shortcut("CmdOrCtrl+Shift+O", move |_app, _shortcut, event| {
@@ -427,13 +414,6 @@ fn setup_global_shortcuts(app: &tauri::App) -> Result<(), Box<dyn std::error::Er
                 }
             }
         }
-    })?;
-
-    // Cmd+Shift+F → Toggle zen mode (fullscreen)
-    let app_handle = app.handle().clone();
-    app.global_shortcut().on_shortcut("CmdOrCtrl+Shift+F", move |_app, _shortcut, event| {
-        if event.state != ShortcutState::Pressed { return; }
-        let _ = app_handle.emit("fullscreen-changed", ());
     })?;
 
     Ok(())
