@@ -22,6 +22,11 @@ cask "yames" do
 
   app "Yames.app"
 
+  postflight do
+    system_command "/usr/bin/xattr",
+                   args: ["-cr", "#{appdir}/Yames.app"]
+  end
+
   zap trash: [
     "~/Library/Application Support/com.yames.metronome",
     "~/Library/Caches/com.yames.metronome",
