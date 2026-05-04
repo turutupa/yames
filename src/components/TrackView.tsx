@@ -139,6 +139,7 @@ export function TrackView({ state }: TrackViewProps) {
   const [savedOffset, setSavedOffset] = useState<number | null>(null);
   const [history, setHistory] = useState<GameResult[]>([]);
   const [viewingResult, setViewingResult] = useState<GameResult | null>(null);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const beatTimestamps = useRef<number[]>([]);
   const firstBeatTime = useRef<number>(0);
   const bpmAtStart = useRef<number>(120);
@@ -495,12 +496,21 @@ export function TrackView({ state }: TrackViewProps) {
           </svg>
           Start
         </button>
-        <button
-          className="play-btn full-width secondary"
-          onClick={startCalibration}
-        >
-          Calibrate
-        </button>
+        <div className="track-secondary-actions">
+          <button
+            className="play-btn full-width secondary"
+            onClick={startCalibration}
+          >
+            Calibrate
+          </button>
+          <button
+            className="play-btn full-width secondary"
+            onClick={() => setSession("history")}
+            disabled={history.length === 0}
+          >
+            History
+          </button>
+        </div>
       </div>
     );
   }
@@ -717,7 +727,7 @@ export function TrackView({ state }: TrackViewProps) {
                 y1="60"
                 x2={displayPerBeat.length * 20}
                 y2="60"
-                stroke="rgba(255,255,255,0.12)"
+                stroke="var(--graph-grid)"
                 strokeWidth="1"
               />
               {(() => {
@@ -747,7 +757,7 @@ export function TrackView({ state }: TrackViewProps) {
                   <path
                     d={pathD}
                     fill="none"
-                    stroke="rgba(255,255,255,0.2)"
+                    stroke="var(--graph-line)"
                     strokeWidth="2"
                   />
                 );
@@ -878,13 +888,7 @@ export function TrackView({ state }: TrackViewProps) {
           <button
             className="track-toolbar-btn track-history-delete"
             data-tooltip="Clear all"
-            onClick={() => {
-              if (window.confirm("Are you sure you want to delete all history?")) {
-                setHistory([]);
-                saveHistory([]);
-                setSession("idle");
-              }
-            }}
+            onClick={() => setShowClearConfirm(true)}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="3 6 5 6 21 6"/>
@@ -923,6 +927,35 @@ export function TrackView({ state }: TrackViewProps) {
         <button className="play-btn full-width track-floating-cta" onClick={startSession}>
           Try Again
         </button>
+        {showClearConfirm && (
+          <div className="keybinding-overlay" onClick={() => setShowClearConfirm(false)}>
+            <div className="keybinding-capture" onClick={(e) => e.stopPropagation()}>
+              <div className="keybinding-capture-title">Clear History</div>
+              <p className="about-text" style={{ textAlign: "center", marginBottom: 0 }}>
+                Delete all {history.length} saved games? This cannot be undone.
+              </p>
+              <div className="keybinding-capture-actions">
+                <button
+                  className="keybinding-btn-remove"
+                  onClick={() => {
+                    setHistory([]);
+                    saveHistory([]);
+                    setShowClearConfirm(false);
+                    setSession("idle");
+                  }}
+                >
+                  Delete All
+                </button>
+                <button
+                  className="keybinding-btn-reset"
+                  onClick={() => setShowClearConfirm(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

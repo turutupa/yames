@@ -9,6 +9,12 @@
   justify-content: center;
 }
 
+.track-secondary-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 /* Intro / Idle */
 .track-intro {
   display: flex;
@@ -315,7 +321,7 @@
 .track-results {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 32px;
   align-items: center;
 }
 
@@ -331,7 +337,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 
 .track-result-rating-wrap {
@@ -410,29 +416,29 @@
   width: 100%;
   display: flex;
   gap: 4px;
-  margin-top: 8px;
-  margin-bottom: 8px;
+  margin-top: 4px;
+  margin-bottom: 4px;
 }
 
 .track-graph-y-labels {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  font-size: 0.55rem;
-  color: var(--text-muted);
-  opacity: 0.5;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  opacity: 0.7;
   padding: 2px 0;
   flex-shrink: 0;
-  width: 28px;
+  width: 32px;
   text-align: right;
 }
 
 .track-graph-svg {
   flex: 1;
   height: 160px;
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--text-primary) 3%, transparent);
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
 }
 
 /* Scatter plot */
@@ -440,13 +446,13 @@
   position: relative;
   width: 100%;
   height: 160px;
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--text-primary) 3%, transparent);
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
   overflow: hidden;
   margin-bottom: 16px;
-  margin-left: 32px; /* align with accuracy graph (28px labels + 4px gap) */
-  width: calc(100% - 32px);
+  margin-left: 36px; /* align with accuracy graph (32px labels + 4px gap) */
+  width: calc(100% - 36px);
 }
 
 .track-scatter-zero {
@@ -455,7 +461,7 @@
   top: 0;
   bottom: 0;
   width: 1px;
-  background: rgba(255, 255, 255, 0.15);
+  background: color-mix(in srgb, var(--text-primary) 20%, transparent);
 }
 
 .track-scatter-dot {
@@ -471,9 +477,9 @@
 .track-scatter-label-right {
   position: absolute;
   bottom: 2px;
-  font-size: 0.55rem;
-  color: var(--text-muted);
-  opacity: 0.5;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  opacity: 0.7;
 }
 
 .track-scatter-label-left {

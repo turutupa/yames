@@ -13,6 +13,8 @@
   --border: rgba(255, 255, 255, 0.08);
   --radius: 12px;
   --radius-sm: 8px;
+  --graph-grid: rgba(255, 255, 255, 0.15);
+  --graph-line: rgba(255, 255, 255, 0.25);
 }
 
 * {
@@ -65,6 +67,7 @@ kbd {
 }
 
 /* =================== Light theme overrides =================== */
+[data-theme-group="light"] { --graph-grid: rgba(0, 0, 0, 0.12); --graph-line: rgba(0, 0, 0, 0.3); }
 [data-theme-group="light"] button { color: var(--text-primary); }
 [data-theme-group="light"] .main-header h1 { color: var(--text-primary); }
 [data-theme-group="light"] .tab-btn { color: var(--text-secondary); }

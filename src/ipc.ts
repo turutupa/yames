@@ -145,3 +145,39 @@ export async function setCalibrationOffset(offset: number): Promise<void> {
 export async function getCalibrationOffset(): Promise<number | null> {
   return invoke<number | null>("get_calibration_offset");
 }
+
+// Update checker — compares current version against latest GitHub release
+export interface UpdateInfo {
+  hasUpdate: boolean;
+  currentVersion: string;
+  latestVersion: string;
+  releaseUrl: string;
+}
+
+export async function checkForUpdate(currentVersion: string): Promise<UpdateInfo> {
+  const releaseUrl = "https://github.com/turutupa/yames/releases/latest";
+  try {
+    const res = await fetch("https://api.github.com/repos/turutupa/yames/releases/latest");
+    if (!res.ok) return { hasUpdate: false, currentVersion, latestVersion: currentVersion, releaseUrl };
+    const data = await res.json();
+    const latest = (data.tag_name || "").replace(/^v/, "");
+    return {
+      hasUpdate: compareSemver(latest, currentVersion) > 0,
+      currentVersion,
+      latestVersion: latest,
+      releaseUrl,
+    };
+  } catch {
+    return { hasUpdate: false, currentVersion, latestVersion: currentVersion, releaseUrl };
+  }
+}
+
+function compareSemver(a: string, b: string): number {
+  const pa = a.split(".").map(Number);
+  const pb = b.split(".").map(Number);
+  for (let i = 0; i < 3; i++) {
+    const diff = (pa[i] || 0) - (pb[i] || 0);
+    if (diff !== 0) return diff;
+  }
+  return 0;
+}

@@ -1,8 +1,9 @@
 import { useMetronome } from "../hooks/useMetronome";
 import { useDrag } from "../hooks/useDrag";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { setBpm, setSubdivision, togglePlayback, setPlaying, setWidgetMode, setAlwaysOnTop, setWidgetAlwaysOnTop, setVolume, setSoundType, setTimeSignature, showFloating, onFullscreenChanged, setActiveTab, getActiveTab, setTheme, stopSpeedRamp, startSpeedRamp, configureSpeedRamp, storeSave, storeLoad, openUrl } from "../ipc";
+import { setBpm, setSubdivision, togglePlayback, setPlaying, setWidgetMode, setAlwaysOnTop, setWidgetAlwaysOnTop, setVolume, setSoundType, setTimeSignature, showFloating, onFullscreenChanged, setActiveTab, getActiveTab, setTheme, stopSpeedRamp, startSpeedRamp, configureSpeedRamp, storeSave, storeLoad, openUrl, checkForUpdate } from "../ipc";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getVersion } from "@tauri-apps/api/app";
 import type { Subdivision, WidgetMode } from "../types";
 import { THEMES } from "../themes";
 import { DrillView } from "./DrillView";
@@ -273,6 +274,26 @@ export function MainWindow() {
   const [buttonFlash, setButtonFlash] = useState(true);
   const [activeBorder, setActiveBorder] = useState(true);
   const [drillAutoCollapse, setDrillAutoCollapse] = useState(true);
+  const [autoCheckUpdates, setAutoCheckUpdates] = useState(true);
+  const [updateStatus, setUpdateStatus] = useState<"idle" | "checking" | "available" | "up-to-date">("idle");
+  const [latestVersion, setLatestVersion] = useState("");
+  const [appVersion, setAppVersion] = useState("0.0.0");
+
+  const doUpdateCheck = useCallback(async () => {
+    setUpdateStatus("checking");
+    try {
+      const ver = appVersion === "0.0.0" ? await getVersion() : appVersion;
+      const result = await checkForUpdate(ver);
+      if (result.hasUpdate) {
+        setLatestVersion(result.latestVersion);
+        setUpdateStatus("available");
+      } else {
+        setUpdateStatus("up-to-date");
+      }
+    } catch {
+      setUpdateStatus("idle");
+    }
+  }, [appVersion]);
 
   // Restore UI prefs from store on mount
   useEffect(() => {
@@ -283,6 +304,20 @@ export function MainWindow() {
       if (ab !== undefined) setActiveBorder(ab);
       const dac = await storeLoad<boolean>("drillAutoCollapse");
       if (dac !== undefined) setDrillAutoCollapse(dac);
+      const acu = await storeLoad<boolean>("autoCheckUpdates");
+      if (acu !== undefined) setAutoCheckUpdates(acu);
+
+      // Get app version and auto-check for updates
+      const ver = await getVersion();
+      setAppVersion(ver);
+      const shouldAutoCheck = acu !== undefined ? acu : true;
+      if (shouldAutoCheck) {
+        const result = await checkForUpdate(ver);
+        if (result.hasUpdate) {
+          setLatestVersion(result.latestVersion);
+          setUpdateStatus("available");
+        }
+      }
     })();
   }, []);
   const [editingBpm, setEditingBpm] = useState(false);
@@ -832,6 +867,14 @@ export function MainWindow() {
           <TrackView state={state} currentBeat={currentBeat} />
         ) : (
           <>
+            {/* Update banner — shown at top of settings when update available */}
+            {updateStatus === "available" && (
+              <div className="update-banner" onClick={() => openUrl("https://turutupa.github.io/yames/")}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span>Yames v{latestVersion || "0.6.0"} is available</span>
+                <span className="update-banner-action">Download →</span>
+              </div>
+            )}
             <section className="settings-section">
               <h2>General</h2>
               <div className="setting-row">
@@ -892,6 +935,22 @@ export function MainWindow() {
                   onClick={() => setAlwaysOnTop(!state.alwaysOnTop)}
                 >
                   {state.alwaysOnTop ? "On" : "Off"}
+                </button>
+              </div>
+              <div className="setting-row">
+                <div className="setting-label">
+                  <label>Check for updates</label>
+                  <span className="setting-hint">Automatically check on launch</span>
+                </div>
+                <button
+                  className={`toggle-btn ${autoCheckUpdates ? "active" : ""}`}
+                  onClick={() => {
+                    const next = !autoCheckUpdates;
+                    setAutoCheckUpdates(next);
+                    storeSave("autoCheckUpdates", next);
+                  }}
+                >
+                  {autoCheckUpdates ? "On" : "Off"}
                 </button>
               </div>
             </section>
@@ -973,6 +1032,7 @@ export function MainWindow() {
                         <span data-tooltip="Bind a USB foot pedal or gamepad controller">
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="14" width="16" height="6" rx="2"/><path d="M8 14V10a4 4 0 0 1 8 0v4"/></svg>
                           Foot
+                          <span className="hotkey-soon-badge">midi soon</span>
                         </span>
                       </div>
                       {items.map((hk) => (
@@ -1054,12 +1114,32 @@ export function MainWindow() {
             <section className="settings-section about-section">
               <h2>About</h2>
               <div className="about-info">
-                <div className="about-row"><span className="about-label">Version</span><span className="about-value">0.5.0</span></div>
+                <div className="about-row">
+                  <span className="about-label">Version</span>
+                  <span className="about-value">{appVersion}</span>
+                </div>
+                <div className="about-row">
+                  <span className="about-label">Updates</span>
+                  <span className="about-value">
+                    {updateStatus === "checking" && <span className="update-status">Checking…</span>}
+                    {updateStatus === "available" && (
+                      <button className="update-available-btn" onClick={() => openUrl("https://github.com/turutupa/yames/releases/latest")}>
+                        v{latestVersion} available — Download
+                      </button>
+                    )}
+                    {updateStatus === "up-to-date" && <span className="update-status up-to-date">Up to date ✓</span>}
+                    {updateStatus === "idle" && (
+                      <button className="update-check-btn" onClick={doUpdateCheck}>
+                        Check for updates
+                      </button>
+                    )}
+                  </span>
+                </div>
                 <div className="about-row"><span className="about-label">Platform</span><span className="about-value">{navigator.platform}</span></div>
                 <div className="about-row"><span className="about-label">User Agent</span><span className="about-value about-value-small">{navigator.userAgent}</span></div>
               </div>
               <div className="about-footer-divider"></div>
-              <p className="about-footer">Made with ♥ for musicians everywhere</p>
+              <p className="about-footer">Made with <span className="about-heart">♥</span> for musicians everywhere</p>
             </section>
           </>
         )}

@@ -250,7 +250,11 @@ jobs:
           git add Casks/yames.rb
           git diff --cached --quiet && echo "No changes" && exit 0
           git commit -m "chore: update homebrew cask to v${{ steps.version.outputs.version }}"
-          git push
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && break
+            echo "Push failed (attempt $i), retrying..."
+            sleep 5
+          done
 
   update-winget:
     needs: build
@@ -333,4 +337,8 @@ jobs:
           git add winget/turutupa.yames.yaml
           git diff --cached --quiet && echo "No changes" && exit 0
           git commit -m "chore: update winget manifest to v${{ steps.version.outputs.version }}"
-          git push
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && break
+            echo "Push failed (attempt $i), retrying..."
+            sleep 5
+          done

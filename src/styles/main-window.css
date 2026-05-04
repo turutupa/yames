@@ -1214,7 +1214,7 @@
   background: rgba(255, 255, 255, 0.04);
   border: 1px dashed rgba(255, 255, 255, 0.12);
   color: var(--text-secondary);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
   text-align: center;
@@ -1460,14 +1460,103 @@
 
 .about-footer-divider {
   border-top: 1px solid rgba(255, 255, 255, 0.06);
-  margin-bottom: 16px;
+  margin-bottom: 28px;
 }
 
 .about-footer {
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
   text-align: center;
-  padding-top: 8px;
+  padding-top: 16px;
+}
+
+.about-heart {
+  color: #e74c3c;
+}
+
+/* =================== Update banner =================== */
+.update-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  margin-top: 16px;
+  margin-bottom: -4px;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: 8px;
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.update-banner:hover {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  border-color: var(--accent);
+}
+
+.update-banner svg {
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+.update-banner-action {
+  margin-left: auto;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.update-banner:hover .update-banner-action {
+  opacity: 1;
+}
+
+/* =================== Update check =================== */
+.update-check-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--accent);
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.update-check-btn:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.update-available-btn {
+  background: none;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  animation: update-pulse 2s ease-in-out infinite;
+}
+
+.update-available-btn:hover {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+@keyframes update-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.update-status {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.update-status.up-to-date {
+  color: var(--accent);
 }
 
 /* =================== Keybinding capture overlay (VSCode-style) =================== */

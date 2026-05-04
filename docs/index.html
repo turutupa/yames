@@ -296,7 +296,7 @@
             <div class="install-note" id="install-note">
               <div class="brew-install" id="cli-install">
                 <span class="brew-label">or install via terminal (recommended):</span>
-                <code class="brew-cmd" id="cli-cmd" onclick="navigator.clipboard.writeText(this.textContent).then(()=>{this.classList.add('copied');setTimeout(()=>this.classList.remove('copied'),1500)})">brew install --cask turutupa/tap/yames</code>
+                <code class="brew-cmd" id="cli-cmd" onclick="if(!this.classList.contains('disabled'))navigator.clipboard.writeText(this.textContent).then(()=>{this.classList.add('copied');setTimeout(()=>this.classList.remove('copied'),1500)})">brew install --cask turutupa/tap/yames</code>
               </div>
             </div>
           </div>
@@ -524,15 +524,17 @@
         "macos-silicon": "brew install --cask turutupa/tap/yames",
         "macos-intel": "brew install --cask turutupa/tap/yames",
         "windows": "winget install turutupa.yames",
-        // "linux": "flatpak install flathub io.github.turutupa.yames",
+        "linux": "sudo snap install yames",
       };
 
       const CLI_LABELS = {
         "macos-silicon": "or install via Homebrew (recommended):",
         "macos-intel": "or install via Homebrew (recommended):",
         "windows": "or install via winget (recommended):",
-        // "linux": "or install via Flatpak (recommended):",
+        "linux": "or install via Snap (recommended):",
       };
+
+      const COMING_SOON = { "windows": true, "linux": true };
 
       function setOS(os) {
         pills.forEach((p) => p.classList.toggle("active", p.dataset.os === os));
@@ -542,8 +544,14 @@
         // Update CLI install command
         const cliCmd = document.getElementById("cli-cmd");
         const cliLabel = document.querySelector(".brew-label");
-        if (cliCmd) cliCmd.textContent = CLI_COMMANDS[os] || CLI_COMMANDS["macos-silicon"];
-        if (cliLabel) cliLabel.textContent = CLI_LABELS[os] || CLI_LABELS["macos-silicon"];
+        if (cliCmd) {
+          cliCmd.textContent = CLI_COMMANDS[os] || CLI_COMMANDS["macos-silicon"];
+          cliCmd.classList.toggle("disabled", !!COMING_SOON[os]);
+        }
+        if (cliLabel) {
+          const label = CLI_LABELS[os] || CLI_LABELS["macos-silicon"];
+          cliLabel.innerHTML = COMING_SOON[os] ? label + ' <span class="soon-badge">soon</span>' : label;
+        }
         const cliInstall = document.getElementById("cli-install");
         if (cliInstall) cliInstall.style.display = CLI_COMMANDS[os] ? "" : "none";
       }

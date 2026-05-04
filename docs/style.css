@@ -42,7 +42,7 @@ body {
 .layout {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 44px;
   max-width: 600px;
   width: 100%;
   padding: 0 24px;
@@ -197,9 +197,29 @@ body {
   color: var(--accent);
 }
 
-.brew-cmd:hover {
+.brew-cmd:hover:not(.disabled) {
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.brew-cmd.disabled {
+  opacity: 0.4;
+  cursor: default;
+  pointer-events: none;
+}
+
+.soon-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-radius: 4px;
+  padding: 1px 6px;
+  margin-left: 6px;
+  vertical-align: middle;
 }
 
 .brew-cmd.copied::after {
