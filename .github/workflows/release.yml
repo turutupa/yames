@@ -342,3 +342,18 @@ jobs:
             echo "Push failed (attempt $i), retrying..."
             sleep 5
           done
+
+      - name: Install wingetcreate
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
+
+      - name: Submit PR to winget-pkgs
+        continue-on-error: true
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          WINGET_PAT: ${{ secrets.WINGET_PAT }}
+        run: |
+          $url = "https://github.com/turutupa/yames/releases/download/v$env:VERSION/Yames_${env:VERSION}_x64-setup.exe"
+          .\wingetcreate.exe update turutupa.yames --version $env:VERSION --urls $url --submit --token $env:WINGET_PAT
