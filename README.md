@@ -12,6 +12,24 @@
 
 <br>
 
+## Table of Contents
+
+- [Why does this exist?](#why-does-this-exist)
+- [The Metronome](#the-metronome)
+- [Speed Drill](#speed-drill)
+- [Tap It](#tap-it)
+- [Zen Mode](#zen-mode)
+- [Floating Widget](#floating-widget)
+- [Keyboard-Driven](#keyboard-driven)
+- [Screenshots](#screenshots)
+- [Install](#install)
+- [Built With](#built-with)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
+
+<br>
+
 ## Why does this exist?
 
 Because most metronome apps out there feel outdated — clunky interfaces, too many taps to start, or just not something you want staring at you for an hour of practice. Yames exists because musicians deserve a metronome that looks great, sounds precise, and gets out of your way the moment you hit play.
