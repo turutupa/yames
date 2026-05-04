@@ -243,18 +243,20 @@ jobs:
           # Remove leading whitespace from heredoc
           sed -i '' 's/^          //' Casks/yames.rb
 
-      - name: Commit and push updated cask
+      - name: Push cask to homebrew-tap
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          PAT: ${{ secrets.WINGET_PAT }}
         run: |
+          git clone https://x-access-token:${PAT}@github.com/turutupa/homebrew-tap.git /tmp/homebrew-tap
+          cp Casks/yames.rb /tmp/homebrew-tap/Casks/yames.rb
+          cd /tmp/homebrew-tap
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add Casks/yames.rb
           git diff --cached --quiet && echo "No changes" && exit 0
-          git commit -m "chore: update homebrew cask to v${{ steps.version.outputs.version }}"
-          for i in 1 2 3; do
-            git pull --rebase origin main && git push && break
-            echo "Push failed (attempt $i), retrying..."
-            sleep 5
-          done
+          git commit -m "chore: update yames cask to v${VERSION}"
+          git push
 
   update-winget:
     needs: build
