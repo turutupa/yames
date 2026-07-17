@@ -5,6 +5,7 @@
     "": {
       "name": "yames",
       "dependencies": {
+        "@coderline/alphatab": "^1.8.3",
         "@tauri-apps/api": "~2.10.0",
         "@tauri-apps/plugin-global-shortcut": "~2.3.0",
         "@tauri-apps/plugin-process": "^2.3.1",
@@ -14,6 +15,7 @@
         "react-dom": "^18.3.1",
       },
       "devDependencies": {
+        "@coderline/alphatab-vite": "^1.8.3",
         "@tauri-apps/cli": "~2.10.0",
         "@testing-library/jest-dom": "^6.9.1",
         "@testing-library/react": "^16.3.2",
@@ -80,6 +82,10 @@
     "@babel/types": ["@babel/types@7.29.0", "https://npme.walmart.com:443/artifactory/api/npm/npme-npm/@babel/types/-/types-7.29.0.tgz", { "dependencies": { "@babel/helper-string-parser": "^7.27.1", "@babel/helper-validator-identifier": "^7.28.5" } }, "sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A=="],
 
     "@bramus/specificity": ["@bramus/specificity@2.4.2", "https://npme.walmart.com:443/artifactory/api/npm/npme-npm/@bramus/specificity/-/specificity-2.4.2.tgz", { "dependencies": { "css-tree": "^3.0.0" }, "bin": { "specificity": "bin/cli.js" } }, "sha512-ctxtJ/eA+t+6q2++vj5j7FYX3nRu311q1wfYH3xjlLOsczhlhxAg2FWNUXhpGvAw3BWo1xBcvOV6/YLc2r5FJw=="],
+
+    "@coderline/alphatab": ["@coderline/alphatab@1.8.3", "https://npme.walmart.com:443/artifactory/api/npm/npme-npm/@coderline/alphatab/-/alphatab-1.8.3.tgz", {}, "sha512-gauoZMBL3yzCNn4jz5qhKSmwnlwFpBG+W+HPowiBmPiD6kTH5Ntk3mCUItGqETN7Vl97REXJK6efGKOa13B4Ng=="],
+
+    "@coderline/alphatab-vite": ["@coderline/alphatab-vite@1.8.3", "https://npme.walmart.com:443/artifactory/api/npm/npme-npm/@coderline/alphatab-vite/-/alphatab-vite-1.8.3.tgz", { "dependencies": { "magic-string": "^0.30.21" }, "peerDependencies": { "vite": "^7 || ^8" } }, "sha512-R9GXqX+w/q+x3/al10N68adcRVfqHfAOBdpj+i2B3GoR4RByy+q2giWOh7IxK+rohgI9hobEayeFc908l9eqXg=="],
 
     "@csstools/color-helpers": ["@csstools/color-helpers@6.0.2", "https://npme.walmart.com:443/artifactory/api/npm/npme-npm/@csstools/color-helpers/-/color-helpers-6.0.2.tgz", {}, "sha512-LMGQLS9EuADloEFkcTBR3BwV/CGHV7zyDxVRtVDTwdI2Ca4it0CCVTT9wCkxSgokjE5Ho41hEPgb8OEUwoXr6Q=="],
 

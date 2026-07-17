@@ -3,12 +3,16 @@ import {
   getCalibrationOffset,
   onBeat,
   setCalibrationOffset,
+  setBpm,
+  setSubdivision,
   setPlaying,
+  storeLoad,
+  storeSave,
   togglePlayback,
 } from "../../ipc";
 import { listen } from "@tauri-apps/api/event";
 import "../../styles/track-view.css";
-import type { AppState, BeatEvent } from "../../types";
+import type { AppState, BeatEvent, Subdivision } from "../../types";
 import {
   loadHistory,
   saveHistory,
@@ -21,7 +25,12 @@ import type {
   SessionState,
   PerBeatDatum,
   GameResult,
+  GameMode,
+  ChordSequence,
+  RhythmPattern,
 } from "./trackTypes";
+import { CHORD_SEQUENCES, RHYTHM_PATTERNS } from "./presets";
+import { useCuedSession } from "./hooks/useCuedSession";
 import { TrackIdleView } from "./TrackIdleView";
 import { TrackCalibrationDoneView } from "./TrackCalibrationDoneView";
 import { TrackHistoryView } from "./TrackHistoryView";
@@ -46,9 +55,17 @@ export const TrackView = forwardRef<TrackViewHandle, TrackViewProps>(function Tr
   const [savedOffset, setSavedOffset] = useState<number | null>(null);
   const [history, setHistory] = useState<GameResult[]>([]);
   const [viewingResult, setViewingResult] = useState<GameResult | null>(null);
+  const [gameBpm, setGameBpm] = useState(80);
+  const [gameMode, setGameMode] = useState<GameMode>("free");
+  const [selectedSequence, setSelectedSequence] = useState<ChordSequence | null>(CHORD_SEQUENCES[0]);
+  const [selectedPattern, setSelectedPattern] = useState<RhythmPattern | null>(RHYTHM_PATTERNS[0]);
   const beatTimestamps = useRef<number[]>([]);
   const firstBeatTime = useRef<number>(0);
   const bpmAtStart = useRef<number>(120);
+  const gameModeRef = useRef<GameMode>("free");
+  const sequenceNameRef = useRef<string | undefined>(undefined);
+  const patternNameRef = useRef<string | undefined>(undefined);
+  const gameSubdivisionRef = useRef<number>(1);
   const hasSavedRef = useRef(false);
   const warmupBeats = 4;
   const scoredBeats = 32;
@@ -59,6 +76,33 @@ export const TrackView = forwardRef<TrackViewHandle, TrackViewProps>(function Tr
   useEffect(() => {
     getCalibrationOffset().then((v) => setSavedOffset(v));
   }, []);
+
+  // Load persisted mode/preset selection on mount
+  useEffect(() => {
+    storeLoad<{ mode: GameMode; sequenceName?: string; patternName?: string; gameBpm?: number }>("pocketCheckMode").then((saved) => {
+      if (!saved) return;
+      if (saved.mode) setGameMode(saved.mode);
+      if (saved.gameBpm) setGameBpm(saved.gameBpm);
+      if (saved.sequenceName) {
+        const seq = CHORD_SEQUENCES.find((s) => s.name === saved.sequenceName) ?? null;
+        if (seq) setSelectedSequence(seq);
+      }
+      if (saved.patternName) {
+        const pat = RHYTHM_PATTERNS.find((p) => p.name === saved.patternName) ?? null;
+        if (pat) setSelectedPattern(pat);
+      }
+    });
+  }, []);
+
+  // Persist mode/preset on change
+  useEffect(() => {
+    storeSave("pocketCheckMode", {
+      mode: gameMode,
+      sequenceName: selectedSequence?.name,
+      patternName: selectedPattern?.name,
+      gameBpm,
+    });
+  }, [gameMode, selectedSequence, selectedPattern, gameBpm]);
 
   // On mount, load history and show last result if available
   useEffect(() => {
@@ -89,7 +133,6 @@ export const TrackView = forwardRef<TrackViewHandle, TrackViewProps>(function Tr
         const beats = beatTimestamps.current;
         if (beats.length === 0) {
           firstBeatTime.current = now;
-          bpmAtStart.current = state.bpm;
           beats.push(now);
         } else {
           const beatIntervalMs = 60000 / bpmAtStart.current;
@@ -104,7 +147,7 @@ export const TrackView = forwardRef<TrackViewHandle, TrackViewProps>(function Tr
     return () => {
       unlisten.then((fn) => fn());
     };
-  }, [session, state.bpm]);
+  }, [session]);
 
   // Auto-finish calibration
   useEffect(() => {
@@ -125,6 +168,22 @@ export const TrackView = forwardRef<TrackViewHandle, TrackViewProps>(function Tr
     }
   }, [beatCount, session, taps]);
 
+  const {
+    currentCue,
+    chordIndex,
+    subBeatTimestamps,
+    subBeatCount,
+    gameSubdivision,
+    expectedTaps,
+  } = useCuedSession({
+    session,
+    beatCount,
+    bpm: gameBpm,
+    gameMode,
+    selectedSequence,
+    selectedPattern,
+  });
+
   // Auto-finish playing — delay so user can tap the last beat
   useEffect(() => {
     if (session === "playing" && beatCount >= maxBeats) {
@@ -142,6 +201,30 @@ export const TrackView = forwardRef<TrackViewHandle, TrackViewProps>(function Tr
   const handleTap = useCallback(() => {
     if (session !== "playing" && session !== "calibrating") return;
     const now = performance.now();
+
+    // Rhythm mode: match against sub-beat timestamps for tighter windowing
+    if (session === "playing" && gameModeRef.current === "rhythm") {
+      const subBeats = subBeatTimestamps.current;
+      if (subBeats.length === 0) return;
+      const subBeatWindowMs = (60000 / bpmAtStart.current / gameSubdivisionRef.current) * 0.5;
+      let closestSubBeatIdx = subBeats.length - 1;
+      let closestDist = Math.abs(now - subBeats[closestSubBeatIdx]);
+      for (let i = subBeats.length - 2; i >= Math.max(0, subBeats.length - (gameSubdivisionRef.current * 3 + 1)); i--) {
+        const dist = Math.abs(now - subBeats[i]);
+        if (dist < closestDist) {
+          closestDist = dist;
+          closestSubBeatIdx = i;
+        }
+      }
+      if (closestDist > subBeatWindowMs) return; // outside tolerance
+      if (Math.floor(closestSubBeatIdx / gameSubdivisionRef.current) < warmupBeats) return; // warmup guard
+      const minOffset = now - subBeats[closestSubBeatIdx];
+      const rating = getOffsetRating(Math.abs(minOffset));
+      setTaps((prev) => [...prev, { offsetMs: minOffset, timestamp: now, rating }]);
+      return;
+    }
+
+    // Beat mode (free + chords): match against beat timestamps
     const beats = beatTimestamps.current;
     if (beats.length === 0) return;
 
@@ -153,7 +236,7 @@ export const TrackView = forwardRef<TrackViewHandle, TrackViewProps>(function Tr
       }
     }
 
-    const beatIntervalMs = 60000 / state.bpm;
+    const beatIntervalMs = 60000 / bpmAtStart.current;
     const lastBeat = beats[beats.length - 1];
     const nextBeatEst = lastBeat + beatIntervalMs;
     const nextOffset = now - nextBeatEst;
@@ -162,7 +245,6 @@ export const TrackView = forwardRef<TrackViewHandle, TrackViewProps>(function Tr
     }
 
     const rating = getOffsetRating(Math.abs(minOffset));
-    // For playing session: find which beat this tap is closest to, skip if it's a warmup beat
     if (session === "playing") {
       let closestBeatIdx = beats.length - 1;
       let closestDist = Math.abs(now - beats[closestBeatIdx]);
@@ -173,7 +255,6 @@ export const TrackView = forwardRef<TrackViewHandle, TrackViewProps>(function Tr
           closestBeatIdx = i;
         }
       }
-      // Also check next estimated beat
       const nextBeatIdx = beats.length;
       const nextDist = Math.abs(now - nextBeatEst);
       if (nextDist < closestDist) {
@@ -185,7 +266,7 @@ export const TrackView = forwardRef<TrackViewHandle, TrackViewProps>(function Tr
       ...prev,
       { offsetMs: minOffset, timestamp: now, rating },
     ]);
-  }, [session, state.bpm]);
+  }, [session, subBeatTimestamps]);
 
   // When evaluation is enabled, listen for instrument onset events as taps
   useEffect(() => {
@@ -214,8 +295,14 @@ export const TrackView = forwardRef<TrackViewHandle, TrackViewProps>(function Tr
     setBeatCount(0);
     beatTimestamps.current = [];
     firstBeatTime.current = 0;
-    bpmAtStart.current = state.bpm;
+    bpmAtStart.current = gameBpm;
+    gameModeRef.current = gameMode;
+    sequenceNameRef.current = gameMode === "chords" ? selectedSequence?.name : undefined;
+    patternNameRef.current = gameMode === "rhythm" ? selectedPattern?.name : undefined;
+    gameSubdivisionRef.current = gameSubdivision;
     catchPhraseRef.current = "";
+    setBpm(gameBpm);
+    setSubdivision(gameSubdivision as Subdivision);
     setSession("playing");
     if (!state.isPlaying) togglePlayback();
   };
@@ -285,11 +372,11 @@ export const TrackView = forwardRef<TrackViewHandle, TrackViewProps>(function Tr
   const scoredBeatCount = Math.max(0, beatCount - warmupBeats);
   const hitRate =
     scoredBeatCount > 0 && session === "results"
-      ? Math.round((validTaps.length / scoredBeats) * 100)
+      ? Math.round((validTaps.length / expectedTaps) * 100)
       : 0;
   const overallRating: Rating = (() => {
     if (validTaps.length === 0) return "miss";
-    const missCount = Math.max(0, scoredBeats - calibratedTaps.length);
+    const missCount = Math.max(0, expectedTaps - calibratedTaps.length);
     const totalBeats = validTaps.length + missCount;
     const adjustedAvg =
       (avgAbs * validTaps.length + missCount * 100) / Math.max(totalBeats, 1);
@@ -316,7 +403,7 @@ export const TrackView = forwardRef<TrackViewHandle, TrackViewProps>(function Tr
     if (session !== "results") return [];
     if (viewingResult) return viewingResult.perBeatData;
     const beats = beatTimestamps.current;
-    const beatIntervalMs = 60000 / state.bpm;
+    const beatIntervalMs = 60000 / bpmAtStart.current;
     const data: PerBeatDatum[] = [];
     for (let b = warmupBeats; b < beats.length; b++) {
       const beatTime = beats[b];
@@ -372,6 +459,10 @@ export const TrackView = forwardRef<TrackViewHandle, TrackViewProps>(function Tr
         hitRate,
         perBeatData,
         calibratedTaps,
+        mode: gameModeRef.current,
+        sequenceName: sequenceNameRef.current,
+        patternName: patternNameRef.current,
+        gameSubdivision: gameSubdivisionRef.current,
       };
       const updated = [result, ...history];
       setHistory(updated);
@@ -395,6 +486,15 @@ export const TrackView = forwardRef<TrackViewHandle, TrackViewProps>(function Tr
         scoredBeats={scoredBeats}
         savedOffset={savedOffset}
         hasHistory={history.length > 0}
+        session={session}
+        gameMode={gameMode}
+        gameBpm={gameBpm}
+        selectedSequence={selectedSequence}
+        selectedPattern={selectedPattern}
+        onModeChange={setGameMode}
+        onBpmChange={setGameBpm}
+        onSequenceChange={setSelectedSequence}
+        onPatternChange={setSelectedPattern}
         onStart={startSession}
         onCalibrate={startCalibration}
         onShowHistory={() => setSession("history")}
@@ -437,6 +537,9 @@ export const TrackView = forwardRef<TrackViewHandle, TrackViewProps>(function Tr
         displayTaps={r ? r.calibratedTaps : calibratedTaps}
         displayBpm={r ? r.bpm : bpmAtStart.current}
         viewingResult={r}
+        liveMode={gameModeRef.current}
+        liveSequenceName={sequenceNameRef.current}
+        livePatternName={patternNameRef.current}
         onShowHistory={() => setSession("history")}
         onCalibrate={startCalibration}
         onStartSession={startSession}
@@ -473,11 +576,17 @@ export const TrackView = forwardRef<TrackViewHandle, TrackViewProps>(function Tr
       beatCount={beatCount}
       warmupBeats={warmupBeats}
       scoredBeats={scoredBeats}
+      expectedTaps={expectedTaps}
       taps={taps}
       beatTimestamps={beatTimestamps.current}
       bpm={bpmAtStart.current}
       offset={offset}
       evaluationEnabled={evaluationEnabled}
+      gameMode={gameMode}
+      currentCue={currentCue}
+      chordIndex={chordIndex}
+      subBeatCount={subBeatCount}
+      gameSubdivision={gameSubdivision}
       onTap={handleTap}
       onStop={stopSession}
     />

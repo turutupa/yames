@@ -83,6 +83,136 @@
   border-radius: 50%;
 }
 
+/* Mode selector */
+.track-mode-selector {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+}
+
+.track-mode-btn {
+  flex: 1;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.track-mode-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.track-mode-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+.track-mode-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* BPM row */
+.track-bpm-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.track-bpm-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  width: 32px;
+  flex-shrink: 0;
+}
+
+.track-bpm-input {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+  appearance: textfield;
+}
+
+.track-bpm-input:disabled {
+  opacity: 0.4;
+}
+
+/* Preset select */
+.track-preset-row {
+  width: 100%;
+}
+
+.track-preset-select {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  font-family: inherit;
+  cursor: pointer;
+  appearance: none;
+}
+
+.track-preset-select:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Cue display in ring */
+.track-ring-cue {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: 0.02em;
+  animation: cue-enter 0.1s ease;
+}
+
+.track-ring-cue-symbol {
+  font-size: 2rem;
+  color: var(--text-primary);
+  opacity: 0.8;
+}
+
+.track-ring-cue-symbol.pulse {
+  animation: cue-subbeat 0.08s ease;
+}
+
+@keyframes cue-enter {
+  0% { transform: scale(1.15); opacity: 0.6; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes cue-subbeat {
+  0% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+
+/* Mode badge in results */
+.track-result-mode-badge {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+  opacity: 0.85;
+}
+
 /* Playing state — fills the wrapper so the entire area is a tap target,
  * with content vertically centered inside that area. */
 .track-playing {

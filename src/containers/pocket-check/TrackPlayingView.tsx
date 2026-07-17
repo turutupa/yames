@@ -1,5 +1,5 @@
 import { RATING_COLORS, getOffsetRating } from "./trackTypes";
-import type { Rating, TapResult } from "./trackTypes";
+import type { GameMode, Rating, TapResult } from "./trackTypes";
 
 /**
  * Playing screen — the active session view. Shows progress ring (warmup or
@@ -15,27 +15,43 @@ export function TrackPlayingView({
   beatCount,
   warmupBeats,
   scoredBeats,
+  expectedTaps,
   taps,
   beatTimestamps,
   bpm,
   offset,
   evaluationEnabled,
+  gameMode,
+  currentCue,
+  chordIndex,
+  subBeatCount,
+  gameSubdivision,
   onTap,
   onStop,
 }: {
   beatCount: number;
   warmupBeats: number;
   scoredBeats: number;
+  expectedTaps: number;
   taps: TapResult[];
   beatTimestamps: number[];
   bpm: number;
   offset: number;
   evaluationEnabled: boolean | undefined;
+  gameMode?: GameMode;
+  currentCue?: string;
+  chordIndex?: number;
+  subBeatCount?: number;
+  gameSubdivision?: number;
   onTap: () => void;
   onStop: () => void;
 }) {
   const isWarmup = beatCount < warmupBeats;
-  const scoredProgress = Math.max(0, beatCount - warmupBeats) / scoredBeats;
+  const isRhythm = gameMode === "rhythm";
+  const activeScoredProgress = isRhythm
+    ? Math.max(0, (subBeatCount ?? 0) - warmupBeats * (gameSubdivision ?? 1)) / expectedTaps
+    : Math.max(0, beatCount - warmupBeats) / scoredBeats;
+  const scoredProgress = activeScoredProgress;
   const warmupProgress = Math.min(beatCount / warmupBeats, 1);
 
   return (
@@ -51,6 +67,10 @@ export function TrackPlayingView({
         {isWarmup ? (
           <span className="track-live-beats warmup">
             Warm-up {beatCount}/{warmupBeats}
+          </span>
+        ) : isRhythm ? (
+          <span className="track-live-beats">
+            {Math.max(0, (subBeatCount ?? 0) - warmupBeats * (gameSubdivision ?? 1))}/{expectedTaps}
           </span>
         ) : (
           <span className="track-live-beats">
@@ -84,6 +104,17 @@ export function TrackPlayingView({
         <div className="track-ring-center">
           {isWarmup ? (
             <span className="track-ring-label warmup">GET READY</span>
+          ) : gameMode === "chords" && currentCue ? (
+            <span className="track-ring-cue" key={chordIndex}>
+              {currentCue}
+            </span>
+          ) : gameMode === "rhythm" && currentCue ? (
+            <span
+              className={`track-ring-cue-symbol${(subBeatCount ?? 0) > 0 ? " pulse" : ""}`}
+              key={subBeatCount}
+            >
+              {currentCue}
+            </span>
           ) : (
             <span className="track-ring-label">TAP</span>
           )}

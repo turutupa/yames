@@ -4,6 +4,7 @@ import {
   RATING_LABELS,
 } from "./trackTypes";
 import type {
+  GameMode,
   GameResult,
   PerBeatDatum,
   Rating,
@@ -28,6 +29,9 @@ export function TrackResultsView({
   displayTaps,
   displayBpm,
   viewingResult,
+  liveMode,
+  liveSequenceName,
+  livePatternName,
   onShowHistory,
   onCalibrate,
   onStartSession,
@@ -39,10 +43,20 @@ export function TrackResultsView({
   displayTaps: TapResult[];
   displayBpm: number;
   viewingResult: GameResult | null;
+  liveMode?: GameMode;
+  liveSequenceName?: string;
+  livePatternName?: string;
   onShowHistory: () => void;
   onCalibrate: () => void;
   onStartSession: () => void;
 }) {
+  const resolvedMode = viewingResult ? viewingResult.mode : liveMode;
+  const resolvedLabel = (() => {
+    if (!resolvedMode || resolvedMode === "free") return null;
+    const name = viewingResult?.sequenceName ?? liveSequenceName ?? viewingResult?.patternName ?? livePatternName;
+    const prefix = resolvedMode === "chords" ? "Chords" : "Rhythm";
+    return name ? `${prefix} • ${name}` : prefix;
+  })();
   // 5-point rolling mean for the smoothed accuracy line — softens the
   // raw per-beat noise without hiding the underlying drift trend.
   const smoothed = displayPerBeat.map((_d, i) => {
@@ -106,6 +120,9 @@ export function TrackResultsView({
           <div className="track-result-meta">
             {displayBpm} BPM · {viewingResult ? new Date(viewingResult.date).toLocaleDateString() : new Date().toLocaleDateString()}
           </div>
+          {resolvedLabel && (
+            <div className="track-result-mode-badge">{resolvedLabel}</div>
+          )}
         </div>
 
         {/* Rating breakdown bars */}

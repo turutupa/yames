@@ -2,6 +2,20 @@ import { storeLoad, storeSave } from "../../ipc";
 
 export type Rating = "metronomic" | "tight" | "solid" | "loose" | "miss";
 
+export type GameMode = "free" | "chords" | "rhythm";
+
+export type ChordSequence = {
+  name: string;
+  chords: string[];
+  beatsPerChord: number;
+};
+
+export type RhythmPattern = {
+  name: string;
+  subdivisionInterval: 1 | 2 | 4;
+  symbol: string;
+};
+
 export type TapResult = {
   offsetMs: number; // negative = early, positive = late
   timestamp: number;
@@ -32,6 +46,10 @@ export type GameResult = {
   hitRate: number;
   perBeatData: PerBeatDatum[];
   calibratedTaps: TapResult[];
+  mode?: GameMode;
+  sequenceName?: string;
+  patternName?: string;
+  gameSubdivision?: number;
 };
 
 export const MAX_HISTORY = 50;
