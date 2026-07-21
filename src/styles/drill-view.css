@@ -612,6 +612,10 @@
   transition: all 0.15s ease;
   letter-spacing: 0.02em;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
 }
 
 .tab-btn:hover {
@@ -623,6 +627,17 @@
   color: var(--accent-text, #fff);
   background: var(--accent);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 519px) {
+  .tab-bar {
+    width: 120px;
+    flex: none;
+    max-width: unset;
+  }
+  .tab-label {
+    display: none;
+  }
 }
 
 /* Disable all drill animations when view animations are off */

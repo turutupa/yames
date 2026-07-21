@@ -150,20 +150,37 @@ export function MainHeader({
           <button
             className={`tab-btn ${view === "beat" ? "active" : ""}`}
             onClick={() => setView("beat")}
+            aria-label="Metronome"
           >
-            Metronome
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 18V5l12-2v13" />
+              <circle cx="6" cy="18" r="3" />
+              <circle cx="18" cy="16" r="3" />
+            </svg>
+            <span className="tab-label">Metronome</span>
           </button>
           <button
             className={`tab-btn ${view === "drill" ? "active" : ""}`}
             onClick={() => setView("drill")}
+            aria-label="Drill"
           >
-            Drill
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+            <span className="tab-label">Drill</span>
           </button>
           <button
             className={`tab-btn ${view === "track" ? "active" : ""}`}
             onClick={() => setView("track")}
+            aria-label="Pocket Check"
           >
-            Pocket Check
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" />
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+              <line x1="12" y1="19" x2="12" y2="22" />
+              <line x1="8" y1="22" x2="16" y2="22" />
+            </svg>
+            <span className="tab-label">Pocket Check</span>
           </button>
         </nav>
       )}
