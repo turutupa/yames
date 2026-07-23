@@ -285,6 +285,7 @@ pub fn save_window_position(label: String, x: i32, y: i32, app_handle: AppHandle
     let store = app_handle.store("settings.json").unwrap();
     let key = format!("window_position_{}", label);
     store.set(key, serde_json::json!({ "x": x, "y": y }));
+    let _ = store.save();
 }
 
 #[tauri::command]

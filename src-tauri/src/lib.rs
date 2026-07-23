@@ -364,24 +364,14 @@ pub fn run() {
             };
 
             if let Some(main_win) = app.get_webview_window("main") {
-                if last_window == "main" {
-                    let _ = main_win.show();
-                    let _ = main_win.set_focus();
-                } else {
-                    let _ = main_win.hide();
-                }
-                // Apply saved always-on-top setting for main window
-                let aot = { app.state::<SharedState>().lock().unwrap().always_on_top };
-                let _ = main_win.set_always_on_top(aot);
-
-                // Restore saved main window size
+                // Restore size and position BEFORE show — window is still hidden,
+                // so the OS applies them without flash or resistance.
                 let store = app.store("settings.json")?;
                 if let Some(size) = store.get("window_size_main") {
                     if let (Some(w), Some(h)) = (size.get("width").and_then(|v| v.as_u64()), size.get("height").and_then(|v| v.as_u64())) {
                         let _ = main_win.set_size(tauri::PhysicalSize::new(w as u32, h as u32));
                     }
                 }
-                // Restore saved main window position (with bounds check)
                 if let Some(pos) = store.get("window_position_main") {
                     if let (Some(x), Some(y)) = (pos.get("x").and_then(|v| v.as_i64()), pos.get("y").and_then(|v| v.as_i64())) {
                         if is_position_visible(x as i32, y as i32, &main_win) {
@@ -391,19 +381,22 @@ pub fn run() {
                         }
                     }
                 }
+                // Show or hide based on last session
+                if last_window == "main" {
+                    let _ = main_win.show();
+                    let _ = main_win.set_focus();
+                } else {
+                    let _ = main_win.hide();
+                }
+                // Apply always-on-top unconditionally (needed for both show and hide paths)
+                let aot = { app.state::<SharedState>().lock().unwrap().always_on_top };
+                let _ = main_win.set_always_on_top(aot);
 
             }
 
             // Restore saved floating widget position (and visibility)
             if let Some(float_win) = app.get_webview_window("floating") {
-                if last_window != "main" {
-                    let _ = float_win.show();
-                } else {
-                    let _ = float_win.hide();
-                }
-                // Apply saved widget always-on-top
-                let widget_aot = { app.state::<SharedState>().lock().unwrap().widget_always_on_top };
-                let _ = float_win.set_always_on_top(widget_aot);
+                // Restore position BEFORE show — avoids flash on primary display
                 let store = app.store("settings.json")?;
                 if let Some(pos) = store.get("window_position_floating") {
                     if let (Some(x), Some(y)) = (pos.get("x").and_then(|v| v.as_i64()), pos.get("y").and_then(|v| v.as_i64())) {
@@ -414,6 +407,15 @@ pub fn run() {
                         }
                     }
                 }
+                // Show or hide based on last session
+                if last_window != "main" {
+                    let _ = float_win.show();
+                } else {
+                    let _ = float_win.hide();
+                }
+                // Apply always-on-top unconditionally (needed for both show and hide paths)
+                let widget_aot = { app.state::<SharedState>().lock().unwrap().widget_always_on_top };
+                let _ = float_win.set_always_on_top(widget_aot);
             }
 
             // NOTE: capture_image() + png-based trigger helper was removed here.
@@ -519,6 +521,12 @@ pub fn run() {
                     // terminates the process so the engine is cleaned up
                     // via Drop on shutdown either way.
                     if window.label() == "main" {
+                        // Flush window state to disk before exit so position/size
+                        // survive even if the process is killed immediately after.
+                        use tauri_plugin_store::StoreExt;
+                        if let Ok(store) = window.app_handle().store("settings.json") {
+                            let _ = store.save();
+                        }
                         if let Some(engine_state) = window.try_state::<EngineState>() {
                             let mut engine = engine_state.0.lock().unwrap();
                             engine.shutdown();
@@ -532,6 +540,7 @@ pub fn run() {
                         use tauri_plugin_store::StoreExt;
                         if let Ok(store) = window.app_handle().store("settings.json") {
                             store.set("window_size_main", serde_json::json!({ "width": size.width, "height": size.height }));
+                            let _ = store.save();
                         }
                     }
                 }
@@ -541,6 +550,7 @@ pub fn run() {
                         use tauri_plugin_store::StoreExt;
                         if let Ok(store) = window.app_handle().store("settings.json") {
                             store.set("window_position_main", serde_json::json!({ "x": pos.x, "y": pos.y }));
+                            let _ = store.save();
                         }
                     }
                 }
@@ -561,34 +571,27 @@ pub fn run() {
 }
 
 /// Check if a window position is at least partially visible on any available monitor.
-/// Returns false if the position would place the window entirely off-screen.
+/// x/y are the window's top-left corner (PhysicalPosition).
+/// Returns true if the top-left is within 100px of any monitor's bounds.
 fn is_position_visible(x: i32, y: i32, window: &tauri::WebviewWindow) -> bool {
-    if let Ok(Some(monitor)) = window.current_monitor() {
-        let pos = monitor.position();
-        let size = monitor.size();
-        let margin = 100; // At least 100px must be visible
-        let screen_left = pos.x;
-        let screen_top = pos.y;
-        let screen_right = pos.x + size.width as i32;
-        let screen_bottom = pos.y + size.height as i32;
-        x > screen_left - (size.width as i32 - margin)
-            && x < screen_right - margin
-            && y > screen_top - (size.height as i32 - margin)
-            && y < screen_bottom - margin
-    } else if let Ok(monitors) = window.available_monitors() {
-        // Check against all monitors
-        for monitor in monitors {
-            let pos = monitor.position();
-            let size = monitor.size();
-            let screen_right = pos.x + size.width as i32;
-            let screen_bottom = pos.y + size.height as i32;
-            if x >= pos.x - 200 && x < screen_right && y >= pos.y - 200 && y < screen_bottom {
-                return true;
+    let margin = 100i32;
+    match window.available_monitors() {
+        Ok(monitors) if !monitors.is_empty() => {
+            for monitor in monitors {
+                let pos = monitor.position();
+                let size = monitor.size();
+                let left = pos.x;
+                let top = pos.y;
+                let right = pos.x + size.width as i32;
+                let bottom = pos.y + size.height as i32;
+                if x >= left - margin && x < right - margin
+                    && y >= top - margin && y < bottom - margin
+                {
+                    return true;
+                }
             }
+            false
         }
-        false
-    } else {
-        // Can't determine monitors, allow the position
-        true
+        _ => true, // can't enumerate monitors — allow the position
     }
 }
