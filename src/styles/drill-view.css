@@ -630,11 +630,6 @@
 }
 
 @media (max-width: 679px) {
-  .tab-bar {
-    width: 120px;
-    flex: none;
-    max-width: unset;
-  }
   .tab-label {
     display: none;
   }
