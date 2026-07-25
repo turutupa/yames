@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { getCurrentWindow, LogicalPosition } from "@tauri-apps/api/window";
+import { getCurrentWindow, PhysicalPosition } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
 
 const INTERACTIVE = new Set(["button", "input", "textarea", "select", "a", "label"]);
@@ -40,12 +40,8 @@ export function useDrag() {
       lastScreenY = e.screenY;
       const win = getCurrentWindow();
       const pos = await win.outerPosition();
-      // Convert physical → logical so deltas (CSS px) accumulate without DPR scaling.
-      // LogicalPosition at setPosition time lets Tauri apply the correct per-monitor DPR,
-      // which fixes Y-axis drift when dragging across monitors with different DPI scales.
-      const dpr = window.devicePixelRatio || 1;
-      winX = pos.x / dpr;
-      winY = pos.y / dpr;
+      winX = pos.x;
+      winY = pos.y;
 
       document.body.style.userSelect = "none";
       document.body.style.webkitUserSelect = "none";
@@ -73,9 +69,9 @@ export function useDrag() {
     function onMouseMove(e: MouseEvent) {
       if (!dragging || nativeTookOver) return;
       e.preventDefault();
-      // screenX/Y are CSS logical pixels — no DPR scaling needed
-      const dx = e.screenX - lastScreenX;
-      const dy = e.screenY - lastScreenY;
+      const scale = window.devicePixelRatio || 1;
+      const dx = (e.screenX - lastScreenX) * scale;
+      const dy = (e.screenY - lastScreenY) * scale;
       lastScreenX = e.screenX;
       lastScreenY = e.screenY;
       winX += dx;
@@ -86,7 +82,7 @@ export function useDrag() {
         rafId = requestAnimationFrame(() => {
           dirty = false;
           getCurrentWindow().setPosition(
-            new LogicalPosition(Math.round(winX), Math.round(winY))
+            new PhysicalPosition(Math.round(winX), Math.round(winY))
           );
         });
       }
@@ -99,7 +95,7 @@ export function useDrag() {
         dirty = false;
         // Apply final position synchronously
         await getCurrentWindow().setPosition(
-          new LogicalPosition(Math.round(winX), Math.round(winY))
+          new PhysicalPosition(Math.round(winX), Math.round(winY))
         );
         document.body.style.userSelect = "";
         document.body.style.webkitUserSelect = "";
