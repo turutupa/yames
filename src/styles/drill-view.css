@@ -629,7 +629,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-@media (max-width: 519px) {
+@media (max-width: 679px) {
   .tab-bar {
     width: 120px;
     flex: none;
