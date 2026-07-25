@@ -1,6 +1,5 @@
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 import { useEffect, useRef, useState } from "react";
-import { useDrag } from "../../hooks/useDrag";
 import { useMetronome } from "../../hooks/useMetronome";
 import {
   setBpm,
@@ -79,7 +78,6 @@ function eventToCombo(e: KeyboardEvent): string {
 const TIME_SIG_VALUES = [0, 1, 2, 3, 4, 5, 6, 7];
 
 export function FloatingWidget() {
-  useDrag();
   const { state, currentBeat } = useMetronome();
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState("");
@@ -226,6 +224,7 @@ export function FloatingWidget() {
         ref={widgetRef}
         className={`floating-widget compact ${IS_MAC ? "os-mac" : "os-other"}`}
         data-playing={state.isPlaying}
+        data-tauri-drag-region
       >
         {bpmDisplay}
         <button className="fw-play" onClick={() => togglePlayback()}>
@@ -278,6 +277,7 @@ export function FloatingWidget() {
       ref={widgetRef}
       className={`floating-widget comfortable ${IS_MAC ? "os-mac" : "os-other"}`}
       data-playing={state.isPlaying}
+      data-tauri-drag-region
     >
       <div className="fw-top-row">
         <div className="fw-bpm-control">

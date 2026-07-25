@@ -536,12 +536,12 @@ pub fn run() {
                     }
                 }
                 tauri::WindowEvent::Moved(pos) => {
-                    // Save main window position on move
-                    if window.label() == "main" {
-                        use tauri_plugin_store::StoreExt;
-                        if let Ok(store) = window.app_handle().store("settings.json") {
-                            store.set("window_position_main", serde_json::json!({ "x": pos.x, "y": pos.y }));
-                        }
+                    // Save position for all windows so native drag-region moves are persisted.
+                    use tauri_plugin_store::StoreExt;
+                    if let Ok(store) = window.app_handle().store("settings.json") {
+                        let key = format!("window_position_{}", window.label());
+                        store.set(key, serde_json::json!({ "x": pos.x, "y": pos.y }));
+                        let _ = store.save();
                     }
                 }
                 tauri::WindowEvent::Destroyed => {
