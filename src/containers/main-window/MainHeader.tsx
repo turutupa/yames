@@ -144,7 +144,7 @@ export function MainHeader({
   const ttsVolumePercent = Math.round(ttsVolume * 100);
 
   return (
-    <header className="main-header" data-tauri-drag-region>
+    <header className="main-header">
       {view !== "settings" && (
         <nav className="tab-bar">
           <button

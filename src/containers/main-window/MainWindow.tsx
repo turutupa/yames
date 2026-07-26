@@ -490,6 +490,7 @@ export function MainWindow() {
       className={`main-window ${isOsFullscreen ? "os-fullscreen" : ""} ${IS_MAC ? "os-mac" : "os-other"}`}
       data-playing={state.isPlaying}
       data-border={activeBorder}
+      data-tauri-drag-region
     >
       <ThemeEffects themeId={state.theme} currentBeat={currentBeat} isPlaying={state.isPlaying} />
       <MainHeader
