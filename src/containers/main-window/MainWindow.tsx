@@ -1,5 +1,6 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useDrag } from "../../hooks/useDrag";
 import {
   formatGamepadButton,
   useGamepad,
@@ -83,6 +84,7 @@ import type { HotkeyAction } from "../../hotkeys";
 import "../../styles/audio-input-test.css";
 
 export function MainWindow() {
+  useDrag();
   const { state, currentBeat } = useMetronome();
   // Practice Coach model + voice state (must come before useEvaluation so
   // coachMode is available when wiring the startEvaluation IPC call).
@@ -490,7 +492,6 @@ export function MainWindow() {
       className={`main-window ${isOsFullscreen ? "os-fullscreen" : ""} ${IS_MAC ? "os-mac" : "os-other"}`}
       data-playing={state.isPlaying}
       data-border={activeBorder}
-      data-tauri-drag-region
     >
       <ThemeEffects themeId={state.theme} currentBeat={currentBeat} isPlaying={state.isPlaying} />
       <MainHeader
