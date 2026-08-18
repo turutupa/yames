@@ -47,6 +47,8 @@ export interface HotkeyEntry {
 }
 
 export const IS_MAC = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+export const IS_WINDOWS = navigator.platform.toUpperCase().indexOf("WIN") >= 0;
+export const IS_LINUX = navigator.platform.toUpperCase().indexOf("LINUX") >= 0;
 
 /** Convert macOS-style symbols to platform-appropriate labels */
 export function platformKey(key: string): string {

@@ -14,11 +14,34 @@
   border-color: var(--accent);
 }
 
+/* Windows: frameless — DWM handles shadow + rounding; clip children to rounded rect */
+.main-window.os-windows {
+  overflow: hidden;
+}
+
+.main-window.os-windows .main-header {
+  padding-left: 12px;     /* no macOS traffic-light offset */
+  padding-right: 140px;   /* reserve space for 3 × 46px window controls */
+}
+
+/* Linux: frameless — compositor handles rounding; CSS box-shadow for depth */
+.main-window.os-linux {
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.main-window.os-linux .main-header {
+  padding-left: 12px;
+  padding-right: 112px;   /* reserve space for 3 × 36px window controls */
+}
+
+/* os-fullscreen comes AFTER platform rules — same specificity, so it wins */
 .main-window.os-fullscreen {
   border-radius: 0;
 }
 
-/* Windows/Linux: OS frame is square, no content rounding needed */
+/* Fallback: non-mac, non-windows, non-linux (should not occur in practice) */
 .main-window.os-other {
   border-radius: 0;
 }
