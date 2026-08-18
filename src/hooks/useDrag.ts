@@ -86,6 +86,9 @@ export function useDrag() {
 
       // Monitor boundary detected — re-sync from actual window position.
       if (currentDpr !== lastDpr) {
+        // Cancel pending RAF immediately — otherwise it fires with stale B-coords
+        // and moves the window back before outerPosition() resolves.
+        if (rafId) { cancelAnimationFrame(rafId); rafId = 0; dirty = false; }
         lastDpr = currentDpr;
         lastScreenX = e.screenX;
         lastScreenY = e.screenY;
