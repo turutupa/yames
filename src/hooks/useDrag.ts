@@ -29,10 +29,6 @@ export function useDrag() {
     let winX = 0;
     let winY = 0;
     let lastDpr = 1;
-    let syncGen = 0;       // incremented on each re-sync; stale async results are ignored
-    let resyncing = false; // true while outerPosition() is in-flight after DPR change
-    let pendingDx = 0;     // accumulated deltas while resyncing
-    let pendingDy = 0;
     let rafId = 0;
     let dirty = false;
 
@@ -44,9 +40,6 @@ export function useDrag() {
       // Set up manual fallback state
       dragging = true;
       nativeTookOver = false;
-      resyncing = false;
-      pendingDx = 0;
-      pendingDy = 0;
       lastScreenX = e.screenX;
       lastScreenY = e.screenY;
       lastDpr = window.devicePixelRatio || 1;
@@ -84,43 +77,16 @@ export function useDrag() {
 
       const currentDpr = window.devicePixelRatio || 1;
 
-      // Monitor boundary detected — re-sync from actual window position.
+      // Monitor boundary detected (DPR changed).
+      // Cancel pending RAF so stale coords don't fire, reset delta baseline,
+      // and continue tracking with the new DPR. winX/winY stay valid — physical
+      // coordinates are in a unified global space across monitors.
       if (currentDpr !== lastDpr) {
-        // Cancel pending RAF immediately — otherwise it fires with stale B-coords
-        // and moves the window back before outerPosition() resolves.
         if (rafId) { cancelAnimationFrame(rafId); rafId = 0; dirty = false; }
         lastDpr = currentDpr;
         lastScreenX = e.screenX;
         lastScreenY = e.screenY;
-        resyncing = true;
-        pendingDx = 0;
-        pendingDy = 0;
-        const thisGen = ++syncGen;
-        getCurrentWindow().outerPosition().then(pos => {
-          if (thisGen !== syncGen) return; // a newer crossing happened — discard
-          resyncing = false;
-          // Apply accumulated deltas on top of true position
-          winX = pos.x + pendingDx;
-          winY = pos.y + pendingDy;
-          pendingDx = 0;
-          pendingDy = 0;
-          if (dragging && !nativeTookOver) {
-            cancelAnimationFrame(rafId);
-            dirty = false;
-            getCurrentWindow().setPosition(new PhysicalPosition(Math.round(winX), Math.round(winY)));
-          }
-        });
-        return;
-      }
-
-      // While re-sync is in flight, accumulate deltas — don't set position yet.
-      if (resyncing) {
-        const scale = currentDpr;
-        pendingDx += (e.screenX - lastScreenX) * scale;
-        pendingDy += (e.screenY - lastScreenY) * scale;
-        lastScreenX = e.screenX;
-        lastScreenY = e.screenY;
-        return;
+        return; // skip one frame to absorb the DPR transition
       }
 
       const scale = currentDpr;
@@ -145,7 +111,6 @@ export function useDrag() {
     async function onMouseUp() {
       if (dragging && !nativeTookOver) {
         dragging = false;
-        resyncing = false;
         if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
         dirty = false;
         // Apply final position synchronously
