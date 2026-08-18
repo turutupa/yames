@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { MainWindow } from "./containers/main-window/MainWindow";
 import { FloatingWidget } from "./containers/floating-widget/FloatingWidget";
 
@@ -10,6 +11,12 @@ function getWindowLabel(): string {
 
 export default function App() {
   const [windowLabel] = useState(getWindowLabel);
+
+  useEffect(() => {
+    // Signal Rust that the frontend is ready. app_ready() sets the
+    // final window position and calls show().
+    invoke("app_ready").catch(console.error);
+  }, []);
 
   useEffect(() => {
     // Prevent context menu in production

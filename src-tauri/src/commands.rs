@@ -1837,3 +1837,53 @@ pub fn start_voice_repair(
     models::start_voice_repair(app_handle, voice_id, cancel);
     Ok(())
 }
+
+/// Called by the frontend after React has fully mounted.
+///
+/// This is the authoritative moment to show the main window: macOS
+/// NSWindowRestoration and any other async OS window-management has
+/// long settled by the time the JS runtime has booted and React has
+/// committed its first render. We re-read the saved position from the
+/// store and call set_position() + show() in one shot, so the window
+/// appears exactly where the user left it with no visible jump.
+#[tauri::command]
+pub fn app_ready(app_handle: AppHandle) {
+    use tauri_plugin_store::StoreExt;
+
+    let store = match app_handle.store("settings.json") {
+        Ok(s) => s,
+        Err(_) => return,
+    };
+
+    // Only show the main window if that's what was last active.
+    let last_window = store
+        .get("lastWindow")
+        .and_then(|v| v.as_str().map(String::from))
+        .unwrap_or_else(|| "floating".to_string());
+
+    if last_window != "main" {
+        return;
+    }
+
+    let main_win = match app_handle.get_webview_window("main") {
+        Some(w) => w,
+        None => return,
+    };
+
+    // Re-apply the saved position. By this point macOS restoration has
+    // settled, so this call is the last word on where the window sits.
+    if let Some(pos) = store.get("window_position_main") {
+        let x = pos.get("x").and_then(|v| v.as_i64()).unwrap_or(0) as i32;
+        let y = pos.get("y").and_then(|v| v.as_i64()).unwrap_or(0) as i32;
+        if crate::is_position_visible(x, y, &main_win) {
+            let _ = main_win.set_position(tauri::PhysicalPosition::new(x, y));
+        } else {
+            let _ = main_win.center();
+        }
+    } else {
+        let _ = main_win.center();
+    }
+
+    let _ = main_win.show();
+    let _ = main_win.set_focus();
+}
