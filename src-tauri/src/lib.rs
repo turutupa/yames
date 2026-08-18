@@ -364,24 +364,17 @@ pub fn run() {
             };
 
             if let Some(main_win) = app.get_webview_window("main") {
-                if last_window == "main" {
-                    let _ = main_win.show();
-                    let _ = main_win.set_focus();
-                } else {
-                    let _ = main_win.hide();
-                }
-                // Apply saved always-on-top setting for main window
+                // Apply size + position while hidden so the window appears exactly
+                // where it should with no visible flash or macOS re-centering.
                 let aot = { app.state::<SharedState>().lock().unwrap().always_on_top };
                 let _ = main_win.set_always_on_top(aot);
 
-                // Restore saved main window size
                 let store = app.store("settings.json")?;
                 if let Some(size) = store.get("window_size_main") {
                     if let (Some(w), Some(h)) = (size.get("width").and_then(|v| v.as_u64()), size.get("height").and_then(|v| v.as_u64())) {
                         let _ = main_win.set_size(tauri::PhysicalSize::new(w as u32, h as u32));
                     }
                 }
-                // Restore saved main window position (with bounds check)
                 if let Some(pos) = store.get("window_position_main") {
                     if let (Some(x), Some(y)) = (pos.get("x").and_then(|v| v.as_i64()), pos.get("y").and_then(|v| v.as_i64())) {
                         if is_position_visible(x as i32, y as i32, &main_win) {
@@ -392,18 +385,20 @@ pub fn run() {
                     }
                 }
 
+                // Show only after geometry is fully applied.
+                if last_window == "main" {
+                    let _ = main_win.show();
+                    let _ = main_win.set_focus();
+                } else {
+                    let _ = main_win.hide();
+                }
             }
 
             // Restore saved floating widget position (and visibility)
             if let Some(float_win) = app.get_webview_window("floating") {
-                if last_window != "main" {
-                    let _ = float_win.show();
-                } else {
-                    let _ = float_win.hide();
-                }
-                // Apply saved widget always-on-top
                 let widget_aot = { app.state::<SharedState>().lock().unwrap().widget_always_on_top };
                 let _ = float_win.set_always_on_top(widget_aot);
+
                 let store = app.store("settings.json")?;
                 if let Some(pos) = store.get("window_position_floating") {
                     if let (Some(x), Some(y)) = (pos.get("x").and_then(|v| v.as_i64()), pos.get("y").and_then(|v| v.as_i64())) {
@@ -413,6 +408,12 @@ pub fn run() {
                             let _ = float_win.center();
                         }
                     }
+                }
+
+                if last_window != "main" {
+                    let _ = float_win.show();
+                } else {
+                    let _ = float_win.hide();
                 }
             }
 
