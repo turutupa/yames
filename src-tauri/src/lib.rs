@@ -562,33 +562,32 @@ pub fn run() {
 
 /// Check if a window position is at least partially visible on any available monitor.
 /// Returns false if the position would place the window entirely off-screen.
+///
+/// Always iterates all monitors (not just current_monitor) so that positions saved
+/// on secondary monitors are correctly accepted when the window starts hidden on
+/// the primary monitor.
 fn is_position_visible(x: i32, y: i32, window: &tauri::WebviewWindow) -> bool {
-    if let Ok(Some(monitor)) = window.current_monitor() {
-        let pos = monitor.position();
-        let size = monitor.size();
-        let margin = 100; // At least 100px must be visible
-        let screen_left = pos.x;
-        let screen_top = pos.y;
-        let screen_right = pos.x + size.width as i32;
-        let screen_bottom = pos.y + size.height as i32;
-        x > screen_left - (size.width as i32 - margin)
-            && x < screen_right - margin
-            && y > screen_top - (size.height as i32 - margin)
-            && y < screen_bottom - margin
-    } else if let Ok(monitors) = window.available_monitors() {
-        // Check against all monitors
+    let margin = 100i32; // At least 100px of the window must remain on-screen
+    if let Ok(monitors) = window.available_monitors() {
+        if monitors.is_empty() {
+            return true; // Can't determine monitors — allow the position
+        }
         for monitor in monitors {
             let pos = monitor.position();
             let size = monitor.size();
-            let screen_right = pos.x + size.width as i32;
-            let screen_bottom = pos.y + size.height as i32;
-            if x >= pos.x - 200 && x < screen_right && y >= pos.y - 200 && y < screen_bottom {
+            let w = size.width as i32;
+            let h = size.height as i32;
+            // Window top-left (x, y) is acceptable if at least `margin` px of
+            // the window's leading edge falls within this monitor's bounds.
+            let in_x = x > pos.x - (w - margin) && x < pos.x + w - margin;
+            let in_y = y > pos.y - (h - margin) && y < pos.y + h - margin;
+            if in_x && in_y {
                 return true;
             }
         }
         false
     } else {
-        // Can't determine monitors, allow the position
+        // available_monitors() failed — allow the position rather than centering
         true
     }
 }
