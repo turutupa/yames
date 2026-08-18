@@ -422,6 +422,17 @@ pub fn run() {
                 // position and calls show(). This eliminates the race with macOS
                 // NSWindowRestoration, which settles long before React is ready.
                 let _ = main_win.hide();
+
+                // Non-macOS: remove native OS frame at runtime so the app renders
+                // frameless on Windows and Linux. DWM (Windows) and the compositor
+                // (Linux) handle the drop-shadow and rounded corners automatically
+                // when shadow=true. macOS keeps decorations=true for the overlay
+                // title bar and traffic lights — do NOT touch that path.
+                #[cfg(not(target_os = "macos"))]
+                {
+                    let _ = main_win.set_decorations(false);
+                    let _ = main_win.set_shadow(true);
+                }
             }
 
             // Restore saved floating widget position (and visibility)

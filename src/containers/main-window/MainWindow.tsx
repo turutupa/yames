@@ -43,6 +43,7 @@ import type { PresetSidebarHandle } from "../../components/presets/PresetSidebar
 import { ThemeEffects } from "./ThemeEffects";
 import { MetronomeView } from "../metronome/MetronomeView";
 import { MainHeader } from "./MainHeader";
+import { WindowControls } from "../../components/WindowControls";
 import { PresetSaveBar } from "../../components/presets/PresetSaveBar";
 import { FloatingPlayButton } from "./FloatingPlayButton";
 import { TrackView } from "../pocket-check/TrackView";
@@ -77,6 +78,8 @@ import { SettingsView } from "../settings/SettingsView";
 import {
   HOTKEYS,
   IS_MAC,
+  IS_WINDOWS,
+  IS_LINUX,
   FULLSCREEN_EXIT_DELAY,
   platformKey,
   eventToCombo,
@@ -493,11 +496,12 @@ export function MainWindow() {
       />
     </ZenTransition>
     <div
-      className={`main-window ${isOsFullscreen ? "os-fullscreen" : ""} ${IS_MAC ? "os-mac" : "os-other"}`}
+      className={`main-window ${isOsFullscreen ? "os-fullscreen" : ""} ${IS_MAC ? "os-mac" : IS_WINDOWS ? "os-windows" : IS_LINUX ? "os-linux" : "os-other"}`}
       data-playing={state.isPlaying}
       data-border={activeBorder}
     >
       <ThemeEffects themeId={state.theme} currentBeat={currentBeat} isPlaying={state.isPlaying} />
+      {(IS_WINDOWS || IS_LINUX) && <WindowControls />}
       <MainHeader
         state={state}
         view={view}
