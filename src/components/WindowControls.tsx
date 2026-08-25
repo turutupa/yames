@@ -14,7 +14,7 @@ export function WindowControls() {
     return () => {
       unlistenPromise.then((f) => f());
     };
-  }, [win]);
+  }, []);
 
   return (
     <div className="window-controls">

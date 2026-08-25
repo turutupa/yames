@@ -32,6 +32,7 @@ rodio = { version = "0.19", default-features = false, features = ["wav"] }
 cpal = "0.15"
 tauri-plugin-updater = "2"
 tauri-plugin-process = "2"
+tauri-plugin-decorum = "1"
 midir = "0.10"
 # Tauri already pulls tokio in transitively; declared explicitly so we can
 # use `tokio::task::spawn_blocking` from blocking command handlers.
@@ -60,3 +61,5 @@ core-foundation-sys = "0.8"
 # No external test deps yet — using Rust's built-in test harness.
 # Add here when needed (e.g. `pretty_assertions`, `proptest`).
 
+[target.'cfg(target_os = "linux")'.dependencies]
+gtk = { version = "0.18" }

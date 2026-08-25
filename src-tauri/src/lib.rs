@@ -91,6 +91,7 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_decorum::init())
         .setup(move |app| {
             let shared_state = create_shared_state();
 
@@ -423,15 +424,48 @@ pub fn run() {
                 // NSWindowRestoration, which settles long before React is ready.
                 let _ = main_win.hide();
 
-                // Non-macOS: remove native OS frame at runtime so the app renders
-                // frameless on Windows and Linux. DWM (Windows) and the compositor
-                // (Linux) handle the drop-shadow and rounded corners automatically
-                // when shadow=true. macOS keeps decorations=true for the overlay
-                // title bar and traffic lights — do NOT touch that path.
+                // Non-macOS: call decorum's create_overlay_titlebar() to:
+                //   - remove native OS frame (set_decorations false at runtime)
+                //   - hook Win32 HTMAXBUTTON so Windows 11 Snap Layout flyout works
+                //   - inject its own JS controls (we hide them via CSS)
+                // macOS keeps decorations=true — native traffic lights + overlay titlebar.
+                // LINUX: transparent: false in config to prevent Nvidia GPU crash (GBM/Err 71).
                 #[cfg(not(target_os = "macos"))]
                 {
-                    let _ = main_win.set_decorations(false);
+                    use tauri_plugin_decorum::WebviewWindowExt;
+                    let _ = main_win.create_overlay_titlebar();
                     let _ = main_win.set_shadow(true);
+                }
+
+                // Windows: apply Mica (Win11) → Acrylic (Win10) → solid CSS fallback
+                // tauri.windows.conf.json sets transparent:true on Windows so DWM effect
+                // shows through the webview. Linux/macOS: transparent:false (safe).
+                #[cfg(target_os = "windows")]
+                {
+                    use tauri::window::{Effect, EffectsBuilder};
+                    let mut vibrancy_active = false;
+                    if main_win.set_effects(
+                        EffectsBuilder::new().effect(Effect::Mica).build()
+                    ).is_ok() {
+                        vibrancy_active = true;
+                    } else if main_win.set_effects(
+                        EffectsBuilder::new().effect(Effect::Acrylic).build()
+                    ).is_ok() {
+                        vibrancy_active = true;
+                    }
+                    if vibrancy_active {
+                        let _ = main_win.eval("document.body.classList.add('mica-active')");
+                    }
+                }
+
+                // Linux: remove any residual GTK CSD titlebar on KDE/Wayland configs
+                // LINUX: transparent: false in config — do NOT set transparent here
+                #[cfg(target_os = "linux")]
+                {
+                    use gtk::prelude::GtkWindowExt;
+                    if let Ok(gtk_win) = main_win.gtk_window() {
+                        gtk_win.set_titlebar(Option::<&gtk::Widget>::None);
+                    }
                 }
             }
 
