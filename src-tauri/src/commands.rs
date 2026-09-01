@@ -44,6 +44,7 @@ fn persist_state(state: &SharedState, app_handle: &AppHandle) {
         store.set("volume", serde_json::json!(s.volume_real));
         store.set("soundType", serde_json::json!(s.sound_type));
         store.set("timeSignature", serde_json::json!(s.time_signature));
+        store.set("beatGroups", serde_json::json!(s.beat_groups));
         store.set(
             "speedRamp",
             serde_json::json!({
@@ -303,16 +304,47 @@ pub fn set_sound_type(sound_type: String, state: State<SharedState>, app_handle:
 
 #[tauri::command]
 pub fn set_time_signature(time_signature: u8, state: State<SharedState>, app_handle: AppHandle) {
+    // Deprecated thin-wrap — delegates to set_beat_groups logic.
+    // time_signature=0 ("Never") is dropped; treated as 4/4.
     let valid = match time_signature {
-        0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 => time_signature,
+        1 | 2 | 3 | 4 | 5 | 6 | 7 => time_signature,
         _ => 4,
     };
     {
         let mut s = state.lock().unwrap();
+        s.beat_groups = vec![valid];
         s.time_signature = valid;
     }
     emit_state_changed(&state, &app_handle);
     persist_state(&state, &app_handle);
+}
+
+#[tauri::command]
+pub fn set_beat_groups(
+    groups: Vec<u8>,
+    state: State<SharedState>,
+    app_handle: AppHandle,
+) -> Result<(), String> {
+    if groups.is_empty() || groups.len() > 6 {
+        return Err("groups: 1–6 required".into());
+    }
+    for g in &groups {
+        if *g < 1 || *g > 8 {
+            return Err("each group: 1–8 beats".into());
+        }
+    }
+    let total: u8 = groups.iter().sum();
+    if total > 16 {
+        return Err("total beats must be ≤ 16".into());
+    }
+    {
+        let mut s = state.lock().unwrap();
+        s.beat_groups = groups;
+        s.time_signature = total;
+    }
+    emit_state_changed(&state, &app_handle);
+    persist_state(&state, &app_handle);
+    Ok(())
 }
 
 #[tauri::command]
