@@ -25,6 +25,7 @@ export const DEFAULT_TEST_STATE: AppState = {
   volume: 0.7,
   soundType: "click",
   timeSignature: 4,
+  beatGroups: [4],
   speedRamp: {
     startBpm: 80,
     targetBpm: 160,

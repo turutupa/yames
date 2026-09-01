@@ -83,6 +83,10 @@ export async function setTimeSignature(timeSignature: number): Promise<void> {
   return invoke("set_time_signature", { timeSignature });
 }
 
+export async function setBeatGroups(groups: number[]): Promise<void> {
+  return invoke("set_beat_groups", { groups });
+}
+
 export async function showMain(): Promise<void> {
   return invoke("show_main");
 }

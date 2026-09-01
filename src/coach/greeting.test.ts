@@ -62,6 +62,7 @@ function makeSession(
     timestamp: FIXED_NOW - daysAgo * 24 * 60 * 60 * 1000,
     bpm,
     timeSignature: 4,
+    beatGroups: [4],
     report: makeReport(score),
     presetId,
     presetName,

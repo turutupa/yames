@@ -24,6 +24,7 @@ const makePreset = (overrides: Partial<Preset> = {}): Preset => ({
   bpm: 110,
   subdivision: 1,
   timeSignature: 4,
+  beatGroups: [4],
   soundType: "click",
   volume: 0.7,
   view: "beat",

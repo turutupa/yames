@@ -52,6 +52,7 @@ function mkCtx(overrides: Partial<ChipContext> = {}): ChipContext {
     report: mkReport(),
     bpm: 120,
     timeSignature: 4,
+    beatGroups: [4],
     segmentsCompleted: 1,
     recentChipIds: new Set(),
     segments: [],
@@ -127,6 +128,7 @@ describe("selectChips", () => {
         report: mkReport({ score: 60 + i * 5 }),
         bpm: 140,
         timeSignature: 4,
+        beatGroups: [4],
       })),
     });
     const out = selectChips(ctx);

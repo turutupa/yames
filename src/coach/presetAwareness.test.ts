@@ -70,6 +70,7 @@ function makeSession(
     timestamp: T0 - daysAgo * DAY,
     bpm,
     timeSignature: 4,
+    beatGroups: [4],
     report: makeReport(score, {
       meanDeviationMs: options.meanDeviationMs ?? 0,
       totalBeats: options.totalBeats ?? 240,
