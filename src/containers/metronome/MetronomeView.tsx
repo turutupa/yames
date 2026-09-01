@@ -2,8 +2,13 @@ import type { Ref } from "react";
 import { useTranslation } from "react-i18next";
 import type { AppState, BeatEvent, Subdivision } from "../../types";
 import type { useEvaluation } from "../../hooks/useEvaluation";
-import { setSubdivision, setTimeSignature } from "../../ipc";
-import { TIME_SIGNATURES, getTempoMarking } from "../../constants/metronome";
+import { setSubdivision } from "../../ipc";
+import {
+  getTempoMarking,
+  SUBDIVISION_NAMES,
+} from "../../constants/metronome";
+import { GroupEditor } from "./GroupEditor";
+import { MeterPresets } from "./MeterPresets";
 import { SubdivisionIcon } from "../../components/MetronomeIcons";
 import DriftMeter from "../../components/DriftMeter";
 
@@ -140,9 +145,13 @@ export function MetronomeView({
           {Array.from({ length: beatsPerMeasure }, (_, beatIdx) => {
             const isBeatActive = activeBeat === beatIdx && isDownbeat;
             const isBeatDownbeat = isBeatActive && beatIdx === 0;
-            const isAccentBeat =
-              state.timeSignature === 1 ||
-              (beatIdx === 0 && state.timeSignature >= 2);
+            const accentPositions = (() => {
+              const s = new Set<number>();
+              let c = 0;
+              for (const g of state.beatGroups) { s.add(c); c += g; }
+              return s;
+            })();
+            const isAccentBeat = accentPositions.has(beatIdx);
             // Feedback coloring when evaluation is active
             const fb = evaluation.enabled && currentBeat
               ? evaluation.dotFeedback.get(
@@ -204,19 +213,8 @@ export function MetronomeView({
         ))}
       </div>
 
-      <div className="time-sig-row">
-        <span className="row-side-label">{t("metronome.meter")}</span>
-        {TIME_SIGNATURES.map((beats, i) => (
-          <button
-            key={beats}
-            className={`time-sig-btn view-stagger-item ${state.timeSignature === beats ? "active" : ""}`}
-            style={{ animationDelay: `${150 + i * 30}ms` }}
-            onClick={() => setTimeSignature(beats)}
-          >
-            {t(`meter.${beats}`)}
-          </button>
-        ))}
-      </div>
+      <GroupEditor beatGroups={state.beatGroups} subdivision={state.subdivision} />
+      <MeterPresets beatGroups={state.beatGroups} />
     </>
   );
 }
