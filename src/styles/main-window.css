@@ -1793,7 +1793,8 @@
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--text-tertiary, var(--text-secondary));
+  color: var(--text-secondary);
+  opacity: 0.35;
   padding-right: 2px;
 }
 
