@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { AppState, BeatEvent, Subdivision } from "../../types";
-import { setBpm, togglePlayback, setSubdivision, setTimeSignature, stopSpeedRamp, startSpeedRamp, startSpeedRampFrom, configureSpeedRamp, storeSave, storeLoad } from "../../ipc";
+import { setBpm, togglePlayback, setSubdivision, setBeatGroups, notifySettingsChange, stopSpeedRamp, startSpeedRamp, startSpeedRampFrom, configureSpeedRamp, storeSave, storeLoad } from "../../ipc";
+import { METER_PRESETS } from "../../constants/metronome";
 import { ZenEffects, type ZenStyle } from "./ZenEffects";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import "../../styles/fullscreen.css";
@@ -35,7 +36,7 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
   // In drill mode, use ramp's beatsPerBar; otherwise use timeSignature
   const beatsPerMeasure = activeTab === "drill"
     ? (ramp.beatsPerBar >= 2 ? ramp.beatsPerBar : 4)
-    : (state.timeSignature >= 2 ? state.timeSignature : 2);
+    : Math.max(2, (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0));
   const activeBeat = currentBeat ? currentBeat.beat % beatsPerMeasure : -1;
   const activeSub = currentBeat ? currentBeat.subdivision : -1;
   const isDownbeat = currentBeat?.isDownbeat ?? false;
@@ -192,7 +193,7 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
             const isBeatActive = !isWarmingUp && activeBeat === beatIdx && isDownbeat;
             const isAccent = activeTab === "drill"
               ? beatIdx === 0
-              : (state.timeSignature === 1 || (beatIdx === 0 && state.timeSignature >= 2));
+              : (() => { const s = new Set<number>(); let c = 0; for (const g of (state.beatGroups ?? [state.timeSignature])) { s.add(c); c += g; } return s.has(beatIdx); })();
             return (
               <div key={beatIdx} className="fs-beat-group">
                 <div className={`fs-beat ${isBeatActive ? "active" : ""} ${isAccent && isBeatActive ? "accent" : ""}`} />
@@ -337,11 +338,12 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
 
         {activeTab !== "drill" && (
           <button className="fs-ctrl-btn fs-ctrl-sub" onClick={() => {
-            const ts = state.timeSignature;
-            const next = ts >= 7 ? 0 : ts + 1;
-            setTimeSignature(next);
+            const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
+            const nextIdx = (currentIdx === -1 ? 0 : (currentIdx + 1) % METER_PRESETS.length);
+            setBeatGroups(METER_PRESETS[nextIdx].groups);
+            notifySettingsChange();
           }}>
-            {state.timeSignature >= 2 ? `${state.timeSignature}/4` : state.timeSignature === 1 ? t("zen.timeSigAll") : t("zen.timeSigOff")}
+            {METER_PRESETS.find(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups))?.label ?? `${state.timeSignature}/4`}
           </button>
         )}
         {activeTab !== "drill" && (

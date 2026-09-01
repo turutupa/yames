@@ -20,7 +20,7 @@ import {
   setSoundType,
   setSubdivision,
   setTheme,
-  setTimeSignature,
+  setBeatGroups,
   setVolume,
   setWidgetAlwaysOnTop,
   setWidgetMode,
@@ -279,7 +279,7 @@ export function MainWindow() {
   // Tab switching and settings are handled by the unified dispatcher via keyBindings
   const soundDropdownRef = useRef<HTMLDivElement>(null);
 
-  const beatsPerMeasure = state.timeSignature >= 2 ? state.timeSignature : 2;
+  const beatsPerMeasure = Math.max(2, (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0));
   const activeBeat = currentBeat ? currentBeat.beat % beatsPerMeasure : -1;
   const activeSub = currentBeat ? currentBeat.subdivision : -1;
   const isDownbeat = currentBeat?.isDownbeat ?? false;
@@ -300,7 +300,7 @@ export function MainWindow() {
   const handleLoadPreset = useCallback(async (preset: Preset) => {
     await setBpm(preset.bpm);
     await setSubdivision(preset.subdivision as Subdivision);
-    await setTimeSignature(preset.timeSignature);
+    await setBeatGroups(preset.beatGroups ?? [preset.timeSignature]);
     await setSoundType(preset.soundType);
     await setVolume(preset.volume);
     if (preset.view === "drill" && preset.speedRamp) {

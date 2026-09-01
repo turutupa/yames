@@ -2,9 +2,10 @@ import { useCallback } from "react";
 import type { MutableRefObject } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import {
+  setBeatGroups,
   setBpm,
+  notifySettingsChange,
   setSubdivision,
-  setTimeSignature,
   showFloating,
   startSpeedRamp,
   stopSpeedRamp,
@@ -13,7 +14,7 @@ import {
 import type { AppState, Subdivision } from "../types";
 import type { HotkeyAction } from "../hotkeys";
 import { FULLSCREEN_EXIT_DELAY } from "../hotkeys";
-import { TIME_SIGNATURES } from "../constants/metronome";
+import { METER_PRESETS } from "../constants/metronome";
 
 export type ViewName = "beat" | "drill" | "track" | "settings";
 
@@ -145,15 +146,17 @@ export function useActionDispatcher({
         case "sub-3": setSubdivision(3); break;
         case "sub-4": setSubdivision(4); break;
         case "sig-next": {
-          const idx = TIME_SIGNATURES.indexOf(state.timeSignature);
-          setTimeSignature(TIME_SIGNATURES[(idx + 1) % TIME_SIGNATURES.length]);
+          const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
+          const nextIdx = (currentIdx === -1 ? 0 : (currentIdx + 1) % METER_PRESETS.length);
+          setBeatGroups(METER_PRESETS[nextIdx].groups);
+          notifySettingsChange();
           break;
         }
         case "sig-prev": {
-          const idx = TIME_SIGNATURES.indexOf(state.timeSignature);
-          setTimeSignature(
-            TIME_SIGNATURES[(idx - 1 + TIME_SIGNATURES.length) % TIME_SIGNATURES.length],
-          );
+          const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
+          const nextIdx = (currentIdx === -1 ? 0 : (currentIdx - 1 + METER_PRESETS.length) % METER_PRESETS.length);
+          setBeatGroups(METER_PRESETS[nextIdx].groups);
+          notifySettingsChange();
           break;
         }
         case "fullscreen":
@@ -198,7 +201,7 @@ export function useActionDispatcher({
       view,
       state.bpm,
       state.subdivision,
-      state.timeSignature,
+      state.beatGroups,
       state.speedRamp?.active,
       state.alwaysOnTop,
       isFullscreen,
