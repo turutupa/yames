@@ -58,6 +58,12 @@ export const INSTRUMENTS: Array<{ id: string; soon?: boolean }> = [
   { id: "other", soon: true },
 ];
 
+export const METER_VARIANTS: Record<string, number[][]> = {
+  "5/4":  [[3, 2], [2, 3]],
+  "7/8":  [[3, 2, 2], [2, 2, 3], [2, 3, 2]],
+  "8/8":  [[3, 2, 3], [3, 3, 2], [2, 3, 3]],
+};
+
 export const METER_PRESETS: Array<{ label: string; groups: number[] }> = [
   { label: "4/4",  groups: [4] },
   { label: "3/4",  groups: [3] },

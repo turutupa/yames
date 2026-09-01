@@ -420,6 +420,7 @@ struct CachedParams {
     kit: SoundKit,
     time_signature: u8,
     beat_groups: Vec<u8>,
+    beat_groups_changed: bool,
     ramp_active: bool,
     ramp_beats_per_bar: u8,
     ramp_warming_up: bool,
@@ -444,6 +445,7 @@ fn compute_group_accents(groups: &[u8]) -> HashSet<u32> {
 struct BeatNotification {
     session: u64,
     beat: u32,
+    measure_beat: u32, // bar-local position (0..beats_per_measure), resets on group change
     subdivision: u32,
     /// Path B — user-configured subdivision count (1, 2, 3, 4, 6).
     /// Mirrored to BeatTick so the matcher's rhythm-inference can map
@@ -553,6 +555,8 @@ fn advance_ramp(
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct BeatEvent {
     pub beat: u32,
+    #[serde(rename = "measureBeat")]
+    pub measure_beat: u32,
     pub subdivision: u32,
     #[serde(rename = "isDownbeat")]
     pub is_downbeat: bool,
@@ -968,6 +972,7 @@ impl MetronomeEngine {
                 kit: SoundKit::Click,
                 time_signature: 4,
                 beat_groups: vec![4],
+                beat_groups_changed: false,
                 ramp_active: false,
                 ramp_beats_per_bar: 4,
                 ramp_warming_up: false,
@@ -1006,7 +1011,11 @@ impl MetronomeEngine {
                         cached.volume = s.volume;
                         cached.kit = SoundKit::from_str(&s.sound_type);
                         cached.time_signature = s.time_signature;
-                        cached.beat_groups = s.beat_groups.clone();
+                        let new_groups = s.beat_groups.clone();
+                        if new_groups != cached.beat_groups {
+                            cached.beat_groups = new_groups;
+                            cached.beat_groups_changed = true;
+                        }
                         cached.ramp_active = s.speed_ramp.active;
                         cached.ramp_beats_per_bar = s.speed_ramp.beats_per_bar;
                         let warming = s.speed_ramp.active
@@ -1068,6 +1077,14 @@ impl MetronomeEngine {
                     for frame_idx in 0..frames {
                         // Beat boundary
                         if sample_counter >= next_beat_sample {
+                            // If beat_groups changed mid-play, reset bar BEFORE
+                            // is_downbeat is computed so this tick IS the new beat 0.
+                            if cached.beat_groups_changed {
+                                measure_beat = 0;
+                                sub_count = 0; // force current tick to be a downbeat
+                                cached.beat_groups_changed = false;
+                            }
+
                             let is_downbeat = sub_count == 0;
 
                             // Warmup transition detection
@@ -1130,6 +1147,7 @@ impl MetronomeEngine {
                             let ts_ns = crate::clock::now_ns() + total_delay_us * 1000; // adjusted to play time
                             let notif_beat = beat_count;
                             let notif_sub = sub_count;
+                            let notif_measure_beat = measure_beat; // capture BEFORE counter advance
 
                             // Advance counters
                             let mut bar_complete = false;
@@ -1159,6 +1177,7 @@ impl MetronomeEngine {
                             let _ = tx.send(BeatNotification {
                                 session,
                                 beat: notif_beat,
+                                measure_beat: notif_measure_beat,
                                 subdivision: notif_sub,
                                 subdivision_total: subdivision.clamp(1, 255) as u8,
                                 is_downbeat,
@@ -1288,6 +1307,7 @@ impl MetronomeEngine {
                     "beat",
                     &BeatEvent {
                         beat: notif.beat,
+                        measure_beat: notif.measure_beat,
                         subdivision: notif.subdivision,
                         is_downbeat: notif.is_downbeat,
                     },

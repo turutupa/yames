@@ -37,7 +37,7 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
   const beatsPerMeasure = activeTab === "drill"
     ? (ramp.beatsPerBar >= 2 ? ramp.beatsPerBar : 4)
     : Math.max(2, (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0));
-  const activeBeat = currentBeat ? currentBeat.beat % beatsPerMeasure : -1;
+  const activeBeat = currentBeat ? currentBeat.measureBeat : -1;
   const activeSub = currentBeat ? currentBeat.subdivision : -1;
   const isDownbeat = currentBeat?.isDownbeat ?? false;
 
@@ -187,29 +187,50 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
           )}
         </div>
 
-        {/* Beat visualization */}
+        {/* Beat visualization — grouped to reflect meter structure */}
         <div className="fs-beats" style={{ visibility: isWarmingUp ? 'hidden' : 'visible' }}>
-          {Array.from({ length: beatsPerMeasure }, (_, beatIdx) => {
-            const isBeatActive = !isWarmingUp && activeBeat === beatIdx && isDownbeat;
-            const isAccent = activeTab === "drill"
-              ? beatIdx === 0
-              : (() => { const s = new Set<number>(); let c = 0; for (const g of (state.beatGroups ?? [state.timeSignature])) { s.add(c); c += g; } return s.has(beatIdx); })();
-            return (
-              <div key={beatIdx} className="fs-beat-group">
-                <div className={`fs-beat ${isBeatActive ? "active" : ""} ${isAccent && isBeatActive ? "accent" : ""}`} />
-                {activeTab !== "drill" && state.subdivision > 1 && (
-                  <div className="fs-sub-dots">
-                    {Array.from({ length: state.subdivision - 1 }, (_, subIdx) => (
-                      <span
-                        key={subIdx}
-                        className={`fs-sub-dot ${activeBeat === beatIdx && activeSub === subIdx + 1 ? "active" : ""}`}
-                      />
-                    ))}
+          {activeTab === "drill"
+            // Drill mode: flat dots, no grouping
+            ? Array.from({ length: beatsPerMeasure }, (_, beatIdx) => {
+                const isBeatActive = !isWarmingUp && activeBeat === beatIdx && isDownbeat;
+                return (
+                  <div key={beatIdx} className="fs-beat-group">
+                    <div className={`fs-beat ${isBeatActive ? "active" : ""} ${beatIdx === 0 && isBeatActive ? "accent" : ""}`} />
                   </div>
-                )}
-              </div>
-            );
-          })}
+                );
+              })
+            // Metronome mode: render per group cluster
+            : (state.beatGroups ?? [state.timeSignature]).map((count, groupIdx) => {
+                const groupStart = (state.beatGroups ?? [state.timeSignature])
+                  .slice(0, groupIdx)
+                  .reduce((a: number, b: number) => a + b, 0);
+                return (
+                  <div key={groupIdx} className="fs-group-cluster">
+                    {Array.from({ length: count }, (_, d) => {
+                      const beatIdx = groupStart + d;
+                      const isGroupDownbeat = d === 0;
+                      const isBeatActive = !isWarmingUp && activeBeat === beatIdx && isDownbeat;
+                      const isSubBeatActive = !isWarmingUp && activeBeat === beatIdx && !isDownbeat;
+                      return (
+                        <div key={d} className="fs-beat-group">
+                          <div className={`fs-beat ${isGroupDownbeat ? "accent-marker" : ""} ${isBeatActive ? "active" : ""} ${isGroupDownbeat && isBeatActive ? "accent" : ""}`} />
+                          {state.subdivision > 1 && (
+                            <div className="fs-sub-dots">
+                              {Array.from({ length: state.subdivision - 1 }, (_, subIdx) => (
+                                <span
+                                  key={subIdx}
+                                  className={`fs-sub-dot ${isSubBeatActive && activeSub === subIdx + 1 ? "active" : ""}`}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })
+          }
         </div>
 
         {/* Ramp grid (drill mode) */}

@@ -280,7 +280,9 @@ export function MainWindow() {
   const soundDropdownRef = useRef<HTMLDivElement>(null);
 
   const beatsPerMeasure = Math.max(2, (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0));
-  const activeBeat = currentBeat ? currentBeat.beat % beatsPerMeasure : -1;
+  // Use measureBeat from the engine — it resets correctly when groups change mid-play,
+  // unlike beat % beatsPerMeasure which produces misaligned values after a meter switch.
+  const activeBeat = currentBeat ? currentBeat.measureBeat : -1;
   const activeSub = currentBeat ? currentBeat.subdivision : -1;
   const isDownbeat = currentBeat?.isDownbeat ?? false;
 

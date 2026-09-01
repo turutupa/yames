@@ -1,6 +1,7 @@
 import type { Ref } from "react";
 import { useTranslation } from "react-i18next";
 import type { AppState, BeatEvent, Subdivision } from "../../types";
+// BeatEvent used for evaluation feedback; Subdivision for sub-row cast
 import type { useEvaluation } from "../../hooks/useEvaluation";
 import { setSubdivision } from "../../ipc";
 import {
@@ -48,9 +49,9 @@ interface MetronomeViewProps {
  */
 export function MetronomeView({
   state,
-  currentBeat,
+  currentBeat: _currentBeat,
   evaluation,
-  beatsPerMeasure,
+  beatsPerMeasure: _beatsPerMeasure,
   activeBeat,
   activeSub,
   isDownbeat,
@@ -140,55 +141,16 @@ export function MetronomeView({
         </div>
       </section>
 
-      <section className="beat-section">
-        <div className="main-beat-dots">
-          {Array.from({ length: beatsPerMeasure }, (_, beatIdx) => {
-            const isBeatActive = activeBeat === beatIdx && isDownbeat;
-            const isBeatDownbeat = isBeatActive && beatIdx === 0;
-            const accentPositions = (() => {
-              const s = new Set<number>();
-              let c = 0;
-              for (const g of state.beatGroups) { s.add(c); c += g; }
-              return s;
-            })();
-            const isAccentBeat = accentPositions.has(beatIdx);
-            // Feedback coloring when evaluation is active
-            const fb = evaluation.enabled && currentBeat
-              ? evaluation.dotFeedback.get(
-                  // Map sequential beat index to measure position
-                  currentBeat.beat - (activeBeat - beatIdx + beatsPerMeasure) % beatsPerMeasure
-                )
-              : undefined;
-            const feedbackClass = fb && isBeatActive
-              ? `feedback-${fb.classification}`
-              : "";
-            return (
-              <div key={beatIdx} className="main-dot-group" style={{ animationDelay: `${beatIdx * 40}ms` }}>
-                <div
-                  className={`main-dot ${isBeatActive ? "active" : ""} ${isBeatDownbeat ? "downbeat" : ""} ${isAccentBeat && isBeatActive ? "accent" : ""} ${feedbackClass}`}
-                />
-                {state.subdivision > 1 && (
-                  <div className="main-sub-dots">
-                    {Array.from(
-                      { length: state.subdivision - 1 },
-                      (_, subIdx) => (
-                        <div
-                          key={subIdx}
-                          className={`main-sub-dot ${
-                            activeBeat === beatIdx &&
-                            activeSub === subIdx + 1
-                              ? "active"
-                              : ""
-                          }`}
-                        />
-                      ),
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+      <div className="beat-controls-group">
+        <GroupEditor
+          beatGroups={state.beatGroups}
+          subdivision={state.subdivision}
+          isPlaying={state.isPlaying}
+          activeBeat={activeBeat}
+          activeSub={activeSub}
+          isDownbeat={isDownbeat}
+        />
+
         {evaluation.enabled && state.isPlaying && (
           <DriftMeter
             lastFeedback={evaluation.lastFeedback}
@@ -196,24 +158,23 @@ export function MetronomeView({
             visible={evaluation.enabled && state.isPlaying}
           />
         )}
-      </section>
 
-      <div className="sub-row">
-        <span className="row-side-label">{t("metronome.subdiv")}</span>
-        {([1, 2, 3, 4, 5, 6] as Subdivision[]).map((sub, i) => (
-          <button
-            key={sub}
-            className={`sub-row-btn view-stagger-item ${state.subdivision === sub ? "active" : ""}`}
-            style={{ animationDelay: `${100 + i * 25}ms` }}
-            onClick={() => setSubdivision(sub)}
-            data-tooltip={t(`subdiv.${sub}`)}
-          >
-            <SubdivisionIcon sub={sub} size={18} />
-          </button>
-        ))}
+        <div className="sub-row">
+          <span className="row-side-label">{t("metronome.subdiv")}</span>
+          {([1, 2, 3, 4, 5, 6] as Subdivision[]).map((sub, i) => (
+            <button
+              key={sub}
+              className={`sub-row-btn view-stagger-item ${state.subdivision === sub ? "active" : ""}`}
+              style={{ animationDelay: `${100 + i * 25}ms` }}
+              onClick={() => setSubdivision(sub)}
+              data-tooltip={t(`subdiv.${sub}`)}
+            >
+              <SubdivisionIcon sub={sub} size={18} />
+            </button>
+          ))}
+        </div>
       </div>
 
-      <GroupEditor beatGroups={state.beatGroups} subdivision={state.subdivision} />
       <MeterPresets beatGroups={state.beatGroups} />
     </>
   );

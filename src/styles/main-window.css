@@ -1763,10 +1763,210 @@
   font-weight: 600;
 }
 
+/* ── Meter presets + contextual variant row ── */
+.meter-presets {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.meter-variant-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+  animation: variant-row-in 0.18s ease;
+}
+
+@keyframes variant-row-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.meter-variant-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-tertiary, var(--text-secondary));
+  padding-right: 2px;
+}
+
+.meter-variant-chip {
+  padding: 5px 11px;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 9%, transparent);
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.meter-variant-chip:hover {
+  background: color-mix(in srgb, var(--text-primary) 10%, transparent);
+  color: var(--text-primary);
+}
+
+.meter-variant-chip.active {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
 /* Sound type button inside time-sig-row */
 .time-sig-row .sub-dropdown-wrapper {
   position: relative;
   flex: 1;
+}
+
+/* =================== Beat controls group (GroupEditor + subdiv, tight spacing) =================== */
+.beat-controls-group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+
+/* =================== Group Editor =================== */
+.group-editor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 4px 0;
+}
+
+.group-editor-boxes {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  row-gap: 18px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.group-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+}
+
+.group-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 18px;
+  background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
+  border-radius: 12px;
+  min-height: 68px;
+}
+
+.group-dots {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 22px;
+}
+
+.group-dot-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.group-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--text-primary) 28%, transparent);
+  flex-shrink: 0;
+  transition: background 0.12s, transform 0.12s, box-shadow 0.12s;
+}
+
+.group-dot.accent {
+  width: 27px;
+  height: 27px;
+  /* Subtle accent tint at rest — shows where the downbeat falls, not "playing" */
+  background: color-mix(in srgb, var(--accent) 45%, color-mix(in srgb, var(--text-primary) 20%, transparent));
+  box-shadow: none;
+}
+
+.group-dot.playing {
+  transform: scale(1.2);
+  background: var(--text-primary);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--text-primary) 30%, transparent);
+}
+
+.group-dot.accent.playing {
+  background: var(--accent);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 65%, transparent);
+  transform: scale(1.25);
+}
+
+.group-sub-dots {
+  display: flex;
+  gap: 3px;
+  justify-content: center;
+}
+
+.group-sub-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--text-primary) 18%, transparent);
+  transition: background 0.1s;
+}
+
+.group-sub-dot.active {
+  background: color-mix(in srgb, var(--text-primary) 70%, transparent);
+}
+
+.group-label {
+  font-size: 0.65rem;
+  color: var(--text-tertiary, var(--text-secondary));
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+.group-formula {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  margin-top: 8px;
+}
+
+.group-formula-total {
+  color: var(--text-secondary);
+}
+
+.group-formula-sep {
+  color: color-mix(in srgb, var(--text-primary) 22%, transparent);
+}
+
+.group-formula-expr {
+  color: var(--text-primary);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.group-formula-clicks {
+  color: var(--text-secondary);
 }
 
 /* =================== Settings view =================== */

@@ -57,6 +57,7 @@ export type AppState = {
 
 export type BeatEvent = {
   beat: number;
+  measureBeat: number; // bar-local position (0..beatsPerMeasure), accurate after meter changes
   subdivision: number;
   isDownbeat: boolean;
 };

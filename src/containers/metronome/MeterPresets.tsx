@@ -1,4 +1,4 @@
-import { METER_PRESETS } from "../../constants/metronome";
+import { METER_PRESETS, METER_VARIANTS } from "../../constants/metronome";
 import { setBeatGroups, notifySettingsChange } from "../../ipc";
 
 interface MeterPresetsProps {
@@ -8,27 +8,57 @@ interface MeterPresetsProps {
 export function MeterPresets({ beatGroups }: MeterPresetsProps) {
   const activeKey = JSON.stringify(beatGroups);
 
+  // Find which preset label is active (exact match OR a known variant of it)
+  const activePreset = METER_PRESETS.find(p => {
+    if (JSON.stringify(p.groups) === activeKey) return true;
+    const variants = METER_VARIANTS[p.label];
+    return variants?.some(v => JSON.stringify(v) === activeKey);
+  });
+
+  const variants = activePreset ? METER_VARIANTS[activePreset.label] : null;
+
   async function handleSelect(groups: number[]) {
     await setBeatGroups(groups);
     await notifySettingsChange();
   }
 
   return (
-    <div className="time-sig-row">
-      <span className="row-side-label">Meter</span>
-      {METER_PRESETS.map((preset, i) => {
-        const isActive = JSON.stringify(preset.groups) === activeKey;
-        return (
-          <button
-            key={preset.label}
-            className={`time-sig-btn view-stagger-item ${isActive ? "active" : ""}`}
-            style={{ animationDelay: `${150 + i * 30}ms` }}
-            onClick={() => handleSelect(preset.groups)}
-          >
-            {preset.label}
-          </button>
-        );
-      })}
+    <div className="meter-presets">
+      <div className="time-sig-row">
+        <span className="row-side-label">Meter</span>
+        {METER_PRESETS.map((preset, i) => {
+          const isActive = activePreset?.label === preset.label;
+          return (
+            <button
+              key={preset.label}
+              className={`time-sig-btn view-stagger-item ${isActive ? "active" : ""}`}
+              style={{ animationDelay: `${150 + i * 30}ms` }}
+              onClick={() => handleSelect(preset.groups)}
+            >
+              {preset.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {variants && (
+        <div className="meter-variant-row">
+          <span className="meter-variant-label">grouping</span>
+          {variants.map(v => {
+            const key = JSON.stringify(v);
+            const isActive = key === activeKey;
+            return (
+              <button
+                key={key}
+                className={`meter-variant-chip ${isActive ? "active" : ""}`}
+                onClick={() => handleSelect(v)}
+              >
+                {v.join(" + ")}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
