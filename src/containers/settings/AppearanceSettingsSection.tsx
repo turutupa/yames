@@ -1,4 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
+import { useTranslation } from "react-i18next";
 import { storeSave } from "../../ipc";
 import { THEMES } from "../../themes";
 
@@ -24,19 +25,20 @@ export function AppearanceSettingsSection({
   animationStyle: AnimationStyle;
   setAnimationStyle: Dispatch<SetStateAction<AnimationStyle>>;
 }) {
+  const { t } = useTranslation();
   return (
     <section className="settings-section">
-      <h2>Appearance</h2>
+      <h2>{t("settings.appearance.title")}</h2>
       <div className="theme-grid">
-        {THEMES.map((t) => (
+        {THEMES.map((theme) => (
           <button
-            key={t.id}
-            className={`theme-card ${themeId === t.id ? "active" : ""}`}
-            onClick={() => setTheme(t.id)}
-            title={t.name}
+            key={theme.id}
+            className={`theme-card ${themeId === theme.id ? "active" : ""}`}
+            onClick={() => setTheme(theme.id)}
+            title={theme.name}
           >
             <div className="theme-card-preview">
-              {t.preview.map((color, i) => (
+              {theme.preview.map((color, i) => (
                 <div
                   key={i}
                   className="theme-card-swatch"
@@ -44,15 +46,15 @@ export function AppearanceSettingsSection({
                 />
               ))}
             </div>
-            <span className="theme-card-name">{t.name}</span>
+            <span className="theme-card-name">{theme.name}</span>
           </button>
         ))}
       </div>
       <div className="setting-row">
         <div className="setting-label">
-          <label>View animations</label>
+          <label>{t("settings.appearance.viewAnimations")}</label>
           <span className="setting-hint">
-            Animate elements when switching views
+            {t("settings.appearance.viewAnimationsHint")}
           </span>
         </div>
         <div className="toggle-group">
@@ -65,16 +67,16 @@ export function AppearanceSettingsSection({
                 storeSave("viewTransitions", level);
               }}
             >
-              {level.charAt(0).toUpperCase() + level.slice(1)}
+              {t(`settings.appearance.transitions.${level}`)}
             </button>
           ))}
         </div>
       </div>
       <div className="setting-row">
         <div className="setting-label">
-          <label>Animation style</label>
+          <label>{t("settings.appearance.animationStyle")}</label>
           <span className="setting-hint">
-            Effect used when switching views
+            {t("settings.appearance.animationStyleHint")}
           </span>
         </div>
         <div className="toggle-group">
@@ -88,7 +90,7 @@ export function AppearanceSettingsSection({
                 storeSave("animationStyle", style);
               }}
             >
-              {style.charAt(0).toUpperCase() + style.slice(1)}
+              {t(`settings.appearance.style.${style}`)}
             </button>
           ))}
         </div>

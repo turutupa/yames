@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ScoreRing, ScoreBadge, BreakdownBar, Histogram } from "../drill/evaluation";
 import { FEEDBACK_COLORS } from "../../hooks/useEvaluation";
 import { SessionNarrativeView } from "../../coach/SessionNarrativeView";
@@ -6,6 +7,7 @@ import { formatTime, formatDuration } from "./coachCardHelpers";
 import { accuracyPct, scoredBeats } from "../../coach/reportStats";
 
 function MiniReportComponents({ report }: { report: SessionReport }) {
+  const { t } = useTranslation();
   const pct = (v: number) => `${Math.round(v * 100)}%`;
   const cov = report.hitCompleteness;
   const eff = report.onsetEfficiency;
@@ -26,11 +28,11 @@ function MiniReportComponents({ report }: { report: SessionReport }) {
 
   return (
     <div className="coach-mini-report-components">
-      <span style={{ color: covColor }}>Cov {cov !== undefined ? pct(cov) : "—"}</span>
+      <span style={{ color: covColor }}>{t("coachReport.cov")} {cov !== undefined ? pct(cov) : "—"}</span>
       <span className="coach-mini-report-comp-sep">·</span>
-      <span style={{ color: effColor }}>Eff {eff !== undefined ? pct(eff) : "—"}</span>
+      <span style={{ color: effColor }}>{t("coachReport.eff")} {eff !== undefined ? pct(eff) : "—"}</span>
       <span className="coach-mini-report-comp-sep">·</span>
-      <span style={{ color: gridColor }}>Grid {pct(grid)}</span>
+      <span style={{ color: gridColor }}>{t("coachReport.grid")} {pct(grid)}</span>
     </div>
   );
 }
@@ -135,6 +137,8 @@ export function FeedMessageItem({
   message: FeedMessage;
   onChipAction?: (action: ChipAction) => void;
 }) {
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
   switch (message.type) {
     case "session-start":
     case "system":
@@ -154,7 +158,7 @@ export function FeedMessageItem({
               onAction={onChipAction}
             />
           )}
-          <div className="coach-feed-msg-time">{formatTime(message.timestamp)}</div>
+          <div className="coach-feed-msg-time">{formatTime(message.timestamp, lang)}</div>
         </div>
       );
 
@@ -162,7 +166,7 @@ export function FeedMessageItem({
       return (
         <div className="coach-feed-msg coach-feed-msg-user">
           <span>{message.content}</span>
-          <div className="coach-feed-msg-time">{formatTime(message.timestamp)}</div>
+          <div className="coach-feed-msg-time">{formatTime(message.timestamp, lang)}</div>
         </div>
       );
 
@@ -180,7 +184,7 @@ export function FeedMessageItem({
               <ScoreRing score={message.report.score} size={40} strokeWidth={4} />
               <div className="coach-mini-report-stats">
                 <span className="coach-mini-report-score-label">
-                  {message.meta?.bpm ? `${message.meta.bpm} BPM` : "Segment"}
+                  {message.meta?.bpm ? `${message.meta.bpm} BPM` : t("coachReport.segment")}
                 </span>
                 <span className="coach-mini-report-text">{message.content}</span>
               </div>
@@ -194,7 +198,7 @@ export function FeedMessageItem({
           {message.report && (
             <MiniReportComponents report={message.report} />
           )}
-          <div className="coach-feed-msg-time">{formatTime(message.timestamp)}</div>
+          <div className="coach-feed-msg-time">{formatTime(message.timestamp, lang)}</div>
         </div>
       );
 
@@ -243,22 +247,22 @@ export function FeedMessageItem({
           )}
           {message.report && (
             <div className="coach-detail-section">
-              <div className="coach-detail-section-title">Breakdown</div>
+              <div className="coach-detail-section-title">{t("eval.breakdown")}</div>
               <div className="coach-detail-bars">
-                <BreakdownBar label="Perfect"  count={message.report.perfectCount} total={scoredBeats(message.report)} color={FEEDBACK_COLORS.perfect} />
-                <BreakdownBar label="Good"     count={message.report.goodCount}    total={scoredBeats(message.report)} color={FEEDBACK_COLORS.good} />
-                <BreakdownBar label="OK"       count={message.report.okCount}      total={scoredBeats(message.report)} color={FEEDBACK_COLORS.ok} />
-                <BreakdownBar label="Off-beat" count={message.report.missCount}    total={scoredBeats(message.report)} color={FEEDBACK_COLORS.miss} />
+                <BreakdownBar label={t("eval.perfect")}  count={message.report.perfectCount} total={scoredBeats(message.report)} color={FEEDBACK_COLORS.perfect} />
+                <BreakdownBar label={t("eval.good")}     count={message.report.goodCount}    total={scoredBeats(message.report)} color={FEEDBACK_COLORS.good} />
+                <BreakdownBar label={t("eval.ok")}       count={message.report.okCount}      total={scoredBeats(message.report)} color={FEEDBACK_COLORS.ok} />
+                <BreakdownBar label={t("eval.miss")} count={message.report.missCount}    total={scoredBeats(message.report)} color={FEEDBACK_COLORS.miss} />
               </div>
             </div>
           )}
           {message.report && message.report.deviations.length > 4 && (
             <div className="coach-detail-section">
-              <div className="coach-detail-section-title">Timing Distribution</div>
+              <div className="coach-detail-section-title">{t("eval.timingDistribution")}</div>
               <Histogram deviations={message.report.deviations} />
             </div>
           )}
-          <div className="coach-feed-msg-time">{formatTime(message.timestamp)}</div>
+          <div className="coach-feed-msg-time">{formatTime(message.timestamp, lang)}</div>
         </div>
       );
 
@@ -276,8 +280,9 @@ export function FeedMessageItem({
  * loading something heavy."
  */
 function TtsThinkingSpinner() {
+  const { t } = useTranslation();
   return (
-    <span className="coach-tts-thinking" aria-label="Coach is preparing to speak">
+    <span className="coach-tts-thinking" aria-label={t("coachReport.thinkingAria")}>
       <span className="coach-tts-thinking-dot" />
       <span className="coach-tts-thinking-dot" />
       <span className="coach-tts-thinking-dot" />
@@ -285,13 +290,14 @@ function TtsThinkingSpinner() {
   );
 }
 
-const scoreQualifier = (score: number): string =>
-  score >= 90 ? "Excellent" :
-  score >= 75 ? "Good" :
-  score >= 55 ? "Fair" :
-  "Keep practicing";
-
 function EndReportSummary({ report }: { report: SessionReport }) {
+  const { t } = useTranslation();
+  const scoreQualifier = (score: number): string =>
+    score >= 90 ? t("coachReport.qualifier.excellent") :
+    score >= 75 ? t("coachReport.qualifier.good") :
+    score >= 55 ? t("coachReport.qualifier.fair") :
+    t("coachReport.qualifier.keepPracticing");
+
   // In Default mode with subdivision > 1, show accent (downbeat) accuracy:
   // only the quarter-beat positions count toward the score. For Pro mode
   // or when accent data is unavailable, fall back to hit/(hit+miss).
@@ -314,7 +320,7 @@ function EndReportSummary({ report }: { report: SessionReport }) {
       <div className="coach-mini-report-header">
         <ScoreRing score={report.score} size={52} strokeWidth={5} />
         <div className="coach-mini-report-stats">
-          <span className="coach-mini-report-score-label">Session Score</span>
+          <span className="coach-mini-report-score-label">{t("coachReport.sessionScore")}</span>
           <span className="coach-mini-report-score-sublabel">
             {scoreQualifier(report.score)}
           </span>
@@ -334,47 +340,47 @@ function EndReportSummary({ report }: { report: SessionReport }) {
       </div>
       <div className="coach-end-report-grid">
         <div className="coach-end-report-stat">
-          <span className="coach-end-report-stat-label">Beats hit</span>
-          <span className="coach-end-report-stat-sublabel">beats you played vs. beats counted</span>
+          <span className="coach-end-report-stat-label">{t("coachReport.beatsHit")}</span>
+          <span className="coach-end-report-stat-sublabel">{t("coachReport.beatsHitHint")}</span>
           <span className="coach-end-report-stat-value">{accuracy}%</span>
         </div>
         <div className="coach-end-report-stat">
-          <span className="coach-end-report-stat-label">Avg Timing Error</span>
-          <span className="coach-end-report-stat-sublabel">lower is tighter</span>
+          <span className="coach-end-report-stat-label">{t("eval.avgTimingError")}</span>
+          <span className="coach-end-report-stat-sublabel">{t("coachReport.tighter")}</span>
           <span className="coach-end-report-stat-value">{"\u00B1"}{report.meanAbsDeviationMs.toFixed(1)}ms</span>
         </div>
         <div className="coach-end-report-stat">
-          <span className="coach-end-report-stat-label">Consistency</span>
-          <span className="coach-end-report-stat-sublabel">lower is tighter</span>
+          <span className="coach-end-report-stat-label">{t("eval.consistency")}</span>
+          <span className="coach-end-report-stat-sublabel">{t("coachReport.tighter")}</span>
           <span className="coach-end-report-stat-value">{"\u00B1"}{report.stdDeviationMs.toFixed(1)}ms</span>
         </div>
         <div className="coach-end-report-stat">
-          <span className="coach-end-report-stat-label">Tempo stability</span>
+          <span className="coach-end-report-stat-label">{t("eval.tempoStability")}</span>
           <span className="coach-end-report-stat-value">{"\u00B1"}{report.tempoStabilityMs.toFixed(1)}ms</span>
         </div>
         <div className="coach-end-report-stat">
-          <span className="coach-end-report-stat-label">Best Streak</span>
+          <span className="coach-end-report-stat-label">{t("coachReport.bestStreak")}</span>
           <span className="coach-end-report-stat-value">{streakBeats}</span>
         </div>
         <div className="coach-end-report-stat">
-          <span className="coach-end-report-stat-label">Scored beats</span>
+          <span className="coach-end-report-stat-label">{t("eval.scoredBeats")}</span>
           <span className="coach-end-report-stat-value">{scoredBeats(report)}</span>
         </div>
         {report.skippedBeats > 0 && (
           <div className="coach-end-report-stat">
-            <span className="coach-end-report-stat-label">Not played</span>
+            <span className="coach-end-report-stat-label">{t("coachDetail.notPlayed")}</span>
             <span className="coach-end-report-stat-value">{report.skippedBeats}</span>
           </div>
         )}
         {report.intervalConsistency !== undefined && (
           <div className="coach-end-report-stat">
-            <span className="coach-end-report-stat-label">Note spacing</span>
+            <span className="coach-end-report-stat-label">{t("coachDetail.noteSpacing")}</span>
             <span className="coach-end-report-stat-value">{report.intervalConsistency.toFixed(2)}</span>
           </div>
         )}
         {report.gridAlignment !== undefined && (
           <div className="coach-end-report-stat">
-            <span className="coach-end-report-stat-label">Beat placement</span>
+            <span className="coach-end-report-stat-label">{t("coachDetail.beatPlacement")}</span>
             <span className="coach-end-report-stat-value">{report.gridAlignment.toFixed(2)}</span>
           </div>
         )}
@@ -383,8 +389,8 @@ function EndReportSummary({ report }: { report: SessionReport }) {
         <div className="end-report-components">
           <div className="end-report-component-row">
             <div className="end-report-component-label-group">
-              <span className="end-report-component-label" title="How evenly spaced your notes are — higher is more consistent">Note spacing</span>
-              <span className="end-report-component-sublabel">Even gaps between your notes</span>
+              <span className="end-report-component-label" title={t("coachReport.noteSpacingTitle")}>{t("coachDetail.noteSpacing")}</span>
+              <span className="end-report-component-sublabel">{t("coachReport.noteSpacingSub")}</span>
             </div>
             <div className="end-report-component-bar-track">
               <div
@@ -398,8 +404,8 @@ function EndReportSummary({ report }: { report: SessionReport }) {
           </div>
           <div className="end-report-component-row">
             <div className="end-report-component-label-group">
-              <span className="end-report-component-label" title="How close your hits land to the beat grid — higher is more accurate">Beat placement</span>
-              <span className="end-report-component-sublabel">How close your hits land to the beat</span>
+              <span className="end-report-component-label" title={t("coachReport.beatPlacementTitle")}>{t("coachDetail.beatPlacement")}</span>
+              <span className="end-report-component-sublabel">{t("coachReport.beatPlacementSub")}</span>
             </div>
             <div className="end-report-component-bar-track">
               <div
@@ -538,9 +544,10 @@ function SegmentBreakdownBar({ report }: { report: SessionReport }) {
 }
 
 export function SegmentTimeline({ segments, sessionStart }: { segments: SessionSegment[]; sessionStart: number }) {
+  const { t } = useTranslation();
   return (
     <div className="coach-segment-timeline">
-      <div className="coach-segment-timeline-title">Timeline</div>
+      <div className="coach-segment-timeline-title">{t("coachReport.timeline")}</div>
       {segments.map((seg, i) => {
         const start = seg.startTime ?? sessionStart;
         const end = seg.endTime ?? start;
@@ -551,21 +558,21 @@ export function SegmentTimeline({ segments, sessionStart }: { segments: SessionS
         // in the timeline doesn't disagree with the overall accuracy
         // above. See `src/coach/reportStats.ts`.
         const accuracy = accuracyPct(seg.report);
-        const style = seg.report.gridCorrelation > 0.8 ? "Grid exercise"
-          : seg.report.gridCorrelation > 0.3 ? "Semi-structured"
-          : "Free playing";
-        const pocket = seg.report.meanDeviationMs < -5 ? "rushing"
-          : seg.report.meanDeviationMs > 5 ? "dragging" : "on beat";
+        const style = seg.report.gridCorrelation > 0.8 ? t("coachReport.styleGrid")
+          : seg.report.gridCorrelation > 0.3 ? t("coachReport.styleSemi")
+          : t("coachReport.styleFree");
+        const pocket = seg.report.meanDeviationMs < -5 ? t("coachReport.pocketRushing")
+          : seg.report.meanDeviationMs > 5 ? t("coachReport.pocketDragging") : t("coachReport.pocketOnBeat");
         const styleTitle = seg.report.gridCorrelation > 0.8
-          ? "Your playing closely matched the metronome grid"
+          ? t("coachReport.styleGridTitle")
           : seg.report.gridCorrelation > 0.3
-          ? "Your playing roughly followed the beat with some variation"
-          : "Your playing wasn't tightly tied to the beat — exploratory";
+          ? t("coachReport.styleSemiTitle")
+          : t("coachReport.styleFreeTitle");
         const pocketTitle = seg.report.meanDeviationMs < -5
-          ? `You played an average of ${Math.abs(Math.round(seg.report.meanDeviationMs))}ms early`
+          ? t("coachReport.pocketEarly", { ms: Math.abs(Math.round(seg.report.meanDeviationMs)) })
           : seg.report.meanDeviationMs > 5
-          ? `You played an average of ${Math.round(seg.report.meanDeviationMs)}ms late`
-          : `Your timing was centred on the beat (±5ms average)`;
+          ? t("coachReport.pocketLate", { ms: Math.round(seg.report.meanDeviationMs) })
+          : t("coachReport.pocketCentred");
 
         return (
           <div key={i} className="coach-segment-row">
@@ -577,7 +584,7 @@ export function SegmentTimeline({ segments, sessionStart }: { segments: SessionS
               <span className="coach-segment-sep">&middot;</span>
               <span>{seg.bpm} BPM</span>
               <span className="coach-segment-sep">&middot;</span>
-              <span title="How many expected beats you actually played">Beats hit: {accuracy}%</span>
+              <span title={t("coachReport.beatsHitTitle")}>{t("coachReport.beatsHit")}: {accuracy}%</span>
               <span className="coach-segment-sep">&middot;</span>
               <span title={pocketTitle}>{pocket}</span>
             </div>

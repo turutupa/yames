@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 type UpdateStatus = "idle" | "checking" | "available" | "downloading" | "up-to-date";
 
 /**
@@ -18,34 +20,35 @@ export function AboutSection({
   onInstallUpdate: () => void;
   onCheckUpdate: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <section className="settings-section about-section">
-      <h2>About</h2>
+      <h2>{t("settings.about.title")}</h2>
       <div className="about-info">
         <div className="about-row">
-          <span className="about-label">Version</span>
+          <span className="about-label">{t("settings.about.version")}</span>
           <span className="about-value">{appVersion}</span>
         </div>
         <div className="about-row">
-          <span className="about-label">Updates</span>
+          <span className="about-label">{t("settings.about.updates")}</span>
           <span className="about-value">
             {updateStatus === "checking" && (
-              <span className="update-status">Checking…</span>
+              <span className="update-status">{t("settings.about.checking")}</span>
             )}
             {updateStatus === "available" && (
               <button
                 className="update-available-btn"
                 onClick={onInstallUpdate}
               >
-                v{latestVersion} available — Install
+                {t("settings.about.available", { version: latestVersion })}
               </button>
             )}
             {updateStatus === "downloading" && (
-              <span className="update-status">Updating…</span>
+              <span className="update-status">{t("settings.about.updating")}</span>
             )}
             {updateStatus === "up-to-date" && (
               <span className="update-status up-to-date">
-                Up to date ✓
+                {t("settings.about.upToDate")}
               </span>
             )}
             {updateStatus === "idle" && (
@@ -53,17 +56,17 @@ export function AboutSection({
                 className="update-check-btn"
                 onClick={onCheckUpdate}
               >
-                Check for updates
+                {t("settings.about.checkUpdates")}
               </button>
             )}
           </span>
         </div>
         <div className="about-row">
-          <span className="about-label">Platform</span>
+          <span className="about-label">{t("settings.about.platform")}</span>
           <span className="about-value">{navigator.platform}</span>
         </div>
         <div className="about-row">
-          <span className="about-label">User Agent</span>
+          <span className="about-label">{t("settings.about.userAgent")}</span>
           <span className="about-value about-value-small">
             {navigator.userAgent}
           </span>
@@ -71,8 +74,7 @@ export function AboutSection({
       </div>
       <div className="about-footer-divider"></div>
       <p className="about-footer">
-        Made with <span className="about-heart">♥</span> for musicians
-        everywhere
+        {t("settings.about.madeWith", { heart: "♥" })}
       </p>
     </section>
   );

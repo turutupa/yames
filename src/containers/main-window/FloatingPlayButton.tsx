@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 interface FloatingPlayButtonProps {
   view: "beat" | "drill";
   isPlaying: boolean;
@@ -24,6 +26,7 @@ export function FloatingPlayButton({
   onStartSpeedRamp,
   onStopSpeedRamp,
 }: FloatingPlayButtonProps) {
+  const { t } = useTranslation();
   const isActive = view === "drill" ? speedRampActive : isPlaying;
   return (
     <button
@@ -44,14 +47,14 @@ export function FloatingPlayButton({
           <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
             <rect x="2" y="2" width="12" height="12" rx="1.5" />
           </svg>{" "}
-          Stop
+          {t("common.stop")}
         </>
       ) : (
         <>
           <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
             <path d="M4 2.5a.5.5 0 0 1 .77-.42l9 5.5a.5.5 0 0 1 0 .84l-9 5.5A.5.5 0 0 1 4 13.5z" />
           </svg>{" "}
-          Play
+          {t("common.play")}
         </>
       )}
     </button>

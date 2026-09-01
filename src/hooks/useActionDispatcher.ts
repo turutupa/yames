@@ -145,15 +145,15 @@ export function useActionDispatcher({
         case "sub-3": setSubdivision(3); break;
         case "sub-4": setSubdivision(4); break;
         case "sig-next": {
-          const vals = TIME_SIGNATURES.map((t) => t.beats);
-          const idx = vals.indexOf(state.timeSignature);
-          setTimeSignature(vals[(idx + 1) % vals.length]);
+          const idx = TIME_SIGNATURES.indexOf(state.timeSignature);
+          setTimeSignature(TIME_SIGNATURES[(idx + 1) % TIME_SIGNATURES.length]);
           break;
         }
         case "sig-prev": {
-          const vals = TIME_SIGNATURES.map((t) => t.beats);
-          const idx = vals.indexOf(state.timeSignature);
-          setTimeSignature(vals[(idx - 1 + vals.length) % vals.length]);
+          const idx = TIME_SIGNATURES.indexOf(state.timeSignature);
+          setTimeSignature(
+            TIME_SIGNATURES[(idx - 1 + TIME_SIGNATURES.length) % TIME_SIGNATURES.length],
+          );
           break;
         }
         case "fullscreen":

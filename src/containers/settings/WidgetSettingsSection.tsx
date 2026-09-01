@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { WidgetMode } from "../../types";
 
 /**
@@ -16,13 +17,14 @@ export function WidgetSettingsSection({
   widgetAlwaysOnTop: boolean;
   setWidgetAlwaysOnTop: (next: boolean) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <section className="settings-section">
-      <h2>Widget</h2>
+      <h2>{t("settings.widget.title")}</h2>
       <div className="setting-row">
         <div className="setting-label">
-          <label>Mode</label>
-          <span className="setting-hint">Widget layout on screen</span>
+          <label>{t("settings.widget.mode")}</label>
+          <span className="setting-hint">{t("settings.widget.modeHint")}</span>
         </div>
         <div className="toggle-group">
           {(["compact", "comfortable"] as WidgetMode[]).map((mode) => (
@@ -31,23 +33,23 @@ export function WidgetSettingsSection({
               className={`toggle-btn ${widgetMode === mode ? "active" : ""}`}
               onClick={() => setWidgetMode(mode)}
             >
-              {mode}
+              {t(`settings.widget.modes.${mode}`)}
             </button>
           ))}
         </div>
       </div>
       <div className="setting-row">
         <div className="setting-label">
-          <label>Always on top</label>
+          <label>{t("settings.widget.alwaysOnTop")}</label>
           <span className="setting-hint">
-            Keep widget visible over other apps
+            {t("settings.widget.alwaysOnTopHint")}
           </span>
         </div>
         <button
           className={`toggle-btn ${widgetAlwaysOnTop ? "active" : ""}`}
           onClick={() => setWidgetAlwaysOnTop(!widgetAlwaysOnTop)}
         >
-          {widgetAlwaysOnTop ? "On" : "Off"}
+          {widgetAlwaysOnTop ? t("common.on") : t("common.off")}
         </button>
       </div>
     </section>

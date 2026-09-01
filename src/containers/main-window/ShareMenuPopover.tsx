@@ -1,4 +1,5 @@
 import type { RefObject } from "react";
+import { useTranslation } from "react-i18next";
 import { SHARE_OPTIONS } from "../../constants/metronome";
 
 type ShareOption = (typeof SHARE_OPTIONS)[number];
@@ -17,6 +18,7 @@ export function ShareMenuPopover({
   popoverRef: RefObject<HTMLDivElement>;
   onSelect: (opt: ShareOption) => void;
 }) {
+  const { t } = useTranslation();
   if (!anchorRef.current) return null;
   const rect = anchorRef.current.getBoundingClientRect();
 
@@ -36,7 +38,7 @@ export function ShareMenuPopover({
           onClick={() => onSelect(opt)}
         >
           <ShareIcon id={opt.id} />
-          <span>{opt.label}</span>
+          <span>{opt.id === "copy" ? t("share.copyLink") : opt.label}</span>
         </button>
       ))}
     </div>

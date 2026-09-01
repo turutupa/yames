@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { DownloadProgress, ModelStatus } from "../../ipc";
 import { formatBytes } from "./formatBytes";
 
@@ -19,10 +20,13 @@ export function CoachDownloadConfirmDialog({
   onUseInstalled: (tier: "standard" | "full") => void;
   onStartDownload: (tier: "standard" | "full") => void;
 }) {
+  const { t } = useTranslation();
+  const tierLabel = (tier: "standard" | "full") =>
+    tier === "standard" ? t("settings.coach.brainStandard") : t("settings.coach.brainFull");
   return (
     <div className="download-confirm-overlay" onClick={onCancel}>
       <div className="download-confirm-dialog" onClick={(e) => e.stopPropagation()}>
-        <h3 className="download-confirm-title">Download AI Model</h3>
+        <h3 className="download-confirm-title">{t("coachDownload.title")}</h3>
         <div className="download-confirm-models">
           {(["standard", "full"] as const).map((tier) => {
             const isInstalled = modelStatus?.brainReady && modelStatus.brainTier === tier;
@@ -32,29 +36,29 @@ export function CoachDownloadConfirmDialog({
                 key={tier}
                 className={`download-confirm-model${isTarget ? " download-confirm-model-selected" : ""}${isInstalled ? " download-confirm-model-installed" : ""}`}
               >
-                {isInstalled && <span className="download-confirm-installed-badge">Installed</span>}
-                <div className="download-confirm-model-name">{tier === "standard" ? "Standard" : "Full"}</div>
+                {isInstalled && <span className="download-confirm-installed-badge">{t("coachDownload.installedBadge")}</span>}
+                <div className="download-confirm-model-name">{tierLabel(tier)}</div>
                 <div className="download-confirm-model-name" style={{ fontWeight: 400, fontSize: 13 }}>
                   {tier === "standard" ? "Qwen 2.5 1.5B" : "Phi 3.5 Mini"}
                 </div>
                 <div className="download-confirm-model-size">
-                  {tier === "standard" ? "~1.1 GB download \u00b7 ~2 GB RAM" : "~2.4 GB download \u00b7 ~4 GB RAM"}
+                  {tier === "standard" ? t("coachDownload.stdSpec") : t("coachDownload.fullSpec")}
                 </div>
                 <p className="download-confirm-model-detail">
                   {tier === "standard"
-                    ? "Good comments, solid Q&A, reliable timing decisions. Best for simple time signatures and moderate tempos."
-                    : "Best quality, most nuanced feedback, strongest Q&A. Handles complex patterns, fast tempos, and polyrhythms."}
+                    ? t("coachDownload.stdDesc")
+                    : t("coachDownload.fullDesc")}
                 </p>
                 {isInstalled ? (
                   <button
                     className="download-confirm-go download-confirm-go-installed"
                     onClick={() => onUseInstalled(tier)}
                   >
-                    Use {tier === "standard" ? "Standard" : "Full"}
+                    {t("coachDownload.use", { tier: tierLabel(tier) })}
                   </button>
                 ) : (
                   <button className="download-confirm-go" onClick={() => onStartDownload(tier)}>
-                    Download {tier === "standard" ? "Standard" : "Full"}
+                    {t("coachDownload.download", { tier: tierLabel(tier) })}
                   </button>
                 )}
               </div>
@@ -62,7 +66,7 @@ export function CoachDownloadConfirmDialog({
           })}
         </div>
         <button className="download-confirm-cancel" onClick={onCancel}>
-          Cancel
+          {t("coachDownload.cancel")}
         </button>
       </div>
     </div>
@@ -79,14 +83,20 @@ export function DownloadProgressBar({
   downloadingTier: "standard" | "full" | null;
   onCancel: () => void;
 }) {
+  const { t } = useTranslation();
   const pct = downloadProgress ? Math.round(downloadProgress.fraction * 100) : 0;
-  const tierLabel = downloadingTier === "full" ? "Full" : "Standard";
+  const tierLabel =
+    downloadingTier === null
+      ? ""
+      : downloadingTier === "full"
+        ? t("settings.coach.brainFull")
+        : t("settings.coach.brainStandard");
   const modelName = downloadProgress?.component ?? "model";
   const bytesInfo =
     downloadProgress && downloadProgress.downloadedBytes > 0
       ? ` · ${formatBytes(downloadProgress.downloadedBytes)}${downloadProgress.totalBytes > 0 ? ` / ${formatBytes(downloadProgress.totalBytes)}` : ""}`
       : "";
-  const label = `${tierLabel} — ${modelName}${bytesInfo} ${pct}%`;
+  const label = t("coachDownload.progress", { tier: tierLabel, model: modelName, bytes: bytesInfo, pct });
 
   return (
     <div className="global-download-bar">
@@ -98,8 +108,8 @@ export function DownloadProgressBar({
       >
         {label}
       </span>
-      <button className="global-download-bar-cancel" onClick={onCancel} title="Cancel download">
-        Cancel
+      <button className="global-download-bar-cancel" onClick={onCancel} title={t("coachDownload.cancelHint")}>
+        {t("coachDownload.cancel")}
       </button>
     </div>
   );
@@ -113,10 +123,11 @@ export function DownloadErrorBar({
   error: string;
   onDismiss: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="global-download-bar global-download-bar-error">
-      <span className="global-download-bar-label">Download failed: {error}</span>
-      <button className="global-download-bar-close" onClick={onDismiss} title="Dismiss">
+      <span className="global-download-bar-label">{t("coachDownload.failed", { error })}</span>
+      <button className="global-download-bar-close" onClick={onDismiss} title={t("coachDownload.dismiss")}>
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
           <path d="M18 6L6 18M6 6l12 12" />
         </svg>
@@ -127,10 +138,11 @@ export function DownloadErrorBar({
 
 /** Sticky bottom bar shown when a model finishes downloading. */
 export function DownloadSuccessBar({ onDismiss }: { onDismiss: () => void }) {
+  const { t } = useTranslation();
   return (
     <div className="global-download-bar global-download-bar-success">
-      <span className="global-download-bar-label">Practice Coach available!</span>
-      <button className="global-download-bar-close" onClick={onDismiss} title="Dismiss">
+      <span className="global-download-bar-label">{t("coachDownload.success")}</span>
+      <button className="global-download-bar-close" onClick={onDismiss} title={t("coachDownload.dismiss")}>
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
           <path d="M18 6L6 18M6 6l12 12" />
         </svg>

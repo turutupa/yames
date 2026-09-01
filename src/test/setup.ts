@@ -4,6 +4,9 @@ import { cleanup } from "@testing-library/react";
 // Side-effect import — registers vi.mock() for Tauri APIs.
 // Must come before any test file imports from `../ipc`.
 import { resetTauriMocks } from "./mocks";
+// Initialize i18n (English default) so components using useTranslation()
+// render translated strings in tests instead of raw keys.
+import "../i18n";
 
 // Cleanup after every test
 afterEach(() => {

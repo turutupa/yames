@@ -4,9 +4,11 @@
  * These are pure data with no React or runtime dependencies — extracted
  * from MainWindow.tsx so that they can be reused (and so MainWindow.tsx
  * stays focused on component logic rather than reference data).
+ *
+ * Display names are intentionally not stored here: user-visible strings
+ * live in the i18n locale files and are looked up via `t(\`key.${id}\`)`
+ * so the UI can be fully translated.
  */
-import type { Subdivision } from "../types";
-
 export const SHARE_URL = "https://yames.app";
 export const SHARE_TEXT =
   "Check out Yames — a free open-source metronome for serious practice 🎵";
@@ -36,37 +38,27 @@ export const SHARE_OPTIONS = [
 ] as const;
 
 export const SOUND_TYPES = [
-  { id: "click", name: "Click", icon: "○" },
-  { id: "wood", name: "Wood", icon: "◆" },
-  { id: "beep", name: "Beep", icon: "◉" },
-  { id: "drum", name: "Drum", icon: "◎" },
+  { id: "click", icon: "○" },
+  { id: "wood", icon: "◆" },
+  { id: "beep", icon: "◉" },
+  { id: "drum", icon: "◎" },
 ];
 
-export const INSTRUMENTS: Array<{ id: string; name: string; soon?: boolean }> =
-  [
-    // Fully calibrated: monophonic instruments where aubio onset + YINFFT pitch
-    // detection work reliably. Practice coach pitch features target these first.
-    { id: "electric-guitar", name: "Electric Guitar" },
-    { id: "acoustic-guitar", name: "Acoustic Guitar" },
-    { id: "bass", name: "Bass" },
-    // Coming soon: drums are non-pitched (pitch pipeline adds no value today);
-    // piano is polyphonic by nature and requires ONNX-based chord detection
-    // rather than YINFFT. "Other" is too generic to calibrate pitch feedback for.
-    { id: "drums", name: "Drums", soon: true },
-    { id: "piano", name: "Piano", soon: true },
-    { id: "other", name: "Other", soon: true },
-  ];
-
-export const TIME_SIGNATURES = [
-  { beats: 0, label: "Never" },
-  { beats: 1, label: "Always" },
-  { beats: 2, label: "2/4" },
-  { beats: 3, label: "3/4" },
-  { beats: 4, label: "4/4" },
-  { beats: 5, label: "5/4" },
-  { beats: 6, label: "6/8" },
-  { beats: 7, label: "7/8" },
+export const INSTRUMENTS: Array<{ id: string; soon?: boolean }> = [
+  // Fully calibrated: monophonic instruments where aubio onset + YINFFT pitch
+  // detection work reliably. Practice coach pitch features target these first.
+  { id: "electric-guitar" },
+  { id: "acoustic-guitar" },
+  { id: "bass" },
+  // Coming soon: drums are non-pitched (pitch pipeline adds no value today);
+  // piano is polyphonic by nature and requires ONNX-based chord detection
+  // rather than YINFFT. "Other" is too generic to calibrate pitch feedback for.
+  { id: "drums", soon: true },
+  { id: "piano", soon: true },
+  { id: "other", soon: true },
 ];
+
+export const TIME_SIGNATURES = [0, 1, 2, 3, 4, 5, 6, 7];
 
 export const TEMPO_MARKINGS: [number, string][] = [
   [20, "Grave"],
@@ -90,12 +82,3 @@ export function getTempoMarking(bpm: number): string {
   }
   return TEMPO_MARKINGS[0][1];
 }
-
-export const SUBDIVISION_NAMES: Record<Subdivision, string> = {
-  1: "Quarter",
-  2: "Eighth",
-  3: "Triplet",
-  4: "16th",
-  5: "Quintuplet",
-  6: "Sextuplet",
-};

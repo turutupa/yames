@@ -12,6 +12,8 @@
  *   7. listening (not locked) → "Listening…"
  *   8. nothing  → renders null
  */
+import { useTranslation } from "react-i18next";
+
 export interface SystemStatusChipProps {
   /** Whether a coach session is currently active. */
   active: boolean;
@@ -44,26 +46,24 @@ function resolveVariant(props: SystemStatusChipProps): ChipVariant | null {
   return null;
 }
 
-const CHIP_LABEL: Record<ChipVariant, string> = {
-  listening: "Listening…",
-  playing: "Playing",
-  noodling: "Noodling",
-  thinking: "Thinking…",
-  speaking: "Speaking…",
-};
-
 /** Map a confirmed (locked) divisor to a "Tracking X" label.
  *  Used for both the playing+locked and listening+locked states —
  *  once locked, inference is done regardless of whether the click is running. */
-function trackingLabel(divisor?: number, fallback?: string): string {
-  switch (divisor) {
-    case 1: return "Tracking quarters";
-    case 2: return "Tracking 8ths";
-    case 3: return "Tracking triplets";
-    case 4: return "Tracking 16ths";
-    case 6: return "Tracking sextuplets";
-    default: return fallback ?? CHIP_LABEL.playing;
-  }
+const TRACKING_KEY: Record<number, string> = {
+  1: "coachStatus.tracking.quarters",
+  2: "coachStatus.tracking.eighths",
+  3: "coachStatus.tracking.triplets",
+  4: "coachStatus.tracking.sixteenths",
+  6: "coachStatus.tracking.sextuplets",
+};
+
+function trackingLabel(
+  divisor: number | undefined,
+  fallback: string,
+  t: (key: string) => string,
+): string {
+  const key = divisor ? TRACKING_KEY[divisor] : undefined;
+  return key ? t(key) : fallback;
 }
 
 /** Minimal dot indicator that pulses for active states. */
@@ -77,13 +77,15 @@ function StatusDot({ variant }: { variant: ChipVariant }) {
 }
 
 export function SystemStatusChip(props: SystemStatusChipProps) {
+  const { t } = useTranslation();
   const variant = resolveVariant(props);
   if (!variant) return null;
 
+  const base = t(`coachStatus.${variant}`);
   const label =
     (variant === "playing" || variant === "listening") && props.inferredDivisor
-      ? trackingLabel(props.inferredDivisor, CHIP_LABEL[variant])
-      : CHIP_LABEL[variant];
+      ? trackingLabel(props.inferredDivisor, base, t)
+      : base;
 
   return (
     <div className={`system-status-chip ${variant}`}>

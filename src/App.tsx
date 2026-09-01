@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { storeLoad } from "./ipc";
+import i18n from "./i18n";
 import { MainWindow } from "./containers/main-window/MainWindow";
 import { FloatingWidget } from "./containers/floating-widget/FloatingWidget";
 
@@ -16,6 +18,13 @@ export default function App() {
     // Signal Rust that the frontend is ready. app_ready() sets the
     // final window position and calls show().
     invoke("app_ready").catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    // Apply the stored language preference once the settings store is ready.
+    storeLoad<string>("language").then((l) => {
+      if (l && i18n.hasResourceBundle(l, "translation")) i18n.changeLanguage(l);
+    });
   }, []);
 
   useEffect(() => {

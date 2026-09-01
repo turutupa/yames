@@ -1,4 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
+import { useTranslation } from "react-i18next";
 import {
   HOTKEYS,
   HOTKEY_GROUPS,
@@ -62,16 +63,17 @@ export function HotkeysSettingsSection({
   midi: UseMidiReturn;
   onResetRequest: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <section className="hotkeys-section">
       <div className="hotkeys-section-header">
-        <h2>Hotkeys</h2>
+        <h2>{t("settings.hotkeys.title")}</h2>
         <button
           className={`input-test-btn ${inputTestMode ? "active" : ""}`}
           onClick={() => setInputTestMode((v) => !v)}
-          title="Test all input bindings (keyboard, MIDI, gamepad)"
+          title={t("settings.hotkeys.testTitle")}
         >
-          {inputTestMode ? "Stop test" : "Test inputs"}
+          {inputTestMode ? t("settings.hotkeys.stopTest") : t("settings.hotkeys.testInputs")}
         </button>
       </div>
       {HOTKEY_GROUPS.map((group) => {
@@ -79,22 +81,22 @@ export function HotkeysSettingsSection({
         if (items.length === 0) return null;
         return (
           <div key={group.key} className="hotkey-group">
-            <div className="hotkey-group-label">{group.label}</div>
+            <div className="hotkey-group-label">{t(`settings.hotkeys.groups.${group.key}`)}</div>
             <div className="hotkey-table">
               <div className="hotkey-table-header">
-                <span>Action</span>
-                <span data-tooltip="Works only when the app is focused">
+                <span>{t("settings.hotkeys.actionHeader")}</span>
+                <span data-tooltip={t("settings.hotkeys.keyTooltip")}>
                   <KeyIcon />
-                  Key
+                  {t("settings.hotkeys.keyHeader")}
                 </span>
-                <span data-tooltip="Works even when the app is in the background">
+                <span data-tooltip={t("settings.hotkeys.globalTooltip")}>
                   <GlobeIcon />
-                  Global
-                  <span className="hotkey-soon-badge">soon</span>
+                  {t("settings.hotkeys.globalHeader")}
+                  <span className="hotkey-soon-badge">{t("settings.hotkeys.soon")}</span>
                 </span>
-                <span data-tooltip="Bind a MIDI controller or USB foot pedal">
+                <span data-tooltip={t("settings.hotkeys.midiTooltip")}>
                   <MidiIcon />
-                  MIDI
+                  {t("settings.hotkeys.midiHeader")}
                 </span>
               </div>
               {items.map((hk) => {
@@ -104,9 +106,9 @@ export function HotkeysSettingsSection({
                   <div key={hk.id} className="hotkey-row">
                     <span
                       className="hotkey-action"
-                      data-tooltip={hk.desc}
+                      data-tooltip={t(`settings.hotkeys.descs.${hk.id}`)}
                     >
-                      {hk.action}
+                      {t(`settings.hotkeys.actions.${hk.id}`)}
                     </span>
                     <button
                       className={`hotkey-bind-btn ${bindingFor?.id === hk.id && bindingFor.type === "key" ? "listening" : ""}`}
@@ -133,10 +135,13 @@ export function HotkeysSettingsSection({
                       }}
                       title={
                         midi.learnMode === hk.id
-                          ? "Listening… press a MIDI button or foot pedal"
+                          ? t("settings.hotkeys.listening")
                           : midiBinding
-                          ? `Bound to ${midiBinding.msgType === "cc" ? "CC" : midiBinding.msgType === "note" ? "Note" : "PC"}#${midiBinding.number}. Click to re-learn.`
-                          : "Click to learn MIDI / pedal binding"
+                          ? t("settings.hotkeys.boundTo", {
+                              type: midiBinding.msgType === "cc" ? "CC" : midiBinding.msgType === "note" ? "Note" : "PC",
+                              number: midiBinding.number,
+                            })
+                          : t("settings.hotkeys.learnHint")
                       }
                     >
                       {(() => {
@@ -165,7 +170,7 @@ export function HotkeysSettingsSection({
           className="hotkey-defaults-btn"
           onClick={onResetRequest}
         >
-          Reset to defaults
+          {t("settings.hotkeys.resetDefaults")}
         </button>
       </div>
     </section>

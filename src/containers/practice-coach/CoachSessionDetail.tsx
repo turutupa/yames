@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ScoreRing, BreakdownBar, Histogram } from "../drill/evaluation";
 import { FEEDBACK_COLORS } from "../../hooks/useEvaluation";
 import type { SavedSession } from "../../types";
@@ -19,6 +20,7 @@ export function CoachSessionDetail({
   session: SavedSession;
   onDelete: () => void;
 }) {
+  const { t, i18n } = useTranslation();
   const report = session.report;
   // In Default mode with subdivision > 1, show accent (downbeat) accuracy
   // so the number reflects what the scoring formula actually measures.
@@ -45,7 +47,7 @@ export function CoachSessionDetail({
         <ScoreRing score={report.score} size={80} strokeWidth={5} />
         <div className="coach-detail-meta">
           {session.presetName && <>{session.presetName} &middot; </>}
-          {session.bpm} BPM &middot; {formatDate(session.timestamp)}
+          {session.bpm} BPM &middot; {formatDate(session.timestamp, t, i18n.language)}
         </div>
         {report.comment && (
           <div className="coach-detail-comment">{report.comment}</div>
@@ -74,7 +76,7 @@ export function CoachSessionDetail({
 
       {session.segments && session.segments.length > 0 && (
         <div className="coach-detail-section">
-          <div className="coach-detail-section-title">Exercises</div>
+          <div className="coach-detail-section-title">{t("coachDetail.exercises")}</div>
           <SegmentTimeline
             segments={session.segments}
             sessionStart={session.segments[0].startTime ?? session.timestamp}
@@ -83,27 +85,27 @@ export function CoachSessionDetail({
       )}
 
       <div className="coach-detail-section">
-        <div className="coach-detail-section-title">Breakdown</div>
+        <div className="coach-detail-section-title">{t("eval.breakdown")}</div>
         <div className="coach-detail-bars">
-          <BreakdownBar label="Perfect"  count={report.perfectCount} total={scored} color={FEEDBACK_COLORS.perfect} />
-          <BreakdownBar label="Good"     count={report.goodCount}    total={scored} color={FEEDBACK_COLORS.good} />
-          <BreakdownBar label="OK"       count={report.okCount}      total={scored} color={FEEDBACK_COLORS.ok} />
-          <BreakdownBar label="Off-beat" count={report.missCount}    total={scored} color={FEEDBACK_COLORS.miss} />
+          <BreakdownBar label={t("eval.perfect")}  count={report.perfectCount} total={scored} color={FEEDBACK_COLORS.perfect} />
+          <BreakdownBar label={t("eval.good")}     count={report.goodCount}    total={scored} color={FEEDBACK_COLORS.good} />
+          <BreakdownBar label={t("eval.ok")}       count={report.okCount}      total={scored} color={FEEDBACK_COLORS.ok} />
+          <BreakdownBar label={t("eval.miss")} count={report.missCount}    total={scored} color={FEEDBACK_COLORS.miss} />
         </div>
       </div>
 
       {report.deviations.length > 4 && (
         <div className="coach-detail-section">
-          <div className="coach-detail-section-title">Timing Distribution</div>
+          <div className="coach-detail-section-title">{t("eval.timingDistribution")}</div>
           <Histogram deviations={report.deviations} />
         </div>
       )}
 
       <div className="coach-detail-section">
-        <div className="coach-detail-section-title">Details</div>
+        <div className="coach-detail-section-title">{t("eval.details")}</div>
         <div className="coach-detail-stats">
           <div className="coach-detail-stat">
-            <span className="coach-detail-stat-label">Hit rate</span>
+            <span className="coach-detail-stat-label">{t("eval.hitRate")}</span>
             <span className="coach-detail-stat-value">{hitRate}%</span>
           </div>
           <div className="coach-detail-stat">
@@ -115,47 +117,47 @@ export function CoachSessionDetail({
               carries information ("rushing" vs "dragging") and is surfaced
               in the narrative block / Bias row below.
             */}
-            <span className="coach-detail-stat-label">Avg timing error</span>
+            <span className="coach-detail-stat-label">{t("eval.avgTimingError")}</span>
             <span className="coach-detail-stat-value">{"\u00B1"}{report.meanAbsDeviationMs.toFixed(1)}ms</span>
           </div>
           <div className="coach-detail-stat">
-            <span className="coach-detail-stat-label">Consistency</span>
+            <span className="coach-detail-stat-label">{t("eval.consistency")}</span>
             <span className="coach-detail-stat-value">{"\u00B1"}{report.stdDeviationMs.toFixed(1)}ms</span>
           </div>
           <div className="coach-detail-stat">
-            <span className="coach-detail-stat-label">Tempo stability</span>
+            <span className="coach-detail-stat-label">{t("eval.tempoStability")}</span>
             <span className="coach-detail-stat-value">{"\u00B1"}{report.tempoStabilityMs.toFixed(1)}ms</span>
           </div>
           <div className="coach-detail-stat">
-            <span className="coach-detail-stat-label">Longest streak</span>
+            <span className="coach-detail-stat-label">{t("eval.longestStreak")}</span>
             <span className="coach-detail-stat-value">{streakBeats}</span>
           </div>
           <div className="coach-detail-stat">
-            <span className="coach-detail-stat-label">Scored beats</span>
+            <span className="coach-detail-stat-label">{t("eval.scoredBeats")}</span>
             <span className="coach-detail-stat-value">{scored}</span>
           </div>
           {report.skippedBeats > 0 && (
             <div className="coach-detail-stat">
-              <span className="coach-detail-stat-label">Not played</span>
+              <span className="coach-detail-stat-label">{t("coachDetail.notPlayed")}</span>
               <span className="coach-detail-stat-value">{report.skippedBeats}</span>
             </div>
           )}
           {report.intervalConsistency !== undefined && (
             <div className="coach-detail-stat">
-              <span className="coach-detail-stat-label">Note spacing</span>
+              <span className="coach-detail-stat-label">{t("coachDetail.noteSpacing")}</span>
               <span className="coach-detail-stat-value">{report.intervalConsistency.toFixed(2)}</span>
             </div>
           )}
           {report.gridAlignment !== undefined && (
             <div className="coach-detail-stat">
-              <span className="coach-detail-stat-label">Beat placement</span>
+              <span className="coach-detail-stat-label">{t("coachDetail.beatPlacement")}</span>
               <span className="coach-detail-stat-value">{report.gridAlignment.toFixed(2)}</span>
             </div>
           )}
         </div>
       </div>
 
-      <button className="coach-detail-delete-btn" onClick={onDelete}>Delete Session</button>
+      <button className="coach-detail-delete-btn" onClick={onDelete}>{t("eval.deleteSession")}</button>
     </div>
   );
 }

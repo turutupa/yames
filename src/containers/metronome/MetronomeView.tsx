@@ -1,12 +1,9 @@
 import type { Ref } from "react";
+import { useTranslation } from "react-i18next";
 import type { AppState, BeatEvent, Subdivision } from "../../types";
 import type { useEvaluation } from "../../hooks/useEvaluation";
 import { setSubdivision, setTimeSignature } from "../../ipc";
-import {
-  TIME_SIGNATURES,
-  getTempoMarking,
-  SUBDIVISION_NAMES,
-} from "../../constants/metronome";
+import { TIME_SIGNATURES, getTempoMarking } from "../../constants/metronome";
 import { SubdivisionIcon } from "../../components/MetronomeIcons";
 import DriftMeter from "../../components/DriftMeter";
 
@@ -66,6 +63,7 @@ export function MetronomeView({
   onStartBpmEdit,
   onCommitBpmEdit,
 }: MetronomeViewProps) {
+  const { t } = useTranslation();
   return (
     <>
       <section className="bpm-section">
@@ -73,9 +71,9 @@ export function MetronomeView({
           className={`tap-btn ${tapActive ? "active" : ""} ${tapPulse ? "pulse" : ""}`}
           onClick={onTap}
         >
-          TAP
+          {t("metronome.tap")}
           {tapActive && tapCount >= 2 && (
-            <span className="tap-count">{tapCount} taps</span>
+            <span className="tap-count">{t("metronome.tapCount", { count: tapCount })}</span>
           )}
         </button>
         <div className="bpm-display view-stagger-item" style={{ animationDelay: '0ms' }}>
@@ -192,14 +190,14 @@ export function MetronomeView({
       </section>
 
       <div className="sub-row">
-        <span className="row-side-label">Subdiv</span>
+        <span className="row-side-label">{t("metronome.subdiv")}</span>
         {([1, 2, 3, 4, 5, 6] as Subdivision[]).map((sub, i) => (
           <button
             key={sub}
             className={`sub-row-btn view-stagger-item ${state.subdivision === sub ? "active" : ""}`}
             style={{ animationDelay: `${100 + i * 25}ms` }}
             onClick={() => setSubdivision(sub)}
-            data-tooltip={SUBDIVISION_NAMES[sub]}
+            data-tooltip={t(`subdiv.${sub}`)}
           >
             <SubdivisionIcon sub={sub} size={18} />
           </button>
@@ -207,15 +205,15 @@ export function MetronomeView({
       </div>
 
       <div className="time-sig-row">
-        <span className="row-side-label">Meter</span>
-        {TIME_SIGNATURES.map((ts, i) => (
+        <span className="row-side-label">{t("metronome.meter")}</span>
+        {TIME_SIGNATURES.map((beats, i) => (
           <button
-            key={ts.beats}
-            className={`time-sig-btn view-stagger-item ${state.timeSignature === ts.beats ? "active" : ""}`}
+            key={beats}
+            className={`time-sig-btn view-stagger-item ${state.timeSignature === beats ? "active" : ""}`}
             style={{ animationDelay: `${150 + i * 30}ms` }}
-            onClick={() => setTimeSignature(ts.beats)}
+            onClick={() => setTimeSignature(beats)}
           >
-            {ts.label}
+            {t(`meter.${beats}`)}
           </button>
         ))}
       </div>

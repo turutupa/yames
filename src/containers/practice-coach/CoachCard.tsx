@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { getSessionHistory, deleteSession, clearAllSessions } from "../../ipc";
 import { rescoreReport } from "../../coach/reportStats";
 import type { FeedMessage, SavedSession, AudioSpectrum, InferredGridChanged } from "../../types";
@@ -68,6 +69,7 @@ type CardTab = "feed" | "history";
 type HistoryView = "list" | "detail";
 
 export default function CoachCard({ open, active, messages, onToggle, onStartSession, onEndSession, onSendChat, onChipAction, onRegisterChatFocus, listening, hasSignal, spectrum, isPlaying, onPause, inferredGrid, playMode, coachLoading, ttsActive }: CoachCardProps) {
+  const { t } = useTranslation();
   const feedRef = useRef<HTMLDivElement>(null);
   const chatInputRef = useRef<HTMLInputElement>(null);
   const [chatInput, setChatInput] = useState("");
@@ -193,14 +195,14 @@ export default function CoachCard({ open, active, messages, onToggle, onStartSes
       <button
         className={`coach-card-pill ${active ? "coach-active" : ""}`}
         onClick={onToggle}
-        title="Practice Coach"
+        title={t("settings.coach.title")}
       >
         {listening && <span className={`coach-status-dot ${hasSignal ? "signal" : "listening"}`} />}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2z" />
           <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2z" />
         </svg>
-        <span className="coach-card-pill-label">Practice Coach</span>
+        <span className="coach-card-pill-label">{t("settings.coach.title")}</span>
       </button>
     );
   }
@@ -214,19 +216,19 @@ export default function CoachCard({ open, active, messages, onToggle, onStartSes
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M19 12H5M12 19l-7-7 7-7" />
               </svg>
-              Back
+              {t("tooltip.back")}
             </button>
           ) : (
             <span className="coach-card-title">
               <span className={`coach-status-dot ${listening ? (hasSignal ? "signal" : "listening") : ""}`} />
-              Practice Coach
-              <span className="experimental-badge" title="Experimental — behaviour may change between builds">
+              {t("settings.coach.title")}
+              <span className="experimental-badge" title={t("settings.coach.betaHint")}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2" />
                   <path d="M8.5 2h7" />
                   <path d="M7 16h10" />
                 </svg>
-                Beta
+                {t("settings.coach.beta")}
               </span>
               {active && listening && spectrum && (
                 <span className={`coach-title-spectrum ${hasSignal ? "has-signal" : ""}`}>
@@ -243,23 +245,23 @@ export default function CoachCard({ open, active, messages, onToggle, onStartSes
           <div className="coach-card-header-actions">
             {active && tab === "feed" && (
               <button className="coach-card-header-btn coach-card-end-btn" onClick={onEndSession}>
-                End
+                {t("coachCard.end")}
               </button>
             )}
             {!active && tab === "feed" && (
               <button className="coach-card-header-btn coach-card-start-btn" onClick={onStartSession}>
-                Start
+                {t("coachCard.start")}
               </button>
             )}
             {tab === "history" && historyView === "list" && history.length > 0 && (
-              <button className="coach-card-header-btn" onClick={() => setShowClearConfirm(true)} title="Clear all">
+              <button className="coach-card-header-btn" onClick={() => setShowClearConfirm(true)} title={t("coachCard.clearAll")}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="3 6 5 6 21 6" />
                   <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
                 </svg>
               </button>
             )}
-            <button className="coach-card-header-btn" onClick={onToggle} title="Collapse">
+            <button className="coach-card-header-btn" onClick={onToggle} title={t("coachCard.collapse")}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polyline points="15 18 9 12 15 6" />
               </svg>
@@ -273,13 +275,13 @@ export default function CoachCard({ open, active, messages, onToggle, onStartSes
             className={`coach-card-tab ${tab === "feed" ? "active" : ""}`}
             onClick={() => { setTab("feed"); setHistoryView("list"); setSelectedSession(null); }}
           >
-            Feed
+            {t("coachCard.feed")}
           </button>
           <button
             className={`coach-card-tab ${tab === "history" ? "active" : ""}`}
             onClick={() => setTab("history")}
           >
-            History
+            {t("coachCard.history")}
           </button>
         </div>
 
@@ -296,8 +298,8 @@ export default function CoachCard({ open, active, messages, onToggle, onStartSes
                   </svg>
                 </div>
                 <p className="coach-card-empty-text">
-                  Start a session to begin.<br/>
-                  The coach listens while you play.
+                  {t("coachCard.emptyTitle")}<br/>
+                  {t("coachCard.emptyHint")}
                 </p>
               </div>
             ) : (
@@ -324,7 +326,7 @@ export default function CoachCard({ open, active, messages, onToggle, onStartSes
                 ref={chatInputRef}
                 className="coach-card-chat-input"
                 type="text"
-                placeholder="Ask the coach..."
+                placeholder={t("coachCard.askPlaceholder")}
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -339,7 +341,7 @@ export default function CoachCard({ open, active, messages, onToggle, onStartSes
                 className="coach-card-chat-send"
                 disabled={!chatInput.trim()}
                 onClick={() => { onSendChat?.(chatInput.trim()); setChatInput(""); }}
-                title="Send"
+                title={t("coachCard.send")}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="22" y1="2" x2="11" y2="13" />
@@ -353,10 +355,10 @@ export default function CoachCard({ open, active, messages, onToggle, onStartSes
             {showClearConfirm && (
               <div className="coach-confirm-overlay" onClick={() => setShowClearConfirm(false)}>
                 <div className="coach-confirm-dialog" onClick={(e) => e.stopPropagation()}>
-                  <p>Delete all sessions? This can't be undone.</p>
+                  <p>{t("eval.deleteAllConfirm")}</p>
                   <div className="coach-confirm-actions">
-                    <button className="coach-confirm-cancel" onClick={() => setShowClearConfirm(false)}>Cancel</button>
-                    <button className="coach-confirm-delete" onClick={handleClearAll}>Delete all</button>
+                    <button className="coach-confirm-cancel" onClick={() => setShowClearConfirm(false)}>{t("eval.cancel")}</button>
+                    <button className="coach-confirm-delete" onClick={handleClearAll}>{t("eval.deleteAll")}</button>
                   </div>
                 </div>
               </div>

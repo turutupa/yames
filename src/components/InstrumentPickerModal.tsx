@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { INSTRUMENTS } from "../constants/metronome";
 import { INSTRUMENT_ICONS } from "./MetronomeIcons";
 
@@ -20,6 +21,7 @@ export function InstrumentPickerModal({
   onPick: (instrumentId: string) => void;
   onDismiss: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div
       className="instrument-picker-overlay"
@@ -29,10 +31,9 @@ export function InstrumentPickerModal({
       }}
     >
       <div className="instrument-picker-modal">
-        <h2 className="instrument-picker-title">What are you practicing on?</h2>
+        <h2 className="instrument-picker-title">{t("instrumentPicker.title")}</h2>
         <p className="instrument-picker-subtitle">
-          Yames tunes onset detection and coaching feedback for your
-          instrument. You can change this later in Settings.
+          {t("instrumentPicker.subtitle")}
         </p>
         <div className="instrument-picker-grid">
           {INSTRUMENTS.filter((i) => i.id !== "other").map((inst) => (
@@ -45,7 +46,7 @@ export function InstrumentPickerModal({
               <span className="instrument-picker-card-icon">
                 {INSTRUMENT_ICONS[inst.id]}
               </span>
-              <span className="instrument-picker-card-name">{inst.name}</span>
+              <span className="instrument-picker-card-name">{t(`instrument.${inst.id}`)}</span>
             </button>
           ))}
         </div>
@@ -54,7 +55,7 @@ export function InstrumentPickerModal({
           onClick={onDismiss}
           type="button"
         >
-          Skip — I'll pick later
+          {t("instrumentPicker.skip")}
         </button>
       </div>
     </div>

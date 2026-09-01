@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { RATING_COLORS, getOffsetRating } from "./trackTypes";
 import type { Rating, TapResult } from "./trackTypes";
 
@@ -34,6 +35,7 @@ export function TrackPlayingView({
   onTap: () => void;
   onStop: () => void;
 }) {
+  const { t } = useTranslation();
   const isWarmup = beatCount < warmupBeats;
   const scoredProgress = Math.max(0, beatCount - warmupBeats) / scoredBeats;
   const warmupProgress = Math.min(beatCount / warmupBeats, 1);
@@ -50,14 +52,14 @@ export function TrackPlayingView({
       <div className="track-live-header">
         {isWarmup ? (
           <span className="track-live-beats warmup">
-            Warm-up {beatCount}/{warmupBeats}
+            {t("pocketCheck.warmupProgress", { count: beatCount, total: warmupBeats })}
           </span>
         ) : (
           <span className="track-live-beats">
             {Math.max(0, beatCount - warmupBeats)}/{scoredBeats}
           </span>
         )}
-        <span className="track-live-taps">{taps.length} taps</span>
+        <span className="track-live-taps">{t("pocketCheck.tapsCount", { count: taps.length })}</span>
       </div>
 
       <div className="track-progress-ring">
@@ -83,9 +85,9 @@ export function TrackPlayingView({
         </svg>
         <div className="track-ring-center">
           {isWarmup ? (
-            <span className="track-ring-label warmup">GET READY</span>
+            <span className="track-ring-label warmup">{t("pocketCheck.getReady")}</span>
           ) : (
-            <span className="track-ring-label">TAP</span>
+            <span className="track-ring-label">{t("pocketCheck.tap")}</span>
           )}
           {!isWarmup &&
             taps.length > 0 &&
@@ -157,7 +159,7 @@ export function TrackPlayingView({
       </div>
 
       <div className="track-live-hint">
-        {evaluationEnabled ? "Play your instrument along with the beat" : "Click the target to tap along"}
+        {evaluationEnabled ? t("pocketCheck.playInstrumentHint") : t("pocketCheck.playTapHint")}
       </div>
 
       <button
@@ -170,7 +172,7 @@ export function TrackPlayingView({
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
           <rect x="2" y="2" width="12" height="12" rx="1.5" />
         </svg>
-        Stop
+        {t("pocketCheck.stop")}
       </button>
     </div>
   );

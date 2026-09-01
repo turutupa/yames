@@ -1,5 +1,6 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useDrag } from "../../hooks/useDrag";
 import {
   formatGamepadButton,
@@ -84,6 +85,7 @@ import type { HotkeyAction } from "../../hotkeys";
 import "../../styles/audio-input-test.css";
 
 export function MainWindow() {
+  const { t } = useTranslation();
   useDrag();
   const { state, currentBeat } = useMetronome();
   // Practice Coach model + voice state (must come before useEvaluation so
@@ -394,7 +396,7 @@ export function MainWindow() {
         appendInputTestLog({
           source: "keyboard",
           label: combo,
-          action: hk?.action,
+          action: hk ? t(`settings.hotkeys.actions.${hk.id}`) : undefined,
         });
         return;
       }
@@ -430,7 +432,7 @@ export function MainWindow() {
         source: "midi",
         label: `${activity.type.toUpperCase()} #${activity.number}`,
         detail: `Ch${activity.channel + 1} Val${activity.value}`,
-        action: hk?.action,
+        action: hk ? t(`settings.hotkeys.actions.${hk.id}`) : undefined,
       });
     }
   }, [inputTestMode, midi.lastActivity]);
@@ -451,7 +453,7 @@ export function MainWindow() {
             appendInputTestLog({
               source: "gamepad",
               label: formatGamepadButton(id),
-              action: hk?.action,
+              action: hk ? t(`settings.hotkeys.actions.${hk.id}`) : undefined,
             });
           }
         : undefined,
@@ -671,14 +673,14 @@ export function MainWindow() {
         {view === "settings" && (
           <SettingsTimeline
             sections={[
-              { id: "general", label: "General" },
-              { id: "appearance", label: "Appearance" },
-              { id: "devices", label: "Devices" },
-              { id: "smart-coach", label: "Practice Coach" },
-              { id: "widget", label: "Widget" },
-              { id: "hotkeys", label: "Hotkeys" },
-              { id: "support", label: "Support" },
-              { id: "about", label: "About" },
+              { id: "general", label: t("settings.tabs.general") },
+              { id: "appearance", label: t("settings.tabs.appearance") },
+              { id: "devices", label: t("settings.tabs.devices") },
+              { id: "smart-coach", label: t("settings.tabs.smartCoach") },
+              { id: "widget", label: t("settings.tabs.widget") },
+              { id: "hotkeys", label: t("settings.tabs.hotkeys") },
+              { id: "support", label: t("settings.tabs.support") },
+              { id: "about", label: t("settings.tabs.about") },
             ]}
             containerRef={contentRef}
           />

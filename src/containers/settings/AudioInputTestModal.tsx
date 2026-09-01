@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import type { AudioInputDevice, AudioSpectrum } from "../../types";
 import {
   listAudioInputDevices,
@@ -36,6 +37,7 @@ interface Props {
 type RecState = "idle" | "recording" | "recorded" | "playing";
 
 export default function AudioInputTestModal({ open, onClose, selectedDevice, onDeviceChange, initialDevices, evaluationActive, inputChannel = 0, onChannelChange }: Props) {
+  const { t } = useTranslation();
   const [devices, setDevices] = useState<AudioInputDevice[]>(initialDevices ?? []);
   const [listening, setListening] = useState(false);
   const [spectrum, setSpectrum] = useState<AudioSpectrum | null>(null);
@@ -366,7 +368,7 @@ export default function AudioInputTestModal({ open, onClose, selectedDevice, onD
     <div className="input-test-modal-overlay" onClick={onClose}>
       <div className="input-test-modal" onClick={(e) => e.stopPropagation()}>
         <div className="input-test-modal-header">
-          <h3>Test Audio Input</h3>
+          <h3>{t("settings.inputTest.title")}</h3>
           <button className="input-test-modal-close" onClick={onClose}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M18 6L6 18M6 6l12 12" />
@@ -379,7 +381,7 @@ export default function AudioInputTestModal({ open, onClose, selectedDevice, onD
               applies once for this whole block, not for each sub-item. */}
           <div className="input-test-device-area">
             <div className="input-test-device-row">
-              <label className="input-test-label">Device</label>
+              <label className="input-test-label">{t("settings.inputTest.device")}</label>
               <InputDeviceDropdown
                 devices={devices}
                 value={selectedDevice ?? ""}
@@ -395,15 +397,15 @@ export default function AudioInputTestModal({ open, onClose, selectedDevice, onD
               />
             )}
             {inputChannel >= 2 && modalIsInterface && (
-              <span className="channel-picker-hint" title="Captures the Direct Monitor mix (your hardware inputs as heard in headphones). To capture DAW or app output, route it through your interface output in Focusrite Control.">
-                Loopback — captures your Direct Monitor mix (hardware inputs, not system audio)
+              <span className="channel-picker-hint" title={t("settings.devices.loopbackHint")}>
+                {t("settings.devices.loopback")}
               </span>
             )}
           </div>
 
           <div className="input-test-gain-section">
             <div className="input-test-meter-label">
-              <span>Sensitivity</span>
+              <span>{t("settings.inputTest.sensitivity")}</span>
               <span className="input-test-db">{inputGainDb > 0 ? `+${inputGainDb}` : inputGainDb} dB</span>
             </div>
             <input
@@ -419,7 +421,7 @@ export default function AudioInputTestModal({ open, onClose, selectedDevice, onD
 
           <div className="input-test-meter-section">
             <div className="input-test-meter-label">
-              <span>Level</span>
+              <span>{t("settings.inputTest.level")}</span>
               <span className="input-test-db">{dbClamped > -59 ? `${Math.round(dbClamped)} dB` : "-\u221E dB"}</span>
             </div>
             <div className="input-test-meter-track">
@@ -438,7 +440,7 @@ export default function AudioInputTestModal({ open, onClose, selectedDevice, onD
 
           <div className="input-test-spectrum-section">
             <div className="input-test-meter-label">
-              <span>Frequency</span>
+              <span>{t("settings.inputTest.frequency")}</span>
             </div>
             <div className="input-test-spectrum">
               {bands.map((level, i) => (
@@ -455,7 +457,7 @@ export default function AudioInputTestModal({ open, onClose, selectedDevice, onD
           {/* ─── Record / Playback section ─── */}
           <div className="input-test-rec-section">
             <div className="input-test-meter-label">
-              <span>Record &amp; Playback</span>
+              <span>{t("settings.inputTest.recordPlayback")}</span>
               <span className="input-test-rec-time">
                 {recState === "recording" ? `${recElapsed.toFixed(1)}s / 10s` :
                  (recState === "recorded" || recState === "playing") ? `${recDuration.toFixed(1)}s` :
@@ -525,17 +527,17 @@ export default function AudioInputTestModal({ open, onClose, selectedDevice, onD
                     <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
                       <rect x="2" y="2" width="12" height="12" rx="1.5" />
                     </svg>
-                    Stop
+                    {t("settings.inputTest.stop")}
                   </>
                 ) : streamSettling ? (
                   <>
                     <span className="input-test-rec-dot settling" />
-                    Ready…
+                    {t("settings.inputTest.ready")}
                   </>
                 ) : (
                   <>
                     <span className="input-test-rec-dot" />
-                    Record
+                    {t("settings.inputTest.record")}
                   </>
                 )}
               </button>
@@ -549,14 +551,14 @@ export default function AudioInputTestModal({ open, onClose, selectedDevice, onD
                     <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
                       <rect x="2" y="2" width="12" height="12" rx="1.5" />
                     </svg>
-                    Stop
+                    {t("settings.inputTest.stop")}
                   </>
                 ) : (
                   <>
                     <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
                       <path d="M4 2.5a.5.5 0 0 1 .77-.42l9 5.5a.5.5 0 0 1 0 .84l-9 5.5A.5.5 0 0 1 4 13.5z" />
                     </svg>
-                    Play
+                    {t("settings.inputTest.play")}
                   </>
                 )}
               </button>
@@ -565,14 +567,14 @@ export default function AudioInputTestModal({ open, onClose, selectedDevice, onD
                 onClick={handleDiscard}
                 disabled={recState !== "recorded" && recState !== "playing"}
               >
-                Discard
+                {t("settings.inputTest.discard")}
               </button>
             </div>
           </div>
 
           <div className={`input-test-status ${hasSignal ? "active" : ""}`}>
             <span className={`input-test-status-dot ${hasSignal ? "connected" : ""}`} />
-            {hasSignal ? "Signal detected \u2014 your input is working" : "No signal \u2014 play your instrument or make noise"}
+            {hasSignal ? t("settings.inputTest.signalDetected") : t("settings.inputTest.noSignal")}
           </div>
         </div>
       </div>
@@ -591,16 +593,17 @@ function InputDeviceDropdown({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   const options = useMemo(
     () => [
-      { value: "", label: "System default" },
+      { value: "", label: t("settings.inputTest.systemDefault") },
       ...devices.map((d) => ({
         value: d.name,
-        label: d.name + (d.isDefault ? " (default)" : ""),
+        label: d.name + (d.isDefault ? t("settings.inputTest.defaultSuffix") : ""),
       })),
     ],
-    [devices],
+    [devices, t],
   );
 
   const selected = options.find((o) => o.value === value) || options[0];

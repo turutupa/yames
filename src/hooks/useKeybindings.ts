@@ -109,14 +109,10 @@ export function useKeybindings() {
           ([action, bound]) => bound === combo && action !== bindingFor.id,
         );
         if (conflictEntry) {
-          const conflictHk = HOTKEYS.find((h) => h.id === conflictEntry[0]);
-          const targetHk = HOTKEYS.find((h) => h.id === bindingFor.id);
           setPendingKeyConflict({
             combo,
             conflictAction: conflictEntry[0],
-            conflictActionLabel: conflictHk?.action ?? conflictEntry[0],
             targetAction: bindingFor.id,
-            targetActionLabel: targetHk?.action ?? bindingFor.id,
             type: bindingFor.type,
           });
           return; // wait for confirmation

@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { clearSession, getSessionHistory, deleteSession, clearAllSessions } from "../../ipc";
 import { FEEDBACK_COLORS } from "../../hooks/useEvaluation";
 import { ScoreRing, BreakdownBar, Histogram, ScoreBadge, MiniSparkline } from "./evaluation";
@@ -34,6 +36,7 @@ interface EvaluationPanelProps {
 }
 
 export default function EvaluationPanel({ open, onClose, onToggle, currentReport, currentMeta, panelView, setPanelView, selectedReport, setSelectedReport, selectedMeta, setSelectedMeta }: EvaluationPanelProps) {
+  const { t } = useTranslation();
   const [history, setHistory] = useState<SavedSession[]>([]);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
@@ -102,7 +105,7 @@ export default function EvaluationPanel({ open, onClose, onToggle, currentReport
         <button
           className="eval-panel-collapsed-tab"
           onClick={onToggle}
-          title="Sessions"
+          title={t("eval.sessions")}
         >
           {sessionsIcon}
         </button>
@@ -116,25 +119,25 @@ export default function EvaluationPanel({ open, onClose, onToggle, currentReport
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M19 12H5M12 19l-7-7 7-7" />
                   </svg>
-                  Sessions
+                  {t("eval.sessions")}
                 </button>
               ) : (
-                <h3>Sessions</h3>
+                <h3>{t("eval.sessions")}</h3>
               )}
               {panelView === "history" && history.length > 0 && (
                 <button
                   className="eval-clear-all-btn"
                   onClick={() => setShowClearConfirm(true)}
-                  title="Clear all sessions"
+                  title={t("eval.clearAllTitle")}
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="3 6 5 6 21 6" />
                     <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
                   </svg>
-                  <span className="eval-clear-all-label">Clear all</span>
+                  <span className="eval-clear-all-label">{t("eval.clearAll")}</span>
                 </button>
               )}
-              <button className="eval-panel-close" onClick={onToggle} title="Close sessions">
+              <button className="eval-panel-close" onClick={onToggle} title={t("eval.closeSessions")}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M18 6L6 18M6 6l12 12" />
                 </svg>
@@ -144,10 +147,10 @@ export default function EvaluationPanel({ open, onClose, onToggle, currentReport
             {showClearConfirm && (
               <div className="eval-confirm-overlay" onClick={() => setShowClearConfirm(false)}>
                 <div className="eval-confirm-dialog" onClick={(e) => e.stopPropagation()}>
-                  <p>Delete all sessions? This can't be undone.</p>
+                  <p>{t("eval.deleteAllConfirm")}</p>
                   <div className="eval-confirm-actions">
-                    <button className="eval-confirm-cancel" onClick={() => setShowClearConfirm(false)}>Cancel</button>
-                    <button className="eval-confirm-delete" onClick={handleClearAll}>Delete all</button>
+                    <button className="eval-confirm-cancel" onClick={() => setShowClearConfirm(false)}>{t("eval.cancel")}</button>
+                    <button className="eval-confirm-delete" onClick={handleClearAll}>{t("eval.deleteAll")}</button>
                   </div>
                 </div>
               </div>
@@ -168,8 +171,8 @@ export default function EvaluationPanel({ open, onClose, onToggle, currentReport
               />
             ) : (
               <div className="eval-panel-empty">
-                <p>No session data yet.</p>
-                <p>Play with evaluation enabled to see your timing report.</p>
+                <p>{t("eval.emptyData")}</p>
+                <p>{t("eval.emptyDataHint")}</p>
               </div>
             )}
           </>
@@ -190,16 +193,17 @@ function HistoryList({
   onSelect: (s: SavedSession) => void;
   onDelete: (id: string) => void;
 }) {
+  const { t, i18n } = useTranslation();
   if (sessions.length === 0) {
     return (
       <div className="eval-panel-empty">
-        <p>No sessions yet.</p>
-        <p>Play with evaluation enabled to build your history.</p>
+        <p>{t("eval.emptyHistory")}</p>
+        <p>{t("eval.emptyHistoryHint")}</p>
       </div>
     );
   }
 
-  const grouped = groupByDay(sessions);
+  const grouped = groupByDay(sessions, t, i18n.language);
 
   return (
     <div className="eval-history-list">
@@ -253,6 +257,7 @@ function ReportDetail({
   onDelete?: () => void;
   onClearCurrent?: () => void;
 }) {
+  const { t, i18n } = useTranslation();
   // Both the breakdown-bar totals and the hit-rate use the SCORED-beat
   // denominator (hits + miss). Centralised in `src/coach/reportStats.ts`
   // so the JS-side accuracy never disagrees with the Rust score.
@@ -264,7 +269,7 @@ function ReportDetail({
         <ScoreRing score={report.score} size={96} strokeWidth={6} />
         {meta && (
           <div className="eval-ring-meta">
-            {meta.bpm} BPM &middot; {formatDate(meta.timestamp)}
+            {meta.bpm} BPM &middot; {formatDate(meta.timestamp, t, i18n.language)}
           </div>
         )}
         <div className="eval-comment">{report.comment}</div>
@@ -289,30 +294,30 @@ function ReportDetail({
       )}
 
       <div className="eval-breakdown">
-        <div className="eval-breakdown-title">Breakdown</div>
+        <div className="eval-breakdown-title">{t("eval.breakdown")}</div>
         <div className="eval-breakdown-bars">
-          <BreakdownBar label="Perfect" count={report.perfectCount} total={scored} color={FEEDBACK_COLORS.perfect} />
-          <BreakdownBar label="Good" count={report.goodCount} total={scored} color={FEEDBACK_COLORS.good} />
-          <BreakdownBar label="OK" count={report.okCount} total={scored} color={FEEDBACK_COLORS.ok} />
-          <BreakdownBar label="Miss" count={report.missCount} total={scored} color={FEEDBACK_COLORS.miss} />
+          <BreakdownBar label={t("eval.perfect")} count={report.perfectCount} total={scored} color={FEEDBACK_COLORS.perfect} />
+          <BreakdownBar label={t("eval.good")} count={report.goodCount} total={scored} color={FEEDBACK_COLORS.good} />
+          <BreakdownBar label={t("eval.ok")} count={report.okCount} total={scored} color={FEEDBACK_COLORS.ok} />
+          <BreakdownBar label={t("eval.miss")} count={report.missCount} total={scored} color={FEEDBACK_COLORS.miss} />
         </div>
       </div>
 
       {report.deviations.length > 4 && (
         <div className="eval-histogram">
-          <div className="eval-breakdown-title">Timing Distribution</div>
+          <div className="eval-breakdown-title">{t("eval.timingDistribution")}</div>
           <Histogram deviations={report.deviations} />
         </div>
       )}
 
       <div className="eval-stats">
-        <div className="eval-breakdown-title">Details</div>
+        <div className="eval-breakdown-title">{t("eval.details")}</div>
         <div className="eval-stat-row">
-          <span className="eval-stat-label">Scored beats</span>
+          <span className="eval-stat-label">{t("eval.scoredBeats")}</span>
           <span className="eval-stat-value">{scored}</span>
         </div>
         <div className="eval-stat-row">
-          <span className="eval-stat-label">Hit rate</span>
+          <span className="eval-stat-label">{t("eval.hitRate")}</span>
           <span className="eval-stat-value">{hitRate}%</span>
         </div>
         <div className="eval-stat-row">
@@ -322,34 +327,34 @@ function ReportDetail({
             errors are balanced and was producing the misleading "+0.0 ms"
             on sloppy sessions. Bias direction lives in the narrative.
           */}
-          <span className="eval-stat-label">Avg timing error</span>
+          <span className="eval-stat-label">{t("eval.avgTimingError")}</span>
           <span className="eval-stat-value">{"\u00B1"}{report.meanAbsDeviationMs.toFixed(1)}ms</span>
         </div>
         <div className="eval-stat-row">
-          <span className="eval-stat-label">Consistency</span>
+          <span className="eval-stat-label">{t("eval.consistency")}</span>
           <span className="eval-stat-value">{"\u00B1"}{report.stdDeviationMs.toFixed(1)}ms</span>
         </div>
         <div className="eval-stat-row">
-          <span className="eval-stat-label">Tempo stability</span>
+          <span className="eval-stat-label">{t("eval.tempoStability")}</span>
           <span className="eval-stat-value">{"\u00B1"}{report.tempoStabilityMs.toFixed(1)}ms</span>
         </div>
         <div className="eval-stat-row">
-          <span className="eval-stat-label">Longest streak</span>
+          <span className="eval-stat-label">{t("eval.longestStreak")}</span>
           <span className="eval-stat-value">{report.longestStreak}</span>
         </div>
         {report.skippedBeats > 0 && (
           <div className="eval-stat-row">
-            <span className="eval-stat-label">Skipped</span>
+            <span className="eval-stat-label">{t("eval.skipped")}</span>
             <span className="eval-stat-value eval-stat-muted">{report.skippedBeats}</span>
           </div>
         )}
       </div>
 
       {onDelete && (
-        <button className="eval-clear-btn" onClick={onDelete}>Delete Session</button>
+        <button className="eval-clear-btn" onClick={onDelete}>{t("eval.deleteSession")}</button>
       )}
       {onClearCurrent && (
-        <button className="eval-clear-btn" onClick={onClearCurrent}>Dismiss</button>
+        <button className="eval-clear-btn" onClick={onClearCurrent}>{t("eval.dismiss")}</button>
       )}
     </div>
   );
@@ -357,24 +362,24 @@ function ReportDetail({
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function getDayGroup(timestamp: number): string {
+function getDayGroup(timestamp: number, t: TFunction, lang: string): string {
   const date = new Date(timestamp);
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   const diffDays = Math.round((today.getTime() - dateDay.getTime()) / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return date.toLocaleDateString([], { weekday: "long" });
-  return date.toLocaleDateString([], { month: "short", day: "numeric" });
+  if (diffDays === 0) return t("eval.today");
+  if (diffDays === 1) return t("eval.yesterday");
+  if (diffDays < 7) return date.toLocaleDateString(lang, { weekday: "long" });
+  return date.toLocaleDateString(lang, { month: "short", day: "numeric" });
 }
 
-function groupByDay(sessions: SavedSession[]): { label: string; sessions: SavedSession[] }[] {
+function groupByDay(sessions: SavedSession[], t: TFunction, lang: string): { label: string; sessions: SavedSession[] }[] {
   const groups: { label: string; sessions: SavedSession[] }[] = [];
   let currentLabel = "";
   for (const session of sessions) {
-    const label = getDayGroup(session.timestamp);
+    const label = getDayGroup(session.timestamp, t, lang);
     if (label !== currentLabel) {
       groups.push({ label, sessions: [session] });
       currentLabel = label;
@@ -385,7 +390,7 @@ function groupByDay(sessions: SavedSession[]): { label: string; sessions: SavedS
   return groups;
 }
 
-function formatDate(timestamp: number): string {
+function formatDate(timestamp: number, t: TFunction, lang: string): string {
   const date = new Date(timestamp);
   const now = new Date();
 
@@ -393,10 +398,10 @@ function formatDate(timestamp: number): string {
   const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   const diffDays = Math.round((today.getTime() - dateDay.getTime()) / (1000 * 60 * 60 * 24));
 
-  const time = date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const time = date.toLocaleTimeString(lang, { hour: "numeric", minute: "2-digit" });
 
-  if (diffDays === 0) return `Today ${time}`;
-  if (diffDays === 1) return `Yesterday ${time}`;
-  if (diffDays < 7) return `${date.toLocaleDateString([], { weekday: "short" })} ${time}`;
-  return date.toLocaleDateString([], { month: "short", day: "numeric" });
+  if (diffDays === 0) return `${t("eval.today")} ${time}`;
+  if (diffDays === 1) return `${t("eval.yesterday")} ${time}`;
+  if (diffDays < 7) return `${date.toLocaleDateString(lang, { weekday: "short" })} ${time}`;
+  return date.toLocaleDateString(lang, { month: "short", day: "numeric" });
 }

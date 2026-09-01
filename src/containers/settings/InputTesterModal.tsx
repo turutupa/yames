@@ -1,4 +1,5 @@
 import type { RefObject } from "react";
+import { useTranslation } from "react-i18next";
 import { splitCombo } from "../../hotkeys";
 
 export type InputTestEntry = {
@@ -24,12 +25,13 @@ export function InputTesterModal({
   onClose: () => void;
   onClear: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="keybinding-overlay" onClick={onClose}>
       <div className="input-tester-modal" onClick={(e) => e.stopPropagation()}>
-        <span className="keybinding-capture-title">Input Tester</span>
+        <span className="keybinding-capture-title">{t("settings.inputTester.title")}</span>
         <div className="input-tester-hint">
-          Press keys, MIDI buttons, or gamepad buttons to see what they map to.
+          {t("settings.inputTester.hint")}
         </div>
         <div className="input-tester-log-wrapper">
           <div
@@ -49,12 +51,12 @@ export function InputTesterModal({
             }}
           >
           {log.length === 0 ? (
-            <div className="midi-tester-empty">Waiting for input…</div>
+            <div className="midi-tester-empty">{t("settings.inputTester.waiting")}</div>
           ) : (
             log.map((entry, i) => (
               <div className={`input-tester-row ${i === log.length - 1 ? "latest" : ""}`} key={i}>
                 <span className={`input-tester-source input-tester-source--${entry.source}`}>
-                  {entry.source === "keyboard" ? "KEY" : entry.source === "midi" ? "MIDI" : "PAD"}
+                  {entry.source === "keyboard" ? t("settings.inputTester.sources.keyboard") : entry.source === "midi" ? t("settings.inputTester.sources.midi") : t("settings.inputTester.sources.gamepad")}
                 </span>
                 <span className="input-tester-keys">
                   {entry.source === "keyboard" ? (
@@ -89,14 +91,14 @@ export function InputTesterModal({
         </div>
         <div className="keybinding-capture-actions">
           <button className="keybinding-btn-reset" onClick={onClear}>
-            Clear
+            {t("settings.inputTester.clear")}
           </button>
           <button className="keybinding-btn-remove" onClick={onClose}>
-            Close
+            {t("settings.inputTester.close")}
           </button>
         </div>
         <span className="keybinding-capture-hint">
-          Press Escape to close
+          {t("settings.inputTester.escapeHint")}
         </span>
       </div>
     </div>

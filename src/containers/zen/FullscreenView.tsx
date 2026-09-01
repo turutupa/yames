@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import type { AppState, BeatEvent, Subdivision } from "../../types";
 import { setBpm, togglePlayback, setSubdivision, setTimeSignature, stopSpeedRamp, startSpeedRamp, startSpeedRampFrom, configureSpeedRamp, storeSave, storeLoad } from "../../ipc";
 import { ZenEffects, type ZenStyle } from "./ZenEffects";
@@ -29,6 +30,7 @@ function zenStyleIcon(s: ZenStyle) {
 }
 
 export function FullscreenView({ state, currentBeat, activeTab, onExit }: FullscreenViewProps) {
+  const { t } = useTranslation();
   const ramp = state.speedRamp;
   // In drill mode, use ramp's beatsPerBar; otherwise use timeSignature
   const beatsPerMeasure = activeTab === "drill"
@@ -136,7 +138,7 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
           <button
             className="zen-top-btn zen-theme-trigger"
             onClick={() => setThemeOpen(!themeOpen)}
-            data-tooltip={!themeOpen ? zenStyle.charAt(0).toUpperCase() + zenStyle.slice(1) : undefined}
+            data-tooltip={!themeOpen ? t(`zen.styles.${zenStyle}`) : undefined}
           >
             {zenStyleIcon(zenStyle)}
           </button>
@@ -146,7 +148,7 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
                 key={s}
                 className={`zen-theme-option ${zenStyle === s ? "active" : ""}`}
                 onClick={() => handleZenStyle(s)}
-                data-tooltip={s.charAt(0).toUpperCase() + s.slice(1)}
+                data-tooltip={t(`zen.styles.${s}`)}
               >
                 {zenStyleIcon(s)}
               </button>
@@ -154,7 +156,7 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
           </div>
         </div>
         {/* Fullscreen toggle */}
-        <button className="zen-top-btn" onClick={toggleFullscreen} data-tooltip="Fullscreen">
+        <button className="zen-top-btn" onClick={toggleFullscreen} data-tooltip={t("zen.fullscreen")}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" />
             <line x1="21" y1="3" x2="14" y2="10" /><line x1="3" y1="21" x2="10" y2="14" />
@@ -167,13 +169,13 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
         <div className="fs-center">
           {activeTab === "drill" && (
             <div className="fs-ramp-info" style={{ visibility: ramp.active && !(ramp.warmupCount < ramp.warmupBeats) ? "visible" : "hidden" }}>
-              <span className="fs-ramp-step">Step {ramp.currentStep + 1}</span>
+              <span className="fs-ramp-step">{t("zen.rampStep", { step: ramp.currentStep + 1 })}</span>
               <span className="fs-ramp-target">→ {ramp.targetBpm}</span>
             </div>
           )}
           {activeTab === "drill" && ramp.active && ramp.warmupCount < ramp.warmupBeats ? (
             <>
-              <div className="fs-warmup-label">Starting in</div>
+              <div className="fs-warmup-label">{t("zen.startingIn")}</div>
               <div className="fs-bpm fs-warmup-number">{ramp.warmupBeats - ramp.warmupCount}</div>
             </>
           ) : (
@@ -339,7 +341,7 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
             const next = ts >= 7 ? 0 : ts + 1;
             setTimeSignature(next);
           }}>
-            {state.timeSignature >= 2 ? `${state.timeSignature}/4` : state.timeSignature === 1 ? "All" : "Off"}
+            {state.timeSignature >= 2 ? `${state.timeSignature}/4` : state.timeSignature === 1 ? t("zen.timeSigAll") : t("zen.timeSigOff")}
           </button>
         )}
         {activeTab !== "drill" && (
@@ -352,7 +354,7 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
 
       {/* Exit hint */}
       <div className="fs-exit-hint">
-        Double-click or press Esc to exit
+        {t("zen.exitHint")}
       </div>
     </div>
   );

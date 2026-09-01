@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { Dispatch, SetStateAction } from "react";
 import type {
   BrainTier,
@@ -81,6 +82,7 @@ export function CoachSettingsSection({
   onStartDownload: (tier: ModelTier) => void;
   onRequestDownload: (tier: ModelTier) => void;
 }) {
+  const { t } = useTranslation();
   // Tracks the in-flight `deleteModels()` IPC call so the Remove button
   // can show a "Removing…" state and stays clickable-but-disabled. The
   // backend does `std::fs::remove_dir_all` on a 4 GB tree, which on
@@ -202,10 +204,10 @@ export function CoachSettingsSection({
           tonally distinct from the accent-pink active toggle state so
           the badge actually reads as a callout rather than chrome. */}
       <div className="settings-section-title">
-        <h2>Practice Coach</h2>
+        <h2>{t("settings.coach.title")}</h2>
         <span
           className="experimental-badge"
-          title="Experimental — behaviour may change between builds"
+          title={t("settings.coach.betaHint")}
         >
           <svg
             viewBox="0 0 24 24"
@@ -220,28 +222,28 @@ export function CoachSettingsSection({
             <path d="M8.5 2h7" />
             <path d="M7 16h10" />
           </svg>
-          Beta
+          {t("settings.coach.beta")}
         </span>
       </div>
       <div className="setting-row">
         <div className="setting-label">
-          <label>Brain</label>
-          <span className="setting-hint">Local AI model for coaching</span>
+          <label>{t("settings.coach.brain")}</label>
+          <span className="setting-hint">{t("settings.coach.brainHint")}</span>
         </div>
         <div className="toggle-group">
           <button
             className={`toggle-btn ${coachBrainTier === "off" ? "active" : ""}`}
-            data-tooltip="No AI coaching — timing feedback only"
+            data-tooltip={t("settings.coach.brainOffHint")}
             onClick={() => {
               setCoachBrainTier("off");
               storeSave("coachBrainTier", "off");
             }}
           >
-            Off
+            {t("common.off")}
           </button>
           <button
             className={`toggle-btn ${coachBrainTier === "standard" ? "active" : ""}`}
-            data-tooltip="Fast & lightweight model. ~1.1 GB download, ~2 GB RAM while running. Good for real-time tips."
+            data-tooltip={t("settings.coach.brainStandardHint")}
             disabled={modelDownloading}
             onClick={() => {
               if (modelStatus?.brainReady && modelStatus.brainTier === "standard") {
@@ -253,11 +255,11 @@ export function CoachSettingsSection({
               }
             }}
           >
-            Standard
+            {t("settings.coach.brainStandard")}
           </button>
           <button
             className={`toggle-btn ${coachBrainTier === "full" ? "active" : ""}`}
-            data-tooltip="Larger model with deeper analysis. ~2.1 GB download, ~4 GB RAM. Richer feedback and practice plans."
+            data-tooltip={t("settings.coach.brainFullHint")}
             disabled={modelDownloading}
             onClick={() => {
               if (modelStatus?.brainReady && modelStatus.brainTier === "full") {
@@ -269,18 +271,18 @@ export function CoachSettingsSection({
               }
             }}
           >
-            Full
+            {t("settings.coach.brainFull")}
           </button>
         </div>
       </div>
       <div className="setting-row">
         <div className="setting-label">
-          <label>Scoring Mode</label>
-          <span className="setting-hint">How the coach grades your timing</span>
+          <label>{t("settings.coach.scoringMode")}</label>
+          <span className="setting-hint">{t("settings.coach.scoringModeHint")}</span>
           <span className="setting-hint" style={{ marginTop: 4 }}>
             {coachMode === "pro"
-              ? "Every subdivision graded against the beat grid. Designed for players drilling tight accuracy — significantly more demanding."
-              : "Grades on feel and groove — the right mode for most players. Rewards locking into the pulse, not subdivision-by-subdivision precision."}
+              ? t("settings.coach.scoringProDesc")
+              : t("settings.coach.scoringDefaultDesc")}
           </span>
         </div>
         <div className="toggle-group">
@@ -293,15 +295,15 @@ export function CoachSettingsSection({
                 storeSave("coachMode", mode);
               }}
             >
-              {mode === "default" ? "Default" : "Pro"}
+              {mode === "default" ? t("settings.coach.scoringDefault") : t("settings.coach.scoringPro")}
             </button>
           ))}
         </div>
       </div>
       <div className="setting-row">
         <div className="setting-label">
-          <label>Instrument</label>
-          <span className="setting-hint">Tunes detection and coaching</span>
+          <label>{t("settings.coach.instrument")}</label>
+          <span className="setting-hint">{t("settings.coach.instrumentHint")}</span>
         </div>
         <InstrumentDropdown
           value={instrument}
@@ -325,8 +327,8 @@ export function CoachSettingsSection({
       </div>
       <div className="setting-row">
         <div className="setting-label">
-          <label>Voice</label>
-          <span className="setting-hint">Audio feedback delivery</span>
+          <label>{t("settings.coach.voice")}</label>
+          <span className="setting-hint">{t("settings.coach.voiceHint")}</span>
         </div>
         <div className="toggle-group">
           {(["silent", "voice"] as const).map((mode) => (
@@ -335,8 +337,8 @@ export function CoachSettingsSection({
               className={`toggle-btn ${coachVoiceMode === mode ? "active" : ""}`}
               data-tooltip={
                 mode === "silent"
-                  ? "No audio — feedback appears as text only"
-                  : "Spoken feedback using local text-to-speech after each session segment"
+                  ? t("settings.coach.voiceSilentHint")
+                  : t("settings.coach.voiceSpeakHint")
               }
               disabled={coachBrainTier === "off" || (mode === "voice" && availableVoices.length === 0)}
               onClick={() => {
@@ -344,7 +346,7 @@ export function CoachSettingsSection({
                 storeSave("coachVoiceMode", mode);
               }}
             >
-              {mode.charAt(0).toUpperCase() + mode.slice(1)}
+              {t(`settings.coach.voiceModes.${mode}`)}
             </button>
           ))}
         </div>
@@ -356,8 +358,8 @@ export function CoachSettingsSection({
           gated by `voiceMode` regardless). */}
       <div className="setting-row">
         <div className="setting-label">
-          <label>Verbosity</label>
-          <span className="setting-hint">How often the coach speaks</span>
+          <label>{t("settings.coach.verbosity")}</label>
+          <span className="setting-hint">{t("settings.coach.verbosityHint")}</span>
         </div>
         <div className="toggle-group">
           {(["less", "default", "more"] as const).map((mode) => (
@@ -366,10 +368,10 @@ export function CoachSettingsSection({
               className={`toggle-btn ${coachVerbosity === mode ? "active" : ""}`}
               data-tooltip={
                 mode === "less"
-                  ? "Coach only speaks urgent events; calm nudges stay written-only"
+                  ? t("settings.coach.verbosityLessHint")
                   : mode === "default"
-                    ? "Coach speaks only when the gatekeeper picks the spoken tier"
-                    : "Coach also speaks written-tier nudges (more talkative)"
+                    ? t("settings.coach.verbosityDefaultHint")
+                    : t("settings.coach.verbosityMoreHint")
               }
               disabled={coachBrainTier === "off" || coachVoiceMode !== "voice"}
               onClick={() => {
@@ -377,7 +379,7 @@ export function CoachSettingsSection({
                 storeSave("coachVerbosity", mode);
               }}
             >
-              {mode === "less" ? "Less" : mode === "default" ? "Default" : "More"}
+              {t(`settings.coach.verbosityModes.${mode}`)}
             </button>
           ))}
         </div>
@@ -389,15 +391,15 @@ export function CoachSettingsSection({
           other locked controls. */}
       <div className="setting-row">
         <div className="setting-label">
-          <label>Voice Name</label>
+          <label>{t("settings.coach.voiceName")}</label>
           <span className="setting-hint">
             {coachBrainTier === "off"
-              ? "Enable the AI Brain to choose a voice"
+              ? t("settings.coach.voiceNameBrainOffHint")
               : coachVoiceMode !== "voice"
-                ? "Switch Voice on to choose a personality"
+                ? t("settings.coach.voiceNameSilentHint")
                 : modelStatus?.voiceReady
-                  ? "Choose a voice personality"
-                  : "Download voices to enable"}
+                  ? t("settings.coach.voiceNameReadyHint")
+                  : t("settings.coach.voiceNameDownloadHint")}
           </span>
         </div>
         <div className="toggle-group">
@@ -420,16 +422,16 @@ export function CoachSettingsSection({
             const titleText = !diag
               ? downloaded
                 ? name
-                : `${name} — not downloaded`
+                : t("settings.coach.voiceNotDownloaded", { name })
               : diag.ready
                 ? name
                 : diag.engineMissing
-                  ? `${name} — speech engine missing (click Repair below)`
+                  ? t("settings.coach.voiceEngineMissing", { name })
                   : diag.corrupted
-                    ? `${name} — voice file is corrupted (click Repair below)`
+                    ? t("settings.coach.voiceCorrupted", { name })
                     : diag.onnxMissing || diag.jsonMissing
-                      ? `${name} — voice files missing (click Repair below)`
-                      : `${name} — unavailable`;
+                      ? t("settings.coach.voiceFilesMissing", { name })
+                      : t("settings.coach.voiceUnavailable", { name });
             const speaking = speakingVoiceId === id;
             return (
               <button
@@ -496,10 +498,10 @@ export function CoachSettingsSection({
           <div className="coach-download-section coach-voices-section">
             <p className="setting-hint" style={{ marginBottom: 8 }}>
               {voiceDiagnostics.some((d) => d.engineMissing)
-                ? "Speech engine is missing — voices can't speak until it's reinstalled."
+                ? t("settings.coach.voicesEngineMissing")
                 : voiceDiagnostics.some((d) => d.corrupted)
-                  ? "One or more voice files look corrupted. Re-download to fix."
-                  : "Voices aren't installed yet — download to enable spoken coaching."}
+                  ? t("settings.coach.voicesCorrupted")
+                  : t("settings.coach.voicesNotInstalled")}
             </p>
             {/* Always render the button so it doesn't pop in/out of
                 the layout — instead disable it while a download is in
@@ -534,7 +536,7 @@ export function CoachSettingsSection({
                 <polyline points="7 10 12 15 17 10" />
                 <line x1="12" y1="15" x2="12" y2="3" />
               </svg>
-              {modelDownloading ? "Downloading…" : "Download voices"}
+              {modelDownloading ? t("settings.coach.downloading") : t("settings.coach.downloadVoices")}
             </button>
           </div>
         )}
@@ -548,7 +550,12 @@ export function CoachSettingsSection({
       {modelStatus?.brainReady && (
         <div className="coach-download-section coach-manage-section">
           <p className="setting-hint" style={{ marginBottom: 8 }}>
-            {modelStatus.brainTier === "full" ? "Full" : "Standard"} coach installed ({formatBytes(modelStatus.brainSizeBytes + modelStatus.voiceSizeBytes)})
+            {t("settings.coach.installed", {
+              tier: modelStatus.brainTier === "full"
+                ? t("settings.coach.brainFull")
+                : t("settings.coach.brainStandard"),
+              size: formatBytes(modelStatus.brainSizeBytes + modelStatus.voiceSizeBytes),
+            })}
           </p>
           <button
             className="coach-download-btn"
@@ -588,7 +595,7 @@ export function CoachSettingsSection({
               <line x1="10" y1="11" x2="10" y2="17" />
               <line x1="14" y1="11" x2="14" y2="17" />
             </svg>
-            {removing ? "Removing…" : "Remove models"}
+            {removing ? t("settings.coach.removing") : t("settings.coach.removeModels")}
           </button>
         </div>
       )}

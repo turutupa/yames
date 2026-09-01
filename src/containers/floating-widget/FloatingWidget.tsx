@@ -1,5 +1,6 @@
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useDrag } from "../../hooks/useDrag";
 import { useMetronome } from "../../hooks/useMetronome";
 import {
@@ -21,26 +22,6 @@ const SUBDIVISION_LABELS: Record<Subdivision, string> = {
   5: "♪⁵",
   6: "♬⁶",
 };
-
-const SUBDIVISION_NAMES: Record<Subdivision, string> = {
-  1: "Quarter",
-  2: "Eighth",
-  3: "Triplet",
-  4: "16th",
-  5: "Quintuplet",
-  6: "Sextuplet",
-};
-
-const TIME_SIG_OPTIONS = [
-  { value: 0, label: "Never" },
-  { value: 1, label: "Always" },
-  { value: 2, label: "2/4" },
-  { value: 3, label: "3/4" },
-  { value: 4, label: "4/4" },
-  { value: 5, label: "5/4" },
-  { value: 6, label: "6/8" },
-  { value: 7, label: "7/8" },
-];
 
 const IS_MAC = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 
@@ -79,6 +60,7 @@ function eventToCombo(e: KeyboardEvent): string {
 const TIME_SIG_VALUES = [0, 1, 2, 3, 4, 5, 6, 7];
 
 export function FloatingWidget() {
+  const { t } = useTranslation();
   useDrag();
   const { state, currentBeat } = useMetronome();
   const [editing, setEditing] = useState(false);
@@ -234,7 +216,7 @@ export function FloatingWidget() {
         <button
           className="fw-settings"
           onClick={() => showMain()}
-          title="Open main window"
+          title={t("widget.openMain")}
         >
           <svg
             width="12"
@@ -261,16 +243,11 @@ export function FloatingWidget() {
   };
 
   const cycleTimeSig = () => {
-    const idx = TIME_SIG_OPTIONS.findIndex(
-      (o) => o.value === state.timeSignature,
-    );
-    const next = TIME_SIG_OPTIONS[(idx + 1) % TIME_SIG_OPTIONS.length];
-    setTimeSignature(next.value);
+    const idx = TIME_SIG_VALUES.indexOf(state.timeSignature);
+    setTimeSignature(TIME_SIG_VALUES[(idx + 1) % TIME_SIG_VALUES.length]);
   };
 
-  const timeSigLabel =
-    TIME_SIG_OPTIONS.find((o) => o.value === state.timeSignature)?.label ||
-    "4/4";
+  const timeSigLabel = t(`meter.${state.timeSignature}`);
   const rampActive = state.speedRamp.active;
 
   return (
@@ -317,7 +294,7 @@ export function FloatingWidget() {
         <button
           className="fw-settings"
           onClick={() => showMain()}
-          title="Open main window"
+          title={t("widget.openMain")}
         >
           <svg
             width="12"
@@ -340,7 +317,10 @@ export function FloatingWidget() {
           {rampActive && (
             <span
               className="fw-ramp-badge"
-              title={`Ramp: ${state.speedRamp.currentBpm} → ${state.speedRamp.targetBpm}`}
+              title={t("widget.ramp", {
+                current: state.speedRamp.currentBpm,
+                target: state.speedRamp.targetBpm,
+              })}
             >
               ⚡
             </span>
@@ -348,20 +328,20 @@ export function FloatingWidget() {
           <button
             className="fw-sub-btn"
             onClick={cycleSubdivision}
-            title={SUBDIVISION_NAMES[state.subdivision]}
+            title={t(`subdiv.${state.subdivision}`)}
           >
             <span className="fw-sub-icon">
               {SUBDIVISION_LABELS[state.subdivision]}
             </span>
             <span className="fw-sub-name">
-              {SUBDIVISION_NAMES[state.subdivision]}
+              {t(`subdiv.${state.subdivision}`)}
             </span>
           </button>
 
           <button
             className="fw-sub-btn"
             onClick={cycleTimeSig}
-            title="Time Signature"
+            title={t("widget.timeSignature")}
           >
             <span className="fw-sub-name">{timeSigLabel}</span>
           </button>

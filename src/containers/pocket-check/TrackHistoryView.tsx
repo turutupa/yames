@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 import type { GameResult } from "./trackTypes";
-import { RATING_COLORS, RATING_LABELS } from "./trackTypes";
+import { RATING_COLORS } from "./trackTypes";
 
 /** History list view — shows past Pocket Check sessions with a clear-all confirm. */
 export function TrackHistoryView({
@@ -17,6 +18,7 @@ export function TrackHistoryView({
   onClearAll: () => void;
   onStartSession: () => void;
 }) {
+  const { t, i18n } = useTranslation();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   return (
@@ -33,10 +35,10 @@ export function TrackHistoryView({
             />
           </svg>
         </button>
-        <h3>History</h3>
+        <h3>{t("pocketCheck.history")}</h3>
         <button
           className="track-toolbar-btn track-history-delete"
-          data-tooltip="Clear all"
+          data-tooltip={t("pocketCheck.clearAll")}
           onClick={() => setShowClearConfirm(true)}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -57,13 +59,13 @@ export function TrackHistoryView({
               className="track-history-rating"
               style={{ color: RATING_COLORS[game.overallRating] }}
             >
-              {RATING_LABELS[game.overallRating]}
+              {t(`pocketCheck.ratings.${game.overallRating}`)}
             </span>
             <span className="track-history-detail">
-              {game.bpm} BPM · {game.hitRate}% hits
+              {game.bpm} BPM · {t("pocketCheck.hits", { count: game.hitRate })}
             </span>
             <span className="track-history-date">
-              {new Date(game.date).toLocaleDateString(undefined, {
+              {new Date(game.date).toLocaleDateString(i18n.language, {
                 month: "short",
                 day: "numeric",
               })}
@@ -73,16 +75,16 @@ export function TrackHistoryView({
       </div>
       {createPortal(
         <button className="play-btn full-width track-floating-cta" onClick={onStartSession}>
-          Try Again
+          {t("pocketCheck.tryAgain")}
         </button>,
         document.body
       )}
       {showClearConfirm && (
         <div className="keybinding-overlay" onClick={() => setShowClearConfirm(false)}>
           <div className="keybinding-capture" onClick={(e) => e.stopPropagation()}>
-            <div className="keybinding-capture-title">Clear History</div>
+            <div className="keybinding-capture-title">{t("pocketCheck.clearHistoryTitle")}</div>
             <p className="about-text" style={{ textAlign: "center", marginBottom: 0 }}>
-              Delete all {history.length} saved games? This cannot be undone.
+              {t("pocketCheck.clearConfirm", { count: history.length })}
             </p>
             <div className="keybinding-capture-actions">
               <button
@@ -92,13 +94,13 @@ export function TrackHistoryView({
                   setShowClearConfirm(false);
                 }}
               >
-                Delete All
+                {t("pocketCheck.deleteAll")}
               </button>
               <button
                 className="keybinding-btn-reset"
                 onClick={() => setShowClearConfirm(false)}
               >
-                Cancel
+                {t("pocketCheck.cancel")}
               </button>
             </div>
           </div>

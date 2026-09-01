@@ -1,4 +1,5 @@
 import { useEffect, useRef, type Ref } from "react";
+import { useTranslation } from "react-i18next";
 import { setSoundType, setVolume, showFloating } from "../../ipc";
 import { SOUND_TYPES } from "../../constants/metronome";
 import type { AppState } from "../../types";
@@ -141,6 +142,7 @@ export function MainHeader({
   setTtsVolume,
   voiceEnabled,
 }: MainHeaderProps) {
+  const { t } = useTranslation();
   const ttsVolumePercent = Math.round(ttsVolume * 100);
 
   return (
@@ -150,29 +152,29 @@ export function MainHeader({
           <button
             className={`tab-btn ${view === "beat" ? "active" : ""}`}
             onClick={() => setView("beat")}
-            aria-label="Metronome"
+            aria-label={t("nav.metronome")}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 18V5l12-2v13" />
               <circle cx="6" cy="18" r="3" />
               <circle cx="18" cy="16" r="3" />
             </svg>
-            <span className="tab-label">Metronome</span>
+            <span className="tab-label">{t("nav.metronome")}</span>
           </button>
           <button
             className={`tab-btn ${view === "drill" ? "active" : ""}`}
             onClick={() => setView("drill")}
-            aria-label="Drill"
+            aria-label={t("nav.drill")}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
             </svg>
-            <span className="tab-label">Drill</span>
+            <span className="tab-label">{t("nav.drill")}</span>
           </button>
           <button
             className={`tab-btn ${view === "track" ? "active" : ""}`}
             onClick={() => setView("track")}
-            aria-label="Pocket Check"
+            aria-label={t("nav.pocketCheck")}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" />
@@ -180,7 +182,7 @@ export function MainHeader({
               <line x1="12" y1="19" x2="12" y2="22" />
               <line x1="8" y1="22" x2="16" y2="22" />
             </svg>
-            <span className="tab-label">Pocket Check</span>
+            <span className="tab-label">{t("nav.pocketCheck")}</span>
           </button>
         </nav>
       )}
@@ -189,7 +191,7 @@ export function MainHeader({
           <button
             className="header-btn"
             onClick={() => setIsFullscreen(true)}
-            data-tooltip="Zen"
+            data-tooltip={t("tooltip.zen")}
           >
             <svg
               width="14"
@@ -212,7 +214,7 @@ export function MainHeader({
             <button
               className="header-btn"
               onClick={() => setSoundOpen(!soundOpen)}
-              data-tooltip={SOUND_TYPES.find((s) => s.id === state.soundType)?.name ?? "Click"}
+              data-tooltip={t(`sound.${SOUND_TYPES.find((s) => s.id === state.soundType)?.id ?? "click"}`)}
             >
               <span className="header-sound-icon">{SOUND_TYPES.find((s) => s.id === state.soundType)?.icon ?? "○"}</span>
             </button>
@@ -228,7 +230,7 @@ export function MainHeader({
                     }}
                   >
                     <span className="sub-dropdown-icon">{st.icon}</span>
-                    <span>{st.name}</span>
+                    <span>{t(`sound.${st.id}`)}</span>
                   </button>
                 ))}
               </div>
@@ -256,7 +258,7 @@ export function MainHeader({
           </button>
           <div className="header-volume-popover">
             <VolumeFader
-              label="Metronome"
+              label={t("volume.metronome")}
               value={volumePercent}
               onChange={(v) => setVolume(v)}
             />
@@ -264,11 +266,11 @@ export function MainHeader({
               data-tooltip={
                 voiceEnabled
                   ? undefined
-                  : "Enable Practice Coach voice in Settings"
+                  : t("tooltip.enableVoice")
               }
             >
               <VolumeFader
-                label="Voice"
+                label={t("volume.voice")}
                 value={ttsVolumePercent}
                 onChange={(v) => setTtsVolume(v)}
                 disabled={!voiceEnabled}
@@ -279,7 +281,7 @@ export function MainHeader({
         <button
           className="header-btn"
           onClick={() => showFloating()}
-          data-tooltip="Open widget"
+          data-tooltip={t("tooltip.openWidget")}
         >
           <svg
             width="14"
@@ -301,7 +303,7 @@ export function MainHeader({
             className="header-btn"
             onClick={() => setShareOpen(!shareOpen)}
             data-tooltip={
-              shareTooltip ? "Copied!" : !shareOpen ? "Share" : undefined
+              shareTooltip ? t("tooltip.copied") : !shareOpen ? t("tooltip.share") : undefined
             }
           >
             <svg
@@ -332,7 +334,7 @@ export function MainHeader({
               setView("settings");
             }
           }}
-          data-tooltip={view === "settings" ? "Back" : "Settings"}
+          data-tooltip={view === "settings" ? t("tooltip.back") : t("tooltip.settings")}
         >
           {view === "settings" ? (
             <svg

@@ -1,4 +1,5 @@
 import { useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { FEEDBACK_COLORS } from "../hooks/useEvaluation";
 import type { BeatFeedback } from "../types";
 
@@ -14,6 +15,7 @@ interface DriftMeterProps {
  * Recent average deviation drives the position.
  */
 export default function DriftMeter({ lastFeedback, avgDeviation, visible }: DriftMeterProps) {
+  const { t } = useTranslation();
   const needleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -32,7 +34,7 @@ export default function DriftMeter({ lastFeedback, avgDeviation, visible }: Drif
 
   return (
     <div className="drift-meter">
-      <span className="drift-label">Early</span>
+      <span className="drift-label">{t("driftMeter.early")}</span>
       <div className="drift-track">
         <div className="drift-center" />
         <div
@@ -41,7 +43,7 @@ export default function DriftMeter({ lastFeedback, avgDeviation, visible }: Drif
           style={{ backgroundColor: color }}
         />
       </div>
-      <span className="drift-label">Late</span>
+      <span className="drift-label">{t("driftMeter.late")}</span>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { TapResult } from "./trackTypes";
 
 /**
@@ -19,6 +20,7 @@ export function TrackCalibratingView({
   onTap: () => void;
   onStop: () => void;
 }) {
+  const { t } = useTranslation();
   const calProgress = beatCount / calibrationBeats;
   return (
     <div
@@ -31,9 +33,9 @@ export function TrackCalibratingView({
     >
       <div className="track-live-header">
         <span className="track-live-beats warmup">
-          Calibrating {beatCount}/{calibrationBeats}
+          {t("pocketCheck.calibratingProgress", { count: beatCount, total: calibrationBeats })}
         </span>
-        <span className="track-live-taps">{taps.length} taps</span>
+        <span className="track-live-taps">{t("pocketCheck.tapsCount", { count: taps.length })}</span>
       </div>
 
       <div className="track-progress-ring">
@@ -48,7 +50,7 @@ export function TrackCalibratingView({
           />
         </svg>
         <div className="track-ring-center">
-          <span className="track-ring-label warmup">TAP</span>
+          <span className="track-ring-label warmup">{t("pocketCheck.tap")}</span>
           {taps.length > 0 && (
             <span
               className="track-last-offset"
@@ -62,7 +64,7 @@ export function TrackCalibratingView({
       </div>
 
       <div className="track-live-hint">
-        Tap naturally along with the clicks
+        {t("pocketCheck.calibratingHint")}
       </div>
 
       <button
@@ -75,7 +77,7 @@ export function TrackCalibratingView({
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
           <rect x="2" y="2" width="12" height="12" rx="1.5" />
         </svg>
-        Cancel
+        {t("pocketCheck.cancel")}
       </button>
     </div>
   );

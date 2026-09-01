@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { SHARE_OPTIONS, SHARE_URL } from "../../constants/metronome";
 import { openUrl } from "../../ipc";
 import { ShareIcon } from "../main-window/ShareMenuPopover";
@@ -16,12 +17,12 @@ export function SupportSection({
   shareTooltip: boolean;
   onShareOption: (opt: ShareOption) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <section className="settings-section about-section support-card">
-      <h2>Support</h2>
+      <h2>{t("settings.support.title")}</h2>
       <p className="about-text">
-        Yames is free and open source. If it helps your practice,
-        consider supporting development!
+        {t("settings.support.blurb")}
       </p>
       <div className="about-links">
         <button
@@ -31,7 +32,7 @@ export function SupportSection({
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
           </svg>
-          Buy me a coffee
+          {t("settings.support.buyCoffee")}
         </button>
         <button
           className="about-link-btn"
@@ -60,11 +61,11 @@ export function SupportSection({
             <line x1="2" y1="12" x2="22" y2="12" />
             <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
           </svg>
-          Website
+          {t("settings.support.website")}
         </button>
       </div>
       <p className="about-text" style={{ marginTop: 16 }}>
-        Know a musician who'd love this? Share it!
+        {t("settings.support.sharePrompt")}
       </p>
       <div className="about-links share-row">
         {SHARE_OPTIONS.map((opt) => (
@@ -74,7 +75,7 @@ export function SupportSection({
             onClick={() => onShareOption(opt)}
           >
             <ShareIcon id={opt.id} size={16} />
-            {opt.id === "copy" && shareTooltip ? "Copied!" : opt.label}
+            {opt.id === "copy" && shareTooltip ? t("tooltip.copied") : opt.label}
           </button>
         ))}
       </div>

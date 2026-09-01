@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
+import i18n from "../i18n";
 
 export type GamepadButtonId = string; // e.g. "gp:0:b:0"
 
@@ -11,7 +12,10 @@ function buttonId(gpIndex: number, btnIndex: number): GamepadButtonId {
 export function formatGamepadButton(id: string): string {
   const m = id.match(/^gp:(\d+):b:(\d+)$/);
   if (!m) return id;
-  return `Pad ${parseInt(m[1]) + 1} · Button ${parseInt(m[2]) + 1}`;
+  return i18n.t("settings.hotkeys.gamepadButton", {
+    pad: parseInt(m[1]) + 1,
+    btn: parseInt(m[2]) + 1,
+  });
 }
 
 /** Returns true if a binding string is a gamepad binding */

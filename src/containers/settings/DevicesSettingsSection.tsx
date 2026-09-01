@@ -1,5 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { AudioOutputDevice } from "../../types";
 import {
   clearCalibrationCacheEntry,
@@ -59,6 +60,7 @@ export function DevicesSettingsSection({
   onOpenInputTest: () => void;
   instrument: string;
 }) {
+  const { t } = useTranslation();
   // Find the selected input device object to read its channel count.
   const selectedInputDevice = evaluation.devices.find(
     (d) => d.name === evaluation.selectedDevice,
@@ -90,9 +92,9 @@ export function DevicesSettingsSection({
 
   return (
     <section className="hotkeys-section">
-      <h2>Devices</h2>
+      <h2>{t("settings.devices.title")}</h2>
       <div className="midi-device-section">
-        <label className="midi-label devices-subsection-label">Audio Output</label>
+        <label className="midi-label devices-subsection-label">{t("settings.devices.audioOutput")}</label>
         <div className="midi-device-row">
           <AudioOutputDropdown
             devices={audioOutputDevices}
@@ -108,7 +110,7 @@ export function DevicesSettingsSection({
               const devices = await listAudioOutputDevices();
               setAudioOutputDevices(devices);
             }}
-            title="Refresh audio devices"
+            title={t("settings.devices.refreshAudio")}
           >
             <RefreshIcon />
           </button>
@@ -120,13 +122,13 @@ export function DevicesSettingsSection({
               <line x1="12" y1="9" x2="12" y2="13" />
               <line x1="12" y1="17" x2="12.01" y2="17" />
             </svg>
-            <span>Bluetooth audio adds significant latency. Visual cues and sound may not sync perfectly.</span>
+            <span>{t("settings.devices.btLatencyWarning")}</span>
           </div>
         )}
       </div>
 
       <div className="midi-device-section" style={{ marginTop: 28 }}>
-        <label className="midi-label devices-subsection-label">Audio Input</label>
+        <label className="midi-label devices-subsection-label">{t("settings.devices.audioInput")}</label>
         <div className="midi-device-row">
           <AudioInputDropdown
             devices={evaluation.devices}
@@ -136,9 +138,9 @@ export function DevicesSettingsSection({
           <button
             className="input-test-btn"
             onClick={onOpenInputTest}
-            title="Test audio input"
+            title={t("settings.devices.testAudioInput")}
           >
-            Test
+            {t("settings.devices.test")}
           </button>
         </div>
         {/* Per-instrument calibration cache hint. Sits right under the
@@ -148,15 +150,16 @@ export function DevicesSettingsSection({
         {calEntry && (
           <div className="calibration-cache-hint">
             <span className="calibration-cache-text">
-              Calibrated for this device ({calEntry.offsetMs >= 0 ? "+" : ""}
-              {calEntry.offsetMs.toFixed(1)} ms)
+              {t("settings.devices.calibrated", {
+                offset: `${calEntry.offsetMs >= 0 ? "+" : ""}${calEntry.offsetMs.toFixed(1)}`,
+              })}
             </span>
             <button
               className="calibration-recalibrate-btn"
               onClick={handleRecalibrate}
-              title="Forget the cached offset; the next session re-learns it from scratch"
+              title={t("settings.devices.recalibrateHint")}
             >
-              Recalibrate
+              {t("settings.devices.recalibrate")}
             </button>
           </div>
         )}
@@ -174,14 +177,14 @@ export function DevicesSettingsSection({
           </div>
         )}
         {evaluation.selectedChannel >= 2 && (selectedInputDevice?.isInterface ?? false) && (
-          <span className="channel-picker-hint" title="Captures the Direct Monitor mix (your hardware inputs as heard in headphones). To capture DAW or app output, route it through your interface output in Focusrite Control.">
-            Loopback — captures your Direct Monitor mix (hardware inputs, not system audio)
+          <span className="channel-picker-hint" title={t("settings.devices.loopbackHint")}>
+            {t("settings.devices.loopback")}
           </span>
         )}
       </div>
 
       <div className="midi-device-section" style={{ marginTop: 28 }}>
-        <label className="midi-label devices-subsection-label">MIDI</label>
+        <label className="midi-label devices-subsection-label">{t("settings.devices.midi")}</label>
         <div className="midi-device-row">
           <MidiDeviceDropdown
             devices={midi.devices}
@@ -197,7 +200,7 @@ export function DevicesSettingsSection({
           <button
             className="midi-refresh-btn"
             onClick={() => midi.refreshDevices()}
-            title="Refresh MIDI devices"
+            title={t("settings.devices.refreshMidi")}
           >
             <RefreshIcon />
           </button>
@@ -205,7 +208,7 @@ export function DevicesSettingsSection({
         {!midi.connectedDevice && midi.devices.length === 0 && (
           <div className="midi-status">
             <span className="midi-status-dot" />
-            No MIDI devices detected
+            {t("settings.devices.noMidi")}
           </div>
         )}
       </div>

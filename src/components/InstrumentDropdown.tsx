@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { INSTRUMENTS } from "../constants/metronome";
 import { INSTRUMENT_ICONS } from "./MetronomeIcons";
 
@@ -12,6 +13,7 @@ export function InstrumentDropdown({
   onChange: (value: string) => void;
   disabled?: boolean;
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -38,7 +40,7 @@ export function InstrumentDropdown({
       >
         <span className="instrument-dropdown-value">
           {INSTRUMENT_ICONS[selected.id]}
-          {selected.name}
+          {t(`instrument.${selected.id}`)}
         </span>
         <svg
           className="instrument-dropdown-chevron"
@@ -84,9 +86,9 @@ export function InstrumentDropdown({
                 </svg>
               )}
               <span className="instrument-dropdown-icon">{INSTRUMENT_ICONS[inst.id]}</span>
-              <span>{inst.name}</span>
+              <span>{t(`instrument.${inst.id}`)}</span>
               {inst.soon && (
-                <span className="instrument-dropdown-soon">SOON</span>
+                <span className="instrument-dropdown-soon">{t("common.soon")}</span>
               )}
             </button>
           ))}

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { Preset } from "../../types";
 
 interface PresetSaveBarProps {
@@ -23,13 +24,14 @@ export function PresetSaveBar({
   onUpdate,
   onSave,
 }: PresetSaveBarProps) {
+  const { t } = useTranslation();
   return (
     <div className="preset-save-area">
       {activePreset && (
         <button
           className="preset-active-name"
           onClick={() => onRename(activePreset.id)}
-          title="Rename preset"
+          title={t("presets.renameTooltip")}
         >
           {activePreset.name}
           {presetDirty ? " •" : ""}
@@ -41,7 +43,7 @@ export function PresetSaveBar({
             presetDirty ? "preset-save-btn--dirty" : ""
           } ${updateFeedback ? "preset-save-btn--feedback" : ""}`}
           onClick={onUpdate}
-          title={presetDirty ? "Update preset" : "No changes to save"}
+          title={presetDirty ? t("presets.updateTooltip") : t("presets.noChangesToSave")}
         >
           {updateFeedback ? (
             <>
@@ -57,7 +59,7 @@ export function PresetSaveBar({
               >
                 <polyline points="20 6 9 17 4 12" />
               </svg>
-              <span className="preset-save-btn-label">Updated!</span>
+              <span className="preset-save-btn-label">{t("presets.updated")}</span>
             </>
           ) : (
             <>
@@ -75,7 +77,7 @@ export function PresetSaveBar({
                 <path d="M5 20h14" />
               </svg>
               <span className="preset-save-btn-label">
-                {presetDirty ? "Update" : "No changes"}
+                {presetDirty ? t("presets.update") : t("presets.noChanges")}
               </span>
             </>
           )}
@@ -84,7 +86,7 @@ export function PresetSaveBar({
         <button
           className="preset-save-btn preset-save-btn--save"
           onClick={onSave}
-          title="Save preset"
+          title={t("presets.save")}
         >
           <svg
             width="13"
@@ -100,7 +102,7 @@ export function PresetSaveBar({
             <polyline points="17 21 17 13 7 13 7 21" />
             <polyline points="7 3 7 8 15 8" />
           </svg>
-          <span className="preset-save-btn-label">Save preset</span>
+          <span className="preset-save-btn-label">{t("presets.save")}</span>
         </button>
       )}
     </div>

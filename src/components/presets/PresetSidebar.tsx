@@ -1,4 +1,5 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { deletePreset, listPresets, savePreset } from "../../ipc";
 import type { AppState, Preset } from "../../types";
 
@@ -103,6 +104,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   } | null>(null);
   const [renaming, setRenaming] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const renameRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -283,7 +285,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
           <button
             className="preset-sidebar-collapsed-tab"
             onClick={onToggle}
-            title={shortcut ? `Open presets (${shortcut})` : "Open presets"}
+            title={shortcut ? t("presets.openWithShortcut", { shortcut }) : t("presets.open")}
           >
             {toggleIcon}
           </button>
@@ -291,13 +293,13 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
         {isOpen && (
         <>
         <div className="preset-sidebar-header">
-          <span className="preset-sidebar-title">Presets</span>
+          <span className="preset-sidebar-title">{t("presets.title")}</span>
           <div className="preset-sidebar-header-actions">
             {viewPresets.length < MAX_PRESETS && (
               <button
                 className="preset-sidebar-add"
                 onClick={() => setAdding(true)}
-                title="Save current settings"
+                title={t("presets.saveCurrent")}
               >
                 +
               </button>
@@ -305,7 +307,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
             <button
               className="preset-sidebar-toggle-inner"
               onClick={onToggle}
-              title={shortcut ? `Close presets (${shortcut})` : "Close presets"}
+              title={shortcut ? t("presets.closeWithShortcut", { shortcut }) : t("presets.close")}
             >
               {toggleIcon}
             </button>
@@ -322,7 +324,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               ref={searchRef}
               className="preset-search-input"
               type="text"
-              placeholder="Search..."
+              placeholder={t("presets.searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => {
@@ -340,7 +342,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
                 ref={inputRef}
                 className="preset-sidebar-name-input"
                 value={newName}
-                placeholder="Name..."
+                placeholder={t("presets.namePlaceholder")}
                 onChange={(e) => setNewName(e.target.value)}
                 onBlur={handleSave}
                 onKeyDown={(e) => {
@@ -391,7 +393,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
           ))}
           {presets.length === 0 && !adding && (
             <div className="preset-sidebar-empty">
-              {search.trim() ? "No results" : "No presets yet"}
+              {search.trim() ? t("presets.noResults") : t("presets.empty")}
             </div>
           )}
         </div>
@@ -416,14 +418,14 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               setContextMenu(null);
             }}
           >
-            Rename
+            {t("presets.rename")}
           </button>
-          <button onClick={() => handleUpdate(contextMenu.id)}>Update</button>
+          <button onClick={() => handleUpdate(contextMenu.id)}>{t("presets.update")}</button>
           <button
             className="preset-context-delete"
             onClick={() => handleDelete(contextMenu.id)}
           >
-            Delete
+            {t("presets.delete")}
           </button>
         </div>
       )}

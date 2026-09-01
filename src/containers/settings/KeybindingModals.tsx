@@ -1,3 +1,5 @@
+import { Trans, useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { HOTKEYS } from "../../hotkeys";
 
 export type BindingTarget = {
@@ -8,10 +10,14 @@ export type BindingTarget = {
 export type PendingKeyConflict = {
   combo: string;
   conflictAction: string;
-  conflictActionLabel: string;
   targetAction: string;
-  targetActionLabel: string;
   type: "key" | "global";
+};
+
+/** Resolve a hotkey action id to its localized display label. */
+const actionLabel = (id: string, t: TFunction) => {
+  const hk = HOTKEYS.find((h) => h.id === id);
+  return hk ? t(`settings.hotkeys.actions.${hk.id}`) : id;
 };
 
 export type MidiConflict = {
@@ -28,21 +34,22 @@ export function ResetKeybindingsConfirm({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="keybinding-overlay" onClick={onCancel}>
       <div className="keybinding-capture" onClick={(e) => e.stopPropagation()}>
-        <span className="keybinding-capture-title">Reset all keybindings?</span>
+        <span className="keybinding-capture-title">{t("keybindings.resetTitle")}</span>
         <div className="keybinding-capture-display">
           <span className="keybinding-capture-waiting">
-            This will restore all keyboard bindings to their defaults.
+            {t("keybindings.resetBody")}
           </span>
         </div>
         <div className="keybinding-capture-actions">
           <button className="keybinding-btn-reset" onClick={onConfirm}>
-            Reset
+            {t("keybindings.resetConfirm")}
           </button>
           <button className="keybinding-btn-remove" onClick={onCancel}>
-            Cancel
+            {t("keybindings.cancel")}
           </button>
         </div>
       </div>
@@ -64,10 +71,11 @@ export function MidiConflictDialog({
   onAccept: () => void;
   onReject: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="keybinding-overlay" onClick={onReject}>
       <div className="keybinding-capture" onClick={(e) => e.stopPropagation()}>
-        <span className="keybinding-capture-title">MIDI Conflict</span>
+        <span className="keybinding-capture-title">{t("keybindings.midiConflictTitle")}</span>
         <div className="conflict-body">
           <div className="conflict-signal">
             <span className="conflict-signal-badge">
@@ -78,25 +86,22 @@ export function MidiConflictDialog({
             </span>
           </div>
           <p className="conflict-message">
-            is already bound to{" "}
-            <strong>
-              {HOTKEYS.find((h) => h.id === conflict.existingBinding.action)?.action
-                ?? conflict.existingBinding.action}
-            </strong>.
-            <br />
-            Overwrite and assign to{" "}
-            <strong>
-              {HOTKEYS.find((h) => h.id === conflict.targetAction)?.action
-                ?? conflict.targetAction}
-            </strong>?
+            <Trans
+              i18nKey="keybindings.conflictBody"
+              values={{
+                existing: actionLabel(conflict.existingBinding.action, t),
+                target: actionLabel(conflict.targetAction, t),
+              }}
+              components={{ strong: <strong />, br: <br /> }}
+            />
           </p>
         </div>
         <div className="keybinding-capture-actions">
           <button className="keybinding-btn-reset" onClick={onReject}>
-            Cancel
+            {t("keybindings.cancel")}
           </button>
           <button className="conflict-accept-btn" onClick={onAccept}>
-            Overwrite
+            {t("keybindings.overwrite")}
           </button>
         </div>
         <label className="conflict-dont-ask">
@@ -105,7 +110,7 @@ export function MidiConflictDialog({
             checked={autoAccept}
             onChange={(e) => onAutoAcceptChange(e.target.checked)}
           />
-          Don't ask again
+          {t("keybindings.dontAskAgain")}
         </label>
       </div>
     </div>
@@ -136,58 +141,64 @@ export function KeybindingCaptureModal({
   onAcceptConflict: () => void;
   onRejectConflict: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="keybinding-overlay" onClick={onDismiss}>
       <div className="keybinding-capture" onClick={(e) => e.stopPropagation()}>
         {pendingKeyConflict ? (
           <>
-            <span className="keybinding-capture-title">Hotkey Conflict</span>
+            <span className="keybinding-capture-title">{t("keybindings.hotkeyConflictTitle")}</span>
             <div className="conflict-body">
               <div className="conflict-signal">
                 <span className="conflict-signal-badge">{pendingKeyConflict.combo}</span>
               </div>
               <p className="conflict-message">
-                is already bound to{" "}
-                <strong>{pendingKeyConflict.conflictActionLabel}</strong>.
-                <br />
-                Overwrite and assign to{" "}
-                <strong>{pendingKeyConflict.targetActionLabel}</strong>?
+                <Trans
+                  i18nKey="keybindings.conflictBody"
+                  values={{
+                    existing: actionLabel(pendingKeyConflict.conflictAction, t),
+                    target: actionLabel(pendingKeyConflict.targetAction, t),
+                  }}
+                  components={{ strong: <strong />, br: <br /> }}
+                />
               </p>
             </div>
             <div className="keybinding-capture-actions">
               <button className="keybinding-btn-reset" onClick={onRejectConflict}>
-                Cancel
+                {t("keybindings.cancel")}
               </button>
               <button className="conflict-accept-btn" onClick={onAcceptConflict}>
-                Overwrite
+                {t("keybindings.overwrite")}
               </button>
             </div>
           </>
         ) : (
           <>
             <span className="keybinding-capture-title">
-              {HOTKEYS.find((hk) => hk.id === target.id)?.action} —{" "}
-              {target.type === "key" ? "Keyboard" : "Global"}
+              {t("keybindings.captureTitle", {
+                action: actionLabel(target.id, t),
+                type: t(target.type === "key" ? "keybindings.keyboard" : "keybindings.global"),
+              })}
             </span>
             <div className="keybinding-capture-display">
               {pendingKeys ? (
                 <span className="keybinding-capture-keys">{pendingKeys}</span>
               ) : (
                 <span className="keybinding-capture-waiting">
-                  Press desired key combination…
+                  {t("keybindings.pressKeys")}
                 </span>
               )}
             </div>
             <div className="keybinding-capture-actions">
               <button className="keybinding-btn-reset" onClick={onResetToDefault}>
-                Reset to default
+                {t("keybindings.resetToDefault")}
               </button>
               <button className="keybinding-btn-remove" onClick={onRemove}>
-                Remove
+                {t("keybindings.remove")}
               </button>
             </div>
             <span className="keybinding-capture-hint">
-              Press Escape to cancel
+              {t("keybindings.escapeHint")}
             </span>
           </>
         )}

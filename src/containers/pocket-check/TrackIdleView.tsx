@@ -1,5 +1,6 @@
+import { useTranslation } from "react-i18next";
 import type { Rating } from "./trackTypes";
-import { RATING_LABELS, RATING_COLORS } from "./trackTypes";
+import { RATING_COLORS } from "./trackTypes";
 
 /** Idle (welcome) view for Pocket Check before a session starts. */
 export function TrackIdleView({
@@ -19,24 +20,26 @@ export function TrackIdleView({
   onCalibrate: () => void;
   onShowHistory: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="track-view">
       <div className="track-intro view-stagger-item" style={{ animationDelay: '0ms' }}>
         <div className="track-intro-icon">🎯</div>
-        <h3>Pocket Check</h3>
+        <h3>{t("pocketCheck.title")}</h3>
         <p>
           {evaluationEnabled
-            ? `Play along with the metronome for ${scoredBeats} beats. Your instrument input is detected automatically.`
-            : `Tap along with the metronome for ${scoredBeats} beats. Click the target to log each beat.`}
+            ? t("pocketCheck.idleWithInstrument", { beats: scoredBeats })
+            : t("pocketCheck.idleWithTaps", { beats: scoredBeats })}
         </p>
         {savedOffset !== null ? (
           <p className="track-config-hint">
-            Calibrated: {savedOffset >= 0 ? "+" : ""}
-            {savedOffset.toFixed(1)}ms offset
+            {t("pocketCheck.calibratedHint", {
+              offset: `${savedOffset >= 0 ? "+" : ""}${savedOffset.toFixed(1)}`,
+            })}
           </p>
         ) : (
           <p className="track-config-hint">
-            Calibrate first for best accuracy on your system.
+            {t("pocketCheck.calibrateHint")}
           </p>
         )}
         <div className="track-ratings-legend">
@@ -48,7 +51,7 @@ export function TrackIdleView({
                 className="track-legend-dot"
                 style={{ background: RATING_COLORS[r] }}
               />
-              {RATING_LABELS[r]}
+              {t(`pocketCheck.ratings.${r}`)}
             </span>
           ))}
         </div>
@@ -57,21 +60,21 @@ export function TrackIdleView({
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
           <path d="M4 2.5a.5.5 0 0 1 .77-.42l9 5.5a.5.5 0 0 1 0 .84l-9 5.5A.5.5 0 0 1 4 13.5z" />
         </svg>
-        Start
+        {t("pocketCheck.start")}
       </button>
       <div className="track-secondary-actions view-stagger-item" style={{ animationDelay: '120ms' }}>
         <button
           className="play-btn full-width secondary"
           onClick={onCalibrate}
         >
-          Calibrate
+          {t("pocketCheck.calibrate")}
         </button>
         <button
           className="play-btn full-width secondary"
           onClick={onShowHistory}
           disabled={!hasHistory}
         >
-          History
+          {t("pocketCheck.history")}
         </button>
       </div>
     </div>

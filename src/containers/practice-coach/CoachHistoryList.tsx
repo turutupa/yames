@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ScoreBadge, MiniSparkline } from "../drill/evaluation";
 import type { SavedSession } from "../../types";
 import { groupByDay } from "./coachCardHelpers";
@@ -17,18 +18,19 @@ export function CoachHistoryList({
   onSelect: (s: SavedSession) => void;
   onDelete: (id: string) => void;
 }) {
+  const { t, i18n } = useTranslation();
   if (sessions.length === 0) {
     return (
       <div className="coach-card-empty">
         <p className="coach-card-empty-text">
-          No sessions yet.<br/>
-          Complete a practice session to build your history.
+          {t("coachHistory.emptyTitle")}<br/>
+          {t("coachHistory.emptyHint")}
         </p>
       </div>
     );
   }
 
-  const grouped = groupByDay(sessions);
+  const grouped = groupByDay(sessions, t, i18n.language);
 
   const icValues = [...sessions]
     .sort((a, b) => a.timestamp - b.timestamp)
@@ -40,7 +42,7 @@ export function CoachHistoryList({
     <div className="coach-history-list">
       {icValues.length >= 3 && (
         <div className="coach-history-ic-trend">
-          <span className="coach-history-ic-label">Note spacing trend</span>
+          <span className="coach-history-ic-label">{t("coachCard.noteSpacingTrend")}</span>
           <svg width="80" height="20" viewBox="0 0 80 20" aria-hidden="true">
             {icValues.slice(1).map((v, i) => {
               const prev = icValues[i];
@@ -84,7 +86,7 @@ export function CoachHistoryList({
               <div className="coach-history-card-top">
                 <ScoreBadge score={session.report.score} />
                 <span className="coach-history-time">
-                  {new Date(session.timestamp).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                  {new Date(session.timestamp).toLocaleTimeString(i18n.language, { hour: "numeric", minute: "2-digit" })}
                 </span>
                 <span className="coach-history-sep">&middot;</span>
                 <span className="coach-history-bpm">{session.bpm} BPM</span>

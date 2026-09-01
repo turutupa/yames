@@ -1,8 +1,6 @@
 import { createPortal } from "react-dom";
-import {
-  RATING_COLORS,
-  RATING_LABELS,
-} from "./trackTypes";
+import { useTranslation } from "react-i18next";
+import { RATING_COLORS } from "./trackTypes";
 import type {
   GameResult,
   PerBeatDatum,
@@ -43,6 +41,7 @@ export function TrackResultsView({
   onCalibrate: () => void;
   onStartSession: () => void;
 }) {
+  const { t, i18n } = useTranslation();
   // 5-point rolling mean for the smoothed accuracy line — softens the
   // raw per-beat noise without hiding the underlying drift trend.
   const smoothed = displayPerBeat.map((_d, i) => {
@@ -70,7 +69,7 @@ export function TrackResultsView({
           <button
             className="track-toolbar-btn"
             onClick={onShowHistory}
-            data-tooltip="History"
+            data-tooltip={t("pocketCheck.history")}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="4" y="14" width="4" height="7" rx="1"/>
@@ -82,7 +81,7 @@ export function TrackResultsView({
         <button
           className="track-toolbar-btn"
           onClick={onCalibrate}
-          data-tooltip="Calibrate"
+          data-tooltip={t("pocketCheck.calibrate")}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="4" y1="8" x2="20" y2="8"/>
@@ -95,16 +94,16 @@ export function TrackResultsView({
       <div className="track-results">
         <div className="track-result-header view-stagger-item" style={{ animationDelay: '0ms' }}>
           <div className="track-result-rating-wrap">
-            <span className="track-result-prefix">Your timing was</span>
+            <span className="track-result-prefix">{t("pocketCheck.yourTimingWas")}</span>
             <span
               className="track-result-rating"
               style={{ color: RATING_COLORS[displayRating] }}
             >
-              {RATING_LABELS[displayRating]}
+              {t(`pocketCheck.ratings.${displayRating}`)}
             </span>
           </div>
           <div className="track-result-meta">
-            {displayBpm} BPM · {viewingResult ? new Date(viewingResult.date).toLocaleDateString() : new Date().toLocaleDateString()}
+            {displayBpm} BPM · {viewingResult ? new Date(viewingResult.date).toLocaleDateString(i18n.language) : new Date().toLocaleDateString(i18n.language)}
           </div>
         </div>
 
@@ -119,7 +118,7 @@ export function TrackResultsView({
                 style={{ background: RATING_COLORS[rating] }}
               />
               <span className="track-breakdown-label">
-                {RATING_LABELS[rating]}
+                {t(`pocketCheck.ratings.${rating}`)}
               </span>
               <span className="track-breakdown-count">
                 {displayBreakdown[rating] || 0}
@@ -140,9 +139,9 @@ export function TrackResultsView({
         {/* Accuracy graph */}
         <div className="track-accuracy-graph view-stagger-item" style={{ animationDelay: '120ms' }}>
           <div className="track-graph-y-labels">
-            <span>Early</span>
+            <span>{t("pocketCheck.early")}</span>
             <span>0ms</span>
-            <span>Late</span>
+            <span>{t("pocketCheck.late")}</span>
           </div>
           <svg
             viewBox={`0 0 ${Math.max(displayPerBeat.length, 1) * 20} 120`}
@@ -287,7 +286,7 @@ export function TrackResultsView({
 
       {createPortal(
         <button className="play-btn full-width track-floating-cta" onClick={onStartSession}>
-          Try Again
+          {t("pocketCheck.tryAgain")}
         </button>,
         document.body
       )}

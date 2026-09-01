@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 type UpdateStatus = "idle" | "checking" | "available" | "downloading" | "up-to-date";
 
 const DownloadIcon = () => (
@@ -31,12 +33,13 @@ export function UpdateBanner({
   latestVersion: string;
   onInstall: () => void;
 }) {
+  const { t } = useTranslation();
   if (updateStatus === "available") {
     return (
       <div className="update-banner" onClick={onInstall}>
         <DownloadIcon />
-        <span>Yames v{latestVersion || "0.6.0"} is available</span>
-        <span className="update-banner-action">Install & Restart →</span>
+        <span>{t("updateBanner.available", { version: latestVersion || "0.6.0" })}</span>
+        <span className="update-banner-action">{t("updateBanner.installRestart")}</span>
       </div>
     );
   }
@@ -44,7 +47,7 @@ export function UpdateBanner({
     return (
       <div className="update-banner update-banner-downloading">
         <DownloadIcon />
-        <span>Updating Yames…</span>
+        <span>{t("updateBanner.updating")}</span>
       </div>
     );
   }

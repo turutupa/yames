@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import type { SavedSession } from "../../types";
 
 /**
@@ -7,42 +8,46 @@ import type { SavedSession } from "../../types";
  * to test in isolation.
  */
 
-export function formatTime(timestamp: number): string {
-  return new Date(timestamp).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+export function formatTime(timestamp: number, lang: string): string {
+  return new Date(timestamp).toLocaleTimeString(lang, { hour: "numeric", minute: "2-digit" });
 }
 
-export function formatDate(timestamp: number): string {
+export function formatDate(timestamp: number, t: TFunction, lang: string): string {
   const date = new Date(timestamp);
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   const diffDays = Math.round((today.getTime() - dateDay.getTime()) / (1000 * 60 * 60 * 24));
-  const time = date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const time = formatTime(timestamp, lang);
 
-  if (diffDays === 0) return `Today ${time}`;
-  if (diffDays === 1) return `Yesterday ${time}`;
-  if (diffDays < 7) return `${date.toLocaleDateString([], { weekday: "short" })} ${time}`;
-  return date.toLocaleDateString([], { month: "short", day: "numeric" });
+  if (diffDays === 0) return `${t("coachCard.today")} ${time}`;
+  if (diffDays === 1) return `${t("coachCard.yesterday")} ${time}`;
+  if (diffDays < 7) return `${date.toLocaleDateString(lang, { weekday: "short" })} ${time}`;
+  return date.toLocaleDateString(lang, { month: "short", day: "numeric" });
 }
 
-export function getDayGroup(timestamp: number): string {
+export function getDayGroup(timestamp: number, t: TFunction, lang: string): string {
   const date = new Date(timestamp);
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   const diffDays = Math.round((today.getTime() - dateDay.getTime()) / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return date.toLocaleDateString([], { weekday: "long" });
-  return date.toLocaleDateString([], { month: "short", day: "numeric" });
+  if (diffDays === 0) return t("coachCard.today");
+  if (diffDays === 1) return t("coachCard.yesterday");
+  if (diffDays < 7) return date.toLocaleDateString(lang, { weekday: "long" });
+  return date.toLocaleDateString(lang, { month: "short", day: "numeric" });
 }
 
-export function groupByDay(sessions: SavedSession[]): { label: string; sessions: SavedSession[] }[] {
+export function groupByDay(
+  sessions: SavedSession[],
+  t: TFunction,
+  lang: string,
+): { label: string; sessions: SavedSession[] }[] {
   const groups: { label: string; sessions: SavedSession[] }[] = [];
   let currentLabel = "";
   for (const session of sessions) {
-    const label = getDayGroup(session.timestamp);
+    const label = getDayGroup(session.timestamp, t, lang);
     if (label !== currentLabel) {
       groups.push({ label, sessions: [session] });
       currentLabel = label;
