@@ -14,6 +14,42 @@ import { INSTRUMENT_ICONS } from "./MetronomeIcons";
  * back to "electric-guitar" (statistically the most likely user); the
  * dropdown in Settings stays available so they can change it later.
  */
+/**
+ * The card grid on its own, so the onboarding wizard's W1 step can host it
+ * inside its own frame (O1) while the standalone modal below keeps working.
+ * `selectedId` renders the current choice as selected — the modal doesn't use
+ * it (there is no prior choice on first launch), the wizard does.
+ */
+export function InstrumentPickerGrid({
+  onPick,
+  selectedId,
+}: {
+  onPick: (instrumentId: string) => void;
+  selectedId?: string;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div className="instrument-picker-grid">
+      {INSTRUMENTS.filter((i) => i.id !== "other").map((inst) => (
+        <button
+          key={inst.id}
+          className={`instrument-picker-card${selectedId === inst.id ? " selected" : ""}`}
+          aria-pressed={selectedId ? selectedId === inst.id : undefined}
+          onClick={() => onPick(inst.id)}
+          type="button"
+        >
+          <span className="instrument-picker-card-icon">
+            {INSTRUMENT_ICONS[inst.id]}
+          </span>
+          <span className="instrument-picker-card-name">
+            {t(`instrument.${inst.id}`)}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function InstrumentPickerModal({
   onPick,
   onDismiss,
@@ -35,21 +71,7 @@ export function InstrumentPickerModal({
         <p className="instrument-picker-subtitle">
           {t("instrumentPicker.subtitle")}
         </p>
-        <div className="instrument-picker-grid">
-          {INSTRUMENTS.filter((i) => i.id !== "other").map((inst) => (
-            <button
-              key={inst.id}
-              className="instrument-picker-card"
-              onClick={() => onPick(inst.id)}
-              type="button"
-            >
-              <span className="instrument-picker-card-icon">
-                {INSTRUMENT_ICONS[inst.id]}
-              </span>
-              <span className="instrument-picker-card-name">{t(`instrument.${inst.id}`)}</span>
-            </button>
-          ))}
-        </div>
+        <InstrumentPickerGrid onPick={onPick} />
         <button
           className="instrument-picker-skip"
           onClick={onDismiss}

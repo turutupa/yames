@@ -17,6 +17,7 @@ import {
   setAlwaysOnTop,
   setBpm,
   setInstrument as setInstrumentBackend,
+  setPlaying,
   setSoundType,
   setSubdivision,
   setTheme,
@@ -35,7 +36,9 @@ import "../../styles/main-window.css";
 import "../../styles/transitions.css";
 import "../../styles/evaluation.css";
 import type { InstrumentId, Preset, Subdivision } from "../../types";
-import { InstrumentPickerModal } from "../../components/InstrumentPickerModal";
+import { OnboardingWizard } from "../onboarding/OnboardingWizard";
+import { FinishSetupChip } from "../onboarding/FinishSetupChip";
+import { useOnboarding } from "../onboarding/useOnboarding";
 import { DrillView } from "../drill/DrillView";
 import { FullscreenView } from "../zen/FullscreenView";
 import { PresetSidebar } from "../../components/presets/PresetSidebar";
@@ -87,6 +90,10 @@ import {
 import type { HotkeyAction } from "../../hotkeys";
 import "../../styles/audio-input-test.css";
 
+/** Onboarding preview click: soft, slow, and the tempo W7 hands over at. */
+const SOFT_CLICK_BPM = 80;
+const SOFT_CLICK_VOLUME = 0.35;
+
 export function MainWindow() {
   const { t } = useTranslation();
   useDrag();
@@ -136,12 +143,24 @@ export function MainWindow() {
   const [updateFeedback, setUpdateFeedback] = useState(false);
   const updateFeedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [instrument, setInstrument] = useState("electric-guitar");
-  // First-launch instrument picker (D0). Shown when the store has no
-  // `instrument` value yet. On pick: persist + push to backend so the
-  // DSP profile is live for the first practice segment. On dismiss:
-  // fall back to electric guitar (the statistically most likely user)
-  // and let the user change it later in Settings.
-  const [showInstrumentPicker, setShowInstrumentPicker] = useState(false);
+  // Whether `instrument` reflects a real choice (stored or picked in the
+  // wizard) rather than the electric-guitar fallback. W1 uses it to decide
+  // whether to render a card as selected.
+  const [instrumentChosen, setInstrumentChosen] = useState(false);
+  const instrumentChosenRef = useRef(false);
+  // First-launch onboarding (ONBOARDING_PLAN §3). The hook owns first-run
+  // detection and the store keys; the wizard replaces the old
+  // `InstrumentPickerModal` mount (the picker's grid is now W1's body).
+  const onboarding = useOnboarding();
+
+  /** Persist an instrument choice + push the DSP profile to the backend. */
+  const applyInstrument = useCallback((id: string) => {
+    setInstrument(id);
+    setInstrumentChosen(true);
+    instrumentChosenRef.current = true;
+    storeSave("instrument", id);
+    setInstrumentBackend(id as InstrumentId).catch(() => {});
+  }, []);
 
   const session = useSession({
     evaluation,
@@ -267,14 +286,80 @@ export function MainWindow() {
       const inst = await storeLoad<string>("instrument");
       if (inst) {
         setInstrument(inst);
-      } else {
-        // No saved instrument → first launch. Show the picker so the
-        // user makes an explicit choice rather than silently inheriting
-        // a default (D0 first-launch UX rule).
-        setShowInstrumentPicker(true);
+        setInstrumentChosen(true);
+        instrumentChosenRef.current = true;
+      }
+      // No saved instrument → first launch. `useOnboarding` detects that and
+      // opens the wizard at W0 (D0's "make an explicit choice" rule now lives
+      // in W1); the electric-guitar fallback is applied when the wizard ends
+      // without a pick.
+    })();
+  }, []);
+
+  // --- Wizard preview click (W0/W2) ---------------------------------------
+  // The wizard demonstrates the app rather than describing it: a soft 80 BPM
+  // click plays while it is open. The user's BPM/volume/playing state are
+  // captured on start and restored on close.
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const softClickPrev = useRef<{
+    bpm: number;
+    volume: number;
+    wasPlaying: boolean;
+  } | null>(null);
+  const [softClickPlaying, setSoftClickPlaying] = useState(false);
+
+  const startSoftClick = useCallback(() => {
+    if (softClickPrev.current) return;
+    const snapshot = stateRef.current;
+    softClickPrev.current = {
+      bpm: snapshot.bpm,
+      volume: snapshot.volume,
+      wasPlaying: snapshot.isPlaying,
+    };
+    setSoftClickPlaying(true);
+    void (async () => {
+      try {
+        await setVolume(SOFT_CLICK_VOLUME);
+        await setBpm(SOFT_CLICK_BPM);
+        if (!snapshot.isPlaying) await togglePlayback();
+      } catch {
+        /* engine not ready — the wizard still works, just silently */
       }
     })();
   }, []);
+
+  const stopSoftClick = useCallback(async () => {
+    const prev = softClickPrev.current;
+    if (!prev) return;
+    softClickPrev.current = null;
+    setSoftClickPlaying(false);
+    try {
+      if (!prev.wasPlaying) await setPlaying(false);
+      await setVolume(prev.volume);
+      await setBpm(prev.bpm);
+    } catch {
+      /* ignore — nothing to restore if the engine is gone */
+    }
+  }, []);
+
+  /**
+   * The wizard closed. Restore the preview click, make sure an instrument is
+   * set either way, and land a completed run on the metronome at 80 BPM
+   * (ONBOARDING_PLAN §3, W7).
+   */
+  const handleWizardFinish = useCallback(
+    (outcome: "completed" | "skipped" | "closed") => {
+      void stopSoftClick().then(() => {
+        if (!instrumentChosenRef.current) applyInstrument("electric-guitar");
+        if (outcome === "completed") {
+          setBpm(SOFT_CLICK_BPM);
+          setView("beat");
+        }
+      });
+    },
+    [stopSoftClick, applyInstrument, setView],
+  );
 
   const [editingBpm, setEditingBpm] = useState(false);
   const [bpmEditValue, setBpmEditValue] = useState("");
@@ -367,7 +452,9 @@ export function MainWindow() {
 
   // Unified local hotkey dispatcher — reads from keyBindings
   useEffect(() => {
-    if (bindingFor) return;
+    // The onboarding overlay owns the keyboard while it is up — Space must
+    // not start the metronome behind it.
+    if (bindingFor || onboarding.isOpen) return;
     const handler = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
@@ -411,7 +498,7 @@ export function MainWindow() {
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [view, keyBindings, isFullscreen, bindingFor, setView, dispatchAction, inputTestMode]);
+  }, [view, keyBindings, isFullscreen, bindingFor, setView, dispatchAction, inputTestMode, onboarding.isOpen]);
 
   // MIDI controller support. The dispatcher is silenced while the input
   // tester is open by reading `inputTestModeRef` (the ref pattern keeps
@@ -526,6 +613,13 @@ export function MainWindow() {
         }
       />
 
+      {onboarding.chipVisible && view !== "settings" && (
+        <FinishSetupChip
+          onOpen={() => onboarding.openAt("instrument")}
+          onDismiss={onboarding.dismissChip}
+        />
+      )}
+
       {shareOpen && (
         <ShareMenuPopover
           anchorRef={shareBtnRef}
@@ -626,6 +720,10 @@ export function MainWindow() {
             setActiveBorder={setActiveBorder}
             drillAutoCollapse={drillAutoCollapse}
             setDrillAutoCollapse={setDrillAutoCollapse}
+            onRunSetupAgain={() => {
+              setView(prevTab.current);
+              onboarding.open();
+            }}
             themeId={state.theme}
             setTheme={setTheme}
             viewTransitions={viewTransitions}
@@ -812,26 +910,27 @@ export function MainWindow() {
       inputChannel={evaluation.selectedChannel}
       onChannelChange={(ch) => evaluation.selectChannel(ch)}
     />
-    {showInstrumentPicker && (
-      <InstrumentPickerModal
-        onPick={(id) => {
-          setInstrument(id);
-          storeSave("instrument", id);
-          setInstrumentBackend(id as InstrumentId).catch(() => {});
-          setShowInstrumentPicker(false);
-        }}
-        onDismiss={() => {
-          // Plan D0 default on dismiss: electric-guitar (the
-          // statistically most likely user). The Settings dropdown
-          // stays available for change later.
-          const fallback: InstrumentId = "electric-guitar";
-          setInstrument(fallback);
-          storeSave("instrument", fallback);
-          setInstrumentBackend(fallback).catch(() => {});
-          setShowInstrumentPicker(false);
-        }}
-      />
-    )}
+    <OnboardingWizard
+      state={onboarding.state}
+      dispatch={onboarding.dispatch}
+      appVersion={appVersion}
+      instrument={instrument}
+      instrumentChosen={instrumentChosen}
+      onInstrumentChange={applyInstrument}
+      soundType={state.soundType}
+      themeId={state.theme}
+      coachTier={coach.coachBrainTier}
+      inputDeviceName={evaluation.selectedDevice}
+      hasFootswitch={midi.bindings.length > 0}
+      alwaysOnTop={state.alwaysOnTop}
+      onAlwaysOnTopChange={setAlwaysOnTop}
+      startSoftClick={startSoftClick}
+      stopSoftClick={stopSoftClick}
+      softClickPlaying={softClickPlaying}
+      currentBeat={currentBeat}
+      onFinish={handleWizardFinish}
+      animate={viewTransitions !== "off"}
+    />
     </>
   );
 }

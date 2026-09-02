@@ -48,6 +48,43 @@
     "subtitle": "Yames stemt de detectie en coachingsfeedback af op je instrument. Je kunt dit later wijzigen in Instellingen.",
     "skip": "Overslaan — kies ik later wel"
   },
+  "onboarding": {
+    "welcome": {
+      "title": "Yames",
+      "tagline": "Een metronoom gemaakt voor echt oefenen. Je handen blijven op het instrument.",
+      "setup": "Stel het voor me in (ongeveer een minuut)",
+      "skip": "Geef me gewoon de klik",
+      "footer": "Gratis · lokaal · open source · v{{version}}"
+    },
+    "back": "Terug",
+    "next": "Volgende",
+    "skip": "Overslaan",
+    "progress": "Stap {{current}} van {{total}}",
+    "chip": {
+      "label": "Installatie afronden",
+      "dismiss": "Sluiten"
+    },
+    "ready": {
+      "title": "Je bent klaar",
+      "subtitle": "Wijzig hier iets, of later in Instellingen.",
+      "rows": {
+        "instrument": "Instrument",
+        "sound": "Klikgeluid",
+        "theme": "Thema",
+        "control": "Bediening",
+        "coach": "Oefencoach",
+        "input": "Audio-invoer"
+      },
+      "controlKeyboard": "Toetsenbord",
+      "controlFootswitch": "Voetschakelaar",
+      "coachTiming": "Alleen timingfeedback",
+      "coachOn": "Aan",
+      "inputNone": "Niet ingesteld",
+      "alwaysOnTop": "Altijd op voorgrond",
+      "start": "Beginnen met oefenen",
+      "tour": "Laat me rondkijken (30 s)"
+    }
+  },
   "widget": {
     "openMain": "Hoofdvenster openen",
     "timeSignature": "Maatsoort",
@@ -358,7 +395,10 @@
       "activeBorder": "Actieve rand",
       "activeBorderHint": "Toon een rand tijdens het spelen",
       "drillAutoCollapse": "Tempotraining automatisch inklappen",
-      "drillAutoCollapseHint": "Klap de configuratie van de tempotraining in tijdens het spelen"
+      "drillAutoCollapseHint": "Klap de configuratie van de tempotraining in tijdens het spelen",
+      "runSetupAgain": "Setup opnieuw uitvoeren",
+      "runSetupAgainHint": "Opent de eerste-start-wizard opnieuw",
+      "runSetupAgainAction": "Openen"
     },
     "devices": {
       "title": "Apparaten",

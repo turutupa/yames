@@ -48,6 +48,43 @@
     "subtitle": "Yames dostraja wykrywanie dźwięku i wskazówki Trenera do Twojego instrumentu. Zmienisz to później w Ustawieniach.",
     "skip": "Pomiń — wybiorę później"
   },
+  "onboarding": {
+    "welcome": {
+      "title": "Yames",
+      "tagline": "Metronom stworzony do prawdziwych ćwiczeń. Ręce zostają na instrumencie.",
+      "setup": "Skonfiguruj (około minuty)",
+      "skip": "Chcę tylko klik",
+      "footer": "Darmowy · lokalny · open source · v{{version}}"
+    },
+    "back": "Wstecz",
+    "next": "Dalej",
+    "skip": "Pomiń",
+    "progress": "Krok {{current}} z {{total}}",
+    "chip": {
+      "label": "Dokończ konfigurację",
+      "dismiss": "Ukryj"
+    },
+    "ready": {
+      "title": "Wszystko gotowe",
+      "subtitle": "Zmień coś tutaj albo później w Ustawieniach.",
+      "rows": {
+        "instrument": "Instrument",
+        "sound": "Dźwięk kliknięcia",
+        "theme": "Motyw",
+        "control": "Sterowanie",
+        "coach": "Trener ćwiczeń",
+        "input": "Wejście audio"
+      },
+      "controlKeyboard": "Klawiatura",
+      "controlFootswitch": "Przełącznik nożny",
+      "coachTiming": "Tylko informacje o timingu",
+      "coachOn": "Włączony",
+      "inputNone": "Nie skonfigurowano",
+      "alwaysOnTop": "Zawsze na wierzchu",
+      "start": "Zacznij ćwiczyć",
+      "tour": "Oprowadź mnie (30 s)"
+    }
+  },
   "widget": {
     "openMain": "Otwórz główne okno",
     "timeSignature": "Metrum",
@@ -358,7 +395,10 @@
       "activeBorder": "Obramowanie podczas odtwarzania",
       "activeBorderHint": "Pokaż obramowanie podczas odtwarzania",
       "drillAutoCollapse": "Auto-zwiń Rozbieg",
-      "drillAutoCollapseHint": "Zwijaj ustawienia rozbiegu podczas odtwarzania"
+      "drillAutoCollapseHint": "Zwijaj ustawienia rozbiegu podczas odtwarzania",
+      "runSetupAgain": "Uruchom konfigurację ponownie",
+      "runSetupAgainHint": "Ponownie otwiera kreatora pierwszego uruchomienia",
+      "runSetupAgainAction": "Otwórz"
     },
     "devices": {
       "title": "Urządzenia",

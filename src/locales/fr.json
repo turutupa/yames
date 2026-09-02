@@ -48,6 +48,43 @@
     "subtitle": "Yames adapte la détection d'attaques et les retours du Coach à ton instrument. Tu pourras le changer plus tard dans les paramètres.",
     "skip": "Passer — je choisirai plus tard"
   },
+  "onboarding": {
+    "welcome": {
+      "title": "Yames",
+      "tagline": "Un métronome conçu pour le vrai travail. Les mains restent sur l'instrument.",
+      "setup": "Configurer (environ une minute)",
+      "skip": "Juste le clic",
+      "footer": "Gratuit · local · open source · v{{version}}"
+    },
+    "back": "Retour",
+    "next": "Suivant",
+    "skip": "Ignorer",
+    "progress": "Étape {{current}} sur {{total}}",
+    "chip": {
+      "label": "Terminer la configuration",
+      "dismiss": "Masquer"
+    },
+    "ready": {
+      "title": "Tout est prêt",
+      "subtitle": "Modifiez ce que vous voulez ici, ou plus tard dans les Réglages.",
+      "rows": {
+        "instrument": "Instrument",
+        "sound": "Son du clic",
+        "theme": "Thème",
+        "control": "Contrôle",
+        "coach": "Coach d'entraînement",
+        "input": "Entrée audio"
+      },
+      "controlKeyboard": "Clavier",
+      "controlFootswitch": "Pédale",
+      "coachTiming": "Retour de timing uniquement",
+      "coachOn": "Activé",
+      "inputNone": "Non configurée",
+      "alwaysOnTop": "Toujours au premier plan",
+      "start": "Commencer à jouer",
+      "tour": "Faites-moi visiter (30 s)"
+    }
+  },
   "widget": {
     "openMain": "Ouvrir la fenêtre principale",
     "timeSignature": "Mesure",
@@ -358,7 +395,10 @@
       "activeBorder": "Bordure active",
       "activeBorderHint": "Afficher une bordure pendant la lecture",
       "drillAutoCollapse": "Repli automatique de la Rampe",
-      "drillAutoCollapseHint": "Replier la configuration de la rampe pendant la lecture"
+      "drillAutoCollapseHint": "Replier la configuration de la rampe pendant la lecture",
+      "runSetupAgain": "Relancer la configuration",
+      "runSetupAgainHint": "Rouvrir l'assistant de première utilisation",
+      "runSetupAgainAction": "Ouvrir"
     },
     "devices": {
       "title": "Périphériques",

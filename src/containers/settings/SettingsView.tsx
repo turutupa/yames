@@ -50,6 +50,8 @@ interface SettingsViewProps {
   setActiveBorder: Dispatch<SetStateAction<boolean>>;
   drillAutoCollapse: boolean;
   setDrillAutoCollapse: Dispatch<SetStateAction<boolean>>;
+  /** Re-opens the first-run wizard at W0 (O1). */
+  onRunSetupAgain: () => void;
 
   // Appearance
   themeId: string;
@@ -135,6 +137,7 @@ export function SettingsView({
   activeBorder,
   setActiveBorder,
   drillAutoCollapse,
+  onRunSetupAgain,
   setDrillAutoCollapse,
   themeId,
   setTheme,
@@ -209,6 +212,7 @@ export function SettingsView({
         setActiveBorder={setActiveBorder}
         drillAutoCollapse={drillAutoCollapse}
         setDrillAutoCollapse={setDrillAutoCollapse}
+        onRunSetupAgain={onRunSetupAgain}
       />
 
       <AppearanceSettingsSection

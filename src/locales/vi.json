@@ -48,6 +48,43 @@
     "subtitle": "Yames sẽ điều chỉnh khả năng phát hiện âm thanh và phản hồi huấn luyện cho phù hợp với nhạc cụ của bạn. Bạn có thể đổi sau trong Cài đặt.",
     "skip": "Bỏ qua — chọn sau"
   },
+  "onboarding": {
+    "welcome": {
+      "title": "Yames",
+      "tagline": "Máy đếm nhịp dành cho việc luyện tập thật sự. Tay vẫn ở trên nhạc cụ.",
+      "setup": "Thiết lập giúp tôi (khoảng một phút)",
+      "skip": "Chỉ cần tiếng click",
+      "footer": "Miễn phí · cục bộ · mã nguồn mở · v{{version}}"
+    },
+    "back": "Quay lại",
+    "next": "Tiếp",
+    "skip": "Bỏ qua",
+    "progress": "Bước {{current}}/{{total}}",
+    "chip": {
+      "label": "Hoàn tất thiết lập",
+      "dismiss": "Đóng"
+    },
+    "ready": {
+      "title": "Đã sẵn sàng",
+      "subtitle": "Thay đổi tại đây, hoặc sau này trong Cài đặt.",
+      "rows": {
+        "instrument": "Nhạc cụ",
+        "sound": "Âm thanh click",
+        "theme": "Giao diện",
+        "control": "Điều khiển",
+        "coach": "Huấn luyện viên luyện tập",
+        "input": "Đầu vào âm thanh"
+      },
+      "controlKeyboard": "Bàn phím",
+      "controlFootswitch": "Bàn đạp",
+      "coachTiming": "Chỉ phản hồi về nhịp",
+      "coachOn": "Bật",
+      "inputNone": "Chưa thiết lập",
+      "alwaysOnTop": "Luôn ở trên cùng",
+      "start": "Bắt đầu luyện tập",
+      "tour": "Giới thiệu nhanh (30 giây)"
+    }
+  },
   "widget": {
     "openMain": "Mở cửa sổ chính",
     "timeSignature": "Số chỉ nhịp",
@@ -358,7 +395,10 @@
       "activeBorder": "Viền khi đang phát",
       "activeBorderHint": "Hiện viền khung khi đang chơi",
       "drillAutoCollapse": "Tự thu gọn Luyện tempo",
-      "drillAutoCollapseHint": "Thu gọn cấu hình Luyện tempo khi đang chơi"
+      "drillAutoCollapseHint": "Thu gọn cấu hình Luyện tempo khi đang chơi",
+      "runSetupAgain": "Chạy lại thiết lập",
+      "runSetupAgainHint": "Mở lại trình thiết lập lần đầu",
+      "runSetupAgainAction": "Mở"
     },
     "devices": {
       "title": "Thiết bị",

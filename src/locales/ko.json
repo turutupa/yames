@@ -48,6 +48,43 @@
     "subtitle": "Yames가 악기에 맞춰 음 감지와 코칭 피드백을 조정합니다. 설정에서 나중에 변경할 수 있어요.",
     "skip": "건너뛰기 — 나중에 고를게요"
   },
+  "onboarding": {
+    "welcome": {
+      "title": "Yames",
+      "tagline": "진짜 연습을 위한 메트로놈. 손은 악기에 그대로.",
+      "setup": "설정하기 (약 1분)",
+      "skip": "클릭 소리만 주세요",
+      "footer": "무료 · 로컬 · 오픈 소스 · v{{version}}"
+    },
+    "back": "뒤로",
+    "next": "다음",
+    "skip": "건너뛰기",
+    "progress": "{{total}}단계 중 {{current}}단계",
+    "chip": {
+      "label": "설정 마치기",
+      "dismiss": "닫기"
+    },
+    "ready": {
+      "title": "준비됐습니다",
+      "subtitle": "여기서 바꾸거나 나중에 설정에서 변경할 수 있어요.",
+      "rows": {
+        "instrument": "악기",
+        "sound": "클릭 사운드",
+        "theme": "테마",
+        "control": "조작",
+        "coach": "연습 코치",
+        "input": "오디오 입력"
+      },
+      "controlKeyboard": "키보드",
+      "controlFootswitch": "풋스위치",
+      "coachTiming": "타이밍 피드백만",
+      "coachOn": "켜짐",
+      "inputNone": "설정 안 됨",
+      "alwaysOnTop": "항상 위에 표시",
+      "start": "연습 시작",
+      "tour": "앱 둘러보기 (30초)"
+    }
+  },
   "widget": {
     "openMain": "메인 창 열기",
     "timeSignature": "박자",
@@ -358,7 +395,10 @@
       "activeBorder": "재생 테두리",
       "activeBorderHint": "재생 중에 테두리를 표시합니다",
       "drillAutoCollapse": "템포 연습 자동 접기",
-      "drillAutoCollapseHint": "재생 중에 연습 설정을 자동으로 접습니다"
+      "drillAutoCollapseHint": "재생 중에 연습 설정을 자동으로 접습니다",
+      "runSetupAgain": "설정 다시 실행",
+      "runSetupAgainHint": "첫 실행 설정 마법사를 다시 엽니다",
+      "runSetupAgainAction": "열기"
     },
     "devices": {
       "title": "기기",

@@ -48,6 +48,43 @@
     "subtitle": "Yames 會根據你的樂器調整起音偵測與教練回饋，之後可在設定中更改。",
     "skip": "跳過——之後再選"
   },
+  "onboarding": {
+    "welcome": {
+      "title": "Yames",
+      "tagline": "為真正的練習而生的節拍器。雙手始終留在樂器上。",
+      "setup": "幫我設定（約一分鐘）",
+      "skip": "只要節拍聲",
+      "footer": "免費 · 本機 · 開源 · v{{version}}"
+    },
+    "back": "上一步",
+    "next": "下一步",
+    "skip": "略過",
+    "progress": "第 {{current}}/{{total}} 步",
+    "chip": {
+      "label": "完成設定",
+      "dismiss": "關閉"
+    },
+    "ready": {
+      "title": "準備就緒",
+      "subtitle": "可以在這裡修改，也可以稍後在設定中修改。",
+      "rows": {
+        "instrument": "樂器",
+        "sound": "節拍音",
+        "theme": "主題",
+        "control": "控制方式",
+        "coach": "練習教練",
+        "input": "音訊輸入"
+      },
+      "controlKeyboard": "鍵盤",
+      "controlFootswitch": "踏板開關",
+      "coachTiming": "僅節奏回饋",
+      "coachOn": "已開啟",
+      "inputNone": "未設定",
+      "alwaysOnTop": "永遠在最上層",
+      "start": "開始練習",
+      "tour": "帶我逛一圈（30 秒）"
+    }
+  },
   "widget": {
     "openMain": "開啟主視窗",
     "timeSignature": "拍號",
@@ -358,7 +395,10 @@
       "activeBorder": "播放指示邊框",
       "activeBorderHint": "播放時顯示邊框",
       "drillAutoCollapse": "變速練習自動收合",
-      "drillAutoCollapseHint": "播放時自動收合變速練習設定"
+      "drillAutoCollapseHint": "播放時自動收合變速練習設定",
+      "runSetupAgain": "重新執行設定",
+      "runSetupAgainHint": "再次開啟首次啟動精靈",
+      "runSetupAgainAction": "開啟"
     },
     "devices": {
       "title": "裝置",

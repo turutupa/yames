@@ -1,0 +1,371 @@
+/* ===================== First-run wizard (O1) =====================
+ *
+ * Visual baseline is the first-launch instrument picker
+ * (`.instrument-picker-*` in main-window.css) — same overlay, same card, same
+ * grid — so the wizard doesn't read as a different product. Everything is
+ * sized to survive the 480x780 minimum window: the card scrolls internally,
+ * the window never does.
+ */
+
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 320;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: onboarding-fade-in 200ms ease-out;
+}
+
+.onboarding-card {
+  position: relative;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 28px 20px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+  outline: none;
+  animation: onboarding-card-in 220ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+/* Progress dots */
+.onboarding-progress {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.onboarding-dot {
+  width: 22px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border);
+  transition: background 160ms ease;
+}
+
+.onboarding-dot.done {
+  background: var(--text-muted, var(--text-secondary));
+}
+
+.onboarding-dot.active {
+  background: var(--accent);
+}
+
+/* Scrollable body — the card grows to the window, the content scrolls. */
+.onboarding-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.onboarding-footer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+  margin-top: 2px;
+}
+
+.onboarding-footer .onboarding-skip {
+  margin-left: auto;
+}
+
+/* ---- Buttons ---- */
+.onboarding-btn {
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: transparent;
+  color: var(--text-primary);
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.onboarding-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.onboarding-btn-primary {
+  background: var(--accent);
+  color: var(--accent-text, #fff);
+}
+
+.onboarding-btn-primary:hover {
+  filter: brightness(1.08);
+}
+
+.onboarding-btn-ghost {
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+.onboarding-btn-ghost:hover:not(:disabled) {
+  color: var(--text-primary);
+  border-color: var(--accent);
+}
+
+.onboarding-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* ---- W0 welcome ---- */
+.onboarding-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+  padding: 12px 4px;
+}
+
+.onboarding-logo {
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(1);
+  transition: transform 140ms ease-out;
+}
+
+.onboarding-logo.pulsing {
+  transform: scale(1.12);
+}
+
+.onboarding-welcome-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--text-primary);
+}
+
+.onboarding-welcome-tagline {
+  margin: 0;
+  max-width: 34ch;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.onboarding-welcome-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 320px;
+  margin-top: 6px;
+}
+
+.onboarding-welcome-footer {
+  margin: 6px 0 0;
+  font-size: 0.75rem;
+  color: var(--text-muted, var(--text-secondary));
+}
+
+/* ---- Generic step frame ---- */
+.onboarding-step {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.onboarding-step-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text-primary);
+}
+
+.onboarding-step-subtitle {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* W1 reuses `.instrument-picker-grid` / `.instrument-picker-card`; the
+   selected state is new (the standalone modal never had one). */
+.onboarding-step .instrument-picker-card.selected {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+/* ---- W7 summary ---- */
+.onboarding-summary {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.onboarding-summary-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  text-align: left;
+  transition:
+    border-color 120ms ease,
+    background 120ms ease;
+}
+
+button.onboarding-summary-row:hover {
+  border-color: var(--accent);
+}
+
+.onboarding-summary-static {
+  cursor: default;
+}
+
+.onboarding-summary-label {
+  color: var(--text-secondary);
+}
+
+.onboarding-summary-value {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* ---- "Finish setup" chip ---- */
+.finish-setup-chip {
+  position: absolute;
+  top: 44px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-card);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+}
+
+.finish-setup-chip-main,
+.finish-setup-chip-close {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 5px 10px;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.finish-setup-chip-main:hover {
+  color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.finish-setup-chip-close {
+  padding: 5px 8px;
+}
+
+.finish-setup-chip-close:hover {
+  color: var(--text-primary);
+}
+
+@keyframes onboarding-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes onboarding-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Motion off: the `viewTransitions` preference (`.no-motion`) and the OS
+   reduced-motion setting both remove the entrance animations. */
+.onboarding-overlay.no-motion,
+.onboarding-overlay.no-motion .onboarding-card {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-overlay,
+  .onboarding-card {
+    animation: none;
+  }
+
+  .onboarding-logo,
+  .onboarding-logo.pulsing {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* Minimum window (480x780): tighter padding, two-up instrument grid. */
+@media (max-width: 560px) {
+  .onboarding-overlay {
+    padding: 12px;
+  }
+
+  .onboarding-card {
+    padding: 20px 16px 14px;
+    gap: 14px;
+    border-radius: 12px;
+  }
+
+  .onboarding-welcome-title {
+    font-size: 1.5rem;
+  }
+
+  .onboarding-step .instrument-picker-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .onboarding-btn {
+    padding: 9px 12px;
+  }
+}
