@@ -1,0 +1,37 @@
+{
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Yames",
+        "url": "index.html?window=main",
+        "width": 800,
+        "height": 900,
+        "minWidth": 480,
+        "minHeight": 780,
+        "resizable": true,
+        "decorations": true,
+        "alwaysOnTop": true,
+        "visible": false,
+        "theme": "Dark",
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
+        "transparent": false,
+        "backgroundColor": "#1a1a2e"
+      },
+      {
+        "label": "floating",
+        "title": "Yames Widget",
+        "url": "index.html?window=floating",
+        "width": 400,
+        "height": 160,
+        "resizable": false,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "visibleOnAllWorkspaces": true
+      }
+    ]
+  }
+}
