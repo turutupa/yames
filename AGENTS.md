@@ -79,6 +79,17 @@ actually opens.
   (`../../../ipc`, `../../../types`, etc.). Run `tsc --noEmit` after
   moving files; TS `noUnusedLocals` will flag any orphaned imports.
 
+## Roadmap & plans
+
+- `plans/ROADMAP.md` is the single active planning document (mission,
+  current state, phased work with acceptance gates, non-goals). Read it
+  before starting any coach / DSP / curriculum work.
+- `plans/archive/DSP_AND_COACH_PLAN.md` is the archived design spec for
+  the shipped scoring pipeline — code comments cite it for the *why*.
+- `plans/tasks/<phase>/T0N-*.md` are self-contained briefs, one per
+  worker session. If you were handed one, follow it and its README.
+- `plans/MOBILE_IMPLEMENTATION_PLAN.md` is out of the current horizon.
+
 ## Coaching pipeline — latency tiers
 
 Every coach feature belongs to exactly one tier. When adding pitch analysis,
