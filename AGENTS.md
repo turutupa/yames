@@ -58,11 +58,18 @@ Prerequisites beyond the usual Rust + cmake (aubio already needs cmake):
   (`LIBCLANG_PATH` must point at the directory holding `libclang.dll` /
   `.so` / `.dylib`).
 - **macOS**: Xcode command line tools. Metal needs nothing extra.
-- **Windows**: the LunarG Vulkan SDK (`VULKAN_SDK` set, `%VULKAN_SDK%\Bin`
-  on PATH for `glslc.exe`). Both MSVC and the `x86_64-pc-windows-gnu`
-  toolchain work; on GNU you also need a MinGW toolchain on PATH
-  (`gcc`, `g++`, `dlltool`, `ninja` — w64devkit has all four) or rustc
-  fails with `error calling dlltool 'dlltool.exe': program not found`.
+- **Windows**: the MSVC toolchain (`stable-x86_64-pc-windows-msvc` plus
+  VS Build Tools) and the LunarG Vulkan SDK (`VULKAN_SDK` set,
+  `%VULKAN_SDK%\Bin` on PATH for `glslc.exe`). MSVC is **required** for
+  the LLM features: on `x86_64-pc-windows-gnu` the `cmake` crate falls
+  back to the MSYS Makefiles generator and `llama-cpp-sys-2`'s build
+  script then panics on `assert_ne!(llama_libs.len(), 0)` because the
+  install step lays the libraries out where it does not look. The
+  default (no-LLM) build still works fine on GNU.
+  Build from a short path, or set `CARGO_TARGET_DIR` to one: llama.cpp's
+  CMake TryCompile tree pushes the default `src-tauri/target/...` past
+  MAX_PATH and MSBuild's CL tracker then fails with
+  `MSB6003 ... cmTC_*.tlog` not found.
 - **Linux**: `libvulkan-dev`, `glslc` (shaderc), `libclang-dev`, cmake.
 
 Smoke test — skipped when the env var is unset, so it is safe in CI:

@@ -752,18 +752,25 @@ mod llm_tests {
         let path = std::path::PathBuf::from(&raw);
         assert!(path.exists(), "YAMES_TEST_GGUF does not exist: {raw}");
 
+        // 8 tokens is the contract; `YAMES_TEST_GGUF_TOKENS` raises it only so
+        // a throughput measurement has enough samples to mean anything.
+        let max_tokens = std::env::var("YAMES_TEST_GGUF_TOKENS")
+            .ok()
+            .and_then(|v| v.trim().parse::<usize>().ok())
+            .unwrap_or(8);
+
         let model = LlmModel::load(&path).expect("model load failed");
 
         let started = std::time::Instant::now();
         let out = model
-            .generate_with_limit("Accuracy: 82\nSignedDev: -4.1\nSay hello.", 8)
+            .generate_with_limit("Accuracy: 82\nSignedDev: -4.1\nSay hello.", max_tokens)
             .expect("generation failed");
         let elapsed = started.elapsed();
 
         eprintln!(
-            "[llm test] backend={} elapsed={:.2}s output={out:?}",
+            "[llm test] backend={} max_tokens={max_tokens} elapsed={:.2}s output={out:?}",
             super::llm::BACKEND,
-            elapsed.as_secs_f64()
+            elapsed.as_secs_f64(),
         );
         assert!(
             !out.trim().is_empty(),
