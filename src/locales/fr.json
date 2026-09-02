@@ -245,9 +245,15 @@
     "subdiv": "Subdiv",
     "meter": "Mesure",
     "free": "FREE",
-    "freeBeatCount": "{{count}} beats",
-    "addBeat": "Add beat",
-    "removeBeat": "Remove beat"
+    "freeBeatCount": "{{count}} temps",
+    "freeBeatCount_one": "{{count}} temps",
+    "freeBeatCount_other": "{{count}} temps",
+    "beatCount": "{{count}} temps",
+    "beatCount_one": "{{count}} temps",
+    "beatCount_other": "{{count}} temps",
+    "clicksPerBar": "{{count}} clics/mesure",
+    "addBeat": "Ajouter un temps",
+    "removeBeat": "Retirer un temps"
   },
   "settings": {
     "tabs": {
@@ -440,8 +446,8 @@
         "sub-2": "Régler la subdivision sur des croches (÷2)",
         "sub-3": "Régler la subdivision sur des triolets (÷3)",
         "sub-4": "Régler la subdivision sur des doubles croches (÷4)",
-        "sig-next": "Passer à la mesure suivante",
-        "sig-prev": "Passer à la mesure précédente",
+        "sig-next": "Passer à la mesure suivante — ajoute un temps en mode FREE",
+        "sig-prev": "Passer à la mesure précédente — retire un temps en mode FREE",
         "fullscreen": "Entrer ou sortir du mode Zen",
         "os-fullscreen": "Basculer le plein écran natif",
         "toggle-widget": "Basculer vers le widget flottant",

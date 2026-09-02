@@ -188,14 +188,14 @@ export const HOTKEYS: HotkeyEntry[] = [
     id: "sig-next",
     action: "Time signature +",
     key: "T",
-    desc: "Cycle to next time signature",
+    desc: "Cycle to next time signature — adds a beat in FREE mode",
     group: "metronome",
   },
   {
     id: "sig-prev",
     action: "Time signature −",
     key: "⇧T",
-    desc: "Cycle to previous time signature",
+    desc: "Cycle to previous time signature — removes a beat in FREE mode",
     group: "metronome",
   },
   {

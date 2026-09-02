@@ -245,9 +245,15 @@
     "subdiv": "分割",
     "meter": "拍子",
     "free": "FREE",
-    "freeBeatCount": "{{count}} beats",
-    "addBeat": "Add beat",
-    "removeBeat": "Remove beat"
+    "freeBeatCount": "{{count}} 拍",
+    "freeBeatCount_one": "{{count}} 拍",
+    "freeBeatCount_other": "{{count}} 拍",
+    "beatCount": "{{count}} 拍",
+    "beatCount_one": "{{count}} 拍",
+    "beatCount_other": "{{count}} 拍",
+    "clicksPerBar": "{{count}} クリック/小節",
+    "addBeat": "拍を追加",
+    "removeBeat": "拍を削除"
   },
   "settings": {
     "tabs": {
@@ -440,8 +446,8 @@
         "sub-2": "分割を八分音符に設定（÷2）",
         "sub-3": "分割を三連符に設定（÷3）",
         "sub-4": "分割を十六分音符に設定（÷4）",
-        "sig-next": "次の拍子に切り替える",
-        "sig-prev": "前の拍子に切り替える",
+        "sig-next": "次の拍子に切り替える — FREE モードでは 1 拍追加",
+        "sig-prev": "前の拍子に切り替える — FREE モードでは 1 拍削除",
         "fullscreen": "禅モードの開始または終了",
         "os-fullscreen": "OS の全画面表示を切り替える",
         "toggle-widget": "フローティングウィジェットに切り替える",

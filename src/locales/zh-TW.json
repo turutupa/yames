@@ -245,9 +245,15 @@
     "subdiv": "細分",
     "meter": "拍號",
     "free": "FREE",
-    "freeBeatCount": "{{count}} beats",
-    "addBeat": "Add beat",
-    "removeBeat": "Remove beat"
+    "freeBeatCount": "{{count}} 拍",
+    "freeBeatCount_one": "{{count}} 拍",
+    "freeBeatCount_other": "{{count}} 拍",
+    "beatCount": "{{count}} 拍",
+    "beatCount_one": "{{count}} 拍",
+    "beatCount_other": "{{count}} 拍",
+    "clicksPerBar": "每小節 {{count}} 次",
+    "addBeat": "增加一拍",
+    "removeBeat": "減少一拍"
   },
   "settings": {
     "tabs": {
@@ -440,8 +446,8 @@
         "sub-2": "將細分設為八分音符（÷2）",
         "sub-3": "將細分設為三連音（÷3）",
         "sub-4": "將細分設為十六分音符（÷4）",
-        "sig-next": "切換到下一個拍號",
-        "sig-prev": "切換到上一個拍號",
+        "sig-next": "切換到下一個拍號 — FREE 模式下增加一拍",
+        "sig-prev": "切換到上一個拍號 — FREE 模式下減少一拍",
         "fullscreen": "進入或退出禪意模式",
         "os-fullscreen": "切換系統全螢幕",
         "toggle-widget": "切換到懸浮小窗",

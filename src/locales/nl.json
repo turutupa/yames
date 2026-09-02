@@ -246,8 +246,14 @@
     "meter": "Maatsoort",
     "free": "FREE",
     "freeBeatCount": "{{count}} beats",
-    "addBeat": "Add beat",
-    "removeBeat": "Remove beat"
+    "freeBeatCount_one": "{{count}} beat",
+    "freeBeatCount_other": "{{count}} beats",
+    "beatCount": "{{count}} beats",
+    "beatCount_one": "{{count}} beat",
+    "beatCount_other": "{{count}} beats",
+    "clicksPerBar": "{{count}} kliks/maat",
+    "addBeat": "Beat toevoegen",
+    "removeBeat": "Beat verwijderen"
   },
   "settings": {
     "tabs": {
@@ -440,8 +446,8 @@
         "sub-2": "Zet de onderverdeling op achtsten (÷2)",
         "sub-3": "Zet de onderverdeling op triolen (÷3)",
         "sub-4": "Zet de onderverdeling op zestienden (÷4)",
-        "sig-next": "Naar de volgende maatsoort",
-        "sig-prev": "Naar de vorige maatsoort",
+        "sig-next": "Naar de volgende maatsoort — voegt een beat toe in FREE-modus",
+        "sig-prev": "Naar de vorige maatsoort — verwijdert een beat in FREE-modus",
         "fullscreen": "Zen-modus in of uit",
         "os-fullscreen": "Systeemvolledig scherm aan/uit",
         "toggle-widget": "Overschakelen naar de zwevende widget",

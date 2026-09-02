@@ -245,9 +245,15 @@
     "subdiv": "Podział",
     "meter": "Metrum",
     "free": "FREE",
-    "freeBeatCount": "{{count}} beats",
-    "addBeat": "Add beat",
-    "removeBeat": "Remove beat"
+    "freeBeatCount": "{{count}} uderzenia",
+    "freeBeatCount_one": "{{count}} uderzenie",
+    "freeBeatCount_other": "{{count}} uderzenia",
+    "beatCount": "{{count}} uderzenia",
+    "beatCount_one": "{{count}} uderzenie",
+    "beatCount_other": "{{count}} uderzenia",
+    "clicksPerBar": "{{count}} kliknięć/takt",
+    "addBeat": "Dodaj uderzenie",
+    "removeBeat": "Usuń uderzenie"
   },
   "settings": {
     "tabs": {
@@ -440,8 +446,8 @@
         "sub-2": "Ustaw podział na ósemki (÷2)",
         "sub-3": "Ustaw podział na triole (÷3)",
         "sub-4": "Ustaw podział na szesnastki (÷4)",
-        "sig-next": "Przełącz na następne metrum",
-        "sig-prev": "Przełącz na poprzednie metrum",
+        "sig-next": "Przełącz na następne metrum — w trybie FREE dodaje uderzenie",
+        "sig-prev": "Przełącz na poprzednie metrum — w trybie FREE usuwa uderzenie",
         "fullscreen": "Wejdź lub wyjdź z trybu Zen",
         "os-fullscreen": "Przełącz pełny ekran systemowy",
         "toggle-widget": "Przełącz na pływający widget",

@@ -245,9 +245,15 @@
     "subdiv": "Phân nhịp",
     "meter": "Nhịp",
     "free": "FREE",
-    "freeBeatCount": "{{count}} beats",
-    "addBeat": "Add beat",
-    "removeBeat": "Remove beat"
+    "freeBeatCount": "{{count}} phách",
+    "freeBeatCount_one": "{{count}} phách",
+    "freeBeatCount_other": "{{count}} phách",
+    "beatCount": "{{count}} phách",
+    "beatCount_one": "{{count}} phách",
+    "beatCount_other": "{{count}} phách",
+    "clicksPerBar": "{{count}} tiếng/ô nhịp",
+    "addBeat": "Thêm phách",
+    "removeBeat": "Bớt phách"
   },
   "settings": {
     "tabs": {
@@ -440,8 +446,8 @@
         "sub-2": "Đặt phân nhịp thành nốt móc đơn (÷2)",
         "sub-3": "Đặt phân nhịp thành chùm ba (÷3)",
         "sub-4": "Đặt phân nhịp thành nốt móc kép (÷4)",
-        "sig-next": "Chuyển sang số chỉ nhịp kế tiếp",
-        "sig-prev": "Chuyển về số chỉ nhịp trước",
+        "sig-next": "Chuyển sang số chỉ nhịp kế tiếp — thêm một phách ở chế độ FREE",
+        "sig-prev": "Chuyển về số chỉ nhịp trước — bớt một phách ở chế độ FREE",
         "fullscreen": "Vào hoặc thoát chế độ thiền",
         "os-fullscreen": "Bật/tắt toàn màn hình hệ thống",
         "toggle-widget": "Chuyển sang cửa sổ mini",
