@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   cancelModelDownload,
   getModelStatus,
+  getSystemMemoryMb,
   onDownloadComplete,
   onDownloadProgress,
   startModelDownload,
@@ -14,16 +15,36 @@ import {
 } from "../ipc";
 import type { DownloadProgress, ModelStatus, VoiceDiagnostic } from "../ipc";
 import type { BrainTier, CoachMode, ModelTier, VoiceMode, Verbosity } from "../types";
+import { needsBrainUpdate, studioAvailable } from "../coach/brainTiers";
 
 // Legacy persisted values may still carry "chime" from an earlier
 // release; we collapse it to "silent" on load and rewrite the store so
 // the user lands on a valid option after migration.
 type PersistedVoiceMode = VoiceMode | "chime";
 
+/**
+ * Brain weights, per ROADMAP §3. Both Apache-2.0, both from Qwen's own
+ * GGUF repos (`bartowski/Qwen_Qwen3-*-GGUF` carries the same quants if
+ * these ever move).
+ *
+ *   standard  Qwen3-4B  Q4_K_M  2,497,280,256 B (2.33 GiB) — the floor
+ *   full      Qwen3-8B  Q4_K_M  5,027,783,488 B (4.68 GiB) — "Studio",
+ *                                offered only at >= 16 GB RAM
+ *
+ * Sizes verified 2026-09-02 and mirrored by `models.rs::min_brain_bytes`,
+ * which rejects a download that comes back implausibly small.
+ *
+ * The `full` tier id is deliberately unchanged even though the label is
+ * now "Studio" — it is persisted in the settings store and written to
+ * `models/brain/tier` on disk, so renaming it would strand every existing
+ * install. Only the user-facing string moved.
+ *
+ * Never Qwen2.5-3B: non-commercial Qwen Research License (ROADMAP §3).
+ */
 const MODEL_URLS: Record<ModelTier, string> = {
   standard:
-    "https://huggingface.co/bartowski/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/Qwen2.5-1.5B-Instruct-Q4_K_M.gguf",
-  full: "https://huggingface.co/bartowski/Phi-3.5-mini-instruct-GGUF/resolve/main/Phi-3.5-mini-instruct-Q4_K_M.gguf",
+    "https://huggingface.co/Qwen/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q4_K_M.gguf",
+  full: "https://huggingface.co/Qwen/Qwen3-8B-GGUF/resolve/main/Qwen3-8B-Q4_K_M.gguf",
 };
 
 /**
@@ -51,6 +72,9 @@ export function useCoachDownload() {
   );
   const [pendingDownloadTier, setPendingDownloadTier] =
     useState<ModelTier | null>(null);
+  // Total physical RAM, for the Studio tier gate. `null` until the IPC
+  // answers; `studioAvailable` treats both null and 0 as "unknown, allow".
+  const [systemMemoryMb, setSystemMemoryMb] = useState<number | null>(null);
 
   const [coachBrainTier, setCoachBrainTier] = useState<BrainTier>("off");
   const [coachVoiceMode, setCoachVoiceMode] = useState<VoiceMode>("silent");
@@ -80,6 +104,9 @@ export function useCoachDownload() {
   // Load all Practice Coach settings from store on mount.
   useEffect(() => {
     getModelStatus().then(setModelStatus);
+    // Asked once on mount — physical RAM does not change while the app
+    // runs, and a failure just leaves the Studio tier ungated.
+    getSystemMemoryMb().then(setSystemMemoryMb).catch(() => {});
     storeLoad<BrainTier>("coachBrainTier").then((v) => {
       if (v) setCoachBrainTier(v);
     });
@@ -210,6 +237,10 @@ export function useCoachDownload() {
     downloadingTier,
     pendingDownloadTier,
     setPendingDownloadTier,
+    // tier gating / migration
+    systemMemoryMb,
+    studioAvailable: studioAvailable(systemMemoryMb),
+    brainUpdateAvailable: needsBrainUpdate(modelStatus),
     // coach prefs
     coachBrainTier,
     setCoachBrainTier,

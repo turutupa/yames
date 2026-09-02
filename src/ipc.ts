@@ -621,6 +621,13 @@ export async function setInputGain(gainDb: number): Promise<void> {
 export type ModelStatus = {
   brainReady: boolean;
   brainTier: string | null;
+  /**
+   * Which model family the downloaded brain belongs to. `"qwen3"` is
+   * current; `"legacy"` is anything installed before the Qwen3 refresh
+   * (Qwen2.5-1.5B / Phi-3.5-mini), detected by the absence of the
+   * `models/brain/model.json` marker. `null` when nothing is downloaded.
+   */
+  brainFamily: string | null;
   brainSizeBytes: number;
   voiceReady: boolean;
   voiceSizeBytes: number;
@@ -636,6 +643,14 @@ export type DownloadProgress = {
 
 export async function getModelStatus(): Promise<ModelStatus> {
   return invoke<ModelStatus>("get_model_status");
+}
+
+/**
+ * Total physical RAM in MB, or 0 when the platform query failed.
+ * Gates the Studio brain tier (ROADMAP §3: offered only at >= 16 GB).
+ */
+export async function getSystemMemoryMb(): Promise<number> {
+  return invoke<number>("get_system_memory_mb");
 }
 
 export async function writeModelChunk(

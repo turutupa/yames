@@ -21,17 +21,21 @@ pub fn create_shared_engine() -> SharedCoachEngine {
 // ---------------------------------------------------------------------------
 
 pub struct CoachEngine {
+    /// Handle to the long-lived inference thread (ROADMAP §3). The model,
+    /// its `LlamaContext` and the llama.cpp backend all live *on* that
+    /// thread; this side only owns a job channel. That is what lets the
+    /// context be hoisted and reused across calls — `LlamaContext` is not
+    /// `Send`, but `SharedCoachEngine` is Tauri managed state and must be.
     #[cfg(feature = "coach-llm")]
-    model: Option<LlmModel>,
-    /// True only when a real GGUF model is held in memory. This used to
-    /// be a plain `loaded` flag that `load_model` also set on the
-    /// template path, so the UI reported "brain loaded" after the user
-    /// downloaded weights that were never read. The flag now means
-    /// exactly one thing: an `LlmModel` is resident.
+    llm: Option<llm::LlmWorker>,
+    /// True only when a real GGUF model is held in memory (on the worker
+    /// thread). This used to be a plain `loaded` flag that `load_model`
+    /// also set on the template path, so the UI reported "brain loaded"
+    /// after the user downloaded weights that were never read. The flag
+    /// now means exactly one thing: an LLM worker is resident.
     model_resident: bool,
     /// File name of the resident model, captured at load. `None` in
-    /// template mode. T04 may replace this with a real model identity
-    /// read from the GGUF metadata.
+    /// template mode.
     model_name: Option<String>,
 }
 
@@ -39,7 +43,7 @@ impl CoachEngine {
     pub fn new() -> Self {
         CoachEngine {
             #[cfg(feature = "coach-llm")]
-            model: None,
+            llm: None,
             model_resident: false,
             model_name: None,
         }
@@ -123,8 +127,18 @@ pub fn load_model(engine: &mut CoachEngine, model_path: &std::path::Path) -> Res
 
     #[cfg(feature = "coach-llm")]
     {
-        let llm = LlmModel::load(model_path)?;
-        engine.model = Some(llm);
+        // Tear the previous worker down FIRST and wait for it to exit.
+        // `LlamaBackend::init()` is a process-wide one-shot (it flips a
+        // static `AtomicBool` and only `Drop` clears it), so spawning the
+        // replacement before the incumbent thread has dropped its backend
+        // fails the second load with `BackendAlreadyInitialized`. The
+        // `Drop` impl on `LlmWorker` closes the job channel and joins.
+        drop(engine.llm.take());
+        engine.model_resident = false;
+        engine.model_name = None;
+
+        let llm = llm::LlmWorker::spawn(model_path)?;
+        engine.llm = Some(llm);
         engine.model_resident = true;
         engine.model_name = model_path
             .file_name()
@@ -153,12 +167,87 @@ pub fn load_model(engine: &mut CoachEngine, model_path: &std::path::Path) -> Res
 #[cfg_attr(not(feature = "coach-llm"), allow(unused_variables))]
 pub fn generate(engine: &CoachEngine, context: &str) -> Result<String, String> {
     #[cfg(feature = "coach-llm")]
-    if let Some(ref model) = engine.model {
-        return model.generate(context);
+    if let Some(ref worker) = engine.llm {
+        return worker.generate(context, token_budget(context));
     }
 
     // Template-based fallback
     generate_template(context)
+}
+
+/// Per-call generation cap (ROADMAP §0.3 / T04).
+///
+/// A rephrase is a one-or-two-sentence paraphrase of a template the JS
+/// side already rendered — 64 tokens is comfortably more than it can
+/// legitimately need, and capping it is what keeps the rephrase path
+/// inside the mid-session tip budget (AGENTS.md latency tiers) when the
+/// model decides to be chatty. Chat answers, mini-reports and session
+/// summaries get the full 256.
+///
+/// The classification mirrors `generate_template`'s markers so the LLM
+/// and template paths agree on what kind of request they are looking at;
+/// both are driven by prompt text the JS layer owns (`useSession.ts`,
+/// `useSegmentCoach.ts`).
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub const REPHRASE_MAX_TOKENS: usize = 64;
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub const CHAT_MAX_TOKENS: usize = 256;
+
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+fn token_budget(context: &str) -> usize {
+    let is_rephrase = context.contains("Rephrase this practice-coach");
+    if is_rephrase {
+        REPHRASE_MAX_TOKENS
+    } else {
+        CHAT_MAX_TOKENS
+    }
+}
+
+/// Remove Qwen3 reasoning blocks from generated text.
+///
+/// We already ask for a non-thinking turn twice over (a `/no_think`
+/// directive in the system message and an empty `<think></think>` block
+/// prefilled into the assistant turn — see `llm::build_prompt`), but a
+/// quantised 4B model under a temperature of 0.7 can still open one, and
+/// a legacy or third-party GGUF may ignore the directive entirely. The
+/// user must never see reasoning text, so strip it defensively:
+///
+///  * every complete `<think>…</think>` pair is removed;
+///  * an unterminated `<think>` swallows the rest of the output (the
+///    model ran out of budget mid-thought — there is no answer after it);
+///  * a stray leading `</think>` (the prefill's closing tag echoed back)
+///    drops everything up to and including it.
+///
+/// Returns the trimmed remainder, which may be empty — callers on the JS
+/// side already treat an empty rephrase as "use the template".
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+fn strip_think(raw: &str) -> String {
+    const OPEN: &str = "<think>";
+    const CLOSE: &str = "</think>";
+
+    let mut out = String::with_capacity(raw.len());
+    let mut rest = raw;
+    while let Some(open) = rest.find(OPEN) {
+        out.push_str(&rest[..open]);
+        let after = &rest[open + OPEN.len()..];
+        match after.find(CLOSE) {
+            Some(close) => rest = &after[close + CLOSE.len()..],
+            // Unterminated block: everything from `<think>` onwards is
+            // reasoning that never reached a conclusion. Drop it.
+            None => {
+                rest = "";
+                break;
+            }
+        }
+    }
+    out.push_str(rest);
+
+    // A bare closing tag can only be the echo of the prefilled block, so
+    // whatever precedes it is reasoning too.
+    if let Some(pos) = out.rfind(CLOSE) {
+        out = out[pos + CLOSE.len()..].to_string();
+    }
+    out.trim().to_string()
 }
 
 /// Extract the trimmed value after a key prefix from the context string.
@@ -578,15 +667,22 @@ fn extract_int(text: &str, prefix: &str) -> Option<u32> {
 
 #[cfg(feature = "coach-llm")]
 mod llm {
+    use std::path::{Path, PathBuf};
+    use std::sync::mpsc::{channel, sync_channel, Receiver, Sender, SyncSender};
+
     use llama_cpp_2::context::params::LlamaContextParams;
+    use llama_cpp_2::context::LlamaContext;
     use llama_cpp_2::llama_backend::LlamaBackend;
     use llama_cpp_2::llama_batch::LlamaBatch;
     use llama_cpp_2::model::params::LlamaModelParams;
     use llama_cpp_2::model::LlamaModel;
     use llama_cpp_2::sampling::LlamaSampler;
 
-    const MAX_TOKENS: usize = 256;
-    const CONTEXT_SIZE: u32 = 2048;
+    /// ROADMAP §0.3: `n_ctx` 4096. Qwen3 trains at 32k but the coach's
+    /// longest prompt (a session summary with narrative + history) is a
+    /// few hundred tokens; 4096 leaves generous headroom while keeping
+    /// the KV buffer — allocated once now, not per call — small.
+    const CONTEXT_SIZE: u32 = 4096;
 
     /// Which llama.cpp backend this binary was compiled against. Reported in
     /// the load log so a bug report can say whether the GPU path was even
@@ -656,150 +752,388 @@ mod llm {
             .map_err(|e| format!("Failed to load model: {e}"))
     }
 
-    pub struct LlmModel {
-        backend: LlamaBackend,
-        model: LlamaModel,
-        n_threads: i32,
+    /// Build the Qwen3 chat prompt.
+    ///
+    /// Hand-built ChatML rather than `LlamaModel::apply_chat_template`
+    /// on purpose. llama.cpp's `llama_chat_apply_template` (which is what
+    /// that method calls) is **not** a Jinja engine: it sniffs the GGUF's
+    /// template string for known markers and, seeing `<|im_start|>`,
+    /// renders generic ChatML. Every bit of Qwen3's template that we
+    /// actually care about — the `enable_thinking` switch and the empty
+    /// `<think>` block it emits when thinking is off — is silently
+    /// dropped. Building the string ourselves is both cheaper and the
+    /// only way to get the non-thinking turn.
+    ///
+    /// Thinking is disabled two ways, because either alone has been seen
+    /// to leak on a Q4 quant:
+    ///   1. `/no_think` in the system message — the documented Qwen3
+    ///      soft switch;
+    ///   2. an empty `<think></think>` block prefilled into the assistant
+    ///      turn, which is exactly what the official template emits for
+    ///      `enable_thinking=false`, so the model continues with content
+    ///      instead of opening a reasoning block.
+    /// `super::strip_think` cleans up anything that still gets through.
+    ///
+    /// The old prompt was Phi-3 style (`<|system|>` … `<|assistant|>`).
+    /// Qwen3 has no such tokens, so they tokenised as literal text and
+    /// showed up in the model's output as template artifacts.
+    fn build_prompt(context: &str) -> String {
+        format!(
+            "<|im_start|>system\n{system}\n\n/no_think<|im_end|>\n\
+             <|im_start|>user\n{context}<|im_end|>\n\
+             <|im_start|>assistant\n<think>\n\n</think>\n\n",
+            system = super::SYSTEM_PROMPT,
+        )
     }
 
-    impl LlmModel {
-        pub fn load(path: &std::path::Path) -> Result<Self, String> {
-            let backend =
-                LlamaBackend::init().map_err(|e| format!("Failed to init llama backend: {e}"))?;
+    // -----------------------------------------------------------------
+    // Inference thread
+    // -----------------------------------------------------------------
 
-            let requested = requested_gpu_layers();
-            let n_threads = inference_threads();
-            eprintln!(
-                "[coach] loading model (backend={BACKEND}, n_gpu_layers={requested}, n_threads={n_threads})"
-            );
+    /// A generation request. The reply carries the cleaned text and how
+    /// many tokens were actually sampled — the count is what makes an
+    /// honest tokens/second figure possible in `latency_bench`.
+    struct Job {
+        context: String,
+        max_tokens: usize,
+        reply: SyncSender<Result<(String, usize), String>>,
+    }
 
-            // GPU first, always. A Vulkan/Metal build on a machine with no
-            // usable device normally still loads — llama.cpp reports zero
-            // offloadable devices and keeps every layer on the CPU — but a
-            // broken driver can fail the load outright, so retry on the CPU
-            // rather than leaving the user with a dead brain.
-            let model = match load_model_file(&backend, path, requested) {
-                Ok(model) => model,
-                Err(gpu_err) if requested != 0 => {
-                    eprintln!(
-                        "[coach] GPU load failed ({gpu_err}) — retrying with n_gpu_layers = 0"
-                    );
-                    load_model_file(&backend, path, 0)?
+    /// Handle to the coach's single, long-lived inference thread.
+    ///
+    /// ROADMAP §3 wants generation to run *below normal* priority so a
+    /// multi-second CPU inference can never preempt the audio path. T01
+    /// did that per call, on whichever tokio `spawn_blocking` worker
+    /// picked the job up, and restored the priority afterwards. That is
+    /// wrong on Linux: an unprivileged thread cannot lower its nice value
+    /// and then raise it again (`setpriority` back down is EPERM), so the
+    /// restore silently failed and every tokio blocking thread that ever
+    /// ran a generation stayed demoted for the life of the process —
+    /// including the ones that later ran TTS synthesis and device
+    /// enumeration.
+    ///
+    /// One dedicated thread, demoted exactly once at spawn and never
+    /// restored, removes the whole problem: nothing else runs on it, so
+    /// there is nothing to restore. It also serialises generations
+    /// (llama.cpp contexts are single-writer anyway) and — the reason
+    /// this task exists — lets the `LlamaContext` and its KV buffer be
+    /// created once and reused, instead of being rebuilt per call.
+    pub struct LlmWorker {
+        /// `Option` only so `Drop` can close the channel before joining.
+        jobs: Option<Sender<Job>>,
+        handle: Option<std::thread::JoinHandle<()>>,
+    }
+
+    impl LlmWorker {
+        /// Spawn the thread and block until the model has finished
+        /// loading (or failed). Callers already treat `load_model` as a
+        /// slow, fallible operation.
+        pub fn spawn(path: &Path) -> Result<Self, String> {
+            let (job_tx, job_rx) = channel::<Job>();
+            let (ready_tx, ready_rx) = sync_channel::<Result<(), String>>(1);
+            let owned = path.to_path_buf();
+
+            let handle = std::thread::Builder::new()
+                .name("yames-coach-llm".to_string())
+                .spawn(move || run(owned, ready_tx, job_rx))
+                .map_err(|e| format!("Failed to spawn inference thread: {e}"))?;
+
+            match ready_rx.recv() {
+                Ok(Ok(())) => Ok(LlmWorker {
+                    jobs: Some(job_tx),
+                    handle: Some(handle),
+                }),
+                Ok(Err(e)) => {
+                    let _ = handle.join();
+                    Err(e)
                 }
-                Err(e) => return Err(e),
-            };
-
-            Ok(LlmModel {
-                backend,
-                model,
-                n_threads,
-            })
+                Err(_) => {
+                    let _ = handle.join();
+                    Err("inference thread exited before reporting load status".to_string())
+                }
+            }
         }
 
-        pub fn generate(&self, context: &str) -> Result<String, String> {
-            self.generate_with_limit(context, MAX_TOKENS)
+        pub fn generate(&self, context: &str, max_tokens: usize) -> Result<String, String> {
+            self.generate_measured(context, max_tokens)
+                .map(|(text, _tokens)| text)
         }
 
-        pub fn generate_with_limit(
+        /// As `generate`, but also reports the sampled token count.
+        pub fn generate_measured(
             &self,
             context: &str,
             max_tokens: usize,
-        ) -> Result<String, String> {
-            let prompt = format!(
-                "<|system|>\n{}<|end|>\n<|user|>\n{context}<|end|>\n<|assistant|>\n",
-                super::SYSTEM_PROMPT,
-            );
-
-            let ctx_params = LlamaContextParams::default()
-                .with_n_ctx(std::num::NonZero::new(CONTEXT_SIZE))
-                .with_n_threads(self.n_threads)
-                .with_n_threads_batch(self.n_threads);
-            let mut ctx = self
-                .model
-                .new_context(&self.backend, ctx_params)
-                .map_err(|e| format!("Context creation failed: {e}"))?;
-
-            let tokens = self
-                .model
-                .str_to_token(&prompt, llama_cpp_2::model::AddBos::Always)
-                .map_err(|e| format!("Tokenization failed: {e}"))?;
-
-            if tokens.len() >= CONTEXT_SIZE as usize {
-                return Err("Prompt too long for context window".into());
-            }
-
-            let mut batch = LlamaBatch::new(CONTEXT_SIZE as usize, 1);
-            for (i, &token) in tokens.iter().enumerate() {
-                let is_last = i == tokens.len() - 1;
-                batch
-                    .add(token, i as i32, &[0], is_last)
-                    .map_err(|e| format!("Batch add failed: {e}"))?;
-            }
-
-            ctx.decode(&mut batch)
-                .map_err(|e| format!("Decode failed: {e}"))?;
-
-            let mut output_tokens = Vec::new();
-            let mut sampler = LlamaSampler::chain_simple([
-                LlamaSampler::temp(0.7),
-                LlamaSampler::top_p(0.9, 1),
-                LlamaSampler::dist(42),
-            ]);
-
-            for _ in 0..max_tokens {
-                let logits_id = batch.n_tokens() - 1;
-                let token = sampler.sample(&ctx, logits_id);
-
-                if self.model.is_eog_token(token) {
-                    break;
-                }
-
-                output_tokens.push(token);
-
-                batch.clear();
-                batch
-                    .add(
-                        token,
-                        tokens.len() as i32 + output_tokens.len() as i32 - 1,
-                        &[0],
-                        true,
-                    )
-                    .map_err(|e| format!("Batch add failed: {e}"))?;
-
-                ctx.decode(&mut batch)
-                    .map_err(|e| format!("Decode failed: {e}"))?;
-            }
-
-            // Was `token_to_str(t, token::LlamaTokenAttr::all())` per token,
-            // which does not compile against llama-cpp-2 0.1.146 — there is no
-            // `LlamaTokenAttr`, and the second argument is a `model::Special`.
-            // (The old call was never exercised: `coach-llm` could only build
-            // on macOS, and nothing shipped with it enabled.)
-            //
-            // `token_to_piece` rather than the deprecated `tokens_to_str`:
-            // the latter hardcodes an 8-byte piece buffer and does not retry,
-            // so any longer piece fails the whole generation with
-            // "Insufficient Buffer Space" — observed on a 128-token run.
-            // One decoder across the whole output also means a UTF-8 sequence
-            // split across two tokens survives instead of becoming replacement
-            // characters. `false` = do not render control tokens as text.
-            let mut decoder = encoding_rs::UTF_8.new_decoder();
-            let mut result = String::new();
-            for token in &output_tokens {
-                let piece = self
-                    .model
-                    .token_to_piece(*token, &mut decoder, false, None)
-                    .map_err(|e| format!("Token decode failed: {e}"))?;
-                result.push_str(&piece);
-            }
-
-            Ok(result.trim().to_string())
+        ) -> Result<(String, usize), String> {
+            let (reply_tx, reply_rx) = sync_channel::<Result<(String, usize), String>>(1);
+            let jobs = self
+                .jobs
+                .as_ref()
+                .ok_or_else(|| "inference thread is shutting down".to_string())?;
+            jobs.send(Job {
+                context: context.to_string(),
+                max_tokens,
+                reply: reply_tx,
+            })
+            .map_err(|_| "inference thread is gone".to_string())?;
+            reply_rx
+                .recv()
+                .map_err(|_| "inference thread died mid-generation".to_string())?
         }
     }
-}
 
-#[cfg(feature = "coach-llm")]
-use llm::LlmModel;
+    impl Drop for LlmWorker {
+        fn drop(&mut self) {
+            // Closing the job channel is what ends the worker's loop, and
+            // joining is what guarantees its `LlamaBackend` has been
+            // dropped — `LlamaBackend::init()` is a process-wide one-shot,
+            // so a replacement worker cannot start until this one is
+            // fully gone (see `super::load_model`).
+            drop(self.jobs.take());
+            if let Some(handle) = self.handle.take() {
+                let _ = handle.join();
+            }
+        }
+    }
+
+    /// Thread body: own the backend, the model, the context and the
+    /// batch; serve jobs until the channel closes.
+    fn run(path: PathBuf, ready: SyncSender<Result<(), String>>, jobs: Receiver<Job>) {
+        // Lowered once, never restored — see `LlmWorker`.
+        lower_current_thread_priority();
+
+        let backend = match LlamaBackend::init() {
+            Ok(b) => b,
+            Err(e) => {
+                let _ = ready.send(Err(format!("Failed to init llama backend: {e}")));
+                return;
+            }
+        };
+
+        let requested = requested_gpu_layers();
+        let n_threads = inference_threads();
+        eprintln!(
+            "[coach] loading model (backend={BACKEND}, n_gpu_layers={requested}, n_threads={n_threads})"
+        );
+
+        // GPU first, always. A Vulkan/Metal build on a machine with no
+        // usable device normally still loads — llama.cpp reports zero
+        // offloadable devices and keeps every layer on the CPU — but a
+        // broken driver can fail the load outright, so retry on the CPU
+        // rather than leaving the user with a dead brain.
+        let model = match load_model_file(&backend, &path, requested) {
+            Ok(model) => model,
+            Err(gpu_err) if requested != 0 => {
+                eprintln!("[coach] GPU load failed ({gpu_err}) — retrying with n_gpu_layers = 0");
+                match load_model_file(&backend, &path, 0) {
+                    Ok(model) => model,
+                    Err(e) => {
+                        let _ = ready.send(Err(e));
+                        return;
+                    }
+                }
+            }
+            Err(e) => {
+                let _ = ready.send(Err(e));
+                return;
+            }
+        };
+
+        // The context — and the KV buffer behind it — is created ONCE
+        // here and reused for every job. T01 measured Vulkan coming out
+        // slower than CPU on a 0.6B model precisely because `generate`
+        // rebuilt this per call, re-allocating a multi-hundred-MiB KV
+        // buffer on the GPU each time. `n_batch` is raised to the full
+        // context so a long prompt decodes in a single pass (the default
+        // is 2048, below our `n_ctx`).
+        let ctx_params = LlamaContextParams::default()
+            .with_n_ctx(std::num::NonZero::new(CONTEXT_SIZE))
+            .with_n_batch(CONTEXT_SIZE)
+            .with_n_threads(n_threads)
+            .with_n_threads_batch(n_threads);
+        let mut ctx = match model.new_context(&backend, ctx_params) {
+            Ok(c) => c,
+            Err(e) => {
+                let _ = ready.send(Err(format!("Context creation failed: {e}")));
+                return;
+            }
+        };
+        let mut batch = LlamaBatch::new(CONTEXT_SIZE as usize, 1);
+
+        if ready.send(Ok(())).is_err() {
+            // Nobody is waiting for us any more (the caller gave up);
+            // tear down rather than sitting on a loaded model.
+            return;
+        }
+
+        while let Ok(job) = jobs.recv() {
+            let out = infer(&model, &mut ctx, &mut batch, &job.context, job.max_tokens);
+            let _ = job.reply.send(out);
+        }
+    }
+
+    /// One generation against the resident context.
+    fn infer(
+        model: &LlamaModel,
+        ctx: &mut LlamaContext<'_>,
+        batch: &mut LlamaBatch,
+        context: &str,
+        max_tokens: usize,
+    ) -> Result<(String, usize), String> {
+        // Every call starts from an empty KV cache. The coach's prompts
+        // do not share a prefix (each one embeds fresh session data), so
+        // there is nothing to reuse — and leaving the previous
+        // conversation resident would both poison the output and run the
+        // window out of room after a handful of calls.
+        //
+        // `clear_kv_cache_seq(seq 0, whole range)` rather than
+        // `clear_kv_cache()`: the latter is `llama_memory_clear(mem, true)`,
+        // which also zeroes the KV *data* buffer — 576 MiB for Qwen3-4B at
+        // n_ctx 4096, and on a Vulkan build that is a device-memory wipe
+        // on every single generation. Dropping the cells is all we need;
+        // stale bytes behind unreferenced cells are never read.
+        //
+        // A full-sequence removal "always succeeds" per the crate docs, so
+        // the bool is not actionable; the error case is an out-of-range
+        // sequence id, which `Some(0)` cannot be.
+        if let Err(e) = ctx.clear_kv_cache_seq(Some(0), None, None) {
+            return Err(format!("KV cache reset failed: {e}"));
+        }
+
+        let prompt = build_prompt(context);
+        let tokens = model
+            .str_to_token(&prompt, llama_cpp_2::model::AddBos::Always)
+            .map_err(|e| format!("Tokenization failed: {e}"))?;
+
+        if tokens.len() + max_tokens >= CONTEXT_SIZE as usize {
+            return Err("Prompt too long for context window".into());
+        }
+
+        batch.clear();
+        for (i, &token) in tokens.iter().enumerate() {
+            let is_last = i == tokens.len() - 1;
+            batch
+                .add(token, i as i32, &[0], is_last)
+                .map_err(|e| format!("Batch add failed: {e}"))?;
+        }
+
+        ctx.decode(batch)
+            .map_err(|e| format!("Decode failed: {e}"))?;
+
+        let mut output_tokens = Vec::new();
+        // ROADMAP §0.3 keeps temp 0.7 / top-p 0.9. The sampler is rebuilt
+        // per call so its RNG restarts from the same seed and identical
+        // input yields identical output — the property the coach's
+        // snapshot-style debugging depends on.
+        let mut sampler = LlamaSampler::chain_simple([
+            LlamaSampler::temp(0.7),
+            LlamaSampler::top_p(0.9, 1),
+            LlamaSampler::dist(42),
+        ]);
+
+        for _ in 0..max_tokens {
+            let logits_id = batch.n_tokens() - 1;
+            let token = sampler.sample(ctx, logits_id);
+
+            if model.is_eog_token(token) {
+                break;
+            }
+
+            output_tokens.push(token);
+
+            batch.clear();
+            batch
+                .add(
+                    token,
+                    tokens.len() as i32 + output_tokens.len() as i32 - 1,
+                    &[0],
+                    true,
+                )
+                .map_err(|e| format!("Batch add failed: {e}"))?;
+
+            ctx.decode(batch)
+                .map_err(|e| format!("Decode failed: {e}"))?;
+        }
+
+        // Was `token_to_str(t, token::LlamaTokenAttr::all())` per token,
+        // which does not compile against llama-cpp-2 0.1.146 — there is no
+        // `LlamaTokenAttr`, and the second argument is a `model::Special`.
+        // (The old call was never exercised: `coach-llm` could only build
+        // on macOS, and nothing shipped with it enabled.)
+        //
+        // `token_to_piece` rather than the deprecated `tokens_to_str`:
+        // the latter hardcodes an 8-byte piece buffer and does not retry,
+        // so any longer piece fails the whole generation with
+        // "Insufficient Buffer Space" — observed on a 128-token run.
+        // One decoder across the whole output also means a UTF-8 sequence
+        // split across two tokens survives instead of becoming replacement
+        // characters. `false` = do not render control tokens as text.
+        let mut decoder = encoding_rs::UTF_8.new_decoder();
+        let mut result = String::new();
+        for token in &output_tokens {
+            let piece = model
+                .token_to_piece(*token, &mut decoder, false, None)
+                .map_err(|e| format!("Token decode failed: {e}"))?;
+            result.push_str(&piece);
+        }
+
+        let cleaned = super::strip_think(&result);
+        if cleaned.is_empty() && !result.trim().is_empty() {
+            eprintln!(
+                "[coach] generation was entirely reasoning ({} chars) — returning empty so the caller falls back to its template",
+                result.trim().len(),
+            );
+        }
+        Ok((cleaned, output_tokens.len()))
+    }
+
+    // -----------------------------------------------------------------
+    // Thread priority (lowered once, at spawn — never restored)
+    // -----------------------------------------------------------------
+
+    #[cfg(windows)]
+    fn lower_current_thread_priority() {
+        use windows_sys::Win32::System::Threading::{
+            GetCurrentThread, SetThreadPriority, THREAD_PRIORITY_BELOW_NORMAL,
+        };
+        // SAFETY: `GetCurrentThread` returns a pseudo-handle that needs no
+        // close, and `SetThreadPriority` only mutates this thread's
+        // scheduling class.
+        let ok =
+            unsafe { SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL) } != 0;
+        if !ok {
+            eprintln!("[coach] could not lower inference thread priority");
+        }
+    }
+
+    #[cfg(unix)]
+    fn lower_current_thread_priority() {
+        // On macOS `PRIO_DARWIN_THREAD` scopes `setpriority` to the calling
+        // thread. On Linux `PRIO_PROCESS` with `who == 0` is already
+        // per-thread (a documented Linux divergence from POSIX), which is
+        // exactly what we want here — a process-wide nice bump would also
+        // slow the audio threads.
+        #[cfg(target_os = "macos")]
+        let which = libc::PRIO_DARWIN_THREAD;
+        #[cfg(not(target_os = "macos"))]
+        let which = libc::PRIO_PROCESS;
+
+        // SAFETY: plain libc scheduling calls scoped to the current thread.
+        // `getpriority` overloads -1 as both "nice -1" and "error"; the only
+        // consequence of guessing wrong is nicing from the wrong base, so
+        // treat it as 0.
+        let previous = match unsafe { libc::getpriority(which, 0) } {
+            -1 => 0,
+            n => n,
+        };
+        if unsafe { libc::setpriority(which, 0, previous.saturating_add(5)) } != 0 {
+            eprintln!("[coach] could not lower inference thread priority");
+        }
+    }
+
+    #[cfg(not(any(windows, unix)))]
+    fn lower_current_thread_priority() {}
+}
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -888,10 +1222,18 @@ mod tests {
 /// GPU build.
 #[cfg(all(test, feature = "coach-llm"))]
 mod llm_tests {
-    use super::llm::LlmModel;
+    use super::llm::LlmWorker;
+
+    /// `LlamaBackend::init()` is a process-wide one-shot (only `Drop`
+    /// clears the flag), so two tests each spawning a worker cannot
+    /// overlap — the second would fail with `BackendAlreadyInitialized`.
+    /// Serialise here rather than relying on `--test-threads=1`, which no
+    /// CI invocation is going to remember to pass.
+    static BACKEND_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
 
     #[test]
     fn loads_gguf_and_generates_tokens() {
+        let _guard = BACKEND_LOCK.lock().unwrap_or_else(|e| e.into_inner());
         let Ok(raw) = std::env::var("YAMES_TEST_GGUF") else {
             eprintln!("YAMES_TEST_GGUF unset — skipping LLM generation test");
             return;
@@ -906,11 +1248,11 @@ mod llm_tests {
             .and_then(|v| v.trim().parse::<usize>().ok())
             .unwrap_or(8);
 
-        let model = LlmModel::load(&path).expect("model load failed");
+        let worker = LlmWorker::spawn(&path).expect("model load failed");
 
         let started = std::time::Instant::now();
-        let out = model
-            .generate_with_limit("Accuracy: 82\nSignedDev: -4.1\nSay hello.", max_tokens)
+        let out = worker
+            .generate("Accuracy: 82\nSignedDev: -4.1\nSay hello.", max_tokens)
             .expect("generation failed");
         let elapsed = started.elapsed();
 
@@ -924,5 +1266,157 @@ mod llm_tests {
             "model produced no text (backend={})",
             super::llm::BACKEND
         );
+        // The whole point of T04's prompt work: a Qwen3 model must not
+        // leak reasoning into the coach feed.
+        assert!(
+            !out.contains("<think>") && !out.contains("</think>"),
+            "output still contains a reasoning block: {out:?}"
+        );
+    }
+
+    /// The context is hoisted into the worker and reused, so the second
+    /// call must not be poisoned by the first one's KV cache — and the
+    /// worker must survive being driven repeatedly.
+    #[test]
+    fn reuses_the_context_across_calls() {
+        let _guard = BACKEND_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let Ok(raw) = std::env::var("YAMES_TEST_GGUF") else {
+            eprintln!("YAMES_TEST_GGUF unset — skipping context-reuse test");
+            return;
+        };
+        let worker = LlmWorker::spawn(std::path::Path::new(&raw)).expect("model load failed");
+        for i in 0..3 {
+            let out = worker
+                .generate("Accuracy: 91\nSignedDev: 2.0\nSay hello.", 8)
+                .unwrap_or_else(|e| panic!("generation {i} failed: {e}"));
+            assert!(!out.contains("<think>"), "call {i} leaked reasoning: {out:?}");
+        }
+    }
+
+    /// ROADMAP §0.3's latency gate, as a runnable measurement rather than
+    /// a number someone typed into a PR once.
+    ///
+    ///   YAMES_TEST_GGUF=/path/to/Qwen3-4B-Q4_K_M.gguf YAMES_LLM_BENCH=1 \
+    ///     cargo test --manifest-path src-tauri/Cargo.toml \
+    ///       --features coach-llm-vulkan --lib latency_bench -- --nocapture
+    ///
+    /// Opt-in because it costs minutes and needs multi-gigabyte weights.
+    /// It asserts nothing: the gate is a judgement about the machine it
+    /// ran on (a 4-core CPU-only laptop and an M1 have different budgets),
+    /// so it prints and lets the reader decide.
+    #[test]
+    fn latency_bench() {
+        if std::env::var("YAMES_LLM_BENCH").is_err() {
+            eprintln!("YAMES_LLM_BENCH unset — skipping latency bench");
+            return;
+        }
+        let _guard = BACKEND_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let raw = std::env::var("YAMES_TEST_GGUF").expect("YAMES_LLM_BENCH needs YAMES_TEST_GGUF");
+        let worker = LlmWorker::spawn(std::path::Path::new(&raw)).expect("model load failed");
+
+        // The two shapes that matter, in the wording the JS layer actually
+        // sends (`useSession.ts`) so `token_budget` classifies them the
+        // same way it will in production.
+        let rephrase = "Rephrase this practice-coach observation for a player of guitar. \
+             Preserve every number; keep it to one sentence.\n\n\
+             Original: \"82% — your kick is drifting. Lock the right foot to the click.\"";
+        let chat = "Current session data:\nScore: 74\nAccuracy: 88\nSignedDev: -6.2\n\
+             Longest clean streak: 19\nInstrument: guitar\n\n\
+             User asks: how was my timing?\nAnswer concisely based only on the data above.";
+
+        for (label, prompt, budget, runs) in [
+            ("rephrase", rephrase, super::REPHRASE_MAX_TOKENS, 10),
+            ("chat", chat, super::CHAT_MAX_TOKENS, 5),
+        ] {
+            // One warm-up outside the sample: the first call after load
+            // pays for cold weights (mmap page-in) and, on a GPU build,
+            // shader pipeline creation. Users pay it once per launch; it
+            // would otherwise dominate a 5-sample p95.
+            let _ = worker.generate(prompt, budget);
+
+            let mut times = Vec::with_capacity(runs);
+            let mut tokens = 0usize;
+            for _ in 0..runs {
+                let started = std::time::Instant::now();
+                let (out, n) = worker
+                    .generate_measured(prompt, budget)
+                    .expect("generation failed");
+                times.push(started.elapsed().as_secs_f64());
+                tokens += n;
+                assert!(!out.contains("<think>"), "reasoning leaked: {out:?}");
+            }
+            let total: f64 = times.iter().sum();
+            times.sort_by(f64::total_cmp);
+            let p50 = times[times.len() / 2];
+            // Nearest-rank p95 — with 5 or 10 samples this is the slowest
+            // one, which is the honest answer at these sample counts.
+            let p95 = times[((times.len() as f64 * 0.95).ceil() as usize - 1).min(times.len() - 1)];
+            eprintln!(
+                "[bench] backend={} kind={label} budget={budget} runs={runs} \
+                 p50={p50:.3}s p95={p95:.3}s mean={:.3}s \
+                 tok_per_s={:.1} tokens_per_call={}",
+                super::llm::BACKEND,
+                total / times.len() as f64,
+                tokens as f64 / total,
+                tokens / runs,
+            );
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Prompt-hygiene tests (run on every build, LLM feature or not)
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod prompt_tests {
+    use super::{strip_think, token_budget, CHAT_MAX_TOKENS, REPHRASE_MAX_TOKENS};
+
+    #[test]
+    fn strips_a_complete_reasoning_block() {
+        assert_eq!(
+            strip_think("<think>\nthe user is dragging\n</think>\n\nYou're a touch behind."),
+            "You're a touch behind."
+        );
+    }
+
+    #[test]
+    fn strips_the_empty_prefilled_block() {
+        assert_eq!(strip_think("<think>\n\n</think>\n\nNice and steady."), "Nice and steady.");
+    }
+
+    #[test]
+    fn strips_a_bare_closing_tag_echoed_from_the_prefill() {
+        assert_eq!(strip_think("</think>\n\nLocked in."), "Locked in.");
+    }
+
+    #[test]
+    fn drops_an_unterminated_block_entirely() {
+        // Ran out of token budget mid-thought — there is no answer after
+        // it, and shipping half a monologue would be worse than nothing.
+        assert_eq!(strip_think("Sure. <think>let me consider the last 8 bars"), "Sure.");
+    }
+
+    #[test]
+    fn leaves_clean_output_alone() {
+        assert_eq!(strip_think("  Really locked in — keep going.  "), "Really locked in — keep going.");
+    }
+
+    #[test]
+    fn rephrase_prompts_get_the_short_budget() {
+        assert_eq!(
+            token_budget("Rephrase this practice-coach observation...\nOriginal: \"Nice.\""),
+            REPHRASE_MAX_TOKENS
+        );
+        assert_eq!(
+            token_budget("Rephrase this practice-coach greeting for a player of guitar."),
+            REPHRASE_MAX_TOKENS
+        );
+    }
+
+    #[test]
+    fn chat_and_reports_get_the_full_budget() {
+        assert_eq!(token_budget("User asks: how was my timing?"), CHAT_MAX_TOKENS);
+        assert_eq!(token_budget("Score: 72\nAccuracy: 88"), CHAT_MAX_TOKENS);
     }
 }

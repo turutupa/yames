@@ -1721,81 +1721,30 @@ pub async fn coach_generate(
     // already guards against via `spawn_blocking`. Move the inference
     // off the async runtime so generations queue behind the mutex
     // without freezing the rest of the command surface.
+    //
+    // The below-normal priority the ROADMAP asks for is no longer applied
+    // here: the LLM path now owns a dedicated inference thread that is
+    // demoted once at spawn (`coach::llm::LlmWorker`), so this
+    // `spawn_blocking` task only marshals a job onto a channel and waits.
+    // Demoting the tokio worker per call — what T01 did — was unsound on
+    // Linux, where an unprivileged thread cannot raise its nice value back
+    // and the "restore" silently left blocking-pool threads demoted.
     let engine_arc: SharedCoachEngine = engine.inner().clone();
     let ctx_owned = context;
     tokio::task::spawn_blocking(move || {
-        // ROADMAP §3: the generation thread runs below normal priority so a
-        // multi-second CPU inference can never preempt the audio path. The
-        // cpal callback thread is untouched — the OS already schedules it
-        // real-time and nothing here goes near it.
-        with_below_normal_priority(|| {
-            let lock = engine_arc.lock().map_err(|e| format!("Lock failed: {e}"))?;
-            crate::coach::generate(&lock, &ctx_owned)
-        })
+        let lock = engine_arc.lock().map_err(|e| format!("Lock failed: {e}"))?;
+        crate::coach::generate(&lock, &ctx_owned)
     })
     .await
     .map_err(|e| format!("coach_generate join failed: {e}"))?
 }
 
-/// Run `f` on the current thread at below-normal scheduling priority,
-/// restoring the previous priority afterwards.
-///
-/// The restore is not optional: tokio's `spawn_blocking` pool *reuses*
-/// threads, so a permanent demotion here would silently slow down whatever
-/// blocking task (TTS synthesis, device enumeration) landed on the same
-/// thread next.
-fn with_below_normal_priority<T>(f: impl FnOnce() -> T) -> T {
-    let restore = lower_current_thread_priority();
-    let out = f();
-    restore();
-    out
-}
-
-#[cfg(windows)]
-fn lower_current_thread_priority() -> impl FnOnce() {
-    use windows_sys::Win32::System::Threading::{
-        GetCurrentThread, SetThreadPriority, THREAD_PRIORITY_BELOW_NORMAL, THREAD_PRIORITY_NORMAL,
-    };
-    // SAFETY: `GetCurrentThread` returns a pseudo-handle that needs no close,
-    // and `SetThreadPriority` only mutates this thread's scheduling class.
-    let ok = unsafe { SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL) } != 0;
-    move || {
-        if ok {
-            unsafe { SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL) };
-        }
-    }
-}
-
-#[cfg(unix)]
-fn lower_current_thread_priority() -> impl FnOnce() {
-    // On macOS `PRIO_DARWIN_THREAD` scopes `setpriority` to the calling
-    // thread. On Linux `PRIO_PROCESS` with `who == 0` is already per-thread
-    // (a documented Linux divergence from POSIX), which is exactly what we
-    // want here — a process-wide nice bump would also slow the audio threads.
-    #[cfg(target_os = "macos")]
-    let which = libc::PRIO_DARWIN_THREAD;
-    #[cfg(not(target_os = "macos"))]
-    let which = libc::PRIO_PROCESS;
-
-    // SAFETY: plain libc scheduling calls scoped to the current thread.
-    // `getpriority` overloads -1 as both "nice -1" and "error"; distinguishing
-    // them needs an errno reset, and the only consequence of guessing wrong is
-    // restoring a tokio worker to nice 0 instead of nice -1, so treat it as 0.
-    let previous = match unsafe { libc::getpriority(which, 0) } {
-        -1 => 0,
-        n => n,
-    };
-    let ok = unsafe { libc::setpriority(which, 0, previous.saturating_add(5)) } == 0;
-    move || {
-        if ok {
-            unsafe { libc::setpriority(which, 0, previous) };
-        }
-    }
-}
-
-#[cfg(not(any(windows, unix)))]
-fn lower_current_thread_priority() -> impl FnOnce() {
-    || {}
+/// Total physical RAM in MB, for the Studio-tier gate (ROADMAP §3: Studio
+/// is only offered at ≥ 16 GB). Returns 0 when the platform query fails,
+/// which the frontend treats as "unknown — don't block the user".
+#[tauri::command]
+pub fn get_system_memory_mb() -> u64 {
+    crate::models::system_memory_mb()
 }
 
 #[tauri::command]

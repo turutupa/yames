@@ -57,6 +57,8 @@ export function CoachSettingsSection({
   modelStatus,
   setModelStatus,
   modelDownloading,
+  studioAvailable,
+  brainUpdateAvailable,
   availableVoices,
   voiceDiagnostics,
   instrument,
@@ -77,6 +79,8 @@ export function CoachSettingsSection({
   modelStatus: ModelStatus | null;
   setModelStatus: Dispatch<SetStateAction<ModelStatus | null>>;
   modelDownloading: boolean;
+  studioAvailable: boolean;
+  brainUpdateAvailable: boolean;
   availableVoices: [string, string][];
   voiceDiagnostics: VoiceDiagnostic[];
   instrument: string;
@@ -288,10 +292,20 @@ export function CoachSettingsSection({
           >
             {t("settings.coach.brainStandard")}
           </button>
+          {/* "Studio" in the UI, `full` on the wire — the tier id is
+              persisted in the settings store and in models/brain/tier,
+              so only the label moved (see MODEL_URLS in
+              useCoachDownload.ts). Disabled below 16 GB of RAM per
+              ROADMAP §3: an 8B Q4_K_M needs ~8 GB resident and would
+              thrash swap on a smaller machine. */}
           <button
             className={`toggle-btn ${coachBrainTier === "full" ? "active" : ""}`}
-            data-tooltip={t("settings.coach.brainFullHint")}
-            disabled={modelDownloading}
+            data-tooltip={
+              studioAvailable
+                ? t("settings.coach.brainStudioHint")
+                : t("settings.coach.brainStudioNeedsRam")
+            }
+            disabled={modelDownloading || !studioAvailable}
             onClick={() => {
               if (modelStatus?.brainReady && modelStatus.brainTier === "full") {
                 setCoachBrainTier("full");
@@ -302,7 +316,7 @@ export function CoachSettingsSection({
               }
             }}
           >
-            {t("settings.coach.brainFull")}
+            {t("settings.coach.brainStudio")}
           </button>
         </div>
       </div>
@@ -311,6 +325,34 @@ export function CoachSettingsSection({
       {coachStatus && (
         <div className={`coach-brain-status coach-brain-status-${coachStatus.tone}`}>
           {t(coachStatus.key, coachStatus.params)}
+        </div>
+      )}
+
+      {/* Migration affordance. A brain downloaded before the Qwen3
+          refresh still loads, but the engine now builds a Qwen3 ChatML
+          prompt, so an older family answers with visible template
+          artifacts. Re-running the normal download flow for the tier
+          that is already installed overwrites the weights in place; we
+          never delete the old file behind the user's back. */}
+      {brainUpdateAvailable && (
+        <div className="setting-row">
+          <div className="setting-label">
+            <label>{t("settings.coach.brainUpdate")}</label>
+            <span className="setting-hint">{t("settings.coach.brainUpdateHint")}</span>
+          </div>
+          <button
+            className="toggle-btn"
+            disabled={modelDownloading}
+            onClick={() => {
+              const tier: ModelTier =
+                modelStatus?.brainTier === "full" && studioAvailable ? "full" : "standard";
+              onStartDownload(tier);
+            }}
+          >
+            {modelDownloading
+              ? t("settings.coach.downloading")
+              : t("settings.coach.brainUpdateAction")}
+          </button>
         </div>
       )}
       <div className="setting-row">
@@ -590,7 +632,7 @@ export function CoachSettingsSection({
           <p className="setting-hint" style={{ marginBottom: 8 }}>
             {t("settings.coach.installed", {
               tier: modelStatus.brainTier === "full"
-                ? t("settings.coach.brainFull")
+                ? t("settings.coach.brainStudio")
                 : t("settings.coach.brainStandard"),
               size: formatBytes(modelStatus.brainSizeBytes + modelStatus.voiceSizeBytes),
             })}
