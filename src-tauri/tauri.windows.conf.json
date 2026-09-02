@@ -16,7 +16,7 @@
         "theme": "Dark",
         "titleBarStyle": "Overlay",
         "hiddenTitle": true,
-        "transparent": true
+        "transparent": false
       },
       {
         "label": "floating",

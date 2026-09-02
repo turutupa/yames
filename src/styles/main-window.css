@@ -36,12 +36,9 @@
   padding-right: 112px;   /* reserve space for 3 × 36px window controls */
 }
 
-/* Mica/Acrylic active on Windows: CSS background must be transparent for DWM to show through */
-body.mica-active .main-window.os-windows {
-  background: transparent;
-}
-body:not(.mica-active) .main-window.os-windows {
-  background: rgba(18, 18, 20, 0.97); /* solid fallback (old Win10 with no Mica/Acrylic) */
+/* Windows: solid background — no Mica/Acrylic */
+.main-window.os-windows {
+  background: rgb(18, 18, 20);
 }
 
 /* Suppress decorum's injected JS controls — we use our own React <WindowControls /> */
