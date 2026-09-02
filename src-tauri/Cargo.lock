@@ -5996,6 +5996,8 @@ dependencies = [
  "core-foundation-sys",
  "coreaudio-sys",
  "cpal",
+ "encoding_rs",
+ "libc",
  "llama-cpp-2",
  "midir",
  "rodio",
@@ -6008,6 +6010,7 @@ dependencies = [
  "tauri-plugin-store",
  "tauri-plugin-updater",
  "tokio",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { setSoundType, setVolume, showFloating } from "../../ipc";
 import { SOUND_TYPES } from "../../constants/metronome";
 import type { AppState } from "../../types";
+import { IS_MAC } from "../../hotkeys";
 
 /** Custom vertical fader — replaces <input type="range"> to avoid WebKit
  *  performance issues with writing-mode on range inputs. Uses pointer capture
@@ -146,7 +147,10 @@ export function MainHeader({
   const ttsVolumePercent = Math.round(ttsVolume * 100);
 
   return (
-    <header className="main-header">
+    <header
+      className="main-header"
+      {...(!IS_MAC && { "data-tauri-drag-region": "" })}
+    >
       {view !== "settings" && (
         <nav className="tab-bar">
           <button

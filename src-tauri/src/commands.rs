@@ -470,20 +470,10 @@ pub fn stop_speed_ramp(
     emit_state_changed(&state, &app_handle);
 }
 
-#[tauri::command]
-pub fn set_adaptive_decision(decision: String, engine_state: State<EngineState>) {
-    use crate::engine::{DECISION_DOWN, DECISION_HOLD, DECISION_UP};
-    let val = match decision.as_str() {
-        "up" => DECISION_UP,
-        "hold" => DECISION_HOLD,
-        "down" => DECISION_DOWN,
-        _ => return,
-    };
-    let engine = engine_state.0.lock().unwrap();
-    engine
-        .adaptive_model_decision()
-        .store(val, std::sync::atomic::Ordering::Relaxed);
-}
+// T07 — `set_adaptive_decision` was removed here. The adaptive drill's
+// direction is computed exclusively by `engine::adaptive_thresholds` /
+// `adaptive_direction`; the coach model comments on the move but can no
+// longer push a decision back into the engine.
 
 #[tauri::command]
 pub fn set_active_tab(tab: String, app_handle: AppHandle) {
@@ -1685,11 +1675,78 @@ pub async fn coach_generate(
     let engine_arc: SharedCoachEngine = engine.inner().clone();
     let ctx_owned = context;
     tokio::task::spawn_blocking(move || {
-        let lock = engine_arc.lock().map_err(|e| format!("Lock failed: {e}"))?;
-        crate::coach::generate(&lock, &ctx_owned)
+        // ROADMAP §3: the generation thread runs below normal priority so a
+        // multi-second CPU inference can never preempt the audio path. The
+        // cpal callback thread is untouched — the OS already schedules it
+        // real-time and nothing here goes near it.
+        with_below_normal_priority(|| {
+            let lock = engine_arc.lock().map_err(|e| format!("Lock failed: {e}"))?;
+            crate::coach::generate(&lock, &ctx_owned)
+        })
     })
     .await
     .map_err(|e| format!("coach_generate join failed: {e}"))?
+}
+
+/// Run `f` on the current thread at below-normal scheduling priority,
+/// restoring the previous priority afterwards.
+///
+/// The restore is not optional: tokio's `spawn_blocking` pool *reuses*
+/// threads, so a permanent demotion here would silently slow down whatever
+/// blocking task (TTS synthesis, device enumeration) landed on the same
+/// thread next.
+fn with_below_normal_priority<T>(f: impl FnOnce() -> T) -> T {
+    let restore = lower_current_thread_priority();
+    let out = f();
+    restore();
+    out
+}
+
+#[cfg(windows)]
+fn lower_current_thread_priority() -> impl FnOnce() {
+    use windows_sys::Win32::System::Threading::{
+        GetCurrentThread, SetThreadPriority, THREAD_PRIORITY_BELOW_NORMAL, THREAD_PRIORITY_NORMAL,
+    };
+    // SAFETY: `GetCurrentThread` returns a pseudo-handle that needs no close,
+    // and `SetThreadPriority` only mutates this thread's scheduling class.
+    let ok = unsafe { SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL) } != 0;
+    move || {
+        if ok {
+            unsafe { SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL) };
+        }
+    }
+}
+
+#[cfg(unix)]
+fn lower_current_thread_priority() -> impl FnOnce() {
+    // On macOS `PRIO_DARWIN_THREAD` scopes `setpriority` to the calling
+    // thread. On Linux `PRIO_PROCESS` with `who == 0` is already per-thread
+    // (a documented Linux divergence from POSIX), which is exactly what we
+    // want here — a process-wide nice bump would also slow the audio threads.
+    #[cfg(target_os = "macos")]
+    let which = libc::PRIO_DARWIN_THREAD;
+    #[cfg(not(target_os = "macos"))]
+    let which = libc::PRIO_PROCESS;
+
+    // SAFETY: plain libc scheduling calls scoped to the current thread.
+    // `getpriority` overloads -1 as both "nice -1" and "error"; distinguishing
+    // them needs an errno reset, and the only consequence of guessing wrong is
+    // restoring a tokio worker to nice 0 instead of nice -1, so treat it as 0.
+    let previous = match unsafe { libc::getpriority(which, 0) } {
+        -1 => 0,
+        n => n,
+    };
+    let ok = unsafe { libc::setpriority(which, 0, previous.saturating_add(5)) } == 0;
+    move || {
+        if ok {
+            unsafe { libc::setpriority(which, 0, previous) };
+        }
+    }
+}
+
+#[cfg(not(any(windows, unix)))]
+fn lower_current_thread_priority() -> impl FnOnce() {
+    || {}
 }
 
 #[tauri::command]

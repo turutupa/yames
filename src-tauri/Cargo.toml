@@ -32,6 +32,7 @@ rodio = { version = "0.19", default-features = false, features = ["wav"] }
 cpal = "0.15"
 tauri-plugin-updater = "2"
 tauri-plugin-process = "2"
+tauri-plugin-decorum = "1"
 midir = "0.10"
 # Tauri already pulls tokio in transitively; declared explicitly so we can
 # use `tokio::task::spawn_blocking` from blocking command handlers.
@@ -44,19 +45,46 @@ tokio = { version = "1", features = ["rt"] }
 # The crate name on crates.io is `aubio` (v0.2.*).
 aubio = { version = "0.2", features = ["static", "bindgen"] }
 
-# LLM inference for Practice Coach (requires cmake to build)
-# Enable with: cargo build --features coach-llm
-llama-cpp-2 = { version = "0.1", features = ["metal"], optional = true }
+# LLM inference for Practice Coach (requires cmake + a C/C++ toolchain to
+# build). Deliberately carries NO backend feature here: `metal` is a
+# macOS-only backend, and hardcoding it made `--features coach-llm`
+# unbuildable on Windows and Linux. The backend is chosen by the Yames
+# feature that turns this dependency on — see [features] below.
+llama-cpp-2 = { version = "0.1.146", optional = true }
+# Detokenisation of LLM output. `LlamaModel::token_to_piece` takes an
+# `encoding_rs::Decoder` and llama-cpp-2 does not re-export the crate, so it
+# has to be a direct dependency. Already in the graph underneath
+# llama-cpp-2, so this adds no package to Cargo.lock.
+encoding_rs = { version = "0.8", optional = true }
 
 [features]
 default = []
-coach-llm = ["llama-cpp-2"]
+# CPU-only inference. Development machines and the CI fallback; also what
+# `cargo test --features coach-llm --lib` exercises.
+coach-llm = ["dep:llama-cpp-2", "dep:encoding_rs"]
+# Shipping features, one GPU backend per platform (ROADMAP §3: always try
+# the GPU first). llama.cpp falls back to CPU at runtime when no usable
+# device/driver is present, so a single binary serves both cases.
+coach-llm-metal = ["coach-llm", "llama-cpp-2/metal"]
+coach-llm-vulkan = ["coach-llm", "llama-cpp-2/vulkan"]
 
 [target.'cfg(target_os = "macos")'.dependencies]
 coreaudio-sys = "0.2"
 core-foundation-sys = "0.8"
 
+# Thread-priority control for the LLM inference worker (ROADMAP §3: the
+# generation thread runs *below normal* so it can never starve the audio
+# path). Both crates are already in the dependency graph transitively, so
+# declaring them adds no new downloads.
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_System_Threading"] }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
 [dev-dependencies]
 # No external test deps yet — using Rust's built-in test harness.
 # Add here when needed (e.g. `pretty_assertions`, `proptest`).
 
+[target.'cfg(target_os = "linux")'.dependencies]
+gtk = { version = "0.18" }

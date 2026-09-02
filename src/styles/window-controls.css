@@ -1,0 +1,77 @@
+.window-controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: stretch;
+  height: 36px;
+  z-index: 200;
+  /* Must NOT be a drag region — buttons need click events */
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+
+.wc-btn {
+  width: 46px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.6);
+  transition: background 0.1s ease, color 0.1s ease;
+  padding: 0;
+}
+
+.wc-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 1);
+}
+
+.wc-close:hover {
+  background: #c42b1c;
+  color: #fff;
+}
+
+/* Minimize — horizontal line */
+.wc-minimize::before {
+  content: "";
+  display: block;
+  width: 10px;
+  height: 1px;
+  background: currentColor;
+}
+
+/* Maximize — square */
+.wc-maximize::before {
+  content: "";
+  display: block;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid currentColor;
+  border-radius: 1px;
+}
+
+/* Restore (when maximized) — offset squares */
+.wc-maximize[data-maximized="true"]::before {
+  transform: translate(-1px, 1px);
+  box-shadow: 2px -2px 0 0 currentColor;
+}
+
+/* Close — × */
+.wc-close::before {
+  content: "✕";
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 300;
+}
+
+/* Linux: slightly smaller buttons to match GNOME/KDE norms */
+.os-linux .window-controls {
+  height: 30px;
+}
+
+.os-linux .wc-btn {
+  width: 36px;
+}

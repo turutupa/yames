@@ -84,7 +84,6 @@ const DEFAULT_INVOKE_MAP: Record<string, InvokeFn> = {
   start_speed_ramp: () => undefined,
   start_speed_ramp_from: () => undefined,
   stop_speed_ramp: () => undefined,
-  set_adaptive_decision: () => undefined,
 
   // MIDI
   list_midi_devices: () => [],
@@ -243,6 +242,9 @@ vi.mock("@tauri-apps/api/window", () => ({
     show: vi.fn().mockResolvedValue(undefined),
     hide: vi.fn().mockResolvedValue(undefined),
     close: vi.fn().mockResolvedValue(undefined),
+    minimize: vi.fn().mockResolvedValue(undefined),
+    toggleMaximize: vi.fn().mockResolvedValue(undefined),
+    isMaximized: vi.fn().mockResolvedValue(false),
     onFocusChanged: vi.fn().mockResolvedValue(() => {}),
     onResized: vi.fn().mockResolvedValue(() => {}),
     onMoved: vi.fn().mockResolvedValue(() => {}),

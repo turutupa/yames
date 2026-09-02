@@ -1,7 +1,10 @@
 {
   "identifier": "default",
   "description": "Default capabilities for Yames",
-  "windows": ["main", "floating"],
+  "windows": [
+    "main",
+    "floating"
+  ],
   "permissions": [
     "core:default",
     "core:event:default",
@@ -23,6 +26,11 @@
     "store:allow-save",
     "store:allow-load",
     "updater:default",
-    "process:allow-restart"
+    "process:allow-restart",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-close",
+    "core:window:allow-is-maximized",
+    "decorum:allow-show-snap-overlay"
   ]
 }

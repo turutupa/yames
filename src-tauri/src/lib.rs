@@ -35,7 +35,7 @@ use commands::{
     get_waveform, is_coach_loaded, list_audio_input_devices, list_audio_output_devices,
     list_calibration_cache, list_midi_devices, list_presets, list_session_logs, load_coach_model,
     close_open_segment, notify_settings_change, open_url, reorder_presets, save_preset, save_session,
-    save_window_position, set_active_tab, set_adaptive_decision, set_always_on_top,
+    save_window_position, set_active_tab, set_always_on_top,
     set_audio_output_device, set_bpm, set_calibration_offset, set_input_gain, set_instrument,
     set_beat_groups, set_midi_binding, set_playing, set_sound_type, set_subdivision, set_theme, set_time_signature,
     app_ready, set_volume, set_widget_always_on_top, set_widget_mode, show_floating, show_main,
@@ -88,11 +88,17 @@ pub fn run() {
     let startup_complete = Arc::new(AtomicBool::new(false));
     let startup_complete_events = Arc::clone(&startup_complete);
 
-    tauri::Builder::default()
+    // tauri_plugin_decorum is Win/Linux only — its init() panics on macOS (cocoa null ptr).
+    #[allow(unused_mut)]
+    let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_updater::Builder::new().build())
-        .plugin(tauri_plugin_process::init())
-        .setup(move |app| {
+        .plugin(tauri_plugin_process::init());
+
+    #[cfg(not(target_os = "macos"))]
+    let builder = builder.plugin(tauri_plugin_decorum::init());
+
+    builder.setup(move |app| {
             let shared_state = create_shared_state();
 
             // Restore saved settings from store
@@ -423,6 +429,29 @@ pub fn run() {
                 // position and calls show(). This eliminates the race with macOS
                 // NSWindowRestoration, which settles long before React is ready.
                 let _ = main_win.hide();
+
+                // Non-macOS: call decorum's create_overlay_titlebar() to:
+                //   - remove native OS frame (set_decorations false at runtime)
+                //   - hook Win32 HTMAXBUTTON so Windows 11 Snap Layout flyout works
+                //   - inject its own JS controls (we hide them via CSS)
+                // macOS keeps decorations=true — native traffic lights + overlay titlebar.
+                // LINUX: transparent: false in config to prevent Nvidia GPU crash (GBM/Err 71).
+                #[cfg(not(target_os = "macos"))]
+                {
+                    use tauri_plugin_decorum::WebviewWindowExt;
+                    let _ = main_win.create_overlay_titlebar();
+                    let _ = main_win.set_shadow(true);
+                }
+
+                // Linux: remove any residual GTK CSD titlebar on KDE/Wayland configs
+                // LINUX: transparent: false in config — do NOT set transparent here
+                #[cfg(target_os = "linux")]
+                {
+                    use gtk::prelude::GtkWindowExt;
+                    if let Ok(gtk_win) = main_win.gtk_window() {
+                        gtk_win.set_titlebar(Option::<&gtk::Widget>::None);
+                    }
+                }
             }
 
             // Restore saved floating widget position (and visibility)
@@ -483,7 +512,6 @@ pub fn run() {
             start_speed_ramp,
             start_speed_ramp_from,
             stop_speed_ramp,
-            set_adaptive_decision,
             set_active_tab,
             get_active_tab,
             set_calibration_offset,

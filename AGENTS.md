@@ -31,6 +31,54 @@ Notes:
   for `error[`, `error:`, `panic`, or `FAILED` in the output to detect
   breakage.
 
+## Building with the coach LLM
+
+`default = []`, so a plain build has **no** LLM — `coach.rs` runs the
+template engine. Turn it on with exactly one Cargo feature:
+
+| Feature | Backend | Use |
+|---|---|---|
+| `coach-llm` | CPU only | dev machines, CI fallback, the jitter probe |
+| `coach-llm-metal` | Metal | shipping macOS |
+| `coach-llm-vulkan` | Vulkan | shipping Windows + Linux |
+
+The GPU features imply `coach-llm`; never enable two backends at once.
+`LlmModel::load` asks for all layers on a GPU build and llama.cpp keeps
+them on the CPU when it finds no usable device, so one binary serves both
+— set `YAMES_LLM_GPU_LAYERS=0` to force CPU inference on a GPU build.
+
+```sh
+cargo build --manifest-path src-tauri/Cargo.toml --features coach-llm-metal   # macOS
+cargo build --manifest-path src-tauri/Cargo.toml --features coach-llm-vulkan  # Windows / Linux
+```
+
+Prerequisites beyond the usual Rust + cmake (aubio already needs cmake):
+
+- **All platforms**: cmake, a C/C++ compiler, and `libclang` for bindgen
+  (`LIBCLANG_PATH` must point at the directory holding `libclang.dll` /
+  `.so` / `.dylib`).
+- **macOS**: Xcode command line tools. Metal needs nothing extra.
+- **Windows**: the MSVC toolchain (`stable-x86_64-pc-windows-msvc` plus
+  VS Build Tools) and the LunarG Vulkan SDK (`VULKAN_SDK` set,
+  `%VULKAN_SDK%\Bin` on PATH for `glslc.exe`). MSVC is **required** for
+  the LLM features: on `x86_64-pc-windows-gnu` the `cmake` crate falls
+  back to the MSYS Makefiles generator and `llama-cpp-sys-2`'s build
+  script then panics on `assert_ne!(llama_libs.len(), 0)` because the
+  install step lays the libraries out where it does not look. The
+  default (no-LLM) build still works fine on GNU.
+  Build from a short path, or set `CARGO_TARGET_DIR` to one: llama.cpp's
+  CMake TryCompile tree pushes the default `src-tauri/target/...` past
+  MAX_PATH and MSBuild's CL tracker then fails with
+  `MSB6003 ... cmTC_*.tlog` not found.
+- **Linux**: `libvulkan-dev`, `glslc` (shaderc), `libclang-dev`, cmake.
+
+Smoke test — skipped when the env var is unset, so it is safe in CI:
+
+```sh
+YAMES_TEST_GGUF=/path/to/tiny.gguf \
+  cargo test --manifest-path src-tauri/Cargo.toml --features coach-llm --lib
+```
+
 ## Fast validation chain (no app boot)
 
 After a refactor / surgical edit, run these in order — they catch the
@@ -78,6 +126,46 @@ actually opens.
 - **Imports**: dedicated hook folders use relative imports
   (`../../../ipc`, `../../../types`, etc.). Run `tsc --noEmit` after
   moving files; TS `noUnusedLocals` will flag any orphaned imports.
+
+## Roadmap & plans
+
+- `plans/ROADMAP.md` is the single active planning document (mission,
+  current state, phased work with acceptance gates, non-goals). Read it
+  before starting any coach / DSP / curriculum work.
+- `plans/archive/DSP_AND_COACH_PLAN.md` is the archived design spec for
+  the shipped scoring pipeline — code comments cite it for the *why*.
+- `plans/ONBOARDING_PLAN.md` is the first-run / product-polish track
+  (wizard, tour, hints, empty states).
+- `plans/tasks/<phase>/T0N-*.md` are self-contained briefs, one per
+  worker session. If you were handed one, follow it and its README.
+- `plans/MOBILE_IMPLEMENTATION_PLAN.md` is out of the current horizon.
+
+## Building on Windows (MSVC — matches CI)
+
+The repo carries a `rustup override` to `stable-x86_64-pc-windows-msvc`
+(set 2026-09-02). Do not build Yames with the `-gnu` toolchain: Rust
+test binaries fail to start (`STATUS_ENTRYPOINT_NOT_FOUND`,
+`TaskDialogIndirect` — no manifest, so comctl32 5.82 is loaded) and the
+cdylib link fails (`export ordinal too large`). Both are GNU-only
+defects; CI's `windows-latest` uses MSVC.
+
+Prerequisites (all installed on the owner's laptop):
+- Visual Studio 2022 Build Tools with the "Desktop development with
+  C++" workload (MSVC 14.44 + Windows SDK 10.0.26100). rustc, `cc`
+  and cmake find it via vswhere; no `vcvars` needed.
+- cmake (aubio-sys, llama-cpp-sys).
+- LLVM 17 (`C:\Program Files\LLVM`) for `libclang` — aubio-sys uses
+  bindgen 0.58, which rejects clang ≥ 18. Set
+  `LIBCLANG_PATH=C:\Program Files\LLVM\bin` (user env var on the
+  owner's machine; agent shells do NOT inherit user env — export it).
+- Vulkan SDK 1.4.x (`C:\VulkanSDK\<ver>`, `VULKAN_SDK` machine-wide)
+  for the `coach-llm-vulkan` feature; `glslc.exe` is in `Bin`.
+
+Fast check that the toolchain is sane (clean target dir, ~3 min):
+
+```sh
+LIBCLANG_PATH="C:/Program Files/LLVM/bin" cargo test --manifest-path src-tauri/Cargo.toml --lib --no-default-features
+```
 
 ## Coaching pipeline — latency tiers
 

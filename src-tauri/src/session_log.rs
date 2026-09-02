@@ -276,7 +276,7 @@ pub struct PracticeSegment {
 /// D3c — four-component scoring breakdown. Each component is in `[0, 1]`
 /// (multiply by 100 to get the "0–100" form the plan documents).
 ///
-/// Plan formula (see D3c in `plans/DSP_AND_COACH_PLAN.md`):
+/// Plan formula (see D3c in `plans/archive/DSP_AND_COACH_PLAN.md`):
 /// ```text
 /// score = interval_consistency × W1
 ///       + grid_alignment       × W2

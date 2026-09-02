@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getFinalSessionReport, stopEvaluation, getSessionHistory, saveSession, clearSession, coachGenerate, loadCoachModel, isCoachLoaded, ttsSpeak, onBeatFeedback, onAdaptiveEval, setAdaptiveDecision, notifySettingsChange, clearCalibrationCacheEntry, onTtsSpeechStarted, onPracticeSegmentEnded } from "../ipc";
+import { getFinalSessionReport, stopEvaluation, getSessionHistory, saveSession, clearSession, coachGenerate, loadCoachModel, isCoachLoaded, ttsSpeak, onBeatFeedback, onAdaptiveEval, notifySettingsChange, clearCalibrationCacheEntry, onTtsSpeechStarted, onPracticeSegmentEnded } from "../ipc";
 import type { AdaptiveEvalRequest } from "../ipc";
 import type { BeatFeedback, FeedChip, FeedMessage, SessionReport, SessionSegment } from "../types";
 import type { useEvaluation } from "./useEvaluation";
@@ -38,6 +38,11 @@ import {
   type Vocabulary,
 } from "../coach/templates";
 import { TEMPLATE_CATALOG } from "../coach/templateCatalog";
+import {
+  adaptiveScenario,
+  buildAdaptiveCommentPrompt,
+  isUsableComment,
+} from "../coach/adaptiveComment";
 import {
   isSegmentReportable,
   shortPocketNote,
@@ -792,7 +797,14 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, presetId
     // stale values while Rust unsubscribes.
   }, [active, isPlaying, timeSignature]);
 
-  // Adaptive drill: model-based tempo decisions
+  // Adaptive drill: the ENGINE decides, the coach only narrates.
+  //
+  // T07 — this used to ask the LLM for the next tempo and push the
+  // answer back via `setAdaptiveDecision`. In a template-only build
+  // (which is every shipped build today) no reply ever started with
+  // UP/DOWN, so every step parsed as "hold" and the drill never moved.
+  // The engine now applies its own threshold decision before emitting
+  // this event; all we do here is put a sentence in the feed.
   useEffect(() => {
     if (!active) return;
 
@@ -800,40 +812,67 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, presetId
     let unlisten: (() => void) | null = null;
 
     onAdaptiveEval((req: AdaptiveEvalRequest) => {
-      if (cancelled || !coachLoadedRef.current) return;
+      if (cancelled) return;
 
-      // Capture a token so the result is dropped if the session ends
-      // OR restarts mid-LLM-call — otherwise the next session's drill
-      // could absorb a stale tempo decision from the previous one
-      // (sid bump), or a just-ended session would still push a tempo
-      // decision to the engine (activeRef flip).
-      const token = createSessionToken(sessionIdRef, activeRef);
-      const context = formatAdaptiveEvalContext(req);
-      coachGenerate(context).then((response) => {
-        if (cancelled || token.isStaleOrInactive()) return;
-        const decision = parseAdaptiveDecision(response);
-        setAdaptiveDecision(decision).catch(() => {});
+      const scenario = adaptiveScenario(req.decision);
+      // A step that didn't move the tempo isn't worth a feed line.
+      if (!scenario) return;
 
-        // Optionally add a coach comment about the decision
-        if (decision !== "hold") {
-          const action = decision === "up" ? "Pushing tempo up" : "Easing tempo down";
-          const comment = response.length > 5 && response.length < 200 ? response : `${action} — accuracy at ${req.accuracyPct}%.`;
-          const msg: FeedMessage = {
-            id: crypto.randomUUID(),
-            type: "coach-tip",
-            timestamp: Date.now(),
-            content: comment,
-          };
-          setMessages((prev) => [...prev, msg]);
-          if (narrativeRef.current) {
-            narrativeRef.current = appendCoachUtterance(
-              narrativeRef.current,
-              comment,
-            );
-          }
-          maybeSpeakRef.current(comment, "normal");
+      // The template line is the floor: it always exists, and it is
+      // what ships when no model is resident. The LLM path (below)
+      // only ever replaces it.
+      const fallback =
+        pickTemplate(TEMPLATE_CATALOG, shuffleStateRef.current, {
+          vocab: vocabRef.current,
+          scenario,
+          severity: "neutral",
+          context: { bpm: req.newBpm, accuracyPct: req.accuracyPct },
+        }) ??
+        (req.decision === "up"
+          ? `Tempo up to ${req.newBpm} BPM — accuracy at ${req.accuracyPct}%.`
+          : `Tempo down to ${req.newBpm} BPM — accuracy at ${req.accuracyPct}%.`);
+
+      const emit = (comment: string) => {
+        const msg: FeedMessage = {
+          id: crypto.randomUUID(),
+          type: "coach-tip",
+          timestamp: Date.now(),
+          content: comment,
+        };
+        setMessages((prev) => [...prev, msg]);
+        if (narrativeRef.current) {
+          narrativeRef.current = appendCoachUtterance(
+            narrativeRef.current,
+            comment,
+          );
         }
-      }).catch(() => {});
+        maybeSpeakRef.current(comment, "normal");
+      };
+
+      if (!coachLoadedRef.current) {
+        emit(fallback);
+        return;
+      }
+
+      // Capture a token so a late reply is dropped if the session ends
+      // OR restarts mid-LLM-call — otherwise a just-ended session would
+      // still push a line into the next session's feed.
+      const token = createSessionToken(sessionIdRef, activeRef);
+      coachGenerate(buildAdaptiveCommentPrompt(req))
+        .then((response) => {
+          if (cancelled || token.isStaleOrInactive()) return;
+          const comment = isUsableComment(response) ? response.trim() : fallback;
+          if (comment !== fallback) {
+            // Prime the similarity ring so the next template pick
+            // doesn't echo what the model just said.
+            recordUtterance(shuffleStateRef.current, comment);
+          }
+          emit(comment);
+        })
+        .catch(() => {
+          if (cancelled || token.isStaleOrInactive()) return;
+          emit(fallback);
+        });
     }).then((fn) => {
       if (cancelled) fn();
       else unlisten = fn;
@@ -2259,16 +2298,6 @@ function buildRephrasePrompt(args: {
   return lines.join("\n");
 }
 
-/** Format context for the coach model to make an adaptive drill decision. */
-function formatAdaptiveEvalContext(req: AdaptiveEvalRequest): string {
-  const noCeiling = req.targetBpm >= 300;
-  const progress = noCeiling
-    ? `Open-ended (no ceiling), currently at ${req.currentBpm} BPM`
-    : `${req.currentBpm} of ${req.targetBpm} BPM target (${Math.round(((req.currentBpm - req.startBpm) / Math.max(1, req.targetBpm - req.startBpm)) * 100)}% progress)`;
-
-  return `You are coaching a drill session. The player just finished a round. Decide the next tempo change.\n\nCurrent BPM: ${req.currentBpm}\nStart BPM: ${req.startBpm}\nProgress: ${progress}\nAccuracy last round: ${req.accuracyPct}%\nAggressiveness: ${req.aggressiveness}\nStep number: ${req.currentStep}\n\nBased on the accuracy and aggressiveness setting, should the tempo go UP, HOLD, or DOWN?\nReply with exactly one word on the first line: UP, HOLD, or DOWN.\nOptionally add a brief coaching comment on the second line (1 sentence max).`;
-}
-
 /**
  * D4 Signal A — render a Signal-A change description used in the
  * `{change}` template placeholder. Kept human-readable: the coach
@@ -2291,12 +2320,4 @@ function formatChangeCopy(c: { kind: string; from: string | number; to: string |
     default:
       return "config changed";
   }
-}
-
-/** Parse the model's adaptive decision response. */
-function parseAdaptiveDecision(response: string): "up" | "hold" | "down" {
-  const firstLine = response.trim().split("\n")[0].trim().toUpperCase();
-  if (firstLine.startsWith("UP")) return "up";
-  if (firstLine.startsWith("DOWN")) return "down";
-  return "hold";
 }
