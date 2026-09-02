@@ -57,6 +57,25 @@ runs:
       if: runner.os == 'Windows'
       uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
+    # Pin the linker by absolute path. Once the MSVC environment variables
+    # are set, rustc stops resolving `link.exe` through vswhere and just
+    # shells out to whatever `link.exe` PATH offers — and a `shell: bash`
+    # step puts Git's `/usr/bin` (which ships a coreutils `link.exe`) in
+    # front of MSVC's. That fails as:
+    #   /usr/bin/link: extra operand '…rcgu.o'
+    - name: Windows — pin the MSVC linker
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        $link = Get-Command link.exe -All |
+          Where-Object { $_.Source -like '*\VC\Tools\MSVC\*' } |
+          Select-Object -First 1 -ExpandProperty Source
+        if (-not $link) { throw 'MSVC link.exe not found on PATH' }
+        Write-Host "MSVC linker: $link"
+        Add-Content -Path $env:GITHUB_ENV -Encoding utf8 `
+          -Value "CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_LINKER=$link"
+
     # The Visual Studio generator's CL tracker writes `.tlog` files under a
     # path derived from the object path and blows past MAX_PATH inside
     # llama.cpp's shader tree, so force Ninja. Ninja is not guaranteed to be

@@ -104,7 +104,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cd "$RUNNER_TEMP"
+          # RUNNER_TEMP is a backslash path on Windows; Git Bash's find/cd
+          # want the POSIX form.
+          TMP="$RUNNER_TEMP"
+          if command -v cygpath > /dev/null 2>&1; then TMP="$(cygpath -u "$RUNNER_TEMP")"; fi
+          cd "$TMP"
           # sha256sum on Linux/Git-Bash, shasum on macOS.
           if command -v sha256sum > /dev/null 2>&1; then
             echo "${TEST_GGUF_SHA256}  test-model.gguf" | sha256sum -c -
@@ -134,7 +138,14 @@ jobs:
           YAMES_TEST_GGUF: ${{ runner.temp }}/test-model.gguf
         run: |
           set -euo pipefail
-          cargo test --manifest-path src-tauri/Cargo.toml \
+          # `--target` for the macOS entries so this really is the artifact
+          # the release job ships; without it both macOS rows would build
+          # the runner's own arm64 and the Intel bundle would go untested.
+          # The x86_64 test binary runs under Rosetta on the arm64 runner.
+          TARGET_ARG=""
+          if [ -n "${{ matrix.target }}" ]; then TARGET_ARG="--target ${{ matrix.target }}"; fi
+          # shellcheck disable=SC2086
+          cargo test --manifest-path src-tauri/Cargo.toml $TARGET_ARG \
             --features ${{ matrix.feature }} --lib -- --nocapture
 
       # ROADMAP §5.0.1 budget: ≤ 80 MB of binary growth per platform. The
@@ -147,26 +158,27 @@ jobs:
         run: |
           set -uo pipefail
           TARGET="${CARGO_TARGET_DIR:-src-tauri/target}"
+          if command -v cygpath > /dev/null 2>&1; then TARGET="$(cygpath -u "$TARGET")"; fi
+          # `tee` so the numbers land in the step log as well as the job
+          # summary — the summary is not readable through the API.
           {
             echo "### llm-smoke — ${{ matrix.label }} (\`${{ matrix.feature }}\`)"
             echo
             echo '| Artifact | Size |'
             echo '|---|---:|'
-          } >> "$GITHUB_STEP_SUMMARY"
-          total=0
-          while IFS= read -r f; do
-            [ -f "$f" ] || continue
-            bytes=$(wc -c < "$f" | tr -d ' ')
-            total=$((total + bytes))
-            printf '| `%s` | %s |\n' "$(basename "$f")" \
-              "$(awk -v b="$bytes" 'BEGIN{printf "%.1f MiB", b/1048576}')" \
-              >> "$GITHUB_STEP_SUMMARY"
-          done < <(find "$TARGET" -type d -name 'llama-cpp-sys-2-*' \
-                     -exec find {} -type f \( -name '*.a' -o -name '*.lib' \) \; 2>/dev/null | sort -u)
-          printf '| **total llama.cpp static libs** | **%s** |\n' \
-            "$(awk -v b="$total" 'BEGIN{printf "%.1f MiB", b/1048576}')" \
-            >> "$GITHUB_STEP_SUMMARY"
-          echo >> "$GITHUB_STEP_SUMMARY"
+            total=0
+            while IFS= read -r f; do
+              [ -f "$f" ] || continue
+              bytes=$(wc -c < "$f" | tr -d ' ')
+              total=$((total + bytes))
+              printf '| `%s` | %s |\n' "$(basename "$f")" \
+                "$(awk -v b="$bytes" 'BEGIN{printf "%.1f MiB", b/1048576}')"
+            done < <(find "$TARGET" -type f \( -name 'libggml*.a' -o -name 'libllama*.a' \
+                          -o -name 'ggml*.lib' -o -name 'llama*.lib' \) 2>/dev/null | sort -u)
+            printf '| **total llama.cpp static libs** | **%s** |\n' \
+              "$(awk -v b="$total" 'BEGIN{printf "%.1f MiB", b/1048576}')"
+            echo
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
   build:
     needs: llm-smoke
