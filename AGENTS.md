@@ -31,6 +31,47 @@ Notes:
   for `error[`, `error:`, `panic`, or `FAILED` in the output to detect
   breakage.
 
+## Building with the coach LLM
+
+`default = []`, so a plain build has **no** LLM — `coach.rs` runs the
+template engine. Turn it on with exactly one Cargo feature:
+
+| Feature | Backend | Use |
+|---|---|---|
+| `coach-llm` | CPU only | dev machines, CI fallback, the jitter probe |
+| `coach-llm-metal` | Metal | shipping macOS |
+| `coach-llm-vulkan` | Vulkan | shipping Windows + Linux |
+
+The GPU features imply `coach-llm`; never enable two backends at once.
+`LlmModel::load` asks for all layers on a GPU build and llama.cpp keeps
+them on the CPU when it finds no usable device, so one binary serves both
+— set `YAMES_LLM_GPU_LAYERS=0` to force CPU inference on a GPU build.
+
+```sh
+cargo build --manifest-path src-tauri/Cargo.toml --features coach-llm-metal   # macOS
+cargo build --manifest-path src-tauri/Cargo.toml --features coach-llm-vulkan  # Windows / Linux
+```
+
+Prerequisites beyond the usual Rust + cmake (aubio already needs cmake):
+
+- **All platforms**: cmake, a C/C++ compiler, and `libclang` for bindgen
+  (`LIBCLANG_PATH` must point at the directory holding `libclang.dll` /
+  `.so` / `.dylib`).
+- **macOS**: Xcode command line tools. Metal needs nothing extra.
+- **Windows**: the LunarG Vulkan SDK (`VULKAN_SDK` set, `%VULKAN_SDK%\Bin`
+  on PATH for `glslc.exe`). Both MSVC and the `x86_64-pc-windows-gnu`
+  toolchain work; on GNU you also need a MinGW toolchain on PATH
+  (`gcc`, `g++`, `dlltool`, `ninja` — w64devkit has all four) or rustc
+  fails with `error calling dlltool 'dlltool.exe': program not found`.
+- **Linux**: `libvulkan-dev`, `glslc` (shaderc), `libclang-dev`, cmake.
+
+Smoke test — skipped when the env var is unset, so it is safe in CI:
+
+```sh
+YAMES_TEST_GGUF=/path/to/tiny.gguf \
+  cargo test --manifest-path src-tauri/Cargo.toml --features coach-llm --lib
+```
+
 ## Fast validation chain (no app boot)
 
 After a refactor / surgical edit, run these in order — they catch the
