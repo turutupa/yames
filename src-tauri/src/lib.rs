@@ -399,12 +399,17 @@ pub fn run() {
                 })
                 .build(app)?;
 
-            // Start with the last-used window visible
+            // Start with the last-used window visible — the main window on a
+            // fresh install, where `lastWindow` has never been written
+            // (`commands::resolve_startup_window`). Must stay in step with
+            // `app_ready`, which decides the main window's side of this.
             let last_window = {
                 let store = app.store("settings.json")?;
-                store.get("lastWindow")
-                    .and_then(|v| v.as_str().map(String::from))
-                    .unwrap_or_else(|| "floating".to_string())
+                commands::resolve_startup_window(
+                    store.get("lastWindow")
+                        .and_then(|v| v.as_str().map(String::from))
+                        .as_deref(),
+                )
             };
 
             if let Some(main_win) = app.get_webview_window("main") {

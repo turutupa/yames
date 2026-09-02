@@ -23,6 +23,50 @@ fn emit_state_changed(state: &SharedState, app_handle: &AppHandle) {
     let _ = app_handle.emit("state-changed", &snapshot);
 }
 
+/// Should `persist_state` write the `instrument` key this time?
+///
+/// `Instrument::default()` is `Other` — the explicit "no specific calibration"
+/// value, not a choice (see `instrument.rs`). Writing it into a store that has
+/// no `instrument` yet makes a fresh install indistinguishable from a returning
+/// user: the frontend's first-run detection reads `instrument` as "this user has
+/// been here before" and the onboarding wizard never opens. Any of the twelve
+/// settings commands (`set_bpm`, `set_volume`, `set_theme`, …) can fire before
+/// the user has picked anything, so the rule lives here rather than at the call
+/// sites.
+///
+/// The store must therefore truthfully lack an instrument until either the user
+/// chooses one (`set_instrument`) or the coming-soon migration in `lib.rs`
+/// writes one. Once the key exists we keep it in sync unconditionally — an
+/// explicit `Other` (a user picking "Other" in the UI, or a legacy store) is a
+/// real value and must not be frozen.
+///
+/// Pure so it can be unit-tested without a Tauri `State` / `AppHandle`.
+pub fn should_persist_instrument(current: Instrument, stored: Option<&serde_json::Value>) -> bool {
+    stored.is_some() || current != Instrument::Other
+}
+
+/// Which window should be on screen at startup, given the stored `lastWindow`?
+///
+/// `lastWindow` is only ever written by `show_main` / `show_floating`, so it is
+/// absent exactly once: on a fresh install, before the user has switched
+/// windows even once. The answer there has to be the **main** window — the
+/// onboarding wizard lives inside it, and the old `"floating"` default left a
+/// first-time user looking at a 400x160 widget while the wizard rendered
+/// invisibly behind the main window's `visible: false` (O1b). It also meant
+/// `app_ready` returned early and never called `show()` at all.
+///
+/// A stored value is always honoured verbatim, including an unrecognised one:
+/// callers treat "anything but `main`" as the floating widget, which is the
+/// behaviour this has always had for a store written by an older build.
+///
+/// Pure so it can be unit-tested without a Tauri `AppHandle`, and shared by
+/// both startup call sites (`app_ready` here, and the floating widget's
+/// show/hide in `lib.rs`) — they must agree or a fresh install would show
+/// both windows at once.
+pub fn resolve_startup_window(stored: Option<&str>) -> String {
+    stored.unwrap_or("main").to_string()
+}
+
 /// Persist the current AppState to the store (minus is_playing which is transient).
 fn persist_state(state: &SharedState, app_handle: &AppHandle) {
     use tauri_plugin_store::StoreExt;
@@ -59,7 +103,12 @@ fn persist_state(state: &SharedState, app_handle: &AppHandle) {
                 "cyclic": s.speed_ramp.cyclic,
             }),
         );
-        store.set("instrument", serde_json::json!(s.instrument.id()));
+        // Every other key above is written unconditionally; `instrument` is
+        // the one first-run signal the frontend reads, so it is gated (see
+        // `should_persist_instrument`).
+        if should_persist_instrument(s.instrument, store.get("instrument").as_ref()) {
+            store.set("instrument", serde_json::json!(s.instrument.id()));
+        }
     }
 }
 
@@ -2059,11 +2108,14 @@ pub fn app_ready(app_handle: AppHandle) {
         Err(_) => return,
     };
 
-    // Only show the main window if that's what was last active.
-    let last_window = store
-        .get("lastWindow")
-        .and_then(|v| v.as_str().map(String::from))
-        .unwrap_or_else(|| "floating".to_string());
+    // Only show the main window if that's what was last active — or if
+    // nothing has been active yet (see `resolve_startup_window`).
+    let last_window = resolve_startup_window(
+        store
+            .get("lastWindow")
+            .and_then(|v| v.as_str().map(String::from))
+            .as_deref(),
+    );
 
     if last_window != "main" {
         return;
@@ -2262,5 +2314,76 @@ mod tests {
             assert_eq!(total as u32, groups.iter().map(|&g| g as u32).sum::<u32>());
             assert!(validate_beat_groups(&groups).is_ok());
         }
+    }
+
+    // -----------------------------------------------------------------------
+    // O1b — `persist_state` must not invent an `instrument` key
+    // -----------------------------------------------------------------------
+
+    /// The bug: a fresh install's first `set_bpm` / `set_volume` / `set_theme`
+    /// wrote the backend default (`Other`) into an empty store, and the
+    /// frontend then read that key as "returning user" and skipped the wizard.
+    #[test]
+    fn default_instrument_is_not_written_into_a_store_without_one() {
+        assert!(!should_persist_instrument(Instrument::Other, None));
+        assert!(!should_persist_instrument(Instrument::default(), None));
+    }
+
+    #[test]
+    fn a_chosen_instrument_creates_the_key() {
+        for inst in [
+            Instrument::Drums,
+            Instrument::ElectricGuitar,
+            Instrument::AcousticGuitar,
+            Instrument::Bass,
+            Instrument::Piano,
+        ] {
+            assert!(
+                should_persist_instrument(inst, None),
+                "{inst:?} is a real choice and must be persisted"
+            );
+        }
+    }
+
+    /// Once the key exists it is kept in sync unconditionally — including a
+    /// deliberate `Other`, which a legacy store or an explicit UI pick can
+    /// hold. Freezing it would strand the user on a stale instrument.
+    #[test]
+    fn an_existing_key_is_always_updated() {
+        let stored = serde_json::json!("electric-guitar");
+        assert!(should_persist_instrument(
+            Instrument::Other,
+            Some(&stored)
+        ));
+        let stored_other = serde_json::json!("other");
+        assert!(should_persist_instrument(
+            Instrument::Other,
+            Some(&stored_other)
+        ));
+        assert!(should_persist_instrument(Instrument::Bass, Some(&stored)));
+    }
+
+    // -----------------------------------------------------------------------
+    // O1b — a fresh install opens the main window, not the widget
+    // -----------------------------------------------------------------------
+
+    /// The bug: `lastWindow` is written only by `show_main` / `show_floating`,
+    /// so on a fresh install it is absent — and the old `"floating"` default
+    /// meant `app_ready` never showed the main window. The onboarding wizard
+    /// mounted and played its preview click inside a window nobody could see.
+    #[test]
+    fn a_fresh_install_starts_on_the_main_window() {
+        assert_eq!(resolve_startup_window(None), "main");
+    }
+
+    #[test]
+    fn a_stored_choice_is_honoured_verbatim() {
+        assert_eq!(resolve_startup_window(Some("main")), "main");
+        assert_eq!(resolve_startup_window(Some("floating")), "floating");
+        // Anything unrecognised keeps its old meaning at the call sites
+        // ("not main" => the floating widget), rather than being repaired
+        // into `main` and stealing focus from a returning widget user.
+        assert_eq!(resolve_startup_window(Some("widget")), "widget");
+        assert_ne!(resolve_startup_window(Some("")), "main");
     }
 }

@@ -61,12 +61,53 @@ fully unit-tested.
 | `hints.lastShownSession` | number | session counter of the last hint (rate limit) |
 | `whatsNew.seenVersion` | string | app version whose notes were shown |
 
-## First-run detection (O1 owns this)
+## First-run detection (O1 owns this; corrected by O1b)
 
-- `instrument` unset AND `onboarding.version` unset → full wizard (W0).
-- `instrument` set AND `onboarding.version` unset → existing user:
-  no wizard; set `onboarding.version = 1`, offer the tour once.
+Detection reads one **prior-use signal**, not the `instrument` key alone:
+
+> prior use ⇔ (`instrument` set AND ≠ `"other"`) OR `getSessionHistory()`
+> non-empty OR `listPresets()` non-empty
+
+- `onboarding.version` unset AND no prior use → full wizard (W0).
+- `onboarding.version` unset AND any prior use → existing user: no wizard;
+  set `onboarding.version = 1` + `onboarding.completedAt`, offer the tour once.
 - `onboarding.version` set → normal launch.
+
+Why the signal is wider than `instrument` (O1b bug):
+`commands.rs::persist_state` writes the whole `AppState` to `settings.json`
+on every settings command (`set_bpm`, `set_volume`, `set_theme`, … — twelve
+call sites). On a fresh install it therefore wrote
+`instrument: "other"` — `Instrument::default()`, which means *"no choice
+made"*, not a choice — before the user had touched anything. The old rule
+("`instrument` set → existing user") then skipped the wizard forever and
+stamped the schema, and the pre-wizard `InstrumentPickerModal` keyed on the
+same signal, so it likely never showed for new users either.
+
+Both sides are fixed:
+
+- Rust: `commands.rs::should_persist_instrument` gates the write —
+  `persist_state` writes `instrument` only when the store already has the
+  key, or when the state holds a real choice (anything but `Other`). Every
+  other key is written as before. Unit-tested as a pure function
+  (`commands::tests::default_instrument_is_not_written_into_a_store_without_one`
+  and friends) because `persist_state` needs a live Tauri `State`/`AppHandle`.
+  The store now truthfully lacks an instrument until the user picks one or
+  the coming-soon migration in `lib.rs` (~L171) writes one.
+- Rust: `commands.rs::resolve_startup_window` decides which window opens.
+  `lastWindow` is written only by `show_main` / `show_floating`, so it is
+  absent exactly once — on a fresh install — and the old `"floating"`
+  default meant a first-time user saw the 400x160 widget while the wizard
+  mounted (and played its preview click) inside the still-hidden main
+  window, with `app_ready` returning early and never calling `show()`.
+  It now defaults to `"main"`; a stored value is honoured verbatim. Both
+  startup call sites share the function (`app_ready`, and the widget's
+  show/hide in `lib.rs` ~L402) — they have to agree or a fresh install
+  would open both windows.
+- Frontend: `useOnboarding.hasPriorUse(instrument, sessionCount, presetCount)`
+  is pure and exported, and treats `"other"` exactly like an absent key. It
+  is correct on its own even against an old store already poisoned with
+  `instrument: "other"`, and a `getSessionHistory()`/`listPresets()` call
+  that rejects counts as *no* signal (never as prior use).
 
 ## Where the briefs live
 
