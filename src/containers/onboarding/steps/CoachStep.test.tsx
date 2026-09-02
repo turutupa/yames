@@ -25,18 +25,58 @@ function stateAt(stepId: OnboardingState["stepId"], context: Partial<OnboardingC
   };
 }
 
-const installed = (tier: "standard" | "full", voiceReady = true): ModelStatus => ({
+/**
+ * The tier gates, as Rust computes them (`models::recommendations`). The
+ * step no longer derives them from `systemMemoryMb` — that number is only
+ * copy now — so a test that wants a small machine says so here.
+ */
+type Gates = Pick<
+  ModelStatus,
+  "studioRecommended" | "standardRecommended" | "brainUpdateRecommended"
+>;
+const ALL_TIERS: Gates = {
+  studioRecommended: true,
+  standardRecommended: true,
+  brainUpdateRecommended: false,
+};
+/** Big enough for Standard, not for Studio. */
+const STANDARD_ONLY: Gates = { ...ALL_TIERS, studioRecommended: false };
+/** Below the Standard floor — timing-only is the honest answer. */
+const TOO_SMALL: Gates = {
+  ...ALL_TIERS,
+  studioRecommended: false,
+  standardRecommended: false,
+};
+
+const noBrain = (gates: Gates = ALL_TIERS): ModelStatus => ({
+  brainReady: false,
+  brainTier: null,
+  brainFamily: null,
+  brainSizeBytes: 0,
+  voiceReady: false,
+  voiceSizeBytes: 0,
+  ...gates,
+});
+
+const installed = (
+  tier: "standard" | "full",
+  voiceReady = true,
+  over: Partial<ModelStatus> = {},
+): ModelStatus => ({
   brainReady: true,
   brainTier: tier,
   brainFamily: "qwen3",
   brainSizeBytes: 2_497_280_256,
   voiceReady,
   voiceSizeBytes: 60_000_000,
+  ...ALL_TIERS,
+  ...over,
 });
 
 type HarnessOptions = {
   llmCompiled?: boolean;
   systemMemoryMb?: number | null;
+  gates?: Gates;
   modelStatus?: ModelStatus | null;
   downloading?: boolean;
   downloadFraction?: number | null;
@@ -47,7 +87,8 @@ function harness(options: HarnessOptions = {}) {
   const {
     llmCompiled = true,
     systemMemoryMb = 32 * GB,
-    modelStatus = null,
+    gates = ALL_TIERS,
+    modelStatus = noBrain(gates),
     downloading = false,
     downloadFraction = null,
     state = stateAt("coach"),
@@ -56,9 +97,12 @@ function harness(options: HarnessOptions = {}) {
   setInvokeResponse("get_coach_capabilities", {
     llmCompiled,
     modelResident: false,
+    loading: false,
     backend: llmCompiled ? "vulkan" : "none",
     modelName: null,
-    ramEstimateMb: 0,
+    loadError: null,
+    brainDownloaded: !!modelStatus?.brainReady,
+    ...gates,
   });
 
   const dispatch = vi.fn();
@@ -158,11 +202,13 @@ describe("W4 — recommendation is preselected", () => {
   });
 
   it("preselects timing-only on a machine below the Standard floor", async () => {
-    await mount({ systemMemoryMb: 4 * GB });
+    await mount({ systemMemoryMb: 4 * GB, gates: TOO_SMALL });
     expect(card("off")).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByTestId("coach-recommendation-reason")).toHaveTextContent(
       "This machine has 4 GB of RAM",
     );
+    // Settings gained the same gate in T04c; the card says so here too.
+    expect(card("standard")).toBeDisabled();
   });
 
   it("preselects the brain that is already downloaded", async () => {
@@ -174,17 +220,19 @@ describe("W4 — recommendation is preselected", () => {
   });
 });
 
-describe("W4 — Studio is greyed with the reason below 16 GB (decision 5)", () => {
+describe("W4 — Studio is greyed with the reason when the machine is too small (decision 5)", () => {
   it("names the RAM this machine actually has", async () => {
-    await mount({ systemMemoryMb: 8 * GB });
+    await mount({ systemMemoryMb: 8 * GB, gates: STANDARD_ONLY });
     expect(card("full")).toBeDisabled();
     expect(within(card("full")).getByText(/Studio needs at least 16 GB of RAM/)).toHaveTextContent(
       "this machine has 8 GB",
     );
   });
 
-  it("is selectable at 16 GB and above", async () => {
-    await mount({ systemMemoryMb: 16 * GB });
+  // The gate is Rust's, and its floor has slack for the firmware and iGPU
+  // reservations that keep a real 16 GB machine from ever reporting 16 GiB.
+  it("is selectable on a real 16 GB machine", async () => {
+    await mount({ systemMemoryMb: 15_872 });
     expect(card("full")).toBeEnabled();
     expect(within(card("full")).queryByText(/needs at least 16 GB/)).toBeNull();
   });
@@ -260,6 +308,23 @@ describe("W4 — the commit on Next", () => {
     await click(next());
     expect(coach.setBrainTier).toHaveBeenCalledWith("standard");
     expect(coach.startDownload).not.toHaveBeenCalled();
+  });
+
+  // The short-circuit above matched only the tier, so a pre-Qwen3 install of
+  // the same tier walked through onboarding untouched and then answered
+  // every prompt with visible ChatML artifacts. Family is part of
+  // "already here".
+  it("re-downloads a brain of the right tier but a superseded family", async () => {
+    const { coach } = await mount({
+      modelStatus: installed("standard", true, {
+        brainFamily: "legacy",
+        brainUpdateRecommended: true,
+      }),
+    });
+    await click(card("standard"));
+    await click(next());
+    expect(coach.startDownload).toHaveBeenCalledTimes(1);
+    expect(coach.startDownload).toHaveBeenCalledWith("standard");
   });
 
   it("fetches the missing voices for a brain that is installed without them", async () => {

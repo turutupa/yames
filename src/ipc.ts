@@ -635,6 +635,16 @@ export type ModelStatus = {
   brainSizeBytes: number;
   voiceReady: boolean;
   voiceSizeBytes: number;
+  /**
+   * Tier gates and the migration prompt, decided in Rust
+   * (`models::recommendations`) against the RAM the OS actually reports.
+   * The frontend consumes the booleans and owns none of the thresholds —
+   * the TS copy compared against a literal 16 GiB, which no real 16 GB
+   * Windows or Linux machine ever reports.
+   */
+  studioRecommended: boolean;
+  standardRecommended: boolean;
+  brainUpdateRecommended: boolean;
 };
 
 export type DownloadProgress = {
@@ -726,34 +736,84 @@ export async function deleteModels(): Promise<void> {
 // Coach LLM Inference
 // ---------------------------------------------------------------------------
 
+/**
+ * Load the brain into memory. Idempotent on the Rust side: the same
+ * weights already resident is a no-op, and a load already in flight is
+ * not restarted. Prefer `ensureCoachLoaded()` from `hooks/coachLoader`,
+ * which also dedupes the in-flight promise on this side.
+ */
 export async function loadCoachModel(): Promise<boolean> {
   return invoke<boolean>("load_coach_model");
 }
 
 /**
- * Hard timeout for every LLM inference call, in milliseconds. Per the
- * plan's C4 latency policy: "LLM call has a hard 3-second timeout.
- * After 3s, ship the filled template directly. The user never waits
- * for the model." The timeout is enforced here at the IPC layer so
- * every caller inherits it without having to reimplement the race.
- *
- * On timeout, this rejects with `Error("coach_generate_timeout")` so
- * call sites can catch and fall back to their template path (every
- * existing call site already has a try/catch or `.catch(() => {})`).
+ * Drop the resident worker and free its RAM. The model is only meant to
+ * be resident while someone is practising, so this is called when the
+ * brain tier is switched off and by the idle timer in `coachLoader`.
  */
-export const COACH_GENERATE_TIMEOUT_MS = 3_000;
+export async function unloadCoachModel(): Promise<void> {
+  return invoke("unload_coach_model");
+}
 
-export async function coachGenerate(context: string): Promise<string> {
-  const call = invoke<string>("coach_generate", { context });
-  return await Promise.race([
-    call,
-    new Promise<string>((_, reject) => {
-      setTimeout(
-        () => reject(new Error("coach_generate_timeout")),
-        COACH_GENERATE_TIMEOUT_MS,
-      );
-    }),
-  ]);
+/**
+ * What kind of generation this is. Explicit rather than sniffed out of
+ * the prompt text: Rust picks the token budget and the template branch
+ * from it, and the timeout below comes from the same value.
+ */
+export type CoachGenKind =
+  | "tip"
+  | "greeting"
+  | "report"
+  | "summary"
+  | "chat"
+  | "drill";
+
+/**
+ * Hard timeout per generation kind, in milliseconds.
+ *
+ * One 3 s cap for everything came from the plan's C4 latency policy,
+ * which is written about the *tip* path — "the user never waits for the
+ * model". Applied to a session summary or a chat answer it just meant
+ * those never arrived on a CPU backend, since a 256-token answer cannot
+ * be produced in three seconds there. The budgets now match AGENTS.md's
+ * latency tiers: a tip must not delay the next thing the player hears,
+ * a report lands while they are already reading their score, and a
+ * summary or chat answer is something they are explicitly waiting for.
+ *
+ * On timeout this rejects with `Error("coach_generate_timeout")` so call
+ * sites fall back to their template path (every one has a try/catch or
+ * a `.catch()`).
+ */
+export const COACH_GENERATE_TIMEOUT_MS: Record<CoachGenKind, number> = {
+  tip: 3_000,
+  drill: 3_000,
+  greeting: 3_000,
+  report: 8_000,
+  summary: 15_000,
+  chat: 15_000,
+};
+
+export async function coachGenerate(
+  kind: CoachGenKind,
+  context: string,
+): Promise<string> {
+  const call = invoke<string>("coach_generate", { kind, context });
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      call,
+      new Promise<string>((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error("coach_generate_timeout")),
+          COACH_GENERATE_TIMEOUT_MS[kind],
+        );
+      }),
+    ]);
+  } finally {
+    // Without this the 15 s chat timer keeps the event loop (and, in
+    // tests, the fake clock) busy long after the call resolved.
+    if (timer !== undefined) clearTimeout(timer);
+  }
 }
 
 export async function isCoachLoaded(): Promise<boolean> {
@@ -773,16 +833,32 @@ export type CoachCapabilities = {
   llmCompiled: boolean;
   /** Whether a real model is loaded in memory right now. */
   modelResident: boolean;
+  /** Whether a load is in flight — the UI says "warming up". */
+  loading: boolean;
   /**
    * Compile-time llama.cpp backend. llama.cpp still falls back to CPU
    * at runtime when no usable GPU is present, so `"vulkan"` does not
    * guarantee GPU execution.
    */
   backend: "metal" | "vulkan" | "cpu" | "none";
-  /** File name of the resident model, or null in template mode. */
+  /**
+   * Display name of the resident model, read from GGUF metadata
+   * ("Qwen3 4B"), or null when nothing is resident. It used to be the
+   * file name the downloader wrote, so the status line read
+   * "model.bin on vulkan".
+   */
   modelName: string | null;
-  /** Rough RAM estimate while generating (weights × 1.2), 0 if absent. */
-  ramEstimateMb: number;
+  /**
+   * Why the last load did not produce a resident model (legacy weights,
+   * nothing downloaded, no LLM in this build), or null.
+   */
+  loadError: string | null;
+  /** Weights are on disk. Mirrors `ModelStatus.brainReady`. */
+  brainDownloaded: boolean;
+  /** Tier gates — see `ModelStatus`. */
+  studioRecommended: boolean;
+  standardRecommended: boolean;
+  brainUpdateRecommended: boolean;
 };
 
 export async function getCoachCapabilities(): Promise<CoachCapabilities> {

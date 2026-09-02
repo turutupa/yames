@@ -207,6 +207,8 @@ export function MainWindow() {
     voiceMode: coach.coachVoiceMode,
     coachVerbosity: coach.coachVerbosity,
     coachMode: coach.coachMode,
+    // "off" means no model: `startSession` skips the load entirely.
+    brainTier: coach.coachBrainTier,
     instrument,
     // Phase 5 — chip "set-bpm" affordances delegate to the canonical
     // BPM IPC. The hook is `setBpm`-agnostic; we pass the IPC fn so
@@ -1008,6 +1010,7 @@ export function MainWindow() {
             setModelStatus={coach.setModelStatus}
             modelDownloading={coach.modelDownloading}
             studioAvailable={coach.studioAvailable}
+            standardAvailable={coach.standardAvailable}
             brainUpdateAvailable={coach.brainUpdateAvailable}
             availableVoices={coach.availableVoices}
             voiceDiagnostics={coach.voiceDiagnostics}

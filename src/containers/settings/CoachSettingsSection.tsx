@@ -21,6 +21,7 @@ import {
   ttsSpeak,
   ttsStop,
 } from "../../ipc";
+import { brainTierLabelKey } from "../../coach/brainTiers";
 import { InstrumentDropdown } from "../../components/InstrumentDropdown";
 import { formatBytes } from "./formatBytes";
 import { coachStatusLabel } from "./coachStatus";
@@ -58,6 +59,7 @@ export function CoachSettingsSection({
   setModelStatus,
   modelDownloading,
   studioAvailable,
+  standardAvailable,
   brainUpdateAvailable,
   availableVoices,
   voiceDiagnostics,
@@ -67,7 +69,7 @@ export function CoachSettingsSection({
   onRequestDownload,
 }: {
   coachBrainTier: BrainTier;
-  setCoachBrainTier: Dispatch<SetStateAction<BrainTier>>;
+  setCoachBrainTier: (tier: BrainTier) => void;
   coachVoiceMode: VoiceMode;
   setCoachVoiceMode: Dispatch<SetStateAction<VoiceMode>>;
   coachVoiceName: string;
@@ -80,6 +82,7 @@ export function CoachSettingsSection({
   setModelStatus: Dispatch<SetStateAction<ModelStatus | null>>;
   modelDownloading: boolean;
   studioAvailable: boolean;
+  standardAvailable: boolean;
   brainUpdateAvailable: boolean;
   availableVoices: [string, string][];
   voiceDiagnostics: VoiceDiagnostic[];
@@ -99,6 +102,13 @@ export function CoachSettingsSection({
   // phase (the download progress bar in MainWindow gates on
   // `modelDownloading`, which is a separate concern).
   const [removing, setRemoving] = useState(false);
+  // Why "Remove models" failed, if it did. The `deleteModels()` call was
+  // previously awaited with no catch at all, so a rejection became an
+  // unhandled promise and the UI simply snapped out of "Removing…" with
+  // the files still on disk — the exact shape of the Windows failure
+  // (the OS refuses to unlink a mapped file, which is why the backend
+  // now unloads the worker first).
+  const [removeError, setRemoveError] = useState<string | null>(null);
   // Which voice (if any) is currently mid-preview. Drives the inline
   // equalizer-style bars rendered inside that voice's toggle button so
   // the user gets visible feedback during the 200-1500 ms synthesis
@@ -152,7 +162,23 @@ export function CoachSettingsSection({
     modelDownloading,
     coachBrainTier,
   ]);
-  const coachStatus = coachStatusLabel(coachCaps, !!modelStatus?.brainReady);
+  // While a load is in flight the status line says "warming up"; nothing
+  // in the dependency list above changes when it finishes, so poll until
+  // it settles. Cheap: the command reads atomics plus one directory
+  // stat, and the poll only exists during the few seconds of a load.
+  useEffect(() => {
+    if (!coachCaps?.loading) return;
+    const id = setInterval(() => {
+      getCoachCapabilities().then(setCoachCaps).catch(() => {});
+    }, 1000);
+    return () => clearInterval(id);
+  }, [coachCaps?.loading]);
+  const coachStatus = coachStatusLabel(
+    coachCaps,
+    // Prefer the capabilities snapshot: it and the residency flag were
+    // read in the same call, so the two can never disagree.
+    coachCaps?.brainDownloaded ?? !!modelStatus?.brainReady,
+  );
 
   // Subscribe to the backend's "speech ended" event. Lifecycle:
   //   - mount: register listener
@@ -280,8 +306,16 @@ export function CoachSettingsSection({
           </button>
           <button
             className={`toggle-btn ${coachBrainTier === "standard" ? "active" : ""}`}
-            data-tooltip={t("settings.coach.brainStandardHint")}
-            disabled={modelDownloading}
+            data-tooltip={
+              standardAvailable
+                ? t("settings.coach.brainStandardHint")
+                : t("settings.coach.brainStandardNeedsRam")
+            }
+            /* The onboarding wizard has gated Standard on RAM since O4;
+               Settings did not, so the same machine was told two
+               different things about the same tier depending on which
+               screen it was looking at. */
+            disabled={modelDownloading || !standardAvailable}
             onClick={() => {
               if (modelStatus?.brainReady && modelStatus.brainTier === "standard") {
                 setCoachBrainTier("standard");
@@ -648,9 +682,7 @@ export function CoachSettingsSection({
         <div className="coach-download-section coach-manage-section">
           <p className="setting-hint" style={{ marginBottom: 8 }}>
             {t("settings.coach.installed", {
-              tier: modelStatus.brainTier === "full"
-                ? t("settings.coach.brainStudio")
-                : t("settings.coach.brainStandard"),
+              tier: t(brainTierLabelKey(modelStatus.brainTier)),
               size: formatBytes(modelStatus.brainSizeBytes + modelStatus.voiceSizeBytes),
             })}
           </p>
@@ -659,11 +691,18 @@ export function CoachSettingsSection({
             disabled={removing || modelDownloading}
             onClick={async () => {
               setRemoving(true);
+              setRemoveError(null);
               try {
                 await deleteModels();
                 setModelStatus(await getModelStatus());
                 setCoachBrainTier("off");
                 storeSave("coachBrainTier", "off");
+              } catch (err) {
+                setRemoveError(err instanceof Error ? err.message : String(err));
+                // Refresh anyway: a partial delete still changed what is
+                // on disk, and the size line must not keep claiming
+                // bytes that are gone.
+                getModelStatus().then(setModelStatus).catch(() => {});
               } finally {
                 // `finally` (not just the happy path) so a backend
                 // error doesn't leave the button stuck in "Removing…"
@@ -694,6 +733,11 @@ export function CoachSettingsSection({
             </svg>
             {removing ? t("settings.coach.removing") : t("settings.coach.removeModels")}
           </button>
+          {removeError && (
+            <p className="coach-brain-status coach-brain-status-warn" role="alert">
+              {t("settings.coach.removeFailed", { error: removeError })}
+            </p>
+          )}
         </div>
       )}
     </section>

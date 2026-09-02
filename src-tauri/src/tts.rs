@@ -44,13 +44,17 @@ pub const VOICES: &[(&str, &str)] = &[
 /// this floor, `list_available_voices` would advertise the voice as
 /// usable, the user would click it, and Piper would crash on garbage
 /// input — same regression class as the missing-dylib silence bug.
-pub const MIN_ONNX_BYTES: u64 = 30 * 1024 * 1024;
+///
+/// The number itself lives in `models::floors`, the single table for
+/// every downloaded asset's size floor; this is the alias the TTS code
+/// reads it through.
+pub const MIN_ONNX_BYTES: u64 = crate::models::floors::VOICE_ONNX;
 
 /// Minimum size for the `.onnx.json` sidecar. Real sidecars are ~5 KB
 /// of JSON (phoneme map + speaker config). 1 KB catches the "saved an
 /// empty 404 page" failure mode without false-flagging legitimate
 /// future config trims.
-pub const MIN_ONNX_JSON_BYTES: u64 = 1024;
+pub const MIN_ONNX_JSON_BYTES: u64 = crate::models::floors::VOICE_ONNX_JSON;
 
 /// Map a Piper voice id to the closest macOS `say` voice for the
 /// fallback path (used when Piper isn't installed or the model file is

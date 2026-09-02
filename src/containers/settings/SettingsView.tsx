@@ -74,7 +74,7 @@ interface SettingsViewProps {
 
   // Coach
   coachBrainTier: BrainTier;
-  setCoachBrainTier: Dispatch<SetStateAction<BrainTier>>;
+  setCoachBrainTier: (tier: BrainTier) => void;
   coachVoiceMode: VoiceMode;
   setCoachVoiceMode: Dispatch<SetStateAction<VoiceMode>>;
   coachVoiceName: string;
@@ -88,6 +88,7 @@ interface SettingsViewProps {
   modelDownloading: boolean;
   /** ROADMAP §3: Studio is only offered at >= 16 GB of RAM. */
   studioAvailable: boolean;
+  standardAvailable: boolean;
   /** A brain from a superseded model family is installed. */
   brainUpdateAvailable: boolean;
   availableVoices: [string, string][];
@@ -173,6 +174,7 @@ export function SettingsView({
   setModelStatus,
   modelDownloading,
   studioAvailable,
+  standardAvailable,
   brainUpdateAvailable,
   availableVoices,
   voiceDiagnostics,
@@ -260,6 +262,7 @@ export function SettingsView({
         setModelStatus={setModelStatus}
         modelDownloading={modelDownloading}
         studioAvailable={studioAvailable}
+        standardAvailable={standardAvailable}
         brainUpdateAvailable={brainUpdateAvailable}
         availableVoices={availableVoices}
         voiceDiagnostics={voiceDiagnostics}

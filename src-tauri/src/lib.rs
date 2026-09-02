@@ -60,7 +60,8 @@ use commands::{
     start_evaluation, start_model_download, start_playback, start_recording, start_speed_ramp,
     start_speed_ramp_from, start_voice_repair, stop_evaluation, stop_playback, stop_recording,
     stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
-    tts_stop, tts_voice_diagnostics, write_model_chunk, DownloadState, EngineState,
+    tts_stop, tts_voice_diagnostics, unload_coach_model, write_model_chunk, DownloadState,
+    EngineState,
 };
 use engine::MetronomeEngine;
 use midi::create_shared_midi;
@@ -600,6 +601,7 @@ pub fn run() {
             start_model_download,
             cancel_model_download,
             load_coach_model,
+            unload_coach_model,
             coach_generate,
             is_coach_loaded,
             get_coach_capabilities,

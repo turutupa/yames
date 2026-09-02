@@ -143,6 +143,12 @@ const DEFAULT_INVOKE_MAP: Record<string, InvokeFn> = {
     brainSizeBytes: 0,
     voiceReady: false,
     voiceSizeBytes: 0,
+    // Tier gates as Rust computes them. Permissive by default so tests
+    // exercise the un-gated UI; a test that wants a small machine sets
+    // these to false.
+    studioRecommended: true,
+    standardRecommended: true,
+    brainUpdateRecommended: false,
   }),
   // 32 GB — above the Studio gate, so tests exercise the un-gated UI.
   get_system_memory_mb: () => 32 * 1024,
@@ -154,8 +160,21 @@ const DEFAULT_INVOKE_MAP: Record<string, InvokeFn> = {
 
   // Coach LLM
   load_coach_model: () => false,
+  unload_coach_model: () => undefined,
   coach_generate: () => "",
   is_coach_loaded: () => false,
+  get_coach_capabilities: () => ({
+    llmCompiled: false,
+    modelResident: false,
+    loading: false,
+    backend: "none",
+    modelName: null,
+    loadError: null,
+    brainDownloaded: false,
+    studioRecommended: true,
+    standardRecommended: true,
+    brainUpdateRecommended: false,
+  }),
 
   // TTS
   tts_speak: () => undefined,

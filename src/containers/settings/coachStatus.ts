@@ -1,3 +1,4 @@
+import { backendLabel } from "../../coach/brainTiers";
 import type { CoachCapabilities } from "../../ipc";
 
 /**
@@ -17,9 +18,10 @@ export type CoachStatusLabel = {
   params?: Record<string, string>;
   /**
    * `ok` — a real model is generating.
-   * `warn` — weights are on disk but unusable (wasted download).
+   * `warn` — weights are on disk but genuinely unusable (a legacy family
+   *   the engine refuses; a wasted download).
    * `info` — expected, non-actionable states (template build, nothing
-   *   downloaded yet).
+   *   downloaded yet, ready-but-not-loaded, warming up).
    */
   tone: "ok" | "warn" | "info";
 };
@@ -40,19 +42,35 @@ export function coachStatusLabel(
     return { key: "settings.coach.statusTemplateBuild", tone: "info" };
   }
 
+  // A load is in flight. Neither "active" nor "not loaded" is true yet,
+  // and the session that triggered it is already running on templates.
+  if (caps.loading) {
+    return { key: "settings.coach.statusWarmingUp", tone: "info" };
+  }
+
   if (caps.modelResident) {
     return {
       key: "settings.coach.statusActive",
       params: {
+        // From GGUF metadata ("Qwen3 4B"), not the file name on disk.
         model: caps.modelName ?? "model",
-        backend: caps.backend,
+        backend: backendLabel(caps.backend),
       },
       tone: "ok",
     };
   }
 
   if (brainDownloaded) {
-    return { key: "settings.coach.statusNotLoaded", tone: "warn" };
+    // Weights that this build refuses to load — a pre-Qwen3 family — is
+    // the one genuinely actionable case, and "Update brain" sits right
+    // below this line.
+    if (caps.brainUpdateRecommended) {
+      return { key: "settings.coach.statusLegacyWeights", tone: "warn" };
+    }
+    // Otherwise this is the normal resting state, not a fault: the model
+    // is deliberately not resident until a session needs it, so the copy
+    // says so and the tone is neutral.
+    return { key: "settings.coach.statusReadyNotLoaded", tone: "info" };
   }
 
   return { key: "settings.coach.statusNoModel", tone: "info" };

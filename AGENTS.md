@@ -234,7 +234,14 @@ coach messages, or new DSP features, use this to decide where it fits.
 
 Key rules:
 - **Real-time tier**: no I/O, no LLM, no model inference — DSP only.
-- **Mid-session tips**: gatekeeper + template engine only. No model inference on this path.
+- **Mid-session tips**: no *blocking* inference on the tip path. The
+  gatekeeper and the template engine own what the tip says; the model
+  may only rephrase it, and only within the 3 s budget on a GPU
+  backend. On a CPU-only backend (`BACKEND == "cpu"`) tips skip the LLM
+  entirely and ship the template — a CPU generation measured 7–11 s,
+  three to four times the whole tier. Enforced in `coach::generate`,
+  which takes `GenKind::Tip` and the compile-time backend into account
+  before it touches the worker.
 - **Mid-session / post-session reports**: correct home for ONNX pitch analysis (Basic-pitch processes a 30 s session in ~3–6 s; user is already reading the timing score — no perceived delay).
 - The post-session window is **free real estate**: the coach LLM summary already runs here. Pitch analysis merges into the same report in parallel with zero additional perceived latency.
 

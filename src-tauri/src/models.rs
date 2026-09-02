@@ -41,6 +41,71 @@ pub struct ModelStatus {
     /// Size on disk in bytes
     #[serde(rename = "voiceSizeBytes")]
     pub voice_size_bytes: u64,
+    /// Whether the Studio tier may be offered on this machine.
+    #[serde(rename = "studioRecommended")]
+    pub studio_recommended: bool,
+    /// Whether the Standard tier may be offered on this machine.
+    #[serde(rename = "standardRecommended")]
+    pub standard_recommended: bool,
+    /// Whether the installed brain belongs to a superseded family and
+    /// should be replaced ("Update brain").
+    #[serde(rename = "brainUpdateRecommended")]
+    pub brain_update_recommended: bool,
+}
+
+/// RAM floor for the Studio tier (Qwen3-8B Q4_K_M, ~8 GB resident).
+///
+/// ROADMAP §3 says "16 GB", but *installed* and *reported* RAM are not
+/// the same number: Windows and Linux subtract firmware and integrated-GPU
+/// reservations before `GlobalMemoryStatusEx` / `MemTotal` ever sees them,
+/// so a real 16 GB laptop answers ~15.7–15.9 GiB and a literal 16 GiB
+/// comparison locked those machines out of a tier they run fine. The gate
+/// is the honest floor with the reservation slack taken off.
+pub const STUDIO_MIN_MEMORY_MB: u64 = 15 * 1024;
+
+/// RAM floor for the Standard tier (Qwen3-4B Q4_K_M, ~4 GB resident plus
+/// the app). Same reservation slack off a nominal 8 GB machine.
+pub const STANDARD_MIN_MEMORY_MB: u64 = 7 * 1024 + 512;
+
+/// Tier gates and the migration prompt, decided in one place.
+///
+/// These used to be TS constants (`brainTiers.ts`, `coachRecommendation.ts`)
+/// duplicating `CURRENT_BRAIN_FAMILY` and a 16 GiB threshold that the
+/// frontend could not see was wrong. Rust owns the numbers; the frontend
+/// consumes the booleans.
+///
+/// `memory_mb == 0` means the platform query failed. That reads as
+/// "unknown", never as "too small": a false "your machine is too small"
+/// is a worse failure than letting someone with 16 GB fetch 4.7 GiB.
+fn recommendations(memory_mb: u64, brain_ready: bool, brain_family: Option<&str>) -> (bool, bool, bool) {
+    let studio = memory_mb == 0 || memory_mb >= STUDIO_MIN_MEMORY_MB;
+    let standard = memory_mb == 0 || memory_mb >= STANDARD_MIN_MEMORY_MB;
+    // A ready brain with no classifiable family is treated like a legacy
+    // install rather than silently left on unknown weights.
+    let update = brain_ready && brain_family != Some(CURRENT_BRAIN_FAMILY);
+    (studio, standard, update)
+}
+
+/// Minimum plausible sizes for everything the installer downloads, in one
+/// table.
+///
+/// Same defence in every case: HuggingFace behind a corporate proxy, a VPN
+/// with TLS interception, or a CDN having a bad day will happily serve a
+/// few KB of HTML with a 200, and curl saves it as a completed download.
+/// The asset then fails at *use* time with an opaque error instead of at
+/// install time with a useful one. Floors sit well under the real assets
+/// so a future re-quantisation or minor release does not trip them.
+pub mod floors {
+    /// Piper release archive (macOS ~19 MB, Windows ~23 MB, Linux ~26 MB).
+    pub const PIPER_ARCHIVE: u64 = 15 * 1024 * 1024;
+    /// A Piper medium voice `.onnx` (~60 MB).
+    pub const VOICE_ONNX: u64 = 30 * 1024 * 1024;
+    /// Its `.onnx.json` sidecar (~5 KB).
+    pub const VOICE_ONNX_JSON: u64 = 1024;
+    /// Brain weights, per tier (Standard 2.50 GB / Studio 5.03 GB as of
+    /// 2026-09-02).
+    pub const BRAIN_STANDARD: u64 = 2 * 1024 * 1024 * 1024;
+    pub const BRAIN_STUDIO: u64 = 4 * 1024 * 1024 * 1024;
 }
 
 /// The current brain family. Bump this (and `family_for_url`) when the
@@ -67,22 +132,59 @@ pub fn family_for_url(url: &str) -> &'static str {
     }
 }
 
-/// Minimum plausible size for a downloaded brain, per tier.
-///
-/// Same defence as `verify_voice_onnx`: HuggingFace behind a corporate
-/// proxy, a VPN with TLS interception, or a CDN having a bad day will
-/// happily serve a few KB of HTML with a 200, and curl saves it as a
-/// completed download. A brain that small then fails at load time with an
-/// opaque llama.cpp error instead of at install time with a useful one.
-/// Floors are set well under the real assets (Standard 2.50 GB / Studio
-/// 5.03 GB as of 2026-09-02) so a future re-quantisation does not trip
-/// them.
+/// Minimum plausible size for a downloaded brain, per tier. Unknown tiers
+/// fall back to the lower floor rather than blocking a download outright.
 pub fn min_brain_bytes(tier: &str) -> u64 {
     match tier {
-        "full" => 4 * 1024 * 1024 * 1024,
+        "full" => floors::BRAIN_STUDIO,
         // "standard" and anything unrecognised
-        _ => 2 * 1024 * 1024 * 1024,
+        _ => floors::BRAIN_STANDARD,
     }
+}
+
+/// Human-readable name for a brain that has not been loaded (or whose
+/// GGUF carries no `general.name`), built from the download marker.
+///
+/// The tier ids are frozen — `full` is persisted in the settings store and
+/// in `models/brain/tier`, so only the *label* moved to "Studio" — which
+/// is why the mapping lives here rather than being re-derived at every
+/// display site.
+pub fn brain_display_name(family: Option<&str>, tier: Option<&str>) -> String {
+    let model = match (family, tier) {
+        (Some(CURRENT_BRAIN_FAMILY), Some("full")) => "Qwen3 8B",
+        (Some(CURRENT_BRAIN_FAMILY), _) => "Qwen3 4B",
+        _ => "brain",
+    };
+    model.to_string()
+}
+
+/// The one path to `models/brain/model.bin`.
+///
+/// Three call sites used to hand-build this out of `app_data_dir()` and
+/// two `join`s, which is three chances to disagree about where the brain
+/// lives.
+pub fn brain_model_path(app: &AppHandle) -> Result<PathBuf, String> {
+    Ok(brain_dir(app)?.join("model.bin"))
+}
+
+/// The directory holding `model.bin`, its `tier` file and the
+/// `model.json` marker.
+pub fn brain_dir(app: &AppHandle) -> Result<PathBuf, String> {
+    Ok(models_dir(app)?.join("brain"))
+}
+
+/// Family + tier recorded for the brain on disk, for the loader's
+/// family gate and its fallback display name.
+pub fn brain_marker_info(app: &AppHandle) -> (Option<String>, Option<String>) {
+    let Ok(dir) = brain_dir(app) else {
+        return (None, None);
+    };
+    (
+        read_brain_family(&dir),
+        std::fs::read_to_string(dir.join("tier"))
+            .ok()
+            .map(|t| t.trim().to_string()),
+    )
 }
 
 /// Total physical RAM in MB, or 0 when the platform query fails.
@@ -218,6 +320,9 @@ pub fn check_model_status(app: &AppHandle) -> Result<ModelStatus, String> {
         0
     };
 
+    let (studio_recommended, standard_recommended, brain_update_recommended) =
+        recommendations(system_memory_mb(), brain_ready, brain_family.as_deref());
+
     Ok(ModelStatus {
         brain_ready,
         brain_tier,
@@ -225,6 +330,9 @@ pub fn check_model_status(app: &AppHandle) -> Result<ModelStatus, String> {
         brain_size_bytes,
         voice_ready,
         voice_size_bytes,
+        studio_recommended,
+        standard_recommended,
+        brain_update_recommended,
     })
 }
 
@@ -641,6 +749,71 @@ pub fn start_download(
     });
 }
 
+/// Command line for one download.
+///
+/// Split out from `curl_download` so the flags are assertable in a unit
+/// test — the Studio brain is 4.7 GiB and the previous line could not
+/// fetch it on ordinary broadband:
+///
+///   * `--max-time 600` is a *wall-clock* cap on the whole transfer, so a
+///     4.7 GiB download failed after ten minutes no matter how healthy
+///     the connection was, and `--retry 3` then restarted it from zero
+///     three more times. Replaced by `--speed-time`/`--speed-limit`,
+///     which abort only when the transfer has actually stalled
+///     (< 10 KB/s sustained for 60 s).
+///   * `-C -` is passed unconditionally rather than only when a `.part`
+///     already exists. curl resumes from the local file's length, which
+///     is 0 when it is absent — so the flag is a no-op on a fresh
+///     download and the thing that saves the first 3 GiB on a retry.
+/// Where the in-progress bytes for `url` live.
+///
+/// Keyed by the URL, not just by the destination: both brain tiers land
+/// on `models/brain/model.bin`, so a single `model.part` plus the
+/// unconditional `-C -` below would let an abandoned 2.3 GiB Standard
+/// download be resumed *into* a Studio request — producing a
+/// Frankenstein file large enough to clear the size floor. A per-URL name
+/// makes that impossible. Parts are renamed away on success; an abandoned
+/// one is cleaned up by "Remove models".
+fn part_path_for(dest: &std::path::Path, url: &str) -> PathBuf {
+    // FNV-1a — a stable, dependency-free file-name key. Not a security
+    // hash; collisions here would only mean sharing a resume buffer.
+    let mut hash: u64 = 0xcbf2_9ce4_8422_2325;
+    for byte in url.as_bytes() {
+        hash ^= u64::from(*byte);
+        hash = hash.wrapping_mul(0x1000_0000_01b3);
+    }
+    dest.with_extension(format!("{hash:016x}.part"))
+}
+
+fn curl_args(url: &str, part_path: &std::path::Path) -> Vec<std::ffi::OsString> {
+    use std::ffi::OsString;
+    let mut args: Vec<OsString> = [
+        "-L",
+        "--retry",
+        "3",
+        "--retry-delay",
+        "2",
+        "--connect-timeout",
+        "15",
+        // Abort a stalled transfer, never a slow-but-moving one.
+        "--speed-time",
+        "60",
+        "--speed-limit",
+        "10240",
+        // Resume whatever is already in the .part file.
+        "-C",
+        "-",
+        "--progress-bar",
+        "-o",
+    ]
+    .iter()
+    .map(OsString::from)
+    .collect();
+    args.push(part_path.as_os_str().to_os_string());
+    args.push(OsString::from(url));
+    args
+}
+
 /// Download a file with curl. Returns Ok(()) on success.
 fn curl_download(
     app: &AppHandle,
@@ -651,30 +824,12 @@ fn curl_download(
 ) -> Result<(), String> {
     use std::process::{Command, Stdio};
 
-    let part_path = dest.with_extension("part");
-    let resume = part_path.exists();
+    let part_path = part_path_for(dest, url);
 
     let mut cmd = Command::new("curl");
-    cmd.arg("-L")
-        .arg("--retry")
-        .arg("3")
-        .arg("--retry-delay")
-        .arg("2")
-        .arg("--connect-timeout")
-        .arg("15")
-        .arg("--max-time")
-        .arg("600")
-        .arg("--progress-bar")
-        .arg("-o")
-        .arg(&part_path)
-        .arg(url)
+    cmd.args(curl_args(url, &part_path))
         .stderr(Stdio::piped())
         .stdout(Stdio::null());
-
-    // Only use resume if a partial file already exists
-    if resume {
-        cmd.arg("-C").arg("-");
-    }
 
     eprintln!("[yames] curl_download: url={url} dest={}", dest.display());
     // Log proxy env for debugging
@@ -733,8 +888,12 @@ fn curl_download(
 
     let status = child.wait().map_err(|e| format!("curl failed: {e}"))?;
     if !status.success() {
-        // Clean up partial file on failure
-        let _ = std::fs::remove_file(&part_path);
+        // The `.part` file is deliberately LEFT on disk. Deleting it threw
+        // away every byte already fetched, so a Studio download that died
+        // at 4 GiB started again from zero on the next attempt; keeping it
+        // is what makes the unconditional `-C -` above worth having. The
+        // size floors (`min_brain_bytes`, `verify_voice_onnx`) are what
+        // stop a junk `.part` from ever being promoted to the real name.
         return Err(format!("curl exited with status {status}"));
     }
 
@@ -1053,7 +1212,10 @@ fn verify_voice_json(path: &std::path::Path) -> Result<(), String> {
 /// Linux ~25.4–26.5 MB. A 15 MB floor clears every platform with room
 /// for future minor release-size shifts while still catching the
 /// "served a wrong/truncated payload" mode.
-const MIN_PIPER_ARCHIVE_BYTES: u64 = 15 * 1024 * 1024;
+///
+/// The number itself lives in `floors`, the single table for every
+/// downloaded asset's size floor.
+const MIN_PIPER_ARCHIVE_BYTES: u64 = floors::PIPER_ARCHIVE;
 
 /// Extract the Piper release archive into `dest`.
 ///
@@ -1397,6 +1559,110 @@ mod brain_family_tests {
         let sample = "MemTotal:       32791612 kB\nMemFree:         1234 kB\n";
         assert_eq!(parse_meminfo_total_kb(sample), Some(32_791_612));
         assert_eq!(parse_meminfo_total_kb("MemFree: 12 kB\n"), None);
+    }
+
+    /// Item 7. The old TS gate compared against a literal 16 GiB, which
+    /// a real 16 GB Windows or Linux machine never reports — firmware and
+    /// iGPU reservations come off the top before the OS answers.
+    #[test]
+    fn a_real_16gb_machine_is_offered_studio() {
+        // What a 16 GB Windows laptop with an integrated GPU actually
+        // reports (15.5–15.9 GiB), what Linux reports, and the nominal
+        // figure. All four are 16 GB machines.
+        for reported in [15_872, 16_263, 15_884, 16_384] {
+            let (studio, standard, _) = recommendations(reported, false, None);
+            assert!(studio, "{reported} MB should be offered Studio");
+            assert!(standard, "{reported} MB should be offered Standard");
+        }
+    }
+
+    /// …while a genuinely small machine is still told the truth.
+    #[test]
+    fn small_machines_are_gated_out() {
+        let (studio, standard, _) = recommendations(8 * 1024, false, None);
+        assert!(!studio, "8 GB must not be offered Studio");
+        assert!(standard, "8 GB is the Standard floor");
+
+        let (studio, standard, _) = recommendations(4 * 1024, false, None);
+        assert!(!studio);
+        assert!(!standard, "4 GB cannot run Qwen3-4B without swapping");
+    }
+
+    /// A failed platform query reports 0 and must read as "unknown",
+    /// never as "too small".
+    #[test]
+    fn an_unknown_memory_size_gates_nothing() {
+        let (studio, standard, _) = recommendations(0, false, None);
+        assert!(studio);
+        assert!(standard);
+    }
+
+    #[test]
+    fn the_update_prompt_follows_the_family() {
+        let current = Some(CURRENT_BRAIN_FAMILY);
+        assert!(!recommendations(0, false, None).2, "nothing installed");
+        assert!(!recommendations(0, true, current).2, "current family");
+        assert!(recommendations(0, true, Some("legacy")).2, "legacy family");
+        assert!(
+            recommendations(0, true, None).2,
+            "a ready brain with no classifiable family is legacy",
+        );
+    }
+
+    #[test]
+    fn brain_names_come_from_the_marker_when_the_gguf_has_none() {
+        let q = Some(CURRENT_BRAIN_FAMILY);
+        assert_eq!(brain_display_name(q, Some("standard")), "Qwen3 4B");
+        assert_eq!(brain_display_name(q, Some("full")), "Qwen3 8B");
+        assert_eq!(brain_display_name(q, None), "Qwen3 4B");
+        assert_eq!(brain_display_name(Some("legacy"), Some("full")), "brain");
+        assert_eq!(brain_display_name(None, None), "brain");
+    }
+
+    /// Item 10. The Studio brain is 4.7 GiB; `--max-time 600` could not
+    /// fetch it on ordinary broadband and each `--retry` started over.
+    #[test]
+    fn the_curl_line_resumes_and_only_aborts_when_stalled() {
+        let dest = std::path::Path::new("/tmp/models/brain/model.bin");
+        let url = "https://huggingface.co/Qwen/Qwen3-8B-GGUF/resolve/main/Qwen3-8B-Q4_K_M.gguf";
+        let part = part_path_for(dest, url);
+        let args: Vec<String> = curl_args(url, &part)
+            .iter()
+            .map(|a| a.to_string_lossy().into_owned())
+            .collect();
+
+        // No wall-clock cap on the transfer.
+        assert!(
+            !args.iter().any(|a| a == "--max-time"),
+            "--max-time cannot fetch a 4.7 GiB model: {args:?}",
+        );
+        // Abort only on a stall.
+        let stall = args.windows(2).any(|w| w[0] == "--speed-time" && w[1] == "60");
+        let floor = args
+            .windows(2)
+            .any(|w| w[0] == "--speed-limit" && w[1] == "10240");
+        assert!(stall && floor, "missing stall detection: {args:?}");
+        // Resume unconditionally — the flag is a no-op when the .part is
+        // absent and is what saves the first 3 GiB when it is not.
+        assert!(
+            args.windows(2).any(|w| w[0] == "-C" && w[1] == "-"),
+            "resume flag missing: {args:?}",
+        );
+        // A connect timeout is still wanted — that one is not wall clock.
+        assert!(args.iter().any(|a| a == "--connect-timeout"));
+    }
+
+    /// Both tiers write `model.bin`, so a shared `model.part` plus an
+    /// unconditional `-C -` would resume a Standard download into a
+    /// Studio request.
+    #[test]
+    fn part_files_are_keyed_by_url() {
+        let dest = std::path::Path::new("/tmp/brain/model.bin");
+        let standard = part_path_for(dest, "https://x/Qwen3-4B-Q4_K_M.gguf");
+        let studio = part_path_for(dest, "https://x/Qwen3-8B-Q4_K_M.gguf");
+        assert_ne!(standard, studio);
+        assert_eq!(standard, part_path_for(dest, "https://x/Qwen3-4B-Q4_K_M.gguf"));
+        assert!(standard.to_string_lossy().ends_with(".part"));
     }
 
     #[test]

@@ -1,8 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getFinalSessionReport, stopEvaluation, getSessionHistory, saveSession, clearSession, coachGenerate, loadCoachModel, isCoachLoaded, ttsSpeak, onBeatFeedback, onAdaptiveEval, notifySettingsChange, clearCalibrationCacheEntry, onTtsSpeechStarted, onPracticeSegmentEnded } from "../ipc";
+import { getFinalSessionReport, stopEvaluation, getSessionHistory, saveSession, clearSession, coachGenerate, isCoachLoaded, ttsSpeak, onBeatFeedback, onAdaptiveEval, notifySettingsChange, clearCalibrationCacheEntry, onTtsSpeechStarted, onPracticeSegmentEnded } from "../ipc";
 import type { AdaptiveEvalRequest } from "../ipc";
-import type { BeatFeedback, FeedChip, FeedMessage, SessionReport, SessionSegment } from "../types";
+import type { BeatFeedback, BrainTier, FeedChip, FeedMessage, SessionReport, SessionSegment } from "../types";
 import type { useEvaluation } from "./useEvaluation";
+import {
+  coachLoadPending,
+  coachResident,
+  ensureCoachLoaded,
+  scheduleCoachIdleUnload,
+} from "./coachLoader";
 import { loadHistoryWithBudget, renderGreeting } from "../coach/greeting";
 import {
   appendCoachUtterance,
@@ -108,6 +114,12 @@ interface UseSessionOptions {
    *  "pro" grades against the full beat grid subdivision-by-subdivision.
    *  Defaults to "default" if absent. */
   coachMode?: "default" | "pro";
+  /**
+   * The user's brain-tier setting. `"off"` means no model is wanted, so
+   * `startSession` does not load one — residency is a cost the user
+   * opted into, not a default.
+   */
+  brainTier?: BrainTier;
   instrument?: string;
   /** Optional BPM setter so chip affordances can land tempo nudges
    *  (e.g. "Drop to 130 BPM"). When absent, set-bpm affordances are
@@ -144,7 +156,7 @@ interface UseSessionOptions {
   drillCompleted?: boolean;
 }
 
-export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGroups, presetId, presetName, voiceMode = "silent", coachVerbosity = "default", coachMode = "default", instrument = "electric-guitar", setBpm, inDrillRamp = false, drillStartBpm, drillTargetBpm, drillCompleted = false }: UseSessionOptions) {
+export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGroups, presetId, presetName, voiceMode = "silent", coachVerbosity = "default", coachMode = "default", brainTier = "off", instrument = "electric-guitar", setBpm, inDrillRamp = false, drillStartBpm, drillTargetBpm, drillCompleted = false }: UseSessionOptions) {
   const instrumentLabel = instrument === "drums" ? "drums/percussion"
     : instrument === "electric-guitar" ? "electric guitar"
     : instrument === "acoustic-guitar" ? "acoustic guitar"
@@ -172,15 +184,12 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
   const playBpmRef = useRef(bpm);
   const segmentReportsRef = useRef<SessionSegment[]>([]);
   const segmentStartRef = useRef<number>(Date.now());
+  // Residency is owned by `hooks/coachLoader.ts`, which is module state
+  // rather than hook state: whether a multi-gigabyte model is in RAM is a
+  // property of the process, not of this component tree. This ref is a
+  // local mirror kept in sync at the few points that change it, so the
+  // hot paths below stay synchronous.
   const coachLoadedRef = useRef(false);
-  // True only while a `loadCoachModel()` call is actually in flight.
-  // The real-time tip path waits up to 1 s for a load to finish before
-  // shipping the un-paraphrased template; that wait is only meaningful
-  // if a load is pending. In template mode (no `coach-llm` feature, or
-  // no model on disk) nothing will ever set `coachLoadedRef`, so
-  // without this flag every tip would burn a dead second — a big chunk
-  // of the 1-3 s mid-session tip budget.
-  const coachLoadPendingRef = useRef(false);
   const sessionIdRef = useRef(0);
   const messagesRef = useRef<FeedMessage[]>([]);
   // ── activeRef: synchronous mirror of `active` ─────────────────
@@ -399,18 +408,26 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
   // not playback-scoped).
   useEffect(() => { playBpmRef.current = bpm; }, [bpm]);
 
-  // Try to load the coach model once on mount
+  // Nothing is loaded at mount.
+  //
+  // This effect used to call `loadCoachModel()` here *and* `startSession`
+  // called it again while the first was still in flight — and the Rust
+  // side unconditionally dropped the resident worker before spawning a
+  // replacement, so the second call tore down a working brain. It also
+  // meant every launch paid 4 GB of RAM and a multi-second load for a
+  // model the user might never ask anything of. The brain is loaded when
+  // a session starts (see `startSession`) and dropped when the app has
+  // been idle (see `endSession`), through the one deduped helper in
+  // `hooks/coachLoader.ts`.
+  //
+  // We do still ask whether something is already resident — a second
+  // window, or a session that ended less than the idle timeout ago.
   useEffect(() => {
-    isCoachLoaded().then((loaded) => {
-      if (loaded) {
-        coachLoadedRef.current = true;
-      } else {
-        coachLoadPendingRef.current = true;
-        loadCoachModel()
-          .then((ok) => { coachLoadedRef.current = ok; })
-          .finally(() => { coachLoadPendingRef.current = false; });
-      }
-    });
+    isCoachLoaded()
+      .then((loaded) => {
+        coachLoadedRef.current = loaded;
+      })
+      .catch(() => {});
   }, []);
 
   // ── Segment coaching: rising-edge start tracking + falling-edge
@@ -686,19 +703,22 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
         // feedback. Only matters for non-intervention events because
         // interventions use their own catalog text verbatim.
         //
-        // Gated on `coachLoadPendingRef`: in template mode no load is
+        // Gated on `coachLoadPending()`: in template mode no load is
         // ever in flight, so there is nothing to wait for and the tip
-        // ships immediately.
-        if (!intervention && !coachLoadedRef.current && coachLoadPendingRef.current) {
+        // ships immediately. While a load IS in flight the coach card
+        // reads "warming up" and tips are templates — the grace window
+        // only buys the paraphrase when the load is nearly done.
+        if (!intervention && !coachLoadedRef.current && coachLoadPending()) {
           const COACH_LOAD_GRACE_MS = 1000;
           const POLL_MS = 50;
           const start = Date.now();
           while (
             !coachLoadedRef.current &&
-            coachLoadPendingRef.current &&
+            coachLoadPending() &&
             Date.now() - start < COACH_LOAD_GRACE_MS
           ) {
             await new Promise((resolve) => setTimeout(resolve, POLL_MS));
+            coachLoadedRef.current = coachResident();
             if (token.isStaleOrInactive()) {
               coachDebug("realtime-tip.discard-during-coach-wait", {
                 waitedMs: Date.now() - start,
@@ -736,7 +756,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
               // genuinely "what the user just heard."
               recentUtterances: shuffleStateRef.current.ring.slice(-3),
             });
-            const rephrased = await coachGenerate(llmPrompt);
+            const rephrased = await coachGenerate("tip", llmPrompt);
             if (rephrased && rephrased.trim()) {
               comment = rephrased.trim();
               // Prime the similarity ring with the LLM rephrase too,
@@ -871,7 +891,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
       // OR restarts mid-LLM-call — otherwise a just-ended session would
       // still push a line into the next session's feed.
       const token = createSessionToken(sessionIdRef, activeRef);
-      coachGenerate(buildAdaptiveCommentPrompt(req))
+      coachGenerate("drill", buildAdaptiveCommentPrompt(req))
         .then((response) => {
           if (cancelled || token.isStaleOrInactive()) return;
           const comment = isUsableComment(response) ? response.trim() : fallback;
@@ -1197,12 +1217,22 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     // Clear backend session data in background — don't block UI
     clearSession().catch(() => {});
 
-    // Try to load coach model if not already loaded
-    if (!coachLoadedRef.current) {
-      coachLoadPendingRef.current = true;
-      loadCoachModel()
-        .then((ok) => { coachLoadedRef.current = ok; })
-        .finally(() => { coachLoadPendingRef.current = false; });
+    // THE load point. The brain is resident only while somebody is
+    // practising, so this is where it comes into memory — not at mount,
+    // and not when the weights finish downloading. `ensureCoachLoaded`
+    // dedupes concurrent callers and cancels any armed idle unload; the
+    // Rust command is idempotent for the same weights and reloads only
+    // when the file on disk has actually changed (path + size + mtime),
+    // which is what makes an "Update brain" take effect on the next
+    // session without ever tearing down a healthy worker.
+    //
+    // Skipped entirely when the user has the brain switched off: that
+    // setting means "no model", and loading one anyway would be both a
+    // 4 GB surprise and a lie about what the app is doing.
+    if (brainTier !== "off") {
+      ensureCoachLoaded().then((ok) => {
+        coachLoadedRef.current = ok;
+      });
     }
 
     // ── C2: Context-Aware Greetings ────────────────────────────
@@ -1305,7 +1335,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
           } else {
             context = `Rephrase this practice-coach greeting for a player of ${instrumentLabel}. Preserve every number; keep it warm and short (1-2 sentences).\n\nOriginal: "${tierGreeting.text}"`;
           }
-          const rephrased = await coachGenerate(context);
+          const rephrased = await coachGenerate("greeting", context);
           if (token.isStaleOrInactive()) return;
           if (!rephrased || !rephrased.trim()) {
             // LLM returned nothing useful — fall back to speaking the
@@ -1335,7 +1365,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
         }
       })();
     }
-  }, [active, evaluation, presetId, presetName, maybeSpeak, instrumentLabel, speakAndReveal]);
+  }, [active, evaluation, presetId, presetName, maybeSpeak, instrumentLabel, speakAndReveal, brainTier]);
 
   const endSession = useCallback(async () => {
     if (!active) {
@@ -1543,8 +1573,19 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
         instrumentLabel,
         narrativeBlock,
       );
-      coachGenerate(context).then((summaryComment) => {
+      coachGenerate("summary", context).then((raw) => {
         if (token.isStale()) return;
+        // Keep the placeholder when the model hands back nothing usable.
+        // Rust already falls back to its own template on an empty or
+        // truncated generation, so this only catches a shape neither
+        // side anticipated — but the four call sites agree on the rule.
+        const summaryComment = raw?.trim();
+        if (!summaryComment) {
+          setMessages((prev) => prev.map((m) =>
+            m.id === endMsgId ? { ...m, pending: false } : m
+          ));
+          return;
+        }
         setMessages((prev) => prev.map((m) =>
           m.id === endMsgId ? { ...m, content: summaryComment } : m
         ));
@@ -1575,6 +1616,11 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     // if the user ended without ever stopping playback first).
     // Shuffle-state and chip-recency intentionally persist across
     // sessions — see their declaration sites.
+    // Arm the idle unload: if no new session starts within
+    // COACH_IDLE_UNLOAD_MS the worker is dropped and its RAM returned.
+    // Cancelled by the next `ensureCoachLoaded()`.
+    scheduleCoachIdleUnload();
+
     narrativeRef.current = null;
     gatekeeperRef.current = null;
     realtimeWindowRef.current = [];
@@ -1678,7 +1724,10 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
           : "";
 
         const context = `Current session data:\n${sessionData}\nInstrument: ${instrumentLabel}${historyContext}${narrativeBlock}${conversationContext}\nUser asks: ${question}\nAnswer concisely based only on the data above.`;
-        reply = await coachGenerate(context);
+        const answer = (await coachGenerate("chat", context))?.trim();
+        // Empty answer → keep the "not enough data yet" line above
+        // rather than showing the user a blank chat bubble.
+        if (answer) reply = answer;
       } catch { /* use fallback */ }
 
       // Drop stale chat replies — either the user is in a new session

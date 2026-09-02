@@ -1737,7 +1737,11 @@ pub fn get_models_path(app_handle: AppHandle) -> Result<String, String> {
 }
 
 #[tauri::command]
-pub fn delete_models(app_handle: AppHandle, dl_state: State<DownloadState>) -> Result<(), String> {
+pub async fn delete_models(
+    app_handle: AppHandle,
+    dl_state: State<'_, DownloadState>,
+    engine: State<'_, SharedCoachEngine>,
+) -> Result<(), String> {
     // Signal any in-flight download to abort BEFORE wiping the models
     // directory. Otherwise the download thread continues, sees its
     // partial-file destination vanish, and emits a confusing failure
@@ -1750,7 +1754,20 @@ pub fn delete_models(app_handle: AppHandle, dl_state: State<DownloadState>) -> R
             cancel.store(true, std::sync::atomic::Ordering::Relaxed);
         }
     }
-    models::delete_models(&app_handle)
+    // Drop the resident brain before deleting the file it is mmap'd from.
+    // Windows refuses to unlink a mapped file, so the whole "Remove
+    // models" failed and the error was swallowed by the caller's
+    // `.catch()`; macOS allows the unlink and left the worker happily
+    // generating from weights that no longer exist, so the disk space
+    // came back but the RAM did not.
+    let handle: SharedCoachEngine = engine.inner().clone();
+    let app = app_handle.clone();
+    tokio::task::spawn_blocking(move || {
+        crate::coach::unload_model(&handle)?;
+        models::delete_models(&app)
+    })
+    .await
+    .map_err(|e| format!("delete_models join failed: {e}"))?
 }
 
 #[tauri::command]
@@ -1786,39 +1803,62 @@ pub fn cancel_model_download(dl_state: State<DownloadState>) -> Result<(), Strin
 // Coach LLM inference
 // ---------------------------------------------------------------------------
 
+/// Load the brain into memory. Idempotent (see `coach::load_model`): the
+/// frontend calls it at every session start and it does nothing when the
+/// same weights are already resident.
+///
+/// `async` + `spawn_blocking` because a cold GGUF load is seconds of
+/// blocking I/O; running it on the async runtime would stall every other
+/// command for that whole window.
 #[tauri::command]
 pub async fn load_coach_model(
     app_handle: AppHandle,
     engine: State<'_, SharedCoachEngine>,
 ) -> Result<bool, String> {
-    let model_path = {
-        let dir = app_handle
-            .path()
-            .app_data_dir()
-            .map_err(|e| format!("Failed to get app data dir: {e}"))?;
-        dir.join("models").join("brain").join("model.bin")
-    };
+    let model_path = models::brain_model_path(&app_handle)?;
+    let (family, tier) = models::brain_marker_info(&app_handle);
+    let fallback_name = models::brain_display_name(family.as_deref(), tier.as_deref());
+    let handle: SharedCoachEngine = engine.inner().clone();
+    tokio::task::spawn_blocking(move || {
+        crate::coach::load_model(&handle, &model_path, family.as_deref(), &fallback_name)
+    })
+    .await
+    .map_err(|e| format!("load_coach_model join failed: {e}"))?
+}
 
-    let mut lock = engine.lock().map_err(|e| format!("Lock failed: {e}"))?;
-    crate::coach::load_model(&mut lock, &model_path)
+/// Drop the resident worker and free its RAM.
+///
+/// Called when the user turns the brain tier off, before "Remove models"
+/// deletes the weights, and by the frontend's idle timer — the model is
+/// only meant to be resident while someone is practising.
+#[tauri::command]
+pub async fn unload_coach_model(engine: State<'_, SharedCoachEngine>) -> Result<(), String> {
+    let handle: SharedCoachEngine = engine.inner().clone();
+    // Joining the inference thread is a blocking wait; keep it off the
+    // async runtime.
+    tokio::task::spawn_blocking(move || crate::coach::unload_model(&handle))
+        .await
+        .map_err(|e| format!("unload_coach_model join failed: {e}"))?
 }
 
 #[tauri::command]
 pub async fn coach_generate(
     engine: State<'_, SharedCoachEngine>,
+    kind: crate::coach::GenKind,
     context: String,
 ) -> Result<String, String> {
     // LLM inference takes ~200-2000ms and the templated fallback can
-    // still spend ~1-10ms parsing the context string. Holding the
-    // CoachEngine Mutex on a tokio worker for that whole window blocks
-    // every concurrent async command (boundary IPC, evaluation
-    // toggles, audio device polling, …) — the same hazard `tts_speak`
-    // already guards against via `spawn_blocking`. Move the inference
-    // off the async runtime so generations queue behind the mutex
-    // without freezing the rest of the command surface.
+    // still spend ~1-10ms parsing the context string. Running that on a
+    // tokio worker blocks every concurrent async command (boundary IPC,
+    // evaluation toggles, audio device polling, …) — the same hazard
+    // `tts_speak` already guards against via `spawn_blocking`.
     //
-    // The below-normal priority the ROADMAP asks for is no longer applied
-    // here: the LLM path now owns a dedicated inference thread that is
+    // `coach::generate` takes the engine mutex only long enough to clone
+    // the worker handle and releases it before waiting on the reply, so a
+    // generation no longer blocks `get_coach_capabilities` either.
+    //
+    // The below-normal priority the ROADMAP asks for is not applied
+    // here: the LLM path owns a dedicated inference thread that is
     // demoted once at spawn (`coach::llm::LlmWorker`), so this
     // `spawn_blocking` task only marshals a job onto a channel and waits.
     // Demoting the tokio worker per call — what T01 did — was unsound on
@@ -1826,12 +1866,9 @@ pub async fn coach_generate(
     // and the "restore" silently left blocking-pool threads demoted.
     let engine_arc: SharedCoachEngine = engine.inner().clone();
     let ctx_owned = context;
-    tokio::task::spawn_blocking(move || {
-        let lock = engine_arc.lock().map_err(|e| format!("Lock failed: {e}"))?;
-        crate::coach::generate(&lock, &ctx_owned)
-    })
-    .await
-    .map_err(|e| format!("coach_generate join failed: {e}"))?
+    tokio::task::spawn_blocking(move || crate::coach::generate(&engine_arc, kind, &ctx_owned))
+        .await
+        .map_err(|e| format!("coach_generate join failed: {e}"))?
 }
 
 /// Total physical RAM in MB, for the Studio-tier gate (ROADMAP §3: Studio
@@ -1842,9 +1879,17 @@ pub fn get_system_memory_mb() -> u64 {
     crate::models::system_memory_mb()
 }
 
+/// Is a real model resident right now?
+///
+/// `async` and lock-free: this and `get_coach_capabilities` used to be
+/// synchronous commands (so they ran on the main thread) that locked
+/// `SharedCoachEngine` — the same mutex `load_coach_model` held for a
+/// whole multi-gigabyte GGUF load. Opening Settings during a cold load
+/// therefore froze the window. Both now read the atomics in
+/// `CoachStatus`, which nobody holds.
 #[tauri::command]
-pub fn is_coach_loaded(engine: State<'_, SharedCoachEngine>) -> bool {
-    engine.lock().map(|lock| lock.is_loaded()).unwrap_or(false)
+pub async fn is_coach_loaded(engine: State<'_, SharedCoachEngine>) -> Result<bool, String> {
+    Ok(engine.status().resident())
 }
 
 /// What the coach can actually do in THIS build, right now.
@@ -1862,45 +1907,58 @@ pub struct CoachCapabilities {
     /// Whether a real model is loaded in memory right now.
     #[serde(rename = "modelResident")]
     pub model_resident: bool,
+    /// Whether a load is in flight — the UI says "warming up" rather than
+    /// claiming either state.
+    pub loading: bool,
     /// Compile-time llama.cpp backend: metal / vulkan / cpu / none.
     pub backend: String,
-    /// File name of the resident model (null in template mode).
+    /// Display name of the resident model, from GGUF metadata
+    /// ("Qwen3 4B"). Null when nothing is resident. This used to be the
+    /// file name the downloader wrote, so the status line read
+    /// "model.bin on vulkan".
     #[serde(rename = "modelName")]
     pub model_name: Option<String>,
-    /// Rough resident-set estimate while generating: weights × 1.2 to
-    /// cover the KV cache and llama.cpp scratch buffers. 0 when no
-    /// model file is on disk.
-    #[serde(rename = "ramEstimateMb")]
-    pub ram_estimate_mb: u64,
+    /// Why the last load did not produce a resident model — legacy
+    /// weights, nothing downloaded, no LLM in this build. Null when the
+    /// last load succeeded or none has been attempted.
+    #[serde(rename = "loadError")]
+    pub load_error: Option<String>,
+    /// Weights are on disk (mirrors `ModelStatus.brainReady`, included so
+    /// the status line needs one round trip rather than two).
+    #[serde(rename = "brainDownloaded")]
+    pub brain_downloaded: bool,
+    /// Tier gates, computed against real reported RAM (see
+    /// `models::recommendations`).
+    #[serde(rename = "studioRecommended")]
+    pub studio_recommended: bool,
+    #[serde(rename = "standardRecommended")]
+    pub standard_recommended: bool,
+    #[serde(rename = "brainUpdateRecommended")]
+    pub brain_update_recommended: bool,
 }
 
+/// Lock-free — see `is_coach_loaded`. The disk half reuses
+/// `check_model_status` rather than paying a second `fs::metadata` on the
+/// brain file.
 #[tauri::command]
-pub fn get_coach_capabilities(
+pub async fn get_coach_capabilities(
     app_handle: AppHandle,
     engine: State<'_, SharedCoachEngine>,
 ) -> Result<CoachCapabilities, String> {
-    let (model_resident, model_name) = engine
-        .lock()
-        .map(|lock| (lock.is_loaded(), lock.model_name().map(str::to_string)))
-        .unwrap_or((false, None));
-
-    let model_path = app_handle
-        .path()
-        .app_data_dir()
-        .map_err(|e| format!("Failed to get app data dir: {e}"))?
-        .join("models")
-        .join("brain")
-        .join("model.bin");
-    let ram_estimate_mb = std::fs::metadata(&model_path)
-        .map(|m| ((m.len() as f64 * 1.2) / (1024.0 * 1024.0)).round() as u64)
-        .unwrap_or(0);
+    let status = engine.status();
+    let disk = models::check_model_status(&app_handle)?;
 
     Ok(CoachCapabilities {
         llm_compiled: crate::coach::llm_compiled(),
-        model_resident,
+        model_resident: status.resident(),
+        loading: status.loading(),
         backend: crate::coach::backend_name().to_string(),
-        model_name,
-        ram_estimate_mb,
+        model_name: status.model_name(),
+        load_error: status.last_error(),
+        brain_downloaded: disk.brain_ready,
+        studio_recommended: disk.studio_recommended,
+        standard_recommended: disk.standard_recommended,
+        brain_update_recommended: disk.brain_update_recommended,
     })
 }
 

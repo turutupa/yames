@@ -1,55 +1,97 @@
 /**
- * Brain-tier rules that the Settings UI reads but does not own.
+ * Brain-tier presentation. The *rules* are not here.
  *
- * Two independent gates live here:
+ * Both gates this file used to own moved into Rust
+ * (`models::recommendations`), and for the same reason in each case: the
+ * frontend was second-guessing facts only the backend can see.
  *
- *  - **Family / migration.** The Rust downloader writes a
- *    `models/brain/model.json` marker recording which model family it
- *    installed; `getModelStatus()` hands the family back. Anything
- *    installed before the Qwen3 refresh has no marker and reports
- *    `"legacy"`. Those weights still load, but the prompt the engine now
- *    builds is Qwen3 ChatML, so a Phi-3.5 or Qwen2.5 model answers with
- *    template artifacts — hence the "Update brain" affordance. The old
- *    file is never deleted for the user; re-running the download
- *    overwrites it.
+ *  - **Family / migration.** `CURRENT_BRAIN_FAMILY` was declared here
+ *    *and* in `models.rs`, so a model-generation bump had to be made in
+ *    two places or the "Update brain" affordance would quietly stop
+ *    firing. Rust now answers `brainUpdateRecommended` directly.
  *
- *  - **Studio RAM gate.** ROADMAP §3 only offers Studio (Qwen3-8B) at
- *    >= 16 GB of RAM. A failed platform query reports 0, which must read
- *    as "unknown" and NOT lock the user out of a tier their machine can
- *    probably run.
+ *  - **RAM gates.** The Studio floor was a literal 16 GiB compared
+ *    against reported RAM — a number no real 16 GB Windows or Linux
+ *    machine produces, because firmware and integrated-GPU reservations
+ *    come off the top before the OS answers (~15.7–15.9 GiB). Real
+ *    machines that run Qwen3-8B fine were locked out of it. Rust holds
+ *    the floors, slack included, and answers `studioRecommended` /
+ *    `standardRecommended`. A failed platform query still reads as
+ *    "unknown" there, never as "too small".
+ *
+ * What is left is presentation: turning a status the backend computed
+ * into the strings and booleans the components render.
  */
 
-/** Family id written by the current downloader. */
-export const CURRENT_BRAIN_FAMILY = "qwen3";
-
-/** ROADMAP §3: Studio is offered only at or above this much RAM. */
-export const STUDIO_MIN_MEMORY_MB = 16 * 1024;
-
-type BrainStatus = {
-  brainReady: boolean;
-  brainFamily: string | null;
+/** The subset of `ModelStatus`/`CoachCapabilities` the gates need. */
+type TierGates = {
+  studioRecommended: boolean;
+  standardRecommended: boolean;
+  brainUpdateRecommended: boolean;
 } | null;
 
 /**
  * True when a brain is installed but belongs to a superseded family, so
  * Settings should offer "Update brain" instead of pretending all is well.
+ *
+ * Defaults to `false` while the status is still loading: offering an
+ * update we have not confirmed is needed is worse than offering it a
+ * moment later.
  */
-export function needsBrainUpdate(status: BrainStatus): boolean {
-  if (!status || !status.brainReady) return false;
-  // A null family on a ready brain means the backend could not classify
-  // it at all — treat that like a legacy install rather than silently
-  // leaving the user on unknown weights.
-  return status.brainFamily !== CURRENT_BRAIN_FAMILY;
+export function needsBrainUpdate(status: TierGates): boolean {
+  return status?.brainUpdateRecommended ?? false;
 }
 
 /**
  * Whether the Studio tier may be offered on this machine.
  *
- * `memoryMb === 0` means the query failed (or hasn't answered yet). We
- * allow Studio in that case: a false "your machine is too small" is a
- * worse failure than letting someone with 16 GB download 5 GB of weights.
+ * Defaults to `true` while the status is still loading, matching the
+ * backend's own "unknown never means too small" rule — a false "your
+ * machine is too small" is a worse failure than the alternative.
  */
-export function studioAvailable(memoryMb: number | null): boolean {
-  if (memoryMb === null || memoryMb === 0) return true;
-  return memoryMb >= STUDIO_MIN_MEMORY_MB;
+export function studioAvailable(status: TierGates): boolean {
+  return status?.studioRecommended ?? true;
+}
+
+/** Same question for the Standard tier. */
+export function standardAvailable(status: TierGates): boolean {
+  return status?.standardRecommended ?? true;
+}
+
+/**
+ * i18n key for a tier's user-facing name.
+ *
+ * The `full` tier id is frozen — it is persisted in the settings store
+ * and written to `models/brain/tier` on disk, so renaming it would
+ * strand every existing install; only the label moved to "Studio". That
+ * mismatch is exactly the kind of thing that gets re-derived slightly
+ * differently at each display site, so it is derived once here.
+ */
+export function brainTierLabelKey(tier: string | null | undefined): string {
+  switch (tier) {
+    case "full":
+      return "settings.coach.brainStudio";
+    case "standard":
+      return "settings.coach.brainStandard";
+    default:
+      return "common.off";
+  }
+}
+
+/**
+ * Display name for the llama.cpp backend. Rust reports the compile-time
+ * feature in lower case (`vulkan`); the status line reads "Qwen3 4B on
+ * Vulkan", not "on vulkan".
+ */
+export function backendLabel(backend: string): string {
+  switch (backend) {
+    case "metal":
+      return "Metal";
+    case "vulkan":
+      return "Vulkan";
+    case "cpu":
+      return "CPU";
+    default:
+      return backend;
+  }
 }

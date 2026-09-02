@@ -4,21 +4,145 @@
 //! runs text generation for coaching comments, mini-reports, session summaries,
 //! and chat Q&A. Without the feature, generates template-based responses.
 
-use std::sync::atomic::{AtomicU32, Ordering};
-use std::sync::{Arc, Mutex};
+use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
+use std::sync::{Arc, Mutex, MutexGuard, RwLock};
 
 static VARIANT_COUNTER: AtomicU32 = AtomicU32::new(0);
 
 /// Thread-safe handle to the coach engine.
-pub type SharedCoachEngine = Arc<Mutex<CoachEngine>>;
+pub type SharedCoachEngine = Arc<CoachHandle>;
 
 pub fn create_shared_engine() -> SharedCoachEngine {
-    Arc::new(Mutex::new(CoachEngine::new()))
+    Arc::new(CoachHandle::new())
+}
+
+// ---------------------------------------------------------------------------
+// Status snapshot (read without ever touching the engine mutex)
+// ---------------------------------------------------------------------------
+
+/// Lock-free view of what the coach is doing right now.
+///
+/// The read-only Tauri commands (`is_coach_loaded`,
+/// `get_coach_capabilities`) used to lock `SharedCoachEngine`, which
+/// `load_coach_model` holds for the whole GGUF load and `coach_generate`
+/// held for the whole generation. A Settings render during a cold load
+/// therefore froze on the mutex for however long llama.cpp took to mmap
+/// several gigabytes. The status commands now read *this* instead: it is
+/// updated by whoever owns the mutex, but never needs it.
+#[derive(Debug, Default)]
+pub struct CoachStatus {
+    resident: AtomicBool,
+    loading: AtomicBool,
+    name: RwLock<Option<String>>,
+    last_error: RwLock<Option<String>>,
+}
+
+impl CoachStatus {
+    /// True when a worker is resident and `generate` will run inference.
+    pub fn resident(&self) -> bool {
+        self.resident.load(Ordering::Acquire)
+    }
+
+    /// True while a load/reload is in flight. The UI shows "warming up".
+    pub fn loading(&self) -> bool {
+        self.loading.load(Ordering::Acquire)
+    }
+
+    /// Display name of the resident model ("Qwen3 4B"), or `None`.
+    pub fn model_name(&self) -> Option<String> {
+        self.name.read().ok().and_then(|g| g.clone())
+    }
+
+    /// Why the last load refused or failed, or `None`.
+    pub fn last_error(&self) -> Option<String> {
+        self.last_error.read().ok().and_then(|g| g.clone())
+    }
+
+    fn set_resident(&self, on: bool) {
+        self.resident.store(on, Ordering::Release);
+    }
+
+    fn set_name(&self, name: Option<String>) {
+        if let Ok(mut g) = self.name.write() {
+            *g = name;
+        }
+    }
+
+    fn set_error(&self, err: Option<String>) {
+        if let Ok(mut g) = self.last_error.write() {
+            *g = err;
+        }
+    }
+
+    /// The worker died under us. Residency is cleared so the status line
+    /// stops claiming an active brain and the next `ensure_loaded` spawns
+    /// a replacement; the message is logged exactly once per death rather
+    /// than on every failed generation.
+    #[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+    fn clear_residency(&self, why: &str) {
+        if self.resident.swap(false, Ordering::AcqRel) {
+            eprintln!("[coach] inference worker is gone ({why}) — falling back to templates");
+        }
+        self.set_name(None);
+        self.set_error(Some(why.to_string()));
+    }
 }
 
 // ---------------------------------------------------------------------------
 // Template-based engine (always available)
 // ---------------------------------------------------------------------------
+
+/// What Tauri manages: the engine behind a mutex, plus the lock-free
+/// status snapshot beside it.
+pub struct CoachHandle {
+    engine: Mutex<CoachEngine>,
+    status: Arc<CoachStatus>,
+}
+
+impl CoachHandle {
+    fn new() -> Self {
+        let status = Arc::new(CoachStatus::default());
+        CoachHandle {
+            engine: Mutex::new(CoachEngine::new(status.clone())),
+            status,
+        }
+    }
+
+    /// Read the status without taking the engine mutex. This is the only
+    /// thing the UI-facing commands are allowed to consult.
+    pub fn status(&self) -> &Arc<CoachStatus> {
+        &self.status
+    }
+
+    /// Take the engine mutex. Every caller here holds it for a handful of
+    /// pointer moves — never across a model load or a generation.
+    fn lock(&self) -> Result<MutexGuard<'_, CoachEngine>, String> {
+        self.engine
+            .lock()
+            .map_err(|e| format!("coach engine lock poisoned: {e}"))
+    }
+}
+
+/// Identity of the weights a worker was built from. Two loads of the same
+/// file are a no-op; a changed file (a re-download, an "Update brain") is
+/// what makes a reload necessary — nothing else does.
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct ModelFingerprint {
+    path: PathBuf,
+    len: u64,
+    mtime: Option<std::time::SystemTime>,
+}
+
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+fn fingerprint(path: &Path) -> Option<ModelFingerprint> {
+    let meta = std::fs::metadata(path).ok()?;
+    Some(ModelFingerprint {
+        path: path.to_path_buf(),
+        len: meta.len(),
+        mtime: meta.modified().ok(),
+    })
+}
 
 pub struct CoachEngine {
     /// Handle to the long-lived inference thread (ROADMAP §3). The model,
@@ -26,45 +150,94 @@ pub struct CoachEngine {
     /// thread; this side only owns a job channel. That is what lets the
     /// context be hoisted and reused across calls — `LlamaContext` is not
     /// `Send`, but `SharedCoachEngine` is Tauri managed state and must be.
+    ///
+    /// Residency is *derived* from this being `Some` (and is structurally
+    /// impossible without the feature): a separate `model_resident` bool
+    /// was a third source of truth that could disagree with the other two.
     #[cfg(feature = "coach-llm")]
-    llm: Option<llm::LlmWorker>,
-    /// True only when a real GGUF model is held in memory (on the worker
-    /// thread). This used to be a plain `loaded` flag that `load_model`
-    /// also set on the template path, so the UI reported "brain loaded"
-    /// after the user downloaded weights that were never read. The flag
-    /// now means exactly one thing: an LLM worker is resident.
-    model_resident: bool,
-    /// File name of the resident model, captured at load. `None` in
-    /// template mode.
-    model_name: Option<String>,
+    llm: Option<Arc<llm::LlmWorker>>,
+    /// Weights the resident worker was built from.
+    #[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+    fingerprint: Option<ModelFingerprint>,
+    status: Arc<CoachStatus>,
 }
 
 impl CoachEngine {
-    pub fn new() -> Self {
+    fn new(status: Arc<CoachStatus>) -> Self {
         CoachEngine {
             #[cfg(feature = "coach-llm")]
             llm: None,
-            model_resident: false,
-            model_name: None,
+            fingerprint: None,
+            status,
         }
     }
 
-    /// True when the engine answers from the phrase banks below rather
-    /// than from a resident LLM. An explicit, first-class state — not
-    /// something the caller infers from a failed load.
-    pub fn template_mode(&self) -> bool {
-        !self.model_resident
-    }
-
     /// True only when a real model is resident and `generate` will
-    /// actually run inference.
+    /// actually run inference. Derived, never stored.
     pub fn is_loaded(&self) -> bool {
-        !self.template_mode()
+        #[cfg(feature = "coach-llm")]
+        {
+            self.llm.is_some()
+        }
+        #[cfg(not(feature = "coach-llm"))]
+        {
+            false
+        }
     }
 
-    /// File name of the resident model, or `None` in template mode.
-    pub fn model_name(&self) -> Option<&str> {
-        self.model_name.as_deref()
+    /// Push the derived residency into the lock-free snapshot. Called by
+    /// whoever just mutated `llm`, while still holding the mutex.
+    fn publish(&self, name: Option<String>) {
+        self.status.set_resident(self.is_loaded());
+        self.status.set_name(name);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Generation kinds
+// ---------------------------------------------------------------------------
+
+/// What the caller is asking for.
+///
+/// This used to be sniffed out of the prompt text ("Rephrase this
+/// practice-coach…", "User asks:"), which meant the token budget and the
+/// template branch were decided by string matching on a prompt the JS
+/// layer owns. The adaptive-drill prompt carries neither marker, so it
+/// silently got the 256-token chat budget and no template branch at all.
+/// The caller now says what it wants.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Deserialize, serde::Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum GenKind {
+    /// Mid-session tip (AGENTS.md 1–3 s tier).
+    Tip,
+    /// Session-start greeting.
+    Greeting,
+    /// End-of-exercise mini-report.
+    Report,
+    /// End-of-session summary.
+    Summary,
+    /// Free-form user question.
+    Chat,
+    /// One-line narration of an adaptive-drill step the engine already made.
+    Drill,
+}
+
+impl GenKind {
+    /// True for the kinds that paraphrase a template the JS side has
+    /// already rendered. They get the short budget, and a paraphrase that
+    /// runs out of budget mid-sentence is worse than the template it was
+    /// paraphrasing — so those fall back instead of shipping a fragment.
+    pub fn is_rephrase(self) -> bool {
+        matches!(self, GenKind::Tip | GenKind::Greeting | GenKind::Drill)
+    }
+
+    /// Per-call generation cap (ROADMAP §0.3 / T04).
+    pub fn max_tokens(self) -> usize {
+        if self.is_rephrase() {
+            REPHRASE_MAX_TOKENS
+        } else {
+            CHAT_MAX_TOKENS
+        }
     }
 }
 
@@ -111,68 +284,233 @@ Rules:
 - When commenting on timing: "early" means ahead of the beat, "late" means behind
 - Reference specific beats or patterns when the data supports it"#;
 
-/// Load the GGUF model from the brain directory.
+/// Reason a load refused before any weights were touched. Surfaced in
+/// `CoachCapabilities.loadError` so Settings can say *why* rather than
+/// silently staying on templates.
+pub const NO_WEIGHTS: &str = "no weights on disk";
+pub const LEGACY_WEIGHTS: &str =
+    "these weights predate the Qwen3 refresh — use \"Update brain\" to replace them";
+pub const NO_LLM_IN_BUILD: &str = "this build was compiled without the coach LLM";
+
+/// Load (or reload) the GGUF model from the brain directory.
 ///
-/// Returns `true` only when a real model is now resident. The template
-/// engine needs no loading at all — it is the fallback `generate` takes
-/// whenever no model is held — so the no-feature path returns `false`.
-/// It used to return `true` here to "activate template mode", which
-/// made `is_coach_loaded` report a brain that did not exist and led the
-/// frontend to route rephrases, chat and adaptive-drill decisions at an
-/// LLM that was never compiled in.
-pub fn load_model(engine: &mut CoachEngine, model_path: &std::path::Path) -> Result<bool, String> {
+/// Idempotent by design. `useSession` used to call this from its mount
+/// effect *and* from `startSession`, and `load_model` unconditionally
+/// dropped the resident worker before spawning a replacement — so the
+/// second call tore down a perfectly good brain, and a failure at that
+/// point left the user with none at all. The rules now:
+///
+///   * same file (path + size + mtime) already resident → `Ok(true)`,
+///     nothing touched;
+///   * another load already in flight → `Ok(true)`, the winner finishes it;
+///   * a *changed* file with a worker resident → the worker loads the new
+///     weights on its own thread and only swaps them in when that
+///     succeeds, so a failed reload leaves the old brain answering
+///     (`LlamaBackend::init()` is a process-wide one-shot, which is why
+///     the new model cannot simply be loaded on a second thread);
+///   * no worker → spawn one.
+///
+/// `family` is the `models/brain/model.json` marker's family. A missing
+/// or superseded family refuses the load: a pre-Qwen3 GGUF loads fine but
+/// is fed Qwen3 ChatML, so its answers arrive full of visible template
+/// artifacts. The UI already offers "Update brain".
+///
+/// Returns `true` only when a real model is resident afterwards. The
+/// template engine needs no loading at all — it is the fallback
+/// `generate` takes whenever no model is held — so every refusal path
+/// returns `false` rather than the `true` that once made `is_coach_loaded`
+/// report a brain that did not exist.
+pub fn load_model(
+    handle: &CoachHandle,
+    model_path: &Path,
+    family: Option<&str>,
+    fallback_name: &str,
+) -> Result<bool, String> {
+    let status = handle.status().clone();
+
     if !model_path.exists() {
+        status.set_error(Some(NO_WEIGHTS.to_string()));
         return Ok(false);
     }
-
-    #[cfg(feature = "coach-llm")]
-    {
-        // Tear the previous worker down FIRST and wait for it to exit.
-        // `LlamaBackend::init()` is a process-wide one-shot (it flips a
-        // static `AtomicBool` and only `Drop` clears it), so spawning the
-        // replacement before the incumbent thread has dropped its backend
-        // fails the second load with `BackendAlreadyInitialized`. The
-        // `Drop` impl on `LlmWorker` closes the job channel and joins.
-        drop(engine.llm.take());
-        engine.model_resident = false;
-        engine.model_name = None;
-
-        let llm = llm::LlmWorker::spawn(model_path)?;
-        engine.llm = Some(llm);
-        engine.model_resident = true;
-        engine.model_name = model_path
-            .file_name()
-            .map(|n| n.to_string_lossy().into_owned());
-        return Ok(true);
+    if family != Some(crate::models::CURRENT_BRAIN_FAMILY) {
+        status.set_error(Some(LEGACY_WEIGHTS.to_string()));
+        eprintln!(
+            "[coach] refusing to load {} — family {:?}, expected {:?}",
+            model_path.display(),
+            family,
+            crate::models::CURRENT_BRAIN_FAMILY,
+        );
+        return Ok(false);
     }
 
     #[cfg(not(feature = "coach-llm"))]
     {
         // No LLM in this build: the weights on disk cannot be read, so
         // stay in template mode and say so.
-        let _ = model_path;
-        engine.model_resident = false;
-        engine.model_name = None;
-        Ok(false)
+        let _ = fallback_name;
+        status.set_error(Some(NO_LLM_IN_BUILD.to_string()));
+        return Ok(false);
+    }
+
+    #[cfg(feature = "coach-llm")]
+    {
+        let wanted = fingerprint(model_path);
+
+        // Fast path: the exact weights we already have.
+        {
+            let engine = handle.lock()?;
+            if engine.is_loaded() && engine.fingerprint == wanted && status.resident() {
+                return Ok(true);
+            }
+        }
+
+        // Exactly one loader at a time. A second caller is told the truth
+        // — a load is happening — rather than starting a rival one that
+        // would have to tear down the winner's worker.
+        if status
+            .loading
+            .compare_exchange(false, true, Ordering::AcqRel, Ordering::Acquire)
+            .is_err()
+        {
+            return Ok(true);
+        }
+        let _loading = LoadingGuard(&status);
+
+        // The incumbent worker, if any. Cloned out under the mutex and
+        // driven *outside* it — the reload blocks for as long as the load
+        // takes, and nothing else may wait on the mutex for that long.
+        let incumbent = { handle.lock()?.llm.clone() };
+
+        let (worker, name) = match incumbent {
+            Some(worker) => match worker.reload(model_path) {
+                Ok(name) => (worker, name),
+                Err(llm::GenError::Failed(e)) => {
+                    // The old model is untouched and still answering.
+                    status.set_error(Some(e.clone()));
+                    return Err(e);
+                }
+                Err(llm::GenError::WorkerGone) => {
+                    // Dead thread — drop it and start over.
+                    {
+                        let mut engine = handle.lock()?;
+                        engine.llm = None;
+                        engine.fingerprint = None;
+                        engine.publish(None);
+                    }
+                    drop(worker);
+                    let (worker, name) = llm::LlmWorker::spawn(model_path).inspect_err(|e| {
+                        status.set_error(Some(e.clone()));
+                    })?;
+                    (Arc::new(worker), name)
+                }
+            },
+            None => {
+                let (worker, name) = llm::LlmWorker::spawn(model_path).inspect_err(|e| {
+                    status.set_error(Some(e.clone()));
+                })?;
+                (Arc::new(worker), name)
+            }
+        };
+
+        let display = if name.trim().is_empty() {
+            fallback_name.to_string()
+        } else {
+            name
+        };
+        let mut engine = handle.lock()?;
+        engine.llm = Some(worker);
+        engine.fingerprint = wanted;
+        engine.publish(Some(display));
+        status.set_error(None);
+        Ok(true)
+    }
+}
+
+/// Drop the resident worker and free its RAM.
+///
+/// Called when the user turns the brain tier off, before "Remove models"
+/// deletes the weights out from under a live mmap (Windows refuses the
+/// delete outright; macOS lets the worker keep running weights that are
+/// no longer on disk), and by the idle timer. The next session start
+/// reloads.
+pub fn unload_model(handle: &CoachHandle) -> Result<(), String> {
+    // The worker's `Drop` closes the job channel and *joins* the thread —
+    // a blocking wait, so it happens after the mutex is released.
+    #[cfg(feature = "coach-llm")]
+    let previous = {
+        let mut engine = handle.lock()?;
+        let previous = engine.llm.take();
+        engine.fingerprint = None;
+        engine.publish(None);
+        previous
+    };
+    #[cfg(not(feature = "coach-llm"))]
+    {
+        let engine = handle.lock()?;
+        engine.publish(None);
+    }
+    handle.status().set_error(None);
+    #[cfg(feature = "coach-llm")]
+    drop(previous);
+    Ok(())
+}
+
+/// Test-only: end the resident worker's thread while leaving the handle
+/// installed, so `generate` meets the "channel is dead" case for real.
+#[cfg(all(test, feature = "coach-llm"))]
+fn kill_worker_for_test(handle: &CoachHandle) {
+    let worker = handle.lock().expect("lock").llm.clone();
+    if let Some(worker) = worker {
+        worker.kill_for_test();
+    }
+}
+
+/// Resets the `loading` flag however the load exits.
+#[cfg(feature = "coach-llm")]
+struct LoadingGuard<'a>(&'a CoachStatus);
+
+#[cfg(feature = "coach-llm")]
+impl Drop for LoadingGuard<'_> {
+    fn drop(&mut self) {
+        self.0.loading.store(false, Ordering::Release);
     }
 }
 
 /// Generate a coaching comment from structured DSP data.
 ///
-/// On the `coach-llm` path `engine.model` is the actual LLM handle.
-/// On the default (no-LLM) path the engine carries no state but the
-/// parameter is kept symmetric so callers don't have to feature-gate
-/// the call site — the underscore prefix silences the unused-var
-/// warning in that build.
+/// Takes the engine mutex only long enough to clone the worker handle;
+/// the generation itself — hundreds of milliseconds to several seconds —
+/// runs with the mutex released, so a Settings render never queues behind
+/// it. Every failure mode ends at the template engine rather than at the
+/// caller: an empty generation, a paraphrase truncated by the token
+/// budget, a decode error, or a dead worker.
 #[cfg_attr(not(feature = "coach-llm"), allow(unused_variables))]
-pub fn generate(engine: &CoachEngine, context: &str) -> Result<String, String> {
+pub fn generate(handle: &CoachHandle, kind: GenKind, context: &str) -> Result<String, String> {
     #[cfg(feature = "coach-llm")]
-    if let Some(ref worker) = engine.llm {
-        return worker.generate(context, token_budget(context));
+    {
+        // AGENTS.md latency tiers: no *blocking* inference on the tip
+        // path. A CPU-only backend measured 7–11 s per call, which is
+        // three to four times the whole mid-session tip budget, so tips
+        // there are template-only. A GPU backend rephrases within budget.
+        let tip_on_cpu = kind == GenKind::Tip && llm::BACKEND == "cpu";
+        if !tip_on_cpu {
+            let worker = { handle.lock()?.llm.clone() };
+            if let Some(worker) = worker {
+                match worker.generate(context, kind) {
+                    Ok(text) => return Ok(text),
+                    Err(llm::GenError::WorkerGone) => {
+                        handle.status().clear_residency("inference thread is gone");
+                    }
+                    Err(llm::GenError::Failed(e)) => {
+                        eprintln!("[coach] {kind:?} generation unusable ({e}) — using template");
+                    }
+                }
+            }
+        }
     }
 
     // Template-based fallback
-    generate_template(context)
+    generate_template(kind, context)
 }
 
 /// Per-call generation cap (ROADMAP §0.3 / T04).
@@ -183,24 +521,44 @@ pub fn generate(engine: &CoachEngine, context: &str) -> Result<String, String> {
 /// inside the mid-session tip budget (AGENTS.md latency tiers) when the
 /// model decides to be chatty. Chat answers, mini-reports and session
 /// summaries get the full 256.
-///
-/// The classification mirrors `generate_template`'s markers so the LLM
-/// and template paths agree on what kind of request they are looking at;
-/// both are driven by prompt text the JS layer owns (`useSession.ts`,
-/// `useSegmentCoach.ts`).
-#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
 pub const REPHRASE_MAX_TOKENS: usize = 64;
-#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
 pub const CHAT_MAX_TOKENS: usize = 256;
 
+/// Verdict on one raw generation, before it can reach the feed.
+///
+/// Two failure modes that used to be shipped to the user:
+///
+///   * **empty** — `strip_think` can legitimately return `""` when the
+///     model spent its whole budget reasoning. `useSegmentCoach` and the
+///     session-summary path both assigned the result unconditionally, so
+///     a blank mini-report replaced a perfectly good template.
+///   * **truncated** — a rephrase that hit the 64-token budget without
+///     ever emitting an end-of-generation token stopped mid-sentence.
+///     Only rephrase-class kinds are judged this way: a chat answer or a
+///     report legitimately runs long, and half of a long answer is still
+///     an answer.
 #[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
-fn token_budget(context: &str) -> usize {
-    let is_rephrase = context.contains("Rephrase this practice-coach");
-    if is_rephrase {
-        REPHRASE_MAX_TOKENS
-    } else {
-        CHAT_MAX_TOKENS
+pub(crate) fn usable_output(kind: GenKind, raw: &str, hit_eog: bool) -> Result<String, String> {
+    let text = raw.trim();
+    if text.is_empty() {
+        return Err("model produced no text".to_string());
     }
+    if kind.is_rephrase() && !hit_eog {
+        return Err("truncated".to_string());
+    }
+    Ok(text.to_string())
+}
+
+/// Inference thread count (ROADMAP §3: `max(1, physical_cores - 2)`).
+///
+/// Split out from the worker so the arithmetic is testable on a build
+/// without the LLM feature. The old implementation halved
+/// `available_parallelism` as an SMT proxy, which is simply wrong on a
+/// machine that does not do SMT: an 8-core Apple M1 got 2 threads and a
+/// 4-core desktop got 1.
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub(crate) fn threads_from_physical(physical: usize) -> i32 {
+    physical.max(1).saturating_sub(2).max(1).min(i32::MAX as usize) as i32
 }
 
 /// Remove Qwen3 reasoning blocks from generated text.
@@ -261,7 +619,14 @@ fn extract_str<'a>(context: &'a str, key: &str) -> Option<&'a str> {
 }
 
 /// Template-based generation — parses the structured context and produces a response.
-fn generate_template(context: &str) -> Result<String, String> {
+///
+/// The branch is chosen by the caller's `kind`, not by sniffing the
+/// prompt for magic substrings ("ended their practice session",
+/// "User asks:", "Rephrase this practice-coach observation"). Those
+/// markers live in JS-owned prompt text, so a prompt reworded on that
+/// side silently re-routed the template engine — which is exactly how the
+/// adaptive-drill prompt ended up with no branch at all.
+fn generate_template(kind: GenKind, context: &str) -> Result<String, String> {
     // Parse key metrics from the context string
     let accuracy = extract_metric(context, "Accuracy:").unwrap_or(0.0);
     // `SignedDev:` is a dedicated parseable line added by the JS context
@@ -288,47 +653,31 @@ fn generate_template(context: &str) -> Result<String, String> {
     // but as a secondary detail.
     let score = extract_int(context, "Score:").unwrap_or(0);
 
-    let is_summary = context.contains("ended their practice session");
-    let is_chat = context.contains("User asks:");
-    // The JS side sends greetings as a `"Rephrase this practice-coach
-    // greeting..."` prompt with the rendered template embedded under
-    // `Original: "..."`. Match on that stable phrase so we recognise
-    // greetings regardless of whether the player has a preset, history,
-    // or is on the cold path.
-    let is_greeting = context.contains("practice-coach greeting");
-    // Real-time tips also arrive as a `"Rephrase this practice-coach
-    // observation..."` prompt with the gatekeeper-filled template
-    // under `Original: "..."`. Without this branch the rephrase falls
-    // through to `format_mini_report` — and since the rephrase prompt
-    // carries neither `Score:` nor `Accuracy:` fields, both extracts
-    // return 0 and the coach-tip lands as a hard-coded "Score 0 —
-    // right in the pocket. Ease the tempo down…" no matter what the
-    // gatekeeper actually said. We treat the template-fallback path
-    // for rephrases the same way as greetings: return the Original
-    // verbatim (the JS template is fully shippable without LLM help).
-    let is_rephrase_observation = context.contains("Rephrase this practice-coach observation");
-
-    if is_chat {
-        // Extract the question
-        let question = context
-            .lines()
-            .find(|l| l.starts_with("User asks:"))
-            .map(|l| l.trim_start_matches("User asks:").trim())
-            .unwrap_or("");
-
-        return Ok(format_chat_response(question, accuracy, deviation));
-    }
-
-    if is_greeting {
-        return Ok(format_greeting(context));
-    }
-
-    if is_rephrase_observation {
-        return Ok(format_rephrase_observation(context));
-    }
-
-    if is_summary {
-        return Ok(format_session_summary(accuracy, deviation, streak));
+    match kind {
+        GenKind::Chat => {
+            // Extract the question
+            let question = context
+                .lines()
+                .find(|l| l.starts_with("User asks:"))
+                .map(|l| l.trim_start_matches("User asks:").trim())
+                .unwrap_or("");
+            return Ok(format_chat_response(question, accuracy, deviation));
+        }
+        // Both arrive as a rephrase prompt with the JS-rendered template
+        // embedded under `Original: "…"`. Without an LLM we cannot
+        // paraphrase, but that template is fully shippable on its own —
+        // return it verbatim.
+        GenKind::Greeting => return Ok(format_greeting(context)),
+        GenKind::Tip => return Ok(format_rephrase_observation(context)),
+        GenKind::Summary => return Ok(format_session_summary(accuracy, deviation, streak)),
+        // The drill prompt carries no template to fall back to — the JS
+        // side holds its own catalog line for exactly this case and
+        // emits it when this call fails. Inventing a generic sentence
+        // here would *replace* that specific line with a worse one.
+        GenKind::Drill => {
+            return Err("no drill narration without a model".to_string());
+        }
+        GenKind::Report => {}
     }
 
     // Mini-report
@@ -695,9 +1044,9 @@ mod llm {
         "cpu"
     };
 
-    /// True when this build has a GPU backend linked in.
-    const HAS_GPU_BACKEND: bool =
-        cfg!(feature = "coach-llm-metal") || cfg!(feature = "coach-llm-vulkan");
+    /// True when this build has a GPU backend linked in. Derived from
+    /// `BACKEND` so a future backend feature is one edit, not two.
+    const HAS_GPU_BACKEND: bool = !matches!(BACKEND.as_bytes(), b"cpu");
 
     /// Layers to offload when a GPU backend is compiled in. `with_n_gpu_layers`
     /// takes a `u32` and saturates into `i32`, so `u32::MAX` lands on
@@ -712,34 +1061,62 @@ mod llm {
     /// runs generation "CPU-only forced") and anyone debugging a driver.
     /// Setting it to `0` disables offload entirely.
     fn requested_gpu_layers() -> u32 {
+        // No GPU backend linked in means there is nothing to offload to;
+        // asking for layers would only produce a confusing warning.
+        let default = if HAS_GPU_BACKEND { ALL_GPU_LAYERS } else { 0 };
         match std::env::var("YAMES_LLM_GPU_LAYERS") {
             Ok(raw) => raw.trim().parse::<u32>().unwrap_or_else(|_| {
                 eprintln!("[coach] YAMES_LLM_GPU_LAYERS={raw:?} is not a number — ignoring");
-                if HAS_GPU_BACKEND {
-                    ALL_GPU_LAYERS
-                } else {
-                    0
-                }
+                default
             }),
-            // No GPU backend linked in means there is nothing to offload to;
-            // asking for layers would only produce a confusing warning.
-            Err(_) if !HAS_GPU_BACKEND => 0,
-            Err(_) => ALL_GPU_LAYERS,
+            Err(_) => default,
         }
     }
 
-    /// Inference thread count (ROADMAP §3: `max(1, physical_cores - 2)`).
+    /// Physical cores on this machine.
     ///
-    /// `available_parallelism` reports *logical* CPUs and there is no portable
-    /// physical-core source in std, so halve it as an SMT proxy — the rule's
-    /// intent is to leave headroom for the audio callback and the UI, and
-    /// over-reserving is the safe direction to err in.
+    /// `available_parallelism` reports *logical* CPUs and std has no
+    /// physical-core query, so this used to halve it as an SMT proxy —
+    /// which under-counts by 2× on every machine that does not do SMT.
+    /// An 8-core Apple M1 got `8/2 - 2 = 2` inference threads and a
+    /// 4-core desktop got 1. `num_cpus` asks the OS.
+    ///
+    /// On Apple Silicon the honest denominator is the *performance* core
+    /// count: the efficiency cores are a third to a quarter of the speed,
+    /// and llama.cpp's decode is a barrier-synchronised fork/join, so a
+    /// batch spread across both classes runs at E-core pace.
+    fn physical_cores() -> usize {
+        #[cfg(target_os = "macos")]
+        if let Some(perf) = performance_cores() {
+            return perf;
+        }
+        num_cpus::get_physical()
+    }
+
+    /// `hw.perflevel0.logicalcpu` — the P-core cluster on an Apple Silicon
+    /// machine. Absent on Intel Macs (and on any kernel that does not
+    /// publish it), in which case the caller falls back to physical cores.
+    #[cfg(target_os = "macos")]
+    fn performance_cores() -> Option<usize> {
+        let mut value: i32 = 0;
+        let mut len = std::mem::size_of::<i32>();
+        let name = c"hw.perflevel0.logicalcpu";
+        // SAFETY: `sysctlbyname` writes at most `len` bytes into `value`.
+        let rc = unsafe {
+            libc::sysctlbyname(
+                name.as_ptr(),
+                std::ptr::addr_of_mut!(value).cast(),
+                &mut len,
+                std::ptr::null_mut(),
+                0,
+            )
+        };
+        (rc == 0 && value > 0).then_some(value as usize)
+    }
+
+    /// Inference thread count (ROADMAP §3: `max(1, physical_cores - 2)`).
     fn inference_threads() -> i32 {
-        let logical = std::thread::available_parallelism()
-            .map(std::num::NonZeroUsize::get)
-            .unwrap_or(4);
-        let physical = (logical / 2).max(1);
-        physical.saturating_sub(2).max(1).min(i32::MAX as usize) as i32
+        super::threads_from_physical(physical_cores())
     }
 
     fn load_model_file(
@@ -790,13 +1167,59 @@ mod llm {
     // Inference thread
     // -----------------------------------------------------------------
 
-    /// A generation request. The reply carries the cleaned text and how
-    /// many tokens were actually sampled — the count is what makes an
-    /// honest tokens/second figure possible in `latency_bench`.
-    struct Job {
-        context: String,
-        max_tokens: usize,
-        reply: SyncSender<Result<(String, usize), String>>,
+    /// One generation's raw result. `tokens` is what makes an honest
+    /// tokens/second figure possible in `latency_bench`; `hit_eog` is what
+    /// tells a finished sentence from one the budget cut off.
+    pub struct Generated {
+        pub text: String,
+        pub tokens: usize,
+        pub hit_eog: bool,
+    }
+
+    /// Why a job did not produce usable text.
+    ///
+    /// The distinction matters: `WorkerGone` means the thread is dead and
+    /// residency has to be cleared so the next session start spawns a
+    /// replacement, while `Failed` is a bad generation on a healthy worker
+    /// and only costs this one call.
+    #[derive(Debug)]
+    pub enum GenError {
+        WorkerGone,
+        Failed(String),
+    }
+
+    impl std::fmt::Display for GenError {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            match self {
+                GenError::WorkerGone => write!(f, "inference thread is gone"),
+                GenError::Failed(e) => write!(f, "{e}"),
+            }
+        }
+    }
+
+    enum Job {
+        Generate {
+            context: String,
+            max_tokens: usize,
+            reply: SyncSender<Result<Generated, String>>,
+        },
+        /// Swap in different weights *on the worker's own thread*.
+        ///
+        /// `LlamaBackend::init()` is a process-wide one-shot, so a second
+        /// worker cannot be spawned while this one lives — but a second
+        /// `LlamaModel` against the same backend is fine. Loading here
+        /// means the incumbent model keeps answering until the new one is
+        /// known-good, so a failed "Update brain" no longer leaves the
+        /// user with no brain at all.
+        Reload {
+            path: PathBuf,
+            reply: SyncSender<Result<String, String>>,
+        },
+        /// Test-only: end the thread while the handle stays resident, so
+        /// the dead-worker fallback can be exercised without killing a
+        /// thread out from under llama.cpp.
+        #[cfg(test)]
+        Shutdown,
     }
 
     /// Handle to the coach's single, long-lived inference thread.
@@ -827,10 +1250,11 @@ mod llm {
     impl LlmWorker {
         /// Spawn the thread and block until the model has finished
         /// loading (or failed). Callers already treat `load_model` as a
-        /// slow, fallible operation.
-        pub fn spawn(path: &Path) -> Result<Self, String> {
+        /// slow, fallible operation. Returns the model's display name,
+        /// read from GGUF metadata.
+        pub fn spawn(path: &Path) -> Result<(Self, String), String> {
             let (job_tx, job_rx) = channel::<Job>();
-            let (ready_tx, ready_rx) = sync_channel::<Result<(), String>>(1);
+            let (ready_tx, ready_rx) = sync_channel::<Result<String, String>>(1);
             let owned = path.to_path_buf();
 
             let handle = std::thread::Builder::new()
@@ -839,10 +1263,13 @@ mod llm {
                 .map_err(|e| format!("Failed to spawn inference thread: {e}"))?;
 
             match ready_rx.recv() {
-                Ok(Ok(())) => Ok(LlmWorker {
-                    jobs: Some(job_tx),
-                    handle: Some(handle),
-                }),
+                Ok(Ok(name)) => Ok((
+                    LlmWorker {
+                        jobs: Some(job_tx),
+                        handle: Some(handle),
+                    },
+                    name,
+                )),
                 Ok(Err(e)) => {
                     let _ = handle.join();
                     Err(e)
@@ -854,31 +1281,64 @@ mod llm {
             }
         }
 
-        pub fn generate(&self, context: &str, max_tokens: usize) -> Result<String, String> {
-            self.generate_measured(context, max_tokens)
-                .map(|(text, _tokens)| text)
+        /// One generation, judged against the kind's contract: an empty
+        /// or budget-truncated rephrase is a `Failed`, not text to ship.
+        pub fn generate(&self, context: &str, kind: super::GenKind) -> Result<String, GenError> {
+            let out = self.run_job(context, kind.max_tokens())?;
+            super::usable_output(kind, &out.text, out.hit_eog).map_err(GenError::Failed)
         }
 
-        /// As `generate`, but also reports the sampled token count.
+        /// Raw generation with an explicit budget — the latency bench
+        /// wants the token count and does not care whether the text is
+        /// shippable.
         pub fn generate_measured(
             &self,
             context: &str,
             max_tokens: usize,
         ) -> Result<(String, usize), String> {
-            let (reply_tx, reply_rx) = sync_channel::<Result<(String, usize), String>>(1);
-            let jobs = self
-                .jobs
-                .as_ref()
-                .ok_or_else(|| "inference thread is shutting down".to_string())?;
-            jobs.send(Job {
+            let out = self.run_job(context, max_tokens).map_err(|e| e.to_string())?;
+            Ok((out.text, out.tokens))
+        }
+
+        fn run_job(&self, context: &str, max_tokens: usize) -> Result<Generated, GenError> {
+            let (reply_tx, reply_rx) = sync_channel::<Result<Generated, String>>(1);
+            let jobs = self.jobs.as_ref().ok_or(GenError::WorkerGone)?;
+            jobs.send(Job::Generate {
                 context: context.to_string(),
                 max_tokens,
                 reply: reply_tx,
             })
-            .map_err(|_| "inference thread is gone".to_string())?;
+            .map_err(|_| GenError::WorkerGone)?;
             reply_rx
                 .recv()
-                .map_err(|_| "inference thread died mid-generation".to_string())?
+                .map_err(|_| GenError::WorkerGone)?
+                .map_err(GenError::Failed)
+        }
+
+        /// Load different weights on this worker's thread and swap them in
+        /// only if that succeeds. Returns the new model's display name.
+        pub fn reload(&self, path: &Path) -> Result<String, GenError> {
+            let (reply_tx, reply_rx) = sync_channel::<Result<String, String>>(1);
+            let jobs = self.jobs.as_ref().ok_or(GenError::WorkerGone)?;
+            jobs.send(Job::Reload {
+                path: path.to_path_buf(),
+                reply: reply_tx,
+            })
+            .map_err(|_| GenError::WorkerGone)?;
+            reply_rx
+                .recv()
+                .map_err(|_| GenError::WorkerGone)?
+                .map_err(GenError::Failed)
+        }
+
+        /// Test-only: make the inference thread exit while this handle
+        /// stays installed on the engine — the exact shape of "the worker
+        /// died but `engine.llm` is still `Some`" that item 4 fixes.
+        #[cfg(test)]
+        pub fn kill_for_test(&self) {
+            if let Some(jobs) = self.jobs.as_ref() {
+                let _ = jobs.send(Job::Shutdown);
+            }
         }
     }
 
@@ -896,9 +1356,66 @@ mod llm {
         }
     }
 
+    /// Load the weights at `path`, retrying on the CPU if the GPU refuses.
+    ///
+    /// GPU first, always. A Vulkan/Metal build on a machine with no usable
+    /// device normally still loads — llama.cpp reports zero offloadable
+    /// devices and keeps every layer on the CPU — but a broken driver can
+    /// fail the load outright, so retry rather than leaving the user with
+    /// a dead brain.
+    fn load_with_fallback(backend: &LlamaBackend, path: &Path) -> Result<LlamaModel, String> {
+        let requested = requested_gpu_layers();
+        let n_threads = inference_threads();
+        eprintln!(
+            "[coach] loading {} (backend={BACKEND}, n_gpu_layers={requested}, n_threads={n_threads})",
+            path.display(),
+        );
+        match load_model_file(backend, path, requested) {
+            Ok(model) => Ok(model),
+            Err(gpu_err) if requested != 0 => {
+                eprintln!("[coach] GPU load failed ({gpu_err}) — retrying with n_gpu_layers = 0");
+                load_model_file(backend, path, 0)
+            }
+            Err(e) => Err(e),
+        }
+    }
+
+    /// Human-readable model identity, from GGUF metadata.
+    ///
+    /// The status line used to read "model.bin on vulkan" because the
+    /// name was the file name the downloader happened to write. Qwen's
+    /// GGUFs carry `general.name` ("Qwen3 4B"); `general.basename` plus
+    /// `general.size_label` is the fallback shape used by conversions that
+    /// omit the composed name. An empty answer means the caller should use
+    /// the family + tier from the download marker instead.
+    fn model_display_name(model: &LlamaModel) -> String {
+        if let Ok(name) = model.meta_val_str("general.name") {
+            let name = name.trim();
+            if !name.is_empty() {
+                return name.to_string();
+            }
+        }
+        let base = model
+            .meta_val_str("general.basename")
+            .unwrap_or_default()
+            .trim()
+            .to_string();
+        if base.is_empty() {
+            return String::new();
+        }
+        match model.meta_val_str("general.size_label") {
+            Ok(size) if !size.trim().is_empty() => format!("{base} {}", size.trim()),
+            _ => base,
+        }
+    }
+
     /// Thread body: own the backend, the model, the context and the
     /// batch; serve jobs until the channel closes.
-    fn run(path: PathBuf, ready: SyncSender<Result<(), String>>, jobs: Receiver<Job>) {
+    ///
+    /// The model is a loop variable rather than a `let` binding so a
+    /// `Reload` job can replace it without tearing the thread — and with
+    /// it the process-wide `LlamaBackend` — down.
+    fn run(path: PathBuf, ready: SyncSender<Result<String, String>>, jobs: Receiver<Job>) {
         // Lowered once, never restored — see `LlmWorker`.
         lower_current_thread_priority();
 
@@ -910,65 +1427,88 @@ mod llm {
             }
         };
 
-        let requested = requested_gpu_layers();
-        let n_threads = inference_threads();
-        eprintln!(
-            "[coach] loading model (backend={BACKEND}, n_gpu_layers={requested}, n_threads={n_threads})"
-        );
-
-        // GPU first, always. A Vulkan/Metal build on a machine with no
-        // usable device normally still loads — llama.cpp reports zero
-        // offloadable devices and keeps every layer on the CPU — but a
-        // broken driver can fail the load outright, so retry on the CPU
-        // rather than leaving the user with a dead brain.
-        let model = match load_model_file(&backend, &path, requested) {
+        let mut model = match load_with_fallback(&backend, &path) {
             Ok(model) => model,
-            Err(gpu_err) if requested != 0 => {
-                eprintln!("[coach] GPU load failed ({gpu_err}) — retrying with n_gpu_layers = 0");
-                match load_model_file(&backend, &path, 0) {
-                    Ok(model) => model,
-                    Err(e) => {
-                        let _ = ready.send(Err(e));
-                        return;
-                    }
-                }
-            }
             Err(e) => {
                 let _ = ready.send(Err(e));
                 return;
             }
         };
+        let mut ready = Some(ready);
 
-        // The context — and the KV buffer behind it — is created ONCE
-        // here and reused for every job. T01 measured Vulkan coming out
-        // slower than CPU on a 0.6B model precisely because `generate`
-        // rebuilt this per call, re-allocating a multi-hundred-MiB KV
-        // buffer on the GPU each time. `n_batch` is raised to the full
-        // context so a long prompt decodes in a single pass (the default
-        // is 2048, below our `n_ctx`).
-        let ctx_params = LlamaContextParams::default()
-            .with_n_ctx(std::num::NonZero::new(CONTEXT_SIZE))
-            .with_n_batch(CONTEXT_SIZE)
-            .with_n_threads(n_threads)
-            .with_n_threads_batch(n_threads);
-        let mut ctx = match model.new_context(&backend, ctx_params) {
-            Ok(c) => c,
-            Err(e) => {
-                let _ = ready.send(Err(format!("Context creation failed: {e}")));
-                return;
+        loop {
+            // The context — and the KV buffer behind it — is created ONCE
+            // per resident model and reused for every job. T01 measured
+            // Vulkan coming out slower than CPU on a 0.6B model precisely
+            // because `generate` rebuilt this per call, re-allocating a
+            // multi-hundred-MiB KV buffer on the GPU each time. `n_batch`
+            // is raised to the full context so a long prompt decodes in a
+            // single pass (the default is 2048, below our `n_ctx`).
+            let n_threads = inference_threads();
+            let ctx_params = LlamaContextParams::default()
+                .with_n_ctx(std::num::NonZero::new(CONTEXT_SIZE))
+                .with_n_batch(CONTEXT_SIZE)
+                .with_n_threads(n_threads)
+                .with_n_threads_batch(n_threads);
+            let mut ctx = match model.new_context(&backend, ctx_params) {
+                Ok(c) => c,
+                Err(e) => {
+                    if let Some(ready) = ready.take() {
+                        let _ = ready.send(Err(format!("Context creation failed: {e}")));
+                    }
+                    return;
+                }
+            };
+            let mut batch = LlamaBatch::new(CONTEXT_SIZE as usize, 1);
+
+            if let Some(ready) = ready.take() {
+                if ready.send(Ok(model_display_name(&model))).is_err() {
+                    // Nobody is waiting for us any more (the caller gave
+                    // up); tear down rather than sitting on a loaded model.
+                    return;
+                }
             }
-        };
-        let mut batch = LlamaBatch::new(CONTEXT_SIZE as usize, 1);
 
-        if ready.send(Ok(())).is_err() {
-            // Nobody is waiting for us any more (the caller gave up);
-            // tear down rather than sitting on a loaded model.
-            return;
-        }
+            // Set when a `Reload` succeeded: the new model is already in
+            // hand, so the old one can be dropped and the context rebuilt.
+            let mut swap_in: Option<LlamaModel> = None;
+            while let Ok(job) = jobs.recv() {
+                match job {
+                    Job::Generate {
+                        context,
+                        max_tokens,
+                        reply,
+                    } => {
+                        let out = infer(&model, &mut ctx, &mut batch, &context, max_tokens);
+                        let _ = reply.send(out);
+                    }
+                    Job::Reload { path, reply } => match load_with_fallback(&backend, &path) {
+                        Ok(new_model) => {
+                            let _ = reply.send(Ok(model_display_name(&new_model)));
+                            swap_in = Some(new_model);
+                            break;
+                        }
+                        Err(e) => {
+                            // Keep serving from the model we already have.
+                            eprintln!("[coach] reload failed ({e}) — keeping the resident model");
+                            let _ = reply.send(Err(e));
+                        }
+                    },
+                    #[cfg(test)]
+                    Job::Shutdown => return,
+                }
+            }
 
-        while let Ok(job) = jobs.recv() {
-            let out = infer(&model, &mut ctx, &mut batch, &job.context, job.max_tokens);
-            let _ = job.reply.send(out);
+            match swap_in {
+                // `ctx` borrows `model`, so it has to die before the
+                // binding is replaced.
+                Some(new_model) => {
+                    drop(ctx);
+                    model = new_model;
+                }
+                // Job channel closed — the worker was dropped.
+                None => return,
+            }
         }
     }
 
@@ -979,7 +1519,7 @@ mod llm {
         batch: &mut LlamaBatch,
         context: &str,
         max_tokens: usize,
-    ) -> Result<(String, usize), String> {
+    ) -> Result<Generated, String> {
         // Every call starts from an empty KV cache. The coach's prompts
         // do not share a prefix (each one embeds fresh session data), so
         // there is nothing to reuse — and leaving the previous
@@ -1031,11 +1571,16 @@ mod llm {
             LlamaSampler::dist(42),
         ]);
 
+        // False when the loop exits because the budget ran out rather
+        // than because the model said it was finished — the caller uses
+        // that to reject a paraphrase cut off mid-sentence.
+        let mut hit_eog = false;
         for _ in 0..max_tokens {
             let logits_id = batch.n_tokens() - 1;
             let token = sampler.sample(ctx, logits_id);
 
             if model.is_eog_token(token) {
+                hit_eog = true;
                 break;
             }
 
@@ -1084,7 +1629,11 @@ mod llm {
                 result.trim().len(),
             );
         }
-        Ok((cleaned, output_tokens.len()))
+        Ok(Generated {
+            text: cleaned,
+            tokens: output_tokens.len(),
+            hit_eog,
+        })
     }
 
     // -----------------------------------------------------------------
@@ -1143,20 +1692,55 @@ mod llm {
 mod tests {
     use super::*;
 
+    fn temp_dir(tag: &str) -> std::path::PathBuf {
+        let dir = std::env::temp_dir().join(format!("yames-coach-{tag}-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("create temp dir");
+        dir
+    }
+
+    const QWEN3: Option<&str> = Some(crate::models::CURRENT_BRAIN_FAMILY);
+
     #[test]
-    fn new_engine_is_in_template_mode() {
-        let engine = CoachEngine::new();
-        assert!(engine.template_mode());
-        assert!(!engine.is_loaded());
-        assert_eq!(engine.model_name(), None);
+    fn a_new_engine_has_no_resident_model() {
+        let handle = create_shared_engine();
+        assert!(!handle.status().resident());
+        assert!(!handle.status().loading());
+        assert_eq!(handle.status().model_name(), None);
     }
 
     #[test]
     fn load_model_returns_false_for_a_missing_file() {
-        let mut engine = CoachEngine::new();
+        let handle = create_shared_engine();
         let missing = std::path::Path::new("this-path-does-not-exist-model.bin");
-        assert_eq!(load_model(&mut engine, missing), Ok(false));
-        assert!(engine.template_mode());
+        assert_eq!(load_model(&handle, missing, QWEN3, "Qwen3 4B"), Ok(false));
+        assert!(!handle.status().resident());
+        assert_eq!(handle.status().last_error().as_deref(), Some(NO_WEIGHTS));
+    }
+
+    /// Item 9: a pre-Qwen3 GGUF still loads in llama.cpp, but the engine
+    /// now builds Qwen3 ChatML, so its answers arrive full of visible
+    /// template artifacts. Refuse it and say why.
+    #[test]
+    fn load_model_refuses_a_legacy_family() {
+        let dir = temp_dir("legacy");
+        let path = dir.join("model.bin");
+        std::fs::write(&path, b"not a real gguf").expect("write stub model");
+
+        let handle = create_shared_engine();
+        assert_eq!(
+            load_model(&handle, &path, Some("legacy"), "Qwen3 4B"),
+            Ok(false)
+        );
+        assert!(!handle.status().resident());
+        assert_eq!(handle.status().last_error().as_deref(), Some(LEGACY_WEIGHTS));
+
+        // A missing marker (nothing recorded at download time) reads the
+        // same way — unknown weights are not trusted weights.
+        assert_eq!(load_model(&handle, &path, None, "Qwen3 4B"), Ok(false));
+        assert_eq!(handle.status().last_error().as_deref(), Some(LEGACY_WEIGHTS));
+
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     /// The regression this whole change exists for: without the
@@ -1165,18 +1749,30 @@ mod tests {
     #[cfg(not(feature = "coach-llm"))]
     #[test]
     fn load_model_without_the_feature_reports_not_loaded() {
-        let dir = std::env::temp_dir().join("yames-coach-load-test");
-        std::fs::create_dir_all(&dir).expect("create temp dir");
+        let dir = temp_dir("nofeature");
         let path = dir.join("model.bin");
         std::fs::write(&path, b"not a real gguf").expect("write stub model");
 
-        let mut engine = CoachEngine::new();
-        assert_eq!(load_model(&mut engine, &path), Ok(false));
-        assert!(engine.template_mode());
-        assert!(!engine.is_loaded());
-        assert_eq!(engine.model_name(), None);
+        let handle = create_shared_engine();
+        assert_eq!(load_model(&handle, &path, QWEN3, "Qwen3 4B"), Ok(false));
+        assert!(!handle.status().resident());
+        assert_eq!(handle.status().model_name(), None);
+        assert_eq!(
+            handle.status().last_error().as_deref(),
+            Some(NO_LLM_IN_BUILD)
+        );
 
-        let _ = std::fs::remove_file(&path);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Unloading an engine that holds nothing is a no-op, not an error —
+    /// "Remove models" and the idle timer both call it unconditionally.
+    #[test]
+    fn unload_is_idempotent() {
+        let handle = create_shared_engine();
+        assert_eq!(unload_model(&handle), Ok(()));
+        assert_eq!(unload_model(&handle), Ok(()));
+        assert!(!handle.status().resident());
     }
 
     #[cfg(not(feature = "coach-llm"))]
@@ -1193,15 +1789,50 @@ mod tests {
         assert_ne!(backend_name(), "none");
     }
 
-    /// Template generation is available regardless of `model_resident` —
-    /// the frontend still routes chat through `coach_generate` in
-    /// template mode and must get a real answer back.
+    /// Template generation is available regardless of residency — the
+    /// frontend still routes chat through `coach_generate` in template
+    /// mode and must get a real answer back.
     #[test]
     fn generate_falls_back_to_templates_with_no_resident_model() {
-        let engine = CoachEngine::new();
-        let out = generate(&engine, "User asks: how was my timing?\nAccuracy: 90%\n")
-            .expect("template generation");
+        let handle = create_shared_engine();
+        let out = generate(
+            &handle,
+            GenKind::Chat,
+            "User asks: how was my timing?\nAccuracy: 90%\n",
+        )
+        .expect("template generation");
         assert!(!out.trim().is_empty());
+    }
+
+    /// Item 6: the branch follows the caller's declared kind, not magic
+    /// substrings in a JS-owned prompt. The greeting prompt below carries
+    /// `Score:`/`Accuracy:` fields deliberately — under the old sniffing
+    /// it would have fallen through to the mini-report bank.
+    #[test]
+    fn the_template_branch_follows_the_kind() {
+        let handle = create_shared_engine();
+        let greeting =
+            "Rephrase this.\n\nOriginal: \"Welcome back to Slow Blues.\"\nScore: 74\nAccuracy: 88";
+        assert_eq!(
+            generate(&handle, GenKind::Greeting, greeting).unwrap(),
+            "Welcome back to Slow Blues."
+        );
+        assert_eq!(
+            generate(&handle, GenKind::Tip, greeting).unwrap(),
+            "Welcome back to Slow Blues."
+        );
+        // A summary reads its numbers; a report picks from the phrase
+        // banks. Neither may return the greeting text.
+        let summary = generate(
+            &handle,
+            GenKind::Summary,
+            "Accuracy: 88\nSignedDev: 1.0\nLongest clean streak: 12",
+        )
+        .unwrap();
+        assert!(summary.contains("88%"), "unexpected summary: {summary}");
+        // The drill kind has no template to fall back to — the JS side
+        // owns that line and emits it when this call fails.
+        assert!(generate(&handle, GenKind::Drill, "tempo went UP").is_err());
     }
 }
 
@@ -1223,6 +1854,7 @@ mod tests {
 #[cfg(all(test, feature = "coach-llm"))]
 mod llm_tests {
     use super::llm::LlmWorker;
+    use super::{create_shared_engine, load_model, unload_model, GenKind};
 
     /// `LlamaBackend::init()` is a process-wide one-shot (only `Drop`
     /// clears the flag), so two tests each spawning a worker cannot
@@ -1248,11 +1880,19 @@ mod llm_tests {
             .and_then(|v| v.trim().parse::<usize>().ok())
             .unwrap_or(8);
 
-        let worker = LlmWorker::spawn(&path).expect("model load failed");
+        let (worker, name) = LlmWorker::spawn(&path).expect("model load failed");
+
+        // Item 8: identity comes from GGUF metadata, not from the file
+        // name the downloader happened to write ("model.bin").
+        eprintln!("[llm test] model name from metadata: {name:?}");
+        assert!(
+            !name.trim().is_empty(),
+            "GGUF metadata carried no model name",
+        );
 
         let started = std::time::Instant::now();
-        let out = worker
-            .generate("Accuracy: 82\nSignedDev: -4.1\nSay hello.", max_tokens)
+        let (out, _tokens) = worker
+            .generate_measured("Accuracy: 82\nSignedDev: -4.1\nSay hello.", max_tokens)
             .expect("generation failed");
         let elapsed = started.elapsed();
 
@@ -1284,13 +1924,125 @@ mod llm_tests {
             eprintln!("YAMES_TEST_GGUF unset — skipping context-reuse test");
             return;
         };
-        let worker = LlmWorker::spawn(std::path::Path::new(&raw)).expect("model load failed");
+        let (worker, _) =
+            LlmWorker::spawn(std::path::Path::new(&raw)).expect("model load failed");
         for i in 0..3 {
-            let out = worker
-                .generate("Accuracy: 91\nSignedDev: 2.0\nSay hello.", 8)
+            let (out, _) = worker
+                .generate_measured("Accuracy: 91\nSignedDev: 2.0\nSay hello.", 32)
                 .unwrap_or_else(|e| panic!("generation {i} failed: {e}"));
             assert!(!out.contains("<think>"), "call {i} leaked reasoning: {out:?}");
         }
+    }
+
+    /// Item 2 — the whole reason this task exists. `useSession` called
+    /// `loadCoachModel()` from its mount effect *and* from `startSession`,
+    /// and the second call used to drop a perfectly good worker and spawn
+    /// a replacement. Loading the same weights twice must now touch
+    /// nothing: same worker, same name, no reload.
+    #[test]
+    fn loading_the_same_weights_twice_is_a_no_op() {
+        let _guard = BACKEND_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let Ok(raw) = std::env::var("YAMES_TEST_GGUF") else {
+            eprintln!("YAMES_TEST_GGUF unset — skipping idempotent-load test");
+            return;
+        };
+        let path = std::path::PathBuf::from(&raw);
+        let handle = create_shared_engine();
+        let family = Some(crate::models::CURRENT_BRAIN_FAMILY);
+
+        assert_eq!(load_model(&handle, &path, family, "Qwen3 4B"), Ok(true));
+        assert!(handle.status().resident());
+        let first = handle.status().model_name();
+        assert!(first.is_some(), "no model name after load");
+        assert!(!handle.status().loading(), "loading flag left set");
+
+        // Same file, second call: still resident, still the same name,
+        // and the worker is still able to answer.
+        assert_eq!(load_model(&handle, &path, family, "Qwen3 4B"), Ok(true));
+        assert_eq!(handle.status().model_name(), first);
+        let out = super::generate(&handle, GenKind::Chat, "User asks: hello?")
+            .expect("generation after the second load");
+        assert!(!out.trim().is_empty());
+
+        unload_model(&handle).expect("unload");
+        assert!(!handle.status().resident());
+        assert_eq!(handle.status().model_name(), None);
+    }
+
+    /// Item 2/3 — a *changed* file is what triggers a reload, and the
+    /// reload happens on the worker's own thread so the backend one-shot
+    /// is never re-initialised. Copying the GGUF gives a new path + mtime
+    /// with identical bytes, which is exactly the "user re-downloaded the
+    /// same tier" shape.
+    #[test]
+    fn a_changed_file_reloads_in_place() {
+        let _guard = BACKEND_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let Ok(raw) = std::env::var("YAMES_TEST_GGUF") else {
+            eprintln!("YAMES_TEST_GGUF unset — skipping reload test");
+            return;
+        };
+        let src = std::path::PathBuf::from(&raw);
+        let dir = std::env::temp_dir().join(format!("yames-coach-reload-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("temp dir");
+        let copy = dir.join("model.bin");
+        std::fs::copy(&src, &copy).expect("copy gguf");
+
+        let handle = create_shared_engine();
+        let family = Some(crate::models::CURRENT_BRAIN_FAMILY);
+        assert_eq!(load_model(&handle, &src, family, "Qwen3 4B"), Ok(true));
+        let name = handle.status().model_name();
+
+        // Different path (and mtime) → reload, and the worker survives it.
+        assert_eq!(load_model(&handle, &copy, family, "Qwen3 4B"), Ok(true));
+        assert!(handle.status().resident());
+        assert_eq!(handle.status().model_name(), name, "same weights, same name");
+        let out = super::generate(&handle, GenKind::Chat, "User asks: still there?")
+            .expect("generation after reload");
+        assert!(!out.trim().is_empty());
+
+        // And the reloaded file is now the fingerprint, so a third call
+        // with it is once again a no-op.
+        assert_eq!(load_model(&handle, &copy, family, "Qwen3 4B"), Ok(true));
+
+        unload_model(&handle).expect("unload");
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Item 4 — when the inference thread is gone, `generate` must clear
+    /// residency and answer from the template engine instead of returning
+    /// `Err` forever while the status line still claims an active brain.
+    #[test]
+    fn a_dead_worker_falls_back_to_templates() {
+        let _guard = BACKEND_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let Ok(raw) = std::env::var("YAMES_TEST_GGUF") else {
+            eprintln!("YAMES_TEST_GGUF unset — skipping dead-worker test");
+            return;
+        };
+        let handle = create_shared_engine();
+        let path = std::path::PathBuf::from(&raw);
+        assert_eq!(
+            load_model(
+                &handle,
+                &path,
+                Some(crate::models::CURRENT_BRAIN_FAMILY),
+                "Qwen3 4B"
+            ),
+            Ok(true)
+        );
+        assert!(handle.status().resident());
+
+        super::kill_worker_for_test(&handle);
+
+        let out = super::generate(&handle, GenKind::Chat, "User asks: how was my timing?")
+            .expect("template fallback after the worker died");
+        assert!(!out.trim().is_empty());
+        assert!(
+            !handle.status().resident(),
+            "residency must be cleared once the worker is gone",
+        );
+
+        unload_model(&handle).expect("unload");
     }
 
     /// ROADMAP §0.3's latency gate, as a runnable measurement rather than
@@ -1312,7 +2064,8 @@ mod llm_tests {
         }
         let _guard = BACKEND_LOCK.lock().unwrap_or_else(|e| e.into_inner());
         let raw = std::env::var("YAMES_TEST_GGUF").expect("YAMES_LLM_BENCH needs YAMES_TEST_GGUF");
-        let worker = LlmWorker::spawn(std::path::Path::new(&raw)).expect("model load failed");
+        let (worker, _name) =
+            LlmWorker::spawn(std::path::Path::new(&raw)).expect("model load failed");
 
         // The two shapes that matter, in the wording the JS layer actually
         // sends (`useSession.ts`) so `token_budget` classifies them the
@@ -1332,7 +2085,7 @@ mod llm_tests {
             // pays for cold weights (mmap page-in) and, on a GPU build,
             // shader pipeline creation. Users pay it once per launch; it
             // would otherwise dominate a 5-sample p95.
-            let _ = worker.generate(prompt, budget);
+            let _ = worker.generate_measured(prompt, budget);
 
             let mut times = Vec::with_capacity(runs);
             let mut tokens = 0usize;
@@ -1370,7 +2123,10 @@ mod llm_tests {
 
 #[cfg(test)]
 mod prompt_tests {
-    use super::{strip_think, token_budget, CHAT_MAX_TOKENS, REPHRASE_MAX_TOKENS};
+    use super::{
+        strip_think, threads_from_physical, usable_output, GenKind, CHAT_MAX_TOKENS,
+        REPHRASE_MAX_TOKENS,
+    };
 
     #[test]
     fn strips_a_complete_reasoning_block() {
@@ -1402,21 +2158,55 @@ mod prompt_tests {
         assert_eq!(strip_think("  Really locked in — keep going.  "), "Really locked in — keep going.");
     }
 
+    /// Item 6: the budget follows the declared kind. The drill kind is
+    /// the one this fixes — its prompt carries neither of the old magic
+    /// markers, so it used to get the 256-token chat budget for a
+    /// one-sentence narration.
     #[test]
-    fn rephrase_prompts_get_the_short_budget() {
-        assert_eq!(
-            token_budget("Rephrase this practice-coach observation...\nOriginal: \"Nice.\""),
-            REPHRASE_MAX_TOKENS
-        );
-        assert_eq!(
-            token_budget("Rephrase this practice-coach greeting for a player of guitar."),
-            REPHRASE_MAX_TOKENS
-        );
+    fn rephrase_kinds_get_the_short_budget() {
+        for kind in [GenKind::Tip, GenKind::Greeting, GenKind::Drill] {
+            assert!(kind.is_rephrase(), "{kind:?} should be rephrase-class");
+            assert_eq!(kind.max_tokens(), REPHRASE_MAX_TOKENS, "{kind:?}");
+        }
     }
 
     #[test]
     fn chat_and_reports_get_the_full_budget() {
-        assert_eq!(token_budget("User asks: how was my timing?"), CHAT_MAX_TOKENS);
-        assert_eq!(token_budget("Score: 72\nAccuracy: 88"), CHAT_MAX_TOKENS);
+        for kind in [GenKind::Chat, GenKind::Report, GenKind::Summary] {
+            assert!(!kind.is_rephrase(), "{kind:?} should not be rephrase-class");
+            assert_eq!(kind.max_tokens(), CHAT_MAX_TOKENS, "{kind:?}");
+        }
+    }
+
+    /// Item 5. An all-reasoning generation strips to nothing, and a
+    /// rephrase that ran out of budget stops mid-sentence; both used to
+    /// be assigned straight into the feed by the JS callers.
+    #[test]
+    fn empty_and_truncated_generations_are_rejected() {
+        assert_eq!(
+            usable_output(GenKind::Report, "  Nice and steady.  ", true).as_deref(),
+            Ok("Nice and steady.")
+        );
+        assert!(usable_output(GenKind::Report, "   ", true).is_err());
+        assert!(usable_output(GenKind::Tip, "", false).is_err());
+        assert_eq!(
+            usable_output(GenKind::Tip, "You're a touch behind.", false),
+            Err("truncated".to_string()),
+        );
+        // A long-form kind is allowed to run to the end of its budget:
+        // half a chat answer is still an answer.
+        assert!(usable_output(GenKind::Chat, "Your timing was", false).is_ok());
+    }
+
+    /// Item 11: `max(1, physical - 2)`, never the old halve-the-logical
+    /// -cores SMT proxy that gave an 8-core M1 two threads.
+    #[test]
+    fn thread_count_leaves_two_cores_for_audio_and_ui() {
+        assert_eq!(threads_from_physical(8), 6);
+        assert_eq!(threads_from_physical(4), 2);
+        assert_eq!(threads_from_physical(3), 1);
+        assert_eq!(threads_from_physical(2), 1);
+        assert_eq!(threads_from_physical(1), 1);
+        assert_eq!(threads_from_physical(0), 1);
     }
 }

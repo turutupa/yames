@@ -174,7 +174,9 @@ export function HearItWorkStep({ onBack, isActive }: WizardStepProps) {
         taken,
         t(`instrument.${instrument}`),
       );
-      const generated = await coachGenerate(context);
+      // A mini-report, so it gets the report kind: the 8 s budget and the
+      // Rust phrase-bank branch that matches what this prompt actually is.
+      const generated = await coachGenerate("report", context);
       if (generated.trim()) sentence = firstSentence(generated);
     } catch {
       /* keep the metrics line */
