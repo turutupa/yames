@@ -23,7 +23,16 @@ pub fn create_shared_engine() -> SharedCoachEngine {
 pub struct CoachEngine {
     #[cfg(feature = "coach-llm")]
     model: Option<LlmModel>,
-    loaded: bool,
+    /// True only when a real GGUF model is held in memory. This used to
+    /// be a plain `loaded` flag that `load_model` also set on the
+    /// template path, so the UI reported "brain loaded" after the user
+    /// downloaded weights that were never read. The flag now means
+    /// exactly one thing: an `LlmModel` is resident.
+    model_resident: bool,
+    /// File name of the resident model, captured at load. `None` in
+    /// template mode. T04 may replace this with a real model identity
+    /// read from the GGUF metadata.
+    model_name: Option<String>,
 }
 
 impl CoachEngine {
@@ -31,12 +40,53 @@ impl CoachEngine {
         CoachEngine {
             #[cfg(feature = "coach-llm")]
             model: None,
-            loaded: false,
+            model_resident: false,
+            model_name: None,
         }
     }
 
+    /// True when the engine answers from the phrase banks below rather
+    /// than from a resident LLM. An explicit, first-class state — not
+    /// something the caller infers from a failed load.
+    pub fn template_mode(&self) -> bool {
+        !self.model_resident
+    }
+
+    /// True only when a real model is resident and `generate` will
+    /// actually run inference.
     pub fn is_loaded(&self) -> bool {
-        self.loaded
+        !self.template_mode()
+    }
+
+    /// File name of the resident model, or `None` in template mode.
+    pub fn model_name(&self) -> Option<&str> {
+        self.model_name.as_deref()
+    }
+}
+
+/// Whether this binary was compiled with the LLM backend at all.
+///
+/// A `false` here is not a user error and not a missing download — the
+/// build simply cannot run a model, and the UI must say so rather than
+/// inviting the user to fetch gigabytes of weights it will never read.
+pub fn llm_compiled() -> bool {
+    cfg!(feature = "coach-llm")
+}
+
+/// Which llama.cpp backend this build was compiled against.
+///
+/// `"none"` when the LLM isn't compiled in at all. Note that this is a
+/// *compile-time* answer: llama.cpp falls back to CPU at runtime when
+/// no usable GPU or driver is present, so a `"vulkan"` build may still
+/// be executing on the CPU.
+pub fn backend_name() -> &'static str {
+    #[cfg(feature = "coach-llm")]
+    {
+        llm::BACKEND
+    }
+    #[cfg(not(feature = "coach-llm"))]
+    {
+        "none"
     }
 }
 
@@ -58,6 +108,14 @@ Rules:
 - Reference specific beats or patterns when the data supports it"#;
 
 /// Load the GGUF model from the brain directory.
+///
+/// Returns `true` only when a real model is now resident. The template
+/// engine needs no loading at all — it is the fallback `generate` takes
+/// whenever no model is held — so the no-feature path returns `false`.
+/// It used to return `true` here to "activate template mode", which
+/// made `is_coach_loaded` report a brain that did not exist and led the
+/// frontend to route rephrases, chat and adaptive-drill decisions at an
+/// LLM that was never compiled in.
 pub fn load_model(engine: &mut CoachEngine, model_path: &std::path::Path) -> Result<bool, String> {
     if !model_path.exists() {
         return Ok(false);
@@ -67,16 +125,21 @@ pub fn load_model(engine: &mut CoachEngine, model_path: &std::path::Path) -> Res
     {
         let llm = LlmModel::load(model_path)?;
         engine.model = Some(llm);
-        engine.loaded = true;
+        engine.model_resident = true;
+        engine.model_name = model_path
+            .file_name()
+            .map(|n| n.to_string_lossy().into_owned());
         return Ok(true);
     }
 
     #[cfg(not(feature = "coach-llm"))]
     {
-        // Mark as loaded so template-based mode activates
+        // No LLM in this build: the weights on disk cannot be read, so
+        // stay in template mode and say so.
         let _ = model_path;
-        engine.loaded = true;
-        Ok(true)
+        engine.model_resident = false;
+        engine.model_name = None;
+        Ok(false)
     }
 }
 
@@ -737,6 +800,76 @@ mod llm {
 
 #[cfg(feature = "coach-llm")]
 use llm::LlmModel;
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn new_engine_is_in_template_mode() {
+        let engine = CoachEngine::new();
+        assert!(engine.template_mode());
+        assert!(!engine.is_loaded());
+        assert_eq!(engine.model_name(), None);
+    }
+
+    #[test]
+    fn load_model_returns_false_for_a_missing_file() {
+        let mut engine = CoachEngine::new();
+        let missing = std::path::Path::new("this-path-does-not-exist-model.bin");
+        assert_eq!(load_model(&mut engine, missing), Ok(false));
+        assert!(engine.template_mode());
+    }
+
+    /// The regression this whole change exists for: without the
+    /// `coach-llm` feature, a model file that IS on disk must still
+    /// report "not loaded", because nothing can read it.
+    #[cfg(not(feature = "coach-llm"))]
+    #[test]
+    fn load_model_without_the_feature_reports_not_loaded() {
+        let dir = std::env::temp_dir().join("yames-coach-load-test");
+        std::fs::create_dir_all(&dir).expect("create temp dir");
+        let path = dir.join("model.bin");
+        std::fs::write(&path, b"not a real gguf").expect("write stub model");
+
+        let mut engine = CoachEngine::new();
+        assert_eq!(load_model(&mut engine, &path), Ok(false));
+        assert!(engine.template_mode());
+        assert!(!engine.is_loaded());
+        assert_eq!(engine.model_name(), None);
+
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[cfg(not(feature = "coach-llm"))]
+    #[test]
+    fn backend_and_compiled_flags_report_the_template_build() {
+        assert!(!llm_compiled());
+        assert_eq!(backend_name(), "none");
+    }
+
+    #[cfg(feature = "coach-llm")]
+    #[test]
+    fn backend_and_compiled_flags_report_an_llm_build() {
+        assert!(llm_compiled());
+        assert_ne!(backend_name(), "none");
+    }
+
+    /// Template generation is available regardless of `model_resident` —
+    /// the frontend still routes chat through `coach_generate` in
+    /// template mode and must get a real answer back.
+    #[test]
+    fn generate_falls_back_to_templates_with_no_resident_model() {
+        let engine = CoachEngine::new();
+        let out = generate(&engine, "User asks: how was my timing?\nAccuracy: 90%\n")
+            .expect("template generation");
+        assert!(!out.trim().is_empty());
+    }
+}
 
 // ---------------------------------------------------------------------------
 // LLM smoke test (coach-llm builds only)

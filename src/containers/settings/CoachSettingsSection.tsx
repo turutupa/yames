@@ -9,9 +9,10 @@ import type {
   Verbosity,
   VoiceMode,
 } from "../../types";
-import type { ModelStatus, VoiceDiagnostic } from "../../ipc";
+import type { CoachCapabilities, ModelStatus, VoiceDiagnostic } from "../../ipc";
 import {
   deleteModels,
+  getCoachCapabilities,
   getModelStatus,
   onTtsSpeechEnded,
   setInstrument as setInstrumentBackend,
@@ -22,6 +23,7 @@ import {
 } from "../../ipc";
 import { InstrumentDropdown } from "../../components/InstrumentDropdown";
 import { formatBytes } from "./formatBytes";
+import { coachStatusLabel } from "./coachStatus";
 
 // Short per-voice sample line played when the user clicks a voice
 // button. Each line is distinct on purpose so the user can hear timbre
@@ -118,6 +120,35 @@ export function CoachSettingsSection({
   // counter naturally handles arbitrary depth: N clicks = N ended
   // events = bars clear only after the Nth one.
   const pendingSpeechRef = useRef(0);
+
+  // Truthful brain state for the status line under the Brain toggle.
+  // `modelStatus` only knows whether the weights are on disk; this
+  // knows whether the build can run them and whether one is actually
+  // resident. Refetched whenever the on-disk state or the selected
+  // tier changes, and when a download finishes — `load_coach_model` is
+  // driven from `useSession`, so residency flips without this
+  // component re-rendering on its own.
+  const [coachCaps, setCoachCaps] = useState<CoachCapabilities | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    getCoachCapabilities()
+      .then((caps) => {
+        if (!cancelled) setCoachCaps(caps);
+      })
+      .catch(() => {
+        // Leave the line hidden rather than guessing at a state.
+        if (!cancelled) setCoachCaps(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    modelStatus?.brainReady,
+    modelStatus?.brainTier,
+    modelDownloading,
+    coachBrainTier,
+  ]);
+  const coachStatus = coachStatusLabel(coachCaps, !!modelStatus?.brainReady);
 
   // Subscribe to the backend's "speech ended" event. Lifecycle:
   //   - mount: register listener
@@ -275,6 +306,13 @@ export function CoachSettingsSection({
           </button>
         </div>
       </div>
+      {/* Honest brain status. Never says "active" unless a real model
+          is resident in a build that can run one — see coachStatus.ts. */}
+      {coachStatus && (
+        <div className={`coach-brain-status coach-brain-status-${coachStatus.tone}`}>
+          {t(coachStatus.key, coachStatus.params)}
+        </div>
+      )}
       <div className="setting-row">
         <div className="setting-label">
           <label>{t("settings.coach.scoringMode")}</label>

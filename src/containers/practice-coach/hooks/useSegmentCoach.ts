@@ -42,7 +42,6 @@ export function useSegmentCoach(params: {
   segmentStartRef: MutableRefObject<number>;
   prevSessionBestRef: MutableRefObject<number | undefined>;
   narrativeRef: MutableRefObject<Narrative | null>;
-  coachLoadedRef: MutableRefObject<boolean>;
   sessionIdRef: MutableRefObject<number>;
   activeRef: MutableRefObject<boolean>;
   playBpmRef: MutableRefObject<number>;
@@ -62,7 +61,6 @@ export function useSegmentCoach(params: {
     segmentStartRef,
     prevSessionBestRef,
     narrativeRef,
-    coachLoadedRef,
     sessionIdRef,
     activeRef,
     playBpmRef,
@@ -362,25 +360,30 @@ export function useSegmentCoach(params: {
           // picked up the instrument doesn't get a misleading "12%
           // accuracy". See `src/coach/reportStats.ts`.
           const accuracy = accuracyPct(report);
+          // Deliberately NOT gated on `coachLoadedRef`. `coach_generate`
+          // is well-defined in both modes: with a model it paraphrases,
+          // without one it returns the Rust phrase-bank mini-report,
+          // which is real coaching prose. The local `formatMiniReport`
+          // fallback is only a metrics line ("Score 72 · 85% hits ·
+          // avg ±8.1ms"), so gating here would silently downgrade every
+          // template-mode user from prose to numbers.
           let comment = formatMiniReport(report);
-          if (coachLoadedRef.current) {
-            try {
-              const context = formatMiniReportContext(
-                segmentBpm,
-                timeSignature,
-                accuracy,
-                report,
-                instrumentLabel,
-                narrativeRef.current ? formatForLLM(narrativeRef.current) : undefined,
-                derivedPlayMode,
-                coachMode,
-              );
-              comment = await coachGenerate(context);
-            } catch (err) {
-              // Fall back to template — but log so we can diagnose
-              // "the LLM stopped paraphrasing" instead of guessing.
-              coachDebug("mini-report.llm-error", String(err));
-            }
+          try {
+            const context = formatMiniReportContext(
+              segmentBpm,
+              timeSignature,
+              accuracy,
+              report,
+              instrumentLabel,
+              narrativeRef.current ? formatForLLM(narrativeRef.current) : undefined,
+              derivedPlayMode,
+              coachMode,
+            );
+            comment = await coachGenerate(context);
+          } catch (err) {
+            // Fall back to the metrics line — but log so we can diagnose
+            // "the LLM stopped paraphrasing" instead of guessing.
+            coachDebug("mini-report.llm-error", String(err));
           }
 
           // Post-LLM staleness recheck — the rephrase at `coachGenerate`
@@ -461,7 +464,7 @@ export function useSegmentCoach(params: {
     wasPlayingRef.current = isPlaying;
   }, [isPlaying, active, timeSignature, instrumentLabel,
     playBpmRef, sessionIdRef, activeRef, segmentReportsRef, segmentStartRef,
-    prevSessionBestRef, narrativeRef, coachLoadedRef, setMessages, setPlayMode]);
+    prevSessionBestRef, narrativeRef, setMessages, setPlayMode]);
 
   /**
    * Reset the falling-edge detector. Call from startSession (and endSession)
