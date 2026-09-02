@@ -2,28 +2,200 @@ name: Build & Release
 
 on:
   push:
-    branches: [main]
+    # `phase0/**` so `llm-smoke` guards LLM work in progress. The `build`
+    # job below still only runs for a `release …` commit or a manual
+    # dispatch, so widening this does not publish anything.
+    branches: [main, 'phase0/**']
   workflow_dispatch:
 
+env:
+  # CI-only test fixture for the LLM smoke job — SmolLM2-135M-Instruct
+  # Q4_K_M, ~100 MB, pinned to an immutable Hugging Face revision. It is
+  # never offered to or downloaded by users; the shipping model tiers are
+  # in plans/ROADMAP.md §3. An instruction-tuned model rather than the
+  # ~20 MB "stories" toys because those have a 256-token training context
+  # (shorter than the coach system prompt) and no notion of following an
+  # instruction, which makes "did it emit any text" a coin flip.
+  TEST_GGUF_URL: 'https://huggingface.co/bartowski/SmolLM2-135M-Instruct-GGUF/resolve/09816acd5d99df7be770d85ea30822623dab342c/SmolLM2-135M-Instruct-Q4_K_M.gguf'
+  TEST_GGUF_SHA256: '2e8040ceae7815abe0dcb3540b9995eaa1fa0d2ca9e797d0a635ae4433c68c2d'
+
 jobs:
-  build:
-    if: startsWith(github.event.head_commit.message, 'release') || github.event_name == 'workflow_dispatch'
+  # =====================================================================
+  # Gate (ROADMAP §5.0.1): on every platform the shipping LLM feature
+  # compiles *and* a real GGUF loads and emits tokens. Runners have no
+  # GPU, so a Vulkan/Metal build here exercises llama.cpp's runtime CPU
+  # fallback — which is exactly the path a user without a usable driver
+  # takes. Runs on every push, not only releases.
+  # =====================================================================
+  llm-smoke:
+    name: llm-smoke (${{ matrix.label }})
     strategy:
       fail-fast: false
       matrix:
         include:
           - platform: macos-latest
-            args: '--target aarch64-apple-darwin'
+            label: macos-aarch64
             target: aarch64-apple-darwin
+            feature: coach-llm-metal
           - platform: macos-latest
-            args: '--target x86_64-apple-darwin'
+            label: macos-x86_64
             target: x86_64-apple-darwin
+            feature: coach-llm-metal
           - platform: ubuntu-22.04
-            args: ''
+            label: ubuntu-22.04
             target: ''
+            feature: coach-llm-vulkan
           - platform: windows-latest
-            args: ''
+            label: windows
             target: ''
+            feature: coach-llm-vulkan
+
+    runs-on: ${{ matrix.platform }}
+    permissions:
+      contents: read
+    env:
+      CARGO_TERM_COLOR: always
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      # Tauri's own Linux prerequisites — the lib target links against
+      # webkit2gtk through the `tauri` crate even when only tests run.
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libasound2-dev
+
+      - name: LLM build environment
+        uses: ./.github/actions/llm-build-env
+
+      # Caches ~/.cargo and the target dir. `prefix-key` carries the CMake
+      # generator and Vulkan SDK: a restored `CMakeCache.txt` pins the
+      # generator it was configured with, and a mismatched one fails with
+      # "CMake was unable to find a build program corresponding to Ninja"
+      # (observed in T02 development). Bump `v1` below whenever the
+      # generator or the SDK version in the composite action changes.
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          prefix-key: 'v1-ninja-vk1.4.313'
+          key: ${{ matrix.label }}-${{ matrix.feature }}
+          workspaces: 'src-tauri'
+
+      - name: Cache the test GGUF
+        id: gguf
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/test-model.gguf
+          key: test-gguf-${{ env.TEST_GGUF_SHA256 }}
+
+      - name: Download the test GGUF
+        if: steps.gguf.outputs.cache-hit != 'true'
+        shell: bash
+        run: curl -fsSL --retry 5 --retry-delay 5 -o "${RUNNER_TEMP}/test-model.gguf" "$TEST_GGUF_URL"
+
+      - name: Verify the test GGUF checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP"
+          # sha256sum on Linux/Git-Bash, shasum on macOS.
+          if command -v sha256sum > /dev/null 2>&1; then
+            echo "${TEST_GGUF_SHA256}  test-model.gguf" | sha256sum -c -
+          else
+            echo "${TEST_GGUF_SHA256}  test-model.gguf" | shasum -a 256 -c -
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # `tauri::generate_context!` in src/lib.rs embeds `../dist`, so the
+      # lib target does not compile until the frontend has been built —
+      # even for `cargo test --lib`.
+      - name: Build frontend assets
+        shell: bash
+        run: |
+          npm install
+          npm run build
+
+      - name: Load a GGUF and generate tokens
+        shell: bash
+        env:
+          # Picked up by the `llm_tests` module added in T01; without it the
+          # test logs a skip and passes vacuously, so it is always set here.
+          YAMES_TEST_GGUF: ${{ runner.temp }}/test-model.gguf
+        run: |
+          set -euo pipefail
+          cargo test --manifest-path src-tauri/Cargo.toml \
+            --features ${{ matrix.feature }} --lib -- --nocapture
+
+      # ROADMAP §5.0.1 budget: ≤ 80 MB of binary growth per platform. The
+      # llama.cpp static libraries are where that growth lives (the Vulkan
+      # backend embeds the compiled SPIR-V shaders), so surface them here;
+      # the `build` job below reports the finished bundle sizes.
+      - name: Record llama.cpp library sizes
+        if: always()
+        shell: bash
+        run: |
+          set -uo pipefail
+          TARGET="${CARGO_TARGET_DIR:-src-tauri/target}"
+          {
+            echo "### llm-smoke — ${{ matrix.label }} (\`${{ matrix.feature }}\`)"
+            echo
+            echo '| Artifact | Size |'
+            echo '|---|---:|'
+          } >> "$GITHUB_STEP_SUMMARY"
+          total=0
+          while IFS= read -r f; do
+            [ -f "$f" ] || continue
+            bytes=$(wc -c < "$f" | tr -d ' ')
+            total=$((total + bytes))
+            printf '| `%s` | %s |\n' "$(basename "$f")" \
+              "$(awk -v b="$bytes" 'BEGIN{printf "%.1f MiB", b/1048576}')" \
+              >> "$GITHUB_STEP_SUMMARY"
+          done < <(find "$TARGET" -type d -name 'llama-cpp-sys-2-*' \
+                     -exec find {} -type f \( -name '*.a' -o -name '*.lib' \) \; 2>/dev/null | sort -u)
+          printf '| **total llama.cpp static libs** | **%s** |\n' \
+            "$(awk -v b="$total" 'BEGIN{printf "%.1f MiB", b/1048576}')" \
+            >> "$GITHUB_STEP_SUMMARY"
+          echo >> "$GITHUB_STEP_SUMMARY"
+
+  build:
+    needs: llm-smoke
+    if: startsWith(github.event.head_commit.message, 'release') || github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # `-- --features …` — tauri-action passes `args` through verbatim
+          # to `<tauriScript> build`, and the Tauri CLI forwards everything
+          # after `--` to cargo. ROADMAP §3: always try the GPU first;
+          # llama.cpp falls back to the CPU at runtime, so one binary per
+          # platform serves both GPU and GPU-less machines.
+          - platform: macos-latest
+            args: '--target aarch64-apple-darwin -- --features coach-llm-metal'
+            target: aarch64-apple-darwin
+            label: macos-aarch64
+          - platform: macos-latest
+            args: '--target x86_64-apple-darwin -- --features coach-llm-metal'
+            target: x86_64-apple-darwin
+            label: macos-x86_64
+          - platform: ubuntu-22.04
+            args: '-- --features coach-llm-vulkan'
+            target: ''
+            label: ubuntu-22.04
+          - platform: windows-latest
+            args: '-- --features coach-llm-vulkan'
+            target: ''
+            label: windows
 
     runs-on: ${{ matrix.platform }}
     permissions:
@@ -41,6 +213,17 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libasound2-dev
+
+      # cmake / Ninja / MSVC / Vulkan SDK — see the composite action.
+      - name: LLM build environment
+        uses: ./.github/actions/llm-build-env
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          prefix-key: 'v1-ninja-vk1.4.313'
+          key: release-${{ matrix.label }}
+          workspaces: 'src-tauri'
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -67,9 +250,18 @@ jobs:
           fi
           echo "tag=$VERSION" >> "$GITHUB_OUTPUT"
 
+      # Pinned to a tag: `@dev` is a moving branch, and this job is the only
+      # thing standing between a `release …` commit and a published binary.
+      # `args` is forwarded verbatim to `npx tauri build`, so the matrix'
+      # `-- --features …` reaches cargo (verified against the action source
+      # at action-v1.0.0: inputs.rawArgs → runner.execTauriCommand).
+      #
+      # With no `tagName` the action builds and uploads workflow artifacts
+      # without touching Releases, which is what a `workflow_dispatch` run
+      # on a feature branch wants.
       - name: Build Tauri app (release)
-        if: steps.version.outputs.tag
-        uses: tauri-apps/tauri-action@dev
+        id: tauri
+        uses: tauri-apps/tauri-action@action-v1.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
@@ -107,6 +299,41 @@ jobs:
           prerelease: false
           tauriScript: npx tauri
           args: ${{ matrix.args }}
+          # Dispatch runs have no tag, so nothing is uploaded to Releases;
+          # keep the bundles as workflow artifacts instead so the build is
+          # still verifiable.
+          uploadWorkflowArtifacts: ${{ steps.version.outputs.tag == '' }}
+
+      # ROADMAP §5.0.1: binary growth budget ≤ 80 MB per platform, and the
+      # actual numbers belong in the PR. `artifactPaths` is the action's own
+      # list of what it produced.
+      - name: Record bundle sizes
+        if: always() && steps.tauri.outputs.artifactPaths
+        shell: bash
+        env:
+          ARTIFACT_PATHS: ${{ steps.tauri.outputs.artifactPaths }}
+        run: |
+          set -uo pipefail
+          {
+            echo "### Bundle sizes — ${{ matrix.label }}"
+            echo
+            echo '| Artifact | Size |'
+            echo '|---|---:|'
+          } >> "$GITHUB_STEP_SUMMARY"
+          node -e '
+            const fs = require("fs"), path = require("path");
+            const du = (p) => {
+              const st = fs.statSync(p);
+              if (!st.isDirectory()) return st.size;
+              return fs.readdirSync(p).reduce((n, e) => n + du(path.join(p, e)), 0);
+            };
+            for (const p of JSON.parse(process.env.ARTIFACT_PATHS)) {
+              if (!fs.existsSync(p)) continue;
+              const mib = (du(p) / 1048576).toFixed(1);
+              console.log(`| \`${path.basename(p)}\` | ${mib} MiB |`);
+            }
+          ' >> "$GITHUB_STEP_SUMMARY"
+          echo >> "$GITHUB_STEP_SUMMARY"
 
   update-homebrew:
     needs: build
