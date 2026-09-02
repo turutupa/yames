@@ -9,10 +9,12 @@
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { load } from "@tauri-apps/plugin-store";
+import { setInvokeResponse } from "../../test/mocks";
 import { ONBOARDING_STEPS } from "./steps";
 import {
   CHIP_DISMISS_LIMIT,
   ONBOARDING_VERSION,
+  hasPriorUse,
   useOnboarding,
 } from "./useOnboarding";
 
@@ -55,13 +57,45 @@ async function mount() {
   return view;
 }
 
+describe("hasPriorUse", () => {
+  it("treats an absent or default instrument as no evidence at all", () => {
+    // `"other"` is `Instrument::default()` on the Rust side — "no choice
+    // made". Before O1b it read as an existing user and ate the wizard.
+    expect(hasPriorUse(undefined, 0, 0)).toBe(false);
+    expect(hasPriorUse("other", 0, 0)).toBe(false);
+  });
+
+  it("counts a chosen instrument, a saved session, or a saved preset", () => {
+    expect(hasPriorUse("bass", 0, 0)).toBe(true);
+    expect(hasPriorUse(undefined, 1, 0)).toBe(true);
+    expect(hasPriorUse(undefined, 0, 1)).toBe(true);
+    // Even the default instrument is prior use once real data exists.
+    expect(hasPriorUse("other", 3, 0)).toBe(true);
+    expect(hasPriorUse("other", 0, 2)).toBe(true);
+  });
+});
+
 describe("first-run detection", () => {
-  it("case 1 — no instrument, no version: opens the full wizard at W0", async () => {
+  it("case 1 — nothing at all: opens the full wizard at W0", async () => {
     const { result } = await mount();
     await waitFor(() => expect(result.current.state.status).toBe("welcome"));
     expect(result.current.isOpen).toBe(true);
+    expect(result.current.firstRun).toBe(true);
     expect(result.current.chipVisible).toBe(false);
     expect(result.current.migratedExistingUser).toBe(false);
+  });
+
+  it('case 1 — a Rust-written default instrument ("other") is still a first run', async () => {
+    // O1b regression: `persist_state` used to stamp `instrument: "other"` into
+    // an empty store from any settings command, and detection then skipped the
+    // wizard forever. Old stores can still carry that value.
+    values.set("instrument", "other");
+    const { result } = await mount();
+    await waitFor(() => expect(result.current.state.status).toBe("welcome"));
+    expect(result.current.isOpen).toBe(true);
+    expect(result.current.firstRun).toBe(true);
+    expect(result.current.migratedExistingUser).toBe(false);
+    expect(values.get("onboarding.version")).toBeUndefined();
   });
 
   it("case 2 — instrument set, no version: no wizard, schema stamped", async () => {
@@ -70,10 +104,43 @@ describe("first-run detection", () => {
     await waitFor(() => expect(result.current.migratedExistingUser).toBe(true));
     expect(result.current.isOpen).toBe(false);
     expect(result.current.state.status).toBe("idle");
+    expect(result.current.firstRun).toBe(false);
     expect(values.get("onboarding.version")).toBe(ONBOARDING_VERSION);
     // completedAt too, so the chip never offers itself to an existing user.
     expect(typeof values.get("onboarding.completedAt")).toBe("string");
     expect(result.current.chipVisible).toBe(false);
+  });
+
+  it("case 2 — a saved session alone marks an existing user", async () => {
+    // No instrument key at all (the store Rust now leaves alone), but the
+    // user has practised: they are not meeting Yames for the first time.
+    setInvokeResponse("get_session_history", () => [{ id: "s1" }]);
+    const { result } = await mount();
+    await waitFor(() => expect(result.current.migratedExistingUser).toBe(true));
+    expect(result.current.isOpen).toBe(false);
+    expect(result.current.firstRun).toBe(false);
+    expect(values.get("onboarding.version")).toBe(ONBOARDING_VERSION);
+  });
+
+  it("case 2 — a saved preset alone marks an existing user", async () => {
+    setInvokeResponse("list_presets", () => [{ id: "p1", name: "Warmup" }]);
+    const { result } = await mount();
+    await waitFor(() => expect(result.current.migratedExistingUser).toBe(true));
+    expect(result.current.isOpen).toBe(false);
+    expect(result.current.firstRun).toBe(false);
+    expect(values.get("onboarding.version")).toBe(ONBOARDING_VERSION);
+  });
+
+  it("a backend that cannot answer does not fake prior use", async () => {
+    setInvokeResponse("get_session_history", () => {
+      throw new Error("backend down");
+    });
+    setInvokeResponse("list_presets", () => {
+      throw new Error("backend down");
+    });
+    const { result } = await mount();
+    await waitFor(() => expect(result.current.state.status).toBe("welcome"));
+    expect(result.current.firstRun).toBe(true);
   });
 
   it("case 3 — version set: normal launch, no wizard", async () => {

@@ -23,6 +23,28 @@ fn emit_state_changed(state: &SharedState, app_handle: &AppHandle) {
     let _ = app_handle.emit("state-changed", &snapshot);
 }
 
+/// Should `persist_state` write the `instrument` key this time?
+///
+/// `Instrument::default()` is `Other` — the explicit "no specific calibration"
+/// value, not a choice (see `instrument.rs`). Writing it into a store that has
+/// no `instrument` yet makes a fresh install indistinguishable from a returning
+/// user: the frontend's first-run detection reads `instrument` as "this user has
+/// been here before" and the onboarding wizard never opens. Any of the twelve
+/// settings commands (`set_bpm`, `set_volume`, `set_theme`, …) can fire before
+/// the user has picked anything, so the rule lives here rather than at the call
+/// sites.
+///
+/// The store must therefore truthfully lack an instrument until either the user
+/// chooses one (`set_instrument`) or the coming-soon migration in `lib.rs`
+/// writes one. Once the key exists we keep it in sync unconditionally — an
+/// explicit `Other` (a user picking "Other" in the UI, or a legacy store) is a
+/// real value and must not be frozen.
+///
+/// Pure so it can be unit-tested without a Tauri `State` / `AppHandle`.
+pub fn should_persist_instrument(current: Instrument, stored: Option<&serde_json::Value>) -> bool {
+    stored.is_some() || current != Instrument::Other
+}
+
 /// Persist the current AppState to the store (minus is_playing which is transient).
 fn persist_state(state: &SharedState, app_handle: &AppHandle) {
     use tauri_plugin_store::StoreExt;
@@ -59,7 +81,12 @@ fn persist_state(state: &SharedState, app_handle: &AppHandle) {
                 "cyclic": s.speed_ramp.cyclic,
             }),
         );
-        store.set("instrument", serde_json::json!(s.instrument.id()));
+        // Every other key above is written unconditionally; `instrument` is
+        // the one first-run signal the frontend reads, so it is gated (see
+        // `should_persist_instrument`).
+        if should_persist_instrument(s.instrument, store.get("instrument").as_ref()) {
+            store.set("instrument", serde_json::json!(s.instrument.id()));
+        }
     }
 }
 
@@ -2248,5 +2275,52 @@ mod tests {
             assert_eq!(total as u32, groups.iter().map(|&g| g as u32).sum::<u32>());
             assert!(validate_beat_groups(&groups).is_ok());
         }
+    }
+
+    // -----------------------------------------------------------------------
+    // O1b — `persist_state` must not invent an `instrument` key
+    // -----------------------------------------------------------------------
+
+    /// The bug: a fresh install's first `set_bpm` / `set_volume` / `set_theme`
+    /// wrote the backend default (`Other`) into an empty store, and the
+    /// frontend then read that key as "returning user" and skipped the wizard.
+    #[test]
+    fn default_instrument_is_not_written_into_a_store_without_one() {
+        assert!(!should_persist_instrument(Instrument::Other, None));
+        assert!(!should_persist_instrument(Instrument::default(), None));
+    }
+
+    #[test]
+    fn a_chosen_instrument_creates_the_key() {
+        for inst in [
+            Instrument::Drums,
+            Instrument::ElectricGuitar,
+            Instrument::AcousticGuitar,
+            Instrument::Bass,
+            Instrument::Piano,
+        ] {
+            assert!(
+                should_persist_instrument(inst, None),
+                "{inst:?} is a real choice and must be persisted"
+            );
+        }
+    }
+
+    /// Once the key exists it is kept in sync unconditionally — including a
+    /// deliberate `Other`, which a legacy store or an explicit UI pick can
+    /// hold. Freezing it would strand the user on a stale instrument.
+    #[test]
+    fn an_existing_key_is_always_updated() {
+        let stored = serde_json::json!("electric-guitar");
+        assert!(should_persist_instrument(
+            Instrument::Other,
+            Some(&stored)
+        ));
+        let stored_other = serde_json::json!("other");
+        assert!(should_persist_instrument(
+            Instrument::Other,
+            Some(&stored_other)
+        ));
+        assert!(should_persist_instrument(Instrument::Bass, Some(&stored)));
     }
 }

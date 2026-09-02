@@ -10,14 +10,26 @@
  *   onboarding.chipDismissed number  times the chip was dismissed (hide at 2)
  *
  * First-run detection, the three cases:
- *   1. no instrument, no version → full wizard from W0
- *   2. instrument set, no version → existing user: no wizard, version stamped
- *      (and completedAt, so the chip never appears for them); the tour offer
- *      is left to O6 via `migratedExistingUser`
+ *   1. no version AND no prior-use signal → full wizard from W0
+ *   2. no version BUT some prior-use signal → existing user: no wizard,
+ *      version stamped (and completedAt, so the chip never appears for them);
+ *      the tour offer is left to O6 via `migratedExistingUser`
  *   3. version set → normal launch
+ *
+ * "Prior-use signal" is deliberately wider than `instrument` alone (O1b). The
+ * Rust side writes the whole `AppState` into `settings.json` on any settings
+ * command, so `instrument` could be created behind the frontend's back holding
+ * nothing but `Instrument::default()` — `"other"`, which means "no choice made"
+ * (see `src-tauri/src/instrument.rs`). A store key that only says "the backend
+ * booted once" must never read as "this user has been here before", so the
+ * signals are: a *chosen* instrument (set and not `"other"`), any saved
+ * session, or any saved preset. Rust also stops writing the default instrument
+ * into a store that has no instrument yet (`commands.rs::persist_state` /
+ * `should_persist_instrument`), but the detection here is correct on its own
+ * even against an older store poisoned by the old behaviour.
  */
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-import { storeLoad, storeSave } from "../../ipc";
+import { getSessionHistory, listPresets, storeLoad, storeSave } from "../../ipc";
 import {
   INITIAL_ONBOARDING_STATE,
   isWizardOpen,
@@ -34,6 +46,30 @@ import type { WizardStepDef } from "./steps/types";
 export const ONBOARDING_VERSION = 1;
 /** The chip stops offering itself after this many dismissals. */
 export const CHIP_DISMISS_LIMIT = 2;
+
+/**
+ * Backend default for `instrument` — `Instrument::default()` in
+ * `src-tauri/src/instrument.rs`. It is the explicit "no specific calibration"
+ * value, never a user's choice, so it is not a prior-use signal.
+ */
+const UNCHOSEN_INSTRUMENT = "other";
+
+/**
+ * Has this user used Yames before? Pure so the rule is testable and so the
+ * three cases above read as one expression.
+ *
+ * @param instrument  `instrument` from the store (`undefined` when absent)
+ * @param sessionCount saved practice sessions
+ * @param presetCount  saved presets
+ */
+export function hasPriorUse(
+  instrument: string | undefined,
+  sessionCount: number,
+  presetCount: number,
+): boolean {
+  const chosenInstrument = !!instrument && instrument !== UNCHOSEN_INSTRUMENT;
+  return chosenInstrument || sessionCount > 0 || presetCount > 0;
+}
 
 export type UseOnboardingResult = {
   state: OnboardingState;
@@ -84,20 +120,27 @@ export function useOnboarding(
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const [version, instrument, completedAt, dismissed] = await Promise.all([
-        storeLoad<number>("onboarding.version"),
-        storeLoad<string>("instrument"),
-        storeLoad<string>("onboarding.completedAt"),
-        storeLoad<number>("onboarding.chipDismissed"),
-      ]);
+      const [version, instrument, completedAt, dismissed, sessions, presets] =
+        await Promise.all([
+          storeLoad<number>("onboarding.version"),
+          storeLoad<string>("instrument"),
+          storeLoad<string>("onboarding.completedAt"),
+          storeLoad<number>("onboarding.chipDismissed"),
+          // A backend that can't answer is not evidence of prior use: fall
+          // back to "no signal" so a broken probe can't silently retire the
+          // wizard for a genuinely new user.
+          getSessionHistory().catch(() => []),
+          listPresets().catch(() => []),
+        ]);
       if (cancelled) return;
       dismissCountRef.current = dismissed ?? 0;
+      const priorUse = hasPriorUse(instrument, sessions.length, presets.length);
 
-      if (version == null && !instrument) {
+      if (version == null && !priorUse) {
         // Case 1 — true first run.
         setFirstRun(true);
         rawDispatch({ type: "START_SETUP" });
-      } else if (version == null && instrument) {
+      } else if (version == null) {
         // Case 2 — existing user. Stamp the schema so they never see the
         // wizard, and stamp completedAt so the chip never offers itself.
         await storeSave("onboarding.version", ONBOARDING_VERSION);
