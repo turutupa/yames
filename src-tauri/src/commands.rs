@@ -303,34 +303,27 @@ pub fn set_sound_type(sound_type: String, state: State<SharedState>, app_handle:
     persist_state(&state, &app_handle);
 }
 
-#[tauri::command]
-pub fn set_time_signature(time_signature: u8, state: State<SharedState>, app_handle: AppHandle) {
-    // Deprecated thin-wrap — delegates to set_beat_groups logic.
-    // time_signature=0 ("Never") is dropped; treated as 4/4.
-    let valid = match time_signature {
-        1 | 2 | 3 | 4 | 5 | 6 | 7 => time_signature,
-        _ => 4,
-    };
-    {
-        let mut s = state.lock().unwrap();
-        s.beat_groups = vec![valid];
-        s.time_signature = valid;
-    }
-    emit_state_changed(&state, &app_handle);
-    persist_state(&state, &app_handle);
-}
-
 /// Smallest / largest beat count a single group (and therefore a FREE-mode
 /// bar) may hold. Mirrored by `MIN_FREE_BEATS` / `MAX_FREE_BEATS` in
 /// `src/constants/metronome.ts`.
 pub const MIN_GROUP_BEATS: u8 = 1;
 pub const MAX_GROUP_BEATS: u8 = 16;
+/// Largest number of accent groups in one bar.
+pub const MAX_BEAT_GROUPS: usize = 6;
+/// Largest bar (sum of all groups). Also the reason the engine's accent
+/// bitmask fits in a `u32`.
+pub const MAX_BAR_BEATS: u8 = 16;
 
 /// Validation half of [`set_beat_groups`], split out so it can be unit-tested
-/// without a Tauri `State` / `AppHandle`.
-pub fn validate_beat_groups(groups: &[u8]) -> Result<(), String> {
-    if groups.is_empty() || groups.len() > 6 {
-        return Err("groups: 1–6 required".into());
+/// without a Tauri `State` / `AppHandle`. Returns the bar total.
+///
+/// Returning the total (rather than `()`) is what lets the callers stop
+/// summing for themselves: `groups.iter().sum::<u8>()` overflows on a
+/// grouping this function would reject, and the store-restore path in
+/// `lib.rs` used to run that sum on unvalidated input.
+pub fn validate_beat_groups(groups: &[u8]) -> Result<u8, String> {
+    if groups.is_empty() || groups.len() > MAX_BEAT_GROUPS {
+        return Err(format!("groups: 1–{MAX_BEAT_GROUPS} required"));
     }
     for g in groups {
         if *g < MIN_GROUP_BEATS || *g > MAX_GROUP_BEATS {
@@ -339,11 +332,52 @@ pub fn validate_beat_groups(groups: &[u8]) -> Result<(), String> {
             ));
         }
     }
+    // u32 accumulator — a u8 one wraps before the check can reject it.
     let total: u32 = groups.iter().map(|g| *g as u32).sum();
-    if total > MAX_GROUP_BEATS as u32 {
-        return Err(format!("total beats must be ≤ {MAX_GROUP_BEATS}"));
+    if total > MAX_BAR_BEATS as u32 {
+        return Err(format!("total beats must be ≤ {MAX_BAR_BEATS}"));
     }
-    Ok(())
+    Ok(total as u8)
+}
+
+/// Resolve a persisted `(beatGroups, timeSignature, freeMode)` triple into a
+/// consistent one, for the store-restore path in `lib.rs`.
+///
+/// `stored` is whatever deserialized out of `beatGroups` (`None` when the key
+/// is absent or not a `Vec<u8>`). That path used to check only the length, so
+/// a persisted `[200, 100]` was accepted and then overflowed
+/// `iter().sum::<u8>()`, and `[]` left `beat_groups` and `time_signature`
+/// disagreeing. Anything [`validate_beat_groups`] rejects now falls through to
+/// the `timeSignature` migration, so the returned total is always
+/// `sum(groups)` and the engine always gets a bar it can click.
+///
+/// `time_signature == 0` is the retired "Never accent" option. It maps to
+/// FREE mode at four beats — the modern spelling of "no accents" — which is
+/// why the third element of the result is the free-mode flag.
+pub fn restore_beat_groups(
+    stored: Option<Vec<u8>>,
+    time_signature: u8,
+    stored_free_mode: bool,
+) -> (Vec<u8>, u8, bool) {
+    if time_signature == 0 && stored.as_deref().map_or(true, |g| g.is_empty()) {
+        return (vec![4], 4, true);
+    }
+    if let Some(groups) = stored {
+        if let Ok(total) = validate_beat_groups(&groups) {
+            // FREE mode implies exactly one group; a stored pair that
+            // disagrees is repaired rather than trusted.
+            if stored_free_mode && groups.len() > 1 {
+                let (collapsed, collapsed_total) = collapse_to_free(&groups);
+                return (collapsed, collapsed_total, true);
+            }
+            return (groups, total, stored_free_mode);
+        }
+    }
+    let ts = match time_signature {
+        1..=16 => time_signature,
+        _ => 4,
+    };
+    (vec![ts], ts, stored_free_mode)
 }
 
 #[tauri::command]
@@ -352,8 +386,7 @@ pub fn set_beat_groups(
     state: State<SharedState>,
     app_handle: AppHandle,
 ) -> Result<(), String> {
-    validate_beat_groups(&groups)?;
-    let total: u8 = groups.iter().sum();
+    let total = validate_beat_groups(&groups)?;
     {
         let mut s = state.lock().unwrap();
         s.beat_groups = groups;
@@ -968,11 +1001,17 @@ pub async fn start_evaluation(
                 }
             }
         },
-        move |segment_end| {
+        move |segment_end, emit_ui| {
             // D4 Signal B — forward to JS so the coach can decide whether
             // to surface a mini-report. The JS side filters by C4's
             // smart-timing gatekeeper.
-            let _ = app_for_segment.emit("practice-segment-ended", &segment_end);
+            //
+            // `emit_ui` is false for SettingsChange closes: the coach
+            // narrates that boundary itself (Signal A), so the segment is
+            // accumulated below but never raises a mini-report.
+            if emit_ui {
+                let _ = app_for_segment.emit("practice-segment-ended", &segment_end);
+            }
             // Also persist into the accumulator so the D1 diagnostic log
             // (written at stop_evaluation) includes the segments timeline.
             if let Ok(mut acc) = session_for_segment.lock() {
@@ -1255,11 +1294,17 @@ fn persist_session_log(
         }
     }
 
-    let (bpm, time_signature, subdivision, instrument) = {
+    let (bpm, time_signature, beat_groups, subdivision, instrument) = {
         let s = state
             .lock()
             .map_err(|e| format!("state lock failed: {e}"))?;
-        (s.bpm, s.time_signature, s.subdivision, s.instrument.clone())
+        (
+            s.bpm,
+            s.time_signature,
+            s.beat_groups.clone(),
+            s.subdivision,
+            s.instrument.clone(),
+        )
     };
 
     let end_ms = std::time::SystemTime::now()
@@ -1271,6 +1316,7 @@ fn persist_session_log(
     let log = crate::session_log::build_log_from_session(
         bpm,
         time_signature,
+        beat_groups,
         subdivision,
         start_secs,
         duration_ms,
@@ -2111,6 +2157,96 @@ mod tests {
                 "collapse_to_free({groups:?}) produced {collapsed:?}"
             );
             assert_eq!(collapsed, vec![total]);
+        }
+    }
+
+    // -----------------------------------------------------------------
+    // Store restore — `lib.rs` used to validate only the group COUNT
+    // -----------------------------------------------------------------
+
+    #[test]
+    fn validate_beat_groups_returns_the_bar_total() {
+        assert_eq!(validate_beat_groups(&[3, 2, 2]).unwrap(), 7);
+        assert_eq!(validate_beat_groups(&[16]).unwrap(), 16);
+        assert_eq!(validate_beat_groups(&[1]).unwrap(), 1);
+    }
+
+    /// `[200, 100]` passed the old length-only check and then overflowed
+    /// `groups.iter().sum::<u8>()` — a panic in debug, a wrapped nonsense
+    /// `time_signature` in release.
+    #[test]
+    fn validate_beat_groups_rejects_totals_that_would_overflow_u8() {
+        assert!(validate_beat_groups(&[200, 100]).is_err());
+        assert!(validate_beat_groups(&[255, 255, 255]).is_err());
+    }
+
+    #[test]
+    fn restore_keeps_a_valid_stored_grouping() {
+        assert_eq!(
+            restore_beat_groups(Some(vec![3, 2, 2]), 4, false),
+            (vec![3, 2, 2], 7, false)
+        );
+    }
+
+    #[test]
+    fn restore_falls_back_to_the_migration_for_invalid_groupings() {
+        // Overflowing pair — must not reach the state.
+        assert_eq!(
+            restore_beat_groups(Some(vec![200, 100]), 3, false),
+            (vec![3], 3, false)
+        );
+        // Empty array — the old code left groups and time_signature
+        // inconsistent (groups untouched, total never recomputed).
+        assert_eq!(
+            restore_beat_groups(Some(vec![]), 5, false),
+            (vec![5], 5, false)
+        );
+        // Absent key on an old save.
+        assert_eq!(restore_beat_groups(None, 6, false), (vec![6], 6, false));
+        // Out-of-range timeSignature lands on 4/4 rather than a bar the
+        // engine cannot click.
+        assert_eq!(restore_beat_groups(None, 99, false), (vec![4], 4, false));
+    }
+
+    /// The retired "Never accent" option persisted `timeSignature: 0`.
+    /// FREE mode is its modern spelling, so an old store restores into it
+    /// rather than silently becoming an accented 4/4.
+    #[test]
+    fn restore_maps_legacy_never_accent_to_free_mode() {
+        assert_eq!(restore_beat_groups(None, 0, false), (vec![4], 4, true));
+        assert_eq!(
+            restore_beat_groups(Some(vec![]), 0, false),
+            (vec![4], 4, true)
+        );
+        // A store that already carries real groups is NOT reinterpreted,
+        // even if timeSignature happens to be stale.
+        assert_eq!(
+            restore_beat_groups(Some(vec![3, 2]), 0, false),
+            (vec![3, 2], 5, false)
+        );
+    }
+
+    #[test]
+    fn restore_repairs_a_free_mode_store_that_carries_multiple_groups() {
+        // FREE mode implies exactly one group (`collapse_to_free`).
+        assert_eq!(
+            restore_beat_groups(Some(vec![3, 2, 2]), 7, true),
+            (vec![7], 7, true)
+        );
+    }
+
+    #[test]
+    fn restore_always_keeps_total_equal_to_the_sum_of_groups() {
+        for (stored, ts, free) in [
+            (Some(vec![3u8, 2]), 4u8, false),
+            (Some(vec![]), 7, false),
+            (Some(vec![200, 100]), 0, false),
+            (Some(vec![3, 2, 2]), 7, true),
+            (None, 99, false),
+        ] {
+            let (groups, total, _) = restore_beat_groups(stored, ts, free);
+            assert_eq!(total as u32, groups.iter().map(|&g| g as u32).sum::<u32>());
+            assert!(validate_beat_groups(&groups).is_ok());
         }
     }
 }

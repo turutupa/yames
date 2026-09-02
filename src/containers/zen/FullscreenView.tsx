@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { AppState, BeatEvent, Subdivision } from "../../types";
-import { setBpm, togglePlayback, setSubdivision, setBeatGroups, notifySettingsChange, stopSpeedRamp, startSpeedRamp, startSpeedRampFrom, configureSpeedRamp, storeSave, storeLoad } from "../../ipc";
-import { METER_PRESETS, nextFreeBeatCount } from "../../constants/metronome";
+import { setBpm, togglePlayback, setSubdivision, setBeatGroups, stopSpeedRamp, startSpeedRamp, startSpeedRampFrom, configureSpeedRamp, storeSave, storeLoad } from "../../ipc";
+import { meterLabel, meterTotal, stepMeter } from "../../utils/meter";
 import { ZenEffects, type ZenStyle } from "./ZenEffects";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { HintCard } from "../onboarding/hints/HintCard";
@@ -36,13 +36,22 @@ function zenStyleIcon(s: ZenStyle) {
 export function FullscreenView({ state, currentBeat, activeTab, onExit }: FullscreenViewProps) {
   const { t } = useTranslation();
   const ramp = state.speedRamp;
-  // In drill mode, use ramp's beatsPerBar; otherwise use timeSignature
-  const beatsPerMeasure = activeTab === "drill"
+  const meterBeats = Math.max(2, meterTotal(state.beatGroups ?? [state.timeSignature]));
+  // `activeBeat` is the engine's `measureBeat`, so the dot count has to
+  // come from the SAME source the engine wraps it against: the ramp's
+  // beatsPerBar only while the ramp is actually running, the meter total
+  // otherwise. The drill tab used ramp.beatsPerBar unconditionally, so
+  // with the ramp stopped in a meter longer than beatsPerBar no dot lit
+  // at all (measureBeat ran past the last rendered index).
+  const beatsPerMeasure = activeTab === "drill" && ramp.active
     ? (ramp.beatsPerBar >= 2 ? ramp.beatsPerBar : 4)
-    : Math.max(2, (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0));
+    : meterBeats;
   const activeBeat = currentBeat ? currentBeat.measureBeat : -1;
   const activeSub = currentBeat ? currentBeat.subdivision : -1;
   const isDownbeat = currentBeat?.isDownbeat ?? false;
+  // Accent comes from the engine event — false in FREE mode, and aware
+  // of the speed ramp's own bar.
+  const isAccent = currentBeat?.isAccent ?? false;
 
   const exitFullscreen = () => onExit();
   const isWarmingUp = activeTab === "drill" && ramp.active && ramp.warmupCount < ramp.warmupBeats;
@@ -214,19 +223,22 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
               })
             // Metronome mode: render per group cluster
             : (state.beatGroups ?? [state.timeSignature]).map((count, groupIdx) => {
-                const groupStart = (state.beatGroups ?? [state.timeSignature])
-                  .slice(0, groupIdx)
-                  .reduce((a: number, b: number) => a + b, 0);
+                const groupStart = meterTotal(
+                  (state.beatGroups ?? [state.timeSignature]).slice(0, groupIdx),
+                );
                 return (
                   <div key={groupIdx} className="fs-group-cluster">
                     {Array.from({ length: count }, (_, d) => {
                       const beatIdx = groupStart + d;
+                      // Static marker: a group's first dot (never in FREE
+                      // mode). Live accent: whatever the engine said about
+                      // THIS tick.
                       const isGroupDownbeat = !state.freeMode && d === 0;
                       const isBeatActive = !isWarmingUp && activeBeat === beatIdx && isDownbeat;
                       const isSubBeatActive = !isWarmingUp && activeBeat === beatIdx && !isDownbeat;
                       return (
                         <div key={d} className="fs-beat-group">
-                          <div className={`fs-beat ${isGroupDownbeat ? "accent-marker" : ""} ${isBeatActive ? "active" : ""} ${isGroupDownbeat && isBeatActive ? "accent" : ""}`} />
+                          <div className={`fs-beat ${isGroupDownbeat ? "accent-marker" : ""} ${isBeatActive ? "active" : ""} ${isBeatActive && isAccent ? "accent" : ""}`} />
                           {state.subdivision > 1 && (
                             <div className="fs-sub-dots">
                               {Array.from({ length: state.subdivision - 1 }, (_, subIdx) => (
@@ -372,20 +384,13 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
 
         {activeTab !== "drill" && (
           <button className="fs-ctrl-btn fs-ctrl-sub" onClick={() => {
-            const total = (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0);
-            if (state.freeMode) {
-              setBeatGroups([nextFreeBeatCount(total)]);
-              notifySettingsChange();
-            } else {
-              const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
-              const nextIdx = (currentIdx === -1 ? 0 : (currentIdx + 1) % METER_PRESETS.length);
-              setBeatGroups(METER_PRESETS[nextIdx].groups);
-              notifySettingsChange();
-            }
+            // useSession fires the debounced coach boundary; calling
+            // notifySettingsChange() here closed the segment early.
+            setBeatGroups(stepMeter(state.beatGroups, state.freeMode, 1));
           }}>
             {state.freeMode
-              ? t("metronome.freeBeatCount", { count: (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0) })
-              : METER_PRESETS.find(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups))?.label ?? `${state.timeSignature}/4`}
+              ? t("metronome.freeBeatCount", { count: meterBeats })
+              : meterLabel(state.beatGroups ?? [state.timeSignature])}
           </button>
         )}
         {activeTab !== "drill" && (

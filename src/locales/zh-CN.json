@@ -384,7 +384,8 @@
     "beatCount_other": "{{count}} 拍",
     "clicksPerBar": "每小节 {{count}} 次",
     "addBeat": "增加一拍",
-    "removeBeat": "减少一拍"
+    "removeBeat": "减少一拍",
+    "grouping": "分组"
   },
   "settings": {
     "tabs": {

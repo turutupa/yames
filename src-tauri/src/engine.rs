@@ -3,7 +3,6 @@ use crate::timing::{BeatLog, BeatTick};
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use rodio::Source;
 use std::io::Cursor;
-use std::collections::HashSet;
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
@@ -418,7 +417,16 @@ struct CachedParams {
     subdivision: u8,
     volume: f32,
     kit: SoundKit,
+    /// Mirror of `SharedState::beat_groups`. Allocated once with
+    /// capacity `MAX_BEAT_GROUPS` and only ever refilled in place —
+    /// the audio callback must never allocate.
     beat_groups: Vec<u8>,
+    /// Bit per bar-local beat position that starts a group (= is
+    /// accented). Rebuilt only when `beat_groups` actually changes so
+    /// the per-beat accent test is a single bit-and.
+    accent_mask: u32,
+    /// `beat_groups.iter().sum()`, precomputed alongside `accent_mask`.
+    beat_groups_total: u32,
     beat_groups_changed: bool,
     ramp_active: bool,
     ramp_beats_per_bar: u8,
@@ -436,11 +444,17 @@ struct CachedParams {
 /// structure", and that has to hold everywhere — including while the drill's
 /// speed ramp is active, which otherwise imposes its own
 /// `ramp_beats_per_bar` bar accent (N1 on PR #11).
+///
+/// The grouped case takes a precomputed `accent_mask` rather than the
+/// `beat_groups` slice: this runs on the audio thread once per beat, and
+/// rebuilding a `HashSet` there allocated on every single click. The mask
+/// is rebuilt only when the grouping actually changes — see
+/// [`accent_mask`] and `CachedParams::accent_mask`.
 fn accent_for(
     free_mode: bool,
     ramp_active: bool,
     ramp_beats_per_bar: u8,
-    beat_groups: &[u8],
+    accent_mask: u32,
     is_downbeat: bool,
     beat_count: u32,
     measure_beat: u32,
@@ -456,18 +470,37 @@ fn accent_for(
         };
         return is_downbeat && (beat_count % bpb) == 0;
     }
-    let accent_set = compute_group_accents(beat_groups);
-    is_downbeat && accent_set.contains(&measure_beat)
+    is_downbeat && mask_has_accent(accent_mask, measure_beat)
 }
 
-fn compute_group_accents(groups: &[u8]) -> HashSet<u32> {
-    let mut set = HashSet::new();
+/// Upper bound on the number of groups (`validate_beat_groups`).
+/// Used to pre-size the callback's `beat_groups` mirror.
+const MAX_BEAT_GROUPS: usize = 6;
+
+/// Bitmask of the bar-local positions that carry an accent — one bit
+/// per beat, bit `n` set when beat `n` opens a group.
+///
+/// `validate_beat_groups` caps the bar at 16 beats, so every position
+/// fits in a `u32` with room to spare; positions past bit 31 (only
+/// reachable from unvalidated input) are dropped rather than shifting
+/// out of range.
+fn accent_mask(groups: &[u8]) -> u32 {
+    let mut mask = 0u32;
     let mut cursor = 0u32;
     for &g in groups {
-        set.insert(cursor);
+        if cursor >= 32 {
+            break;
+        }
+        mask |= 1u32 << cursor;
         cursor += g as u32;
     }
-    set
+    mask
+}
+
+/// Is the bar-local position `beat` accented under `mask`?
+#[inline]
+fn mask_has_accent(mask: u32, beat: u32) -> bool {
+    beat < 32 && (mask & (1u32 << beat)) != 0
 }
 
 // ---------------------------------------------------------------------------
@@ -484,6 +517,14 @@ struct BeatNotification {
     /// each tick to its phase within the beat.
     subdivision_total: u8,
     is_downbeat: bool,
+    /// Whether this tick is accented (opens a group, or is the first
+    /// beat of the ramp's bar). Mirrored to `BeatEvent` so the UI never
+    /// has to re-derive accent positions from `beat_groups`.
+    is_accent: bool,
+    /// Beats per bar the engine used to wrap `measure_beat` for this
+    /// tick — ramp `beats_per_bar` while the ramp is active, else the
+    /// meter total.
+    beats_per_bar: u8,
     ts_ns: u64,
     expected_interval_ms: f64,
     is_warmup_beat: bool,
@@ -611,6 +652,10 @@ pub struct BeatEvent {
     pub subdivision: u32,
     #[serde(rename = "isDownbeat")]
     pub is_downbeat: bool,
+    /// True when the engine accented this tick. The UI reads this
+    /// instead of re-deriving group starts from `beatGroups`.
+    #[serde(rename = "isAccent")]
+    pub is_accent: bool,
 }
 
 // ---------------------------------------------------------------------------
@@ -1007,12 +1052,18 @@ impl MetronomeEngine {
             let mut measure_beat: u32 = 0;
             let mut was_playing = false;
             let mut session: u64 = 0;
+            // Pre-size so refilling `beat_groups` in the callback never
+            // reallocates (validated input is at most MAX_BEAT_GROUPS).
+            let mut initial_groups: Vec<u8> = Vec::with_capacity(MAX_BEAT_GROUPS);
+            initial_groups.push(4);
             let mut cached = CachedParams {
                 bpm: 120,
                 subdivision: 1,
                 volume: 0.8,
                 kit: SoundKit::Click,
-                beat_groups: vec![4],
+                accent_mask: accent_mask(&initial_groups),
+                beat_groups_total: 4,
+                beat_groups: initial_groups,
                 beat_groups_changed: false,
                 ramp_active: false,
                 ramp_beats_per_bar: 4,
@@ -1052,9 +1103,16 @@ impl MetronomeEngine {
                         };
                         cached.volume = s.volume;
                         cached.kit = SoundKit::from_str(&s.sound_type);
-                        let new_groups = s.beat_groups.clone();
-                        if new_groups != cached.beat_groups {
-                            cached.beat_groups = new_groups;
+                        // Compare slices — cloning here would allocate on
+                        // every output buffer. Refill in place (capacity
+                        // is pre-reserved) and rebuild the accent mask +
+                        // bar length only on an actual change.
+                        if s.beat_groups.as_slice() != cached.beat_groups.as_slice() {
+                            cached.beat_groups.clear();
+                            cached.beat_groups.extend_from_slice(&s.beat_groups);
+                            cached.accent_mask = accent_mask(&cached.beat_groups);
+                            cached.beat_groups_total =
+                                cached.beat_groups.iter().map(|&g| g as u32).sum();
                             cached.beat_groups_changed = true;
                         }
                         cached.ramp_active = s.speed_ramp.active;
@@ -1143,12 +1201,30 @@ impl MetronomeEngine {
                                 is_warmup_transition = true;
                             }
 
-                            // Determine accent
+                            // Bar length the engine wraps `measure_beat`
+                            // against — the ramp owns it while active,
+                            // otherwise it is the meter total (which in
+                            // FREE mode is the single collapsed group).
+                            let beats_per_measure: u32 = if cached.ramp_active {
+                                if cached.ramp_beats_per_bar >= 2 {
+                                    cached.ramp_beats_per_bar as u32
+                                } else {
+                                    4
+                                }
+                            } else if cached.beat_groups_total >= 1 {
+                                cached.beat_groups_total
+                            } else {
+                                4
+                            };
+
+                            // Determine accent. A handful of integer ops
+                            // — no allocation, no set build, per the
+                            // "click is sacred" rule.
                             let use_accent = accent_for(
                                 cached.free_mode,
                                 cached.ramp_active,
                                 cached.ramp_beats_per_bar,
-                                &cached.beat_groups,
+                                cached.accent_mask,
                                 is_downbeat,
                                 beat_count,
                                 measure_beat,
@@ -1196,18 +1272,6 @@ impl MetronomeEngine {
                                 sub_count = 0;
                                 beat_count += 1;
                                 measure_beat += 1;
-                                let beats_per_measure = if cached.ramp_active {
-                                    let b = cached.ramp_beats_per_bar;
-                                    if b >= 2 {
-                                        b as u32
-                                    } else {
-                                        4
-                                    }
-                                } else {
-                                    let total: u32 =
-                                        cached.beat_groups.iter().map(|&g| g as u32).sum();
-                                    if total >= 1 { total } else { 4 }
-                                };
                                 if measure_beat >= beats_per_measure {
                                     measure_beat = 0;
                                     bar_complete = true;
@@ -1221,6 +1285,8 @@ impl MetronomeEngine {
                                 subdivision: notif_sub,
                                 subdivision_total: subdivision.clamp(1, 255) as u8,
                                 is_downbeat,
+                                is_accent: use_accent,
+                                beats_per_bar: beats_per_measure.clamp(1, 255) as u8,
                                 ts_ns,
                                 expected_interval_ms: beat_duration_secs * 1000.0,
                                 is_warmup_beat,
@@ -1350,6 +1416,7 @@ impl MetronomeEngine {
                         measure_beat: notif.measure_beat,
                         subdivision: notif.subdivision,
                         is_downbeat: notif.is_downbeat,
+                        is_accent: notif.is_accent,
                     },
                 );
 
@@ -1373,6 +1440,7 @@ impl MetronomeEngine {
                         expected_interval_ms: notif.expected_interval_ms,
                         subdivision_index: notif.subdivision.min(255) as u8,
                         subdivision_total: notif.subdivision_total.max(1),
+                        beats_per_bar: notif.beats_per_bar.max(1),
                     });
                     // 64 quarters worth of ticks = up to 64 × 6 = 384
                     // entries at the highest configured subdivision.
@@ -1591,6 +1659,88 @@ impl Drop for MetronomeEngine {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::collections::HashSet;
+
+    /// Reference implementation the audio callback used to run on every
+    /// beat. Kept here only so `accent_mask` can be proved equivalent to
+    /// it — the hot path must not build a set.
+    fn compute_group_accents(groups: &[u8]) -> HashSet<u32> {
+        let mut set = HashSet::new();
+        let mut cursor = 0u32;
+        for &g in groups {
+            set.insert(cursor);
+            cursor += g as u32;
+        }
+        set
+    }
+
+    /// Every METER_PRESETS entry plus every METER_VARIANTS entry from
+    /// `src/constants/metronome.ts`, and the 2/4 preset added alongside.
+    const ALL_METERS: &[&[u8]] = &[
+        // METER_PRESETS
+        &[4],
+        &[3],
+        &[2],
+        &[3, 2],
+        &[3, 3],
+        &[3, 2, 2],
+        &[3, 2, 3],
+        &[3, 3, 3],
+        &[3, 3, 3, 3],
+        // METER_VARIANTS
+        &[2, 3],
+        &[2, 2, 3],
+        &[2, 3, 2],
+        &[3, 3, 2],
+        &[2, 3, 3],
+        // edges the validator still accepts
+        &[1],
+        &[16],
+        &[1, 1, 1, 1, 1, 1],
+        &[8, 8],
+    ];
+
+    #[test]
+    fn accent_mask_matches_the_set_implementation() {
+        for groups in ALL_METERS {
+            let set = compute_group_accents(groups);
+            let mask = accent_mask(groups);
+            let total: u32 = groups.iter().map(|&g| g as u32).sum();
+            for beat in 0..total.max(1) {
+                assert_eq!(
+                    mask_has_accent(mask, beat),
+                    set.contains(&beat),
+                    "groups {groups:?}, beat {beat}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn accent_mask_marks_exactly_one_bit_per_group() {
+        for groups in ALL_METERS {
+            assert_eq!(
+                accent_mask(groups).count_ones() as usize,
+                groups.len(),
+                "groups {groups:?}"
+            );
+        }
+        // Beat 0 always accents — it opens the first group.
+        assert!(mask_has_accent(accent_mask(&[3, 2, 2]), 0));
+        assert!(mask_has_accent(accent_mask(&[3, 2, 2]), 3));
+        assert!(mask_has_accent(accent_mask(&[3, 2, 2]), 5));
+        assert!(!mask_has_accent(accent_mask(&[3, 2, 2]), 1));
+        assert!(!mask_has_accent(accent_mask(&[3, 2, 2]), 6));
+    }
+
+    #[test]
+    fn accent_mask_is_bounded_for_pathological_input() {
+        // Not reachable through `validate_beat_groups`, but the shift
+        // must never be UB if it ever were.
+        let mask = accent_mask(&[255, 255, 255]);
+        assert!(mask_has_accent(mask, 0));
+        assert!(!mask_has_accent(mask, 255));
+    }
 
     #[test]
     fn adaptive_thresholds_conservative_clamps_steps() {
@@ -1742,7 +1892,7 @@ mod tests {
             for beat in 0..16u32 {
                 for is_downbeat in [true, false] {
                     assert!(
-                        !accent_for(true, false, 4, &groups, is_downbeat, beat, beat),
+                        !accent_for(true, false, 4, accent_mask(&groups), is_downbeat, beat, beat),
                         "free mode accented beat {beat} (downbeat={is_downbeat}, groups={groups:?})"
                     );
                 }
@@ -1756,15 +1906,15 @@ mod tests {
         // is checked first, so a drill in FREE mode stays flat.
         for beat in 0..16u32 {
             assert!(
-                !accent_for(true, true, 4, &[16], true, beat, beat),
+                !accent_for(true, true, 4, accent_mask(&[16]), true, beat, beat),
                 "free mode accented beat {beat} while the ramp was active"
             );
         }
         // Same inputs with free_mode off: beat 0 of every ramp bar IS accented,
         // proving the assertion above is not vacuous.
-        assert!(accent_for(false, true, 4, &[16], true, 0, 0));
-        assert!(accent_for(false, true, 4, &[16], true, 4, 4));
-        assert!(!accent_for(false, true, 4, &[16], true, 5, 5));
+        assert!(accent_for(false, true, 4, accent_mask(&[16]), true, 0, 0));
+        assert!(accent_for(false, true, 4, accent_mask(&[16]), true, 4, 4));
+        assert!(!accent_for(false, true, 4, accent_mask(&[16]), true, 5, 5));
     }
 
     #[test]
@@ -1775,7 +1925,7 @@ mod tests {
         for pos in 0..7u32 {
             let expected = matches!(pos, 0 | 3 | 5);
             assert_eq!(
-                accent_for(false, false, 4, &groups, true, pos, pos),
+                accent_for(false, false, 4, accent_mask(&groups), true, pos, pos),
                 expected,
                 "grouped accent wrong at bar position {pos}"
             );
@@ -1785,7 +1935,7 @@ mod tests {
     #[test]
     fn accent_never_fires_off_the_quarter_note_grid() {
         // `is_downbeat == false` means a subdivision tick — never an accent.
-        assert!(!accent_for(false, false, 4, &[4], false, 0, 0));
-        assert!(!accent_for(false, true, 4, &[4], false, 0, 0));
+        assert!(!accent_for(false, false, 4, accent_mask(&[4]), false, 0, 0));
+        assert!(!accent_for(false, true, 4, accent_mask(&[4]), false, 0, 0));
     }
 }

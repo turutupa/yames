@@ -14,9 +14,27 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { GroupEditor } from "./GroupEditor";
 import { mockInvoke } from "../../test/mocks";
 import { MAX_FREE_BEATS, MIN_FREE_BEATS } from "../../constants/metronome";
+import type { BeatFeedback } from "../../types";
 
 function stepper(label: "Add beat" | "Remove beat"): HTMLButtonElement {
   return screen.getByLabelText(label) as HTMLButtonElement;
+}
+
+function fb(classification: string): BeatFeedback {
+  return {
+    beatIndex: 0,
+    deviationMs: 0,
+    intervalErrorMs: 0,
+    classification,
+    amplitude: 0.5,
+    calibrationOffsetMs: 0,
+    calibrationConfidence: 1,
+    gridCorrelation: 1,
+  } as BeatFeedback;
+}
+
+function dots(container: HTMLElement): HTMLElement[] {
+  return [...container.querySelectorAll(".group-dot")] as HTMLElement[];
 }
 
 describe("GroupEditor — free mode", () => {
@@ -160,5 +178,122 @@ describe("GroupEditor — grouped mode", () => {
   it("shows no free-mode stepper in grouped mode", () => {
     render(<GroupEditor beatGroups={[4]} subdivision={1} />);
     expect(screen.queryByLabelText("Add beat")).toBeNull();
+  });
+});
+
+describe("GroupEditor — accents", () => {
+  it("marks group starts as accents while stopped", () => {
+    const { container } = render(
+      <GroupEditor beatGroups={[3, 2, 2]} subdivision={1} />,
+    );
+    const accented = dots(container)
+      .map((d, i) => (d.className.includes("accent") ? i : -1))
+      .filter((i) => i >= 0);
+    expect(accented).toEqual([0, 3, 5]);
+  });
+
+  it("draws no accent markers in FREE mode", () => {
+    const { container } = render(
+      <GroupEditor beatGroups={[7]} subdivision={1} freeMode />,
+    );
+    for (const d of dots(container)) expect(d.className).not.toContain("accent");
+  });
+
+  it("takes the LIVE accent from the engine, not the local markers", () => {
+    // Beat 1 does not open a group, but the engine says this tick is
+    // accented — the dot must follow the engine.
+    const { container } = render(
+      <GroupEditor
+        beatGroups={[3, 2, 2]}
+        subdivision={1}
+        isPlaying
+        isDownbeat
+        activeBeat={1}
+        isAccentBeat
+      />,
+    );
+    expect(dots(container)[1].className).toContain("accent");
+
+    // ...and the converse: a group start the engine did NOT accent (a
+    // speed ramp running with a different bar length, or FREE mode)
+    // stays plain.
+    const { container: c2 } = render(
+      <GroupEditor
+        beatGroups={[3, 2, 2]}
+        subdivision={1}
+        isPlaying
+        isDownbeat
+        activeBeat={3}
+        isAccentBeat={false}
+      />,
+    );
+    expect(dots(c2)[3].className).not.toContain("accent");
+  });
+});
+
+describe("GroupEditor — per-beat evaluation feedback", () => {
+  it("renders different classes for a miss and a perfect hit", () => {
+    const missed = render(
+      <GroupEditor
+        beatGroups={[4]}
+        subdivision={1}
+        isPlaying
+        isDownbeat
+        activeBeat={2}
+        feedback={new Map([[2, fb("miss")]])}
+      />,
+    );
+    const perfect = render(
+      <GroupEditor
+        beatGroups={[4]}
+        subdivision={1}
+        isPlaying
+        isDownbeat
+        activeBeat={2}
+        feedback={new Map([[2, fb("perfect")]])}
+      />,
+    );
+    const missClass = dots(missed.container)[2].className;
+    const perfectClass = dots(perfect.container)[2].className;
+    expect(missClass).toContain("feedback-miss");
+    expect(perfectClass).toContain("feedback-perfect");
+    expect(missClass).not.toBe(perfectClass);
+  });
+
+  it("only tints the beat that is currently lit", () => {
+    const { container } = render(
+      <GroupEditor
+        beatGroups={[4]}
+        subdivision={1}
+        isPlaying
+        isDownbeat
+        activeBeat={2}
+        feedback={new Map([[1, fb("miss")], [2, fb("good")]])}
+      />,
+    );
+    expect(dots(container)[1].className).not.toContain("feedback-");
+    expect(dots(container)[2].className).toContain("feedback-good");
+  });
+
+  it("tints the FREE-mode dots too", () => {
+    const { container } = render(
+      <GroupEditor
+        beatGroups={[5]}
+        subdivision={1}
+        freeMode
+        isPlaying
+        isDownbeat
+        activeBeat={3}
+        feedback={new Map([[3, fb("ok")]])}
+      />,
+    );
+    expect(dots(container)[3].className).toContain("feedback-ok");
+  });
+
+  it("renders no feedback class when no feedback is supplied", () => {
+    const { container } = render(
+      <GroupEditor beatGroups={[4]} subdivision={1} isPlaying isDownbeat activeBeat={0} />,
+    );
+    for (const d of dots(container)) expect(d.className).not.toContain("feedback-");
   });
 });

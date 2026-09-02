@@ -79,10 +79,6 @@ export async function setSoundType(soundType: string): Promise<void> {
   return invoke("set_sound_type", { soundType });
 }
 
-export async function setTimeSignature(timeSignature: number): Promise<void> {
-  return invoke("set_time_signature", { timeSignature });
-}
-
 export async function setBeatGroups(groups: number[]): Promise<void> {
   return invoke("set_beat_groups", { groups });
 }

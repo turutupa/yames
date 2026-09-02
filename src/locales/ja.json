@@ -384,7 +384,8 @@
     "beatCount_other": "{{count}} 拍",
     "clicksPerBar": "{{count}} クリック/小節",
     "addBeat": "拍を追加",
-    "removeBeat": "拍を削除"
+    "removeBeat": "拍を削除",
+    "grouping": "グループ分け"
   },
   "settings": {
     "tabs": {

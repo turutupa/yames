@@ -3,6 +3,8 @@ import {
   nextFreeBeatCount,
   prevFreeBeatCount,
 } from "../../constants/metronome";
+import type { BeatFeedback } from "../../types";
+import { accentPositions, meterTotal } from "../../utils/meter";
 
 const SUBDIVISION_MULTIPLIER: Record<number, number> = {
   1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
@@ -16,19 +18,21 @@ interface GroupEditorProps {
   activeSub?: number;
   isDownbeat?: boolean;
   freeMode?: boolean;
+  /** `BeatEvent.isAccent` for the beat currently lit. */
+  isAccentBeat?: boolean;
+  /**
+   * Per-beat evaluation feedback, keyed by bar position. Renders the
+   * `feedback-<classification>` tint the pre-grouping beat dots had —
+   * `evaluation.dotFeedback` lost its consumer when the flat dot row was
+   * replaced by this grouped editor.
+   */
+  feedback?: Map<number, BeatFeedback>;
   /**
    * Called by the free-mode stepper with the new beat count. Kept as a prop so
    * this component stays presentational — the owner (`MetronomeView`) does the
    * IPC. No-op default lets the grouped branch render without wiring.
    */
   onBeatCountChange?: (next: number) => void;
-}
-
-function computeAccentPositions(groups: number[]): Set<number> {
-  const s = new Set<number>();
-  let c = 0;
-  for (const g of groups) { s.add(c); c += g; }
-  return s;
 }
 
 export function GroupEditor({
@@ -39,13 +43,18 @@ export function GroupEditor({
   activeSub = -1,
   isDownbeat = false,
   freeMode = false,
+  isAccentBeat = false,
+  feedback,
   onBeatCountChange,
 }: GroupEditorProps) {
   const { t } = useTranslation();
-  const total = beatGroups.reduce((a, b) => a + b, 0);
+  const total = meterTotal(beatGroups);
   const formula = beatGroups.join(" + ");
   const clicksPerBar = total * (SUBDIVISION_MULTIPLIER[subdivision] ?? 1);
-  const accentPositions = computeAccentPositions(beatGroups);
+  // Static markers only — the LIVE accent comes from the engine via
+  // `isAccentBeat`, so the two can never disagree (and stays false in
+  // FREE mode, where `accentPositions` is empty anyway).
+  const accents = accentPositions(beatGroups, freeMode);
 
   if (freeMode) {
     return (
@@ -55,9 +64,11 @@ export function GroupEditor({
           {Array.from({ length: total }, (_, i) => {
             const isActive = isPlaying && isDownbeat && activeBeat === i;
             const isSubBeat = isPlaying && !isDownbeat && activeBeat === i;
+            const fb = feedback?.get(i);
+            const feedbackClass = fb && isActive ? `feedback-${fb.classification}` : "";
             return (
               <div key={i} className="group-dot-wrap">
-                <div className={`group-dot ${isActive ? "playing" : "free-active"}`} />
+                <div className={`group-dot ${isActive ? "playing" : "free-active"} ${feedbackClass}`} />
                 {subdivision > 1 && (
                   <div className="group-sub-dots">
                     {Array.from({ length: subdivision - 1 }, (_, s) => (
@@ -104,12 +115,15 @@ export function GroupEditor({
               <div className="group-dots">
                 {Array.from({ length: count }, (_, d) => {
                   const pos = startPos + d;
-                  const isAccent = accentPositions.has(pos);
                   const isActive = isPlaying && isDownbeat && activeBeat === pos;
                   const isSubBeat = isPlaying && !isDownbeat && activeBeat === pos;
+                  // Playing: trust the engine. Stopped: draw the marker.
+                  const isAccent = isActive ? isAccentBeat : accents.has(pos);
+                  const fb = feedback?.get(pos);
+                  const feedbackClass = fb && isActive ? `feedback-${fb.classification}` : "";
                   return (
                     <div key={d} className="group-dot-wrap">
-                      <div className={`group-dot ${isAccent ? "accent" : ""} ${isActive ? "playing" : ""}`} />
+                      <div className={`group-dot ${isAccent ? "accent" : ""} ${isActive ? "playing" : ""} ${feedbackClass}`} />
                       {subdivision > 1 && (
                         <div className="group-sub-dots">
                           {Array.from({ length: subdivision - 1 }, (_, s) => (

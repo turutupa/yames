@@ -384,7 +384,8 @@
     "beatCount_other": "{{count}} beats",
     "clicksPerBar": "{{count}} clicks/bar",
     "addBeat": "Add beat",
-    "removeBeat": "Remove beat"
+    "removeBeat": "Remove beat",
+    "grouping": "grouping"
   },
   "settings": {
     "tabs": {

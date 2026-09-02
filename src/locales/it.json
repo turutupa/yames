@@ -384,7 +384,8 @@
     "beatCount_other": "{{count}} colpi",
     "clicksPerBar": "{{count}} clic/battuta",
     "addBeat": "Aggiungi colpo",
-    "removeBeat": "Rimuovi colpo"
+    "removeBeat": "Rimuovi colpo",
+    "grouping": "raggruppamento"
   },
   "settings": {
     "tabs": {

@@ -61,6 +61,13 @@ export type BeatEvent = {
   measureBeat: number; // bar-local position (0..beatsPerMeasure), accurate after meter changes
   subdivision: number;
   isDownbeat: boolean;
+  /**
+   * Whether the engine accented this tick — it opens a beat group, or
+   * is beat 0 of the speed ramp's bar. Read this for the LIVE accent
+   * state instead of re-deriving group starts from `beatGroups`; the
+   * engine is the only thing that knows which rule applied.
+   */
+  isAccent: boolean;
 };
 
 // ---------------------------------------------------------------------------

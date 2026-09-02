@@ -51,6 +51,15 @@ pub struct BeatTick {
     /// each tick to its absolute phase within the beat.
     #[serde(rename = "subdivisionTotal")]
     pub subdivision_total: u8,
+    /// Beats per bar the engine wrapped `measure_beat` against for this
+    /// tick — the ramp's `beats_per_bar` while a speed ramp is running,
+    /// otherwise the meter total (sum of `beat_groups`).
+    ///
+    /// The segment's `time_sig` is seeded from this instead of a
+    /// hard-coded 4, so accent buckets bin against the bar the user is
+    /// actually playing.
+    #[serde(rename = "beatsPerBar")]
+    pub beats_per_bar: u8,
 }
 
 /// Feedback for a single beat after matching with an onset.
@@ -347,7 +356,13 @@ impl TimingAnalyzer {
     /// fire a fresh segment via Signal A.
     ///
     /// `on_feedback` is per-beat (existing behavior).
-    /// `on_segment_end` is Signal-B (≥30s play + ≥4s silence → emit).
+    /// `on_segment_end` fires for EVERY closed segment, with a second
+    /// `emit_ui: bool` argument saying whether the callee should also
+    /// surface `practice-segment-ended` to the frontend. It is `false`
+    /// only for `SegmentEndReason::SettingsChange`, where the JS
+    /// gatekeeper already narrates the boundary itself — the segment is
+    /// still scored and accumulated, it just doesn't raise a second
+    /// mini-report. Signal-B (≥30s play + ≥4s silence) passes `true`.
     /// `initial_calibration_offset_ms` (when `Some`) pre-seeds the
     /// running-median calibration buffer so a cached `(instrument,
     /// device)` pair skips the ~8-beat warmup convergence period
@@ -371,7 +386,7 @@ impl TimingAnalyzer {
         on_inferred_grid: I,
     ) where
         F: Fn(BeatFeedback) + Send + 'static,
-        G: Fn(PracticeSegmentEnded) + Send + 'static,
+        G: Fn(PracticeSegmentEnded, bool) + Send + 'static,
         H: Fn(f64) + Send + 'static,
         I: Fn(InferredGridChanged) + Send + 'static,
     {
@@ -450,7 +465,7 @@ impl TimingAnalyzer {
         on_inferred_grid: I,
     ) where
         F: Fn(BeatFeedback) + Send + 'static,
-        G: Fn(PracticeSegmentEnded) + Send + 'static,
+        G: Fn(PracticeSegmentEnded, bool) + Send + 'static,
         H: Fn(f64) + Send + 'static,
         I: Fn(InferredGridChanged) + Send + 'static,
     {
@@ -653,9 +668,26 @@ impl TimingAnalyzer {
             // the next run of play opens a fresh segment. Per plan,
             // SettingsChange does NOT emit `practice-segment-ended` —
             // the coach already speaks the boundary via the JS
-            // gatekeeper's forced `boundary_signal_a` event.
+            // gatekeeper's forced `boundary_signal_a` event — so the
+            // callback is told to skip the UI event (`emit_ui = false`).
+            //
+            // The segment is still SCORED and pushed into the session
+            // accumulator: dropping it (the pre-fix behaviour) meant
+            // every bar played before a tempo/meter tweak vanished from
+            // the session log and the final report.
             if settings_changed.swap(false, Ordering::SeqCst) {
-                if segment.take().is_some() {
+                if let Some(seg) = segment.take() {
+                    on_segment_end(
+                        build_segment_ended(
+                            &seg,
+                            &instrument_id,
+                            &preset_id,
+                            SegmentEndReason::SettingsChange,
+                            rhythm_inference.current_divisor(),
+                            rhythm_inference.confidence(),
+                        ),
+                        false,
+                    );
                     // Reset onset/prev-tracking state so the next
                     // segment scores fresh inter-onset intervals
                     // against the new BPM grid.
@@ -678,42 +710,17 @@ impl TimingAnalyzer {
             // (player can resume after the report is shown).
             if close_segment_now.swap(false, Ordering::SeqCst) {
                 if let Some(seg) = segment.take() {
-                    let instr_profile = Instrument::from_id(&instrument_id).profile();
-                    let seg_weights = if seg.coach_mode == CoachMode::Default {
-                        instr_profile.default_score_weights
-                    } else {
-                        instr_profile.score_weights
-                    };
-                    let (score, components) = score_segment(&seg, &seg_weights);
-                    let onset_efficiency = if seg.total_onsets > 0 {
-                        (seg.onset_count as f32 / seg.total_onsets as f32).clamp(0.0, 1.0)
-                    } else {
-                        0.0
-                    };
-                    let spurious_onsets = seg.total_onsets.saturating_sub(seg.onset_count);
-                    on_segment_end(PracticeSegmentEnded {
-                        start_ms: seg.start_wall_ms,
-                        end_ms: seg.last_onset_wall_ms,
-                        score,
-                        component_scores: components,
-                        bpm: seg.start_bpm,
-                        instrument: instrument_id.clone(),
-                        preset_id: preset_id.clone(),
-                        end_reason: SegmentEndReason::UserStopped,
-                        onset_count: seg.onset_count,
-                        beat_count: seg.beat_count,
-                        total_onsets: seg.total_onsets,
-                        spurious_onsets,
-                        onset_efficiency,
-                        inferred_divisor: rhythm_inference.current_divisor(),
-                        inferred_divisor_confidence: rhythm_inference.confidence(),
-                        play_mode: if onset_efficiency >= 0.45 {
-                            PlayMode::Structured
-                        } else {
-                            PlayMode::Noodling
-                        },
-                        interval_errors: seg.interval_errors.clone(),
-                    });
+                    on_segment_end(
+                        build_segment_ended(
+                            &seg,
+                            &instrument_id,
+                            &preset_id,
+                            SegmentEndReason::UserStopped,
+                            rhythm_inference.current_divisor(),
+                            rhythm_inference.confidence(),
+                        ),
+                        true,
+                    );
                 }
             }
 
@@ -1212,7 +1219,11 @@ impl TimingAnalyzer {
                             grid_alignment_denominator: 0.0,
                             matched_confidence_sum: 0.0,
                             coach_mode,
-                            time_sig: 4,
+                            // Bar length the engine is actually clicking
+                            // (meter total, or the ramp's beats-per-bar).
+                            // Was hard-coded to 4, which mis-binned the
+                            // accent buckets in every non-4 meter.
+                            time_sig: beat.beats_per_bar.max(1),
                             subdivision: beat.subdivision_total,
                             accent_buckets: std::collections::HashMap::new(),
                             matched_amplitudes: Vec::new(),
@@ -1483,48 +1494,17 @@ impl TimingAnalyzer {
                             if silence_ms >= SIGNAL_B_MIN_SILENCE_MS
                                 && play_ms >= SIGNAL_B_MIN_PLAY_MS
                             {
-                                let instr_profile = Instrument::from_id(&instrument_id).profile();
-                                let seg_weights = if seg.coach_mode == CoachMode::Default {
-                                    instr_profile.default_score_weights
-                                } else {
-                                    instr_profile.score_weights
-                                };
-                                let (score, components) = score_segment(seg, &seg_weights);
-                                // D3b — onset_efficiency = matched / total.
-                                // Floor the denominator at 1 to avoid
-                                // div-by-zero on truly empty segments.
-                                let onset_efficiency = if seg.total_onsets > 0 {
-                                    (seg.onset_count as f32 / seg.total_onsets as f32)
-                                        .clamp(0.0, 1.0)
-                                } else {
-                                    0.0
-                                };
-                                let spurious_onsets =
-                                    seg.total_onsets.saturating_sub(seg.onset_count);
-                                on_segment_end(PracticeSegmentEnded {
-                                    start_ms: seg.start_wall_ms,
-                                    end_ms: seg.last_onset_wall_ms,
-                                    score,
-                                    component_scores: components,
-                                    bpm: seg.start_bpm,
-                                    instrument: instrument_id.clone(),
-                                    preset_id: preset_id.clone(),
-                                    end_reason: SegmentEndReason::ActivityGap,
-                                    onset_count: seg.onset_count,
-                                    beat_count: seg.beat_count,
-                                    total_onsets: seg.total_onsets,
-                                    spurious_onsets,
-                                    onset_efficiency,
-                                    inferred_divisor: rhythm_inference.current_divisor(),
-                                    inferred_divisor_confidence: rhythm_inference.confidence(),
-                                    play_mode: if onset_efficiency >= 0.45 {
-                                        PlayMode::Structured
-                                    } else {
-                                        PlayMode::Noodling
-                                    },
-                                    // D4c — forward raw errors for D1 log.
-                                    interval_errors: seg.interval_errors.clone(),
-                                });
+                                on_segment_end(
+                                    build_segment_ended(
+                                        seg,
+                                        &instrument_id,
+                                        &preset_id,
+                                        SegmentEndReason::ActivityGap,
+                                        rhythm_inference.current_divisor(),
+                                        rhythm_inference.confidence(),
+                                    ),
+                                    true,
+                                );
                                 segment = None;
                             }
                         }
@@ -1613,46 +1593,19 @@ impl TimingAnalyzer {
                                 // don't surface a "drifted" report
                                 // for a 5-second warmup blip.
                                 if play_ms >= SIGNAL_B_MIN_PLAY_MS {
-                                    let instr_profile =
-                                        Instrument::from_id(&instrument_id).profile();
-                                    let seg_weights = if seg.coach_mode == CoachMode::Default {
-                                        instr_profile.default_score_weights
-                                    } else {
-                                        instr_profile.score_weights
-                                    };
-                                    let (score, components) = score_segment(seg, &seg_weights);
-                                    let onset_efficiency = if seg.total_onsets > 0 {
-                                        (seg.onset_count as f32 / seg.total_onsets as f32)
-                                            .clamp(0.0, 1.0)
-                                    } else {
-                                        0.0
-                                    };
-                                    let spurious_onsets =
-                                        seg.total_onsets.saturating_sub(seg.onset_count);
-                                    on_segment_end(PracticeSegmentEnded {
-                                        start_ms: seg.start_wall_ms,
-                                        end_ms: now_wall,
-                                        score,
-                                        component_scores: components,
-                                        bpm: seg.start_bpm,
-                                        instrument: instrument_id.clone(),
-                                        preset_id: preset_id.clone(),
-                                        end_reason: SegmentEndReason::GridDiscontinuity,
-                                        onset_count: seg.onset_count,
-                                        beat_count: seg.beat_count,
-                                        total_onsets: seg.total_onsets,
-                                        spurious_onsets,
-                                        onset_efficiency,
-                                        inferred_divisor: rhythm_inference.current_divisor(),
-                                        inferred_divisor_confidence: rhythm_inference.confidence(),
-                                        play_mode: if onset_efficiency >= 0.45 {
-                                            PlayMode::Structured
-                                        } else {
-                                            PlayMode::Noodling
-                                        },
-                                        // D4c — forward raw errors for D1 log.
-                                        interval_errors: seg.interval_errors.clone(),
-                                    });
+                                    let mut ended = build_segment_ended(
+                                        seg,
+                                        &instrument_id,
+                                        &preset_id,
+                                        SegmentEndReason::GridDiscontinuity,
+                                        rhythm_inference.current_divisor(),
+                                        rhythm_inference.confidence(),
+                                    );
+                                    // The grid was lost *now*, which may be
+                                    // several beats after the last matched
+                                    // onset — report the detection instant.
+                                    ended.end_ms = now_wall;
+                                    on_segment_end(ended, true);
                                 }
                                 segment = None;
                             }
@@ -1735,42 +1688,17 @@ impl TimingAnalyzer {
         if let Some(seg) = segment.take() {
             let play_ms = seg.last_onset_wall_ms.saturating_sub(seg.start_wall_ms);
             if play_ms >= SIGNAL_B_MIN_PLAY_MS {
-                let instr_profile = Instrument::from_id(&instrument_id).profile();
-                let seg_weights = if seg.coach_mode == CoachMode::Default {
-                    instr_profile.default_score_weights
-                } else {
-                    instr_profile.score_weights
-                };
-                let (score, components) = score_segment(&seg, &seg_weights);
-                let onset_efficiency = if seg.total_onsets > 0 {
-                    (seg.onset_count as f32 / seg.total_onsets as f32).clamp(0.0, 1.0)
-                } else {
-                    0.0
-                };
-                let spurious_onsets = seg.total_onsets.saturating_sub(seg.onset_count);
-                on_segment_end(PracticeSegmentEnded {
-                    start_ms: seg.start_wall_ms,
-                    end_ms: seg.last_onset_wall_ms,
-                    score,
-                    component_scores: components,
-                    bpm: seg.start_bpm,
-                    instrument: instrument_id.clone(),
-                    preset_id: preset_id.clone(),
-                    end_reason: SegmentEndReason::SessionEnd,
-                    onset_count: seg.onset_count,
-                    beat_count: seg.beat_count,
-                    total_onsets: seg.total_onsets,
-                    spurious_onsets,
-                    onset_efficiency,
-                    inferred_divisor: rhythm_inference.current_divisor(),
-                    inferred_divisor_confidence: rhythm_inference.confidence(),
-                    play_mode: if onset_efficiency >= 0.45 {
-                        PlayMode::Structured
-                    } else {
-                        PlayMode::Noodling
-                    },
-                    interval_errors: seg.interval_errors.clone(),
-                });
+                on_segment_end(
+                    build_segment_ended(
+                        &seg,
+                        &instrument_id,
+                        &preset_id,
+                        SegmentEndReason::SessionEnd,
+                        rhythm_inference.current_divisor(),
+                        rhythm_inference.confidence(),
+                    ),
+                    true,
+                );
             }
         }
     }
@@ -2266,6 +2194,60 @@ const IC_K_FACTOR_DEFAULT: f64 = 0.8;
 /// `total_expected_beats` (all beat ticks, including Resting/Idle skips) is
 /// still used as the `onset_efficiency` floor to prevent the "ratio of
 /// nothing" exploit where sparse play would otherwise inflate that score.
+/// Score `seg` and package it as a `PracticeSegmentEnded`.
+///
+/// Every close path in the analysis loop (Signal-A settings change,
+/// falling-edge close, Signal-B activity gap, grid discontinuity,
+/// session end) produced a byte-identical copy of this block; the only
+/// thing that ever varied is `end_reason`. Extracted so a new close
+/// reason cannot silently diverge from the others' scoring.
+fn build_segment_ended(
+    seg: &SegmentState,
+    instrument_id: &str,
+    preset_id: &Option<String>,
+    end_reason: SegmentEndReason,
+    inferred_divisor: u8,
+    inferred_divisor_confidence: f64,
+) -> PracticeSegmentEnded {
+    let instr_profile = Instrument::from_id(instrument_id).profile();
+    let seg_weights = if seg.coach_mode == CoachMode::Default {
+        instr_profile.default_score_weights
+    } else {
+        instr_profile.score_weights
+    };
+    let (score, component_scores) = score_segment(seg, &seg_weights);
+    // D3b — onset_efficiency = matched / total. Floor the denominator
+    // at 1 to avoid div-by-zero on truly empty segments.
+    let onset_efficiency = if seg.total_onsets > 0 {
+        (seg.onset_count as f32 / seg.total_onsets as f32).clamp(0.0, 1.0)
+    } else {
+        0.0
+    };
+    PracticeSegmentEnded {
+        start_ms: seg.start_wall_ms,
+        end_ms: seg.last_onset_wall_ms,
+        score,
+        component_scores,
+        bpm: seg.start_bpm,
+        instrument: instrument_id.to_string(),
+        preset_id: preset_id.clone(),
+        end_reason,
+        onset_count: seg.onset_count,
+        beat_count: seg.beat_count,
+        total_onsets: seg.total_onsets,
+        spurious_onsets: seg.total_onsets.saturating_sub(seg.onset_count),
+        onset_efficiency,
+        inferred_divisor,
+        inferred_divisor_confidence,
+        play_mode: if onset_efficiency >= 0.45 {
+            PlayMode::Structured
+        } else {
+            PlayMode::Noodling
+        },
+        interval_errors: seg.interval_errors.clone(),
+    }
+}
+
 fn score_segment(seg: &SegmentState, weights: &ScoreWeights) -> (f32, ComponentScores) {
     // ── interval_consistency ────────────────────────────────────────
     //
@@ -3969,7 +3951,7 @@ mod tests {
             move |fb| {
                 feedbacks_writer.lock().unwrap().push(fb);
             },
-            |_seg| {},
+            |_seg, _emit_ui| {},
             |_| {},
             |_| {},
         );
@@ -4005,6 +3987,7 @@ mod tests {
                     expected_interval_ms: INTERVAL_MS,
                     subdivision_index: 0,
                     subdivision_total: 1,
+                    beats_per_bar: 4,
                 })
                 .collect()
         };
@@ -4084,7 +4067,7 @@ mod tests {
             move |fb| {
                 feedbacks_writer.lock().unwrap().push(fb);
             },
-            |_seg| {},
+            |_seg, _emit_ui| {},
             |_| {},
             |_| {},
         );
@@ -4105,6 +4088,7 @@ mod tests {
                     expected_interval_ms: INTERVAL_MS,
                     subdivision_index: 0,
                     subdivision_total: 1,
+                    beats_per_bar: 4,
                 })
                 .collect()
         };
@@ -4179,7 +4163,7 @@ mod tests {
             None,
             CoachMode::Default,
             |_| {},
-            move |pse| {
+            move |pse, _emit_ui| {
                 seg_ends_writer.lock().unwrap().push(pse.end_reason);
             },
             |_| {},
@@ -4202,5 +4186,100 @@ mod tests {
             "short / empty session must not emit SessionEnd; got {:?}",
             session_ends
         );
+    }
+
+    /// Signal A must SCORE the open segment, not discard it.
+    ///
+    /// Before this fix the settings-change poll did `segment.take()` and
+    /// threw the result away, so every bar played before a tempo or
+    /// meter tweak vanished from the session log and the final report.
+    /// The segment now goes through the same `on_segment_end` path as
+    /// every other close reason — the caller pushes it into the session
+    /// accumulator — but with `emit_ui = false` so the UI does not get a
+    /// second mini-report on top of the coach's own boundary narration.
+    #[test]
+    fn settings_change_scores_the_open_segment_without_a_ui_event() {
+        let beat_log = create_beat_log();
+        let mut analyzer = TimingAnalyzer::new(beat_log.clone());
+
+        // (end_reason, emit_ui) for every segment close.
+        let closes: Arc<Mutex<Vec<(SegmentEndReason, bool)>>> = Arc::new(Mutex::new(Vec::new()));
+        let closes_writer = closes.clone();
+
+        analyzer.start(
+            Instrument::Other.profile(),
+            "other".to_string(),
+            Some("preset-a".to_string()),
+            None,
+            CoachMode::Default,
+            |_fb| {},
+            move |pse, emit_ui| {
+                closes_writer
+                    .lock()
+                    .unwrap()
+                    .push((pse.end_reason, emit_ui));
+            },
+            |_| {},
+            |_| {},
+        );
+
+        // Advance past the tiny ts_ns values below so every beat's
+        // matching deadline has already elapsed when the loop sees it.
+        std::thread::sleep(std::time::Duration::from_millis(200));
+
+        // Eight ticks with an onset dead on each — enough to clear the
+        // 4-beat warmup grace and open a segment. Like the neighbouring
+        // analyzer tests the ticks sit 1 ns apart at a tiny `ts_ns`:
+        // real 500 ms spacing would put later beats in the analyzer's
+        // future and they would never leave the held-beat buffer.
+        const INTERVAL_MS: f64 = 500.0;
+        const TICKS: u32 = 8;
+        let base_ns: u64 = 1_000;
+        {
+            let mut log = beat_log.lock().unwrap();
+            for i in 0..TICKS {
+                log.push_back(BeatTick {
+                    ts_ns: base_ns + i as u64,
+                    beat_index: i,
+                    is_downbeat: i % 4 == 0,
+                    expected_interval_ms: INTERVAL_MS,
+                    subdivision_index: 0,
+                    subdivision_total: 1,
+                    beats_per_bar: 4,
+                });
+            }
+        }
+        for i in 0..TICKS {
+            analyzer.log_onset(Onset {
+                ts_ns: base_ns + i as u64,
+                amplitude: 0.8,
+                centroid: 900.0,
+                confidence: 0.9,
+            });
+        }
+
+        // Let the 5ms analysis loop chew through the batch and open a
+        // segment before the settings change lands.
+        std::thread::sleep(std::time::Duration::from_millis(120));
+
+        analyzer.notify_settings_change();
+        std::thread::sleep(std::time::Duration::from_millis(80));
+
+        let observed = closes.lock().unwrap().clone();
+        let settings_closes: Vec<_> = observed
+            .iter()
+            .filter(|(reason, _)| *reason == SegmentEndReason::SettingsChange)
+            .collect();
+        assert_eq!(
+            settings_closes.len(),
+            1,
+            "expected exactly one SettingsChange close, got {observed:?}"
+        );
+        assert!(
+            !settings_closes[0].1,
+            "SettingsChange must not raise the practice-segment-ended UI event"
+        );
+
+        analyzer.stop();
     }
 }

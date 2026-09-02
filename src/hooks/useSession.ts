@@ -58,6 +58,7 @@ import {
 import { accuracyPct, commentForScore, computeLegacyScore, computeRecentHitCompleteness, gradeForScore, rescoreReport, scoredBeats } from "../coach/reportStats";
 import { createSessionToken } from "../coach/sessionGuard";
 import { coachDebug } from "../coach/debug";
+import { meterKey } from "../utils/meter";
 import { useRealtimeTips } from "../containers/practice-coach/hooks/useRealtimeTips";
 import { useSegmentCoach } from "../containers/practice-coach/hooks/useSegmentCoach";
 
@@ -84,6 +85,13 @@ interface UseSessionOptions {
   isPlaying: boolean;
   bpm: number;
   timeSignature: number;
+  /**
+   * Accent grouping of the bar. Watched alongside `timeSignature` so a
+   * variant switch that keeps the same total (7/8 `[3,2,2]` → `[2,3,2]`)
+   * still produces one debounced coach boundary — `timeSignature` alone
+   * cannot see it.
+   */
+  beatGroups?: number[];
   presetId?: string;
   presetName?: string;
   voiceMode?: "silent" | "voice";
@@ -136,7 +144,7 @@ interface UseSessionOptions {
   drillCompleted?: boolean;
 }
 
-export function useSession({ evaluation, isPlaying, bpm, timeSignature, presetId, presetName, voiceMode = "silent", coachVerbosity = "default", coachMode = "default", instrument = "electric-guitar", setBpm, inDrillRamp = false, drillStartBpm, drillTargetBpm, drillCompleted = false }: UseSessionOptions) {
+export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGroups, presetId, presetName, voiceMode = "silent", coachVerbosity = "default", coachMode = "default", instrument = "electric-guitar", setBpm, inDrillRamp = false, drillStartBpm, drillTargetBpm, drillCompleted = false }: UseSessionOptions) {
   const instrumentLabel = instrument === "drums" ? "drums/percussion"
     : instrument === "electric-guitar" ? "electric guitar"
     : instrument === "acoustic-guitar" ? "acoustic guitar"
@@ -238,9 +246,14 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, presetId
   // NOT updated on every render so a burst of rapid changes (e.g.
   // hammering -5 BPM six times) coalesces into a single event for
   // the net change ("tempo down to 90 BPM") instead of six cards.
+  // Stable identity for the meter. `beatGroups` arrives as a fresh
+  // array on every state-changed event, so the boundary effect must
+  // depend on this string rather than the array reference.
+  const meterId = meterKey(beatGroups ?? [timeSignature]);
   const prevBpmRef = useRef<number>(bpm);
   const prevPresetIdRef = useRef<string | undefined>(presetId);
   const prevTimeSignatureRef = useRef<number>(timeSignature);
+  const prevMeterKeyRef = useRef<string>(meterKey(beatGroups ?? [timeSignature]));
   const prevInstrumentRef = useRef<string>(instrument);
   // Debounce timer used to coalesce config-change bursts. Each new
   // change resets the timer; the gatekeeper fires once the user
@@ -908,6 +921,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, presetId
       prevBpmRef.current = bpm;
       prevPresetIdRef.current = presetId;
       prevTimeSignatureRef.current = timeSignature;
+      prevMeterKeyRef.current = meterId;
       prevInstrumentRef.current = instrument;
       return;
     }
@@ -936,6 +950,14 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, presetId
         from: prevTimeSignatureRef.current,
         to: timeSignature,
       });
+    } else if (prevMeterKeyRef.current !== meterId) {
+      // Same bar length, different accent grouping — a real change the
+      // player hears, invisible to `timeSignature`.
+      changes.push({
+        kind: "grouping",
+        from: prevMeterKeyRef.current,
+        to: meterId,
+      });
     }
     if (prevInstrumentRef.current !== instrument) {
       changes.push({
@@ -953,7 +975,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, presetId
     // exactly the state observed when it was scheduled. Subsequent
     // changes cancel + reschedule via the cleanup below, so closure
     // staleness is not a concern.
-    const snapshot = { bpm, presetId, presetName, timeSignature, instrument };
+    const snapshot = { bpm, presetId, presetName, timeSignature, meterId, instrument };
     const timerId = window.setTimeout(() => {
       boundaryDebounceRef.current = null;
 
@@ -962,7 +984,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, presetId
       // multiple shift inside one debounce window (e.g. preset apply
       // bumps both BPM and time-sig). The remaining changes are still
       // surfaced through `{change}` copy below.
-      const priority = ["bpm-up", "bpm-down", "preset", "time-sig", "instrument"];
+      const priority = ["bpm-up", "bpm-down", "preset", "time-sig", "grouping", "instrument"];
       changes.sort((a, b) => priority.indexOf(a.kind) - priority.indexOf(b.kind));
       const primary = changes[0];
       const changeText = changes.map(formatChangeCopy).join("; ");
@@ -973,6 +995,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, presetId
       prevBpmRef.current = snapshot.bpm;
       prevPresetIdRef.current = snapshot.presetId;
       prevTimeSignatureRef.current = snapshot.timeSignature;
+      prevMeterKeyRef.current = snapshot.meterId;
       prevInstrumentRef.current = snapshot.instrument;
 
       // C1 narrative: log the preset change so the LLM sees the new
@@ -1066,7 +1089,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, presetId
         boundaryDebounceRef.current = null;
       }
     };
-  }, [active, bpm, presetId, presetName, timeSignature, instrument, vocab, maybeSpeak, voiceMode, speakAndReveal]);
+  }, [active, bpm, presetId, presetName, timeSignature, meterId, instrument, vocab, maybeSpeak, voiceMode, speakAndReveal]);
 
   // ── D4 Signal B extension — grid-discontinuity coaching ──────────
   // Rust emits `practice-segment-ended` with endReason "grid-discontinuity"
@@ -1143,6 +1166,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, presetId
     prevBpmRef.current = bpm;
     prevPresetIdRef.current = presetId;
     prevTimeSignatureRef.current = timeSignature;
+    prevMeterKeyRef.current = meterKey(beatGroups ?? [timeSignature]);
     prevInstrumentRef.current = instrument;
     // Fresh segment for the first-4-beats hard rule. Counter ticks
     // up in the onBeatFeedback handler; the gatekeeper demotes spoken
@@ -2315,6 +2339,8 @@ function formatChangeCopy(c: { kind: string; from: string | number; to: string |
       return c.to === "free play" ? "preset cleared" : `loading "${c.to}"`;
     case "time-sig":
       return `time signature ${c.to}/4`;
+    case "grouping":
+      return `regrouped to ${String(c.to).split(",").join(" + ")}`;
     case "instrument":
       return `switching to ${c.to}`;
     default:

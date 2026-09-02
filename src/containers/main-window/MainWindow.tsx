@@ -65,6 +65,8 @@ import { useSession } from "../../hooks/useSession";
 import AudioInputTestModal from "../settings/AudioInputTestModal";
 import SettingsTimeline from "../settings/SettingsTimeline";
 import { InputTesterModal } from "../settings/InputTesterModal";
+import { coachDebug } from "../../coach/debug";
+import { presetBeatGroups, presetFreeMode } from "../../utils/meter";
 import { useShareMenu } from "./useShareMenu";
 import { ShareMenuPopover } from "./ShareMenuPopover";
 import { useUiPreferences } from "./hooks/useUiPreferences";
@@ -190,6 +192,7 @@ export function MainWindow() {
     isPlaying: state.isPlaying,
     bpm: state.bpm,
     timeSignature: state.timeSignature,
+    beatGroups: state.beatGroups,
     presetId: activePreset?.id,
     presetName: activePreset?.name,
     voiceMode: coach.coachVoiceMode,
@@ -418,7 +421,6 @@ export function MainWindow() {
   // Tab switching and settings are handled by the unified dispatcher via keyBindings
   const soundDropdownRef = useRef<HTMLDivElement>(null);
 
-  const beatsPerMeasure = Math.max(2, (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0));
   // Use measureBeat from the engine — it resets correctly when groups change mid-play,
   // unlike beat % beatsPerMeasure which produces misaligned values after a meter switch.
   const activeBeat = currentBeat ? currentBeat.measureBeat : -1;
@@ -438,25 +440,43 @@ export function MainWindow() {
       onBpmDetected: handleBpmChange,
     });
 
+  // Each IPC call is awaited but the whole load is guarded: one setter
+  // rejecting must not abort the rest. A legacy preset saved under the
+  // retired "Never accent" option carries `timeSignature: 0` and no
+  // `beatGroups`, which used to reach Rust as `[0]`, get rejected, and
+  // take FREE mode / sound / volume / ramp / view down with it — the
+  // preset applied its BPM and nothing else. `presetBeatGroups` maps 0 to
+  // [4] and `presetFreeMode` turns that preset into FREE mode (same rule
+  // as the Rust store migration); the try/catch contains the rest.
   const handleLoadPreset = useCallback(async (preset: Preset) => {
-    await setBpm(preset.bpm);
-    await setSubdivision(preset.subdivision as Subdivision);
-    await setBeatGroups(preset.beatGroups ?? [preset.timeSignature]);
-    await setFreeMode(preset.freeMode ?? false);
-    await setSoundType(preset.soundType);
-    await setVolume(preset.volume);
+    const steps: Array<[string, () => Promise<unknown>]> = [
+      ["bpm", () => setBpm(preset.bpm)],
+      ["subdivision", () => setSubdivision(preset.subdivision as Subdivision)],
+      ["beatGroups", () => setBeatGroups(presetBeatGroups(preset))],
+      ["freeMode", () => setFreeMode(presetFreeMode(preset))],
+      ["soundType", () => setSoundType(preset.soundType)],
+      ["volume", () => setVolume(preset.volume)],
+    ];
     if (preset.view === "drill" && preset.speedRamp) {
-      await configureSpeedRamp({
-        startBpm: preset.speedRamp.startBpm,
-        targetBpm: preset.speedRamp.targetBpm,
-        increment: preset.speedRamp.increment,
-        decrement: preset.speedRamp.decrement,
-        barsPerStep: preset.speedRamp.barsPerStep,
-        beatsPerBar: preset.speedRamp.beatsPerBar,
-        mode: preset.speedRamp.mode,
-        cyclic: preset.speedRamp.cyclic,
-        warmupBeats: preset.speedRamp.warmupBeats,
-      });
+      const ramp = preset.speedRamp;
+      steps.push(["speedRamp", () => configureSpeedRamp({
+        startBpm: ramp.startBpm,
+        targetBpm: ramp.targetBpm,
+        increment: ramp.increment,
+        decrement: ramp.decrement,
+        barsPerStep: ramp.barsPerStep,
+        beatsPerBar: ramp.beatsPerBar,
+        mode: ramp.mode,
+        cyclic: ramp.cyclic,
+        warmupBeats: ramp.warmupBeats,
+      })]);
+    }
+    for (const [name, run] of steps) {
+      try {
+        await run();
+      } catch (err) {
+        coachDebug("loadPreset.step-failed", { preset: preset.id, step: name, err });
+      }
     }
     if (preset.view === "drill" || preset.view === "beat") setView(preset.view);
   }, [setView]);
@@ -778,7 +798,6 @@ export function MainWindow() {
             state={state}
             currentBeat={currentBeat}
             evaluation={evaluation}
-            beatsPerMeasure={beatsPerMeasure}
             activeBeat={activeBeat}
             activeSub={activeSub}
             isDownbeat={isDownbeat}

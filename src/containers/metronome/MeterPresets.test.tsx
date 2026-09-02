@@ -9,6 +9,10 @@
  *   groups, so the two never disagree.
  * - The active-chip highlight is exclusive: FREE is active in free mode and
  *   no meter preset is, even when `beatGroups` still matches one.
+ * - The row does NOT call `notifySettingsChange()` itself: useSession
+ *   watches the meter and fires ONE debounced coach boundary for a burst
+ *   of clicks. Calling it per click closed the practice segment early and
+ *   in addition to the debounce.
  */
 import { describe, it, expect } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
@@ -30,19 +34,20 @@ describe("MeterPresets — FREE chip", () => {
     );
   });
 
-  it("notifies the settings change so the engine re-reads state", async () => {
+  it("leaves the coach boundary to useSession's debounce", async () => {
     render(<MeterPresets beatGroups={[3, 2, 2]} freeMode={false} />);
     fireEvent.click(screen.getByText("FREE"));
     await waitFor(() =>
-      expect(invokedCommands()).toContain("notify_settings_change"),
+      expect(invokedCommands()).toContain("set_free_mode"),
     );
+    expect(invokedCommands()).not.toContain("notify_settings_change");
   });
 
   it("leaves the collapse to Rust — no second set_beat_groups call", async () => {
     render(<MeterPresets beatGroups={[3, 2, 2]} freeMode={false} />);
     fireEvent.click(screen.getByText("FREE"));
     await waitFor(() =>
-      expect(invokedCommands()).toContain("notify_settings_change"),
+      expect(invokedCommands()).toContain("set_free_mode"),
     );
     expect(invokedCommands()).not.toContain("set_beat_groups");
   });

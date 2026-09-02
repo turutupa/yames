@@ -6,13 +6,12 @@ import { useMetronome } from "../../hooks/useMetronome";
 import {
   setBeatGroups,
   setBpm,
-  notifySettingsChange,
   setSubdivision,
   showMain,
   storeLoad,
   togglePlayback,
 } from "../../ipc";
-import { METER_PRESETS, nextFreeBeatCount, prevFreeBeatCount } from "../../constants/metronome";
+import { meterKey, meterLabel, meterTotal, stepMeter } from "../../utils/meter";
 import "../../styles/floating-widget.css";
 import type { Subdivision } from "../../types";
 
@@ -119,30 +118,14 @@ export function FloatingWidget() {
           setSubdivision(subs[(idx - 1 + subs.length) % subs.length]);
           break;
         }
-        case "sig-next": {
-          if (state.freeMode) {
-            const total = (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0);
-            setBeatGroups([nextFreeBeatCount(total)]); notifySettingsChange();
-          } else {
-            const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
-            const nextIdx = (currentIdx === -1 ? 0 : (currentIdx + 1) % METER_PRESETS.length);
-            setBeatGroups(METER_PRESETS[nextIdx].groups);
-            notifySettingsChange();
-          }
+        // No notifySettingsChange() — useSession's debounced boundary
+        // watch collapses a burst of meter changes into one coach event.
+        case "sig-next":
+          setBeatGroups(stepMeter(state.beatGroups, state.freeMode, 1));
           break;
-        }
-        case "sig-prev": {
-          if (state.freeMode) {
-            const total = (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0);
-            setBeatGroups([prevFreeBeatCount(total)]); notifySettingsChange();
-          } else {
-            const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
-            const nextIdx = (currentIdx === -1 ? 0 : (currentIdx - 1 + METER_PRESETS.length) % METER_PRESETS.length);
-            setBeatGroups(METER_PRESETS[nextIdx].groups);
-            notifySettingsChange();
-          }
+        case "sig-prev":
+          setBeatGroups(stepMeter(state.beatGroups, state.freeMode, -1));
           break;
-        }
         case "toggle-widget":
         case "os-fullscreen":
           showMain();
@@ -151,14 +134,17 @@ export function FloatingWidget() {
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [keyBindings, state.bpm, state.subdivision, state.beatGroups, state.freeMode]);
+    // `meterKey` rather than the array: `state.beatGroups` is a fresh
+    // array on every state-changed event, so the reference re-subscribed
+    // the listener on every tick.
+  }, [keyBindings, state.bpm, state.subdivision, meterKey(state.beatGroups), state.freeMode]);
 
   const MIN_WIDTH = 300;
   const FIXED_HEIGHT = 120;
 
   // Calculate needed width based on beat dots and subdivision
   // Left side (buttons ~170px) + gap + beat dots + padding
-  const beatsPerMeasure = Math.max(2, (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0));
+  const beatsPerMeasure = Math.max(2, meterTotal(state.beatGroups ?? [state.timeSignature]));
   const subCount = state.subdivision > 1 ? state.subdivision - 1 : 0;
   const beatGroupWidth = Math.max(10, subCount * 4 + (subCount - 1) * 2); // sub dots or main dot
   const beatsWidth =
@@ -169,18 +155,17 @@ export function FloatingWidget() {
     const width = Math.max(MIN_WIDTH, Math.ceil(neededWidth));
     getCurrentWindow().setSize(new LogicalSize(width, FIXED_HEIGHT));
   }, [neededWidth]);
-  const activeBeat = currentBeat ? currentBeat.beat % beatsPerMeasure : -1;
+  // `measureBeat`, not `beat % beatsPerMeasure`: the engine resets the
+  // bar when the grouping changes mid-play, so the modulo drifts out of
+  // phase after a meter switch and lights the wrong dot.
+  const activeBeat = currentBeat ? currentBeat.measureBeat : -1;
   const activeSub = currentBeat ? currentBeat.subdivision : -1;
   const isDownbeat = currentBeat?.isDownbeat ?? false;
+  // Accent comes from the engine event — which is false in FREE mode,
+  // and knows about the speed ramp's own bar. No local re-derive.
+  const isAccent = currentBeat?.isAccent ?? false;
   const widgetBeats = beatsPerMeasure;
   const widgetActiveBeat = activeBeat;
-  const isAccentBeat = (beatIdx: number) => {
-    if (state.freeMode) return false;
-    const s = new Set<number>();
-    let c = 0;
-    for (const g of (state.beatGroups ?? [state.timeSignature])) { s.add(c); c += g; }
-    return s.has(beatIdx);
-  };
 
   const startEdit = () => {
     setEditValue(String(state.bpm));
@@ -256,20 +241,12 @@ export function FloatingWidget() {
   };
 
   const cycleTimeSig = () => {
-    if (state.freeMode) {
-      const total = (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0);
-      setBeatGroups([nextFreeBeatCount(total)]); notifySettingsChange();
-    } else {
-      const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
-      const nextIdx = (currentIdx === -1 ? 0 : (currentIdx + 1) % METER_PRESETS.length);
-      setBeatGroups(METER_PRESETS[nextIdx].groups);
-      notifySettingsChange();
-    }
+    setBeatGroups(stepMeter(state.beatGroups, state.freeMode, 1));
   };
 
   const timeSigLabel = state.freeMode
-    ? t("metronome.freeBeatCount", { count: (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0) })
-    : METER_PRESETS.find(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups))?.label ?? `${state.timeSignature}/4`;
+    ? t("metronome.freeBeatCount", { count: beatsPerMeasure })
+    : meterLabel(state.beatGroups ?? [state.timeSignature]);
   const rampActive = state.speedRamp.active;
 
   return (
@@ -372,7 +349,7 @@ export function FloatingWidget() {
         <div className="fw-beat-row">
           {Array.from({ length: widgetBeats }, (_, beatIdx) => {
             const isBeatActive = widgetActiveBeat === beatIdx && isDownbeat;
-            const isBeatDownbeat = isBeatActive && isAccentBeat(beatIdx);
+            const isBeatDownbeat = isBeatActive && isAccent;
             return (
               <div key={beatIdx} className="fw-beat-group">
                 <span

@@ -67,6 +67,7 @@ export const METER_VARIANTS: Record<string, number[][]> = {
 export const METER_PRESETS: Array<{ label: string; groups: number[] }> = [
   { label: "4/4",  groups: [4] },
   { label: "3/4",  groups: [3] },
+  { label: "2/4",  groups: [2] },
   { label: "5/4",  groups: [3, 2] },
   { label: "6/8",  groups: [3, 3] },
   { label: "7/8",  groups: [3, 2, 2] },

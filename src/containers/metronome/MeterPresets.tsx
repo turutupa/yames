@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { METER_PRESETS, METER_VARIANTS } from "../../constants/metronome";
-import { setBeatGroups, notifySettingsChange, setFreeMode } from "../../ipc";
+import { setBeatGroups, setFreeMode } from "../../ipc";
+import { findMeterPreset, meterKey } from "../../utils/meter";
 
 interface MeterPresetsProps {
   beatGroups: number[];
@@ -9,21 +10,18 @@ interface MeterPresetsProps {
 
 export function MeterPresets({ beatGroups, freeMode }: MeterPresetsProps) {
   const { t } = useTranslation();
-  const activeKey = JSON.stringify(beatGroups);
-
-  // Find which preset label is active (exact match OR a known variant of it)
-  const activePreset = freeMode ? undefined : METER_PRESETS.find(p => {
-    if (JSON.stringify(p.groups) === activeKey) return true;
-    const variants = METER_VARIANTS[p.label];
-    return variants?.some(v => JSON.stringify(v) === activeKey);
-  });
-
+  const activeKey = meterKey(beatGroups);
+  // Variant-aware, so [2, 3] highlights 5/4 rather than nothing.
+  const activePreset = freeMode ? undefined : findMeterPreset(beatGroups);
   const variants = activePreset ? METER_VARIANTS[activePreset.label] : null;
 
+  // No `notifySettingsChange()` here: useSession watches bpm / preset /
+  // meter and fires ONE debounced coach boundary for a burst of changes.
+  // Calling it directly closed the practice segment on every click,
+  // ahead of the debounce.
   async function handleSelect(groups: number[]) {
     if (freeMode) await setFreeMode(false);
     await setBeatGroups(groups);
-    await notifySettingsChange();
   }
 
   return (
@@ -34,12 +32,11 @@ export function MeterPresets({ beatGroups, freeMode }: MeterPresetsProps) {
           key="free"
           className={`time-sig-btn view-stagger-item ${freeMode ? "active" : ""}`}
           style={{ animationDelay: "150ms" }}
-          onClick={async () => {
+          onClick={() => {
             // `set_free_mode(true)` collapses `beat_groups` to `[total]`
             // itself — the invariant "freeMode ⇒ one group" is owned by Rust,
             // so no second `setBeatGroups` round-trip is needed here.
-            await setFreeMode(true);
-            await notifySettingsChange();
+            setFreeMode(true);
           }}
         >
           {t("metronome.free")}
@@ -61,9 +58,9 @@ export function MeterPresets({ beatGroups, freeMode }: MeterPresetsProps) {
 
       {variants && !freeMode && (
         <div className="meter-variant-row">
-          <span className="meter-variant-label">grouping</span>
+          <span className="meter-variant-label">{t("metronome.grouping")}</span>
           {variants.map(v => {
-            const key = JSON.stringify(v);
+            const key = meterKey(v);
             const isActive = key === activeKey;
             return (
               <button
