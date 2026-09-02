@@ -39,6 +39,10 @@ export type WizardStepDef = {
 };
 ```
 
+**Selection never advances a step.** A card click selects (and may
+preview); only Next / Start practicing / Skip advance. Every step's
+tests must cover "click does not advance".
+
 Steps register in `src/containers/onboarding/steps/index.ts` in flow
 order. Adding a step = adding a file + one array entry. The machine
 (`onboardingMachine.ts`) is pure: `(state, event) => state`, no React,

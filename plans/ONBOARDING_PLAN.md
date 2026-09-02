@@ -39,7 +39,10 @@ localised (15 locales).
    working metronome immediately. Setup is offered, never imposed.
 2. **One decision per screen, every screen skippable, everything
    re-openable.** Esc skips; Settings → General → "Run setup again";
-   Help → "Take the tour".
+   Help → "Take the tour". **Selecting never advances.** Clicking a
+   card only selects it (and may preview live); only Next, Start
+   practicing, or Skip moves on, so a misclick is harmless (owner rule,
+   2026-09-02).
 3. **The app demonstrates itself.** The click plays softly during the
    wizard; sound and theme choices preview live; the last step lets the
    user play a few bars and see timing dots. Show, don't explain.
