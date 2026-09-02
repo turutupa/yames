@@ -1,11 +1,12 @@
 import { METER_PRESETS, METER_VARIANTS } from "../../constants/metronome";
-import { setBeatGroups, notifySettingsChange } from "../../ipc";
+import { setBeatGroups, notifySettingsChange, setFreeMode } from "../../ipc";
 
 interface MeterPresetsProps {
   beatGroups: number[];
+  freeMode: boolean;
 }
 
-export function MeterPresets({ beatGroups }: MeterPresetsProps) {
+export function MeterPresets({ beatGroups, freeMode }: MeterPresetsProps) {
   const activeKey = JSON.stringify(beatGroups);
 
   // Find which preset label is active (exact match OR a known variant of it)
@@ -18,6 +19,7 @@ export function MeterPresets({ beatGroups }: MeterPresetsProps) {
   const variants = activePreset ? METER_VARIANTS[activePreset.label] : null;
 
   async function handleSelect(groups: number[]) {
+    if (freeMode) await setFreeMode(false);
     await setBeatGroups(groups);
     await notifySettingsChange();
   }
@@ -26,6 +28,19 @@ export function MeterPresets({ beatGroups }: MeterPresetsProps) {
     <div className="meter-presets">
       <div className="time-sig-row">
         <span className="row-side-label">Meter</span>
+        <button
+          key="free"
+          className={`time-sig-btn view-stagger-item ${freeMode ? "active" : ""}`}
+          style={{ animationDelay: "150ms" }}
+          onClick={async () => {
+            const total = Math.max(1, beatGroups.reduce((a, b) => a + b, 0));
+            await setFreeMode(true);
+            await setBeatGroups([total]);
+            await notifySettingsChange();
+          }}
+        >
+          FREE
+        </button>
         {METER_PRESETS.map((preset, i) => {
           const isActive = activePreset?.label === preset.label;
           return (
@@ -41,7 +56,7 @@ export function MeterPresets({ beatGroups }: MeterPresetsProps) {
         })}
       </div>
 
-      {variants && (
+      {variants && !freeMode && (
         <div className="meter-variant-row">
           <span className="meter-variant-label">grouping</span>
           {variants.map(v => {

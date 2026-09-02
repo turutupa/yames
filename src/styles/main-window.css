@@ -2001,6 +2001,50 @@
   color: var(--text-secondary);
 }
 
+/* ── FREE mode beat row ── */
+.free-beat-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.free-beat-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 11%, transparent);
+  color: var(--text-secondary);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.1s, color 0.1s;
+  flex-shrink: 0;
+}
+
+.free-beat-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--text-primary) 13%, transparent);
+  color: var(--text-primary);
+}
+
+.free-beat-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.free-dots {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 420px;
+}
+
 /* =================== Settings view =================== */
 .settings-section:first-child {
   margin-top: 10px;

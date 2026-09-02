@@ -148,6 +148,7 @@ export function MetronomeView({
           activeBeat={activeBeat}
           activeSub={activeSub}
           isDownbeat={isDownbeat}
+          freeMode={state.freeMode}
         />
 
         {evaluation.enabled && state.isPlaying && (
@@ -174,7 +175,7 @@ export function MetronomeView({
         </div>
       </div>
 
-      <MeterPresets beatGroups={state.beatGroups} />
+      <MeterPresets beatGroups={state.beatGroups} freeMode={state.freeMode} />
     </>
   );
 }
