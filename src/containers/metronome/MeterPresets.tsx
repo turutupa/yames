@@ -29,15 +29,16 @@ export function MeterPresets({ beatGroups, freeMode }: MeterPresetsProps) {
   return (
     <div className="meter-presets">
       <div className="time-sig-row">
-        <span className="row-side-label">Meter</span>
+        <span className="row-side-label">{t("metronome.meter")}</span>
         <button
           key="free"
           className={`time-sig-btn view-stagger-item ${freeMode ? "active" : ""}`}
           style={{ animationDelay: "150ms" }}
           onClick={async () => {
-            const total = Math.max(1, beatGroups.reduce((a, b) => a + b, 0));
+            // `set_free_mode(true)` collapses `beat_groups` to `[total]`
+            // itself — the invariant "freeMode ⇒ one group" is owned by Rust,
+            // so no second `setBeatGroups` round-trip is needed here.
             await setFreeMode(true);
-            await setBeatGroups([total]);
             await notifySettingsChange();
           }}
         >
