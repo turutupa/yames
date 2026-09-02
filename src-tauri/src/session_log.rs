@@ -50,6 +50,11 @@ pub struct SessionLog {
     pub bpm: u16,
     #[serde(rename = "timeSignature")]
     pub time_signature: u8,
+    /// Accent grouping of the bar (e.g. `[3, 2, 2]` for 7/8). Sums to
+    /// `time_signature`. `#[serde(default)]` — logs written before beat
+    /// grouping existed load with an empty vec rather than failing.
+    #[serde(rename = "beatGroups", default)]
+    pub beat_groups: Vec<u8>,
     pub subdivision: u8,
     /// Seconds since UNIX epoch (session start).
     pub timestamp: u64,
@@ -849,6 +854,9 @@ pub fn build_log_from_raw(
     SessionLog {
         bpm,
         time_signature,
+        // Test/convenience builder — no grouping information available,
+        // so record the bar as one undivided group.
+        beat_groups: vec![time_signature],
         subdivision,
         started_at: secs_to_iso8601(timestamp),
         timestamp,
@@ -1175,6 +1183,7 @@ pub fn matches_to_feedbacks(
 pub fn build_log_from_session(
     bpm: u16,
     time_signature: u8,
+    beat_groups: Vec<u8>,
     subdivision: u8,
     timestamp_secs: u64,
     duration_ms: u64,
@@ -1230,6 +1239,7 @@ pub fn build_log_from_session(
     SessionLog {
         bpm,
         time_signature,
+        beat_groups,
         subdivision,
         started_at: secs_to_iso8601(timestamp_secs),
         timestamp: timestamp_secs,
@@ -1629,6 +1639,7 @@ mod tests {
         let log = build_log_from_session(
             120,
             4,
+            vec![4],
             1,
             1_700_000_000,
             45_000,
@@ -1686,6 +1697,7 @@ mod tests {
         let log = build_log_from_session(
             100,
             4,
+            vec![4],
             1,
             1_700_000_000,
             60_000,
@@ -1713,6 +1725,7 @@ mod tests {
         let log = build_log_from_session(
             120,
             4,
+            vec![4],
             1,
             1_700_000_000,
             0,
