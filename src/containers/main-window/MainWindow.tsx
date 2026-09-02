@@ -344,6 +344,34 @@ export function MainWindow() {
     }
   }, []);
 
+  // --- W2 → Settings → Appearance detour (O2) ------------------------------
+  // "More themes in Settings" cannot open Settings *under* a full-window
+  // overlay, so the wizard steps aside instead of ending: the machine keeps
+  // its step and the overlay comes back as soon as the user leaves the
+  // Settings tab. Nothing is persisted or skipped in between.
+  const [themeDetour, setThemeDetour] = useState(false);
+  const openThemeSettings = useCallback(() => {
+    setThemeDetour(true);
+    setView("settings");
+    // The pane mounts behind a view transition and `setView` scrolls it to the
+    // top on its own timer, so one early scroll gets overwritten — try again
+    // across the transition (landing on a section already in place is a
+    // no-op). Instant, not smooth: a smooth scroll started while the
+    // transition is still animating gets dropped.
+    for (const delay of [80, 260, 520]) {
+      setTimeout(
+        () =>
+          document
+            .getElementById("settings-appearance")
+            ?.scrollIntoView({ block: "start", behavior: "auto" }),
+        delay,
+      );
+    }
+  }, [setView]);
+  useEffect(() => {
+    if (themeDetour && view !== "settings") setThemeDetour(false);
+  }, [themeDetour, view]);
+
   /**
    * The wizard closed. Restore the preview click, make sure an instrument is
    * set either way, and land a completed run on the metronome at 80 BPM
@@ -934,6 +962,8 @@ export function MainWindow() {
       softClickPlaying={softClickPlaying}
       currentBeat={currentBeat}
       onFinish={handleWizardFinish}
+      onOpenThemeSettings={openThemeSettings}
+      hidden={themeDetour}
       animate={viewTransitions !== "off"}
     />
     </>

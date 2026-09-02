@@ -5,11 +5,13 @@
  * these tests assert what the UI *emits* — the transitions themselves are
  * covered by `onboardingMachine.test.ts`.
  */
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useEffect, useState } from "react";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { mockInvoke } from "../../test/mocks";
 import { useWizardEnv } from "./WizardContext";
 import { FinishSetupChip } from "./FinishSetupChip";
+import { PREVIEW_DEBOUNCE_MS } from "./steps/SoundLookStep";
 import { OnboardingWizard, type OnboardingWizardProps } from "./OnboardingWizard";
 import { ONBOARDING_STEPS } from "./steps";
 import {
@@ -88,7 +90,10 @@ describe("wizard shell", () => {
 
   it("shows progress dots and Back/Skip/Next on a step", () => {
     const { container } = setup({ state: stateAt("instrument"), steps: PLAIN_STEPS });
-    expect(container.querySelectorAll(".onboarding-dot")).toHaveLength(2);
+    // One dot per registered step minus W0 — derived so registering a step
+    // (O2–O5) doesn't need this number edited.
+    const dots = ONBOARDING_STEPS.filter((s) => !s.hideInProgress).length;
+    expect(container.querySelectorAll(".onboarding-dot")).toHaveLength(dots);
     expect(container.querySelector(".onboarding-dot.active")).not.toBeNull();
     // Back on the first step is live: it returns to W0.
     expect(screen.getByRole("button", { name: "Back" })).toBeEnabled();
@@ -318,6 +323,217 @@ describe("W1 — instrument", () => {
   });
 });
 
+describe("W2 — sound & look", () => {
+  const at = { state: stateAt("sound-look", ["welcome", "instrument", "sound-look"]) };
+
+  /** ids passed to a Tauri setter, in call order. */
+  function calls(command: "set_sound_type" | "set_theme"): string[] {
+    return mockInvoke.mock.calls
+      .filter(([cmd]) => cmd === command)
+      .map(([, args]) =>
+        String(
+          (args as Record<string, string>)[
+            command === "set_theme" ? "theme" : "soundType"
+          ],
+        ),
+      );
+  }
+
+  /** Let the preview debounce elapse. */
+  function settle() {
+    act(() => {
+      vi.advanceTimersByTime(PREVIEW_DEBOUNCE_MS + 10);
+    });
+  }
+
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it("offers every engine sound and the three curated themes", () => {
+    setup(at);
+    for (const name of ["Click", "Wood", "Beep", "Drum"]) {
+      expect(screen.getByRole("button", { name })).toBeInTheDocument();
+    }
+    for (const name of ["Obsidian", "Aurora", "Ivory"]) {
+      expect(screen.getByRole("button", { name })).toBeInTheDocument();
+    }
+    // Curated, not the full grid — the other eight live in Settings.
+    expect(screen.queryByRole("button", { name: "Lavender" })).toBeNull();
+    // The current sound is marked, and Obsidian is the confirmed theme here.
+    expect(screen.getByRole("button", { name: "Wood" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "Obsidian" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("keeps the click audible even when W0 was never shown", () => {
+    const startSoftClick = vi.fn();
+    setup({ ...at, startSoftClick });
+    expect(startSoftClick).toHaveBeenCalled();
+  });
+
+  it("the shell's opening focus does not change the user's sound", () => {
+    setup(at);
+    settle();
+    expect(calls("set_sound_type")).toEqual([]);
+  });
+
+  it("focusing a sound card previews it, debounced", () => {
+    setup(at);
+    fireEvent.focus(screen.getByRole("button", { name: "Beep" }));
+    expect(calls("set_sound_type")).toEqual([]); // not yet — debounced
+    settle();
+    expect(calls("set_sound_type")).toEqual(["beep"]);
+    // A preview is not a choice: the confirmed card is still Wood.
+    expect(screen.getByRole("button", { name: "Wood" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("a fast sweep across cards only reaches the engine once", () => {
+    setup(at);
+    fireEvent.focus(screen.getByRole("button", { name: "Beep" }));
+    fireEvent.focus(screen.getByRole("button", { name: "Drum" }));
+    fireEvent.focus(screen.getByRole("button", { name: "Click" }));
+    settle();
+    expect(calls("set_sound_type")).toEqual(["click"]);
+  });
+
+  it("leaving a card puts the confirmed sound back", () => {
+    setup(at);
+    const beep = screen.getByRole("button", { name: "Beep" });
+    fireEvent.focus(beep);
+    settle();
+    fireEvent.blur(beep);
+    settle();
+    expect(calls("set_sound_type")).toEqual(["beep", "wood"]);
+  });
+
+  it("hovering previews too, and un-hovering rolls back", () => {
+    setup(at);
+    const drum = screen.getByRole("button", { name: "Drum" });
+    fireEvent.mouseEnter(drum);
+    settle();
+    expect(calls("set_sound_type")).toEqual(["drum"]);
+    fireEvent.mouseLeave(drum);
+    settle();
+    expect(calls("set_sound_type")).toEqual(["drum", "wood"]);
+  });
+
+  it("moving from a sound card onto a theme card still rolls the sound back", () => {
+    // The two columns debounce independently: a shared timer let the theme
+    // hover swallow the sound's pending rollback and strand the click on a
+    // preview (caught driving the real app).
+    setup(at);
+    const beep = screen.getByRole("button", { name: "Beep" });
+    fireEvent.mouseEnter(beep);
+    settle();
+    fireEvent.mouseLeave(beep);
+    fireEvent.mouseEnter(screen.getByRole("button", { name: "Aurora" }));
+    settle();
+    expect(calls("set_sound_type")).toEqual(["beep", "wood"]);
+    expect(calls("set_theme")).toEqual(["aurora"]);
+  });
+
+  it("focusing a theme card restyles the window behind the overlay", () => {
+    setup(at);
+    fireEvent.focus(screen.getByRole("button", { name: "Aurora" }));
+    settle();
+    expect(calls("set_theme")).toEqual(["aurora"]);
+  });
+
+  it("picking persists immediately, exactly like the Settings controls", () => {
+    setup(at);
+    fireEvent.click(screen.getByRole("button", { name: "Beep" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ivory" }));
+    // No timer needed: a pick is not a preview.
+    expect(calls("set_sound_type")).toEqual(["beep"]);
+    expect(calls("set_theme")).toEqual(["ivory"]);
+    expect(screen.getByRole("button", { name: "Beep" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "Ivory" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("picking a card never advances the step — only Next does", () => {
+    const { dispatch } = setup(at);
+    fireEvent.click(screen.getByRole("button", { name: "Beep" }));
+    fireEvent.click(screen.getByRole("button", { name: "Aurora" }));
+    expect(dispatch).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(dispatch).toHaveBeenCalledExactlyOnceWith({ type: "NEXT" });
+  });
+
+  it("Esc/Back restores the previously confirmed sound and theme", () => {
+    const { rerender, props } = setup(at);
+    fireEvent.focus(screen.getByRole("button", { name: "Drum" }));
+    fireEvent.focus(screen.getByRole("button", { name: "Aurora" }));
+    settle();
+    expect(calls("set_sound_type")).toEqual(["drum"]);
+    expect(calls("set_theme")).toEqual(["aurora"]);
+    // Esc skips the step: the shell moves on and W2 unmounts mid-preview.
+    act(() => {
+      rerender(<OnboardingWizard {...props} state={stateAt("ready")} />);
+    });
+    expect(calls("set_sound_type")).toEqual(["drum", "wood"]);
+    expect(calls("set_theme")).toEqual(["aurora", "obsidian"]);
+  });
+
+  it("what was picked survives Next", () => {
+    const { rerender, props } = setup(at);
+    fireEvent.click(screen.getByRole("button", { name: "Drum" }));
+    fireEvent.click(screen.getByRole("button", { name: "Aurora" }));
+    act(() => {
+      rerender(<OnboardingWizard {...props} state={stateAt("ready")} />);
+    });
+    expect(calls("set_sound_type")).toEqual(["drum"]);
+    expect(calls("set_theme")).toEqual(["aurora"]);
+  });
+
+  it("preselects Obsidian when no theme was ever chosen (decision 2)", () => {
+    setup({ ...at, themeId: "mono" });
+    expect(calls("set_theme")).toEqual(["obsidian"]);
+    expect(screen.getByRole("button", { name: "Obsidian" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("never hijacks a theme the user already chose", () => {
+    const { container } = setup({ ...at, themeId: "lavender" });
+    expect(calls("set_theme")).toEqual([]);
+    expect(container.querySelector(".onboarding-theme-card.active")).toBeNull();
+  });
+
+  it("'More themes in Settings' is hidden until the app wires the detour", () => {
+    setup(at);
+    expect(screen.queryByRole("button", { name: /More themes/ })).toBeNull();
+    const onOpenThemeSettings = vi.fn();
+    setup({ ...at, onOpenThemeSettings });
+    fireEvent.click(screen.getByRole("button", { name: "More themes in Settings" }));
+    expect(onOpenThemeSettings).toHaveBeenCalled();
+  });
+
+  it("hiding the wizard for the Settings detour keeps the confirmed setup", () => {
+    const { container, rerender, props } = setup(at);
+    fireEvent.click(screen.getByRole("button", { name: "Ivory" }));
+    act(() => {
+      rerender(<OnboardingWizard {...props} hidden />);
+    });
+    expect(container.querySelector(".onboarding-overlay")).toBeNull();
+    expect(calls("set_theme")).toEqual(["ivory"]);
+  });
+});
+
 describe("W7 — ready", () => {
   const ready = { state: stateAt("ready", ["welcome", "instrument", "ready"]) };
 
@@ -341,15 +557,20 @@ describe("W7 — ready", () => {
     expect(dispatch).toHaveBeenCalledWith({ type: "JUMP", stepId: "instrument" });
   });
 
-  it("rows for steps O2–O5 have not added yet are static, not inert buttons", () => {
+  it("the sound and theme rows went live when O2 registered its step", () => {
+    const { dispatch } = setup(ready);
+    for (const label of ["Click sound", "Theme"]) {
+      const row = screen.getByText(label).closest("button");
+      expect(row, `${label} row should jump to W2`).not.toBeNull();
+      fireEvent.click(row!);
+    }
+    expect(dispatch).toHaveBeenCalledWith({ type: "JUMP", stepId: "sound-look" });
+    expect(dispatch).toHaveBeenCalledTimes(2);
+  });
+
+  it("rows for steps O3–O5 have not added yet are static, not inert buttons", () => {
     setup(ready);
-    for (const label of [
-      "Click sound",
-      "Theme",
-      "Control",
-      "Practice coach",
-      "Audio input",
-    ]) {
+    for (const label of ["Control", "Practice coach", "Audio input"]) {
       const row = screen.getByText(label).closest(".onboarding-summary-row");
       expect(row).not.toBeNull();
       expect(row!.tagName).toBe("DIV");

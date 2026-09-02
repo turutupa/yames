@@ -55,6 +55,15 @@ export type OnboardingWizardProps = {
   onFinish: (outcome: "completed" | "skipped" | "closed") => void;
   /** Wired by O6; the W7 tour button stays hidden until then. */
   onRequestTour?: () => void;
+  /** W2's "More themes in Settings" (O2); the link stays hidden until wired. */
+  onOpenThemeSettings?: () => void;
+  /**
+   * Take the overlay off screen without ending the run — the machine keeps its
+   * step, so putting it back resumes exactly where the user was. Used by the
+   * W2 → Settings → Appearance detour; a step unmounts while hidden, so a step
+   * that previews app state must already have committed or rolled it back.
+   */
+  hidden?: boolean;
   /** `viewTransitions !== "off"` — reduced motion is honoured on top of this. */
   animate?: boolean;
 };
@@ -80,10 +89,12 @@ export function OnboardingWizard({
   currentBeat,
   onFinish,
   onRequestTour,
+  onOpenThemeSettings,
+  hidden = false,
   animate = true,
 }: OnboardingWizardProps) {
   const { t } = useTranslation();
-  const open = isWizardOpen(state);
+  const open = isWizardOpen(state) && !hidden;
   const cardRef = useRef<HTMLDivElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
   const finishedRef = useRef(false);
@@ -306,6 +317,7 @@ export function OnboardingWizard({
       startSetup,
       finish,
       onRequestTour,
+      openThemeSettings: onOpenThemeSettings,
       setMachineContext,
     }),
     [
@@ -333,6 +345,7 @@ export function OnboardingWizard({
       startSetup,
       finish,
       onRequestTour,
+      onOpenThemeSettings,
       setMachineContext,
     ],
   );

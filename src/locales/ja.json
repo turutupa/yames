@@ -64,6 +64,13 @@
       "label": "セットアップを完了",
       "dismiss": "閉じる"
     },
+    "soundLook": {
+      "title": "サウンドと外観",
+      "subtitle": "カードにカーソルを合わせると、クリック音とテーマをその場で確認できます。好きなものを選んでください。",
+      "soundHeading": "クリック音",
+      "themeHeading": "テーマ",
+      "moreThemes": "その他のテーマは設定から"
+    },
     "ready": {
       "title": "準備完了",
       "subtitle": "ここでも、後で設定からでも変更できます。",

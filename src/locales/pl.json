@@ -64,6 +64,13 @@
       "label": "Dokończ konfigurację",
       "dismiss": "Ukryj"
     },
+    "soundLook": {
+      "title": "Dźwięk i wygląd",
+      "subtitle": "Najedź na kartę, aby usłyszeć klik lub zobaczyć motyw. Wybierz to, co lubisz.",
+      "soundHeading": "Dźwięk kliknięcia",
+      "themeHeading": "Motyw",
+      "moreThemes": "Więcej motywów w Ustawieniach"
+    },
     "ready": {
       "title": "Wszystko gotowe",
       "subtitle": "Zmień coś tutaj albo później w Ustawieniach.",

@@ -213,6 +213,148 @@
   background: var(--accent-subtle);
 }
 
+/* ---- W2 sound & look (O2) ----
+   Two columns on a normal window, stacked at the 480px minimum. Cards are
+   the instrument picker's card, shrunk: same border, same hover, same
+   selected state, so W1 → W2 doesn't read as two different designs. */
+.onboarding-sound-look {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.onboarding-choice-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.onboarding-choice-heading {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted, var(--text-secondary));
+}
+
+.onboarding-sound-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.onboarding-sound-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: inherit;
+  transition:
+    border-color 120ms ease,
+    background 120ms ease;
+}
+
+.onboarding-sound-card:hover,
+.onboarding-sound-card:focus-visible {
+  border-color: var(--accent);
+  background: var(--bg-secondary);
+}
+
+.onboarding-sound-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Selected reads as accent *type*, focus as an accent *ring* — otherwise a
+   focused card and the chosen one look the same (the theme cards next to it
+   already colour their name when active). */
+.onboarding-sound-card.selected {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.onboarding-sound-card.selected .onboarding-sound-name {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.onboarding-sound-icon {
+  font-size: 1.125rem;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.onboarding-sound-name {
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.onboarding-theme-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* The Settings theme card, one per row and with a readable name. */
+.onboarding-theme-card {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  font-family: inherit;
+}
+
+.onboarding-theme-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.onboarding-theme-card .theme-card-preview {
+  width: 52px;
+  height: 22px;
+  flex: 0 0 auto;
+}
+
+.onboarding-theme-card .theme-card-name {
+  font-size: 0.75rem;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text-primary);
+}
+
+.onboarding-more-themes {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 4px 0;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.75rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 120ms ease;
+}
+
+.onboarding-more-themes:hover {
+  color: var(--accent);
+}
+
+.onboarding-more-themes:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* ---- W7 summary ---- */
 .onboarding-summary {
   list-style: none;
@@ -380,6 +522,12 @@ button.onboarding-summary-row:hover {
 
   .onboarding-step .instrument-picker-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* W2: one column under the other rather than two narrow ones. */
+  .onboarding-sound-look {
+    grid-template-columns: 1fr;
+    gap: 14px;
   }
 
   .onboarding-btn {

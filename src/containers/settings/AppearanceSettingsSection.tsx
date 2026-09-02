@@ -26,8 +26,10 @@ export function AppearanceSettingsSection({
   setAnimationStyle: Dispatch<SetStateAction<AnimationStyle>>;
 }) {
   const { t } = useTranslation();
+  // `id` is the anchor the wizard's W2 "More themes in Settings" link scrolls
+  // to (O2).
   return (
-    <section className="settings-section">
+    <section className="settings-section" id="settings-appearance">
       <h2>{t("settings.appearance.title")}</h2>
       <div className="theme-grid">
         {THEMES.map((theme) => (
