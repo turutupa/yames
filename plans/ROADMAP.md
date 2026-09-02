@@ -158,8 +158,10 @@ stutters. Nothing else in this roadmap is real until this is.
   (Windows/Linux). Install cmake and the Vulkan SDK on the runners.
   Expect Windows to need MSVC + Ninja; Linux needs `libclang` for
   bindgen. Runtime falls back to CPU when no GPU is usable.
-- Bundle-size budget: binary growth ≤ 30 MB per platform. Record actual
-  sizes in the PR.
+- Bundle-size budget: binary growth ≤ 80 MB per platform (revised
+  2026-09-02: the Vulkan build embeds ~61 MB of SPIR-V shaders; CPU is
+  +3 MB). Shader trimming is a later optimisation. Record actual sizes
+  in the PR.
 - **Gate:** release workflow green on all three; a CI smoke job
   downloads a tiny GGUF (a ~30 MB "stories"-class test model is enough;
   CI only, never offered to users), loads it via `load_coach_model`,

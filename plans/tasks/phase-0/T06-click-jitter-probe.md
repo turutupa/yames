@@ -35,9 +35,11 @@ metronome, so every later phase can re-run it.
    - args: `--bpm 200 --subdivision 4 --seconds 60 --gguf <path>
      [--no-llm]`;
    - starts the engine on the default output device;
-   - if a GGUF is given (needs `--features coach-llm`), loops
-     `coach::generate` on a background thread for the duration, CPU
-     backend forced if the feature set allows;
+   - if a GGUF is given (needs `--features coach-llm` or
+     `coach-llm-vulkan`), loops `coach::generate` on a background thread
+     for the duration; force the CPU path with `YAMES_LLM_GPU_LAYERS=0`
+     (T01's override) and also run once with the GPU on a Vulkan/Metal
+     build — report both;
    - collects timestamps, computes expected beat interval from the
      stream sample rate and buffer size, reports p50/p95/p99 jitter,
      max gap, missed beats, and exits 1 above threshold.

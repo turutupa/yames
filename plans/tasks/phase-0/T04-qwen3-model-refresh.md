@@ -26,6 +26,11 @@ a decent experience beats reaching very old hardware.
   `SYSTEM_PROMPT` + context, `n_ctx = CONTEXT_SIZE`, sampler
   temp 0.7 / top-p 0.9 / seed 42, and creates a new context per call.
 - ROADMAP §3: never Qwen2.5-3B (non-commercial license).
+- T01 (`phase0/t01-llm-features`) already made the LLM path compile,
+  added `llm::BACKEND`, `requested_gpu_layers()`, `inference_threads()`,
+  `generate_with_limit`, and the `YAMES_TEST_GGUF` smoke test. The prompt
+  is still Phi-3 style (`<|system|>` … `<|assistant|>`), so Qwen3 output
+  currently contains template artifacts — that is what this task fixes.
 
 ## Steps
 
@@ -44,7 +49,19 @@ a decent experience beats reaching very old hardware.
      `enable_thinking=false` in the template; strip any `<think>…</think>`
      block from output defensively.
    - `n_ctx` 4096; keep temp 0.7 / top-p 0.9; set a max-token cap per
-     call (rephrase 64, chat 256) — add a parameter rather than a global.
+     call (rephrase 64, chat 256) — T01 added `generate_with_limit`; use it.
+   - **Hoist the `LlamaContext` into `LlmModel`** and reuse it across
+     calls (clear the KV cache per call). T01 measured Vulkan slower than
+     CPU on a 0.6B model because `generate` re-creates the context (and a
+     224 MiB KV buffer on the GPU) on every call. Re-measure after.
+   - **Dedicated inference thread.** Replace the per-call
+     `with_below_normal_priority` dance in `commands.rs::coach_generate`
+     (T01) with one long-lived inference thread owned by the coach
+     engine, priority lowered once at spawn, fed through a channel. On
+     Linux an unprivileged thread cannot restore a lowered nice value,
+     so the current restore is a no-op there and would leave tokio
+     blocking-pool threads permanently demoted.
+   - Keep T01's `YAMES_LLM_GPU_LAYERS` env override (T06 relies on it).
 3. Migration: `getModelStatus` returns the stored tier; add a
    `brainFamily: "qwen3" | "legacy"` derived from a small marker file
    written by the downloader (`models/brain/model.json` with url, sha,

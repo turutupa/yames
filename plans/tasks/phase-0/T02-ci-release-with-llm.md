@@ -45,8 +45,18 @@ on each OS before publishing.
    Make the release job `needs: llm-smoke`.
 4. Cache cargo and the test model between runs (`actions/cache`).
 5. Record binary sizes per platform in the job summary
-   (`$GITHUB_STEP_SUMMARY`) so the ≤30 MB growth budget from ROADMAP
-   §5.0.1 is visible.
+   (`$GITHUB_STEP_SUMMARY`) so the ≤80 MB growth budget from ROADMAP
+   §5.0.1 is visible (T01 measured: CPU +3.2 MiB, Vulkan +61 MiB on
+   Windows).
+6. Windows runner specifics learned in T01: set `CMAKE_GENERATOR=Ninja`
+   (the VS generator's CL tracker fails on long `.tlog` paths) and use
+   a short `CARGO_TARGET_DIR` such as `C:\t` — llama.cpp's
+   `vulkan-shaders-gen` ExternalProject nests a second CMake tree and
+   exceeds MAX_PATH otherwise. A stale `CMakeCache.txt` pins the
+   generator, so caches must not carry `llama-cpp-sys-2-*` build dirs
+   across generator changes. MSVC is mandatory for the LLM features
+   (the `cmake` crate picks MSYS Makefiles on `-gnu` and
+   `llama-cpp-sys-2` then finds no libs).
 6. Trigger the workflow with `workflow_dispatch` on your branch (ask the
    owner to run it if you lack permissions) and paste the run URL in the
    PR.
