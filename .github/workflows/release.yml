@@ -171,11 +171,18 @@ jobs:
             echo '| Artifact | Size |'
             echo '|---|---:|'
             total=0
+            seen=""
             while IFS= read -r f; do
               [ -f "$f" ] || continue
+              # A cached target dir can hold several `llama-cpp-sys-2-<hash>`
+              # trees (one per feature set built there); count each library
+              # once.
+              base="$(basename "$f")"
+              case " $seen " in *" $base "*) continue ;; esac
+              seen="$seen $base"
               bytes=$(wc -c < "$f" | tr -d ' ')
               total=$((total + bytes))
-              printf '| `%s` | %s |\n' "$(basename "$f")" \
+              printf '| `%s` | %s |\n' "$base" \
                 "$(awk -v b="$bytes" 'BEGIN{printf "%.1f MiB", b/1048576}')"
             # Only the cmake *install* tree: `out/build/...` holds a second
             # copy of every library and would double the total.
@@ -333,13 +340,14 @@ jobs:
           ARTIFACT_PATHS: ${{ steps.tauri.outputs.artifactPaths }}
         run: |
           set -uo pipefail
+          # `tee` so the numbers land in the step log too — the job summary
+          # is not readable through the API.
           {
             echo "### Bundle sizes — ${{ matrix.label }}"
             echo
             echo '| Artifact | Size |'
             echo '|---|---:|'
-          } >> "$GITHUB_STEP_SUMMARY"
-          node -e '
+            node -e '
             const fs = require("fs"), path = require("path");
             const du = (p) => {
               const st = fs.statSync(p);
@@ -351,8 +359,9 @@ jobs:
               const mib = (du(p) / 1048576).toFixed(1);
               console.log(`| \`${path.basename(p)}\` | ${mib} MiB |`);
             }
-          ' >> "$GITHUB_STEP_SUMMARY"
-          echo >> "$GITHUB_STEP_SUMMARY"
+            '
+            echo
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
   update-homebrew:
     needs: build
