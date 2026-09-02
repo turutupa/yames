@@ -568,6 +568,16 @@ numbers, proposes a routine, and loads it on a footswitch tap.
 
 ---
 
+## 9b. Parallel track — first-run experience & product polish
+
+Tracked in `plans/ONBOARDING_PLAN.md`: welcome flow, setup wizard
+(instrument, sound/look, hands-free, coach opt-in, audio input, "hear it
+work"), spotlight tour, progressive hints, empty states, what's-new and a
+Help menu. Independent of the phases above except that the coach step
+(O4/O5) waits for T03/T04 so the tier recommendation is truthful.
+
+---
+
 ## 10. Explicit non-goals
 
 Decided, with reasons, so future sessions don't re-litigate them.

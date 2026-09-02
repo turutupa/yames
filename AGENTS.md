@@ -86,6 +86,8 @@ actually opens.
   before starting any coach / DSP / curriculum work.
 - `plans/archive/DSP_AND_COACH_PLAN.md` is the archived design spec for
   the shipped scoring pipeline — code comments cite it for the *why*.
+- `plans/ONBOARDING_PLAN.md` is the first-run / product-polish track
+  (wizard, tour, hints, empty states).
 - `plans/tasks/<phase>/T0N-*.md` are self-contained briefs, one per
   worker session. If you were handed one, follow it and its README.
 - `plans/MOBILE_IMPLEMENTATION_PLAN.md` is out of the current horizon.
