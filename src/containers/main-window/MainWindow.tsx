@@ -21,6 +21,7 @@ import {
   setSubdivision,
   setTheme,
   setBeatGroups,
+  setFreeMode,
   setVolume,
   setWidgetAlwaysOnTop,
   setWidgetMode,
@@ -306,6 +307,7 @@ export function MainWindow() {
     await setBpm(preset.bpm);
     await setSubdivision(preset.subdivision as Subdivision);
     await setBeatGroups(preset.beatGroups ?? [preset.timeSignature]);
+    await setFreeMode(preset.freeMode ?? false);
     await setSoundType(preset.soundType);
     await setVolume(preset.volume);
     if (preset.view === "drill" && preset.speedRamp) {

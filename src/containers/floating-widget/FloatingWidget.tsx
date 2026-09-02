@@ -120,17 +120,27 @@ export function FloatingWidget() {
           break;
         }
         case "sig-next": {
-          const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
-          const nextIdx = (currentIdx === -1 ? 0 : (currentIdx + 1) % METER_PRESETS.length);
-          setBeatGroups(METER_PRESETS[nextIdx].groups);
-          notifySettingsChange();
+          if (state.freeMode) {
+            const total = (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0);
+            if (total < 16) { setBeatGroups([total + 1]); notifySettingsChange(); }
+          } else {
+            const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
+            const nextIdx = (currentIdx === -1 ? 0 : (currentIdx + 1) % METER_PRESETS.length);
+            setBeatGroups(METER_PRESETS[nextIdx].groups);
+            notifySettingsChange();
+          }
           break;
         }
         case "sig-prev": {
-          const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
-          const nextIdx = (currentIdx === -1 ? 0 : (currentIdx - 1 + METER_PRESETS.length) % METER_PRESETS.length);
-          setBeatGroups(METER_PRESETS[nextIdx].groups);
-          notifySettingsChange();
+          if (state.freeMode) {
+            const total = (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0);
+            if (total > 1) { setBeatGroups([total - 1]); notifySettingsChange(); }
+          } else {
+            const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
+            const nextIdx = (currentIdx === -1 ? 0 : (currentIdx - 1 + METER_PRESETS.length) % METER_PRESETS.length);
+            setBeatGroups(METER_PRESETS[nextIdx].groups);
+            notifySettingsChange();
+          }
           break;
         }
         case "toggle-widget":
@@ -141,7 +151,7 @@ export function FloatingWidget() {
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [keyBindings, state.bpm, state.subdivision, state.beatGroups]);
+  }, [keyBindings, state.bpm, state.subdivision, state.beatGroups, state.freeMode]);
 
   const MIN_WIDTH = 300;
   const FIXED_HEIGHT = 120;
@@ -245,14 +255,20 @@ export function FloatingWidget() {
   };
 
   const cycleTimeSig = () => {
-    const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
-    const nextIdx = (currentIdx === -1 ? 0 : (currentIdx + 1) % METER_PRESETS.length);
-    setBeatGroups(METER_PRESETS[nextIdx].groups);
-    notifySettingsChange();
+    if (state.freeMode) {
+      const total = (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0);
+      if (total < 16) { setBeatGroups([total + 1]); notifySettingsChange(); }
+    } else {
+      const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
+      const nextIdx = (currentIdx === -1 ? 0 : (currentIdx + 1) % METER_PRESETS.length);
+      setBeatGroups(METER_PRESETS[nextIdx].groups);
+      notifySettingsChange();
+    }
   };
 
-  const timeSigLabel =
-    METER_PRESETS.find(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups))?.label ?? `${state.timeSignature}/4`;
+  const timeSigLabel = state.freeMode
+    ? `${(state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0)} beats`
+    : METER_PRESETS.find(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups))?.label ?? `${state.timeSignature}/4`;
   const rampActive = state.speedRamp.active;
 
   return (
