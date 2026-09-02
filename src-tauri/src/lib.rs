@@ -87,12 +87,17 @@ pub fn run() {
     let startup_complete = Arc::new(AtomicBool::new(false));
     let startup_complete_events = Arc::clone(&startup_complete);
 
-    tauri::Builder::default()
+    // tauri_plugin_decorum is Win/Linux only — its init() panics on macOS (cocoa null ptr).
+    #[allow(unused_mut)]
+    let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_updater::Builder::new().build())
-        .plugin(tauri_plugin_process::init())
-        .plugin(tauri_plugin_decorum::init())
-        .setup(move |app| {
+        .plugin(tauri_plugin_process::init());
+
+    #[cfg(not(target_os = "macos"))]
+    let builder = builder.plugin(tauri_plugin_decorum::init());
+
+    builder.setup(move |app| {
             let shared_state = create_shared_state();
 
             // Restore saved settings from store
