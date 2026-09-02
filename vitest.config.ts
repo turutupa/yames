@@ -16,6 +16,13 @@ export default defineConfig({
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
     exclude: ["node_modules", "src-tauri"],
     css: false,
+    // Component tests that mount MainWindow / FullscreenView take well
+    // under a second on an idle machine but routinely blow the default
+    // 5 s limit when the box is busy (parallel cargo builds, cold CI
+    // runners, first Vite transform). The limit exists to catch hangs,
+    // not slow CPUs; 20 s still catches a hang.
+    testTimeout: 20_000,
+    hookTimeout: 20_000,
     // bun's worker MessagePort lacks `addListener`, which breaks vitest's
     // default `threads` pool. `forks` uses child_process and works fine.
     pool: "forks",
