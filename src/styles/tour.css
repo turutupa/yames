@@ -224,10 +224,14 @@
   cursor: default;
 }
 
-/* ---- Existing-user offer toast ---- */
+/* ---- Existing-user offer toast ----
+   Same slot as O1's "Finish setup" chip (top-centre, under the header). The
+   two never coexist — the chip is for a skipped setup, this is for a migrated
+   existing user whose setup is already stamped complete — and it keeps the
+   toast clear of the floating play button in the bottom-right. */
 .tour-offer {
   position: absolute;
-  bottom: 16px;
+  top: 44px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 200;
@@ -292,7 +296,7 @@
 @keyframes tour-offer-in {
   from {
     opacity: 0;
-    transform: translate(-50%, 8px);
+    transform: translate(-50%, -8px);
   }
   to {
     opacity: 1;
