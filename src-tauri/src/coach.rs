@@ -525,29 +525,132 @@ mod llm {
     const MAX_TOKENS: usize = 256;
     const CONTEXT_SIZE: u32 = 2048;
 
+    /// Which llama.cpp backend this binary was compiled against. Reported in
+    /// the load log so a bug report can say whether the GPU path was even
+    /// available. (`coach-llm` alone is a CPU-only build.)
+    pub const BACKEND: &str = if cfg!(feature = "coach-llm-metal") {
+        "metal"
+    } else if cfg!(feature = "coach-llm-vulkan") {
+        "vulkan"
+    } else {
+        "cpu"
+    };
+
+    /// True when this build has a GPU backend linked in.
+    const HAS_GPU_BACKEND: bool =
+        cfg!(feature = "coach-llm-metal") || cfg!(feature = "coach-llm-vulkan");
+
+    /// Layers to offload when a GPU backend is compiled in. `with_n_gpu_layers`
+    /// takes a `u32` and saturates into `i32`, so `u32::MAX` lands on
+    /// `i32::MAX` — llama.cpp's idiom for "all layers".
+    const ALL_GPU_LAYERS: u32 = u32::MAX;
+
+    /// How many layers to try to offload on this build, honouring the
+    /// `YAMES_LLM_GPU_LAYERS` override.
+    ///
+    /// The override exists for two callers that must be able to force CPU
+    /// inference on a GPU build: the audio-safety jitter probe (ROADMAP §0.5
+    /// runs generation "CPU-only forced") and anyone debugging a driver.
+    /// Setting it to `0` disables offload entirely.
+    fn requested_gpu_layers() -> u32 {
+        match std::env::var("YAMES_LLM_GPU_LAYERS") {
+            Ok(raw) => raw.trim().parse::<u32>().unwrap_or_else(|_| {
+                eprintln!("[coach] YAMES_LLM_GPU_LAYERS={raw:?} is not a number — ignoring");
+                if HAS_GPU_BACKEND {
+                    ALL_GPU_LAYERS
+                } else {
+                    0
+                }
+            }),
+            // No GPU backend linked in means there is nothing to offload to;
+            // asking for layers would only produce a confusing warning.
+            Err(_) if !HAS_GPU_BACKEND => 0,
+            Err(_) => ALL_GPU_LAYERS,
+        }
+    }
+
+    /// Inference thread count (ROADMAP §3: `max(1, physical_cores - 2)`).
+    ///
+    /// `available_parallelism` reports *logical* CPUs and there is no portable
+    /// physical-core source in std, so halve it as an SMT proxy — the rule's
+    /// intent is to leave headroom for the audio callback and the UI, and
+    /// over-reserving is the safe direction to err in.
+    fn inference_threads() -> i32 {
+        let logical = std::thread::available_parallelism()
+            .map(std::num::NonZeroUsize::get)
+            .unwrap_or(4);
+        let physical = (logical / 2).max(1);
+        physical.saturating_sub(2).max(1).min(i32::MAX as usize) as i32
+    }
+
+    fn load_model_file(
+        backend: &LlamaBackend,
+        path: &std::path::Path,
+        n_gpu_layers: u32,
+    ) -> Result<LlamaModel, String> {
+        let params = LlamaModelParams::default().with_n_gpu_layers(n_gpu_layers);
+        LlamaModel::load_from_file(backend, path, &params)
+            .map_err(|e| format!("Failed to load model: {e}"))
+    }
+
     pub struct LlmModel {
         backend: LlamaBackend,
         model: LlamaModel,
+        n_threads: i32,
     }
 
     impl LlmModel {
         pub fn load(path: &std::path::Path) -> Result<Self, String> {
             let backend =
                 LlamaBackend::init().map_err(|e| format!("Failed to init llama backend: {e}"))?;
-            let params = LlamaModelParams::default();
-            let model = LlamaModel::load_from_file(&backend, path, &params)
-                .map_err(|e| format!("Failed to load model: {e}"))?;
-            Ok(LlmModel { backend, model })
+
+            let requested = requested_gpu_layers();
+            let n_threads = inference_threads();
+            eprintln!(
+                "[coach] loading model (backend={BACKEND}, n_gpu_layers={requested}, n_threads={n_threads})"
+            );
+
+            // GPU first, always. A Vulkan/Metal build on a machine with no
+            // usable device normally still loads — llama.cpp reports zero
+            // offloadable devices and keeps every layer on the CPU — but a
+            // broken driver can fail the load outright, so retry on the CPU
+            // rather than leaving the user with a dead brain.
+            let model = match load_model_file(&backend, path, requested) {
+                Ok(model) => model,
+                Err(gpu_err) if requested != 0 => {
+                    eprintln!(
+                        "[coach] GPU load failed ({gpu_err}) — retrying with n_gpu_layers = 0"
+                    );
+                    load_model_file(&backend, path, 0)?
+                }
+                Err(e) => return Err(e),
+            };
+
+            Ok(LlmModel {
+                backend,
+                model,
+                n_threads,
+            })
         }
 
         pub fn generate(&self, context: &str) -> Result<String, String> {
+            self.generate_with_limit(context, MAX_TOKENS)
+        }
+
+        pub fn generate_with_limit(
+            &self,
+            context: &str,
+            max_tokens: usize,
+        ) -> Result<String, String> {
             let prompt = format!(
                 "<|system|>\n{}<|end|>\n<|user|>\n{context}<|end|>\n<|assistant|>\n",
                 super::SYSTEM_PROMPT,
             );
 
-            let ctx_params =
-                LlamaContextParams::default().with_n_ctx(std::num::NonZero::new(CONTEXT_SIZE));
+            let ctx_params = LlamaContextParams::default()
+                .with_n_ctx(std::num::NonZero::new(CONTEXT_SIZE))
+                .with_n_threads(self.n_threads)
+                .with_n_threads_batch(self.n_threads);
             let mut ctx = self
                 .model
                 .new_context(&self.backend, ctx_params)
@@ -580,7 +683,7 @@ mod llm {
                 LlamaSampler::dist(42),
             ]);
 
-            for _ in 0..MAX_TOKENS {
+            for _ in 0..max_tokens {
                 let logits_id = batch.n_tokens() - 1;
                 let token = sampler.sample(&ctx, logits_id);
 
@@ -604,11 +707,25 @@ mod llm {
                     .map_err(|e| format!("Decode failed: {e}"))?;
             }
 
+            // Was `token_to_str(t, token::LlamaTokenAttr::all())` per token,
+            // which does not compile against llama-cpp-2 0.1.146 — there is no
+            // `LlamaTokenAttr`, and the second argument is a `model::Special`.
+            // (The old call was never exercised: `coach-llm` could only build
+            // on macOS, and nothing shipped with it enabled.)
+            //
+            // `token_to_piece` rather than the deprecated `tokens_to_str`:
+            // the latter hardcodes an 8-byte piece buffer and does not retry,
+            // so any longer piece fails the whole generation with
+            // "Insufficient Buffer Space" — observed on a 128-token run.
+            // One decoder across the whole output also means a UTF-8 sequence
+            // split across two tokens survives instead of becoming replacement
+            // characters. `false` = do not render control tokens as text.
+            let mut decoder = encoding_rs::UTF_8.new_decoder();
             let mut result = String::new();
             for token in &output_tokens {
                 let piece = self
                     .model
-                    .token_to_str(*token, llama_cpp_2::token::LlamaTokenAttr::all())
+                    .token_to_piece(*token, &mut decoder, false, None)
                     .map_err(|e| format!("Token decode failed: {e}"))?;
                 result.push_str(&piece);
             }
@@ -620,3 +737,59 @@ mod llm {
 
 #[cfg(feature = "coach-llm")]
 use llm::LlmModel;
+
+// ---------------------------------------------------------------------------
+// LLM smoke test (coach-llm builds only)
+// ---------------------------------------------------------------------------
+
+/// End-to-end check that a real GGUF loads and produces tokens on this
+/// build's backend. Skipped unless `YAMES_TEST_GGUF` points at a model file,
+/// because the repo ships no weights and CI must stay able to run
+/// `cargo test --features coach-llm --lib` without a multi-hundred-MB
+/// download when it only wants the compile checked.
+///
+///   YAMES_TEST_GGUF=/path/to/tiny.gguf \
+///     cargo test --manifest-path src-tauri/Cargo.toml --features coach-llm --lib
+///
+/// Set `YAMES_LLM_GPU_LAYERS=0` alongside it to force the CPU path on a
+/// GPU build.
+#[cfg(all(test, feature = "coach-llm"))]
+mod llm_tests {
+    use super::llm::LlmModel;
+
+    #[test]
+    fn loads_gguf_and_generates_tokens() {
+        let Ok(raw) = std::env::var("YAMES_TEST_GGUF") else {
+            eprintln!("YAMES_TEST_GGUF unset — skipping LLM generation test");
+            return;
+        };
+        let path = std::path::PathBuf::from(&raw);
+        assert!(path.exists(), "YAMES_TEST_GGUF does not exist: {raw}");
+
+        // 8 tokens is the contract; `YAMES_TEST_GGUF_TOKENS` raises it only so
+        // a throughput measurement has enough samples to mean anything.
+        let max_tokens = std::env::var("YAMES_TEST_GGUF_TOKENS")
+            .ok()
+            .and_then(|v| v.trim().parse::<usize>().ok())
+            .unwrap_or(8);
+
+        let model = LlmModel::load(&path).expect("model load failed");
+
+        let started = std::time::Instant::now();
+        let out = model
+            .generate_with_limit("Accuracy: 82\nSignedDev: -4.1\nSay hello.", max_tokens)
+            .expect("generation failed");
+        let elapsed = started.elapsed();
+
+        eprintln!(
+            "[llm test] backend={} max_tokens={max_tokens} elapsed={:.2}s output={out:?}",
+            super::llm::BACKEND,
+            elapsed.as_secs_f64(),
+        );
+        assert!(
+            !out.trim().is_empty(),
+            "model produced no text (backend={})",
+            super::llm::BACKEND
+        );
+    }
+}

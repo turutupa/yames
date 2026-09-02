@@ -31,6 +31,54 @@ Notes:
   for `error[`, `error:`, `panic`, or `FAILED` in the output to detect
   breakage.
 
+## Building with the coach LLM
+
+`default = []`, so a plain build has **no** LLM — `coach.rs` runs the
+template engine. Turn it on with exactly one Cargo feature:
+
+| Feature | Backend | Use |
+|---|---|---|
+| `coach-llm` | CPU only | dev machines, CI fallback, the jitter probe |
+| `coach-llm-metal` | Metal | shipping macOS |
+| `coach-llm-vulkan` | Vulkan | shipping Windows + Linux |
+
+The GPU features imply `coach-llm`; never enable two backends at once.
+`LlmModel::load` asks for all layers on a GPU build and llama.cpp keeps
+them on the CPU when it finds no usable device, so one binary serves both
+— set `YAMES_LLM_GPU_LAYERS=0` to force CPU inference on a GPU build.
+
+```sh
+cargo build --manifest-path src-tauri/Cargo.toml --features coach-llm-metal   # macOS
+cargo build --manifest-path src-tauri/Cargo.toml --features coach-llm-vulkan  # Windows / Linux
+```
+
+Prerequisites beyond the usual Rust + cmake (aubio already needs cmake):
+
+- **All platforms**: cmake, a C/C++ compiler, and `libclang` for bindgen
+  (`LIBCLANG_PATH` must point at the directory holding `libclang.dll` /
+  `.so` / `.dylib`).
+- **macOS**: Xcode command line tools. Metal needs nothing extra.
+- **Windows**: the MSVC toolchain (`stable-x86_64-pc-windows-msvc` plus
+  VS Build Tools) and the LunarG Vulkan SDK (`VULKAN_SDK` set,
+  `%VULKAN_SDK%\Bin` on PATH for `glslc.exe`). MSVC is **required** for
+  the LLM features: on `x86_64-pc-windows-gnu` the `cmake` crate falls
+  back to the MSYS Makefiles generator and `llama-cpp-sys-2`'s build
+  script then panics on `assert_ne!(llama_libs.len(), 0)` because the
+  install step lays the libraries out where it does not look. The
+  default (no-LLM) build still works fine on GNU.
+  Build from a short path, or set `CARGO_TARGET_DIR` to one: llama.cpp's
+  CMake TryCompile tree pushes the default `src-tauri/target/...` past
+  MAX_PATH and MSBuild's CL tracker then fails with
+  `MSB6003 ... cmTC_*.tlog` not found.
+- **Linux**: `libvulkan-dev`, `glslc` (shaderc), `libclang-dev`, cmake.
+
+Smoke test — skipped when the env var is unset, so it is safe in CI:
+
+```sh
+YAMES_TEST_GGUF=/path/to/tiny.gguf \
+  cargo test --manifest-path src-tauri/Cargo.toml --features coach-llm --lib
+```
+
 ## Fast validation chain (no app boot)
 
 After a refactor / surgical edit, run these in order — they catch the
