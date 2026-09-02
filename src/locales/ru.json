@@ -247,6 +247,8 @@
     "free": "FREE",
     "freeBeatCount": "{{count}} доли",
     "freeBeatCount_one": "{{count}} доля",
+    "freeBeatCount_few": "{{count}} доли",
+    "freeBeatCount_many": "{{count}} долей",
     "freeBeatCount_other": "{{count}} долей",
     "beatCount": "{{count}} доли",
     "beatCount_one": "{{count}} доля",
