@@ -243,7 +243,11 @@
     "tap": "TAP",
     "tapCount": "{{count}}회 탭",
     "subdiv": "분할",
-    "meter": "박자"
+    "meter": "박자",
+    "free": "FREE",
+    "freeBeatCount": "{{count}} beats",
+    "addBeat": "Add beat",
+    "removeBeat": "Remove beat"
   },
   "settings": {
     "tabs": {

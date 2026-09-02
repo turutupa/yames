@@ -243,7 +243,11 @@
     "tap": "TAP",
     "tapCount": "{{count}} tocchi",
     "subdiv": "Suddiv",
-    "meter": "Tempo"
+    "meter": "Tempo",
+    "free": "FREE",
+    "freeBeatCount": "{{count}} beats",
+    "addBeat": "Add beat",
+    "removeBeat": "Remove beat"
   },
   "settings": {
     "tabs": {

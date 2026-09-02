@@ -243,7 +243,11 @@
     "tap": "TAP",
     "tapCount": "{{count}} golpes",
     "subdiv": "Subdivisión",
-    "meter": "Compás"
+    "meter": "Compás",
+    "free": "FREE",
+    "freeBeatCount": "{{count}} beats",
+    "addBeat": "Add beat",
+    "removeBeat": "Remove beat"
   },
   "settings": {
     "tabs": {

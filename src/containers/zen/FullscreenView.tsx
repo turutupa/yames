@@ -208,7 +208,7 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
                   <div key={groupIdx} className="fs-group-cluster">
                     {Array.from({ length: count }, (_, d) => {
                       const beatIdx = groupStart + d;
-                      const isGroupDownbeat = d === 0;
+                      const isGroupDownbeat = !state.freeMode && d === 0;
                       const isBeatActive = !isWarmingUp && activeBeat === beatIdx && isDownbeat;
                       const isSubBeatActive = !isWarmingUp && activeBeat === beatIdx && !isDownbeat;
                       return (
@@ -371,7 +371,7 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
             }
           }}>
             {state.freeMode
-              ? `${(state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0)} beats`
+              ? t("metronome.freeBeatCount", { count: (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0) })
               : METER_PRESETS.find(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups))?.label ?? `${state.timeSignature}/4`}
           </button>
         )}

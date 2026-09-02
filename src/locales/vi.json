@@ -243,7 +243,11 @@
     "tap": "TAP",
     "tapCount": "{{count}} lần gõ",
     "subdiv": "Phân nhịp",
-    "meter": "Nhịp"
+    "meter": "Nhịp",
+    "free": "FREE",
+    "freeBeatCount": "{{count}} beats",
+    "addBeat": "Add beat",
+    "removeBeat": "Remove beat"
   },
   "settings": {
     "tabs": {

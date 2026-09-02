@@ -243,7 +243,11 @@
     "tap": "TAP",
     "tapCount": "{{count}} нажатий",
     "subdiv": "Дробление",
-    "meter": "Размер"
+    "meter": "Размер",
+    "free": "FREE",
+    "freeBeatCount": "{{count}} beats",
+    "addBeat": "Add beat",
+    "removeBeat": "Remove beat"
   },
   "settings": {
     "tabs": {

@@ -243,7 +243,11 @@
     "tap": "TAP",
     "tapCount": "{{count}} tapnięć",
     "subdiv": "Podział",
-    "meter": "Metrum"
+    "meter": "Metrum",
+    "free": "FREE",
+    "freeBeatCount": "{{count}} beats",
+    "addBeat": "Add beat",
+    "removeBeat": "Remove beat"
   },
   "settings": {
     "tabs": {

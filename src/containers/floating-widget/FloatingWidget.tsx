@@ -175,6 +175,7 @@ export function FloatingWidget() {
   const widgetBeats = beatsPerMeasure;
   const widgetActiveBeat = activeBeat;
   const isAccentBeat = (beatIdx: number) => {
+    if (state.freeMode) return false;
     const s = new Set<number>();
     let c = 0;
     for (const g of (state.beatGroups ?? [state.timeSignature])) { s.add(c); c += g; }
@@ -267,7 +268,7 @@ export function FloatingWidget() {
   };
 
   const timeSigLabel = state.freeMode
-    ? `${(state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0)} beats`
+    ? t("metronome.freeBeatCount", { count: (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0) })
     : METER_PRESETS.find(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups))?.label ?? `${state.timeSignature}/4`;
   const rampActive = state.speedRamp.active;
 

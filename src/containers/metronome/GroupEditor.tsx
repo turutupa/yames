@@ -1,4 +1,5 @@
-import { setBeatGroups } from "../../ipc";
+import { useTranslation } from "react-i18next";
+import { setBeatGroups, notifySettingsChange } from "../../ipc";
 
 const SUBDIVISION_MULTIPLIER: Record<number, number> = {
   1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
@@ -30,6 +31,7 @@ export function GroupEditor({
   isDownbeat = false,
   freeMode = false,
 }: GroupEditorProps) {
+  const { t } = useTranslation();
   const total = beatGroups.reduce((a, b) => a + b, 0);
   const formula = beatGroups.join(" + ");
   const clicksPerBar = total * (SUBDIVISION_MULTIPLIER[subdivision] ?? 1);
@@ -61,16 +63,22 @@ export function GroupEditor({
         <div className="group-formula">
           <button
             className="free-count-btn"
-            onClick={() => { if (total > 1) setBeatGroups([total - 1]); }}
-            disabled={total <= 1}
-            aria-label="Remove beat"
+            onClick={async () => {
+              const next = total <= 1 ? 16 : total - 1;
+              await setBeatGroups([next]);
+              await notifySettingsChange();
+            }}
+            aria-label={t("metronome.removeBeat")}
           >‹</button>
           <span className="group-formula-total">{total} beats</span>
           <button
             className="free-count-btn"
-            onClick={() => { if (total < 12) setBeatGroups([total + 1]); }}
-            disabled={total >= 12}
-            aria-label="Add beat"
+            onClick={async () => {
+              const next = total >= 16 ? 1 : total + 1;
+              await setBeatGroups([next]);
+              await notifySettingsChange();
+            }}
+            aria-label={t("metronome.addBeat")}
           >›</button>
           <span className="group-formula-clicks">{total * (SUBDIVISION_MULTIPLIER[subdivision] ?? 1)} clicks/bar</span>
         </div>

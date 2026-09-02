@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { METER_PRESETS, METER_VARIANTS } from "../../constants/metronome";
 import { setBeatGroups, notifySettingsChange, setFreeMode } from "../../ipc";
 
@@ -7,10 +8,11 @@ interface MeterPresetsProps {
 }
 
 export function MeterPresets({ beatGroups, freeMode }: MeterPresetsProps) {
+  const { t } = useTranslation();
   const activeKey = JSON.stringify(beatGroups);
 
   // Find which preset label is active (exact match OR a known variant of it)
-  const activePreset = METER_PRESETS.find(p => {
+  const activePreset = freeMode ? undefined : METER_PRESETS.find(p => {
     if (JSON.stringify(p.groups) === activeKey) return true;
     const variants = METER_VARIANTS[p.label];
     return variants?.some(v => JSON.stringify(v) === activeKey);
@@ -39,7 +41,7 @@ export function MeterPresets({ beatGroups, freeMode }: MeterPresetsProps) {
             await notifySettingsChange();
           }}
         >
-          FREE
+          {t("metronome.free")}
         </button>
         {METER_PRESETS.map((preset, i) => {
           const isActive = activePreset?.label === preset.label;

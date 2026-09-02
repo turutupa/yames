@@ -243,7 +243,11 @@
     "tap": "点拍",
     "tapCount": "{{count}} 次",
     "subdiv": "细分",
-    "meter": "拍号"
+    "meter": "拍号",
+    "free": "FREE",
+    "freeBeatCount": "{{count}} beats",
+    "addBeat": "Add beat",
+    "removeBeat": "Remove beat"
   },
   "settings": {
     "tabs": {
