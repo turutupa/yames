@@ -3,10 +3,13 @@ import type { Dispatch, SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 import { storeLoad, storeSave } from "../../ipc";
 import { getLanguages } from "../../i18n";
+import { resetHints } from "../onboarding/hints/hintRuntime";
 
 /**
  * General settings — auto-update, always-on-top, button flash, active border,
- * drill auto-collapse. Pure UI; state lives in the parent.
+ * drill auto-collapse, and the two onboarding escape hatches ("Run setup
+ * again", "Reset hints"). Pure UI; state lives in the parent, except the
+ * one-shot "Reset hints" confirmation, which is local.
  */
 export function GeneralSettingsSection({
   autoCheckUpdates,
@@ -38,6 +41,9 @@ export function GeneralSettingsSection({
   const { t, i18n } = useTranslation();
   const [language, setLanguage] = useState("en");
   const [languageOpen, setLanguageOpen] = useState(false);
+  // "Reset hints" has no persistent state to reflect — the button just
+  // confirms it did something until the user leaves the section.
+  const [hintsReset, setHintsReset] = useState(false);
   const languages = getLanguages();
   const langWrapRef = useRef<HTMLDivElement>(null);
 
@@ -234,6 +240,25 @@ export function GeneralSettingsSection({
           </button>
         </div>
       )}
+      <div className="setting-row">
+        <div className="setting-label">
+          <label>{t("settings.general.resetHints")}</label>
+          <span className="setting-hint">
+            {t("settings.general.resetHintsHint")}
+          </span>
+        </div>
+        <button
+          className="toggle-btn"
+          onClick={() => {
+            void resetHints();
+            setHintsReset(true);
+          }}
+        >
+          {hintsReset
+            ? t("settings.general.resetHintsDone")
+            : t("settings.general.resetHintsAction")}
+        </button>
+      </div>
     </section>
   );
 }

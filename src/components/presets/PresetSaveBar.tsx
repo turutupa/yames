@@ -25,8 +25,10 @@ export function PresetSaveBar({
   onSave,
 }: PresetSaveBarProps) {
   const { t } = useTranslation();
+  // `data-hint` anchors the `preset-suggest` hint (O7); the card itself is
+  // rendered by MainWindow.
   return (
-    <div className="preset-save-area">
+    <div className="preset-save-area" data-hint="preset-suggest">
       {activePreset && (
         <button
           className="preset-active-name"

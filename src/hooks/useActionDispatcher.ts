@@ -11,6 +11,7 @@ import {
   stopSpeedRamp,
   togglePlayback,
 } from "../ipc";
+import { markWidgetOpened } from "../containers/onboarding/hints/hintRuntime";
 import type { AppState, Subdivision } from "../types";
 import type { HotkeyAction } from "../hotkeys";
 import { FULLSCREEN_EXIT_DELAY } from "../hotkeys";
@@ -91,6 +92,9 @@ export function useActionDispatcher({
             }
             break;
           case "toggle-widget":
+            // Same bookkeeping as the header button — the `widget-discover`
+            // hint must not offer a feature the user already uses.
+            void markWidgetOpened();
             showFloating();
             break;
           case "toggle-sidebar":
