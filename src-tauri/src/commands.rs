@@ -1866,6 +1866,7 @@ pub async fn tts_speak(
     tts_active: State<'_, SharedTtsActive>,
     state: State<'_, SharedState>,
     dim_state: State<'_, SharedTtsDim>,
+    engine_state: State<'_, EngineState>,
     text: String,
 ) -> Result<(), String> {
     // Interrupt any in-flight speech BEFORE we dim — a duplicate dim
@@ -1911,11 +1912,23 @@ pub async fn tts_speak(
     // it. The active-state cancellation above gives us the interrupt
     // semantic; releasing the lock here lets the new call actually
     // proceed concurrently to do the cancelling.
-    let snapshot = {
+    let mut snapshot = {
         let engine = tts.lock().map_err(|e| format!("Lock failed: {e}"))?;
         engine.snapshot()
     }
     .ok_or_else(|| "Models directory not set".to_string())?;
+
+    // Speech now plays in-process (was macOS `afplay`, which always used
+    // the OS default output). Route it to the SAME device the metronome
+    // engine is on, exactly like `start_playback` does for the input
+    // tester — otherwise a user on a USB interface hears the click in
+    // their monitors and the coach in their laptop speakers. The engine
+    // lock is taken and released immediately; the heavy work below runs
+    // without holding it.
+    snapshot.output_device = {
+        let engine = engine_state.0.lock().unwrap();
+        engine.device_name().map(|s| s.to_string())
+    };
 
     let tts_active_arc: SharedTtsActive = tts_active.inner().clone();
     let text_owned = text;
@@ -1975,7 +1988,8 @@ pub fn tts_set_voice(tts: State<'_, SharedTts>, voice: String) {
 }
 
 /// Set the coach voice playback volume (0.0..=1.0). Stored on the TtsEngine
-/// and applied to the next `afplay` invocation via the `-v` flag.
+/// and applied to the next utterance via the rodio `Sink`'s gain (it was
+/// `afplay -v` before speech playback moved in-process).
 #[tauri::command]
 pub fn tts_set_volume(tts: State<'_, SharedTts>, volume: f32) {
     if let Ok(mut engine) = tts.lock() {
