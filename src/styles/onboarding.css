@@ -765,17 +765,6 @@ button.onboarding-hf-device:hover {
 
 /* ---- W6 hear it work (O5) ---- */
 
-/* `DriftMeter` fades itself in with a `.visible` class that the component
-   never actually adds — it honours its `visible` prop by returning null
-   instead, so the base rule's `opacity: 0` is all that ever applies. Scoped
-   to the wizard card rather than fixed in `evaluation.css`, because the
-   metronome screen has shipped with that behaviour and changing it there is
-   not this task's call. Inside the card, a rendered meter is a visible one. */
-.onboarding-step .drift-meter {
-  opacity: 1;
-  transform: none;
-}
-
 .onboarding-hiw-dots {
   display: flex;
   justify-content: center;

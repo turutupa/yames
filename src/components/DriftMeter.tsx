@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FEEDBACK_COLORS } from "../hooks/useEvaluation";
 import type { BeatFeedback } from "../types";
@@ -17,6 +17,19 @@ interface DriftMeterProps {
 export default function DriftMeter({ lastFeedback, avgDeviation, visible }: DriftMeterProps) {
   const { t } = useTranslation();
   const needleRef = useRef<HTMLDivElement>(null);
+  // `evaluation.css` fades the meter in through `.drift-meter.visible`
+  // (base rule is opacity 0). The class is added one frame after mount so
+  // the transition actually plays; without it the needle was rendered at
+  // zero opacity forever — it occupied layout but never painted.
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    if (!visible) {
+      setShown(false);
+      return;
+    }
+    const frame = requestAnimationFrame(() => setShown(true));
+    return () => cancelAnimationFrame(frame);
+  }, [visible]);
 
   useEffect(() => {
     if (!needleRef.current) return;
@@ -33,7 +46,7 @@ export default function DriftMeter({ lastFeedback, avgDeviation, visible }: Drif
     : "var(--text-tertiary)";
 
   return (
-    <div className="drift-meter">
+    <div className={`drift-meter${shown ? " visible" : ""}`} data-testid="drift-meter">
       <span className="drift-label">{t("driftMeter.early")}</span>
       <div className="drift-track">
         <div className="drift-center" />
