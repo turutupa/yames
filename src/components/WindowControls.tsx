@@ -19,6 +19,11 @@ export function WindowControls() {
   return (
     <div className="window-controls">
       <button
+        className="wc-btn wc-close"
+        onClick={() => win.close()}
+        aria-label="Close"
+      />
+      <button
         className="wc-btn wc-minimize"
         onClick={() => win.minimize()}
         aria-label="Minimize"
@@ -28,11 +33,6 @@ export function WindowControls() {
         onClick={() => win.toggleMaximize()}
         aria-label={isMaximized ? "Restore" : "Maximize"}
         data-maximized={isMaximized}
-      />
-      <button
-        className="wc-btn wc-close"
-        onClick={() => win.close()}
-        aria-label="Close"
       />
     </div>
   );

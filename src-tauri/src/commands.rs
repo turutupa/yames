@@ -1918,13 +1918,4 @@ pub fn app_ready(app_handle: AppHandle) {
 
     let _ = main_win.show();
     let _ = main_win.set_focus();
-
-    // Apply mica-active CSS class now that the DOM is ready.
-    // setup() cannot do this safely — document.body doesn't exist yet at that point.
-    #[cfg(target_os = "windows")]
-    {
-        if app_handle.state::<crate::VibrancyActive>().0 {
-            let _ = main_win.eval("document.body.classList.add('mica-active')");
-        }
-    }
 }
