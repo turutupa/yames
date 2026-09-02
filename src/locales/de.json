@@ -48,6 +48,43 @@
     "subtitle": "Yames stimmt Anschlagerkennung und Coaching auf dein Instrument ab. Du kannst das später in den Einstellungen ändern.",
     "skip": "Überspringen — wähle ich später"
   },
+  "onboarding": {
+    "welcome": {
+      "title": "Yames",
+      "tagline": "Ein Metronom für echtes Üben. Die Hände bleiben am Instrument.",
+      "setup": "Einrichten (etwa eine Minute)",
+      "skip": "Nur den Klick, bitte",
+      "footer": "Kostenlos · lokal · Open Source · v{{version}}"
+    },
+    "back": "Zurück",
+    "next": "Weiter",
+    "skip": "Überspringen",
+    "progress": "Schritt {{current}} von {{total}}",
+    "chip": {
+      "label": "Einrichtung abschließen",
+      "dismiss": "Ausblenden"
+    },
+    "ready": {
+      "title": "Alles bereit",
+      "subtitle": "Ändere hier etwas – oder später in den Einstellungen.",
+      "rows": {
+        "instrument": "Instrument",
+        "sound": "Klick-Sound",
+        "theme": "Design",
+        "control": "Steuerung",
+        "coach": "Übungscoach",
+        "input": "Audioeingang"
+      },
+      "controlKeyboard": "Tastatur",
+      "controlFootswitch": "Fußschalter",
+      "coachTiming": "Nur Timing-Feedback",
+      "coachOn": "An",
+      "inputNone": "Nicht eingerichtet",
+      "alwaysOnTop": "Immer im Vordergrund",
+      "start": "Üben starten",
+      "tour": "Kurze Tour (30 s)"
+    }
+  },
   "widget": {
     "openMain": "Hauptfenster öffnen",
     "timeSignature": "Taktart",
@@ -372,7 +409,10 @@
       "activeBorder": "Aktiver Rahmen",
       "activeBorderHint": "Rahmen anzeigen, während der Metronom läuft",
       "drillAutoCollapse": "Tempo-Training automatisch einklappen",
-      "drillAutoCollapseHint": "Trainingskonfiguration einklappen, während gespielt wird"
+      "drillAutoCollapseHint": "Trainingskonfiguration einklappen, während gespielt wird",
+      "runSetupAgain": "Einrichtung erneut starten",
+      "runSetupAgainHint": "Den Einrichtungsassistenten erneut öffnen",
+      "runSetupAgainAction": "Öffnen"
     },
     "devices": {
       "title": "Geräte",

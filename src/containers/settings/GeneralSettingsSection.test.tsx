@@ -70,6 +70,20 @@ describe("GeneralSettingsSection language select", () => {
     expect(trigger.textContent).toContain("中文");
   });
 
+  it('shows "Run setup again" only when the handler is wired, and calls it', () => {
+    render(<GeneralSettingsSection {...baseProps} />);
+    expect(screen.queryByText("Run setup again")).toBeNull();
+    cleanup();
+
+    const onRunSetupAgain = vi.fn();
+    render(
+      <GeneralSettingsSection {...baseProps} onRunSetupAgain={onRunSetupAgain} />,
+    );
+    expect(screen.getByText("Run setup again")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Open" }));
+    expect(onRunSetupAgain).toHaveBeenCalled();
+  });
+
   it("clicking outside closes the list without changing language", async () => {
     render(<GeneralSettingsSection {...baseProps} />);
     fireEvent.click(document.querySelector(".lang-select-btn")!);

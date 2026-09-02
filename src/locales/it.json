@@ -48,6 +48,43 @@
     "subtitle": "Yames adatta il rilevamento dell'input e il feedback del coach al tuo strumento. Puoi cambiarlo in seguito nelle Impostazioni.",
     "skip": "Salta — lo sceglierò più tardi"
   },
+  "onboarding": {
+    "welcome": {
+      "title": "Yames",
+      "tagline": "Un metronomo pensato per lo studio vero. Le mani restano sullo strumento.",
+      "setup": "Configura tutto (circa un minuto)",
+      "skip": "Dammi solo il click",
+      "footer": "Gratuito · locale · open source · v{{version}}"
+    },
+    "back": "Indietro",
+    "next": "Avanti",
+    "skip": "Salta",
+    "progress": "Passo {{current}} di {{total}}",
+    "chip": {
+      "label": "Completa la configurazione",
+      "dismiss": "Nascondi"
+    },
+    "ready": {
+      "title": "Tutto pronto",
+      "subtitle": "Cambia quello che vuoi qui, o più tardi nelle Impostazioni.",
+      "rows": {
+        "instrument": "Strumento",
+        "sound": "Suono del click",
+        "theme": "Tema",
+        "control": "Controllo",
+        "coach": "Coach di studio",
+        "input": "Ingresso audio"
+      },
+      "controlKeyboard": "Tastiera",
+      "controlFootswitch": "Pedale",
+      "coachTiming": "Solo feedback sul tempo",
+      "coachOn": "Attivo",
+      "inputNone": "Non configurato",
+      "alwaysOnTop": "Sempre in primo piano",
+      "start": "Inizia a suonare",
+      "tour": "Fammi fare un giro (30 s)"
+    }
+  },
   "widget": {
     "openMain": "Apri la finestra principale",
     "timeSignature": "Tempo",
@@ -372,7 +409,10 @@
       "activeBorder": "Bordo attivo",
       "activeBorderHint": "Mostra il bordo durante la riproduzione",
       "drillAutoCollapse": "Rampa a scomparsa automatica",
-      "drillAutoCollapseHint": "Comprimi le impostazioni della rampa durante la riproduzione"
+      "drillAutoCollapseHint": "Comprimi le impostazioni della rampa durante la riproduzione",
+      "runSetupAgain": "Riavvia la configurazione",
+      "runSetupAgainHint": "Riapre la procedura guidata iniziale",
+      "runSetupAgainAction": "Apri"
     },
     "devices": {
       "title": "Dispositivi",

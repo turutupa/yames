@@ -48,6 +48,43 @@
     "subtitle": "O Yames ajusta a detecção de som e o feedback do coach para o seu instrumento. Você pode mudar isso depois em Configurações.",
     "skip": "Pular — escolho depois"
   },
+  "onboarding": {
+    "welcome": {
+      "title": "Yames",
+      "tagline": "Um metrônomo feito para o estudo de verdade. As mãos ficam no instrumento.",
+      "setup": "Configurar para mim (cerca de um minuto)",
+      "skip": "Só me dê o clique",
+      "footer": "Grátis · local · código aberto · v{{version}}"
+    },
+    "back": "Voltar",
+    "next": "Avançar",
+    "skip": "Pular",
+    "progress": "Etapa {{current}} de {{total}}",
+    "chip": {
+      "label": "Concluir configuração",
+      "dismiss": "Dispensar"
+    },
+    "ready": {
+      "title": "Tudo pronto",
+      "subtitle": "Mude o que quiser aqui, ou depois em Configurações.",
+      "rows": {
+        "instrument": "Instrumento",
+        "sound": "Som do clique",
+        "theme": "Tema",
+        "control": "Controle",
+        "coach": "Coach de estudo",
+        "input": "Entrada de áudio"
+      },
+      "controlKeyboard": "Teclado",
+      "controlFootswitch": "Pedal",
+      "coachTiming": "Apenas feedback de tempo",
+      "coachOn": "Ativado",
+      "inputNone": "Não configurada",
+      "alwaysOnTop": "Sempre visível",
+      "start": "Começar a praticar",
+      "tour": "Me mostre o app (30 s)"
+    }
+  },
   "widget": {
     "openMain": "Abrir janela principal",
     "timeSignature": "Compasso",
@@ -372,7 +409,10 @@
       "activeBorder": "Borda ativa",
       "activeBorderHint": "Mostra uma borda enquanto está tocando",
       "drillAutoCollapse": "Auto-recolher treino",
-      "drillAutoCollapseHint": "Recolhe a configuração do treino enquanto toca"
+      "drillAutoCollapseHint": "Recolhe a configuração do treino enquanto toca",
+      "runSetupAgain": "Refazer a configuração",
+      "runSetupAgainHint": "Reabre o assistente de primeira execução",
+      "runSetupAgainAction": "Abrir"
     },
     "devices": {
       "title": "Dispositivos",

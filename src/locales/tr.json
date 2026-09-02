@@ -48,6 +48,43 @@
     "subtitle": "Yames, vuruş algılamayı ve koç geri bildirimini enstrümanına göre ayarlar. Bunu daha sonra Ayarlar'dan değiştirebilirsin.",
     "skip": "Atla — daha sonra seçerim"
   },
+  "onboarding": {
+    "welcome": {
+      "title": "Yames",
+      "tagline": "Gerçek çalışma için yapılmış bir metronom. Eller enstrümanda kalır.",
+      "setup": "Benim için ayarla (yaklaşık bir dakika)",
+      "skip": "Sadece klik yeter",
+      "footer": "Ücretsiz · yerel · açık kaynak · v{{version}}"
+    },
+    "back": "Geri",
+    "next": "İleri",
+    "skip": "Atla",
+    "progress": "Adım {{current}}/{{total}}",
+    "chip": {
+      "label": "Kurulumu tamamla",
+      "dismiss": "Kapat"
+    },
+    "ready": {
+      "title": "Hazırsın",
+      "subtitle": "Buradan ya da sonra Ayarlar'dan değiştirebilirsin.",
+      "rows": {
+        "instrument": "Enstrüman",
+        "sound": "Klik sesi",
+        "theme": "Tema",
+        "control": "Kontrol",
+        "coach": "Çalışma koçu",
+        "input": "Ses girişi"
+      },
+      "controlKeyboard": "Klavye",
+      "controlFootswitch": "Pedal",
+      "coachTiming": "Yalnızca zamanlama geri bildirimi",
+      "coachOn": "Açık",
+      "inputNone": "Ayarlanmadı",
+      "alwaysOnTop": "Her zaman üstte",
+      "start": "Çalışmaya başla",
+      "tour": "Bana etrafı gezdir (30 sn)"
+    }
+  },
   "widget": {
     "openMain": "Ana pencereyi aç",
     "timeSignature": "Zaman İmzası",
@@ -372,7 +409,10 @@
       "activeBorder": "Aktif kenarlık",
       "activeBorderHint": "Çalarken kenarlık göster",
       "drillAutoCollapse": "Antrenmanı otomatik daralt",
-      "drillAutoCollapseHint": "Çalarken antrenman ayarlarını daralt"
+      "drillAutoCollapseHint": "Çalarken antrenman ayarlarını daralt",
+      "runSetupAgain": "Kurulumu yeniden çalıştır",
+      "runSetupAgainHint": "İlk kurulum sihirbazını yeniden açar",
+      "runSetupAgainAction": "Aç"
     },
     "devices": {
       "title": "Cihazlar",

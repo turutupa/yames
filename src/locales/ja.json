@@ -48,6 +48,43 @@
     "subtitle": "Yames が楽器に合わせて音の検出とコーチのフィードバックを調整します。あとから設定で変更できます。",
     "skip": "スキップ — あとで選ぶ"
   },
+  "onboarding": {
+    "welcome": {
+      "title": "Yames",
+      "tagline": "本気の練習のためのメトロノーム。手は楽器に置いたまま。",
+      "setup": "セットアップする（約1分）",
+      "skip": "クリック音だけでいい",
+      "footer": "無料・ローカル・オープンソース・v{{version}}"
+    },
+    "back": "戻る",
+    "next": "次へ",
+    "skip": "スキップ",
+    "progress": "ステップ {{current}}/{{total}}",
+    "chip": {
+      "label": "セットアップを完了",
+      "dismiss": "閉じる"
+    },
+    "ready": {
+      "title": "準備完了",
+      "subtitle": "ここでも、後で設定からでも変更できます。",
+      "rows": {
+        "instrument": "楽器",
+        "sound": "クリック音",
+        "theme": "テーマ",
+        "control": "操作方法",
+        "coach": "練習コーチ",
+        "input": "オーディオ入力"
+      },
+      "controlKeyboard": "キーボード",
+      "controlFootswitch": "フットスイッチ",
+      "coachTiming": "タイミングのフィードバックのみ",
+      "coachOn": "オン",
+      "inputNone": "未設定",
+      "alwaysOnTop": "常に最前面",
+      "start": "練習を始める",
+      "tour": "アプリを見て回る（30秒）"
+    }
+  },
   "widget": {
     "openMain": "メインウィンドウを開く",
     "timeSignature": "拍子",
@@ -372,7 +409,10 @@
       "activeBorder": "再生中の枠表示",
       "activeBorderHint": "再生中は枠を表示する",
       "drillAutoCollapse": "テンポ練習の自動折りたたみ",
-      "drillAutoCollapseHint": "演奏中はテンポ練習の設定を折りたたむ"
+      "drillAutoCollapseHint": "演奏中はテンポ練習の設定を折りたたむ",
+      "runSetupAgain": "セットアップをやり直す",
+      "runSetupAgainHint": "初回セットアップをもう一度開きます",
+      "runSetupAgainAction": "開く"
     },
     "devices": {
       "title": "デバイス",

@@ -19,6 +19,7 @@ export function GeneralSettingsSection({
   setActiveBorder,
   drillAutoCollapse,
   setDrillAutoCollapse,
+  onRunSetupAgain,
 }: {
   autoCheckUpdates: boolean;
   setAutoCheckUpdates: Dispatch<SetStateAction<boolean>>;
@@ -30,6 +31,9 @@ export function GeneralSettingsSection({
   setActiveBorder: Dispatch<SetStateAction<boolean>>;
   drillAutoCollapse: boolean;
   setDrillAutoCollapse: Dispatch<SetStateAction<boolean>>;
+  /** Re-opens the first-run wizard at W0. Optional so existing tests and
+   *  any other mount of this section keep working without it. */
+  onRunSetupAgain?: () => void;
 }) {
   const { t, i18n } = useTranslation();
   const [language, setLanguage] = useState("en");
@@ -217,6 +221,19 @@ export function GeneralSettingsSection({
           {drillAutoCollapse ? t("common.on") : t("common.off")}
         </button>
       </div>
+      {onRunSetupAgain && (
+        <div className="setting-row">
+          <div className="setting-label">
+            <label>{t("settings.general.runSetupAgain")}</label>
+            <span className="setting-hint">
+              {t("settings.general.runSetupAgainHint")}
+            </span>
+          </div>
+          <button className="toggle-btn" onClick={onRunSetupAgain}>
+            {t("settings.general.runSetupAgainAction")}
+          </button>
+        </div>
+      )}
     </section>
   );
 }

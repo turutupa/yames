@@ -48,6 +48,43 @@
     "subtitle": "Yames tunes onset detection and coaching feedback for your instrument. You can change this later in Settings.",
     "skip": "Skip — I'll pick later"
   },
+  "onboarding": {
+    "welcome": {
+      "title": "Yames",
+      "tagline": "A metronome built for real practice. Hands stay on the instrument.",
+      "setup": "Set me up (about a minute)",
+      "skip": "Just give me the click",
+      "footer": "Free · local · open source · v{{version}}"
+    },
+    "back": "Back",
+    "next": "Next",
+    "skip": "Skip",
+    "progress": "Step {{current}} of {{total}}",
+    "chip": {
+      "label": "Finish setup",
+      "dismiss": "Dismiss"
+    },
+    "ready": {
+      "title": "You're ready",
+      "subtitle": "Change anything here, or later in Settings.",
+      "rows": {
+        "instrument": "Instrument",
+        "sound": "Click sound",
+        "theme": "Theme",
+        "control": "Control",
+        "coach": "Practice coach",
+        "input": "Audio input"
+      },
+      "controlKeyboard": "Keyboard",
+      "controlFootswitch": "Footswitch",
+      "coachTiming": "Timing feedback only",
+      "coachOn": "On",
+      "inputNone": "Not set up",
+      "alwaysOnTop": "Always on top",
+      "start": "Start practicing",
+      "tour": "Show me around (30 s)"
+    }
+  },
   "widget": {
     "openMain": "Open main window",
     "timeSignature": "Time Signature",
@@ -372,7 +409,10 @@
       "activeBorder": "Active border",
       "activeBorderHint": "Show border when playing",
       "drillAutoCollapse": "Drill auto-collapse",
-      "drillAutoCollapseHint": "Collapse drill config while playing"
+      "drillAutoCollapseHint": "Collapse drill config while playing",
+      "runSetupAgain": "Run setup again",
+      "runSetupAgainHint": "Reopen the first-run setup wizard",
+      "runSetupAgainAction": "Open"
     },
     "devices": {
       "title": "Devices",

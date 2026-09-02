@@ -48,6 +48,43 @@
     "subtitle": "Yames adapta la detección de inicio y el entrenamiento a tu instrumento. Puedes cambiarlo más tarde en Ajustes.",
     "skip": "Saltar: elijo luego"
   },
+  "onboarding": {
+    "welcome": {
+      "title": "Yames",
+      "tagline": "Un metrónomo hecho para practicar de verdad. Las manos siguen en el instrumento.",
+      "setup": "Configúralo por mí (un minuto)",
+      "skip": "Solo dame el clic",
+      "footer": "Gratis · local · código abierto · v{{version}}"
+    },
+    "back": "Atrás",
+    "next": "Siguiente",
+    "skip": "Omitir",
+    "progress": "Paso {{current}} de {{total}}",
+    "chip": {
+      "label": "Terminar configuración",
+      "dismiss": "Descartar"
+    },
+    "ready": {
+      "title": "Todo listo",
+      "subtitle": "Cambia lo que quieras aquí o luego en Ajustes.",
+      "rows": {
+        "instrument": "Instrumento",
+        "sound": "Sonido del clic",
+        "theme": "Tema",
+        "control": "Control",
+        "coach": "Entrenador de práctica",
+        "input": "Entrada de audio"
+      },
+      "controlKeyboard": "Teclado",
+      "controlFootswitch": "Pedal",
+      "coachTiming": "Solo feedback de tiempo",
+      "coachOn": "Activado",
+      "inputNone": "Sin configurar",
+      "alwaysOnTop": "Siempre visible",
+      "start": "Empezar a practicar",
+      "tour": "Enséñame la app (30 s)"
+    }
+  },
   "widget": {
     "openMain": "Abrir ventana principal",
     "timeSignature": "Compás",
@@ -372,7 +409,10 @@
       "activeBorder": "Borde activo",
       "activeBorderHint": "Muestra un borde mientras se reproduce",
       "drillAutoCollapse": "Auto-contraer la rampa",
-      "drillAutoCollapseHint": "Contrae la configuración de la rampa mientras se reproduce"
+      "drillAutoCollapseHint": "Contrae la configuración de la rampa mientras se reproduce",
+      "runSetupAgain": "Volver a configurar",
+      "runSetupAgainHint": "Reabre el asistente de configuración inicial",
+      "runSetupAgainAction": "Abrir"
     },
     "devices": {
       "title": "Dispositivos",
