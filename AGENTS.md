@@ -43,9 +43,16 @@ template engine. Turn it on with exactly one Cargo feature:
 | `coach-llm-vulkan` | Vulkan | shipping Windows + Linux |
 
 The GPU features imply `coach-llm`; never enable two backends at once.
-`LlmModel::load` asks for all layers on a GPU build and llama.cpp keeps
-them on the CPU when it finds no usable device, so one binary serves both
-— set `YAMES_LLM_GPU_LAYERS=0` to force CPU inference on a GPU build.
+The inference worker asks for all layers on a GPU build and llama.cpp
+keeps them on the CPU when it finds no usable device, so one binary serves
+both — set `YAMES_LLM_GPU_LAYERS=0` to force CPU inference on a GPU build.
+
+The model, its `LlamaContext` and the llama.cpp backend live on a single
+long-lived thread (`coach::llm::LlmWorker`), demoted to below-normal
+priority once at spawn. Do not move inference back onto the tokio
+blocking pool: `LlamaContext` is not `Send`, `LlamaBackend::init()` is a
+process-wide one-shot, and lowering a pool thread's priority per call
+cannot be undone on Linux.
 
 ```sh
 cargo build --manifest-path src-tauri/Cargo.toml --features coach-llm-metal   # macOS
@@ -70,6 +77,15 @@ Prerequisites beyond the usual Rust + cmake (aubio already needs cmake):
   CMake TryCompile tree pushes the default `src-tauri/target/...` past
   MAX_PATH and MSBuild's CL tracker then fails with
   `MSB6003 ... cmTC_*.tlog` not found.
+  With `CMAKE_GENERATOR=Ninja`, **`ninja.exe` must be on PATH** — use the
+  copy shipped with VS Build Tools
+  (`…\2022\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja`),
+  never w64devkit's. If it is missing, cmake caches
+  `CMAKE_MAKE_PROGRAM-NOTFOUND` and every later build fails with an empty
+  build-tool name (`CMake Error: Generator: build tool execution failed,
+  command was:  -j 16 install`) even after ninja is added, because the
+  configure step is skipped. Delete
+  `$CARGO_TARGET_DIR/debug/build/llama-cpp-sys-2-*/` to recover.
 - **Linux**: `libvulkan-dev`, `glslc` (shaderc), `libclang-dev`, cmake.
 
 Smoke test — skipped when the env var is unset, so it is safe in CI:
