@@ -14,13 +14,14 @@ import type { WizardStepDef } from "./types";
 import { WelcomeStep } from "./WelcomeStep";
 import { InstrumentStep } from "./InstrumentStep";
 import { SoundLookStep } from "./SoundLookStep";
+import { HandsFreeStep } from "./HandsFreeStep";
 import { ReadyStep } from "./ReadyStep";
 
 export const ONBOARDING_STEPS: WizardStepDef[] = [
   { id: "welcome", Component: WelcomeStep, hideInProgress: true },
   { id: "instrument", Component: InstrumentStep },
   { id: "sound-look", Component: SoundLookStep },
-  // O3: { id: "hands-free", Component: HandsFreeStep },
+  { id: "hands-free", Component: HandsFreeStep },
   // O4: { id: "coach", Component: CoachStep },
   // O5: { id: "audio-input", Component: AudioInputStep,
   //        isEnabled: (ctx) => ctx.coachTier !== "off" || ctx.inputConfigured === true },

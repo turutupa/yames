@@ -71,6 +71,31 @@
       "themeHeading": "Giao diện",
       "moreThemes": "Thêm giao diện trong Cài đặt"
     },
+    "handsFree": {
+      "title": "Tay vẫn ở trên nhạc cụ",
+      "subtitle": "Những phím này đã dùng được. Nếu bạn có pedal hoặc tay cầm, hãy gán ngay cho Phát/Dừng tại đây.",
+      "cancel": "Hủy",
+      "keyboard": {
+        "title": "Bàn phím",
+        "hint": "Mọi phím đều đổi được trong Cài đặt → Phím tắt."
+      },
+      "midi": {
+        "title": "Pedal MIDI",
+        "none": "Cắm vào bất cứ lúc nào — Yames sẽ mời bạn gán phím.",
+        "map": "Gán Phát/Dừng",
+        "remap": "Gán pedal khác",
+        "listening": "Đạp pedal bạn muốn dùng cho Phát/Dừng.",
+        "mapped": "Phát/Dừng → {{signal}} · kênh {{channel}}"
+      },
+      "gamepad": {
+        "title": "Tay cầm",
+        "none": "Kết nối tay cầm bất cứ lúc nào — bấm một nút và Yames sẽ nhận ra.",
+        "map": "Gán Phát/Dừng",
+        "remap": "Gán nút khác",
+        "listening": "Bấm nút bạn muốn dùng cho Phát/Dừng.",
+        "mapped": "Phát/Dừng → {{button}}"
+      }
+    },
     "ready": {
       "title": "Đã sẵn sàng",
       "subtitle": "Thay đổi tại đây, hoặc sau này trong Cài đặt.",

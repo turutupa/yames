@@ -71,6 +71,31 @@
       "themeHeading": "테마",
       "moreThemes": "더 많은 테마는 설정에서"
     },
+    "handsFree": {
+      "title": "손은 악기에 그대로",
+      "subtitle": "이 키들은 이미 작동합니다. 풋스위치나 컨트롤러가 있다면 여기서 바로 재생/정지에 연결하세요.",
+      "cancel": "취소",
+      "keyboard": {
+        "title": "키보드",
+        "hint": "모든 키는 설정 → 단축키에서 바꿀 수 있습니다."
+      },
+      "midi": {
+        "title": "MIDI 풋스위치",
+        "none": "언제든 연결하세요 — Yames가 연결을 제안합니다.",
+        "map": "재생/정지 연결",
+        "remap": "다른 페달 연결",
+        "listening": "재생/정지에 사용할 페달을 밟으세요.",
+        "mapped": "재생/정지 → {{signal}} · 채널 {{channel}}"
+      },
+      "gamepad": {
+        "title": "게임패드",
+        "none": "언제든 컨트롤러를 연결하세요 — 버튼을 누르면 Yames가 인식합니다.",
+        "map": "재생/정지 연결",
+        "remap": "다른 버튼 연결",
+        "listening": "재생/정지에 사용할 버튼을 누르세요.",
+        "mapped": "재생/정지 → {{button}}"
+      }
+    },
     "ready": {
       "title": "준비됐습니다",
       "subtitle": "여기서 바꾸거나 나중에 설정에서 변경할 수 있어요.",

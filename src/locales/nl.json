@@ -71,6 +71,31 @@
       "themeHeading": "Thema",
       "moreThemes": "Meer thema's in Instellingen"
     },
+    "handsFree": {
+      "title": "Je handen blijven op het instrument",
+      "subtitle": "Deze toetsen werken al. Heb je een voetschakelaar of controller, koppel die hier meteen aan Afspelen/Stoppen.",
+      "cancel": "Annuleren",
+      "keyboard": {
+        "title": "Toetsenbord",
+        "hint": "Elke toets is aan te passen in Instellingen → Sneltoetsen."
+      },
+      "midi": {
+        "title": "MIDI-voetschakelaar",
+        "none": "Sluit er wanneer je wilt een aan — Yames biedt dan aan om hem te koppelen.",
+        "map": "Afspelen/Stoppen koppelen",
+        "remap": "Ander pedaal koppelen",
+        "listening": "Druk op het pedaal dat je voor Afspelen/Stoppen wilt.",
+        "mapped": "Afspelen/Stoppen → {{signal}} · kanaal {{channel}}"
+      },
+      "gamepad": {
+        "title": "Gamepad",
+        "none": "Sluit wanneer je wilt een controller aan — druk op een knop en Yames ziet hem.",
+        "map": "Afspelen/Stoppen koppelen",
+        "remap": "Andere knop koppelen",
+        "listening": "Druk op de knop die je voor Afspelen/Stoppen wilt.",
+        "mapped": "Afspelen/Stoppen → {{button}}"
+      }
+    },
     "ready": {
       "title": "Je bent klaar",
       "subtitle": "Wijzig hier iets, of later in Instellingen.",

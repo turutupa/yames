@@ -71,6 +71,31 @@
       "themeHeading": "Tema",
       "moreThemes": "Más temas en Ajustes"
     },
+    "handsFree": {
+      "title": "Las manos siguen en el instrumento",
+      "subtitle": "Estas teclas ya funcionan. Si tienes un pedal o un mando, asígnalo aquí mismo a Reproducir/Detener.",
+      "cancel": "Cancelar",
+      "keyboard": {
+        "title": "Teclado",
+        "hint": "Puedes reasignar cualquier tecla en Ajustes → Atajos."
+      },
+      "midi": {
+        "title": "Pedal MIDI",
+        "none": "Conéctalo cuando quieras: Yames te ofrecerá asignarlo.",
+        "map": "Asignar Reproducir/Detener",
+        "remap": "Asignar otro pedal",
+        "listening": "Pisa el pedal que quieras para Reproducir/Detener.",
+        "mapped": "Reproducir/Detener → {{signal}} · canal {{channel}}"
+      },
+      "gamepad": {
+        "title": "Mando",
+        "none": "Conecta un mando cuando quieras: pulsa un botón y Yames lo detectará.",
+        "map": "Asignar Reproducir/Detener",
+        "remap": "Asignar otro botón",
+        "listening": "Pulsa el botón que quieras para Reproducir/Detener.",
+        "mapped": "Reproducir/Detener → {{button}}"
+      }
+    },
     "ready": {
       "title": "Todo listo",
       "subtitle": "Cambia lo que quieras aquí o luego en Ajustes.",

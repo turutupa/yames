@@ -71,6 +71,31 @@
       "themeHeading": "Motyw",
       "moreThemes": "Więcej motywów w Ustawieniach"
     },
+    "handsFree": {
+      "title": "Ręce zostają na instrumencie",
+      "subtitle": "Te klawisze już działają. Jeśli masz przełącznik nożny lub pada, przypisz go tutaj do Odtwarzaj/Zatrzymaj.",
+      "cancel": "Anuluj",
+      "keyboard": {
+        "title": "Klawiatura",
+        "hint": "Każdy klawisz zmienisz w Ustawieniach → Skróty klawiszowe."
+      },
+      "midi": {
+        "title": "Przełącznik nożny MIDI",
+        "none": "Podłącz go kiedy chcesz — Yames zaproponuje przypisanie.",
+        "map": "Przypisz Odtwarzaj/Zatrzymaj",
+        "remap": "Przypisz inny pedał",
+        "listening": "Naciśnij pedał, który ma odtwarzać i zatrzymywać.",
+        "mapped": "Odtwarzaj/Zatrzymaj → {{signal}} · kanał {{channel}}"
+      },
+      "gamepad": {
+        "title": "Pad",
+        "none": "Podłącz pada kiedy chcesz — naciśnij przycisk, a Yames go wykryje.",
+        "map": "Przypisz Odtwarzaj/Zatrzymaj",
+        "remap": "Przypisz inny przycisk",
+        "listening": "Naciśnij przycisk, który ma odtwarzać i zatrzymywać.",
+        "mapped": "Odtwarzaj/Zatrzymaj → {{button}}"
+      }
+    },
     "ready": {
       "title": "Wszystko gotowe",
       "subtitle": "Zmień coś tutaj albo później w Ustawieniach.",

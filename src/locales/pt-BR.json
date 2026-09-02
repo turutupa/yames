@@ -71,6 +71,31 @@
       "themeHeading": "Tema",
       "moreThemes": "Mais temas em Configurações"
     },
+    "handsFree": {
+      "title": "As mãos ficam no instrumento",
+      "subtitle": "Estas teclas já funcionam. Se você tem um pedal ou controle, mapeie agora para Tocar/Parar.",
+      "cancel": "Cancelar",
+      "keyboard": {
+        "title": "Teclado",
+        "hint": "Qualquer tecla pode ser trocada em Configurações → Atalhos."
+      },
+      "midi": {
+        "title": "Pedal MIDI",
+        "none": "Conecte um quando quiser — o Yames vai oferecer o mapeamento.",
+        "map": "Mapear Tocar/Parar",
+        "remap": "Mapear outro pedal",
+        "listening": "Pise no pedal que você quer para Tocar/Parar.",
+        "mapped": "Tocar/Parar → {{signal}} · canal {{channel}}"
+      },
+      "gamepad": {
+        "title": "Controle",
+        "none": "Conecte um controle quando quiser — aperte um botão e o Yames vai vê-lo.",
+        "map": "Mapear Tocar/Parar",
+        "remap": "Mapear outro botão",
+        "listening": "Aperte o botão que você quer para Tocar/Parar.",
+        "mapped": "Tocar/Parar → {{button}}"
+      }
+    },
     "ready": {
       "title": "Tudo pronto",
       "subtitle": "Mude o que quiser aqui, ou depois em Configurações.",

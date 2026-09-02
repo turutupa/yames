@@ -9,6 +9,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import type { UseMidiReturn } from "../../hooks/useMidi";
 import type { BeatEvent } from "../../types";
 import {
   isWizardOpen,
@@ -24,6 +25,30 @@ import "../../styles/onboarding.css";
 
 const FOCUSABLE =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+/**
+ * Stand-in for the app's MIDI hook when the wizard is rendered outside
+ * MainWindow (tests, storybook-style harnesses): no devices, no bindings, and
+ * every command a no-op, so W3 renders its "nothing plugged in" path.
+ */
+const NO_MIDI: UseMidiReturn = {
+  devices: [],
+  bindings: [],
+  connectedDevice: null,
+  lastActivity: null,
+  learnMode: null,
+  pendingConflict: null,
+  connect: async () => {},
+  disconnect: async () => {},
+  refreshDevices: async () => {},
+  startLearn: () => {},
+  cancelLearn: () => {},
+  removeBinding: async () => {},
+  acceptConflict: async () => {},
+  rejectConflict: () => {},
+};
+
+const NO_GAMEPAD_BINDINGS: Record<string, string> = {};
 
 export type OnboardingWizardProps = {
   state: OnboardingState;
@@ -42,6 +67,10 @@ export type OnboardingWizardProps = {
   hasFootswitch?: boolean;
   alwaysOnTop: boolean;
   onAlwaysOnTopChange: (value: boolean) => void;
+  /** The app's MIDI hook (W3). Defaults to a device-less stand-in. */
+  midi?: UseMidiReturn;
+  /** MainWindow's `footBindings` — gamepad/footswitch bindings by action (W3). */
+  gamepadBindings?: Record<string, string>;
 
   /** 80 BPM / volume 0.35 preview click, implemented in MainWindow. */
   startSoftClick: () => void;
@@ -83,6 +112,8 @@ export function OnboardingWizard({
   hasFootswitch = false,
   alwaysOnTop,
   onAlwaysOnTopChange,
+  midi = NO_MIDI,
+  gamepadBindings = NO_GAMEPAD_BINDINGS,
   startSoftClick,
   stopSoftClick,
   softClickPlaying,
@@ -304,6 +335,8 @@ export function OnboardingWizard({
       hasFootswitch,
       alwaysOnTop,
       setAlwaysOnTop: onAlwaysOnTopChange,
+      midi,
+      gamepadBindings,
       startSoftClick,
       stopSoftClick,
       softClickPlaying,
@@ -332,6 +365,8 @@ export function OnboardingWizard({
       hasFootswitch,
       alwaysOnTop,
       onAlwaysOnTopChange,
+      midi,
+      gamepadBindings,
       startSoftClick,
       stopSoftClick,
       softClickPlaying,
