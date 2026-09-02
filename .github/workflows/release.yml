@@ -164,6 +164,10 @@ jobs:
           {
             echo "### llm-smoke — ${{ matrix.label }} (\`${{ matrix.feature }}\`)"
             echo
+            echo 'llama.cpp static libraries *before* linking — an upper'
+            echo 'bound on the growth, not the shipped size. The `build` job'
+            echo 'reports the finished bundles.'
+            echo
             echo '| Artifact | Size |'
             echo '|---|---:|'
             total=0
@@ -173,7 +177,10 @@ jobs:
               total=$((total + bytes))
               printf '| `%s` | %s |\n' "$(basename "$f")" \
                 "$(awk -v b="$bytes" 'BEGIN{printf "%.1f MiB", b/1048576}')"
-            done < <(find "$TARGET" -type f \( -name 'libggml*.a' -o -name 'libllama*.a' \
+            # Only the cmake *install* tree: `out/build/...` holds a second
+            # copy of every library and would double the total.
+            done < <(find "$TARGET" -type f -path '*/out/lib/*' \
+                       \( -name 'libggml*' -o -name 'libllama*' \
                           -o -name 'ggml*.lib' -o -name 'llama*.lib' \) 2>/dev/null | sort -u)
             printf '| **total llama.cpp static libs** | **%s** |\n' \
               "$(awk -v b="$total" 'BEGIN{printf "%.1f MiB", b/1048576}')"
