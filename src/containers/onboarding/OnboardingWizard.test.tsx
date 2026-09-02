@@ -16,9 +16,19 @@ import { OnboardingWizard, type OnboardingWizardProps } from "./OnboardingWizard
 import { ONBOARDING_STEPS } from "./steps";
 import {
   INITIAL_ONBOARDING_STATE,
+  type OnboardingContext,
   type OnboardingState,
   type StepId,
 } from "./onboardingMachine";
+
+/** Steps the registry offers for a given context — the shell's own rule. */
+function reachableSteps(context: OnboardingContext): Set<StepId> {
+  return new Set(
+    ONBOARDING_STEPS.filter((s) => (s.isEnabled ? s.isEnabled(context) : true)).map(
+      (s) => s.id,
+    ),
+  );
+}
 
 function stateAt(stepId: StepId, visited: StepId[] = [stepId]): OnboardingState {
   return {
@@ -89,10 +99,15 @@ describe("wizard shell", () => {
   });
 
   it("shows progress dots and Back/Skip/Next on a step", () => {
+    // PLAIN_STEPS only swaps W1's component (same ids, same gates), so the dot
+    // count still derives from the real registry — W1 gates Next until a card
+    // is picked, which is the subject of its own tests below.
     const { container } = setup({ state: stateAt("instrument"), steps: PLAIN_STEPS });
     // One dot per registered step minus W0 — derived so registering a step
     // (O2–O5) doesn't need this number edited.
-    const dots = ONBOARDING_STEPS.filter((s) => !s.hideInProgress).length;
+    const dots = ONBOARDING_STEPS.filter(
+      (s) => !s.hideInProgress && reachableSteps({ skipped: [], visited: [] }).has(s.id),
+    ).length;
     expect(container.querySelectorAll(".onboarding-dot")).toHaveLength(dots);
     expect(container.querySelector(".onboarding-dot.active")).not.toBeNull();
     // Back on the first step is live: it returns to W0.
@@ -568,13 +583,37 @@ describe("W7 — ready", () => {
     expect(dispatch).toHaveBeenCalledTimes(2);
   });
 
-  it("rows for steps O3–O5 have not added yet are static, not inert buttons", () => {
+  it("the control row went live when O3 registered its step", () => {
+    const { dispatch } = setup(ready);
+    const row = screen.getByText("Control").closest("button");
+    expect(row, "Control row should jump to W3").not.toBeNull();
+    fireEvent.click(row!);
+    expect(dispatch).toHaveBeenCalledExactlyOnceWith({
+      type: "JUMP",
+      stepId: "hands-free",
+    });
+  });
+
+  it("a row is a button exactly when its step is registered", () => {
     setup(ready);
-    for (const label of ["Control", "Practice coach", "Audio input"]) {
+    const reachable = reachableSteps(ready.state.context);
+    const rowTargets: [string, StepId][] = [
+      ["Click sound", "sound-look"],
+      ["Theme", "sound-look"],
+      ["Control", "hands-free"],
+      ["Practice coach", "coach"],
+      ["Audio input", "audio-input"],
+    ];
+    for (const [label, target] of rowTargets) {
       const row = screen.getByText(label).closest(".onboarding-summary-row");
-      expect(row).not.toBeNull();
-      expect(row!.tagName).toBe("DIV");
-      expect(row).toHaveClass("onboarding-summary-static");
+      expect(row, label).not.toBeNull();
+      if (reachable.has(target)) {
+        expect(row!.tagName, label).toBe("BUTTON");
+      } else {
+        // A clickable-looking row that leads nowhere is worse than plain text.
+        expect(row!.tagName, label).toBe("DIV");
+        expect(row, label).toHaveClass("onboarding-summary-static");
+      }
     }
   });
 

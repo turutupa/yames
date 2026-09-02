@@ -9,11 +9,24 @@
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { load } from "@tauri-apps/plugin-store";
+import { ONBOARDING_STEPS } from "./steps";
 import {
   CHIP_DISMISS_LIMIT,
   ONBOARDING_VERSION,
   useOnboarding,
 } from "./useOnboarding";
+
+/**
+ * Derived from the registry rather than spelled out, so registering a step
+ * (O2–O5) doesn't rewrite these expectations. Mirrors the machine: W0 is never
+ * "skipped", and a gated step that is off for this context never enters the
+ * flow either.
+ */
+const SKIPPABLE_STEP_IDS = ONBOARDING_STEPS.filter((s) =>
+  s.isEnabled ? s.isEnabled({ skipped: [], visited: [] }) : true,
+)
+  .map((s) => s.id)
+  .filter((id) => id !== "welcome");
 
 const values = new Map<string, unknown>();
 let store: {
@@ -120,11 +133,7 @@ describe("persistence", () => {
     await waitFor(() => expect(result.current.state.status).toBe("welcome"));
     act(() => result.current.dispatch({ type: "SKIP_ALL" }));
     await waitFor(() => expect(values.get("onboarding.version")).toBe(ONBOARDING_VERSION));
-    expect(values.get("onboarding.skipped")).toEqual([
-      "instrument",
-      "sound-look",
-      "ready",
-    ]);
+    expect(values.get("onboarding.skipped")).toEqual(SKIPPABLE_STEP_IDS);
     expect(values.get("onboarding.completedAt")).toBeUndefined();
     expect(result.current.chipVisible).toBe(true);
   });
@@ -133,9 +142,10 @@ describe("persistence", () => {
     const { result } = await mount();
     await waitFor(() => expect(result.current.state.status).toBe("welcome"));
     act(() => result.current.dispatch({ type: "START_SETUP" }));
-    // W1 → W2 → W7 (every registered step, in flow order).
-    act(() => result.current.dispatch({ type: "NEXT" }));
-    act(() => result.current.dispatch({ type: "NEXT" }));
+    // Walk the registry rather than assuming its length.
+    for (let i = 0; i < ONBOARDING_STEPS.length && result.current.state.stepId !== "ready"; i++) {
+      act(() => result.current.dispatch({ type: "NEXT" }));
+    }
     expect(result.current.state.stepId).toBe("ready");
     act(() => result.current.dispatch({ type: "CLOSE" }));
     await waitFor(() =>
