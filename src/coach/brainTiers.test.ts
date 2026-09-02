@@ -1,51 +1,70 @@
 import { describe, expect, it } from "vitest";
 import {
-  CURRENT_BRAIN_FAMILY,
-  STUDIO_MIN_MEMORY_MB,
+  backendLabel,
+  brainTierLabelKey,
   needsBrainUpdate,
+  standardAvailable,
   studioAvailable,
 } from "./brainTiers";
 
+/** A `ModelStatus`-shaped gate bundle with everything permissive. */
+const gates = (over: Partial<Parameters<typeof needsBrainUpdate>[0] & object> = {}) => ({
+  studioRecommended: true,
+  standardRecommended: true,
+  brainUpdateRecommended: false,
+  ...over,
+});
+
 describe("needsBrainUpdate", () => {
-  it("is false when nothing is downloaded", () => {
+  it("mirrors the backend's answer", () => {
+    expect(needsBrainUpdate(gates({ brainUpdateRecommended: true }))).toBe(true);
+    expect(needsBrainUpdate(gates({ brainUpdateRecommended: false }))).toBe(false);
+  });
+
+  it("offers no update before the status has arrived", () => {
+    // Prompting for a 2.5 GB re-download on a guess is worse than
+    // prompting a moment later.
     expect(needsBrainUpdate(null)).toBe(false);
-    expect(needsBrainUpdate({ brainReady: false, brainFamily: null })).toBe(false);
-  });
-
-  it("is false for a current-family brain", () => {
-    expect(
-      needsBrainUpdate({ brainReady: true, brainFamily: CURRENT_BRAIN_FAMILY }),
-    ).toBe(false);
-  });
-
-  it("is true for a pre-Qwen3 install (no marker on disk)", () => {
-    expect(needsBrainUpdate({ brainReady: true, brainFamily: "legacy" })).toBe(true);
-  });
-
-  it("is true when the backend could not classify the brain at all", () => {
-    // A ready brain with a null family means a marker that exists but is
-    // unreadable, or a backend older than the marker. Offer the update.
-    expect(needsBrainUpdate({ brainReady: true, brainFamily: null })).toBe(true);
-  });
-
-  it("is true for a future family this build does not know", () => {
-    expect(needsBrainUpdate({ brainReady: true, brainFamily: "qwen4" })).toBe(true);
   });
 });
 
-describe("studioAvailable", () => {
-  it("allows Studio at or above 16 GB", () => {
-    expect(studioAvailable(STUDIO_MIN_MEMORY_MB)).toBe(true);
-    expect(studioAvailable(32 * 1024)).toBe(true);
+describe("tier gates", () => {
+  it("mirror the backend's answers", () => {
+    expect(studioAvailable(gates({ studioRecommended: false }))).toBe(false);
+    expect(standardAvailable(gates({ standardRecommended: false }))).toBe(false);
+    expect(studioAvailable(gates())).toBe(true);
+    expect(standardAvailable(gates())).toBe(true);
   });
 
-  it("blocks Studio below 16 GB", () => {
-    expect(studioAvailable(8 * 1024)).toBe(false);
-    expect(studioAvailable(STUDIO_MIN_MEMORY_MB - 1)).toBe(false);
-  });
-
-  it("treats an unknown/failed RAM query as permissive", () => {
-    expect(studioAvailable(0)).toBe(true);
+  it("are permissive while the status is unknown", () => {
+    // Same rule the backend applies to a failed RAM query: a false "your
+    // machine is too small" is the worse failure.
     expect(studioAvailable(null)).toBe(true);
+    expect(standardAvailable(null)).toBe(true);
+  });
+});
+
+describe("brainTierLabelKey", () => {
+  it("maps the frozen `full` id onto the Studio label", () => {
+    expect(brainTierLabelKey("full")).toBe("settings.coach.brainStudio");
+    expect(brainTierLabelKey("standard")).toBe("settings.coach.brainStandard");
+  });
+
+  it("falls back to Off for anything else", () => {
+    expect(brainTierLabelKey(null)).toBe("common.off");
+    expect(brainTierLabelKey(undefined)).toBe("common.off");
+    expect(brainTierLabelKey("off")).toBe("common.off");
+  });
+});
+
+describe("backendLabel", () => {
+  it("capitalises the compile-time backend for display", () => {
+    expect(backendLabel("vulkan")).toBe("Vulkan");
+    expect(backendLabel("metal")).toBe("Metal");
+    expect(backendLabel("cpu")).toBe("CPU");
+  });
+
+  it("passes anything unknown through unchanged", () => {
+    expect(backendLabel("none")).toBe("none");
   });
 });

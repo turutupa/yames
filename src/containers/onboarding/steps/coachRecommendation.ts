@@ -8,34 +8,37 @@
  *   - `llmCompiled`   — does this binary contain llama.cpp at all (T03)? A
  *                       release built without the `coach-llm` feature can hold
  *                       5 GB of weights and still not read a byte of them.
- *   - `systemMemoryMb` — total physical RAM (T04). `0`/`null` means the
- *                       platform query failed; that must read as "unknown" and
- *                       never as "too small" (same rule as `studioAvailable`).
+ *   - `gates`          — `studioRecommended` / `standardRecommended` as
+ *                       computed by Rust against the RAM the OS actually
+ *                       reports. The floors used to live here as literal 8 GiB
+ *                       and 16 GiB comparisons, which no real 8 GB or 16 GB
+ *                       Windows/Linux machine passes — firmware and iGPU
+ *                       reservations come off the top before the OS answers.
  *   - `installedTier`  — weights already on disk, so the honest recommendation
  *                       is "use what you have", not "download 2.5 GB again".
+ *
+ * `systemMemoryMb` survives only as *copy*: "this machine has {gb} GB". It no
+ * longer decides anything.
  *
  * Kept out of the component so the matrix is unit-testable without a DOM, and
  * so the reason shown to the user is chosen in the same place as the tier —
  * a recommendation without its reason is exactly the overselling this step is
  * supposed to avoid.
  */
-import { STUDIO_MIN_MEMORY_MB, studioAvailable } from "../../../coach/brainTiers";
+import { standardAvailable, studioAvailable } from "../../../coach/brainTiers";
 import type { BrainTier, ModelTier } from "../../../types";
-
-/**
- * Floor for the Standard brain (Qwen3-4B Q4_K_M, ~4 GB resident while
- * generating plus the app itself). Below this the honest answer is timing-only
- * — the model would swap and the coach would feel broken.
- */
-export const STANDARD_MIN_MEMORY_MB = 8 * 1024;
-
-export { STUDIO_MIN_MEMORY_MB, studioAvailable };
 
 export type CoachFacts = {
   /** `get_coach_capabilities().llmCompiled`; false when the query failed. */
   llmCompiled: boolean;
-  /** Total physical RAM in MB. `null` or `0` = unknown, never "too small". */
+  /** Total physical RAM in MB, for the copy only. `null`/`0` = unknown. */
   systemMemoryMb: number | null;
+  /** Rust's tier gates. `null` until the status has arrived (permissive). */
+  gates: {
+    studioRecommended: boolean;
+    standardRecommended: boolean;
+    brainUpdateRecommended: boolean;
+  } | null;
   /** Tier whose weights are already on disk, or null. */
   installedTier: ModelTier | null;
 };
@@ -66,21 +69,20 @@ function knownMemory(memoryMb: number | null): number | null {
  */
 export function recommendCoachTier(facts: CoachFacts): CoachRecommendation {
   const { llmCompiled, installedTier } = facts;
-  const memoryMb = knownMemory(facts.systemMemoryMb);
 
   if (!llmCompiled) {
     return { tier: "off", reasonKey: "onboarding.coach.reasonNoLlm" };
   }
-  if (memoryMb !== null && memoryMb < STANDARD_MIN_MEMORY_MB) {
+  if (!standardAvailable(facts.gates)) {
     return { tier: "off", reasonKey: "onboarding.coach.reasonLowMemory" };
   }
   if (installedTier === "standard") {
     return { tier: "standard", reasonKey: "onboarding.coach.reasonInstalled" };
   }
   // An installed Studio brain is only recommended where Studio is allowed:
-  // below 16 GB an 8B model thrashes, and "it is already there" is not a
-  // good enough reason to point someone at it.
-  if (installedTier === "full" && studioAvailable(facts.systemMemoryMb)) {
+  // below the floor an 8B model thrashes, and "it is already there" is not
+  // a good enough reason to point someone at it.
+  if (installedTier === "full" && studioAvailable(facts.gates)) {
     return { tier: "full", reasonKey: "onboarding.coach.reasonInstalled" };
   }
   return { tier: "standard", reasonKey: null };
@@ -97,7 +99,7 @@ export function recommendCoachTier(facts: CoachFacts): CoachRecommendation {
  */
 export function studioDisabledReason(facts: CoachFacts): string | null {
   if (!facts.llmCompiled) return "onboarding.coach.unavailableInBuild";
-  if (!studioAvailable(facts.systemMemoryMb)) {
+  if (!studioAvailable(facts.gates)) {
     return "onboarding.coach.studioNeedsRam";
   }
   return null;
@@ -106,6 +108,9 @@ export function studioDisabledReason(facts: CoachFacts): string | null {
 /** Same question for the Standard card. */
 export function standardDisabledReason(facts: CoachFacts): string | null {
   if (!facts.llmCompiled) return "onboarding.coach.unavailableInBuild";
+  if (!standardAvailable(facts.gates)) {
+    return "onboarding.coach.standardNeedsRam";
+  }
   return null;
 }
 

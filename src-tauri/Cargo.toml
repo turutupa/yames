@@ -57,12 +57,18 @@ llama-cpp-2 = { version = "0.1.146", optional = true }
 # llama-cpp-2, so this adds no package to Cargo.lock.
 encoding_rs = { version = "0.8", optional = true }
 audio_thread_priority = { version = "0.37.0", default-features = false }
+# Physical-core count for the inference thread budget (ROADMAP §3:
+# `n_threads = max(1, physical_cores - 2)`). std only exposes *logical*
+# CPUs; halving them as an SMT proxy under-counts by 2x on every machine
+# without hyper-threading (an 8-core M1 got 2 threads). Optional so a
+# default build does not pay for it.
+num_cpus = { version = "1", optional = true }
 
 [features]
 default = []
 # CPU-only inference. Development machines and the CI fallback; also what
 # `cargo test --features coach-llm --lib` exercises.
-coach-llm = ["dep:llama-cpp-2", "dep:encoding_rs"]
+coach-llm = ["dep:llama-cpp-2", "dep:encoding_rs", "dep:num_cpus"]
 # Shipping features, one GPU backend per platform (ROADMAP §3: always try
 # the GPU first). llama.cpp falls back to CPU at runtime when no usable
 # device/driver is present, so a single binary serves both cases.

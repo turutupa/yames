@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import type { DownloadProgress, ModelStatus } from "../../ipc";
+import { brainTierLabelKey } from "../../coach/brainTiers";
 import { formatBytes } from "./formatBytes";
 
 /**
@@ -28,8 +29,9 @@ export function CoachDownloadConfirmDialog({
   onStartDownload: (tier: "standard" | "full") => void;
 }) {
   const { t } = useTranslation();
-  const tierLabel = (tier: "standard" | "full") =>
-    tier === "standard" ? t("settings.coach.brainStandard") : t("settings.coach.brainStudio");
+  // `full` on the wire, "Studio" on screen — the mapping lives in
+  // `brainTiers.ts` so every display site agrees.
+  const tierLabel = (tier: "standard" | "full") => t(brainTierLabelKey(tier));
   return (
     <div className="download-confirm-overlay" onClick={onCancel}>
       <div className="download-confirm-dialog" onClick={(e) => e.stopPropagation()}>
@@ -96,12 +98,7 @@ export function DownloadProgressBar({
 }) {
   const { t } = useTranslation();
   const pct = downloadProgress ? Math.round(downloadProgress.fraction * 100) : 0;
-  const tierLabel =
-    downloadingTier === null
-      ? ""
-      : downloadingTier === "full"
-        ? t("settings.coach.brainStudio")
-        : t("settings.coach.brainStandard");
+  const tierLabel = downloadingTier === null ? "" : t(brainTierLabelKey(downloadingTier));
   const modelName = downloadProgress?.component ?? "model";
   const bytesInfo =
     downloadProgress && downloadProgress.downloadedBytes > 0

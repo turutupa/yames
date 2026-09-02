@@ -69,13 +69,25 @@ export function CoachStep(_props: WizardStepProps) {
       ? coach.modelStatus.brainTier
       : null;
 
-  const facts: CoachFacts | null = useMemo(
-    () =>
-      llmCompiled === null
-        ? null
-        : { llmCompiled, systemMemoryMb: coach.systemMemoryMb, installedTier },
-    [llmCompiled, coach.systemMemoryMb, installedTier],
-  );
+  // The tier gates come from Rust with the model status; reading them from
+  // the same place Settings does means the two cannot disagree about what
+  // this machine can run.
+  const status = coach.modelStatus;
+  const facts: CoachFacts | null = useMemo(() => {
+    if (llmCompiled === null) return null;
+    return {
+      llmCompiled,
+      systemMemoryMb: coach.systemMemoryMb,
+      gates: status
+        ? {
+            studioRecommended: status.studioRecommended,
+            standardRecommended: status.standardRecommended,
+            brainUpdateRecommended: status.brainUpdateRecommended,
+          }
+        : null,
+      installedTier,
+    };
+  }, [llmCompiled, coach.systemMemoryMb, status, installedTier]);
 
   const recommendation = useMemo(
     () => (facts ? recommendCoachTier(facts) : null),
@@ -138,9 +150,15 @@ export function CoachStep(_props: WizardStepProps) {
     // Nothing to fetch when this tier's weights *and* the voices are already
     // here — Settings makes the same call (`CoachSettingsSection`), and a
     // second download of 2.5 GB the user already has is not a kindness.
+    //
+    // `brainUpdateRecommended` is part of "already here": matching only the
+    // tier let a pre-Qwen3 install of the same tier short-circuit the
+    // wizard, so a legacy brain survived onboarding and then answered every
+    // prompt with visible ChatML artifacts.
     const complete =
       modelStatus?.brainReady &&
       modelStatus.brainTier === staged &&
+      !modelStatus.brainUpdateRecommended &&
       modelStatus.voiceReady;
     if (complete || downloading) return;
     startDownload(staged);
@@ -164,7 +182,8 @@ export function CoachStep(_props: WizardStepProps) {
     staged !== undefined &&
     staged !== "off" &&
     modelStatus?.brainReady &&
-    modelStatus.brainTier === staged;
+    modelStatus.brainTier === staged &&
+    !modelStatus.brainUpdateRecommended;
 
   return (
     <div className="onboarding-step">

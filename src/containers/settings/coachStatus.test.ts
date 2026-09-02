@@ -5,9 +5,14 @@ import type { CoachCapabilities } from "../../ipc";
 const caps = (over: Partial<CoachCapabilities> = {}): CoachCapabilities => ({
   llmCompiled: true,
   modelResident: false,
+  loading: false,
   backend: "cpu",
   modelName: null,
-  ramEstimateMb: 0,
+  loadError: null,
+  brainDownloaded: false,
+  studioRecommended: true,
+  standardRecommended: true,
+  brainUpdateRecommended: false,
   ...over,
 });
 
@@ -28,9 +33,9 @@ describe("coachStatusLabel", () => {
     });
   });
 
-  // The regression this task exists for: shipping binaries have no
-  // `coach-llm` feature, so a user who downloaded 2.4 GB of weights
-  // must still be told the build can't run them — never "active".
+  // The regression T03 exists for: shipping binaries had no `coach-llm`
+  // feature, so a user who downloaded 2.4 GB of weights must still be
+  // told the build can't run them — never "active".
   it("still says template build when weights are downloaded but uncompiled", () => {
     const label = coachStatusLabel(
       caps({ llmCompiled: false, backend: "none" }),
@@ -40,11 +45,37 @@ describe("coachStatusLabel", () => {
     expect(label?.tone).toBe("info");
   });
 
-  it("flags downloaded-but-not-loaded weights as a warning", () => {
+  // The model is deliberately not resident until a session starts, so
+  // "downloaded, not loaded" is the normal resting state — a neutral
+  // fact, not a warning about a wasted download.
+  it("reports downloaded-but-not-loaded as a neutral resting state", () => {
     const label = coachStatusLabel(caps({ modelResident: false }), true);
     expect(label).toEqual({
-      key: "settings.coach.statusNotLoaded",
+      key: "settings.coach.statusReadyNotLoaded",
+      tone: "info",
+    });
+  });
+
+  // Weights the engine refuses are the one genuinely actionable case.
+  it("warns about weights from a superseded family", () => {
+    const label = coachStatusLabel(
+      caps({ modelResident: false, brainUpdateRecommended: true }),
+      true,
+    );
+    expect(label).toEqual({
+      key: "settings.coach.statusLegacyWeights",
       tone: "warn",
+    });
+  });
+
+  it("says warming up while a load is in flight", () => {
+    const label = coachStatusLabel(
+      caps({ loading: true, modelResident: false }),
+      true,
+    );
+    expect(label).toEqual({
+      key: "settings.coach.statusWarmingUp",
+      tone: "info",
     });
   });
 
@@ -56,24 +87,26 @@ describe("coachStatusLabel", () => {
     });
   });
 
+  // Item 8: the name comes from GGUF metadata, and the backend is
+  // capitalised for display — the line used to read "model.bin on vulkan".
   it("names the model and backend when one is resident", () => {
     const label = coachStatusLabel(
-      caps({ modelResident: true, modelName: "model.bin", backend: "metal" }),
+      caps({ modelResident: true, modelName: "Qwen3 4B", backend: "vulkan" }),
       true,
     );
     expect(label).toEqual({
       key: "settings.coach.statusActive",
-      params: { model: "model.bin", backend: "metal" },
+      params: { model: "Qwen3 4B", backend: "Vulkan" },
       tone: "ok",
     });
   });
 
   it("falls back to a generic model name when the backend didn't report one", () => {
     const label = coachStatusLabel(
-      caps({ modelResident: true, modelName: null, backend: "vulkan" }),
+      caps({ modelResident: true, modelName: null, backend: "metal" }),
       true,
     );
-    expect(label?.params).toEqual({ model: "model", backend: "vulkan" });
+    expect(label?.params).toEqual({ model: "model", backend: "Metal" });
   });
 
   it("trusts residency over the on-disk flag", () => {
@@ -81,7 +114,7 @@ describe("coachStatusLabel", () => {
     // load; a resident model wins so the line never regresses to
     // "not loaded" while the coach is actively generating.
     const label = coachStatusLabel(
-      caps({ modelResident: true, modelName: "model.bin" }),
+      caps({ modelResident: true, modelName: "Qwen3 4B" }),
       false,
     );
     expect(label?.key).toBe("settings.coach.statusActive");

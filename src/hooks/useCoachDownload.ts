@@ -15,7 +15,8 @@ import {
 } from "../ipc";
 import type { DownloadProgress, ModelStatus, VoiceDiagnostic } from "../ipc";
 import type { BrainTier, CoachMode, ModelTier, VoiceMode, Verbosity } from "../types";
-import { needsBrainUpdate, studioAvailable } from "../coach/brainTiers";
+import { needsBrainUpdate, standardAvailable, studioAvailable } from "../coach/brainTiers";
+import { unloadCoach } from "./coachLoader";
 
 // Legacy persisted values may still carry "chime" from an earlier
 // release; we collapse it to "silent" on load and rewrite the store so
@@ -76,7 +77,20 @@ export function useCoachDownload() {
   // answers; `studioAvailable` treats both null and 0 as "unknown, allow".
   const [systemMemoryMb, setSystemMemoryMb] = useState<number | null>(null);
 
-  const [coachBrainTier, setCoachBrainTier] = useState<BrainTier>("off");
+  const [coachBrainTier, setCoachBrainTierState] = useState<BrainTier>("off");
+  /**
+   * Setter wrapper: switching the brain off must also free the RAM.
+   * Nothing else did — the tier flag only gated *future* prompts, so a
+   * user who turned the coach off after a session kept paying 4 GB for a
+   * model that would never be asked anything again. Loading is the
+   * mirror image and deliberately does NOT happen here: weights become
+   * resident when a session starts, not when a toggle is pressed
+   * (`hooks/coachLoader.ts`).
+   */
+  const setCoachBrainTier = useCallback((tier: BrainTier) => {
+    setCoachBrainTierState(tier);
+    if (tier === "off") void unloadCoach();
+  }, []);
   const [coachVoiceMode, setCoachVoiceMode] = useState<VoiceMode>("silent");
   const [coachVoiceName, setCoachVoiceName] = useState("lessac");
   // C5 verbosity. "default" honours the gatekeeper's tier verbatim.
@@ -108,7 +122,9 @@ export function useCoachDownload() {
     // runs, and a failure just leaves the Studio tier ungated.
     getSystemMemoryMb().then(setSystemMemoryMb).catch(() => {});
     storeLoad<BrainTier>("coachBrainTier").then((v) => {
-      if (v) setCoachBrainTier(v);
+      // Raw setter: restoring a persisted "off" at startup is not the
+      // user switching the brain off, and nothing is resident yet.
+      if (v) setCoachBrainTierState(v);
     });
     storeLoad<PersistedVoiceMode>("coachVoiceMode").then((v) => {
       if (!v) return;
@@ -191,6 +207,14 @@ export function useCoachDownload() {
       if (result.success && result.tier) {
         // Full brain+voices install path — tier present, persist + flip
         // the active brain tier.
+        //
+        // Deliberately NOT loading the model here. Downloading weights is
+        // not the same act as wanting them in RAM: Settings shows "ready
+        // — loads when you start a session" and the next `startSession`
+        // picks them up. Because `load_coach_model` fingerprints the file
+        // (path + size + mtime), an "Update brain" that lands while a
+        // session is running is picked up by the session after it — the
+        // old weights are never left answering forever.
         setCoachBrainTier(result.tier as ModelTier);
         storeSave("coachBrainTier", result.tier);
         setDownloadSuccess(true);
@@ -237,9 +261,12 @@ export function useCoachDownload() {
     downloadingTier,
     pendingDownloadTier,
     setPendingDownloadTier,
-    // tier gating / migration
+    // Tier gating / migration — all three decided in Rust against the RAM
+    // the OS actually reports and the family marker on disk. `systemMemoryMb`
+    // is kept for copy ("this machine has 16 GB"), not for gating.
     systemMemoryMb,
-    studioAvailable: studioAvailable(systemMemoryMb),
+    studioAvailable: studioAvailable(modelStatus),
+    standardAvailable: standardAvailable(modelStatus),
     brainUpdateAvailable: needsBrainUpdate(modelStatus),
     // coach prefs
     coachBrainTier,

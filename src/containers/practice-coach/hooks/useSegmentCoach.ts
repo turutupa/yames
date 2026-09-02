@@ -379,7 +379,13 @@ export function useSegmentCoach(params: {
               derivedPlayMode,
               coachMode,
             );
-            comment = await coachGenerate(context);
+            // Only replace the local metrics line when the model (or the
+            // Rust phrase bank behind it) actually produced prose. The
+            // assignment used to be unconditional, so an all-reasoning
+            // generation that `strip_think` reduced to "" replaced a
+            // perfectly good mini-report with a blank card.
+            const generated = (await coachGenerate("report", context))?.trim();
+            if (generated) comment = generated;
           } catch (err) {
             // Fall back to the metrics line — but log so we can diagnose
             // "the LLM stopped paraphrasing" instead of guessing.

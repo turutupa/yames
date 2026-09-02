@@ -2,6 +2,13 @@
  * W4's honesty matrix (O4). Every row here is a machine someone actually
  * has, and the rule being pinned is "never recommend what this machine or
  * this build cannot deliver".
+ *
+ * The RAM thresholds themselves are no longer tested here — they moved to
+ * Rust (`models::recommendations`, tested in `models.rs`) because a
+ * literal 16 GiB comparison against reported RAM locked real 16 GB
+ * machines out of Studio. What this file pins is the *matrix*: given the
+ * gates the backend computed, which tier does the wizard point at and
+ * which reason does it owe the user.
  */
 import { describe, expect, it } from "vitest";
 import {
@@ -9,19 +16,27 @@ import {
   recommendCoachTier,
   standardDisabledReason,
   studioDisabledReason,
-  STANDARD_MIN_MEMORY_MB,
-  STUDIO_MIN_MEMORY_MB,
   type CoachFacts,
 } from "./coachRecommendation";
 
 const facts = (over: Partial<CoachFacts> = {}): CoachFacts => ({
   llmCompiled: true,
   systemMemoryMb: 32 * 1024,
+  gates: {
+    studioRecommended: true,
+    standardRecommended: true,
+    brainUpdateRecommended: false,
+  },
   installedTier: null,
   ...over,
 });
 
-describe("recommendCoachTier — RAM × llmCompiled", () => {
+/** A machine the backend says is below the Standard floor. */
+const tooSmall = { studioRecommended: false, standardRecommended: false, brainUpdateRecommended: false };
+/** Big enough for Standard, not for Studio. */
+const standardOnly = { studioRecommended: false, standardRecommended: true, brainUpdateRecommended: false };
+
+describe("recommendCoachTier — gates × llmCompiled", () => {
   it("recommends Standard on a capable machine, with nothing to explain", () => {
     expect(recommendCoachTier(facts())).toEqual({ tier: "standard", reasonKey: null });
   });
@@ -35,29 +50,21 @@ describe("recommendCoachTier — RAM × llmCompiled", () => {
   });
 
   it("recommends timing-only when the build has no LLM, whatever the RAM", () => {
-    for (const memoryMb of [4 * 1024, 32 * 1024, 128 * 1024, null, 0]) {
-      expect(recommendCoachTier(facts({ llmCompiled: false, systemMemoryMb: memoryMb })))
+    for (const gates of [tooSmall, standardOnly, null]) {
+      expect(recommendCoachTier(facts({ llmCompiled: false, gates })))
         .toEqual({ tier: "off", reasonKey: "onboarding.coach.reasonNoLlm" });
     }
   });
 
   it("recommends timing-only below the Standard floor, with the RAM reason", () => {
-    expect(recommendCoachTier(facts({ systemMemoryMb: STANDARD_MIN_MEMORY_MB - 1 })))
+    expect(recommendCoachTier(facts({ gates: tooSmall })))
       .toEqual({ tier: "off", reasonKey: "onboarding.coach.reasonLowMemory" });
   });
 
-  it("treats exactly the floor as enough", () => {
-    expect(recommendCoachTier(facts({ systemMemoryMb: STANDARD_MIN_MEMORY_MB })).tier)
-      .toBe("standard");
-  });
-
-  it("never reads a failed RAM query as 'too small'", () => {
-    // 0 and null both mean "the platform query failed" (see brainTiers.ts).
-    for (const memoryMb of [null, 0]) {
-      expect(recommendCoachTier(facts({ systemMemoryMb: memoryMb })).tier).toBe(
-        "standard",
-      );
-    }
+  it("never reads an unanswered gate query as 'too small'", () => {
+    // `gates: null` means the status has not arrived yet — same rule the
+    // backend applies to a failed RAM query.
+    expect(recommendCoachTier(facts({ gates: null })).tier).toBe("standard");
   });
 });
 
@@ -70,17 +77,16 @@ describe("recommendCoachTier — weights already on disk", () => {
   });
 
   it("points at an installed Studio brain when the machine may run it", () => {
-    expect(
-      recommendCoachTier(facts({ installedTier: "full", systemMemoryMb: 32 * 1024 })),
-    ).toEqual({ tier: "full", reasonKey: "onboarding.coach.reasonInstalled" });
+    expect(recommendCoachTier(facts({ installedTier: "full" }))).toEqual({
+      tier: "full",
+      reasonKey: "onboarding.coach.reasonInstalled",
+    });
   });
 
   it("does not push an installed Studio brain onto a machine below the gate", () => {
     // "It is already there" is not a reason to run an 8B model in 8 GB.
     expect(
-      recommendCoachTier(
-        facts({ installedTier: "full", systemMemoryMb: STUDIO_MIN_MEMORY_MB - 1024 }),
-      ),
+      recommendCoachTier(facts({ installedTier: "full", gates: standardOnly })),
     ).toEqual({ tier: "standard", reasonKey: null });
   });
 
@@ -92,25 +98,23 @@ describe("recommendCoachTier — weights already on disk", () => {
 
   it("ignores installed weights on a machine below the Standard floor", () => {
     expect(
-      recommendCoachTier(facts({ installedTier: "standard", systemMemoryMb: 4 * 1024 })),
+      recommendCoachTier(facts({ installedTier: "standard", gates: tooSmall })),
     ).toEqual({ tier: "off", reasonKey: "onboarding.coach.reasonLowMemory" });
   });
 });
 
 describe("disabled reasons", () => {
-  it("greys Studio below 16 GB with the RAM reason (decision 5)", () => {
-    expect(studioDisabledReason(facts({ systemMemoryMb: STUDIO_MIN_MEMORY_MB - 1 })))
+  it("greys Studio when the backend says the machine is too small (decision 5)", () => {
+    expect(studioDisabledReason(facts({ gates: standardOnly })))
       .toBe("onboarding.coach.studioNeedsRam");
   });
 
-  it("leaves Studio selectable at exactly 16 GB", () => {
-    expect(studioDisabledReason(facts({ systemMemoryMb: STUDIO_MIN_MEMORY_MB }))).toBeNull();
+  it("leaves Studio selectable when the backend allows it", () => {
+    expect(studioDisabledReason(facts())).toBeNull();
   });
 
-  it("leaves Studio selectable when the RAM query failed", () => {
-    for (const memoryMb of [null, 0]) {
-      expect(studioDisabledReason(facts({ systemMemoryMb: memoryMb }))).toBeNull();
-    }
+  it("leaves Studio selectable while the gates are unknown", () => {
+    expect(studioDisabledReason(facts({ gates: null }))).toBeNull();
   });
 
   it("greys both brains when the build cannot run one at all", () => {
@@ -121,8 +125,15 @@ describe("disabled reasons", () => {
     expect(studioDisabledReason(noLlm)).toBe("onboarding.coach.unavailableInBuild");
   });
 
-  it("never greys Standard on a build that can run a model", () => {
-    expect(standardDisabledReason(facts({ systemMemoryMb: 4 * 1024 }))).toBeNull();
+  it("greys Standard below its own floor", () => {
+    // Settings gained the same gate in T04c; before that the two screens
+    // told the same machine two different things about the same tier.
+    expect(standardDisabledReason(facts({ gates: tooSmall })))
+      .toBe("onboarding.coach.standardNeedsRam");
+  });
+
+  it("never greys Standard on a capable machine", () => {
+    expect(standardDisabledReason(facts({ gates: standardOnly }))).toBeNull();
   });
 });
 
