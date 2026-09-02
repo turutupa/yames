@@ -13,8 +13,10 @@
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  /* Under the wizard (320) — the wizard owns the screen when it is up — and
-     over the tour (which sits below it) and everything else. */
+  /* Between the hint card (300) and the wizard (320) / tour (330). Help is
+     never up at the same time as those two — the `?` button is hidden and the
+     shortcut is disabled while they own the screen — so the ordering only has
+     to be right for a stray overlap, and "the wizard wins" is the right call. */
   z-index: 310;
   display: flex;
   align-items: center;
@@ -191,6 +193,13 @@
 
 .help-shortcuts-body {
   overflow-y: auto;
+  /* Explicit, because `overflow-y: auto` alone would compute the x axis to
+     `auto` too — and the hotkey rows carry hidden `[data-tooltip]::after`
+     bubbles that are absolutely positioned well past the right edge. They are
+     invisible but they still count toward scrollWidth, so the sheet grew a
+     horizontal scrollbar for content that does not exist. Every real cell fits
+     the four-column grid at every width. */
+  overflow-x: hidden;
   min-height: 0;
 }
 
@@ -313,5 +322,25 @@
 
   .help-menu-note {
     margin-left: 24px;
+  }
+
+  /* The hotkey table's four columns are sized for the Settings pane's width;
+     at 480 px they overflow by ~75 px and the sheet would scroll sideways.
+     Tightening the cells inside the read-only copy fits all four without
+     touching how Settings renders the same component. */
+  .help-shortcuts-body .hotkey-table-header,
+  .help-shortcuts-body .hotkey-row {
+    padding-left: 8px;
+    padding-right: 8px;
+    gap: 0 4px;
+  }
+
+  .help-shortcuts-body .hotkey-bind-btn {
+    padding: 4px 6px;
+    font-size: 0.75rem;
+  }
+
+  .help-shortcuts-body .hotkey-action {
+    font-size: 0.75rem;
   }
 }
