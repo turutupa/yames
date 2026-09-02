@@ -106,6 +106,9 @@ Rules:
   both. CUDA only if a contributor owns the hardware to test it.
 - Capabilities are identical across tiers. Bigger models only improve
   prose and planning quality; nothing deterministic is gated.
+- **Residency:** the model loads when a coach session starts, never at
+  app start or on download, and is unloaded when the tier is turned off
+  or after 10 idle minutes (owner decision 2026-09-02, T04c).
 
 ---
 
