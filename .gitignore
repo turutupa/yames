@@ -10,3 +10,6 @@ certs/
 .wibey/
 .claude/
 videos/
+
+# Tauri regenerates these on every build; they churned in every worktree and PR.
+src-tauri/gen/schemas/

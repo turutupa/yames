@@ -252,10 +252,11 @@ O4/O5 wait for roadmap T03/T04 to merge so the coach step is truthful.
 | O3 W3 hands-free (live MIDI/gamepad mapping through the app's learn path) | shipped | #26 |
 | O7 six first-time hints + Reset hints | shipped | #27 |
 | O6 spotlight tour (six stops) + `?` button + Take the tour | shipped | #29 |
-| O4 W4 coach opt-in | open, needs T03/T04 (merged) — ready to start | |
-| O5 W5/W6 audio input + hear it work | open, after O4 | |
-| O8 empty states, what's-new, Help menu, motion audit | open | |
-| O9 screenshots, website/README, locale review | open, last | |
+| O4 W4 coach opt-in (honest tiers, background download, voice toast) | shipped | #31 |
+| O5 W5 audio input + W6 hear it work (real evaluation path, honest no-onset state) | shipped | #37 |
+| O8 empty states, what's-new modal, Help menu, reduced-motion audit | shipped | #32 |
+| O1b first-run detection fix + fresh install opens the main window | shipped | #35 |
+| O9 screenshots, website/README, locale review | open (only remaining item) | |
 
 Corrections learned while shipping (keep the plan honest): the engine
 has **four** click sounds, not six; there is **no tap-tempo hotkey** (T
@@ -264,8 +265,13 @@ copy show the real keymap; the tour's `zen-widget` stop unions two
 non-adjacent header buttons; `midi-plugged` hint currently opens
 Settings → Hotkeys and should point at W3's mapping card (follow-up);
 the hint cards were re-anchored to the tour's shared helper and need one
-visual check at 480 px. Manual checks still owed by the owner: a real
-MIDI pedal on W3, and the wizard end to end on macOS.
+visual check at 480 px. Additional learnings: the Rust side used to persist the default
+instrument before the frontend looked (fixed in O1b), a fresh install
+used to open the floating widget (fixed in O1b), and `DriftMeter`'s
+`.visible` class is never added on the metronome screen (pre-existing,
+open). Manual checks still owed by the owner: a real MIDI pedal on
+W3, a real instrument through W5/W6, and the wizard end to end on
+macOS.
 
 ## 8. Success criteria
 
