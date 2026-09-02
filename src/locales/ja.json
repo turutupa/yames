@@ -176,6 +176,21 @@
           "body": "全画面のビジュアル、または常に最前面の小さなウィジェット。"
         }
       }
+    },
+    "help": {
+      "title": "ヘルプ",
+      "takeTour": "ツアーを見る",
+      "runSetup": "セットアップをやり直す",
+      "shortcuts": "キーボードショートカット",
+      "reportProblem": "問題を報告",
+      "reportWorking": "ログを収集中…",
+      "reportDone": "診断情報を保存しました。このファイルを報告に添付してください:",
+      "reportError": "診断ファイルを書き出せませんでした。",
+      "website": "ウェブサイト",
+      "version": "バージョン {{version}}",
+      "back": "戻る",
+      "close": "閉じる",
+      "alwaysOnTopNote": "Yames は他のウィンドウより前面に表示されます。設定 → 一般で変更できます。"
     }
   },
   "widget": {
@@ -689,10 +704,6 @@
     "yesterday": "昨日",
     "noteSpacingTrend": "音符間隔の推移"
   },
-  "coachHistory": {
-    "emptyTitle": "まだセッションがありません。",
-    "emptyHint": "練習セッションを完了すると履歴が積み上がります。"
-  },
   "coachDetail": {
     "exercises": "エクササイズ",
     "notPlayed": "未演奏",
@@ -756,5 +767,28 @@
     "available": "Yames v{{version}} が利用可能です",
     "installRestart": "インストールして再起動 →",
     "updating": "Yames を更新しています…"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "プリセットはまだありません",
+      "hint": "よく使うテンポ・音色・拍子を保存しておきましょう。",
+      "action": "最初のプリセットを保存",
+      "shortcut": "{{shortcut}} でこのパネルを開閉できます。"
+    },
+    "history": {
+      "title": "セッションはまだありません。",
+      "hint": "メトロノームを止めると、ここにセッションが表示されます。"
+    },
+    "drill": {
+      "linear": "リニア: 開始 BPM から目標まで、1 段ずつテンポが上がります。",
+      "zigzag": "ジグザグ: テンポが上がり、少し戻り、また上がります。",
+      "adaptive": "アダプティブ: 演奏の様子に合わせてコーチがテンポを上げ下げします。"
+    }
+  },
+  "whatsNew": {
+    "title": "{{version}} の新機能",
+    "noNotes": "新しいバージョンです。詳しいリリースノートはウェブにあります。",
+    "fullNotes": "リリースノート",
+    "dismiss": "了解"
   }
 }

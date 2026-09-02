@@ -446,6 +446,20 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
         </div>
       </div>
 
+      {/* Idle empty state (ONBOARDING_PLAN §6): the grid below always has
+          rows, so the screen never looks empty — but until the drill runs,
+          nothing on it says what the selected mode will do. One line, only
+          while idle, so it disappears the moment the ramp starts. */}
+      {!ramp.active && (
+        <div
+          className="drill-idle-hint view-stagger-item"
+          style={{ animationDelay: '300ms' }}
+          data-testid="drill-idle-hint"
+        >
+          {t(`emptyStates.drill.${mode === "zigzag" ? "zigzag" : mode === "adaptive" ? "adaptive" : "linear"}`)}
+        </div>
+      )}
+
       <div className="drill-summary view-stagger-item" style={{ animationDelay: '310ms' }}>
         {t("drill.summary", {
           beats: beatsPerBar,

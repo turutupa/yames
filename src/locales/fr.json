@@ -176,6 +176,21 @@
           "body": "Visuels en plein écran, ou un minuscule widget toujours visible."
         }
       }
+    },
+    "help": {
+      "title": "Aide",
+      "takeTour": "Faire la visite",
+      "runSetup": "Relancer la configuration",
+      "shortcuts": "Raccourcis clavier",
+      "reportProblem": "Signaler un problème",
+      "reportWorking": "Collecte des journaux…",
+      "reportDone": "Diagnostic enregistré. Joignez ce fichier à votre signalement :",
+      "reportError": "Impossible d'écrire le fichier de diagnostic.",
+      "website": "Site web",
+      "version": "Version {{version}}",
+      "back": "Retour",
+      "close": "Fermer",
+      "alwaysOnTopNote": "Yames reste au-dessus des autres fenêtres. Vous pouvez le changer dans Réglages → Général."
     }
   },
   "widget": {
@@ -689,10 +704,6 @@
     "yesterday": "Hier",
     "noteSpacingTrend": "Tendance de l'espacement des notes"
   },
-  "coachHistory": {
-    "emptyTitle": "Aucune séance pour l'instant.",
-    "emptyHint": "Termine une séance d'entraînement pour construire ton historique."
-  },
   "coachDetail": {
     "exercises": "Exercices",
     "notPlayed": "Non joué",
@@ -756,5 +767,28 @@
     "available": "Yames v{{version}} est disponible",
     "installRestart": "Installer et redémarrer →",
     "updating": "Mise à jour de Yames…"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "Aucun préréglage pour l'instant",
+      "hint": "Enregistrez un tempo, un son et une mesure sur lesquels vous revenez souvent.",
+      "action": "Enregistrer votre premier préréglage",
+      "shortcut": "Appuyez sur {{shortcut}} pour ouvrir et fermer ce panneau."
+    },
+    "history": {
+      "title": "Aucune session pour l'instant.",
+      "hint": "Vos sessions apparaissent ici dès que vous arrêtez le métronome."
+    },
+    "drill": {
+      "linear": "Linéaire : le tempo monte du BPM de départ vers la cible, palier par palier.",
+      "zigzag": "Zigzag : le tempo monte, redescend, puis remonte.",
+      "adaptive": "Adaptatif : le coach monte ou baisse le tempo selon votre jeu."
+    }
+  },
+  "whatsNew": {
+    "title": "Nouveautés de la version {{version}}",
+    "noNotes": "Vous êtes sur une nouvelle version. Les notes complètes sont sur le web.",
+    "fullNotes": "Notes de version",
+    "dismiss": "Compris"
   }
 }

@@ -176,6 +176,21 @@
           "body": "전체 화면 비주얼, 또는 항상 위에 있는 작은 위젯."
         }
       }
+    },
+    "help": {
+      "title": "도움말",
+      "takeTour": "둘러보기",
+      "runSetup": "설정 다시 하기",
+      "shortcuts": "키보드 단축키",
+      "reportProblem": "문제 신고",
+      "reportWorking": "로그를 모으는 중…",
+      "reportDone": "진단 파일을 저장했어요. 신고에 이 파일을 첨부해 주세요:",
+      "reportError": "진단 파일을 저장하지 못했습니다.",
+      "website": "웹사이트",
+      "version": "버전 {{version}}",
+      "back": "이전",
+      "close": "닫기",
+      "alwaysOnTopNote": "Yames는 다른 창 위에 머무릅니다. 설정 → 일반에서 바꿀 수 있어요."
     }
   },
   "widget": {
@@ -689,10 +704,6 @@
     "yesterday": "어제",
     "noteSpacingTrend": "음표 간격 추세"
   },
-  "coachHistory": {
-    "emptyTitle": "아직 세션이 없습니다.",
-    "emptyHint": "연습을 마치면 기록이 쌓입니다."
-  },
   "coachDetail": {
     "exercises": "연습 구간",
     "notPlayed": "연주 안 함",
@@ -756,5 +767,28 @@
     "available": "Yames v{{version}} 업데이트가 있습니다",
     "installRestart": "설치 및 재시작 →",
     "updating": "Yames 업데이트 중…"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "아직 프리셋이 없습니다",
+      "hint": "자주 돌아오는 템포와 소리, 박자를 저장해 두세요.",
+      "action": "첫 프리셋 저장하기",
+      "shortcut": "{{shortcut}} 키로 이 패널을 열고 닫습니다."
+    },
+    "history": {
+      "title": "아직 세션이 없습니다.",
+      "hint": "메트로놈을 멈추면 여기에 세션이 나타납니다."
+    },
+    "drill": {
+      "linear": "선형: 시작 BPM에서 목표까지 한 단계씩 템포가 올라갑니다.",
+      "zigzag": "지그재그: 템포가 올라갔다 내려온 뒤 다시 올라갑니다.",
+      "adaptive": "적응형: 연주에 맞춰 코치가 템포를 올리거나 내립니다."
+    }
+  },
+  "whatsNew": {
+    "title": "{{version}} 새로운 기능",
+    "noNotes": "새 버전을 쓰고 있어요. 전체 릴리스 노트는 웹에 있습니다.",
+    "fullNotes": "릴리스 노트",
+    "dismiss": "알겠어요"
   }
 }

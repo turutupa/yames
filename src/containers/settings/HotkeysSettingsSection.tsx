@@ -39,6 +39,12 @@ const MidiIcon = () => (
  * table (Key / Global / MIDI). Includes the "Test inputs" toggle and the
  * "Reset to defaults" button. Pure UI; capture/binding state lives in the
  * parent.
+ *
+ * `readOnly` (O8) turns the same table into the Help → Keyboard shortcuts
+ * sheet: identical rows, nothing clickable, no test/reset affordances. Reusing
+ * the component rather than a second table is the point — a shortcut added to
+ * `HOTKEYS` shows up in both places or neither. The edit-only props are
+ * optional so a read-only host does not have to fabricate capture state.
  */
 export function HotkeysSettingsSection({
   keyBindings,
@@ -51,30 +57,34 @@ export function HotkeysSettingsSection({
   setInputTestMode,
   midi,
   onResetRequest,
+  readOnly = false,
 }: {
   keyBindings: Bindings;
   globalBindings: Bindings;
   footBindings: Bindings;
-  bindingFor: BindingTarget | null;
-  setBindingFor: Dispatch<SetStateAction<BindingTarget | null>>;
-  setPendingKeys: Dispatch<SetStateAction<string>>;
-  inputTestMode: boolean;
-  setInputTestMode: Dispatch<SetStateAction<boolean>>;
+  bindingFor?: BindingTarget | null;
+  setBindingFor?: Dispatch<SetStateAction<BindingTarget | null>>;
+  setPendingKeys?: Dispatch<SetStateAction<string>>;
+  inputTestMode?: boolean;
+  setInputTestMode?: Dispatch<SetStateAction<boolean>>;
   midi: UseMidiReturn;
-  onResetRequest: () => void;
+  onResetRequest?: () => void;
+  readOnly?: boolean;
 }) {
   const { t } = useTranslation();
   return (
-    <section className="hotkeys-section">
+    <section className={`hotkeys-section${readOnly ? " hotkeys-section-readonly" : ""}`}>
       <div className="hotkeys-section-header">
         <h2>{t("settings.hotkeys.title")}</h2>
-        <button
-          className={`input-test-btn ${inputTestMode ? "active" : ""}`}
-          onClick={() => setInputTestMode((v) => !v)}
-          title={t("settings.hotkeys.testTitle")}
-        >
-          {inputTestMode ? t("settings.hotkeys.stopTest") : t("settings.hotkeys.testInputs")}
-        </button>
+        {!readOnly && setInputTestMode && (
+          <button
+            className={`input-test-btn ${inputTestMode ? "active" : ""}`}
+            onClick={() => setInputTestMode((v) => !v)}
+            title={t("settings.hotkeys.testTitle")}
+          >
+            {inputTestMode ? t("settings.hotkeys.stopTest") : t("settings.hotkeys.testInputs")}
+          </button>
+        )}
       </div>
       {HOTKEY_GROUPS.map((group) => {
         const items = HOTKEYS.filter((hk) => hk.group === group.key);
@@ -112,9 +122,11 @@ export function HotkeysSettingsSection({
                     </span>
                     <button
                       className={`hotkey-bind-btn ${bindingFor?.id === hk.id && bindingFor.type === "key" ? "listening" : ""}`}
+                      disabled={readOnly}
                       onClick={() => {
-                        setBindingFor({ id: hk.id, type: "key" });
-                        setPendingKeys("");
+                        if (readOnly) return;
+                        setBindingFor?.({ id: hk.id, type: "key" });
+                        setPendingKeys?.("");
                       }}
                     >
                       {platformKey(keyBindings[hk.id] || "—")}
@@ -126,7 +138,9 @@ export function HotkeysSettingsSection({
                     </button>
                     <button
                       className={`hotkey-bind-btn ${midi.learnMode === hk.id ? "listening" : ""}`}
+                      disabled={readOnly}
                       onClick={() => {
+                        if (readOnly) return;
                         if (midi.learnMode === hk.id) {
                           midi.cancelLearn();
                         } else {
@@ -165,14 +179,16 @@ export function HotkeysSettingsSection({
           </div>
         );
       })}
-      <div className="hotkey-defaults-row">
-        <button
-          className="hotkey-defaults-btn"
-          onClick={onResetRequest}
-        >
-          {t("settings.hotkeys.resetDefaults")}
-        </button>
-      </div>
+      {!readOnly && onResetRequest && (
+        <div className="hotkey-defaults-row">
+          <button
+            className="hotkey-defaults-btn"
+            onClick={onResetRequest}
+          >
+            {t("settings.hotkeys.resetDefaults")}
+          </button>
+        </div>
+      )}
     </section>
   );
 }

@@ -176,6 +176,21 @@
           "body": "Vollbild-Visuals oder ein winziges Widget, immer im Vordergrund."
         }
       }
+    },
+    "help": {
+      "title": "Hilfe",
+      "takeTour": "Rundgang starten",
+      "runSetup": "Einrichtung erneut starten",
+      "shortcuts": "Tastenkürzel",
+      "reportProblem": "Problem melden",
+      "reportWorking": "Protokolle werden gesammelt …",
+      "reportDone": "Diagnose gespeichert. Hänge diese Datei an deine Meldung an:",
+      "reportError": "Die Diagnosedatei konnte nicht geschrieben werden.",
+      "website": "Website",
+      "version": "Version {{version}}",
+      "back": "Zurück",
+      "close": "Schließen",
+      "alwaysOnTopNote": "Yames bleibt über anderen Fenstern. Ändern kannst du das unter Einstellungen → Allgemein."
     }
   },
   "widget": {
@@ -689,10 +704,6 @@
     "yesterday": "Gestern",
     "noteSpacingTrend": "Notenabstands-Trend"
   },
-  "coachHistory": {
-    "emptyTitle": "Noch keine Sessions.",
-    "emptyHint": "Absolviere eine Übungssession, um deine Historie aufzubauen."
-  },
   "coachDetail": {
     "exercises": "Übungen",
     "notPlayed": "Nicht gespielt",
@@ -756,5 +767,28 @@
     "available": "Yames v{{version}} ist verfügbar",
     "installRestart": "Installieren & Neustart →",
     "updating": "Yames wird aktualisiert…"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "Noch keine Presets",
+      "hint": "Sichere Tempo, Klang und Taktart, zu denen du immer wieder zurückkehrst.",
+      "action": "Erstes Preset speichern",
+      "shortcut": "Mit {{shortcut}} öffnest und schließt du dieses Panel."
+    },
+    "history": {
+      "title": "Noch keine Sessions.",
+      "hint": "Deine Sessions erscheinen hier, sobald du das Metronom stoppst."
+    },
+    "drill": {
+      "linear": "Linear: das Tempo steigt Schritt für Schritt vom Start-BPM zum Ziel.",
+      "zigzag": "Zickzack: das Tempo steigt, fällt zurück und steigt erneut.",
+      "adaptive": "Adaptiv: der Coach erhöht oder senkt das Tempo danach, wie du spielst."
+    }
+  },
+  "whatsNew": {
+    "title": "Neu in {{version}}",
+    "noNotes": "Du nutzt eine neue Version. Die vollständigen Release Notes stehen im Web.",
+    "fullNotes": "Release Notes",
+    "dismiss": "Verstanden"
   }
 }

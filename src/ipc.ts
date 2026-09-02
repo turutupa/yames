@@ -277,6 +277,13 @@ export interface UpdateInfo {
   currentVersion: string;
   latestVersion: string;
   releaseUrl: string;
+  /**
+   * The `notes` body from `latest.json`, when the endpoint had an update to
+   * describe. O8's what's-new modal caches this and replays it after the
+   * install, because `check()` returns null once you are on the latest build —
+   * which is exactly when the notes become worth reading.
+   */
+  notes?: string;
 }
 
 export async function checkForUpdate(currentVersion: string): Promise<UpdateInfo> {
@@ -289,6 +296,7 @@ export async function checkForUpdate(currentVersion: string): Promise<UpdateInfo
         currentVersion,
         latestVersion: update.version,
         releaseUrl,
+        notes: update.body,
       };
     }
     return { hasUpdate: false, currentVersion, latestVersion: currentVersion, releaseUrl };

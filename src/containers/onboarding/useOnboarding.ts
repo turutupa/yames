@@ -50,6 +50,12 @@ export type UseOnboardingResult = {
   dismissChip: () => void;
   /** Case 2 above — O6 hangs the one-time tour offer off this. */
   migratedExistingUser: boolean;
+  /**
+   * Case 1 above — a genuine first launch. O8's what's-new modal reads it to
+   * stay quiet for a user who has never run any version of Yames: a changelog
+   * for a release they are meeting for the first time is noise.
+   */
+  firstRun: boolean;
   /** Store has been read; nothing should render wizard-dependent UI before. */
   hydrated: boolean;
 };
@@ -68,6 +74,7 @@ export function useOnboarding(
   const [hydrated, setHydrated] = useState(false);
   const [chipVisible, setChipVisible] = useState(false);
   const [migratedExistingUser, setMigratedExistingUser] = useState(false);
+  const [firstRun, setFirstRun] = useState(false);
   const dismissCountRef = useRef(0);
   const persistedRef = useRef(false);
 
@@ -88,6 +95,7 @@ export function useOnboarding(
 
       if (version == null && !instrument) {
         // Case 1 — true first run.
+        setFirstRun(true);
         rawDispatch({ type: "START_SETUP" });
       } else if (version == null && instrument) {
         // Case 2 — existing user. Stamp the schema so they never see the
@@ -157,6 +165,7 @@ export function useOnboarding(
     chipVisible: chipVisible && !isOpen,
     dismissChip,
     migratedExistingUser,
+    firstRun,
     hydrated,
   };
 }

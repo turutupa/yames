@@ -1,7 +1,24 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { getVersion } from "@tauri-apps/api/app";
-import { checkForUpdate, storeLoad } from "../../../ipc";
+import { checkForUpdate, storeLoad, storeSave } from "../../../ipc";
+import {
+  WHATS_NEW_NOTES_KEY,
+  type PendingNotes,
+} from "../../onboarding/whats-new/whatsNew";
+
+/**
+ * Stash the release body for the version we are about to install, so O8's
+ * what's-new modal can show it after the relaunch. The updater endpoint only
+ * ever describes a version *newer* than the running one, so this is the last
+ * moment the notes are reachable. Failure is silent — a missing body only
+ * costs the modal its bullet list, and never an update.
+ */
+function cacheReleaseNotes(version: string, notes: string | undefined) {
+  if (!version || !notes?.trim()) return;
+  const pending: PendingNotes = { version, notes };
+  storeSave(WHATS_NEW_NOTES_KEY, pending).catch(() => {});
+}
 
 /**
  * Owns the auto-update lifecycle:
@@ -55,6 +72,7 @@ export function useAppUpdates(): AppUpdates {
       const ver = appVersion === "0.0.0" ? await getVersion() : appVersion;
       const result = await checkForUpdate(ver);
       if (result.hasUpdate) {
+        cacheReleaseNotes(result.latestVersion, result.notes);
         setLatestVersion(result.latestVersion);
         setUpdateStatus("available");
       } else {
@@ -78,6 +96,7 @@ export function useAppUpdates(): AppUpdates {
       if (shouldAutoCheck) {
         const result = await checkForUpdate(ver);
         if (result.hasUpdate) {
+          cacheReleaseNotes(result.latestVersion, result.notes);
           setLatestVersion(result.latestVersion);
           setUpdateStatus("available");
         }
