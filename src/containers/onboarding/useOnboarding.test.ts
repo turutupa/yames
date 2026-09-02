@@ -120,7 +120,11 @@ describe("persistence", () => {
     await waitFor(() => expect(result.current.state.status).toBe("welcome"));
     act(() => result.current.dispatch({ type: "SKIP_ALL" }));
     await waitFor(() => expect(values.get("onboarding.version")).toBe(ONBOARDING_VERSION));
-    expect(values.get("onboarding.skipped")).toEqual(["instrument", "ready"]);
+    expect(values.get("onboarding.skipped")).toEqual([
+      "instrument",
+      "sound-look",
+      "ready",
+    ]);
     expect(values.get("onboarding.completedAt")).toBeUndefined();
     expect(result.current.chipVisible).toBe(true);
   });
@@ -129,6 +133,8 @@ describe("persistence", () => {
     const { result } = await mount();
     await waitFor(() => expect(result.current.state.status).toBe("welcome"));
     act(() => result.current.dispatch({ type: "START_SETUP" }));
+    // W1 → W2 → W7 (every registered step, in flow order).
+    act(() => result.current.dispatch({ type: "NEXT" }));
     act(() => result.current.dispatch({ type: "NEXT" }));
     expect(result.current.state.stepId).toBe("ready");
     act(() => result.current.dispatch({ type: "CLOSE" }));
