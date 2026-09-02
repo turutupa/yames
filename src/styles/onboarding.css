@@ -355,6 +355,150 @@
   outline-offset: 2px;
 }
 
+/* ---- W3 hands-free ----
+   Three stacked cards (keyboard / MIDI / gamepad). The card body scrolls, so
+   this stays inside the 480x780 minimum window without its own breakpoint. */
+.onboarding-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.onboarding-hf-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-card);
+}
+
+.onboarding-hf-title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
+}
+
+.onboarding-hf-keys {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.onboarding-hf-key-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.onboarding-hf-key-combo {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.onboarding-hf-kbd {
+  min-width: 20px;
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.onboarding-hf-hint,
+.onboarding-hf-mapped,
+.onboarding-hf-listening {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--text-muted, var(--text-secondary));
+}
+
+.onboarding-hf-mapped {
+  color: var(--accent);
+}
+
+.onboarding-hf-listening {
+  color: var(--text-primary);
+}
+
+.onboarding-hf-muted {
+  color: var(--text-muted, var(--text-secondary));
+}
+
+.onboarding-hf-devices {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.onboarding-hf-device {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.75rem;
+  text-align: left;
+}
+
+button.onboarding-hf-device:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.onboarding-hf-device.connected {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.onboarding-hf-device-dot {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+}
+
+.onboarding-hf-device.connected .onboarding-hf-device-dot {
+  background: var(--accent);
+}
+
+.onboarding-hf-device-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.onboarding-hf-action {
+  align-self: flex-start;
+  padding: 7px 12px;
+  font-size: 0.75rem;
+}
+
+
 /* ---- W7 summary ---- */
 .onboarding-summary {
   list-style: none;

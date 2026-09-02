@@ -538,6 +538,9 @@ export function MainWindow() {
 
   const midi = useMidi((action) => {
     if (inputTestModeRef.current) return;
+    // The wizard swallows keyboard hotkeys behind its overlay; a pedal press
+    // while W3 is mapping must not drive the app either.
+    if (onboarding.isOpen) return;
     dispatchAction(action as HotkeyAction);
   }, midiAutoAccept, inputTestMode);
 
@@ -579,8 +582,8 @@ export function MainWindow() {
             });
           }
         : undefined,
-    bindings: !midi.learnMode && !inputTestMode ? footBindings : undefined,
-    onAction: !midi.learnMode && !inputTestMode
+    bindings: !midi.learnMode && !inputTestMode && !onboarding.isOpen ? footBindings : undefined,
+    onAction: !midi.learnMode && !inputTestMode && !onboarding.isOpen
       ? (id) => dispatchAction(id as HotkeyAction)
       : undefined,
   });
@@ -954,7 +957,9 @@ export function MainWindow() {
       themeId={state.theme}
       coachTier={coach.coachBrainTier}
       inputDeviceName={evaluation.selectedDevice}
-      hasFootswitch={midi.bindings.length > 0}
+      hasFootswitch={midi.bindings.length > 0 || Object.keys(footBindings).length > 0}
+      midi={midi}
+      gamepadBindings={footBindings}
       alwaysOnTop={state.alwaysOnTop}
       onAlwaysOnTopChange={setAlwaysOnTop}
       startSoftClick={startSoftClick}
