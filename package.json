@@ -37,6 +37,7 @@
     "test:dsp:bake": "UPDATE_FIXTURES=1 cargo test --manifest-path src-tauri/Cargo.toml --test dsp_fixtures",
     "test:highbpm": "cargo test --manifest-path src-tauri/Cargo.toml --test highbpm_fixtures",
     "test:highbpm:bake": "UPDATE_FIXTURES=1 cargo test --manifest-path src-tauri/Cargo.toml --test highbpm_fixtures",
+    "yames:jitter-probe": "cargo run --release --manifest-path src-tauri/Cargo.toml --bin click-jitter-probe --",
     "yames:debug-bpm": "bash scripts/debug-bpm.sh",
     "dev:debug-bpm": "bash scripts/dev-debug-bpm.sh"
   },
