@@ -45,6 +45,28 @@ pub fn should_persist_instrument(current: Instrument, stored: Option<&serde_json
     stored.is_some() || current != Instrument::Other
 }
 
+/// Which window should be on screen at startup, given the stored `lastWindow`?
+///
+/// `lastWindow` is only ever written by `show_main` / `show_floating`, so it is
+/// absent exactly once: on a fresh install, before the user has switched
+/// windows even once. The answer there has to be the **main** window — the
+/// onboarding wizard lives inside it, and the old `"floating"` default left a
+/// first-time user looking at a 400x160 widget while the wizard rendered
+/// invisibly behind the main window's `visible: false` (O1b). It also meant
+/// `app_ready` returned early and never called `show()` at all.
+///
+/// A stored value is always honoured verbatim, including an unrecognised one:
+/// callers treat "anything but `main`" as the floating widget, which is the
+/// behaviour this has always had for a store written by an older build.
+///
+/// Pure so it can be unit-tested without a Tauri `AppHandle`, and shared by
+/// both startup call sites (`app_ready` here, and the floating widget's
+/// show/hide in `lib.rs`) — they must agree or a fresh install would show
+/// both windows at once.
+pub fn resolve_startup_window(stored: Option<&str>) -> String {
+    stored.unwrap_or("main").to_string()
+}
+
 /// Persist the current AppState to the store (minus is_playing which is transient).
 fn persist_state(state: &SharedState, app_handle: &AppHandle) {
     use tauri_plugin_store::StoreExt;
@@ -2072,11 +2094,14 @@ pub fn app_ready(app_handle: AppHandle) {
         Err(_) => return,
     };
 
-    // Only show the main window if that's what was last active.
-    let last_window = store
-        .get("lastWindow")
-        .and_then(|v| v.as_str().map(String::from))
-        .unwrap_or_else(|| "floating".to_string());
+    // Only show the main window if that's what was last active — or if
+    // nothing has been active yet (see `resolve_startup_window`).
+    let last_window = resolve_startup_window(
+        store
+            .get("lastWindow")
+            .and_then(|v| v.as_str().map(String::from))
+            .as_deref(),
+    );
 
     if last_window != "main" {
         return;
@@ -2322,5 +2347,29 @@ mod tests {
             Some(&stored_other)
         ));
         assert!(should_persist_instrument(Instrument::Bass, Some(&stored)));
+    }
+
+    // -----------------------------------------------------------------------
+    // O1b — a fresh install opens the main window, not the widget
+    // -----------------------------------------------------------------------
+
+    /// The bug: `lastWindow` is written only by `show_main` / `show_floating`,
+    /// so on a fresh install it is absent — and the old `"floating"` default
+    /// meant `app_ready` never showed the main window. The onboarding wizard
+    /// mounted and played its preview click inside a window nobody could see.
+    #[test]
+    fn a_fresh_install_starts_on_the_main_window() {
+        assert_eq!(resolve_startup_window(None), "main");
+    }
+
+    #[test]
+    fn a_stored_choice_is_honoured_verbatim() {
+        assert_eq!(resolve_startup_window(Some("main")), "main");
+        assert_eq!(resolve_startup_window(Some("floating")), "floating");
+        // Anything unrecognised keeps its old meaning at the call sites
+        // ("not main" => the floating widget), rather than being repaired
+        // into `main` and stealing focus from a returning widget user.
+        assert_eq!(resolve_startup_window(Some("widget")), "widget");
+        assert_ne!(resolve_startup_window(Some("")), "main");
     }
 }

@@ -93,6 +93,16 @@ Both sides are fixed:
   and friends) because `persist_state` needs a live Tauri `State`/`AppHandle`.
   The store now truthfully lacks an instrument until the user picks one or
   the coming-soon migration in `lib.rs` (~L171) writes one.
+- Rust: `commands.rs::resolve_startup_window` decides which window opens.
+  `lastWindow` is written only by `show_main` / `show_floating`, so it is
+  absent exactly once — on a fresh install — and the old `"floating"`
+  default meant a first-time user saw the 400x160 widget while the wizard
+  mounted (and played its preview click) inside the still-hidden main
+  window, with `app_ready` returning early and never calling `show()`.
+  It now defaults to `"main"`; a stored value is honoured verbatim. Both
+  startup call sites share the function (`app_ready`, and the widget's
+  show/hide in `lib.rs` ~L402) — they have to agree or a fresh install
+  would open both windows.
 - Frontend: `useOnboarding.hasPriorUse(instrument, sessionCount, presetCount)`
   is pure and exported, and treats `"other"` exactly like an absent key. It
   is correct on its own even against an old store already poisoned with
