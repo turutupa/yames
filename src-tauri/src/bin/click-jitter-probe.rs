@@ -299,7 +299,7 @@ struct LlmRun {
 #[cfg(feature = "coach-llm")]
 fn start_llm(path: &str, stop: Arc<AtomicBool>) -> Result<LlmRun, String> {
     use std::time::Instant;
-    use yames_lib::probe::{generate, load_model, with_below_normal_priority, CoachEngine};
+    use yames_lib::probe::{generate, load_model, CoachEngine};
 
     let p = std::path::PathBuf::from(path);
     if !p.exists() {
@@ -333,10 +333,11 @@ fn start_llm(path: &str, stop: Arc<AtomicBool>) -> Result<LlmRun, String> {
     let handle = std::thread::Builder::new()
         .name("probe-llm".into())
         .spawn(move || {
-            // Same scheduling policy `coach_generate` uses in the app
-            // (ROADMAP §3) — measuring a normal-priority thread would not
-            // be measuring the shipping behaviour.
-            with_below_normal_priority(|| {
+            // Since T04 the model lives on the coach's own inference thread,
+            // which is lowered to below-normal priority once at spawn;
+            // `generate` just queues a job there, so this loop measures the
+            // shipping behaviour without any priority dance of its own.
+            {
                 while !stop.load(Ordering::Relaxed) {
                     match generate(&engine, LLM_CONTEXT) {
                         Ok(_) => {
@@ -348,7 +349,7 @@ fn start_llm(path: &str, stop: Arc<AtomicBool>) -> Result<LlmRun, String> {
                         }
                     }
                 }
-            });
+            }
         })
         .map_err(|e| format!("failed to spawn LLM thread: {e}"))?;
 
