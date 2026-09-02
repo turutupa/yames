@@ -64,6 +64,13 @@
       "label": "Installatie afronden",
       "dismiss": "Sluiten"
     },
+    "soundLook": {
+      "title": "Geluid en uiterlijk",
+      "subtitle": "Beweeg over een kaart om de klik te horen of het thema te zien. Kies wat je mooi vindt.",
+      "soundHeading": "Klikgeluid",
+      "themeHeading": "Thema",
+      "moreThemes": "Meer thema's in Instellingen"
+    },
     "ready": {
       "title": "Je bent klaar",
       "subtitle": "Wijzig hier iets, of later in Instellingen.",

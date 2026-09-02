@@ -64,6 +64,13 @@
       "label": "Concluir configuração",
       "dismiss": "Dispensar"
     },
+    "soundLook": {
+      "title": "Som e aparência",
+      "subtitle": "Passe o mouse sobre um cartão para ouvir o clique ou ver o tema. Escolha o que gostar.",
+      "soundHeading": "Som do clique",
+      "themeHeading": "Tema",
+      "moreThemes": "Mais temas em Configurações"
+    },
     "ready": {
       "title": "Tudo pronto",
       "subtitle": "Mude o que quiser aqui, ou depois em Configurações.",

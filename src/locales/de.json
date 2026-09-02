@@ -64,6 +64,13 @@
       "label": "Einrichtung abschließen",
       "dismiss": "Ausblenden"
     },
+    "soundLook": {
+      "title": "Klang & Aussehen",
+      "subtitle": "Fahre über eine Karte, um den Klick zu hören oder das Design zu sehen. Wähle, was dir gefällt.",
+      "soundHeading": "Klick-Sound",
+      "themeHeading": "Design",
+      "moreThemes": "Mehr Designs in den Einstellungen"
+    },
     "ready": {
       "title": "Alles bereit",
       "subtitle": "Ändere hier etwas – oder später in den Einstellungen.",

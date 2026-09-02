@@ -64,6 +64,13 @@
       "label": "Terminer la configuration",
       "dismiss": "Masquer"
     },
+    "soundLook": {
+      "title": "Son et apparence",
+      "subtitle": "Survolez une carte pour entendre le clic ou voir le thème. Choisissez ce qui vous plaît.",
+      "soundHeading": "Son du clic",
+      "themeHeading": "Thème",
+      "moreThemes": "Plus de thèmes dans les Réglages"
+    },
     "ready": {
       "title": "Tout est prêt",
       "subtitle": "Modifiez ce que vous voulez ici, ou plus tard dans les Réglages.",

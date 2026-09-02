@@ -64,6 +64,13 @@
       "label": "完成設定",
       "dismiss": "關閉"
     },
+    "soundLook": {
+      "title": "音色與外觀",
+      "subtitle": "把滑鼠移到卡片上即可試聽節拍音、預覽主題。選一個你喜歡的。",
+      "soundHeading": "節拍音",
+      "themeHeading": "主題",
+      "moreThemes": "更多主題在設定中"
+    },
     "ready": {
       "title": "準備就緒",
       "subtitle": "可以在這裡修改，也可以稍後在設定中修改。",

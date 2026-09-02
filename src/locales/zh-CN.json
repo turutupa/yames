@@ -64,6 +64,13 @@
       "label": "完成设置",
       "dismiss": "关闭"
     },
+    "soundLook": {
+      "title": "音色与外观",
+      "subtitle": "把鼠标移到卡片上即可试听节拍音、预览主题。选一个你喜欢的。",
+      "soundHeading": "节拍音",
+      "themeHeading": "主题",
+      "moreThemes": "更多主题在设置中"
+    },
     "ready": {
       "title": "准备就绪",
       "subtitle": "可以在这里修改，也可以稍后在设置中修改。",

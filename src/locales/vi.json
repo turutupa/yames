@@ -64,6 +64,13 @@
       "label": "Hoàn tất thiết lập",
       "dismiss": "Đóng"
     },
+    "soundLook": {
+      "title": "Âm thanh và giao diện",
+      "subtitle": "Di chuột lên một thẻ để nghe tiếng click hoặc xem giao diện. Chọn cái bạn thích.",
+      "soundHeading": "Âm thanh click",
+      "themeHeading": "Giao diện",
+      "moreThemes": "Thêm giao diện trong Cài đặt"
+    },
     "ready": {
       "title": "Đã sẵn sàng",
       "subtitle": "Thay đổi tại đây, hoặc sau này trong Cài đặt.",

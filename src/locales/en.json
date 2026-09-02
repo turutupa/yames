@@ -64,6 +64,13 @@
       "label": "Finish setup",
       "dismiss": "Dismiss"
     },
+    "soundLook": {
+      "title": "Sound & look",
+      "subtitle": "Hover a card to hear the click or see the theme. Pick what you like.",
+      "soundHeading": "Click sound",
+      "themeHeading": "Theme",
+      "moreThemes": "More themes in Settings"
+    },
     "ready": {
       "title": "You're ready",
       "subtitle": "Change anything here, or later in Settings.",

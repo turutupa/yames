@@ -64,6 +64,13 @@
       "label": "설정 마치기",
       "dismiss": "닫기"
     },
+    "soundLook": {
+      "title": "소리와 모양",
+      "subtitle": "카드에 마우스를 올리면 클릭 소리와 테마를 바로 확인할 수 있어요. 마음에 드는 것을 고르세요.",
+      "soundHeading": "클릭 사운드",
+      "themeHeading": "테마",
+      "moreThemes": "더 많은 테마는 설정에서"
+    },
     "ready": {
       "title": "준비됐습니다",
       "subtitle": "여기서 바꾸거나 나중에 설정에서 변경할 수 있어요.",

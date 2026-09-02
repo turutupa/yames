@@ -64,6 +64,13 @@
       "label": "Kurulumu tamamla",
       "dismiss": "Kapat"
     },
+    "soundLook": {
+      "title": "Ses ve görünüm",
+      "subtitle": "Bir kartın üzerine gelerek klik sesini duy ya da temayı gör. Beğendiğini seç.",
+      "soundHeading": "Klik sesi",
+      "themeHeading": "Tema",
+      "moreThemes": "Ayarlar'da daha fazla tema"
+    },
     "ready": {
       "title": "Hazırsın",
       "subtitle": "Buradan ya da sonra Ayarlar'dan değiştirebilirsin.",

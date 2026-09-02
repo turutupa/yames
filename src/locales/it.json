@@ -64,6 +64,13 @@
       "label": "Completa la configurazione",
       "dismiss": "Nascondi"
     },
+    "soundLook": {
+      "title": "Suono e aspetto",
+      "subtitle": "Passa sopra una scheda per sentire il click o vedere il tema. Scegli quello che ti piace.",
+      "soundHeading": "Suono del click",
+      "themeHeading": "Tema",
+      "moreThemes": "Altri temi nelle Impostazioni"
+    },
     "ready": {
       "title": "Tutto pronto",
       "subtitle": "Cambia quello che vuoi qui, o più tardi nelle Impostazioni.",
