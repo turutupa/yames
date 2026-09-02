@@ -1,0 +1,141 @@
+/* ===================== Progressive first-time hints (O7) =====================
+ *
+ * Same visual language as the wizard card in `onboarding.css` — card
+ * background, 1px border, accent primary — one size down, because a hint sits
+ * on top of a working screen instead of replacing it. Kept in its own file so
+ * the wizard (O1) and the tour (O6) can each own theirs.
+ */
+
+.hint-card {
+  position: fixed;
+  z-index: 300; /* under the wizard overlay (320), over everything else */
+  width: max-content;
+  max-width: min(320px, calc(100vw - 24px));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-card);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.36);
+  animation: hint-card-in 180ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+/* Inline hosts (coach feed, Zen overlay) own the placement themselves. */
+.hint-card-inline {
+  position: static;
+  width: auto;
+  max-width: 100%;
+  margin: 6px 0;
+  box-shadow: none;
+}
+
+.hint-card-body {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.hint-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.hint-card-btn {
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding: 5px 12px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: transparent;
+  color: var(--text-secondary);
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.hint-card-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.hint-card-btn-action {
+  background: var(--accent);
+  color: var(--accent-text, #fff);
+}
+
+.hint-card-btn-action:hover {
+  filter: brightness(1.08);
+}
+
+.hint-card-btn-dismiss {
+  border-color: var(--border);
+}
+
+.hint-card-btn-dismiss:hover {
+  color: var(--text-primary);
+  border-color: var(--accent);
+}
+
+/* `zen-first` lives inside the Zen overlay (z-index 9999), so it is placed by
+   this wrapper rather than by the fixed anchor layer. */
+.zen-hint {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  width: min(360px, calc(100vw - 32px));
+}
+
+.zen-hint .hint-card {
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+@keyframes hint-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hint-card[data-placement="above"] {
+  animation-name: hint-card-in-up;
+}
+
+@keyframes hint-card-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* `.no-motion` mirrors the wizard's handling of the viewTransitions
+   preference; the media query covers the OS setting. */
+.no-motion .hint-card,
+.hint-card.no-motion {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hint-card {
+    animation: none;
+  }
+}

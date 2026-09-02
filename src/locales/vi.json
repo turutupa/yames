@@ -115,6 +115,30 @@
       "alwaysOnTop": "Luôn ở trên cùng",
       "start": "Bắt đầu luyện tập",
       "tour": "Giới thiệu nhanh (30 giây)"
+    },
+    "hints": {
+      "dismiss": "Đã hiểu",
+      "drillFirstOpen": {
+        "body": "Đặt điểm bắt đầu, mục tiêu và bước nhảy. Chế độ thích ứng để huấn luyện viên quyết định."
+      },
+      "presetSuggest": {
+        "body": "Bạn liên tục quay lại thiết lập này. Lưu thành preset nhé?",
+        "action": "Lưu preset"
+      },
+      "coachAsk": {
+        "body": "Nhấn ? bất cứ lúc nào để hỏi huấn luyện viên về điều này."
+      },
+      "zenFirst": {
+        "body": "Esc để thoát Zen. Hiệu ứng nằm trong Cài đặt → Giao diện."
+      },
+      "widgetDiscover": {
+        "body": "Thử widget nổi (W) đặt trên DAW hay bản tab của bạn.",
+        "action": "Mở widget"
+      },
+      "midiPlugged": {
+        "body": "Có thiết bị MIDI đang kết nối nhưng chưa gán gì. Gán bàn đạp cho Phát/Dừng nhé?",
+        "action": "Mở phím tắt"
+      }
     }
   },
   "widget": {
@@ -444,7 +468,11 @@
       "drillAutoCollapseHint": "Thu gọn cấu hình Luyện tempo khi đang chơi",
       "runSetupAgain": "Chạy lại thiết lập",
       "runSetupAgainHint": "Mở lại trình thiết lập lần đầu",
-      "runSetupAgainAction": "Mở"
+      "runSetupAgainAction": "Mở",
+      "resetHints": "Đặt lại gợi ý",
+      "resetHintsHint": "Hiển thị lại sáu gợi ý một lần",
+      "resetHintsAction": "Đặt lại",
+      "resetHintsDone": "Xong"
     },
     "devices": {
       "title": "Thiết bị",

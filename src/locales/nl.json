@@ -115,6 +115,30 @@
       "alwaysOnTop": "Altijd op voorgrond",
       "start": "Beginnen met oefenen",
       "tour": "Laat me rondkijken (30 s)"
+    },
+    "hints": {
+      "dismiss": "Duidelijk",
+      "drillFirstOpen": {
+        "body": "Stel start, doel en stap in. In adaptieve modus beslist de coach."
+      },
+      "presetSuggest": {
+        "body": "Je komt steeds terug op deze instelling. Opslaan als preset?",
+        "action": "Preset opslaan"
+      },
+      "coachAsk": {
+        "body": "Druk op ? om de coach hier iets over te vragen."
+      },
+      "zenFirst": {
+        "body": "Esc verlaat Zen. Effecten staan in Instellingen → Weergave."
+      },
+      "widgetDiscover": {
+        "body": "Probeer de zwevende widget (W) boven je DAW of tabs.",
+        "action": "Widget openen"
+      },
+      "midiPlugged": {
+        "body": "Er is een MIDI-apparaat verbonden maar niets toegewezen. Pedaal aan Afspelen/Stoppen koppelen?",
+        "action": "Sneltoetsen openen"
+      }
     }
   },
   "widget": {
@@ -444,7 +468,11 @@
       "drillAutoCollapseHint": "Klap de configuratie van de tempotraining in tijdens het spelen",
       "runSetupAgain": "Setup opnieuw uitvoeren",
       "runSetupAgainHint": "Opent de eerste-start-wizard opnieuw",
-      "runSetupAgainAction": "Openen"
+      "runSetupAgainAction": "Openen",
+      "resetHints": "Tips resetten",
+      "resetHintsHint": "Toon de zes eenmalige tips opnieuw",
+      "resetHintsAction": "Resetten",
+      "resetHintsDone": "Klaar"
     },
     "devices": {
       "title": "Apparaten",

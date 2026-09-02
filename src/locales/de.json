@@ -115,6 +115,30 @@
       "alwaysOnTop": "Immer im Vordergrund",
       "start": "Üben starten",
       "tour": "Kurze Tour (30 s)"
+    },
+    "hints": {
+      "dismiss": "Verstanden",
+      "drillFirstOpen": {
+        "body": "Start, Ziel und Schritt festlegen. Im adaptiven Modus entscheidet der Coach."
+      },
+      "presetSuggest": {
+        "body": "Du kehrst immer wieder zu dieser Einstellung zurück. Als Preset speichern?",
+        "action": "Preset speichern"
+      },
+      "coachAsk": {
+        "body": "Drücke jederzeit ?, um den Coach dazu zu fragen."
+      },
+      "zenFirst": {
+        "body": "Esc verlässt Zen. Effekte findest du unter Einstellungen → Darstellung."
+      },
+      "widgetDiscover": {
+        "body": "Probier das schwebende Widget (W) über deiner DAW oder deinen Tabs.",
+        "action": "Widget öffnen"
+      },
+      "midiPlugged": {
+        "body": "Ein MIDI-Gerät ist verbunden, aber nichts ist zugewiesen. Pedal auf Start/Stopp legen?",
+        "action": "Tastenkürzel öffnen"
+      }
     }
   },
   "widget": {
@@ -444,7 +468,11 @@
       "drillAutoCollapseHint": "Trainingskonfiguration einklappen, während gespielt wird",
       "runSetupAgain": "Einrichtung erneut starten",
       "runSetupAgainHint": "Den Einrichtungsassistenten erneut öffnen",
-      "runSetupAgainAction": "Öffnen"
+      "runSetupAgainAction": "Öffnen",
+      "resetHints": "Hinweise zurücksetzen",
+      "resetHintsHint": "Die sechs einmaligen Tipps erneut anzeigen",
+      "resetHintsAction": "Zurücksetzen",
+      "resetHintsDone": "Fertig"
     },
     "devices": {
       "title": "Geräte",

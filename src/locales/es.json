@@ -115,6 +115,30 @@
       "alwaysOnTop": "Siempre visible",
       "start": "Empezar a practicar",
       "tour": "Enséñame la app (30 s)"
+    },
+    "hints": {
+      "dismiss": "Entendido",
+      "drillFirstOpen": {
+        "body": "Define inicio, objetivo y paso. El modo adaptativo deja decidir al coach."
+      },
+      "presetSuggest": {
+        "body": "Vuelves una y otra vez a esta configuración. ¿La guardas como preset?",
+        "action": "Guardar preset"
+      },
+      "coachAsk": {
+        "body": "Pulsa ? cuando quieras para preguntarle al coach sobre esto."
+      },
+      "zenFirst": {
+        "body": "Esc sale de Zen. Los efectos están en Ajustes → Apariencia."
+      },
+      "widgetDiscover": {
+        "body": "Prueba el widget flotante (W) sobre tu DAW o tus tablaturas.",
+        "action": "Abrir widget"
+      },
+      "midiPlugged": {
+        "body": "Hay un dispositivo MIDI conectado pero nada asignado. ¿Asignas un pedal a Reproducir/Parar?",
+        "action": "Abrir atajos"
+      }
     }
   },
   "widget": {
@@ -444,7 +468,11 @@
       "drillAutoCollapseHint": "Contrae la configuración de la rampa mientras se reproduce",
       "runSetupAgain": "Volver a configurar",
       "runSetupAgainHint": "Reabre el asistente de configuración inicial",
-      "runSetupAgainAction": "Abrir"
+      "runSetupAgainAction": "Abrir",
+      "resetHints": "Restablecer consejos",
+      "resetHintsHint": "Volver a mostrar los seis consejos de una vez",
+      "resetHintsAction": "Restablecer",
+      "resetHintsDone": "Hecho"
     },
     "devices": {
       "title": "Dispositivos",

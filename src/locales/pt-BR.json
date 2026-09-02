@@ -115,6 +115,30 @@
       "alwaysOnTop": "Sempre visível",
       "start": "Começar a praticar",
       "tour": "Me mostre o app (30 s)"
+    },
+    "hints": {
+      "dismiss": "Entendi",
+      "drillFirstOpen": {
+        "body": "Defina início, alvo e passo. No modo adaptativo o coach decide."
+      },
+      "presetSuggest": {
+        "body": "Você sempre volta a esta configuração. Salvar como preset?",
+        "action": "Salvar preset"
+      },
+      "coachAsk": {
+        "body": "Pressione ? a qualquer momento para perguntar ao coach sobre isso."
+      },
+      "zenFirst": {
+        "body": "Esc sai do Zen. Os efeitos estão em Configurações → Aparência."
+      },
+      "widgetDiscover": {
+        "body": "Experimente o widget flutuante (W) sobre sua DAW ou tablaturas.",
+        "action": "Abrir widget"
+      },
+      "midiPlugged": {
+        "body": "Há um dispositivo MIDI conectado, mas nada mapeado. Mapear um pedal para Tocar/Parar?",
+        "action": "Abrir atalhos"
+      }
     }
   },
   "widget": {
@@ -444,7 +468,11 @@
       "drillAutoCollapseHint": "Recolhe a configuração do treino enquanto toca",
       "runSetupAgain": "Refazer a configuração",
       "runSetupAgainHint": "Reabre o assistente de primeira execução",
-      "runSetupAgainAction": "Abrir"
+      "runSetupAgainAction": "Abrir",
+      "resetHints": "Redefinir dicas",
+      "resetHintsHint": "Mostrar novamente as seis dicas únicas",
+      "resetHintsAction": "Redefinir",
+      "resetHintsDone": "Pronto"
     },
     "devices": {
       "title": "Dispositivos",

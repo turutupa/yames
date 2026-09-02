@@ -115,6 +115,30 @@
       "alwaysOnTop": "Always on top",
       "start": "Start practicing",
       "tour": "Show me around (30 s)"
+    },
+    "hints": {
+      "dismiss": "Got it",
+      "drillFirstOpen": {
+        "body": "Set start, target and step. Adaptive mode lets the coach decide."
+      },
+      "presetSuggest": {
+        "body": "You keep coming back to this setup. Save it as a preset?",
+        "action": "Save preset"
+      },
+      "coachAsk": {
+        "body": "Press ? any time to ask the coach about this."
+      },
+      "zenFirst": {
+        "body": "Esc leaves Zen. Effects are in Settings → Appearance."
+      },
+      "widgetDiscover": {
+        "body": "Try the floating widget (W) over your DAW or tabs.",
+        "action": "Open widget"
+      },
+      "midiPlugged": {
+        "body": "A MIDI device is connected but nothing is mapped. Map a pedal to Play/Stop?",
+        "action": "Open Hotkeys"
+      }
     }
   },
   "widget": {
@@ -444,7 +468,11 @@
       "drillAutoCollapseHint": "Collapse drill config while playing",
       "runSetupAgain": "Run setup again",
       "runSetupAgainHint": "Reopen the first-run setup wizard",
-      "runSetupAgainAction": "Open"
+      "runSetupAgainAction": "Open",
+      "resetHints": "Reset hints",
+      "resetHintsHint": "Show the six one-time tips again",
+      "resetHintsAction": "Reset",
+      "resetHintsDone": "Done"
     },
     "devices": {
       "title": "Devices",
