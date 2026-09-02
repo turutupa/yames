@@ -1,4 +1,8 @@
 mod audio_input;
+/// Tracks whether Mica/Acrylic DWM effect was successfully applied on Windows.
+/// Managed state so `app_ready` can apply the `mica-active` CSS class after
+/// the DOM is ready (the setup() eval() fires before document.body exists).
+pub struct VibrancyActive(pub bool);
 mod calibration_cache;
 mod clock;
 mod coach;
@@ -437,9 +441,11 @@ pub fn run() {
                     let _ = main_win.set_shadow(true);
                 }
 
-                // Windows: apply Mica (Win11) → Acrylic (Win10) → solid CSS fallback
+                // Windows: apply Mica (Win11) → Acrylic (Win10) → solid CSS fallback.
                 // tauri.windows.conf.json sets transparent:true on Windows so DWM effect
                 // shows through the webview. Linux/macOS: transparent:false (safe).
+                // NOTE: we do NOT eval() mica-active here — document.body doesn't exist yet.
+                //       app_ready() applies the CSS class after React mounts.
                 #[cfg(target_os = "windows")]
                 {
                     use tauri::window::{Effect, EffectsBuilder};
@@ -453,9 +459,11 @@ pub fn run() {
                     ).is_ok() {
                         vibrancy_active = true;
                     }
-                    if vibrancy_active {
-                        let _ = main_win.eval("document.body.classList.add('mica-active')");
-                    }
+                    app.manage(VibrancyActive(vibrancy_active));
+                }
+                #[cfg(not(target_os = "windows"))]
+                {
+                    app.manage(VibrancyActive(false));
                 }
 
                 // Linux: remove any residual GTK CSD titlebar on KDE/Wayland configs
