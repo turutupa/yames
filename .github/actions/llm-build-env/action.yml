@@ -1,0 +1,146 @@
+name: 'LLM build environment'
+description: >
+  Installs everything `llama-cpp-sys-2` needs to compile Yames' GPU LLM
+  backend on this runner: cmake, a C/C++ toolchain, and (on Windows/Linux)
+  the Vulkan SDK — headers, the loader and `glslc`, which llama.cpp's
+  `vulkan-shaders-gen` shells out to for every SPIR-V shader. macOS needs
+  nothing beyond the preinstalled Xcode + cmake for the Metal backend.
+
+  Also exports the Windows-only environment discovered in T01 (see
+  AGENTS.md "Building on Windows"): the Ninja generator and a short
+  CARGO_TARGET_DIR.
+
+inputs:
+  vulkan-sdk-version:
+    description: >
+      LunarG SDK version. Windows uses the four-part installer version,
+      Ubuntu the three-part apt channel. 1.4.313 is the newest channel
+      LunarG still publishes for jammy (22.04) — do not bump past it
+      without also moving the Ubuntu runner off 22.04.
+    default: '1.4.313'
+  vulkan-sdk-build:
+    description: 'Fourth component of the Windows installer version.'
+    default: '2'
+
+runs:
+  using: composite
+  steps:
+    # ------------------------------------------------------------------
+    # Linux
+    # ------------------------------------------------------------------
+    # `libclang-dev` is for aubio-sys' bindgen; `cmake` builds both aubio
+    # and llama.cpp. The distro's libvulkan-dev on jammy is 1.3.204, old
+    # enough that llama.cpp silently drops its coopmat/bf16 shader paths,
+    # so take the LunarG SDK instead — the same source llama.cpp's own
+    # build docs point at.
+    - name: Linux — LLM build prerequisites
+      if: runner.os == 'Linux'
+      shell: bash
+      env:
+        SDK: ${{ inputs.vulkan-sdk-version }}
+      run: |
+        set -euo pipefail
+        wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc \
+          | sudo tee /etc/apt/trusted.gpg.d/lunarg.asc > /dev/null
+        sudo wget -qO "/etc/apt/sources.list.d/lunarg-vulkan-${SDK}-jammy.list" \
+          "https://packages.lunarg.com/vulkan/${SDK}/lunarg-vulkan-${SDK}-jammy.list"
+        sudo apt-get update
+        sudo apt-get install -y cmake libclang-dev vulkan-sdk
+        echo "glslc: $(glslc --version | head -1)"
+
+    # ------------------------------------------------------------------
+    # Windows
+    # ------------------------------------------------------------------
+    # MSVC is mandatory (T01): on the `-gnu` toolchain the `cmake` crate
+    # picks MSYS Makefiles and `llama-cpp-sys-2` then finds no libraries.
+    - name: Windows — MSVC developer environment
+      if: runner.os == 'Windows'
+      uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+
+    # Pin the linker by absolute path. Once the MSVC environment variables
+    # are set, rustc stops resolving `link.exe` through vswhere and just
+    # shells out to whatever `link.exe` PATH offers — and a `shell: bash`
+    # step puts Git's `/usr/bin` (which ships a coreutils `link.exe`) in
+    # front of MSVC's. That fails as:
+    #   /usr/bin/link: extra operand '…rcgu.o'
+    - name: Windows — pin the MSVC linker
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        $link = Get-Command link.exe -All |
+          Where-Object { $_.Source -like '*\VC\Tools\MSVC\*' } |
+          Select-Object -First 1 -ExpandProperty Source
+        if (-not $link) { throw 'MSVC link.exe not found on PATH' }
+        Write-Host "MSVC linker: $link"
+        Add-Content -Path $env:GITHUB_ENV -Encoding utf8 `
+          -Value "CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_LINKER=$link"
+
+    # The Visual Studio generator's CL tracker writes `.tlog` files under a
+    # path derived from the object path and blows past MAX_PATH inside
+    # llama.cpp's shader tree, so force Ninja. Ninja is not guaranteed to be
+    # on PATH on the hosted image; ~600 KB, pinned.
+    - name: Windows — Ninja
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        $dest = "$env:RUNNER_TEMP\ninja"
+        New-Item -ItemType Directory -Force -Path $dest | Out-Null
+        Invoke-WebRequest -Uri 'https://github.com/ninja-build/ninja/releases/download/v1.13.2/ninja-win.zip' -OutFile "$dest\ninja.zip"
+        Expand-Archive -Path "$dest\ninja.zip" -DestinationPath $dest -Force
+        Add-Content -Path $env:GITHUB_PATH -Value $dest -Encoding utf8
+        & "$dest\ninja.exe" --version
+
+    - name: Windows — cache the Vulkan SDK installer
+      if: runner.os == 'Windows'
+      uses: actions/cache@v4
+      with:
+        path: ${{ runner.temp }}\vulkan-installer.exe
+        key: vulkan-sdk-installer-${{ inputs.vulkan-sdk-version }}.${{ inputs.vulkan-sdk-build }}
+
+    - name: Windows — Vulkan SDK
+      if: runner.os == 'Windows'
+      shell: pwsh
+      env:
+        SDK: ${{ inputs.vulkan-sdk-version }}.${{ inputs.vulkan-sdk-build }}
+      run: |
+        $ErrorActionPreference = 'Stop'
+        $installer = "$env:RUNNER_TEMP\vulkan-installer.exe"
+        if (-not (Test-Path $installer)) {
+          $url = "https://sdk.lunarg.com/sdk/download/$env:SDK/windows/vulkansdk-windows-X64-$env:SDK.exe"
+          Write-Host "Downloading $url"
+          Invoke-WebRequest -Uri $url -OutFile $installer
+        }
+        # Unattended install of the default component set (headers, loader
+        # import library, glslc). `--root` keeps the path short; the SDK's
+        # own default lives under C:\VulkanSDK\<ver> anyway.
+        $root = "C:\VulkanSDK\$env:SDK"
+        & $installer --root $root --accept-licenses --default-answer --confirm-command install
+        if ($LASTEXITCODE -ne 0) { throw "Vulkan SDK installer exited $LASTEXITCODE" }
+        Add-Content -Path $env:GITHUB_ENV -Value "VULKAN_SDK=$root" -Encoding utf8
+        Add-Content -Path $env:GITHUB_PATH -Value "$root\Bin" -Encoding utf8
+        & "$root\Bin\glslc.exe" --version
+
+    # llama.cpp's `vulkan-shaders-gen` is an ExternalProject: a second CMake
+    # tree nested inside the first one's build dir. Under the default
+    # `src-tauri/target/...` that nesting exceeds MAX_PATH, so move the whole
+    # target dir to the drive root. Ninja is set here rather than per-step so
+    # every cargo invocation in the job agrees.
+    - name: Windows — cargo/cmake environment
+      if: runner.os == 'Windows'
+      shell: bash
+      run: |
+        set -euo pipefail
+        echo 'CMAKE_GENERATOR=Ninja' >> "$GITHUB_ENV"
+        echo 'CARGO_TARGET_DIR=C:\t' >> "$GITHUB_ENV"
+
+    # ------------------------------------------------------------------
+    # macOS
+    # ------------------------------------------------------------------
+    # cmake is preinstalled on the hosted macOS images, but assert it rather
+    # than discovering its absence 10 minutes into a llama.cpp build.
+    - name: macOS — verify cmake
+      if: runner.os == 'macOS'
+      shell: bash
+      run: cmake --version
