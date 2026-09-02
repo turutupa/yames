@@ -418,7 +418,6 @@ struct CachedParams {
     subdivision: u8,
     volume: f32,
     kit: SoundKit,
-    time_signature: u8,
     beat_groups: Vec<u8>,
     beat_groups_changed: bool,
     ramp_active: bool,
@@ -970,7 +969,6 @@ impl MetronomeEngine {
                 subdivision: 1,
                 volume: 0.8,
                 kit: SoundKit::Click,
-                time_signature: 4,
                 beat_groups: vec![4],
                 beat_groups_changed: false,
                 ramp_active: false,
@@ -1010,7 +1008,6 @@ impl MetronomeEngine {
                         };
                         cached.volume = s.volume;
                         cached.kit = SoundKit::from_str(&s.sound_type);
-                        cached.time_signature = s.time_signature;
                         let new_groups = s.beat_groups.clone();
                         if new_groups != cached.beat_groups {
                             cached.beat_groups = new_groups;
