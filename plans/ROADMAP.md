@@ -88,7 +88,7 @@ What actually ships today. Read this before trusting any older doc.
 | Tier | Model (all Apache-2.0) | Download | RAM while active | Who |
 |---|---|---|---|---|
 | Off | — | 0 | 0 | Timing feedback + templates only |
-| Standard | Qwen3-4B Q4_K_M | ~2.5 GB | ~4 GB | The floor. Any machine with ≥ 8 GB RAM; CPU-only is acceptable (2–4 s per tip) |
+| Standard | Qwen3-4B Q4_K_M | ~2.5 GB | ~4 GB | The floor. Any machine with ≥ 8 GB RAM. On a GPU: ~0.3 s per tip. CPU-only: reports and chat use the model, live tips stay templates until T04b lands prompt caching (measured 7–11 s per call today) |
 | Studio | Qwen3-8B Q4_K_M | ~5 GB | ~8 GB | Offered only when ≥ 16 GB RAM; GPU strongly preferred |
 
 Decision (2026-09-02): no 1.7B tier. A decent experience is prioritised
@@ -223,6 +223,15 @@ stutters. Nothing else in this roadmap is real until this is.
   only if it helps.
 - **Gate:** probe passes on CPU-only Windows and Linux VMs with the
   Standard model.
+
+### 0.5b CPU-only latency (T04b) — **M**
+- T04 measured Qwen3-4B at 0.3 s per tip on the RTX 3080 and 7–11 s CPU-only
+  (prompt evaluation dominates; the frontend times out at 3 s). Brief:
+  `plans/tasks/phase-0/T04b-cpu-latency.md` — prompt-prefix KV caching,
+  thread-count tuning, tier-aware timeouts (tip 3 s / report 8 s /
+  chat 15 s) and template-only tips on CPU when the model is too slow.
+- **Gate:** CPU rephrase p50 ≤ 3 s on the owner's laptop; tier routing
+  unit-tested; Settings copy honest about which tiers use the model.
 
 ### 0.6 Deterministic adaptive drill — **S** (*parallel-safe*)
 - The rule table already exists (`adaptive_thresholds` in `engine.rs`).
