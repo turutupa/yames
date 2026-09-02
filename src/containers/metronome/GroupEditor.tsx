@@ -38,41 +38,40 @@ export function GroupEditor({
   if (freeMode) {
     return (
       <div className="group-editor">
-        <div className="free-beat-row">
+        {/* N active dots — display only, no grid */}
+        <div className="free-dots">
+          {Array.from({ length: total }, (_, i) => {
+            const isActive = isPlaying && isDownbeat && activeBeat === i;
+            const isSubBeat = isPlaying && !isDownbeat && activeBeat === i;
+            return (
+              <div key={i} className="group-dot-wrap">
+                <div className={`group-dot ${isActive ? "playing" : "free-active"}`} />
+                {subdivision > 1 && (
+                  <div className="group-sub-dots">
+                    {Array.from({ length: subdivision - 1 }, (_, s) => (
+                      <div key={s} className={`group-sub-dot ${isSubBeat && activeSub === s + 1 ? "active" : ""}`} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        {/* Formula bar with inline beat count control */}
+        <div className="group-formula">
           <button
-            className="free-beat-btn"
+            className="free-count-btn"
             onClick={() => { if (total > 1) setBeatGroups([total - 1]); }}
             disabled={total <= 1}
             aria-label="Remove beat"
-          >−</button>
-          <div className="free-dots">
-            {Array.from({ length: total }, (_, i) => {
-              const isActive = isPlaying && isDownbeat && activeBeat === i;
-              const isSubBeat = isPlaying && !isDownbeat && activeBeat === i;
-              return (
-                <div key={i} className="group-dot-wrap">
-                  <div className={`group-dot ${isActive ? "playing" : ""}`} />
-                  {subdivision > 1 && (
-                    <div className="group-sub-dots">
-                      {Array.from({ length: subdivision - 1 }, (_, s) => (
-                        <div key={s} className={`group-sub-dot ${isSubBeat && activeSub === s + 1 ? "active" : ""}`} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-          <button
-            className="free-beat-btn"
-            onClick={() => { if (total < 16) setBeatGroups([total + 1]); }}
-            disabled={total >= 16}
-            aria-label="Add beat"
-          >+</button>
-        </div>
-        <div className="group-formula">
+          >‹</button>
           <span className="group-formula-total">{total} beats</span>
-          <span className="group-formula-sep">·</span>
+          <button
+            className="free-count-btn"
+            onClick={() => { if (total < 12) setBeatGroups([total + 1]); }}
+            disabled={total >= 12}
+            aria-label="Add beat"
+          >›</button>
           <span className="group-formula-clicks">{total * (SUBDIVISION_MULTIPLIER[subdivision] ?? 1)} clicks/bar</span>
         </div>
       </div>
@@ -123,9 +122,7 @@ export function GroupEditor({
 
       <div className="group-formula">
         <span className="group-formula-total">{total} beats</span>
-        <span className="group-formula-sep">·</span>
         <span className="group-formula-expr">{formula}</span>
-        <span className="group-formula-sep">·</span>
         <span className="group-formula-clicks">{clicksPerBar} clicks/bar</span>
       </div>
     </div>
