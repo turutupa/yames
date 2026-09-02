@@ -470,20 +470,10 @@ pub fn stop_speed_ramp(
     emit_state_changed(&state, &app_handle);
 }
 
-#[tauri::command]
-pub fn set_adaptive_decision(decision: String, engine_state: State<EngineState>) {
-    use crate::engine::{DECISION_DOWN, DECISION_HOLD, DECISION_UP};
-    let val = match decision.as_str() {
-        "up" => DECISION_UP,
-        "hold" => DECISION_HOLD,
-        "down" => DECISION_DOWN,
-        _ => return,
-    };
-    let engine = engine_state.0.lock().unwrap();
-    engine
-        .adaptive_model_decision()
-        .store(val, std::sync::atomic::Ordering::Relaxed);
-}
+// T07 — `set_adaptive_decision` was removed here. The adaptive drill's
+// direction is computed exclusively by `engine::adaptive_thresholds` /
+// `adaptive_direction`; the coach model comments on the move but can no
+// longer push a decision back into the engine.
 
 #[tauri::command]
 pub fn set_active_tab(tab: String, app_handle: AppHandle) {

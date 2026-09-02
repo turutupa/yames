@@ -84,7 +84,6 @@ const DEFAULT_INVOKE_MAP: Record<string, InvokeFn> = {
   start_speed_ramp: () => undefined,
   start_speed_ramp_from: () => undefined,
   stop_speed_ramp: () => undefined,
-  set_adaptive_decision: () => undefined,
 
   // MIDI
   list_midi_devices: () => [],

@@ -141,17 +141,26 @@ export async function stopSpeedRamp(): Promise<void> {
   return invoke("stop_speed_ramp");
 }
 
-export async function setAdaptiveDecision(decision: "up" | "hold" | "down"): Promise<void> {
-  return invoke("set_adaptive_decision", { decision });
-}
-
+/**
+ * Emitted by the engine AFTER an adaptive drill step has been applied.
+ *
+ * T07 — the tempo decision belongs to the engine (`adaptive_thresholds`
+ * in `engine.rs`). This payload reports the move that already happened
+ * so the coach can comment on it; there is no longer any way to push a
+ * decision back into the engine.
+ *
+ * `currentBpm` is the tempo the evaluated round was played at,
+ * `newBpm` the tempo the drill continues at.
+ */
 export type AdaptiveEvalRequest = {
   currentBpm: number;
+  newBpm: number;
   startBpm: number;
   targetBpm: number;
   accuracyPct: number;
   aggressiveness: string;
   currentStep: number;
+  decision: "up" | "hold" | "down";
 };
 
 export function onAdaptiveEval(callback: (req: AdaptiveEvalRequest) => void) {
