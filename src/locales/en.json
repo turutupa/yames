@@ -129,6 +129,36 @@
       "voicePick": "Pick a voice",
       "voiceDismiss": "Dismiss"
     },
+    "audioInput": {
+      "title": "Set up your input",
+      "subtitle": "Yames listens through this to score your timing. Play something and watch the meter move.",
+      "device": "Input device",
+      "guidance": {
+        "electric-guitar": "Plug into an interface, or play in front of the laptop mic — the mic works, an interface is better.",
+        "acoustic-guitar": "Play towards the laptop mic, or use a pickup through an interface. Both work.",
+        "bass": "An interface is best for bass — laptop mics lose the low end, though they still hear the attack.",
+        "drums": "Any mic in the room will do. Put it where it hears the whole kit, not one drum.",
+        "piano": "A mic near the instrument is enough. A digital piano can go straight into an interface.",
+        "other": "An interface is better, but the laptop mic works — just play close to it."
+      },
+      "waiting": "Play something — the meter needs a second of signal.",
+      "heard": "Got it. Yames can hear you.",
+      "skip": "Skip, I'll set this up later"
+    },
+    "hearItWork": {
+      "title": "Hear it work",
+      "subtitle": "Four beats to get ready, then play along for eight. Nothing is invented — you see exactly what was heard.",
+      "ready": "Play along with the click. One note on every beat is plenty.",
+      "start": "Start",
+      "countIn": "Starting in {{beats}}",
+      "playing": "Beat {{beat}} of {{total}}",
+      "scoring": "Scoring…",
+      "cancel": "Cancel",
+      "dotsLabel": "Your eight beats",
+      "nothing": "Didn't hear anything — check the input level.",
+      "backToInput": "Back to input setup",
+      "again": "Try again"
+    },
     "ready": {
       "title": "You're ready",
       "subtitle": "Change anything here, or later in Settings.",

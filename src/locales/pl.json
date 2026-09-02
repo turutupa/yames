@@ -129,6 +129,36 @@
       "voicePick": "Wybierz głos",
       "voiceDismiss": "Zamknij"
     },
+    "audioInput": {
+      "title": "Skonfiguruj wejście",
+      "subtitle": "Yames słucha tędy, żeby ocenić twoje tempo. Zagraj coś i popatrz na wskaźnik.",
+      "device": "Urządzenie wejściowe",
+      "guidance": {
+        "electric-guitar": "Podłącz się do interfejsu albo graj przed mikrofonem laptopa — mikrofon wystarczy, interfejs jest lepszy.",
+        "acoustic-guitar": "Graj w stronę mikrofonu laptopa albo użyj przetwornika i interfejsu. Obie drogi działają.",
+        "bass": "Do basu najlepszy jest interfejs — mikrofony laptopów gubią dół, choć słyszą atak.",
+        "drums": "Wystarczy dowolny mikrofon w pomieszczeniu. Ustaw go tak, by słyszał cały zestaw, nie jeden bęben.",
+        "piano": "Wystarczy mikrofon blisko instrumentu. Pianino cyfrowe możesz wpiąć prosto w interfejs.",
+        "other": "Interfejs jest lepszy, ale mikrofon laptopa wystarczy — graj po prostu blisko niego."
+      },
+      "waiting": "Zagraj coś — wskaźnik potrzebuje sekundy sygnału.",
+      "heard": "Jest. Yames cię słyszy.",
+      "skip": "Pomiń, ustawię to później"
+    },
+    "hearItWork": {
+      "title": "Posłuchaj, jak działa",
+      "subtitle": "Cztery uderzenia na przygotowanie, potem zagraj osiem. Nic nie jest zmyślone — widzisz dokładnie to, co zostało usłyszane.",
+      "ready": "Graj razem z klikiem. Jedna nuta na uderzenie w zupełności wystarczy.",
+      "start": "Start",
+      "countIn": "Start za {{beats}}",
+      "playing": "Uderzenie {{beat}} z {{total}}",
+      "scoring": "Ocenianie…",
+      "cancel": "Anuluj",
+      "dotsLabel": "Twoje osiem uderzeń",
+      "nothing": "Nic nie usłyszałem — sprawdź poziom wejścia.",
+      "backToInput": "Wróć do wejścia",
+      "again": "Spróbuj jeszcze raz"
+    },
     "ready": {
       "title": "Wszystko gotowe",
       "subtitle": "Zmień coś tutaj albo później w Ustawieniach.",

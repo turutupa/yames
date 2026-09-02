@@ -129,6 +129,36 @@
       "voicePick": "Elegir voz",
       "voiceDismiss": "Descartar"
     },
+    "audioInput": {
+      "title": "Configura tu entrada",
+      "subtitle": "Yames escucha por aquí para puntuar tu ritmo. Toca algo y mira cómo se mueve el medidor.",
+      "device": "Dispositivo de entrada",
+      "guidance": {
+        "electric-guitar": "Conéctate a una interfaz o toca delante del micrófono del portátil: el micro sirve, la interfaz es mejor.",
+        "acoustic-guitar": "Toca hacia el micrófono del portátil o usa una pastilla con una interfaz. Ambas opciones valen.",
+        "bass": "Para el bajo lo mejor es una interfaz: los micros del portátil pierden los graves, aunque sí captan el ataque.",
+        "drums": "Cualquier micro de la sala vale. Colócalo donde oiga toda la batería, no un solo tambor.",
+        "piano": "Basta con un micro cerca del instrumento. Un piano digital puede ir directo a una interfaz.",
+        "other": "Una interfaz es mejor, pero el micrófono del portátil funciona: toca cerca de él."
+      },
+      "waiting": "Toca algo: el medidor necesita un segundo de señal.",
+      "heard": "Listo. Yames te oye.",
+      "skip": "Saltar, lo configuro más tarde"
+    },
+    "hearItWork": {
+      "title": "Escúchalo funcionar",
+      "subtitle": "Cuatro pulsos para prepararte y luego toca ocho. No se inventa nada: verás exactamente lo que se ha oído.",
+      "ready": "Toca con el clic. Con una nota en cada pulso basta.",
+      "start": "Empezar",
+      "countIn": "Empieza en {{beats}}",
+      "playing": "Pulso {{beat}} de {{total}}",
+      "scoring": "Puntuando…",
+      "cancel": "Cancelar",
+      "dotsLabel": "Tus ocho pulsos",
+      "nothing": "No se ha oído nada: revisa el nivel de entrada.",
+      "backToInput": "Volver a la entrada",
+      "again": "Intentarlo otra vez"
+    },
     "ready": {
       "title": "Todo listo",
       "subtitle": "Cambia lo que quieras aquí o luego en Ajustes.",

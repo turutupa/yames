@@ -129,6 +129,36 @@
       "voicePick": "Kies een stem",
       "voiceDismiss": "Sluiten"
     },
+    "audioInput": {
+      "title": "Stel je ingang in",
+      "subtitle": "Yames luistert hierlangs mee om je timing te beoordelen. Speel iets en kijk naar de meter.",
+      "device": "Invoerapparaat",
+      "guidance": {
+        "electric-guitar": "Sluit aan op een interface of speel voor de laptopmicrofoon — de microfoon werkt, een interface is beter.",
+        "acoustic-guitar": "Speel richting de laptopmicrofoon of gebruik een element via een interface. Allebei prima.",
+        "bass": "Voor bas is een interface het beste — laptopmicrofoons verliezen het laag, maar horen de aanslag wel.",
+        "drums": "Elke microfoon in de ruimte volstaat. Zet hem zo dat hij het hele stel hoort, niet één trom.",
+        "piano": "Een microfoon dicht bij het instrument is genoeg. Een digitale piano kan rechtstreeks een interface in.",
+        "other": "Een interface is beter, maar de laptopmicrofoon werkt — speel er gewoon dichtbij."
+      },
+      "waiting": "Speel iets — de meter heeft een seconde signaal nodig.",
+      "heard": "Gelukt. Yames hoort je.",
+      "skip": "Overslaan, doe ik later"
+    },
+    "hearItWork": {
+      "title": "Hoor het werken",
+      "subtitle": "Vier tellen om klaar te staan, speel er dan acht mee. Niets is verzonnen — je ziet precies wat er gehoord is.",
+      "ready": "Speel mee met de klik. Eén noot per tel is genoeg.",
+      "start": "Starten",
+      "countIn": "Start over {{beats}}",
+      "playing": "Tel {{beat}} van {{total}}",
+      "scoring": "Beoordelen…",
+      "cancel": "Annuleren",
+      "dotsLabel": "Jouw acht tellen",
+      "nothing": "Niets gehoord — controleer het ingangsniveau.",
+      "backToInput": "Terug naar de ingang",
+      "again": "Opnieuw"
+    },
     "ready": {
       "title": "Je bent klaar",
       "subtitle": "Wijzig hier iets, of later in Instellingen.",

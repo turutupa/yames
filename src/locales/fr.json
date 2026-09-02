@@ -129,6 +129,36 @@
       "voicePick": "Choisir une voix",
       "voiceDismiss": "Ignorer"
     },
+    "audioInput": {
+      "title": "Configurer l'entrée",
+      "subtitle": "Yames écoute par ici pour évaluer ta précision. Joue quelque chose et regarde le vu-mètre.",
+      "device": "Périphérique d'entrée",
+      "guidance": {
+        "electric-guitar": "Branche-toi sur une interface ou joue devant le micro du portable — le micro suffit, l'interface est meilleure.",
+        "acoustic-guitar": "Joue vers le micro du portable, ou passe par un micro/capteur et une interface. Les deux marchent.",
+        "bass": "Pour la basse, une interface vaut mieux : les micros de portable perdent le grave, mais entendent l'attaque.",
+        "drums": "N'importe quel micro dans la pièce fait l'affaire. Place-le de façon à entendre toute la batterie.",
+        "piano": "Un micro près de l'instrument suffit. Un piano numérique peut aller directement dans une interface.",
+        "other": "Une interface est préférable, mais le micro du portable fonctionne — joue simplement près de lui."
+      },
+      "waiting": "Joue quelque chose — le vu-mètre a besoin d'une seconde de signal.",
+      "heard": "C'est bon. Yames t'entend.",
+      "skip": "Passer, je verrai plus tard"
+    },
+    "hearItWork": {
+      "title": "Écoute-le travailler",
+      "subtitle": "Quatre temps pour te préparer, puis joue-en huit. Rien n'est inventé : tu vois exactement ce qui a été entendu.",
+      "ready": "Joue avec le clic. Une note par temps suffit.",
+      "start": "Commencer",
+      "countIn": "Départ dans {{beats}}",
+      "playing": "Temps {{beat}} sur {{total}}",
+      "scoring": "Analyse…",
+      "cancel": "Annuler",
+      "dotsLabel": "Tes huit temps",
+      "nothing": "Rien entendu — vérifie le niveau d'entrée.",
+      "backToInput": "Retour à l'entrée",
+      "again": "Réessayer"
+    },
     "ready": {
       "title": "Tout est prêt",
       "subtitle": "Modifiez ce que vous voulez ici, ou plus tard dans les Réglages.",

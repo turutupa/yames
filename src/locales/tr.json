@@ -129,6 +129,36 @@
       "voicePick": "Bir ses seç",
       "voiceDismiss": "Kapat"
     },
+    "audioInput": {
+      "title": "Girişini ayarla",
+      "subtitle": "Yames zamanlamanı buradan dinleyerek puanlar. Bir şeyler çal ve göstergeye bak.",
+      "device": "Giriş aygıtı",
+      "guidance": {
+        "electric-guitar": "Bir arayüze bağlan ya da dizüstünün mikrofonunun önünde çal — mikrofon iş görür, arayüz daha iyidir.",
+        "acoustic-guitar": "Dizüstünün mikrofonuna doğru çal ya da manyetikle bir arayüz kullan. İkisi de olur.",
+        "bass": "Bas için en iyisi arayüz: dizüstü mikrofonları alt frekansları kaybeder, ama atağı duyar.",
+        "drums": "Odadaki herhangi bir mikrofon yeter. Tek bir davulu değil, bütün seti duyacak yere koy.",
+        "piano": "Enstrümanın yanında bir mikrofon yeterli. Dijital piyano doğrudan arayüze girebilir.",
+        "other": "Arayüz daha iyi ama dizüstü mikrofonu da olur — sadece yakınında çal."
+      },
+      "waiting": "Bir şeyler çal — göstergenin bir saniyelik sinyale ihtiyacı var.",
+      "heard": "Tamam. Yames seni duyuyor.",
+      "skip": "Atla, sonra ayarlarım"
+    },
+    "hearItWork": {
+      "title": "Çalıştığını duy",
+      "subtitle": "Hazırlanmak için dört vuruş, sonra sekiz vuruş boyunca çal. Hiçbir şey uydurulmuyor — tam olarak ne duyulduğunu görürsün.",
+      "ready": "Klik ile birlikte çal. Her vuruşta bir nota fazlasıyla yeter.",
+      "start": "Başla",
+      "countIn": "{{beats}} sonra başlıyor",
+      "playing": "Vuruş {{beat}} / {{total}}",
+      "scoring": "Puanlanıyor…",
+      "cancel": "İptal",
+      "dotsLabel": "Sekiz vuruşun",
+      "nothing": "Hiçbir şey duyulmadı — giriş seviyesini kontrol et.",
+      "backToInput": "Giriş ayarına dön",
+      "again": "Tekrar dene"
+    },
     "ready": {
       "title": "Hazırsın",
       "subtitle": "Buradan ya da sonra Ayarlar'dan değiştirebilirsin.",

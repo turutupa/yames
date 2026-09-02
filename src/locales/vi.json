@@ -129,6 +129,36 @@
       "voicePick": "Chọn giọng",
       "voiceDismiss": "Bỏ qua"
     },
+    "audioInput": {
+      "title": "Thiết lập đầu vào",
+      "subtitle": "Yames nghe qua đây để chấm nhịp của bạn. Chơi thử và nhìn vạch mức tín hiệu.",
+      "device": "Thiết bị đầu vào",
+      "guidance": {
+        "electric-guitar": "Cắm vào sound card, hoặc chơi trước micro laptop — micro vẫn được, sound card thì tốt hơn.",
+        "acoustic-guitar": "Chơi hướng về micro laptop, hoặc dùng pickup qua sound card. Cách nào cũng được.",
+        "bass": "Với bass thì sound card là tốt nhất — micro laptop mất tiếng trầm, nhưng vẫn nghe được điểm gảy.",
+        "drums": "Micro nào trong phòng cũng được. Đặt sao cho nó nghe cả bộ trống, không chỉ một mặt trống.",
+        "piano": "Một micro đặt gần đàn là đủ. Piano điện có thể cắm thẳng vào sound card.",
+        "other": "Sound card thì tốt hơn, nhưng micro laptop vẫn dùng được — chỉ cần chơi gần nó."
+      },
+      "waiting": "Chơi thử đi — vạch mức cần một giây có tín hiệu.",
+      "heard": "Được rồi. Yames nghe thấy bạn.",
+      "skip": "Bỏ qua, để sau tôi thiết lập"
+    },
+    "hearItWork": {
+      "title": "Nghe thử xem nó chạy",
+      "subtitle": "Bốn phách chuẩn bị, rồi chơi theo tám phách. Không có gì bịa ra — bạn thấy đúng những gì đã nghe được.",
+      "ready": "Chơi theo tiếng click. Mỗi phách một nốt là đủ.",
+      "start": "Bắt đầu",
+      "countIn": "Bắt đầu sau {{beats}}",
+      "playing": "Phách {{beat}} / {{total}}",
+      "scoring": "Đang chấm…",
+      "cancel": "Hủy",
+      "dotsLabel": "Tám phách của bạn",
+      "nothing": "Không nghe thấy gì — kiểm tra mức tín hiệu đầu vào.",
+      "backToInput": "Quay lại phần đầu vào",
+      "again": "Thử lại"
+    },
     "ready": {
       "title": "Đã sẵn sàng",
       "subtitle": "Thay đổi tại đây, hoặc sau này trong Cài đặt.",
