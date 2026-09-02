@@ -183,6 +183,43 @@ Fast check that the toolchain is sane (clean target dir, ~3 min):
 LIBCLANG_PATH="C:/Program Files/LLVM/bin" cargo test --manifest-path src-tauri/Cargo.toml --lib --no-default-features
 ```
 
+## Audio-safety gate — the click-jitter probe
+
+ROADMAP §1 principle 1 says nothing may add jitter to the metronome, and
+§4 makes that testable: **p99 callback-to-callback jitter < 1 ms and zero
+missed beats over 60 s while the LLM generates continuously.** Re-run it
+whenever a change adds background compute.
+
+```sh
+bun run yames:jitter-probe -- --no-llm                  # baseline
+# LLM runs need the feature, so call cargo directly:
+cargo run --release --manifest-path src-tauri/Cargo.toml \
+  --features coach-llm-vulkan --bin click-jitter-probe -- --gguf model.gguf
+YAMES_LLM_GPU_LAYERS=0 cargo run --release ... --gguf model.gguf   # force CPU
+```
+
+The probe runs the real `MetronomeEngine` headless (`start_headless`,
+no Tauri app) and times the cpal callback from inside it via
+`CallbackProbe` — a preallocated lock-free arena, `None` unless the probe
+built the engine, so the shipping callback pays one null check per
+buffer. `--dump-csv` writes the raw capture so a run can be re-analysed
+without re-running it. Exit 0 = pass, 1 = gate failure, 2 = setup error.
+
+Two things the numbers depend on, and one that is not a Yames bug:
+
+- **Other load on the box invalidates a run.** A parallel `cargo test`
+  taking six cores pushed the *baseline* p99 from 0.35 ms to 2.46 ms.
+  Check the machine is quiet before believing a failure.
+- **cpal already runs its WASAPI stream thread at
+  `THREAD_PRIORITY_TIME_CRITICAL`** (`cpal-0.15.3/src/host/wasapi/
+  stream.rs`). Do not try to "fix" jitter by touching the callback.
+- **ggml's threadpool defeats `with_below_normal_priority`.** That helper
+  demotes only the calling thread; llama.cpp's worker threads start at
+  `THREAD_PRIORITY_NORMAL` and `ggml_thread_apply_priority` explicitly
+  disables power throttling on them. llama-cpp-2 0.1.146 exposes no
+  `GGML_SCHED_PRIO` knob, so CPU inference is measurably noisier than GPU
+  inference.
+
 ## Coaching pipeline — latency tiers
 
 Every coach feature belongs to exactly one tier. When adding pitch analysis,

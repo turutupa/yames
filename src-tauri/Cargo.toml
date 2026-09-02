@@ -56,6 +56,7 @@ llama-cpp-2 = { version = "0.1.146", optional = true }
 # has to be a direct dependency. Already in the graph underneath
 # llama-cpp-2, so this adds no package to Cargo.lock.
 encoding_rs = { version = "0.8", optional = true }
+audio_thread_priority = { version = "0.37.0", default-features = false }
 
 [features]
 default = []

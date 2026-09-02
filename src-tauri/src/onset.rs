@@ -201,6 +201,10 @@ impl OnsetDetector {
         let alive = self.alive.clone();
 
         self.thread_handle = Some(thread::spawn(move || {
+            // ROADMAP §0.5 — the analyzer runs per audio hop and must not be
+            // preempted by background compute (LLM inference).
+            let _rt = audio_thread_priority::promote_current_thread_to_real_time(0, 48_000)
+                .map_err(|e| eprintln!("[yames] analyzer stayed at normal priority: {e}"));
             Self::detect_loop(alive, audio_input, profile, tempo_ctx, on_onset);
         }));
     }
