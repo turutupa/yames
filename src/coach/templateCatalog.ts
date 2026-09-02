@@ -562,6 +562,34 @@ const GENERIC: ScenarioCatalog = {
       "Timing is dialed in across the board. That's what consistent practice sounds like.",
     ],
   },
+  // T07 — adaptive drill narration. The engine has ALREADY moved the
+  // tempo by the time these are drawn, so the copy reports the move as
+  // a fact and never asks or offers. `{bpm}` is the new tempo,
+  // `{accuracyPct}` the score that earned it.
+  drill_step_up: {
+    neutral: [
+      "{accuracyPct}% — tempo up to {bpm} BPM.",
+      "Clean round at {accuracyPct}%. Moving you up to {bpm} BPM.",
+      "That earned it: {accuracyPct}%. Now at {bpm} BPM.",
+      "{accuracyPct}% clears the bar — {bpm} BPM from here.",
+      "Solid at {accuracyPct}%. Stepping up to {bpm} BPM.",
+      "Nice round — {accuracyPct}%. {bpm} BPM next.",
+      "Up to {bpm} BPM. You held {accuracyPct}% last round.",
+      "{accuracyPct}% says you're ready. {bpm} BPM.",
+    ],
+  },
+  drill_step_down: {
+    neutral: [
+      "{accuracyPct}% — easing back to {bpm} BPM.",
+      "That round slipped to {accuracyPct}%. Dropping to {bpm} BPM.",
+      "Backing off to {bpm} BPM — {accuracyPct}% last round.",
+      "{accuracyPct}%. Let's rebuild it at {bpm} BPM.",
+      "Pulling back to {bpm} BPM after {accuracyPct}%.",
+      "{accuracyPct}% is under the bar — {bpm} BPM for the next round.",
+      "Down to {bpm} BPM. Get it clean before we climb again.",
+      "Easing to {bpm} BPM; {accuracyPct}% needs firmer ground.",
+    ],
+  },
 } as const;
 
 // ---------------------------------------------------------------------------

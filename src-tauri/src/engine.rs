@@ -4,7 +4,7 @@ use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use rodio::Source;
 use std::io::Cursor;
 use std::collections::HashSet;
-use std::sync::atomic::{AtomicBool, AtomicU32, AtomicU8, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
 use std::time::Duration;
@@ -463,11 +463,20 @@ struct BeatNotification {
 // Speed ramp logic
 // ---------------------------------------------------------------------------
 
-/// Payload emitted when adaptive mode needs a decision from the coach model.
+/// Payload emitted after adaptive mode has ALREADY moved the tempo.
+///
+/// T07 — the engine decides, the model only narrates. `decision` and
+/// `new_bpm` describe the move the engine just made; the frontend
+/// comments on it and must never change it.
+///
+/// `current_bpm` is the tempo the evaluated round was played at (i.e.
+/// *before* this step); `new_bpm` is the tempo the drill continues at.
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct AdaptiveEvalRequest {
     #[serde(rename = "currentBpm")]
     pub current_bpm: u16,
+    #[serde(rename = "newBpm")]
+    pub new_bpm: u16,
     #[serde(rename = "startBpm")]
     pub start_bpm: u16,
     #[serde(rename = "targetBpm")]
@@ -477,13 +486,23 @@ pub struct AdaptiveEvalRequest {
     pub aggressiveness: String,
     #[serde(rename = "currentStep")]
     pub current_step: u16,
+    /// "up" | "hold" | "down" — the move the engine already applied.
+    pub decision: String,
 }
 
-/// Model decision constants for the adaptive_model_decision atomic.
-pub const DECISION_NONE: u8 = 0;
-pub const DECISION_UP: u8 = 1;
-pub const DECISION_HOLD: u8 = 2;
-pub const DECISION_DOWN: u8 = 3;
+/// Direction the adaptive drill takes for `score`, given the
+/// thresholds from [`adaptive_thresholds`]. Pure so the boundary
+/// behaviour is unit-testable: `>= up` goes up, `<= down` goes down,
+/// everything between holds.
+fn adaptive_direction(score: u32, up_thresh: u32, down_thresh: u32) -> &'static str {
+    if score >= up_thresh {
+        "up"
+    } else if score <= down_thresh {
+        "down"
+    } else {
+        "hold"
+    }
+}
 
 /// Returns (up_threshold, down_threshold, step_up_bpm, step_down_bpm) for adaptive mode.
 fn adaptive_thresholds(
@@ -807,8 +826,6 @@ pub struct MetronomeEngine {
     device_name: Option<String>,
     /// Shared adaptive accuracy score (0-100), updated by timing analyzer callback
     adaptive_score: Arc<AtomicU32>,
-    /// Shared model decision for adaptive mode: 0=none, 1=up, 2=hold, 3=down
-    adaptive_model_decision: Arc<AtomicU8>,
 }
 
 impl MetronomeEngine {
@@ -820,7 +837,6 @@ impl MetronomeEngine {
             beat_log,
             device_name: None,
             adaptive_score: Arc::new(AtomicU32::new(0)),
-            adaptive_model_decision: Arc::new(AtomicU8::new(0)),
         }
     }
 
@@ -859,11 +875,6 @@ impl MetronomeEngine {
         self.adaptive_score.clone()
     }
 
-    /// Get a clone of the adaptive model decision Arc for external writes.
-    pub fn adaptive_model_decision(&self) -> Arc<AtomicU8> {
-        self.adaptive_model_decision.clone()
-    }
-
     /// Ensure the audio thread is running (opens audio device once).
     fn ensure_thread(&mut self, state: SharedState, app_handle: AppHandle) {
         if self.alive.load(Ordering::SeqCst) {
@@ -876,7 +887,6 @@ impl MetronomeEngine {
         let beat_log = self.beat_log.clone();
         let device_name = self.device_name.clone();
         let adaptive_score = self.adaptive_score.clone();
-        let adaptive_model_decision = self.adaptive_model_decision.clone();
 
         let handle = thread::spawn(move || {
             // ---- cpal setup ----
@@ -1363,26 +1373,12 @@ impl MetronomeEngine {
                                         s.speed_ramp.decrement,
                                     );
 
-                                // Check if the coach model provided a decision
-                                let model_decision =
-                                    adaptive_model_decision.swap(DECISION_NONE, Ordering::Relaxed);
-
-                                // Determine direction: model decision overrides DSP thresholds
-                                let direction = match model_decision {
-                                    DECISION_UP => "up",
-                                    DECISION_HOLD => "hold",
-                                    DECISION_DOWN => "down",
-                                    _ => {
-                                        // No model decision — fall back to DSP thresholds
-                                        if score >= up_thresh {
-                                            "up"
-                                        } else if score <= down_thresh {
-                                            "down"
-                                        } else {
-                                            "hold"
-                                        }
-                                    }
-                                };
+                                // T07 — the direction is ALWAYS the engine's
+                                // own threshold decision. The coach model
+                                // used to be able to override this via an
+                                // atomic; it can now only comment on the
+                                // move after the fact.
+                                let direction = adaptive_direction(score, up_thresh, down_thresh);
 
                                 let prev_bpm = s.speed_ramp.current_bpm;
                                 let target = s.speed_ramp.target_bpm;
@@ -1423,13 +1419,29 @@ impl MetronomeEngine {
 
                                 // Emit events
                                 let rc = s.speed_ramp.clone();
+                                // Report the EFFECTIVE move, not the raw
+                                // threshold direction: "down" at the start
+                                // BPM (or "up" already clamped at 300)
+                                // leaves the tempo where it was, and the
+                                // coach must not narrate a step that never
+                                // happened.
+                                let new_bpm = s.speed_ramp.current_bpm;
+                                let effective = if new_bpm > prev_bpm {
+                                    "up"
+                                } else if new_bpm < prev_bpm {
+                                    "down"
+                                } else {
+                                    "hold"
+                                };
                                 let eval_req = AdaptiveEvalRequest {
-                                    current_bpm: s.speed_ramp.current_bpm,
+                                    current_bpm: prev_bpm,
+                                    new_bpm,
                                     start_bpm: s.speed_ramp.start_bpm,
                                     target_bpm: s.speed_ramp.target_bpm,
                                     accuracy_pct: score,
                                     aggressiveness: s.speed_ramp.aggressiveness.clone(),
                                     current_step: s.speed_ramp.current_step,
+                                    decision: effective.to_string(),
                                 };
                                 let sc = s.clone();
                                 drop(s);
@@ -1573,6 +1585,58 @@ mod tests {
             up_mod, up_unknown,
             "unknown mode should fall through to moderate"
         );
+    }
+
+    /// T07 — every aggressiveness value returns sane, ordered
+    /// thresholds and steps. Guards the table itself: the drill's whole
+    /// behaviour hangs off these six numbers now that no model decision
+    /// can override them.
+    #[test]
+    fn adaptive_thresholds_all_modes_are_well_formed() {
+        for mode in ["conservative", "moderate", "aggressive", "not-a-mode"] {
+            let (up, down, step_up, step_down) = adaptive_thresholds(mode, 5, 3);
+            assert!(
+                up > down,
+                "{mode}: up threshold {up} must sit above down threshold {down}"
+            );
+            assert!(up <= 100, "{mode}: up threshold {up} must be reachable");
+            assert!(step_up >= 1, "{mode}: step up must move the tempo");
+            assert!(step_down >= 1, "{mode}: step down must move the tempo");
+        }
+        // Step clamping is per-mode: a huge configured increment is
+        // capped, a tiny one is floored.
+        let (_, _, big_up, _) = adaptive_thresholds("aggressive", 99, 99);
+        assert_eq!(big_up, 10, "aggressive caps the step up at 10 BPM");
+        let (_, _, small_up, _) = adaptive_thresholds("moderate", 1, 1);
+        assert_eq!(small_up, 3, "moderate floors the step up at 3 BPM");
+    }
+
+    /// T07 — boundary scores. `>= up` goes up, `<= down` goes down,
+    /// strictly between holds. The thresholds are inclusive on both
+    /// ends, so the exact boundary score must move the tempo.
+    #[test]
+    fn adaptive_direction_boundary_scores() {
+        for mode in ["conservative", "moderate", "aggressive"] {
+            let (up, down, _, _) = adaptive_thresholds(mode, 5, 3);
+            assert_eq!(adaptive_direction(up, up, down), "up", "{mode}: at up");
+            assert_eq!(
+                adaptive_direction(up - 1, up, down),
+                "hold",
+                "{mode}: just below up"
+            );
+            assert_eq!(
+                adaptive_direction(down, up, down),
+                "down",
+                "{mode}: at down"
+            );
+            assert_eq!(
+                adaptive_direction(down + 1, up, down),
+                "hold",
+                "{mode}: just above down"
+            );
+            assert_eq!(adaptive_direction(100, up, down), "up", "{mode}: perfect");
+            assert_eq!(adaptive_direction(0, up, down), "down", "{mode}: zero");
+        }
     }
 
     #[test]
