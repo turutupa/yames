@@ -112,7 +112,11 @@
   }
 }
 
-.hint-card[data-placement="above"] {
+/* The card slides in *from* the target, so a card sitting above or to the
+   left of its anchor enters upward. Placement names come from the shared
+   `onboarding/anchor.ts` (bottom / top / right / left / center). */
+.hint-card[data-placement="top"],
+.hint-card[data-placement="left"] {
   animation-name: hint-card-in-up;
 }
 

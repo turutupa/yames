@@ -1,71 +1,18 @@
 /**
- * `HintCard` rendering + the anchoring geometry behind it.
+ * `HintCard` rendering and how it picks up its anchor.
  *
- * The placement maths is a pure function so it can be checked without a real
- * layout engine (jsdom reports every element as 0x0). The component tests
- * cover the parts that do matter in the DOM: the copy comes from i18n, the
- * action button only exists when there is an action, and both buttons plus
- * Escape end the hint.
+ * The placement maths itself lives in `../anchor` and is covered exhaustively
+ * by `anchor.test.ts` — the tour card and the hint card share it, so it is
+ * tested once. What is tested here is the DOM half: the copy comes from i18n,
+ * the action button only exists when there is an action, both buttons plus
+ * Escape end the hint, and the card finds (or fails to find) `data-hint`.
  */
 import { describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach } from "vitest";
 import { HintCard } from "./HintCard";
-import { ANCHOR_GAP, VIEWPORT_MARGIN, computeAnchorPlacement } from "./anchor";
 
 afterEach(cleanup);
-
-const VIEWPORT = { width: 800, height: 600 };
-const CARD = { width: 300, height: 100 };
-
-describe("computeAnchorPlacement", () => {
-  it("centres the card under the anchor", () => {
-    const p = computeAnchorPlacement(
-      { top: 100, left: 350, width: 100, height: 40 },
-      CARD,
-      VIEWPORT,
-    );
-    expect(p.placement).toBe("below");
-    expect(p.top).toBe(100 + 40 + ANCHOR_GAP);
-    expect(p.left).toBe(350 + 50 - 150);
-  });
-
-  it("flips above when the card does not fit below", () => {
-    const p = computeAnchorPlacement(
-      { top: 520, left: 350, width: 100, height: 40 },
-      CARD,
-      VIEWPORT,
-    );
-    expect(p.placement).toBe("above");
-    expect(p.top).toBe(520 - ANCHOR_GAP - CARD.height);
-  });
-
-  it("stays below when there is no room either way", () => {
-    // Tall card, anchor near the top — above would be off-screen.
-    const p = computeAnchorPlacement(
-      { top: 10, left: 350, width: 100, height: 40 },
-      { width: 300, height: 580 },
-      VIEWPORT,
-    );
-    expect(p.placement).toBe("below");
-  });
-
-  it("clamps to the viewport for anchors near the edges", () => {
-    const left = computeAnchorPlacement(
-      { top: 100, left: 0, width: 20, height: 20 },
-      CARD,
-      VIEWPORT,
-    );
-    expect(left.left).toBe(VIEWPORT_MARGIN);
-
-    const right = computeAnchorPlacement(
-      { top: 100, left: 790, width: 20, height: 20 },
-      CARD,
-      VIEWPORT,
-    );
-    expect(right.left).toBe(VIEWPORT.width - CARD.width - VIEWPORT_MARGIN);
-  });
-});
 
 describe("HintCard", () => {
   it("renders the localised body and a dismiss button only", () => {
@@ -100,15 +47,40 @@ describe("HintCard", () => {
   it("anchors to the matching data-hint element when not inline", () => {
     const anchor = document.createElement("div");
     anchor.setAttribute("data-hint", "drill-first-open");
+    // jsdom has no layout engine, so the anchor has to say how big it is.
+    anchor.getBoundingClientRect = () =>
+      ({ top: 100, left: 350, width: 100, height: 40 }) as DOMRect;
     document.body.appendChild(anchor);
     const { container } = render(
       <HintCard id="drill-first-open" onDismiss={vi.fn()} />,
     );
     const card = container.querySelector(".hint-card") as HTMLElement;
-    expect(card.dataset.placement).toBe("below");
-    // jsdom has no layout, so only the fact that a fixed position was applied
-    // (rather than the hidden pre-measure state) is meaningful here.
+    expect(card.dataset.placement).toBe("bottom");
+    // A real position was applied, rather than the hidden pre-measure state.
     expect(card.style.visibility).toBe("");
+    expect(card.style.top).not.toBe("");
     anchor.remove();
+  });
+
+  it("falls back to a floating toast when the anchor has no layout", () => {
+    // Present in the DOM but 0x0 — a collapsed panel or a hidden tab. There is
+    // nothing to point at, so the card must not aim at the window's corner.
+    const anchor = document.createElement("div");
+    anchor.setAttribute("data-hint", "drill-first-open");
+    document.body.appendChild(anchor);
+    const { container } = render(
+      <HintCard id="drill-first-open" onDismiss={vi.fn()} />,
+    );
+    const card = container.querySelector(".hint-card") as HTMLElement;
+    expect(card.dataset.placement).toBe("float");
+    anchor.remove();
+  });
+
+  it("floats when no data-hint element exists at all", () => {
+    const { container } = render(
+      <HintCard id="drill-first-open" onDismiss={vi.fn()} />,
+    );
+    const card = container.querySelector(".hint-card") as HTMLElement;
+    expect(card.dataset.placement).toBe("float");
   });
 });
