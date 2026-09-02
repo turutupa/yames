@@ -243,6 +243,30 @@ O4/O5 wait for roadmap T03/T04 to merge so the coach step is truthful.
 
 ---
 
+## 7b. Status (2026-09-02)
+
+| Item | State | PR |
+|---|---|---|
+| O1 wizard shell, W0/W1/W7, select-then-Next contract | shipped | #17 |
+| O2 W2 sound & look (4 sounds, 3 curated themes, Settings detour) | shipped | #23 |
+| O3 W3 hands-free (live MIDI/gamepad mapping through the app's learn path) | shipped | #26 |
+| O7 six first-time hints + Reset hints | shipped | #27 |
+| O6 spotlight tour (six stops) + `?` button + Take the tour | shipped | #29 |
+| O4 W4 coach opt-in | open, needs T03/T04 (merged) — ready to start | |
+| O5 W5/W6 audio input + hear it work | open, after O4 | |
+| O8 empty states, what's-new, Help menu, motion audit | open | |
+| O9 screenshots, website/README, locale review | open, last | |
+
+Corrections learned while shipping (keep the plan honest): the engine
+has **four** click sounds, not six; there is **no tap-tempo hotkey** (T
+is next meter) and `?` is not a binding, so the keyboard card and tour
+copy show the real keymap; the tour's `zen-widget` stop unions two
+non-adjacent header buttons; `midi-plugged` hint currently opens
+Settings → Hotkeys and should point at W3's mapping card (follow-up);
+the hint cards were re-anchored to the tour's shared helper and need one
+visual check at 480 px. Manual checks still owed by the owner: a real
+MIDI pedal on W3, and the wizard end to end on macOS.
+
 ## 8. Success criteria
 
 - Skip path: click audible ≤ 10 s after launch on a cold start.
