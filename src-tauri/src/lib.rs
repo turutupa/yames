@@ -21,6 +21,23 @@ mod state;
 pub mod timing;
 mod tts;
 
+/// Everything `src/bin/click-jitter-probe.rs` needs, and nothing more.
+///
+/// The probe is a separate crate (Cargo compiles `src/bin/*` against the
+/// `yames_lib` rlib), so it can only see `pub` items. Rather than making
+/// `engine`, `state`, `coach` and `commands` public wholesale — they are
+/// implementation details of the Tauri command surface — this facade
+/// re-exports the exact handful of symbols the audio-safety gate uses.
+pub mod probe {
+    pub use crate::clock::now_ns;
+    pub use crate::engine::{CallbackProbe, CallbackSample, MetronomeEngine};
+    pub use crate::state::{create_shared_state, AppState, SharedState};
+    pub use crate::timing::create_beat_log;
+
+    #[cfg(feature = "coach-llm")]
+    pub use crate::coach::{generate, load_model, CoachEngine};
+}
+
 use audio_input::create_shared_audio_input;
 use calibration_cache::create_shared_calibration_cache;
 use coach::create_shared_engine;
