@@ -299,7 +299,9 @@ struct LlmRun {
 #[cfg(feature = "coach-llm")]
 fn start_llm(path: &str, stop: Arc<AtomicBool>) -> Result<LlmRun, String> {
     use std::time::Instant;
-    use yames_lib::probe::{generate, load_model, CoachEngine};
+    use yames_lib::probe::{
+        create_shared_engine, generate, load_model, GenKind, CURRENT_BRAIN_FAMILY,
+    };
 
     let p = std::path::PathBuf::from(path);
     if !p.exists() {
@@ -320,8 +322,13 @@ fn start_llm(path: &str, stop: Arc<AtomicBool>) -> Result<LlmRun, String> {
     // disturbing the click, and a 60 s window that begins mid-load would
     // measure a different thing every run.
     let started = Instant::now();
-    let mut engine = CoachEngine::new();
-    load_model(&mut engine, &p)?;
+    let engine = create_shared_engine();
+    // The probe points at a bare GGUF with no `model.json` marker beside
+    // it, so the family the loader gates on is asserted here rather than
+    // read off disk.
+    if !load_model(&engine, &p, Some(CURRENT_BRAIN_FAMILY), "probe model")? {
+        return Err(format!("model did not load: {path}"));
+    }
     let load_secs = started.elapsed().as_secs_f64();
     eprintln!("[probe] model loaded in {load_secs:.1}s");
 
@@ -339,7 +346,12 @@ fn start_llm(path: &str, stop: Arc<AtomicBool>) -> Result<LlmRun, String> {
             // shipping behaviour without any priority dance of its own.
             {
                 while !stop.load(Ordering::Relaxed) {
-                    match generate(&engine, LLM_CONTEXT) {
+                    // `Chat` deliberately: it carries the 256-token budget,
+                    // which is the longest generation the coach ever runs and
+                    // therefore the heaviest thing the audio thread has to
+                    // survive. (`Tip` would skip inference entirely on a CPU
+                    // build — the AGENTS.md tier rule — and measure nothing.)
+                    match generate(&engine, GenKind::Chat, LLM_CONTEXT) {
                         Ok(_) => {
                             gens.fetch_add(1, Ordering::Relaxed);
                         }

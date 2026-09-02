@@ -290,6 +290,7 @@ Rules:
 pub const NO_WEIGHTS: &str = "no weights on disk";
 pub const LEGACY_WEIGHTS: &str =
     "these weights predate the Qwen3 refresh — use \"Update brain\" to replace them";
+#[cfg_attr(feature = "coach-llm", allow(dead_code))]
 pub const NO_LLM_IN_BUILD: &str = "this build was compiled without the coach LLM";
 
 /// Load (or reload) the GGUF model from the brain directory.
@@ -1172,6 +1173,10 @@ mod llm {
     /// tells a finished sentence from one the budget cut off.
     pub struct Generated {
         pub text: String,
+        /// Only read by `latency_bench`, which is the reason the count is
+        /// carried at all — a tokens/second figure someone measured beats
+        /// one someone typed into a PR.
+        #[cfg_attr(not(test), allow(dead_code))]
         pub tokens: usize,
         pub hit_eog: bool,
     }
@@ -1290,7 +1295,8 @@ mod llm {
 
         /// Raw generation with an explicit budget — the latency bench
         /// wants the token count and does not care whether the text is
-        /// shippable.
+        /// shippable. Nothing in the shipping path calls it.
+        #[cfg_attr(not(test), allow(dead_code))]
         pub fn generate_measured(
             &self,
             context: &str,

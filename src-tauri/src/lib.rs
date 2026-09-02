@@ -35,7 +35,9 @@ pub mod probe {
     pub use crate::timing::create_beat_log;
 
     #[cfg(feature = "coach-llm")]
-    pub use crate::coach::{generate, load_model, CoachEngine};
+    pub use crate::coach::{create_shared_engine, generate, load_model, GenKind};
+    #[cfg(feature = "coach-llm")]
+    pub use crate::models::CURRENT_BRAIN_FAMILY;
 }
 
 use audio_input::create_shared_audio_input;
