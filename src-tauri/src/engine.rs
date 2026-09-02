@@ -425,6 +425,7 @@ struct CachedParams {
     ramp_warming_up: bool,
     warmup_count: u8,
     warmup_beats: u8,
+    free_mode: bool,
 }
 
 fn compute_group_accents(groups: &[u8]) -> HashSet<u32> {
@@ -986,6 +987,7 @@ impl MetronomeEngine {
                 ramp_warming_up: false,
                 warmup_count: 0,
                 warmup_beats: 4,
+                free_mode: false,
             };
 
             // ---- Build output stream ----
@@ -1030,6 +1032,7 @@ impl MetronomeEngine {
                         cached.ramp_warming_up = warming;
                         cached.warmup_count = s.speed_ramp.warmup_count;
                         cached.warmup_beats = s.speed_ramp.warmup_beats;
+                        cached.free_mode = s.free_mode;
                     }
 
                     // ---- Not playing: silence ----
@@ -1116,6 +1119,8 @@ impl MetronomeEngine {
                                     4
                                 };
                                 is_downbeat && (beat_count % bpb) == 0
+                            } else if cached.free_mode {
+                                false
                             } else {
                                 let accent_set = compute_group_accents(&cached.beat_groups);
                                 is_downbeat && accent_set.contains(&measure_beat)

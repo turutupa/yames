@@ -45,6 +45,7 @@ fn persist_state(state: &SharedState, app_handle: &AppHandle) {
         store.set("soundType", serde_json::json!(s.sound_type));
         store.set("timeSignature", serde_json::json!(s.time_signature));
         store.set("beatGroups", serde_json::json!(s.beat_groups));
+        store.set("freeMode", serde_json::json!(s.free_mode));
         store.set(
             "speedRamp",
             serde_json::json!({
@@ -329,7 +330,7 @@ pub fn set_beat_groups(
         return Err("groups: 1–6 required".into());
     }
     for g in &groups {
-        if *g < 1 || *g > 8 {
+        if *g < 1 || *g > 16 {
             return Err("each group: 1–8 beats".into());
         }
     }
@@ -341,6 +342,21 @@ pub fn set_beat_groups(
         let mut s = state.lock().unwrap();
         s.beat_groups = groups;
         s.time_signature = total;
+    }
+    emit_state_changed(&state, &app_handle);
+    persist_state(&state, &app_handle);
+    Ok(())
+}
+
+#[tauri::command]
+pub fn set_free_mode(
+    enabled: bool,
+    state: State<SharedState>,
+    app_handle: AppHandle,
+) -> Result<(), String> {
+    {
+        let mut s = state.lock().unwrap();
+        s.free_mode = enabled;
     }
     emit_state_changed(&state, &app_handle);
     persist_state(&state, &app_handle);
