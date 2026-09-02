@@ -153,6 +153,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "audio_thread_priority"
+version = "0.37.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e58c7a923538aa84eef9947d81924fb9f34d7db6004e179218ab57a7bb7700b6"
+dependencies = [
+ "cfg-if",
+ "libc",
+ "log",
+ "mach2",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
 name = "autocfg"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6294,6 +6307,7 @@ name = "yames"
 version = "1.0.4"
 dependencies = [
  "aubio",
+ "audio_thread_priority",
  "core-foundation-sys",
  "coreaudio-sys",
  "cpal",

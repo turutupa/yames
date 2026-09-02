@@ -3,7 +3,7 @@ use crate::timing::{BeatLog, BeatTick};
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use rodio::Source;
 use std::io::Cursor;
-use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU32, AtomicU64, AtomicUsize, Ordering};
 use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
 use std::time::Duration;
@@ -893,6 +893,159 @@ fn is_bluetooth_transport(_device_name: &str) -> bool {
 }
 
 // ---------------------------------------------------------------------------
+// Callback timing probe (ROADMAP §4 audio-safety gate)
+// ---------------------------------------------------------------------------
+
+/// One cpal output callback, as observed from inside it.
+#[derive(Debug, Clone, Copy)]
+pub struct CallbackSample {
+    /// `clock::now_ns()` read at the very top of the callback.
+    pub entry_ns: u64,
+    /// Frames this callback was asked to fill.
+    pub frames: u32,
+    /// Engine sample counter at callback entry — i.e. audio-clock time.
+    /// Only advances by frames the device actually consumed, so comparing
+    /// it against `entry_ns` exposes buffers that never made it out.
+    pub sample_pos: u64,
+    /// Metronome ticks (beats *and* subdivisions) rendered in this buffer.
+    pub ticks: u32,
+}
+
+/// Preallocated, lock-free sink for cpal callback timings.
+///
+/// Exists so `click-jitter-probe` can measure the real output callback
+/// without changing how it behaves. Constraints, in priority order:
+///
+/// * **The callback must not allocate, lock or block.** Every slot is
+///   allocated up front by the probe; writing one is a single `fetch_add`
+///   plus three relaxed stores. There is exactly one writer (the audio
+///   thread) and readers only run after the stream is torn down.
+/// * **The app must not pay for it.** `MetronomeEngine::new` leaves
+///   `callback_probe` as `None`, so a shipping build costs one null check
+///   per buffer and nothing per beat.
+/// * **Overflow must be visible, not silent.** Pushes past `capacity` are
+///   dropped, but `written` keeps counting so `overflow()` can report them
+///   and the probe can refuse to publish truncated statistics.
+pub struct CallbackProbe {
+    entry_ns: Box<[AtomicU64]>,
+    frames: Box<[AtomicU32]>,
+    sample_pos: Box<[AtomicU64]>,
+    ticks: Box<[AtomicU32]>,
+    /// Total pushes attempted, including any beyond `capacity`.
+    written: AtomicUsize,
+    /// Output sample rate, published by the engine thread before the stream
+    /// is built. 0 until then.
+    sample_rate: AtomicU32,
+}
+
+impl CallbackProbe {
+    /// Allocate room for `capacity` callbacks. The probe sizes this from
+    /// the run length and a pessimistic callback rate; see the binary.
+    pub fn new(capacity: usize) -> Self {
+        let alloc_u64 = || {
+            (0..capacity)
+                .map(|_| AtomicU64::new(0))
+                .collect::<Vec<_>>()
+                .into_boxed_slice()
+        };
+        let alloc_u32 = || {
+            (0..capacity)
+                .map(|_| AtomicU32::new(0))
+                .collect::<Vec<_>>()
+                .into_boxed_slice()
+        };
+        Self {
+            entry_ns: alloc_u64(),
+            frames: alloc_u32(),
+            sample_pos: alloc_u64(),
+            ticks: alloc_u32(),
+            written: AtomicUsize::new(0),
+            sample_rate: AtomicU32::new(0),
+        }
+    }
+
+    pub fn capacity(&self) -> usize {
+        self.entry_ns.len()
+    }
+
+    /// Output sample rate the engine opened the device at, or 0 if the
+    /// stream never started.
+    pub fn sample_rate(&self) -> u32 {
+        self.sample_rate.load(Ordering::Acquire)
+    }
+
+    /// Callbacks dropped because the preallocated arena filled up.
+    pub fn overflow(&self) -> usize {
+        self.written
+            .load(Ordering::Acquire)
+            .saturating_sub(self.capacity())
+    }
+
+    /// Read the recorded callbacks. Call only after the stream is stopped —
+    /// there is no synchronisation with an in-flight callback beyond the
+    /// acquire on `written`.
+    pub fn snapshot(&self) -> Vec<CallbackSample> {
+        let n = self.written.load(Ordering::Acquire).min(self.capacity());
+        (0..n)
+            .map(|i| CallbackSample {
+                entry_ns: self.entry_ns[i].load(Ordering::Relaxed),
+                frames: self.frames[i].load(Ordering::Relaxed),
+                sample_pos: self.sample_pos[i].load(Ordering::Relaxed),
+                ticks: self.ticks[i].load(Ordering::Relaxed),
+            })
+            .collect()
+    }
+
+    fn set_sample_rate(&self, sr: u32) {
+        self.sample_rate.store(sr, Ordering::Release);
+    }
+
+    /// Audio-thread hot path. Returns the slot index so the tick counter
+    /// can be bumped later in the same buffer, or `None` once full.
+    #[inline]
+    fn record(&self, entry_ns: u64, frames: u32, sample_pos: u64) -> Option<usize> {
+        let i = self.written.fetch_add(1, Ordering::Release);
+        if i >= self.capacity() {
+            return None;
+        }
+        self.entry_ns[i].store(entry_ns, Ordering::Relaxed);
+        self.frames[i].store(frames, Ordering::Relaxed);
+        self.sample_pos[i].store(sample_pos, Ordering::Relaxed);
+        self.ticks[i].store(0, Ordering::Relaxed);
+        Some(i)
+    }
+
+    /// Audio-thread hot path — one tick rendered into slot `i`.
+    #[inline]
+    fn note_tick(&self, i: usize) {
+        self.ticks[i].fetch_add(1, Ordering::Relaxed);
+    }
+}
+
+/// Where the engine's event loop sends UI events.
+///
+/// The desktop app passes a real `AppHandle`. `click-jitter-probe` runs the
+/// same engine with no Tauri application at all, so the handle is optional
+/// and every emit becomes a no-op. The method signature mirrors
+/// `Emitter::emit` precisely so the ~11 call sites in the event loop are
+/// untouched by the probe's existence.
+#[derive(Clone)]
+struct EventSink(Option<AppHandle>);
+
+impl EventSink {
+    fn emit<S: serde::Serialize + Clone>(
+        &self,
+        event: &str,
+        payload: S,
+    ) -> Result<(), tauri::Error> {
+        match self.0 {
+            Some(ref h) => h.emit(event, payload),
+            None => Ok(()),
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
 // MetronomeEngine — cpal-direct, sample-accurate timing
 // ---------------------------------------------------------------------------
 
@@ -904,6 +1057,10 @@ pub struct MetronomeEngine {
     device_name: Option<String>,
     /// Shared adaptive accuracy score (0-100), updated by timing analyzer callback
     adaptive_score: Arc<AtomicU32>,
+    /// Callback timing sink. `None` in the app — only `click-jitter-probe`
+    /// ever sets it (`new_with_probe`), so the shipping build's cpal
+    /// callback pays a single `Option` check per buffer and nothing else.
+    callback_probe: Option<Arc<CallbackProbe>>,
 }
 
 impl MetronomeEngine {
@@ -915,7 +1072,19 @@ impl MetronomeEngine {
             beat_log,
             device_name: None,
             adaptive_score: Arc::new(AtomicU32::new(0)),
+            callback_probe: None,
         }
+    }
+
+    /// Build an engine whose output callback records its own timings into
+    /// `probe`. Used only by `click-jitter-probe` (ROADMAP §4 audio-safety
+    /// gate); the app uses `new`, which leaves the sink off.
+    pub fn new_with_probe(beat_log: BeatLog, probe: Arc<CallbackProbe>) -> Self {
+        // Not `..Self::new(beat_log)`: `MetronomeEngine` implements `Drop`,
+        // so functional-update syntax cannot move fields out of it.
+        let mut engine = Self::new(beat_log);
+        engine.callback_probe = Some(probe);
+        engine
     }
 
     /// Set the output device. If the engine is running, it will be restarted.
@@ -932,7 +1101,7 @@ impl MetronomeEngine {
         // Brief pause to let CoreAudio fully release the old device
         thread::sleep(Duration::from_millis(100));
         // Restart on the new device
-        self.ensure_thread(state, app_handle);
+        self.ensure_thread(state, Some(app_handle));
         if was_playing {
             self.playing.store(true, Ordering::SeqCst);
         }
@@ -954,7 +1123,12 @@ impl MetronomeEngine {
     }
 
     /// Ensure the audio thread is running (opens audio device once).
-    fn ensure_thread(&mut self, state: SharedState, app_handle: AppHandle) {
+    ///
+    /// `app_handle` is `None` only for `click-jitter-probe`, which runs the
+    /// engine outside a Tauri application; the event loop then emits into
+    /// an `EventSink` that discards. Everything else — timing, the beat
+    /// log, the ramp state machine — is identical either way.
+    fn ensure_thread(&mut self, state: SharedState, app_handle: Option<AppHandle>) {
         if self.alive.load(Ordering::SeqCst) {
             return;
         }
@@ -965,6 +1139,8 @@ impl MetronomeEngine {
         let beat_log = self.beat_log.clone();
         let device_name = self.device_name.clone();
         let adaptive_score = self.adaptive_score.clone();
+        let callback_probe = self.callback_probe.clone();
+        let app_handle = EventSink(app_handle);
 
         let handle = thread::spawn(move || {
             // ---- cpal setup ----
@@ -1031,6 +1207,12 @@ impl MetronomeEngine {
             let state_cb = state.clone();
             let sr = sample_rate;
 
+            // Audio-safety probe (ROADMAP §4). `None` in the app.
+            if let Some(ref p) = callback_probe {
+                p.set_sample_rate(sample_rate);
+            }
+            let probe_cb = callback_probe.clone();
+
             // Query CoreAudio for the real output latency (device + safety + stream).
             // This auto-adapts to the user's selected device.
             let device_latency_frames =
@@ -1078,6 +1260,19 @@ impl MetronomeEngine {
                 &config,
                 move |data: &mut [f32], _info: &cpal::OutputCallbackInfo| {
                     let frames = data.len() / channels;
+
+                    // Audio-safety probe: timestamp the callback *entry*,
+                    // before any work, so callback-to-callback jitter is
+                    // measured at the point the OS handed us the buffer.
+                    // The value is only committed further down, once we
+                    // know this buffer is actually rendering the click —
+                    // silent buffers reset `sample_counter`, which would
+                    // make the audio-clock delta meaningless. `None` in
+                    // the app, where this costs one null check per buffer.
+                    let probe_entry_ns = match probe_cb {
+                        Some(_) => crate::clock::now_ns(),
+                        None => 0,
+                    };
 
                     // Output latency compensation.
                     // CoreAudio device/safety/stream latency + one buffer of
@@ -1153,6 +1348,13 @@ impl MetronomeEngine {
                         measure_beat = 0;
                         voices.clear();
                     }
+
+                    // Audio-safety probe: commit this buffer's entry time,
+                    // now that `sample_counter` is the live audio clock.
+                    let probe_slot = match probe_cb {
+                        Some(ref p) => p.record(probe_entry_ns, frames as u32, sample_counter),
+                        None => None,
+                    };
 
                     // ---- Check for pending chime from event thread ----
                     if let Ok(mut chime) = pending_chime_cb.try_lock() {
@@ -1295,6 +1497,15 @@ impl MetronomeEngine {
                                 delay_us: total_delay_us,
                             });
 
+                            // Audio-safety probe: one audible tick rendered
+                            // into this buffer. Counting here (rather than
+                            // from the event thread) keeps the count on the
+                            // audio clock, which is what "missed beats"
+                            // has to be measured against.
+                            if let (Some(ref p), Some(slot)) = (&probe_cb, probe_slot) {
+                                p.note_tick(slot);
+                            }
+
                             next_beat_sample = sample_counter + tick_samples;
                         }
 
@@ -1351,6 +1562,20 @@ impl MetronomeEngine {
                 eprintln!("Failed to start audio stream: {}", e);
                 return;
             }
+
+            // ROADMAP §0.5 — promote the event loop (not the cpal callback,
+            // which the backend already runs at TIME_CRITICAL). Failure is
+            // non-fatal: the loop just runs at normal priority.
+            let _rt_handle = match audio_thread_priority::promote_current_thread_to_real_time(
+                0,
+                sample_rate,
+            ) {
+                Ok(h) => Some(h),
+                Err(e) => {
+                    eprintln!("[yames] event loop stayed at normal priority: {e}");
+                    None
+                }
+            };
 
             // ---- Event loop (also keeps the cpal Stream alive) ----
             let mut pending_ramp_advance = false;
@@ -1624,7 +1849,15 @@ impl MetronomeEngine {
     }
 
     pub fn start(&mut self, state: SharedState, app_handle: AppHandle) {
-        self.ensure_thread(state, app_handle);
+        self.ensure_thread(state, Some(app_handle));
+        self.playing.store(true, Ordering::SeqCst);
+    }
+
+    /// Start the engine with no Tauri application attached — the audio path
+    /// and the event loop run exactly as they do in the app, but UI events
+    /// go nowhere. Only `click-jitter-probe` uses this.
+    pub fn start_headless(&mut self, state: SharedState) {
+        self.ensure_thread(state, None);
         self.playing.store(true, Ordering::SeqCst);
     }
 
