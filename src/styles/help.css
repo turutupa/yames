@@ -1,0 +1,346 @@
+/* ============== Help menu, shortcuts sheet, what's-new modal (O8) ==========
+ *
+ * Same visual language as the wizard card in `onboarding.css` — overlay with a
+ * blur, one card, 1px border, accent primary button — a notch smaller, since
+ * these are things the user asked for rather than things the app is asking
+ * them. Sized for the 480x780 minimum window: the card body scrolls, the
+ * window never does.
+ */
+
+.help-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  /* Between the hint card (300) and the wizard (320) / tour (330). Help is
+     never up at the same time as those two — the `?` button is hidden and the
+     shortcut is disabled while they own the screen — so the ordering only has
+     to be right for a stray overlap, and "the wizard wins" is the right call. */
+  z-index: 310;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: help-fade-in 160ms ease-out;
+}
+
+.help-card {
+  position: relative;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 20px 14px;
+  width: 100%;
+  max-width: 380px;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+  outline: none;
+  animation: help-card-in 180ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.help-card-title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.help-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.help-btn {
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-secondary);
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.help-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.help-btn-ghost {
+  border-color: var(--border);
+}
+
+.help-btn-ghost:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover, rgba(255, 255, 255, 0.04));
+}
+
+.help-btn-primary {
+  background: var(--accent);
+  color: var(--accent-text, #fff);
+}
+
+.help-btn-primary:hover {
+  filter: brightness(1.08);
+}
+
+/* ------------------------------ Menu ------------------------------------ */
+
+.help-menu-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+}
+
+.help-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease;
+}
+
+.help-menu-item:hover:not(:disabled) {
+  background: var(--bg-hover, rgba(255, 255, 255, 0.05));
+  border-color: var(--border);
+}
+
+.help-menu-item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.help-menu-item:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.help-menu-item svg {
+  flex: 0 0 auto;
+  color: var(--text-secondary);
+}
+
+.help-menu-note {
+  margin: 2px 0 6px 34px;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.help-menu-note-error {
+  color: var(--danger, #e5484d);
+}
+
+.help-menu-path {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.625rem;
+  color: var(--text-muted, var(--text-secondary));
+  word-break: break-all;
+  user-select: text;
+}
+
+.help-menu-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  flex: 0 0 auto;
+}
+
+.help-menu-version {
+  font-size: 0.6875rem;
+  color: var(--text-muted, var(--text-secondary));
+  user-select: text;
+}
+
+/* -------------------------- Shortcuts sheet ----------------------------- */
+
+.help-shortcuts-card {
+  max-width: 560px;
+}
+
+.help-shortcuts-body {
+  overflow-y: auto;
+  /* Explicit, because `overflow-y: auto` alone would compute the x axis to
+     `auto` too — and the hotkey rows carry hidden `[data-tooltip]::after`
+     bubbles that are absolutely positioned well past the right edge. They are
+     invisible but they still count toward scrollWidth, so the sheet grew a
+     horizontal scrollbar for content that does not exist. Every real cell fits
+     the four-column grid at every width. */
+  overflow-x: hidden;
+  min-height: 0;
+}
+
+/* The section carries Settings' own padding; inside a card it would double. */
+.help-shortcuts-body .hotkeys-section {
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.hotkeys-section-readonly .hotkey-bind-btn:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+.help-shortcuts-note {
+  margin: 14px 0 0;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+/* --------------------------- What's new --------------------------------- */
+
+.whats-new-card {
+  max-width: 440px;
+}
+
+.whats-new-notes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  min-height: 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--text-primary);
+  user-select: text;
+}
+
+.whats-new-bullet {
+  position: relative;
+  padding-left: 14px;
+}
+
+.whats-new-bullet::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.6em;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.whats-new-line {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.whats-new-fallback {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+/* ------------------------------ Motion ---------------------------------- */
+
+@keyframes help-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes help-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Motion off: the `viewTransitions` preference (`.no-motion`, set by the host
+   from the shared `useReducedMotion` hook) and the OS setting both remove the
+   entrance animations. */
+.help-overlay.no-motion,
+.help-overlay.no-motion .help-card {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .help-overlay,
+  .help-card {
+    animation: none;
+  }
+}
+
+/* Minimum window (480x780). */
+@media (max-width: 560px) {
+  .help-overlay {
+    padding: 12px;
+  }
+
+  .help-card {
+    padding: 16px 14px 12px;
+    gap: 12px;
+    border-radius: 12px;
+  }
+
+  .help-menu-note {
+    margin-left: 24px;
+  }
+
+  /* The hotkey table's four columns are sized for the Settings pane's width;
+     at 480 px they overflow by ~75 px and the sheet would scroll sideways.
+     Tightening the cells inside the read-only copy fits all four without
+     touching how Settings renders the same component. */
+  .help-shortcuts-body .hotkey-table-header,
+  .help-shortcuts-body .hotkey-row {
+    padding-left: 8px;
+    padding-right: 8px;
+    gap: 0 4px;
+  }
+
+  .help-shortcuts-body .hotkey-bind-btn {
+    padding: 4px 6px;
+    font-size: 0.75rem;
+  }
+
+  .help-shortcuts-body .hotkey-action {
+    font-size: 0.75rem;
+  }
+}

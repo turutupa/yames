@@ -209,6 +209,21 @@
           "body": "Beeldvullende visuals, of een piepklein widget altijd bovenop."
         }
       }
+    },
+    "help": {
+      "title": "Help",
+      "takeTour": "Rondleiding starten",
+      "runSetup": "Setup opnieuw doorlopen",
+      "shortcuts": "Sneltoetsen",
+      "reportProblem": "Probleem melden",
+      "reportWorking": "Logs verzamelen…",
+      "reportDone": "Diagnose opgeslagen. Voeg dit bestand toe aan je melding:",
+      "reportError": "Het diagnosebestand kon niet worden geschreven.",
+      "website": "Website",
+      "version": "Versie {{version}}",
+      "back": "Terug",
+      "close": "Sluiten",
+      "alwaysOnTopNote": "Yames blijft boven andere vensters. Je wijzigt dat in Instellingen → Algemeen."
     }
   },
   "widget": {
@@ -722,10 +737,6 @@
     "yesterday": "Gisteren",
     "noteSpacingTrend": "Nootafstand-trend"
   },
-  "coachHistory": {
-    "emptyTitle": "Nog geen sessies.",
-    "emptyHint": "Rond een oefensessie af om je historie op te bouwen."
-  },
   "coachDetail": {
     "exercises": "Oefeningen",
     "notPlayed": "Niet gespeeld",
@@ -789,5 +800,28 @@
     "available": "Yames v{{version}} is beschikbaar",
     "installRestart": "Installeren en herstarten →",
     "updating": "Yames bijwerken…"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "Nog geen presets",
+      "hint": "Bewaar een tempo, geluid en maatsoort waar je steeds op terugkomt.",
+      "action": "Bewaar je eerste preset",
+      "shortcut": "Druk op {{shortcut}} om dit paneel te openen en te sluiten."
+    },
+    "history": {
+      "title": "Nog geen sessies.",
+      "hint": "Je sessies verschijnen hier zodra je de metronoom stopt."
+    },
+    "drill": {
+      "linear": "Lineair: het tempo klimt stap voor stap van start-BPM naar doel.",
+      "zigzag": "Zigzag: het tempo klimt, zakt terug en klimt opnieuw.",
+      "adaptive": "Adaptief: de coach verhoogt of verlaagt het tempo op basis van je spel."
+    }
+  },
+  "whatsNew": {
+    "title": "Nieuw in {{version}}",
+    "noNotes": "Je gebruikt een nieuwe versie. De volledige release notes staan op het web.",
+    "fullNotes": "Release notes",
+    "dismiss": "Duidelijk"
   }
 }

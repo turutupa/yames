@@ -310,7 +310,9 @@
 .tour-overlay.no-motion,
 .tour-overlay.no-motion .tour-hole,
 .tour-overlay.no-motion .tour-ring,
-.tour-overlay.no-motion .tour-card {
+.tour-overlay.no-motion .tour-card,
+/* The offer toast lives outside the overlay, so it carries its own flag. */
+.tour-offer.no-motion {
   animation: none;
   transition: none;
 }

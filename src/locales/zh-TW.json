@@ -209,6 +209,21 @@
           "body": "全螢幕視覺效果，或一個永遠置頂的小視窗。"
         }
       }
+    },
+    "help": {
+      "title": "說明",
+      "takeTour": "看看導覽",
+      "runSetup": "重新執行設定",
+      "shortcuts": "鍵盤快速鍵",
+      "reportProblem": "回報問題",
+      "reportWorking": "正在收集紀錄…",
+      "reportDone": "診斷資訊已儲存。請把這個檔案附在回報裡：",
+      "reportError": "無法寫入診斷檔案。",
+      "website": "官網",
+      "version": "版本 {{version}}",
+      "back": "上一步",
+      "close": "關閉",
+      "alwaysOnTopNote": "Yames 會一直浮在其他視窗之上。可在設定 → 一般中修改。"
     }
   },
   "widget": {
@@ -722,10 +737,6 @@
     "yesterday": "昨天",
     "noteSpacingTrend": "音符間距趨勢"
   },
-  "coachHistory": {
-    "emptyTitle": "還沒有練習紀錄。",
-    "emptyHint": "完成一次練習，累積你的紀錄。"
-  },
   "coachDetail": {
     "exercises": "練習段落",
     "notPlayed": "未演奏",
@@ -789,5 +800,28 @@
     "available": "Yames v{{version}} 新版本可用",
     "installRestart": "安裝並重新啟動 →",
     "updating": "正在更新 Yames…"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "還沒有預設",
+      "hint": "把你常用的速度、音色和拍子存起來。",
+      "action": "儲存第一個預設",
+      "shortcut": "按 {{shortcut}} 可以開啟和收起這個面板。"
+    },
+    "history": {
+      "title": "還沒有練習紀錄。",
+      "hint": "停止節拍器後，這次練習就會出現在這裡。"
+    },
+    "drill": {
+      "linear": "線性：速度從起始 BPM 一級一級升到目標。",
+      "zigzag": "鋸齒：速度升上去、退回來，再升上去。",
+      "adaptive": "自適應：教練依你的演奏調高或調低速度。"
+    }
+  },
+  "whatsNew": {
+    "title": "{{version}} 更新內容",
+    "noNotes": "你用的是新版本。完整的發行說明在網路上。",
+    "fullNotes": "發行說明",
+    "dismiss": "知道了"
   }
 }

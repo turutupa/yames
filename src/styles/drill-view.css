@@ -139,6 +139,19 @@
   margin-top: 6px;
 }
 
+/* Idle empty state (O8) — one line explaining the selected mode, shown only
+   while the ramp is stopped. Sits above the summary and reads as a caption,
+   not as a control. */
+.drill-idle-hint {
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  opacity: 0.85;
+  margin-top: 8px;
+  padding: 0 12px;
+}
+
 /* Rotated grid: rows = BPM steps, cols = repeats */
 .drill-grid-wrapper {
   display: flex;

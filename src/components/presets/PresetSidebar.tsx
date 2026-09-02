@@ -398,9 +398,30 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
             </button>
           ))}
           {presets.length === 0 && !adding && (
-            <div className="preset-sidebar-empty">
-              {search.trim() ? t("presets.noResults") : t("presets.empty")}
-            </div>
+            search.trim() ? (
+              <div className="preset-sidebar-empty">{t("presets.noResults")}</div>
+            ) : (
+              /* Empty state with exactly one action (ONBOARDING_PLAN §6). The
+                 button does what the "+" in the header does — starting the
+                 name input is the whole gesture, and a first-time user has no
+                 reason to know the "+" means "save what you have now". */
+              <div className="preset-sidebar-empty preset-sidebar-empty-state">
+                <p className="empty-state-title">{t("emptyStates.presets.title")}</p>
+                <p className="empty-state-hint">{t("emptyStates.presets.hint")}</p>
+                <button
+                  type="button"
+                  className="empty-state-action"
+                  onClick={() => setAdding(true)}
+                >
+                  {t("emptyStates.presets.action")}
+                </button>
+                {shortcut && (
+                  <p className="empty-state-shortcut">
+                    {t("emptyStates.presets.shortcut", { shortcut })}
+                  </p>
+                )}
+              </div>
+            )
           )}
         </div>
         </>

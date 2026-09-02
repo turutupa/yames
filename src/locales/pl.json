@@ -209,6 +209,21 @@
           "body": "Wizualizacje na pełnym ekranie albo mały widżet zawsze na wierzchu."
         }
       }
+    },
+    "help": {
+      "title": "Pomoc",
+      "takeTour": "Zobacz przewodnik",
+      "runSetup": "Uruchom konfigurację ponownie",
+      "shortcuts": "Skróty klawiszowe",
+      "reportProblem": "Zgłoś problem",
+      "reportWorking": "Zbieranie logów…",
+      "reportDone": "Zapisano diagnostykę. Dołącz ten plik do zgłoszenia:",
+      "reportError": "Nie udało się zapisać pliku diagnostycznego.",
+      "website": "Strona",
+      "version": "Wersja {{version}}",
+      "back": "Wstecz",
+      "close": "Zamknij",
+      "alwaysOnTopNote": "Yames pozostaje nad innymi oknami. Zmienisz to w Ustawieniach → Ogólne."
     }
   },
   "widget": {
@@ -722,10 +737,6 @@
     "yesterday": "Wczoraj",
     "noteSpacingTrend": "Trend odstępów nut"
   },
-  "coachHistory": {
-    "emptyTitle": "Nie ma jeszcze sesji.",
-    "emptyHint": "Ukończ sesję ćwiczeń, aby zbudować historię."
-  },
   "coachDetail": {
     "exercises": "Ćwiczenia",
     "notPlayed": "Niezagrane",
@@ -789,5 +800,28 @@
     "available": "Dostępna wersja Yames v{{version}}",
     "installRestart": "Zainstaluj i uruchom ponownie →",
     "updating": "Aktualizuję Yames…"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "Nie ma jeszcze presetów",
+      "hint": "Zapisz tempo, brzmienie i metrum, do których często wracasz.",
+      "action": "Zapisz pierwszy preset",
+      "shortcut": "Naciśnij {{shortcut}}, aby otworzyć i zamknąć ten panel."
+    },
+    "history": {
+      "title": "Nie ma jeszcze sesji.",
+      "hint": "Twoje sesje pojawią się tutaj po zatrzymaniu metronomu."
+    },
+    "drill": {
+      "linear": "Liniowo: tempo rośnie od BPM startowego do docelowego, krok po kroku.",
+      "zigzag": "Zygzak: tempo rośnie, cofa się i rośnie ponownie.",
+      "adaptive": "Adaptacyjnie: trener podnosi lub obniża tempo zależnie od tego, jak grasz."
+    }
+  },
+  "whatsNew": {
+    "title": "Co nowego w {{version}}",
+    "noNotes": "Masz nową wersję. Pełne informacje o wydaniu są w sieci.",
+    "fullNotes": "Informacje o wydaniu",
+    "dismiss": "Jasne"
   }
 }

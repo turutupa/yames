@@ -209,6 +209,21 @@
           "body": "Visuais em tela cheia, ou um widget minúsculo sempre no topo."
         }
       }
+    },
+    "help": {
+      "title": "Ajuda",
+      "takeTour": "Fazer o tour",
+      "runSetup": "Refazer a configuração",
+      "shortcuts": "Atalhos de teclado",
+      "reportProblem": "Relatar um problema",
+      "reportWorking": "Coletando registros…",
+      "reportDone": "Diagnóstico salvo. Anexe este arquivo ao seu relato:",
+      "reportError": "Não foi possível gravar o arquivo de diagnóstico.",
+      "website": "Site",
+      "version": "Versão {{version}}",
+      "back": "Voltar",
+      "close": "Fechar",
+      "alwaysOnTopNote": "O Yames fica acima das outras janelas. Você muda isso em Configurações → Geral."
     }
   },
   "widget": {
@@ -722,10 +737,6 @@
     "yesterday": "Ontem",
     "noteSpacingTrend": "Tendência do espaçamento das notas"
   },
-  "coachHistory": {
-    "emptyTitle": "Ainda não há sessões.",
-    "emptyHint": "Complete uma sessão de prática para montar seu histórico."
-  },
   "coachDetail": {
     "exercises": "Exercícios",
     "notPlayed": "Não tocado",
@@ -789,5 +800,28 @@
     "available": "O Yames v{{version}} está disponível",
     "installRestart": "Instalar e reiniciar →",
     "updating": "Atualizando o Yames…"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "Ainda não há predefinições",
+      "hint": "Salve o andamento, o som e o compasso aos quais você sempre volta.",
+      "action": "Salvar sua primeira predefinição",
+      "shortcut": "Aperte {{shortcut}} para abrir e fechar este painel."
+    },
+    "history": {
+      "title": "Ainda não há sessões.",
+      "hint": "Suas sessões aparecem aqui depois que você para o metrônomo."
+    },
+    "drill": {
+      "linear": "Linear: o andamento sobe do BPM inicial até o alvo, um passo por vez.",
+      "zigzag": "Ziguezague: o andamento sobe, recua e sobe de novo.",
+      "adaptive": "Adaptativo: o coach sobe ou desce o andamento conforme você toca."
+    }
+  },
+  "whatsNew": {
+    "title": "Novidades da {{version}}",
+    "noNotes": "Você está em uma versão nova. As notas completas estão na web.",
+    "fullNotes": "Notas da versão",
+    "dismiss": "Entendi"
   }
 }

@@ -209,6 +209,21 @@
           "body": "Fullscreen visuals, or a tiny always-on-top widget."
         }
       }
+    },
+    "help": {
+      "title": "Help",
+      "takeTour": "Take the tour",
+      "runSetup": "Run setup again",
+      "shortcuts": "Keyboard shortcuts",
+      "reportProblem": "Report a problem",
+      "reportWorking": "Collecting logs…",
+      "reportDone": "Diagnostics saved. Attach this file to your report:",
+      "reportError": "Could not write the diagnostics file.",
+      "website": "Website",
+      "version": "Version {{version}}",
+      "back": "Back",
+      "close": "Close",
+      "alwaysOnTopNote": "Yames stays above other windows. Change that in Settings → General."
     }
   },
   "widget": {
@@ -722,10 +737,6 @@
     "yesterday": "Yesterday",
     "noteSpacingTrend": "Note spacing trend"
   },
-  "coachHistory": {
-    "emptyTitle": "No sessions yet.",
-    "emptyHint": "Complete a practice session to build your history."
-  },
   "coachDetail": {
     "exercises": "Exercises",
     "notPlayed": "Not played",
@@ -789,5 +800,28 @@
     "available": "Yames v{{version}} is available",
     "installRestart": "Install & Restart →",
     "updating": "Updating Yames…"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "No presets yet",
+      "hint": "Save a tempo, sound and meter you keep coming back to.",
+      "action": "Save your first preset",
+      "shortcut": "Press {{shortcut}} to open and close this panel."
+    },
+    "history": {
+      "title": "No sessions yet.",
+      "hint": "Your sessions show up here after you stop the metronome."
+    },
+    "drill": {
+      "linear": "Linear: the tempo climbs from the start BPM to the target, one step at a time.",
+      "zigzag": "Zigzag: the tempo climbs, drops back, and climbs again.",
+      "adaptive": "Adaptive: the coach raises or lowers the tempo from how you play."
+    }
+  },
+  "whatsNew": {
+    "title": "What's new in {{version}}",
+    "noNotes": "You're on a new version. The full release notes are on the web.",
+    "fullNotes": "Release notes",
+    "dismiss": "Got it"
   }
 }

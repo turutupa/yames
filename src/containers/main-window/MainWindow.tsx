@@ -50,6 +50,12 @@ import { markWidgetOpened } from "../onboarding/hints/hintRuntime";
 import { Tour } from "../onboarding/tour/Tour";
 import { TourOfferToast } from "../onboarding/tour/TourOfferToast";
 import { useTour } from "../onboarding/tour/useTour";
+import { HelpMenu } from "../onboarding/help/HelpMenu";
+import { ShortcutsSheet } from "../onboarding/help/ShortcutsSheet";
+import { useHelpMenu } from "../onboarding/help/useHelpMenu";
+import { WhatsNewModal } from "../onboarding/whats-new/WhatsNewModal";
+import { useWhatsNew } from "../onboarding/whats-new/useWhatsNew";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { DrillView } from "../drill/DrillView";
 import { FullscreenView } from "../zen/FullscreenView";
 import { PresetSidebar } from "../../components/presets/PresetSidebar";
@@ -256,6 +262,13 @@ export function MainWindow() {
     rejectKeyConflict,
   } = useKeybindings();
 
+  // Help menu (O8) — the header `?` and Cmd/Ctrl-/. Silenced while the wizard
+  // or the tour owns the screen, and while a key-capture modal is listening,
+  // so "/" lands where the user is looking.
+  const help = useHelpMenu(IS_MAC, {
+    disabled: onboarding.isOpen || tour.isOpen || !!bindingFor || inputTestOpen,
+  });
+
   // Unified input tester — modal that captures keyboard/MIDI/gamepad and
   // shows the mapped action. State, log buffer and the auto-scrolling
   // `appendLog` helper all live in the dedicated hook.
@@ -306,6 +319,20 @@ export function MainWindow() {
     setUpdateStatus,
     doUpdateCheck,
   } = useAppUpdates();
+
+  // Motion gate (O8): the OS `prefers-reduced-motion` setting OR the app's own
+  // `viewTransitions === "off"`. One value, passed to every animated overlay,
+  // so "no motion" means the same thing everywhere.
+  const reducedMotion = useReducedMotion(viewTransitions);
+
+  // What's new (O8) — the release notes for this build, once. Gated on the
+  // onboarding hydration so a genuine first launch (which gets the wizard)
+  // is never also handed a changelog.
+  const whatsNew = useWhatsNew({
+    appVersion,
+    firstRun: onboarding.firstRun,
+    ready: onboarding.hydrated,
+  });
 
   // Restore instrument from store on mount (other prefs are hydrated by
   // their dedicated hooks: useUiPreferences, useAudioOutputDevices,
@@ -768,7 +795,7 @@ export function MainWindow() {
           coach.coachVoiceMode === "voice" &&
           !!coach.modelStatus?.voiceReady
         }
-        onOpenHelp={() => tour.open()}
+        onOpenHelp={help.openMenu}
       />
 
       {onboarding.chipVisible && view !== "settings" && (
@@ -786,11 +813,16 @@ export function MainWindow() {
           id={appHint.id}
           onAction={appHint.onAction}
           onDismiss={appHint.markShown}
+          animate={!reducedMotion}
         />
       )}
 
       {tour.offerVisible && view !== "settings" && (
-        <TourOfferToast onAccept={tour.acceptOffer} onDismiss={tour.dismissOffer} />
+        <TourOfferToast
+          onAccept={tour.acceptOffer}
+          onDismiss={tour.dismissOffer}
+          animate={!reducedMotion}
+        />
       )}
 
       {/* W4 left the voice unchosen on purpose; the download that finished is
@@ -880,7 +912,7 @@ export function MainWindow() {
             state={state}
             currentBeat={currentBeat}
             autoCollapse={drillAutoCollapse}
-            animations={viewTransitions !== "off"}
+            animations={!reducedMotion}
           />
         ) : view === "track" ? (
           <TrackView state={state} currentBeat={currentBeat} evaluationEnabled={evaluation.enabled} />
@@ -1126,7 +1158,7 @@ export function MainWindow() {
       onOpenThemeSettings={openThemeSettings}
       hidden={themeDetour}
       onRequestTour={handleRequestTour}
-      animate={viewTransitions !== "off"}
+      animate={!reducedMotion}
     />
     <Tour
       open={tour.isOpen}
@@ -1137,7 +1169,43 @@ export function MainWindow() {
       onPrev={tour.prev}
       onClose={tour.close}
       keyBindings={keyBindings}
-      animate={viewTransitions !== "off"}
+      animate={!reducedMotion}
+    />
+    <HelpMenu
+      open={help.panel === "menu"}
+      onClose={help.close}
+      appVersion={appVersion}
+      onTakeTour={() => {
+        // The tour has no stop in Settings, so leave first and hand it the
+        // tab it must restore — same contract the Settings entry uses.
+        const back = view === "settings" ? prevTab.current : (view as "beat" | "drill" | "track");
+        if (view === "settings") setView(back);
+        tour.open(back);
+      }}
+      onRunSetupAgain={() => {
+        if (view === "settings") setView(prevTab.current);
+        onboarding.open();
+      }}
+      onShowShortcuts={help.openShortcuts}
+      onReportProblem={help.reportProblem}
+      animate={!reducedMotion}
+    />
+    <ShortcutsSheet
+      open={help.panel === "shortcuts"}
+      onClose={help.close}
+      onBack={help.openMenu}
+      keyBindings={keyBindings}
+      globalBindings={globalBindings}
+      footBindings={footBindings}
+      midi={midi}
+      animate={!reducedMotion}
+    />
+    <WhatsNewModal
+      open={whatsNew.isOpen && !onboarding.isOpen}
+      version={appVersion}
+      notes={whatsNew.notes}
+      onClose={whatsNew.dismiss}
+      animate={!reducedMotion}
     />
     </>
   );

@@ -23,8 +23,8 @@ export function CoachHistoryList({
     return (
       <div className="coach-card-empty">
         <p className="coach-card-empty-text">
-          {t("coachHistory.emptyTitle")}<br/>
-          {t("coachHistory.emptyHint")}
+          {t("emptyStates.history.title")}<br/>
+          {t("emptyStates.history.hint")}
         </p>
       </div>
     );

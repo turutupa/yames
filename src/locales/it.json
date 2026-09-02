@@ -209,6 +209,21 @@
           "body": "Visuali a schermo intero, o un piccolo widget sempre in primo piano."
         }
       }
+    },
+    "help": {
+      "title": "Aiuto",
+      "takeTour": "Fai il tour",
+      "runSetup": "Rifai la configurazione",
+      "shortcuts": "Scorciatoie da tastiera",
+      "reportProblem": "Segnala un problema",
+      "reportWorking": "Raccolta dei log…",
+      "reportDone": "Diagnostica salvata. Allega questo file alla segnalazione:",
+      "reportError": "Impossibile scrivere il file di diagnostica.",
+      "website": "Sito web",
+      "version": "Versione {{version}}",
+      "back": "Indietro",
+      "close": "Chiudi",
+      "alwaysOnTopNote": "Yames resta sopra le altre finestre. Puoi cambiarlo in Impostazioni → Generale."
     }
   },
   "widget": {
@@ -722,10 +737,6 @@
     "yesterday": "Ieri",
     "noteSpacingTrend": "Andamento della spaziatura delle note"
   },
-  "coachHistory": {
-    "emptyTitle": "Ancora nessuna sessione.",
-    "emptyHint": "Completa una sessione di studio per costruire la tua cronologia."
-  },
   "coachDetail": {
     "exercises": "Esercizi",
     "notPlayed": "Non suonato",
@@ -789,5 +800,28 @@
     "available": "Yames v{{version}} è disponibile",
     "installRestart": "Installa e riavvia →",
     "updating": "Aggiornamento di Yames in corso…"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "Ancora nessun preset",
+      "hint": "Salva tempo, suono e metro a cui torni sempre.",
+      "action": "Salva il tuo primo preset",
+      "shortcut": "Premi {{shortcut}} per aprire e chiudere questo pannello."
+    },
+    "history": {
+      "title": "Ancora nessuna sessione.",
+      "hint": "Le tue sessioni compaiono qui quando fermi il metronomo."
+    },
+    "drill": {
+      "linear": "Lineare: il tempo sale dal BPM iniziale all'obiettivo, un passo alla volta.",
+      "zigzag": "Zigzag: il tempo sale, torna indietro e risale.",
+      "adaptive": "Adattivo: il coach alza o abbassa il tempo in base a come suoni."
+    }
+  },
+  "whatsNew": {
+    "title": "Novità nella {{version}}",
+    "noNotes": "Stai usando una versione nuova. Le note complete sono sul web.",
+    "fullNotes": "Note di rilascio",
+    "dismiss": "Ho capito"
   }
 }

@@ -1,0 +1,53 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`drill idle state > explains the selected mode while the ramp is stopped 1`] = `
+<div
+  class="drill-idle-hint view-stagger-item"
+  data-testid="drill-idle-hint"
+  style="animation-delay: 300ms;"
+>
+  Linear: the tempo climbs from the start BPM to the target, one step at a time.
+</div>
+`;
+
+exports[`presets empty state > offers one action and names the panel shortcut 1`] = `
+<div
+  class="preset-sidebar-empty preset-sidebar-empty-state"
+>
+  <p
+    class="empty-state-title"
+  >
+    No presets yet
+  </p>
+  <p
+    class="empty-state-hint"
+  >
+    Save a tempo, sound and meter you keep coming back to.
+  </p>
+  <button
+    class="empty-state-action"
+    type="button"
+  >
+    Save your first preset
+  </button>
+  <p
+    class="empty-state-shortcut"
+  >
+    Press B to open and close this panel.
+  </p>
+</div>
+`;
+
+exports[`session history empty state > says where sessions come from 1`] = `
+<div
+  class="coach-card-empty"
+>
+  <p
+    class="coach-card-empty-text"
+  >
+    No sessions yet.
+    <br />
+    Your sessions show up here after you stop the metronome.
+  </p>
+</div>
+`;

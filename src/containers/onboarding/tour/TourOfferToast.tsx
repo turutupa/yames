@@ -10,12 +10,26 @@ import { useTranslation } from "react-i18next";
 export type TourOfferToastProps = {
   onAccept: () => void;
   onDismiss: () => void;
+  /**
+   * False suppresses the entrance animation. `tour.css` covers the OS
+   * `prefers-reduced-motion` setting; this covers the app's own
+   * `viewTransitions` preference, which CSS cannot see (O8 motion audit).
+   */
+  animate?: boolean;
 };
 
-export function TourOfferToast({ onAccept, onDismiss }: TourOfferToastProps) {
+export function TourOfferToast({
+  onAccept,
+  onDismiss,
+  animate = true,
+}: TourOfferToastProps) {
   const { t } = useTranslation();
   return (
-    <div className="tour-offer" role="status" data-testid="tour-offer">
+    <div
+      className={`tour-offer${animate ? "" : " no-motion"}`}
+      role="status"
+      data-testid="tour-offer"
+    >
       <span className="tour-offer-text">{t("onboarding.tour.offer")}</span>
       <button type="button" className="tour-offer-accept" onClick={onAccept}>
         {t("onboarding.tour.offerAccept")}

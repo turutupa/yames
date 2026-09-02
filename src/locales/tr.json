@@ -209,6 +209,21 @@
           "body": "Tam ekran görseller ya da hep üstte duran minik bir widget."
         }
       }
+    },
+    "help": {
+      "title": "Yardım",
+      "takeTour": "Turu başlat",
+      "runSetup": "Kurulumu yeniden çalıştır",
+      "shortcuts": "Klavye kısayolları",
+      "reportProblem": "Sorun bildir",
+      "reportWorking": "Günlükler toplanıyor…",
+      "reportDone": "Tanılama kaydedildi. Bu dosyayı bildiriminize ekleyin:",
+      "reportError": "Tanılama dosyası yazılamadı.",
+      "website": "Web sitesi",
+      "version": "Sürüm {{version}}",
+      "back": "Geri",
+      "close": "Kapat",
+      "alwaysOnTopNote": "Yames diğer pencerelerin üstünde kalır. Bunu Ayarlar → Genel'den değiştirebilirsiniz."
     }
   },
   "widget": {
@@ -722,10 +737,6 @@
     "yesterday": "Dün",
     "noteSpacingTrend": "Nota aralığı eğilimi"
   },
-  "coachHistory": {
-    "emptyTitle": "Henüz seans yok.",
-    "emptyHint": "Geçmişini oluşturmak için bir alıştırma seansını tamamla."
-  },
   "coachDetail": {
     "exercises": "Alıştırmalar",
     "notPlayed": "Çalınmadı",
@@ -789,5 +800,28 @@
     "available": "Yames v{{version}} sürümü mevcut",
     "installRestart": "Kur ve Yeniden Başlat →",
     "updating": "Yames güncelleniyor…"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "Henüz ön ayar yok",
+      "hint": "Sürekli döndüğünüz tempo, ses ve ölçüyü kaydedin.",
+      "action": "İlk ön ayarınızı kaydedin",
+      "shortcut": "Bu paneli açıp kapatmak için {{shortcut}} tuşuna basın."
+    },
+    "history": {
+      "title": "Henüz seans yok.",
+      "hint": "Metronomu durdurduğunuzda seanslarınız burada görünür."
+    },
+    "drill": {
+      "linear": "Doğrusal: tempo başlangıç BPM'inden hedefe adım adım yükselir.",
+      "zigzag": "Zikzak: tempo yükselir, geri düşer ve yeniden yükselir.",
+      "adaptive": "Uyarlanır: koç, çalışınıza göre tempoyu yükseltir veya düşürür."
+    }
+  },
+  "whatsNew": {
+    "title": "{{version}} sürümünde yenilikler",
+    "noNotes": "Yeni bir sürümdesiniz. Sürüm notlarının tamamı web'de.",
+    "fullNotes": "Sürüm notları",
+    "dismiss": "Anlaşıldı"
   }
 }

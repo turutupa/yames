@@ -209,6 +209,21 @@
           "body": "Hình ảnh toàn màn hình, hoặc một widget nhỏ luôn nổi lên trên."
         }
       }
+    },
+    "help": {
+      "title": "Trợ giúp",
+      "takeTour": "Xem hướng dẫn nhanh",
+      "runSetup": "Chạy lại phần thiết lập",
+      "shortcuts": "Phím tắt",
+      "reportProblem": "Báo lỗi",
+      "reportWorking": "Đang thu thập nhật ký…",
+      "reportDone": "Đã lưu tệp chẩn đoán. Hãy đính kèm tệp này vào báo cáo:",
+      "reportError": "Không ghi được tệp chẩn đoán.",
+      "website": "Trang web",
+      "version": "Phiên bản {{version}}",
+      "back": "Quay lại",
+      "close": "Đóng",
+      "alwaysOnTopNote": "Yames luôn nằm trên các cửa sổ khác. Bạn đổi được trong Cài đặt → Chung."
     }
   },
   "widget": {
@@ -722,10 +737,6 @@
     "yesterday": "Hôm qua",
     "noteSpacingTrend": "Xu hướng khoảng cách nốt"
   },
-  "coachHistory": {
-    "emptyTitle": "Chưa có buổi tập nào.",
-    "emptyHint": "Hoàn thành một buổi tập để xây dựng lịch sử của bạn."
-  },
   "coachDetail": {
     "exercises": "Bài tập",
     "notPlayed": "Chưa chơi",
@@ -789,5 +800,28 @@
     "available": "Đã có phiên bản Yames v{{version}}",
     "installRestart": "Cài đặt & Khởi động lại →",
     "updating": "Đang cập nhật Yames…"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "Chưa có cài đặt sẵn",
+      "hint": "Lưu lại nhịp độ, âm thanh và nhịp mà bạn hay quay lại.",
+      "action": "Lưu cài đặt sẵn đầu tiên",
+      "shortcut": "Nhấn {{shortcut}} để mở và đóng bảng này."
+    },
+    "history": {
+      "title": "Chưa có buổi tập nào.",
+      "hint": "Các buổi tập sẽ hiện ở đây sau khi bạn dừng máy đếm nhịp."
+    },
+    "drill": {
+      "linear": "Tuyến tính: nhịp độ tăng dần từ BPM đầu đến mục tiêu, từng bậc một.",
+      "zigzag": "Zigzag: nhịp độ tăng lên, lùi lại rồi tăng tiếp.",
+      "adaptive": "Thích ứng: huấn luyện viên tăng hoặc giảm nhịp độ theo cách bạn chơi."
+    }
+  },
+  "whatsNew": {
+    "title": "Có gì mới trong {{version}}",
+    "noNotes": "Bạn đang dùng phiên bản mới. Ghi chú phát hành đầy đủ có trên web.",
+    "fullNotes": "Ghi chú phát hành",
+    "dismiss": "Đã hiểu"
   }
 }

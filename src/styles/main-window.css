@@ -596,6 +596,64 @@
   opacity: 0.5;
 }
 
+/* The "no presets yet" case is an empty state with one action (O8), not the
+   faded "no results" caption — so it drops the 0.5 opacity and gets a real
+   hierarchy: title, one line of why, one button. */
+.preset-sidebar-empty-state {
+  opacity: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 22px 12px;
+}
+
+.preset-sidebar-empty-state .empty-state-title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.preset-sidebar-empty-state .empty-state-hint {
+  margin: 0;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.preset-sidebar-empty-state .empty-state-action {
+  margin-top: 4px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 5px 12px;
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-primary);
+  transition:
+    background 120ms ease,
+    border-color 120ms ease;
+}
+
+.preset-sidebar-empty-state .empty-state-action:hover {
+  background: var(--bg-hover, rgba(255, 255, 255, 0.05));
+  border-color: var(--accent);
+}
+
+.preset-sidebar-empty-state .empty-state-action:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.preset-sidebar-empty-state .empty-state-shortcut {
+  margin: 2px 0 0;
+  font-size: 0.625rem;
+  color: var(--text-muted);
+}
+
 .preset-search-wrap {
   padding: 0 10px 8px;
   flex-shrink: 0;
