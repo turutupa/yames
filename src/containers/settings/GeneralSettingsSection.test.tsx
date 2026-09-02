@@ -13,6 +13,7 @@ import { waitFor } from "@testing-library/react";
 import { afterEach } from "vitest";
 import i18n from "../../i18n";
 import { GeneralSettingsSection } from "./GeneralSettingsSection";
+import { HINT_IDS } from "../onboarding/hints/types";
 
 vi.mock("../../ipc", () => ({
   storeLoad: vi.fn(() => Promise.resolve(undefined)),
@@ -82,6 +83,23 @@ describe("GeneralSettingsSection language select", () => {
     expect(screen.getByText("Run setup again")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Open" }));
     expect(onRunSetupAgain).toHaveBeenCalled();
+  });
+
+  it('"Reset hints" clears every hints.* key and confirms', async () => {
+    const { storeSave } = (await import("../../ipc")) as unknown as {
+      storeSave: ReturnType<typeof vi.fn>;
+    };
+    storeSave.mockClear();
+    render(<GeneralSettingsSection {...baseProps} />);
+    fireEvent.click(screen.getByRole("button", { name: "Reset" }));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Done" })).toBeInTheDocument(),
+    );
+    const cleared = storeSave.mock.calls.map((c) => c[0] as string);
+    for (const id of HINT_IDS) expect(cleared).toContain(`hints.${id}`);
+    expect(cleared).toContain("hints.lastShownSession");
+    // The app session counter is an observation, not hint state — it survives.
+    expect(cleared).not.toContain("appSessionCount");
   });
 
   it("clicking outside closes the list without changing language", async () => {
