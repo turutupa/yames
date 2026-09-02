@@ -1,9 +1,9 @@
-import type { Ref } from "react";
+import { useMemo, type Ref } from "react";
 import { useTranslation } from "react-i18next";
 import type { AppState, BeatEvent, Subdivision } from "../../types";
 // BeatEvent used for evaluation feedback; Subdivision for sub-row cast
 import type { useEvaluation } from "../../hooks/useEvaluation";
-import { setSubdivision, setBeatGroups, notifySettingsChange } from "../../ipc";
+import { setSubdivision, setBeatGroups } from "../../ipc";
 import {
   getTempoMarking,
 } from "../../constants/metronome";
@@ -18,7 +18,6 @@ interface MetronomeViewProps {
   state: AppState;
   currentBeat: BeatEvent | null;
   evaluation: Evaluation;
-  beatsPerMeasure: number;
   activeBeat: number;
   activeSub: number;
   isDownbeat: boolean;
@@ -48,9 +47,8 @@ interface MetronomeViewProps {
  */
 export function MetronomeView({
   state,
-  currentBeat: _currentBeat,
+  currentBeat,
   evaluation,
-  beatsPerMeasure: _beatsPerMeasure,
   activeBeat,
   activeSub,
   isDownbeat,
@@ -69,6 +67,16 @@ export function MetronomeView({
   onCommitBpmEdit,
 }: MetronomeViewProps) {
   const { t } = useTranslation();
+
+  // Per-beat evaluation tint, re-keyed from the engine's sequential beat
+  // index to the bar position the dot grid is drawn on. Only the beat
+  // currently lit is ever tinted — same as the pre-grouping dot row.
+  const dotFeedback = useMemo(() => {
+    if (!evaluation.enabled || !currentBeat) return undefined;
+    const fb = evaluation.dotFeedback.get(currentBeat.beat);
+    return fb ? new Map([[currentBeat.measureBeat, fb]]) : undefined;
+  }, [evaluation.enabled, evaluation.dotFeedback, currentBeat]);
+
   return (
     <>
       {/* `data-tour` ids are the tour's (O6) anchors — see tour/stops.ts. */}
@@ -150,9 +158,13 @@ export function MetronomeView({
           activeSub={activeSub}
           isDownbeat={isDownbeat}
           freeMode={state.freeMode}
-          onBeatCountChange={async (next) => {
-            await setBeatGroups([next]);
-            await notifySettingsChange();
+          isAccentBeat={currentBeat?.isAccent ?? false}
+          feedback={dotFeedback}
+          onBeatCountChange={(next) => {
+            // No notifySettingsChange() — useSession watches the meter
+            // and fires ONE debounced coach boundary for a burst of
+            // stepper clicks.
+            setBeatGroups([next]);
           }}
         />
 

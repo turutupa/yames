@@ -384,7 +384,8 @@
     "beatCount_other": "{{count}} tempos",
     "clicksPerBar": "{{count}} cliques/compasso",
     "addBeat": "Adicionar tempo",
-    "removeBeat": "Remover tempo"
+    "removeBeat": "Remover tempo",
+    "grouping": "agrupamento"
   },
   "settings": {
     "tabs": {

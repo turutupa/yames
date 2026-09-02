@@ -384,7 +384,8 @@
     "beatCount_other": "{{count}} vuruş",
     "clicksPerBar": "{{count}} tık/ölçü",
     "addBeat": "Vuruş ekle",
-    "removeBeat": "Vuruş çıkar"
+    "removeBeat": "Vuruş çıkar",
+    "grouping": "gruplama"
   },
   "settings": {
     "tabs": {

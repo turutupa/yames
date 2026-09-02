@@ -4,7 +4,6 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import {
   setBeatGroups,
   setBpm,
-  notifySettingsChange,
   setSubdivision,
   showFloating,
   startSpeedRamp,
@@ -15,7 +14,7 @@ import { markWidgetOpened } from "../containers/onboarding/hints/hintRuntime";
 import type { AppState, Subdivision } from "../types";
 import type { HotkeyAction } from "../hotkeys";
 import { FULLSCREEN_EXIT_DELAY } from "../hotkeys";
-import { METER_PRESETS, nextFreeBeatCount, prevFreeBeatCount } from "../constants/metronome";
+import { meterKey, stepMeter } from "../utils/meter";
 
 export type ViewName = "beat" | "drill" | "track" | "settings";
 
@@ -149,30 +148,16 @@ export function useActionDispatcher({
         case "sub-2": setSubdivision(2); break;
         case "sub-3": setSubdivision(3); break;
         case "sub-4": setSubdivision(4); break;
-        case "sig-next": {
-          if (state.freeMode) {
-            const total = state.beatGroups.reduce((a, b) => a + b, 0);
-            setBeatGroups([nextFreeBeatCount(total)]); notifySettingsChange();
-          } else {
-            const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
-            const nextIdx = (currentIdx === -1 ? 0 : (currentIdx + 1) % METER_PRESETS.length);
-            setBeatGroups(METER_PRESETS[nextIdx].groups);
-            notifySettingsChange();
-          }
+        // No notifySettingsChange() — useSession watches the meter and
+        // fires ONE debounced coach boundary for a burst of changes.
+        // `stepMeter` handles the FREE-mode branch (step the beat count,
+        // wrapping) vs. the grouped branch (walk the preset list).
+        case "sig-next":
+          setBeatGroups(stepMeter(state.beatGroups, state.freeMode, 1));
           break;
-        }
-        case "sig-prev": {
-          if (state.freeMode) {
-            const total = state.beatGroups.reduce((a, b) => a + b, 0);
-            setBeatGroups([prevFreeBeatCount(total)]); notifySettingsChange();
-          } else {
-            const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
-            const nextIdx = (currentIdx === -1 ? 0 : (currentIdx - 1 + METER_PRESETS.length) % METER_PRESETS.length);
-            setBeatGroups(METER_PRESETS[nextIdx].groups);
-            notifySettingsChange();
-          }
+        case "sig-prev":
+          setBeatGroups(stepMeter(state.beatGroups, state.freeMode, -1));
           break;
-        }
         case "fullscreen":
           if (view !== "track") {
             if (isFullscreen) {
@@ -215,7 +200,10 @@ export function useActionDispatcher({
       view,
       state.bpm,
       state.subdivision,
-      state.beatGroups,
+      // Stable key — `state.beatGroups` is a fresh array on every
+      // state-changed event, so the reference alone rebuilt the
+      // callback on every beat.
+      meterKey(state.beatGroups),
       state.freeMode,
       state.speedRamp?.active,
       state.alwaysOnTop,

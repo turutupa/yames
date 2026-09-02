@@ -10,9 +10,34 @@
  * - Settings button calls showMain
  */
 import { describe, it, expect } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { FloatingWidget } from "./FloatingWidget";
-import { mockInvoke, setInvokeResponse } from "../../test/mocks";
+import {
+  DEFAULT_TEST_STATE,
+  mockInvoke,
+  mockListen,
+  setInvokeResponse,
+} from "../../test/mocks";
+import type { BeatEvent } from "../../types";
+
+/** Push a `beat` event through the mocked Tauri listener. */
+async function emitBeat(beat: Partial<BeatEvent>) {
+  const entry = mockListen.mock.calls.find(([evt]) => evt === "beat");
+  expect(entry, "no 'beat' listener registered").toBeDefined();
+  const cb = entry![1] as (e: { payload: BeatEvent }) => void;
+  await act(async () => {
+    cb({
+      payload: {
+        beat: 0,
+        measureBeat: 0,
+        subdivision: 0,
+        isDownbeat: true,
+        isAccent: false,
+        ...beat,
+      },
+    });
+  });
+}
 
 describe("FloatingWidget", () => {
   it("renders the current BPM from state", async () => {
@@ -97,5 +122,52 @@ describe("FloatingWidget", () => {
     await waitFor(() => {
       expect(mockInvoke).toHaveBeenCalledWith("set_bpm", { bpm: 125 });
     });
+  });
+
+  /**
+   * The widget used to light `currentBeat.beat % beatsPerMeasure`. The
+   * engine resets its bar when the grouping changes mid-play, so after a
+   * meter switch the sequential index and the bar position fall out of
+   * phase and the modulo lights the wrong dot. `measureBeat` is the
+   * engine's own bar position and is correct across the switch.
+   */
+  it("lights the dot at measureBeat, not beat % beatsPerMeasure", async () => {
+    setInvokeResponse("get_state", () => ({
+      ...DEFAULT_TEST_STATE,
+      timeSignature: 7,
+      beatGroups: [3, 2, 2],
+    }));
+    const { container } = render(<FloatingWidget />);
+    await waitFor(() => {
+      expect(container.querySelectorAll(".fw-beat-dot").length).toBe(7);
+    });
+
+    // Simulates play continuing across a meter change: the sequential
+    // beat counter is at 30, but the engine restarted the bar and says
+    // this tick is bar position 2. `30 % 7` is 2 by luck, so use a
+    // sequential index where the two genuinely disagree.
+    await emitBeat({ beat: 30, measureBeat: 5, isDownbeat: true });
+    const lit = [...container.querySelectorAll(".fw-beat-dot")]
+      .map((d, i) => (d.className.includes("active") ? i : -1))
+      .filter((i) => i >= 0);
+    expect(lit).toEqual([5]);
+    expect(30 % 7).not.toBe(5); // the old formula would have lit dot 2
+  });
+
+  it("takes the accent from the engine event", async () => {
+    const { container } = render(<FloatingWidget />);
+    await waitFor(() => {
+      expect(container.querySelectorAll(".fw-beat-dot").length).toBe(4);
+    });
+
+    await emitBeat({ beat: 1, measureBeat: 1, isDownbeat: true, isAccent: true });
+    expect(
+      (container.querySelectorAll(".fw-beat-dot")[1] as HTMLElement).className,
+    ).toContain("downbeat");
+
+    await emitBeat({ beat: 0, measureBeat: 0, isDownbeat: true, isAccent: false });
+    expect(
+      (container.querySelectorAll(".fw-beat-dot")[0] as HTMLElement).className,
+    ).not.toContain("downbeat");
   });
 });

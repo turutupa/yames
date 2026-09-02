@@ -384,7 +384,8 @@
     "beatCount_other": "{{count}} долей",
     "clicksPerBar": "{{count}} щелчков/такт",
     "addBeat": "Добавить долю",
-    "removeBeat": "Убрать долю"
+    "removeBeat": "Убрать долю",
+    "grouping": "группировка"
   },
   "settings": {
     "tabs": {

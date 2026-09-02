@@ -384,7 +384,8 @@
     "beatCount_other": "{{count}} temps",
     "clicksPerBar": "{{count}} clics/mesure",
     "addBeat": "Ajouter un temps",
-    "removeBeat": "Retirer un temps"
+    "removeBeat": "Retirer un temps",
+    "grouping": "groupement"
   },
   "settings": {
     "tabs": {

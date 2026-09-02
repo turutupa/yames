@@ -384,7 +384,8 @@
     "beatCount_other": "{{count}} pulsos",
     "clicksPerBar": "{{count}} clics/compás",
     "addBeat": "Añadir pulso",
-    "removeBeat": "Quitar pulso"
+    "removeBeat": "Quitar pulso",
+    "grouping": "agrupación"
   },
   "settings": {
     "tabs": {

@@ -384,7 +384,8 @@
     "beatCount_other": "{{count}}박",
     "clicksPerBar": "마디당 {{count}}회",
     "addBeat": "박 추가",
-    "removeBeat": "박 제거"
+    "removeBeat": "박 제거",
+    "grouping": "그룹"
   },
   "settings": {
     "tabs": {

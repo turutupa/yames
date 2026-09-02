@@ -384,7 +384,8 @@
     "beatCount_other": "{{count}} phách",
     "clicksPerBar": "{{count}} tiếng/ô nhịp",
     "addBeat": "Thêm phách",
-    "removeBeat": "Bớt phách"
+    "removeBeat": "Bớt phách",
+    "grouping": "nhóm nhịp"
   },
   "settings": {
     "tabs": {

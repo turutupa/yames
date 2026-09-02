@@ -384,7 +384,8 @@
     "beatCount_other": "{{count}} uderzenia",
     "clicksPerBar": "{{count}} kliknięć/takt",
     "addBeat": "Dodaj uderzenie",
-    "removeBeat": "Usuń uderzenie"
+    "removeBeat": "Usuń uderzenie",
+    "grouping": "grupowanie"
   },
   "settings": {
     "tabs": {
