@@ -692,6 +692,151 @@ button.onboarding-hf-device:hover {
   padding: 5px 8px;
 }
 
+/* ---- W5 audio input (O5) ----
+   The meter itself is `InputLevelMeter`, styled by `audio-input-test.css` —
+   the wizard adds only the layout around it, so the meter here and the one in
+   Settings -> Test audio input stay the same object. */
+.onboarding-input-device {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.onboarding-input-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-tertiary);
+}
+
+.onboarding-input-guidance {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+/* The one-second gate, said out loud. Grey until the input has proved
+   itself, accent once it has — the same colour Next turns. */
+.onboarding-input-gate {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.onboarding-input-gate.proven {
+  color: var(--accent);
+}
+
+.onboarding-input-gate-dot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+}
+
+.onboarding-input-gate.proven .onboarding-input-gate-dot {
+  background: var(--accent);
+}
+
+.onboarding-input-gate-bar {
+  flex: 1 1 auto;
+  height: 3px;
+  min-width: 40px;
+  border-radius: 2px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.onboarding-input-gate-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 100ms linear;
+}
+
+.onboarding-input-skip {
+  align-self: center;
+}
+
+/* ---- W6 hear it work (O5) ---- */
+.onboarding-hiw-dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Eight slots. An empty slot is an outline, not a grey dot: nothing has
+   happened on that beat yet, and a filled grey dot would read as a miss. */
+.onboarding-hiw-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.onboarding-hiw-dot.filled {
+  border-color: transparent;
+}
+
+.onboarding-hiw-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-height: 108px;
+  justify-content: center;
+}
+
+.onboarding-hiw-hint,
+.onboarding-hiw-line {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.onboarding-hiw-count {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.onboarding-hiw-result {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+}
+
+.onboarding-hiw-result .onboarding-hiw-line {
+  text-align: left;
+  color: var(--text-primary);
+}
+
+.onboarding-hiw-nothing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.onboarding-hiw-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 /* ---- W7 summary ---- */
 .onboarding-summary {
   list-style: none;
@@ -865,6 +1010,20 @@ button.onboarding-summary-row:hover {
   .onboarding-sound-look {
     grid-template-columns: 1fr;
     gap: 14px;
+  }
+
+  /* W6: ring above the sentence rather than beside it. */
+  .onboarding-hiw-result {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .onboarding-hiw-result .onboarding-hiw-line {
+    text-align: center;
+  }
+
+  .onboarding-hiw-dots {
+    gap: 8px;
   }
 
   .onboarding-btn {

@@ -129,6 +129,35 @@
       "voicePick": "Scegli una voce",
       "voiceDismiss": "Chiudi"
     },
+    "audioInput": {
+      "title": "Configura l'ingresso",
+      "subtitle": "Yames ascolta da qui per valutare il tuo tempo. Suona qualcosa e guarda il misuratore.",
+      "device": "Dispositivo di ingresso",
+      "guidance": {
+        "electric-guitar": "Collegati a un'interfaccia o suona davanti al microfono del portatile: il microfono va bene, l'interfaccia è meglio.",
+        "acoustic-guitar": "Suona verso il microfono del portatile, oppure usa un pickup con un'interfaccia. Funzionano entrambi.",
+        "bass": "Per il basso è meglio un'interfaccia: i microfoni dei portatili perdono i bassi, ma sentono l'attacco.",
+        "drums": "Va bene qualsiasi microfono nella stanza. Mettilo dove sente tutta la batteria, non un solo tamburo.",
+        "piano": "Basta un microfono vicino allo strumento. Un piano digitale può andare dritto in un'interfaccia.",
+        "other": "Un'interfaccia è meglio, ma il microfono del portatile funziona: suona vicino."
+      },
+      "waiting": "Suona qualcosa: al misuratore serve un secondo di segnale.",
+      "heard": "Fatto. Yames ti sente.",
+      "skip": "Salta, lo configuro dopo"
+    },
+    "hearItWork": {
+      "title": "Sentilo funzionare",
+      "subtitle": "Quattro battiti per prepararti, poi suonane otto. Niente è inventato: vedi esattamente cosa è stato sentito.",
+      "ready": "Suona insieme al clic. Una nota per battito è più che sufficiente.",
+      "start": "Inizia",
+      "countIn": "Si parte tra {{beats}}",
+      "playing": "Battito {{beat}} di {{total}}",
+      "scoring": "Valutazione…",
+      "dotsLabel": "I tuoi otto battiti",
+      "nothing": "Non ho sentito niente: controlla il livello di ingresso.",
+      "backToInput": "Torna all'ingresso",
+      "again": "Riprova"
+    },
     "ready": {
       "title": "Tutto pronto",
       "subtitle": "Cambia quello che vuoi qui, o più tardi nelle Impostazioni.",

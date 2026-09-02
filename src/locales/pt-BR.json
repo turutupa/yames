@@ -129,6 +129,35 @@
       "voicePick": "Escolher voz",
       "voiceDismiss": "Dispensar"
     },
+    "audioInput": {
+      "title": "Configure sua entrada",
+      "subtitle": "O Yames escuta por aqui para avaliar seu tempo. Toque algo e veja o medidor se mexer.",
+      "device": "Dispositivo de entrada",
+      "guidance": {
+        "electric-guitar": "Ligue numa interface ou toque na frente do microfone do notebook — o microfone serve, a interface é melhor.",
+        "acoustic-guitar": "Toque em direção ao microfone do notebook ou use um captador com interface. Os dois funcionam.",
+        "bass": "Para o baixo, a interface é melhor: microfones de notebook perdem os graves, mas ouvem o ataque.",
+        "drums": "Qualquer microfone na sala serve. Ponha onde ele ouça a bateria toda, não um tambor só.",
+        "piano": "Um microfone perto do instrumento basta. Um piano digital pode ir direto para a interface.",
+        "other": "Uma interface é melhor, mas o microfone do notebook funciona — só toque perto dele."
+      },
+      "waiting": "Toque algo: o medidor precisa de um segundo de sinal.",
+      "heard": "Pronto. O Yames está te ouvindo.",
+      "skip": "Pular, configuro depois"
+    },
+    "hearItWork": {
+      "title": "Ouça funcionando",
+      "subtitle": "Quatro tempos para se preparar e depois toque oito. Nada é inventado: você vê exatamente o que foi ouvido.",
+      "ready": "Toque junto com o clique. Uma nota por tempo já basta.",
+      "start": "Começar",
+      "countIn": "Começa em {{beats}}",
+      "playing": "Tempo {{beat}} de {{total}}",
+      "scoring": "Avaliando…",
+      "dotsLabel": "Seus oito tempos",
+      "nothing": "Não ouvi nada — confira o nível de entrada.",
+      "backToInput": "Voltar para a entrada",
+      "again": "Tentar de novo"
+    },
     "ready": {
       "title": "Tudo pronto",
       "subtitle": "Mude o que quiser aqui, ou depois em Configurações.",

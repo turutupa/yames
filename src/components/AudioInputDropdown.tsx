@@ -6,23 +6,33 @@ export function AudioInputDropdown({
   devices,
   value,
   onChange,
+  defaultLabel = "System default",
+  defaultSuffix = " (default)",
 }: {
   devices: AudioInputDevice[];
   value: string;
   onChange: (value: string) => void;
+  /**
+   * Label for the "no explicit device" entry. Optional so existing call sites
+   * keep their wording; the onboarding wizard (O5) passes the localised
+   * `settings.inputTest.systemDefault` / `.defaultSuffix` strings.
+   */
+  defaultLabel?: string;
+  /** Suffix appended to the OS default device's name. */
+  defaultSuffix?: string;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   const options = useMemo(
     () => [
-      { value: "", label: "System default" },
+      { value: "", label: defaultLabel },
       ...devices.map((d) => ({
         value: d.name,
-        label: d.name + (d.isDefault ? " (default)" : ""),
+        label: d.name + (d.isDefault ? defaultSuffix : ""),
       })),
     ],
-    [devices],
+    [devices, defaultLabel, defaultSuffix],
   );
 
   const selected = options.find((o) => o.value === value) || options[0];

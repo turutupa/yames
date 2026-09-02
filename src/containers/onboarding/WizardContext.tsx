@@ -9,7 +9,13 @@
 import { createContext, useContext } from "react";
 import type { UseMidiReturn } from "../../hooks/useMidi";
 import type { ModelStatus } from "../../ipc";
-import type { BrainTier, ModelTier } from "../../types";
+import type {
+  AudioInputDevice,
+  AudioSpectrum,
+  BeatFeedback,
+  BrainTier,
+  ModelTier,
+} from "../../types";
 import type { OnboardingContext, StepId } from "./onboardingMachine";
 
 /**
@@ -32,6 +38,35 @@ export type WizardCoachEnv = {
   startDownload: (tier: ModelTier) => void;
   /** Sets the active tier *and* persists `coachBrainTier`. */
   setBrainTier: (tier: BrainTier) => void;
+};
+
+/**
+ * The app's single `useEvaluation` instance, narrowed to what W5 and W6 (O5)
+ * need. Same reasoning as `midi` and `coach`: the steps drive the app's own
+ * hook rather than opening a second audio stream, so the device the user picks
+ * in the wizard *is* the device Settings, the coach card and W7's summary row
+ * see — and W6's take runs through the normal analyzer, which is the only way
+ * the calibration seed it leaves behind can be real.
+ */
+export type WizardEvaluationEnv = {
+  devices: AudioInputDevice[];
+  /** Selected input device name; `undefined`/`""` = system default. */
+  selectedDevice?: string;
+  /** Persists `evaluationDevice` and restarts the stream when it is running. */
+  selectDevice: (name: string) => void;
+  /** 0-indexed capture channel. */
+  selectedChannel: number;
+  selectChannel: (channel: number) => void;
+  /** True while the shared input stream is running. */
+  listening: boolean;
+  /** Idempotent "make sure it is on/off" — never a flip; see `setListening`. */
+  setListening: (on: boolean) => void;
+  /** Latest `audio-spectrum` payload, or null when nothing is listening. */
+  spectrum: AudioSpectrum | null;
+  /** Latest `beat-feedback` payload — W6's onset dots and drift needle. */
+  lastFeedback: BeatFeedback | null;
+  /** Rolling mean deviation in ms over the last 16 scored beats. */
+  avgDeviation: number;
 };
 
 export type WizardEnv = {
@@ -66,6 +101,10 @@ export type WizardEnv = {
   // --- Practice coach (W4) --------------------------------------------------
   /** Facts and hand-offs for the coach step; see `WizardCoachEnv`. */
   coach: WizardCoachEnv;
+
+  // --- Audio input + "hear it work" (W5/W6) ---------------------------------
+  /** The app's evaluation hook, narrowed; see `WizardEvaluationEnv`. */
+  evaluation: WizardEvaluationEnv;
 
   // --- The demo click ------------------------------------------------------
   /** Start the soft 80 BPM preview click (idempotent). */

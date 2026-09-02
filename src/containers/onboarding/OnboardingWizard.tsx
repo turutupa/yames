@@ -24,6 +24,7 @@ import {
   WizardEnvProvider,
   type WizardCoachEnv,
   type WizardEnv,
+  type WizardEvaluationEnv,
 } from "./WizardContext";
 import "../../styles/onboarding.css";
 
@@ -68,6 +69,25 @@ const NO_COACH: WizardCoachEnv = {
   setBrainTier: () => {},
 };
 
+/**
+ * Stand-in for the app's evaluation hook (same role as `NO_MIDI`/`NO_COACH`):
+ * no devices, nothing listening, no feedback. W5 then renders its "no input
+ * found" path and W6 can only report that it heard nothing — which is exactly
+ * what is true when the wizard runs outside MainWindow.
+ */
+const NO_EVALUATION: WizardEvaluationEnv = {
+  devices: [],
+  selectedDevice: undefined,
+  selectDevice: () => {},
+  selectedChannel: 0,
+  selectChannel: () => {},
+  listening: false,
+  setListening: () => {},
+  spectrum: null,
+  lastFeedback: null,
+  avgDeviation: 0,
+};
+
 export type OnboardingWizardProps = {
   state: OnboardingState;
   dispatch: (event: OnboardingEvent) => void;
@@ -94,6 +114,12 @@ export type OnboardingWizardProps = {
    * hand-off. Defaults to an inert stand-in outside MainWindow.
    */
   coach?: WizardCoachEnv;
+  /**
+   * The app's evaluation hook (W5/W6): devices, the live spectrum, beat
+   * feedback and the shared stream's on/off. Defaults to an inert stand-in
+   * outside MainWindow.
+   */
+  evaluation?: WizardEvaluationEnv;
 
   /** 80 BPM / volume 0.35 preview click, implemented in MainWindow. */
   startSoftClick: () => void;
@@ -138,6 +164,7 @@ export function OnboardingWizard({
   midi = NO_MIDI,
   gamepadBindings = NO_GAMEPAD_BINDINGS,
   coach = NO_COACH,
+  evaluation = NO_EVALUATION,
   startSoftClick,
   stopSoftClick,
   softClickPlaying,
@@ -362,6 +389,7 @@ export function OnboardingWizard({
       midi,
       gamepadBindings,
       coach,
+      evaluation,
       startSoftClick,
       stopSoftClick,
       softClickPlaying,
@@ -393,6 +421,7 @@ export function OnboardingWizard({
       midi,
       gamepadBindings,
       coach,
+      evaluation,
       startSoftClick,
       stopSoftClick,
       softClickPlaying,

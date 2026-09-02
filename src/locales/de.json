@@ -129,6 +129,35 @@
       "voicePick": "Stimme wählen",
       "voiceDismiss": "Schließen"
     },
+    "audioInput": {
+      "title": "Eingang einrichten",
+      "subtitle": "Yames hört hier mit und bewertet dein Timing. Spiel etwas und beobachte die Anzeige.",
+      "device": "Eingabegerät",
+      "guidance": {
+        "electric-guitar": "Über ein Interface anschließen oder vor dem Laptop-Mikrofon spielen — das Mikro geht, ein Interface ist besser.",
+        "acoustic-guitar": "Spiel in Richtung Laptop-Mikrofon oder nutze einen Tonabnehmer am Interface. Beides funktioniert.",
+        "bass": "Für Bass ist ein Interface am besten — Laptop-Mikrofone verlieren die Tiefen, hören aber den Anschlag.",
+        "drums": "Jedes Mikrofon im Raum reicht. Stell es so auf, dass es das ganze Set hört, nicht eine Trommel.",
+        "piano": "Ein Mikrofon in der Nähe genügt. Ein Digitalpiano kann direkt ins Interface.",
+        "other": "Ein Interface ist besser, aber das Laptop-Mikrofon reicht — spiel einfach nah dran."
+      },
+      "waiting": "Spiel etwas — die Anzeige braucht eine Sekunde Signal.",
+      "heard": "Passt. Yames hört dich.",
+      "skip": "Überspringen, mache ich später"
+    },
+    "hearItWork": {
+      "title": "Hör es arbeiten",
+      "subtitle": "Vier Schläge zum Vorbereiten, dann spiel acht mit. Nichts wird erfunden — du siehst genau, was gehört wurde.",
+      "ready": "Spiel zum Klick mit. Eine Note pro Schlag genügt.",
+      "start": "Los",
+      "countIn": "Start in {{beats}}",
+      "playing": "Schlag {{beat}} von {{total}}",
+      "scoring": "Auswertung…",
+      "dotsLabel": "Deine acht Schläge",
+      "nothing": "Nichts gehört — prüf den Eingangspegel.",
+      "backToInput": "Zurück zum Eingang",
+      "again": "Nochmal"
+    },
     "ready": {
       "title": "Alles bereit",
       "subtitle": "Ändere hier etwas – oder später in den Einstellungen.",

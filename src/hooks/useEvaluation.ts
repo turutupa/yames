@@ -205,6 +205,51 @@ export function useEvaluation(options?: { coachMode?: "default" | "pro" }) {
     return devs;
   }, []);
 
+  /**
+   * Latest values, for callbacks that must stay referentially stable.
+   * `setListening` is called from effects in the onboarding wizard (O5): if its
+   * identity changed whenever the device or channel changed, those effects
+   * would re-run and stop/start the shared stream underneath the user.
+   */
+  const enabledRef = useRef(enabled);
+  enabledRef.current = enabled;
+  const selectedDeviceRef = useRef(selectedDevice);
+  selectedDeviceRef.current = selectedDevice;
+  const selectedChannelRef = useRef(selectedChannel);
+  selectedChannelRef.current = selectedChannel;
+
+  /**
+   * Explicit start/stop, as opposed to `toggle`'s flip.
+   *
+   * The wizard's W5 (level meter) and W6 ("hear it work") mount and unmount
+   * around the same shared stream, so they need "make sure it is on/off" rather
+   * than "invert it" — a `toggle` racing an unmount cleanup ends with the
+   * stream in the wrong state. Idempotent, and shares `restartingRef` with
+   * `selectDevice`/`selectChannel` so a call landing mid-restart is dropped
+   * instead of opening a second stream on the same device.
+   */
+  const setListening = useCallback(async (on: boolean) => {
+    if (on === enabledRef.current) return;
+    if (restartingRef.current) return;
+    restartingRef.current = true;
+    try {
+      if (on) {
+        await refreshDevices();
+        await startEvaluation(
+          selectedDeviceRef.current,
+          selectedChannelRef.current,
+          coachModeRef.current,
+        );
+      } else {
+        await stopEvaluation();
+      }
+      enabledRef.current = on;
+      setEnabled(on);
+    } finally {
+      restartingRef.current = false;
+    }
+  }, [refreshDevices]);
+
   const toggle = useCallback(async () => {
     if (enabled) {
       await stopEvaluation();
@@ -271,6 +316,7 @@ export function useEvaluation(options?: { coachMode?: "default" | "pro" }) {
   return {
     enabled,
     toggle,
+    setListening,
     devices,
     refreshDevices,
     selectedDevice,

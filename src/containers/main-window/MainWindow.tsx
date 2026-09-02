@@ -39,7 +39,7 @@ import "../../styles/transitions.css";
 import "../../styles/evaluation.css";
 import type { BrainTier, InstrumentId, ModelTier, Preset, Subdivision } from "../../types";
 import { OnboardingWizard } from "../onboarding/OnboardingWizard";
-import type { WizardCoachEnv } from "../onboarding/WizardContext";
+import type { WizardCoachEnv, WizardEvaluationEnv } from "../onboarding/WizardContext";
 import { FinishSetupChip } from "../onboarding/FinishSetupChip";
 import { useOnboarding } from "../onboarding/useOnboarding";
 import { CoachVoiceToast } from "../onboarding/CoachVoiceToast";
@@ -453,6 +453,43 @@ export function MainWindow() {
       coach.downloadProgress?.fraction,
       coach.handleStartDownload,
       coach.setCoachBrainTier,
+    ],
+  );
+
+  // W5/W6 (O5) drive the app's single `useEvaluation` for the same reason W3
+  // drives the single `useMidi`: the device picked in the wizard is the device
+  // the rest of the app uses, and W6's eight beats go through the normal
+  // analyzer — the only path that leaves a real calibration seed behind.
+  const wizardEvaluation: WizardEvaluationEnv = useMemo(
+    () => ({
+      devices: evaluation.devices,
+      selectedDevice: evaluation.selectedDevice,
+      selectDevice: (name: string) => {
+        void evaluation.selectDevice(name);
+      },
+      selectedChannel: evaluation.selectedChannel,
+      selectChannel: (channel: number) => {
+        void evaluation.selectChannel(channel);
+      },
+      listening: evaluation.enabled,
+      setListening: (on: boolean) => {
+        void evaluation.setListening(on);
+      },
+      spectrum: evaluation.spectrum,
+      lastFeedback: evaluation.lastFeedback,
+      avgDeviation: evaluation.avgDeviation,
+    }),
+    [
+      evaluation.devices,
+      evaluation.selectedDevice,
+      evaluation.selectDevice,
+      evaluation.selectedChannel,
+      evaluation.selectChannel,
+      evaluation.enabled,
+      evaluation.setListening,
+      evaluation.spectrum,
+      evaluation.lastFeedback,
+      evaluation.avgDeviation,
     ],
   );
 
@@ -1148,6 +1185,7 @@ export function MainWindow() {
       midi={midi}
       gamepadBindings={footBindings}
       coach={wizardCoach}
+      evaluation={wizardEvaluation}
       alwaysOnTop={state.alwaysOnTop}
       onAlwaysOnTopChange={setAlwaysOnTop}
       startSoftClick={startSoftClick}

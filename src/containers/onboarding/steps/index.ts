@@ -16,6 +16,8 @@ import { InstrumentStep } from "./InstrumentStep";
 import { SoundLookStep } from "./SoundLookStep";
 import { HandsFreeStep } from "./HandsFreeStep";
 import { CoachStep } from "./CoachStep";
+import { AudioInputStep } from "./AudioInputStep";
+import { HearItWorkStep } from "./HearItWorkStep";
 import { ReadyStep } from "./ReadyStep";
 
 export const ONBOARDING_STEPS: WizardStepDef[] = [
@@ -24,14 +26,24 @@ export const ONBOARDING_STEPS: WizardStepDef[] = [
   { id: "sound-look", Component: SoundLookStep },
   { id: "hands-free", Component: HandsFreeStep },
   { id: "coach", Component: CoachStep },
-  // O5: { id: "audio-input", Component: AudioInputStep,
-  //        isEnabled: (ctx) =>
-  //          (ctx.coachTier ?? "off") !== "off" || ctx.tryListening === true },
-  // O5: { id: "hear-it-work", Component: HearItWorkStep,
-  //        isEnabled: (ctx) => ctx.inputConfigured === true },
-  //   `tryListening` is W4's optional branch for timing-only users (plan
-  //   decision 3). `coachTier` is undefined until W4 commits — a run that
-  //   skipped W4 must read as "off", hence the `??`.
+  // `tryListening` is W4's optional branch for timing-only users (plan
+  // decision 3). `coachTier` is undefined until W4 commits — a run that
+  // skipped W4 must read as "off", hence the `??`.
+  {
+    id: "audio-input",
+    Component: AudioInputStep,
+    isEnabled: (ctx) => (ctx.coachTier ?? "off") !== "off" || ctx.tryListening === true,
+  },
+  // W6 gates on the *outcome* of W5, not on the intent: an input that never
+  // produced signal (skipped W5, or a dead interface) has nothing to
+  // demonstrate, and "hear it work" with nothing to hear is the fake result
+  // the plan forbids. `inputConfigured` is set by W5's commit, so skipping W5
+  // skips W6 with it.
+  {
+    id: "hear-it-work",
+    Component: HearItWorkStep,
+    isEnabled: (ctx) => ctx.inputConfigured === true,
+  },
   { id: "ready", Component: ReadyStep },
 ];
 

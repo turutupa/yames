@@ -18,6 +18,11 @@ import {
   onPlaybackFinished,
 } from "../../ipc";
 import { ChannelDropdown } from "../../components/ChannelDropdown";
+import {
+  InputLevelMeter,
+  SIGNAL_FLOOR_RMS,
+  useSmoothedRms,
+} from "../../components/InputLevelMeter";
 
 interface Props {
   open: boolean;
@@ -329,6 +334,14 @@ export default function AudioInputTestModal({ open, onClose, selectedDevice, onD
     setRecDuration(0);
   }, []);
 
+  // Level smoothing lives above the early return: it is a hook now (shared
+  // with the wizard's W5 through `InputLevelMeter`), so it has to run on every
+  // render, open or not. Nothing arrives while closed, so it simply decays.
+  const rawRms = spectrum?.rms ?? 0;
+  const smoothedRms = useSmoothedRms(rawRms);
+  // The recording timer samples this every 100 ms from outside React.
+  smoothRmsRef.current = smoothedRms;
+
   if (!open) return null;
 
   // Derive channel info from the current device list entry.
@@ -336,20 +349,10 @@ export default function AudioInputTestModal({ open, onClose, selectedDevice, onD
   const modalChannelCount = selectedDeviceObj?.channels ?? 0;
   const modalIsInterface = selectedDeviceObj?.isInterface ?? false;
 
-  const rawRms = spectrum?.rms ?? 0;
-
-  // Smooth RMS with EMA for stable dB readout
-  const alpha = 0.3; // lower = smoother
-  smoothRmsRef.current = smoothRmsRef.current * (1 - alpha) + rawRms * alpha;
-  const rms = smoothRmsRef.current;
-
-  const dbValue = rms > 0.0001 ? 20 * Math.log10(rms) : -60;
-  const dbClamped = Math.max(-60, Math.min(0, dbValue));
-  const levelPct = ((dbClamped + 60) / 60) * 100;
   const bands = spectrum?.bands ?? new Array(16).fill(0);
 
   // Debounce signal status — require 500ms of consistent state before switching
-  const signalNow = rawRms > 0.01;
+  const signalNow = rawRms > SIGNAL_FLOOR_RMS;
   if (signalNow !== hasSignal) {
     if (!signalTimerRef.current) {
       signalTimerRef.current = setTimeout(() => {
@@ -419,24 +422,7 @@ export default function AudioInputTestModal({ open, onClose, selectedDevice, onD
             />
           </div>
 
-          <div className="input-test-meter-section">
-            <div className="input-test-meter-label">
-              <span>{t("settings.inputTest.level")}</span>
-              <span className="input-test-db">{dbClamped > -59 ? `${Math.round(dbClamped)} dB` : "-\u221E dB"}</span>
-            </div>
-            <div className="input-test-meter-track">
-              <div
-                className={`input-test-meter-fill ${levelPct > 90 ? "clipping" : levelPct > 70 ? "hot" : ""}`}
-                style={{ width: `${levelPct}%` }}
-              />
-              <div className="input-test-meter-ticks">
-                <span>-60</span>
-                <span>-40</span>
-                <span>-20</span>
-                <span>0 dB</span>
-              </div>
-            </div>
-          </div>
+          <InputLevelMeter rms={smoothedRms} label={t("settings.inputTest.level")} />
 
           <div className="input-test-spectrum-section">
             <div className="input-test-meter-label">
