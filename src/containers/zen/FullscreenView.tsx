@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { AppState, BeatEvent, Subdivision } from "../../types";
 import { setBpm, togglePlayback, setSubdivision, setBeatGroups, notifySettingsChange, stopSpeedRamp, startSpeedRamp, startSpeedRampFrom, configureSpeedRamp, storeSave, storeLoad } from "../../ipc";
-import { METER_PRESETS } from "../../constants/metronome";
+import { METER_PRESETS, nextFreeBeatCount } from "../../constants/metronome";
 import { ZenEffects, type ZenStyle } from "./ZenEffects";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import "../../styles/fullscreen.css";
@@ -208,7 +208,7 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
                   <div key={groupIdx} className="fs-group-cluster">
                     {Array.from({ length: count }, (_, d) => {
                       const beatIdx = groupStart + d;
-                      const isGroupDownbeat = d === 0;
+                      const isGroupDownbeat = !state.freeMode && d === 0;
                       const isBeatActive = !isWarmingUp && activeBeat === beatIdx && isDownbeat;
                       const isSubBeatActive = !isWarmingUp && activeBeat === beatIdx && !isDownbeat;
                       return (
@@ -359,12 +359,20 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
 
         {activeTab !== "drill" && (
           <button className="fs-ctrl-btn fs-ctrl-sub" onClick={() => {
-            const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
-            const nextIdx = (currentIdx === -1 ? 0 : (currentIdx + 1) % METER_PRESETS.length);
-            setBeatGroups(METER_PRESETS[nextIdx].groups);
-            notifySettingsChange();
+            const total = (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0);
+            if (state.freeMode) {
+              setBeatGroups([nextFreeBeatCount(total)]);
+              notifySettingsChange();
+            } else {
+              const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
+              const nextIdx = (currentIdx === -1 ? 0 : (currentIdx + 1) % METER_PRESETS.length);
+              setBeatGroups(METER_PRESETS[nextIdx].groups);
+              notifySettingsChange();
+            }
           }}>
-            {METER_PRESETS.find(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups))?.label ?? `${state.timeSignature}/4`}
+            {state.freeMode
+              ? t("metronome.freeBeatCount", { count: (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0) })
+              : METER_PRESETS.find(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups))?.label ?? `${state.timeSignature}/4`}
           </button>
         )}
         {activeTab !== "drill" && (

@@ -45,6 +45,7 @@ fn persist_state(state: &SharedState, app_handle: &AppHandle) {
         store.set("soundType", serde_json::json!(s.sound_type));
         store.set("timeSignature", serde_json::json!(s.time_signature));
         store.set("beatGroups", serde_json::json!(s.beat_groups));
+        store.set("freeMode", serde_json::json!(s.free_mode));
         store.set(
             "speedRamp",
             serde_json::json!({
@@ -319,28 +320,76 @@ pub fn set_time_signature(time_signature: u8, state: State<SharedState>, app_han
     persist_state(&state, &app_handle);
 }
 
+/// Smallest / largest beat count a single group (and therefore a FREE-mode
+/// bar) may hold. Mirrored by `MIN_FREE_BEATS` / `MAX_FREE_BEATS` in
+/// `src/constants/metronome.ts`.
+pub const MIN_GROUP_BEATS: u8 = 1;
+pub const MAX_GROUP_BEATS: u8 = 16;
+
+/// Validation half of [`set_beat_groups`], split out so it can be unit-tested
+/// without a Tauri `State` / `AppHandle`.
+pub fn validate_beat_groups(groups: &[u8]) -> Result<(), String> {
+    if groups.is_empty() || groups.len() > 6 {
+        return Err("groups: 1–6 required".into());
+    }
+    for g in groups {
+        if *g < MIN_GROUP_BEATS || *g > MAX_GROUP_BEATS {
+            return Err(format!(
+                "each group: {MIN_GROUP_BEATS}–{MAX_GROUP_BEATS} beats"
+            ));
+        }
+    }
+    let total: u32 = groups.iter().map(|g| *g as u32).sum();
+    if total > MAX_GROUP_BEATS as u32 {
+        return Err(format!("total beats must be ≤ {MAX_GROUP_BEATS}"));
+    }
+    Ok(())
+}
+
 #[tauri::command]
 pub fn set_beat_groups(
     groups: Vec<u8>,
     state: State<SharedState>,
     app_handle: AppHandle,
 ) -> Result<(), String> {
-    if groups.is_empty() || groups.len() > 6 {
-        return Err("groups: 1–6 required".into());
-    }
-    for g in &groups {
-        if *g < 1 || *g > 8 {
-            return Err("each group: 1–8 beats".into());
-        }
-    }
+    validate_beat_groups(&groups)?;
     let total: u8 = groups.iter().sum();
-    if total > 16 {
-        return Err("total beats must be ≤ 16".into());
-    }
     {
         let mut s = state.lock().unwrap();
         s.beat_groups = groups;
         s.time_signature = total;
+    }
+    emit_state_changed(&state, &app_handle);
+    persist_state(&state, &app_handle);
+    Ok(())
+}
+
+/// FREE mode means "N equal beats, no grouping", so it implies exactly one
+/// group holding every beat. Rust owns that invariant (N2 on PR #11): callers
+/// only flip the flag, they don't have to remember a second `set_beat_groups`
+/// round-trip. Returns `(beat_groups, time_signature)`.
+///
+/// Pure so it can be unit-tested without a Tauri `State` / `AppHandle`.
+pub fn collapse_to_free(groups: &[u8]) -> (Vec<u8>, u8) {
+    let total: u32 = groups.iter().map(|g| *g as u32).sum();
+    let total = total.clamp(MIN_GROUP_BEATS as u32, MAX_GROUP_BEATS as u32) as u8;
+    (vec![total], total)
+}
+
+#[tauri::command]
+pub fn set_free_mode(
+    enabled: bool,
+    state: State<SharedState>,
+    app_handle: AppHandle,
+) -> Result<(), String> {
+    {
+        let mut s = state.lock().unwrap();
+        s.free_mode = enabled;
+        if enabled {
+            let (groups, total) = collapse_to_free(&s.beat_groups);
+            s.beat_groups = groups;
+            s.time_signature = total;
+        }
     }
     emit_state_changed(&state, &app_handle);
     persist_state(&state, &app_handle);
@@ -2032,4 +2081,87 @@ pub fn app_ready(app_handle: AppHandle) {
 
     let _ = main_win.show();
     let _ = main_win.set_focus();
+}
+
+// ---------------------------------------------------------------------------
+// Tests — the pure halves of the beat-group / free-mode commands. The
+// `#[tauri::command]` wrappers need a live `State` + `AppHandle`, so the
+// validation and the FREE-mode invariant are extracted above and tested here.
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn validate_beat_groups_accepts_a_full_16_beat_free_bar() {
+        assert!(validate_beat_groups(&[16]).is_ok());
+    }
+
+    #[test]
+    fn validate_beat_groups_accepts_the_minimum_single_beat() {
+        assert!(validate_beat_groups(&[1]).is_ok());
+    }
+
+    #[test]
+    fn validate_beat_groups_rejects_a_group_of_17() {
+        let err = validate_beat_groups(&[17]).unwrap_err();
+        assert_eq!(err, "each group: 1–16 beats");
+    }
+
+    #[test]
+    fn validate_beat_groups_rejects_a_zero_beat_group() {
+        assert!(validate_beat_groups(&[0]).is_err());
+        assert!(validate_beat_groups(&[3, 0, 2]).is_err());
+    }
+
+    #[test]
+    fn validate_beat_groups_rejects_totals_over_16() {
+        // Every group is individually legal; only the sum breaks the cap.
+        let err = validate_beat_groups(&[9, 8]).unwrap_err();
+        assert_eq!(err, "total beats must be ≤ 16");
+        assert!(validate_beat_groups(&[4, 4, 4, 4, 4]).is_err());
+    }
+
+    #[test]
+    fn validate_beat_groups_rejects_empty_and_over_six_groups() {
+        assert!(validate_beat_groups(&[]).is_err());
+        assert!(validate_beat_groups(&[1, 1, 1, 1, 1, 1, 1]).is_err());
+    }
+
+    #[test]
+    fn validate_beat_groups_accepts_grouped_meters_summing_to_16() {
+        assert!(validate_beat_groups(&[3, 2, 2]).is_ok());
+        assert!(validate_beat_groups(&[4, 4, 4, 4]).is_ok());
+    }
+
+    #[test]
+    fn collapse_to_free_flattens_a_grouped_meter_preserving_the_total() {
+        assert_eq!(collapse_to_free(&[3, 2, 2]), (vec![7], 7));
+        assert_eq!(collapse_to_free(&[3, 3, 3, 3]), (vec![12], 12));
+    }
+
+    #[test]
+    fn collapse_to_free_is_idempotent_on_an_already_flat_bar() {
+        assert_eq!(collapse_to_free(&[5]), (vec![5], 5));
+    }
+
+    #[test]
+    fn collapse_to_free_result_is_always_valid() {
+        for groups in [
+            vec![1],
+            vec![4],
+            vec![3, 2, 2],
+            vec![4, 4, 4, 4],
+            vec![],
+            vec![16, 16],
+        ] {
+            let (collapsed, total) = collapse_to_free(&groups);
+            assert!(
+                validate_beat_groups(&collapsed).is_ok(),
+                "collapse_to_free({groups:?}) produced {collapsed:?}"
+            );
+            assert_eq!(collapsed, vec![total]);
+        }
+    }
 }

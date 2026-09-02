@@ -243,7 +243,17 @@
     "tap": "TAP",
     "tapCount": "{{count}} нажатий",
     "subdiv": "Дробление",
-    "meter": "Размер"
+    "meter": "Размер",
+    "free": "FREE",
+    "freeBeatCount": "{{count}} доли",
+    "freeBeatCount_one": "{{count}} доля",
+    "freeBeatCount_other": "{{count}} долей",
+    "beatCount": "{{count}} доли",
+    "beatCount_one": "{{count}} доля",
+    "beatCount_other": "{{count}} долей",
+    "clicksPerBar": "{{count}} щелчков/такт",
+    "addBeat": "Добавить долю",
+    "removeBeat": "Убрать долю"
   },
   "settings": {
     "tabs": {
@@ -436,8 +446,8 @@
         "sub-2": "Дробление: восьмые (÷2)",
         "sub-3": "Дробление: триоли (÷3)",
         "sub-4": "Дробление: шестнадцатые (÷4)",
-        "sig-next": "Следующий тактовый размер",
-        "sig-prev": "Предыдущий тактовый размер",
+        "sig-next": "Следующий тактовый размер — в режиме FREE добавляет долю",
+        "sig-prev": "Предыдущий тактовый размер — в режиме FREE убирает долю",
         "fullscreen": "Войти или выйти из дзен-режима",
         "os-fullscreen": "Переключить системный полноэкранный режим",
         "toggle-widget": "Переключиться на плавающий виджет",

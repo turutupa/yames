@@ -87,6 +87,10 @@ export async function setBeatGroups(groups: number[]): Promise<void> {
   return invoke("set_beat_groups", { groups });
 }
 
+export async function setFreeMode(enabled: boolean): Promise<void> {
+  return invoke("set_free_mode", { enabled });
+}
+
 export async function showMain(): Promise<void> {
   return invoke("show_main");
 }

@@ -243,7 +243,17 @@
     "tap": "TAP",
     "tapCount": "{{count}} taps",
     "subdiv": "Subdiv",
-    "meter": "Meter"
+    "meter": "Meter",
+    "free": "FREE",
+    "freeBeatCount": "{{count}} beats",
+    "freeBeatCount_one": "{{count}} beat",
+    "freeBeatCount_other": "{{count}} beats",
+    "beatCount": "{{count}} beats",
+    "beatCount_one": "{{count}} beat",
+    "beatCount_other": "{{count}} beats",
+    "clicksPerBar": "{{count}} clicks/bar",
+    "addBeat": "Add beat",
+    "removeBeat": "Remove beat"
   },
   "settings": {
     "tabs": {
@@ -436,8 +446,8 @@
         "sub-2": "Set subdivision to eighth notes (÷2)",
         "sub-3": "Set subdivision to triplets (÷3)",
         "sub-4": "Set subdivision to sixteenth notes (÷4)",
-        "sig-next": "Cycle to next time signature",
-        "sig-prev": "Cycle to previous time signature",
+        "sig-next": "Cycle to next time signature — adds a beat in FREE mode",
+        "sig-prev": "Cycle to previous time signature — removes a beat in FREE mode",
         "fullscreen": "Enter or exit zen mode",
         "os-fullscreen": "Toggle native fullscreen",
         "toggle-widget": "Switch to floating widget",

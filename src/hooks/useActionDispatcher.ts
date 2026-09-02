@@ -14,7 +14,7 @@ import {
 import type { AppState, Subdivision } from "../types";
 import type { HotkeyAction } from "../hotkeys";
 import { FULLSCREEN_EXIT_DELAY } from "../hotkeys";
-import { METER_PRESETS } from "../constants/metronome";
+import { METER_PRESETS, nextFreeBeatCount, prevFreeBeatCount } from "../constants/metronome";
 
 export type ViewName = "beat" | "drill" | "track" | "settings";
 
@@ -146,17 +146,27 @@ export function useActionDispatcher({
         case "sub-3": setSubdivision(3); break;
         case "sub-4": setSubdivision(4); break;
         case "sig-next": {
-          const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
-          const nextIdx = (currentIdx === -1 ? 0 : (currentIdx + 1) % METER_PRESETS.length);
-          setBeatGroups(METER_PRESETS[nextIdx].groups);
-          notifySettingsChange();
+          if (state.freeMode) {
+            const total = state.beatGroups.reduce((a, b) => a + b, 0);
+            setBeatGroups([nextFreeBeatCount(total)]); notifySettingsChange();
+          } else {
+            const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
+            const nextIdx = (currentIdx === -1 ? 0 : (currentIdx + 1) % METER_PRESETS.length);
+            setBeatGroups(METER_PRESETS[nextIdx].groups);
+            notifySettingsChange();
+          }
           break;
         }
         case "sig-prev": {
-          const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
-          const nextIdx = (currentIdx === -1 ? 0 : (currentIdx - 1 + METER_PRESETS.length) % METER_PRESETS.length);
-          setBeatGroups(METER_PRESETS[nextIdx].groups);
-          notifySettingsChange();
+          if (state.freeMode) {
+            const total = state.beatGroups.reduce((a, b) => a + b, 0);
+            setBeatGroups([prevFreeBeatCount(total)]); notifySettingsChange();
+          } else {
+            const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
+            const nextIdx = (currentIdx === -1 ? 0 : (currentIdx - 1 + METER_PRESETS.length) % METER_PRESETS.length);
+            setBeatGroups(METER_PRESETS[nextIdx].groups);
+            notifySettingsChange();
+          }
           break;
         }
         case "fullscreen":
@@ -202,6 +212,7 @@ export function useActionDispatcher({
       state.bpm,
       state.subdivision,
       state.beatGroups,
+      state.freeMode,
       state.speedRamp?.active,
       state.alwaysOnTop,
       isFullscreen,

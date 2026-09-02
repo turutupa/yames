@@ -89,6 +89,8 @@ pub struct AppState {
     pub time_signature: u8,
     #[serde(rename = "beatGroups", default = "default_beat_groups")]
     pub beat_groups: Vec<u8>,
+    #[serde(rename = "freeMode", default)]
+    pub free_mode: bool,
     #[serde(rename = "speedRamp")]
     pub speed_ramp: SpeedRamp,
 
@@ -123,6 +125,7 @@ impl Default for AppState {
             sound_type: "click".to_string(),
             time_signature: 4,
             beat_groups: vec![4],
+            free_mode: false,
             speed_ramp: SpeedRamp::default(),
             instrument: Instrument::default(),
         }

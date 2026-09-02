@@ -37,7 +37,7 @@ use commands::{
     close_open_segment, notify_settings_change, open_url, reorder_presets, save_preset, save_session,
     save_window_position, set_active_tab, set_always_on_top,
     set_audio_output_device, set_bpm, set_calibration_offset, set_input_gain, set_instrument,
-    set_beat_groups, set_midi_binding, set_playing, set_sound_type, set_subdivision, set_theme, set_time_signature,
+    set_beat_groups, set_free_mode, set_midi_binding, set_playing, set_sound_type, set_subdivision, set_theme, set_time_signature,
     app_ready, set_volume, set_widget_always_on_top, set_widget_mode, show_floating, show_main,
     start_evaluation, start_model_download, start_playback, start_recording, start_speed_ramp,
     start_speed_ramp_from, start_voice_repair, stop_evaluation, stop_playback, stop_recording,
@@ -153,6 +153,9 @@ pub fn run() {
                     // Migration: old save has no beatGroups — derive from timeSignature.
                     // time_signature=0 ("Never") is dropped; treat as 4/4.
                     s.beat_groups = vec![if s.time_signature == 0 { 4 } else { s.time_signature }];
+                }
+                if let Some(v) = store.get("freeMode").and_then(|v| v.as_bool()) {
+                    s.free_mode = v;
                 }
                 if let Some(v) = store.get("instrument").and_then(|v| v.as_str().map(String::from)) {
                     let loaded = instrument::Instrument::from_id(&v);
@@ -508,6 +511,7 @@ pub fn run() {
             set_sound_type,
             set_time_signature,
             set_beat_groups,
+            set_free_mode,
             configure_speed_ramp,
             start_speed_ramp,
             start_speed_ramp_from,

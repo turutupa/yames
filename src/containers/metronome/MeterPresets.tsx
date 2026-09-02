@@ -1,15 +1,18 @@
+import { useTranslation } from "react-i18next";
 import { METER_PRESETS, METER_VARIANTS } from "../../constants/metronome";
-import { setBeatGroups, notifySettingsChange } from "../../ipc";
+import { setBeatGroups, notifySettingsChange, setFreeMode } from "../../ipc";
 
 interface MeterPresetsProps {
   beatGroups: number[];
+  freeMode: boolean;
 }
 
-export function MeterPresets({ beatGroups }: MeterPresetsProps) {
+export function MeterPresets({ beatGroups, freeMode }: MeterPresetsProps) {
+  const { t } = useTranslation();
   const activeKey = JSON.stringify(beatGroups);
 
   // Find which preset label is active (exact match OR a known variant of it)
-  const activePreset = METER_PRESETS.find(p => {
+  const activePreset = freeMode ? undefined : METER_PRESETS.find(p => {
     if (JSON.stringify(p.groups) === activeKey) return true;
     const variants = METER_VARIANTS[p.label];
     return variants?.some(v => JSON.stringify(v) === activeKey);
@@ -18,6 +21,7 @@ export function MeterPresets({ beatGroups }: MeterPresetsProps) {
   const variants = activePreset ? METER_VARIANTS[activePreset.label] : null;
 
   async function handleSelect(groups: number[]) {
+    if (freeMode) await setFreeMode(false);
     await setBeatGroups(groups);
     await notifySettingsChange();
   }
@@ -25,7 +29,21 @@ export function MeterPresets({ beatGroups }: MeterPresetsProps) {
   return (
     <div className="meter-presets">
       <div className="time-sig-row">
-        <span className="row-side-label">Meter</span>
+        <span className="row-side-label">{t("metronome.meter")}</span>
+        <button
+          key="free"
+          className={`time-sig-btn view-stagger-item ${freeMode ? "active" : ""}`}
+          style={{ animationDelay: "150ms" }}
+          onClick={async () => {
+            // `set_free_mode(true)` collapses `beat_groups` to `[total]`
+            // itself — the invariant "freeMode ⇒ one group" is owned by Rust,
+            // so no second `setBeatGroups` round-trip is needed here.
+            await setFreeMode(true);
+            await notifySettingsChange();
+          }}
+        >
+          {t("metronome.free")}
+        </button>
         {METER_PRESETS.map((preset, i) => {
           const isActive = activePreset?.label === preset.label;
           return (
@@ -41,7 +59,7 @@ export function MeterPresets({ beatGroups }: MeterPresetsProps) {
         })}
       </div>
 
-      {variants && (
+      {variants && !freeMode && (
         <div className="meter-variant-row">
           <span className="meter-variant-label">grouping</span>
           {variants.map(v => {

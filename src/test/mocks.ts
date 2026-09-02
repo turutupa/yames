@@ -26,6 +26,7 @@ export const DEFAULT_TEST_STATE: AppState = {
   soundType: "click",
   timeSignature: 4,
   beatGroups: [4],
+  freeMode: false,
   speedRamp: {
     startBpm: 80,
     targetBpm: 160,
@@ -69,6 +70,8 @@ const DEFAULT_INVOKE_MAP: Record<string, InvokeFn> = {
   set_volume: () => undefined,
   set_sound_type: () => undefined,
   set_time_signature: () => undefined,
+  set_beat_groups: () => undefined,
+  set_free_mode: () => undefined,
   show_main: () => undefined,
   show_floating: () => undefined,
   open_url: () => undefined,

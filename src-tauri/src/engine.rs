@@ -425,6 +425,39 @@ struct CachedParams {
     ramp_warming_up: bool,
     warmup_count: u8,
     warmup_beats: u8,
+    free_mode: bool,
+}
+
+/// Should this tick be played as an accent (the "high" sound)?
+///
+/// Pure so it can be unit-tested without an audio device.
+///
+/// FREE mode is checked **first**: it means "N equal beats, no accent
+/// structure", and that has to hold everywhere — including while the drill's
+/// speed ramp is active, which otherwise imposes its own
+/// `ramp_beats_per_bar` bar accent (N1 on PR #11).
+fn accent_for(
+    free_mode: bool,
+    ramp_active: bool,
+    ramp_beats_per_bar: u8,
+    beat_groups: &[u8],
+    is_downbeat: bool,
+    beat_count: u32,
+    measure_beat: u32,
+) -> bool {
+    if free_mode {
+        return false;
+    }
+    if ramp_active {
+        let bpb = if ramp_beats_per_bar >= 2 {
+            ramp_beats_per_bar as u32
+        } else {
+            4
+        };
+        return is_downbeat && (beat_count % bpb) == 0;
+    }
+    let accent_set = compute_group_accents(beat_groups);
+    is_downbeat && accent_set.contains(&measure_beat)
 }
 
 fn compute_group_accents(groups: &[u8]) -> HashSet<u32> {
@@ -986,6 +1019,7 @@ impl MetronomeEngine {
                 ramp_warming_up: false,
                 warmup_count: 0,
                 warmup_beats: 4,
+                free_mode: false,
             };
 
             // ---- Build output stream ----
@@ -1030,6 +1064,7 @@ impl MetronomeEngine {
                         cached.ramp_warming_up = warming;
                         cached.warmup_count = s.speed_ramp.warmup_count;
                         cached.warmup_beats = s.speed_ramp.warmup_beats;
+                        cached.free_mode = s.free_mode;
                     }
 
                     // ---- Not playing: silence ----
@@ -1109,17 +1144,15 @@ impl MetronomeEngine {
                             }
 
                             // Determine accent
-                            let use_accent = if cached.ramp_active {
-                                let bpb = if cached.ramp_beats_per_bar >= 2 {
-                                    cached.ramp_beats_per_bar as u32
-                                } else {
-                                    4
-                                };
-                                is_downbeat && (beat_count % bpb) == 0
-                            } else {
-                                let accent_set = compute_group_accents(&cached.beat_groups);
-                                is_downbeat && accent_set.contains(&measure_beat)
-                            };
+                            let use_accent = accent_for(
+                                cached.free_mode,
+                                cached.ramp_active,
+                                cached.ramp_beats_per_bar,
+                                &cached.beat_groups,
+                                is_downbeat,
+                                beat_count,
+                                measure_beat,
+                            );
 
                             // Spawn voice for this beat
                             if use_accent && !cached.ramp_warming_up {
@@ -1694,5 +1727,65 @@ mod tests {
     fn advance_ramp_down_floors_at_20_bpm() {
         let (bpm, _, _) = advance_ramp(22, "down", 10, 100, 5, 3, "linear", false);
         assert_eq!(bpm, 20, "BPM should floor at 20");
+    }
+
+    // -----------------------------------------------------------------
+    // FREE mode — accent decision (PR #11, F8 / N1)
+    // -----------------------------------------------------------------
+
+    #[test]
+    fn free_mode_never_accents_any_beat() {
+        // 16 beats is the FREE-mode maximum; walk every one of them, on and
+        // off the quarter-note grid, at every group shape the state could
+        // carry. Nothing may come back accented.
+        for groups in [vec![16], vec![4], vec![3, 2, 2]] {
+            for beat in 0..16u32 {
+                for is_downbeat in [true, false] {
+                    assert!(
+                        !accent_for(true, false, 4, &groups, is_downbeat, beat, beat),
+                        "free mode accented beat {beat} (downbeat={is_downbeat}, groups={groups:?})"
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn free_mode_beats_the_speed_ramp_bar_accent() {
+        // N1: the ramp imposes its own `ramp_beats_per_bar` accent. FREE mode
+        // is checked first, so a drill in FREE mode stays flat.
+        for beat in 0..16u32 {
+            assert!(
+                !accent_for(true, true, 4, &[16], true, beat, beat),
+                "free mode accented beat {beat} while the ramp was active"
+            );
+        }
+        // Same inputs with free_mode off: beat 0 of every ramp bar IS accented,
+        // proving the assertion above is not vacuous.
+        assert!(accent_for(false, true, 4, &[16], true, 0, 0));
+        assert!(accent_for(false, true, 4, &[16], true, 4, 4));
+        assert!(!accent_for(false, true, 4, &[16], true, 5, 5));
+    }
+
+    #[test]
+    fn grouped_mode_accents_each_group_downbeat() {
+        // Control case: with free mode off and no ramp, 3+2+2 accents
+        // bar positions 0, 3 and 5.
+        let groups = [3u8, 2, 2];
+        for pos in 0..7u32 {
+            let expected = matches!(pos, 0 | 3 | 5);
+            assert_eq!(
+                accent_for(false, false, 4, &groups, true, pos, pos),
+                expected,
+                "grouped accent wrong at bar position {pos}"
+            );
+        }
+    }
+
+    #[test]
+    fn accent_never_fires_off_the_quarter_note_grid() {
+        // `is_downbeat == false` means a subdivision tick — never an accent.
+        assert!(!accent_for(false, false, 4, &[4], false, 0, 0));
+        assert!(!accent_for(false, true, 4, &[4], false, 0, 0));
     }
 }

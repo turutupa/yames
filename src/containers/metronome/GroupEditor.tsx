@@ -1,3 +1,9 @@
+import { useTranslation } from "react-i18next";
+import {
+  nextFreeBeatCount,
+  prevFreeBeatCount,
+} from "../../constants/metronome";
+
 const SUBDIVISION_MULTIPLIER: Record<number, number> = {
   1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
 };
@@ -9,6 +15,13 @@ interface GroupEditorProps {
   activeBeat?: number;
   activeSub?: number;
   isDownbeat?: boolean;
+  freeMode?: boolean;
+  /**
+   * Called by the free-mode stepper with the new beat count. Kept as a prop so
+   * this component stays presentational — the owner (`MetronomeView`) does the
+   * IPC. No-op default lets the grouped branch render without wiring.
+   */
+  onBeatCountChange?: (next: number) => void;
 }
 
 function computeAccentPositions(groups: number[]): Set<number> {
@@ -25,11 +38,55 @@ export function GroupEditor({
   activeBeat = -1,
   activeSub = -1,
   isDownbeat = false,
+  freeMode = false,
+  onBeatCountChange,
 }: GroupEditorProps) {
+  const { t } = useTranslation();
   const total = beatGroups.reduce((a, b) => a + b, 0);
   const formula = beatGroups.join(" + ");
   const clicksPerBar = total * (SUBDIVISION_MULTIPLIER[subdivision] ?? 1);
   const accentPositions = computeAccentPositions(beatGroups);
+
+  if (freeMode) {
+    return (
+      <div className="group-editor">
+        {/* N active dots — display only, no grid */}
+        <div className="free-dots">
+          {Array.from({ length: total }, (_, i) => {
+            const isActive = isPlaying && isDownbeat && activeBeat === i;
+            const isSubBeat = isPlaying && !isDownbeat && activeBeat === i;
+            return (
+              <div key={i} className="group-dot-wrap">
+                <div className={`group-dot ${isActive ? "playing" : "free-active"}`} />
+                {subdivision > 1 && (
+                  <div className="group-sub-dots">
+                    {Array.from({ length: subdivision - 1 }, (_, s) => (
+                      <div key={s} className={`group-sub-dot ${isSubBeat && activeSub === s + 1 ? "active" : ""}`} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        {/* Formula bar with inline beat count control */}
+        <div className="group-formula">
+          <button
+            className="free-count-btn"
+            onClick={() => onBeatCountChange?.(prevFreeBeatCount(total))}
+            aria-label={t("metronome.removeBeat")}
+          >‹</button>
+          <span className="group-formula-total">{t("metronome.beatCount", { count: total })}</span>
+          <button
+            className="free-count-btn"
+            onClick={() => onBeatCountChange?.(nextFreeBeatCount(total))}
+            aria-label={t("metronome.addBeat")}
+          >›</button>
+          <span className="group-formula-clicks">{t("metronome.clicksPerBar", { count: clicksPerBar })}</span>
+        </div>
+      </div>
+    );
+  }
 
   let dotCursor = 0;
   const groups = beatGroups.map((count, idx) => {
@@ -68,17 +125,15 @@ export function GroupEditor({
                 })}
               </div>
             </div>
-            <span className="group-label">{count} {count === 1 ? "beat" : "beats"}</span>
+            <span className="group-label">{t("metronome.beatCount", { count })}</span>
           </div>
         ))}
       </div>
 
       <div className="group-formula">
-        <span className="group-formula-total">{total} beats</span>
-        <span className="group-formula-sep">·</span>
+        <span className="group-formula-total">{t("metronome.beatCount", { count: total })}</span>
         <span className="group-formula-expr">{formula}</span>
-        <span className="group-formula-sep">·</span>
-        <span className="group-formula-clicks">{clicksPerBar} clicks/bar</span>
+        <span className="group-formula-clicks">{t("metronome.clicksPerBar", { count: clicksPerBar })}</span>
       </div>
     </div>
   );

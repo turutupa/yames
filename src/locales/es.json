@@ -243,7 +243,17 @@
     "tap": "TAP",
     "tapCount": "{{count}} golpes",
     "subdiv": "Subdivisión",
-    "meter": "Compás"
+    "meter": "Compás",
+    "free": "FREE",
+    "freeBeatCount": "{{count}} pulsos",
+    "freeBeatCount_one": "{{count}} pulso",
+    "freeBeatCount_other": "{{count}} pulsos",
+    "beatCount": "{{count}} pulsos",
+    "beatCount_one": "{{count}} pulso",
+    "beatCount_other": "{{count}} pulsos",
+    "clicksPerBar": "{{count}} clics/compás",
+    "addBeat": "Añadir pulso",
+    "removeBeat": "Quitar pulso"
   },
   "settings": {
     "tabs": {
@@ -436,8 +446,8 @@
         "sub-2": "Fija la subdivisión en corcheas (÷2)",
         "sub-3": "Fija la subdivisión en tresillos (÷3)",
         "sub-4": "Fija la subdivisión en semicorcheas (÷4)",
-        "sig-next": "Pasa al siguiente compás",
-        "sig-prev": "Pasa al compás anterior",
+        "sig-next": "Pasa al siguiente compás — añade un pulso en modo FREE",
+        "sig-prev": "Pasa al compás anterior — quita un pulso en modo FREE",
         "fullscreen": "Entra o sale del modo Zen",
         "os-fullscreen": "Alterna la pantalla completa nativa",
         "toggle-widget": "Cambia a la ventana flotante",

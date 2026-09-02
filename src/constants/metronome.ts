@@ -97,3 +97,27 @@ export function getTempoMarking(bpm: number): string {
   }
   return TEMPO_MARKINGS[0][1];
 }
+
+/**
+ * FREE-mode beat-count bounds.
+ *
+ * FREE mode replaces the grouped meter with a flat run of N equal beats.
+ * The steppers (GroupEditor chevrons, floating-widget / zen meter buttons,
+ * `sig-next` / `sig-prev`) wrap around these bounds rather than clamping, so
+ * `MAX_FREE_BEATS + 1` lands on `MIN_FREE_BEATS` and vice versa.
+ *
+ * `MAX_FREE_BEATS` must stay in sync with the per-group and total caps
+ * enforced by `set_beat_groups` in `src-tauri/src/commands.rs`.
+ */
+export const MIN_FREE_BEATS = 1;
+export const MAX_FREE_BEATS = 16;
+
+/** Next beat count for a "+1" stepper, wrapping MAX → MIN. */
+export function nextFreeBeatCount(total: number): number {
+  return total >= MAX_FREE_BEATS ? MIN_FREE_BEATS : total + 1;
+}
+
+/** Previous beat count for a "−1" stepper, wrapping MIN → MAX. */
+export function prevFreeBeatCount(total: number): number {
+  return total <= MIN_FREE_BEATS ? MAX_FREE_BEATS : total - 1;
+}

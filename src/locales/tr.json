@@ -243,7 +243,17 @@
     "tap": "TAP",
     "tapCount": "{{count}} TAP",
     "subdiv": "Alt Bölüm",
-    "meter": "Zaman İmzası"
+    "meter": "Zaman İmzası",
+    "free": "FREE",
+    "freeBeatCount": "{{count}} vuruş",
+    "freeBeatCount_one": "{{count}} vuruş",
+    "freeBeatCount_other": "{{count}} vuruş",
+    "beatCount": "{{count}} vuruş",
+    "beatCount_one": "{{count}} vuruş",
+    "beatCount_other": "{{count}} vuruş",
+    "clicksPerBar": "{{count}} tık/ölçü",
+    "addBeat": "Vuruş ekle",
+    "removeBeat": "Vuruş çıkar"
   },
   "settings": {
     "tabs": {
@@ -436,8 +446,8 @@
         "sub-2": "Alt bölümü sekizliğe ayarla (÷2)",
         "sub-3": "Alt bölümü üçlemeye ayarla (÷3)",
         "sub-4": "Alt bölümü onaltılığa ayarla (÷4)",
-        "sig-next": "Sonraki zaman imzasına geç",
-        "sig-prev": "Önceki zaman imzasına geç",
+        "sig-next": "Sonraki zaman imzasına geç — FREE modunda bir vuruş ekler",
+        "sig-prev": "Önceki zaman imzasına geç — FREE modunda bir vuruş çıkarır",
         "fullscreen": "Zen moduna gir veya çık",
         "os-fullscreen": "Sistem tam ekranını aç/kapat",
         "toggle-widget": "Mini pencereye geç",

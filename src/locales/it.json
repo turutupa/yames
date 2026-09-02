@@ -243,7 +243,17 @@
     "tap": "TAP",
     "tapCount": "{{count}} tocchi",
     "subdiv": "Suddiv",
-    "meter": "Tempo"
+    "meter": "Tempo",
+    "free": "FREE",
+    "freeBeatCount": "{{count}} colpi",
+    "freeBeatCount_one": "{{count}} colpo",
+    "freeBeatCount_other": "{{count}} colpi",
+    "beatCount": "{{count}} colpi",
+    "beatCount_one": "{{count}} colpo",
+    "beatCount_other": "{{count}} colpi",
+    "clicksPerBar": "{{count}} clic/battuta",
+    "addBeat": "Aggiungi colpo",
+    "removeBeat": "Rimuovi colpo"
   },
   "settings": {
     "tabs": {
@@ -436,8 +446,8 @@
         "sub-2": "Imposta la suddivisione su crome (÷2)",
         "sub-3": "Imposta la suddivisione su terzine (÷3)",
         "sub-4": "Imposta la suddivisione su semicrome (÷4)",
-        "sig-next": "Passa al tempo successivo",
-        "sig-prev": "Passa al tempo precedente",
+        "sig-next": "Passa al tempo successivo — aggiunge un colpo in modalità FREE",
+        "sig-prev": "Passa al tempo precedente — rimuove un colpo in modalità FREE",
         "fullscreen": "Entra o esci dalla modalità Zen",
         "os-fullscreen": "Attiva/disattiva lo schermo intero nativo",
         "toggle-widget": "Passa al widget flottante",

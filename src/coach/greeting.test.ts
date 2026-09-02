@@ -63,6 +63,7 @@ function makeSession(
     bpm,
     timeSignature: 4,
     beatGroups: [4],
+    freeMode: false,
     report: makeReport(score),
     presetId,
     presetName,

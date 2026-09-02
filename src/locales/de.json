@@ -243,7 +243,17 @@
     "tap": "TAP",
     "tapCount": "{{count}} Taps",
     "subdiv": "Unterteilung",
-    "meter": "Taktart"
+    "meter": "Taktart",
+    "free": "FREE",
+    "freeBeatCount": "{{count}} Beats",
+    "freeBeatCount_one": "{{count}} Beat",
+    "freeBeatCount_other": "{{count}} Beats",
+    "beatCount": "{{count}} Beats",
+    "beatCount_one": "{{count}} Beat",
+    "beatCount_other": "{{count}} Beats",
+    "clicksPerBar": "{{count}} Klicks/Takt",
+    "addBeat": "Beat hinzufügen",
+    "removeBeat": "Beat entfernen"
   },
   "settings": {
     "tabs": {
@@ -436,8 +446,8 @@
         "sub-2": "Unterteilung auf Achtelnoten setzen (÷2)",
         "sub-3": "Unterteilung auf Triolen setzen (÷3)",
         "sub-4": "Unterteilung auf Sechzehntelnoten setzen (÷4)",
-        "sig-next": "Zur nächsten Taktart wechseln",
-        "sig-prev": "Zur vorherigen Taktart wechseln",
+        "sig-next": "Zur nächsten Taktart wechseln — fügt im FREE-Modus einen Beat hinzu",
+        "sig-prev": "Zur vorherigen Taktart wechseln — entfernt im FREE-Modus einen Beat",
         "fullscreen": "Zen-Modus öffnen oder beenden",
         "os-fullscreen": "System-Vollbild umschalten",
         "toggle-widget": "Zum schwebenden Widget wechseln",
