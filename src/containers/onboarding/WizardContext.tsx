@@ -69,6 +69,12 @@ export type WizardEnv = {
   finish: () => void;
   /** Wired by O6. The W7 tour button is hidden while this is undefined. */
   onRequestTour?: () => void;
+  /**
+   * W2's "More themes in Settings": hides the wizard, opens Settings →
+   * Appearance, and brings the wizard back when the user leaves Settings.
+   * Hidden while undefined (same rule as `onRequestTour`).
+   */
+  openThemeSettings?: () => void;
   /** Merge a result into the machine context (O2–O5). */
   setMachineContext: (patch: Partial<OnboardingContext>) => void;
 };

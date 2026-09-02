@@ -13,12 +13,13 @@ import type { StepGate } from "../onboardingMachine";
 import type { WizardStepDef } from "./types";
 import { WelcomeStep } from "./WelcomeStep";
 import { InstrumentStep } from "./InstrumentStep";
+import { SoundLookStep } from "./SoundLookStep";
 import { ReadyStep } from "./ReadyStep";
 
 export const ONBOARDING_STEPS: WizardStepDef[] = [
   { id: "welcome", Component: WelcomeStep, hideInProgress: true },
   { id: "instrument", Component: InstrumentStep },
-  // O2: { id: "sound-look", Component: SoundLookStep },
+  { id: "sound-look", Component: SoundLookStep },
   // O3: { id: "hands-free", Component: HandsFreeStep },
   // O4: { id: "coach", Component: CoachStep },
   // O5: { id: "audio-input", Component: AudioInputStep,
