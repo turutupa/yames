@@ -26,12 +26,135 @@ pub struct ModelStatus {
     /// Size on disk in bytes
     #[serde(rename = "brainSizeBytes")]
     pub brain_size_bytes: u64,
+    /// Which model family the downloaded brain belongs to.
+    ///
+    /// `"qwen3"` when the downloader left a `model.json` marker saying so,
+    /// `"legacy"` for anything installed before T04 (Qwen2.5-1.5B /
+    /// Phi-3.5-mini — no marker on disk), and `null` when no brain is
+    /// downloaded at all. Drives the Settings "Update brain" affordance;
+    /// the old file is never deleted automatically.
+    #[serde(rename = "brainFamily")]
+    pub brain_family: Option<String>,
     /// Whether voice models are downloaded
     #[serde(rename = "voiceReady")]
     pub voice_ready: bool,
     /// Size on disk in bytes
     #[serde(rename = "voiceSizeBytes")]
     pub voice_size_bytes: u64,
+}
+
+/// The current brain family. Bump this (and `family_for_url`) when the
+/// tiers move to another model generation — every user on an older family
+/// is then offered "Update brain".
+pub const CURRENT_BRAIN_FAMILY: &str = "qwen3";
+
+/// Name of the per-download marker written next to `model.bin`.
+pub const BRAIN_MARKER: &str = "model.json";
+
+/// Classify a download URL into a brain family.
+///
+/// The URL is the only thing the backend knows about *what* it is being
+/// asked to fetch — `useCoachDownload.ts` owns `MODEL_URLS` — so the
+/// family is derived from it at download time and frozen into the marker.
+/// Reading it back later from the GGUF metadata would be more principled
+/// but needs the model loaded, which is exactly what the Settings screen
+/// cannot do on a build without `coach-llm`.
+pub fn family_for_url(url: &str) -> &'static str {
+    if url.to_ascii_lowercase().contains("qwen3") {
+        CURRENT_BRAIN_FAMILY
+    } else {
+        "legacy"
+    }
+}
+
+/// Minimum plausible size for a downloaded brain, per tier.
+///
+/// Same defence as `verify_voice_onnx`: HuggingFace behind a corporate
+/// proxy, a VPN with TLS interception, or a CDN having a bad day will
+/// happily serve a few KB of HTML with a 200, and curl saves it as a
+/// completed download. A brain that small then fails at load time with an
+/// opaque llama.cpp error instead of at install time with a useful one.
+/// Floors are set well under the real assets (Standard 2.50 GB / Studio
+/// 5.03 GB as of 2026-09-02) so a future re-quantisation does not trip
+/// them.
+pub fn min_brain_bytes(tier: &str) -> u64 {
+    match tier {
+        "full" => 4 * 1024 * 1024 * 1024,
+        // "standard" and anything unrecognised
+        _ => 2 * 1024 * 1024 * 1024,
+    }
+}
+
+/// Total physical RAM in MB, or 0 when the platform query fails.
+///
+/// ROADMAP §3 offers the Studio tier only at ≥ 16 GB. Implemented against
+/// the OS directly rather than pulling in `sysinfo`: all three platforms
+/// are two lines, and the crate would add ~15 transitive dependencies to
+/// answer one question asked once per Settings render.
+pub fn system_memory_mb() -> u64 {
+    #[cfg(windows)]
+    {
+        use windows_sys::Win32::System::SystemInformation::{
+            GlobalMemoryStatusEx, MEMORYSTATUSEX,
+        };
+        // SAFETY: `GlobalMemoryStatusEx` fills a caller-owned struct whose
+        // `dwLength` we set to its own size, as the API requires.
+        let mut status: MEMORYSTATUSEX = unsafe { std::mem::zeroed() };
+        status.dwLength = std::mem::size_of::<MEMORYSTATUSEX>() as u32;
+        if unsafe { GlobalMemoryStatusEx(&mut status) } != 0 {
+            return status.ullTotalPhys / (1024 * 1024);
+        }
+        0
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        let mut bytes: u64 = 0;
+        let mut len = std::mem::size_of::<u64>();
+        let name = c"hw.memsize";
+        // SAFETY: `sysctlbyname` writes at most `len` bytes into `bytes`.
+        let rc = unsafe {
+            libc::sysctlbyname(
+                name.as_ptr(),
+                std::ptr::addr_of_mut!(bytes).cast(),
+                &mut len,
+                std::ptr::null_mut(),
+                0,
+            )
+        };
+        if rc == 0 {
+            return bytes / (1024 * 1024);
+        }
+        0
+    }
+
+    #[cfg(all(unix, not(target_os = "macos")))]
+    {
+        // /proc/meminfo rather than `libc::sysinfo` — no unsafe, and the
+        // `MemTotal:` line is stable across every kernel Yames supports.
+        std::fs::read_to_string("/proc/meminfo")
+            .ok()
+            .and_then(|text| parse_meminfo_total_kb(&text))
+            .map(|kb| kb / 1024)
+            .unwrap_or(0)
+    }
+
+    #[cfg(not(any(windows, unix)))]
+    {
+        0
+    }
+}
+
+/// Pull `MemTotal:` (in kB) out of /proc/meminfo. Split out so it is
+/// testable on any host, not just Linux.
+#[cfg_attr(not(all(unix, not(target_os = "macos"))), allow(dead_code))]
+fn parse_meminfo_total_kb(text: &str) -> Option<u64> {
+    text.lines()
+        .find(|l| l.starts_with("MemTotal:"))?
+        .split_whitespace()
+        .nth(1)?
+        .parse::<u64>()
+        .ok()
 }
 
 /// Get the models directory inside the app data dir.
@@ -52,6 +175,14 @@ pub fn check_model_status(app: &AppHandle) -> Result<ModelStatus, String> {
     let brain_ready = brain_dir.join("model.bin").exists();
     let brain_tier = if brain_ready {
         std::fs::read_to_string(brain_dir.join("tier")).ok()
+    } else {
+        None
+    };
+    // Family marker. Absent marker = installed before T04 = legacy, which
+    // is the whole migration signal: the Phi-3-style prompt those models
+    // want is gone, so their output would be full of template artifacts.
+    let brain_family = if brain_ready {
+        Some(read_brain_family(&brain_dir).unwrap_or_else(|| "legacy".to_string()))
     } else {
         None
     };
@@ -90,10 +221,62 @@ pub fn check_model_status(app: &AppHandle) -> Result<ModelStatus, String> {
     Ok(ModelStatus {
         brain_ready,
         brain_tier,
+        brain_family,
         brain_size_bytes,
         voice_ready,
         voice_size_bytes,
     })
+}
+
+/// Read the `family` field out of the brain marker, if there is one.
+/// A marker that exists but cannot be parsed is treated as no marker at
+/// all — a corrupt marker should offer the user an update, not crash the
+/// Settings screen.
+fn read_brain_family(brain_dir: &std::path::Path) -> Option<String> {
+    read_brain_marker(brain_dir)?
+        .get("family")?
+        .as_str()
+        .map(std::string::ToString::to_string)
+}
+
+fn read_brain_marker(brain_dir: &std::path::Path) -> Option<serde_json::Value> {
+    let raw = std::fs::read_to_string(brain_dir.join(BRAIN_MARKER)).ok()?;
+    serde_json::from_str(&raw).ok()
+}
+
+/// True when the brain already on disk is the exact thing this download
+/// was asked for — same family AND same tier — so the multi-gigabyte
+/// fetch can be skipped.
+///
+/// The tier half matters as much as the family half: before T04 this
+/// check was just `model.bin exists`, so a user on Standard who picked
+/// Studio got the tier file rewritten to `full` and no new weights. The
+/// UI then advertised Studio while the Standard model stayed resident.
+fn brain_matches_request(brain_dir: &std::path::Path, url: &str, tier: &str) -> bool {
+    let Some(marker) = read_brain_marker(brain_dir) else {
+        return false;
+    };
+    marker.get("family").and_then(serde_json::Value::as_str) == Some(family_for_url(url))
+        && marker.get("tier").and_then(serde_json::Value::as_str) == Some(tier)
+}
+
+/// Write the marker that records what was just installed. Best-effort:
+/// a failure here only costs the user a spurious "Update brain" prompt,
+/// so it is logged rather than failing an otherwise-good download.
+fn write_brain_marker(dir: &std::path::Path, url: &str, tier: &str, bytes: u64) {
+    let marker = serde_json::json!({
+        "family": family_for_url(url),
+        "tier": tier,
+        "url": url,
+        "bytes": bytes,
+    });
+    let path = dir.join(BRAIN_MARKER);
+    if let Err(e) = std::fs::write(&path, marker.to_string()) {
+        eprintln!(
+            "[yames] Failed to write brain marker at {}: {e}",
+            path.display(),
+        );
+    }
 }
 
 /// Write model data from the frontend to disk.
@@ -189,9 +372,17 @@ pub fn start_download(
             }
         };
 
-        // Step 1: Download the brain model (skip if already present)
-        let brain_path = models_dir.join(&component).join(&filename);
-        if !brain_path.exists() {
+        // Step 1: Download the brain model.
+        //
+        // Skipped only when what is on disk is exactly what was asked for
+        // — right family, right tier, per the `model.json` marker. That
+        // covers both T04 migrations (a legacy Qwen2.5/Phi-3.5 install has
+        // no marker, so it re-downloads and "Update brain" actually
+        // updates) and the tier switch that used to silently no-op.
+        let component_dir = models_dir.join(&component);
+        let brain_path = component_dir.join(&filename);
+        let up_to_date = brain_path.exists() && brain_matches_request(&component_dir, &url, &tier);
+        if !up_to_date {
             let result = do_download(&app, &url, &component, &filename, &tier, &cancel, "brain");
             if let Err(e) = result {
                 let event = if e == "cancelled" {
@@ -203,8 +394,9 @@ pub fn start_download(
                 return;
             }
         } else {
-            // Brain exists, just ensure tier marker is correct
-            let tier_path = models_dir.join(&component).join("tier");
+            // Already the right model — just make sure the legacy `tier`
+            // file agrees with the marker.
+            let tier_path = component_dir.join("tier");
             let _ = std::fs::write(&tier_path, &tier);
         }
 
@@ -685,6 +877,22 @@ fn do_download(
     let path = dir.join(filename);
     curl_download(app, url, &path, cancel, label)?;
 
+    // Size-gate the brain the same way voices are gated. A truncated or
+    // proxy-substituted file is removed here so the next attempt starts
+    // clean instead of leaving a permanently unloadable model.bin behind.
+    if component == "brain" {
+        let bytes = std::fs::metadata(&path).map(|m| m.len()).unwrap_or(0);
+        let floor = min_brain_bytes(tier);
+        if bytes < floor {
+            let _ = std::fs::remove_file(&path);
+            return Err(format!(
+                "downloaded model is only {bytes} bytes (expected at least {} GB) — the file may be corrupted or intercepted by a proxy",
+                floor / (1024 * 1024 * 1024),
+            ));
+        }
+        write_brain_marker(&dir, url, tier, bytes);
+    }
+
     // Write the tier marker file
     let tier_path = dir.join("tier");
     std::fs::write(&tier_path, tier).map_err(|e| format!("Failed to write tier: {e}"))?;
@@ -1059,6 +1267,116 @@ fn verify_voice_json(path: &std::path::Path) -> Result<(), String> {
         ))
     } else {
         Ok(())
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Brain family / marker tests (T04)
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod brain_family_tests {
+    use super::*;
+
+    #[test]
+    fn qwen3_urls_are_the_current_family() {
+        assert_eq!(
+            family_for_url(
+                "https://huggingface.co/Qwen/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q4_K_M.gguf"
+            ),
+            CURRENT_BRAIN_FAMILY
+        );
+        assert_eq!(
+            family_for_url(
+                "https://huggingface.co/bartowski/Qwen_Qwen3-8B-GGUF/resolve/main/Qwen_Qwen3-8B-Q4_K_M.gguf"
+            ),
+            CURRENT_BRAIN_FAMILY
+        );
+    }
+
+    #[test]
+    fn the_pre_t04_urls_are_legacy() {
+        assert_eq!(
+            family_for_url(
+                "https://huggingface.co/bartowski/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/Qwen2.5-1.5B-Instruct-Q4_K_M.gguf"
+            ),
+            "legacy"
+        );
+        assert_eq!(
+            family_for_url(
+                "https://huggingface.co/bartowski/Phi-3.5-mini-instruct-GGUF/resolve/main/Phi-3.5-mini-instruct-Q4_K_M.gguf"
+            ),
+            "legacy"
+        );
+    }
+
+    fn temp_dir(tag: &str) -> PathBuf {
+        let dir = std::env::temp_dir().join(format!("yames-brain-{tag}-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        dir
+    }
+
+    #[test]
+    fn a_missing_marker_reads_as_no_family() {
+        let dir = temp_dir("nomarker");
+        assert_eq!(read_brain_family(&dir), None);
+        assert!(!brain_matches_request(
+            &dir,
+            "https://x/Qwen3-4B.gguf",
+            "standard"
+        ));
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_written_marker_round_trips() {
+        let dir = temp_dir("roundtrip");
+        let url = "https://huggingface.co/Qwen/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q4_K_M.gguf";
+        write_brain_marker(&dir, url, "standard", 2_497_280_256);
+        assert_eq!(
+            read_brain_family(&dir).as_deref(),
+            Some(CURRENT_BRAIN_FAMILY)
+        );
+        assert!(brain_matches_request(&dir, url, "standard"));
+        // Same family, different tier — must NOT be treated as up to date,
+        // otherwise picking Studio would only rewrite the tier file.
+        assert!(!brain_matches_request(&dir, url, "full"));
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_corrupt_marker_is_treated_as_legacy() {
+        let dir = temp_dir("corrupt");
+        std::fs::write(dir.join(BRAIN_MARKER), b"<html>not json</html>").unwrap();
+        assert_eq!(read_brain_family(&dir), None);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn size_floors_track_the_tier() {
+        assert_eq!(min_brain_bytes("standard"), 2 * 1024 * 1024 * 1024);
+        assert_eq!(min_brain_bytes("full"), 4 * 1024 * 1024 * 1024);
+        // Unknown tiers fall back to the lower floor rather than blocking.
+        assert_eq!(min_brain_bytes("mystery"), 2 * 1024 * 1024 * 1024);
+        // The real assets clear their floors (sizes measured 2026-09-02).
+        assert!(2_497_280_256_u64 > min_brain_bytes("standard"));
+        assert!(5_027_783_488_u64 > min_brain_bytes("full"));
+    }
+
+    #[test]
+    fn meminfo_total_is_parsed() {
+        let sample = "MemTotal:       32791612 kB\nMemFree:         1234 kB\n";
+        assert_eq!(parse_meminfo_total_kb(sample), Some(32_791_612));
+        assert_eq!(parse_meminfo_total_kb("MemFree: 12 kB\n"), None);
+    }
+
+    #[test]
+    fn system_memory_is_plausible_on_this_host() {
+        // 0 means "the platform query failed"; every machine Yames builds
+        // on has at least 1 GB, so a real answer is > 1024 MB.
+        let mb = system_memory_mb();
+        assert!(mb == 0 || mb > 1024, "implausible system memory: {mb} MB");
     }
 }
 

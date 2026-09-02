@@ -74,10 +74,11 @@ core-foundation-sys = "0.8"
 
 # Thread-priority control for the LLM inference worker (ROADMAP §3: the
 # generation thread runs *below normal* so it can never starve the audio
-# path). Both crates are already in the dependency graph transitively, so
-# declaring them adds no new downloads.
+# path) and the total-RAM query behind the Studio tier gate (§3: Studio is
+# only offered at >= 16 GB). Both crates are already in the dependency
+# graph transitively, so declaring them adds no new downloads.
 [target.'cfg(windows)'.dependencies]
-windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_System_Threading"] }
+windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_System_Threading", "Win32_System_SystemInformation"] }
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"
