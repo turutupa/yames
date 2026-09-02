@@ -153,6 +153,7 @@
       "countIn": "{{beats}} 후 시작",
       "playing": "{{total}}박 중 {{beat}}박",
       "scoring": "채점 중…",
+      "cancel": "취소",
       "dotsLabel": "당신의 여덟 박",
       "nothing": "아무것도 들리지 않았습니다. 입력 레벨을 확인하세요.",
       "backToInput": "입력 설정으로",

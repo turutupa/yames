@@ -153,6 +153,7 @@
       "countIn": "Start za {{beats}}",
       "playing": "Uderzenie {{beat}} z {{total}}",
       "scoring": "Ocenianie…",
+      "cancel": "Anuluj",
       "dotsLabel": "Twoje osiem uderzeń",
       "nothing": "Nic nie usłyszałem — sprawdź poziom wejścia.",
       "backToInput": "Wróć do wejścia",

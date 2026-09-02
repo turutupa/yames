@@ -153,6 +153,7 @@
       "countIn": "Départ dans {{beats}}",
       "playing": "Temps {{beat}} sur {{total}}",
       "scoring": "Analyse…",
+      "cancel": "Annuler",
       "dotsLabel": "Tes huit temps",
       "nothing": "Rien entendu — vérifie le niveau d'entrée.",
       "backToInput": "Retour à l'entrée",

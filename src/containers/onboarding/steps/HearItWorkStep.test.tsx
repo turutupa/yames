@@ -315,6 +315,22 @@ describe("W6 — when nothing was heard", () => {
   });
 });
 
+describe("W6 — cancelling", () => {
+  it("hands the stream back and returns to the button", async () => {
+    const { setListening, beat } = mount();
+    await start();
+    await beat(feedback(0, "good"));
+
+    await act(async () => {
+      screen.getByTestId("hiw-cancel").click();
+    });
+    expect(setListening.mock.calls).toEqual([[true], [false]]);
+    expect(screen.getByTestId("hiw-start")).toBeInTheDocument();
+    expect(screen.queryByTestId("hiw-result")).toBeNull();
+    expect(screen.queryByTestId("hiw-nothing")).toBeNull();
+  });
+});
+
 describe("W6 — starting the take is not navigation", () => {
   it("pressing Start plays; only Next advances", async () => {
     const { dispatch } = mount();

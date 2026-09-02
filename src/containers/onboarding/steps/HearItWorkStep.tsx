@@ -34,6 +34,12 @@ import {
 import type { BeatFeedback, SessionReport } from "../../../types";
 import { useWizardEnv } from "../WizardContext";
 import type { WizardStepProps } from "./types";
+// `ScoreRing` centres its number with `.eval-ring-score`, which lives here.
+// Imported by the step rather than inherited from whichever container happens
+// to have imported it first — without it the score falls out of the ring.
+import "../../../styles/evaluation-panel.css";
+// `DriftMeter`'s own styles, for the same reason.
+import "../../../styles/evaluation.css";
 
 /** Beats of count-in before the take. The click is already at 80 BPM (W0). */
 export const COUNT_IN_BEATS = 4;
@@ -118,6 +124,19 @@ export function HearItWorkStep({ onBack, isActive }: WizardStepProps) {
     setPhase("countin");
     setListeningRef.current(true);
   }, [beatTick]);
+
+  /**
+   * Back to the button. The take depends on beats arriving from the engine,
+   * and an engine that never starts (a click the user muted, an audio device
+   * that vanished) would otherwise leave the step counting in forever with no
+   * way to try again.
+   */
+  const cancel = useCallback(() => {
+    finishingRef.current = true;
+    setListeningRef.current(false);
+    setDots([]);
+    setPhase("idle");
+  }, []);
 
   const finish = useCallback(async () => {
     if (finishingRef.current) return;
@@ -255,6 +274,17 @@ export function HearItWorkStep({ onBack, isActive }: WizardStepProps) {
               total: TAKE_BEATS,
             })}
           </p>
+        )}
+
+        {running && (
+          <button
+            type="button"
+            className="onboarding-btn onboarding-btn-ghost"
+            onClick={cancel}
+            data-testid="hiw-cancel"
+          >
+            {t("onboarding.hearItWork.cancel")}
+          </button>
         )}
 
         {phase === "scoring" && (

@@ -153,6 +153,7 @@
       "countIn": "Bắt đầu sau {{beats}}",
       "playing": "Phách {{beat}} / {{total}}",
       "scoring": "Đang chấm…",
+      "cancel": "Hủy",
       "dotsLabel": "Tám phách của bạn",
       "nothing": "Không nghe thấy gì — kiểm tra mức tín hiệu đầu vào.",
       "backToInput": "Quay lại phần đầu vào",

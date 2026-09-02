@@ -153,6 +153,7 @@
       "countIn": "Empieza en {{beats}}",
       "playing": "Pulso {{beat}} de {{total}}",
       "scoring": "Puntuando…",
+      "cancel": "Cancelar",
       "dotsLabel": "Tus ocho pulsos",
       "nothing": "No se ha oído nada: revisa el nivel de entrada.",
       "backToInput": "Volver a la entrada",

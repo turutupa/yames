@@ -153,6 +153,7 @@
       "countIn": "Si parte tra {{beats}}",
       "playing": "Battito {{beat}} di {{total}}",
       "scoring": "Valutazione…",
+      "cancel": "Annulla",
       "dotsLabel": "I tuoi otto battiti",
       "nothing": "Non ho sentito niente: controlla il livello di ingresso.",
       "backToInput": "Torna all'ingresso",

@@ -153,6 +153,7 @@
       "countIn": "あと {{beats}}",
       "playing": "{{total}} 拍中 {{beat}} 拍目",
       "scoring": "採点中…",
+      "cancel": "キャンセル",
       "dotsLabel": "あなたの 8 拍",
       "nothing": "何も聞こえませんでした。入力レベルを確認してください。",
       "backToInput": "入力設定に戻る",

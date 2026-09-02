@@ -153,6 +153,7 @@
       "countIn": "{{beats}} 拍后开始",
       "playing": "第 {{beat}} / {{total}} 拍",
       "scoring": "评分中…",
+      "cancel": "取消",
       "dotsLabel": "你的八拍",
       "nothing": "什么都没听到——检查一下输入电平。",
       "backToInput": "回到输入设置",

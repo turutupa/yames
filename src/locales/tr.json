@@ -153,6 +153,7 @@
       "countIn": "{{beats}} sonra başlıyor",
       "playing": "Vuruş {{beat}} / {{total}}",
       "scoring": "Puanlanıyor…",
+      "cancel": "İptal",
       "dotsLabel": "Sekiz vuruşun",
       "nothing": "Hiçbir şey duyulmadı — giriş seviyesini kontrol et.",
       "backToInput": "Giriş ayarına dön",

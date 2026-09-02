@@ -153,6 +153,7 @@
       "countIn": "Start in {{beats}}",
       "playing": "Schlag {{beat}} von {{total}}",
       "scoring": "Auswertung…",
+      "cancel": "Abbrechen",
       "dotsLabel": "Deine acht Schläge",
       "nothing": "Nichts gehört — prüf den Eingangspegel.",
       "backToInput": "Zurück zum Eingang",

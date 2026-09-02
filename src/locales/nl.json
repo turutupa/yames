@@ -153,6 +153,7 @@
       "countIn": "Start over {{beats}}",
       "playing": "Tel {{beat}} van {{total}}",
       "scoring": "Beoordelen…",
+      "cancel": "Annuleren",
       "dotsLabel": "Jouw acht tellen",
       "nothing": "Niets gehoord — controleer het ingangsniveau.",
       "backToInput": "Terug naar de ingang",

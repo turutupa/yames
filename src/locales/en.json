@@ -153,6 +153,7 @@
       "countIn": "Starting in {{beats}}",
       "playing": "Beat {{beat}} of {{total}}",
       "scoring": "Scoring…",
+      "cancel": "Cancel",
       "dotsLabel": "Your eight beats",
       "nothing": "Didn't hear anything — check the input level.",
       "backToInput": "Back to input setup",
