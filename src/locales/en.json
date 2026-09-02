@@ -96,6 +96,38 @@
         "mapped": "Play/Stop → {{button}}"
       }
     },
+    "coach": {
+      "title": "Practice coach",
+      "what1": "The coach listens through your audio input and scores how your timing sits against the click.",
+      "what2": "After each run it writes a short report — and, with a brain downloaded, explains what to work on next.",
+      "privacy": "Everything runs on this machine. Your audio never leaves it, and release builds never record it.",
+      "recommended": "Recommended",
+      "timing": {
+        "title": "Timing feedback only",
+        "desc": "No download. You still get the live dots, the timing score and your session history."
+      },
+      "standard": {
+        "title": "Standard brain",
+        "desc": "Qwen3 4B · ~2.5 GB download · ~4 GB RAM while running. Runs on the CPU if you have no GPU."
+      },
+      "studio": {
+        "title": "Studio brain",
+        "desc": "Qwen3 8B · ~5 GB download · ~8 GB RAM. Richer feedback and practice plans."
+      },
+      "studioNeedsRam": "Studio needs at least 16 GB of RAM — this machine has {{gb}} GB.",
+      "reasonNoLlm": "This build can't run a model, so timing feedback is the honest choice here.",
+      "reasonLowMemory": "This machine has {{gb}} GB of RAM — not enough to run a brain comfortably.",
+      "reasonInstalled": "Already downloaded on this machine — nothing to fetch.",
+      "downloadNote": "The download starts when you continue and keeps running in the background.",
+      "downloading": "Downloading the coach brain",
+      "tryListening": {
+        "label": "Try the listening feature anyway",
+        "hint": "Two short steps: pick your input, play eight beats, and see your timing."
+      },
+      "voiceReady": "Coach voices are ready.",
+      "voicePick": "Pick a voice",
+      "voiceDismiss": "Dismiss"
+    },
     "ready": {
       "title": "You're ready",
       "subtitle": "Change anything here, or later in Settings.",

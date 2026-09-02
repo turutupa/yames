@@ -96,6 +96,38 @@
         "mapped": "Avvia/Ferma → {{button}}"
       }
     },
+    "coach": {
+      "title": "Coach di studio",
+      "what1": "Il coach ascolta dal tuo ingresso audio e valuta come il tuo timing si appoggia al click.",
+      "what2": "Dopo ogni passaggio scrive un breve report e, con un modello scaricato, spiega su cosa lavorare.",
+      "privacy": "Tutto gira su questa macchina. Il tuo audio non esce mai e le build di rilascio non lo registrano.",
+      "recommended": "Consigliato",
+      "timing": {
+        "title": "Solo feedback sul timing",
+        "desc": "Nessun download. Restano i punti in tempo reale, il punteggio di timing e lo storico."
+      },
+      "standard": {
+        "title": "Modello standard",
+        "desc": "Qwen3 4B · ~2,5 GB di download · ~4 GB di RAM in esecuzione. Va su CPU se non hai GPU."
+      },
+      "studio": {
+        "title": "Modello Studio",
+        "desc": "Qwen3 8B · ~5 GB di download · ~8 GB di RAM. Feedback più ricco e piani di studio."
+      },
+      "studioNeedsRam": "Studio richiede almeno 16 GB di RAM: questa macchina ne ha {{gb}}.",
+      "reasonNoLlm": "Questa build non può eseguire un modello: il feedback sul timing è la scelta onesta.",
+      "reasonLowMemory": "Questa macchina ha {{gb}} GB di RAM: troppo poco per far girare bene un modello.",
+      "reasonInstalled": "Già scaricato su questa macchina: non serve altro.",
+      "downloadNote": "Il download parte quando continui e prosegue in background.",
+      "downloading": "Download del modello del coach",
+      "tryListening": {
+        "label": "Prova comunque la funzione di ascolto",
+        "hint": "Due passaggi brevi: scegli l'ingresso, suona otto movimenti, guarda il tuo timing."
+      },
+      "voiceReady": "Le voci del coach sono pronte.",
+      "voicePick": "Scegli una voce",
+      "voiceDismiss": "Chiudi"
+    },
     "ready": {
       "title": "Tutto pronto",
       "subtitle": "Cambia quello che vuoi qui, o più tardi nelle Impostazioni.",

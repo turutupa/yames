@@ -96,6 +96,38 @@
         "mapped": "Reproducir/Detener → {{button}}"
       }
     },
+    "coach": {
+      "title": "Entrenador de práctica",
+      "what1": "El entrenador escucha por tu entrada de audio y puntúa cómo encaja tu timing con el clic.",
+      "what2": "Tras cada toma escribe un informe breve y, con un modelo descargado, explica qué trabajar después.",
+      "privacy": "Todo funciona en este equipo. Tu audio nunca sale de él y las versiones publicadas no lo graban.",
+      "recommended": "Recomendado",
+      "timing": {
+        "title": "Solo feedback de timing",
+        "desc": "Sin descarga. Sigues teniendo los puntos en vivo, la puntuación de timing y tu historial."
+      },
+      "standard": {
+        "title": "Modelo estándar",
+        "desc": "Qwen3 4B · ~2,5 GB de descarga · ~4 GB de RAM en uso. Funciona en CPU si no tienes GPU."
+      },
+      "studio": {
+        "title": "Modelo Studio",
+        "desc": "Qwen3 8B · ~5 GB de descarga · ~8 GB de RAM. Feedback más rico y planes de práctica."
+      },
+      "studioNeedsRam": "Studio necesita al menos 16 GB de RAM; este equipo tiene {{gb}} GB.",
+      "reasonNoLlm": "Esta compilación no puede ejecutar un modelo, así que el feedback de timing es la opción honesta.",
+      "reasonLowMemory": "Este equipo tiene {{gb}} GB de RAM: no bastan para mover un modelo con soltura.",
+      "reasonInstalled": "Ya está descargado en este equipo; no hay nada que bajar.",
+      "downloadNote": "La descarga empieza al continuar y sigue en segundo plano.",
+      "downloading": "Descargando el modelo del entrenador",
+      "tryListening": {
+        "label": "Probar la función de escucha de todos modos",
+        "hint": "Dos pasos cortos: elige la entrada, toca ocho pulsos y mira tu timing."
+      },
+      "voiceReady": "Las voces del entrenador están listas.",
+      "voicePick": "Elegir voz",
+      "voiceDismiss": "Descartar"
+    },
     "ready": {
       "title": "Todo listo",
       "subtitle": "Cambia lo que quieras aquí o luego en Ajustes.",

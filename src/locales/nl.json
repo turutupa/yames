@@ -96,6 +96,38 @@
         "mapped": "Afspelen/Stoppen → {{button}}"
       }
     },
+    "coach": {
+      "title": "Oefencoach",
+      "what1": "De coach luistert mee via je audio-ingang en beoordeelt hoe je timing op de klik ligt.",
+      "what2": "Na elke run schrijft hij een kort verslag — met een gedownload model legt hij ook uit wat je hierna kunt oefenen.",
+      "privacy": "Alles draait op deze computer. Je audio verlaat hem nooit en releasebuilds nemen niets op.",
+      "recommended": "Aanbevolen",
+      "timing": {
+        "title": "Alleen timingfeedback",
+        "desc": "Geen download. Je houdt de live stippen, de timingscore en je sessiegeschiedenis."
+      },
+      "standard": {
+        "title": "Standaardmodel",
+        "desc": "Qwen3 4B · ~2,5 GB download · ~4 GB RAM tijdens gebruik. Draait op de CPU als je geen GPU hebt."
+      },
+      "studio": {
+        "title": "Studio-model",
+        "desc": "Qwen3 8B · ~5 GB download · ~8 GB RAM. Rijkere feedback en oefenplannen."
+      },
+      "studioNeedsRam": "Studio heeft minstens 16 GB RAM nodig — deze computer heeft {{gb}} GB.",
+      "reasonNoLlm": "Deze build kan geen model draaien, dus timingfeedback is hier de eerlijke keuze.",
+      "reasonLowMemory": "Deze computer heeft {{gb}} GB RAM — te weinig om een model comfortabel te draaien.",
+      "reasonInstalled": "Staat al op deze computer — niets op te halen.",
+      "downloadNote": "De download begint zodra je verdergaat en loopt op de achtergrond door.",
+      "downloading": "Coachmodel downloaden",
+      "tryListening": {
+        "label": "Toch de luisterfunctie proberen",
+        "hint": "Twee korte stappen: kies je ingang, speel acht tellen, bekijk je timing."
+      },
+      "voiceReady": "De stemmen van de coach staan klaar.",
+      "voicePick": "Kies een stem",
+      "voiceDismiss": "Sluiten"
+    },
     "ready": {
       "title": "Je bent klaar",
       "subtitle": "Wijzig hier iets, of later in Instellingen.",

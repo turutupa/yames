@@ -33,6 +33,21 @@
  * A step with nothing to stage can ignore both: Next stays enabled.
  * Re-entering a step (W7's summary rows, the "Finish setup" chip) must
  * preselect the setting that is live today rather than starting blank.
+ *
+ * ## Machine-context fields a step may set (`setMachineContext`)
+ *
+ * The shared `OnboardingContext` is how one step tells a later step's
+ * `isEnabled` what to do. The fields in use today:
+ *
+ *   `coachTier`       W4 → the tier the user picked ("off" for timing-only).
+ *                     W5/W6 are mandatory when it is not "off".
+ *   `tryListening`    W4 → a timing-only user opted into the optional
+ *                     "Try the listening feature" branch (plan decision 3),
+ *                     so W5/W6 appear for them anyway. Intent, not outcome.
+ *   `inputConfigured` W5 → an input was actually set up and produced signal;
+ *                     W6 gates on it so "hear it work" is never a fake.
+ *
+ * Both W4 fields are committed on Next, never on selection.
  */
 import type { ComponentType } from "react";
 import type { OnboardingContext, StepId } from "../onboardingMachine";

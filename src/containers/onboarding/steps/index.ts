@@ -15,6 +15,7 @@ import { WelcomeStep } from "./WelcomeStep";
 import { InstrumentStep } from "./InstrumentStep";
 import { SoundLookStep } from "./SoundLookStep";
 import { HandsFreeStep } from "./HandsFreeStep";
+import { CoachStep } from "./CoachStep";
 import { ReadyStep } from "./ReadyStep";
 
 export const ONBOARDING_STEPS: WizardStepDef[] = [
@@ -22,11 +23,15 @@ export const ONBOARDING_STEPS: WizardStepDef[] = [
   { id: "instrument", Component: InstrumentStep },
   { id: "sound-look", Component: SoundLookStep },
   { id: "hands-free", Component: HandsFreeStep },
-  // O4: { id: "coach", Component: CoachStep },
+  { id: "coach", Component: CoachStep },
   // O5: { id: "audio-input", Component: AudioInputStep,
-  //        isEnabled: (ctx) => ctx.coachTier !== "off" || ctx.inputConfigured === true },
+  //        isEnabled: (ctx) =>
+  //          (ctx.coachTier ?? "off") !== "off" || ctx.tryListening === true },
   // O5: { id: "hear-it-work", Component: HearItWorkStep,
   //        isEnabled: (ctx) => ctx.inputConfigured === true },
+  //   `tryListening` is W4's optional branch for timing-only users (plan
+  //   decision 3). `coachTier` is undefined until W4 commits — a run that
+  //   skipped W4 must read as "off", hence the `??`.
   { id: "ready", Component: ReadyStep },
 ];
 

@@ -96,6 +96,38 @@
         "mapped": "播放／停止 → {{button}}"
       }
     },
+    "coach": {
+      "title": "練習教練",
+      "what1": "教練透過音訊輸入聆聽，並為你的拍點與節拍器的貼合程度評分。",
+      "what2": "每段結束後會寫一份簡短報告；下載模型後還會說明接下來該練什麼。",
+      "privacy": "一切都在本機執行。你的音訊不會離開這台電腦，正式版也不會錄音。",
+      "recommended": "建議",
+      "timing": {
+        "title": "僅拍點回饋",
+        "desc": "不用下載。即時圓點、拍點評分與練習紀錄照常可用。"
+      },
+      "standard": {
+        "title": "標準模型",
+        "desc": "Qwen3 4B · 約 2.5 GB 下載 · 執行時約 4 GB 記憶體。沒有 GPU 也能在 CPU 上執行。"
+      },
+      "studio": {
+        "title": "Studio 模型",
+        "desc": "Qwen3 8B · 約 5 GB 下載 · 約 8 GB 記憶體。更細緻的講評與練習計畫。"
+      },
+      "studioNeedsRam": "Studio 至少需要 16 GB 記憶體，本機只有 {{gb}} GB。",
+      "reasonNoLlm": "此版本無法執行模型，因此這裡如實建議僅拍點回饋。",
+      "reasonLowMemory": "本機記憶體為 {{gb}} GB，不足以順暢執行模型。",
+      "reasonInstalled": "本機已下載，不需要再取得。",
+      "downloadNote": "繼續時開始下載，並在背景持續進行。",
+      "downloading": "正在下載教練模型",
+      "tryListening": {
+        "label": "仍然試試聆聽功能",
+        "hint": "兩步就好：選擇輸入、彈八拍、看看你的拍點。"
+      },
+      "voiceReady": "教練語音已就緒。",
+      "voicePick": "選擇語音",
+      "voiceDismiss": "關閉"
+    },
     "ready": {
       "title": "準備就緒",
       "subtitle": "可以在這裡修改，也可以稍後在設定中修改。",

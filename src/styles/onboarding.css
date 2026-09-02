@@ -499,6 +499,189 @@ button.onboarding-hf-device:hover {
 }
 
 
+/* ---- W4 practice coach ----
+   Three full-width option cards (they carry a paragraph each, so the W2 grid
+   would squeeze them), plus the privacy line, the recommendation reason and
+   the optional "try the listening feature" branch. */
+.onboarding-coach-privacy {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--text-muted, var(--text-secondary));
+}
+
+.onboarding-coach-card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 12px 14px;
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-card);
+  font-family: inherit;
+  color: var(--text-primary);
+  transition:
+    border-color 120ms ease,
+    background 120ms ease;
+}
+
+.onboarding-coach-card:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.onboarding-coach-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.onboarding-coach-card.selected {
+  border-color: var(--accent);
+  background: var(--accent-subtle, var(--bg-card));
+}
+
+.onboarding-coach-card:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.onboarding-coach-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.onboarding-coach-card-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.onboarding-coach-badge {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+
+.onboarding-coach-card-desc,
+.onboarding-coach-card-reason,
+.onboarding-coach-reason,
+.onboarding-coach-note {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.onboarding-coach-card-reason {
+  color: var(--text-muted, var(--text-secondary));
+  font-style: italic;
+}
+
+.onboarding-coach-try {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.onboarding-coach-try input {
+  margin-top: 2px;
+  accent-color: var(--accent);
+}
+
+.onboarding-coach-try-label,
+.onboarding-coach-try-hint {
+  display: block;
+  font-size: 0.75rem;
+}
+
+.onboarding-coach-try-label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.onboarding-coach-try-hint {
+  color: var(--text-secondary);
+}
+
+/* The background download, as a hairline above the footer. It is informative
+   only — nothing in the wizard waits for it, and it stays put while the steps
+   change underneath. */
+.onboarding-download {
+  flex: 0 0 auto;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.onboarding-download-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 220ms ease;
+}
+
+/* ---- "Pick a voice" toast (O4) ----
+   Same pill as the tour offer; it appears when the download W4 started
+   finishes, long after the wizard has closed. */
+.coach-voice-offer {
+  position: absolute;
+  top: 44px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100vw - 24px);
+  padding: 6px 8px 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-card);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.32);
+}
+
+.coach-voice-offer-text {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.coach-voice-offer-accept,
+.coach-voice-offer-dismiss {
+  flex: 0 0 auto;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+  padding: 5px 10px;
+  transition: background 120ms ease;
+}
+
+.coach-voice-offer-accept:hover {
+  background: var(--accent-subtle);
+}
+
+.coach-voice-offer-dismiss {
+  display: flex;
+  align-items: center;
+  color: var(--text-secondary);
+  padding: 5px 8px;
+}
+
 /* ---- W7 summary ---- */
 .onboarding-summary {
   list-style: none;

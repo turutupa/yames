@@ -96,6 +96,38 @@
         "mapped": "Start/Stopp → {{button}}"
       }
     },
+    "coach": {
+      "title": "Übungscoach",
+      "what1": "Der Coach hört über deinen Audio-Eingang mit und bewertet, wie dein Timing zum Klick sitzt.",
+      "what2": "Nach jedem Durchgang schreibt er einen kurzen Bericht – mit geladenem Modell erklärt er auch, woran du als Nächstes arbeiten solltest.",
+      "privacy": "Alles läuft auf diesem Rechner. Dein Audio verlässt ihn nie, und Release-Builds nehmen nichts auf.",
+      "recommended": "Empfohlen",
+      "timing": {
+        "title": "Nur Timing-Feedback",
+        "desc": "Kein Download. Live-Punkte, Timing-Wertung und Sitzungsverlauf bekommst du trotzdem."
+      },
+      "standard": {
+        "title": "Standard-Modell",
+        "desc": "Qwen3 4B · ~2,5 GB Download · ~4 GB RAM im Betrieb. Läuft auch ohne GPU auf der CPU."
+      },
+      "studio": {
+        "title": "Studio-Modell",
+        "desc": "Qwen3 8B · ~5 GB Download · ~8 GB RAM. Ausführlicheres Feedback und Übungspläne."
+      },
+      "studioNeedsRam": "Studio braucht mindestens 16 GB RAM – dieser Rechner hat {{gb}} GB.",
+      "reasonNoLlm": "Dieser Build kann kein Modell ausführen, deshalb ist Timing-Feedback hier die ehrliche Wahl.",
+      "reasonLowMemory": "Dieser Rechner hat {{gb}} GB RAM – zu wenig, um ein Modell flüssig zu betreiben.",
+      "reasonInstalled": "Bereits auf diesem Rechner geladen – nichts zu holen.",
+      "downloadNote": "Der Download startet beim Weitergehen und läuft im Hintergrund weiter.",
+      "downloading": "Coach-Modell wird geladen",
+      "tryListening": {
+        "label": "Zuhör-Funktion trotzdem ausprobieren",
+        "hint": "Zwei kurze Schritte: Eingang wählen, acht Schläge spielen, Timing sehen."
+      },
+      "voiceReady": "Die Coach-Stimmen sind bereit.",
+      "voicePick": "Stimme wählen",
+      "voiceDismiss": "Schließen"
+    },
     "ready": {
       "title": "Alles bereit",
       "subtitle": "Ändere hier etwas – oder später in den Einstellungen.",

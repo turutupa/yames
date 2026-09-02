@@ -1,5 +1,5 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDrag } from "../../hooks/useDrag";
 import {
@@ -37,10 +37,13 @@ import CoachCard from "../practice-coach/CoachCard";
 import "../../styles/main-window.css";
 import "../../styles/transitions.css";
 import "../../styles/evaluation.css";
-import type { InstrumentId, Preset, Subdivision } from "../../types";
+import type { BrainTier, InstrumentId, ModelTier, Preset, Subdivision } from "../../types";
 import { OnboardingWizard } from "../onboarding/OnboardingWizard";
+import type { WizardCoachEnv } from "../onboarding/WizardContext";
 import { FinishSetupChip } from "../onboarding/FinishSetupChip";
 import { useOnboarding } from "../onboarding/useOnboarding";
+import { CoachVoiceToast } from "../onboarding/CoachVoiceToast";
+import { useVoicePrompt } from "../onboarding/useVoicePrompt";
 import { HintCard } from "../onboarding/hints/HintCard";
 import { useAppHints } from "../onboarding/hints/useAppHints";
 import { markWidgetOpened } from "../onboarding/hints/hintRuntime";
@@ -394,6 +397,53 @@ export function MainWindow() {
     if (themeDetour && view !== "settings") setThemeDetour(false);
   }, [themeDetour, view]);
 
+  // --- W4 coach opt-in (O4) ------------------------------------------------
+  // The wizard drives the app's single `useCoachDownload` instance, exactly
+  // as W3 drives the single `useMidi`: a download started in the wizard is
+  // the one the coach card, Settings and the wizard's own footer bar watch,
+  // and it keeps running after the overlay closes.
+  const wizardCoach: WizardCoachEnv = useMemo(
+    () => ({
+      systemMemoryMb: coach.systemMemoryMb,
+      modelStatus: coach.modelStatus,
+      downloading: coach.modelDownloading,
+      downloadFraction: coach.downloadProgress?.fraction ?? null,
+      startDownload: (tier: ModelTier) => {
+        void coach.handleStartDownload(tier);
+      },
+      setBrainTier: (tier: BrainTier) => {
+        coach.setCoachBrainTier(tier);
+        storeSave("coachBrainTier", tier);
+      },
+    }),
+    [
+      coach.systemMemoryMb,
+      coach.modelStatus,
+      coach.modelDownloading,
+      coach.downloadProgress?.fraction,
+      coach.handleStartDownload,
+      coach.setCoachBrainTier,
+    ],
+  );
+
+  // The voice question W4 leaves open, asked when the voices actually land.
+  const voicePrompt = useVoicePrompt();
+  const openVoiceSettings = useCallback(() => {
+    voicePrompt.accept();
+    setView("settings");
+    // Same triple nudge as the theme detour: `setView` scrolls the pane to
+    // the top on its own timer, so one early scroll gets overwritten.
+    for (const delay of [80, 260, 520]) {
+      setTimeout(
+        () =>
+          document
+            .getElementById("settings-coach")
+            ?.scrollIntoView({ block: "start", behavior: "auto" }),
+        delay,
+      );
+    }
+  }, [voicePrompt, setView]);
+
   /**
    * The wizard closed. Restore the preview click, make sure an instrument is
    * set either way, and land a completed run on the metronome at 80 BPM
@@ -723,6 +773,16 @@ export function MainWindow() {
         <TourOfferToast onAccept={tour.acceptOffer} onDismiss={tour.dismissOffer} />
       )}
 
+      {/* W4 left the voice unchosen on purpose; the download that finished is
+          what makes the question answerable (O4). Never over the wizard or
+          over the Settings page it points at. */}
+      {voicePrompt.visible && view !== "settings" && !onboarding.isOpen && (
+        <CoachVoiceToast
+          onAccept={openVoiceSettings}
+          onDismiss={voicePrompt.dismiss}
+        />
+      )}
+
       {shareOpen && (
         <ShareMenuPopover
           anchorRef={shareBtnRef}
@@ -1036,6 +1096,7 @@ export function MainWindow() {
       hasFootswitch={midi.bindings.length > 0 || Object.keys(footBindings).length > 0}
       midi={midi}
       gamepadBindings={footBindings}
+      coach={wizardCoach}
       alwaysOnTop={state.alwaysOnTop}
       onAlwaysOnTopChange={setAlwaysOnTop}
       startSoftClick={startSoftClick}
