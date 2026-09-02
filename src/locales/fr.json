@@ -115,6 +115,30 @@
       "alwaysOnTop": "Toujours au premier plan",
       "start": "Commencer à jouer",
       "tour": "Faites-moi visiter (30 s)"
+    },
+    "hints": {
+      "dismiss": "Compris",
+      "drillFirstOpen": {
+        "body": "Définis le départ, la cible et le pas. Le mode adaptatif laisse le coach décider."
+      },
+      "presetSuggest": {
+        "body": "Tu reviens souvent à cette configuration. L'enregistrer comme preset ?",
+        "action": "Enregistrer le preset"
+      },
+      "coachAsk": {
+        "body": "Appuie sur ? à tout moment pour interroger le coach là-dessus."
+      },
+      "zenFirst": {
+        "body": "Esc quitte le mode Zen. Les effets sont dans Réglages → Apparence."
+      },
+      "widgetDiscover": {
+        "body": "Essaie le widget flottant (W) par-dessus ton DAW ou tes tablatures.",
+        "action": "Ouvrir le widget"
+      },
+      "midiPlugged": {
+        "body": "Un appareil MIDI est connecté mais rien n'est assigné. Assigner une pédale à Lecture/Arrêt ?",
+        "action": "Ouvrir les raccourcis"
+      }
     }
   },
   "widget": {
@@ -444,7 +468,11 @@
       "drillAutoCollapseHint": "Replier la configuration de la rampe pendant la lecture",
       "runSetupAgain": "Relancer la configuration",
       "runSetupAgainHint": "Rouvrir l'assistant de première utilisation",
-      "runSetupAgainAction": "Ouvrir"
+      "runSetupAgainAction": "Ouvrir",
+      "resetHints": "Réinitialiser les astuces",
+      "resetHintsHint": "Afficher à nouveau les six astuces uniques",
+      "resetHintsAction": "Réinitialiser",
+      "resetHintsDone": "Terminé"
     },
     "devices": {
       "title": "Périphériques",

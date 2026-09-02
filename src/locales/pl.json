@@ -115,6 +115,30 @@
       "alwaysOnTop": "Zawsze na wierzchu",
       "start": "Zacznij ćwiczyć",
       "tour": "Oprowadź mnie (30 s)"
+    },
+    "hints": {
+      "dismiss": "Jasne",
+      "drillFirstOpen": {
+        "body": "Ustaw start, cel i krok. W trybie adaptacyjnym decyduje trener."
+      },
+      "presetSuggest": {
+        "body": "Ciągle wracasz do tego ustawienia. Zapisać je jako preset?",
+        "action": "Zapisz preset"
+      },
+      "coachAsk": {
+        "body": "Naciśnij ?, aby w każdej chwili zapytać o to trenera."
+      },
+      "zenFirst": {
+        "body": "Esc wychodzi z trybu Zen. Efekty są w Ustawienia → Wygląd."
+      },
+      "widgetDiscover": {
+        "body": "Wypróbuj pływający widget (W) nad swoim DAW-em lub tabulaturami.",
+        "action": "Otwórz widget"
+      },
+      "midiPlugged": {
+        "body": "Urządzenie MIDI jest podłączone, ale nic nie jest przypisane. Przypisać pedał do Start/Stop?",
+        "action": "Otwórz skróty"
+      }
     }
   },
   "widget": {
@@ -444,7 +468,11 @@
       "drillAutoCollapseHint": "Zwijaj ustawienia rozbiegu podczas odtwarzania",
       "runSetupAgain": "Uruchom konfigurację ponownie",
       "runSetupAgainHint": "Ponownie otwiera kreatora pierwszego uruchomienia",
-      "runSetupAgainAction": "Otwórz"
+      "runSetupAgainAction": "Otwórz",
+      "resetHints": "Resetuj wskazówki",
+      "resetHintsHint": "Pokaż ponownie sześć jednorazowych wskazówek",
+      "resetHintsAction": "Resetuj",
+      "resetHintsDone": "Gotowe"
     },
     "devices": {
       "title": "Urządzenia",

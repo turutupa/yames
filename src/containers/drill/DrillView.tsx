@@ -271,7 +271,9 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
         </span>
       </div>
 
-      <div className={`drill-config view-stagger-item ${configCollapsed ? "collapsed" : ""}`} style={{ animationDelay: '30ms' }}>
+      {/* `data-hint` anchors the `drill-first-open` hint (O7) — the card is
+          rendered by MainWindow, next to the controls the copy talks about. */}
+      <div data-hint="drill-first-open" className={`drill-config view-stagger-item ${configCollapsed ? "collapsed" : ""}`} style={{ animationDelay: '30ms' }}>
         <button className="drill-config-toggle" onClick={() => { setUserToggledConfig(true); setConfigCollapsed(!configCollapsed); }}>
           <span className="drill-config-summary">
             {startBpm}

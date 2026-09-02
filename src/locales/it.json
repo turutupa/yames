@@ -115,6 +115,30 @@
       "alwaysOnTop": "Sempre in primo piano",
       "start": "Inizia a suonare",
       "tour": "Fammi fare un giro (30 s)"
+    },
+    "hints": {
+      "dismiss": "Ho capito",
+      "drillFirstOpen": {
+        "body": "Imposta inizio, obiettivo e passo. In modalità adattiva decide il coach."
+      },
+      "presetSuggest": {
+        "body": "Torni sempre a questa configurazione. La salvi come preset?",
+        "action": "Salva preset"
+      },
+      "coachAsk": {
+        "body": "Premi ? in qualsiasi momento per chiedere al coach."
+      },
+      "zenFirst": {
+        "body": "Esc esce da Zen. Gli effetti sono in Impostazioni → Aspetto."
+      },
+      "widgetDiscover": {
+        "body": "Prova il widget flottante (W) sopra la tua DAW o le tab.",
+        "action": "Apri widget"
+      },
+      "midiPlugged": {
+        "body": "C'è un dispositivo MIDI collegato ma nulla è assegnato. Assegni un pedale a Play/Stop?",
+        "action": "Apri scorciatoie"
+      }
     }
   },
   "widget": {
@@ -444,7 +468,11 @@
       "drillAutoCollapseHint": "Comprimi le impostazioni della rampa durante la riproduzione",
       "runSetupAgain": "Riavvia la configurazione",
       "runSetupAgainHint": "Riapre la procedura guidata iniziale",
-      "runSetupAgainAction": "Apri"
+      "runSetupAgainAction": "Apri",
+      "resetHints": "Reimposta i suggerimenti",
+      "resetHintsHint": "Mostra di nuovo i sei suggerimenti una tantum",
+      "resetHintsAction": "Reimposta",
+      "resetHintsDone": "Fatto"
     },
     "devices": {
       "title": "Dispositivi",

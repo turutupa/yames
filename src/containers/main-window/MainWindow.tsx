@@ -24,6 +24,7 @@ import {
   setBeatGroups,
   setFreeMode,
   setVolume,
+  showFloating,
   setWidgetAlwaysOnTop,
   setWidgetMode,
   startSpeedRamp,
@@ -40,6 +41,9 @@ import type { InstrumentId, Preset, Subdivision } from "../../types";
 import { OnboardingWizard } from "../onboarding/OnboardingWizard";
 import { FinishSetupChip } from "../onboarding/FinishSetupChip";
 import { useOnboarding } from "../onboarding/useOnboarding";
+import { HintCard } from "../onboarding/hints/HintCard";
+import { useAppHints } from "../onboarding/hints/useAppHints";
+import { markWidgetOpened } from "../onboarding/hints/hintRuntime";
 import { DrillView } from "../drill/DrillView";
 import { FullscreenView } from "../zen/FullscreenView";
 import { PresetSidebar } from "../../components/presets/PresetSidebar";
@@ -588,6 +592,36 @@ export function MainWindow() {
       : undefined,
   });
 
+  // Progressive first-time hints (ONBOARDING_PLAN §5). The hook owns the
+  // triggers and the one-per-session rate limit; MainWindow only supplies the
+  // inputs and the three actions. `coach-ask` and `zen-first` are wired at
+  // their own sites (the coach feed and the Zen overlay).
+  const appHint = useAppHints({
+    view,
+    bpm: state.bpm,
+    subdivision: state.subdivision,
+    beatGroups: state.beatGroups ?? [state.timeSignature],
+    isPlaying: state.isPlaying,
+    midiDevices: midi.devices,
+    midiBindings: midi.bindings,
+    onSavePreset: handlePresetSave,
+    onOpenWidget: () => {
+      void markWidgetOpened();
+      showFloating();
+    },
+    onOpenHotkeys: () => {
+      // O3's MIDI capture flow is not merged yet — until it is, the hint
+      // lands the user on the section that owns the mapping UI.
+      prevTab.current = view === "settings" ? prevTab.current : (view as "beat" | "drill" | "track");
+      setView("settings");
+      setTimeout(() => {
+        document
+          .querySelector("section.hotkeys-section")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 400);
+    },
+  });
+
   // Resize window based on current view
   const sliderPercent = ((state.bpm - 20) / (300 - 20)) * 100;
   // Round to an integer for display — the slider operates on integers and
@@ -650,6 +684,16 @@ export function MainWindow() {
         <FinishSetupChip
           onOpen={() => onboarding.openAt("instrument")}
           onDismiss={onboarding.dismissChip}
+        />
+      )}
+
+      {/* Hints stay out of the way of the wizard and of Zen (which renders
+          its own `zen-first` card inside the overlay). */}
+      {appHint && !onboarding.isOpen && !isFullscreen && (
+        <HintCard
+          id={appHint.id}
+          onAction={appHint.onAction}
+          onDismiss={appHint.markShown}
         />
       )}
 

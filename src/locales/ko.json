@@ -115,6 +115,30 @@
       "alwaysOnTop": "항상 위에 표시",
       "start": "연습 시작",
       "tour": "앱 둘러보기 (30초)"
+    },
+    "hints": {
+      "dismiss": "알겠어요",
+      "drillFirstOpen": {
+        "body": "시작·목표·증가폭을 설정하세요. 적응형 모드에서는 코치가 정합니다."
+      },
+      "presetSuggest": {
+        "body": "이 설정을 계속 쓰고 계시네요. 프리셋으로 저장할까요?",
+        "action": "프리셋 저장"
+      },
+      "coachAsk": {
+        "body": "언제든 ? 키를 누르면 코치에게 물어볼 수 있어요."
+      },
+      "zenFirst": {
+        "body": "Esc로 Zen을 나갑니다. 효과는 설정 → 모양에 있어요."
+      },
+      "widgetDiscover": {
+        "body": "DAW나 악보 위에 띄우는 위젯(W)을 써 보세요.",
+        "action": "위젯 열기"
+      },
+      "midiPlugged": {
+        "body": "MIDI 기기가 연결됐지만 매핑된 것이 없어요. 페달을 재생/정지에 매핑할까요?",
+        "action": "단축키 열기"
+      }
     }
   },
   "widget": {
@@ -444,7 +468,11 @@
       "drillAutoCollapseHint": "재생 중에 연습 설정을 자동으로 접습니다",
       "runSetupAgain": "설정 다시 실행",
       "runSetupAgainHint": "첫 실행 설정 마법사를 다시 엽니다",
-      "runSetupAgainAction": "열기"
+      "runSetupAgainAction": "열기",
+      "resetHints": "힌트 초기화",
+      "resetHintsHint": "한 번만 나오는 힌트 6개를 다시 보기",
+      "resetHintsAction": "초기화",
+      "resetHintsDone": "완료"
     },
     "devices": {
       "title": "기기",

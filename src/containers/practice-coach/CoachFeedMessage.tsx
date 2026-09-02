@@ -5,6 +5,9 @@ import { SessionNarrativeView } from "../../coach/SessionNarrativeView";
 import type { FeedAffordance, FeedChip, FeedMessage, SessionReport, SessionSegment } from "../../types";
 import { formatTime, formatDuration } from "./coachCardHelpers";
 import { accuracyPct, scoredBeats } from "../../coach/reportStats";
+import { HintCard } from "../onboarding/hints/HintCard";
+import { useFirstTimeHint } from "../onboarding/hints/useFirstTimeHint";
+import { shouldHintCoachAsk } from "../onboarding/hints/triggers";
 
 function MiniReportComponents({ report }: { report: SessionReport }) {
   const { t } = useTranslation();
@@ -139,6 +142,10 @@ export function FeedMessageItem({
 }) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
+  // `coach-ask` (O7): the first mini-report the feed ever renders explains
+  // that "?" opens the chat. Called unconditionally (hooks rule) — the
+  // trigger predicate does the filtering.
+  const coachAskHint = useFirstTimeHint("coach-ask", shouldHintCoachAsk(message.type));
   switch (message.type) {
     case "session-start":
     case "system":
@@ -197,6 +204,9 @@ export function FeedMessageItem({
           )}
           {message.report && (
             <MiniReportComponents report={message.report} />
+          )}
+          {coachAskHint.shouldShow && (
+            <HintCard id="coach-ask" inline onDismiss={coachAskHint.markShown} />
           )}
           <div className="coach-feed-msg-time">{formatTime(message.timestamp, lang)}</div>
         </div>

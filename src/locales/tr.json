@@ -115,6 +115,30 @@
       "alwaysOnTop": "Her zaman üstte",
       "start": "Çalışmaya başla",
       "tour": "Bana etrafı gezdir (30 sn)"
+    },
+    "hints": {
+      "dismiss": "Anlaşıldı",
+      "drillFirstOpen": {
+        "body": "Başlangıç, hedef ve adımı ayarla. Uyarlamalı modda kararı koç verir."
+      },
+      "presetSuggest": {
+        "body": "Sürekli bu ayara dönüyorsun. Ön ayar olarak kaydedelim mi?",
+        "action": "Ön ayarı kaydet"
+      },
+      "coachAsk": {
+        "body": "Bunu koça sormak için istediğin zaman ? tuşuna bas."
+      },
+      "zenFirst": {
+        "body": "Esc Zen'den çıkar. Efektler Ayarlar → Görünüm altında."
+      },
+      "widgetDiscover": {
+        "body": "DAW'ının ya da tablarının üstünde yüzen bileşeni (W) dene.",
+        "action": "Bileşeni aç"
+      },
+      "midiPlugged": {
+        "body": "Bir MIDI cihazı bağlı ama hiçbir eşleme yok. Bir pedalı Oynat/Durdur'a bağlayalım mı?",
+        "action": "Kısayolları aç"
+      }
     }
   },
   "widget": {
@@ -444,7 +468,11 @@
       "drillAutoCollapseHint": "Çalarken antrenman ayarlarını daralt",
       "runSetupAgain": "Kurulumu yeniden çalıştır",
       "runSetupAgainHint": "İlk kurulum sihirbazını yeniden açar",
-      "runSetupAgainAction": "Aç"
+      "runSetupAgainAction": "Aç",
+      "resetHints": "İpuçlarını sıfırla",
+      "resetHintsHint": "Altı tek seferlik ipucunu yeniden göster",
+      "resetHintsAction": "Sıfırla",
+      "resetHintsDone": "Tamam"
     },
     "devices": {
       "title": "Cihazlar",

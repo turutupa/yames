@@ -1,6 +1,7 @@
 import { useEffect, useRef, type Ref } from "react";
 import { useTranslation } from "react-i18next";
 import { setSoundType, setVolume, showFloating } from "../../ipc";
+import { markWidgetOpened } from "../onboarding/hints/hintRuntime";
 import { SOUND_TYPES } from "../../constants/metronome";
 import type { AppState } from "../../types";
 import { IS_MAC } from "../../hotkeys";
@@ -284,7 +285,13 @@ export function MainHeader({
         </div>
         <button
           className="header-btn"
-          onClick={() => showFloating()}
+          data-hint="widget-discover"
+          onClick={() => {
+            // The `widget-discover` hint stops offering itself once the user
+            // has found the widget on their own.
+            void markWidgetOpened();
+            showFloating();
+          }}
           data-tooltip={t("tooltip.openWidget")}
         >
           <svg
@@ -330,6 +337,7 @@ export function MainHeader({
         </div>
         <button
           className={`header-btn ${view === "settings" ? "active" : ""}`}
+          data-hint="midi-plugged"
           onClick={() => {
             if (view === "settings") {
               setView(prevTab.current);

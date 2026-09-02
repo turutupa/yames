@@ -115,6 +115,30 @@
       "alwaysOnTop": "常に最前面",
       "start": "練習を始める",
       "tour": "アプリを見て回る（30秒）"
+    },
+    "hints": {
+      "dismiss": "了解",
+      "drillFirstOpen": {
+        "body": "開始・目標・ステップを設定します。アダプティブモードではコーチが判断します。"
+      },
+      "presetSuggest": {
+        "body": "この設定を何度も使っています。プリセットとして保存しますか？",
+        "action": "プリセットを保存"
+      },
+      "coachAsk": {
+        "body": "? キーを押すと、いつでもコーチに質問できます。"
+      },
+      "zenFirst": {
+        "body": "Esc で Zen を終了します。エフェクトは設定 → 外観にあります。"
+      },
+      "widgetDiscover": {
+        "body": "DAW やタブ譜の上にフローティングウィジェット（W）を試してみてください。",
+        "action": "ウィジェットを開く"
+      },
+      "midiPlugged": {
+        "body": "MIDI デバイスが接続されていますが、割当てがありません。ペダルを再生/停止に割り当てますか？",
+        "action": "ショートカットを開く"
+      }
     }
   },
   "widget": {
@@ -444,7 +468,11 @@
       "drillAutoCollapseHint": "演奏中はテンポ練習の設定を折りたたむ",
       "runSetupAgain": "セットアップをやり直す",
       "runSetupAgainHint": "初回セットアップをもう一度開きます",
-      "runSetupAgainAction": "開く"
+      "runSetupAgainAction": "開く",
+      "resetHints": "ヒントをリセット",
+      "resetHintsHint": "6 つの一度限りのヒントを再度表示",
+      "resetHintsAction": "リセット",
+      "resetHintsDone": "完了"
     },
     "devices": {
       "title": "デバイス",

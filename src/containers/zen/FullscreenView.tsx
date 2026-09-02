@@ -5,6 +5,9 @@ import { setBpm, togglePlayback, setSubdivision, setBeatGroups, notifySettingsCh
 import { METER_PRESETS, nextFreeBeatCount } from "../../constants/metronome";
 import { ZenEffects, type ZenStyle } from "./ZenEffects";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { HintCard } from "../onboarding/hints/HintCard";
+import { useFirstTimeHint } from "../onboarding/hints/useFirstTimeHint";
+import { shouldHintZenFirst } from "../onboarding/hints/triggers";
 import "../../styles/fullscreen.css";
 
 interface FullscreenViewProps {
@@ -47,6 +50,10 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
   const [zenStyle, setZenStyle] = useState<ZenStyle>("focus");
   const [themeOpen, setThemeOpen] = useState(false);
   const themePickerRef = useRef<HTMLDivElement>(null);
+  // `zen-first` (O7): this component only mounts inside Zen, so being here is
+  // the trigger. The card renders inside the overlay — the overlay sits at
+  // z-index 9999, well above the fixed hint layer MainWindow uses.
+  const zenHint = useFirstTimeHint("zen-first", shouldHintZenFirst(true));
 
   // Restore zen style from store on mount
   useEffect(() => {
@@ -131,6 +138,12 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
       onDoubleClick={exitFullscreen}
     >
       <ZenEffects style={zenStyle} currentBeat={currentBeat} isPlaying={state.isPlaying} activeTab={activeTab} beatsPerMeasure={beatsPerMeasure} />
+
+      {zenHint.shouldShow && (
+        <div className="zen-hint" onDoubleClick={(e) => e.stopPropagation()}>
+          <HintCard id="zen-first" inline onDismiss={zenHint.markShown} />
+        </div>
+      )}
 
       {/* Top-right controls: theme picker + fullscreen */}
       <div className="zen-top-controls" onDoubleClick={(e) => e.stopPropagation()} ref={themePickerRef}>

@@ -115,6 +115,30 @@
       "alwaysOnTop": "永遠在最上層",
       "start": "開始練習",
       "tour": "帶我逛一圈（30 秒）"
+    },
+    "hints": {
+      "dismiss": "知道了",
+      "drillFirstOpen": {
+        "body": "設定起點、目標與步進。自適應模式交由教練決定。"
+      },
+      "presetSuggest": {
+        "body": "你一直回到這套設定。要存成預設嗎？",
+        "action": "儲存預設"
+      },
+      "coachAsk": {
+        "body": "隨時按 ? 向教練提問。"
+      },
+      "zenFirst": {
+        "body": "按 Esc 離開 Zen。特效在設定 → 外觀裡。"
+      },
+      "widgetDiscover": {
+        "body": "試試浮動小工具（W），可以放在 DAW 或樂譜上方。",
+        "action": "開啟小工具"
+      },
+      "midiPlugged": {
+        "body": "已連接 MIDI 裝置，但尚未指派任何動作。要將踏板指派給播放/停止嗎？",
+        "action": "開啟快速鍵"
+      }
     }
   },
   "widget": {
@@ -444,7 +468,11 @@
       "drillAutoCollapseHint": "播放時自動收合變速練習設定",
       "runSetupAgain": "重新執行設定",
       "runSetupAgainHint": "再次開啟首次啟動精靈",
-      "runSetupAgainAction": "開啟"
+      "runSetupAgainAction": "開啟",
+      "resetHints": "重設提示",
+      "resetHintsHint": "重新顯示六則一次性提示",
+      "resetHintsAction": "重設",
+      "resetHintsDone": "完成"
     },
     "devices": {
       "title": "裝置",
