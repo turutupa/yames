@@ -425,6 +425,21 @@ describe("W2 — sound & look", () => {
     expect(calls("set_sound_type")).toEqual(["drum", "wood"]);
   });
 
+  it("moving from a sound card onto a theme card still rolls the sound back", () => {
+    // The two columns debounce independently: a shared timer let the theme
+    // hover swallow the sound's pending rollback and strand the click on a
+    // preview (caught driving the real app).
+    setup(at);
+    const beep = screen.getByRole("button", { name: "Beep" });
+    fireEvent.mouseEnter(beep);
+    settle();
+    fireEvent.mouseLeave(beep);
+    fireEvent.mouseEnter(screen.getByRole("button", { name: "Aurora" }));
+    settle();
+    expect(calls("set_sound_type")).toEqual(["beep", "wood"]);
+    expect(calls("set_theme")).toEqual(["aurora"]);
+  });
+
   it("focusing a theme card restyles the window behind the overlay", () => {
     setup(at);
     fireEvent.focus(screen.getByRole("button", { name: "Aurora" }));
@@ -449,17 +464,27 @@ describe("W2 — sound & look", () => {
     );
   });
 
+  it("picking a card never advances the step — only Next does", () => {
+    const { dispatch } = setup(at);
+    fireEvent.click(screen.getByRole("button", { name: "Beep" }));
+    fireEvent.click(screen.getByRole("button", { name: "Aurora" }));
+    expect(dispatch).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(dispatch).toHaveBeenCalledExactlyOnceWith({ type: "NEXT" });
+  });
+
   it("Esc/Back restores the previously confirmed sound and theme", () => {
     const { rerender, props } = setup(at);
     fireEvent.focus(screen.getByRole("button", { name: "Drum" }));
     fireEvent.focus(screen.getByRole("button", { name: "Aurora" }));
     settle();
-    expect(calls("set_sound_type")).toEqual([]);
+    expect(calls("set_sound_type")).toEqual(["drum"]);
     expect(calls("set_theme")).toEqual(["aurora"]);
     // Esc skips the step: the shell moves on and W2 unmounts mid-preview.
     act(() => {
       rerender(<OnboardingWizard {...props} state={stateAt("ready")} />);
     });
+    expect(calls("set_sound_type")).toEqual(["drum", "wood"]);
     expect(calls("set_theme")).toEqual(["aurora", "obsidian"]);
   });
 

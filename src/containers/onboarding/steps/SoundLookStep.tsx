@@ -18,6 +18,7 @@
  * rolled back on unmount.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { MutableRefObject } from "react";
 import { useTranslation } from "react-i18next";
 import { SOUND_TYPES } from "../../../constants/metronome";
 import { setSoundType, setTheme } from "../../../ipc";
@@ -70,17 +71,24 @@ export function SoundLookStep({ isActive }: WizardStepProps) {
   // What the engine is actually set to right now (preview included), so a
   // revert only fires when something really changed.
   const appliedRef = useRef({ sound: soundType, theme: themeId });
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // One timer per column, never one shared: moving the mouse off a sound card
+  // and onto a theme card would otherwise cancel the sound's pending rollback
+  // and leave the click stuck on a preview the user never picked.
+  const soundTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const themeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // The shell focuses a step's first control when it opens. That programmatic
   // focus must not preview a sound the user never asked for.
   const skipAutoFocusRef = useRef(true);
 
-  const cancelPending = useCallback(() => {
-    if (timerRef.current !== null) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-  }, []);
+  const cancelPending = useCallback(
+    (ref: MutableRefObject<ReturnType<typeof setTimeout> | null>) => {
+      if (ref.current !== null) {
+        clearTimeout(ref.current);
+        ref.current = null;
+      }
+    },
+    [],
+  );
 
   const pushSound = useCallback((id: string) => {
     if (appliedRef.current.sound === id) return;
@@ -95,10 +103,13 @@ export function SoundLookStep({ isActive }: WizardStepProps) {
   }, []);
 
   const schedule = useCallback(
-    (run: () => void) => {
-      cancelPending();
-      timerRef.current = setTimeout(() => {
-        timerRef.current = null;
+    (
+      ref: MutableRefObject<ReturnType<typeof setTimeout> | null>,
+      run: () => void,
+    ) => {
+      cancelPending(ref);
+      ref.current = setTimeout(() => {
+        ref.current = null;
         run();
       }, PREVIEW_DEBOUNCE_MS);
     },
@@ -124,8 +135,10 @@ export function SoundLookStep({ isActive }: WizardStepProps) {
   // hover preview still in flight and puts the confirmed choice back.
   useEffect(
     () => () => {
-      if (timerRef.current !== null) clearTimeout(timerRef.current);
-      timerRef.current = null;
+      for (const ref of [soundTimerRef, themeTimerRef]) {
+        if (ref.current !== null) clearTimeout(ref.current);
+        ref.current = null;
+      }
       const { sound, theme } = confirmedRef.current;
       if (appliedRef.current.sound !== sound) {
         appliedRef.current.sound = sound;
@@ -140,20 +153,20 @@ export function SoundLookStep({ isActive }: WizardStepProps) {
   );
 
   const previewSound = useCallback(
-    (id: string) => schedule(() => pushSound(id)),
+    (id: string) => schedule(soundTimerRef, () => pushSound(id)),
     [schedule, pushSound],
   );
   const previewTheme = useCallback(
-    (id: string) => schedule(() => pushTheme(id)),
+    (id: string) => schedule(themeTimerRef, () => pushTheme(id)),
     [schedule, pushTheme],
   );
   const revertSound = useCallback(
-    () => schedule(() => pushSound(confirmedRef.current.sound)),
+    () => schedule(soundTimerRef, () => pushSound(confirmedRef.current.sound)),
     [schedule, pushSound],
   );
   const revertTheme = useCallback(
     () =>
-      schedule(() => {
+      schedule(themeTimerRef, () => {
         const theme = confirmedRef.current.theme;
         if (theme) pushTheme(theme);
       }),
@@ -162,7 +175,7 @@ export function SoundLookStep({ isActive }: WizardStepProps) {
 
   const pickSound = useCallback(
     (id: string) => {
-      cancelPending();
+      cancelPending(soundTimerRef);
       pushSound(id);
       setConfirmed((c) => ({ ...c, sound: id }));
     },
@@ -170,7 +183,7 @@ export function SoundLookStep({ isActive }: WizardStepProps) {
   );
   const pickTheme = useCallback(
     (id: string) => {
-      cancelPending();
+      cancelPending(themeTimerRef);
       pushTheme(id);
       setConfirmed((c) => ({ ...c, theme: id }));
     },

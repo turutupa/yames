@@ -353,15 +353,20 @@ export function MainWindow() {
   const openThemeSettings = useCallback(() => {
     setThemeDetour(true);
     setView("settings");
-    // `setView` scrolls the settings pane to the top on a 0 ms timer; land the
-    // appearance section in view after that.
-    setTimeout(
-      () =>
-        document
-          .getElementById("settings-appearance")
-          ?.scrollIntoView({ block: "start", behavior: "smooth" }),
-      80,
-    );
+    // The pane mounts behind a view transition and `setView` scrolls it to the
+    // top on its own timer, so one early scroll gets overwritten — try again
+    // across the transition (landing on a section already in place is a
+    // no-op). Instant, not smooth: a smooth scroll started while the
+    // transition is still animating gets dropped.
+    for (const delay of [80, 260, 520]) {
+      setTimeout(
+        () =>
+          document
+            .getElementById("settings-appearance")
+            ?.scrollIntoView({ block: "start", behavior: "auto" }),
+        delay,
+      );
+    }
   }, [setView]);
   useEffect(() => {
     if (themeDetour && view !== "settings") setThemeDetour(false);
