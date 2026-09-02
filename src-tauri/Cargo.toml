@@ -50,12 +50,17 @@ aubio = { version = "0.2", features = ["static", "bindgen"] }
 # unbuildable on Windows and Linux. The backend is chosen by the Yames
 # feature that turns this dependency on — see [features] below.
 llama-cpp-2 = { version = "0.1.146", optional = true }
+# Detokenisation of LLM output. `LlamaModel::token_to_piece` takes an
+# `encoding_rs::Decoder` and llama-cpp-2 does not re-export the crate, so it
+# has to be a direct dependency. Already in the graph underneath
+# llama-cpp-2, so this adds no package to Cargo.lock.
+encoding_rs = { version = "0.8", optional = true }
 
 [features]
 default = []
 # CPU-only inference. Development machines and the CI fallback; also what
 # `cargo test --features coach-llm --lib` exercises.
-coach-llm = ["dep:llama-cpp-2"]
+coach-llm = ["dep:llama-cpp-2", "dep:encoding_rs"]
 # Shipping features, one GPU backend per platform (ROADMAP §3: always try
 # the GPU first). llama.cpp falls back to CPU at runtime when no usable
 # device/driver is present, so a single binary serves both cases.

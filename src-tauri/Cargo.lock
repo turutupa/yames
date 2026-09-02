@@ -5996,6 +5996,7 @@ dependencies = [
  "core-foundation-sys",
  "coreaudio-sys",
  "cpal",
+ "encoding_rs",
  "libc",
  "llama-cpp-2",
  "midir",

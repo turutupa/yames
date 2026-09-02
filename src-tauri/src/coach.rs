@@ -707,11 +707,25 @@ mod llm {
                     .map_err(|e| format!("Decode failed: {e}"))?;
             }
 
+            // Was `token_to_str(t, token::LlamaTokenAttr::all())` per token,
+            // which does not compile against llama-cpp-2 0.1.146 — there is no
+            // `LlamaTokenAttr`, and the second argument is a `model::Special`.
+            // (The old call was never exercised: `coach-llm` could only build
+            // on macOS, and nothing shipped with it enabled.)
+            //
+            // `token_to_piece` rather than the deprecated `tokens_to_str`:
+            // the latter hardcodes an 8-byte piece buffer and does not retry,
+            // so any longer piece fails the whole generation with
+            // "Insufficient Buffer Space" — observed on a 128-token run.
+            // One decoder across the whole output also means a UTF-8 sequence
+            // split across two tokens survives instead of becoming replacement
+            // characters. `false` = do not render control tokens as text.
+            let mut decoder = encoding_rs::UTF_8.new_decoder();
             let mut result = String::new();
             for token in &output_tokens {
                 let piece = self
                     .model
-                    .token_to_str(*token, llama_cpp_2::token::LlamaTokenAttr::all())
+                    .token_to_piece(*token, &mut decoder, false, None)
                     .map_err(|e| format!("Token decode failed: {e}"))?;
                 result.push_str(&piece);
             }
