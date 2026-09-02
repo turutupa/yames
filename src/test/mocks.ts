@@ -136,10 +136,13 @@ const DEFAULT_INVOKE_MAP: Record<string, InvokeFn> = {
   get_model_status: () => ({
     brainReady: false,
     brainTier: null,
+    brainFamily: null,
     brainSizeBytes: 0,
     voiceReady: false,
     voiceSizeBytes: 0,
   }),
+  // 32 GB — above the Studio gate, so tests exercise the un-gated UI.
+  get_system_memory_mb: () => 32 * 1024,
   write_model_chunk: () => "",
   get_models_path: () => "",
   delete_models: () => undefined,

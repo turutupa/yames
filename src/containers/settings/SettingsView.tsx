@@ -82,6 +82,10 @@ interface SettingsViewProps {
   modelStatus: ModelStatus | null;
   setModelStatus: Dispatch<SetStateAction<ModelStatus | null>>;
   modelDownloading: boolean;
+  /** ROADMAP §3: Studio is only offered at >= 16 GB of RAM. */
+  studioAvailable: boolean;
+  /** A brain from a superseded model family is installed. */
+  brainUpdateAvailable: boolean;
   availableVoices: [string, string][];
   voiceDiagnostics: VoiceDiagnostic[];
   instrument: string;
@@ -162,6 +166,8 @@ export function SettingsView({
   modelStatus,
   setModelStatus,
   modelDownloading,
+  studioAvailable,
+  brainUpdateAvailable,
   availableVoices,
   voiceDiagnostics,
   instrument,
@@ -245,6 +251,8 @@ export function SettingsView({
         modelStatus={modelStatus}
         setModelStatus={setModelStatus}
         modelDownloading={modelDownloading}
+        studioAvailable={studioAvailable}
+        brainUpdateAvailable={brainUpdateAvailable}
         availableVoices={availableVoices}
         voiceDiagnostics={voiceDiagnostics}
         instrument={instrument}

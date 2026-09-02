@@ -652,6 +652,8 @@ export function MainWindow() {
             modelStatus={coach.modelStatus}
             setModelStatus={coach.setModelStatus}
             modelDownloading={coach.modelDownloading}
+            studioAvailable={coach.studioAvailable}
+            brainUpdateAvailable={coach.brainUpdateAvailable}
             availableVoices={coach.availableVoices}
             voiceDiagnostics={coach.voiceDiagnostics}
             instrument={instrument}
@@ -773,6 +775,7 @@ export function MainWindow() {
         <CoachDownloadConfirmDialog
           pendingTier={coach.pendingDownloadTier}
           modelStatus={coach.modelStatus}
+          studioAvailable={coach.studioAvailable}
           onCancel={() => coach.setPendingDownloadTier(null)}
           onUseInstalled={(tier) => {
             coach.setCoachBrainTier(tier);

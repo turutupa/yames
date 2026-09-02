@@ -4,25 +4,32 @@ import { formatBytes } from "./formatBytes";
 
 /**
  * Tier-selection dialog shown when the user wants to install or switch the
- * Practice Coach AI model. Lets them choose between Standard (Qwen 1.5B) and
- * Full (Phi 3.5 Mini), showing which is already installed if any.
+ * Practice Coach AI model. Lets them choose between Standard (Qwen3-4B) and
+ * Studio (Qwen3-8B), showing which is already installed if any.
+ *
+ * `studioAvailable` is the ROADMAP §3 RAM gate (>= 16 GB). When it is
+ * false the Studio card still renders — hiding it would leave the user
+ * wondering what happened to the tier they read about — but its button is
+ * disabled and explains why.
  */
 export function CoachDownloadConfirmDialog({
   pendingTier,
   modelStatus,
+  studioAvailable,
   onCancel,
   onUseInstalled,
   onStartDownload,
 }: {
   pendingTier: "standard" | "full";
   modelStatus: ModelStatus | null;
+  studioAvailable: boolean;
   onCancel: () => void;
   onUseInstalled: (tier: "standard" | "full") => void;
   onStartDownload: (tier: "standard" | "full") => void;
 }) {
   const { t } = useTranslation();
   const tierLabel = (tier: "standard" | "full") =>
-    tier === "standard" ? t("settings.coach.brainStandard") : t("settings.coach.brainFull");
+    tier === "standard" ? t("settings.coach.brainStandard") : t("settings.coach.brainStudio");
   return (
     <div className="download-confirm-overlay" onClick={onCancel}>
       <div className="download-confirm-dialog" onClick={(e) => e.stopPropagation()}>
@@ -39,17 +46,21 @@ export function CoachDownloadConfirmDialog({
                 {isInstalled && <span className="download-confirm-installed-badge">{t("coachDownload.installedBadge")}</span>}
                 <div className="download-confirm-model-name">{tierLabel(tier)}</div>
                 <div className="download-confirm-model-name" style={{ fontWeight: 400, fontSize: 13 }}>
-                  {tier === "standard" ? "Qwen 2.5 1.5B" : "Phi 3.5 Mini"}
+                  {tier === "standard" ? "Qwen3 4B" : "Qwen3 8B"}
                 </div>
                 <div className="download-confirm-model-size">
-                  {tier === "standard" ? t("coachDownload.stdSpec") : t("coachDownload.fullSpec")}
+                  {tier === "standard" ? t("coachDownload.stdSpec") : t("coachDownload.studioSpec")}
                 </div>
                 <p className="download-confirm-model-detail">
                   {tier === "standard"
                     ? t("coachDownload.stdDesc")
-                    : t("coachDownload.fullDesc")}
+                    : t("coachDownload.studioDesc")}
                 </p>
-                {isInstalled ? (
+                {tier === "full" && !studioAvailable ? (
+                  <button className="download-confirm-go" disabled>
+                    {t("coachDownload.studioNeedsRam")}
+                  </button>
+                ) : isInstalled ? (
                   <button
                     className="download-confirm-go download-confirm-go-installed"
                     onClick={() => onUseInstalled(tier)}
@@ -89,7 +100,7 @@ export function DownloadProgressBar({
     downloadingTier === null
       ? ""
       : downloadingTier === "full"
-        ? t("settings.coach.brainFull")
+        ? t("settings.coach.brainStudio")
         : t("settings.coach.brainStandard");
   const modelName = downloadProgress?.component ?? "model";
   const bytesInfo =
