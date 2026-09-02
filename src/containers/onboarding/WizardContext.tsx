@@ -7,6 +7,7 @@
  * the step contract.
  */
 import { createContext, useContext } from "react";
+import type { UseMidiReturn } from "../../hooks/useMidi";
 import type { OnboardingContext, StepId } from "./onboardingMachine";
 
 export type WizardEnv = {
@@ -27,6 +28,16 @@ export type WizardEnv = {
   hasFootswitch: boolean;
   alwaysOnTop: boolean;
   setAlwaysOnTop: (value: boolean) => void;
+
+  // --- Hands-free control (W3) --------------------------------------------
+  /**
+   * The app's single `useMidi` instance — devices, bindings and learn mode.
+   * W3 drives it rather than mounting its own so a binding made in the wizard
+   * is the same binding the rest of the app (and W7's summary) sees.
+   */
+  midi: UseMidiReturn;
+  /** Gamepad/footswitch bindings by action id (MainWindow's `footBindings`). */
+  gamepadBindings: Record<string, string>;
 
   // --- The demo click ------------------------------------------------------
   /** Start the soft 80 BPM preview click (idempotent). */
