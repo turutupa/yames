@@ -148,7 +148,7 @@ export function useActionDispatcher({
         case "sig-next": {
           if (state.freeMode) {
             const total = state.beatGroups.reduce((a, b) => a + b, 0);
-            if (total < 16) { setBeatGroups([total + 1]); notifySettingsChange(); }
+            setBeatGroups([total >= 16 ? 1 : total + 1]); notifySettingsChange();
           } else {
             const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
             const nextIdx = (currentIdx === -1 ? 0 : (currentIdx + 1) % METER_PRESETS.length);
@@ -160,7 +160,7 @@ export function useActionDispatcher({
         case "sig-prev": {
           if (state.freeMode) {
             const total = state.beatGroups.reduce((a, b) => a + b, 0);
-            if (total > 1) { setBeatGroups([total - 1]); notifySettingsChange(); }
+            setBeatGroups([total <= 1 ? 16 : total - 1]); notifySettingsChange();
           } else {
             const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
             const nextIdx = (currentIdx === -1 ? 0 : (currentIdx - 1 + METER_PRESETS.length) % METER_PRESETS.length);

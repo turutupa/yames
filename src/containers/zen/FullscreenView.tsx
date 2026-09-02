@@ -361,7 +361,7 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
           <button className="fs-ctrl-btn fs-ctrl-sub" onClick={() => {
             const total = (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0);
             if (state.freeMode) {
-              setBeatGroups([Math.min(16, total + 1)]);
+              setBeatGroups([total >= 16 ? 1 : total + 1]);
               notifySettingsChange();
             } else {
               const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
