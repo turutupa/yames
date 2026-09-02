@@ -49,6 +49,7 @@ export type AppState = {
   volume: number;
   soundType: string;
   timeSignature: number;
+  beatGroups: number[];
   speedRamp: SpeedRamp;
   /** Selected instrument id; drives DSP profile + coach vocabulary. */
   instrument: InstrumentId;
@@ -56,6 +57,7 @@ export type AppState = {
 
 export type BeatEvent = {
   beat: number;
+  measureBeat: number; // bar-local position (0..beatsPerMeasure), accurate after meter changes
   subdivision: number;
   isDownbeat: boolean;
 };
@@ -97,6 +99,7 @@ export type Preset = {
   bpm: number;
   subdivision: number;
   timeSignature: number;
+  beatGroups?: number[];
   soundType: string;
   volume: number;
   view: "beat" | "drill";

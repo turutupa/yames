@@ -35,6 +35,7 @@ function stateToPreset(
     bpm: state.bpm,
     subdivision: state.subdivision,
     timeSignature: state.timeSignature,
+    beatGroups: state.beatGroups,
     soundType: state.soundType,
     volume: state.volume,
     view,
@@ -59,6 +60,7 @@ function isDirty(state: AppState, preset: Preset, view: string): boolean {
   if (state.bpm !== preset.bpm) return true;
   if (state.subdivision !== preset.subdivision) return true;
   if (state.timeSignature !== preset.timeSignature) return true;
+  if (JSON.stringify(state.beatGroups) !== JSON.stringify(preset.beatGroups ?? [preset.timeSignature])) return true;
   if (state.soundType !== preset.soundType) return true;
   if (Math.abs(state.volume - preset.volume) > 0.01) return true;
   if (view === "drill" && preset.speedRamp && state.speedRamp) {

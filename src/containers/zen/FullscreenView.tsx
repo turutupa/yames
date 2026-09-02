@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { AppState, BeatEvent, Subdivision } from "../../types";
-import { setBpm, togglePlayback, setSubdivision, setTimeSignature, stopSpeedRamp, startSpeedRamp, startSpeedRampFrom, configureSpeedRamp, storeSave, storeLoad } from "../../ipc";
+import { setBpm, togglePlayback, setSubdivision, setBeatGroups, notifySettingsChange, stopSpeedRamp, startSpeedRamp, startSpeedRampFrom, configureSpeedRamp, storeSave, storeLoad } from "../../ipc";
+import { METER_PRESETS } from "../../constants/metronome";
 import { ZenEffects, type ZenStyle } from "./ZenEffects";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import "../../styles/fullscreen.css";
@@ -35,8 +36,8 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
   // In drill mode, use ramp's beatsPerBar; otherwise use timeSignature
   const beatsPerMeasure = activeTab === "drill"
     ? (ramp.beatsPerBar >= 2 ? ramp.beatsPerBar : 4)
-    : (state.timeSignature >= 2 ? state.timeSignature : 2);
-  const activeBeat = currentBeat ? currentBeat.beat % beatsPerMeasure : -1;
+    : Math.max(2, (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0));
+  const activeBeat = currentBeat ? currentBeat.measureBeat : -1;
   const activeSub = currentBeat ? currentBeat.subdivision : -1;
   const isDownbeat = currentBeat?.isDownbeat ?? false;
 
@@ -186,29 +187,50 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
           )}
         </div>
 
-        {/* Beat visualization */}
+        {/* Beat visualization — grouped to reflect meter structure */}
         <div className="fs-beats" style={{ visibility: isWarmingUp ? 'hidden' : 'visible' }}>
-          {Array.from({ length: beatsPerMeasure }, (_, beatIdx) => {
-            const isBeatActive = !isWarmingUp && activeBeat === beatIdx && isDownbeat;
-            const isAccent = activeTab === "drill"
-              ? beatIdx === 0
-              : (state.timeSignature === 1 || (beatIdx === 0 && state.timeSignature >= 2));
-            return (
-              <div key={beatIdx} className="fs-beat-group">
-                <div className={`fs-beat ${isBeatActive ? "active" : ""} ${isAccent && isBeatActive ? "accent" : ""}`} />
-                {activeTab !== "drill" && state.subdivision > 1 && (
-                  <div className="fs-sub-dots">
-                    {Array.from({ length: state.subdivision - 1 }, (_, subIdx) => (
-                      <span
-                        key={subIdx}
-                        className={`fs-sub-dot ${activeBeat === beatIdx && activeSub === subIdx + 1 ? "active" : ""}`}
-                      />
-                    ))}
+          {activeTab === "drill"
+            // Drill mode: flat dots, no grouping
+            ? Array.from({ length: beatsPerMeasure }, (_, beatIdx) => {
+                const isBeatActive = !isWarmingUp && activeBeat === beatIdx && isDownbeat;
+                return (
+                  <div key={beatIdx} className="fs-beat-group">
+                    <div className={`fs-beat ${isBeatActive ? "active" : ""} ${beatIdx === 0 && isBeatActive ? "accent" : ""}`} />
                   </div>
-                )}
-              </div>
-            );
-          })}
+                );
+              })
+            // Metronome mode: render per group cluster
+            : (state.beatGroups ?? [state.timeSignature]).map((count, groupIdx) => {
+                const groupStart = (state.beatGroups ?? [state.timeSignature])
+                  .slice(0, groupIdx)
+                  .reduce((a: number, b: number) => a + b, 0);
+                return (
+                  <div key={groupIdx} className="fs-group-cluster">
+                    {Array.from({ length: count }, (_, d) => {
+                      const beatIdx = groupStart + d;
+                      const isGroupDownbeat = d === 0;
+                      const isBeatActive = !isWarmingUp && activeBeat === beatIdx && isDownbeat;
+                      const isSubBeatActive = !isWarmingUp && activeBeat === beatIdx && !isDownbeat;
+                      return (
+                        <div key={d} className="fs-beat-group">
+                          <div className={`fs-beat ${isGroupDownbeat ? "accent-marker" : ""} ${isBeatActive ? "active" : ""} ${isGroupDownbeat && isBeatActive ? "accent" : ""}`} />
+                          {state.subdivision > 1 && (
+                            <div className="fs-sub-dots">
+                              {Array.from({ length: state.subdivision - 1 }, (_, subIdx) => (
+                                <span
+                                  key={subIdx}
+                                  className={`fs-sub-dot ${isSubBeatActive && activeSub === subIdx + 1 ? "active" : ""}`}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })
+          }
         </div>
 
         {/* Ramp grid (drill mode) */}
@@ -337,11 +359,12 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
 
         {activeTab !== "drill" && (
           <button className="fs-ctrl-btn fs-ctrl-sub" onClick={() => {
-            const ts = state.timeSignature;
-            const next = ts >= 7 ? 0 : ts + 1;
-            setTimeSignature(next);
+            const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
+            const nextIdx = (currentIdx === -1 ? 0 : (currentIdx + 1) % METER_PRESETS.length);
+            setBeatGroups(METER_PRESETS[nextIdx].groups);
+            notifySettingsChange();
           }}>
-            {state.timeSignature >= 2 ? `${state.timeSignature}/4` : state.timeSignature === 1 ? t("zen.timeSigAll") : t("zen.timeSigOff")}
+            {METER_PRESETS.find(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups))?.label ?? `${state.timeSignature}/4`}
           </button>
         )}
         {activeTab !== "drill" && (

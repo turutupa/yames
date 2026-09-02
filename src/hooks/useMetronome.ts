@@ -16,6 +16,7 @@ const DEFAULT_STATE: AppState = {
   volume: 0.8,
   soundType: "click",
   timeSignature: 4,
+  beatGroups: [4],
   speedRamp: {
     startBpm: 80,
     targetBpm: 140,

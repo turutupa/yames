@@ -121,6 +121,29 @@
   display: flex;
   align-items: flex-start;
   gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Group cluster — tighter gap within a group, wider gap between groups */
+.fs-group-cluster {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 0 4px;
+  position: relative;
+}
+
+/* Subtle separator between groups */
+.fs-group-cluster + .fs-group-cluster::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .fs-beat-group {
@@ -137,6 +160,12 @@
   background: rgba(255, 255, 255, 0.18);
   border: 2px solid rgba(255, 255, 255, 0.3);
   transition: all 0.08s ease;
+}
+
+/* First beat of each group — subtle accent tint at rest */
+.fs-beat.accent-marker {
+  background: color-mix(in srgb, var(--accent) 30%, rgba(255,255,255,0.12));
+  border-color: color-mix(in srgb, var(--accent) 40%, rgba(255,255,255,0.2));
 }
 
 .fs-beat.active {

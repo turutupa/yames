@@ -58,7 +58,22 @@ export const INSTRUMENTS: Array<{ id: string; soon?: boolean }> = [
   { id: "other", soon: true },
 ];
 
-export const TIME_SIGNATURES = [0, 1, 2, 3, 4, 5, 6, 7];
+export const METER_VARIANTS: Record<string, number[][]> = {
+  "5/4":  [[3, 2], [2, 3]],
+  "7/8":  [[3, 2, 2], [2, 2, 3], [2, 3, 2]],
+  "8/8":  [[3, 2, 3], [3, 3, 2], [2, 3, 3]],
+};
+
+export const METER_PRESETS: Array<{ label: string; groups: number[] }> = [
+  { label: "4/4",  groups: [4] },
+  { label: "3/4",  groups: [3] },
+  { label: "5/4",  groups: [3, 2] },
+  { label: "6/8",  groups: [3, 3] },
+  { label: "7/8",  groups: [3, 2, 2] },
+  { label: "8/8",  groups: [3, 2, 3] },
+  { label: "9/8",  groups: [3, 3, 3] },
+  { label: "12/8", groups: [3, 3, 3, 3] },
+];
 
 export const TEMPO_MARKINGS: [number, string][] = [
   [20, "Grave"],

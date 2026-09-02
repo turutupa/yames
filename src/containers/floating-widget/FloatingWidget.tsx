@@ -4,13 +4,15 @@ import { useTranslation } from "react-i18next";
 import { useDrag } from "../../hooks/useDrag";
 import { useMetronome } from "../../hooks/useMetronome";
 import {
+  setBeatGroups,
   setBpm,
+  notifySettingsChange,
   setSubdivision,
-  setTimeSignature,
   showMain,
   storeLoad,
   togglePlayback,
 } from "../../ipc";
+import { METER_PRESETS } from "../../constants/metronome";
 import "../../styles/floating-widget.css";
 import type { Subdivision } from "../../types";
 
@@ -22,6 +24,7 @@ const SUBDIVISION_LABELS: Record<Subdivision, string> = {
   5: "♪⁵",
   6: "♬⁶",
 };
+
 
 const IS_MAC = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 
@@ -56,8 +59,6 @@ function eventToCombo(e: KeyboardEvent): string {
   }
   return parts.join("");
 }
-
-const TIME_SIG_VALUES = [0, 1, 2, 3, 4, 5, 6, 7];
 
 export function FloatingWidget() {
   const { t } = useTranslation();
@@ -119,17 +120,17 @@ export function FloatingWidget() {
           break;
         }
         case "sig-next": {
-          const idx = TIME_SIG_VALUES.indexOf(state.timeSignature);
-          setTimeSignature(TIME_SIG_VALUES[(idx + 1) % TIME_SIG_VALUES.length]);
+          const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
+          const nextIdx = (currentIdx === -1 ? 0 : (currentIdx + 1) % METER_PRESETS.length);
+          setBeatGroups(METER_PRESETS[nextIdx].groups);
+          notifySettingsChange();
           break;
         }
         case "sig-prev": {
-          const idx = TIME_SIG_VALUES.indexOf(state.timeSignature);
-          setTimeSignature(
-            TIME_SIG_VALUES[
-              (idx - 1 + TIME_SIG_VALUES.length) % TIME_SIG_VALUES.length
-            ],
-          );
+          const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
+          const nextIdx = (currentIdx === -1 ? 0 : (currentIdx - 1 + METER_PRESETS.length) % METER_PRESETS.length);
+          setBeatGroups(METER_PRESETS[nextIdx].groups);
+          notifySettingsChange();
           break;
         }
         case "toggle-widget":
@@ -140,14 +141,14 @@ export function FloatingWidget() {
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [keyBindings, state.bpm, state.subdivision, state.timeSignature]);
+  }, [keyBindings, state.bpm, state.subdivision, state.beatGroups]);
 
   const MIN_WIDTH = 300;
   const FIXED_HEIGHT = 120;
 
   // Calculate needed width based on beat dots and subdivision
   // Left side (buttons ~170px) + gap + beat dots + padding
-  const beatsPerMeasure = state.timeSignature >= 2 ? state.timeSignature : 2;
+  const beatsPerMeasure = Math.max(2, (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0));
   const subCount = state.subdivision > 1 ? state.subdivision - 1 : 0;
   const beatGroupWidth = Math.max(10, subCount * 4 + (subCount - 1) * 2); // sub dots or main dot
   const beatsWidth =
@@ -164,9 +165,10 @@ export function FloatingWidget() {
   const widgetBeats = beatsPerMeasure;
   const widgetActiveBeat = activeBeat;
   const isAccentBeat = (beatIdx: number) => {
-    if (state.timeSignature === 1) return true; // Always
-    if (state.timeSignature >= 2 && beatIdx === 0) return activeBeat === 0;
-    return false;
+    const s = new Set<number>();
+    let c = 0;
+    for (const g of (state.beatGroups ?? [state.timeSignature])) { s.add(c); c += g; }
+    return s.has(beatIdx);
   };
 
   const startEdit = () => {
@@ -243,11 +245,14 @@ export function FloatingWidget() {
   };
 
   const cycleTimeSig = () => {
-    const idx = TIME_SIG_VALUES.indexOf(state.timeSignature);
-    setTimeSignature(TIME_SIG_VALUES[(idx + 1) % TIME_SIG_VALUES.length]);
+    const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
+    const nextIdx = (currentIdx === -1 ? 0 : (currentIdx + 1) % METER_PRESETS.length);
+    setBeatGroups(METER_PRESETS[nextIdx].groups);
+    notifySettingsChange();
   };
 
-  const timeSigLabel = t(`meter.${state.timeSignature}`);
+  const timeSigLabel =
+    METER_PRESETS.find(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups))?.label ?? `${state.timeSignature}/4`;
   const rampActive = state.speedRamp.active;
 
   return (

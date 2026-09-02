@@ -87,6 +87,8 @@ pub struct AppState {
     pub sound_type: String,
     #[serde(rename = "timeSignature")]
     pub time_signature: u8,
+    #[serde(rename = "beatGroups", default = "default_beat_groups")]
+    pub beat_groups: Vec<u8>,
     #[serde(rename = "speedRamp")]
     pub speed_ramp: SpeedRamp,
 
@@ -98,6 +100,10 @@ pub struct AppState {
     /// Defaults to `Other` until the user picks one — the first-launch
     /// modal on the React side is responsible for prompting.
     pub instrument: Instrument,
+}
+
+fn default_beat_groups() -> Vec<u8> {
+    vec![4]
 }
 
 impl Default for AppState {
@@ -116,6 +122,7 @@ impl Default for AppState {
             volume_real: 0.8,
             sound_type: "click".to_string(),
             time_signature: 4,
+            beat_groups: vec![4],
             speed_ramp: SpeedRamp::default(),
             instrument: Instrument::default(),
         }

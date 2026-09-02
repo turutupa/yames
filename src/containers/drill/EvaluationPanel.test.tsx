@@ -31,6 +31,7 @@ const makeSession = (overrides: Partial<SavedSession> = {}): SavedSession => ({
   timestamp: 1700000000000,
   bpm: 120,
   timeSignature: 4,
+  beatGroups: [4],
   report: {
     totalBeats: 32,
     hitsCount: 30,

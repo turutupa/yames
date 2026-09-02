@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>yames — Interaction Concepts</title>
+<style>
+:root {
+  --bg:          #0b0b16;
+  --surface:     #13131f;
+  --card:        #191926;
+  --accent:      #e94560;
+  --accent-glow: rgba(233,69,96,0.4);
+  --accent-dim:  rgba(233,69,96,0.55);
+  --text:        #eee;
+  --text2:       #666;
+  --text3:       #444;
+  --border:      rgba(255,255,255,0.06);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+body {
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 36px 24px 56px;
+  gap: 16px;
+  color: var(--text);
+}
+
+.page-label {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--text2);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  width: 100%;
+  max-width: 820px;
+}
+
+/* ── Card ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.card-head { display: flex; flex-direction: column; gap: 4px; }
+
+.card-num {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--accent); opacity: 0.8;
+}
+
+.card-title {
+  font-size: 15px; font-weight: 700; color: var(--text);
+}
+
+.card-hint {
+  font-size: 11px; color: var(--text2); line-height: 1.5;
+}
+
+.demo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 120px;
+}
+
+
+/* ══════════════════════════════
+   IDEA 1 — Drag bars
+══════════════════════════════ */
+.bars-demo {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 110px;
+}
+
+.drag-bar-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  height: 110px;
+  justify-content: flex-end;
+  cursor: ns-resize;
+  position: relative;
+}
+
+.drag-bar {
+  width: 42px;
+  border-radius: 6px 6px 3px 3px;
+  transition: box-shadow 80ms;
+  position: relative;
+}
+
+.drag-bar::after {
+  content: '';
+  position: absolute;
+  top: 6px; left: 50%; transform: translateX(-50%);
+  width: 16px; height: 3px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.25);
+  pointer-events: none;
+}
+
+.drag-bar-num {
+  position: absolute;
+  bottom: -18px;
+  font-size: 10px;
+  color: var(--text3);
+}
+
+.drag-bar-slot:hover .drag-bar { filter: brightness(1.2); }
+.drag-bar-slot.dragging .drag-bar { filter: brightness(1.35); }
+
+
+/* ══════════════════════════════
+   IDEA 2 — Ring fill
+══════════════════════════════ */
+.rings-demo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ring-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: ns-resize;
+}
+.ring-slot:hover svg { filter: drop-shadow(0 0 6px var(--accent-glow)); }
+.ring-slot.dragging svg { filter: drop-shadow(0 0 10px var(--accent-glow)); }
+
+.ring-num {
+  font-size: 10px;
+  color: var(--text3);
+}
+
+
+/* ══════════════════════════════
+   IDEA 3 — Long press radial
+══════════════════════════════ */
+.dots-demo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+}
+
+.lp-dot-slot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.lp-dot {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.1);
+  transition: transform 120ms, box-shadow 120ms;
+  position: relative;
+}
+
+.lp-dot.state-accent {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 14px var(--accent-glow);
+}
+.lp-dot.state-normal {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.15);
+}
+.lp-dot.state-ghost {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.08);
+}
+.lp-dot.state-mute {
+  background: transparent;
+  border-color: rgba(255,255,255,0.06);
+  border-style: dashed;
+}
+
+/* press ring animation */
+.lp-dot::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  opacity: 0;
+  transform: scale(0.8);
+  transition: none;
+}
+.lp-dot-slot.pressing .lp-dot::before {
+  animation: pressRing 0.55s ease-out forwards;
+}
+@keyframes pressRing {
+  0%   { opacity: 0.6; transform: scale(0.9); }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+
+.lp-num {
+  font-size: 10px; color: var(--text3);
+}
+
+/* Radial menu */
+.radial-menu {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0; height: 0;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.radial-menu.open { pointer-events: all; }
+
+.radial-option {
+  position: absolute;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 11px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.1);
+  cursor: pointer;
+  transform: translate(-50%, -50%) scale(0.6);
+  opacity: 0;
+  transition: all 200ms cubic-bezier(.34,1.56,.64,1);
+  backdrop-filter: blur(8px);
+}
+
+.radial-menu.open .radial-option {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+
+.radial-option.opt-accent {
+  background: var(--accent); color: #fff;
+  top: -52px; left: 50%;
+  transition-delay: 0ms;
+}
+.radial-option.opt-normal {
+  background: rgba(30,30,50,0.95); color: rgba(255,255,255,0.85);
+  top: 0; left: calc(50% + 64px);
+  transition-delay: 40ms;
+}
+.radial-option.opt-ghost {
+  background: rgba(30,30,50,0.95); color: rgba(255,255,255,0.45);
+  top: 52px; left: 50%;
+  transition-delay: 80ms;
+}
+.radial-option.opt-mute {
+  background: rgba(30,30,50,0.95); color: rgba(255,255,255,0.25);
+  top: 0; left: calc(50% - 64px);
+  transition-delay: 40ms;
+}
+
+.radial-option:hover { filter: brightness(1.2); transform: translate(-50%,-50%) scale(1.08) !important; }
+
+/* long-press hint */
+.lp-hint {
+  font-size: 10px; color: var(--text3);
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+
+/* ══════════════════════════════
+   IDEA 4 — Dot faders
+══════════════════════════════ */
+.faders-demo {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding-bottom: 18px;
+}
+
+.fader-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: ns-resize;
+}
+
+.fader-lane {
+  width: 38px;
+  height: 96px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
+  position: relative;
+  overflow: visible;
+}
+
+/* track line */
+.fader-lane::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 8px; bottom: 8px;
+  width: 1px;
+  background: rgba(255,255,255,0.06);
+  transform: translateX(-50%);
+}
+
+/* zone labels */
+.fader-lane::after {
+  content: '';
+}
+
+.fader-dot {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  position: absolute;
+  left: 50%; transform: translateX(-50%);
+  cursor: ns-resize;
+  transition: box-shadow 120ms, background 120ms;
+}
+
+.fader-num {
+  font-size: 10px; color: var(--text3);
+}
+
+/* zone ticks inside lane */
+.fader-tick {
+  position: absolute;
+  left: 6px; right: 6px;
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+  pointer-events: none;
+}
+.fader-tick-label {
+  position: absolute;
+  right: calc(100% + 5px);
+  font-size: 8px;
+  color: var(--text3);
+  letter-spacing: 0.06em;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+</style>
+</head>
+<body>
+
+<div class="page-label">yames — Interaction Concepts</div>
+
+<div class="grid">
+
+  <!-- ══ IDEA 1 ══ -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-num">01</div>
+      <div class="card-title">Drag bars</div>
+      <div class="card-hint">Drag up/down to set accent. Like a mixer fader.</div>
+    </div>
+    <div class="demo">
+      <div class="bars-demo" id="barsDemo"></div>
+    </div>
+  </div>
+
+  <!-- ══ IDEA 2 ══ -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-num">02</div>
+      <div class="card-title">Ring fill</div>
+      <div class="card-hint">Drag up/down to fill the ring. Fill level = accent.</div>
+    </div>
+    <div class="demo">
+      <div class="rings-demo" id="ringsDemo"></div>
+    </div>
+  </div>
+
+  <!-- ══ IDEA 3 ══ -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-num">03</div>
+      <div class="card-title">Long press reveal</div>
+      <div class="card-hint">Hold a beat dot to reveal a floating accent menu.</div>
+    </div>
+    <div class="demo" style="flex-direction:column; gap:12px;">
+      <div class="dots-demo" id="dotsDemo"></div>
+      <div class="lp-hint">hold any dot</div>
+    </div>
+  </div>
+
+  <!-- ══ IDEA 4 ══ -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-num">04</div>
+      <div class="card-title">Dot faders</div>
+      <div class="card-hint">Each dot lives in a lane. Drag it up/down — top = accent, bottom = silent.</div>
+    </div>
+    <div class="demo">
+      <div class="faders-demo" id="fadersDemo"></div>
+    </div>
+  </div>
+
+</div><!-- /grid -->
+
+<script>
+/* ─────────────────────────────────────
+   SHARED DRAG INFRASTRUCTURE
+───────────────────────────────────── */
+let activeDrag = null;
+
+document.addEventListener('mousemove', (e) => {
+  if (!activeDrag) return;
+  e.preventDefault();
+  activeDrag.onMove(e);
+});
+
+document.addEventListener('mouseup', (e) => {
+  if (!activeDrag) return;
+  activeDrag.onUp && activeDrag.onUp(e);
+  activeDrag = null;
+});
+
+function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+/* ─────────────────────────────────────
+   IDEA 1 — DRAG BARS
+───────────────────────────────────── */
+const barData = [
+  { level: 1.0 },  // accent
+  { level: 0.52 }, // normal
+  { level: 0.52 },
+  { level: 0.52 },
+  { level: 1.0 },  // accent
+];
+
+const BAR_MAX = 88, BAR_MIN = 10, BAR_RANGE = BAR_MAX - BAR_MIN;
+
+function barColor(level) {
+  if (level > 0.72) return { bg: 'var(--accent)', shadow: '0 0 14px var(--accent-glow), 0 0 28px rgba(233,69,96,0.2)' };
+  if (level > 0.25) return { bg: 'rgba(255,255,255,0.22)', shadow: 'none' };
+  return { bg: 'rgba(255,255,255,0.06)', shadow: 'none' };
+}
+
+function buildBars() {
+  const wrap = document.getElementById('barsDemo');
+  barData.forEach((d, i) => {
+    const slot = document.createElement('div');
+    slot.className = 'drag-bar-slot';
+
+    const bar = document.createElement('div');
+    bar.className = 'drag-bar';
+    bar.dataset.i = i;
+
+    const num = document.createElement('div');
+    num.className = 'drag-bar-num';
+    num.textContent = i + 1;
+
+    slot.appendChild(bar);
+    slot.appendChild(num);
+    wrap.appendChild(slot);
+
+    slot.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      slot.classList.add('dragging');
+      const startY = e.clientY;
+      const startLevel = d.level;
+      activeDrag = {
+        onMove(ev) {
+          const dy = startY - ev.clientY;
+          d.level = clamp(startLevel + dy / BAR_RANGE, 0, 1);
+          renderBar(bar, d.level);
+        },
+        onUp() { slot.classList.remove('dragging'); }
+      };
+    });
+
+    renderBar(bar, d.level);
+  });
+}
+
+function renderBar(bar, level) {
+  const h = BAR_MIN + level * BAR_RANGE;
+  const { bg, shadow } = barColor(level);
+  bar.style.height = h + 'px';
+  bar.style.background = bg;
+  bar.style.boxShadow = shadow;
+}
+
+buildBars();
+
+
+/* ─────────────────────────────────────
+   IDEA 2 — RING FILL
+───────────────────────────────────── */
+const ringData = [
+  { level: 1.0 },
+  { level: 0.5 },
+  { level: 0.5 },
+  { level: 0.5 },
+  { level: 1.0 },
+];
+
+const R = 22;
+const CIRCUM = 2 * Math.PI * R; // ~138.2
+
+function ringOffset(level) {
+  return CIRCUM * (1 - level);
+}
+
+function ringStroke(level) {
+  if (level > 0.72) return 'var(--accent)';
+  if (level > 0.2)  return 'rgba(255,255,255,0.35)';
+  return 'rgba(255,255,255,0.1)';
+}
+
+function ringGlow(level) {
+  if (level > 0.72) return `drop-shadow(0 0 6px var(--accent-glow))`;
+  return 'none';
+}
+
+function buildRings() {
+  const wrap = document.getElementById('ringsDemo');
+  ringData.forEach((d, i) => {
+    const slot = document.createElement('div');
+    slot.className = 'ring-slot';
+
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '56');
+    svg.setAttribute('height', '56');
+    svg.setAttribute('viewBox', '0 0 56 56');
+
+    // track circle
+    const track = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    track.setAttribute('cx', '28'); track.setAttribute('cy', '28');
+    track.setAttribute('r', R);
+    track.setAttribute('fill', 'none');
+    track.setAttribute('stroke', 'rgba(255,255,255,0.07)');
+    track.setAttribute('stroke-width', '5');
+
+    // fill circle
+    const fill = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    fill.setAttribute('cx', '28'); fill.setAttribute('cy', '28');
+    fill.setAttribute('r', R);
+    fill.setAttribute('fill', 'none');
+    fill.setAttribute('stroke-width', '5');
+    fill.setAttribute('stroke-linecap', 'round');
+    fill.setAttribute('stroke-dasharray', CIRCUM);
+    fill.setAttribute('transform', 'rotate(-90 28 28)');
+
+    // center dot
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    dot.setAttribute('cx', '28'); dot.setAttribute('cy', '28');
+    dot.setAttribute('r', '8');
+
+    svg.appendChild(track);
+    svg.appendChild(fill);
+    svg.appendChild(dot);
+
+    const num = document.createElement('div');
+    num.className = 'ring-num';
+    num.textContent = i + 1;
+
+    slot.appendChild(svg);
+    slot.appendChild(num);
+    wrap.appendChild(slot);
+
+    slot.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      slot.classList.add('dragging');
+      const startY = e.clientY;
+      const startLevel = d.level;
+      activeDrag = {
+        onMove(ev) {
+          const dy = startY - ev.clientY;
+          d.level = clamp(startLevel + dy / 80, 0, 1);
+          renderRing(fill, dot, svg, d.level);
+        },
+        onUp() { slot.classList.remove('dragging'); }
+      };
+    });
+
+    renderRing(fill, dot, svg, d.level);
+  });
+}
+
+function renderRing(fill, dot, svg, level) {
+  fill.setAttribute('stroke-dashoffset', ringOffset(level));
+  fill.setAttribute('stroke', ringStroke(level));
+  dot.setAttribute('fill', level > 0.72 ? 'rgba(255,255,255,0.9)' : level > 0.2 ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.08)');
+  svg.style.filter = ringGlow(level);
+}
+
+buildRings();
+
+
+/* ─────────────────────────────────────
+   IDEA 3 — LONG PRESS RADIAL
+───────────────────────────────────── */
+const dotStates = ['accent', 'normal', 'normal', 'ghost', 'accent'];
+let openMenu = null;
+let pressTimer = null;
+
+const RADIAL_OPTIONS = [
+  { cls: 'opt-accent', label: 'Accent', state: 'accent' },
+  { cls: 'opt-normal', label: 'Normal', state: 'normal' },
+  { cls: 'opt-ghost',  label: 'Ghost',  state: 'ghost'  },
+  { cls: 'opt-mute',   label: 'Mute',   state: 'mute'   },
+];
+
+function buildDots() {
+  const wrap = document.getElementById('dotsDemo');
+
+  dotStates.forEach((state, i) => {
+    const slot = document.createElement('div');
+    slot.className = 'lp-dot-slot';
+
+    const dot = document.createElement('div');
+    dot.className = 'lp-dot state-' + state;
+
+    const num = document.createElement('div');
+    num.className = 'lp-num';
+    num.textContent = i + 1;
+
+    // radial menu
+    const menu = document.createElement('div');
+    menu.className = 'radial-menu';
+
+    RADIAL_OPTIONS.forEach(opt => {
+      const btn = document.createElement('div');
+      btn.className = 'radial-option ' + opt.cls;
+      btn.textContent = opt.label;
+      btn.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        dotStates[i] = opt.state;
+        dot.className = 'lp-dot state-' + opt.state;
+        closeMenu();
+      });
+      menu.appendChild(btn);
+    });
+
+    slot.appendChild(dot);
+    slot.appendChild(num);
+    slot.appendChild(menu);
+    wrap.appendChild(slot);
+
+    // long press
+    slot.addEventListener('mousedown', (e) => {
+      if (openMenu) { closeMenu(); return; }
+      slot.classList.add('pressing');
+      pressTimer = setTimeout(() => {
+        openMenu = menu;
+        menu.classList.add('open');
+        slot.classList.remove('pressing');
+      }, 500);
+    });
+
+    slot.addEventListener('mouseup', () => {
+      clearTimeout(pressTimer);
+      slot.classList.remove('pressing');
+    });
+
+    slot.addEventListener('mouseleave', () => {
+      clearTimeout(pressTimer);
+      slot.classList.remove('pressing');
+    });
+  });
+
+  // click outside to close
+  document.addEventListener('mousedown', (e) => {
+    if (openMenu && !e.target.closest('.radial-option')) {
+      closeMenu();
+    }
+  });
+}
+
+function closeMenu() {
+  if (openMenu) { openMenu.classList.remove('open'); openMenu = null; }
+  clearTimeout(pressTimer);
+}
+
+buildDots();
+
+
+/* ─────────────────────────────────────
+   IDEA 4 — DOT FADERS
+───────────────────────────────────── */
+const faderData = [
+  { level: 0.0 },  // top = accent
+  { level: 0.5 },
+  { level: 0.5 },
+  { level: 0.5 },
+  { level: 0.0 },  // accent
+];
+
+const LANE_H = 96;
+const DOT_D  = 28;
+const LANE_PAD = 8;
+const TRAVEL = LANE_H - DOT_D - (LANE_PAD * 2); // usable drag range
+
+const ZONES = [
+  { label: 'accent', top: LANE_PAD,                bg: 'var(--accent)',            shadow: '0 0 12px var(--accent-glow)' },
+  { label: 'normal', top: LANE_PAD + TRAVEL * 0.5, bg: 'rgba(255,255,255,0.22)',   shadow: 'none' },
+  { label: 'silent', top: LANE_PAD + TRAVEL,       bg: 'rgba(255,255,255,0.06)',   shadow: 'none' },
+];
+
+function faderStyle(level) {
+  // level 0 = top = accent, level 1 = bottom = silent
+  const t = LANE_PAD + level * TRAVEL;
+  let bg, shadow;
+  if (level < 0.3)       { bg = 'var(--accent)';          shadow = '0 0 14px var(--accent-glow)'; }
+  else if (level < 0.72) { bg = 'rgba(255,255,255,0.22)'; shadow = 'none'; }
+  else                   { bg = 'rgba(255,255,255,0.06)';  shadow = 'none'; }
+  return { top: t, bg, shadow };
+}
+
+function buildFaders() {
+  const wrap = document.getElementById('fadersDemo');
+
+  // one-time zone labels on first fader
+  faderData.forEach((d, i) => {
+    const slot = document.createElement('div');
+    slot.className = 'fader-slot';
+
+    const lane = document.createElement('div');
+    lane.className = 'fader-lane';
+
+    // ticks
+    const tickPositions = [
+      { top: LANE_PAD + DOT_D/2,              label: 'acc' },
+      { top: LANE_PAD + TRAVEL/2 + DOT_D/2,  label: 'mid' },
+      { top: LANE_PAD + TRAVEL + DOT_D/2,     label: 'off' },
+    ];
+    if (i === 0) {
+      tickPositions.forEach(tp => {
+        const tick = document.createElement('div');
+        tick.className = 'fader-tick';
+        tick.style.top = tp.top + 'px';
+        const lbl = document.createElement('div');
+        lbl.className = 'fader-tick-label';
+        lbl.textContent = tp.label;
+        lbl.style.top = tp.top + 'px';
+        lane.appendChild(tick);
+        lane.appendChild(lbl);
+      });
+    }
+
+    const dot = document.createElement('div');
+    dot.className = 'fader-dot';
+
+    const num = document.createElement('div');
+    num.className = 'fader-num';
+    num.textContent = i + 1;
+
+    lane.appendChild(dot);
+    slot.appendChild(lane);
+    slot.appendChild(num);
+    wrap.appendChild(slot);
+
+    lane.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      const startY = e.clientY;
+      const startLevel = d.level;
+      activeDrag = {
+        onMove(ev) {
+          const dy = ev.clientY - startY;
+          d.level = clamp(startLevel + dy / TRAVEL, 0, 1);
+          renderFaderDot(dot, d.level);
+        }
+      };
+    });
+
+    renderFaderDot(dot, d.level);
+  });
+}
+
+function renderFaderDot(dot, level) {
+  const { top, bg, shadow } = faderStyle(level);
+  dot.style.top = top + 'px';
+  dot.style.background = bg;
+  dot.style.boxShadow = shadow;
+}
+
+buildFaders();
+</script>
+</body>
+</html>
