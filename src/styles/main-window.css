@@ -2025,14 +2025,11 @@
   transition: opacity 0.12s, color 0.12s;
 }
 
-.free-count-btn:hover:not(:disabled) {
+/* The chevrons wrap (16 → 1, 1 → 16) rather than clamp, so they never
+   disable — no `:disabled` rule needed. */
+.free-count-btn:hover {
   opacity: 1;
   color: var(--text-primary);
-}
-
-.free-count-btn:disabled {
-  opacity: 0.2;
-  cursor: default;
 }
 
 /* =================== Settings view =================== */

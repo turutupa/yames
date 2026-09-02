@@ -14,7 +14,7 @@ import {
 import type { AppState, Subdivision } from "../types";
 import type { HotkeyAction } from "../hotkeys";
 import { FULLSCREEN_EXIT_DELAY } from "../hotkeys";
-import { METER_PRESETS } from "../constants/metronome";
+import { METER_PRESETS, nextFreeBeatCount, prevFreeBeatCount } from "../constants/metronome";
 
 export type ViewName = "beat" | "drill" | "track" | "settings";
 
@@ -148,7 +148,7 @@ export function useActionDispatcher({
         case "sig-next": {
           if (state.freeMode) {
             const total = state.beatGroups.reduce((a, b) => a + b, 0);
-            setBeatGroups([total >= 16 ? 1 : total + 1]); notifySettingsChange();
+            setBeatGroups([nextFreeBeatCount(total)]); notifySettingsChange();
           } else {
             const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
             const nextIdx = (currentIdx === -1 ? 0 : (currentIdx + 1) % METER_PRESETS.length);
@@ -160,7 +160,7 @@ export function useActionDispatcher({
         case "sig-prev": {
           if (state.freeMode) {
             const total = state.beatGroups.reduce((a, b) => a + b, 0);
-            setBeatGroups([total <= 1 ? 16 : total - 1]); notifySettingsChange();
+            setBeatGroups([prevFreeBeatCount(total)]); notifySettingsChange();
           } else {
             const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
             const nextIdx = (currentIdx === -1 ? 0 : (currentIdx - 1 + METER_PRESETS.length) % METER_PRESETS.length);

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { AppState, BeatEvent, Subdivision } from "../../types";
 // BeatEvent used for evaluation feedback; Subdivision for sub-row cast
 import type { useEvaluation } from "../../hooks/useEvaluation";
-import { setSubdivision } from "../../ipc";
+import { setSubdivision, setBeatGroups, notifySettingsChange } from "../../ipc";
 import {
   getTempoMarking,
 } from "../../constants/metronome";
@@ -149,6 +149,10 @@ export function MetronomeView({
           activeSub={activeSub}
           isDownbeat={isDownbeat}
           freeMode={state.freeMode}
+          onBeatCountChange={async (next) => {
+            await setBeatGroups([next]);
+            await notifySettingsChange();
+          }}
         />
 
         {evaluation.enabled && state.isPlaying && (

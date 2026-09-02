@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { AppState, BeatEvent, Subdivision } from "../../types";
 import { setBpm, togglePlayback, setSubdivision, setBeatGroups, notifySettingsChange, stopSpeedRamp, startSpeedRamp, startSpeedRampFrom, configureSpeedRamp, storeSave, storeLoad } from "../../ipc";
-import { METER_PRESETS } from "../../constants/metronome";
+import { METER_PRESETS, nextFreeBeatCount } from "../../constants/metronome";
 import { ZenEffects, type ZenStyle } from "./ZenEffects";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import "../../styles/fullscreen.css";
@@ -361,7 +361,7 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
           <button className="fs-ctrl-btn fs-ctrl-sub" onClick={() => {
             const total = (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0);
             if (state.freeMode) {
-              setBeatGroups([total >= 16 ? 1 : total + 1]);
+              setBeatGroups([nextFreeBeatCount(total)]);
               notifySettingsChange();
             } else {
               const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));

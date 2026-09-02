@@ -1,5 +1,8 @@
 import { useTranslation } from "react-i18next";
-import { setBeatGroups, notifySettingsChange } from "../../ipc";
+import {
+  nextFreeBeatCount,
+  prevFreeBeatCount,
+} from "../../constants/metronome";
 
 const SUBDIVISION_MULTIPLIER: Record<number, number> = {
   1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
@@ -13,6 +16,12 @@ interface GroupEditorProps {
   activeSub?: number;
   isDownbeat?: boolean;
   freeMode?: boolean;
+  /**
+   * Called by the free-mode stepper with the new beat count. Kept as a prop so
+   * this component stays presentational — the owner (`MetronomeView`) does the
+   * IPC. No-op default lets the grouped branch render without wiring.
+   */
+  onBeatCountChange?: (next: number) => void;
 }
 
 function computeAccentPositions(groups: number[]): Set<number> {
@@ -30,6 +39,7 @@ export function GroupEditor({
   activeSub = -1,
   isDownbeat = false,
   freeMode = false,
+  onBeatCountChange,
 }: GroupEditorProps) {
   const { t } = useTranslation();
   const total = beatGroups.reduce((a, b) => a + b, 0);
@@ -63,24 +73,16 @@ export function GroupEditor({
         <div className="group-formula">
           <button
             className="free-count-btn"
-            onClick={async () => {
-              const next = total <= 1 ? 16 : total - 1;
-              await setBeatGroups([next]);
-              await notifySettingsChange();
-            }}
+            onClick={() => onBeatCountChange?.(prevFreeBeatCount(total))}
             aria-label={t("metronome.removeBeat")}
           >‹</button>
-          <span className="group-formula-total">{total} beats</span>
+          <span className="group-formula-total">{t("metronome.beatCount", { count: total })}</span>
           <button
             className="free-count-btn"
-            onClick={async () => {
-              const next = total >= 16 ? 1 : total + 1;
-              await setBeatGroups([next]);
-              await notifySettingsChange();
-            }}
+            onClick={() => onBeatCountChange?.(nextFreeBeatCount(total))}
             aria-label={t("metronome.addBeat")}
           >›</button>
-          <span className="group-formula-clicks">{total * (SUBDIVISION_MULTIPLIER[subdivision] ?? 1)} clicks/bar</span>
+          <span className="group-formula-clicks">{t("metronome.clicksPerBar", { count: clicksPerBar })}</span>
         </div>
       </div>
     );
@@ -123,15 +125,15 @@ export function GroupEditor({
                 })}
               </div>
             </div>
-            <span className="group-label">{count} {count === 1 ? "beat" : "beats"}</span>
+            <span className="group-label">{t("metronome.beatCount", { count })}</span>
           </div>
         ))}
       </div>
 
       <div className="group-formula">
-        <span className="group-formula-total">{total} beats</span>
+        <span className="group-formula-total">{t("metronome.beatCount", { count: total })}</span>
         <span className="group-formula-expr">{formula}</span>
-        <span className="group-formula-clicks">{clicksPerBar} clicks/bar</span>
+        <span className="group-formula-clicks">{t("metronome.clicksPerBar", { count: clicksPerBar })}</span>
       </div>
     </div>
   );

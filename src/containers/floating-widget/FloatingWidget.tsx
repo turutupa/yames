@@ -12,7 +12,7 @@ import {
   storeLoad,
   togglePlayback,
 } from "../../ipc";
-import { METER_PRESETS } from "../../constants/metronome";
+import { METER_PRESETS, nextFreeBeatCount, prevFreeBeatCount } from "../../constants/metronome";
 import "../../styles/floating-widget.css";
 import type { Subdivision } from "../../types";
 
@@ -122,7 +122,7 @@ export function FloatingWidget() {
         case "sig-next": {
           if (state.freeMode) {
             const total = (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0);
-            setBeatGroups([total >= 16 ? 1 : total + 1]); notifySettingsChange();
+            setBeatGroups([nextFreeBeatCount(total)]); notifySettingsChange();
           } else {
             const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
             const nextIdx = (currentIdx === -1 ? 0 : (currentIdx + 1) % METER_PRESETS.length);
@@ -134,7 +134,7 @@ export function FloatingWidget() {
         case "sig-prev": {
           if (state.freeMode) {
             const total = (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0);
-            setBeatGroups([total <= 1 ? 16 : total - 1]); notifySettingsChange();
+            setBeatGroups([prevFreeBeatCount(total)]); notifySettingsChange();
           } else {
             const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
             const nextIdx = (currentIdx === -1 ? 0 : (currentIdx - 1 + METER_PRESETS.length) % METER_PRESETS.length);
@@ -258,7 +258,7 @@ export function FloatingWidget() {
   const cycleTimeSig = () => {
     if (state.freeMode) {
       const total = (state.beatGroups ?? [state.timeSignature]).reduce((a: number, b: number) => a + b, 0);
-      setBeatGroups([total >= 16 ? 1 : total + 1]); notifySettingsChange();
+      setBeatGroups([nextFreeBeatCount(total)]); notifySettingsChange();
     } else {
       const currentIdx = METER_PRESETS.findIndex(p => JSON.stringify(p.groups) === JSON.stringify(state.beatGroups));
       const nextIdx = (currentIdx === -1 ? 0 : (currentIdx + 1) % METER_PRESETS.length);
