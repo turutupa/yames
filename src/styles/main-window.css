@@ -17,11 +17,12 @@
 /* Windows: frameless — DWM handles shadow + rounding; clip children to rounded rect */
 .main-window.os-windows {
   overflow: hidden;
+  background: var(--bg-primary);
 }
 
 .main-window.os-windows .main-header {
-  padding-left: 12px;     /* no macOS traffic-light offset */
-  padding-right: 140px;   /* reserve space for 3 × 46px window controls */
+  padding-left: 140px;    /* reserve space for 3 × 46px window controls (now on left) */
+  padding-right: 12px;
 }
 
 /* Linux: frameless — compositor handles rounding; CSS box-shadow for depth */
@@ -29,16 +30,12 @@
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-primary);
 }
 
 .main-window.os-linux .main-header {
-  padding-left: 12px;
-  padding-right: 112px;   /* reserve space for 3 × 36px window controls */
-}
-
-/* Windows: solid background — no Mica/Acrylic */
-.main-window.os-windows {
-  background: rgb(18, 18, 20);
+  padding-left: 112px;    /* reserve space for 3 × 36px window controls (now on left) */
+  padding-right: 12px;
 }
 
 /* Suppress decorum's injected JS controls — we use our own React <WindowControls /> */
