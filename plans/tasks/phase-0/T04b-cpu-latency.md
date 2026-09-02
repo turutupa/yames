@@ -36,22 +36,29 @@ Two observations point at the fix:
    `clear_kv_cache()` zeroes the buffer and cost 1.8 s on Vulkan;
    use the seq-range variant). Re-measure CPU rephrase; target p50
    ≤ 3 s on this laptop.
-2. **Thread count**: `inference_threads()` gives 6 on a 16-logical-core
+2. **llama.cpp worker priority**: T06 found `with_below_normal_priority`
+   (and T04's lowered inference thread) demote only the calling thread;
+   llama.cpp's compute workers start at normal priority and disable
+   power throttling. Use `llama_attach_threadpool` with
+   `GGML_SCHED_PRIO_LOW` through `llama-cpp-sys-2` (or upgrade
+   `llama-cpp-2` if a release exposes it) so every inference thread is
+   below normal. Re-run the jitter probe on CPU afterwards.
+3. **Thread count**: `inference_threads()` gives 6 on a 16-logical-core
    Zen3 and yields 1.8 tok/s, which is far below what 4B Q4_K_M should
    do on this CPU. Measure 4/6/8/12 threads and pick the rule that
    maximises tok/s while leaving two physical cores free; keep the
    generation thread below normal priority.
-3. **Tier-aware LLM use**: add a `latency_tier` argument to the generate
+4. **Tier-aware LLM use**: add a `latency_tier` argument to the generate
    path (`tip` | `report` | `chat`). Timeouts: tip 3 s (unchanged),
    report 8 s, chat 15 s, matching AGENTS.md. On the CPU backend, the
    first call measures itself; if a tip call would exceed its budget
    (moving p50 > 2.5 s), tips skip the LLM and use templates while
    reports and chat still use it. Expose the measured p50 in
    `getCoachCapabilities()` so Settings can show "Tips: template · Reports: AI".
-4. **Honest copy**: Settings brain hint for Standard says the truth on a
+5. **Honest copy**: Settings brain hint for Standard says the truth on a
    CPU-only build ("Reports and chat use the AI; live tips stay instant
    templates"). i18n in all 15 locales.
-5. **Gates**: LLM smoke test still passes; a new `latency_bench` run on
+6. **Gates**: LLM smoke test still passes; a new `latency_bench` run on
    CPU and Vulkan recorded in the PR; vitest for the tier routing;
    jitter probe (T06) still green while the CPU model generates.
 
