@@ -6,7 +6,6 @@ import type { useEvaluation } from "../../hooks/useEvaluation";
 import { setSubdivision } from "../../ipc";
 import {
   getTempoMarking,
-  SUBDIVISION_NAMES,
 } from "../../constants/metronome";
 import { GroupEditor } from "./GroupEditor";
 import { MeterPresets } from "./MeterPresets";
