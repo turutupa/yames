@@ -246,8 +246,25 @@ button.onboarding-summary-row:hover {
   border-color: var(--accent);
 }
 
+/* Rows that lead nowhere yet: no hover, no pointer, no button affordance. */
 .onboarding-summary-static {
   cursor: default;
+  background: transparent;
+  border-color: var(--border);
+}
+
+/* W7's own actions run the full width of the summary above them, so the
+   primary button lines up with the rows instead of floating mid-card. */
+.onboarding-ready-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.onboarding-ready-actions .onboarding-btn {
+  width: 100%;
 }
 
 .onboarding-summary-label {

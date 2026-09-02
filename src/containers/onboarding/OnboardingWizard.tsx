@@ -105,8 +105,17 @@ export function OnboardingWizard({
     [steps, state.context],
   );
   const dotIndex = dotted.findIndex((s) => s.id === current);
+  // Every step a JUMP can actually reach on this run (W7 summary rows).
+  const availableSteps = useMemo(
+    () =>
+      steps
+        .filter((s) => (s.isEnabled ? s.isEnabled(state.context) : true))
+        .map((s) => s.id),
+    [steps, state.context],
+  );
   const isWelcome = state.status === "welcome";
-  const isFirstStep = dotIndex === 0;
+  // Back on the first step returns to W0 (never a dead end), so it is never
+  // disabled — the ← key does the same thing.
   const isLastStep = dotIndex === dotted.length - 1;
 
   // --- Navigation helpers passed to steps ---------------------------------
@@ -250,6 +259,7 @@ export function OnboardingWizard({
       softClickPlaying,
       beatTick,
       machineContext: state.context,
+      availableSteps,
       jumpTo,
       skipAll,
       startSetup,
@@ -274,6 +284,7 @@ export function OnboardingWizard({
       softClickPlaying,
       beatTick,
       state.context,
+      availableSteps,
       jumpTo,
       skipAll,
       startSetup,
@@ -337,7 +348,6 @@ export function OnboardingWizard({
               type="button"
               className="onboarding-btn onboarding-btn-ghost"
               onClick={onBack}
-              disabled={isFirstStep}
             >
               {t("onboarding.back")}
             </button>

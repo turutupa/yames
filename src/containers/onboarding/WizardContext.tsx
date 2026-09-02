@@ -40,6 +40,12 @@ export type WizardEnv = {
   // --- Machine ------------------------------------------------------------
   /** Shared machine context (`skipped`, `visited`, coach tier, …). */
   machineContext: OnboardingContext;
+  /**
+   * Ids the registry actually offers on this run. W7 uses it so a summary row
+   * is only a button when jumping there leads somewhere — rows for steps
+   * O2–O5 have not added yet render as static text.
+   */
+  availableSteps: StepId[];
   /** Jump to a step (W7 summary rows). */
   jumpTo: (id: StepId) => void;
   /** "Just give me the click" — end the wizard, skipping everything left. */

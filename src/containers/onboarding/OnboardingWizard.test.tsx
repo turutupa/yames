@@ -71,7 +71,8 @@ describe("wizard shell", () => {
     const { container } = setup({ state: stateAt("instrument") });
     expect(container.querySelectorAll(".onboarding-dot")).toHaveLength(2);
     expect(container.querySelector(".onboarding-dot.active")).not.toBeNull();
-    expect(screen.getByRole("button", { name: "Back" })).toBeDisabled();
+    // Back on the first step is live: it returns to W0.
+    expect(screen.getByRole("button", { name: "Back" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Skip" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Next" })).toBeEnabled();
   });
@@ -252,18 +253,34 @@ describe("W7 — ready", () => {
     expect(screen.getByText("Not set up")).toBeInTheDocument();
   });
 
-  it("each row jumps back to the step that owns it", () => {
+  it("a row for a registered step is a button that jumps there", () => {
     const { dispatch } = setup(ready);
-    fireEvent.click(screen.getByText("Instrument").closest("button")!);
+    const row = screen.getByText("Instrument").closest("button");
+    expect(row).not.toBeNull();
+    fireEvent.click(row!);
     expect(dispatch).toHaveBeenCalledWith({ type: "JUMP", stepId: "instrument" });
-    fireEvent.click(screen.getByText("Click sound").closest("button")!);
-    expect(dispatch).toHaveBeenCalledWith({ type: "JUMP", stepId: "sound-look" });
+  });
+
+  it("rows for steps O2–O5 have not added yet are static, not inert buttons", () => {
+    setup(ready);
+    for (const label of [
+      "Click sound",
+      "Theme",
+      "Control",
+      "Practice coach",
+      "Audio input",
+    ]) {
+      const row = screen.getByText(label).closest(".onboarding-summary-row");
+      expect(row).not.toBeNull();
+      expect(row!.tagName).toBe("DIV");
+      expect(row).toHaveClass("onboarding-summary-static");
+    }
   });
 
   it("toggles always-on-top through the existing setter", () => {
     const onAlwaysOnTopChange = vi.fn();
     const { container } = setup({ ...ready, onAlwaysOnTopChange });
-    const row = container.querySelector(".onboarding-summary-static") as HTMLElement;
+    const row = container.querySelector(".onboarding-summary-toggle") as HTMLElement;
     const toggle = within(row).getByRole("button");
     expect(toggle).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(toggle);

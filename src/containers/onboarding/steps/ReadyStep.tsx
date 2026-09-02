@@ -30,6 +30,7 @@ export function ReadyStep(_props: WizardStepProps) {
     hasFootswitch,
     alwaysOnTop,
     setAlwaysOnTop,
+    availableSteps,
     jumpTo,
     finish,
     onRequestTour,
@@ -87,20 +88,37 @@ export function ReadyStep(_props: WizardStepProps) {
       <p className="onboarding-step-subtitle">{t("onboarding.ready.subtitle")}</p>
 
       <ul className="onboarding-summary">
-        {rows.map((row) => (
-          <li key={row.key}>
-            <button
-              type="button"
-              className="onboarding-summary-row"
-              onClick={() => jumpTo(row.target)}
-            >
+        {rows.map((row) => {
+          // A row is only a button when the step it points at exists on this
+          // run. Rows for steps O2–O5 have yet to add stay static — a
+          // clickable-looking row that does nothing is worse than plain text.
+          const reachable = availableSteps.includes(row.target);
+          const body = (
+            <>
               <span className="onboarding-summary-label">{row.label}</span>
               <span className="onboarding-summary-value">{row.value}</span>
-            </button>
-          </li>
-        ))}
+            </>
+          );
+          return (
+            <li key={row.key}>
+              {reachable ? (
+                <button
+                  type="button"
+                  className="onboarding-summary-row"
+                  onClick={() => jumpTo(row.target)}
+                >
+                  {body}
+                </button>
+              ) : (
+                <div className="onboarding-summary-row onboarding-summary-static">
+                  {body}
+                </div>
+              )}
+            </li>
+          );
+        })}
         <li>
-          <div className="onboarding-summary-row onboarding-summary-static">
+          <div className="onboarding-summary-row onboarding-summary-static onboarding-summary-toggle">
             <span className="onboarding-summary-label">
               {t("onboarding.ready.alwaysOnTop")}
             </span>
@@ -116,7 +134,7 @@ export function ReadyStep(_props: WizardStepProps) {
         </li>
       </ul>
 
-      <div className="onboarding-welcome-actions">
+      <div className="onboarding-ready-actions">
         <button
           type="button"
           className="onboarding-btn onboarding-btn-primary"
