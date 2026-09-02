@@ -139,6 +139,43 @@
         "body": "C'è un dispositivo MIDI collegato ma nulla è assegnato. Assegni un pedale a Play/Stop?",
         "action": "Apri scorciatoie"
       }
+    },
+    "tour": {
+      "progress": "{{current}} di {{total}}",
+      "keys": "Tasti",
+      "back": "Indietro",
+      "next": "Avanti",
+      "done": "Fatto",
+      "skip": "Salta il tour",
+      "offer": "Sei nuovo? Fai il tour di 30 secondi.",
+      "offerAccept": "Mostrami in giro",
+      "offerDismiss": "Chiudi",
+      "stops": {
+        "bpm": {
+          "title": "Tempo",
+          "body": "Trascina, scorri, digita o batti il tempo."
+        },
+        "subdivision": {
+          "title": "Suddivisioni e gruppi",
+          "body": "Clicca le suddivisioni e modella la battuta con i gruppi di movimenti."
+        },
+        "presets": {
+          "title": "Preset",
+          "body": "Salva qualsiasi configurazione e cambia all'istante."
+        },
+        "drill": {
+          "title": "Drill",
+          "body": "Aumenta il tempo automaticamente; il coach può adattarlo."
+        },
+        "coach": {
+          "title": "Coach di studio",
+          "body": "Ascolta, valuta e parla. Chiedigli qualsiasi cosa nella sua chat."
+        },
+        "zenWidget": {
+          "title": "Zen e widget",
+          "body": "Visuali a schermo intero, o un piccolo widget sempre in primo piano."
+        }
+      }
     }
   },
   "widget": {
@@ -326,7 +363,8 @@
     "copied": "Copiato!",
     "share": "Condividi",
     "back": "Indietro",
-    "settings": "Impostazioni"
+    "settings": "Impostazioni",
+    "help": "Aiuto"
   },
   "volume": {
     "metronome": "Metronomo",
@@ -472,7 +510,10 @@
       "resetHints": "Reimposta i suggerimenti",
       "resetHintsHint": "Mostra di nuovo i sei suggerimenti una tantum",
       "resetHintsAction": "Reimposta",
-      "resetHintsDone": "Fatto"
+      "resetHintsDone": "Fatto",
+      "takeTour": "Fai il tour",
+      "takeTourHint": "Sei tappe nell'app, circa 30 secondi",
+      "takeTourAction": "Avvia"
     },
     "devices": {
       "title": "Dispositivi",

@@ -1,0 +1,335 @@
+/* ===================== Spotlight tour (O6) =====================
+ *
+ * Sits above everything except the wizard (z 320) — the two never coexist, but
+ * the tour is opened *from* W7, so it must be able to draw over the fading
+ * overlay. Sizes are chosen for the 480x780 minimum window: the card is
+ * `min(300px, viewport - 24px)` wide and its text wraps rather than the card
+ * growing, so `computeAnchor`'s clamp always has somewhere to put it.
+ */
+
+.tour-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 330;
+  animation: tour-fade-in 160ms ease-out;
+}
+
+/* The dim + cut-out. One <svg> layer, so the hole animates as one rect. */
+.tour-mask {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+}
+
+.tour-scrim {
+  fill: rgba(0, 0, 0, 0.66);
+  /* The scrim is what blocks clicks; the SVG itself is transparent to them. */
+  pointer-events: auto;
+}
+
+.tour-hole {
+  transition:
+    x 220ms cubic-bezier(0.2, 0.8, 0.3, 1),
+    y 220ms cubic-bezier(0.2, 0.8, 0.3, 1),
+    width 220ms cubic-bezier(0.2, 0.8, 0.3, 1),
+    height 220ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+/* A thin accent outline on the spotlit control, so the eye lands on it even
+   when the target is already bright. */
+.tour-ring {
+  position: absolute;
+  pointer-events: none;
+  border: 1.5px solid var(--accent);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+  transition:
+    left 220ms cubic-bezier(0.2, 0.8, 0.3, 1),
+    top 220ms cubic-bezier(0.2, 0.8, 0.3, 1),
+    width 220ms cubic-bezier(0.2, 0.8, 0.3, 1),
+    height 220ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+/* ---- The card ---- */
+.tour-card {
+  position: absolute;
+  width: 300px;
+  max-width: calc(100vw - 24px);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  outline: none;
+  transition:
+    left 220ms cubic-bezier(0.2, 0.8, 0.3, 1),
+    top 220ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+/* The arrow is a rotated square tucked under the card's own background, so it
+   picks up the border on exactly two sides. */
+.tour-arrow {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  transform: rotate(45deg);
+}
+
+.tour-card[data-placement="bottom"] .tour-arrow {
+  top: -6px;
+  margin-left: -5px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.tour-card[data-placement="top"] .tour-arrow {
+  bottom: -6px;
+  margin-left: -5px;
+  border-left: none;
+  border-top: none;
+}
+
+.tour-card[data-placement="right"] .tour-arrow {
+  left: -6px;
+  margin-top: -5px;
+  border-right: none;
+  border-top: none;
+}
+
+.tour-card[data-placement="left"] .tour-arrow {
+  right: -6px;
+  margin-top: -5px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.tour-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.tour-card-title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.tour-progress {
+  flex: 0 0 auto;
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted, var(--text-secondary));
+}
+
+.tour-card-body {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.tour-card-keys {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.tour-keys-label {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted, var(--text-secondary));
+}
+
+.tour-key {
+  display: inline-flex;
+  align-items: center;
+  min-width: 20px;
+  justify-content: center;
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 500;
+}
+
+.tour-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.tour-card-nav {
+  display: flex;
+  gap: 6px;
+}
+
+.tour-btn {
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: transparent;
+  color: var(--text-primary);
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.tour-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.tour-btn-primary {
+  background: var(--accent);
+  color: var(--accent-text, #fff);
+}
+
+.tour-btn-primary:hover {
+  filter: brightness(1.08);
+}
+
+.tour-btn-ghost {
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+.tour-btn-ghost:hover:not(:disabled) {
+  color: var(--text-primary);
+  border-color: var(--accent);
+}
+
+.tour-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* ---- Existing-user offer toast ---- */
+.tour-offer {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100vw - 24px);
+  padding: 6px 8px 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-card);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.32);
+  animation: tour-offer-in 220ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.tour-offer-text {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tour-offer-accept,
+.tour-offer-dismiss {
+  flex: 0 0 auto;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+  padding: 5px 10px;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.tour-offer-accept:hover {
+  background: var(--accent-subtle);
+}
+
+.tour-offer-dismiss {
+  display: flex;
+  align-items: center;
+  color: var(--text-secondary);
+  padding: 5px 8px;
+}
+
+.tour-offer-dismiss:hover {
+  color: var(--text-primary);
+}
+
+@keyframes tour-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes tour-offer-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* Motion off — the `viewTransitions` preference and the OS reduced-motion
+   setting both freeze the hole, the ring and the card in place. They still
+   move, they just stop easing. */
+.tour-overlay.no-motion,
+.tour-overlay.no-motion .tour-hole,
+.tour-overlay.no-motion .tour-ring,
+.tour-overlay.no-motion .tour-card {
+  animation: none;
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-overlay,
+  .tour-hole,
+  .tour-ring,
+  .tour-card,
+  .tour-offer {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* Minimum window (480x780). */
+@media (max-width: 560px) {
+  .tour-card {
+    width: 272px;
+    padding: 12px 13px 10px;
+  }
+
+  .tour-card-body {
+    font-size: 0.78125rem;
+  }
+}

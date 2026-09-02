@@ -278,6 +278,8 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
       {/* Sidebar panel */}
       <div
         className={`preset-sidebar ${isOpen ? "open" : ""}`}
+        /* Tour (O6) anchor — works open or collapsed; see tour/stops.ts. */
+        data-tour="presets"
         onMouseDown={(e) => {
           if (searchRef.current && e.target !== searchRef.current) {
             searchRef.current.blur();

@@ -102,6 +102,18 @@ describe("GeneralSettingsSection language select", () => {
     expect(cleared).not.toContain("appSessionCount");
   });
 
+  it('shows "Take the tour" only when the handler is wired, and calls it', () => {
+    render(<GeneralSettingsSection {...baseProps} />);
+    expect(screen.queryByText("Take the tour")).toBeNull();
+    cleanup();
+
+    const onTakeTour = vi.fn();
+    render(<GeneralSettingsSection {...baseProps} onTakeTour={onTakeTour} />);
+    expect(screen.getByText("Take the tour")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Start" }));
+    expect(onTakeTour).toHaveBeenCalled();
+  });
+
   it("clicking outside closes the list without changing language", async () => {
     render(<GeneralSettingsSection {...baseProps} />);
     fireEvent.click(document.querySelector(".lang-select-btn")!);

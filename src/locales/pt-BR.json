@@ -139,6 +139,43 @@
         "body": "Há um dispositivo MIDI conectado, mas nada mapeado. Mapear um pedal para Tocar/Parar?",
         "action": "Abrir atalhos"
       }
+    },
+    "tour": {
+      "progress": "{{current}} de {{total}}",
+      "keys": "Teclas",
+      "back": "Voltar",
+      "next": "Avançar",
+      "done": "Concluir",
+      "skip": "Pular o tour",
+      "offer": "É novo por aqui? Faça o tour de 30 segundos.",
+      "offerAccept": "Me mostre",
+      "offerDismiss": "Dispensar",
+      "stops": {
+        "bpm": {
+          "title": "Andamento",
+          "body": "Arraste, role, digite ou marque o andamento."
+        },
+        "subdivision": {
+          "title": "Subdivisões e grupos",
+          "body": "Clique nas subdivisões e molde o compasso com grupos de tempos."
+        },
+        "presets": {
+          "title": "Presets",
+          "body": "Salve qualquer configuração e troque na hora."
+        },
+        "drill": {
+          "title": "Drill",
+          "body": "Suba o andamento automaticamente; o coach pode adaptá-lo."
+        },
+        "coach": {
+          "title": "Coach de estudo",
+          "body": "Ouve, pontua e fala. Pergunte o que quiser no chat dele."
+        },
+        "zenWidget": {
+          "title": "Zen e widget",
+          "body": "Visuais em tela cheia, ou um widget minúsculo sempre no topo."
+        }
+      }
     }
   },
   "widget": {
@@ -326,7 +363,8 @@
     "copied": "Copiado!",
     "share": "Compartilhar",
     "back": "Voltar",
-    "settings": "Configurações"
+    "settings": "Configurações",
+    "help": "Ajuda"
   },
   "volume": {
     "metronome": "Metrônomo",
@@ -472,7 +510,10 @@
       "resetHints": "Redefinir dicas",
       "resetHintsHint": "Mostrar novamente as seis dicas únicas",
       "resetHintsAction": "Redefinir",
-      "resetHintsDone": "Pronto"
+      "resetHintsDone": "Pronto",
+      "takeTour": "Fazer o tour",
+      "takeTourHint": "Seis paradas pelo app, cerca de 30 segundos",
+      "takeTourAction": "Iniciar"
     },
     "devices": {
       "title": "Dispositivos",

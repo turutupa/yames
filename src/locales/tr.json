@@ -139,6 +139,43 @@
         "body": "Bir MIDI cihazı bağlı ama hiçbir eşleme yok. Bir pedalı Oynat/Durdur'a bağlayalım mı?",
         "action": "Kısayolları aç"
       }
+    },
+    "tour": {
+      "progress": "{{current}} / {{total}}",
+      "keys": "Tuşlar",
+      "back": "Geri",
+      "next": "İleri",
+      "done": "Bitti",
+      "skip": "Turu atla",
+      "offer": "Yeni misin? 30 saniyelik turu yap.",
+      "offerAccept": "Etrafı gezdir",
+      "offerDismiss": "Kapat",
+      "stops": {
+        "bpm": {
+          "title": "Tempo",
+          "body": "Tempoyu sürükle, kaydır, yaz veya vurarak ayarla."
+        },
+        "subdivision": {
+          "title": "Bölünmeler ve gruplar",
+          "body": "Bölünmelere tıkla, ölçüyü vuruş gruplarıyla biçimlendir."
+        },
+        "presets": {
+          "title": "Ön ayarlar",
+          "body": "Herhangi bir kurulumu kaydet, anında geç."
+        },
+        "drill": {
+          "title": "Drill",
+          "body": "Tempoyu otomatik yükseltir; koç bunu uyarlayabilir."
+        },
+        "coach": {
+          "title": "Çalışma koçu",
+          "body": "Dinler, puanlar ve konuşur. Sohbet kutusundan her şeyi sor."
+        },
+        "zenWidget": {
+          "title": "Zen ve widget",
+          "body": "Tam ekran görseller ya da hep üstte duran minik bir widget."
+        }
+      }
     }
   },
   "widget": {
@@ -326,7 +363,8 @@
     "copied": "Kopyalandı!",
     "share": "Paylaş",
     "back": "Geri",
-    "settings": "Ayarlar"
+    "settings": "Ayarlar",
+    "help": "Yardım"
   },
   "volume": {
     "metronome": "Metronom",
@@ -472,7 +510,10 @@
       "resetHints": "İpuçlarını sıfırla",
       "resetHintsHint": "Altı tek seferlik ipucunu yeniden göster",
       "resetHintsAction": "Sıfırla",
-      "resetHintsDone": "Tamam"
+      "resetHintsDone": "Tamam",
+      "takeTour": "Turu başlat",
+      "takeTourHint": "Uygulamada altı durak, yaklaşık 30 saniye",
+      "takeTourAction": "Başlat"
     },
     "devices": {
       "title": "Cihazlar",

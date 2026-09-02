@@ -71,7 +71,8 @@ export function MetronomeView({
   const { t } = useTranslation();
   return (
     <>
-      <section className="bpm-section">
+      {/* `data-tour` ids are the tour's (O6) anchors — see tour/stops.ts. */}
+      <section className="bpm-section" data-tour="bpm">
         <button
           className={`tap-btn ${tapActive ? "active" : ""} ${tapPulse ? "pulse" : ""}`}
           onClick={onTap}
@@ -140,7 +141,7 @@ export function MetronomeView({
         </div>
       </section>
 
-      <div className="beat-controls-group">
+      <div className="beat-controls-group" data-tour="subdivision">
         <GroupEditor
           beatGroups={state.beatGroups}
           subdivision={state.subdivision}

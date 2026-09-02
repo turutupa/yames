@@ -44,6 +44,9 @@ import { useOnboarding } from "../onboarding/useOnboarding";
 import { HintCard } from "../onboarding/hints/HintCard";
 import { useAppHints } from "../onboarding/hints/useAppHints";
 import { markWidgetOpened } from "../onboarding/hints/hintRuntime";
+import { Tour } from "../onboarding/tour/Tour";
+import { TourOfferToast } from "../onboarding/tour/TourOfferToast";
+import { useTour } from "../onboarding/tour/useTour";
 import { DrillView } from "../drill/DrillView";
 import { FullscreenView } from "../zen/FullscreenView";
 import { PresetSidebar } from "../../components/presets/PresetSidebar";
@@ -157,6 +160,21 @@ export function MainWindow() {
   // detection and the store keys; the wizard replaces the old
   // `InstrumentPickerModal` mount (the picker's grid is now W1's body).
   const onboarding = useOnboarding();
+  // Spotlight tour (O6). It owns the tab while it runs — stop 4 is the drill
+  // tab — and puts the user back where they were when it ends. Existing users
+  // (O1's migration case) are offered it once through a toast.
+  const tour = useTour({
+    view,
+    setView,
+    offerWhen: onboarding.migratedExistingUser,
+  });
+
+  /** W7's "Show me around": finish the wizard, then start the tour. */
+  const handleRequestTour = useCallback(() => {
+    // CLOSE on W7 counts as completion, so the wizard tidies up as usual.
+    onboarding.dispatch({ type: "CLOSE" });
+    tour.open("beat");
+  }, [onboarding.dispatch, tour.open]);
 
   /** Persist an instrument choice + push the DSP profile to the backend. */
   const applyInstrument = useCallback((id: string) => {
@@ -488,7 +506,9 @@ export function MainWindow() {
   useEffect(() => {
     // The onboarding overlay owns the keyboard while it is up — Space must
     // not start the metronome behind it.
-    if (bindingFor || onboarding.isOpen) return;
+    // The onboarding overlay and the tour each own the keyboard while they are
+    // up — Space must not start the metronome behind them.
+    if (bindingFor || onboarding.isOpen || tour.isOpen) return;
     const handler = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
@@ -532,7 +552,7 @@ export function MainWindow() {
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [view, keyBindings, isFullscreen, bindingFor, setView, dispatchAction, inputTestMode, onboarding.isOpen]);
+  }, [view, keyBindings, isFullscreen, bindingFor, setView, dispatchAction, inputTestMode, onboarding.isOpen, tour.isOpen]);
 
   // MIDI controller support. The dispatcher is silenced while the input
   // tester is open by reading `inputTestModeRef` (the ref pattern keeps
@@ -678,6 +698,7 @@ export function MainWindow() {
           coach.coachVoiceMode === "voice" &&
           !!coach.modelStatus?.voiceReady
         }
+        onOpenHelp={() => tour.open()}
       />
 
       {onboarding.chipVisible && view !== "settings" && (
@@ -687,14 +708,19 @@ export function MainWindow() {
         />
       )}
 
-      {/* Hints stay out of the way of the wizard and of Zen (which renders
-          its own `zen-first` card inside the overlay). */}
-      {appHint && !onboarding.isOpen && !isFullscreen && (
+      {/* Hints stay out of the way of the wizard, of the tour (another
+          anchored overlay — two cards pointing at the same UI is noise) and
+          of Zen (which renders its own `zen-first` card inside the overlay). */}
+      {appHint && !onboarding.isOpen && !tour.isOpen && !isFullscreen && (
         <HintCard
           id={appHint.id}
           onAction={appHint.onAction}
           onDismiss={appHint.markShown}
         />
+      )}
+
+      {tour.offerVisible && view !== "settings" && (
+        <TourOfferToast onAccept={tour.acceptOffer} onDismiss={tour.dismissOffer} />
       )}
 
       {shareOpen && (
@@ -800,6 +826,12 @@ export function MainWindow() {
             onRunSetupAgain={() => {
               setView(prevTab.current);
               onboarding.open();
+            }}
+            onTakeTour={() => {
+              // Leave settings first: no stop lives there, and the tour must
+              // restore a real tab rather than the settings overlay.
+              setView(prevTab.current);
+              tour.open(prevTab.current);
             }}
             themeId={state.theme}
             setTheme={setTheme}
@@ -1013,6 +1045,18 @@ export function MainWindow() {
       onFinish={handleWizardFinish}
       onOpenThemeSettings={openThemeSettings}
       hidden={themeDetour}
+      onRequestTour={handleRequestTour}
+      animate={viewTransitions !== "off"}
+    />
+    <Tour
+      open={tour.isOpen}
+      index={tour.index}
+      stop={tour.stop}
+      total={tour.total}
+      onNext={tour.next}
+      onPrev={tour.prev}
+      onClose={tour.close}
+      keyBindings={keyBindings}
       animate={viewTransitions !== "off"}
     />
     </>

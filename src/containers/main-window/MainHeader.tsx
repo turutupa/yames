@@ -114,6 +114,13 @@ interface MainHeaderProps {
    *  rendered (even when the coach is off) so the feature is discoverable;
    *  it just disables the control until brain + voice are ready. */
   voiceEnabled: boolean;
+  /**
+   * The `?` button. O6 wires it straight to the spotlight tour; O8 will turn
+   * it into the Help menu (tour / run setup again / shortcuts / …), so it is
+   * deliberately a plain button with one callback and no menu state of its own.
+   * Optional so other mounts of the header keep working without it.
+   */
+  onOpenHelp?: () => void;
 }
 
 /**
@@ -143,6 +150,7 @@ export function MainHeader({
   ttsVolume,
   setTtsVolume,
   voiceEnabled,
+  onOpenHelp,
 }: MainHeaderProps) {
   const { t } = useTranslation();
   const ttsVolumePercent = Math.round(ttsVolume * 100);
@@ -168,6 +176,7 @@ export function MainHeader({
           </button>
           <button
             className={`tab-btn ${view === "drill" ? "active" : ""}`}
+            data-tour="drill-tab"
             onClick={() => setView("drill")}
             aria-label={t("nav.drill")}
           >
@@ -195,6 +204,9 @@ export function MainHeader({
         {view !== "settings" && view !== "track" && (
           <button
             className="header-btn"
+            /* Tour stop 6 spotlights zen + widget together: both buttons carry
+               the same id and the overlay unions their rects. */
+            data-tour="zen-widget"
             onClick={() => setIsFullscreen(true)}
             data-tooltip={t("tooltip.zen")}
           >
@@ -286,6 +298,7 @@ export function MainHeader({
         <button
           className="header-btn"
           data-hint="widget-discover"
+          data-tour="zen-widget"
           onClick={() => {
             // The `widget-discover` hint stops offering itself once the user
             // has found the widget on their own.
@@ -335,6 +348,29 @@ export function MainHeader({
             </svg>
           </button>
         </div>
+        {onOpenHelp && view !== "settings" && (
+          <button
+            className="header-btn"
+            onClick={onOpenHelp}
+            data-tooltip={t("tooltip.help")}
+            aria-label={t("tooltip.help")}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          </button>
+        )}
         <button
           className={`header-btn ${view === "settings" ? "active" : ""}`}
           data-hint="midi-plugged"

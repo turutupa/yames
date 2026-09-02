@@ -139,6 +139,43 @@
         "body": "Có thiết bị MIDI đang kết nối nhưng chưa gán gì. Gán bàn đạp cho Phát/Dừng nhé?",
         "action": "Mở phím tắt"
       }
+    },
+    "tour": {
+      "progress": "{{current}} / {{total}}",
+      "keys": "Phím",
+      "back": "Quay lại",
+      "next": "Tiếp",
+      "done": "Xong",
+      "skip": "Bỏ qua hướng dẫn",
+      "offer": "Mới dùng? Xem hướng dẫn 30 giây.",
+      "offerAccept": "Dẫn tôi đi xem",
+      "offerDismiss": "Đóng",
+      "stops": {
+        "bpm": {
+          "title": "Nhịp độ",
+          "body": "Kéo, cuộn, gõ số hoặc gõ nhịp để đặt nhịp độ."
+        },
+        "subdivision": {
+          "title": "Chia nhỏ và nhóm phách",
+          "body": "Bấm các mức chia nhỏ và tạo hình ô nhịp bằng nhóm phách."
+        },
+        "presets": {
+          "title": "Cài đặt sẵn",
+          "body": "Lưu mọi thiết lập và chuyển đổi tức thì."
+        },
+        "drill": {
+          "title": "Drill",
+          "body": "Tự động tăng nhịp độ; coach có thể điều chỉnh."
+        },
+        "coach": {
+          "title": "Coach luyện tập",
+          "body": "Nghe, chấm điểm và nói. Hỏi bất cứ điều gì trong khung chat."
+        },
+        "zenWidget": {
+          "title": "Zen và widget",
+          "body": "Hình ảnh toàn màn hình, hoặc một widget nhỏ luôn nổi lên trên."
+        }
+      }
     }
   },
   "widget": {
@@ -326,7 +363,8 @@
     "copied": "Đã sao chép!",
     "share": "Chia sẻ",
     "back": "Quay lại",
-    "settings": "Cài đặt"
+    "settings": "Cài đặt",
+    "help": "Trợ giúp"
   },
   "volume": {
     "metronome": "Máy đếm nhịp",
@@ -472,7 +510,10 @@
       "resetHints": "Đặt lại gợi ý",
       "resetHintsHint": "Hiển thị lại sáu gợi ý một lần",
       "resetHintsAction": "Đặt lại",
-      "resetHintsDone": "Xong"
+      "resetHintsDone": "Xong",
+      "takeTour": "Xem hướng dẫn",
+      "takeTourHint": "Sáu điểm dừng trong ứng dụng, khoảng 30 giây",
+      "takeTourAction": "Bắt đầu"
     },
     "devices": {
       "title": "Thiết bị",

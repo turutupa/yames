@@ -194,6 +194,7 @@ export default function CoachCard({ open, active, messages, onToggle, onStartSes
     return (
       <button
         className={`coach-card-pill ${active ? "coach-active" : ""}`}
+        data-tour="coach"
         onClick={onToggle}
         title={t("settings.coach.title")}
       >
@@ -208,7 +209,10 @@ export default function CoachCard({ open, active, messages, onToggle, onStartSes
   }
 
   return (
-    <div className={`coach-card coach-card-open${closing ? " coach-card-closing" : ""}`}>
+    <div
+      className={`coach-card coach-card-open${closing ? " coach-card-closing" : ""}`}
+      data-tour="coach"
+    >
       <div className="coach-card-inner">
         <div className="coach-card-header">
           {tab === "history" && historyView === "detail" ? (

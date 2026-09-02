@@ -139,6 +139,43 @@
         "body": "Hay un dispositivo MIDI conectado pero nada asignado. ¿Asignas un pedal a Reproducir/Parar?",
         "action": "Abrir atajos"
       }
+    },
+    "tour": {
+      "progress": "{{current}} de {{total}}",
+      "keys": "Teclas",
+      "back": "Atrás",
+      "next": "Siguiente",
+      "done": "Listo",
+      "skip": "Omitir el tour",
+      "offer": "¿Eres nuevo? Haz el tour de 30 segundos.",
+      "offerAccept": "Enséñame",
+      "offerDismiss": "Descartar",
+      "stops": {
+        "bpm": {
+          "title": "Tempo",
+          "body": "Arrastra, desplaza, escribe o marca el tempo."
+        },
+        "subdivision": {
+          "title": "Subdivisiones y grupos",
+          "body": "Pulsa las subdivisiones y da forma al compás con grupos de pulsos."
+        },
+        "presets": {
+          "title": "Presets",
+          "body": "Guarda cualquier configuración y cambia al instante."
+        },
+        "drill": {
+          "title": "Drill",
+          "body": "Sube el tempo automáticamente; el coach puede adaptarlo."
+        },
+        "coach": {
+          "title": "Coach de práctica",
+          "body": "Escucha, puntúa y habla. Pregúntale lo que sea en su chat."
+        },
+        "zenWidget": {
+          "title": "Zen y widget",
+          "body": "Visuales a pantalla completa, o un widget diminuto siempre visible."
+        }
+      }
     }
   },
   "widget": {
@@ -326,7 +363,8 @@
     "copied": "¡Copiado!",
     "share": "Compartir",
     "back": "Volver",
-    "settings": "Ajustes"
+    "settings": "Ajustes",
+    "help": "Ayuda"
   },
   "volume": {
     "metronome": "Metrónomo",
@@ -472,7 +510,10 @@
       "resetHints": "Restablecer consejos",
       "resetHintsHint": "Volver a mostrar los seis consejos de una vez",
       "resetHintsAction": "Restablecer",
-      "resetHintsDone": "Hecho"
+      "resetHintsDone": "Hecho",
+      "takeTour": "Hacer el tour",
+      "takeTourHint": "Seis paradas por la app, unos 30 segundos",
+      "takeTourAction": "Empezar"
     },
     "devices": {
       "title": "Dispositivos",

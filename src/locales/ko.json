@@ -139,6 +139,43 @@
         "body": "MIDI 기기가 연결됐지만 매핑된 것이 없어요. 페달을 재생/정지에 매핑할까요?",
         "action": "단축키 열기"
       }
+    },
+    "tour": {
+      "progress": "{{total}} 중 {{current}}",
+      "keys": "단축키",
+      "back": "이전",
+      "next": "다음",
+      "done": "완료",
+      "skip": "둘러보기 건너뛰기",
+      "offer": "처음이신가요? 30초 둘러보기를 해보세요.",
+      "offerAccept": "둘러보기",
+      "offerDismiss": "닫기",
+      "stops": {
+        "bpm": {
+          "title": "템포",
+          "body": "드래그, 스크롤, 입력 또는 탭으로 템포를 정하세요."
+        },
+        "subdivision": {
+          "title": "분할과 박 그룹",
+          "body": "분할을 클릭하고 박 그룹으로 마디를 구성하세요."
+        },
+        "presets": {
+          "title": "프리셋",
+          "body": "어떤 설정이든 저장하고 즉시 전환하세요."
+        },
+        "drill": {
+          "title": "드릴",
+          "body": "템포를 자동으로 올립니다. 코치가 조절할 수도 있습니다."
+        },
+        "coach": {
+          "title": "연습 코치",
+          "body": "듣고, 점수를 매기고, 말합니다. 채팅창에서 무엇이든 물어보세요."
+        },
+        "zenWidget": {
+          "title": "젠과 위젯",
+          "body": "전체 화면 비주얼, 또는 항상 위에 있는 작은 위젯."
+        }
+      }
     }
   },
   "widget": {
@@ -326,7 +363,8 @@
     "copied": "복사됨!",
     "share": "공유",
     "back": "뒤로",
-    "settings": "설정"
+    "settings": "설정",
+    "help": "도움말"
   },
   "volume": {
     "metronome": "메트로놈",
@@ -472,7 +510,10 @@
       "resetHints": "힌트 초기화",
       "resetHintsHint": "한 번만 나오는 힌트 6개를 다시 보기",
       "resetHintsAction": "초기화",
-      "resetHintsDone": "완료"
+      "resetHintsDone": "완료",
+      "takeTour": "둘러보기",
+      "takeTourHint": "앱의 여섯 곳, 약 30초",
+      "takeTourAction": "시작"
     },
     "devices": {
       "title": "기기",

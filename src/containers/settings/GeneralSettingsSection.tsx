@@ -23,6 +23,7 @@ export function GeneralSettingsSection({
   drillAutoCollapse,
   setDrillAutoCollapse,
   onRunSetupAgain,
+  onTakeTour,
 }: {
   autoCheckUpdates: boolean;
   setAutoCheckUpdates: Dispatch<SetStateAction<boolean>>;
@@ -37,6 +38,8 @@ export function GeneralSettingsSection({
   /** Re-opens the first-run wizard at W0. Optional so existing tests and
    *  any other mount of this section keep working without it. */
   onRunSetupAgain?: () => void;
+  /** Re-opens the six-stop spotlight tour (O6). Optional, like the row above. */
+  onTakeTour?: () => void;
 }) {
   const { t, i18n } = useTranslation();
   const [language, setLanguage] = useState("en");
@@ -237,6 +240,21 @@ export function GeneralSettingsSection({
           </div>
           <button className="toggle-btn" onClick={onRunSetupAgain}>
             {t("settings.general.runSetupAgainAction")}
+          </button>
+        </div>
+      )}
+      {/* The three first-run rows sit together, in the order a user meets
+          them: rerun the wizard, retake the tour, bring the hints back. */}
+      {onTakeTour && (
+        <div className="setting-row">
+          <div className="setting-label">
+            <label>{t("settings.general.takeTour")}</label>
+            <span className="setting-hint">
+              {t("settings.general.takeTourHint")}
+            </span>
+          </div>
+          <button className="toggle-btn" onClick={onTakeTour}>
+            {t("settings.general.takeTourAction")}
           </button>
         </div>
       )}
