@@ -115,6 +115,7 @@
         "desc": "Qwen3 8B · ~5 GB download · ~8 GB RAM. Rijkere feedback en oefenplannen."
       },
       "studioNeedsRam": "Studio heeft minstens 16 GB RAM nodig — deze computer heeft {{gb}} GB.",
+      "unavailableInBuild": "Niet beschikbaar in deze build.",
       "reasonNoLlm": "Deze build kan geen model draaien, dus timingfeedback is hier de eerlijke keuze.",
       "reasonLowMemory": "Deze computer heeft {{gb}} GB RAM — te weinig om een model comfortabel te draaien.",
       "reasonInstalled": "Staat al op deze computer — niets op te halen.",

@@ -115,6 +115,7 @@
         "desc": "Qwen3 8B · ~5 Go · ~8 Go de RAM. Retours plus riches et plans d'entraînement."
       },
       "studioNeedsRam": "Studio demande au moins 16 Go de RAM — cette machine en a {{gb}}.",
+      "unavailableInBuild": "Indisponible dans cette version.",
       "reasonNoLlm": "Cette version ne peut pas exécuter de modèle : le retour de timing est le choix honnête ici.",
       "reasonLowMemory": "Cette machine a {{gb}} Go de RAM — pas assez pour faire tourner un modèle confortablement.",
       "reasonInstalled": "Déjà téléchargé sur cette machine — rien à récupérer.",

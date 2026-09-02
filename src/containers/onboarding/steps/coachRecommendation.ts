@@ -90,9 +90,13 @@ export function recommendCoachTier(facts: CoachFacts): CoachRecommendation {
  * Why the Studio card is greyed out, or null when it is selectable
  * (decision 5). Two independent reasons, in the order they matter: a build
  * that cannot run any model, then the 16 GB RAM gate.
+ *
+ * The no-LLM case gets the short label rather than `reasonNoLlm`: the long
+ * explanation is already on the recommendation line right below, and the same
+ * sentence printed three times reads as noise instead of honesty.
  */
 export function studioDisabledReason(facts: CoachFacts): string | null {
-  if (!facts.llmCompiled) return "onboarding.coach.reasonNoLlm";
+  if (!facts.llmCompiled) return "onboarding.coach.unavailableInBuild";
   if (!studioAvailable(facts.systemMemoryMb)) {
     return "onboarding.coach.studioNeedsRam";
   }
@@ -101,7 +105,7 @@ export function studioDisabledReason(facts: CoachFacts): string | null {
 
 /** Same question for the Standard card. */
 export function standardDisabledReason(facts: CoachFacts): string | null {
-  if (!facts.llmCompiled) return "onboarding.coach.reasonNoLlm";
+  if (!facts.llmCompiled) return "onboarding.coach.unavailableInBuild";
   return null;
 }
 

@@ -115,6 +115,7 @@
         "desc": "Qwen3 8B · 약 5 GB 다운로드 · 약 8 GB RAM. 더 풍부한 피드백과 연습 계획."
       },
       "studioNeedsRam": "스튜디오는 최소 16 GB RAM이 필요합니다. 이 컴퓨터는 {{gb}} GB입니다.",
+      "unavailableInBuild": "이 빌드에서는 사용할 수 없습니다.",
       "reasonNoLlm": "이 빌드는 모델을 실행할 수 없어 타이밍 피드백이 정직한 선택입니다.",
       "reasonLowMemory": "이 컴퓨터의 RAM은 {{gb}} GB로, 모델을 편안하게 돌리기엔 부족합니다.",
       "reasonInstalled": "이미 이 컴퓨터에 받아져 있습니다. 내려받을 것이 없습니다.",

@@ -115,6 +115,7 @@
         "desc": "Qwen3 8B · ~5 GB pobierania · ~8 GB RAM. Bogatsze uwagi i plany ćwiczeń."
       },
       "studioNeedsRam": "Studio wymaga co najmniej 16 GB RAM — ten komputer ma {{gb}} GB.",
+      "unavailableInBuild": "Niedostępne w tej kompilacji.",
       "reasonNoLlm": "Ta kompilacja nie uruchomi modelu, więc uczciwym wyborem jest sama informacja o timingu.",
       "reasonLowMemory": "Ten komputer ma {{gb}} GB RAM — za mało, by wygodnie uruchomić model.",
       "reasonInstalled": "Już pobrane na tym komputerze — nie ma czego ściągać.",

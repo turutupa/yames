@@ -114,9 +114,11 @@ describe("disabled reasons", () => {
   });
 
   it("greys both brains when the build cannot run one at all", () => {
+    // The short label, not `reasonNoLlm`: the long sentence belongs to the
+    // recommendation line, printed once.
     const noLlm = facts({ llmCompiled: false });
-    expect(standardDisabledReason(noLlm)).toBe("onboarding.coach.reasonNoLlm");
-    expect(studioDisabledReason(noLlm)).toBe("onboarding.coach.reasonNoLlm");
+    expect(standardDisabledReason(noLlm)).toBe("onboarding.coach.unavailableInBuild");
+    expect(studioDisabledReason(noLlm)).toBe("onboarding.coach.unavailableInBuild");
   });
 
   it("never greys Standard on a build that can run a model", () => {

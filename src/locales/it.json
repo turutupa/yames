@@ -115,6 +115,7 @@
         "desc": "Qwen3 8B · ~5 GB di download · ~8 GB di RAM. Feedback più ricco e piani di studio."
       },
       "studioNeedsRam": "Studio richiede almeno 16 GB di RAM: questa macchina ne ha {{gb}}.",
+      "unavailableInBuild": "Non disponibile in questa build.",
       "reasonNoLlm": "Questa build non può eseguire un modello: il feedback sul timing è la scelta onesta.",
       "reasonLowMemory": "Questa macchina ha {{gb}} GB di RAM: troppo poco per far girare bene un modello.",
       "reasonInstalled": "Già scaricato su questa macchina: non serve altro.",

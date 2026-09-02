@@ -503,11 +503,21 @@ button.onboarding-hf-device:hover {
    Three full-width option cards (they carry a paragraph each, so the W2 grid
    would squeeze them), plus the privacy line, the recommendation reason and
    the optional "try the listening feature" branch. */
+.onboarding-coach-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* The privacy line is load-bearing copy, not fine print: same weight as the
+   two lines above it, only smaller. `--text-muted` was too faint to read on
+   the dark themes. */
 .onboarding-coach-privacy {
   margin: 0;
   font-size: 0.75rem;
   line-height: 1.45;
-  color: var(--text-muted, var(--text-secondary));
+  text-align: center;
+  color: var(--text-secondary);
 }
 
 .onboarding-coach-card {

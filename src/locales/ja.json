@@ -115,6 +115,7 @@
         "desc": "Qwen3 8B・約5 GBのダウンロード・約8 GBのRAM。より詳しい講評と練習プラン。"
       },
       "studioNeedsRam": "Studioには16 GB以上のRAMが必要です。この端末は{{gb}} GBです。",
+      "unavailableInBuild": "このビルドでは利用できません。",
       "reasonNoLlm": "このビルドはモデルを実行できないため、タイミング表示のみが正直な選択です。",
       "reasonLowMemory": "この端末のRAMは{{gb}} GBで、モデルを快適に動かすには足りません。",
       "reasonInstalled": "この端末にダウンロード済みです。取得するものはありません。",

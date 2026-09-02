@@ -115,6 +115,7 @@
         "desc": "Qwen3 8B · ~5 GB indirme · ~8 GB RAM. Daha zengin geri bildirim ve çalışma planları."
       },
       "studioNeedsRam": "Studio en az 16 GB RAM ister — bu bilgisayarda {{gb}} GB var.",
+      "unavailableInBuild": "Bu sürümde kullanılamaz.",
       "reasonNoLlm": "Bu sürüm model çalıştıramıyor; burada dürüst seçim zamanlama geri bildirimi.",
       "reasonLowMemory": "Bu bilgisayarda {{gb}} GB RAM var — bir modeli rahat çalıştırmaya yetmez.",
       "reasonInstalled": "Bu bilgisayarda zaten indirilmiş — alınacak bir şey yok.",

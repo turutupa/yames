@@ -115,6 +115,7 @@
         "desc": "Qwen3 8B · 約 5 GB 下載 · 約 8 GB 記憶體。更細緻的講評與練習計畫。"
       },
       "studioNeedsRam": "Studio 至少需要 16 GB 記憶體，本機只有 {{gb}} GB。",
+      "unavailableInBuild": "此版本不提供。",
       "reasonNoLlm": "此版本無法執行模型，因此這裡如實建議僅拍點回饋。",
       "reasonLowMemory": "本機記憶體為 {{gb}} GB，不足以順暢執行模型。",
       "reasonInstalled": "本機已下載，不需要再取得。",

@@ -153,6 +153,8 @@ describe("W4 — recommendation is preselected", () => {
     );
     expect(card("standard")).toBeDisabled();
     expect(card("full")).toBeDisabled();
+    // The cards carry the short label; the long reason is stated once.
+    expect(within(card("standard")).getByText("Not available in this build.")).toBeInTheDocument();
   });
 
   it("preselects timing-only on a machine below the Standard floor", async () => {

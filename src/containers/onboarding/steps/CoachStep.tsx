@@ -171,9 +171,14 @@ export function CoachStep(_props: WizardStepProps) {
       <h2 className="onboarding-step-title" id="onboarding-title">
         {t("onboarding.coach.title")}
       </h2>
-      <p className="onboarding-step-subtitle">{t("onboarding.coach.what1")}</p>
-      <p className="onboarding-step-subtitle">{t("onboarding.coach.what2")}</p>
-      <p className="onboarding-coach-privacy">{t("onboarding.coach.privacy")}</p>
+      {/* Two lines on what it does, then the privacy line — one block so the
+          step's 12px rhythm does not spread three short paragraphs over half
+          the card at the 480x780 minimum window. */}
+      <div className="onboarding-coach-intro">
+        <p className="onboarding-step-subtitle">{t("onboarding.coach.what1")}</p>
+        <p className="onboarding-step-subtitle">{t("onboarding.coach.what2")}</p>
+        <p className="onboarding-coach-privacy">{t("onboarding.coach.privacy")}</p>
+      </div>
 
       <div className="onboarding-cards" data-testid="coach-tiers">
         {options.map((option) => {
