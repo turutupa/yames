@@ -89,14 +89,17 @@ export function AudioInputStep({ onSkip, isActive }: WizardStepProps) {
     if (!isActive || proven) return;
     const id = window.setInterval(() => {
       if (rawRmsRef.current <= SIGNAL_FLOOR_RMS) return;
-      setHeldMs((ms) => {
-        const next = ms + TICK_MS;
-        if (next >= SIGNAL_HOLD_MS) setProven(true);
-        return next;
-      });
+      setHeldMs((ms) => ms + TICK_MS);
     }, TICK_MS);
     return () => window.clearInterval(id);
   }, [isActive, proven]);
+
+  // Latching in its own effect rather than inside the updater above: React
+  // may call an updater twice under StrictMode, and a state change is not
+  // something to do from inside one.
+  useEffect(() => {
+    if (heldMs >= SIGNAL_HOLD_MS) setProven(true);
+  }, [heldMs]);
 
   // --- What Next means here ------------------------------------------------
   // The device and channel are already persisted by `selectDevice` /
