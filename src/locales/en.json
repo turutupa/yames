@@ -71,6 +71,31 @@
       "themeHeading": "Theme",
       "moreThemes": "More themes in Settings"
     },
+    "handsFree": {
+      "title": "Hands stay on the instrument",
+      "subtitle": "These keys already work. If you have a footswitch or a controller, map it to Play/Stop right here.",
+      "cancel": "Cancel",
+      "keyboard": {
+        "title": "Keyboard",
+        "hint": "Every key is remappable in Settings → Hotkeys."
+      },
+      "midi": {
+        "title": "MIDI footswitch",
+        "none": "Plug one in any time — Yames will offer to map it.",
+        "map": "Map Play/Stop",
+        "remap": "Map a different pedal",
+        "listening": "Press the pedal you want for Play/Stop.",
+        "mapped": "Play/Stop → {{signal}} · channel {{channel}}"
+      },
+      "gamepad": {
+        "title": "Gamepad",
+        "none": "Connect a controller any time — press a button and Yames will see it.",
+        "map": "Map Play/Stop",
+        "remap": "Map a different button",
+        "listening": "Press the button you want for Play/Stop.",
+        "mapped": "Play/Stop → {{button}}"
+      }
+    },
     "ready": {
       "title": "You're ready",
       "subtitle": "Change anything here, or later in Settings.",

@@ -71,6 +71,31 @@
       "themeHeading": "主題",
       "moreThemes": "更多主題在設定中"
     },
+    "handsFree": {
+      "title": "雙手一直留在樂器上",
+      "subtitle": "這些按鍵已經可用。如果你有踏板或手把，現在就能把播放／停止對應上去。",
+      "cancel": "取消",
+      "keyboard": {
+        "title": "鍵盤",
+        "hint": "所有按鍵都可在設定 → 快速鍵中修改。"
+      },
+      "midi": {
+        "title": "MIDI 踏板",
+        "none": "隨時插上即可 — Yames 會主動提示對應。",
+        "map": "對應播放／停止",
+        "remap": "改用其他踏板",
+        "listening": "踩下你想用來播放／停止的踏板。",
+        "mapped": "播放／停止 → {{signal}} · 通道 {{channel}}"
+      },
+      "gamepad": {
+        "title": "手把",
+        "none": "隨時連接手把 — 按一個鍵，Yames 就會看到它。",
+        "map": "對應播放／停止",
+        "remap": "改用其他按鍵",
+        "listening": "按下你想用來播放／停止的按鍵。",
+        "mapped": "播放／停止 → {{button}}"
+      }
+    },
     "ready": {
       "title": "準備就緒",
       "subtitle": "可以在這裡修改，也可以稍後在設定中修改。",
