@@ -253,17 +253,13 @@ O4/O5 wait for roadmap T03/T04 to merge so the coach step is truthful.
 
 ---
 
-## 9. Open decisions for the owner
+## 9. Decisions (owner approved the proposals, 2026-09-02)
 
-1. **Tone.** The coach voice is warm and specific. Should the wizard
-   copy match it (first person, "I'll listen…") or stay product-neutral?
-   Proposal: product-neutral in the wizard, coach voice from W6 on.
-2. **Default theme on first run.** Obsidian (current) vs letting W2
-   decide with no default. Proposal: Obsidian preselected.
-3. **W6 finale when the user picked "timing feedback only".** Still
-   offer it (it needs an input device)? Proposal: offer W5+W6 as an
-   optional "Try the listening feature" branch.
-4. **Always-on-top default.** Keep on, with the W7 toggle? Proposal: yes.
-5. **Studio tier in the wizard** or only in Settings? Proposal: show it
-   greyed with the RAM reason; it teaches the tier model without
-   pushing a 5 GB download on day one.
+1. **Tone.** Product-neutral copy in the wizard; the coach's own voice
+   takes over from W6 ("hear it work") onward.
+2. **Default theme.** Obsidian preselected in W2.
+3. **Timing-only users** still get W5+W6 offered as an optional "Try the
+   listening feature" branch.
+4. **Always-on-top** stays on by default; W7 shows it with a toggle.
+5. **Studio tier** appears in W4 greyed out with the RAM reason when the
+   machine has < 16 GB; selectable otherwise.
