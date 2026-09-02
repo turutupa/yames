@@ -4197,14 +4197,33 @@ mod tests {
     /// every other close reason — the caller pushes it into the session
     /// accumulator — but with `emit_ui = false` so the UI does not get a
     /// second mini-report on top of the coach's own boundary narration.
+    ///
+    /// The test drives the real analysis thread, so it is written to be
+    /// event-driven rather than clock-driven: the analyzer's own
+    /// `on_feedback` / `on_segment_end` callbacks are the only clock it
+    /// reads. A starved analyzer thread makes this test slower, never
+    /// red. The two races the original sleep-based version lost are
+    /// documented inline below (onset/beat publish order, and waiting
+    /// for the segment to actually open before firing Signal A).
     #[test]
     fn settings_change_scores_the_open_segment_without_a_ui_event() {
+        use std::sync::mpsc;
+        use std::time::Duration;
+
+        /// Upper bound on how long we will wait for the 5 ms analysis
+        /// loop to reach a state transition. Never reached on a healthy
+        /// run — it only turns a hang into a readable failure.
+        const WAIT: Duration = Duration::from_secs(10);
+
         let beat_log = create_beat_log();
         let mut analyzer = TimingAnalyzer::new(beat_log.clone());
 
-        // (end_reason, emit_ui) for every segment close.
-        let closes: Arc<Mutex<Vec<(SegmentEndReason, bool)>>> = Arc::new(Mutex::new(Vec::new()));
-        let closes_writer = closes.clone();
+        // Per-beat feedback, and (end_reason, emit_ui) for every segment
+        // close. Channels rather than a shared Vec so the test can BLOCK
+        // on the transitions it cares about instead of guessing how long
+        // they take.
+        let (feedback_tx, feedback_rx) = mpsc::channel::<BeatFeedback>();
+        let (close_tx, close_rx) = mpsc::channel::<(SegmentEndReason, bool)>();
 
         analyzer.start(
             Instrument::Other.profile(),
@@ -4212,29 +4231,46 @@ mod tests {
             Some("preset-a".to_string()),
             None,
             CoachMode::Default,
-            |_fb| {},
+            move |fb| {
+                let _ = feedback_tx.send(fb);
+            },
             move |pse, emit_ui| {
-                closes_writer
-                    .lock()
-                    .unwrap()
-                    .push((pse.end_reason, emit_ui));
+                let _ = close_tx.send((pse.end_reason, emit_ui));
             },
             |_| {},
             |_| {},
         );
-
-        // Advance past the tiny ts_ns values below so every beat's
-        // matching deadline has already elapsed when the loop sees it.
-        std::thread::sleep(std::time::Duration::from_millis(200));
 
         // Eight ticks with an onset dead on each — enough to clear the
         // 4-beat warmup grace and open a segment. Like the neighbouring
         // analyzer tests the ticks sit 1 ns apart at a tiny `ts_ns`:
         // real 500 ms spacing would put later beats in the analyzer's
         // future and they would never leave the held-beat buffer.
+        //
+        // ORDER MATTERS: onsets first, beats second. The analysis loop
+        // drains the onset log *before* the beat log inside a single
+        // iteration, so publishing the onsets first guarantees they are
+        // already sitting in `pending_onsets` on whichever iteration the
+        // beats become matchable. (Nothing prunes them meanwhile: the
+        // spurious-onset prune only runs on an iteration that processed
+        // beats, and its cutoff is `latest_beat.ts_ns - 200 ms`, which
+        // saturates to 0 here.) With the old order the loop could wake
+        // in the gap between the two pushes — every beat's deadline is
+        // already long past, so the whole batch was consumed against an
+        // empty onset buffer, all eight beats came back "skipped", no
+        // segment ever opened, and the Signal-A poll below then silently
+        // swallowed the flag with nothing to close.
         const INTERVAL_MS: f64 = 500.0;
         const TICKS: u32 = 8;
         let base_ns: u64 = 1_000;
+        for i in 0..TICKS {
+            analyzer.log_onset(Onset {
+                ts_ns: base_ns + i as u64,
+                amplitude: 0.8,
+                centroid: 900.0,
+                confidence: 0.9,
+            });
+        }
         {
             let mut log = beat_log.lock().unwrap();
             for i in 0..TICKS {
@@ -4249,37 +4285,62 @@ mod tests {
                 });
             }
         }
-        for i in 0..TICKS {
-            analyzer.log_onset(Onset {
-                ts_ns: base_ns + i as u64,
-                amplitude: 0.8,
-                centroid: 900.0,
-                confidence: 0.9,
-            });
-        }
 
-        // Let the 5ms analysis loop chew through the batch and open a
-        // segment before the settings change lands.
-        std::thread::sleep(std::time::Duration::from_millis(120));
+        // Block until the matcher actually matches an onset — the exact
+        // moment a segment opens. Beats 0..3 are burned by the warmup
+        // grace and arrive as "skipped"; activity starts Idle, and an
+        // unmatched beat in Idle is also "skipped", so the first
+        // non-"skipped" feedback can only come from a matched onset.
+        // That is a precise "the segment is now open" signal, which the
+        // old fixed 120 ms sleep only approximated — under load the
+        // batch was sometimes still unprocessed when Signal A fired.
+        let mut classifications: Vec<String> = Vec::new();
+        let mut segment_open = false;
+        while let Ok(fb) = feedback_rx.recv_timeout(WAIT) {
+            let matched = fb.classification != "skipped";
+            classifications.push(fb.classification);
+            if matched {
+                segment_open = true;
+                break;
+            }
+        }
+        assert!(
+            segment_open,
+            "analyzer never matched an onset, so no segment was open to close; \
+             beat classifications: {classifications:?}"
+        );
 
         analyzer.notify_settings_change();
-        std::thread::sleep(std::time::Duration::from_millis(80));
 
-        let observed = closes.lock().unwrap().clone();
-        let settings_closes: Vec<_> = observed
-            .iter()
-            .filter(|(reason, _)| *reason == SegmentEndReason::SettingsChange)
-            .collect();
+        // Block on the close rather than sleeping for it. Signal B
+        // (ActivityGap) and Signal D (GridDiscontinuity) both need ≥30 s
+        // of play, so the first close to arrive here is necessarily the
+        // settings-change one.
+        let (reason, emit_ui) = close_rx
+            .recv_timeout(WAIT)
+            .expect("Signal A must close the open segment, but no close arrived");
         assert_eq!(
-            settings_closes.len(),
-            1,
-            "expected exactly one SettingsChange close, got {observed:?}"
+            reason,
+            SegmentEndReason::SettingsChange,
+            "first close after notify_settings_change must be SettingsChange"
         );
         assert!(
-            !settings_closes[0].1,
+            !emit_ui,
             "SettingsChange must not raise the practice-segment-ended UI event"
         );
 
+        // stop() joins the analysis thread, which drops the sender, so
+        // this drain sees every close the session ever produced — no
+        // second SettingsChange may hide behind the first.
         analyzer.stop();
+        let extra: Vec<_> = close_rx.try_iter().collect();
+        let extra_settings = extra
+            .iter()
+            .filter(|(reason, _)| *reason == SegmentEndReason::SettingsChange)
+            .count();
+        assert_eq!(
+            extra_settings, 0,
+            "expected exactly one SettingsChange close; later closes were {extra:?}"
+        );
     }
 }
