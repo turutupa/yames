@@ -5,10 +5,13 @@
  * these tests assert what the UI *emits* — the transitions themselves are
  * covered by `onboardingMachine.test.ts`.
  */
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useEffect, useState } from "react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
+import { useWizardEnv } from "./WizardContext";
 import { FinishSetupChip } from "./FinishSetupChip";
 import { OnboardingWizard, type OnboardingWizardProps } from "./OnboardingWizard";
+import { ONBOARDING_STEPS } from "./steps";
 import {
   INITIAL_ONBOARDING_STATE,
   type OnboardingState,
@@ -22,6 +25,22 @@ function stateAt(stepId: StepId, visited: StepId[] = [stepId]): OnboardingState 
     context: { skipped: [], visited },
   };
 }
+
+/**
+ * A step that stages nothing, so Next is enabled from the start. Used by the
+ * shell-chrome tests — W1 deliberately gates Next until a card is selected,
+ * which is the subject of its own tests below.
+ */
+function PlainStep() {
+  return (
+    <div className="onboarding-step">
+      <button type="button">plain</button>
+    </div>
+  );
+}
+const PLAIN_STEPS = ONBOARDING_STEPS.map((s) =>
+  s.id === "instrument" ? { ...s, Component: PlainStep } : s,
+);
 
 function setup(overrides: Partial<OnboardingWizardProps> = {}) {
   const dispatch = vi.fn();
@@ -68,7 +87,7 @@ describe("wizard shell", () => {
   });
 
   it("shows progress dots and Back/Skip/Next on a step", () => {
-    const { container } = setup({ state: stateAt("instrument") });
+    const { container } = setup({ state: stateAt("instrument"), steps: PLAIN_STEPS });
     expect(container.querySelectorAll(".onboarding-dot")).toHaveLength(2);
     expect(container.querySelector(".onboarding-dot.active")).not.toBeNull();
     // Back on the first step is live: it returns to W0.
@@ -78,7 +97,7 @@ describe("wizard shell", () => {
   });
 
   it("footer buttons dispatch NEXT / BACK / SKIP_STEP", () => {
-    const { dispatch } = setup({ state: stateAt("instrument") });
+    const { dispatch } = setup({ state: stateAt("instrument"), steps: PLAIN_STEPS });
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     fireEvent.click(screen.getByRole("button", { name: "Skip" }));
     expect(dispatch).toHaveBeenCalledWith({ type: "NEXT" });
@@ -105,7 +124,7 @@ describe("wizard shell", () => {
   });
 
   it("←/→ navigate on a step and do nothing on W0", () => {
-    const { dispatch } = setup({ state: stateAt("instrument") });
+    const { dispatch } = setup({ state: stateAt("instrument"), steps: PLAIN_STEPS });
     fireEvent.keyDown(document, { key: "ArrowRight" });
     fireEvent.keyDown(document, { key: "ArrowLeft" });
     expect(dispatch).toHaveBeenCalledWith({ type: "NEXT" });
@@ -213,27 +232,88 @@ describe("W1 — instrument", () => {
     expect(screen.getByRole("button", { name: /Bass/ })).toBeInTheDocument();
   });
 
-  it("does not pre-select anything on a true first run", () => {
+  it("does not pre-select anything on a true first run, and Next waits", () => {
     const { container } = setup({ state: stateAt("instrument") });
     expect(container.querySelector(".instrument-picker-card.selected")).toBeNull();
+    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
   });
 
-  it("marks the current instrument when one was already chosen", () => {
+  it("preselects the current instrument on a re-run, with Next live", () => {
     setup({ state: stateAt("instrument"), instrument: "bass", instrumentChosen: true });
     expect(screen.getByRole("button", { name: /Bass/ })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
+    expect(screen.getByRole("button", { name: "Next" })).toBeEnabled();
   });
 
-  it("picking persists the choice and advances", () => {
+  it("clicking a card only selects it — it never advances or persists", () => {
     const onInstrumentChange = vi.fn();
     const { dispatch } = setup({
       state: stateAt("instrument"),
       onInstrumentChange,
     });
     fireEvent.click(screen.getByRole("button", { name: /Bass/ }));
+    expect(screen.getByRole("button", { name: /Bass/ })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(onInstrumentChange).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Next" })).toBeEnabled();
+  });
+
+  it("a misclick is harmless: the last card clicked is the one selected", () => {
+    const onInstrumentChange = vi.fn();
+    const { dispatch } = setup({ state: stateAt("instrument"), onInstrumentChange });
+    fireEvent.click(screen.getByRole("button", { name: /Drums/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Bass/ }));
+    expect(screen.getByRole("button", { name: /Drums/ })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+    expect(dispatch).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(onInstrumentChange).toHaveBeenCalledTimes(1);
     expect(onInstrumentChange).toHaveBeenCalledWith("bass");
+  });
+
+  it("Next persists the selection, then advances", () => {
+    const onInstrumentChange = vi.fn();
+    const { dispatch } = setup({ state: stateAt("instrument"), onInstrumentChange });
+    fireEvent.click(screen.getByRole("button", { name: /Bass/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(onInstrumentChange).toHaveBeenCalledWith("bass");
+    expect(dispatch).toHaveBeenCalledWith({ type: "NEXT" });
+  });
+
+  it("Skip advances without persisting anything", () => {
+    const onInstrumentChange = vi.fn();
+    const { dispatch } = setup({ state: stateAt("instrument"), onInstrumentChange });
+    fireEvent.click(screen.getByRole("button", { name: /Bass/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Skip" }));
+    expect(onInstrumentChange).not.toHaveBeenCalled();
+    expect(dispatch).toHaveBeenCalledWith({ type: "SKIP_STEP" });
+  });
+
+  it("Enter advances once a card is selected, and does nothing before", () => {
+    const onInstrumentChange = vi.fn();
+    const { dispatch } = setup({ state: stateAt("instrument"), onInstrumentChange });
+    fireEvent.keyDown(document, { key: "Enter" });
+    expect(dispatch).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: /Bass/ }));
+    fireEvent.keyDown(document, { key: "Enter" });
+    expect(onInstrumentChange).toHaveBeenCalledWith("bass");
+    expect(dispatch).toHaveBeenCalledWith({ type: "NEXT" });
+  });
+
+  it("→ is gated the same way as Next", () => {
+    const { dispatch } = setup({ state: stateAt("instrument") });
+    fireEvent.keyDown(document, { key: "ArrowRight" });
+    expect(dispatch).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: /Bass/ }));
+    fireEvent.keyDown(document, { key: "ArrowRight" });
     expect(dispatch).toHaveBeenCalledWith({ type: "NEXT" });
   });
 });
@@ -300,6 +380,77 @@ describe("W7 — ready", () => {
     setup({ ...ready, onRequestTour });
     fireEvent.click(screen.getByRole("button", { name: /Show me around/ }));
     expect(onRequestTour).toHaveBeenCalled();
+  });
+});
+
+/**
+ * The contract O2–O5 build against: a step stages a choice, gates Next, and
+ * hands the shell a commit that runs on Next and only on Next.
+ */
+describe("step commit contract", () => {
+  const commitSpy = vi.fn();
+
+  function StagingStep() {
+    const { setStepCommit, setNextEnabled } = useWizardEnv();
+    const [picked, setPicked] = useState(false);
+    useEffect(() => {
+      setNextEnabled(picked);
+      setStepCommit(picked ? () => commitSpy() : null);
+    }, [picked, setNextEnabled, setStepCommit]);
+    return (
+      <button type="button" onClick={() => setPicked(true)}>
+        stage it
+      </button>
+    );
+  }
+
+  const STAGING_STEPS = ONBOARDING_STEPS.map((s) =>
+    s.id === "instrument" ? { ...s, Component: StagingStep } : s,
+  );
+  const staging = { state: stateAt("instrument"), steps: STAGING_STEPS };
+
+  beforeEach(() => commitSpy.mockClear());
+
+  it("gates Next until the step says it is ready", () => {
+    const { dispatch } = setup(staging);
+    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "stage it" }));
+    expect(screen.getByRole("button", { name: "Next" })).toBeEnabled();
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it("runs the commit before advancing", () => {
+    const { dispatch } = setup(staging);
+    fireEvent.click(screen.getByRole("button", { name: "stage it" }));
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(commitSpy).toHaveBeenCalledTimes(1);
+    expect(dispatch).toHaveBeenCalledWith({ type: "NEXT" });
+  });
+
+  it("never runs the commit on Skip or Back", () => {
+    const { dispatch } = setup(staging);
+    fireEvent.click(screen.getByRole("button", { name: "stage it" }));
+    fireEvent.click(screen.getByRole("button", { name: "Skip" }));
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+    expect(commitSpy).not.toHaveBeenCalled();
+    expect(dispatch).toHaveBeenCalledWith({ type: "SKIP_STEP" });
+    expect(dispatch).toHaveBeenCalledWith({ type: "BACK" });
+  });
+
+  it("clears the gate and the commit when the step changes", () => {
+    const { rerender, props } = setup(staging);
+    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+    // W7 registers nothing, so Next must not stay stuck off.
+    rerender(
+      <OnboardingWizard
+        {...props}
+        steps={STAGING_STEPS}
+        state={stateAt("ready", ["instrument", "ready"])}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Start practicing" })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "Start practicing" }));
+    expect(commitSpy).not.toHaveBeenCalled();
   });
 });
 

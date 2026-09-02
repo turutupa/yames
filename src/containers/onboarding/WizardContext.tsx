@@ -46,6 +46,19 @@ export type WizardEnv = {
    * O2–O5 have not added yet render as static text.
    */
   availableSteps: StepId[];
+  /**
+   * Selection is not navigation (see `steps/types.ts`). A step stages the
+   * user's choice and registers what to persist here; the shell runs it right
+   * before it advances on Next — and never on Skip or Back. Pass `null` when
+   * there is nothing to commit. Cleared automatically when the step changes.
+   */
+  setStepCommit: (commit: (() => void) | null) => void;
+  /**
+   * Enable/disable the footer's Next (and the ←/→/Enter equivalents) — e.g.
+   * W1 keeps it off until an instrument is selected. Resets to enabled when
+   * the step changes, so a step that never calls it is always advanceable.
+   */
+  setNextEnabled: (enabled: boolean) => void;
   /** Jump to a step (W7 summary rows). */
   jumpTo: (id: StepId) => void;
   /** "Just give me the click" — end the wizard, skipping everything left. */

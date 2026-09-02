@@ -118,8 +118,33 @@ export function OnboardingWizard({
   // disabled — the ← key does the same thing.
   const isLastStep = dotIndex === dotted.length - 1;
 
+  // --- Selection is not navigation -----------------------------------------
+  // House rule (owner, 2026-09-02): choosing something inside a step only
+  // selects it. Advancing is always the user's separate, deliberate act via
+  // Next (or Enter). A step stages its choice, tells the shell whether Next
+  // is allowed yet, and hands over a commit callback the shell runs *before*
+  // it advances — so a misclick costs nothing and Skip never persists.
+  const commitRef = useRef<(() => void) | null>(null);
+  const [nextEnabled, setNextEnabled] = useState(true);
+  // Reset both when the visible step changes. Done during render (not in an
+  // effect) because child effects run before the parent's would, and an
+  // effect here would wipe the registration the new step just made.
+  const stepRef = useRef(current);
+  if (stepRef.current !== current) {
+    stepRef.current = current;
+    commitRef.current = null;
+    if (!nextEnabled) setNextEnabled(true);
+  }
+  const setStepCommit = useCallback((fn: (() => void) | null) => {
+    commitRef.current = fn;
+  }, []);
+
   // --- Navigation helpers passed to steps ---------------------------------
-  const onNext = useCallback(() => dispatch({ type: "NEXT" }), [dispatch]);
+  const onNext = useCallback(() => {
+    // Persist the step's result first, then move.
+    commitRef.current?.();
+    dispatch({ type: "NEXT" });
+  }, [dispatch]);
   const onBack = useCallback(() => dispatch({ type: "BACK" }), [dispatch]);
   const onSkip = useCallback(() => dispatch({ type: "SKIP_STEP" }), [dispatch]);
   const skipAll = useCallback(() => dispatch({ type: "SKIP_ALL" }), [dispatch]);
@@ -217,7 +242,7 @@ export function OnboardingWizard({
       if (e.key === "ArrowRight") {
         e.preventDefault();
         e.stopPropagation();
-        if (!isWelcome) onNext();
+        if (!isWelcome && nextEnabled) onNext();
         return;
       }
       if (e.key === "ArrowLeft") {
@@ -226,13 +251,27 @@ export function OnboardingWizard({
         if (!isWelcome) onBack();
         return;
       }
+      // Enter is the footer's default action: it advances, exactly like the
+      // Next button. Space still activates whatever has focus, so a card is
+      // selected with Space or a click and never by pressing Enter over it.
+      // Enter on a footer button (Back / Skip) keeps that button's meaning.
+      if (e.key === "Enter" && !isWelcome) {
+        const onFooterButton = !!target?.closest?.(".onboarding-footer button");
+        if (!onFooterButton) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (nextEnabled) onNext();
+          return;
+        }
+        return;
+      }
       // Everything else stays inside the overlay: no app hotkeys behind it.
       if (e.key === " " || e.key === "Enter") return;
       e.stopPropagation();
     };
     document.addEventListener("keydown", handler, true);
     return () => document.removeEventListener("keydown", handler, true);
-  }, [open, isWelcome, skipAll, onSkip, onNext, onBack]);
+  }, [open, isWelcome, nextEnabled, skipAll, onSkip, onNext, onBack]);
 
   // --- Step environment ----------------------------------------------------
   // Count main beats only (subdivision 0) so the W0 mark pulses in tempo
@@ -260,6 +299,8 @@ export function OnboardingWizard({
       beatTick,
       machineContext: state.context,
       availableSteps,
+      setStepCommit,
+      setNextEnabled,
       jumpTo,
       skipAll,
       startSetup,
@@ -285,6 +326,8 @@ export function OnboardingWizard({
       beatTick,
       state.context,
       availableSteps,
+      setStepCommit,
+      setNextEnabled,
       jumpTo,
       skipAll,
       startSetup,
@@ -366,6 +409,7 @@ export function OnboardingWizard({
                   type="button"
                   className="onboarding-btn onboarding-btn-primary"
                   onClick={onNext}
+                  disabled={!nextEnabled}
                 >
                   {t("onboarding.next")}
                 </button>
