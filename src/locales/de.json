@@ -71,6 +71,31 @@
       "themeHeading": "Design",
       "moreThemes": "Mehr Designs in den Einstellungen"
     },
+    "handsFree": {
+      "title": "Die Hände bleiben am Instrument",
+      "subtitle": "Diese Tasten funktionieren bereits. Wenn du einen Fußschalter oder ein Gamepad hast, leg es hier direkt auf Start/Stopp.",
+      "cancel": "Abbrechen",
+      "keyboard": {
+        "title": "Tastatur",
+        "hint": "Jede Taste lässt sich unter Einstellungen → Tastenkürzel ändern."
+      },
+      "midi": {
+        "title": "MIDI-Fußschalter",
+        "none": "Schließ jederzeit einen an — Yames bietet die Zuweisung dann an.",
+        "map": "Start/Stopp zuweisen",
+        "remap": "Anderes Pedal zuweisen",
+        "listening": "Drück das Pedal, das Start/Stopp auslösen soll.",
+        "mapped": "Start/Stopp → {{signal}} · Kanal {{channel}}"
+      },
+      "gamepad": {
+        "title": "Gamepad",
+        "none": "Schließ jederzeit ein Gamepad an — drück eine Taste und Yames erkennt es.",
+        "map": "Start/Stopp zuweisen",
+        "remap": "Andere Taste zuweisen",
+        "listening": "Drück die Taste, die Start/Stopp auslösen soll.",
+        "mapped": "Start/Stopp → {{button}}"
+      }
+    },
     "ready": {
       "title": "Alles bereit",
       "subtitle": "Ändere hier etwas – oder später in den Einstellungen.",

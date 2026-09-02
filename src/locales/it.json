@@ -71,6 +71,31 @@
       "themeHeading": "Tema",
       "moreThemes": "Altri temi nelle Impostazioni"
     },
+    "handsFree": {
+      "title": "Le mani restano sullo strumento",
+      "subtitle": "Questi tasti funzionano già. Se hai un pedale o un controller, assegnalo qui ad Avvia/Ferma.",
+      "cancel": "Annulla",
+      "keyboard": {
+        "title": "Tastiera",
+        "hint": "Ogni tasto si può cambiare in Impostazioni → Scorciatoie."
+      },
+      "midi": {
+        "title": "Pedale MIDI",
+        "none": "Collegane uno quando vuoi: Yames proporrà di assegnarlo.",
+        "map": "Assegna Avvia/Ferma",
+        "remap": "Assegna un altro pedale",
+        "listening": "Premi il pedale che vuoi usare per Avvia/Ferma.",
+        "mapped": "Avvia/Ferma → {{signal}} · canale {{channel}}"
+      },
+      "gamepad": {
+        "title": "Controller",
+        "none": "Collega un controller quando vuoi: premi un tasto e Yames lo rileverà.",
+        "map": "Assegna Avvia/Ferma",
+        "remap": "Assegna un altro tasto",
+        "listening": "Premi il tasto che vuoi usare per Avvia/Ferma.",
+        "mapped": "Avvia/Ferma → {{button}}"
+      }
+    },
     "ready": {
       "title": "Tutto pronto",
       "subtitle": "Cambia quello che vuoi qui, o più tardi nelle Impostazioni.",

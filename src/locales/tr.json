@@ -71,6 +71,31 @@
       "themeHeading": "Tema",
       "moreThemes": "Ayarlar'da daha fazla tema"
     },
+    "handsFree": {
+      "title": "Eller çalgının üzerinde kalır",
+      "subtitle": "Bu tuşlar şimdiden çalışıyor. Pedalın ya da oyun kumandan varsa, Çal/Durdur'a burada atayabilirsin.",
+      "cancel": "İptal",
+      "keyboard": {
+        "title": "Klavye",
+        "hint": "Her tuş Ayarlar → Kısayollar'dan değiştirilebilir."
+      },
+      "midi": {
+        "title": "MIDI pedalı",
+        "none": "İstediğin zaman tak — Yames atamayı kendisi önerecek.",
+        "map": "Çal/Durdur'a ata",
+        "remap": "Başka pedal ata",
+        "listening": "Çal/Durdur için kullanmak istediğin pedala bas.",
+        "mapped": "Çal/Durdur → {{signal}} · kanal {{channel}}"
+      },
+      "gamepad": {
+        "title": "Oyun kumandası",
+        "none": "İstediğin zaman bir kumanda bağla — bir düğmeye bas, Yames görecek.",
+        "map": "Çal/Durdur'a ata",
+        "remap": "Başka düğme ata",
+        "listening": "Çal/Durdur için kullanmak istediğin düğmeye bas.",
+        "mapped": "Çal/Durdur → {{button}}"
+      }
+    },
     "ready": {
       "title": "Hazırsın",
       "subtitle": "Buradan ya da sonra Ayarlar'dan değiştirebilirsin.",

@@ -71,6 +71,31 @@
       "themeHeading": "主题",
       "moreThemes": "更多主题在设置中"
     },
+    "handsFree": {
+      "title": "双手一直留在乐器上",
+      "subtitle": "这些按键已经可用。如果你有踏板或手柄，现在就能把播放/停止映射上去。",
+      "cancel": "取消",
+      "keyboard": {
+        "title": "键盘",
+        "hint": "所有按键都可在设置 → 快捷键中修改。"
+      },
+      "midi": {
+        "title": "MIDI 踏板",
+        "none": "随时插上即可 — Yames 会主动提示映射。",
+        "map": "映射播放/停止",
+        "remap": "改用别的踏板",
+        "listening": "踩下你想用来播放/停止的踏板。",
+        "mapped": "播放/停止 → {{signal}} · 通道 {{channel}}"
+      },
+      "gamepad": {
+        "title": "手柄",
+        "none": "随时连接手柄 — 按一个键，Yames 就能看到它。",
+        "map": "映射播放/停止",
+        "remap": "改用别的按键",
+        "listening": "按下你想用来播放/停止的按键。",
+        "mapped": "播放/停止 → {{button}}"
+      }
+    },
     "ready": {
       "title": "准备就绪",
       "subtitle": "可以在这里修改，也可以稍后在设置中修改。",

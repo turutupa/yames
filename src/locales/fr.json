@@ -71,6 +71,31 @@
       "themeHeading": "Thème",
       "moreThemes": "Plus de thèmes dans les Réglages"
     },
+    "handsFree": {
+      "title": "Les mains restent sur l'instrument",
+      "subtitle": "Ces touches fonctionnent déjà. Si vous avez une pédale ou une manette, associez-la ici à Lecture/Arrêt.",
+      "cancel": "Annuler",
+      "keyboard": {
+        "title": "Clavier",
+        "hint": "Chaque touche est modifiable dans Paramètres → Raccourcis."
+      },
+      "midi": {
+        "title": "Pédale MIDI",
+        "none": "Branchez-en une quand vous voulez — Yames proposera de l'associer.",
+        "map": "Associer Lecture/Arrêt",
+        "remap": "Associer une autre pédale",
+        "listening": "Appuyez sur la pédale à utiliser pour Lecture/Arrêt.",
+        "mapped": "Lecture/Arrêt → {{signal}} · canal {{channel}}"
+      },
+      "gamepad": {
+        "title": "Manette",
+        "none": "Branchez une manette quand vous voulez — appuyez sur un bouton et Yames la verra.",
+        "map": "Associer Lecture/Arrêt",
+        "remap": "Associer un autre bouton",
+        "listening": "Appuyez sur le bouton à utiliser pour Lecture/Arrêt.",
+        "mapped": "Lecture/Arrêt → {{button}}"
+      }
+    },
     "ready": {
       "title": "Tout est prêt",
       "subtitle": "Modifiez ce que vous voulez ici, ou plus tard dans les Réglages.",
