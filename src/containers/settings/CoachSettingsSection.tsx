@@ -585,6 +585,21 @@ export function CoachSettingsSection({
                   ? t("settings.coach.voicesCorrupted")
                   : t("settings.coach.voicesNotInstalled")}
             </p>
+            {/* OS-specific remediation from Rust, shown only when the
+                engine itself is broken. Speech now works on Windows and
+                Linux too, and those platforms fail for reasons the
+                translated copy above can't cover (AV quarantine of
+                piper.exe, a missing espeak-ng-data folder). The string
+                is English-only by design — it names filesystem paths
+                and package names, same as the download error banner. */}
+            {(() => {
+              const hint = voiceDiagnostics.find((d) => d.engineHint)?.engineHint;
+              return hint ? (
+                <p className="setting-hint" style={{ marginBottom: 8, opacity: 0.75 }}>
+                  {hint}
+                </p>
+              ) : null;
+            })()}
             {/* Always render the button so it doesn't pop in/out of
                 the layout — instead disable it while a download is in
                 flight. The global progress bar in MainWindow already
