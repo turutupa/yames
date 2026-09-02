@@ -3334,6 +3334,30 @@
   box-shadow: 0 0 4px rgba(34, 197, 94, 0.5);
 }
 
+/* Honest brain status line, directly under the Brain toggle row.
+   Three tones: `info` reads as a plain hint (nothing is wrong — this
+   build is template-only, or nothing is downloaded yet), `warn` reuses
+   the amber used elsewhere for "you have something that isn't working"
+   (weights on disk this build can't load), `ok` uses the accent for a
+   live model. */
+.coach-brain-status {
+  margin: -4px 0 8px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  opacity: 0.75;
+}
+
+.coach-brain-status-warn {
+  color: rgb(234, 179, 8);
+  opacity: 1;
+}
+
+.coach-brain-status-ok {
+  color: var(--accent);
+  opacity: 1;
+}
+
 /* Audio output Bluetooth warning */
 .audio-output-bt-warning {
   display: flex;

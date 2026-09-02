@@ -1697,6 +1697,63 @@ pub fn is_coach_loaded(engine: State<'_, SharedCoachEngine>) -> bool {
     engine.lock().map(|lock| lock.is_loaded()).unwrap_or(false)
 }
 
+/// What the coach can actually do in THIS build, right now.
+///
+/// Deliberately separate from `ModelStatus` (which only answers "are
+/// the weights on disk"). The two together are what the Settings
+/// status line needs: weights present + `llm_compiled` + resident tells
+/// you whether the user is getting a real brain, a downloaded-but-
+/// unusable one, or the template coach.
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct CoachCapabilities {
+    /// Whether the binary was built with the `coach-llm` feature.
+    #[serde(rename = "llmCompiled")]
+    pub llm_compiled: bool,
+    /// Whether a real model is loaded in memory right now.
+    #[serde(rename = "modelResident")]
+    pub model_resident: bool,
+    /// Compile-time llama.cpp backend: metal / vulkan / cpu / none.
+    pub backend: String,
+    /// File name of the resident model (null in template mode).
+    #[serde(rename = "modelName")]
+    pub model_name: Option<String>,
+    /// Rough resident-set estimate while generating: weights × 1.2 to
+    /// cover the KV cache and llama.cpp scratch buffers. 0 when no
+    /// model file is on disk.
+    #[serde(rename = "ramEstimateMb")]
+    pub ram_estimate_mb: u64,
+}
+
+#[tauri::command]
+pub fn get_coach_capabilities(
+    app_handle: AppHandle,
+    engine: State<'_, SharedCoachEngine>,
+) -> Result<CoachCapabilities, String> {
+    let (model_resident, model_name) = engine
+        .lock()
+        .map(|lock| (lock.is_loaded(), lock.model_name().map(str::to_string)))
+        .unwrap_or((false, None));
+
+    let model_path = app_handle
+        .path()
+        .app_data_dir()
+        .map_err(|e| format!("Failed to get app data dir: {e}"))?
+        .join("models")
+        .join("brain")
+        .join("model.bin");
+    let ram_estimate_mb = std::fs::metadata(&model_path)
+        .map(|m| ((m.len() as f64 * 1.2) / (1024.0 * 1024.0)).round() as u64)
+        .unwrap_or(0);
+
+    Ok(CoachCapabilities {
+        llm_compiled: crate::coach::llm_compiled(),
+        model_resident,
+        backend: crate::coach::backend_name().to_string(),
+        model_name,
+        ram_estimate_mb,
+    })
+}
+
 // ---------------------------------------------------------------------------
 // TTS
 // ---------------------------------------------------------------------------

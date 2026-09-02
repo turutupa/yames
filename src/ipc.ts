@@ -728,6 +728,35 @@ export async function isCoachLoaded(): Promise<boolean> {
   return invoke<boolean>("is_coach_loaded");
 }
 
+/**
+ * What the coach can actually do in this build, right now.
+ *
+ * Distinct from `ModelStatus`, which only answers "are the weights on
+ * disk". A release binary compiled without the `coach-llm` Cargo
+ * feature can have 2.4 GB of GGUF downloaded and still be unable to
+ * read a byte of it — `llmCompiled` is what tells the two apart.
+ */
+export type CoachCapabilities = {
+  /** Whether the binary was built with the `coach-llm` feature. */
+  llmCompiled: boolean;
+  /** Whether a real model is loaded in memory right now. */
+  modelResident: boolean;
+  /**
+   * Compile-time llama.cpp backend. llama.cpp still falls back to CPU
+   * at runtime when no usable GPU is present, so `"vulkan"` does not
+   * guarantee GPU execution.
+   */
+  backend: "metal" | "vulkan" | "cpu" | "none";
+  /** File name of the resident model, or null in template mode. */
+  modelName: string | null;
+  /** Rough RAM estimate while generating (weights × 1.2), 0 if absent. */
+  ramEstimateMb: number;
+};
+
+export async function getCoachCapabilities(): Promise<CoachCapabilities> {
+  return invoke<CoachCapabilities>("get_coach_capabilities");
+}
+
 // ---------------------------------------------------------------------------
 // TTS (Text-to-Speech)
 // ---------------------------------------------------------------------------
