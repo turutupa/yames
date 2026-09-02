@@ -433,19 +433,10 @@ pub fn start_download(
         // install would silently pass a `.exists()` check and then
         // crash at speak time.
         if crate::tts::piper_smoke_test(&piper_dir).is_err() {
-            let _ = app.emit(
-                "model-download-progress",
-                DownloadProgress {
-                    component: "Piper TTS engine".to_string(),
-                    downloaded_bytes: 0,
-                    total_bytes: 0,
-                    fraction: 0.0,
-                    done: false,
-                },
-            );
-            let piper_url = crate::tts::piper_binary_url();
-            let tar_path = models_dir.join("piper.tar.gz");
-            if let Err(e) = curl_download(&app, piper_url, &tar_path, &cancel, "Piper TTS engine") {
+            // One shared installer for both entry points — download,
+            // size-check, wipe, extract (tar.gz or zip depending on the
+            // platform), per-OS fixups, smoke test, verified marker.
+            if let Err(e) = install_piper_engine(&app, &models_dir, &cancel) {
                 if e == "cancelled" {
                     let _ = app.emit(
                         "model-download-complete",
@@ -453,7 +444,7 @@ pub fn start_download(
                     );
                     return;
                 }
-                eprintln!("[yames] Failed to download Piper binary: {e}");
+                eprintln!("[yames] Piper engine install failed: {e}");
                 piper_error = Some(e.clone());
                 let _ = app.emit(
                     "model-download-progress",
@@ -465,114 +456,6 @@ pub fn start_download(
                         done: true,
                     },
                 );
-            } else {
-                // Sanity-check the tarball size before handing it to
-                // tar. HuggingFace (or a corporate proxy / VPN with TLS
-                // interception) can serve a redirect page or
-                // maintenance HTML in place of the real asset — those
-                // are KB, not MB. The real Piper macOS tarball is
-                // ~24 MB; we floor at 15 MB so the check is robust to
-                // future minor release-size shifts but still catches
-                // the common "served a wrong/truncated payload" mode.
-                const MIN_PIPER_TARBALL_BYTES: u64 = 15 * 1024 * 1024;
-                let tar_size = std::fs::metadata(&tar_path).map(|m| m.len()).unwrap_or(0);
-                if tar_size < MIN_PIPER_TARBALL_BYTES {
-                    eprintln!(
-                        "[yames] Piper tarball is only {tar_size} bytes (expected >= {MIN_PIPER_TARBALL_BYTES}) \u{2014} likely corrupted or intercepted",
-                    );
-                    let _ = std::fs::remove_file(&tar_path);
-                    piper_error = Some(format!(
-                        "downloaded archive is only {tar_size} bytes (expected at least {} MB) \u{2014} the file may be corrupted or intercepted by a proxy",
-                        MIN_PIPER_TARBALL_BYTES / (1024 * 1024),
-                    ));
-                } else {
-                    // Wipe stale piper/ only after download succeeds and tarball
-                    // size is verified — so a failed download never destroys a
-                    // working install. `tar xzf` extracts side-by-side and won't
-                    // remove orphan files, so we still need to clear before extract.
-                    if piper_dir.exists() {
-                        if let Err(e) = std::fs::remove_dir_all(&piper_dir) {
-                            eprintln!("[yames] Failed to remove stale piper/: {e}");
-                        }
-                    }
-                    // Extract tar.gz
-                    let _ = std::fs::create_dir_all(&models_dir);
-                    let extract = std::process::Command::new("tar")
-                        .arg("xzf")
-                        .arg(&tar_path)
-                        .arg("-C")
-                        .arg(&models_dir)
-                        .output();
-                    let _ = std::fs::remove_file(&tar_path);
-                    match extract {
-                        Ok(out) if !out.status.success() => {
-                            let stderr = String::from_utf8_lossy(&out.stderr).to_string();
-                            eprintln!(
-                                "[yames] tar exited {} extracting Piper: {stderr}",
-                                out.status,
-                            );
-                            piper_error = Some(format!("tar failed extracting Piper: {stderr}"));
-                        }
-                        Err(e) => {
-                            eprintln!("[yames] Failed to extract Piper: {e}");
-                            piper_error = Some(format!("failed to run tar: {e}"));
-                        }
-                        _ => {}
-                    }
-                    // Strip macOS Gatekeeper quarantine attribute
-                    // recursively. Files downloaded via curl carry the
-                    // `com.apple.quarantine` xattr; after a system
-                    // security update macOS can refuse to load
-                    // unsigned dylibs that have it set, even ones that
-                    // worked yesterday. Symptom: dyld error "Library
-                    // not loaded: @rpath/...dylib" with all files
-                    // visibly present on disk. Stripping the xattr
-                    // pre-emptively avoids this whole class of failure.
-                    // Errors are swallowed because `xattr` exits
-                    // non-zero when the attribute isn't set, which is
-                    // the success case for us.
-                    let _ = std::process::Command::new("xattr")
-                        .arg("-dr")
-                        .arg("com.apple.quarantine")
-                        .arg(&piper_dir)
-                        .output();
-                    // Add the piper directory as rpath so @rpath/lib*.dylib resolves.
-                    // The binary ships with @rpath references but no LC_RPATH entry —
-                    // without this dyld can never locate libespeak-ng, libonnxruntime, etc.
-                    for bin in ["piper", "piper_phonemize"] {
-                        let bin_path = piper_dir.join(bin);
-                        if bin_path.exists() {
-                            let _ = std::process::Command::new("install_name_tool")
-                                .arg("-add_rpath")
-                                .arg(&piper_dir)
-                                .arg(&bin_path)
-                                .output();
-                        }
-                    }
-                    // Log any still-missing dylibs after extraction for future debugging.
-                    for dylib in ["libespeak-ng.1.dylib", "libpiper_phonemize.1.dylib", "libonnxruntime.1.14.1.dylib"] {
-                        if !piper_dir.join(dylib).exists() {
-                            eprintln!("[yames] WARNING: piper dylib missing after extract: {dylib}");
-                        }
-                    }
-                    // Post-extract smoke test. Only set piper_error
-                    // here if no upstream step already failed —
-                    // otherwise we'd clobber a more specific error
-                    // (e.g. "tar failed extracting") with whatever the
-                    // smoke test reports about the symptom downstream.
-                    //
-                    // Smoke test runs the binary itself rather than
-                    // checking filenames, so this is forward-compatible
-                    // with future Piper releases that ship a different
-                    // set of dylibs/helpers — as long as `piper --help`
-                    // runs cleanly the install is considered healthy.
-                    if piper_error.is_none() {
-                        if let Err(e) = crate::tts::piper_smoke_test(&piper_dir) {
-                            eprintln!("[yames] Piper smoke test failed after extract: {e}",);
-                            piper_error = Some(e);
-                        }
-                    }
-                }
             }
         }
 
@@ -708,11 +591,17 @@ pub fn start_download(
             let err = piper_error
                 .or_else(|| engine_check.err())
                 .unwrap_or_else(|| "Speech engine install incomplete".to_string());
+            // Append the OS-specific remediation sentence: on Windows
+            // and Linux the failure modes (AV quarantine, a zip that no
+            // extractor could open, missing espeak-ng-data) are nothing
+            // like macOS's Gatekeeper story, and the raw error alone
+            // gives the user nothing to act on.
+            let hint = crate::tts::engine_missing_hint(&models_dir);
             let _ = app.emit(
                 "model-download-complete",
                 serde_json::json!({
                     "success": false,
-                    "error": format!("Speech engine couldn't be installed: {err}"),
+                    "error": format!("Speech engine couldn't be installed: {err}. {hint}"),
                 }),
             );
             return;
@@ -956,24 +845,13 @@ pub fn start_voice_repair(app: AppHandle, voice_id: String, cancel: DownloadCanc
         // `piper` binary on disk, all three dylibs missing).
         let piper_dir = models_dir.join("piper");
         if crate::tts::piper_smoke_test(&piper_dir).is_err() {
-            let _ = app.emit(
-                "model-download-progress",
-                DownloadProgress {
-                    component: "Piper TTS engine".to_string(),
-                    downloaded_bytes: 0,
-                    total_bytes: 0,
-                    fraction: 0.0,
-                    done: false,
-                },
-            );
-            if piper_dir.exists() {
-                if let Err(e) = std::fs::remove_dir_all(&piper_dir) {
-                    eprintln!("[yames] start_voice_repair: failed to remove stale piper/: {e}");
-                }
-            }
-            let piper_url = crate::tts::piper_binary_url();
-            let tar_path = models_dir.join("piper.tar.gz");
-            if let Err(e) = curl_download(&app, piper_url, &tar_path, &cancel, "Piper TTS engine") {
+            // Same shared installer `start_download` uses. This block
+            // used to be a near-verbatim copy that had already drifted
+            // (it wiped `piper/` BEFORE downloading, destroying a
+            // working install whenever the network was down) — one
+            // implementation now covers both entry points and all three
+            // OSes.
+            if let Err(e) = install_piper_engine(&app, &models_dir, &cancel) {
                 if e == "cancelled" {
                     let _ = app.emit(
                         "model-download-complete",
@@ -981,119 +859,15 @@ pub fn start_voice_repair(app: AppHandle, voice_id: String, cancel: DownloadCanc
                     );
                     return;
                 }
-                let _ = app.emit(
-                    "model-download-complete",
-                    serde_json::json!({ "success": false, "error": format!("Piper engine: {e}") }),
-                );
-                return;
-            }
-            // Sanity-check tarball size — see start_download for the
-            // full rationale (HuggingFace / proxy / VPN-intercept can
-            // serve a tiny error page in place of the real ~24 MB
-            // tarball). 15 MB floor catches everything spurious.
-            const MIN_PIPER_TARBALL_BYTES: u64 = 15 * 1024 * 1024;
-            let tar_size = std::fs::metadata(&tar_path).map(|m| m.len()).unwrap_or(0);
-            if tar_size < MIN_PIPER_TARBALL_BYTES {
-                let _ = std::fs::remove_file(&tar_path);
+                let hint = crate::tts::engine_missing_hint(&models_dir);
                 let _ = app.emit(
                     "model-download-complete",
                     serde_json::json!({
                         "success": false,
-                        "error": format!(
-                            "Piper engine archive is only {tar_size} bytes (expected at least {} MB) \u{2014} download may be corrupted or intercepted",
-                            MIN_PIPER_TARBALL_BYTES / (1024 * 1024),
-                        ),
+                        "error": format!("Piper engine: {e}. {hint}"),
                     }),
                 );
                 return;
-            }
-            let _ = std::fs::create_dir_all(&models_dir);
-            let extract = std::process::Command::new("tar")
-                .arg("xzf")
-                .arg(&tar_path)
-                .arg("-C")
-                .arg(&models_dir)
-                .output();
-            let _ = std::fs::remove_file(&tar_path);
-            // Capture tar failure explicitly so the UI shows the real
-            // root cause (e.g. "gzip: stdin: not in gzip format") rather
-            // than the generic downstream smoke-test failure.
-            match extract {
-                Ok(out) if !out.status.success() => {
-                    let stderr = String::from_utf8_lossy(&out.stderr).to_string();
-                    let _ = app.emit(
-                        "model-download-complete",
-                        serde_json::json!({
-                            "success": false,
-                            "error": format!("tar failed extracting Piper: {stderr}"),
-                        }),
-                    );
-                    return;
-                }
-                Err(e) => {
-                    let _ = app.emit(
-                        "model-download-complete",
-                        serde_json::json!({
-                            "success": false,
-                            "error": format!("failed to run tar: {e}"),
-                        }),
-                    );
-                    return;
-                }
-                _ => {}
-            }
-            // Strip macOS Gatekeeper quarantine xattr from the freshly-
-            // extracted tree. Parity with `start_download` — without this
-            // the dylibs Piper loads at startup can be silently blocked
-            // by Gatekeeper even though the files exist, producing the
-            // "Library not loaded: @rpath/libespeak-ng.1.dylib" failure
-            // mode the 2026-05-18 user hit. Errors are ignored because
-            // `xattr` exits non-zero when the attribute isn't set —
-            // which is exactly the case we want.
-            let _ = std::process::Command::new("xattr")
-                .arg("-dr")
-                .arg("com.apple.quarantine")
-                .arg(&piper_dir)
-                .output();
-            // Add the piper directory as rpath so @rpath/lib*.dylib resolves.
-            // The binary ships with @rpath references but no LC_RPATH entry —
-            // without this dyld can never locate libespeak-ng, libonnxruntime, etc.
-            for bin in ["piper", "piper_phonemize"] {
-                let bin_path = piper_dir.join(bin);
-                if bin_path.exists() {
-                    let _ = std::process::Command::new("install_name_tool")
-                        .arg("-add_rpath")
-                        .arg(&piper_dir)
-                        .arg(&bin_path)
-                        .output();
-                }
-            }
-            // Log any still-missing dylibs after extraction for future debugging.
-            for dylib in ["libespeak-ng.1.dylib", "libpiper_phonemize.1.dylib", "libonnxruntime.1.14.1.dylib"] {
-                if !piper_dir.join(dylib).exists() {
-                    eprintln!("[yames] WARNING: piper dylib missing after extract: {dylib}");
-                }
-            }
-            if let Err(e) = crate::tts::piper_smoke_test(&piper_dir) {
-                let _ = app.emit(
-                    "model-download-complete",
-                    serde_json::json!({
-                        "success": false,
-                        "error": format!("Piper engine extracted but failed smoke test: {e}"),
-                    }),
-                );
-                return;
-            }
-            // Smoke test passed — write the verified marker so the hot-
-            // path `piper_runnable` check sees a healthy install and
-            // the UI advertises voices as ready. See the matching write
-            // in `start_download` for the full rationale.
-            let marker = piper_dir.join(crate::tts::PIPER_VERIFIED_MARKER);
-            if let Err(e) = std::fs::write(&marker, b"") {
-                eprintln!(
-                    "[yames] Failed to write piper verified marker at {}: {e}",
-                    marker.display(),
-                );
             }
         }
 
@@ -1268,6 +1042,260 @@ fn verify_voice_json(path: &std::path::Path) -> Result<(), String> {
     } else {
         Ok(())
     }
+}
+
+/// Minimum size the Piper release archive should have on disk before we
+/// hand it to an extractor. HuggingFace / GitHub (or a corporate proxy
+/// with TLS interception) can serve a redirect page or maintenance HTML
+/// in place of the real asset — those are KB, not MB.
+///
+/// Real 2023.11.14-2 asset sizes: macOS ~19.1 MB, Windows zip ~22.5 MB,
+/// Linux ~25.4–26.5 MB. A 15 MB floor clears every platform with room
+/// for future minor release-size shifts while still catching the
+/// "served a wrong/truncated payload" mode.
+const MIN_PIPER_ARCHIVE_BYTES: u64 = 15 * 1024 * 1024;
+
+/// Extract the Piper release archive into `dest`.
+///
+/// macOS and Linux ship `.tar.gz`, which `tar xzf` handles everywhere.
+/// Windows ships a `.zip`, which GNU tar refuses ("This does not look
+/// like a tar archive") — and `tar` on a Windows box with Git for
+/// Windows installed frequently resolves to GNU tar, not the bsdtar in
+/// System32. So the zip path calls `%SystemRoot%\System32\tar.exe` by
+/// ABSOLUTE path (bsdtar/libarchive, present since Windows 10 1803, and
+/// verified to read this exact archive), and falls back to PowerShell's
+/// `Expand-Archive` if that binary is absent. Two independent extractors
+/// beats one new crate dependency for a path that only runs once per
+/// install.
+fn extract_piper_archive(
+    archive: &std::path::Path,
+    format: crate::tts::ArchiveFormat,
+    dest: &std::path::Path,
+) -> Result<(), String> {
+    use crate::tts::ArchiveFormat;
+    match format {
+        ArchiveFormat::TarGz => {
+            let out = std::process::Command::new("tar")
+                .arg("xzf")
+                .arg(archive)
+                .arg("-C")
+                .arg(dest)
+                .output()
+                .map_err(|e| format!("failed to run tar: {e}"))?;
+            if !out.status.success() {
+                return Err(format!(
+                    "tar failed extracting Piper: {}",
+                    String::from_utf8_lossy(&out.stderr).trim(),
+                ));
+            }
+            Ok(())
+        }
+        ArchiveFormat::Zip => {
+            let system_root = std::env::var("SystemRoot").unwrap_or_else(|_| "C:\\Windows".into());
+            let bsdtar = std::path::Path::new(&system_root)
+                .join("System32")
+                .join("tar.exe");
+            if bsdtar.exists() {
+                let out = std::process::Command::new(&bsdtar)
+                    // `-xf` (not `xzf`): libarchive sniffs the format,
+                    // and forcing gzip would reject the zip.
+                    .arg("-xf")
+                    .arg(archive)
+                    .arg("-C")
+                    .arg(dest)
+                    .output()
+                    .map_err(|e| format!("failed to run {}: {e}", bsdtar.display()))?;
+                if out.status.success() {
+                    return Ok(());
+                }
+                eprintln!(
+                    "[yames] {} failed extracting Piper zip: {} \u{2014} trying Expand-Archive",
+                    bsdtar.display(),
+                    String::from_utf8_lossy(&out.stderr).trim(),
+                );
+            }
+            let out = std::process::Command::new("powershell")
+                .arg("-NoProfile")
+                .arg("-NonInteractive")
+                .arg("-Command")
+                .arg(format!(
+                    "Expand-Archive -LiteralPath '{}' -DestinationPath '{}' -Force",
+                    archive.display(),
+                    dest.display(),
+                ))
+                .output()
+                .map_err(|e| format!("failed to run PowerShell Expand-Archive: {e}"))?;
+            if !out.status.success() {
+                return Err(format!(
+                    "could not extract the Piper zip: {}",
+                    String::from_utf8_lossy(&out.stderr).trim(),
+                ));
+            }
+            Ok(())
+        }
+    }
+}
+
+/// Per-OS repair of the freshly unpacked Piper tree, run between
+/// extraction and the smoke test.
+///
+/// The macOS half was previously duplicated inline in `start_download`
+/// and `start_voice_repair` and ran unconditionally — spawning `xattr`
+/// and `install_name_tool` on Windows and Linux, where neither command
+/// exists, on every install. It is now `cfg`-gated:
+///
+///   * macOS — `xattr -dr com.apple.quarantine` (curl-downloaded files
+///     carry the quarantine xattr; after a security update macOS can
+///     refuse to load unsigned dylibs that have it, producing "Library
+///     not loaded: @rpath/…" with every file visibly present,
+///     2026-05-18) plus `install_name_tool -add_rpath` (the shipped
+///     binaries reference `@rpath/lib*.dylib` but carry no LC_RPATH
+///     entry, so dyld can never find the bundled libraries otherwise).
+///   * Linux — restore the executable bit and warn on a missing
+///     `espeak-ng-data`.
+///   * Windows — nothing to repair (the DLLs sit beside `piper.exe` and
+///     the loader finds them there); warn on a missing `espeak-ng-data`.
+///
+/// Errors are swallowed: `xattr` exits non-zero when the attribute
+/// isn't set, which is the success case for us, and the `piper_smoke_test`
+/// that follows is the real verdict either way.
+fn post_extract_fixups(piper_dir: &std::path::Path) {
+    #[cfg(target_os = "macos")]
+    {
+        let _ = std::process::Command::new("xattr")
+            .arg("-dr")
+            .arg("com.apple.quarantine")
+            .arg(piper_dir)
+            .output();
+        for bin in ["piper", "piper_phonemize"] {
+            let bin_path = piper_dir.join(bin);
+            if bin_path.exists() {
+                let _ = std::process::Command::new("install_name_tool")
+                    .arg("-add_rpath")
+                    .arg(piper_dir)
+                    .arg(&bin_path)
+                    .output();
+            }
+        }
+        // Log any still-missing dylibs after extraction for future debugging.
+        for dylib in [
+            "libespeak-ng.1.dylib",
+            "libpiper_phonemize.1.dylib",
+            "libonnxruntime.1.14.1.dylib",
+        ] {
+            if !piper_dir.join(dylib).exists() {
+                eprintln!("[yames] WARNING: piper dylib missing after extract: {dylib}");
+            }
+        }
+    }
+    #[cfg(target_os = "linux")]
+    {
+        // Piper's Linux tarball carries the executable bit, but a few
+        // extraction paths (and some filesystems) drop it. Restore it
+        // rather than failing the smoke test with "Permission denied".
+        use std::os::unix::fs::PermissionsExt;
+        for bin in ["piper", "piper_phonemize"] {
+            let p = piper_dir.join(bin);
+            if let Ok(meta) = std::fs::metadata(&p) {
+                let mut perms = meta.permissions();
+                perms.set_mode(perms.mode() | 0o111);
+                let _ = std::fs::set_permissions(&p, perms);
+            }
+        }
+        // espeak-ng-data ships inside the archive; without it Piper
+        // cannot phonemise and every synthesis fails.
+        if !piper_dir.join("espeak-ng-data").exists() {
+            eprintln!(
+                "[yames] WARNING: espeak-ng-data missing after extract \u{2014} speech will fail"
+            );
+        }
+    }
+    #[cfg(target_os = "windows")]
+    {
+        // The DLLs sit beside piper.exe and the loader finds them
+        // there; nothing to repair. Warn on a layout surprise so a
+        // future upstream reorg shows up in the logs rather than as a
+        // silent smoke-test failure.
+        if !piper_dir.join("espeak-ng-data").exists() {
+            eprintln!(
+                "[yames] WARNING: espeak-ng-data missing after extract \u{2014} speech will fail"
+            );
+        }
+    }
+    // Every branch above is cfg-gated; on an OS we don't special-case
+    // the parameter would otherwise read as unused.
+    let _ = piper_dir;
+}
+
+/// Download + extract + verify the Piper engine into `models_dir/piper`.
+/// Shared by `start_download` and `start_voice_repair`, which previously
+/// carried two near-identical ~60-line copies of this logic that had
+/// already drifted apart (only one of them wiped a stale `piper/` before
+/// extracting).
+///
+/// Returns `Err("cancelled")` verbatim when the user aborted, so callers
+/// can emit the cancelled event rather than an error banner.
+fn install_piper_engine(
+    app: &AppHandle,
+    models_dir: &std::path::Path,
+    cancel: &DownloadCancelFlag,
+) -> Result<(), String> {
+    let piper_dir = models_dir.join("piper");
+    let _ = app.emit(
+        "model-download-progress",
+        DownloadProgress {
+            component: "Piper TTS engine".to_string(),
+            downloaded_bytes: 0,
+            total_bytes: 0,
+            fraction: 0.0,
+            done: false,
+        },
+    );
+
+    let archive = crate::tts::piper_archive()?;
+    let archive_path = models_dir.join(archive.file_name);
+    curl_download(app, archive.url, &archive_path, cancel, "Piper TTS engine")?;
+
+    let size = std::fs::metadata(&archive_path)
+        .map(|m| m.len())
+        .unwrap_or(0);
+    if size < MIN_PIPER_ARCHIVE_BYTES {
+        let _ = std::fs::remove_file(&archive_path);
+        return Err(format!(
+            "downloaded archive is only {size} bytes (expected at least {} MB) \u{2014} the file may be corrupted or intercepted by a proxy",
+            MIN_PIPER_ARCHIVE_BYTES / (1024 * 1024),
+        ));
+    }
+
+    // Wipe a stale piper/ only after the download succeeded and its size
+    // is verified — so a failed download never destroys a working
+    // install. Extractors unpack side-by-side and won't remove orphan
+    // files, so clearing first is still required.
+    if piper_dir.exists() {
+        if let Err(e) = std::fs::remove_dir_all(&piper_dir) {
+            eprintln!("[yames] Failed to remove stale piper/: {e}");
+        }
+    }
+    let _ = std::fs::create_dir_all(models_dir);
+    let extract_result = extract_piper_archive(&archive_path, archive.format, models_dir);
+    let _ = std::fs::remove_file(&archive_path);
+    extract_result?;
+
+    post_extract_fixups(&piper_dir);
+    crate::tts::piper_smoke_test(&piper_dir)?;
+
+    // Smoke test passed — write the verified marker so hot-path callers
+    // (`tts::piper_runnable`, used on every Settings render and every
+    // voice-preview click) can trust the install without paying a
+    // subprocess on each check.
+    let marker = piper_dir.join(crate::tts::PIPER_VERIFIED_MARKER);
+    if let Err(e) = std::fs::write(&marker, b"") {
+        eprintln!(
+            "[yames] Failed to write piper verified marker at {}: {e}",
+            marker.display(),
+        );
+    }
+    Ok(())
 }
 
 // ---------------------------------------------------------------------------

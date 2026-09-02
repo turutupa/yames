@@ -799,8 +799,8 @@ export async function ttsSpeak(text: string): Promise<void> {
 
 /**
  * Subscribe to the "TTS audio is about to play" signal. The Rust side
- * emits this AFTER Piper synthesis finishes but BEFORE `afplay` is
- * launched — i.e. when the spinner-to-text swap should fire so the
+ * emits this AFTER Piper synthesis finishes but BEFORE the WAV starts
+ * playing — i.e. when the spinner-to-text swap should fire so the
  * visible text lands within ~10-30ms of the first audible sample. The
  * payload is empty; the consumer maintains its own pending-speech
  * queue (FIFO) and pops the head on each event.
@@ -841,13 +841,14 @@ export async function ttsListVoices(): Promise<[string, string][]> {
 }
 
 /**
- * Interrupt any currently-playing TTS utterance (piper-then-afplay or the
- * macOS `say` fallback). The Rust side bumps a generation counter so any
- * in-flight `speak_standalone` call early-returns as Cancelled and kills
- * the tracked PID with `kill -9`. Safe to call when nothing is playing
- * (the counter still bumps but no kill is issued). Used by the voice
- * preview UI so rapid clicks across voices feel snappy instead of
- * queueing up.
+ * Interrupt any currently-playing TTS utterance (Piper synthesis, the
+ * in-process WAV playback that follows it, or the macOS `say` fallback).
+ * The Rust side bumps a generation counter: an in-flight Piper
+ * subprocess is killed by PID (`kill -9` / `taskkill /F`), and playback
+ * already under way sees the bumped generation on its next 20 ms poll
+ * and stops the rodio sink. Safe to call when nothing is playing (the
+ * counter still bumps, no kill is issued). Used by the voice preview UI
+ * so rapid clicks across voices feel snappy instead of queueing up.
  */
 export async function ttsStop(): Promise<void> {
   return invoke("tts_stop");
@@ -857,7 +858,8 @@ export async function ttsStop(): Promise<void> {
  * Per-voice diagnostic info from the Rust side. Mirrors the
  * `VoiceDiagnostic` struct in `tts.rs` (serde renames the boolean fields
  * to camelCase). `ready` is true only when:
- *   - the Piper binary + its 3 required dylibs are all on disk
+ *   - the Piper engine (`piper` / `piper.exe`) is on disk AND passed the
+ *     install-time smoke test
  *   - the voice's .onnx file exists AND is larger than `MIN_ONNX_BYTES`
  *   - the voice's .onnx.json sidecar exists
  *
@@ -874,6 +876,14 @@ export interface VoiceDiagnostic {
   jsonMissing: boolean;
   engineMissing: boolean;
   onnxBytes: number;
+  /**
+   * OS-specific remediation sentence, present only when `engineMissing`
+   * is true. Windows (antivirus quarantine), Linux (missing
+   * `espeak-ng-data`) and macOS (Gatekeeper) fail in different ways, so
+   * "engine missing" on its own gave the user nothing to act on. Emitted
+   * from Rust in English; skipped entirely when the engine is healthy.
+   */
+  engineHint?: string;
 }
 
 export async function ttsVoiceDiagnostics(): Promise<VoiceDiagnostic[]> {
