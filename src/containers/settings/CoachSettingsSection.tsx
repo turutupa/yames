@@ -230,8 +230,10 @@ export function CoachSettingsSection({
     });
   };
 
+  // `id` is the deep-link target for O4's "Pick a voice" toast, the same way
+  // `settings-appearance` anchors W2's "More themes in Settings".
   return (
-    <section className="settings-section">
+    <section className="settings-section" id="settings-coach">
       {/* EXPERIMENTAL badge: signals to users that the coach is a labs
           feature and that behaviour may shift between builds. The flask
           icon mirrors the "labs" visual language people already know

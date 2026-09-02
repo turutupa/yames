@@ -8,7 +8,31 @@
  */
 import { createContext, useContext } from "react";
 import type { UseMidiReturn } from "../../hooks/useMidi";
+import type { ModelStatus } from "../../ipc";
+import type { BrainTier, ModelTier } from "../../types";
 import type { OnboardingContext, StepId } from "./onboardingMachine";
+
+/**
+ * The app's single `useCoachDownload` instance, narrowed to what W4 (O4)
+ * needs. Same reasoning as `midi` above: the step drives the app's own hook
+ * rather than mounting a second one, so a download started in the wizard is
+ * the download the coach card, Settings and the footer bar all see — and it
+ * keeps running when the step unmounts.
+ */
+export type WizardCoachEnv = {
+  /** Total physical RAM in MB (T04). `null`/`0` = query failed. */
+  systemMemoryMb: number | null;
+  /** What is on disk right now; `null` until `get_model_status` answers. */
+  modelStatus: ModelStatus | null;
+  /** A model download is in flight (the wizard never waits for it). */
+  downloading: boolean;
+  /** 0..1, or null while the first progress event is outstanding. */
+  downloadFraction: number | null;
+  /** Hand-off to `useCoachDownload().handleStartDownload`. */
+  startDownload: (tier: ModelTier) => void;
+  /** Sets the active tier *and* persists `coachBrainTier`. */
+  setBrainTier: (tier: BrainTier) => void;
+};
 
 export type WizardEnv = {
   /** App version, for the W0 footer. */
@@ -38,6 +62,10 @@ export type WizardEnv = {
   midi: UseMidiReturn;
   /** Gamepad/footswitch bindings by action id (MainWindow's `footBindings`). */
   gamepadBindings: Record<string, string>;
+
+  // --- Practice coach (W4) --------------------------------------------------
+  /** Facts and hand-offs for the coach step; see `WizardCoachEnv`. */
+  coach: WizardCoachEnv;
 
   // --- The demo click ------------------------------------------------------
   /** Start the soft 80 BPM preview click (idempotent). */

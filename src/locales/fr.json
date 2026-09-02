@@ -96,6 +96,39 @@
         "mapped": "Lecture/Arrêt → {{button}}"
       }
     },
+    "coach": {
+      "title": "Coach d'entraînement",
+      "what1": "Le coach écoute via ton entrée audio et note la façon dont ton timing se place sur le clic.",
+      "what2": "Après chaque passage, il écrit un court rapport — et, avec un modèle téléchargé, explique quoi travailler ensuite.",
+      "privacy": "Tout tourne sur cette machine. Ton audio n'en sort jamais et les versions publiées ne l'enregistrent pas.",
+      "recommended": "Recommandé",
+      "timing": {
+        "title": "Retour de timing uniquement",
+        "desc": "Aucun téléchargement. Tu gardes les points en direct, le score de timing et ton historique."
+      },
+      "standard": {
+        "title": "Modèle standard",
+        "desc": "Qwen3 4B · ~2,5 Go de téléchargement · ~4 Go de RAM en marche. Fonctionne sur CPU sans GPU."
+      },
+      "studio": {
+        "title": "Modèle Studio",
+        "desc": "Qwen3 8B · ~5 Go · ~8 Go de RAM. Retours plus riches et plans d'entraînement."
+      },
+      "studioNeedsRam": "Studio demande au moins 16 Go de RAM — cette machine en a {{gb}}.",
+      "unavailableInBuild": "Indisponible dans cette version.",
+      "reasonNoLlm": "Cette version ne peut pas exécuter de modèle : le retour de timing est le choix honnête ici.",
+      "reasonLowMemory": "Cette machine a {{gb}} Go de RAM — pas assez pour faire tourner un modèle confortablement.",
+      "reasonInstalled": "Déjà téléchargé sur cette machine — rien à récupérer.",
+      "downloadNote": "Le téléchargement démarre quand tu continues et se poursuit en arrière-plan.",
+      "downloading": "Téléchargement du modèle du coach",
+      "tryListening": {
+        "label": "Essayer quand même la fonction d'écoute",
+        "hint": "Deux étapes courtes : choisis ton entrée, joue huit temps, regarde ton timing."
+      },
+      "voiceReady": "Les voix du coach sont prêtes.",
+      "voicePick": "Choisir une voix",
+      "voiceDismiss": "Ignorer"
+    },
     "ready": {
       "title": "Tout est prêt",
       "subtitle": "Modifiez ce que vous voulez ici, ou plus tard dans les Réglages.",

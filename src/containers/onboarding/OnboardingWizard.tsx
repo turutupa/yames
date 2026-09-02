@@ -20,7 +20,11 @@ import {
 } from "./onboardingMachine";
 import { ONBOARDING_STEPS } from "./steps";
 import type { WizardStepDef } from "./steps/types";
-import { WizardEnvProvider, type WizardEnv } from "./WizardContext";
+import {
+  WizardEnvProvider,
+  type WizardCoachEnv,
+  type WizardEnv,
+} from "./WizardContext";
 import "../../styles/onboarding.css";
 
 const FOCUSABLE =
@@ -50,6 +54,20 @@ const NO_MIDI: UseMidiReturn = {
 
 const NO_GAMEPAD_BINDINGS: Record<string, string> = {};
 
+/**
+ * Stand-in for the app's coach hook (same role as `NO_MIDI`): no RAM answer,
+ * nothing downloaded, and both hand-offs inert. W4 then renders its honest
+ * "this build can't run a model" path rather than crashing outside MainWindow.
+ */
+const NO_COACH: WizardCoachEnv = {
+  systemMemoryMb: null,
+  modelStatus: null,
+  downloading: false,
+  downloadFraction: null,
+  startDownload: () => {},
+  setBrainTier: () => {},
+};
+
 export type OnboardingWizardProps = {
   state: OnboardingState;
   dispatch: (event: OnboardingEvent) => void;
@@ -71,6 +89,11 @@ export type OnboardingWizardProps = {
   midi?: UseMidiReturn;
   /** MainWindow's `footBindings` — gamepad/footswitch bindings by action (W3). */
   gamepadBindings?: Record<string, string>;
+  /**
+   * The app's coach hook (W4): RAM, what is downloaded, and the download
+   * hand-off. Defaults to an inert stand-in outside MainWindow.
+   */
+  coach?: WizardCoachEnv;
 
   /** 80 BPM / volume 0.35 preview click, implemented in MainWindow. */
   startSoftClick: () => void;
@@ -114,6 +137,7 @@ export function OnboardingWizard({
   onAlwaysOnTopChange,
   midi = NO_MIDI,
   gamepadBindings = NO_GAMEPAD_BINDINGS,
+  coach = NO_COACH,
   startSoftClick,
   stopSoftClick,
   softClickPlaying,
@@ -337,6 +361,7 @@ export function OnboardingWizard({
       setAlwaysOnTop: onAlwaysOnTopChange,
       midi,
       gamepadBindings,
+      coach,
       startSoftClick,
       stopSoftClick,
       softClickPlaying,
@@ -367,6 +392,7 @@ export function OnboardingWizard({
       onAlwaysOnTopChange,
       midi,
       gamepadBindings,
+      coach,
       startSoftClick,
       stopSoftClick,
       softClickPlaying,
@@ -432,6 +458,28 @@ export function OnboardingWizard({
             isActive
           />
         </div>
+
+        {/* The brain download W4 started, as a thin line above the footer.
+            It lives in the shell rather than in the step so it survives the
+            move to W5, W6 and W7 — the wizard never waits for it, and the
+            same bytes are the ones the coach card and Settings are watching.
+            Purely informational: no cancel, no gate on Next. */}
+        {!isWelcome && coach.downloading && (
+          <div
+            className="onboarding-download"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round((coach.downloadFraction ?? 0) * 100)}
+            aria-label={t("onboarding.coach.downloading")}
+            data-testid="onboarding-download-bar"
+          >
+            <div
+              className="onboarding-download-fill"
+              style={{ width: `${Math.round((coach.downloadFraction ?? 0) * 100)}%` }}
+            />
+          </div>
+        )}
 
         {!isWelcome && (
           <div className="onboarding-footer">

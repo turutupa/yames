@@ -96,6 +96,39 @@
         "mapped": "Çal/Durdur → {{button}}"
       }
     },
+    "coach": {
+      "title": "Çalışma koçu",
+      "what1": "Koç ses girişinden dinler ve zamanlamanın klik'e göre nasıl oturduğunu puanlar.",
+      "what2": "Her turdan sonra kısa bir rapor yazar; model indirildiğinde sırada neyi çalışman gerektiğini de anlatır.",
+      "privacy": "Her şey bu bilgisayarda çalışır. Sesin dışarı çıkmaz, yayın sürümleri kayıt yapmaz.",
+      "recommended": "Önerilen",
+      "timing": {
+        "title": "Yalnızca zamanlama geri bildirimi",
+        "desc": "İndirme yok. Canlı noktalar, zamanlama puanı ve geçmişin yerinde kalır."
+      },
+      "standard": {
+        "title": "Standart model",
+        "desc": "Qwen3 4B · ~2,5 GB indirme · çalışırken ~4 GB RAM. GPU yoksa CPU'da çalışır."
+      },
+      "studio": {
+        "title": "Studio modeli",
+        "desc": "Qwen3 8B · ~5 GB indirme · ~8 GB RAM. Daha zengin geri bildirim ve çalışma planları."
+      },
+      "studioNeedsRam": "Studio en az 16 GB RAM ister — bu bilgisayarda {{gb}} GB var.",
+      "unavailableInBuild": "Bu sürümde kullanılamaz.",
+      "reasonNoLlm": "Bu sürüm model çalıştıramıyor; burada dürüst seçim zamanlama geri bildirimi.",
+      "reasonLowMemory": "Bu bilgisayarda {{gb}} GB RAM var — bir modeli rahat çalıştırmaya yetmez.",
+      "reasonInstalled": "Bu bilgisayarda zaten indirilmiş — alınacak bir şey yok.",
+      "downloadNote": "İndirme devam ettiğinde başlar ve arka planda sürer.",
+      "downloading": "Koç modeli indiriliyor",
+      "tryListening": {
+        "label": "Yine de dinleme özelliğini dene",
+        "hint": "İki kısa adım: girişini seç, sekiz vuruş çal, zamanlamana bak."
+      },
+      "voiceReady": "Koç sesleri hazır.",
+      "voicePick": "Bir ses seç",
+      "voiceDismiss": "Kapat"
+    },
     "ready": {
       "title": "Hazırsın",
       "subtitle": "Buradan ya da sonra Ayarlar'dan değiştirebilirsin.",

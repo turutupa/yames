@@ -96,6 +96,39 @@
         "mapped": "Odtwarzaj/Zatrzymaj → {{button}}"
       }
     },
+    "coach": {
+      "title": "Trener ćwiczeń",
+      "what1": "Trener słucha przez wejście audio i ocenia, jak Twój timing układa się względem klika.",
+      "what2": "Po każdym przebiegu pisze krótki raport, a z pobranym modelem tłumaczy, nad czym pracować dalej.",
+      "privacy": "Wszystko działa na tym komputerze. Dźwięk nigdy go nie opuszcza, a wydania nie nagrywają go.",
+      "recommended": "Zalecane",
+      "timing": {
+        "title": "Tylko informacja o timingu",
+        "desc": "Bez pobierania. Zostają kropki na żywo, ocena timingu i historia sesji."
+      },
+      "standard": {
+        "title": "Model standardowy",
+        "desc": "Qwen3 4B · ~2,5 GB pobierania · ~4 GB RAM w czasie pracy. Działa na CPU, gdy nie ma GPU."
+      },
+      "studio": {
+        "title": "Model Studio",
+        "desc": "Qwen3 8B · ~5 GB pobierania · ~8 GB RAM. Bogatsze uwagi i plany ćwiczeń."
+      },
+      "studioNeedsRam": "Studio wymaga co najmniej 16 GB RAM — ten komputer ma {{gb}} GB.",
+      "unavailableInBuild": "Niedostępne w tej kompilacji.",
+      "reasonNoLlm": "Ta kompilacja nie uruchomi modelu, więc uczciwym wyborem jest sama informacja o timingu.",
+      "reasonLowMemory": "Ten komputer ma {{gb}} GB RAM — za mało, by wygodnie uruchomić model.",
+      "reasonInstalled": "Już pobrane na tym komputerze — nie ma czego ściągać.",
+      "downloadNote": "Pobieranie ruszy po przejściu dalej i będzie trwać w tle.",
+      "downloading": "Pobieranie modelu trenera",
+      "tryListening": {
+        "label": "Mimo to wypróbuj funkcję słuchania",
+        "hint": "Dwa krótkie kroki: wybierz wejście, zagraj osiem uderzeń, zobacz swój timing."
+      },
+      "voiceReady": "Głosy trenera są gotowe.",
+      "voicePick": "Wybierz głos",
+      "voiceDismiss": "Zamknij"
+    },
     "ready": {
       "title": "Wszystko gotowe",
       "subtitle": "Zmień coś tutaj albo później w Ustawieniach.",

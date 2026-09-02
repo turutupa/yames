@@ -96,6 +96,39 @@
         "mapped": "Phát/Dừng → {{button}}"
       }
     },
+    "coach": {
+      "title": "Huấn luyện viên luyện tập",
+      "what1": "Huấn luyện viên nghe qua đầu vào âm thanh và chấm điểm cách nhịp của bạn bám theo tiếng click.",
+      "what2": "Sau mỗi lượt, nó viết một báo cáo ngắn — có mô hình đã tải thì còn giải thích nên luyện gì tiếp theo.",
+      "privacy": "Mọi thứ chạy trên máy này. Âm thanh của bạn không bao giờ rời máy, và bản phát hành không ghi âm.",
+      "recommended": "Khuyên dùng",
+      "timing": {
+        "title": "Chỉ phản hồi nhịp",
+        "desc": "Không tải gì. Bạn vẫn có các chấm thời gian thực, điểm nhịp và lịch sử buổi tập."
+      },
+      "standard": {
+        "title": "Mô hình tiêu chuẩn",
+        "desc": "Qwen3 4B · tải ~2,5 GB · ~4 GB RAM khi chạy. Chạy trên CPU nếu bạn không có GPU."
+      },
+      "studio": {
+        "title": "Mô hình Studio",
+        "desc": "Qwen3 8B · tải ~5 GB · ~8 GB RAM. Nhận xét sâu hơn và kế hoạch luyện tập."
+      },
+      "studioNeedsRam": "Studio cần ít nhất 16 GB RAM — máy này có {{gb}} GB.",
+      "unavailableInBuild": "Không có trong bản dựng này.",
+      "reasonNoLlm": "Bản dựng này không chạy được mô hình, nên chỉ phản hồi nhịp là lựa chọn trung thực.",
+      "reasonLowMemory": "Máy này có {{gb}} GB RAM — không đủ để chạy mô hình thoải mái.",
+      "reasonInstalled": "Đã tải sẵn trên máy này — không cần tải thêm.",
+      "downloadNote": "Việc tải bắt đầu khi bạn đi tiếp và tiếp tục chạy nền.",
+      "downloading": "Đang tải mô hình huấn luyện viên",
+      "tryListening": {
+        "label": "Vẫn thử tính năng nghe",
+        "hint": "Hai bước ngắn: chọn đầu vào, chơi tám phách, xem nhịp của bạn."
+      },
+      "voiceReady": "Giọng đọc của huấn luyện viên đã sẵn sàng.",
+      "voicePick": "Chọn giọng",
+      "voiceDismiss": "Bỏ qua"
+    },
     "ready": {
       "title": "Đã sẵn sàng",
       "subtitle": "Thay đổi tại đây, hoặc sau này trong Cài đặt.",

@@ -96,6 +96,39 @@
         "mapped": "播放/停止 → {{button}}"
       }
     },
+    "coach": {
+      "title": "练习教练",
+      "what1": "教练通过音频输入聆听，并为你的时值与节拍器的贴合程度打分。",
+      "what2": "每段结束后会写一份简短报告；下载模型后还会说明接下来该练什么。",
+      "privacy": "一切都在本机运行。你的音频不会离开这台电脑，正式版也不会录音。",
+      "recommended": "推荐",
+      "timing": {
+        "title": "仅时值反馈",
+        "desc": "无需下载。实时圆点、时值评分和练习记录照常可用。"
+      },
+      "standard": {
+        "title": "标准模型",
+        "desc": "Qwen3 4B · 约 2.5 GB 下载 · 运行时约 4 GB 内存。没有 GPU 也可在 CPU 上运行。"
+      },
+      "studio": {
+        "title": "Studio 模型",
+        "desc": "Qwen3 8B · 约 5 GB 下载 · 约 8 GB 内存。更细致的点评和练习计划。"
+      },
+      "studioNeedsRam": "Studio 至少需要 16 GB 内存，本机只有 {{gb}} GB。",
+      "unavailableInBuild": "此版本不提供。",
+      "reasonNoLlm": "此版本无法运行模型，所以这里如实推荐仅时值反馈。",
+      "reasonLowMemory": "本机内存为 {{gb}} GB，不足以流畅运行模型。",
+      "reasonInstalled": "本机已下载，无需再次获取。",
+      "downloadNote": "继续时开始下载，并在后台继续。",
+      "downloading": "正在下载教练模型",
+      "tryListening": {
+        "label": "仍然试试聆听功能",
+        "hint": "两步就好：选择输入，弹八拍，看看你的时值。"
+      },
+      "voiceReady": "教练语音已就绪。",
+      "voicePick": "选择语音",
+      "voiceDismiss": "关闭"
+    },
     "ready": {
       "title": "准备就绪",
       "subtitle": "可以在这里修改，也可以稍后在设置中修改。",

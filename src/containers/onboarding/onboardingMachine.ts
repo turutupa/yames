@@ -28,6 +28,12 @@ export type OnboardingContext = {
   visited: string[];
   /** Set by W4 (O4) so W5/W6 can gate themselves. */
   coachTier?: "off" | "standard" | "full";
+  /**
+   * W4's optional branch (decision 3): a user who picked timing-only can still
+   * ask to "try the listening feature", which makes W5/W6 appear for them.
+   * Intent, not outcome — `inputConfigured` records what W5 actually achieved.
+   */
+  tryListening?: boolean;
   /** Set by W5 (O5) so W6 can gate itself. */
   inputConfigured?: boolean;
 };

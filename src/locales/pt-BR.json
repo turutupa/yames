@@ -96,6 +96,39 @@
         "mapped": "Tocar/Parar → {{button}}"
       }
     },
+    "coach": {
+      "title": "Coach de estudo",
+      "what1": "O coach escuta pela sua entrada de áudio e pontua como seu timing se encaixa no clique.",
+      "what2": "Depois de cada trecho ele escreve um relatório curto e, com um modelo baixado, explica o que treinar em seguida.",
+      "privacy": "Tudo roda nesta máquina. Seu áudio nunca sai dela, e as versões de lançamento não gravam nada.",
+      "recommended": "Recomendado",
+      "timing": {
+        "title": "Somente feedback de timing",
+        "desc": "Sem download. Você continua com os pontos ao vivo, a nota de timing e o histórico."
+      },
+      "standard": {
+        "title": "Modelo padrão",
+        "desc": "Qwen3 4B · ~2,5 GB de download · ~4 GB de RAM em execução. Roda na CPU se você não tiver GPU."
+      },
+      "studio": {
+        "title": "Modelo Studio",
+        "desc": "Qwen3 8B · ~5 GB de download · ~8 GB de RAM. Retorno mais rico e planos de estudo."
+      },
+      "studioNeedsRam": "O Studio precisa de pelo menos 16 GB de RAM — esta máquina tem {{gb}} GB.",
+      "unavailableInBuild": "Indisponível nesta build.",
+      "reasonNoLlm": "Esta build não consegue rodar um modelo, então o feedback de timing é a escolha honesta.",
+      "reasonLowMemory": "Esta máquina tem {{gb}} GB de RAM — pouco para rodar um modelo com folga.",
+      "reasonInstalled": "Já baixado nesta máquina — nada a buscar.",
+      "downloadNote": "O download começa quando você continuar e segue em segundo plano.",
+      "downloading": "Baixando o modelo do coach",
+      "tryListening": {
+        "label": "Testar a escuta mesmo assim",
+        "hint": "Dois passos curtos: escolha a entrada, toque oito tempos e veja seu timing."
+      },
+      "voiceReady": "As vozes do coach estão prontas.",
+      "voicePick": "Escolher voz",
+      "voiceDismiss": "Dispensar"
+    },
     "ready": {
       "title": "Tudo pronto",
       "subtitle": "Mude o que quiser aqui, ou depois em Configurações.",
