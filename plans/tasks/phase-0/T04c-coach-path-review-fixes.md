@@ -33,11 +33,18 @@ names the deeper fix, not a patch.
    loading on the same thread sequentially and only then swapping).
    TS: one `ensureCoachLoaded()` helper (dedupes the in-flight promise)
    used by both sites.
-3. **New weights never reloaded.** After a download or "Update brain",
-   nothing reloads the model; the old weights keep answering. Fix: the
-   download-complete path (Rust `do_download` success, or the TS
-   `model-download-complete` handler) triggers `load_coach_model`;
-   `load_model` reloads when path/mtime/size changed (item 2).
+3. **Residency policy (owner decision 2026-09-02): lazy load, idle unload.**
+   The model is never resident unless a coach session needs it. A
+   download or "Update brain" writes weights + marker only (no load);
+   Settings shows "ready, not loaded" as a neutral state. Nothing loads
+   at app mount (remove the mount-time `loadCoachModel()`); `startSession`
+   loads through one deduped `ensureCoachLoaded()` when the brain tier is
+   on, with a "warming up" state and template tips meanwhile. New
+   `unload_coach_model` command: called when the tier is turned off, and
+   after 10 minutes with no active session (idle unload); the next
+   session start reloads. Reload happens only when the file on disk
+   changed (path/mtime/size), evaluated at session start. This also
+   closes the old finding that new weights were never reloaded.
 4. **Worker death leaves the coach "active" but erroring.** If the
    inference thread dies, `engine.llm` stays `Some`, `generate` returns
    `Err` forever and status says active. Fix: on a dead channel, clear
