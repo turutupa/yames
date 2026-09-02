@@ -139,6 +139,43 @@
         "body": "已连接 MIDI 设备，但还没有任何映射。把踏板映射到播放/停止？",
         "action": "打开快捷键"
       }
+    },
+    "tour": {
+      "progress": "第 {{current}} / {{total}} 站",
+      "keys": "快捷键",
+      "back": "上一步",
+      "next": "下一步",
+      "done": "完成",
+      "skip": "跳过导览",
+      "offer": "第一次用？花 30 秒看看导览吧。",
+      "offerAccept": "带我看看",
+      "offerDismiss": "关闭",
+      "stops": {
+        "bpm": {
+          "title": "速度",
+          "body": "拖动、滚动、输入或敲击来设置速度。"
+        },
+        "subdivision": {
+          "title": "细分与拍组",
+          "body": "点击细分，用拍组来塑造小节。"
+        },
+        "presets": {
+          "title": "预设",
+          "body": "保存任意配置，随时一键切换。"
+        },
+        "drill": {
+          "title": "渐进练习",
+          "body": "自动提升速度；教练可以据此调整。"
+        },
+        "coach": {
+          "title": "练习教练",
+          "body": "会听、会评分、会说话。在聊天框里问它任何问题。"
+        },
+        "zenWidget": {
+          "title": "禅模式与浮窗",
+          "body": "全屏视觉效果，或一个始终置顶的小浮窗。"
+        }
+      }
     }
   },
   "widget": {
@@ -326,7 +363,8 @@
     "copied": "已复制！",
     "share": "分享",
     "back": "返回",
-    "settings": "设置"
+    "settings": "设置",
+    "help": "帮助"
   },
   "volume": {
     "metronome": "节拍器",
@@ -472,7 +510,10 @@
       "resetHints": "重置提示",
       "resetHintsHint": "重新显示六条一次性提示",
       "resetHintsAction": "重置",
-      "resetHintsDone": "完成"
+      "resetHintsDone": "完成",
+      "takeTour": "开始导览",
+      "takeTourHint": "六站走遍应用，约 30 秒",
+      "takeTourAction": "开始"
     },
     "devices": {
       "title": "设备",

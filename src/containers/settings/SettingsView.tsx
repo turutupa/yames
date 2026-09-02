@@ -52,6 +52,8 @@ interface SettingsViewProps {
   setDrillAutoCollapse: Dispatch<SetStateAction<boolean>>;
   /** Re-opens the first-run wizard at W0 (O1). */
   onRunSetupAgain: () => void;
+  /** Re-opens the six-stop spotlight tour (O6). */
+  onTakeTour: () => void;
 
   // Appearance
   themeId: string;
@@ -142,6 +144,7 @@ export function SettingsView({
   setActiveBorder,
   drillAutoCollapse,
   onRunSetupAgain,
+  onTakeTour,
   setDrillAutoCollapse,
   themeId,
   setTheme,
@@ -219,6 +222,7 @@ export function SettingsView({
         drillAutoCollapse={drillAutoCollapse}
         setDrillAutoCollapse={setDrillAutoCollapse}
         onRunSetupAgain={onRunSetupAgain}
+        onTakeTour={onTakeTour}
       />
 
       <AppearanceSettingsSection

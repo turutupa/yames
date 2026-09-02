@@ -139,6 +139,43 @@
         "body": "MIDI デバイスが接続されていますが、割当てがありません。ペダルを再生/停止に割り当てますか？",
         "action": "ショートカットを開く"
       }
+    },
+    "tour": {
+      "progress": "{{current}} / {{total}}",
+      "keys": "キー",
+      "back": "戻る",
+      "next": "次へ",
+      "done": "完了",
+      "skip": "ツアーをスキップ",
+      "offer": "はじめてですか？30 秒のツアーをどうぞ。",
+      "offerAccept": "案内してもらう",
+      "offerDismiss": "閉じる",
+      "stops": {
+        "bpm": {
+          "title": "テンポ",
+          "body": "ドラッグ、スクロール、入力、タップでテンポを設定。"
+        },
+        "subdivision": {
+          "title": "分割と拍グループ",
+          "body": "分割をクリックし、拍グループで小節を形づくります。"
+        },
+        "presets": {
+          "title": "プリセット",
+          "body": "どんな設定も保存して、すぐに切り替え。"
+        },
+        "drill": {
+          "title": "ドリル",
+          "body": "テンポを自動で上げます。コーチが調整することも。"
+        },
+        "coach": {
+          "title": "練習コーチ",
+          "body": "聴いて、採点して、話します。チャット欄で何でも聞けます。"
+        },
+        "zenWidget": {
+          "title": "Zen とウィジェット",
+          "body": "全画面のビジュアル、または常に最前面の小さなウィジェット。"
+        }
+      }
     }
   },
   "widget": {
@@ -326,7 +363,8 @@
     "copied": "コピーしました！",
     "share": "シェア",
     "back": "戻る",
-    "settings": "設定"
+    "settings": "設定",
+    "help": "ヘルプ"
   },
   "volume": {
     "metronome": "メトロノーム",
@@ -472,7 +510,10 @@
       "resetHints": "ヒントをリセット",
       "resetHintsHint": "6 つの一度限りのヒントを再度表示",
       "resetHintsAction": "リセット",
-      "resetHintsDone": "完了"
+      "resetHintsDone": "完了",
+      "takeTour": "ツアーを見る",
+      "takeTourHint": "アプリを 6 か所、約 30 秒",
+      "takeTourAction": "開始"
     },
     "devices": {
       "title": "デバイス",

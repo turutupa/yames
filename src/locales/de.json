@@ -139,6 +139,43 @@
         "body": "Ein MIDI-Gerät ist verbunden, aber nichts ist zugewiesen. Pedal auf Start/Stopp legen?",
         "action": "Tastenkürzel öffnen"
       }
+    },
+    "tour": {
+      "progress": "{{current}} von {{total}}",
+      "keys": "Tasten",
+      "back": "Zurück",
+      "next": "Weiter",
+      "done": "Fertig",
+      "skip": "Tour überspringen",
+      "offer": "Neu hier? Sieh dir die 30-Sekunden-Tour an.",
+      "offerAccept": "Zeig mir alles",
+      "offerDismiss": "Schließen",
+      "stops": {
+        "bpm": {
+          "title": "Tempo",
+          "body": "Tempo ziehen, scrollen, eintippen oder antippen."
+        },
+        "subdivision": {
+          "title": "Unterteilungen & Gruppen",
+          "body": "Unterteilungen anklicken und den Takt mit Schlaggruppen formen."
+        },
+        "presets": {
+          "title": "Presets",
+          "body": "Jedes Setup speichern und sofort wechseln."
+        },
+        "drill": {
+          "title": "Drill",
+          "body": "Tempo automatisch steigern; der Coach kann es anpassen."
+        },
+        "coach": {
+          "title": "Übungs-Coach",
+          "body": "Hört zu, bewertet und spricht. Frag ihn alles im Chatfeld."
+        },
+        "zenWidget": {
+          "title": "Zen & Widget",
+          "body": "Vollbild-Visuals oder ein winziges Widget, immer im Vordergrund."
+        }
+      }
     }
   },
   "widget": {
@@ -326,7 +363,8 @@
     "copied": "Kopiert!",
     "share": "Teilen",
     "back": "Zurück",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "help": "Hilfe"
   },
   "volume": {
     "metronome": "Metronom",
@@ -472,7 +510,10 @@
       "resetHints": "Hinweise zurücksetzen",
       "resetHintsHint": "Die sechs einmaligen Tipps erneut anzeigen",
       "resetHintsAction": "Zurücksetzen",
-      "resetHintsDone": "Fertig"
+      "resetHintsDone": "Fertig",
+      "takeTour": "Tour starten",
+      "takeTourHint": "Sechs Stationen durch die App, etwa 30 Sekunden",
+      "takeTourAction": "Start"
     },
     "devices": {
       "title": "Geräte",

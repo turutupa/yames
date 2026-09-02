@@ -3,8 +3,9 @@
  *
  * Two placements:
  *   - anchored (default): fixed, positioned next to the `data-hint="<id>"`
- *     element via `anchor.ts`. Falls back to a bottom-centre toast when the
- *     anchor is not on screen.
+ *     element by the shared `../anchor` helper — the same four-sided,
+ *     never-leaves-the-window maths the O6 tour card uses. Falls back to a
+ *     bottom-centre toast when the anchor is not on screen.
  *   - inline: rendered in the document flow, for hosts that already own their
  *     layout (the coach feed, the Zen overlay).
  *
@@ -14,12 +15,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  VIEWPORT_MARGIN,
-  computeAnchorPlacement,
-  findAnchorElement,
-  rectOf,
-} from "./anchor";
+import { ANCHOR_MARGIN, computeAnchor, type Placement, type Rect } from "../anchor";
 import { HINT_I18N_KEY, type HintId } from "./types";
 import "../../../styles/hints.css";
 
@@ -33,13 +29,27 @@ export type HintCardProps = {
   onDismiss: () => void;
 };
 
+/**
+ * The element a hint anchors to, measured — or null when it is not on screen.
+ * A 0x0 rect means "present in the DOM but not laid out" (a collapsed panel,
+ * a tab that is not the visible one), which is not something to point at.
+ */
+function anchorRect(hintId: string): Rect | null {
+  if (typeof document === "undefined") return null;
+  const el = document.querySelector<HTMLElement>(`[data-hint="${hintId}"]`);
+  if (!el) return null;
+  const r = el.getBoundingClientRect();
+  if (r.width <= 0 || r.height <= 0) return null;
+  return { x: r.left, y: r.top, width: r.width, height: r.height };
+}
+
 export function HintCard({ id, inline, onAction, onDismiss }: HintCardProps) {
   const { t } = useTranslation();
   const cardRef = useRef<HTMLDivElement>(null);
   const [style, setStyle] = useState<CSSProperties>(
     inline ? {} : { top: 0, left: 0, visibility: "hidden" },
   );
-  const [placement, setPlacement] = useState<"below" | "above" | "float">("below");
+  const [placement, setPlacement] = useState<Placement | "float">("bottom");
   const key = HINT_I18N_KEY[id];
 
   // --- Anchoring ----------------------------------------------------------
@@ -50,19 +60,19 @@ export function HintCard({ id, inline, onAction, onDismiss }: HintCardProps) {
       if (!el) return;
       const size = { width: el.offsetWidth, height: el.offsetHeight };
       const viewport = { width: window.innerWidth, height: window.innerHeight };
-      const anchor = findAnchorElement(id);
+      const anchor = anchorRect(id);
       if (!anchor) {
         // No anchor on screen — behave like a toast above the bottom edge.
         setPlacement("float");
         setStyle({
-          top: Math.max(VIEWPORT_MARGIN, viewport.height - size.height - 24),
-          left: Math.max(VIEWPORT_MARGIN, (viewport.width - size.width) / 2),
+          top: Math.max(ANCHOR_MARGIN, viewport.height - size.height - 24),
+          left: Math.max(ANCHOR_MARGIN, (viewport.width - size.width) / 2),
         });
         return;
       }
-      const next = computeAnchorPlacement(rectOf(anchor), size, viewport);
+      const next = computeAnchor(anchor, size, viewport);
       setPlacement(next.placement);
-      setStyle({ top: next.top, left: next.left });
+      setStyle({ top: next.y, left: next.x });
     };
     update();
     window.addEventListener("resize", update);

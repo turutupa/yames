@@ -139,6 +139,43 @@
         "body": "A MIDI device is connected but nothing is mapped. Map a pedal to Play/Stop?",
         "action": "Open Hotkeys"
       }
+    },
+    "tour": {
+      "progress": "{{current}} of {{total}}",
+      "keys": "Keys",
+      "back": "Back",
+      "next": "Next",
+      "done": "Done",
+      "skip": "Skip tour",
+      "offer": "New here? Take the 30-second tour.",
+      "offerAccept": "Show me around",
+      "offerDismiss": "Dismiss",
+      "stops": {
+        "bpm": {
+          "title": "Tempo",
+          "body": "Drag, scroll, type, or tap the tempo."
+        },
+        "subdivision": {
+          "title": "Subdivisions & groups",
+          "body": "Click subdivisions and shape the bar with beat groups."
+        },
+        "presets": {
+          "title": "Presets",
+          "body": "Save any setup and switch instantly."
+        },
+        "drill": {
+          "title": "Drill",
+          "body": "Ramp tempo automatically; the coach can adapt it."
+        },
+        "coach": {
+          "title": "Practice coach",
+          "body": "Listens, scores, and speaks. Ask it anything in its chat box."
+        },
+        "zenWidget": {
+          "title": "Zen & widget",
+          "body": "Fullscreen visuals, or a tiny always-on-top widget."
+        }
+      }
     }
   },
   "widget": {
@@ -326,7 +363,8 @@
     "copied": "Copied!",
     "share": "Share",
     "back": "Back",
-    "settings": "Settings"
+    "settings": "Settings",
+    "help": "Help"
   },
   "volume": {
     "metronome": "Metronome",
@@ -472,7 +510,10 @@
       "resetHints": "Reset hints",
       "resetHintsHint": "Show the six one-time tips again",
       "resetHintsAction": "Reset",
-      "resetHintsDone": "Done"
+      "resetHintsDone": "Done",
+      "takeTour": "Take the tour",
+      "takeTourHint": "Six stops around the app, about 30 seconds",
+      "takeTourAction": "Start"
     },
     "devices": {
       "title": "Devices",

@@ -139,6 +139,43 @@
         "body": "Un appareil MIDI est connecté mais rien n'est assigné. Assigner une pédale à Lecture/Arrêt ?",
         "action": "Ouvrir les raccourcis"
       }
+    },
+    "tour": {
+      "progress": "{{current}} sur {{total}}",
+      "keys": "Touches",
+      "back": "Retour",
+      "next": "Suivant",
+      "done": "Terminé",
+      "skip": "Passer la visite",
+      "offer": "Nouveau ici ? Faites la visite de 30 secondes.",
+      "offerAccept": "Faites-moi visiter",
+      "offerDismiss": "Fermer",
+      "stops": {
+        "bpm": {
+          "title": "Tempo",
+          "body": "Glissez, faites défiler, saisissez ou tapez le tempo."
+        },
+        "subdivision": {
+          "title": "Subdivisions et groupes",
+          "body": "Cliquez les subdivisions et façonnez la mesure avec des groupes de temps."
+        },
+        "presets": {
+          "title": "Préréglages",
+          "body": "Enregistrez n'importe quelle configuration et changez instantanément."
+        },
+        "drill": {
+          "title": "Drill",
+          "body": "Montez le tempo automatiquement ; le coach peut l'adapter."
+        },
+        "coach": {
+          "title": "Coach d'entraînement",
+          "body": "Il écoute, note et parle. Posez-lui vos questions dans son chat."
+        },
+        "zenWidget": {
+          "title": "Zen et widget",
+          "body": "Visuels en plein écran, ou un minuscule widget toujours visible."
+        }
+      }
     }
   },
   "widget": {
@@ -326,7 +363,8 @@
     "copied": "Copié !",
     "share": "Partager",
     "back": "Retour",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "help": "Aide"
   },
   "volume": {
     "metronome": "Métronome",
@@ -472,7 +510,10 @@
       "resetHints": "Réinitialiser les astuces",
       "resetHintsHint": "Afficher à nouveau les six astuces uniques",
       "resetHintsAction": "Réinitialiser",
-      "resetHintsDone": "Terminé"
+      "resetHintsDone": "Terminé",
+      "takeTour": "Faire la visite",
+      "takeTourHint": "Six étapes dans l'app, environ 30 secondes",
+      "takeTourAction": "Démarrer"
     },
     "devices": {
       "title": "Périphériques",

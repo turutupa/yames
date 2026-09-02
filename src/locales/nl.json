@@ -139,6 +139,43 @@
         "body": "Er is een MIDI-apparaat verbonden maar niets toegewezen. Pedaal aan Afspelen/Stoppen koppelen?",
         "action": "Sneltoetsen openen"
       }
+    },
+    "tour": {
+      "progress": "{{current}} van {{total}}",
+      "keys": "Toetsen",
+      "back": "Terug",
+      "next": "Volgende",
+      "done": "Klaar",
+      "skip": "Rondleiding overslaan",
+      "offer": "Nieuw hier? Doe de rondleiding van 30 seconden.",
+      "offerAccept": "Laat me rondkijken",
+      "offerDismiss": "Sluiten",
+      "stops": {
+        "bpm": {
+          "title": "Tempo",
+          "body": "Sleep, scroll, typ of tik het tempo."
+        },
+        "subdivision": {
+          "title": "Onderverdelingen en groepen",
+          "body": "Klik onderverdelingen en geef de maat vorm met telgroepen."
+        },
+        "presets": {
+          "title": "Presets",
+          "body": "Bewaar elke instelling en wissel direct."
+        },
+        "drill": {
+          "title": "Drill",
+          "body": "Voer het tempo automatisch op; de coach kan het aanpassen."
+        },
+        "coach": {
+          "title": "Oefencoach",
+          "body": "Luistert, beoordeelt en praat. Vraag hem alles in het chatvak."
+        },
+        "zenWidget": {
+          "title": "Zen en widget",
+          "body": "Beeldvullende visuals, of een piepklein widget altijd bovenop."
+        }
+      }
     }
   },
   "widget": {
@@ -326,7 +363,8 @@
     "copied": "Gekopieerd!",
     "share": "Delen",
     "back": "Terug",
-    "settings": "Instellingen"
+    "settings": "Instellingen",
+    "help": "Help"
   },
   "volume": {
     "metronome": "Metronoom",
@@ -472,7 +510,10 @@
       "resetHints": "Tips resetten",
       "resetHintsHint": "Toon de zes eenmalige tips opnieuw",
       "resetHintsAction": "Resetten",
-      "resetHintsDone": "Klaar"
+      "resetHintsDone": "Klaar",
+      "takeTour": "Rondleiding volgen",
+      "takeTourHint": "Zes stops door de app, ongeveer 30 seconden",
+      "takeTourAction": "Start"
     },
     "devices": {
       "title": "Apparaten",

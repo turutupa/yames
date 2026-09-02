@@ -139,6 +139,43 @@
         "body": "Urządzenie MIDI jest podłączone, ale nic nie jest przypisane. Przypisać pedał do Start/Stop?",
         "action": "Otwórz skróty"
       }
+    },
+    "tour": {
+      "progress": "{{current}} z {{total}}",
+      "keys": "Klawisze",
+      "back": "Wstecz",
+      "next": "Dalej",
+      "done": "Gotowe",
+      "skip": "Pomiń przewodnik",
+      "offer": "Nowy tutaj? Zobacz 30-sekundowy przewodnik.",
+      "offerAccept": "Oprowadź mnie",
+      "offerDismiss": "Zamknij",
+      "stops": {
+        "bpm": {
+          "title": "Tempo",
+          "body": "Przeciągnij, przewiń, wpisz lub wystukaj tempo."
+        },
+        "subdivision": {
+          "title": "Podziały i grupy",
+          "body": "Klikaj podziały i kształtuj takt grupami miar."
+        },
+        "presets": {
+          "title": "Presety",
+          "body": "Zapisz dowolne ustawienie i przełączaj się natychmiast."
+        },
+        "drill": {
+          "title": "Drill",
+          "body": "Automatycznie podnoś tempo; coach może je dostosować."
+        },
+        "coach": {
+          "title": "Trener ćwiczeń",
+          "body": "Słucha, ocenia i mówi. Zapytaj go o wszystko w oknie czatu."
+        },
+        "zenWidget": {
+          "title": "Zen i widżet",
+          "body": "Wizualizacje na pełnym ekranie albo mały widżet zawsze na wierzchu."
+        }
+      }
     }
   },
   "widget": {
@@ -326,7 +363,8 @@
     "copied": "Skopiowano!",
     "share": "Udostępnij",
     "back": "Wstecz",
-    "settings": "Ustawienia"
+    "settings": "Ustawienia",
+    "help": "Pomoc"
   },
   "volume": {
     "metronome": "Metronom",
@@ -472,7 +510,10 @@
       "resetHints": "Resetuj wskazówki",
       "resetHintsHint": "Pokaż ponownie sześć jednorazowych wskazówek",
       "resetHintsAction": "Resetuj",
-      "resetHintsDone": "Gotowe"
+      "resetHintsDone": "Gotowe",
+      "takeTour": "Uruchom przewodnik",
+      "takeTourHint": "Sześć przystanków po aplikacji, około 30 sekund",
+      "takeTourAction": "Start"
     },
     "devices": {
       "title": "Urządzenia",
