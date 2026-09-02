@@ -122,10 +122,14 @@ bun run test:highbpm               # raw-onset fixtures
 cargo test --manifest-path src-tauri/Cargo.toml --features coach-llm --lib   # once Phase 0 lands
 ```
 
-- **Audio-safety gate (Phase 0 introduces it):** `cargo run --bin
-  click-jitter-probe` runs the engine for 60 s while the LLM generates
-  continuously and asserts p99 callback-to-callback jitter < 1 ms and
-  zero missed beats. Any phase that adds background compute re-runs it.
+- **Audio-safety gate (Phase 0 introduces it):** `bun run
+  yames:jitter-probe` runs the engine for 60 s while the LLM generates
+  continuously. Hard gate: **zero missed beats and zero dropouts**.
+  Target: p99 callback-to-callback jitter < 1 ms on an idle machine;
+  advisory on shared CI runners (T06 saw p99 2.5 ms from unrelated
+  local builds alone). Any phase that adds background compute re-runs
+  it. T06 results (2026-09-02, Qwen3-4B): GPU 0.30 ms, CPU 0.55 ms
+  with the event loop promoted, 0 missed beats in every run.
 - **Scoring gate:** any change to `onset.rs`, `timing.rs` or
   `instrument.rs` re-bakes nothing silently. Golden drift must be
   explained in the commit body and `INSTRUMENT_PROFILE_VERSION` bumped
@@ -232,6 +236,11 @@ stutters. Nothing else in this roadmap is real until this is.
   chat 15 s) and template-only tips on CPU when the model is too slow.
 - **Gate:** CPU rephrase p50 ≤ 3 s on the owner's laptop; tier routing
   unit-tested; Settings copy honest about which tiers use the model.
+
+### 0.5c Allocation-free beat queue (T06b) — **S–M**
+- T06 found the callback's `mpsc` send allocates under load; a bounded
+  queue removes the root cause and lets us decide whether the event-loop
+  real-time promotion stays. Brief: `plans/tasks/phase-0/T06b-callback-queue.md`.
 
 ### 0.6 Deterministic adaptive drill — **S** (*parallel-safe*)
 - The rule table already exists (`adaptive_thresholds` in `engine.rs`).
