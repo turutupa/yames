@@ -160,6 +160,14 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, presetId
   const segmentReportsRef = useRef<SessionSegment[]>([]);
   const segmentStartRef = useRef<number>(Date.now());
   const coachLoadedRef = useRef(false);
+  // True only while a `loadCoachModel()` call is actually in flight.
+  // The real-time tip path waits up to 1 s for a load to finish before
+  // shipping the un-paraphrased template; that wait is only meaningful
+  // if a load is pending. In template mode (no `coach-llm` feature, or
+  // no model on disk) nothing will ever set `coachLoadedRef`, so
+  // without this flag every tip would burn a dead second — a big chunk
+  // of the 1-3 s mid-session tip budget.
+  const coachLoadPendingRef = useRef(false);
   const sessionIdRef = useRef(0);
   const messagesRef = useRef<FeedMessage[]>([]);
   // ── activeRef: synchronous mirror of `active` ─────────────────
@@ -379,7 +387,10 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, presetId
       if (loaded) {
         coachLoadedRef.current = true;
       } else {
-        loadCoachModel().then((ok) => { coachLoadedRef.current = ok; });
+        coachLoadPendingRef.current = true;
+        loadCoachModel()
+          .then((ok) => { coachLoadedRef.current = ok; })
+          .finally(() => { coachLoadPendingRef.current = false; });
       }
     });
   }, []);
@@ -390,7 +401,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, presetId
     isPlaying, active, timeSignature, instrumentLabel,
     coachVerbosity, coachMode,
     segmentReportsRef, segmentStartRef, prevSessionBestRef,
-    narrativeRef, coachLoadedRef, sessionIdRef, activeRef, playBpmRef,
+    narrativeRef, sessionIdRef, activeRef, playBpmRef,
     beatsInSegmentRef, setMessages, setPlayMode,
   });
 
@@ -656,12 +667,17 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, presetId
         // better than waiting indefinitely and silencing real-time
         // feedback. Only matters for non-intervention events because
         // interventions use their own catalog text verbatim.
-        if (!intervention && !coachLoadedRef.current) {
+        //
+        // Gated on `coachLoadPendingRef`: in template mode no load is
+        // ever in flight, so there is nothing to wait for and the tip
+        // ships immediately.
+        if (!intervention && !coachLoadedRef.current && coachLoadPendingRef.current) {
           const COACH_LOAD_GRACE_MS = 1000;
           const POLL_MS = 50;
           const start = Date.now();
           while (
             !coachLoadedRef.current &&
+            coachLoadPendingRef.current &&
             Date.now() - start < COACH_LOAD_GRACE_MS
           ) {
             await new Promise((resolve) => setTimeout(resolve, POLL_MS));
@@ -1120,7 +1136,10 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, presetId
 
     // Try to load coach model if not already loaded
     if (!coachLoadedRef.current) {
-      loadCoachModel().then((ok) => { coachLoadedRef.current = ok; });
+      coachLoadPendingRef.current = true;
+      loadCoachModel()
+        .then((ok) => { coachLoadedRef.current = ok; })
+        .finally(() => { coachLoadPendingRef.current = false; });
     }
 
     // ── C2: Context-Aware Greetings ────────────────────────────
@@ -1384,7 +1403,10 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, presetId
     // final text and there's no spinner-to-text swap to do. The actual
     // LLM rephrase path below converts the message to its final form
     // and calls speakAndReveal in the same tick.
-    const willSpeakSummary = !!sessionReport && coachLoadedRef.current && voiceMode === "voice";
+    // A summary is generated whenever there's a report — `coach_generate`
+    // falls back to the Rust session-summary template when no model is
+    // resident, so this no longer keys off `coachLoadedRef`.
+    const willSpeakSummary = !!sessionReport && voiceMode === "voice";
     const endMsg: FeedMessage = {
       id: endMsgId,
       type: "session-end",
@@ -1421,8 +1443,13 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, presetId
       }).catch(() => {});
     }
 
-    // Generate coach summary in the background, then patch the message
-    if (sessionReport && coachLoadedRef.current) {
+    // Generate coach summary in the background, then patch the message.
+    // Deliberately NOT gated on `coachLoadedRef`: without a resident
+    // model `coach_generate` returns the Rust `format_session_summary`
+    // template, which is the only session wrap-up a template-mode user
+    // ever gets. Gating here would leave them staring at the bare
+    // "Session complete." placeholder.
+    if (sessionReport) {
       // Capture a token so we can drop the result if the user starts
       // a NEW session before the LLM call resolves. Without this guard,
       // the old session's spoken summary leaks into the next session
