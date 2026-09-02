@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, type ReactNode } from "react";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
 
 interface ZenTransitionProps {
   isActive: boolean;
@@ -12,7 +13,10 @@ interface ZenTransitionProps {
 type ZenState = "hidden" | "entering" | "visible" | "exiting";
 
 export function ZenTransition({ isActive, themeId, disabled, level, animStyle, children }: ZenTransitionProps) {
-  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Shared hook (O8 motion audit): one definition of "reduced motion", and it
+  // re-renders when the OS setting changes instead of latching whatever was
+  // true at first render.
+  const prefersReduced = useReducedMotion();
   const noAnimation = prefersReduced || disabled || themeId === "mono";
   const [state, setState] = useState<ZenState>(isActive ? "visible" : "hidden");
   const prevActive = useRef(isActive);

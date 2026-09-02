@@ -1,4 +1,5 @@
 import { useRef, useLayoutEffect, useEffect, type ReactNode } from "react";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 
 interface ViewTransitionProps {
   viewKey: string;
@@ -48,6 +49,10 @@ export function ViewTransition({
   // animations elsewhere, and animating the very first view feels
   // jarring on app boot.)
   const isFirstRenderRef = useRef(true);
+  // Shared hook (O8 motion audit) — same answer everywhere, and live, so
+  // toggling the OS setting takes effect without a reload. `disabled` already
+  // carries the `viewTransitions === "off"` preference from the caller.
+  const reducedMotion = useReducedMotion();
 
   useLayoutEffect(() => {
     const el = wrapperRef.current;
@@ -63,7 +68,7 @@ export function ViewTransition({
     prevKeyRef.current = viewKey;
 
     if (disabled) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (reducedMotion) return;
 
     const isSettings = viewKey === "settings";
     const cls = isSettings ? "settings-entering" : "view-entering";
@@ -90,15 +95,16 @@ export function ViewTransition({
     return () => {
       window.clearTimeout(timer);
     };
-  }, [viewKey, disabled]);
+  }, [viewKey, disabled, reducedMotion]);
 
   // If transitions are disabled mid-animation, clear classes immediately.
+  // Flipping the OS reduced-motion setting counts as disabling them.
   useEffect(() => {
-    if (!disabled) return;
+    if (!disabled && !reducedMotion) return;
     const el = wrapperRef.current;
     if (!el) return;
     el.classList.remove("view-entering", "settings-entering");
-  }, [disabled]);
+  }, [disabled, reducedMotion]);
 
   return (
     <div

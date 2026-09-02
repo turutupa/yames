@@ -27,6 +27,13 @@ export type HintCardProps = {
   onAction?: () => void;
   /** Called for the dismiss button, Escape, and after the action runs. */
   onDismiss: () => void;
+  /**
+   * False suppresses the entrance animation. `hints.css` already covers the OS
+   * `prefers-reduced-motion` setting, but the app's own `viewTransitions`
+   * preference is invisible to CSS — the host passes the shared
+   * `useReducedMotion` result here (O8 motion audit).
+   */
+  animate?: boolean;
 };
 
 /**
@@ -43,7 +50,13 @@ function anchorRect(hintId: string): Rect | null {
   return { x: r.left, y: r.top, width: r.width, height: r.height };
 }
 
-export function HintCard({ id, inline, onAction, onDismiss }: HintCardProps) {
+export function HintCard({
+  id,
+  inline,
+  onAction,
+  onDismiss,
+  animate = true,
+}: HintCardProps) {
   const { t } = useTranslation();
   const cardRef = useRef<HTMLDivElement>(null);
   const [style, setStyle] = useState<CSSProperties>(
@@ -102,7 +115,7 @@ export function HintCard({ id, inline, onAction, onDismiss }: HintCardProps) {
   return (
     <div
       ref={cardRef}
-      className={`hint-card${inline ? " hint-card-inline" : ""}`}
+      className={`hint-card${inline ? " hint-card-inline" : ""}${animate ? "" : " no-motion"}`}
       data-hint-id={id}
       data-placement={inline ? undefined : placement}
       style={inline ? undefined : style}
