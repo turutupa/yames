@@ -43,6 +43,7 @@ describe("FloatingWidget", () => {
       soundType: "click",
       timeSignature: 4,
       beatGroups: [4],
+      freeMode: false,
       speedRamp: {
         startBpm: 80,
         targetBpm: 160,

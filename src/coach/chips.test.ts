@@ -53,6 +53,7 @@ function mkCtx(overrides: Partial<ChipContext> = {}): ChipContext {
     bpm: 120,
     timeSignature: 4,
     beatGroups: [4],
+    freeMode: false,
     segmentsCompleted: 1,
     recentChipIds: new Set(),
     segments: [],

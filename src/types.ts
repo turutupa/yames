@@ -50,6 +50,7 @@ export type AppState = {
   soundType: string;
   timeSignature: number;
   beatGroups: number[];
+  freeMode: boolean;
   speedRamp: SpeedRamp;
   /** Selected instrument id; drives DSP profile + coach vocabulary. */
   instrument: InstrumentId;
@@ -100,6 +101,7 @@ export type Preset = {
   subdivision: number;
   timeSignature: number;
   beatGroups?: number[];
+  freeMode?: boolean;
   soundType: string;
   volume: number;
   view: "beat" | "drill";
