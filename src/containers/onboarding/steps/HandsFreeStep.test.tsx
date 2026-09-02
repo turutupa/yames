@@ -229,6 +229,9 @@ describe("W3 — the cards never navigate", () => {
     expect(dispatch).not.toHaveBeenCalled();
 
     // …and the footer still does advance, so the step is not a dead end.
+    // A control is optional, so unlike W1 this step never gates Next — it
+    // registers no `setNextEnabled`, and the shell's default is enabled.
+    expect(screen.getByRole("button", { name: "Next" })).toBeEnabled();
     act(() => {
       screen.getByRole("button", { name: "Next" }).click();
     });
