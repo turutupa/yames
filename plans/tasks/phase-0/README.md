@@ -46,3 +46,11 @@ is merged.
 Development happens on macOS (Apple Silicon) and Windows 11. CI builds
 macOS (arm64 + x86_64), Ubuntu 22.04 and Windows. A worker on one OS
 must say which gates it could not run.
+
+On Windows the repo is pinned to the MSVC toolchain (see AGENTS.md
+"Building on Windows"). Worker shells do not inherit the user's
+environment: export `LIBCLANG_PATH=C:\Program Files\LLVM\bin` and
+`VULKAN_SDK=C:\VulkanSDK\1.4.357.0` before any cargo command, and
+never put w64devkit or another MinGW on PATH. Worktrees start without
+`node_modules`; copy it from the main checkout (`robocopy`) if
+`bun install` cannot reach the registry.
