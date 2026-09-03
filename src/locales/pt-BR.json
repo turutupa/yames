@@ -834,6 +834,13 @@
     "dismiss": "Fechar",
     "success": "Coach disponível!"
   },
+  "audioError": {
+    "deviceInUse": "Outro aplicativo está usando sua saída de áudio, então o metrônomo não consegue tocar. Feche-o ou escolha outro dispositivo de saída em Configurações → Dispositivos.",
+    "generic": "O Yames não conseguiu iniciar a saída de áudio, então o metrônomo não consegue tocar.",
+    "detail": "Motivo: {{reason}}",
+    "openSettings": "Configurações de áudio",
+    "dismiss": "Fechar"
+  },
   "updateBanner": {
     "available": "O Yames v{{version}} está disponível",
     "installRestart": "Instalar e reiniciar →",

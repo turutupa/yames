@@ -834,6 +834,13 @@
     "dismiss": "Schließen",
     "success": "Übungscoach ist verfügbar!"
   },
+  "audioError": {
+    "deviceInUse": "Eine andere App belegt deine Audio-Ausgabe, deshalb kann das Metronom nicht spielen. Schließe sie oder wähle unter Einstellungen → Geräte ein anderes Ausgabegerät.",
+    "generic": "Yames konnte die Audio-Ausgabe nicht starten, deshalb kann das Metronom nicht spielen.",
+    "detail": "Grund: {{reason}}",
+    "openSettings": "Audio-Einstellungen",
+    "dismiss": "Schließen"
+  },
   "updateBanner": {
     "available": "Yames v{{version}} ist verfügbar",
     "installRestart": "Installieren & Neustart →",

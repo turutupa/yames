@@ -834,6 +834,13 @@
     "dismiss": "Đóng",
     "success": "Huấn luyện viên đã sẵn sàng!"
   },
+  "audioError": {
+    "deviceInUse": "Một ứng dụng khác đang dùng ngõ ra âm thanh nên máy đếm nhịp không phát được. Hãy đóng ứng dụng đó hoặc chọn thiết bị đầu ra khác trong Cài đặt → Thiết bị.",
+    "generic": "Yames không khởi động được ngõ ra âm thanh nên máy đếm nhịp không phát được.",
+    "detail": "Lý do: {{reason}}",
+    "openSettings": "Cài đặt âm thanh",
+    "dismiss": "Đóng"
+  },
   "updateBanner": {
     "available": "Đã có phiên bản Yames v{{version}}",
     "installRestart": "Cài đặt & Khởi động lại →",

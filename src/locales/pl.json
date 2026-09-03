@@ -834,6 +834,13 @@
     "dismiss": "Zamknij",
     "success": "Trener jest dostępny!"
   },
+  "audioError": {
+    "deviceInUse": "Inna aplikacja używa wyjścia audio, więc metronom nie może grać. Zamknij ją albo wybierz inne urządzenie wyjściowe w Ustawieniach → Urządzenia.",
+    "generic": "Yames nie mógł uruchomić wyjścia audio, więc metronom nie może grać.",
+    "detail": "Powód: {{reason}}",
+    "openSettings": "Ustawienia audio",
+    "dismiss": "Zamknij"
+  },
   "updateBanner": {
     "available": "Dostępna wersja Yames v{{version}}",
     "installRestart": "Zainstaluj i uruchom ponownie →",

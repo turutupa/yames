@@ -834,6 +834,13 @@
     "dismiss": "Chiudi",
     "success": "Coach di pratica disponibile!"
   },
+  "audioError": {
+    "deviceInUse": "Un'altra app sta usando l'uscita audio, quindi il metronomo non può suonare. Chiudila oppure scegli un altro dispositivo di uscita in Impostazioni → Dispositivi.",
+    "generic": "Yames non è riuscito ad avviare l'uscita audio, quindi il metronomo non può suonare.",
+    "detail": "Motivo: {{reason}}",
+    "openSettings": "Impostazioni audio",
+    "dismiss": "Chiudi"
+  },
   "updateBanner": {
     "available": "Yames v{{version}} è disponibile",
     "installRestart": "Installa e riavvia →",

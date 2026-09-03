@@ -834,6 +834,13 @@
     "dismiss": "Sluiten",
     "success": "Oefencoach beschikbaar!"
   },
+  "audioError": {
+    "deviceInUse": "Een andere app gebruikt je audio-uitvoer, dus de metronoom kan niet spelen. Sluit die app of kies een ander uitvoerapparaat in Instellingen → Apparaten.",
+    "generic": "Yames kon de audio-uitvoer niet starten, dus de metronoom kan niet spelen.",
+    "detail": "Reden: {{reason}}",
+    "openSettings": "Audio-instellingen",
+    "dismiss": "Sluiten"
+  },
   "updateBanner": {
     "available": "Yames v{{version}} is beschikbaar",
     "installRestart": "Installeren en herstarten →",

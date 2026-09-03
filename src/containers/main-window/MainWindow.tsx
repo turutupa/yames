@@ -85,6 +85,8 @@ import { useAppUpdates } from "./hooks/useAppUpdates";
 import { useTabRouting } from "./hooks/useTabRouting";
 import { useDownbeatPulse } from "./hooks/useDownbeatPulse";
 import { useInputTester } from "./hooks/useInputTester";
+import { useAudioError } from "./hooks/useAudioError";
+import { AudioErrorNotice } from "./AudioErrorNotice";
 import {
   CoachDownloadConfirmDialog,
   DownloadProgressBar,
@@ -400,6 +402,27 @@ export function MainWindow() {
       /* ignore — nothing to restore if the engine is gone */
     }
   }, []);
+
+  // --- Audio output failure ------------------------------------------------
+  // The audio thread emits `audio-error` when it cannot open or start the
+  // output stream — the WASAPI exclusive-mode case being the one a guitarist
+  // meets weekly, with an amp sim already holding the endpoint. Nothing else
+  // consumed that event, so Play used to snap back in silence.
+  const audioError = useAudioError(state.isPlaying);
+  const openAudioSettings = useCallback(() => {
+    setView("settings");
+    // Same triple nudge as the theme and voice detours: `setView` scrolls the
+    // pane to the top on its own timer, so one early scroll is overwritten.
+    for (const delay of [80, 260, 520]) {
+      setTimeout(
+        () =>
+          document
+            .getElementById("settings-devices")
+            ?.scrollIntoView({ block: "start", behavior: "auto" }),
+        delay,
+      );
+    }
+  }, [setView]);
 
   // --- W2 → Settings → Appearance detour (O2) ------------------------------
   // "More themes in Settings" cannot open Settings *under* a full-window
@@ -841,6 +864,23 @@ export function MainWindow() {
         <FinishSetupChip
           onOpen={() => onboarding.openAt("instrument")}
           onDismiss={onboarding.dismissChip}
+        />
+      )}
+
+      {/* Shown on every tab, Settings included: the user pressed Play and got
+          silence, and the remedy the message points at lives in Settings, so
+          hiding it there would strand them mid-fix. It shares the top-centre
+          slot with the setup chip and the tour offer, none of which can be on
+          screen during a failed Play — those are one-time onboarding nudges,
+          this is a live fault. */}
+      {audioError.notice && (
+        <AudioErrorNotice
+          notice={audioError.notice}
+          onOpenSettings={() => {
+            audioError.dismiss();
+            openAudioSettings();
+          }}
+          onDismiss={audioError.dismiss}
         />
       )}
 

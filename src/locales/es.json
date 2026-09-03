@@ -834,6 +834,13 @@
     "dismiss": "Descartar",
     "success": "¡El entrenador ya está disponible!"
   },
+  "audioError": {
+    "deviceInUse": "Otra aplicación está usando tu salida de audio, así que el metrónomo no puede sonar. Ciérrala o elige otro dispositivo de salida en Ajustes → Dispositivos.",
+    "generic": "Yames no pudo iniciar la salida de audio, así que el metrónomo no puede sonar.",
+    "detail": "Motivo: {{reason}}",
+    "openSettings": "Ajustes de audio",
+    "dismiss": "Descartar"
+  },
   "updateBanner": {
     "available": "Yames v{{version}} está disponible",
     "installRestart": "Instalar y reiniciar →",
