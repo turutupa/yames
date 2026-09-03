@@ -1052,11 +1052,15 @@ impl EventSink {
 /// How long `start` waits for the audio thread to report whether the output
 /// stream actually came up.
 ///
-/// Opening a shared-mode endpoint is tens of milliseconds on a local device
-/// and can be most of a second on a cold Bluetooth one, so this is generous.
-/// It is only ever *spent* when the device is genuinely wedged: on the happy
-/// path `start` returns the moment `stream.play()` succeeds.
-const AUDIO_SETUP_TIMEOUT: Duration = Duration::from_secs(3);
+/// `start` is reached from synchronous Tauri commands, so this is time the
+/// window can spend unresponsive — hence a cap, and a short one. It is
+/// almost never spent: on the happy path `start` returns the moment
+/// `stream.play()` succeeds (tens of milliseconds on a local device), and
+/// the failure this exists for — WASAPI refusing a busy endpoint — comes
+/// back immediately. Only a backend that hangs inside `build_output_stream`
+/// reaches the cap, and even then nothing is lost: the thread keeps going,
+/// so the next press of Play finds it already alive and plays.
+const AUDIO_SETUP_TIMEOUT: Duration = Duration::from_millis(2000);
 
 /// Clears the engine's `alive` / `playing` flags however the audio thread
 /// leaves — clean shutdown, no output device, a config the backend refuses,
