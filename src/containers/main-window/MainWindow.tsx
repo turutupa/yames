@@ -1131,7 +1131,6 @@ export function MainWindow() {
 
       {coach.pendingDownloadTier && (
         <CoachDownloadConfirmDialog
-          pendingTier={coach.pendingDownloadTier}
           modelStatus={coach.modelStatus}
           studioAvailable={coach.studioAvailable}
           onCancel={() => coach.setPendingDownloadTier(null)}

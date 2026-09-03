@@ -2472,40 +2472,35 @@
   border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
   background: color-mix(in srgb, var(--bg-primary) 50%, transparent);
   position: relative;
+  transition: border-color 0.15s, background 0.15s, opacity 0.15s;
 }
 
-.download-confirm-model-selected {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent);
-}
-
-/* Both cards are actionable, so both have to answer the pointer.
-   Only the pending tier carried any border treatment before, which read
-   as a stuck highlight on one card while the other looked inert — the
-   accent border says "this is the tier you clicked", not "this is what
-   you are hovering". Kept weaker than `-selected` so the two states stay
-   tellable apart when you hover the card that is already selected. */
+/* Hover is the ONLY accent in this dialog, so exactly one card is ever
+   highlighted: the one under the pointer.
+   There used to be a `.download-confirm-model-selected` rule painting the
+   same accent border on whichever tier the user clicked in Settings. That
+   is not a selection — the dialog is still asking which tier to get, and
+   each card has its own button — so it read as a card stuck in the "on"
+   state no matter where the pointer went. Adding hover on top of it made
+   it worse: two cards lit at once. The pending tier now gets no treatment
+   at all; "Installed" (badge + dimming) is the only persistent per-card
+   state, and it describes the disk, not a choice. */
 .download-confirm-model:hover {
   border-color: color-mix(in srgb, var(--accent) 55%, transparent);
   background: color-mix(in srgb, var(--bg-primary) 75%, transparent);
-}
-
-/* An installed tier is dimmed; lift it on hover so the card under the
-   pointer never looks disabled. Declared BEFORE the `.installed.selected`
-   rule on purpose: that selector has the same specificity (0,2,0), so
-   source order decides, and a card that is both installed and selected
-   should stay at full opacity rather than dropping to 0.8 when hovered.
-   Against plain `.installed` (0,1,0) this wins on specificity regardless
-   of order, so the non-selected case is unaffected. */
-.download-confirm-model-installed:hover {
-  opacity: 0.8;
 }
 
 .download-confirm-model-installed {
   opacity: 0.55;
 }
 
-.download-confirm-model-installed.download-confirm-model-selected {
+/* The installed tier is dimmed because you already have it, but it is still
+   actionable ("Use Standard"). Lift it to full opacity on hover so the card
+   under the pointer never looks disabled and the hover accent above is not
+   washed out by the dimming. `:hover` adds a class-level component (0,2,0
+   vs 0,1,0), so it beats the plain rule on specificity; it is still written
+   after it so the cascade reads in the order it applies. */
+.download-confirm-model-installed:hover {
   opacity: 1;
 }
 
