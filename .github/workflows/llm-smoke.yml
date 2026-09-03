@@ -1,0 +1,204 @@
+name: llm-smoke
+
+# Reusable (`workflow_call`) rather than a workflow of its own so that
+# both `ci.yml` (every push) and `release.yml` (release commits only) can
+# run it while `release.yml`'s `build` job keeps a real `needs:` edge on
+# it — `needs:` cannot cross workflow files, and the "nothing publishes
+# with a dead brain" guarantee from T02 depends on that edge.
+on:
+  workflow_call:
+
+env:
+  # CI-only test fixture for the LLM smoke job — SmolLM2-135M-Instruct
+  # Q4_K_M, ~100 MB, pinned to an immutable Hugging Face revision. It is
+  # never offered to or downloaded by users; the shipping model tiers are
+  # in plans/ROADMAP.md §3. An instruction-tuned model rather than the
+  # ~20 MB "stories" toys because those have a 256-token training context
+  # (shorter than the coach system prompt) and no notion of following an
+  # instruction, which makes "did it emit any text" a coin flip.
+  TEST_GGUF_URL: 'https://huggingface.co/bartowski/SmolLM2-135M-Instruct-GGUF/resolve/09816acd5d99df7be770d85ea30822623dab342c/SmolLM2-135M-Instruct-Q4_K_M.gguf'
+  TEST_GGUF_SHA256: '2e8040ceae7815abe0dcb3540b9995eaa1fa0d2ca9e797d0a635ae4433c68c2d'
+
+jobs:
+  # =====================================================================
+  # Gate (ROADMAP §5.0.1): on every platform the shipping LLM feature
+  # compiles *and* a real GGUF loads and emits tokens. Runners have no
+  # GPU, so a Vulkan/Metal build here exercises llama.cpp's runtime CPU
+  # fallback — which is exactly the path a user without a usable driver
+  # takes.
+  #
+  # Scope note: this job runs ONLY `coach::llm_tests`, not the whole lib
+  # suite. It used to run `--lib` unfiltered, which meant an unrelated
+  # audio test could redden the LLM gate — and did: a macOS TTS timing
+  # assertion and a Windows audio/Vulkan interaction took this job down
+  # for 13 consecutive runs after T05 merged. The rest of the suite runs
+  # in `ci.yml`'s `rust-tests` job, on the same four platforms.
+  # =====================================================================
+  llm-smoke:
+    name: llm-smoke (${{ matrix.label }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            label: macos-aarch64
+            target: aarch64-apple-darwin
+            feature: coach-llm-metal
+          - platform: macos-latest
+            label: macos-x86_64
+            target: x86_64-apple-darwin
+            feature: coach-llm-metal
+          - platform: ubuntu-22.04
+            label: ubuntu-22.04
+            target: ''
+            feature: coach-llm-vulkan
+          - platform: windows-latest
+            label: windows
+            target: ''
+            feature: coach-llm-vulkan
+
+    runs-on: ${{ matrix.platform }}
+    permissions:
+      contents: read
+    env:
+      CARGO_TERM_COLOR: always
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      # Tauri's own Linux prerequisites — the lib target links against
+      # webkit2gtk through the `tauri` crate even when only tests run.
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libasound2-dev
+
+      - name: LLM build environment
+        uses: ./.github/actions/llm-build-env
+
+      # Caches ~/.cargo and the target dir. `prefix-key` carries the CMake
+      # generator and Vulkan SDK: a restored `CMakeCache.txt` pins the
+      # generator it was configured with, and a mismatched one fails with
+      # "CMake was unable to find a build program corresponding to Ninja"
+      # (observed in T02 development). Bump `v1` below whenever the
+      # generator or the SDK version in the composite action changes.
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          prefix-key: 'v1-ninja-vk1.4.313'
+          key: ${{ matrix.label }}-${{ matrix.feature }}
+          workspaces: 'src-tauri'
+
+      - name: Cache the test GGUF
+        id: gguf
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/test-model.gguf
+          key: test-gguf-${{ env.TEST_GGUF_SHA256 }}
+
+      - name: Download the test GGUF
+        if: steps.gguf.outputs.cache-hit != 'true'
+        shell: bash
+        run: curl -fsSL --retry 5 --retry-delay 5 -o "${RUNNER_TEMP}/test-model.gguf" "$TEST_GGUF_URL"
+
+      - name: Verify the test GGUF checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          # RUNNER_TEMP is a backslash path on Windows; Git Bash's find/cd
+          # want the POSIX form.
+          TMP="$RUNNER_TEMP"
+          if command -v cygpath > /dev/null 2>&1; then TMP="$(cygpath -u "$RUNNER_TEMP")"; fi
+          cd "$TMP"
+          # sha256sum on Linux/Git-Bash, shasum on macOS.
+          if command -v sha256sum > /dev/null 2>&1; then
+            echo "${TEST_GGUF_SHA256}  test-model.gguf" | sha256sum -c -
+          else
+            echo "${TEST_GGUF_SHA256}  test-model.gguf" | shasum -a 256 -c -
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # `tauri::generate_context!` in src/lib.rs embeds `../dist`, so the
+      # lib target does not compile until the frontend has been built —
+      # even for `cargo test --lib`.
+      - name: Build frontend assets
+        shell: bash
+        run: |
+          npm install
+          npm run build
+
+      - name: Load a GGUF and generate tokens
+        shell: bash
+        env:
+          # Picked up by the `llm_tests` module added in T01; without it the
+          # test logs a skip and passes vacuously, so it is always set here.
+          YAMES_TEST_GGUF: ${{ runner.temp }}/test-model.gguf
+        run: |
+          set -euo pipefail
+          # `--target` for the macOS entries so this really is the artifact
+          # the release job ships; without it both macOS rows would build
+          # the runner's own arm64 and the Intel bundle would go untested.
+          # The x86_64 test binary runs under Rosetta on the arm64 runner.
+          TARGET_ARG=""
+          if [ -n "${{ matrix.target }}" ]; then TARGET_ARG="--target ${{ matrix.target }}"; fi
+          # `coach::llm_tests` filter: this gate is about the brain, not
+          # about the rest of the suite (see the scope note above).
+          # shellcheck disable=SC2086
+          cargo test --manifest-path src-tauri/Cargo.toml $TARGET_ARG \
+            --features ${{ matrix.feature }} --lib coach::llm_tests -- --nocapture
+
+      # ROADMAP §5.0.1 budget: ≤ 80 MB of binary growth per platform. The
+      # llama.cpp static libraries are where that growth lives (the Vulkan
+      # backend embeds the compiled SPIR-V shaders), so surface them here;
+      # the `build` job reports the finished bundle sizes.
+      - name: Record llama.cpp library sizes
+        if: always()
+        shell: bash
+        run: |
+          set -uo pipefail
+          TARGET="${CARGO_TARGET_DIR:-src-tauri/target}"
+          if command -v cygpath > /dev/null 2>&1; then TARGET="$(cygpath -u "$TARGET")"; fi
+          # `tee` so the numbers land in the step log as well as the job
+          # summary — the summary is not readable through the API.
+          {
+            echo "### llm-smoke — ${{ matrix.label }} (\`${{ matrix.feature }}\`)"
+            echo
+            echo 'llama.cpp static libraries *before* linking — an upper'
+            echo 'bound on the growth, not the shipped size. The `build` job'
+            echo 'reports the finished bundles.'
+            echo
+            echo '| Artifact | Size |'
+            echo '|---|---:|'
+            total=0
+            seen=""
+            while IFS= read -r f; do
+              [ -f "$f" ] || continue
+              # A cached target dir can hold several `llama-cpp-sys-2-<hash>`
+              # trees (one per feature set built there); count each library
+              # once.
+              base="$(basename "$f")"
+              case " $seen " in *" $base "*) continue ;; esac
+              seen="$seen $base"
+              bytes=$(wc -c < "$f" | tr -d ' ')
+              total=$((total + bytes))
+              printf '| `%s` | %s |\n' "$base" \
+                "$(awk -v b="$bytes" 'BEGIN{printf "%.1f MiB", b/1048576}')"
+            # Only the cmake *install* tree: `out/build/...` holds a second
+            # copy of every library and would double the total.
+            done < <(find "$TARGET" -type f -path '*/out/lib/*' \
+                       \( -name 'libggml*' -o -name 'libllama*' \
+                          -o -name 'ggml*.lib' -o -name 'llama*.lib' \) 2>/dev/null | sort -u)
+            printf '| **total llama.cpp static libs** | **%s** |\n' \
+              "$(awk -v b="$total" 'BEGIN{printf "%.1f MiB", b/1048576}')"
+            echo
+          } | tee -a "$GITHUB_STEP_SUMMARY"

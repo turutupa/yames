@@ -1437,19 +1437,38 @@ mod tts_playback_tests {
             "yames_tts_test_interrupt_{}.wav",
             std::process::id()
         ));
-        // 3 s of audio: if interruption were broken the assert below
-        // would fail loudly rather than merely being slow.
-        write_sine_wav(&path, 3000, 440.0, 22050);
+        // A deliberately long clip. The regression this guards is
+        // "playback ran to completion instead of stopping", so the gap
+        // between interrupted (milliseconds) and played-out (10 s) wants
+        // to be wide enough that no amount of host slowness can blur the
+        // two. Widening the signal beats tightening the tolerance: the
+        // previous version wrote 3 s and asserted a 500 ms wall-clock
+        // budget, which measured the test harness rather than the code
+        // and failed 13 CI runs in a row after T05 (macOS x86_64 saw
+        // 1.22 s). Instrumenting the real cost showed why: serialised,
+        // the interrupt path is `sink.stop()` 200 ns plus ~9 ms of
+        // output-stream teardown — but with 200+ tests running in
+        // parallel the same path measured 613 ms on a fast laptop,
+        // because a 20 ms poll loop under contention times the OS
+        // scheduler, not `play_wav_path`.
+        const CLIP_MS: u32 = 10_000;
+        write_sine_wav(&path, CLIP_MS, 440.0, 22050);
+
         let started = std::time::Instant::now();
         let result = play_wav_path(&path, 0.0, None, &|| false);
         let elapsed = started.elapsed();
         let _ = std::fs::remove_file(&path);
+
         if let Ok(end) = result {
             assert_eq!(end, PlaybackEnd::Interrupted);
             assert!(
-                elapsed < Duration::from_millis(500),
-                "interrupt took {elapsed:?} \u{2014} the ~100 ms budget is blown",
+                elapsed < Duration::from_millis(CLIP_MS as u64 / 2),
+                "play_wav_path took {elapsed:?} for a {CLIP_MS} ms clip \u{2014} \
+                 it played through instead of stopping",
             );
+            // Not a gate — the number is useful when reading a CI log,
+            // but asserting on it is what made this test flaky.
+            eprintln!("[test] interrupt returned in {elapsed:?}");
         }
     }
 

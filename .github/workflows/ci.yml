@@ -1,0 +1,138 @@
+name: CI
+
+# Everything that must be true of any commit, on every platform we ship.
+# Separate from `release.yml` on purpose: a red check here means "this
+# commit is broken", not "a release failed". Before this split the LLM
+# smoke job lived inside the release workflow, so ordinary merges showed
+# up in the Actions tab as a failing "Build & Release" run even though
+# nothing was ever being published.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A newer push to the same branch supersedes an in-flight run. The
+# llm-smoke matrix builds llama.cpp from source, so a superseded run is
+# ~15 minutes of runner time nobody will read.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Cheap and first: type errors and unit-test failures should not wait
+  # behind a llama.cpp build.
+  frontend:
+    name: frontend (tsc + vitest)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Unit tests
+        run: npx vitest run
+
+  # The full Rust suite on all four shipping platforms, without the LLM
+  # feature — no llama.cpp build, so this is minutes rather than a
+  # quarter of an hour. This is where the audio, timing, TTS and DSP
+  # tests live; keeping them here rather than in `llm-smoke` is what
+  # stops an audio regression from reddening the brain gate.
+  rust-tests:
+    name: rust-tests (${{ matrix.label }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            label: macos-aarch64
+            target: aarch64-apple-darwin
+          - platform: macos-latest
+            label: macos-x86_64
+            target: x86_64-apple-darwin
+          - platform: ubuntu-22.04
+            label: ubuntu-22.04
+            target: ''
+          - platform: windows-latest
+            label: windows
+            target: ''
+    runs-on: ${{ matrix.platform }}
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      # Tauri's Linux prerequisites plus cmake/libclang for aubio-sys'
+      # bindgen. Deliberately NOT the `llm-build-env` composite action:
+      # this job never compiles llama.cpp, so it does not want the Vulkan
+      # SDK — and it does not want `msvc-dev-cmd` either, whose exported
+      # environment is what makes rustc pick up Git's coreutils
+      # `link.exe` instead of MSVC's (see that action's linker-pin step).
+      - name: Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev \
+            librsvg2-dev patchelf libasound2-dev cmake libclang-dev
+
+      # LLVM is preinstalled on windows-latest, but bindgen only finds it
+      # when told; naming it here beats a 10-minute-in failure.
+      - name: Windows — point bindgen at libclang
+        if: matrix.platform == 'windows-latest'
+        shell: bash
+        run: echo 'LIBCLANG_PATH=C:\Program Files\LLVM\bin' >> "$GITHUB_ENV"
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          prefix-key: 'v1-nollm'
+          key: ${{ matrix.label }}
+          workspaces: 'src-tauri'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # `tauri::generate_context!` in src/lib.rs embeds `../dist`, so the
+      # lib target does not compile until the frontend has been built —
+      # even for `cargo test --lib`.
+      - name: Build frontend assets
+        shell: bash
+        run: |
+          npm install
+          npm run build
+
+      - name: cargo test --lib
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET_ARG=""
+          if [ -n "${{ matrix.target }}" ]; then TARGET_ARG="--target ${{ matrix.target }}"; fi
+          # shellcheck disable=SC2086
+          cargo test --manifest-path src-tauri/Cargo.toml $TARGET_ARG \
+            --lib --no-default-features -- --nocapture
+
+      # The golden-fixture gates from `package.json` (`test:dsp`,
+      # `test:highbpm`). They were previously local-only.
+      - name: DSP and high-BPM fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET_ARG=""
+          if [ -n "${{ matrix.target }}" ]; then TARGET_ARG="--target ${{ matrix.target }}"; fi
+          # shellcheck disable=SC2086
+          cargo test --manifest-path src-tauri/Cargo.toml $TARGET_ARG --test dsp_fixtures
+          # shellcheck disable=SC2086
+          cargo test --manifest-path src-tauri/Cargo.toml $TARGET_ARG --test highbpm_fixtures
+
+  # ROADMAP §5.0.1 — the brain compiles and generates on every shipping
+  # platform. Shared with `release.yml`, which gates publishing on it.
+  llm-smoke:
+    uses: ./.github/workflows/llm-smoke.yml
