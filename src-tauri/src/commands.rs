@@ -167,21 +167,34 @@ pub fn toggle_playback(
         s.is_playing
     };
 
-    let mut engine = engine_state.0.lock().unwrap();
+    // What the engine is actually doing after this call — not what was
+    // asked for. `start` fails when the output device will not open, and
+    // recording playback that is not happening is what left the transport
+    // showing "Stop" over silence.
+    let now_playing = {
+        let mut engine = engine_state.0.lock().unwrap();
+        if is_playing {
+            engine.stop();
+            false
+        } else {
+            match engine.start(state.inner().clone(), app_handle.clone()) {
+                Ok(()) => true,
+                Err(e) => {
+                    eprintln!("[yames] play failed: {e}");
+                    false
+                }
+            }
+        }
+    };
 
-    if is_playing {
-        engine.stop();
+    {
         let mut s = state.lock().unwrap();
-        s.is_playing = false;
-    } else {
-        engine.start(state.inner().clone(), app_handle.clone());
-        let mut s = state.lock().unwrap();
-        s.is_playing = true;
+        s.is_playing = now_playing;
     }
 
     // D2 — keep tempo context in sync so the onset detector gates
     // analysis against the live playing state.
-    tempo_ctx.set_playing(!is_playing);
+    tempo_ctx.set_playing(now_playing);
     emit_state_changed(&state, &app_handle);
 }
 
@@ -193,21 +206,36 @@ pub fn set_playing(
     tempo_ctx: State<SharedTempoContext>,
     app_handle: AppHandle,
 ) {
-    let mut engine = engine_state.0.lock().unwrap();
+    let now_playing = {
+        let mut engine = engine_state.0.lock().unwrap();
+        if playing && !engine.is_running() {
+            match engine.start(state.inner().clone(), app_handle.clone()) {
+                Ok(()) => true,
+                Err(e) => {
+                    eprintln!("[yames] play failed: {e}");
+                    false
+                }
+            }
+        } else if !playing && engine.is_running() {
+            engine.stop();
+            false
+        } else {
+            // No transition to make. `is_playing` was left untouched here,
+            // so a stop that arrived with the engine already stopped left
+            // the flag stuck true and the next press of Play was spent
+            // toggling it back off. Write the engine's real state instead.
+            engine.is_running()
+        }
+    };
 
-    if playing && !engine.is_running() {
-        engine.start(state.inner().clone(), app_handle.clone());
+    {
         let mut s = state.lock().unwrap();
-        s.is_playing = true;
-    } else if !playing && engine.is_running() {
-        engine.stop();
-        let mut s = state.lock().unwrap();
-        s.is_playing = false;
+        s.is_playing = now_playing;
     }
 
     // D2 — mirror into tempo context so the onset detector gates on
     // the live playing state.
-    tempo_ctx.set_playing(playing);
+    tempo_ctx.set_playing(now_playing);
     emit_state_changed(&state, &app_handle);
 }
 
@@ -534,14 +562,24 @@ pub fn start_speed_ramp(
         s.speed_ramp.completed = false;
         s.speed_ramp.warmup_count = 0;
         // Don't touch s.bpm — ramp uses its own current_bpm
-        s.is_playing = true;
     }
-    {
+    let started = {
         let mut engine = engine_state.0.lock().unwrap();
-        engine.start(state.inner().clone(), app_handle.clone());
+        match engine.start(state.inner().clone(), app_handle.clone()) {
+            Ok(()) => true,
+            Err(e) => {
+                eprintln!("[yames] drill start failed: {e}");
+                false
+            }
+        }
+    };
+    {
+        let mut s = state.lock().unwrap();
+        s.is_playing = started;
+        s.speed_ramp.active = started;
     }
     // D2 — gate onset analysis on the running state.
-    tempo_ctx.set_playing(true);
+    tempo_ctx.set_playing(started);
     emit_state_changed(&state, &app_handle);
 }
 
@@ -569,14 +607,24 @@ pub fn start_speed_ramp_from(
         s.speed_ramp.completed = false;
         s.speed_ramp.warmup_count = 0;
         // Don't touch s.bpm — ramp uses its own current_bpm
-        s.is_playing = true;
     }
-    {
+    let started = {
         let mut engine = engine_state.0.lock().unwrap();
-        engine.start(state.inner().clone(), app_handle.clone());
+        match engine.start(state.inner().clone(), app_handle.clone()) {
+            Ok(()) => true,
+            Err(e) => {
+                eprintln!("[yames] drill start failed: {e}");
+                false
+            }
+        }
+    };
+    {
+        let mut s = state.lock().unwrap();
+        s.is_playing = started;
+        s.speed_ramp.active = started;
     }
     // D2 — gate onset analysis on the running state.
-    tempo_ctx.set_playing(true);
+    tempo_ctx.set_playing(started);
     emit_state_changed(&state, &app_handle);
 }
 
@@ -1705,7 +1753,12 @@ pub fn set_audio_output_device(
     }
 
     let mut engine = engine_state.0.lock().unwrap();
-    engine.set_device(device_name, state.inner().clone(), app_handle);
+    if let Err(e) = engine.set_device(device_name, state.inner().clone(), app_handle) {
+        // Non-fatal: `set_device` leaves the engine startable, so the next
+        // press of Play re-tries. The reason already reached the UI as an
+        // `audio-error` event from the audio thread.
+        eprintln!("[yames] switching audio output device failed: {e}");
+    }
 }
 
 // ---------------------------------------------------------------------------
