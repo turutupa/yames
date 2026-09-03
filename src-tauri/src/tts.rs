@@ -1395,8 +1395,24 @@ mod tts_playback_tests {
         f.write_all(&buf).expect("write wav");
     }
 
+    /// Probe for an output device exactly once per process.
+    ///
+    /// The caching is not an optimisation. On a `windows-latest` runner —
+    /// which has no audio device at all — enumerating through cpal's
+    /// WASAPI backend from several test threads at once takes the whole
+    /// test binary down with `0xC0000005 STATUS_ACCESS_VIOLATION`, after
+    /// the first probe has already returned cleanly. The crash was
+    /// isolated to this: of the eight tests that never reported before
+    /// the process died, `plays_a_short_sine_without_panicking` had not
+    /// even reached its own "no output device" skip message, so it was
+    /// still inside this call.
+    ///
+    /// `OnceLock` turns N concurrent enumerations into one. It cannot
+    /// reintroduce the race, and on a developer machine the answer is
+    /// stable for the life of the process anyway.
     fn have_output_device() -> bool {
-        cpal::default_host().default_output_device().is_some()
+        static PRESENT: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+        *PRESENT.get_or_init(|| cpal::default_host().default_output_device().is_some())
     }
 
     /// The replacement for `afplay` has to actually open a stream,
@@ -1437,19 +1453,38 @@ mod tts_playback_tests {
             "yames_tts_test_interrupt_{}.wav",
             std::process::id()
         ));
-        // 3 s of audio: if interruption were broken the assert below
-        // would fail loudly rather than merely being slow.
-        write_sine_wav(&path, 3000, 440.0, 22050);
+        // A deliberately long clip. The regression this guards is
+        // "playback ran to completion instead of stopping", so the gap
+        // between interrupted (milliseconds) and played-out (10 s) wants
+        // to be wide enough that no amount of host slowness can blur the
+        // two. Widening the signal beats tightening the tolerance: the
+        // previous version wrote 3 s and asserted a 500 ms wall-clock
+        // budget, which measured the test harness rather than the code
+        // and failed 13 CI runs in a row after T05 (macOS x86_64 saw
+        // 1.22 s). Instrumenting the real cost showed why: serialised,
+        // the interrupt path is `sink.stop()` 200 ns plus ~9 ms of
+        // output-stream teardown — but with 200+ tests running in
+        // parallel the same path measured 613 ms on a fast laptop,
+        // because a 20 ms poll loop under contention times the OS
+        // scheduler, not `play_wav_path`.
+        const CLIP_MS: u32 = 10_000;
+        write_sine_wav(&path, CLIP_MS, 440.0, 22050);
+
         let started = std::time::Instant::now();
         let result = play_wav_path(&path, 0.0, None, &|| false);
         let elapsed = started.elapsed();
         let _ = std::fs::remove_file(&path);
+
         if let Ok(end) = result {
             assert_eq!(end, PlaybackEnd::Interrupted);
             assert!(
-                elapsed < Duration::from_millis(500),
-                "interrupt took {elapsed:?} \u{2014} the ~100 ms budget is blown",
+                elapsed < Duration::from_millis(CLIP_MS as u64 / 2),
+                "play_wav_path took {elapsed:?} for a {CLIP_MS} ms clip \u{2014} \
+                 it played through instead of stopping",
             );
+            // Not a gate — the number is useful when reading a CI log,
+            // but asserting on it is what made this test flaky.
+            eprintln!("[test] interrupt returned in {elapsed:?}");
         }
     }
 
