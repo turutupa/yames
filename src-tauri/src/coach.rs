@@ -477,6 +477,111 @@ impl Drop for LoadingGuard<'_> {
     }
 }
 
+/// A rephrase-tier call has to land inside AGENTS.md's 1–3 s budget.
+/// Above this the frontend's `COACH_GENERATE_TIMEOUT_MS.tip` (3 s) kills
+/// it anyway, so the only thing a slower call buys the user is three
+/// seconds of waiting before the template they were always going to get
+/// — while a core is pinned generating text nobody will read.
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub const TIP_LLM_BUDGET_MS: u32 = 2_500;
+
+/// What rephrase-tier generations actually cost on *this* machine.
+///
+/// T04b routed tips on `llm::BACKEND`, which is the **compile-time**
+/// feature string. The shipped Windows/Linux binary is built
+/// `coach-llm-vulkan`, so `BACKEND == "vulkan"` on a machine with no
+/// usable GPU too — llama.cpp falls back to the CPU at runtime and the
+/// string never changes. The guard therefore never fired for the users it
+/// was written for: measured on a GPU-less path, a rephrase takes ~3.8 s
+/// against a 3 s timeout, so every live tip burned a CPU core and then
+/// got killed.
+///
+/// Measuring is also strictly better than any backend string could be: it
+/// covers a slow GPU, a fast CPU, and a machine busy doing something else,
+/// none of which a compile-time constant can see.
+#[cfg_attr(not(feature = "coach-llm"), allow(dead_code))]
+pub(crate) mod latency {
+    use std::sync::Mutex;
+
+    /// Deliberately short. This is "what is this machine doing for me
+    /// right now", not a long-run statistic — a laptop that just came off
+    /// battery saver should be believed within a few calls.
+    const WINDOW: usize = 5;
+
+    static SAMPLES: Mutex<Vec<u32>> = Mutex::new(Vec::new());
+
+    pub fn record_rephrase_ms(ms: u32) {
+        let mut samples = SAMPLES.lock().unwrap_or_else(|e| e.into_inner());
+        samples.push(ms);
+        let len = samples.len();
+        if len > WINDOW {
+            samples.drain(..len - WINDOW);
+        }
+    }
+
+    /// Median of the samples so far; `None` until the model has been
+    /// asked for a rephrase at least once.
+    pub fn rephrase_p50_ms() -> Option<u32> {
+        let samples = SAMPLES.lock().unwrap_or_else(|e| e.into_inner());
+        if samples.is_empty() {
+            return None;
+        }
+        let mut sorted = samples.clone();
+        sorted.sort_unstable();
+        Some(sorted[sorted.len() / 2])
+    }
+
+    #[cfg(test)]
+    pub fn reset() {
+        SAMPLES.lock().unwrap_or_else(|e| e.into_inner()).clear();
+    }
+}
+
+/// Whether a given kind should reach the model at all.
+///
+/// Reports, summaries and chat have 8–15 s budgets and always do: a CPU
+/// rephrase measures ~3.8 s and a chat answer ~5.6 s, both comfortably
+/// inside their own tiers. Only the 1–3 s rephrase tier is at risk.
+#[cfg(feature = "coach-llm")]
+fn should_use_model(kind: GenKind) -> bool {
+    if !kind.is_rephrase() {
+        return true;
+    }
+    match latency::rephrase_p50_ms() {
+        Some(p50) => p50 <= TIP_LLM_BUDGET_MS,
+        // Nothing measured yet. Seed from the compile-time backend, which
+        // is right for the one case it can actually see — a build with no
+        // GPU backend compiled in cannot have one at runtime either — and
+        // lets a GPU build take one measured call before deciding.
+        None => llm::BACKEND != "cpu",
+    }
+}
+
+/// Median rephrase round-trip measured on this machine so far, in ms.
+///
+/// `None` until the model has actually been asked for one — Settings
+/// should say "measuring" rather than invent a number, because before the
+/// first call we genuinely do not know whether this machine offloaded to
+/// a GPU (see `latency`).
+pub fn rephrase_p50_ms() -> Option<u32> {
+    latency::rephrase_p50_ms()
+}
+
+/// Whether live tips currently reach the model, for Settings copy.
+///
+/// A build without the LLM feature never uses it; otherwise this is the
+/// same decision `generate` makes, so the UI cannot drift from behaviour.
+pub fn tips_use_model() -> bool {
+    #[cfg(feature = "coach-llm")]
+    {
+        should_use_model(GenKind::Tip)
+    }
+    #[cfg(not(feature = "coach-llm"))]
+    {
+        false
+    }
+}
+
 /// Generate a coaching comment from structured DSP data.
 ///
 /// Takes the engine mutex only long enough to clone the worker handle;
@@ -489,15 +594,21 @@ impl Drop for LoadingGuard<'_> {
 pub fn generate(handle: &CoachHandle, kind: GenKind, context: &str) -> Result<String, String> {
     #[cfg(feature = "coach-llm")]
     {
-        // AGENTS.md latency tiers: no *blocking* inference on the tip
-        // path. A CPU-only backend measured 7–11 s per call, which is
-        // three to four times the whole mid-session tip budget, so tips
-        // there are template-only. A GPU backend rephrases within budget.
-        let tip_on_cpu = kind == GenKind::Tip && llm::BACKEND == "cpu";
-        if !tip_on_cpu {
+        if should_use_model(kind) {
             let worker = { handle.lock()?.llm.clone() };
             if let Some(worker) = worker {
-                match worker.generate(context, kind) {
+                let started = std::time::Instant::now();
+                let outcome = worker.generate(context, kind);
+                // Record on any answer from a live worker, including one
+                // we end up rejecting: a truncated rephrase cost the user
+                // the same wall clock as a good one, and that cost is
+                // exactly what the routing decision is about.
+                if kind.is_rephrase() && !matches!(outcome, Err(llm::GenError::WorkerGone)) {
+                    latency::record_rephrase_ms(
+                        started.elapsed().as_millis().min(u32::MAX as u128) as u32,
+                    );
+                }
+                match outcome {
                     Ok(text) => return Ok(text),
                     Err(llm::GenError::WorkerGone) => {
                         handle.status().clear_residency("inference thread is gone");
@@ -1027,6 +1138,7 @@ mod llm {
     use llama_cpp_2::model::params::LlamaModelParams;
     use llama_cpp_2::model::LlamaModel;
     use llama_cpp_2::sampling::LlamaSampler;
+    use llama_cpp_2::token::LlamaToken;
 
     /// ROADMAP §0.3: `n_ctx` 4096. Qwen3 trains at 32k but the coach's
     /// longest prompt (a session summary with narrative + history) is a
@@ -1116,8 +1228,26 @@ mod llm {
     }
 
     /// Inference thread count (ROADMAP §3: `max(1, physical_cores - 2)`).
+    ///
+    /// `YAMES_LLM_THREADS` overrides it. T04b deliverable 3 asks for a
+    /// measured answer to "how many threads?" rather than an assumed one,
+    /// and that measurement needs to sweep counts on one binary; the same
+    /// override then lets a user on unusual hardware check our rule
+    /// against their own machine. Out-of-range values are ignored rather
+    /// than clamped silently, so a typo does not quietly change the
+    /// number a benchmark is attributing to the rule.
     fn inference_threads() -> i32 {
-        super::threads_from_physical(physical_cores())
+        let default = super::threads_from_physical(physical_cores());
+        match std::env::var("YAMES_LLM_THREADS") {
+            Ok(raw) => match raw.trim().parse::<i32>() {
+                Ok(n) if n >= 1 && n <= 256 => n,
+                _ => {
+                    eprintln!("[coach] YAMES_LLM_THREADS={raw:?} is not a thread count — ignoring");
+                    default
+                }
+            },
+            Err(_) => default,
+        }
     }
 
     fn load_model_file(
@@ -1466,6 +1596,12 @@ mod llm {
                 }
             };
             let mut batch = LlamaBatch::new(CONTEXT_SIZE as usize, 1);
+            // What `infer` believes is currently evaluated into the KV
+            // cells of this context, so the next call can skip re-evaluating
+            // the shared head. Declared beside `ctx` because it describes
+            // that context's cache: rebuilding the context on a model swap
+            // drops both together.
+            let mut resident: Vec<LlamaToken> = Vec::new();
 
             if let Some(ready) = ready.take() {
                 if ready.send(Ok(model_display_name(&model))).is_err() {
@@ -1485,7 +1621,8 @@ mod llm {
                         max_tokens,
                         reply,
                     } => {
-                        let out = infer(&model, &mut ctx, &mut batch, &context, max_tokens);
+                        let out =
+                            infer(&model, &mut ctx, &mut batch, &mut resident, &context, max_tokens);
                         let _ = reply.send(out);
                     }
                     Job::Reload { path, reply } => match load_with_fallback(&backend, &path) {
@@ -1518,34 +1655,31 @@ mod llm {
         }
     }
 
+    /// Escape hatch for the KV prefix reuse below, in the same spirit as
+    /// `YAMES_LLM_GPU_LAYERS`: set `YAMES_LLM_NO_PREFIX_CACHE=1` to force
+    /// full prompt evaluation on every call. It exists so the T04b
+    /// speed-up can be re-measured A/B on any machine rather than taken
+    /// on faith from a number in a PR, and so a suspected cache bug can
+    /// be ruled in or out without a rebuild.
+    fn prefix_cache_disabled() -> bool {
+        static DISABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+        *DISABLED.get_or_init(|| {
+            matches!(
+                std::env::var("YAMES_LLM_NO_PREFIX_CACHE").as_deref(),
+                Ok("1") | Ok("true")
+            )
+        })
+    }
+
     /// One generation against the resident context.
     fn infer(
         model: &LlamaModel,
         ctx: &mut LlamaContext<'_>,
         batch: &mut LlamaBatch,
+        resident: &mut Vec<LlamaToken>,
         context: &str,
         max_tokens: usize,
     ) -> Result<Generated, String> {
-        // Every call starts from an empty KV cache. The coach's prompts
-        // do not share a prefix (each one embeds fresh session data), so
-        // there is nothing to reuse — and leaving the previous
-        // conversation resident would both poison the output and run the
-        // window out of room after a handful of calls.
-        //
-        // `clear_kv_cache_seq(seq 0, whole range)` rather than
-        // `clear_kv_cache()`: the latter is `llama_memory_clear(mem, true)`,
-        // which also zeroes the KV *data* buffer — 576 MiB for Qwen3-4B at
-        // n_ctx 4096, and on a Vulkan build that is a device-memory wipe
-        // on every single generation. Dropping the cells is all we need;
-        // stale bytes behind unreferenced cells are never read.
-        //
-        // A full-sequence removal "always succeeds" per the crate docs, so
-        // the bool is not actionable; the error case is an out-of-range
-        // sequence id, which `Some(0)` cannot be.
-        if let Err(e) = ctx.clear_kv_cache_seq(Some(0), None, None) {
-            return Err(format!("KV cache reset failed: {e}"));
-        }
-
         let prompt = build_prompt(context);
         let tokens = model
             .str_to_token(&prompt, llama_cpp_2::model::AddBos::Always)
@@ -1554,17 +1688,73 @@ mod llm {
         if tokens.len() + max_tokens >= CONTEXT_SIZE as usize {
             return Err("Prompt too long for context window".into());
         }
+        // `- 1` below would wrap; `AddBos::Always` makes this unreachable.
+        if tokens.is_empty() {
+            return Err("Tokenizer produced an empty prompt".into());
+        }
+
+        // T04b: reuse the KV cells the previous call already evaluated.
+        //
+        // `build_prompt` puts a byte-identical ChatML system block in
+        // front of every prompt — SYSTEM_PROMPT is a 553-char constant —
+        // and only `{context}` varies. Re-evaluating that prefix on every
+        // call is the cost that made the CPU path unusable: a rephrase
+        // emits ~17 tokens but was paying full prompt evaluation each
+        // time.
+        //
+        // Matching on *tokens* rather than trusting the string prefix is
+        // deliberate: BPE can merge across the prefix/context boundary,
+        // so the tokenisation of the fixed text is not guaranteed to be
+        // stable when what follows it changes. A longest-common-prefix
+        // scan is correct whatever the tokeniser does, and opportunistically
+        // reuses more than the system block when two calls in a session
+        // happen to share a longer head.
+        //
+        // Capped at `len - 1` so at least one token is always decoded:
+        // llama.cpp needs a non-empty batch, and the final prompt token
+        // is the one carrying the logits the sampler reads.
+        let mut keep = 0usize;
+        if !prefix_cache_disabled() {
+            while keep < resident.len() && keep < tokens.len() - 1 && resident[keep] == tokens[keep]
+            {
+                keep += 1;
+            }
+        }
+
+        // Drop every cell from `keep` onward — the diverging tail of the
+        // last prompt plus everything it generated. `clear_kv_cache_seq`
+        // rather than `clear_kv_cache()`: the latter is
+        // `llama_memory_clear(mem, true)`, which also zeroes the KV *data*
+        // buffer — 576 MiB for Qwen3-4B at n_ctx 4096, and on a Vulkan
+        // build that is a device-memory wipe on every single generation.
+        // Dropping the cells is all we need; stale bytes behind
+        // unreferenced cells are never read.
+        //
+        // The error case is an out-of-range sequence id, which `Some(0)`
+        // cannot be. If it ever does fail the cache is in an unknown
+        // state, so forget what we thought was resident.
+        if let Err(e) = ctx.clear_kv_cache_seq(Some(0), Some(keep as u32), None) {
+            resident.clear();
+            return Err(format!("KV cache reset failed: {e}"));
+        }
 
         batch.clear();
-        for (i, &token) in tokens.iter().enumerate() {
+        for (i, &token) in tokens.iter().enumerate().skip(keep) {
             let is_last = i == tokens.len() - 1;
             batch
                 .add(token, i as i32, &[0], is_last)
                 .map_err(|e| format!("Batch add failed: {e}"))?;
         }
 
-        ctx.decode(batch)
-            .map_err(|e| format!("Decode failed: {e}"))?;
+        // From here the KV holds `tokens[..]` (and, once the loop below
+        // runs, the sampled tail). Record the prompt now so that a decode
+        // failure leaves `resident` describing no more than what is
+        // actually there.
+        resident.clear();
+        if let Err(e) = ctx.decode(batch) {
+            return Err(format!("Decode failed: {e}"));
+        }
+        resident.extend_from_slice(&tokens);
 
         let mut output_tokens = Vec::new();
         // ROADMAP §0.3 keeps temp 0.7 / top-p 0.9. The sampler is rebuilt
@@ -2076,29 +2266,55 @@ mod llm_tests {
         // The two shapes that matter, in the wording the JS layer actually
         // sends (`useSession.ts`) so `token_budget` classifies them the
         // same way it will in production.
-        let rephrase = "Rephrase this practice-coach observation for a player of guitar. \
-             Preserve every number; keep it to one sentence.\n\n\
-             Original: \"82% — your kick is drifting. Lock the right foot to the click.\"";
-        let chat = "Current session data:\nScore: 74\nAccuracy: 88\nSignedDev: -6.2\n\
-             Longest clean streak: 19\nInstrument: guitar\n\n\
-             User asks: how was my timing?\nAnswer concisely based only on the data above.";
+        //
+        // Each run varies the numbers. That is not cosmetic: since T04b
+        // the worker reuses the KV cells its previous prompt already
+        // evaluated, so a benchmark that sent one fixed string would
+        // re-decode a single token and report a number no user will ever
+        // see. Varying the tail leaves exactly what production shares —
+        // the fixed ChatML system block — and measures the real saving.
+        let rephrase = |i: usize| {
+            format!(
+                "Rephrase this practice-coach observation for a player of guitar. \
+                 Preserve every number; keep it to one sentence.\n\n\
+                 Original: \"{}% — your kick is drifting {} ms early. \
+                 Lock the right foot to the click.\"",
+                70 + i,
+                3 + i,
+            )
+        };
+        let chat = |i: usize| {
+            format!(
+                "Current session data:\nScore: {}\nAccuracy: {}\nSignedDev: -{}.2\n\
+                 Longest clean streak: {}\nInstrument: guitar\n\n\
+                 User asks: how was my timing?\nAnswer concisely based only on the data above.",
+                70 + i,
+                84 + i,
+                4 + i,
+                15 + i,
+            )
+        };
 
-        for (label, prompt, budget, runs) in [
-            ("rephrase", rephrase, super::REPHRASE_MAX_TOKENS, 10),
-            ("chat", chat, super::CHAT_MAX_TOKENS, 5),
-        ] {
+        let shapes: [(&str, &dyn Fn(usize) -> String, usize, usize); 2] = [
+            ("rephrase", &rephrase, super::REPHRASE_MAX_TOKENS, 10),
+            ("chat", &chat, super::CHAT_MAX_TOKENS, 5),
+        ];
+        for (label, prompt, budget, runs) in shapes {
             // One warm-up outside the sample: the first call after load
             // pays for cold weights (mmap page-in) and, on a GPU build,
             // shader pipeline creation. Users pay it once per launch; it
             // would otherwise dominate a 5-sample p95.
-            let _ = worker.generate_measured(prompt, budget);
+            // `runs` — one past the last sampled index, so the warm-up is
+            // a distinct prompt (it must not seed the KV cache with a
+            // prompt the timed runs would then reuse in full).
+            let _ = worker.generate_measured(&prompt(runs), budget);
 
             let mut times = Vec::with_capacity(runs);
             let mut tokens = 0usize;
-            for _ in 0..runs {
+            for run in 0..runs {
                 let started = std::time::Instant::now();
                 let (out, n) = worker
-                    .generate_measured(prompt, budget)
+                    .generate_measured(&prompt(run), budget)
                     .expect("generation failed");
                 times.push(started.elapsed().as_secs_f64());
                 tokens += n;
@@ -2120,6 +2336,73 @@ mod llm_tests {
                 tokens / runs,
             );
         }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Rephrase-latency routing (T04b) — runs on every build
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod latency_tests {
+    use super::{latency, TIP_LLM_BUDGET_MS};
+
+    /// The samples are process-global, so these cases cannot run in
+    /// parallel with each other.
+    static SERIAL: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
+    fn guard() -> std::sync::MutexGuard<'static, ()> {
+        let g = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        latency::reset();
+        g
+    }
+
+    #[test]
+    fn no_samples_means_no_opinion() {
+        let _g = guard();
+        assert_eq!(latency::rephrase_p50_ms(), None);
+    }
+
+    #[test]
+    fn median_not_mean_so_one_slow_call_does_not_dominate() {
+        let _g = guard();
+        for ms in [1_000, 1_100, 1_200, 1_300, 30_000] {
+            latency::record_rephrase_ms(ms);
+        }
+        // A mean would be 6.9 s and would wrongly banish tips to
+        // templates for the rest of the session on one hiccup.
+        assert_eq!(latency::rephrase_p50_ms(), Some(1_200));
+    }
+
+    #[test]
+    fn only_the_last_five_count_so_the_machine_can_get_faster() {
+        let _g = guard();
+        // A slow start (e.g. weights still paging in) must age out.
+        for ms in [9_000, 9_000, 9_000, 9_000, 9_000] {
+            latency::record_rephrase_ms(ms);
+        }
+        assert_eq!(latency::rephrase_p50_ms(), Some(9_000));
+        for ms in [800, 900, 1_000, 1_100, 1_200] {
+            latency::record_rephrase_ms(ms);
+        }
+        assert_eq!(latency::rephrase_p50_ms(), Some(1_000));
+    }
+
+    #[test]
+    fn the_measured_cpu_number_is_over_budget_and_the_gpu_one_is_not() {
+        let _g = guard();
+        // Measured on the owner's laptop, Qwen3-4B Q4_K_M (see the T04b
+        // PR): 3.83 s with no GPU offload, 0.31 s on the RTX 3080.
+        for _ in 0..3 {
+            latency::record_rephrase_ms(3_830);
+        }
+        assert!(latency::rephrase_p50_ms().unwrap() > TIP_LLM_BUDGET_MS);
+
+        latency::reset();
+        for _ in 0..3 {
+            latency::record_rephrase_ms(310);
+        }
+        assert!(latency::rephrase_p50_ms().unwrap() <= TIP_LLM_BUDGET_MS);
     }
 }
 

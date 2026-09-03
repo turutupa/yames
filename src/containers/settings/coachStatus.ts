@@ -75,3 +75,40 @@ export function coachStatusLabel(
 
   return { key: "settings.coach.statusNoModel", tone: "info" };
 }
+
+/**
+ * Second line under the Brain status: which coach features this machine
+ * actually gets the model for.
+ *
+ * T04b. A GPU-less machine running the shipped Vulkan build reports
+ * `backend: "vulkan"` but takes ~3.8 s per rephrase against a 3 s tip
+ * budget, so live tips there are templates while reports and chat — on
+ * 8 s and 15 s budgets — really do use the model. Saying only "active on
+ * vulkan" would be true and still mislead, which is the same dishonesty
+ * `coachStatusLabel` exists to prevent.
+ *
+ * Returns null whenever there is nothing honest and useful to add: no
+ * capabilities yet, a build with no LLM, or nothing resident to route to.
+ */
+export function coachTierLabel(
+  caps: CoachCapabilities | null,
+): CoachStatusLabel | null {
+  if (!caps || !caps.llmCompiled || !caps.modelResident) return null;
+
+  // Measured, so it can be shown. Before the first rephrase we do not
+  // know what this machine does and must not guess a number.
+  const params =
+    caps.rephraseP50Ms == null
+      ? undefined
+      : { seconds: (caps.rephraseP50Ms / 1000).toFixed(1) };
+
+  return caps.tipsUseModel
+    ? { key: "settings.coach.tiersAllModel", tone: "ok" }
+    : {
+        key: params
+          ? "settings.coach.tiersTipsTemplateMeasured"
+          : "settings.coach.tiersTipsTemplate",
+        params,
+        tone: "info",
+      };
+}
