@@ -1395,8 +1395,24 @@ mod tts_playback_tests {
         f.write_all(&buf).expect("write wav");
     }
 
+    /// Probe for an output device exactly once per process.
+    ///
+    /// The caching is not an optimisation. On a `windows-latest` runner —
+    /// which has no audio device at all — enumerating through cpal's
+    /// WASAPI backend from several test threads at once takes the whole
+    /// test binary down with `0xC0000005 STATUS_ACCESS_VIOLATION`, after
+    /// the first probe has already returned cleanly. The crash was
+    /// isolated to this: of the eight tests that never reported before
+    /// the process died, `plays_a_short_sine_without_panicking` had not
+    /// even reached its own "no output device" skip message, so it was
+    /// still inside this call.
+    ///
+    /// `OnceLock` turns N concurrent enumerations into one. It cannot
+    /// reintroduce the race, and on a developer machine the answer is
+    /// stable for the life of the process anyway.
     fn have_output_device() -> bool {
-        cpal::default_host().default_output_device().is_some()
+        static PRESENT: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+        *PRESENT.get_or_init(|| cpal::default_host().default_output_device().is_some())
     }
 
     /// The replacement for `afplay` has to actually open a stream,
