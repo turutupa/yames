@@ -239,11 +239,37 @@ stutters. Nothing else in this roadmap is real until this is.
   chat 15 s) and template-only tips on CPU when the model is too slow.
 - **Gate:** CPU rephrase p50 ≤ 3 s on the owner's laptop; tier routing
   unit-tested; Settings copy honest about which tiers use the model.
+- **Done 2026-09-03, with the latency gate not met and deliberately not
+  chased.** T04's numbers were stale: T04c's resident context and
+  seq-scoped KV reset had already cut CPU rephrase p50 from 9.3 s to
+  4.22 s, so *generation throughput*, not prompt evaluation, is now the
+  cost (21 tokens at ~5 tok/s). KV prefix reuse buys ~9% (4.22 → 3.83 s)
+  and a clean thread sweep says the existing `physical_cores - 2` rule is
+  already optimal here (4 threads 4.66 s, 6 4.17 s, 8 4.08 s, 12 4.20 s,
+  16 4.84 s). ≤ 3 s is not reachable on this CPU at this model size, and
+  the tier design is the answer rather than a blocker: tips fall back to
+  templates, reports (8 s) and chat (15 s) sit inside their budgets.
+  The real bug was the routing itself — `llm::BACKEND == "cpu"` is the
+  *compile-time* feature string, so the shipped `coach-llm-vulkan` binary
+  read `"vulkan"` on GPU-less machines too and the tip guard never fired
+  for the users it was written for. Now routed on a measured moving
+  median, surfaced through `getCoachCapabilities` and the Settings line.
+  `YAMES_LLM_NO_PREFIX_CACHE` and `YAMES_LLM_THREADS` make both claims
+  re-checkable. Threadpool priority (`GGML_SCHED_PRIO_LOW`) is *not*
+  done — it is an audio-safety item, not a latency one, and T06 measures
+  zero missed beats today.
 
 ### 0.5c Allocation-free beat queue (T06b) — **S–M**
 - T06 found the callback's `mpsc` send allocates under load; a bounded
   queue removes the root cause and lets us decide whether the event-loop
   real-time promotion stays. Brief: `plans/tasks/phase-0/T06b-callback-queue.md`.
+- **Carried past the Phase 0 close (2026-09-03).** Deliberate: this
+  rewrites the audio callback, the one path the manual test pass is about
+  to exercise, and it fixes a root cause with no user-visible symptom —
+  the probe measures zero missed beats and p99 0.5 ms as it stands.
+  Landing it immediately before a hardware pass would put risk exactly
+  where the pass cannot tell a new bug from an old one. Do it first in
+  Phase 1, with its own probe run.
 
 ### 0.6 Deterministic adaptive drill — **S** (*parallel-safe*)
 - The rule table already exists (`adaptive_thresholds` in `engine.rs`).
@@ -253,6 +279,12 @@ stutters. Nothing else in this roadmap is real until this is.
   decision the engine already made (pass the decision in the prompt).
 - **Gate:** unit tests for `adaptive_thresholds`; a drill in template
   mode with a downloaded brain moves up and down.
+
+**Phase 0 status (2026-09-03):** 0.1–0.4, 0.5, 0.5b and 0.6 are merged;
+0.5c is carried to Phase 1 for the reason above. CI was red on every push
+for 13 runs after 0.4 merged; the smoke job now lives in its own
+`ci.yml`/`llm-smoke.yml` and `release.yml` is publishing-only, so "the
+jitter probe is green in CI" below is satisfied.
 
 **Phase 0 exit:** a Windows user installs v1.1, downloads Standard
 (Qwen3-4B), it runs on their GPU if they have one and on CPU if not,

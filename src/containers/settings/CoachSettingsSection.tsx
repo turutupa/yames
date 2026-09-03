@@ -24,7 +24,7 @@ import {
 import { brainTierLabelKey } from "../../coach/brainTiers";
 import { InstrumentDropdown } from "../../components/InstrumentDropdown";
 import { formatBytes } from "./formatBytes";
-import { coachStatusLabel } from "./coachStatus";
+import { coachStatusLabel, coachTierLabel } from "./coachStatus";
 
 // Short per-voice sample line played when the user clicks a voice
 // button. Each line is distinct on purpose so the user can hear timbre
@@ -179,6 +179,10 @@ export function CoachSettingsSection({
     // read in the same call, so the two can never disagree.
     coachCaps?.brainDownloaded ?? !!modelStatus?.brainReady,
   );
+  // Which tiers actually reach the model on this machine (T04b). Null
+  // unless a model is resident, so it never appears above the line that
+  // says whether there is a brain at all.
+  const coachTiers = coachTierLabel(coachCaps);
 
   // Subscribe to the backend's "speech ended" event. Lifecycle:
   //   - mount: register listener
@@ -361,6 +365,15 @@ export function CoachSettingsSection({
       {coachStatus && (
         <div className={`coach-brain-status coach-brain-status-${coachStatus.tone}`}>
           {t(coachStatus.key, coachStatus.params)}
+        </div>
+      )}
+
+      {/* Second line: a GPU-less machine running the Vulkan build reports
+          backend "vulkan" but is too slow for the 3 s tip budget, so the
+          line above alone would be true and still misleading. */}
+      {coachTiers && (
+        <div className={`coach-brain-status coach-brain-status-${coachTiers.tone}`}>
+          {t(coachTiers.key, coachTiers.params)}
         </div>
       )}
 

@@ -557,6 +557,31 @@ fn should_use_model(kind: GenKind) -> bool {
     }
 }
 
+/// Median rephrase round-trip measured on this machine so far, in ms.
+///
+/// `None` until the model has actually been asked for one — Settings
+/// should say "measuring" rather than invent a number, because before the
+/// first call we genuinely do not know whether this machine offloaded to
+/// a GPU (see `latency`).
+pub fn rephrase_p50_ms() -> Option<u32> {
+    latency::rephrase_p50_ms()
+}
+
+/// Whether live tips currently reach the model, for Settings copy.
+///
+/// A build without the LLM feature never uses it; otherwise this is the
+/// same decision `generate` makes, so the UI cannot drift from behaviour.
+pub fn tips_use_model() -> bool {
+    #[cfg(feature = "coach-llm")]
+    {
+        should_use_model(GenKind::Tip)
+    }
+    #[cfg(not(feature = "coach-llm"))]
+    {
+        false
+    }
+}
+
 /// Generate a coaching comment from structured DSP data.
 ///
 /// Takes the engine mutex only long enough to clone the worker handle;
