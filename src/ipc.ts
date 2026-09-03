@@ -859,6 +859,21 @@ export type CoachCapabilities = {
   studioRecommended: boolean;
   standardRecommended: boolean;
   brainUpdateRecommended: boolean;
+  /**
+   * Whether live mid-session tips actually reach the model (T04b).
+   *
+   * Deliberately not derivable from `backend` here: that is the
+   * compile-time feature string, so a GPU-less machine running the
+   * shipped Vulkan build still reports `"vulkan"`. This is the routing
+   * decision itself, taken from measured rephrase latency, so the UI
+   * cannot claim something the coach does not do.
+   */
+  tipsUseModel: boolean;
+  /**
+   * Measured median rephrase round-trip in ms, or null before the model
+   * has been asked for one. Null means "not measured yet", not "fast".
+   */
+  rephraseP50Ms: number | null;
 };
 
 export async function getCoachCapabilities(): Promise<CoachCapabilities> {

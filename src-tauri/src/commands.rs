@@ -1935,6 +1935,18 @@ pub struct CoachCapabilities {
     pub standard_recommended: bool,
     #[serde(rename = "brainUpdateRecommended")]
     pub brain_update_recommended: bool,
+    /// Whether live mid-session tips actually reach the model (T04b).
+    ///
+    /// Not derivable from `backend` on the UI side: that is the
+    /// compile-time feature string, so it reads "vulkan" on a machine
+    /// with no usable GPU as well. This is the routing decision itself,
+    /// measured, so Settings cannot claim something the coach does not do.
+    #[serde(rename = "tipsUseModel")]
+    pub tips_use_model: bool,
+    /// Measured median rephrase round-trip in ms; null until the model has
+    /// been asked for one.
+    #[serde(rename = "rephraseP50Ms")]
+    pub rephrase_p50_ms: Option<u32>,
 }
 
 /// Lock-free — see `is_coach_loaded`. The disk half reuses
@@ -1959,6 +1971,8 @@ pub async fn get_coach_capabilities(
         studio_recommended: disk.studio_recommended,
         standard_recommended: disk.standard_recommended,
         brain_update_recommended: disk.brain_update_recommended,
+        tips_use_model: crate::coach::tips_use_model(),
+        rephrase_p50_ms: crate::coach::rephrase_p50_ms(),
     })
 }
 

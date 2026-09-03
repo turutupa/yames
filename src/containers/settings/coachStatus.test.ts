@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { coachStatusLabel } from "./coachStatus";
+import { coachStatusLabel, coachTierLabel } from "./coachStatus";
 import type { CoachCapabilities } from "../../ipc";
 
 const caps = (over: Partial<CoachCapabilities> = {}): CoachCapabilities => ({
@@ -13,6 +13,8 @@ const caps = (over: Partial<CoachCapabilities> = {}): CoachCapabilities => ({
   studioRecommended: true,
   standardRecommended: true,
   brainUpdateRecommended: false,
+  tipsUseModel: false,
+  rephraseP50Ms: null,
   ...over,
 });
 
@@ -118,5 +120,53 @@ describe("coachStatusLabel", () => {
       false,
     );
     expect(label?.key).toBe("settings.coach.statusActive");
+  });
+});
+
+describe("coachTierLabel", () => {
+  it("says nothing without capabilities, without an LLM, or with nothing resident", () => {
+    expect(coachTierLabel(null)).toBeNull();
+    expect(coachTierLabel(caps({ llmCompiled: false }))).toBeNull();
+    // Weights on disk but not loaded: the line above already says so, and
+    // there is no routing decision to report yet.
+    expect(coachTierLabel(caps({ modelResident: false, brainDownloaded: true }))).toBeNull();
+  });
+
+  it("says every tier uses the model when tips are fast enough", () => {
+    const label = coachTierLabel(
+      caps({ modelResident: true, tipsUseModel: true, rephraseP50Ms: 310 }),
+    );
+    expect(label).toEqual({ key: "settings.coach.tiersAllModel", tone: "ok" });
+  });
+
+  // The dishonesty T04b removes: this machine reports backend "vulkan"
+  // because that is the compile-time feature string, but has no usable
+  // GPU, so tips are templates. "AI brain active on vulkan" alone would
+  // be true and still mislead.
+  it("admits tips are templates on a vulkan build with no usable GPU", () => {
+    const label = coachTierLabel(
+      caps({
+        modelResident: true,
+        backend: "vulkan",
+        tipsUseModel: false,
+        rephraseP50Ms: 3830,
+      }),
+    );
+    expect(label).toEqual({
+      key: "settings.coach.tiersTipsTemplateMeasured",
+      params: { seconds: "3.8" },
+      tone: "info",
+    });
+  });
+
+  it("omits the number until a rephrase has actually been measured", () => {
+    const label = coachTierLabel(
+      caps({ modelResident: true, tipsUseModel: false, rephraseP50Ms: null }),
+    );
+    expect(label).toEqual({
+      key: "settings.coach.tiersTipsTemplate",
+      params: undefined,
+      tone: "info",
+    });
   });
 });
