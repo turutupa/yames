@@ -2479,6 +2479,28 @@
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent);
 }
 
+/* Both cards are actionable, so both have to answer the pointer.
+   Only the pending tier carried any border treatment before, which read
+   as a stuck highlight on one card while the other looked inert — the
+   accent border says "this is the tier you clicked", not "this is what
+   you are hovering". Kept weaker than `-selected` so the two states stay
+   tellable apart when you hover the card that is already selected. */
+.download-confirm-model:hover {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--bg-primary) 75%, transparent);
+}
+
+/* An installed tier is dimmed; lift it on hover so the card under the
+   pointer never looks disabled. Declared BEFORE the `.installed.selected`
+   rule on purpose: that selector has the same specificity (0,2,0), so
+   source order decides, and a card that is both installed and selected
+   should stay at full opacity rather than dropping to 0.8 when hovered.
+   Against plain `.installed` (0,1,0) this wins on specificity regardless
+   of order, so the non-selected case is unaffected. */
+.download-confirm-model-installed:hover {
+  opacity: 0.8;
+}
+
 .download-confirm-model-installed {
   opacity: 0.55;
 }
