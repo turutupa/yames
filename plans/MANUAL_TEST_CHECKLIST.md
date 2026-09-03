@@ -1,9 +1,15 @@
-# Manual test checklist — main after the 2026-09-02 merges
+# Manual test checklist — Phase 0 close
 
-Everything below is on `main` and passed the automated gates (tsc, vitest,
-cargo, DSP fixtures, LLM smoke test, jitter probe). These are the checks
-only a person at the instrument can do. Tick what works; anything that
-fails goes back as a task before any release.
+Covers everything merged for Phase 0 and the onboarding track. All of it
+passed the automated gates (tsc, vitest, cargo, DSP and high-BPM
+fixtures, LLM smoke, jitter probe) — and since 2026-09-03 those gates run
+in CI on all four shipping platforms, not just on a developer laptop.
+These are the checks only a person at the instrument can do. Tick what
+works; anything that fails goes back as a task before any release.
+
+Phase 0 §0.5c (T06b, the allocation-free beat queue) is deliberately
+*not* in this build — it rewrites the audio callback and would put fresh
+risk into the very path §4 and §5 are here to test.
 
 **Setup for the fresh-install checks:** either move your real store aside
 (`%APPDATA%\com.yames.metronome\settings.json` on Windows,
@@ -25,8 +31,9 @@ dev build with a different identifier. Restore it afterwards.
 - [ ] Existing store (your real one): no wizard, one-time tour offer, what's-new modal once; Settings → General has Run setup again / Take the tour / Reset hints.
 - [ ] Help menu (`?` and Cmd/Ctrl-/): tour, setup, shortcuts sheet fits at 480 px, Report a problem writes the diagnostics bundle.
 
-## 2. Coach and local model (T01, T03, T04, T04c)
+## 2. Coach and local model (T01, T03, T04, T04b, T04c)
 - [ ] Settings → Coach shows the truthful status: template coach / ready, not loaded / warming up / active with the model's real name and backend.
+- [ ] Second status line (T04b) matches reality on the machine you are on. On your RTX 3080 laptop, once a session has produced one tip, expect "Tips, reports and chat all use the AI". Forcing the CPU path (`YAMES_LLM_GPU_LAYERS=0`) should instead give "Tips: instant templates · Reports and chat: AI (~3.8s each)" — and tips should then arrive *instantly* as templates rather than pausing ~3 s first. Before the first rephrase the line omits the number rather than guessing it.
 - [ ] Download Standard (Qwen3-4B) from Settings on a normal connection; progress bar; no model loads yet (RAM stays flat).
 - [ ] Start a session with the brain on: "warming up", then tips arrive rephrased; stop the session, wait 10 minutes → RAM drops (unloaded); next session reloads.
 - [ ] Turn the brain tier off → unloaded immediately. Remove models works while a session is off and shows an error if something holds the file.
@@ -53,6 +60,8 @@ dev build with a different identifier. Restore it afterwards.
 ## 5. Audio safety (T06)
 - [ ] Play for a minute at a fast tempo while the coach generates; no click dropouts or glitches. Optional: `bun run yames:jitter-probe --gguf <model>` prints zero missed beats.
 
-## 6. Housekeeping to do by hand
-- [ ] Delete the leftover worker target dirs the sandbox could not remove: `C:\yo4`, `C:\yo8`, `C:\yo1b`, `C:\yt01`, `C:\yt04r`, `C:\yt06`, `C:\yt06models` (several GB each).
-- [ ] Optional: delete the isolated app-data folder `%APPDATA%\com.yames.metronome.o1check` left by an early worker.
+## 6. Housekeeping — done 2026-09-03, nothing left for you here
+- [x] Leftover worker target dirs deleted: `C:\yo4`, `C:\yo8`, `C:\yo1b`, `C:\yt01`, `C:\yt04r`, `C:\yt06`, plus a duplicate copy of the test weights. 63 GB reclaimed.
+- [x] `%APPDATA%\com.yames.metronome.o1check` was already gone.
+- **Kept on purpose:** `C:\yt06models` (2.7 GB, Qwen3-0.6B + Qwen3-4B). It is the only remaining copy of those weights and the optional jitter probe in §5 needs it. Delete it yourself if you would rather re-download.
+- Still on disk: 22 stale worktrees under `.claude/worktrees/`. All content-merged; `git worktree prune` after removing them is safe whenever you want the space.
