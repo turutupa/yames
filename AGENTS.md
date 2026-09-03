@@ -59,6 +59,18 @@ cargo build --manifest-path src-tauri/Cargo.toml --features coach-llm-metal   # 
 cargo build --manifest-path src-tauri/Cargo.toml --features coach-llm-vulkan  # Windows / Linux
 ```
 
+`npm run tauri dev` and `npm run tauri build` pick the right one for the
+host automatically — `scripts/tauri.mjs` injects it unless you pass
+`--features` yourself. That matters because `default = []`: without a
+feature flag `coach::llm_compiled()` is false, the wizard greys out both
+brain tiers ("this build can't run a model"), and the entire coach path
+goes untested while every shipped binary has it. Set `YAMES_DEV_NO_LLM=1`
+to skip the injection when you are only touching the frontend and do not
+want to pay the llama.cpp compile. On Windows the wrapper also exports
+`CMAKE_GENERATOR=Ninja` and a short `CARGO_TARGET_DIR` when they are
+unset, for the MAX_PATH reasons below. CI is unaffected: `release.yml`
+runs `tauriScript: npx tauri` with its own explicit `--features`.
+
 Prerequisites beyond the usual Rust + cmake (aubio already needs cmake):
 
 - **All platforms**: cmake, a C/C++ compiler, and `libclang` for bindgen

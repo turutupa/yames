@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import type { DownloadProgress, ModelStatus } from "../../ipc";
 import { brainTierLabelKey } from "../../coach/brainTiers";
@@ -12,16 +13,23 @@ import { formatBytes } from "./formatBytes";
  * false the Studio card still renders — hiding it would leave the user
  * wondering what happened to the tier they read about — but its button is
  * disabled and explains why.
+ *
+ * The dialog deliberately does NOT pre-highlight the tier whose Settings
+ * button opened it. Nothing has been chosen yet: each card carries its own
+ * "Download <tier>" / "Use <tier>" button, so the choice is still open and
+ * an accent border on one card reads as "this one is selected". Hover is
+ * the only accent, which keeps exactly one card highlighted — the one under
+ * the pointer. The only persistent per-card state left is "Installed",
+ * carried by the green badge and the dimmed card, which is a fact about the
+ * disk rather than a guess about intent.
  */
 export function CoachDownloadConfirmDialog({
-  pendingTier,
   modelStatus,
   studioAvailable,
   onCancel,
   onUseInstalled,
   onStartDownload,
 }: {
-  pendingTier: "standard" | "full";
   modelStatus: ModelStatus | null;
   studioAvailable: boolean;
   onCancel: () => void;
@@ -29,21 +37,46 @@ export function CoachDownloadConfirmDialog({
   onStartDownload: (tier: "standard" | "full") => void;
 }) {
   const { t } = useTranslation();
+
+  // Escape closes this dialog and nothing else. MainWindow's unified hotkey
+  // dispatcher listens on `document` in the bubble phase and maps Escape in
+  // the settings view to "leave settings", so without this the dialog stayed
+  // up while the page behind it navigated away. Capture phase + a
+  // stopPropagation is the convention the other modals in this app already
+  // use (AudioInputTestModal right next door, WhatsNewModal, HelpMenu): the
+  // capture listener on `document` runs before any bubble listener on
+  // `document`, so the ancestor never sees the key.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.stopPropagation();
+      e.preventDefault();
+      onCancel();
+    };
+    document.addEventListener("keydown", onKey, true);
+    return () => document.removeEventListener("keydown", onKey, true);
+  }, [onCancel]);
+
   // `full` on the wire, "Studio" on screen — the mapping lives in
   // `brainTiers.ts` so every display site agrees.
   const tierLabel = (tier: "standard" | "full") => t(brainTierLabelKey(tier));
   return (
     <div className="download-confirm-overlay" onClick={onCancel}>
-      <div className="download-confirm-dialog" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="download-confirm-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("coachDownload.title")}
+        onClick={(e) => e.stopPropagation()}
+      >
         <h3 className="download-confirm-title">{t("coachDownload.title")}</h3>
         <div className="download-confirm-models">
           {(["standard", "full"] as const).map((tier) => {
             const isInstalled = modelStatus?.brainReady && modelStatus.brainTier === tier;
-            const isTarget = pendingTier === tier;
             return (
               <div
                 key={tier}
-                className={`download-confirm-model${isTarget ? " download-confirm-model-selected" : ""}${isInstalled ? " download-confirm-model-installed" : ""}`}
+                className={`download-confirm-model${isInstalled ? " download-confirm-model-installed" : ""}`}
               >
                 {isInstalled && <span className="download-confirm-installed-badge">{t("coachDownload.installedBadge")}</span>}
                 <div className="download-confirm-model-name">{tierLabel(tier)}</div>
