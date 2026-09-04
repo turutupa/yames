@@ -1,3 +1,4 @@
+use crate::onset::SharedTempoContext;
 use crate::state::SharedState;
 use crate::timing::{BeatLog, BeatTick};
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
@@ -1049,18 +1050,30 @@ impl EventSink {
 // Audio thread exit — the engine's only way back to a startable state
 // ---------------------------------------------------------------------------
 
-/// How long `start` waits for the audio thread to report whether the output
-/// stream actually came up.
+/// How long `start_headless` waits for the audio thread to report whether the
+/// output stream actually came up.
 ///
-/// `start` is reached from synchronous Tauri commands, so this is time the
-/// window can spend unresponsive — hence a cap, and a short one. It is
-/// almost never spent: on the happy path `start` returns the moment
-/// `stream.play()` succeeds (tens of milliseconds on a local device), and
-/// the failure this exists for — WASAPI refusing a busy endpoint — comes
-/// back immediately. Only a backend that hangs inside `build_output_stream`
-/// reaches the cap, and even then nothing is lost: the thread keeps going,
-/// so the next press of Play finds it already alive and plays.
+/// Only the headless path waits. `click-jitter-probe` has no UI and must not
+/// start measuring against a stream that never opened, so a synchronous
+/// answer is worth a bounded stall there. The app does **not** wait: `start`
+/// is reached from synchronous Tauri commands, which Tauri v2 runs on the
+/// main thread, so any wait at all is a frozen window — and the first Play
+/// after launch is exactly when the wait is longest, because the audio thread
+/// still has to enumerate devices, decode the sound bank and open the device.
+/// The app does not need the answer anyway: `AudioThreadExit::fail` corrects
+/// the transport and emits `audio-error` + `state-changed` on its own, and
+/// the UI renders playback from that state rather than from this call.
 const AUDIO_SETUP_TIMEOUT: Duration = Duration::from_millis(2000);
+
+/// Whether `ensure_thread` waits for the audio thread's setup verdict.
+enum SetupWait {
+    /// Return as soon as the thread is spawned. The app path — see
+    /// `AUDIO_SETUP_TIMEOUT`.
+    No,
+    /// Block until the stream is up, the device gives up, or the timeout
+    /// expires. Only `start_headless`.
+    UpTo(Duration),
+}
 
 /// Clears the engine's `alive` / `playing` flags however the audio thread
 /// leaves — clean shutdown, no output device, a config the backend refuses,
@@ -1076,11 +1089,19 @@ const AUDIO_SETUP_TIMEOUT: Duration = Duration::from_millis(2000);
 /// tab, with the reason visible nowhere but stderr. That is the regression
 /// this type exists to make impossible: the flags come down in `Drop`, so no
 /// future early return can forget them.
+///
+/// The flags are each thread's *own*: `ensure_thread` installs a fresh pair of
+/// `Arc`s per spawn, so a thread that is still unwinding can never clear the
+/// flags of the thread that replaced it.
 struct AudioThreadExit {
     alive: Arc<AtomicBool>,
     playing: Arc<AtomicBool>,
     state: SharedState,
     sink: EventSink,
+    /// Cleared alongside the transport when setup fails, so the onset
+    /// detector stops gating analysis on a click track that is not playing.
+    /// `None` for `click-jitter-probe`, which runs no detector.
+    tempo: Option<SharedTempoContext>,
     /// Answers the `start` call that spawned this thread. Taken once —
     /// by `ready`, by `fail`, or by `Drop` if the thread died without
     /// saying anything (a panic), so `start` can never hang on it.
@@ -1093,6 +1114,7 @@ impl AudioThreadExit {
         playing: Arc<AtomicBool>,
         state: SharedState,
         sink: EventSink,
+        tempo: Option<SharedTempoContext>,
         setup: mpsc::SyncSender<Result<(), String>>,
     ) -> Self {
         Self {
@@ -1100,6 +1122,7 @@ impl AudioThreadExit {
             playing,
             state,
             sink,
+            tempo,
             setup: Some(setup),
         }
     }
@@ -1114,6 +1137,12 @@ impl AudioThreadExit {
     /// Setup failed. Lowers `alive` *before* answering `start`, so the very
     /// next press of Play spawns a fresh thread and re-tries the device
     /// instead of short-circuiting on a flag this dead thread left behind.
+    ///
+    /// This is also the only correction the app gets: `start` no longer waits
+    /// for a verdict, so every caller has already recorded playback by the
+    /// time this runs. Whatever the transport must stop claiming has to be
+    /// undone here, and this write is always the last one — the command wrote
+    /// its optimistic state before the spawn that led here.
     fn fail(&mut self, reason: String) {
         self.alive.store(false, Ordering::SeqCst);
         self.playing.store(false, Ordering::SeqCst);
@@ -1125,8 +1154,16 @@ impl AudioThreadExit {
             // Never panic inside a path that also runs from `Drop`.
             let mut s = self.state.lock().unwrap_or_else(|e| e.into_inner());
             s.is_playing = false;
+            // A drill cannot be running either — there is no click to run it
+            // against — and `start_speed_ramp` raised this before spawning.
+            s.speed_ramp.active = false;
             s.clone()
         };
+        // D2 — no click track, so the onset detector must not go on matching
+        // incoming audio against a beat grid that is not being played.
+        if let Some(ref tempo) = self.tempo {
+            tempo.set_playing(false);
+        }
         let _ = self.sink.emit("audio-error", reason.clone());
         let _ = self.sink.emit("state-changed", &snapshot);
         if let Some(tx) = self.setup.take() {
@@ -1164,6 +1201,11 @@ pub struct MetronomeEngine {
     /// ever sets it (`new_with_probe`), so the shipping build's cpal
     /// callback pays a single `Option` check per buffer and nothing else.
     callback_probe: Option<Arc<CallbackProbe>>,
+    /// D2 gate for the onset detector. The audio thread clears it when the
+    /// output device will not open, because `start` no longer waits long
+    /// enough for the command to learn that and clear it itself. `None` for
+    /// `click-jitter-probe`, which runs no detector.
+    tempo_ctx: Option<SharedTempoContext>,
     /// Test-only: make the audio thread fail its setup without touching a
     /// real device, so the recovery path above can be exercised on a build
     /// machine that has a perfectly good sound card.
@@ -1181,9 +1223,17 @@ impl MetronomeEngine {
             device_name: None,
             adaptive_score: Arc::new(AtomicU32::new(0)),
             callback_probe: None,
+            tempo_ctx: None,
             #[cfg(test)]
             force_setup_failure: false,
         }
+    }
+
+    /// Hand the engine the same `TempoContext` the commands mirror into, so
+    /// a failed device open can clear the onset detector's playing gate from
+    /// the audio thread. Called once, at app setup.
+    pub fn set_tempo_context(&mut self, tempo_ctx: SharedTempoContext) {
+        self.tempo_ctx = Some(tempo_ctx);
     }
 
     /// Test-only constructor: the audio thread spawns, refuses to open a
@@ -1208,8 +1258,10 @@ impl MetronomeEngine {
     }
 
     /// Set the output device. If the engine is running, it will be restarted.
-    /// `Err` means the new device would not open — the engine is left in a
-    /// startable state either way (see `AudioThreadExit`).
+    /// The engine is left in a startable state whatever happens, and a device
+    /// that will not open reports itself through `AudioThreadExit` — which
+    /// also puts the transport back, so a failed switch cannot leave the
+    /// button on "Stop" over silence.
     pub fn set_device(
         &mut self,
         name: Option<String>,
@@ -1222,17 +1274,17 @@ impl MetronomeEngine {
         // Fully tear down the old thread/stream
         self.shutdown();
         // Create fresh atomics so the old cpal callback (if still lingering
-        // in CoreAudio) can never be reactivated by a shared flag.
+        // in CoreAudio) can never be reactivated by a shared flag. `playing`
+        // carries the old state across *before* the spawn rather than being
+        // restored after it: `ensure_thread` no longer waits, so a device
+        // that fails instantly would otherwise have its `playing = false`
+        // overwritten by a restore running a moment later.
         self.alive = Arc::new(AtomicBool::new(false));
-        self.playing = Arc::new(AtomicBool::new(false));
+        self.playing = Arc::new(AtomicBool::new(was_playing));
         // Brief pause to let CoreAudio fully release the old device
         thread::sleep(Duration::from_millis(100));
         // Restart on the new device
-        self.ensure_thread(state, Some(app_handle))?;
-        if was_playing {
-            self.playing.store(true, Ordering::SeqCst);
-        }
-        Ok(())
+        self.ensure_thread(state, Some(app_handle), SetupWait::No)
     }
 
     /// Set the device name without restarting (for startup/restore).
@@ -1256,19 +1308,30 @@ impl MetronomeEngine {
     /// engine outside a Tauri application; the event loop then emits into
     /// an `EventSink` that discards. Everything else — timing, the beat
     /// log, the ramp state machine — is identical either way.
-    /// Returns `Err` when the audio thread could not open the output stream,
-    /// so callers do not record playback that is not happening. A thread that
-    /// is already running is `Ok` immediately — there is nothing to wait for.
+    /// With `SetupWait::UpTo`, returns `Err` when the audio thread could not
+    /// open the output stream. With `SetupWait::No` it returns as soon as the
+    /// thread is spawned and the verdict arrives later, out of band, through
+    /// `AudioThreadExit`. A thread that is already running is `Ok` either
+    /// way — there is nothing to wait for.
     fn ensure_thread(
         &mut self,
         state: SharedState,
         app_handle: Option<AppHandle>,
+        wait: SetupWait,
     ) -> Result<(), String> {
         if self.alive.load(Ordering::SeqCst) {
             return Ok(());
         }
 
-        self.alive.store(true, Ordering::SeqCst);
+        // A *fresh* flag per spawn, not `store(true)` on the shared one. The
+        // outgoing thread may still be unwinding — `AudioThreadExit::fail`
+        // lowers `alive` before the thread has actually returned, so its
+        // `Drop` runs after this call can already have spawned a replacement.
+        // Sharing one `Arc` would let that dying thread's `Drop` clear the
+        // live thread's flag, ending its event loop and dropping the stream:
+        // silence, with `start` having reported success. Same idiom as
+        // `set_device`.
+        self.alive = Arc::new(AtomicBool::new(true));
         let alive = self.alive.clone();
         let playing = self.playing.clone();
         let beat_log = self.beat_log.clone();
@@ -1278,14 +1341,16 @@ impl MetronomeEngine {
         let app_handle = EventSink(app_handle);
         #[cfg(test)]
         let force_setup_failure = self.force_setup_failure;
-        // Rendezvous for the setup outcome. Bounded at 1 and always read or
-        // dropped by `start`, so the audio thread never blocks on it.
+        // Rendezvous for the setup outcome. Bounded at 1 and never waited on
+        // by the sender, so the audio thread does not block on it even when
+        // the receiver is dropped unread (which is what `SetupWait::No` does).
         let (setup_tx, setup_rx) = mpsc::sync_channel::<Result<(), String>>(1);
 
         let exit_alive = alive.clone();
         let exit_playing = playing.clone();
         let exit_state = state.clone();
         let exit_sink = app_handle.clone();
+        let exit_tempo = self.tempo_ctx.clone();
         let handle = thread::spawn(move || {
             // Lowers `alive` / `playing` however this thread leaves, and
             // answers `start` exactly once. See `AudioThreadExit`.
@@ -1294,6 +1359,7 @@ impl MetronomeEngine {
                 exit_playing,
                 exit_state,
                 exit_sink,
+                exit_tempo,
                 setup_tx,
             );
 
@@ -2016,11 +2082,18 @@ impl MetronomeEngine {
 
         self.thread_handle = Some(handle);
 
-        // Wait for the thread to say whether it got a stream. `start` has to
-        // know: reporting `is_playing = true` for a device that never opened
-        // is what made this failure look like "the app is broken" instead of
-        // "the speakers are busy".
-        match setup_rx.recv_timeout(AUDIO_SETUP_TIMEOUT) {
+        let timeout = match wait {
+            // Nothing to wait for. `setup_rx` drops here; the thread's send
+            // then fails harmlessly and it reports the outcome to the UI
+            // itself through `AudioThreadExit`.
+            SetupWait::No => return Ok(()),
+            SetupWait::UpTo(d) => d,
+        };
+
+        // Wait for the thread to say whether it got a stream. Only the
+        // headless path does this: `click-jitter-probe` has no UI to correct
+        // afterwards and must not start measuring a stream that never opened.
+        match setup_rx.recv_timeout(timeout) {
             Ok(Ok(())) => Ok(()),
             Ok(Err(e)) => Err(e),
             Err(mpsc::RecvTimeoutError::Timeout) => {
@@ -2034,19 +2107,33 @@ impl MetronomeEngine {
         }
     }
 
-    /// Start playing. `Err` means no sound is coming out — the caller must
-    /// not record the transport as running.
+    /// Start playing. Returns as soon as the audio thread is on its way —
+    /// it does **not** wait for the output device, because this is reached
+    /// from a synchronous Tauri command and waiting there freezes the window
+    /// for exactly as long as the device takes (see `AUDIO_SETUP_TIMEOUT`).
+    ///
+    /// A device that will not open is not silently swallowed: the audio
+    /// thread puts the transport back and emits `audio-error` plus a truthful
+    /// `state-changed` from `AudioThreadExit::fail`, which is what the UI
+    /// actually renders. `Ok` therefore means "the engine is trying", not
+    /// "sound is coming out".
     pub fn start(&mut self, state: SharedState, app_handle: AppHandle) -> Result<(), String> {
-        self.ensure_thread(state, Some(app_handle))?;
+        // Before the spawn, not after: the thread can fail and lower this at
+        // any moment once `ensure_thread` returns, and a raise running after
+        // that correction would put the engine back to claiming playback.
         self.playing.store(true, Ordering::SeqCst);
-        Ok(())
+        self.ensure_thread(state, Some(app_handle), SetupWait::No)
     }
 
     /// Start the engine with no Tauri application attached — the audio path
     /// and the event loop run exactly as they do in the app, but UI events
     /// go nowhere. Only `click-jitter-probe` uses this.
+    ///
+    /// Unlike `start` this *does* wait for the setup verdict: there is no UI
+    /// to correct after the fact, and the probe must not begin timing a
+    /// stream that never opened. `Err` means no sound is coming out.
     pub fn start_headless(&mut self, state: SharedState) -> Result<(), String> {
-        self.ensure_thread(state, None)?;
+        self.ensure_thread(state, None, SetupWait::UpTo(AUDIO_SETUP_TIMEOUT))?;
         self.playing.store(true, Ordering::SeqCst);
         Ok(())
     }
@@ -2420,11 +2507,69 @@ mod tests {
     }
 
     #[test]
-    fn a_failed_audio_setup_stops_the_transport_claiming_playback() {
+    fn each_audio_thread_gets_its_own_alive_flag() {
+        // `fail` lowers `alive` *before* the audio thread has returned, so
+        // that thread's `Drop` can run after `ensure_thread` has already
+        // spawned a replacement. If the two shared one flag, the dying
+        // thread's `Drop` would end the live thread's event loop and drop
+        // its stream: silence, with `start` having reported success. Every
+        // spawn must install its own flag.
+        let mut engine =
+            MetronomeEngine::new_with_forced_setup_failure(crate::timing::create_beat_log());
+        let state = crate::state::create_shared_state();
+
+        let _ = engine.start_headless(state.clone());
+        let first = engine.alive.clone();
+        let _ = engine.start_headless(state);
+        let second = engine.alive.clone();
+
+        assert!(
+            !Arc::ptr_eq(&first, &second),
+            "the replacement audio thread reused the dead thread's `alive` flag"
+        );
+    }
+
+    #[test]
+    fn the_app_path_does_not_wait_for_the_output_device() {
+        // What `start` uses. It must answer without waiting for a verdict
+        // the audio thread has not produced yet, because on the app path
+        // that wait happens on the Tauri main thread and is a frozen window.
+        let mut engine =
+            MetronomeEngine::new_with_forced_setup_failure(crate::timing::create_beat_log());
         let state = crate::state::create_shared_state();
         state.lock().unwrap().is_playing = true;
+
+        assert!(
+            engine
+                .ensure_thread(state.clone(), None, SetupWait::No)
+                .is_ok(),
+            "the non-waiting path must report that the engine is trying"
+        );
+
+        // The verdict still arrives — out of band, from the audio thread —
+        // so the engine ends up startable and the transport stops lying.
+        assert!(
+            eventually(|| !engine.alive.load(Ordering::SeqCst)),
+            "`alive` never came down, so nothing could ever start again"
+        );
+        assert!(
+            eventually(|| !state.lock().unwrap().is_playing),
+            "the transport was left claiming playback with no audio stream"
+        );
+    }
+
+    #[test]
+    fn a_failed_audio_setup_stops_the_transport_claiming_playback() {
+        let state = crate::state::create_shared_state();
+        {
+            let mut s = state.lock().unwrap();
+            s.is_playing = true;
+            s.speed_ramp.active = true;
+        }
         let alive = Arc::new(AtomicBool::new(true));
         let playing = Arc::new(AtomicBool::new(true));
+        let tempo: SharedTempoContext = Arc::new(crate::onset::TempoContext::new(120, 1));
+        tempo.set_playing(true);
         let (tx, rx) = mpsc::sync_channel::<Result<(), String>>(1);
 
         {
@@ -2433,6 +2578,7 @@ mod tests {
                 playing.clone(),
                 state.clone(),
                 EventSink(None),
+                Some(tempo.clone()),
                 tx,
             );
             exit.fail("could not open the audio output stream: 0x8889000A".to_string());
@@ -2440,9 +2586,20 @@ mod tests {
 
         assert!(!alive.load(Ordering::SeqCst), "`alive` must come down");
         assert!(!playing.load(Ordering::SeqCst), "`playing` must come down");
+        {
+            let s = state.lock().unwrap();
+            assert!(
+                !s.is_playing,
+                "the transport must not report playback with no audio stream"
+            );
+            assert!(
+                !s.speed_ramp.active,
+                "a drill cannot be running with no audio stream"
+            );
+        }
         assert!(
-            !state.lock().unwrap().is_playing,
-            "the transport must not report playback with no audio stream"
+            !tempo.is_playing(),
+            "the onset detector was left gating on a click track that never started"
         );
         match rx.try_recv() {
             Ok(Err(reason)) => assert!(reason.contains("0x8889000A")),
@@ -2465,6 +2622,7 @@ mod tests {
             playing.clone(),
             state,
             EventSink(None),
+            None,
             tx,
         ));
 
@@ -2479,6 +2637,8 @@ mod tests {
         state.lock().unwrap().is_playing = true;
         let alive = Arc::new(AtomicBool::new(true));
         let playing = Arc::new(AtomicBool::new(true));
+        let tempo: SharedTempoContext = Arc::new(crate::onset::TempoContext::new(120, 1));
+        tempo.set_playing(true);
         let (tx, rx) = mpsc::sync_channel::<Result<(), String>>(1);
 
         let mut exit = AudioThreadExit::new(
@@ -2486,6 +2646,7 @@ mod tests {
             playing.clone(),
             state.clone(),
             EventSink(None),
+            Some(tempo.clone()),
             tx,
         );
         exit.ready();
@@ -2495,9 +2656,13 @@ mod tests {
             state.lock().unwrap().is_playing,
             "a working stream must not rewrite the transport"
         );
+        assert!(
+            tempo.is_playing(),
+            "a working stream must not close the onset detector's gate"
+        );
         // The flags only come down when the thread actually ends.
         assert!(alive.load(Ordering::SeqCst));
         drop(exit);
-        assert!(eventually(|| !alive.load(Ordering::SeqCst)));
+        assert!(!alive.load(Ordering::SeqCst));
     }
 }
