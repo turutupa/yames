@@ -2043,7 +2043,7 @@ mod tests {
 /// download when it only wants the compile checked.
 ///
 ///   YAMES_TEST_GGUF=/path/to/tiny.gguf \
-///     cargo test --manifest-path src-tauri/Cargo.toml --features coach-llm --lib
+///     node scripts/rust-test.mjs --features coach-llm --lib
 ///
 /// Set `YAMES_LLM_GPU_LAYERS=0` alongside it to force the CPU path on a
 /// GPU build.
@@ -2245,7 +2245,7 @@ mod llm_tests {
     /// a number someone typed into a PR once.
     ///
     ///   YAMES_TEST_GGUF=/path/to/Qwen3-4B-Q4_K_M.gguf YAMES_LLM_BENCH=1 \
-    ///     cargo test --manifest-path src-tauri/Cargo.toml \
+    ///     node scripts/rust-test.mjs \
     ///       --features coach-llm-vulkan --lib latency_bench -- --nocapture
     ///
     /// Opt-in because it costs minutes and needs multi-gigabyte weights.

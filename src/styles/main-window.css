@@ -2416,6 +2416,83 @@
   color: var(--accent);
 }
 
+/* ─── Audio-failure notice ───
+   The same pill the tour offer and the "Pick a voice" toast use (top-centre,
+   under the header, z-index 200 so it stays under the wizard and the tour).
+   That slot keeps it off the floating play button in the bottom-right: the
+   user is being told the metronome did not start, so the control they will
+   reach for next must not be underneath the message.
+
+   Unlike those two it wraps rather than ellipsing — a device name or a
+   backend reason is worth reading in full — and it is tinted with
+   `--feedback-miss`, the same colour the download error bar uses. */
+.audio-error-notice {
+  position: absolute;
+  top: 44px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: min(460px, calc(100vw - 24px));
+  padding: 8px 8px 8px 14px;
+  border: 1px solid color-mix(in srgb, var(--feedback-miss) 45%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--feedback-miss) 12%, var(--bg-card));
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.32);
+}
+
+.audio-error-notice-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.audio-error-notice-text {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+
+.audio-error-notice-detail {
+  font-size: 0.6875rem;
+  line-height: 1.35;
+  color: var(--text-secondary);
+  word-break: break-word;
+}
+
+.audio-error-notice-action,
+.audio-error-notice-dismiss {
+  flex: 0 0 auto;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.audio-error-notice-action:hover {
+  background: var(--accent-subtle);
+}
+
+.audio-error-notice-dismiss {
+  display: flex;
+  align-items: center;
+  color: var(--text-secondary);
+  padding: 5px 8px;
+}
+
+.audio-error-notice-dismiss:hover {
+  color: var(--text-primary);
+}
+
 /* ─── Download Confirmation Dialog ─── */
 .download-confirm-overlay {
   position: fixed;

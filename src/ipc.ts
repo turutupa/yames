@@ -397,6 +397,16 @@ export function onAudioDevicesChanged(callback: (devices: AudioOutputDevice[]) =
   return listen<AudioOutputDevice[]>("audio-devices-changed", (e) => callback(e.payload));
 }
 
+/**
+ * The audio thread could not open or start the output stream, so the
+ * metronome is silent and the transport has already been reset. The payload
+ * is the backend's own reason string — raw, untranslated and meant for a bug
+ * report; `classifyAudioError` turns it into something a musician can act on.
+ */
+export function onAudioError(callback: (reason: string) => void) {
+  return listen<string>("audio-error", (e) => callback(e.payload));
+}
+
 // ---------------------------------------------------------------------------
 // Audio Input / Evaluation
 // ---------------------------------------------------------------------------

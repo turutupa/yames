@@ -834,6 +834,13 @@
     "dismiss": "Dismiss",
     "success": "Practice Coach available!"
   },
+  "audioError": {
+    "deviceInUse": "Another app is using your audio output, so the metronome can't play. Close it, or pick a different output device in Settings → Devices.",
+    "generic": "Yames couldn't start the audio output, so the metronome can't play.",
+    "detail": "Reason: {{reason}}",
+    "openSettings": "Audio settings",
+    "dismiss": "Dismiss"
+  },
   "updateBanner": {
     "available": "Yames v{{version}} is available",
     "installRestart": "Install & Restart →",

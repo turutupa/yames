@@ -167,21 +167,32 @@ pub fn toggle_playback(
         s.is_playing
     };
 
-    let mut engine = engine_state.0.lock().unwrap();
-
-    if is_playing {
-        engine.stop();
-        let mut s = state.lock().unwrap();
-        s.is_playing = false;
-    } else {
-        engine.start(state.inner().clone(), app_handle.clone());
-        let mut s = state.lock().unwrap();
-        s.is_playing = true;
+    {
+        let mut engine = engine_state.0.lock().unwrap();
+        if is_playing {
+            engine.stop();
+            state.lock().unwrap().is_playing = false;
+            // D2 — keep tempo context in sync so the onset detector gates
+            // analysis against the live playing state.
+            tempo_ctx.set_playing(false);
+        } else {
+            // Record the request *before* starting, and never after. `start`
+            // no longer waits for the output device, so the audio thread can
+            // report a failure at any moment once it returns — and when it
+            // does it writes `is_playing = false` and clears this same tempo
+            // context itself. Writing here afterwards would overwrite that
+            // correction with a stale `true`, which is precisely the "Stop
+            // over silence" this whole change exists to kill.
+            state.lock().unwrap().is_playing = true;
+            tempo_ctx.set_playing(true);
+            if let Err(e) = engine.start(state.inner().clone(), app_handle.clone()) {
+                eprintln!("[yames] play failed: {e}");
+            }
+        }
     }
 
-    // D2 — keep tempo context in sync so the onset detector gates
-    // analysis against the live playing state.
-    tempo_ctx.set_playing(!is_playing);
+    // Reads whatever is true now — which may already be the audio thread's
+    // correction rather than the optimistic value written above.
     emit_state_changed(&state, &app_handle);
 }
 
@@ -193,21 +204,32 @@ pub fn set_playing(
     tempo_ctx: State<SharedTempoContext>,
     app_handle: AppHandle,
 ) {
-    let mut engine = engine_state.0.lock().unwrap();
-
-    if playing && !engine.is_running() {
-        engine.start(state.inner().clone(), app_handle.clone());
-        let mut s = state.lock().unwrap();
-        s.is_playing = true;
-    } else if !playing && engine.is_running() {
-        engine.stop();
-        let mut s = state.lock().unwrap();
-        s.is_playing = false;
+    {
+        let mut engine = engine_state.0.lock().unwrap();
+        if playing && !engine.is_running() {
+            // Written before the start, never after — see `toggle_playback`.
+            state.lock().unwrap().is_playing = true;
+            // D2 — mirror into tempo context so the onset detector gates on
+            // the live playing state.
+            tempo_ctx.set_playing(true);
+            if let Err(e) = engine.start(state.inner().clone(), app_handle.clone()) {
+                eprintln!("[yames] play failed: {e}");
+            }
+        } else if !playing && engine.is_running() {
+            engine.stop();
+            state.lock().unwrap().is_playing = false;
+            tempo_ctx.set_playing(false);
+        } else {
+            // No transition to make. `is_playing` was left untouched here,
+            // so a stop that arrived with the engine already stopped left
+            // the flag stuck true and the next press of Play was spent
+            // toggling it back off. Write the engine's real state instead.
+            let running = engine.is_running();
+            state.lock().unwrap().is_playing = running;
+            tempo_ctx.set_playing(running);
+        }
     }
 
-    // D2 — mirror into tempo context so the onset detector gates on
-    // the live playing state.
-    tempo_ctx.set_playing(playing);
     emit_state_changed(&state, &app_handle);
 }
 
@@ -533,15 +555,20 @@ pub fn start_speed_ramp(
         s.speed_ramp.bars_in_step = 0;
         s.speed_ramp.completed = false;
         s.speed_ramp.warmup_count = 0;
-        // Don't touch s.bpm — ramp uses its own current_bpm
         s.is_playing = true;
+        // Don't touch s.bpm — ramp uses its own current_bpm
     }
+    // D2 — gate onset analysis on the running state. Both this and
+    // `is_playing` above are written before the start, never after: a device
+    // that will not open is reported by the audio thread, which clears
+    // `is_playing`, `speed_ramp.active` and this gate itself.
+    tempo_ctx.set_playing(true);
     {
         let mut engine = engine_state.0.lock().unwrap();
-        engine.start(state.inner().clone(), app_handle.clone());
+        if let Err(e) = engine.start(state.inner().clone(), app_handle.clone()) {
+            eprintln!("[yames] drill start failed: {e}");
+        }
     }
-    // D2 — gate onset analysis on the running state.
-    tempo_ctx.set_playing(true);
     emit_state_changed(&state, &app_handle);
 }
 
@@ -568,15 +595,18 @@ pub fn start_speed_ramp_from(
         s.speed_ramp.bars_in_step = bar;
         s.speed_ramp.completed = false;
         s.speed_ramp.warmup_count = 0;
-        // Don't touch s.bpm — ramp uses its own current_bpm
         s.is_playing = true;
+        // Don't touch s.bpm — ramp uses its own current_bpm
     }
+    // D2 — gate onset analysis on the running state. Written before the
+    // start, never after — see `start_speed_ramp`.
+    tempo_ctx.set_playing(true);
     {
         let mut engine = engine_state.0.lock().unwrap();
-        engine.start(state.inner().clone(), app_handle.clone());
+        if let Err(e) = engine.start(state.inner().clone(), app_handle.clone()) {
+            eprintln!("[yames] drill start failed: {e}");
+        }
     }
-    // D2 — gate onset analysis on the running state.
-    tempo_ctx.set_playing(true);
     emit_state_changed(&state, &app_handle);
 }
 
@@ -1705,7 +1735,14 @@ pub fn set_audio_output_device(
     }
 
     let mut engine = engine_state.0.lock().unwrap();
-    engine.set_device(device_name, state.inner().clone(), app_handle);
+    if let Err(e) = engine.set_device(device_name, state.inner().clone(), app_handle) {
+        // Non-fatal, and not the failure report. `set_device` does not wait
+        // for the new device — a device that will not open is announced by
+        // the audio thread, which stops the transport claiming playback and
+        // emits `audio-error` plus a truthful `state-changed`, and leaves the
+        // engine startable so the next press of Play re-tries.
+        eprintln!("[yames] switching audio output device failed: {e}");
+    }
 }
 
 // ---------------------------------------------------------------------------

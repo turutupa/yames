@@ -834,6 +834,13 @@
     "dismiss": "閉じる",
     "success": "練習コーチが使えるようになりました！"
   },
+  "audioError": {
+    "deviceInUse": "他のアプリがオーディオ出力を使っているため、メトロノームを再生できません。そのアプリを閉じるか、設定 → デバイスで別の出力デバイスを選んでください。",
+    "generic": "Yames はオーディオ出力を開始できなかったため、メトロノームを再生できません。",
+    "detail": "原因: {{reason}}",
+    "openSettings": "オーディオ設定",
+    "dismiss": "閉じる"
+  },
   "updateBanner": {
     "available": "Yames v{{version}} が利用可能です",
     "installRestart": "インストールして再起動 →",

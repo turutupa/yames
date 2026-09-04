@@ -250,11 +250,15 @@ pub fn run() {
             };
             let tempo_ctx: SharedTempoContext =
                 Arc::new(TempoContext::new(initial_bpm, initial_subdiv));
-            app.manage(tempo_ctx);
+            app.manage(tempo_ctx.clone());
 
             app.manage(shared_state);
             let beat_log = create_beat_log();
             let mut engine = MetronomeEngine::new(beat_log.clone());
+            // The audio thread clears this gate itself when the output device
+            // will not open: `start` no longer waits long enough for the
+            // command that called it to learn that and clear it.
+            engine.set_tempo_context(tempo_ctx);
 
             // Restore saved audio output device
             {

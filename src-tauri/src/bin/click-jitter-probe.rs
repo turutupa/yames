@@ -441,7 +441,10 @@ fn main() -> ExitCode {
     }
 
     let mut engine = MetronomeEngine::new_with_probe(beat_log, cb_probe.clone());
-    engine.start_headless(state);
+    if let Err(e) = engine.start_headless(state) {
+        eprintln!("error: audio engine did not start: {e}");
+        return ExitCode::from(2);
+    }
 
     eprintln!(
         "[probe] {} BPM / subdivision {} ({:.1} ticks/s, {:.2} ms apart), warmup {} ms, window {} s",

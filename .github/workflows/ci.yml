@@ -109,8 +109,22 @@ jobs:
           npm install
           npm run build
 
+      # `RUSTFLAGS` below is Windows-only and is not optional: without the
+      # Common-Controls v6 manifest the `--lib` test harness on MSVC dies at
+      # load with STATUS_ENTRYPOINT_NOT_FOUND (0xc0000139) and this gate goes
+      # red before a single test runs. Read
+      # src-tauri/tests-common-controls-v6.manifest before removing it.
+      #
+      # It lives on THIS step only. `RUSTFLAGS` is global, and applying the
+      # manifest to a link that produces `yames.exe` fails with LNK1123 —
+      # `tauri-build` already put a manifest resource there. `cargo test
+      # --lib` builds no bins, so it is safe here; the fixtures step below
+      # DOES build them, which is why it is covered by
+      # `cargo:rustc-link-arg-tests` in src-tauri/build.rs instead.
       - name: cargo test --lib
         shell: bash
+        env:
+          RUSTFLAGS: ${{ matrix.platform == 'windows-latest' && format('-Clink-arg=/MANIFEST:EMBED -Clink-arg=/MANIFESTINPUT:{0}/src-tauri/tests-common-controls-v6.manifest', github.workspace) || '' }}
         run: |
           set -euo pipefail
           TARGET_ARG=""
@@ -121,6 +135,12 @@ jobs:
 
       # The golden-fixture gates from `package.json` (`test:dsp`,
       # `test:highbpm`). They were previously local-only.
+      #
+      # No `RUSTFLAGS` here on purpose: `cargo test --test <name>` builds
+      # every bin target too, so a global flag would break the `yames.exe`
+      # link (LNK1123). These harnesses get the same manifest from
+      # `cargo:rustc-link-arg-tests` in src-tauri/build.rs, which cargo keeps
+      # away from bins.
       - name: DSP and high-BPM fixtures
         shell: bash
         run: |

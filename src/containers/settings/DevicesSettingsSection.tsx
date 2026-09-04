@@ -91,7 +91,9 @@ export function DevicesSettingsSection({
   };
 
   return (
-    <section className="hotkeys-section">
+    // `id` is the deep-link target for the audio-failure notice, the same way
+    // `settings-coach` is for O4's "Pick a voice" toast.
+    <section className="hotkeys-section" id="settings-devices">
       <h2>{t("settings.devices.title")}</h2>
       <div className="midi-device-section">
         <label className="midi-label devices-subsection-label">{t("settings.devices.audioOutput")}</label>

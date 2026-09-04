@@ -834,6 +834,13 @@
     "dismiss": "關閉",
     "success": "練習教練已可用！"
   },
+  "audioError": {
+    "deviceInUse": "其他應用程式正在占用音訊輸出，節拍器無法播放。請關閉該程式，或在設定 → 裝置中選擇其他輸出裝置。",
+    "generic": "Yames 無法啟動音訊輸出，節拍器無法播放。",
+    "detail": "原因：{{reason}}",
+    "openSettings": "音訊設定",
+    "dismiss": "關閉"
+  },
   "updateBanner": {
     "available": "Yames v{{version}} 新版本可用",
     "installRestart": "安裝並重新啟動 →",
