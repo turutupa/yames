@@ -119,8 +119,12 @@ describe("meterLabel", () => {
 
 describe("cycleMeterPreset", () => {
   it("steps forward and back through the preset list", () => {
-    expect(cycleMeterPreset([4], 1)).toEqual(METER_PRESETS[1].groups);
-    expect(cycleMeterPreset(METER_PRESETS[1].groups, -1)).toEqual([4]);
+    // Index-relative, not hardcoded: the row is display-ordered and has
+    // been reordered once already (4/4-first -> ascending).
+    const fourFour = findMeterPresetIndex([4]);
+    const next = METER_PRESETS[fourFour + 1].groups;
+    expect(cycleMeterPreset([4], 1)).toEqual(next);
+    expect(cycleMeterPreset(next, -1)).toEqual([4]);
   });
 
   it("wraps at both ends", () => {
@@ -142,16 +146,23 @@ describe("cycleMeterPreset", () => {
     );
   });
 
-  it("cycles from the new 2/4 preset", () => {
+  it("cycles from the 2/4 preset", () => {
+    const n = METER_PRESETS.length;
     const twoFour = findMeterPresetIndex([2]);
     expect(twoFour).toBeGreaterThanOrEqual(0);
-    expect(cycleMeterPreset([2], 1)).toEqual(METER_PRESETS[twoFour + 1].groups);
-    expect(cycleMeterPreset([2], -1)).toEqual(METER_PRESETS[twoFour - 1].groups);
+    // Modular both ways: 2/4 is the first entry since the row was sorted
+    // ascending, so stepping back from it wraps to the last preset.
+    expect(cycleMeterPreset([2], 1)).toEqual(METER_PRESETS[(twoFour + 1) % n].groups);
+    expect(cycleMeterPreset([2], -1)).toEqual(METER_PRESETS[(twoFour - 1 + n) % n].groups);
   });
 
-  it("steps onto the first preset from an unknown grouping", () => {
-    expect(cycleMeterPreset([5, 5], 1)).toEqual(METER_PRESETS[0].groups);
-    expect(cycleMeterPreset([5, 5], -1)).toEqual(METER_PRESETS[0].groups);
+  // Pins the behaviour that sorting the row ascending would otherwise have
+  // changed silently: the landing spot is 4/4 because it is 4/4, not
+  // because it happened to be first in the array.
+  it("lands on 4/4 from an unknown grouping, wherever 4/4 sits in the row", () => {
+    expect(cycleMeterPreset([5, 5], 1)).toEqual([4]);
+    expect(cycleMeterPreset([5, 5], -1)).toEqual([4]);
+    expect(METER_PRESETS[0].label).not.toBe("4/4");
   });
 
   it("never produces a grouping Rust would reject", () => {
@@ -201,8 +212,10 @@ describe("presetBeatGroups", () => {
 
 describe("stepMeter", () => {
   it("walks the preset list when free mode is off", () => {
-    expect(stepMeter([4], false, 1)).toEqual(METER_PRESETS[1].groups);
-    expect(stepMeter(METER_PRESETS[1].groups, false, -1)).toEqual([4]);
+    // Relative to where 4/4 actually sits, not to a fixed index.
+    const next = METER_PRESETS[findMeterPresetIndex([4]) + 1].groups;
+    expect(stepMeter([4], false, 1)).toEqual(next);
+    expect(stepMeter(next, false, -1)).toEqual([4]);
   });
 
   it("steps the beat count in FREE mode", () => {

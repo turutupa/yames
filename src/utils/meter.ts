@@ -111,9 +111,14 @@ export function cycleMeterPreset(
 ): number[] {
   const n = METER_PRESETS.length;
   const current = findMeterPresetIndex(groups);
-  // Unknown grouping: step onto the first preset rather than jumping
-  // somewhere arbitrary.
-  if (current === -1) return METER_PRESETS[0].groups;
+  // Unknown grouping: land on 4/4 rather than jumping somewhere
+  // arbitrary. Looked up by LABEL, not by index: this used to read
+  // `METER_PRESETS[0]`, which was 4/4 only by accident of the list
+  // being ordered 4/4, 3/4, 2/4, … Sorting the row ascending would
+  // have silently moved this landing spot to 2/4.
+  if (current === -1) {
+    return (METER_PRESETS.find((p) => p.label === "4/4") ?? METER_PRESETS[0]).groups;
+  }
   return METER_PRESETS[(current + dir + n) % n].groups;
 }
 
