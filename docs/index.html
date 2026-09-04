@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="obsidian">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -15,6 +15,7 @@
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
 
     <!-- Open Graph / Facebook -->
@@ -25,10 +26,11 @@
       property="og:description"
       content="Free, open-source desktop metronome built for real practice. MIDI footswitch control, sub-millisecond precision, zen mode, speed drills, presets, and an AI practice coach. Hands stay on the instrument. macOS, Windows, Linux."
     />
-    <meta property="og:image" content="https://yames.app/og-image.png" />
+    <meta property="og:image" content="https://yames.app/og-image.png?v=3" />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Yames desktop metronome app screenshot showing the floating widget and drill practice mode" />
+    <meta property="og:image:alt" content="Yames — a metronome you won&#39;t skip. The app shown in the Obsidian theme with the practice coach open." />
     <meta property="og:site_name" content="Yames Metronome" />
     <meta property="og:locale" content="en_US" />
 
@@ -39,12 +41,11 @@
       name="twitter:description"
       content="Free, open-source desktop metronome built for real practice. MIDI footswitch control, sub-millisecond precision, zen mode, speed drills, presets, and an AI practice coach. Hands stay on the instrument. macOS, Windows, Linux."
     />
-    <meta name="twitter:image" content="https://yames.app/og-image.png" />
-    <meta name="twitter:image:alt" content="Yames desktop metronome app screenshot" />
+    <meta name="twitter:image" content="https://yames.app/og-image.png?v=3" />
+    <meta name="twitter:image:alt" content="Yames — a metronome you won&#39;t skip. The app shown in the Obsidian theme with the practice coach open." />
 
     <!-- Additional meta -->
-    <meta name="theme-color" content="#0a0a0f" />
-    <meta name="theme-color" content="#f5f0e8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#f59e0b" />
     <meta name="application-name" content="Yames Metronome" />
     <meta name="apple-mobile-web-app-title" content="Yames Metronome" />
     <meta name="format-detection" content="telephone=no" />
@@ -74,8 +75,9 @@
         "priceCurrency": "USD",
         "availability": "https://schema.org/InStock"
       },
-      "softwareVersion": "1.0.0",
-      "datePublished": "2024-01-01",
+      "softwareVersion": "1.0.4",
+      "datePublished": "2026-04-28",
+      "dateModified": "2026-09-04",
       "author": {
         "@type": "Person",
         "name": "turutupa",
@@ -244,72 +246,103 @@
     }
     </script>
 
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://api.github.com" />
     <link
-      rel="preload"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
-      as="style"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Comfortaa:wght@400;600;700&family=Nunito:wght@400;600;700;800&family=Quicksand:wght@400;500;600;700&family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Manrope:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
+
     <link rel="preload" href="style.css" as="style" />
     <link rel="stylesheet" href="style.css" />
 
     <!-- Preload LCP image for faster first paint -->
-    <link rel="preload" href="img/metronome/aurora-metronome.webp" as="image" />
+    <link rel="preload" href="img/metronome/obsidian-metronome.webp" as="image" />
 
     <!-- Web App Manifest -->
     <link rel="manifest" href="manifest.json" />
+
+    <!-- Apply the saved/requested palette before first paint -->
+    <script>
+      (function () {
+        try {
+          var ids = ["mono","obsidian","velvet","neon","aurora","ivory","arctic","sand","lavender","prism"];
+          var q = new URLSearchParams(location.search).get("theme");
+          var saved = localStorage.getItem("yames-theme");
+          var t = ids.indexOf(q) > -1 ? q : (ids.indexOf(saved) > -1 ? saved : "obsidian");
+          document.documentElement.dataset.theme = t;
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
-    <canvas id="particles-canvas"></canvas>
-    <div class="page">
-      <div class="layout">
-        <!-- Left: Content -->
-        <div class="content">
-          <div class="brand">
-            <h1>yames</h1>
-            <p class="subtitle">Yet Another Metronome Everyone Skips</p>
-          </div>
+    <a class="skip-link" href="#main">Skip to content</a>
 
-          <div class="features">
-            <p class="feature">
-              <strong>Speed drills & presets.</strong> Auto-ramping BPM, saved
-              exercise configs, always-on-top widget over your DAW.
-            </p>
-            <p class="feature">
-              <strong>Hands stay on the instrument.</strong> MIDI footswitches,
-              controllers, and keyboard shortcuts — practice without breaking flow.
-            </p>
-            <p class="feature">
-              <strong>Zen mode.</strong> Fullscreen immersive visuals that
-              respond to the beat. No distractions.
-            </p>
-            <p class="feature">
-              <strong>Practice coach.<span class="experimental-badge" title="Experimental — behaviour may change between builds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/></svg>Beta</span></strong> AI-powered live feedback,
-              session history, and adaptive coaching — all running locally.
-            </p>
-          </div>
+    <!-- ─── Nav ─────────────────────────────────────────── -->
+    <!-- Page-level atmosphere. It sits behind all content rather than
+         inside the hero, so it bleeds across the section boundary
+         instead of being cut off at it. -->
+    <div class="page-glow" aria-hidden="true" data-parallax="0.16">
+      <span class="page-glow__a"></span>
+      <span class="page-glow__b"></span>
+      <span class="page-glow__c"></span>
+    </div>
 
-          <div class="download-section">
+    <header class="nav" id="nav">
+      <div class="nav__inner">
+        <a class="nav__brand" href="#main">yames</a>
+        <nav class="nav__links" aria-label="Sections">
+        <a href="#themes">Themes</a>
+        <a href="#zen">Zen</a>
+        <a href="#coach">Coach</a>
+        <a
+          href="https://github.com/turutupa/yames"
+          target="_blank"
+          rel="noopener"
+          >GitHub</a
+        >
+          <a class="btn btn--sm" href="#download">Download</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- ─── Hero ──────────────────────────────────────── -->
+      <section class="hero">
+        <div class="hero__inner">
+          <p class="eyebrow reveal" data-reveal-delay="0">
+            <span class="eyebrow__dot" aria-hidden="true"></span>
+            Ten themes &middot; Seven live visuals &middot; Zero setup
+          </p>
+
+          <h1 class="hero__title reveal" data-reveal-delay="1">
+            Finally, a metronome you <em>won&rsquo;t skip</em>.
+          </h1>
+
+          <p class="hero__sub reveal" data-reveal-delay="2">
+            Timing you can trust for a whole session, ten full themes, and seven
+            fullscreen visuals that move on the beat. Free, and nothing you play
+            ever leaves your computer.
+          </p>
+
+          <div class="hero__cta reveal" data-reveal-delay="3">
             <a
-              href="https://github.com/turutupa/yames/releases/latest"
-              class="btn-download"
+              class="btn btn--primary"
               id="download-btn"
+              href="https://github.com/turutupa/yames/releases/latest"
             >
               <svg
-                width="18"
-                height="18"
+                width="17"
+                height="17"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2"
+                stroke-width="2.4"
                 stroke-linecap="round"
                 stroke-linejoin="round"
+                aria-hidden="true"
               >
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                 <polyline points="7 10 12 15 17 10" />
@@ -317,7 +350,8 @@
               </svg>
               <span>Download for <span id="os-name">macOS</span></span>
             </a>
-            <div class="platforms">
+
+            <div class="platforms" role="group" aria-label="Choose a platform">
               <button class="platform-pill active" data-os="macos-silicon">
                 macOS (Silicon)
               </button>
@@ -327,1275 +361,200 @@
               <button class="platform-pill" data-os="windows">Windows</button>
               <button class="platform-pill" data-os="linux">Linux</button>
             </div>
-            <div class="install-note" id="install-note">
-              <div class="brew-install" id="cli-install">
-                <span class="brew-label">or install via terminal:</span>
-                <code class="brew-cmd" id="cli-cmd" onclick="if(!this.classList.contains('disabled'))navigator.clipboard.writeText(this.textContent).then(()=>{this.classList.add('copied');setTimeout(()=>this.classList.remove('copied'),1500)})">brew install --cask turutupa/tap/yames</code>
-              </div>
-            </div>
           </div>
 
-          <p class="feature-request">
+          <p class="hero__reassure reveal" data-reveal-delay="4">
+            <span id="price-free">Free forever</span> &middot; no account
+            &middot; works offline
+          </p>
+        </div>
+
+        <!-- ─── Theme fan (slot-machine roll) ───────────── -->
+        <div class="fan" id="themes">
+          <div class="fan__viewport" data-parallax="-0.06">
+            <ul class="fan__track" id="fan-track" role="list"></ul>
+          </div>
+        </div>
+
+        <div class="picker">
+          <p class="picker__name" id="picker-name" aria-live="polite"></p>
+          <div
+            class="picker__row"
+            id="picker"
+            role="radiogroup"
+            aria-label="Theme"
+          ></div>
+          <p class="picker__hint">
+            pick a theme &mdash; the whole page follows
+          </p>
+        </div>
+      </section>
+
+      <!-- ─── Claim tiles ───────────────────────────────── -->
+      <section class="tiles" aria-label="Why Yames">
+        <article class="tile tile--1 reveal">
+          <p class="tile__figure">&lt;&#8202;1&#8239;ms</p>
+          <p class="tile__body">
+            Every click lands where it should. Leave it running for a whole
+            session and bar 400 arrives exactly where bar 1 promised it would.
+          </p>
+        </article>
+        <article class="tile tile--2 reveal" data-reveal-delay="1">
+          <p class="tile__figure" id="price-figure">0&#8239;&euro;</p>
+          <p class="tile__body">
+            Free, and open source. No account, no subscription, and no upsell
+            screen halfway through your practice.
+          </p>
+        </article>
+        <article class="tile tile--3 reveal" data-reveal-delay="2">
+          <p class="tile__figure">Offline</p>
+          <p class="tile__body">
+            Even the practice coach. It listens and scores your session without
+            sending a single note anywhere.
+          </p>
+        </article>
+      </section>
+
+      <!-- ─── Zen (live canvas) ─────────────────────────── -->
+      <section class="zen" id="zen">
+        <canvas id="zen-canvas" class="zen__canvas" aria-hidden="true"></canvas>
+        <div class="zen__veil" aria-hidden="true"></div>
+        <div class="zen__inner reveal">
+          <p class="kicker">Zen mode</p>
+          <h2 class="h2">Turn the room into the metronome.</h2>
+          <p class="lede">
+            Cosmos, gravity, rain, warp, radar, pulse and focus &mdash; seven
+            fullscreen visuals that move on the beat, in whichever theme you
+            picked. Prop the laptop up across the room and stop looking at
+            numbers.
+          </p>
+          <div class="zen__styles" id="zen-styles" role="group" aria-label="Zen visual"></div>
+        </div>
+      </section>
+
+      <!-- ─── Coach ─────────────────────────────────────── -->
+      <section class="feature feature--wide" id="coach">
+        <div class="feature__text reveal">
+          <p class="kicker">
+            Practice coach <span class="badge-beta">Beta</span>
+          </p>
+          <h2 class="h3">Someone in the room who notices you drag.</h2>
+          <p class="body">
+            It listens while you play, scores the session, tells you whether you
+            rushed or dragged and by how much, then adapts tomorrow&rsquo;s
+            tempo to match. It never needs a connection.
+          </p>
+        </div>
+        <div class="feature__shot reveal" data-reveal-delay="1">
+          <img
+            id="coach-shot"
+            src="img/metronome/aurora-metronome.webp"
+            alt="The practice coach panel, showing a scored session with timing breakdown"
+            loading="lazy"
+            decoding="async"
+            width="1400"
+            height="1050"
+          />
+        </div>
+      </section>
+
+      <!-- ─── Drill + hands-free ────────────────────────── -->
+      <section class="duo" id="drill">
+        <article class="card card--drill reveal">
+          <p class="kicker">Speed drill</p>
+          <h2 class="h3">60 to 135&#8239;<span class="unit">BPM</span> without touching the mouse.</h2>
+          <p class="body">
+            Ramps that climb on their own &mdash; straight up, zigzag, or
+            adapting to how you played. Countdown, cyclic repeat, and presets
+            that save the whole exercise.
+          </p>
+        </article>
+        <article class="card card--hands reveal" data-reveal-delay="1">
+          <p class="kicker">Hands-free</p>
+          <h2 class="h3">A footswitch, and you never look up.</h2>
+          <p class="body">
+            Map any MIDI CC, note or program change to play, stop, tempo or
+            subdivision. Every action has a hotkey, and the floating widget
+            stays on top of your DAW and your sheet music.
+          </p>
+        </article>
+      </section>
+
+      <!-- ─── Download ──────────────────────────────────── -->
+      <section class="close" id="download">
+        <div class="close__glow" aria-hidden="true"></div>
+        <div class="close__inner reveal">
+          <h2 class="h1">Open it. Hit play. Disappear.</h2>
+          <p class="lede">
+            macOS (Apple Silicon &amp; Intel), Windows and Linux.
+          </p>
+          <a
+            class="btn btn--primary btn--lg"
+            id="download-btn-2"
+            href="https://github.com/turutupa/yames/releases/latest"
+          >
+            Download Yames &mdash; free
+          </a>
+          <div class="install" id="cli-install">
+            <span class="brew-label">or install via terminal:</span>
+            <code
+              class="brew-cmd"
+              id="cli-cmd"
+              tabindex="0"
+              role="button"
+              title="Copy to clipboard"
+              >brew install --cask turutupa/tap/yames</code
+            >
+          </div>
+          <p class="close__ask">
             Missing a feature?
             <a
               href="https://github.com/turutupa/yames/issues/new"
               target="_blank"
               rel="noopener"
-              >Request it here →</a
+              >Request it here &rarr;</a
             >
           </p>
-
-          <div class="links">
-            <button class="version-badge" id="version-badge" onclick="openChangelog()" title="View changelog">
-              v<span id="version-number">0.6.0</span>
-            </button>
-            <span class="separator">·</span>
-            <a
-              href="https://github.com/turutupa/yames"
-              class="link-btn"
-              target="_blank"
-              rel="noopener"
-            >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path
-                  d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"
-                />
-              </svg>
-              GitHub
-            </a>
-            <span class="separator">·</span>
-            <span class="note">Free & open-source</span>
-          </div>
-
-          <!-- Changelog modal -->
-          <div class="changelog-overlay" id="changelog-overlay" onclick="closeChangelog()">
-            <div class="changelog-modal" onclick="event.stopPropagation()">
-              <div class="changelog-header">
-                <h2>Changelog</h2>
-                <button class="changelog-close" onclick="closeChangelog()" aria-label="Close">&times;</button>
-              </div>
-              <div class="changelog-content">
-                <div class="changelog-body" id="changelog-body">
-                  <div class="changelog-loading">Loading releases…</div>
-                </div>
-              </div>
-              <div class="changelog-timeline" id="changelog-timeline"></div>
-            </div>
-          </div>
-
         </div>
+      </section>
+    </main>
 
-        <!-- Right: Theme showcase -->
-        <div class="showcase">
-          <!-- Big preview -->
-          <div class="preview-container">
-            <div class="preview-wrapper">
-              <div class="preview-frame">
-                <img
-                  id="preview-img"
-                  src="img/metronome/aurora-metronome.webp"
-                  alt="App screenshot"
-                />
-                <div id="zen-live-preview" class="zen-live-preview">
-                  <canvas id="zen-canvas"></canvas>
-                  <div class="zen-preview-inner">
-                    <div class="zen-bpm-number">120</div>
-                    <div class="zen-bpm-label">BPM</div>
-                    <div class="zen-beats">
-                      <div class="zen-beat-group">
-                        <div class="zen-beat"></div>
-                        <div class="zen-sub-dots">
-                          <div class="zen-sub-dot"></div>
-                          <div class="zen-sub-dot"></div>
-                          <div class="zen-sub-dot"></div>
-                          <div class="zen-sub-dot"></div>
-                        </div>
-                      </div>
-                      <div class="zen-beat-group">
-                        <div class="zen-beat"></div>
-                        <div class="zen-sub-dots">
-                          <div class="zen-sub-dot"></div>
-                          <div class="zen-sub-dot"></div>
-                          <div class="zen-sub-dot"></div>
-                          <div class="zen-sub-dot"></div>
-                        </div>
-                      </div>
-                      <div class="zen-beat-group">
-                        <div class="zen-beat"></div>
-                        <div class="zen-sub-dots">
-                          <div class="zen-sub-dot"></div>
-                          <div class="zen-sub-dot"></div>
-                          <div class="zen-sub-dot"></div>
-                          <div class="zen-sub-dot"></div>
-                        </div>
-                      </div>
-                      <div class="zen-beat-group">
-                        <div class="zen-beat"></div>
-                        <div class="zen-sub-dots">
-                          <div class="zen-sub-dot"></div>
-                          <div class="zen-sub-dot"></div>
-                          <div class="zen-sub-dot"></div>
-                          <div class="zen-sub-dot"></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="zen-preview-controls">
-                    <button class="zen-ctrl-btn">−5</button>
-                    <button class="zen-ctrl-btn">−1</button>
-                    <button class="zen-ctrl-btn zen-ctrl-sub">♩</button>
-                    <button class="zen-play-btn" aria-label="Play">
-                      <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path d="M4 2.5v15l13-7.5z"/></svg>
-                    </button>
-                    <button class="zen-ctrl-btn zen-ctrl-sub">4/4</button>
-                    <button class="zen-ctrl-btn">+1</button>
-                    <button class="zen-ctrl-btn">+5</button>
-                  </div>
-                </div>
-              </div>
-              <div class="widget-overlay" id="widget-overlay">
-                <img
-                  id="widget-img"
-                  src="img/widget/aurora-widget.webp"
-                  alt="Widget"
-                />
-              </div>
-            </div>
-          </div>
+    <!-- ─── Footer ──────────────────────────────────────── -->
+    <footer class="foot">
+      <p class="foot__tag">Yet Another Metronome Everyone Skips</p>
+      <nav class="foot__links" aria-label="Footer">
+        <button class="version-badge" id="version-badge" title="View changelog">
+          v<span id="version-number">0.6.0</span>
+        </button>
+        <a href="https://github.com/turutupa/yames" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/turutupa/yames/issues/new" target="_blank" rel="noopener">Request a feature</a>
+        <a href="https://github.com/turutupa/yames/blob/main/LICENSE" target="_blank" rel="noopener">GPLv3</a>
+      </nav>
+    </footer>
 
-          <!-- Tab selector -->
-          <div class="tab-selector">
-            <button class="tab-btn active" data-tab="metronome">Metronome</button>
-            <button class="tab-btn" data-tab="drill">Drill</button>
-            <button class="tab-btn" data-tab="zen">Zen</button>
-          </div>
-
-          <!-- Zen style picker (visible when Zen tab is active) -->
-          <div id="zen-style-selector" class="zen-style-selector">
-            <div class="swatch-row">
-              <button class="zen-swatch active" data-style="cosmos" data-tooltip="Cosmos">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="8" r="1.5"/><circle cx="18" cy="6" r="1"/><circle cx="12" cy="16" r="1.5"/><circle cx="4" cy="18" r="1"/><circle cx="19" cy="15" r="1.2"/></svg>
-              </button>
-              <button class="zen-swatch" data-style="rain" data-tooltip="Rain">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6M8 4v4M16 5v3M6 8v3M18 7v3"/><ellipse cx="12" cy="20" rx="3" ry="1"/></svg>
-              </button>
-              <button class="zen-swatch" data-style="warp" data-tooltip="Warp">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,2 22,12 12,22 2,12"/></svg>
-              </button>
-              <button class="zen-swatch" data-style="gravity" data-tooltip="Gravity">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="3"/><line x1="12" y1="18" x2="12" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-              </button>
-            </div>
-            <div class="swatch-row">
-              <button class="zen-swatch" data-style="pulse" data-tooltip="Pulse">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/></svg>
-              </button>
-              <button class="zen-swatch" data-style="radar" data-tooltip="Radar">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="12" x2="12" y2="5"/></svg>
-              </button>
-              <button class="zen-swatch" data-style="focus" data-tooltip="Focus">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="5"/></svg>
-              </button>
-            </div>
-          </div>
-
-          <!-- Theme swatches -->
-          <div class="theme-swatches">
-            <div class="swatch-row">
-              <button
-                class="swatch"
-                data-theme="obsidian"
-                data-tooltip="Obsidian"
-                style="--c1: #0a0a0a; --c2: #f59e0b"
-              >
-                <span class="swatch-half"></span>
-              </button>
-              <button
-                class="swatch"
-                data-theme="mono"
-                data-tooltip="Mono"
-                style="--c1: #121212; --c2: #d4d4d4"
-              >
-                <span class="swatch-half"></span>
-              </button>
-              <button
-                class="swatch"
-                data-theme="velvet"
-                data-tooltip="Velvet"
-                style="--c1: #110b1e; --c2: #8b5cf6"
-              >
-                <span class="swatch-half"></span>
-              </button>
-              <button
-                class="swatch"
-                data-theme="neon"
-                data-tooltip="Neon"
-                style="--c1: #0c0c18; --c2: #06b6d4"
-              >
-                <span class="swatch-half"></span>
-              </button>
-              <button
-                class="swatch active"
-                data-theme="aurora"
-                data-tooltip="Aurora"
-                style="--c1: #0a0020; --c2: #00d4ff"
-              >
-                <span class="swatch-half"></span>
-              </button>
-            </div>
-            <div class="swatch-row">
-              <button
-                class="swatch"
-                data-theme="ivory"
-                data-tooltip="Ivory"
-                style="--c1: #faf8f2; --c2: #b8860b"
-              >
-                <span class="swatch-half"></span>
-              </button>
-              <button
-                class="swatch"
-                data-theme="arctic"
-                data-tooltip="Arctic"
-                style="--c1: #f0f4f8; --c2: #0369a1"
-              >
-                <span class="swatch-half"></span>
-              </button>
-              <button
-                class="swatch"
-                data-theme="sand"
-                data-tooltip="Sand"
-                style="--c1: #f5f0e8; --c2: #92400e"
-              >
-                <span class="swatch-half"></span>
-              </button>
-              <button
-                class="swatch"
-                data-theme="lavender"
-                data-tooltip="Lavender"
-                style="--c1: #f5f0ff; --c2: #7c3aed"
-              >
-                <span class="swatch-half"></span>
-              </button>
-              <button
-                class="swatch"
-                data-theme="prism"
-                data-tooltip="Prism"
-                style="--c1: #ffe0f0; --c2: #ff3d8a"
-              >
-                <span class="swatch-half"></span>
-              </button>
-            </div>
+    <!-- ─── Changelog modal ─────────────────────────────── -->
+    <div class="changelog-overlay" id="changelog-overlay">
+      <div
+        class="changelog-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Changelog"
+      >
+        <div class="changelog-header">
+          <h2>Changelog</h2>
+          <button class="changelog-close" id="changelog-close" aria-label="Close">
+            &times;
+          </button>
+        </div>
+        <div class="changelog-content">
+          <div class="changelog-body" id="changelog-body">
+            <div class="changelog-loading">Loading releases&hellip;</div>
           </div>
         </div>
+        <div class="changelog-timeline" id="changelog-timeline"></div>
       </div>
     </div>
 
-    <script>
-      // OS detection
-      const osName = document.getElementById("os-name");
-      const pills = document.querySelectorAll(".platform-pill");
-      const downloadBtn = document.getElementById("download-btn");
-      const ua = navigator.userAgent.toLowerCase();
-      let detectedOS = "macos-silicon";
-      if (ua.includes("win")) detectedOS = "windows";
-      else if (ua.includes("linux")) detectedOS = "linux";
-
-      // Asset filename patterns to match from GitHub releases
-      const ASSET_PATTERNS = {
-        "macos-silicon": /aarch64\.dmg$/,
-        "macos-intel": /x64\.dmg$/,
-        "windows": /x64-setup\.exe$/,
-        "linux": /amd64\.deb$/,
-      };
-
-      const OS_LABELS = {
-        "macos-silicon": "macOS",
-        "macos-intel": "macOS",
-        "windows": "Windows",
-        "linux": "Linux",
-      };
-
-      // Fallback URL if API fails
-      const FALLBACK = "https://github.com/turutupa/yames/releases/latest";
-      let assetURLs = {};
-
-      // Fetch latest release assets from GitHub API
-      fetch("https://api.github.com/repos/turutupa/yames/releases/latest")
-        .then((r) => r.json())
-        .then((data) => {
-          if (!data.assets) return;
-          for (const [os, pattern] of Object.entries(ASSET_PATTERNS)) {
-            const asset = data.assets.find((a) => pattern.test(a.name));
-            if (asset) assetURLs[os] = asset.browser_download_url;
-          }
-          // Update button href with resolved URL
-          if (assetURLs[detectedOS]) downloadBtn.href = assetURLs[detectedOS];
-          // Also update version badge (avoids separate API call)
-          if (data.tag_name) {
-            document.getElementById("version-number").textContent = data.tag_name.replace(/^v/, "");
-          }
-        })
-        .catch(() => {}); // Silently fall back to releases page
-
-      const CLI_COMMANDS = {
-        "macos-silicon": "brew install --cask turutupa/tap/yames",
-        "macos-intel": "brew install --cask turutupa/tap/yames",
-        "windows": "winget install turutupa.yames",
-        "linux": "sudo snap install yames",
-      };
-
-      const CLI_LABELS = {
-        "macos-silicon": "or install via Homebrew:",
-        "macos-intel": "or install via Homebrew:",
-        "windows": "or install via winget:",
-        "linux": "or install via Snap:",
-      };
-
-      const COMING_SOON = { "linux": true };
-
-      function setOS(os) {
-        pills.forEach((p) => p.classList.toggle("active", p.dataset.os === os));
-        osName.textContent = OS_LABELS[os] || "macOS (Apple Silicon)";
-        downloadBtn.href = assetURLs[os] || FALLBACK;
-        detectedOS = os;
-        // Update CLI install command
-        const cliCmd = document.getElementById("cli-cmd");
-        const cliLabel = document.querySelector(".brew-label");
-        if (cliCmd) {
-          cliCmd.textContent = CLI_COMMANDS[os] || CLI_COMMANDS["macos-silicon"];
-          cliCmd.classList.toggle("disabled", !!COMING_SOON[os]);
-        }
-        if (cliLabel) {
-          const label = CLI_LABELS[os] || CLI_LABELS["macos-silicon"];
-          cliLabel.innerHTML = COMING_SOON[os] ? label + ' <span class="soon-badge">soon</span>' : label;
-        }
-        const cliInstall = document.getElementById("cli-install");
-        if (cliInstall) cliInstall.style.display = CLI_COMMANDS[os] ? "" : "none";
-      }
-      setOS(detectedOS);
-      pills.forEach((p) =>
-        p.addEventListener("click", () => setOS(p.dataset.os)),
-      );
-
-      // Theme showcase
-      const previewImg = document.getElementById("preview-img");
-      const tabBtns = document.querySelectorAll(".tab-btn");
-      const swatches = document.querySelectorAll(".swatch");
-
-      let currentTab = localStorage.getItem("yames-tab") || "metronome";
-      let currentTheme = localStorage.getItem("yames-theme") || "aurora";
-      let currentZenStyle = localStorage.getItem("yames-zen-style") || "cosmos";
-      let zenMode = false;
-      let currentAnim = 'none'; // token prevents zombie animation loops
-      let animCx = 0, animCy = 0; // center of zen preview in viewport coords
-      let amplifyId = null;
-
-      // Theme accent colors (from --c2 of each swatch)
-      const themeAccents = {
-        obsidian: "#f59e0b",
-        mono: "#d4d4d4",
-        velvet: "#8b5cf6",
-        neon: "#06b6d4",
-        aurora: "#00d4ff",
-        ivory: "#b8860b",
-        arctic: "#0369a1",
-        sand: "#92400e",
-        lavender: "#7c3aed",
-        prism: "#ff3d8a",
-      };
-
-      // Theme background colors (from --c1 of each swatch)
-      const themeBgs = {
-        obsidian: "#0a0a0a",
-        mono: "#121212",
-        velvet: "#110b1e",
-        neon: "#0c0c18",
-        aurora: "#0a0020",
-        ivory: "#faf8f2",
-        arctic: "#f0f4f8",
-        sand: "#f5f0e8",
-        lavender: "#f5f0ff",
-        prism: "#ffe0f0",
-      };
-
-      // Light themes need dark text
-      const lightThemes = new Set([
-        "ivory",
-        "arctic",
-        "sand",
-        "lavender",
-        "prism",
-      ]);
-
-      const themeFonts = {
-        mono:      { family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", weight: "400" },
-        obsidian:  { family: "'SF Mono', 'Fira Code', 'JetBrains Mono', monospace",               weight: "400" },
-        velvet:    { family: "'Comfortaa', 'Nunito', system-ui, sans-serif",                       weight: "600" },
-        neon:      { family: "'Orbitron', 'Rajdhani', 'Exo 2', monospace",                         weight: "500" },
-        aurora:    { family: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",             weight: "500" },
-        ivory:     { family: "'Georgia', 'Palatino', 'Times New Roman', serif",                   weight: "500" },
-        arctic:    { family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", weight: "500" },
-        sand:      { family: "'Avenir Next', 'Avenir', -apple-system, sans-serif",                weight: "500" },
-        lavender:  { family: "'Quicksand', 'Nunito', system-ui, sans-serif",                       weight: "600" },
-        prism:     { family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", weight: "500" },
-      };
-
-      function setAccent(theme) {
-        const root = document.documentElement;
-        const accent = themeAccents[theme] || "#f59e0b";
-        const bg = themeBgs[theme] || "#0a0a0f";
-        const isLight = lightThemes.has(theme);
-        const tf = themeFonts[theme] || { family: "'Inter', sans-serif", weight: "500" };
-
-        root.style.setProperty("--accent", accent);
-        root.style.setProperty("--accent-hover", accent);
-        root.style.setProperty("--bg", bg);
-        root.style.setProperty("--text", isLight ? "#1a1a2e" : "#f0f0f5");
-        root.style.setProperty("--text-dim", isLight ? "#555570" : "#8888a0");
-        root.style.setProperty("--font-family", tf.family);
-        root.style.setProperty("--font-weight-theme", tf.weight);
-
-        // Button text: dark on light accents, dark on all (accent is the bg)
-        const btn = document.getElementById("download-btn");
-        const needsDarkText = [
-          "obsidian",
-          "mono",
-          "neon",
-          "aurora",
-          "velvet",
-        ].includes(theme);
-        btn.style.color = needsDarkText ? "#0a0a0f" : "#ffffff";
-      }
-
-      // Map of available images: tab -> theme -> filename
-      const images = {
-        metronome: {
-          obsidian: "img/metronome/obsidian-metronome.webp",
-          mono: "img/metronome/mono-metronome.webp",
-          velvet: "img/metronome/velvet-metronome.webp",
-          neon: "img/metronome/neon-metronome.webp",
-          aurora: "img/metronome/aurora-metronome.webp",
-          ivory: "img/metronome/ivory-metronome.webp",
-          arctic: "img/metronome/arctic-metronome.webp",
-          sand: "img/metronome/sand-metronome.webp",
-          lavender: "img/metronome/lavender-metronome.webp",
-          prism: "img/metronome/prism-metronome.webp",
-        },
-        drill: {
-          obsidian: "img/drill/obsidian-drill.webp",
-          mono: "img/drill/mono-drill.webp",
-          velvet: "img/drill/velvet-drill.webp",
-          neon: "img/drill/neon-drill.webp",
-          aurora: "img/drill/aurora-drill.webp",
-          ivory: "img/drill/ivory-drill.webp",
-          arctic: "img/drill/arctic-drill.webp",
-          sand: "img/drill/sand-drill.webp",
-          lavender: "img/drill/lavender-drill.webp",
-          prism: "img/drill/prism-drill.webp",
-        },
-        zen: {},
-      };
-
-      // Widget images available
-      const widgetImages = {
-        obsidian: "img/widget/obsidian-widget.webp",
-        mono: "img/widget/mono-widget.webp",
-        velvet: "img/widget/velvet-widget.webp",
-        neon: "img/widget/neon-widget.webp",
-        aurora: "img/widget/aurora-widget.webp",
-        ivory: "img/widget/ivory-widget.webp",
-        arctic: "img/widget/arctic-widget.webp",
-        sand: "img/widget/sand-widget.webp",
-        lavender: "img/widget/lavender-widget.webp",
-        prism: "img/widget/prism-widget.webp",
-      };
-
-      const widgetOverlay = document.getElementById("widget-overlay");
-      const widgetImg = document.getElementById("widget-img");
-
-      function updateWidget() {
-        // Never show the floating widget when showcasing zen (it's fullscreen)
-        if (currentTab === "zen") {
-          widgetOverlay.classList.remove("visible");
-          return;
-        }
-        const src = widgetImages[currentTheme];
-        if (src) {
-          widgetImg.src = src;
-          widgetOverlay.classList.add("visible");
-        } else {
-          widgetOverlay.classList.remove("visible");
-        }
-      }
-
-      function updateSwatches() {
-        const tabImages = images[currentTab];
-        swatches.forEach((sw) => {
-          const theme = sw.dataset.theme;
-          const available = currentTab === "zen"
-            ? !!images.zen[theme]
-            : (tabImages && tabImages[theme]);
-          sw.style.display = available ? "" : "none";
-        });
-        // If current theme isn't available in this tab, select first available
-        const themeAvailable = currentTab === "zen"
-          ? !!images.zen[currentTheme]
-          : (tabImages && tabImages[currentTheme]);
-        if (!themeAvailable) {
-          const firstAvailable = currentTab === "zen"
-            ? Object.keys(images.zen)[0]
-            : Object.keys(tabImages || {})[0];
-          if (firstAvailable) {
-            currentTheme = firstAvailable;
-            swatches.forEach((s) =>
-              s.classList.toggle("active", s.dataset.theme === currentTheme),
-            );
-            setAccent(currentTheme);
-          }
-        }
-      }
-
-      function updatePreview() {
-        updateSwatches();
-        const isZen = currentTab === "zen";
-        const zenLive = document.getElementById("zen-live-preview");
-        if (isZen) {
-          zenMode = true;
-          previewImg.style.visibility = "hidden";
-          if (zenLive) zenLive.classList.add("active");
-          startZenAnim(currentZenStyle, themeAccents[currentTheme] || "#00d4ff");
-        } else {
-          if (zenMode) {
-            zenMode = false;
-            stopZenAnim();
-            // Restore theme-based particle effect if applicable
-            const tc = particleThemes[currentTheme];
-            if (tc) startParticles(tc);
-          }
-          if (zenLive) zenLive.classList.remove("active");
-          previewImg.style.visibility = "";
-          const tabImages = images[currentTab];
-          const src = tabImages && tabImages[currentTheme];
-          if (src) {
-            previewImg.src = src;
-            previewImg.style.opacity = "1";
-          } else {
-            for (const tab of ["metronome", "drill"]) {
-              if (images[tab] && images[tab][currentTheme]) {
-                previewImg.src = images[tab][currentTheme];
-                previewImg.style.opacity = "0.6";
-                break;
-              }
-            }
-          }
-        }
-        updateWidget();
-        const previewFrame = document.querySelector(".preview-frame");
-        if (previewFrame) previewFrame.classList.toggle("zen-active", isZen);
-        const previewWrapper = document.querySelector(".preview-wrapper");
-        if (previewWrapper) previewWrapper.classList.toggle("zen-active", isZen);
-        const themeSwatchContainer = document.querySelector(".theme-swatches");
-        if (themeSwatchContainer) themeSwatchContainer.classList.toggle("zen-hidden", isZen);
-        const zenSel = document.getElementById("zen-style-selector");
-        if (zenSel) zenSel.classList.toggle("visible", isZen);
-      }
-
-      // Preload all images for instant theme/tab switching.
-      // For zen, only preload the default style (cosmos) to avoid 70 upfront loads.
-      (function preloadImages() {
-        const allSrcs = new Set();
-        Object.values(images).forEach((tab) =>
-          Object.values(tab).forEach((val) => {
-            if (typeof val === "string") {
-              allSrcs.add(val);
-            } else if (val && typeof val === "object") {
-              // nested zen structure — preload only the default style
-              if (val.cosmos) allSrcs.add(val.cosmos);
-            }
-          })
-        );
-        Object.values(widgetImages).forEach((src) => allSrcs.add(src));
-        allSrcs.forEach((src) => { new Image().src = src; });
-      })();
-
-      tabBtns.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          tabBtns.forEach((b) => b.classList.remove("active"));
-          btn.classList.add("active");
-          currentTab = btn.dataset.tab;
-          localStorage.setItem("yames-tab", currentTab);
-          updatePreview();
-        });
-      });
-
-      swatches.forEach((sw) => {
-        sw.addEventListener("click", () => {
-          swatches.forEach((s) => s.classList.remove("active"));
-          sw.classList.add("active");
-          currentTheme = sw.dataset.theme;
-          localStorage.setItem("yames-theme", currentTheme);
-          setAccent(currentTheme);
-          updatePreview();
-        });
-      });
-
-      // Zen style icon swatches
-      const zenSwatches = document.querySelectorAll(".zen-swatch");
-      zenSwatches.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          zenSwatches.forEach((b) => b.classList.remove("active"));
-          btn.classList.add("active");
-          currentZenStyle = btn.dataset.style;
-          localStorage.setItem("yames-zen-style", currentZenStyle);
-          updatePreview();
-        });
-      });
-      // Restore saved zen style active state
-      zenSwatches.forEach((b) => b.classList.toggle("active", b.dataset.style === currentZenStyle));
-
-      // Initial swatch visibility
-      updateSwatches();
-
-      // Restore saved state
-      swatches.forEach((s) =>
-        s.classList.toggle("active", s.dataset.theme === currentTheme),
-      );
-      tabBtns.forEach((b) =>
-        b.classList.toggle("active", b.dataset.tab === currentTab),
-      );
-      setAccent(currentTheme);
-
-      // ─── Particles effect for Aurora & Prism ───
-      const canvas = document.getElementById("particles-canvas");
-      const ctx = canvas.getContext("2d");
-      // ─── Contained zen canvas (inside zen-live-preview) ───
-      const zenCanvas = document.getElementById("zen-canvas");
-      const zenCtx = zenCanvas.getContext("2d");
-      function resizeZenCanvas() {
-        const r = document.getElementById("zen-live-preview")?.getBoundingClientRect();
-        if (r && r.width > 0) { zenCanvas.width = r.width; zenCanvas.height = r.height; }
-      }
-      let particles = [];
-      let animId = null;
-      let particleColor = "#00d4ff";
-      // Zen animation state
-      let rainDrops = [];
-      let warpAngle = 0;
-      let gravDots = [];
-      let pulseRings = [], pulseTick = 0;
-      let radarAngle = 0, radarDots = [];
-      let focusPulse = 0;
-
-      function hexToRgbArr(hex) {
-        const h = hex.replace('#', '');
-        return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
-      }
-
-      function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
-      resizeCanvas();
-      window.addEventListener("resize", resizeCanvas);
-      window.addEventListener("resize", resizeZenCanvas);
-
-      function createParticle(w, h) {
-        return {
-          x: Math.random() * w,
-          y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 0.4,
-          vy: (Math.random() - 0.5) * 0.4,
-          size: Math.random() * 4 + 1,
-          alpha: Math.random() * 0.5 + 0.2,
-          pulse: Math.random() * Math.PI * 2,
-        };
-      }
-
-      function initParticles(w, h) {
-        w = w || canvas.width; h = h || canvas.height;
-        particles = [];
-        for (let i = 0; i < 150; i++) particles.push(createParticle(w, h));
-      }
-
-      function drawParticles() {
-        const _ctx = ctx;
-        const _w = canvas.width;
-        const _h = canvas.height;
-        _ctx.clearRect(0, 0, _w, _h);
-        for (const p of particles) {
-          p.x += p.vx;
-          p.y += p.vy;
-          p.pulse += 0.02;
-          if (p.x < 0) p.x = _w;
-          if (p.x > _w) p.x = 0;
-          if (p.y < 0) p.y = _h;
-          if (p.y > _h) p.y = 0;
-          const alpha = p.alpha * (0.6 + 0.4 * Math.sin(p.pulse));
-          _ctx.beginPath();
-          _ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-          _ctx.fillStyle = particleColor;
-          _ctx.globalAlpha = alpha;
-          _ctx.fill();
-        }
-        _ctx.globalAlpha = 1;
-        for (let i = 0; i < particles.length; i++) {
-          for (let j = i + 1; j < particles.length; j++) {
-            const dx = particles[i].x - particles[j].x;
-            const dy = particles[i].y - particles[j].y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 120) {
-              _ctx.beginPath();
-              _ctx.moveTo(particles[i].x, particles[i].y);
-              _ctx.lineTo(particles[j].x, particles[j].y);
-              _ctx.strokeStyle = particleColor;
-              _ctx.globalAlpha = 0.08 * (1 - dist / 120);
-              _ctx.lineWidth = 0.5;
-              _ctx.stroke();
-            }
-          }
-        }
-        _ctx.globalAlpha = 1;
-        if (currentAnim === 'cosmos' || currentAnim === 'particles') animId = requestAnimationFrame(drawParticles);
-      }
-
-      function startParticles(color) {
-        currentAnim = 'particles';
-        particleColor = color;
-        canvas.classList.add("active");
-        if (!animId) {
-          initParticles();
-          drawParticles();
-        }
-      }
-
-      function stopParticles() {
-        currentAnim = 'none';
-        canvas.classList.remove("active");
-        if (animId) {
-          cancelAnimationFrame(animId);
-          animId = null;
-        }
-      }
-
-      // ─── Zen animation functions ───
-
-      function initRain() {
-        rainDrops = [];
-        for (let i = 0; i < 80; i++) {
-          const depth = Math.random();
-          const ds = 0.3 + depth * 0.7;
-          rainDrops.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            speed: (3 + depth * 7) * ds,
-            length: (12 + depth * 25) * ds,
-            opacity: 0.1 + depth * 0.35,
-            depth,
-          });
-        }
-      }
-      function drawRain() {
-        ctx.fillStyle = "rgba(0,0,0,0.18)";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        for (const d of rainDrops) {
-          d.y += d.speed;
-          if (d.y > canvas.height * (0.55 + d.depth * 0.4)) {
-            d.y = -d.length;
-            d.x = Math.random() * canvas.width;
-          }
-          ctx.beginPath();
-          ctx.moveTo(d.x, d.y);
-          ctx.lineTo(d.x + Math.sin(0.04) * d.length, d.y - d.length);
-          ctx.strokeStyle = particleColor;
-          ctx.globalAlpha = d.opacity;
-          ctx.lineWidth = 0.5 + d.depth * 1.2;
-          ctx.stroke();
-        }
-        ctx.globalAlpha = 1;
-        if (currentAnim === 'rain') animId = requestAnimationFrame(drawRain);
-      }
-
-      function drawWarp() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const cx = animCx, cy = animCy;
-        warpAngle += 0.005;
-        const maxR = Math.hypot(Math.max(cx, canvas.width - cx), Math.max(cy, canvas.height - cy)) + 60;
-        for (let r = 50; r < maxR; r += 55) {
-          const tilt = warpAngle + (r / maxR) * Math.PI * 0.5;
-          ctx.beginPath();
-          for (let i = 0; i <= 4; i++) {
-            const a = (i / 4) * Math.PI * 2 + tilt;
-            const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
-            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-          }
-          ctx.strokeStyle = particleColor;
-          ctx.globalAlpha = 0.05 + 0.18 * (1 - r / maxR);
-          ctx.lineWidth = 0.8;
-          ctx.stroke();
-        }
-        ctx.globalAlpha = 1;
-        if (currentAnim === 'warp') animId = requestAnimationFrame(drawWarp);
-      }
-
-      function initGravity() {
-        gravDots = [];
-        const cx = animCx, cy = animCy;
-        const maxR = Math.hypot(Math.max(cx, canvas.width - cx), Math.max(cy, canvas.height - cy));
-        for (let i = 0; i < 100; i++) {
-          gravDots.push({
-            angle: Math.random() * Math.PI * 2,
-            r: 30 + Math.random() * maxR,
-            speed: (0.0018 + Math.random() * 0.005) * (Math.random() < 0.5 ? 1 : -1),
-            size: 1 + Math.random() * 2.5,
-            alpha: 0.2 + Math.random() * 0.5,
-          });
-        }
-      }
-      function drawGravity() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const cx = animCx, cy = animCy;
-        const [gr, gg, gb] = hexToRgbArr(particleColor);
-        ctx.globalAlpha = 1;
-        for (const d of gravDots) {
-          d.angle += d.speed;
-          ctx.beginPath();
-          ctx.arc(cx + Math.cos(d.angle) * d.r, cy + Math.sin(d.angle) * d.r, d.size, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(${gr},${gg},${gb},${d.alpha})`;
-          ctx.fill();
-        }
-        if (currentAnim === 'gravity') animId = requestAnimationFrame(drawGravity);
-      }
-
-      function initPulse() {
-        const cx = animCx, cy = animCy;
-        const maxR = Math.hypot(Math.max(cx, canvas.width - cx), Math.max(cy, canvas.height - cy));
-        pulseRings = Array.from({ length: 5 }, (_, i) => ({
-          r: (i / 5) * maxR * 0.75,
-          a0: 0.65,
-        }));
-        pulseTick = 0;
-      }
-      function drawPulse() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const cx = animCx, cy = animCy;
-        const maxR = Math.hypot(Math.max(cx, canvas.width - cx), Math.max(cy, canvas.height - cy));
-        pulseTick++;
-        if (pulseTick % 55 === 0) pulseRings.push({ r: 0, a0: 0.65 });
-        for (let i = pulseRings.length - 1; i >= 0; i--) {
-          const ring = pulseRings[i];
-          ring.r += 3.0;
-          if (ring.r >= maxR) { pulseRings.splice(i, 1); continue; }
-          const alpha = ring.a0 * Math.pow(1 - ring.r / maxR, 1.5);
-          ctx.beginPath();
-          ctx.arc(cx, cy, ring.r, 0, Math.PI * 2);
-          ctx.strokeStyle = particleColor;
-          ctx.globalAlpha = alpha;
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
-        }
-        ctx.globalAlpha = 1;
-        if (currentAnim === 'pulse') animId = requestAnimationFrame(drawPulse);
-      }
-
-      function initRadar() {
-        radarAngle = 0;
-        radarDots = [];
-        for (let i = 0; i < 50; i++) {
-          radarDots.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, a: 0 });
-        }
-      }
-      function drawRadar() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const cx = animCx, cy = animCy;
-        const maxR = Math.hypot(Math.max(cx, canvas.width - cx), Math.max(cy, canvas.height - cy));
-        radarAngle += 0.018;
-        const [wr, wg, wb] = hexToRgbArr(particleColor);
-        ctx.globalAlpha = 1;
-        // Radar grid — concentric rings + radial spokes
-        ctx.strokeStyle = `rgba(${wr},${wg},${wb},0.08)`;
-        ctx.lineWidth = 0.6;
-        for (let ring = 1; ring <= 4; ring++) {
-          ctx.beginPath();
-          ctx.arc(cx, cy, maxR * (ring / 4), 0, Math.PI * 2);
-          ctx.stroke();
-        }
-        for (let s = 0; s < 12; s++) {
-          const ang = (s / 12) * Math.PI * 2;
-          ctx.beginPath();
-          ctx.moveTo(cx, cy);
-          ctx.lineTo(cx + Math.cos(ang) * maxR, cy + Math.sin(ang) * maxR);
-          ctx.stroke();
-        }
-        // Radar wake — smooth conic gradient (slice fallback for older browsers)
-        // Website alpha is halved to account for zen-canvas double screen-blend amplification
-        const wakeArc = Math.PI * 0.6;
-        if ('createConicGradient' in ctx) {
-          const grad = ctx.createConicGradient(radarAngle - wakeArc, cx, cy);
-          const wFrac = wakeArc / (Math.PI * 2);
-          grad.addColorStop(0, `rgba(${wr},${wg},${wb},0)`);
-          grad.addColorStop(wFrac, `rgba(${wr},${wg},${wb},0.065)`);
-          grad.addColorStop(Math.min(wFrac + 0.01, 1), `rgba(${wr},${wg},${wb},0)`);
-          grad.addColorStop(1, `rgba(${wr},${wg},${wb},0)`);
-          ctx.beginPath();
-          ctx.moveTo(cx, cy);
-          ctx.arc(cx, cy, maxR, radarAngle - wakeArc, radarAngle);
-          ctx.closePath();
-          ctx.fillStyle = grad;
-          ctx.globalAlpha = 1;
-          ctx.fill();
-        } else {
-          for (let t = 0; t < 120; t++) {
-            const frac = t / 120;
-            const a0 = radarAngle - wakeArc + frac * wakeArc;
-            const a1 = radarAngle - wakeArc + (frac + 1 / 120) * wakeArc;
-            ctx.beginPath();
-            ctx.moveTo(cx, cy);
-            ctx.arc(cx, cy, maxR, a0, a1);
-            ctx.closePath();
-            ctx.fillStyle = `rgba(${wr},${wg},${wb},${0.06 * Math.pow(frac, 1.3)})`;
-            ctx.globalAlpha = 1;
-            ctx.fill();
-          }
-        }
-        // Active scan line
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.lineTo(cx + Math.cos(radarAngle) * maxR, cy + Math.sin(radarAngle) * maxR);
-        ctx.strokeStyle = `rgba(${wr},${wg},${wb},0.55)`;
-        ctx.globalAlpha = 1;
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-        // Scatter dots — light up when swept, then fade slowly (~4 s)
-        for (const d of radarDots) {
-          const diff = ((radarAngle - Math.atan2(d.y - cy, d.x - cx)) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
-          if (diff < 0.12) d.a = 0.85;
-          d.a *= 0.985;
-          if (d.a > 0.02) {
-            ctx.beginPath();
-            ctx.arc(d.x, d.y, 2.5, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${wr},${wg},${wb},${d.a})`;
-            ctx.fill();
-          }
-        }
-        ctx.globalAlpha = 1;
-        if (currentAnim === 'radar') animId = requestAnimationFrame(drawRadar);
-      }
-
-      function drawFocus() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const cx = animCx, cy = animCy;
-        focusPulse += 0.025;
-        const s = 0.6 + 0.4 * Math.sin(focusPulse);
-        // Outer glow
-        const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, 130 * s);
-        g.addColorStop(0, particleColor + '33');
-        g.addColorStop(1, particleColor + '00');
-        ctx.beginPath();
-        ctx.arc(cx, cy, 130 * s, 0, Math.PI * 2);
-        ctx.fillStyle = g;
-        ctx.globalAlpha = s;
-        ctx.fill();
-        // Core
-        ctx.beginPath();
-        ctx.arc(cx, cy, 7 * s, 0, Math.PI * 2);
-        ctx.fillStyle = particleColor;
-        ctx.globalAlpha = 0.9;
-        ctx.fill();
-        ctx.globalAlpha = 1;
-        if (currentAnim === 'focus') animId = requestAnimationFrame(drawFocus);
-      }
-
-      function startZenAnim(style, color) {
-        currentAnim = style;
-        particleColor = color;
-        if (animId) { cancelAnimationFrame(animId); animId = null; }
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        canvas.classList.add("active");
-        canvas.classList.add("zen");
-        updateAnimCenter();
-        resizeZenCanvas();
-        if (!amplifyId) amplifyId = requestAnimationFrame(amplifyZenArea);
-        switch (style) {
-          case 'cosmos':  initParticles(); animId = requestAnimationFrame(drawParticles); break;
-          case 'rain':    initRain();      animId = requestAnimationFrame(drawRain);      break;
-          case 'warp':    warpAngle = 0;   animId = requestAnimationFrame(drawWarp);      break;
-          case 'gravity': initGravity();   animId = requestAnimationFrame(drawGravity);   break;
-          case 'pulse':   initPulse();     animId = requestAnimationFrame(drawPulse);     break;
-          case 'radar':   initRadar();     animId = requestAnimationFrame(drawRadar);     break;
-          case 'focus':   focusPulse = 0;  animId = requestAnimationFrame(drawFocus);     break;
-        }
-      }
-
-      function stopZenAnim() {
-        currentAnim = 'none';
-        if (animId) { cancelAnimationFrame(animId); animId = null; }
-        if (amplifyId) { cancelAnimationFrame(amplifyId); amplifyId = null; }
-        canvas.classList.remove("active");
-        canvas.classList.remove("zen");
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        zenCtx.clearRect(0, 0, zenCanvas.width, zenCanvas.height);
-      }
-
-      function amplifyZenArea() {
-        const zenLive = document.getElementById("zen-live-preview");
-        if (zenLive && zenLive.classList.contains("active")) {
-          const r = zenLive.getBoundingClientRect();
-          const sx = Math.round(r.left), sy = Math.round(r.top), sw = Math.round(r.width), sh = Math.round(r.height);
-          zenCtx.clearRect(0, 0, zenCanvas.width, zenCanvas.height);
-          // First pass: copy
-          zenCtx.globalCompositeOperation = 'source-over';
-          zenCtx.drawImage(canvas, sx, sy, sw, sh, 0, 0, zenCanvas.width, zenCanvas.height);
-          // Second pass: screen-blend the same source on top — doubles brightness while preserving hue
-          zenCtx.globalCompositeOperation = 'screen';
-          zenCtx.drawImage(canvas, sx, sy, sw, sh, 0, 0, zenCanvas.width, zenCanvas.height);
-          zenCtx.globalCompositeOperation = 'source-over';
-        }
-        amplifyId = requestAnimationFrame(amplifyZenArea);
-      }
-
-      function updateAnimCenter() {
-        const zenLive = document.getElementById("zen-live-preview");
-        if (zenLive) {
-          const r = zenLive.getBoundingClientRect();
-          animCx = r.left + r.width / 2;
-          animCy = r.top + r.height / 2;
-        }
-      }
-
-      let _animCenterPending = false;
-      function _scheduleAnimCenter() {
-        if (!_animCenterPending) {
-          _animCenterPending = true;
-          requestAnimationFrame(() => { updateAnimCenter(); _animCenterPending = false; });
-        }
-      }
-      window.addEventListener('resize', _scheduleAnimCenter);
-      window.addEventListener('scroll', _scheduleAnimCenter, { passive: true });
-
-      // Integrate with theme switching
-      const particleThemes = { aurora: "#00d4ff", prism: "#ff3d8a" };
-
-      function updateParticles(theme) {
-        if (zenMode) {
-          // Update animation color when theme changes while zen is active
-          particleColor = themeAccents[theme] || "#00d4ff";
-          return;
-        }
-        if (particleThemes[theme]) {
-          startParticles(particleThemes[theme]);
-        } else {
-          stopParticles();
-        }
-      }
-
-      // Patch setAccent to also handle particles
-      const _origSetAccent = setAccent;
-      setAccent = function (theme) {
-        _origSetAccent(theme);
-        updateParticles(theme);
-      };
-      // Initialize particle state for current theme on page load
-      if (currentTab !== "zen") updateParticles(currentTheme);
-      // Initialize animation center so first zen start isn't at (0,0)
-      updateAnimCenter();
-      // Initial render — called after all canvas/particle/animation state is ready
-      updatePreview();
-
-      // ─── Changelog modal ───
-      let changelogLoaded = false;
-      const RELEASES_URL = "https://api.github.com/repos/turutupa/yames/releases";
-      const INITIAL_SHOW = 5;
-
-      function openChangelog() {
-        const overlay = document.getElementById("changelog-overlay");
-        overlay.classList.add("open");
-        document.body.style.overflow = "hidden";
-        if (!changelogLoaded) loadChangelog();
-      }
-
-      function closeChangelog() {
-        const overlay = document.getElementById("changelog-overlay");
-        overlay.classList.remove("open");
-        document.body.style.overflow = "";
-      }
-
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") closeChangelog();
-      });
-
-      async function loadChangelog() {
-        const body = document.getElementById("changelog-body");
-        try {
-          const res = await fetch(RELEASES_URL + "?per_page=30");
-          if (!res.ok) throw new Error("API error");
-          const releases = await res.json();
-          if (!releases.length) {
-            body.innerHTML = '<div class="changelog-empty">No releases found.</div>';
-            return;
-          }
-          // Update version badge with latest
-          document.getElementById("version-number").textContent = releases[0].tag_name.replace(/^v/, "");
-
-          let html = "";
-          releases.forEach((rel, i) => {
-            const date = new Date(rel.published_at).toLocaleDateString("en-US", {
-              year: "numeric", month: "short", day: "numeric"
-            });
-            const isHidden = i >= INITIAL_SHOW;
-            const releaseBody = rel.body && rel.body !== "Download Yames for your platform below."
-              ? formatBody(rel.body)
-              : '<span class="changelog-no-notes">Release artifacts only.</span>';
-            html += '<div class="changelog-release' + (isHidden ? " changelog-hidden" : "") + '">'
-              + '<div class="changelog-release-header">'
-              + '<span class="changelog-version">' + escHtml(rel.tag_name) + '</span>'
-              + '<span class="changelog-date">' + date + '</span>'
-              + '</div>'
-              + '<div class="changelog-notes">' + releaseBody + '</div>'
-              + '</div>';
-          });
-          if (releases.length > INITIAL_SHOW) {
-            html += '<button class="changelog-load-more" onclick="showAllReleases(this)">'
-              + 'Show ' + (releases.length - INITIAL_SHOW) + ' older releases'
-              + '</button>';
-          }
-          body.innerHTML = html;
-          changelogLoaded = true;
-          requestAnimationFrame(() => buildTimeline(releases));
-        } catch (e) {
-          body.innerHTML = '<div class="changelog-empty">Could not load releases. <a href="https://github.com/turutupa/yames/releases" target="_blank" rel="noopener">View on GitHub →</a></div>';
-        }
-      }
-
-      function showAllReleases(btn) {
-        document.querySelectorAll(".changelog-hidden").forEach((el) => el.classList.remove("changelog-hidden"));
-        btn.remove();
-        requestAnimationFrame(rebuildTimelinePositions);
-      }
-
-      function formatBody(text) {
-        // Naive inline markdown: bold, italic, strikethrough, code
-        function inline(raw) {
-          return escHtml(raw)
-            .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-            .replace(/\*(.+?)\*/g,     "<em>$1</em>")
-            .replace(/~~(.+?)~~/g,     "<del>$1</del>")
-            .replace(/`(.+?)`/g,       "<code>$1</code>");
-        }
-        const lines = text.split("\n");
-        let html = "";
-        let inList = false;
-        lines.forEach((line) => {
-          const trimmed = line.trim();
-          if (!trimmed) return;
-          // Skip ## headings — version header already shown
-          if (/^#{1,3}\s/.test(trimmed)) return;
-          // Bullet: must be "- text" or "* text" (space required — avoids matching **bold**)
-          if (/^[-*] /.test(trimmed)) {
-            if (!inList) { html += "<ul>"; inList = true; }
-            html += "<li>" + inline(trimmed.replace(/^[-*] /, "")) + "</li>";
-          } else {
-            if (inList) { html += "</ul>"; inList = false; }
-            html += "<p>" + inline(trimmed) + "</p>";
-          }
-        });
-        if (inList) html += "</ul>";
-        return html;
-      }
-
-      function escHtml(s) {
-        return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-      }
-
-      // ─── Timeline nav ───
-      let timelineReleases = [];
-      let _tlObserver = null;
-      let _tlVisibleSet = new Set();
-      let _tlActiveIdx = 0;
-      let _tlRafPending = false;
-
-      function buildTimeline(releases) {
-        timelineReleases = releases;
-        const timeline = document.getElementById("changelog-timeline");
-        const body = document.getElementById("changelog-body");
-        let html = "";
-        releases.forEach((rel, i) => {
-          const hidden = i >= INITIAL_SHOW ? " tl-hidden" : "";
-          const bullets = (rel.body || "").split("\n").filter((l) => /^\s*[-*]/.test(l)).length;
-          const tw = Math.max(6, Math.min(20, 6 + bullets * 2));
-          html += '<div class="tl-tick' + hidden + '" data-index="' + i + '" style="--tw:' + tw + 'px">'
-            + '<div class="tl-tooltip">' + escHtml(rel.tag_name) + '</div>'
-            + '</div>';
-        });
-        timeline.innerHTML = html;
-        timeline.querySelectorAll(".tl-tick").forEach((tick) => {
-          tick.addEventListener("click", () => {
-            const idx = parseInt(tick.dataset.index);
-            _tlActiveIdx = idx;
-            const els = body.querySelectorAll(".changelog-release");
-            if (els[idx]) els[idx].scrollIntoView({ behavior: "smooth", block: "start" });
-            _applyTimelineTicks();
-          });
-        });
-
-        // Use IntersectionObserver — no scroll listeners, no layout reads
-        if (_tlObserver) _tlObserver.disconnect();
-        _tlVisibleSet = new Set();
-        _tlObserver = new IntersectionObserver((entries) => {
-          entries.forEach((entry) => {
-            const idx = parseInt(entry.target.dataset.tlIndex);
-            if (entry.isIntersecting) {
-              _tlVisibleSet.add(idx);
-            } else {
-              _tlVisibleSet.delete(idx);
-            }
-          });
-          // Active = topmost visible
-          if (_tlVisibleSet.size > 0) {
-            _tlActiveIdx = Math.min(..._tlVisibleSet);
-          }
-          // Coalesce rapid observer callbacks into a single paint
-          if (!_tlRafPending) {
-            _tlRafPending = true;
-            requestAnimationFrame(() => {
-              _tlRafPending = false;
-              _applyTimelineTicks();
-            });
-          }
-        }, { root: body, threshold: 0.1 });
-
-        body.querySelectorAll(".changelog-release").forEach((el, i) => {
-          el.dataset.tlIndex = i;
-          if (!el.classList.contains("changelog-hidden")) _tlObserver.observe(el);
-        });
-
-        _applyTimelineTicks();
-      }
-
-      function _applyTimelineTicks() {
-        const ticks = document.querySelectorAll(".tl-tick");
-        ticks.forEach((tick, i) => {
-          tick.classList.toggle("tl-active", i === _tlActiveIdx);
-          tick.classList.toggle("tl-visible", i !== _tlActiveIdx && _tlVisibleSet.has(i));
-        });
-      }
-
-      function rebuildTimelinePositions() {
-        const body = document.getElementById("changelog-body");
-        document.querySelectorAll(".tl-hidden").forEach((el) => el.classList.remove("tl-hidden"));
-        // Re-observe any newly visible releases
-        if (_tlObserver) {
-          body.querySelectorAll(".changelog-release").forEach((el, i) => {
-            el.dataset.tlIndex = i;
-            _tlObserver.observe(el);
-          });
-        }
-        _applyTimelineTicks();
-      }
-    </script>
+    <script src="site.js" defer></script>
   </body>
 </html>

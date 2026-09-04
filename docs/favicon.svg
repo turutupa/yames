@@ -1,11 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Yames">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#4a2068"/>
-      <stop offset="100%" stop-color="#050505"/>
+    <!-- Brand amber. A filled colour block reads at 16px and stands out
+         in a tab strip where almost every other icon is dark. -->
+    <linearGradient id="tile" gradientUnits="userSpaceOnUse"
+                    x1="6" y1="0" x2="58" y2="64">
+      <stop offset="0%" stop-color="#FFC24D"/>
+      <stop offset="100%" stop-color="#E8760C"/>
     </linearGradient>
   </defs>
-  <rect width="32" height="32" rx="8" fill="url(#bg)"/>
-  <rect x="0.5" y="0.5" width="31" height="31" rx="7.5" fill="none" stroke="#ffffff" stroke-opacity="0.08"/>
-  <text x="16" y="14.5" font-family="Inter, -apple-system, sans-serif" font-size="26" font-weight="900" letter-spacing="-0.03em" fill="#e94560" text-anchor="middle" dominant-baseline="central">y</text>
+
+  <rect width="64" height="64" rx="15" fill="url(#tile)"/>
+
+  <!-- The Y is knocked through the tile in ink rather than left
+       transparent, so it reads the same on light and dark chrome.
+       It doubles as a metronome pendulum: fork is the swing, stem is
+       the rod. -->
+  <g fill="none" stroke="#0B0A14" stroke-width="8"
+     stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 17 L32 37 L46 17"/>
+    <path d="M32 37 L32 48"/>
+  </g>
 </svg>
