@@ -180,8 +180,16 @@ Prerequisites (all installed on the owner's laptop):
 Fast check that the toolchain is sane (clean target dir, ~3 min):
 
 ```sh
-LIBCLANG_PATH="C:/Program Files/LLVM/bin" cargo test --manifest-path src-tauri/Cargo.toml --lib --no-default-features
+LIBCLANG_PATH="C:/Program Files/LLVM/bin" npm run test:rust
 ```
+
+Use the npm script on Windows, not a bare `cargo test --lib`. The unit-test
+harness needs a Common-Controls v6 manifest that only `scripts/rust-test.mjs`
+supplies; without it the binary dies at load with
+`STATUS_ENTRYPOINT_NOT_FOUND` (0xc0000139) before a single test runs. See
+`src-tauri/tests-common-controls-v6.manifest`. `npm run test:dsp` and
+`test:highbpm` need nothing special — `src-tauri/build.rs` covers the
+integration-test harnesses.
 
 ## Audio-safety gate — the click-jitter probe
 

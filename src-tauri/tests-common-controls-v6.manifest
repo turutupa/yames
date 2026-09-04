@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  Do not delete. Without this, `cargo test` on Windows/MSVC dies at process
+  load with STATUS_ENTRYPOINT_NOT_FOUND (0xc0000139) before a single test
+  runs, and the whole Rust gate goes red for a reason that has nothing to do
+  with the test that broke it.
+
+  Why: linked Tauri/`muda` code imports `TaskDialogIndirect`, which exists
+  only in the side-by-side Common-Controls v6 comctl32. `tauri-build` gives
+  the *app* binary a manifest that asks for v6; `cargo test` harness binaries
+  get none, so the loader binds System32's comctl32 5.82 and cannot resolve
+  the import. Whether the import is even present depends on whether anything
+  reachable from a test happens to pull that object in — before the audio
+  recovery tests in `engine.rs` nothing did, so the gate was green by luck.
+
+  This manifest is applied ONLY to `cargo test` links, via `RUSTFLAGS` in
+  `.github/workflows/ci.yml` and in `scripts/rust-test.mjs` (which is what
+  the `test:rust` / `test:dsp` / `test:highbpm` npm scripts run). It must not
+  be applied to a build that produces `yames.exe`: `tauri-build` already
+  embeds a manifest resource there, and a second one fails the link with
+  `CVT1100: duplicate resource` / `LNK1123`.
+-->
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <dependency>
+    <dependentAssembly>
+      <assemblyIdentity
+        type="win32"
+        name="Microsoft.Windows.Common-Controls"
+        version="6.0.0.0"
+        processorArchitecture="*"
+        publicKeyToken="6595b64144ccf1df"
+        language="*"/>
+    </dependentAssembly>
+  </dependency>
+</assembly>
