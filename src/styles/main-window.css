@@ -2176,7 +2176,15 @@
   white-space: nowrap;
   flex-shrink: 0;
   text-align: center;
-  width: 64px;
+  /* `min-width`, never `width`. This was `width: 64px`, which the label
+     cannot fit: "TEST INPUTS" is ~95px uppercase at this size, and
+     `white-space: nowrap` means it cannot wrap, so the text spilled
+     outside its own border. A fixed width can only ever be right for one
+     string, and this button has two ("Test inputs" / "Stop test") across
+     15 locales — several of them longer than English. The minimum keeps
+     the button from jumping when the label toggles; the content decides
+     the rest. */
+  min-width: 64px;
 }
 
 .input-test-btn:hover {
@@ -2857,7 +2865,23 @@
 .voice-toggle-btn {
   display: inline-flex;
   align-items: center;
+  /* `display: inline-flex` throws away a button's default text centring,
+     and there was no `justify-content` to replace it, so the contents
+     packed to the start and the voice name sat left of centre. */
+  justify-content: center;
   gap: 6px;
+}
+
+/* Even centred, the flex line is [name][gap][wave] — so centring the LINE
+   still leaves the NAME about 10px left of the button's middle, because
+   the wave keeps its 14px whether or not it is showing (deliberately: it
+   flips opacity rather than display so the button does not reflow when a
+   preview starts). Mirror that reserved footprint on the leading side and
+   the name lands dead centre, with the no-reflow property intact. */
+.voice-toggle-btn::before {
+  content: "";
+  flex: none;
+  width: 14px;
 }
 
 .voice-wave {

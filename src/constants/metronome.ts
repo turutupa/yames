@@ -64,10 +64,24 @@ export const METER_VARIANTS: Record<string, number[][]> = {
   "8/8":  [[3, 2, 3], [3, 3, 2], [2, 3, 3]],
 };
 
+/**
+ * Display order for the meter row, and the order the next/previous meter
+ * affordance walks.
+ *
+ * Ascending by beats, one rule the whole way. It used to run 4/4, 3/4,
+ * 2/4 and then 5/4, 6/8, 7/8 … — "most common first" for the simple
+ * meters grafted onto an ascending list, which reads as a mistake
+ * because the sequence reverses direction halfway. Frequency ordering
+ * was not really available anyway: FREE holds the leftmost slot, and a
+ * true frequency order would not put 5/4 ahead of 6/8 either.
+ *
+ * Nothing may depend on the index of an entry: `cycleMeterPreset` looks
+ * 4/4 up by label precisely so this list can be reordered again.
+ */
 export const METER_PRESETS: Array<{ label: string; groups: number[] }> = [
-  { label: "4/4",  groups: [4] },
-  { label: "3/4",  groups: [3] },
   { label: "2/4",  groups: [2] },
+  { label: "3/4",  groups: [3] },
+  { label: "4/4",  groups: [4] },
   { label: "5/4",  groups: [3, 2] },
   { label: "6/8",  groups: [3, 3] },
   { label: "7/8",  groups: [3, 2, 2] },

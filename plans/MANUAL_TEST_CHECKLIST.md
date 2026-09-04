@@ -50,7 +50,9 @@ dev build with a different identifier. Restore it afterwards.
 ## 4. Metronome, meter, FREE mode (#10 follow-ups, #11)
 - [ ] The live early/late needle is visible while playing with evaluation on (it was invisible before today).
 - [ ] FREE mode: chip collapses groups; chevrons wrap 16→1 and 1→16; no accent on any beat, including during a drill ramp; switching to 7/8 restores groups.
-- [ ] 2/4 exists; cycling meters with the hotkey/widget/Zen steps through variants correctly (from 2+2+3 next is 8/8, not 4/4).
+- [ ] The meter row reads ascending: FREE, 2/4, 3/4, 4/4, 5/4, 6/8, 7/8, 8/8, 9/8, 12/8. It used to run 4/4, 3/4, 2/4 and then ascend, which reversed direction halfway.
+- [ ] Cycling meters with the hotkey/widget/Zen walks that same order and wraps at both ends (12/8 → 2/4, and 2/4 back → 12/8); from a 2+2+3 variant the next is still 8/8.
+- [ ] A meter the app doesn't recognise (e.g. a hand-edited grouping) still lands on **4/4** when you press next/previous — not on 2/4. This is the one thing the reorder could have broken silently.
 - [ ] Change meter mid-play: main window dots, floating widget dots and Zen dots all stay aligned with the audible accent.
 - [ ] Zen on the Drill tab with a 7-beat meter: a dot lights on every beat.
 - [ ] Clicking meter chips mid-practice does not erase the open practice segment from the session report.
