@@ -88,6 +88,33 @@ def render(size):
     return out.resize((size, size), Image.LANCZOS)
 
 
+def render_tray(size):
+    """Tray icon: the Y alone on transparency, no tile.
+
+    tauri.conf.json sets iconAsTemplate, and macOS renders a template
+    image from its ALPHA CHANNEL ONLY. A filled tile is therefore a solid
+    blob in the menu bar with no Y in it — which is what the old icon did
+    too. Amber rather than black so the same file still reads on Windows
+    and Linux trays, where the colour is used as-is; macOS discards it.
+    """
+    W = size * SS
+    K = W / VB
+    px = lambda v: v * K
+
+    glyph = Image.new("L", (W, W), 0)
+    gd = ImageDraw.Draw(glyph)
+    sw = px(9.5)
+    pts = [(px(15), px(15)), (px(32), px(38)), (px(49), px(15))]
+    gd.line(pts, fill=255, width=int(round(sw)), joint="curve")
+    gd.line([(px(32), px(38)), (px(32), px(51))], fill=255, width=int(round(sw)))
+    for (x, y) in pts + [(px(32), px(51))]:
+        gd.ellipse([x - sw / 2, y - sw / 2, x + sw / 2, y + sw / 2], fill=255)
+
+    out = Image.new("RGBA", (W, W), (0, 0, 0, 0))
+    out.paste(Image.new("RGB", (W, W), hex_rgb("#F5A30B")), (0, 0), glyph)
+    return out.resize((size, size), Image.LANCZOS)
+
+
 def main():
     for name, size in WEB.items():
         render(size).save(os.path.join(DOCS, name))
@@ -100,6 +127,9 @@ def main():
     for name, size in APP_PNGS.items():
         render(size).save(os.path.join(APP, name))
         print(f"  src-tauri/icons/{name}  {size}x{size}")
+
+    render_tray(128).save(os.path.join(APP, "tray.png"))
+    print("  src-tauri/icons/tray.png  128x128  (transparent, template-safe)")
 
     master = render(1024)
 
