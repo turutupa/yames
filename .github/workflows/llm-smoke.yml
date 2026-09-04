@@ -137,12 +137,25 @@ jobs:
           npm install
           npm run build
 
+      # `RUSTFLAGS` below is the Windows row only, and is not optional:
+      # `cargo test --lib` on MSVC links Tauri code importing
+      # `TaskDialogIndirect`, which lives only in the side-by-side
+      # Common-Controls v6 comctl32. The harness gets none of the manifest
+      # `tauri-build` puts in `yames.exe`, so without this it dies at load
+      # with STATUS_ENTRYPOINT_NOT_FOUND (0xc0000139) before running a test.
+      # Read src-tauri/tests-common-controls-v6.manifest before removing it.
+      #
+      # `matrix.label == 'windows'` and not the platform: macOS and Linux
+      # must never see MSVC linker flags. `--lib` builds no bins, so the
+      # global flag cannot reach a `yames.exe` link (where a second manifest
+      # fails with LNK1123) — the same reasoning as `ci.yml`'s `--lib` step.
       - name: Load a GGUF and generate tokens
         shell: bash
         env:
           # Picked up by the `llm_tests` module added in T01; without it the
           # test logs a skip and passes vacuously, so it is always set here.
           YAMES_TEST_GGUF: ${{ runner.temp }}/test-model.gguf
+          RUSTFLAGS: ${{ matrix.label == 'windows' && format('-Clink-arg=/MANIFEST:EMBED -Clink-arg=/MANIFESTINPUT:{0}/src-tauri/tests-common-controls-v6.manifest', github.workspace) || '' }}
         run: |
           set -euo pipefail
           # `--target` for the macOS entries so this really is the artifact

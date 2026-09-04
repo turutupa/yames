@@ -92,8 +92,12 @@ Smoke test — skipped when the env var is unset, so it is safe in CI:
 
 ```sh
 YAMES_TEST_GGUF=/path/to/tiny.gguf \
-  cargo test --manifest-path src-tauri/Cargo.toml --features coach-llm --lib
+  node scripts/rust-test.mjs --features coach-llm --lib
 ```
+
+The wrapper, not a bare `cargo test --lib` — on Windows the unit-test
+harness will not load without the manifest it supplies (see the Windows
+section below).
 
 ## Fast validation chain (no app boot)
 

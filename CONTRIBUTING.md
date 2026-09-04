@@ -67,8 +67,12 @@ bun run build          # tsc + Vite production build
 Rust unit tests:
 
 ```sh
-cd src-tauri && cargo test --lib --no-default-features
+bun run test:rust        # or: npm run test:rust
 ```
+
+Use the script rather than a bare `cargo test --lib`: on Windows the
+unit-test harness needs a Common-Controls v6 manifest that
+`scripts/rust-test.mjs` supplies, and will not load without it.
 
 ## Commit conventions
 
@@ -86,6 +90,6 @@ not bump a release.
 - [ ] `bun run tsc --noEmit` passes (zero errors)
 - [ ] `bun run test` passes
 - [ ] `bun run build` passes
-- [ ] Rust tests pass (`cargo test --lib --no-default-features`)
+- [ ] Rust tests pass (`bun run test:rust`)
 - [ ] No large-file rewrites — edit surgically (see AGENTS.md)
 - [ ] Commit message follows the convention above
