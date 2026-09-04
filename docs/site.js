@@ -1227,7 +1227,15 @@
     const TILT = -0.22;
 
     let w = 0, h = 0, running = false, rafId = null;
-    let spin = 0, beat = 0, acc = 0, last = 0, drift = 0.08;
+    /* The front face — plate and aperture — sits at +z, which the
+       projection puts furthest from the camera. Starting at 0 therefore
+       opened on the back of the case. FRONT turns it to face us, and the
+       swing keeps it there: it rocks between front-left and front-right
+       instead of rotating fully, so the back is never presented. */
+    const FRONT = Math.PI - 0.5;
+    const TURN = 0.5;
+    let turn = 0, beat = 0, acc = 0, last = 0, drift = 0.08;
+    let driftTarget = 0.08, driftHold = 20;
     let ink = "245,163,11", ghostInk = "255,107,166";
 
     /* ── Geometry helpers: each returns {pts, edges} ── */
@@ -1412,6 +1420,7 @@
     function draw(now) {
       ctx.clearRect(0, 0, w, h);
       const scale = Math.min(w, h) / 7.9;
+      const spin = FRONT + Math.sin(turn) * TURN;
       const cy = Math.cos(spin), sy = Math.sin(spin);
       const cx = Math.cos(TILT), sx = Math.sin(TILT);
       const phase = acc / BEAT;
@@ -1456,22 +1465,32 @@
 
     /** Settles open, then breathes, so it is never quite static. */
     function explodeAmount() {
-      return 0.4 + Math.sin(spin * 1.7) * 0.04;
+      return 0.4 + Math.sin(turn * 1.3) * 0.04;
     }
 
     function frame(now) {
       if (!running) return;
       const dt = Math.min(now - last, 60);
       last = now;
-      spin += dt * 0.00011;
+      turn += dt * 0.00016;
       acc += dt;
       while (acc >= BEAT) {
         acc -= BEAT;
         beat++;
-        drift += (Math.random() - 0.5) * 0.06;
-        // Biased late and clamped wide enough that the two rods visibly
-        // separate — real drag is too small to see at this scale.
-        drift = Math.max(-0.06, Math.min(0.12, drift * 0.95 + 0.006));
+        /* A player who settles into a habit and then corrects it, rather
+           than one who is always late. The target is held for several
+           bars at a time so the readout does not flicker between states
+           — it drifts behind, gets pulled back, sometimes overshoots
+           ahead of the beat, sometimes sits in the pocket. */
+        if (--driftHold <= 0) {
+          driftHold = 14 + Math.floor(Math.random() * 18);
+          const r = Math.random();
+          driftTarget = r < 0.45 ? 0.05 + Math.random() * 0.07   // behind
+                      : r < 0.72 ? -(0.03 + Math.random() * 0.05) // ahead
+                      : (Math.random() - 0.5) * 0.02;             // in the pocket
+        }
+        drift += (driftTarget - drift) * 0.06 + (Math.random() - 0.5) * 0.008;
+        drift = Math.max(-0.1, Math.min(0.13, drift));
       }
       draw(now);
       const ms = Math.round(drift * BEAT);

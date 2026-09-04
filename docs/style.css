@@ -1191,15 +1191,15 @@ main,
   aspect-ratio: 4 / 3;
 }
 
-/* Bottom left: the top of this card sits under the sticky nav, and the
-   drawing's mass is upper right. */
+/* Top right, inset enough that the sticky nav clears it while the
+   section is actually being read. */
 .figure__readout {
   position: absolute;
-  left: 26px;
-  bottom: 24px;
+  right: 26px;
+  top: 40px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-end;
   gap: 1px;
   pointer-events: none;
 }
