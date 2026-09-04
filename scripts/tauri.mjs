@@ -22,7 +22,7 @@
  * passes its own `--features`, so it never goes through this file.
  */
 import { spawn } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -66,6 +66,58 @@ if (wantsFeatureInjection) {
         `[tauri] CARGO_TARGET_DIR=${env.CARGO_TARGET_DIR} — a short path is required for the` +
           " llama.cpp build on Windows; set it yourself to override",
       );
+    }
+
+    // `llama-cpp-sys-2`'s build script panics with "Please install Vulkan
+    // SDK and ensure that VULKAN_SDK env variable is set: NotPresent" — and
+    // it does so several minutes into the build, after cargo has already
+    // compiled a pile of unrelated crates. The SDK's installer sets
+    // VULKAN_SDK machine-wide, but a shell opened before the install
+    // inherited the old environment and will never see it, which is exactly
+    // how this bites: the machine is set up correctly and the build still
+    // fails. Recover it from disk, and if we genuinely cannot find one,
+    // say so now with a usable instruction instead of panicking later.
+    if (!env.VULKAN_SDK) {
+      const root = "C:\\VulkanSDK";
+      const versions = existsSync(root)
+        ? readdirSync(root, { withFileTypes: true })
+            .filter((e) => e.isDirectory())
+            // Newest first, comparing version components numerically so
+            // 1.4.357 sorts above 1.4.99 (a plain string sort would not).
+            .map((e) => e.name)
+            .sort((a, b) => {
+              const pa = a.split(".").map(Number);
+              const pb = b.split(".").map(Number);
+              for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+                const d = (pb[i] ?? 0) - (pa[i] ?? 0);
+                if (d) return d;
+              }
+              return 0;
+            })
+        : [];
+      const found = versions.find((v) => existsSync(join(root, v, "Include", "vulkan")));
+      if (found) {
+        env.VULKAN_SDK = join(root, found);
+        console.log(`[tauri] VULKAN_SDK=${env.VULKAN_SDK} (found on disk; your shell did not have it)`);
+      } else {
+        console.error(
+          "[tauri] The Vulkan SDK is required for the coach-llm-vulkan build and was not found.\n" +
+            "        Install it from https://vulkan.lunarg.com/sdk/home#windows, then open a NEW\n" +
+            "        terminal so it picks up VULKAN_SDK.\n" +
+            "        To build without the coach instead:  YAMES_DEV_NO_LLM=1 npm run tauri dev",
+        );
+        process.exit(1);
+      }
+    }
+
+    // Same failure shape, different crate: aubio-sys' bindgen needs
+    // libclang and reports its absence just as unhelpfully.
+    if (!env.LIBCLANG_PATH) {
+      const llvm = "C:\\Program Files\\LLVM\\bin";
+      if (existsSync(join(llvm, "libclang.dll"))) {
+        env.LIBCLANG_PATH = llvm;
+        console.log(`[tauri] LIBCLANG_PATH=${llvm} (found on disk; your shell did not have it)`);
+      }
     }
   }
 }
