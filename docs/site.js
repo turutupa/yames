@@ -624,7 +624,7 @@
     }
   });
 
-  /* ── Reveals, parallax, sticky nav ────────────────────── */
+  /* ── Reveals ──────────────────────────────────────────── */
 
   $$(".reveal").forEach((el) => {
     const delay = el.dataset.revealDelay;
@@ -648,50 +648,9 @@
     $$(".reveal").forEach((el) => observer.observe(el));
   }
 
-  /* Parallax is measured from each layer's own position, not from raw
-     scrollY. Driving it off scrollY means a layer 3000px down the page
-     gets displaced by 3000 * rate — hundreds of pixels — instead of
-     drifting gently as it passes. Document-space centres are cached so
-     the loop never reads back a rect it has just transformed. */
-  const parallaxEls = $$("[data-parallax]");
-  const parallaxCentres = new WeakMap();
-
-  function measureParallax() {
-    for (const el of parallaxEls) {
-      let top = 0;
-      for (let node = el; node; node = node.offsetParent) top += node.offsetTop;
-      parallaxCentres.set(el, top + el.offsetHeight / 2);
-    }
-  }
-
-  let ticking = false;
-
-  function onScroll() {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(() => {
-      if (!reduceMotion) {
-        const middle = window.scrollY + window.innerHeight / 2;
-        for (const el of parallaxEls) {
-          const centre = parallaxCentres.get(el);
-          if (centre === undefined) continue;
-          const rate = parseFloat(el.dataset.parallax) || 0;
-          // Zero when the layer is centred in the viewport, so the drift
-          // is symmetrical either side and never accumulates.
-          const shift = (centre - middle) * rate;
-          el.style.transform = `translate3d(0, ${shift.toFixed(2)}px, 0)`;
-        }
-      }
-      ticking = false;
-    });
-  }
-
-  window.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", () => {
     rollTo(PRIMARY * THEMES.length + themeIndex(currentTheme));
     zen.resize();
-    measureParallax();
-    onScroll();
   });
 
   /* ── Zen ──────────────────────────────────────────────────
@@ -1255,14 +1214,9 @@
   buildPicker();
   applyTheme(currentTheme, { persist: false });
   zen.init();
-  measureParallax();
-  onScroll();
 
   // The fan measures itself, so re-roll once images have their real size.
-  window.addEventListener("load", () => {
-    rollTo(PRIMARY * THEMES.length + themeIndex(currentTheme));
-    // Images have their real height by now, so the cached centres move.
-    measureParallax();
-    onScroll();
-  });
+  window.addEventListener("load", () =>
+    rollTo(PRIMARY * THEMES.length + themeIndex(currentTheme)),
+  );
 })();
