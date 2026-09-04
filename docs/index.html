@@ -445,17 +445,17 @@
             tempo to match. It never needs a connection.
           </p>
         </div>
-        <div class="feature__shot reveal" data-reveal-delay="1">
-          <img
-            id="coach-shot"
-            src="img/metronome/aurora-metronome.webp"
-            alt="The practice coach panel, showing a scored session with timing breakdown"
-            loading="lazy"
-            decoding="async"
-            width="1400"
-            height="1050"
-          />
-        </div>
+        <figure class="feature__figure reveal" data-reveal-delay="1">
+          <canvas
+            id="coach-figure"
+            role="img"
+            aria-label="An exploded diagram of a metronome. The pendulum is drawn twice: a solid rod on the beat, and a dashed rod lagging behind it. The gap between them is how far behind the beat the player is."
+          ></canvas>
+          <figcaption class="figure__readout" aria-hidden="true">
+            <span class="figure__ms" id="coach-ms">+0 ms</span>
+            <span class="figure__state" id="coach-state">in the pocket</span>
+          </figcaption>
+        </figure>
       </section>
 
       <!-- ─── Drill + hands-free ────────────────────────── -->

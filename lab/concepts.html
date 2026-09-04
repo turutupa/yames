@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en" data-theme="obsidian">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Yames — coach visual concepts</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Manrope:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* Obsidian tokens, same as the site. */
+      :root {
+        --bg: #110a0c;
+        --bg-2: #1d1114;
+        --ink: #f7f0ea;
+        --ink-dim: #cdb5a8;
+        --ink-mute: #a08b7f;
+        --line: rgba(255, 255, 255, 0.09);
+        --line-2: rgba(255, 255, 255, 0.17);
+        --a1: #f59e0b;
+        --a2: #ff3d8a;
+        --a3: #8b5cf6;
+        --good: #22c55e;
+        --ff-display: "Bricolage Grotesque", system-ui, sans-serif;
+        --ff-body: "Manrope", system-ui, sans-serif;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: var(--ff-body);
+        background: var(--bg);
+        color: var(--ink);
+        padding: clamp(20px, 4vw, 56px);
+        -webkit-font-smoothing: antialiased;
+      }
+      header { max-width: 900px; margin: 0 auto clamp(28px, 4vw, 48px); }
+      h1 {
+        font-family: var(--ff-display);
+        font-size: clamp(1.6rem, 4vw, 2.4rem);
+        font-weight: 800;
+        letter-spacing: -0.04em;
+      }
+      header p { color: var(--ink-dim); margin-top: 10px; line-height: 1.6; }
+      .controls {
+        display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+        margin-top: 20px; font-size: 0.9rem; color: var(--ink-dim);
+      }
+      .controls button {
+        font: inherit; font-weight: 700; color: var(--bg); background: var(--a1);
+        border: none; border-radius: 999px; padding: 9px 20px; cursor: pointer;
+      }
+      .controls label { display: flex; align-items: center; gap: 8px; }
+      input[type="range"] { accent-color: var(--a1); }
+
+      .grid {
+        display: grid; gap: 24px; max-width: 1400px; margin: 0 auto;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      }
+      .card {
+        border: 1px solid var(--line-2); border-radius: 20px;
+        background: linear-gradient(160deg, var(--bg-2), var(--bg));
+        padding: 22px; display: flex; flex-direction: column; gap: 12px;
+      }
+      .card--wide { grid-column: 1 / -1; }
+      .card h2 {
+        font-family: var(--ff-display); font-size: 1.2rem; font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      .card .kicker {
+        font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em;
+        text-transform: uppercase; color: var(--a1);
+      }
+      .card p { font-size: 0.9rem; line-height: 1.6; color: var(--ink-dim); }
+      canvas { width: 100%; display: block; border-radius: 12px; background: #0b0708; }
+      .note { font-size: 0.8rem; color: var(--ink-mute); }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Coach visual — three concepts</h1>
+      <p>
+        All three run on their own clock at the tempo below, no scrolling
+        involved. They simulate a player who drifts: the timing error wanders,
+        so you can watch each one respond. Obsidian palette, same tokens as the
+        site.
+      </p>
+      <div class="controls">
+        <button id="toggle" type="button">Pause</button>
+        <label>Tempo <input id="bpm" type="range" min="60" max="180" value="120" /> <span id="bpmv">120</span> BPM</label>
+        <label>Sloppiness <input id="err" type="range" min="0" max="100" value="42" /> <span id="errv">42</span></label>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <p class="kicker">Concept 1</p>
+        <h2>The Pocket Dial</h2>
+        <canvas id="dial" width="900" height="900"></canvas>
+        <p>
+          One bar around the ring, ticks for subdivisions. A hit lands inside
+          the ring when it is early and outside when it is late, so the shape
+          of the cloud <em>is</em> your timing. Closest to the rings-and-ticks
+          language you liked.
+        </p>
+      </section>
+
+      <section class="card">
+        <p class="kicker">Concept 3</p>
+        <h2>Pendulum Wave</h2>
+        <canvas id="wave" width="900" height="900"></canvas>
+        <p>
+          Pendulums of slightly different lengths: in phase, then fanning
+          apart, then converging again. It is about time itself rather than
+          about your playing — the best object, the least specific claim.
+        </p>
+      </section>
+
+      <section class="card card--wide">
+        <p class="kicker">Concept 2</p>
+        <h2>The Drift Ribbon</h2>
+        <canvas id="ribbon" width="1800" height="520"></canvas>
+        <p>
+          The strip moves itself, right to left. The centre line is perfect
+          time; hits sit above it when rushing and below when dragging, and the
+          ribbon traces the trend. The clearest teacher of the three — you can
+          read "you are dragging" without a caption.
+        </p>
+      </section>
+    </div>
+
+    <p class="note" style="max-width: 900px; margin: 28px auto 0;">
+      Rough prototypes, deliberately: enough to judge each as an object before
+      any of it is built properly. Hit values are simulated, not real playing.
+    </p>
+
+    <script>
+      const css = getComputedStyle(document.documentElement);
+      const C = (n) => css.getPropertyValue(n).trim();
+      const A1 = C("--a1"), A2 = C("--a2"), A3 = C("--a3"), GOOD = C("--good");
+      const INK = C("--ink"), DIM = C("--ink-dim"), MUTE = C("--ink-mute");
+
+      let bpm = 120, sloppy = 0.42, running = true;
+      const beatMs = () => 60000 / bpm;
+
+      const bpmEl = document.getElementById("bpm");
+      const errEl = document.getElementById("err");
+      bpmEl.addEventListener("input", () => {
+        bpm = +bpmEl.value; document.getElementById("bpmv").textContent = bpm;
+      });
+      errEl.addEventListener("input", () => {
+        sloppy = +errEl.value / 100; document.getElementById("errv").textContent = errEl.value;
+      });
+      document.getElementById("toggle").addEventListener("click", (e) => {
+        running = !running; e.target.textContent = running ? "Pause" : "Play";
+        if (running) { last = performance.now(); requestAnimationFrame(frame); }
+      });
+
+      function fit(cv) {
+        const dpr = Math.min(devicePixelRatio || 1, 2);
+        const r = cv.getBoundingClientRect();
+        cv.width = Math.round(r.width * dpr);
+        cv.height = Math.round((cv.dataset.ratio ? r.width * +cv.dataset.ratio : r.width) * dpr);
+        cv.style.height = cv.height / dpr + "px";
+        const ctx = cv.getContext("2d");
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { ctx, w: cv.width / dpr, h: cv.height / dpr };
+      }
+
+      const dialC = document.getElementById("dial");
+      const waveC = document.getElementById("wave");
+      const ribbonC = document.getElementById("ribbon");
+      ribbonC.dataset.ratio = 0.29;
+      let D = fit(dialC), W = fit(waveC), R = fit(ribbonC);
+      addEventListener("resize", () => { D = fit(dialC); W = fit(waveC); R = fit(ribbonC); });
+
+      /* A player who wanders: the error drifts on a slow random walk rather
+         than being independent noise, which is what dragging actually is. */
+      let drift = 0;
+      function nextError() {
+        drift += (Math.random() - 0.5) * 0.06;
+        drift = Math.max(-0.5, Math.min(0.5, drift * 0.985));
+        const jitter = (Math.random() - 0.5) * 0.9;
+        return (drift + jitter * 0.5) * sloppy; // in beats, +late / -early
+      }
+
+      const hits = [];          // {beat, err, t}
+      let beatIndex = -1, acc = 0, last = performance.now();
+
+      // ── 1. Pocket Dial ────────────────────────────────────────────────
+      function drawDial(now) {
+        const { ctx, w, h } = D;
+        const cx = w / 2, cy = h / 2, rad = Math.min(w, h) * 0.34;
+        ctx.clearRect(0, 0, w, h);
+
+        // Ring and subdivision ticks
+        ctx.strokeStyle = "rgba(255,255,255,0.10)";
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(cx, cy, rad, 0, Math.PI * 2); ctx.stroke();
+
+        for (let i = 0; i < 16; i++) {
+          const a = (i / 16) * Math.PI * 2 - Math.PI / 2;
+          const major = i % 4 === 0;
+          const r0 = rad + (major ? 12 : 6), r1 = rad + (major ? 26 : 13);
+          ctx.beginPath();
+          ctx.moveTo(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0);
+          ctx.lineTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1);
+          ctx.strokeStyle = major ? A1 : "rgba(255,255,255,0.22)";
+          ctx.lineWidth = major ? 2.5 : 1.2;
+          ctx.stroke();
+        }
+
+        // Playhead sweeping one bar
+        const barMs = beatMs() * 4;
+        const phase = (now % barMs) / barMs;
+        const pa = phase * Math.PI * 2 - Math.PI / 2;
+        const grad = ctx.createLinearGradient(cx, cy, cx + Math.cos(pa) * rad, cy + Math.sin(pa) * rad);
+        grad.addColorStop(0, "rgba(245,158,11,0)");
+        grad.addColorStop(1, "rgba(245,158,11,0.55)");
+        ctx.strokeStyle = grad; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(pa) * rad, cy + Math.sin(pa) * rad); ctx.stroke();
+
+        // Hits: radius carries the error, so the cloud's shape is the timing
+        for (const hit of hits) {
+          const age = (now - hit.t) / (barMs * 2);
+          if (age > 1) continue;
+          const a = ((hit.beat % 4) / 4) * Math.PI * 2 - Math.PI / 2;
+          const r = rad + hit.err * rad * 0.42;
+          const mag = Math.abs(hit.err);
+          const col = mag < 0.06 ? GOOD : mag < 0.16 ? A1 : A2;
+          ctx.beginPath();
+          ctx.arc(cx + Math.cos(a) * r, cy + Math.sin(a) * r, 4.5 * (1 - age * 0.4), 0, Math.PI * 2);
+          ctx.fillStyle = col.replace(")", "") ;
+          ctx.globalAlpha = 1 - age;
+          ctx.fillStyle = col;
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+
+        // Centre readout
+        const recent = hits.slice(-16);
+        const avg = recent.length ? recent.reduce((s, x) => s + x.err, 0) / recent.length : 0;
+        const score = Math.max(0, Math.round(100 - Math.abs(avg) * 260));
+        ctx.fillStyle = INK;
+        ctx.font = `800 ${Math.round(rad * 0.42)}px "Bricolage Grotesque", sans-serif`;
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText(String(score), cx, cy - rad * 0.04);
+        ctx.fillStyle = MUTE;
+        ctx.font = `700 ${Math.round(rad * 0.1)}px Manrope, sans-serif`;
+        ctx.fillText(avg > 0.02 ? "DRAGGING" : avg < -0.02 ? "RUSHING" : "IN THE POCKET",
+                     cx, cy + rad * 0.26);
+      }
+
+      // ── 2. Drift Ribbon ───────────────────────────────────────────────
+      function drawRibbon(now) {
+        const { ctx, w, h } = R;
+        ctx.clearRect(0, 0, w, h);
+        const mid = h / 2;
+        const pxPerMs = w / (beatMs() * 8); // eight beats across
+
+        ctx.strokeStyle = "rgba(255,255,255,0.16)";
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(0, mid); ctx.lineTo(w, mid); ctx.stroke();
+
+        ctx.fillStyle = MUTE;
+        ctx.font = '700 11px Manrope, sans-serif';
+        ctx.textAlign = "left";
+        ctx.fillText("RUSHING", 14, mid - h * 0.3);
+        ctx.fillText("DRAGGING", 14, mid + h * 0.3 + 10);
+
+        // Beat lines marching left
+        for (let i = -1; i < 10; i++) {
+          const beatAt = Math.floor(now / beatMs()) - i;
+          const x = w - ((now - beatAt * beatMs()) * pxPerMs);
+          if (x < 0 || x > w) continue;
+          const down = beatAt % 4 === 0;
+          ctx.strokeStyle = down ? "rgba(245,158,11,0.5)" : "rgba(255,255,255,0.12)";
+          ctx.lineWidth = down ? 2 : 1;
+          ctx.beginPath(); ctx.moveTo(x, mid - h * 0.34); ctx.lineTo(x, mid + h * 0.34); ctx.stroke();
+        }
+
+        // The ribbon through recent hits
+        const pts = hits.filter((x) => now - x.t < beatMs() * 8)
+          .map((x) => ({ x: w - (now - x.t) * pxPerMs, y: mid + x.err * h * 0.42, e: x.err }));
+        if (pts.length > 1) {
+          ctx.beginPath();
+          ctx.moveTo(pts[0].x, pts[0].y);
+          for (let i = 1; i < pts.length; i++) {
+            const p = pts[i - 1], q = pts[i];
+            ctx.quadraticCurveTo(p.x, p.y, (p.x + q.x) / 2, (p.y + q.y) / 2);
+          }
+          ctx.strokeStyle = "rgba(245,158,11,0.5)";
+          ctx.lineWidth = 2; ctx.stroke();
+        }
+        for (const p of pts) {
+          const mag = Math.abs(p.e);
+          ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+          ctx.fillStyle = mag < 0.06 ? GOOD : mag < 0.16 ? A1 : A2;
+          ctx.fill();
+        }
+      }
+
+      // ── 3. Pendulum Wave ──────────────────────────────────────────────
+      const N = 15;
+      function drawWave(now) {
+        const { ctx, w, h } = W;
+        ctx.clearRect(0, 0, w, h);
+        const top = h * 0.14, maxLen = h * 0.66;
+        const cycle = beatMs() * 32; // the whole fan-and-converge
+
+        ctx.strokeStyle = "rgba(255,255,255,0.14)";
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(w * 0.08, top); ctx.lineTo(w * 0.92, top); ctx.stroke();
+
+        for (let i = 0; i < N; i++) {
+          // Each pendulum does one more swing per cycle than the last.
+          const swings = 24 + i;
+          const len = maxLen * Math.pow(24 / swings, 2) + h * 0.14;
+          const x0 = w * 0.08 + ((w * 0.84) / (N - 1)) * i;
+          // Narrow arc: a wide swing makes the columns overlap and the wave
+          // reads as chaos rather than as a travelling ripple.
+          const ang = Math.sin((now / cycle) * Math.PI * 2 * swings) * 0.24;
+          const x = x0 + Math.sin(ang) * len;
+          const y = top + Math.cos(ang) * len;
+
+          ctx.strokeStyle = "rgba(255,255,255,0.10)";
+          ctx.beginPath(); ctx.moveTo(x0, top); ctx.lineTo(x, y); ctx.stroke();
+
+          const t = i / (N - 1);
+          const col = t < 0.5
+            ? mix(A1, A2, t * 2)
+            : mix(A2, A3, (t - 0.5) * 2);
+          ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2);
+          ctx.fillStyle = col; ctx.fill();
+          ctx.beginPath(); ctx.arc(x, y, 20, 0, Math.PI * 2);
+          ctx.fillStyle = col; ctx.globalAlpha = 0.12; ctx.fill(); ctx.globalAlpha = 1;
+        }
+      }
+
+      function mix(a, b, t) {
+        const p = (h) => [1, 3, 5].map((i) => parseInt(h.substr(i, 2), 16));
+        const [r1, g1, b1] = p(a), [r2, g2, b2] = p(b);
+        return `rgb(${Math.round(r1 + (r2 - r1) * t)},${Math.round(g1 + (g2 - g1) * t)},${Math.round(b1 + (b2 - b1) * t)})`;
+      }
+
+      // ── Clock ─────────────────────────────────────────────────────────
+      function frame(now) {
+        if (!running) return;
+        acc += now - last; last = now;
+        while (acc >= beatMs()) {
+          acc -= beatMs();
+          beatIndex++;
+          hits.push({ beat: beatIndex, err: nextError(), t: now });
+          if (hits.length > 120) hits.shift();
+        }
+        drawDial(now); drawRibbon(now); drawWave(now);
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    </script>
+  </body>
+</html>

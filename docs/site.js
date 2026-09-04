@@ -85,14 +85,10 @@
     const theme = THEMES[themeIndex(id)];
     if (meta && theme) meta.setAttribute("content", theme.bg);
 
-    // The coach screenshot follows the picker too, otherwise the page
-    // shows one theme while claiming another.
-    const coachShot = $("#coach-shot");
-    if (coachShot) coachShot.src = `img/metronome/${id}-metronome.webp`;
-
     updateFan();
     updatePicker();
     zen.recolour();
+    coachFigure.recolour();
   }
 
   /* ── Theme fan (slot-machine roll) ────────────────────── */
@@ -1208,12 +1204,343 @@
       },
     };
   })();
+
+  /* ── The coach figure ─────────────────────────────────────────────
+     An exploded metronome drawn as an engineering illustration, with the
+     pendulum drawn twice: solid where the beat is, dashed where the
+     player landed. The gap between them is the drag.
+
+     Written against a plain 2D context rather than a 3D library. Every
+     part of this is line segments — no lights, no materials, no depth
+     buffer — so a few hundred lines of projection is the whole job, and
+     the page keeps shipping no dependencies.
+     ────────────────────────────────────────────────────────────────── */
+
+  const coachFigure = (() => {
+    const canvas = $("#coach-figure");
+    const ctx = canvas?.getContext("2d");
+    const msEl = $("#coach-ms");
+    const stateEl = $("#coach-state");
+
+    const BPM = 96;
+    const BEAT = 60000 / BPM;
+    const TILT = -0.22;
+
+    let w = 0, h = 0, running = false, rafId = null;
+    let spin = 0, beat = 0, acc = 0, last = 0, drift = 0.08;
+    let ink = "245,163,11", ghostInk = "255,107,166";
+
+    /* ── Geometry helpers: each returns {pts, edges} ── */
+
+    function box(sx, sy, sz, cx = 0, cy = 0, cz = 0) {
+      const X = sx / 2, Y = sy / 2, Z = sz / 2;
+      const pts = [
+        [-X, -Y, -Z], [X, -Y, -Z], [X, Y, -Z], [-X, Y, -Z],
+        [-X, -Y, Z], [X, -Y, Z], [X, Y, Z], [-X, Y, Z],
+      ].map(([x, y, z]) => [x + cx, y + cy, z + cz]);
+      return {
+        pts,
+        edges: [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]],
+      };
+    }
+
+    /** Four-sided frustum: the classic Maelzel case. */
+    function frustum(topR, botR, height, cy = 0) {
+      const pts = [], edges = [];
+      for (let i = 0; i < 4; i++) {
+        const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
+        pts.push([Math.cos(a) * botR, cy - height / 2, Math.sin(a) * botR]);
+        pts.push([Math.cos(a) * topR, cy + height / 2, Math.sin(a) * topR]);
+      }
+      for (let i = 0; i < 4; i++) {
+        const b0 = i * 2, t0 = i * 2 + 1;
+        const b1 = ((i + 1) % 4) * 2, t1 = ((i + 1) % 4) * 2 + 1;
+        edges.push([b0, t0], [b0, b1], [t0, t1]);
+      }
+      return { pts, edges };
+    }
+
+    /** A toothed wheel, drawn front and back with the rim joined. */
+    function gear(teeth, r, toothH, thick, cx = 0, cy = 0, cz = 0) {
+      const pts = [], edges = [], ring = [];
+      for (let i = 0; i < teeth; i++) {
+        const s = (Math.PI * 2) / teeth;
+        const a0 = i * s, a1 = a0 + s * 0.32, a2 = a0 + s * 0.5, a3 = a0 + s * 0.82;
+        ring.push([Math.cos(a0) * r, Math.sin(a0) * r],
+                  [Math.cos(a1) * (r + toothH), Math.sin(a1) * (r + toothH)],
+                  [Math.cos(a2) * (r + toothH), Math.sin(a2) * (r + toothH)],
+                  [Math.cos(a3) * r, Math.sin(a3) * r]);
+      }
+      const n = ring.length;
+      for (const [x, y] of ring) pts.push([x + cx, y + cy, cz - thick / 2]);
+      for (const [x, y] of ring) pts.push([x + cx, y + cy, cz + thick / 2]);
+      for (let i = 0; i < n; i++) {
+        edges.push([i, (i + 1) % n], [n + i, n + ((i + 1) % n)]);
+        if (i % 4 === 1 || i % 4 === 2) edges.push([i, n + i]);
+      }
+      // Hub
+      const hubStart = pts.length, HUB = 14, hr = r * 0.2;
+      for (let i = 0; i < HUB; i++) {
+        const a = (i / HUB) * Math.PI * 2;
+        pts.push([Math.cos(a) * hr + cx, Math.sin(a) * hr + cy, cz - thick / 2]);
+      }
+      for (let i = 0; i < HUB; i++) edges.push([hubStart + i, hubStart + ((i + 1) % HUB)]);
+      return { pts, edges };
+    }
+
+    function merge(...parts) {
+      const pts = [], edges = [];
+      for (const p of parts) {
+        const base = pts.length;
+        pts.push(...p.pts);
+        for (const [a, b] of p.edges) edges.push([base + a, base + b]);
+      }
+      return { pts, edges };
+    }
+
+    /* ── The assembly ── */
+
+    /* The case, with the detail a drawing of one would carry: a plinth,
+       a chamfer at the top, ribs down the sides and the aperture the
+       pendulum shows through. Flat frusta read as an empty box. */
+    const caseP = (() => {
+      const parts = [frustum(1.05, 2.15, 5.2), frustum(1.02, 1.05, 0.22, 2.7)];
+      // Plinth
+      parts.push(box(3.5, 0.24, 3.5, 0, -2.72, 0), box(3.1, 0.14, 3.1, 0, -2.92, 0));
+      // Ribs down all four faces, following the taper
+      for (let i = 1; i <= 2; i++) {
+        const t = i / 3;
+        const y = -2.6 + t * 5.2;
+        const r = 2.15 + (1.05 - 2.15) * t;
+        const ring = { pts: [], edges: [] };
+        for (let k = 0; k < 4; k++) {
+          const a = (k / 4) * Math.PI * 2 + Math.PI / 4;
+          ring.pts.push([Math.cos(a) * r, y, Math.sin(a) * r]);
+        }
+        for (let k = 0; k < 4; k++) ring.edges.push([k, (k + 1) % 4]);
+        parts.push(ring);
+      }
+      // The aperture on the front face
+      parts.push(box(1.55, 3.5, 0.05, 0, 0.15, 1.42), box(1.25, 3.2, 0.05, 0, 0.15, 1.44));
+      return merge(...parts);
+    })();
+    const plateTicks = [];
+    for (let i = 0; i < 15; i++) {
+      plateTicks.push(box(i % 3 === 0 ? 0.5 : 0.28, 0.03, 0.04, -0.28, -1.75 + i * 0.25, 0.05));
+    }
+    const plateP = merge(box(1.35, 4.1, 0.06, 0, 0.1, 0), ...plateTicks);
+    const movementP = merge(
+      box(1.9, 2.4, 0.08, 0, -0.2, 0),
+      gear(26, 0.6, 0.1, 0.1, -0.38, 0.3, 0),
+      gear(18, 0.42, 0.09, 0.1, 0.5, -0.3, 0),
+      gear(13, 0.3, 0.08, 0.1, -0.15, -0.95, 0),
+    );
+    const escapementP = merge(
+      gear(20, 0.5, 0.14, 0.09, 0, 0, 0),
+      box(1.25, 0.09, 0.09, 0, 0.62, 0),
+      box(0.11, 0.34, 0.09, -0.56, 0.45, 0),
+      box(0.11, 0.34, 0.09, 0.56, 0.45, 0),
+    );
+    const rodP = merge(box(0.09, 3.7, 0.09, 0, 0.75, 0), box(0.58, 0.28, 0.2, 0, 1.35, 0));
+    const bellP = (() => {
+      const pts = [], edges = [], N = 16;
+      for (let ring = 0; ring < 3; ring++) {
+        const phi = (ring / 3) * 0.9;
+        for (let i = 0; i < N; i++) {
+          const a = (i / N) * Math.PI * 2;
+          pts.push([Math.cos(a) * Math.sin(phi + 0.35) * 0.7,
+                    Math.cos(phi + 0.35) * 0.7, Math.sin(a) * Math.sin(phi + 0.35) * 0.7]);
+        }
+      }
+      for (let ring = 0; ring < 3; ring++)
+        for (let i = 0; i < N; i++) {
+          edges.push([ring * N + i, ring * N + ((i + 1) % N)]);
+          if (ring < 2 && i % 4 === 0) edges.push([ring * N + i, (ring + 1) * N + i]);
+        }
+      return { pts, edges };
+    })();
+
+    // The graduated arc the drag is read off.
+    const arcP = (() => {
+      const pts = [], edges = [], R = 3.5, SPAN = 0.46, N = 40;
+      for (let i = 0; i <= N; i++) {
+        const a = -Math.PI / 2 - SPAN + (i / N) * SPAN * 2;
+        pts.push([Math.cos(a) * R, Math.sin(a) * R + 3.1, 0]);
+        if (i > 0) edges.push([i - 1, i]);
+      }
+      for (let i = -4; i <= 4; i++) {
+        const a = -Math.PI / 2 + (i / 4) * SPAN;
+        const major = i % 2 === 0;
+        const r0 = R - (major ? 0.3 : 0.16);
+        const s = pts.length;
+        pts.push([Math.cos(a) * r0, Math.sin(a) * r0 + 3.1, 0],
+                 [Math.cos(a) * R, Math.sin(a) * R + 3.1, 0]);
+        edges.push([s, s + 1]);
+      }
+      return { pts, edges };
+    })();
+
+    /* Parts explode along their own axis. `swing` marks the two rods,
+       which rotate about the pivot before anything else happens. */
+    const PARTS = [
+      { geo: caseP,       off: [0, 0, -2.4], dim: 0.55 },
+      { geo: plateP,      off: [0, 0, 2.0],  dim: 0.75, at: [0, 0.1, 1.15] },
+      { geo: movementP,   off: [0, 0, 0.5],  dim: 1,    at: [0, -0.1, 0.2] },
+      { geo: escapementP, off: [0, 0.4, 1.7],dim: 1,    at: [0, 1.1, 0.2] },
+      { geo: arcP,        off: [0, 0.5, 2.5],dim: 0.45, at: [0, 0.1, 0.5] },
+      { geo: rodP,        off: [0, 0.5, 2.5],dim: 1,    at: [0, 0.15, 0.5], swing: "true" },
+      { geo: rodP,        off: [0, 0.5, 2.5],dim: 1,    at: [0, 0.15, 0.5], swing: "ghost", dash: true },
+      { geo: bellP,       off: [0, 1.2, -1.6],dim: 0.5, at: [0, 2.45, -0.35] },
+    ];
+
+    /* ── Projection ── */
+
+    function project(p, cy, sy, cx, sx, scale) {
+      let [x, y, z] = p;
+      // Y then X
+      let x2 = x * cy + z * sy;
+      let z2 = -x * sy + z * cy;
+      let y2 = y * cx - z2 * sx;
+      let z3 = y * sx + z2 * cx;
+      const d = 26;
+      const k = d / (d + z3 + 8);
+      // Biased down: the rod and bell extend upward, so the mass of the
+      // drawing sits above the case's own centre.
+      return [w / 2 + x2 * scale * k, h * 0.54 - y2 * scale * k, z3, k];
+    }
+
+    function draw(now) {
+      ctx.clearRect(0, 0, w, h);
+      const scale = Math.min(w, h) / 7.9;
+      const cy = Math.cos(spin), sy = Math.sin(spin);
+      const cx = Math.cos(TILT), sx = Math.sin(TILT);
+      const phase = acc / BEAT;
+      const swingTrue = Math.sin((beat + phase) * Math.PI) * 0.26;
+      const swingGhost = Math.sin((beat + phase - drift) * Math.PI) * 0.26;
+
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      for (const part of PARTS) {
+        const ang = part.swing === "true" ? swingTrue
+                  : part.swing === "ghost" ? swingGhost : 0;
+        const ca = Math.cos(ang), sa = Math.sin(ang);
+        const at = part.at || [0, 0, 0];
+        const ex = explodeAmount();
+
+        const proj = part.geo.pts.map((p) => {
+          let x = p[0], y = p[1], z = p[2];
+          if (ang) { const nx = x * ca - y * sa; y = x * sa + y * ca; x = nx; }
+          return project([x + at[0] + part.off[0] * ex,
+                          y + at[1] + part.off[1] * ex,
+                          z + at[2] + part.off[2] * ex], cy, sy, cx, sx, scale);
+        });
+
+        ctx.setLineDash(part.dash ? [4, 4] : []);
+        ctx.strokeStyle = "";
+        for (const [a, b] of part.geo.edges) {
+          const p = proj[a], q = proj[b];
+          // Depth cue: lines further away fade. No lighting needed.
+          const depth = (p[3] + q[3]) / 2;
+          const alpha = Math.max(0.12, Math.min(1, (depth - 0.62) * 3.4)) * part.dim;
+          ctx.strokeStyle = `rgba(${part.dash ? ghostInk : ink}, ${alpha.toFixed(3)})`;
+          ctx.lineWidth = part.dash ? 1.15 : 0.9 + depth * 0.5;
+          ctx.beginPath();
+          ctx.moveTo(p[0], p[1]);
+          ctx.lineTo(q[0], q[1]);
+          ctx.stroke();
+        }
+      }
+      ctx.setLineDash([]);
+    }
+
+    /** Settles open, then breathes, so it is never quite static. */
+    function explodeAmount() {
+      return 0.4 + Math.sin(spin * 1.7) * 0.04;
+    }
+
+    function frame(now) {
+      if (!running) return;
+      const dt = Math.min(now - last, 60);
+      last = now;
+      spin += dt * 0.00011;
+      acc += dt;
+      while (acc >= BEAT) {
+        acc -= BEAT;
+        beat++;
+        drift += (Math.random() - 0.5) * 0.06;
+        // Biased late and clamped wide enough that the two rods visibly
+        // separate — real drag is too small to see at this scale.
+        drift = Math.max(-0.06, Math.min(0.12, drift * 0.95 + 0.006));
+      }
+      draw(now);
+      const ms = Math.round(drift * BEAT);
+      if (msEl) msEl.textContent = (ms >= 0 ? "+" : "") + ms + " ms";
+      if (stateEl) stateEl.textContent =
+        ms > 14 ? "dragging" : ms < -14 ? "rushing" : "in the pocket";
+      rafId = requestAnimationFrame(frame);
+    }
+
+    function resize() {
+      if (!canvas || !ctx) return;
+      const r = canvas.getBoundingClientRect();
+      if (r.width < 2) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = r.width; h = r.height;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (!running) draw(performance.now());
+    }
+
+    function readInk() {
+      const cs = getComputedStyle(document.documentElement);
+      const hex = (v) => {
+        const s = cs.getPropertyValue(v).trim().replace("#", "");
+        return s.length === 6
+          ? `${parseInt(s.slice(0, 2), 16)},${parseInt(s.slice(2, 4), 16)},${parseInt(s.slice(4, 6), 16)}`
+          : null;
+      };
+      ink = hex("--a1") || ink;
+      ghostInk = hex("--a2") || ghostInk;
+    }
+
+    return {
+      init() {
+        if (!canvas || !ctx) return;
+        readInk();
+        resize();
+        window.addEventListener("resize", resize);
+        if (reduceMotion) { draw(performance.now()); return; }
+        new IntersectionObserver(([e]) => {
+          if (e.isIntersecting) {
+            if (!running) { running = true; last = performance.now(); rafId = requestAnimationFrame(frame); }
+          } else if (running) {
+            running = false;
+            if (rafId) cancelAnimationFrame(rafId);
+          }
+        }, { threshold: 0.05 }).observe(canvas);
+        document.addEventListener("visibilitychange", () => {
+          if (document.hidden && running) { running = false; if (rafId) cancelAnimationFrame(rafId); }
+          else if (!document.hidden && !running && canvas.getBoundingClientRect().top < innerHeight) {
+            running = true; last = performance.now(); rafId = requestAnimationFrame(frame);
+          }
+        });
+      },
+      recolour() {
+        readInk();
+        if (!running) draw(performance.now());
+      },
+    };
+  })();
+
   /* ── Go ───────────────────────────────────────────────── */
 
   buildFan();
   buildPicker();
   applyTheme(currentTheme, { persist: false });
   zen.init();
+  coachFigure.init();
 
   // The fan measures itself, so re-roll once images have their real size.
   window.addEventListener("load", () =>

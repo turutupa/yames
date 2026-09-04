@@ -1159,29 +1159,67 @@ main,
   gap: 16px;
 }
 
-/* The screenshot has its own square window corners, so rounding the
-   image itself shaved them off. Round a frame instead and inset the
-   image inside it. */
-.feature__shot {
-  padding: 10px;
+/* The coach figure. It is drawn, not photographed, so it gets no frame —
+   the linework sits directly on the page the way a plate would. */
+/* Boxed like the cards below it, so the drawing has a room to sit in and
+   the readout has a corner to sit in rather than floating in space. */
+.feature__figure {
+  position: relative;
+  margin: 0;
+  padding: 18px;
   border-radius: 24px;
-  background: color-mix(in srgb, var(--ink) 4%, transparent);
-  border: 1px solid color-mix(in srgb, var(--a1) 34%, transparent);
+  /* Neutral, and darker than the accent-tinted cards below — it sat at
+     the same warm tint as the drill card and read as its twin. Darker
+     also gives the linework more to sit against. */
+  /* Violet, so the trio reads amber / violet / pink instead of two
+     coloured cards beside an empty one — and it ties to the Beta badge.
+     Cool against the warm linework, which makes the drawing sit forward. */
+  border: 1px solid color-mix(in srgb, var(--a3) 26%, transparent);
+  background: linear-gradient(
+    150deg,
+    color-mix(in srgb, var(--a3) 11%, var(--bg)),
+    var(--bg)
+  );
   box-shadow:
-    0 40px 90px -34px rgba(0, 0, 0, 0.85),
-    0 0 60px -26px color-mix(in srgb, var(--a1) 55%, transparent);
-  transition:
-    border-color 0.55s var(--ease-out),
-    box-shadow 0.55s var(--ease-out);
+    0 40px 90px -40px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 color-mix(in srgb, var(--ink) 6%, transparent);
 }
 
-.feature__shot img {
+.feature__figure canvas {
+  display: block;
   width: 100%;
-  height: auto;
-  aspect-ratio: 16 / 10;
-  object-fit: cover;
-  object-position: right top;
-  border-radius: 14px;
+  aspect-ratio: 4 / 3;
+}
+
+/* Bottom left: the top of this card sits under the sticky nav, and the
+   drawing's mass is upper right. */
+.figure__readout {
+  position: absolute;
+  left: 26px;
+  bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  pointer-events: none;
+}
+
+.figure__ms {
+  font-family: var(--ff-display);
+  font-size: clamp(1.3rem, 2.3vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--a2);
+  font-variant-numeric: tabular-nums;
+}
+
+.figure__state {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
 }
 
 .duo {
