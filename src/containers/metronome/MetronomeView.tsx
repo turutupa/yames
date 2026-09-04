@@ -10,7 +10,6 @@ import {
 import { GroupEditor } from "./GroupEditor";
 import { MeterPresets } from "./MeterPresets";
 import { SubdivisionIcon } from "../../components/MetronomeIcons";
-import DriftMeter from "../../components/DriftMeter";
 
 type Evaluation = ReturnType<typeof useEvaluation>;
 
@@ -168,13 +167,14 @@ export function MetronomeView({
           }}
         />
 
-        {evaluation.enabled && state.isPlaying && (
-          <DriftMeter
-            lastFeedback={evaluation.lastFeedback}
-            avgDeviation={evaluation.avgDeviation}
-            visible={evaluation.enabled && state.isPlaying}
-          />
-        )}
+        {/* The live early/late needle used to sit here. Pulled from the
+            metronome screen at the owner's request: it had been rendering
+            at opacity 0 since it was written, so making it paint (#40) was
+            the first time anyone saw it on this screen, and it is not a
+            decision that was ever actually taken. The component and its
+            tests are intentionally kept — `HearItWorkStep` still uses it,
+            where a needle responding to your playing is the whole point of
+            the step — so putting it back here is a one-line change. */}
 
         <div className="sub-row">
           <span className="row-side-label">{t("metronome.subdiv")}</span>
