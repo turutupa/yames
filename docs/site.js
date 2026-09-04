@@ -9,6 +9,9 @@
   /** Which palette the page lands on. "obsidian" = warm, "aurora" = cool. */
   const LANDING_THEME = "obsidian";
 
+  /** Which Zen visual the band opens on. Must be one of ZEN_STYLES. */
+  const LANDING_ZEN = "warp";
+
   /** id + display name + the two swatch colours (bg, accent) from src/themes.ts */
   const THEMES = [
     { id: "mono", name: "Mono", bg: "#121212", accent: "#d4d4d4" },
@@ -691,8 +694,8 @@
     let h = 0;
     let rafId = null;
     let running = false;
-    let style = store.get("yames-zen-style", "cosmos");
-    if (!ZEN_STYLES.includes(style)) style = "cosmos";
+    let style = store.get("yames-zen-style", LANDING_ZEN);
+    if (!ZEN_STYLES.includes(style)) style = LANDING_ZEN;
 
     let accent = { r: 0, g: 212, b: 255 };
     let hues = [190, 220, 160];
@@ -1122,7 +1125,7 @@
 
       // Rain composites its own fade, so it must not be cleared.
       if (style !== "rain") ctx.clearRect(0, 0, w, h);
-      (RENDERERS[style] || cosmos)();
+      (RENDERERS[style] || RENDERERS[LANDING_ZEN])();
 
       rafId = requestAnimationFrame(frame);
     }
@@ -1144,7 +1147,7 @@
     function still() {
       if (!ctx) return;
       ctx.clearRect(0, 0, w, h);
-      (RENDERERS[style] || cosmos)();
+      (RENDERERS[style] || RENDERERS[LANDING_ZEN])();
     }
 
     function setStyle(next) {
