@@ -2176,7 +2176,15 @@
   white-space: nowrap;
   flex-shrink: 0;
   text-align: center;
-  width: 64px;
+  /* `min-width`, never `width`. This was `width: 64px`, which the label
+     cannot fit: "TEST INPUTS" is ~95px uppercase at this size, and
+     `white-space: nowrap` means it cannot wrap, so the text spilled
+     outside its own border. A fixed width can only ever be right for one
+     string, and this button has two ("Test inputs" / "Stop test") across
+     15 locales — several of them longer than English. The minimum keeps
+     the button from jumping when the label toggles; the content decides
+     the rest. */
+  min-width: 64px;
 }
 
 .input-test-btn:hover {
