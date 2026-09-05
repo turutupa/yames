@@ -17,7 +17,6 @@ import {
   setAlwaysOnTop,
   setBpm,
   setInstrument as setInstrumentBackend,
-  setPlaying,
   setSoundType,
   setSubdivision,
   setTheme,
@@ -84,6 +83,8 @@ import { useAppUpdates } from "./hooks/useAppUpdates";
 import { useTabRouting } from "./hooks/useTabRouting";
 import { useDownbeatPulse } from "./hooks/useDownbeatPulse";
 import { useInputTester } from "./hooks/useInputTester";
+import { useSoftClickPreview, SOFT_CLICK_BPM } from "./hooks/useSoftClickPreview";
+import { useBpmEditing } from "./hooks/useBpmEditing";
 import { useAudioError } from "./hooks/useAudioError";
 import { AudioErrorNotice } from "./AudioErrorNotice";
 import {
@@ -111,8 +112,6 @@ import type { HotkeyAction } from "../../hotkeys";
 import "../../styles/audio-input-test.css";
 
 /** Onboarding preview click: soft, slow, and the tempo W7 hands over at. */
-const SOFT_CLICK_BPM = 80;
-const SOFT_CLICK_VOLUME = 0.35;
 
 export function MainWindow() {
   const { t } = useTranslation();
@@ -355,52 +354,10 @@ export function MainWindow() {
     })();
   }, []);
 
-  // --- Wizard preview click (W0/W2) ---------------------------------------
-  // The wizard demonstrates the app rather than describing it: a soft 80 BPM
-  // click plays while it is open. The user's BPM/volume/playing state are
-  // captured on start and restored on close.
-  const stateRef = useRef(state);
-  stateRef.current = state;
-  const softClickPrev = useRef<{
-    bpm: number;
-    volume: number;
-    wasPlaying: boolean;
-  } | null>(null);
-  const [softClickPlaying, setSoftClickPlaying] = useState(false);
-
-  const startSoftClick = useCallback(() => {
-    if (softClickPrev.current) return;
-    const snapshot = stateRef.current;
-    softClickPrev.current = {
-      bpm: snapshot.bpm,
-      volume: snapshot.volume,
-      wasPlaying: snapshot.isPlaying,
-    };
-    setSoftClickPlaying(true);
-    void (async () => {
-      try {
-        await setVolume(SOFT_CLICK_VOLUME);
-        await setBpm(SOFT_CLICK_BPM);
-        if (!snapshot.isPlaying) await togglePlayback();
-      } catch {
-        /* engine not ready — the wizard still works, just silently */
-      }
-    })();
-  }, []);
-
-  const stopSoftClick = useCallback(async () => {
-    const prev = softClickPrev.current;
-    if (!prev) return;
-    softClickPrev.current = null;
-    setSoftClickPlaying(false);
-    try {
-      if (!prev.wasPlaying) await setPlaying(false);
-      await setVolume(prev.volume);
-      await setBpm(prev.bpm);
-    } catch {
-      /* ignore — nothing to restore if the engine is gone */
-    }
-  }, []);
+  // The wizard's demo click, and the `state` ref the rest of this component
+  // reads when it needs "whatever is true right now" rather than a dependency.
+  const { softClickPlaying, startSoftClick, stopSoftClick } =
+    useSoftClickPreview(state);
 
   // --- Audio output failure ------------------------------------------------
   // The audio thread emits `audio-error` when it cannot open or start the
@@ -553,9 +510,6 @@ export function MainWindow() {
     [stopSoftClick, applyInstrument, setView],
   );
 
-  const [editingBpm, setEditingBpm] = useState(false);
-  const [bpmEditValue, setBpmEditValue] = useState("");
-  const bpmInputRef = useRef<HTMLInputElement>(null);
   // Tab switching and settings are handled by the unified dispatcher via keyBindings
   const soundDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -569,6 +523,16 @@ export function MainWindow() {
     const clamped = Math.max(20, Math.min(300, value));
     setBpm(clamped);
   };
+
+  const {
+    editingBpm,
+    setEditingBpm,
+    bpmEditValue,
+    setBpmEditValue,
+    bpmInputRef,
+    startBpmEdit,
+    commitBpmEdit,
+  } = useBpmEditing(state.bpm, handleBpmChange);
 
   const { isPulsing, tapPulse, handleTap, tapCount, tapActive } =
     useDownbeatPulse({
@@ -619,17 +583,6 @@ export function MainWindow() {
     if (preset.view === "drill" || preset.view === "beat") setView(preset.view);
   }, [setView]);
 
-  const startBpmEdit = () => {
-    setBpmEditValue(String(state.bpm));
-    setEditingBpm(true);
-    setTimeout(() => bpmInputRef.current?.select(), 0);
-  };
-
-  const commitBpmEdit = () => {
-    const val = parseInt(bpmEditValue);
-    if (!isNaN(val)) handleBpmChange(val);
-    setEditingBpm(false);
-  };
 
   // Close dropdown on outside click
   useEffect(() => {
