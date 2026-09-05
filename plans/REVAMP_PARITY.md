@@ -237,11 +237,27 @@ survive a rebind and a reset to defaults.
 
 | Phase item | Areas it must tick | Signed off |
 |---|---|---|
-| A6 Pocket Check removal | §2 in full | |
-| B The shell | 3.1, 3.4, 3.6, 3.9, §4 | |
-| C1 Metronome | 3.2 | |
-| C2 Drill | 3.3 | |
-| C3 Settings | 3.7 | |
-| C4 Zen | 3.5 | |
-| C5 Themes | 3.10 themes row, 3.8 | |
-| D Merge to main | everything, on a release build | |
+| A6 Pocket Check removal | §2 in full | automated ✓ — see below |
+| B The shell | 3.1, 3.4, 3.6, 3.9, §4 | code landed, **needs eyes** |
+| C1 Metronome | 3.2 | code landed, **needs eyes** |
+| C2 Drill | 3.3 | code landed, **needs eyes** |
+| C3 Settings | 3.7 | not started |
+| C4 Zen | 3.5 | not started |
+| C5 Themes | 3.10 themes row, 3.8 | code landed, **needs eyes** |
+| D Merge to main | everything, on a release build | not started |
+
+**What "automated ✓" covers.** `test/i18n.coverage.test.ts` fails if any
+English key has no reference in `src/`, or any `t("…")` names a key that does
+not exist. It is what caught `settings.hotkeys.{actions,descs}.tab-3`
+surviving the Pocket Check removal, and 14 dead strings besides.
+`test/i18n.locales.test.ts` holds all fifteen languages to the same key set
+and the same placeholders. Between them, a feature cannot lose its strings
+quietly.
+
+**What "needs eyes" means.** Nothing in Phase B or C has been seen running.
+The evidence is types, 2,528 unit tests, 229 cargo tests and a rule-by-rule
+diff of the built CSS — all of which prove the code is consistent, and none
+of which prove a layout looks right. A browser cannot boot this app (every
+Tauri call fails) and stubbing the bridge hung the page, so the first step on
+picking this up is `npm run tauri dev` and a pass down §3 with the app in
+front of you.
