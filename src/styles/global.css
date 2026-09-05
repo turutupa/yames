@@ -2,14 +2,24 @@
   --bg-primary: #1a1a2e;
   --bg-secondary: #16213e;
   --bg-card: #0f3460;
+  --bg-panel: #18213a;
+  --bg-raised: #17416f;
   --accent: #e94560;
   --accent-glow: rgba(233, 69, 96, 0.3);
   --accent-glow-strong: rgba(233, 69, 96, 0.5);
   --accent-subtle: rgba(233, 69, 96, 0.15);
   --accent-subtle-hover: rgba(233, 69, 96, 0.25);
   --accent-text: #ffffff;
+  /* Second accent — the coach's colour, so it reads as a different kind of
+     thing from the metronome's accent. Every theme overrides these. */
+  --accent-2: #8b5cf6;
+  --accent-2-subtle: rgba(139, 92, 246, 0.14);
+  --accent-2-text: #ffffff;
   --text-primary: #eee;
   --text-secondary: #aaa;
+  --text-tertiary: #8b8b9c;
+  --text-muted: #777;
+  --text-faint: #4d4d5c;
   --border: rgba(255, 255, 255, 0.08);
   --radius: 12px;
   --radius-sm: 8px;
