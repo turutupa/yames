@@ -1,0 +1,935 @@
+/* shell.css
+ *
+ * Window frame and platform chrome, header and its popovers, the preset
+   sidebar, the preset save bar.
+ *
+ * Split out of main-window.css (UI_REVAMP A3). Moves only — not one rule was
+ * edited, and the parts are contiguous runs of the original file imported in
+ * the original order, so the cascade is unchanged. */
+
+/* =================== Layout: fixed header + scrolling content =================== */
+.main-window {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  transition: border-color 0.3s;
+  position: relative;
+}
+
+.main-window[data-playing="true"][data-border="true"] {
+  border-color: var(--accent);
+}
+
+/* Windows: frameless — DWM handles shadow + rounding; clip children to rounded rect */
+.main-window.os-windows {
+  overflow: hidden;
+  background: var(--bg-primary);
+}
+
+.main-window.os-windows .main-header {
+  padding-left: 140px;    /* reserve space for 3 × 46px window controls (now on left) */
+  padding-right: 12px;
+}
+
+/* Linux: frameless — compositor handles rounding; CSS box-shadow for depth */
+.main-window.os-linux {
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-primary);
+}
+
+.main-window.os-linux .main-header {
+  padding-left: 112px;    /* reserve space for 3 × 36px window controls (now on left) */
+  padding-right: 12px;
+}
+
+/* Suppress decorum's injected JS controls — we use our own React <WindowControls /> */
+[data-tauri-decorum-tb] {
+  display: none !important;
+}
+
+
+/* os-fullscreen comes AFTER platform rules — same specificity, so it wins */
+.main-window.os-fullscreen {
+  border-radius: 0;
+}
+
+/* Fallback: non-mac, non-windows, non-linux (should not occur in practice) */
+.main-window.os-other {
+  border-radius: 0;
+}
+
+.main-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px 30px 84px;
+  height: 72px;
+  z-index: 100;
+}
+
+.main-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--bg-primary) 80%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  -webkit-mask-image: linear-gradient(to bottom, black 52px, transparent);
+  mask-image: linear-gradient(to bottom, black 52px, transparent);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.main-header h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  text-transform: lowercase;
+  color: var(--accent);
+}
+
+.header-subtitle {
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  text-transform: none;
+  vertical-align: middle;
+}
+
+.header-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.header-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary);
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.header-btn:hover,
+.header-btn.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.header-btn[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 0.7rem;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
+  z-index: 50;
+}
+
+.header-btn[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.header-volume-wrap {
+  position: relative;
+}
+
+.header-sound-wrap {
+  position: relative;
+}
+
+.header-sound-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.header-sound-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 120px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  z-index: 200;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* ─── Header volume popover: iOS-style chunky pill faders ────────────────
+ *
+ * Two side-by-side vertical faders (Metronome, Voice). Built around a
+ * native <input type="range"> with `writing-mode: vertical-lr; direction:
+ * rtl;` so 0 sits at the bottom and 100 at the top.
+ *
+ * Visually: each fader is a wide rounded pill column. The track is the
+ * empty/dim container; the fill is the accent-colored portion that
+ * rises with the value. The fill itself IS the draggable surface — the
+ * native thumb is transparent and the entire pill is the click/drag
+ * target, so the user grabs the chunky bar directly (iOS-volume feel).
+ *
+ * `overflow: hidden` on the track clips the fill to the pill shape;
+ * hover/active glow lives on the track so it escapes the clip.
+ */
+.header-volume-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  padding: 16px 20px 14px;
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.15s,
+    visibility 0.15s,
+    transform 0.15s;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 18px;
+}
+
+.header-volume-wrap:hover .header-volume-popover {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Fixed column width so both faders are symmetric inside the popover.
+ * Without this, each column would size to its widest child (the label),
+ * making the wider "METRONOME" column push the slider track off-center
+ * relative to the popover's midpoint. */
+.header-volume-popover .volume-fader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 72px;
+}
+
+.header-volume-popover .volume-fader-value {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: var(--text-primary, rgba(255, 255, 255, 0.92));
+  min-width: 28px;
+  text-align: center;
+  user-select: none;
+}
+
+.header-volume-popover .volume-fader-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+  user-select: none;
+}
+
+/* Keep the fader visible (discoverability) but dim it and italicize the
+ * label so it reads as "available but gated". Pointer events still flow
+ * so the parent tooltip explains why. */
+.header-volume-popover .volume-fader-disabled {
+  opacity: 0.4;
+}
+
+.header-volume-popover .volume-fader-disabled .volume-fader-label {
+  font-style: italic;
+}
+
+/* Track = the rounded pill container. Fill rises inside it; clip it so
+ * the fill's top edge follows the pill curve cleanly at any value. */
+.header-volume-popover .volume-fader-track {
+  position: relative;
+  width: 32px;
+  height: 144px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow:
+    inset 0 1px 1px rgba(0, 0, 0, 0.25),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.header-volume-popover .volume-fader-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(
+    to top,
+    var(--accent) 0%,
+    color-mix(in srgb, var(--accent) 86%, white 14%) 100%
+  );
+  /* Subtle top highlight so the fill's top edge reads as the "grab" line. */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+  transition: height 0.06s ease-out;
+}
+
+.header-volume-popover .volume-fader-disabled .volume-fader-fill {
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: none;
+}
+
+/* Native input layered over the entire track — invisible. The colored
+ * fill behind it is what the user sees and "grabs"; the input just
+ * captures pointer + keyboard input. */
+.header-volume-popover .volume-slider {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  outline: none;
+  border: none;
+  cursor: pointer;
+}
+
+.header-volume-popover .volume-slider:disabled {
+  cursor: not-allowed;
+}
+
+.header-volume-popover .volume-slider::-webkit-slider-runnable-track {
+  background: transparent;
+  border: none;
+  width: 100%;
+  height: 100%;
+}
+
+.header-volume-popover .volume-slider::-moz-range-track {
+  background: transparent;
+  border: none;
+  width: 100%;
+  height: 100%;
+}
+
+/* The thumb is transparent — the colored fill behind the input is the
+ * visible "handle". The thumb is still sized full-width so the hit area
+ * matches the entire pill column. */
+.header-volume-popover .volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 32px;
+  height: 4px;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  cursor: grab;
+}
+
+.header-volume-popover .volume-slider:active::-webkit-slider-thumb {
+  cursor: grabbing;
+}
+
+.header-volume-popover .volume-slider:disabled::-webkit-slider-thumb {
+  cursor: not-allowed;
+}
+
+.header-volume-popover .volume-slider::-moz-range-thumb {
+  width: 32px;
+  height: 4px;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  cursor: grab;
+}
+
+.header-volume-popover .volume-slider:active::-moz-range-thumb {
+  cursor: grabbing;
+}
+
+.header-volume-popover .volume-slider:disabled::-moz-range-thumb {
+  cursor: not-allowed;
+}
+
+/* =================== Preset Sidebar =================== */
+.main-body {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  position: relative;
+}
+
+/* External toggle removed — sidebar now uses collapsed tab strip */
+
+/* Toggle button living inside the sidebar header when open */
+.preset-sidebar-toggle-inner {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  padding: 0;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.preset-sidebar-toggle-inner:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  opacity: 1;
+}
+
+.preset-sidebar-toggle-inner:active {
+  transform: none;
+}
+
+.preset-sidebar {
+  width: 44px;
+  min-width: 44px;
+  overflow: hidden;
+  transition:
+    width 0.2s ease,
+    min-width 0.2s ease;
+  /* NOTE: macOS WKWebView occasionally leaves the OS cursor stale for
+   * a few frames during this width transition — it resolves on the
+   * next mousemove. Treated as a cosmetic platform quirk; no JS
+   * workaround. `will-change` doesn't help here because width is a
+   * layout property, not a composited one. */
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--sidebar-border, color-mix(in srgb, var(--border) 60%, transparent));
+  background: color-mix(in srgb, var(--bg-primary) 95%, transparent);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.preset-sidebar.open {
+  width: 220px;
+}
+
+.preset-sidebar-collapsed-tab {
+  width: 44px;
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 82px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.15s, color 0.15s;
+}
+
+.preset-sidebar-collapsed-tab:hover {
+  opacity: 1;
+  color: var(--text-primary);
+}
+
+.preset-sidebar-collapsed-tab:active {
+  transform: none;
+}
+
+.preset-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 77px 8px 10px 12px;
+  flex-shrink: 0;
+  gap: 6px;
+}
+
+.preset-sidebar-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.preset-sidebar-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text-secondary);
+}
+
+.preset-sidebar-add {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px dashed var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.15s;
+}
+
+.preset-sidebar-add:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.preset-sidebar-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 10px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.preset-sidebar-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.12s;
+  text-align: left;
+  gap: 6px;
+  position: relative;
+}
+
+.preset-sidebar-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.preset-sidebar-item.active {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--text-primary);
+}
+
+.preset-sidebar-item.dirty::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.8;
+}
+
+.preset-item-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.preset-item-bpm {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.preset-sidebar-name-input {
+  width: 100%;
+  border: 1px solid var(--accent);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 8px;
+  border-radius: 6px;
+  outline: none;
+}
+
+.preset-sidebar-empty {
+  padding: 20px 10px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+  opacity: 0.5;
+}
+
+/* The "no presets yet" case is an empty state with one action (O8), not the
+   faded "no results" caption — so it drops the 0.5 opacity and gets a real
+   hierarchy: title, one line of why, one button. */
+.preset-sidebar-empty-state {
+  opacity: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 22px 12px;
+}
+
+.preset-sidebar-empty-state .empty-state-title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.preset-sidebar-empty-state .empty-state-hint {
+  margin: 0;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.preset-sidebar-empty-state .empty-state-action {
+  margin-top: 4px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 5px 12px;
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-primary);
+  transition:
+    background 120ms ease,
+    border-color 120ms ease;
+}
+
+.preset-sidebar-empty-state .empty-state-action:hover {
+  background: var(--bg-hover, rgba(255, 255, 255, 0.05));
+  border-color: var(--accent);
+}
+
+.preset-sidebar-empty-state .empty-state-action:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.preset-sidebar-empty-state .empty-state-shortcut {
+  margin: 2px 0 0;
+  font-size: 0.625rem;
+  color: var(--text-muted);
+}
+
+.preset-search-wrap {
+  padding: 0 10px 8px;
+  flex-shrink: 0;
+}
+
+.preset-search-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.preset-search-icon {
+  position: absolute;
+  left: 8px;
+  color: var(--text-muted);
+  opacity: 0.5;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.preset-search-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 8px 5px 26px;
+  font-size: 0.75rem;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.preset-search-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.preset-search-input:focus {
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+/* Context menu */
+.preset-context-menu {
+  position: fixed;
+  z-index: 200;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  min-width: 100px;
+}
+
+.preset-context-menu button {
+  display: block;
+  width: 100%;
+  padding: 6px 14px;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.preset-context-menu button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme-group="light"] .preset-context-menu button:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.preset-context-delete {
+  color: #e74c3c !important;
+}
+
+/* =================== Preset save / update button =================== */
+.preset-save-area {
+  position: absolute;
+  top: 76px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 15;
+}
+
+.eval-actions-area {
+  position: absolute;
+  top: 76px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 15;
+}
+
+.eval-action-btn {
+  position: static !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 30px;
+  max-width: 30px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition:
+    max-width 0.22s ease,
+    border-radius 0.22s ease,
+    padding 0.22s ease,
+    color 0.15s,
+    border-color 0.15s,
+    background 0.15s;
+}
+
+.eval-action-label {
+  white-space: nowrap;
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  padding-left: 0;
+  transition:
+    max-width 0.22s ease,
+    opacity 0.15s ease,
+    padding-left 0.15s ease;
+}
+
+.eval-action-btn:hover {
+  max-width: 160px;
+  border-radius: var(--radius-sm);
+  padding: 0 10px;
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.eval-action-btn:hover .eval-action-label {
+  max-width: 120px;
+  opacity: 1;
+  padding-left: 5px;
+}
+
+.eval-action-active {
+  color: var(--accent) !important;
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent) !important;
+}
+
+.eval-action-btn:active {
+  transform: none;
+}
+
+.preset-active-name {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+
+.preset-active-name:hover {
+  color: var(--text-primary);
+}
+
+.preset-save-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  flex-shrink: 0;
+  white-space: nowrap;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+/* Label always visible */
+.preset-save-btn-label {
+  white-space: nowrap;
+}
+
+.preset-save-btn:hover {
+  background: var(--accent);
+  color: var(--accent-text, white);
+}
+
+.preset-save-btn:hover .preset-save-btn-label {
+  opacity: 1;
+}
+
+
+
+/* Dirty state: accent border to signal changes */
+.preset-save-btn--dirty {
+  border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent);
+  color: var(--accent);
+}
+
+.preset-save-btn--dirty:hover {
+  border-color: var(--accent);
+}
+
+/* Feedback state: green */
+.preset-save-btn--feedback,
+.preset-save-btn--feedback:hover {
+  background: rgba(74, 222, 128, 0.12);
+  color: #4ade80;
+}
+
+.preset-save-btn--feedback .preset-save-btn-label {
+  opacity: 1;
+}
+
+.main-content {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  padding: 56px 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  justify-content: center;
+}
+
+.main-content[data-view="settings"] {
+  justify-content: flex-start;
+  padding-bottom: 0;
+}
+
+.main-content[data-view="settings"] > * {
+  max-width: 680px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.main-content[data-view="settings"] > .view-transition-wrapper {
+  max-width: none;
+}
+
+.main-content[data-view="settings"] > .view-transition-wrapper > * {
+  max-width: 680px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}

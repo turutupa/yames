@@ -1,0 +1,315 @@
+/* overlays.css
+ *
+ * Floating play button and the audio input tester overlay — shell-adjacent,
+   owned by no single screen.
+ *
+ * Split out of main-window.css (UI_REVAMP A3). Moves only — not one rule was
+ * edited, and the parts are contiguous runs of the original file imported in
+ * the original order, so the cascade is unchanged. */
+
+/* Floating play button */
+.floating-play-btn {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 340px;
+  padding: 16px 24px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  border-radius: var(--radius);
+  background: linear-gradient(
+    135deg,
+    var(--accent),
+    color-mix(in srgb, var(--accent) 70%, #000)
+  );
+  color: var(--accent-text, white);
+  letter-spacing: 1px;
+  box-shadow: 0 4px 16px var(--accent-glow);
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  z-index: 50;
+  transition:
+    box-shadow 0.15s,
+    transform 0.15s,
+    filter 0.1s;
+}
+
+.floating-play-btn:hover {
+  box-shadow:
+    0 6px 28px var(--accent-glow),
+    0 0 12px var(--accent-glow);
+  transform: translateX(-50%) translateY(-1px);
+}
+
+.floating-play-btn:active {
+  transform: translateX(-50%) scale(0.97);
+}
+
+.floating-play-shortcut {
+  font-size: 0.65rem;
+  opacity: 0.45;
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.floating-play-btn.playing {
+  background: linear-gradient(
+    135deg,
+    var(--accent),
+    color-mix(in srgb, var(--accent) 70%, #000)
+  );
+  color: var(--accent-text, white);
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+.floating-play-btn.pulse {
+  animation: floating-pulse 0.15s ease-out;
+}
+
+@keyframes floating-pulse {
+  0% {
+    filter: brightness(1);
+    box-shadow: 0 4px 16px var(--accent-glow);
+  }
+  50% {
+    filter: brightness(1.4);
+    box-shadow:
+      0 4px 24px var(--accent-glow),
+      0 0 16px var(--accent-glow);
+  }
+  100% {
+    filter: brightness(1);
+    box-shadow: 0 4px 16px var(--accent-glow);
+  }
+}
+
+/* Preserve 3D shadow during pulse on velvet/sand themes */
+@keyframes floating-pulse-3d {
+  0% {
+    filter: brightness(1);
+    box-shadow:
+      0 4px 0 0 color-mix(in srgb, var(--accent) 50%, #000),
+      0 4px 16px var(--accent-glow);
+  }
+  50% {
+    filter: brightness(1.4);
+    box-shadow:
+      0 4px 0 0 color-mix(in srgb, var(--accent) 50%, #000),
+      0 4px 24px var(--accent-glow),
+      0 0 16px var(--accent-glow);
+  }
+  100% {
+    filter: brightness(1);
+    box-shadow:
+      0 4px 0 0 color-mix(in srgb, var(--accent) 50%, #000),
+      0 4px 16px var(--accent-glow);
+  }
+}
+
+html[data-theme="velvet"] .floating-play-btn.pulse,
+html[data-theme="sand"] .floating-play-btn.pulse {
+  animation: floating-pulse-3d 0.15s ease-out;
+}
+
+/* ── Unified Input Tester ── */
+
+.input-tester-modal {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px 28px;
+  min-width: 420px;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.input-tester-hint {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.input-tester-log-wrapper {
+  height: 340px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  position: relative;
+  overflow: hidden;
+}
+
+.input-tester-log {
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  padding-right: 14px;
+  scrollbar-width: none;
+}
+
+.input-tester-log::-webkit-scrollbar {
+  display: none;
+}
+
+.input-tester-scrollbar {
+  position: absolute;
+  top: 4px;
+  right: 3px;
+  bottom: 4px;
+  width: 5px;
+  border-radius: 3px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.input-tester-log-wrapper:hover .input-tester-scrollbar,
+.input-tester-scrollbar.visible {
+  opacity: 1;
+}
+
+.input-tester-scrollbar-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--accent);
+  border-radius: 3px;
+  min-height: 24px;
+  transition: background 0.15s;
+}
+
+.input-tester-log-wrapper:hover .input-tester-scrollbar-thumb {
+  background: var(--accent);
+  filter: brightness(1.15);
+}
+
+.input-tester-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 5px;
+  font-size: 0.78rem;
+  font-family: "SF Mono", "Fira Code", monospace;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+
+.input-tester-row.latest {
+  opacity: 1;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.input-tester-source {
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+  min-width: 34px;
+  text-align: center;
+}
+
+.input-tester-source--keyboard {
+  background: color-mix(in srgb, #6c9bff 20%, transparent);
+  color: #6c9bff;
+}
+
+.input-tester-source--midi {
+  background: color-mix(in srgb, #b06cff 20%, transparent);
+  color: #b06cff;
+}
+
+.input-tester-source--gamepad {
+  background: color-mix(in srgb, #4ccc6c 20%, transparent);
+  color: #4ccc6c;
+}
+
+.input-tester-keys {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+}
+
+.input-tester-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 5px;
+  font-size: 0.78rem;
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-weight: 600;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-bottom-width: 3px;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  text-transform: none;
+  line-height: 1;
+}
+
+.input-tester-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  font-family: "SF Mono", "Fira Code", monospace;
+  line-height: 1;
+  height: 22px;
+}
+
+.input-tester-pill.midi {
+  background: color-mix(in srgb, #b06cff 18%, transparent);
+  color: #c88aff;
+  border: 1px solid color-mix(in srgb, #b06cff 25%, transparent);
+}
+
+.input-tester-midi-detail {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-family: "SF Mono", "Fira Code", monospace;
+}
+
+.input-tester-pill.midi-subtle {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.64rem;
+}
+
+.input-tester-pill.gamepad {
+  background: color-mix(in srgb, #4ccc6c 18%, transparent);
+  color: #6edd8a;
+  border: 1px solid color-mix(in srgb, #4ccc6c 25%, transparent);
+}
+
+.input-tester-action {
+  margin-left: auto;
+  flex-shrink: 0;
+}

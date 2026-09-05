@@ -1,0 +1,193 @@
+/* theme-overrides.css
+ *
+ * Per-theme treatments that override the base controls: the 3D button style
+   Velvet and Sand use, and the play button's glow.
+ *
+ * Split out of main-window.css (UI_REVAMP A3). Moves only — not one rule was
+ * edited, and the parts are contiguous runs of the original file imported in
+ * the original order, so the cascade is unchanged. */
+
+/* =================== 3D Buttons — Velvet & Sand themes =================== */
+/*
+ * Josh Comeau-style pushable button effect for tactile feel.
+ * CSS-only: translateY + hard box-shadow simulate a front face + side wall.
+ * Spring easing on return, 34ms snap on press.
+ * Using html[data-theme] prefix for specificity (0,2,1) — beats any two-class
+ * combo like .floating-play-btn.playing (0,2,0).
+ */
+
+/* --- Floating play button --- */
+html[data-theme="velvet"] .floating-play-btn,
+html[data-theme="sand"] .floating-play-btn {
+  transform: translateX(-50%) translateY(-4px);
+  box-shadow: 0 4px 0 0 color-mix(in srgb, var(--accent) 50%, #000);
+  transition:
+    transform 600ms cubic-bezier(0.3, 0.7, 0.4, 1.5),
+    box-shadow 600ms cubic-bezier(0.3, 0.7, 0.4, 1.5),
+    filter 0.15s;
+}
+html[data-theme="velvet"] .floating-play-btn:hover,
+html[data-theme="sand"] .floating-play-btn:hover {
+  transform: translateX(-50%) translateY(-6px);
+  box-shadow: 0 6px 0 0 color-mix(in srgb, var(--accent) 50%, #000);
+  filter: brightness(1.08);
+  transition:
+    transform 250ms cubic-bezier(0.3, 0.7, 0.4, 1.5),
+    box-shadow 250ms cubic-bezier(0.3, 0.7, 0.4, 1.5),
+    filter 0.15s;
+}
+html[data-theme="velvet"] .floating-play-btn:active,
+html[data-theme="sand"] .floating-play-btn:active {
+  transform: translateX(-50%) translateY(-1px);
+  box-shadow: 0 1px 0 0 color-mix(in srgb, var(--accent) 50%, #000);
+  transition:
+    transform 34ms,
+    box-shadow 34ms;
+}
+
+/* --- BPM +/- buttons --- */
+html[data-theme="velvet"] .bpm-btn,
+html[data-theme="sand"] .bpm-btn {
+  transform: translateY(-3px);
+  box-shadow: 0 3px 0 0 color-mix(in srgb, var(--accent) 40%, #000);
+  transition:
+    transform 600ms cubic-bezier(0.3, 0.7, 0.4, 1.5),
+    box-shadow 600ms cubic-bezier(0.3, 0.7, 0.4, 1.5);
+}
+html[data-theme="velvet"] .bpm-btn:hover,
+html[data-theme="sand"] .bpm-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 0 0 color-mix(in srgb, var(--accent) 40%, #000);
+  filter: brightness(1.1);
+  transition:
+    transform 250ms cubic-bezier(0.3, 0.7, 0.4, 1.5),
+    box-shadow 250ms cubic-bezier(0.3, 0.7, 0.4, 1.5);
+}
+html[data-theme="velvet"] .bpm-btn:active,
+html[data-theme="sand"] .bpm-btn:active {
+  transform: translateY(0px);
+  box-shadow: 0 0px 0 0 color-mix(in srgb, var(--accent) 40%, #000);
+  transition:
+    transform 34ms,
+    box-shadow 34ms;
+}
+
+/* --- Subdivision buttons --- */
+html[data-theme="velvet"] .sub-row-btn,
+html[data-theme="sand"] .sub-row-btn {
+  transform: translateY(-3px);
+  box-shadow: 0 3px 0 0 color-mix(in srgb, var(--accent) 45%, #000);
+  transition:
+    transform 600ms cubic-bezier(0.3, 0.7, 0.4, 1.5),
+    box-shadow 600ms cubic-bezier(0.3, 0.7, 0.4, 1.5);
+}
+html[data-theme="velvet"] .sub-row-btn:hover,
+html[data-theme="sand"] .sub-row-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 0 0 color-mix(in srgb, var(--accent) 45%, #000);
+  filter: brightness(1.1);
+  transition:
+    transform 250ms cubic-bezier(0.3, 0.7, 0.4, 1.5),
+    box-shadow 250ms cubic-bezier(0.3, 0.7, 0.4, 1.5);
+}
+html[data-theme="velvet"] .sub-row-btn:active,
+html[data-theme="sand"] .sub-row-btn:active {
+  transform: translateY(0px);
+  box-shadow: 0 0px 0 0 color-mix(in srgb, var(--accent) 45%, #000);
+  transition:
+    transform 34ms,
+    box-shadow 34ms;
+}
+
+/* --- Time signature buttons --- */
+html[data-theme="velvet"] .time-sig-btn,
+html[data-theme="sand"] .time-sig-btn {
+  transform: translateY(-3px);
+  box-shadow: 0 3px 0 0 color-mix(in srgb, var(--accent) 45%, #000);
+  transition:
+    transform 600ms cubic-bezier(0.3, 0.7, 0.4, 1.5),
+    box-shadow 600ms cubic-bezier(0.3, 0.7, 0.4, 1.5);
+}
+html[data-theme="velvet"] .time-sig-btn:hover,
+html[data-theme="sand"] .time-sig-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 0 0 color-mix(in srgb, var(--accent) 45%, #000);
+  filter: brightness(1.1);
+  transition:
+    transform 250ms cubic-bezier(0.3, 0.7, 0.4, 1.5),
+    box-shadow 250ms cubic-bezier(0.3, 0.7, 0.4, 1.5);
+}
+html[data-theme="velvet"] .time-sig-btn:active,
+html[data-theme="sand"] .time-sig-btn:active {
+  transform: translateY(0px);
+  box-shadow: 0 0px 0 0 color-mix(in srgb, var(--accent) 45%, #000);
+  transition:
+    transform 34ms,
+    box-shadow 34ms;
+}
+
+/* --- Drill stepper +/- buttons --- */
+html[data-theme="velvet"] .stepper-btn,
+html[data-theme="sand"] .stepper-btn {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 0 0 color-mix(in srgb, var(--accent) 40%, #000);
+  transition:
+    transform 600ms cubic-bezier(0.3, 0.7, 0.4, 1.5),
+    box-shadow 600ms cubic-bezier(0.3, 0.7, 0.4, 1.5);
+}
+html[data-theme="velvet"] .stepper-btn:hover,
+html[data-theme="sand"] .stepper-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 3px 0 0 color-mix(in srgb, var(--accent) 40%, #000);
+  filter: brightness(1.1);
+  transition:
+    transform 250ms cubic-bezier(0.3, 0.7, 0.4, 1.5),
+    box-shadow 250ms cubic-bezier(0.3, 0.7, 0.4, 1.5);
+}
+html[data-theme="velvet"] .stepper-btn:active,
+html[data-theme="sand"] .stepper-btn:active {
+  transform: translateY(0px);
+  box-shadow: 0 0px 0 0 color-mix(in srgb, var(--accent) 40%, #000);
+  transition:
+    transform 34ms,
+    box-shadow 34ms;
+}
+
+/* Cancel global scale(0.95) on :active for all 3D buttons */
+html[data-theme="velvet"] .floating-play-btn:active,
+html[data-theme="sand"] .floating-play-btn:active,
+html[data-theme="velvet"] .bpm-btn:active,
+html[data-theme="sand"] .bpm-btn:active,
+html[data-theme="velvet"] .sub-row-btn:active,
+html[data-theme="sand"] .sub-row-btn:active,
+html[data-theme="velvet"] .time-sig-btn:active,
+html[data-theme="sand"] .time-sig-btn:active,
+html[data-theme="velvet"] .stepper-btn:active,
+html[data-theme="sand"] .stepper-btn:active {
+  scale: 1;
+}
+
+/* =================== Play button glow — per-theme overrides =================== */
+/*
+ * Glow is intentional for: obsidian, neon, aurora, prism.
+ * Remove it for themes where it feels out of place.
+ * Using html[data-theme] prefix for specificity (0,2,1) to beat the
+ * light-theme global override [data-theme-group="light"] (0,2,0).
+ */
+html[data-theme="mono"] .floating-play-btn,
+html[data-theme="mono"] .floating-play-btn:hover,
+html[data-theme="mono"] .floating-play-btn.playing {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+}
+
+html[data-theme="ivory"] .floating-play-btn,
+html[data-theme="ivory"] .floating-play-btn:hover,
+html[data-theme="ivory"] .floating-play-btn.playing,
+html[data-theme="arctic"] .floating-play-btn,
+html[data-theme="arctic"] .floating-play-btn:hover,
+html[data-theme="arctic"] .floating-play-btn.playing,
+html[data-theme="lavender"] .floating-play-btn,
+html[data-theme="lavender"] .floating-play-btn:hover,
+html[data-theme="lavender"] .floating-play-btn.playing {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+}

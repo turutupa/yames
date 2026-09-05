@@ -23,8 +23,7 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, fireEvent } from "@testing-library/react";
-import fs from "node:fs";
-import path from "node:path";
+import { readStylesheet } from "../../test/readStyles";
 import { CoachDownloadConfirmDialog } from "./CoachDownloadStatus";
 import type { ModelStatus } from "../../ipc";
 
@@ -101,9 +100,7 @@ describe("CoachDownloadConfirmDialog — card highlighting", () => {
 describe("download-confirm card styling", () => {
   // Comments are stripped so these assertions are about rules, not about the
   // prose explaining them (the fix's comment names the class it removed).
-  const css = fs
-    .readFileSync(path.join(process.cwd(), "src/styles/main-window.css"), "utf8")
-    .replace(/\/\*[\s\S]*?\*\//g, "");
+  const css = readStylesheet();
 
   it("has no persistent -selected accent rule left", () => {
     expect(css).not.toContain("download-confirm-model-selected");

@@ -10,20 +10,14 @@
  * same shape as the guard in `CoachDownloadStatus.test.tsx`.
  */
 import { describe, it, expect } from "vitest";
-import fs from "node:fs";
-import path from "node:path";
+import { readStylesheet, ruleBlock } from "../../test/readStyles";
 
 describe("input-test-btn sizing", () => {
   // Comments stripped so these assert rules, not the prose explaining them
   // (the fix's own comment names the declaration it removed).
-  const css = fs
-    .readFileSync(path.join(process.cwd(), "src/styles/main-window.css"), "utf8")
-    .replace(/\/\*[\s\S]*?\*\//g, "");
+  const css = readStylesheet();
 
-  const block = css.slice(
-    css.indexOf(".input-test-btn {"),
-    css.indexOf("}", css.indexOf(".input-test-btn {")),
-  );
+  const block = ruleBlock(css, ".input-test-btn");
 
   it("has a rule to guard", () => {
     expect(block).toContain("min-width");

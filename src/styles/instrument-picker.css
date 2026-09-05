@@ -1,0 +1,130 @@
+/* instrument-picker.css
+ *
+ * The first-launch instrument picker modal.
+ *
+ * Split out of main-window.css (UI_REVAMP A3). Moves only — not one rule was
+ * edited, and the parts are contiguous runs of the original file imported in
+ * the original order, so the cascade is unchanged. */
+
+/* =================== First-launch instrument picker =================== */
+.instrument-picker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fade-in 200ms ease-out;
+}
+
+.instrument-picker-modal {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 36px 40px;
+  min-width: 480px;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 20px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+}
+
+.instrument-picker-title {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text);
+}
+
+.instrument-picker-subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  text-align: center;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.instrument-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.instrument-picker-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: var(--text);
+  transition:
+    border-color 120ms ease,
+    background 120ms ease,
+    transform 80ms ease;
+  font-family: inherit;
+}
+
+.instrument-picker-card:hover {
+  border-color: var(--accent);
+  background: var(--bg-secondary);
+}
+
+.instrument-picker-card:active {
+  transform: scale(0.97);
+}
+
+.instrument-picker-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: var(--accent);
+}
+
+.instrument-picker-card-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.instrument-picker-card-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.instrument-picker-skip {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  padding: 8px;
+  cursor: pointer;
+  align-self: center;
+  margin-top: 4px;
+  font-family: inherit;
+  transition: color 120ms ease;
+}
+
+.instrument-picker-skip:hover {
+  color: var(--text);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
