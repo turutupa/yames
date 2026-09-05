@@ -15,7 +15,7 @@ export const TOUR_VERSION = 1;
 export const TOUR_SEEN_KEY = "tour.seenVersion";
 
 /** The tabs a stop can require. Mirrors `MainView` minus "settings". */
-export type TourView = "beat" | "drill" | "track";
+export type TourView = "beat" | "drill";
 
 export type TourStop = {
   /** Matches the `data-tour="…"` attribute on the target element(s). */

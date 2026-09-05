@@ -336,48 +336,7 @@
   },
   "nav": {
     "metronome": "Máy đếm nhịp",
-    "drill": "Luyện tempo",
-    "pocketCheck": "Kiểm tra cảm nhịp"
-  },
-  "pocketCheck": {
-    "title": "Kiểm tra cảm nhịp",
-    "idleWithInstrument": "Chơi theo máy đếm nhịp {{beats}} phách. Nhạc cụ của bạn sẽ được tự động phát hiện.",
-    "idleWithTaps": "Gõ theo máy đếm nhịp {{beats}} phách. Bấm vào ô đích để ghi từng phách.",
-    "calibratedHint": "Đã hiệu chỉnh: độ lệch {{offset}}ms",
-    "calibrateHint": "Hãy hiệu chỉnh trước để có độ chính xác tốt nhất trên máy của bạn.",
-    "start": "Bắt đầu",
-    "calibrate": "Hiệu chỉnh",
-    "history": "Lịch sử",
-    "stop": "Dừng",
-    "cancel": "Hủy",
-    "calibratingProgress": "Đang hiệu chỉnh {{count}}/{{total}}",
-    "tapsCount": "{{count}} lần gõ",
-    "tap": "TAP",
-    "calibratingHint": "Gõ tự nhiên theo từng tiếng tích tắc",
-    "calibratedTitle": "Hiệu chỉnh xong!",
-    "systemOffset": "Độ lệch hệ thống của bạn:",
-    "offsetNote": "Giá trị này đã tính đến độ trễ của âm thanh đầu ra và độ trễ đầu vào trên máy của bạn. Bạn có thể hiệu chỉnh lại bất cứ lúc nào.",
-    "done": "Xong",
-    "tryAgain": "Thử lại",
-    "clearAll": "Xóa hết",
-    "clearHistoryTitle": "Xóa lịch sử",
-    "clearConfirm": "Xóa toàn bộ {{count}} lần chơi? Không thể hoàn tác.",
-    "deleteAll": "Xóa tất cả",
-    "hits": "{{count}}% trúng",
-    "warmupProgress": "Khởi động {{count}}/{{total}}",
-    "getReady": "SẴN SÀNG",
-    "playInstrumentHint": "Chơi nhạc cụ của bạn theo nhịp",
-    "playTapHint": "Bấm vào ô đích để gõ theo nhịp",
-    "yourTimingWas": "Bạn đánh",
-    "early": "sớm hơn nhịp",
-    "late": "muộn hơn nhịp",
-    "ratings": {
-      "metronomic": "Chuẩn như máy",
-      "tight": "Khít",
-      "solid": "Chắc",
-      "loose": "Lỏng",
-      "miss": "Trượt"
-    }
+    "drill": "Luyện tempo"
   },
   "driftMeter": {
     "early": "Sớm",
@@ -661,7 +620,6 @@
         "toggle-widget": "Bật/tắt cửa sổ mini",
         "tab-1": "Trang máy đếm nhịp",
         "tab-2": "Trang luyện tempo",
-        "tab-3": "Trang kiểm tra cảm nhịp",
         "settings": "Cài đặt",
         "toggle-sidebar": "Bật/tắt cài đặt sẵn",
         "toggle-coach": "Bật/tắt huấn luyện viên"
@@ -685,7 +643,6 @@
         "toggle-widget": "Chuyển sang cửa sổ mini",
         "tab-1": "Chuyển sang trang máy đếm nhịp",
         "tab-2": "Chuyển sang trang luyện tempo",
-        "tab-3": "Chuyển sang trang kiểm tra cảm nhịp",
         "settings": "Mở hoặc đóng cài đặt",
         "toggle-sidebar": "Mở hoặc đóng thanh cài đặt sẵn",
         "toggle-coach": "Mở hoặc đóng bảng huấn luyện viên"

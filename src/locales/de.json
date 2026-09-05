@@ -336,48 +336,7 @@
   },
   "nav": {
     "metronome": "Metronom",
-    "drill": "Tempo-Training",
-    "pocketCheck": "Groove-Check"
-  },
-  "pocketCheck": {
-    "title": "Groove-Check",
-    "idleWithInstrument": "Spiele {{beats}} Beats im Takt mit dem Metronom. Dein Instrument wird automatisch erkannt.",
-    "idleWithTaps": "Tippe {{beats}} Beats im Takt mit dem Metronom. Klicke auf das Ziel, um jeden Beat zu erfassen.",
-    "calibratedHint": "Kalibriert: {{offset}} ms Offset",
-    "calibrateHint": "Kalibriere zuerst — das gibt die beste Genauigkeit auf deinem System.",
-    "start": "Start",
-    "calibrate": "Kalibrieren",
-    "history": "Verlauf",
-    "stop": "Stopp",
-    "cancel": "Abbrechen",
-    "calibratingProgress": "Kalibriere {{count}}/{{total}}",
-    "tapsCount": "{{count}} Taps",
-    "tap": "TAP",
-    "calibratingHint": "Tippe natürlich zu den Klicks mit",
-    "calibratedTitle": "Kalibriert!",
-    "systemOffset": "Dein System-Offset:",
-    "offsetNote": "Das berücksichtigt die Audio-Ausgabelatenz und die Eingabeverzögerung deines Systems. Du kannst jederzeit neu kalibrieren.",
-    "done": "Fertig",
-    "tryAgain": "Nochmal versuchen",
-    "clearAll": "Alles löschen",
-    "clearHistoryTitle": "Verlauf löschen",
-    "clearConfirm": "Wirklich alle {{count}} gespeicherten Läufe löschen? Das kann nicht rückgängig gemacht werden.",
-    "deleteAll": "Alle löschen",
-    "hits": "{{count}}% Treffer",
-    "warmupProgress": "Aufwärmen {{count}}/{{total}}",
-    "getReady": "MACH DICH BEREIT",
-    "playInstrumentHint": "Spiele dein Instrument zum Beat",
-    "playTapHint": "Klicke auf das Ziel, um mitzutippen",
-    "yourTimingWas": "Dein Timing war",
-    "early": "zu früh",
-    "late": "zu spät",
-    "ratings": {
-      "metronomic": "Metronomisch",
-      "tight": "Straff",
-      "solid": "Solide",
-      "loose": "Locker",
-      "miss": "Daneben"
-    }
+    "drill": "Tempo-Training"
   },
   "driftMeter": {
     "early": "zu früh",
@@ -661,7 +620,6 @@
         "toggle-widget": "Widget umschalten",
         "tab-1": "Metronom-Tab",
         "tab-2": "Tempo-Training-Tab",
-        "tab-3": "Groove-Check-Tab",
         "settings": "Einstellungen",
         "toggle-sidebar": "Presets umschalten",
         "toggle-coach": "Coach umschalten"
@@ -685,7 +643,6 @@
         "toggle-widget": "Zum schwebenden Widget wechseln",
         "tab-1": "Zum Metronom-Tab wechseln",
         "tab-2": "Zum Tempo-Training-Tab wechseln",
-        "tab-3": "Zum Groove-Check-Tab wechseln",
         "settings": "Einstellungen öffnen oder schließen",
         "toggle-sidebar": "Preset-Seitenleiste öffnen oder schließen",
         "toggle-coach": "Coach-Bedienfeld öffnen oder schließen"

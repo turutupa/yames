@@ -336,48 +336,7 @@
   },
   "nav": {
     "metronome": "節拍器",
-    "drill": "變速練習",
-    "pocketCheck": "律動檢查"
-  },
-  "pocketCheck": {
-    "title": "律動檢查",
-    "idleWithInstrument": "跟著節拍器演奏 {{beats}} 拍。你的樂器輸入會被自動偵測。",
-    "idleWithTaps": "跟著節拍器點擊 {{beats}} 拍。點擊目標區即可記錄每一拍。",
-    "calibratedHint": "已校準——偏移 {{offset}}ms",
-    "calibrateHint": "建議先校準，以獲得本機最佳準確度。",
-    "start": "開始",
-    "calibrate": "校準",
-    "history": "歷史",
-    "stop": "停止",
-    "cancel": "取消",
-    "calibratingProgress": "校準中 {{count}}/{{total}}",
-    "tapsCount": "{{count}} 次點擊",
-    "tap": "TAP",
-    "calibratingHint": "跟著提示音自然打拍",
-    "calibratedTitle": "校準完成！",
-    "systemOffset": "你的系統偏移：",
-    "offsetNote": "這包含了本機音訊輸出延遲與輸入延遲。你可以隨時重新校準。",
-    "done": "完成",
-    "tryAgain": "再試一次",
-    "clearAll": "清空",
-    "clearHistoryTitle": "清空歷史",
-    "clearConfirm": "確定刪除全部 {{count}} 筆紀錄？此操作無法復原。",
-    "deleteAll": "全部刪除",
-    "hits": "{{count}}% 命中",
-    "warmupProgress": "暖身 {{count}}/{{total}}",
-    "getReady": "準備",
-    "playInstrumentHint": "跟著節拍演奏你的樂器",
-    "playTapHint": "每拍點擊目標區",
-    "yourTimingWas": "你的節奏是",
-    "early": "偏快",
-    "late": "偏慢",
-    "ratings": {
-      "metronomic": "節拍器級",
-      "tight": "緊密",
-      "solid": "穩定",
-      "loose": "鬆散",
-      "miss": "未命中"
-    }
+    "drill": "變速練習"
   },
   "driftMeter": {
     "early": "偏快",
@@ -661,7 +620,6 @@
         "toggle-widget": "切換懸浮小窗",
         "tab-1": "節拍器分頁",
         "tab-2": "變速練習分頁",
-        "tab-3": "律動檢查分頁",
         "settings": "設定",
         "toggle-sidebar": "切換預設",
         "toggle-coach": "切換教練"
@@ -685,7 +643,6 @@
         "toggle-widget": "切換到懸浮小窗",
         "tab-1": "切換到節拍器分頁",
         "tab-2": "切換到變速練習分頁",
-        "tab-3": "切換到律動檢查分頁",
         "settings": "開啟或關閉設定",
         "toggle-sidebar": "開啟或關閉預設側邊欄",
         "toggle-coach": "開啟或關閉練習教練面板"

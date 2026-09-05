@@ -336,48 +336,7 @@
   },
   "nav": {
     "metronome": "Metronomo",
-    "drill": "Rampa",
-    "pocketCheck": "Check del groove"
-  },
-  "pocketCheck": {
-    "title": "Check del groove",
-    "idleWithInstrument": "Suona insieme al metronomo per {{beats}} colpi. L'input del tuo strumento viene rilevato automaticamente.",
-    "idleWithTaps": "Tocca a tempo insieme al metronomo per {{beats}} colpi. Clicca sul bersaglio per segnare ogni colpo.",
-    "calibratedHint": "Calibrato: offset {{offset}} ms",
-    "calibrateHint": "Calibra prima per la massima precisione sul tuo sistema.",
-    "start": "Inizia",
-    "calibrate": "Calibra",
-    "history": "Cronologia",
-    "stop": "Ferma",
-    "cancel": "Annulla",
-    "calibratingProgress": "Calibrazione {{count}}/{{total}}",
-    "tapsCount": "{{count}} tocchi",
-    "tap": "TAP",
-    "calibratingHint": "Tocca in modo naturale seguendo i clic",
-    "calibratedTitle": "Calibrazione completata!",
-    "systemOffset": "L'offset del tuo sistema:",
-    "offsetNote": "Comprende la latenza di uscita audio e il ritardo di input del tuo sistema. Puoi ricalibrare quando vuoi.",
-    "done": "Fatto",
-    "tryAgain": "Riprova",
-    "clearAll": "Cancella tutto",
-    "clearHistoryTitle": "Cancella cronologia",
-    "clearConfirm": "Eliminare tutte le {{count}} sessioni salvate? Non si può annullare.",
-    "deleteAll": "Elimina tutto",
-    "hits": "{{count}}% a segno",
-    "warmupProgress": "Riscaldamento {{count}}/{{total}}",
-    "getReady": "PREPARATI",
-    "playInstrumentHint": "Suona il tuo strumento insieme al beat",
-    "playTapHint": "Clicca sul bersaglio a ogni colpo",
-    "yourTimingWas": "Il tuo timing è stato",
-    "early": "In anticipo",
-    "late": "In ritardo",
-    "ratings": {
-      "metronomic": "Metronomico",
-      "tight": "Serrato",
-      "solid": "Solido",
-      "loose": "Sciolto",
-      "miss": "Mancato"
-    }
+    "drill": "Rampa"
   },
   "driftMeter": {
     "early": "In anticipo",
@@ -661,7 +620,6 @@
         "toggle-widget": "Attiva/disattiva widget",
         "tab-1": "Scheda Metronomo",
         "tab-2": "Scheda Rampa",
-        "tab-3": "Scheda Check del groove",
         "settings": "Impostazioni",
         "toggle-sidebar": "Attiva/disattiva Preset",
         "toggle-coach": "Attiva/disattiva Coach"
@@ -685,7 +643,6 @@
         "toggle-widget": "Passa al widget flottante",
         "tab-1": "Passa alla scheda Metronomo",
         "tab-2": "Passa alla scheda Rampa",
-        "tab-3": "Passa alla scheda Check del groove",
         "settings": "Apri o chiudi le impostazioni",
         "toggle-sidebar": "Apri o chiudi la barra laterale dei Preset",
         "toggle-coach": "Apri o chiudi il pannello del coach"

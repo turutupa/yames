@@ -72,7 +72,7 @@ export function useFullscreenLifecycle({
   // 1. Listen for fullscreen changes from Rust (global shortcut)
   useEffect(() => {
     const unlisten = onFullscreenChanged(() => {
-      if (view !== "track") setIsFullscreen((prev) => !prev);
+      setIsFullscreen((prev) => !prev);
     });
     return () => {
       unlisten.then((fn) => fn());

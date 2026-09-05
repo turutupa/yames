@@ -33,7 +33,6 @@ export type HotkeyAction =
   | "toggle-coach"
   | "tab-1"
   | "tab-2"
-  | "tab-3"
   | "settings";
 
 export interface HotkeyEntry {
@@ -233,13 +232,6 @@ export const HOTKEYS: HotkeyEntry[] = [
     action: "Drill tab",
     key: "⌘2",
     desc: "Switch to Drill tab",
-    group: "navigation",
-  },
-  {
-    id: "tab-3",
-    action: "Pocket Check tab",
-    key: "⌘3",
-    desc: "Switch to Pocket Check tab",
     group: "navigation",
   },
   {

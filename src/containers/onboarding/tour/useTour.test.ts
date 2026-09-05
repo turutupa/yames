@@ -120,22 +120,22 @@ describe("tab switch and restore", () => {
   });
 
   it("restores the tab the user came from when the tour ends", async () => {
-    const view = await mount("track");
+    const view = await mount("drill");
     act(() => view.result.current.open());
     view.sync();
     expect(view.view).toBe("beat"); // stop 1 needs the metronome tab
     act(() => view.result.current.close());
     view.sync();
-    expect(view.view).toBe("track");
+    expect(view.view).toBe("drill");
   });
 
   it("restores the tab after finishing on the last stop too", async () => {
-    const view = await mount("track");
+    const view = await mount("drill");
     act(() => view.result.current.open());
     for (let i = 0; i < TOUR_STOPS.length; i++) act(() => view.result.current.next());
     view.sync();
     expect(view.result.current.isOpen).toBe(false);
-    expect(view.view).toBe("track");
+    expect(view.view).toBe("drill");
   });
 
   it("never restores to settings — a tour has no home there", async () => {

@@ -336,48 +336,7 @@
   },
   "nav": {
     "metronome": "Metronom",
-    "drill": "Rozbieg",
-    "pocketCheck": "Test rytmu"
-  },
-  "pocketCheck": {
-    "title": "Test rytmu",
-    "idleWithInstrument": "Graj razem z metronomem przez {{beats}} uderzeń. Dźwięk Twojego instrumentu jest wykrywany automatycznie.",
-    "idleWithTaps": "Stukaj razem z metronomem przez {{beats}} uderzeń. Klikaj cel, aby zarejestrować każde uderzenie.",
-    "calibratedHint": "Szkalibrowano: offset {{offset}} ms",
-    "calibrateHint": "Najpierw wykonaj kalibrację, aby uzyskać najlepszą dokładność w Twoim systemie.",
-    "start": "Start",
-    "calibrate": "Kalibruj",
-    "history": "Historia",
-    "stop": "Zatrzymaj",
-    "cancel": "Anuluj",
-    "calibratingProgress": "Kalibracja {{count}}/{{total}}",
-    "tapsCount": "{{count}} tapnięć",
-    "tap": "TAP",
-    "calibratingHint": "Stukaj naturalnie w rytmie kliknięć",
-    "calibratedTitle": "Szkalibrowano!",
-    "systemOffset": "Offset Twojego systemu:",
-    "offsetNote": "Uwzględnia opóźnienie wyjścia audio oraz opóźnienie wejścia w Twoim systemie. Możesz przekalibrować w każdej chwili.",
-    "done": "Gotowe",
-    "tryAgain": "Spróbuj ponownie",
-    "clearAll": "Wyczyść wszystko",
-    "clearHistoryTitle": "Wyczyść historię",
-    "clearConfirm": "Usunąć wszystkie {{count}} zapisane próby? Tego nie można cofnąć.",
-    "deleteAll": "Usuń wszystko",
-    "hits": "{{count}}% trafień",
-    "warmupProgress": "Rozgrzewka {{count}}/{{total}}",
-    "getReady": "PRZYGOTUJ SIĘ",
-    "playInstrumentHint": "Graj na instrumencie w rytmie",
-    "playTapHint": "Klikaj cel, aby stukać w rytmie",
-    "yourTimingWas": "Twój rytm był",
-    "early": "Za wcześnie",
-    "late": "Za późno",
-    "ratings": {
-      "metronomic": "Metronomiczny",
-      "tight": "Ciasny",
-      "solid": "Stabilny",
-      "loose": "Luźny",
-      "miss": "Pudło"
-    }
+    "drill": "Rozbieg"
   },
   "driftMeter": {
     "early": "Za wcześnie",
@@ -661,7 +620,6 @@
         "toggle-widget": "Przełącz Widget",
         "tab-1": "Zakładka Metronom",
         "tab-2": "Zakładka Rozbieg",
-        "tab-3": "Zakładka Test rytmu",
         "settings": "Ustawienia",
         "toggle-sidebar": "Przełącz Presety",
         "toggle-coach": "Przełącz Trenera"
@@ -685,7 +643,6 @@
         "toggle-widget": "Przełącz na pływający widget",
         "tab-1": "Przełącz na zakładkę Metronom",
         "tab-2": "Przełącz na zakładkę Rozbieg",
-        "tab-3": "Przełącz na zakładkę Test rytmu",
         "settings": "Otwórz lub zamknij ustawienia",
         "toggle-sidebar": "Otwórz lub zamknij pasek presetów",
         "toggle-coach": "Otwórz lub zamknij panel trenera"

@@ -336,48 +336,7 @@
   },
   "nav": {
     "metronome": "Métronome",
-    "drill": "Rampe",
-    "pocketCheck": "Groove Check"
-  },
-  "pocketCheck": {
-    "title": "Groove Check",
-    "idleWithInstrument": "Joue avec le métronome pendant {{beats}} temps. Ton instrument est détecté automatiquement.",
-    "idleWithTaps": "Tape avec le métronome pendant {{beats}} temps. Clique sur la cible pour enregistrer chaque temps.",
-    "calibratedHint": "Calibré : décalage de {{offset}} ms",
-    "calibrateHint": "Calibre d'abord pour une précision optimale sur ton système.",
-    "start": "Démarrer",
-    "calibrate": "Calibrer",
-    "history": "Historique",
-    "stop": "Arrêter",
-    "cancel": "Annuler",
-    "calibratingProgress": "Calibration {{count}}/{{total}}",
-    "tapsCount": "{{count}} appuis",
-    "tap": "TAP",
-    "calibratingHint": "Tape naturellement en suivant les clics",
-    "calibratedTitle": "Calibré !",
-    "systemOffset": "Décalage de ton système :",
-    "offsetNote": "Cela tient compte de la latence de sortie audio et du délai d'entrée de ton système. Tu peux recalibrer à tout moment.",
-    "done": "Terminé",
-    "tryAgain": "Réessayer",
-    "clearAll": "Tout effacer",
-    "clearHistoryTitle": "Effacer l'historique",
-    "clearConfirm": "Supprimer les {{count}} enregistrements ? Cette action est irréversible.",
-    "deleteAll": "Tout supprimer",
-    "hits": "{{count}} % de réussite",
-    "warmupProgress": "Échauffement {{count}}/{{total}}",
-    "getReady": "PRÉPARE-TOI",
-    "playInstrumentHint": "Joue de ton instrument en suivant le tempo",
-    "playTapHint": "Clique sur la cible à chaque temps",
-    "yourTimingWas": "Ton timing était",
-    "early": "En avance",
-    "late": "En retard",
-    "ratings": {
-      "metronomic": "Métronomique",
-      "tight": "Serré",
-      "solid": "Solide",
-      "loose": "Lâche",
-      "miss": "Raté"
-    }
+    "drill": "Rampe"
   },
   "driftMeter": {
     "early": "En avance",
@@ -661,7 +620,6 @@
         "toggle-widget": "Basculer le widget",
         "tab-1": "Onglet Métronome",
         "tab-2": "Onglet Rampe",
-        "tab-3": "Onglet Groove Check",
         "settings": "Paramètres",
         "toggle-sidebar": "Basculer les préréglages",
         "toggle-coach": "Basculer le Coach"
@@ -685,7 +643,6 @@
         "toggle-widget": "Basculer vers le widget flottant",
         "tab-1": "Passer à l'onglet Métronome",
         "tab-2": "Passer à l'onglet Rampe",
-        "tab-3": "Passer à l'onglet Groove Check",
         "settings": "Ouvrir ou fermer les paramètres",
         "toggle-sidebar": "Ouvrir ou fermer le panneau des préréglages",
         "toggle-coach": "Ouvrir ou fermer le panneau du Coach"

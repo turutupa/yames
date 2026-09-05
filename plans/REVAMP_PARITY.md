@@ -11,7 +11,7 @@
 > release. This covers what *exists*. They overlap and both are needed.
 
 Baseline: `main` at 1f22919, v1.0.4. English locale carries **688 keys**
-across 30 groups; **651** of them must survive the revamp.
+across 30 groups; **649** of them must survive the revamp.
 
 ---
 
@@ -40,6 +40,9 @@ missing after the revamp is a bug, not a decision.
       (485 lines) and `TrackView.test.tsx`
 - [ ] Locale group `pocketCheck` — 36 keys, all 15 languages
 - [ ] Locale key `nav.pocketCheck` — 1 key, all 15 languages
+- [ ] Locale keys `settings.hotkeys.actions.tab-3` and
+      `settings.hotkeys.descs.tab-3` — 2 keys, all 15 languages (found during
+      A6; the hotkey list carries its own label for every action)
 - [ ] Bindable action `tab-3` (`src/hotkeys.ts`, `useActionDispatcher`)
 - [ ] The `"track"` member of `MainView` and its branches in
       `MainWindow.tsx`, `MainHeader.tsx`, `useTabRouting.ts`,
@@ -47,7 +50,15 @@ missing after the revamp is a bug, not a decision.
 - [ ] The onboarding tour stop and hint trigger that reference it
       (`onboarding/tour/stops.ts`, `onboarding/hints/triggers.test.ts`)
 
-**Before deleting, confirm these are not shared:** any IPC command, Rust
+**Checked before deleting (A6, 2026-09-04):** every IPC call `TrackView`
+made — `getCalibrationOffset`, `onBeat`, `setCalibrationOffset`, `setPlaying`,
+`togglePlayback` — is defined in `src/ipc.ts` and used elsewhere or wraps a
+live engine command, so nothing in `src-tauri` existed solely for Pocket
+Check. `getCalibrationOffset` / `setCalibrationOffset` are now unreferenced
+from the UI but kept: they wrap the running auto-calibration, and deleting the
+wrapper would remove a capability the coach work is likely to want.
+
+**The original precondition, kept for the record:** any IPC command, Rust
 type or timing-analysis path that only the Track view exercises today. If
 something in `src-tauri` exists solely for Pocket Check, that is a separate
 decision and a separate PR — this revamp does not touch Rust.

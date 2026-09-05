@@ -66,7 +66,6 @@ import { MainHeader } from "./MainHeader";
 import { WindowControls } from "../../components/WindowControls";
 import { PresetSaveBar } from "../../components/presets/PresetSaveBar";
 import { FloatingPlayButton } from "./FloatingPlayButton";
-import { TrackView } from "../pocket-check/TrackView";
 import { ViewTransition } from "../../components/ViewTransition";
 import { ZenTransition } from "../zen/ZenTransition";
 import { useEvaluation } from "../../hooks/useEvaluation";
@@ -791,7 +790,7 @@ export function MainWindow() {
     onOpenHotkeys: () => {
       // O3's MIDI capture flow is not merged yet — until it is, the hint
       // lands the user on the section that owns the mapping UI.
-      prevTab.current = view === "settings" ? prevTab.current : (view as "beat" | "drill" | "track");
+      prevTab.current = view === "settings" ? prevTab.current : (view as "beat" | "drill");
       setView("settings");
       setTimeout(() => {
         document
@@ -923,7 +922,7 @@ export function MainWindow() {
       )}
 
       <div className="main-body">
-        {view !== "settings" && view !== "track" && (
+        {view !== "settings" && (
           <PresetSidebar
             ref={sidebarRef}
             state={state}
@@ -993,8 +992,6 @@ export function MainWindow() {
             autoCollapse={drillAutoCollapse}
             animations={!reducedMotion}
           />
-        ) : view === "track" ? (
-          <TrackView state={state} currentBeat={currentBeat} evaluationEnabled={evaluation.enabled} />
         ) : (
           <SettingsView
             updateStatus={updateStatus}
@@ -1258,7 +1255,7 @@ export function MainWindow() {
       onTakeTour={() => {
         // The tour has no stop in Settings, so leave first and hand it the
         // tab it must restore — same contract the Settings entry uses.
-        const back = view === "settings" ? prevTab.current : (view as "beat" | "drill" | "track");
+        const back = view === "settings" ? prevTab.current : (view as "beat" | "drill");
         if (view === "settings") setView(back);
         tour.open(back);
       }}

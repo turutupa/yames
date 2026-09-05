@@ -336,48 +336,7 @@
   },
   "nav": {
     "metronome": "Metronoom",
-    "drill": "Tempotraining",
-    "pocketCheck": "Groovecheck"
-  },
-  "pocketCheck": {
-    "title": "Groovecheck",
-    "idleWithInstrument": "Speel {{beats}} beats mee met de metronoom. Je instrument wordt automatisch gedetecteerd.",
-    "idleWithTaps": "Tik {{beats}} beats mee met de metronoom. Klik op het doelwit om elke beat te registreren.",
-    "calibratedHint": "Gekalibreerd: offset {{offset}}ms",
-    "calibrateHint": "Kalibreer eerst voor de beste nauwkeurigheid op jouw systeem.",
-    "start": "Start",
-    "calibrate": "Kalibreren",
-    "history": "Geschiedenis",
-    "stop": "Stoppen",
-    "cancel": "Annuleren",
-    "calibratingProgress": "Kalibreren {{count}}/{{total}}",
-    "tapsCount": "{{count}} keer getikt",
-    "tap": "TAP",
-    "calibratingHint": "Tik natuurlijk mee met de kliks",
-    "calibratedTitle": "Gekalibreerd!",
-    "systemOffset": "Systeemoffset:",
-    "offsetNote": "Dit houdt rekening met de audio-uitvoerlatentie en invoervertraging van jouw systeem. Je kunt altijd opnieuw kalibreren.",
-    "done": "Klaar",
-    "tryAgain": "Opnieuw proberen",
-    "clearAll": "Alles wissen",
-    "clearHistoryTitle": "Geschiedenis wissen",
-    "clearConfirm": "Alle {{count}} opgeslagen sessies verwijderen? Dit kan niet ongedaan worden gemaakt.",
-    "deleteAll": "Alles verwijderen",
-    "hits": "{{count}}% treffers",
-    "warmupProgress": "Warming-up {{count}}/{{total}}",
-    "getReady": "Maak je klaar",
-    "playInstrumentHint": "Speel je instrument mee met de beat",
-    "playTapHint": "Klik op het doelwit om mee te tikken",
-    "yourTimingWas": "Je timing was",
-    "early": "Te vroeg",
-    "late": "Te laat",
-    "ratings": {
-      "metronomic": "Metronomisch",
-      "tight": "Strak",
-      "solid": "Solide",
-      "loose": "Losjes",
-      "miss": "Gemist"
-    }
+    "drill": "Tempotraining"
   },
   "driftMeter": {
     "early": "Te vroeg",
@@ -661,7 +620,6 @@
         "toggle-widget": "Widget aan/uit",
         "tab-1": "Metronoom-tabblad",
         "tab-2": "Tempotraining-tabblad",
-        "tab-3": "Groovecheck-tabblad",
         "settings": "Instellingen",
         "toggle-sidebar": "Presets aan/uit",
         "toggle-coach": "Coach aan/uit"
@@ -685,7 +643,6 @@
         "toggle-widget": "Overschakelen naar de zwevende widget",
         "tab-1": "Naar het Metronoom-tabblad",
         "tab-2": "Naar het Tempotraining-tabblad",
-        "tab-3": "Naar het Groovecheck-tabblad",
         "settings": "Instellingen openen of sluiten",
         "toggle-sidebar": "Open of sluit de presets-zijbalk",
         "toggle-coach": "Open of sluit het oefencoach-paneel"

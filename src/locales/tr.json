@@ -336,48 +336,7 @@
   },
   "nav": {
     "metronome": "Metronom",
-    "drill": "Tempo Antrenmanı",
-    "pocketCheck": "Groove Kontrolü"
-  },
-  "pocketCheck": {
-    "title": "Groove Kontrolü",
-    "idleWithInstrument": "Metronomla birlikte {{beats}} vuruş çal. Enstrüman girişin otomatik algılanır.",
-    "idleWithTaps": "Metronomla birlikte {{beats}} vuruş tıkla. Her vuruşu kaydetmek için hedefe bas.",
-    "calibratedHint": "Kalibre edildi: {{offset}}ms ofset",
-    "calibrateHint": "En iyi doğruluk için önce kalibre et.",
-    "start": "Başlat",
-    "calibrate": "Kalibre Et",
-    "history": "Geçmiş",
-    "stop": "Durdur",
-    "cancel": "İptal",
-    "calibratingProgress": "Kalibre ediliyor {{count}}/{{total}}",
-    "tapsCount": "{{count}} TAP",
-    "tap": "TAP",
-    "calibratingHint": "Vuruşlarla birlikte doğal şekilde tıkla",
-    "calibratedTitle": "Kalibre edildi!",
-    "systemOffset": "Sistem ofsetin:",
-    "offsetNote": "Bu, sistemindeki ses çıkışı gecikmesini ve giriş gecikmesini denkler. İstediğin an yeniden kalibre edebilirsin.",
-    "done": "Tamam",
-    "tryAgain": "Tekrar Dene",
-    "clearAll": "Tümünü temizle",
-    "clearHistoryTitle": "Geçmişi Temizle",
-    "clearConfirm": "{{count}} kayıtlı seans silinsin mi? Bu işlem geri alınamaz.",
-    "deleteAll": "Tümünü Sil",
-    "hits": "{{count}}% isabet",
-    "warmupProgress": "Isınma {{count}}/{{total}}",
-    "getReady": "HAZIR OL",
-    "playInstrumentHint": "Vuruşla birlikte enstrümanını çal",
-    "playTapHint": "Eşlik etmek için hedefe tıkla",
-    "yourTimingWas": "Zamanlaman:",
-    "early": "Erken",
-    "late": "Geç",
-    "ratings": {
-      "metronomic": "Metronomik",
-      "tight": "Sıkı",
-      "solid": "Sağlam",
-      "loose": "Gevşek",
-      "miss": "Kaçırıldı"
-    }
+    "drill": "Tempo Antrenmanı"
   },
   "driftMeter": {
     "early": "Erken",
@@ -661,7 +620,6 @@
         "toggle-widget": "Mini pencereyi aç/kapat",
         "tab-1": "Metronom sekmesi",
         "tab-2": "Tempo Antrenmanı sekmesi",
-        "tab-3": "Groove Kontrolü sekmesi",
         "settings": "Ayarlar",
         "toggle-sidebar": "Ön ayarları aç/kapat",
         "toggle-coach": "Koç panelini aç/kapat"
@@ -685,7 +643,6 @@
         "toggle-widget": "Mini pencereye geç",
         "tab-1": "Metronom sekmesine geç",
         "tab-2": "Tempo Antrenmanı sekmesine geç",
-        "tab-3": "Groove Kontrolü sekmesine geç",
         "settings": "Ayarları aç veya kapat",
         "toggle-sidebar": "Ön ayar panelini aç veya kapat",
         "toggle-coach": "Pratik Koçu panelini aç veya kapat"

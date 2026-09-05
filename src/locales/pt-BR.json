@@ -336,48 +336,7 @@
   },
   "nav": {
     "metronome": "Metrônomo",
-    "drill": "Treino",
-    "pocketCheck": "Teste de Groove"
-  },
-  "pocketCheck": {
-    "title": "Teste de Groove",
-    "idleWithInstrument": "Toque junto com o metrônomo por {{beats}} tempos. A entrada do seu instrumento é detectada automaticamente.",
-    "idleWithTaps": "Toque junto com o metrônomo por {{beats}} tempos. Clique no alvo para marcar cada tempo.",
-    "calibratedHint": "Calibrado: offset {{offset}}ms",
-    "calibrateHint": "Calibre primeiro para obter a melhor precisão no seu sistema.",
-    "start": "Iniciar",
-    "calibrate": "Calibrar",
-    "history": "Histórico",
-    "stop": "Parar",
-    "cancel": "Cancelar",
-    "calibratingProgress": "Calibrando {{count}}/{{total}}",
-    "tapsCount": "{{count}} toques",
-    "tap": "TAP",
-    "calibratingHint": "Toque naturalmente junto com os cliques",
-    "calibratedTitle": "Calibração concluída!",
-    "systemOffset": "Offset do seu sistema:",
-    "offsetNote": "Isso considera a latência de saída de áudio e de entrada do seu sistema. Você pode recalibrar quando quiser.",
-    "done": "Concluído",
-    "tryAgain": "Tentar de novo",
-    "clearAll": "Limpar tudo",
-    "clearHistoryTitle": "Limpar histórico",
-    "clearConfirm": "Excluir todas as {{count}} sessões salvas? Isso não pode ser desfeito.",
-    "deleteAll": "Excluir todas",
-    "hits": "{{count}}% de acertos",
-    "warmupProgress": "Aquecimento {{count}}/{{total}}",
-    "getReady": "PREPARE-SE",
-    "playInstrumentHint": "Toque seu instrumento junto com a batida",
-    "playTapHint": "Clique no alvo a cada tempo para acompanhar",
-    "yourTimingWas": "Seu timing foi",
-    "early": "Adiantado",
-    "late": "Atrasado",
-    "ratings": {
-      "metronomic": "Metronômico",
-      "tight": "Firme",
-      "solid": "Sólido",
-      "loose": "Solto",
-      "miss": "Erro"
-    }
+    "drill": "Treino"
   },
   "driftMeter": {
     "early": "Adiantado",
@@ -661,7 +620,6 @@
         "toggle-widget": "Alternar widget",
         "tab-1": "Aba Metrônomo",
         "tab-2": "Aba Treino",
-        "tab-3": "Aba Teste de Groove",
         "settings": "Configurações",
         "toggle-sidebar": "Alternar predefinições",
         "toggle-coach": "Alternar Coach"
@@ -685,7 +643,6 @@
         "toggle-widget": "Alterna para o widget flutuante",
         "tab-1": "Vai para a aba Metrônomo",
         "tab-2": "Vai para a aba Treino",
-        "tab-3": "Vai para a aba Teste de Groove",
         "settings": "Abre ou fecha as configurações",
         "toggle-sidebar": "Abre ou fecha a barra lateral de predefinições",
         "toggle-coach": "Abre ou fecha o painel do coach"

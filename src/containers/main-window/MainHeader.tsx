@@ -89,13 +89,13 @@ function VolumeFader({
   );
 }
 
-export type MainView = "beat" | "drill" | "track" | "settings";
+export type MainView = "beat" | "drill" | "settings";
 
 interface MainHeaderProps {
   state: AppState;
   view: MainView;
   setView: (v: MainView) => void;
-  prevTab: { current: "beat" | "drill" | "track" };
+  prevTab: { current: "beat" | "drill" };
   setIsFullscreen: (v: boolean) => void;
   soundOpen: boolean;
   setSoundOpen: (v: boolean | ((p: boolean) => boolean)) => void;
@@ -185,23 +185,10 @@ export function MainHeader({
             </svg>
             <span className="tab-label">{t("nav.drill")}</span>
           </button>
-          <button
-            className={`tab-btn ${view === "track" ? "active" : ""}`}
-            onClick={() => setView("track")}
-            aria-label={t("nav.pocketCheck")}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" />
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-              <line x1="12" y1="19" x2="12" y2="22" />
-              <line x1="8" y1="22" x2="16" y2="22" />
-            </svg>
-            <span className="tab-label">{t("nav.pocketCheck")}</span>
-          </button>
         </nav>
       )}
       <div className="header-actions">
-        {view !== "settings" && view !== "track" && (
+        {view !== "settings" && (
           <button
             className="header-btn"
             /* Tour stop 6 spotlights zen + widget together: both buttons carry
@@ -226,34 +213,32 @@ export function MainHeader({
             </svg>
           </button>
         )}
-        {view !== "track" && (
-          <div className="header-sound-wrap" ref={soundDropdownRef}>
-            <button
-              className="header-btn"
-              onClick={() => setSoundOpen(!soundOpen)}
-              data-tooltip={t(`sound.${SOUND_TYPES.find((s) => s.id === state.soundType)?.id ?? "click"}`)}
-            >
-              <span className="header-sound-icon">{SOUND_TYPES.find((s) => s.id === state.soundType)?.icon ?? "○"}</span>
-            </button>
-            {soundOpen && (
-              <div className="header-sound-menu">
-                {SOUND_TYPES.map((st) => (
-                  <button
-                    key={st.id}
-                    className={`sub-dropdown-item ${state.soundType === st.id ? "active" : ""}`}
-                    onClick={() => {
-                      setSoundType(st.id);
-                      setSoundOpen(false);
-                    }}
-                  >
-                    <span className="sub-dropdown-icon">{st.icon}</span>
-                    <span>{t(`sound.${st.id}`)}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        <div className="header-sound-wrap" ref={soundDropdownRef}>
+          <button
+            className="header-btn"
+            onClick={() => setSoundOpen(!soundOpen)}
+            data-tooltip={t(`sound.${SOUND_TYPES.find((s) => s.id === state.soundType)?.id ?? "click"}`)}
+          >
+            <span className="header-sound-icon">{SOUND_TYPES.find((s) => s.id === state.soundType)?.icon ?? "○"}</span>
+          </button>
+          {soundOpen && (
+            <div className="header-sound-menu">
+              {SOUND_TYPES.map((st) => (
+                <button
+                  key={st.id}
+                  className={`sub-dropdown-item ${state.soundType === st.id ? "active" : ""}`}
+                  onClick={() => {
+                    setSoundType(st.id);
+                    setSoundOpen(false);
+                  }}
+                >
+                  <span className="sub-dropdown-icon">{st.icon}</span>
+                  <span>{t(`sound.${st.id}`)}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <div className="header-volume-wrap">
           <button className="header-btn header-volume-btn">
             <svg
@@ -378,7 +363,7 @@ export function MainHeader({
             if (view === "settings") {
               setView(prevTab.current);
             } else {
-              prevTab.current = view as "beat" | "drill" | "track";
+              prevTab.current = view as "beat" | "drill";
               setView("settings");
             }
           }}

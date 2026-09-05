@@ -336,48 +336,7 @@
   },
   "nav": {
     "metronome": "メトロノーム",
-    "drill": "テンポ練習",
-    "pocketCheck": "ノリチェック"
-  },
-  "pocketCheck": {
-    "title": "ノリチェック",
-    "idleWithInstrument": "メトロノームに合わせて {{beats}} 拍演奏してください。楽器の音は自動で検出されます。",
-    "idleWithTaps": "メトロノームに合わせて {{beats}} 拍タップしてください。ターゲットをクリックして各拍を記録します。",
-    "calibratedHint": "キャリブレーション済み — オフセット {{offset}}ms",
-    "calibrateHint": "このシステムで最高の精度にするために、まずキャリブレーションしてください。",
-    "start": "開始",
-    "calibrate": "キャリブレーション",
-    "history": "履歴",
-    "stop": "停止",
-    "cancel": "キャンセル",
-    "calibratingProgress": "キャリブレーション中 {{count}}/{{total}}",
-    "tapsCount": "{{count}} タップ",
-    "tap": "TAP",
-    "calibratingHint": "クリックに合わせて自然にタップしてください",
-    "calibratedTitle": "キャリブレーション完了！",
-    "systemOffset": "このシステムのオフセット:",
-    "offsetNote": "オーディオ出力の遅延と入力の遅延を見込んだ値です。いつでも再キャリブレーションできます。",
-    "done": "完了",
-    "tryAgain": "もう一度",
-    "clearAll": "すべて消去",
-    "clearHistoryTitle": "履歴を消去",
-    "clearConfirm": "保存された {{count}} 件の記録をすべて削除しますか？この操作は元に戻せません。",
-    "deleteAll": "すべて削除",
-    "hits": "命中率 {{count}}%",
-    "warmupProgress": "ウォームアップ {{count}}/{{total}}",
-    "getReady": "用意！",
-    "playInstrumentHint": "ビートに合わせて楽器を演奏してください",
-    "playTapHint": "ターゲットをクリックしてタップしてください",
-    "yourTimingWas": "あなたのタイミングは",
-    "early": "早め",
-    "late": "遅め",
-    "ratings": {
-      "metronomic": "メトロノーム級",
-      "tight": "タイト",
-      "solid": "安定",
-      "loose": "ゆるめ",
-      "miss": "ミス"
-    }
+    "drill": "テンポ練習"
   },
   "driftMeter": {
     "early": "早め",
@@ -661,7 +620,6 @@
         "toggle-widget": "ウィジェット切替",
         "tab-1": "メトロノームタブ",
         "tab-2": "テンポ練習タブ",
-        "tab-3": "ノリチェックタブ",
         "settings": "設定",
         "toggle-sidebar": "プリセット切替",
         "toggle-coach": "コーチ切替"
@@ -685,7 +643,6 @@
         "toggle-widget": "フローティングウィジェットに切り替える",
         "tab-1": "メトロノームタブへ切り替える",
         "tab-2": "テンポ練習タブへ切り替える",
-        "tab-3": "ノリチェックタブへ切り替える",
         "settings": "設定を開くまたは閉じる",
         "toggle-sidebar": "プリセットサイドバーを開くまたは閉じる",
         "toggle-coach": "練習コーチパネルを開くまたは閉じる"

@@ -16,12 +16,12 @@ import type { HotkeyAction } from "../hotkeys";
 import { FULLSCREEN_EXIT_DELAY } from "../hotkeys";
 import { meterKey, stepMeter } from "../utils/meter";
 
-export type ViewName = "beat" | "drill" | "track" | "settings";
+export type ViewName = "beat" | "drill" | "settings";
 
 interface ActionDispatcherArgs {
   view: ViewName;
   setView: (v: ViewName) => void;
-  prevTab: MutableRefObject<"beat" | "drill" | "track">;
+  prevTab: MutableRefObject<"beat" | "drill">;
   state: AppState;
   isFullscreen: boolean;
   setIsFullscreen: (v: boolean) => void;
@@ -67,7 +67,6 @@ export function useActionDispatcher({
       if (
         actionId === "tab-1" ||
         actionId === "tab-2" ||
-        actionId === "tab-3" ||
         actionId === "settings" ||
         actionId === "toggle-widget" ||
         actionId === "toggle-sidebar" ||
@@ -80,13 +79,10 @@ export function useActionDispatcher({
           case "tab-2":
             setView("drill");
             break;
-          case "tab-3":
-            setView("track");
-            break;
           case "settings":
             if (view === "settings") setView(prevTab.current);
             else {
-              prevTab.current = view as "beat" | "drill" | "track";
+              prevTab.current = view as "beat" | "drill";
               setView("settings");
             }
             break;
@@ -159,24 +155,22 @@ export function useActionDispatcher({
           setBeatGroups(stepMeter(state.beatGroups, state.freeMode, -1));
           break;
         case "fullscreen":
-          if (view !== "track") {
-            if (isFullscreen) {
-              (async () => {
-                const win = getCurrentWindow();
-                if (await win.isFullscreen()) {
-                  await win.setFullscreen(false);
-                  await new Promise((r) =>
-                    setTimeout(r, FULLSCREEN_EXIT_DELAY),
-                  );
-                }
-                setIsFullscreen(false);
-                await win.setAlwaysOnTop(state.alwaysOnTop);
-                await win.setFocus();
-                await forceWebviewFocus();
-              })();
-            } else {
-              setIsFullscreen(true);
-            }
+          if (isFullscreen) {
+            (async () => {
+              const win = getCurrentWindow();
+              if (await win.isFullscreen()) {
+                await win.setFullscreen(false);
+                await new Promise((r) =>
+                  setTimeout(r, FULLSCREEN_EXIT_DELAY),
+                );
+              }
+              setIsFullscreen(false);
+              await win.setAlwaysOnTop(state.alwaysOnTop);
+              await win.setFocus();
+              await forceWebviewFocus();
+            })();
+          } else {
+            setIsFullscreen(true);
           }
           break;
         case "os-fullscreen": {

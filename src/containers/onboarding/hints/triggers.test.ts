@@ -51,7 +51,6 @@ describe("drill-first-open", () => {
   it("fires on the Drill tab only", () => {
     expect(shouldHintDrillFirstOpen("drill")).toBe(true);
     expect(shouldHintDrillFirstOpen("beat")).toBe(false);
-    expect(shouldHintDrillFirstOpen("track")).toBe(false);
     expect(shouldHintDrillFirstOpen("settings")).toBe(false);
   });
 });

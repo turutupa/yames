@@ -336,48 +336,7 @@
   },
   "nav": {
     "metronome": "Metronome",
-    "drill": "Drill",
-    "pocketCheck": "Pocket Check"
-  },
-  "pocketCheck": {
-    "title": "Pocket Check",
-    "idleWithInstrument": "Play along with the metronome for {{beats}} beats. Your instrument input is detected automatically.",
-    "idleWithTaps": "Tap along with the metronome for {{beats}} beats. Click the target to log each beat.",
-    "calibratedHint": "Calibrated: {{offset}}ms offset",
-    "calibrateHint": "Calibrate first for best accuracy on your system.",
-    "start": "Start",
-    "calibrate": "Calibrate",
-    "history": "History",
-    "stop": "Stop",
-    "cancel": "Cancel",
-    "calibratingProgress": "Calibrating {{count}}/{{total}}",
-    "tapsCount": "{{count}} taps",
-    "tap": "TAP",
-    "calibratingHint": "Tap naturally along with the clicks",
-    "calibratedTitle": "Calibrated!",
-    "systemOffset": "Your system offset:",
-    "offsetNote": "This accounts for audio output latency and input lag on your system. You can recalibrate anytime.",
-    "done": "Done",
-    "tryAgain": "Try Again",
-    "clearAll": "Clear all",
-    "clearHistoryTitle": "Clear History",
-    "clearConfirm": "Delete all {{count}} saved games? This cannot be undone.",
-    "deleteAll": "Delete All",
-    "hits": "{{count}}% hits",
-    "warmupProgress": "Warm-up {{count}}/{{total}}",
-    "getReady": "GET READY",
-    "playInstrumentHint": "Play your instrument along with the beat",
-    "playTapHint": "Click the target to tap along",
-    "yourTimingWas": "Your timing was",
-    "early": "Early",
-    "late": "Late",
-    "ratings": {
-      "metronomic": "Metronomic",
-      "tight": "Tight",
-      "solid": "Solid",
-      "loose": "Loose",
-      "miss": "Miss"
-    }
+    "drill": "Drill"
   },
   "driftMeter": {
     "early": "Early",
@@ -661,7 +620,6 @@
         "toggle-widget": "Toggle Widget",
         "tab-1": "Metronome tab",
         "tab-2": "Drill tab",
-        "tab-3": "Pocket Check tab",
         "settings": "Settings",
         "toggle-sidebar": "Toggle Presets",
         "toggle-coach": "Toggle Coach"
@@ -685,7 +643,6 @@
         "toggle-widget": "Switch to floating widget",
         "tab-1": "Switch to Metronome tab",
         "tab-2": "Switch to Drill tab",
-        "tab-3": "Switch to Pocket Check tab",
         "settings": "Open or close settings",
         "toggle-sidebar": "Open or close the presets sidebar",
         "toggle-coach": "Open or close the practice coach panel"

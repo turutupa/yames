@@ -336,48 +336,7 @@
   },
   "nav": {
     "metronome": "메트로놈",
-    "drill": "템포 연습",
-    "pocketCheck": "그루브 체크"
-  },
-  "pocketCheck": {
-    "title": "그루브 체크",
-    "idleWithInstrument": "메트로놈에 맞춰 {{beats}}박 연주하세요. 악기 입력은 자동으로 감지됩니다.",
-    "idleWithTaps": "메트로놈에 맞춰 {{beats}}박 탭하세요. 매 박마다 목표를 클릭해 기록하세요.",
-    "calibratedHint": "보정됨: {{offset}}ms 오프셋",
-    "calibrateHint": "정확도를 위해 먼저 보정해 주세요.",
-    "start": "시작",
-    "calibrate": "보정",
-    "history": "기록",
-    "stop": "정지",
-    "cancel": "취소",
-    "calibratingProgress": "보정 중 {{count}}/{{total}}",
-    "tapsCount": "{{count}}회 탭",
-    "tap": "TAP",
-    "calibratingHint": "클릭에 맞춰 자연스럽게 탭하세요",
-    "calibratedTitle": "보정 완료!",
-    "systemOffset": "시스템 오프셋:",
-    "offsetNote": "시스템의 오디오 출력 지연과 입력 지연을 반영한 값입니다. 언제든 다시 보정할 수 있어요.",
-    "done": "완료",
-    "tryAgain": "다시 시도",
-    "clearAll": "모두 지우기",
-    "clearHistoryTitle": "기록 지우기",
-    "clearConfirm": "저장된 기록 {{count}}개를 모두 삭제할까요? 되돌릴 수 없습니다.",
-    "deleteAll": "모두 삭제",
-    "hits": "적중 {{count}}%",
-    "warmupProgress": "웜업 {{count}}/{{total}}",
-    "getReady": "준비하세요!",
-    "playInstrumentHint": "박자에 맞춰 악기를 연주하세요",
-    "playTapHint": "박자에 맞춰 목표를 클릭하세요",
-    "yourTimingWas": "당신의 타이밍은",
-    "early": "앞당김",
-    "late": "뒤처짐",
-    "ratings": {
-      "metronomic": "메트로놈급",
-      "tight": "타이트",
-      "solid": "안정적",
-      "loose": "느슨",
-      "miss": "놓침"
-    }
+    "drill": "템포 연습"
   },
   "driftMeter": {
     "early": "앞당김",
@@ -661,7 +620,6 @@
         "toggle-widget": "위젯 전환",
         "tab-1": "메트로놈 탭",
         "tab-2": "템포 연습 탭",
-        "tab-3": "그루브 체크 탭",
         "settings": "설정",
         "toggle-sidebar": "프리셋 전환",
         "toggle-coach": "코치 전환"
@@ -685,7 +643,6 @@
         "toggle-widget": "플로팅 위젯으로 전환합니다",
         "tab-1": "메트로놈 탭으로 전환합니다",
         "tab-2": "템포 연습 탭으로 전환합니다",
-        "tab-3": "그루브 체크 탭으로 전환합니다",
         "settings": "설정을 열거나 닫습니다",
         "toggle-sidebar": "프리셋 사이드바를 열거나 닫습니다",
         "toggle-coach": "연습 코치 패널을 열거나 닫습니다"

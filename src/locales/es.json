@@ -336,48 +336,7 @@
   },
   "nav": {
     "metronome": "Metrónomo",
-    "drill": "Rampa de tempo",
-    "pocketCheck": "Chequeo de groove"
-  },
-  "pocketCheck": {
-    "title": "Chequeo de groove",
-    "idleWithInstrument": "Toca con el metrónomo durante {{beats}} pulsos. Tu instrumento se detecta automáticamente.",
-    "idleWithTaps": "Golpea con el metrónomo durante {{beats}} pulsos. Toca el objetivo para registrar cada pulso.",
-    "calibratedHint": "Calibrado: desfase de {{offset}} ms",
-    "calibrateHint": "Calibra primero para más precisión en tu sistema.",
-    "start": "Empezar",
-    "calibrate": "Calibrar",
-    "history": "Historial",
-    "stop": "Detener",
-    "cancel": "Cancelar",
-    "calibratingProgress": "Calibrando {{count}}/{{total}}",
-    "tapsCount": "{{count}} golpes",
-    "tap": "TAP",
-    "calibratingHint": "Golpea con naturalidad siguiendo los clics",
-    "calibratedTitle": "¡Calibrado!",
-    "systemOffset": "El desfase de tu sistema:",
-    "offsetNote": "Incluye la latencia de salida de audio y la latencia de entrada de tu sistema. Puedes recalibrar cuando quieras.",
-    "done": "Listo",
-    "tryAgain": "Intentar de nuevo",
-    "clearAll": "Borrar todo",
-    "clearHistoryTitle": "Borrar historial",
-    "clearConfirm": "¿Eliminar las {{count}} sesiones guardadas? No se puede deshacer.",
-    "deleteAll": "Eliminar todo",
-    "hits": "{{count}}% de acierto",
-    "warmupProgress": "Calentamiento {{count}}/{{total}}",
-    "getReady": "PREPÁRATE",
-    "playInstrumentHint": "Toca tu instrumento siguiendo el pulso",
-    "playTapHint": "Golpea el objetivo para marcar cada pulso",
-    "yourTimingWas": "Tu tiempo fue",
-    "early": "Adelantado",
-    "late": "Atrasado",
-    "ratings": {
-      "metronomic": "Metronómico",
-      "tight": "Ajustado",
-      "solid": "Sólido",
-      "loose": "Suelto",
-      "miss": "Fallo"
-    }
+    "drill": "Rampa de tempo"
   },
   "driftMeter": {
     "early": "Adelantado",
@@ -661,7 +620,6 @@
         "toggle-widget": "Alternar widget",
         "tab-1": "Pestaña Metrónomo",
         "tab-2": "Pestaña Rampa de tempo",
-        "tab-3": "Pestaña Chequeo de groove",
         "settings": "Ajustes",
         "toggle-sidebar": "Alternar preajustes",
         "toggle-coach": "Alternar entrenador"
@@ -685,7 +643,6 @@
         "toggle-widget": "Cambia a la ventana flotante",
         "tab-1": "Cambia a la pestaña Metrónomo",
         "tab-2": "Cambia a la pestaña Rampa de tempo",
-        "tab-3": "Cambia a la pestaña Chequeo de groove",
         "settings": "Abre o cierra los ajustes",
         "toggle-sidebar": "Abre o cierra la barra lateral de preajustes",
         "toggle-coach": "Abre o cierra el panel del entrenador"

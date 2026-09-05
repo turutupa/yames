@@ -30,7 +30,7 @@ import type { MainView } from "../MainHeader";
  * applied (skipping `settings`, which is never persisted as a default).
  */
 
-export type PlayTab = "beat" | "drill" | "track";
+export type PlayTab = "beat" | "drill";
 
 export interface UseTabRoutingArgs {
   isPlaying: boolean;
@@ -71,7 +71,7 @@ export function useTabRouting({
       if (v !== "settings") {
         setActiveTab(v);
       }
-      if (v === "track" || v === "settings") {
+      if (v === "settings") {
         setTimeout(() => contentRef.current?.scrollTo(0, 0), 0);
       }
     },
@@ -81,7 +81,7 @@ export function useTabRouting({
   // Restore last active tab on mount.
   useEffect(() => {
     getActiveTab().then((tab) => {
-      if (tab === "beat" || tab === "drill" || tab === "track") {
+      if (tab === "beat" || tab === "drill") {
         setViewRaw(tab);
         prevTab.current = tab;
       }
