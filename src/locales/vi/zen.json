@@ -1,0 +1,24 @@
+{
+  "zen": {
+    "startingIn": "Sắp bắt đầu",
+    "rampStep": "Bước {{step}}",
+    "fullscreen": "Toàn màn hình",
+    "exitHint": "Nhấn đúp hoặc phím Esc để thoát",
+    "timeSigAll": "Tất cả",
+    "timeSigOff": "Tắt",
+    "styles": {
+      "focus": "Tập trung",
+      "pulse": "Nhịp đập",
+      "gravity": "Trọng lực",
+      "radar": "Radar",
+      "cosmos": "Vũ trụ",
+      "warp": "Xoắn",
+      "rain": "Mưa"
+    }
+  },
+  "widget": {
+    "openMain": "Mở cửa sổ chính",
+    "timeSignature": "Số chỉ nhịp",
+    "ramp": "Tăng tốc: {{current}} → {{target}}"
+  }
+}

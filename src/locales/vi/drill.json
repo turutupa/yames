@@ -1,0 +1,40 @@
+{
+  "drill": {
+    "startingIn": "Sắp bắt đầu",
+    "done": "Xong!",
+    "stepBar": "Bước {{step}} · Ô nhịp {{bar}}/{{bars}}",
+    "beatsSummary": "{{count}} phách",
+    "repsSummary": "{{count}} lần lặp",
+    "mode": "Chế độ",
+    "modeLinear": "Tuyến tính",
+    "modeZigzag": "Zigzag",
+    "modeAdaptive": "Thích ứng",
+    "aggr": "Mức tăng",
+    "aggrGentle": "Nhẹ nhàng",
+    "aggrModerate": "Vừa phải",
+    "aggrPush": "Mạnh",
+    "startBpm": "BPM ban đầu",
+    "targetBpm": "BPM mục tiêu",
+    "speedUp": "Tăng tốc",
+    "slowDown": "Giảm tốc",
+    "beats": "Số phách",
+    "repeats": "Số lần lặp",
+    "countdown": "Đếm ngược",
+    "cyclic": "Khứ hồi",
+    "repeatsLegend": "Lặp lại →",
+    "summary": "{{beats}} phách · {{steps}} bước · {{repeats}} lần lặp · {{time}}",
+    "timeRemaining": "Còn {{time}}",
+    "desc": {
+      "startBpm": "Tempo bạn bắt đầu luyện. Hãy đi chậm rồi tăng dần.",
+      "targetBpm": "Tempo mục tiêu bạn đang hướng tới.",
+      "increment": "Số BPM tăng ở mỗi bước lên. Càng lớn càng tăng nhanh.",
+      "decrement": "Số BPM giảm ở mỗi bước xuống (chỉ trong Zigzag). Nên nhỏ hơn mức tăng để tiến dần lên.",
+      "beats": "Số phách mỗi ô. Phách 1 luôn được nhấn mạnh để bạn nghe rõ mẫu nhịp.",
+      "repeat": "Số ô mỗi cột — số lần bạn lặp ở mỗi tempo trước khi sang bước tiếp theo.",
+      "mode": "Tuyến tính đi thẳng lên. Zigzag luân phiên lên xuống. Thích ứng tự điều chỉnh theo độ chính xác của bạn.",
+      "cyclic": "Tăng lên tới mục tiêu rồi giảm về điểm xuất phát với cùng mức tăng (khứ hồi).",
+      "aggressiveness": "Tempo thay đổi nhanh hay chậm. Nhẹ nhàng chờ lâu hơn, Mạnh mẽ đẩy nhanh hơn.",
+      "countdown": "Đếm ngược 4 phách trước khi bài bắt đầu. Giúp bạn vào đúng tempo."
+    }
+  }
+}

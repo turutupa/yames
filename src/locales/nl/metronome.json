@@ -1,0 +1,47 @@
+{
+  "metronome": {
+    "tap": "TAP",
+    "tapCount": "{{count}} keer getikt",
+    "subdiv": "Onderverdeling",
+    "meter": "Maatsoort",
+    "free": "FREE",
+    "freeBeatCount": "{{count}} beats",
+    "freeBeatCount_one": "{{count}} beat",
+    "freeBeatCount_other": "{{count}} beats",
+    "beatCount": "{{count}} beats",
+    "beatCount_one": "{{count}} beat",
+    "beatCount_other": "{{count}} beats",
+    "clicksPerBar": "{{count}} kliks/maat",
+    "addBeat": "Beat toevoegen",
+    "removeBeat": "Beat verwijderen",
+    "grouping": "groepering"
+  },
+  "meter": {
+    "0": "Nooit",
+    "1": "Altijd",
+    "2": "2/4",
+    "3": "3/4",
+    "4": "4/4",
+    "5": "5/4",
+    "6": "6/8",
+    "7": "7/8"
+  },
+  "subdiv": {
+    "1": "Kwartnoot",
+    "2": "Achtste",
+    "3": "Triool",
+    "4": "Zestiende",
+    "5": "Kwintool",
+    "6": "Sextool"
+  },
+  "sound": {
+    "click": "Klik",
+    "wood": "Hout",
+    "beep": "Piep",
+    "drum": "Drum"
+  },
+  "driftMeter": {
+    "early": "Te vroeg",
+    "late": "Te laat"
+  }
+}

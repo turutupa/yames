@@ -1,0 +1,40 @@
+{
+  "drill": {
+    "startingIn": "Début dans",
+    "done": "Terminé !",
+    "stepBar": "Étape {{step}} · Mesure {{bar}}/{{bars}}",
+    "beatsSummary": "{{count}} temps",
+    "repsSummary": "{{count}} répétitions",
+    "mode": "Mode",
+    "modeLinear": "Linéaire",
+    "modeZigzag": "Zigzag",
+    "modeAdaptive": "Adaptatif",
+    "aggr": "Soutenue",
+    "aggrGentle": "Douce",
+    "aggrModerate": "Modérée",
+    "aggrPush": "Soutenue",
+    "startBpm": "BPM de départ",
+    "targetBpm": "BPM cible",
+    "speedUp": "Accélérer",
+    "slowDown": "Ralentir",
+    "beats": "Temps",
+    "repeats": "Répétitions",
+    "countdown": "Décompte",
+    "cyclic": "Aller-retour",
+    "repeatsLegend": "Répétitions →",
+    "summary": "{{beats}} temps · {{steps}} étapes · {{repeats}} répétitions · {{time}}",
+    "timeRemaining": "Reste {{time}}",
+    "desc": {
+      "startBpm": "Le tempo auquel tu commences. Commence lentement et monte progressivement.",
+      "targetBpm": "Le tempo cible que tu vises.",
+      "increment": "BPM ajoutés à chaque palier montant. Plus le chiffre est grand, plus la rampe monte vite.",
+      "decrement": "BPM retirés à chaque palier descendant (zigzag uniquement). Plus petit que l'incrément pour avancer doucement.",
+      "beats": "Clics par cellule. Le temps 1 est toujours accentué pour bien repérer le motif.",
+      "repeat": "Nombre de cellules par colonne — le nombre de répétitions à chaque tempo avant de passer au suivant.",
+      "mode": "Linéaire monte d'un trait. Zigzag alterne. Adaptatif ajuste selon ta précision.",
+      "cyclic": "Monte jusqu'à la cible puis redescend au départ avec les mêmes incréments (aller-retour).",
+      "aggressiveness": "La vitesse à laquelle le tempo change. Douce attend plus longtemps, Soutenue pousse plus vite.",
+      "countdown": "Décompte sur 4 temps avant le départ de l'exercice. T'aide à te caler sur le tempo."
+    }
+  }
+}

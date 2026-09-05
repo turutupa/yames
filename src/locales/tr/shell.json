@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "metronome": "Metronom",
+    "drill": "Tempo Antrenmanı"
+  },
+  "tooltip": {
+    "zen": "Zen",
+    "enableVoice": "Ayarlar'dan Pratik Koçu'nun sesini etkinleştir",
+    "openWidget": "Mini pencereyi aç",
+    "copied": "Kopyalandı!",
+    "share": "Paylaş",
+    "back": "Geri",
+    "settings": "Ayarlar",
+    "help": "Yardım"
+  },
+  "volume": {
+    "metronome": "Metronom",
+    "voice": "Ses"
+  },
+  "presets": {
+    "title": "Ön Ayarlar",
+    "open": "Ön ayarları aç",
+    "openWithShortcut": "Ön ayarları aç ({{shortcut}})",
+    "close": "Ön ayarları kapat",
+    "closeWithShortcut": "Ön ayarları kapat ({{shortcut}})",
+    "saveCurrent": "Geçerli ayarları kaydet",
+    "searchPlaceholder": "Ara...",
+    "namePlaceholder": "Ad...",
+    "noResults": "Sonuç yok",
+    "empty": "Henüz ön ayar yok",
+    "rename": "Yeniden Adlandır",
+    "renameTooltip": "Ön ayarı yeniden adlandır",
+    "update": "Güncelle",
+    "updateTooltip": "Ön ayarı güncelle",
+    "updated": "Güncellendi!",
+    "noChanges": "Değişiklik yok",
+    "noChangesToSave": "Kaydedilecek değişiklik yok",
+    "save": "Ön ayarı kaydet",
+    "delete": "Sil"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "Henüz ön ayar yok",
+      "hint": "Sürekli döndüğünüz tempo, ses ve ölçüyü kaydedin.",
+      "action": "İlk ön ayarınızı kaydedin",
+      "shortcut": "Bu paneli açıp kapatmak için {{shortcut}} tuşuna basın."
+    },
+    "history": {
+      "title": "Henüz seans yok.",
+      "hint": "Metronomu durdurduğunuzda seanslarınız burada görünür."
+    },
+    "drill": {
+      "linear": "Doğrusal: tempo başlangıç BPM'inden hedefe adım adım yükselir.",
+      "zigzag": "Zikzak: tempo yükselir, geri düşer ve yeniden yükselir.",
+      "adaptive": "Uyarlanır: koç, çalışınıza göre tempoyu yükseltir veya düşürür."
+    }
+  }
+}

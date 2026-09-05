@@ -1,0 +1,29 @@
+{
+  "_name": "中文",
+  "common": {
+    "on": "开",
+    "off": "关",
+    "play": "播放",
+    "stop": "停止",
+    "soon": "敬请期待",
+    "durationMinSec": "{{m}} 分 {{s}} 秒",
+    "durationSec": "{{s}} 秒",
+    "language": "语言",
+    "languageHint": "界面语言，立即生效"
+  },
+  "share": {
+    "copyLink": "复制链接"
+  },
+  "audioError": {
+    "deviceInUse": "其他应用正在占用音频输出，节拍器无法播放。请关闭该应用，或在设置 → 设备中选择其他输出设备。",
+    "generic": "Yames 无法启动音频输出，节拍器无法播放。",
+    "detail": "原因：{{reason}}",
+    "openSettings": "音频设置",
+    "dismiss": "关闭"
+  },
+  "updateBanner": {
+    "available": "Yames v{{version}} 新版本可用",
+    "installRestart": "安装并重启 →",
+    "updating": "正在更新 Yames…"
+  }
+}

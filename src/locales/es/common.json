@@ -1,0 +1,29 @@
+{
+  "_name": "Español",
+  "common": {
+    "on": "Activado",
+    "off": "Desactivado",
+    "play": "Reproducir",
+    "stop": "Detener",
+    "soon": "PRONTO",
+    "durationMinSec": "{{m}} min {{s}} s",
+    "durationSec": "{{s}} s",
+    "language": "Idioma",
+    "languageHint": "Idioma de la interfaz, se aplica al instante"
+  },
+  "share": {
+    "copyLink": "Copiar enlace"
+  },
+  "audioError": {
+    "deviceInUse": "Otra aplicación está usando tu salida de audio, así que el metrónomo no puede sonar. Ciérrala o elige otro dispositivo de salida en Ajustes → Dispositivos.",
+    "generic": "Yames no pudo iniciar la salida de audio, así que el metrónomo no puede sonar.",
+    "detail": "Motivo: {{reason}}",
+    "openSettings": "Ajustes de audio",
+    "dismiss": "Descartar"
+  },
+  "updateBanner": {
+    "available": "Yames v{{version}} está disponible",
+    "installRestart": "Instalar y reiniciar →",
+    "updating": "Actualizando Yames…"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "metronome": "Metronome",
+    "drill": "Drill"
+  },
+  "tooltip": {
+    "zen": "Zen",
+    "enableVoice": "Enable Practice Coach voice in Settings",
+    "openWidget": "Open widget",
+    "copied": "Copied!",
+    "share": "Share",
+    "back": "Back",
+    "settings": "Settings",
+    "help": "Help"
+  },
+  "volume": {
+    "metronome": "Metronome",
+    "voice": "Voice"
+  },
+  "presets": {
+    "title": "Presets",
+    "open": "Open presets",
+    "openWithShortcut": "Open presets ({{shortcut}})",
+    "close": "Close presets",
+    "closeWithShortcut": "Close presets ({{shortcut}})",
+    "saveCurrent": "Save current settings",
+    "searchPlaceholder": "Search...",
+    "namePlaceholder": "Name...",
+    "noResults": "No results",
+    "empty": "No presets yet",
+    "rename": "Rename",
+    "renameTooltip": "Rename preset",
+    "update": "Update",
+    "updateTooltip": "Update preset",
+    "updated": "Updated!",
+    "noChanges": "No changes",
+    "noChangesToSave": "No changes to save",
+    "save": "Save preset",
+    "delete": "Delete"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "No presets yet",
+      "hint": "Save a tempo, sound and meter you keep coming back to.",
+      "action": "Save your first preset",
+      "shortcut": "Press {{shortcut}} to open and close this panel."
+    },
+    "history": {
+      "title": "No sessions yet.",
+      "hint": "Your sessions show up here after you stop the metronome."
+    },
+    "drill": {
+      "linear": "Linear: the tempo climbs from the start BPM to the target, one step at a time.",
+      "zigzag": "Zigzag: the tempo climbs, drops back, and climbs again.",
+      "adaptive": "Adaptive: the coach raises or lowers the tempo from how you play."
+    }
+  }
+}

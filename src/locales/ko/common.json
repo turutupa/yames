@@ -1,0 +1,29 @@
+{
+  "_name": "한국어",
+  "common": {
+    "on": "켬",
+    "off": "끔",
+    "play": "재생",
+    "stop": "정지",
+    "soon": "준비 중",
+    "durationMinSec": "{{m}}분 {{s}}초",
+    "durationSec": "{{s}}초",
+    "language": "언어",
+    "languageHint": "UI 언어, 즉시 적용됩니다"
+  },
+  "share": {
+    "copyLink": "링크 복사"
+  },
+  "audioError": {
+    "deviceInUse": "다른 앱이 오디오 출력을 사용 중이어서 메트로놈을 재생할 수 없습니다. 그 앱을 닫거나 설정 → 기기에서 다른 출력 기기를 선택하세요.",
+    "generic": "Yames가 오디오 출력을 시작하지 못해 메트로놈을 재생할 수 없습니다.",
+    "detail": "원인: {{reason}}",
+    "openSettings": "오디오 설정",
+    "dismiss": "닫기"
+  },
+  "updateBanner": {
+    "available": "Yames v{{version}} 업데이트가 있습니다",
+    "installRestart": "설치 및 재시작 →",
+    "updating": "Yames 업데이트 중…"
+  }
+}

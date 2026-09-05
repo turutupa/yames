@@ -1,0 +1,24 @@
+{
+  "zen": {
+    "startingIn": "Başlamak üzere",
+    "rampStep": "Adım {{step}}",
+    "fullscreen": "Tam Ekran",
+    "exitHint": "Çıkmak için çift tıkla veya Esc'ye bas",
+    "timeSigAll": "Tümü",
+    "timeSigOff": "Kapalı",
+    "styles": {
+      "focus": "Odak",
+      "pulse": "Nabız",
+      "gravity": "Yerçekimi",
+      "radar": "Radar",
+      "cosmos": "Kozmos",
+      "warp": "Bükülme",
+      "rain": "Yağmur"
+    }
+  },
+  "widget": {
+    "openMain": "Ana pencereyi aç",
+    "timeSignature": "Zaman İmzası",
+    "ramp": "Tempo: {{current}} → {{target}}"
+  }
+}

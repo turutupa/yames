@@ -1,0 +1,47 @@
+{
+  "metronome": {
+    "tap": "TAP",
+    "tapCount": "{{count}} tapnięć",
+    "subdiv": "Podział",
+    "meter": "Metrum",
+    "free": "FREE",
+    "freeBeatCount": "{{count}} uderzenia",
+    "freeBeatCount_one": "{{count}} uderzenie",
+    "freeBeatCount_other": "{{count}} uderzenia",
+    "beatCount": "{{count}} uderzenia",
+    "beatCount_one": "{{count}} uderzenie",
+    "beatCount_other": "{{count}} uderzenia",
+    "clicksPerBar": "{{count}} kliknięć/takt",
+    "addBeat": "Dodaj uderzenie",
+    "removeBeat": "Usuń uderzenie",
+    "grouping": "grupowanie"
+  },
+  "meter": {
+    "0": "Nigdy",
+    "1": "Zawsze",
+    "2": "2/4",
+    "3": "3/4",
+    "4": "4/4",
+    "5": "5/4",
+    "6": "6/8",
+    "7": "7/8"
+  },
+  "subdiv": {
+    "1": "Ćwierćnuty",
+    "2": "Ósemki",
+    "3": "Triole",
+    "4": "Szesnastki",
+    "5": "Kwintole",
+    "6": "Sekstole"
+  },
+  "sound": {
+    "click": "Klik",
+    "wood": "Drewno",
+    "beep": "Pip",
+    "drum": "Bęben"
+  },
+  "driftMeter": {
+    "early": "Za wcześnie",
+    "late": "Za późno"
+  }
+}

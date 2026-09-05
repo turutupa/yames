@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "metronome": "Metrônomo",
+    "drill": "Treino"
+  },
+  "tooltip": {
+    "zen": "Modo Zen",
+    "enableVoice": "Ative a voz do Coach nas Configurações",
+    "openWidget": "Abrir widget",
+    "copied": "Copiado!",
+    "share": "Compartilhar",
+    "back": "Voltar",
+    "settings": "Configurações",
+    "help": "Ajuda"
+  },
+  "volume": {
+    "metronome": "Metrônomo",
+    "voice": "Voz"
+  },
+  "presets": {
+    "title": "Predefinições",
+    "open": "Abrir predefinições",
+    "openWithShortcut": "Abrir predefinições ({{shortcut}})",
+    "close": "Fechar predefinições",
+    "closeWithShortcut": "Fechar predefinições ({{shortcut}})",
+    "saveCurrent": "Salvar configurações atuais",
+    "searchPlaceholder": "Buscar...",
+    "namePlaceholder": "Nome...",
+    "noResults": "Nenhum resultado",
+    "empty": "Ainda não há predefinições",
+    "rename": "Renomear",
+    "renameTooltip": "Renomear predefinição",
+    "update": "Atualizar",
+    "updateTooltip": "Atualizar predefinição",
+    "updated": "Atualizado!",
+    "noChanges": "Sem alterações",
+    "noChangesToSave": "Não há alterações para salvar",
+    "save": "Salvar predefinição",
+    "delete": "Excluir"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "Ainda não há predefinições",
+      "hint": "Salve o andamento, o som e o compasso aos quais você sempre volta.",
+      "action": "Salvar sua primeira predefinição",
+      "shortcut": "Aperte {{shortcut}} para abrir e fechar este painel."
+    },
+    "history": {
+      "title": "Ainda não há sessões.",
+      "hint": "Suas sessões aparecem aqui depois que você para o metrônomo."
+    },
+    "drill": {
+      "linear": "Linear: o andamento sobe do BPM inicial até o alvo, um passo por vez.",
+      "zigzag": "Ziguezague: o andamento sobe, recua e sobe de novo.",
+      "adaptive": "Adaptativo: o coach sobe ou desce o andamento conforme você toca."
+    }
+  }
+}

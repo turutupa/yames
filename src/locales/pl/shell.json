@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "metronome": "Metronom",
+    "drill": "Rozbieg"
+  },
+  "tooltip": {
+    "zen": "Zen",
+    "enableVoice": "Włącz głos Trenera w Ustawieniach",
+    "openWidget": "Otwórz widget",
+    "copied": "Skopiowano!",
+    "share": "Udostępnij",
+    "back": "Wstecz",
+    "settings": "Ustawienia",
+    "help": "Pomoc"
+  },
+  "volume": {
+    "metronome": "Metronom",
+    "voice": "Głos"
+  },
+  "presets": {
+    "title": "Presety",
+    "open": "Otwórz presety",
+    "openWithShortcut": "Otwórz presety ({{shortcut}})",
+    "close": "Zamknij presety",
+    "closeWithShortcut": "Zamknij presety ({{shortcut}})",
+    "saveCurrent": "Zapisz bieżące ustawienia",
+    "searchPlaceholder": "Szukaj...",
+    "namePlaceholder": "Nazwa...",
+    "noResults": "Brak wyników",
+    "empty": "Nie ma jeszcze presetów",
+    "rename": "Zmień nazwę",
+    "renameTooltip": "Zmień nazwę presetu",
+    "update": "Zaktualizuj",
+    "updateTooltip": "Zaktualizuj preset",
+    "updated": "Zaktualizowano!",
+    "noChanges": "Brak zmian",
+    "noChangesToSave": "Brak zmian do zapisania",
+    "save": "Zapisz preset",
+    "delete": "Usuń"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "Nie ma jeszcze presetów",
+      "hint": "Zapisz tempo, brzmienie i metrum, do których często wracasz.",
+      "action": "Zapisz pierwszy preset",
+      "shortcut": "Naciśnij {{shortcut}}, aby otworzyć i zamknąć ten panel."
+    },
+    "history": {
+      "title": "Nie ma jeszcze sesji.",
+      "hint": "Twoje sesje pojawią się tutaj po zatrzymaniu metronomu."
+    },
+    "drill": {
+      "linear": "Liniowo: tempo rośnie od BPM startowego do docelowego, krok po kroku.",
+      "zigzag": "Zygzak: tempo rośnie, cofa się i rośnie ponownie.",
+      "adaptive": "Adaptacyjnie: trener podnosi lub obniża tempo zależnie od tego, jak grasz."
+    }
+  }
+}

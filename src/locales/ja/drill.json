@@ -1,0 +1,40 @@
+{
+  "drill": {
+    "startingIn": "開始まで",
+    "done": "完了！",
+    "stepBar": "ステップ {{step}} · 小節 {{bar}}/{{bars}}",
+    "beatsSummary": "{{count}} 拍",
+    "repsSummary": "{{count}} 回",
+    "mode": "モード",
+    "modeLinear": "リニア",
+    "modeZigzag": "ジグザグ",
+    "modeAdaptive": "アダプティブ",
+    "aggr": "攻め具合",
+    "aggrGentle": "穏やか",
+    "aggrModerate": "標準",
+    "aggrPush": "攻め",
+    "startBpm": "開始BPM",
+    "targetBpm": "目標BPM",
+    "speedUp": "加速",
+    "slowDown": "減速",
+    "beats": "拍数",
+    "repeats": "繰り返し",
+    "countdown": "カウントダウン",
+    "cyclic": "往復",
+    "repeatsLegend": "繰り返し →",
+    "summary": "{{beats}} 拍 · {{steps}} ステップ · {{repeats}} 回 · {{time}}",
+    "timeRemaining": "残り {{time}}",
+    "desc": {
+      "startBpm": "練習を始めるテンポです。ゆっくりから始めて、徐々に上げていきましょう。",
+      "targetBpm": "目標にしているテンポです。",
+      "increment": "上昇ステップごとに増やすBPM。数が大きいほど上がりが早くなります。",
+      "decrement": "下降ステップごとに減らすBPM（ジグザグのみ）。増加分より小さめにすると、じわじわ進めます。",
+      "beats": "1セルの拍数。1拍目はいつもアクセントが付くので、パターンを耳で追えます。",
+      "repeat": "1列のセル数 — 各テンポを何回繰り返してから次へ進むかです。",
+      "mode": "リニアはそのまま上がっていきます。ジグザグは交互です。アダプティブは正確さに応じて調整します。",
+      "cyclic": "目標まで上がったら、同じ増分で開始テンポまで戻ります（往復）。",
+      "aggressiveness": "テンポを変える速さ。穏やかなほど変化までに長く待ち、攻めだとぐんぐん進みます。",
+      "countdown": "練習開始前の4拍カウントダウン。テンポに乗りやすくなります。"
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "metronome": {
+    "tap": "TAP",
+    "tapCount": "{{count}} нажатий",
+    "subdiv": "Дробление",
+    "meter": "Размер",
+    "free": "FREE",
+    "freeBeatCount": "{{count}} доли",
+    "freeBeatCount_one": "{{count}} доля",
+    "freeBeatCount_other": "{{count}} долей",
+    "beatCount": "{{count}} доли",
+    "beatCount_one": "{{count}} доля",
+    "beatCount_other": "{{count}} долей",
+    "clicksPerBar": "{{count}} щелчков/такт",
+    "addBeat": "Добавить долю",
+    "removeBeat": "Убрать долю",
+    "grouping": "группировка"
+  },
+  "meter": {
+    "0": "Никогда",
+    "1": "Всегда",
+    "2": "2/4",
+    "3": "3/4",
+    "4": "4/4",
+    "5": "5/4",
+    "6": "6/8",
+    "7": "7/8"
+  },
+  "subdiv": {
+    "1": "Четверть",
+    "2": "Восьмая",
+    "3": "Триоль",
+    "4": "Шестнадцатая",
+    "5": "Квинтоль",
+    "6": "Секстоль"
+  },
+  "sound": {
+    "click": "Щелчок",
+    "wood": "Дерево",
+    "beep": "Бип",
+    "drum": "Барабан"
+  },
+  "driftMeter": {
+    "early": "Рано",
+    "late": "Поздно"
+  }
+}

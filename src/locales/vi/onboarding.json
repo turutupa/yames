@@ -1,0 +1,217 @@
+{
+  "onboarding": {
+    "welcome": {
+      "title": "Yames",
+      "tagline": "Máy đếm nhịp dành cho việc luyện tập thật sự. Tay vẫn ở trên nhạc cụ.",
+      "setup": "Thiết lập giúp tôi (khoảng một phút)",
+      "skip": "Chỉ cần tiếng click",
+      "footer": "Miễn phí · cục bộ · mã nguồn mở · v{{version}}"
+    },
+    "back": "Quay lại",
+    "next": "Tiếp",
+    "skip": "Bỏ qua",
+    "progress": "Bước {{current}}/{{total}}",
+    "chip": {
+      "label": "Hoàn tất thiết lập",
+      "dismiss": "Đóng"
+    },
+    "soundLook": {
+      "title": "Âm thanh và giao diện",
+      "subtitle": "Di chuột lên một thẻ để nghe tiếng click hoặc xem giao diện. Chọn cái bạn thích.",
+      "soundHeading": "Âm thanh click",
+      "themeHeading": "Giao diện",
+      "moreThemes": "Thêm giao diện trong Cài đặt"
+    },
+    "handsFree": {
+      "title": "Tay vẫn ở trên nhạc cụ",
+      "subtitle": "Những phím này đã dùng được. Nếu bạn có pedal hoặc tay cầm, hãy gán ngay cho Phát/Dừng tại đây.",
+      "cancel": "Hủy",
+      "keyboard": {
+        "title": "Bàn phím",
+        "hint": "Mọi phím đều đổi được trong Cài đặt → Phím tắt."
+      },
+      "midi": {
+        "title": "Pedal MIDI",
+        "none": "Cắm vào bất cứ lúc nào — Yames sẽ mời bạn gán phím.",
+        "map": "Gán Phát/Dừng",
+        "remap": "Gán pedal khác",
+        "listening": "Đạp pedal bạn muốn dùng cho Phát/Dừng.",
+        "mapped": "Phát/Dừng → {{signal}} · kênh {{channel}}"
+      },
+      "gamepad": {
+        "title": "Tay cầm",
+        "none": "Kết nối tay cầm bất cứ lúc nào — bấm một nút và Yames sẽ nhận ra.",
+        "map": "Gán Phát/Dừng",
+        "remap": "Gán nút khác",
+        "listening": "Bấm nút bạn muốn dùng cho Phát/Dừng.",
+        "mapped": "Phát/Dừng → {{button}}"
+      }
+    },
+    "coach": {
+      "title": "Huấn luyện viên luyện tập",
+      "what1": "Huấn luyện viên nghe qua đầu vào âm thanh và chấm điểm cách nhịp của bạn bám theo tiếng click.",
+      "what2": "Sau mỗi lượt, nó viết một báo cáo ngắn — có mô hình đã tải thì còn giải thích nên luyện gì tiếp theo.",
+      "privacy": "Mọi thứ chạy trên máy này. Âm thanh của bạn không bao giờ rời máy, và bản phát hành không ghi âm.",
+      "recommended": "Khuyên dùng",
+      "timing": {
+        "title": "Chỉ phản hồi nhịp",
+        "desc": "Không tải gì. Bạn vẫn có các chấm thời gian thực, điểm nhịp và lịch sử buổi tập."
+      },
+      "standard": {
+        "title": "Mô hình tiêu chuẩn",
+        "desc": "Qwen3 4B · tải ~2,5 GB · ~4 GB RAM khi chạy. Chạy trên CPU nếu bạn không có GPU."
+      },
+      "studio": {
+        "title": "Mô hình Studio",
+        "desc": "Qwen3 8B · tải ~5 GB · ~8 GB RAM. Nhận xét sâu hơn và kế hoạch luyện tập."
+      },
+      "studioNeedsRam": "Studio cần ít nhất 16 GB RAM — máy này có {{gb}} GB.",
+      "standardNeedsRam": "Bộ não Standard cần ít nhất 8 GB RAM — máy này có {{gb}} GB.",
+      "unavailableInBuild": "Không có trong bản dựng này.",
+      "reasonNoLlm": "Bản dựng này không chạy được mô hình, nên chỉ phản hồi nhịp là lựa chọn trung thực.",
+      "reasonLowMemory": "Máy này có {{gb}} GB RAM — không đủ để chạy mô hình thoải mái.",
+      "reasonInstalled": "Đã tải sẵn trên máy này — không cần tải thêm.",
+      "downloadNote": "Việc tải bắt đầu khi bạn đi tiếp và tiếp tục chạy nền.",
+      "downloading": "Đang tải mô hình huấn luyện viên",
+      "tryListening": {
+        "label": "Vẫn thử tính năng nghe",
+        "hint": "Hai bước ngắn: chọn đầu vào, chơi tám phách, xem nhịp của bạn."
+      },
+      "voiceReady": "Giọng đọc của huấn luyện viên đã sẵn sàng.",
+      "voicePick": "Chọn giọng",
+      "voiceDismiss": "Bỏ qua"
+    },
+    "audioInput": {
+      "title": "Thiết lập đầu vào",
+      "subtitle": "Yames nghe qua đây để chấm nhịp của bạn. Chơi thử và nhìn vạch mức tín hiệu.",
+      "device": "Thiết bị đầu vào",
+      "guidance": {
+        "electric-guitar": "Cắm vào sound card, hoặc chơi trước micro laptop — micro vẫn được, sound card thì tốt hơn.",
+        "acoustic-guitar": "Chơi hướng về micro laptop, hoặc dùng pickup qua sound card. Cách nào cũng được.",
+        "bass": "Với bass thì sound card là tốt nhất — micro laptop mất tiếng trầm, nhưng vẫn nghe được điểm gảy.",
+        "drums": "Micro nào trong phòng cũng được. Đặt sao cho nó nghe cả bộ trống, không chỉ một mặt trống.",
+        "piano": "Một micro đặt gần đàn là đủ. Piano điện có thể cắm thẳng vào sound card.",
+        "other": "Sound card thì tốt hơn, nhưng micro laptop vẫn dùng được — chỉ cần chơi gần nó."
+      },
+      "waiting": "Chơi thử đi — vạch mức cần một giây có tín hiệu.",
+      "heard": "Được rồi. Yames nghe thấy bạn.",
+      "skip": "Bỏ qua, để sau tôi thiết lập"
+    },
+    "hearItWork": {
+      "title": "Nghe thử xem nó chạy",
+      "subtitle": "Bốn phách chuẩn bị, rồi chơi theo tám phách. Không có gì bịa ra — bạn thấy đúng những gì đã nghe được.",
+      "ready": "Chơi theo tiếng click. Mỗi phách một nốt là đủ.",
+      "start": "Bắt đầu",
+      "countIn": "Bắt đầu sau {{beats}}",
+      "playing": "Phách {{beat}} / {{total}}",
+      "scoring": "Đang chấm…",
+      "cancel": "Hủy",
+      "dotsLabel": "Tám phách của bạn",
+      "nothing": "Không nghe thấy gì — kiểm tra mức tín hiệu đầu vào.",
+      "backToInput": "Quay lại phần đầu vào",
+      "again": "Thử lại"
+    },
+    "ready": {
+      "title": "Đã sẵn sàng",
+      "subtitle": "Thay đổi tại đây, hoặc sau này trong Cài đặt.",
+      "rows": {
+        "instrument": "Nhạc cụ",
+        "sound": "Âm thanh click",
+        "theme": "Giao diện",
+        "control": "Điều khiển",
+        "coach": "Huấn luyện viên luyện tập",
+        "input": "Đầu vào âm thanh"
+      },
+      "controlKeyboard": "Bàn phím",
+      "controlFootswitch": "Bàn đạp",
+      "coachTiming": "Chỉ phản hồi về nhịp",
+      "coachOn": "Bật",
+      "inputNone": "Chưa thiết lập",
+      "alwaysOnTop": "Luôn ở trên cùng",
+      "start": "Bắt đầu luyện tập",
+      "tour": "Giới thiệu nhanh (30 giây)"
+    },
+    "hints": {
+      "dismiss": "Đã hiểu",
+      "drillFirstOpen": {
+        "body": "Đặt điểm bắt đầu, mục tiêu và bước nhảy. Chế độ thích ứng để huấn luyện viên quyết định."
+      },
+      "presetSuggest": {
+        "body": "Bạn liên tục quay lại thiết lập này. Lưu thành preset nhé?",
+        "action": "Lưu preset"
+      },
+      "coachAsk": {
+        "body": "Nhấn ? bất cứ lúc nào để hỏi huấn luyện viên về điều này."
+      },
+      "zenFirst": {
+        "body": "Esc để thoát Zen. Hiệu ứng nằm trong Cài đặt → Giao diện."
+      },
+      "widgetDiscover": {
+        "body": "Thử widget nổi (W) đặt trên DAW hay bản tab của bạn.",
+        "action": "Mở widget"
+      },
+      "midiPlugged": {
+        "body": "Có thiết bị MIDI đang kết nối nhưng chưa gán gì. Gán bàn đạp cho Phát/Dừng nhé?",
+        "action": "Mở phím tắt"
+      }
+    },
+    "tour": {
+      "progress": "{{current}} / {{total}}",
+      "keys": "Phím",
+      "back": "Quay lại",
+      "next": "Tiếp",
+      "done": "Xong",
+      "skip": "Bỏ qua hướng dẫn",
+      "offer": "Mới dùng? Xem hướng dẫn 30 giây.",
+      "offerAccept": "Dẫn tôi đi xem",
+      "offerDismiss": "Đóng",
+      "stops": {
+        "bpm": {
+          "title": "Nhịp độ",
+          "body": "Kéo, cuộn, gõ số hoặc gõ nhịp để đặt nhịp độ."
+        },
+        "subdivision": {
+          "title": "Chia nhỏ và nhóm phách",
+          "body": "Bấm các mức chia nhỏ và tạo hình ô nhịp bằng nhóm phách."
+        },
+        "presets": {
+          "title": "Cài đặt sẵn",
+          "body": "Lưu mọi thiết lập và chuyển đổi tức thì."
+        },
+        "drill": {
+          "title": "Drill",
+          "body": "Tự động tăng nhịp độ; coach có thể điều chỉnh."
+        },
+        "coach": {
+          "title": "Coach luyện tập",
+          "body": "Nghe, chấm điểm và nói. Hỏi bất cứ điều gì trong khung chat."
+        },
+        "zenWidget": {
+          "title": "Zen và widget",
+          "body": "Hình ảnh toàn màn hình, hoặc một widget nhỏ luôn nổi lên trên."
+        }
+      }
+    },
+    "help": {
+      "title": "Trợ giúp",
+      "takeTour": "Xem hướng dẫn nhanh",
+      "runSetup": "Chạy lại phần thiết lập",
+      "shortcuts": "Phím tắt",
+      "reportProblem": "Báo lỗi",
+      "reportWorking": "Đang thu thập nhật ký…",
+      "reportDone": "Đã lưu tệp chẩn đoán. Hãy đính kèm tệp này vào báo cáo:",
+      "reportError": "Không ghi được tệp chẩn đoán.",
+      "website": "Trang web",
+      "version": "Phiên bản {{version}}",
+      "back": "Quay lại",
+      "close": "Đóng",
+      "alwaysOnTopNote": "Yames luôn nằm trên các cửa sổ khác. Bạn đổi được trong Cài đặt → Chung."
+    }
+  },
+  "whatsNew": {
+    "title": "Có gì mới trong {{version}}",
+    "noNotes": "Bạn đang dùng phiên bản mới. Ghi chú phát hành đầy đủ có trên web.",
+    "fullNotes": "Ghi chú phát hành",
+    "dismiss": "Đã hiểu"
+  }
+}

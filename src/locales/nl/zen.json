@@ -1,0 +1,24 @@
+{
+  "zen": {
+    "startingIn": "Begint over",
+    "rampStep": "Stap {{step}}",
+    "fullscreen": "Volledig scherm",
+    "exitHint": "Dubbelklik of druk op Esc om te verlaten",
+    "timeSigAll": "Alles",
+    "timeSigOff": "Uit",
+    "styles": {
+      "focus": "Focus",
+      "pulse": "Puls",
+      "gravity": "Zwaartekracht",
+      "radar": "Radar",
+      "cosmos": "Kosmos",
+      "warp": "Vervorming",
+      "rain": "Regen"
+    }
+  },
+  "widget": {
+    "openMain": "Hoofdvenster openen",
+    "timeSignature": "Maatsoort",
+    "ramp": "Tempo-opbouw: {{current}} → {{target}}"
+  }
+}

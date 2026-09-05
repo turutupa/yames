@@ -1,0 +1,217 @@
+{
+  "onboarding": {
+    "welcome": {
+      "title": "Yames",
+      "tagline": "A metronome built for real practice. Hands stay on the instrument.",
+      "setup": "Set me up (about a minute)",
+      "skip": "Just give me the click",
+      "footer": "Free · local · open source · v{{version}}"
+    },
+    "back": "Back",
+    "next": "Next",
+    "skip": "Skip",
+    "progress": "Step {{current}} of {{total}}",
+    "chip": {
+      "label": "Finish setup",
+      "dismiss": "Dismiss"
+    },
+    "soundLook": {
+      "title": "Sound & look",
+      "subtitle": "Hover a card to hear the click or see the theme. Pick what you like.",
+      "soundHeading": "Click sound",
+      "themeHeading": "Theme",
+      "moreThemes": "More themes in Settings"
+    },
+    "handsFree": {
+      "title": "Hands stay on the instrument",
+      "subtitle": "These keys already work. If you have a footswitch or a controller, map it to Play/Stop right here.",
+      "cancel": "Cancel",
+      "keyboard": {
+        "title": "Keyboard",
+        "hint": "Every key is remappable in Settings → Hotkeys."
+      },
+      "midi": {
+        "title": "MIDI footswitch",
+        "none": "Plug one in any time — Yames will offer to map it.",
+        "map": "Map Play/Stop",
+        "remap": "Map a different pedal",
+        "listening": "Press the pedal you want for Play/Stop.",
+        "mapped": "Play/Stop → {{signal}} · channel {{channel}}"
+      },
+      "gamepad": {
+        "title": "Gamepad",
+        "none": "Connect a controller any time — press a button and Yames will see it.",
+        "map": "Map Play/Stop",
+        "remap": "Map a different button",
+        "listening": "Press the button you want for Play/Stop.",
+        "mapped": "Play/Stop → {{button}}"
+      }
+    },
+    "coach": {
+      "title": "Practice coach",
+      "what1": "The coach listens through your audio input and scores how your timing sits against the click.",
+      "what2": "After each run it writes a short report — and, with a brain downloaded, explains what to work on next.",
+      "privacy": "Everything runs on this machine. Your audio never leaves it, and release builds never record it.",
+      "recommended": "Recommended",
+      "timing": {
+        "title": "Timing feedback only",
+        "desc": "No download. You still get the live dots, the timing score and your session history."
+      },
+      "standard": {
+        "title": "Standard brain",
+        "desc": "Qwen3 4B · ~2.5 GB download · ~4 GB RAM while running. Runs on the CPU if you have no GPU."
+      },
+      "studio": {
+        "title": "Studio brain",
+        "desc": "Qwen3 8B · ~5 GB download · ~8 GB RAM. Richer feedback and practice plans."
+      },
+      "studioNeedsRam": "Studio needs at least 16 GB of RAM — this machine has {{gb}} GB.",
+      "standardNeedsRam": "The Standard brain needs at least 8 GB of RAM — this machine has {{gb}} GB.",
+      "unavailableInBuild": "Not available in this build.",
+      "reasonNoLlm": "This build can't run a model, so timing feedback is the honest choice here.",
+      "reasonLowMemory": "This machine has {{gb}} GB of RAM — not enough to run a brain comfortably.",
+      "reasonInstalled": "Already downloaded on this machine — nothing to fetch.",
+      "downloadNote": "The download starts when you continue and keeps running in the background.",
+      "downloading": "Downloading the coach brain",
+      "tryListening": {
+        "label": "Try the listening feature anyway",
+        "hint": "Two short steps: pick your input, play eight beats, and see your timing."
+      },
+      "voiceReady": "Coach voices are ready.",
+      "voicePick": "Pick a voice",
+      "voiceDismiss": "Dismiss"
+    },
+    "audioInput": {
+      "title": "Set up your input",
+      "subtitle": "Yames listens through this to score your timing. Play something and watch the meter move.",
+      "device": "Input device",
+      "guidance": {
+        "electric-guitar": "Plug into an interface, or play in front of the laptop mic — the mic works, an interface is better.",
+        "acoustic-guitar": "Play towards the laptop mic, or use a pickup through an interface. Both work.",
+        "bass": "An interface is best for bass — laptop mics lose the low end, though they still hear the attack.",
+        "drums": "Any mic in the room will do. Put it where it hears the whole kit, not one drum.",
+        "piano": "A mic near the instrument is enough. A digital piano can go straight into an interface.",
+        "other": "An interface is better, but the laptop mic works — just play close to it."
+      },
+      "waiting": "Play something — the meter needs a second of signal.",
+      "heard": "Got it. Yames can hear you.",
+      "skip": "Skip, I'll set this up later"
+    },
+    "hearItWork": {
+      "title": "Hear it work",
+      "subtitle": "Four beats to get ready, then play along for eight. Nothing is invented — you see exactly what was heard.",
+      "ready": "Play along with the click. One note on every beat is plenty.",
+      "start": "Start",
+      "countIn": "Starting in {{beats}}",
+      "playing": "Beat {{beat}} of {{total}}",
+      "scoring": "Scoring…",
+      "cancel": "Cancel",
+      "dotsLabel": "Your eight beats",
+      "nothing": "Didn't hear anything — check the input level.",
+      "backToInput": "Back to input setup",
+      "again": "Try again"
+    },
+    "ready": {
+      "title": "You're ready",
+      "subtitle": "Change anything here, or later in Settings.",
+      "rows": {
+        "instrument": "Instrument",
+        "sound": "Click sound",
+        "theme": "Theme",
+        "control": "Control",
+        "coach": "Practice coach",
+        "input": "Audio input"
+      },
+      "controlKeyboard": "Keyboard",
+      "controlFootswitch": "Footswitch",
+      "coachTiming": "Timing feedback only",
+      "coachOn": "On",
+      "inputNone": "Not set up",
+      "alwaysOnTop": "Always on top",
+      "start": "Start practicing",
+      "tour": "Show me around (30 s)"
+    },
+    "hints": {
+      "dismiss": "Got it",
+      "drillFirstOpen": {
+        "body": "Set start, target and step. Adaptive mode lets the coach decide."
+      },
+      "presetSuggest": {
+        "body": "You keep coming back to this setup. Save it as a preset?",
+        "action": "Save preset"
+      },
+      "coachAsk": {
+        "body": "Press ? any time to ask the coach about this."
+      },
+      "zenFirst": {
+        "body": "Esc leaves Zen. Effects are in Settings → Appearance."
+      },
+      "widgetDiscover": {
+        "body": "Try the floating widget (W) over your DAW or tabs.",
+        "action": "Open widget"
+      },
+      "midiPlugged": {
+        "body": "A MIDI device is connected but nothing is mapped. Map a pedal to Play/Stop?",
+        "action": "Open Hotkeys"
+      }
+    },
+    "tour": {
+      "progress": "{{current}} of {{total}}",
+      "keys": "Keys",
+      "back": "Back",
+      "next": "Next",
+      "done": "Done",
+      "skip": "Skip tour",
+      "offer": "New here? Take the 30-second tour.",
+      "offerAccept": "Show me around",
+      "offerDismiss": "Dismiss",
+      "stops": {
+        "bpm": {
+          "title": "Tempo",
+          "body": "Drag, scroll, type, or tap the tempo."
+        },
+        "subdivision": {
+          "title": "Subdivisions & groups",
+          "body": "Click subdivisions and shape the bar with beat groups."
+        },
+        "presets": {
+          "title": "Presets",
+          "body": "Save any setup and switch instantly."
+        },
+        "drill": {
+          "title": "Drill",
+          "body": "Ramp tempo automatically; the coach can adapt it."
+        },
+        "coach": {
+          "title": "Practice coach",
+          "body": "Listens, scores, and speaks. Ask it anything in its chat box."
+        },
+        "zenWidget": {
+          "title": "Zen & widget",
+          "body": "Fullscreen visuals, or a tiny always-on-top widget."
+        }
+      }
+    },
+    "help": {
+      "title": "Help",
+      "takeTour": "Take the tour",
+      "runSetup": "Run setup again",
+      "shortcuts": "Keyboard shortcuts",
+      "reportProblem": "Report a problem",
+      "reportWorking": "Collecting logs…",
+      "reportDone": "Diagnostics saved. Attach this file to your report:",
+      "reportError": "Could not write the diagnostics file.",
+      "website": "Website",
+      "version": "Version {{version}}",
+      "back": "Back",
+      "close": "Close",
+      "alwaysOnTopNote": "Yames stays above other windows. Change that in Settings → General."
+    }
+  },
+  "whatsNew": {
+    "title": "What's new in {{version}}",
+    "noNotes": "You're on a new version. The full release notes are on the web.",
+    "fullNotes": "Release notes",
+    "dismiss": "Got it"
+  }
+}

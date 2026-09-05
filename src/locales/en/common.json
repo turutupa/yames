@@ -1,0 +1,29 @@
+{
+  "_name": "English",
+  "common": {
+    "on": "On",
+    "off": "Off",
+    "play": "Play",
+    "stop": "Stop",
+    "soon": "SOON",
+    "durationMinSec": "{{m}}m {{s}}s",
+    "durationSec": "{{s}}s",
+    "language": "Language",
+    "languageHint": "UI language, applies immediately"
+  },
+  "share": {
+    "copyLink": "Copy link"
+  },
+  "audioError": {
+    "deviceInUse": "Another app is using your audio output, so the metronome can't play. Close it, or pick a different output device in Settings → Devices.",
+    "generic": "Yames couldn't start the audio output, so the metronome can't play.",
+    "detail": "Reason: {{reason}}",
+    "openSettings": "Audio settings",
+    "dismiss": "Dismiss"
+  },
+  "updateBanner": {
+    "available": "Yames v{{version}} is available",
+    "installRestart": "Install & Restart →",
+    "updating": "Updating Yames…"
+  }
+}

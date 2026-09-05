@@ -1,0 +1,47 @@
+{
+  "metronome": {
+    "tap": "TAP",
+    "tapCount": "{{count}} 次點擊",
+    "subdiv": "細分",
+    "meter": "拍號",
+    "free": "FREE",
+    "freeBeatCount": "{{count}} 拍",
+    "freeBeatCount_one": "{{count}} 拍",
+    "freeBeatCount_other": "{{count}} 拍",
+    "beatCount": "{{count}} 拍",
+    "beatCount_one": "{{count}} 拍",
+    "beatCount_other": "{{count}} 拍",
+    "clicksPerBar": "每小節 {{count}} 次",
+    "addBeat": "增加一拍",
+    "removeBeat": "減少一拍",
+    "grouping": "分組"
+  },
+  "meter": {
+    "0": "從不",
+    "1": "總是",
+    "2": "2/4",
+    "3": "3/4",
+    "4": "4/4",
+    "5": "5/4",
+    "6": "6/8",
+    "7": "7/8"
+  },
+  "subdiv": {
+    "1": "四分音符",
+    "2": "八分音符",
+    "3": "三連音",
+    "4": "十六分音符",
+    "5": "五連音",
+    "6": "六連音"
+  },
+  "sound": {
+    "click": "滴答",
+    "wood": "木聲",
+    "beep": "嗶聲",
+    "drum": "鼓聲"
+  },
+  "driftMeter": {
+    "early": "偏快",
+    "late": "偏慢"
+  }
+}

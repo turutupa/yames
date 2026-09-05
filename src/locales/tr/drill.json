@@ -1,0 +1,40 @@
+{
+  "drill": {
+    "startingIn": "Başlamak üzere",
+    "done": "Bitti!",
+    "stepBar": "Adım {{step}} · Ölçü {{bar}}/{{bars}}",
+    "beatsSummary": "{{count}} vuruş",
+    "repsSummary": "{{count}} tekrar",
+    "mode": "Mod",
+    "modeLinear": "Doğrusal",
+    "modeZigzag": "Zikzak",
+    "modeAdaptive": "Uyarlanabilir",
+    "aggr": "Hızlandırma",
+    "aggrGentle": "Yumuşak",
+    "aggrModerate": "Orta",
+    "aggrPush": "Sert",
+    "startBpm": "Başlangıç BPM",
+    "targetBpm": "Hedef BPM",
+    "speedUp": "Hızlandır",
+    "slowDown": "Yavaşlat",
+    "beats": "Vuruş",
+    "repeats": "Tekrar",
+    "countdown": "Geri Sayım",
+    "cyclic": "Döngüsel",
+    "repeatsLegend": "Tekrar →",
+    "summary": "{{beats}} vuruş · {{steps}} adım · {{repeats}} tekrar · {{time}}",
+    "timeRemaining": "Kalan {{time}}",
+    "desc": {
+      "startBpm": "Antrenmana başladığın tempo. Yavaş başla, yavaşça hızlan.",
+      "targetBpm": "Ulaşmak için çalıştığın hedef tempo.",
+      "increment": "Her yukarı adımda eklenen BPM. Sayı büyüdükçe tırmanış hızlanır.",
+      "decrement": "Her aşağı adımda çıkarılan BPM (yalnızca zikzak modunda). İlerleyebilmek için artıştan küçük tut.",
+      "beats": "Her hücredeki vuruş sayısı. 1. vuruş her zaman vurguludur, böylece kalıbı duyabilirsin.",
+      "repeat": "Sütun başına hücre sayısı — her tempoda, bir sonrakine geçmeden önce kaç kez tekrarladığın.",
+      "mode": "Doğrusal dümdüz yukarı çıkar. Zikzak dönüşümlü gider. Uyarlanabilir isabetine göre ayarlar.",
+      "cyclic": "Hedefe kadar çıkar, aynı artışlarla başlangıca geri döner (gidiş-dönüş).",
+      "aggressiveness": "Temponun ne kadar hızlı değiştiği. Yumuşak daha uzun bekler, Sert daha hızlı iter.",
+      "countdown": "Antrenman başlamadan önce 4 vuruşluk geri sayım. Tempoya yerleşmene yardımcı olur."
+    }
+  }
+}

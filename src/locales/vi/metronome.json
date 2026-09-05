@@ -1,0 +1,47 @@
+{
+  "metronome": {
+    "tap": "TAP",
+    "tapCount": "{{count}} lần gõ",
+    "subdiv": "Phân nhịp",
+    "meter": "Nhịp",
+    "free": "FREE",
+    "freeBeatCount": "{{count}} phách",
+    "freeBeatCount_one": "{{count}} phách",
+    "freeBeatCount_other": "{{count}} phách",
+    "beatCount": "{{count}} phách",
+    "beatCount_one": "{{count}} phách",
+    "beatCount_other": "{{count}} phách",
+    "clicksPerBar": "{{count}} tiếng/ô nhịp",
+    "addBeat": "Thêm phách",
+    "removeBeat": "Bớt phách",
+    "grouping": "nhóm nhịp"
+  },
+  "meter": {
+    "0": "Không bao giờ",
+    "1": "Luôn luôn",
+    "2": "2/4",
+    "3": "3/4",
+    "4": "4/4",
+    "5": "5/4",
+    "6": "6/8",
+    "7": "7/8"
+  },
+  "subdiv": {
+    "1": "Nốt đen",
+    "2": "Nốt móc đơn",
+    "3": "Chùm ba",
+    "4": "Nốt móc kép",
+    "5": "Chùm năm",
+    "6": "Chùm sáu"
+  },
+  "sound": {
+    "click": "Tích tắc",
+    "wood": "Gỗ",
+    "beep": "Bíp",
+    "drum": "Trống"
+  },
+  "driftMeter": {
+    "early": "Sớm",
+    "late": "Muộn"
+  }
+}

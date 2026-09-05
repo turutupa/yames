@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "metronome": "Metronom",
+    "drill": "Tempo-Training"
+  },
+  "tooltip": {
+    "zen": "Zen",
+    "enableVoice": "Aktiviere die Stimme des Übungscoachs in den Einstellungen",
+    "openWidget": "Widget öffnen",
+    "copied": "Kopiert!",
+    "share": "Teilen",
+    "back": "Zurück",
+    "settings": "Einstellungen",
+    "help": "Hilfe"
+  },
+  "volume": {
+    "metronome": "Metronom",
+    "voice": "Stimme"
+  },
+  "presets": {
+    "title": "Presets",
+    "open": "Presets öffnen",
+    "openWithShortcut": "Presets öffnen ({{shortcut}})",
+    "close": "Presets schließen",
+    "closeWithShortcut": "Presets schließen ({{shortcut}})",
+    "saveCurrent": "Aktuelle Einstellungen speichern",
+    "searchPlaceholder": "Suchen…",
+    "namePlaceholder": "Name…",
+    "noResults": "Keine Ergebnisse",
+    "empty": "Noch keine Presets",
+    "rename": "Umbenennen",
+    "renameTooltip": "Preset umbenennen",
+    "update": "Aktualisieren",
+    "updateTooltip": "Preset aktualisieren",
+    "updated": "Aktualisiert!",
+    "noChanges": "Keine Änderungen",
+    "noChangesToSave": "Nichts zu speichern",
+    "save": "Preset speichern",
+    "delete": "Löschen"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "Noch keine Presets",
+      "hint": "Sichere Tempo, Klang und Taktart, zu denen du immer wieder zurückkehrst.",
+      "action": "Erstes Preset speichern",
+      "shortcut": "Mit {{shortcut}} öffnest und schließt du dieses Panel."
+    },
+    "history": {
+      "title": "Noch keine Sessions.",
+      "hint": "Deine Sessions erscheinen hier, sobald du das Metronom stoppst."
+    },
+    "drill": {
+      "linear": "Linear: das Tempo steigt Schritt für Schritt vom Start-BPM zum Ziel.",
+      "zigzag": "Zickzack: das Tempo steigt, fällt zurück und steigt erneut.",
+      "adaptive": "Adaptiv: der Coach erhöht oder senkt das Tempo danach, wie du spielst."
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "drill": {
+    "startingIn": "Startet in",
+    "done": "Fertig!",
+    "stepBar": "Stufe {{step}} · Takt {{bar}}/{{bars}}",
+    "beatsSummary": "{{count}} Beats",
+    "repsSummary": "{{count}} Wiederholungen",
+    "mode": "Modus",
+    "modeLinear": "Linear",
+    "modeZigzag": "Zickzack",
+    "modeAdaptive": "Adaptiv",
+    "aggr": "Intensität",
+    "aggrGentle": "Sanft",
+    "aggrModerate": "Mäßig",
+    "aggrPush": "Kräftig",
+    "startBpm": "Start-BPM",
+    "targetBpm": "Ziel-BPM",
+    "speedUp": "Schneller",
+    "slowDown": "Langsamer",
+    "beats": "Beats",
+    "repeats": "Wiederholungen",
+    "countdown": "Countdown",
+    "cyclic": "Zyklisch",
+    "repeatsLegend": "Wiederholungen →",
+    "summary": "{{beats}} Beats · {{steps}} Stufen · {{repeats}} Wiederholungen · {{time}}",
+    "timeRemaining": "{{time}} verbleibend",
+    "desc": {
+      "startBpm": "Das Tempo, mit dem du beginnst. Starte langsam und steigere dich.",
+      "targetBpm": "Das Zieltempo, auf das du hinarbeitest.",
+      "increment": "BPM, die pro Aufwärtsstufe dazukommen. Größerer Wert = schnellere Steigerung.",
+      "decrement": "BPM, die pro Abwärtsstufe abgezogen werden (nur Zickzack). Kleiner als der Zuwachs, um langsam voranzukommen.",
+      "beats": "Klicks pro Zelle. Beat 1 ist immer akzentuiert, damit du das Muster hörst.",
+      "repeat": "Wie viele Zellen pro Spalte — wie oft du jedes Tempo wiederholst, bevor es weitergeht.",
+      "mode": "Linear geht gerade nach oben. Zickzack wechselt ab. Adaptiv passt sich deiner Genauigkeit an.",
+      "cyclic": "Geht bis zum Ziel hinauf und in denselben Schritten zurück zum Start (Hin- und Rückweg).",
+      "aggressiveness": "Wie schnell sich das Tempo ändert. Sanft wartet länger, Kräftig drückt schneller.",
+      "countdown": "4-Beat-Countdown vor dem Start der Übung. Hilft dir, dich auf das Tempo einzustellen."
+    }
+  }
+}

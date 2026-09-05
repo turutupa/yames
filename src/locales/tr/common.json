@@ -1,0 +1,29 @@
+{
+  "_name": "Türkçe",
+  "common": {
+    "on": "Açık",
+    "off": "Kapalı",
+    "play": "Oynat",
+    "stop": "Durdur",
+    "soon": "YAKINDA",
+    "durationMinSec": "{{m}} dk {{s}} sn",
+    "durationSec": "{{s}} sn",
+    "language": "Dil",
+    "languageHint": "Arayüz dili, anında uygulanır"
+  },
+  "share": {
+    "copyLink": "Bağlantıyı kopyala"
+  },
+  "audioError": {
+    "deviceInUse": "Başka bir uygulama ses çıkışını kullanıyor, bu yüzden metronom çalamıyor. O uygulamayı kapat ya da Ayarlar → Cihazlar'dan başka bir çıkış cihazı seç.",
+    "generic": "Yames ses çıkışını başlatamadı, bu yüzden metronom çalamıyor.",
+    "detail": "Neden: {{reason}}",
+    "openSettings": "Ses ayarları",
+    "dismiss": "Kapat"
+  },
+  "updateBanner": {
+    "available": "Yames v{{version}} sürümü mevcut",
+    "installRestart": "Kur ve Yeniden Başlat →",
+    "updating": "Yames güncelleniyor…"
+  }
+}

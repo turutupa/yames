@@ -1,8 +1,16 @@
-// Guards the "file = language" contract:
-//   - every file in src/locales/*.json is a supported language
-//   - each file has a "_name" (native language name, used by the picker)
-//   - every language has exactly the keys of en.json (no missing, no extra)
-//   - every {{placeholder}} token used in en.json appears in each language too
+// Guards the "directory = language, file = namespace" contract:
+//   - every directory in src/locales/ is a supported language
+//   - each language carries the same set of namespace files
+//   - no top-level group is claimed by two namespaces (the loader merges
+//     namespaces shallowly, so a clash would resolve by glob order)
+//   - each language declares a "_name" (native name, used by the picker)
+//   - every language has exactly the keys of English (no missing, no extra)
+//   - every {{placeholder}} token used in English appears in each language too
+//
+// The namespaces exist so that work on four screens touches four files rather
+// than one. They are not part of the key space: `t("drill.mode")` is
+// `drill.mode` wherever it is stored, and moving a group between namespace
+// files must change nothing a caller can see.
 import { describe, expect, it } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
@@ -10,12 +18,42 @@ import path from "node:path";
 // Vitest runs from the project root (no `root` override in vitest.config.ts).
 const LOCALES_DIR = path.resolve(process.cwd(), "src/locales");
 
-function localeFiles(): string[] {
-  return fs.readdirSync(LOCALES_DIR).filter((f) => f.endsWith(".json"));
+const NAMESPACES = [
+  "coach",
+  "common",
+  "drill",
+  "metronome",
+  "onboarding",
+  "settings",
+  "shell",
+  "zen",
+];
+
+function languages(): string[] {
+  return fs
+    .readdirSync(LOCALES_DIR, { withFileTypes: true })
+    .filter((e) => e.isDirectory())
+    .map((e) => e.name)
+    .sort();
 }
 
-function loadJson(name: string): Record<string, unknown> {
-  return JSON.parse(fs.readFileSync(path.join(LOCALES_DIR, name), "utf8"));
+function namespaceFiles(lang: string): string[] {
+  return fs
+    .readdirSync(path.join(LOCALES_DIR, lang))
+    .filter((f) => f.endsWith(".json"))
+    .map((f) => f.replace(/\.json$/, ""))
+    .sort();
+}
+
+function loadNamespace(lang: string, ns: string): Record<string, unknown> {
+  return JSON.parse(fs.readFileSync(path.join(LOCALES_DIR, lang, `${ns}.json`), "utf8"));
+}
+
+/** One language's namespaces merged the way the loader merges them. */
+function loadLanguage(lang: string): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const ns of namespaceFiles(lang)) Object.assign(out, loadNamespace(lang, ns));
+  return out;
 }
 
 /** All leaf keys, skipping "_" meta keys (e.g. _name). */
@@ -47,33 +85,66 @@ function placeholders(value: unknown): string[] {
 }
 
 describe("locale files", () => {
-  const files = localeFiles();
-  const en = loadJson("en.json");
+  const langs = languages();
+  const en = loadLanguage("en");
   const enKeys = collectKeys(en);
   const enPlaceholders = leafValues(en).flatMap(placeholders);
 
-  it("en.json is present and is the source of truth", () => {
-    expect(files).toContain("en.json");
+  it("English is present and is the source of truth", () => {
+    expect(langs).toContain("en");
     expect(enKeys.length).toBeGreaterThan(100);
   });
 
-  it("every file declares a _name (native language name)", () => {
-    for (const file of files) {
-      expect(loadJson(file)._name, `${file} is missing "_name"`).toBeTypeOf("string");
+  it("no stray flat locale file survives the namespace split", () => {
+    const strays = fs
+      .readdirSync(LOCALES_DIR, { withFileTypes: true })
+      .filter((e) => e.isFile() && e.name.endsWith(".json"))
+      .map((e) => e.name);
+    expect(strays).toEqual([]);
+  });
+
+  it("every language carries the same namespaces", () => {
+    for (const lang of langs) {
+      expect(namespaceFiles(lang), `${lang} namespace mismatch`).toEqual(NAMESPACES);
     }
   });
 
-  it("every language has exactly the en.json key set", () => {
-    for (const file of files) {
-      const keys = collectKeys(loadJson(file));
-      expect(keys, `${file} key mismatch`).toEqual(enKeys);
+  it("no top-level group is claimed by two namespaces", () => {
+    const owner = new Map<string, string>();
+    const clashes: string[] = [];
+    for (const ns of NAMESPACES) {
+      for (const group of Object.keys(loadNamespace("en", ns))) {
+        const prev = owner.get(group);
+        if (prev) clashes.push(`${group} is in both ${prev} and ${ns}`);
+        else owner.set(group, ns);
+      }
+    }
+    expect(clashes).toEqual([]);
+  });
+
+  it("every language declares a _name (native language name)", () => {
+    for (const lang of langs) {
+      expect(loadNamespace(lang, "common")._name, `${lang} is missing "_name"`).toBeTypeOf(
+        "string",
+      );
     }
   });
 
-  it("every {{placeholder}} from en.json exists in every language", () => {
-    for (const file of files) {
-      const p = leafValues(loadJson(file)).flatMap(placeholders);
-      expect(p, `${file} placeholder drift`).toEqual(enPlaceholders);
+  it("every language has exactly the English key set", () => {
+    for (const lang of langs) {
+      expect(collectKeys(loadLanguage(lang)), `${lang} key mismatch`).toEqual(enKeys);
     }
+  });
+
+  it("every {{placeholder}} from English exists in every language", () => {
+    for (const lang of langs) {
+      const p = leafValues(loadLanguage(lang)).flatMap(placeholders);
+      expect(p, `${lang} placeholder drift`).toEqual(enPlaceholders);
+    }
+  });
+
+  it("Pocket Check left no strings behind", () => {
+    const stale = enKeys.filter((k) => k.includes("pocketCheck") || k.includes("tab-3"));
+    expect(stale).toEqual([]);
   });
 });

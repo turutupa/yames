@@ -1,0 +1,40 @@
+{
+  "drill": {
+    "startingIn": "Starting in",
+    "done": "Done!",
+    "stepBar": "Step {{step}} · Bar {{bar}}/{{bars}}",
+    "beatsSummary": "{{count}} beats",
+    "repsSummary": "{{count}} reps",
+    "mode": "Mode",
+    "modeLinear": "Linear",
+    "modeZigzag": "Zigzag",
+    "modeAdaptive": "Adaptive",
+    "aggr": "Push",
+    "aggrGentle": "Gentle",
+    "aggrModerate": "Moderate",
+    "aggrPush": "Push",
+    "startBpm": "Start BPM",
+    "targetBpm": "Target BPM",
+    "speedUp": "Speed Up",
+    "slowDown": "Slow Down",
+    "beats": "Beats",
+    "repeats": "Repeats",
+    "countdown": "Countdown",
+    "cyclic": "Cyclic",
+    "repeatsLegend": "Repeats →",
+    "summary": "{{beats}} beats · {{steps}} steps · {{repeats}} repeats · {{time}}",
+    "timeRemaining": "{{time}} remaining",
+    "desc": {
+      "startBpm": "The tempo you begin practicing at. Start slow and build up.",
+      "targetBpm": "The goal tempo you're working toward.",
+      "increment": "BPM added each up-step. Bigger number = faster ramp.",
+      "decrement": "BPM subtracted each down-step (zigzag only). Smaller than increment to crawl forward.",
+      "beats": "Clicks per cell. Beat 1 is always accented so you can hear the pattern.",
+      "repeat": "How many cells per column — the number of times you repeat at each tempo before moving on.",
+      "mode": "Linear goes straight up. Zigzag alternates. Adaptive adjusts based on your accuracy.",
+      "cyclic": "Goes up to target then back down to start in the same increments (round-trip).",
+      "aggressiveness": "How quickly the tempo changes. Conservative waits longer, Aggressive pushes faster.",
+      "countdown": "4-beat countdown before the drill starts. Helps you lock into the tempo."
+    }
+  }
+}

@@ -1,0 +1,217 @@
+{
+  "onboarding": {
+    "welcome": {
+      "title": "Yames",
+      "tagline": "진짜 연습을 위한 메트로놈. 손은 악기에 그대로.",
+      "setup": "설정하기 (약 1분)",
+      "skip": "클릭 소리만 주세요",
+      "footer": "무료 · 로컬 · 오픈 소스 · v{{version}}"
+    },
+    "back": "뒤로",
+    "next": "다음",
+    "skip": "건너뛰기",
+    "progress": "{{total}}단계 중 {{current}}단계",
+    "chip": {
+      "label": "설정 마치기",
+      "dismiss": "닫기"
+    },
+    "soundLook": {
+      "title": "소리와 모양",
+      "subtitle": "카드에 마우스를 올리면 클릭 소리와 테마를 바로 확인할 수 있어요. 마음에 드는 것을 고르세요.",
+      "soundHeading": "클릭 사운드",
+      "themeHeading": "테마",
+      "moreThemes": "더 많은 테마는 설정에서"
+    },
+    "handsFree": {
+      "title": "손은 악기에 그대로",
+      "subtitle": "이 키들은 이미 작동합니다. 풋스위치나 컨트롤러가 있다면 여기서 바로 재생/정지에 연결하세요.",
+      "cancel": "취소",
+      "keyboard": {
+        "title": "키보드",
+        "hint": "모든 키는 설정 → 단축키에서 바꿀 수 있습니다."
+      },
+      "midi": {
+        "title": "MIDI 풋스위치",
+        "none": "언제든 연결하세요 — Yames가 연결을 제안합니다.",
+        "map": "재생/정지 연결",
+        "remap": "다른 페달 연결",
+        "listening": "재생/정지에 사용할 페달을 밟으세요.",
+        "mapped": "재생/정지 → {{signal}} · 채널 {{channel}}"
+      },
+      "gamepad": {
+        "title": "게임패드",
+        "none": "언제든 컨트롤러를 연결하세요 — 버튼을 누르면 Yames가 인식합니다.",
+        "map": "재생/정지 연결",
+        "remap": "다른 버튼 연결",
+        "listening": "재생/정지에 사용할 버튼을 누르세요.",
+        "mapped": "재생/정지 → {{button}}"
+      }
+    },
+    "coach": {
+      "title": "연습 코치",
+      "what1": "코치는 오디오 입력으로 소리를 듣고 클릭에 대한 타이밍을 채점합니다.",
+      "what2": "연주가 끝날 때마다 짧은 리포트를 쓰고, 모델을 받아 두면 다음에 무엇을 연습할지도 알려 줍니다.",
+      "privacy": "모든 처리는 이 컴퓨터에서 이뤄집니다. 오디오는 밖으로 나가지 않고, 배포 빌드는 녹음하지 않습니다.",
+      "recommended": "추천",
+      "timing": {
+        "title": "타이밍 피드백만",
+        "desc": "다운로드 없음. 실시간 점, 타이밍 점수, 세션 기록은 그대로 쓸 수 있습니다."
+      },
+      "standard": {
+        "title": "표준 모델",
+        "desc": "Qwen3 4B · 약 2.5 GB 다운로드 · 실행 시 약 4 GB RAM. GPU가 없어도 CPU로 동작합니다."
+      },
+      "studio": {
+        "title": "스튜디오 모델",
+        "desc": "Qwen3 8B · 약 5 GB 다운로드 · 약 8 GB RAM. 더 풍부한 피드백과 연습 계획."
+      },
+      "studioNeedsRam": "스튜디오는 최소 16 GB RAM이 필요합니다. 이 컴퓨터는 {{gb}} GB입니다.",
+      "standardNeedsRam": "스탠다드 브레인은 최소 8 GB RAM이 필요합니다. 이 컴퓨터는 {{gb}} GB입니다.",
+      "unavailableInBuild": "이 빌드에서는 사용할 수 없습니다.",
+      "reasonNoLlm": "이 빌드는 모델을 실행할 수 없어 타이밍 피드백이 정직한 선택입니다.",
+      "reasonLowMemory": "이 컴퓨터의 RAM은 {{gb}} GB로, 모델을 편안하게 돌리기엔 부족합니다.",
+      "reasonInstalled": "이미 이 컴퓨터에 받아져 있습니다. 내려받을 것이 없습니다.",
+      "downloadNote": "계속하면 다운로드가 시작되고 백그라운드에서 이어집니다.",
+      "downloading": "코치 모델 다운로드 중",
+      "tryListening": {
+        "label": "듣기 기능만 먼저 써 보기",
+        "hint": "두 단계면 됩니다. 입력을 고르고, 여덟 박을 치고, 타이밍을 확인하세요."
+      },
+      "voiceReady": "코치 음성이 준비됐습니다.",
+      "voicePick": "음성 고르기",
+      "voiceDismiss": "닫기"
+    },
+    "audioInput": {
+      "title": "입력 설정",
+      "subtitle": "Yames는 여기로 들으면서 타이밍을 채점합니다. 뭔가 연주하고 미터를 확인하세요.",
+      "device": "입력 장치",
+      "guidance": {
+        "electric-guitar": "오디오 인터페이스에 연결하거나 노트북 마이크 앞에서 연주하세요. 마이크도 되지만 인터페이스가 낫습니다.",
+        "acoustic-guitar": "노트북 마이크 쪽을 향해 연주하거나 픽업과 인터페이스를 쓰세요. 둘 다 됩니다.",
+        "bass": "베이스는 인터페이스가 가장 좋습니다. 노트북 마이크는 저음을 놓치지만 어택은 잡습니다.",
+        "drums": "방에 있는 마이크면 충분합니다. 드럼 하나가 아니라 세트 전체가 들리는 위치에 두세요.",
+        "piano": "악기 가까이에 마이크 하나면 충분합니다. 디지털 피아노는 인터페이스에 바로 연결할 수 있습니다.",
+        "other": "인터페이스가 낫지만 노트북 마이크로도 됩니다. 가까이에서 연주하세요."
+      },
+      "waiting": "뭔가 연주해 보세요. 미터에 1초 동안 신호가 필요합니다.",
+      "heard": "됐습니다. Yames가 듣고 있어요.",
+      "skip": "건너뛰기, 나중에 설정할게요"
+    },
+    "hearItWork": {
+      "title": "직접 들어보기",
+      "subtitle": "네 박자 준비 후 여덟 박자를 같이 연주하세요. 지어내는 건 없습니다. 들린 그대로 보여줍니다.",
+      "ready": "클릭에 맞춰 연주하세요. 박마다 한 음이면 충분합니다.",
+      "start": "시작",
+      "countIn": "{{beats}} 후 시작",
+      "playing": "{{total}}박 중 {{beat}}박",
+      "scoring": "채점 중…",
+      "cancel": "취소",
+      "dotsLabel": "당신의 여덟 박",
+      "nothing": "아무것도 들리지 않았습니다. 입력 레벨을 확인하세요.",
+      "backToInput": "입력 설정으로",
+      "again": "다시 시도"
+    },
+    "ready": {
+      "title": "준비됐습니다",
+      "subtitle": "여기서 바꾸거나 나중에 설정에서 변경할 수 있어요.",
+      "rows": {
+        "instrument": "악기",
+        "sound": "클릭 사운드",
+        "theme": "테마",
+        "control": "조작",
+        "coach": "연습 코치",
+        "input": "오디오 입력"
+      },
+      "controlKeyboard": "키보드",
+      "controlFootswitch": "풋스위치",
+      "coachTiming": "타이밍 피드백만",
+      "coachOn": "켜짐",
+      "inputNone": "설정 안 됨",
+      "alwaysOnTop": "항상 위에 표시",
+      "start": "연습 시작",
+      "tour": "앱 둘러보기 (30초)"
+    },
+    "hints": {
+      "dismiss": "알겠어요",
+      "drillFirstOpen": {
+        "body": "시작·목표·증가폭을 설정하세요. 적응형 모드에서는 코치가 정합니다."
+      },
+      "presetSuggest": {
+        "body": "이 설정을 계속 쓰고 계시네요. 프리셋으로 저장할까요?",
+        "action": "프리셋 저장"
+      },
+      "coachAsk": {
+        "body": "언제든 ? 키를 누르면 코치에게 물어볼 수 있어요."
+      },
+      "zenFirst": {
+        "body": "Esc로 Zen을 나갑니다. 효과는 설정 → 모양에 있어요."
+      },
+      "widgetDiscover": {
+        "body": "DAW나 악보 위에 띄우는 위젯(W)을 써 보세요.",
+        "action": "위젯 열기"
+      },
+      "midiPlugged": {
+        "body": "MIDI 기기가 연결됐지만 매핑된 것이 없어요. 페달을 재생/정지에 매핑할까요?",
+        "action": "단축키 열기"
+      }
+    },
+    "tour": {
+      "progress": "{{total}} 중 {{current}}",
+      "keys": "단축키",
+      "back": "이전",
+      "next": "다음",
+      "done": "완료",
+      "skip": "둘러보기 건너뛰기",
+      "offer": "처음이신가요? 30초 둘러보기를 해보세요.",
+      "offerAccept": "둘러보기",
+      "offerDismiss": "닫기",
+      "stops": {
+        "bpm": {
+          "title": "템포",
+          "body": "드래그, 스크롤, 입력 또는 탭으로 템포를 정하세요."
+        },
+        "subdivision": {
+          "title": "분할과 박 그룹",
+          "body": "분할을 클릭하고 박 그룹으로 마디를 구성하세요."
+        },
+        "presets": {
+          "title": "프리셋",
+          "body": "어떤 설정이든 저장하고 즉시 전환하세요."
+        },
+        "drill": {
+          "title": "드릴",
+          "body": "템포를 자동으로 올립니다. 코치가 조절할 수도 있습니다."
+        },
+        "coach": {
+          "title": "연습 코치",
+          "body": "듣고, 점수를 매기고, 말합니다. 채팅창에서 무엇이든 물어보세요."
+        },
+        "zenWidget": {
+          "title": "젠과 위젯",
+          "body": "전체 화면 비주얼, 또는 항상 위에 있는 작은 위젯."
+        }
+      }
+    },
+    "help": {
+      "title": "도움말",
+      "takeTour": "둘러보기",
+      "runSetup": "설정 다시 하기",
+      "shortcuts": "키보드 단축키",
+      "reportProblem": "문제 신고",
+      "reportWorking": "로그를 모으는 중…",
+      "reportDone": "진단 파일을 저장했어요. 신고에 이 파일을 첨부해 주세요:",
+      "reportError": "진단 파일을 저장하지 못했습니다.",
+      "website": "웹사이트",
+      "version": "버전 {{version}}",
+      "back": "이전",
+      "close": "닫기",
+      "alwaysOnTopNote": "Yames는 다른 창 위에 머무릅니다. 설정 → 일반에서 바꿀 수 있어요."
+    }
+  },
+  "whatsNew": {
+    "title": "{{version}} 새로운 기능",
+    "noNotes": "새 버전을 쓰고 있어요. 전체 릴리스 노트는 웹에 있습니다.",
+    "fullNotes": "릴리스 노트",
+    "dismiss": "알겠어요"
+  }
+}

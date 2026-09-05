@@ -1,0 +1,40 @@
+{
+  "drill": {
+    "startingIn": "即將開始",
+    "done": "完成！",
+    "stepBar": "第 {{step}} 級 · 第 {{bar}}/{{bars}} 小節",
+    "beatsSummary": "{{count}} 拍",
+    "repsSummary": "{{count}} 遍",
+    "mode": "模式",
+    "modeLinear": "線性",
+    "modeZigzag": "鋸齒",
+    "modeAdaptive": "自適應",
+    "aggr": "推進",
+    "aggrGentle": "溫和",
+    "aggrModerate": "中等",
+    "aggrPush": "激進",
+    "startBpm": "起始 BPM",
+    "targetBpm": "目標 BPM",
+    "speedUp": "加速",
+    "slowDown": "減速",
+    "beats": "拍數",
+    "repeats": "遍數",
+    "countdown": "倒數計時",
+    "cyclic": "循環",
+    "repeatsLegend": "遍數 →",
+    "summary": "{{beats}} 拍 · {{steps}} 級 · {{repeats}} 遍 · {{time}}",
+    "timeRemaining": "剩餘 {{time}}",
+    "desc": {
+      "startBpm": "練習開始的起始速度。從慢開始，逐步加快。",
+      "targetBpm": "你正在挑戰的目標速度。",
+      "increment": "每次上調增加的 BPM。數字越大爬升越快。",
+      "decrement": "每次下調減少的 BPM（僅鋸齒模式）。小於增量，才能穩步前進。",
+      "beats": "每格的節拍數。第 1 拍永遠帶重音，方便你聽清規律。",
+      "repeat": "每欄的格數——每個速度下重複的次數。",
+      "mode": "線性一路往上。鋸齒上下交替。自適應依你的準確度調整。",
+      "cyclic": "升到目標後，以同樣增量回到起點（往返）。",
+      "aggressiveness": "速度變化的快慢。保守會等更久，激進推進更快。",
+      "countdown": "開始練習前的 4 拍倒數計時，幫助你鎖定節奏。"
+    }
+  }
+}

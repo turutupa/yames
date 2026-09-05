@@ -1,0 +1,24 @@
+{
+  "zen": {
+    "startingIn": "Начинаем через",
+    "rampStep": "Шаг {{step}}",
+    "fullscreen": "Полный экран",
+    "exitHint": "Двойной клик или Esc — выход",
+    "timeSigAll": "Все",
+    "timeSigOff": "Выкл",
+    "styles": {
+      "focus": "Фокус",
+      "pulse": "Пульс",
+      "gravity": "Гравитация",
+      "radar": "Радар",
+      "cosmos": "Космос",
+      "warp": "Варп",
+      "rain": "Дождь"
+    }
+  },
+  "widget": {
+    "openMain": "Открыть главное окно",
+    "timeSignature": "Тактовый размер",
+    "ramp": "Разгон: {{current}} → {{target}}"
+  }
+}

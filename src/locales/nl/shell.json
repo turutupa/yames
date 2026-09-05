@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "metronome": "Metronoom",
+    "drill": "Tempotraining"
+  },
+  "tooltip": {
+    "zen": "Zen",
+    "enableVoice": "Schakel de stem van de oefencoach in via Instellingen",
+    "openWidget": "Widget openen",
+    "copied": "Gekopieerd!",
+    "share": "Delen",
+    "back": "Terug",
+    "settings": "Instellingen",
+    "help": "Help"
+  },
+  "volume": {
+    "metronome": "Metronoom",
+    "voice": "Stem"
+  },
+  "presets": {
+    "title": "Presets",
+    "open": "Presets openen",
+    "openWithShortcut": "Presets openen ({{shortcut}})",
+    "close": "Presets sluiten",
+    "closeWithShortcut": "Presets sluiten ({{shortcut}})",
+    "saveCurrent": "Huidige instellingen opslaan",
+    "searchPlaceholder": "Zoeken…",
+    "namePlaceholder": "Naam…",
+    "noResults": "Geen resultaten",
+    "empty": "Nog geen presets",
+    "rename": "Hernoemen",
+    "renameTooltip": "Preset hernoemen",
+    "update": "Bijwerken",
+    "updateTooltip": "Preset bijwerken",
+    "updated": "Bijgewerkt!",
+    "noChanges": "Geen wijzigingen",
+    "noChangesToSave": "Geen wijzigingen om op te slaan",
+    "save": "Preset opslaan",
+    "delete": "Verwijderen"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "Nog geen presets",
+      "hint": "Bewaar een tempo, geluid en maatsoort waar je steeds op terugkomt.",
+      "action": "Bewaar je eerste preset",
+      "shortcut": "Druk op {{shortcut}} om dit paneel te openen en te sluiten."
+    },
+    "history": {
+      "title": "Nog geen sessies.",
+      "hint": "Je sessies verschijnen hier zodra je de metronoom stopt."
+    },
+    "drill": {
+      "linear": "Lineair: het tempo klimt stap voor stap van start-BPM naar doel.",
+      "zigzag": "Zigzag: het tempo klimt, zakt terug en klimt opnieuw.",
+      "adaptive": "Adaptief: de coach verhoogt of verlaagt het tempo op basis van je spel."
+    }
+  }
+}

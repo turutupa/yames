@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "metronome": "メトロノーム",
+    "drill": "テンポ練習"
+  },
+  "tooltip": {
+    "zen": "禅",
+    "enableVoice": "設定で練習コーチの音声を有効にできます",
+    "openWidget": "ウィジェットを開く",
+    "copied": "コピーしました！",
+    "share": "シェア",
+    "back": "戻る",
+    "settings": "設定",
+    "help": "ヘルプ"
+  },
+  "volume": {
+    "metronome": "メトロノーム",
+    "voice": "音声"
+  },
+  "presets": {
+    "title": "プリセット",
+    "open": "プリセットを開く",
+    "openWithShortcut": "プリセットを開く（{{shortcut}}）",
+    "close": "プリセットを閉じる",
+    "closeWithShortcut": "プリセットを閉じる（{{shortcut}}）",
+    "saveCurrent": "現在の設定を保存",
+    "searchPlaceholder": "検索…",
+    "namePlaceholder": "名前…",
+    "noResults": "結果なし",
+    "empty": "プリセットはまだありません",
+    "rename": "名前を変更",
+    "renameTooltip": "プリセット名を変更",
+    "update": "更新",
+    "updateTooltip": "プリセットを更新",
+    "updated": "更新しました！",
+    "noChanges": "変更なし",
+    "noChangesToSave": "保存する変更はありません",
+    "save": "プリセットを保存",
+    "delete": "削除"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "プリセットはまだありません",
+      "hint": "よく使うテンポ・音色・拍子を保存しておきましょう。",
+      "action": "最初のプリセットを保存",
+      "shortcut": "{{shortcut}} でこのパネルを開閉できます。"
+    },
+    "history": {
+      "title": "セッションはまだありません。",
+      "hint": "メトロノームを止めると、ここにセッションが表示されます。"
+    },
+    "drill": {
+      "linear": "リニア: 開始 BPM から目標まで、1 段ずつテンポが上がります。",
+      "zigzag": "ジグザグ: テンポが上がり、少し戻り、また上がります。",
+      "adaptive": "アダプティブ: 演奏の様子に合わせてコーチがテンポを上げ下げします。"
+    }
+  }
+}

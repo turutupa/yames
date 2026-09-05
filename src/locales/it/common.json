@@ -1,0 +1,29 @@
+{
+  "_name": "Italiano",
+  "common": {
+    "on": "Attivo",
+    "off": "Disattivo",
+    "play": "Avvia",
+    "stop": "Ferma",
+    "soon": "IN ARRIVO",
+    "durationMinSec": "{{m}} min {{s}} s",
+    "durationSec": "{{s}} s",
+    "language": "Lingua",
+    "languageHint": "Lingua dell'interfaccia, si applica subito"
+  },
+  "share": {
+    "copyLink": "Copia link"
+  },
+  "audioError": {
+    "deviceInUse": "Un'altra app sta usando l'uscita audio, quindi il metronomo non può suonare. Chiudila oppure scegli un altro dispositivo di uscita in Impostazioni → Dispositivi.",
+    "generic": "Yames non è riuscito ad avviare l'uscita audio, quindi il metronomo non può suonare.",
+    "detail": "Motivo: {{reason}}",
+    "openSettings": "Impostazioni audio",
+    "dismiss": "Chiudi"
+  },
+  "updateBanner": {
+    "available": "Yames v{{version}} è disponibile",
+    "installRestart": "Installa e riavvia →",
+    "updating": "Aggiornamento di Yames in corso…"
+  }
+}

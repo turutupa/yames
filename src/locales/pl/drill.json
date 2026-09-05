@@ -1,0 +1,40 @@
+{
+  "drill": {
+    "startingIn": "Zaczyna się za",
+    "done": "Gotowe!",
+    "stepBar": "Krok {{step}} · Takt {{bar}}/{{bars}}",
+    "beatsSummary": "{{count}} uderzeń",
+    "repsSummary": "{{count}} powtórzeń",
+    "mode": "Tryb",
+    "modeLinear": "Liniowy",
+    "modeZigzag": "Zygzak",
+    "modeAdaptive": "Adaptacyjny",
+    "aggr": "Nacisk",
+    "aggrGentle": "Łagodny",
+    "aggrModerate": "Umiarkowany",
+    "aggrPush": "Nacisk",
+    "startBpm": "BPM startowe",
+    "targetBpm": "BPM docelowe",
+    "speedUp": "Przyspiesz",
+    "slowDown": "Zwolnij",
+    "beats": "Uderzenia",
+    "repeats": "Powtórzenia",
+    "countdown": "Odliczanie",
+    "cyclic": "Cykl",
+    "repeatsLegend": "Powtórzenia →",
+    "summary": "{{beats}} uderzeń · {{steps}} kroków · {{repeats}} powtórzeń · {{time}}",
+    "timeRemaining": "Zostało {{time}}",
+    "desc": {
+      "startBpm": "Tempo, od którego zaczynasz ćwiczyć. Zacznij wolno i stopniowo zwiększaj.",
+      "targetBpm": "Docelowe tempo, do którego dążysz.",
+      "increment": "BPM dodawane na każdym kroku w górę. Większa liczba = szybszy rozbieg.",
+      "decrement": "BPM odejmowane na każdym kroku w dół (tylko zygzak). Mniejszy niż przyrost, aby powoli posuwać się naprzód.",
+      "beats": "Uderzenia na komórkę. Pierwsze uderzenie zawsze jest akcentowane, abyś słyszał wzorzec.",
+      "repeat": "Ile komórek w kolumnie — ile razy powtarzasz dane tempo przed przejściem dalej.",
+      "mode": "Liniowy idzie prosto w górę. Zygzak naprzemiennie. Adaptacyjny dopasowuje się do Twojej celności.",
+      "cyclic": "Wchodzi do celu, potem wraca do startu tymi samymi przyrostami (tam i z powrotem).",
+      "aggressiveness": "Jak szybko zmienia się tempo. Tryb konserwatywny czeka dłużej, agresywny przyspiesza szybciej.",
+      "countdown": "4-uderzeniowe odliczanie przed startem. Pomaga wczuć się w tempo."
+    }
+  }
+}

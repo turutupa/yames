@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "metronome": "Máy đếm nhịp",
+    "drill": "Luyện tempo"
+  },
+  "tooltip": {
+    "zen": "Thiền",
+    "enableVoice": "Bật giọng nói của Huấn luyện viên trong Cài đặt",
+    "openWidget": "Mở cửa sổ mini",
+    "copied": "Đã sao chép!",
+    "share": "Chia sẻ",
+    "back": "Quay lại",
+    "settings": "Cài đặt",
+    "help": "Trợ giúp"
+  },
+  "volume": {
+    "metronome": "Máy đếm nhịp",
+    "voice": "Giọng nói"
+  },
+  "presets": {
+    "title": "Cài đặt sẵn",
+    "open": "Mở cài đặt sẵn",
+    "openWithShortcut": "Mở cài đặt sẵn ({{shortcut}})",
+    "close": "Đóng cài đặt sẵn",
+    "closeWithShortcut": "Đóng cài đặt sẵn ({{shortcut}})",
+    "saveCurrent": "Lưu cài đặt hiện tại",
+    "searchPlaceholder": "Tìm kiếm...",
+    "namePlaceholder": "Tên...",
+    "noResults": "Không có kết quả",
+    "empty": "Chưa có cài đặt sẵn",
+    "rename": "Đổi tên",
+    "renameTooltip": "Đổi tên cài đặt sẵn",
+    "update": "Cập nhật",
+    "updateTooltip": "Cập nhật cài đặt sẵn",
+    "updated": "Đã cập nhật!",
+    "noChanges": "Không có thay đổi",
+    "noChangesToSave": "Không có thay đổi để lưu",
+    "save": "Lưu cài đặt sẵn",
+    "delete": "Xóa"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "Chưa có cài đặt sẵn",
+      "hint": "Lưu lại nhịp độ, âm thanh và nhịp mà bạn hay quay lại.",
+      "action": "Lưu cài đặt sẵn đầu tiên",
+      "shortcut": "Nhấn {{shortcut}} để mở và đóng bảng này."
+    },
+    "history": {
+      "title": "Chưa có buổi tập nào.",
+      "hint": "Các buổi tập sẽ hiện ở đây sau khi bạn dừng máy đếm nhịp."
+    },
+    "drill": {
+      "linear": "Tuyến tính: nhịp độ tăng dần từ BPM đầu đến mục tiêu, từng bậc một.",
+      "zigzag": "Zigzag: nhịp độ tăng lên, lùi lại rồi tăng tiếp.",
+      "adaptive": "Thích ứng: huấn luyện viên tăng hoặc giảm nhịp độ theo cách bạn chơi."
+    }
+  }
+}

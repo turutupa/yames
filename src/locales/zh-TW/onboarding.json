@@ -1,0 +1,217 @@
+{
+  "onboarding": {
+    "welcome": {
+      "title": "Yames",
+      "tagline": "為真正的練習而生的節拍器。雙手始終留在樂器上。",
+      "setup": "幫我設定（約一分鐘）",
+      "skip": "只要節拍聲",
+      "footer": "免費 · 本機 · 開源 · v{{version}}"
+    },
+    "back": "上一步",
+    "next": "下一步",
+    "skip": "略過",
+    "progress": "第 {{current}}/{{total}} 步",
+    "chip": {
+      "label": "完成設定",
+      "dismiss": "關閉"
+    },
+    "soundLook": {
+      "title": "音色與外觀",
+      "subtitle": "把滑鼠移到卡片上即可試聽節拍音、預覽主題。選一個你喜歡的。",
+      "soundHeading": "節拍音",
+      "themeHeading": "主題",
+      "moreThemes": "更多主題在設定中"
+    },
+    "handsFree": {
+      "title": "雙手一直留在樂器上",
+      "subtitle": "這些按鍵已經可用。如果你有踏板或手把，現在就能把播放／停止對應上去。",
+      "cancel": "取消",
+      "keyboard": {
+        "title": "鍵盤",
+        "hint": "所有按鍵都可在設定 → 快速鍵中修改。"
+      },
+      "midi": {
+        "title": "MIDI 踏板",
+        "none": "隨時插上即可 — Yames 會主動提示對應。",
+        "map": "對應播放／停止",
+        "remap": "改用其他踏板",
+        "listening": "踩下你想用來播放／停止的踏板。",
+        "mapped": "播放／停止 → {{signal}} · 通道 {{channel}}"
+      },
+      "gamepad": {
+        "title": "手把",
+        "none": "隨時連接手把 — 按一個鍵，Yames 就會看到它。",
+        "map": "對應播放／停止",
+        "remap": "改用其他按鍵",
+        "listening": "按下你想用來播放／停止的按鍵。",
+        "mapped": "播放／停止 → {{button}}"
+      }
+    },
+    "coach": {
+      "title": "練習教練",
+      "what1": "教練透過音訊輸入聆聽，並為你的拍點與節拍器的貼合程度評分。",
+      "what2": "每段結束後會寫一份簡短報告；下載模型後還會說明接下來該練什麼。",
+      "privacy": "一切都在本機執行。你的音訊不會離開這台電腦，正式版也不會錄音。",
+      "recommended": "建議",
+      "timing": {
+        "title": "僅拍點回饋",
+        "desc": "不用下載。即時圓點、拍點評分與練習紀錄照常可用。"
+      },
+      "standard": {
+        "title": "標準模型",
+        "desc": "Qwen3 4B · 約 2.5 GB 下載 · 執行時約 4 GB 記憶體。沒有 GPU 也能在 CPU 上執行。"
+      },
+      "studio": {
+        "title": "Studio 模型",
+        "desc": "Qwen3 8B · 約 5 GB 下載 · 約 8 GB 記憶體。更細緻的講評與練習計畫。"
+      },
+      "studioNeedsRam": "Studio 至少需要 16 GB 記憶體，本機只有 {{gb}} GB。",
+      "standardNeedsRam": "標準大腦至少需要 8 GB 記憶體，本機只有 {{gb}} GB。",
+      "unavailableInBuild": "此版本不提供。",
+      "reasonNoLlm": "此版本無法執行模型，因此這裡如實建議僅拍點回饋。",
+      "reasonLowMemory": "本機記憶體為 {{gb}} GB，不足以順暢執行模型。",
+      "reasonInstalled": "本機已下載，不需要再取得。",
+      "downloadNote": "繼續時開始下載，並在背景持續進行。",
+      "downloading": "正在下載教練模型",
+      "tryListening": {
+        "label": "仍然試試聆聽功能",
+        "hint": "兩步就好：選擇輸入、彈八拍、看看你的拍點。"
+      },
+      "voiceReady": "教練語音已就緒。",
+      "voicePick": "選擇語音",
+      "voiceDismiss": "關閉"
+    },
+    "audioInput": {
+      "title": "設定輸入",
+      "subtitle": "Yames 透過它聆聽並為你的節奏評分。彈一下，看看電平表。",
+      "device": "輸入裝置",
+      "guidance": {
+        "electric-guitar": "接上錄音介面，或對著筆電麥克風彈——麥克風可以用，介面更穩。",
+        "acoustic-guitar": "朝筆電麥克風彈，或用拾音器接介面。兩種都行。",
+        "bass": "貝斯最好用錄音介面：筆電麥克風會漏掉低頻，不過仍聽得到起音。",
+        "drums": "房間裡任何一支麥克風都夠。放在聽得到整組鼓的位置，而不是單一顆鼓。",
+        "piano": "在樂器旁放一支麥克風就夠了。數位鋼琴可以直接接介面。",
+        "other": "錄音介面更好，但筆電麥克風也行——靠近一點彈就好。"
+      },
+      "waiting": "彈點什麼——電平表需要一秒鐘的訊號。",
+      "heard": "可以了，Yames 聽得到你。",
+      "skip": "跳過，我之後再設定"
+    },
+    "hearItWork": {
+      "title": "聽聽它怎麼運作",
+      "subtitle": "四拍準備，然後跟著彈八拍。不會編造結果——聽到什麼就顯示什麼。",
+      "ready": "跟著節拍器彈。每拍一個音就夠了。",
+      "start": "開始",
+      "countIn": "{{beats}} 拍後開始",
+      "playing": "第 {{beat}} / {{total}} 拍",
+      "scoring": "評分中…",
+      "cancel": "取消",
+      "dotsLabel": "你的八拍",
+      "nothing": "什麼都沒聽到——檢查一下輸入電平。",
+      "backToInput": "回到輸入設定",
+      "again": "再試一次"
+    },
+    "ready": {
+      "title": "準備就緒",
+      "subtitle": "可以在這裡修改，也可以稍後在設定中修改。",
+      "rows": {
+        "instrument": "樂器",
+        "sound": "節拍音",
+        "theme": "主題",
+        "control": "控制方式",
+        "coach": "練習教練",
+        "input": "音訊輸入"
+      },
+      "controlKeyboard": "鍵盤",
+      "controlFootswitch": "踏板開關",
+      "coachTiming": "僅節奏回饋",
+      "coachOn": "已開啟",
+      "inputNone": "未設定",
+      "alwaysOnTop": "永遠在最上層",
+      "start": "開始練習",
+      "tour": "帶我逛一圈（30 秒）"
+    },
+    "hints": {
+      "dismiss": "知道了",
+      "drillFirstOpen": {
+        "body": "設定起點、目標與步進。自適應模式交由教練決定。"
+      },
+      "presetSuggest": {
+        "body": "你一直回到這套設定。要存成預設嗎？",
+        "action": "儲存預設"
+      },
+      "coachAsk": {
+        "body": "隨時按 ? 向教練提問。"
+      },
+      "zenFirst": {
+        "body": "按 Esc 離開 Zen。特效在設定 → 外觀裡。"
+      },
+      "widgetDiscover": {
+        "body": "試試浮動小工具（W），可以放在 DAW 或樂譜上方。",
+        "action": "開啟小工具"
+      },
+      "midiPlugged": {
+        "body": "已連接 MIDI 裝置，但尚未指派任何動作。要將踏板指派給播放/停止嗎？",
+        "action": "開啟快速鍵"
+      }
+    },
+    "tour": {
+      "progress": "第 {{current}} / {{total}} 站",
+      "keys": "快速鍵",
+      "back": "上一步",
+      "next": "下一步",
+      "done": "完成",
+      "skip": "略過導覽",
+      "offer": "第一次使用？花 30 秒看看導覽吧。",
+      "offerAccept": "帶我看看",
+      "offerDismiss": "關閉",
+      "stops": {
+        "bpm": {
+          "title": "速度",
+          "body": "拖曳、捲動、輸入或敲擊來設定速度。"
+        },
+        "subdivision": {
+          "title": "細分與拍組",
+          "body": "點擊細分，用拍組塑造小節。"
+        },
+        "presets": {
+          "title": "預設組合",
+          "body": "儲存任何設定，隨時立即切換。"
+        },
+        "drill": {
+          "title": "漸進練習",
+          "body": "自動提升速度；教練可以據此調整。"
+        },
+        "coach": {
+          "title": "練習教練",
+          "body": "會聽、會評分、會說話。在聊天框裡問它任何問題。"
+        },
+        "zenWidget": {
+          "title": "禪模式與浮動視窗",
+          "body": "全螢幕視覺效果，或一個永遠置頂的小視窗。"
+        }
+      }
+    },
+    "help": {
+      "title": "說明",
+      "takeTour": "看看導覽",
+      "runSetup": "重新執行設定",
+      "shortcuts": "鍵盤快速鍵",
+      "reportProblem": "回報問題",
+      "reportWorking": "正在收集紀錄…",
+      "reportDone": "診斷資訊已儲存。請把這個檔案附在回報裡：",
+      "reportError": "無法寫入診斷檔案。",
+      "website": "官網",
+      "version": "版本 {{version}}",
+      "back": "上一步",
+      "close": "關閉",
+      "alwaysOnTopNote": "Yames 會一直浮在其他視窗之上。可在設定 → 一般中修改。"
+    }
+  },
+  "whatsNew": {
+    "title": "{{version}} 更新內容",
+    "noNotes": "你用的是新版本。完整的發行說明在網路上。",
+    "fullNotes": "發行說明",
+    "dismiss": "知道了"
+  }
+}

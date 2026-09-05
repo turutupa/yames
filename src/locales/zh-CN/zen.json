@@ -1,0 +1,24 @@
+{
+  "zen": {
+    "startingIn": "即将开始",
+    "rampStep": "第 {{step}} 步",
+    "fullscreen": "全屏",
+    "exitHint": "双击或按 Esc 退出",
+    "timeSigAll": "所有",
+    "timeSigOff": "关闭",
+    "styles": {
+      "focus": "专注",
+      "pulse": "脉冲",
+      "gravity": "重力",
+      "radar": "雷达",
+      "cosmos": "宇宙",
+      "warp": "扭曲",
+      "rain": "雨"
+    }
+  },
+  "widget": {
+    "openMain": "打开主窗口",
+    "timeSignature": "拍号",
+    "ramp": "变速：{{current}} → {{target}}"
+  }
+}

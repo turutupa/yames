@@ -1,0 +1,29 @@
+{
+  "_name": "Français",
+  "common": {
+    "on": "Activé",
+    "off": "Désactivé",
+    "play": "Lecture",
+    "stop": "Arrêt",
+    "soon": "BIENTÔT",
+    "durationMinSec": "{{m}} min {{s}} s",
+    "durationSec": "{{s}} s",
+    "language": "Langue",
+    "languageHint": "Langue de l'interface, appliquée immédiatement"
+  },
+  "share": {
+    "copyLink": "Copier le lien"
+  },
+  "audioError": {
+    "deviceInUse": "Une autre application utilise votre sortie audio, le métronome ne peut donc pas jouer. Fermez-la ou choisissez un autre périphérique de sortie dans Réglages → Périphériques.",
+    "generic": "Yames n'a pas pu démarrer la sortie audio, le métronome ne peut donc pas jouer.",
+    "detail": "Raison : {{reason}}",
+    "openSettings": "Réglages audio",
+    "dismiss": "Fermer"
+  },
+  "updateBanner": {
+    "available": "Yames v{{version}} est disponible",
+    "installRestart": "Installer et redémarrer →",
+    "updating": "Mise à jour de Yames…"
+  }
+}

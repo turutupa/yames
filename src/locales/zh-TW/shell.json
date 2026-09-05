@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "metronome": "節拍器",
+    "drill": "變速練習"
+  },
+  "tooltip": {
+    "zen": "禪意",
+    "enableVoice": "在設定中啟用練習教練語音",
+    "openWidget": "開啟懸浮小窗",
+    "copied": "已複製！",
+    "share": "分享",
+    "back": "返回",
+    "settings": "設定",
+    "help": "說明"
+  },
+  "volume": {
+    "metronome": "節拍器",
+    "voice": "語音"
+  },
+  "presets": {
+    "title": "預設",
+    "open": "開啟預設",
+    "openWithShortcut": "開啟預設（{{shortcut}}）",
+    "close": "關閉預設",
+    "closeWithShortcut": "關閉預設（{{shortcut}}）",
+    "saveCurrent": "儲存目前設定",
+    "searchPlaceholder": "搜尋…",
+    "namePlaceholder": "名稱…",
+    "noResults": "無結果",
+    "empty": "還沒有預設",
+    "rename": "重新命名",
+    "renameTooltip": "重新命名預設",
+    "update": "更新",
+    "updateTooltip": "更新預設",
+    "updated": "已更新！",
+    "noChanges": "沒有變更",
+    "noChangesToSave": "沒有需要儲存的變更",
+    "save": "儲存預設",
+    "delete": "刪除"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "還沒有預設",
+      "hint": "把你常用的速度、音色和拍子存起來。",
+      "action": "儲存第一個預設",
+      "shortcut": "按 {{shortcut}} 可以開啟和收起這個面板。"
+    },
+    "history": {
+      "title": "還沒有練習紀錄。",
+      "hint": "停止節拍器後，這次練習就會出現在這裡。"
+    },
+    "drill": {
+      "linear": "線性：速度從起始 BPM 一級一級升到目標。",
+      "zigzag": "鋸齒：速度升上去、退回來，再升上去。",
+      "adaptive": "自適應：教練依你的演奏調高或調低速度。"
+    }
+  }
+}

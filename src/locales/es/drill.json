@@ -1,0 +1,40 @@
+{
+  "drill": {
+    "startingIn": "Empieza en",
+    "done": "¡Listo!",
+    "stepBar": "Paso {{step}} · Compás {{bar}}/{{bars}}",
+    "beatsSummary": "{{count}} pulsos",
+    "repsSummary": "{{count}} repeticiones",
+    "mode": "Modo",
+    "modeLinear": "Lineal",
+    "modeZigzag": "Zigzag",
+    "modeAdaptive": "Adaptativo",
+    "aggr": "Agresivo",
+    "aggrGentle": "Suave",
+    "aggrModerate": "Moderado",
+    "aggrPush": "Agresivo",
+    "startBpm": "BPM inicial",
+    "targetBpm": "BPM objetivo",
+    "speedUp": "Acelerar",
+    "slowDown": "Desacelerar",
+    "beats": "Pulsos",
+    "repeats": "Repeticiones",
+    "countdown": "Cuenta atrás",
+    "cyclic": "Cíclico",
+    "repeatsLegend": "Repeticiones →",
+    "summary": "{{beats}} pulsos · {{steps}} pasos · {{repeats}} repeticiones · {{time}}",
+    "timeRemaining": "Quedan {{time}}",
+    "desc": {
+      "startBpm": "El tempo con el que empiezas a practicar. Empieza lento y ve subiendo.",
+      "targetBpm": "El tempo al que apuntas.",
+      "increment": "BPM que se añaden en cada paso hacia arriba. Cuanto más grande, más rápida la rampa.",
+      "decrement": "BPM que se restan en cada paso hacia abajo (solo zigzag). Más pequeño que el incremento para avanzar poco a poco.",
+      "beats": "Pulsos por celda. El pulso 1 siempre va acentuado para que oigas el patrón.",
+      "repeat": "Cuántas celdas por columna: las veces que repites cada tempo antes de pasar al siguiente.",
+      "mode": "Lineal sube directamente. Zigzag alterna. Adaptativo se ajusta según tu precisión.",
+      "cyclic": "Sube hasta el objetivo y vuelve al inicio con los mismos incrementos (ida y vuelta).",
+      "aggressiveness": "Lo rápido que cambia el tempo. Conservador espera más; agresivo empuja más.",
+      "countdown": "Cuenta atrás de 4 pulsos antes de que empiece la práctica. Te ayuda a entrar en el tempo."
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "metronome": "Metronomo",
+    "drill": "Rampa"
+  },
+  "tooltip": {
+    "zen": "Zen",
+    "enableVoice": "Abilita la voce del coach di pratica nelle Impostazioni",
+    "openWidget": "Apri widget",
+    "copied": "Copiato!",
+    "share": "Condividi",
+    "back": "Indietro",
+    "settings": "Impostazioni",
+    "help": "Aiuto"
+  },
+  "volume": {
+    "metronome": "Metronomo",
+    "voice": "Voce"
+  },
+  "presets": {
+    "title": "Preset",
+    "open": "Apri preset",
+    "openWithShortcut": "Apri preset ({{shortcut}})",
+    "close": "Chiudi preset",
+    "closeWithShortcut": "Chiudi preset ({{shortcut}})",
+    "saveCurrent": "Salva impostazioni attuali",
+    "searchPlaceholder": "Cerca…",
+    "namePlaceholder": "Nome…",
+    "noResults": "Nessun risultato",
+    "empty": "Ancora nessun preset",
+    "rename": "Rinomina",
+    "renameTooltip": "Rinomina preset",
+    "update": "Aggiorna",
+    "updateTooltip": "Aggiorna preset",
+    "updated": "Aggiornato!",
+    "noChanges": "Nessuna modifica",
+    "noChangesToSave": "Nessuna modifica da salvare",
+    "save": "Salva preset",
+    "delete": "Elimina"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "Ancora nessun preset",
+      "hint": "Salva tempo, suono e metro a cui torni sempre.",
+      "action": "Salva il tuo primo preset",
+      "shortcut": "Premi {{shortcut}} per aprire e chiudere questo pannello."
+    },
+    "history": {
+      "title": "Ancora nessuna sessione.",
+      "hint": "Le tue sessioni compaiono qui quando fermi il metronomo."
+    },
+    "drill": {
+      "linear": "Lineare: il tempo sale dal BPM iniziale all'obiettivo, un passo alla volta.",
+      "zigzag": "Zigzag: il tempo sale, torna indietro e risale.",
+      "adaptive": "Adattivo: il coach alza o abbassa il tempo in base a come suoni."
+    }
+  }
+}

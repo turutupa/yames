@@ -1,0 +1,29 @@
+{
+  "_name": "Deutsch",
+  "common": {
+    "on": "An",
+    "off": "Aus",
+    "play": "Start",
+    "stop": "Stopp",
+    "soon": "BALD",
+    "durationMinSec": "{{m}} Min {{s}} Sek",
+    "durationSec": "{{s}} Sek",
+    "language": "Sprache",
+    "languageHint": "Sprache der Oberfläche, wirkt sofort"
+  },
+  "share": {
+    "copyLink": "Link kopieren"
+  },
+  "audioError": {
+    "deviceInUse": "Eine andere App belegt deine Audio-Ausgabe, deshalb kann das Metronom nicht spielen. Schließe sie oder wähle unter Einstellungen → Geräte ein anderes Ausgabegerät.",
+    "generic": "Yames konnte die Audio-Ausgabe nicht starten, deshalb kann das Metronom nicht spielen.",
+    "detail": "Grund: {{reason}}",
+    "openSettings": "Audio-Einstellungen",
+    "dismiss": "Schließen"
+  },
+  "updateBanner": {
+    "available": "Yames v{{version}} ist verfügbar",
+    "installRestart": "Installieren & Neustart →",
+    "updating": "Yames wird aktualisiert…"
+  }
+}

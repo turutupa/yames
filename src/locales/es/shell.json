@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "metronome": "Metrónomo",
+    "drill": "Rampa de tempo"
+  },
+  "tooltip": {
+    "zen": "Zen",
+    "enableVoice": "Activa la voz del entrenador en Ajustes",
+    "openWidget": "Abrir widget",
+    "copied": "¡Copiado!",
+    "share": "Compartir",
+    "back": "Volver",
+    "settings": "Ajustes",
+    "help": "Ayuda"
+  },
+  "volume": {
+    "metronome": "Metrónomo",
+    "voice": "Voz"
+  },
+  "presets": {
+    "title": "Preajustes",
+    "open": "Abrir preajustes",
+    "openWithShortcut": "Abrir preajustes ({{shortcut}})",
+    "close": "Cerrar preajustes",
+    "closeWithShortcut": "Cerrar preajustes ({{shortcut}})",
+    "saveCurrent": "Guardar ajustes actuales",
+    "searchPlaceholder": "Buscar…",
+    "namePlaceholder": "Nombre…",
+    "noResults": "Sin resultados",
+    "empty": "Aún no hay preajustes",
+    "rename": "Renombrar",
+    "renameTooltip": "Renombrar preajuste",
+    "update": "Actualizar",
+    "updateTooltip": "Actualizar preajuste",
+    "updated": "¡Actualizado!",
+    "noChanges": "Sin cambios",
+    "noChangesToSave": "Nada que guardar",
+    "save": "Guardar preajuste",
+    "delete": "Eliminar"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "Aún no hay preajustes",
+      "hint": "Guarda el tempo, el sonido y el compás a los que siempre vuelves.",
+      "action": "Guarda tu primer preajuste",
+      "shortcut": "Pulsa {{shortcut}} para abrir y cerrar este panel."
+    },
+    "history": {
+      "title": "Aún no hay sesiones.",
+      "hint": "Tus sesiones aparecerán aquí cuando pares el metrónomo."
+    },
+    "drill": {
+      "linear": "Lineal: el tempo sube del BPM inicial al objetivo, paso a paso.",
+      "zigzag": "Zigzag: el tempo sube, retrocede y vuelve a subir.",
+      "adaptive": "Adaptativo: el entrenador sube o baja el tempo según cómo toques."
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "metronome": {
+    "tap": "TAP",
+    "tapCount": "{{count}}회 탭",
+    "subdiv": "분할",
+    "meter": "박자",
+    "free": "FREE",
+    "freeBeatCount": "{{count}}박",
+    "freeBeatCount_one": "{{count}}박",
+    "freeBeatCount_other": "{{count}}박",
+    "beatCount": "{{count}}박",
+    "beatCount_one": "{{count}}박",
+    "beatCount_other": "{{count}}박",
+    "clicksPerBar": "마디당 {{count}}회",
+    "addBeat": "박 추가",
+    "removeBeat": "박 제거",
+    "grouping": "그룹"
+  },
+  "meter": {
+    "0": "없음",
+    "1": "항상",
+    "2": "2/4",
+    "3": "3/4",
+    "4": "4/4",
+    "5": "5/4",
+    "6": "6/8",
+    "7": "7/8"
+  },
+  "subdiv": {
+    "1": "4분음표",
+    "2": "8분음표",
+    "3": "셋잇단음표",
+    "4": "16분음표",
+    "5": "5연음",
+    "6": "6연음"
+  },
+  "sound": {
+    "click": "클릭",
+    "wood": "우드",
+    "beep": "비프",
+    "drum": "드럼"
+  },
+  "driftMeter": {
+    "early": "앞당김",
+    "late": "뒤처짐"
+  }
+}

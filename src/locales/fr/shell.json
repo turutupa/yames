@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "metronome": "Métronome",
+    "drill": "Rampe"
+  },
+  "tooltip": {
+    "zen": "Zen",
+    "enableVoice": "Activer la voix du Coach dans les paramètres",
+    "openWidget": "Ouvrir le widget",
+    "copied": "Copié !",
+    "share": "Partager",
+    "back": "Retour",
+    "settings": "Paramètres",
+    "help": "Aide"
+  },
+  "volume": {
+    "metronome": "Métronome",
+    "voice": "Voix"
+  },
+  "presets": {
+    "title": "Préréglages",
+    "open": "Ouvrir les préréglages",
+    "openWithShortcut": "Ouvrir les préréglages ({{shortcut}})",
+    "close": "Fermer les préréglages",
+    "closeWithShortcut": "Fermer les préréglages ({{shortcut}})",
+    "saveCurrent": "Enregistrer les réglages actuels",
+    "searchPlaceholder": "Rechercher…",
+    "namePlaceholder": "Nom…",
+    "noResults": "Aucun résultat",
+    "empty": "Aucun préréglage pour l'instant",
+    "rename": "Renommer",
+    "renameTooltip": "Renommer le préréglage",
+    "update": "Mettre à jour",
+    "updateTooltip": "Mettre à jour le préréglage",
+    "updated": "Mis à jour !",
+    "noChanges": "Aucun changement",
+    "noChangesToSave": "Rien à enregistrer",
+    "save": "Enregistrer le préréglage",
+    "delete": "Supprimer"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "Aucun préréglage pour l'instant",
+      "hint": "Enregistrez un tempo, un son et une mesure sur lesquels vous revenez souvent.",
+      "action": "Enregistrer votre premier préréglage",
+      "shortcut": "Appuyez sur {{shortcut}} pour ouvrir et fermer ce panneau."
+    },
+    "history": {
+      "title": "Aucune session pour l'instant.",
+      "hint": "Vos sessions apparaissent ici dès que vous arrêtez le métronome."
+    },
+    "drill": {
+      "linear": "Linéaire : le tempo monte du BPM de départ vers la cible, palier par palier.",
+      "zigzag": "Zigzag : le tempo monte, redescend, puis remonte.",
+      "adaptive": "Adaptatif : le coach monte ou baisse le tempo selon votre jeu."
+    }
+  }
+}

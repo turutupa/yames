@@ -1,0 +1,40 @@
+{
+  "drill": {
+    "startingIn": "Begint over",
+    "done": "Klaar!",
+    "stepBar": "Stap {{step}} · Maat {{bar}}/{{bars}}",
+    "beatsSummary": "{{count}} beats",
+    "repsSummary": "{{count}} herhalingen",
+    "mode": "Modus",
+    "modeLinear": "Lineair",
+    "modeZigzag": "Zigzag",
+    "modeAdaptive": "Adaptief",
+    "aggr": "Stevig",
+    "aggrGentle": "Mild",
+    "aggrModerate": "Gematigd",
+    "aggrPush": "Stevig",
+    "startBpm": "Start-BPM",
+    "targetBpm": "Doel-BPM",
+    "speedUp": "Versnellen",
+    "slowDown": "Vertragen",
+    "beats": "Beats",
+    "repeats": "Herhalingen",
+    "countdown": "Aftellen",
+    "cyclic": "Cyclisch",
+    "repeatsLegend": "Herhalingen →",
+    "summary": "{{beats}} beats · {{steps}} stappen · {{repeats}} herhalingen · {{time}}",
+    "timeRemaining": "Nog {{time}}",
+    "desc": {
+      "startBpm": "Het tempo waarmee je begint. Begin langzaam en bouw op.",
+      "targetBpm": "Het doeltempo waarnaar je toewerkt.",
+      "increment": "BPM dat bij elke omhoogstap wordt toegevoegd. Hoe groter het getal, hoe sneller de klim.",
+      "decrement": "BPM dat bij elke omlaagstap wordt afgetrokken (alleen bij zigzag). Kies een kleinere waarde dan de verhoging om langzaam vooruit te kruipen.",
+      "beats": "Kliks per cel. De eerste beat is altijd geaccentueerd, zodat je het patroon hoort.",
+      "repeat": "Hoeveel cellen per kolom — het aantal herhalingen per tempo voordat je doorgaat.",
+      "mode": "Lineair gaat recht omhoog. Zigzag wisselt af. Adaptief past zich aan je nauwkeurigheid aan.",
+      "cyclic": "Omhoog tot het doel en dan in dezelfde stappen terug naar de start (heen en weer).",
+      "aggressiveness": "Hoe snel het tempo verandert. Mild wacht langer, Stevig duwt sneller.",
+      "countdown": "Aftellen van 4 beats voordat de training begint. Helpt je om in het tempo te komen."
+    }
+  }
+}

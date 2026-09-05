@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "metronome": "메트로놈",
+    "drill": "템포 연습"
+  },
+  "tooltip": {
+    "zen": "젠 모드",
+    "enableVoice": "설정에서 연습 코치 음성을 켜세요",
+    "openWidget": "위젯 열기",
+    "copied": "복사됨!",
+    "share": "공유",
+    "back": "뒤로",
+    "settings": "설정",
+    "help": "도움말"
+  },
+  "volume": {
+    "metronome": "메트로놈",
+    "voice": "음성"
+  },
+  "presets": {
+    "title": "프리셋",
+    "open": "프리셋 열기",
+    "openWithShortcut": "프리셋 열기 ({{shortcut}})",
+    "close": "프리셋 닫기",
+    "closeWithShortcut": "프리셋 닫기 ({{shortcut}})",
+    "saveCurrent": "현재 설정 저장",
+    "searchPlaceholder": "검색…",
+    "namePlaceholder": "이름…",
+    "noResults": "결과 없음",
+    "empty": "아직 프리셋이 없습니다",
+    "rename": "이름 바꾸기",
+    "renameTooltip": "프리셋 이름 바꾸기",
+    "update": "업데이트",
+    "updateTooltip": "프리셋 업데이트",
+    "updated": "업데이트됨!",
+    "noChanges": "변경 사항 없음",
+    "noChangesToSave": "저장할 변경 사항이 없습니다",
+    "save": "프리셋 저장",
+    "delete": "삭제"
+  },
+  "emptyStates": {
+    "presets": {
+      "title": "아직 프리셋이 없습니다",
+      "hint": "자주 돌아오는 템포와 소리, 박자를 저장해 두세요.",
+      "action": "첫 프리셋 저장하기",
+      "shortcut": "{{shortcut}} 키로 이 패널을 열고 닫습니다."
+    },
+    "history": {
+      "title": "아직 세션이 없습니다.",
+      "hint": "메트로놈을 멈추면 여기에 세션이 나타납니다."
+    },
+    "drill": {
+      "linear": "선형: 시작 BPM에서 목표까지 한 단계씩 템포가 올라갑니다.",
+      "zigzag": "지그재그: 템포가 올라갔다 내려온 뒤 다시 올라갑니다.",
+      "adaptive": "적응형: 연주에 맞춰 코치가 템포를 올리거나 내립니다."
+    }
+  }
+}

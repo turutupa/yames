@@ -1,0 +1,47 @@
+{
+  "metronome": {
+    "tap": "TAP",
+    "tapCount": "{{count}} toques",
+    "subdiv": "Subdivisão",
+    "meter": "Compasso",
+    "free": "FREE",
+    "freeBeatCount": "{{count}} tempos",
+    "freeBeatCount_one": "{{count}} tempo",
+    "freeBeatCount_other": "{{count}} tempos",
+    "beatCount": "{{count}} tempos",
+    "beatCount_one": "{{count}} tempo",
+    "beatCount_other": "{{count}} tempos",
+    "clicksPerBar": "{{count}} cliques/compasso",
+    "addBeat": "Adicionar tempo",
+    "removeBeat": "Remover tempo",
+    "grouping": "agrupamento"
+  },
+  "meter": {
+    "0": "Nunca",
+    "1": "Sempre",
+    "2": "2/4",
+    "3": "3/4",
+    "4": "4/4",
+    "5": "5/4",
+    "6": "6/8",
+    "7": "7/8"
+  },
+  "subdiv": {
+    "1": "Semínima",
+    "2": "Colcheia",
+    "3": "Tercina",
+    "4": "Semicolcheia",
+    "5": "Quintina",
+    "6": "Sextina"
+  },
+  "sound": {
+    "click": "Clique",
+    "wood": "Madeira",
+    "beep": "Bipe",
+    "drum": "Bateria"
+  },
+  "driftMeter": {
+    "early": "Adiantado",
+    "late": "Atrasado"
+  }
+}

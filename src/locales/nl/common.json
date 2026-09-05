@@ -1,0 +1,29 @@
+{
+  "_name": "Nederlands",
+  "common": {
+    "on": "Aan",
+    "off": "Uit",
+    "play": "Afspelen",
+    "stop": "Stoppen",
+    "soon": "BINNENKORT",
+    "durationMinSec": "{{m}} min {{s}} sec",
+    "durationSec": "{{s}} sec",
+    "language": "Taal",
+    "languageHint": "Taal van de interface, werkt direct"
+  },
+  "share": {
+    "copyLink": "Link kopiëren"
+  },
+  "audioError": {
+    "deviceInUse": "Een andere app gebruikt je audio-uitvoer, dus de metronoom kan niet spelen. Sluit die app of kies een ander uitvoerapparaat in Instellingen → Apparaten.",
+    "generic": "Yames kon de audio-uitvoer niet starten, dus de metronoom kan niet spelen.",
+    "detail": "Reden: {{reason}}",
+    "openSettings": "Audio-instellingen",
+    "dismiss": "Sluiten"
+  },
+  "updateBanner": {
+    "available": "Yames v{{version}} is beschikbaar",
+    "installRestart": "Installeren en herstarten →",
+    "updating": "Yames bijwerken…"
+  }
+}

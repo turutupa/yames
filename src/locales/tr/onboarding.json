@@ -1,0 +1,217 @@
+{
+  "onboarding": {
+    "welcome": {
+      "title": "Yames",
+      "tagline": "Gerçek çalışma için yapılmış bir metronom. Eller enstrümanda kalır.",
+      "setup": "Benim için ayarla (yaklaşık bir dakika)",
+      "skip": "Sadece klik yeter",
+      "footer": "Ücretsiz · yerel · açık kaynak · v{{version}}"
+    },
+    "back": "Geri",
+    "next": "İleri",
+    "skip": "Atla",
+    "progress": "Adım {{current}}/{{total}}",
+    "chip": {
+      "label": "Kurulumu tamamla",
+      "dismiss": "Kapat"
+    },
+    "soundLook": {
+      "title": "Ses ve görünüm",
+      "subtitle": "Bir kartın üzerine gelerek klik sesini duy ya da temayı gör. Beğendiğini seç.",
+      "soundHeading": "Klik sesi",
+      "themeHeading": "Tema",
+      "moreThemes": "Ayarlar'da daha fazla tema"
+    },
+    "handsFree": {
+      "title": "Eller çalgının üzerinde kalır",
+      "subtitle": "Bu tuşlar şimdiden çalışıyor. Pedalın ya da oyun kumandan varsa, Çal/Durdur'a burada atayabilirsin.",
+      "cancel": "İptal",
+      "keyboard": {
+        "title": "Klavye",
+        "hint": "Her tuş Ayarlar → Kısayollar'dan değiştirilebilir."
+      },
+      "midi": {
+        "title": "MIDI pedalı",
+        "none": "İstediğin zaman tak — Yames atamayı kendisi önerecek.",
+        "map": "Çal/Durdur'a ata",
+        "remap": "Başka pedal ata",
+        "listening": "Çal/Durdur için kullanmak istediğin pedala bas.",
+        "mapped": "Çal/Durdur → {{signal}} · kanal {{channel}}"
+      },
+      "gamepad": {
+        "title": "Oyun kumandası",
+        "none": "İstediğin zaman bir kumanda bağla — bir düğmeye bas, Yames görecek.",
+        "map": "Çal/Durdur'a ata",
+        "remap": "Başka düğme ata",
+        "listening": "Çal/Durdur için kullanmak istediğin düğmeye bas.",
+        "mapped": "Çal/Durdur → {{button}}"
+      }
+    },
+    "coach": {
+      "title": "Çalışma koçu",
+      "what1": "Koç ses girişinden dinler ve zamanlamanın klik'e göre nasıl oturduğunu puanlar.",
+      "what2": "Her turdan sonra kısa bir rapor yazar; model indirildiğinde sırada neyi çalışman gerektiğini de anlatır.",
+      "privacy": "Her şey bu bilgisayarda çalışır. Sesin dışarı çıkmaz, yayın sürümleri kayıt yapmaz.",
+      "recommended": "Önerilen",
+      "timing": {
+        "title": "Yalnızca zamanlama geri bildirimi",
+        "desc": "İndirme yok. Canlı noktalar, zamanlama puanı ve geçmişin yerinde kalır."
+      },
+      "standard": {
+        "title": "Standart model",
+        "desc": "Qwen3 4B · ~2,5 GB indirme · çalışırken ~4 GB RAM. GPU yoksa CPU'da çalışır."
+      },
+      "studio": {
+        "title": "Studio modeli",
+        "desc": "Qwen3 8B · ~5 GB indirme · ~8 GB RAM. Daha zengin geri bildirim ve çalışma planları."
+      },
+      "studioNeedsRam": "Studio en az 16 GB RAM ister — bu bilgisayarda {{gb}} GB var.",
+      "standardNeedsRam": "Standard beyin en az 8 GB RAM ister — bu bilgisayarda {{gb}} GB var.",
+      "unavailableInBuild": "Bu sürümde kullanılamaz.",
+      "reasonNoLlm": "Bu sürüm model çalıştıramıyor; burada dürüst seçim zamanlama geri bildirimi.",
+      "reasonLowMemory": "Bu bilgisayarda {{gb}} GB RAM var — bir modeli rahat çalıştırmaya yetmez.",
+      "reasonInstalled": "Bu bilgisayarda zaten indirilmiş — alınacak bir şey yok.",
+      "downloadNote": "İndirme devam ettiğinde başlar ve arka planda sürer.",
+      "downloading": "Koç modeli indiriliyor",
+      "tryListening": {
+        "label": "Yine de dinleme özelliğini dene",
+        "hint": "İki kısa adım: girişini seç, sekiz vuruş çal, zamanlamana bak."
+      },
+      "voiceReady": "Koç sesleri hazır.",
+      "voicePick": "Bir ses seç",
+      "voiceDismiss": "Kapat"
+    },
+    "audioInput": {
+      "title": "Girişini ayarla",
+      "subtitle": "Yames zamanlamanı buradan dinleyerek puanlar. Bir şeyler çal ve göstergeye bak.",
+      "device": "Giriş aygıtı",
+      "guidance": {
+        "electric-guitar": "Bir arayüze bağlan ya da dizüstünün mikrofonunun önünde çal — mikrofon iş görür, arayüz daha iyidir.",
+        "acoustic-guitar": "Dizüstünün mikrofonuna doğru çal ya da manyetikle bir arayüz kullan. İkisi de olur.",
+        "bass": "Bas için en iyisi arayüz: dizüstü mikrofonları alt frekansları kaybeder, ama atağı duyar.",
+        "drums": "Odadaki herhangi bir mikrofon yeter. Tek bir davulu değil, bütün seti duyacak yere koy.",
+        "piano": "Enstrümanın yanında bir mikrofon yeterli. Dijital piyano doğrudan arayüze girebilir.",
+        "other": "Arayüz daha iyi ama dizüstü mikrofonu da olur — sadece yakınında çal."
+      },
+      "waiting": "Bir şeyler çal — göstergenin bir saniyelik sinyale ihtiyacı var.",
+      "heard": "Tamam. Yames seni duyuyor.",
+      "skip": "Atla, sonra ayarlarım"
+    },
+    "hearItWork": {
+      "title": "Çalıştığını duy",
+      "subtitle": "Hazırlanmak için dört vuruş, sonra sekiz vuruş boyunca çal. Hiçbir şey uydurulmuyor — tam olarak ne duyulduğunu görürsün.",
+      "ready": "Klik ile birlikte çal. Her vuruşta bir nota fazlasıyla yeter.",
+      "start": "Başla",
+      "countIn": "{{beats}} sonra başlıyor",
+      "playing": "Vuruş {{beat}} / {{total}}",
+      "scoring": "Puanlanıyor…",
+      "cancel": "İptal",
+      "dotsLabel": "Sekiz vuruşun",
+      "nothing": "Hiçbir şey duyulmadı — giriş seviyesini kontrol et.",
+      "backToInput": "Giriş ayarına dön",
+      "again": "Tekrar dene"
+    },
+    "ready": {
+      "title": "Hazırsın",
+      "subtitle": "Buradan ya da sonra Ayarlar'dan değiştirebilirsin.",
+      "rows": {
+        "instrument": "Enstrüman",
+        "sound": "Klik sesi",
+        "theme": "Tema",
+        "control": "Kontrol",
+        "coach": "Çalışma koçu",
+        "input": "Ses girişi"
+      },
+      "controlKeyboard": "Klavye",
+      "controlFootswitch": "Pedal",
+      "coachTiming": "Yalnızca zamanlama geri bildirimi",
+      "coachOn": "Açık",
+      "inputNone": "Ayarlanmadı",
+      "alwaysOnTop": "Her zaman üstte",
+      "start": "Çalışmaya başla",
+      "tour": "Bana etrafı gezdir (30 sn)"
+    },
+    "hints": {
+      "dismiss": "Anlaşıldı",
+      "drillFirstOpen": {
+        "body": "Başlangıç, hedef ve adımı ayarla. Uyarlamalı modda kararı koç verir."
+      },
+      "presetSuggest": {
+        "body": "Sürekli bu ayara dönüyorsun. Ön ayar olarak kaydedelim mi?",
+        "action": "Ön ayarı kaydet"
+      },
+      "coachAsk": {
+        "body": "Bunu koça sormak için istediğin zaman ? tuşuna bas."
+      },
+      "zenFirst": {
+        "body": "Esc Zen'den çıkar. Efektler Ayarlar → Görünüm altında."
+      },
+      "widgetDiscover": {
+        "body": "DAW'ının ya da tablarının üstünde yüzen bileşeni (W) dene.",
+        "action": "Bileşeni aç"
+      },
+      "midiPlugged": {
+        "body": "Bir MIDI cihazı bağlı ama hiçbir eşleme yok. Bir pedalı Oynat/Durdur'a bağlayalım mı?",
+        "action": "Kısayolları aç"
+      }
+    },
+    "tour": {
+      "progress": "{{current}} / {{total}}",
+      "keys": "Tuşlar",
+      "back": "Geri",
+      "next": "İleri",
+      "done": "Bitti",
+      "skip": "Turu atla",
+      "offer": "Yeni misin? 30 saniyelik turu yap.",
+      "offerAccept": "Etrafı gezdir",
+      "offerDismiss": "Kapat",
+      "stops": {
+        "bpm": {
+          "title": "Tempo",
+          "body": "Tempoyu sürükle, kaydır, yaz veya vurarak ayarla."
+        },
+        "subdivision": {
+          "title": "Bölünmeler ve gruplar",
+          "body": "Bölünmelere tıkla, ölçüyü vuruş gruplarıyla biçimlendir."
+        },
+        "presets": {
+          "title": "Ön ayarlar",
+          "body": "Herhangi bir kurulumu kaydet, anında geç."
+        },
+        "drill": {
+          "title": "Drill",
+          "body": "Tempoyu otomatik yükseltir; koç bunu uyarlayabilir."
+        },
+        "coach": {
+          "title": "Çalışma koçu",
+          "body": "Dinler, puanlar ve konuşur. Sohbet kutusundan her şeyi sor."
+        },
+        "zenWidget": {
+          "title": "Zen ve widget",
+          "body": "Tam ekran görseller ya da hep üstte duran minik bir widget."
+        }
+      }
+    },
+    "help": {
+      "title": "Yardım",
+      "takeTour": "Turu başlat",
+      "runSetup": "Kurulumu yeniden çalıştır",
+      "shortcuts": "Klavye kısayolları",
+      "reportProblem": "Sorun bildir",
+      "reportWorking": "Günlükler toplanıyor…",
+      "reportDone": "Tanılama kaydedildi. Bu dosyayı bildiriminize ekleyin:",
+      "reportError": "Tanılama dosyası yazılamadı.",
+      "website": "Web sitesi",
+      "version": "Sürüm {{version}}",
+      "back": "Geri",
+      "close": "Kapat",
+      "alwaysOnTopNote": "Yames diğer pencerelerin üstünde kalır. Bunu Ayarlar → Genel'den değiştirebilirsiniz."
+    }
+  },
+  "whatsNew": {
+    "title": "{{version}} sürümünde yenilikler",
+    "noNotes": "Yeni bir sürümdesiniz. Sürüm notlarının tamamı web'de.",
+    "fullNotes": "Sürüm notları",
+    "dismiss": "Anlaşıldı"
+  }
+}

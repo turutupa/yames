@@ -1,0 +1,47 @@
+{
+  "metronome": {
+    "tap": "TAP",
+    "tapCount": "{{count}} タップ",
+    "subdiv": "分割",
+    "meter": "拍子",
+    "free": "FREE",
+    "freeBeatCount": "{{count}} 拍",
+    "freeBeatCount_one": "{{count}} 拍",
+    "freeBeatCount_other": "{{count}} 拍",
+    "beatCount": "{{count}} 拍",
+    "beatCount_one": "{{count}} 拍",
+    "beatCount_other": "{{count}} 拍",
+    "clicksPerBar": "{{count}} クリック/小節",
+    "addBeat": "拍を追加",
+    "removeBeat": "拍を削除",
+    "grouping": "グループ分け"
+  },
+  "meter": {
+    "0": "なし",
+    "1": "常に",
+    "2": "2/4",
+    "3": "3/4",
+    "4": "4/4",
+    "5": "5/4",
+    "6": "6/8",
+    "7": "7/8"
+  },
+  "subdiv": {
+    "1": "四分音符",
+    "2": "八分音符",
+    "3": "三連符",
+    "4": "十六分音符",
+    "5": "五連符",
+    "6": "六連符"
+  },
+  "sound": {
+    "click": "クリック",
+    "wood": "ウッド",
+    "beep": "ビープ",
+    "drum": "ドラム"
+  },
+  "driftMeter": {
+    "early": "早め",
+    "late": "遅め"
+  }
+}

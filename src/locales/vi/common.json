@@ -1,0 +1,29 @@
+{
+  "_name": "Tiếng Việt",
+  "common": {
+    "on": "Bật",
+    "off": "Tắt",
+    "play": "Phát",
+    "stop": "Dừng",
+    "soon": "SẮP CÓ",
+    "durationMinSec": "{{m}} phút {{s}} giây",
+    "durationSec": "{{s}} giây",
+    "language": "Ngôn ngữ",
+    "languageHint": "Ngôn ngữ giao diện, áp dụng ngay"
+  },
+  "share": {
+    "copyLink": "Sao chép liên kết"
+  },
+  "audioError": {
+    "deviceInUse": "Một ứng dụng khác đang dùng ngõ ra âm thanh nên máy đếm nhịp không phát được. Hãy đóng ứng dụng đó hoặc chọn thiết bị đầu ra khác trong Cài đặt → Thiết bị.",
+    "generic": "Yames không khởi động được ngõ ra âm thanh nên máy đếm nhịp không phát được.",
+    "detail": "Lý do: {{reason}}",
+    "openSettings": "Cài đặt âm thanh",
+    "dismiss": "Đóng"
+  },
+  "updateBanner": {
+    "available": "Đã có phiên bản Yames v{{version}}",
+    "installRestart": "Cài đặt & Khởi động lại →",
+    "updating": "Đang cập nhật Yames…"
+  }
+}

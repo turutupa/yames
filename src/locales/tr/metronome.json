@@ -1,0 +1,47 @@
+{
+  "metronome": {
+    "tap": "TAP",
+    "tapCount": "{{count}} TAP",
+    "subdiv": "Alt Bölüm",
+    "meter": "Zaman İmzası",
+    "free": "FREE",
+    "freeBeatCount": "{{count}} vuruş",
+    "freeBeatCount_one": "{{count}} vuruş",
+    "freeBeatCount_other": "{{count}} vuruş",
+    "beatCount": "{{count}} vuruş",
+    "beatCount_one": "{{count}} vuruş",
+    "beatCount_other": "{{count}} vuruş",
+    "clicksPerBar": "{{count}} tık/ölçü",
+    "addBeat": "Vuruş ekle",
+    "removeBeat": "Vuruş çıkar",
+    "grouping": "gruplama"
+  },
+  "meter": {
+    "0": "Asla",
+    "1": "Her Zaman",
+    "2": "2/4",
+    "3": "3/4",
+    "4": "4/4",
+    "5": "5/4",
+    "6": "6/8",
+    "7": "7/8"
+  },
+  "subdiv": {
+    "1": "Dörtlük",
+    "2": "Sekizlik",
+    "3": "Üçleme",
+    "4": "Onaltılık",
+    "5": "Beşleme",
+    "6": "Altıleme"
+  },
+  "sound": {
+    "click": "Tık",
+    "wood": "Tahta",
+    "beep": "Bip",
+    "drum": "Davul"
+  },
+  "driftMeter": {
+    "early": "Erken",
+    "late": "Geç"
+  }
+}

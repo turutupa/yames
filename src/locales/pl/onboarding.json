@@ -1,0 +1,217 @@
+{
+  "onboarding": {
+    "welcome": {
+      "title": "Yames",
+      "tagline": "Metronom stworzony do prawdziwych ćwiczeń. Ręce zostają na instrumencie.",
+      "setup": "Skonfiguruj (około minuty)",
+      "skip": "Chcę tylko klik",
+      "footer": "Darmowy · lokalny · open source · v{{version}}"
+    },
+    "back": "Wstecz",
+    "next": "Dalej",
+    "skip": "Pomiń",
+    "progress": "Krok {{current}} z {{total}}",
+    "chip": {
+      "label": "Dokończ konfigurację",
+      "dismiss": "Ukryj"
+    },
+    "soundLook": {
+      "title": "Dźwięk i wygląd",
+      "subtitle": "Najedź na kartę, aby usłyszeć klik lub zobaczyć motyw. Wybierz to, co lubisz.",
+      "soundHeading": "Dźwięk kliknięcia",
+      "themeHeading": "Motyw",
+      "moreThemes": "Więcej motywów w Ustawieniach"
+    },
+    "handsFree": {
+      "title": "Ręce zostają na instrumencie",
+      "subtitle": "Te klawisze już działają. Jeśli masz przełącznik nożny lub pada, przypisz go tutaj do Odtwarzaj/Zatrzymaj.",
+      "cancel": "Anuluj",
+      "keyboard": {
+        "title": "Klawiatura",
+        "hint": "Każdy klawisz zmienisz w Ustawieniach → Skróty klawiszowe."
+      },
+      "midi": {
+        "title": "Przełącznik nożny MIDI",
+        "none": "Podłącz go kiedy chcesz — Yames zaproponuje przypisanie.",
+        "map": "Przypisz Odtwarzaj/Zatrzymaj",
+        "remap": "Przypisz inny pedał",
+        "listening": "Naciśnij pedał, który ma odtwarzać i zatrzymywać.",
+        "mapped": "Odtwarzaj/Zatrzymaj → {{signal}} · kanał {{channel}}"
+      },
+      "gamepad": {
+        "title": "Pad",
+        "none": "Podłącz pada kiedy chcesz — naciśnij przycisk, a Yames go wykryje.",
+        "map": "Przypisz Odtwarzaj/Zatrzymaj",
+        "remap": "Przypisz inny przycisk",
+        "listening": "Naciśnij przycisk, który ma odtwarzać i zatrzymywać.",
+        "mapped": "Odtwarzaj/Zatrzymaj → {{button}}"
+      }
+    },
+    "coach": {
+      "title": "Trener ćwiczeń",
+      "what1": "Trener słucha przez wejście audio i ocenia, jak Twój timing układa się względem klika.",
+      "what2": "Po każdym przebiegu pisze krótki raport, a z pobranym modelem tłumaczy, nad czym pracować dalej.",
+      "privacy": "Wszystko działa na tym komputerze. Dźwięk nigdy go nie opuszcza, a wydania nie nagrywają go.",
+      "recommended": "Zalecane",
+      "timing": {
+        "title": "Tylko informacja o timingu",
+        "desc": "Bez pobierania. Zostają kropki na żywo, ocena timingu i historia sesji."
+      },
+      "standard": {
+        "title": "Model standardowy",
+        "desc": "Qwen3 4B · ~2,5 GB pobierania · ~4 GB RAM w czasie pracy. Działa na CPU, gdy nie ma GPU."
+      },
+      "studio": {
+        "title": "Model Studio",
+        "desc": "Qwen3 8B · ~5 GB pobierania · ~8 GB RAM. Bogatsze uwagi i plany ćwiczeń."
+      },
+      "studioNeedsRam": "Studio wymaga co najmniej 16 GB RAM — ten komputer ma {{gb}} GB.",
+      "standardNeedsRam": "Mózg Standard wymaga co najmniej 8 GB RAM — ten komputer ma {{gb}} GB.",
+      "unavailableInBuild": "Niedostępne w tej kompilacji.",
+      "reasonNoLlm": "Ta kompilacja nie uruchomi modelu, więc uczciwym wyborem jest sama informacja o timingu.",
+      "reasonLowMemory": "Ten komputer ma {{gb}} GB RAM — za mało, by wygodnie uruchomić model.",
+      "reasonInstalled": "Już pobrane na tym komputerze — nie ma czego ściągać.",
+      "downloadNote": "Pobieranie ruszy po przejściu dalej i będzie trwać w tle.",
+      "downloading": "Pobieranie modelu trenera",
+      "tryListening": {
+        "label": "Mimo to wypróbuj funkcję słuchania",
+        "hint": "Dwa krótkie kroki: wybierz wejście, zagraj osiem uderzeń, zobacz swój timing."
+      },
+      "voiceReady": "Głosy trenera są gotowe.",
+      "voicePick": "Wybierz głos",
+      "voiceDismiss": "Zamknij"
+    },
+    "audioInput": {
+      "title": "Skonfiguruj wejście",
+      "subtitle": "Yames słucha tędy, żeby ocenić twoje tempo. Zagraj coś i popatrz na wskaźnik.",
+      "device": "Urządzenie wejściowe",
+      "guidance": {
+        "electric-guitar": "Podłącz się do interfejsu albo graj przed mikrofonem laptopa — mikrofon wystarczy, interfejs jest lepszy.",
+        "acoustic-guitar": "Graj w stronę mikrofonu laptopa albo użyj przetwornika i interfejsu. Obie drogi działają.",
+        "bass": "Do basu najlepszy jest interfejs — mikrofony laptopów gubią dół, choć słyszą atak.",
+        "drums": "Wystarczy dowolny mikrofon w pomieszczeniu. Ustaw go tak, by słyszał cały zestaw, nie jeden bęben.",
+        "piano": "Wystarczy mikrofon blisko instrumentu. Pianino cyfrowe możesz wpiąć prosto w interfejs.",
+        "other": "Interfejs jest lepszy, ale mikrofon laptopa wystarczy — graj po prostu blisko niego."
+      },
+      "waiting": "Zagraj coś — wskaźnik potrzebuje sekundy sygnału.",
+      "heard": "Jest. Yames cię słyszy.",
+      "skip": "Pomiń, ustawię to później"
+    },
+    "hearItWork": {
+      "title": "Posłuchaj, jak działa",
+      "subtitle": "Cztery uderzenia na przygotowanie, potem zagraj osiem. Nic nie jest zmyślone — widzisz dokładnie to, co zostało usłyszane.",
+      "ready": "Graj razem z klikiem. Jedna nuta na uderzenie w zupełności wystarczy.",
+      "start": "Start",
+      "countIn": "Start za {{beats}}",
+      "playing": "Uderzenie {{beat}} z {{total}}",
+      "scoring": "Ocenianie…",
+      "cancel": "Anuluj",
+      "dotsLabel": "Twoje osiem uderzeń",
+      "nothing": "Nic nie usłyszałem — sprawdź poziom wejścia.",
+      "backToInput": "Wróć do wejścia",
+      "again": "Spróbuj jeszcze raz"
+    },
+    "ready": {
+      "title": "Wszystko gotowe",
+      "subtitle": "Zmień coś tutaj albo później w Ustawieniach.",
+      "rows": {
+        "instrument": "Instrument",
+        "sound": "Dźwięk kliknięcia",
+        "theme": "Motyw",
+        "control": "Sterowanie",
+        "coach": "Trener ćwiczeń",
+        "input": "Wejście audio"
+      },
+      "controlKeyboard": "Klawiatura",
+      "controlFootswitch": "Przełącznik nożny",
+      "coachTiming": "Tylko informacje o timingu",
+      "coachOn": "Włączony",
+      "inputNone": "Nie skonfigurowano",
+      "alwaysOnTop": "Zawsze na wierzchu",
+      "start": "Zacznij ćwiczyć",
+      "tour": "Oprowadź mnie (30 s)"
+    },
+    "hints": {
+      "dismiss": "Jasne",
+      "drillFirstOpen": {
+        "body": "Ustaw start, cel i krok. W trybie adaptacyjnym decyduje trener."
+      },
+      "presetSuggest": {
+        "body": "Ciągle wracasz do tego ustawienia. Zapisać je jako preset?",
+        "action": "Zapisz preset"
+      },
+      "coachAsk": {
+        "body": "Naciśnij ?, aby w każdej chwili zapytać o to trenera."
+      },
+      "zenFirst": {
+        "body": "Esc wychodzi z trybu Zen. Efekty są w Ustawienia → Wygląd."
+      },
+      "widgetDiscover": {
+        "body": "Wypróbuj pływający widget (W) nad swoim DAW-em lub tabulaturami.",
+        "action": "Otwórz widget"
+      },
+      "midiPlugged": {
+        "body": "Urządzenie MIDI jest podłączone, ale nic nie jest przypisane. Przypisać pedał do Start/Stop?",
+        "action": "Otwórz skróty"
+      }
+    },
+    "tour": {
+      "progress": "{{current}} z {{total}}",
+      "keys": "Klawisze",
+      "back": "Wstecz",
+      "next": "Dalej",
+      "done": "Gotowe",
+      "skip": "Pomiń przewodnik",
+      "offer": "Nowy tutaj? Zobacz 30-sekundowy przewodnik.",
+      "offerAccept": "Oprowadź mnie",
+      "offerDismiss": "Zamknij",
+      "stops": {
+        "bpm": {
+          "title": "Tempo",
+          "body": "Przeciągnij, przewiń, wpisz lub wystukaj tempo."
+        },
+        "subdivision": {
+          "title": "Podziały i grupy",
+          "body": "Klikaj podziały i kształtuj takt grupami miar."
+        },
+        "presets": {
+          "title": "Presety",
+          "body": "Zapisz dowolne ustawienie i przełączaj się natychmiast."
+        },
+        "drill": {
+          "title": "Drill",
+          "body": "Automatycznie podnoś tempo; coach może je dostosować."
+        },
+        "coach": {
+          "title": "Trener ćwiczeń",
+          "body": "Słucha, ocenia i mówi. Zapytaj go o wszystko w oknie czatu."
+        },
+        "zenWidget": {
+          "title": "Zen i widżet",
+          "body": "Wizualizacje na pełnym ekranie albo mały widżet zawsze na wierzchu."
+        }
+      }
+    },
+    "help": {
+      "title": "Pomoc",
+      "takeTour": "Zobacz przewodnik",
+      "runSetup": "Uruchom konfigurację ponownie",
+      "shortcuts": "Skróty klawiszowe",
+      "reportProblem": "Zgłoś problem",
+      "reportWorking": "Zbieranie logów…",
+      "reportDone": "Zapisano diagnostykę. Dołącz ten plik do zgłoszenia:",
+      "reportError": "Nie udało się zapisać pliku diagnostycznego.",
+      "website": "Strona",
+      "version": "Wersja {{version}}",
+      "back": "Wstecz",
+      "close": "Zamknij",
+      "alwaysOnTopNote": "Yames pozostaje nad innymi oknami. Zmienisz to w Ustawieniach → Ogólne."
+    }
+  },
+  "whatsNew": {
+    "title": "Co nowego w {{version}}",
+    "noNotes": "Masz nową wersję. Pełne informacje o wydaniu są w sieci.",
+    "fullNotes": "Informacje o wydaniu",
+    "dismiss": "Jasne"
+  }
+}

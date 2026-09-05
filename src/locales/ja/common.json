@@ -1,0 +1,29 @@
+{
+  "_name": "日本語",
+  "common": {
+    "on": "オン",
+    "off": "オフ",
+    "play": "再生",
+    "stop": "停止",
+    "soon": "近日公開",
+    "durationMinSec": "{{m}}分 {{s}}秒",
+    "durationSec": "{{s}}秒",
+    "language": "言語",
+    "languageHint": "UIの言語。すぐに反映されます"
+  },
+  "share": {
+    "copyLink": "リンクをコピー"
+  },
+  "audioError": {
+    "deviceInUse": "他のアプリがオーディオ出力を使っているため、メトロノームを再生できません。そのアプリを閉じるか、設定 → デバイスで別の出力デバイスを選んでください。",
+    "generic": "Yames はオーディオ出力を開始できなかったため、メトロノームを再生できません。",
+    "detail": "原因: {{reason}}",
+    "openSettings": "オーディオ設定",
+    "dismiss": "閉じる"
+  },
+  "updateBanner": {
+    "available": "Yames v{{version}} が利用可能です",
+    "installRestart": "インストールして再起動 →",
+    "updating": "Yames を更新しています…"
+  }
+}

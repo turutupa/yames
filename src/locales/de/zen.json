@@ -1,0 +1,24 @@
+{
+  "zen": {
+    "startingIn": "Startet in",
+    "rampStep": "Stufe {{step}}",
+    "fullscreen": "Vollbild",
+    "exitHint": "Doppelklick oder Esc zum Beenden",
+    "timeSigAll": "Alle",
+    "timeSigOff": "Aus",
+    "styles": {
+      "focus": "Fokus",
+      "pulse": "Puls",
+      "gravity": "Schwerkraft",
+      "radar": "Radar",
+      "cosmos": "Kosmos",
+      "warp": "Warp",
+      "rain": "Regen"
+    }
+  },
+  "widget": {
+    "openMain": "Hauptfenster öffnen",
+    "timeSignature": "Taktart",
+    "ramp": "Steigerung: {{current}} → {{target}}"
+  }
+}

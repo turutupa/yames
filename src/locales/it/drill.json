@@ -1,0 +1,40 @@
+{
+  "drill": {
+    "startingIn": "Inizio tra",
+    "done": "Fatto!",
+    "stepBar": "Livello {{step}} · Battuta {{bar}}/{{bars}}",
+    "beatsSummary": "{{count}} colpi",
+    "repsSummary": "{{count}} ripetizioni",
+    "mode": "Modalità",
+    "modeLinear": "Lineare",
+    "modeZigzag": "Zigzag",
+    "modeAdaptive": "Adattivo",
+    "aggr": "Spinta",
+    "aggrGentle": "Dolce",
+    "aggrModerate": "Moderata",
+    "aggrPush": "Spinta",
+    "startBpm": "BPM iniziale",
+    "targetBpm": "BPM obiettivo",
+    "speedUp": "Accelera",
+    "slowDown": "Rallenta",
+    "beats": "Colpi",
+    "repeats": "Ripetizioni",
+    "countdown": "Conto alla rovescia",
+    "cyclic": "Ciclico",
+    "repeatsLegend": "Ripetizioni →",
+    "summary": "{{beats}} colpi · {{steps}} livelli · {{repeats}} ripetizioni · {{time}}",
+    "timeRemaining": "Rimane {{time}}",
+    "desc": {
+      "startBpm": "Il tempo da cui inizi a esercitarti. Parti lento e sali piano.",
+      "targetBpm": "Il tempo che stai puntando a raggiungere.",
+      "increment": "BPM aggiunti a ogni gradino in salita. Più alto è il numero, più veloce è la rampa.",
+      "decrement": "BPM sottratti a ogni gradino in discesa (solo zigzag). Se è più piccolo dell'incremento, si avanza piano.",
+      "beats": "Colpi per cella. Il primo colpo è sempre accentato, così senti subito il pattern.",
+      "repeat": "Quante celle per colonna — quante volte ripeti a ogni tempo prima di proseguire.",
+      "mode": "Lineare sale dritto. Zigzag alterna. Adattivo si regola in base alla tua precisione.",
+      "cyclic": "Sale fino all'obiettivo e scende di nuovo al valore iniziale con gli stessi incrementi (andata e ritorno).",
+      "aggressiveness": "Quanto rapidamente cambia il tempo. La modalità dolce attende più a lungo, quella spinta accelera più veloce.",
+      "countdown": "Conto alla rovescia di 4 colpi prima dell'inizio. Ti aiuta a entrare nel tempo."
+    }
+  }
+}

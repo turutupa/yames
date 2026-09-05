@@ -1,0 +1,24 @@
+{
+  "zen": {
+    "startingIn": "開始まで",
+    "rampStep": "ステップ {{step}}",
+    "fullscreen": "全画面",
+    "exitHint": "ダブルクリックまたは Esc で終了",
+    "timeSigAll": "すべて",
+    "timeSigOff": "オフ",
+    "styles": {
+      "focus": "フォーカス",
+      "pulse": "パルス",
+      "gravity": "グラビティ",
+      "radar": "レーダー",
+      "cosmos": "コスモス",
+      "warp": "ワープ",
+      "rain": "レイン"
+    }
+  },
+  "widget": {
+    "openMain": "メインウィンドウを開く",
+    "timeSignature": "拍子",
+    "ramp": "テンポ: {{current}} → {{target}}"
+  }
+}

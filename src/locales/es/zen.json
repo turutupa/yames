@@ -1,0 +1,24 @@
+{
+  "zen": {
+    "startingIn": "Empieza en",
+    "rampStep": "Paso {{step}}",
+    "fullscreen": "Pantalla completa",
+    "exitHint": "Doble clic o Esc para salir",
+    "timeSigAll": "Todos",
+    "timeSigOff": "Ninguno",
+    "styles": {
+      "focus": "Enfoque",
+      "pulse": "Pulso",
+      "gravity": "Gravedad",
+      "radar": "Radar",
+      "cosmos": "Cosmos",
+      "warp": "Deformación",
+      "rain": "Lluvia"
+    }
+  },
+  "widget": {
+    "openMain": "Abrir ventana principal",
+    "timeSignature": "Compás",
+    "ramp": "Rampa: {{current}} → {{target}}"
+  }
+}
