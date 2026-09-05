@@ -419,8 +419,8 @@ const lavender: Theme = {
     "--accent-subtle": "rgba(124, 58, 237, 0.08)",
     "--accent-subtle-hover": "rgba(124, 58, 237, 0.15)",
     "--accent-text": "#ffffff",
-    "--accent-2": "#0d9488",
-    "--accent-2-subtle": "rgba(13, 148, 136, 0.10)",
+    "--accent-2": "#0f766e",
+    "--accent-2-subtle": "rgba(15, 118, 110, 0.10)",
     "--accent-2-text": "#ffffff",
     "--beat-accent": "#c4b5fd",
     "--text-primary": "#1e1338",
@@ -489,9 +489,148 @@ const prism: Theme = {
 // Exports
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// REVAMP THEMES (UI_DECISIONS U5.3)
+//
+// Designed against the redesign rather than retro-fitted to it: each names a
+// second accent for the coach, five text levels and five surfaces, so nothing
+// falls back to a neighbour's value. Whether these replace the ten above, join
+// them, or the ten get re-cut on the same contract is still open — the site
+// currently sells "ten themes", so that decision is not only a code decision.
+// ---------------------------------------------------------------------------
+
+/** Studio hardware: cold graphite, one signal LED, hard corners. */
+const ash: Theme = {
+  id: "ash",
+  name: "Ash",
+  group: "dark",
+  preview: ["#0e0f11", "#1a1d20", "#c3ec4f"],
+  vars: {
+    "--bg-primary": "#0e0f11",
+    "--bg-secondary": "#141618",
+    "--bg-card": "#1a1d20",
+    "--bg-panel": "#111315",
+    "--bg-raised": "#212528",
+    "--bg-widget": "linear-gradient(135deg, #0e0f11, #141618)",
+    "--accent": "#c3ec4f",
+    "--accent-glow": "rgba(195, 236, 79, 0.28)",
+    "--accent-glow-strong": "rgba(195, 236, 79, 0.45)",
+    "--accent-subtle": "rgba(195, 236, 79, 0.10)",
+    "--accent-subtle-hover": "rgba(195, 236, 79, 0.18)",
+    "--accent-text": "#111404",
+    "--accent-2": "#7aa2ff",
+    "--accent-2-subtle": "rgba(122, 162, 255, 0.12)",
+    "--accent-2-text": "#0b1020",
+    "--beat-accent": "#e2f79a",
+    "--text-primary": "#eceef0",
+    "--text-secondary": "#c2c7cc",
+    "--text-tertiary": "#9aa1a8",
+    "--text-muted": "#7b838a",
+    "--text-faint": "#5f676e",
+    "--border": "rgba(255, 255, 255, 0.07)",
+    "--surface-hover": "rgba(255, 255, 255, 0.045)",
+    "--surface-active": "rgba(255, 255, 255, 0.09)",
+    "--shadow": "0 8px 32px rgba(0, 0, 0, 0.6)",
+    "--font-family": "'Archivo', 'Segoe UI', system-ui, sans-serif",
+    "--font-weight": "500",
+    "--radius": "4px",
+    "--radius-sm": "3px",
+    "--feedback-perfect": "#4ade80",
+    "--feedback-good": "#67e8f9",
+    "--feedback-ok": "#fbbf24",
+    "--feedback-miss": "#6b7280",
+  },
+};
+
+/** A valve amp in a dim room: warm brown-black, burnt orange, soft corners. */
+const ember: Theme = {
+  id: "ember",
+  name: "Ember",
+  group: "dark",
+  preview: ["#110d0a", "#1e1712", "#ff7a3c"],
+  vars: {
+    "--bg-primary": "#110d0a",
+    "--bg-secondary": "#17120e",
+    "--bg-card": "#1e1712",
+    "--bg-panel": "#1a1410",
+    "--bg-raised": "#261e17",
+    "--bg-widget": "linear-gradient(135deg, #110d0a, #1e1712)",
+    "--accent": "#ff7a3c",
+    "--accent-glow": "rgba(255, 122, 60, 0.30)",
+    "--accent-glow-strong": "rgba(255, 122, 60, 0.50)",
+    "--accent-subtle": "rgba(255, 122, 60, 0.10)",
+    "--accent-subtle-hover": "rgba(255, 122, 60, 0.20)",
+    "--accent-text": "#1a0d05",
+    "--accent-2": "#35c4b0",
+    "--accent-2-subtle": "rgba(53, 196, 176, 0.12)",
+    "--accent-2-text": "#04201c",
+    "--beat-accent": "#ffbc93",
+    "--text-primary": "#f5ece2",
+    "--text-secondary": "#d8c9b8",
+    "--text-tertiary": "#b5a494",
+    "--text-muted": "#94816f",
+    "--text-faint": "#776553",
+    "--border": "rgba(255, 255, 255, 0.07)",
+    "--surface-hover": "rgba(255, 122, 60, 0.06)",
+    "--surface-active": "rgba(255, 122, 60, 0.12)",
+    "--shadow": "0 8px 32px rgba(0, 0, 0, 0.55)",
+    "--font-family": "'Outfit', 'Segoe UI', system-ui, sans-serif",
+    "--font-weight": "500",
+    "--radius": "16px",
+    "--radius-sm": "12px",
+    "--feedback-perfect": "#5fd08a",
+    "--feedback-good": "#7fd8e8",
+    "--feedback-ok": "#f5b53d",
+    "--feedback-miss": "#6b7280",
+  },
+};
+
+/** A method book on a stand: warm paper, ink indigo, a serif interface. */
+const manuscript: Theme = {
+  id: "manuscript",
+  name: "Manuscript",
+  group: "light",
+  preview: ["#f7f3ea", "#ece5d6", "#26428f"],
+  vars: {
+    "--bg-primary": "#f7f3ea",
+    "--bg-secondary": "#f1ece0",
+    "--bg-card": "#ece5d6",
+    "--bg-panel": "#f4efe4",
+    "--bg-raised": "#e5dcc9",
+    "--bg-widget": "linear-gradient(135deg, #f7f3ea, #f1ece0)",
+    "--accent": "#26428f",
+    "--accent-glow": "rgba(38, 66, 143, 0.22)",
+    "--accent-glow-strong": "rgba(38, 66, 143, 0.38)",
+    "--accent-subtle": "rgba(38, 66, 143, 0.09)",
+    "--accent-subtle-hover": "rgba(38, 66, 143, 0.16)",
+    "--accent-text": "#ffffff",
+    "--accent-2": "#2f6b4f",
+    "--accent-2-subtle": "rgba(47, 107, 79, 0.10)",
+    "--accent-2-text": "#ffffff",
+    "--beat-accent": "#4a67bd",
+    "--text-primary": "#1e1b16",
+    "--text-secondary": "#4a443a",
+    "--text-tertiary": "#625b4e",
+    "--text-muted": "#7d7466",
+    "--text-faint": "#948b7b",
+    "--border": "rgba(30, 27, 22, 0.12)",
+    "--surface-hover": "rgba(30, 27, 22, 0.045)",
+    "--surface-active": "rgba(30, 27, 22, 0.09)",
+    "--shadow": "0 8px 32px rgba(30, 27, 22, 0.12)",
+    "--font-family": "'Source Serif 4', Georgia, 'Times New Roman', serif",
+    "--font-weight": "400",
+    "--radius": "6px",
+    "--radius-sm": "4px",
+    "--feedback-perfect": "#197a4e",
+    "--feedback-good": "#1f6f8f",
+    "--feedback-ok": "#a8620d",
+    "--feedback-miss": "#9ca3af",
+  },
+};
+
 export const THEMES: Theme[] = [
-  mono, obsidian, velvet, neon, aurora,
-  ivory, arctic, sand, lavender, prism,
+  mono, obsidian, velvet, neon, aurora, ash, ember,
+  ivory, arctic, sand, lavender, prism, manuscript,
 ];
 
 export function getThemeById(id: string): Theme {
