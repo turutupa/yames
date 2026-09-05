@@ -4,8 +4,6 @@
     "rampStep": "Adım {{step}}",
     "fullscreen": "Tam Ekran",
     "exitHint": "Çıkmak için çift tıkla veya Esc'ye bas",
-    "timeSigAll": "Tümü",
-    "timeSigOff": "Kapalı",
     "styles": {
       "focus": "Odak",
       "pulse": "Nabız",

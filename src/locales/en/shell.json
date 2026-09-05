@@ -27,7 +27,6 @@
     "searchPlaceholder": "Search...",
     "namePlaceholder": "Name...",
     "noResults": "No results",
-    "empty": "No presets yet",
     "rename": "Rename",
     "renameTooltip": "Rename preset",
     "update": "Update",
@@ -60,9 +59,5 @@
     "elapsed": "Elapsed",
     "listening": "Listening",
     "inputOff": "Input off"
-  },
-  "rail": {
-    "library": "Library",
-    "modes": "Modes"
   }
 }

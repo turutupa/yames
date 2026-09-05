@@ -1,7 +1,6 @@
 {
   "drill": {
     "startingIn": "Начинаем через",
-    "done": "Готово!",
     "stepBar": "Шаг {{step}} · Такт {{bar}}/{{bars}}",
     "beatsSummary": "{{count}} долей",
     "repsSummary": "{{count}} повторов",

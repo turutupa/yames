@@ -4,8 +4,6 @@
     "rampStep": "Krok {{step}}",
     "fullscreen": "Pełny ekran",
     "exitHint": "Kliknij dwa razy lub naciśnij Esc, aby wyjść",
-    "timeSigAll": "Wszystkie",
-    "timeSigOff": "Wyłączone",
     "styles": {
       "focus": "Fokus",
       "pulse": "Puls",

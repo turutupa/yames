@@ -1,7 +1,6 @@
 {
   "drill": {
     "startingIn": "잠시 후 시작",
-    "done": "완료!",
     "stepBar": "{{step}}단계 · {{bar}}/{{bars}}마디",
     "beatsSummary": "{{count}}박",
     "repsSummary": "{{count}}회",

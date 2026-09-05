@@ -4,8 +4,6 @@
     "rampStep": "Шаг {{step}}",
     "fullscreen": "Полный экран",
     "exitHint": "Двойной клик или Esc — выход",
-    "timeSigAll": "Все",
-    "timeSigOff": "Выкл",
     "styles": {
       "focus": "Фокус",
       "pulse": "Пульс",

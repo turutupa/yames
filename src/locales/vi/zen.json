@@ -4,8 +4,6 @@
     "rampStep": "Bước {{step}}",
     "fullscreen": "Toàn màn hình",
     "exitHint": "Nhấn đúp hoặc phím Esc để thoát",
-    "timeSigAll": "Tất cả",
-    "timeSigOff": "Tắt",
     "styles": {
       "focus": "Tập trung",
       "pulse": "Nhịp đập",

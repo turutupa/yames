@@ -1,7 +1,6 @@
 {
   "drill": {
     "startingIn": "Sắp bắt đầu",
-    "done": "Xong!",
     "stepBar": "Bước {{step}} · Ô nhịp {{bar}}/{{bars}}",
     "beatsSummary": "{{count}} phách",
     "repsSummary": "{{count}} lần lặp",

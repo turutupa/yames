@@ -27,7 +27,6 @@
     "searchPlaceholder": "搜索…",
     "namePlaceholder": "名称…",
     "noResults": "无结果",
-    "empty": "还没有预设",
     "rename": "重命名",
     "renameTooltip": "重命名预设",
     "update": "更新",
@@ -60,9 +59,5 @@
     "elapsed": "已用时",
     "listening": "正在聆听",
     "inputOff": "输入已关闭"
-  },
-  "rail": {
-    "library": "资料库",
-    "modes": "模式"
   }
 }

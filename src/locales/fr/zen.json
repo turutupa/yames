@@ -4,8 +4,6 @@
     "rampStep": "Étape {{step}}",
     "fullscreen": "Plein écran",
     "exitHint": "Double-clique ou appuie sur Esc pour quitter",
-    "timeSigAll": "Toutes",
-    "timeSigOff": "Désactivé",
     "styles": {
       "focus": "Concentration",
       "pulse": "Pulsation",

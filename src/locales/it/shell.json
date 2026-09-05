@@ -27,7 +27,6 @@
     "searchPlaceholder": "Cerca…",
     "namePlaceholder": "Nome…",
     "noResults": "Nessun risultato",
-    "empty": "Ancora nessun preset",
     "rename": "Rinomina",
     "renameTooltip": "Rinomina preset",
     "update": "Aggiorna",
@@ -60,9 +59,5 @@
     "elapsed": "Trascorso",
     "listening": "In ascolto",
     "inputOff": "Ingresso spento"
-  },
-  "rail": {
-    "library": "Libreria",
-    "modes": "Modalità"
   }
 }

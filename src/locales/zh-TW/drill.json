@@ -1,7 +1,6 @@
 {
   "drill": {
     "startingIn": "即將開始",
-    "done": "完成！",
     "stepBar": "第 {{step}} 級 · 第 {{bar}}/{{bars}} 小節",
     "beatsSummary": "{{count}} 拍",
     "repsSummary": "{{count}} 遍",

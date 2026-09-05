@@ -27,7 +27,6 @@
     "searchPlaceholder": "検索…",
     "namePlaceholder": "名前…",
     "noResults": "結果なし",
-    "empty": "プリセットはまだありません",
     "rename": "名前を変更",
     "renameTooltip": "プリセット名を変更",
     "update": "更新",
@@ -60,9 +59,5 @@
     "elapsed": "経過",
     "listening": "聴いています",
     "inputOff": "入力オフ"
-  },
-  "rail": {
-    "library": "ライブラリ",
-    "modes": "モード"
   }
 }

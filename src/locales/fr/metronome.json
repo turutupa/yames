@@ -16,16 +16,6 @@
     "removeBeat": "Retirer un temps",
     "grouping": "groupement"
   },
-  "meter": {
-    "0": "Jamais",
-    "1": "Toujours",
-    "2": "2/4",
-    "3": "3/4",
-    "4": "4/4",
-    "5": "5/4",
-    "6": "6/8",
-    "7": "7/8"
-  },
   "subdiv": {
     "1": "Noire",
     "2": "Croche",

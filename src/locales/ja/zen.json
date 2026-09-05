@@ -4,8 +4,6 @@
     "rampStep": "ステップ {{step}}",
     "fullscreen": "全画面",
     "exitHint": "ダブルクリックまたは Esc で終了",
-    "timeSigAll": "すべて",
-    "timeSigOff": "オフ",
     "styles": {
       "focus": "フォーカス",
       "pulse": "パルス",

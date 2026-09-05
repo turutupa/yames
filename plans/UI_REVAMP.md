@@ -1,7 +1,8 @@
 # UI revamp — execution plan
 
-> **Status:** Planned, not started. Nothing in this document has been built.
-> **Written:** 2026-09-04.
+> **Status:** Phase A done, Phase B done, Phase C partly done. See §12 for
+> exactly what landed, what deviated and why, and what is left.
+> **Written:** 2026-09-04. Progress appended the same day.
 > **The design:** https://claude.ai/code/artifact/35ee5455-0403-4b5c-ab32-fe99703729a5
 > **The decisions:** `UI_DECISIONS.md`. Read it once before starting a phase;
 > it is the answer to "why is it like this" and it is closed, not a proposal.
@@ -305,3 +306,79 @@ Rough effort with agent-driven implementation: Phase A ≈ 1 week, Phase B
 ≈ 1–1.5 weeks, Phase C ≈ 1.5–2 weeks with the fan-out, Phase D ≈ 2 days.
 Four to five weeks in total, and the first two of those produce no visible
 change at all — which is the part worth remembering when it feels slow.
+
+---
+
+## 12. What actually landed
+
+Written as the work went in, on branch `ui-revamp`. Deviations are listed
+with their reasons rather than quietly absorbed — every one of them is a
+decision the owner may want to reverse.
+
+### Done
+
+| Item | Commit | Note |
+|---|---|---|
+| A1 parity inventory | `docs: UI revamp plan…` | `REVAMP_PARITY.md`; 688 keys, 30 groups, 22 bindable actions |
+| A2 token contract | `feat(themes): token contract…` | 7 vars × 10 themes, `TOKEN_CONTRACT` + test |
+| A6 Pocket Check removal | `feat: remove Pocket Check` | 39 locale keys, not the 37 the inventory predicted |
+| A5 locale split | `refactor(i18n): one file…` | 15 dirs × 8 namespaces, migration verified per language |
+| A3 CSS split | `refactor(styles): split…` | 6 files; built CSS diffed rule by rule, identical |
+| A4 MainWindow split | `refactor(main-window)…` | **reduced on purpose** — see below |
+| B shell | `feat(shell): the rail…` + `…dock the coach…` | rail, docked transport, context bar, coach dock |
+| C1 metronome | `feat(metronome)…` | subdivision names, tempo ruler, bigger dots, drift meter |
+| C2 drill | `feat(drill)…` | the plan line; the form follows it |
+| C5 themes | `feat(themes): Ash, Ember…` | added, not substituted; contrast tests found four failures |
+
+### Deviations
+
+- **A4 was cut down.** The plan assumed splitting `MainWindow.tsx` is what
+  makes Phase C parallelisable. It is not: the C items live in
+  `MetronomeView`, `DrillView` and `settings/*`, and Phase B is what rewrites
+  MainWindow's shell and JSX. A large speculative split would have been work
+  Phase B undid. Two hooks that survive Phase B were extracted instead.
+- **A2's fallbacks went into `global.css`**, not a new `tokens.css`. That file
+  already holds the `:root` fallback layer; a second one would have had to be
+  imported ahead of it and put cascade order at risk for no gain.
+- **The CSS split is six files, not four**, and each is a contiguous run of
+  the original. An earlier attempt grouped rules by area and reordered them
+  between files, which changes which of two equal-specificity rules wins. It
+  was thrown away.
+- **U2.3 (meter chip + accent control) is not built.** The three-state accent
+  it describes — group starts / every beat / none — has no engine behind it,
+  and this revamp does not touch Rust.
+- **U3.2 (the climb) is not built.** The step grid keeps its current shape.
+  It holds the same data, is more scannable past nine steps, and already
+  carries click-to-jump and its animations; the staircase is prettier but the
+  actual complaint — a floating play button on top of it — is fixed.
+- **Settings is inside the shell, not a sheet over the window (U1.5).** The
+  rail now stays visible on the settings view and the rail's own button
+  toggles it, which is most of the value. A true overlay sheet would have
+  meant unpicking `ViewTransition` and `SettingsTimeline` for the rest.
+- **C5 added three themes rather than replacing ten**, because U5.3 is open.
+
+### Not done
+
+- **C3, the settings restyle.** The largest C item and the least verifiable
+  without running the app; the structural half arrived with Phase B.
+- **C4, Zen.** U6.3 (one shared ramp-grid component) is a real refactor of a
+  screen that cannot be checked visually from here, and Zen's grid is a
+  different presentation — a peek window around the current step — not the
+  same view. **U6.4 should be revisited before anyone implements it:** Zen's
+  `−5 −1 +1 +5` cluster is *richer* than the metronome's `− +`, so
+  "converging on the transport's vocabulary" would remove capability from
+  Zen and break parity. The convergence should run the other way.
+- **A visual pass.** Nothing here has been seen running. The gates are types,
+  2,525 unit tests, and a rule-by-rule diff of the built CSS. A browser
+  cannot boot this app — every Tauri call fails — and an attempt to stub the
+  bridge hung the page. The first thing to do on picking this up is
+  `npm run tauri dev` and look at it.
+
+### Known finding, not acted on
+
+Three shipped themes put white ink on a mid-luminance accent and miss 4.5:1
+on the Play button: velvet 4.23, ivory 3.25, prism 3.34. Ivory and Prism
+clear the bar with dark ink on the accent instead; Velvet needs a slightly
+darker violet. All three are visible changes to shipped themes, so they are
+recorded in `themes.test.ts` — where the assertion still fails if one gets
+worse or a fourth appears — rather than changed unattended.

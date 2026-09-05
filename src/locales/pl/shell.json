@@ -27,7 +27,6 @@
     "searchPlaceholder": "Szukaj...",
     "namePlaceholder": "Nazwa...",
     "noResults": "Brak wyników",
-    "empty": "Nie ma jeszcze presetów",
     "rename": "Zmień nazwę",
     "renameTooltip": "Zmień nazwę presetu",
     "update": "Zaktualizuj",
@@ -60,9 +59,5 @@
     "elapsed": "Upłynęło",
     "listening": "Słucham",
     "inputOff": "Wejście wyłączone"
-  },
-  "rail": {
-    "library": "Biblioteka",
-    "modes": "Tryby"
   }
 }

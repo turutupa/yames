@@ -1,7 +1,6 @@
 {
   "drill": {
     "startingIn": "Startet in",
-    "done": "Fertig!",
     "stepBar": "Stufe {{step}} · Takt {{bar}}/{{bars}}",
     "beatsSummary": "{{count}} Beats",
     "repsSummary": "{{count}} Wiederholungen",

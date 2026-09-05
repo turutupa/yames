@@ -4,8 +4,6 @@
     "rampStep": "Stufe {{step}}",
     "fullscreen": "Vollbild",
     "exitHint": "Doppelklick oder Esc zum Beenden",
-    "timeSigAll": "Alle",
-    "timeSigOff": "Aus",
     "styles": {
       "focus": "Fokus",
       "pulse": "Puls",

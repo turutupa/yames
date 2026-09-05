@@ -1,7 +1,6 @@
 {
   "drill": {
     "startingIn": "Başlamak üzere",
-    "done": "Bitti!",
     "stepBar": "Adım {{step}} · Ölçü {{bar}}/{{bars}}",
     "beatsSummary": "{{count}} vuruş",
     "repsSummary": "{{count}} tekrar",

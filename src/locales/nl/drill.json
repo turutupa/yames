@@ -1,7 +1,6 @@
 {
   "drill": {
     "startingIn": "Begint over",
-    "done": "Klaar!",
     "stepBar": "Stap {{step}} · Maat {{bar}}/{{bars}}",
     "beatsSummary": "{{count}} beats",
     "repsSummary": "{{count}} herhalingen",

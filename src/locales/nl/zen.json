@@ -4,8 +4,6 @@
     "rampStep": "Stap {{step}}",
     "fullscreen": "Volledig scherm",
     "exitHint": "Dubbelklik of druk op Esc om te verlaten",
-    "timeSigAll": "Alles",
-    "timeSigOff": "Uit",
     "styles": {
       "focus": "Focus",
       "pulse": "Puls",

@@ -4,8 +4,6 @@
     "rampStep": "Passo {{step}}",
     "fullscreen": "Tela cheia",
     "exitHint": "Duplo clique ou Esc para sair",
-    "timeSigAll": "Todas",
-    "timeSigOff": "Desligado",
     "styles": {
       "focus": "Foco",
       "pulse": "Pulso",

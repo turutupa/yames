@@ -4,8 +4,6 @@
     "rampStep": "第 {{step}} 步",
     "fullscreen": "全螢幕",
     "exitHint": "雙擊或按 Esc 退出",
-    "timeSigAll": "所有",
-    "timeSigOff": "關閉",
     "styles": {
       "focus": "專注",
       "pulse": "脈動",
