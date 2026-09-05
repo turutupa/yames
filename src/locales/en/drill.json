@@ -35,6 +35,7 @@
       "cyclic": "Goes up to target then back down to start in the same increments (round-trip).",
       "aggressiveness": "How quickly the tempo changes. Conservative waits longer, Aggressive pushes faster.",
       "countdown": "4-beat countdown before the drill starts. Helps you lock into the tempo."
-    }
+    },
+    "allSettings": "All settings"
   }
 }

@@ -35,6 +35,7 @@
       "cyclic": "Wchodzi do celu, potem wraca do startu tymi samymi przyrostami (tam i z powrotem).",
       "aggressiveness": "Jak szybko zmienia się tempo. Tryb konserwatywny czeka dłużej, agresywny przyspiesza szybciej.",
       "countdown": "4-uderzeniowe odliczanie przed startem. Pomaga wczuć się w tempo."
-    }
+    },
+    "allSettings": "Wszystkie ustawienia"
   }
 }

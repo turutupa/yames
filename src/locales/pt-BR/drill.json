@@ -35,6 +35,7 @@
       "cyclic": "Sobe até a meta e volta ao ponto de partida nos mesmos incrementos (ida e volta).",
       "aggressiveness": "O quão rápido o andamento muda. Suave espera mais; Agressivo acelera mais.",
       "countdown": "Contagem de 4 tempos antes de o treino começar. Ajuda a travar no andamento."
-    }
+    },
+    "allSettings": "Todos os ajustes"
   }
 }

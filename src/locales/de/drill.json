@@ -35,6 +35,7 @@
       "cyclic": "Geht bis zum Ziel hinauf und in denselben Schritten zurück zum Start (Hin- und Rückweg).",
       "aggressiveness": "Wie schnell sich das Tempo ändert. Sanft wartet länger, Kräftig drückt schneller.",
       "countdown": "4-Beat-Countdown vor dem Start der Übung. Hilft dir, dich auf das Tempo einzustellen."
-    }
+    },
+    "allSettings": "Alle Einstellungen"
   }
 }

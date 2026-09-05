@@ -657,3 +657,87 @@
 .drill-view[data-animations="off"] .drill-dot.exiting {
   animation: none;
 }
+
+/* =================== The plan line (UI_REVAMP Phase C2) =================== */
+/* A drill read as a sentence rather than a form. The eight rows are still
+   there — click a phrase and the settings behind it appear — but they stop
+   being the first thing on the screen (UI_DECISIONS U3.1). */
+
+.drill-plan {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.drill-plan-token {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-primary);
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--text-primary) 16%, transparent);
+}
+
+.drill-plan-token:hover {
+  background: var(--surface-hover);
+}
+
+.drill-plan-token.open {
+  background: var(--accent-subtle);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.drill-plan-value {
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.drill-plan-down {
+  color: var(--text-tertiary);
+}
+
+.drill-plan-unit {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+}
+
+.drill-plan-arrow {
+  align-self: center;
+  color: var(--text-muted);
+}
+
+.drill-plan-sep {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  margin: 0 6px;
+}
+
+/* When the plan line opens one phrase, the config shows only that phrase's
+   settings. "All settings" clears it and the whole form comes back. */
+.drill-config-body[data-showing="tempo"] .drill-row:not([data-field="tempo"]),
+.drill-config-body[data-showing="rate"] .drill-row:not([data-field="rate"]),
+.drill-config-body[data-showing="shape"] .drill-row:not([data-field="shape"]) {
+  display: none;
+}
+
+.drill-config-summary {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}

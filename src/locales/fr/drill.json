@@ -35,6 +35,7 @@
       "cyclic": "Monte jusqu'à la cible puis redescend au départ avec les mêmes incréments (aller-retour).",
       "aggressiveness": "La vitesse à laquelle le tempo change. Douce attend plus longtemps, Soutenue pousse plus vite.",
       "countdown": "Décompte sur 4 temps avant le départ de l'exercice. T'aide à te caler sur le tempo."
-    }
+    },
+    "allSettings": "Tous les réglages"
   }
 }

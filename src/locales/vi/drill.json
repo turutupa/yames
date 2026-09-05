@@ -35,6 +35,7 @@
       "cyclic": "Tăng lên tới mục tiêu rồi giảm về điểm xuất phát với cùng mức tăng (khứ hồi).",
       "aggressiveness": "Tempo thay đổi nhanh hay chậm. Nhẹ nhàng chờ lâu hơn, Mạnh mẽ đẩy nhanh hơn.",
       "countdown": "Đếm ngược 4 phách trước khi bài bắt đầu. Giúp bạn vào đúng tempo."
-    }
+    },
+    "allSettings": "Tất cả cài đặt"
   }
 }

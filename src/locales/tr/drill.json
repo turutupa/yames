@@ -35,6 +35,7 @@
       "cyclic": "Hedefe kadar çıkar, aynı artışlarla başlangıca geri döner (gidiş-dönüş).",
       "aggressiveness": "Temponun ne kadar hızlı değiştiği. Yumuşak daha uzun bekler, Sert daha hızlı iter.",
       "countdown": "Antrenman başlamadan önce 4 vuruşluk geri sayım. Tempoya yerleşmene yardımcı olur."
-    }
+    },
+    "allSettings": "Tüm ayarlar"
   }
 }
