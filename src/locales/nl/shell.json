@@ -54,5 +54,15 @@
       "zigzag": "Zigzag: het tempo klimt, zakt terug en klimt opnieuw.",
       "adaptive": "Adaptief: de coach verhoogt of verlaagt het tempo op basis van je spel."
     }
+  },
+  "transport": {
+    "bar": "Maat",
+    "elapsed": "Verstreken",
+    "listening": "Luistert",
+    "inputOff": "Ingang uit"
+  },
+  "rail": {
+    "library": "Bibliotheek",
+    "modes": "Modi"
   }
 }

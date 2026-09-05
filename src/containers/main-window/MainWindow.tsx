@@ -57,14 +57,13 @@ import { useWhatsNew } from "../onboarding/whats-new/useWhatsNew";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { DrillView } from "../drill/DrillView";
 import { FullscreenView } from "../zen/FullscreenView";
-import { PresetSidebar } from "../../components/presets/PresetSidebar";
 import type { PresetSidebarHandle } from "../../components/presets/PresetSidebar";
 import { ThemeEffects } from "./ThemeEffects";
 import { MetronomeView } from "../metronome/MetronomeView";
 import { MainHeader } from "./MainHeader";
 import { WindowControls } from "../../components/WindowControls";
-import { PresetSaveBar } from "../../components/presets/PresetSaveBar";
-import { FloatingPlayButton } from "./FloatingPlayButton";
+import { Rail } from "./Rail";
+import { Transport } from "./Transport";
 import { ViewTransition } from "../../components/ViewTransition";
 import { ZenTransition } from "../zen/ZenTransition";
 import { useEvaluation } from "../../hooks/useEvaluation";
@@ -85,6 +84,7 @@ import { useDownbeatPulse } from "./hooks/useDownbeatPulse";
 import { useInputTester } from "./hooks/useInputTester";
 import { useSoftClickPreview, SOFT_CLICK_BPM } from "./hooks/useSoftClickPreview";
 import { useBpmEditing } from "./hooks/useBpmEditing";
+import { usePlaybackClock } from "./hooks/usePlaybackClock";
 import { useAudioError } from "./hooks/useAudioError";
 import { AudioErrorNotice } from "./AudioErrorNotice";
 import {
@@ -148,7 +148,7 @@ export function MainWindow() {
     handleShareOption,
   } = useShareMenu();
   const [soundOpen, setSoundOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   // Note: WKWebView occasionally leaves the OS cursor "stale" for a
   // few frames after the sidebar's width transition or a play/pause
   // toggle (the cursor reappears on the next mousemove). It's a
@@ -524,6 +524,11 @@ export function MainWindow() {
     setBpm(clamped);
   };
 
+  const { bar, elapsedSeconds } = usePlaybackClock(
+    state.isPlaying || (state.speedRamp?.active ?? false),
+    currentBeat,
+  );
+
   const {
     editingBpm,
     setEditingBpm,
@@ -790,9 +795,15 @@ export function MainWindow() {
       <MainHeader
         state={state}
         view={view}
-        setView={setView}
-        prevTab={prevTab}
-        setIsFullscreen={setIsFullscreen}
+        activePreset={activePreset}
+        presetDirty={presetDirty}
+        updateFeedback={updateFeedback}
+        onRenamePreset={(presetId) => {
+          setSidebarOpen(true);
+          setTimeout(() => sidebarRef.current?.triggerRename(presetId), 150);
+        }}
+        onUpdatePreset={handlePresetUpdate}
+        onSavePreset={handlePresetSave}
         soundOpen={soundOpen}
         setSoundOpen={setSoundOpen}
         soundDropdownRef={soundDropdownRef}
@@ -875,18 +886,23 @@ export function MainWindow() {
       )}
 
       <div className="main-body">
-        {view !== "settings" && (
-          <PresetSidebar
-            ref={sidebarRef}
-            state={state}
-            view={view === "beat" || view === "drill" ? view : "beat"}
-            isOpen={sidebarOpen}
-            onToggle={() => setSidebarOpen((o) => !o)}
-            onLoadPreset={handleLoadPreset}
-            onActiveChange={handleActivePresetChange}
-            shortcut={platformKey(keyBindings["toggle-sidebar"] || "")}
-          />
-        )}
+        <Rail
+          ref={sidebarRef}
+          state={state}
+          view={view}
+          setView={setView}
+          prevTab={prevTab}
+          libraryOpen={sidebarOpen}
+          onToggleLibrary={() => setSidebarOpen((o) => !o)}
+          onLoadPreset={handleLoadPreset}
+          onActivePresetChange={handleActivePresetChange}
+          presetShortcut={platformKey(keyBindings["toggle-sidebar"] || "")}
+          coachOpen={session.cardOpen}
+          coachActive={session.active}
+          coachListening={evaluation.enabled}
+          onToggleCoach={session.toggleCard}
+          onZen={() => setIsFullscreen(true)}
+        />
       <div
         ref={contentRef}
         className="main-content"
@@ -902,19 +918,6 @@ export function MainWindow() {
           setIsFullscreen(true);
         }}
       >
-        {(view === "beat" || view === "drill") && (
-          <PresetSaveBar
-            activePreset={activePreset}
-            presetDirty={presetDirty}
-            updateFeedback={updateFeedback}
-            onRename={(presetId) => {
-              setSidebarOpen(true);
-              setTimeout(() => sidebarRef.current?.triggerRename(presetId), 150);
-            }}
-            onUpdate={handlePresetUpdate}
-            onSave={handlePresetSave}
-          />
-        )}
         <ViewTransition viewKey={view} themeId={state.theme} disabled={viewTransitions === "off"} level={viewTransitions} animStyle={animationStyle}>
         {view === "beat" ? (
           <MetronomeView
@@ -1041,13 +1044,17 @@ export function MainWindow() {
             containerRef={contentRef}
           />
         )}
-        {/* Floating play button for Metronome and Drill */}
         {(view === "beat" || view === "drill") && (
-          <FloatingPlayButton
+          <Transport
             view={view}
             isPlaying={state.isPlaying}
             speedRampActive={state.speedRamp?.active ?? false}
             isPulsing={isPulsing}
+            bar={bar}
+            elapsedSeconds={elapsedSeconds}
+            listening={evaluation.enabled}
+            hasSignal={evaluation.hasSignal}
+            playShortcut={platformKey(keyBindings["play"] || "")}
             onTogglePlayback={() => togglePlayback()}
             onStartSpeedRamp={() => startSpeedRamp()}
             onStopSpeedRamp={() => stopSpeedRamp()}

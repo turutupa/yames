@@ -54,5 +54,15 @@
       "zigzag": "Zigzag : le tempo monte, redescend, puis remonte.",
       "adaptive": "Adaptatif : le coach monte ou baisse le tempo selon votre jeu."
     }
+  },
+  "transport": {
+    "bar": "Mesure",
+    "elapsed": "Écoulé",
+    "listening": "À l'écoute",
+    "inputOff": "Entrée coupée"
+  },
+  "rail": {
+    "library": "Bibliothèque",
+    "modes": "Modes"
   }
 }

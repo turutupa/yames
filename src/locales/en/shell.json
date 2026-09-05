@@ -54,5 +54,15 @@
       "zigzag": "Zigzag: the tempo climbs, drops back, and climbs again.",
       "adaptive": "Adaptive: the coach raises or lowers the tempo from how you play."
     }
+  },
+  "transport": {
+    "bar": "Bar",
+    "elapsed": "Elapsed",
+    "listening": "Listening",
+    "inputOff": "Input off"
+  },
+  "rail": {
+    "library": "Library",
+    "modes": "Modes"
   }
 }

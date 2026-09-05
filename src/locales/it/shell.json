@@ -54,5 +54,15 @@
       "zigzag": "Zigzag: il tempo sale, torna indietro e risale.",
       "adaptive": "Adattivo: il coach alza o abbassa il tempo in base a come suoni."
     }
+  },
+  "transport": {
+    "bar": "Battuta",
+    "elapsed": "Trascorso",
+    "listening": "In ascolto",
+    "inputOff": "Ingresso spento"
+  },
+  "rail": {
+    "library": "Libreria",
+    "modes": "Modalità"
   }
 }

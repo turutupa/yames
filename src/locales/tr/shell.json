@@ -54,5 +54,15 @@
       "zigzag": "Zikzak: tempo yükselir, geri düşer ve yeniden yükselir.",
       "adaptive": "Uyarlanır: koç, çalışınıza göre tempoyu yükseltir veya düşürür."
     }
+  },
+  "transport": {
+    "bar": "Ölçü",
+    "elapsed": "Geçen",
+    "listening": "Dinliyor",
+    "inputOff": "Giriş kapalı"
+  },
+  "rail": {
+    "library": "Kitaplık",
+    "modes": "Modlar"
   }
 }

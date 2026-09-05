@@ -54,5 +54,15 @@
       "zigzag": "Ziguezague: o andamento sobe, recua e sobe de novo.",
       "adaptive": "Adaptativo: o coach sobe ou desce o andamento conforme você toca."
     }
+  },
+  "transport": {
+    "bar": "Compasso",
+    "elapsed": "Decorrido",
+    "listening": "Ouvindo",
+    "inputOff": "Entrada desligada"
+  },
+  "rail": {
+    "library": "Biblioteca",
+    "modes": "Modos"
   }
 }

@@ -54,5 +54,15 @@
       "zigzag": "Zigzag: el tempo sube, retrocede y vuelve a subir.",
       "adaptive": "Adaptativo: el entrenador sube o baja el tempo según cómo toques."
     }
+  },
+  "transport": {
+    "bar": "Compás",
+    "elapsed": "Transcurrido",
+    "listening": "Escuchando",
+    "inputOff": "Entrada apagada"
+  },
+  "rail": {
+    "library": "Biblioteca",
+    "modes": "Modos"
   }
 }

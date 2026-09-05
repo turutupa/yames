@@ -1,9 +1,9 @@
 import { useEffect, useRef, type Ref } from "react";
 import { useTranslation } from "react-i18next";
-import { setSoundType, setVolume, showFloating } from "../../ipc";
-import { markWidgetOpened } from "../onboarding/hints/hintRuntime";
+import { setSoundType, setVolume } from "../../ipc";
 import { SOUND_TYPES } from "../../constants/metronome";
-import type { AppState } from "../../types";
+import type { AppState, Preset } from "../../types";
+import { PresetSaveBar } from "../../components/presets/PresetSaveBar";
 import { IS_MAC } from "../../hotkeys";
 
 /** Custom vertical fader — replaces <input type="range"> to avoid WebKit
@@ -94,9 +94,13 @@ export type MainView = "beat" | "drill" | "settings";
 interface MainHeaderProps {
   state: AppState;
   view: MainView;
-  setView: (v: MainView) => void;
-  prevTab: { current: "beat" | "drill" };
-  setIsFullscreen: (v: boolean) => void;
+  /** Preset context — the header is also the context bar (UI_DECISIONS U1.4). */
+  activePreset: Preset | null;
+  presetDirty: boolean;
+  updateFeedback: boolean;
+  onRenamePreset: (presetId: string) => void;
+  onUpdatePreset: () => void;
+  onSavePreset: () => void;
   soundOpen: boolean;
   setSoundOpen: (v: boolean | ((p: boolean) => boolean)) => void;
   soundDropdownRef: Ref<HTMLDivElement>;
@@ -124,20 +128,24 @@ interface MainHeaderProps {
 }
 
 /**
- * Top-of-window header — tab bar (Metronome / Drill / Pocket Check),
- * plus the right-side action cluster (zen, sound dropdown, volume,
- * widget, share, settings toggle). Settings toggle swaps to a back/X
- * icon when already on the settings view and remembers the last "real"
- * tab via `prevTab` so closing settings returns to where the user was.
+ * The context bar along the top of the window.
  *
- * All state lives in the parent — this is just presentation + callbacks.
+ * Navigation left here in Phase B: modes, Zen and Settings live in the rail
+ * now (UI_DECISIONS U1.1, U1.5). What remains is context — which preset is
+ * loaded and whether it is edited — and the output cluster: sound set,
+ * volume, widget, share, help.
+ *
+ * All state lives in the parent; this is presentation and callbacks.
  */
 export function MainHeader({
   state,
   view,
-  setView,
-  prevTab,
-  setIsFullscreen,
+  activePreset,
+  presetDirty,
+  updateFeedback,
+  onRenamePreset,
+  onUpdatePreset,
+  onSavePreset,
   soundOpen,
   setSoundOpen,
   soundDropdownRef,
@@ -160,59 +168,19 @@ export function MainHeader({
       className="main-header"
       {...(!IS_MAC && { "data-tauri-drag-region": "" })}
     >
-      {view !== "settings" && (
-        <nav className="tab-bar">
-          <button
-            className={`tab-btn ${view === "beat" ? "active" : ""}`}
-            onClick={() => setView("beat")}
-            aria-label={t("nav.metronome")}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 18V5l12-2v13" />
-              <circle cx="6" cy="18" r="3" />
-              <circle cx="18" cy="16" r="3" />
-            </svg>
-            <span className="tab-label">{t("nav.metronome")}</span>
-          </button>
-          <button
-            className={`tab-btn ${view === "drill" ? "active" : ""}`}
-            data-tour="drill-tab"
-            onClick={() => setView("drill")}
-            aria-label={t("nav.drill")}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-            </svg>
-            <span className="tab-label">{t("nav.drill")}</span>
-          </button>
-        </nav>
-      )}
-      <div className="header-actions">
-        {view !== "settings" && (
-          <button
-            className="header-btn"
-            /* Tour stop 6 spotlights zen + widget together: both buttons carry
-               the same id and the overlay unions their rects. */
-            data-tour="zen-widget"
-            onClick={() => setIsFullscreen(true)}
-            data-tooltip={t("tooltip.zen")}
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 22c4-4 8-7.5 8-12a8 8 0 1 0-16 0c0 4.5 4 8 8 12z" />
-              <path d="M12 2v20" />
-              <path d="M4.5 10c2.5 1 5 1 7.5 0s5-1 7.5 0" />
-            </svg>
-          </button>
+      <div className="header-context">
+        {(view === "beat" || view === "drill") && (
+          <PresetSaveBar
+            activePreset={activePreset}
+            presetDirty={presetDirty}
+            updateFeedback={updateFeedback}
+            onRename={onRenamePreset}
+            onUpdate={onUpdatePreset}
+            onSave={onSavePreset}
+          />
         )}
+      </div>
+      <div className="header-actions">
         <div className="header-sound-wrap" ref={soundDropdownRef}>
           <button
             className="header-btn"
@@ -280,32 +248,6 @@ export function MainHeader({
             </div>
           </div>
         </div>
-        <button
-          className="header-btn"
-          data-hint="widget-discover"
-          data-tour="zen-widget"
-          onClick={() => {
-            // The `widget-discover` hint stops offering itself once the user
-            // has found the widget on their own.
-            void markWidgetOpened();
-            showFloating();
-          }}
-          data-tooltip={t("tooltip.openWidget")}
-        >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <rect x="2" y="2" width="20" height="20" rx="2" />
-            <rect x="10" y="10" width="10" height="10" rx="1" />
-          </svg>
-        </button>
         <div className="header-share-wrap" ref={shareRef}>
           <button
             ref={shareBtnRef}
@@ -356,48 +298,6 @@ export function MainHeader({
             </svg>
           </button>
         )}
-        <button
-          className={`header-btn ${view === "settings" ? "active" : ""}`}
-          data-hint="midi-plugged"
-          onClick={() => {
-            if (view === "settings") {
-              setView(prevTab.current);
-            } else {
-              prevTab.current = view as "beat" | "drill";
-              setView("settings");
-            }
-          }}
-          data-tooltip={view === "settings" ? t("tooltip.back") : t("tooltip.settings")}
-        >
-          {view === "settings" ? (
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <line x1="6" y1="6" x2="18" y2="18" />
-              <line x1="18" y1="6" x2="6" y2="18" />
-            </svg>
-          ) : (
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-            </svg>
-          )}
-        </button>
       </div>
     </header>
   );

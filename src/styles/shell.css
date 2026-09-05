@@ -933,3 +933,345 @@
   margin-left: auto;
   margin-right: auto;
 }
+
+/* =================== The rail (UI_REVAMP Phase B) =================== */
+/* One navigation surface: modes at the top, the library beneath them, and the
+   things that are not modes pinned at the bottom. Its width is fixed so the
+   stage keeps a constant offset from the window's left edge whatever else
+   opens (UI_DECISIONS U1.3). */
+
+.rail {
+  width: 252px;
+  min-width: 252px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.rail-modes {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 10px;
+  flex-shrink: 0;
+}
+
+.rail-mode {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  height: 42px;
+  padding: 0 12px 0 10px;
+  border: none;
+  border-left: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-tertiary);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.rail-mode:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.rail-mode.active {
+  border-left-color: var(--accent);
+  background: var(--accent-subtle);
+  color: var(--text-primary);
+}
+
+.rail-mode.active svg {
+  color: var(--accent);
+}
+
+.rail-mode-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rail-library {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border);
+}
+
+/* The preset sidebar is no longer a drawer that slides over the content — it
+   is a section of the rail. Neutralise the drawer's own geometry rather than
+   forking the component. */
+.rail-library .preset-sidebar {
+  width: 100%;
+  min-width: 0;
+  flex: 1;
+  min-height: 0;
+  border-right: none;
+  background: transparent;
+  transition: none;
+}
+
+.rail-library .preset-sidebar-toggle-inner {
+  display: none;
+}
+
+.rail-library-reopen {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 42px;
+  margin: 10px;
+  padding: 0 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-tertiary);
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.rail-library-reopen:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.rail-footer {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.rail-action {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  height: 42px;
+  padding: 0 12px 0 10px;
+  border: none;
+  border-left: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-tertiary);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.rail-action:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.rail-action.active {
+  background: var(--accent-2-subtle);
+  border-left-color: var(--accent-2);
+  color: var(--text-primary);
+}
+
+.rail-action-icon {
+  display: flex;
+  align-items: center;
+}
+
+.rail-action-coach {
+  color: var(--accent-2);
+}
+
+.rail-action-label {
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rail-action-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.rail-action-dot.listening {
+  background: var(--feedback-perfect);
+  box-shadow: 0 0 8px var(--feedback-perfect);
+}
+
+/* =================== The docked transport =================== */
+/* The same bar on every screen. It used to float over the content and, on the
+   Drill tab, covered the bottom rows of the step grid (UI_DECISIONS U1.2). */
+
+.transport {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  height: 76px;
+  padding: 0 24px;
+  margin: 0 -24px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+
+.transport-play {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 150px;
+  height: 46px;
+  padding: 0 24px;
+  border: none;
+  border-radius: 23px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-family: inherit;
+  font-size: 0.98rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.2s ease;
+  box-shadow: 0 8px 24px -10px var(--accent-glow-strong);
+}
+
+.transport-play:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px -10px var(--accent-glow-strong);
+}
+
+.transport-play:active {
+  transform: translateY(0);
+}
+
+.transport-play.playing {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--text-primary);
+  box-shadow: none;
+}
+
+.transport-play.pulse {
+  box-shadow: 0 0 0 6px var(--accent-glow);
+}
+
+.transport-key {
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 4px 7px;
+}
+
+.transport-readouts {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding-left: 22px;
+  border-left: 1px solid var(--border);
+}
+
+.transport-readout {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.transport-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.transport-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.transport-spacer {
+  flex: 1;
+}
+
+.transport-input {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 17px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.transport-input.listening {
+  color: var(--feedback-perfect);
+  border-color: color-mix(in srgb, var(--feedback-perfect) 35%, transparent);
+  background: color-mix(in srgb, var(--feedback-perfect) 8%, transparent);
+}
+
+.transport-signal {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--feedback-perfect) 35%, transparent);
+}
+
+.transport-signal.on {
+  background: var(--feedback-perfect);
+  box-shadow: 0 0 8px var(--feedback-perfect);
+}
+
+/* =================== Content region =================== */
+/* The view grows, the transport stays put. Vertical centring moves from the
+   content region onto the view itself so the transport is not centred with
+   it — the screens keep looking exactly as they did until Phase C. */
+
+.main-content > .view-transition-wrapper {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 28px;
+}
+
+.main-content {
+  justify-content: flex-start;
+}
+
+.main-content[data-view="settings"] > .view-transition-wrapper {
+  display: block;
+}
+
+/* The context bar's left half: which preset is loaded, and its save state. */
+.header-context {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 1;
+}

@@ -54,5 +54,15 @@
       "zigzag": "지그재그: 템포가 올라갔다 내려온 뒤 다시 올라갑니다.",
       "adaptive": "적응형: 연주에 맞춰 코치가 템포를 올리거나 내립니다."
     }
+  },
+  "transport": {
+    "bar": "마디",
+    "elapsed": "경과",
+    "listening": "듣는 중",
+    "inputOff": "입력 꺼짐"
+  },
+  "rail": {
+    "library": "라이브러리",
+    "modes": "모드"
   }
 }

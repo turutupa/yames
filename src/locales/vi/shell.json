@@ -54,5 +54,15 @@
       "zigzag": "Zigzag: nhịp độ tăng lên, lùi lại rồi tăng tiếp.",
       "adaptive": "Thích ứng: huấn luyện viên tăng hoặc giảm nhịp độ theo cách bạn chơi."
     }
+  },
+  "transport": {
+    "bar": "Ô nhịp",
+    "elapsed": "Đã qua",
+    "listening": "Đang nghe",
+    "inputOff": "Tắt đầu vào"
+  },
+  "rail": {
+    "library": "Thư viện",
+    "modes": "Chế độ"
   }
 }

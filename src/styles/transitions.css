@@ -24,11 +24,6 @@
 /* Pocket Check: center when content fits, top-align + scrollable when it
  * overflows. `safe center` falls back to start alignment so overflow content
  * stays reachable. */
-.main-content[data-view="track"] .view-transition-wrapper {
-  justify-content: safe center;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
 
 /* Scrollable views — hide scrollbar */
 .view-transition-wrapper {

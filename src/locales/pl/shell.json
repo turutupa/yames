@@ -54,5 +54,15 @@
       "zigzag": "Zygzak: tempo rośnie, cofa się i rośnie ponownie.",
       "adaptive": "Adaptacyjnie: trener podnosi lub obniża tempo zależnie od tego, jak grasz."
     }
+  },
+  "transport": {
+    "bar": "Takt",
+    "elapsed": "Upłynęło",
+    "listening": "Słucham",
+    "inputOff": "Wejście wyłączone"
+  },
+  "rail": {
+    "library": "Biblioteka",
+    "modes": "Tryby"
   }
 }

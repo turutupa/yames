@@ -54,5 +54,15 @@
       "zigzag": "Zickzack: das Tempo steigt, fällt zurück und steigt erneut.",
       "adaptive": "Adaptiv: der Coach erhöht oder senkt das Tempo danach, wie du spielst."
     }
+  },
+  "transport": {
+    "bar": "Takt",
+    "elapsed": "Vergangen",
+    "listening": "Hört zu",
+    "inputOff": "Eingang aus"
+  },
+  "rail": {
+    "library": "Bibliothek",
+    "modes": "Modi"
   }
 }

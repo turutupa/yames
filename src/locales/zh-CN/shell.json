@@ -54,5 +54,15 @@
       "zigzag": "锯齿：速度升上去、退回来，再升上去。",
       "adaptive": "自适应：教练根据你的演奏调高或调低速度。"
     }
+  },
+  "transport": {
+    "bar": "小节",
+    "elapsed": "已用时",
+    "listening": "正在聆听",
+    "inputOff": "输入已关闭"
+  },
+  "rail": {
+    "library": "资料库",
+    "modes": "模式"
   }
 }

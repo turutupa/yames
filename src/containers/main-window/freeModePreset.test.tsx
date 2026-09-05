@@ -88,15 +88,8 @@ describe("FREE mode — preset round trip", () => {
     setInvokeResponse("list_presets", () => [preset]);
     render(<MainWindow />);
 
-    const tab = await waitFor(() => {
-      const b = document.querySelector(
-        ".preset-sidebar-collapsed-tab",
-      ) as HTMLButtonElement;
-      expect(b).not.toBeNull();
-      return b;
-    });
-    fireEvent.click(tab);
-
+    // The library lives in the rail and is open by default (UI_DECISIONS
+    // U1.1), so there is no drawer to open first — the preset is just there.
     const item = await screen.findByText("Free Nine");
     fireEvent.click(item);
 
