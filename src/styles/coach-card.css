@@ -1218,3 +1218,42 @@
   opacity: 0.5;
   color: var(--text-muted);
 }
+
+/* =================== Coach dock (UI_REVAMP Phase B) =================== */
+/* The card stops floating and becomes a dock at the window's right edge
+   (UI_DECISIONS U1.6). Because it opens at the edge rather than in the middle,
+   the stage — anchored to the rail on the other side — does not move when it
+   appears. That is the whole reason the dock is a dock.
+
+   Only the geometry changes here. Everything inside the panel is coach work
+   and ships exactly as it was (U4.4). */
+
+.coach-card.coach-card-open {
+  margin: 0;
+  border-radius: 0;
+  border: none;
+  border-left: 1px solid var(--border);
+  box-shadow: none;
+  background: var(--bg-panel);
+  animation: coach-dock-in 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes coach-dock-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* The pill was the only way to open the coach when the card floated. The rail
+   carries that job now, with the same status dot, so a second control for one
+   thing would be exactly the duplication this revamp is removing. Hidden
+   rather than deleted: the element is coach content, and the coach work owns
+   removing it properly. */
+.coach-card:not(.coach-card-open) {
+  display: none;
+}
