@@ -1,0 +1,221 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <style>
+    body { margin: 0; background: #e9e7e1; }
+    a { color: #b4530a; text-decoration: none; }
+    a:hover { color: #8a3f08; }
+    .dirC { font-family: "Archivo", "Helvetica Neue", Arial, sans-serif; }
+    .pm { font-family: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace; }
+  </style>
+</helmet>
+
+<div class="dirC" style="width: 1440px; background: #e9e7e1; color: #17161a;">
+
+  <div class="pm" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 56px; border-bottom: 1px solid #17161a; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #55524b;">
+    <div>Yames &mdash; desktop metronome</div>
+    <div>Mod. 0.6.0 &middot; GPLv3 &middot; macOS / Windows / Linux</div>
+  </div>
+
+  <div style="display: flex; align-items: center; justify-content: space-between; padding: 22px 56px; border-bottom: 1px solid #c9c5ba;">
+    <div style="font-size: 24px; font-weight: 800; letter-spacing: -0.05em;">yames</div>
+    <div class="pm" style="display: flex; align-items: center; gap: 30px; font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #55524b;">
+      <div>01 Timing</div>
+      <div>02 Drill</div>
+      <div>03 Coach</div>
+      <div>04 Zen</div>
+      <div style="background: #17161a; color: #e9e7e1; padding: 9px 18px; letter-spacing: 0.12em;">Download</div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); border-bottom: 1px solid #17161a;">
+    <div style="padding: 76px 56px 64px; border-right: 1px solid #c9c5ba; display: flex; flex-direction: column; gap: 26px;">
+      <div class="pm" style="font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: #b4530a;">Fig. 1 &mdash; the instrument</div>
+      <h1 style="margin: 0; font-size: 76px; line-height: 0.92; font-weight: 800; letter-spacing: -0.05em;">
+        A metronome<br>built like a<br>measuring tool.
+      </h1>
+      <p style="margin: 0; max-width: 480px; font-size: 17.5px; line-height: 1.6; color: #3d3a35;">
+        Sub-millisecond beat scheduling in Rust. No drift across a two-hour session, no jitter,
+        no Electron. Everything else &mdash; drills, MIDI control, the coach &mdash; is built on top of
+        that one guarantee.
+      </p>
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 6px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div class="pm" style="background: #17161a; color: #e9e7e1; font-size: 14px; font-weight: 600; letter-spacing: 0.04em; padding: 15px 28px;">DOWNLOAD FOR MACOS</div>
+          <div class="pm" style="border: 1px solid #17161a; font-size: 14px; font-weight: 600; letter-spacing: 0.04em; padding: 14px 24px;">WINDOWS</div>
+          <div class="pm" style="border: 1px solid #17161a; font-size: 14px; font-weight: 600; letter-spacing: 0.04em; padding: 14px 24px;">LINUX</div>
+        </div>
+        <div class="pm" style="font-size: 12px; color: #6b675e;">$ brew install --cask turutupa/tap/yames</div>
+      </div>
+    </div>
+
+    <div style="position: relative; padding: 56px; display: flex; align-items: center; justify-content: center; background: #e3e0d8;">
+      <svg width="420" height="420" viewBox="0 0 420 420" fill="none">
+        <circle cx="210" cy="210" r="190" stroke="#c9c5ba" stroke-width="1"/>
+        <circle cx="210" cy="210" r="150" stroke="#c9c5ba" stroke-width="1"/>
+        <circle cx="210" cy="210" r="3.5" fill="#17161a"/>
+        <g stroke="#17161a" stroke-width="1">
+          <line x1="210" y1="20" x2="210" y2="44"/>
+          <line x1="400" y1="210" x2="376" y2="210"/>
+          <line x1="210" y1="400" x2="210" y2="376"/>
+          <line x1="20" y1="210" x2="44" y2="210"/>
+        </g>
+        <g stroke="#8f8b81" stroke-width="0.75">
+          <line x1="344" y1="76" x2="330" y2="90"/>
+          <line x1="344" y1="344" x2="330" y2="330"/>
+          <line x1="76" y1="344" x2="90" y2="330"/>
+          <line x1="76" y1="76" x2="90" y2="90"/>
+        </g>
+        <path d="M210 210 L318 130" stroke="#b4530a" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="318" cy="130" r="6" fill="#b4530a"/>
+        <path d="M 271 148 A 68 68 0 0 0 210 142" stroke="#b4530a" stroke-width="1" stroke-dasharray="3 3"/>
+        <text x="210" y="252" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="58" font-weight="600" fill="#17161a">120</text>
+        <text x="210" y="276" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" letter-spacing="4" fill="#6b675e">BPM</text>
+        <text x="210" y="300" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" letter-spacing="2" fill="#b4530a">ALLEGRO</text>
+        <text x="336" y="122" font-family="IBM Plex Mono, monospace" font-size="9.5" letter-spacing="1.5" fill="#6b675e">TAP</text>
+        <text x="26" y="196" font-family="IBM Plex Mono, monospace" font-size="9.5" letter-spacing="1.5" fill="#6b675e">40</text>
+        <text x="366" y="196" font-family="IBM Plex Mono, monospace" font-size="9.5" letter-spacing="1.5" fill="#6b675e">300</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="pm" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-bottom: 1px solid #17161a; background: #e3e0d8;">
+    <div style="padding: 26px 32px; border-right: 1px solid #c9c5ba;">
+      <div style="font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #8f8b81; margin-bottom: 7px;">Timing</div>
+      <div style="font-size: 19px; font-weight: 600; letter-spacing: -0.01em;">Sub-millisecond</div>
+    </div>
+    <div style="padding: 26px 32px; border-right: 1px solid #c9c5ba;">
+      <div style="font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #8f8b81; margin-bottom: 7px;">Drift</div>
+      <div style="font-size: 19px; font-weight: 600; letter-spacing: -0.01em;">None</div>
+    </div>
+    <div style="padding: 26px 32px; border-right: 1px solid #c9c5ba;">
+      <div style="font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #8f8b81; margin-bottom: 7px;">Runtime</div>
+      <div style="font-size: 19px; font-weight: 600; letter-spacing: -0.01em;">Native Rust</div>
+    </div>
+    <div style="padding: 26px 32px;">
+      <div style="font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #8f8b81; margin-bottom: 7px;">Network</div>
+      <div style="font-size: 19px; font-weight: 600; letter-spacing: -0.01em;">Never</div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); border-bottom: 1px solid #c9c5ba;">
+    <div style="padding: 68px 56px; border-right: 1px solid #c9c5ba; display: flex; flex-direction: column; gap: 18px;">
+      <div class="pm" style="font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: #b4530a;">02 &mdash; speed drill</div>
+      <h2 style="margin: 0; font-size: 42px; line-height: 1.02; font-weight: 700; letter-spacing: -0.04em;">Program the session, then forget the app exists.</h2>
+      <p style="margin: 0; font-size: 16.5px; line-height: 1.65; color: #3d3a35; max-width: 400px;">
+        Start tempo, target tempo, step size, beats per step, repeats. Linear, zigzag or adaptive.
+        The grid draws the whole session before the first click.
+      </p>
+      <div class="pm" style="display: flex; flex-direction: column; gap: 0; margin-top: 10px; font-size: 12.5px; border-top: 1px solid #c9c5ba;">
+        <div style="display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid #c9c5ba;"><span style="color: #6b675e;">MODE</span><span style="font-weight: 600;">LINEAR / ZIGZAG / ADAPTIVE</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid #c9c5ba;"><span style="color: #6b675e;">RANGE</span><span style="font-weight: 600;">60 &rarr; 135 BPM</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid #c9c5ba;"><span style="color: #6b675e;">PRESETS</span><span style="font-weight: 600;">SAVED PER EXERCISE</span></div>
+      </div>
+    </div>
+    <div style="padding: 48px 56px; background: #e3e0d8; display: flex; flex-direction: column; gap: 12px;">
+      <img src="shot-drill-aurora.webp" alt="Speed drill configuration" style="display: block; width: 100%; border: 1px solid #17161a;">
+      <div class="pm" style="font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #8f8b81;">Plate 02 &mdash; drill configuration, Aurora theme</div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); border-bottom: 1px solid #c9c5ba;">
+    <div style="padding: 48px 56px; background: #e3e0d8; border-right: 1px solid #c9c5ba; display: flex; flex-direction: column; gap: 12px;">
+      <img src="shot-metronome-ivory.webp" alt="Metronome with the coach panel, Ivory theme" style="display: block; width: 100%; border: 1px solid #17161a;">
+      <div class="pm" style="font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #8f8b81;">Plate 03 &mdash; coach report, Ivory theme</div>
+    </div>
+    <div style="padding: 68px 56px; display: flex; flex-direction: column; gap: 18px;">
+      <div class="pm" style="display: flex; align-items: center; gap: 10px; font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: #b4530a;">
+        <span>03 &mdash; practice coach</span>
+        <span style="border: 1px solid #b4530a; padding: 2px 6px; letter-spacing: 0.1em;">Beta</span>
+      </div>
+      <h2 style="margin: 0; font-size: 42px; line-height: 1.02; font-weight: 700; letter-spacing: -0.04em;">A measurement of how you actually played.</h2>
+      <p style="margin: 0; font-size: 16.5px; line-height: 1.65; color: #3d3a35;">
+        It listens through the microphone, scores the session, and tells you the thing a metronome
+        normally can&#39;t: whether you were dragging or rushing, by how many milliseconds, and where
+        it fell apart. The model runs locally &mdash; the app makes no network calls at all.
+      </p>
+      <div class="pm" style="display: flex; flex-wrap: wrap; gap: 7px; margin-top: 6px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;">
+        <div style="border: 1px solid #c9c5ba; padding: 7px 12px; color: #55524b;">Timing spread</div>
+        <div style="border: 1px solid #c9c5ba; padding: 7px 12px; color: #55524b;">Drag / rush</div>
+        <div style="border: 1px solid #c9c5ba; padding: 7px 12px; color: #55524b;">Session history</div>
+        <div style="border: 1px solid #c9c5ba; padding: 7px 12px; color: #55524b;">Adaptive tempo</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="position: relative; height: 520px; overflow: hidden; border-bottom: 1px solid #17161a;">
+    <img src="shot-zen-velvet.webp" alt="Zen mode fullscreen visuals" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;">
+    <div style="position: absolute; inset: 0; background: linear-gradient(90deg, rgba(17,11,30,0.9) 0%, rgba(17,11,30,0.55) 45%, rgba(17,11,30,0.2) 100%);"></div>
+    <div style="position: relative; display: flex; flex-direction: column; justify-content: center; gap: 18px; height: 100%; padding: 0 56px; max-width: 620px; color: #f2effa;">
+      <div class="pm" style="font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: #c7b3ff;">04 &mdash; zen mode</div>
+      <h2 style="margin: 0; font-size: 44px; line-height: 1.02; font-weight: 700; letter-spacing: -0.04em;">And then, the opposite of a spec sheet.</h2>
+      <p style="margin: 0; font-size: 16.5px; line-height: 1.65; color: #ddd7ec;">
+        Seven fullscreen visuals that move on the beat, in any of the ten themes. No numbers, no
+        controls, nothing to read. Put the laptop across the room and play.
+      </p>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-bottom: 1px solid #c9c5ba;">
+    <div style="padding: 56px; border-right: 1px solid #c9c5ba; display: flex; flex-direction: column; gap: 14px;">
+      <div class="pm" style="font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: #b4530a;">05 &mdash; control surface</div>
+      <h3 style="margin: 0; font-size: 30px; line-height: 1.06; font-weight: 700; letter-spacing: -0.035em;">Hands stay on the instrument.</h3>
+      <p style="margin: 0; font-size: 16px; line-height: 1.65; color: #3d3a35;">
+        Map any MIDI CC, note or program change to play, stop, tempo or subdivision. Assign a
+        footswitch and run the whole session without looking up. Every action has a rebindable hotkey.
+      </p>
+    </div>
+    <div style="padding: 56px; display: flex; flex-direction: column; gap: 14px;">
+      <div class="pm" style="font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: #b4530a;">06 &mdash; finish</div>
+      <h3 style="margin: 0; font-size: 30px; line-height: 1.06; font-weight: 700; letter-spacing: -0.035em;">Ten themes, widget included.</h3>
+      <p style="margin: 0; font-size: 16px; line-height: 1.65; color: #3d3a35;">
+        Dark and light, serif and monospace. The always-on-top floating widget follows the theme and
+        sits over your DAW, your tabs, or your sheet music.
+      </p>
+      <div style="display: flex; gap: 7px; margin-top: 6px;">
+        <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #121212 50%, #d4d4d4 50%); border: 1px solid #17161a;"></div>
+        <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #0a0a0a 50%, #f59e0b 50%); border: 1px solid #17161a;"></div>
+        <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #110b1e 50%, #8b5cf6 50%); border: 1px solid #17161a;"></div>
+        <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #0c0c18 50%, #06b6d4 50%); border: 1px solid #17161a;"></div>
+        <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #0a0020 50%, #00d4ff 50%); border: 1px solid #17161a;"></div>
+        <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #faf8f2 50%, #b8860b 50%); border: 1px solid #17161a;"></div>
+        <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #f0f4f8 50%, #0369a1 50%); border: 1px solid #17161a;"></div>
+        <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #f5f0e8 50%, #92400e 50%); border: 1px solid #17161a;"></div>
+        <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #f5f0ff 50%, #7c3aed 50%); border: 1px solid #17161a;"></div>
+        <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #ffe0f0 50%, #ff3d8a 50%); border: 1px solid #17161a;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="background: #17161a; color: #e9e7e1; padding: 76px 56px;">
+    <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 48px;">
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <h2 style="margin: 0; font-size: 52px; line-height: 0.98; font-weight: 800; letter-spacing: -0.045em;">Open it. Hit play.<br>Disappear.</h2>
+        <p style="margin: 0; font-size: 16.5px; color: #a5a09a; max-width: 440px;">Free and open source under GPLv3. No account, no telemetry, no upsell.</p>
+      </div>
+      <div class="pm" style="display: flex; flex-direction: column; gap: 10px; min-width: 400px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #35322c; padding-bottom: 10px; font-size: 13px;"><span>macOS &mdash; Apple Silicon</span><span style="color: #f0a318;">.dmg &rarr;</span></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #35322c; padding-bottom: 10px; font-size: 13px;"><span>macOS &mdash; Intel</span><span style="color: #f0a318;">.dmg &rarr;</span></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #35322c; padding-bottom: 10px; font-size: 13px;"><span>Windows</span><span style="color: #f0a318;">.msi &rarr;</span></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #35322c; padding-bottom: 10px; font-size: 13px;"><span>Linux</span><span style="color: #f0a318;">.AppImage &rarr;</span></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #6b675e; padding-top: 4px;"><span>brew install --cask turutupa/tap/yames</span><span>winget install turutupa.yames</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pm" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 56px; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #6b675e;">
+    <div>Yet another metronome everyone skips</div>
+    <div style="display: flex; gap: 26px;"><span>GitHub</span><span>Changelog</span><span>Request a feature</span><span>GPLv3</span></div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1440, "h": 3800, "title": "Yames site — B" },
+    { "file": "SpectrumWarm.dc.html", "x": 1560, "y": 0, "w": 1440, "h": 1780, "title": "B2 · Warm (amber)" },
+    { "file": "SpectrumSpotlight.dc.html", "x": 1560, "y": 1980, "w": 1440, "h": 2100, "title": "B3 · Spotlight" },
+    { "file": "Headlines.dc.html", "x": 3120, "y": 0, "w": 1200, "h": 1720, "title": "Headline candidates" }
+  ],
+  "annotations": [
+    {
+      "id": "note-main",
+      "x": 0,
+      "y": -300,
+      "w": 1440,
+      "text": "THE DESIGN — direction B, refined\n\nChanges from the version you saw:\n· Headline is now \"Finally, a metronome you won't skip\" — no arbitrary two hours, and it leans on your own tagline.\n· Every developer word is gone. No Rust, no Electron, no binary, no telemetry. \"< 1 ms\" stays — musicians deal in milliseconds every time they open a DAW.\n· The three tiles now say what the number means for practice, not how it is built.\n· brew / winget moved from the hero to the footer.\n\nStill open: the currency in the 0 € tile (see the decisions doc), and whether the theme row recolours the page on click or on hover."
+    },
+    {
+      "id": "note-variants",
+      "x": 1560,
+      "y": -300,
+      "w": 1440,
+      "text": "TWO VARIANTS — each changes exactly ONE thing, so the choice is decidable.\n\nB2 · WARM — identical layout and copy, your brand amber leading instead of cyan.\nThe question: does the flashiness survive on the colour the app already ships with? Amber is warmer and more \"instrument\", cyan is colder and more \"software\". (Tile accents follow their own gradient in each palette, so tiles 2 and 3 swap hue — same copy, same order.)\n\nB3 · SPOTLIGHT — identical colour and copy, different hero. One big app window instead of the fan, with the theme picker directly underneath as the first thing you can touch. The fan does not disappear — it moves below the tiles as a four-up strip, which is the whole trade being tested.\nThe question: collage or product? The fan up top sells variety in one glance; the spotlight sells the app itself and puts the theme switcher above the fold where it can do its trick immediately.\n\nBoth variants stop after that — the Zen, coach, drill and closing sections are unchanged from the main artboard and are not repeated here."
+    },
+    {
+      "id": "note-headlines",
+      "x": 3120,
+      "y": -300,
+      "w": 1200,
+      "text": "HEADLINES — set at hero size so they read as type, not as a list.\n\nEach has the bet it makes and the risk it carries. Candidate 05 is the answer to your metronome-or-coach question: it sells a metronome today and a coach tomorrow, and it is the one to switch to once the coach is out of beta."
+    }
+  ],
+  "launch": { "view": "canvas" }
+}

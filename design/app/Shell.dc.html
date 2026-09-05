@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Manrope:wght@400;500;600;700;800&display=swap">
+  <style>
+    body { margin: 0; background: #08070f; }
+    a { color: #00d4ff; text-decoration: none; }
+    a:hover { color: #7de8ff; }
+    .ui { font-family: "Manrope", "Segoe UI", "Helvetica Neue", Arial, sans-serif; }
+    .disp { font-family: "Bricolage Grotesque", "Manrope", "Segoe UI", Arial, sans-serif; }
+    .lbl { font-size: 10.5px; font-weight: 800; letter-spacing: 0.16em; color: #605d80; }
+    .old { font-size: 14px; font-weight: 600; color: #7d799e; }
+    .new { font-size: 14px; font-weight: 700; color: #eceaf6; }
+    .key { font-size: 11.5px; font-weight: 800; letter-spacing: 0.06em; color: #b6b1d6; border: 1px solid rgba(255,255,255,0.14); border-radius: 6px; padding: 5px 9px; }
+  </style>
+</helmet>
+
+<div class="ui" style="width: 1280px; height: 880px; background: #08070f; color: #eceaf6; padding: 34px 36px; box-sizing: border-box; display: flex; flex-direction: column; gap: 28px;">
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <span class="lbl">THE SHELL</span>
+    <span class="disp" style="font-size: 27px; font-weight: 700; letter-spacing: -0.03em;">One rail, one transport, and nothing that jumps</span>
+    <span style="font-size: 14.5px; line-height: 1.55; color: #a9a4c8; max-width: 900px;">Today five surfaces compete to navigate: a tab strip, a preset drawer, seven unlabelled icons, a floating play button and a coach rail. The proposal collapses them into two fixed frames that never move, and lets everything else open inside them.</span>
+  </div>
+
+  <div style="display: flex; gap: 40px; flex-grow: 1; min-height: 0;">
+
+    <div style="width: 470px; flex-shrink: 0; display: flex; flex-direction: column; gap: 16px;">
+      <span class="lbl">WHAT MOVES WHERE</span>
+      <div style="display: flex; flex-direction: column; gap: 0;">
+
+        <div style="display: flex; align-items: center; gap: 14px; padding: 13px 0; border-bottom: 1px solid rgba(255,255,255,0.055);">
+          <span class="old" style="width: 178px;">Tab strip, top centre</span>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#454264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+          <span class="new">Modes at the top of the rail</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px; padding: 13px 0; border-bottom: 1px solid rgba(255,255,255,0.055);">
+          <span class="old" style="width: 178px;">Preset drawer, sliding</span>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#454264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+          <span class="new">The same rail, under the modes</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px; padding: 13px 0; border-bottom: 1px solid rgba(255,255,255,0.055);">
+          <span class="old" style="width: 178px;">Seven unlabelled icons</span>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#454264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+          <span class="new">Three labelled chips, one overflow</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px; padding: 13px 0; border-bottom: 1px solid rgba(255,255,255,0.055);">
+          <span class="old" style="width: 178px;">Floating Play, over content</span>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#454264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+          <span class="new">Docked transport, identical on every screen</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px; padding: 13px 0; border-bottom: 1px solid rgba(255,255,255,0.055);">
+          <span class="old" style="width: 178px;">Coach rail, narrow</span>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#454264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+          <span class="new">Dock that promotes to the centre</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px; padding: 13px 0; border-bottom: 1px solid rgba(255,255,255,0.055);">
+          <span class="old" style="width: 178px;">Settings as a fourth tab</span>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#454264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+          <span class="new">A sheet over the window, Esc to close</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px; padding: 13px 0;">
+          <span class="old" style="width: 178px; text-decoration: line-through; text-decoration-color: rgba(255,255,255,0.25);">Pocket Check tab</span>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#454264" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+          <span class="new" style="color: #7d799e;">Retired — the slot the Paths mode takes</span>
+        </div>
+
+      </div>
+    </div>
+
+    <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 16px; min-width: 0;">
+      <span class="lbl">FIXED FRAMES</span>
+
+      <div style="height: 268px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: #0c0b16; display: flex; padding: 8px; gap: 8px; box-sizing: border-box; position: relative;">
+        <div style="width: 74px; background: rgba(255,255,255,0.05); border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+          <span style="font-size: 10px; font-weight: 800; letter-spacing: 0.1em; color: #7d799e; writing-mode: vertical-rl; transform: rotate(180deg);">RAIL 252</span>
+        </div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0;">
+          <div style="height: 30px; background: rgba(255,255,255,0.035); border-radius: 4px; display: flex; align-items: center; padding: 0 10px;">
+            <span style="font-size: 10px; font-weight: 800; letter-spacing: 0.1em; color: #7d799e;">CONTEXT + OUTPUT CHIPS 54</span>
+          </div>
+          <div style="flex-grow: 1; display: flex; gap: 8px; min-width: 0;">
+            <div style="flex-grow: 1; border: 1px dashed rgba(0,212,255,0.35); border-radius: 4px; display: flex; align-items: center; padding-left: 22px; position: relative;">
+              <span class="disp" style="font-size: 40px; font-weight: 800; color: #2f2c48;">130</span>
+              <span style="position: absolute; top: 8px; left: 22px; font-size: 10px; font-weight: 800; letter-spacing: 0.1em; color: #00d4ff;">STAGE · ANCHORED LEFT</span>
+            </div>
+            <div style="width: 118px; background: rgba(167,139,250,0.13); border: 1px solid rgba(167,139,250,0.35); border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+              <span style="font-size: 10px; font-weight: 800; letter-spacing: 0.1em; color: #c4b5fd; writing-mode: vertical-rl; transform: rotate(180deg);">DOCK 380</span>
+            </div>
+          </div>
+          <div style="height: 40px; background: rgba(0,212,255,0.09); border: 1px solid rgba(0,212,255,0.2); border-radius: 4px; display: flex; align-items: center; padding: 0 10px;">
+            <span style="font-size: 10px; font-weight: 800; letter-spacing: 0.1em; color: #7de8ff;">TRANSPORT 88 · PLAY, BAR, ELAPSED, INPUT</span>
+          </div>
+        </div>
+        <div style="position: absolute; left: 104px; top: 0; bottom: 0; width: 1px; background: repeating-linear-gradient(180deg, rgba(0,212,255,0.5) 0 5px, transparent 5px 11px);"></div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 9px; padding: 15px 18px; border-radius: 11px; background: rgba(0,212,255,0.05); border: 1px solid rgba(0,212,255,0.16);">
+        <span style="font-size: 13.5px; font-weight: 800; color: #7de8ff;">The rule that fixes the jump</span>
+        <span style="font-size: 13.5px; line-height: 1.55; color: #b8d9e6;">The tempo readout sits at a fixed distance from the rail, not in the middle of whatever space is left. Open the coach, open the presets, resize the window — the number you are staring at stays exactly where your eye already is. Today it slides sideways every time a panel opens.</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 14px; padding-top: 4px; border-top: 1px solid rgba(255,255,255,0.06);">
+    <span class="lbl">HANDS ON THE INSTRUMENT</span>
+    <div style="display: flex; gap: 34px; flex-wrap: wrap;">
+      <div style="display: flex; align-items: center; gap: 9px;"><span class="key">SPACE</span><span style="font-size: 13px; font-weight: 600; color: #a9a4c8;">Play / stop</span></div>
+      <div style="display: flex; align-items: center; gap: 9px;"><span class="key">↑ ↓</span><span style="font-size: 13px; font-weight: 600; color: #a9a4c8;">Tempo ±1</span></div>
+      <div style="display: flex; align-items: center; gap: 9px;"><span class="key">T</span><span style="font-size: 13px; font-weight: 600; color: #a9a4c8;">Tap</span></div>
+      <div style="display: flex; align-items: center; gap: 9px;"><span class="key">C</span><span style="font-size: 13px; font-weight: 600; color: #a9a4c8;">Coach dock / centre</span></div>
+      <div style="display: flex; align-items: center; gap: 9px;"><span class="key">1 2 3</span><span style="font-size: 13px; font-weight: 600; color: #a9a4c8;">Modes</span></div>
+      <div style="display: flex; align-items: center; gap: 9px;"><span class="key">F</span><span style="font-size: 13px; font-weight: 600; color: #a9a4c8;">Zen</span></div>
+      <div style="display: flex; align-items: center; gap: 9px;"><span class="key">FOOTSWITCH</span><span style="font-size: 13px; font-weight: 600; color: #a9a4c8;">Play, next step, ask what next, accept the suggestion</span></div>
+    </div>
+    <span style="font-size: 12.5px; line-height: 1.5; color: #605d80;">Every action on these screens has a key and can be bound to MIDI. Nothing in the redesign requires a mouse, and nothing requires looking at the screen except reading an answer you asked for.</span>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

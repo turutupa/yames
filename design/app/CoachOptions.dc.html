@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Manrope:wght@400;500;600;700;800&display=swap">
+  <style>
+    body { margin: 0; background: #08070f; }
+    a { color: #00d4ff; text-decoration: none; }
+    a:hover { color: #7de8ff; }
+    .ui { font-family: "Manrope", "Segoe UI", "Helvetica Neue", Arial, sans-serif; }
+    .disp { font-family: "Bricolage Grotesque", "Manrope", "Segoe UI", Arial, sans-serif; }
+    .wire { background: #0d0c18; border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; }
+    .coachzone { background: rgba(167,139,250,0.16); border: 1px solid rgba(167,139,250,0.45); border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+    .zlabel { font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; color: #c4b5fd; }
+    .h3 { font-size: 19px; font-weight: 800; letter-spacing: -0.015em; color: #eceaf6; }
+    .lbl { font-size: 10.5px; font-weight: 800; letter-spacing: 0.14em; }
+    .body { font-size: 13px; line-height: 1.55; color: #a9a4c8; }
+  </style>
+</helmet>
+
+<div class="ui" style="width: 1280px; height: 640px; background: #08070f; color: #eceaf6; padding: 34px 36px; box-sizing: border-box; display: flex; flex-direction: column; gap: 26px;">
+
+  <div style="display: flex; flex-direction: column; gap: 7px;">
+    <span class="lbl" style="color: #605d80;">OPEN QUESTION · WHERE THE COACH LIVES</span>
+    <span class="disp" style="font-size: 27px; font-weight: 700; letter-spacing: -0.03em;">Three places to put a coach you can talk to</span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px; flex-grow: 1;">
+
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <div class="wire" style="height: 214px; display: flex; padding: 7px; gap: 7px; box-sizing: border-box;">
+        <div style="width: 46px; background: rgba(255,255,255,0.05); border-radius: 3px;"></div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 7px;">
+          <div style="flex-grow: 1; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border-radius: 3px;">
+            <span class="disp" style="font-size: 34px; font-weight: 800; color: #3d3a58;">130</span>
+          </div>
+          <div style="height: 26px; background: rgba(0,212,255,0.10); border-radius: 3px;"></div>
+        </div>
+        <div class="coachzone" style="width: 88px;"><span class="zlabel">COACH</span></div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 9px;">
+        <span class="h3">A · Dock</span>
+        <span class="body">A column on the right, roughly where it is today but wider and built for a conversation rather than a feed.</span>
+        <div style="display: flex; flex-direction: column; gap: 5px; padding-top: 4px;">
+          <span style="font-size: 12.5px; font-weight: 700; color: #34d399;">Keeps the beat dots in view while you talk.</span>
+          <span style="font-size: 12.5px; font-weight: 700; color: #fbbf24;">Costs a third of the width; long answers get cramped.</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <div class="wire" style="height: 214px; display: flex; padding: 7px; gap: 7px; box-sizing: border-box;">
+        <div style="width: 46px; background: rgba(255,255,255,0.05); border-radius: 3px;"></div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 7px;">
+          <div style="height: 30px; display: flex; align-items: center; padding: 0 9px; background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.22); border-radius: 3px;">
+            <span class="disp" style="font-size: 15px; font-weight: 800; color: #7de8ff;">130</span>
+          </div>
+          <div class="coachzone" style="flex-grow: 1;"><span class="zlabel">COACH</span></div>
+          <div style="height: 26px; background: rgba(0,212,255,0.10); border-radius: 3px;"></div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 9px;">
+        <span class="h3">B · Centre stage</span>
+        <span class="body">The coach takes the middle. The click keeps running as a live strip along the top, so nothing stops to talk.</span>
+        <div style="display: flex; flex-direction: column; gap: 5px; padding-top: 4px;">
+          <span style="font-size: 12.5px; font-weight: 700; color: #34d399;">Room for evidence: charts, tab, a real answer.</span>
+          <span style="font-size: 12.5px; font-weight: 700; color: #fbbf24;">The big beat dots shrink — wrong while you are mid-take.</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <div class="wire" style="height: 214px; display: flex; padding: 7px; gap: 7px; box-sizing: border-box;">
+        <div style="width: 46px; background: rgba(255,255,255,0.05); border-radius: 3px;"></div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 7px;">
+          <div style="flex-grow: 1; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border-radius: 3px;">
+            <span class="disp" style="font-size: 34px; font-weight: 800; color: #3d3a58;">130</span>
+          </div>
+          <div class="coachzone" style="height: 74px;"><span class="zlabel">COACH</span></div>
+          <div style="height: 26px; background: rgba(0,212,255,0.10); border-radius: 3px;"></div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 9px;">
+        <span class="h3">C · Floor</span>
+        <span class="body">A band across the bottom, under the tempo. Full width, so a chart or a bar of tab fits end to end.</span>
+        <div style="display: flex; flex-direction: column; gap: 5px; padding-top: 4px;">
+          <span style="font-size: 12.5px; font-weight: 700; color: #34d399;">Tempo stays the hero; wide enough for notation later.</span>
+          <span style="font-size: 12.5px; font-weight: 700; color: #fbbf24;">Height is the scarce dimension on a laptop, and paths need it.</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 16px; padding: 16px 20px; border-radius: 12px; background: rgba(0,212,255,0.06); border: 1px solid rgba(0,212,255,0.18);">
+    <span class="lbl" style="color: #00d4ff; flex-shrink: 0;">THE PROPOSAL</span>
+    <span style="font-size: 14px; line-height: 1.5; color: #cfe9f5;">A and B are one panel at two sizes, not two designs. It docks while the click runs and takes the centre the moment you stop — because that is exactly when you have a question and nothing to watch. One button, one keystroke, one footswitch action moves it either way.</span>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

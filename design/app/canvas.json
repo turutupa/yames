@@ -1,0 +1,260 @@
+{
+  "pages": [
+    {
+      "id": "page-1",
+      "name": "The screens"
+    },
+    {
+      "id": "page-2",
+      "name": "The coach"
+    },
+    {
+      "id": "page-3",
+      "name": "Where it goes"
+    },
+    {
+      "id": "page-4",
+      "name": "Directions"
+    }
+  ],
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "page": "page-1",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "1 · Metronome, at rest"
+    },
+    {
+      "file": "MetronomePlaying.dc.html",
+      "page": "page-1",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "2 · Metronome, playing"
+    },
+    {
+      "file": "Drill.dc.html",
+      "page": "page-1",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "3 · Drill"
+    },
+    {
+      "file": "Shell.dc.html",
+      "page": "page-1",
+      "x": 4680,
+      "y": 0,
+      "w": 1280,
+      "h": 880,
+      "title": "4 · The shell"
+    },
+    {
+      "file": "CoachOptions.dc.html",
+      "page": "page-2",
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 640,
+      "title": "Where the coach lives"
+    },
+    {
+      "file": "CoachCentre.dc.html",
+      "page": "page-2",
+      "x": 1400,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Coach, centre stage"
+    },
+    {
+      "file": "PathMode.dc.html",
+      "page": "page-3",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Paths in the same shell"
+    },
+    {
+      "file": "MetronomeAsh.dc.html",
+      "page": "page-1",
+      "x": 0,
+      "y": 1100,
+      "w": 1440,
+      "h": 900,
+      "title": "Metronome · Ash"
+    },
+    {
+      "file": "MetronomeEmber.dc.html",
+      "page": "page-1",
+      "x": 1560,
+      "y": 1100,
+      "w": 1440,
+      "h": 900,
+      "title": "Metronome · Ember"
+    },
+    {
+      "file": "MetronomeManuscript.dc.html",
+      "page": "page-1",
+      "x": 3120,
+      "y": 1100,
+      "w": 1440,
+      "h": 900,
+      "title": "Metronome · Manuscript"
+    },
+    {
+      "file": "CoachAsh.dc.html",
+      "page": "page-2",
+      "x": 0,
+      "y": 1100,
+      "w": 1440,
+      "h": 900,
+      "title": "Coach · Ash"
+    },
+    {
+      "file": "CoachEmber.dc.html",
+      "page": "page-2",
+      "x": 1560,
+      "y": 1100,
+      "w": 1440,
+      "h": 900,
+      "title": "Coach · Ember"
+    },
+    {
+      "file": "CoachManuscript.dc.html",
+      "page": "page-2",
+      "x": 3120,
+      "y": 1100,
+      "w": 1440,
+      "h": 900,
+      "title": "Coach · Manuscript"
+    },
+    {
+      "file": "DirectionB.dc.html",
+      "page": "page-4",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "B · Console"
+    },
+    {
+      "file": "DirectionC.dc.html",
+      "page": "page-4",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "C · Instrument"
+    },
+    {
+      "file": "DirectionsCompare.dc.html",
+      "page": "page-4",
+      "x": 3120,
+      "y": 0,
+      "w": 1400,
+      "h": 880,
+      "title": "A vs B vs C"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note-intro",
+      "page": "page-1",
+      "x": 0,
+      "y": -900,
+      "w": 1440,
+      "text": "YAMES — APP REDESIGN, FIRST PASS\n\nBlank slate, as asked: new type (Bricolage Grotesque for the numbers, Manrope for the interface), new spacing, new control vocabulary. It shares the wordmark and palette family with the site you just designed, so the two read as one product.\n\nStructure follows the roadmap rather than today's code: the shell has to survive learning paths, exercises with notation, routines and a coach you can talk to — without growing a fifth tab.\n\nOne aesthetic is committed to here rather than three timid variants. If the look is wrong it changes cheaply; the structure is the part worth arguing about first.\n\nNot designed yet: Zen, Settings, onboarding, the floating widget, and the nine other themes. Everything here is one theme's worth of tokens — the ten-theme system stays exactly as it is."
+    },
+    {
+      "id": "note-main",
+      "page": "page-1",
+      "x": 0,
+      "y": -520,
+      "w": 1440,
+      "text": "1 · METRONOME, AT REST\n\n· The tempo number is the screen. Anchored to the rail rather than centred in whatever space is left, so it never moves when a panel opens.\n· The slider becomes a tempo ruler with the Italian markings laid out in proportion — same control, but it now shows what Allegro means and where you sit in the range.\n· The six subdivision glyphs were near-identical at a glance and needed a tooltip to tell apart. They are drawn as real beamed groups now, with names underneath.\n· The meter row mixed two ideas — FREE and the accent policy sharing a row with time signatures. Meter becomes a chip with a picker; accent becomes its own three-state control. (Your build still renders the retired Never / Always buttons in that row.)\n· Beat dots grow and keep their subdivision ticks. This is the thing you read from two metres away with a guitar on.\n· Play is docked, not floating over the content.\n\nOpen: whether \"Last session\" earns its place here, or belongs only inside the coach."
+    },
+    {
+      "id": "note-playing",
+      "page": "page-1",
+      "x": 1560,
+      "y": -520,
+      "w": 1440,
+      "text": "2 · METRONOME, PLAYING\n\nThe same frame, nothing moved. Rail and header dim, the beat dots grow, the coach dock opens at the right edge — and because it opens at the edge, the tempo readout is still exactly where your eye left it.\n\nThe timing band is the drift meter put back on this screen deliberately. The code says it was pulled because it had been rendering at opacity 0 since it was written, so making it paint was the first time anyone saw it and that was never a decision anyone took. This is the decision, taken on purpose: bias, spread and hit rate, in plain words, only while you play.\n\nThe score card in the dock breaks the number into the four components the Rust scorer actually computes, named the way a guitarist would say them."
+    },
+    {
+      "id": "note-drill",
+      "page": "page-1",
+      "x": 3120,
+      "y": -520,
+      "w": 1440,
+      "text": "3 · DRILL\n\nThe eight-row stepper form leaves the main view. A drill is a sentence you edit: 80 → 120, +5 BPM, every 12 bars. Click a token, get a two-line popover. Nothing is hidden — the same numbers, one glance instead of eight rows.\n\nThe grid becomes the climb: a column per tempo step, a cell per bar, rising left to right so the shape of the picture is the shape of the exercise. The filled cells are your LAST run, drawn under tonight's plan, so the wall you hit is on screen before you start. Same data the exercise ceilings need later.\n\nAdaptive carries a badge saying it listens, because it is the one mode whose behaviour depends on your audio input.\n\nOpen: what the climb shows mid-run — the plan filling in, or the achieved path drawn over the plan when adaptive diverges from it."
+    },
+    {
+      "id": "note-shell",
+      "page": "page-1",
+      "x": 4680,
+      "y": -520,
+      "w": 1280,
+      "text": "4 · THE SHELL\n\nFive navigation surfaces become two fixed frames. The rail carries modes and library together, which is the only structure that survives the roadmap: Paths needs a home and exercises need a library, and neither should cost a fifth tab.\n\nThe fixed-frame rule is the load-bearing part. Compare your second and third screenshots: opening the coach shifts the whole metronome column sideways. Anchoring the stage to the rail costs nothing and ends that permanently."
+    },
+    {
+      "id": "note-coach-options",
+      "page": "page-2",
+      "x": 0,
+      "y": -520,
+      "w": 1280,
+      "text": "WHERE THE COACH LIVES\n\nThe roadmap leaves this open — \"coach card, or a dedicated chat view; proposal: coach card, expandable\" — and never says what expandable means. These are the three real answers with what each costs.\n\nThe recommendation is not a fourth option. A and B are the same panel at two sizes with a rule for when it changes: docked while the click runs, centre the moment you stop, because that is exactly when you have a question and nothing left to watch. If you want the coach to feel like the app rather than a sidebar, that rule is what does it — not more pixels."
+    },
+    {
+      "id": "note-coach-centre",
+      "page": "page-2",
+      "x": 1400,
+      "y": -520,
+      "w": 1440,
+      "text": "THE COACH, CENTRE STAGE\n\nThe click never stops. It collapses into a live strip along the top — tempo, beat dots, bar, and how far ahead you are right now — so giving the conversation the full width costs you nothing you were actually watching.\n\nThe chart inside the answer is the point. \"Deterministic decides, model narrates\" only reads as trustworthy if the evidence sits next to the sentence. Every number in that card is computable today from per-beat-position bias — the insight layer in your decisions doc — and the line under it says so out loud.\n\nAnything the coach proposes is a button you press. It never changes your tempo on its own."
+    },
+    {
+      "id": "note-path",
+      "page": "page-3",
+      "x": 0,
+      "y": -520,
+      "w": 1440,
+      "text": "WHERE THIS IS HEADED — the learning-paths pivot in the same shell\n\nThis is not a proposal to build now. It is a test of the frames: if the redesign cannot absorb the pivot without new tabs, it is the wrong redesign.\n\nThe rail becomes the path and its steps. The stage takes the tab strip and the coloured trust view from decision D0.8 — expected note, matched onset, deviation, colour, no pitch detection required. The ceiling bar is the comfortable/peak pair. The dock speaks at the segment boundary and offers the next step for you to accept.\n\nIt is also the argument for the docked transport and the left-anchored stage: notation wants full width and a stable left edge, and it is the one thing coming that would break a centred layout."
+    },
+    {
+      "id": "note-themes",
+      "page": "page-1",
+      "x": 4680,
+      "y": 1100,
+      "w": 1280,
+      "text": "THREE THEMES, DESIGNED FROM SCRATCH\n\nNot the ten that ship today — new ones, each committing to a different idea of what a practice room is.\n\nASH — cold graphite, acid lime, 4px corners, Archivo. A piece of studio hardware: the accent is a signal LED, not a brand colour, and it appears only where something is live.\n\nEMBER — warm brown-black, burnt orange, 16px corners, Outfit. A valve amp in a dim room. Softer, slower, the one you would leave running for two hours.\n\nMANUSCRIPT — warm paper, ink indigo, a serif interface. A method book on a music stand, for playing in daylight. This is the honest stress test: with no dark background doing the separating, the surfaces have to do it.\n\nEach theme sets a ground, three surfaces, five text levels, an accent, a SECOND accent for the coach, four feedback colours, a font and a corner radius. That last pair matters more than the palette: the radius takes the Play button from a pill to a hard rectangle, and the font changes the app's whole posture. The numerals stay Bricolage in all three so the comparison is about colour and chrome.\n\nThe second accent is the piece today's token system does not have. There is only --accent, so the coach would have to borrow the app's colour — and in a violet theme it would vanish into it entirely. Every theme here carries --accent-2 instead. That is a decision to take before any of this is built."
+    },
+    {
+      "id": "note-themes-coach",
+      "page": "page-2",
+      "x": 4680,
+      "y": 1100,
+      "w": 1100,
+      "text": "The coach, centre stage, in the same three themes.\n\nThis is where the second accent earns its place: the coach's colour is what tells you, without reading a word, that this panel is a different kind of thing from the metronome around it."
+    },
+    {
+      "id": "note-directions",
+      "page": "page-4",
+      "x": 0,
+      "y": -560,
+      "w": 1440,
+      "text": "THREE DIRECTIONS — the structural bet, put to the test\n\nA is the one you have already seen; it lives on page one and is not repeated here at full size. The third artboard sets all three side by side on the three jobs that actually matter.\n\nSame type, same palette, same controls in all three, on purpose. The only variable is how much permanent furniture the app has. A keeps a rail and docks panels to the edges. B keeps one band of chrome at the top and floats everything else over the stage. C keeps nothing at all and summons what you ask for.\n\nWhat each is really betting:\nA — the roadmap needs somewhere to put a library, so pay for that space now.\nB — today's structure was never wrong, only badly drawn; and floating panels fix the jumping without a rail.\nC — a metronome is an instrument display, and everything else is an interruption.\n\nWhere I land, for what it is worth: A. But B is a serious answer, not a strawman — it is far cheaper to build, and if paths were ever dropped it becomes the right answer outright. C is the one I would want on my own screen and the one I would not ship to someone opening the app for the first time."
+    }
+  ],
+  "launch": {
+    "view": "canvas",
+    "page": "page-4"
+  }
+}

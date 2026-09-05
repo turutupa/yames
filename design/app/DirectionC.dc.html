@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Manrope:wght@400;500;600;700;800&display=swap">
+  <style>
+    body { margin: 0; background: #08070f; }
+    a { color: #00d4ff; text-decoration: none; }
+    a:hover { color: #7de8ff; }
+    .ui { font-family: "Manrope", "Segoe UI", "Helvetica Neue", Arial, sans-serif; }
+    .disp { font-family: "Bricolage Grotesque", "Manrope", "Segoe UI", Arial, sans-serif; }
+    .dot { width: 60px; height: 60px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.14); }
+    .sub { display: flex; gap: 6px; }
+    .sub span { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.18); }
+    .key { font-size: 11px; font-weight: 800; letter-spacing: 0.06em; color: #55527a; border: 1px solid rgba(255,255,255,0.09); border-radius: 5px; padding: 4px 7px; }
+  </style>
+</helmet>
+
+<div class="ui" style="width: 1440px; height: 900px; background: #08070f; color: #eceaf6; display: flex; flex-direction: column; overflow: hidden; position: relative;">
+
+  <div style="position: absolute; top: 130px; left: 50%; width: 900px; height: 640px; transform: translateX(-50%); background: radial-gradient(ellipse at center, rgba(0,212,255,0.055), rgba(8,7,15,0) 68%); pointer-events: none;"></div>
+
+  <div style="height: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 12px 0 18px; position: relative;">
+    <div style="display: flex; align-items: center; gap: 10px; opacity: 0.35;">
+      <div style="width: 17px; height: 17px; border-radius: 5px; background: linear-gradient(135deg, #00d4ff, #8b5cf6);"></div>
+      <span class="disp" style="font-size: 14px; font-weight: 800; letter-spacing: -0.03em; color: #b6b2d2;">yames</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 6px; color: #3d3a58;">
+      <div style="width: 34px; height: 26px; display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2"><line x1="1" y1="6" x2="11" y2="6"/></svg></div>
+      <div style="width: 34px; height: 26px; display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1.5" y="1.5" width="9" height="9"/></svg></div>
+      <div style="width: 34px; height: 26px; display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2"><line x1="1.5" y1="1.5" x2="10.5" y2="10.5"/><line x1="10.5" y1="1.5" x2="1.5" y2="10.5"/></svg></div>
+    </div>
+  </div>
+
+  <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 52px; position: relative; padding-bottom: 40px;">
+
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 14px;">
+      <span class="disp" style="font-size: 244px; line-height: 0.76; font-weight: 800; letter-spacing: -0.06em;">130</span>
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <span style="font-size: 13px; font-weight: 800; letter-spacing: 0.2em; color: #00d4ff;">ALLEGRO</span>
+        <span style="width: 4px; height: 4px; border-radius: 50%; background: #3d3a58;"></span>
+        <span style="font-size: 13px; font-weight: 700; letter-spacing: 0.12em; color: #605d80;">6/8 · TRIPLETS</span>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 46px;">
+      <div style="display: flex; gap: 26px;">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 13px;">
+          <div class="dot" style="border-color: #00d4ff; box-shadow: 0 0 0 7px rgba(0,212,255,0.06);"></div>
+          <div class="sub"><span></span><span></span><span></span></div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 13px;">
+          <div class="dot"></div>
+          <div class="sub"><span></span><span></span><span></span></div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 13px;">
+          <div class="dot"></div>
+          <div class="sub"><span></span><span></span><span></span></div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 26px;">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 13px;">
+          <div class="dot" style="border-color: #a78bfa; box-shadow: 0 0 0 7px rgba(167,139,250,0.06);"></div>
+          <div class="sub"><span></span><span></span><span></span></div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 13px;">
+          <div class="dot"></div>
+          <div class="sub"><span></span><span></span><span></span></div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 13px;">
+          <div class="dot"></div>
+          <div class="sub"><span></span><span></span><span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 16px; opacity: 0.55;">
+      <div style="width: 46px; height: 46px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; color: #9995ba;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 11px; width: 152px; height: 46px; border-radius: 23px; border: 1.5px solid rgba(255,255,255,0.16); color: #eceaf6;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>
+        <span style="font-size: 15px; font-weight: 800;">Play</span>
+      </div>
+      <div style="width: 46px; height: 46px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; color: #9995ba;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="height: 58px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; position: relative;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span style="width: 6px; height: 6px; border-radius: 50%; background: #fbbf24;"></span>
+      <span style="font-size: 13px; font-weight: 700; color: #7d799e;">Warmup</span>
+      <span style="font-size: 12.5px; font-weight: 600; color: #4e4b6b;">edited</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 18px;">
+      <div style="display: flex; align-items: center; gap: 8px;"><span class="key">SPACE</span><span style="font-size: 12px; font-weight: 600; color: #4e4b6b;">play</span></div>
+      <div style="display: flex; align-items: center; gap: 8px;"><span class="key">↑ ↓</span><span style="font-size: 12px; font-weight: 600; color: #4e4b6b;">tempo</span></div>
+      <div style="display: flex; align-items: center; gap: 8px;"><span class="key">T</span><span style="font-size: 12px; font-weight: 600; color: #4e4b6b;">tap</span></div>
+      <div style="display: flex; align-items: center; gap: 8px;"><span class="key" style="color: #7de8ff; border-color: rgba(0,212,255,0.3);">⌘ K</span><span style="font-size: 12px; font-weight: 600; color: #605d80;">everything else</span></div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

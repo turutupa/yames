@@ -13,3 +13,7 @@ videos/
 
 # Tauri regenerates these on every build; they churned in every worktree and PR.
 src-tauri/gen/schemas/
+
+# Seeded design-canvas output — regenerated from the .dc.html working files
+design/**/yames-app-redesign.html
+design/**/yames-site-directions.html
