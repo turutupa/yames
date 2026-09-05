@@ -1176,3 +1176,100 @@
   opacity: 1;
   color: var(--text-primary);
 }
+
+/* =================== Metronome, Phase C1 =================== */
+
+/* Subdivision tiles carry their name. Six near-identical note glyphs needed a
+   tooltip to tell apart, which is not a control you can use with an instrument
+   in your hands (UI_DECISIONS U2.2). */
+.sub-row {
+  max-width: 640px;
+  gap: 8px;
+}
+
+.sub-row-btn {
+  flex-direction: column;
+  gap: 7px;
+  padding: 12px 6px 10px;
+  min-height: 74px;
+  border-radius: var(--radius-sm);
+}
+
+.sub-row-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.sub-row-btn.active .sub-row-label {
+  color: var(--accent);
+}
+
+/* The tempo ruler. Still a range input — it keeps the drag, the arrow keys and
+   the screen-reader semantics — but it reads as a measured scale rather than a
+   progress bar, and the Italian markings sit under it at their real positions
+   (UI_DECISIONS U2.1). Ticks every 5 BPM over the 20–300 range, majors every
+   20: 5/280 and 20/280 of the track width. */
+.bpm-slider-wrap {
+  max-width: 620px;
+  gap: 9px;
+}
+
+.bpm-slider {
+  height: 26px;
+  border-radius: 0;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--text-primary) 30%, transparent) 0 1px,
+      transparent 1px calc(100% / 56)
+    ),
+    linear-gradient(
+      to right,
+      var(--accent) 0%,
+      var(--accent) var(--slider-pct, 50%),
+      color-mix(in srgb, var(--text-primary) 12%, transparent) var(--slider-pct, 50%),
+      color-mix(in srgb, var(--text-primary) 12%, transparent) 100%
+    );
+  background-size:
+    100% 11px,
+    100% 3px;
+  background-position:
+    left bottom,
+    left calc(100% - 14px);
+  background-repeat: no-repeat;
+}
+
+.tempo-scale {
+  position: relative;
+  width: 100%;
+  height: 13px;
+}
+
+.tempo-scale span {
+  position: absolute;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.tempo-scale span.current {
+  color: var(--accent);
+}
+
+/* The beat dots are what you read from two metres away with a guitar on, so
+   they grow — 36px to 44px (UI_DECISIONS U2.4). Size only: the active and
+   downbeat treatments above already do the right thing and are left alone. */
+.beat-dot {
+  width: 44px;
+  height: 44px;
+}

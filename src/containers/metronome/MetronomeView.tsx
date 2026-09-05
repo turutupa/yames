@@ -6,10 +6,14 @@ import type { useEvaluation } from "../../hooks/useEvaluation";
 import { setSubdivision, setBeatGroups } from "../../ipc";
 import {
   getTempoMarking,
+  getTempoScale,
+  MAX_BPM,
+  MIN_BPM,
 } from "../../constants/metronome";
 import { GroupEditor } from "./GroupEditor";
 import { MeterPresets } from "./MeterPresets";
 import { SubdivisionIcon } from "../../components/MetronomeIcons";
+import DriftMeter from "../../components/DriftMeter";
 
 type Evaluation = ReturnType<typeof useEvaluation>;
 
@@ -66,6 +70,7 @@ export function MetronomeView({
   onCommitBpmEdit,
 }: MetronomeViewProps) {
   const { t } = useTranslation();
+  const marking = getTempoMarking(state.bpm);
 
   // Per-beat evaluation tint, re-keyed from the engine's sequential beat
   // index to the bar position the dot grid is drawn on. Only the beat
@@ -132,8 +137,8 @@ export function MetronomeView({
           <input
             type="range"
             className="bpm-slider"
-            min={20}
-            max={300}
+            min={MIN_BPM}
+            max={MAX_BPM}
             value={state.bpm}
             onChange={(e) => onBpmChange(parseInt(e.target.value))}
             style={
@@ -142,9 +147,18 @@ export function MetronomeView({
               } as React.CSSProperties
             }
           />
-          <span className="tempo-marking">
-            {getTempoMarking(state.bpm)}
-          </span>
+          <div className="tempo-scale" aria-hidden="true">
+            {getTempoScale().map(({ label, percent }) => (
+              <span
+                key={label}
+                className={label === marking ? "current" : undefined}
+                style={{ left: `${percent}%` }}
+              >
+                {label}
+              </span>
+            ))}
+          </div>
+          <span className="tempo-marking">{marking}</span>
         </div>
       </section>
 
@@ -167,14 +181,17 @@ export function MetronomeView({
           }}
         />
 
-        {/* The live early/late needle used to sit here. Pulled from the
-            metronome screen at the owner's request: it had been rendering
-            at opacity 0 since it was written, so making it paint (#40) was
-            the first time anyone saw it on this screen, and it is not a
-            decision that was ever actually taken. The component and its
-            tests are intentionally kept — `HearItWorkStep` still uses it,
-            where a needle responding to your playing is the whole point of
-            the step — so putting it back here is a one-line change. */}
+        {/* The live early/late needle. It was pulled from this screen after #40
+            made it paint for the first time — it had been rendering at opacity 0
+            since it was written, so nobody had ever actually decided it belonged
+            here. UI_DECISIONS U2.5 is that decision, taken on purpose: while you
+            are playing with the input on, how early or late you are is the most
+            useful thing this screen can tell you. */}
+        <DriftMeter
+          lastFeedback={evaluation.lastFeedback}
+          avgDeviation={evaluation.avgDeviation}
+          visible={evaluation.enabled && state.isPlaying}
+        />
 
         <div className="sub-row">
           <span className="row-side-label">{t("metronome.subdiv")}</span>
@@ -184,9 +201,12 @@ export function MetronomeView({
               className={`sub-row-btn view-stagger-item ${state.subdivision === sub ? "active" : ""}`}
               style={{ animationDelay: `${100 + i * 25}ms` }}
               onClick={() => setSubdivision(sub)}
-              data-tooltip={t(`subdiv.${sub}`)}
             >
-              <SubdivisionIcon sub={sub} size={18} />
+              <SubdivisionIcon sub={sub} size={20} />
+              {/* The six glyphs are near-identical at a glance and used to need
+                  a tooltip to tell apart. Naming them is the fix — UI_DECISIONS
+                  U2.2. */}
+              <span className="sub-row-label">{t(`subdiv.${sub}`)}</span>
             </button>
           ))}
         </div>

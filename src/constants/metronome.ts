@@ -106,6 +106,40 @@ export const TEMPO_MARKINGS: [number, string][] = [
   [178, "Prestissimo"],
 ];
 
+/**
+ * BPM bounds of the tempo slider. Exported so the ruler's scale and the
+ * slider itself cannot drift apart.
+ */
+export const MIN_BPM = 20;
+export const MAX_BPM = 300;
+
+/**
+ * The markings the tempo ruler labels, with their position along it as a
+ * percentage (UI_DECISIONS U2.1).
+ *
+ * Not all thirteen: Lento, Adagietto, Andantino, Allegretto and Vivace open
+ * bands only a few BPM wide, and at ruler scale their labels would sit on top
+ * of their neighbours. These five are the ones a player navigates by, spaced
+ * far enough apart to read — the same reason a ruler numbers every twentieth
+ * mark rather than every one. Positions are computed from TEMPO_MARKINGS, so
+ * they stay honest if those move.
+ */
+export const TEMPO_SCALE_LABELS = [
+  "Largo",
+  "Moderato",
+  "Allegro",
+  "Presto",
+  "Prestissimo",
+] as const;
+
+export function getTempoScale(): Array<{ label: string; percent: number }> {
+  return TEMPO_SCALE_LABELS.map((label) => {
+    const entry = TEMPO_MARKINGS.find(([, name]) => name === label);
+    if (!entry) throw new Error(`TEMPO_SCALE_LABELS names ${label}, which TEMPO_MARKINGS does not`);
+    return { label, percent: ((entry[0] - MIN_BPM) / (MAX_BPM - MIN_BPM)) * 100 };
+  });
+}
+
 export function getTempoMarking(bpm: number): string {
   for (let i = TEMPO_MARKINGS.length - 1; i >= 0; i--) {
     if (bpm >= TEMPO_MARKINGS[i][0]) return TEMPO_MARKINGS[i][1];
