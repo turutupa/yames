@@ -306,3 +306,46 @@ words; both mean retranslating a label and its description into fifteen
 languages, and choosing product vocabulary is the owner's call, not a thing to
 change in passing while unifying a duplicate.
 
+
+### U9.1 · A chain is a list of copies, not a list of pointers — **decided**
+
+A chain step holds a full configuration of its own. Referencing presets by id
+would mean editing "Warmup" silently changes every chain that used it, and
+deleting it breaks them; the owner's call was that a preset should be atomic,
+because a pointer is a thing the user has to hold in their head and nothing on
+the screen can show them.
+
+The cost is real and accepted: a step that came from a preset does not track
+that preset afterwards. The two are the same shape, so "save this step as a
+preset" and "add this preset as a step" both stay one-line operations.
+
+### U9.2 · Two axes per gap: when to move, and how to arrive — **decided**
+
+The trigger answers *when* — when I say (button, hotkey or footswitch), after
+N bars, after N seconds. The transition answers *how* — clean cut, count me
+in, rest a bar. Keeping them separate is what lets a chain say "after two
+minutes, with two bars of count-in", which is the thing a warm-up actually
+wants and which a single trigger control cannot express.
+
+### U9.3 · The bar you are in always finishes — **decided, and forced**
+
+`engine.rs` resets `measure_beat` to 0 the instant `beat_groups` changes, so a
+config swap lands as an immediate downbeat wherever it happens. For a bar-based
+trigger that is free, because the switch already falls on a bar line. For a
+time-based one or a pedal press it would cut the bar in half — in 7/8, halfway
+through. So every switch defers to the next downbeat. Not an option, a rule.
+
+### U9.4 · It is called a chain — **decided**
+
+"Chain" is vague in isolation and precise where it lives: in a list headed
+PRESETS, beside presets, "chain" says exactly what it is. Setlist and routine
+are musician's words for something a musician would expect to hold songs or a
+practice plan, and a chain here may hold neither.
+
+### U9.5 · The count-in has to be unwelded from the ramp — **open**
+
+The engine already plays a count-in, with its own click and a clean handover
+where the last warm-up beat becomes beat 0. It is gated on `ramp_warming_up`
+and reads `speed_ramp.warmup_*`, so today only a drill can have one. U9.2's
+"count me in" needs that machinery to belong to the engine rather than to the
+ramp. Modest Rust work, and the audio side of it is already written.
