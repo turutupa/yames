@@ -376,6 +376,29 @@ decision the owner may want to reverse.
   presentations, not one component used twice, and unifying them is a real
   refactor of a screen best done with it in front of you.
 
+### From looking at it running (2026-09-05)
+
+Screenshots of the built app against the mockups turned up five things no
+test would have caught, all fixed:
+
+- **The stage floated.** Every element was a centred column with its own
+  max-width, so on a wide window the tempo sat in the middle of a large empty
+  field. Both screens now anchor to a fixed offset from the rail (U1.3), with
+  the measure capped so controls do not smear across a 2000px monitor.
+- **The tempo was a number on a page, not a readout** — 64px on the
+  metronome, and the drill's current tempo was smaller than the preset name
+  in the rail. Now 104px and 80px.
+- **The drill's climb lived below the fold.** The settings form opened by
+  default and sprang back open on every stop, pushing the grid off the bottom
+  of the window. It starts collapsed now and never reopens on its own.
+- **Quintuplet was byte-identical to Eighth, and Sextuplet to 16th.** Two
+  pairs of controls that looked the same and did different things — a bug
+  that predates the revamp, and one the C1 labels had masked rather than
+  fixed. All six glyphs are redrawn from one shape, with a notehead per click
+  and the tuplet numeral above the beam.
+- **The beat groups were cards.** Three pieces of chrome around the thing you
+  look at while playing; the box now appears only on hover.
+
 **The app boots.** `npm run tauri dev` compiles, runs, hot-reloads and exits
 clean — checked repeatedly while the later commits went in. What has *not*
 happened is a person looking at every screen: the layout bugs fixed in
