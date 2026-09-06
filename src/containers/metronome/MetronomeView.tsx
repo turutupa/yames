@@ -12,6 +12,7 @@ import {
   MIN_BPM,
 } from "../../constants/metronome";
 import { GroupEditor } from "./GroupEditor";
+import { LastSession } from "./LastSession";
 import { MeterPresets } from "./MeterPresets";
 import { SubdivisionIcon } from "../../components/MetronomeIcons";
 import DriftMeter from "../../components/DriftMeter";
@@ -41,13 +42,17 @@ interface MetronomeViewProps {
 }
 
 /**
- * The main "Metronome" tab content — BPM display, tap button, slider, beat
- * dots with subdivision sub-dots, optional drift meter when audio evaluation
- * is enabled, and the subdivision + time-signature button rows.
+ * The main "Metronome" tab content — BPM display, tap button, tempo ruler,
+ * the meter and its beat dots, optional drift meter when audio evaluation is
+ * enabled, and the subdivision cards.
+ *
+ * The order is the design's: TEMPO → ruler → METER → dots → SUBDIVISION. The
+ * meter sits above the dots because the meter is what the dots *are* —
+ * reading "9/8" after counting nine circles is backwards.
  *
  * All beat/state values come from the parent (which owns `useMetronome`).
- * Subdivision and time-signature buttons fire the IPC setters directly —
- * keeping that wiring out of the parent.
+ * Subdivision and beat-group changes fire the IPC setters directly — keeping
+ * that wiring out of the parent.
  */
 export function MetronomeView({
   state,
@@ -86,91 +91,107 @@ export function MetronomeView({
     <>
       {/* `data-tour` ids are the tour's (O6) anchors — see tour/stops.ts. */}
       <section className="bpm-section" data-tour="bpm">
-        <span className="stage-label">{t("metronome.tempo")}</span>
-        <div className="bpm-display view-stagger-item" style={{ animationDelay: '0ms' }}>
-          {editingBpm ? (
-            <input
-              ref={bpmInputRef}
-              type="text"
-              inputMode="numeric"
-              className="bpm-input"
-              value={bpmEditValue}
-              onChange={(e) =>
-                setBpmEditValue(e.target.value.replace(/\D/g, ""))
-              }
-              onBlur={onCommitBpmEdit}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") onCommitBpmEdit();
-                if (e.key === "Escape") setEditingBpm(false);
-              }}
-              autoFocus
-            />
-          ) : (
-            <span
-              className="bpm-input bpm-clickable"
-              onClick={onStartBpmEdit}
-            >
-              {state.bpm}
-            </span>
-          )}
-          {/* The unit and the marking belong with the number they describe.
-              The marking is also highlighted on the ruler below, but that is
-              a position rather than a label. */}
-          <div className="tempo-units">
-            <span className="tempo-unit">BPM</span>
-            <span className="tempo-marking">{marking}</span>
-          </div>
-          <div className="tempo-controls">
-            <button
-              className="bpm-btn"
-              aria-label={t("metronome.tempoDown")}
-              onClick={() => onBpmChange(state.bpm - 5)}
-            >
-              −
-            </button>
-            <button
-              className="bpm-btn"
-              aria-label={t("metronome.tempoUp")}
-              onClick={() => onBpmChange(state.bpm + 5)}
-            >
-              +
-            </button>
-            <button
-              className={`tap-btn ${tapActive ? "active" : ""} ${tapPulse ? "pulse" : ""}`}
-              onClick={onTap}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M8 13V4.5a1.5 1.5 0 0 1 3 0V12" />
-                <path d="M11 11.5V4a1.5 1.5 0 0 1 3 0v8" />
-                <path d="M14 12V6.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-.5a6 6 0 0 1-5.5-4l-1.4-3.2a1.6 1.6 0 0 1 2.7-1.7L8 14" />
-              </svg>
-              {t("metronome.tap")}
-              {tapActive && tapCount >= 2 && (
-                <span className="tap-count">{t("metronome.tapCount", { count: tapCount })}</span>
+        <div className="tempo-head">
+          <div className="tempo-block">
+            <span className="stage-label">{t("metronome.tempo")}</span>
+            <div className="bpm-display view-stagger-item" style={{ animationDelay: '0ms' }}>
+              {editingBpm ? (
+                <input
+                  ref={bpmInputRef}
+                  type="text"
+                  inputMode="numeric"
+                  className="bpm-input"
+                  value={bpmEditValue}
+                  onChange={(e) =>
+                    setBpmEditValue(e.target.value.replace(/\D/g, ""))
+                  }
+                  onBlur={onCommitBpmEdit}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") onCommitBpmEdit();
+                    if (e.key === "Escape") setEditingBpm(false);
+                  }}
+                  autoFocus
+                />
+              ) : (
+                <span
+                  className="bpm-input bpm-clickable"
+                  onClick={onStartBpmEdit}
+                >
+                  {state.bpm}
+                </span>
               )}
-            </button>
+              {/* The unit and the marking belong with the number they describe.
+                  The marking is also highlighted on the ruler below, but that is
+                  a position rather than a label. */}
+              <div className="tempo-units">
+                <span className="tempo-unit">BPM</span>
+                <span className="tempo-marking">{marking}</span>
+              </div>
+              <div className="tempo-controls">
+                <button
+                  className="bpm-btn"
+                  aria-label={t("metronome.tempoDown")}
+                  onClick={() => onBpmChange(state.bpm - 5)}
+                >
+                  −
+                </button>
+                <button
+                  className="bpm-btn"
+                  aria-label={t("metronome.tempoUp")}
+                  onClick={() => onBpmChange(state.bpm + 5)}
+                >
+                  +
+                </button>
+                <button
+                  className={`tap-btn ${tapActive ? "active" : ""} ${tapPulse ? "pulse" : ""}`}
+                  onClick={onTap}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M8 13V4.5a1.5 1.5 0 0 1 3 0V12" />
+                    <path d="M11 11.5V4a1.5 1.5 0 0 1 3 0v8" />
+                    <path d="M14 12V6.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-.5a6 6 0 0 1-5.5-4l-1.4-3.2a1.6 1.6 0 0 1 2.7-1.7L8 14" />
+                  </svg>
+                  {t("metronome.tap")}
+                  {tapActive && tapCount >= 2 && (
+                    <span className="tap-count">{t("metronome.tapCount", { count: tapCount })}</span>
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
+
+          {/* Right-aligned against the stage's far edge, as drawn. It is a
+              rest-state readout: the `MetronomePlaying` artboard gives this
+              corner to the bar counter instead, and the docked transport
+              already carries that. */}
+          <LastSession isPlaying={state.isPlaying} />
         </div>
+
         <div className="bpm-slider-wrap view-stagger-item" style={{ animationDelay: '40ms' }}>
-          <input
-            type="range"
-            className="bpm-slider"
-            min={MIN_BPM}
-            max={MAX_BPM}
-            value={state.bpm}
-            onChange={(e) => onBpmChange(parseInt(e.target.value))}
-            style={
-              {
-                "--slider-pct": `${sliderPercent}%`,
-              } as React.CSSProperties
-            }
-          />
+          {/* Numbers above the ticks, era names below, a caret at the current
+              tempo and no fill: a ruler measures, it does not report progress
+              towards 300 BPM (UI_DECISIONS U2.1). */}
           <div className="tempo-ticks" aria-hidden="true">
             {getTempoTicks().map(({ bpm, percent }) => (
               <span key={bpm} style={{ left: `${percent}%` }}>
                 {bpm}
               </span>
             ))}
+          </div>
+          <div className="tempo-ruler">
+            <input
+              type="range"
+              className="bpm-slider"
+              min={MIN_BPM}
+              max={MAX_BPM}
+              value={state.bpm}
+              onChange={(e) => onBpmChange(parseInt(e.target.value))}
+            />
+            <span
+              className="tempo-caret"
+              aria-hidden="true"
+              style={{ left: `${sliderPercent}%` }}
+            />
           </div>
           <div className="tempo-scale" aria-hidden="true">
             {getTempoScale().map(({ label, percent }) => (
@@ -186,7 +207,12 @@ export function MetronomeView({
         </div>
       </section>
 
-      <div className="beat-controls-group" data-tour="subdivision">
+      {/* Without it tempo and meter read as one run-on block. */}
+      <div className="stage-divider" aria-hidden="true" />
+
+      <section className="meter-section">
+        <MeterPresets beatGroups={state.beatGroups} freeMode={state.freeMode} />
+
         <GroupEditor
           beatGroups={state.beatGroups}
           subdivision={state.subdivision}
@@ -197,11 +223,11 @@ export function MetronomeView({
           freeMode={state.freeMode}
           isAccentBeat={currentBeat?.isAccent ?? false}
           feedback={dotFeedback}
-          onBeatCountChange={(next) => {
+          onBeatGroupsChange={(next) => {
             // No notifySettingsChange() — useSession watches the meter
             // and fires ONE debounced coach boundary for a burst of
             // stepper clicks.
-            setBeatGroups([next]);
+            setBeatGroups(next);
           }}
         />
 
@@ -210,15 +236,18 @@ export function MetronomeView({
             since it was written, so nobody had ever actually decided it belonged
             here. UI_DECISIONS U2.5 is that decision, taken on purpose: while you
             are playing with the input on, how early or late you are is the most
-            useful thing this screen can tell you. */}
+            useful thing this screen can tell you. It sits under the dots
+            because that is where the `MetronomePlaying` artboard puts it. */}
         <DriftMeter
           lastFeedback={evaluation.lastFeedback}
           avgDeviation={evaluation.avgDeviation}
           visible={evaluation.enabled && state.isPlaying}
         />
+      </section>
 
+      <section className="sub-section" data-tour="subdivision">
+        <span className="stage-label">{t("metronome.subdivision")}</span>
         <div className="sub-row">
-          <span className="row-side-label">{t("metronome.subdiv")}</span>
           {([1, 2, 3, 4, 5, 6] as Subdivision[]).map((sub, i) => (
             <button
               key={sub}
@@ -226,7 +255,7 @@ export function MetronomeView({
               style={{ animationDelay: `${100 + i * 25}ms` }}
               onClick={() => setSubdivision(sub)}
             >
-              <SubdivisionIcon sub={sub} size={20} />
+              <SubdivisionIcon sub={sub} size={28} />
               {/* The six glyphs are near-identical at a glance and used to need
                   a tooltip to tell apart. Naming them is the fix — UI_DECISIONS
                   U2.2. */}
@@ -234,9 +263,7 @@ export function MetronomeView({
             </button>
           ))}
         </div>
-      </div>
-
-      <MeterPresets beatGroups={state.beatGroups} freeMode={state.freeMode} />
+      </section>
     </>
   );
 }

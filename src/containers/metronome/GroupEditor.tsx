@@ -1,7 +1,11 @@
 import { useTranslation } from "react-i18next";
 import {
+  addBeatToLastGroup,
+  MAX_FREE_BEATS,
+  MIN_FREE_BEATS,
   nextFreeBeatCount,
   prevFreeBeatCount,
+  removeBeatFromLastGroup,
 } from "../../constants/metronome";
 import type { BeatFeedback } from "../../types";
 import { accentPositions, meterTotal } from "../../utils/meter";
@@ -28,11 +32,13 @@ interface GroupEditorProps {
    */
   feedback?: Map<number, BeatFeedback>;
   /**
-   * Called by the free-mode stepper with the new beat count. Kept as a prop so
-   * this component stays presentational — the owner (`MetronomeView`) does the
-   * IPC. No-op default lets the grouped branch render without wiring.
+   * Called by the stepper with the whole new grouping. Kept as a prop so this
+   * component stays presentational — the owner (`MetronomeView`) does the IPC.
+   * It takes an array rather than a count because the grouped stepper resizes
+   * the last group: `[3, 3]` → `[3, 4]` is not expressible as a number.
+   * No-op default lets either branch render without wiring.
    */
-  onBeatCountChange?: (next: number) => void;
+  onBeatGroupsChange?: (next: number[]) => void;
 }
 
 export function GroupEditor({
@@ -45,16 +51,72 @@ export function GroupEditor({
   freeMode = false,
   isAccentBeat = false,
   feedback,
-  onBeatCountChange,
+  onBeatGroupsChange,
 }: GroupEditorProps) {
   const { t } = useTranslation();
   const total = meterTotal(beatGroups);
-  const formula = beatGroups.join(" + ");
   const clicksPerBar = total * (SUBDIVISION_MULTIPLIER[subdivision] ?? 1);
   // Static markers only — the LIVE accent comes from the engine via
   // `isAccentBeat`, so the two can never disagree (and stays false in
   // FREE mode, where `accentPositions` is empty anyway).
   const accents = accentPositions(beatGroups, freeMode);
+
+  /**
+   * The bar's length, as the design draws it: a compact `− 6 +` beside the
+   * dots (UI_REVAMP gaps M5). It replaces three lines of prose — the beat
+   * total, the `3 + 3 + 3` formula and a caption under every group — none of
+   * which the mockup has. Nothing they said is gone: the number here IS the
+   * total, the formula is stated beside the meter chip (`MeterPresets`, which
+   * is where the grouping is actually chosen), each group still carries its
+   * count as a `title`, and clicks/bar — the one figure you cannot read off
+   * the dots — sits next to the stepper.
+   *
+   * FREE mode wraps at both ends and so never disables; a grouped meter
+   * clamps, because wrapping would discard the grouping. See
+   * `addBeatToLastGroup`.
+   */
+  const stepper = (
+    <div className="beat-stepper-row">
+      <div
+        className="beat-stepper"
+        role="group"
+        aria-label={t("metronome.beatCount", { count: total })}
+      >
+        <button
+          className="beat-stepper-btn"
+          onClick={() =>
+            onBeatGroupsChange?.(
+              freeMode
+                ? [prevFreeBeatCount(total)]
+                : removeBeatFromLastGroup(beatGroups),
+            )
+          }
+          disabled={!freeMode && total <= MIN_FREE_BEATS}
+          aria-label={t("metronome.removeBeat")}
+        >
+          −
+        </button>
+        <span className="beat-stepper-value">{total}</span>
+        <button
+          className="beat-stepper-btn"
+          onClick={() =>
+            onBeatGroupsChange?.(
+              freeMode
+                ? [nextFreeBeatCount(total)]
+                : addBeatToLastGroup(beatGroups),
+            )
+          }
+          disabled={!freeMode && total >= MAX_FREE_BEATS}
+          aria-label={t("metronome.addBeat")}
+        >
+          +
+        </button>
+      </div>
+      <span className="beat-clicks">
+        {t("metronome.clicksPerBar", { count: clicksPerBar })}
+      </span>
+    </div>
+  );
 
   if (freeMode) {
     return (
@@ -80,21 +142,7 @@ export function GroupEditor({
             );
           })}
         </div>
-        {/* Formula bar with inline beat count control */}
-        <div className="group-formula">
-          <button
-            className="free-count-btn"
-            onClick={() => onBeatCountChange?.(prevFreeBeatCount(total))}
-            aria-label={t("metronome.removeBeat")}
-          >‹</button>
-          <span className="group-formula-total">{t("metronome.beatCount", { count: total })}</span>
-          <button
-            className="free-count-btn"
-            onClick={() => onBeatCountChange?.(nextFreeBeatCount(total))}
-            aria-label={t("metronome.addBeat")}
-          >›</button>
-          <span className="group-formula-clicks">{t("metronome.clicksPerBar", { count: clicksPerBar })}</span>
-        </div>
+        {stepper}
       </div>
     );
   }
@@ -110,7 +158,10 @@ export function GroupEditor({
     <div className="group-editor">
       <div className="group-editor-boxes">
         {groups.map(({ count, startPos, idx }) => (
-          <div key={idx} className="group-box">
+          // The caption under each group went with the rest of M5's prose. Its
+          // one job — saying how long a group is without counting circles —
+          // survives as the tooltip.
+          <div key={idx} className="group-box" title={t("metronome.beatCount", { count })}>
             <div className="group-display">
               <div className="group-dots">
                 {Array.from({ length: count }, (_, d) => {
@@ -139,16 +190,11 @@ export function GroupEditor({
                 })}
               </div>
             </div>
-            <span className="group-label">{t("metronome.beatCount", { count })}</span>
           </div>
         ))}
       </div>
 
-      <div className="group-formula">
-        <span className="group-formula-total">{t("metronome.beatCount", { count: total })}</span>
-        <span className="group-formula-expr">{formula}</span>
-        <span className="group-formula-clicks">{t("metronome.clicksPerBar", { count: clicksPerBar })}</span>
-      </div>
+      {stepper}
     </div>
   );
 }

@@ -250,20 +250,6 @@
   position: relative;
 }
 
-.row-side-label {
-  position: absolute;
-  left: -52px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 0.6rem;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--text-secondary);
-  opacity: 0.35;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
 .sub-row-btn {
   flex: 1;
   padding: 8px 4px;
@@ -1005,14 +991,6 @@
   flex: 1;
 }
 
-/* =================== Beat controls group (GroupEditor + subdiv, tight spacing) =================== */
-.beat-controls-group {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  width: 100%;
-}
-
 /* =================== Group Editor =================== */
 .group-editor {
   display: flex;
@@ -1066,81 +1044,131 @@
   gap: 5px;
 }
 
+/* Outlined, not filled. Eight filled discs all say "something is happening
+   here"; eight rings with one of them lit says which beat is sounding, which
+   is the only question the dots are asked. The accent ring marks where a
+   group opens, and fill is reserved for the beat you are hearing right now. */
 .group-dot {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--text-primary) 28%, transparent);
+  background: transparent;
+  border: 2px solid color-mix(in srgb, var(--text-primary) 16%, transparent);
+  box-sizing: border-box;
   flex-shrink: 0;
-  transition: background 0.12s, transform 0.12s, box-shadow 0.12s;
+  transition: background 0.12s, border-color 0.12s, transform 0.12s, box-shadow 0.12s;
 }
 
 .group-dot.accent {
-  width: 27px;
-  height: 27px;
-  /* Subtle accent tint at rest — shows where the downbeat falls, not "playing" */
-  background: color-mix(in srgb, var(--accent) 45%, color-mix(in srgb, var(--text-primary) 20%, transparent));
-  box-shadow: none;
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 7%, transparent);
 }
 
 .group-dot.playing {
-  transform: scale(1.2);
+  transform: scale(1.35);
   background: var(--text-primary);
-  box-shadow: 0 0 6px color-mix(in srgb, var(--text-primary) 30%, transparent);
+  border-color: var(--text-primary);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--text-primary) 30%, transparent);
 }
 
 .group-dot.accent.playing {
   background: var(--accent);
-  box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 65%, transparent);
-  transform: scale(1.25);
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 8px color-mix(in srgb, var(--accent) 14%, transparent),
+    0 0 18px color-mix(in srgb, var(--accent) 50%, transparent);
+  transform: scale(1.35);
 }
 
 .group-sub-dots {
   display: flex;
-  gap: 3px;
+  gap: 4px;
   justify-content: center;
 }
 
+/* Small on purpose. At 10px, five sextuplet sub-dots were wider than the beat
+   they belong to and read as a second row of beats; the design draws them as
+   tick marks under the circle, which is what they are. */
 .group-sub-dot {
-  width: 10px;
-  height: 10px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: color-mix(in srgb, var(--text-primary) 18%, transparent);
   transition: background 0.1s;
 }
 
 .group-sub-dot.active {
-  background: color-mix(in srgb, var(--text-primary) 70%, transparent);
+  background: var(--accent);
 }
 
-.group-label {
-  font-size: 0.65rem;
-  color: var(--text-tertiary, var(--text-secondary));
-  letter-spacing: 0.04em;
-  text-align: center;
-}
-
-.group-formula {
+/* ── The bar's length ──
+   A compact `− 6 +` beside the dots, in both FREE and grouped meters. It
+   replaced three lines of prose: the beat total (which is now the stepper's
+   own number), the `3 + 3 + 3` formula (stated beside the meter chip, where
+   the grouping is chosen) and a caption under every group (now the group's
+   `title`). Clicks/bar is the one figure none of that expresses, so it stays
+   here, beside the number it is derived from. */
+.beat-stepper-row {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
-  font-size: 0.875rem;
-  margin-top: 8px;
+  align-items: center;
+  gap: 14px;
 }
 
-.group-formula-total {
-  color: var(--text-secondary);
+.beat-stepper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  padding: 0 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
 }
 
+.beat-stepper-btn {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-tertiary, var(--text-secondary));
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
 
-.group-formula-expr {
+.beat-stepper-btn:hover:not(:disabled) {
+  background: var(--surface-hover);
   color: var(--text-primary);
-  font-weight: 600;
-  letter-spacing: 0.03em;
 }
 
-.group-formula-clicks {
-  color: var(--text-secondary);
+/* Grouped meters clamp at 1 and 16 beats rather than wrapping, because
+   wrapping would silently discard the grouping. FREE mode wraps, so its
+   buttons are never in this state. */
+.beat-stepper-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.beat-stepper-value {
+  min-width: 14px;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.beat-clicks {
+  font-size: 0.75rem;
+  color: var(--text-tertiary, var(--text-secondary));
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 /* ── FREE mode ── */
@@ -1153,46 +1181,38 @@
   justify-content: center;
 }
 
-/* Free-mode active dot — same size as grouped dots, no accent color */
+/* Free-mode dot at rest — a ring like the rest, with no accent structure to
+   mark, since FREE mode has none. */
 .free-dots .group-dot.free-active {
-  background: color-mix(in srgb, var(--text-primary) 30%, transparent);
-}
-
-/* Inline beat count arrows flanking "N beats" in the formula bar */
-.free-count-btn {
-  background: none;
-  border: none;
-  color: var(--text-secondary);
-  font-size: 1.1rem;
-  cursor: pointer;
-  padding: 0 4px;
-  opacity: 0.75;
-  transition: opacity 0.12s, color 0.12s;
-}
-
-/* The chevrons wrap (16 → 1, 1 → 16) rather than clamp, so they never
-   disable — no `:disabled` rule needed. */
-.free-count-btn:hover {
-  opacity: 1;
-  color: var(--text-primary);
+  background: transparent;
+  border-color: color-mix(in srgb, var(--text-primary) 16%, transparent);
 }
 
 /* =================== Metronome, Phase C1 =================== */
 
 /* Subdivision tiles carry their name. Six near-identical note glyphs needed a
    tooltip to tell apart, which is not a control you can use with an instrument
-   in your hands (UI_DECISIONS U2.2). */
+   in your hands (UI_DECISIONS U2.2).
+
+   Six equal columns across the stage rather than a strip of 65px buttons
+   squeezed to one side. The glyph is the control — it gets the room — and the
+   name sits under it at normal weight. */
 .sub-row {
-  max-width: 640px;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  max-width: none;
+  margin: 0;
 }
 
 .sub-row-btn {
   flex-direction: column;
-  gap: 7px;
+  gap: 8px;
   padding: 12px 6px 10px;
-  min-height: 74px;
-  border-radius: var(--radius-sm);
+  min-height: 78px;
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 7%, transparent);
 }
 
 .sub-row-label {
@@ -1206,43 +1226,80 @@
   max-width: 100%;
 }
 
+/* The selected tile is a raised panel with an accent edge, not a solid accent
+   block. Filled, it was the loudest thing on a screen whose loudest thing is
+   supposed to be the tempo — and it forced dark ink on the accent, which is
+   the one contrast pair the themes cannot all satisfy. */
+.sub-row-btn.active {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.sub-row-btn.active:hover {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+}
+
 .sub-row-btn.active .sub-row-label {
   color: var(--accent);
+  font-weight: 800;
 }
 
 /* The tempo ruler. Still a range input — it keeps the drag, the arrow keys and
    the screen-reader semantics — but it reads as a measured scale rather than a
-   progress bar, and the Italian markings sit under it at their real positions
-   (UI_DECISIONS U2.1). Ticks every 5 BPM over the 20–300 range, majors every
-   20: 5/280 and 20/280 of the track width. */
+   progress bar (UI_DECISIONS U2.1).
+
+   Two runs of ticks over the 20–300 range: minor every 5 BPM (56 divisions),
+   major every 20 (14). Nothing is filled. The old accent bar growing from the
+   left said "you are 39% of the way to 300 BPM", which is not a fact about
+   anything — a ruler is a scale, and where you are on it is a mark, not a
+   quantity. That mark is `.tempo-caret`. */
 .bpm-slider-wrap {
-  max-width: 620px;
-  gap: 9px;
+  gap: 7px;
+}
+
+.tempo-ruler {
+  position: relative;
+  width: 100%;
 }
 
 .bpm-slider {
-  height: 26px;
+  height: 24px;
   border-radius: 0;
   background:
     repeating-linear-gradient(
       90deg,
-      color-mix(in srgb, var(--text-primary) 30%, transparent) 0 1px,
+      color-mix(in srgb, var(--text-primary) 14%, transparent) 0 1px,
       transparent 1px calc(100% / 56)
     ),
-    linear-gradient(
-      to right,
-      var(--accent) 0%,
-      var(--accent) var(--slider-pct, 50%),
-      color-mix(in srgb, var(--text-primary) 12%, transparent) var(--slider-pct, 50%),
-      color-mix(in srgb, var(--text-primary) 12%, transparent) 100%
+    repeating-linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--text-primary) 30%, transparent) 0 1px,
+      transparent 1px calc(100% / 14)
     );
   background-size:
-    100% 11px,
-    100% 3px;
+    100% 9px,
+    100% 17px;
   background-position:
     left bottom,
-    left calc(100% - 14px);
+    left bottom;
   background-repeat: no-repeat;
+}
+
+/* One vertical mark at the current tempo, full ruler height so it reads
+   against both runs of ticks. `pointer-events: none` keeps the slider under
+   it draggable through the mark. */
+.tempo-caret {
+  position: absolute;
+  bottom: 0;
+  width: 2px;
+  height: 24px;
+  transform: translateX(-50%);
+  background: var(--accent);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 85%, transparent);
+  pointer-events: none;
 }
 
 .tempo-scale {
@@ -1288,11 +1345,12 @@
   align-items: flex-start;
   width: 100%;
   max-width: 1176px;
-  /* The SUBDIV and METER labels hang 52px to the left of their rows
-     (`.row-side-label` is absolute at left: -52px), so the stage's gutter has
-     to be wide enough to hold them. At 24px they were sliced in half by the
-     content region's edge and read "UBDIV" and "ETER". */
-  padding-left: 80px;
+  /* Even padding, as the artboard draws it. The 80px gutter this used to
+     carry existed for two labels that hung outside their rows; METER and
+     SUBDIVISION are now section headings above the thing they name, so the
+     stage does not have to reserve a margin for them. */
+  padding-left: 48px;
+  padding-right: 48px;
 }
 
 .main-content[data-view="beat"] .bpm-section,
@@ -1304,6 +1362,12 @@
   align-self: flex-start;
 }
 
+/* The rows were capped at 720px for a centred column, so on a 1440 window the
+   content occupied the left 45% of the stage and the right half was empty.
+   The ruler in particular needs every pixel: its markings are laid out in
+   proportion to the tempo they name, so a short ruler crowds Moderato into
+   Allegro. They span the stage now, and the stage's own max-width is what
+   stops them smearing. */
 .main-content[data-view="beat"] .sub-row,
 .main-content[data-view="beat"] .meter-presets,
 .main-content[data-view="beat"] .time-sig-row,
@@ -1311,22 +1375,8 @@
   margin-left: 0;
   margin-right: 0;
   justify-content: flex-start;
-}
-
-/* The rows were capped for a centred column. Anchored left they can breathe,
-   and the tempo ruler in particular needs the width: its markings are laid
-   out in proportion, so a short ruler crowds Moderato into Allegro. */
-.main-content[data-view="beat"] .sub-row {
-  max-width: 720px;
-}
-
-.main-content[data-view="beat"] .meter-presets,
-.main-content[data-view="beat"] .time-sig-row {
-  max-width: 720px;
-}
-
-.main-content[data-view="beat"] .bpm-slider-wrap {
-  max-width: 720px;
+  max-width: none;
+  width: 100%;
 }
 
 .main-content[data-view="beat"] .beat-dots-row {
@@ -1362,15 +1412,21 @@
 /* The beat groups read as dots, not as cards.
    Each group sat in a bordered, filled box with a caption under it — three
    pieces of chrome around the thing you are actually looking at. The box
-   becomes invisible until you reach for it, the gap between groups does the
-   grouping instead of a border, and the dots grow to match the rest of the
-   screen (UI_DECISIONS U2.4). The caption stays: it is how you know which
-   stepper you are about to press. */
+   becomes invisible until you reach for it, and the gap between groups does
+   the grouping instead of a border.
+
+   The stepper stands on the same line as the dots, at the end of the run, so
+   the bar's length is read and changed in one place (M5). */
 
 .main-content[data-view="beat"] .group-editor {
-  align-items: flex-start;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  column-gap: 34px;
+  row-gap: 14px;
   margin-left: 0;
-  max-width: 760px;
+  max-width: none;
 }
 
 .main-content[data-view="beat"] .group-editor-boxes {
@@ -1391,32 +1447,22 @@
   border-color: color-mix(in srgb, var(--text-primary) 9%, transparent);
 }
 
+/* 34px at rest, 46px under the beat that is sounding (the `.playing` scale
+   above) — UI_DECISIONS U2.4, and the two sizes the artboards draw. The
+   accent ring is the same circle as the rest now; what marks it is the ring's
+   colour and its halo, not a bigger diameter, so a 7/8 bar no longer looks
+   like it has three different kinds of beat in it. */
 .main-content[data-view="beat"] .group-dot {
-  width: 28px;
-  height: 28px;
-}
-
-.main-content[data-view="beat"] .group-dot.accent {
   width: 34px;
   height: 34px;
 }
 
 .main-content[data-view="beat"] .group-dots {
-  gap: 12px;
+  gap: 16px;
 }
 
-.main-content[data-view="beat"] .group-label {
-  opacity: 0.55;
-  transition: opacity 0.15s ease;
-}
-
-.main-content[data-view="beat"] .group-box:hover .group-label,
-.main-content[data-view="beat"] .group-box:focus-within .group-label {
-  opacity: 1;
-}
-
-.main-content[data-view="beat"] .group-formula {
-  justify-content: flex-start;
+.main-content[data-view="beat"] .group-dot-wrap {
+  gap: 9px;
 }
 
 /* The tempo ruler needs its width, and its labels need to know when they
@@ -1447,14 +1493,14 @@
    window sideways and painted the subdivision and meter rows straight over
    the transport.
 
-   Nothing is removed. The type comes down, the gutter goes (with the labels
-   that needed it — they name rows whose buttons say the same thing), the rows
+   Nothing is removed. The type comes down, the padding narrows, the rows
    wrap, and the stage scrolls instead of writing over the controls
    underneath it. */
 
 @media (max-width: 819px) {
   .main-content[data-view="beat"] > .view-transition-wrapper {
     padding-left: 20px;
+    padding-right: 20px;
     justify-content: flex-start;
     overflow-y: auto;
     overflow-x: hidden;
@@ -1471,31 +1517,48 @@
     gap: 12px;
   }
 
-  /* These label the row beneath them, and the row's own buttons already say
-     what it is. They hang 52px into a gutter that no longer exists. */
-  .main-content[data-view="beat"] .row-side-label {
-    display: none;
+  /* The tempo block and LAST SESSION stop sharing a line; the readout goes
+     under the number rather than off the edge of the stage. */
+  .main-content[data-view="beat"] .tempo-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
   }
 
-  .main-content[data-view="beat"] .sub-row,
+  .main-content[data-view="beat"] .last-session {
+    align-items: flex-start;
+    padding-bottom: 0;
+  }
+
   .main-content[data-view="beat"] .time-sig-row,
   .main-content[data-view="beat"] .meter-variant-row {
     flex-wrap: wrap;
   }
 
-  .main-content[data-view="beat"] .sub-row-btn {
-    flex: 1 0 88px;
+  /* Two rows of three: six 1fr columns leave the names no room to sit under
+     their glyphs at this width. */
+  .main-content[data-view="beat"] .sub-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .main-content[data-view="beat"] .group-editor-boxes {
     gap: 16px;
     row-gap: 12px;
   }
+
+  .main-content[data-view="beat"] .group-dot {
+    width: 26px;
+    height: 26px;
+  }
+
+  .main-content[data-view="beat"] .group-dots {
+    gap: 10px;
+  }
 }
 
-/* Under ~560px the subdivision names stop fitting their tiles two-up. The
-   glyphs carry the meaning — that is what redrawing them was for — so the
-   names go and the tiles stay reachable. */
+/* Under ~560px the subdivision names stop fitting their tiles. The glyphs
+   carry the meaning — that is what redrawing them was for — so the names go
+   and the tiles stay reachable. */
 @media (max-width: 559px) {
   .main-content[data-view="beat"] .bpm-input {
     font-size: 3.25rem;
@@ -1505,22 +1568,18 @@
     display: none;
   }
 
-  /* Fixed width rather than `flex: 1`: a growing item on a wrapped row
-     stretches to fill it, which left the sixth glyph alone and enormous on a
-     line of its own. At 62px all six sit on one row down to 440px of stage. */
+  /* Back to six, now that only the glyph has to fit: at the 480px minimum the
+     stage is ~400px wide, which is 56px a column after the gaps — enough for
+     the widest glyph, the sextuplet. */
+  .main-content[data-view="beat"] .sub-row {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+  }
+
   .main-content[data-view="beat"] .sub-row-btn {
-    flex: 0 0 auto;
-    width: 52px;
     min-height: 54px;
     padding-left: 0;
     padding-right: 0;
-  }
-
-  /* At the 480px minimum the stage is ~372px wide: six 52px tiles and five
-     6px gaps come to 342. Any wider and the sixth wraps onto a line of its
-     own, which is how this looked before the width was pinned. */
-  .main-content[data-view="beat"] .sub-row {
-    gap: 6px;
   }
 }
 
@@ -1688,5 +1747,77 @@
 
 .main-content[data-view="beat"] .meter-picker .time-sig-row {
   max-width: none;
+  /* The stage's rows are `width: 100%`; inside a popover that sizes itself to
+     its content, that would resolve against nothing useful. */
+  width: auto;
   flex-wrap: nowrap;
+}
+
+/* =================== The stage, in the design's order =====================
+   TEMPO → ruler → METER → dots → SUBDIVISION (M1). The meter goes above the
+   dots because the meter is what the dots *are*; reading "9/8" after counting
+   nine circles is backwards. Each section is a labelled block spanning the
+   stage, with a hairline between the tempo and the meter so the two do not
+   read as one run-on column (M7). */
+
+.main-content[data-view="beat"] .bpm-section {
+  gap: 22px;
+}
+
+.tempo-head {
+  display: flex;
+  align-items: flex-end;
+  gap: 34px;
+  width: 100%;
+}
+
+.tempo-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Takes the slack, which is what pushes LAST SESSION out to the stage's far
+   edge however wide the window is. */
+.last-session {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  margin-left: auto;
+  padding-bottom: 0.7rem;
+  text-align: right;
+}
+
+.last-session-line {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.stage-divider {
+  width: 100%;
+  height: 1px;
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+}
+
+.meter-section,
+.sub-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.sub-section {
+  gap: 12px;
+}
+
+/* The widest glyph is the sextuplet at ~2.1× its height. It fits a full-width
+   column with room to spare and has to give way only in the narrowest of the
+   breakpoints above, where the tile is 56px. */
+.sub-row-btn svg {
+  max-width: 100%;
+  height: auto;
 }

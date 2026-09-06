@@ -2,7 +2,7 @@
   "metronome": {
     "tap": "TAP",
     "tapCount": "{{count}} TAP",
-    "subdiv": "Alt Bölüm",
+    "subdivision": "Alt Bölüm",
     "meter": "Zaman İmzası",
     "free": "FREE",
     "freeBeatCount": "{{count}} vuruş",
@@ -17,7 +17,12 @@
     "grouping": "gruplama",
     "tempo": "Tempo",
     "tempoUp": "Tempoyu artır",
-    "tempoDown": "Tempoyu azalt"
+    "tempoDown": "Tempoyu azalt",
+    "lastSession": "Son seans",
+    "lastSessionMinutes": "{{count}} dk",
+    "lastSessionMinutes_one": "{{count}} dk",
+    "lastSessionMinutes_other": "{{count}} dk",
+    "lastSessionScore": "puan {{score}}"
   },
   "subdiv": {
     "1": "Dörtlük",

@@ -2,7 +2,7 @@
   "metronome": {
     "tap": "TAP",
     "tapCount": "{{count}} appuis",
-    "subdiv": "Subdiv",
+    "subdivision": "Subdivision",
     "meter": "Mesure",
     "free": "FREE",
     "freeBeatCount": "{{count}} temps",
@@ -17,7 +17,12 @@
     "grouping": "groupement",
     "tempo": "Tempo",
     "tempoUp": "Accélérer le tempo",
-    "tempoDown": "Ralentir le tempo"
+    "tempoDown": "Ralentir le tempo",
+    "lastSession": "Dernière séance",
+    "lastSessionMinutes": "{{count}} min",
+    "lastSessionMinutes_one": "{{count}} min",
+    "lastSessionMinutes_other": "{{count}} min",
+    "lastSessionScore": "score {{score}}"
   },
   "subdiv": {
     "1": "Noire",

@@ -2,7 +2,7 @@
   "metronome": {
     "tap": "TAP",
     "tapCount": "{{count}} нажатий",
-    "subdiv": "Дробление",
+    "subdivision": "Дробление",
     "meter": "Размер",
     "free": "FREE",
     "freeBeatCount": "{{count}} доли",
@@ -17,7 +17,12 @@
     "grouping": "группировка",
     "tempo": "Темп",
     "tempoUp": "Быстрее",
-    "tempoDown": "Медленнее"
+    "tempoDown": "Медленнее",
+    "lastSession": "Прошлая сессия",
+    "lastSessionMinutes": "{{count}} мин",
+    "lastSessionMinutes_one": "{{count}} мин",
+    "lastSessionMinutes_other": "{{count}} мин",
+    "lastSessionScore": "оценка {{score}}"
   },
   "subdiv": {
     "1": "Четверть",

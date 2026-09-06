@@ -2,7 +2,7 @@
   "metronome": {
     "tap": "TAP",
     "tapCount": "{{count}} タップ",
-    "subdiv": "分割",
+    "subdivision": "分割",
     "meter": "拍子",
     "free": "FREE",
     "freeBeatCount": "{{count}} 拍",
@@ -17,7 +17,12 @@
     "grouping": "グループ分け",
     "tempo": "テンポ",
     "tempoUp": "テンポを上げる",
-    "tempoDown": "テンポを下げる"
+    "tempoDown": "テンポを下げる",
+    "lastSession": "前回のセッション",
+    "lastSessionMinutes": "{{count}} 分",
+    "lastSessionMinutes_one": "{{count}} 分",
+    "lastSessionMinutes_other": "{{count}} 分",
+    "lastSessionScore": "スコア {{score}}"
   },
   "subdiv": {
     "1": "四分音符",
