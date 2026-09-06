@@ -11,11 +11,13 @@
     "share": "Condividi",
     "back": "Indietro",
     "settings": "Impostazioni",
-    "help": "Aiuto"
+    "help": "Aiuto",
+    "more": "Altro"
   },
   "volume": {
     "metronome": "Metronomo",
-    "voice": "Voce"
+    "voice": "Voce",
+    "short": "Vol."
   },
   "presets": {
     "title": "Preset",
@@ -29,11 +31,14 @@
     "noResults": "Nessun risultato",
     "rename": "Rinomina",
     "renameTooltip": "Rinomina preset",
+    "edited": "Modificato",
     "update": "Aggiorna",
     "updateTooltip": "Aggiorna preset",
     "updated": "Aggiornato!",
     "noChanges": "Nessuna modifica",
     "noChangesToSave": "Nessuna modifica da salvare",
+    "revert": "Ripristina",
+    "revertTooltip": "Annulla le modifiche e ricarica il preset",
     "save": "Salva preset",
     "delete": "Elimina"
   },

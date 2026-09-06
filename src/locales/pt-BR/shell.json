@@ -11,11 +11,13 @@
     "share": "Compartilhar",
     "back": "Voltar",
     "settings": "Configurações",
-    "help": "Ajuda"
+    "help": "Ajuda",
+    "more": "Mais"
   },
   "volume": {
     "metronome": "Metrônomo",
-    "voice": "Voz"
+    "voice": "Voz",
+    "short": "Vol."
   },
   "presets": {
     "title": "Predefinições",
@@ -29,11 +31,14 @@
     "noResults": "Nenhum resultado",
     "rename": "Renomear",
     "renameTooltip": "Renomear predefinição",
+    "edited": "Editada",
     "update": "Atualizar",
     "updateTooltip": "Atualizar predefinição",
     "updated": "Atualizado!",
     "noChanges": "Sem alterações",
     "noChangesToSave": "Não há alterações para salvar",
+    "revert": "Reverter",
+    "revertTooltip": "Descartar as alterações e recarregar a predefinição",
     "save": "Salvar predefinição",
     "delete": "Excluir"
   },

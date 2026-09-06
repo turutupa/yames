@@ -904,10 +904,15 @@ export function MainWindow() {
           }}
           onUpdatePreset={handlePresetUpdate}
           onSavePreset={handlePresetSave}
+          // Revert is "load the preset again": the same path the sidebar
+          // takes, so there is one definition of what a preset restores.
+          onRevertPreset={
+            activePreset ? () => void handleLoadPreset(activePreset) : undefined
+          }
+          listening={evaluation.enabled}
           soundOpen={soundOpen}
           setSoundOpen={setSoundOpen}
           soundDropdownRef={soundDropdownRef}
-          shareRef={shareRef}
           shareBtnRef={shareBtnRef}
           shareOpen={shareOpen}
           setShareOpen={setShareOpen}

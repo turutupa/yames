@@ -11,11 +11,13 @@
     "share": "Delen",
     "back": "Terug",
     "settings": "Instellingen",
-    "help": "Help"
+    "help": "Help",
+    "more": "Meer"
   },
   "volume": {
     "metronome": "Metronoom",
-    "voice": "Stem"
+    "voice": "Stem",
+    "short": "Vol."
   },
   "presets": {
     "title": "Presets",
@@ -29,11 +31,14 @@
     "noResults": "Geen resultaten",
     "rename": "Hernoemen",
     "renameTooltip": "Preset hernoemen",
+    "edited": "Bewerkt",
     "update": "Bijwerken",
     "updateTooltip": "Preset bijwerken",
     "updated": "Bijgewerkt!",
     "noChanges": "Geen wijzigingen",
     "noChangesToSave": "Geen wijzigingen om op te slaan",
+    "revert": "Herstellen",
+    "revertTooltip": "Wijzigingen verwerpen en de preset opnieuw laden",
     "save": "Preset opslaan",
     "delete": "Verwijderen"
   },

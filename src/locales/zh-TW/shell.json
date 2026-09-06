@@ -11,11 +11,13 @@
     "share": "分享",
     "back": "返回",
     "settings": "設定",
-    "help": "說明"
+    "help": "說明",
+    "more": "更多"
   },
   "volume": {
     "metronome": "節拍器",
-    "voice": "語音"
+    "voice": "語音",
+    "short": "音量"
   },
   "presets": {
     "title": "預設",
@@ -29,11 +31,14 @@
     "noResults": "無結果",
     "rename": "重新命名",
     "renameTooltip": "重新命名預設",
+    "edited": "已修改",
     "update": "更新",
     "updateTooltip": "更新預設",
     "updated": "已更新！",
     "noChanges": "沒有變更",
     "noChangesToSave": "沒有需要儲存的變更",
+    "revert": "還原",
+    "revertTooltip": "捨棄變更並重新載入預設",
     "save": "儲存預設",
     "delete": "刪除"
   },

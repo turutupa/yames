@@ -11,11 +11,13 @@
     "share": "Chia sẻ",
     "back": "Quay lại",
     "settings": "Cài đặt",
-    "help": "Trợ giúp"
+    "help": "Trợ giúp",
+    "more": "Thêm"
   },
   "volume": {
     "metronome": "Máy đếm nhịp",
-    "voice": "Giọng nói"
+    "voice": "Giọng nói",
+    "short": "Âm"
   },
   "presets": {
     "title": "Cài đặt sẵn",
@@ -29,11 +31,14 @@
     "noResults": "Không có kết quả",
     "rename": "Đổi tên",
     "renameTooltip": "Đổi tên cài đặt sẵn",
+    "edited": "Đã sửa",
     "update": "Cập nhật",
     "updateTooltip": "Cập nhật cài đặt sẵn",
     "updated": "Đã cập nhật!",
     "noChanges": "Không có thay đổi",
     "noChangesToSave": "Không có thay đổi để lưu",
+    "revert": "Hoàn tác",
+    "revertTooltip": "Bỏ thay đổi và tải lại cài đặt sẵn",
     "save": "Lưu cài đặt sẵn",
     "delete": "Xóa"
   },

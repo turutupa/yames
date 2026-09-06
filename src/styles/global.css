@@ -99,8 +99,6 @@ kbd {
 [data-theme-group="light"] .hotkey-table { border-color: rgba(0,0,0,0.08); }
 [data-theme-group="light"] .hotkey-row { border-color: rgba(0,0,0,0.05); }
 [data-theme-group="light"] .hotkey-bind-btn { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.08); color: var(--text-secondary); }
-[data-theme-group="light"] .header-btn { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.08); color: var(--text-secondary); }
-[data-theme-group="light"] .header-btn:hover { background: rgba(0,0,0,0.1); color: var(--text-primary); border-color: rgba(0,0,0,0.12); }
 [data-theme-group="light"] kbd { background: var(--bg-secondary); border-color: rgba(0,0,0,0.1); color: var(--text-primary); }
 [data-theme-group="light"] .theme-card:hover { background: rgba(0,0,0,0.04); }
 [data-theme-group="light"] .theme-card.active { background: rgba(0,0,0,0.06); }
@@ -120,7 +118,6 @@ kbd {
 
 /* Light theme: popovers, tooltips, tips */
 [data-theme-group="light"] .header-volume-popover { background: var(--bg-secondary); border-color: var(--border); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
-[data-theme-group="light"] .header-btn[data-tooltip]::after { background: var(--bg-secondary); border-color: var(--border); color: var(--text-primary); }
 [data-theme-group="light"] .hotkey-action[data-tooltip]::after { background: var(--bg-secondary); border-color: var(--border); color: var(--text-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 [data-theme-group="light"] .drill-tip { background: var(--bg-secondary); border-color: var(--border); color: var(--text-secondary); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 [data-theme-group="light"] .track-stat-popover { background: var(--bg-secondary); border-color: var(--border); color: var(--text-secondary); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }

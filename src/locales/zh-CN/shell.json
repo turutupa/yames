@@ -11,11 +11,13 @@
     "share": "分享",
     "back": "返回",
     "settings": "设置",
-    "help": "帮助"
+    "help": "帮助",
+    "more": "更多"
   },
   "volume": {
     "metronome": "节拍器",
-    "voice": "语音"
+    "voice": "语音",
+    "short": "音量"
   },
   "presets": {
     "title": "预设",
@@ -29,11 +31,14 @@
     "noResults": "无结果",
     "rename": "重命名",
     "renameTooltip": "重命名预设",
+    "edited": "已修改",
     "update": "更新",
     "updateTooltip": "更新预设",
     "updated": "已更新！",
     "noChanges": "无更改",
     "noChangesToSave": "没有需要保存的更改",
+    "revert": "还原",
+    "revertTooltip": "放弃更改并重新加载预设",
     "save": "保存预设",
     "delete": "删除"
   },

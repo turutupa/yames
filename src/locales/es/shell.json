@@ -11,11 +11,13 @@
     "share": "Compartir",
     "back": "Volver",
     "settings": "Ajustes",
-    "help": "Ayuda"
+    "help": "Ayuda",
+    "more": "Más"
   },
   "volume": {
     "metronome": "Metrónomo",
-    "voice": "Voz"
+    "voice": "Voz",
+    "short": "Vol."
   },
   "presets": {
     "title": "Preajustes",
@@ -29,11 +31,14 @@
     "noResults": "Sin resultados",
     "rename": "Renombrar",
     "renameTooltip": "Renombrar preajuste",
+    "edited": "Editado",
     "update": "Actualizar",
     "updateTooltip": "Actualizar preajuste",
     "updated": "¡Actualizado!",
     "noChanges": "Sin cambios",
     "noChangesToSave": "Nada que guardar",
+    "revert": "Descartar",
+    "revertTooltip": "Descartar los cambios y volver a cargar el preajuste",
     "save": "Guardar preajuste",
     "delete": "Eliminar"
   },

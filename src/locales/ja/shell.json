@@ -11,11 +11,13 @@
     "share": "シェア",
     "back": "戻る",
     "settings": "設定",
-    "help": "ヘルプ"
+    "help": "ヘルプ",
+    "more": "その他"
   },
   "volume": {
     "metronome": "メトロノーム",
-    "voice": "音声"
+    "voice": "音声",
+    "short": "音量"
   },
   "presets": {
     "title": "プリセット",
@@ -29,11 +31,14 @@
     "noResults": "結果なし",
     "rename": "名前を変更",
     "renameTooltip": "プリセット名を変更",
+    "edited": "編集済み",
     "update": "更新",
     "updateTooltip": "プリセットを更新",
     "updated": "更新しました！",
     "noChanges": "変更なし",
     "noChangesToSave": "保存する変更はありません",
+    "revert": "元に戻す",
+    "revertTooltip": "変更を破棄してプリセットを読み込み直す",
     "save": "プリセットを保存",
     "delete": "削除"
   },

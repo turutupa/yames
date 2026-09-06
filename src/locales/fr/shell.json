@@ -11,11 +11,13 @@
     "share": "Partager",
     "back": "Retour",
     "settings": "Paramètres",
-    "help": "Aide"
+    "help": "Aide",
+    "more": "Plus"
   },
   "volume": {
     "metronome": "Métronome",
-    "voice": "Voix"
+    "voice": "Voix",
+    "short": "Vol."
   },
   "presets": {
     "title": "Préréglages",
@@ -29,11 +31,14 @@
     "noResults": "Aucun résultat",
     "rename": "Renommer",
     "renameTooltip": "Renommer le préréglage",
+    "edited": "Modifié",
     "update": "Mettre à jour",
     "updateTooltip": "Mettre à jour le préréglage",
     "updated": "Mis à jour !",
     "noChanges": "Aucun changement",
     "noChangesToSave": "Rien à enregistrer",
+    "revert": "Rétablir",
+    "revertTooltip": "Annuler les modifications et recharger le préréglage",
     "save": "Enregistrer le préréglage",
     "delete": "Supprimer"
   },

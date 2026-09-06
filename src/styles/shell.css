@@ -29,10 +29,10 @@
   background: var(--bg-primary);
 }
 
-.main-window.os-windows .main-header {
-  padding-left: 140px;    /* reserve space for 3 × 46px window controls (now on left) */
-  padding-right: 12px;
-}
+/* The window controls used to force the header to reserve room for them.
+   They sit over the rail now, so the context bar — which starts where the
+   rail ends — has nothing to reserve. See "The context bar joins the content
+   region" at the foot of this file. */
 
 /* Linux: frameless — compositor handles rounding; CSS box-shadow for depth */
 .main-window.os-linux {
@@ -40,11 +40,6 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: var(--bg-primary);
-}
-
-.main-window.os-linux .main-header {
-  padding-left: 112px;    /* reserve space for 3 × 36px window controls (now on left) */
-  padding-right: 12px;
 }
 
 /* Suppress decorum's injected JS controls — we use our own React <WindowControls /> */
@@ -63,30 +58,25 @@
   border-radius: 0;
 }
 
+/* The context bar. One row, the full width of the stage region, closed by a
+   hairline — the same move the transport makes at the other end, so the stage
+   reads as something held between two frames rather than as the whole window.
+   It used to be a blurred pane fading into the content underneath, which is
+   what you do when a bar floats over what it belongs to. It does not any more
+   (see the foot of this file), so the blur and its mask are gone with it. */
 .main-header {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  position: static;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px 30px 84px;
-  height: 72px;
-  z-index: 100;
-}
-
-.main-header::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: color-mix(in srgb, var(--bg-primary) 80%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  -webkit-mask-image: linear-gradient(to bottom, black 52px, transparent);
-  mask-image: linear-gradient(to bottom, black 52px, transparent);
-  z-index: -1;
-  pointer-events: none;
+  gap: 16px;
+  height: 56px;
+  z-index: 20;
+  border-bottom: 1px solid var(--border);
+  /* Cancel the content region's 24px gutter so the hairline runs the whole
+     width of the stage, then put the gutter back inside. */
+  margin: 0 -24px;
+  padding: 0 20px 0 24px;
 }
 
 .main-header h1 {
@@ -108,34 +98,93 @@
 
 .header-actions {
   display: flex;
-  gap: 6px;
+  align-items: center;
+  gap: 8px;
   flex-shrink: 0;
   margin-left: auto;
 }
 
-.header-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text-secondary);
-  font-size: 1.25rem;
+/* ─── Output chips (UI_DECISIONS U1.4) ───────────────────────────────────
+ *
+ * Seven unlabelled circles became three labelled chips and an overflow. A
+ * circle with a glyph in it is a guess; "Wood" is not. The chip is the only
+ * control shape in the bar, so sound, volume and input read as one family
+ * and the overflow reads as the odd one out, which it is.
+ *
+ * Everything here is a token: thirteen themes paint these, and a chip that
+ * hardcodes a grey is a chip that disappears on paper white. */
+.context-chip {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-weight: 600;
   line-height: 1;
+  white-space: nowrap;
   position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition:
+    color 0.15s,
+    border-color 0.15s,
+    background 0.15s;
 }
 
-.header-btn:hover,
-.header-btn.active {
-  background: rgba(255, 255, 255, 0.12);
+/* Icon-only chips (the overflow) are square rather than a stubby pill. */
+.context-chip-icon {
+  width: 32px;
+  padding: 0;
+  justify-content: center;
+}
+
+button.context-chip:hover,
+.context-chip-open {
   color: var(--text-primary);
-  border-color: rgba(255, 255, 255, 0.15);
+  background: var(--bg-raised);
+  border-color: color-mix(in srgb, var(--text-secondary) 35%, var(--border));
 }
 
-.header-btn[data-tooltip]::after {
+.context-chip-open {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+/* A readout wearing the chip shape. It must not light up under the cursor —
+   there is nothing behind it to press. */
+.context-chip-static {
+  cursor: default;
+  color: var(--text-tertiary);
+}
+
+.context-chip-input.listening {
+  color: var(--feedback-perfect);
+  border-color: color-mix(in srgb, var(--feedback-perfect) 35%, transparent);
+  background: color-mix(in srgb, var(--feedback-perfect) 8%, transparent);
+}
+
+/* The volume chip carries its own readout: how loud the metronome is, drawn
+   rather than written, so the answer survives the label being shed. */
+.context-chip-level {
+  display: block;
+  width: 54px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--bg-raised);
+  overflow: hidden;
+}
+
+.context-chip-level-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.12s ease-out;
+}
+
+.context-chip[data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
   top: calc(100% + 8px);
@@ -156,7 +205,7 @@
   z-index: 50;
 }
 
-.header-btn[data-tooltip]:hover::after {
+.context-chip[data-tooltip]:hover::after {
   opacity: 1;
   transform: translateY(0);
 }
@@ -169,12 +218,12 @@
   position: relative;
 }
 
-.header-sound-icon {
-  font-size: 14px;
-  line-height: 1;
+.header-more-wrap {
+  position: relative;
 }
 
-.header-sound-menu {
+.header-sound-menu,
+.header-more-menu {
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
@@ -185,6 +234,13 @@
   padding: 4px;
   z-index: 200;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Share and help live behind the "…" now. They are the two things in the bar
+   you reach for least, and hiding them is what bought the other three room
+   for their labels. */
+.header-more-menu {
+  min-width: 150px;
 }
 
 /* ─── Header volume popover: iOS-style chunky pill faders ────────────────
@@ -225,7 +281,10 @@
   gap: 18px;
 }
 
-.header-volume-wrap:hover .header-volume-popover {
+/* Hover opens it; focus-within opens it too, so the faders are reachable
+   without a pointer — the chip is a button for exactly that reason. */
+.header-volume-wrap:hover .header-volume-popover,
+.header-volume-wrap:focus-within .header-volume-popover {
   opacity: 1;
   visibility: visible;
   transform: translateX(-50%) translateY(0);
@@ -741,15 +800,20 @@
   color: #e74c3c !important;
 }
 
-/* =================== Preset save / update button =================== */
+/* =================== Preset context (the bar's left half) ===============
+ *
+ * This was `position: absolute; top: 76px; left: 10px` — coordinates from
+ * when it floated below a header that floated over the window. Moving the
+ * header into the content region left those coordinates behind, and since
+ * `.main-content` is the positioned ancestor they still resolved: the preset
+ * context painted 76px down the stage while the chips stayed on the bar's
+ * row. That is the "two halves on different rows" bug. It is in the flow now,
+ * where the flexbox that owns the row can see it. */
 .preset-save-area {
-  position: absolute;
-  top: 76px;
-  left: 10px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  z-index: 15;
+  gap: 10px;
+  min-width: 0;
 }
 
 .eval-actions-area {
@@ -825,15 +889,20 @@
   transform: none;
 }
 
+/* The loaded preset's name is the largest thing in the bar: it answers "what
+   am I looking at", and everything beside it is a footnote to that answer. */
 .preset-active-name {
-  font-size: 0.82rem;
-  color: var(--text-secondary);
+  font-size: 16.5px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  color: var(--text-primary);
   background: none;
   border: none;
-  padding: 4px 6px;
+  padding: 2px 0;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  max-width: 160px;
+  min-width: 0;
+  max-width: 260px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -841,7 +910,84 @@
 }
 
 .preset-active-name:hover {
-  color: var(--text-primary);
+  color: var(--accent);
+}
+
+/* "Edited", not a bullet. The dot is the glance; the word is what makes the
+   glance mean something the first time you see it. `--feedback-ok` is the
+   token contract's warm attention colour — the only amber the themes agree
+   on — and it is never used for anything else inside the bar. */
+.preset-edited {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  height: 22px;
+  padding: 0 9px 0 8px;
+  border-radius: 11px;
+  border: 1px solid color-mix(in srgb, var(--feedback-ok) 35%, transparent);
+  background: color-mix(in srgb, var(--feedback-ok) 10%, transparent);
+  color: var(--feedback-ok);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.preset-edited-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--feedback-ok);
+}
+
+/* Save and Revert are text, not buttons with walls: the chips on the other
+   side of the bar are the only bordered things in the row, so the eye finds
+   the output cluster without being told. */
+.preset-text-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 4px 6px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+
+.preset-text-btn--save {
+  color: var(--accent);
+}
+
+.preset-text-btn--revert {
+  color: var(--text-tertiary);
+}
+
+.preset-text-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.preset-text-btn--revert:hover:not(:disabled) {
+  color: var(--text-secondary);
+}
+
+/* Nothing to save reads as nothing to save. The button stays — its absence
+   would be a third state to interpret — but it stops offering itself. */
+.preset-text-btn:disabled {
+  color: var(--text-faint);
+  cursor: default;
+}
+
+.preset-text-btn--feedback,
+.preset-text-btn--feedback:disabled {
+  color: var(--feedback-perfect);
 }
 
 .preset-save-btn {
@@ -879,26 +1025,11 @@
 
 
 
-/* Dirty state: accent border to signal changes */
-.preset-save-btn--dirty {
-  border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent);
-  color: var(--accent);
-}
-
-.preset-save-btn--dirty:hover {
-  border-color: var(--accent);
-}
-
-/* Feedback state: green */
-.preset-save-btn--feedback,
-.preset-save-btn--feedback:hover {
-  background: rgba(74, 222, 128, 0.12);
-  color: #4ade80;
-}
-
-.preset-save-btn--feedback .preset-save-btn-label {
-  opacity: 1;
-}
+/* The dirty and feedback modifiers of this button are gone: with a preset
+   loaded, those states now belong to the Edited pill and to
+   `.preset-text-btn--feedback`. `.preset-save-btn` survives as the one thing
+   the bar shows when no preset is loaded at all — and that button has no
+   dirty state, because there is nothing yet to be dirty. */
 
 .main-content {
   flex: 1;
@@ -1272,7 +1403,10 @@
   display: block;
 }
 
-/* The context bar's left half: which preset is loaded, and its save state. */
+/* The context bar's left half: which preset is loaded, and its save state.
+   It takes the slack, so the chips sit against the right edge whatever the
+   preset is called, and `min-width: 0` is what lets a long name ellipsise
+   instead of pushing them off. */
 .header-context {
   display: flex;
   align-items: center;
@@ -1450,6 +1584,80 @@
   }
 }
 
+/* The context bar sheds in a fixed order, and the order comes out of the
+   arithmetic rather than out of a principle stated in advance.
+ *
+ * Three labelled chips are 325px. The preset context wants 199 for its pill
+ * and its two verbs plus ~80 for a readable name. With 252 of rail, 48 of
+ * gutter and 16 between the halves, all of that fits only above ~920px — so
+ * at the window's own default size of 800, something has to go.
+ *
+ * What goes first is the input chip, not the labels. It is the one thing in
+ * the row that reports rather than does, and the transport reports the same
+ * state at the bottom of the same screen; dropping it buys 129px, which is
+ * enough to keep the other two chips labelled *and* leave the preset a name.
+ * Shedding labels first would have left three anonymous circles at the size
+ * the app actually opens at, which is the arrangement this bar replaced.
+ *
+ * Nothing that changes a setting is ever hidden. Losing the volume faders to
+ * a narrow window would be a feature disappearing, not a layout adapting.
+ *
+ * A shed label leaves the layout, not the accessibility tree: it is clipped
+ * to a pixel rather than set to `display: none`, so a screen reader still
+ * reads "Wood", "Listening" and "Edited" when there is no room to draw them. */
+
+/* 252 rail + 48 gutter + 325 chips + 16 + 279 context = 920. */
+@media (max-width: 919px) {
+  .context-chip-input {
+    display: none;
+  }
+}
+
+/* 252 + 48 + 196 chips + 16 + 279 = 791. Below it the labels and the pill's
+   word go together — they are the same kind of thing. */
+@media (max-width: 789px) {
+  .context-chip-label,
+  .preset-edited-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .context-chip {
+    padding: 0 9px;
+  }
+
+  /* The pill keeps its dot. This is the one place a bare dot is the right
+     answer: there is no room for a better one, and the word is still there
+     for anything that reads the page. */
+  .preset-edited {
+    padding: 0 6px;
+  }
+
+  .header-actions {
+    gap: 6px;
+  }
+
+  .main-header {
+    gap: 10px;
+    padding-right: 14px;
+  }
+}
+
+/* Under 620px the rail is a strip of icons and the bar gets 184px back all at
+   once. This is only the level bar giving up the last of its resolution — the
+   labels do not come back, because a control that re-labels itself as you drag
+   a window smaller is harder to learn than one that does not. */
+@media (max-width: 619px) {
+  .context-chip-level {
+    width: 36px;
+  }
+}
+
 /* =================== The context bar joins the content region ===============
    It used to float over the whole window — position: absolute, full width,
    z-index 100 — and every panel compensated with its own top padding (the
@@ -1466,22 +1674,11 @@
   padding: 0 24px;
 }
 
-.main-content > .main-header {
-  position: static;
-  height: 60px;
-  flex-shrink: 0;
-  margin: 0 -24px;
-  padding: 0 16px 0 24px;
-  z-index: 20;
-}
-
-/* The platform paddings reserved room for the window controls while the header
-   ran the full width. It does not any more. */
-.main-window.os-windows .main-content > .main-header,
-.main-window.os-linux .main-content > .main-header {
-  padding-left: 24px;
-  padding-right: 12px;
-}
+/* The bar's own geometry — static, 56px, hairline-closed — is declared with
+   the rest of the header at the top of this file rather than patched in here,
+   and the platform paddings that reserved room for the window controls are
+   deleted rather than overridden. A rule that only exists to cancel another
+   rule is two places to look when it goes wrong. */
 
 /* The rail now owns the window's top-left corner, where the controls are
    drawn — 36px of them on Windows and Linux, the traffic lights on macOS. */

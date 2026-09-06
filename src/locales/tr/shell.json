@@ -11,11 +11,13 @@
     "share": "Paylaş",
     "back": "Geri",
     "settings": "Ayarlar",
-    "help": "Yardım"
+    "help": "Yardım",
+    "more": "Daha fazla"
   },
   "volume": {
     "metronome": "Metronom",
-    "voice": "Ses"
+    "voice": "Ses",
+    "short": "Ses"
   },
   "presets": {
     "title": "Ön Ayarlar",
@@ -29,11 +31,14 @@
     "noResults": "Sonuç yok",
     "rename": "Yeniden Adlandır",
     "renameTooltip": "Ön ayarı yeniden adlandır",
+    "edited": "Düzenlendi",
     "update": "Güncelle",
     "updateTooltip": "Ön ayarı güncelle",
     "updated": "Güncellendi!",
     "noChanges": "Değişiklik yok",
     "noChangesToSave": "Kaydedilecek değişiklik yok",
+    "revert": "Geri al",
+    "revertTooltip": "Değişiklikleri at ve ön ayarı yeniden yükle",
     "save": "Ön ayarı kaydet",
     "delete": "Sil"
   },
