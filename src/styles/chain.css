@@ -1,0 +1,563 @@
+/* chain.css — the preset chain (UI_DECISIONS U9).
+ *
+ * Two surfaces: the rows the library grows for chains, and the track that
+ * sits across the top of the metronome stage. Nothing here restyles the
+ * metronome underneath, on purpose — the artboard's whole argument is that
+ * loading a chain adds a strip, it does not swap the screen for another one.
+ *
+ * Imported last so its rules win over the preset-sidebar rules it borrows
+ * shapes from (`.preset-save-area`, `.preset-sidebar-item`). */
+
+/* =================== The library's chain rows =================== */
+
+.preset-sidebar-new-chain {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  border-radius: 5px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.preset-sidebar-new-chain:hover {
+  color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.preset-sidebar-item.chain-item {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.chain-item-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.chain-item-glyph {
+  display: flex;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.preset-sidebar-item.chain-item.active .chain-item-glyph {
+  color: var(--accent);
+}
+
+.chain-item-sub {
+  font-size: 10.5px;
+  color: var(--text-faint);
+  padding-left: 19px;
+}
+
+.chain-item-rule {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 11px;
+}
+
+/* =================== The context bar's chain badge =================== */
+
+.chain-badge {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  border: 1px solid var(--accent-subtle-hover);
+  border-radius: 5px;
+  padding: 3px 7px;
+  flex-shrink: 0;
+}
+
+/* =================== The track =================== */
+
+.chain-track {
+  padding: 0 0 4px;
+  margin-bottom: 14px;
+}
+
+.chain-track-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 11px;
+}
+
+.chain-track-title {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.chain-track-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.chain-track-summary {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.chain-repeat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chain-repeat-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+/* The strip scrolls sideways rather than wrapping: a chain read across two
+   lines stops looking like an order and starts looking like a grid. */
+.chain-track-strip {
+  display: flex;
+  align-items: stretch;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding-bottom: 4px;
+}
+
+.chain-track-cell {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.chain-step {
+  position: relative;
+  width: 168px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.chain-step:hover {
+  border-color: var(--accent-subtle-hover);
+}
+
+.chain-step.selected {
+  border-color: var(--accent-subtle-hover);
+  background: var(--bg-panel);
+}
+
+.chain-step.running {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-subtle);
+}
+
+.chain-step-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 12px;
+}
+
+.chain-step-index {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--text-tertiary);
+}
+
+.chain-step.running .chain-step-index {
+  color: var(--accent);
+}
+
+.chain-step-progress-label {
+  font-size: 9.5px;
+  color: var(--text-muted);
+}
+
+.chain-step-name {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 7px 0 5px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chain-step-rename {
+  width: 100%;
+  margin: 7px 0 5px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  border: 1px solid var(--accent-subtle-hover);
+  border-radius: 6px;
+  padding: 2px 6px;
+}
+
+.chain-step-config {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.chain-step-sound {
+  font-size: 10px;
+  color: var(--text-faint);
+  margin-top: 10px;
+  height: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chain-step-bar {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border);
+  margin-top: 15px;
+  overflow: hidden;
+}
+
+.chain-step-bar-fill {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width 0.25s linear;
+}
+
+/* The tools only appear on the card you are working with — four buttons on
+   every card at once would read as more chrome than chain. */
+.chain-step-tools {
+  display: flex;
+  gap: 2px;
+  margin-top: 9px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.chain-step:hover .chain-step-tools,
+.chain-step.selected .chain-step-tools,
+.chain-step:focus-within .chain-step-tools {
+  opacity: 1;
+}
+
+.chain-step-tools button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  padding: 4px 5px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s, background 0.15s;
+}
+
+.chain-step-tools button:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: var(--border);
+}
+
+.chain-step-tools button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.chain-step-tools .chain-step-remove:hover {
+  color: var(--accent);
+}
+
+/* =================== The gap and its chip =================== */
+
+.chain-gap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 9px;
+}
+
+.chain-gap-chip {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-primary);
+  padding: 5px 11px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+/* A dashed edge for a gap nothing will close on its own. */
+.chain-gap-chip.manual {
+  border-style: dashed;
+}
+
+.chain-gap-chip:hover {
+  color: var(--text-primary);
+  border-color: var(--accent-subtle-hover);
+}
+
+.chain-gap-chip.open {
+  background: var(--accent);
+  border-color: var(--accent);
+  border-style: solid;
+  color: var(--accent-text);
+}
+
+.chain-add-step {
+  align-self: center;
+  margin-left: 4px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  background: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  padding: 20px 13px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.chain-add-step:hover {
+  color: var(--accent);
+  border-color: var(--accent-subtle-hover);
+}
+
+.chain-track-empty {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin: 10px 0 0;
+}
+
+/* =================== The transition editor =================== */
+
+.chain-transition-editor {
+  position: absolute;
+  top: 42px;
+  left: -52px;
+  width: 320px;
+  z-index: 60;
+  background: var(--bg-panel);
+  border: 1px solid var(--accent-subtle-hover);
+  border-radius: 13px;
+  padding: 15px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.6);
+}
+
+.chain-editor-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 9px;
+}
+
+.chain-editor-label:not(:first-child) {
+  margin-top: 16px;
+}
+
+.chain-option-row {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.chain-option {
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.chain-option:hover {
+  color: var(--text-primary);
+  background: var(--border);
+}
+
+.chain-option.on {
+  background: var(--accent-subtle);
+  border-color: var(--accent-subtle-hover);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.chain-stepper {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 9px 0 0;
+}
+
+.chain-stepper-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.chain-stepper-field {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 10px;
+}
+
+.chain-stepper-field button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 3px;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+
+.chain-stepper-field button:hover {
+  color: var(--text-primary);
+}
+
+.chain-stepper-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  min-width: 84px;
+  text-align: center;
+}
+
+.chain-editor-note {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 10px 0 0;
+}
+
+.chain-editor-note-warn {
+  color: var(--text-secondary);
+}
+
+.chain-editor-footnote {
+  font-size: 11px;
+  color: var(--text-faint);
+  line-height: 1.5;
+  margin: 11px 0 0;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+/* =================== The heading over the metronome =================== */
+
+.chain-step-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+  margin-bottom: 12px;
+}
+
+.chain-step-heading-title {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.chain-step-heading-note {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* =================== The transport's counts =================== */
+
+.transport-chain {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.transport-chain-count,
+.transport-chain-next {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.transport-chain-count {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.transport-skip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--accent);
+  background: none;
+  border: 1px solid var(--accent-subtle-hover);
+  border-radius: 999px;
+  padding: 7px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.transport-skip:hover:not(:disabled) {
+  background: var(--accent-subtle);
+}
+
+.transport-skip:disabled {
+  opacity: 0.35;
+  cursor: default;
+  color: var(--text-muted);
+  border-color: var(--border);
+}
+
+/* The transport sheds the chain's readouts before it sheds the bar count:
+   below this width the track above is already scrolling, and the counts are
+   repeated there on the running card. */
+@media (max-width: 860px) {
+  .transport-chain-next {
+    display: none;
+  }
+}

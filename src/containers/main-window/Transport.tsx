@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { durationLabel, type ChainRemaining } from "../../components/chain/format";
 
 interface TransportProps {
   view: "beat" | "drill";
@@ -21,6 +22,15 @@ interface TransportProps {
   onTogglePlayback: () => void;
   onStartSpeedRamp: () => void;
   onStopSpeedRamp: () => void;
+  /**
+   * The chain's counts (U9.7). A chain hides what a metronome normally shows
+   * plainly — what it is about to do — so the transport has to say it.
+   * `chainStepCount` is 0 when no chain is loaded and the block is absent.
+   */
+  chainStepNumber?: number;
+  chainStepCount?: number;
+  chainRemaining?: ChainRemaining;
+  onChainSkip?: () => void;
 }
 
 function clock(totalSeconds: number): string {
@@ -101,10 +111,15 @@ export function Transport({
   onTogglePlayback,
   onStartSpeedRamp,
   onStopSpeedRamp,
+  chainStepNumber = 0,
+  chainStepCount = 0,
+  chainRemaining,
+  onChainSkip,
 }: TransportProps) {
   const { t } = useTranslation();
   const running = view === "drill" ? speedRampActive : isPlaying;
   const anyRunning = isPlaying || speedRampActive;
+  const chained = view === "beat" && chainStepCount > 0;
 
   return (
     <div
@@ -161,6 +176,42 @@ export function Transport({
           <span className="transport-label">{t("transport.elapsed")}</span>
         </div>
       </div>
+
+      {/* U9.7. Two steps that sound alike are indistinguishable without the
+          count, and a chain that is waiting on you looks identical to one
+          that is counting down — so `manual` says so in words rather than
+          borrowing the shape of a countdown it cannot fill. */}
+      {chained && (
+        <div className="transport-chain">
+          <span className="transport-chain-count">
+            {t("chain.transport.stepOf", { number: chainStepNumber, total: chainStepCount })}
+          </span>
+          {chainRemaining && (
+            <span className="transport-chain-next">
+              {chainRemaining.kind === "manual"
+                ? t("chain.transport.nextWhenYouSay")
+                : t("chain.transport.nextIn", {
+                    gap:
+                      chainRemaining.kind === "bars"
+                        ? t("chain.trigger.barsShort", { count: chainRemaining.bars })
+                        : durationLabel(t, chainRemaining.seconds),
+                  })}
+            </span>
+          )}
+          {/* Skipping arms a switch that lands on the next downbeat (U9.3), so
+              it needs beats to land on. Stopped, there are none. */}
+          <button
+            type="button"
+            className="transport-skip"
+            onClick={onChainSkip}
+            disabled={!isPlaying}
+            aria-label={t("chain.transport.skip")}
+            title={t("chain.transport.skip")}
+          >
+            {t("chain.transport.skip")}
+          </button>
+        </div>
+      )}
 
       {view === "drill" && (
         <div className="transport-drill">

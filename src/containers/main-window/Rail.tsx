@@ -4,7 +4,7 @@ import { showFloating } from "../../ipc";
 import { markWidgetOpened } from "../onboarding/hints/hintRuntime";
 import { PresetSidebar } from "../../components/presets/PresetSidebar";
 import type { PresetSidebarHandle } from "../../components/presets/PresetSidebar";
-import type { AppState, Preset } from "../../types";
+import type { AppState, Chain, Preset } from "../../types";
 import type { MainView } from "./MainHeader";
 
 interface RailProps {
@@ -18,6 +18,14 @@ interface RailProps {
   onLoadPreset: (preset: Preset) => void;
   onActivePresetChange: (preset: Preset | null, dirty: boolean) => void;
   presetShortcut?: string;
+  /** The library lists chains beside presets (U9.4); the parent owns them. */
+  chains: Chain[];
+  activeChainId: string | null;
+  onLoadChain: (chain: Chain) => void;
+  onNewChain: () => void;
+  onDeleteChain: (id: string) => void;
+  onRenameChain: (id: string, name: string) => void;
+  onAddPresetToChain?: (preset: Preset) => void;
   coachOpen: boolean;
   coachActive: boolean;
   coachListening: boolean;
@@ -68,6 +76,13 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
     onLoadPreset,
     onActivePresetChange,
     presetShortcut,
+    chains,
+    activeChainId,
+    onLoadChain,
+    onNewChain,
+    onDeleteChain,
+    onRenameChain,
+    onAddPresetToChain,
     coachOpen,
     coachActive,
     coachListening,
@@ -138,6 +153,13 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
             onLoadPreset={onLoadPreset}
             onActiveChange={onActivePresetChange}
             shortcut={presetShortcut}
+            chains={chains}
+            activeChainId={activeChainId}
+            onLoadChain={onLoadChain}
+            onNewChain={onNewChain}
+            onDeleteChain={onDeleteChain}
+            onRenameChain={onRenameChain}
+            onAddPresetToChain={onAddPresetToChain}
           />
         )}
       </div>
