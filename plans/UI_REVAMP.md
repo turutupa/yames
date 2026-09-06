@@ -1,7 +1,7 @@
 # UI revamp — execution plan
 
-> **Status:** Phase A done, Phase B done, Phase C partly done. See §12 for
-> exactly what landed, what deviated and why, and what is left.
+> **Status:** Phase A, B and C done bar two items. See §12 for exactly what
+> landed, what deviated and why, and what is left.
 > **Written:** 2026-09-04. Progress appended the same day.
 > **The design:** https://claude.ai/code/artifact/35ee5455-0403-4b5c-ab32-fe99703729a5
 > **The decisions:** `UI_DECISIONS.md`. Read it once before starting a phase;
@@ -329,6 +329,9 @@ decision the owner may want to reverse.
 | C1 metronome | `feat(metronome)…` | subdivision names, tempo ruler, bigger dots, drift meter |
 | C2 drill | `feat(drill)…` | the plan line; the form follows it |
 | C5 themes | `feat(themes): Ash, Ember…` | added, not substituted; contrast tests found four failures |
+| B fixes | `fix(shell): the context bar…` | header reflow, narrow windows, the coach pill |
+| C3 settings | `feat(settings): panels…` | surfaces only; section contents untouched |
+| C4 zen | (in the settings commit) | text ramp completed; see below for what was not done |
 
 ### Deviations
 
@@ -368,11 +371,17 @@ decision the owner may want to reverse.
   `−5 −1 +1 +5` cluster is *richer* than the metronome's `− +`, so
   "converging on the transport's vocabulary" would remove capability from
   Zen and break parity. The convergence should run the other way.
-- **A visual pass.** Nothing here has been seen running. The gates are types,
-  2,525 unit tests, and a rule-by-rule diff of the built CSS. A browser
-  cannot boot this app — every Tauri call fails — and an attempt to stub the
-  bridge hung the page. The first thing to do on picking this up is
-  `npm run tauri dev` and look at it.
+- **C4's shared ramp grid (U6.3).** Zen renders a peek window around the
+  current step; the drill renders the whole plan. They are different
+  presentations, not one component used twice, and unifying them is a real
+  refactor of a screen best done with it in front of you.
+
+**The app boots.** `npm run tauri dev` compiles, runs, hot-reloads and exits
+clean — checked repeatedly while the later commits went in. What has *not*
+happened is a person looking at every screen: the layout bugs fixed in
+`fix(shell): the context bar joins the content region` were all found by
+reading CSS, and reading only finds the ones you think to look for. Walk
+§3 of `REVAMP_PARITY.md` with the app open before trusting any of it.
 
 ### Known finding, not acted on
 
