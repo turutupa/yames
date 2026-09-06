@@ -414,3 +414,68 @@ clear the bar with dark ink on the accent instead; Velvet needs a slightly
 darker violet. All three are visible changes to shipped themes, so they are
 recorded in `themes.test.ts` — where the assertion still fails if one gets
 worse or a fourth appears — rather than changed unattended.
+
+---
+
+## 13. The polish round — the mockups, checked on screen
+
+The phases above left the build looking like the design without matching it.
+The owner said so: *"you were still missing so many details that you were
+seemingly not noticing, and a lot of them very blatant."* This round rendered
+the artboards at 1440×900 next to the running app and went region by region.
+The findings are in `plans/tasks/ui-polish/GAPS.md`; three workers took a
+section each, on disjoint files.
+
+**Two things the earlier passes had wrongly called missing.** The document
+title — preset name, Edited pill, Update, Revert — was fully built; it reads
+"Save preset" only when no preset is loaded, which is correct, and the browser
+preview had never loaded one. The climb was built too. Both were about to be
+reported as gaps a second time. Loading the state before judging the screen is
+the cheapest check in this document.
+
+**Metronome.** The stage now runs tempo → ruler → meter → dots → subdivision,
+so the meter is read before the dots it describes rather than after. Rows span
+the stage instead of stopping at 720px. The ruler measures — numbers above,
+eras below, one caret — instead of filling like a progress bar. Dots are rings
+that fill only on the sounding beat. The beat-count stepper now works in
+grouped meters by resizing the last group, which it never did before.
+
+**Drill.** The leftover tempo readout and beat circles are gone from the
+at-rest screen; the plan sentence heads it at display size with the mode
+selector on its own line. The readout was not deleted — four things lived only
+in it, including the ramp's current tempo, which the transport never shows —
+so it now appears beside the climb while a ramp runs.
+
+**Shell.** Wordmark in the titlebar, the library titled for the mode it lists
+with rows that restore a tempo and a meter, a coach row that reports, and a
+transport that carries count-in and cyclic.
+
+### What this round found that was not on the list
+
+- **Per-beat timing never painted on the metronome.** `GroupEditor` had put
+  `feedback-<classification>` on `.group-dot` since the grouped editor replaced
+  the flat row, but only `.main-dot` was ever styled. The coach was hearing
+  every beat and showing nothing, silently — a class with no rule is not an
+  error anywhere. Fixed, with a test that reads the union from `types.ts`.
+- **TAP was unreachable at the 480px minimum**, sitting 60px outside the stage
+  with no scroll to reach it. Found by dragging the window, not by reading.
+- **Every multi-line CSS assertion failed on any Windows checkout** and passed
+  in CI. No `.gitattributes` pins the line endings; `readStyles.ts` normalises.
+- **"Loop" was the wrong word.** `advance_ramp` flips direction at the target
+  and again at the start, so a cyclic ramp never finishes. The mockup said Loop
+  because the mockup was drawn without reading the engine.
+
+### Still open after this round
+
+- **U3.3 is blocked in the backend, not the UI.** `SavedSession` records no
+  drill identity and no ramp position, and sessions are only written when the
+  mic was on and heard real hits. So "LAST RUN — you got five bars into 110",
+  "Last run 4 days ago" and the climb's last-run series cannot be built without
+  a Rust-side change. They were left out rather than faked.
+- **U2.3's accent control stays half-built.** Two of its three states have no
+  engine behind them.
+- **U3.5** — whether "cyclic" and "countdown" are the right words for
+  guitarists. **U6.5** — whether Zen should stay always-dark under all
+  thirteen themes.
+- **Nobody has run this on macOS or Linux.** The titlebar gained a real strip
+  and a platform-dependent gutter; only Windows has been seen.
