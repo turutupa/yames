@@ -1523,3 +1523,101 @@
     gap: 6px;
   }
 }
+
+/* =================== The tempo block, as drawn ============================
+   The mockup labels its sections — TEMPO, METER, SUBDIVISION — in small
+   tracked capitals, gives the number its unit, and gathers the controls to
+   the number's right rather than bracketing it. The build had none of that:
+   an unlabelled number with a minus on one side and a plus on the other, and
+   TAP floating above it. */
+
+.stage-label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  line-height: 1;
+}
+
+.main-content[data-view="beat"] .bpm-display {
+  align-items: flex-end;
+  gap: 18px;
+}
+
+.tempo-units {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding-bottom: 1rem;
+}
+
+.tempo-unit {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-faint);
+  letter-spacing: 0.04em;
+}
+
+.tempo-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 1rem;
+  margin-left: 12px;
+}
+
+/* Round, and outlined rather than filled: they nudge the tempo, they are not
+   the thing you press to start playing. That is the transport's job, and it
+   is the only filled control on the screen. */
+.main-content[data-view="beat"] .bpm-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.main-content[data-view="beat"] .bpm-btn:hover {
+  background: var(--surface-hover);
+  border-color: var(--text-tertiary);
+  color: var(--text-primary);
+}
+
+.main-content[data-view="beat"] .tap-btn {
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 22px;
+  gap: 8px;
+}
+
+/* The ruler's gradations. Ticks alone say the scale is uneven without saying
+   what it measures. */
+.tempo-ticks {
+  position: relative;
+  width: 100%;
+  height: 12px;
+}
+
+.tempo-ticks span {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: 0.58rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+@media (max-width: 979px) {
+  .main-content[data-view="beat"] .tempo-ticks {
+    display: none;
+  }
+}

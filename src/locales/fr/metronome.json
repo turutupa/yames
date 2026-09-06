@@ -14,7 +14,10 @@
     "clicksPerBar": "{{count}} clics/mesure",
     "addBeat": "Ajouter un temps",
     "removeBeat": "Retirer un temps",
-    "grouping": "groupement"
+    "grouping": "groupement",
+    "tempo": "Tempo",
+    "tempoUp": "Accélérer le tempo",
+    "tempoDown": "Ralentir le tempo"
   },
   "subdiv": {
     "1": "Noire",

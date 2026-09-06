@@ -14,7 +14,10 @@
     "clicksPerBar": "{{count}} tiếng/ô nhịp",
     "addBeat": "Thêm phách",
     "removeBeat": "Bớt phách",
-    "grouping": "nhóm nhịp"
+    "grouping": "nhóm nhịp",
+    "tempo": "Nhịp độ",
+    "tempoUp": "Tăng nhịp độ",
+    "tempoDown": "Giảm nhịp độ"
   },
   "subdiv": {
     "1": "Nốt đen",

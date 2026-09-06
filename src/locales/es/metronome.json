@@ -14,7 +14,10 @@
     "clicksPerBar": "{{count}} clics/compás",
     "addBeat": "Añadir pulso",
     "removeBeat": "Quitar pulso",
-    "grouping": "agrupación"
+    "grouping": "agrupación",
+    "tempo": "Tempo",
+    "tempoUp": "Subir el tempo",
+    "tempoDown": "Bajar el tempo"
   },
   "subdiv": {
     "1": "Negra",

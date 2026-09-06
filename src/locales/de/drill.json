@@ -32,11 +32,12 @@
       "decrement": "BPM, die pro Abwärtsstufe abgezogen werden (nur Zickzack). Kleiner als der Zuwachs, um langsam voranzukommen.",
       "beats": "Klicks pro Zelle. Beat 1 ist immer akzentuiert, damit du das Muster hörst.",
       "repeat": "Wie viele Zellen pro Spalte — wie oft du jedes Tempo wiederholst, bevor es weitergeht.",
-      "mode": "Linear geht gerade nach oben. Zickzack wechselt ab. Adaptiv passt sich deiner Genauigkeit an.",
       "cyclic": "Geht bis zum Ziel hinauf und in denselben Schritten zurück zum Start (Hin- und Rückweg).",
       "aggressiveness": "Wie schnell sich das Tempo ändert. Sanft wartet länger, Kräftig drückt schneller.",
       "countdown": "4-Beat-Countdown vor dem Start der Übung. Hilft dir, dich auf das Tempo einzustellen."
     },
-    "allSettings": "Alle Einstellungen"
+    "allSettings": "Alle Einstellungen",
+    "planLabel": "Der Plan",
+    "listensBadge": "Hört zu"
   }
 }

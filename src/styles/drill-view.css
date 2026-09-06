@@ -971,3 +971,51 @@
     display: none;
   }
 }
+
+/* =================== The plan's head, as drawn =============================
+   The mockup puts the mode selector on the stage, beside a "THE PLAN" label.
+   The build had it buried inside ALL SETTINGS — the drill's primary choice,
+   the one that decides whether the tempo climbs, zigzags or follows your
+   playing, was two clicks and a scroll away. */
+
+.drill-stage-head {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.drill-modes {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+}
+
+.drill-modes .toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+/* Adaptive behaves differently depending on whether the audio input is on,
+   which is not something a mode name can carry on its own (U3.4). */
+.drill-mode-badge {
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  border: 1px solid color-mix(in srgb, var(--accent-2) 40%, transparent);
+  border-radius: 4px;
+  padding: 2px 5px;
+  line-height: 1;
+}
+
+@media (max-width: 559px) {
+  .drill-mode-badge {
+    display: none;
+  }
+}

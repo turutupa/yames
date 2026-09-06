@@ -14,7 +14,10 @@
     "clicksPerBar": "每小节 {{count}} 次",
     "addBeat": "增加一拍",
     "removeBeat": "减少一拍",
-    "grouping": "分组"
+    "grouping": "分组",
+    "tempo": "速度",
+    "tempoUp": "提高速度",
+    "tempoDown": "降低速度"
   },
   "subdiv": {
     "1": "四分音符",

@@ -132,6 +132,19 @@ export const TEMPO_SCALE_LABELS = [
   "Prestissimo",
 ] as const;
 
+/**
+ * The numbered gradations under the ruler, every 20 BPM, with their position
+ * along it. A ruler with ticks and no numbers shows that the scale is uneven
+ * without saying what it is measuring.
+ */
+export function getTempoTicks(): Array<{ bpm: number; percent: number }> {
+  const ticks: Array<{ bpm: number; percent: number }> = [];
+  for (let bpm = 40; bpm <= 240; bpm += 20) {
+    ticks.push({ bpm, percent: ((bpm - MIN_BPM) / (MAX_BPM - MIN_BPM)) * 100 });
+  }
+  return ticks;
+}
+
 export function getTempoScale(): Array<{ label: string; percent: number }> {
   return TEMPO_SCALE_LABELS.map((label) => {
     const entry = TEMPO_MARKINGS.find(([, name]) => name === label);

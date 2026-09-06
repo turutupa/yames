@@ -14,7 +14,10 @@
     "clicksPerBar": "{{count}} щелчков/такт",
     "addBeat": "Добавить долю",
     "removeBeat": "Убрать долю",
-    "grouping": "группировка"
+    "grouping": "группировка",
+    "tempo": "Темп",
+    "tempoUp": "Быстрее",
+    "tempoDown": "Медленнее"
   },
   "subdiv": {
     "1": "Четверть",

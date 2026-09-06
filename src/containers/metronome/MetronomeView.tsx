@@ -7,6 +7,7 @@ import { setSubdivision, setBeatGroups } from "../../ipc";
 import {
   getTempoMarking,
   getTempoScale,
+  getTempoTicks,
   MAX_BPM,
   MIN_BPM,
 } from "../../constants/metronome";
@@ -85,22 +86,8 @@ export function MetronomeView({
     <>
       {/* `data-tour` ids are the tour's (O6) anchors — see tour/stops.ts. */}
       <section className="bpm-section" data-tour="bpm">
-        <button
-          className={`tap-btn ${tapActive ? "active" : ""} ${tapPulse ? "pulse" : ""}`}
-          onClick={onTap}
-        >
-          {t("metronome.tap")}
-          {tapActive && tapCount >= 2 && (
-            <span className="tap-count">{t("metronome.tapCount", { count: tapCount })}</span>
-          )}
-        </button>
+        <span className="stage-label">{t("metronome.tempo")}</span>
         <div className="bpm-display view-stagger-item" style={{ animationDelay: '0ms' }}>
-          <button
-            className="bpm-btn"
-            onClick={() => onBpmChange(state.bpm - 5)}
-          >
-            −
-          </button>
           {editingBpm ? (
             <input
               ref={bpmInputRef}
@@ -126,16 +113,43 @@ export function MetronomeView({
               {state.bpm}
             </span>
           )}
-          <button
-            className="bpm-btn"
-            onClick={() => onBpmChange(state.bpm + 5)}
-          >
-            +
-          </button>
-          {/* The marking belongs with the number it describes. It is also
-              highlighted on the ruler below, which is a position, not a
-              label — showing the word twice was just noise. */}
-          <span className="tempo-marking">{marking}</span>
+          {/* The unit and the marking belong with the number they describe.
+              The marking is also highlighted on the ruler below, but that is
+              a position rather than a label. */}
+          <div className="tempo-units">
+            <span className="tempo-unit">BPM</span>
+            <span className="tempo-marking">{marking}</span>
+          </div>
+          <div className="tempo-controls">
+            <button
+              className="bpm-btn"
+              aria-label={t("metronome.tempoDown")}
+              onClick={() => onBpmChange(state.bpm - 5)}
+            >
+              −
+            </button>
+            <button
+              className="bpm-btn"
+              aria-label={t("metronome.tempoUp")}
+              onClick={() => onBpmChange(state.bpm + 5)}
+            >
+              +
+            </button>
+            <button
+              className={`tap-btn ${tapActive ? "active" : ""} ${tapPulse ? "pulse" : ""}`}
+              onClick={onTap}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M8 13V4.5a1.5 1.5 0 0 1 3 0V12" />
+                <path d="M11 11.5V4a1.5 1.5 0 0 1 3 0v8" />
+                <path d="M14 12V6.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-.5a6 6 0 0 1-5.5-4l-1.4-3.2a1.6 1.6 0 0 1 2.7-1.7L8 14" />
+              </svg>
+              {t("metronome.tap")}
+              {tapActive && tapCount >= 2 && (
+                <span className="tap-count">{t("metronome.tapCount", { count: tapCount })}</span>
+              )}
+            </button>
+          </div>
         </div>
         <div className="bpm-slider-wrap view-stagger-item" style={{ animationDelay: '40ms' }}>
           <input
@@ -151,6 +165,13 @@ export function MetronomeView({
               } as React.CSSProperties
             }
           />
+          <div className="tempo-ticks" aria-hidden="true">
+            {getTempoTicks().map(({ bpm, percent }) => (
+              <span key={bpm} style={{ left: `${percent}%` }}>
+                {bpm}
+              </span>
+            ))}
+          </div>
           <div className="tempo-scale" aria-hidden="true">
             {getTempoScale().map(({ label, percent }) => (
               <span

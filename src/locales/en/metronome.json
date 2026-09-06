@@ -14,7 +14,10 @@
     "clicksPerBar": "{{count}} clicks/bar",
     "addBeat": "Add beat",
     "removeBeat": "Remove beat",
-    "grouping": "grouping"
+    "grouping": "grouping",
+    "tempo": "Tempo",
+    "tempoUp": "Tempo up",
+    "tempoDown": "Tempo down"
   },
   "subdiv": {
     "1": "Quarter",

@@ -32,11 +32,12 @@
       "decrement": "Her aşağı adımda çıkarılan BPM (yalnızca zikzak modunda). İlerleyebilmek için artıştan küçük tut.",
       "beats": "Her hücredeki vuruş sayısı. 1. vuruş her zaman vurguludur, böylece kalıbı duyabilirsin.",
       "repeat": "Sütun başına hücre sayısı — her tempoda, bir sonrakine geçmeden önce kaç kez tekrarladığın.",
-      "mode": "Doğrusal dümdüz yukarı çıkar. Zikzak dönüşümlü gider. Uyarlanabilir isabetine göre ayarlar.",
       "cyclic": "Hedefe kadar çıkar, aynı artışlarla başlangıca geri döner (gidiş-dönüş).",
       "aggressiveness": "Temponun ne kadar hızlı değiştiği. Yumuşak daha uzun bekler, Sert daha hızlı iter.",
       "countdown": "Antrenman başlamadan önce 4 vuruşluk geri sayım. Tempoya yerleşmene yardımcı olur."
     },
-    "allSettings": "Tüm ayarlar"
+    "allSettings": "Tüm ayarlar",
+    "planLabel": "Plan",
+    "listensBadge": "Dinler"
   }
 }

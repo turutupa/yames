@@ -14,7 +14,10 @@
     "clicksPerBar": "{{count}} clic/battuta",
     "addBeat": "Aggiungi colpo",
     "removeBeat": "Rimuovi colpo",
-    "grouping": "raggruppamento"
+    "grouping": "raggruppamento",
+    "tempo": "Tempo",
+    "tempoUp": "Aumenta il tempo",
+    "tempoDown": "Riduci il tempo"
   },
   "subdiv": {
     "1": "Semiminime",

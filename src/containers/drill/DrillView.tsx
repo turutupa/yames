@@ -283,6 +283,33 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
 
       {/* `data-hint` anchors the `drill-first-open` hint (O7) — the card is
           rendered by MainWindow, next to the controls the copy talks about. */}
+      <div className="drill-stage-head">
+        <span className="stage-label">{t("drill.planLabel")}</span>
+        <div className="drill-modes">
+          <button
+            className={`toggle-btn ${mode === "linear" ? "active" : ""}`}
+            onClick={() => { setMode("linear"); saveWith({ mode: "linear" }); }}
+          >
+            {t("drill.modeLinear")}
+          </button>
+          <button
+            className={`toggle-btn ${mode === "zigzag" ? "active" : ""}`}
+            onClick={() => { setMode("zigzag"); saveWith({ mode: "zigzag" }); }}
+          >
+            {t("drill.modeZigzag")}
+          </button>
+          {/* Adaptive is the one mode whose behaviour depends on the audio
+              input, so it says so on its face (UI_DECISIONS U3.4). */}
+          <button
+            className={`toggle-btn ${mode === "adaptive" ? "active" : ""}`}
+            onClick={() => { setMode("adaptive"); setTargetBpm(300); saveWith({ mode: "adaptive", targetBpm: 300 }); }}
+          >
+            {t("drill.modeAdaptive")}
+            <span className="drill-mode-badge">{t("drill.listensBadge")}</span>
+          </button>
+        </div>
+      </div>
+
       <DrillPlanLine
         startBpm={startBpm}
         targetBpm={targetBpm}
@@ -314,20 +341,6 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
           </svg>
         </button>
         <div className="drill-config-body" data-showing={openField ?? undefined}>
-          <div className="drill-row view-stagger-item" data-field="more" style={{ animationDelay: '40ms' }}>
-            <label className="drill-label-tip">{t("drill.mode")}<span className="drill-tip">{t("drill.desc.mode")}</span></label>
-            <div className="toggle-group">
-              <button className={`toggle-btn ${mode === "linear" ? "active" : ""}`} onClick={() => { setMode("linear"); saveWith({ mode: "linear" }); }}>
-                {t("drill.modeLinear")}
-              </button>
-              <button className={`toggle-btn ${mode === "zigzag" ? "active" : ""}`} onClick={() => { setMode("zigzag"); saveWith({ mode: "zigzag" }); }}>
-                {t("drill.modeZigzag")}
-              </button>
-              <button className={`toggle-btn ${mode === "adaptive" ? "active" : ""}`} onClick={() => { setMode("adaptive"); setTargetBpm(300); saveWith({ mode: "adaptive", targetBpm: 300 }); }}>
-                {t("drill.modeAdaptive")}
-              </button>
-            </div>
-          </div>
           {mode === "adaptive" && (
           <div className="drill-row view-stagger-item" data-field="more" style={{ animationDelay: '55ms' }}>
             <label className="drill-label-tip">{t("drill.aggr")}<span className="drill-tip">{t("drill.desc.aggressiveness")}</span></label>

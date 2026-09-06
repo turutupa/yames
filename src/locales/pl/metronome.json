@@ -14,7 +14,10 @@
     "clicksPerBar": "{{count}} kliknięć/takt",
     "addBeat": "Dodaj uderzenie",
     "removeBeat": "Usuń uderzenie",
-    "grouping": "grupowanie"
+    "grouping": "grupowanie",
+    "tempo": "Tempo",
+    "tempoUp": "Zwiększ tempo",
+    "tempoDown": "Zmniejsz tempo"
   },
   "subdiv": {
     "1": "Ćwierćnuty",

@@ -14,7 +14,10 @@
     "clicksPerBar": "{{count}} kliks/maat",
     "addBeat": "Beat toevoegen",
     "removeBeat": "Beat verwijderen",
-    "grouping": "groepering"
+    "grouping": "groepering",
+    "tempo": "Tempo",
+    "tempoUp": "Tempo omhoog",
+    "tempoDown": "Tempo omlaag"
   },
   "subdiv": {
     "1": "Kwartnoot",

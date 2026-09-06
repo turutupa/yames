@@ -32,11 +32,12 @@
       "decrement": "BPM subtracted each down-step (zigzag only). Smaller than increment to crawl forward.",
       "beats": "Clicks per cell. Beat 1 is always accented so you can hear the pattern.",
       "repeat": "How many cells per column — the number of times you repeat at each tempo before moving on.",
-      "mode": "Linear goes straight up. Zigzag alternates. Adaptive adjusts based on your accuracy.",
       "cyclic": "Goes up to target then back down to start in the same increments (round-trip).",
       "aggressiveness": "How quickly the tempo changes. Conservative waits longer, Aggressive pushes faster.",
       "countdown": "4-beat countdown before the drill starts. Helps you lock into the tempo."
     },
-    "allSettings": "All settings"
+    "allSettings": "All settings",
+    "planLabel": "The plan",
+    "listensBadge": "Listens"
   }
 }

@@ -14,7 +14,10 @@
     "clicksPerBar": "{{count}} Klicks/Takt",
     "addBeat": "Beat hinzufügen",
     "removeBeat": "Beat entfernen",
-    "grouping": "Gruppierung"
+    "grouping": "Gruppierung",
+    "tempo": "Tempo",
+    "tempoUp": "Tempo erhöhen",
+    "tempoDown": "Tempo verringern"
   },
   "subdiv": {
     "1": "Viertel",

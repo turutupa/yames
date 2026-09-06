@@ -32,11 +32,12 @@
       "decrement": "BPM sottratti a ogni gradino in discesa (solo zigzag). Se è più piccolo dell'incremento, si avanza piano.",
       "beats": "Colpi per cella. Il primo colpo è sempre accentato, così senti subito il pattern.",
       "repeat": "Quante celle per colonna — quante volte ripeti a ogni tempo prima di proseguire.",
-      "mode": "Lineare sale dritto. Zigzag alterna. Adattivo si regola in base alla tua precisione.",
       "cyclic": "Sale fino all'obiettivo e scende di nuovo al valore iniziale con gli stessi incrementi (andata e ritorno).",
       "aggressiveness": "Quanto rapidamente cambia il tempo. La modalità dolce attende più a lungo, quella spinta accelera più veloce.",
       "countdown": "Conto alla rovescia di 4 colpi prima dell'inizio. Ti aiuta a entrare nel tempo."
     },
-    "allSettings": "Tutte le impostazioni"
+    "allSettings": "Tutte le impostazioni",
+    "planLabel": "Il piano",
+    "listensBadge": "Ascolta"
   }
 }

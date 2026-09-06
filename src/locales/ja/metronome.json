@@ -14,7 +14,10 @@
     "clicksPerBar": "{{count}} クリック/小節",
     "addBeat": "拍を追加",
     "removeBeat": "拍を削除",
-    "grouping": "グループ分け"
+    "grouping": "グループ分け",
+    "tempo": "テンポ",
+    "tempoUp": "テンポを上げる",
+    "tempoDown": "テンポを下げる"
   },
   "subdiv": {
     "1": "四分音符",

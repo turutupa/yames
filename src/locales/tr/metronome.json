@@ -14,7 +14,10 @@
     "clicksPerBar": "{{count}} tık/ölçü",
     "addBeat": "Vuruş ekle",
     "removeBeat": "Vuruş çıkar",
-    "grouping": "gruplama"
+    "grouping": "gruplama",
+    "tempo": "Tempo",
+    "tempoUp": "Tempoyu artır",
+    "tempoDown": "Tempoyu azalt"
   },
   "subdiv": {
     "1": "Dörtlük",

@@ -32,11 +32,12 @@
       "decrement": "BPM subtraído a cada passo de descida (só no zigue-zague). Menor que o incremento, para avançar devagar.",
       "beats": "Tempos por célula. O 1º tempo é sempre acentuado para você ouvir o padrão.",
       "repeat": "Quantas células por coluna — quantas repetições em cada andamento antes de avançar para o próximo.",
-      "mode": "Linear sobe direto. Zigue-zague alterna. Adaptativo ajusta de acordo com a sua precisão.",
       "cyclic": "Sobe até a meta e volta ao ponto de partida nos mesmos incrementos (ida e volta).",
       "aggressiveness": "O quão rápido o andamento muda. Suave espera mais; Agressivo acelera mais.",
       "countdown": "Contagem de 4 tempos antes de o treino começar. Ajuda a travar no andamento."
     },
-    "allSettings": "Todos os ajustes"
+    "allSettings": "Todos os ajustes",
+    "planLabel": "O plano",
+    "listensBadge": "Ouve"
   }
 }

@@ -32,11 +32,12 @@
       "decrement": "BPM odejmowane na każdym kroku w dół (tylko zygzak). Mniejszy niż przyrost, aby powoli posuwać się naprzód.",
       "beats": "Uderzenia na komórkę. Pierwsze uderzenie zawsze jest akcentowane, abyś słyszał wzorzec.",
       "repeat": "Ile komórek w kolumnie — ile razy powtarzasz dane tempo przed przejściem dalej.",
-      "mode": "Liniowy idzie prosto w górę. Zygzak naprzemiennie. Adaptacyjny dopasowuje się do Twojej celności.",
       "cyclic": "Wchodzi do celu, potem wraca do startu tymi samymi przyrostami (tam i z powrotem).",
       "aggressiveness": "Jak szybko zmienia się tempo. Tryb konserwatywny czeka dłużej, agresywny przyspiesza szybciej.",
       "countdown": "4-uderzeniowe odliczanie przed startem. Pomaga wczuć się w tempo."
     },
-    "allSettings": "Wszystkie ustawienia"
+    "allSettings": "Wszystkie ustawienia",
+    "planLabel": "Plan",
+    "listensBadge": "Słucha"
   }
 }

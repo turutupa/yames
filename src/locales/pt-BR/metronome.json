@@ -14,7 +14,10 @@
     "clicksPerBar": "{{count}} cliques/compasso",
     "addBeat": "Adicionar tempo",
     "removeBeat": "Remover tempo",
-    "grouping": "agrupamento"
+    "grouping": "agrupamento",
+    "tempo": "Andamento",
+    "tempoUp": "Aumentar o andamento",
+    "tempoDown": "Diminuir o andamento"
   },
   "subdiv": {
     "1": "Semínima",

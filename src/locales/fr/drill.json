@@ -32,11 +32,12 @@
       "decrement": "BPM retirés à chaque palier descendant (zigzag uniquement). Plus petit que l'incrément pour avancer doucement.",
       "beats": "Clics par cellule. Le temps 1 est toujours accentué pour bien repérer le motif.",
       "repeat": "Nombre de cellules par colonne — le nombre de répétitions à chaque tempo avant de passer au suivant.",
-      "mode": "Linéaire monte d'un trait. Zigzag alterne. Adaptatif ajuste selon ta précision.",
       "cyclic": "Monte jusqu'à la cible puis redescend au départ avec les mêmes incréments (aller-retour).",
       "aggressiveness": "La vitesse à laquelle le tempo change. Douce attend plus longtemps, Soutenue pousse plus vite.",
       "countdown": "Décompte sur 4 temps avant le départ de l'exercice. T'aide à te caler sur le tempo."
     },
-    "allSettings": "Tous les réglages"
+    "allSettings": "Tous les réglages",
+    "planLabel": "Le plan",
+    "listensBadge": "À l'écoute"
   }
 }

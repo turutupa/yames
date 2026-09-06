@@ -23,14 +23,15 @@ describe("App routing", () => {
   it("renders the main window app shell when no ?window param is present", async () => {
     render(<App />);
     // MainWindow contains the BPM display — assert SOMETHING from it appears.
-    // Default state has bpm=120, so look for the digit string.
-    expect(await screen.findByText(/120/)).toBeInTheDocument();
+    // Default state has bpm=120. Query the readout specifically: the tempo
+    // ruler is numbered now, so "120" also appears as a gradation under it.
+    expect(await screen.findByText("120", { selector: ".bpm-input" })).toBeInTheDocument();
   });
 
   it("renders the main window app shell when ?window=main is set", async () => {
     setSearch("?window=main");
     render(<App />);
-    expect(await screen.findByText(/120/)).toBeInTheDocument();
+    expect(await screen.findByText("120", { selector: ".bpm-input" })).toBeInTheDocument();
   });
 
   it("renders the floating widget when ?window=floating is set", async () => {
