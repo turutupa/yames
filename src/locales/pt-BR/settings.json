@@ -195,7 +195,7 @@
         "tab-1": "Aba Metrônomo",
         "tab-2": "Aba Treino",
         "settings": "Configurações",
-        "toggle-sidebar": "Alternar predefinições",
+        "toggle-sidebar": "Alternar barra lateral",
         "toggle-coach": "Alternar Coach"
       },
       "descs": {
@@ -218,7 +218,7 @@
         "tab-1": "Vai para a aba Metrônomo",
         "tab-2": "Vai para a aba Treino",
         "settings": "Abre ou fecha as configurações",
-        "toggle-sidebar": "Abre ou fecha a barra lateral de predefinições",
+        "toggle-sidebar": "Recolher ou expandir a barra lateral esquerda",
         "toggle-coach": "Abre ou fecha o painel do coach"
       }
     },

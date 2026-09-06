@@ -74,6 +74,10 @@
   "rail": {
     "label": "모드 및 라이브러리",
     "coachReady": "대기 중",
-    "coachInSession": "세션 중"
+    "coachInSession": "세션 중",
+    "collapse": "사이드바 접기",
+    "expand": "사이드바 펼치기",
+    "collapseWithShortcut": "사이드바 접기 ({{shortcut}})",
+    "expandWithShortcut": "사이드바 펼치기 ({{shortcut}})"
   }
 }

@@ -195,7 +195,7 @@
         "tab-1": "節拍器分頁",
         "tab-2": "變速練習分頁",
         "settings": "設定",
-        "toggle-sidebar": "切換預設",
+        "toggle-sidebar": "切換側邊欄",
         "toggle-coach": "切換教練"
       },
       "descs": {
@@ -218,7 +218,7 @@
         "tab-1": "切換到節拍器分頁",
         "tab-2": "切換到變速練習分頁",
         "settings": "開啟或關閉設定",
-        "toggle-sidebar": "開啟或關閉預設側邊欄",
+        "toggle-sidebar": "摺疊或展開左側邊欄",
         "toggle-coach": "開啟或關閉練習教練面板"
       }
     },

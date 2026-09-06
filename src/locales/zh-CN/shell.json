@@ -74,6 +74,10 @@
   "rail": {
     "label": "模式与资料库",
     "coachReady": "就绪",
-    "coachInSession": "练习中"
+    "coachInSession": "练习中",
+    "collapse": "折叠侧边栏",
+    "expand": "展开侧边栏",
+    "collapseWithShortcut": "折叠侧边栏 ({{shortcut}})",
+    "expandWithShortcut": "展开侧边栏 ({{shortcut}})"
   }
 }

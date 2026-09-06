@@ -195,7 +195,7 @@
         "tab-1": "Pestaña Metrónomo",
         "tab-2": "Pestaña Rampa de tempo",
         "settings": "Ajustes",
-        "toggle-sidebar": "Alternar preajustes",
+        "toggle-sidebar": "Alternar barra lateral",
         "toggle-coach": "Alternar entrenador"
       },
       "descs": {
@@ -218,7 +218,7 @@
         "tab-1": "Cambia a la pestaña Metrónomo",
         "tab-2": "Cambia a la pestaña Rampa de tempo",
         "settings": "Abre o cierra los ajustes",
-        "toggle-sidebar": "Abre o cierra la barra lateral de preajustes",
+        "toggle-sidebar": "Contraer o expandir la barra lateral izquierda",
         "toggle-coach": "Abre o cierra el panel del entrenador"
       }
     },

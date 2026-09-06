@@ -195,7 +195,7 @@
         "tab-1": "Metronome tab",
         "tab-2": "Drill tab",
         "settings": "Settings",
-        "toggle-sidebar": "Toggle Presets",
+        "toggle-sidebar": "Toggle Sidebar",
         "toggle-coach": "Toggle Coach"
       },
       "descs": {
@@ -218,7 +218,7 @@
         "tab-1": "Switch to Metronome tab",
         "tab-2": "Switch to Drill tab",
         "settings": "Open or close settings",
-        "toggle-sidebar": "Open or close the presets sidebar",
+        "toggle-sidebar": "Collapse or expand the left sidebar",
         "toggle-coach": "Open or close the practice coach panel"
       }
     },

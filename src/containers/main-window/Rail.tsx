@@ -91,7 +91,12 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
     : t("rail.coachReady");
 
   return (
-    <nav className="rail" data-library-open={libraryOpen ? "" : undefined} aria-label={t("rail.label")}>
+    <nav
+      className="rail"
+      data-library-open={libraryOpen ? "" : undefined}
+      data-collapsed={libraryOpen ? undefined : ""}
+      aria-label={t("rail.label")}
+    >
       <div className="rail-modes">
         {MODES.map((mode) => (
           <button
@@ -123,7 +128,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
       </div>
 
       <div className="rail-library" data-open={libraryOpen ? "" : undefined}>
-        {libraryOpen ? (
+        {libraryOpen && (
           <PresetSidebar
             ref={sidebarRef}
             state={state}
@@ -134,30 +139,6 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
             onActiveChange={onActivePresetChange}
             shortcut={presetShortcut}
           />
-        ) : (
-          <button
-            className="rail-library-reopen"
-            onClick={onToggleLibrary}
-            title={
-              presetShortcut
-                ? t("presets.openWithShortcut", { shortcut: presetShortcut })
-                : t("presets.open")
-            }
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="9 6 15 12 9 18" />
-            </svg>
-            <span>{t(playView === "drill" ? "presets.titleDrill" : "presets.title")}</span>
-          </button>
         )}
       </div>
 
@@ -285,6 +266,43 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
             </svg>
           </span>
           <span className="rail-action-label">{t("tooltip.settings")}</span>
+        </button>
+        {/* The sidebar's own control, at the sidebar's level.
+
+            It used to sit in the PRESETS header, where it collapsed the whole
+            rail but read as though it collapsed the preset list — the owner
+            called that out. A control belongs beside the thing it acts on, and
+            what this acts on is all of it. */}
+        <button
+          className="rail-action rail-collapse"
+          aria-label={t(libraryOpen ? "rail.collapse" : "rail.expand")}
+          title={
+            presetShortcut
+              ? t(libraryOpen ? "rail.collapseWithShortcut" : "rail.expandWithShortcut", {
+                  shortcut: presetShortcut,
+                })
+              : t(libraryOpen ? "rail.collapse" : "rail.expand")
+          }
+          aria-expanded={libraryOpen}
+          onClick={onToggleLibrary}
+        >
+          <span className="rail-action-icon">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x="3" y="4" width="18" height="16" rx="3" />
+              <line x1="9.5" y1="4" x2="9.5" y2="20" />
+              <polyline points={libraryOpen ? "15.5 9.5 13 12 15.5 14.5" : "13 9.5 15.5 12 13 14.5"} />
+            </svg>
+          </span>
+          <span className="rail-action-label">{t("rail.collapse")}</span>
         </button>
       </div>
     </nav>

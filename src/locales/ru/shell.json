@@ -74,6 +74,10 @@
   "rail": {
     "label": "Режимы и библиотека",
     "coachReady": "Готов",
-    "coachInSession": "В сессии"
+    "coachInSession": "В сессии",
+    "collapse": "Свернуть боковую панель",
+    "expand": "Развернуть боковую панель",
+    "collapseWithShortcut": "Свернуть боковую панель ({{shortcut}})",
+    "expandWithShortcut": "Развернуть боковую панель ({{shortcut}})"
   }
 }

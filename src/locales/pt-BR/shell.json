@@ -74,6 +74,10 @@
   "rail": {
     "label": "Modos e biblioteca",
     "coachReady": "Pronto",
-    "coachInSession": "Em sessão"
+    "coachInSession": "Em sessão",
+    "collapse": "Recolher barra lateral",
+    "expand": "Expandir barra lateral",
+    "collapseWithShortcut": "Recolher barra lateral ({{shortcut}})",
+    "expandWithShortcut": "Expandir barra lateral ({{shortcut}})"
   }
 }

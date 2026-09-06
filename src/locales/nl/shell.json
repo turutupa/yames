@@ -74,6 +74,10 @@
   "rail": {
     "label": "Modi en bibliotheek",
     "coachReady": "Klaar",
-    "coachInSession": "In sessie"
+    "coachInSession": "In sessie",
+    "collapse": "Zijbalk inklappen",
+    "expand": "Zijbalk uitklappen",
+    "collapseWithShortcut": "Zijbalk inklappen ({{shortcut}})",
+    "expandWithShortcut": "Zijbalk uitklappen ({{shortcut}})"
   }
 }

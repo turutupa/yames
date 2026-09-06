@@ -74,6 +74,10 @@
   "rail": {
     "label": "Modlar ve kitaplık",
     "coachReady": "Hazır",
-    "coachInSession": "Seansta"
+    "coachInSession": "Seansta",
+    "collapse": "Kenar çubuğunu daralt",
+    "expand": "Kenar çubuğunu genişlet",
+    "collapseWithShortcut": "Kenar çubuğunu daralt ({{shortcut}})",
+    "expandWithShortcut": "Kenar çubuğunu genişlet ({{shortcut}})"
   }
 }

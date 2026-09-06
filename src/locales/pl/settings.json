@@ -195,7 +195,7 @@
         "tab-1": "Zakładka Metronom",
         "tab-2": "Zakładka Rozbieg",
         "settings": "Ustawienia",
-        "toggle-sidebar": "Przełącz Presety",
+        "toggle-sidebar": "Przełącz panel boczny",
         "toggle-coach": "Przełącz Trenera"
       },
       "descs": {
@@ -218,7 +218,7 @@
         "tab-1": "Przełącz na zakładkę Metronom",
         "tab-2": "Przełącz na zakładkę Rozbieg",
         "settings": "Otwórz lub zamknij ustawienia",
-        "toggle-sidebar": "Otwórz lub zamknij pasek presetów",
+        "toggle-sidebar": "Zwija lub rozwija lewy panel boczny",
         "toggle-coach": "Otwórz lub zamknij panel trenera"
       }
     },

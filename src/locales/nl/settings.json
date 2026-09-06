@@ -195,7 +195,7 @@
         "tab-1": "Metronoom-tabblad",
         "tab-2": "Tempotraining-tabblad",
         "settings": "Instellingen",
-        "toggle-sidebar": "Presets aan/uit",
+        "toggle-sidebar": "Zijbalk schakelen",
         "toggle-coach": "Coach aan/uit"
       },
       "descs": {
@@ -218,7 +218,7 @@
         "tab-1": "Naar het Metronoom-tabblad",
         "tab-2": "Naar het Tempotraining-tabblad",
         "settings": "Instellingen openen of sluiten",
-        "toggle-sidebar": "Open of sluit de presets-zijbalk",
+        "toggle-sidebar": "De linkerzijbalk in- of uitklappen",
         "toggle-coach": "Open of sluit het oefencoach-paneel"
       }
     },

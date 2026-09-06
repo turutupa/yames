@@ -74,6 +74,10 @@
   "rail": {
     "label": "Chế độ và thư viện",
     "coachReady": "Sẵn sàng",
-    "coachInSession": "Đang trong buổi tập"
+    "coachInSession": "Đang trong buổi tập",
+    "collapse": "Thu gọn thanh bên",
+    "expand": "Mở rộng thanh bên",
+    "collapseWithShortcut": "Thu gọn thanh bên ({{shortcut}})",
+    "expandWithShortcut": "Mở rộng thanh bên ({{shortcut}})"
   }
 }

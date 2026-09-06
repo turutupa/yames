@@ -74,6 +74,10 @@
   "rail": {
     "label": "Modes and library",
     "coachReady": "Ready",
-    "coachInSession": "In session"
+    "coachInSession": "In session",
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar",
+    "collapseWithShortcut": "Collapse sidebar ({{shortcut}})",
+    "expandWithShortcut": "Expand sidebar ({{shortcut}})"
   }
 }

@@ -74,6 +74,10 @@
   "rail": {
     "label": "模式與資料庫",
     "coachReady": "就緒",
-    "coachInSession": "練習中"
+    "coachInSession": "練習中",
+    "collapse": "摺疊側邊欄",
+    "expand": "展開側邊欄",
+    "collapseWithShortcut": "摺疊側邊欄 ({{shortcut}})",
+    "expandWithShortcut": "展開側邊欄 ({{shortcut}})"
   }
 }

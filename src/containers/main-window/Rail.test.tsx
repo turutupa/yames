@@ -49,17 +49,34 @@ describe("Rail", () => {
     expect(current?.textContent).toBe("Drill");
   });
 
-  it("shows the library when open and a way back to it when closed", () => {
+  it("shows the library only while the sidebar is expanded", () => {
     const { container, props, rerender } = setup({ libraryOpen: true });
     expect(container.querySelector(".preset-sidebar")).not.toBeNull();
-    expect(container.querySelector(".rail-library-reopen")).toBeNull();
+    expect(container.getAttribute("data-collapsed")).toBeNull();
 
     rerender(<Rail {...props} libraryOpen={false} />);
     expect(container.querySelector(".preset-sidebar")).toBeNull();
-    const reopen = container.querySelector(".rail-library-reopen") as HTMLButtonElement;
-    expect(reopen).not.toBeNull();
-    fireEvent.click(reopen);
+  });
+
+  it("collapses and expands the whole sidebar from one control", () => {
+    // The control used to live in the PRESETS header, where it collapsed the
+    // whole rail but read as though it collapsed the preset list. There is one
+    // now, at the sidebar's level, and one state behind it: expanded shows
+    // labels and the library, collapsed shows neither.
+    const { container, props, rerender } = setup({ libraryOpen: true });
+    const toggle = () =>
+      container.querySelector(".rail-collapse") as HTMLButtonElement;
+
+    expect(toggle()).not.toBeNull();
+    expect(toggle().getAttribute("aria-expanded")).toBe("true");
+    fireEvent.click(toggle());
     expect(props.onToggleLibrary).toHaveBeenCalled();
+
+    rerender(<Rail {...props} libraryOpen={false} />);
+    expect(container.querySelector(".rail")?.getAttribute("data-collapsed")).toBe("");
+    expect(toggle().getAttribute("aria-expanded")).toBe("false");
+    // Still named while its own label is hidden — it is the way back.
+    expect(toggle().getAttribute("aria-label")).toBeTruthy();
   });
 
   it("shows the coach's status dot only once a session is running", () => {
@@ -152,30 +169,5 @@ describe("Rail", () => {
     expect(anchored[0].nextElementSibling).toBe(anchored[1]);
   });
 
-  it("can be closed again, not just opened", () => {
-    // The bug this guards: the rail hid the library's own toggle, and the
-    // only other control — `.rail-library-reopen` — renders exclusively while
-    // the library is CLOSED. Open it and there was no way back except a
-    // hotkey you had to already know about. A one-way door.
-    const { container, props } = setup({ libraryOpen: true });
-    const close = container.querySelector(
-      ".preset-sidebar-toggle-inner",
-    ) as HTMLButtonElement;
-    expect(close, "no visible way to collapse the library").not.toBeNull();
-    fireEvent.click(close);
-    expect(props.onToggleLibrary).toHaveBeenCalled();
-  });
 
-  it("offers exactly one library control at a time", () => {
-    // Open: the collapse button. Closed: the reopen button. Never both, never
-    // neither — either would be a different kind of confusing.
-    const { container, props, rerender } = setup({ libraryOpen: true });
-    const count = () =>
-      container.querySelectorAll(
-        ".preset-sidebar-toggle-inner, .rail-library-reopen",
-      ).length;
-    expect(count()).toBe(1);
-    rerender(<Rail {...props} libraryOpen={false} />);
-    expect(count()).toBe(1);
-  });
 });

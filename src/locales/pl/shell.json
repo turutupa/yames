@@ -74,6 +74,10 @@
   "rail": {
     "label": "Tryby i biblioteka",
     "coachReady": "Gotowy",
-    "coachInSession": "W sesji"
+    "coachInSession": "W sesji",
+    "collapse": "Zwiń panel boczny",
+    "expand": "Rozwiń panel boczny",
+    "collapseWithShortcut": "Zwiń panel boczny ({{shortcut}})",
+    "expandWithShortcut": "Rozwiń panel boczny ({{shortcut}})"
   }
 }

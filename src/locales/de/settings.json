@@ -195,7 +195,7 @@
         "tab-1": "Metronom-Tab",
         "tab-2": "Tempo-Training-Tab",
         "settings": "Einstellungen",
-        "toggle-sidebar": "Presets umschalten",
+        "toggle-sidebar": "Seitenleiste umschalten",
         "toggle-coach": "Coach umschalten"
       },
       "descs": {
@@ -218,7 +218,7 @@
         "tab-1": "Zum Metronom-Tab wechseln",
         "tab-2": "Zum Tempo-Training-Tab wechseln",
         "settings": "Einstellungen öffnen oder schließen",
-        "toggle-sidebar": "Preset-Seitenleiste öffnen oder schließen",
+        "toggle-sidebar": "Die linke Seitenleiste ein- oder ausklappen",
         "toggle-coach": "Coach-Bedienfeld öffnen oder schließen"
       }
     },

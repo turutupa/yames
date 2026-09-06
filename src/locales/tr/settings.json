@@ -195,7 +195,7 @@
         "tab-1": "Metronom sekmesi",
         "tab-2": "Tempo Antrenmanı sekmesi",
         "settings": "Ayarlar",
-        "toggle-sidebar": "Ön ayarları aç/kapat",
+        "toggle-sidebar": "Kenar çubuğunu aç/kapat",
         "toggle-coach": "Koç panelini aç/kapat"
       },
       "descs": {
@@ -218,7 +218,7 @@
         "tab-1": "Metronom sekmesine geç",
         "tab-2": "Tempo Antrenmanı sekmesine geç",
         "settings": "Ayarları aç veya kapat",
-        "toggle-sidebar": "Ön ayar panelini aç veya kapat",
+        "toggle-sidebar": "Sol kenar çubuğunu daraltır veya genişletir",
         "toggle-coach": "Pratik Koçu panelini aç veya kapat"
       }
     },

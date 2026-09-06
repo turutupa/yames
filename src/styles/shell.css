@@ -1249,31 +1249,12 @@ button.context-chip:hover,
   transition: none;
 }
 
-/* The way out of the library.
-
-   This used to be `display: none`. The rail's library is not the drawer the
-   old sidebar was, and the drawer's toggle looked out of place in it — but
-   hiding it left the panel with a `.rail-library-reopen` button that only
-   exists while it is *closed*. Open it and there was no button to close it
-   again: a one-way door, with only the toggle-sidebar hotkey behind it for
-   anyone who knew. Sized to sit with search and `+` rather than restyled as
-   the drawer control it no longer is. */
+/* The library's own toggle stays hidden here. The rail is not the sliding
+   drawer that button was built for, and a control inside the PRESETS header
+   reads as "collapse the presets" whatever it actually does. The sidebar's
+   control lives at the sidebar's level, in the footer — see `.rail-collapse`. */
 .rail-library .preset-sidebar-toggle-inner {
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
-  opacity: 1;
-  color: var(--text-secondary);
-}
-
-.rail-library .preset-sidebar-toggle-inner svg {
-  width: 14px;
-  height: 14px;
-}
-
-.rail-library .preset-sidebar-toggle-inner:hover {
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.06);
+  display: none;
 }
 
 .rail-library-reopen {
@@ -2030,4 +2011,54 @@ button.context-chip:hover,
    anything. The rail's coach row replaces it, status dot and all. */
 .coach-card-pill {
   display: none;
+}
+
+
+/* ── The sidebar, collapsed on purpose ───────────────────────────────────
+   Below 620px the rail becomes a strip of icons because it has to. This is
+   the same shape asked for deliberately, at any width, and it is one state
+   rather than two: expanded shows labels and the library, collapsed shows
+   neither. The middle state that used to exist — labels but no library, with
+   a "PRESETS ›" button to get it back — was a third thing to understand for
+   no gain, and it was the only way to reach a library the header's own button
+   could not close. */
+.rail[data-collapsed] {
+  width: 68px;
+  min-width: 68px;
+}
+
+.rail[data-collapsed] .rail-mode,
+.rail[data-collapsed] .rail-action {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+  border-left-width: 0;
+}
+
+.rail[data-collapsed] .rail-mode.active,
+.rail[data-collapsed] .rail-action.active {
+  border-left-width: 0;
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.rail[data-collapsed] .rail-action.active {
+  box-shadow: inset 2px 0 0 var(--accent-2);
+}
+
+.rail[data-collapsed] .rail-mode-label,
+.rail[data-collapsed] .rail-action-label,
+.rail[data-collapsed] .rail-action-status,
+.rail[data-collapsed] .rail-library {
+  display: none;
+}
+
+/* The collapse control is the one label that would be useful while collapsed,
+   and it is the one that cannot be shown — so it is named, not labelled. */
+.rail-collapse {
+  margin-top: 2px;
+  opacity: 0.75;
+}
+
+.rail-collapse:hover {
+  opacity: 1;
 }

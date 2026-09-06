@@ -74,6 +74,10 @@
   "rail": {
     "label": "Modi und Bibliothek",
     "coachReady": "Bereit",
-    "coachInSession": "In Sitzung"
+    "coachInSession": "In Sitzung",
+    "collapse": "Seitenleiste einklappen",
+    "expand": "Seitenleiste ausklappen",
+    "collapseWithShortcut": "Seitenleiste einklappen ({{shortcut}})",
+    "expandWithShortcut": "Seitenleiste ausklappen ({{shortcut}})"
   }
 }

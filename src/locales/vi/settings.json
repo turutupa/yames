@@ -195,7 +195,7 @@
         "tab-1": "Trang máy đếm nhịp",
         "tab-2": "Trang luyện tempo",
         "settings": "Cài đặt",
-        "toggle-sidebar": "Bật/tắt cài đặt sẵn",
+        "toggle-sidebar": "Bật/tắt thanh bên",
         "toggle-coach": "Bật/tắt huấn luyện viên"
       },
       "descs": {
@@ -218,7 +218,7 @@
         "tab-1": "Chuyển sang trang máy đếm nhịp",
         "tab-2": "Chuyển sang trang luyện tempo",
         "settings": "Mở hoặc đóng cài đặt",
-        "toggle-sidebar": "Mở hoặc đóng thanh cài đặt sẵn",
+        "toggle-sidebar": "Thu gọn hoặc mở rộng thanh bên trái",
         "toggle-coach": "Mở hoặc đóng bảng huấn luyện viên"
       }
     },
