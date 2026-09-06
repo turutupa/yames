@@ -286,3 +286,31 @@
     opacity: 0.4;
   }
 }
+
+/* ── Fitting the beat row into a window that cannot grow ──────────────────
+   The floating window is a fixed 400x160 and `resizable: false`, while a bar
+   can hold up to 16 beats. At the shipped size a 9-beat bar already put the
+   last dot outside the window, where it was cut off — and the more beats, the
+   more of the bar went missing, silently.
+
+   The numbers come from the component (`beatRowSizing`), which knows the beat
+   count. They are only ever smaller than what the widget shipped with, so the
+   common meters look exactly as they did. */
+.fw-beat-row {
+  gap: var(--fw-dot-gap, 10px);
+  min-width: 0;
+}
+
+.fw-beat-row .fw-beat-dot {
+  width: var(--fw-dot, 10px);
+  height: var(--fw-dot, 10px);
+}
+
+.fw-beat-row .fw-sub-dots {
+  gap: var(--fw-sub-gap, 3px);
+}
+
+.fw-beat-row .fw-sub-dot {
+  width: var(--fw-sub-dot, 4px);
+  height: var(--fw-sub-dot, 4px);
+}

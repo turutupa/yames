@@ -59,6 +59,58 @@ function eventToCombo(e: KeyboardEvent): string {
   return parts.join("");
 }
 
+/**
+ * Room the beat row has, in px. The floating window is a fixed 400 wide and
+ * `resizable: false`, and everything to the left of the row is fixed-size
+ * too, so this is a constant rather than a measurement — measured once at
+ * 400px with the row flex-shrunk to 187.
+ */
+const BEAT_ROW_WIDTH = 185;
+
+/** Each dot carries a 1px border, so it occupies 2px more than its width. */
+const DOT_BORDER = 2;
+
+/**
+ * Dot and gap sizes for a bar of `beats`, as CSS variables.
+ *
+ * Everything is capped at the sizes the widget shipped with, so the common
+ * meters are untouched and only a bar too wide to fit gives anything up. The
+ * floor keeps a dot a dot: below about 4px it stops reading as a beat, and a
+ * 16-beat bar is legible at 6.
+ *
+ * The border comes out of the budget before it is divided. Leaving it in was
+ * the first version's bug: the split adds back to the full width, so the
+ * borders pushed the row over by exactly 2px per beat — 32px at sixteen,
+ * which is what put the last dot outside the window.
+ */
+function beatRowSizing(beats: number): React.CSSProperties {
+  const n = Math.max(1, beats);
+  const each = Math.max(0, BEAT_ROW_WIDTH - DOT_BORDER * n) / n;
+  const dot = Math.max(4, Math.min(10, each * 0.62));
+  const gap = Math.max(2, Math.min(10, each * 0.38));
+  return {
+    "--fw-dot": `${dot}px`,
+    "--fw-dot-gap": `${gap}px`,
+    "--fw-sub-dot": `${Math.max(2, Math.min(4, dot * 0.4))}px`,
+    "--fw-sub-gap": `${Math.max(1, Math.min(3, gap * 0.3))}px`,
+  } as React.CSSProperties;
+}
+
+/** The dot diameter for `beats`, without its border. Exported for the test. */
+export function beatRowDot(beats: number): number {
+  return parseFloat((beatRowSizing(beats) as Record<string, string>)["--fw-dot"]);
+}
+
+/** What `beats` dots and their gaps actually occupy. Exported for the test. */
+export function beatRowExtent(beats: number): number {
+  const st = beatRowSizing(beats) as Record<string, string>;
+  const dot = parseFloat(st["--fw-dot"]) + DOT_BORDER;
+  const gap = parseFloat(st["--fw-dot-gap"]);
+  return beats * dot + Math.max(0, beats - 1) * gap;
+}
+
+export { BEAT_ROW_WIDTH };
+
 export function FloatingWidget() {
   const { t } = useTranslation();
   useDrag();
@@ -346,7 +398,17 @@ export function FloatingWidget() {
           </button>
         </div>
 
-        <div className="fw-beat-row">
+        {/* The widget's window is 400x160 and cannot be resized, so this row
+            has to fit whatever meter it is handed — up to the 16 beats
+            `validate_beat_groups` allows. At the shipped size a 9-beat bar
+            already pushed the last dot outside the window, where it was
+            simply cut off.
+
+            Sized here rather than in CSS because the arithmetic is a division
+            by the beat count, and `calc(74px / var(--fw-beats))` is dropped as
+            invalid — silently, leaving the dots at their full size and the
+            overflow exactly as it was. Measured, not assumed. */}
+        <div className="fw-beat-row" style={beatRowSizing(widgetBeats)}>
           {Array.from({ length: widgetBeats }, (_, beatIdx) => {
             const isBeatActive = widgetActiveBeat === beatIdx && isDownbeat;
             const isBeatDownbeat = isBeatActive && isAccent;
