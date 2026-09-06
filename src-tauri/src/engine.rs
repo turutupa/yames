@@ -244,6 +244,88 @@ const CHIME_DOWN: &[u8] = include_bytes!("../sounds/chime_down.wav");
 // ---------------------------------------------------------------------------
 
 /// Decode an embedded WAV to mono f32 samples resampled to `target_sr`.
+/// How loud a plain beat is against an accent, which always plays at 1.0.
+///
+/// This was 0.75. Measured, that put the accent only 1.6 to 2.2 dB above the
+/// beat for click, wood and beep — the samples themselves are very slightly
+/// *quieter* on the accent, so the engine's gain was doing all the work and
+/// not quite enough of it. A downbeat you have to listen for is not a
+/// downbeat. 0.65 puts the difference at 3 to 4 dB, which is where an accent
+/// reads without shouting.
+const BEAT_GAIN: f32 = 0.65;
+
+/// Subdivisions, quieter again. Kept at the same ratio to `BEAT_GAIN` it had
+/// at 0.75/0.35, so lifting the accent does not also raise the ticks between
+/// beats relative to the beats themselves.
+const SUB_GAIN: f32 = 0.30;
+
+/// Resample `mono` from `source_sr` to `target_sr` with a windowed sinc.
+    //
+    // This was linear interpolation, which is a poor low-pass: it dulls the
+    // transient and folds imaging back into the audible band. It matters here
+    // because the samples ship at 44.1 kHz and most output devices run at 48,
+    // so nearly every user hears a resampled click rather than the file — and
+    // the brightest sounds, the ones carrying the attack, suffer the most.
+    //
+    // Cost is irrelevant: this runs once per sound when the bank is built, on
+    // the setup path, never on the audio thread. A 25 ms click at 44.1 kHz is
+    // about a thousand samples.
+    // Half-width in source samples. 16 is well past the point where the
+    // stop-band of a Blackman-windowed sinc stops being the limiting factor.
+    // Downsampling has to band-limit to the NEW Nyquist, or it aliases.
+                // sinc, scaled to the cutoff
+                // Blackman window over the whole kernel
+            // Normalising by the taps actually used keeps the level steady at
+            // the edges, where half the kernel hangs off the end of the sample.
+fn resample(mono: &[f32], source_sr: u32, target_sr: u32) -> Vec<f32> {
+    if source_sr == target_sr {
+        return mono.to_vec();
+    }
+    let ratio = target_sr as f64 / source_sr as f64;
+    let out_len = (mono.len() as f64 * ratio).ceil() as usize;
+
+    const HALF: i64 = 16;
+    let cutoff = if ratio < 1.0 { ratio } else { 1.0 };
+
+    (0..out_len)
+        .map(|i| {
+            let pos = i as f64 / ratio;
+            let centre = pos.floor() as i64;
+            let mut acc = 0.0f64;
+            let mut norm = 0.0f64;
+            for k in (centre - HALF + 1)..=(centre + HALF) {
+                let x = pos - k as f64;
+                let sinc = if x.abs() < 1e-9 {
+                    cutoff
+                } else {
+                    (std::f64::consts::PI * cutoff * x).sin() / (std::f64::consts::PI * x)
+                };
+                let w = {
+                    let t = (x + HALF as f64) / (2.0 * HALF as f64);
+                    if !(0.0..=1.0).contains(&t) {
+                        0.0
+                    } else {
+                        0.42 - 0.5 * (2.0 * std::f64::consts::PI * t).cos()
+                            + 0.08 * (4.0 * std::f64::consts::PI * t).cos()
+                    }
+                };
+                let tap = sinc * w;
+                if k >= 0 {
+                    if let Some(s) = mono.get(k as usize) {
+                        acc += *s as f64 * tap;
+                    }
+                }
+                norm += tap;
+            }
+            if norm.abs() > 1e-9 {
+                (acc / norm) as f32
+            } else {
+                0.0
+            }
+        })
+        .collect()
+}
+
 fn decode_wav(wav_bytes: &'static [u8], target_sr: u32) -> Vec<f32> {
     let cursor = Cursor::new(wav_bytes);
     let decoder = rodio::Decoder::new(cursor).expect("Failed to decode embedded WAV");
@@ -264,19 +346,7 @@ fn decode_wav(wav_bytes: &'static [u8], target_sr: u32) -> Vec<f32> {
         return mono;
     }
 
-    // Linear-interpolation resample
-    let ratio = target_sr as f64 / source_sr as f64;
-    let out_len = (mono.len() as f64 * ratio).ceil() as usize;
-    (0..out_len)
-        .map(|i| {
-            let pos = i as f64 / ratio;
-            let idx = pos.floor() as usize;
-            let frac = (pos - idx as f64) as f32;
-            let s0 = mono.get(idx).copied().unwrap_or(0.0);
-            let s1 = mono.get(idx + 1).copied().unwrap_or(s0);
-            s0 + (s1 - s0) * frac
-        })
-        .collect()
+    resample(&mono, source_sr, target_sr)
 }
 
 // ---------------------------------------------------------------------------
@@ -327,6 +397,18 @@ impl SoundBank {
         }
         for (i, s) in drum_crash.iter().enumerate() {
             drum_accent[i] += s * 0.35;
+        }
+
+        // Three samples summed peak above full scale — 1.27 as measured — so
+        // at any volume over about 0.79 the accent clipped, on every downbeat
+        // of every bar. Scaling the premix back is free: the user's volume is
+        // applied after this, so the only thing lost is distortion.
+        let peak = drum_accent.iter().fold(0.0f32, |m, s| m.max(s.abs()));
+        if peak > 0.97 {
+            let g = 0.97 / peak;
+            for s in drum_accent.iter_mut() {
+                *s *= g;
+            }
         }
 
         Self {
@@ -1672,9 +1754,9 @@ impl MetronomeEngine {
                                 let (sid, amp) = if cached.ramp_warming_up && !is_last_warmup {
                                     (SoundId::BeepHigh, 0.6)
                                 } else if is_downbeat {
-                                    (cached.kit.low_id(), 0.75)
+                                    (cached.kit.low_id(), BEAT_GAIN)
                                 } else {
-                                    (cached.kit.low_id(), 0.35)
+                                    (cached.kit.low_id(), SUB_GAIN)
                                 };
                                 voices.push(Voice {
                                     sound_id: sid,
@@ -2168,6 +2250,106 @@ impl Drop for MetronomeEngine {
 
 #[cfg(test)]
 mod tests {
+
+    // ─── Sound bank ──────────────────────────────────────────────────────
+
+    /// A 44.1 kHz sine, resampled to 48 k, must come out at the same level and
+    /// the same frequency. Linear interpolation — what this replaced — loses
+    /// height on every peak it lands between, and the loss grows with
+    /// frequency, which is exactly where a click's character lives.
+    #[test]
+    fn resampler_keeps_a_tone_intact() {
+        for freq in [440.0f64, 2000.0, 6000.0] {
+            let src: Vec<f32> = (0..4410)
+                .map(|i| (2.0 * std::f64::consts::PI * freq * i as f64 / 44100.0).sin() as f32)
+                .collect();
+            let out = resample(&src, 44100, 48000);
+
+            // Ignore the kernel's reach at either end.
+            let body = &out[64..out.len() - 64];
+            let peak = body.iter().fold(0.0f32, |m, s| m.max(s.abs()));
+            assert!(
+                (peak - 1.0).abs() < 0.02,
+                "{freq} Hz came out at {peak}, expected ~1.0"
+            );
+
+            // Zero crossings give the frequency without an FFT.
+            let crossings = body.windows(2).filter(|w| w[0] <= 0.0 && w[1] > 0.0).count();
+            let expected = freq * body.len() as f64 / 48000.0;
+            assert!(
+                (crossings as f64 - expected).abs() / expected < 0.02,
+                "{freq} Hz: {crossings} crossings, expected about {expected:.0}"
+            );
+        }
+    }
+
+    /// Downsampling must band-limit to the new Nyquist. Without the cutoff
+    /// term this aliases: content above the target's Nyquist folds back down
+    /// and lands somewhere audible.
+    #[test]
+    fn resampler_does_not_alias_when_going_down() {
+        // 18 kHz has nowhere to go at 24 kHz output — it must be filtered out,
+        // not folded to 6 kHz.
+        let src: Vec<f32> = (0..4410)
+            .map(|i| (2.0 * std::f64::consts::PI * 18000.0 * i as f64 / 44100.0).sin() as f32)
+            .collect();
+        let out = resample(&src, 44100, 24000);
+        let body = &out[64..out.len() - 64];
+        let rms = (body.iter().map(|s| (s * s) as f64).sum::<f64>() / body.len() as f64).sqrt();
+        assert!(rms < 0.1, "18 kHz survived a downsample to 24 kHz at rms {rms}");
+    }
+
+    /// Silence in, silence out — the normalisation must not divide by nothing.
+    #[test]
+    fn resampler_survives_silence_and_emptiness() {
+        assert!(resample(&[], 44100, 48000).is_empty());
+        let quiet = resample(&vec![0.0f32; 128], 44100, 48000);
+        assert!(quiet.iter().all(|s| s.abs() < 1e-6));
+    }
+
+    /// The drum accent is three samples summed. Unscaled they peak at about
+    /// 1.27, so every downbeat clipped once the user's volume passed ~0.79.
+    #[test]
+    fn drum_accent_leaves_headroom() {
+        let bank = SoundBank::new(48000);
+        let peak = bank.drum_accent.iter().fold(0.0f32, |m, s| m.max(s.abs()));
+        assert!(peak <= 0.971, "drum accent peaks at {peak}, which clips");
+        assert!(peak > 0.5, "drum accent is suspiciously quiet at {peak}");
+    }
+
+    /// An accent plays at 1.0. These are what it is measured against, and the
+    /// ordering is the whole point: accent, then beat, then the ticks between.
+    #[test]
+    fn accent_reads_louder_than_the_beat_it_marks() {
+        assert!(BEAT_GAIN < 1.0);
+        assert!(SUB_GAIN < BEAT_GAIN);
+        let accent_db = 20.0 * (1.0f32 / BEAT_GAIN).log10();
+        assert!(
+            (3.0..=4.5).contains(&accent_db),
+            "accent sits {accent_db:.1} dB over the beat; under 3 it is not heard              as an accent and over 4.5 it shouts"
+        );
+    }
+
+    /// Every sample ends in silence. A file truncated mid-decay steps to zero,
+    /// and that step is a click — a second one, on every beat. Five of the ten
+    /// did this before `scripts/sounds/rebuild.py`, the worst at -20 dBFS.
+    #[test]
+    fn no_sample_ends_mid_decay() {
+        let bank = SoundBank::new(44100);
+        let named: [(&str, &Vec<f32>); 7] = [
+            ("click_high", &bank.click_high),
+            ("click_low", &bank.click_low),
+            ("wood_high", &bank.wood_high),
+            ("wood_low", &bank.wood_low),
+            ("beep_high", &bank.beep_high),
+            ("beep_low", &bank.beep_low),
+            ("drum_low", &bank.drum_low),
+        ];
+        for (name, buf) in named {
+            let tail = buf.last().copied().unwrap_or(0.0).abs();
+            assert!(tail < 0.002, "{name} ends at {tail}, which clicks");
+        }
+    }
     use super::*;
     use std::collections::HashSet;
 
