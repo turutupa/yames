@@ -1517,11 +1517,17 @@
     gap: 12px;
   }
 
-  /* The head stops trying to lay two blocks side by side at this width. */
+  /* The tempo block and LAST SESSION stop sharing a line; the readout goes
+     under the number rather than off the edge of the stage. */
   .main-content[data-view="beat"] .tempo-head {
     flex-direction: column;
     align-items: flex-start;
     gap: 14px;
+  }
+
+  .main-content[data-view="beat"] .last-session {
+    align-items: flex-start;
+    padding-bottom: 0;
   }
 
   .main-content[data-view="beat"] .time-sig-row,
@@ -1769,6 +1775,25 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+/* Takes the slack, which is what pushes LAST SESSION out to the stage's far
+   edge however wide the window is. */
+.last-session {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  margin-left: auto;
+  padding-bottom: 0.7rem;
+  text-align: right;
+}
+
+.last-session-line {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
 }
 
 .stage-divider {

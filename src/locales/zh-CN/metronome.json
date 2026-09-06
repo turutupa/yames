@@ -17,7 +17,12 @@
     "grouping": "分组",
     "tempo": "速度",
     "tempoUp": "提高速度",
-    "tempoDown": "降低速度"
+    "tempoDown": "降低速度",
+    "lastSession": "上次练习",
+    "lastSessionMinutes": "{{count}} 分钟",
+    "lastSessionMinutes_one": "{{count}} 分钟",
+    "lastSessionMinutes_other": "{{count}} 分钟",
+    "lastSessionScore": "得分 {{score}}"
   },
   "subdiv": {
     "1": "四分音符",

@@ -17,7 +17,12 @@
     "grouping": "agrupamento",
     "tempo": "Andamento",
     "tempoUp": "Aumentar o andamento",
-    "tempoDown": "Diminuir o andamento"
+    "tempoDown": "Diminuir o andamento",
+    "lastSession": "Última sessão",
+    "lastSessionMinutes": "{{count}} min",
+    "lastSessionMinutes_one": "{{count}} min",
+    "lastSessionMinutes_other": "{{count}} min",
+    "lastSessionScore": "nota {{score}}"
   },
   "subdiv": {
     "1": "Semínima",

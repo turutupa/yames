@@ -17,7 +17,12 @@
     "grouping": "agrupación",
     "tempo": "Tempo",
     "tempoUp": "Subir el tempo",
-    "tempoDown": "Bajar el tempo"
+    "tempoDown": "Bajar el tempo",
+    "lastSession": "Última sesión",
+    "lastSessionMinutes": "{{count}} min",
+    "lastSessionMinutes_one": "{{count}} min",
+    "lastSessionMinutes_other": "{{count}} min",
+    "lastSessionScore": "puntuación {{score}}"
   },
   "subdiv": {
     "1": "Negra",

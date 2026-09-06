@@ -12,6 +12,7 @@ import {
   MIN_BPM,
 } from "../../constants/metronome";
 import { GroupEditor } from "./GroupEditor";
+import { LastSession } from "./LastSession";
 import { MeterPresets } from "./MeterPresets";
 import { SubdivisionIcon } from "../../components/MetronomeIcons";
 import DriftMeter from "../../components/DriftMeter";
@@ -158,6 +159,12 @@ export function MetronomeView({
               </div>
             </div>
           </div>
+
+          {/* Right-aligned against the stage's far edge, as drawn. It is a
+              rest-state readout: the `MetronomePlaying` artboard gives this
+              corner to the bar counter instead, and the docked transport
+              already carries that. */}
+          <LastSession isPlaying={state.isPlaying} />
         </div>
 
         <div className="bpm-slider-wrap view-stagger-item" style={{ animationDelay: '40ms' }}>

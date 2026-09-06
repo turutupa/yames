@@ -17,7 +17,12 @@
     "grouping": "nhóm nhịp",
     "tempo": "Nhịp độ",
     "tempoUp": "Tăng nhịp độ",
-    "tempoDown": "Giảm nhịp độ"
+    "tempoDown": "Giảm nhịp độ",
+    "lastSession": "Buổi tập trước",
+    "lastSessionMinutes": "{{count}} phút",
+    "lastSessionMinutes_one": "{{count}} phút",
+    "lastSessionMinutes_other": "{{count}} phút",
+    "lastSessionScore": "điểm {{score}}"
   },
   "subdiv": {
     "1": "Nốt đen",

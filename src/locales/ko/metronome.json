@@ -17,7 +17,12 @@
     "grouping": "그룹",
     "tempo": "템포",
     "tempoUp": "템포 올리기",
-    "tempoDown": "템포 내리기"
+    "tempoDown": "템포 내리기",
+    "lastSession": "지난 세션",
+    "lastSessionMinutes": "{{count}}분",
+    "lastSessionMinutes_one": "{{count}}분",
+    "lastSessionMinutes_other": "{{count}}분",
+    "lastSessionScore": "점수 {{score}}"
   },
   "subdiv": {
     "1": "4분음표",
