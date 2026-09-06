@@ -14,6 +14,11 @@ const STYLES = path.resolve(process.cwd(), "src/styles");
  * Comments are stripped: these tests assert rules, not the prose explaining
  * them, and more than one of them looks for a class name that also appears in
  * a comment about its removal.
+ *
+ * Line endings are normalised because the assertions are written with "\n" and
+ * a checkout with `core.autocrlf=true` — the default on Windows, and what the
+ * owner's machine has — hands back "\r\n". Every multi-line assertion in these
+ * tests failed there and passed in CI, which is the worst way round.
  */
 export function readStylesheet(file = "main-window.css"): string {
   const seen = new Set<string>();
@@ -27,7 +32,9 @@ export function readStylesheet(file = "main-window.css"): string {
       .replace(/@import\s+["']\.\/([^"']+)["'];?/g, (_, imported: string) => read(imported));
   }
 
-  return read(file).replace(/\/\*[\s\S]*?\*\//g, "");
+  return read(file)
+    .replace(/\r\n/g, "\n")
+    .replace(/\/\*[\s\S]*?\*\//g, "");
 }
 
 /** The declarations of the first rule whose selector block starts with `selector`. */

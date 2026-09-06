@@ -47,6 +47,60 @@
   display: none !important;
 }
 
+/* =================== The titlebar =================== */
+/* The strip the mockups draw across the top: the mark, the wordmark, and the
+   window controls. It replaces the arrangement where the controls floated
+   over the rail's first 42px and nothing named the app.
+ *
+ * `align-items: stretch` is what makes the controls fill the strip's height
+ * whatever the platform sizes them — they used to be positioned absolutely
+ * against the window and are in the flow now (see window-controls.css). */
+.app-titlebar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: stretch;
+  height: 38px;
+  padding-right: 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel);
+  user-select: none;
+}
+
+/* The left gutter is whatever the platform's controls need. Windows and Linux
+   render ours into the strip, so they measure themselves and the gutter is
+   only the gap after them. macOS draws its traffic lights over the webview
+   (`titleBarStyle: Overlay` in tauri.conf.json) — nothing is in the flow to
+   push the wordmark clear of them, so the padding does it. */
+.app-titlebar .app-mark {
+  margin-left: 10px;
+}
+
+.main-window.os-mac .app-titlebar .app-mark {
+  margin-left: 78px;
+}
+
+.main-window.os-other .app-titlebar .app-mark {
+  margin-left: 16px;
+}
+
+.app-mark {
+  align-self: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  flex-shrink: 0;
+}
+
+.app-wordmark {
+  align-self: center;
+  margin-left: 9px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text-secondary);
+}
+
 
 /* os-fullscreen comes AFTER platform rules — same specificity, so it wins */
 .main-window.os-fullscreen {
@@ -1680,13 +1734,12 @@ button.context-chip:hover,
    deleted rather than overridden. A rule that only exists to cancel another
    rule is two places to look when it goes wrong. */
 
-/* The rail now owns the window's top-left corner, where the controls are
-   drawn — 36px of them on Windows and Linux, the traffic lights on macOS. */
-.rail {
-  padding-top: 42px;
-}
+/* The rail used to own the window's top-left corner and reserve 42px of empty
+   padding for the controls drawn over it. The titlebar strip holds them now,
+   so the rail starts at its own top and the modes sit where the mockup puts
+   them — 14px under the hairline rather than 56px. */
 
-/* …which also means the preset sidebar's own clearance is double-counted. */
+/* …the preset sidebar's clearance is still double-counted, though. */
 .rail-library .preset-sidebar-header {
   padding-top: 10px;
 }

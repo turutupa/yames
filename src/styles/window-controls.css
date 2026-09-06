@@ -1,11 +1,11 @@
+/* The controls live inside the titlebar strip now rather than floating at the
+   window's top-left corner over the rail, so they take their height from it
+   instead of declaring one. Their side has not moved — see TitleBar.tsx for
+   why they stay left on Windows. */
 .window-controls {
-  position: absolute;
-  top: 0;
-  left: 0;
   display: flex;
   align-items: stretch;
-  height: 36px;
-  z-index: 200;
+  flex-shrink: 0;
   /* Must NOT be a drag region — buttons need click events */
   -webkit-app-region: no-drag;
   app-region: no-drag;
@@ -67,11 +67,8 @@
   font-weight: 300;
 }
 
-/* Linux: slightly smaller buttons to match GNOME/KDE norms */
-.os-linux .window-controls {
-  height: 30px;
-}
-
+/* Linux: slightly narrower buttons to match GNOME/KDE norms. The height went
+   with the absolute positioning — the strip sets it now. */
 .os-linux .wc-btn {
   width: 36px;
 }

@@ -61,7 +61,7 @@ import type { PresetSidebarHandle } from "../../components/presets/PresetSidebar
 import { ThemeEffects } from "./ThemeEffects";
 import { MetronomeView } from "../metronome/MetronomeView";
 import { MainHeader } from "./MainHeader";
-import { WindowControls } from "../../components/WindowControls";
+import { TitleBar } from "../../components/TitleBar";
 import { Rail } from "./Rail";
 import { Transport } from "./Transport";
 import { ViewTransition } from "../../components/ViewTransition";
@@ -795,7 +795,7 @@ export function MainWindow() {
       data-border={activeBorder}
     >
       <ThemeEffects themeId={state.theme} currentBeat={currentBeat} isPlaying={state.isPlaying} />
-      {(IS_WINDOWS || IS_LINUX) && <WindowControls />}
+      <TitleBar />
 
       {onboarding.chipVisible && view !== "settings" && (
         <FinishSetupChip
