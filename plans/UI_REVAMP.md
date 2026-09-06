@@ -479,3 +479,48 @@ transport that carries count-in and cyclic.
   thirteen themes.
 - **Nobody has run this on macOS or Linux.** The titlebar gained a real strip
   and a platform-dependent gutter; only Windows has been seen.
+
+---
+
+## 14. Preset chains
+
+Built after the polish round, on the owner's word. A chain is an ordered list
+of preset-shaped steps with a configured gap between each pair; loading one and
+pressing play walks it unattended. The decisions are U9.1–U9.7; the brief is
+`plans/tasks/chain/BRIEF.md`; the artboard is `design/app/PresetChain.dc.html`.
+
+Three parts, built in two passes because the second depends on the first:
+
+- **Model and runtime.** Types, storage beside presets, pure data operations,
+  and a state machine that walks a chain. `useChainRunner` drives it from the
+  engine's beat events.
+- **UI.** The library lists chains beside presets; loading one puts the track
+  over the stage with a trigger chip in every gap; the metronome underneath
+  keeps editing the selected step rather than becoming a second mode.
+
+### What only looking at it found
+
+Both workers gated clean and neither could open the app: the dev server serves
+the main checkout, so a worktree cannot render itself. Three bugs survived
+every test and died on first sight.
+
+- **The stage stopped scrolling.** Beat was the only view centred with
+  `overflow: visible`. The chain track pushed the subdivision row 44px behind
+  the transport — unreadable, unclickable, no scrollbar. Not chain-specific: a
+  short window did it too, and always would have.
+- **The transition editor opened off-screen** on the last gap.
+- **The transport overflowed at 800px**, the window's own default size, with a
+  chain loaded.
+
+The lesson is not that the workers were careless — it is that a component test
+cannot fail on a layout that has never been laid out. Anything that ends up on
+screen needs someone to open it.
+
+### Still open
+
+- **U9.5** — the engine's count-in is welded to the speed ramp. Until it is
+  unwelded, "count me in" is stored and shown but arrives as a clean cut, and
+  the UI says so in fifteen languages rather than implying otherwise.
+- **The runtime has never run against a real engine.** The browser preview has
+  no audio and no beat events, so the arming rule, the trigger clock and the
+  step handover are covered by unit tests and nothing else.
