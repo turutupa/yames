@@ -21,11 +21,13 @@
   },
   "presets": {
     "title": "Presety",
+    "titleDrill": "Rozbiegi",
     "open": "Otwórz presety",
     "openWithShortcut": "Otwórz presety ({{shortcut}})",
     "close": "Zamknij presety",
     "closeWithShortcut": "Zamknij presety ({{shortcut}})",
     "saveCurrent": "Zapisz bieżące ustawienia",
+    "search": "Szukaj w bibliotece",
     "searchPlaceholder": "Szukaj...",
     "namePlaceholder": "Nazwa...",
     "noResults": "Brak wyników",

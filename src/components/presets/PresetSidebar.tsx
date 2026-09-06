@@ -1,6 +1,7 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { deletePreset, listPresets, savePreset } from "../../ipc";
+import { meterLabel, presetBeatGroups, presetFreeMode } from "../../utils/meter";
 import type { AppState, Preset } from "../../types";
 
 export interface PresetSidebarHandle {
@@ -86,6 +87,26 @@ function isDirty(state: AppState, preset: Preset, view: string): boolean {
 
 const MAX_PRESETS = 20;
 
+/**
+ * The line at the right of a row: what the preset restores, in as few
+ * characters as the column has room for.
+ *
+ * A drill is its tempo range — the two numbers that say how far it climbs.
+ * Everything else is tempo and meter, because tempo alone does not
+ * distinguish two presets a player keeps at the same speed in 4/4 and 6/8,
+ * which is exactly the pair worth telling apart at a glance. FREE mode has
+ * no signature to print, so it says so.
+ */
+function presetSummary(preset: Preset, t: (key: string) => string): string {
+  if (preset.view === "drill" && preset.speedRamp) {
+    return `${preset.speedRamp.startBpm}–${preset.speedRamp.targetBpm}`;
+  }
+  const meter = presetFreeMode(preset)
+    ? t("metronome.free")
+    : meterLabel(presetBeatGroups(preset));
+  return `${preset.bpm} · ${meter}`;
+}
+
 export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>(function PresetSidebar({
   state,
   view,
@@ -101,6 +122,10 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState("");
   const [search, setSearch] = useState("");
+  // The field is asked for rather than permanent (design: a magnifier beside
+  // the "+"). A list of five presets does not need a row of chrome spent on
+  // finding one.
+  const [searchOpen, setSearchOpen] = useState(false);
   const [contextMenu, setContextMenu] = useState<{
     id: string;
     x: number;
@@ -129,7 +154,10 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
 
   // Clear search when sidebar closes
   useEffect(() => {
-    if (!isOpen) setSearch("");
+    if (!isOpen) {
+      setSearch("");
+      setSearchOpen(false);
+    }
   }, [isOpen]);
 
   // Close context menu on outside click
@@ -151,6 +179,11 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   useEffect(() => {
     if (adding) inputRef.current?.focus();
   }, [adding]);
+  // Opening the field and then having to click into it would make the icon
+  // worse than the permanent row it replaces.
+  useEffect(() => {
+    if (searchOpen) searchRef.current?.focus();
+  }, [searchOpen]);
   useEffect(() => {
     if (renaming) {
       renameRef.current?.focus();
@@ -299,8 +332,30 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
         {isOpen && (
         <>
         <div className="preset-sidebar-header">
-          <span className="preset-sidebar-title">{t("presets.title")}</span>
+          {/* The library is contextual: the same panel lists presets on the
+              metronome and drills on the drill screen, and it already filters
+              by `view`. Titling both PRESETS said one of them wrongly. */}
+          <span className="preset-sidebar-title">
+            {t(view === "drill" ? "presets.titleDrill" : "presets.title")}
+          </span>
           <div className="preset-sidebar-header-actions">
+            <button
+              className={`preset-sidebar-search-btn${searchOpen ? " active" : ""}`}
+              onClick={() => {
+                // Closing takes the filter with it — a list still narrowed by
+                // a query you can no longer see is a list that looks broken.
+                if (searchOpen) setSearch("");
+                setSearchOpen((o) => !o);
+              }}
+              aria-label={t("presets.search")}
+              aria-expanded={searchOpen}
+              title={t("presets.search")}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="6.5" />
+                <line x1="16" y1="16" x2="21" y2="21" />
+              </svg>
+            </button>
             {viewPresets.length < MAX_PRESETS && (
               <button
                 className="preset-sidebar-add"
@@ -320,6 +375,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
           </div>
         </div>
 
+        {searchOpen && (
         <div className="preset-search-wrap">
           <div className="preset-search-field">
             <svg className="preset-search-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -334,12 +390,19 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Escape") setSearch("");
+                // Escape empties a query you can see; a second Escape puts the
+                // field away. Closing on the first press would hide the reason
+                // the list is short before you had a chance to read it.
+                if (e.key === "Escape") {
+                  if (search) setSearch("");
+                  else setSearchOpen(false);
+                }
                 e.stopPropagation();
               }}
             />
           </div>
         </div>
+        )}
 
         <div className="preset-sidebar-list">
           {adding && (
@@ -391,8 +454,14 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
                 />
               ) : (
                 <>
+                  {/* The dot is the loaded marker. `.active` already tints the
+                      row, but tint is what hover does too, and a preset you
+                      loaded and then edited has to stay identifiable. Every
+                      row carries the dot so the names line up; only the
+                      loaded one is painted. */}
+                  <span className="preset-item-dot" aria-hidden="true" />
                   <span className="preset-item-name">{p.name}</span>
-                  <span className="preset-item-bpm">{p.view === "drill" && p.speedRamp ? `${p.speedRamp.startBpm}–${p.speedRamp.targetBpm}` : p.bpm}</span>
+                  <span className="preset-item-bpm">{presetSummary(p, t)}</span>
                 </>
               )}
             </button>

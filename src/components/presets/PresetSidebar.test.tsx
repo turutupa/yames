@@ -41,6 +41,21 @@ const baseProps = {
   onActiveChange: vi.fn(),
 };
 
+/** The field is behind the header's magnifier now, not a permanent row. */
+async function openSearch(): Promise<HTMLInputElement> {
+  const toggle = await waitFor(() => {
+    const b = document.querySelector(".preset-sidebar-search-btn") as HTMLButtonElement;
+    expect(b).not.toBeNull();
+    return b;
+  });
+  fireEvent.click(toggle);
+  return (await waitFor(() => {
+    const el = document.querySelector(".preset-search-input");
+    expect(el).not.toBeNull();
+    return el;
+  })) as HTMLInputElement;
+}
+
 describe("PresetSidebar", () => {
   it("shows a collapsed-tab button when isOpen=false", () => {
     render(<PresetSidebar {...baseProps} isOpen={false} />);
@@ -96,16 +111,65 @@ describe("PresetSidebar", () => {
       makePreset({ id: "b", name: "Fast Latin" }),
     ]);
     render(<PresetSidebar {...baseProps} />);
-    const search = (await waitFor(() => {
-      const el = document.querySelector(".preset-search-input");
-      expect(el).not.toBeNull();
-      return el;
-    })) as HTMLInputElement;
+    const search = await openSearch();
     fireEvent.change(search, { target: { value: "blues" } });
     await waitFor(() => {
       expect(screen.queryByText("Fast Latin")).not.toBeInTheDocument();
       expect(screen.getByText("Slow Blues")).toBeInTheDocument();
     });
+  });
+
+  it("puts the field away and unfilters the list with it", async () => {
+    // A list still narrowed by a query you can no longer see is a list that
+    // looks broken — which is the failure mode a hidden field invites.
+    setInvokeResponse("list_presets", () => [
+      makePreset({ id: "a", name: "Slow Blues" }),
+      makePreset({ id: "b", name: "Fast Latin" }),
+    ]);
+    render(<PresetSidebar {...baseProps} />);
+    const search = await openSearch();
+    fireEvent.change(search, { target: { value: "blues" } });
+    await waitFor(() => expect(screen.queryByText("Fast Latin")).not.toBeInTheDocument());
+
+    fireEvent.click(document.querySelector(".preset-sidebar-search-btn")!);
+    await waitFor(() => {
+      expect(document.querySelector(".preset-search-input")).toBeNull();
+      expect(screen.getByText("Fast Latin")).toBeInTheDocument();
+    });
+  });
+
+  it("says tempo and meter, and marks the one that is loaded", async () => {
+    // Tempo alone does not separate two presets a player keeps at the same
+    // speed in different meters, which is the pair worth telling apart.
+    setInvokeResponse("list_presets", () => [
+      makePreset({ id: "a", name: "Warmup", bpm: 130, beatGroups: [3, 3] }),
+    ]);
+    const { container } = render(<PresetSidebar {...baseProps} />);
+    expect(await screen.findByText("130 · 6/8")).toBeInTheDocument();
+
+    // Every row carries the marker so the names align; loading paints it.
+    expect(container.querySelector(".preset-sidebar-item .preset-item-dot")).not.toBeNull();
+    expect(container.querySelector(".preset-sidebar-item.active")).toBeNull();
+    fireEvent.click(screen.getByText("Warmup"));
+    await waitFor(() =>
+      expect(container.querySelector(".preset-sidebar-item.active .preset-item-dot")).not.toBeNull(),
+    );
+  });
+
+  it("says FREE where there is no signature to print", async () => {
+    setInvokeResponse("list_presets", () => [
+      makePreset({ id: "a", name: "Loose", bpm: 90, freeMode: true }),
+    ]);
+    render(<PresetSidebar {...baseProps} />);
+    expect(await screen.findByText("90 · FREE")).toBeInTheDocument();
+  });
+
+  it("titles the library for the mode it is listing", async () => {
+    setInvokeResponse("list_presets", () => []);
+    const { rerender } = render(<PresetSidebar {...baseProps} />);
+    expect(document.querySelector(".preset-sidebar-title")?.textContent).toBe("Presets");
+    rerender(<PresetSidebar {...baseProps} view="drill" />);
+    expect(document.querySelector(".preset-sidebar-title")?.textContent).toBe("Drills");
   });
 
   it("imperative triggerAdd() opens the name input", async () => {

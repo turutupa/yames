@@ -21,11 +21,13 @@
   },
   "presets": {
     "title": "프리셋",
+    "titleDrill": "템포 연습",
     "open": "프리셋 열기",
     "openWithShortcut": "프리셋 열기 ({{shortcut}})",
     "close": "프리셋 닫기",
     "closeWithShortcut": "프리셋 닫기 ({{shortcut}})",
     "saveCurrent": "현재 설정 저장",
+    "search": "라이브러리 검색",
     "searchPlaceholder": "검색…",
     "namePlaceholder": "이름…",
     "noResults": "결과 없음",

@@ -614,6 +614,33 @@ button.context-chip:hover,
   color: var(--text-secondary);
 }
 
+/* The magnifier that replaces the permanent search row. Sized and spaced to
+   sit next to the "+" as one pair, the way the mockup draws them. */
+.preset-sidebar-search-btn {
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.preset-sidebar-search-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.preset-sidebar-search-btn.active {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
 .preset-sidebar-add {
   width: 22px;
   height: 22px;
@@ -682,6 +709,20 @@ button.context-chip:hover,
   border-radius: 50%;
   background: var(--accent);
   opacity: 0.8;
+}
+
+/* The loaded marker. It is on every row so the names align down the column;
+   an unloaded row's dot is simply not painted. */
+.preset-item-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.preset-sidebar-item.active .preset-item-dot {
+  background: var(--accent);
 }
 
 .preset-item-name {

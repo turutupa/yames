@@ -21,11 +21,13 @@
   },
   "presets": {
     "title": "Cài đặt sẵn",
+    "titleDrill": "Bài luyện tempo",
     "open": "Mở cài đặt sẵn",
     "openWithShortcut": "Mở cài đặt sẵn ({{shortcut}})",
     "close": "Đóng cài đặt sẵn",
     "closeWithShortcut": "Đóng cài đặt sẵn ({{shortcut}})",
     "saveCurrent": "Lưu cài đặt hiện tại",
+    "search": "Tìm trong thư viện",
     "searchPlaceholder": "Tìm kiếm...",
     "namePlaceholder": "Tên...",
     "noResults": "Không có kết quả",

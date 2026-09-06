@@ -145,7 +145,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
             >
               <polyline points="9 6 15 12 9 18" />
             </svg>
-            <span>{t("presets.title")}</span>
+            <span>{t(playView === "drill" ? "presets.titleDrill" : "presets.title")}</span>
           </button>
         )}
       </div>

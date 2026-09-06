@@ -21,11 +21,13 @@
   },
   "presets": {
     "title": "預設",
+    "titleDrill": "變速練習",
     "open": "開啟預設",
     "openWithShortcut": "開啟預設（{{shortcut}}）",
     "close": "關閉預設",
     "closeWithShortcut": "關閉預設（{{shortcut}}）",
     "saveCurrent": "儲存目前設定",
+    "search": "搜尋資料庫",
     "searchPlaceholder": "搜尋…",
     "namePlaceholder": "名稱…",
     "noResults": "無結果",
