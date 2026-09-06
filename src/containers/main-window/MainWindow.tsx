@@ -61,7 +61,7 @@ import type { PresetSidebarHandle } from "../../components/presets/PresetSidebar
 import { ThemeEffects } from "./ThemeEffects";
 import { MetronomeView } from "../metronome/MetronomeView";
 import { MainHeader } from "./MainHeader";
-import { WindowControls } from "../../components/WindowControls";
+import { TitleBar } from "../../components/TitleBar";
 import { Rail } from "./Rail";
 import { Transport } from "./Transport";
 import { ViewTransition } from "../../components/ViewTransition";
@@ -224,6 +224,37 @@ export function MainWindow() {
     drillTargetBpm: state.speedRamp?.targetBpm,
     drillCompleted: state.speedRamp?.completed ?? false,
   });
+
+  /**
+   * Re-send the whole ramp with one or two fields changed.
+   *
+   * The transport promotes count-in and loop out of the drill's settings form
+   * (S7): they are decided in the seconds before you press Start, and having
+   * to open a form to reach them is the reason people run a drill without the
+   * count-in they wanted. They are not a second copy of the setting —
+   * `configure_speed_ramp` replaces the whole config, so every field has to
+   * come back with the change, and `speedRamp` stays the one place either
+   * control reads from. The form re-syncs from it when it changes.
+   */
+  const reconfigureRamp = useCallback(
+    (overrides: Partial<{ cyclic: boolean; warmupBeats: number }>) => {
+      const ramp = state.speedRamp;
+      void configureSpeedRamp({
+        startBpm: ramp.startBpm,
+        targetBpm: ramp.targetBpm,
+        increment: ramp.increment,
+        decrement: ramp.decrement,
+        barsPerStep: ramp.barsPerStep,
+        beatsPerBar: ramp.beatsPerBar,
+        mode: ramp.mode,
+        cyclic: ramp.cyclic,
+        warmupBeats: ramp.warmupBeats,
+        aggressiveness: ramp.aggressiveness,
+        ...overrides,
+      }).catch((err) => coachDebug("transport.reconfigureRamp-failed", { err }));
+    },
+    [state.speedRamp],
+  );
 
   const handleActivePresetChange = useCallback((preset: Preset | null, dirty: boolean) => {
     setActivePreset(preset);
@@ -795,7 +826,7 @@ export function MainWindow() {
       data-border={activeBorder}
     >
       <ThemeEffects themeId={state.theme} currentBeat={currentBeat} isPlaying={state.isPlaying} />
-      {(IS_WINDOWS || IS_LINUX) && <WindowControls />}
+      <TitleBar />
 
       {onboarding.chipVisible && view !== "settings" && (
         <FinishSetupChip
@@ -1069,6 +1100,13 @@ export function MainWindow() {
             listening={evaluation.enabled}
             hasSignal={evaluation.hasSignal}
             playShortcut={platformKey(keyBindings["play"] || "")}
+            startBpm={state.speedRamp.startBpm}
+            countIn={state.speedRamp.warmupBeats > 0}
+            loop={state.speedRamp.cyclic}
+            onToggleCountIn={() =>
+              reconfigureRamp({ warmupBeats: state.speedRamp.warmupBeats > 0 ? 0 : 4 })
+            }
+            onToggleLoop={() => reconfigureRamp({ cyclic: !state.speedRamp.cyclic })}
             onTogglePlayback={() => togglePlayback()}
             onStartSpeedRamp={() => startSpeedRamp()}
             onStopSpeedRamp={() => stopSpeedRamp()}

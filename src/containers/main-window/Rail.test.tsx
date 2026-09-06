@@ -2,6 +2,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { Rail } from "./Rail";
 import { DEFAULT_TEST_STATE } from "../../test/mocks";
+import { readStylesheet } from "../../test/readStyles";
 
 function setup(overrides: Partial<React.ComponentProps<typeof Rail>> = {}) {
   const props = {
@@ -73,6 +74,26 @@ describe("Rail", () => {
     expect(container.querySelector(".rail-action-dot.listening")).not.toBeNull();
   });
 
+  it("says what the coach is doing, and says it in the button's name too", () => {
+    // The mockup writes "Ready" here. The row knows three states, not one, and
+    // below 620px the visible label is `display: none` — so the status has to
+    // be in the accessible name as well or it disappears with the text.
+    const { container, props, rerender } = setup();
+    const status = () => container.querySelector(".rail-action-status")?.textContent;
+    const name = () =>
+      container.querySelector(".rail-action")?.getAttribute("aria-label") ?? "";
+
+    expect(status()).toBe("Ready");
+    expect(name()).toContain("Ready");
+
+    rerender(<Rail {...props} coachActive />);
+    expect(status()).toBe("In session");
+
+    rerender(<Rail {...props} coachActive coachListening />);
+    expect(status()).toBe("Listening");
+    expect(name()).toContain("Listening");
+  });
+
   it("remembers the mode it left when opening settings, and returns to it", () => {
     const prevTab = { current: "beat" as "beat" | "drill" };
     const setView = vi.fn();
@@ -103,6 +124,22 @@ describe("Rail", () => {
     for (const b of container.querySelectorAll(".rail-mode, .rail-action")) {
       expect(b.getAttribute("aria-label"), b.className).toBeTruthy();
     }
+  });
+
+  it("hides and restores the coach's status with the labels it sits beside", () => {
+    // Below 620px the rail is 68px of icons; a status left drawn there would
+    // overflow the strip. Opening the library floats the rail back to full
+    // width, and everything the strip hid has to come back with it — the
+    // status included, or it is the one thing missing from a rail that
+    // otherwise looks whole.
+    const css = readStylesheet();
+    const strip = css.slice(css.indexOf("@media (max-width: 619px) {"));
+    const hide = strip.slice(0, strip.indexOf("display: none;"));
+    expect(hide).toContain(".rail-action-status");
+    const restore = strip.slice(strip.indexOf(".rail[data-library-open] .rail-mode-label"));
+    expect(restore.slice(0, restore.indexOf("display: revert;"))).toContain(
+      ".rail[data-library-open] .rail-action-status",
+    );
   });
 
   it("keeps Zen and the widget adjacent — the tour spotlights them together", () => {

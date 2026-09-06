@@ -21,11 +21,13 @@
   },
   "presets": {
     "title": "Cài đặt sẵn",
+    "titleDrill": "Bài luyện tempo",
     "open": "Mở cài đặt sẵn",
     "openWithShortcut": "Mở cài đặt sẵn ({{shortcut}})",
     "close": "Đóng cài đặt sẵn",
     "closeWithShortcut": "Đóng cài đặt sẵn ({{shortcut}})",
     "saveCurrent": "Lưu cài đặt hiện tại",
+    "search": "Tìm trong thư viện",
     "searchPlaceholder": "Tìm kiếm...",
     "namePlaceholder": "Tên...",
     "noResults": "Không có kết quả",
@@ -62,10 +64,18 @@
   "transport": {
     "bar": "Ô nhịp",
     "elapsed": "Đã qua",
+    "start": "Bắt đầu",
+    "startsAt": "Bắt đầu từ",
+    "countIn": "Đếm vào",
+    "loop": "Lặp",
     "listening": "Đang nghe",
-    "inputOff": "Tắt đầu vào"
+    "inputOff": "Tắt đầu vào",
+    "coachOnPlay": "Huấn luyện viên nghe khi bạn bấm phát",
+    "coachQuiet": "Huấn luyện viên im lặng giữa mỗi bước"
   },
   "rail": {
-    "label": "Chế độ và thư viện"
+    "label": "Chế độ và thư viện",
+    "coachReady": "Sẵn sàng",
+    "coachInSession": "Đang trong buổi tập"
   }
 }

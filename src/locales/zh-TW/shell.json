@@ -21,11 +21,13 @@
   },
   "presets": {
     "title": "預設",
+    "titleDrill": "變速練習",
     "open": "開啟預設",
     "openWithShortcut": "開啟預設（{{shortcut}}）",
     "close": "關閉預設",
     "closeWithShortcut": "關閉預設（{{shortcut}}）",
     "saveCurrent": "儲存目前設定",
+    "search": "搜尋資料庫",
     "searchPlaceholder": "搜尋…",
     "namePlaceholder": "名稱…",
     "noResults": "無結果",
@@ -62,10 +64,18 @@
   "transport": {
     "bar": "小節",
     "elapsed": "已用時間",
+    "start": "開始",
+    "startsAt": "起始速度",
+    "countIn": "預備拍",
+    "loop": "循環",
     "listening": "正在聆聽",
-    "inputOff": "輸入已關閉"
+    "inputOff": "輸入已關閉",
+    "coachOnPlay": "按下播放後教練開始聆聽",
+    "coachQuiet": "教練在每一步中途保持安靜"
   },
   "rail": {
-    "label": "模式與資料庫"
+    "label": "模式與資料庫",
+    "coachReady": "就緒",
+    "coachInSession": "練習中"
   }
 }

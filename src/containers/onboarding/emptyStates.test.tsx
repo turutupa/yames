@@ -53,6 +53,8 @@ describe("presets empty state", () => {
     setInvokeResponse("list_presets", () => []);
     render(<PresetSidebar {...sidebarProps} />);
     await screen.findByText("No presets yet");
+    // The field lives behind the header's magnifier now.
+    await user.click(document.querySelector(".preset-sidebar-search-btn")!);
     await user.type(document.querySelector(".preset-search-input")!, "zzz");
     expect(screen.getByText("No results")).toBeInTheDocument();
     expect(document.querySelector(".preset-sidebar-empty-state")).toBeNull();

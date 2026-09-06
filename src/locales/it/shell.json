@@ -21,11 +21,13 @@
   },
   "presets": {
     "title": "Preset",
+    "titleDrill": "Rampe",
     "open": "Apri preset",
     "openWithShortcut": "Apri preset ({{shortcut}})",
     "close": "Chiudi preset",
     "closeWithShortcut": "Chiudi preset ({{shortcut}})",
     "saveCurrent": "Salva impostazioni attuali",
+    "search": "Cerca nella libreria",
     "searchPlaceholder": "Cerca…",
     "namePlaceholder": "Nome…",
     "noResults": "Nessun risultato",
@@ -62,10 +64,18 @@
   "transport": {
     "bar": "Battuta",
     "elapsed": "Trascorso",
+    "start": "Inizia",
+    "startsAt": "Parte da",
+    "countIn": "Preconteggio",
+    "loop": "Ciclo",
     "listening": "In ascolto",
-    "inputOff": "Ingresso spento"
+    "inputOff": "Ingresso spento",
+    "coachOnPlay": "Il coach ascolta quando avvii",
+    "coachQuiet": "Il coach tace durante ogni step"
   },
   "rail": {
-    "label": "Modalità e libreria"
+    "label": "Modalità e libreria",
+    "coachReady": "Pronto",
+    "coachInSession": "In sessione"
   }
 }

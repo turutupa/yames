@@ -21,11 +21,13 @@
   },
   "presets": {
     "title": "프리셋",
+    "titleDrill": "템포 연습",
     "open": "프리셋 열기",
     "openWithShortcut": "프리셋 열기 ({{shortcut}})",
     "close": "프리셋 닫기",
     "closeWithShortcut": "프리셋 닫기 ({{shortcut}})",
     "saveCurrent": "현재 설정 저장",
+    "search": "라이브러리 검색",
     "searchPlaceholder": "검색…",
     "namePlaceholder": "이름…",
     "noResults": "결과 없음",
@@ -62,10 +64,18 @@
   "transport": {
     "bar": "마디",
     "elapsed": "경과",
+    "start": "시작",
+    "startsAt": "시작 템포",
+    "countIn": "카운트인",
+    "loop": "반복",
     "listening": "듣는 중",
-    "inputOff": "입력 꺼짐"
+    "inputOff": "입력 꺼짐",
+    "coachOnPlay": "재생하면 코치가 듣습니다",
+    "coachQuiet": "단계 진행 중에는 코치가 조용합니다"
   },
   "rail": {
-    "label": "모드 및 라이브러리"
+    "label": "모드 및 라이브러리",
+    "coachReady": "대기 중",
+    "coachInSession": "세션 중"
   }
 }

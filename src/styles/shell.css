@@ -47,6 +47,60 @@
   display: none !important;
 }
 
+/* =================== The titlebar =================== */
+/* The strip the mockups draw across the top: the mark, the wordmark, and the
+   window controls. It replaces the arrangement where the controls floated
+   over the rail's first 42px and nothing named the app.
+ *
+ * `align-items: stretch` is what makes the controls fill the strip's height
+ * whatever the platform sizes them — they used to be positioned absolutely
+ * against the window and are in the flow now (see window-controls.css). */
+.app-titlebar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: stretch;
+  height: 38px;
+  padding-right: 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel);
+  user-select: none;
+}
+
+/* The left gutter is whatever the platform's controls need. Windows and Linux
+   render ours into the strip, so they measure themselves and the gutter is
+   only the gap after them. macOS draws its traffic lights over the webview
+   (`titleBarStyle: Overlay` in tauri.conf.json) — nothing is in the flow to
+   push the wordmark clear of them, so the padding does it. */
+.app-titlebar .app-mark {
+  margin-left: 10px;
+}
+
+.main-window.os-mac .app-titlebar .app-mark {
+  margin-left: 78px;
+}
+
+.main-window.os-other .app-titlebar .app-mark {
+  margin-left: 16px;
+}
+
+.app-mark {
+  align-self: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  flex-shrink: 0;
+}
+
+.app-wordmark {
+  align-self: center;
+  margin-left: 9px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text-secondary);
+}
+
 
 /* os-fullscreen comes AFTER platform rules — same specificity, so it wins */
 .main-window.os-fullscreen {
@@ -560,6 +614,33 @@ button.context-chip:hover,
   color: var(--text-secondary);
 }
 
+/* The magnifier that replaces the permanent search row. Sized and spaced to
+   sit next to the "+" as one pair, the way the mockup draws them. */
+.preset-sidebar-search-btn {
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.preset-sidebar-search-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.preset-sidebar-search-btn.active {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
 .preset-sidebar-add {
   width: 22px;
   height: 22px;
@@ -628,6 +709,20 @@ button.context-chip:hover,
   border-radius: 50%;
   background: var(--accent);
   opacity: 0.8;
+}
+
+/* The loaded marker. It is on every row so the names align down the column;
+   an unloaded row's dot is simply not painted. */
+.preset-item-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.preset-sidebar-item.active .preset-item-dot {
+  background: var(--accent);
 }
 
 .preset-item-name {
@@ -1237,6 +1332,16 @@ button.context-chip:hover,
   text-overflow: ellipsis;
 }
 
+/* The coach's status, at the right of its row. Quieter and smaller than the
+   label it follows: it reports, and the row is what you press. */
+.rail-action-status {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-faint);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .rail-action-dot {
   width: 7px;
   height: 7px;
@@ -1317,6 +1422,16 @@ button.context-chip:hover,
   padding: 4px 7px;
 }
 
+/* Nothing in this row wraps or squashes; it sheds instead (see the
+   breakpoints at the foot of this file). A bar that answers a narrow window
+   by folding "STARTS AT" onto a second line, or by squeezing Play, is a bar
+   that looks broken rather than one that has adapted — and it also hides the
+   overflow from anything measuring it. */
+.transport > * {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .transport-readouts {
   display: flex;
   align-items: center;
@@ -1379,6 +1494,108 @@ button.context-chip:hover,
 .transport-signal.on {
   background: var(--feedback-perfect);
   box-shadow: 0 0 8px var(--feedback-perfect);
+}
+
+/* ─── The drill's end of the bar ─────────────────────────────────────────
+ *
+ * The tempo the ramp starts at, and the two switches you decide immediately
+ * before pressing Start. They sit after the bar and clock, sharing the same
+ * rule that divides the readouts from the button. */
+.transport-drill {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* The switch is the whole row — track and word together — so the word is a
+   click target too. A 34x20 pill with a 16px knob, as the mockup draws it. */
+.transport-switch {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.transport-switch.on {
+  color: var(--text-secondary);
+}
+
+.transport-switch:hover {
+  color: var(--text-primary);
+}
+
+.transport-switch-track {
+  position: relative;
+  width: 34px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--surface-hover, rgba(255, 255, 255, 0.09));
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.transport-switch-track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.transport-switch.on .transport-switch-track {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.transport-switch.on .transport-switch-track::after {
+  transform: translateX(14px);
+  background: var(--accent);
+}
+
+.transport-switch:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .transport-switch-track,
+  .transport-switch-track::after {
+    transition: none;
+  }
+}
+
+/* The sentence at the right end: what the coach will do, drawn as the mockup
+   draws it — dashed, because it is the one thing in the bar that is not a
+   control and should not look like one. */
+.transport-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px dashed var(--border);
+  border-radius: 17px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* The compact input readout that stands in for the sentence once the context
+   bar has shed its own input chip. Hidden until then — see the breakpoint. */
+.transport-input-narrow {
+  display: none;
 }
 
 /* =================== Content region =================== */
@@ -1511,6 +1728,7 @@ button.context-chip:hover,
 
   .rail-mode-label,
   .rail-action-label,
+  .rail-action-status,
   .rail-library,
   .rail-action-dot {
     display: none;
@@ -1539,6 +1757,7 @@ button.context-chip:hover,
 
   .rail[data-library-open] .rail-mode-label,
   .rail[data-library-open] .rail-action-label,
+  .rail[data-library-open] .rail-action-status,
   .rail[data-library-open] .rail-library,
   .rail[data-library-open] .rail-action-dot {
     display: revert;
@@ -1549,17 +1768,111 @@ button.context-chip:hover,
   }
 }
 
-/* The transport sheds what it can rather than overflowing: the keyboard hint
-   first, then the input chip's label, then the bar and clock. Play and Stop
-   never go — finding how to stop is the one thing that must always work. */
-@media (max-width: 719px) {
-  .transport {
-    gap: 14px;
-    padding: 0 16px;
+/* The transport sheds what it can rather than overflowing. Play and Stop never
+ * go — finding how to stop is the one thing that must always work — and
+ * nothing here wraps or squashes on its way out (see `.transport > *`), so
+ * what is drawn is always drawn at full size.
+ *
+ * Every width below was measured rather than estimated: the row was rendered
+ * in fixed-width frames from 480 to 1440 on both screens and its overflow
+ * read off. Two rounds of arithmetic got them wrong, and the first round of
+ * measurement was wrong too, because without `nowrap` the labels folded onto
+ * a second line and reported no overflow at all.
+ *
+ * The drill's bar is the crowded one: it carries three things the metronome's
+ * does not — the start tempo and two switches — so it sheds in its own tiers
+ * before the shared ones begin. Every one of them is something the same
+ * screen says again somewhere else. */
+
+/* Everything fits above 1286 (252 of rail + 1034 of row), which is why the
+   1440 artboard shows the whole thing. Below it the keyboard hint goes — it
+   is in Settings — and so does the start tempo, which the plan line above
+   states in 40px type. */
+@media (max-width: 1285px) {
+  .transport[data-view="drill"] .transport-key,
+  .transport[data-view="drill"] .transport-drill > .transport-readout {
+    display: none;
+  }
+}
+
+/* 252 + 866 = 1118. Bar and elapsed give way to the two switches: a control
+   that changes what the run will do outranks two numbers that report on it,
+   and the climb on the stage is already drawing where the run has got to.
+   The metronome keeps both to 780 — nothing there is competing for the
+   space until then. */
+@media (max-width: 1117px) {
+  .transport[data-view="drill"] .transport-readouts {
+    display: none;
+  }
+}
+
+/* The sentence goes at the width where the context bar drops its input chip —
+   on the stated grounds that the transport reports the same state. So the
+   compact readout takes the sentence's place rather than the slot going
+   empty, and input status is on screen at every width the window can reach.
+   The two are not the same number: the swap happens at 961, where the row
+   itself runs out of room, and the chip goes at 919. Between the two both
+   report the input, which is what the app does at every width above 961
+   anyway. Below 919 the transport is the only one left, which is the part
+   that matters.
+
+   The keyboard hint goes here too. It was shedding at 719, which is 240px
+   later than the row could actually afford it. */
+@media (max-width: 961px) {
+  .transport-note {
+    display: none;
+  }
+
+  .transport-input-narrow {
+    display: flex;
   }
 
   .transport-key {
     display: none;
+  }
+
+  .transport {
+    gap: 16px;
+    padding: 0 16px;
+  }
+
+  .transport-drill {
+    gap: 14px;
+  }
+}
+
+/* Below 780 both screens give up the bar and the clock, and the drill gives
+   up its switches with them — 620–719 is the pinch, where the rail is still
+   252 wide and the stage is under 470. The switches are the drill's own
+   settings and the settings form never stopped having them, so this costs no
+   capability; the readouts are readouts.
+
+   They shed here and stay shed. Below 620 the rail collapses to a strip and
+   the room comes back, but a control that disappears and reappears as you
+   drag a window is harder to trust than one that is simply gone once the
+   window is small.
+
+   This band is also where the row used to overflow rather than shed, before
+   any of the drill's items existed. With only the keyboard hint sheddable it
+   needed 610px of stage, and the window's own default size of 800 gives it
+   546 — so the metronome's transport ran off the right edge at the size the
+   app opens at. Nothing was measuring it. */
+@media (max-width: 779px) {
+  .transport-readouts {
+    display: none;
+  }
+
+  /* The switches go back to being the form's, which never stopped having
+     them. Promoting them was about the seconds before you press Start, not
+     about being the only way to reach the setting. */
+  .transport[data-view="drill"] .transport-drill {
+    display: none;
+  }
+}
+
+@media (max-width: 719px) {
+  .transport {
+    gap: 14px;
   }
 
   .transport-readouts {
@@ -1575,12 +1888,6 @@ button.context-chip:hover,
 
   .transport-input {
     padding: 0 10px;
-  }
-}
-
-@media (max-width: 479px) {
-  .transport-readouts {
-    display: none;
   }
 }
 
@@ -1680,13 +1987,12 @@ button.context-chip:hover,
    deleted rather than overridden. A rule that only exists to cancel another
    rule is two places to look when it goes wrong. */
 
-/* The rail now owns the window's top-left corner, where the controls are
-   drawn — 36px of them on Windows and Linux, the traffic lights on macOS. */
-.rail {
-  padding-top: 42px;
-}
+/* The rail used to own the window's top-left corner and reserve 42px of empty
+   padding for the controls drawn over it. The titlebar strip holds them now,
+   so the rail starts at its own top and the modes sit where the mockup puts
+   them — 14px under the hairline rather than 56px. */
 
-/* …which also means the preset sidebar's own clearance is double-counted. */
+/* …the preset sidebar's clearance is still double-counted, though. */
 .rail-library .preset-sidebar-header {
   padding-top: 10px;
 }

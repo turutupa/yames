@@ -21,11 +21,13 @@
   },
   "presets": {
     "title": "预设",
+    "titleDrill": "变速练习",
     "open": "打开预设",
     "openWithShortcut": "打开预设（{{shortcut}}）",
     "close": "关闭预设",
     "closeWithShortcut": "关闭预设（{{shortcut}}）",
     "saveCurrent": "保存当前设置",
+    "search": "搜索资料库",
     "searchPlaceholder": "搜索…",
     "namePlaceholder": "名称…",
     "noResults": "无结果",
@@ -62,10 +64,18 @@
   "transport": {
     "bar": "小节",
     "elapsed": "已用时",
+    "start": "开始",
+    "startsAt": "起始速度",
+    "countIn": "预备拍",
+    "loop": "循环",
     "listening": "正在聆听",
-    "inputOff": "输入已关闭"
+    "inputOff": "输入已关闭",
+    "coachOnPlay": "按下播放后教练开始聆听",
+    "coachQuiet": "教练在每一步中途保持安静"
   },
   "rail": {
-    "label": "模式与资料库"
+    "label": "模式与资料库",
+    "coachReady": "就绪",
+    "coachInSession": "练习中"
   }
 }

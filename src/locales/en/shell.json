@@ -21,11 +21,13 @@
   },
   "presets": {
     "title": "Presets",
+    "titleDrill": "Drills",
     "open": "Open presets",
     "openWithShortcut": "Open presets ({{shortcut}})",
     "close": "Close presets",
     "closeWithShortcut": "Close presets ({{shortcut}})",
     "saveCurrent": "Save current settings",
+    "search": "Search the library",
     "searchPlaceholder": "Search...",
     "namePlaceholder": "Name...",
     "noResults": "No results",
@@ -62,10 +64,18 @@
   "transport": {
     "bar": "Bar",
     "elapsed": "Elapsed",
+    "start": "Start",
+    "startsAt": "Starts at",
+    "countIn": "Count-in",
+    "loop": "Loop",
     "listening": "Listening",
-    "inputOff": "Input off"
+    "inputOff": "Input off",
+    "coachOnPlay": "Coach listens when you press play",
+    "coachQuiet": "Coach stays quiet mid-step"
   },
   "rail": {
-    "label": "Modes and library"
+    "label": "Modes and library",
+    "coachReady": "Ready",
+    "coachInSession": "In session"
   }
 }

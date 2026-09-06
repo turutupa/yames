@@ -21,11 +21,13 @@
   },
   "presets": {
     "title": "Préréglages",
+    "titleDrill": "Rampes",
     "open": "Ouvrir les préréglages",
     "openWithShortcut": "Ouvrir les préréglages ({{shortcut}})",
     "close": "Fermer les préréglages",
     "closeWithShortcut": "Fermer les préréglages ({{shortcut}})",
     "saveCurrent": "Enregistrer les réglages actuels",
+    "search": "Rechercher dans la bibliothèque",
     "searchPlaceholder": "Rechercher…",
     "namePlaceholder": "Nom…",
     "noResults": "Aucun résultat",
@@ -62,10 +64,18 @@
   "transport": {
     "bar": "Mesure",
     "elapsed": "Écoulé",
+    "start": "Démarrer",
+    "startsAt": "Départ à",
+    "countIn": "Décompte",
+    "loop": "Boucle",
     "listening": "À l'écoute",
-    "inputOff": "Entrée coupée"
+    "inputOff": "Entrée coupée",
+    "coachOnPlay": "Le coach écoute dès que vous lancez la lecture",
+    "coachQuiet": "Le coach se tait pendant une étape"
   },
   "rail": {
-    "label": "Modes et bibliothèque"
+    "label": "Modes et bibliothèque",
+    "coachReady": "Prêt",
+    "coachInSession": "En session"
   }
 }

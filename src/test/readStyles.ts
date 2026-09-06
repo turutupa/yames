@@ -15,12 +15,15 @@ const STYLES = path.resolve(process.cwd(), "src/styles");
  * them, and more than one of them looks for a class name that also appears in
  * a comment about its removal.
  *
- * Line endings are normalised to LF. The callers assert on fragments that
- * carry their own newline and indentation, and the repository has no
- * `.gitattributes`, so a clone made with Git for Windows' default
- * `core.autocrlf=true` checks these files out as CRLF and every one of those
- * assertions fails. The tests are about which rules exist, not about how a
- * working copy happens to store newlines.
+ * Line endings are normalised because the assertions are written with "\n" and
+ * a checkout with `core.autocrlf=true` — the default on Windows, and what the
+ * owner's machine has — hands back "\r\n". Every multi-line assertion in these
+ * tests failed there and passed in CI, which is the worst way round.
+ *
+ * The root cause is that the repository has no `.gitattributes`, so nothing
+ * pins the checkout. Adding one would fix this and every future case of it,
+ * but it renormalises every tracked text file, which is not a change to make
+ * with branches open.
  */
 export function readStylesheet(file = "main-window.css"): string {
   const seen = new Set<string>();
@@ -35,8 +38,8 @@ export function readStylesheet(file = "main-window.css"): string {
   }
 
   return read(file)
-    .replace(/\/\*[\s\S]*?\*\//g, "")
-    .replace(/\r\n/g, "\n");
+    .replace(/\r\n/g, "\n")
+    .replace(/\/\*[\s\S]*?\*\//g, "");
 }
 
 /** The declarations of the first rule whose selector block starts with `selector`. */

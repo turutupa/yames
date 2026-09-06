@@ -21,11 +21,13 @@
   },
   "presets": {
     "title": "Пресеты",
+    "titleDrill": "Тренировки",
     "open": "Открыть пресеты",
     "openWithShortcut": "Открыть пресеты ({{shortcut}})",
     "close": "Закрыть пресеты",
     "closeWithShortcut": "Закрыть пресеты ({{shortcut}})",
     "saveCurrent": "Сохранить текущие настройки",
+    "search": "Поиск в библиотеке",
     "searchPlaceholder": "Поиск…",
     "namePlaceholder": "Название…",
     "noResults": "Ничего не найдено",
@@ -62,10 +64,18 @@
   "transport": {
     "bar": "Такт",
     "elapsed": "Прошло",
+    "start": "Старт",
+    "startsAt": "Старт с",
+    "countIn": "Отсчёт",
+    "loop": "Цикл",
     "listening": "Слушаю",
-    "inputOff": "Вход выключен"
+    "inputOff": "Вход выключен",
+    "coachOnPlay": "Тренер слушает, когда вы нажимаете «Играть»",
+    "coachQuiet": "Тренер молчит внутри шага"
   },
   "rail": {
-    "label": "Режимы и библиотека"
+    "label": "Режимы и библиотека",
+    "coachReady": "Готов",
+    "coachInSession": "В сессии"
   }
 }

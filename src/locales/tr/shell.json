@@ -21,11 +21,13 @@
   },
   "presets": {
     "title": "Ön Ayarlar",
+    "titleDrill": "Antrenmanlar",
     "open": "Ön ayarları aç",
     "openWithShortcut": "Ön ayarları aç ({{shortcut}})",
     "close": "Ön ayarları kapat",
     "closeWithShortcut": "Ön ayarları kapat ({{shortcut}})",
     "saveCurrent": "Geçerli ayarları kaydet",
+    "search": "Kitaplıkta ara",
     "searchPlaceholder": "Ara...",
     "namePlaceholder": "Ad...",
     "noResults": "Sonuç yok",
@@ -62,10 +64,18 @@
   "transport": {
     "bar": "Ölçü",
     "elapsed": "Geçen",
+    "start": "Başlat",
+    "startsAt": "Başlangıç",
+    "countIn": "Giriş sayımı",
+    "loop": "Döngü",
     "listening": "Dinliyor",
-    "inputOff": "Giriş kapalı"
+    "inputOff": "Giriş kapalı",
+    "coachOnPlay": "Koç, oynata bastığınızda dinler",
+    "coachQuiet": "Koç adım sürerken susar"
   },
   "rail": {
-    "label": "Modlar ve kitaplık"
+    "label": "Modlar ve kitaplık",
+    "coachReady": "Hazır",
+    "coachInSession": "Seansta"
   }
 }

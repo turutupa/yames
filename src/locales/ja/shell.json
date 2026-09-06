@@ -21,11 +21,13 @@
   },
   "presets": {
     "title": "プリセット",
+    "titleDrill": "テンポ練習",
     "open": "プリセットを開く",
     "openWithShortcut": "プリセットを開く（{{shortcut}}）",
     "close": "プリセットを閉じる",
     "closeWithShortcut": "プリセットを閉じる（{{shortcut}}）",
     "saveCurrent": "現在の設定を保存",
+    "search": "ライブラリを検索",
     "searchPlaceholder": "検索…",
     "namePlaceholder": "名前…",
     "noResults": "結果なし",
@@ -62,10 +64,18 @@
   "transport": {
     "bar": "小節",
     "elapsed": "経過",
+    "start": "開始",
+    "startsAt": "開始テンポ",
+    "countIn": "カウントイン",
+    "loop": "ループ",
     "listening": "聴いています",
-    "inputOff": "入力オフ"
+    "inputOff": "入力オフ",
+    "coachOnPlay": "再生するとコーチが聴き始めます",
+    "coachQuiet": "ステップの途中ではコーチは黙っています"
   },
   "rail": {
-    "label": "モードとライブラリ"
+    "label": "モードとライブラリ",
+    "coachReady": "待機中",
+    "coachInSession": "セッション中"
   }
 }

@@ -21,11 +21,13 @@
   },
   "presets": {
     "title": "Presets",
+    "titleDrill": "Trainingen",
     "open": "Presets openen",
     "openWithShortcut": "Presets openen ({{shortcut}})",
     "close": "Presets sluiten",
     "closeWithShortcut": "Presets sluiten ({{shortcut}})",
     "saveCurrent": "Huidige instellingen opslaan",
+    "search": "Zoeken in de bibliotheek",
     "searchPlaceholder": "Zoeken…",
     "namePlaceholder": "Naam…",
     "noResults": "Geen resultaten",
@@ -62,10 +64,18 @@
   "transport": {
     "bar": "Maat",
     "elapsed": "Verstreken",
+    "start": "Starten",
+    "startsAt": "Start bij",
+    "countIn": "Aftellen",
+    "loop": "Herhalen",
     "listening": "Luistert",
-    "inputOff": "Ingang uit"
+    "inputOff": "Ingang uit",
+    "coachOnPlay": "De coach luistert zodra je afspeelt",
+    "coachQuiet": "De coach zwijgt tijdens een stap"
   },
   "rail": {
-    "label": "Modi en bibliotheek"
+    "label": "Modi en bibliotheek",
+    "coachReady": "Klaar",
+    "coachInSession": "In sessie"
   }
 }
