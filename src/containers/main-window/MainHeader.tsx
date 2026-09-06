@@ -2,8 +2,9 @@ import { useEffect, useRef, useState, type Ref } from "react";
 import { useTranslation } from "react-i18next";
 import { setSoundType, setVolume } from "../../ipc";
 import { SOUND_TYPES } from "../../constants/metronome";
-import type { AppState, Preset } from "../../types";
+import type { AppState, Chain, Preset } from "../../types";
 import { PresetSaveBar } from "../../components/presets/PresetSaveBar";
+import { ChainSaveBar } from "../../components/chain/ChainSaveBar";
 import { IS_MAC } from "../../hotkeys";
 
 /** Custom vertical fader — replaces <input type="range"> to avoid WebKit
@@ -198,6 +199,13 @@ interface MainHeaderProps {
   onSavePreset: () => void;
   /** Reload the active preset's stored values, throwing away the edits. */
   onRevertPreset?: () => void;
+  /** A loaded chain takes the context bar's left half (U9.4). */
+  activeChain: Chain | null;
+  chainDirty: boolean;
+  chainSaveFeedback: boolean;
+  onSaveChain: () => void;
+  onRevertChain: () => void;
+  onRenameChain: () => void;
   soundOpen: boolean;
   setSoundOpen: (v: boolean | ((p: boolean) => boolean)) => void;
   soundDropdownRef: Ref<HTMLDivElement>;
@@ -254,6 +262,12 @@ export function MainHeader({
   onUpdatePreset,
   onSavePreset,
   onRevertPreset,
+  activeChain,
+  chainDirty,
+  chainSaveFeedback,
+  onSaveChain,
+  onRevertChain,
+  onRenameChain,
   soundOpen,
   setSoundOpen,
   soundDropdownRef,
@@ -302,16 +316,29 @@ export function MainHeader({
       {...(!IS_MAC && { "data-tauri-drag-region": "" })}
     >
       <div className="header-context">
-        {(view === "beat" || view === "drill") && (
-          <PresetSaveBar
-            activePreset={activePreset}
-            presetDirty={presetDirty}
-            updateFeedback={updateFeedback}
-            onRename={onRenamePreset}
-            onUpdate={onUpdatePreset}
-            onSave={onSavePreset}
-            onRevert={onRevertPreset}
+        {/* One or the other, never both: a chain and a preset are two answers
+            to "what am I looking at", and the bar can only give one. */}
+        {view === "beat" && activeChain ? (
+          <ChainSaveBar
+            chain={activeChain}
+            dirty={chainDirty}
+            saveFeedback={chainSaveFeedback}
+            onRename={onRenameChain}
+            onSave={onSaveChain}
+            onRevert={onRevertChain}
           />
+        ) : (
+          (view === "beat" || view === "drill") && (
+            <PresetSaveBar
+              activePreset={activePreset}
+              presetDirty={presetDirty}
+              updateFeedback={updateFeedback}
+              onRename={onRenamePreset}
+              onUpdate={onUpdatePreset}
+              onSave={onSavePreset}
+              onRevert={onRevertPreset}
+            />
+          )
         )}
       </div>
       <div className="header-actions">

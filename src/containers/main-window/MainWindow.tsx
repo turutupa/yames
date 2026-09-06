@@ -87,6 +87,8 @@ import { useSoftClickPreview, SOFT_CLICK_BPM } from "./hooks/useSoftClickPreview
 import { useBpmEditing } from "./hooks/useBpmEditing";
 import { usePlaybackClock } from "./hooks/usePlaybackClock";
 import { useLibraryFit } from "./hooks/useLibraryFit";
+import { useChainSession } from "./hooks/useChainSession";
+import { ChainStepHeading, ChainTrack } from "../../components/chain/ChainTrack";
 import { useAudioError } from "./hooks/useAudioError";
 import { AudioErrorNotice } from "./AudioErrorNotice";
 import {
@@ -261,6 +263,29 @@ export function MainWindow() {
     setActivePreset(preset);
     setPresetDirty(dirty);
   }, []);
+
+  // The chain the window has open (U9). With none loaded every one of these
+  // is inert and the metronome behaves exactly as it did.
+  const chainSession = useChainSession({
+    state,
+    isPlaying: state.isPlaying,
+    currentBeat,
+    setView,
+    onChainLoaded: () => {
+      // The library marks what is loaded, and only one thing can be.
+      sidebarRef.current?.clearActive();
+      setActivePreset(null);
+      setPresetDirty(false);
+    },
+  });
+
+  const handleNewChain = useCallback(async () => {
+    setSidebarOpen(true);
+    const created = await chainSession.newChain();
+    // Same delay the preset "+" uses: let the library settle before the
+    // name field appears under the caret.
+    setTimeout(() => sidebarRef.current?.triggerRenameChain(created.id), 150);
+  }, [chainSession.newChain]);
 
   const handlePresetSave = useCallback(() => {
     setSidebarOpen(true);
@@ -622,7 +647,10 @@ export function MainWindow() {
       }
     }
     if (preset.view === "drill" || preset.view === "beat") setView(preset.view);
-  }, [setView]);
+    // Loading a preset is loading a preset. Leaving the chain open would put
+    // the track over a stage the chain no longer describes.
+    chainSession.closeChain();
+  }, [setView, chainSession.closeChain]);
 
 
   // Close dropdown on outside click
@@ -903,6 +931,13 @@ export function MainWindow() {
           onLoadPreset={handleLoadPreset}
           onActivePresetChange={handleActivePresetChange}
           presetShortcut={platformKey(keyBindings["toggle-sidebar"] || "")}
+          chains={chainSession.chains}
+          activeChainId={chainSession.chain?.id ?? null}
+          onLoadChain={chainSession.loadChain}
+          onNewChain={handleNewChain}
+          onDeleteChain={chainSession.deleteChain}
+          onRenameChain={chainSession.renameChain}
+          onAddPresetToChain={chainSession.chain ? chainSession.addPresetAsStep : undefined}
           coachOpen={session.cardOpen}
           coachActive={session.active}
           coachListening={evaluation.enabled}
@@ -945,6 +980,17 @@ export function MainWindow() {
           onRevertPreset={
             activePreset ? () => void handleLoadPreset(activePreset) : undefined
           }
+          activeChain={chainSession.chain}
+          chainDirty={chainSession.dirty}
+          chainSaveFeedback={chainSession.saveFeedback}
+          onSaveChain={() => void chainSession.saveActiveChain()}
+          onRevertChain={chainSession.revertChain}
+          onRenameChain={() => {
+            const id = chainSession.chain?.id;
+            if (!id) return;
+            setSidebarOpen(true);
+            setTimeout(() => sidebarRef.current?.triggerRenameChain(id), 150);
+          }}
           listening={evaluation.enabled}
           soundOpen={soundOpen}
           setSoundOpen={setSoundOpen}
@@ -972,6 +1018,29 @@ export function MainWindow() {
             bpm={state.bpm}
             isPlaying={state.isPlaying}
             currentBeat={currentBeat}
+          />
+        )}
+
+        {/* Above the metronome, not instead of it. Everything below this
+            strip is the same metronome it has always been — it just happens
+            to be pointed at the selected step. */}
+        {view === "beat" && chainSession.chain && (
+          <ChainTrack
+            chain={chainSession.chain}
+            selectedStepId={chainSession.selectedStepId}
+            onSelectStep={chainSession.selectStep}
+            runningIndex={chainSession.runningIndex}
+            remaining={chainSession.runner.remaining}
+            onChange={chainSession.setChain}
+            onAddStep={chainSession.addStepFromNow}
+          />
+        )}
+        {view === "beat" && chainSession.chain && (
+          <ChainStepHeading
+            step={chainSession.selectedStep}
+            number={
+              chainSession.chain.steps.findIndex((s) => s.id === chainSession.selectedStepId) + 1
+            }
           />
         )}
 
@@ -1122,6 +1191,10 @@ export function MainWindow() {
             onTogglePlayback={() => togglePlayback()}
             onStartSpeedRamp={() => startSpeedRamp()}
             onStopSpeedRamp={() => stopSpeedRamp()}
+            chainStepNumber={chainSession.runner.stepNumber}
+            chainStepCount={chainSession.chain?.steps.length ?? 0}
+            chainRemaining={chainSession.runner.remaining}
+            onChainSkip={chainSession.runner.skip}
           />
         )}
       </div>

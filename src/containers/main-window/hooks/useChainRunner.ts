@@ -6,8 +6,9 @@ import {
   type ChainEffect,
   type ChainRunState,
 } from "../../../chain";
-import { setBeatGroups, setBpm, setFreeMode, setPlaying, setSoundType, setSubdivision, setVolume } from "../../../ipc";
-import type { BeatEvent, Chain, ChainStep, Subdivision } from "../../../types";
+import { setPlaying, setVolume } from "../../../ipc";
+import { applyChainStep } from "./applyChainStep";
+import type { BeatEvent, Chain, ChainStep } from "../../../types";
 
 /**
  * Drives a chain from the engine's beat events.
@@ -58,24 +59,13 @@ export function useChainRunner(
     [],
   );
 
-  const applyStep = useCallback((step: ChainStep) => {
-    // Order is not load-bearing — every one of these lands on a downbeat, so
-    // the `measure_beat` reset that `set_beat_groups` triggers is a no-op.
-    void setBpm(step.bpm).catch(() => {});
-    void setSubdivision(step.subdivision as Subdivision).catch(() => {});
-    if (step.beatGroups.length > 0) void setBeatGroups(step.beatGroups).catch(() => {});
-    if (typeof step.freeMode === "boolean") void setFreeMode(step.freeMode).catch(() => {});
-    void setSoundType(step.soundType).catch(() => {});
-    void setVolume(step.volume).catch(() => {});
-  }, []);
-
   const runEffects = useCallback(
     (effects: ChainEffect[]) => {
       for (const effect of effects) {
         switch (effect.kind) {
           case "applyStep":
             restingVolume.current = null;
-            applyStep(effect.step);
+            applyChainStep(effect.step);
             break;
           case "rest":
             // The engine has no rest, so a rest is silence: the step that
@@ -89,7 +79,7 @@ export function useChainRunner(
         }
       }
     },
-    [applyStep],
+    [],
   );
 
   const dispatch = useCallback(

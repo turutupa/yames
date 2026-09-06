@@ -2,12 +2,15 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useSta
 import { useTranslation } from "react-i18next";
 import { deletePreset, listPresets, savePreset } from "../../ipc";
 import { meterLabel, presetBeatGroups, presetFreeMode } from "../../utils/meter";
-import type { AppState, Preset } from "../../types";
+import type { AppState, Chain, Preset } from "../../types";
 
 export interface PresetSidebarHandle {
   triggerAdd: () => void;
   triggerUpdate: () => void;
   triggerRename: (id: string) => void;
+  triggerRenameChain: (id: string) => void;
+  /** Drop the loaded marker — a chain has taken the context bar. */
+  clearActive: () => void;
 }
 
 interface PresetSidebarProps {
@@ -18,6 +21,20 @@ interface PresetSidebarProps {
   onLoadPreset: (preset: Preset) => void;
   onActiveChange: (preset: Preset | null, dirty: boolean) => void;
   shortcut?: string;
+  /**
+   * Chains share this list with presets (U9.4) — the word is precise here
+   * and nowhere else. They are the parent's state, not this component's:
+   * the stage edits the loaded chain continuously, and a second copy kept
+   * here would be stale between every keystroke.
+   */
+  chains?: Chain[];
+  activeChainId?: string | null;
+  onLoadChain?: (chain: Chain) => void;
+  onNewChain?: () => void;
+  onDeleteChain?: (id: string) => void;
+  onRenameChain?: (id: string, name: string) => void;
+  /** "Add this preset as a step" — offered only while a chain is loaded. */
+  onAddPresetToChain?: (preset: Preset) => void;
 }
 
 function generateId(): string {
@@ -115,6 +132,13 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   onLoadPreset,
   onActiveChange,
   shortcut,
+  chains,
+  activeChainId,
+  onLoadChain,
+  onNewChain,
+  onDeleteChain,
+  onRenameChain,
+  onAddPresetToChain,
 }, ref) {
   const [allPresets, setAllPresets] = useState<Preset[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -133,6 +157,11 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   } | null>(null);
   const [renaming, setRenaming] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
+  // Chains rename through the same field but never at the same time as a
+  // preset, so the two ids are kept apart rather than sharing one slot that
+  // would have to say which list it meant.
+  const [renamingChain, setRenamingChain] = useState<string | null>(null);
+  const [chainMenu, setChainMenu] = useState<{ id: string; x: number; y: number } | null>(null);
   const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const renameRef = useRef<HTMLInputElement>(null);
@@ -185,11 +214,24 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
     if (searchOpen) searchRef.current?.focus();
   }, [searchOpen]);
   useEffect(() => {
-    if (renaming) {
+    if (renaming || renamingChain) {
       renameRef.current?.focus();
       renameRef.current?.select();
     }
-  }, [renaming]);
+  }, [renaming, renamingChain]);
+
+  // Close the chain context menu on an outside click, same rule as the
+  // preset one above.
+  useEffect(() => {
+    if (!chainMenu) return;
+    const handler = (e: MouseEvent) => {
+      if (contextRef.current && !contextRef.current.contains(e.target as Node)) {
+        setChainMenu(null);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [chainMenu]);
 
   const handleSave = useCallback(async () => {
     const name = newName.trim();
@@ -297,7 +339,14 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
       setRenameValue(preset.name);
       setRenaming(id);
     },
-  }), [activeId, allPresets, state, view]);
+    clearActive: () => setActiveId(null),
+    triggerRenameChain: (id: string) => {
+      const chain = chains?.find((c) => c.id === id);
+      if (!chain) return;
+      setRenameValue(chain.name);
+      setRenamingChain(id);
+    },
+  }), [activeId, allPresets, chains, state, view]);
 
   const toggleIcon = (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -305,6 +354,25 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
       <line x1="9" y1="3" x2="9" y2="21" />
     </svg>
   );
+
+  // Two links, joined. It is the one glyph in the row that says "several
+  // things in an order" without a word, which is what a list mixing chains
+  // and presets needs at 11px.
+  const chainIcon = (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9.5 14.5a4 4 0 0 1 0-5l2-2a4 4 0 0 1 5.7 5.7l-1 1" />
+      <path d="M14.5 9.5a4 4 0 0 1 0 5l-2 2a4 4 0 0 1-5.7-5.7l1-1" />
+    </svg>
+  );
+
+  // Only the metronome list carries chains: a chain step is a metronome
+  // configuration, and a drill is a ramp the chain runtime has no way to run.
+  const showChains = view === "beat" && !!chains;
+  const chainList = showChains
+    ? (search.trim()
+        ? chains!.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
+        : chains!)
+    : [];
 
   return (
     <>
@@ -356,6 +424,20 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
                 <line x1="16" y1="16" x2="21" y2="21" />
               </svg>
             </button>
+            {/* A chain needs its own opener. The "+" beside it means "save
+                what I have now as a preset" and is the first thing a new user
+                presses; overloading it with a menu would put a choice in
+                front of the gesture that has never needed one. */}
+            {showChains && onNewChain && (
+              <button
+                className="preset-sidebar-new-chain"
+                onClick={onNewChain}
+                aria-label={t("chain.newChain")}
+                title={t("chain.newChain")}
+              >
+                {chainIcon}
+              </button>
+            )}
             {viewPresets.length < MAX_PRESETS && (
               <button
                 className="preset-sidebar-add"
@@ -405,6 +487,65 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
         )}
 
         <div className="preset-sidebar-list">
+          {/* Chains sit above the presets and above the rule that separates
+              them: they are the bigger thing, and a list that opened with
+              four presets would bury them. */}
+          {chainList.map((c) => (
+            <div
+              key={c.id}
+              className={`preset-sidebar-item chain-item ${activeChainId === c.id ? "active" : ""}`}
+              role="button"
+              tabIndex={0}
+              onClick={() => onLoadChain?.(c)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onLoadChain?.(c);
+                }
+              }}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                setChainMenu({ id: c.id, x: e.clientX, y: e.clientY });
+              }}
+            >
+              {renamingChain === c.id ? (
+                <input
+                  ref={renameRef}
+                  className="preset-sidebar-name-input"
+                  value={renameValue}
+                  onChange={(e) => setRenameValue(e.target.value)}
+                  onBlur={() => {
+                    const name = renameValue.trim();
+                    if (name) onRenameChain?.(c.id, name);
+                    setRenamingChain(null);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      const name = renameValue.trim();
+                      if (name) onRenameChain?.(c.id, name);
+                      setRenamingChain(null);
+                    }
+                    if (e.key === "Escape") setRenamingChain(null);
+                    e.stopPropagation();
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  maxLength={20}
+                />
+              ) : (
+                <>
+                  <span className="chain-item-row">
+                    <span className="chain-item-glyph">{chainIcon}</span>
+                    <span className="preset-item-name">{c.name}</span>
+                  </span>
+                  <span className="chain-item-sub">
+                    {t("chain.librarySteps", { count: c.steps.length })}
+                  </span>
+                </>
+              )}
+            </div>
+          ))}
+          {chainList.length > 0 && <div className="chain-item-rule" aria-hidden="true" />}
+
           {adding && (
             <div className="preset-sidebar-item adding">
               <input
@@ -517,11 +658,55 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
             {t("presets.rename")}
           </button>
           <button onClick={() => handleUpdate(contextMenu.id)}>{t("presets.update")}</button>
+          {/* U9.1's consolation: a step is a copy of a preset, so the two
+              directions stay one call each. Offered only while a chain is
+              loaded — with nothing to add to, the row would be a dead end. */}
+          {onAddPresetToChain && (
+            <button
+              onClick={() => {
+                const p = allPresets.find((p) => p.id === contextMenu.id);
+                if (p) onAddPresetToChain(p);
+                setContextMenu(null);
+              }}
+            >
+              {t("chain.addPresetAsStep")}
+            </button>
+          )}
           <button
             className="preset-context-delete"
             onClick={() => handleDelete(contextMenu.id)}
           >
             {t("presets.delete")}
+          </button>
+        </div>
+      )}
+
+      {chainMenu && (
+        <div
+          ref={contextRef}
+          className="preset-context-menu"
+          style={{ top: chainMenu.y, left: chainMenu.x }}
+        >
+          <button
+            onClick={() => {
+              const c = chains?.find((c) => c.id === chainMenu.id);
+              if (c) {
+                setRenameValue(c.name);
+                setRenamingChain(chainMenu.id);
+              }
+              setChainMenu(null);
+            }}
+          >
+            {t("presets.rename")}
+          </button>
+          <button
+            className="preset-context-delete"
+            onClick={() => {
+              onDeleteChain?.(chainMenu.id);
+              setChainMenu(null);
+            }}
+          >
+            {t("chain.deleteChain")}
           </button>
         </div>
       )}
