@@ -41,48 +41,28 @@ export function SubdivisionIcon({
           <rect x="8.5" y="3" width="13.3" height="2.5" rx="1" />
         </svg>
       );
-    case 3: // Triplet — three beamed
+    case 3: // Triplet — three beamed under a 3
       return (
-        <svg width={Math.round(size * 1.1)} height={h} viewBox="0 0 30 24" fill={noteColor}>
-          <ellipse cx="4" cy="20" rx="3.8" ry="3" transform="rotate(-15 4 20)" />
-          <ellipse cx="14" cy="20" rx="3.8" ry="3" transform="rotate(-15 14 20)" />
-          <ellipse cx="24" cy="20" rx="3.8" ry="3" transform="rotate(-15 24 20)" />
-          <rect x="7" y="4" width="1.6" height="16" rx="0.8" />
-          <rect x="17" y="4" width="1.6" height="16" rx="0.8" />
-          <rect x="27" y="4" width="1.6" height="16" rx="0.8" />
-          <rect x="7" y="4" width="21.6" height="2.2" rx="1" />
+        <svg width={Math.round(size * 1.28)} height={h} viewBox="0 0 30.8 24" fill={noteColor}>
+          <ellipse cx="3" cy="20.5" rx="3.6" ry="2.9" transform="rotate(-15 3 20.5)" /><ellipse cx="13" cy="20.5" rx="3.6" ry="2.9" transform="rotate(-15 13 20.5)" /><ellipse cx="23" cy="20.5" rx="3.6" ry="2.9" transform="rotate(-15 23 20.5)" /><rect x="6.2" y="6.5" width="1.6" height="14" rx="0.8" /><rect x="16.2" y="6.5" width="1.6" height="14" rx="0.8" /><rect x="26.2" y="6.5" width="1.6" height="14" rx="0.8" /><rect x="6.2" y="6.5" width="21.6" height="2.2" rx="1" /><text x="17.0" y="4.2" textAnchor="middle" fontSize="7.5" fontWeight="700" fill={noteColor}>3</text>
         </svg>
       );
-    case 4: // 16th notes — two stems with double beam
+    case 4: // 16ths — four stems under a double beam
       return (
-        <svg width={w} height={h} viewBox="0 0 22 24" fill={noteColor}>
-          <ellipse cx="5" cy="20" rx="4.5" ry="3.2" transform="rotate(-15 5 20)" />
-          <ellipse cx="17" cy="20" rx="4.5" ry="3.2" transform="rotate(-15 17 20)" />
-          <rect x="8.5" y="3" width="1.8" height="17" rx="0.9" />
-          <rect x="20" y="3" width="1.8" height="17" rx="0.9" />
-          <rect x="8.5" y="3" width="13.3" height="2.2" rx="1" />
-          <rect x="8.5" y="7.5" width="13.3" height="2.2" rx="1" />
+        <svg width={Math.round(size * 1.45)} height={h} viewBox="0 0 34.8 24" fill={noteColor}>
+          <ellipse cx="3" cy="20.5" rx="3.6" ry="2.9" transform="rotate(-15 3 20.5)" /><ellipse cx="11" cy="20.5" rx="3.6" ry="2.9" transform="rotate(-15 11 20.5)" /><ellipse cx="19" cy="20.5" rx="3.6" ry="2.9" transform="rotate(-15 19 20.5)" /><ellipse cx="27" cy="20.5" rx="3.6" ry="2.9" transform="rotate(-15 27 20.5)" /><rect x="6.2" y="6.5" width="1.6" height="14" rx="0.8" /><rect x="14.2" y="6.5" width="1.6" height="14" rx="0.8" /><rect x="22.2" y="6.5" width="1.6" height="14" rx="0.8" /><rect x="30.2" y="6.5" width="1.6" height="14" rx="0.8" /><rect x="6.2" y="6.5" width="25.6" height="2.2" rx="1" /><rect x="6.2" y="10.9" width="25.6" height="2.2" rx="1" />
         </svg>
       );
-    case 5: // Quintuplet — beamed pair
+    case 5: // Quintuplet — five stems, double beam, under a 5
       return (
-        <svg width={w} height={h} viewBox="0 0 22 24" fill={noteColor}>
-          <ellipse cx="5" cy="20" rx="4.5" ry="3.2" transform="rotate(-15 5 20)" />
-          <ellipse cx="17" cy="20" rx="4.5" ry="3.2" transform="rotate(-15 17 20)" />
-          <rect x="8.5" y="3" width="1.8" height="17" rx="0.9" />
-          <rect x="20" y="3" width="1.8" height="17" rx="0.9" />
-          <rect x="8.5" y="3" width="13.3" height="2.2" rx="1" />
+        <svg width={Math.round(size * 1.78)} height={h} viewBox="0 0 42.800000000000004 24" fill={noteColor}>
+          <ellipse cx="3" cy="20.5" rx="3.6" ry="2.9" transform="rotate(-15 3 20.5)" /><ellipse cx="11" cy="20.5" rx="3.6" ry="2.9" transform="rotate(-15 11 20.5)" /><ellipse cx="19" cy="20.5" rx="3.6" ry="2.9" transform="rotate(-15 19 20.5)" /><ellipse cx="27" cy="20.5" rx="3.6" ry="2.9" transform="rotate(-15 27 20.5)" /><ellipse cx="35" cy="20.5" rx="3.6" ry="2.9" transform="rotate(-15 35 20.5)" /><rect x="6.2" y="6.5" width="1.6" height="14" rx="0.8" /><rect x="14.2" y="6.5" width="1.6" height="14" rx="0.8" /><rect x="22.2" y="6.5" width="1.6" height="14" rx="0.8" /><rect x="30.2" y="6.5" width="1.6" height="14" rx="0.8" /><rect x="38.2" y="6.5" width="1.6" height="14" rx="0.8" /><rect x="6.2" y="6.5" width="33.6" height="2.2" rx="1" /><rect x="6.2" y="10.9" width="33.6" height="2.2" rx="1" /><text x="23.0" y="4.2" textAnchor="middle" fontSize="7.5" fontWeight="700" fill={noteColor}>5</text>
         </svg>
       );
-    case 6: // Sextuplet — double beam
+    case 6: // Sextuplet — six stems, double beam, under a 6
       return (
-        <svg width={w} height={h} viewBox="0 0 22 24" fill={noteColor}>
-          <ellipse cx="5" cy="20" rx="4.5" ry="3.2" transform="rotate(-15 5 20)" />
-          <ellipse cx="17" cy="20" rx="4.5" ry="3.2" transform="rotate(-15 17 20)" />
-          <rect x="8.5" y="3" width="1.8" height="17" rx="0.9" />
-          <rect x="20" y="3" width="1.8" height="17" rx="0.9" />
-          <rect x="8.5" y="3" width="13.3" height="2.2" rx="1" />
-          <rect x="8.5" y="7.5" width="13.3" height="2.2" rx="1" />
+        <svg width={Math.round(size * 2.12)} height={h} viewBox="0 0 50.800000000000004 24" fill={noteColor}>
+          <ellipse cx="3" cy="20.5" rx="3.6" ry="2.9" transform="rotate(-15 3 20.5)" /><ellipse cx="11" cy="20.5" rx="3.6" ry="2.9" transform="rotate(-15 11 20.5)" /><ellipse cx="19" cy="20.5" rx="3.6" ry="2.9" transform="rotate(-15 19 20.5)" /><ellipse cx="27" cy="20.5" rx="3.6" ry="2.9" transform="rotate(-15 27 20.5)" /><ellipse cx="35" cy="20.5" rx="3.6" ry="2.9" transform="rotate(-15 35 20.5)" /><ellipse cx="43" cy="20.5" rx="3.6" ry="2.9" transform="rotate(-15 43 20.5)" /><rect x="6.2" y="6.5" width="1.6" height="14" rx="0.8" /><rect x="14.2" y="6.5" width="1.6" height="14" rx="0.8" /><rect x="22.2" y="6.5" width="1.6" height="14" rx="0.8" /><rect x="30.2" y="6.5" width="1.6" height="14" rx="0.8" /><rect x="38.2" y="6.5" width="1.6" height="14" rx="0.8" /><rect x="46.2" y="6.5" width="1.6" height="14" rx="0.8" /><rect x="6.2" y="6.5" width="41.6" height="2.2" rx="1" /><rect x="6.2" y="10.9" width="41.6" height="2.2" rx="1" /><text x="27.0" y="4.2" textAnchor="middle" fontSize="7.5" fontWeight="700" fill={noteColor}>6</text>
         </svg>
       );
   }
