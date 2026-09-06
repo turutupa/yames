@@ -1,0 +1,295 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Manrope:wght@400;500;600;700;800&display=swap">
+  <style>
+    body { margin: 0; background: #08070f; }
+    .ui { font-family: "Manrope", "Segoe UI", "Helvetica Neue", Arial, sans-serif; }
+    .disp { font-family: "Bricolage Grotesque", "Manrope", "Segoe UI", Arial, sans-serif; }
+    .lbl { font-size: 10px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: #5b5878; }
+    .step { border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; background: #0e0d18; padding: 13px 15px; width: 168px; }
+    .step-on { border-color: rgba(0,212,255,0.45); background: #0d1622; box-shadow: 0 0 0 3px rgba(0,212,255,0.07); }
+    .trig { border: 1px dashed rgba(255,255,255,0.16); border-radius: 999px; padding: 5px 11px; font-size: 11px; font-weight: 700; color: #9995ba; white-space: nowrap; background: #08070f; }
+    .trig-on { border: 1px solid #00d4ff; border-style: solid; color: #08070f; background: #00d4ff; }
+    .opt { padding: 7px 10px; border-radius: 8px; font-size: 12px; color: #b6b1d6; border: 1px solid transparent; }
+    .opt-on { background: rgba(0,212,255,0.12); border-color: rgba(0,212,255,0.4); color: #7de8ff; font-weight: 700; }
+    .row { display: flex; align-items: center; }
+  </style>
+</helmet>
+
+<div class="ui" style="width: 1440px; height: 900px; background: #08070f; color: #eceaf6; display: flex; flex-direction: column; overflow: hidden;">
+
+  <!-- titlebar -->
+  <div style="height: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 12px 0 18px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+    <div class="row" style="gap: 10px;">
+      <div style="width: 17px; height: 17px; border-radius: 5px; background: linear-gradient(135deg, #00d4ff, #8b5cf6);"></div>
+      <span class="disp" style="font-size: 14px; font-weight: 800; letter-spacing: -0.01em;">yames</span>
+    </div>
+    <div class="row" style="gap: 18px; color: #5b5878; font-size: 13px;">
+      <span>&#8212;</span><span>&#9723;</span><span>&#10005;</span>
+    </div>
+  </div>
+
+  <div style="flex: 1; display: flex; min-height: 0;">
+
+    <!-- ── rail ────────────────────────────────────────────────── -->
+    <div style="width: 208px; flex-shrink: 0; border-right: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; padding: 12px 10px;">
+
+      <div class="row" style="gap: 11px; padding: 10px 12px; border-radius: 10px; background: rgba(0,212,255,0.09); border: 1px solid rgba(0,212,255,0.25);">
+        <span style="color: #00d4ff; font-size: 13px;">&#9835;</span>
+        <span style="font-size: 14px; font-weight: 700;">Metronome</span>
+      </div>
+      <div class="row" style="gap: 11px; padding: 10px 12px; color: #9995ba;">
+        <span style="font-size: 13px;">&#8599;</span><span style="font-size: 14px; font-weight: 600;">Drill</span>
+      </div>
+      <div class="row" style="gap: 11px; padding: 10px 12px; color: #605d80;">
+        <span style="font-size: 13px;">&#9863;</span><span style="font-size: 14px; font-weight: 600;">Paths</span>
+        <span style="margin-left: auto; font-size: 8px; font-weight: 800; letter-spacing: 0.12em; color: #8b5cf6; border: 1px solid rgba(139,92,246,0.4); border-radius: 4px; padding: 2px 5px;">SOON</span>
+      </div>
+
+      <div class="row" style="margin: 22px 4px 10px; justify-content: space-between;">
+        <span class="lbl">Presets</span>
+        <div class="row" style="gap: 10px; color: #5b5878; font-size: 12px;"><span>&#9906;</span><span>&#43;</span></div>
+      </div>
+
+      <!-- the chain, sitting in the same list as the presets -->
+      <div style="border-radius: 10px; background: rgba(0,212,255,0.07); border: 1px solid rgba(0,212,255,0.22); padding: 9px 11px;">
+        <div class="row" style="gap: 8px;">
+          <span style="color: #00d4ff; font-size: 11px;">&#9741;</span>
+          <span style="font-size: 13px; font-weight: 700;">Warm-up routine</span>
+        </div>
+        <div style="font-size: 10.5px; color: #605d80; margin-top: 4px; padding-left: 19px;">chain &middot; 4 steps &middot; ~12 min</div>
+      </div>
+
+      <div style="padding: 9px 11px; margin-top: 2px;">
+        <div class="row" style="gap: 8px; color: #b6b1d6;">
+          <span style="color: #4e4b6b; font-size: 11px;">&#9741;</span>
+          <span style="font-size: 13px; font-weight: 600;">Gig set &mdash; Thursday</span>
+        </div>
+        <div style="font-size: 10.5px; color: #4e4b6b; margin-top: 4px; padding-left: 19px;">chain &middot; 6 steps</div>
+      </div>
+
+      <div style="height: 1px; background: rgba(255,255,255,0.05); margin: 10px 11px;"></div>
+
+      <div class="row" style="justify-content: space-between; padding: 7px 11px; color: #9995ba;">
+        <span style="font-size: 13px;">Warmup</span><span style="font-size: 11px; color: #4e4b6b;">130 &middot; 6/8</span>
+      </div>
+      <div class="row" style="justify-content: space-between; padding: 7px 11px; color: #9995ba;">
+        <span style="font-size: 13px;">Gallop 16ths</span><span style="font-size: 11px; color: #4e4b6b;">96 &middot; 4/4</span>
+      </div>
+      <div class="row" style="justify-content: space-between; padding: 7px 11px; color: #9995ba;">
+        <span style="font-size: 13px;">Slow blues</span><span style="font-size: 11px; color: #4e4b6b;">62 &middot; 12/8</span>
+      </div>
+
+      <div style="margin-top: auto;">
+        <div class="row" style="gap: 11px; padding: 9px 12px; color: #9995ba;"><span style="color:#22d3a8; font-size:12px;">&#9673;</span><span style="font-size: 13px;">Practice Coach</span><span style="margin-left:auto; font-size:10px; color:#4e4b6b;">Ready</span></div>
+        <div class="row" style="gap: 11px; padding: 9px 12px; color: #9995ba;"><span style="font-size:12px;">&#9974;</span><span style="font-size: 13px;">Zen</span></div>
+        <div class="row" style="gap: 11px; padding: 9px 12px; color: #9995ba;"><span style="font-size:12px;">&#9881;</span><span style="font-size: 13px;">Settings</span></div>
+      </div>
+    </div>
+
+    <!-- ── stage ───────────────────────────────────────────────── -->
+    <div style="flex: 1; display: flex; flex-direction: column; min-width: 0;">
+
+      <!-- context bar -->
+      <div class="row" style="height: 52px; flex-shrink: 0; padding: 0 26px; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.04);">
+        <div class="row" style="gap: 12px;">
+          <span class="disp" style="font-size: 17px; font-weight: 700;">Warm-up routine</span>
+          <span style="font-size: 9.5px; font-weight: 800; letter-spacing: 0.12em; color: #00d4ff; border: 1px solid rgba(0,212,255,0.35); border-radius: 5px; padding: 3px 7px;">CHAIN</span>
+          <span class="row" style="gap: 5px; font-size: 11px; color: #f0a04b;"><span style="width:5px;height:5px;border-radius:50%;background:#f0a04b;"></span>Edited</span>
+          <span style="font-size: 12px; color: #00d4ff; font-weight: 600;">Save</span>
+          <span style="font-size: 12px; color: #605d80;">Revert</span>
+        </div>
+        <div class="row" style="gap: 8px;">
+          <span class="row" style="gap: 6px; font-size: 11.5px; color: #9995ba; border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 6px 11px;">&#9834; Wood</span>
+          <span class="row" style="gap: 7px; font-size: 11.5px; color: #9995ba; border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 6px 11px;">Vol <span style="width:46px;height:3px;border-radius:2px;background:#4e4b6b;"><span style="display:block;width:32px;height:3px;border-radius:2px;background:#9995ba;"></span></span></span>
+          <span class="row" style="gap: 6px; font-size: 11.5px; color: #605d80; border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 6px 11px;">&#9678; Input off</span>
+          <span style="font-size: 13px; color: #605d80; padding: 0 6px;">&hellip;</span>
+        </div>
+      </div>
+
+      <div style="flex: 1; padding: 26px 26px 0; min-height: 0; display: flex; flex-direction: column;">
+
+        <!-- ── the chain track ─────────────────────────────────── -->
+        <div class="row" style="justify-content: space-between; margin-bottom: 13px;">
+          <span class="lbl">The chain</span>
+          <span style="font-size: 11px; color: #5b5878;">4 steps &middot; about 12 minutes &middot; ends on its own</span>
+        </div>
+
+        <div class="row" style="gap: 0; align-items: stretch;">
+
+          <!-- step 1 (playing) -->
+          <div class="step step-on">
+            <div class="row" style="justify-content: space-between;">
+              <span style="font-size: 9px; font-weight: 800; letter-spacing: 0.12em; color: #00d4ff;">NOW &middot; 1</span>
+              <span style="font-size: 9.5px; color: #5b5878;">bar 3 of 8</span>
+            </div>
+            <div class="disp" style="font-size: 15px; font-weight: 700; margin: 7px 0 5px;">Loosen up</div>
+            <div style="font-size: 11px; color: #9995ba;">70 &middot; 4/4 &middot; quarter</div>
+            <div style="height: 3px; border-radius: 2px; background: rgba(255,255,255,0.07); margin-top: 10px;">
+              <div style="width: 38%; height: 3px; border-radius: 2px; background: #00d4ff;"></div>
+            </div>
+          </div>
+
+          <div class="row" style="padding: 0 9px;"><span class="trig">8 bars</span></div>
+
+          <!-- step 2 -->
+          <div class="step">
+            <div style="font-size: 9px; font-weight: 800; letter-spacing: 0.12em; color: #5b5878;">2</div>
+            <div class="disp" style="font-size: 15px; font-weight: 700; margin: 7px 0 5px; color: #b6b1d6;">Alt picking</div>
+            <div style="font-size: 11px; color: #605d80;">96 &middot; 4/4 &middot; sixteenth</div>
+            <div style="font-size: 10px; color: #4e4b6b; margin-top: 10px;">wood &middot; vol 70</div>
+          </div>
+
+          <!-- the open one -->
+          <div class="row" style="padding: 0 9px; position: relative;">
+            <span class="trig trig-on">2 min &#9662;</span>
+
+            <!-- transition editor -->
+            <div style="position: absolute; top: 46px; left: -52px; width: 320px; background: #15132a; border: 1px solid rgba(0,212,255,0.3); border-radius: 13px; padding: 15px; box-shadow: 0 18px 44px rgba(0,0,0,0.6); z-index: 5;">
+              <div class="lbl" style="margin-bottom: 9px;">Move on</div>
+              <div class="row" style="gap: 5px; margin-bottom: 5px;">
+                <span class="opt">When I say</span>
+                <span class="opt">After bars</span>
+                <span class="opt opt-on">After time</span>
+              </div>
+              <div class="row" style="gap: 9px; margin: 9px 0 16px; padding-left: 2px;">
+                <span style="font-size: 12px; color: #9995ba;">after</span>
+                <span class="row" style="gap: 11px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 5px 11px;">
+                  <span style="color:#605d80; font-size:12px;">&minus;</span>
+                  <span class="disp" style="font-size: 14px; font-weight: 700;">2 min</span>
+                  <span style="color:#605d80; font-size:12px;">&plus;</span>
+                </span>
+              </div>
+
+              <div class="lbl" style="margin-bottom: 9px;">Get there by</div>
+              <div class="row" style="gap: 5px; flex-wrap: wrap;">
+                <span class="opt">Clean cut</span>
+                <span class="opt opt-on">Count me in</span>
+                <span class="opt">Rest a bar</span>
+              </div>
+              <div style="font-size: 11px; color: #605d80; line-height: 1.5; margin-top: 11px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
+                Two bars of count-in at 96, then step 2 begins. The bar you are
+                in always finishes first &mdash; nothing is cut in half.
+              </div>
+            </div>
+          </div>
+
+          <!-- step 3 -->
+          <div class="step">
+            <div style="font-size: 9px; font-weight: 800; letter-spacing: 0.12em; color: #5b5878;">3</div>
+            <div class="disp" style="font-size: 15px; font-weight: 700; margin: 7px 0 5px; color: #b6b1d6;">Odd meter</div>
+            <div style="font-size: 11px; color: #605d80;">88 &middot; 7/8 &middot; eighth</div>
+            <div style="font-size: 10px; color: #4e4b6b; margin-top: 10px;">3 + 2 + 2</div>
+          </div>
+
+          <div class="row" style="padding: 0 9px;"><span class="trig">&#9711; when I say</span></div>
+
+          <!-- step 4 -->
+          <div class="step">
+            <div style="font-size: 9px; font-weight: 800; letter-spacing: 0.12em; color: #5b5878;">4</div>
+            <div class="disp" style="font-size: 15px; font-weight: 700; margin: 7px 0 5px; color: #b6b1d6;">Cool down</div>
+            <div style="font-size: 11px; color: #605d80;">60 &middot; 4/4 &middot; quarter</div>
+            <div style="font-size: 10px; color: #4e4b6b; margin-top: 10px;">last step</div>
+          </div>
+
+          <div class="row" style="padding-left: 13px;">
+            <span style="font-size: 12px; color: #4e4b6b; border: 1px dashed rgba(255,255,255,0.12); border-radius: 10px; padding: 20px 13px;">&plus;</span>
+          </div>
+        </div>
+
+        <div style="height: 1px; background: rgba(255,255,255,0.05); margin: 22px 0 18px;"></div>
+
+        <!-- ── the current step's own controls ─────────────────── -->
+        <div class="row" style="justify-content: space-between; margin-bottom: 14px;">
+          <span class="lbl">Step 1 &mdash; Loosen up</span>
+          <span style="font-size: 11px; color: #5b5878;">editing the step, not the chain</span>
+        </div>
+
+        <div class="row" style="gap: 28px; align-items: flex-end;">
+          <div>
+            <div class="disp" style="font-size: 74px; font-weight: 800; line-height: 0.86; letter-spacing: -0.04em;">70</div>
+          </div>
+          <div style="padding-bottom: 7px;">
+            <div style="font-size: 11px; font-weight: 700; color: #5b5878;">BPM</div>
+            <div style="font-size: 12px; font-weight: 800; letter-spacing: 0.1em; color: #00d4ff;">ADAGIO</div>
+          </div>
+          <div class="row" style="gap: 9px; padding-bottom: 9px;">
+            <span style="width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.12); color: #9995ba; font-size: 14px; display: flex; align-items: center; justify-content: center;">&minus;</span>
+            <span style="width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.12); color: #9995ba; font-size: 14px; display: flex; align-items: center; justify-content: center;">&plus;</span>
+          </div>
+          <div class="row" style="gap: 13px; padding-bottom: 9px; margin-left: 14px;">
+            <span class="lbl">Meter</span>
+            <span class="row" style="gap: 8px; border: 1px solid rgba(255,255,255,0.1); border-radius: 9px; padding: 6px 11px; font-size: 13px; font-weight: 700;">4/4 <span style="color:#605d80; font-size:9px;">&#9662;</span></span>
+          </div>
+          <div class="row" style="gap: 7px; padding-bottom: 9px;">
+            <span style="width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(0,212,255,0.5);"></span>
+            <span style="width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.16);"></span>
+            <span style="width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.16);"></span>
+            <span style="width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.16);"></span>
+          </div>
+        </div>
+
+        <!-- The rest of the metronome is still the metronome. Nothing about
+             loading a chain takes the controls away; they just point at the
+             step you have selected. -->
+        <div style="margin-top: 26px;">
+          <div class="row" style="justify-content: space-between; align-items: flex-end; height: 26px;">
+            <span style="font-size: 9.5px; color: #4e4b6b;">40</span>
+            <span style="font-size: 9.5px; color: #4e4b6b;">80</span>
+            <span style="font-size: 9.5px; color: #00d4ff; font-weight: 700;">70</span>
+            <span style="font-size: 9.5px; color: #4e4b6b;">120</span>
+            <span style="font-size: 9.5px; color: #4e4b6b;">160</span>
+            <span style="font-size: 9.5px; color: #4e4b6b;">200</span>
+            <span style="font-size: 9.5px; color: #4e4b6b;">240</span>
+          </div>
+          <div class="row" style="gap: 4px; align-items: flex-end; height: 16px;">
+            <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
+          </div>
+          <div class="row" style="justify-content: space-between; margin-top: 6px;">
+            <span style="font-size: 9px; letter-spacing: 0.12em; color: #4e4b6b;">LARGO</span>
+            <span style="font-size: 9px; letter-spacing: 0.12em; color: #00d4ff;">ADAGIO</span>
+            <span style="font-size: 9px; letter-spacing: 0.12em; color: #4e4b6b;">MODERATO</span>
+            <span style="font-size: 9px; letter-spacing: 0.12em; color: #4e4b6b;">ALLEGRO</span>
+            <span style="font-size: 9px; letter-spacing: 0.12em; color: #4e4b6b;">PRESTO</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 28px;">
+          <div class="lbl" style="margin-bottom: 11px;">Subdivision</div>
+          <div class="row" style="gap: 9px;">
+            <span style="flex:1; text-align:center; padding: 15px 0; border-radius: 11px; border: 1px solid rgba(0,212,255,0.4); background: rgba(0,212,255,0.08); color:#7de8ff; font-size: 12px; font-weight: 700;">Quarter</span>
+            <span style="flex:1; text-align:center; padding: 15px 0; border-radius: 11px; border: 1px solid rgba(255,255,255,0.07); color:#9995ba; font-size: 12px;">Eighth</span>
+            <span style="flex:1; text-align:center; padding: 15px 0; border-radius: 11px; border: 1px solid rgba(255,255,255,0.07); color:#9995ba; font-size: 12px;">Triplet</span>
+            <span style="flex:1; text-align:center; padding: 15px 0; border-radius: 11px; border: 1px solid rgba(255,255,255,0.07); color:#9995ba; font-size: 12px;">Sixteenth</span>
+            <span style="flex:1; text-align:center; padding: 15px 0; border-radius: 11px; border: 1px solid rgba(255,255,255,0.07); color:#9995ba; font-size: 12px;">Quintuplet</span>
+            <span style="flex:1; text-align:center; padding: 15px 0; border-radius: 11px; border: 1px solid rgba(255,255,255,0.07); color:#9995ba; font-size: 12px;">Sextuplet</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- transport -->
+      <div class="row" style="height: 74px; flex-shrink: 0; padding: 0 26px; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.05);">
+        <div class="row" style="gap: 17px;">
+          <span class="row" style="gap: 9px; background: #00d4ff; color: #08070f; font-weight: 800; font-size: 14px; border-radius: 999px; padding: 12px 30px;">&#9654; Playing</span>
+          <span style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em; color: #4e4b6b; border: 1px solid rgba(255,255,255,0.08); border-radius: 5px; padding: 4px 8px;">SPACE</span>
+        </div>
+        <div class="row" style="gap: 24px;">
+          <span style="font-size: 12px; color: #9995ba;"><span class="disp" style="font-size:15px;font-weight:700;color:#eceaf6;">Step 1</span> <span style="color:#5b5878;">of 4</span></span>
+          <span style="font-size: 12px; color: #9995ba;">Next in <span class="disp" style="font-size:15px;font-weight:700;color:#eceaf6;">5</span> bars</span>
+          <span class="row" style="gap: 8px; font-size: 12px; color: #00d4ff; border: 1px solid rgba(0,212,255,0.3); border-radius: 999px; padding: 8px 15px;">Skip to next &#8250;</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
