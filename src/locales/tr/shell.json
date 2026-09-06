@@ -22,10 +22,6 @@
   "presets": {
     "title": "Ön Ayarlar",
     "titleDrill": "Antrenmanlar",
-    "open": "Ön ayarları aç",
-    "openWithShortcut": "Ön ayarları aç ({{shortcut}})",
-    "close": "Ön ayarları kapat",
-    "closeWithShortcut": "Ön ayarları kapat ({{shortcut}})",
     "saveCurrent": "Geçerli ayarları kaydet",
     "search": "Kitaplıkta ara",
     "searchPlaceholder": "Ara...",

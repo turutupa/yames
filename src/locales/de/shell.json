@@ -22,10 +22,6 @@
   "presets": {
     "title": "Presets",
     "titleDrill": "Trainings",
-    "open": "Presets öffnen",
-    "openWithShortcut": "Presets öffnen ({{shortcut}})",
-    "close": "Presets schließen",
-    "closeWithShortcut": "Presets schließen ({{shortcut}})",
     "saveCurrent": "Aktuelle Einstellungen speichern",
     "search": "Bibliothek durchsuchen",
     "searchPlaceholder": "Suchen…",

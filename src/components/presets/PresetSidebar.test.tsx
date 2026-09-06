@@ -70,7 +70,6 @@ const baseProps = {
   state: DEFAULT_TEST_STATE,
   view: "beat" as const,
   isOpen: true,
-  onToggle: vi.fn(),
   onLoadPreset: vi.fn(),
   onActiveChange: vi.fn(),
 };
@@ -91,12 +90,6 @@ async function openSearch(): Promise<HTMLInputElement> {
 }
 
 describe("PresetSidebar", () => {
-  it("shows a collapsed-tab button when isOpen=false", () => {
-    render(<PresetSidebar {...baseProps} isOpen={false} />);
-    const tab = document.querySelector(".preset-sidebar-collapsed-tab");
-    expect(tab).not.toBeNull();
-  });
-
   it("renders 'No presets yet' when listPresets returns []", async () => {
     setInvokeResponse("list_presets", () => []);
     render(<PresetSidebar {...baseProps} />);

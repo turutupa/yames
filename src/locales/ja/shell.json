@@ -22,10 +22,6 @@
   "presets": {
     "title": "プリセット",
     "titleDrill": "テンポ練習",
-    "open": "プリセットを開く",
-    "openWithShortcut": "プリセットを開く（{{shortcut}}）",
-    "close": "プリセットを閉じる",
-    "closeWithShortcut": "プリセットを閉じる（{{shortcut}}）",
     "saveCurrent": "現在の設定を保存",
     "search": "ライブラリを検索",
     "searchPlaceholder": "検索…",

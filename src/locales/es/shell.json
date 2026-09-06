@@ -22,10 +22,6 @@
   "presets": {
     "title": "Preajustes",
     "titleDrill": "Rampas",
-    "open": "Abrir preajustes",
-    "openWithShortcut": "Abrir preajustes ({{shortcut}})",
-    "close": "Cerrar preajustes",
-    "closeWithShortcut": "Cerrar preajustes ({{shortcut}})",
     "saveCurrent": "Guardar ajustes actuales",
     "search": "Buscar en la biblioteca",
     "searchPlaceholder": "Buscar…",

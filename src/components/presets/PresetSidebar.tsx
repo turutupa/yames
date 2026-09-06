@@ -17,7 +17,6 @@ interface PresetSidebarProps {
   state: AppState;
   view: "beat" | "drill";
   isOpen: boolean;
-  onToggle: () => void;
   onLoadPreset: (preset: Preset) => void;
   onActiveChange: (preset: Preset | null, dirty: boolean) => void;
   shortcut?: string;
@@ -128,7 +127,6 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   state,
   view,
   isOpen,
-  onToggle,
   onLoadPreset,
   onActiveChange,
   shortcut,
@@ -348,13 +346,6 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
     },
   }), [activeId, allPresets, chains, state, view]);
 
-  const toggleIcon = (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="18" height="18" rx="3" />
-      <line x1="9" y1="3" x2="9" y2="21" />
-    </svg>
-  );
-
   // Two links, joined. It is the one glyph in the row that says "several
   // things in an order" without a word, which is what a list mixing chains
   // and presets needs at 11px.
@@ -387,16 +378,6 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
           }
         }}
       >
-        {/* Collapsed tab — clickable strip when sidebar is closed */}
-        {!isOpen && (
-          <button
-            className="preset-sidebar-collapsed-tab"
-            onClick={onToggle}
-            title={shortcut ? t("presets.openWithShortcut", { shortcut }) : t("presets.open")}
-          >
-            {toggleIcon}
-          </button>
-        )}
         {isOpen && (
         <>
         <div className="preset-sidebar-header">
@@ -447,13 +428,6 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
                 +
               </button>
             )}
-            <button
-              className="preset-sidebar-toggle-inner"
-              onClick={onToggle}
-              title={shortcut ? t("presets.closeWithShortcut", { shortcut }) : t("presets.close")}
-            >
-              {toggleIcon}
-            </button>
           </div>
         </div>
 

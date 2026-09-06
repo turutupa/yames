@@ -22,10 +22,6 @@
   "presets": {
     "title": "Préréglages",
     "titleDrill": "Rampes",
-    "open": "Ouvrir les préréglages",
-    "openWithShortcut": "Ouvrir les préréglages ({{shortcut}})",
-    "close": "Fermer les préréglages",
-    "closeWithShortcut": "Fermer les préréglages ({{shortcut}})",
     "saveCurrent": "Enregistrer les réglages actuels",
     "search": "Rechercher dans la bibliothèque",
     "searchPlaceholder": "Rechercher…",

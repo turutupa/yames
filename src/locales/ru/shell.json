@@ -22,10 +22,6 @@
   "presets": {
     "title": "Пресеты",
     "titleDrill": "Тренировки",
-    "open": "Открыть пресеты",
-    "openWithShortcut": "Открыть пресеты ({{shortcut}})",
-    "close": "Закрыть пресеты",
-    "closeWithShortcut": "Закрыть пресеты ({{shortcut}})",
     "saveCurrent": "Сохранить текущие настройки",
     "search": "Поиск в библиотеке",
     "searchPlaceholder": "Поиск…",

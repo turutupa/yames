@@ -149,7 +149,6 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
             state={state}
             view={playView}
             isOpen
-            onToggle={onToggleLibrary}
             onLoadPreset={onLoadPreset}
             onActiveChange={onActivePresetChange}
             shortcut={presetShortcut}

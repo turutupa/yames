@@ -22,10 +22,6 @@
   "presets": {
     "title": "Predefinições",
     "titleDrill": "Treinos",
-    "open": "Abrir predefinições",
-    "openWithShortcut": "Abrir predefinições ({{shortcut}})",
-    "close": "Fechar predefinições",
-    "closeWithShortcut": "Fechar predefinições ({{shortcut}})",
     "saveCurrent": "Salvar configurações atuais",
     "search": "Buscar na biblioteca",
     "searchPlaceholder": "Buscar...",

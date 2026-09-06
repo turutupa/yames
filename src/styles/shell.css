@@ -101,7 +101,6 @@
   color: var(--text-secondary);
 }
 
-
 /* os-fullscreen comes AFTER platform rules — same specificity, so it wins */
 .main-window.os-fullscreen {
   border-radius: 0;
@@ -514,34 +513,6 @@ button.context-chip:hover,
 
 /* External toggle removed — sidebar now uses collapsed tab strip */
 
-/* Toggle button living inside the sidebar header when open */
-.preset-sidebar-toggle-inner {
-  width: 28px;
-  height: 28px;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s;
-  padding: 0;
-  opacity: 0.7;
-  flex-shrink: 0;
-}
-
-.preset-sidebar-toggle-inner:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary);
-  opacity: 1;
-}
-
-.preset-sidebar-toggle-inner:active {
-  transform: none;
-}
-
 .preset-sidebar {
   width: 44px;
   min-width: 44px;
@@ -564,30 +535,6 @@ button.context-chip:hover,
 
 .preset-sidebar.open {
   width: 220px;
-}
-
-.preset-sidebar-collapsed-tab {
-  width: 44px;
-  height: 100%;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding-top: 82px;
-  border: none;
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  opacity: 0.7;
-  transition: opacity 0.15s, color 0.15s;
-}
-
-.preset-sidebar-collapsed-tab:hover {
-  opacity: 1;
-  color: var(--text-primary);
-}
-
-.preset-sidebar-collapsed-tab:active {
-  transform: none;
 }
 
 .preset-sidebar-header {
@@ -1118,8 +1065,6 @@ button.context-chip:hover,
   opacity: 1;
 }
 
-
-
 /* The dirty and feedback modifiers of this button are gone: with a preset
    loaded, those states now belong to the Edited pill and to
    `.preset-text-btn--feedback`. `.preset-save-btn` survives as the one thing
@@ -1247,14 +1192,6 @@ button.context-chip:hover,
   border-right: none;
   background: transparent;
   transition: none;
-}
-
-/* The library's own toggle stays hidden here. The rail is not the sliding
-   drawer that button was built for, and a control inside the PRESETS header
-   reads as "collapse the presets" whatever it actually does. The sidebar's
-   control lives at the sidebar's level, in the footer — see `.rail-collapse`. */
-.rail-library .preset-sidebar-toggle-inner {
-  display: none;
 }
 
 .rail-library-reopen {
@@ -2073,7 +2010,6 @@ button.context-chip:hover,
 .coach-card-pill {
   display: none;
 }
-
 
 /* ── The sidebar, collapsed on purpose ───────────────────────────────────
    Below 620px the rail becomes a strip of icons because it has to. This is

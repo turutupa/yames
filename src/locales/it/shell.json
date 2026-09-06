@@ -22,10 +22,6 @@
   "presets": {
     "title": "Preset",
     "titleDrill": "Rampe",
-    "open": "Apri preset",
-    "openWithShortcut": "Apri preset ({{shortcut}})",
-    "close": "Chiudi preset",
-    "closeWithShortcut": "Chiudi preset ({{shortcut}})",
     "saveCurrent": "Salva impostazioni attuali",
     "search": "Cerca nella libreria",
     "searchPlaceholder": "Cerca…",
