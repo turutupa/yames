@@ -1621,3 +1621,72 @@
     display: none;
   }
 }
+
+/* The meter as a chip and a picker, not ten buttons laid flat. */
+.meter-presets {
+  position: relative;
+}
+
+.meter-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.meter-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.meter-chip:hover,
+.meter-chip.open {
+  background: var(--surface-hover);
+  border-color: var(--text-tertiary);
+}
+
+/* The part that changes without the meter changing: 7/8 as 3+2+2 and as
+   2+2+3 are the same chip and very different bars. */
+.meter-grouping {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.meter-picker {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  box-shadow: var(--shadow);
+}
+
+.meter-picker .time-sig-row,
+.meter-picker .meter-variant-row {
+  margin: 0;
+  max-width: none;
+}
+
+.main-content[data-view="beat"] .meter-picker .time-sig-row {
+  max-width: none;
+  flex-wrap: nowrap;
+}
