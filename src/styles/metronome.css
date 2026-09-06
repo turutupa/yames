@@ -1414,3 +1414,24 @@
 .main-content[data-view="beat"] .group-formula {
   justify-content: flex-start;
 }
+
+/* The tempo ruler needs its width, and its labels need to know when they
+   cannot have it.
+   Anchoring the stage left made `.bpm-section` shrink to its content, so the
+   ruler's `width: 100%` resolved against the widest row rather than the stage
+   — about 515px instead of 720. At that width the markings, which are placed
+   in proportion to the tempo they name, ran into each other: Moderato and
+   Allegro are 10% of the track apart, and "MODERATO" alone is wider than 10%
+   of 515px. The owner's screenshot read "MODERAALLEGRO". */
+.main-content[data-view="beat"] .bpm-section {
+  width: 100%;
+}
+
+/* Below the width where the labels fit, the ruler keeps its ticks and drops
+   the words. The marking beside the tempo already names where you are — that
+   is the reading; this row is the map. */
+@media (max-width: 979px) {
+  .main-content[data-view="beat"] .tempo-scale {
+    display: none;
+  }
+}
