@@ -8,12 +8,24 @@
   position: relative;
 }
 
-/* Beat view: center content */
-.main-content[data-view="beat"] .view-transition-wrapper {
-  justify-content: center;
-}
-
-/* Scrollable views */
+/* Every stage scrolls when it has to.
+ *
+ * Beat used to be the exception — centred, `overflow: visible` — which was
+ * fine while the metronome always fitted. Loading a chain puts the track above
+ * it and it stops fitting: at 1440x900 the subdivision row rendered 44px BEHIND
+ * the transport, unreadable and unclickable, with no scrollbar to admit it. A
+ * short window did the same thing with no chain at all.
+ *
+ * Centring and scrolling cannot both come from `justify-content`. A centred
+ * flex column that overflows spills out of BOTH ends, and the half above the
+ * top is unreachable — scrolling starts at the container's origin, which the
+ * content has already passed. `safe center` exists for this and is not
+ * supported here; it computes back to plain `center`.
+ *
+ * So: align to the start, and let auto margins do the centring. They absorb
+ * the spare room when there is some and collapse to nothing when there is not,
+ * which is exactly the behaviour `safe center` was meant to provide. */
+.main-content[data-view="beat"] .view-transition-wrapper,
 .main-content[data-view="drill"] .view-transition-wrapper,
 .main-content[data-view="settings"] .view-transition-wrapper {
   justify-content: flex-start;
@@ -21,9 +33,15 @@
   overflow-x: hidden;
 }
 
-/* Pocket Check: center when content fits, top-align + scrollable when it
- * overflows. `safe center` falls back to start alignment so overflow content
- * stays reachable. */
+.main-content[data-view="beat"] .view-transition-wrapper > *:first-child,
+.main-content[data-view="drill"] .view-transition-wrapper > *:first-child {
+  margin-top: auto;
+}
+
+.main-content[data-view="beat"] .view-transition-wrapper > *:last-child,
+.main-content[data-view="drill"] .view-transition-wrapper > *:last-child {
+  margin-bottom: auto;
+}
 
 /* Scrollable views — hide scrollbar */
 .view-transition-wrapper {
