@@ -286,3 +286,23 @@ main window into a black Zen is a jolt, and the four light themes exist for
 people who do not want a dark screen. The alternatives are to tokenise Zen's
 background so each theme brings its own, or to keep it always-dark and say so
 in the theme picker. This needs the owner, not a guess.
+
+### U3.5 · "Countdown" and "Cyclic" are the words, for now — **open**
+
+Promoting these two settings to the drill transport briefly gave each of them
+two names: the form said Countdown and Cyclic, the transport said Count-in and
+Loop. One setting with two names on one screen is worse than either name, so
+the transport now uses the form's keys and there is one vocabulary again.
+
+Loop was also wrong on the facts. `advance_ramp` flips direction at the target
+and again at the start, so a cyclic ramp climbs and descends without ever
+finishing. Loop suggests the climb repeating from the bottom, which is a
+different exercise.
+
+What stays open is whether these are the right words at all. Yames is for
+guitarists, and "cyclic" is engineering vocabulary — "up and down" says what
+it does. "Count-in" is what a musician calls a countdown. Both are better
+words; both mean retranslating a label and its description into fifteen
+languages, and choosing product vocabulary is the owner's call, not a thing to
+change in passing while unifying a duplicate.
+

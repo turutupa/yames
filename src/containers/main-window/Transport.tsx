@@ -179,7 +179,7 @@ export function Transport({
             onClick={onToggleCountIn}
           >
             <span className="transport-switch-track" aria-hidden="true" />
-            {t("transport.countIn")}
+            {t("drill.countdown")}
           </button>
           <button
             type="button"
@@ -189,7 +189,7 @@ export function Transport({
             onClick={onToggleLoop}
           >
             <span className="transport-switch-track" aria-hidden="true" />
-            {t("transport.loop")}
+            {t("drill.cyclic")}
           </button>
         </div>
       )}
