@@ -1513,8 +1513,20 @@
     font-size: 4.25rem;
   }
 
+  /* The number, its units and the −/+/TAP group stop being one unbreakable
+     row. Without this the group is pushed past the right edge of the stage:
+     at the 480px minimum the TAP button sat 60px outside it, clipped and
+     unclickable, with no scroll to reach it. TAP is how you set a tempo you
+     can only hear, so losing it at the smallest size loses the feature for
+     exactly the window a phone-sized practice setup uses. */
   .main-content[data-view="beat"] .bpm-display {
     gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .main-content[data-view="beat"] .tempo-controls {
+    margin-left: 0;
+    padding-bottom: 0;
   }
 
   /* The tempo block and LAST SESSION stop sharing a line; the readout goes
