@@ -5,7 +5,7 @@
  * - Renders the climb from the speedRamp config (start, target, increment)
  * - Linear/Zigzag/Adaptive mode toggle buttons exist
  * - Clicking a cell calls start_speed_ramp_from with stepIdx + bpm + barIdx
- * - Cyclic toggle switches the speed_ramp.cyclic flag
+ * - The up-and-down toggle switches the speed_ramp.cyclic flag
  */
 import { describe, it, expect } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
@@ -152,10 +152,13 @@ describe("DrillView", () => {
     expect(detail).toContain("Wood");
   });
 
-  it("clicking Cyclic toggle calls configure_speed_ramp with cyclic=true", async () => {
+  it("clicking the up-and-down toggle calls configure_speed_ramp with cyclic=true", async () => {
     render(<DrillView state={drillState} currentBeat={null} animations={false} />);
-    // The "Cyclic" toggle is rendered next to a label with that text.
-    const cyclicLabel = screen.getByText("Cyclic");
+    // The flag is still `cyclic` in the engine; only the word the musician
+    // reads changed. "Cyclic" was engineering vocabulary, and "Repeat" would
+    // have been wrong — the ramp turns round and descends rather than starting
+    // again, which is what the chain's repeat does.
+    const cyclicLabel = screen.getByText("Up and down");
     const toggleBtn = cyclicLabel.parentElement?.querySelector(".toggle-btn") as HTMLElement;
     expect(toggleBtn).not.toBeNull();
     fireEvent.click(toggleBtn);

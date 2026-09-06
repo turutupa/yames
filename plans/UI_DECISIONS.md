@@ -268,7 +268,7 @@ Recorded here rather than edited into the owner's documents.
   the owner's to work through; this revamp does not depend on it and must
   not pre-empt it.
 
-### U6.5 · Zen ignores the theme's background, on purpose or not — **open**
+### U6.5 · Zen is always dark, on purpose — **decided**
 
 `fullscreen.css:12` paints Zen with a literal `radial-gradient(#0d0d1a → #000)`
 and `.fs-bpm` with a literal `rgba(255,255,255,0.95)`. Neither is a token, so
@@ -281,13 +281,17 @@ Checked because it looked like a theming bug: under Ivory, whose
 `--text-primary` is `#2c2416`, tokenised text on that background would have
 been invisible. It is not tokenised, so nothing is unreadable today.
 
-What is open is whether it is intended. Going from Manuscript's paper-white
-main window into a black Zen is a jolt, and the four light themes exist for
-people who do not want a dark screen. The alternatives are to tokenise Zen's
-background so each theme brings its own, or to keep it always-dark and say so
-in the theme picker. This needs the owner, not a guess.
+The owner's call is that it stays that way. Zen is the mode for turning the
+room down, and the accents still carry the theme, so it reads as "lights out,
+your colour on top" rather than as a theme that failed to apply. The jolt
+leaving a light theme is the point of the mode, not a defect in it.
 
-### U3.5 · "Countdown" and "Cyclic" are the words, for now — **open**
+So the literals stay literals. What must not happen is a later pass
+"tokenising Zen for consistency": under Ivory that would put `#2c2416` text on
+`#0d0d1a` and make the tempo invisible. If Zen is ever tokenised, it needs its
+own dark palette, not the active theme's.
+
+### U3.6 · "Up and down" and "Count-in" — **decided**
 
 Promoting these two settings to the drill transport briefly gave each of them
 two names: the form said Countdown and Cyclic, the transport said Count-in and
@@ -299,12 +303,16 @@ and again at the start, so a cyclic ramp climbs and descends without ever
 finishing. Loop suggests the climb repeating from the bottom, which is a
 different exercise.
 
-What stays open is whether these are the right words at all. Yames is for
-guitarists, and "cyclic" is engineering vocabulary — "up and down" says what
-it does. "Count-in" is what a musician calls a countdown. Both are better
-words; both mean retranslating a label and its description into fifteen
-languages, and choosing product vocabulary is the owner's call, not a thing to
-change in passing while unifying a duplicate.
+Both are now changed, in fifteen languages, along with the description that
+was carrying the meaning "Cyclic" failed to.
+
+"Repeat" was considered and rejected. The chain's repeat starts again at step
+one; `advance_ramp` turns round at the target and descends. Giving both the
+same word would put two behaviours behind one label in an app that has both on
+adjacent screens — the exact collision this entry was written to avoid. "Up
+and down" describes the shape, which is the thing the drill is for.
+
+The engine's flag stays `cyclic`. Only the word the musician reads changed.
 
 
 ### U9.1 · A chain is a list of copies, not a list of pointers — **decided**
@@ -344,6 +352,12 @@ practice plan, and a chain here may hold neither.
 
 ### U9.5 · The count-in has to be unwelded from the ramp — **open**
 
+Worth stating plainly, because it has already been misread once: this is about
+where the code lives, not about what a musician hears. The count-in plays at
+the *new* tempo with its own click, and that is the right cue — nothing here
+proposes changing it. Unwelding does not alter a drill's count-in at all. It
+only lets something other than a drill have one.
+
 The engine already plays a count-in, with its own click and a clean handover
 where the last warm-up beat becomes beat 0. It is gated on `ramp_warming_up`
 and reads `speed_ramp.warmup_*`, so today only a drill can have one. U9.2's
@@ -365,7 +379,7 @@ off the last transition would read as a fifth step.
 The drill's `cyclic` is deliberately NOT this. A cyclic ramp turns round at
 the target and descends, which is a shape; a repeated chain starts again at
 step one. Same word, two behaviours — worth keeping apart in the vocabulary
-(see U3.5, still open on whether "cyclic" survives at all).
+(see U3.6, which settled it: the drill says "Up and down").
 
 ### U9.7 · The transport counts the steps — **decided**
 
