@@ -108,6 +108,51 @@
   box-shadow: none !important;
 }
 
+/* The same five states on the grouped dots, which are what the metronome
+   screen actually renders. `GroupEditor` has emitted `feedback-<class>` since
+   the grouped editor replaced the flat row, but only `.main-dot` was ever
+   styled, so per-beat timing never painted there — the coach heard you and
+   said nothing. Found while restyling the dots as rings.
+
+   `!important` for the same reason `.main-dot` needs it: `metronome.css` is
+   loaded after this file and `.group-dot.playing` has equal specificity, so
+   without it the beat's own fill wins over the verdict on that beat.
+
+   The ring shape changes what "miss" means. A filled dot showed a miss by
+   emptying itself; a ring is already empty, so it keeps the outline and takes
+   the miss colour — the dot stays visible and only its meaning changes. */
+   The scale is not repeated here: a classification is only ever set on the
+   beat that is currently sounding, so `.playing` is always alongside it and
+   has already done it. */
+.group-dot.feedback-perfect {
+  background: var(--feedback-perfect) !important;
+  border-color: var(--feedback-perfect) !important;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--feedback-perfect) 55%, transparent), 0 0 22px color-mix(in srgb, var(--feedback-perfect) 22%, transparent) !important;
+}
+
+.group-dot.feedback-good {
+  background: var(--feedback-good) !important;
+  border-color: var(--feedback-good) !important;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--feedback-good) 55%, transparent), 0 0 22px color-mix(in srgb, var(--feedback-good) 22%, transparent) !important;
+}
+
+.group-dot.feedback-ok {
+  background: var(--feedback-ok) !important;
+  border-color: var(--feedback-ok) !important;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--feedback-ok) 55%, transparent), 0 0 22px color-mix(in srgb, var(--feedback-ok) 22%, transparent) !important;
+}
+
+.group-dot.feedback-miss {
+  background: transparent !important;
+  border-color: var(--feedback-miss) !important;
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--feedback-miss) 12%, transparent) !important;
+}
+
+.group-dot.feedback-skipped {
+  opacity: 0.3;
+  box-shadow: none !important;
+}
+
 /* ─── Drift Meter ─── */
 .drift-meter {
   display: flex;
