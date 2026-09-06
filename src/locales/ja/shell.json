@@ -68,6 +68,8 @@
     "inputOff": "入力オフ"
   },
   "rail": {
-    "label": "モードとライブラリ"
+    "label": "モードとライブラリ",
+    "coachReady": "待機中",
+    "coachInSession": "セッション中"
   }
 }

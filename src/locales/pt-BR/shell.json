@@ -68,6 +68,8 @@
     "inputOff": "Entrada desligada"
   },
   "rail": {
-    "label": "Modos e biblioteca"
+    "label": "Modos e biblioteca",
+    "coachReady": "Pronto",
+    "coachInSession": "Em sessão"
   }
 }

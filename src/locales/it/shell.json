@@ -68,6 +68,8 @@
     "inputOff": "Ingresso spento"
   },
   "rail": {
-    "label": "Modalità e libreria"
+    "label": "Modalità e libreria",
+    "coachReady": "Pronto",
+    "coachInSession": "In sessione"
   }
 }

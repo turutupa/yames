@@ -73,6 +73,26 @@ describe("Rail", () => {
     expect(container.querySelector(".rail-action-dot.listening")).not.toBeNull();
   });
 
+  it("says what the coach is doing, and says it in the button's name too", () => {
+    // The mockup writes "Ready" here. The row knows three states, not one, and
+    // below 620px the visible label is `display: none` — so the status has to
+    // be in the accessible name as well or it disappears with the text.
+    const { container, props, rerender } = setup();
+    const status = () => container.querySelector(".rail-action-status")?.textContent;
+    const name = () =>
+      container.querySelector(".rail-action")?.getAttribute("aria-label") ?? "";
+
+    expect(status()).toBe("Ready");
+    expect(name()).toContain("Ready");
+
+    rerender(<Rail {...props} coachActive />);
+    expect(status()).toBe("In session");
+
+    rerender(<Rail {...props} coachActive coachListening />);
+    expect(status()).toBe("Listening");
+    expect(name()).toContain("Listening");
+  });
+
   it("remembers the mode it left when opening settings, and returns to it", () => {
     const prevTab = { current: "beat" as "beat" | "drill" };
     const setView = vi.fn();

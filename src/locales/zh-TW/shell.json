@@ -68,6 +68,8 @@
     "inputOff": "輸入已關閉"
   },
   "rail": {
-    "label": "模式與資料庫"
+    "label": "模式與資料庫",
+    "coachReady": "就緒",
+    "coachInSession": "練習中"
   }
 }

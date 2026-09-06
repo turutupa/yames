@@ -68,6 +68,8 @@
     "inputOff": "입력 꺼짐"
   },
   "rail": {
-    "label": "모드 및 라이브러리"
+    "label": "모드 및 라이브러리",
+    "coachReady": "대기 중",
+    "coachInSession": "세션 중"
   }
 }

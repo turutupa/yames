@@ -68,6 +68,8 @@
     "inputOff": "Input off"
   },
   "rail": {
-    "label": "Modes and library"
+    "label": "Modes and library",
+    "coachReady": "Ready",
+    "coachInSession": "In session"
   }
 }

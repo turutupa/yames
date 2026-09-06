@@ -1332,6 +1332,16 @@ button.context-chip:hover,
   text-overflow: ellipsis;
 }
 
+/* The coach's status, at the right of its row. Quieter and smaller than the
+   label it follows: it reports, and the row is what you press. */
+.rail-action-status {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-faint);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .rail-action-dot {
   width: 7px;
   height: 7px;
@@ -1606,6 +1616,7 @@ button.context-chip:hover,
 
   .rail-mode-label,
   .rail-action-label,
+  .rail-action-status,
   .rail-library,
   .rail-action-dot {
     display: none;
@@ -1634,6 +1645,7 @@ button.context-chip:hover,
 
   .rail[data-library-open] .rail-mode-label,
   .rail[data-library-open] .rail-action-label,
+  .rail[data-library-open] .rail-action-status,
   .rail[data-library-open] .rail-library,
   .rail[data-library-open] .rail-action-dot {
     display: revert;

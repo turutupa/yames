@@ -68,6 +68,8 @@
     "inputOff": "输入已关闭"
   },
   "rail": {
-    "label": "模式与资料库"
+    "label": "模式与资料库",
+    "coachReady": "就绪",
+    "coachInSession": "练习中"
   }
 }

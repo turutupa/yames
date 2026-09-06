@@ -68,6 +68,8 @@
     "inputOff": "Wejście wyłączone"
   },
   "rail": {
-    "label": "Tryby i biblioteka"
+    "label": "Tryby i biblioteka",
+    "coachReady": "Gotowy",
+    "coachInSession": "W sesji"
   }
 }

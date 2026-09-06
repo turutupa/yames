@@ -68,6 +68,8 @@
     "inputOff": "Ingang uit"
   },
   "rail": {
-    "label": "Modi en bibliotheek"
+    "label": "Modi en bibliotheek",
+    "coachReady": "Klaar",
+    "coachInSession": "In sessie"
   }
 }

@@ -79,6 +79,17 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
   const { t } = useTranslation();
   const playView = view === "beat" || view === "drill" ? view : "beat";
 
+  // The mockup writes "Ready" at the right of the coach's row. Three words
+  // rather than one, because the row already knows more than that: a session
+  // is either running with the input open, running without it, or not running
+  // at all, and "Ready" for all three would be the least informative of the
+  // three states pretending to be the only one.
+  const coachStatus = coachActive
+    ? coachListening
+      ? t("transport.listening")
+      : t("rail.coachInSession")
+    : t("rail.coachReady");
+
   return (
     <nav className="rail" data-library-open={libraryOpen ? "" : undefined} aria-label={t("rail.label")}>
       <div className="rail-modes">
@@ -153,7 +164,10 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
       <div className="rail-footer">
         <button
           className={`rail-action ${coachOpen ? "active" : ""}`}
-          aria-label={t("settings.coach.title")}
+          // The status is in the name, not only beside it: below 620px the
+          // rail is icons and every label here is `display: none`, which
+          // would take the status with it.
+          aria-label={`${t("settings.coach.title")} — ${coachStatus}`}
           onClick={onToggleCoach}
         >
           <span className="rail-action-icon rail-action-coach">
@@ -174,6 +188,9 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
             </svg>
           </span>
           <span className="rail-action-label">{t("settings.coach.title")}</span>
+          <span className="rail-action-status" aria-hidden="true">
+            {coachStatus}
+          </span>
           {coachActive && (
             <span
               className={`rail-action-dot ${coachListening ? "listening" : ""}`}

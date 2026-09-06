@@ -68,6 +68,8 @@
     "inputOff": "Tắt đầu vào"
   },
   "rail": {
-    "label": "Chế độ và thư viện"
+    "label": "Chế độ và thư viện",
+    "coachReady": "Sẵn sàng",
+    "coachInSession": "Đang trong buổi tập"
   }
 }

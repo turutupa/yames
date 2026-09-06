@@ -68,6 +68,8 @@
     "inputOff": "Entrée coupée"
   },
   "rail": {
-    "label": "Modes et bibliothèque"
+    "label": "Modes et bibliothèque",
+    "coachReady": "Prêt",
+    "coachInSession": "En session"
   }
 }

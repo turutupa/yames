@@ -68,6 +68,8 @@
     "inputOff": "Entrada apagada"
   },
   "rail": {
-    "label": "Modos y biblioteca"
+    "label": "Modos y biblioteca",
+    "coachReady": "Listo",
+    "coachInSession": "En sesión"
   }
 }

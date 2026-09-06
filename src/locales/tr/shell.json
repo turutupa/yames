@@ -68,6 +68,8 @@
     "inputOff": "Giriş kapalı"
   },
   "rail": {
-    "label": "Modlar ve kitaplık"
+    "label": "Modlar ve kitaplık",
+    "coachReady": "Hazır",
+    "coachInSession": "Seansta"
   }
 }
