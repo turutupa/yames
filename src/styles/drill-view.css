@@ -11,12 +11,18 @@
   padding: 26px 4px 80px;
 }
 
-.drill-current {
+/* The live readout, which exists only while a run does. It used to head the
+   screen at rest as a 5rem tempo over four dead circles, above the sentence
+   that is supposed to be this screen's subject — a readout of a number the
+   plan line already states. Now it is a strip, and it appears when there is
+   something to read: the tempo the ramp has reached, the beat inside the bar,
+   and where in the plan that bar falls. */
+.drill-live {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 16px 0 0px;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 2px 0 4px;
 }
 
 .drill-current-bpm {
@@ -47,14 +53,13 @@
 
 .drill-beat-dots {
   display: flex;
-  gap: 12px;
-  justify-content: center;
-  margin-top: 6px;
+  gap: 10px;
+  align-items: center;
 }
 
 .drill-dot {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
   border: 2px solid rgba(255, 255, 255, 0.15);
@@ -110,8 +115,6 @@
 .drill-current-step {
   font-size: 0.8rem;
   color: var(--text-secondary);
-  margin-top: 4px;
-  margin-bottom: 12px;
 }
 
 .drill-completed {
@@ -121,22 +124,16 @@
   margin-top: 2px;
 }
 
-/* Beat visualization in drill — same height as config */
-.drill-beat-section {
-  margin: 0;
-  min-height: 220px;
-  display: flex;
-  align-items: center;
-}
-
-/* Progress bar */
-/* Summary line */
-.drill-summary {
-  text-align: center;
-  font-size: 0.75rem;
+/* What the plan adds up to, right-aligned under the mode selector as drawn:
+   how many steps, how many bars of playing that is, and roughly how long it
+   will take. It used to sit under the plan and repeat the beat count and the
+   repeat count, both of which the sentence above now says in words. */
+.drill-run-stats {
+  font-size: 0.78rem;
+  font-weight: 600;
   color: var(--text-muted);
-  margin-bottom: 0px;
-  margin-top: 6px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 /* Idle empty state (O8) — one line explaining the selected mode, shown only
@@ -197,13 +194,44 @@
   color: var(--text-muted);
 }
 
+/* Two swatches rather than a sentence: the cells carry two states and the
+   caption could not say which was which. The sentence it replaced is the
+   legend's tooltip now, so the explanation of how the picture is built is
+   still one hover away. */
 .drill-climb-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
   font-size: 0.7rem;
   font-weight: 600;
   color: var(--text-tertiary);
   transition:
     opacity 0.3s ease,
     color 0.3s ease;
+}
+
+.drill-climb-key {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.drill-climb-swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* The same two fills the cells use, so the key is literally a sample. */
+.drill-climb-swatch.done {
+  background: color-mix(in srgb, var(--accent) 55%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.drill-climb-swatch.plan {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
 }
 
 /* The fallback, stated on purpose. Nine steps of twelve bars want ~830px and
@@ -292,9 +320,14 @@
      fractional device-pixel ratio, so "1px" became 0.67 of a physical pixel
      and the whole plan read as almost-empty space — the shape of the climb
      was there and you could not see it. A faint fill carries the shape; the
-     border sharpens its edge. */
-  background: color-mix(in srgb, var(--text-primary) 7%, transparent);
-  border: 1px solid color-mix(in srgb, var(--text-primary) 16%, transparent);
+     border sharpens its edge.
+
+     Both are mixed from the accent rather than from the ink, because a
+     staircase of grey boxes reads as furniture. This is tonight's plan, and
+     it belongs in the same colour as the bars you will have played by the
+     end of it — just far enough back to be clearly the outline. */
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
   opacity: 1;
   box-shadow: none;
   transition:
@@ -413,19 +446,15 @@
 .drill-view[data-highlight] .drill-climb-legend {
   opacity: 0.3;
 }
-.drill-view[data-highlight] .drill-dot {
-  opacity: 0.15;
-}
 
-/* Beats spotlight: highlight the beat dots */
-.drill-view[data-highlight="beats"] .drill-dot {
-  opacity: 1;
-  background: var(--accent);
-  border-color: var(--accent);
-  box-shadow:
-    0 0 12px var(--accent-glow),
-    0 0 24px var(--accent-glow);
-  transform: scale(1.2);
+/* Beats spotlight. It used to light the beat dots, which only exist while a
+   run is going — and the spotlight only exists while one is not, so it was
+   pointing at something that was never on screen at the same time. The plan's
+   second line states the beat count in words, so it points there instead. */
+.drill-view[data-highlight="beats"] .drill-plan-detail-token {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: var(--accent-subtle);
 }
 
 /* Repeats spotlight: the first column is exactly the thing the stepper
@@ -727,13 +756,65 @@
    there — click a phrase and the settings behind it appear — but they stop
    being the first thing on the screen (UI_DECISIONS U3.1). */
 
+.drill-plan-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
 .drill-plan {
   display: flex;
   align-items: baseline;
-  justify-content: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
   gap: 2px;
-  margin-bottom: 14px;
+}
+
+/* The quiet line under the sentence: what one bar of this drill sounds like,
+   as opposed to the shape the tempo traces. Only the beat count is a control
+   — the subdivision is fixed at 1 for the whole of a ramp by the engine, and
+   the click is changed from the header chip that is already on this screen. */
+.drill-plan-detail {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+}
+
+.drill-plan-detail-token {
+  padding: 1px 2px 3px;
+  border: none;
+  border-bottom: 1px dotted color-mix(in srgb, var(--text-primary) 20%, transparent);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.drill-plan-detail-token:hover {
+  color: var(--text-secondary);
+  border-bottom-color: var(--text-tertiary);
+}
+
+.drill-plan-detail-token.open {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.drill-plan-detail-fact {
+  color: var(--text-muted);
+}
+
+.drill-plan-detail-sep {
+  color: var(--text-faint);
 }
 
 /* The token is a phrase with an underline, not a button with a box. A row of
@@ -769,16 +850,19 @@
   color: var(--accent);
 }
 
+/* Display type, and the size is the point: the plan is the subject of this
+   screen, and at 2rem it was reading as a caption under the tempo block that
+   used to head the stage. The mockup sets it at 38px. */
 .drill-plan-value {
-  font-size: 2rem;
+  font-size: 2.4rem;
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1.05;
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
 }
 
 .drill-plan-down {
-  font-size: 1.35rem;
+  font-size: 1.6rem;
   color: var(--text-tertiary);
 }
 
@@ -798,6 +882,8 @@
 
 .drill-plan-arrow {
   align-self: center;
+  width: 20px;
+  height: 20px;
   color: var(--text-muted);
 }
 
@@ -847,9 +933,8 @@
   width: 100%;
 }
 
-.drill-plan,
-.drill-current {
-  align-items: flex-start;
+.drill-plan {
+  align-items: baseline;
   justify-content: flex-start;
 }
 
@@ -900,14 +985,12 @@
   opacity: 0.6;
 }
 
-.drill-summary {
-  text-align: left;
-}
-
 /* The current tempo is the drill's readout, and it was smaller than the
-   preset name in the rail. */
+   preset name in the rail. It is horizontal now rather than a stacked block,
+   so it does not need the full 5rem to carry across a room — the number sits
+   on the same line as the beat it belongs to. */
 .drill-current-bpm {
-  font-size: 5rem;
+  font-size: 2.75rem;
   line-height: 1;
 }
 
@@ -946,7 +1029,7 @@
   }
 
   .drill-current-bpm {
-    font-size: 3.25rem;
+    font-size: 2rem;
   }
 
   .drill-plan {
@@ -954,7 +1037,15 @@
   }
 
   .drill-plan-value {
-    font-size: 1.2rem;
+    font-size: 1.5rem;
+  }
+
+  /* The head wraps here, and a right-aligned column under a left-aligned
+     sentence reads as two unrelated things. Once it is on its own row it
+     lines up with everything else. */
+  .drill-stage-meta {
+    align-items: flex-start;
+    width: 100%;
   }
 }
 
@@ -980,10 +1071,30 @@
 
 .drill-stage-head {
   display: flex;
-  align-items: center;
-  gap: 20px;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
   flex-wrap: wrap;
-  margin-bottom: 10px;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.drill-stage-plan {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* The mode and the run's size, stacked at the far edge of the stage. They are
+   what you check before pressing Start and never touch again mid-run, which
+   is why the mockup puts them opposite the sentence rather than in it. */
+.drill-stage-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  padding-bottom: 2px;
 }
 
 .drill-modes {

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { AppState, BeatEvent } from "../../types";
 import { configureSpeedRamp, startSpeedRampFrom, onRampStep } from "../../ipc";
+import { SOUND_TYPES } from "../../constants/metronome";
 import { DrillPlanLine, type PlanField } from "./DrillPlanLine";
 import { DrillClimb } from "./DrillClimb";
 import "../../styles/drill-view.css";
@@ -241,90 +242,84 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
   const isDownbeat = currentBeat?.isDownbeat ?? false;
   const isWarmingUp = ramp.active && ramp.warmupCount < ramp.warmupBeats;
   const warmupRemaining = ramp.warmupBeats - ramp.warmupCount;
+  // The ramp plays the global click, so the plan can state which one it is.
+  const soundName = t(
+    `sound.${SOUND_TYPES.find((s) => s.id === state.soundType)?.id ?? "click"}`,
+  );
+  // Every bar the drill will ask for — the size of the exercise in the unit a
+  // player actually counts in, and exactly the number of cells the climb draws.
+  const totalBars = steps.length * barsPerStep;
+  // The readout only exists while there is something to read. At rest it was a
+  // 5rem "80" over four dead circles above the sentence that is supposed to be
+  // this screen's subject, and every number in it was already on the page.
+  const showLive = ramp.active || ramp.completed;
 
   return (
     <div className="drill-view" data-highlight={!ramp.active ? highlightMode || undefined : undefined} data-animations={animations ? undefined : "off"} data-active={ramp.active ? "" : undefined}>
-      <div className="drill-current view-stagger-item" style={{ animationDelay: '0ms' }}>
-        {isWarmingUp ? (
-          <>
-            <span className="drill-warmup-label">{t("drill.startingIn")}</span>
-            <span className="drill-current-bpm drill-warmup-number">{warmupRemaining}</span>
-          </>
-        ) : (
-          <>
-            <span className="drill-current-bpm">{ramp.active ? ramp.currentBpm : startBpm}</span>
-            <span className="drill-current-label">BPM</span>
-          </>
-        )}
-        {/* Beat dots — hidden during warmup countdown */}
-        <div className="drill-beat-dots" style={{ visibility: isWarmingUp ? 'hidden' : 'visible' }}>
-          {Array.from({ length: beatsPerBar }, (_, beatIdx) => {
-            const isBeatActive = ramp.active && !isWarmingUp && activeBeat === beatIdx && isDownbeat;
-            const isAccent = beatIdx === 0;
-            return (
-              <div
-                key={beatIdx}
-                className={`drill-dot ${isBeatActive ? "active" : ""} ${isAccent && isBeatActive ? "accent" : ""}`}
-              />
-            );
-          })}
-          {ghostDots > 0 && Array.from({ length: ghostDots }, (_, i) => (
-            <div key={`ghost-dot-${i}`} className="drill-dot exiting" />
-          ))}
-        </div>
-        <span className="drill-current-step" style={{ visibility: (ramp.active && !isWarmingUp) || ramp.completed ? "visible" : "hidden" }}>
-          {ramp.completed
-            ? t("drill.finished")
-            : ramp.active
-              ? t("drill.stepBar", { step: ramp.currentStep + 1, bar: ramp.barsInStep + 1, bars: barsPerStep })
-              : "\u00A0"}
-        </span>
-      </div>
+      {/* The plan, and the numbers it adds up to, on one line: the sentence at
+          the left, the mode and the run's size at the right, as drawn. The
+          modes moved off the label row because they belong to the plan rather
+          than to the word "THE PLAN".
 
-      {/* `data-hint` anchors the `drill-first-open` hint (O7) — the card is
+          `data-hint` anchors the `drill-first-open` hint (O7) — the card is
           rendered by MainWindow, next to the controls the copy talks about. */}
-      <div className="drill-stage-head">
-        <span className="stage-label">{t("drill.planLabel")}</span>
-        <div className="drill-modes">
-          <button
-            className={`toggle-btn ${mode === "linear" ? "active" : ""}`}
-            onClick={() => { setMode("linear"); saveWith({ mode: "linear" }); }}
-          >
-            {t("drill.modeLinear")}
-          </button>
-          <button
-            className={`toggle-btn ${mode === "zigzag" ? "active" : ""}`}
-            onClick={() => { setMode("zigzag"); saveWith({ mode: "zigzag" }); }}
-          >
-            {t("drill.modeZigzag")}
-          </button>
-          {/* Adaptive is the one mode whose behaviour depends on the audio
-              input, so it says so on its face (UI_DECISIONS U3.4). */}
-          <button
-            className={`toggle-btn ${mode === "adaptive" ? "active" : ""}`}
-            onClick={() => { setMode("adaptive"); setTargetBpm(300); saveWith({ mode: "adaptive", targetBpm: 300 }); }}
-          >
-            {t("drill.modeAdaptive")}
-            <span className="drill-mode-badge">{t("drill.listensBadge")}</span>
-          </button>
+      <div className="drill-stage-head view-stagger-item" style={{ animationDelay: '0ms' }}>
+        <div className="drill-stage-plan">
+          <span className="stage-label">{t("drill.planLabel")}</span>
+          <DrillPlanLine
+            startBpm={startBpm}
+            targetBpm={targetBpm}
+            increment={increment}
+            decrement={decrement}
+            beatsPerBar={beatsPerBar}
+            barsPerStep={barsPerStep}
+            mode={mode}
+            soundName={soundName}
+            openField={openField}
+            onOpenField={(field) => {
+              setOpenField(field);
+              setUserToggledConfig(true);
+              setConfigCollapsed(field === null);
+            }}
+          />
+        </div>
+
+        <div className="drill-stage-meta">
+          <div className="drill-modes">
+            <button
+              className={`toggle-btn ${mode === "linear" ? "active" : ""}`}
+              onClick={() => { setMode("linear"); saveWith({ mode: "linear" }); }}
+            >
+              {t("drill.modeLinear")}
+            </button>
+            <button
+              className={`toggle-btn ${mode === "zigzag" ? "active" : ""}`}
+              onClick={() => { setMode("zigzag"); saveWith({ mode: "zigzag" }); }}
+            >
+              {t("drill.modeZigzag")}
+            </button>
+            {/* Adaptive is the one mode whose behaviour depends on the audio
+                input, so it says so on its face (UI_DECISIONS U3.4). */}
+            <button
+              className={`toggle-btn ${mode === "adaptive" ? "active" : ""}`}
+              onClick={() => { setMode("adaptive"); setTargetBpm(300); saveWith({ mode: "adaptive", targetBpm: 300 }); }}
+            >
+              {t("drill.modeAdaptive")}
+              <span className="drill-mode-badge">{t("drill.listensBadge")}</span>
+            </button>
+          </div>
+
+          <div className="drill-run-stats">
+            {t("drill.runStats", {
+              steps: steps.length,
+              bars: totalBars,
+              time: ramp.active
+                ? t("drill.timeRemaining", { time: formatTime(liveRemaining) })
+                : t("drill.aboutTime", { time: formatTime(totalTimeSeconds) }),
+            })}
+          </div>
         </div>
       </div>
-
-      <DrillPlanLine
-        startBpm={startBpm}
-        targetBpm={targetBpm}
-        increment={increment}
-        decrement={decrement}
-        beatsPerBar={beatsPerBar}
-        barsPerStep={barsPerStep}
-        mode={mode}
-        openField={openField}
-        onOpenField={(field) => {
-          setOpenField(field);
-          setUserToggledConfig(true);
-          setConfigCollapsed(field === null);
-        }}
-      />
 
       <div data-hint="drill-first-open" className={`drill-config view-stagger-item ${configCollapsed ? "collapsed" : ""}`} style={{ animationDelay: '30ms' }}>
         <button
@@ -491,16 +486,47 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
         </div>
       )}
 
-      <div className="drill-summary view-stagger-item" style={{ animationDelay: '310ms' }}>
-        {t("drill.summary", {
-          beats: beatsPerBar,
-          steps: steps.length,
-          repeats: barsPerStep,
-          time: ramp.active
-            ? t("drill.timeRemaining", { time: formatTime(liveRemaining) })
-            : formatTime(totalTimeSeconds),
-        })}
-      </div>
+      {/* The live readout, next to the picture it is narrating. Everything
+          the old header block carried is here — tempo, the count-in, the
+          beat dots and the step/bar position — but only while a run is
+          actually producing those numbers. It takes the row the idle hint
+          gives up on start, so pressing Start does not shove the climb. */}
+      {showLive && (
+        <div className="drill-live" data-testid="drill-live">
+          {isWarmingUp ? (
+            <>
+              <span className="drill-warmup-label">{t("drill.startingIn")}</span>
+              <span className="drill-current-bpm drill-warmup-number">{warmupRemaining}</span>
+            </>
+          ) : (
+            <>
+              <span className="drill-current-bpm">{ramp.active ? ramp.currentBpm : startBpm}</span>
+              <span className="drill-current-label">{t("drill.bpmUnit")}</span>
+            </>
+          )}
+          {/* Beat dots — hidden during warmup countdown */}
+          <div className="drill-beat-dots" style={{ visibility: isWarmingUp ? 'hidden' : 'visible' }}>
+            {Array.from({ length: beatsPerBar }, (_, beatIdx) => {
+              const isBeatActive = ramp.active && !isWarmingUp && activeBeat === beatIdx && isDownbeat;
+              const isAccent = beatIdx === 0;
+              return (
+                <div
+                  key={beatIdx}
+                  className={`drill-dot ${isBeatActive ? "active" : ""} ${isAccent && isBeatActive ? "accent" : ""}`}
+                />
+              );
+            })}
+            {ghostDots > 0 && Array.from({ length: ghostDots }, (_, i) => (
+              <div key={`ghost-dot-${i}`} className="drill-dot exiting" />
+            ))}
+          </div>
+          <span className="drill-current-step">
+            {ramp.completed
+              ? t("drill.finished")
+              : t("drill.stepBar", { step: ramp.currentStep + 1, bar: ramp.barsInStep + 1, bars: barsPerStep })}
+          </span>
+        </div>
+      )}
 
       <DrillClimb
         steps={steps}

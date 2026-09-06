@@ -138,9 +138,15 @@ describe("DrillClimb", () => {
     expect(columns(container)[2][1]).toBeCloseTo(0.5, 4);
   });
 
-  it("names the picture and says how to read it", () => {
-    render(<DrillClimb {...base} />);
+  it("names the picture and keys the two states a cell can be in", () => {
+    const { container } = render(<DrillClimb {...base} />);
     expect(screen.getByText("The climb")).toBeInTheDocument();
-    expect(screen.getByText(/one cell per bar/i)).toBeInTheDocument();
+    expect(screen.getByText("Tonight")).toBeInTheDocument();
+    expect(screen.getByText("Played")).toBeInTheDocument();
+    // The sentence the swatches replaced still explains how the picture is
+    // built; it moved to the legend's tooltip rather than being dropped.
+    expect(
+      container.querySelector(".drill-climb-legend")?.getAttribute("title"),
+    ).toMatch(/one cell per bar/i);
   });
 });
