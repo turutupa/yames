@@ -680,3 +680,53 @@
   text-transform: uppercase;
   color: var(--text-muted);
 }
+
+/* =================== The drill stage, anchored ===================
+   Same treatment as the metronome (UI_DECISIONS U1.3): a fixed offset from
+   the rail rather than a centred column adrift in a wide window. The climb
+   gets the width it has always wanted — it was drawn below the fold, under a
+   settings form that reopened itself every time a run stopped. */
+
+.main-content[data-view="drill"] > .view-transition-wrapper {
+  align-self: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 1120px;
+  padding-left: 24px;
+}
+
+.drill-view {
+  /* The 80px was clearance for a play button that floated over this screen.
+     The transport is docked now and takes its own space. */
+  padding: 18px 4px 16px;
+  width: 100%;
+}
+
+.drill-plan,
+.drill-current {
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.drill-config {
+  align-self: flex-start;
+  max-width: 560px;
+}
+
+.drill-grid-wrapper {
+  align-items: flex-start;
+  /* The negative margin nudged a centred grid back under a centred heading.
+     Anchored left there is nothing to compensate for. */
+  margin-left: 0;
+}
+
+.drill-summary {
+  text-align: left;
+}
+
+/* The current tempo is the drill's readout, and it was smaller than the
+   preset name in the rail. */
+.drill-current-bpm {
+  font-size: 5rem;
+  line-height: 1;
+}

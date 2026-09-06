@@ -132,6 +132,10 @@ export function MetronomeView({
           >
             +
           </button>
+          {/* The marking belongs with the number it describes. It is also
+              highlighted on the ruler below, which is a position, not a
+              label — showing the word twice was just noise. */}
+          <span className="tempo-marking">{marking}</span>
         </div>
         <div className="bpm-slider-wrap view-stagger-item" style={{ animationDelay: '40ms' }}>
           <input
@@ -158,7 +162,6 @@ export function MetronomeView({
               </span>
             ))}
           </div>
-          <span className="tempo-marking">{marking}</span>
         </div>
       </section>
 

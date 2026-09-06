@@ -1273,3 +1273,84 @@
   width: 44px;
   height: 44px;
 }
+
+/* =================== The stage, anchored (UI_DECISIONS U1.3) ===============
+   Everything on this screen was a centred column with its own max-width, so
+   on a wide window the tempo — the one thing you read from across the room —
+   floated in the middle of a large empty field, and moved whenever anything
+   opened beside it.
+
+   It now sits at a fixed offset from the rail and stays there. The measure is
+   capped so the controls do not stretch into a smear on a 2000px monitor. */
+
+.main-content[data-view="beat"] > .view-transition-wrapper {
+  align-self: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 1120px;
+  padding-left: 24px;
+}
+
+.main-content[data-view="beat"] .bpm-section,
+.main-content[data-view="beat"] .meter-presets {
+  align-items: flex-start;
+}
+
+.main-content[data-view="beat"] .tap-btn {
+  align-self: flex-start;
+}
+
+.main-content[data-view="beat"] .sub-row,
+.main-content[data-view="beat"] .meter-presets,
+.main-content[data-view="beat"] .time-sig-row,
+.main-content[data-view="beat"] .bpm-slider-wrap {
+  margin-left: 0;
+  margin-right: 0;
+  justify-content: flex-start;
+}
+
+/* The rows were capped for a centred column. Anchored left they can breathe,
+   and the tempo ruler in particular needs the width: its markings are laid
+   out in proportion, so a short ruler crowds Moderato into Allegro. */
+.main-content[data-view="beat"] .sub-row {
+  max-width: 720px;
+}
+
+.main-content[data-view="beat"] .meter-presets,
+.main-content[data-view="beat"] .time-sig-row {
+  max-width: 720px;
+}
+
+.main-content[data-view="beat"] .bpm-slider-wrap {
+  max-width: 720px;
+}
+
+.main-content[data-view="beat"] .beat-dots-row {
+  justify-content: flex-start;
+}
+
+/* The tempo is the screen. 64px was a number on a page; this is a readout. */
+.main-content[data-view="beat"] .bpm-input {
+  font-size: 6.5rem;
+  width: auto;
+  min-width: 3ch;
+  text-align: left;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.main-content[data-view="beat"] .bpm-display {
+  gap: 22px;
+}
+
+/* The marking reads as a unit label next to the number rather than a caption
+   under the ruler, where it duplicated the ruler's own highlight. */
+.main-content[data-view="beat"] .tempo-marking {
+  align-self: flex-end;
+  padding-bottom: 0.9rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--accent);
+  opacity: 1;
+}

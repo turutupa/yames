@@ -16,7 +16,10 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
   const { t } = useTranslation();
   const ramp = state.speedRamp;
   const [highlightMode, setHighlightMode] = useState<"beats" | "repeats" | "startBpm" | "targetBpm" | null>(null);
-  const [configCollapsed, setConfigCollapsed] = useState(false);
+  // Collapsed by default: the plan line says what the drill is, and the
+  // climb below is the thing worth looking at. The form opens when asked
+  // for — a phrase in the plan line, or the chevron (UI_DECISIONS U3.1).
+  const [configCollapsed, setConfigCollapsed] = useState(true);
   const [openField, setOpenField] = useState<PlanField>(null);
   const [userToggledConfig, setUserToggledConfig] = useState(false);
   const [startBpm, setStartBpm] = useState(ramp.startBpm);
@@ -56,10 +59,12 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
     }
   }, [ramp.startBpm, ramp.targetBpm, ramp.increment, ramp.decrement, ramp.barsPerStep, ramp.beatsPerBar, ramp.mode, ramp.cyclic, ramp.warmupBeats, ramp.active]);
 
-  // Auto-collapse config when playing, auto-expand on stop
+  // Collapse the config when a run starts. It does NOT re-open on stop: the
+  // form used to spring back and push the step grid off the bottom of the
+  // window, which is where the grid spent most of its life.
   useEffect(() => {
     if (!autoCollapse || userToggledConfig) return;
-    setConfigCollapsed(ramp.active);
+    if (ramp.active) setConfigCollapsed(true);
   }, [ramp.active, userToggledConfig, autoCollapse]);
 
   // Reset manual override when playback stops so next play auto-collapses again
