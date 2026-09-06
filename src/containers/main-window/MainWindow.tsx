@@ -880,8 +880,12 @@ export function MainWindow() {
         onDoubleClick={(e) => {
           if (view !== "beat" && view !== "drill") return;
           if (
+            // The context bar and the transport live inside this region now,
+            // so a double-click on either must not fall through to Zen — the
+            // header is also the window's drag area. `.tab-bar` is gone with
+            // the top strip it named.
             (e.target as HTMLElement).closest(
-              "button, input, select, a, .tab-bar, .drill-grid-cell",
+              "button, input, select, a, .main-header, .transport, .drill-grid-cell",
             )
           )
             return;

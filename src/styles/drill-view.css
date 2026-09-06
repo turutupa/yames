@@ -587,67 +587,6 @@
   border-color: var(--accent);
 }
 
-/* Tab bar */
-.tab-bar {
-  display: flex;
-  gap: 4px;
-  padding: 3px;
-  background: var(--surface-2, rgba(255, 255, 255, 0.04));
-  border-radius: 8px;
-  flex: 1;
-  max-width: 480px;
-  margin: 0 auto;
-}
-
-/* True-center tabs when window is wide enough */
-@media (min-width: 900px) {
-  .tab-bar {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    flex: none;
-    width: min(50%, 400px);
-    margin: 0;
-  }
-}
-
-.tab-btn {
-  flex: 1 1 0;
-  min-width: 0;
-  padding: 8px 0;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  background: transparent;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-}
-
-.tab-btn:hover {
-  color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.tab-btn.active {
-  color: var(--accent-text, #fff);
-  background: var(--accent);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-@media (max-width: 679px) {
-  .tab-label {
-    display: none;
-  }
-}
-
 /* Disable all drill animations when view animations are off */
 .drill-view[data-animations="off"] .drill-grid-row,
 .drill-view[data-animations="off"] .drill-grid-cell,

@@ -80,8 +80,6 @@ kbd {
 [data-theme-group="light"] { --graph-grid: rgba(0, 0, 0, 0.12); --graph-line: rgba(0, 0, 0, 0.3); }
 [data-theme-group="light"] button { color: var(--text-primary); }
 [data-theme-group="light"] .main-header h1 { color: var(--text-primary); }
-[data-theme-group="light"] .tab-btn { color: var(--text-secondary); }
-[data-theme-group="light"] .tab-btn.active { background: var(--accent); color: var(--accent-text); }
 [data-theme-group="light"] .play-btn { background: var(--accent); color: var(--accent-text); box-shadow: none; }
 [data-theme-group="light"] .play-btn:hover { filter: brightness(1.1); }
 [data-theme-group="light"] .floating-play-btn { background: var(--accent); color: var(--accent-text); box-shadow: 0 4px 16px var(--accent-glow); }

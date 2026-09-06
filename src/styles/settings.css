@@ -2302,3 +2302,51 @@
   height: 13px;
   cursor: pointer;
 }
+
+/* =================== Settings in the new shell (UI_REVAMP C3) ==============
+   Settings is a sheet inside the shell rather than a fourth mode (U1.5), and
+   it reads better as a stack of panels than as one long scroll separated by
+   hairlines. Surfaces only — every control inside the sections keeps exactly
+   the behaviour and markup it had (U7.1). */
+
+.settings-section,
+.hotkeys-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+}
+
+/* The separator did the job the panels now do. */
+.settings-section + .settings-section,
+.settings-section + .hotkeys-section,
+.hotkeys-section + .settings-section {
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+  margin-top: 14px;
+}
+
+.settings-section:first-child {
+  margin-top: 14px;
+}
+
+/* A section heading inside a panel does not need to shout as loudly as one
+   floating in a scroll. */
+.settings-section h2,
+.hotkeys-section h2 {
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  color: var(--text-tertiary);
+}
+
+/* Rows gain their own hairline so a long section stays scannable. */
+.settings-section .setting-row + .setting-row,
+.hotkeys-section .setting-row + .setting-row {
+  border-top: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+}
+
+/* Settings scrolls; the sheet needs air under the last panel so the transport
+   is not sitting on it. */
+.main-content[data-view="settings"] .view-transition-wrapper {
+  padding-bottom: 24px;
+}
