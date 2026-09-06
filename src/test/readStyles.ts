@@ -14,6 +14,13 @@ const STYLES = path.resolve(process.cwd(), "src/styles");
  * Comments are stripped: these tests assert rules, not the prose explaining
  * them, and more than one of them looks for a class name that also appears in
  * a comment about its removal.
+ *
+ * Line endings are normalised to LF. The callers assert on fragments that
+ * carry their own newline and indentation, and the repository has no
+ * `.gitattributes`, so a clone made with Git for Windows' default
+ * `core.autocrlf=true` checks these files out as CRLF and every one of those
+ * assertions fails. The tests are about which rules exist, not about how a
+ * working copy happens to store newlines.
  */
 export function readStylesheet(file = "main-window.css"): string {
   const seen = new Set<string>();
@@ -27,7 +34,9 @@ export function readStylesheet(file = "main-window.css"): string {
       .replace(/@import\s+["']\.\/([^"']+)["'];?/g, (_, imported: string) => read(imported));
   }
 
-  return read(file).replace(/\/\*[\s\S]*?\*\//g, "");
+  return read(file)
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\r\n/g, "\n");
 }
 
 /** The declarations of the first rule whose selector block starts with `selector`. */
