@@ -59,5 +59,8 @@
     "elapsed": "Trascorso",
     "listening": "In ascolto",
     "inputOff": "Ingresso spento"
+  },
+  "rail": {
+    "label": "Modalità e libreria"
   }
 }

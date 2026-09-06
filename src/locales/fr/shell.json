@@ -59,5 +59,8 @@
     "elapsed": "Écoulé",
     "listening": "À l'écoute",
     "inputOff": "Entrée coupée"
+  },
+  "rail": {
+    "label": "Modes et bibliothèque"
   }
 }

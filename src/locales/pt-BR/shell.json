@@ -59,5 +59,8 @@
     "elapsed": "Decorrido",
     "listening": "Ouvindo",
     "inputOff": "Entrada desligada"
+  },
+  "rail": {
+    "label": "Modos e biblioteca"
   }
 }

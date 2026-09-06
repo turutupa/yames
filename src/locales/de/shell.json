@@ -59,5 +59,8 @@
     "elapsed": "Vergangen",
     "listening": "Hört zu",
     "inputOff": "Eingang aus"
+  },
+  "rail": {
+    "label": "Modi und Bibliothek"
   }
 }

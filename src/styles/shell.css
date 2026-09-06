@@ -916,7 +916,11 @@
   padding-bottom: 0;
 }
 
-.main-content[data-view="settings"] > * {
+/* The settings column is centred and capped — but the context bar and the
+   transport are shell furniture and span the region, so they are excluded.
+   Before the header moved into the content region this rule could not reach
+   it; now it can. */
+.main-content[data-view="settings"] > *:not(.main-header):not(.transport) {
   max-width: 680px;
   width: 100%;
   margin-left: auto;
@@ -1274,4 +1278,230 @@
   align-items: center;
   min-width: 0;
   flex: 1;
+}
+
+/* =================== Playing: the chrome recedes =================== */
+/* Three rungs of one ladder, not two modes (UI_DECISIONS U6.2): at rest
+   everything is present; while the click runs the furniture dims and the beat
+   is what is left; Zen removes the furniture entirely.
+
+   Dimmed, never gone, and it comes back the moment you reach for it — this is
+   a nudge toward the dots, not a mode you have to escape. The transport keeps
+   full contrast throughout: stopping is the one thing you must always be able
+   to find. */
+
+.main-window[data-playing="true"] .rail,
+.main-window[data-playing="true"] .main-header {
+  opacity: 0.55;
+  transition: opacity 0.45s ease;
+}
+
+.main-window[data-playing="true"] .rail:hover,
+.main-window[data-playing="true"] .rail:focus-within,
+.main-window[data-playing="true"] .main-header:hover,
+.main-window[data-playing="true"] .main-header:focus-within {
+  opacity: 1;
+  transition: opacity 0.12s ease;
+}
+
+.rail,
+.main-header {
+  transition: opacity 0.25s ease;
+}
+
+/* Reduced motion keeps the dimming — it is a contrast change, not movement —
+   but drops the fade. */
+@media (prefers-reduced-motion: reduce) {
+  .main-window[data-playing="true"] .rail,
+  .main-window[data-playing="true"] .main-header,
+  .rail,
+  .main-header {
+    transition: none;
+  }
+}
+
+/* =================== Narrow windows =================== */
+/* The window opens at 800×900 and may be dragged down to 480×780. A 252px
+   rail and a 380px dock are 632px of furniture — at the default size that
+   leaves the stage 168px, which is not a metronome. Two breakpoints fix it,
+   both chosen from the arithmetic rather than from a round number. */
+
+/* Under 1160px there is not room for rail + dock + a usable stage
+   (252 + 380 + 528). The coach stops displacing the stage and floats over
+   it instead: the tempo readout keeps its place, which is the same promise
+   docking made when there was room for both. */
+@media (max-width: 1159px) {
+  .coach-card.coach-card-open {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    box-shadow: -18px 0 48px -20px rgba(0, 0, 0, 0.55);
+  }
+}
+
+@media (max-width: 719px) {
+  .coach-card.coach-card-open {
+    width: 320px;
+    min-width: 320px;
+  }
+}
+
+/* Under 620px the rail itself is the problem: 252 of 480 is more than half
+   the window. It becomes a strip of icons, and opening the library floats it
+   back out to full width over the stage rather than squeezing it. */
+@media (max-width: 619px) {
+  .rail {
+    width: 68px;
+    min-width: 68px;
+  }
+
+  .rail-mode,
+  .rail-action {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+    border-left-width: 0;
+  }
+
+  .rail-mode.active,
+  .rail-action.active {
+    border-left-width: 0;
+    box-shadow: inset 2px 0 0 var(--accent);
+  }
+
+  .rail-action.active {
+    box-shadow: inset 2px 0 0 var(--accent-2);
+  }
+
+  .rail-mode-label,
+  .rail-action-label,
+  .rail-library,
+  .rail-action-dot {
+    display: none;
+  }
+
+  /* Opening the library gives the rail its width back, over the stage. */
+  .rail[data-library-open] {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 40;
+    width: 252px;
+    min-width: 252px;
+    box-shadow: 18px 0 48px -20px rgba(0, 0, 0, 0.55);
+  }
+
+  .rail[data-library-open] .rail-mode,
+  .rail[data-library-open] .rail-action {
+    justify-content: flex-start;
+    padding-left: 10px;
+    padding-right: 12px;
+    border-left-width: 2px;
+    box-shadow: none;
+  }
+
+  .rail[data-library-open] .rail-mode-label,
+  .rail[data-library-open] .rail-action-label,
+  .rail[data-library-open] .rail-library,
+  .rail[data-library-open] .rail-action-dot {
+    display: revert;
+  }
+
+  .rail[data-library-open] .rail-library {
+    display: flex;
+  }
+}
+
+/* The transport sheds what it can rather than overflowing: the keyboard hint
+   first, then the input chip's label, then the bar and clock. Play and Stop
+   never go — finding how to stop is the one thing that must always work. */
+@media (max-width: 719px) {
+  .transport {
+    gap: 14px;
+    padding: 0 16px;
+  }
+
+  .transport-key {
+    display: none;
+  }
+
+  .transport-readouts {
+    gap: 14px;
+    padding-left: 14px;
+  }
+}
+
+@media (max-width: 559px) {
+  .transport-input span {
+    display: none;
+  }
+
+  .transport-input {
+    padding: 0 10px;
+  }
+}
+
+@media (max-width: 479px) {
+  .transport-readouts {
+    display: none;
+  }
+}
+
+/* =================== The context bar joins the content region ===============
+   It used to float over the whole window — position: absolute, full width,
+   z-index 100 — and every panel compensated with its own top padding (the
+   preset sidebar's 77px, the coach card's 68px margin). With a rail on the
+   left that arrangement breaks outright: the header lies across the rail's
+   mode buttons and swallows their clicks.
+
+   So it stops floating and becomes the first row of the content region. It
+   spans the stage and nothing else; the rail and the coach dock own their own
+   full height; and the window controls, which sit at the window's top-left,
+   now have the rail's top to themselves. */
+
+.main-content {
+  padding: 0 24px;
+}
+
+.main-content > .main-header {
+  position: static;
+  height: 60px;
+  flex-shrink: 0;
+  margin: 0 -24px;
+  padding: 0 16px 0 24px;
+  z-index: 20;
+}
+
+/* The platform paddings reserved room for the window controls while the header
+   ran the full width. It does not any more. */
+.main-window.os-windows .main-content > .main-header,
+.main-window.os-linux .main-content > .main-header {
+  padding-left: 24px;
+  padding-right: 12px;
+}
+
+/* The rail now owns the window's top-left corner, where the controls are
+   drawn — 36px of them on Windows and Linux, the traffic lights on macOS. */
+.rail {
+  padding-top: 42px;
+}
+
+/* …which also means the preset sidebar's own clearance is double-counted. */
+.rail-library .preset-sidebar-header {
+  padding-top: 10px;
+}
+
+/* Nothing overlays the dock any more, so it keeps its own top. */
+.coach-card.coach-card-open {
+  margin: 0;
+}
+
+/* The pill is the closed state of the coach card and renders instead of it,
+   not inside it — so hiding `.coach-card:not(.coach-card-open)` never matched
+   anything. The rail's coach row replaces it, status dot and all. */
+.coach-card-pill {
+  display: none;
 }

@@ -59,5 +59,8 @@
     "elapsed": "Verstreken",
     "listening": "Luistert",
     "inputOff": "Ingang uit"
+  },
+  "rail": {
+    "label": "Modi en bibliotheek"
   }
 }

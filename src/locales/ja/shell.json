@@ -59,5 +59,8 @@
     "elapsed": "経過",
     "listening": "聴いています",
     "inputOff": "入力オフ"
+  },
+  "rail": {
+    "label": "モードとライブラリ"
   }
 }

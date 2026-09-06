@@ -80,7 +80,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
   const playView = view === "beat" || view === "drill" ? view : "beat";
 
   return (
-    <nav className="rail" aria-label={t("nav.metronome")}>
+    <nav className="rail" data-library-open={libraryOpen ? "" : undefined} aria-label={t("rail.label")}>
       <div className="rail-modes">
         {MODES.map((mode) => (
           <button

@@ -59,5 +59,8 @@
     "elapsed": "Elapsed",
     "listening": "Listening",
     "inputOff": "Input off"
+  },
+  "rail": {
+    "label": "Modes and library"
   }
 }

@@ -59,5 +59,8 @@
     "elapsed": "경과",
     "listening": "듣는 중",
     "inputOff": "입력 꺼짐"
+  },
+  "rail": {
+    "label": "모드 및 라이브러리"
   }
 }

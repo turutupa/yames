@@ -59,5 +59,8 @@
     "elapsed": "已用時間",
     "listening": "正在聆聽",
     "inputOff": "輸入已關閉"
+  },
+  "rail": {
+    "label": "模式與資料庫"
   }
 }

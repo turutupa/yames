@@ -792,36 +792,6 @@ export function MainWindow() {
     >
       <ThemeEffects themeId={state.theme} currentBeat={currentBeat} isPlaying={state.isPlaying} />
       {(IS_WINDOWS || IS_LINUX) && <WindowControls />}
-      <MainHeader
-        state={state}
-        view={view}
-        activePreset={activePreset}
-        presetDirty={presetDirty}
-        updateFeedback={updateFeedback}
-        onRenamePreset={(presetId) => {
-          setSidebarOpen(true);
-          setTimeout(() => sidebarRef.current?.triggerRename(presetId), 150);
-        }}
-        onUpdatePreset={handlePresetUpdate}
-        onSavePreset={handlePresetSave}
-        soundOpen={soundOpen}
-        setSoundOpen={setSoundOpen}
-        soundDropdownRef={soundDropdownRef}
-        shareRef={shareRef}
-        shareBtnRef={shareBtnRef}
-        shareOpen={shareOpen}
-        setShareOpen={setShareOpen}
-        shareTooltip={shareTooltip}
-        volumePercent={volumePercent}
-        ttsVolume={coach.ttsVolume}
-        setTtsVolume={coach.setTtsVolume}
-        voiceEnabled={
-          coach.coachBrainTier !== "off" &&
-          coach.coachVoiceMode === "voice" &&
-          !!coach.modelStatus?.voiceReady
-        }
-        onOpenHelp={help.openMenu}
-      />
 
       {onboarding.chipVisible && view !== "settings" && (
         <FinishSetupChip
@@ -918,6 +888,37 @@ export function MainWindow() {
           setIsFullscreen(true);
         }}
       >
+        <MainHeader
+          state={state}
+          view={view}
+          activePreset={activePreset}
+          presetDirty={presetDirty}
+          updateFeedback={updateFeedback}
+          onRenamePreset={(presetId) => {
+            setSidebarOpen(true);
+            setTimeout(() => sidebarRef.current?.triggerRename(presetId), 150);
+          }}
+          onUpdatePreset={handlePresetUpdate}
+          onSavePreset={handlePresetSave}
+          soundOpen={soundOpen}
+          setSoundOpen={setSoundOpen}
+          soundDropdownRef={soundDropdownRef}
+          shareRef={shareRef}
+          shareBtnRef={shareBtnRef}
+          shareOpen={shareOpen}
+          setShareOpen={setShareOpen}
+          shareTooltip={shareTooltip}
+          volumePercent={volumePercent}
+          ttsVolume={coach.ttsVolume}
+          setTtsVolume={coach.setTtsVolume}
+          voiceEnabled={
+            coach.coachBrainTier !== "off" &&
+            coach.coachVoiceMode === "voice" &&
+            !!coach.modelStatus?.voiceReady
+          }
+          onOpenHelp={help.openMenu}
+        />
+
         <ViewTransition viewKey={view} themeId={state.theme} disabled={viewTransitions === "off"} level={viewTransitions} animStyle={animationStyle}>
         {view === "beat" ? (
           <MetronomeView

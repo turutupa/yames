@@ -59,5 +59,8 @@
     "elapsed": "已用时",
     "listening": "正在聆听",
     "inputOff": "输入已关闭"
+  },
+  "rail": {
+    "label": "模式与资料库"
   }
 }

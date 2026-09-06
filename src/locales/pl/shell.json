@@ -59,5 +59,8 @@
     "elapsed": "Upłynęło",
     "listening": "Słucham",
     "inputOff": "Wejście wyłączone"
+  },
+  "rail": {
+    "label": "Tryby i biblioteka"
   }
 }
