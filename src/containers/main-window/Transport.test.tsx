@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { Transport } from "./Transport";
-import { readStylesheet } from "../../test/readStyles";
+import { readStylesheet, ruleBlock } from "../../test/readStyles";
 
 const base = {
   isPlaying: false,
@@ -183,21 +183,44 @@ describe("Transport — what it sheds, and in what order", () => {
     return out.join("\n");
   };
 
-  it("swaps the sentence for the input readout exactly where the context bar drops its chip", () => {
-    // 919 is not a round number chosen here — it is the width at which
-    // `.context-chip-input` disappears, and the comment on that rule says the
-    // transport is what still reports input status. Move one without the
-    // other and there is a band of widths that reports it nowhere.
-    const narrow = at(919);
-    expect(narrow).toContain(".transport-note {\n    display: none;");
-    expect(narrow).toContain(".transport-input-narrow {\n    display: flex;");
-    expect(narrow).toContain(".context-chip-input {\n    display: none;");
+  it("has the input readout in place before the context bar drops its chip", () => {
+    // The context bar sheds `.context-chip-input` at 919 on the stated
+    // grounds that the transport reports the same state. So the transport's
+    // compact readout has to be drawn by then — it arrives at 961, where the
+    // row itself runs out of room for the sentence. Put the swap below the
+    // chip's breakpoint instead and there is a band of widths that reports
+    // the input nowhere.
+    expect(at(961)).toContain(".transport-note {\n    display: none;");
+    expect(at(961)).toContain(".transport-input-narrow {\n    display: flex;");
+    expect(at(919)).toContain(".context-chip-input {\n    display: none;");
   });
 
-  it("never hides the play button or the drill's two switches", () => {
-    // Finding how to stop, and what the run will do, are not things a narrow
-    // window is allowed to take away.
+  it("never hides the play button, at any width", () => {
+    // Finding how to stop is the one thing that must always work.
     expect(css).not.toContain(".transport-play {\n    display: none;");
-    expect(css).not.toContain(".transport-switch {\n    display: none;");
+  });
+
+  it("sheds the readouts before the window reaches its own default size", () => {
+    // The bar needed 610px of stage and the window's default 800 gives it
+    // 546, so this row used to run off the right edge at the size the app
+    // opens at. 779 is where bar and elapsed go, on both screens.
+    expect(at(779)).toContain(".transport-readouts {\n    display: none;");
+  });
+
+  it("gives the drill's switches back to the form rather than squeezing them", () => {
+    // 620-719 is the band where the rail is still 252 wide and the stage is
+    // under 470. The switches are the drill's own settings and the settings
+    // form never stopped having them, so shedding them costs no capability.
+    expect(at(779)).toContain('.transport[data-view="drill"] .transport-drill {\n    display: none;');
+  });
+
+  it("lets nothing in the row wrap or squash instead of shedding", () => {
+    // A bar that answers a narrow window by folding "STARTS AT" onto a second
+    // line has not adapted, it has broken — and it also hides the overflow
+    // from anything measuring it, which is how the first pass at these
+    // breakpoints came out believing the row fitted when it did not.
+    const row = ruleBlock(css, ".transport > *");
+    expect(row).toContain("flex-shrink: 0");
+    expect(row).toContain("white-space: nowrap");
   });
 });

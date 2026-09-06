@@ -107,7 +107,15 @@ export function Transport({
   const anyRunning = isPlaying || speedRampActive;
 
   return (
-    <div className="transport" data-running={anyRunning ? "" : undefined}>
+    <div
+      className="transport"
+      // The drill's bar carries two switches the metronome's does not, so the
+      // two shed differently once the window is narrow. The CSS needs to know
+      // which one it is looking at, and the readouts come before the drill
+      // block — there is no previous-sibling selector to ask with.
+      data-view={view}
+      data-running={anyRunning ? "" : undefined}
+    >
       <button
         className={`transport-play ${anyRunning ? "playing" : ""} ${isPulsing ? "pulse" : ""}`}
         onClick={() => {
