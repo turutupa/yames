@@ -121,9 +121,12 @@ Status key: **decided** · **first release** · **open** · **deferred**
   it was written, so nobody had ever actually decided it belonged. This is
   that decision, taken on purpose. It is not a revert of #40.
 
-- **U2.6 — "Last session" on the metronome screen.** *open (Phase C1).*
-  Drawn on `Main`. It may belong only inside the coach. Decide when C1
-  starts; costs nothing either way.
+- **U2.6 — "Last session" on the metronome screen.** *decided.* It stays on
+  the stage rather than moving into the coach: it is the one line that answers
+  "did I practise yesterday", which is a question you ask before opening
+  anything. Built in C1 as `LastSession`, and it shows only the numbers a
+  saved session actually recorded — the duration is dropped from the line
+  entirely when no segment carried one, rather than estimated.
 
 ---
 
@@ -146,9 +149,12 @@ Status key: **decided** · **first release** · **open** · **deferred**
 - **U3.4 — Adaptive carries a badge saying it listens.** *decided.* It is
   the one mode whose behaviour depends on the audio input being on.
 
-- **U3.5 — What the climb shows mid-run.** *open (Phase C2).* Either the
-  plan filling in, or the achieved path drawn over the plan when adaptive
-  diverges from it. The second is more honest and more work.
+- **U3.5 — What the climb shows mid-run.** *partly decided (Phase C2).* The
+  plan fills in: cells behind the playhead are filled, the rest outlined, and
+  a playhead line stands at the current bar. The achieved path drawn *over*
+  the plan — the more honest and more expensive option — is still not built,
+  and cannot be until a run records where it actually got to. Same blocker as
+  U3.3.
 
 ---
 

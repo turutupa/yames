@@ -241,10 +241,32 @@ survive a rebind and a reset to defaults.
 | B The shell | 3.1, 3.4, 3.6, 3.9, §4 | code landed, **needs eyes** |
 | C1 Metronome | 3.2 | code landed, **needs eyes** |
 | C2 Drill | 3.3 | code landed, **needs eyes** |
-| C3 Settings | 3.7 | not started |
-| C4 Zen | 3.5 | not started |
+| C3 Settings | 3.7 | surfaces only; renders, **needs eyes** |
+| C4 Zen | 3.5 | renders; always-dark decided (U6.5), **needs eyes** |
 | C5 Themes | 3.10 themes row, 3.8 | code landed, **needs eyes** |
+| Chains | §6 below | code landed, **needs a real engine** |
 | D Merge to main | everything, on a release build | not started |
+
+## 6. Preset chains
+
+Built after the revamp (UI_REVAMP §14, decisions U9.1–U9.7). What a browser
+can show has been checked; what it cannot has not.
+
+**Seen working:** chains listed beside presets; loading one puts the track on
+the stage with the metronome still under it; all four transition editors open
+inside the window; the transport counts and sheds without overflowing at
+thirteen widths from 480 to 1440; add, remove, duplicate, reorder.
+
+**Not seen at all — the browser preview has no audio engine and emits no beat
+events, so none of this has ever run:**
+
+- [ ] A trigger firing at all — bars, seconds, or manual
+- [ ] The arming rule: a trigger that fires mid-bar must wait for the downbeat
+- [ ] A step's configuration actually reaching the engine on handover
+- [ ] `repeat` wrapping to step one, and a chain ending cleanly after the last
+- [ ] `rest` silencing and restoring the volume
+- [ ] Skip landing on the next downbeat rather than immediately
+- [ ] Two adjacent steps with different meters — the case U9.3 exists for
 
 **What "automated ✓" covers.** `test/i18n.coverage.test.ts` fails if any
 English key has no reference in `src/`, or any `t("…")` names a key that does
