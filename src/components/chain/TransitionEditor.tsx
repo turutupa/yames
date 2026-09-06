@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { ChainStep, ChainTransition, ChainTrigger } from "../../types";
 import { durationLabel } from "./format";
@@ -96,6 +96,33 @@ export function TransitionEditor({ step, isLast, onChange, onClose }: Transition
       document.removeEventListener("keydown", onKey);
     };
   }, [onClose]);
+
+  /**
+   * Keep the panel on the screen.
+   *
+   * It is anchored to its own gap, and the last gap sits at the right-hand end
+   * of the track — at 1440 wide the fourth step's editor opened 13px past the
+   * edge of the window, with the track's own horizontal scroll unable to reach
+   * it. Found by opening all four in the running app; no test would have,
+   * because nothing about it is wrong until it is laid out.
+   *
+   * Measured rather than guessed at with `:nth-last-child`: how much room is
+   * left depends on the window, the step count and how far the track has been
+   * scrolled, and only one of those is known to CSS.
+   */
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.removeProperty("--editor-shift");
+    const margin = 12;
+    const r = el.getBoundingClientRect();
+    const over = r.right - (window.innerWidth - margin);
+    const under = margin - r.left;
+    // Only one can be true at a time unless the panel is wider than the
+    // window, in which case pinning the left edge is the more useful half.
+    const shift = under > 0 ? under : over > 0 ? -over : 0;
+    if (shift !== 0) el.style.setProperty("--editor-shift", `${Math.round(shift)}px`);
+  });
 
   const setTrigger = (next: ChainTrigger) => onChange({ trigger: next });
   const setTransition = (next: ChainTransition) => onChange({ transition: next });

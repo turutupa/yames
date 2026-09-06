@@ -365,7 +365,9 @@
 .chain-transition-editor {
   position: absolute;
   top: 42px;
-  left: -52px;
+  /* `--editor-shift` is set by the component when the panel would otherwise
+     open past the edge of the window — see the note in TransitionEditor. */
+  left: calc(-52px + var(--editor-shift, 0px));
   width: 320px;
   z-index: 60;
   background: var(--bg-panel);

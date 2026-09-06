@@ -1861,6 +1861,67 @@ button.context-chip:hover,
    needed 610px of stage, and the window's own default size of 800 gives it
    546 — so the metronome's transport ran off the right edge at the size the
    app opens at. Nothing was measuring it. */
+/* A loaded chain puts a third group in the row — the step count, what is
+   coming next, and Skip — and the row had already been measured to the pixel
+   without it. At the window's own default of 800 that is 631px of content in
+   546px of stage, so it ran off the right edge at the size the app opens at,
+   with a chain loaded and nothing else unusual.
+
+   The bar-and-elapsed readouts give way rather than the chain group, and the
+   order is not arbitrary: while a routine is running, which step you are on
+   and how long until the next one is the thing you look down at. The bar
+   count is still on the stage, and Skip is a control, which readouts are not.
+
+   Above this width all three fit and nothing is hidden. */
+@media (max-width: 1099px) {
+  .transport[data-chain] .transport-readouts {
+    display: none;
+  }
+}
+
+/* Narrower still, with a chain. At a 620px window the rail is at its full
+   252 and the stage is 366 — the tightest arrangement the app allows, because
+   below 620 the rail collapses and hands most of it back.
+
+   Everything here keeps its meaning and loses only its words. Skip already
+   carries an aria-label, so it reads the same to a screen reader with the
+   text hidden; the input chip keeps its lamp, which is the part that says
+   whether sound is arriving. Nothing is hidden outright, because at this
+   width the context bar has already shed its own input chip on the grounds
+   that the transport still reports it — shedding it here too would leave the
+   answer nowhere. */
+@media (max-width: 819px) {
+  .transport[data-chain] .transport-skip {
+    font-size: 0;
+    padding: 0 11px;
+  }
+
+  .transport[data-chain] .transport-skip::after {
+    content: "A";
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .transport[data-chain] .transport-input span {
+    display: none;
+  }
+
+  .transport[data-chain] .transport-input {
+    padding: 0 10px;
+  }
+}
+
+/* The last thing to give way, and only under about 680px, where a full rail
+   leaves the stage 366px. The step count goes rather than Skip: the track on
+   the stage already marks which step is playing, so the count is a second
+   telling of it, while Skip is the only place in the app that skips. Losing a
+   duplicate readout is a smaller thing than losing a control. */
+@media (max-width: 679px) {
+  .transport[data-chain] .transport-chain-count {
+    display: none;
+  }
+}
+
 @media (max-width: 779px) {
   .transport-readouts {
     display: none;

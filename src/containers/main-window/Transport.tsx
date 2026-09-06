@@ -129,6 +129,9 @@ export function Transport({
       // which one it is looking at, and the readouts come before the drill
       // block — there is no previous-sibling selector to ask with.
       data-view={view}
+      // A loaded chain adds a third group to a row that was already measured
+      // to the pixel, so the CSS has to be able to shed differently for it.
+      data-chain={chained ? "" : undefined}
       data-running={anyRunning ? "" : undefined}
     >
       <button
