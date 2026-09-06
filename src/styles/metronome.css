@@ -1833,3 +1833,56 @@
   max-width: 100%;
   height: auto;
 }
+
+/* =============== The metronome figure (background) =============== */
+/* A line drawing of the object the screen is named after, standing toward the
+   right of the content region with the controls lying across its left edge.
+
+   It hangs off `.main-content`, not off the stage, and that is the whole
+   trick: the stage caps itself at 1176px so the controls do not smear across
+   a wide monitor, and the room this figure needs is exactly the strip that
+   cap leaves over. Parented to the stage it would have been drawn entirely
+   behind the ruler, which spans the full measure.
+
+   It is scenery — no pointer events, aria-hidden — and it is gone below
+   1560px, where the strip is too thin for it to be anything but a smudge
+   under text. */
+.metronome-figure {
+  position: absolute;
+  top: 52%;
+  right: 1.5%;
+  transform: translateY(-50%);
+  width: min(40vw, 540px);
+  height: min(68vh, 600px);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.16;
+  transition: opacity 0.45s ease;
+}
+
+/* Playing, it earns a little more presence — still far under the controls. */
+.main-window[data-playing="true"] .metronome-figure {
+  opacity: 0.3;
+}
+
+/* The stage stacks above it and stays transparent: the figure is meant to
+   show through the gaps between controls, not to be framed by a panel. */
+.main-content[data-view="beat"] > .view-transition-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 1559px) {
+  .metronome-figure {
+    display: none;
+  }
+}
+
+/* Light themes: ink on paper reads at less of it. */
+[data-theme-group="light"] .metronome-figure {
+  opacity: 0.11;
+}
+
+[data-theme-group="light"] .main-window[data-playing="true"] .metronome-figure {
+  opacity: 0.2;
+}

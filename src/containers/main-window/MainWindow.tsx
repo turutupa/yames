@@ -60,6 +60,7 @@ import { FullscreenView } from "../zen/FullscreenView";
 import type { PresetSidebarHandle } from "../../components/presets/PresetSidebar";
 import { ThemeEffects } from "./ThemeEffects";
 import { MetronomeView } from "../metronome/MetronomeView";
+import { MetronomeFigure } from "../metronome/MetronomeFigure";
 import { MainHeader } from "./MainHeader";
 import { TitleBar } from "../../components/TitleBar";
 import { Rail } from "./Rail";
@@ -962,6 +963,17 @@ export function MainWindow() {
           }
           onOpenHelp={help.openMenu}
         />
+
+        {/* Behind the stage, not inside it: the stage caps its own width, and
+            the room this figure needs is the part of the content region that
+            the cap leaves over. */}
+        {view === "beat" && (
+          <MetronomeFigure
+            bpm={state.bpm}
+            isPlaying={state.isPlaying}
+            currentBeat={currentBeat}
+          />
+        )}
 
         <ViewTransition viewKey={view} themeId={state.theme} disabled={viewTransitions === "off"} level={viewTransitions} animStyle={animationStyle}>
         {view === "beat" ? (
