@@ -1354,3 +1354,63 @@
   color: var(--accent);
   opacity: 1;
 }
+
+/* The beat groups read as dots, not as cards.
+   Each group sat in a bordered, filled box with a caption under it — three
+   pieces of chrome around the thing you are actually looking at. The box
+   becomes invisible until you reach for it, the gap between groups does the
+   grouping instead of a border, and the dots grow to match the rest of the
+   screen (UI_DECISIONS U2.4). The caption stays: it is how you know which
+   stepper you are about to press. */
+
+.main-content[data-view="beat"] .group-editor {
+  align-items: flex-start;
+  margin-left: 0;
+  max-width: 760px;
+}
+
+.main-content[data-view="beat"] .group-editor-boxes {
+  justify-content: flex-start;
+  gap: 26px;
+}
+
+.main-content[data-view="beat"] .group-display {
+  background: transparent;
+  border-color: transparent;
+  padding: 10px 6px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.main-content[data-view="beat"] .group-box:hover .group-display,
+.main-content[data-view="beat"] .group-box:focus-within .group-display {
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+  border-color: color-mix(in srgb, var(--text-primary) 9%, transparent);
+}
+
+.main-content[data-view="beat"] .group-dot {
+  width: 28px;
+  height: 28px;
+}
+
+.main-content[data-view="beat"] .group-dot.accent {
+  width: 34px;
+  height: 34px;
+}
+
+.main-content[data-view="beat"] .group-dots {
+  gap: 12px;
+}
+
+.main-content[data-view="beat"] .group-label {
+  opacity: 0.55;
+  transition: opacity 0.15s ease;
+}
+
+.main-content[data-view="beat"] .group-box:hover .group-label,
+.main-content[data-view="beat"] .group-box:focus-within .group-label {
+  opacity: 1;
+}
+
+.main-content[data-view="beat"] .group-formula {
+  justify-content: flex-start;
+}
