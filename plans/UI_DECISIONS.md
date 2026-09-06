@@ -267,3 +267,22 @@ Recorded here rather than edited into the owner's documents.
   *informed* by the canvas but are **not** decided here. That document is
   the owner's to work through; this revamp does not depend on it and must
   not pre-empt it.
+
+### U6.5 · Zen ignores the theme's background, on purpose or not — **open**
+
+`fullscreen.css:12` paints Zen with a literal `radial-gradient(#0d0d1a → #000)`
+and `.fs-bpm` with a literal `rgba(255,255,255,0.95)`. Neither is a token, so
+Zen is the same near-black screen under all thirteen themes. The accents are
+themed — the dots and the play button follow `--accent` — so it reads as
+"lights down, your colour on top", which is a defensible thing to want from a
+mode called Zen.
+
+Checked because it looked like a theming bug: under Ivory, whose
+`--text-primary` is `#2c2416`, tokenised text on that background would have
+been invisible. It is not tokenised, so nothing is unreadable today.
+
+What is open is whether it is intended. Going from Manuscript's paper-white
+main window into a black Zen is a jolt, and the four light themes exist for
+people who do not want a dark screen. The alternatives are to tokenise Zen's
+background so each theme brings its own, or to keep it always-dark and say so
+in the theme picker. This needs the owner, not a guess.
