@@ -127,6 +127,53 @@ export type Preset = {
 };
 
 // ---------------------------------------------------------------------------
+// Preset chains (U9)
+// ---------------------------------------------------------------------------
+
+/** When the gap after a step moves the chain on. (U9.2) */
+export type ChainTrigger =
+  | { kind: "manual" }
+  | { kind: "bars"; bars: number }
+  | { kind: "seconds"; seconds: number };
+
+/** How the next step arrives once the trigger has fired. (U9.2) */
+export type ChainTransition =
+  | { kind: "cut" }
+  | { kind: "countIn"; bars: number }
+  | { kind: "rest"; bars: number };
+
+export type ChainStep = {
+  id: string;
+  name: string;
+  /** A full configuration. Copied in, never referenced. (U9.1) */
+  bpm: number;
+  subdivision: number;
+  beatGroups: number[];
+  freeMode?: boolean;
+  soundType: string;
+  volume: number;
+  /**
+   * How the gap AFTER this step behaves.
+   *
+   * On the last step this is what ends the pass: it wraps the chain back to
+   * step 1, or — on the final pass — stops it. A chain with no way to say
+   * when its last step is over could neither repeat nor stop on its own,
+   * and U9.6 asks for both. `manual` there means "wait for me".
+   */
+  trigger: ChainTrigger;
+  transition: ChainTransition;
+};
+
+export type Chain = {
+  id: string;
+  name: string;
+  createdAt: number;
+  steps: ChainStep[];
+  /** 1 = once through. 0 = until stopped. (U9.6) */
+  repeat: number;
+};
+
+// ---------------------------------------------------------------------------
 // Audio Output Device types
 // ---------------------------------------------------------------------------
 

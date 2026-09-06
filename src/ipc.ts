@@ -381,6 +381,64 @@ export async function reorderPresets(ids: string[]): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// Preset chains (U9)
+// ---------------------------------------------------------------------------
+import type { Chain } from "./types";
+
+/**
+ * Chains live beside presets: same `settings.json` store, own `chains` key.
+ *
+ * `commands.rs` keeps presets under `presets` there and Rust owns the
+ * read-modify-write; a chain has no engine-side reader, so the same four
+ * operations are done here through the store plugin instead of adding
+ * commands Rust would never call itself. The array *is* the order — same
+ * contract as `reorder_presets` — so the UI can drag chains around without
+ * a sort key.
+ */
+const CHAINS_KEY = "chains";
+
+export async function listChains(): Promise<Chain[]> {
+  const chains = await storeLoad<Chain[]>(CHAINS_KEY);
+  return Array.isArray(chains) ? chains : [];
+}
+
+/** Upsert by id, keeping the existing position. New chains go last. */
+export async function saveChain(chain: Chain): Promise<void> {
+  const chains = await listChains();
+  const at = chains.findIndex((c) => c.id === chain.id);
+  if (at >= 0) chains[at] = chain;
+  else chains.push(chain);
+  await storeSave(CHAINS_KEY, chains);
+}
+
+export async function deleteChain(id: string): Promise<void> {
+  const chains = await listChains();
+  await storeSave(
+    CHAINS_KEY,
+    chains.filter((c) => c.id !== id),
+  );
+}
+
+/**
+ * Ids not in `ids` keep their relative order at the end, so a reorder issued
+ * against a stale list cannot silently drop a chain saved in another window.
+ */
+export async function reorderChains(ids: string[]): Promise<void> {
+  const chains = await listChains();
+  const byId = new Map(chains.map((c) => [c.id, c]));
+  const ordered: Chain[] = [];
+  for (const id of ids) {
+    const chain = byId.get(id);
+    if (chain) {
+      ordered.push(chain);
+      byId.delete(id);
+    }
+  }
+  for (const chain of chains) if (byId.has(chain.id)) ordered.push(chain);
+  await storeSave(CHAINS_KEY, ordered);
+}
+
+// ---------------------------------------------------------------------------
 // Audio Output Device
 // ---------------------------------------------------------------------------
 import type { AudioOutputDevice } from "./types";
