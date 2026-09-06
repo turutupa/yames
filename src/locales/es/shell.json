@@ -64,8 +64,14 @@
   "transport": {
     "bar": "Compás",
     "elapsed": "Transcurrido",
+    "start": "Iniciar",
+    "startsAt": "Empieza en",
+    "countIn": "Cuenta previa",
+    "loop": "Bucle",
     "listening": "Escuchando",
-    "inputOff": "Entrada apagada"
+    "inputOff": "Entrada apagada",
+    "coachOnPlay": "El entrenador escucha al pulsar reproducir",
+    "coachQuiet": "El entrenador calla durante cada paso"
   },
   "rail": {
     "label": "Modos y biblioteca",

@@ -64,8 +64,14 @@
   "transport": {
     "bar": "小節",
     "elapsed": "已用時間",
+    "start": "開始",
+    "startsAt": "起始速度",
+    "countIn": "預備拍",
+    "loop": "循環",
     "listening": "正在聆聽",
-    "inputOff": "輸入已關閉"
+    "inputOff": "輸入已關閉",
+    "coachOnPlay": "按下播放後教練開始聆聽",
+    "coachQuiet": "教練在每一步中途保持安靜"
   },
   "rail": {
     "label": "模式與資料庫",

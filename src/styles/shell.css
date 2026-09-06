@@ -1486,6 +1486,108 @@ button.context-chip:hover,
   box-shadow: 0 0 8px var(--feedback-perfect);
 }
 
+/* ─── The drill's end of the bar ─────────────────────────────────────────
+ *
+ * The tempo the ramp starts at, and the two switches you decide immediately
+ * before pressing Start. They sit after the bar and clock, sharing the same
+ * rule that divides the readouts from the button. */
+.transport-drill {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* The switch is the whole row — track and word together — so the word is a
+   click target too. A 34x20 pill with a 16px knob, as the mockup draws it. */
+.transport-switch {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.transport-switch.on {
+  color: var(--text-secondary);
+}
+
+.transport-switch:hover {
+  color: var(--text-primary);
+}
+
+.transport-switch-track {
+  position: relative;
+  width: 34px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--surface-hover, rgba(255, 255, 255, 0.09));
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.transport-switch-track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.transport-switch.on .transport-switch-track {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.transport-switch.on .transport-switch-track::after {
+  transform: translateX(14px);
+  background: var(--accent);
+}
+
+.transport-switch:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .transport-switch-track,
+  .transport-switch-track::after {
+    transition: none;
+  }
+}
+
+/* The sentence at the right end: what the coach will do, drawn as the mockup
+   draws it — dashed, because it is the one thing in the bar that is not a
+   control and should not look like one. */
+.transport-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px dashed var(--border);
+  border-radius: 17px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* The compact input readout that stands in for the sentence once the context
+   bar has shed its own input chip. Hidden until then — see the breakpoint. */
+.transport-input-narrow {
+  display: none;
+}
+
 /* =================== Content region =================== */
 /* The view grows, the transport stays put. Vertical centring moves from the
    content region onto the view itself so the transport is not centred with
@@ -1659,6 +1761,31 @@ button.context-chip:hover,
 /* The transport sheds what it can rather than overflowing: the keyboard hint
    first, then the input chip's label, then the bar and clock. Play and Stop
    never go — finding how to stop is the one thing that must always work. */
+
+/* The first thing to go is the sentence, and it goes at the width where the
+   context bar drops its input chip — on the stated grounds that the transport
+   reports the same state. So the compact readout takes the sentence's place
+   rather than the slot going empty, and input status is on screen at every
+   width the window can reach. The drill's "starts at" goes at the same point:
+   the plan line on the stage above says 80 → 120 in larger type. */
+@media (max-width: 919px) {
+  .transport-note {
+    display: none;
+  }
+
+  .transport-input-narrow {
+    display: flex;
+  }
+
+  .transport-drill > .transport-readout {
+    display: none;
+  }
+
+  .transport-drill {
+    gap: 16px;
+  }
+}
+
 @media (max-width: 719px) {
   .transport {
     gap: 14px;

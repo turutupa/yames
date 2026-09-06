@@ -64,8 +64,14 @@
   "transport": {
     "bar": "Mesure",
     "elapsed": "Écoulé",
+    "start": "Démarrer",
+    "startsAt": "Départ à",
+    "countIn": "Décompte",
+    "loop": "Boucle",
     "listening": "À l'écoute",
-    "inputOff": "Entrée coupée"
+    "inputOff": "Entrée coupée",
+    "coachOnPlay": "Le coach écoute dès que vous lancez la lecture",
+    "coachQuiet": "Le coach se tait pendant une étape"
   },
   "rail": {
     "label": "Modes et bibliothèque",

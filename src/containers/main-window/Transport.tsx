@@ -12,6 +12,12 @@ interface TransportProps {
   listening: boolean;
   hasSignal: boolean;
   playShortcut?: string;
+  /** Drill only — the tempo the ramp begins at, and its two run switches. */
+  startBpm: number;
+  countIn: boolean;
+  loop: boolean;
+  onToggleCountIn: () => void;
+  onToggleLoop: () => void;
   onTogglePlayback: () => void;
   onStartSpeedRamp: () => void;
   onStopSpeedRamp: () => void;
@@ -20,6 +26,45 @@ interface TransportProps {
 function clock(totalSeconds: number): string {
   const s = Math.max(0, Math.floor(totalSeconds));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+}
+
+function CoachIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 12a8 8 0 1 0-3.1 6.3L21 19z" />
+      <line x1="9" y1="10" x2="9" y2="14" />
+      <line x1="12.5" y1="8.5" x2="12.5" y2="15.5" />
+      <line x1="16" y1="11" x2="16" y2="13" />
+    </svg>
+  );
+}
+
+function MicIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="9" y="3" width="6" height="11" rx="3" />
+      <path d="M5.5 12a6.5 6.5 0 0 0 13 0" />
+      <line x1="12" y1="18.5" x2="12" y2="21" />
+    </svg>
+  );
 }
 
 /**
@@ -33,7 +78,10 @@ function clock(totalSeconds: number): string {
  *
  * Play means different things per mode — the drill starts a ramp, the
  * metronome starts the click — and that difference stays here rather than
- * leaking into either screen.
+ * leaking into either screen. The drill's version of the bar also carries the
+ * two switches you decide immediately before pressing Start, count-in and
+ * loop; they are the drill's own settings, handed down as props, not state
+ * this component keeps.
  */
 export function Transport({
   view,
@@ -45,6 +93,11 @@ export function Transport({
   listening,
   hasSignal,
   playShortcut,
+  startBpm,
+  countIn,
+  loop,
+  onToggleCountIn,
+  onToggleLoop,
   onTogglePlayback,
   onStartSpeedRamp,
   onStopSpeedRamp,
@@ -78,7 +131,10 @@ export function Transport({
             <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
               <path d="M4 2.5a.5.5 0 0 1 .77-.42l9 5.5a.5.5 0 0 1 0 .84l-9 5.5A.5.5 0 0 1 4 13.5z" />
             </svg>
-            {t("common.play")}
+            {/* A drill is not played, it is run. The metronome's button starts
+                a sound; this one starts an exercise that lasts four minutes
+                and changes tempo on its own. */}
+            {view === "drill" ? t("transport.start") : t("common.play")}
           </>
         )}
       </button>
@@ -87,7 +143,9 @@ export function Transport({
 
       <div className="transport-readouts">
         <div className="transport-readout">
-          <span className="transport-value">{anyRunning ? bar : "—"}</span>
+          {/* At rest this said "—". You are always about to play bar one, and
+              a dash is a value the counter never actually holds. */}
+          <span className="transport-value">{anyRunning ? bar : 1}</span>
           <span className="transport-label">{t("transport.bar")}</span>
         </div>
         <div className="transport-readout">
@@ -96,28 +154,74 @@ export function Transport({
         </div>
       </div>
 
+      {view === "drill" && (
+        <div className="transport-drill">
+          <div className="transport-readout">
+            <span className="transport-value">{startBpm}</span>
+            <span className="transport-label">{t("transport.startsAt")}</span>
+          </div>
+          {/* Both switches write the drill's `speedRamp`, which is also where
+              the settings form reads them from — one setting, two places to
+              reach it, no second copy of the state. */}
+          <button
+            type="button"
+            role="switch"
+            aria-checked={countIn}
+            className={`transport-switch ${countIn ? "on" : ""}`}
+            onClick={onToggleCountIn}
+          >
+            <span className="transport-switch-track" aria-hidden="true" />
+            {t("transport.countIn")}
+          </button>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={loop}
+            className={`transport-switch ${loop ? "on" : ""}`}
+            onClick={onToggleLoop}
+          >
+            <span className="transport-switch-track" aria-hidden="true" />
+            {t("transport.loop")}
+          </button>
+        </div>
+      )}
+
       <div className="transport-spacer" />
 
-      <div className={`transport-input ${listening ? "listening" : ""}`}>
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.9"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <rect x="9" y="3" width="6" height="11" rx="3" />
-          <path d="M5.5 12a6.5 6.5 0 0 0 13 0" />
-          <line x1="12" y1="18.5" x2="12" y2="21" />
-        </svg>
-        <span>{listening ? t("transport.listening") : t("transport.inputOff")}</span>
-        {listening && (
+      {/* The right end of the bar, in three states.
+       *
+       * Once the coach is actually listening it is a live readout — the label
+       * plus a signal lamp, which is the one place in the app that shows
+       * whether sound is arriving. The context bar's input chip does not.
+       *
+       * Before that there is nothing live to report, so the mockup's sentence
+       * takes the slot and explains what the coach is about to do. It is an
+       * explanation, not a control; nothing here ever turned the input on.
+       *
+       * Except that below 920px the context bar sheds its input chip — on the
+       * explicit grounds that the transport reports the same state — so the
+       * compact readout has to come back at that width instead. The sentence
+       * has no room there anyway. */}
+      {listening ? (
+        <div className="transport-input listening">
+          <MicIcon />
+          <span>{t("transport.listening")}</span>
           <span className={`transport-signal ${hasSignal ? "on" : ""}`} aria-hidden="true" />
-        )}
-      </div>
+        </div>
+      ) : (
+        <>
+          <div className="transport-note">
+            <CoachIcon />
+            <span>
+              {view === "drill" ? t("transport.coachQuiet") : t("transport.coachOnPlay")}
+            </span>
+          </div>
+          <div className="transport-input transport-input-narrow">
+            <MicIcon />
+            <span>{t("transport.inputOff")}</span>
+          </div>
+        </>
+      )}
     </div>
   );
 }

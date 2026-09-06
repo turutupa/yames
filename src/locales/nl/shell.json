@@ -64,8 +64,14 @@
   "transport": {
     "bar": "Maat",
     "elapsed": "Verstreken",
+    "start": "Starten",
+    "startsAt": "Start bij",
+    "countIn": "Aftellen",
+    "loop": "Herhalen",
     "listening": "Luistert",
-    "inputOff": "Ingang uit"
+    "inputOff": "Ingang uit",
+    "coachOnPlay": "De coach luistert zodra je afspeelt",
+    "coachQuiet": "De coach zwijgt tijdens een stap"
   },
   "rail": {
     "label": "Modi en bibliotheek",

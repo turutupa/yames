@@ -64,8 +64,14 @@
   "transport": {
     "bar": "Takt",
     "elapsed": "Vergangen",
+    "start": "Starten",
+    "startsAt": "Startet bei",
+    "countIn": "Einzähler",
+    "loop": "Schleife",
     "listening": "Hört zu",
-    "inputOff": "Eingang aus"
+    "inputOff": "Eingang aus",
+    "coachOnPlay": "Der Coach hört zu, sobald du startest",
+    "coachQuiet": "Der Coach schweigt während eines Schritts"
   },
   "rail": {
     "label": "Modi und Bibliothek",

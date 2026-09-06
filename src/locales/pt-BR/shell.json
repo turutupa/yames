@@ -64,8 +64,14 @@
   "transport": {
     "bar": "Compasso",
     "elapsed": "Decorrido",
+    "start": "Iniciar",
+    "startsAt": "Começa em",
+    "countIn": "Contagem",
+    "loop": "Repetir",
     "listening": "Ouvindo",
-    "inputOff": "Entrada desligada"
+    "inputOff": "Entrada desligada",
+    "coachOnPlay": "O coach escuta quando você toca",
+    "coachQuiet": "O coach fica quieto durante o passo"
   },
   "rail": {
     "label": "Modos e biblioteca",

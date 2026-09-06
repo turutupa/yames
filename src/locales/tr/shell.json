@@ -64,8 +64,14 @@
   "transport": {
     "bar": "Ölçü",
     "elapsed": "Geçen",
+    "start": "Başlat",
+    "startsAt": "Başlangıç",
+    "countIn": "Giriş sayımı",
+    "loop": "Döngü",
     "listening": "Dinliyor",
-    "inputOff": "Giriş kapalı"
+    "inputOff": "Giriş kapalı",
+    "coachOnPlay": "Koç, oynata bastığınızda dinler",
+    "coachQuiet": "Koç adım sürerken susar"
   },
   "rail": {
     "label": "Modlar ve kitaplık",

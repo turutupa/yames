@@ -64,8 +64,14 @@
   "transport": {
     "bar": "Bar",
     "elapsed": "Elapsed",
+    "start": "Start",
+    "startsAt": "Starts at",
+    "countIn": "Count-in",
+    "loop": "Loop",
     "listening": "Listening",
-    "inputOff": "Input off"
+    "inputOff": "Input off",
+    "coachOnPlay": "Coach listens when you press play",
+    "coachQuiet": "Coach stays quiet mid-step"
   },
   "rail": {
     "label": "Modes and library",

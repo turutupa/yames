@@ -64,8 +64,14 @@
   "transport": {
     "bar": "Takt",
     "elapsed": "Upłynęło",
+    "start": "Rozpocznij",
+    "startsAt": "Start od",
+    "countIn": "Odliczanie",
+    "loop": "Pętla",
     "listening": "Słucham",
-    "inputOff": "Wejście wyłączone"
+    "inputOff": "Wejście wyłączone",
+    "coachOnPlay": "Trener słucha, gdy włączysz odtwarzanie",
+    "coachQuiet": "Trener milczy w trakcie kroku"
   },
   "rail": {
     "label": "Tryby i biblioteka",

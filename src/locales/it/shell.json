@@ -64,8 +64,14 @@
   "transport": {
     "bar": "Battuta",
     "elapsed": "Trascorso",
+    "start": "Inizia",
+    "startsAt": "Parte da",
+    "countIn": "Preconteggio",
+    "loop": "Ciclo",
     "listening": "In ascolto",
-    "inputOff": "Ingresso spento"
+    "inputOff": "Ingresso spento",
+    "coachOnPlay": "Il coach ascolta quando avvii",
+    "coachQuiet": "Il coach tace durante ogni step"
   },
   "rail": {
     "label": "Modalità e libreria",
