@@ -85,6 +85,7 @@ import { useInputTester } from "./hooks/useInputTester";
 import { useSoftClickPreview, SOFT_CLICK_BPM } from "./hooks/useSoftClickPreview";
 import { useBpmEditing } from "./hooks/useBpmEditing";
 import { usePlaybackClock } from "./hooks/usePlaybackClock";
+import { useLibraryFit } from "./hooks/useLibraryFit";
 import { useAudioError } from "./hooks/useAudioError";
 import { AudioErrorNotice } from "./AudioErrorNotice";
 import {
@@ -523,6 +524,9 @@ export function MainWindow() {
     const clamped = Math.max(20, Math.min(300, value));
     setBpm(clamped);
   };
+
+  // A narrow window cannot hold the library and a usable stage at once.
+  useLibraryFit(sidebarOpen, setSidebarOpen);
 
   const { bar, elapsedSeconds } = usePlaybackClock(
     state.isPlaying || (state.speedRamp?.active ?? false),

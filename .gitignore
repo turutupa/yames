@@ -17,3 +17,6 @@ src-tauri/gen/schemas/
 # Seeded design-canvas output — regenerated from the .dc.html working files
 design/**/yames-app-redesign.html
 design/**/yames-site-directions.html
+
+# Local-only browser preview shim (see src/devShim.local.ts)
+src/devShim.local.ts

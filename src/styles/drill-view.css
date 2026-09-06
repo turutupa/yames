@@ -288,8 +288,13 @@
   height: var(--climb-cell-h);
   border-radius: 2px;
   cursor: pointer;
-  background: transparent;
-  border: 1px solid var(--text-faint);
+  /* An upcoming bar was a hairline and nothing else. The window renders at a
+     fractional device-pixel ratio, so "1px" became 0.67 of a physical pixel
+     and the whole plan read as almost-empty space — the shape of the climb
+     was there and you could not see it. A faint fill carries the shape; the
+     border sharpens its edge. */
+  background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 16%, transparent);
   opacity: 1;
   box-shadow: none;
   transition:
@@ -904,4 +909,65 @@
 .drill-current-bpm {
   font-size: 5rem;
   line-height: 1;
+}
+
+/* The climb's caption belongs next to its title, not at the far end of the
+   stage. `space-between` put them at opposite edges, which at 1600px meant
+   the legend explaining the picture sat nowhere near it. */
+.drill-climb-head {
+  justify-content: flex-start;
+  gap: 20px;
+}
+
+/* The mode description reads as part of the plan above it, so it starts where
+   the plan starts rather than centring itself in whatever room is left. */
+.drill-idle-hint {
+  text-align: left;
+  align-self: flex-start;
+  max-width: 640px;
+}
+
+/* =================== The drill in a narrow window ==========================
+   Same problem the metronome had and the same answer. At the 480×780 minimum
+   the plan line, the mode note, the summary and the climb come to more height
+   than the stage has, and the climb was drawn straight through the transport
+   — measured at 69px past it. The stage scrolls instead of writing over the
+   controls underneath it, and the readout comes down to leave room for the
+   picture, which is the part worth the space. */
+
+@media (max-width: 819px) {
+  .main-content[data-view="drill"] > .view-transition-wrapper {
+    padding-left: 20px;
+    justify-content: flex-start;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .drill-current-bpm {
+    font-size: 3.25rem;
+  }
+
+  .drill-plan {
+    gap: 2px;
+  }
+
+  .drill-plan-value {
+    font-size: 1.2rem;
+  }
+}
+
+/* Under 560px the plan reads as a stack rather than a line: three phrases
+   side by side leave each one too narrow to hold its own numbers. */
+@media (max-width: 559px) {
+  .drill-plan {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .drill-plan-sep {
+    display: none;
+  }
 }

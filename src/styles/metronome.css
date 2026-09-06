@@ -1287,8 +1287,12 @@
   align-self: flex-start;
   align-items: flex-start;
   width: 100%;
-  max-width: 1120px;
-  padding-left: 24px;
+  max-width: 1176px;
+  /* The SUBDIV and METER labels hang 52px to the left of their rows
+     (`.row-side-label` is absolute at left: -52px), so the stage's gutter has
+     to be wide enough to hold them. At 24px they were sliced in half by the
+     content region's edge and read "UBDIV" and "ETER". */
+  padding-left: 80px;
 }
 
 .main-content[data-view="beat"] .bpm-section,
@@ -1433,5 +1437,89 @@
 @media (max-width: 979px) {
   .main-content[data-view="beat"] .tempo-scale {
     display: none;
+  }
+}
+
+/* =================== The metronome in a narrow window =====================
+   The stage is built for room it does not have below ~820px: a 104px tempo,
+   an 80px gutter holding labels that hang outside their rows, and rows that
+   assume they can lie flat. Dragged to the 480px minimum it overflowed the
+   window sideways and painted the subdivision and meter rows straight over
+   the transport.
+
+   Nothing is removed. The type comes down, the gutter goes (with the labels
+   that needed it — they name rows whose buttons say the same thing), the rows
+   wrap, and the stage scrolls instead of writing over the controls
+   underneath it. */
+
+@media (max-width: 819px) {
+  .main-content[data-view="beat"] > .view-transition-wrapper {
+    padding-left: 20px;
+    justify-content: flex-start;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    gap: 20px;
+  }
+
+  .main-content[data-view="beat"] .bpm-input {
+    font-size: 4.25rem;
+  }
+
+  .main-content[data-view="beat"] .bpm-display {
+    gap: 12px;
+  }
+
+  /* These label the row beneath them, and the row's own buttons already say
+     what it is. They hang 52px into a gutter that no longer exists. */
+  .main-content[data-view="beat"] .row-side-label {
+    display: none;
+  }
+
+  .main-content[data-view="beat"] .sub-row,
+  .main-content[data-view="beat"] .time-sig-row,
+  .main-content[data-view="beat"] .meter-variant-row {
+    flex-wrap: wrap;
+  }
+
+  .main-content[data-view="beat"] .sub-row-btn {
+    flex: 1 0 88px;
+  }
+
+  .main-content[data-view="beat"] .group-editor-boxes {
+    gap: 16px;
+    row-gap: 12px;
+  }
+}
+
+/* Under ~560px the subdivision names stop fitting their tiles two-up. The
+   glyphs carry the meaning — that is what redrawing them was for — so the
+   names go and the tiles stay reachable. */
+@media (max-width: 559px) {
+  .main-content[data-view="beat"] .bpm-input {
+    font-size: 3.25rem;
+  }
+
+  .main-content[data-view="beat"] .sub-row-label {
+    display: none;
+  }
+
+  /* Fixed width rather than `flex: 1`: a growing item on a wrapped row
+     stretches to fill it, which left the sixth glyph alone and enormous on a
+     line of its own. At 62px all six sit on one row down to 440px of stage. */
+  .main-content[data-view="beat"] .sub-row-btn {
+    flex: 0 0 auto;
+    width: 52px;
+    min-height: 54px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  /* At the 480px minimum the stage is ~372px wide: six 52px tiles and five
+     6px gaps come to 342. Any wider and the sixth wraps onto a line of its
+     own, which is how this looked before the width was pinned. */
+  .main-content[data-view="beat"] .sub-row {
+    gap: 6px;
   }
 }

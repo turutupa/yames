@@ -87,6 +87,24 @@ describe("Rail", () => {
     expect(setView).toHaveBeenLastCalledWith("drill");
   });
 
+  it("names every button, so the icon-only rail is still usable blind", () => {
+    // Below 620px the rail hides its labels with `display: none`, which takes
+    // the accessible name with it — six unlabelled buttons. Found by reading
+    // the accessibility tree of the running app at the 480px minimum.
+    const { container } = setup({ libraryOpen: false });
+    const unnamed = [...container.querySelectorAll("button")].filter(
+      (b) => !(b.getAttribute("aria-label") ?? "").trim() && !(b.textContent ?? "").trim(),
+    );
+    expect(unnamed.map((b) => b.className)).toEqual([]);
+  });
+
+  it("keeps the name when the label is hidden", () => {
+    const { container } = setup();
+    for (const b of container.querySelectorAll(".rail-mode, .rail-action")) {
+      expect(b.getAttribute("aria-label"), b.className).toBeTruthy();
+    }
+  });
+
   it("keeps Zen and the widget adjacent — the tour spotlights them together", () => {
     // Tour stop "zen-widget" unions every element carrying the id. They used
     // to sit next to each other in the header; separating them would stretch

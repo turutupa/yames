@@ -86,6 +86,10 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
           <button
             key={mode.id}
             className={`rail-mode ${view === mode.id ? "active" : ""}`}
+            // Below 620px the rail is icons only and the label is display:
+            // none, which leaves the button with no accessible name at all.
+            // The label is named here so it survives being hidden.
+            aria-label={t(mode.labelKey)}
             data-tour={mode.id === "drill" ? "drill-tab" : undefined}
             onClick={() => setView(mode.id)}
             aria-current={view === mode.id ? "page" : undefined}
@@ -149,6 +153,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
       <div className="rail-footer">
         <button
           className={`rail-action ${coachOpen ? "active" : ""}`}
+          aria-label={t("settings.coach.title")}
           onClick={onToggleCoach}
         >
           <span className="rail-action-icon rail-action-coach">
@@ -177,7 +182,12 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
           )}
         </button>
 
-        <button className="rail-action" onClick={onZen} data-tour="zen-widget">
+        <button
+          className="rail-action"
+          aria-label={t("tooltip.zen")}
+          onClick={onZen}
+          data-tour="zen-widget"
+        >
           <span className="rail-action-icon">
             <svg
               width="18"
@@ -199,6 +209,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
 
         <button
           className="rail-action"
+          aria-label={t("tooltip.openWidget")}
           data-hint="widget-discover"
           data-tour="zen-widget"
           onClick={() => {
@@ -228,6 +239,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
 
         <button
           className={`rail-action ${view === "settings" ? "active" : ""}`}
+          aria-label={t("tooltip.settings")}
           data-hint="midi-plugged"
           onClick={() => {
             if (view === "settings") {
