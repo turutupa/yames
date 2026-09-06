@@ -20,7 +20,9 @@
     "repeats": "Herhalingen",
     "countdown": "Aftellen",
     "cyclic": "Cyclisch",
-    "repeatsLegend": "Herhalingen →",
+    "finished": "Klaar!",
+    "climbTitle": "De klim",
+    "climbLegend": "Één kolom per tempo · één vakje per maat",
     "summary": "{{beats}} beats · {{steps}} stappen · {{repeats}} herhalingen · {{time}}",
     "timeRemaining": "Nog {{time}}",
     "desc": {

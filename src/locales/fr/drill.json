@@ -20,7 +20,9 @@
     "repeats": "Répétitions",
     "countdown": "Décompte",
     "cyclic": "Aller-retour",
-    "repeatsLegend": "Répétitions →",
+    "finished": "Terminé !",
+    "climbTitle": "La montée",
+    "climbLegend": "Une colonne par tempo · une case par mesure",
     "summary": "{{beats}} temps · {{steps}} étapes · {{repeats}} répétitions · {{time}}",
     "timeRemaining": "Reste {{time}}",
     "desc": {

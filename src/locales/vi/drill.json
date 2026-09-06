@@ -20,7 +20,9 @@
     "repeats": "Số lần lặp",
     "countdown": "Đếm ngược",
     "cyclic": "Khứ hồi",
-    "repeatsLegend": "Lặp lại →",
+    "finished": "Xong!",
+    "climbTitle": "Đường leo",
+    "climbLegend": "Mỗi nhịp độ một cột · mỗi ô nhịp một ô",
     "summary": "{{beats}} phách · {{steps}} bước · {{repeats}} lần lặp · {{time}}",
     "timeRemaining": "Còn {{time}}",
     "desc": {

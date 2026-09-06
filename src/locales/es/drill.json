@@ -20,7 +20,9 @@
     "repeats": "Repeticiones",
     "countdown": "Cuenta atrás",
     "cyclic": "Cíclico",
-    "repeatsLegend": "Repeticiones →",
+    "finished": "¡Hecho!",
+    "climbTitle": "La subida",
+    "climbLegend": "Una columna por tempo · una celda por compás",
     "summary": "{{beats}} pulsos · {{steps}} pasos · {{repeats}} repeticiones · {{time}}",
     "timeRemaining": "Quedan {{time}}",
     "desc": {

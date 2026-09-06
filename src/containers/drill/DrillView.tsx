@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { AppState, BeatEvent } from "../../types";
 import { configureSpeedRamp, startSpeedRampFrom, onRampStep } from "../../ipc";
 import { DrillPlanLine, type PlanField } from "./DrillPlanLine";
+import { DrillClimb } from "./DrillClimb";
 import "../../styles/drill-view.css";
 
 interface DrillViewProps {
@@ -33,15 +34,17 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
   const [aggressiveness, setAggressiveness] = useState(ramp.aggressiveness || "moderate");
   const [countIn, setCountIn] = useState(ramp.warmupBeats > 0);
 
-  // Ghost elements for smooth exit animations
+  // Ghost elements for smooth exit animations. They were named rows and cols
+  // when the plan was drawn as a matrix; a step is a column of the climb now
+  // and a repeat is a cell inside it, so they are named for what they are.
   const prevStepsRef = useRef<number[]>([]);
   const prevBarsRef = useRef(barsPerStep);
   const prevBeatsRef = useRef(beatsPerBar);
-  const [ghostRows, setGhostRows] = useState<number[]>([]);
-  const [ghostCols, setGhostCols] = useState(0);
+  const [ghostSteps, setGhostSteps] = useState<number[]>([]);
+  const [ghostBars, setGhostBars] = useState(0);
   const [ghostDots, setGhostDots] = useState(0);
-  const ghostRowTimer = useRef<ReturnType<typeof setTimeout>>();
-  const ghostColTimer = useRef<ReturnType<typeof setTimeout>>();
+  const ghostStepTimer = useRef<ReturnType<typeof setTimeout>>();
+  const ghostBarTimer = useRef<ReturnType<typeof setTimeout>>();
   const ghostDotTimer = useRef<ReturnType<typeof setTimeout>>();
 
   // Sync local form with state when it changes from backend
@@ -139,15 +142,15 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
     }
   }
 
-  // Detect row/col shrinks and create ghost elements for exit animation
+  // Detect step/bar shrinks and create ghost elements for exit animation
   useEffect(() => {
     const prev = prevStepsRef.current;
     if (prev.length > steps.length) {
-      setGhostRows(prev.slice(steps.length));
-      clearTimeout(ghostRowTimer.current);
-      ghostRowTimer.current = setTimeout(() => setGhostRows([]), 250);
+      setGhostSteps(prev.slice(steps.length));
+      clearTimeout(ghostStepTimer.current);
+      ghostStepTimer.current = setTimeout(() => setGhostSteps([]), 250);
     } else {
-      setGhostRows([]);
+      setGhostSteps([]);
     }
     prevStepsRef.current = [...steps];
   }, [steps.length, startBpm, targetBpm, increment, decrement, mode]);
@@ -155,11 +158,11 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
   useEffect(() => {
     const prev = prevBarsRef.current;
     if (prev > barsPerStep) {
-      setGhostCols(prev - barsPerStep);
-      clearTimeout(ghostColTimer.current);
-      ghostColTimer.current = setTimeout(() => setGhostCols(0), 200);
+      setGhostBars(prev - barsPerStep);
+      clearTimeout(ghostBarTimer.current);
+      ghostBarTimer.current = setTimeout(() => setGhostBars(0), 200);
     } else {
-      setGhostCols(0);
+      setGhostBars(0);
     }
     prevBarsRef.current = barsPerStep;
   }, [barsPerStep]);
@@ -271,7 +274,7 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
         </div>
         <span className="drill-current-step" style={{ visibility: (ramp.active && !isWarmingUp) || ramp.completed ? "visible" : "hidden" }}>
           {ramp.completed
-            ? "Done!"
+            ? t("drill.finished")
             : ramp.active
               ? t("drill.stepBar", { step: ramp.currentStep + 1, bar: ramp.barsInStep + 1, bars: barsPerStep })
               : "\u00A0"}
@@ -486,73 +489,20 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
         })}
       </div>
 
-      <div className="drill-grid-wrapper">
-        <div className="drill-grid">
-          {steps.map((bpm, stepIdx) => {
-            const effectiveStep = cyclic && steps.length > 0 ? ramp.currentStep % steps.length : ramp.currentStep;
-            const isDone = ramp.active ? (cyclic ? false : stepIdx < ramp.currentStep) : false;
-            const isCurrent = stepIdx === effectiveStep && ramp.active;
-            const pct = steps.length > 1 ? stepIdx / (steps.length - 1) : 0;
-            const rowOpacity = 0.15 + pct * 0.85;
-            return (
-              <div
-                key={stepIdx}
-                className="drill-grid-row"
-                data-row-idx={stepIdx}
-                data-last-row={stepIdx === steps.length - 1 && ghostRows.length === 0 ? "" : undefined}
-                // The row stagger (~50ms) gives a clear top-to-bottom
-                // cascade — by the time row N starts, row N-1 is already
-                // well into its fade. Cells use the SAME base delay plus
-                // a tiny per-cell offset for a subtle left-to-right shimmer
-                // inside each row without bleeding into the next row's
-                // start (cell stagger × column count ≈ row stagger).
-                style={{ animationDelay: `${300 + stepIdx * 50}ms` }}
-              >
-                <span className={`drill-grid-bpm ${isCurrent ? "current" : ""} ${isDone ? "done" : ""}`}>{bpm}</span>
-                <div className="drill-grid-cells">
-                  {Array.from({ length: barsPerStep }, (_, barIdx) => {
-                    const barDone = isDone || (isCurrent && barIdx < ramp.barsInStep);
-                    const barActive = isCurrent && barIdx === ramp.barsInStep;
-                    return (
-                      <div
-                        key={barIdx}
-                        className={`drill-grid-cell ${barDone ? "done" : ""} ${barActive ? "current" : ""}`}
-                        data-first-cell={stepIdx === 0 && barIdx === 0 ? "" : undefined}
-                        style={{ cursor: "pointer", opacity: barDone || barActive ? undefined : rowOpacity * 0.3, animationDelay: `${300 + stepIdx * 50 + barIdx * 4}ms` }}
-                        onClick={() => { startSpeedRampFrom(stepIdx, bpm, barIdx); startTimer(stepIdx, barIdx); }}
-                      />
-                    );
-                  })}
-                  {/* Ghost cols exiting */}
-                  {ghostCols > 0 && Array.from({ length: ghostCols }, (_, i) => (
-                    <div key={`ghost-col-${i}`} className="drill-grid-cell exiting" style={{ opacity: rowOpacity * 0.3 }} />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-          {/* Ghost rows exiting */}
-          {ghostRows.map((bpm, i) => {
-            const ghostIdx = steps.length + i;
-            const pct = steps.length > 1 ? ghostIdx / (steps.length + ghostRows.length - 1) : 1;
-            const rowOpacity = 0.15 + pct * 0.85;
-            return (
-              <div key={`ghost-row-${i}`} className="drill-grid-row exiting">
-                <span className="drill-grid-bpm">{bpm}</span>
-                <div className="drill-grid-cells">
-                  {Array.from({ length: barsPerStep + ghostCols }, (_, barIdx) => (
-                    <div key={barIdx} className="drill-grid-cell exiting" style={{ opacity: rowOpacity * 0.3 }} />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <div className="drill-grid-legend-bottom">
-          <span className="drill-grid-corner"></span>
-          <span className="drill-grid-legend-label">{t("drill.repeatsLegend")}</span>
-        </div>
-      </div>
+      <DrillClimb
+        steps={steps}
+        barsPerStep={barsPerStep}
+        currentStep={ramp.currentStep}
+        barsInStep={ramp.barsInStep}
+        active={ramp.active}
+        cyclic={cyclic}
+        ghostSteps={ghostSteps}
+        ghostBars={ghostBars}
+        onJump={(stepIdx, bpm, barIdx) => {
+          startSpeedRampFrom(stepIdx, bpm, barIdx);
+          startTimer(stepIdx, barIdx);
+        }}
+      />
     </div>
   );
 }

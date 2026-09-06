@@ -20,7 +20,9 @@
     "repeats": "반복",
     "countdown": "카운트다운",
     "cyclic": "왕복",
-    "repeatsLegend": "반복 →",
+    "finished": "완료!",
+    "climbTitle": "오르막",
+    "climbLegend": "템포마다 한 열 · 마디마다 한 칸",
     "summary": "{{beats}}박 · {{steps}}단계 · {{repeats}}반복 · {{time}}",
     "timeRemaining": "{{time}} 남음",
     "desc": {

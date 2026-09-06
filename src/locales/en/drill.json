@@ -20,7 +20,9 @@
     "repeats": "Repeats",
     "countdown": "Countdown",
     "cyclic": "Cyclic",
-    "repeatsLegend": "Repeats →",
+    "finished": "Done!",
+    "climbTitle": "The climb",
+    "climbLegend": "One column per tempo · one cell per bar",
     "summary": "{{beats}} beats · {{steps}} steps · {{repeats}} repeats · {{time}}",
     "timeRemaining": "{{time}} remaining",
     "desc": {

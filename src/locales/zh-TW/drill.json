@@ -20,7 +20,9 @@
     "repeats": "遍數",
     "countdown": "倒數計時",
     "cyclic": "循環",
-    "repeatsLegend": "遍數 →",
+    "finished": "完成！",
+    "climbTitle": "爬升圖",
+    "climbLegend": "每個速度一欄 · 每小節一格",
     "summary": "{{beats}} 拍 · {{steps}} 級 · {{repeats}} 遍 · {{time}}",
     "timeRemaining": "剩餘 {{time}}",
     "desc": {

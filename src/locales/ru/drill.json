@@ -20,7 +20,9 @@
     "repeats": "Повторы",
     "countdown": "Обратный отсчёт",
     "cyclic": "Циклический",
-    "repeatsLegend": "Повторы →",
+    "finished": "Готово!",
+    "climbTitle": "Подъём",
+    "climbLegend": "Один столбец на темп · одна ячейка на такт",
     "summary": "{{beats}} долей · {{steps}} шагов · {{repeats}} повторов · {{time}}",
     "timeRemaining": "Осталось {{time}}",
     "desc": {

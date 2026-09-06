@@ -152,96 +152,203 @@
   padding: 0 12px;
 }
 
-/* Rotated grid: rows = BPM steps, cols = repeats */
-.drill-grid-wrapper {
+/* =================== The climb (UI_DECISIONS U3.2) ===================
+   One column per tempo step, rising left to right; one cell per bar inside a
+   column. The thing this replaced was a 13×9 matrix of identical squares —
+   the same picture whether the drill climbed, zigzagged or looped, which is
+   to say no picture at all.
+
+   Three numbers drive the whole layout, and they are the ones that have to
+   give when the window is small:
+     --climb-rise    how far the top step stands above the bottom one
+     --climb-cell-h  the height of one bar
+     --climb-cell-w  its width */
+.drill-climb {
+  /* Sized off the window rather than a breakpoint, because the thing that
+     runs out is the window's height, not a category of window. At the 780px
+     minimum the whole screen above the climb costs about 600px, so 23vh is
+     what is actually left; the 290px ceiling stops a tall monitor from
+     drawing a staircase you have to look up at. */
+  --climb-rise: clamp(110px, 23vh, 290px);
+  --climb-cell-h: clamp(18px, 3.2vh, 30px);
+  --climb-cell-w: 6px;
+  --climb-cell-gap: 2px;
+  --climb-col-gap: 12px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0;
-  margin-left: -40px;
-}
-
-.drill-grid-legend-bottom {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  gap: 12px;
   width: 100%;
-  max-width: fit-content;
-  margin-top: 4px;
+  min-width: 0;
 }
 
-.drill-grid-corner {
-  width: 40px;
-  flex-shrink: 0;
+.drill-climb-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-.drill-grid-legend-label {
-  font-size: 0.6rem;
-  color: var(--text-muted);
+.drill-climb-title {
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding-left: 2px;
+  color: var(--text-muted);
+}
+
+.drill-climb-legend {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
   transition:
     opacity 0.3s ease,
     color 0.3s ease;
 }
 
-.drill-grid {
+/* The fallback, stated on purpose. Nine steps of twelve bars want ~830px and
+   a 480px window has about 380px to give. Shrinking the cells to fit turns
+   the staircase into the mesh we just left, so the cells shrink to a floor
+   (three breakpoints below) and then the track scrolls. DrillClimb keeps the
+   playing column centred while a run is going, so scrolling never hides the
+   part you need. */
+.drill-climb-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scroll-behavior: smooth;
+  padding-bottom: 2px;
+  /* The glow on the current cell would be clipped by the scroll box. */
+  margin: -8px -4px 0;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-top: 8px;
+}
+
+.drill-climb-track {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--climb-col-gap);
+  width: max-content;
+  min-width: 100%;
+  /* Fixed height so adding a step does not shove the rest of the screen
+     around — only the columns move. */
+  height: calc(var(--climb-rise) + var(--climb-cell-h) + 26px);
+}
+
+/* `--climb-step-rise` is set per column by DrillClimb: 0 for the slowest
+   tempo in the plan, 1 for the fastest, linear in between. Everything that
+   makes the staircase a staircase is this one line. */
+.drill-climb-col {
+  --climb-step-rise: 0;
+  margin-bottom: calc(var(--climb-rise) * var(--climb-step-rise));
   display: flex;
   flex-direction: column;
-  gap: 4px;
-}
-
-.drill-grid-row {
-  display: flex;
   align-items: center;
-  gap: 4px;
-  /* `backwards` keeps the row in its `from` state (invisible, shifted)
-   * during the inline animation-delay so the BPM label doesn't flash
-   * visible before its turn in the top-to-bottom cascade. */
-  animation: gridRowIn 0.25s ease backwards;
+  gap: 8px;
+  flex-shrink: 0;
+  /* `backwards` holds the column invisible through its inline delay so the
+     staircase draws itself left to right instead of flashing whole. */
+  animation: climbColIn 0.28s ease backwards;
 }
 
-@keyframes gridRowIn {
+@keyframes climbColIn {
   from {
     opacity: 0;
-    transform: translateY(-4px);
+    transform: translateY(6px);
   }
 }
 
-.drill-grid-row.exiting {
-  animation: gridRowOut 0.25s ease forwards;
+.drill-climb-col.exiting {
+  animation: climbColOut 0.25s ease forwards;
+  pointer-events: none;
 }
 
-@keyframes gridRowOut {
+@keyframes climbColOut {
   to {
     opacity: 0;
-    transform: translateY(4px) scaleY(0.6);
-    max-height: 0;
-    margin-top: -4px;
+    transform: translateY(6px) scaleY(0.7);
+    max-width: 0;
+    margin-right: calc(var(--climb-col-gap) * -1);
   }
 }
 
-.drill-grid-cell.exiting {
-  animation: gridCellOut 0.2s ease forwards;
+.drill-climb-cells {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--climb-cell-gap);
 }
 
-@keyframes gridCellOut {
+/* Specificity note: `[data-theme-group="light"] .drill-grid-cell` in
+   global.css paints every cell with a flat accent fill, which would erase the
+   three states below. Two classes plus the block beats it in both themes
+   without an !important war. */
+.drill-climb .drill-climb-cells .drill-climb-cell {
+  width: var(--climb-cell-w);
+  height: var(--climb-cell-h);
+  border-radius: 2px;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--text-faint);
+  opacity: 1;
+  box-shadow: none;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.3s ease,
+    opacity 0.3s ease,
+    transform 0.15s ease;
+  animation: climbCellIn 0.2s ease;
+}
+
+@keyframes climbCellIn {
+  from {
+    transform: scaleY(0.3);
+    opacity: 0;
+  }
+}
+
+.drill-climb .drill-climb-cells .drill-climb-cell:hover {
+  border-color: var(--accent);
+  transform: scaleY(1.08);
+}
+
+.drill-climb .drill-climb-cells .drill-climb-cell.done {
+  background: color-mix(in srgb, var(--accent) 55%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  opacity: 1;
+}
+
+.drill-climb .drill-climb-cells .drill-climb-cell.current {
+  background: var(--accent);
+  border-color: var(--accent);
+  opacity: 1;
+  box-shadow:
+    0 0 8px var(--accent-glow),
+    0 0 18px var(--accent-glow);
+}
+
+.drill-climb-cell.exiting {
+  animation: climbCellOut 0.2s ease forwards;
+}
+
+@keyframes climbCellOut {
   to {
-    opacity: 0 !important;
-    transform: scale(0.3);
+    opacity: 0;
+    transform: scaleY(0.3);
+    width: 0;
+    border-width: 0;
+    margin-left: calc(var(--climb-cell-gap) * -1);
   }
 }
 
-.drill-grid-bpm {
-  width: 40px;
-  font-size: 0.65rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-align: right;
-  padding-right: 6px;
-  flex-shrink: 0;
+/* The tempo, under its own column, at that column's height. */
+.drill-climb-bpm {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-tertiary);
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
   transition:
     color 0.3s ease,
     opacity 0.3s ease,
@@ -249,57 +356,56 @@
     text-shadow 0.3s ease;
 }
 
-.drill-grid-bpm.current {
+.drill-climb-bpm.current {
   color: var(--accent);
+  text-shadow: 0 0 10px var(--accent-glow);
 }
 
-.drill-grid-bpm.done {
+.drill-climb-bpm.done {
   color: var(--text-secondary);
 }
 
-.drill-grid-cells {
-  display: flex;
-  gap: 4px;
-}
-
-.drill-grid-cell {
-  width: 28px;
-  height: 28px;
-  border-radius: 4px;
-  background: var(--accent);
-  opacity: 0.2;
-  transition:
-    opacity 0.3s ease,
-    box-shadow 0.3s ease,
-    transform 0.3s ease;
-  animation: gridCellIn 0.2s ease;
-}
-
-@keyframes gridCellIn {
-  from {
-    transform: scale(0.4);
-    opacity: 0;
+/* Below ~830px of stage the cells give up width before the track gives up
+   and scrolls. 3px is the floor: thinner than that and a bar stops reading
+   as a bar. */
+@media (max-width: 1023px) {
+  .drill-climb {
+    --climb-cell-w: 5px;
+    --climb-col-gap: 9px;
   }
 }
 
-.drill-grid-cell.done {
-  opacity: 1 !important;
-  box-shadow: none;
+@media (max-width: 767px) {
+  .drill-climb {
+    --climb-cell-w: 4px;
+    --climb-cell-gap: 1px;
+    --climb-col-gap: 7px;
+  }
 }
 
-.drill-grid-cell.current {
-  opacity: 1 !important;
-  box-shadow: 0 0 6px var(--accent-glow);
+@media (max-width: 559px) {
+  .drill-climb {
+    --climb-cell-w: 3px;
+    --climb-cell-gap: 1px;
+    --climb-col-gap: 6px;
+    /* Shorter as well as thinner: a narrow window is usually a small one, and
+       the staircase has to leave room for the tempo readout above it. */
+    --climb-rise: clamp(90px, 19vh, 180px);
+  }
+
+  .drill-climb-bpm {
+    font-size: 0.68rem;
+  }
 }
 
-/* Spotlight: dim grid + dots, then boost targeted elements */
+/* Spotlight: dim the climb + dots, then boost targeted elements */
 .drill-view[data-highlight] .drill-grid-cell {
   opacity: 0.06 !important;
 }
 .drill-view[data-highlight] .drill-grid-bpm {
   opacity: 0.3;
 }
-.drill-view[data-highlight] .drill-grid-legend-label {
+.drill-view[data-highlight] .drill-climb-legend {
   opacity: 0.3;
 }
 .drill-view[data-highlight] .drill-dot {
@@ -317,21 +423,23 @@
   transform: scale(1.2);
 }
 
-/* Repeats spotlight: highlight entire first row */
+/* Repeats spotlight: the first column is exactly the thing the stepper
+   changes — one cell per bar held at that tempo. */
 .drill-view[data-highlight="repeats"] [data-row-idx="0"] .drill-grid-cell {
   opacity: 0.9 !important;
+  border-color: var(--accent);
   box-shadow: 0 0 8px var(--accent-glow);
 }
 .drill-view[data-highlight="repeats"] [data-row-idx="0"] .drill-grid-bpm {
   opacity: 1;
   color: var(--accent);
 }
-.drill-view[data-highlight="repeats"] .drill-grid-legend-label {
+.drill-view[data-highlight="repeats"] .drill-climb-legend {
   opacity: 1;
   color: var(--accent);
 }
 
-/* Start BPM spotlight: highlight first row's BPM label */
+/* Start BPM spotlight: the column the climb starts from */
 .drill-view[data-highlight="startBpm"] [data-row-idx="0"] .drill-grid-bpm {
   opacity: 1;
   color: var(--accent);
@@ -339,7 +447,7 @@
   transform: scale(1.15);
 }
 
-/* Target BPM spotlight: highlight last row's BPM label */
+/* Target BPM spotlight: the column at the top of the climb */
 .drill-view[data-highlight="targetBpm"] [data-last-row] .drill-grid-bpm {
   opacity: 1;
   color: var(--accent);
@@ -353,9 +461,11 @@
   flex-direction: column;
   gap: 0;
   padding: 0;
-  background: rgba(255, 255, 255, 0.02);
+  /* Was rgba(255,255,255,0.02) over a hardcoded white hairline, which is
+     invisible in Ivory and Arctic and wrong in Manuscript. */
+  background: var(--bg-panel);
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
   max-width: 480px;
   width: 100%;
   align-self: center;
@@ -588,13 +698,23 @@
 }
 
 /* Disable all drill animations when view animations are off */
-.drill-view[data-animations="off"] .drill-grid-row,
+.drill-view[data-animations="off"] .drill-climb-col,
 .drill-view[data-animations="off"] .drill-grid-cell,
 .drill-view[data-animations="off"] .drill-dot,
-.drill-view[data-animations="off"] .drill-grid-row.exiting,
+.drill-view[data-animations="off"] .drill-climb-col.exiting,
 .drill-view[data-animations="off"] .drill-grid-cell.exiting,
 .drill-view[data-animations="off"] .drill-dot.exiting {
   animation: none;
+}
+
+.drill-view[data-animations="off"] .drill-climb-scroll {
+  scroll-behavior: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drill-climb-scroll {
+    scroll-behavior: auto;
+  }
 }
 
 /* =================== The plan line (UI_REVAMP Phase C2) =================== */
@@ -604,52 +724,71 @@
 
 .drill-plan {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 2px;
   margin-bottom: 14px;
 }
 
+/* The token is a phrase with an underline, not a button with a box. A row of
+   chips reads as a toolbar; a row of underlined phrases reads as a sentence
+   you can reach into, which is what U3.1 asked for. The dotted rule is the
+   affordance — the same one a form field uses to say "this is editable". */
 .drill-plan-token {
   display: flex;
   align-items: baseline;
-  gap: 8px;
-  padding: 6px 12px;
+  gap: 7px;
+  padding: 2px 10px 5px;
   border: none;
-  border-radius: var(--radius-sm);
+  border-bottom: 2px dotted color-mix(in srgb, var(--text-primary) 22%, transparent);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   background: transparent;
   color: var(--text-primary);
   font-family: inherit;
   cursor: pointer;
-  transition: background 0.15s ease, box-shadow 0.15s ease;
-  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--text-primary) 16%, transparent);
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .drill-plan-token:hover {
   background: var(--surface-hover);
+  border-bottom-color: var(--text-tertiary);
 }
 
 .drill-plan-token.open {
   background: var(--accent-subtle);
-  box-shadow: inset 0 -2px 0 var(--accent);
+  border-bottom-color: var(--accent);
+  color: var(--accent);
 }
 
 .drill-plan-value {
-  font-size: 1.45rem;
+  font-size: 2rem;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
 }
 
 .drill-plan-down {
+  font-size: 1.35rem;
   color: var(--text-tertiary);
 }
 
+/* Small, and set apart from the numeral it belongs to — the value is what you
+   read across the room, the unit is what tells you which value it was. */
 .drill-plan-unit {
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
   color: var(--text-tertiary);
+}
+
+.drill-plan-token.open .drill-plan-unit {
+  color: color-mix(in srgb, var(--accent) 75%, var(--text-tertiary));
 }
 
 .drill-plan-arrow {
@@ -662,7 +801,8 @@
   height: 4px;
   border-radius: 50%;
   background: var(--text-faint);
-  margin: 0 6px;
+  margin: 0 8px;
+  align-self: center;
 }
 
 /* When the plan line opens one phrase, the config shows only that phrase's
@@ -708,16 +848,51 @@
   justify-content: flex-start;
 }
 
+/* ALL SETTINGS is the back door, not the front one. Collapsed it is a line of
+   small caps and a chevron with no panel around it — the plan line above is
+   where the drill is actually edited. The panel appears only once it is open,
+   because then it really is holding something. */
 .drill-config {
   align-self: flex-start;
   max-width: 560px;
+  width: auto;
+  min-width: 0;
+  background: transparent;
+  border-color: transparent;
+  border-radius: var(--radius-sm);
+  margin-bottom: 4px;
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease;
 }
 
-.drill-grid-wrapper {
-  align-items: flex-start;
-  /* The negative margin nudged a centred grid back under a centred heading.
-     Anchored left there is nothing to compensate for. */
-  margin-left: 0;
+.drill-config:not(.collapsed) {
+  width: 100%;
+  background: var(--bg-panel);
+  border-color: var(--border);
+  border-radius: 10px;
+}
+
+.drill-config-toggle {
+  justify-content: flex-start;
+  gap: 7px;
+  width: auto;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.drill-config:not(.collapsed) .drill-config-toggle {
+  width: 100%;
+  justify-content: space-between;
+  padding: 10px 12px;
+}
+
+.drill-config-toggle:hover {
+  background: var(--surface-hover);
+}
+
+.drill-config-chevron {
+  opacity: 0.6;
 }
 
 .drill-summary {

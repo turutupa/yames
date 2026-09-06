@@ -20,7 +20,9 @@
     "repeats": "Powtórzenia",
     "countdown": "Odliczanie",
     "cyclic": "Cykl",
-    "repeatsLegend": "Powtórzenia →",
+    "finished": "Gotowe!",
+    "climbTitle": "Wspinaczka",
+    "climbLegend": "Jedna kolumna na tempo · jedno pole na takt",
     "summary": "{{beats}} uderzeń · {{steps}} kroków · {{repeats}} powtórzeń · {{time}}",
     "timeRemaining": "Zostało {{time}}",
     "desc": {

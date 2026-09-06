@@ -20,7 +20,9 @@
     "repeats": "Tekrar",
     "countdown": "Geri Sayım",
     "cyclic": "Döngüsel",
-    "repeatsLegend": "Tekrar →",
+    "finished": "Bitti!",
+    "climbTitle": "Tırmanış",
+    "climbLegend": "Her tempo için bir sütun · her ölçü için bir kare",
     "summary": "{{beats}} vuruş · {{steps}} adım · {{repeats}} tekrar · {{time}}",
     "timeRemaining": "Kalan {{time}}",
     "desc": {

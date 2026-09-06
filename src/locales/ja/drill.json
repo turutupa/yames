@@ -20,7 +20,9 @@
     "repeats": "繰り返し",
     "countdown": "カウントダウン",
     "cyclic": "往復",
-    "repeatsLegend": "繰り返し →",
+    "finished": "完了！",
+    "climbTitle": "上り坂",
+    "climbLegend": "テンポごとに1列 · 小節ごとに1マス",
     "summary": "{{beats}} 拍 · {{steps}} ステップ · {{repeats}} 回 · {{time}}",
     "timeRemaining": "残り {{time}}",
     "desc": {

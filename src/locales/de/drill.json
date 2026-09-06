@@ -20,7 +20,9 @@
     "repeats": "Wiederholungen",
     "countdown": "Countdown",
     "cyclic": "Zyklisch",
-    "repeatsLegend": "Wiederholungen →",
+    "finished": "Fertig!",
+    "climbTitle": "Der Aufstieg",
+    "climbLegend": "Eine Spalte pro Tempo · ein Feld pro Takt",
     "summary": "{{beats}} Beats · {{steps}} Stufen · {{repeats}} Wiederholungen · {{time}}",
     "timeRemaining": "{{time}} verbleibend",
     "desc": {
