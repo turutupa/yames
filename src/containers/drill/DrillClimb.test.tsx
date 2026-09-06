@@ -149,4 +149,33 @@ describe("DrillClimb", () => {
       container.querySelector(".drill-climb-legend")?.getAttribute("title"),
     ).toMatch(/one cell per bar/i);
   });
+
+  it("marks where you are with one playhead, and only while a run is going", () => {
+    // The line is worth drawing only because the columns are a fixed width:
+    // a picture that rescaled to fit the step count would slide it under the
+    // player's eyes whenever a step was added.
+    const { container, rerender } = render(<DrillClimb {...base} />);
+    expect(container.querySelectorAll(".drill-climb-playhead")).toHaveLength(0);
+
+    rerender(<DrillClimb {...base} active currentStep={1} barsInStep={2} />);
+    const heads = container.querySelectorAll(".drill-climb-playhead");
+    expect(heads).toHaveLength(1);
+
+    // In the column being played, at the bar being played.
+    const col = heads[0].closest(".drill-climb-col") as HTMLElement;
+    expect(col.querySelector(".drill-climb-bpm")?.textContent).toBe("90");
+    expect((heads[0] as HTMLElement).style.getPropertyValue("--climb-playhead-bar")).toBe("2");
+  });
+
+  it("follows the bar, not the step", () => {
+    const { container, rerender } = render(
+      <DrillClimb {...base} active currentStep={0} barsInStep={0} />,
+    );
+    const bar = () =>
+      (container.querySelector(".drill-climb-playhead") as HTMLElement)
+        .style.getPropertyValue("--climb-playhead-bar");
+    expect(bar()).toBe("0");
+    rerender(<DrillClimb {...base} active currentStep={0} barsInStep={3} />);
+    expect(bar()).toBe("3");
+  });
 });

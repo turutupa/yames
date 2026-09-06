@@ -135,6 +135,19 @@ export function DrillClimb({
                 data-current={isCurrent ? "" : undefined}
                 style={columnStyle(bpm, base)}
               >
+                {/* The playhead. The columns are a fixed width and the track
+                    scrolls, so the picture never rescales to fit the step
+                    count — which means a position in it stays put and is
+                    worth marking with a line. It rises out of the column to
+                    the full height of the track so it reads across the whole
+                    staircase rather than only the step it is standing on. */}
+                {isCurrent && (
+                  <span
+                    className="drill-climb-playhead"
+                    style={{ "--climb-playhead-bar": barsInStep } as React.CSSProperties}
+                    aria-hidden="true"
+                  />
+                )}
                 <div className="drill-climb-cells">
                   {Array.from({ length: barsPerStep }, (_, barIdx) => {
                     const barDone = isDone || (isCurrent && barIdx < barsInStep);

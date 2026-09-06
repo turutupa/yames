@@ -307,6 +307,57 @@
   gap: var(--climb-cell-gap);
 }
 
+/* The playhead — where you are, right now, in the whole exercise.
+
+   It is worth drawing only because the columns are a fixed width and the
+   track scrolls: a picture that rescaled itself to fit the step count would
+   move this line under your eyes every time a step was added. Because it does
+   not, the line means one thing all the way through a run.
+
+   It stands to the full height of the track rather than its own column, so on
+   a staircase you can see it against the steps still to climb. `bottom` is
+   pinned to the column's base and the height reaches past the column's top —
+   nothing on this path clips, and the track's height is the same expression
+   used to size the track itself. */
+.drill-climb-col {
+  position: relative;
+}
+
+.drill-climb-playhead {
+  position: absolute;
+  bottom: -6px;
+  /* Centre of the bar being played: whole cells before it, plus half of it. */
+  left: calc(
+    var(--climb-playhead-bar, 0) * (var(--climb-cell-w) + var(--climb-cell-gap)) +
+      var(--climb-cell-w) / 2 - 1px
+  );
+  width: 2px;
+  height: calc(var(--climb-rise) + var(--climb-cell-h) + 32px);
+  border-radius: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--accent) 55%, transparent) 22%,
+    var(--accent) 100%
+  );
+  box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 45%, transparent);
+  pointer-events: none;
+  /* Slides between bars rather than jumping, so at a slow tempo it reads as
+     movement instead of a light switching on somewhere else. */
+  transition: left 0.18s ease;
+}
+
+.drill-view[data-animations="off"] .drill-climb-playhead,
+.drill-climb[data-reduced] .drill-climb-playhead {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drill-climb-playhead {
+    transition: none;
+  }
+}
+
 /* Specificity note: `[data-theme-group="light"] .drill-grid-cell` in
    global.css paints every cell with a flat accent fill, which would erase the
    three states below. Two classes plus the block beats it in both themes
