@@ -349,3 +349,27 @@ where the last warm-up beat becomes beat 0. It is gated on `ramp_warming_up`
 and reads `speed_ramp.warmup_*`, so today only a drill can have one. U9.2's
 "count me in" needs that machinery to belong to the engine rather than to the
 ramp. Modest Rust work, and the audio side of it is already written.
+
+### U9.6 · A chain ends, unless you say how many times to repeat it — **decided**
+
+The default is that a routine finishes and stops. A metronome that will not
+stop on its own is a metronome you have to go and switch off, and the point of
+chaining is to stop watching it.
+
+Repeat is a count, not a toggle. "Loop forever" and "three times through" are
+the same control with different numbers, and the count is the one that can
+express both — where a checkbox can only ever mean forever. It belongs to the
+chain, not to a gap: repeating is what the whole routine does, and hanging it
+off the last transition would read as a fifth step.
+
+The drill's `cyclic` is deliberately NOT this. A cyclic ramp turns round at
+the target and descends, which is a shape; a repeated chain starts again at
+step one. Same word, two behaviours — worth keeping apart in the vocabulary
+(see U3.5, still open on whether "cyclic" survives at all).
+
+### U9.7 · The transport counts the steps — **decided**
+
+"Step 1 of 4" and "next in 5 bars", with a way to skip ahead. A chain hides
+what a metronome normally shows plainly — what it is about to do — so the
+transport has to say it, and the count is also how you know the routine is
+progressing at all when two adjacent steps sound similar.
