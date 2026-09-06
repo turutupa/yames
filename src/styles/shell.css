@@ -1249,8 +1249,31 @@ button.context-chip:hover,
   transition: none;
 }
 
+/* The way out of the library.
+
+   This used to be `display: none`. The rail's library is not the drawer the
+   old sidebar was, and the drawer's toggle looked out of place in it — but
+   hiding it left the panel with a `.rail-library-reopen` button that only
+   exists while it is *closed*. Open it and there was no button to close it
+   again: a one-way door, with only the toggle-sidebar hotkey behind it for
+   anyone who knew. Sized to sit with search and `+` rather than restyled as
+   the drawer control it no longer is. */
 .rail-library .preset-sidebar-toggle-inner {
-  display: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  opacity: 1;
+  color: var(--text-secondary);
+}
+
+.rail-library .preset-sidebar-toggle-inner svg {
+  width: 14px;
+  height: 14px;
+}
+
+.rail-library .preset-sidebar-toggle-inner:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .rail-library-reopen {

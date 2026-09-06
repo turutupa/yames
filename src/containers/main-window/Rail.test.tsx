@@ -151,4 +151,31 @@ describe("Rail", () => {
     expect(anchored).toHaveLength(2);
     expect(anchored[0].nextElementSibling).toBe(anchored[1]);
   });
+
+  it("can be closed again, not just opened", () => {
+    // The bug this guards: the rail hid the library's own toggle, and the
+    // only other control — `.rail-library-reopen` — renders exclusively while
+    // the library is CLOSED. Open it and there was no way back except a
+    // hotkey you had to already know about. A one-way door.
+    const { container, props } = setup({ libraryOpen: true });
+    const close = container.querySelector(
+      ".preset-sidebar-toggle-inner",
+    ) as HTMLButtonElement;
+    expect(close, "no visible way to collapse the library").not.toBeNull();
+    fireEvent.click(close);
+    expect(props.onToggleLibrary).toHaveBeenCalled();
+  });
+
+  it("offers exactly one library control at a time", () => {
+    // Open: the collapse button. Closed: the reopen button. Never both, never
+    // neither — either would be a different kind of confusing.
+    const { container, props, rerender } = setup({ libraryOpen: true });
+    const count = () =>
+      container.querySelectorAll(
+        ".preset-sidebar-toggle-inner, .rail-library-reopen",
+      ).length;
+    expect(count()).toBe(1);
+    rerender(<Rail {...props} libraryOpen={false} />);
+    expect(count()).toBe(1);
+  });
 });
