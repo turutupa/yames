@@ -2,7 +2,7 @@
   "metronome": {
     "tap": "TAP",
     "tapCount": "{{count}} lần gõ",
-    "subdiv": "Phân nhịp",
+    "subdivision": "Phân nhịp",
     "meter": "Nhịp",
     "free": "FREE",
     "freeBeatCount": "{{count}} phách",

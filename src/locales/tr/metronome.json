@@ -2,7 +2,7 @@
   "metronome": {
     "tap": "TAP",
     "tapCount": "{{count}} TAP",
-    "subdiv": "Alt Bölüm",
+    "subdivision": "Alt Bölüm",
     "meter": "Zaman İmzası",
     "free": "FREE",
     "freeBeatCount": "{{count}} vuruş",

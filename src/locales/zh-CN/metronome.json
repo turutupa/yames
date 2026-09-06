@@ -2,7 +2,7 @@
   "metronome": {
     "tap": "点拍",
     "tapCount": "{{count}} 次",
-    "subdiv": "细分",
+    "subdivision": "细分",
     "meter": "拍号",
     "free": "FREE",
     "freeBeatCount": "{{count}} 拍",

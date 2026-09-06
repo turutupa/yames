@@ -2,7 +2,7 @@
   "metronome": {
     "tap": "TAP",
     "tapCount": "{{count}} appuis",
-    "subdiv": "Subdiv",
+    "subdivision": "Subdivision",
     "meter": "Mesure",
     "free": "FREE",
     "freeBeatCount": "{{count}} temps",

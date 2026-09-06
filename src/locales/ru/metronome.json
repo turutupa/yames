@@ -2,7 +2,7 @@
   "metronome": {
     "tap": "TAP",
     "tapCount": "{{count}} нажатий",
-    "subdiv": "Дробление",
+    "subdivision": "Дробление",
     "meter": "Размер",
     "free": "FREE",
     "freeBeatCount": "{{count}} доли",

@@ -2,7 +2,7 @@
   "metronome": {
     "tap": "TAP",
     "tapCount": "{{count}}회 탭",
-    "subdiv": "분할",
+    "subdivision": "분할",
     "meter": "박자",
     "free": "FREE",
     "freeBeatCount": "{{count}}박",

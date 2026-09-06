@@ -68,7 +68,10 @@ export function MeterPresets({ beatGroups, freeMode }: MeterPresetsProps) {
   return (
     <div className="meter-presets" ref={pickerRef}>
       <div className="meter-head">
-        <span className="row-side-label">{t("metronome.meter")}</span>
+        {/* Inline, above the dots it describes. It used to hang in a gutter to
+            the left of its row, which is what the 80px of stage padding was
+            for; the design labels its sections like TEMPO instead. */}
+        <span className="stage-label">{t("metronome.meter")}</span>
         <button
           className={`meter-chip ${open ? "open" : ""}`}
           onClick={() => setOpen((o) => !o)}
