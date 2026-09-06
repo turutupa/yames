@@ -35,8 +35,11 @@ export interface DrillClimbProps {
  *
  * What is deliberately missing: the last-run underlay (U3.3) and the note
  * beside the chart ("you got five bars into 110 before the timing came
- * apart"). Both need per-run history the app does not record yet, and a chart
- * that invents its own history is worse than one that admits it has none.
+ * apart"). Both need per-run history the app does not record yet — a saved
+ * session carries a timestamp, a tempo and a score, and nothing that says
+ * which drill it was or how far up the ramp it got — and a chart that invents
+ * its own history is worse than one that admits it has none. So the legend's
+ * filled swatch is the run you are playing now, not the one you played last.
  *
  * Rendered as its own component because Zen mounts the same object (U6.3) and
  * two implementations of one picture have already drifted apart once.
@@ -97,7 +100,20 @@ export function DrillClimb({
     <div className="drill-climb">
       <div className="drill-climb-head">
         <span className="drill-climb-title">{t("drill.climbTitle")}</span>
-        <span className="drill-climb-legend">{t("drill.climbLegend")}</span>
+        {/* Swatches rather than a sentence, because the cells now carry two
+            meanings and a caption cannot say which is which. The sentence it
+            replaced still explains the picture's construction, so it stays as
+            the legend's tooltip rather than being deleted. */}
+        <span className="drill-climb-legend" title={t("drill.climbLegend")}>
+          <span className="drill-climb-key">
+            <span className="drill-climb-swatch done" aria-hidden="true" />
+            {t("drill.climbLegendDone")}
+          </span>
+          <span className="drill-climb-key">
+            <span className="drill-climb-swatch plan" aria-hidden="true" />
+            {t("drill.climbLegendPlan")}
+          </span>
+        </span>
       </div>
       <div className="drill-climb-scroll" ref={scrollRef}>
         <div className="drill-climb-track">

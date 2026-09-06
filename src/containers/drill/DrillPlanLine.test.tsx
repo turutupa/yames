@@ -10,6 +10,7 @@ const base = {
   beatsPerBar: 4,
   barsPerStep: 12,
   mode: "linear",
+  soundName: "Wood",
   openField: null,
   onOpenField: vi.fn(),
 };
@@ -64,5 +65,35 @@ describe("DrillPlanLine", () => {
     const { container } = render(<DrillPlanLine {...base} openField="shape" />);
     const open = container.querySelectorAll(".drill-plan-token.open");
     expect(open).toHaveLength(1);
+  });
+
+  // Two lines, as drawn: the loud one is the shape of the climb, the quiet one
+  // is what a single bar will sound like. The beat count belongs to the second
+  // because it is a per-bar fact, not part of the tempo's journey.
+  it("keeps the shape of the climb on the loud line", () => {
+    const { container } = render(<DrillPlanLine {...base} />);
+    const line = container.querySelector(".drill-plan")?.textContent ?? "";
+    expect(line).toContain("80");
+    expect(line).toContain("120");
+    expect(line).toContain("+5");
+    expect(line).toContain("every 12 bars");
+    expect(line).not.toContain("per bar");
+  });
+
+  it("puts what a bar sounds like on the quiet line", () => {
+    const { container } = render(<DrillPlanLine {...base} />);
+    const detail = container.querySelector(".drill-plan-detail")?.textContent ?? "";
+    expect(detail).toContain("4 beats per bar");
+    expect(detail).toContain("quarter notes");
+    expect(detail).toContain("Wood");
+  });
+
+  it("reaches the same settings from the beat count as from the bar count", () => {
+    const onOpenField = vi.fn();
+    const { container } = render(
+      <DrillPlanLine {...base} onOpenField={onOpenField} />,
+    );
+    fireEvent.click(container.querySelector(".drill-plan-detail-token")!);
+    expect(onOpenField).toHaveBeenCalledWith("shape");
   });
 });
