@@ -1276,12 +1276,24 @@ span.meter-grouping-chip {
 
 /* ── FREE mode ── */
 
+/* The same box as a grouped bar's, so switching between FREE and a meter does
+   not shift the screen under the pointer.
+ *
+ * A grouped bar draws its dots inside `.group-display`, which carries 10px of
+ * vertical padding and a 1px transparent border that becomes visible on hover.
+ * FREE drew them bare, so the row was 22px shorter and everything below it —
+ * subdivision, and the whole stage's centring — jumped when the meter changed.
+ * The padding is matched rather than removed from the grouped side, because
+ * the box is what the hover state needs to have somewhere to appear. */
 .free-dots {
   display: flex;
   align-items: flex-start;
   gap: 9px;
   flex-wrap: wrap;
   justify-content: center;
+  padding: 10px 6px;
+  border: 1px solid transparent;
+  box-sizing: border-box;
 }
 
 /* Free-mode dot at rest — a ring like the rest, with no accent structure to
