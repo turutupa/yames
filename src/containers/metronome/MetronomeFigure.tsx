@@ -392,5 +392,34 @@ export function MetronomeFigure({ bpm, isPlaying, currentBeat }: MetronomeFigure
     redraw.current?.();
   }, [bpm, isPlaying]);
 
+  /**
+   * ...and a theme change, which is the same problem with a worse symptom.
+   *
+   * `rgb()` reads the ink live, so a frame drawn after a theme change is
+   * correct — but nothing was asking for that frame. A stopped figure only
+   * redraws on mount, on a resize, or on a tempo change, so switching theme
+   * left the canvas holding the PREVIOUS theme's ink until something else
+   * happened to trigger one. Going from a dark theme to a light one left
+   * near-white lines on cream: the sketch simply vanished. Loading straight
+   * into the same theme drew it correctly, which is why this survived — it is
+   * only reachable by changing theme with the figure already on screen.
+   *
+   * Watched rather than passed in as a prop. `applyTheme` writes the tokens
+   * onto the root element's style, and every route to it — settings, the
+   * hotkey, onboarding — goes through that one write, so observing it catches
+   * all of them without any caller having to remember to tell us.
+   *
+   * Only while stopped: the running figure already redraws every frame.
+   */
+  useEffect(() => {
+    if (isPlaying) return;
+    const observer = new MutationObserver(() => redraw.current?.());
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["style", "data-theme"],
+    });
+    return () => observer.disconnect();
+  }, [isPlaying]);
+
   return <canvas ref={canvasRef} className="metronome-figure" aria-hidden="true" />;
 }
