@@ -270,6 +270,7 @@ export function MetronomeView({
           activeSub={activeSub}
           isDownbeat={isDownbeat}
           freeMode={state.freeMode}
+          accentMode={state.accentMode ?? "groups"}
           isAccentBeat={currentBeat?.isAccent ?? false}
           feedback={dotFeedback}
           onBeatGroupsChange={(next) => {

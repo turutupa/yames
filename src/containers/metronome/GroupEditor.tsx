@@ -10,6 +10,8 @@ interface GroupEditorProps {
   activeSub?: number;
   isDownbeat?: boolean;
   freeMode?: boolean;
+  /** Which beats carry the accent — mirrors the engine (U2.3). */
+  accentMode?: "groups" | "all" | "none";
   /** `BeatEvent.isAccent` for the beat currently lit. */
   isAccentBeat?: boolean;
   /**
@@ -37,6 +39,7 @@ export function GroupEditor({
   activeSub = -1,
   isDownbeat = false,
   freeMode = false,
+  accentMode = "groups",
   isAccentBeat = false,
   feedback,
 }: GroupEditorProps) {
@@ -45,7 +48,7 @@ export function GroupEditor({
   // Static markers only — the LIVE accent comes from the engine via
   // `isAccentBeat`, so the two can never disagree (and stays false in
   // FREE mode, where `accentPositions` is empty anyway).
-  const accents = accentPositions(beatGroups, freeMode);
+  const accents = accentPositions(beatGroups, freeMode, accentMode);
 
   if (freeMode) {
     return (

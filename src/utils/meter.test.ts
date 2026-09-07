@@ -84,6 +84,36 @@ describe("accentPositions", () => {
     }
   });
 });
+describe("accentPositions and the accent mode", () => {
+  // This mirrors `accent_for` in engine.rs. They must agree: this is what the
+  // dots draw at rest, and the engine is what you hear. For as long as the
+  // accent control existed without a mode argument here, you could choose
+  // "every beat", hear every beat, and watch a single dot stay lit.
+  it("marks every beat under `all`", () => {
+    expect([...accentPositions([3, 2, 2], false, "all")].sort((a, b) => a - b)).toEqual([
+      0, 1, 2, 3, 4, 5, 6,
+    ]);
+  });
+
+  it("marks nothing under `none`", () => {
+    expect([...accentPositions([3, 2, 2], false, "none")]).toEqual([]);
+  });
+
+  it("keeps group starts under `groups`, which is the default", () => {
+    expect([...accentPositions([3, 2, 2], false, "groups")].sort((a, b) => a - b)).toEqual([0, 3, 5]);
+    expect([...accentPositions([3, 2, 2])].sort((a, b) => a - b)).toEqual([0, 3, 5]);
+  });
+
+  it("lets `all` and `none` override FREE mode, exactly as the engine does", () => {
+    // `accent_for` returns early on the mode before it looks at free_mode, so
+    // a player who asked for every beat gets every beat there too.
+    expect([...accentPositions([4], true, "all")].sort((a, b) => a - b)).toEqual([0, 1, 2, 3]);
+    expect([...accentPositions([4], true, "none")]).toEqual([]);
+    // `groups` still yields nothing in FREE — it has no groups to open.
+    expect([...accentPositions([4], true, "groups")]).toEqual([]);
+  });
+});
+
 
 describe("findMeterPresetIndex", () => {
   it("finds an exact preset match", () => {

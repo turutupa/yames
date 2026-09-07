@@ -54,8 +54,20 @@ export function meterKey(groups: number[] | undefined | null): string {
 export function accentPositions(
   groups: number[] | undefined | null,
   freeMode = false,
+  mode: "groups" | "all" | "none" = "groups",
 ): Set<number> {
   const positions = new Set<number>();
+  // Mirrors `accent_for` in engine.rs, and must keep mirroring it: this is
+  // what the dots draw at rest, and the engine is what you hear. They
+  // disagreed for exactly as long as the accent control existed without this
+  // argument — you could pick "every beat", hear it, and watch one dot stay
+  // lit. `all` and `none` override FREE mode there too, for the same reason.
+  if (mode === "none") return positions;
+  if (mode === "all") {
+    const total = meterTotal(groups);
+    for (let i = 0; i < total; i++) positions.add(i);
+    return positions;
+  }
   if (freeMode) return positions;
   let cursor = 0;
   for (const g of groups ?? []) {
