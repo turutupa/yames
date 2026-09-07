@@ -140,16 +140,22 @@ describe("ChainTrack", () => {
     );
   });
 
-  it("says out loud that count-in does not play yet (U9.5)", () => {
-    // The artboard promises "two bars of count-in at 96, then step 2 begins".
-    // The engine cannot do that yet, so the editor says what it will do.
-    const withCountIn: Chain = {
+  it("says what a count-in does, now that it does it (U9.5)", () => {
+    // This test used to assert the opposite — that the editor admitted the
+    // count-in did not play. The engine's count-in is no longer welded to the
+    // speed ramp, so it does, and the copy says what happens rather than what
+    // is missing.
+    const chain = {
       ...CHAIN,
-      steps: [{ ...CHAIN.steps[0], transition: { kind: "countIn", bars: 2 } }, CHAIN.steps[1]],
+      steps: [
+        { ...CHAIN.steps[0], transition: { kind: "countIn", bars: 2 } as const },
+        CHAIN.steps[1],
+      ],
     };
-    setup({ chain: withCountIn });
-    fireEvent.click(screen.getByText("8 bars"));
-    expect(screen.getByText(/does not play yet/)).toBeInTheDocument();
+    const { container } = setup({ chain });
+    fireEvent.click(container.querySelectorAll(".chain-gap-chip")[0]);
+    expect(screen.queryByText(/does not play yet/)).toBeNull();
+    expect(screen.getByText(/beat one of the step/i)).toBeInTheDocument();
   });
 
   it("selecting a step is one click, renaming it is the second", () => {

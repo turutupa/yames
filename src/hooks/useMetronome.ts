@@ -18,6 +18,7 @@ const DEFAULT_STATE: AppState = {
   timeSignature: 4,
   beatGroups: [4],
   freeMode: false,
+  countIn: { beats: 0, done: 0 },
   speedRamp: {
     startBpm: 80,
     targetBpm: 140,
@@ -45,7 +46,9 @@ export function useMetronome() {
   const [currentBeat, setCurrentBeat] = useState<BeatEvent | null>(null);
 
   useEffect(() => {
-    getState().then(setState).catch(() => {});
+    getState()
+      .then(setState)
+      .catch(() => {});
 
     const unlistenState = onStateChange((s) => setState(s));
     const unlistenBeat = onBeat((b) => setCurrentBeat(b));

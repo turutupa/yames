@@ -85,8 +85,8 @@
       "restFor": "sus süresi",
       "fewerRestBars": "Daha az ölçü sus",
       "moreRestBars": "Daha çok ölçü sus",
-      "countInNotYet": "Sayma zincirinle birlikte kaydedilir ama henüz çalmıyor — bu adım şimdilik doğrudan geçişle giriyor.",
-      "barFinishes": "İçinde olduğun ölçü her zaman tamamlanır — hiçbir şey ortasından kesilmez."
+      "barFinishes": "İçinde olduğun ölçü her zaman tamamlanır — hiçbir şey ortasından kesilmez.",
+      "countInPlays": "Vuruşlar yeni tempoda duyulur; sonuncusu adımın birinci vuruşudur."
     },
     "transport": {
       "stepOf": "{{total}} adımdan {{number}}.",

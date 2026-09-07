@@ -397,6 +397,17 @@ import type { Chain } from "./types";
  */
 const CHAINS_KEY = "chains";
 
+/**
+ * Arm a count-in of `beats` beats before whatever starts next.
+ *
+ * The drill arms one from its own setting when a ramp starts; this is how a
+ * chain asks for the same thing between steps (U9.2). 0 disarms. The engine
+ * caps it at 8.
+ */
+export async function armCountIn(beats: number): Promise<void> {
+  return invoke("arm_count_in", { beats: Math.max(0, Math.min(8, Math.round(beats))) });
+}
+
 export async function listChains(): Promise<Chain[]> {
   const chains = await storeLoad<Chain[]>(CHAINS_KEY);
   return Array.isArray(chains) ? chains : [];

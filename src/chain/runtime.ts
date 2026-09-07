@@ -78,6 +78,12 @@ export type ChainEffect =
   | { kind: "applyStep"; index: number; step: ChainStep }
   /** Go quiet for `bars` bars before the next step. */
   | { kind: "rest"; bars: number }
+  /**
+   * Count the player into the step just applied. Emitted after `applyStep`
+   * and never before it: the beats have to sound at the tempo you are about
+   * to play, which is the whole point of a count-in (U9.2).
+   */
+  | { kind: "countIn"; beats: number }
   /** The chain is over. Stop playback. (U9.6) */
   | { kind: "finished" };
 
@@ -292,10 +298,17 @@ function land(chain: Chain, state: ChainRunState, seconds: number): ChainReducti
   }
 
   const transition = chain.steps[state.stepIndex]?.transition;
-  // TODO(U9.5): `countIn` is stored and shown but behaves as `cut` here. The
-  // engine's count-in is welded to the speed ramp (`ramp_warming_up`,
-  // `speed_ramp.warmup_*`) and has to be unwelded before a chain can ask for
-  // one; until then a false count-in would be worse than none.
+
+  // A count-in enters the step and then asks to be counted into it, in that
+  // order — the beats must sound at the tempo you are about to play.
+  if (transition?.kind === "countIn" && Number.isFinite(transition.bars) && transition.bars > 0) {
+    const entered = enterStep(chain, { ...state, pending }, seconds);
+    const beats = countInBeats(chain, pending, transition.bars);
+    return beats > 0
+      ? { ...entered, effects: [...entered.effects, { kind: "countIn", beats }] }
+      : entered;
+  }
+
   if (transition?.kind === "rest" && Number.isFinite(transition.bars) && transition.bars > 0) {
     return {
       state: {
@@ -309,6 +322,27 @@ function land(chain: Chain, state: ChainRunState, seconds: number): ChainReducti
     };
   }
   return enterStep(chain, { ...state, pending }, seconds);
+}
+
+/**
+ * Bars of count-in, in beats.
+ *
+ * The transition is written in bars because that is how a musician counts one
+ * in; the engine counts beats. The bar comes from the step being entered, not
+ * the one being left — you are being counted into the new meter.
+ *
+ * Capped at the engine's own limit of 8, so a two-bar count-in of 7/8 asks for
+ * something the engine will honour rather than something it will silently
+ * clamp behind our back.
+ */
+const MAX_COUNT_IN_BEATS = 8;
+
+function countInBeats(chain: Chain, pending: ChainNext, bars: number): number {
+  if (pending.kind === "end") return 0;
+  const step = chain.steps[pending.index];
+  if (!step) return 0;
+  const perBar = step.beatGroups.reduce((sum, n) => sum + n, 0) || 4;
+  return Math.min(MAX_COUNT_IN_BEATS, Math.max(1, Math.floor(bars) * perBar));
 }
 
 function enterStep(chain: Chain, state: ChainRunState, seconds: number): ChainReduction {

@@ -85,8 +85,8 @@
       "restFor": "pausa di",
       "fewerRestBars": "Meno battute di pausa",
       "moreRestBars": "Più battute di pausa",
-      "countInNotYet": "Il conteggio d'attacco viene salvato con la catena, ma non suona ancora: questo passo arriva comunque con uno stacco netto.",
-      "barFinishes": "La battuta in corso arriva sempre in fondo — niente viene tagliato a metà."
+      "barFinishes": "La battuta in corso arriva sempre in fondo — niente viene tagliato a metà.",
+      "countInPlays": "I battiti suonano al nuovo tempo e l’ultimo è il primo movimento dello step."
     },
     "transport": {
       "stepOf": "Passo {{number}} di {{total}}",

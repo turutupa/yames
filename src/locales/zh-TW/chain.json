@@ -85,8 +85,8 @@
       "restFor": "空拍長度",
       "fewerRestBars": "減少空拍小節",
       "moreRestBars": "增加空拍小節",
-      "countInNotYet": "數拍會隨鏈條一起儲存，但現在還不會響——這一步目前仍是直接切換進來。",
-      "barFinishes": "目前這一小節一定會走完，不會從中間切斷。"
+      "barFinishes": "目前這一小節一定會走完，不會從中間切斷。",
+      "countInPlays": "預備拍以新速度響起，最後一拍就是該步驟的第一拍。"
     },
     "transport": {
       "stepOf": "第 {{number}} 步 / 共 {{total}} 步",

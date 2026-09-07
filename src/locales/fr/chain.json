@@ -85,8 +85,8 @@
       "restFor": "silence de",
       "fewerRestBars": "Moins de mesures de silence",
       "moreRestBars": "Plus de mesures de silence",
-      "countInNotYet": "Le décompte est enregistré avec votre chaîne, mais il ne se joue pas encore : cette étape arrive toujours par une coupe nette.",
-      "barFinishes": "La mesure en cours va toujours à son terme — rien n'est coupé en deux."
+      "barFinishes": "La mesure en cours va toujours à son terme — rien n'est coupé en deux.",
+      "countInPlays": "Les temps sonnent au nouveau tempo, et le dernier est le premier temps de l’étape."
     },
     "transport": {
       "stepOf": "Étape {{number}} sur {{total}}",

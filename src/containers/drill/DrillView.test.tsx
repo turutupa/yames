@@ -15,6 +15,7 @@ import type { AppState } from "../../types";
 
 const drillState: AppState = {
   ...DEFAULT_TEST_STATE,
+  countIn: { beats: 0, done: 0 },
   speedRamp: {
     ...DEFAULT_TEST_STATE.speedRamp,
     startBpm: 80,
@@ -33,10 +34,14 @@ const drillState: AppState = {
 
 describe("DrillView", () => {
   it("renders mode toggle buttons (Linear/Zigzag/Adaptive)", () => {
-    render(<DrillView state={drillState} currentBeat={null} animations={false} />);
+    render(
+      <DrillView state={drillState} currentBeat={null} animations={false} />,
+    );
     expect(screen.getByRole("button", { name: /linear/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /zigzag/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /adaptive/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /adaptive/i }),
+    ).toBeInTheDocument();
   });
 
   it("gives the climb one column per step (80, 90, 100)", () => {
@@ -58,7 +63,9 @@ describe("DrillView", () => {
     const repeats = screen.getByText("Repeats").parentElement!;
     fireEvent.click(repeats.querySelectorAll(".stepper-btn")[1]);
     await waitFor(() =>
-      expect(container.querySelectorAll(".drill-grid-cell")).toHaveLength(3 * 3),
+      expect(container.querySelectorAll(".drill-grid-cell")).toHaveLength(
+        3 * 3,
+      ),
     );
   });
 
@@ -99,7 +106,9 @@ describe("DrillView", () => {
     expect(container.querySelector(".drill-live")).toBeNull();
     expect(container.querySelectorAll(".drill-dot")).toHaveLength(0);
     // The plan is what heads the stage instead.
-    expect(container.querySelector(".drill-stage-head .drill-plan")).not.toBeNull();
+    expect(
+      container.querySelector(".drill-stage-head .drill-plan"),
+    ).not.toBeNull();
   });
 
   it("brings the tempo, the beat dots and the step position back while a run is going", () => {
@@ -107,7 +116,15 @@ describe("DrillView", () => {
       ...drillState,
       // Past the count-in, so the readout is showing the run rather than the
       // countdown that replaces it.
-      speedRamp: { ...drillState.speedRamp, active: true, warmupCount: 4, currentBpm: 90, currentStep: 1, barsInStep: 1 },
+      countIn: { beats: 0, done: 0 },
+      speedRamp: {
+        ...drillState.speedRamp,
+        active: true,
+        warmupCount: 4,
+        currentBpm: 90,
+        currentStep: 1,
+        barsInStep: 1,
+      },
     };
     const { container } = render(
       <DrillView state={running} currentBeat={null} animations={false} />,
@@ -116,13 +133,19 @@ describe("DrillView", () => {
     expect(live).not.toBeNull();
     expect(live!.querySelector(".drill-current-bpm")?.textContent).toBe("90");
     expect(live!.querySelectorAll(".drill-dot")).toHaveLength(4);
-    expect(live!.querySelector(".drill-current-step")?.textContent).toContain("2");
+    expect(live!.querySelector(".drill-current-step")?.textContent).toContain(
+      "2",
+    );
   });
 
   it("counts the run in when the drill is warming up", () => {
+    // The live counter is `state.countIn` now, not `speedRamp.warmupCount`
+    // (U9.5) — the ramp still owns `warmupBeats` as the setting, and the
+    // engine owns the counting so a chain can use the same machinery.
     const warming: AppState = {
       ...drillState,
-      speedRamp: { ...drillState.speedRamp, active: true, warmupBeats: 4, warmupCount: 1 },
+      countIn: { beats: 4, done: 1 },
+      speedRamp: { ...drillState.speedRamp, active: true, warmupBeats: 4 },
     };
     render(<DrillView state={warming} currentBeat={null} animations={false} />);
     expect(screen.getByText("Starting in")).toBeInTheDocument();
@@ -134,7 +157,8 @@ describe("DrillView", () => {
       <DrillView state={drillState} currentBeat={null} animations={false} />,
     );
     // 3 steps (80, 90, 100) of 2 bars each.
-    const stats = container.querySelector(".drill-run-stats")?.textContent ?? "";
+    const stats =
+      container.querySelector(".drill-run-stats")?.textContent ?? "";
     expect(stats).toContain("3 steps");
     expect(stats).toContain("6 bars");
     expect(stats).toContain("about");
@@ -142,9 +166,14 @@ describe("DrillView", () => {
 
   it("says what one bar will sound like under the sentence", () => {
     const { container } = render(
-      <DrillView state={{ ...drillState, soundType: "wood" }} currentBeat={null} animations={false} />,
+      <DrillView
+        state={{ ...drillState, soundType: "wood" }}
+        currentBeat={null}
+        animations={false}
+      />,
     );
-    const detail = container.querySelector(".drill-plan-detail")?.textContent ?? "";
+    const detail =
+      container.querySelector(".drill-plan-detail")?.textContent ?? "";
     expect(detail).toContain("4 beats per bar");
     // A ramp pins the subdivision to 1 in the engine, whatever the metronome
     // screen is set to, so this line is a fact rather than a reading.
@@ -153,13 +182,17 @@ describe("DrillView", () => {
   });
 
   it("clicking the up-and-down toggle calls configure_speed_ramp with cyclic=true", async () => {
-    render(<DrillView state={drillState} currentBeat={null} animations={false} />);
+    render(
+      <DrillView state={drillState} currentBeat={null} animations={false} />,
+    );
     // The flag is still `cyclic` in the engine; only the word the musician
     // reads changed. "Cyclic" was engineering vocabulary, and "Repeat" would
     // have been wrong — the ramp turns round and descends rather than starting
     // again, which is what the chain's repeat does.
     const cyclicLabel = screen.getByText("Up and down");
-    const toggleBtn = cyclicLabel.parentElement?.querySelector(".toggle-btn") as HTMLElement;
+    const toggleBtn = cyclicLabel.parentElement?.querySelector(
+      ".toggle-btn",
+    ) as HTMLElement;
     expect(toggleBtn).not.toBeNull();
     fireEvent.click(toggleBtn);
     await waitFor(() => {

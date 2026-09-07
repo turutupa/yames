@@ -85,8 +85,8 @@
       "restFor": "Pause von",
       "fewerRestBars": "Weniger Takte Pause",
       "moreRestBars": "Mehr Takte Pause",
-      "countInNotYet": "Der Einzähler wird mit deiner Kette gespeichert, erklingt aber noch nicht — dieser Schritt beginnt weiterhin mit einem harten Schnitt.",
-      "barFinishes": "Der laufende Takt wird immer zu Ende gespielt — nichts wird mittendrin abgeschnitten."
+      "barFinishes": "Der laufende Takt wird immer zu Ende gespielt — nichts wird mittendrin abgeschnitten.",
+      "countInPlays": "Die Schläge erklingen im neuen Tempo, der letzte ist Zählzeit eins des Schritts."
     },
     "transport": {
       "stepOf": "Schritt {{number}} von {{total}}",

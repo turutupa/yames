@@ -27,6 +27,7 @@ export const DEFAULT_TEST_STATE: AppState = {
   timeSignature: 4,
   beatGroups: [4],
   freeMode: false,
+  countIn: { beats: 0, done: 0 },
   speedRamp: {
     startBpm: 80,
     targetBpm: 160,
@@ -185,12 +186,16 @@ const DEFAULT_INVOKE_MAP: Record<string, InvokeFn> = {
 const invokeMap = new Map<string, InvokeFn>();
 function resetInvokeMap() {
   invokeMap.clear();
-  for (const [cmd, fn] of Object.entries(DEFAULT_INVOKE_MAP)) invokeMap.set(cmd, fn);
+  for (const [cmd, fn] of Object.entries(DEFAULT_INVOKE_MAP))
+    invokeMap.set(cmd, fn);
 }
 resetInvokeMap();
 
 /** Override the response for a single invoke command in the current test. */
-export function setInvokeResponse(command: string, value: unknown | InvokeFn): void {
+export function setInvokeResponse(
+  command: string,
+  value: unknown | InvokeFn,
+): void {
   if (typeof value === "function") {
     invokeMap.set(command, value as InvokeFn);
   } else {
@@ -206,14 +211,16 @@ export function resetTauriMocks(): void {
 }
 
 // The spy that every invoke() call routes through. Tests can assert on it.
-export const mockInvoke = vi.fn(async (command: string, args?: Record<string, unknown>) => {
-  const handler = invokeMap.get(command);
-  if (!handler) {
-    // Unknown command — return undefined silently to keep tests from crashing
-    return undefined;
-  }
-  return handler(args);
-});
+export const mockInvoke = vi.fn(
+  async (command: string, args?: Record<string, unknown>) => {
+    const handler = invokeMap.get(command);
+    if (!handler) {
+      // Unknown command — return undefined silently to keep tests from crashing
+      return undefined;
+    }
+    return handler(args);
+  },
+);
 
 // listen() returns Promise<UnlistenFn>. UnlistenFn = () => void.
 // Tests can grab specific listeners via mockListen.mock.calls.
@@ -227,7 +234,8 @@ export const mockListen = vi.fn(async (_event: string, _cb: unknown) => {
 // ---------------------------------------------------------------------------
 
 vi.mock("@tauri-apps/api/core", () => ({
-  invoke: (cmd: string, args?: Record<string, unknown>) => mockInvoke(cmd, args),
+  invoke: (cmd: string, args?: Record<string, unknown>) =>
+    mockInvoke(cmd, args),
 }));
 
 vi.mock("@tauri-apps/api/event", () => ({

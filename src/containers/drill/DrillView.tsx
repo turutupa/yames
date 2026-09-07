@@ -240,8 +240,12 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
 
   const activeBeat = currentBeat ? currentBeat.beat % beatsPerBar : -1;
   const isDownbeat = currentBeat?.isDownbeat ?? false;
-  const isWarmingUp = ramp.active && ramp.warmupCount < ramp.warmupBeats;
-  const warmupRemaining = ramp.warmupBeats - ramp.warmupCount;
+  // The live count-in is the engine's now, not the ramp's (U9.5). `ramp.active`
+  // still gates the readout because this is the drill's screen and only a
+  // drill's count-in belongs on it — a chain's is reported by the transport.
+  const liveCountIn = state.countIn;
+  const isWarmingUp = ramp.active && liveCountIn.done < liveCountIn.beats;
+  const warmupRemaining = liveCountIn.beats - liveCountIn.done;
   // The ramp plays the global click, so the plan can state which one it is.
   const soundName = t(
     `sound.${SOUND_TYPES.find((s) => s.id === state.soundType)?.id ?? "click"}`,

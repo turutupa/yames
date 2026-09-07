@@ -85,8 +85,8 @@
       "restFor": "silencio de",
       "fewerRestBars": "Menos compases de silencio",
       "moreRestBars": "Más compases de silencio",
-      "countInNotYet": "La cuenta de entrada se guarda con tu cadena, pero todavía no suena: este paso sigue llegando con un corte limpio.",
-      "barFinishes": "El compás en curso siempre se termina — nada se corta por la mitad."
+      "barFinishes": "El compás en curso siempre se termina — nada se corta por la mitad.",
+      "countInPlays": "Los pulsos suenan al tempo nuevo, y el último es el primer tiempo del paso."
     },
     "transport": {
       "stepOf": "Paso {{number}} de {{total}}",

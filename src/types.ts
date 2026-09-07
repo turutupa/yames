@@ -52,6 +52,12 @@ export type AppState = {
   beatGroups: number[];
   freeMode: boolean;
   speedRamp: SpeedRamp;
+  /**
+   * The live count-in, which belongs to the engine rather than to the drill
+   * (U9.5). `beats` of 0 means nothing is counting in. `warmupBeats` on the
+   * ramp is still the drill's *setting*; this is what is actually counting.
+   */
+  countIn: { beats: number; done: number };
   /** Selected instrument id; drives DSP profile + coach vocabulary. */
   instrument: InstrumentId;
 };

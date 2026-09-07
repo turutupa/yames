@@ -85,8 +85,8 @@
       "restFor": "nghỉ",
       "fewerRestBars": "Nghỉ ít ô nhịp hơn",
       "moreRestBars": "Nghỉ nhiều ô nhịp hơn",
-      "countInNotYet": "Phần đếm vào được lưu cùng chuỗi nhưng chưa phát ra tiếng — bước này hiện vẫn vào bằng cách chuyển thẳng.",
-      "barFinishes": "Ô nhịp đang chạy luôn được đánh trọn — không có gì bị cắt ngang."
+      "barFinishes": "Ô nhịp đang chạy luôn được đánh trọn — không có gì bị cắt ngang.",
+      "countInPlays": "Các phách vang lên ở nhịp độ mới, và phách cuối là phách một của bước."
     },
     "transport": {
       "stepOf": "Bước {{number}} trên {{total}}",

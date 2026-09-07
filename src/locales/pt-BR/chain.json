@@ -85,8 +85,8 @@
       "restFor": "pausa de",
       "fewerRestBars": "Menos compassos de pausa",
       "moreRestBars": "Mais compassos de pausa",
-      "countInNotYet": "A contagem de entrada é salva com a sua cadeia, mas ainda não toca — este passo continua chegando com corte seco.",
-      "barFinishes": "O compasso em que você está sempre termina — nada é cortado no meio."
+      "barFinishes": "O compasso em que você está sempre termina — nada é cortado no meio.",
+      "countInPlays": "As batidas soam no novo andamento, e a última é o primeiro tempo do passo."
     },
     "transport": {
       "stepOf": "Passo {{number}} de {{total}}",

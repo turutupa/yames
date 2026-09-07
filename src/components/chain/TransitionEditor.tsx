@@ -238,12 +238,12 @@ export function TransitionEditor({ step, isLast, onChange, onClose }: Transition
         />
       )}
 
-      {/* The count-in is saved and shown, and it does not play (U9.5). Saying
-          so here is the whole reason this note exists: the alternative is a
-          control that silently means nothing, which is worse than one that
-          admits what it is waiting for. */}
+      {/* It plays now. The note this replaced said it did not — U9.5 has been
+          done, the engine's count-in is no longer the drill's, and a chain can
+          arm one between steps. Kept as a plain explanation rather than a
+          warning because there is nothing left to warn about. */}
       {transition.kind === "countIn" && (
-        <p className="chain-editor-note chain-editor-note-warn">{t("chain.gap.countInNotYet")}</p>
+        <p className="chain-editor-note">{t("chain.gap.countInPlays")}</p>
       )}
 
       <p className="chain-editor-footnote">{t("chain.gap.barFinishes")}</p>

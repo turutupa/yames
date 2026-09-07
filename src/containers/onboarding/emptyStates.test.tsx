@@ -44,7 +44,9 @@ describe("presets empty state", () => {
     const user = userEvent.setup();
     setInvokeResponse("list_presets", () => []);
     render(<PresetSidebar {...sidebarProps} />);
-    await user.click(await screen.findByRole("button", { name: /save your first preset/i }));
+    await user.click(
+      await screen.findByRole("button", { name: /save your first preset/i }),
+    );
     expect(document.querySelector(".preset-sidebar-name-input")).not.toBeNull();
   });
 
@@ -67,13 +69,16 @@ describe("session history empty state", () => {
       <CoachHistoryList sessions={[]} onSelect={vi.fn()} onDelete={vi.fn()} />,
     );
     expect(container.firstChild).toMatchSnapshot();
-    expect(screen.getByText(/after you stop the metronome/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/after you stop the metronome/i),
+    ).toBeInTheDocument();
   });
 });
 
 describe("drill idle state", () => {
   const drillState = (mode: string, active = false): AppState => ({
     ...DEFAULT_TEST_STATE,
+    countIn: { beats: 0, done: 0 },
     speedRamp: { ...DEFAULT_TEST_STATE.speedRamp!, mode, active },
   });
 
@@ -88,7 +93,9 @@ describe("drill idle state", () => {
     expect(screen.getByTestId("drill-idle-hint")).toHaveTextContent(/^Zigzag:/);
 
     rerender(<DrillView state={drillState("adaptive")} currentBeat={0} />);
-    expect(screen.getByTestId("drill-idle-hint")).toHaveTextContent(/^Adaptive:/);
+    expect(screen.getByTestId("drill-idle-hint")).toHaveTextContent(
+      /^Adaptive:/,
+    );
   });
 
   it("gets out of the way once the drill is running", () => {

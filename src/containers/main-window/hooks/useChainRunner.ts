@@ -6,7 +6,7 @@ import {
   type ChainEffect,
   type ChainRunState,
 } from "../../../chain";
-import { setPlaying, setVolume } from "../../../ipc";
+import { armCountIn, setPlaying, setVolume } from "../../../ipc";
 import { applyChainStep } from "./applyChainStep";
 import type { BeatEvent, Chain, ChainStep } from "../../../types";
 
@@ -72,6 +72,11 @@ export function useChainRunner(
             // lands next restores the volume as part of its own config.
             restingVolume.current = chainRef.current?.steps[stateRef.current.stepIndex]?.volume ?? null;
             void setVolume(0).catch(() => {});
+            break;
+          case "countIn":
+            // After applyStep, never before: the beats have to sound at the
+            // tempo of the step they are counting you into.
+            void armCountIn(effect.beats).catch(() => {});
             break;
           case "finished":
             void setPlaying(false).catch(() => {});

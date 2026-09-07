@@ -85,8 +85,8 @@
       "restFor": "쉬는 길이",
       "fewerRestBars": "쉬는 마디 줄이기",
       "moreRestBars": "쉬는 마디 늘리기",
-      "countInNotYet": "카운트인은 체인에 저장되지만 아직 소리가 나지 않습니다. 이 단계는 지금은 바로 전환됩니다.",
-      "barFinishes": "연주 중인 마디는 항상 끝까지 갑니다. 중간에 잘리지 않습니다."
+      "barFinishes": "연주 중인 마디는 항상 끝까지 갑니다. 중간에 잘리지 않습니다.",
+      "countInPlays": "새 템포로 카운트가 울리고, 마지막 박이 그 스텝의 첫 박이 됩니다."
     },
     "transport": {
       "stepOf": "{{total}}단계 중 {{number}}단계",

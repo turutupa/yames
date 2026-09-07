@@ -85,8 +85,8 @@
       "restFor": "rust van",
       "fewerRestBars": "Minder maten rust",
       "moreRestBars": "Meer maten rust",
-      "countInNotYet": "Het intellen wordt met je keten bewaard, maar klinkt nog niet — deze stap begint voorlopig met een directe overgang.",
-      "barFinishes": "De maat waar je in zit wordt altijd afgemaakt — er wordt niets doormidden geknipt."
+      "barFinishes": "De maat waar je in zit wordt altijd afgemaakt — er wordt niets doormidden geknipt.",
+      "countInPlays": "De tellen klinken op het nieuwe tempo, en de laatste is tel één van de stap."
     },
     "transport": {
       "stepOf": "Stap {{number}} van {{total}}",

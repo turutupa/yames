@@ -85,8 +85,8 @@
       "restFor": "pauza",
       "fewerRestBars": "Mniej taktów pauzy",
       "moreRestBars": "Więcej taktów pauzy",
-      "countInNotYet": "Odliczenie zapisuje się razem z łańcuchem, ale jeszcze nie brzmi — ten krok wciąż wchodzi cięciem.",
-      "barFinishes": "Takt, w którym jesteś, zawsze dobrzmi do końca — nic nie zostanie przerwane w połowie."
+      "barFinishes": "Takt, w którym jesteś, zawsze dobrzmi do końca — nic nie zostanie przerwane w połowie.",
+      "countInPlays": "Uderzenia brzmią w nowym tempie, a ostatnie z nich to pierwsza miara kroku."
     },
     "transport": {
       "stepOf": "Krok {{number}} z {{total}}",

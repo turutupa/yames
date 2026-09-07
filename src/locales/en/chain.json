@@ -85,8 +85,8 @@
       "restFor": "rest for",
       "fewerRestBars": "Fewer bars of rest",
       "moreRestBars": "More bars of rest",
-      "countInNotYet": "Count me in is saved with your chain, but it does not play yet — this step still arrives as a clean cut.",
-      "barFinishes": "The bar you are in always finishes first — nothing is cut in half."
+      "barFinishes": "The bar you are in always finishes first — nothing is cut in half.",
+      "countInPlays": "The beats sound at the new tempo, and the last of them is beat one of the step."
     },
     "transport": {
       "stepOf": "Step {{number}} of {{total}}",
