@@ -241,6 +241,45 @@ describe("DrillView", () => {
     });
   });
 
+  it("clicking a phrase lands the cursor in the number behind it", () => {
+    // Tested here and not only on the popover in isolation, because what the
+    // owner reported is the whole path: click the words "every 12 bars" and
+    // expect to be typing into the 12. A component that focuses correctly
+    // when mounted by hand can still fail when mounted by a click.
+    render(<DrillView state={drillState} currentBeat={null} animations={false} />);
+    fireEvent.click(screen.getByText("every 2 bars"));
+    expect(document.activeElement).toBe(screen.getByLabelText("Repeats"));
+
+    fireEvent.click(screen.getByText("4 beats per bar"));
+    expect(document.activeElement).toBe(screen.getByLabelText("Beats"));
+  });
+
+  it("sends the aggressiveness you just clicked, not the one before it", async () => {
+    // A real bug, found while collapsing eleven pieces of state into one.
+    // The handler was `setAggressiveness(next)` followed by a save that read
+    // `aggressiveness` out of the render's own closure — the value BEFORE the
+    // click — so picking "Gentle" sent whatever had been selected previously.
+    // The button looked right and the engine got the wrong number.
+    render(
+      <DrillView
+        state={{
+          ...drillState,
+          speedRamp: { ...drillState.speedRamp, mode: "adaptive", aggressiveness: "moderate" },
+        }}
+        currentBeat={null}
+        animations={false}
+      />,
+    );
+    fireEvent.click(screen.getByText("Options"));
+    fireEvent.click(screen.getByRole("button", { name: "Gentle" }));
+    await waitFor(() => {
+      expect(mockInvoke).toHaveBeenCalledWith(
+        "configure_speed_ramp",
+        expect.objectContaining({ aggressiveness: "conservative" }),
+      );
+    });
+  });
+
   it("changing the drill's subdivision saves it with the rest of the ramp", async () => {
     render(<DrillView state={drillState} currentBeat={null} animations={false} />);
     fireEvent.click(screen.getByText("Quarter"));

@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import type { AppState, BeatEvent } from "../../types";
-import { configureSpeedRamp, startSpeedRampFrom, onRampStep, setSoundType } from "../../ipc";
+import { startSpeedRampFrom, onRampStep, setSoundType } from "../../ipc";
+import { useDrillPlan } from "./useDrillPlan";
 import { SOUND_TYPES } from "../../constants/metronome";
 import { SubdivisionIcon } from "../../components/MetronomeIcons";
 import type { Subdivision } from "../../types";
@@ -48,17 +49,23 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
   // the thing worth looking at (UI_DECISIONS U3.1).
   const [openField, setOpenField] = useState<PlanField>(null);
   const anchors: PlanAnchors = useRef({});
-  const [startBpm, setStartBpm] = useState(ramp.startBpm);
-  const [targetBpm, setTargetBpm] = useState(ramp.targetBpm);
-  const [increment, setIncrement] = useState(ramp.increment);
-  const [decrement, setDecrement] = useState(ramp.decrement);
-  const [barsPerStep, setBarsPerStep] = useState(ramp.barsPerStep);
-  const [beatsPerBar, setBeatsPerBar] = useState(ramp.beatsPerBar);
-  const [subdivision, setSubdivision] = useState(ramp.subdivision ?? 1);
-  const [mode, setMode] = useState(ramp.mode);
-  const [cyclic, setCyclic] = useState(ramp.cyclic);
-  const [aggressiveness, setAggressiveness] = useState(ramp.aggressiveness || "moderate");
-  const [countIn, setCountIn] = useState(ramp.warmupBeats > 0);
+  // The plan, and the one way to change it. Destructured so every place that
+  // READS a setting reads it by name, exactly as it did when these were
+  // eleven separate pieces of state.
+  const { plan, edit } = useDrillPlan(ramp);
+  const {
+    startBpm,
+    targetBpm,
+    increment,
+    decrement,
+    barsPerStep,
+    beatsPerBar,
+    subdivision,
+    mode,
+    cyclic,
+    aggressiveness,
+  } = plan;
+  const countIn = plan.warmupBeats > 0;
 
   // Ghost elements for smooth exit animations. They were named rows and cols
   // when the plan was drawn as a matrix; a step is a column of the climb now
@@ -73,24 +80,6 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
   const ghostBarTimer = useRef<ReturnType<typeof setTimeout>>();
   const ghostDotTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  // Sync local form with state when it changes from backend
-  useEffect(() => {
-    if (!ramp.active) {
-      setStartBpm(ramp.startBpm);
-      setTargetBpm(ramp.targetBpm);
-      setIncrement(ramp.increment);
-      setDecrement(ramp.decrement);
-      setBarsPerStep(ramp.barsPerStep);
-      setBeatsPerBar(ramp.beatsPerBar);
-      // Defended: a hot-reloaded frontend can render against a binary that
-      // predates the field, and a subdivision of 0 divides a beat by nothing.
-      setSubdivision(ramp.subdivision || 1);
-      setMode(ramp.mode);
-      setCyclic(ramp.cyclic);
-      setCountIn(ramp.warmupBeats > 0);
-    }
-  }, [ramp.startBpm, ramp.targetBpm, ramp.increment, ramp.decrement, ramp.barsPerStep, ramp.beatsPerBar, ramp.subdivision, ramp.mode, ramp.cyclic, ramp.warmupBeats, ramp.active]);
-
   // A settings window does not survive the start of a run. It is a floating
   // card over the climb, and the climb is the thing you watch while playing.
   useEffect(() => {
@@ -103,33 +92,7 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
     return () => { unlisten.then((fn) => fn()); };
   }, []);
 
-  const saveWith = (overrides: Partial<{ startBpm: number; targetBpm: number; increment: number; decrement: number; barsPerStep: number; beatsPerBar: number; subdivision: number; mode: string; cyclic: boolean; warmupBeats: number }>) => {
-    configureSpeedRamp({
-      startBpm: overrides.startBpm ?? startBpm,
-      targetBpm: overrides.targetBpm ?? targetBpm,
-      increment: overrides.increment ?? increment,
-      decrement: overrides.decrement ?? decrement,
-      barsPerStep: overrides.barsPerStep ?? barsPerStep,
-      beatsPerBar: overrides.beatsPerBar ?? beatsPerBar,
-      subdivision: overrides.subdivision ?? subdivision,
-      mode: overrides.mode ?? mode,
-      cyclic: overrides.cyclic ?? cyclic,
-      warmupBeats: overrides.warmupBeats ?? (countIn ? 4 : 0),
-      aggressiveness: aggressiveness,
-    });
-  };
-
   const closeField = useCallback(() => setOpenField(null), []);
-
-  /* Uncoupled. These used to drag each other around — raising the start past
-     the target pushed the target up with it — because the engine only ever
-     ramped upward and a start above the target was a drill with no steps in
-     it. It descends now, so the two numbers are just the two ends of the
-     plan and neither constrains the other. */
-  const commitStartBpm = (v: number) => {
-    setStartBpm(v);
-    saveWith({ startBpm: v });
-  };
 
   // Spacebar start/stop is handled by MainWindow's unified dispatcher via "play" hotkey
 
@@ -362,9 +325,11 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
             <DrillConfigPopover
               anchor={anchors.current.tempo ?? null}
               onClose={closeField}
-              // Named for the phrase, not for its first field: this window
-              // holds both ends of the tempo, and calling it "Start BPM" gave
-              // it the same accessible name as a control inside it.
+              // Every window is named for the PHRASE that opens it, never
+              // for a field inside it. Naming one "Start BPM" gave a dialog
+              // the same accessible name as one of its own controls, which is
+              // ambiguous to a screen reader and to anything else that goes
+              // looking by name.
               label={t("metronome.tempo")}
               note={planSummary}
             >
@@ -375,7 +340,7 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
                   max={300}
                   step={5}
                   label={t("drill.startBpm")}
-                  onCommit={commitStartBpm}
+                  onCommit={(v) => edit({ startBpm: v })}
                 />
               </DrillPopoverRow>
               {mode !== "adaptive" && (
@@ -390,7 +355,7 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
                     max={300}
                     step={5}
                     label={t("drill.targetBpm")}
-                    onCommit={(v) => { setTargetBpm(v); saveWith({ targetBpm: v }); }}
+                    onCommit={(v) => edit({ targetBpm: v })}
                   />
                 </DrillPopoverRow>
               )}
@@ -401,7 +366,7 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
             <DrillConfigPopover
               anchor={anchors.current.rate ?? null}
               onClose={closeField}
-              label={t("drill.speedUp")}
+              label={`+${increment} ${t("drill.bpmUnit")}`}
               note={planSummary}
             >
               <DrillPopoverRow label={t("drill.speedUp")} tip={t("drill.desc.increment")}>
@@ -410,7 +375,7 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
                   min={1}
                   max={50}
                   label={t("drill.speedUp")}
-                  onCommit={(v) => { setIncrement(v); saveWith({ increment: v }); }}
+                  onCommit={(v) => edit({ increment: v })}
                 />
               </DrillPopoverRow>
               {mode === "zigzag" && (
@@ -420,7 +385,7 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
                     min={1}
                     max={50}
                     label={t("drill.slowDown")}
-                    onCommit={(v) => { setDecrement(v); saveWith({ decrement: v }); }}
+                    onCommit={(v) => edit({ decrement: v })}
                   />
                 </DrillPopoverRow>
               )}
@@ -437,7 +402,7 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
             <DrillConfigPopover
               anchor={anchors.current.repeats ?? null}
               onClose={closeField}
-              label={t("drill.repeats")}
+              label={t("drill.everyBars", { count: barsPerStep })}
               note={planSummary}
             >
               <DrillPopoverRow label={t("drill.repeats")} tip={t("drill.desc.repeat")} onHover={(on) => setHighlightMode(on ? "repeats" : null)}>
@@ -447,7 +412,7 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
                   max={32}
                   unit={t("drill.barsUnit")}
                   label={t("drill.repeats")}
-                  onCommit={(v) => { setBarsPerStep(v); saveWith({ barsPerStep: v }); }}
+                  onCommit={(v) => edit({ barsPerStep: v })}
                 />
               </DrillPopoverRow>
             </DrillConfigPopover>
@@ -457,7 +422,7 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
             <DrillConfigPopover
               anchor={anchors.current.beats ?? null}
               onClose={closeField}
-              label={t("drill.beats")}
+              label={t("drill.beatsSummary", { count: beatsPerBar })}
               note={planSummary}
             >
               <DrillPopoverRow label={t("drill.beats")} tip={t("drill.desc.beats")} onHover={(on) => setHighlightMode(on ? "beats" : null)}>
@@ -466,7 +431,7 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
                   min={1}
                   max={12}
                   label={t("drill.beats")}
-                  onCommit={(v) => { setBeatsPerBar(v); saveWith({ beatsPerBar: v }); }}
+                  onCommit={(v) => edit({ beatsPerBar: v })}
                 />
               </DrillPopoverRow>
             </DrillConfigPopover>
@@ -489,7 +454,7 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
                     key={sub}
                     className={`drill-choice ${subdivision === sub ? "active" : ""}`}
                     aria-pressed={subdivision === sub}
-                    onClick={() => { setSubdivision(sub); saveWith({ subdivision: sub }); }}
+                    onClick={() => edit({ subdivision: sub })}
                   >
                     <SubdivisionIcon sub={sub as Subdivision} size={22} />
                     <span className="drill-choice-label">{t(`subdiv.${sub}`)}</span>
@@ -538,7 +503,7 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
                 <button
                   className={`toggle-btn ${countIn ? "active" : ""}`}
                   aria-pressed={countIn}
-                  onClick={() => { const next = !countIn; setCountIn(next); saveWith({ warmupBeats: next ? 4 : 0 }); }}
+                  onClick={() => edit({ warmupBeats: countIn ? 0 : 4 })}
                 >
                   {countIn ? t("common.on") : t("common.off")}
                 </button>
@@ -548,7 +513,7 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
                   <button
                     className={`toggle-btn ${cyclic ? "active" : ""}`}
                     aria-pressed={cyclic}
-                    onClick={() => { const next = !cyclic; setCyclic(next); saveWith({ cyclic: next }); }}
+                    onClick={() => edit({ cyclic: !cyclic })}
                   >
                     {cyclic ? t("common.on") : t("common.off")}
                   </button>
@@ -562,7 +527,7 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
                         key={a.id}
                         className={`toggle-btn ${aggressiveness === a.id ? "active" : ""}`}
                         aria-pressed={aggressiveness === a.id}
-                        onClick={() => { setAggressiveness(a.id); saveWith({ mode: "adaptive" }); }}
+                        onClick={() => edit({ aggressiveness: a.id, mode: "adaptive" })}
                       >
                         {t(a.labelKey)}
                       </button>
@@ -585,17 +550,15 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
                   className={`toggle-btn ${mode === m.id ? "active" : ""}`}
                   aria-pressed={mode === m.id}
                   aria-describedby={`drill-mode-tip-${m.id}`}
-                  onClick={() => {
-                    setMode(m.id);
+                  onClick={() =>
                     // Adaptive has no target of its own — it climbs until the
                     // playing falls apart — so the ceiling goes to the top.
-                    if (m.id === "adaptive") {
-                      setTargetBpm(300);
-                      saveWith({ mode: m.id, targetBpm: 300 });
-                    } else {
-                      saveWith({ mode: m.id });
-                    }
-                  }}
+                    edit(
+                      m.id === "adaptive"
+                        ? { mode: m.id, targetBpm: 300 }
+                        : { mode: m.id },
+                    )
+                  }
                 >
                   {t(m.labelKey)}
                   {m.id === "adaptive" && (

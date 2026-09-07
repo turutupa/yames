@@ -117,12 +117,6 @@
   color: var(--text-secondary);
 }
 
-.drill-completed {
-  font-size: 0.85rem;
-  color: var(--accent);
-  font-weight: 600;
-  margin-top: 2px;
-}
 
 /* What the plan adds up to, right-aligned under the mode selector as drawn:
    how many steps, how many bars of playing that is, and roughly how long it
@@ -887,45 +881,6 @@
   opacity: 1;
 }
 
-/* Timer */
-.drill-timer {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  margin-top: 4px;
-  font-variant-numeric: tabular-nums;
-}
-
-/* Subdivision selector */
-.drill-sub-options {
-  display: flex;
-  gap: 4px;
-}
-
-.drill-sub-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.drill-sub-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-.drill-sub-btn.active {
-  background: var(--accent);
-  color: var(--accent-text, white);
-  border-color: var(--accent);
-}
 
 /* Disable all drill animations when view animations are off */
 .drill-view[data-animations="off"] .drill-climb-col,
@@ -1005,9 +960,6 @@
   border-bottom-color: var(--accent);
 }
 
-.drill-plan-detail-fact {
-  color: var(--text-muted);
-}
 
 .drill-plan-detail-sep {
   color: var(--text-faint);
