@@ -28,7 +28,8 @@
       "groups": "Groepsbegin",
       "all": "Elke tel",
       "none": "Geen"
-    }
+    },
+    "soundLabel": "Geluid"
   },
   "subdiv": {
     "1": "Kwartnoot",

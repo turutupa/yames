@@ -28,7 +28,8 @@
       "groups": "Grup başları",
       "all": "Her vuruş",
       "none": "Yok"
-    }
+    },
+    "soundLabel": "Ses"
   },
   "subdiv": {
     "1": "Dörtlük",

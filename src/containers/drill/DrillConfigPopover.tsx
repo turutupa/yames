@@ -187,6 +187,32 @@ export function DrillPopoverRow({ label, tip, onHover, children }: DrillPopoverR
   );
 }
 
+interface DrillPopoverChoicesProps {
+  label: string;
+  tip?: string;
+  children: ReactNode;
+}
+
+/**
+ * A row whose control is a set of options rather than a value — the six
+ * subdivisions, the four clicks.
+ *
+ * Stacked instead of `label ⟷ control`, because six cards will not sit beside
+ * a label in a 322px card and shrinking them to fit is how the metronome's
+ * subdivision glyphs became indistinguishable in the first place (U2.2).
+ */
+export function DrillPopoverChoices({ label, tip, children }: DrillPopoverChoicesProps) {
+  return (
+    <div className="drill-popover-row drill-popover-row-stacked">
+      <span className={`drill-popover-label${tip ? " drill-label-tip" : ""}`}>
+        <span className="drill-popover-label-text">{label}</span>
+        {tip && <span className="drill-tip">{tip}</span>}
+      </span>
+      <div className="drill-popover-choices">{children}</div>
+    </div>
+  );
+}
+
 interface DrillNumberFieldProps {
   value: number;
   min: number;

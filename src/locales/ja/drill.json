@@ -5,7 +5,6 @@
     "beatsSummary": "1 小節 {{count}} 拍",
     "everyBars": "{{count}} 小節ごと",
     "bpmUnit": "BPM",
-    "quarterNotes": "4 分音符",
     "soundPhrase": "{{sound}} の音",
     "mode": "モード",
     "modeLinear": "リニア",
@@ -45,6 +44,7 @@
     "planLabel": "プラン",
     "listensBadge": "聴きます",
     "runOptions": "オプション",
-    "barsUnit": "小節"
+    "barsUnit": "小節",
+    "jumpTo": "{{bpm}} BPM の {{bar}} 小節目から開始"
   }
 }

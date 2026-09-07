@@ -230,6 +230,9 @@ pub fn run() {
                     if let Some(bpb) = v.get("beatsPerBar").and_then(|x| x.as_u64()) {
                         s.speed_ramp.beats_per_bar = (bpb as u8).clamp(1, 12);
                     }
+                    if let Some(sub) = v.get("subdivision").and_then(|x| x.as_u64()) {
+                        s.speed_ramp.subdivision = (sub as u8).clamp(1, 6);
+                    }
                     if let Some(m) = v.get("mode").and_then(|x| x.as_str()) {
                         s.speed_ramp.mode = m.to_string();
                     }

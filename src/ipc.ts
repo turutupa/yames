@@ -114,6 +114,13 @@ export async function configureSpeedRamp(config: {
   cyclic: boolean;
   warmupBeats?: number;
   aggressiveness?: string;
+  /**
+   * Ticks per beat for the drill. Optional and passed through as null when
+   * absent, so a caller with no opinion — a chain step, MainWindow restoring
+   * a preset — leaves the setting where the user put it rather than silently
+   * resetting the drill to quarter notes.
+   */
+  subdivision?: number;
 }): Promise<void> {
   return invoke("configure_speed_ramp", {
     startBpm: config.startBpm,
@@ -126,6 +133,7 @@ export async function configureSpeedRamp(config: {
     cyclic: config.cyclic,
     warmupBeats: config.warmupBeats ?? 4,
     aggressiveness: config.aggressiveness ?? null,
+    subdivision: config.subdivision ?? null,
   });
 }
 

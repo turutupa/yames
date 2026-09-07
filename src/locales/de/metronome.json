@@ -28,7 +28,8 @@
       "groups": "Gruppenanfänge",
       "all": "Jeder Schlag",
       "none": "Keine"
-    }
+    },
+    "soundLabel": "Klang"
   },
   "subdiv": {
     "1": "Viertel",

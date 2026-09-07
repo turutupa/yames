@@ -5,7 +5,6 @@
     "beatsSummary": "{{count}} Beats pro Takt",
     "everyBars": "alle {{count}} Takte",
     "bpmUnit": "BPM",
-    "quarterNotes": "Viertelnoten",
     "soundPhrase": "{{sound}}-Sound",
     "mode": "Modus",
     "modeLinear": "Linear",
@@ -45,6 +44,7 @@
     "planLabel": "Der Plan",
     "listensBadge": "Hört zu",
     "runOptions": "Optionen",
-    "barsUnit": "Takte"
+    "barsUnit": "Takte",
+    "jumpTo": "Ab {{bpm}} BPM starten, Takt {{bar}}"
   }
 }

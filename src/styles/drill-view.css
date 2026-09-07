@@ -370,6 +370,10 @@
   height: var(--climb-cell-h);
   border-radius: 2px;
   cursor: pointer;
+  /* These are buttons now, so the UA's own padding and font have to go. */
+  padding: 0;
+  font: inherit;
+  flex-shrink: 0;
   /* Solid, not outlined. An outlined cell at this size is mostly border, and
      a staircase of little empty boxes reads as a wireframe of a chart rather
      than as the chart. Every bar of the plan is a filled block; what changes
@@ -397,6 +401,13 @@
     transform: scaleY(0.3);
     opacity: 0;
   }
+}
+
+/* Keyboard focus has to be visible on a 10px block, and the ring must not be
+   clipped by the scroll box — hence the offset rather than an inset shadow. */
+.drill-climb .drill-climb-cells .drill-climb-cell:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .drill-climb .drill-climb-cells .drill-climb-cell:hover {
@@ -602,6 +613,65 @@
   font-weight: 700;
   color: var(--text-primary);
   flex-shrink: 0;
+}
+
+/* Six subdivisions or four clicks will not sit beside a label in a 322px
+   card, and shrinking them to fit is how the metronome's subdivision glyphs
+   became indistinguishable in the first place (U2.2). Stack instead. */
+.drill-popover-row-stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 9px;
+}
+
+.drill-popover-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.drill-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: 1 1 62px;
+  min-width: 62px;
+  padding: 8px 6px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--surface-2, transparent);
+  color: var(--text-secondary);
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.drill-choice:hover {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+  color: var(--text-primary);
+}
+
+.drill-choice.active {
+  background: var(--accent-subtle);
+  border-color: var(--accent);
+  color: var(--accent-text, var(--text-primary));
+}
+
+.drill-choice-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.drill-choice-glyph {
+  font-size: 1.05rem;
+  line-height: 1.25;
 }
 
 .drill-popover-rule {

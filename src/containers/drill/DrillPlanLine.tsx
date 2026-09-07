@@ -1,8 +1,16 @@
 import type { MutableRefObject } from "react";
 import { useTranslation } from "react-i18next";
 
-/** Which group of settings the plan line is asking the config to show. */
-export type PlanField = "tempo" | "rate" | "shape" | "more" | null;
+/** Which settings the plan line is asking the config window to show. */
+export type PlanField =
+  | "tempo"
+  | "rate"
+  | "repeats"
+  | "beats"
+  | "sub"
+  | "sound"
+  | "more"
+  | null;
 
 /** Every token's element, so the settings window can hang off the right one. */
 export type PlanAnchors = MutableRefObject<
@@ -17,6 +25,8 @@ interface DrillPlanLineProps {
   beatsPerBar: number;
   barsPerStep: number;
   mode: string;
+  /** Ticks per beat the drill will play. */
+  subdivision: number;
   /** Translated name of the click the drill will play, e.g. "Wood". */
   soundName: string;
   openField: PlanField;
@@ -50,6 +60,7 @@ export function DrillPlanLine({
   beatsPerBar,
   barsPerStep,
   mode,
+  subdivision,
   soundName,
   openField,
   onOpenField,
@@ -111,10 +122,10 @@ export function DrillPlanLine({
 
         <button
           type="button"
-          ref={anchor("shape")}
-          className={`drill-plan-token ${openField === "shape" ? "open" : ""}`}
-          onClick={() => toggle("shape")}
-          aria-expanded={openField === "shape"}
+          ref={anchor("repeats")}
+          className={`drill-plan-token ${openField === "repeats" ? "open" : ""}`}
+          onClick={() => toggle("repeats")}
+          aria-expanded={openField === "repeats"}
         >
           <span className="drill-plan-value">
             {t("drill.everyBars", { count: barsPerStep })}
@@ -122,32 +133,51 @@ export function DrillPlanLine({
         </button>
       </div>
 
+      {/* Every phrase down here opens something too. Two of them used to be
+          plain text — the subdivision because the engine pinned a drill to
+          quarter notes, and the click because it is changed from the header
+          chip. Both were the only unclickable words in a line of clickable
+          ones, which reads as a bug rather than as a rule. */}
       <div className="drill-plan-detail">
         <button
           type="button"
-          className={`drill-plan-detail-token ${openField === "shape" ? "open" : ""}`}
-          onClick={() => toggle("shape")}
-          aria-expanded={openField === "shape"}
+          ref={anchor("beats")}
+          className={`drill-plan-detail-token ${openField === "beats" ? "open" : ""}`}
+          onClick={() => toggle("beats")}
+          aria-expanded={openField === "beats"}
         >
           {t("drill.beatsSummary", { count: beatsPerBar })}
         </button>
         <span className="drill-plan-detail-sep" aria-hidden="true">
           ·
         </span>
-        {/* Not editable, and deliberately so: the engine pins the subdivision
-            to 1 for the whole of a ramp (engine.rs, `cached.subdivision`), so
-            a drill is quarter notes whatever the metronome screen is set to.
-            Saying it here is the only place that fact is ever stated. */}
-        <span className="drill-plan-detail-fact">{t("drill.quarterNotes")}</span>
+        {/* Bare `subdiv.N`, not "N notes": every locale's names already read
+            as note values ("Viertel", "Noire", "Negra"), so a "notes" suffix
+            would be wrong in most of them. Same labels the metronome uses. */}
+        <button
+          type="button"
+          ref={anchor("sub")}
+          className={`drill-plan-detail-token ${openField === "sub" ? "open" : ""}`}
+          onClick={() => toggle("sub")}
+          aria-expanded={openField === "sub"}
+        >
+          {t(`subdiv.${subdivision}`)}
+        </button>
         <span className="drill-plan-detail-sep" aria-hidden="true">
           ·
         </span>
-        {/* The click, on the other hand, is live global state — it is changed
-            from the header chip that is already on this screen, so repeating
-            the control here would be a second switch for one setting. */}
-        <span className="drill-plan-detail-fact">
+        {/* The click is global state — the same setting the header chip
+            changes. Two doors to one switch is better than a word that looks
+            like the others and does nothing. */}
+        <button
+          type="button"
+          ref={anchor("sound")}
+          className={`drill-plan-detail-token ${openField === "sound" ? "open" : ""}`}
+          onClick={() => toggle("sound")}
+          aria-expanded={openField === "sound"}
+        >
           {t("drill.soundPhrase", { sound: soundName })}
-        </span>
+        </button>
         <span className="drill-plan-detail-sep" aria-hidden="true">
           ·
         </span>

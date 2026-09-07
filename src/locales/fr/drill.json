@@ -5,7 +5,6 @@
     "beatsSummary": "{{count}} temps par mesure",
     "everyBars": "toutes les {{count}} mesures",
     "bpmUnit": "BPM",
-    "quarterNotes": "noires",
     "soundPhrase": "son {{sound}}",
     "mode": "Mode",
     "modeLinear": "Linéaire",
@@ -45,6 +44,7 @@
     "planLabel": "Le plan",
     "listensBadge": "À l'écoute",
     "runOptions": "options",
-    "barsUnit": "mesures"
+    "barsUnit": "mesures",
+    "jumpTo": "Démarrer à {{bpm}} BPM, mesure {{bar}}"
   }
 }

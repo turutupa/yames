@@ -178,10 +178,34 @@ describe("DrillView", () => {
     const detail =
       container.querySelector(".drill-plan-detail")?.textContent ?? "";
     expect(detail).toContain("4 beats per bar");
-    // A ramp pins the subdivision to 1 in the engine, whatever the metronome
-    // screen is set to, so this line is a fact rather than a reading.
-    expect(detail).toContain("quarter notes");
+    // The subdivision is the DRILL's now — the engine used to pin every ramp
+    // to 1, so this line stated a fact instead of reading a setting.
+    expect(detail).toContain("Quarter");
     expect(detail).toContain("Wood");
+  });
+
+  it("changing the drill's subdivision saves it with the rest of the ramp", async () => {
+    render(<DrillView state={drillState} currentBeat={null} animations={false} />);
+    fireEvent.click(screen.getByText("Quarter"));
+    fireEvent.click(screen.getByRole("button", { name: /Sixteenth/ }));
+    await waitFor(() => {
+      expect(mockInvoke).toHaveBeenCalledWith(
+        "configure_speed_ramp",
+        expect.objectContaining({ subdivision: 4 }),
+      );
+    });
+  });
+
+  it("the click can be changed from the plan line, not only the header", async () => {
+    render(<DrillView state={drillState} currentBeat={null} animations={false} />);
+    fireEvent.click(screen.getByText(/sound$/));
+    fireEvent.click(screen.getByRole("button", { name: /Beep/ }));
+    await waitFor(() => {
+      expect(mockInvoke).toHaveBeenCalledWith(
+        "set_sound_type",
+        expect.objectContaining({ soundType: "beep" }),
+      );
+    });
   });
 
   it("clicking the up-and-down toggle calls configure_speed_ramp with cyclic=true", async () => {

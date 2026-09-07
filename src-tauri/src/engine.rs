@@ -541,7 +541,6 @@ struct CachedParams {
     ramp_warming_up: bool,
     warmup_count: u8,
     warmup_beats: u8,
-    free_mode: bool,
 }
 
 /// Should this tick be played as an accent (the "high" sound)?
@@ -1602,7 +1601,6 @@ impl MetronomeEngine {
                 ramp_warming_up: false,
                 warmup_count: 0,
                 warmup_beats: 4,
-                free_mode: false,
             };
 
             // ---- Build output stream ----
@@ -1641,8 +1639,15 @@ impl MetronomeEngine {
                             s.bpm
                         };
                         cached.bpm = eff_bpm;
+                        // A drill used to be pinned to quarter notes here,
+                        // whatever the metronome screen said. It carries its
+                        // own subdivision now: the exercise where a player
+                        // most wants a subdivided pulse -- climbing a passage
+                        // one step at a time -- was the one place they could
+                        // not have one. `.max(1)` because a zero would divide
+                        // the beat into nothing on the audio thread.
                         cached.subdivision = if s.speed_ramp.active {
-                            1
+                            s.speed_ramp.subdivision.max(1)
                         } else {
                             s.subdivision
                         };
@@ -1672,7 +1677,6 @@ impl MetronomeEngine {
                         cached.ramp_warming_up = warming;
                         cached.warmup_count = s.count_in.done;
                         cached.warmup_beats = s.count_in.beats;
-                        cached.free_mode = s.free_mode;
                     }
 
                     // ---- Not playing: silence ----

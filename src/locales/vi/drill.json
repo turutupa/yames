@@ -5,7 +5,6 @@
     "beatsSummary": "{{count}} phách mỗi ô nhịp",
     "everyBars": "mỗi {{count}} ô nhịp",
     "bpmUnit": "BPM",
-    "quarterNotes": "nốt đen",
     "soundPhrase": "âm {{sound}}",
     "mode": "Chế độ",
     "modeLinear": "Tuyến tính",
@@ -45,6 +44,7 @@
     "planLabel": "Kế hoạch",
     "listensBadge": "Lắng nghe",
     "runOptions": "tùy chọn",
-    "barsUnit": "ô nhịp"
+    "barsUnit": "ô nhịp",
+    "jumpTo": "Bắt đầu từ {{bpm}} BPM, ô nhịp {{bar}}"
   }
 }

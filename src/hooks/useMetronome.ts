@@ -27,6 +27,7 @@ const DEFAULT_STATE: AppState = {
     decrement: 3,
     barsPerStep: 4,
     beatsPerBar: 4,
+    subdivision: 1,
     mode: "linear",
     cyclic: false,
     aggressiveness: "moderate",

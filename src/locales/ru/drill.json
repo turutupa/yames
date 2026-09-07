@@ -5,7 +5,6 @@
     "beatsSummary": "{{count}} долей в такте",
     "everyBars": "каждые {{count}} тактов",
     "bpmUnit": "BPM",
-    "quarterNotes": "четверти",
     "soundPhrase": "звук «{{sound}}»",
     "mode": "Режим",
     "modeLinear": "Линейный",
@@ -45,6 +44,7 @@
     "planLabel": "План",
     "listensBadge": "Слушает",
     "runOptions": "параметры",
-    "barsUnit": "тактов"
+    "barsUnit": "тактов",
+    "jumpTo": "Начать с {{bpm}} BPM, такт {{bar}}"
   }
 }

@@ -5,7 +5,6 @@
     "beatsSummary": "{{count}} beats per bar",
     "everyBars": "every {{count}} bars",
     "bpmUnit": "BPM",
-    "quarterNotes": "quarter notes",
     "soundPhrase": "{{sound}} sound",
     "mode": "Mode",
     "modeLinear": "Linear",
@@ -45,6 +44,7 @@
     "planLabel": "The plan",
     "listensBadge": "Listens",
     "runOptions": "options",
-    "barsUnit": "bars"
+    "barsUnit": "bars",
+    "jumpTo": "Start from {{bpm}} BPM, bar {{bar}}"
   }
 }

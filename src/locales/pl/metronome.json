@@ -28,7 +28,8 @@
       "groups": "Początki grup",
       "all": "Każda miara",
       "none": "Brak"
-    }
+    },
+    "soundLabel": "Dźwięk"
   },
   "subdiv": {
     "1": "Ćwierćnuty",

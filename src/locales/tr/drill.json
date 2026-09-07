@@ -5,7 +5,6 @@
     "beatsSummary": "ölçü başına {{count}} vuruş",
     "everyBars": "her {{count}} ölçüde",
     "bpmUnit": "BPM",
-    "quarterNotes": "dörtlük notalar",
     "soundPhrase": "{{sound}} sesi",
     "mode": "Mod",
     "modeLinear": "Doğrusal",
@@ -45,6 +44,7 @@
     "planLabel": "Plan",
     "listensBadge": "Dinler",
     "runOptions": "seçenekler",
-    "barsUnit": "ölçü"
+    "barsUnit": "ölçü",
+    "jumpTo": "{{bpm}} BPM, {{bar}}. ölçüden başla"
   }
 }

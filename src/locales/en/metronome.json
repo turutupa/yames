@@ -28,7 +28,8 @@
       "groups": "Group starts",
       "all": "Every beat",
       "none": "None"
-    }
+    },
+    "soundLabel": "Sound"
   },
   "subdiv": {
     "1": "Quarter",

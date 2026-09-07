@@ -28,7 +28,8 @@
       "groups": "Đầu nhóm",
       "all": "Mọi phách",
       "none": "Không"
-    }
+    },
+    "soundLabel": "Âm thanh"
   },
   "subdiv": {
     "1": "Nốt đen",

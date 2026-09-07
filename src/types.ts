@@ -23,6 +23,12 @@ export type SpeedRamp = {
   decrement: number;
   barsPerStep: number;
   beatsPerBar: number;
+  /**
+   * Ticks per beat while the drill runs. The engine pinned this to 1 for the
+   * whole of a ramp until it existed, so a drill was quarter notes whatever
+   * the metronome screen said.
+   */
+  subdivision: number;
   mode: "linear" | "zigzag" | "adaptive";
   cyclic: boolean;
   aggressiveness: "conservative" | "moderate" | "aggressive";

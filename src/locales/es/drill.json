@@ -5,7 +5,6 @@
     "beatsSummary": "{{count}} pulsos por compás",
     "everyBars": "cada {{count}} compases",
     "bpmUnit": "BPM",
-    "quarterNotes": "negras",
     "soundPhrase": "sonido {{sound}}",
     "mode": "Modo",
     "modeLinear": "Lineal",
@@ -45,6 +44,7 @@
     "planLabel": "El plan",
     "listensBadge": "Escucha",
     "runOptions": "opciones",
-    "barsUnit": "compases"
+    "barsUnit": "compases",
+    "jumpTo": "Empezar en {{bpm}} BPM, compás {{bar}}"
   }
 }

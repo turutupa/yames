@@ -5,7 +5,6 @@
     "beatsSummary": "每小节 {{count}} 拍",
     "everyBars": "每 {{count}} 小节",
     "bpmUnit": "BPM",
-    "quarterNotes": "四分音符",
     "soundPhrase": "{{sound}} 音色",
     "mode": "模式",
     "modeLinear": "线性",
@@ -45,6 +44,7 @@
     "planLabel": "计划",
     "listensBadge": "会聆听",
     "runOptions": "选项",
-    "barsUnit": "小节"
+    "barsUnit": "小节",
+    "jumpTo": "从 {{bpm}} BPM 第 {{bar}} 小节开始"
   }
 }

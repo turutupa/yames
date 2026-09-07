@@ -28,7 +28,8 @@
       "groups": "Inicio de grupo",
       "all": "Cada pulso",
       "none": "Ninguno"
-    }
+    },
+    "soundLabel": "Sonido"
   },
   "subdiv": {
     "1": "Negra",

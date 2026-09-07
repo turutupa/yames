@@ -28,7 +28,8 @@
       "groups": "Início de grupo",
       "all": "Cada tempo",
       "none": "Nenhum"
-    }
+    },
+    "soundLabel": "Som"
   },
   "subdiv": {
     "1": "Semínima",

@@ -99,6 +99,7 @@ fn persist_state(state: &SharedState, app_handle: &AppHandle) {
                 "decrement": s.speed_ramp.decrement,
                 "barsPerStep": s.speed_ramp.bars_per_step,
                 "beatsPerBar": s.speed_ramp.beats_per_bar,
+                "subdivision": s.speed_ramp.subdivision,
                 "mode": s.speed_ramp.mode,
                 "cyclic": s.speed_ramp.cyclic,
             }),
@@ -516,6 +517,10 @@ pub fn configure_speed_ramp(
     cyclic: bool,
     warmup_beats: u8,
     aggressiveness: Option<String>,
+    // `Option` so a frontend that predates drill subdivisions -- or a chain
+    // step with no opinion about them -- leaves the setting alone rather than
+    // silently resetting it to quarter notes.
+    subdivision: Option<u8>,
     state: State<SharedState>,
     app_handle: AppHandle,
 ) {
@@ -527,6 +532,11 @@ pub fn configure_speed_ramp(
         s.speed_ramp.decrement = decrement.clamp(1, 50);
         s.speed_ramp.bars_per_step = bars_per_step.clamp(1, 32);
         s.speed_ramp.beats_per_bar = beats_per_bar.clamp(1, 12);
+        if let Some(sub) = subdivision {
+            // The same five the metronome offers, and the same clamp: 1, 2,
+            // 3, 4 or 6 ticks a beat.
+            s.speed_ramp.subdivision = sub.clamp(1, 6);
+        }
         s.speed_ramp.mode = match mode.as_str() {
             "linear" | "zigzag" | "adaptive" => mode,
             _ => "linear".to_string(),

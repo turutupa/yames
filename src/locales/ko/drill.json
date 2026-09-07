@@ -5,7 +5,6 @@
     "beatsSummary": "한 마디 {{count}}박",
     "everyBars": "{{count}}마디마다",
     "bpmUnit": "BPM",
-    "quarterNotes": "4분음표",
     "soundPhrase": "{{sound}} 소리",
     "mode": "모드",
     "modeLinear": "선형",
@@ -45,6 +44,7 @@
     "planLabel": "계획",
     "listensBadge": "듣습니다",
     "runOptions": "옵션",
-    "barsUnit": "마디"
+    "barsUnit": "마디",
+    "jumpTo": "{{bpm}} BPM {{bar}}번째 마디부터 시작"
   }
 }

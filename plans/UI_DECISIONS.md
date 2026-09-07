@@ -155,6 +155,23 @@ Status key: **decided** · **first release** · **open** · **deferred**
   Adaptive now (`aria-describedby`, so it is not mouse-only), which also means
   the two modes you did NOT pick are readable before you pick them.
 
+- **U3.1c — Every phrase in the plan opens something, and each opens its
+  own.** *decided.* Three follow-ons from the owner reviewing U3.1:
+
+  - The bar count and the beat count shared a window, so clicking "6 beats per
+    bar" on the quiet line opened a card belonging to "every 12 bars" four
+    inches away. They are separate phrases and they get separate windows.
+  - The subdivision and the click were plain text in a line of clickable
+    words, which reads as a bug rather than as a rule. Both are tokens now.
+  - The subdivision was plain text *because* the engine pinned every ramp to
+    quarter notes. That is lifted: `speedRamp.subdivision` is the drill's own,
+    persisted with the rest of the plan. The exercise where a player most
+    wants a subdivided pulse — climbing a passage one step at a time — was the
+    one place they could not ask for one. The click stays global (the same
+    setting the header chip changes): two doors to one switch, deliberately,
+    because a drill playing a different sound from the metronome would be a
+    second thing to keep in sync.
+
 - **U3.2 — The grid becomes the climb.** *decided.* One column per tempo
   step, one cell per bar, rising left to right so the picture's shape is the
   exercise's shape. Promoted from below the fold to the screen's main object.

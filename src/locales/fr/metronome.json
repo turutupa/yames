@@ -28,7 +28,8 @@
       "groups": "Débuts de groupe",
       "all": "Chaque temps",
       "none": "Aucun"
-    }
+    },
+    "soundLabel": "Son"
   },
   "subdiv": {
     "1": "Noire",

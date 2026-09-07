@@ -1,16 +1,22 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import type { AppState, BeatEvent } from "../../types";
-import { configureSpeedRamp, startSpeedRampFrom, onRampStep } from "../../ipc";
+import { configureSpeedRamp, startSpeedRampFrom, onRampStep, setSoundType } from "../../ipc";
 import { SOUND_TYPES } from "../../constants/metronome";
+import { SubdivisionIcon } from "../../components/MetronomeIcons";
+import type { Subdivision } from "../../types";
 import { DrillPlanLine, type PlanField, type PlanAnchors } from "./DrillPlanLine";
 import {
   DrillConfigPopover,
   DrillPopoverRow,
+  DrillPopoverChoices,
   DrillNumberField,
 } from "./DrillConfigPopover";
 import { DrillClimb } from "./DrillClimb";
 import "../../styles/drill-view.css";
+
+/** Ticks per beat a drill can play — the same six the metronome offers. */
+const SUBDIVISIONS = [1, 2, 3, 4, 5, 6] as const;
 
 /** The three ramp shapes, each with the sentence its tooltip shows. */
 const MODES = [
@@ -48,6 +54,7 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
   const [decrement, setDecrement] = useState(ramp.decrement);
   const [barsPerStep, setBarsPerStep] = useState(ramp.barsPerStep);
   const [beatsPerBar, setBeatsPerBar] = useState(ramp.beatsPerBar);
+  const [subdivision, setSubdivision] = useState(ramp.subdivision ?? 1);
   const [mode, setMode] = useState(ramp.mode);
   const [cyclic, setCyclic] = useState(ramp.cyclic);
   const [aggressiveness, setAggressiveness] = useState(ramp.aggressiveness || "moderate");
@@ -75,11 +82,14 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
       setDecrement(ramp.decrement);
       setBarsPerStep(ramp.barsPerStep);
       setBeatsPerBar(ramp.beatsPerBar);
+      // Defended: a hot-reloaded frontend can render against a binary that
+      // predates the field, and a subdivision of 0 divides a beat by nothing.
+      setSubdivision(ramp.subdivision || 1);
       setMode(ramp.mode);
       setCyclic(ramp.cyclic);
       setCountIn(ramp.warmupBeats > 0);
     }
-  }, [ramp.startBpm, ramp.targetBpm, ramp.increment, ramp.decrement, ramp.barsPerStep, ramp.beatsPerBar, ramp.mode, ramp.cyclic, ramp.warmupBeats, ramp.active]);
+  }, [ramp.startBpm, ramp.targetBpm, ramp.increment, ramp.decrement, ramp.barsPerStep, ramp.beatsPerBar, ramp.subdivision, ramp.mode, ramp.cyclic, ramp.warmupBeats, ramp.active]);
 
   // A settings window does not survive the start of a run. It is a floating
   // card over the climb, and the climb is the thing you watch while playing.
@@ -93,7 +103,7 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
     return () => { unlisten.then((fn) => fn()); };
   }, []);
 
-  const saveWith = (overrides: Partial<{ startBpm: number; targetBpm: number; increment: number; decrement: number; barsPerStep: number; beatsPerBar: number; mode: string; cyclic: boolean; warmupBeats: number }>) => {
+  const saveWith = (overrides: Partial<{ startBpm: number; targetBpm: number; increment: number; decrement: number; barsPerStep: number; beatsPerBar: number; subdivision: number; mode: string; cyclic: boolean; warmupBeats: number }>) => {
     configureSpeedRamp({
       startBpm: overrides.startBpm ?? startBpm,
       targetBpm: overrides.targetBpm ?? targetBpm,
@@ -101,6 +111,7 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
       decrement: overrides.decrement ?? decrement,
       barsPerStep: overrides.barsPerStep ?? barsPerStep,
       beatsPerBar: overrides.beatsPerBar ?? beatsPerBar,
+      subdivision: overrides.subdivision ?? subdivision,
       mode: overrides.mode ?? mode,
       cyclic: overrides.cyclic ?? cyclic,
       warmupBeats: overrides.warmupBeats ?? (countIn ? 4 : 0),
@@ -317,6 +328,7 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
             beatsPerBar={beatsPerBar}
             barsPerStep={barsPerStep}
             mode={mode}
+            subdivision={subdivision}
             soundName={soundName}
             openField={openField}
             onOpenField={setOpenField}
@@ -389,9 +401,15 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
             </DrillConfigPopover>
           )}
 
-          {openField === "shape" && (
+          {/* One window per phrase, and these two are separate phrases: the
+              bar count is on the loud line because it shapes the climb, the
+              beat count is on the quiet line because it shapes a bar. They
+              shared a window at first and the owner found what that does —
+              clicking "6 beats per bar" opened a card belonging to "every 12
+              bars", four inches away from the words that were clicked. */}
+          {openField === "repeats" && (
             <DrillConfigPopover
-              anchor={anchors.current.shape ?? null}
+              anchor={anchors.current.repeats ?? null}
               onClose={closeField}
               label={t("drill.repeats")}
               note={planSummary}
@@ -406,6 +424,16 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
                   onCommit={(v) => { setBarsPerStep(v); saveWith({ barsPerStep: v }); }}
                 />
               </DrillPopoverRow>
+            </DrillConfigPopover>
+          )}
+
+          {openField === "beats" && (
+            <DrillConfigPopover
+              anchor={anchors.current.beats ?? null}
+              onClose={closeField}
+              label={t("drill.beats")}
+              note={planSummary}
+            >
               <DrillPopoverRow label={t("drill.beats")} tip={t("drill.desc.beats")} onHover={(on) => setHighlightMode(on ? "beats" : null)}>
                 <DrillNumberField
                   value={beatsPerBar}
@@ -415,6 +443,62 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
                   onCommit={(v) => { setBeatsPerBar(v); saveWith({ beatsPerBar: v }); }}
                 />
               </DrillPopoverRow>
+            </DrillConfigPopover>
+          )}
+
+          {/* The subdivision, which a drill could not have until now: the
+              engine pinned every ramp to quarter notes, so the one exercise
+              where a player most wants a subdivided pulse was the one place
+              they could not ask for one. */}
+          {openField === "sub" && (
+            <DrillConfigPopover
+              anchor={anchors.current.sub ?? null}
+              onClose={closeField}
+              label={t("metronome.subdivision")}
+              note={planSummary}
+            >
+              <DrillPopoverChoices label={t("metronome.subdivision")}>
+                {SUBDIVISIONS.map((sub) => (
+                  <button
+                    key={sub}
+                    className={`drill-choice ${subdivision === sub ? "active" : ""}`}
+                    aria-pressed={subdivision === sub}
+                    onClick={() => { setSubdivision(sub); saveWith({ subdivision: sub }); }}
+                  >
+                    <SubdivisionIcon sub={sub as Subdivision} size={22} />
+                    <span className="drill-choice-label">{t(`subdiv.${sub}`)}</span>
+                  </button>
+                ))}
+              </DrillPopoverChoices>
+            </DrillConfigPopover>
+          )}
+
+          {/* The click. This is global state, the same setting the header chip
+              changes — deliberately, because a drill playing a different sound
+              from the metronome would be a second click to keep in sync. */}
+          {openField === "sound" && (
+            <DrillConfigPopover
+              anchor={anchors.current.sound ?? null}
+              onClose={closeField}
+              label={t("metronome.soundLabel")}
+            >
+              <DrillPopoverChoices label={t("metronome.soundLabel")}>
+                {SOUND_TYPES.map((snd) => (
+                  <button
+                    key={snd.id}
+                    className={`drill-choice ${state.soundType === snd.id ? "active" : ""}`}
+                    aria-pressed={state.soundType === snd.id}
+                    onClick={() => {
+                      void setSoundType(snd.id).catch((err) => {
+                        console.error("[yames] set_sound_type failed", err);
+                      });
+                    }}
+                  >
+                    <span className="drill-choice-glyph" aria-hidden="true">{snd.icon}</span>
+                    <span className="drill-choice-label">{t(`sound.${snd.id}`)}</span>
+                  </button>
+                ))}
+              </DrillPopoverChoices>
             </DrillConfigPopover>
           )}
 

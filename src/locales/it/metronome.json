@@ -28,7 +28,8 @@
       "groups": "Inizio gruppo",
       "all": "Ogni movimento",
       "none": "Nessuno"
-    }
+    },
+    "soundLabel": "Suono"
   },
   "subdiv": {
     "1": "Semiminime",

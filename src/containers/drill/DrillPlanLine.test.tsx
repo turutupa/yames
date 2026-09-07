@@ -11,6 +11,7 @@ const base = {
   barsPerStep: 12,
   mode: "linear",
   soundName: "Wood",
+  subdivision: 1,
   openField: null,
   onOpenField: vi.fn(),
   // The settings window measures its position off these; the plan line only
@@ -65,7 +66,7 @@ describe("DrillPlanLine", () => {
   });
 
   it("marks only the open phrase", () => {
-    const { container } = render(<DrillPlanLine {...base} openField="shape" />);
+    const { container } = render(<DrillPlanLine {...base} openField="repeats" />);
     const open = container.querySelectorAll(".drill-plan-token.open");
     expect(open).toHaveLength(1);
   });
@@ -87,16 +88,49 @@ describe("DrillPlanLine", () => {
     const { container } = render(<DrillPlanLine {...base} />);
     const detail = container.querySelector(".drill-plan-detail")?.textContent ?? "";
     expect(detail).toContain("4 beats per bar");
-    expect(detail).toContain("quarter notes");
     expect(detail).toContain("Wood");
   });
 
-  it("reaches the same settings from the beat count as from the bar count", () => {
+  it("names whichever subdivision is set, not the pinned fact", () => {
+    // This said "quarter notes" whatever the drill was doing, because the
+    // engine pinned every ramp to 1. It is a setting now, so the sentence
+    // reports it.
+    const { container, rerender } = render(<DrillPlanLine {...base} />);
+    const detail = () =>
+      container.querySelector(".drill-plan-detail")?.textContent ?? "";
+    expect(detail()).toContain("Quarter");
+    rerender(<DrillPlanLine {...base} subdivision={4} />);
+    expect(detail()).toContain("Sixteenth");
+  });
+
+  it("gives every phrase on the quiet line a window of its own", () => {
+    // All four used to be one shared window or plain text. The owner hit both
+    // halves of that: clicking "6 beats per bar" opened a card belonging to
+    // "every 12 bars", and the subdivision and the click could not be clicked
+    // at all while sitting in a line of things that could.
     const onOpenField = vi.fn();
     const { container } = render(
       <DrillPlanLine {...base} onOpenField={onOpenField} />,
     );
+    const tokens = [...container.querySelectorAll(".drill-plan-detail-token")];
+    expect(tokens).toHaveLength(4);
+    for (const token of tokens) fireEvent.click(token);
+    expect(onOpenField.mock.calls.map((c) => c[0])).toEqual([
+      "beats",
+      "sub",
+      "sound",
+      "more",
+    ]);
+  });
+
+  it("keeps the bar count and the beat count apart", () => {
+    const onOpenField = vi.fn();
+    const { container } = render(
+      <DrillPlanLine {...base} onOpenField={onOpenField} />,
+    );
+    fireEvent.click(container.querySelectorAll(".drill-plan-token")[2]);
+    expect(onOpenField).toHaveBeenCalledWith("repeats");
     fireEvent.click(container.querySelector(".drill-plan-detail-token")!);
-    expect(onOpenField).toHaveBeenCalledWith("shape");
+    expect(onOpenField).toHaveBeenCalledWith("beats");
   });
 });

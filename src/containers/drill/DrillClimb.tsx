@@ -150,8 +150,23 @@ export function DrillClimb({
                     const barDone = isDone || (isCurrent && barIdx < barsInStep);
                     const barActive = isCurrent && barIdx === barsInStep;
                     return (
-                      <div
+                      // A button, not a div. Clicking a bar has always jumped
+                      // the run to it — but a div with an onClick says so to
+                      // nobody: no tooltip on hover, nothing for a screen
+                      // reader, no way in from the keyboard. The owner asked
+                      // for behaviour that was already there, which is what an
+                      // affordance with no announcement looks like.
+                      //
+                      // Only the first bar of each column takes a tab stop.
+                      // The step is the unit worth navigating to; putting all
+                      // hundred-odd bars in the tab order would bury the
+                      // transport behind them.
+                      <button
                         key={barIdx}
+                        type="button"
+                        tabIndex={barIdx === 0 ? 0 : -1}
+                        title={t("drill.jumpTo", { bpm, bar: barIdx + 1 })}
+                        aria-label={t("drill.jumpTo", { bpm, bar: barIdx + 1 })}
                         className={`drill-grid-cell drill-climb-cell ${barDone ? "done" : ""} ${barActive ? "current" : ""}`}
                         data-first-cell={
                           stepIdx === 0 && barIdx === 0 ? "" : undefined

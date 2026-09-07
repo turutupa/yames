@@ -15,6 +15,13 @@ pub struct SpeedRamp {
     pub bars_per_step: u8,
     #[serde(rename = "beatsPerBar")]
     pub beats_per_bar: u8,
+    /// Ticks per beat while the ramp runs. The engine used to pin this to 1
+    /// for the whole of a drill, which meant the one exercise where a player
+    /// most wants a subdivided pulse -- climbing a passage -- was the one
+    /// place they could not have one. `default_ramp_subdivision` keeps a
+    /// store written before this field from arriving as 0.
+    #[serde(default = "default_ramp_subdivision")]
+    pub subdivision: u8,
     pub mode: String, // "linear" | "zigzag" | "adaptive"
     pub cyclic: bool,
     pub aggressiveness: String, // "conservative" | "moderate" | "aggressive"
@@ -34,6 +41,12 @@ pub struct SpeedRamp {
     pub warmup_count: u8,
 }
 
+/// Quarter notes. A drill has always played them; the field is new, and a
+/// store written before it exists must not deserialise as zero ticks a beat.
+fn default_ramp_subdivision() -> u8 {
+    1
+}
+
 impl Default for SpeedRamp {
     fn default() -> Self {
         Self {
@@ -43,6 +56,7 @@ impl Default for SpeedRamp {
             decrement: 3,
             bars_per_step: 12,
             beats_per_bar: 4,
+            subdivision: 1,
             mode: "linear".to_string(),
             cyclic: false,
             aggressiveness: "moderate".to_string(),

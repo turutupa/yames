@@ -5,7 +5,6 @@
     "beatsSummary": "{{count}} beats per maat",
     "everyBars": "elke {{count}} maten",
     "bpmUnit": "BPM",
-    "quarterNotes": "kwartnoten",
     "soundPhrase": "{{sound}}-geluid",
     "mode": "Modus",
     "modeLinear": "Lineair",
@@ -45,6 +44,7 @@
     "planLabel": "Het plan",
     "listensBadge": "Luistert",
     "runOptions": "opties",
-    "barsUnit": "maten"
+    "barsUnit": "maten",
+    "jumpTo": "Starten vanaf {{bpm}} BPM, maat {{bar}}"
   }
 }
