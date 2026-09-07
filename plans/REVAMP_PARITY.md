@@ -276,10 +276,27 @@ surviving the Pocket Check removal, and 14 dead strings besides.
 and the same placeholders. Between them, a feature cannot lose its strings
 quietly.
 
-**What "needs eyes" means.** Nothing in Phase B or C has been seen running.
-The evidence is types, 2,528 unit tests, 229 cargo tests and a rule-by-rule
-diff of the built CSS — all of which prove the code is consistent, and none
-of which prove a layout looks right. A browser cannot boot this app (every
-Tauri call fails) and stubbing the bridge hung the page, so the first step on
-picking this up is `npm run tauri dev` and a pass down §3 with the app in
-front of you.
+**What "needs eyes" means — updated.** The claim this paragraph used to make,
+that "a browser cannot boot this app and stubbing the bridge hung the page",
+is no longer true and should not be repeated. `src/devShim.local.ts` (local,
+gitignored, never committed) fakes the Tauri bridge well enough to drive the
+whole UI in a plain browser, including the transport: it answers
+`plugin:event|listen`, emits `state-changed` and `beat`, and implements
+`toggle_playback`. The metronome figure's pendulum has been watched swinging
+that way. To use it, add the `installDevShim()` import to `src/main.tsx`, run
+`npx vite --port <free port>` — NOT 1420, which the owner's real app holds —
+and **revert `main.tsx` before committing**, or a fresh clone fails on a
+missing module.
+
+Two cautions learned the hard way while previewing. The pane does not always
+repaint, and a stalled CSS transition makes `getComputedStyle` report the
+value the property STARTED at — twice this looked like a rule that was not
+applying. Disable transitions before trusting a computed colour. And jsdom
+does not model focusability at all, so a rendering test cannot catch a
+`focus()` refused because its element sits inside `visibility: hidden`.
+
+The current evidence is types, 2,778 unit tests, 247 cargo tests and a
+rule-by-rule diff of the built CSS. The owner has now reviewed the metronome
+and drill screens in the real app across several rounds. What still has NOT
+been seen running anywhere: macOS (the whole app), the chain runtime against a
+real engine, and the reworked sounds.

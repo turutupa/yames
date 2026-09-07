@@ -401,7 +401,13 @@ PRESETS, beside presets, "chain" says exactly what it is. Setlist and routine
 are musician's words for something a musician would expect to hold songs or a
 practice plan, and a chain here may hold neither.
 
-### U9.5 · The count-in has to be unwelded from the ramp — **open**
+### U9.5 · The count-in has to be unwelded from the ramp — **decided**
+
+Closed, and built. `CountIn { beats, done }` lives on `AppState`, `arm_count_in`
+is a registered command, the engine's `warming` reads the count rather than the
+ramp, and `src/chain/runtime.ts` emits a `countIn` effect between steps. The
+rest of this entry is the reasoning that got there, kept because it is the part
+that was misread once.
 
 Worth stating plainly, because it has already been misread once: this is about
 where the code lives, not about what a musician hears. The count-in plays at
