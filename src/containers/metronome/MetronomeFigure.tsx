@@ -1,15 +1,24 @@
 import { useEffect, useRef } from "react";
 import type { BeatEvent } from "../../types";
+import { rod, ROD_AT, STATIC_PARTS, type Mesh } from "./figureGeometry";
 import { MIN_BPM, MAX_BPM } from "../../constants/metronome";
 
 /**
  * The metronome, drawn behind the metronome.
  *
- * A line figure that sits toward the right of the stage with the controls
- * lying over it, so the screen has an object in it rather than a field of
- * widgets. It is decoration and says nothing the numbers do not — which is
- * why it is `aria-hidden`, takes no pointer events, and disappears entirely
- * when there is not enough width for it to be anything but noise behind text.
+ * A wireframe drawing of the object, in perspective, sitting toward the right
+ * of the stage with the controls lying over it — so the screen has something
+ * in it rather than a field of widgets. It is decoration and says nothing the
+ * numbers do not, which is why it is `aria-hidden`, takes no pointer events,
+ * and disappears entirely when there is not enough width for it to be
+ * anything but noise behind text.
+ *
+ * The geometry is ported from the marketing site (`figureGeometry.ts`) — case,
+ * plate, movement, escapement, bell and the graduated arc — assembled rather
+ * than exploded, and held at one three-quarter angle instead of rocking. The
+ * site is a hero and can afford to move; this sits under live controls all
+ * day, where anything that moves without meaning is something to look at
+ * instead of the tempo.
  *
  * Two things make it worth drawing rather than dropping in a static SVG:
  *
@@ -121,12 +130,138 @@ export function MetronomeFigure({ bpm, isPlaying, currentBeat }: MetronomeFigure
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
-    /** Read the live theme rather than caching — themes change under us. */
+    /**
+     * The theme's ink, as `r,g,b` for `rgba()` — the depth cue needs to set
+     * alpha per edge, so a hex token is no use directly. Read live rather than
+     * cached: the theme changes under us.
+     */
+    function rgb(value: string, fallback: string): string {
+      const v = value.trim();
+      const hex = /^#?([0-9a-f]{6})$/i.exec(v);
+      if (hex) {
+        const n = parseInt(hex[1], 16);
+        return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`;
+      }
+      const nums = v.match(/[\d.]+/g);
+      if (nums && nums.length >= 3) return nums.slice(0, 3).map((x) => Math.round(+x)).join(",");
+      return fallback;
+    }
+
     function ink() {
       const cs = getComputedStyle(canvas!);
       return {
-        line: cs.getPropertyValue("--text-primary").trim() || "#fff",
-        accent: cs.getPropertyValue("--accent").trim() || "#f5a30b",
+        line: rgb(cs.getPropertyValue("--text-primary"), "245,236,226"),
+        accent: rgb(cs.getPropertyValue("--accent"), "245,163,11"),
+      };
+    }
+
+    /* Orientation. Fixed — the site's figure rocks, which is right for a
+       hero and wrong for a thing that sits behind live controls all day.
+
+       `FRONT` is where the case's front face meets the camera; the yaw turns
+       it a little to the left and the pitch looks a little down on it, which
+       is the three-quarter view a drawing of an object is usually given. */
+    const FRONT = Math.PI - 0.5;
+    const YAW = FRONT + 0.3;
+    const PITCH = -0.34;
+    const cosYaw = Math.cos(YAW);
+    const sinYaw = Math.sin(YAW);
+    const cosPitch = Math.cos(PITCH);
+    const sinPitch = Math.sin(PITCH);
+
+    /** World point to screen, with the perspective divide kept for depth. */
+    function project(
+      p: [number, number, number],
+      scale: number,
+      ox: number,
+      oy: number,
+    ): [number, number, number] {
+      const [x, y, z] = p;
+      const x2 = x * cosYaw + z * sinYaw;
+      const z2 = -x * sinYaw + z * cosYaw;
+      const y2 = y * cosPitch - z2 * sinPitch;
+      const z3 = y * sinPitch + z2 * cosPitch;
+      const d = 26;
+      const k = d / (d + z3 + 8);
+      return [ox + x2 * scale * k, oy - y2 * scale * k, k];
+    }
+
+    function strokeMesh(
+      geo: Mesh,
+      at: [number, number, number],
+      dim: number,
+      angle: number,
+      scale: number,
+      ox: number,
+      oy: number,
+      ink: string,
+    ) {
+      const ca = Math.cos(angle);
+      const sa = Math.sin(angle);
+      const proj = geo.pts.map((p) => {
+        let [x, y] = p;
+        const z = p[2];
+        if (angle) {
+          const nx = x * ca - y * sa;
+          y = x * sa + y * ca;
+          x = nx;
+        }
+        return project([x + at[0], y + at[1], z + at[2]], scale, ox, oy);
+      });
+      for (const [a2, b2] of geo.edges) {
+        const p = proj[a2];
+        const q = proj[b2];
+        // Depth cue: what is further away fades. No lighting needed.
+        const depth = (p[2] + q[2]) / 2;
+        const alpha = Math.max(0.1, Math.min(1, (depth - 0.62) * 3.4)) * dim;
+        ctx!.strokeStyle = `rgba(${ink}, ${alpha.toFixed(3)})`;
+        ctx!.lineWidth = 0.85 + depth * 0.5;
+        ctx!.beginPath();
+        ctx!.moveTo(p[0], p[1]);
+        ctx!.lineTo(q[0], q[1]);
+        ctx!.stroke();
+      }
+    }
+
+    /**
+     * How big to draw it, and where to centre it.
+     *
+     * Measured rather than guessed with a divisor: project every point of
+     * every part at unit scale, including the rod at the widest swing the
+     * slowest tempo allows, and fit the resulting box into the canvas. The
+     * first version used the site's `min(w, h) / 7.9`, which is right for the
+     * canvas the site gives it and clipped the bell off the top of ours.
+     */
+    function fit(): { scale: number; ox: number; oy: number } {
+      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      const consider = (geo: Mesh, at: [number, number, number], angle: number) => {
+        const ca = Math.cos(angle);
+        const sa = Math.sin(angle);
+        for (const pt of geo.pts) {
+          let x = pt[0];
+          let y = pt[1];
+          if (angle) {
+            const nx = x * ca - y * sa;
+            y = x * sa + y * ca;
+            x = nx;
+          }
+          const [px, py] = project([x + at[0], y + at[1], pt[2] + at[2]], 1, 0, 0);
+          if (px < minX) minX = px;
+          if (px > maxX) maxX = px;
+          if (py < minY) minY = py;
+          if (py > maxY) maxY = py;
+        }
+      };
+      for (const part of STATIC_PARTS) consider(part.geo, part.at, 0);
+      const widest = swingFor(MIN_BPM);
+      for (const a of [-widest, 0, widest]) consider(rod(BOB_SLOW), ROD_AT, a);
+
+      const pad = 0.94;
+      const scale = Math.min(w / (maxX - minX), h / (maxY - minY)) * pad;
+      return {
+        scale,
+        ox: w / 2 - ((minX + maxX) / 2) * scale,
+        oy: h / 2 - ((minY + maxY) / 2) * scale,
       };
     }
 
@@ -135,93 +270,21 @@ export function MetronomeFigure({ bpm, isPlaying, currentBeat }: MetronomeFigure
       ctx!.clearRect(0, 0, w, h);
 
       const { line, accent } = ink();
-      const bobAt = bobFor(tempo.current);
-
-      // The case: a tall trapezoid standing on the baseline, drawn as an
-      // outline so the rod reads through it.
-      const pad = Math.min(w, h) * 0.08;
-      const baseY = h - pad;
-      const topY = pad;
-      // Right of centre: the canvas reaches back under the stage, and the
-      // part that should be readable is the part past the stage's edge.
-      const cx = w * 0.63;
-      const halfBase = Math.min(w * 0.34, (h - pad * 2) * 0.36);
-      const halfTop = halfBase * 0.34;
-      const rodLen = (baseY - topY) * 0.82;
-      const pivotY = baseY - (baseY - topY) * 0.06;
-
-      ctx!.lineJoin = "round";
+      const { scale, ox, oy } = fit();
       ctx!.lineCap = "round";
+      ctx!.lineJoin = "round";
 
-      // Case outline.
-      ctx!.strokeStyle = line;
-      ctx!.globalAlpha = 0.5;
-      ctx!.lineWidth = 1.4;
-      ctx!.beginPath();
-      ctx!.moveTo(cx - halfBase, baseY);
-      ctx!.lineTo(cx - halfTop, topY);
-      ctx!.lineTo(cx + halfTop, topY);
-      ctx!.lineTo(cx + halfBase, baseY);
-      ctx!.closePath();
-      ctx!.stroke();
-
-      // The scale the bob is set against — the reason a metronome is a
-      // wedge rather than a box.
-      ctx!.globalAlpha = 0.22;
-      ctx!.lineWidth = 1;
-      const marks = 9;
-      for (let i = 1; i < marks; i++) {
-        const f = i / marks;
-        const y = baseY - (baseY - topY) * f * 0.9;
-        const half = lerp(halfBase, halfTop, f) * 0.34;
-        ctx!.beginPath();
-        ctx!.moveTo(cx - half, y);
-        ctx!.lineTo(cx - half * 0.35, y);
-        ctx!.stroke();
+      for (const part of STATIC_PARTS) {
+        strokeMesh(part.geo, part.at, part.dim, 0, scale, ox, oy, line);
       }
 
-      // Where the rod is, right now.
       const angle =
         !playing.current || reduced
           ? 0
           : rodAngle(tempo.current, now - phase.current.start, phase.current.dir);
-
-      const tipX = cx + Math.sin(angle) * rodLen;
-      const tipY = pivotY - Math.cos(angle) * rodLen;
-
-      // Rod.
-      ctx!.globalAlpha = 0.75;
-      ctx!.lineWidth = 1.8;
-      ctx!.strokeStyle = accent;
-      ctx!.beginPath();
-      ctx!.moveTo(cx, pivotY);
-      ctx!.lineTo(tipX, tipY);
-      ctx!.stroke();
-
-      // Bob — a filled block on the rod, which is the part you slide.
-      const bx = cx + Math.sin(angle) * rodLen * bobAt;
-      const by = pivotY - Math.cos(angle) * rodLen * bobAt;
-      const bobW = Math.max(10, halfBase * 0.3);
-      const bobH = bobW * 0.62;
-      ctx!.save();
-      ctx!.translate(bx, by);
-      ctx!.rotate(angle);
-      ctx!.globalAlpha = 0.9;
-      ctx!.fillStyle = accent;
-      // A plain rect rather than roundRect: the corners are two pixels at
-      // this size, and roundRect is missing from the canvas stub the tests
-      // run against — which took the whole app down with it.
-      ctx!.fillRect(-bobW / 2, -bobH / 2, bobW, bobH);
-      ctx!.restore();
-
-      // Pivot.
-      ctx!.globalAlpha = 0.85;
-      ctx!.fillStyle = line;
-      ctx!.beginPath();
-      ctx!.arc(cx, pivotY, 2.6, 0, Math.PI * 2);
-      ctx!.fill();
-
-      ctx!.globalAlpha = 1;
+      // The rod is the one part that carries the accent: it is the part that
+      // is doing something.
+      strokeMesh(rod(bobFor(tempo.current)), ROD_AT, 1, angle, scale, ox, oy, accent);
     }
 
     function frame(now: number) {
