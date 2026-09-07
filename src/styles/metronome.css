@@ -1754,6 +1754,12 @@ span.meter-grouping-chip {
   align-items: flex-start;
   gap: 4px;
   padding-bottom: 1rem;
+  /* Fixed, because the marking under BPM is a word of wildly varying length —
+     "Lento" is 51px and "Prestissimo" 105 — and the -, + and TAP buttons sit
+     directly after it. Changing tempo slid them up to 54px sideways, which is
+     the kind of movement that makes you press the wrong one. 7rem clears the
+     longest marking with room to spare. */
+  min-width: 7rem;
 }
 
 .tempo-unit {
