@@ -159,7 +159,9 @@
    give when the window is small:
      --climb-rise    how far the top step stands above the bottom one
      --climb-cell-h  the height of one bar
-     --climb-cell-w  its width */
+
+   The cells' width is not one of them: columns and cells share the track
+   equally, so any plan fits whatever its size. */
 .drill-climb {
   /* Sized off the window rather than a breakpoint, because the thing that
      runs out is the window's height, not a category of window. At the 780px
@@ -168,7 +170,6 @@
      drawing a staircase you have to look up at. */
   --climb-rise: clamp(110px, 23vh, 290px);
   --climb-cell-h: clamp(18px, 3.2vh, 30px);
-  --climb-cell-w: 6px;
   --climb-cell-gap: 2px;
   --climb-col-gap: 12px;
   display: flex;
@@ -225,26 +226,20 @@
 
 /* The same two fills the cells use, so the key is literally a sample. */
 .drill-climb-swatch.done {
-  background: color-mix(in srgb, var(--accent) 55%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 78%, transparent);
 }
 
 .drill-climb-swatch.plan {
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
 }
 
-/* The fallback, stated on purpose. Nine steps of twelve bars want ~830px and
-   a 480px window has about 380px to give. Shrinking the cells to fit turns
-   the staircase into the mesh we just left, so the cells shrink to a floor
-   (three breakpoints below) and then the track scrolls. DrillClimb keeps the
-   playing column centred while a run is going, so scrolling never hides the
-   part you need. */
+/* The whole plan, always in view. */
 .drill-climb-scroll {
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: thin;
-  scroll-behavior: smooth;
+  /* No scrolling. The plan is bounded — you chose a start, a target and a step
+     — so the whole of it can be shown, and a chart you have to drag to read is
+     a chart that has stopped being a glance. The columns and their cells share
+     the width instead; see `.drill-climb-col` and the cell rule below. */
+  overflow: hidden;
   padding-bottom: 2px;
   /* The glow on the current cell would be clipped by the scroll box. */
   margin: -8px -4px 0;
@@ -257,8 +252,7 @@
   display: flex;
   align-items: flex-end;
   gap: var(--climb-col-gap);
-  width: max-content;
-  min-width: 100%;
+  width: 100%;
   /* Fixed height so adding a step does not shove the rest of the screen
      around — only the columns move. */
   height: calc(var(--climb-rise) + var(--climb-cell-h) + 26px);
@@ -323,14 +317,23 @@
   position: relative;
 }
 
+/* Every column takes an equal share of the track, and every cell an equal
+   share of its column — so eleven steps of twelve bars fit exactly as three
+   steps of four do, without a scrollbar and without a fixed size that only
+   suits one plan. */
+.drill-climb .drill-climb-col {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
 .drill-climb-playhead {
   position: absolute;
   bottom: -6px;
   /* Centre of the bar being played: whole cells before it, plus half of it. */
-  left: calc(
-    var(--climb-playhead-bar, 0) * (var(--climb-cell-w) + var(--climb-cell-gap)) +
-      var(--climb-cell-w) / 2 - 1px
-  );
+  /* A fraction of the column rather than a count of fixed-width cells: the
+     cells share the column's width now, so there is no per-cell figure to
+     multiply. `--climb-playhead-pct` is set by DrillClimb. */
+  left: calc(var(--climb-playhead-pct, 0) * 1% - 1px);
   width: 2px;
   height: calc(var(--climb-rise) + var(--climb-cell-h) + 32px);
   border-radius: 1px;
@@ -362,23 +365,28 @@
    global.css paints every cell with a flat accent fill, which would erase the
    three states below. Two classes plus the block beats it in both themes
    without an !important war. */
+.drill-climb .drill-climb-cells {
+  width: 100%;
+}
+
 .drill-climb .drill-climb-cells .drill-climb-cell {
-  width: var(--climb-cell-w);
+  flex: 1 1 0;
+  min-width: 1px;
+  width: auto;
   height: var(--climb-cell-h);
   border-radius: 2px;
   cursor: pointer;
-  /* An upcoming bar was a hairline and nothing else. The window renders at a
-     fractional device-pixel ratio, so "1px" became 0.67 of a physical pixel
-     and the whole plan read as almost-empty space — the shape of the climb
-     was there and you could not see it. A faint fill carries the shape; the
-     border sharpens its edge.
+  /* Solid, not outlined. An outlined cell at this size is mostly border, and
+     a staircase of little empty boxes reads as a wireframe of a chart rather
+     than as the chart. Every bar of the plan is a filled block; what changes
+     as you play is how strongly it is filled.
 
-     Both are mixed from the accent rather than from the ink, because a
-     staircase of grey boxes reads as furniture. This is tonight's plan, and
-     it belongs in the same colour as the bars you will have played by the
-     end of it — just far enough back to be clearly the outline. */
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
+     Mixed from the accent rather than the ink, because a staircase of grey
+     boxes reads as furniture. This is tonight's plan, in the same colour as
+     the bars you will have played by the end of it — just far enough back to
+     read as what is still ahead. */
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+  border: none;
   opacity: 1;
   box-shadow: none;
   transition:
@@ -398,19 +406,17 @@
 }
 
 .drill-climb .drill-climb-cells .drill-climb-cell:hover {
-  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 45%, transparent);
   transform: scaleY(1.08);
 }
 
 .drill-climb .drill-climb-cells .drill-climb-cell.done {
-  background: color-mix(in srgb, var(--accent) 55%, transparent);
-  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 78%, transparent);
   opacity: 1;
 }
 
 .drill-climb .drill-climb-cells .drill-climb-cell.current {
   background: var(--accent);
-  border-color: var(--accent);
   opacity: 1;
   box-shadow:
     0 0 8px var(--accent-glow),
@@ -459,14 +465,12 @@
    as a bar. */
 @media (max-width: 1023px) {
   .drill-climb {
-    --climb-cell-w: 5px;
     --climb-col-gap: 9px;
   }
 }
 
 @media (max-width: 767px) {
   .drill-climb {
-    --climb-cell-w: 4px;
     --climb-cell-gap: 1px;
     --climb-col-gap: 7px;
   }
@@ -474,7 +478,6 @@
 
 @media (max-width: 559px) {
   .drill-climb {
-    --climb-cell-w: 3px;
     --climb-cell-gap: 1px;
     --climb-col-gap: 6px;
     /* Shorter as well as thinner: a narrow window is usually a small one, and

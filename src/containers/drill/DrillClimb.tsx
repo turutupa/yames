@@ -1,5 +1,5 @@
 import type React from "react";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 export interface DrillClimbProps {
@@ -56,7 +56,6 @@ export function DrillClimb({
   onJump,
 }: DrillClimbProps) {
   const { t } = useTranslation();
-  const scrollRef = useRef<HTMLDivElement>(null);
   const currentColRef = useRef<HTMLDivElement>(null);
 
   // Ghosts are still on screen, so they get a vote on the range — otherwise
@@ -81,21 +80,6 @@ export function DrillClimb({
   const effectiveStep =
     cyclic && steps.length > 0 ? currentStep % steps.length : currentStep;
 
-  // Nine steps of twelve bars is 800-odd pixels of climb; a 480px window sees
-  // about half of it. Rather than crushing the cells until the shape is
-  // unreadable, the track scrolls — and while a run is going it keeps the
-  // column you are actually playing in the middle of the view, so the one
-  // thing you need to see never leaves the window.
-  useEffect(() => {
-    const scroller = scrollRef.current;
-    const column = currentColRef.current;
-    if (!active || !scroller || !column) return;
-    const target =
-      column.offsetLeft + column.offsetWidth / 2 - scroller.clientWidth / 2;
-    const max = scroller.scrollWidth - scroller.clientWidth;
-    scroller.scrollLeft = Math.max(0, Math.min(target, max));
-  }, [active, effectiveStep, barsPerStep, steps.length]);
-
   return (
     <div className="drill-climb">
       <div className="drill-climb-head">
@@ -115,7 +99,7 @@ export function DrillClimb({
           </span>
         </span>
       </div>
-      <div className="drill-climb-scroll" ref={scrollRef}>
+      <div className="drill-climb-scroll">
         <div className="drill-climb-track">
           {steps.map((bpm, stepIdx) => {
             const isDone = active && !cyclic ? stepIdx < currentStep : false;
@@ -135,16 +119,22 @@ export function DrillClimb({
                 data-current={isCurrent ? "" : undefined}
                 style={columnStyle(bpm, base)}
               >
-                {/* The playhead. The columns are a fixed width and the track
-                    scrolls, so the picture never rescales to fit the step
-                    count — which means a position in it stays put and is
-                    worth marking with a line. It rises out of the column to
-                    the full height of the track so it reads across the whole
-                    staircase rather than only the step it is standing on. */}
+                {/* The playhead. It rises out of the column to the full height
+                    of the track, so on a staircase you read it against the
+                    steps still to climb rather than only the one it stands
+                    on. */}
                 {isCurrent && (
                   <span
                     className="drill-climb-playhead"
-                    style={{ "--climb-playhead-bar": barsInStep } as React.CSSProperties}
+                    style={
+                      {
+                        // The middle of the bar being played, as a fraction of
+                        // the column. Cells share the column's width, so there
+                        // is no fixed cell size to count in.
+                        "--climb-playhead-pct":
+                          ((barsInStep + 0.5) / Math.max(1, barsPerStep)) * 100,
+                      } as React.CSSProperties
+                    }
                     aria-hidden="true"
                   />
                 )}

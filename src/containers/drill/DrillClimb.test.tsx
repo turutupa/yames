@@ -164,18 +164,21 @@ describe("DrillClimb", () => {
     // In the column being played, at the bar being played.
     const col = heads[0].closest(".drill-climb-col") as HTMLElement;
     expect(col.querySelector(".drill-climb-bpm")?.textContent).toBe("90");
-    expect((heads[0] as HTMLElement).style.getPropertyValue("--climb-playhead-bar")).toBe("2");
+    // Position is a fraction of the column now, not a count of fixed cells:
+    // bar 2 of 4 is the middle of the third cell, (2 + 0.5) / 4 = 62.5%.
+    expect((heads[0] as HTMLElement).style.getPropertyValue("--climb-playhead-pct")).toBe("62.5");
   });
 
   it("follows the bar, not the step", () => {
     const { container, rerender } = render(
       <DrillClimb {...base} active currentStep={0} barsInStep={0} />,
     );
-    const bar = () =>
+    const at = () =>
       (container.querySelector(".drill-climb-playhead") as HTMLElement)
-        .style.getPropertyValue("--climb-playhead-bar");
-    expect(bar()).toBe("0");
+        .style.getPropertyValue("--climb-playhead-pct");
+    // Four bars per step: the first is centred at 12.5%, the last at 87.5%.
+    expect(at()).toBe("12.5");
     rerender(<DrillClimb {...base} active currentStep={0} barsInStep={3} />);
-    expect(bar()).toBe("3");
+    expect(at()).toBe("87.5");
   });
 });
