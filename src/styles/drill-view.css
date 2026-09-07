@@ -931,7 +931,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
-  font-size: 0.82rem;
+  font-size: var(--plan-quiet);
   font-weight: 600;
   color: var(--text-tertiary);
 }
@@ -1001,8 +1001,19 @@
 /* Display type, and the size is the point: the plan is the subject of this
    screen, and at 2rem it was reading as a caption under the tempo block that
    used to head the stage. The mockup sets it at 38px. */
+/* Two sizes, one relationship. The loud line is the shape of the climb and
+   the quiet one is what a single bar will sound like — the gap between them
+   is what lets the first be read across a room. They are tokens so the pair
+   can be moved together: the quiet line grew when it stopped being mostly
+   plain facts and became four things you click, and the loud line grew with
+   it to keep the contrast the split exists for. */
+.drill-plan-block {
+  --plan-loud: 2.6rem;
+  --plan-quiet: 0.95rem;
+}
+
 .drill-plan-value {
-  font-size: 2.4rem;
+  font-size: var(--plan-loud);
   font-weight: 700;
   line-height: 1.05;
   letter-spacing: -0.03em;
@@ -1010,14 +1021,14 @@
 }
 
 .drill-plan-down {
-  font-size: 1.6rem;
+  font-size: calc(var(--plan-loud) * 0.67);
   color: var(--text-tertiary);
 }
 
 /* Small, and set apart from the numeral it belongs to — the value is what you
    read across the room, the unit is what tells you which value it was. */
 .drill-plan-unit {
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -1115,8 +1126,9 @@
     gap: 2px;
   }
 
-  .drill-plan-value {
-    font-size: 1.5rem;
+  .drill-plan-block {
+    --plan-loud: 1.7rem;
+    --plan-quiet: 0.88rem;
   }
 
   /* The head wraps here, and a right-aligned column under a left-aligned
