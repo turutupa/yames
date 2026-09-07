@@ -22,7 +22,13 @@
     "lastSessionMinutes": "{{count}} min",
     "lastSessionMinutes_one": "{{count}} min",
     "lastSessionMinutes_other": "{{count}} min",
-    "lastSessionScore": "punteggio {{score}}"
+    "lastSessionScore": "punteggio {{score}}",
+    "accent": {
+      "label": "Accento",
+      "groups": "Inizio gruppo",
+      "all": "Ogni movimento",
+      "none": "Nessuno"
+    }
   },
   "subdiv": {
     "1": "Semiminime",

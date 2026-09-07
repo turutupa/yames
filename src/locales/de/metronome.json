@@ -22,7 +22,13 @@
     "lastSessionMinutes": "{{count}} Min.",
     "lastSessionMinutes_one": "{{count}} Min.",
     "lastSessionMinutes_other": "{{count}} Min.",
-    "lastSessionScore": "Score {{score}}"
+    "lastSessionScore": "Score {{score}}",
+    "accent": {
+      "label": "Betonung",
+      "groups": "Gruppenanfänge",
+      "all": "Jeder Schlag",
+      "none": "Keine"
+    }
   },
   "subdiv": {
     "1": "Viertel",

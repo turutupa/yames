@@ -22,7 +22,13 @@
     "lastSessionMinutes": "{{count}} min",
     "lastSessionMinutes_one": "{{count}} min",
     "lastSessionMinutes_other": "{{count}} min",
-    "lastSessionScore": "ocena {{score}}"
+    "lastSessionScore": "ocena {{score}}",
+    "accent": {
+      "label": "Akcent",
+      "groups": "Początki grup",
+      "all": "Każda miara",
+      "none": "Brak"
+    }
   },
   "subdiv": {
     "1": "Ćwierćnuty",

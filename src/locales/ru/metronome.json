@@ -22,7 +22,13 @@
     "lastSessionMinutes": "{{count}} мин",
     "lastSessionMinutes_one": "{{count}} мин",
     "lastSessionMinutes_other": "{{count}} мин",
-    "lastSessionScore": "оценка {{score}}"
+    "lastSessionScore": "оценка {{score}}",
+    "accent": {
+      "label": "Акцент",
+      "groups": "Начало групп",
+      "all": "Каждая доля",
+      "none": "Нет"
+    }
   },
   "subdiv": {
     "1": "Четверть",

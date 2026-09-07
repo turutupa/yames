@@ -445,6 +445,30 @@ impl SoundBank {
 // Sound kit mapping
 // ---------------------------------------------------------------------------
 
+/// Which beats carry the accent.
+///
+/// Parsed from `AppState::accent_mode` when the cached params are refreshed,
+/// so the audio thread compares an integer rather than a string once per beat.
+#[derive(Clone, Copy, PartialEq)]
+enum AccentMode {
+    /// Where each beat group opens — the default, and what the meter means.
+    Groups,
+    /// Every beat. Useful for hearing a bar as flat pulses rather than a shape.
+    All,
+    /// None at all: every click identical.
+    None,
+}
+
+impl AccentMode {
+    fn from_str(s: &str) -> Self {
+        match s {
+            "all" => Self::All,
+            "none" => Self::None,
+            _ => Self::Groups,
+        }
+    }
+}
+
 #[derive(Clone, Copy, PartialEq)]
 enum SoundKit {
     Click,
@@ -508,6 +532,7 @@ struct CachedParams {
     /// accented). Rebuilt only when `beat_groups` actually changes so
     /// the per-beat accent test is a single bit-and.
     accent_mask: u32,
+    accent_mode: AccentMode,
     /// `beat_groups.iter().sum()`, precomputed alongside `accent_mask`.
     beat_groups_total: u32,
     beat_groups_changed: bool,
@@ -534,6 +559,7 @@ struct CachedParams {
 /// is rebuilt only when the grouping actually changes — see
 /// [`accent_mask`] and `CachedParams::accent_mask`.
 fn accent_for(
+    mode: AccentMode,
     free_mode: bool,
     ramp_active: bool,
     ramp_beats_per_bar: u8,
@@ -542,6 +568,14 @@ fn accent_for(
     beat_count: u32,
     measure_beat: u32,
 ) -> bool {
+    // The mode comes first, because it is the user saying what they want to
+    // hear and everything below is a rule about where accents fall by default.
+    match mode {
+        AccentMode::None => return false,
+        // Every beat, whatever the meter, the grouping, or a running ramp.
+        AccentMode::All => return is_downbeat,
+        AccentMode::Groups => {}
+    }
     if free_mode {
         return false;
     }
@@ -1552,6 +1586,7 @@ impl MetronomeEngine {
                 volume: 0.8,
                 kit: SoundKit::Click,
                 accent_mask: accent_mask(&initial_groups),
+                accent_mode: AccentMode::Groups,
                 beat_groups_total: 4,
                 beat_groups: initial_groups,
                 beat_groups_changed: false,
@@ -1606,6 +1641,7 @@ impl MetronomeEngine {
                         };
                         cached.volume = s.volume;
                         cached.kit = SoundKit::from_str(&s.sound_type);
+                        cached.accent_mode = AccentMode::from_str(&s.accent_mode);
                         // Compare slices — cloning here would allocate on
                         // every output buffer. Refill in place (capacity
                         // is pre-reserved) and rebuild the accent mask +
@@ -1735,6 +1771,7 @@ impl MetronomeEngine {
                             // — no allocation, no set build, per the
                             // "click is sacred" rule.
                             let use_accent = accent_for(
+                                cached.accent_mode,
                                 cached.free_mode,
                                 cached.ramp_active,
                                 cached.ramp_beats_per_bar,
@@ -2259,6 +2296,78 @@ impl Drop for MetronomeEngine {
 #[cfg(test)]
 mod tests {
 
+    // ─── Accents ─────────────────────────────────────────────────────────
+
+    /// "none" silences the accent everywhere, including the two cases that
+    /// have their own rules — a running ramp, and FREE mode.
+    #[test]
+    fn accent_none_means_none() {
+        for (free, ramp) in [(false, false), (true, false), (false, true)] {
+            for beat in 0..8u32 {
+                assert!(
+                    !accent_for(
+                        AccentMode::None,
+                        free,
+                        ramp,
+                        4,
+                        accent_mask(&[3, 2, 2]),
+                        true,
+                        beat,
+                        beat
+                    ),
+                    "free={free} ramp={ramp} beat={beat}"
+                );
+            }
+        }
+    }
+
+    /// "all" accents every beat of the bar, whatever the grouping says.
+    #[test]
+    fn accent_all_means_every_beat() {
+        let mask = accent_mask(&[3, 2, 2]);
+        for beat in 0..7u32 {
+            assert!(
+                accent_for(AccentMode::All, false, false, 4, mask, true, beat, beat),
+                "beat {beat}"
+            );
+        }
+        // Still only on the beat itself — a subdivision tick is not a beat.
+        assert!(!accent_for(AccentMode::All, false, false, 4, mask, false, 0, 0));
+    }
+
+    /// "all" reaches the two cases that override the grouping, because a
+    /// player who asked for every beat means every beat.
+    #[test]
+    fn accent_all_overrides_free_mode_and_the_ramp() {
+        assert!(accent_for(AccentMode::All, true, false, 4, 0, true, 3, 3), "free mode");
+        assert!(accent_for(AccentMode::All, false, true, 4, 0, true, 3, 3), "mid-ramp");
+    }
+
+    /// The default is unchanged: group openings only.
+    #[test]
+    fn accent_groups_is_what_it_always_was() {
+        let mask = accent_mask(&[3, 2, 2]);
+        for beat in 0..7u32 {
+            let expected = matches!(beat, 0 | 3 | 5);
+            assert_eq!(
+                accent_for(AccentMode::Groups, false, false, 4, mask, true, beat, beat),
+                expected,
+                "beat {beat} of 3+2+2"
+            );
+        }
+    }
+
+    #[test]
+    fn accent_mode_parses_and_falls_back() {
+        assert!(AccentMode::from_str("all") == AccentMode::All);
+        assert!(AccentMode::from_str("none") == AccentMode::None);
+        assert!(AccentMode::from_str("groups") == AccentMode::Groups);
+        // Anything else sounds ordinary rather than erroring — it crosses from
+        // the frontend as a string.
+        assert!(AccentMode::from_str("") == AccentMode::Groups);
+        assert!(AccentMode::from_str("every-other-tuesday") == AccentMode::Groups);
+    }
+
     // ─── The count-in ────────────────────────────────────────────────────
 
     /// It used to be gated on `speed_ramp.active`, so only a drill could have
@@ -2647,7 +2756,7 @@ mod tests {
             for beat in 0..16u32 {
                 for is_downbeat in [true, false] {
                     assert!(
-                        !accent_for(true, false, 4, accent_mask(&groups), is_downbeat, beat, beat),
+                        !accent_for(AccentMode::Groups,true, false, 4, accent_mask(&groups), is_downbeat, beat, beat),
                         "free mode accented beat {beat} (downbeat={is_downbeat}, groups={groups:?})"
                     );
                 }
@@ -2661,15 +2770,15 @@ mod tests {
         // is checked first, so a drill in FREE mode stays flat.
         for beat in 0..16u32 {
             assert!(
-                !accent_for(true, true, 4, accent_mask(&[16]), true, beat, beat),
+                !accent_for(AccentMode::Groups,true, true, 4, accent_mask(&[16]), true, beat, beat),
                 "free mode accented beat {beat} while the ramp was active"
             );
         }
         // Same inputs with free_mode off: beat 0 of every ramp bar IS accented,
         // proving the assertion above is not vacuous.
-        assert!(accent_for(false, true, 4, accent_mask(&[16]), true, 0, 0));
-        assert!(accent_for(false, true, 4, accent_mask(&[16]), true, 4, 4));
-        assert!(!accent_for(false, true, 4, accent_mask(&[16]), true, 5, 5));
+        assert!(accent_for(AccentMode::Groups,false, true, 4, accent_mask(&[16]), true, 0, 0));
+        assert!(accent_for(AccentMode::Groups,false, true, 4, accent_mask(&[16]), true, 4, 4));
+        assert!(!accent_for(AccentMode::Groups,false, true, 4, accent_mask(&[16]), true, 5, 5));
     }
 
     #[test]
@@ -2680,7 +2789,7 @@ mod tests {
         for pos in 0..7u32 {
             let expected = matches!(pos, 0 | 3 | 5);
             assert_eq!(
-                accent_for(false, false, 4, accent_mask(&groups), true, pos, pos),
+                accent_for(AccentMode::Groups,false, false, 4, accent_mask(&groups), true, pos, pos),
                 expected,
                 "grouped accent wrong at bar position {pos}"
             );
@@ -2690,8 +2799,8 @@ mod tests {
     #[test]
     fn accent_never_fires_off_the_quarter_note_grid() {
         // `is_downbeat == false` means a subdivision tick — never an accent.
-        assert!(!accent_for(false, false, 4, accent_mask(&[4]), false, 0, 0));
-        assert!(!accent_for(false, true, 4, accent_mask(&[4]), false, 0, 0));
+        assert!(!accent_for(AccentMode::Groups,false, false, 4, accent_mask(&[4]), false, 0, 0));
+        assert!(!accent_for(AccentMode::Groups,false, true, 4, accent_mask(&[4]), false, 0, 0));
     }
 
     // -----------------------------------------------------------------

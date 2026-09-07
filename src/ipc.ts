@@ -404,6 +404,11 @@ const CHAINS_KEY = "chains";
  * chain asks for the same thing between steps (U9.2). 0 disarms. The engine
  * caps it at 8.
  */
+/** Which beats carry the accent. See `AccentMode` in the engine. */
+export async function setAccentMode(mode: "groups" | "all" | "none"): Promise<void> {
+  return invoke("set_accent_mode", { mode });
+}
+
 export async function armCountIn(beats: number): Promise<void> {
   return invoke("arm_count_in", { beats: Math.max(0, Math.min(8, Math.round(beats))) });
 }

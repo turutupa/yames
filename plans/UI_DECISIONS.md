@@ -393,3 +393,22 @@ step one. Same word, two behaviours — worth keeping apart in the vocabulary
 what a metronome normally shows plainly — what it is about to do — so the
 transport has to say it, and the count is also how you know the routine is
 progressing at all when two adjacent steps sound similar.
+
+
+### U2.3 · The accent control is built — **decided**
+
+Closed. It was drawn on the artboard from the start and stayed unbuilt because
+two of its three states had nothing behind them: the engine accented where beat
+groups opened and nowhere else, and the only way to hear a bar with no accents
+was to give up the grouping by switching to FREE.
+
+`AccentMode` is the engine's now — parsed once when the cached params refresh,
+so the audio thread compares an integer rather than a string on every beat, per
+the "click is sacred" rule. `groups` is the default and is what a meter means;
+`all` and `none` deliberately override both of the cases that have their own
+accent rules, FREE mode and a running ramp, because a player who asked for
+every beat means every beat.
+
+The one thing not offered is a per-beat accent editor — tapping individual dots
+to move where the accents fall. That is a different feature and a bigger one;
+the grouping already expresses it for every meter the app ships.

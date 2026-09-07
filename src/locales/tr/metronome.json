@@ -22,7 +22,13 @@
     "lastSessionMinutes": "{{count}} dk",
     "lastSessionMinutes_one": "{{count}} dk",
     "lastSessionMinutes_other": "{{count}} dk",
-    "lastSessionScore": "puan {{score}}"
+    "lastSessionScore": "puan {{score}}",
+    "accent": {
+      "label": "Vurgu",
+      "groups": "Grup başları",
+      "all": "Her vuruş",
+      "none": "Yok"
+    }
   },
   "subdiv": {
     "1": "Dörtlük",

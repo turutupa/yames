@@ -78,7 +78,8 @@ describe("session history empty state", () => {
 describe("drill idle state", () => {
   const drillState = (mode: string, active = false): AppState => ({
     ...DEFAULT_TEST_STATE,
-    countIn: { beats: 0, done: 0 },
+    accentMode: "groups" as const,
+  countIn: { beats: 0, done: 0 },
     speedRamp: { ...DEFAULT_TEST_STATE.speedRamp!, mode, active },
   });
 

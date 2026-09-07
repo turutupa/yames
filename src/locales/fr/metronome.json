@@ -22,7 +22,13 @@
     "lastSessionMinutes": "{{count}} min",
     "lastSessionMinutes_one": "{{count}} min",
     "lastSessionMinutes_other": "{{count}} min",
-    "lastSessionScore": "score {{score}}"
+    "lastSessionScore": "score {{score}}",
+    "accent": {
+      "label": "Accent",
+      "groups": "Débuts de groupe",
+      "all": "Chaque temps",
+      "none": "Aucun"
+    }
   },
   "subdiv": {
     "1": "Noire",

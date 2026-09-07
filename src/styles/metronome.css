@@ -2068,3 +2068,70 @@ span.meter-grouping-chip {
   opacity: var(--far-fade, 0.3);
   transition: opacity 0.25s ease;
 }
+
+
+/* ── Which beats carry the accent (UI_DECISIONS U2.3) ────────────────────
+   Right of the meter row: the meter says where the accents fall, this says
+   whether they fall at all. `margin-left: auto` puts it against the stage's
+   far edge, as the artboard draws it, without a fixed column — nothing here
+   moves when the meter changes, because it is measured from the right. */
+.accent-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.accent-label {
+  white-space: nowrap;
+}
+
+.accent-options {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--text-primary) 3%, transparent);
+}
+
+.accent-option {
+  padding: 5px 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-tertiary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+
+.accent-option:hover {
+  color: var(--text-primary);
+}
+
+.accent-option.active {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+}
+
+/* Below about 1100px the row cannot hold the meter, the stepper, clicks/bar,
+   the groupings AND this. The label goes first — the buttons still say what
+   they are — and then the whole control wraps onto its own line rather than
+   squeezing the meter it belongs beside. */
+@media (max-width: 1279px) {
+  .accent-label {
+    display: none;
+  }
+}
+
+@media (max-width: 1099px) {
+  .accent-control {
+    margin-left: 0;
+  }
+}

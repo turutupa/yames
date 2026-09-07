@@ -51,6 +51,12 @@ export type AppState = {
   timeSignature: number;
   beatGroups: number[];
   freeMode: boolean;
+  /**
+   * Which beats the click accents: where each group opens (the default), every
+   * beat, or none. "none" is what FREE mode does to accents, without giving up
+   * the grouping the dots draw.
+   */
+  accentMode: "groups" | "all" | "none";
   speedRamp: SpeedRamp;
   /**
    * The live count-in, which belongs to the engine rather than to the drill

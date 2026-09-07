@@ -22,7 +22,13 @@
     "lastSessionMinutes": "{{count}} min",
     "lastSessionMinutes_one": "{{count}} min",
     "lastSessionMinutes_other": "{{count}} min",
-    "lastSessionScore": "puntuación {{score}}"
+    "lastSessionScore": "puntuación {{score}}",
+    "accent": {
+      "label": "Acento",
+      "groups": "Inicio de grupo",
+      "all": "Cada pulso",
+      "none": "Ninguno"
+    }
   },
   "subdiv": {
     "1": "Negra",

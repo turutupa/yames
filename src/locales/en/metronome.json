@@ -22,7 +22,13 @@
     "lastSessionMinutes": "{{count}} min",
     "lastSessionMinutes_one": "{{count}} min",
     "lastSessionMinutes_other": "{{count}} min",
-    "lastSessionScore": "score {{score}}"
+    "lastSessionScore": "score {{score}}",
+    "accent": {
+      "label": "Accent",
+      "groups": "Group starts",
+      "all": "Every beat",
+      "none": "None"
+    }
   },
   "subdiv": {
     "1": "Quarter",

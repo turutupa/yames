@@ -22,7 +22,13 @@
     "lastSessionMinutes": "{{count}} min",
     "lastSessionMinutes_one": "{{count}} min",
     "lastSessionMinutes_other": "{{count}} min",
-    "lastSessionScore": "nota {{score}}"
+    "lastSessionScore": "nota {{score}}",
+    "accent": {
+      "label": "Acento",
+      "groups": "Início de grupo",
+      "all": "Cada tempo",
+      "none": "Nenhum"
+    }
   },
   "subdiv": {
     "1": "Semínima",

@@ -22,7 +22,13 @@
     "lastSessionMinutes": "{{count}} 分",
     "lastSessionMinutes_one": "{{count}} 分",
     "lastSessionMinutes_other": "{{count}} 分",
-    "lastSessionScore": "スコア {{score}}"
+    "lastSessionScore": "スコア {{score}}",
+    "accent": {
+      "label": "アクセント",
+      "groups": "グループの頭",
+      "all": "すべての拍",
+      "none": "なし"
+    }
   },
   "subdiv": {
     "1": "四分音符",

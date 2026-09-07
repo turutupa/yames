@@ -15,6 +15,7 @@ import {
 } from "../../constants/metronome";
 import { GroupEditor } from "./GroupEditor";
 import { LastSession } from "./LastSession";
+import { AccentControl } from "./AccentControl";
 import { BeatStepper } from "./BeatStepper";
 import { MeterPresets } from "./MeterPresets";
 import { SubdivisionIcon } from "../../components/MetronomeIcons";
@@ -256,6 +257,9 @@ export function MetronomeView({
               />
             }
           />
+          {/* Right of the meter row, as the artboard draws it: the meter says
+              where the accents fall, and this says whether they fall at all. */}
+          <AccentControl mode={state.accentMode} />
         </div>
 
         <GroupEditor

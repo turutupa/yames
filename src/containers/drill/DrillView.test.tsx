@@ -15,6 +15,7 @@ import type { AppState } from "../../types";
 
 const drillState: AppState = {
   ...DEFAULT_TEST_STATE,
+  accentMode: "groups" as const,
   countIn: { beats: 0, done: 0 },
   speedRamp: {
     ...DEFAULT_TEST_STATE.speedRamp,

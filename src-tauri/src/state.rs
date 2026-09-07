@@ -78,6 +78,10 @@ pub struct CountIn {
     pub done: u8,
 }
 
+fn default_accent_mode() -> String {
+    "groups".to_string()
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AppState {
     pub bpm: u16,
@@ -113,6 +117,14 @@ pub struct AppState {
     pub free_mode: bool,
     #[serde(rename = "speedRamp")]
     pub speed_ramp: SpeedRamp,
+    /// Which beats the click accents: "groups" (where each beat group opens,
+    /// the default), "all" (every beat) or "none". A string rather than an
+    /// enum for the same reason `sound_type` is one — it crosses to the
+    /// frontend as JSON and is parsed into an enum before it reaches the audio
+    /// thread. See `AccentMode` in engine.rs.
+    #[serde(rename = "accentMode", default = "default_accent_mode")]
+    pub accent_mode: String,
+
     /// The live count-in. See `CountIn` — it is not the ramp's any more.
     #[serde(rename = "countIn", default)]
     pub count_in: CountIn,
@@ -150,6 +162,7 @@ impl Default for AppState {
             beat_groups: vec![4],
             free_mode: false,
             speed_ramp: SpeedRamp::default(),
+            accent_mode: default_accent_mode(),
             count_in: CountIn::default(),
             instrument: Instrument::default(),
         }

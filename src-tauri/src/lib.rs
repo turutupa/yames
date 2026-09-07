@@ -61,7 +61,7 @@ use commands::{
     app_ready, set_volume, set_widget_always_on_top, set_widget_mode, show_floating, show_main,
     start_evaluation, start_model_download, start_playback, start_recording, start_speed_ramp,
     start_speed_ramp_from, start_voice_repair, stop_evaluation, stop_playback, stop_recording,
-    arm_count_in, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
+    arm_count_in, set_accent_mode, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
     tts_stop, tts_voice_diagnostics, unload_coach_model, write_model_chunk, DownloadState,
     EngineState,
 };
@@ -555,6 +555,7 @@ pub fn run() {
             start_speed_ramp,
             start_speed_ramp_from,
             arm_count_in,
+            set_accent_mode,
             stop_speed_ramp,
             set_active_tab,
             get_active_tab,

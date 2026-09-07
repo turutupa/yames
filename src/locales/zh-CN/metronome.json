@@ -22,7 +22,13 @@
     "lastSessionMinutes": "{{count}} 分钟",
     "lastSessionMinutes_one": "{{count}} 分钟",
     "lastSessionMinutes_other": "{{count}} 分钟",
-    "lastSessionScore": "得分 {{score}}"
+    "lastSessionScore": "得分 {{score}}",
+    "accent": {
+      "label": "重音",
+      "groups": "分组起始",
+      "all": "每一拍",
+      "none": "无"
+    }
   },
   "subdiv": {
     "1": "四分音符",

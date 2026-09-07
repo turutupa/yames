@@ -637,6 +637,29 @@ pub fn start_speed_ramp_from(
 /// It is armed, not played: the beats sound when the engine next reaches a
 /// downbeat, and the last of them becomes beat 0 of what follows, which is
 /// what makes a count-in a cue rather than a delay.
+/// Which beats the click accents: "groups", "all" or "none".
+///
+/// "groups" is where each beat group opens, which is what a meter means and
+/// the default. "all" accents every beat, for hearing a bar as flat pulses.
+/// "none" makes every click identical — the same thing FREE mode does to the
+/// meter, but without giving up the grouping.
+///
+/// An unknown value falls back to "groups" rather than erroring: this crosses
+/// from the frontend as a string, and a bad one should sound ordinary.
+#[tauri::command]
+pub fn set_accent_mode(mode: String, state: State<SharedState>, app_handle: AppHandle) {
+    let valid = match mode.as_str() {
+        "all" | "none" => mode,
+        _ => "groups".to_string(),
+    };
+    {
+        let mut s = state.lock().unwrap();
+        s.accent_mode = valid;
+    }
+    emit_state_changed(&state, &app_handle);
+    persist_state(&state, &app_handle);
+}
+
 #[tauri::command]
 pub fn arm_count_in(beats: u8, state: State<SharedState>, app_handle: AppHandle) {
     {

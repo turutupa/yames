@@ -22,7 +22,13 @@
     "lastSessionMinutes": "{{count}} phút",
     "lastSessionMinutes_one": "{{count}} phút",
     "lastSessionMinutes_other": "{{count}} phút",
-    "lastSessionScore": "điểm {{score}}"
+    "lastSessionScore": "điểm {{score}}",
+    "accent": {
+      "label": "Nhấn",
+      "groups": "Đầu nhóm",
+      "all": "Mọi phách",
+      "none": "Không"
+    }
   },
   "subdiv": {
     "1": "Nốt đen",
