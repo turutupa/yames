@@ -49,8 +49,25 @@
   flex-shrink: 0;
 }
 
+/* A loaded chain has to look loaded.
+ *
+ * It used to differ from an unloaded one only by the glyph turning accent —
+ * eleven pixels of colour in the corner of a row — so clicking a chain read as
+ * doing nothing at all. It now takes the same tint a loaded preset takes,
+ * which is the vocabulary the list already uses for "this is the one you have
+ * open". */
+.preset-sidebar-item.chain-item.active {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--text-primary);
+}
+
 .preset-sidebar-item.chain-item.active .chain-item-glyph {
   color: var(--accent);
+}
+
+.preset-sidebar-item.chain-item.active .chain-item-sub {
+  color: var(--text-tertiary);
 }
 
 .chain-item-sub {

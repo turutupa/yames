@@ -1491,6 +1491,7 @@ span.meter-grouping-chip {
 }
 
 .main-content[data-view="beat"] .tap-btn {
+  margin-left: 12px;
   align-self: flex-start;
 }
 
@@ -1776,7 +1777,10 @@ span.meter-grouping-chip {
 .tempo-controls {
   display: flex;
   align-items: center;
-  gap: 10px;
+  /* -, + and TAP are one row but two ideas: nudge the tempo, and set it by
+     ear. The pair sits close and TAP stands off — see `.tap-btn` below, which
+     takes the extra margin rather than the gap being widened for all three. */
+  gap: 12px;
   padding-bottom: 1rem;
   margin-left: 12px;
 }
@@ -1785,8 +1789,8 @@ span.meter-grouping-chip {
    the thing you press to start playing. That is the transport's job, and it
    is the only filled control on the screen. */
 .main-content[data-view="beat"] .bpm-btn {
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: transparent;
   border: 1px solid var(--border);

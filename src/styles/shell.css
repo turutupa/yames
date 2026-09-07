@@ -561,55 +561,6 @@ button.context-chip:hover,
   color: var(--text-secondary);
 }
 
-/* The magnifier that replaces the permanent search row. Sized and spaced to
-   sit next to the "+" as one pair, the way the mockup draws them. */
-.preset-sidebar-search-btn {
-  width: 22px;
-  height: 22px;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  transition: color 0.15s, background 0.15s;
-}
-
-.preset-sidebar-search-btn:hover {
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.preset-sidebar-search-btn.active {
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-}
-
-.preset-sidebar-add {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: 1px dashed var(--border);
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  transition: all 0.15s;
-}
-
-.preset-sidebar-add:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
-}
-
 .preset-sidebar-list {
   flex: 1;
   overflow-y: auto;
@@ -2058,4 +2009,84 @@ button.context-chip:hover,
 
 .rail-collapse:hover {
   opacity: 1;
+}
+
+
+/* ── The library header's buttons ────────────────────────────────────────
+   Search, new chain and new preset. They were three different shapes with
+   three different hovers — a plain square, a dashed circle and a text "+" —
+   which read as three unrelated controls rather than one row of them. The
+   icons were also 12 and 13px, small enough to be hard to hit and hard to
+   tell apart.
+
+   They share one box now, and they carry their own tooltip rather than the
+   OS one: `title` waits about a second, appears wherever the pointer is, and
+   is styled by the operating system, which on a themed app looks like a bug.
+   The pattern matches the context bar's chips (see `.context-chip[data-tooltip]`). */
+.preset-sidebar-head-btn {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-tertiary);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.preset-sidebar-head-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.preset-sidebar-head-btn:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover, rgba(255, 255, 255, 0.06));
+  border-color: var(--border);
+}
+
+.preset-sidebar-head-btn.active {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+/* The tooltip. Below the button, because the header is at the top of the rail
+   and there is nothing above it to show one in. */
+.preset-sidebar-head-btn[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%) translateY(3px);
+  padding: 5px 9px;
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
+  z-index: 120;
+}
+
+.preset-sidebar-head-btn[data-tip]:hover::after,
+.preset-sidebar-head-btn[data-tip]:focus-visible::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }

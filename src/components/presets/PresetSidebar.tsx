@@ -389,7 +389,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
           </span>
           <div className="preset-sidebar-header-actions">
             <button
-              className={`preset-sidebar-search-btn${searchOpen ? " active" : ""}`}
+              className={`preset-sidebar-head-btn preset-sidebar-search-btn${searchOpen ? " active" : ""}`}
               onClick={() => {
                 // Closing takes the filter with it — a list still narrowed by
                 // a query you can no longer see is a list that looks broken.
@@ -398,9 +398,9 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               }}
               aria-label={t("presets.search")}
               aria-expanded={searchOpen}
-              title={t("presets.search")}
+              data-tip={t("presets.search")}
             >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="6.5" />
                 <line x1="16" y1="16" x2="21" y2="21" />
               </svg>
@@ -411,19 +411,20 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
                 front of the gesture that has never needed one. */}
             {showChains && onNewChain && (
               <button
-                className="preset-sidebar-new-chain"
+                className="preset-sidebar-head-btn preset-sidebar-new-chain"
                 onClick={onNewChain}
                 aria-label={t("chain.newChain")}
-                title={t("chain.newChain")}
+                data-tip={t("chain.newChain")}
               >
                 {chainIcon}
               </button>
             )}
             {viewPresets.length < MAX_PRESETS && (
               <button
-                className="preset-sidebar-add"
+                className="preset-sidebar-head-btn preset-sidebar-add"
                 onClick={() => setAdding(true)}
-                title={t("presets.saveCurrent")}
+                aria-label={t("presets.saveCurrent")}
+                data-tip={t("presets.saveCurrent")}
               >
                 +
               </button>
