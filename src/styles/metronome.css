@@ -2041,7 +2041,10 @@ span.meter-grouping-chip {
   height: min(68vh, 600px);
   pointer-events: none;
   z-index: 0;
-  opacity: 0.34;
+  /* The whole drawing, rod included. This is the knob for "how present is the
+     sketch", as distinct from `part.dim` (which parts of it are loud) and
+     `caseDim` (how far the body steps back while the rod is moving). */
+  opacity: 0.4;
   transition: opacity 0.45s ease;
 }
 
@@ -2066,7 +2069,7 @@ span.meter-grouping-chip {
 /* Light themes: ink on paper reads at less of it. */
 /* On paper the hairlines vanish long before they do on a dark ground. */
 [data-theme-group="light"] .metronome-figure {
-  opacity: 0.42;
+  opacity: 0.48;
 }
 
 [data-theme-group="light"] .main-window[data-playing="true"] .metronome-figure {

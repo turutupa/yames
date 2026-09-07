@@ -309,8 +309,15 @@ export function MetronomeFigure({ bpm, isPlaying, currentBeat }: MetronomeFigure
       // While it is running the case steps back and the rod steps forward, so
       // the moving part is unmistakably the moving part. Standing still they
       // are closer together and the whole object reads as one drawing.
+      //
+      // 0.62 was too far back. The rod gained a glow and nearly double the
+      // line weight when it started running, and the case was pulled down to
+      // meet it from the other side as well — two moves toward the same
+      // separation, which left the body of the metronome barely there for the
+      // whole time anyone is actually looking at it. The rod's own treatment
+      // is enough to carry the difference, so the case gives up much less.
       const running = playing.current && !reduced;
-      const caseDim = running ? 0.62 : 1;
+      const caseDim = running ? 0.78 : 1;
 
       for (const part of STATIC_PARTS) {
         strokeMesh(part.geo, part.at, part.dim * caseDim, 0, scale, ox, oy, line);
