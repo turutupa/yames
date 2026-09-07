@@ -159,9 +159,7 @@
    give when the window is small:
      --climb-rise    how far the top step stands above the bottom one
      --climb-cell-h  the height of one bar
-
-   The cells' width is not one of them: columns and cells share the track
-   equally, so any plan fits whatever its size. */
+     --climb-cell-w  its width */
 .drill-climb {
   /* Sized off the window rather than a breakpoint, because the thing that
      runs out is the window's height, not a category of window. At the 780px
@@ -170,6 +168,7 @@
      drawing a staircase you have to look up at. */
   --climb-rise: clamp(110px, 23vh, 290px);
   --climb-cell-h: clamp(18px, 3.2vh, 30px);
+  --climb-cell-w: 6px;
   --climb-cell-gap: 2px;
   --climb-col-gap: 12px;
   display: flex;
@@ -233,13 +232,20 @@
   background: color-mix(in srgb, var(--accent) 26%, transparent);
 }
 
-/* The whole plan, always in view. */
+/* A step is always the same width, and the track runs off the edge when the
+   plan is long.
+
+   Squeezing the whole plan into the window was tried and reverted: at
+   twenty-six steps the columns became slivers and the staircase turned back
+   into the mesh the climb replaced. A bar is a bar — it should be the same
+   size in a four-step drill and a forty-step one, and the way you read a long
+   plan is by moving through it, which is what playing does. `DrillClimb`
+   keeps the playing column centred, so the run carries the view with it. */
 .drill-climb-scroll {
-  /* No scrolling. The plan is bounded — you chose a start, a target and a step
-     — so the whole of it can be shown, and a chart you have to drag to read is
-     a chart that has stopped being a glance. The columns and their cells share
-     the width instead; see `.drill-climb-col` and the cell rule below. */
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scroll-behavior: smooth;
   padding-bottom: 2px;
   /* The glow on the current cell would be clipped by the scroll box. */
   margin: -8px -4px 0;
@@ -252,7 +258,8 @@
   display: flex;
   align-items: flex-end;
   gap: var(--climb-col-gap);
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   /* Fixed height so adding a step does not shove the rest of the screen
      around — only the columns move. */
   height: calc(var(--climb-rise) + var(--climb-cell-h) + 26px);
@@ -317,23 +324,14 @@
   position: relative;
 }
 
-/* Every column takes an equal share of the track, and every cell an equal
-   share of its column — so eleven steps of twelve bars fit exactly as three
-   steps of four do, without a scrollbar and without a fixed size that only
-   suits one plan. */
-.drill-climb .drill-climb-col {
-  flex: 1 1 0;
-  min-width: 0;
-}
-
 .drill-climb-playhead {
   position: absolute;
   bottom: -6px;
   /* Centre of the bar being played: whole cells before it, plus half of it. */
-  /* A fraction of the column rather than a count of fixed-width cells: the
-     cells share the column's width now, so there is no per-cell figure to
-     multiply. `--climb-playhead-pct` is set by DrillClimb. */
-  left: calc(var(--climb-playhead-pct, 0) * 1% - 1px);
+  left: calc(
+    var(--climb-playhead-bar, 0) * (var(--climb-cell-w) + var(--climb-cell-gap)) +
+      var(--climb-cell-w) / 2 - 1px
+  );
   width: 2px;
   height: calc(var(--climb-rise) + var(--climb-cell-h) + 32px);
   border-radius: 1px;
@@ -365,14 +363,8 @@
    global.css paints every cell with a flat accent fill, which would erase the
    three states below. Two classes plus the block beats it in both themes
    without an !important war. */
-.drill-climb .drill-climb-cells {
-  width: 100%;
-}
-
 .drill-climb .drill-climb-cells .drill-climb-cell {
-  flex: 1 1 0;
-  min-width: 1px;
-  width: auto;
+  width: var(--climb-cell-w);
   height: var(--climb-cell-h);
   border-radius: 2px;
   cursor: pointer;

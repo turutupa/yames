@@ -1,5 +1,5 @@
 import type React from "react";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 export interface DrillClimbProps {
@@ -56,6 +56,7 @@ export function DrillClimb({
   onJump,
 }: DrillClimbProps) {
   const { t } = useTranslation();
+  const scrollRef = useRef<HTMLDivElement>(null);
   const currentColRef = useRef<HTMLDivElement>(null);
 
   // Ghosts are still on screen, so they get a vote on the range — otherwise
@@ -80,6 +81,20 @@ export function DrillClimb({
   const effectiveStep =
     cyclic && steps.length > 0 ? currentStep % steps.length : currentStep;
 
+  // A step is always the same width, so a long plan runs off the edge — and
+  // the way you read it is by moving through it. While a run is going the
+  // playing column is kept in the middle of the view, so the picture travels
+  // with the player instead of being dragged.
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    const column = currentColRef.current;
+    if (!active || !scroller || !column) return;
+    const target =
+      column.offsetLeft + column.offsetWidth / 2 - scroller.clientWidth / 2;
+    const max = scroller.scrollWidth - scroller.clientWidth;
+    scroller.scrollLeft = Math.max(0, Math.min(target, max));
+  }, [active, effectiveStep, barsPerStep, steps.length]);
+
   return (
     <div className="drill-climb">
       <div className="drill-climb-head">
@@ -99,7 +114,7 @@ export function DrillClimb({
           </span>
         </span>
       </div>
-      <div className="drill-climb-scroll">
+      <div className="drill-climb-scroll" ref={scrollRef}>
         <div className="drill-climb-track">
           {steps.map((bpm, stepIdx) => {
             const isDone = active && !cyclic ? stepIdx < currentStep : false;
@@ -126,15 +141,7 @@ export function DrillClimb({
                 {isCurrent && (
                   <span
                     className="drill-climb-playhead"
-                    style={
-                      {
-                        // The middle of the bar being played, as a fraction of
-                        // the column. Cells share the column's width, so there
-                        // is no fixed cell size to count in.
-                        "--climb-playhead-pct":
-                          ((barsInStep + 0.5) / Math.max(1, barsPerStep)) * 100,
-                      } as React.CSSProperties
-                    }
+                    style={{ "--climb-playhead-bar": barsInStep } as React.CSSProperties}
                     aria-hidden="true"
                   />
                 )}
