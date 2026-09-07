@@ -226,6 +226,7 @@ export function MetronomeFigure({ bpm, isPlaying, currentBeat }: MetronomeFigure
       ox: number,
       oy: number,
       ink: string,
+      weight = 1,
     ) {
       const ca = Math.cos(angle);
       const sa = Math.sin(angle);
@@ -246,7 +247,7 @@ export function MetronomeFigure({ bpm, isPlaying, currentBeat }: MetronomeFigure
         const depth = (p[2] + q[2]) / 2;
         const alpha = Math.max(0.1, Math.min(1, (depth - 0.62) * 3.4)) * dim;
         ctx!.strokeStyle = `rgba(${ink}, ${alpha.toFixed(3)})`;
-        ctx!.lineWidth = 0.85 + depth * 0.5;
+        ctx!.lineWidth = (0.85 + depth * 0.5) * weight;
         ctx!.beginPath();
         ctx!.moveTo(p[0], p[1]);
         ctx!.lineTo(q[0], q[1]);
@@ -305,8 +306,14 @@ export function MetronomeFigure({ bpm, isPlaying, currentBeat }: MetronomeFigure
       ctx!.lineCap = "round";
       ctx!.lineJoin = "round";
 
+      // While it is running the case steps back and the rod steps forward, so
+      // the moving part is unmistakably the moving part. Standing still they
+      // are closer together and the whole object reads as one drawing.
+      const running = playing.current && !reduced;
+      const caseDim = running ? 0.62 : 1;
+
       for (const part of STATIC_PARTS) {
-        strokeMesh(part.geo, part.at, part.dim, 0, scale, ox, oy, line);
+        strokeMesh(part.geo, part.at, part.dim * caseDim, 0, scale, ox, oy, line);
       }
 
       const angle =
@@ -318,7 +325,25 @@ export function MetronomeFigure({ bpm, isPlaying, currentBeat }: MetronomeFigure
       // at full strength the accent reads as a solid bar laid over a delicate
       // wireframe, and the two stop looking like one object. Pulling it back
       // lets the case hold its own and puts some depth between them.
-      strokeMesh(rod(bobFor(tempo.current)), ROD_AT, ROD_DIM, angle, scale, ox, oy, accent);
+      // The rod carries a glow while running — alpha is already at its
+      // ceiling, so more contrast has to come from light around the line
+      // rather than from the line itself.
+      if (running) {
+        ctx!.shadowColor = `rgba(${accent}, 0.85)`;
+        ctx!.shadowBlur = 14;
+      }
+      strokeMesh(
+        rod(bobFor(tempo.current)),
+        ROD_AT,
+        ROD_DIM,
+        angle,
+        scale,
+        ox,
+        oy,
+        accent,
+        running ? 1.9 : 1,
+      );
+      ctx!.shadowBlur = 0;
     }
 
     function frame(now: number) {
