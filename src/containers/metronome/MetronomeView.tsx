@@ -8,6 +8,8 @@ import {
   getTempoMarking,
   getTempoScale,
   getTempoTicks,
+  FAR_TEMPO,
+  farTempoFade,
   MAX_BPM,
   MIN_BPM,
 } from "../../constants/metronome";
@@ -87,6 +89,8 @@ export function MetronomeView({
     const fb = evaluation.dotFeedback.get(currentBeat.beat);
     return fb ? new Map([[currentBeat.measureBeat, fb]]) : undefined;
   }, [evaluation.enabled, evaluation.dotFeedback, currentBeat]);
+
+  const farFade = farTempoFade(state.bpm);
 
   return (
     <>
@@ -168,13 +172,33 @@ export function MetronomeView({
           <LastSession isPlaying={state.isPlaying} />
         </div>
 
-        <div className="bpm-slider-wrap view-stagger-item" style={{ animationDelay: '40ms' }}>
+        <div
+          className="bpm-slider-wrap view-stagger-item"
+          style={
+            {
+              animationDelay: "40ms",
+              // Read by the numbers above and by the tick lines in the slider
+              // itself, so the whole far end fades as one thing.
+              "--far-fade": farFade,
+              "--far-start": `${((FAR_TEMPO - MIN_BPM) / (MAX_BPM - MIN_BPM)) * 100}%`,
+            } as React.CSSProperties
+          }
+        >
           {/* Numbers above the ticks, era names below, a caret at the current
               tempo and no fill: a ruler measures, it does not report progress
               towards 300 BPM (UI_DECISIONS U2.1). */}
+          {/* Past 200 the ruler is drawn back. Almost nobody practises up
+              there, and the numbers were competing with the half of the scale
+              people actually use — but they fade in as you approach, so the
+              far end is quiet rather than missing. `farFade` is the strength;
+              `data-far` marks what it applies to. */}
           <div className="tempo-ticks" aria-hidden="true">
             {getTempoTicks().map(({ bpm, percent }) => (
-              <span key={bpm} style={{ left: `${percent}%` }}>
+              <span
+                key={bpm}
+                data-far={bpm > FAR_TEMPO ? "" : undefined}
+                style={{ left: `${percent}%` }}
+              >
                 {bpm}
               </span>
             ))}
@@ -194,6 +218,8 @@ export function MetronomeView({
               style={{ left: `${sliderPercent}%` }}
             />
           </div>
+          {/* The era names are not faded: they stop at Prestissimo, which begins
+              at 178, so none of them is out past the threshold anyway. */}
           <div className="tempo-scale" aria-hidden="true">
             {getTempoScale().map(({ label, percent }) => (
               <span

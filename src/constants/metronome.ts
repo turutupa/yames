@@ -145,12 +145,43 @@ export function getTempoTicks(): Array<{ bpm: number; percent: number }> {
   return ticks;
 }
 
-export function getTempoScale(): Array<{ label: string; percent: number }> {
+export function getTempoScale(): Array<{ label: string; percent: number; bpm: number }> {
   return TEMPO_SCALE_LABELS.map((label) => {
     const entry = TEMPO_MARKINGS.find(([, name]) => name === label);
     if (!entry) throw new Error(`TEMPO_SCALE_LABELS names ${label}, which TEMPO_MARKINGS does not`);
-    return { label, percent: ((entry[0] - MIN_BPM) / (MAX_BPM - MIN_BPM)) * 100 };
+    return {
+      label,
+      percent: ((entry[0] - MIN_BPM) / (MAX_BPM - MIN_BPM)) * 100,
+      bpm: entry[0],
+    };
   });
+}
+
+/**
+ * Where the ruler starts being drawn back.
+ *
+ * Almost nobody practises past 180, and the far end of the scale was competing
+ * for attention with the half people actually use. It is dimmed rather than
+ * cut: the range still goes to 300, and anyone who climbs up there needs to be
+ * able to read where they are.
+ *
+ * This applies to the numbered ticks only. The era names stop at Prestissimo,
+ * which begins at 178, so none of them is ever out here.
+ */
+export const FAR_TEMPO = 180;
+
+/**
+ * How strongly the far end of the ruler is drawn, for a given tempo.
+ *
+ * Quiet while you are nowhere near it, and fully lit by the time you arrive —
+ * it starts coming back a little before 200 so the numbers are already legible
+ * when you get there rather than appearing under the caret.
+ */
+export function farTempoFade(bpm: number): number {
+  const FADE_FROM = FAR_TEMPO - 40;
+  if (bpm <= FADE_FROM) return 0.3;
+  if (bpm >= FAR_TEMPO) return 1;
+  return 0.3 + ((bpm - FADE_FROM) / (FAR_TEMPO - FADE_FROM)) * 0.7;
 }
 
 export function getTempoMarking(bpm: number): string {

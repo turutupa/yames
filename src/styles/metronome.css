@@ -1033,8 +1033,8 @@
 .group-dots {
   display: flex;
   align-items: center;
-  gap: 9px;
-  min-width: 22px;
+  gap: 11px;
+  min-width: 30px;
 }
 
 .group-dot-wrap {
@@ -1049,8 +1049,10 @@
    is the only question the dots are asked. The accent ring marks where a
    group opens, and fill is reserved for the beat you are hearing right now. */
 .group-dot {
-  width: 22px;
-  height: 22px;
+  /* The thing you look at while playing, so it gets the size to match — the
+     rest of the row is labels and small print. */
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: transparent;
   border: 2px solid color-mix(in srgb, var(--text-primary) 16%, transparent);
@@ -1090,8 +1092,8 @@
    they belong to and read as a second row of beats; the design draws them as
    tick marks under the circle, which is what they are. */
 .group-sub-dot {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: color-mix(in srgb, var(--text-primary) 18%, transparent);
   transition: background 0.1s;
@@ -1288,7 +1290,7 @@ span.meter-grouping-chip {
 .free-dots {
   display: flex;
   align-items: flex-start;
-  gap: 9px;
+  gap: 11px;
   flex-wrap: wrap;
   justify-content: center;
   padding: 10px 6px;
@@ -1401,6 +1403,21 @@ span.meter-grouping-chip {
     left bottom,
     left bottom;
   background-repeat: no-repeat;
+  /* The tick lines fade with the numbers above them. They are painted as two
+     repeating gradients across the whole width, so there is no element to dim
+     — a mask does it instead, opaque up to `--far-start` and at `--far-fade`
+     beyond, with a soft handover so the change does not read as a seam. */
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    #000 0 var(--far-start, 57%),
+    rgba(0, 0, 0, var(--far-fade, 0.3)) calc(var(--far-start, 57%) + 9%) 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    #000 0 var(--far-start, 57%),
+    rgba(0, 0, 0, var(--far-fade, 0.3)) calc(var(--far-start, 57%) + 9%) 100%
+  );
+  transition: -webkit-mask-image 0.25s ease, mask-image 0.25s ease;
 }
 
 /* One vertical mark at the current tempo, full ruler height so it reads
@@ -2024,4 +2041,16 @@ span.meter-grouping-chip {
 
 [data-theme-group="light"] .main-window[data-playing="true"] .metronome-figure {
   opacity: 0.58;
+}
+
+
+/* ── The far end of the ruler ────────────────────────────────────────────
+   Past 180 BPM the numbered ticks are drawn back, because almost nobody
+   practises up there and they were competing with the half of the scale that
+   gets used. The era names are left alone — they stop at Prestissimo (178). `--far-fade` comes from the component and rises
+   as the tempo approaches, so the far end is quiet rather than missing — and
+   it is already legible by the time the caret arrives. */
+.tempo-ticks span[data-far] {
+  opacity: var(--far-fade, 0.3);
+  transition: opacity 0.25s ease;
 }
