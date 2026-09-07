@@ -169,23 +169,10 @@ export function MeterPresets({ beatGroups, freeMode, stepper }: MeterPresetsProp
             ))}
           </div>
 
-          {variants && !freeMode && (
-            <div className="meter-variant-row">
-              <span className="meter-variant-label">{t("metronome.grouping")}</span>
-              {variants.map((v) => {
-                const key = meterKey(v);
-                return (
-                  <button
-                    key={key}
-                    className={`meter-variant-chip ${key === activeKey ? "active" : ""}`}
-                    onClick={() => handleSelect(v)}
-                  >
-                    {v.join(" + ")}
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          {/* No grouping row here. The alternatives live on the meter row
+              itself now, one click away and visible without opening anything —
+              having them in both places meant the picker taught you a slower
+              way to do something the screen already offered. */}
         </div>
       )}
     </div>

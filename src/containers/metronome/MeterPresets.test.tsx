@@ -175,15 +175,13 @@ describe("MeterPresets — meter presets", () => {
     expect(invokedCommands()).not.toContain("set_free_mode");
   });
 
-  it("hides the grouping-variant row in free mode", () => {
-    // [3, 2] is a 5/4 variant, so the row would render if free mode did not
-    // suppress it.
-    const { container } = openPicker({ beatGroups: [3, 2], freeMode: true });
-    expect(container.querySelector(".meter-variant-row")).toBeNull();
-  });
-
-  it("shows the grouping-variant row for a grouped meter", () => {
-    const { container } = openPicker({ beatGroups: [3, 2], freeMode: false });
-    expect(container.querySelector(".meter-variant-row")).not.toBeNull();
+  it("keeps the grouping out of the picker — it lives on the row", () => {
+    // It used to be in both places, which taught a slower way to do something
+    // the screen already offered without opening anything. The picker chooses
+    // the meter; the row refines it.
+    const grouped = openPicker({ beatGroups: [3, 2], freeMode: false });
+    expect(grouped.container.querySelector(".meter-variant-row")).toBeNull();
+    // Still reachable, on the row, without the picker.
+    expect(grouped.container.querySelectorAll(".meter-grouping-chip").length).toBeGreaterThan(1);
   });
 });
