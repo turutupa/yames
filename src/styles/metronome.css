@@ -2060,7 +2060,45 @@ span.meter-grouping-chip {
   z-index: 1;
 }
 
+/* Below the width the full-height figure needs, it moves to the top-right
+   corner and gets smaller rather than disappearing. It is becoming the app's
+   mark, and a mark that is only there on a wide monitor is not one.
+
+   Anchored to the top rather than centred, because that is the one part of a
+   narrow stage that stays empty: the tempo and the ruler are the left half of
+   the upper block, and the meter row and the subdivision cards claim the
+   width further down. Drawn back a little as well — down here it sits closer
+   to the controls it is scenery for. */
 @media (max-width: 1559px) {
+  .metronome-figure {
+    top: 96px;
+    right: 1%;
+    transform: none;
+    width: min(28vw, 290px);
+    /* Short enough that the BOX clears the accent row, not just the drawing
+       inside it — `fit()` centres the figure in whatever space it is given,
+       so a tall box hides its overlap until a different window aspect brings
+       the ink down into the controls. */
+    height: min(33vh, 300px);
+    opacity: 0.3;
+  }
+
+  .main-window[data-playing="true"] .metronome-figure {
+    opacity: 0.4;
+  }
+
+  [data-theme-group="light"] .metronome-figure {
+    opacity: 0.38;
+  }
+
+  [data-theme-group="light"] .main-window[data-playing="true"] .metronome-figure {
+    opacity: 0.48;
+  }
+}
+
+/* Under 1100px the stage is a single column that uses its whole width, and
+   scenery behind the controls stops being scenery and starts being noise. */
+@media (max-width: 1099px) {
   .metronome-figure {
     display: none;
   }

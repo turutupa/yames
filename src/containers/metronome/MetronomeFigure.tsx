@@ -146,8 +146,18 @@ export function MetronomeFigure({ bpm, isPlaying, currentBeat }: MetronomeFigure
       const rect = canvas!.getBoundingClientRect();
       w = rect.width;
       h = rect.height;
-      canvas!.width = Math.round(w * dpr);
-      canvas!.height = Math.round(h * dpr);
+      const pw = Math.round(w * dpr);
+      const ph = Math.round(h * dpr);
+      // Guarded, because ASSIGNING `canvas.width` clears the canvas even when
+      // the value is identical. This effect is rebuilt whenever `isPlaying`
+      // flips, and rebuilding it called `resize()` unconditionally — so
+      // pressing play wiped the drawing and left it blank until the first
+      // animation frame arrived. See the note at the end of the effect: the
+      // same wipe used to fire on every tempo nudge.
+      if (canvas!.width !== pw || canvas!.height !== ph) {
+        canvas!.width = pw;
+        canvas!.height = ph;
+      }
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
@@ -359,12 +369,16 @@ export function MetronomeFigure({ bpm, isPlaying, currentBeat }: MetronomeFigure
     }
 
     resize();
-    // Stopped or reduced-motion: one still frame and no loop at all, so an
-    // idle metronome costs nothing.
+    // One frame NOW, before anything is scheduled. Starting the loop without
+    // it left the browser a whole frame in which to paint whatever `resize()`
+    // had left behind, which is what the owner saw as a flicker on play and
+    // never on pause: the stopped branch drew synchronously and the playing
+    // branch waited for `requestAnimationFrame`.
+    draw(performance.now());
+    // Stopped or reduced-motion: that one still frame is all it gets, and no
+    // loop at all, so an idle metronome costs nothing.
     if (isPlaying && !reduced) {
       raf = requestAnimationFrame(frame);
-    } else {
-      draw(performance.now());
     }
 
     const ro = new ResizeObserver(() => {
