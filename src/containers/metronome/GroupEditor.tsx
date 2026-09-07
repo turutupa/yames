@@ -1,18 +1,6 @@
 import { useTranslation } from "react-i18next";
-import {
-  addBeatToLastGroup,
-  MAX_FREE_BEATS,
-  MIN_FREE_BEATS,
-  nextFreeBeatCount,
-  prevFreeBeatCount,
-  removeBeatFromLastGroup,
-} from "../../constants/metronome";
 import type { BeatFeedback } from "../../types";
 import { accentPositions, meterTotal } from "../../utils/meter";
-
-const SUBDIVISION_MULTIPLIER: Record<number, number> = {
-  1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-};
 
 interface GroupEditorProps {
   beatGroups: number[];
@@ -51,72 +39,13 @@ export function GroupEditor({
   freeMode = false,
   isAccentBeat = false,
   feedback,
-  onBeatGroupsChange,
 }: GroupEditorProps) {
   const { t } = useTranslation();
   const total = meterTotal(beatGroups);
-  const clicksPerBar = total * (SUBDIVISION_MULTIPLIER[subdivision] ?? 1);
   // Static markers only — the LIVE accent comes from the engine via
   // `isAccentBeat`, so the two can never disagree (and stays false in
   // FREE mode, where `accentPositions` is empty anyway).
   const accents = accentPositions(beatGroups, freeMode);
-
-  /**
-   * The bar's length, as the design draws it: a compact `− 6 +` beside the
-   * dots (UI_REVAMP gaps M5). It replaces three lines of prose — the beat
-   * total, the `3 + 3 + 3` formula and a caption under every group — none of
-   * which the mockup has. Nothing they said is gone: the number here IS the
-   * total, the formula is stated beside the meter chip (`MeterPresets`, which
-   * is where the grouping is actually chosen), each group still carries its
-   * count as a `title`, and clicks/bar — the one figure you cannot read off
-   * the dots — sits next to the stepper.
-   *
-   * FREE mode wraps at both ends and so never disables; a grouped meter
-   * clamps, because wrapping would discard the grouping. See
-   * `addBeatToLastGroup`.
-   */
-  const stepper = (
-    <div className="beat-stepper-row">
-      <div
-        className="beat-stepper"
-        role="group"
-        aria-label={t("metronome.beatCount", { count: total })}
-      >
-        <button
-          className="beat-stepper-btn"
-          onClick={() =>
-            onBeatGroupsChange?.(
-              freeMode
-                ? [prevFreeBeatCount(total)]
-                : removeBeatFromLastGroup(beatGroups),
-            )
-          }
-          disabled={!freeMode && total <= MIN_FREE_BEATS}
-          aria-label={t("metronome.removeBeat")}
-        >
-          −
-        </button>
-        <span className="beat-stepper-value">{total}</span>
-        <button
-          className="beat-stepper-btn"
-          onClick={() =>
-            onBeatGroupsChange?.(
-              freeMode
-                ? [nextFreeBeatCount(total)]
-                : addBeatToLastGroup(beatGroups),
-            )
-          }
-          disabled={!freeMode && total >= MAX_FREE_BEATS}
-          aria-label={t("metronome.addBeat")}
-        >
-          +
-        </button>
-      </div>
-      <span className="beat-clicks">
-        {t("metronome.clicksPerBar", { count: clicksPerBar })}
-      </span>
-    </div>
-  );
 
   if (freeMode) {
     return (
@@ -142,7 +71,6 @@ export function GroupEditor({
             );
           })}
         </div>
-        {stepper}
       </div>
     );
   }
@@ -194,7 +122,6 @@ export function GroupEditor({
         ))}
       </div>
 
-      {stepper}
     </div>
   );
 }

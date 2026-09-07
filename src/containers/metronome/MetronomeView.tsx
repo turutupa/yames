@@ -13,6 +13,7 @@ import {
 } from "../../constants/metronome";
 import { GroupEditor } from "./GroupEditor";
 import { LastSession } from "./LastSession";
+import { BeatStepper } from "./BeatStepper";
 import { MeterPresets } from "./MeterPresets";
 import { SubdivisionIcon } from "../../components/MetronomeIcons";
 import DriftMeter from "../../components/DriftMeter";
@@ -211,7 +212,20 @@ export function MetronomeView({
       <div className="stage-divider" aria-hidden="true" />
 
       <section className="meter-section">
-        <MeterPresets beatGroups={state.beatGroups} freeMode={state.freeMode} />
+        {/* The meter and the bar's length share a row, and the row is a grid
+            with a fixed first column — so the stepper sits at the same x
+            whatever the meter is called and however long the grouping reads.
+            It used to trail the dots, which slid it sideways on every click
+            of the very buttons you were clicking repeatedly. */}
+        <div className="meter-row">
+          <MeterPresets beatGroups={state.beatGroups} freeMode={state.freeMode} />
+          <BeatStepper
+            beatGroups={state.beatGroups}
+            subdivision={state.subdivision}
+            freeMode={state.freeMode}
+            onBeatGroupsChange={(next) => setBeatGroups(next)}
+          />
+        </div>
 
         <GroupEditor
           beatGroups={state.beatGroups}

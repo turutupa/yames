@@ -1108,10 +1108,83 @@
    the grouping is chosen) and a caption under every group (now the group's
    `title`). Clicks/bar is the one figure none of that expresses, so it stays
    here, beside the number it is derived from. */
+/* The meter row: the chip and its grouping on the left, the bar's length on
+   the right. A grid rather than a flex row, because the point is that the
+   stepper does not move — and in a flow it would, every time the grouping
+   went from "3 + 2" to "3 + 3" or the chip from 5/4 to 12/8.
+
+   The first column is fixed, so the stepper starts at the same x forever. */
+.meter-row {
+  display: grid;
+  grid-template-columns: minmax(0, 19rem) auto;
+  align-items: center;
+  column-gap: 20px;
+  width: 100%;
+}
+
 .beat-stepper-row {
   display: flex;
   align-items: center;
   gap: 14px;
+}
+
+/* Nothing inside may resize either. Both numbers are tabular and both boxes
+   are cut for the largest value they can hold, so 9 -> 10 beats does not
+   nudge the `+` and a shorter clicks/bar does not pull the whole group left. */
+.beat-stepper-value,
+.beat-clicks {
+  font-variant-numeric: tabular-nums;
+}
+
+.beat-clicks {
+  min-width: 7rem;
+  text-align: left;
+}
+
+/* The grouping alternatives, inline. Small and quiet: they are a refinement
+   of the meter beside them, not a second meter control. */
+.meter-groupings {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.meter-grouping-chip {
+  padding: 4px 9px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-tertiary, var(--text-secondary));
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.meter-grouping-chip:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+}
+
+.meter-grouping-chip.active {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+/* Under about 900px the row stops being two columns — the stepper drops
+   beneath the meter rather than squeezing it — and the fixed left column
+   would be a lie there. */
+@media (max-width: 899px) {
+  .meter-row {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 16px;
+  }
+
+  .beat-clicks {
+    min-width: 0;
+  }
 }
 
 .beat-stepper {
@@ -1156,7 +1229,10 @@
 }
 
 .beat-stepper-value {
-  min-width: 14px;
+  /* Two digits wide, always. The bar can be 16 beats, and at the old 14px the
+     `+` stepped 2px to the right the moment the count reached 10 — which is
+     the exact movement this row exists to prevent. */
+  min-width: 2.4ch;
   text-align: center;
   font-size: 0.85rem;
   font-weight: 800;

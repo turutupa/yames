@@ -93,8 +93,36 @@ export function MeterPresets({ beatGroups, freeMode }: MeterPresetsProps) {
             <polyline points="6 9 12 15 18 9" />
           </svg>
         </button>
-        {!freeMode && beatGroups.length > 1 && (
-          <span className="meter-grouping">{beatGroups.join(" + ")}</span>
+        {/* The grouping, and where a meter has more than one, the alternatives
+            beside it as buttons.
+
+            It used to be static text, which meant reaching 3+2+2 from 2+2+3
+            cost three clicks: open the picker, find the variant row, choose.
+            Only three meters have variants at all, and never more than three
+            of them, so they fit on the row that already names the grouping —
+            and one click is the right price for a change this small. */}
+        {!freeMode && variants && variants.length > 1 ? (
+          <span className="meter-groupings" role="group" aria-label={t("metronome.grouping")}>
+            {variants.map((v) => {
+              const key = meterKey(v);
+              const on = key === activeKey;
+              return (
+                <button
+                  key={key}
+                  className={`meter-grouping-chip${on ? " active" : ""}`}
+                  onClick={() => void handleSelect(v)}
+                  aria-pressed={on}
+                >
+                  {v.join(" + ")}
+                </button>
+              );
+            })}
+          </span>
+        ) : (
+          !freeMode &&
+          beatGroups.length > 1 && (
+            <span className="meter-grouping">{beatGroups.join(" + ")}</span>
+          )
         )}
       </div>
 

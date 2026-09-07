@@ -89,11 +89,34 @@ describe("MeterPresets — FREE chip", () => {
     expect(pickerBtn(container, "FREE").className).not.toContain("active");
   });
 
+  it("switches grouping in one click, without opening the picker", () => {
+    // 2+2+3 and 3+2+2 are the same meter and a different bar. Reaching one
+    // from the other used to cost three clicks through the picker.
+    const { container } = render(<MeterPresets beatGroups={[3, 2, 2]} freeMode={false} />);
+    const chips = [...container.querySelectorAll(".meter-grouping-chip")] as HTMLButtonElement[];
+    fireEvent.click(chips[1]);
+    expect(mockInvoke).toHaveBeenCalledWith("set_beat_groups", { groups: [2, 2, 3] });
+    expect(container.querySelector(".meter-picker")).toBeNull();
+  });
+
+  it("leaves a meter with only one grouping as plain text", () => {
+    // 4/4 has no alternatives; a lone button that cannot change anything
+    // would be a control in name only.
+    const { container } = render(<MeterPresets beatGroups={[2, 2]} freeMode={false} />);
+    expect(container.querySelectorAll(".meter-grouping-chip")).toHaveLength(0);
+  });
+
   it("says on the chip what the meter is, without opening anything", () => {
     const { container, unmount } = render(<MeterPresets beatGroups={[3, 2, 2]} freeMode={false} />);
     expect(container.querySelector(".meter-chip")?.textContent).toContain("7/8");
-    // The grouping is the part that changes without the meter changing.
-    expect(container.querySelector(".meter-grouping")?.textContent).toBe("3 + 2 + 2");
+    // The grouping is the part that changes without the meter changing, so
+    // where a meter has alternatives they sit on the row as buttons — one
+    // click, not three through the picker. 7/8 has three.
+    const chips = [...container.querySelectorAll(".meter-grouping-chip")];
+    expect(chips.map((c) => c.textContent)).toEqual(["3 + 2 + 2", "2 + 2 + 3", "2 + 3 + 2"]);
+    expect(chips.filter((c) => c.className.includes("active")).map((c) => c.textContent)).toEqual([
+      "3 + 2 + 2",
+    ]);
     expect(container.querySelector(".meter-picker")).toBeNull();
     unmount();
 
