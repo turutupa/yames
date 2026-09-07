@@ -211,7 +211,9 @@ const ARC: Mesh = (() => {
 export function rod(bobAt: number): Mesh {
   const LENGTH = 3.7;
   const BASE = 0.75;
-  const y = BASE + (bobAt - 0.5) * LENGTH * 0.82;
+  // 0.95 rather than 0.82: the weight uses nearly the whole shaft, so a
+  // tempo change is visible without a side-by-side comparison.
+  const y = BASE + (bobAt - 0.5) * LENGTH * 0.95;
   return merge(box(0.09, LENGTH, 0.09, 0, BASE, 0), box(0.58, 0.28, 0.2, 0, y, 0));
 }
 

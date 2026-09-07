@@ -111,6 +111,7 @@ import {
   FULLSCREEN_EXIT_DELAY,
   platformKey,
   eventToCombo,
+  isTypingTarget,
 } from "../../hotkeys";
 import type { HotkeyAction } from "../../hotkeys";
 import "../../styles/audio-input-test.css";
@@ -690,8 +691,11 @@ export function MainWindow() {
     // up — Space must not start the metronome behind them.
     if (bindingFor || onboarding.isOpen || tour.isOpen) return;
     const handler = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      // A range, a checkbox or a button holds no text, so a keypress with one
+      // focused is a hotkey. See `isTypingTarget` — the tempo ruler is a range,
+      // and treating it as a text field swallowed every hotkey in the app the
+      // moment anyone set a tempo with it.
+      if (isTypingTarget(e.target)) return;
       // Escape: close tester > exit zen > exit settings
       if (e.key === "Escape") {
         if (inputTestMode) {

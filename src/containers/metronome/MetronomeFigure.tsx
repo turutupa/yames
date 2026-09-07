@@ -50,9 +50,19 @@ interface MetronomeFigureProps {
 const SWING_SLOW = 0.42; // ~24°
 const SWING_FAST = 0.13; // ~7.5°
 
-/** Where the bob sits on the rod, as a fraction of rod length from the pivot. */
-const BOB_SLOW = 0.86;
-const BOB_FAST = 0.42;
+/**
+ * Where the weight sits on the rod, as a fraction of its length from the
+ * pivot, at the slowest and the fastest tempo.
+ *
+ * Deliberately wider than a real Maelzel's scale. The first range moved the
+ * weight about a third of the rod across the whole tempo range, which only
+ * read as movement if you went from 200 to 30 in one go — and the point of
+ * drawing it at all is that a glance tells you roughly how fast the thing is
+ * set. Nearly the whole rod is honest enough for a drawing and legible at the
+ * ten-BPM nudges people actually make.
+ */
+const BOB_SLOW = 0.95;
+const BOB_FAST = 0.16;
 
 function lerp(a: number, b: number, t: number) {
   return a + (b - a) * Math.max(0, Math.min(1, t));
@@ -96,6 +106,8 @@ export function MetronomeFigure({ bpm, isPlaying, currentBeat }: MetronomeFigure
   const phase = useRef({ start: 0, dir: 1 });
   const playing = useRef(isPlaying);
   const tempo = useRef(bpm);
+  /** Draw one frame without restarting the loop. Set while the effect lives. */
+  const redraw = useRef<(() => void) | null>(null);
 
   playing.current = isPlaying;
   tempo.current = bpm;
@@ -162,8 +174,18 @@ export function MetronomeFigure({ bpm, isPlaying, currentBeat }: MetronomeFigure
        it a little to the left and the pitch looks a little down on it, which
        is the three-quarter view a drawing of an object is usually given. */
     const FRONT = Math.PI - 0.5;
-    const YAW = FRONT + 0.3;
-    const PITCH = -0.34;
+    /* Turned to face slightly LEFT, and looked slightly down on.
+       
+       `FRONT + 0.8` is square to the camera — the site's `FRONT` is one end of
+       a rock, not a head-on view, which is why nudging it either side of 0.3
+       only ever turned the case further right. Past square is the other
+       three-quarter, and 1.05 is a quarter turn short of the 1.15 that starts
+       to read as a side view. Found by sweeping it in the running app; there
+       is no arithmetic that would have told me. */
+    const YAW = FRONT + 1.05;
+    // A shade less downward than the site's -0.34: enough to read as looking
+    // down on the case without hiding the top of it.
+    const PITCH = -0.24;
     const cosYaw = Math.cos(YAW);
     const sinYaw = Math.sin(YAW);
     const cosPitch = Math.cos(PITCH);
@@ -307,13 +329,31 @@ export function MetronomeFigure({ bpm, isPlaying, currentBeat }: MetronomeFigure
     });
     ro.observe(canvas);
 
+    // Held so a tempo change can ask for one still frame without rebuilding
+    // anything. See the effect below.
+    redraw.current = () => draw(performance.now());
+
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
+      redraw.current = null;
     };
-    // `bpm` is read through a ref inside the loop, but a stopped figure has
-    // to redraw when the tempo changes — the arc and the bob move with it.
-  }, [isPlaying, bpm]);
+    // `bpm` is deliberately NOT a dependency. It used to be, and every nudge
+    // of the tempo while playing tore this effect down and built it again —
+    // which cancels the loop, reallocates the canvas backing store in
+    // `resize()` and clears it, so the whole figure blinked once per press.
+    // The loop reads the tempo through `tempo.current`, which is updated on
+    // every render, so it already follows the tempo without being restarted.
+  }, [isPlaying]);
+
+  /**
+   * A stopped figure still has to answer a tempo change — the arc narrows and
+   * the weight slides — but it needs one frame, not a new render loop.
+   */
+  useEffect(() => {
+    if (isPlaying) return;
+    redraw.current?.();
+  }, [bpm, isPlaying]);
 
   return <canvas ref={canvasRef} className="metronome-figure" aria-hidden="true" />;
 }

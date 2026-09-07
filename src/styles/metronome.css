@@ -1925,20 +1925,22 @@
    under text. */
 .metronome-figure {
   position: absolute;
-  top: 52%;
+  /* Sat too low against the stage — the tempo and the ruler are the top half
+     of the screen and the figure should stand with them, not under them. */
+  top: 40%;
   right: 1.5%;
   transform: translateY(-50%);
   width: min(40vw, 540px);
   height: min(68vh, 600px);
   pointer-events: none;
   z-index: 0;
-  opacity: 0.16;
+  opacity: 0.34;
   transition: opacity 0.45s ease;
 }
 
 /* Playing, it earns a little more presence — still far under the controls. */
 .main-window[data-playing="true"] .metronome-figure {
-  opacity: 0.3;
+  opacity: 0.5;
 }
 
 /* The stage stacks above it and stays transparent: the figure is meant to
@@ -1956,9 +1958,9 @@
 
 /* Light themes: ink on paper reads at less of it. */
 [data-theme-group="light"] .metronome-figure {
-  opacity: 0.11;
+  opacity: 0.24;
 }
 
 [data-theme-group="light"] .main-window[data-playing="true"] .metronome-figure {
-  opacity: 0.2;
+  opacity: 0.36;
 }

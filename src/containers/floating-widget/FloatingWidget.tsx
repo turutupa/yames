@@ -1,6 +1,7 @@
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { isTypingTarget } from "../../hotkeys";
 import { useDrag } from "../../hooks/useDrag";
 import { useMetronome } from "../../hooks/useMetronome";
 import {
@@ -131,8 +132,11 @@ export function FloatingWidget() {
   // Hotkey dispatcher for widget
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      // A range, a checkbox or a button holds no text, so a keypress with one
+      // focused is a hotkey. See `isTypingTarget` — the tempo ruler is a range,
+      // and treating it as a text field swallowed every hotkey in the app the
+      // moment anyone set a tempo with it.
+      if (isTypingTarget(e.target)) return;
       const combo = eventToCombo(e);
       if (!combo) return;
       const actionId = Object.entries(keyBindings).find(

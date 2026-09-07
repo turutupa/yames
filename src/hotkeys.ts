@@ -63,6 +63,45 @@ export function platformKey(key: string): string {
 }
 
 /** Convert a KeyboardEvent to a normalized binding string */
+/**
+ * Is this event coming from somewhere the user is *typing*?
+ *
+ * Hotkey handlers have to stand aside while a name is being entered, or Space
+ * starts the metronome in the middle of a word. The guard used to be
+ * `INPUT || TEXTAREA || SELECT`, which is too broad by one very important
+ * case: the tempo ruler is an `input[type=range]`. Click or drag it — which is
+ * to say, set the tempo, the most ordinary thing on the screen — and it keeps
+ * focus, and from then on every hotkey in the app was swallowed until you
+ * clicked something else. The owner found it as "hotkeys stop working until I
+ * click the rail".
+ *
+ * You cannot type into a range, a checkbox, a radio or a button, so a keypress
+ * with one of them focused is a hotkey and nothing else.
+ */
+export function isTypingTarget(target: EventTarget | null): boolean {
+  const el = target as HTMLElement | null;
+  if (!el || typeof el.tagName !== "string") return false;
+  if (el.isContentEditable) return true;
+  const tag = el.tagName;
+  if (tag === "TEXTAREA" || tag === "SELECT") return true;
+  if (tag !== "INPUT") return false;
+  const type = (el as HTMLInputElement).type;
+  return !NON_TEXT_INPUTS.has(type);
+}
+
+/** Input types that hold no text, so a keypress in them is not typing. */
+const NON_TEXT_INPUTS = new Set([
+  "range",
+  "checkbox",
+  "radio",
+  "button",
+  "submit",
+  "reset",
+  "color",
+  "file",
+  "image",
+]);
+
 export function eventToCombo(e: KeyboardEvent): string {
   const parts: string[] = [];
   const cmdMod = IS_MAC ? e.metaKey : e.ctrlKey;
