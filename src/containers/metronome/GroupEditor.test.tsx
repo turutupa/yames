@@ -150,6 +150,30 @@ describe("GroupEditor — free mode", () => {
     render(<BeatStepper beatGroups={[1]} subdivision={1} freeMode />);
     expect(screen.getByLabelText("1 beat")).not.toBeNull();
   });
+  it("accents FREE mode's dots when the mode says every beat", () => {
+    // FREE has no groups, but "every beat" applies to it — in the engine
+    // (`accent_for` answers the mode before it looks at free_mode) and so on
+    // the dots. The free branch used to draw no accent ring at all, whatever
+    // the control said.
+    const { container } = render(
+      <GroupEditor beatGroups={[4]} subdivision={1} freeMode accentMode="all" />,
+    );
+    expect(container.querySelectorAll(".free-dots .group-dot.accent")).toHaveLength(4);
+  });
+
+  it("leaves FREE mode's dots unaccented under groups and none", () => {
+    for (const mode of ["groups", "none"] as const) {
+      const { container, unmount } = render(
+        <GroupEditor beatGroups={[4]} subdivision={1} freeMode accentMode={mode} />,
+      );
+      expect(
+        container.querySelectorAll(".free-dots .group-dot.accent"),
+        mode,
+      ).toHaveLength(0);
+      unmount();
+    }
+  });
+
 });
 
 describe("GroupEditor — grouped mode", () => {

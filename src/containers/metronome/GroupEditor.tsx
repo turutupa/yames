@@ -60,9 +60,16 @@ export function GroupEditor({
             const isSubBeat = isPlaying && !isDownbeat && activeBeat === i;
             const fb = feedback?.get(i);
             const feedbackClass = fb && isActive ? `feedback-${fb.classification}` : "";
+            // FREE mode has no groups, but it can still have accents: the
+            // accent control's "every beat" applies here too, in the engine
+            // and so on the dots. Playing, the engine is the authority; at
+            // rest `accents` is, exactly as in the grouped branch below.
+            const isAccent = isActive ? isAccentBeat : accents.has(i);
             return (
               <div key={i} className="group-dot-wrap">
-                <div className={`group-dot ${isActive ? "playing" : "free-active"} ${feedbackClass}`} />
+                <div
+                  className={`group-dot ${isAccent ? "accent" : ""} ${isActive ? "playing" : "free-active"} ${feedbackClass}`}
+                />
                 {subdivision > 1 && (
                   <div className="group-sub-dots">
                     {Array.from({ length: subdivision - 1 }, (_, s) => (

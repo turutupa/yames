@@ -1305,6 +1305,16 @@ span.meter-grouping-chip {
   border-color: color-mix(in srgb, var(--text-primary) 16%, transparent);
 }
 
+/* An accented beat in FREE mode. The rule above is more specific than
+   `.group-dot.accent`, so without this the ring stayed grey however the accent
+   control was set — FREE has no groups, but "every beat" still applies to it.
+   The comment this replaced said FREE had "no accent structure to mark", which
+   stopped being true when the accent control was built. */
+.free-dots .group-dot.free-active.accent {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
 /* =================== Metronome, Phase C1 =================== */
 
 /* Subdivision tiles carry their name. Six near-identical note glyphs needed a
@@ -1871,7 +1881,13 @@ span.meter-grouping-chip {
   width: 7.5rem;
   gap: 8px;
   height: 34px;
-  padding: 0 12px;
+  /* Asymmetric on purpose. The label is centred between the padding edges, and
+     the caret is out of the flow against the right edge — so centring it in
+     the whole box put it dead centre by measurement and left-heavy to the eye,
+     with the caret weighing down one side. The extra right padding is the
+     caret's footprint, which centres the label in the space actually left for
+     it. */
+  padding: 0 26px 0 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--text-primary) 5%, transparent);
