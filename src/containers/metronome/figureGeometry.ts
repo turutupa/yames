@@ -109,7 +109,7 @@ export function merge(...parts: Mesh[]): Mesh {
 /* ── The assembly ─────────────────────────────────────────────────────── */
 
 /** The case: plinth, chamfer, ribs following the taper, and the aperture the
- *  rod shows through. Flat frusta read as an empty box. */
+ *  Flat frusta read as an empty box. */
 const CASE: Mesh = (() => {
   const parts: Mesh[] = [frustum(1.05, 2.15, 5.2), frustum(1.02, 1.05, 0.22, 2.7)];
   parts.push(box(3.5, 0.24, 3.5, 0, -2.72, 0), box(3.1, 0.14, 3.1, 0, -2.92, 0));
@@ -125,20 +125,17 @@ const CASE: Mesh = (() => {
     for (let k = 0; k < 4; k++) ring.edges.push([k, (k + 1) % 4]);
     parts.push(ring);
   }
-  parts.push(box(1.55, 3.5, 0.05, 0, 0.15, 1.42), box(1.25, 3.2, 0.05, 0, 0.15, 1.44));
+  // No aperture. The site draws one as two flat plates at a fixed z of 1.42,
+  // but the case is a frustum: its front face slopes from z=1.52 at the plinth
+  // to z=0.74 at the top, so a plate at a constant depth is inside the case at
+  // the bottom and hanging out in front of it at the top. It read as a sheet
+  // floating clear of the object — the owner took it for a separate layer
+  // altogether. Cutting a window that follows the taper is possible and is not
+  // worth it: nothing is lost, because the rod already shows through.
   return merge(...parts);
 })();
 
-/** The graduated plate the weight is set against. */
-const PLATE: Mesh = (() => {
-  const ticks: Mesh[] = [];
-  for (let i = 0; i < 15; i++) {
-    ticks.push(box(i % 3 === 0 ? 0.5 : 0.28, 0.03, 0.04, -0.28, -1.75 + i * 0.25, 0.05));
-  }
-  return merge(box(1.35, 4.1, 0.06, 0, 0.1, 0), ...ticks);
-})();
-
-/** The train: plate and three wheels. */
+/** The train: backplate and three wheels. */
 const MOVEMENT: Mesh = merge(
   box(1.9, 2.4, 0.08, 0, -0.2, 0),
   gear(26, 0.6, 0.1, 0.1, -0.38, 0.3, 0),
@@ -218,11 +215,20 @@ export function rod(bobAt: number): Mesh {
 }
 
 /** Everything that does not move, with where it sits and how bright it is. */
+/**
+ * Everything that does not move, with where it sits and how brightly it is
+ * drawn.
+ *
+ * The movement and the escapement used to be drawn at full strength, which
+ * made the gears the loudest thing in the figure — and pulling the rod back to
+ * separate it from the case only made them louder by comparison. They are the
+ * busiest geometry here by a long way, so they are also the least in need of
+ * emphasis: a hundred gear teeth at full contrast is a texture, not a detail.
+ */
 export const STATIC_PARTS: { geo: Mesh; at: [number, number, number]; dim: number }[] = [
-  { geo: CASE, at: [0, 0, 0], dim: 0.55 },
-  { geo: PLATE, at: [0, 0.1, 1.15], dim: 0.75 },
-  { geo: MOVEMENT, at: [0, -0.1, 0.2], dim: 1 },
-  { geo: ESCAPEMENT, at: [0, 1.1, 0.2], dim: 1 },
+  { geo: CASE, at: [0, 0, 0], dim: 0.6 },
+  { geo: MOVEMENT, at: [0, -0.1, 0.2], dim: 0.55 },
+  { geo: ESCAPEMENT, at: [0, 1.1, 0.2], dim: 0.55 },
   { geo: ARC, at: [0, 0.1, 0.5], dim: 0.45 },
   { geo: BELL, at: [0, 2.45, -0.35], dim: 0.5 },
 ];

@@ -7,6 +7,14 @@ import { findMeterPreset, meterKey } from "../../utils/meter";
 interface MeterPresetsProps {
   beatGroups: number[];
   freeMode: boolean;
+  /**
+   * Sits between the meter chip and the grouping badges — the bar's length,
+   * which is the same subject as the two things either side of it.
+   *
+   * It used to hang at the right-hand end of the row, far from the meter it
+   * belongs to and with a gap in the middle that meant nothing.
+   */
+  stepper?: React.ReactNode;
 }
 
 /**
@@ -24,7 +32,7 @@ interface MeterPresetsProps {
  * the click accents group starts, and FREE mode is how you get none. Adding a
  * picker for behaviour the engine cannot produce would be a lie on the screen.
  */
-export function MeterPresets({ beatGroups, freeMode }: MeterPresetsProps) {
+export function MeterPresets({ beatGroups, freeMode, stepper }: MeterPresetsProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
@@ -93,6 +101,8 @@ export function MeterPresets({ beatGroups, freeMode }: MeterPresetsProps) {
             <polyline points="6 9 12 15 18 9" />
           </svg>
         </button>
+        {stepper}
+
         {/* The grouping, always as a badge.
 
             Where a meter has alternatives they are buttons and one is active;

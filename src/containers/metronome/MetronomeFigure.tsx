@@ -47,11 +47,13 @@ interface MetronomeFigureProps {
 }
 
 /**
- * How strongly the rod is drawn against the rest of the figure. Below 1 on
- * purpose: it is the accent colour, so at equal weight it reads as a solid bar
- * laid over a delicate wireframe rather than as part of the same object.
+ * The rod is drawn at full strength while the mechanism around it sits at
+ * about half (see `STATIC_PARTS`). It is the only part in the accent colour
+ * and the only part that moves, so it should be the thing the eye lands on —
+ * the contrast comes from everything else being quieter, not from the rod
+ * being louder than it can be.
  */
-const ROD_DIM = 0.72;
+const ROD_DIM = 1;
 
 /** Swing at the slowest and fastest tempo, in radians. */
 const SWING_SLOW = 0.42; // ~24°

@@ -32,7 +32,7 @@ describe("the figure's geometry", () => {
       expect(part.geo.pts.length, "a part with no points").toBeGreaterThan(0);
       expect(part.geo.edges.length, "a part with no edges").toBeGreaterThan(0);
     }
-    expect(STATIC_PARTS).toHaveLength(6);
+    expect(STATIC_PARTS).toHaveLength(5);
   });
 
   it("indexes every edge into a point that exists", () => {

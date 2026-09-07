@@ -218,12 +218,17 @@ export function MetronomeView({
             It used to trail the dots, which slid it sideways on every click
             of the very buttons you were clicking repeatedly. */}
         <div className="meter-row">
-          <MeterPresets beatGroups={state.beatGroups} freeMode={state.freeMode} />
-          <BeatStepper
+          <MeterPresets
             beatGroups={state.beatGroups}
-            subdivision={state.subdivision}
             freeMode={state.freeMode}
-            onBeatGroupsChange={(next) => setBeatGroups(next)}
+            stepper={
+              <BeatStepper
+                beatGroups={state.beatGroups}
+                subdivision={state.subdivision}
+                freeMode={state.freeMode}
+                onBeatGroupsChange={(next) => setBeatGroups(next)}
+              />
+            }
           />
         </div>
 

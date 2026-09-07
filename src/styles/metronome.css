@@ -1115,17 +1115,19 @@
 
    The first column is fixed, so the stepper starts at the same x forever. */
 .meter-row {
-  display: grid;
-  grid-template-columns: minmax(0, 26rem) auto;
+  display: flex;
   align-items: center;
-  column-gap: 20px;
   width: 100%;
 }
 
+/* Between the meter chip and the grouping badges — all three are the same
+   subject, and the stepper used to sit at the far end of the row with an empty
+   gap where the connection should have been. */
 .beat-stepper-row {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
+  margin: 0 18px 0 4px;
 }
 
 /* Nothing inside may resize either. Both numbers are tabular and both boxes
@@ -1137,7 +1139,9 @@
 }
 
 .beat-clicks {
-  min-width: 7rem;
+  /* Cut for the widest value it can hold, so a bar of 6 and a bar of 16 do not
+     shuffle the badges to its right. */
+  min-width: 6.5rem;
   text-align: left;
 }
 
@@ -1183,8 +1187,8 @@
    would be a lie there. */
 @media (max-width: 899px) {
   .meter-row {
-    grid-template-columns: minmax(0, 1fr);
-    row-gap: 16px;
+    flex-wrap: wrap;
+    row-gap: 12px;
   }
 
   .beat-clicks {
@@ -1962,10 +1966,11 @@
 }
 
 /* Light themes: ink on paper reads at less of it. */
+/* On paper the hairlines vanish long before they do on a dark ground. */
 [data-theme-group="light"] .metronome-figure {
-  opacity: 0.24;
+  opacity: 0.42;
 }
 
 [data-theme-group="light"] .main-window[data-playing="true"] .metronome-figure {
-  opacity: 0.36;
+  opacity: 0.58;
 }

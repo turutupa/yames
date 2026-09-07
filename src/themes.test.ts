@@ -115,4 +115,33 @@ describe("theme legibility", () => {
     }
     expect(failures).toEqual(KNOWN);
   });
+
+  /**
+   * The quiet text has to be readable, not merely present.
+   *
+   * `--text-tertiary` and `--text-faint` carry the section labels (TEMPO,
+   * METER, SUBDIVISION), the ruler's numbers and eras, and most of the small
+   * print. They were set by eye and measured 1.65:1 to 4.40:1 against their
+   * own background — under the 4.5:1 body text needs and, at the bottom of
+   * that range, under the 3:1 asked of anything at all. The owner's report was
+   * blunter: on the light themes you could not see a thing.
+   *
+   * Every one of them was walked towards its own theme's `--text-primary`
+   * until it cleared the bar, so the hues survived and only the contrast
+   * moved. This keeps them there.
+   */
+  it("keeps the quiet text readable in every theme", () => {
+    const failures: string[] = [];
+    for (const theme of THEMES) {
+      const bg = theme.vars["--bg-primary"];
+      if (!isHex(bg)) continue;
+      for (const key of ["--text-secondary", "--text-tertiary", "--text-faint"] as const) {
+        const fg = theme.vars[key];
+        if (!isHex(fg)) continue;
+        const ratio = contrast(bg, fg);
+        if (ratio < 4.5) failures.push(`${theme.id} ${key}: ${ratio.toFixed(2)}:1`);
+      }
+    }
+    expect(failures).toEqual([]);
+  });
 });
