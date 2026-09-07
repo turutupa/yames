@@ -715,6 +715,18 @@ fn adaptive_thresholds(
 }
 
 /// Advance the speed ramp by one step. Returns (new_bpm, new_direction, is_done).
+///
+/// A target BELOW the start is a descending drill, and is exactly as valid as
+/// an ascending one: "play it at 120 and work down to 80 until it is clean" is
+/// a real exercise, and the app used to refuse to express it — the target was
+/// clamped to a floor of the start tempo, so it could not be set.
+///
+/// So this function stopped thinking in "up" and "down" and started thinking
+/// in OUT (toward the target) and BACK (toward the start). The `direction`
+/// string is still literally "up" or "down" — it is persisted and it crosses
+/// to the frontend — but which of the two means "keep going" is now read off
+/// the plan instead of assumed. For an ascending drill every branch below
+/// resolves to exactly what it did before.
 fn advance_ramp(
     current_bpm: u16,
     direction: &str,
@@ -725,38 +737,74 @@ fn advance_ramp(
     mode: &str,
     cyclic: bool,
 ) -> (u16, String, bool) {
+    let descending = target_bpm < start_bpm;
+    let out = if descending { "down" } else { "up" };
+    let back = if descending { "up" } else { "down" };
+
+    // One step toward the target, never past it and never outside the
+    // engine's range.
+    let toward_target = |bpm: u16, by: u16| -> u16 {
+        if descending {
+            bpm.saturating_sub(by).max(target_bpm).max(20)
+        } else {
+            bpm.saturating_add(by).min(target_bpm).min(300)
+        }
+    };
+    // One step back toward the start, never past it.
+    let toward_start = |bpm: u16, by: u16| -> u16 {
+        if descending {
+            bpm.saturating_add(by).min(start_bpm).min(300)
+        } else {
+            bpm.saturating_sub(by).max(start_bpm).max(20)
+        }
+    };
+    let at_target = |bpm: u16| {
+        if descending {
+            bpm <= target_bpm
+        } else {
+            bpm >= target_bpm
+        }
+    };
+    let at_start = |bpm: u16| {
+        if descending {
+            bpm >= start_bpm
+        } else {
+            bpm <= start_bpm
+        }
+    };
+
     match mode {
         "zigzag" => {
-            if direction == "up" {
-                let new_bpm = current_bpm.saturating_add(increment).min(300);
-                if new_bpm >= target_bpm {
-                    (target_bpm, "up".to_string(), true)
+            if direction == out {
+                let new_bpm = toward_target(current_bpm, increment);
+                if at_target(new_bpm) {
+                    (target_bpm, out.to_string(), true)
                 } else {
-                    (new_bpm, "down".to_string(), false)
+                    (new_bpm, back.to_string(), false)
                 }
             } else {
-                let new_bpm = current_bpm.saturating_sub(decrement).max(start_bpm);
-                (new_bpm, "up".to_string(), false)
+                let new_bpm = toward_start(current_bpm, decrement);
+                (new_bpm, out.to_string(), false)
             }
         }
         _ => {
-            if direction == "up" {
-                let new_bpm = current_bpm.saturating_add(increment).min(300);
-                if new_bpm >= target_bpm {
+            if direction == out {
+                let new_bpm = toward_target(current_bpm, increment);
+                if at_target(new_bpm) {
                     if cyclic {
-                        (target_bpm, "down".to_string(), false)
+                        (target_bpm, back.to_string(), false)
                     } else {
-                        (target_bpm, "up".to_string(), true)
+                        (target_bpm, out.to_string(), true)
                     }
                 } else {
-                    (new_bpm, "up".to_string(), false)
+                    (new_bpm, out.to_string(), false)
                 }
             } else {
-                let new_bpm = current_bpm.saturating_sub(increment).max(20);
-                if new_bpm <= start_bpm {
-                    (start_bpm, "up".to_string(), false)
+                let new_bpm = toward_start(current_bpm, increment);
+                if at_start(new_bpm) {
+                    (start_bpm, out.to_string(), false)
                 } else {
-                    (new_bpm, "down".to_string(), false)
+                    (new_bpm, back.to_string(), false)
                 }
             }
         }
@@ -2743,6 +2791,75 @@ mod tests {
     fn advance_ramp_clamps_at_300_bpm() {
         let (bpm, _, _) = advance_ramp(298, "up", 80, 350, 10, 5, "linear", false);
         assert_eq!(bpm, 300, "BPM should be hard-clamped at 300");
+    }
+
+    // -----------------------------------------------------------------
+    // Descending drills — a target below the start
+    // -----------------------------------------------------------------
+
+    /// "Play it at 120 and work down to 80 until it is clean" is a real
+    /// exercise, and the app could not express it: the target was clamped to
+    /// a floor of the start tempo, so it could not be typed. `advance_ramp`
+    /// reads the travel direction off the plan now.
+    #[test]
+    fn advance_ramp_linear_descends_toward_a_lower_target() {
+        let (bpm, dir, done) = advance_ramp(120, "down", 120, 80, 5, 3, "linear", false);
+        assert_eq!(bpm, 115);
+        assert_eq!(dir, "down", "keep going toward the target");
+        assert!(!done);
+    }
+
+    #[test]
+    fn advance_ramp_descending_stops_on_the_target_not_past_it() {
+        // 83 - 5 would be 78, four below the goal. It lands on 80 and ends.
+        let (bpm, _, done) = advance_ramp(83, "down", 120, 80, 5, 3, "linear", false);
+        assert_eq!(bpm, 80);
+        assert!(done);
+    }
+
+    #[test]
+    fn advance_ramp_descending_cyclic_turns_round_and_climbs_home() {
+        let (bpm, dir, done) = advance_ramp(85, "down", 120, 80, 5, 3, "linear", true);
+        assert_eq!(bpm, 80);
+        assert_eq!(dir, "up", "a cyclic descent comes back UP to the start");
+        assert!(!done, "cyclic never finishes at the target");
+        // ...and the way home stops at the start rather than overshooting it.
+        let (bpm, dir, _) = advance_ramp(118, "up", 120, 80, 5, 3, "linear", true);
+        assert_eq!(bpm, 120);
+        assert_eq!(dir, "down");
+    }
+
+    #[test]
+    fn advance_ramp_descending_zigzag_backs_off_upward() {
+        // Out is down by `increment`; the back-off is up by `decrement`.
+        let (bpm, dir, _) = advance_ramp(120, "down", 120, 80, 5, 3, "zigzag", false);
+        assert_eq!(bpm, 115);
+        assert_eq!(dir, "up", "next step backs off toward the start");
+        let (bpm, dir, _) = advance_ramp(115, "up", 120, 80, 5, 3, "zigzag", false);
+        assert_eq!(bpm, 118);
+        assert_eq!(dir, "down");
+        // The back-off never climbs past the tempo the drill started at.
+        let (bpm, _, _) = advance_ramp(119, "up", 120, 80, 5, 3, "zigzag", false);
+        assert_eq!(bpm, 120);
+    }
+
+    #[test]
+    fn an_ascending_drill_is_untouched_by_all_of_that() {
+        // The whole point of expressing this as out/back is that the old
+        // behaviour falls out of it unchanged. Walk a full ascent.
+        let mut bpm = 80u16;
+        let mut dir = "up".to_string();
+        let mut seen = vec![bpm];
+        for _ in 0..10 {
+            let (next, d, done) = advance_ramp(bpm, &dir, 80, 100, 5, 3, "linear", false);
+            bpm = next;
+            dir = d;
+            seen.push(bpm);
+            if done {
+                break;
+            }
+        }
+        assert_eq!(seen, vec![80, 85, 90, 95, 100]);
     }
 
     #[test]

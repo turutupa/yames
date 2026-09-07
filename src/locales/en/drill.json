@@ -26,7 +26,7 @@
     "climbTitle": "The climb",
     "climbLegend": "One column per tempo · one cell per bar",
     "climbLegendDone": "Played",
-    "climbLegendPlan": "Tonight",
+    "climbLegendPlan": "Remaining",
     "runStats": "{{steps}} steps · {{bars}} bars · {{time}}",
     "aboutTime": "about {{time}}",
     "timeRemaining": "{{time}} remaining",
@@ -43,7 +43,7 @@
     },
     "planLabel": "The plan",
     "listensBadge": "Listens",
-    "runOptions": "options",
+    "runOptions": "Options",
     "barsUnit": "bars",
     "jumpTo": "Start from {{bpm}} BPM, bar {{bar}}"
   }

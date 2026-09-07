@@ -26,7 +26,7 @@
     "climbTitle": "上り坂",
     "climbLegend": "テンポごとに1列 · 小節ごとに1マス",
     "climbLegendDone": "演奏済み",
-    "climbLegendPlan": "今日",
+    "climbLegendPlan": "残り",
     "runStats": "{{steps}} ステップ · {{bars}} 小節 · {{time}}",
     "aboutTime": "約 {{time}}",
     "timeRemaining": "残り {{time}}",

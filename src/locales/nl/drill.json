@@ -26,7 +26,7 @@
     "climbTitle": "De klim",
     "climbLegend": "Één kolom per tempo · één vakje per maat",
     "climbLegendDone": "Gespeeld",
-    "climbLegendPlan": "Vandaag",
+    "climbLegendPlan": "Resterend",
     "runStats": "{{steps}} stappen · {{bars}} maten · {{time}}",
     "aboutTime": "ongeveer {{time}}",
     "timeRemaining": "Nog {{time}}",
@@ -43,7 +43,7 @@
     },
     "planLabel": "Het plan",
     "listensBadge": "Luistert",
-    "runOptions": "opties",
+    "runOptions": "Opties",
     "barsUnit": "maten",
     "jumpTo": "Starten vanaf {{bpm}} BPM, maat {{bar}}"
   }

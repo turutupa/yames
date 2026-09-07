@@ -26,7 +26,7 @@
     "climbTitle": "Tırmanış",
     "climbLegend": "Her tempo için bir sütun · her ölçü için bir kare",
     "climbLegendDone": "Çalındı",
-    "climbLegendPlan": "Bugün",
+    "climbLegendPlan": "Kalan",
     "runStats": "{{steps}} adım · {{bars}} ölçü · {{time}}",
     "aboutTime": "yaklaşık {{time}}",
     "timeRemaining": "Kalan {{time}}",
@@ -43,7 +43,7 @@
     },
     "planLabel": "Plan",
     "listensBadge": "Dinler",
-    "runOptions": "seçenekler",
+    "runOptions": "Seçenekler",
     "barsUnit": "ölçü",
     "jumpTo": "{{bpm}} BPM, {{bar}}. ölçüden başla"
   }

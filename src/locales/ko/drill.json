@@ -26,7 +26,7 @@
     "climbTitle": "오르막",
     "climbLegend": "템포마다 한 열 · 마디마다 한 칸",
     "climbLegendDone": "연주함",
-    "climbLegendPlan": "오늘",
+    "climbLegendPlan": "남음",
     "runStats": "{{steps}}단계 · {{bars}}마디 · {{time}}",
     "aboutTime": "약 {{time}}",
     "timeRemaining": "{{time}} 남음",

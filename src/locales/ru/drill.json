@@ -26,7 +26,7 @@
     "climbTitle": "Подъём",
     "climbLegend": "Один столбец на темп · одна ячейка на такт",
     "climbLegendDone": "Сыграно",
-    "climbLegendPlan": "Сегодня",
+    "climbLegendPlan": "Осталось",
     "runStats": "{{steps}} шагов · {{bars}} тактов · {{time}}",
     "aboutTime": "около {{time}}",
     "timeRemaining": "Осталось {{time}}",
@@ -43,7 +43,7 @@
     },
     "planLabel": "План",
     "listensBadge": "Слушает",
-    "runOptions": "параметры",
+    "runOptions": "Параметры",
     "barsUnit": "тактов",
     "jumpTo": "Начать с {{bpm}} BPM, такт {{bar}}"
   }

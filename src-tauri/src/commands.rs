@@ -527,7 +527,11 @@ pub fn configure_speed_ramp(
     {
         let mut s = state.lock().unwrap();
         s.speed_ramp.start_bpm = start_bpm.clamp(20, 300);
-        s.speed_ramp.target_bpm = target_bpm.clamp(s.speed_ramp.start_bpm, 300);
+        // Not floored at the start tempo. A target below it is a DESCENDING
+        // drill -- "play it at 120 and work down to 80 until it is clean" --
+        // and the floor made that plan impossible to type, not just unusual.
+        // `advance_ramp` reads the travel direction off the two numbers.
+        s.speed_ramp.target_bpm = target_bpm.clamp(20, 300);
         s.speed_ramp.increment = increment.clamp(1, 50);
         s.speed_ramp.decrement = decrement.clamp(1, 50);
         s.speed_ramp.bars_per_step = bars_per_step.clamp(1, 32);
@@ -565,7 +569,12 @@ pub fn start_speed_ramp(
         s.speed_ramp.active = true;
         s.speed_ramp.current_step = 0;
         s.speed_ramp.current_bpm = s.speed_ramp.start_bpm;
-        s.speed_ramp.direction = "up".to_string();
+        // Toward the target, whichever way that is.
+        s.speed_ramp.direction = if s.speed_ramp.target_bpm < s.speed_ramp.start_bpm {
+            "down".to_string()
+        } else {
+            "up".to_string()
+        };
         s.speed_ramp.bars_in_step = 0;
         s.speed_ramp.completed = false;
         s.speed_ramp.warmup_count = 0;
@@ -608,11 +617,17 @@ pub fn start_speed_ramp_from(
         s.speed_ramp.active = true;
         s.speed_ramp.current_step = step;
         s.speed_ramp.current_bpm = bpm.clamp(20, 300);
-        s.speed_ramp.direction = if bpm >= s.speed_ramp.target_bpm {
-            "down".to_string()
+        // Same rule as `advance_ramp`: keep going toward the target unless
+        // this step is already at it, in which case head back.
+        let descending = s.speed_ramp.target_bpm < s.speed_ramp.start_bpm;
+        let at_target = if descending {
+            bpm <= s.speed_ramp.target_bpm
         } else {
-            "up".to_string()
+            bpm >= s.speed_ramp.target_bpm
         };
+        let out = if descending { "down" } else { "up" };
+        let back = if descending { "up" } else { "down" };
+        s.speed_ramp.direction = if at_target { back } else { out }.to_string();
         s.speed_ramp.bars_in_step = bar;
         s.speed_ramp.completed = false;
         s.speed_ramp.warmup_count = 0;

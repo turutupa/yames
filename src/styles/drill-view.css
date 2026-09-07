@@ -630,18 +630,23 @@
   gap: 6px;
 }
 
+/* Deliberately the same card the metronome's subdivision row draws, down to
+   the mix percentages: these are the same six options in a second place, and
+   two treatments of one control is how a screen starts looking assembled
+   rather than designed. Selected is a WASH, not an outline — a full-strength
+   accent border on a 62px card shouts next to its soft neighbours. */
 .drill-choice {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 6px;
   flex: 1 1 62px;
   min-width: 62px;
-  padding: 8px 6px;
-  border-radius: 9px;
-  border: 1px solid var(--border);
-  background: var(--surface-2, transparent);
+  padding: 10px 6px 9px;
+  border-radius: var(--radius);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 7%, transparent);
+  background: var(--bg-panel);
   color: var(--text-secondary);
   font-family: inherit;
   cursor: pointer;
@@ -652,14 +657,19 @@
 }
 
 .drill-choice:hover {
-  border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+  background: color-mix(in srgb, var(--text-primary) 5%, var(--bg-panel));
   color: var(--text-primary);
 }
 
 .drill-choice.active {
-  background: var(--accent-subtle);
-  border-color: var(--accent);
-  color: var(--accent-text, var(--text-primary));
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  color: var(--accent);
+}
+
+.drill-choice.active:hover {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
 }
 
 .drill-choice-label {
@@ -667,6 +677,13 @@
   font-weight: 700;
   letter-spacing: 0.01em;
   white-space: nowrap;
+}
+
+/* The glyph is `currentColor`, so it follows the label into the accent and
+   the card reads as one object rather than an orange word under a white
+   note. */
+.drill-choice.active .drill-choice-label {
+  font-weight: 800;
 }
 
 .drill-choice-glyph {
@@ -762,9 +779,14 @@
   margin: 0;
 }
 
+/* NOT `--accent-text` here. That token is the ink for text sitting ON an
+   accent fill — #121212 in Ember, #0a0a0a in Ash — and this input sits on a
+   dark panel, so it turned the number black on black. You could not see what
+   you typed, which reads as a field that will not accept typing at all. The
+   pill's own border and ring already say which field has focus. */
 .drill-field-value input:focus {
   outline: none;
-  color: var(--accent-text, var(--accent));
+  color: var(--text-primary);
 }
 
 .drill-field:focus-within {

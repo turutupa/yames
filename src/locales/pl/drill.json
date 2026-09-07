@@ -26,7 +26,7 @@
     "climbTitle": "Wspinaczka",
     "climbLegend": "Jedna kolumna na tempo · jedno pole na takt",
     "climbLegendDone": "Zagrane",
-    "climbLegendPlan": "Dziś",
+    "climbLegendPlan": "Pozostało",
     "runStats": "{{steps}} kroków · {{bars}} taktów · {{time}}",
     "aboutTime": "około {{time}}",
     "timeRemaining": "Zostało {{time}}",
@@ -43,7 +43,7 @@
     },
     "planLabel": "Plan",
     "listensBadge": "Słucha",
-    "runOptions": "opcje",
+    "runOptions": "Opcje",
     "barsUnit": "taktów",
     "jumpTo": "Zacznij od {{bpm}} BPM, takt {{bar}}"
   }

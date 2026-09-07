@@ -73,6 +73,47 @@ describe("DrillConfigPopover", () => {
   });
 });
 
+describe("DrillConfigPopover — reaching the field", () => {
+  it("opens with the first number focused and selected", () => {
+    // One click to configure a number, not two and a drag. Every change used
+    // to cost a click to open the window, a click into the field, and a
+    // selection by hand before the digits would replace anything.
+    const anchor = document.createElement("button");
+    document.body.appendChild(anchor);
+    render(
+      <DrillConfigPopover anchor={anchor} onClose={vi.fn()} label="Tempo">
+        <DrillPopoverRow label="Start BPM">
+          <DrillNumberField
+            value={120}
+            min={20}
+            max={300}
+            label="Start BPM"
+            onCommit={vi.fn()}
+          />
+        </DrillPopoverRow>
+      </DrillConfigPopover>,
+    );
+    const input = screen.getByLabelText("Start BPM") as HTMLInputElement;
+    expect(document.activeElement).toBe(input);
+  });
+
+  it("leaves focus alone in a window with nothing to type into", () => {
+    // The subdivision and the click are choice cards. Focusing one would arm
+    // Enter to re-press it, which is not what opening a window should do.
+    const anchor = document.createElement("button");
+    document.body.appendChild(anchor);
+    anchor.focus();
+    render(
+      <DrillConfigPopover anchor={anchor} onClose={vi.fn()} label="Sound">
+        <DrillPopoverRow label="Sound">
+          <button>Wood</button>
+        </DrillPopoverRow>
+      </DrillConfigPopover>,
+    );
+    expect(document.activeElement).toBe(anchor);
+  });
+});
+
 describe("DrillNumberField", () => {
   const field = (onCommit = vi.fn(), value = 300) =>
     render(

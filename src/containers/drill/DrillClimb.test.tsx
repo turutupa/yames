@@ -141,7 +141,12 @@ describe("DrillClimb", () => {
   it("names the picture and keys the two states a cell can be in", () => {
     const { container } = render(<DrillClimb {...base} />);
     expect(screen.getByText("The climb")).toBeInTheDocument();
-    expect(screen.getByText("Tonight")).toBeInTheDocument();
+    // "Tonight" until the owner asked what it meant. The artboard's legend
+    // was "Last run" / "Tonight" — a comparison with a run the app does not
+    // record (U3.3), so half of it was never built and the other half was
+    // left naming nothing. The two states a cell actually has are played and
+    // not yet played.
+    expect(screen.getByText("Remaining")).toBeInTheDocument();
     expect(screen.getByText("Played")).toBeInTheDocument();
     // The sentence the swatches replaced still explains how the picture is
     // built; it moved to the legend's tooltip rather than being dropped.

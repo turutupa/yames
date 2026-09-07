@@ -26,7 +26,7 @@
     "climbTitle": "A subida",
     "climbLegend": "Uma coluna por andamento · uma célula por compasso",
     "climbLegendDone": "Tocado",
-    "climbLegendPlan": "Hoje",
+    "climbLegendPlan": "Restante",
     "runStats": "{{steps}} passos · {{bars}} compassos · {{time}}",
     "aboutTime": "cerca de {{time}}",
     "timeRemaining": "{{time}} restantes",
@@ -43,7 +43,7 @@
     },
     "planLabel": "O plano",
     "listensBadge": "Ouve",
-    "runOptions": "opções",
+    "runOptions": "Opções",
     "barsUnit": "compassos",
     "jumpTo": "Começar em {{bpm}} BPM, compasso {{bar}}"
   }

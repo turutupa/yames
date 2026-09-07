@@ -184,6 +184,63 @@ describe("DrillView", () => {
     expect(detail).toContain("Wood");
   });
 
+  it("draws a descending drill, and lets the target be typed below the start", async () => {
+    // The owner asked for this twice. The target used to be clamped to a
+    // floor of the start tempo — in Rust AND in the field's own `min` — so
+    // "play it at 120 and work down to 80 until it is clean" could not be
+    // entered at all. The climb below mirrors `advance_ramp`, so it has to
+    // descend too or the picture is a lie about what will play.
+    const { container } = render(
+      <DrillView
+        state={{
+          ...drillState,
+          speedRamp: { ...drillState.speedRamp, startBpm: 100, targetBpm: 80, increment: 10 },
+        }}
+        currentBeat={null}
+        animations={false}
+      />,
+    );
+    const tempos = [...container.querySelectorAll(".drill-climb-bpm")].map(
+      (el) => el.textContent,
+    );
+    expect(tempos).toEqual(["100", "90", "80"]);
+  });
+
+  it("does not draw the same tempo twice when start already is the target", () => {
+    // 80 to 80 drew two identical columns: the first move landed on the
+    // target and was pushed as if it had gone somewhere.
+    const { container } = render(
+      <DrillView
+        state={{
+          ...drillState,
+          speedRamp: { ...drillState.speedRamp, startBpm: 80, targetBpm: 80 },
+        }}
+        currentBeat={null}
+        animations={false}
+      />,
+    );
+    expect(container.querySelectorAll(".drill-climb-bpm")).toHaveLength(1);
+  });
+
+  it("lets the start tempo pass the target without dragging it along", async () => {
+    // Raising the start past the target used to push the target up with it,
+    // because the engine only ramped upward. It descends now, so the two are
+    // just the two ends of the plan.
+    const { container } = render(
+      <DrillView state={drillState} currentBeat={null} animations={false} />,
+    );
+    fireEvent.click(container.querySelector(".drill-plan-token")!);
+    const start = screen.getByLabelText("Start BPM");
+    fireEvent.change(start, { target: { value: "140" } });
+    fireEvent.blur(start);
+    await waitFor(() => {
+      expect(mockInvoke).toHaveBeenCalledWith(
+        "configure_speed_ramp",
+        expect.objectContaining({ startBpm: 140, targetBpm: 100 }),
+      );
+    });
+  });
+
   it("changing the drill's subdivision saves it with the rest of the ramp", async () => {
     render(<DrillView state={drillState} currentBeat={null} animations={false} />);
     fireEvent.click(screen.getByText("Quarter"));
@@ -216,7 +273,7 @@ describe("DrillView", () => {
     // reads changed. "Cyclic" was engineering vocabulary, and "Repeat" would
     // have been wrong — the ramp turns round and descends rather than starting
     // again, which is what the chain's repeat does.
-    fireEvent.click(screen.getByText("options"));
+    fireEvent.click(screen.getByText("Options"));
     const cyclicLabel = screen.getByText("Up and down");
     const toggleBtn = cyclicLabel
       .closest(".drill-popover-row")

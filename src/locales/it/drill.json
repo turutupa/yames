@@ -26,7 +26,7 @@
     "climbTitle": "La salita",
     "climbLegend": "Una colonna per tempo · una casella per battuta",
     "climbLegendDone": "Suonato",
-    "climbLegendPlan": "Oggi",
+    "climbLegendPlan": "Rimanenti",
     "runStats": "{{steps}} livelli · {{bars}} battute · {{time}}",
     "aboutTime": "circa {{time}}",
     "timeRemaining": "Rimane {{time}}",
@@ -43,7 +43,7 @@
     },
     "planLabel": "Il piano",
     "listensBadge": "Ascolta",
-    "runOptions": "opzioni",
+    "runOptions": "Opzioni",
     "barsUnit": "battute",
     "jumpTo": "Inizia da {{bpm}} BPM, battuta {{bar}}"
   }

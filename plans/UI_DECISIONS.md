@@ -172,6 +172,17 @@ Status key: **decided** · **first release** · **open** · **deferred**
     because a drill playing a different sound from the metronome would be a
     second thing to keep in sync.
 
+- **U3.7 — A drill may descend.** *decided.* A target below the start is a
+  descending drill and is exactly as valid as an ascending one: "play it at
+  120 and work down to 80 until it is clean" is a real exercise, and the app
+  could not express it — `configure_speed_ramp` clamped the target to a floor
+  of the start tempo, and the field carried the same floor, so the plan could
+  not be typed. `advance_ramp` now thinks in OUT (toward the target) and BACK
+  (toward the start) rather than up and down, and reads which is which off the
+  plan; for an ascending drill every branch resolves to what it did before.
+  The two tempo fields are uncoupled as a consequence — raising the start past
+  the target no longer drags the target with it.
+
 - **U3.2 — The grid becomes the climb.** *decided.* One column per tempo
   step, one cell per bar, rising left to right so the picture's shape is the
   exercise's shape. Promoted from below the fold to the screen's main object.

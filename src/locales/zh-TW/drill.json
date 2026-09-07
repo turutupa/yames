@@ -26,7 +26,7 @@
     "climbTitle": "爬升圖",
     "climbLegend": "每個速度一欄 · 每小節一格",
     "climbLegendDone": "已彈",
-    "climbLegendPlan": "今天",
+    "climbLegendPlan": "剩餘",
     "runStats": "{{steps}} 級 · {{bars}} 小節 · {{time}}",
     "aboutTime": "約 {{time}}",
     "timeRemaining": "剩餘 {{time}}",

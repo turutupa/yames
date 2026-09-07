@@ -26,7 +26,7 @@
     "climbTitle": "Đường leo",
     "climbLegend": "Mỗi nhịp độ một cột · mỗi ô nhịp một ô",
     "climbLegendDone": "Đã chơi",
-    "climbLegendPlan": "Hôm nay",
+    "climbLegendPlan": "Còn lại",
     "runStats": "{{steps}} bước · {{bars}} ô nhịp · {{time}}",
     "aboutTime": "khoảng {{time}}",
     "timeRemaining": "Còn {{time}}",
@@ -43,7 +43,7 @@
     },
     "planLabel": "Kế hoạch",
     "listensBadge": "Lắng nghe",
-    "runOptions": "tùy chọn",
+    "runOptions": "Tùy chọn",
     "barsUnit": "ô nhịp",
     "jumpTo": "Bắt đầu từ {{bpm}} BPM, ô nhịp {{bar}}"
   }

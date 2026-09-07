@@ -26,7 +26,7 @@
     "climbTitle": "La montée",
     "climbLegend": "Une colonne par tempo · une case par mesure",
     "climbLegendDone": "Joué",
-    "climbLegendPlan": "Aujourd'hui",
+    "climbLegendPlan": "Restant",
     "runStats": "{{steps}} étapes · {{bars}} mesures · {{time}}",
     "aboutTime": "environ {{time}}",
     "timeRemaining": "Reste {{time}}",
@@ -43,7 +43,7 @@
     },
     "planLabel": "Le plan",
     "listensBadge": "À l'écoute",
-    "runOptions": "options",
+    "runOptions": "Options",
     "barsUnit": "mesures",
     "jumpTo": "Démarrer à {{bpm}} BPM, mesure {{bar}}"
   }

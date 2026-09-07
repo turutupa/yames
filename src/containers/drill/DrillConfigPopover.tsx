@@ -101,6 +101,26 @@ export function DrillConfigPopover({
     };
   }, [anchor]);
 
+  // Opening a window puts the cursor in its first number, with the value
+  // selected — so setting a tempo is click, type, done. Without it every
+  // change costs two clicks and a drag: one to open the window, one to reach
+  // into the field, and a selection by hand before the digits will replace
+  // anything.
+  //
+  // Only a number. The windows made of choice cards (the subdivision, the
+  // click) have nothing to type into, and stealing focus onto one of their
+  // buttons would arm Enter to re-press it.
+  //
+  // `preventScroll` because the window can open below the fold on a short
+  // screen, and focus would otherwise jump the stage out from under the hand
+  // that just clicked.
+  useEffect(() => {
+    const field = ref.current?.querySelector("input");
+    if (!field) return;
+    field.focus({ preventScroll: true });
+    field.select();
+  }, []);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
@@ -280,6 +300,11 @@ export function DrillNumberField({
           min={min}
           max={max}
           aria-label={label}
+          // Focusing selects what is there, so the first digit REPLACES the
+          // value rather than landing beside it. Without it, changing 5 to 10
+          // means clicking in, selecting or clearing by hand, and then typing
+          // — three moves for a two-character edit.
+          onFocus={(e) => e.target.select()}
           onChange={(e) => setDraft(e.target.value)}
           onBlur={(e) => commit(e.target.value)}
           onKeyDown={(e) => {

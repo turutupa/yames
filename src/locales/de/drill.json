@@ -26,7 +26,7 @@
     "climbTitle": "Der Aufstieg",
     "climbLegend": "Eine Spalte pro Tempo · ein Feld pro Takt",
     "climbLegendDone": "Gespielt",
-    "climbLegendPlan": "Heute",
+    "climbLegendPlan": "Verbleibend",
     "runStats": "{{steps}} Stufen · {{bars}} Takte · {{time}}",
     "aboutTime": "ca. {{time}}",
     "timeRemaining": "{{time}} verbleibend",

@@ -121,63 +121,82 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
 
   const closeField = useCallback(() => setOpenField(null), []);
 
-  /* Start and target are coupled: the engine ramps upward, so a start above
-     the target is a drill with no steps in it. Pushing the target along is
-     the least surprising repair — the alternative, refusing the start value,
-     leaves the box showing a number that is not what was typed. */
+  /* Uncoupled. These used to drag each other around — raising the start past
+     the target pushed the target up with it — because the engine only ever
+     ramped upward and a start above the target was a drill with no steps in
+     it. It descends now, so the two numbers are just the two ends of the
+     plan and neither constrains the other. */
   const commitStartBpm = (v: number) => {
     setStartBpm(v);
-    if (v > targetBpm) {
-      setTargetBpm(v);
-      saveWith({ startBpm: v, targetBpm: v });
-    } else {
-      saveWith({ startBpm: v });
-    }
+    saveWith({ startBpm: v });
   };
 
   // Spacebar start/stop is handled by MainWindow's unified dispatcher via "play" hotkey
 
-  // Calculate steps for the progress visualization
+  // The tempos the climb will draw, in the order the ramp will play them.
+  // This mirrors `advance_ramp` in engine.rs and has to keep mirroring it: it
+  // is the picture of a plan the engine is going to execute, and the two
+  // disagreeing means the staircase is a lie.
+  //
+  // Like `advance_ramp`, it thinks in OUT (toward the target) and BACK
+  // (toward the start) rather than up and down, so a target below the start
+  // is a descending drill rather than an impossible one.
+  const descending = targetBpm < startBpm;
+  const towardTarget = (bpm: number, by: number) =>
+    descending
+      ? Math.max(bpm - by, targetBpm)
+      : Math.min(bpm + by, targetBpm);
+  const towardStart = (bpm: number, by: number) =>
+    descending
+      ? Math.min(bpm + by, startBpm)
+      : Math.max(bpm - by, startBpm);
+  const atTarget = (bpm: number) => (descending ? bpm <= targetBpm : bpm >= targetBpm);
+  const atStart = (bpm: number) => (descending ? bpm >= startBpm : bpm <= startBpm);
+
   const steps: number[] = [];
   {
     let bpm = startBpm;
-    let dir: "up" | "down" = "up";
+    let goingOut = true;
     steps.push(bpm);
-    if (mode === "adaptive") {
-      // Adaptive: show projected linear path (actual path determined by accuracy)
-      while (bpm < targetBpm && steps.length < 200) {
-        bpm = Math.min(bpm + increment, targetBpm);
-        steps.push(bpm);
-        if (bpm >= targetBpm) break;
-      }
-    } else {
-    for (let i = 0; i < 200; i++) {
-      if (mode === "zigzag") {
-        // Zigzag: alternate +increment / -decrement each step
-        if (dir === "up") {
-          bpm = Math.min(bpm + increment, targetBpm);
-          if (bpm >= targetBpm) { steps.push(bpm); break; }
-          dir = "down"; // next step goes down
-        } else {
-          bpm = Math.max(bpm - decrement, startBpm);
-          dir = "up"; // next step goes up
+    // A plan whose start IS its target is one step, not two. It used to draw
+    // the same tempo twice, because the first move landed on the target and
+    // was pushed as if it had gone somewhere.
+    if (!atTarget(bpm)) {
+      if (mode === "adaptive") {
+        // Adaptive climbs until the playing falls apart, so the picture is a
+        // projection: the linear path it would take if nothing went wrong.
+        while (!atTarget(bpm) && steps.length < 200) {
+          bpm = towardTarget(bpm, increment);
+          steps.push(bpm);
         }
       } else {
-        // Linear (or cyclic linear)
-        if (dir === "up") {
-          bpm = Math.min(bpm + increment, targetBpm);
-          if (bpm >= targetBpm) {
-            steps.push(bpm);
-            if (cyclic) { dir = "down"; continue; } else { break; }
+        for (let i = 0; i < 200; i++) {
+          if (mode === "zigzag") {
+            // Two forward, one back — and "forward" is whichever way the plan
+            // is pointing.
+            if (goingOut) {
+              bpm = towardTarget(bpm, increment);
+              if (atTarget(bpm)) { steps.push(bpm); break; }
+              goingOut = false;
+            } else {
+              bpm = towardStart(bpm, decrement);
+              goingOut = true;
+            }
+          } else if (goingOut) {
+            bpm = towardTarget(bpm, increment);
+            if (atTarget(bpm)) {
+              steps.push(bpm);
+              if (cyclic) { goingOut = false; continue; }
+              break;
+            }
+          } else {
+            // Cyclic: the round trip home.
+            bpm = towardStart(bpm, increment);
+            if (atStart(bpm)) { steps.push(bpm); break; }
           }
-        } else {
-          // Cyclic: coming back down
-          bpm = Math.max(bpm - increment, startBpm);
-          if (bpm <= startBpm) { steps.push(bpm); break; }
+          steps.push(bpm);
         }
       }
-      steps.push(bpm);
-    }
     }
   }
 
@@ -343,7 +362,10 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
             <DrillConfigPopover
               anchor={anchors.current.tempo ?? null}
               onClose={closeField}
-              label={t("drill.startBpm")}
+              // Named for the phrase, not for its first field: this window
+              // holds both ends of the tempo, and calling it "Start BPM" gave
+              // it the same accessible name as a control inside it.
+              label={t("metronome.tempo")}
               note={planSummary}
             >
               <DrillPopoverRow label={t("drill.startBpm")} tip={t("drill.desc.startBpm")} onHover={(on) => setHighlightMode(on ? "startBpm" : null)}>
@@ -358,9 +380,13 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
               </DrillPopoverRow>
               {mode !== "adaptive" && (
                 <DrillPopoverRow label={t("drill.targetBpm")} tip={t("drill.desc.targetBpm")} onHover={(on) => setHighlightMode(on ? "targetBpm" : null)}>
+                  {/* Floor of 20, not of the start tempo. A target below the
+                      start is a descending drill — "play it at 120 and work
+                      down to 80 until it is clean" — and the old floor made
+                      that plan impossible to type. */}
                   <DrillNumberField
                     value={targetBpm}
-                    min={startBpm}
+                    min={20}
                     max={300}
                     step={5}
                     label={t("drill.targetBpm")}
