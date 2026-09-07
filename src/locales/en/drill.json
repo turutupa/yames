@@ -42,8 +42,9 @@
       "aggressiveness": "How quickly the tempo changes. Conservative waits longer, Aggressive pushes faster.",
       "countdown": "4-beat countdown before the drill starts. Helps you lock into the tempo."
     },
-    "allSettings": "All settings",
     "planLabel": "The plan",
-    "listensBadge": "Listens"
+    "listensBadge": "Listens",
+    "runOptions": "options",
+    "barsUnit": "bars"
   }
 }

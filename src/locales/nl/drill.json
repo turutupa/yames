@@ -42,8 +42,9 @@
       "aggressiveness": "Hoe snel het tempo verandert. Mild wacht langer, Stevig duwt sneller.",
       "countdown": "Aftellen van 4 beats voordat de training begint. Helpt je om in het tempo te komen."
     },
-    "allSettings": "Alle instellingen",
     "planLabel": "Het plan",
-    "listensBadge": "Luistert"
+    "listensBadge": "Luistert",
+    "runOptions": "opties",
+    "barsUnit": "maten"
   }
 }

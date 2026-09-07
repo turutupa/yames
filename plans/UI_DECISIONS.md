@@ -134,9 +134,26 @@ Status key: **decided** · **first release** · **open** · **deferred**
 
 - **U3.1 — The plan is an editable sentence, not a form.** *decided.*
   `80 → 120 · +5 BPM · every 12 bars`, with a second line for
-  `4 beats per bar · quarter notes · wood click`. Each token opens a
+  `4 beats per bar · quarter notes · wood click · options`. Each token opens a
   two-row popover. The eight stepper rows leave the main view; no setting
   is hidden.
+
+  *Built in two goes.* The first kept the rows in an "All settings"
+  disclosure below the sentence and dimmed the ones you had not clicked —
+  which is a form that is always on the stage, only sometimes greyed. The
+  artboard draws a floating card hanging under the phrase instead, and that
+  is what ships: `DrillConfigPopover`, one window per token, holding only
+  that token's fields, closing on Escape or a click outside. The disclosure,
+  its toggle and its eight rows are deleted. The window clears the whole plan
+  block rather than the token that opened it, so the second line of tokens
+  stays clickable while one is open.
+
+- **U3.1b — What a mode does is on the button that does it.** *decided.* A
+  line of prose under the plan explained the selected mode for the whole time
+  the ramp was stopped — describing a choice already made, and taking a row of
+  the stage from the climb. It is a hover on each of Linear / Zigzag /
+  Adaptive now (`aria-describedby`, so it is not mouse-only), which also means
+  the two modes you did NOT pick are readable before you pick them.
 
 - **U3.2 — The grid becomes the climb.** *decided.* One column per tempo
   step, one cell per bar, rising left to right so the picture's shape is the

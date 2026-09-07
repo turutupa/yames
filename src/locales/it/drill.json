@@ -42,8 +42,9 @@
       "aggressiveness": "Quanto rapidamente cambia il tempo. La modalità dolce attende più a lungo, quella spinta accelera più veloce.",
       "countdown": "Conto alla rovescia di 4 colpi prima dell'inizio. Ti aiuta a entrare nel tempo."
     },
-    "allSettings": "Tutte le impostazioni",
     "planLabel": "Il piano",
-    "listensBadge": "Ascolta"
+    "listensBadge": "Ascolta",
+    "runOptions": "opzioni",
+    "barsUnit": "battute"
   }
 }

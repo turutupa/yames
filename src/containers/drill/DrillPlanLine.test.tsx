@@ -13,6 +13,9 @@ const base = {
   soundName: "Wood",
   openField: null,
   onOpenField: vi.fn(),
+  // The settings window measures its position off these; the plan line only
+  // fills them in.
+  anchors: { current: {} },
 };
 
 afterEach(() => {

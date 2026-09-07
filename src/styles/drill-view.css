@@ -139,16 +139,6 @@
 /* Idle empty state (O8) — one line explaining the selected mode, shown only
    while the ramp is stopped. Sits above the summary and reads as a caption,
    not as a control. */
-.drill-idle-hint {
-  text-align: center;
-  font-size: 0.75rem;
-  line-height: 1.5;
-  color: var(--text-secondary);
-  opacity: 0.85;
-  margin-top: 8px;
-  padding: 0 12px;
-}
-
 /* =================== The climb (UI_DECISIONS U3.2) ===================
    One column per tempo step, rising left to right; one cell per bar inside a
    column. The thing this replaced was a 13×9 matrix of identical squares —
@@ -162,15 +152,18 @@
      --climb-cell-w  its width */
 .drill-climb {
   /* Sized off the window rather than a breakpoint, because the thing that
-     runs out is the window's height, not a category of window. At the 780px
-     minimum the whole screen above the climb costs about 600px, so 23vh is
-     what is actually left; the 290px ceiling stops a tall monitor from
-     drawing a staircase you have to look up at. */
-  --climb-rise: clamp(110px, 23vh, 290px);
-  --climb-cell-h: clamp(18px, 3.2vh, 30px);
-  --climb-cell-w: 6px;
-  --climb-cell-gap: 2px;
-  --climb-col-gap: 12px;
+     runs out is the window's height, not a category of window.
+
+     These grew when the settings form above them was deleted: an "All
+     settings" disclosure and a line of mode prose used to cost about 90px of
+     the stage, and the climb was drawn in what was left. It has that back, so
+     a bar is a shape you can see rather than a 6px sliver — the artboard's
+     cell is 5×28 at 1440×900 and ours now reaches past it. */
+  --climb-rise: clamp(140px, 30vh, 360px);
+  --climb-cell-h: clamp(26px, 4.4vh, 44px);
+  --climb-cell-w: 10px;
+  --climb-cell-gap: 3px;
+  --climb-col-gap: 18px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -244,7 +237,12 @@
 .drill-climb-scroll {
   overflow-x: auto;
   overflow-y: hidden;
-  scrollbar-width: thin;
+  /* Scrollable, with no scrollbar drawn. The bar is not how you move through
+     a drill — the run is, and `DrillClimb` keeps the playing column centred —
+     so the chrome was a permanent grey line under the picture advertising an
+     interaction nobody needs. Dragging and the wheel still work. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   scroll-behavior: smooth;
   padding-bottom: 2px;
   /* The glow on the current cell would be clipped by the scroll box. */
@@ -252,6 +250,10 @@
   padding-left: 4px;
   padding-right: 4px;
   padding-top: 8px;
+}
+
+.drill-climb-scroll::-webkit-scrollbar {
+  display: none;
 }
 
 .drill-climb-track {
@@ -452,29 +454,33 @@
   color: var(--text-secondary);
 }
 
-/* Below ~830px of stage the cells give up width before the track gives up
-   and scrolls. 3px is the floor: thinner than that and a bar stops reading
-   as a bar. */
+/* A narrow window buys back its room from the gaps between columns, not from
+   the cells: a bar is the unit the picture is made of and it should be the
+   same size in a four-step drill and a forty-step one. The track scrolls, and
+   the run carries the view with it, so there is nothing to fit. */
 @media (max-width: 1023px) {
   .drill-climb {
-    --climb-col-gap: 9px;
+    --climb-col-gap: 13px;
   }
 }
 
 @media (max-width: 767px) {
   .drill-climb {
-    --climb-cell-gap: 1px;
-    --climb-col-gap: 7px;
+    --climb-cell-gap: 2px;
+    --climb-col-gap: 10px;
+    --climb-cell-w: 8px;
   }
 }
 
 @media (max-width: 559px) {
   .drill-climb {
-    --climb-cell-gap: 1px;
-    --climb-col-gap: 6px;
+    --climb-cell-gap: 2px;
+    --climb-col-gap: 8px;
+    --climb-cell-w: 7px;
     /* Shorter as well as thinner: a narrow window is usually a small one, and
        the staircase has to leave room for the tempo readout above it. */
-    --climb-rise: clamp(90px, 19vh, 180px);
+    --climb-rise: clamp(100px, 22vh, 200px);
+    --climb-cell-h: clamp(20px, 3.4vh, 32px);
   }
 
   .drill-climb-bpm {
@@ -536,205 +542,257 @@
 }
 
 /* Config form */
-.drill-config {
+/* =================== The settings window (Drill.dc.html) ===================
+   The artboard draws a card hanging under the phrase you clicked, holding
+   only that phrase's fields. It replaced a disclosure called "All settings"
+   that carried eight rows of the same steppers in a strip across the stage,
+   open or closed, whether or not anything in it was being changed.
+
+   Positioned by DrillConfigPopover against `.drill-stage-plan`, which is the
+   nearest positioned ancestor — the component measures, this only paints. */
+.drill-stage-plan {
+  position: relative;
+}
+
+.drill-popover {
+  position: absolute;
+  z-index: 40;
+  width: 322px;
+  max-width: calc(100vw - 32px);
+  padding: 16px;
+  border-radius: 13px;
+  background: var(--bg-raised, var(--bg-panel));
+  /* The accent tint on the border is what says this card belongs to the token
+     that opened it — every other panel on the screen uses the plain border. */
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--border));
+  box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
-  gap: 0;
-  padding: 0;
-  /* Was rgba(255,255,255,0.02) over a hardcoded white hairline, which is
-     invisible in Ivory and Arctic and wrong in Manuscript. */
-  background: var(--bg-panel);
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  max-width: 480px;
-  width: 100%;
-  align-self: center;
-  overflow: hidden;
-  margin-bottom: 12px;
+  gap: 12px;
+  animation: drillPopoverIn 0.16s ease;
 }
 
-.drill-config-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 10px 12px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-secondary);
-  font-size: 0.75rem;
-  letter-spacing: 0.02em;
+@keyframes drillPopoverIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
 }
 
-.drill-config-toggle:hover {
-  color: var(--text-primary);
+.drill-view[data-animations="off"] .drill-popover {
+  animation: none;
 }
 
-.drill-config-summary {
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.drill-config-arrow {
-  opacity: 0.5;
-  flex-shrink: 0;
-}
-
-.drill-config-sep {
-  margin: 0 6px;
-  opacity: 0.4;
-  display: flex;
-  align-items: center;
-}
-
-.drill-config-chevron {
-  transition: transform 0.25s ease;
-}
-
-.drill-config-chevron.open {
-  transform: rotate(180deg);
-}
-
-.drill-config-body {
+.drill-popover-rows {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 0 12px 10px;
-  max-height: 400px;
-  opacity: 1;
-  overflow: hidden;
-  transition: max-height 0.3s ease, opacity 0.2s ease, padding 0.3s ease;
+  gap: 12px;
 }
 
-.drill-config.collapsed .drill-config-body {
-  max-height: 0;
-  opacity: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-.drill-row {
+.drill-popover-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  min-height: 32px;
 }
 
-.drill-row label {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
+.drill-popover-label {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-primary);
   flex-shrink: 0;
 }
 
+.drill-popover-rule {
+  height: 1px;
+  background: var(--border);
+}
+
+/* The plan restated. It is the same sentence the stage header carries, put
+   under the divider because that is where you are looking while you change a
+   value — the size of the exercise answers immediately. */
+.drill-popover-note {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The `− value +` pill. One bordered container rather than three separate
+   controls, as drawn — the number belongs inside the thing that changes it. */
+.drill-field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 5px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--surface-2, transparent);
+}
+
+.drill-field-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.drill-field-btn:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.drill-field-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.drill-field-value {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  justify-content: center;
+  min-width: 46px;
+}
+
+/* Still a real number input, so the value can be typed. The chrome is gone
+   because the pill around it is the control's edge. */
+.drill-field-value input {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 800;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.drill-field-value input::-webkit-inner-spin-button,
+.drill-field-value input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.drill-field-value input:focus {
+  outline: none;
+  color: var(--accent-text, var(--accent));
+}
+
+.drill-field:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+.drill-field-unit {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+.drill-popover .toggle-group {
+  display: flex;
+  gap: 4px;
+}
+
+.drill-popover .toggle-btn {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
+/* What a setting means, on hover of its label. These explanations are the
+   only place the app says what a decrement is for, so they moved into the
+   window with the controls they describe. */
 .drill-label-tip {
   position: relative;
   cursor: help;
+  border-bottom: 1px dotted var(--text-faint);
 }
 
 .drill-tip {
   visibility: hidden;
   opacity: 0;
-  max-height: 0;
-  overflow: hidden;
-  padding: 0;
   position: absolute;
   bottom: calc(100% + 8px);
   left: 0;
-  width: 220px;
-  background: var(--bg-secondary, #2a2a3e);
-  border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+  width: 240px;
+  padding: 8px 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
   border-radius: 8px;
-  font-size: 0.75rem;
-  line-height: 1.4;
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.45;
   color: var(--text-secondary);
-  z-index: 100;
+  box-shadow: var(--shadow);
+  z-index: 50;
   pointer-events: none;
   transition:
-    opacity 0.15s,
-    visibility 0.15s,
-    max-height 0.15s,
-    padding 0.15s;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    opacity 0.15s ease,
+    visibility 0.15s ease;
 }
 
 .drill-label-tip:hover .drill-tip {
   visibility: visible;
   opacity: 1;
-  max-height: 200px;
-  padding: 8px 10px;
 }
 
-.drill-row input[type="number"] {
-  width: 64px;
-  padding: 5px 6px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  color: var(--text-primary);
-  font-size: 0.85rem;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-  -moz-appearance: textfield;
-}
-
-.drill-row input[type="number"]::-webkit-inner-spin-button,
-.drill-row input[type="number"]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.drill-row input[type="number"]:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent-glow);
-}
-
-.drill-stepper {
+/* =================== What a mode does, on the mode ===================
+   This used to be a line of prose under the plan, on screen the entire time
+   the ramp was stopped, explaining a choice the player had already made. It
+   is a hover on the button that makes the choice now. */
+.drill-mode-wrap {
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 4px;
 }
 
-.stepper-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
+.drill-mode-tip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  top: calc(100% + 9px);
+  right: 0;
+  width: 260px;
+  padding: 9px 11px;
+  background: var(--bg-secondary);
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  font-size: 0.73rem;
+  font-weight: 500;
+  line-height: 1.45;
   color: var(--text-secondary);
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  text-align: left;
+  box-shadow: var(--shadow);
+  z-index: 45;
+  pointer-events: none;
   transition:
-    background 0.15s ease,
-    border-color 0.15s ease;
-  flex-shrink: 0;
+    opacity 0.15s ease,
+    visibility 0.15s ease;
 }
 
-.stepper-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: var(--accent);
-  color: var(--text-primary);
-}
-
-.stepper-btn:active {
-  background: rgba(255, 255, 255, 0.18);
-}
-
-.drill-row .toggle-group {
-  display: flex;
-  gap: 4px;
-}
-
-.drill-row .toggle-btn {
-  padding: 6px 12px;
-  font-size: 0.85rem;
+.drill-mode-wrap:hover .drill-mode-tip,
+.drill-mode-wrap:focus-within .drill-mode-tip {
+  visibility: visible;
+  opacity: 1;
 }
 
 /* Timer */
@@ -942,22 +1000,6 @@
   align-self: center;
 }
 
-/* When the plan line opens one phrase, the config shows only that phrase's
-   settings. "All settings" clears it and the whole form comes back. */
-.drill-config-body[data-showing="tempo"] .drill-row:not([data-field="tempo"]),
-.drill-config-body[data-showing="rate"] .drill-row:not([data-field="rate"]),
-.drill-config-body[data-showing="shape"] .drill-row:not([data-field="shape"]) {
-  display: none;
-}
-
-.drill-config-summary {
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
 /* =================== The drill stage, anchored ===================
    Same treatment as the metronome (UI_DECISIONS U1.3): a fixed offset from
    the rail rather than a centred column adrift in a wide window. The climb
@@ -974,61 +1016,16 @@
 
 .drill-view {
   /* The 80px was clearance for a play button that floated over this screen.
-     The transport is docked now and takes its own space. */
-  padding: 18px 4px 16px;
+     The transport is docked now and takes its own space. The top came down
+     with it: 18px of it was breathing room above a settings strip that is no
+     longer there, and the plan line reads as the top of the stage. */
+  padding: 6px 4px 16px;
   width: 100%;
 }
 
 .drill-plan {
   align-items: baseline;
   justify-content: flex-start;
-}
-
-/* ALL SETTINGS is the back door, not the front one. Collapsed it is a line of
-   small caps and a chevron with no panel around it — the plan line above is
-   where the drill is actually edited. The panel appears only once it is open,
-   because then it really is holding something. */
-.drill-config {
-  align-self: flex-start;
-  max-width: 560px;
-  width: auto;
-  min-width: 0;
-  background: transparent;
-  border-color: transparent;
-  border-radius: var(--radius-sm);
-  margin-bottom: 4px;
-  transition:
-    background 0.25s ease,
-    border-color 0.25s ease;
-}
-
-.drill-config:not(.collapsed) {
-  width: 100%;
-  background: var(--bg-panel);
-  border-color: var(--border);
-  border-radius: 10px;
-}
-
-.drill-config-toggle {
-  justify-content: flex-start;
-  gap: 7px;
-  width: auto;
-  padding: 6px 8px;
-  border-radius: var(--radius-sm);
-}
-
-.drill-config:not(.collapsed) .drill-config-toggle {
-  width: 100%;
-  justify-content: space-between;
-  padding: 10px 12px;
-}
-
-.drill-config-toggle:hover {
-  background: var(--surface-hover);
-}
-
-.drill-config-chevron {
-  opacity: 0.6;
 }
 
 /* The current tempo is the drill's readout, and it was smaller than the
@@ -1046,14 +1043,6 @@
 .drill-climb-head {
   justify-content: flex-start;
   gap: 20px;
-}
-
-/* The mode description reads as part of the plan above it, so it starts where
-   the plan starts rather than centring itself in whatever room is left. */
-.drill-idle-hint {
-  text-align: left;
-  align-self: flex-start;
-  max-width: 640px;
 }
 
 /* =================== The drill in a narrow window ==========================

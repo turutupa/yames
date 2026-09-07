@@ -42,8 +42,9 @@
       "aggressiveness": "速度變化的快慢。保守會等更久，激進推進更快。",
       "countdown": "開始練習前的 4 拍倒數計時，幫助你鎖定節奏。"
     },
-    "allSettings": "全部設定",
     "planLabel": "計畫",
-    "listensBadge": "會聆聽"
+    "listensBadge": "會聆聽",
+    "runOptions": "選項",
+    "barsUnit": "小節"
   }
 }

@@ -1,11 +1,30 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import type { AppState, BeatEvent } from "../../types";
 import { configureSpeedRamp, startSpeedRampFrom, onRampStep } from "../../ipc";
 import { SOUND_TYPES } from "../../constants/metronome";
-import { DrillPlanLine, type PlanField } from "./DrillPlanLine";
+import { DrillPlanLine, type PlanField, type PlanAnchors } from "./DrillPlanLine";
+import {
+  DrillConfigPopover,
+  DrillPopoverRow,
+  DrillNumberField,
+} from "./DrillConfigPopover";
 import { DrillClimb } from "./DrillClimb";
 import "../../styles/drill-view.css";
+
+/** The three ramp shapes, each with the sentence its tooltip shows. */
+const MODES = [
+  { id: "linear", labelKey: "drill.modeLinear" },
+  { id: "zigzag", labelKey: "drill.modeZigzag" },
+  { id: "adaptive", labelKey: "drill.modeAdaptive" },
+] as const;
+
+/** How hard Adaptive pushes. Only reachable while Adaptive is selected. */
+const AGGRESSIVENESS = [
+  { id: "conservative", labelKey: "drill.aggrGentle" },
+  { id: "moderate", labelKey: "drill.aggrModerate" },
+  { id: "aggressive", labelKey: "drill.aggrPush" },
+] as const;
 
 interface DrillViewProps {
   state: AppState;
@@ -18,12 +37,11 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
   const { t } = useTranslation();
   const ramp = state.speedRamp;
   const [highlightMode, setHighlightMode] = useState<"beats" | "repeats" | "startBpm" | "targetBpm" | null>(null);
-  // Collapsed by default: the plan line says what the drill is, and the
-  // climb below is the thing worth looking at. The form opens when asked
-  // for — a phrase in the plan line, or the chevron (UI_DECISIONS U3.1).
-  const [configCollapsed, setConfigCollapsed] = useState(true);
+  // Which settings window is open, and the token it hangs from. Nothing is
+  // open at rest: the plan line says what the drill is and the climb below is
+  // the thing worth looking at (UI_DECISIONS U3.1).
   const [openField, setOpenField] = useState<PlanField>(null);
-  const [userToggledConfig, setUserToggledConfig] = useState(false);
+  const anchors: PlanAnchors = useRef({});
   const [startBpm, setStartBpm] = useState(ramp.startBpm);
   const [targetBpm, setTargetBpm] = useState(ramp.targetBpm);
   const [increment, setIncrement] = useState(ramp.increment);
@@ -63,18 +81,11 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
     }
   }, [ramp.startBpm, ramp.targetBpm, ramp.increment, ramp.decrement, ramp.barsPerStep, ramp.beatsPerBar, ramp.mode, ramp.cyclic, ramp.warmupBeats, ramp.active]);
 
-  // Collapse the config when a run starts. It does NOT re-open on stop: the
-  // form used to spring back and push the step grid off the bottom of the
-  // window, which is where the grid spent most of its life.
+  // A settings window does not survive the start of a run. It is a floating
+  // card over the climb, and the climb is the thing you watch while playing.
   useEffect(() => {
-    if (!autoCollapse || userToggledConfig) return;
-    if (ramp.active) setConfigCollapsed(true);
-  }, [ramp.active, userToggledConfig, autoCollapse]);
-
-  // Reset manual override when playback stops so next play auto-collapses again
-  useEffect(() => {
-    if (!ramp.active) setUserToggledConfig(false);
-  }, [ramp.active]);
+    if (autoCollapse && ramp.active) setOpenField(null);
+  }, [ramp.active, autoCollapse]);
 
   // Listen for ramp-step events (for future use / logging)
   useEffect(() => {
@@ -95,6 +106,22 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
       warmupBeats: overrides.warmupBeats ?? (countIn ? 4 : 0),
       aggressiveness: aggressiveness,
     });
+  };
+
+  const closeField = useCallback(() => setOpenField(null), []);
+
+  /* Start and target are coupled: the engine ramps upward, so a start above
+     the target is a drill with no steps in it. Pushing the target along is
+     the least surprising repair — the alternative, refusing the start value,
+     leaves the box showing a number that is not what was typed. */
+  const commitStartBpm = (v: number) => {
+    setStartBpm(v);
+    if (v > targetBpm) {
+      setTargetBpm(v);
+      saveWith({ startBpm: v, targetBpm: v });
+    } else {
+      saveWith({ startBpm: v });
+    }
   };
 
   // Spacebar start/stop is handled by MainWindow's unified dispatcher via "play" hotkey
@@ -261,18 +288,26 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
   // 5rem "80" over four dead circles above the sentence that is supposed to be
   // this screen's subject, and every number in it was already on the page.
   const showLive = ramp.active || ramp.completed;
+  // What the plan adds up to. It heads the stage, and it is also the line
+  // under each settings window's divider — change a value and the size of the
+  // exercise answers where you are already looking.
+  const planSummary = t("drill.runStats", {
+    steps: steps.length,
+    bars: totalBars,
+    time: ramp.active
+      ? t("drill.timeRemaining", { time: formatTime(liveRemaining) })
+      : t("drill.aboutTime", { time: formatTime(totalTimeSeconds) }),
+  });
 
   return (
     <div className="drill-view" data-highlight={!ramp.active ? highlightMode || undefined : undefined} data-animations={animations ? undefined : "off"} data-active={ramp.active ? "" : undefined}>
       {/* The plan, and the numbers it adds up to, on one line: the sentence at
-          the left, the mode and the run's size at the right, as drawn. The
-          modes moved off the label row because they belong to the plan rather
-          than to the word "THE PLAN".
+          the left, the mode and the run's size at the right, as drawn.
 
           `data-hint` anchors the `drill-first-open` hint (O7) — the card is
           rendered by MainWindow, next to the controls the copy talks about. */}
       <div className="drill-stage-head view-stagger-item" style={{ animationDelay: '0ms' }}>
-        <div className="drill-stage-plan">
+        <div className="drill-stage-plan" data-hint="drill-first-open">
           <span className="stage-label">{t("drill.planLabel")}</span>
           <DrillPlanLine
             startBpm={startBpm}
@@ -284,215 +319,194 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
             mode={mode}
             soundName={soundName}
             openField={openField}
-            onOpenField={(field) => {
-              setOpenField(field);
-              setUserToggledConfig(true);
-              setConfigCollapsed(field === null);
-            }}
+            onOpenField={setOpenField}
+            anchors={anchors}
           />
+
+          {/* The settings, where they were asked for. One window per phrase,
+              holding only the fields that phrase covers — the eight-row "All
+              settings" disclosure this replaced is gone, along with the
+              dimming that hid the rows you had not clicked. */}
+          {openField === "tempo" && (
+            <DrillConfigPopover
+              anchor={anchors.current.tempo ?? null}
+              onClose={closeField}
+              label={t("drill.startBpm")}
+              note={planSummary}
+            >
+              <DrillPopoverRow label={t("drill.startBpm")} tip={t("drill.desc.startBpm")} onHover={(on) => setHighlightMode(on ? "startBpm" : null)}>
+                <DrillNumberField
+                  value={startBpm}
+                  min={20}
+                  max={300}
+                  step={5}
+                  label={t("drill.startBpm")}
+                  onCommit={commitStartBpm}
+                />
+              </DrillPopoverRow>
+              {mode !== "adaptive" && (
+                <DrillPopoverRow label={t("drill.targetBpm")} tip={t("drill.desc.targetBpm")} onHover={(on) => setHighlightMode(on ? "targetBpm" : null)}>
+                  <DrillNumberField
+                    value={targetBpm}
+                    min={startBpm}
+                    max={300}
+                    step={5}
+                    label={t("drill.targetBpm")}
+                    onCommit={(v) => { setTargetBpm(v); saveWith({ targetBpm: v }); }}
+                  />
+                </DrillPopoverRow>
+              )}
+            </DrillConfigPopover>
+          )}
+
+          {openField === "rate" && (
+            <DrillConfigPopover
+              anchor={anchors.current.rate ?? null}
+              onClose={closeField}
+              label={t("drill.speedUp")}
+              note={planSummary}
+            >
+              <DrillPopoverRow label={t("drill.speedUp")} tip={t("drill.desc.increment")}>
+                <DrillNumberField
+                  value={increment}
+                  min={1}
+                  max={50}
+                  label={t("drill.speedUp")}
+                  onCommit={(v) => { setIncrement(v); saveWith({ increment: v }); }}
+                />
+              </DrillPopoverRow>
+              {mode === "zigzag" && (
+                <DrillPopoverRow label={t("drill.slowDown")} tip={t("drill.desc.decrement")}>
+                  <DrillNumberField
+                    value={decrement}
+                    min={1}
+                    max={50}
+                    label={t("drill.slowDown")}
+                    onCommit={(v) => { setDecrement(v); saveWith({ decrement: v }); }}
+                  />
+                </DrillPopoverRow>
+              )}
+            </DrillConfigPopover>
+          )}
+
+          {openField === "shape" && (
+            <DrillConfigPopover
+              anchor={anchors.current.shape ?? null}
+              onClose={closeField}
+              label={t("drill.repeats")}
+              note={planSummary}
+            >
+              <DrillPopoverRow label={t("drill.repeats")} tip={t("drill.desc.repeat")} onHover={(on) => setHighlightMode(on ? "repeats" : null)}>
+                <DrillNumberField
+                  value={barsPerStep}
+                  min={1}
+                  max={32}
+                  unit={t("drill.barsUnit")}
+                  label={t("drill.repeats")}
+                  onCommit={(v) => { setBarsPerStep(v); saveWith({ barsPerStep: v }); }}
+                />
+              </DrillPopoverRow>
+              <DrillPopoverRow label={t("drill.beats")} tip={t("drill.desc.beats")} onHover={(on) => setHighlightMode(on ? "beats" : null)}>
+                <DrillNumberField
+                  value={beatsPerBar}
+                  min={1}
+                  max={12}
+                  label={t("drill.beats")}
+                  onCommit={(v) => { setBeatsPerBar(v); saveWith({ beatsPerBar: v }); }}
+                />
+              </DrillPopoverRow>
+            </DrillConfigPopover>
+          )}
+
+          {openField === "more" && (
+            <DrillConfigPopover
+              anchor={anchors.current.more ?? null}
+              onClose={closeField}
+              label={t("drill.runOptions")}
+            >
+              <DrillPopoverRow label={t("drill.countdown")} tip={t("drill.desc.countdown")}>
+                <button
+                  className={`toggle-btn ${countIn ? "active" : ""}`}
+                  aria-pressed={countIn}
+                  onClick={() => { const next = !countIn; setCountIn(next); saveWith({ warmupBeats: next ? 4 : 0 }); }}
+                >
+                  {countIn ? t("common.on") : t("common.off")}
+                </button>
+              </DrillPopoverRow>
+              {mode !== "adaptive" && (
+                <DrillPopoverRow label={t("drill.cyclic")} tip={t("drill.desc.cyclic")}>
+                  <button
+                    className={`toggle-btn ${cyclic ? "active" : ""}`}
+                    aria-pressed={cyclic}
+                    onClick={() => { const next = !cyclic; setCyclic(next); saveWith({ cyclic: next }); }}
+                  >
+                    {cyclic ? t("common.on") : t("common.off")}
+                  </button>
+                </DrillPopoverRow>
+              )}
+              {mode === "adaptive" && (
+                <DrillPopoverRow label={t("drill.aggr")} tip={t("drill.desc.aggressiveness")}>
+                  <div className="toggle-group">
+                    {AGGRESSIVENESS.map((a) => (
+                      <button
+                        key={a.id}
+                        className={`toggle-btn ${aggressiveness === a.id ? "active" : ""}`}
+                        aria-pressed={aggressiveness === a.id}
+                        onClick={() => { setAggressiveness(a.id); saveWith({ mode: "adaptive" }); }}
+                      >
+                        {t(a.labelKey)}
+                      </button>
+                    ))}
+                  </div>
+                </DrillPopoverRow>
+              )}
+            </DrillConfigPopover>
+          )}
         </div>
 
         <div className="drill-stage-meta">
-          <div className="drill-modes">
-            <button
-              className={`toggle-btn ${mode === "linear" ? "active" : ""}`}
-              onClick={() => { setMode("linear"); saveWith({ mode: "linear" }); }}
-            >
-              {t("drill.modeLinear")}
-            </button>
-            <button
-              className={`toggle-btn ${mode === "zigzag" ? "active" : ""}`}
-              onClick={() => { setMode("zigzag"); saveWith({ mode: "zigzag" }); }}
-            >
-              {t("drill.modeZigzag")}
-            </button>
-            {/* Adaptive is the one mode whose behaviour depends on the audio
-                input, so it says so on its face (UI_DECISIONS U3.4). */}
-            <button
-              className={`toggle-btn ${mode === "adaptive" ? "active" : ""}`}
-              onClick={() => { setMode("adaptive"); setTargetBpm(300); saveWith({ mode: "adaptive", targetBpm: 300 }); }}
-            >
-              {t("drill.modeAdaptive")}
-              <span className="drill-mode-badge">{t("drill.listensBadge")}</span>
-            </button>
+          {/* What each mode does is on the button that does it. It used to be
+              a line of prose under the plan, on screen the whole time the ramp
+              was stopped, explaining a choice that had already been made. */}
+          <div className="drill-modes" role="group" aria-label={t("drill.mode")}>
+            {MODES.map((m) => (
+              <span key={m.id} className="drill-mode-wrap">
+                <button
+                  className={`toggle-btn ${mode === m.id ? "active" : ""}`}
+                  aria-pressed={mode === m.id}
+                  aria-describedby={`drill-mode-tip-${m.id}`}
+                  onClick={() => {
+                    setMode(m.id);
+                    // Adaptive has no target of its own — it climbs until the
+                    // playing falls apart — so the ceiling goes to the top.
+                    if (m.id === "adaptive") {
+                      setTargetBpm(300);
+                      saveWith({ mode: m.id, targetBpm: 300 });
+                    } else {
+                      saveWith({ mode: m.id });
+                    }
+                  }}
+                >
+                  {t(m.labelKey)}
+                  {m.id === "adaptive" && (
+                    <span className="drill-mode-badge">{t("drill.listensBadge")}</span>
+                  )}
+                </button>
+                <span
+                  className="drill-mode-tip"
+                  id={`drill-mode-tip-${m.id}`}
+                  role="tooltip"
+                  data-testid={`drill-mode-tip-${m.id}`}
+                >
+                  {t(`emptyStates.drill.${m.id}`)}
+                </span>
+              </span>
+            ))}
           </div>
 
-          <div className="drill-run-stats">
-            {t("drill.runStats", {
-              steps: steps.length,
-              bars: totalBars,
-              time: ramp.active
-                ? t("drill.timeRemaining", { time: formatTime(liveRemaining) })
-                : t("drill.aboutTime", { time: formatTime(totalTimeSeconds) }),
-            })}
-          </div>
+          <div className="drill-run-stats">{planSummary}</div>
         </div>
       </div>
-
-      <div data-hint="drill-first-open" className={`drill-config view-stagger-item ${configCollapsed ? "collapsed" : ""}`} style={{ animationDelay: '30ms' }}>
-        <button
-          className="drill-config-toggle"
-          onClick={() => {
-            setUserToggledConfig(true);
-            setOpenField(null);
-            setConfigCollapsed(!configCollapsed);
-          }}
-        >
-          <span className="drill-config-summary">{t("drill.allSettings")}</span>
-          <svg className={`drill-config-chevron ${configCollapsed ? "" : "open"}`} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </button>
-        <div className="drill-config-body" data-showing={openField ?? undefined}>
-          {mode === "adaptive" && (
-          <div className="drill-row view-stagger-item" data-field="more" style={{ animationDelay: '55ms' }}>
-            <label className="drill-label-tip">{t("drill.aggr")}<span className="drill-tip">{t("drill.desc.aggressiveness")}</span></label>
-            <div className="toggle-group">
-              <button className={`toggle-btn ${aggressiveness === "conservative" ? "active" : ""}`} onClick={() => { setAggressiveness("conservative"); saveWith({ mode: "adaptive" }); }}>
-                {t("drill.aggrGentle")}
-              </button>
-              <button className={`toggle-btn ${aggressiveness === "moderate" ? "active" : ""}`} onClick={() => { setAggressiveness("moderate"); saveWith({ mode: "adaptive" }); }}>
-                {t("drill.aggrModerate")}
-              </button>
-              <button className={`toggle-btn ${aggressiveness === "aggressive" ? "active" : ""}`} onClick={() => { setAggressiveness("aggressive"); saveWith({ mode: "adaptive" }); }}>
-                {t("drill.aggrPush")}
-              </button>
-            </div>
-          </div>
-          )}
-          <div className="drill-row view-stagger-item" data-field="tempo" style={{ animationDelay: '70ms' }} onMouseEnter={() => setHighlightMode("startBpm")} onMouseLeave={() => setHighlightMode(null)}>
-            <label className="drill-label-tip">{t("drill.startBpm")}<span className="drill-tip">{t("drill.desc.startBpm")}</span></label>
-            <div className="drill-stepper">
-              <button className="stepper-btn" onClick={() => { const v = Math.max(20, startBpm - 5); setStartBpm(v); saveWith({ startBpm: v }); }}>−</button>
-              <input
-                type="number"
-                min={20}
-                max={300}
-                value={startBpm}
-                onChange={(e) => setStartBpm(Math.max(20, Math.min(300, +e.target.value)))}
-                onBlur={() => { const clamped = Math.max(20, Math.min(300, startBpm)); if (clamped > targetBpm) { setTargetBpm(clamped); saveWith({ startBpm: clamped, targetBpm: clamped }); } else { saveWith({ startBpm: clamped }); } }}
-              />
-              <button className="stepper-btn" onClick={() => { const v = Math.min(300, startBpm + 5); setStartBpm(v); if (v > targetBpm) { setTargetBpm(v); saveWith({ startBpm: v, targetBpm: v }); } else { saveWith({ startBpm: v }); } }}>+</button>
-            </div>
-          </div>
-          {mode !== "adaptive" && (
-          <div className="drill-row view-stagger-item" data-field="tempo" style={{ animationDelay: '100ms' }} onMouseEnter={() => setHighlightMode("targetBpm")} onMouseLeave={() => setHighlightMode(null)}>
-            <label className="drill-label-tip">{t("drill.targetBpm")}<span className="drill-tip">{t("drill.desc.targetBpm")}</span></label>
-            <div className="drill-stepper">
-              <button className="stepper-btn" onClick={() => { const v = Math.max(startBpm, targetBpm - 5); setTargetBpm(v); saveWith({ targetBpm: v }); }}>−</button>
-              <input
-                type="number"
-                min={startBpm}
-                max={300}
-                value={targetBpm}
-                onChange={(e) => setTargetBpm(Math.max(startBpm, Math.min(300, +e.target.value)))}
-                onBlur={() => { const clamped = Math.max(startBpm, Math.min(300, targetBpm)); setTargetBpm(clamped); saveWith({ targetBpm: clamped }); }}
-              />
-              <button className="stepper-btn" onClick={() => { const v = Math.min(300, targetBpm + 5); setTargetBpm(v); saveWith({ targetBpm: v }); }}>+</button>
-            </div>
-          </div>
-          )}
-          {mode !== "adaptive" && (
-          <div className="drill-row view-stagger-item" data-field="rate" style={{ animationDelay: '130ms' }}>
-            <label className="drill-label-tip">{t("drill.speedUp")}<span className="drill-tip">{t("drill.desc.increment")}</span></label>
-            <div className="drill-stepper">
-              <button className="stepper-btn" onClick={() => { const v = Math.max(1, increment - 1); setIncrement(v); saveWith({ increment: v }); }}>−</button>
-              <input
-                type="number"
-                min={1}
-                max={50}
-                value={increment}
-                onChange={(e) => setIncrement(Math.max(1, Math.min(50, +e.target.value)))}
-                onBlur={() => saveWith({ increment })}
-              />
-              <button className="stepper-btn" onClick={() => { const v = Math.min(50, increment + 1); setIncrement(v); saveWith({ increment: v }); }}>+</button>
-            </div>
-          </div>
-          )}
-          {mode === "zigzag" && (
-            <div className="drill-row view-stagger-item" data-field="rate" style={{ animationDelay: '160ms' }}>
-              <label className="drill-label-tip">{t("drill.slowDown")}<span className="drill-tip">{t("drill.desc.decrement")}</span></label>
-              <div className="drill-stepper">
-                <button className="stepper-btn" onClick={() => { const v = Math.max(1, decrement - 1); setDecrement(v); saveWith({ decrement: v }); }}>−</button>
-                <input
-                  type="number"
-                  min={1}
-                  max={50}
-                  value={decrement}
-                  onChange={(e) => setDecrement(Math.max(1, Math.min(50, +e.target.value)))}
-                  onBlur={() => saveWith({ decrement })}
-                />
-                <button className="stepper-btn" onClick={() => { const v = Math.min(50, decrement + 1); setDecrement(v); saveWith({ decrement: v }); }}>+</button>
-              </div>
-            </div>
-          )}
-          <div className="drill-row view-stagger-item" data-field="shape" style={{ animationDelay: '190ms' }} onMouseEnter={() => setHighlightMode("beats")} onMouseLeave={() => setHighlightMode(null)}>
-            <label className="drill-label-tip">{t("drill.beats")}<span className="drill-tip">{t("drill.desc.beats")}</span></label>
-            <div className="drill-stepper">
-              <button className="stepper-btn" onClick={() => { const v = Math.max(1, beatsPerBar - 1); setBeatsPerBar(v); saveWith({ beatsPerBar: v }); }}>−</button>
-              <input
-                type="number"
-                min={1}
-                max={12}
-                value={beatsPerBar}
-                onChange={(e) => setBeatsPerBar(Math.max(1, Math.min(12, +e.target.value)))}
-                onBlur={() => saveWith({ beatsPerBar })}
-              />
-              <button className="stepper-btn" onClick={() => { const v = Math.min(12, beatsPerBar + 1); setBeatsPerBar(v); saveWith({ beatsPerBar: v }); }}>+</button>
-            </div>
-          </div>
-          <div className="drill-row view-stagger-item" data-field="shape" style={{ animationDelay: '220ms' }} onMouseEnter={() => setHighlightMode("repeats")} onMouseLeave={() => setHighlightMode(null)}>
-            <label className="drill-label-tip">{t("drill.repeats")}<span className="drill-tip">{t("drill.desc.repeat")}</span></label>
-            <div className="drill-stepper">
-              <button className="stepper-btn" onClick={() => { const v = Math.max(1, barsPerStep - 1); setBarsPerStep(v); saveWith({ barsPerStep: v }); }}>−</button>
-              <input
-                type="number"
-                min={1}
-                max={32}
-                value={barsPerStep}
-                onChange={(e) => setBarsPerStep(Math.max(1, Math.min(32, +e.target.value)))}
-                onBlur={() => saveWith({ barsPerStep })}
-              />
-              <button className="stepper-btn" onClick={() => { const v = Math.min(32, barsPerStep + 1); setBarsPerStep(v); saveWith({ barsPerStep: v }); }}>+</button>
-            </div>
-          </div>
-          <div className="drill-row view-stagger-item" data-field="more" style={{ animationDelay: '250ms' }}>
-            <label className="drill-label-tip">{t("drill.countdown")}<span className="drill-tip">{t("drill.desc.countdown")}</span></label>
-            <button
-              className={`toggle-btn ${countIn ? "active" : ""}`}
-              onClick={() => { const next = !countIn; setCountIn(next); saveWith({ warmupBeats: next ? 4 : 0 }); }}
-            >
-              {countIn ? t("common.on") : t("common.off")}
-            </button>
-          </div>
-          {mode !== "adaptive" && (
-          <div className="drill-row view-stagger-item" data-field="more" style={{ animationDelay: '280ms' }}>
-            <label className="drill-label-tip">{t("drill.cyclic")}<span className="drill-tip">{t("drill.desc.cyclic")}</span></label>
-            <button
-              className={`toggle-btn ${cyclic ? "active" : ""}`}
-              onClick={() => { const next = !cyclic; setCyclic(next); saveWith({ cyclic: next }); }}
-            >
-              {cyclic ? t("common.on") : t("common.off")}
-            </button>
-          </div>
-          )}
-
-        </div>
-      </div>
-
-      {/* Idle empty state (ONBOARDING_PLAN §6): the grid below always has
-          rows, so the screen never looks empty — but until the drill runs,
-          nothing on it says what the selected mode will do. One line, only
-          while idle, so it disappears the moment the ramp starts. */}
-      {!ramp.active && (
-        <div
-          className="drill-idle-hint view-stagger-item"
-          style={{ animationDelay: '300ms' }}
-          data-testid="drill-idle-hint"
-        >
-          {t(`emptyStates.drill.${mode === "zigzag" ? "zigzag" : mode === "adaptive" ? "adaptive" : "linear"}`)}
-        </div>
-      )}
 
       {/* The live readout, next to the picture it is narrating. Everything
           the old header block carried is here — tempo, the count-in, the

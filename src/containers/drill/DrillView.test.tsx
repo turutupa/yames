@@ -61,8 +61,10 @@ describe("DrillView", () => {
       <DrillView state={drillState} currentBeat={null} animations={false} />,
     );
     expect(container.querySelectorAll(".drill-grid-cell")).toHaveLength(3 * 2);
-    const repeats = screen.getByText("Repeats").parentElement!;
-    fireEvent.click(repeats.querySelectorAll(".stepper-btn")[1]);
+    // The settings live in a window under the phrase they belong to now, so
+    // the bar count has to be opened before it can be changed.
+    fireEvent.click(screen.getByText("every 2 bars"));
+    fireEvent.click(screen.getByLabelText("Repeats +1"));
     await waitFor(() =>
       expect(container.querySelectorAll(".drill-grid-cell")).toHaveLength(
         3 * 3,
@@ -190,10 +192,11 @@ describe("DrillView", () => {
     // reads changed. "Cyclic" was engineering vocabulary, and "Repeat" would
     // have been wrong — the ramp turns round and descends rather than starting
     // again, which is what the chain's repeat does.
+    fireEvent.click(screen.getByText("options"));
     const cyclicLabel = screen.getByText("Up and down");
-    const toggleBtn = cyclicLabel.parentElement?.querySelector(
-      ".toggle-btn",
-    ) as HTMLElement;
+    const toggleBtn = cyclicLabel
+      .closest(".drill-popover-row")
+      ?.querySelector(".toggle-btn") as HTMLElement;
     expect(toggleBtn).not.toBeNull();
     fireEvent.click(toggleBtn);
     await waitFor(() => {

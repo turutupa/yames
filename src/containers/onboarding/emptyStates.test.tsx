@@ -83,24 +83,45 @@ describe("drill idle state", () => {
     speedRamp: { ...DEFAULT_TEST_STATE.speedRamp!, mode, active },
   });
 
-  it("explains the selected mode while the ramp is stopped", () => {
-    const { rerender } = render(
-      <DrillView state={drillState("linear")} currentBeat={0} />,
+  it("explains every mode on the button that selects it", () => {
+    // One line of prose used to sit under the plan the whole time the ramp
+    // was stopped, explaining the mode already chosen. All three explanations
+    // are hovers on the three buttons now — which means the two you did NOT
+    // choose are readable before you choose them, and none of them is on
+    // screen while you play.
+    render(<DrillView state={drillState("linear")} currentBeat={0} />);
+    expect(screen.getByTestId("drill-mode-tip-linear")).toMatchSnapshot();
+    expect(screen.getByTestId("drill-mode-tip-linear")).toHaveTextContent(
+      /^Linear:/,
     );
-    expect(screen.getByTestId("drill-idle-hint")).toMatchSnapshot();
-    expect(screen.getByTestId("drill-idle-hint")).toHaveTextContent(/^Linear:/);
-
-    rerender(<DrillView state={drillState("zigzag")} currentBeat={0} />);
-    expect(screen.getByTestId("drill-idle-hint")).toHaveTextContent(/^Zigzag:/);
-
-    rerender(<DrillView state={drillState("adaptive")} currentBeat={0} />);
-    expect(screen.getByTestId("drill-idle-hint")).toHaveTextContent(
+    expect(screen.getByTestId("drill-mode-tip-zigzag")).toHaveTextContent(
+      /^Zigzag:/,
+    );
+    expect(screen.getByTestId("drill-mode-tip-adaptive")).toHaveTextContent(
       /^Adaptive:/,
     );
   });
 
-  it("gets out of the way once the drill is running", () => {
-    render(<DrillView state={drillState("linear", true)} currentBeat={0} />);
-    expect(screen.queryByTestId("drill-idle-hint")).toBeNull();
+  it("names each tip as its button's description, for assistive tech", () => {
+    // The tip is a hover, so a keyboard or screen-reader user reaches it only
+    // through `aria-describedby`. Without the link it is decoration.
+    render(<DrillView state={drillState("zigzag")} currentBeat={0} />);
+    const zigzag = screen.getByRole("button", { name: "Zigzag" });
+    expect(zigzag.getAttribute("aria-describedby")).toBe("drill-mode-tip-zigzag");
+    expect(document.getElementById("drill-mode-tip-zigzag")).toHaveTextContent(
+      /^Zigzag:/,
+    );
+  });
+
+  it("keeps the explanations off the stage while the drill is running", () => {
+    // Still rendered — they belong to the buttons, which are still there —
+    // but nothing on the stage is showing prose at a player mid-run.
+    const { container } = render(
+      <DrillView state={drillState("linear", true)} currentBeat={0} />,
+    );
+    expect(container.querySelector(".drill-idle-hint")).toBeNull();
+    for (const tip of container.querySelectorAll(".drill-mode-tip")) {
+      expect(tip.parentElement?.className).toContain("drill-mode-wrap");
+    }
   });
 });

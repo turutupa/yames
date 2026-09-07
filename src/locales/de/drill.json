@@ -42,8 +42,9 @@
       "aggressiveness": "Wie schnell sich das Tempo ändert. Sanft wartet länger, Kräftig drückt schneller.",
       "countdown": "4-Beat-Countdown vor dem Start der Übung. Hilft dir, dich auf das Tempo einzustellen."
     },
-    "allSettings": "Alle Einstellungen",
     "planLabel": "Der Plan",
-    "listensBadge": "Hört zu"
+    "listensBadge": "Hört zu",
+    "runOptions": "Optionen",
+    "barsUnit": "Takte"
   }
 }

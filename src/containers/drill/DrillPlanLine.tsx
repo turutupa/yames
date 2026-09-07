@@ -1,7 +1,13 @@
+import type { MutableRefObject } from "react";
 import { useTranslation } from "react-i18next";
 
 /** Which group of settings the plan line is asking the config to show. */
-export type PlanField = "tempo" | "rate" | "shape" | null;
+export type PlanField = "tempo" | "rate" | "shape" | "more" | null;
+
+/** Every token's element, so the settings window can hang off the right one. */
+export type PlanAnchors = MutableRefObject<
+  Partial<Record<Exclude<PlanField, null>, HTMLButtonElement | null>>
+>;
 
 interface DrillPlanLineProps {
   startBpm: number;
@@ -15,26 +21,26 @@ interface DrillPlanLineProps {
   soundName: string;
   openField: PlanField;
   onOpenField: (field: PlanField) => void;
+  anchors: PlanAnchors;
 }
 
 /**
  * The drill as a sentence you edit.
  *
- * The eight stepper rows are still there — nothing is hidden — but they stop
- * being the screen. A drill is "80 to 120, five at a time, every twelve bars",
- * and reading that took eight rows and a scan; now it takes one line
- * (UI_DECISIONS U3.1). Clicking a phrase opens just the settings behind it,
- * so the form arrives contextually instead of standing between the player and
- * the exercise.
+ * A drill is "80 to 120, five at a time, every twelve bars", and reading that
+ * took eight stepper rows and a scan; now it takes one line (UI_DECISIONS
+ * U3.1). Clicking a phrase opens a settings window under it holding just the
+ * fields behind that phrase — so the form arrives where you asked for it and
+ * nowhere else. The rows this replaced lived in an "All settings" disclosure
+ * that stood between the player and the exercise; it is gone, and every token
+ * here is now the only way to reach what it covers.
  *
  * Two lines, as drawn: the loud one is the shape of the climb, the quiet one
  * underneath is what a single bar will sound like. Splitting them is what lets
- * the first line stay short enough to read at display size — it was carrying
- * the beat count as well, which belongs with the other per-bar facts.
+ * the first line stay short enough to read at display size.
  *
- * The values live in DrillView, which owns the clamping — start may not pass
- * target, and the two are coupled. This component only says what is set and
- * which part the user reached for.
+ * The values live in DrillView, which owns the clamping. This component only
+ * says what is set, and which part the user reached for.
  */
 export function DrillPlanLine({
   startBpm,
@@ -47,16 +53,22 @@ export function DrillPlanLine({
   soundName,
   openField,
   onOpenField,
+  anchors,
 }: DrillPlanLineProps) {
   const { t } = useTranslation();
   const toggle = (field: Exclude<PlanField, null>) =>
     onOpenField(openField === field ? null : field);
+  const anchor =
+    (field: Exclude<PlanField, null>) => (el: HTMLButtonElement | null) => {
+      anchors.current[field] = el;
+    };
 
   return (
     <div className="drill-plan-block">
       <div className="drill-plan">
         <button
           type="button"
+          ref={anchor("tempo")}
           className={`drill-plan-token ${openField === "tempo" ? "open" : ""}`}
           onClick={() => toggle("tempo")}
           aria-expanded={openField === "tempo"}
@@ -83,6 +95,7 @@ export function DrillPlanLine({
 
         <button
           type="button"
+          ref={anchor("rate")}
           className={`drill-plan-token ${openField === "rate" ? "open" : ""}`}
           onClick={() => toggle("rate")}
           aria-expanded={openField === "rate"}
@@ -98,6 +111,7 @@ export function DrillPlanLine({
 
         <button
           type="button"
+          ref={anchor("shape")}
           className={`drill-plan-token ${openField === "shape" ? "open" : ""}`}
           onClick={() => toggle("shape")}
           aria-expanded={openField === "shape"}
@@ -134,6 +148,23 @@ export function DrillPlanLine({
         <span className="drill-plan-detail-fact">
           {t("drill.soundPhrase", { sound: soundName })}
         </span>
+        <span className="drill-plan-detail-sep" aria-hidden="true">
+          ·
+        </span>
+        {/* The count-in, the round trip, and how hard Adaptive pushes. They
+            have no phrase in the sentence above because they do not change its
+            shape — but they are settings, and every setting opens the same
+            window now, so they get a token of their own rather than the
+            disclosure they used to live in. */}
+        <button
+          type="button"
+          ref={anchor("more")}
+          className={`drill-plan-detail-token ${openField === "more" ? "open" : ""}`}
+          onClick={() => toggle("more")}
+          aria-expanded={openField === "more"}
+        >
+          {t("drill.runOptions")}
+        </button>
       </div>
     </div>
   );

@@ -42,8 +42,9 @@
       "aggressiveness": "Lo rápido que cambia el tempo. Conservador espera más; agresivo empuja más.",
       "countdown": "Cuenta atrás de 4 pulsos antes de que empiece la práctica. Te ayuda a entrar en el tempo."
     },
-    "allSettings": "Todos los ajustes",
     "planLabel": "El plan",
-    "listensBadge": "Escucha"
+    "listensBadge": "Escucha",
+    "runOptions": "opciones",
+    "barsUnit": "compases"
   }
 }

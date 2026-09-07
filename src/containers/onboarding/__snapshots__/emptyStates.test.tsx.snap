@@ -1,13 +1,14 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`drill idle state > explains the selected mode while the ramp is stopped 1`] = `
-<div
-  class="drill-idle-hint view-stagger-item"
-  data-testid="drill-idle-hint"
-  style="animation-delay: 300ms;"
+exports[`drill idle state > explains every mode on the button that selects it 1`] = `
+<span
+  class="drill-mode-tip"
+  data-testid="drill-mode-tip-linear"
+  id="drill-mode-tip-linear"
+  role="tooltip"
 >
   Linear: the tempo climbs from the start BPM to the target, one step at a time.
-</div>
+</span>
 `;
 
 exports[`presets empty state > offers one action and names the panel shortcut 1`] = `

@@ -42,8 +42,9 @@
       "aggressiveness": "템포 변화가 얼마나 빠른지입니다. 보수적은 오래 기다리고, 공격적은 더 빠르게 밀어붙입니다.",
       "countdown": "연습 시작 전 4박 카운트다운입니다. 템포에 몸을 맞추는 데 도움이 됩니다."
     },
-    "allSettings": "모든 설정",
     "planLabel": "계획",
-    "listensBadge": "듣습니다"
+    "listensBadge": "듣습니다",
+    "runOptions": "옵션",
+    "barsUnit": "마디"
   }
 }

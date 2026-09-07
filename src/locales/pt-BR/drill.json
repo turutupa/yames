@@ -42,8 +42,9 @@
       "aggressiveness": "O quão rápido o andamento muda. Suave espera mais; Agressivo acelera mais.",
       "countdown": "Contagem de 4 tempos antes de o treino começar. Ajuda a travar no andamento."
     },
-    "allSettings": "Todos os ajustes",
     "planLabel": "O plano",
-    "listensBadge": "Ouve"
+    "listensBadge": "Ouve",
+    "runOptions": "opções",
+    "barsUnit": "compassos"
   }
 }

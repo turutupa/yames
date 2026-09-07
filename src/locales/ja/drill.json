@@ -42,8 +42,9 @@
       "aggressiveness": "テンポを変える速さ。穏やかなほど変化までに長く待ち、攻めだとぐんぐん進みます。",
       "countdown": "練習開始前の4拍カウントダウン。テンポに乗りやすくなります。"
     },
-    "allSettings": "すべての設定",
     "planLabel": "プラン",
-    "listensBadge": "聴きます"
+    "listensBadge": "聴きます",
+    "runOptions": "オプション",
+    "barsUnit": "小節"
   }
 }

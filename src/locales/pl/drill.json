@@ -42,8 +42,9 @@
       "aggressiveness": "Jak szybko zmienia się tempo. Tryb konserwatywny czeka dłużej, agresywny przyspiesza szybciej.",
       "countdown": "4-uderzeniowe odliczanie przed startem. Pomaga wczuć się w tempo."
     },
-    "allSettings": "Wszystkie ustawienia",
     "planLabel": "Plan",
-    "listensBadge": "Słucha"
+    "listensBadge": "Słucha",
+    "runOptions": "opcje",
+    "barsUnit": "taktów"
   }
 }
