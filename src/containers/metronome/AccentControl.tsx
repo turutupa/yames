@@ -45,7 +45,15 @@ export function AccentControl({ mode }: { mode: Mode }) {
             // No `notifySettingsChange()`: useSession watches the metronome's
             // settings and fires ONE debounced coach boundary for a burst of
             // changes, which is what a player flicking between these makes.
-            onClick={() => void setAccentMode(m.id)}
+            onClick={() => {
+              // Reported rather than swallowed. An `invoke` that rejects — a
+              // command not registered, an older binary behind a hot-reloaded
+              // frontend — is silent when nobody awaits it, and the control
+              // just looks broken. This is the one line that says why.
+              void setAccentMode(m.id).catch((err) => {
+                console.error("[yames] set_accent_mode failed", err);
+              });
+            }}
           >
             {t(m.labelKey)}
           </button>
