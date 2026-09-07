@@ -1532,7 +1532,11 @@ span.meter-grouping-chip {
 /* The marking reads as a unit label next to the number rather than a caption
    under the ruler, where it duplicated the ruler's own highlight. */
 .main-content[data-view="beat"] .tempo-marking {
-  align-self: flex-end;
+  /* Left, under BPM. This was `flex-end`, which in a column flex is the cross
+     axis — it pushed the word to the RIGHT edge of its box. That did nothing
+     while the box was content-sized, and became visible the moment it was
+     pinned to 7rem: "Lento" sat far right of "BPM" above it. */
+  align-self: flex-start;
   padding-bottom: 0.9rem;
   font-size: 0.78rem;
   font-weight: 800;
