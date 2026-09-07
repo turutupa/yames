@@ -46,6 +46,13 @@ interface MetronomeFigureProps {
   currentBeat: BeatEvent | null;
 }
 
+/**
+ * How strongly the rod is drawn against the rest of the figure. Below 1 on
+ * purpose: it is the accent colour, so at equal weight it reads as a solid bar
+ * laid over a delicate wireframe rather than as part of the same object.
+ */
+const ROD_DIM = 0.72;
+
 /** Swing at the slowest and fastest tempo, in radians. */
 const SWING_SLOW = 0.42; // ~24°
 const SWING_FAST = 0.13; // ~7.5°
@@ -305,8 +312,11 @@ export function MetronomeFigure({ bpm, isPlaying, currentBeat }: MetronomeFigure
           ? 0
           : rodAngle(tempo.current, now - phase.current.start, phase.current.dir);
       // The rod is the one part that carries the accent: it is the part that
-      // is doing something.
-      strokeMesh(rod(bobFor(tempo.current)), ROD_AT, 1, angle, scale, ox, oy, accent);
+      // is doing something. Drawn a shade lighter than the case around it —
+      // at full strength the accent reads as a solid bar laid over a delicate
+      // wireframe, and the two stop looking like one object. Pulling it back
+      // lets the case hold its own and puts some depth between them.
+      strokeMesh(rod(bobFor(tempo.current)), ROD_AT, ROD_DIM, angle, scale, ox, oy, accent);
     }
 
     function frame(now: number) {
