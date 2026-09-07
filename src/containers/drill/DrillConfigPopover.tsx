@@ -157,7 +157,19 @@ export function DrillConfigPopover({
           ? { left: pos.left, top: pos.top }
           : // Measured but not yet placed: laid out so `offsetWidth` is real,
             // painted nowhere.
-            { left: 0, top: 0, visibility: "hidden" }
+            //
+            // `opacity: 0` and NOT `visibility: hidden`, which is what this
+            // was and which quietly broke the autofocus below. `focus()` is a
+            // no-op on anything inside `visibility: hidden`, and React flushes
+            // the pending passive effects — including that focus — when the
+            // layout effect's `setPos` schedules its re-render, so the focus
+            // call landed on the still-hidden card and was refused. Opacity
+            // does not block focus, and it does not affect layout either, so
+            // the measurement is unchanged.
+            //
+            // jsdom does not model focusability, so no test that renders this
+            // can catch it. The test below asserts the style directly.
+            { left: 0, top: 0, opacity: 0, pointerEvents: "none" }
       }
     >
       <div className="drill-popover-rows">{children}</div>

@@ -97,6 +97,32 @@ describe("DrillConfigPopover — reaching the field", () => {
     expect(document.activeElement).toBe(input);
   });
 
+  it("never hides the unplaced card with `visibility`, which would block the focus", () => {
+    // The bug this exists for, and it survived a passing focus test.
+    //
+    // The card renders invisible for one frame while it measures its own
+    // width. That was `visibility: hidden` — and `focus()` is a NO-OP on
+    // anything inside `visibility: hidden`. React flushes pending passive
+    // effects when the layout effect's `setPos` schedules its re-render, so
+    // the autofocus fired against the still-hidden card and was silently
+    // refused. Every window opened with the cursor still on the token.
+    //
+    // jsdom does not model focusability at all, so the focus test above
+    // passed throughout. This asserts the mechanism instead: whatever hides
+    // the unplaced card must not be `visibility`.
+    const anchor = document.createElement("button");
+    document.body.appendChild(anchor);
+    const { container } = render(
+      <DrillConfigPopover anchor={anchor} onClose={vi.fn()} label="Tempo">
+        <DrillPopoverRow label="Start BPM">
+          <DrillNumberField value={120} min={20} max={300} label="Start BPM" onCommit={vi.fn()} />
+        </DrillPopoverRow>
+      </DrillConfigPopover>,
+    );
+    const card = container.querySelector(".drill-popover") as HTMLElement;
+    expect(card.style.visibility).not.toBe("hidden");
+  });
+
   it("leaves focus alone in a window with nothing to type into", () => {
     // The subdivision and the click are choice cards. Focusing one would arm
     // Enter to re-press it, which is not what opening a window should do.
