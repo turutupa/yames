@@ -1126,8 +1126,7 @@
 .beat-stepper-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 0 18px 0 4px;
+  gap: 14px;
 }
 
 /* Nothing inside may resize either. Both numbers are tabular and both boxes
@@ -1140,8 +1139,9 @@
 
 .beat-clicks {
   /* Cut for the widest value it can hold, so a bar of 6 and a bar of 16 do not
-     shuffle the badges to its right. */
-  min-width: 6.5rem;
+     shuffle the badges to its right. Just wide enough for "96 clicks/bar" and
+     no wider — the extra was reading as a gap in the middle of the row. */
+  min-width: 5.6rem;
   text-align: left;
 }
 
@@ -1783,15 +1783,27 @@
   position: relative;
 }
 
+/* One gap for the whole row. Every element on it — the label, the chip, the
+   stepper, clicks/bar, the grouping badges — sits the same distance from its
+   neighbour, so the row reads as one series rather than as three clumps. */
 .meter-head {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .meter-chip {
   display: flex;
   align-items: center;
+  /* Fixed. The label runs from "2/4" to "12/8" to "11 beats" in FREE mode, and
+     a chip that resizes with it drags everything to its right along — on a row
+     whose whole job is to hold still. `space-between` keeps the caret pinned
+     to the right edge whatever the label's width. */
+  justify-content: space-between;
+  /* 7.5rem leaves 77px for the label. Measured against the longest it gets:
+     "16 beats" is 51px and German's "16 Schläge" is 66 — which overflowed the
+     6.5rem this started at. Sized for the widest translation, not for English. */
+  width: 7.5rem;
   gap: 8px;
   height: 34px;
   padding: 0 12px;
