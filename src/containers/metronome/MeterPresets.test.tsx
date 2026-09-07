@@ -99,11 +99,24 @@ describe("MeterPresets — FREE chip", () => {
     expect(container.querySelector(".meter-picker")).toBeNull();
   });
 
-  it("leaves a meter with only one grouping as plain text", () => {
-    // 4/4 has no alternatives; a lone button that cannot change anything
-    // would be a control in name only.
-    const { container } = render(<MeterPresets beatGroups={[2, 2]} freeMode={false} />);
-    expect(container.querySelectorAll(".meter-grouping-chip")).toHaveLength(0);
+  it("shows a lone grouping as the active badge, not as a button", () => {
+    // 9/8 is only ever 3+3+3. It reads as the same kind of thing as a meter
+    // that has alternatives — one active badge — but there is nothing to
+    // press, so it is not a button.
+    const { container } = render(<MeterPresets beatGroups={[3, 3, 3]} freeMode={false} />);
+    const chips = [...container.querySelectorAll(".meter-grouping-chip")];
+    expect(chips).toHaveLength(1);
+    expect(chips[0].tagName).toBe("SPAN");
+    expect(chips[0].className).toContain("active");
+    expect(chips[0].textContent).toBe("3 + 3 + 3");
+  });
+
+  it("shows every alternative as a button, with one active", () => {
+    const { container } = render(<MeterPresets beatGroups={[3, 2, 2]} freeMode={false} />);
+    const chips = [...container.querySelectorAll(".meter-grouping-chip")];
+    expect(chips).toHaveLength(3);
+    expect(chips.every((c) => c.tagName === "BUTTON")).toBe(true);
+    expect(chips.filter((c) => c.className.includes("active"))).toHaveLength(1);
   });
 
   it("says on the chip what the meter is, without opening anything", () => {

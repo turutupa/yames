@@ -93,36 +93,42 @@ export function MeterPresets({ beatGroups, freeMode }: MeterPresetsProps) {
             <polyline points="6 9 12 15 18 9" />
           </svg>
         </button>
-        {/* The grouping, and where a meter has more than one, the alternatives
-            beside it as buttons.
+        {/* The grouping, always as a badge.
 
-            It used to be static text, which meant reaching 3+2+2 from 2+2+3
-            cost three clicks: open the picker, find the variant row, choose.
-            Only three meters have variants at all, and never more than three
-            of them, so they fit on the row that already names the grouping —
-            and one click is the right price for a change this small. */}
-        {!freeMode && variants && variants.length > 1 ? (
-          <span className="meter-groupings" role="group" aria-label={t("metronome.grouping")}>
-            {variants.map((v) => {
-              const key = meterKey(v);
-              const on = key === activeKey;
-              return (
-                <button
-                  key={key}
-                  className={`meter-grouping-chip${on ? " active" : ""}`}
-                  onClick={() => void handleSelect(v)}
-                  aria-pressed={on}
-                >
-                  {v.join(" + ")}
-                </button>
-              );
-            })}
+            Where a meter has alternatives they are buttons and one is active;
+            where it has only one — 9/8 is only ever 3+3+3 — it is that same
+            active badge and not a button, because there is nothing to press.
+            It used to fall back to plain text, which made the one case look
+            like a different kind of thing from the other, and left the reader
+            to work out which of the two they were looking at.
+
+            Reaching 2+2+3 from 3+2+2 used to cost three clicks through the
+            picker, for a change that does not touch the meter at all. */}
+        {!freeMode && beatGroups.length > 1 && (
+          <span
+            className="meter-groupings"
+            role={variants && variants.length > 1 ? "group" : undefined}
+            aria-label={variants && variants.length > 1 ? t("metronome.grouping") : undefined}
+          >
+            {variants && variants.length > 1 ? (
+              variants.map((v) => {
+                const key = meterKey(v);
+                const on = key === activeKey;
+                return (
+                  <button
+                    key={key}
+                    className={`meter-grouping-chip${on ? " active" : ""}`}
+                    onClick={() => void handleSelect(v)}
+                    aria-pressed={on}
+                  >
+                    {v.join(" + ")}
+                  </button>
+                );
+              })
+            ) : (
+              <span className="meter-grouping-chip active">{beatGroups.join(" + ")}</span>
+            )}
           </span>
-        ) : (
-          !freeMode &&
-          beatGroups.length > 1 && (
-            <span className="meter-grouping">{beatGroups.join(" + ")}</span>
-          )
         )}
       </div>
 

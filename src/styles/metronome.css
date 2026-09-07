@@ -1116,7 +1116,7 @@
    The first column is fixed, so the stepper starts at the same x forever. */
 .meter-row {
   display: grid;
-  grid-template-columns: minmax(0, 19rem) auto;
+  grid-template-columns: minmax(0, 26rem) auto;
   align-items: center;
   column-gap: 20px;
   width: 100%;
@@ -1146,10 +1146,15 @@
 .meter-groupings {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  min-width: 0;
 }
 
 .meter-grouping-chip {
+  /* 7/8's variants are "3 + 2 + 2" — long enough to wrap onto two lines and
+     make the row taller than the meter chip beside it. They are one token
+     each and must stay on one line. */
+  white-space: nowrap;
   padding: 4px 9px;
   border-radius: 7px;
   border: 1px solid transparent;
