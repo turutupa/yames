@@ -214,7 +214,6 @@ export function rod(bobAt: number): Mesh {
   return merge(box(0.09, LENGTH, 0.09, 0, BASE, 0), box(0.58, 0.28, 0.2, 0, y, 0));
 }
 
-/** Everything that does not move, with where it sits and how bright it is. */
 /**
  * Everything that does not move, with where it sits and how brightly it is
  * drawn.
@@ -224,13 +223,26 @@ export function rod(bobAt: number): Mesh {
  * separate it from the case only made them louder by comparison. They are the
  * busiest geometry here by a long way, so they are also the least in need of
  * emphasis: a hundred gear teeth at full contrast is a texture, not a detail.
+ *
+ * The whole set was then lifted about a fifth, because the owner asked for a
+ * little more contrast in the drawn case while saying the rod was already
+ * right. These numbers are the only lever that reaches the case without
+ * touching the rod: the per-edge depth fade in `MetronomeFigure` and the
+ * container opacity in `metronome.css` both apply to the rod as well, so
+ * either of those would have brightened the one part that was not to change.
+ *
+ * The lift is not uniform, and deliberately so. The case, the arc and the bell
+ * are the silhouette — the lines that say what the object is — and they take
+ * most of it. The two gear trains take a token share, enough that they do not
+ * drop out of a drawing that got brighter around them, and no more: they are
+ * the part that has already been over-emphasised once.
  */
 export const STATIC_PARTS: { geo: Mesh; at: [number, number, number]; dim: number }[] = [
-  { geo: CASE, at: [0, 0, 0], dim: 0.6 },
-  { geo: MOVEMENT, at: [0, -0.1, 0.2], dim: 0.55 },
-  { geo: ESCAPEMENT, at: [0, 1.1, 0.2], dim: 0.55 },
-  { geo: ARC, at: [0, 0.1, 0.5], dim: 0.45 },
-  { geo: BELL, at: [0, 2.45, -0.35], dim: 0.5 },
+  { geo: CASE, at: [0, 0, 0], dim: 0.74 },
+  { geo: MOVEMENT, at: [0, -0.1, 0.2], dim: 0.6 },
+  { geo: ESCAPEMENT, at: [0, 1.1, 0.2], dim: 0.6 },
+  { geo: ARC, at: [0, 0.1, 0.5], dim: 0.58 },
+  { geo: BELL, at: [0, 2.45, -0.35], dim: 0.62 },
 ];
 
 /** Where the rod hangs, and the point it pivots about. */
