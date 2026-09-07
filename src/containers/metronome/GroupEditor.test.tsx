@@ -151,27 +151,35 @@ describe("GroupEditor — free mode", () => {
     expect(screen.getByLabelText("1 beat")).not.toBeNull();
   });
   it("accents FREE mode's dots when the mode says every beat", () => {
-    // FREE has no groups, but "every beat" applies to it — in the engine
-    // (`accent_for` answers the mode before it looks at free_mode) and so on
-    // the dots. The free branch used to draw no accent ring at all, whatever
-    // the control said.
+    // The free branch used to draw no accent ring at all, whatever the
+    // control said.
     const { container } = render(
       <GroupEditor beatGroups={[4]} subdivision={1} freeMode accentMode="all" />,
     );
     expect(container.querySelectorAll(".free-dots .group-dot.accent")).toHaveLength(4);
   });
 
-  it("leaves FREE mode's dots unaccented under groups and none", () => {
-    for (const mode of ["groups", "none"] as const) {
-      const { container, unmount } = render(
-        <GroupEditor beatGroups={[4]} subdivision={1} freeMode accentMode={mode} />,
-      );
-      expect(
-        container.querySelectorAll(".free-dots .group-dot.accent"),
-        mode,
-      ).toHaveLength(0);
-      unmount();
-    }
+  it("accents FREE mode's first dot under groups, and no others", () => {
+    // The bug the owner reported: on FREE, "Every beat" and "None" behaved
+    // and "Group starts" did nothing — no click, no lit dot. A FREE bar is
+    // one group of N, so it opens once, at beat one.
+    const { container } = render(
+      <GroupEditor beatGroups={[4]} subdivision={1} freeMode accentMode="groups" />,
+    );
+    const dots = [...container.querySelectorAll(".free-dots .group-dot")];
+    expect(dots.map((d) => d.classList.contains("accent"))).toEqual([
+      true,
+      false,
+      false,
+      false,
+    ]);
+  });
+
+  it("leaves FREE mode's dots unaccented under none", () => {
+    const { container } = render(
+      <GroupEditor beatGroups={[4]} subdivision={1} freeMode accentMode="none" />,
+    );
+    expect(container.querySelectorAll(".free-dots .group-dot.accent")).toHaveLength(0);
   });
 
 });
@@ -267,11 +275,14 @@ describe("GroupEditor — accents", () => {
     expect(accented).toEqual([0, 3, 5]);
   });
 
-  it("draws no accent markers in FREE mode", () => {
+  it("draws exactly one accent marker in FREE mode — the first beat", () => {
     const { container } = render(
       <GroupEditor beatGroups={[7]} subdivision={1} freeMode />,
     );
-    for (const d of dots(container)) expect(d.className).not.toContain("accent");
+    const marked = dots(container)
+      .map((d, i) => (d.className.includes("accent") ? i : -1))
+      .filter((i) => i >= 0);
+    expect(marked).toEqual([0]);
   });
 
   it("takes the LIVE accent from the engine, not the local markers", () => {

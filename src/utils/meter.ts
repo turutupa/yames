@@ -15,9 +15,9 @@
  * remove. `accentPositions` is for the STATIC markers drawn while
  * stopped.
  *
- * FREE mode means "N equal beats, no accent structure" — Rust checks it
- * first in `accent_for`, so every helper here that speaks about accents
- * takes a `freeMode` flag and agrees.
+ * FREE mode means "N equal beats in one group". It is not a special case for
+ * accents on either side of the wire — one group opens once, so beat 0 takes
+ * the accent and no other beat does.
  */
 import {
   METER_PRESETS,
@@ -48,12 +48,12 @@ export function meterKey(groups: number[] | undefined | null): string {
  * Bar-local positions that open a group, i.e. the accented beats.
  * `[3, 2, 2]` → `{0, 3, 5}`.
  *
- * Empty in FREE mode: there is no accent structure to draw, matching
- * `accent_for`'s free-mode-first branch in `engine.rs`.
+ * FREE mode is not a case here, and used to be: it is one group of N beats —
+ * Rust's `collapse_to_free` enforces that on the way in — so it accents beat
+ * 0 and nothing else, straight out of the same loop as every other meter.
  */
 export function accentPositions(
   groups: number[] | undefined | null,
-  freeMode = false,
   mode: "groups" | "all" | "none" = "groups",
 ): Set<number> {
   const positions = new Set<number>();
@@ -61,14 +61,13 @@ export function accentPositions(
   // what the dots draw at rest, and the engine is what you hear. They
   // disagreed for exactly as long as the accent control existed without this
   // argument — you could pick "every beat", hear it, and watch one dot stay
-  // lit. `all` and `none` override FREE mode there too, for the same reason.
+  // lit.
   if (mode === "none") return positions;
   if (mode === "all") {
     const total = meterTotal(groups);
     for (let i = 0; i < total; i++) positions.add(i);
     return positions;
   }
-  if (freeMode) return positions;
   let cursor = 0;
   for (const g of groups ?? []) {
     positions.add(cursor);

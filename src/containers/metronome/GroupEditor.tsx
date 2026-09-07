@@ -46,9 +46,8 @@ export function GroupEditor({
   const { t } = useTranslation();
   const total = meterTotal(beatGroups);
   // Static markers only — the LIVE accent comes from the engine via
-  // `isAccentBeat`, so the two can never disagree (and stays false in
-  // FREE mode, where `accentPositions` is empty anyway).
-  const accents = accentPositions(beatGroups, freeMode, accentMode);
+  // `isAccentBeat`, so the two can never disagree.
+  const accents = accentPositions(beatGroups, accentMode);
 
   if (freeMode) {
     return (

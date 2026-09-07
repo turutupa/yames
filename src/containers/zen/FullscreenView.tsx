@@ -230,10 +230,12 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
                   <div key={groupIdx} className="fs-group-cluster">
                     {Array.from({ length: count }, (_, d) => {
                       const beatIdx = groupStart + d;
-                      // Static marker: a group's first dot (never in FREE
-                      // mode). Live accent: whatever the engine said about
-                      // THIS tick.
-                      const isGroupDownbeat = !state.freeMode && d === 0;
+                      // Static marker: a group's first dot. FREE mode is one
+                      // group of N, so it marks its first dot too — the same
+                      // rule as `accentPositions`, which is what the metronome
+                      // screen draws. Live accent: whatever the engine said
+                      // about THIS tick.
+                      const isGroupDownbeat = d === 0;
                       const isBeatActive = !isWarmingUp && activeBeat === beatIdx && isDownbeat;
                       const isSubBeatActive = !isWarmingUp && activeBeat === beatIdx && !isDownbeat;
                       return (

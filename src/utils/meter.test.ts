@@ -63,11 +63,13 @@ describe("accentPositions", () => {
     expect([...accentPositions([2])]).toEqual([0]);
   });
 
-  it("is empty in FREE mode — there is no accent structure", () => {
-    expect(accentPositions([7], true).size).toBe(0);
-    expect(accentPositions([3, 2, 2], true).size).toBe(0);
-    // ...and still populated when free mode is off.
-    expect(accentPositions([3, 2, 2], false).size).toBe(3);
+  it("marks the first beat in FREE mode, which is one group of N", () => {
+    // This used to assert the opposite. The owner found the consequence: on
+    // FREE with "Group starts" selected, beat one was neither heard nor lit,
+    // while the other two modes behaved. FREE mode carries a single group —
+    // Rust's `collapse_to_free` guarantees it — so it opens once.
+    expect([...accentPositions([7])]).toEqual([0]);
+    expect([...accentPositions([16])]).toEqual([0]);
   });
 
   it("agrees with the group boundaries for every shipped meter", () => {
@@ -90,27 +92,26 @@ describe("accentPositions and the accent mode", () => {
   // accent control existed without a mode argument here, you could choose
   // "every beat", hear every beat, and watch a single dot stay lit.
   it("marks every beat under `all`", () => {
-    expect([...accentPositions([3, 2, 2], false, "all")].sort((a, b) => a - b)).toEqual([
+    expect([...accentPositions([3, 2, 2], "all")].sort((a, b) => a - b)).toEqual([
       0, 1, 2, 3, 4, 5, 6,
     ]);
   });
 
   it("marks nothing under `none`", () => {
-    expect([...accentPositions([3, 2, 2], false, "none")]).toEqual([]);
+    expect([...accentPositions([3, 2, 2], "none")]).toEqual([]);
   });
 
   it("keeps group starts under `groups`, which is the default", () => {
-    expect([...accentPositions([3, 2, 2], false, "groups")].sort((a, b) => a - b)).toEqual([0, 3, 5]);
+    expect([...accentPositions([3, 2, 2], "groups")].sort((a, b) => a - b)).toEqual([0, 3, 5]);
     expect([...accentPositions([3, 2, 2])].sort((a, b) => a - b)).toEqual([0, 3, 5]);
   });
 
-  it("lets `all` and `none` override FREE mode, exactly as the engine does", () => {
-    // `accent_for` returns early on the mode before it looks at free_mode, so
-    // a player who asked for every beat gets every beat there too.
-    expect([...accentPositions([4], true, "all")].sort((a, b) => a - b)).toEqual([0, 1, 2, 3]);
-    expect([...accentPositions([4], true, "none")]).toEqual([]);
-    // `groups` still yields nothing in FREE — it has no groups to open.
-    expect([...accentPositions([4], true, "groups")]).toEqual([]);
+  it("gives FREE mode all three modes, exactly as the engine does", () => {
+    // A FREE bar is `[N]`, so all three answers fall out of the general rule:
+    // every beat, no beat, or the one beat that opens the single group.
+    expect([...accentPositions([4], "all")].sort((a, b) => a - b)).toEqual([0, 1, 2, 3]);
+    expect([...accentPositions([4], "none")]).toEqual([]);
+    expect([...accentPositions([4], "groups")]).toEqual([0]);
   });
 });
 
