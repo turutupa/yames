@@ -58,6 +58,26 @@ impl Default for SpeedRamp {
     }
 }
 
+/// A count-in: N beats of a distinct click before the thing you asked for
+/// starts, so you arrive on the downbeat already in tempo.
+///
+/// This used to live inside `SpeedRamp` and be gated on the ramp being active,
+/// which meant only a drill could have one. It is the same behaviour and the
+/// same sound — the drill's count-in has not changed at all — but it belongs
+/// to the engine now, so a preset chain can ask for one between steps
+/// (UI_DECISIONS U9.2, U9.5).
+///
+/// `beats` of 0 means no count-in is armed, which is the resting state. The
+/// drill's own `warmup_beats` remains the drill's *setting*; this is the live
+/// counter, and the two are seeded together when a ramp starts.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CountIn {
+    /// How many beats to count. 0 when nothing is counting in.
+    pub beats: u8,
+    /// How many have sounded. The count-in ends when this reaches `beats`.
+    pub done: u8,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AppState {
     pub bpm: u16,
@@ -93,6 +113,9 @@ pub struct AppState {
     pub free_mode: bool,
     #[serde(rename = "speedRamp")]
     pub speed_ramp: SpeedRamp,
+    /// The live count-in. See `CountIn` — it is not the ramp's any more.
+    #[serde(rename = "countIn", default)]
+    pub count_in: CountIn,
 
     /// Selected instrument. Drives onset-detection refractory floor,
     /// chord-cluster window, spurious-onset cap, activity silence
@@ -127,6 +150,7 @@ impl Default for AppState {
             beat_groups: vec![4],
             free_mode: false,
             speed_ramp: SpeedRamp::default(),
+            count_in: CountIn::default(),
             instrument: Instrument::default(),
         }
     }

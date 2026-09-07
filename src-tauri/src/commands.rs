@@ -171,7 +171,11 @@ pub fn toggle_playback(
         let mut engine = engine_state.0.lock().unwrap();
         if is_playing {
             engine.stop();
-            state.lock().unwrap().is_playing = false;
+            {
+                let mut s = state.lock().unwrap();
+                s.is_playing = false;
+                s.count_in = crate::state::CountIn::default();
+            }
             // D2 — keep tempo context in sync so the onset detector gates
             // analysis against the live playing state.
             tempo_ctx.set_playing(false);
@@ -555,6 +559,13 @@ pub fn start_speed_ramp(
         s.speed_ramp.bars_in_step = 0;
         s.speed_ramp.completed = false;
         s.speed_ramp.warmup_count = 0;
+        // The drill's setting seeds the engine's count-in. `warmup_beats` is
+        // still what the user toggles; `count_in` is what actually counts, and
+        // it belongs to the engine so a chain can use it too (U9.5).
+        s.count_in = crate::state::CountIn {
+            beats: s.speed_ramp.warmup_beats,
+            done: 0,
+        };
         s.is_playing = true;
         // Don't touch s.bpm — ramp uses its own current_bpm
     }
@@ -595,6 +606,13 @@ pub fn start_speed_ramp_from(
         s.speed_ramp.bars_in_step = bar;
         s.speed_ramp.completed = false;
         s.speed_ramp.warmup_count = 0;
+        // The drill's setting seeds the engine's count-in. `warmup_beats` is
+        // still what the user toggles; `count_in` is what actually counts, and
+        // it belongs to the engine so a chain can use it too (U9.5).
+        s.count_in = crate::state::CountIn {
+            beats: s.speed_ramp.warmup_beats,
+            done: 0,
+        };
         s.is_playing = true;
         // Don't touch s.bpm — ramp uses its own current_bpm
     }
@@ -610,6 +628,27 @@ pub fn start_speed_ramp_from(
     emit_state_changed(&state, &app_handle);
 }
 
+/// Arm a count-in of `beats` beats before the next thing that starts.
+///
+/// The drill arms one from its own setting when a ramp starts; this is how
+/// anything else asks for the same thing — a preset chain between steps
+/// (U9.2). 0 disarms. Capped at 8, the same bound the drill's setting has.
+///
+/// It is armed, not played: the beats sound when the engine next reaches a
+/// downbeat, and the last of them becomes beat 0 of what follows, which is
+/// what makes a count-in a cue rather than a delay.
+#[tauri::command]
+pub fn arm_count_in(beats: u8, state: State<SharedState>, app_handle: AppHandle) {
+    {
+        let mut s = state.lock().unwrap();
+        s.count_in = crate::state::CountIn {
+            beats: beats.min(8),
+            done: 0,
+        };
+    }
+    emit_state_changed(&state, &app_handle);
+}
+
 #[tauri::command]
 pub fn stop_speed_ramp(
     state: State<SharedState>,
@@ -621,6 +660,9 @@ pub fn stop_speed_ramp(
         let mut s = state.lock().unwrap();
         s.speed_ramp.active = false;
         s.is_playing = false;
+        // A count-in the ramp armed but never spent must not be waiting for
+        // the next thing that presses play.
+        s.count_in = crate::state::CountIn::default();
     }
     {
         let mut engine = engine_state.0.lock().unwrap();

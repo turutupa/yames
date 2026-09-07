@@ -1620,11 +1620,15 @@ impl MetronomeEngine {
                         }
                         cached.ramp_active = s.speed_ramp.active;
                         cached.ramp_beats_per_bar = s.speed_ramp.beats_per_bar;
-                        let warming = s.speed_ramp.active
-                            && s.speed_ramp.warmup_count < s.speed_ramp.warmup_beats;
+                        // No `speed_ramp.active` here any more: a count-in is
+                        // the engine's, not the drill's, so a chain step can
+                        // ask for one between steps (U9.5). `beats == 0` is the
+                        // resting state, which is what keeps a plain Play from
+                        // counting itself in.
+                        let warming = s.count_in.done < s.count_in.beats;
                         cached.ramp_warming_up = warming;
-                        cached.warmup_count = s.speed_ramp.warmup_count;
-                        cached.warmup_beats = s.speed_ramp.warmup_beats;
+                        cached.warmup_count = s.count_in.done;
+                        cached.warmup_beats = s.count_in.beats;
                         cached.free_mode = s.free_mode;
                     }
 
@@ -1928,7 +1932,7 @@ impl MetronomeEngine {
                 // ---- Warmup beats (not the transition) ----
                 if notif.is_warmup_beat && !notif.is_warmup_transition {
                     let mut s = state.lock().unwrap();
-                    s.speed_ramp.warmup_count += 1;
+                    s.count_in.done = s.count_in.done.saturating_add(1);
                     let sc = s.clone();
                     drop(s);
                     let _ = app_handle.emit("state-changed", &sc);
@@ -1938,7 +1942,11 @@ impl MetronomeEngine {
                 // ---- Warmup transition (last warmup beat = beat 0) ----
                 if notif.is_warmup_transition {
                     let mut s = state.lock().unwrap();
-                    s.speed_ramp.warmup_count += 1;
+                    // Spent: this beat IS beat 0 of the real thing. Cleared
+                    // rather than counted up to, so nothing counts in again
+                    // until something arms it.
+                    s.count_in.beats = 0;
+                    s.count_in.done = 0;
                     let sc = s.clone();
                     drop(s);
                     let _ = app_handle.emit("state-changed", &sc);
@@ -2250,6 +2258,61 @@ impl Drop for MetronomeEngine {
 
 #[cfg(test)]
 mod tests {
+
+    // ─── The count-in ────────────────────────────────────────────────────
+
+    /// It used to be gated on `speed_ramp.active`, so only a drill could have
+    /// one. These lock the new contract: armed by whoever wants it, resting at
+    /// zero, and never left armed by a stop.
+    #[test]
+    fn a_count_in_rests_disarmed() {
+        let c = crate::state::CountIn::default();
+        assert_eq!(c.beats, 0, "a fresh state must not count anything in");
+        assert!(
+            c.done >= c.beats,
+            "with no beats armed the engine must read this as not counting in"
+        );
+    }
+
+    #[test]
+    fn a_count_in_is_over_when_it_has_been_counted() {
+        // The engine's test is `done < beats`; walk it.
+        let mut c = crate::state::CountIn { beats: 4, done: 0 };
+        for expected in [true, true, true, true] {
+            assert_eq!(c.done < c.beats, expected, "at done={}", c.done);
+            c.done += 1;
+        }
+        assert!(!(c.done < c.beats), "four of four beats must end it");
+    }
+
+    #[test]
+    fn a_ramp_seeds_its_count_in_from_its_own_setting() {
+        // The drill still owns *whether* to count in; the engine owns the
+        // counting. Both must agree at the moment a ramp starts.
+        let ramp = crate::state::SpeedRamp::default();
+        let seeded = crate::state::CountIn {
+            beats: ramp.warmup_beats,
+            done: 0,
+        };
+        assert_eq!(seeded.beats, ramp.warmup_beats);
+        assert_eq!(seeded.done, 0, "a restarted ramp counts in from the top");
+    }
+
+    #[test]
+    fn count_in_off_means_off() {
+        // `warmupBeats: 0` is how the drill's Count-in switch says no. It has
+        // to survive being copied into the engine's count-in as "not armed",
+        // or turning the switch off would silently do nothing.
+        let ramp = crate::state::SpeedRamp {
+            warmup_beats: 0,
+            ..Default::default()
+        };
+        let seeded = crate::state::CountIn {
+            beats: ramp.warmup_beats,
+            done: 0,
+        };
+        assert!(!(seeded.done < seeded.beats), "0 beats must not count in");
+    }
 
     // ─── Sound bank ──────────────────────────────────────────────────────
 
