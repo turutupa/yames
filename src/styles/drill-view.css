@@ -307,6 +307,15 @@
   background: transparent;
 }
 
+/* Chromium keeps the little end arrows at their default size unless they are
+   styled away — a custom `::-webkit-scrollbar` does not zero them. They are
+   the last piece of platform chrome on an otherwise drawn lane. */
+.drill-climb-scroll::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 .drill-climb-scroll::-webkit-scrollbar-thumb {
   border-radius: 4px;
   background: color-mix(in srgb, var(--text-primary) 18%, transparent);

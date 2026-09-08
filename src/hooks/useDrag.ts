@@ -66,6 +66,34 @@ function isInteractive(el: HTMLElement | null): boolean {
 }
 
 /**
+ * Did this mousedown land on a scrollbar rather than on the content?
+ *
+ * A scrollbar belongs to no element of its own. Chromium dispatches the
+ * mousedown to the SCROLLING BOX — measured: clicking the chain track's
+ * horizontal bar arrives with `target` = `.chain-track-strip` and
+ * `offsetY` 154 against a `clientHeight` of 140 — so by the time
+ * `isInteractive` sees it, it is looking at a plain `div` and says "furniture,
+ * drag the window". Which is what happened: the owner grabbed the bar under a
+ * long chain and the whole window came with it, on both platforms.
+ *
+ * `offsetX`/`offsetY` are measured from the padding box, and `clientWidth`
+ * and `clientHeight` are the padding box MINUS the scrollbar gutters, so
+ * "past the client box" is exactly "in a gutter" and needs no geometry of its
+ * own. In a right-to-left box the vertical gutter is on the left instead,
+ * hence the `direction` check.
+ *
+ * This only sees a scrollbar that occupies layout — a classic one. macOS
+ * overlay bars measure zero, which is why the chain strip and the drill's
+ * climb both style `::-webkit-scrollbar`: a styled bar is always classic.
+ */
+function isOnScrollbar(el: HTMLElement, e: MouseEvent): boolean {
+  const gutterY = el.offsetHeight > 0 && e.offsetY > el.clientHeight;
+  if (gutterY) return true;
+  const rtl = getComputedStyle(el).direction === "rtl";
+  return rtl ? e.offsetX < 0 : e.offsetX > el.clientWidth;
+}
+
+/**
  * Hybrid drag: tries native startDragging() first (perfect multi-monitor),
  * falls back to manual incremental drag when the window is already focused
  * (macOS bug: startDragging doesn't work on focused undecorated windows).
@@ -87,7 +115,11 @@ export function useDrag() {
 
     async function onMouseDown(e: MouseEvent) {
       if (e.button !== 0) return;
-      if (isInteractive(e.target as HTMLElement)) return;
+      const target = e.target as HTMLElement;
+      if (isInteractive(target)) return;
+      // The scrollbar of whatever was clicked. Its own box, not an ancestor's
+      // — a scrollbar hit always targets the box it scrolls.
+      if (isOnScrollbar(target, e)) return;
       e.preventDefault();
 
       // Set up manual fallback state
