@@ -875,6 +875,20 @@ fn advance_ramp(
                 } else {
                     (new_bpm, out.to_string(), false)
                 }
+            } else if !cyclic {
+                // Travelling BACK on a drill that was never asked to come
+                // back. The owner hit this: "Up and down" was off and the
+                // ramp turned round at the target anyway.
+                //
+                // This branch used to descend without ever consulting
+                // `cyclic` — the flag was read only where the ramp DECIDES to
+                // turn round, so anything else that set the direction to back
+                // (a jump into the last step via `start_speed_ramp_from`, or a
+                // direction left over in a persisted ramp) sent a one-way
+                // drill down and then up again, forever.
+                //
+                // A one-way drill has nowhere to go from the target. Finish.
+                (target_bpm, out.to_string(), true)
             } else {
                 let new_bpm = toward_start(current_bpm, increment);
                 if at_start(new_bpm) {
@@ -2984,6 +2998,56 @@ mod tests {
         assert!(!done);
     }
 
+    /// The owner's report: "when it reaches target, it's doing the 'and down'
+    /// regardless of whether Up and down is enabled — I had it disabled and it
+    /// still did it."
+    ///
+    /// `cyclic` was consulted only at the moment the ramp decides to turn
+    /// round. The branch that actually TRAVELS back never looked at it, so any
+    /// other route into a backward direction — jumping into the last step with
+    /// `start_speed_ramp_from`, or a direction left over in a persisted ramp —
+    /// sent a one-way drill down to the start and up again, forever.
+    #[test]
+    fn a_one_way_drill_never_travels_back_however_it_got_pointed_that_way() {
+        // Pointed backwards mid-climb, cyclic off: it finishes rather than
+        // descending. Every tempo between start and target, so this cannot
+        // pass by landing on an edge case.
+        for bpm in [85u16, 90, 95, 100] {
+            let (new_bpm, dir, done) = advance_ramp(bpm, "down", 80, 100, 5, 3, "linear", false);
+            assert_eq!(new_bpm, 100, "from {bpm}: a one-way drill ends at its target");
+            assert_eq!(dir, "up", "from {bpm}: and never faces back");
+            assert!(done, "from {bpm}: it is finished");
+        }
+        // The same input WITH the round trip asked for still comes back down,
+        // so the assertion above is about `cyclic` and not about the branch
+        // being unreachable.
+        let (new_bpm, dir, done) = advance_ramp(95, "down", 80, 100, 5, 3, "linear", true);
+        assert_eq!(new_bpm, 90);
+        assert_eq!(dir, "down");
+        assert!(!done);
+    }
+
+    /// The descending twin: a one-way drill that runs 120 down to 80 must not
+    /// climb back to 120 either.
+    #[test]
+    fn a_one_way_descending_drill_never_climbs_back() {
+        let (new_bpm, dir, done) = advance_ramp(95, "up", 120, 80, 5, 3, "linear", false);
+        assert_eq!(new_bpm, 80, "it ends at its target");
+        assert_eq!(dir, "down", "still facing the way it was going");
+        assert!(done);
+    }
+
+    /// Zigzag travels back by definition — that is the shape — and `cyclic`
+    /// has nothing to do with it. Kept so the fix above cannot be widened
+    /// into the branch next door.
+    #[test]
+    fn zigzag_still_backs_off_with_cyclic_off() {
+        let (new_bpm, dir, done) = advance_ramp(110, "down", 80, 200, 10, 5, "zigzag", false);
+        assert_eq!(new_bpm, 105, "the back-off is by `decrement`");
+        assert_eq!(dir, "up");
+        assert!(!done);
+    }
+
     #[test]
     fn advance_ramp_descending_stops_on_the_target_not_past_it() {
         // 83 - 5 would be 78, four below the goal. It lands on 80 and ends.
@@ -3039,7 +3103,12 @@ mod tests {
 
     #[test]
     fn advance_ramp_down_floors_at_20_bpm() {
-        let (bpm, _, _) = advance_ramp(22, "down", 10, 100, 5, 3, "linear", false);
+        // Cyclic, because that is now the only legitimate way for a linear
+        // ramp to be travelling back — a one-way drill finishes at its target
+        // instead. This test is about the 20 BPM floor holding when a plan
+        // names a start below it, and it used to reach the descent through a
+        // non-cyclic ramp, which no longer descends at all.
+        let (bpm, _, _) = advance_ramp(22, "down", 10, 100, 5, 3, "linear", true);
         assert_eq!(bpm, 20, "BPM should floor at 20");
     }
 
