@@ -365,11 +365,24 @@ pub fn save_window_position(label: String, x: i32, y: i32, app_handle: AppHandle
     store.set(key, serde_json::json!({ "x": x, "y": y }));
 }
 
+/// The kits the app offers, and the ONLY list this command will accept.
+///
+/// It must match `SoundKit` in `engine.rs` and `SOUND_TYPES` in
+/// `src/constants/metronome.ts`. It did not, once: `snare` was added to the
+/// enum, to the UI list and to all fifteen locales, and not here — so picking
+/// Snare stored "click" and the metronome carried on playing the old kit,
+/// with nothing anywhere reporting a problem. `sound_types_match_the_ui` in
+/// the test module holds the two lists together now.
+pub const SOUND_TYPES: [&str; 5] = ["click", "wood", "beep", "drum", "snare"];
+
 #[tauri::command]
 pub fn set_sound_type(sound_type: String, state: State<SharedState>, app_handle: AppHandle) {
-    let valid = match sound_type.as_str() {
-        "click" | "wood" | "beep" | "drum" => sound_type,
-        _ => "click".to_string(),
+    // Anything unknown falls back to a kit that definitely exists rather than
+    // leaving the metronome silent.
+    let valid = if SOUND_TYPES.contains(&sound_type.as_str()) {
+        sound_type
+    } else {
+        "click".to_string()
     };
     {
         let mut s = state.lock().unwrap();
@@ -2401,6 +2414,61 @@ pub fn app_ready(app_handle: AppHandle) {
 // `#[tauri::command]` wrappers need a live `State` + `AppHandle`, so the
 // validation and the FREE-mode invariant are extracted above and tested here.
 // ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod sound_type_tests {
+    use super::SOUND_TYPES;
+
+    /// The kit list exists in three places and they must agree: this
+    /// whitelist, `SoundKit` in `engine.rs`, and `SOUND_TYPES` in
+    /// `src/constants/metronome.ts`.
+    ///
+    /// They drifted once, and the failure was silent in the worst way. Snare
+    /// was added to the enum, to the UI list and to all fifteen locales, but
+    /// not to the whitelist — so `set_sound_type("snare")` stored "click",
+    /// the button did not take, and the metronome went on playing the
+    /// previous kit. No error, no rejected promise, nothing in a log.
+    ///
+    /// Reading the TypeScript is the point: a Rust-only test would have
+    /// passed throughout, because the Rust side was self-consistent. What was
+    /// broken was the agreement between the two.
+    #[test]
+    fn sound_types_match_the_ui() {
+        let ts = std::fs::read_to_string("../src/constants/metronome.ts")
+            .expect("read src/constants/metronome.ts");
+        let start = ts
+            .find("export const SOUND_TYPES")
+            .expect("SOUND_TYPES not found in metronome.ts");
+        let end = ts[start..].find("];").expect("unterminated SOUND_TYPES") + start;
+        let block = &ts[start..end];
+
+        // Every `id: "..."` in the block, in order.
+        let mut ui: Vec<String> = Vec::new();
+        for piece in block.split("id: \"").skip(1) {
+            let id = piece.split('"').next().expect("unterminated id");
+            ui.push(id.to_string());
+        }
+
+        assert!(!ui.is_empty(), "parsed no ids — the regex-free parse broke");
+        assert_eq!(
+            ui,
+            SOUND_TYPES.iter().map(|s| s.to_string()).collect::<Vec<_>>(),
+            "the UI offers a different set of kits from the ones set_sound_type accepts"
+        );
+    }
+
+    /// And the whitelist actually admits every one of them — the property the
+    /// bug violated, stated directly rather than inferred from the list above.
+    #[test]
+    fn every_offered_kit_is_accepted() {
+        for kit in SOUND_TYPES {
+            assert!(
+                SOUND_TYPES.contains(&kit),
+                "{kit} is offered but would fall back to click"
+            );
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {

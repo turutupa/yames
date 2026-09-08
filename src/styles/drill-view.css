@@ -299,8 +299,10 @@
   scrollbar-color: color-mix(in srgb, var(--text-primary) 22%, transparent)
     transparent;
   scroll-behavior: smooth;
-  /* Room for the scrollbar lane below the tempo labels. */
-  padding-bottom: 6px;
+  /* Room between the tempo labels and the scrollbar lane. 6px put the bar
+     hard under the numbers and the two read as one crowded strip; this is the
+     gap, and the lane is drawn below it. */
+  padding-bottom: 18px;
   /* The glow on the current cell would be clipped by the scroll box. */
   margin: -8px -4px 0;
   padding-left: 4px;
