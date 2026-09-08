@@ -27,6 +27,27 @@
   --graph-line: rgba(255, 255, 255, 0.25);
 }
 
+/* Tell the engine which way round the page is.
+ *
+ * Without this the property is `normal`, and every scrollbar we have not
+ * styled by hand is painted in the platform's LIGHT colours however dark the
+ * theme is — a white lane with a grey thumb, which is what the chain track
+ * showed on Windows. macOS hid the mistake: WKWebView's overlay scrollbar is
+ * drawn by the OS and inverts itself against whatever is behind it, so the
+ * same build looked correct there and wrong here. It was never theme-aware on
+ * either; one platform was just guessing well.
+ *
+ * `applyTheme` already writes `data-theme-group`, so this costs one
+ * declaration and covers every scroller, text field and native control in the
+ * app rather than the one we happened to notice. */
+:root[data-theme-group="dark"] {
+  color-scheme: dark;
+}
+
+:root[data-theme-group="light"] {
+  color-scheme: light;
+}
+
 * {
   margin: 0;
   padding: 0;

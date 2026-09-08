@@ -147,7 +147,59 @@
      escapes by being portalled out rather than by a declaration that never
      took effect. */
   overflow-y: auto;
-  padding-bottom: 4px;
+  padding-bottom: 8px;
+  /* For engines that honour the standard properties rather than the WebKit
+     pseudo-elements below. Both of our targets are Chromium-derived, so in
+     the app it is the pseudo-elements that paint; this is for the browser
+     preview. */
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text-primary) 22%, transparent)
+    transparent;
+  scroll-behavior: smooth;
+}
+
+/* The same lane the drill's climb uses, for the same reason: a chain long
+   enough to scroll is exactly when you most need to see where you are in it,
+   and the default bar was a white platform strip laid across a dark theme.
+   Styling it also makes it a CLASSIC scrollbar on macOS instead of an OS
+   overlay — which is what lets `useDrag` tell a scrollbar click apart from a
+   click on the strip behind it, since an overlay bar takes no layout room and
+   so cannot be measured. */
+.chain-track-strip::-webkit-scrollbar {
+  height: 8px;
+}
+
+.chain-track-strip::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Chromium keeps the little end arrows at their default size unless they are
+   styled away — a custom `::-webkit-scrollbar` does not zero them. They are
+   the last piece of platform chrome on an otherwise drawn lane. */
+.chain-track-strip::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.chain-track-strip::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--text-primary) 18%, transparent);
+  /* Inset by its own border so the thumb reads as 6px on an 8px lane. */
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  transition: background 0.15s ease;
+}
+
+.chain-track-strip:hover::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--text-primary) 30%, transparent);
+  background-clip: padding-box;
+}
+
+.chain-track-strip::-webkit-scrollbar-thumb:hover,
+.chain-track-strip::-webkit-scrollbar-thumb:active {
+  background: var(--accent);
+  background-clip: padding-box;
 }
 
 .chain-track-cell {

@@ -38,11 +38,26 @@ vi.mock("@tauri-apps/api/window", () => ({
 }));
 vi.mock("@tauri-apps/api/core", () => ({ invoke: () => Promise.resolve() }));
 
-/** Mousedown on `el` and report whether the drag handler claimed the event. */
-function claimedByDrag(el: HTMLElement): boolean {
+/**
+ * Mousedown on `el` and report whether the drag handler claimed the event.
+ *
+ * `at` places the press inside the element's padding box. jsdom lays nothing
+ * out, so both the offsets and the client box have to be stated — which is
+ * the point: the numbers below are the ones measured in the real engine.
+ */
+function claimedByDrag(el: HTMLElement, at?: { offsetX: number; offsetY: number }): boolean {
   const e = new MouseEvent("mousedown", { bubbles: true, button: 0, cancelable: true });
+  Object.defineProperty(e, "offsetX", { value: at?.offsetX ?? 0 });
+  Object.defineProperty(e, "offsetY", { value: at?.offsetY ?? 0 });
   el.dispatchEvent(e);
   return e.defaultPrevented;
+}
+
+/** Give `el` a client box, the way a laid-out scrolling element has one. */
+function scrollBox(el: HTMLElement, box: { clientWidth: number; clientHeight: number; offsetHeight: number }) {
+  for (const [k, value] of Object.entries(box)) {
+    Object.defineProperty(el, k, { value, configurable: true });
+  }
 }
 
 let root: HTMLDivElement;
@@ -86,6 +101,34 @@ describe("what useDrag treats as a control", () => {
       root.innerHTML = `<${tag}>x</${tag}>`;
       expect(claimedByDrag(root.firstElementChild as HTMLElement), tag).toBe(false);
     }
+  });
+
+  it("leaves a horizontal scrollbar alone, and the strip above it draggable", () => {
+    /*
+     * The chain track, measured in the real engine: a mousedown on its
+     * scrollbar arrives with `target` = the strip itself and `offsetY` 154
+     * against a `clientHeight` of 140. Nothing about the target says
+     * "control", so before this the strip's bar was unusable — pressing it
+     * dragged the whole window instead of scrolling the chain.
+     */
+    root.innerHTML = `<div class="chain-track-strip"><div>step</div></div>`;
+    const strip = root.firstElementChild as HTMLElement;
+    scrollBox(strip, { clientWidth: 387, clientHeight: 140, offsetHeight: 155 });
+
+    expect(claimedByDrag(strip, { offsetX: 123, offsetY: 154 })).toBe(false);
+    expect(startDragging).not.toHaveBeenCalled();
+
+    // ...and the 140px above the gutter is still the strip, which has no
+    // controls of its own and so is still somewhere to grab the window by.
+    expect(claimedByDrag(strip, { offsetX: 123, offsetY: 60 })).toBe(true);
+  });
+
+  it("leaves a vertical scrollbar alone too", () => {
+    root.innerHTML = `<div class="scroller">tall</div>`;
+    const el = root.firstElementChild as HTMLElement;
+    scrollBox(el, { clientWidth: 300, clientHeight: 200, offsetHeight: 200 });
+    expect(claimedByDrag(el, { offsetX: 310, offsetY: 90 })).toBe(false);
+    expect(claimedByDrag(el, { offsetX: 290, offsetY: 90 })).toBe(true);
   });
 
   it("still drags from plain furniture, or the window could not be moved", () => {
