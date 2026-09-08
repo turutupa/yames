@@ -241,12 +241,18 @@ Status key: **decided** · **first release** · **open** · **deferred**
 - **U3.4 — Adaptive carries a badge saying it listens.** *decided.* It is
   the one mode whose behaviour depends on the audio input being on.
 
-- **U3.5 — What the climb shows mid-run.** *partly decided (Phase C2).* The
-  plan fills in: cells behind the playhead are filled, the rest outlined, and
-  a playhead line stands at the current bar. The achieved path drawn *over*
-  the plan — the more honest and more expensive option — is still not built,
-  and cannot be until a run records where it actually got to. Same blocker as
-  U3.3.
+- **U3.5 — What the climb shows mid-run.** *decided.* The plan fills in:
+  cells behind the playhead are filled, the rest outlined, and a playhead line
+  stands at the current bar. Behind all of it, a wash covers the ground
+  already swept — the playhead says where you are, and the filled cells answer
+  that one column at a time, so without it a long plan looks much the same
+  near the start as near the end.
+
+  The blocker recorded here is gone: U3.3 built `DrillRun`, and a run now
+  records the bars it played at every tempo it touched. The achieved path
+  drawn *over* the plan is therefore buildable, and is deliberately not built
+  — the last run is drawn UNDER tonight's plan instead (U3.3), and a second
+  overlay on the same cells would be a fourth thing competing for them.
 
 ---
 

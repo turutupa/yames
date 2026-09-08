@@ -338,6 +338,58 @@
   position: relative;
 }
 
+/* Ground already covered.
+   The playhead is a line saying WHERE you are; this is the answer to how much
+   of the exercise is behind it — which the filled cells give only one column
+   at a time, so at a glance a long plan reads the same near the start as near
+   the end.
+
+   One element for the whole track rather than a state per column, because the
+   boundary falls in the middle of the column being played. Its width is the
+   playhead's own position expressed against the track: whole columns before
+   it, then whole cells into this one. `--climb-bars` is set by DrillClimb
+   because a column's width in pixels is a fact only the track knows.
+
+   A change of ground, not a shape: no border on the leading edge (the
+   playhead is already there) and an alpha low enough that it reads as the
+   picture's floor rather than as a fourth cell state. */
+.drill-climb-swept {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: calc(
+    var(--climb-swept-step, 0) *
+      (
+        var(--climb-bars, 1) * (var(--climb-cell-w) + var(--climb-cell-gap)) -
+          var(--climb-cell-gap) + var(--climb-col-gap)
+      ) + var(--climb-swept-bar, 0) *
+      (var(--climb-cell-w) + var(--climb-cell-gap)) + var(--climb-cell-w) / 2 -
+      1px
+  );
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+  pointer-events: none;
+  z-index: 0;
+  /* Moves with the playhead rather than stepping after it. */
+  transition: width 0.18s ease;
+}
+
+.drill-view[data-animations="off"] .drill-climb-swept {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drill-climb-swept {
+    transition: none;
+  }
+}
+
+/* The track becomes the wash's containing block. The columns already stack
+   above it — they come later in source order and the wash is at z-index 0. */
+.drill-climb-track {
+  position: relative;
+}
+
 .drill-climb-playhead {
   position: absolute;
   bottom: -6px;
@@ -1142,12 +1194,25 @@
    gets the width it has always wanted — it was drawn below the fold, under a
    settings form that reopened itself every time a run stopped. */
 
+/* Anchored to the rail like the metronome (U1.3) — until the window is wide
+   enough that "anchored left" becomes "stranded at one edge". The metronome
+   has its sketch out on the right to hold the other end of a big screen; the
+   drill has nothing there, so past its own width it just centres.
+
+   `max(0px, ...)` means this is inert until the stage genuinely has room to
+   spare, so no breakpoint has to guess where that is — the same expression
+   the metronome's band uses. */
+.main-content[data-view="drill"] {
+  --stage-band: 1120px;
+}
+
 .main-content[data-view="drill"] > .view-transition-wrapper {
   align-self: flex-start;
   align-items: flex-start;
   width: 100%;
   max-width: 1120px;
   padding-left: 24px;
+  margin-left: max(0px, calc(50% - var(--stage-band) / 2));
 }
 
 .drill-view {

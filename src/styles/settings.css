@@ -2202,12 +2202,19 @@
   opacity: 0.5;
 }
 
-/* Keyboard conflict warning in capture overlay */
+/* Keyboard conflict warning in capture overlay.
+
+   The amber was hardcoded, which meant it did not move when the themes did:
+   #f59e0b measures about 2:1 on a light page and the `strong` inside it about
+   1.5:1, so the one message in the app that says "that shortcut is already
+   taken" was the hardest thing on the screen to read. Both are tokens now, so
+   they follow every theme — and `--feedback-ok` is the amber-family token, so
+   the warning still reads as a warning rather than as an error. */
 .keybinding-conflict-warn {
   font-size: 0.78rem;
-  color: #f59e0b;
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.25);
+  color: var(--feedback-ok);
+  background: color-mix(in srgb, var(--feedback-ok) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--feedback-ok) 25%, transparent);
   border-radius: 6px;
   padding: 6px 14px;
   text-align: center;
@@ -2215,7 +2222,7 @@
 }
 
 .keybinding-conflict-warn strong {
-  color: #fbbf24;
+  color: var(--text-primary);
 }
 
 @keyframes conflict-warn-in {

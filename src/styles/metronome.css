@@ -2107,11 +2107,11 @@ span.meter-grouping-chip {
   }
 
   [data-theme-group="light"] .metronome-figure {
-    opacity: 0.38;
+    opacity: 0.5;
   }
 
   [data-theme-group="light"] .main-window[data-playing="true"] .metronome-figure {
-    opacity: 0.48;
+    opacity: 0.6;
   }
 }
 
@@ -2125,12 +2125,19 @@ span.meter-grouping-chip {
 
 /* Light themes: ink on paper reads at less of it. */
 /* On paper the hairlines vanish long before they do on a dark ground. */
+/* Ink on paper needs more of itself than ink on a dark ground, and this was
+   still short of it. Measured against every light theme's page colour, the
+   figure's lines came out at 2.83–3.16:1 at 0.48 — under the 3:1 that a
+   drawing (a "large / non-text" element) has to clear, and the owner read the
+   result as "hard to see". At 0.62 the lines reach roughly 4.0–4.6:1 and the
+   accent-coloured rod about 2.8–3.5:1, which is where it stops being a smudge
+   without becoming a second object competing with the controls. */
 [data-theme-group="light"] .metronome-figure {
-  opacity: 0.48;
+  opacity: 0.62;
 }
 
 [data-theme-group="light"] .main-window[data-playing="true"] .metronome-figure {
-  opacity: 0.58;
+  opacity: 0.72;
 }
 
 
