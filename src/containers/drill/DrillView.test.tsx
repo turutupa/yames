@@ -106,18 +106,53 @@ describe("DrillView", () => {
     const { container } = render(
       <DrillView state={drillState} currentBeat={null} animations={false} />,
     );
-    // Present but hidden, not absent. It has to keep its height or the
-    // climb jumps down the screen when a run starts — which is exactly what
-    // happened once the idle hint that used to hold this row moved onto the
-    // mode buttons as a tooltip.
+    // The row is always there and never hides — three goes at this taught
+    // that. Unmounted, it shoved the climb down the screen on Start; hidden,
+    // it flashed the whole row in and out. What changes is the VALUE: an em
+    // dash asserts nothing, where the "80" this used to show at rest was a
+    // tempo that nothing was sounding.
     const live = container.querySelector(".drill-live") as HTMLElement;
     expect(live).not.toBeNull();
-    expect(live.hasAttribute("data-idle")).toBe(true);
-    expect(live.getAttribute("aria-hidden")).toBe("true");
+    expect(live.hasAttribute("data-idle")).toBe(false);
+    const bpm = container.querySelector(".drill-current-bpm") as HTMLElement;
+    expect(bpm.textContent).toBe("—");
+    expect(bpm.hasAttribute("data-idle")).toBe(true);
     // The plan is what heads the stage instead.
     expect(
       container.querySelector(".drill-stage-head .drill-plan"),
     ).not.toBeNull();
+  });
+
+  it("never takes the beat dots away — not at rest, not through the count-in", () => {
+    // "The dots should NEVER disappear." They used to go twice over: with the
+    // whole row while the drill was stopped, and again behind an inline
+    // `visibility: hidden` for the duration of the count-in — which is
+    // precisely when they are the thing you are counting towards.
+    const dots = (c: HTMLElement) => c.querySelectorAll(".drill-dot").length;
+
+    const rest = render(
+      <DrillView state={drillState} currentBeat={null} animations={false} />,
+    );
+    expect(dots(rest.container)).toBe(4);
+    rest.unmount();
+
+    const counting = render(
+      <DrillView
+        state={{
+          ...drillState,
+          countIn: { beats: 4, done: 1 },
+          speedRamp: { ...drillState.speedRamp, active: true },
+        }}
+        currentBeat={null}
+        animations={false}
+      />,
+    );
+    // Rendered AND visible: `visibility` inherits, so a hidden row with a
+    // `visible` child was how the dots once survived alone on an otherwise
+    // blank row. Nothing here sets visibility at all now.
+    const row = counting.container.querySelector(".drill-beat-dots") as HTMLElement;
+    expect(dots(counting.container)).toBe(4);
+    expect(row.style.visibility).toBe("");
   });
 
   it("brings the tempo, the beat dots and the step position back while a run is going", () => {

@@ -589,29 +589,29 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
         </div>
       </div>
 
-      {/* The live readout, next to the picture it is narrating. Everything
-          the old header block carried is here — tempo, the count-in, the beat
-          dots and the step/bar position — and it says nothing until a run is
-          producing those numbers.
+      {/* The live readout, next to the picture it is narrating: the tempo, the
+          count-in, the beat dots and the step/bar position.
 
-          Hidden at rest rather than unmounted, and that is the whole point:
-          the row keeps its height, so pressing Start does not shove the climb
-          down the screen. It used to take the row the idle hint gave up on
-          start, which balanced exactly — then the hint moved onto the mode
-          buttons as a tooltip (U3.1b) and nothing was left holding the space.
-          The owner found it at once: "when you hit play, the row showing the
-          current bpm and the dots shows up moving everything around".
+          Every part of it is ALWAYS here. Only the values change. Three goes
+          at this row taught the rule the hard way — it was unmounted at rest
+          and shoved the climb down the screen on Start; then hidden at rest,
+          which shoved nothing but made the whole row flash in and out; and the
+          dots blinked out again during the count-in on top of that. The owner:
+          "they appear and disappear too much... the dots should NEVER
+          disappear."
 
-          `visibility`, not `opacity`: it takes the row out of the
-          accessibility tree too, so a screen reader is not read a tempo that
-          nothing is playing. The markup is identical in both states, which is
-          what makes the reserved height exactly the right height. */}
-      <div
-        className="drill-live"
-        data-testid="drill-live"
-        data-idle={showLive ? undefined : ""}
-        aria-hidden={showLive ? undefined : true}
-      >
+          So nothing here is conditional on the run. The tempo reads an em dash
+          when no tempo is being played — a dash asserts nothing, where the
+          "80" this used to show was a tempo nothing was sounding — and the
+          dots are drawn unlit rather than removed, including through the
+          count-in, where they are exactly the thing you are counting towards.
+
+          The `visibility: hidden` this replaced also had a bug worth naming:
+          `visibility` INHERITS, and a child that sets `visible` overrides a
+          hidden parent. The dots carried an inline `visibility: visible` for
+          the count-in case, so when the row was hidden they were the one thing
+          that stayed on screen. */}
+      <div className="drill-live" data-testid="drill-live">
         {isWarmingUp ? (
           <>
             <span className="drill-warmup-label">{t("drill.startingIn")}</span>
@@ -619,12 +619,13 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
           </>
         ) : (
           <>
-            <span className="drill-current-bpm">{ramp.active ? ramp.currentBpm : startBpm}</span>
+            <span className="drill-current-bpm" data-idle={showLive ? undefined : ""}>
+              {showLive ? ramp.currentBpm : "—"}
+            </span>
             <span className="drill-current-label">{t("drill.bpmUnit")}</span>
           </>
         )}
-        {/* Beat dots — hidden during warmup countdown */}
-        <div className="drill-beat-dots" style={{ visibility: isWarmingUp ? 'hidden' : 'visible' }}>
+        <div className="drill-beat-dots">
           {Array.from({ length: beatsPerBar }, (_, beatIdx) => {
             const isBeatActive = ramp.active && !isWarmingUp && activeBeat === beatIdx && isDownbeat;
             const isAccent = beatIdx === 0;

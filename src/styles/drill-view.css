@@ -25,11 +25,12 @@
   padding: 2px 0 4px;
 }
 
-/* At rest the row is still laid out — it just says nothing. Unmounting it
-   made the climb jump down the screen the moment you pressed Start, because
-   nothing else was holding those ~70px. */
-.drill-live[data-idle] {
-  visibility: hidden;
+/* At rest the tempo is an em dash, drawn back so it reads as "nothing yet"
+   rather than as a value. The row itself never hides: unmounting it made the
+   climb jump down the screen on Start, and hiding it made the whole thing
+   flash in and out instead. */
+.drill-current-bpm[data-idle] {
+  color: var(--text-faint);
 }
 
 .drill-current-bpm {
