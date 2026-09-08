@@ -142,12 +142,12 @@ describe("DrillClimb", () => {
     const { container } = render(<DrillClimb {...base} />);
     expect(screen.getByText("The climb")).toBeInTheDocument();
     // "Tonight" until the owner asked what it meant. The artboard's legend
-    // was "Last run" / "Tonight" — a comparison with a run the app does not
-    // record (U3.3), so half of it was never built and the other half was
-    // left naming nothing. The two states a cell actually has are played and
-    // not yet played.
+    // was "Last run" / "Tonight"; the two states a cell actually has while
+    // you play are played and not yet played, so those are the two that are
+    // always keyed. "Last run" joins them only when there IS one (U3.3).
     expect(screen.getByText("Remaining")).toBeInTheDocument();
     expect(screen.getByText("Played")).toBeInTheDocument();
+    expect(screen.queryByText("Last run")).not.toBeInTheDocument();
     // The sentence the swatches replaced still explains how the picture is
     // built; it moved to the legend's tooltip rather than being dropped.
     expect(
@@ -182,5 +182,88 @@ describe("DrillClimb", () => {
     expect(at()).toBe("0");
     rerender(<DrillClimb {...base} active currentStep={0} barsInStep={3} />);
     expect(at()).toBe("3");
+  });
+  // ---- The last run, under tonight's plan (U3.3) ----
+
+  const lastRun = {
+    barsPerColumn: [4, 4, 2],
+    wallStep: 2,
+    wallBar: 2,
+    wallBpm: 100,
+    furthestBpm: 100,
+    furthestBars: 2,
+    completed: false,
+    daysAgo: 4,
+  };
+
+  it("draws nothing at all when there is no comparable run", () => {
+    // The rule U3.3 inherits from this component's docblock: a chart that
+    // invents its own history is worse than one that admits it has none. An
+    // empty underlay would read as "you got nowhere".
+    const { container } = render(<DrillClimb {...base} />);
+    expect(container.querySelectorAll(".drill-climb-cell.lastrun")).toHaveLength(0);
+    expect(container.querySelectorAll(".drill-climb-wall")).toHaveLength(0);
+    expect(container.querySelector(".drill-climb-lastrun")).toBeNull();
+  });
+
+  it("marks the bars the last run played, column by column", () => {
+    const { container } = render(<DrillClimb {...base} lastRun={lastRun} />);
+    const marked = cellsOf(container).map((c) => c.classList.contains("lastrun"));
+    expect(marked).toEqual([
+      true, true, true, true,
+      true, true, true, true,
+      true, true, false, false,
+    ]);
+  });
+
+  it("keys the underlay in the legend only when there is one", () => {
+    const { rerender } = render(<DrillClimb {...base} />);
+    expect(screen.queryByText("Last run")).not.toBeInTheDocument();
+    rerender(<DrillClimb {...base} lastRun={lastRun} />);
+    expect(screen.getByText("Last run")).toBeInTheDocument();
+  });
+
+  it("stands the wall in the column the last run stopped in", () => {
+    const { container } = render(<DrillClimb {...base} lastRun={lastRun} />);
+    const walls = container.querySelectorAll(".drill-climb-wall");
+    expect(walls).toHaveLength(1);
+    const col = walls[0].closest(".drill-climb-col") as HTMLElement;
+    expect(col.querySelector(".drill-climb-bpm")?.textContent).toBe("100");
+    // A COUNT of bars, not an index — the line stands after the last bar
+    // played rather than through the middle of it.
+    expect((walls[0] as HTMLElement).style.getPropertyValue("--climb-wall-bar")).toBe("2");
+  });
+
+  it("says how far you got and when, and does not say why you stopped", () => {
+    render(<DrillClimb {...base} lastRun={lastRun} />);
+    const note = screen.getByText(/2 bars into 100 BPM/);
+    expect(note).toHaveTextContent("4 days ago");
+    // The artboard's "before the timing came apart" is not here: nothing
+    // records why a run ended, and a stopped run is a phone call as often as
+    // it is a wall.
+    expect(note.textContent).not.toMatch(/came apart/i);
+  });
+
+  it("says you finished it when you finished it", () => {
+    render(
+      <DrillClimb
+        {...base}
+        lastRun={{ ...lastRun, completed: true, daysAgo: 1 }}
+      />,
+    );
+    expect(screen.getByText(/finished this at 100 BPM/)).toHaveTextContent("yesterday");
+  });
+
+  it("keeps the underlay under a run in progress rather than replacing it", () => {
+    // You watch tonight cover last time — so a bar can be both, and the
+    // cell's own three states are unaffected.
+    const { container } = render(
+      <DrillClimb {...base} lastRun={lastRun} active currentStep={1} barsInStep={2} />,
+    );
+    const cells = cellsOf(container);
+    expect(cells[4].classList.contains("done")).toBe(true);
+    expect(cells[4].classList.contains("lastrun")).toBe(true);
+    expect(cells[6].classList.contains("current")).toBe(true);
+    expect(cells[6].classList.contains("lastrun")).toBe(true);
   });
 });

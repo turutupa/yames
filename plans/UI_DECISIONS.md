@@ -187,9 +187,56 @@ Status key: **decided** · **first release** · **open** · **deferred**
   step, one cell per bar, rising left to right so the picture's shape is the
   exercise's shape. Promoted from below the fold to the screen's main object.
 
-- **U3.3 — The last run is drawn under tonight's plan.** *decided.* Filled
-  cells show how far you got last time, so the wall is on screen before you
-  start. This is also the raw material for exercise ceilings later.
+- **U3.3 — The last run is drawn under tonight's plan.** *built.* A band
+  along the foot of every bar the last run played, a wall line where it
+  stopped, and one sentence saying how far you got and when — so the wall is
+  on screen before you press start. Still the raw material for exercise
+  ceilings later.
+
+  **What a run records.** A new `DrillRun` (`src-tauri/src/session.rs`,
+  its own `drillRunHistory` store, capped at thirty like the session
+  history) carries the plan that was running — start, target, increment,
+  decrement, bars per step, beats per bar, subdivision, mode, cyclic — the
+  position it stopped at, and `reach`: the bars actually played at each
+  tempo it touched.
+
+  *Not a field on `SavedSession`*, which is what it looks like it should
+  be. A saved session cannot exist without a `SessionReport`, which cannot
+  exist without the mic; most drills are played with the input off, and
+  those are exactly the runs whose wall this has to draw. Hanging the
+  underlay off `evalSessionHistory` would have left the picture blank for
+  everyone who practises without evaluation on, and blank for a reason
+  nothing on screen could explain. "Clear all sessions" clears both.
+
+  *Bars per tempo, not just a step index*, because a step index is only
+  meaningful against the ladder it was counted on and that ladder is not
+  recoverable later: adaptive counts a step per decision including the ones
+  that went down, and a cyclic ramp counts past the end of its own ladder.
+  Tempo is the one coordinate that means the same thing in two runs.
+
+  **Matching a run to a plan that has changed.** By tempo, never by column
+  index. A column of tonight's climb stands at a tempo; what goes under it
+  is what the past run played *at that tempo*. Tonight's 90→140 against last
+  night's 80→120 therefore draws an underlay on 90–120 and nothing above,
+  which is true — you have not played those. A run counts as the same
+  *exercise* when `barsPerStep`, `beatsPerBar` and `subdivision` match,
+  because those three are what one cell means; start, target, increment,
+  mode and cyclic are the *route* and are deliberately ignored, or nudging a
+  target from 120 to 125 would throw away every run you had ever done.
+
+  **Which run, and when there is none.** The newest run that is comparable
+  *and* shares a tempo it actually played — so "last run" means the last run
+  of this exercise, not the last time you pressed start. When there is none,
+  nothing is drawn: no swatch, no note, no empty underlay. An underlay of
+  zeroes reads as "you got nowhere", which is a different claim from "there
+  is no record of this".
+
+  **The note beside the chart, half-built on purpose.** The artboard said
+  "You got five bars into 110 before the timing came apart." The first half
+  ships. The second does not: nothing records *why* a run ended, and a
+  stopped run is a phone call as often as it is a wall. Pressing start and
+  stopping again is not recorded at all — without one completed step there
+  is no wall to draw, and the record would only crowd out the last real run.
 
 - **U3.4 — Adaptive carries a badge saying it listens.** *decided.* It is
   the one mode whose behaviour depends on the audio input being on.

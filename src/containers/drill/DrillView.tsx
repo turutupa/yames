@@ -14,6 +14,7 @@ import {
   DrillNumberField,
 } from "./DrillConfigPopover";
 import { DrillClimb } from "./DrillClimb";
+import { useDrillRuns } from "./useDrillRuns";
 import "../../styles/drill-view.css";
 
 /** Ticks per beat a drill can play — the same six the metronome offers. */
@@ -162,6 +163,13 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
       }
     }
   }
+
+  // The last run, drawn under tonight's plan (U3.3). This has to sit below
+  // `steps`, because what the underlay is matched against is the ladder the
+  // climb is about to draw — by tempo, never by column index. The same hook
+  // records tonight's run when it ends, so the two halves of U3.3 cannot
+  // drift apart in the way the two climbs once did.
+  const { underlay: lastRun, markJump } = useDrillRuns(ramp, plan, steps);
 
   // Detect step/bar shrinks and create ghost elements for exit animation
   useEffect(() => {
@@ -632,7 +640,11 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
         cyclic={cyclic}
         ghostSteps={ghostSteps}
         ghostBars={ghostBars}
+        lastRun={lastRun}
         onJump={(stepIdx, bpm, barIdx) => {
+          // Before the jump, not after: the run is about to skip bars it did
+          // not play, and the recorder must not credit them (U3.3).
+          markJump();
           startSpeedRampFrom(stepIdx, bpm, barIdx);
           startTimer(stepIdx, barIdx);
         }}

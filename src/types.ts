@@ -317,6 +317,50 @@ export type SavedSession = {
   segments?: SessionSegment[];
 };
 
+/** Bars actually played at one tempo during a drill run. */
+export type DrillReach = {
+  bpm: number;
+  bars: number;
+};
+
+/**
+ * One drill run (UI_DECISIONS U3.3), mirroring `DrillRun` in
+ * `src-tauri/src/session.rs` — read that doc for why this is its own record
+ * rather than a field on `SavedSession`.
+ *
+ * The short version: a `SavedSession` cannot exist without a `SessionReport`,
+ * which cannot exist without the mic, and most drills are played with the
+ * input off. Those runs are exactly the ones whose wall the climb has to
+ * draw.
+ */
+export type DrillRun = {
+  id: string;
+  /** Epoch ms at which the run started. */
+  timestamp: number;
+  // --- the plan that was running ---
+  startBpm: number;
+  targetBpm: number;
+  increment: number;
+  decrement: number;
+  barsPerStep: number;
+  beatsPerBar: number;
+  subdivision: number;
+  mode: string;
+  cyclic: boolean;
+  // --- how far it got ---
+  /** `speedRamp.currentStep` at the end. Counts past the ladder on a cyclic
+   *  run and counts decisions rather than rungs on an adaptive one, which is
+   *  why the picture is drawn from `reach`. */
+  reachedStep: number;
+  reachedBar: number;
+  reachedBpm: number;
+  /** The ramp reached its target rather than being stopped short. */
+  completed: boolean;
+  /** Bars played at each tempo the run touched. Empty means "no picture" —
+   *  a record from an older build degrades to no underlay, not a wrong one. */
+  reach: DrillReach[];
+};
+
 // ---------------------------------------------------------------------------
 // Diagnostic Session Logs (D1) — heavyweight per-session JSON written
 // by the backend for dev/debug. Mirrors `src-tauri/src/session_log.rs`.

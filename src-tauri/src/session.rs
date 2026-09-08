@@ -781,6 +781,85 @@ pub struct SavedSession {
 
 pub const MAX_SESSION_HISTORY: usize = 30;
 
+/// Bars actually played at one tempo during a drill run.
+///
+/// A pair rather than a map because a JSON object keyed by a number is
+/// awkward on both sides of the bridge, and the list is never long — one
+/// entry per distinct tempo the run touched.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct DrillReach {
+    pub bpm: u16,
+    pub bars: u16,
+}
+
+/// One drill run, recorded so the next one can be drawn against it
+/// (UI_DECISIONS U3.3 — the last run under tonight's plan).
+///
+/// # Why this is not a field on `SavedSession`
+///
+/// A `SavedSession` is an *evaluation* record: it cannot exist without a
+/// `SessionReport`, which cannot exist without the mic on. Most drills are
+/// played with the input off — and those are exactly the runs whose wall the
+/// climb has to draw. Hanging the underlay off `evalSessionHistory` would
+/// have made the picture blank for everyone who practises without the mic,
+/// which is a silent, invisible failure. So a drill run is its own record in
+/// its own store key, written when the ramp stops, not when a session ends.
+///
+/// # What is here, and why each piece is needed
+///
+/// The *plan* half (`start_bpm` … `cyclic`) is what lets the frontend decide
+/// whether a stored run is comparable to tonight's plan at all — see
+/// `lastRun.ts`, which requires `beats_per_bar`, `subdivision` and
+/// `bars_per_step` to match, because those three are what one cell of the
+/// climb *means*.
+///
+/// The *reach* half is deliberately recorded as bars-per-tempo rather than
+/// only as a step index. A step index is only meaningful against the ladder
+/// the run was following, and that ladder is not recoverable later: adaptive
+/// counts a step per decision (including the ones that went down), and a
+/// cyclic ramp counts past the end of its own ladder and comes back. Tempo is
+/// the one coordinate that means the same thing in both runs, so tempo is
+/// what is stored. `reached_step` / `reached_bar` / `reached_bpm` are kept
+/// alongside it as the literal position the run stopped at.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DrillRun {
+    pub id: String,
+    /// Epoch ms at which the run *started* — the note beside the climb says
+    /// how long ago you practised, and that is when you practised.
+    pub timestamp: u64,
+    // --- the plan that was running ---
+    pub start_bpm: u16,
+    pub target_bpm: u16,
+    pub increment: u16,
+    pub decrement: u16,
+    pub bars_per_step: u16,
+    pub beats_per_bar: u8,
+    pub subdivision: u8,
+    pub mode: String,
+    pub cyclic: bool,
+    // --- how far it got ---
+    /// `speed_ramp.current_step` at the end. May exceed the ladder's length
+    /// on a cyclic run, and counts decisions rather than rungs on an adaptive
+    /// one, which is why the picture is drawn from `reach` instead.
+    pub reached_step: u32,
+    /// Bars completed inside that step.
+    pub reached_bar: u16,
+    pub reached_bpm: u16,
+    /// The ramp reached its target, rather than being stopped short.
+    pub completed: bool,
+    /// Bars played at each tempo the run touched, most bars seen at each.
+    /// Empty is legal (and means "no picture"), so old or partial records
+    /// degrade to no underlay rather than to a wrong one.
+    #[serde(default)]
+    pub reach: Vec<DrillReach>,
+}
+
+/// Same cap as the session history: thirty runs is more than enough to find
+/// the last comparable one, and this lives in `settings.json` alongside
+/// everything else the app stores.
+pub const MAX_DRILL_RUN_HISTORY: usize = 30;
+
 /// Generate a one-liner comment based on the grade and score.
 fn generate_comment(grade: &str, score: u32, scored_beats: u32) -> String {
     if scored_beats < 8 {
@@ -1328,5 +1407,75 @@ mod tests {
         assert!(acc.all_segments().is_empty(), "full segments");
         assert_eq!(acc.session_start_secs(), None);
         assert_eq!(acc.session_start_ms(), None);
+    }
+
+    // ---------------------------------------------------------------------
+    // DrillRun (UI_DECISIONS U3.3) — the record the climb's underlay reads.
+    // ---------------------------------------------------------------------
+
+    /// A run written by a build that predates `reach` must still load. It
+    /// degrades to "no underlay", which is the whole point of U3.3's rule: a
+    /// chart that admits it has no history beats one that invents some.
+    #[test]
+    fn drill_run_loads_without_its_reach() {
+        let json = r#"{
+            "id": "r1", "timestamp": 1234, "startBpm": 80, "targetBpm": 120,
+            "increment": 5, "decrement": 3, "barsPerStep": 12, "beatsPerBar": 4,
+            "subdivision": 1, "mode": "linear", "cyclic": false,
+            "reachedStep": 6, "reachedBar": 5, "reachedBpm": 110,
+            "completed": false
+        }"#;
+        let run: DrillRun = serde_json::from_str(json).expect("old record loads");
+        assert!(run.reach.is_empty());
+        assert_eq!(run.reached_bpm, 110);
+    }
+
+    /// The wire names are what `types.ts` mirrors and what sits in
+    /// `settings.json`; renaming one silently blanks the underlay, because
+    /// every call site of `save_drill_run` is fire-and-forget.
+    #[test]
+    fn drill_run_serialises_camel_case() {
+        let run = DrillRun {
+            id: "r1".into(),
+            timestamp: 1,
+            start_bpm: 80,
+            target_bpm: 120,
+            increment: 5,
+            decrement: 3,
+            bars_per_step: 12,
+            beats_per_bar: 4,
+            subdivision: 1,
+            mode: "linear".into(),
+            cyclic: false,
+            reached_step: 6,
+            reached_bar: 5,
+            reached_bpm: 110,
+            completed: false,
+            reach: vec![DrillReach { bpm: 80, bars: 12 }],
+        };
+        let v = serde_json::to_value(&run).unwrap();
+        for key in [
+            "startBpm", "targetBpm", "barsPerStep", "beatsPerBar", "reachedStep", "reachedBar",
+            "reachedBpm", "completed", "reach",
+        ] {
+            assert!(v.get(key).is_some(), "missing {key}");
+        }
+        assert_eq!(v["reach"][0]["bars"], 12);
+    }
+
+    /// `SavedSession` is untouched by U3.3 — a drill run is its own record,
+    /// so nothing about the evaluation history's shape may have moved.
+    #[test]
+    fn saved_session_still_loads_without_its_optional_fields() {
+        let report = serde_json::to_value(SessionAccumulator::new().report()).unwrap();
+        let json = serde_json::json!({
+            "id": "s1", "timestamp": 1, "bpm": 100, "timeSignature": 4,
+            "report": report,
+        });
+        let parsed: Result<SavedSession, _> = serde_json::from_value(json);
+        assert!(parsed.is_ok(), "old session record must still load");
+        let s = parsed.unwrap();
+        assert_eq!(s.preset_id, None);
+        assert!(s.segments.is_none());
     }
 }

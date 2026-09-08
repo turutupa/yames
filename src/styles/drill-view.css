@@ -158,6 +158,13 @@
   --climb-cell-w: 10px;
   --climb-cell-gap: 3px;
   --climb-col-gap: 18px;
+  /* The last run is drawn in the ink, not in the accent (U3.3). The accent is
+     this run — the plan ahead of you, the bars behind you, the playhead — and
+     a fourth tint of it would have joined that scale and read as a fourth
+     amount of "now". History is a different kind of thing, so it is drawn in
+     the text colour, which is legible against the cell in every theme
+     because the cell is mixed from the accent and the ground. */
+  --climb-lastrun-ink: color-mix(in srgb, var(--text-secondary) 70%, transparent);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -217,6 +224,17 @@
 
 .drill-climb-swatch.plan {
   background: color-mix(in srgb, var(--accent) 26%, transparent);
+}
+
+/* The last run's key (U3.3). A sample of the band, not a filled square: a
+   third tint of the accent between "Remaining" and "Played" would have been a
+   third value on one scale, and the eye reads a scale as one quantity. The
+   past is a different quantity, so it gets a different mark. */
+.drill-climb-swatch.last {
+  background: transparent;
+  border-bottom: 3px solid var(--climb-lastrun-ink);
+  border-radius: 0;
+  height: 9px;
 }
 
 /* A step is always the same width, and the track runs off the edge when the
@@ -420,6 +438,69 @@
   box-shadow:
     0 0 8px var(--accent-glow),
     0 0 18px var(--accent-glow);
+}
+
+/* ---- The last run, under tonight's plan (U3.3) ----
+
+   A band along the foot of every bar the last comparable run played. Under,
+   literally: the cell keeps its own fill and its own three states on top, so
+   the underlay survives the bar being planned, played and playing, and you
+   watch tonight's run cover it.
+
+   Not a fourth fill. A cell that was 26% accent for "ahead", 78% for
+   "behind", 100% for "now" and some fourth value for "last time" would put
+   two unrelated facts on one scale, and the eye would read the fourth value
+   as an amount of tonight rather than a different night. */
+.drill-climb .drill-climb-cells .drill-climb-cell.lastrun {
+  position: relative;
+}
+
+.drill-climb .drill-climb-cells .drill-climb-cell.lastrun::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  border-radius: 0 0 2px 2px;
+  background: var(--climb-lastrun-ink);
+  pointer-events: none;
+}
+
+/* The wall: where the last run stopped, standing at the trailing edge of the
+   last bar it played. Drawn like the playhead and deliberately not as loud —
+   it is the thing you are trying to get past, and it has to be readable
+   before you press start, next to a playhead that does not exist yet.
+
+   `--climb-wall-bar` is a COUNT of bars, not an index, so the line lands
+   after that many cells rather than through the middle of one. */
+.drill-climb-wall {
+  position: absolute;
+  /* Pinned to the top of the column, which is where the cells are — the
+     playhead pins to the bottom because it reaches up past the whole track,
+     and this one only spans its own column's bars. */
+  top: 0;
+  left: calc(
+    var(--climb-wall-bar, 0) * (var(--climb-cell-w) + var(--climb-cell-gap)) -
+      var(--climb-cell-gap) / 2 - 1px
+  );
+  width: 2px;
+  height: calc(var(--climb-cell-h) + 6px);
+  border-radius: 1px;
+  background: var(--climb-lastrun-ink);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+/* One sentence, under the picture rather than beside it: the track scrolls,
+   and a note parked inside it leaves the screen along with the columns it is
+   describing. */
+.drill-climb-lastrun {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--text-tertiary);
 }
 
 .drill-climb-cell.exiting {

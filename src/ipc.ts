@@ -653,6 +653,25 @@ export async function clearAllSessions(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// Drill runs (UI_DECISIONS U3.3)
+//
+// Their own store, not a field on SavedSession: a saved session needs a
+// SessionReport, which needs the mic, and most drills are played without it.
+// See `DrillRun` in `src-tauri/src/session.rs`.
+// ---------------------------------------------------------------------------
+
+import type { DrillRun } from "./types";
+
+export async function saveDrillRun(run: DrillRun): Promise<void> {
+  return invoke("save_drill_run", { run });
+}
+
+/** Newest first, the same order `getSessionHistory` returns. */
+export async function getDrillRuns(): Promise<DrillRun[]> {
+  return invoke<DrillRun[]>("get_drill_runs");
+}
+
+// ---------------------------------------------------------------------------
 // Diagnostic Session Logs (D1)
 //
 // Heavier per-session JSON dumps written by the eval pipeline once

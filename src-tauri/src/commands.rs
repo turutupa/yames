@@ -1681,7 +1681,60 @@ pub fn clear_all_sessions(app_handle: AppHandle) -> Result<(), String> {
         .map_err(|e| e.to_string())?;
     let empty: Vec<crate::session::SavedSession> = Vec::new();
     store.set("evalSessionHistory", serde_json::to_value(&empty).unwrap());
+    // U3.3 — the drill-run history is practice history too. "Clear all
+    // sessions" is the one gesture a user has for "forget what I played", and
+    // leaving the runs behind would mean the climb still draws last month's
+    // wall after they asked for it to be gone.
+    let no_runs: Vec<crate::session::DrillRun> = Vec::new();
+    store.set("drillRunHistory", serde_json::to_value(&no_runs).unwrap());
     Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Drill runs (UI_DECISIONS U3.3)
+//
+// Separate from `evalSessionHistory` on purpose — see the `DrillRun` doc in
+// `session.rs`. The short version: a saved session needs a `SessionReport`,
+// which needs the mic, and most drills are played without it.
+// ---------------------------------------------------------------------------
+
+#[tauri::command]
+pub fn save_drill_run(
+    run: crate::session::DrillRun,
+    app_handle: AppHandle,
+) -> Result<(), String> {
+    use tauri_plugin_store::StoreExt;
+    let store = app_handle
+        .store("settings.json")
+        .map_err(|e| e.to_string())?;
+    let mut history: Vec<crate::session::DrillRun> = store
+        .get("drillRunHistory")
+        .and_then(|v| serde_json::from_value(v.clone()).ok())
+        .unwrap_or_default();
+    // Newest first, the same order `get_session_history` hands back, so the
+    // frontend's "the most recent comparable run" is a scan from index 0.
+    history.insert(0, run);
+    history.truncate(crate::session::MAX_DRILL_RUN_HISTORY);
+    store.set("drillRunHistory", serde_json::to_value(&history).unwrap());
+    Ok(())
+}
+
+#[tauri::command]
+pub fn get_drill_runs(app_handle: AppHandle) -> Vec<crate::session::DrillRun> {
+    use tauri_plugin_store::StoreExt;
+    app_handle
+        .store("settings.json")
+        .ok()
+        .and_then(|store| {
+            store
+                .get("drillRunHistory")
+                .and_then(|v| serde_json::from_value(v.clone()).ok())
+        })
+        // A store written by a build whose `DrillRun` had a different shape
+        // deserialises to `None` and lands here: no runs, so no underlay.
+        // The alternative — a partial parse — would draw a wall that never
+        // happened, which U3.3 rules out explicitly.
+        .unwrap_or_default()
 }
 
 // ---------------------------------------------------------------------------

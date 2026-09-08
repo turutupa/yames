@@ -1,6 +1,7 @@
 import type React from "react";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import type { ClimbUnderlay } from "./lastRun";
 
 export interface DrillClimbProps {
   /** One BPM per tempo step, in the order the ramp will play them. */
@@ -17,6 +18,13 @@ export interface DrillClimbProps {
   ghostSteps?: number[];
   /** Bars that have just been removed, same idea, one per column. */
   ghostBars?: number;
+  /**
+   * How far the last comparable run got, matched to THIS plan's columns
+   * by tempo (U3.3). Null or absent draws nothing at all — no swatch, no
+   * note, no empty underlay — because there is no history to draw.
+   * `lastRun.ts` decides what "comparable" means and why.
+   */
+  lastRun?: ClimbUnderlay | null;
   onJump: (stepIdx: number, bpm: number, barIdx: number) => void;
 }
 
@@ -33,13 +41,20 @@ export interface DrillClimbProps {
  * BPM onto the available rise. That is the one line that makes a zigzag look
  * like a zigzag.
  *
- * What is deliberately missing: the last-run underlay (U3.3) and the note
- * beside the chart ("you got five bars into 110 before the timing came
- * apart"). Both need per-run history the app does not record yet — a saved
- * session carries a timestamp, a tempo and a score, and nothing that says
- * which drill it was or how far up the ramp it got — and a chart that invents
- * its own history is worse than one that admits it has none. So the legend's
- * filled swatch is the run you are playing now, not the one you played last.
+ * The last run is drawn under tonight's plan (U3.3): a band along the foot of
+ * every bar the last comparable run played, a wall line where it stopped, and
+ * one sentence saying so. It arrived once a run recorded which tempos it
+ * actually played and for how many bars — see `DrillRun` in
+ * `src-tauri/src/session.rs`, and `lastRun.ts` for how a past run is matched
+ * to a plan that has changed since. When nothing matches, nothing is drawn:
+ * no swatch, no note, no empty underlay. A chart that invents its own history
+ * is worse than one that admits it has none, and an empty underlay would read
+ * as "you got nowhere" rather than "there is no record".
+ *
+ * The artboard's note said "...before the timing came apart". That half is
+ * not built, because nothing records WHY a run ended — a stopped run is a
+ * phone call as often as it is a wall. The sentence says how far you got and
+ * when, which is what the data supports.
  *
  * Rendered as its own component because Zen mounts the same object (U6.3) and
  * two implementations of one picture have already drifted apart once.
@@ -53,6 +68,7 @@ export function DrillClimb({
   cyclic,
   ghostSteps = [],
   ghostBars = 0,
+  lastRun = null,
   onJump,
 }: DrillClimbProps) {
   const { t } = useTranslation();
@@ -80,6 +96,17 @@ export function DrillClimb({
   // same columns, so the index has to wrap to find the column being played.
   const effectiveStep =
     cyclic && steps.length > 0 ? currentStep % steps.length : currentStep;
+
+  // "today" / "yesterday" / "N days ago". Three keys rather than one plural
+  // string: i18next plurals would make English's plural categories the key
+  // set every one of the fifteen locales has to carry, and
+  // `i18n.locales.test.ts` requires exactly the same keys everywhere.
+  const whenLastRun = (days: number) =>
+    days <= 0
+      ? t("drill.lastRunToday")
+      : days === 1
+        ? t("drill.lastRunYesterday")
+        : t("drill.lastRunDaysAgo", { days });
 
   // A step is always the same width, so a long plan runs off the edge — and
   // the way you read it is by moving through it. While a run is going the
@@ -112,6 +139,14 @@ export function DrillClimb({
             <span className="drill-climb-swatch plan" aria-hidden="true" />
             {t("drill.climbLegendPlan")}
           </span>
+          {/* Only when there is one. A permanent "Last run" key over an empty
+              underlay would claim a history the app does not have. */}
+          {lastRun && (
+            <span className="drill-climb-key">
+              <span className="drill-climb-swatch last" aria-hidden="true" />
+              {t("drill.climbLegendLast")}
+            </span>
+          )}
         </span>
       </div>
       <div className="drill-climb-scroll" ref={scrollRef}>
@@ -120,6 +155,10 @@ export function DrillClimb({
             const isDone = active && !cyclic ? stepIdx < currentStep : false;
             const isCurrent = stepIdx === effectiveStep && active;
             const base = 140 + stepIdx * 24;
+            // Bars the last run played AT THIS TEMPO — the column index is
+            // not the past run's column index, and `lastRun.ts` explains at
+            // length why it must not be treated as one.
+            const lastBars = lastRun?.barsPerColumn[stepIdx] ?? 0;
             return (
               <div
                 key={stepIdx}
@@ -145,6 +184,21 @@ export function DrillClimb({
                     aria-hidden="true"
                   />
                 )}
+                {/* The wall. Drawn like the playhead but muted and static:
+                    the whole point of U3.3 is that it is on screen BEFORE you
+                    press start, so you can see what you are walking into.
+                    It stands at the trailing edge of the last bar the run
+                    played, not through its middle — that edge is where the
+                    playing stopped. */}
+                {lastRun?.wallStep === stepIdx && (
+                  <span
+                    className="drill-climb-wall"
+                    style={
+                      { "--climb-wall-bar": lastRun.wallBar } as React.CSSProperties
+                    }
+                    aria-hidden="true"
+                  />
+                )}
                 <div className="drill-climb-cells">
                   {Array.from({ length: barsPerStep }, (_, barIdx) => {
                     const barDone = isDone || (isCurrent && barIdx < barsInStep);
@@ -167,7 +221,7 @@ export function DrillClimb({
                         tabIndex={barIdx === 0 ? 0 : -1}
                         title={t("drill.jumpTo", { bpm, bar: barIdx + 1 })}
                         aria-label={t("drill.jumpTo", { bpm, bar: barIdx + 1 })}
-                        className={`drill-grid-cell drill-climb-cell ${barDone ? "done" : ""} ${barActive ? "current" : ""}`}
+                        className={`drill-grid-cell drill-climb-cell ${barDone ? "done" : ""} ${barActive ? "current" : ""} ${barIdx < lastBars ? "lastrun" : ""}`}
                         data-first-cell={
                           stepIdx === 0 && barIdx === 0 ? "" : undefined
                         }
@@ -211,6 +265,27 @@ export function DrillClimb({
           ))}
         </div>
       </div>
+      {/* The artboard put this beside the chart. Here it goes under it: the
+          track is a scroller that can be several screens wide, and a note
+          parked inside it scrolls out of the picture it is describing.
+
+          It says where you got and when. It does not say why you stopped —
+          nothing records that, and "before the timing came apart" is a
+          diagnosis a stop button cannot make. */}
+      {lastRun && (
+        <p className="drill-climb-lastrun">
+          {lastRun.completed
+            ? t("drill.lastRunCleared", {
+                bpm: lastRun.furthestBpm,
+                when: whenLastRun(lastRun.daysAgo),
+              })
+            : t("drill.lastRunWall", {
+                bars: lastRun.furthestBars,
+                bpm: lastRun.furthestBpm,
+                when: whenLastRun(lastRun.daysAgo),
+              })}
+        </p>
+      )}
     </div>
   );
 }
