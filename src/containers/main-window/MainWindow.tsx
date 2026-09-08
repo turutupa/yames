@@ -1047,6 +1047,7 @@ export function MainWindow() {
               activeSub={activeSub}
               isDownbeat={isDownbeat}
               isPlaying={state.isPlaying}
+              countIn={state.countIn ?? { beats: 0, done: 0 }}
               onEdit={chainSession.editWhileRunning}
             />
           ) : (

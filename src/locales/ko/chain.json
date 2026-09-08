@@ -122,6 +122,16 @@
       "lastStep": "마지막 단계",
       "roundAgain": "그리고 한 바퀴 더",
       "backToPlaying": "재생으로 돌아가기"
+    },
+    "countIn": {
+      "label": "카운트인",
+      "off": "카운트인 없음",
+      "startingIn": "시작까지",
+      "beats": "{{count}}박",
+      "beats_one": "{{count}}박",
+      "beats_other": "{{count}}박",
+      "fewer": "카운트인 박 줄이기",
+      "more": "카운트인 박 늘리기"
     }
   }
 }

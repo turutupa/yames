@@ -122,6 +122,16 @@
       "lastStep": "Последний шаг",
       "roundAgain": "и ещё круг",
       "backToPlaying": "Вернуться к игре"
+    },
+    "countIn": {
+      "label": "Отсчёт",
+      "off": "Без отсчёта",
+      "startingIn": "старт через",
+      "beats": "{{count}} долей",
+      "beats_one": "{{count}} доля",
+      "beats_other": "{{count}} долей",
+      "fewer": "Меньше долей отсчёта",
+      "more": "Больше долей отсчёта"
     }
   }
 }

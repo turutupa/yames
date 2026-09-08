@@ -502,3 +502,56 @@ describe("a chain edited while it runs", () => {
     ).toEqual(IDLE_CHAIN_RUN);
   });
 });
+
+describe("the count-in at the top of a chain", () => {
+  it("counts you into the first step, after the step is on the engine", () => {
+    /*
+     * Ordering is the whole thing. The beats have to sound at the tempo of
+     * the step they are counting you into, and step one's tempo does not
+     * exist on the engine until `applyStep` puts it there — so a count-in
+     * emitted first would count you in at whatever the metronome happened to
+     * be set to.
+     */
+    const chain = { ...chainOf([step("one", { kind: "bars", bars: 4 })]), countIn: 4 };
+    const { effects } = chainReduce(chain, IDLE_CHAIN_RUN, { kind: "start", seconds: 0 });
+    expect(effects.map((e) => e.kind)).toEqual(["applyStep", "countIn"]);
+    expect(effects[1]).toEqual({ kind: "countIn", beats: 4 });
+  });
+
+  it("emits nothing extra for a chain that does not ask for one", () => {
+    // Every chain saved before this existed has no `countIn` at all, and must
+    // start exactly as it always did.
+    const plain = chainOf([step("one", { kind: "bars", bars: 4 })]);
+    const { effects } = chainReduce(plain, IDLE_CHAIN_RUN, { kind: "start", seconds: 0 });
+    expect(effects.map((e) => e.kind)).toEqual(["applyStep"]);
+
+    const zero = chainReduce({ ...plain, countIn: 0 }, IDLE_CHAIN_RUN, { kind: "start", seconds: 0 });
+    expect(zero.effects.map((e) => e.kind)).toEqual(["applyStep"]);
+  });
+
+  it("does not count you in again on the way round", () => {
+    // It is the top of the RUN, not the top of every pass. Between steps the
+    // count-in is a transition and says so for itself.
+    const chain = {
+      ...chainOf([step("one", { kind: "bars", bars: 1 }), step("two", { kind: "bars", bars: 1 })], 0),
+      countIn: 4,
+    };
+    let state = chainReduce(chain, IDLE_CHAIN_RUN, { kind: "start", seconds: 0 }).state;
+    const seen: string[] = [];
+    for (let i = 0; i < 200 && seen.length < 40; i++) {
+      const step = chainReduce(chain, state, { kind: "beat", isDownbeat: true, seconds: i });
+      state = step.state;
+      for (const e of step.effects) seen.push(e.kind);
+    }
+    expect(seen.filter((k) => k === "countIn")).toHaveLength(0);
+  });
+
+  it("an empty chain finishes rather than counting you into nothing", () => {
+    const { effects } = chainReduce(
+      { ...chainOf([]), countIn: 4 },
+      IDLE_CHAIN_RUN,
+      { kind: "start", seconds: 0 },
+    );
+    expect(effects.map((e) => e.kind)).toEqual(["finished"]);
+  });
+});

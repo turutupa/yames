@@ -11,6 +11,7 @@ export {
   renameChain,
   upsertChain,
   reorderSteps,
+  setChainCountIn,
   setChainRepeat,
   updateStep,
 } from "./chains";

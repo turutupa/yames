@@ -122,6 +122,16 @@
       "lastStep": "Last step",
       "roundAgain": "then round again",
       "backToPlaying": "Back to playing"
+    },
+    "countIn": {
+      "label": "Count in",
+      "off": "No count-in",
+      "startingIn": "starting in",
+      "beats": "{{count}} beats",
+      "beats_one": "{{count}} beat",
+      "beats_other": "{{count}} beats",
+      "fewer": "Fewer count-in beats",
+      "more": "More count-in beats"
     }
   }
 }

@@ -122,6 +122,16 @@
       "lastStep": "最後のステップ",
       "roundAgain": "そしてもう一周",
       "backToPlaying": "再生に戻る"
+    },
+    "countIn": {
+      "label": "カウント",
+      "off": "カウントなし",
+      "startingIn": "開始まで",
+      "beats": "{{count}} 拍",
+      "beats_one": "{{count}} 拍",
+      "beats_other": "{{count}} 拍",
+      "fewer": "カウントを減らす",
+      "more": "カウントを増やす"
     }
   }
 }

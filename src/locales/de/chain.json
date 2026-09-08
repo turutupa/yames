@@ -122,6 +122,16 @@
       "lastStep": "Letzter Schritt",
       "roundAgain": "dann noch eine Runde",
       "backToPlaying": "Zurück zum Spielen"
+    },
+    "countIn": {
+      "label": "Einzähler",
+      "off": "Kein Einzähler",
+      "startingIn": "Start in",
+      "beats": "{{count}} Schläge",
+      "beats_one": "{{count}} Schlag",
+      "beats_other": "{{count}} Schläge",
+      "fewer": "Weniger Einzählschläge",
+      "more": "Mehr Einzählschläge"
     }
   }
 }

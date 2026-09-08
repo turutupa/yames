@@ -9,6 +9,7 @@ import {
   removeStep,
   renameChain,
   reorderSteps,
+  setChainCountIn,
   setChainRepeat,
   upsertChain,
   updateStep,
@@ -270,5 +271,34 @@ describe("upsertChain", () => {
     let list: Chain[] = [];
     for (let i = 0; i < 5; i++) list = upsertChain(list, a);
     expect(list.map((c) => c.id)).toEqual(["a"]);
+  });
+});
+
+describe("the count-in at the top of a chain", () => {
+  it("is clamped to what the engine will take", () => {
+    // `arm_count_in` accepts 0..8, and past two bars of four a count-in has
+    // stopped being a count-in and become a wait.
+    const chain = createChain("Warm-up");
+    expect(setChainCountIn(chain, 4).countIn).toBe(4);
+    expect(setChainCountIn(chain, 99).countIn).toBe(8);
+    // `undefined` and 0 are the same answer — no count-in — and clamping a
+    // chain that already has none returns the chain itself, so this reads
+    // the meaning rather than the literal.
+    expect(setChainCountIn(chain, -3).countIn ?? 0).toBe(0);
+    expect(setChainCountIn(setChainCountIn(chain, 6), -3).countIn).toBe(0);
+    expect(setChainCountIn(chain, 2.6).countIn).toBe(3);
+  });
+
+  it("returns the same chain when nothing changed", () => {
+    // The header's steppers run against the ends of the range, and a new
+    // object each press would mark the chain dirty for doing nothing.
+    const chain = setChainCountIn(createChain("Warm-up"), 4);
+    expect(setChainCountIn(chain, 4)).toBe(chain);
+    const none = createChain("Cold");
+    expect(setChainCountIn(none, 0)).toBe(none);
+  });
+
+  it("a new chain has none, like every chain saved before it existed", () => {
+    expect(createChain("Warm-up").countIn).toBeUndefined();
   });
 });

@@ -38,6 +38,8 @@ interface ChainPlayerProps {
   activeSub: number;
   isDownbeat: boolean;
   isPlaying: boolean;
+  /** The engine's live count-in. `beats` of 0 is nothing counting. */
+  countIn: { beats: number; done: number };
   /** Back to the paragraph. The chain keeps running. */
   onEdit: () => void;
 }
@@ -108,11 +110,22 @@ export function ChainPlayer({
   activeSub,
   isDownbeat,
   isPlaying,
+  countIn,
   onEdit,
 }: ChainPlayerProps) {
   const { t } = useTranslation();
   const next = chain.steps[stepNumber] ?? null;
   const done = progress(step, remaining);
+  /**
+   * Counting you in, at the tempo you are about to play.
+   *
+   * The big slot carries the count rather than the tempo while this runs.
+   * The number is the loudest thing on the screen and during a count-in the
+   * only number that matters is how many are left — the tempo is the thing
+   * the beats are already telling you.
+   */
+  const counting = countIn.beats > 0 && countIn.done < countIn.beats;
+  const left = Math.max(0, countIn.beats - countIn.done);
 
   // The ribbon: the whole routine as one wordless bar, each step as wide as
   // it is long. Alternative C from the sketches, stripped of its labels —
@@ -147,8 +160,12 @@ export function ChainPlayer({
       </div>
       <div className="chain-player-name">{step.name}</div>
 
-      <div className="chain-player-bpm">{step.bpm}</div>
-      <div className="chain-player-bpm-label">{t("drill.bpmUnit")}</div>
+      <div className={`chain-player-bpm${counting ? " counting" : ""}`}>
+        {counting ? left : step.bpm}
+      </div>
+      <div className="chain-player-bpm-label">
+        {counting ? t("chain.countIn.startingIn") : t("drill.bpmUnit")}
+      </div>
 
       <div className="chain-player-beats" aria-hidden="true">
         {groups.map((size, groupIndex) => {

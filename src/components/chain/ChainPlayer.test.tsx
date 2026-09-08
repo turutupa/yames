@@ -51,6 +51,7 @@ function draw(over: Partial<Parameters<typeof ChainPlayer>[0]> = {}) {
       activeSub={0}
       isDownbeat
       isPlaying
+      countIn={{ beats: 0, done: 0 }}
       onEdit={() => {}}
       {...over}
     />,
@@ -131,6 +132,21 @@ describe("the chain, playing", () => {
     expect(container.querySelectorAll(".chain-player-dot[data-live]")).toHaveLength(1);
     const stopped = draw({ isPlaying: false }).container;
     expect(stopped.querySelectorAll(".chain-player-dot[data-live]")).toHaveLength(0);
+  });
+
+  it("the big slot carries the count-in while one is running", () => {
+    // During a count-in the only number that matters is how many are left;
+    // the tempo is what the beats themselves are telling you.
+    const { container } = draw({ countIn: { beats: 4, done: 1 } });
+    expect(container.querySelector(".chain-player-bpm")!.textContent).toBe("3");
+    expect(container.querySelector(".chain-player-bpm-label")!.textContent).toBe("starting in");
+    expect(container.querySelector(".chain-player-bpm")!.className).toContain("counting");
+  });
+
+  it("gives the slot back the moment the count-in is spent", () => {
+    const { container } = draw({ countIn: { beats: 4, done: 4 } });
+    expect(container.querySelector(".chain-player-bpm")!.textContent).toBe("70");
+    expect(container.querySelector(".chain-player-bpm-label")!.textContent).toBe("BPM");
   });
 
   it("says the chain is about to end rather than naming a step that is not there", () => {

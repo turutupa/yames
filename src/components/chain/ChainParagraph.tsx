@@ -4,6 +4,7 @@ import {
   duplicateStep,
   removeStep,
   reorderSteps,
+  setChainCountIn,
   setChainRepeat,
   updateStep,
 } from "../../chain";
@@ -117,6 +118,34 @@ export function ChainParagraph({
             {t("chain.player.backToPlaying")}
           </button>
         )}
+        {/* Beats counted out before step one, at step one's tempo. A count
+            of beats and not a switch, for the reason the repeat below is: the
+            useful question is how many, and "off" is simply none of them. */}
+        <span className="chain-repeat-label">{t("chain.countIn.label")}</span>
+        <div className="chain-stepper-field">
+          <button
+            type="button"
+            aria-label={t("chain.countIn.fewer")}
+            title={t("chain.countIn.fewer")}
+            onClick={() => onChange(setChainCountIn(chain, (chain.countIn ?? 0) - 1))}
+          >
+            −
+          </button>
+          <span className="chain-stepper-value">
+            {chain.countIn
+              ? t("chain.countIn.beats", { count: chain.countIn })
+              : t("chain.countIn.off")}
+          </span>
+          <button
+            type="button"
+            aria-label={t("chain.countIn.more")}
+            title={t("chain.countIn.more")}
+            onClick={() => onChange(setChainCountIn(chain, (chain.countIn ?? 0) + 1))}
+          >
+            +
+          </button>
+        </div>
+
         {/* Repeat is a count, never a switch (U9.6): "three times through" and
             "until I stop" are one control at different numbers. */}
         <span className="chain-repeat-label">{t("chain.repeat.label")}</span>

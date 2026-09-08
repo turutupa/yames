@@ -605,6 +605,16 @@
   color: var(--accent);
 }
 
+/* The count-in owns the big slot while it runs, and wears the quiet ink so
+   the moment the tempo arrives is visible from across the room. */
+.chain-player-bpm.counting {
+  color: var(--text-secondary);
+}
+
+.chain-player[data-playing="true"] .chain-player-bpm.counting {
+  color: var(--text-secondary);
+}
+
 .chain-player-bpm-label {
   font-size: 0.8rem;
   letter-spacing: 0.3em;

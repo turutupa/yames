@@ -122,6 +122,16 @@
       "lastStep": "Ostatni krok",
       "roundAgain": "i jeszcze raz",
       "backToPlaying": "Wróć do grania"
+    },
+    "countIn": {
+      "label": "Odliczenie",
+      "off": "Bez odliczenia",
+      "startingIn": "start za",
+      "beats": "{{count}} miar",
+      "beats_one": "{{count}} miara",
+      "beats_other": "{{count}} miar",
+      "fewer": "Mniej miar odliczenia",
+      "more": "Więcej miar odliczenia"
     }
   }
 }

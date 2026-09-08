@@ -122,6 +122,16 @@
       "lastStep": "最後一步",
       "roundAgain": "然後再一輪",
       "backToPlaying": "回到播放"
+    },
+    "countIn": {
+      "label": "預備拍",
+      "off": "無預備拍",
+      "startingIn": "還有",
+      "beats": "{{count}} 拍",
+      "beats_one": "{{count}} 拍",
+      "beats_other": "{{count}} 拍",
+      "fewer": "減少預備拍",
+      "more": "增加預備拍"
     }
   }
 }

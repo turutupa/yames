@@ -122,6 +122,16 @@
       "lastStep": "Último passo",
       "roundAgain": "e mais uma volta",
       "backToPlaying": "Voltar a tocar"
+    },
+    "countIn": {
+      "label": "Contagem",
+      "off": "Sem contagem",
+      "startingIn": "começa em",
+      "beats": "{{count}} tempos",
+      "beats_one": "{{count}} tempo",
+      "beats_other": "{{count}} tempos",
+      "fewer": "Menos tempos de contagem",
+      "more": "Mais tempos de contagem"
     }
   }
 }

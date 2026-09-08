@@ -122,6 +122,16 @@
       "lastStep": "Laatste stap",
       "roundAgain": "dan nog een ronde",
       "backToPlaying": "Terug naar spelen"
+    },
+    "countIn": {
+      "label": "Aftellen",
+      "off": "Niet aftellen",
+      "startingIn": "start over",
+      "beats": "{{count}} tellen",
+      "beats_one": "{{count}} tel",
+      "beats_other": "{{count}} tellen",
+      "fewer": "Minder tellen aftellen",
+      "more": "Meer tellen aftellen"
     }
   }
 }

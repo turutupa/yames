@@ -209,6 +209,14 @@ function start(chain: Chain, seconds: number): ChainReduction {
   if (chain.steps.length === 0) {
     return { state: { ...IDLE_CHAIN_RUN, phase: "finished" }, effects: [{ kind: "finished" }] };
   }
+  const effects: ChainEffect[] = [{ kind: "applyStep", index: 0, step: chain.steps[0] }];
+  // After the step, never before it — the same ordering the between-steps
+  // count-in has, and for the same reason: the beats have to sound at the
+  // tempo of the step they are counting you into, and step one's tempo does
+  // not exist on the engine until `applyStep` puts it there.
+  if (chain.countIn && chain.countIn > 0) {
+    effects.push({ kind: "countIn", beats: chain.countIn });
+  }
   return {
     state: {
       ...IDLE_CHAIN_RUN,
@@ -217,7 +225,7 @@ function start(chain: Chain, seconds: number): ChainReduction {
       // The first downbeat anchors step one; until then no bar has elapsed.
       anchored: false,
     },
-    effects: [{ kind: "applyStep", index: 0, step: chain.steps[0] }],
+    effects,
   };
 }
 

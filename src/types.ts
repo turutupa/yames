@@ -189,6 +189,17 @@ export type Chain = {
   steps: ChainStep[];
   /** 1 = once through. 0 = until stopped. (U9.6) */
   repeat: number;
+  /**
+   * Beats counted out before the FIRST step, at that step's tempo. 0 or
+   * absent is none, which is what every chain saved before this existed has.
+   *
+   * It belongs to the chain rather than to the transport because it is a
+   * property of the routine: a warm-up you always want counted in stays
+   * counted in, and a burst you want to hit cold does not, without the two
+   * fighting over one global switch. Between steps the count-in is a
+   * `transition` and already worked; this is the one at the top.
+   */
+  countIn?: number;
 };
 
 // ---------------------------------------------------------------------------

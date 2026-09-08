@@ -82,6 +82,17 @@ export function chainStepToPreset(step: ChainStep, name = step.name): Preset {
 // Chains
 // ---------------------------------------------------------------------------
 
+/**
+ * How many beats to count out before the first step. Clamped to what the
+ * engine will take — `arm_count_in` accepts 0..8, and a count-in longer than
+ * two bars of four stops being a count-in and starts being a wait.
+ */
+export function setChainCountIn(chain: Chain, beats: number): Chain {
+  const next = Math.max(0, Math.min(8, Math.round(beats)));
+  if ((chain.countIn ?? 0) === next) return chain;
+  return { ...chain, countIn: next };
+}
+
 export function createChain(name: string, steps: ChainStep[] = []): Chain {
   return {
     id: newId(),

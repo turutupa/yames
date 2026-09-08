@@ -122,6 +122,16 @@
       "lastStep": "Bước cuối",
       "roundAgain": "rồi thêm một vòng",
       "backToPlaying": "Quay lại chơi"
+    },
+    "countIn": {
+      "label": "Đếm vào",
+      "off": "Không đếm vào",
+      "startingIn": "bắt đầu sau",
+      "beats": "{{count}} phách",
+      "beats_one": "{{count}} phách",
+      "beats_other": "{{count}} phách",
+      "fewer": "Bớt phách đếm vào",
+      "more": "Thêm phách đếm vào"
     }
   }
 }

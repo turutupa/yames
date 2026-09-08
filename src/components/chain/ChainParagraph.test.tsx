@@ -146,6 +146,37 @@ describe("the chain, as a paragraph", () => {
     expect(onBackToPlaying).toHaveBeenCalled();
   });
 
+  it("offers a count-in, and says none rather than zero", () => {
+    const onChange = vi.fn();
+    const { rerender } = render(
+      <ChainParagraph
+        chain={CHAIN}
+        selectedStepId="s1"
+        onSelectStep={() => {}}
+        runningIndex={-1}
+        onChange={onChange}
+        onAddStep={() => {}}
+      />,
+    );
+    // "0 beats" is not a length of anything. A chain with no count-in says so.
+    expect(screen.getByText("No count-in")).toBeTruthy();
+
+    screen.getByRole("button", { name: "More count-in beats" }).click();
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ countIn: 1 }));
+
+    rerender(
+      <ChainParagraph
+        chain={{ ...CHAIN, countIn: 4 }}
+        selectedStepId="s1"
+        onSelectStep={() => {}}
+        runningIndex={-1}
+        onChange={onChange}
+        onAddStep={() => {}}
+      />,
+    );
+    expect(screen.getByText("4 beats")).toBeTruthy();
+  });
+
   it("an empty chain says what a chain is", () => {
     draw({ chain: { ...CHAIN, steps: [] }, selectedStepId: null });
     expect(screen.getByText(/plays your steps in order/i)).toBeTruthy();

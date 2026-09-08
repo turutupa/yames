@@ -122,6 +122,16 @@
       "lastStep": "Son adım",
       "roundAgain": "sonra bir tur daha",
       "backToPlaying": "Çalmaya dön"
+    },
+    "countIn": {
+      "label": "Sayım",
+      "off": "Sayım yok",
+      "startingIn": "başlıyor",
+      "beats": "{{count}} vuruş",
+      "beats_one": "{{count}} vuruş",
+      "beats_other": "{{count}} vuruş",
+      "fewer": "Daha az sayım vuruşu",
+      "more": "Daha çok sayım vuruşu"
     }
   }
 }
