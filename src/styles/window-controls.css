@@ -1,14 +1,41 @@
-/* The controls live inside the titlebar strip now rather than floating at the
+/* The controls live inside the titlebar strip rather than floating at the
    window's top-left corner over the rail, so they take their height from it
-   instead of declaring one. Their side has not moved — see TitleBar.tsx for
-   why they stay left on Windows. */
+   instead of declaring one.
+
+   They sit at the right end of it now — see TitleBar.tsx for why. `margin-left:
+   auto` is what puts them there: it swallows the slack left after the mark and
+   the wordmark, so the strip needs no spacer element to do the same job.
+
+   The two rules after this one reach up to `.app-titlebar`, which shell.css
+   owns. They are here rather than there because each exists only as a
+   consequence of these controls moving, and reading them beside the thing
+   that caused them is worth more than filing them by selector. */
 .window-controls {
   display: flex;
   align-items: stretch;
   flex-shrink: 0;
+  margin-left: auto;
   /* Must NOT be a drag region — buttons need click events */
   -webkit-app-region: no-drag;
   app-region: no-drag;
+}
+
+/* Close belongs in the corner, so the strip gives up its right padding on the
+   platforms that render these. `.main-window.os-windows` clips its children to
+   the frame's 10px radius, which rounds the hover fill into the corner the way
+   Windows 11 does it. macOS keeps the padding: it renders nothing here, so its
+   right end is only an edge. */
+.os-windows .app-titlebar,
+.os-linux .app-titlebar {
+  padding-right: 0;
+}
+
+/* 10px was measured as the gap *after* a button. With the controls gone from
+   the left the mark is against the window edge instead, so it takes the 16px
+   inset the other non-mac platforms already use. */
+.os-windows .app-titlebar .app-mark,
+.os-linux .app-titlebar .app-mark {
+  margin-left: 16px;
 }
 
 .wc-btn {

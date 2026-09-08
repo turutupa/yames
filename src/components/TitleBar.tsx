@@ -11,18 +11,19 @@ import { WindowControls } from "./WindowControls";
  * put a mark and "yames" there, and a window that never says what it is is a
  * window you cannot identify in a screenshot or a bug report.
  *
- * Two things about it are deliberately not the mockup:
+ * The controls go where the platform puts them, which on Windows and Linux is
+ * the right end of the strip. They were briefly left instead, on the stated
+ * grounds that decorum hooks the native non-client area for the Windows 11
+ * Snap Layout flyout and the revamp had no Windows machine to check the move
+ * against. That reason does not survive reading the crate: on Windows
+ * `create_overlay_titlebar()` calls `set_decorations(false)` and injects a
+ * transparent drag strip, nothing more — the hit-test hook is not in this
+ * version, and its own controls are Linux-only. There is no Snap Layout
+ * integration on Windows to break, and left was only ever a placeholder.
  *
- *  - The controls stay on the left. The mockup draws them right, which is the
- *    Windows convention, but decorum hooks the native non-client area for the
- *    Snap Layout flyout and this revamp does not have a Windows machine in
- *    front of it to check that moving them keeps working. Left is where they
- *    are today and where macOS puts them anyway; the wordmark sits after them
- *    rather than before.
- *  - Which is why the strip carries a platform gutter. On macOS the traffic
- *    lights are drawn by the OS over the webview (`titleBarStyle: Overlay`),
- *    so nothing renders here and the padding is what stops the wordmark from
- *    sitting under them.
+ * macOS renders none of this: the traffic lights are drawn by the OS over the
+ * webview (`titleBarStyle: Overlay`), so the strip carries a left gutter there
+ * to keep the wordmark out from under them.
  *
  * The whole strip is a drag region on the platforms where the frame is ours.
  * macOS keeps its decorations, so it drags itself — and marking it there
@@ -31,9 +32,9 @@ import { WindowControls } from "./WindowControls";
 export function TitleBar() {
   return (
     <div className="app-titlebar" {...(!IS_MAC && { "data-tauri-drag-region": "" })}>
-      {(IS_WINDOWS || IS_LINUX) && <WindowControls />}
       <span className="app-mark" aria-hidden="true" />
       <span className="app-wordmark">yames</span>
+      {(IS_WINDOWS || IS_LINUX) && <WindowControls />}
     </div>
   );
 }
