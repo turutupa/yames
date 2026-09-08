@@ -1482,11 +1482,28 @@ span.meter-grouping-chip {
    It now sits at a fixed offset from the rail and stays there. The measure is
    capped so the controls do not stretch into a smear on a 2000px monitor. */
 
+/* ── The stage on a very large screen ───────────────────────────────────
+   The stage is capped at 1176px and anchored to the rail (U1.3), and the
+   figure is anchored to the far right edge of the window. On a laptop those
+   two overlap, which is the intended reading — the controls sit in front of
+   the sketch. On a 32-inch monitor they stop overlapping and start being two
+   objects at opposite ends of an empty band, about 550px of nothing between
+   them, which is what the owner hit.
+
+   Both are pinned to one centred band instead. `--stage-band` is the stage
+   plus a gap plus the figure, and `max(0px, 50% - band/2)` is zero until the
+   window is actually wider than that — so nothing moves until the gap would
+   otherwise open, and no breakpoint has to guess where that is. */
+.main-content[data-view="beat"] {
+  --stage-band: 1776px;
+}
+
 .main-content[data-view="beat"] > .view-transition-wrapper {
   align-self: flex-start;
   align-items: flex-start;
   width: 100%;
   max-width: 1176px;
+  margin-left: max(0px, calc(50% - var(--stage-band) / 2));
   /* Even padding, as the artboard draws it. The 80px gutter this used to
      carry existed for two labels that hung outside their rows; METER and
      SUBDIVISION are now section headings above the thing they name, so the
@@ -2035,7 +2052,9 @@ span.meter-grouping-chip {
   /* Sat too low against the stage — the tempo and the ruler are the top half
      of the screen and the figure should stand with them, not under them. */
   top: 40%;
-  right: 1.5%;
+  /* The right end of the same centred band the stage's left end is pinned to
+     — see `--stage-band`. Below that width this resolves to the old 1.5%. */
+  right: max(1.5%, calc(50% - var(--stage-band, 1776px) / 2));
   transform: translateY(-50%);
   width: min(40vw, 540px);
   height: min(68vh, 600px);
