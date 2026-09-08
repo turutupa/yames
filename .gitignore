@@ -20,3 +20,7 @@ design/**/yames-site-directions.html
 
 # Local-only browser preview shim (see src/devShim.local.ts)
 src/devShim.local.ts
+
+# Python bytecode from the sound generators in scripts/
+__pycache__/
+*.pyc
