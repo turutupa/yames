@@ -78,6 +78,45 @@ script for the full table.
    against a drum kit at −22.0 LUFS, +3.63 dB, and a `drum_low` of 106. The
    accent's peak is unchanged, so nothing clips that did not before.
 
+5. THE SNARE KIT AGAIN, LOUD ENOUGH AND STILL NOT COHERENT. "The 'big' accent
+   on snare really sounds out of place compared to the normal snare beats,
+   can we work on that?"
+
+   Point 4 fixed the level and left a musical problem behind it. What the kit
+   actually played was a snare-and-kick on the accent and a MID TOM on the
+   other three beats, so a 4/4 bar was snare, tom, tom, tom: two instruments
+   alternating, which is a drum fill and not a pulse. A metronome accent is
+   the same drum hit harder, not a different drum — and the owner said so
+   themselves by calling the unaccented beats "the normal snare beats".
+
+   The plain beat is now the same drum as the accent, struck softly:
+   `_snare(sr, hard=False)`. Measured against the accent's snare layer with
+   level divided out and sub-60 Hz excluded, so that only timbre is left:
+
+     plain beat        band-fraction distance    centre frequency ratio
+     mid tom (before)          1.065                     5.25x
+     soft snare (after)        0.368                     1.23x
+
+   COHERENCE COSTS ACCENT MARGIN, and that is not a bug in the numbers. The
+   tom measured loud in the bar and small against the accent at the same time
+   because it was loud somewhere else — a 165 Hz sine, under the band a
+   laptop radiates. Once the beat is the same drum, the two sounds occupy the
+   same bands and level is all that separates them:
+
+     snare kit          bar    accent vs beat   accent vs beat   beat
+                       LUFS     200Hz–4kHz       K-weighted      peak
+     tom (before)    −21.91       +6.50 dB         +7.88 dB      0.93
+     soft snare      −21.62       +5.82 dB         +7.06 dB      0.72
+
+   The bar is 0.29 dB LOUDER, not quieter — the wire ring gives back what the
+   lower ceiling costs — so point 4 does not regress. The accent gives up
+   0.68 dB band-limited and keeps a margin wider than the `drum` kit's own
+   +3.63 dB, which is the accent the owner has already accepted.
+
+   `snare_high` is BYTE-IDENTICAL to what point 4 shipped. The accent was the
+   half of this kit the owner stopped complaining about, so it was not
+   touched; every number above moved because the beat moved.
+
 THE TRANSFORM STAGE IS NOT IDEMPOTENT — running it twice adds a second beater
 to the kick. It refuses to run when every sample already ends in silence,
 which is true only after it has run. To re-run it, restore the originals:
@@ -266,40 +305,71 @@ def _kick(sr):
     return _norm(body + beater * 0.45)
 
 
-def _snare(sr):
-    """Shell tones plus the wires, and the wires are the point.
+# The three shell modes of the snare drum, as (frequency, decay, gain). This
+# is the drum's IDENTITY and it is shared by both dynamics on purpose — see
+# `_snare`. Changing a number here changes which drum the kit is; changing one
+# in the `hard`/`soft` table below only changes how hard it is hit.
+SNARE_SHELL = ((196, 24, 1.00), (292, 32, 0.62), (421, 44, 0.34))
 
-    "The snare does not sound at all like the drums of a drum kit, it's super
-    underwhelming — I was expecting to feel it and all I got was a shy sound."
+# What a player's arm changes, and nothing else.
+#
+#            ms   ring decay  crack gain  stick gain  noise seeds
+# The wires damp sooner on a soft stroke because they are not thrown as far,
+# and a soft stroke is darker: less crack off the head, less stick in the
+# attack. The shell and ring GAINS are identical in both, because the drum
+# resonates the same way however hard you hit it — only the amount changes,
+# and `_norm` plus the ceiling in each caller set the amount.
+_HARD = (300.0, 13, 0.55, 0.30, (22, 23, 25))
+_SOFT = (190.0, 30, 0.36, 0.20, (52, 53, 55))
 
-    The first version of this was 140 ms with the wires decaying at 30/s, so
-    the file ended while the tail was still at −36 dBFS: cut off rather than
-    decayed. It measured a respectable peak and almost no loudness, which is
-    what "shy" sounds like. What a snare actually is, is a fast crack over a
-    slow wire ring, and it is the RING that carries the size — a decaying
-    noise bed adds energy for 250 ms without touching the peak, which is the
-    only currency available when the peak is already spent.
 
-    Three separate decays, therefore, instead of one:
+def _snare(sr, hard=True):
+    """ONE snare drum, struck hard for the accent or soft for the plain beat.
+
+    "The 'big' accent on snare really sounds out of place compared to the
+    normal snare beats, can we work on that?"
+
+    The owner's phrase is the diagnosis: they call the other beats "the normal
+    snare beats" and expect them to be the same instrument as the accented
+    one. They were not. The accent was this drum and the plain beat was a mid
+    tom at 165 Hz, so a 4/4 bar played snare, tom, tom, tom — two instruments
+    alternating, which is a drum FILL and not a pulse. A metronome accent is
+    the same drum hit harder. That is what this function now is, and why it
+    takes a dynamic instead of coming in two unrelated copies.
+
+    Measured against the accent's own snare layer, level divided out and
+    sub-60 Hz excluded so only timbre is left, the tom sat 1.065 away in
+    summed band-fraction distance with 5.25x the centre frequency. The soft
+    stroke sits at 0.368 and 1.23x — still slightly darker than the accent,
+    which is what a soft stroke IS, but recognisably the same drum.
+
+    What stays fixed is `SNARE_SHELL`: the same three modes at the same
+    frequencies with the same decays. Shell modes are the drum, so voicing
+    them identically is the whole claim. What changes is only what a harder
+    arm changes, and the layers are otherwise the same three decays:
       - `stick`, 400/s, gone in 10 ms: the impact.
       - `crack`, 85/s: the head, the part that says "snare" and not "cymbal".
-      - `ring`, 13/s over the full 300 ms: the wires, and the loudness.
+      - `ring`: the wires, and — on the accent — the loudness.
 
-    The shell is three modes rather than two and is voiced a little higher
-    (196 Hz), a minor third above the tom that plays the other beats, so the
-    two drums are heard as two drums rather than as one drum at two
-    volumes."""
-    n = int(sr * 300.0 / 1000)
+    THE RING IS STILL WHERE THE LOUDNESS LIVES, and the first version of this
+    drum is why that is written down. It was 140 ms with the wires decaying at
+    30/s, so the file ended while the tail was still at −36 dBFS: cut off
+    rather than decayed. It measured a respectable peak and almost no
+    loudness, which is what "shy" sounds like. A decaying noise bed adds
+    energy for 250 ms without touching the peak, which is the only currency
+    available when the peak is already spent. So the accent keeps its 13/s
+    ring over the full 300 ms; only the soft stroke gives that up, and
+    `snare_low` explains what it buys back."""
+    ms, ring_decay, crack_gain, stick_gain, seeds = _HARD if hard else _SOFT
+    n = int(sr * ms / 1000)
     t = np.arange(n) / sr
-    shell = (
-        np.sin(2 * np.pi * 196 * t) * _hit(t, 24)
-        + np.sin(2 * np.pi * 292 * t) * _hit(t, 32) * 0.62
-        + np.sin(2 * np.pi * 421 * t) * _hit(t, 44) * 0.34
+    shell = sum(
+        np.sin(2 * np.pi * f * t) * _hit(t, d) * g for f, d, g in SNARE_SHELL
     )
-    ring = _band(_noise(n, 22), 330, 8000, sr) * np.exp(-t * 13)
-    crack = _band(_noise(n, 23), 1100, 6500, sr) * np.exp(-t * 85)
-    stick = _band(_noise(n, 25), 2800, 9500, sr) * np.exp(-t * 400)
-    return _norm(shell * 0.60 + ring + crack * 0.55 + stick * 0.30)
+    ring = _band(_noise(n, seeds[0]), 330, 8000, sr) * np.exp(-t * ring_decay)
+    crack = _band(_noise(n, seeds[1]), 1100, 6500, sr) * np.exp(-t * 85)
+    stick = _band(_noise(n, seeds[2]), 2800, 9500, sr) * np.exp(-t * 400)
+    return _norm(shell * 0.60 + ring + crack * crack_gain + stick * stick_gain)
 
 
 def snare_high(sr):
@@ -324,7 +394,14 @@ def snare_high(sr):
 
     The kick lands 5 ms after the snare because a beater has further to
     travel than a stick, and because two coincident attacks spend peak the
-    limiter then takes back off everything."""
+    limiter then takes back off everything.
+
+    THE KICK STAYS, now that the plain beat is the same snare played softly.
+    It is the one thing the accent has that the beat categorically does not,
+    so it does more for "this is the downbeat" than another decibel of level
+    would — and kick-with-snare is the most ordinary thing a drummer plays on
+    a "1". Taking it out would have cost the band-limited margin and the bar
+    loudness at once, which is the complaint before this one."""
     s, k = _snare(sr), _kick(sr)
     delay = int(sr * 5.0 / 1000)
     n = max(len(s), delay + len(k))
@@ -335,41 +412,54 @@ def snare_high(sr):
 
 
 def snare_low(sr):
-    """The SNARE kit's plain beat: a mid tom.
+    """The SNARE kit's plain beat: the SAME snare, struck softly.
 
-    This was a side-stick, and the side-stick is most of why the kit did not
-    "sound at all like the drums of a drum kit". Two measured problems.
+    "The 'big' accent on snare really sounds out of place compared to the
+    normal snare beats, can we work on that?"
 
-    It was not a drum. 48% of its energy sat in 250–800 Hz around a 780 Hz
-    wood tone, which is a description of the `wood` kit's block — so three
-    beats in every four sounded like the kit the user did not choose.
+    This was a mid tom at 165 Hz, and before that a side-stick. Both were a
+    different instrument from the accent, so a 4/4 bar of this kit played
+    snare, tom, tom, tom — two instruments alternating, which is a drum fill
+    rather than a pulse. The owner's own words give the fix away: they call
+    the other beats "the normal snare beats", meaning they expect the drum
+    that is accented and the drum that is not to be the same drum. It is now
+    `_snare(sr, hard=False)` — same three shell modes at 196/292/421 Hz, same
+    wire band, fewer wires and less crack and no kick under it.
 
-    And it was tiny: 60 ms and 29 energy units against `drum_low`'s 130 ms
-    and 106. Three quarters of the events in a bar were 5.6 dB below the kit
-    the owner is happy with, which is what dragged the whole kit to −24.9
-    LUFS against the drum kit's −22.0. A metronome is mostly its plain beat;
-    make that shy and the kit is shy however loud the accent is.
+    THE CEILING IS 0.72, NOT THE TOM'S 0.93, and that number is the whole
+    trade in this change. The tom got its loudness from a 165 Hz sine, which
+    is below the 200 Hz a laptop radiates and which a K-weighted meter counts
+    at full value — so it could be loud in the bar while measuring small
+    against the accent through a band-pass. That is exactly why it was loud
+    AND why it was incoherent: the two sounds were loud in different places.
+    A snare beat lives in the same bands as the snare accent, so once it is
+    the same drum, level is the only thing separating them and it has to be
+    spent deliberately. 0.72 is what a sweep of ceiling against the accent
+    margin chose: the last point where the bar does not get quieter than the
+    tom's while the accent keeps a margin wider than the `drum` kit's.
 
-    A tom fixes both at once: a struck head with a real fundamental (165 Hz,
-    a minor third below the snare so the two are distinguishable) and a shell
-    mode above it. `skin` and `stick` are carried at high gain on purpose —
-    the fundamental is what you feel on a real speaker, but it is under the
-    200 Hz that a laptop radiates, so the 380 Hz–8 kHz layers are the only
-    reason this is audible at all on the machine most people practise on.
+      snare kit          bar    accent vs beat   accent vs beat   beat
+                        LUFS     200Hz–4kHz       K-weighted      peak
+      tom (before)    −21.91       +6.50 dB         +7.88 dB      0.93
+      soft snare      −21.62       +5.82 dB         +7.06 dB      0.72
+      `drum` kit      −22.63       +3.63 dB         +3.84 dB      0.71
+
+    So the bar is 0.29 dB LOUDER than the tom's, not quieter — the shorter,
+    quieter hit gets it back from the wire ring, which the tom did not have.
+    The accent gives up 0.68 dB band-limited and 0.82 dB K-weighted, and
+    still stands wider over its beat than the accent of the kit the owner has
+    already accepted. It also keeps something the beat categorically does not
+    have: the kick underneath it.
+
+    190 ms rather than the accent's 300, and the wires damp at 30/s rather
+    than 13/s, because a soft stroke does not throw them as far. Still well
+    over the 100 ms that `the_snare_kit_is_not_quieter_than_the_drum_kit`
+    requires, and 126 energy units against `drum_low`'s 106.
 
     Saturated at 1.5 rather than peak-normalised, for the reason in
-    `_saturate`: the noise layers have the loudness and the sine has the
-    peak, so dividing by the peak would throw the noise away. Peak 0.93,
-    not 0.97, because it plays under an accent that needs to dominate."""
-    n = int(sr * 145.0 / 1000)
-    t = np.arange(n) / sr
-    f = 45 * np.exp(-t * 42) + 165
-    head = np.sin(2 * np.pi * np.cumsum(f) / sr) * _hit(t, 36, 1.2)
-    mode = np.sin(2 * np.pi * 165 * 1.72 * t) * _hit(t, 50) * 0.45
-    skin = _band(_noise(n, 31), 380, 3000, sr) * np.exp(-t * 78)
-    stick = _band(_noise(n, 32), 2000, 8000, sr) * np.exp(-t * 330)
-    y = _norm(head + mode + skin * 1.5 + stick * 0.7)
-    return fade_tail(_saturate(y, 1.5, 0.93), sr)
+    `_saturate`: the noise layers have the loudness and the shell modes have
+    the peak, so dividing by the peak would throw the noise away."""
+    return fade_tail(_saturate(_snare(sr, hard=False), 1.5, 0.72), sr)
 
 
 def synthesise(name, sr=SR):

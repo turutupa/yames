@@ -239,16 +239,24 @@ const DRUM_CRASH: &[u8] = include_bytes!("../sounds/drum_crash.wav");
 /// The mid-band layer the drum accent was missing. See `drum_body` in
 /// `scripts/sounds/rebuild.py` for why a 6 ms transient could not do this job.
 const DRUM_BODY: &[u8] = include_bytes!("../sounds/drum_body.wav");
-/// The second kit: a kick-and-snare backbeat over a mid tom. Both are
-/// synthesised whole, so their balance is fixed in the files.
+/// The second kit: ONE snare drum at two dynamics, with a kick under the
+/// accent. Both are synthesised whole, so their balance is fixed in the files.
 ///
-/// The first version of this kit was a backbeat over a SIDE-STICK, and the
-/// owner's verdict on hearing it was "super underwhelming — I was expecting
-/// to feel it and all I got was a shy sound". Both files were rebuilt; see
-/// `snare_high` and `snare_low` in `scripts/sounds/rebuild.py` for the
-/// measurements. The short version is that the side-stick was 60 ms of
-/// 780 Hz wood — three beats in four that sounded like the `wood` kit and
-/// carried a quarter of `drum_low`'s energy.
+/// This kit has been wrong twice, in two different ways, and both are worth
+/// knowing before touching it.
+///
+/// It was a backbeat over a SIDE-STICK, and the owner's verdict was "super
+/// underwhelming — I was expecting to feel it and all I got was a shy sound".
+/// The side-stick was 60 ms of 780 Hz wood — three beats in four that sounded
+/// like the `wood` kit and carried a quarter of `drum_low`'s energy.
+///
+/// The side-stick became a MID TOM, which fixed the level and left a musical
+/// problem: "the 'big' accent on snare really sounds out of place compared to
+/// the normal snare beats". A bar played snare, tom, tom, tom — two
+/// instruments alternating, which is a drum fill and not a pulse. The plain
+/// beat is now the same snare struck softly, which is what a metronome accent
+/// has always been: the same drum hit harder. See `_snare` and `snare_low` in
+/// `scripts/sounds/rebuild.py` for the measurements and what it cost.
 const SNARE_HIGH: &[u8] = include_bytes!("../sounds/snare_high.wav");
 const SNARE_LOW: &[u8] = include_bytes!("../sounds/snare_low.wav");
 const CHIME_UP: &[u8] = include_bytes!("../sounds/chime_up.wav");
@@ -551,10 +559,16 @@ enum SoundKit {
     Beep,
     /// Kick, hi-hat and crash. The bright one.
     Drum,
-    /// Kick-and-snare backbeat over a mid tom. The same idea as `Drum` with
-    /// the metal taken out — the owner asked for a second kit that sounds
-    /// like drums rather than like cymbals. Every voice in it is a struck
-    /// head, which is the point: nothing here rings like a cymbal.
+    /// One snare drum at two dynamics, with a kick under the accent. The same
+    /// idea as `Drum` with the metal taken out — the owner asked for a second
+    /// kit that sounds like drums rather than like cymbals. Every voice in it
+    /// is a struck head, which is the point: nothing here rings like a cymbal.
+    ///
+    /// Unlike `Drum`, whose accent and beat are different instruments (kick
+    /// and hi-hat), this kit's two sounds are the SAME drum played harder and
+    /// softer. That is deliberate and it is what the accent test numbers
+    /// below are shaped by: two dynamics of one drum cannot pull as far apart
+    /// as two different instruments can, and should not need to.
     Snare,
 }
 
@@ -2700,15 +2714,24 @@ mod tests {
     /// cannot see that, and did not.
     ///
     /// Measured through `laptop_band_energy`, the old premix scores -0.46 dB
-    /// and fails; the current one scores +4.13. The other kits sit at +3.72
-    /// (wood) to +4.57 (beep), and the snare kit at +6.39, so a 2 dB floor
+    /// and fails; the current one scores +3.67. The other kits sit at +3.74
+    /// (wood) to +4.58 (beep), and the snare kit at +5.78, so a 2 dB floor
     /// has real room on both sides rather than being fitted to today's mix.
     ///
     /// NOTE that passing this is not the same as sounding good, and the
-    /// snare kit is the proof: its first version passed at +4.89 and was
-    /// still rejected as shy. A ratio says the accent beats its own beat; it
-    /// says nothing about whether either of them is loud enough to feel.
-    /// `the_snare_kit_is_not_quieter_than_the_drum_kit` is the other half.
+    /// snare kit is the proof TWICE OVER. Its first version passed at +4.89
+    /// and was rejected as shy. Its second scored +6.39 — the widest margin
+    /// of any kit — and was rejected again, because the margin was bought by
+    /// making the plain beat a different instrument from the accent: a mid
+    /// tom, whose loudness sat under the 200 Hz this filter starts at. It
+    /// now scores +5.78 with both sounds being the same drum, which is a
+    /// smaller number and a better kit.
+    ///
+    /// So a ratio says the accent beats its own beat. It does not say either
+    /// of them is loud enough to feel — that is
+    /// `the_snare_kit_is_not_quieter_than_the_drum_kit` — and it does not say
+    /// they belong in the same bar as each other, which no assertion here
+    /// checks and which needed the owner's ears both times.
     #[test]
     fn every_accent_is_louder_than_its_beat_on_a_small_speaker() {
         let sr = 48000;
@@ -2817,9 +2840,15 @@ mod tests {
     /// drum kits, so it is a fair comparison, where `click` (a 20 ms burst
     /// with all of its energy in-band) is not.
     ///
-    /// The rejected kit scores -2.71 dB here. The current one scores +0.89,
-    /// and the two sub-assertions below are the ones with the teeth: the
-    /// rejected beat fails both of them outright.
+    /// The rejected kit scores -2.71 dB here. The tom that replaced it scored
+    /// +0.89, and the soft snare stroke that replaced the tom scores +1.19 —
+    /// so making the kit COHERENT did not cost it loudness, which was the
+    /// thing to be careful about. It would have been easy to fix "the accent
+    /// sounds out of place" by pulling the accent down to the tom's weight
+    /// and ship the shy kit for a third time; this number is what stops that.
+    ///
+    /// The two sub-assertions below are the ones with the teeth: the rejected
+    /// side-stick fails both of them outright.
     #[test]
     fn the_snare_kit_is_not_quieter_than_the_drum_kit() {
         let sr = 48000;
@@ -2844,8 +2873,15 @@ mod tests {
         // is a drum's worth of sound in the file at all, and both weightings
         // would be answering a different one. `drum_low` is a hi-hat with 71%
         // of its energy above 6 kHz, so K-weighting's treble shelf flatters it
-        // against a tom and the band-pass throws most of it away — the two
-        // sounds are only comparable on how much of them there is.
+        // against a struck head and the band-pass throws most of it away —
+        // the two sounds are only comparable on how much of them there is.
+        //
+        // The beat is 127 units here against `drum_low`'s 106, down from the
+        // tom's 156. That drop is deliberate and is the price of coherence:
+        // the tom got its energy from a 165 Hz sine that the accent had no
+        // equivalent of, and a beat made of the same drum as the accent has
+        // to be held down by LEVEL instead. What matters is that it is still
+        // a drum's worth of sound, which is what this asserts.
         let beat = bank.get(SoundKit::Snare.low_id());
         let ms = beat.len() as f64 * 1000.0 / sr as f64;
         assert!(ms > 100.0, "the snare kit's beat is {ms:.0} ms, which is a tick");

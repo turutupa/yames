@@ -43,10 +43,17 @@ export const SOUND_TYPES = [
   { id: "beep", icon: "◉" },
   { id: "drum", icon: "◎" },
   // The same kit idea with the metal taken out, for people who want drums
-  // rather than cymbals: a snare over a kick on the accent, a mid tom on the
-  // beat. It was a side-stick, which measured as the `wood` kit's block —
-  // 48% of its energy on a 780 Hz wood tone — and was most of why the owner
-  // heard "a shy sound" rather than a drum kit.
+  // rather than cymbals: ONE snare drum, struck hard on the accent with a
+  // kick under it and struck softly on the other beats.
+  //
+  // The plain beat has been two other things and both were the same mistake
+  // — a different instrument from the accent. First a side-stick, which
+  // measured as the `wood` kit's block (48% of its energy on a 780 Hz wood
+  // tone) and was most of why the owner heard "a shy sound" rather than a
+  // drum kit. Then a mid tom, which was loud enough but made a bar play
+  // snare, tom, tom, tom: "the 'big' accent on snare really sounds out of
+  // place compared to the normal snare beats". A metronome accent is the
+  // same drum hit harder, so that is what it is now.
   { id: "snare", icon: "◍" },
 ];
 
