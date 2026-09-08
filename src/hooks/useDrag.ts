@@ -2,11 +2,64 @@ import { useEffect } from "react";
 import { getCurrentWindow, PhysicalPosition } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
 
-const INTERACTIVE = new Set(["button", "input", "textarea", "select", "a", "label"]);
+const INTERACTIVE_TAGS = new Set([
+  "button",
+  "input",
+  "textarea",
+  "select",
+  "option",
+  "a",
+  "label",
+  "summary",
+]);
 
+/**
+ * ARIA roles that mean "this is a control". A `div` carrying one of these is
+ * as clickable as a `<button>`, and the user has no way of knowing which the
+ * author reached for.
+ */
+const INTERACTIVE_ROLES = new Set([
+  "button",
+  "link",
+  "checkbox",
+  "radio",
+  "switch",
+  "slider",
+  "spinbutton",
+  "textbox",
+  "combobox",
+  "listbox",
+  "option",
+  "tab",
+  "menuitem",
+  "menuitemcheckbox",
+  "menuitemradio",
+]);
+
+/**
+ * Is this something the user is clicking, rather than somewhere they are
+ * grabbing the window by?
+ *
+ * This used to test tag names alone, and that cost a real bug — WINDOWS ONLY,
+ * which is what made it hard to see. The chain rows in the library are
+ * `<div role="button" tabIndex={0}>`, so they failed the tag test; mousedown
+ * called `preventDefault()` and `startDragging()`, the OS took the mouse, and
+ * the click never arrived. On macOS `startDragging()` REJECTS on a focused
+ * undecorated window — see the note on the hook below — so the manual
+ * fallback ran and the click survived. The owner found it as "on my Mac I can
+ * click a chain and it goes active, on Windows the click does nothing".
+ *
+ * So: a role, a tabindex or `contenteditable` counts as much as a tag. Being
+ * focusable is the honest definition of "the user aims at this".
+ */
 function isInteractive(el: HTMLElement | null): boolean {
   while (el) {
-    if (INTERACTIVE.has(el.tagName.toLowerCase())) return true;
+    if (INTERACTIVE_TAGS.has(el.tagName.toLowerCase())) return true;
+    const role = el.getAttribute?.("role");
+    if (role && INTERACTIVE_ROLES.has(role)) return true;
+    // Anything the author made focusable. A drag region is not focusable.
+    if (el.hasAttribute?.("tabindex")) return true;
+    if (el.isContentEditable) return true;
     el = el.parentElement;
   }
   return false;
