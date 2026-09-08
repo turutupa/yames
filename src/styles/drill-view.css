@@ -25,6 +25,13 @@
   padding: 2px 0 4px;
 }
 
+/* At rest the row is still laid out — it just says nothing. Unmounting it
+   made the climb jump down the screen the moment you pressed Start, because
+   nothing else was holding those ~70px. */
+.drill-live[data-idle] {
+  visibility: hidden;
+}
+
 .drill-current-bpm {
   font-size: 4rem;
   font-weight: 700;
@@ -249,14 +256,23 @@
 .drill-climb-scroll {
   overflow-x: auto;
   overflow-y: hidden;
-  /* Scrollable, with no scrollbar drawn. The bar is not how you move through
-     a drill — the run is, and `DrillClimb` keeps the playing column centred —
-     so the chrome was a permanent grey line under the picture advertising an
-     interaction nobody needs. Dragging and the wheel still work. */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  /* A scrollbar, drawn on purpose.
+
+     This was hidden once, on the argument that the run carries the view and
+     nobody needs the chrome. That was right about the DEFAULT bar — a grey
+     platform line under the picture — and wrong about the need: a trackpad
+     scrolls sideways, and a mouse with one wheel does not, so for those users
+     the plan past the fold was unreachable while the drill was stopped.
+
+     So it is styled from the theme rather than suppressed: thin, rounded, the
+     ink colour at low alpha, and it only exists when the track actually
+     overflows because that is what `overflow-x: auto` already means. */
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text-primary) 22%, transparent)
+    transparent;
   scroll-behavior: smooth;
-  padding-bottom: 2px;
+  /* Room for the scrollbar lane below the tempo labels. */
+  padding-bottom: 6px;
   /* The glow on the current cell would be clipped by the scroll box. */
   margin: -8px -4px 0;
   padding-left: 4px;
@@ -264,8 +280,36 @@
   padding-top: 8px;
 }
 
+/* Both targets are WebKit-derived — WebView2 is Chromium, macOS is WKWebView
+   — so these are the rules that actually paint. `scrollbar-color` above is
+   for the preview in Firefox and for anything that ignores them. */
 .drill-climb-scroll::-webkit-scrollbar {
-  display: none;
+  height: 8px;
+}
+
+.drill-climb-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.drill-climb-scroll::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--text-primary) 18%, transparent);
+  /* Inset by its own border so the thumb reads as 6px on an 8px lane and
+     never touches the cells above it. */
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  transition: background 0.15s ease;
+}
+
+.drill-climb-scroll:hover::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--text-primary) 30%, transparent);
+  background-clip: padding-box;
+}
+
+.drill-climb-scroll::-webkit-scrollbar-thumb:hover,
+.drill-climb-scroll::-webkit-scrollbar-thumb:active {
+  background: var(--accent);
+  background-clip: padding-box;
 }
 
 .drill-climb-track {
@@ -335,58 +379,6 @@
    nothing on this path clips, and the track's height is the same expression
    used to size the track itself. */
 .drill-climb-col {
-  position: relative;
-}
-
-/* Ground already covered.
-   The playhead is a line saying WHERE you are; this is the answer to how much
-   of the exercise is behind it — which the filled cells give only one column
-   at a time, so at a glance a long plan reads the same near the start as near
-   the end.
-
-   One element for the whole track rather than a state per column, because the
-   boundary falls in the middle of the column being played. Its width is the
-   playhead's own position expressed against the track: whole columns before
-   it, then whole cells into this one. `--climb-bars` is set by DrillClimb
-   because a column's width in pixels is a fact only the track knows.
-
-   A change of ground, not a shape: no border on the leading edge (the
-   playhead is already there) and an alpha low enough that it reads as the
-   picture's floor rather than as a fourth cell state. */
-.drill-climb-swept {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: calc(
-    var(--climb-swept-step, 0) *
-      (
-        var(--climb-bars, 1) * (var(--climb-cell-w) + var(--climb-cell-gap)) -
-          var(--climb-cell-gap) + var(--climb-col-gap)
-      ) + var(--climb-swept-bar, 0) *
-      (var(--climb-cell-w) + var(--climb-cell-gap)) + var(--climb-cell-w) / 2 -
-      1px
-  );
-  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
-  pointer-events: none;
-  z-index: 0;
-  /* Moves with the playhead rather than stepping after it. */
-  transition: width 0.18s ease;
-}
-
-.drill-view[data-animations="off"] .drill-climb-swept {
-  transition: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .drill-climb-swept {
-    transition: none;
-  }
-}
-
-/* The track becomes the wash's containing block. The columns already stack
-   above it — they come later in source order and the wash is at z-index 0. */
-.drill-climb-track {
   position: relative;
 }
 

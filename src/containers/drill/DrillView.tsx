@@ -590,46 +590,61 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
       </div>
 
       {/* The live readout, next to the picture it is narrating. Everything
-          the old header block carried is here — tempo, the count-in, the
-          beat dots and the step/bar position — but only while a run is
-          actually producing those numbers. It takes the row the idle hint
-          gives up on start, so pressing Start does not shove the climb. */}
-      {showLive && (
-        <div className="drill-live" data-testid="drill-live">
-          {isWarmingUp ? (
-            <>
-              <span className="drill-warmup-label">{t("drill.startingIn")}</span>
-              <span className="drill-current-bpm drill-warmup-number">{warmupRemaining}</span>
-            </>
-          ) : (
-            <>
-              <span className="drill-current-bpm">{ramp.active ? ramp.currentBpm : startBpm}</span>
-              <span className="drill-current-label">{t("drill.bpmUnit")}</span>
-            </>
-          )}
-          {/* Beat dots — hidden during warmup countdown */}
-          <div className="drill-beat-dots" style={{ visibility: isWarmingUp ? 'hidden' : 'visible' }}>
-            {Array.from({ length: beatsPerBar }, (_, beatIdx) => {
-              const isBeatActive = ramp.active && !isWarmingUp && activeBeat === beatIdx && isDownbeat;
-              const isAccent = beatIdx === 0;
-              return (
-                <div
-                  key={beatIdx}
-                  className={`drill-dot ${isBeatActive ? "active" : ""} ${isAccent && isBeatActive ? "accent" : ""}`}
-                />
-              );
-            })}
-            {ghostDots > 0 && Array.from({ length: ghostDots }, (_, i) => (
-              <div key={`ghost-dot-${i}`} className="drill-dot exiting" />
-            ))}
-          </div>
-          <span className="drill-current-step">
-            {ramp.completed
-              ? t("drill.finished")
-              : t("drill.stepBar", { step: ramp.currentStep + 1, bar: ramp.barsInStep + 1, bars: barsPerStep })}
-          </span>
+          the old header block carried is here — tempo, the count-in, the beat
+          dots and the step/bar position — and it says nothing until a run is
+          producing those numbers.
+
+          Hidden at rest rather than unmounted, and that is the whole point:
+          the row keeps its height, so pressing Start does not shove the climb
+          down the screen. It used to take the row the idle hint gave up on
+          start, which balanced exactly — then the hint moved onto the mode
+          buttons as a tooltip (U3.1b) and nothing was left holding the space.
+          The owner found it at once: "when you hit play, the row showing the
+          current bpm and the dots shows up moving everything around".
+
+          `visibility`, not `opacity`: it takes the row out of the
+          accessibility tree too, so a screen reader is not read a tempo that
+          nothing is playing. The markup is identical in both states, which is
+          what makes the reserved height exactly the right height. */}
+      <div
+        className="drill-live"
+        data-testid="drill-live"
+        data-idle={showLive ? undefined : ""}
+        aria-hidden={showLive ? undefined : true}
+      >
+        {isWarmingUp ? (
+          <>
+            <span className="drill-warmup-label">{t("drill.startingIn")}</span>
+            <span className="drill-current-bpm drill-warmup-number">{warmupRemaining}</span>
+          </>
+        ) : (
+          <>
+            <span className="drill-current-bpm">{ramp.active ? ramp.currentBpm : startBpm}</span>
+            <span className="drill-current-label">{t("drill.bpmUnit")}</span>
+          </>
+        )}
+        {/* Beat dots — hidden during warmup countdown */}
+        <div className="drill-beat-dots" style={{ visibility: isWarmingUp ? 'hidden' : 'visible' }}>
+          {Array.from({ length: beatsPerBar }, (_, beatIdx) => {
+            const isBeatActive = ramp.active && !isWarmingUp && activeBeat === beatIdx && isDownbeat;
+            const isAccent = beatIdx === 0;
+            return (
+              <div
+                key={beatIdx}
+                className={`drill-dot ${isBeatActive ? "active" : ""} ${isAccent && isBeatActive ? "accent" : ""}`}
+              />
+            );
+          })}
+          {ghostDots > 0 && Array.from({ length: ghostDots }, (_, i) => (
+            <div key={`ghost-dot-${i}`} className="drill-dot exiting" />
+          ))}
         </div>
-      )}
+        <span className="drill-current-step">
+          {ramp.completed
+            ? t("drill.finished")
+            : t("drill.stepBar", { step: ramp.currentStep + 1, bar: ramp.barsInStep + 1, bars: barsPerStep })}
+        </span>
+      </div>
 
       <DrillClimb
         steps={steps}

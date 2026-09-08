@@ -150,29 +150,7 @@ export function DrillClimb({
         </span>
       </div>
       <div className="drill-climb-scroll" ref={scrollRef}>
-        {/* `--climb-bars` is how wide one column is, in cells. The swept wash
-            below needs it to work out where the playhead stands in the WHOLE
-            track, which no single column knows. */}
-        <div
-          className="drill-climb-track"
-          style={{ "--climb-bars": barsPerStep } as React.CSSProperties}
-        >
-          {/* Ground already covered. The playhead says where you are; this
-              says how much of the exercise is behind it, which the filled
-              cells only tell you column by column. Drawn behind everything
-              and very quietly — it is a change of ground, not a shape. */}
-          {active && (
-            <div
-              className="drill-climb-swept"
-              style={
-                {
-                  "--climb-swept-step": effectiveStep,
-                  "--climb-swept-bar": barsInStep,
-                } as React.CSSProperties
-              }
-              aria-hidden="true"
-            />
-          )}
+        <div className="drill-climb-track">
           {steps.map((bpm, stepIdx) => {
             const isDone = active && !cyclic ? stepIdx < currentStep : false;
             const isCurrent = stepIdx === effectiveStep && active;

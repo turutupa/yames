@@ -106,8 +106,14 @@ describe("DrillView", () => {
     const { container } = render(
       <DrillView state={drillState} currentBeat={null} animations={false} />,
     );
-    expect(container.querySelector(".drill-live")).toBeNull();
-    expect(container.querySelectorAll(".drill-dot")).toHaveLength(0);
+    // Present but hidden, not absent. It has to keep its height or the
+    // climb jumps down the screen when a run starts — which is exactly what
+    // happened once the idle hint that used to hold this row moved onto the
+    // mode buttons as a tooltip.
+    const live = container.querySelector(".drill-live") as HTMLElement;
+    expect(live).not.toBeNull();
+    expect(live.hasAttribute("data-idle")).toBe(true);
+    expect(live.getAttribute("aria-hidden")).toBe("true");
     // The plan is what heads the stage instead.
     expect(
       container.querySelector(".drill-stage-head .drill-plan"),
