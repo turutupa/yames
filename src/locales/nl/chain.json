@@ -18,18 +18,12 @@
     "revertTooltip": "Terug naar de opgeslagen keten",
     "track": "De keten",
     "stepDefaultName": "Stap {{number}}",
-    "stepHeading": "Stap {{number}} — {{name}}",
-    "editingStep": "je bewerkt de stap, niet de keten",
-    "now": "NU · {{number}}",
-    "volume": "vol {{percent}}",
     "selectStep": "Deze stap bewerken",
     "renameStep": "Deze stap hernoemen",
     "moveEarlier": "Deze stap naar voren",
     "moveLater": "Deze stap naar achteren",
     "duplicateStep": "Deze stap dupliceren",
     "removeStep": "Deze stap verwijderen",
-    "addStep": "Voeg toe wat je nu hebt als stap",
-    "emptyHint": "Deze keten is nog leeg. Zet de metronoom goed en voeg dat toe als stap.",
     "barOf": "maat {{current}} van {{total}}",
     "timeLeft": "nog {{duration}}",
     "waitingForYou": "wacht op jou",
@@ -66,7 +60,6 @@
     },
     "gap": {
       "title": "Tussen deze stap en de volgende",
-      "edit": "Na stap {{number}}: {{gap}}",
       "moveOn": "Doorgaan",
       "whenISay": "Als ik het zeg",
       "afterBars": "Na maten",
@@ -93,6 +86,42 @@
       "nextIn": "Volgende over {{gap}}",
       "nextWhenYouSay": "Volgende als jij het zegt",
       "skip": "Naar de volgende"
+    },
+    "nowShort": "Nu",
+    "emptyLead": "Een keten speelt je stappen op volgorde af, de een na de ander. Voeg hieronder de eerste toe.",
+    "addStepPlain": "+ Stap toevoegen",
+    "orFromLibrary": "of voeg een preset uit de bibliotheek toe",
+    "transition": {
+      "cutShort": "knip",
+      "countInShort": "{{count}} maten aftellen",
+      "countInShort_one": "{{count}} maat aftellen",
+      "countInShort_other": "{{count}} maten aftellen",
+      "restShort": "{{count}} maten rust",
+      "restShort_one": "{{count}} maat rust",
+      "restShort_other": "{{count}} maten rust"
+    },
+    "said": {
+      "config": "{{bpm}} BPM, {{meter}}, {{subdivision}} · {{sound}}",
+      "untilISay": "tot ik het zeg",
+      "forSpan": "{{span}} lang",
+      "thenTransition": "{{trigger}}, dan {{transition}}",
+      "thenTheChainEnds": "{{trigger}}, en dan stopt de keten",
+      "stepNote": "Stap {{number}} van {{total}}",
+      "runs": "loopt",
+      "for": "gedurende",
+      "then": "dan",
+      "andThen": "en dan",
+      "theChainEnds": "stopt de keten",
+      "volume": "volume {{percent}}%",
+      "volumeLabel": "Volume",
+      "beatsTip": "Eén groep, dus het accent valt op tel één."
+    },
+    "player": {
+      "edit": "Keten bewerken",
+      "then": "dan",
+      "lastStep": "Laatste stap",
+      "roundAgain": "dan nog een ronde",
+      "backToPlaying": "Terug naar spelen"
     }
   }
 }

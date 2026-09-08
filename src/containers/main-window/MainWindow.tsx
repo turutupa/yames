@@ -88,7 +88,8 @@ import { useBpmEditing } from "./hooks/useBpmEditing";
 import { usePlaybackClock } from "./hooks/usePlaybackClock";
 import { useLibraryFit } from "./hooks/useLibraryFit";
 import { useChainSession } from "./hooks/useChainSession";
-import { ChainStepHeading, ChainTrack } from "../../components/chain/ChainTrack";
+import { ChainParagraph } from "../../components/chain/ChainParagraph";
+import { ChainPlayer } from "../../components/chain/ChainPlayer";
 import { useAudioError } from "./hooks/useAudioError";
 import { AudioErrorNotice } from "./AudioErrorNotice";
 import {
@@ -1025,31 +1026,41 @@ export function MainWindow() {
           />
         )}
 
-        {/* Above the metronome, not instead of it. Everything below this
-            strip is the same metronome it has always been — it just happens
-            to be pointed at the selected step. */}
-        {view === "beat" && chainSession.chain && (
-          <ChainTrack
-            chain={chainSession.chain}
-            selectedStepId={chainSession.selectedStepId}
-            onSelectStep={chainSession.selectStep}
-            runningIndex={chainSession.runningIndex}
-            remaining={chainSession.runner.remaining}
-            onChange={chainSession.setChain}
-            onAddStep={chainSession.addStepFromNow}
-          />
-        )}
-        {view === "beat" && chainSession.chain && (
-          <ChainStepHeading
-            step={chainSession.selectedStep}
-            number={
-              chainSession.chain.steps.findIndex((s) => s.id === chainSession.selectedStepId) + 1
-            }
-          />
-        )}
-
         <ViewTransition viewKey={view} themeId={state.theme} disabled={viewTransitions === "off"} level={viewTransitions} animStyle={animationStyle}>
-        {view === "beat" ? (
+        {/* Chain mode is two rooms, and Start is the door between them.
+            Building a chain is desk work; playing one is done a metre back
+            with a guitar in your hands. One stage was trying to hold both,
+            and the cost was 309px spent above a metronome that then had 364px
+            of the 523px it needs — overflowing with the scrollbar hidden.
+
+            Neither room stacks anything above the stage, so each gets the
+            same 672px the metronome gets with no chain loaded. */}
+        {view === "beat" && chainSession.chain ? (
+          chainSession.chainPlaying ? (
+            <ChainPlayer
+              chain={chainSession.chain}
+              step={chainSession.runner.step!}
+              stepNumber={chainSession.runner.stepNumber}
+              stepCount={chainSession.runner.stepCount}
+              remaining={chainSession.runner.remaining}
+              activeBeat={activeBeat}
+              activeSub={activeSub}
+              isDownbeat={isDownbeat}
+              isPlaying={state.isPlaying}
+              onEdit={chainSession.editWhileRunning}
+            />
+          ) : (
+            <ChainParagraph
+              chain={chainSession.chain}
+              selectedStepId={chainSession.selectedStepId}
+              onSelectStep={chainSession.selectStep}
+              runningIndex={chainSession.runningIndex}
+              onChange={chainSession.setChain}
+              onAddStep={chainSession.addStepFromNow}
+              onBackToPlaying={chainSession.backToPlaying}
+            />
+          )
+        ) : view === "beat" ? (
           <MetronomeView
             state={state}
             currentBeat={currentBeat}

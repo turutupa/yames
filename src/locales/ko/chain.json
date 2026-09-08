@@ -18,18 +18,12 @@
     "revertTooltip": "저장된 체인으로 되돌리기",
     "track": "체인",
     "stepDefaultName": "{{number}}단계",
-    "stepHeading": "{{number}}단계 — {{name}}",
-    "editingStep": "체인이 아니라 단계를 편집하는 중입니다",
-    "now": "재생 중 · {{number}}",
-    "volume": "음량 {{percent}}",
     "selectStep": "이 단계 편집",
     "renameStep": "이 단계 이름 바꾸기",
     "moveEarlier": "이 단계를 앞으로 옮기기",
     "moveLater": "이 단계를 뒤로 옮기기",
     "duplicateStep": "이 단계 복제",
     "removeStep": "이 단계 삭제",
-    "addStep": "지금 설정을 단계로 추가",
-    "emptyHint": "아직 이 체인은 비어 있습니다. 메트로놈을 설정한 뒤 단계로 추가하세요.",
     "barOf": "{{current}}/{{total}}마디",
     "timeLeft": "{{duration}} 남음",
     "waitingForYou": "신호를 기다리는 중",
@@ -66,7 +60,6 @@
     },
     "gap": {
       "title": "이 단계와 다음 단계 사이",
-      "edit": "{{number}}단계 뒤: {{gap}}",
       "moveOn": "넘어갈 시점",
       "whenISay": "신호하면",
       "afterBars": "몇 마디 뒤",
@@ -93,6 +86,42 @@
       "nextIn": "{{gap}} 뒤 다음 단계",
       "nextWhenYouSay": "신호하면 다음 단계",
       "skip": "다음으로 건너뛰기"
+    },
+    "nowShort": "재생 중",
+    "emptyLead": "체인은 단계를 순서대로 하나씩 재생합니다. 아래에서 첫 단계를 추가하세요.",
+    "addStepPlain": "+ 단계 추가",
+    "orFromLibrary": "또는 라이브러리에서 프리셋 추가",
+    "transition": {
+      "cutShort": "바로 전환",
+      "countInShort": "{{count}}마디 카운트",
+      "countInShort_one": "{{count}}마디 카운트",
+      "countInShort_other": "{{count}}마디 카운트",
+      "restShort": "{{count}}마디 쉼",
+      "restShort_one": "{{count}}마디 쉼",
+      "restShort_other": "{{count}}마디 쉼"
+    },
+    "said": {
+      "config": "{{bpm}} BPM, {{meter}}, {{subdivision}} · {{sound}}",
+      "untilISay": "내가 말할 때까지",
+      "forSpan": "{{span}} 동안",
+      "thenTransition": "{{trigger}}, 그다음 {{transition}}",
+      "thenTheChainEnds": "{{trigger}}, 그리고 체인이 끝납니다",
+      "stepNote": "{{total}}단계 중 {{number}}단계",
+      "runs": "계속",
+      "for": "동안",
+      "then": "그다음",
+      "andThen": "그리고",
+      "theChainEnds": "체인이 끝납니다",
+      "volume": "음량 {{percent}}%",
+      "volumeLabel": "음량",
+      "beatsTip": "한 그룹이라 악센트는 첫 박에 옵니다."
+    },
+    "player": {
+      "edit": "체인 편집",
+      "then": "다음",
+      "lastStep": "마지막 단계",
+      "roundAgain": "그리고 한 바퀴 더",
+      "backToPlaying": "재생으로 돌아가기"
     }
   }
 }

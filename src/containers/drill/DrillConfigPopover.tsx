@@ -10,6 +10,12 @@ interface DrillConfigPopoverProps {
   label: string;
   /** The quiet line under the divider, as drawn. */
   note?: string;
+  /**
+   * Selector for the block the window must clear, hung off the anchor. The
+   * drill's plan is the default; a chain step's sentence passes its own.
+   * Falling back to the anchor itself is what a token outside any block gets.
+   */
+  clears?: string;
   children: ReactNode;
 }
 
@@ -44,6 +50,7 @@ export function DrillConfigPopover({
   onClose,
   label,
   note,
+  clears = ".drill-plan-block",
   children,
 }: DrillConfigPopoverProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -73,7 +80,7 @@ export function DrillConfigPopover({
       // Hanging it off the token's own bottom edge put it over the second line
       // of the sentence, and the tokens down there — the beat count, the run
       // options — became unclickable for as long as any window was open.
-      const clears = (anchor.closest(".drill-plan-block") ?? anchor).getBoundingClientRect();
+      const clearsRect = (anchor.closest(clears) ?? anchor).getBoundingClientRect();
       const width = card.offsetWidth;
       let screenLeft = a.left;
       // Right edge first, then left: on a narrow window the right clamp can
@@ -85,7 +92,7 @@ export function DrillConfigPopover({
       if (screenLeft < MARGIN) screenLeft = MARGIN;
       setPos({
         left: screenLeft - parent.left,
-        top: clears.bottom - parent.top + OFFSET,
+        top: clearsRect.bottom - parent.top + OFFSET,
       });
     };
     place();

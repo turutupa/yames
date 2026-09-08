@@ -18,18 +18,12 @@
     "revertTooltip": "Quay lại chuỗi đã lưu",
     "track": "Chuỗi",
     "stepDefaultName": "Bước {{number}}",
-    "stepHeading": "Bước {{number}} — {{name}}",
-    "editingStep": "bạn đang sửa bước, không phải chuỗi",
-    "now": "ĐANG CHẠY · {{number}}",
-    "volume": "âm lượng {{percent}}",
     "selectStep": "Sửa bước này",
     "renameStep": "Đổi tên bước này",
     "moveEarlier": "Chuyển bước này lên trước",
     "moveLater": "Chuyển bước này xuống sau",
     "duplicateStep": "Nhân đôi bước này",
     "removeStep": "Xóa bước này",
-    "addStep": "Thêm thiết lập hiện tại thành một bước",
-    "emptyHint": "Chuỗi này còn trống. Chỉnh máy đập nhịp rồi thêm vào làm một bước.",
     "barOf": "ô nhịp {{current}} trên {{total}}",
     "timeLeft": "còn {{duration}}",
     "waitingForYou": "đang chờ bạn",
@@ -66,7 +60,6 @@
     },
     "gap": {
       "title": "Giữa bước này và bước sau",
-      "edit": "Sau bước {{number}}: {{gap}}",
       "moveOn": "Khi nào chuyển",
       "whenISay": "Khi tôi ra hiệu",
       "afterBars": "Sau số ô nhịp",
@@ -93,6 +86,42 @@
       "nextIn": "Còn {{gap}} tới bước sau",
       "nextWhenYouSay": "Bước sau khi bạn ra hiệu",
       "skip": "Sang bước sau"
+    },
+    "nowShort": "Đang chạy",
+    "emptyLead": "Chuỗi phát các bước theo thứ tự, lần lượt từng bước. Thêm bước đầu tiên bên dưới.",
+    "addStepPlain": "+ Thêm một bước",
+    "orFromLibrary": "hoặc thêm một cài đặt sẵn từ thư viện",
+    "transition": {
+      "cutShort": "cắt thẳng",
+      "countInShort": "đếm vào {{count}} ô nhịp",
+      "countInShort_one": "đếm vào {{count}} ô nhịp",
+      "countInShort_other": "đếm vào {{count}} ô nhịp",
+      "restShort": "nghỉ {{count}} ô nhịp",
+      "restShort_one": "nghỉ {{count}} ô nhịp",
+      "restShort_other": "nghỉ {{count}} ô nhịp"
+    },
+    "said": {
+      "config": "{{bpm}} BPM, {{meter}}, {{subdivision}} · {{sound}}",
+      "untilISay": "cho đến khi tôi ra hiệu",
+      "forSpan": "trong {{span}}",
+      "thenTransition": "{{trigger}}, rồi {{transition}}",
+      "thenTheChainEnds": "{{trigger}}, rồi chuỗi kết thúc",
+      "stepNote": "Bước {{number}} trên {{total}}",
+      "runs": "chạy",
+      "for": "trong",
+      "then": "rồi",
+      "andThen": "và rồi",
+      "theChainEnds": "chuỗi kết thúc",
+      "volume": "âm lượng {{percent}}%",
+      "volumeLabel": "Âm lượng",
+      "beatsTip": "Một nhóm duy nhất, nên trọng âm rơi vào phách một."
+    },
+    "player": {
+      "edit": "Sửa chuỗi",
+      "then": "rồi",
+      "lastStep": "Bước cuối",
+      "roundAgain": "rồi thêm một vòng",
+      "backToPlaying": "Quay lại chơi"
     }
   }
 }

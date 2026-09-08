@@ -18,18 +18,12 @@
     "revertTooltip": "Вернуться к сохранённой цепочке",
     "track": "Цепочка",
     "stepDefaultName": "Шаг {{number}}",
-    "stepHeading": "Шаг {{number}} — {{name}}",
-    "editingStep": "вы правите шаг, а не цепочку",
-    "now": "СЕЙЧАС · {{number}}",
-    "volume": "гром. {{percent}}",
     "selectStep": "Править этот шаг",
     "renameStep": "Переименовать этот шаг",
     "moveEarlier": "Переместить этот шаг раньше",
     "moveLater": "Переместить этот шаг позже",
     "duplicateStep": "Продублировать этот шаг",
     "removeStep": "Удалить этот шаг",
-    "addStep": "Добавить текущие настройки как шаг",
-    "emptyHint": "В этой цепочке пока пусто. Настройте метроном и добавьте это как шаг.",
     "barOf": "такт {{current}} из {{total}}",
     "timeLeft": "осталось {{duration}}",
     "waitingForYou": "ждёт вас",
@@ -66,7 +60,6 @@
     },
     "gap": {
       "title": "Между этим шагом и следующим",
-      "edit": "После шага {{number}}: {{gap}}",
       "moveOn": "Когда переходить",
       "whenISay": "По моему знаку",
       "afterBars": "Через такты",
@@ -93,6 +86,42 @@
       "nextIn": "Следующий через {{gap}}",
       "nextWhenYouSay": "Следующий по вашему знаку",
       "skip": "К следующему"
+    },
+    "nowShort": "Сейчас",
+    "emptyLead": "Цепочка проигрывает шаги по порядку, один за другим. Добавьте первый ниже.",
+    "addStepPlain": "+ Добавить шаг",
+    "orFromLibrary": "или добавьте пресет из библиотеки",
+    "transition": {
+      "cutShort": "срез",
+      "countInShort": "отсчёт {{count}} тактов",
+      "countInShort_one": "отсчёт {{count}} такта",
+      "countInShort_other": "отсчёт {{count}} тактов",
+      "restShort": "пауза {{count}} тактов",
+      "restShort_one": "пауза {{count}} такт",
+      "restShort_other": "пауза {{count}} тактов"
+    },
+    "said": {
+      "config": "{{bpm}} BPM, {{meter}}, {{subdivision}} · {{sound}}",
+      "untilISay": "пока я не скажу",
+      "forSpan": "{{span}}",
+      "thenTransition": "{{trigger}}, затем {{transition}}",
+      "thenTheChainEnds": "{{trigger}}, и цепочка заканчивается",
+      "stepNote": "Шаг {{number}} из {{total}}",
+      "runs": "идёт",
+      "for": "в течение",
+      "then": "затем",
+      "andThen": "и затем",
+      "theChainEnds": "цепочка заканчивается",
+      "volume": "громкость {{percent}}%",
+      "volumeLabel": "Громкость",
+      "beatsTip": "Одна группа, поэтому акцент падает на первую долю."
+    },
+    "player": {
+      "edit": "Изменить цепочку",
+      "then": "затем",
+      "lastStep": "Последний шаг",
+      "roundAgain": "и ещё круг",
+      "backToPlaying": "Вернуться к игре"
     }
   }
 }

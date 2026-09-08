@@ -18,18 +18,12 @@
     "revertTooltip": "Revenir à la chaîne enregistrée",
     "track": "La chaîne",
     "stepDefaultName": "Étape {{number}}",
-    "stepHeading": "Étape {{number}} — {{name}}",
-    "editingStep": "vous modifiez l'étape, pas la chaîne",
-    "now": "EN COURS · {{number}}",
-    "volume": "vol {{percent}}",
     "selectStep": "Modifier cette étape",
     "renameStep": "Renommer cette étape",
     "moveEarlier": "Déplacer cette étape vers la gauche",
     "moveLater": "Déplacer cette étape vers la droite",
     "duplicateStep": "Dupliquer cette étape",
     "removeStep": "Retirer cette étape",
-    "addStep": "Ajouter le réglage actuel comme étape",
-    "emptyHint": "Cette chaîne est encore vide. Réglez le métronome, puis ajoutez-le comme étape.",
     "barOf": "mesure {{current}} sur {{total}}",
     "timeLeft": "{{duration}} restantes",
     "waitingForYou": "vous attend",
@@ -66,7 +60,6 @@
     },
     "gap": {
       "title": "Entre cette étape et la suivante",
-      "edit": "Après l'étape {{number}} : {{gap}}",
       "moveOn": "Passer à la suite",
       "whenISay": "Quand je le dis",
       "afterBars": "Après des mesures",
@@ -93,6 +86,42 @@
       "nextIn": "Suivante dans {{gap}}",
       "nextWhenYouSay": "Suivante quand vous le dites",
       "skip": "Passer à la suivante"
+    },
+    "nowShort": "En cours",
+    "emptyLead": "Une chaîne joue vos étapes dans l'ordre, l'une après l'autre. Ajoutez la première ci-dessous.",
+    "addStepPlain": "+ Ajouter une étape",
+    "orFromLibrary": "ou ajoutez un préréglage depuis la bibliothèque",
+    "transition": {
+      "cutShort": "coupure",
+      "countInShort": "décompte de {{count}} mesures",
+      "countInShort_one": "décompte de {{count}} mesure",
+      "countInShort_other": "décompte de {{count}} mesures",
+      "restShort": "pause de {{count}} mesures",
+      "restShort_one": "pause de {{count}} mesure",
+      "restShort_other": "pause de {{count}} mesures"
+    },
+    "said": {
+      "config": "{{bpm}} BPM, {{meter}}, {{subdivision}} · {{sound}}",
+      "untilISay": "jusqu'à ce que je le dise",
+      "forSpan": "pendant {{span}}",
+      "thenTransition": "{{trigger}}, puis {{transition}}",
+      "thenTheChainEnds": "{{trigger}}, puis la chaîne se termine",
+      "stepNote": "Étape {{number}} sur {{total}}",
+      "runs": "tourne",
+      "for": "pendant",
+      "then": "puis",
+      "andThen": "et puis",
+      "theChainEnds": "la chaîne se termine",
+      "volume": "volume {{percent}} %",
+      "volumeLabel": "Volume",
+      "beatsTip": "Un seul groupe : l'accent tombe donc sur le premier temps."
+    },
+    "player": {
+      "edit": "Modifier la chaîne",
+      "then": "puis",
+      "lastStep": "Dernière étape",
+      "roundAgain": "puis on recommence",
+      "backToPlaying": "Revenir au jeu"
     }
   }
 }
