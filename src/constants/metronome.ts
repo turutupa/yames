@@ -42,8 +42,11 @@ export const SOUND_TYPES = [
   { id: "wood", icon: "◆" },
   { id: "beep", icon: "◉" },
   { id: "drum", icon: "◎" },
-  // The same kit idea with the metal taken out: kick and snare against a
-  // side-stick, for people who want drums rather than cymbals.
+  // The same kit idea with the metal taken out, for people who want drums
+  // rather than cymbals: a snare over a kick on the accent, a mid tom on the
+  // beat. It was a side-stick, which measured as the `wood` kit's block —
+  // 48% of its energy on a 780 Hz wood tone — and was most of why the owner
+  // heard "a shy sound" rather than a drum kit.
   { id: "snare", icon: "◍" },
 ];
 
