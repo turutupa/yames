@@ -140,7 +140,13 @@
   display: flex;
   align-items: stretch;
   overflow-x: auto;
-  overflow-y: visible;
+  /* NOT `visible`, however much we would like it to be: when either axis is
+     `auto`, CSS computes the other to `auto` too. This said `visible` for a
+     long time and the browser read it as `auto` the whole time, which is what
+     clipped the transition editor. Saying `auto` is honest — and the editor
+     escapes by being portalled out rather than by a declaration that never
+     took effect. */
+  overflow-y: auto;
   padding-bottom: 4px;
 }
 
@@ -369,11 +375,11 @@
 /* =================== The transition editor =================== */
 
 .chain-transition-editor {
-  position: absolute;
-  top: 42px;
-  /* `--editor-shift` is set by the component when the panel would otherwise
-     open past the edge of the window — see the note in TransitionEditor. */
-  left: calc(-52px + var(--editor-shift, 0px));
+  /* `fixed`, and rendered into the body by a portal, because the track strip
+     clips it otherwise — see the placement effect in TransitionEditor. `top`
+     and `left` are set there from the chip's own rect; the panel has no
+     positioned ancestor to hang off any more. */
+  position: fixed;
   width: 320px;
   z-index: 60;
   background: var(--bg-panel);

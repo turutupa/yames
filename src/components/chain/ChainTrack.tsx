@@ -70,6 +70,12 @@ export function ChainTrack({
 }: ChainTrackProps) {
   const { t } = useTranslation();
   const [openGap, setOpenGap] = useState<string | null>(null);
+  /**
+   * Each gap chip, by step id. The editor is rendered in a portal so that the
+   * track's horizontal scroll box cannot clip it, which means it can no longer
+   * reach its own chip through the DOM — it measures against this instead.
+   */
+  const gapChips = useRef<Record<string, HTMLButtonElement | null>>({});
   const [renaming, setRenaming] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
   const renameRef = useRef<HTMLInputElement>(null);
@@ -272,6 +278,9 @@ export function ChainTrack({
                     number: index + 1,
                     gap: triggerLabel(t, step.trigger),
                   })}
+                  ref={(el) => {
+                    gapChips.current[step.id] = el;
+                  }}
                   onClick={() => setOpenGap((open) => (open === step.id ? null : step.id))}
                 >
                   {triggerLabel(t, step.trigger)}
@@ -280,6 +289,7 @@ export function ChainTrack({
                   <TransitionEditor
                     step={step}
                     isLast={index === chain.steps.length - 1}
+                    anchor={gapChips.current[step.id] ?? null}
                     onChange={(patch) => patchGap(step.id, patch)}
                     onClose={() => setOpenGap(null)}
                   />
