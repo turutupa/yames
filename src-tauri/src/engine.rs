@@ -236,6 +236,13 @@ const DRUM_HIGH: &[u8] = include_bytes!("../sounds/drum_high.wav");
 const DRUM_LOW: &[u8] = include_bytes!("../sounds/drum_low.wav");
 const DRUM_METAL: &[u8] = include_bytes!("../sounds/drum_metal.wav");
 const DRUM_CRASH: &[u8] = include_bytes!("../sounds/drum_crash.wav");
+/// The mid-band layer the drum accent was missing. See `drum_body` in
+/// `scripts/sounds/rebuild.py` for why a 6 ms transient could not do this job.
+const DRUM_BODY: &[u8] = include_bytes!("../sounds/drum_body.wav");
+/// The second kit: kick-and-snare backbeat against a side-stick. Both are
+/// synthesised whole, so their balance is fixed in the files.
+const SNARE_HIGH: &[u8] = include_bytes!("../sounds/snare_high.wav");
+const SNARE_LOW: &[u8] = include_bytes!("../sounds/snare_low.wav");
 const CHIME_UP: &[u8] = include_bytes!("../sounds/chime_up.wav");
 const CHIME_DOWN: &[u8] = include_bytes!("../sounds/chime_down.wav");
 
@@ -363,6 +370,8 @@ enum SoundId {
     BeepLow,
     DrumLow,
     DrumAccent,
+    SnareLow,
+    SnareHigh,
     ChimeUp,
     ChimeDown,
 }
@@ -375,7 +384,9 @@ struct SoundBank {
     beep_high: Vec<f32>,
     beep_low: Vec<f32>,
     drum_low: Vec<f32>,
-    drum_accent: Vec<f32>, // pre-mixed kick + metal hat + crash
+    drum_accent: Vec<f32>, // pre-mixed kick + metal hat + crash + body
+    snare_low: Vec<f32>,
+    snare_high: Vec<f32>,
     chime_up: Vec<f32>,
     chime_down: Vec<f32>,
 }
@@ -385,24 +396,70 @@ impl SoundBank {
         let drum_high = decode_wav(DRUM_HIGH, sr);
         let drum_metal = decode_wav(DRUM_METAL, sr);
         let drum_crash = decode_wav(DRUM_CRASH, sr);
+        let drum_body = decode_wav(DRUM_BODY, sr);
 
-        // Pre-mix drum accent composite
-        let max_len = drum_high.len().max(drum_metal.len()).max(drum_crash.len());
+        // Pre-mix the drum accent.
+        //
+        // The owner's report was that the accent is not dominant enough, and
+        // measurement agreed in the worst way: through a 200 Hz–4 kHz
+        // band-pass — roughly what a laptop speaker radiates — the accent was
+        // 0.5 dB QUIETER than the plain beat it is supposed to mark, and
+        // 2.1 dB quieter A-weighted. It only ever measured louder broadband,
+        // on sub-bass nobody's laptop can reproduce.
+        //
+        // Two things were wrong, and both are fixed here.
+        //
+        // 1. The kick was setting a ceiling it could not be heard through.
+        //    It carries 99.7% of its energy below 120 Hz, yet its peak drove
+        //    the normalisation that scaled the metal and crash — the layers a
+        //    small speaker CAN reproduce — down by 2.3 dB. Its gain drops
+        //    from 1.0 to 0.7 and the two audible layers come up to meet it.
+        //
+        // 2. There was no mid-band content to raise. `drum_body` is the new
+        //    55 ms layer that supplies it; an earlier attempt added a 6 ms
+        //    beater transient carrying 0.45% of the kick's energy, which
+        //    raised the peak without raising the loudness and moved the
+        //    measured accent by 0.1 dB.
+        let max_len = drum_high
+            .len()
+            .max(drum_metal.len())
+            .max(drum_crash.len())
+            .max(drum_body.len());
         let mut drum_accent = vec![0.0f32; max_len];
         for (i, s) in drum_high.iter().enumerate() {
-            drum_accent[i] += s;
+            drum_accent[i] += s * 0.70;
         }
         for (i, s) in drum_metal.iter().enumerate() {
-            drum_accent[i] += s * 0.55;
+            drum_accent[i] += s * 0.70;
         }
         for (i, s) in drum_crash.iter().enumerate() {
-            drum_accent[i] += s * 0.35;
+            drum_accent[i] += s * 0.45;
+        }
+        for (i, s) in drum_body.iter().enumerate() {
+            drum_accent[i] += s;
         }
 
-        // Three samples summed peak above full scale — 1.27 as measured — so
-        // at any volume over about 0.79 the accent clipped, on every downbeat
-        // of every bar. Scaling the premix back is free: the user's volume is
-        // applied after this, so the only thing lost is distortion.
+        // Four samples summed peak well above full scale — 1.68 as measured —
+        // so without limiting the accent clipped on every downbeat once the
+        // user's volume passed about 0.58.
+        //
+        // This used to divide the whole buffer by its peak, which is what a
+        // peak meter wants and not what an ear wants: it threw away 2.3 dB of
+        // everything to make room for one subsonic spike. A tanh curve holds
+        // the same ceiling while keeping that loudness, and the harmonics it
+        // folds out of the kick's fundamental land at 100–300 Hz, where a
+        // laptop speaker starts working. Drive 1.0 measures 19 dB below the
+        // signal — saturation a drum wears well, not distortion.
+        //
+        // Net, against the plain beat: −0.5 dB → +5.6 dB band-limited,
+        // −2.1 dB → +2.7 dB A-weighted. Peak is unchanged at 0.97.
+        //
+        // This runs once when the bank is built, never on the audio thread.
+        const DRIVE: f32 = 1.0;
+        let shape = DRIVE.tanh();
+        for s in drum_accent.iter_mut() {
+            *s = (*s * DRIVE).tanh() / shape;
+        }
         let peak = drum_accent.iter().fold(0.0f32, |m, s| m.max(s.abs()));
         if peak > 0.97 {
             let g = 0.97 / peak;
@@ -420,6 +477,11 @@ impl SoundBank {
             beep_low: decode_wav(BEEP_LOW, sr),
             drum_low: decode_wav(DRUM_LOW, sr),
             drum_accent,
+            // No premix for this kit: it is synthesised whole, so its accent
+            // is already balanced against its beat in the file and there is
+            // no summed peak to limit away.
+            snare_low: decode_wav(SNARE_LOW, sr),
+            snare_high: decode_wav(SNARE_HIGH, sr),
             chime_up: decode_wav(CHIME_UP, sr),
             chime_down: decode_wav(CHIME_DOWN, sr),
         }
@@ -435,6 +497,8 @@ impl SoundBank {
             SoundId::BeepLow => &self.beep_low,
             SoundId::DrumLow => &self.drum_low,
             SoundId::DrumAccent => &self.drum_accent,
+            SoundId::SnareLow => &self.snare_low,
+            SoundId::SnareHigh => &self.snare_high,
             SoundId::ChimeUp => &self.chime_up,
             SoundId::ChimeDown => &self.chime_down,
         }
@@ -474,15 +538,25 @@ enum SoundKit {
     Click,
     Wood,
     Beep,
+    /// Kick, hi-hat and crash. The bright one.
     Drum,
+    /// Kick-and-snare backbeat against a side-stick. The same idea as `Drum`
+    /// with the metal taken out — the owner asked for a second kit that
+    /// sounds like drums rather than like cymbals.
+    Snare,
 }
 
 impl SoundKit {
+    /// `sound_type` is persisted as a free string, so a store written by a
+    /// newer build — or a corrupted one — can name a kit this build has never
+    /// heard of. Falling through to Click keeps the metronome audible instead
+    /// of silent, which is the only failure mode that matters here.
     fn from_str(s: &str) -> Self {
         match s {
             "wood" => Self::Wood,
             "beep" => Self::Beep,
             "drum" => Self::Drum,
+            "snare" => Self::Snare,
             _ => Self::Click,
         }
     }
@@ -492,6 +566,7 @@ impl SoundKit {
             Self::Wood => SoundId::WoodHigh,
             Self::Beep => SoundId::BeepHigh,
             Self::Drum => SoundId::DrumAccent,
+            Self::Snare => SoundId::SnareHigh,
         }
     }
     fn low_id(self) -> SoundId {
@@ -500,6 +575,7 @@ impl SoundKit {
             Self::Wood => SoundId::WoodLow,
             Self::Beep => SoundId::BeepLow,
             Self::Drum => SoundId::DrumLow,
+            Self::Snare => SoundId::SnareLow,
         }
     }
 }
@@ -2535,14 +2611,111 @@ mod tests {
         assert!(quiet.iter().all(|s| s.abs() < 1e-6));
     }
 
-    /// The drum accent is three samples summed. Unscaled they peak at about
-    /// 1.27, so every downbeat clipped once the user's volume passed ~0.79.
+    /// The drum accent is four samples summed. Unscaled they peak at about
+    /// 1.68, so every downbeat clipped once the user's volume passed ~0.58.
     #[test]
     fn drum_accent_leaves_headroom() {
         let bank = SoundBank::new(48000);
-        let peak = bank.drum_accent.iter().fold(0.0f32, |m, s| m.max(s.abs()));
-        assert!(peak <= 0.971, "drum accent peaks at {peak}, which clips");
-        assert!(peak > 0.5, "drum accent is suspiciously quiet at {peak}");
+        for (name, buf) in [
+            ("drum accent", &bank.drum_accent),
+            ("snare accent", &bank.snare_high),
+        ] {
+            let peak = buf.iter().fold(0.0f32, |m, s| m.max(s.abs()));
+            assert!(peak <= 0.971, "{name} peaks at {peak}, which clips");
+            assert!(peak > 0.5, "{name} is suspiciously quiet at {peak}");
+        }
+    }
+
+    /// Energy through a 200 Hz–4 kHz band-pass: roughly the band a laptop
+    /// speaker actually radiates.
+    ///
+    /// FOUR cascaded one-pole high-pass sections, not one. That is the whole
+    /// difficulty of this measurement and it is worth being explicit about:
+    /// the drum kick carries 99.7% of its energy below 120 Hz, so a gentle
+    /// 6 dB/octave roll-off still passes enough of it to swamp everything
+    /// else and report the accent as louder no matter what. At 24 dB/octave
+    /// the sub-bass is genuinely gone, and the number tracks a proper
+    /// Butterworth band-pass to within 0.05 dB on these samples.
+    ///
+    /// Each section needs its OWN state. Scaling a single section's output
+    /// four times is a gain, not a filter — the mistake is easy to make and
+    /// silently turns this test green.
+    fn laptop_band_energy(buf: &[f32], sr: u32) -> f64 {
+        const HP: usize = 4;
+        const LP: usize = 2;
+        let hp_a = 1.0 / (1.0 + 2.0 * std::f64::consts::PI * 200.0 / sr as f64);
+        let lp_a = 2.0 * std::f64::consts::PI * 4000.0 / sr as f64;
+        let (mut prev_in, mut prev_out, mut lp) = ([0.0f64; HP], [0.0f64; HP], [0.0f64; LP]);
+        let mut energy = 0.0f64;
+        for &s in buf {
+            let mut v = s as f64;
+            for k in 0..HP {
+                let out = hp_a * (prev_out[k] + v - prev_in[k]);
+                prev_in[k] = v;
+                prev_out[k] = out;
+                v = out;
+            }
+            for k in 0..LP {
+                lp[k] += lp_a * (v - lp[k]);
+                v = lp[k];
+            }
+            energy += v * v;
+        }
+        energy
+    }
+
+    /// THE ACCENT MUST BE LOUDER ON THE SPEAKER PEOPLE ACTUALLY USE.
+    ///
+    /// This is the test that was missing. The drum accent measured +7.8 dB
+    /// broadband and was shipped as correct, but essentially all of that was
+    /// sub-120 Hz kick: band-limited to what a laptop radiates it was 0.5 dB
+    /// QUIETER than the plain beat, so on the machine the owner practises on
+    /// the downbeat was the quietest thing in the bar. A broadband check
+    /// cannot see that, and did not.
+    ///
+    /// Measured through `laptop_band_energy`, the old premix scores -0.46 dB
+    /// and fails; the current one scores +4.13. The other kits sit at +3.72
+    /// (wood) to +4.57 (beep), and the snare kit at +4.89, so a 2 dB floor
+    /// has real room on both sides rather than being fitted to today's mix.
+    #[test]
+    fn every_accent_is_louder_than_its_beat_on_a_small_speaker() {
+        let sr = 48000;
+        let bank = SoundBank::new(sr);
+        // Every kit the UI offers, named so a failure says which one broke.
+        for (name, kit) in [
+            ("click", SoundKit::Click),
+            ("wood", SoundKit::Wood),
+            ("beep", SoundKit::Beep),
+            ("drum", SoundKit::Drum),
+            ("snare", SoundKit::Snare),
+        ] {
+            let accent = laptop_band_energy(bank.get(kit.high_id()), sr);
+            let beat =
+                laptop_band_energy(bank.get(kit.low_id()), sr) * (BEAT_GAIN * BEAT_GAIN) as f64;
+            let db = 10.0 * (accent / beat.max(1e-30)).log10();
+            assert!(
+                db > 2.0,
+                "{name}: accent is only {db:.2} dB over its beat through a 200 Hz-4 kHz \
+                 band-pass. Under about 2 dB it does not read as an accent on a laptop, \
+                 which is the speaker that matters."
+            );
+        }
+    }
+
+    /// A store written by a newer build can name a kit this one has never
+    /// heard of. It must fall back to something audible, not go silent.
+    #[test]
+    fn an_unknown_sound_type_falls_back_to_a_real_kit() {
+        for s in ["", "drum2", "Snare", "kit-from-the-future", "🥁"] {
+            let kit = SoundKit::from_str(s);
+            assert!(kit == SoundKit::Click, "{s:?} should fall back to Click");
+            let bank = SoundBank::new(48000);
+            assert!(!bank.get(kit.high_id()).is_empty());
+            assert!(!bank.get(kit.low_id()).is_empty());
+        }
+        // And the kits that do exist must keep resolving to themselves.
+        assert!(SoundKit::from_str("drum") == SoundKit::Drum);
+        assert!(SoundKit::from_str("snare") == SoundKit::Snare);
     }
 
     /// An accent plays at 1.0. These are what it is measured against, and the
@@ -2564,7 +2737,7 @@ mod tests {
     #[test]
     fn no_sample_ends_mid_decay() {
         let bank = SoundBank::new(44100);
-        let named: [(&str, &Vec<f32>); 7] = [
+        let named: [(&str, &Vec<f32>); 9] = [
             ("click_high", &bank.click_high),
             ("click_low", &bank.click_low),
             ("wood_high", &bank.wood_high),
@@ -2572,6 +2745,8 @@ mod tests {
             ("beep_high", &bank.beep_high),
             ("beep_low", &bank.beep_low),
             ("drum_low", &bank.drum_low),
+            ("snare_low", &bank.snare_low),
+            ("snare_high", &bank.snare_high),
         ];
         for (name, buf) in named {
             let tail = buf.last().copied().unwrap_or(0.0).abs();

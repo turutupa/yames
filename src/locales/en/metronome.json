@@ -43,7 +43,8 @@
     "click": "Click",
     "wood": "Wood",
     "beep": "Beep",
-    "drum": "Drum"
+    "drum": "Drum",
+    "snare": "Snare"
   },
   "driftMeter": {
     "early": "Early",

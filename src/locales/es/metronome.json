@@ -43,7 +43,8 @@
     "click": "Clic",
     "wood": "Madera",
     "beep": "Pitido",
-    "drum": "Tambor"
+    "drum": "Tambor",
+    "snare": "Caja"
   },
   "driftMeter": {
     "early": "Adelantado",

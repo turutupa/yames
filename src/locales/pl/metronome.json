@@ -43,7 +43,8 @@
     "click": "Klik",
     "wood": "Drewno",
     "beep": "Pip",
-    "drum": "Bęben"
+    "drum": "Bęben",
+    "snare": "Werbel"
   },
   "driftMeter": {
     "early": "Za wcześnie",

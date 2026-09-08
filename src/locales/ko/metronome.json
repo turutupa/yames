@@ -43,7 +43,8 @@
     "click": "클릭",
     "wood": "우드",
     "beep": "비프",
-    "drum": "드럼"
+    "drum": "드럼",
+    "snare": "스네어"
   },
   "driftMeter": {
     "early": "앞당김",

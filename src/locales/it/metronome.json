@@ -43,7 +43,8 @@
     "click": "Clic",
     "wood": "Legno",
     "beep": "Bip",
-    "drum": "Tamburo"
+    "drum": "Tamburo",
+    "snare": "Rullante"
   },
   "driftMeter": {
     "early": "In anticipo",

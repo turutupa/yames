@@ -43,7 +43,8 @@
     "click": "滴答",
     "wood": "木聲",
     "beep": "嗶聲",
-    "drum": "鼓聲"
+    "drum": "鼓聲",
+    "snare": "小鼓"
   },
   "driftMeter": {
     "early": "偏快",

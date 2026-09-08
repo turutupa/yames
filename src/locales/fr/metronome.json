@@ -43,7 +43,8 @@
     "click": "Clic",
     "wood": "Bois",
     "beep": "Bip",
-    "drum": "Caisse"
+    "drum": "Caisse",
+    "snare": "Caisse claire"
   },
   "driftMeter": {
     "early": "En avance",

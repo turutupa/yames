@@ -43,7 +43,8 @@
     "click": "Tích tắc",
     "wood": "Gỗ",
     "beep": "Bíp",
-    "drum": "Trống"
+    "drum": "Trống",
+    "snare": "Trống snare"
   },
   "driftMeter": {
     "early": "Sớm",

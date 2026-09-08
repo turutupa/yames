@@ -43,7 +43,8 @@
     "click": "Tık",
     "wood": "Tahta",
     "beep": "Bip",
-    "drum": "Davul"
+    "drum": "Davul",
+    "snare": "Trampet"
   },
   "driftMeter": {
     "early": "Erken",

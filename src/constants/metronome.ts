@@ -42,6 +42,9 @@ export const SOUND_TYPES = [
   { id: "wood", icon: "◆" },
   { id: "beep", icon: "◉" },
   { id: "drum", icon: "◎" },
+  // The same kit idea with the metal taken out: kick and snare against a
+  // side-stick, for people who want drums rather than cymbals.
+  { id: "snare", icon: "◍" },
 ];
 
 export const INSTRUMENTS: Array<{ id: string; soon?: boolean }> = [
