@@ -1627,6 +1627,28 @@ button.context-chip:hover,
    count is still on the stage, and Skip is a control, which readouts are not.
 
    Above this width all three fit and nothing is hidden. */
+/* The chain's counts in the transport. This block had no rule of its own, so
+   its three spans ran together as "Step 2 of 4Next in 2 minSkip to next" —
+   which nobody noticed while it sat under a strip of cards that said the same
+   things more loudly. */
+.transport-chain {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.transport-chain-count {
+  font-weight: 700;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.transport-chain-next {
+  white-space: nowrap;
+}
+
 @media (max-width: 1099px) {
   .transport[data-chain] .transport-readouts {
     display: none;

@@ -122,6 +122,15 @@ export function useChainSession({
   const [saved, setSaved] = useState<Chain | null>(null);
   const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
   const [saveFeedback, setSaveFeedback] = useState(false);
+  /**
+   * The player is showing but you asked for the paragraph back.
+   *
+   * You start a chain, hear that step 3 is too fast, and want to fix it
+   * without stopping — so the way out of the player does not stop the run.
+   * It clears itself when the run does, because the paragraph is where a
+   * stopped chain lives anyway.
+   */
+  const [editingWhileRunning, setEditingWhileRunning] = useState(false);
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /**
@@ -133,6 +142,10 @@ export function useChainSession({
   const awaiting = useRef<string | null>(null);
 
   const runner = useChainRunner(chain, isPlaying, currentBeat);
+
+  useEffect(() => {
+    if (!isPlaying) setEditingWhileRunning(false);
+  }, [isPlaying]);
 
   useEffect(() => {
     listChains().then(setChains).catch(() => {});
@@ -264,11 +277,27 @@ export function useChainSession({
     [chains, chain?.id, saved?.id],
   );
 
-  /** "+" on the track: whatever the metronome is set to now, as a new step. */
+  /**
+   * A new step at the end of the chain.
+   *
+   * This used to mean "whatever the metronome is set to now", which worked
+   * because the metronome was on screen underneath the track. In the
+   * paragraph there is no metronome to copy, so a new step copies the step
+   * ABOVE it — you add a step to a routine because it is like the last one
+   * but faster, not because it is like whatever happened to be loaded. The
+   * first step of an empty chain has nothing above it and takes the engine's
+   * current settings, which is the old behaviour exactly where it still makes
+   * sense.
+   *
+   * Adding a preset from the library is unchanged; that is `addPresetAsStep`.
+   */
   const addStepFromNow = useCallback(() => {
     if (!chain) return;
     const name = t("chain.stepDefaultName", { number: chain.steps.length + 1 });
-    const step = presetToChainStep(stateAsPreset(state, name));
+    const previous = chain.steps[chain.steps.length - 1];
+    const step = previous
+      ? { ...previous, id: crypto.randomUUID(), name }
+      : presetToChainStep(stateAsPreset(state, name));
     // The step already is what the engine is playing, so there is nothing to
     // apply — but the mirror must not read that back as an edit, which is
     // the same wait selecting a step opens.
@@ -309,5 +338,11 @@ export function useChainSession({
     renameChain,
     addStepFromNow,
     addPresetAsStep,
+    /** True while the chain is on a step — the player's condition. */
+    chainPlaying: runner.step !== null && !editingWhileRunning,
+    editingWhileRunning,
+    /** Leave the player for the paragraph without stopping the run. */
+    editWhileRunning: () => setEditingWhileRunning(true),
+    backToPlaying: () => setEditingWhileRunning(false),
   };
 }

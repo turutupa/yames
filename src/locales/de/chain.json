@@ -18,18 +18,12 @@
     "revertTooltip": "Zur gespeicherten Kette zurückkehren",
     "track": "Die Kette",
     "stepDefaultName": "Schritt {{number}}",
-    "stepHeading": "Schritt {{number}} — {{name}}",
-    "editingStep": "du bearbeitest den Schritt, nicht die Kette",
-    "now": "JETZT · {{number}}",
-    "volume": "Lautst. {{percent}}",
     "selectStep": "Diesen Schritt bearbeiten",
     "renameStep": "Diesen Schritt umbenennen",
     "moveEarlier": "Diesen Schritt nach vorn schieben",
     "moveLater": "Diesen Schritt nach hinten schieben",
     "duplicateStep": "Diesen Schritt duplizieren",
     "removeStep": "Diesen Schritt entfernen",
-    "addStep": "Aktuelle Einstellung als Schritt hinzufügen",
-    "emptyHint": "Diese Kette ist noch leer. Stell das Metronom ein und füge es als Schritt hinzu.",
     "barOf": "Takt {{current}} von {{total}}",
     "timeLeft": "noch {{duration}}",
     "waitingForYou": "wartet auf dich",
@@ -66,7 +60,6 @@
     },
     "gap": {
       "title": "Zwischen diesem und dem nächsten Schritt",
-      "edit": "Nach Schritt {{number}}: {{gap}}",
       "moveOn": "Weiter",
       "whenISay": "Auf mein Zeichen",
       "afterBars": "Nach Takten",
@@ -93,6 +86,42 @@
       "nextIn": "Nächster in {{gap}}",
       "nextWhenYouSay": "Nächster auf dein Zeichen",
       "skip": "Zum nächsten"
+    },
+    "nowShort": "Jetzt",
+    "emptyLead": "Eine Kette spielt deine Schritte der Reihe nach ab. Füge unten den ersten hinzu.",
+    "addStepPlain": "+ Schritt hinzufügen",
+    "orFromLibrary": "oder ein Preset aus der Bibliothek hinzufügen",
+    "transition": {
+      "cutShort": "Schnitt",
+      "countInShort": "{{count}} Takte Einzähler",
+      "countInShort_one": "{{count}} Takt Einzähler",
+      "countInShort_other": "{{count}} Takte Einzähler",
+      "restShort": "{{count}} Takte Pause",
+      "restShort_one": "{{count}} Takt Pause",
+      "restShort_other": "{{count}} Takte Pause"
+    },
+    "said": {
+      "config": "{{bpm}} BPM, {{meter}}, {{subdivision}} · {{sound}}",
+      "untilISay": "bis ich es sage",
+      "forSpan": "für {{span}}",
+      "thenTransition": "{{trigger}}, dann {{transition}}",
+      "thenTheChainEnds": "{{trigger}}, dann endet die Kette",
+      "stepNote": "Schritt {{number}} von {{total}}",
+      "runs": "läuft",
+      "for": "für",
+      "then": "dann",
+      "andThen": "und dann",
+      "theChainEnds": "endet die Kette",
+      "volume": "Lautstärke {{percent}} %",
+      "volumeLabel": "Lautstärke",
+      "beatsTip": "Eine Gruppe — der Akzent liegt also auf der Eins."
+    },
+    "player": {
+      "edit": "Kette bearbeiten",
+      "then": "dann",
+      "lastStep": "Letzter Schritt",
+      "roundAgain": "dann noch eine Runde",
+      "backToPlaying": "Zurück zum Spielen"
     }
   }
 }

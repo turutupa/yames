@@ -18,18 +18,12 @@
     "revertTooltip": "保存済みのチェーンに戻す",
     "track": "チェーン",
     "stepDefaultName": "ステップ {{number}}",
-    "stepHeading": "ステップ {{number}} — {{name}}",
-    "editingStep": "編集しているのはステップで、チェーンではありません",
-    "now": "再生中 · {{number}}",
-    "volume": "音量 {{percent}}",
     "selectStep": "このステップを編集",
     "renameStep": "このステップの名前を変更",
     "moveEarlier": "このステップを前へ",
     "moveLater": "このステップを後ろへ",
     "duplicateStep": "このステップを複製",
     "removeStep": "このステップを削除",
-    "addStep": "今の設定をステップとして追加",
-    "emptyHint": "このチェーンはまだ空です。メトロノームを設定して、ステップとして追加してください。",
     "barOf": "{{total}} 小節中 {{current}} 小節目",
     "timeLeft": "残り {{duration}}",
     "waitingForYou": "合図待ち",
@@ -66,7 +60,6 @@
     },
     "gap": {
       "title": "このステップと次のステップのあいだ",
-      "edit": "ステップ {{number}} のあと: {{gap}}",
       "moveOn": "次へ進む条件",
       "whenISay": "合図したら",
       "afterBars": "小節数で",
@@ -93,6 +86,42 @@
       "nextIn": "次まで {{gap}}",
       "nextWhenYouSay": "次は合図したら",
       "skip": "次へ進む"
+    },
+    "nowShort": "再生中",
+    "emptyLead": "チェーンはステップを順番に再生します。まず最初のステップを下から追加してください。",
+    "addStepPlain": "+ ステップを追加",
+    "orFromLibrary": "またはライブラリからプリセットを追加",
+    "transition": {
+      "cutShort": "そのまま切り替え",
+      "countInShort": "{{count}} 小節のカウント",
+      "countInShort_one": "{{count}} 小節のカウント",
+      "countInShort_other": "{{count}} 小節のカウント",
+      "restShort": "{{count}} 小節の休み",
+      "restShort_one": "{{count}} 小節の休み",
+      "restShort_other": "{{count}} 小節の休み"
+    },
+    "said": {
+      "config": "{{bpm}} BPM、{{meter}}、{{subdivision}}・{{sound}}",
+      "untilISay": "合図するまで",
+      "forSpan": "{{span}}",
+      "thenTransition": "{{trigger}}、そのあと{{transition}}",
+      "thenTheChainEnds": "{{trigger}}、そこでチェーンは終わり",
+      "stepNote": "ステップ {{number}} / {{total}}",
+      "runs": "続く",
+      "for": "の間",
+      "then": "そのあと",
+      "andThen": "そして",
+      "theChainEnds": "チェーンは終わり",
+      "volume": "音量 {{percent}}%",
+      "volumeLabel": "音量",
+      "beatsTip": "1 グループなので、アクセントは 1 拍目に付きます。"
+    },
+    "player": {
+      "edit": "チェーンを編集",
+      "then": "次は",
+      "lastStep": "最後のステップ",
+      "roundAgain": "そしてもう一周",
+      "backToPlaying": "再生に戻る"
     }
   }
 }

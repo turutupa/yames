@@ -18,18 +18,12 @@
     "revertTooltip": "Go back to the saved chain",
     "track": "The chain",
     "stepDefaultName": "Step {{number}}",
-    "stepHeading": "Step {{number}} — {{name}}",
-    "editingStep": "editing the step, not the chain",
-    "now": "NOW · {{number}}",
-    "volume": "vol {{percent}}",
     "selectStep": "Edit this step",
     "renameStep": "Rename this step",
     "moveEarlier": "Move this step earlier",
     "moveLater": "Move this step later",
     "duplicateStep": "Duplicate this step",
     "removeStep": "Remove this step",
-    "addStep": "Add what you have now as a step",
-    "emptyHint": "Nothing in this chain yet. Set the metronome up, then add it as a step.",
     "barOf": "bar {{current}} of {{total}}",
     "timeLeft": "{{duration}} left",
     "waitingForYou": "waiting for you",
@@ -66,7 +60,6 @@
     },
     "gap": {
       "title": "Between this step and the next",
-      "edit": "After step {{number}}: {{gap}}",
       "moveOn": "Move on",
       "whenISay": "When I say",
       "afterBars": "After bars",
@@ -93,6 +86,42 @@
       "nextIn": "Next in {{gap}}",
       "nextWhenYouSay": "Next when you say",
       "skip": "Skip to next"
+    },
+    "nowShort": "Now",
+    "emptyLead": "A chain plays your steps in order, one after another. Add the first one below.",
+    "addStepPlain": "+ Add a step",
+    "orFromLibrary": "or add a preset from the library",
+    "transition": {
+      "cutShort": "cut",
+      "countInShort": "count in {{count}} bars",
+      "countInShort_one": "count in {{count}} bar",
+      "countInShort_other": "count in {{count}} bars",
+      "restShort": "rest {{count}} bars",
+      "restShort_one": "rest {{count}} bar",
+      "restShort_other": "rest {{count}} bars"
+    },
+    "said": {
+      "config": "{{bpm}} BPM, {{meter}}, {{subdivision}} · {{sound}}",
+      "untilISay": "until I say",
+      "forSpan": "for {{span}}",
+      "thenTransition": "{{trigger}}, then {{transition}}",
+      "thenTheChainEnds": "{{trigger}}, then the chain ends",
+      "stepNote": "Step {{number}} of {{total}}",
+      "runs": "runs",
+      "for": "for",
+      "then": "then",
+      "andThen": "and then",
+      "theChainEnds": "the chain ends",
+      "volume": "volume {{percent}}%",
+      "volumeLabel": "Volume",
+      "beatsTip": "One group, so the accent falls on beat one."
+    },
+    "player": {
+      "edit": "Edit the chain",
+      "then": "then",
+      "lastStep": "Last step",
+      "roundAgain": "then round again",
+      "backToPlaying": "Back to playing"
     }
   }
 }

@@ -152,6 +152,72 @@ describe("useChainSession", () => {
     expect(lastCall("set_bpm")).toEqual({ bpm: 70 });
   });
 
+  it("a new step copies the one above it, not the metronome", async () => {
+    /*
+     * "Add what you have now" made sense while the metronome sat under the
+     * track and WAS what you had. The paragraph has no metronome on it, so
+     * there is nothing live to copy — and the honest default is the step
+     * above, because you add a step to a routine when it is like the last one
+     * but faster, not when it is like whatever happened to be loaded.
+     */
+    const { result, rerender } = mount();
+    await act(async () => {
+      result.current.loadChain(CHAIN);
+    });
+    // The engine is set to something quite unlike the chain's last step.
+    rerender({ state: { ...DEFAULT_TEST_STATE, bpm: 200, subdivision: 3 }, isPlaying: false });
+
+    const last = result.current.chain!.steps[result.current.chain!.steps.length - 1];
+    await act(async () => {
+      result.current.addStepFromNow();
+    });
+
+    const steps = result.current.chain!.steps;
+    const added = steps[steps.length - 1];
+    expect(added.bpm).toBe(last.bpm);
+    expect(added.subdivision).toBe(last.subdivision);
+    expect(added.trigger).toEqual(last.trigger);
+    // Its own step, not an alias of the one it copied.
+    expect(added.id).not.toBe(last.id);
+    expect(added.name).not.toBe(last.name);
+    expect(result.current.selectedStepId).toBe(added.id);
+  });
+
+  it("the FIRST step of an empty chain still takes the engine's settings", async () => {
+    // There is nothing above it, and the metronome is the only thing that can
+    // say what the player wants — which is the old behaviour, kept exactly
+    // where it still makes sense.
+    const { result, rerender } = mount();
+    await act(async () => {
+      result.current.loadChain({ ...CHAIN, steps: [] });
+    });
+    rerender({ state: { ...DEFAULT_TEST_STATE, bpm: 143, subdivision: 3 }, isPlaying: false });
+    await act(async () => {
+      result.current.addStepFromNow();
+    });
+    expect(result.current.chain!.steps).toHaveLength(1);
+    expect(result.current.chain!.steps[0].bpm).toBe(143);
+  });
+
+  it("leaving the player does not stop the run, and stopping puts it back", async () => {
+    const { result, rerender } = mount();
+    await act(async () => {
+      result.current.loadChain(CHAIN);
+    });
+    rerender({ state: DEFAULT_TEST_STATE, isPlaying: true });
+
+    await act(async () => {
+      result.current.editWhileRunning();
+    });
+    expect(result.current.editingWhileRunning).toBe(true);
+    expect(result.current.chainPlaying).toBe(false);
+
+    // Stop, and the paragraph is where a stopped chain lives anyway — so the
+    // flag must not survive into the next run and hide the player.
+    rerender({ state: DEFAULT_TEST_STATE, isPlaying: false });
+    expect(result.current.editingWhileRunning).toBe(false);
+  });
+
   it("closing the chain leaves nothing behind for the preset to fight with", async () => {
     const { result } = mount();
     await act(async () => {

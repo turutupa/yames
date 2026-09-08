@@ -18,18 +18,12 @@
     "revertTooltip": "回到已儲存的鏈條",
     "track": "鏈條",
     "stepDefaultName": "第 {{number}} 步",
-    "stepHeading": "第 {{number}} 步 — {{name}}",
-    "editingStep": "你在編輯這一步，不是整條鏈",
-    "now": "正在播放 · {{number}}",
-    "volume": "音量 {{percent}}",
     "selectStep": "編輯這一步",
     "renameStep": "重新命名這一步",
     "moveEarlier": "把這一步往前移",
     "moveLater": "把這一步往後移",
     "duplicateStep": "複製這一步",
     "removeStep": "刪除這一步",
-    "addStep": "把目前的設定加成一步",
-    "emptyHint": "這條鏈還是空的。先調好節拍器，再把它加成一步。",
     "barOf": "第 {{current}} / {{total}} 小節",
     "timeLeft": "還剩 {{duration}}",
     "waitingForYou": "等你示意",
@@ -66,7 +60,6 @@
     },
     "gap": {
       "title": "這一步與下一步之間",
-      "edit": "第 {{number}} 步之後：{{gap}}",
       "moveOn": "何時繼續",
       "whenISay": "等我示意",
       "afterBars": "過幾小節",
@@ -93,6 +86,42 @@
       "nextIn": "{{gap}} 後進入下一步",
       "nextWhenYouSay": "等你示意再進入下一步",
       "skip": "跳到下一步"
+    },
+    "nowShort": "正在播放",
+    "emptyLead": "鏈會依序逐一播放你的步驟。先在下面加入第一個。",
+    "addStepPlain": "+ 新增一個步驟",
+    "orFromLibrary": "或從資料庫加入一個預設",
+    "transition": {
+      "cutShort": "直接切換",
+      "countInShort": "預備 {{count}} 小節",
+      "countInShort_one": "預備 {{count}} 小節",
+      "countInShort_other": "預備 {{count}} 小節",
+      "restShort": "休息 {{count}} 小節",
+      "restShort_one": "休息 {{count}} 小節",
+      "restShort_other": "休息 {{count}} 小節"
+    },
+    "said": {
+      "config": "{{bpm}} BPM，{{meter}}，{{subdivision}} · {{sound}}",
+      "untilISay": "直到我示意",
+      "forSpan": "持續 {{span}}",
+      "thenTransition": "{{trigger}}，然後{{transition}}",
+      "thenTheChainEnds": "{{trigger}}，然後這條鏈就結束了",
+      "stepNote": "第 {{number}} 步，共 {{total}} 步",
+      "runs": "持續播放",
+      "for": "持續",
+      "then": "然後",
+      "andThen": "然後",
+      "theChainEnds": "這條鏈就結束了",
+      "volume": "音量 {{percent}}%",
+      "volumeLabel": "音量",
+      "beatsTip": "只有一組，所以重音落在第一拍。"
+    },
+    "player": {
+      "edit": "編輯這條鏈",
+      "then": "接下來",
+      "lastStep": "最後一步",
+      "roundAgain": "然後再一輪",
+      "backToPlaying": "回到播放"
     }
   }
 }

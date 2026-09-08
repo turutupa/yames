@@ -18,18 +18,12 @@
     "revertTooltip": "Kayıtlı zincire dön",
     "track": "Zincir",
     "stepDefaultName": "Adım {{number}}",
-    "stepHeading": "Adım {{number}} — {{name}}",
-    "editingStep": "zinciri değil, adımı düzenliyorsun",
-    "now": "ŞİMDİ · {{number}}",
-    "volume": "ses {{percent}}",
     "selectStep": "Bu adımı düzenle",
     "renameStep": "Bu adımı yeniden adlandır",
     "moveEarlier": "Bu adımı öne al",
     "moveLater": "Bu adımı geriye al",
     "duplicateStep": "Bu adımı çoğalt",
     "removeStep": "Bu adımı kaldır",
-    "addStep": "Şu anki ayarı adım olarak ekle",
-    "emptyHint": "Bu zincir henüz boş. Metronomu ayarla, sonra adım olarak ekle.",
     "barOf": "{{total}} ölçüden {{current}}. ölçü",
     "timeLeft": "{{duration}} kaldı",
     "waitingForYou": "seni bekliyor",
@@ -66,7 +60,6 @@
     },
     "gap": {
       "title": "Bu adımla sonraki adım arasında",
-      "edit": "Adım {{number}} sonrası: {{gap}}",
       "moveOn": "Ne zaman geçilsin",
       "whenISay": "Ben söyleyince",
       "afterBars": "Ölçü sonrası",
@@ -93,6 +86,42 @@
       "nextIn": "Sonraki {{gap}} sonra",
       "nextWhenYouSay": "Sonraki, sen söyleyince",
       "skip": "Sonrakine geç"
+    },
+    "nowShort": "Şimdi",
+    "emptyLead": "Zincir adımlarını sırayla, birbiri ardına çalar. İlkini aşağıya ekle.",
+    "addStepPlain": "+ Adım ekle",
+    "orFromLibrary": "ya da kitaplıktan bir hazır ayar ekle",
+    "transition": {
+      "cutShort": "kesme",
+      "countInShort": "{{count}} ölçü sayım",
+      "countInShort_one": "{{count}} ölçü sayım",
+      "countInShort_other": "{{count}} ölçü sayım",
+      "restShort": "{{count}} ölçü mola",
+      "restShort_one": "{{count}} ölçü mola",
+      "restShort_other": "{{count}} ölçü mola"
+    },
+    "said": {
+      "config": "{{bpm}} BPM, {{meter}}, {{subdivision}} · {{sound}}",
+      "untilISay": "ben söyleyene kadar",
+      "forSpan": "{{span}} boyunca",
+      "thenTransition": "{{trigger}}, sonra {{transition}}",
+      "thenTheChainEnds": "{{trigger}}, sonra zincir biter",
+      "stepNote": "Adım {{number}} / {{total}}",
+      "runs": "çalar",
+      "for": "süresi",
+      "then": "sonra",
+      "andThen": "ve sonra",
+      "theChainEnds": "zincir biter",
+      "volume": "ses {{percent}}%",
+      "volumeLabel": "Ses",
+      "beatsTip": "Tek grup, yani vurgu birinci vuruşa düşer."
+    },
+    "player": {
+      "edit": "Zinciri düzenle",
+      "then": "sonra",
+      "lastStep": "Son adım",
+      "roundAgain": "sonra bir tur daha",
+      "backToPlaying": "Çalmaya dön"
     }
   }
 }

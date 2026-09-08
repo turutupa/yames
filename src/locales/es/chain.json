@@ -18,18 +18,12 @@
     "revertTooltip": "Volver a la cadena guardada",
     "track": "La cadena",
     "stepDefaultName": "Paso {{number}}",
-    "stepHeading": "Paso {{number}} — {{name}}",
-    "editingStep": "estás editando el paso, no la cadena",
-    "now": "AHORA · {{number}}",
-    "volume": "vol {{percent}}",
     "selectStep": "Editar este paso",
     "renameStep": "Renombrar este paso",
     "moveEarlier": "Mover este paso antes",
     "moveLater": "Mover este paso después",
     "duplicateStep": "Duplicar este paso",
     "removeStep": "Quitar este paso",
-    "addStep": "Añadir lo que tienes ahora como paso",
-    "emptyHint": "Esta cadena aún está vacía. Ajusta el metrónomo y añádelo como paso.",
     "barOf": "compás {{current}} de {{total}}",
     "timeLeft": "quedan {{duration}}",
     "waitingForYou": "esperándote",
@@ -66,7 +60,6 @@
     },
     "gap": {
       "title": "Entre este paso y el siguiente",
-      "edit": "Después del paso {{number}}: {{gap}}",
       "moveOn": "Pasar al siguiente",
       "whenISay": "Cuando yo diga",
       "afterBars": "Tras unos compases",
@@ -93,6 +86,42 @@
       "nextIn": "Siguiente en {{gap}}",
       "nextWhenYouSay": "Siguiente cuando tú digas",
       "skip": "Saltar al siguiente"
+    },
+    "nowShort": "Ahora",
+    "emptyLead": "Una cadena reproduce tus pasos en orden, uno tras otro. Añade el primero abajo.",
+    "addStepPlain": "+ Añadir un paso",
+    "orFromLibrary": "o añade un preajuste desde la biblioteca",
+    "transition": {
+      "cutShort": "corte",
+      "countInShort": "entrada de {{count}} compases",
+      "countInShort_one": "entrada de {{count}} compás",
+      "countInShort_other": "entrada de {{count}} compases",
+      "restShort": "descanso de {{count}} compases",
+      "restShort_one": "descanso de {{count}} compás",
+      "restShort_other": "descanso de {{count}} compases"
+    },
+    "said": {
+      "config": "{{bpm}} BPM, {{meter}}, {{subdivision}} · {{sound}}",
+      "untilISay": "hasta que yo diga",
+      "forSpan": "durante {{span}}",
+      "thenTransition": "{{trigger}}, luego {{transition}}",
+      "thenTheChainEnds": "{{trigger}}, y ahí acaba la cadena",
+      "stepNote": "Paso {{number}} de {{total}}",
+      "runs": "suena",
+      "for": "durante",
+      "then": "luego",
+      "andThen": "y luego",
+      "theChainEnds": "acaba la cadena",
+      "volume": "volumen {{percent}}%",
+      "volumeLabel": "Volumen",
+      "beatsTip": "Un solo grupo, así que el acento cae en el primer tiempo."
+    },
+    "player": {
+      "edit": "Editar la cadena",
+      "then": "luego",
+      "lastStep": "Último paso",
+      "roundAgain": "y otra vuelta",
+      "backToPlaying": "Volver a tocar"
     }
   }
 }

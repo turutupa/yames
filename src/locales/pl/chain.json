@@ -18,18 +18,12 @@
     "revertTooltip": "Wróć do zapisanego łańcucha",
     "track": "Łańcuch",
     "stepDefaultName": "Krok {{number}}",
-    "stepHeading": "Krok {{number}} — {{name}}",
-    "editingStep": "edytujesz krok, nie łańcuch",
-    "now": "TERAZ · {{number}}",
-    "volume": "gł. {{percent}}",
     "selectStep": "Edytuj ten krok",
     "renameStep": "Zmień nazwę tego kroku",
     "moveEarlier": "Przesuń ten krok wcześniej",
     "moveLater": "Przesuń ten krok później",
     "duplicateStep": "Powiel ten krok",
     "removeStep": "Usuń ten krok",
-    "addStep": "Dodaj obecne ustawienia jako krok",
-    "emptyHint": "Ten łańcuch jest jeszcze pusty. Ustaw metronom i dodaj to jako krok.",
     "barOf": "takt {{current}} z {{total}}",
     "timeLeft": "zostało {{duration}}",
     "waitingForYou": "czeka na ciebie",
@@ -66,7 +60,6 @@
     },
     "gap": {
       "title": "Między tym krokiem a następnym",
-      "edit": "Po kroku {{number}}: {{gap}}",
       "moveOn": "Przejdź dalej",
       "whenISay": "Na mój znak",
       "afterBars": "Po taktach",
@@ -93,6 +86,42 @@
       "nextIn": "Następny za {{gap}}",
       "nextWhenYouSay": "Następny na twój znak",
       "skip": "Przejdź do następnego"
+    },
+    "nowShort": "Teraz",
+    "emptyLead": "Łańcuch odtwarza kroki po kolei, jeden po drugim. Dodaj pierwszy poniżej.",
+    "addStepPlain": "+ Dodaj krok",
+    "orFromLibrary": "albo dodaj ustawienie z biblioteki",
+    "transition": {
+      "cutShort": "cięcie",
+      "countInShort": "odliczenie {{count}} taktów",
+      "countInShort_one": "odliczenie {{count}} taktu",
+      "countInShort_other": "odliczenie {{count}} taktów",
+      "restShort": "{{count}} taktów pauzy",
+      "restShort_one": "{{count}} takt pauzy",
+      "restShort_other": "{{count}} taktów pauzy"
+    },
+    "said": {
+      "config": "{{bpm}} BPM, {{meter}}, {{subdivision}} · {{sound}}",
+      "untilISay": "aż powiem",
+      "forSpan": "przez {{span}}",
+      "thenTransition": "{{trigger}}, potem {{transition}}",
+      "thenTheChainEnds": "{{trigger}}, i łańcuch się kończy",
+      "stepNote": "Krok {{number}} z {{total}}",
+      "runs": "gra",
+      "for": "przez",
+      "then": "potem",
+      "andThen": "i potem",
+      "theChainEnds": "łańcuch się kończy",
+      "volume": "głośność {{percent}}%",
+      "volumeLabel": "Głośność",
+      "beatsTip": "Jedna grupa, więc akcent pada na pierwszą miarę."
+    },
+    "player": {
+      "edit": "Edytuj łańcuch",
+      "then": "potem",
+      "lastStep": "Ostatni krok",
+      "roundAgain": "i jeszcze raz",
+      "backToPlaying": "Wróć do grania"
     }
   }
 }

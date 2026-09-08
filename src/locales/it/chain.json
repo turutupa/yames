@@ -18,18 +18,12 @@
     "revertTooltip": "Torna alla catena salvata",
     "track": "La catena",
     "stepDefaultName": "Passo {{number}}",
-    "stepHeading": "Passo {{number}} — {{name}}",
-    "editingStep": "stai modificando il passo, non la catena",
-    "now": "ORA · {{number}}",
-    "volume": "vol {{percent}}",
     "selectStep": "Modifica questo passo",
     "renameStep": "Rinomina questo passo",
     "moveEarlier": "Sposta questo passo prima",
     "moveLater": "Sposta questo passo dopo",
     "duplicateStep": "Duplica questo passo",
     "removeStep": "Rimuovi questo passo",
-    "addStep": "Aggiungi come passo ciò che hai adesso",
-    "emptyHint": "Questa catena è ancora vuota. Imposta il metronomo e aggiungilo come passo.",
     "barOf": "battuta {{current}} di {{total}}",
     "timeLeft": "{{duration}} rimasti",
     "waitingForYou": "in attesa di te",
@@ -66,7 +60,6 @@
     },
     "gap": {
       "title": "Fra questo passo e il prossimo",
-      "edit": "Dopo il passo {{number}}: {{gap}}",
       "moveOn": "Vai avanti",
       "whenISay": "Quando lo dico io",
       "afterBars": "Dopo alcune battute",
@@ -93,6 +86,42 @@
       "nextIn": "Prossimo fra {{gap}}",
       "nextWhenYouSay": "Prossimo quando lo dici tu",
       "skip": "Vai al prossimo"
+    },
+    "nowShort": "Ora",
+    "emptyLead": "Una catena riproduce i tuoi passi in ordine, uno dopo l'altro. Aggiungi il primo qui sotto.",
+    "addStepPlain": "+ Aggiungi un passo",
+    "orFromLibrary": "oppure aggiungi un preset dalla libreria",
+    "transition": {
+      "cutShort": "stacco",
+      "countInShort": "{{count}} battute di intro",
+      "countInShort_one": "{{count}} battuta di intro",
+      "countInShort_other": "{{count}} battute di intro",
+      "restShort": "{{count}} battute di pausa",
+      "restShort_one": "{{count}} battuta di pausa",
+      "restShort_other": "{{count}} battute di pausa"
+    },
+    "said": {
+      "config": "{{bpm}} BPM, {{meter}}, {{subdivision}} · {{sound}}",
+      "untilISay": "finché non lo dico io",
+      "forSpan": "per {{span}}",
+      "thenTransition": "{{trigger}}, poi {{transition}}",
+      "thenTheChainEnds": "{{trigger}}, poi la catena finisce",
+      "stepNote": "Passo {{number}} di {{total}}",
+      "runs": "va avanti",
+      "for": "per",
+      "then": "poi",
+      "andThen": "e poi",
+      "theChainEnds": "la catena finisce",
+      "volume": "volume {{percent}}%",
+      "volumeLabel": "Volume",
+      "beatsTip": "Un solo gruppo, quindi l'accento cade sul primo movimento."
+    },
+    "player": {
+      "edit": "Modifica la catena",
+      "then": "poi",
+      "lastStep": "Ultimo passo",
+      "roundAgain": "poi un altro giro",
+      "backToPlaying": "Torna a suonare"
     }
   }
 }
