@@ -239,8 +239,16 @@ const DRUM_CRASH: &[u8] = include_bytes!("../sounds/drum_crash.wav");
 /// The mid-band layer the drum accent was missing. See `drum_body` in
 /// `scripts/sounds/rebuild.py` for why a 6 ms transient could not do this job.
 const DRUM_BODY: &[u8] = include_bytes!("../sounds/drum_body.wav");
-/// The second kit: kick-and-snare backbeat against a side-stick. Both are
+/// The second kit: a kick-and-snare backbeat over a mid tom. Both are
 /// synthesised whole, so their balance is fixed in the files.
+///
+/// The first version of this kit was a backbeat over a SIDE-STICK, and the
+/// owner's verdict on hearing it was "super underwhelming — I was expecting
+/// to feel it and all I got was a shy sound". Both files were rebuilt; see
+/// `snare_high` and `snare_low` in `scripts/sounds/rebuild.py` for the
+/// measurements. The short version is that the side-stick was 60 ms of
+/// 780 Hz wood — three beats in four that sounded like the `wood` kit and
+/// carried a quarter of `drum_low`'s energy.
 const SNARE_HIGH: &[u8] = include_bytes!("../sounds/snare_high.wav");
 const SNARE_LOW: &[u8] = include_bytes!("../sounds/snare_low.wav");
 const CHIME_UP: &[u8] = include_bytes!("../sounds/chime_up.wav");
@@ -479,7 +487,10 @@ impl SoundBank {
             drum_accent,
             // No premix for this kit: it is synthesised whole, so its accent
             // is already balanced against its beat in the file and there is
-            // no summed peak to limit away.
+            // no summed peak to limit away. That decision was right and was
+            // not the reason the first version came out shy — the level was
+            // lost inside the files, in a 60 ms plain beat and a snare whose
+            // wire tail was cut off at -36 dBFS, not in the mixing.
             snare_low: decode_wav(SNARE_LOW, sr),
             snare_high: decode_wav(SNARE_HIGH, sr),
             chime_up: decode_wav(CHIME_UP, sr),
@@ -540,9 +551,10 @@ enum SoundKit {
     Beep,
     /// Kick, hi-hat and crash. The bright one.
     Drum,
-    /// Kick-and-snare backbeat against a side-stick. The same idea as `Drum`
-    /// with the metal taken out — the owner asked for a second kit that
-    /// sounds like drums rather than like cymbals.
+    /// Kick-and-snare backbeat over a mid tom. The same idea as `Drum` with
+    /// the metal taken out — the owner asked for a second kit that sounds
+    /// like drums rather than like cymbals. Every voice in it is a struck
+    /// head, which is the point: nothing here rings like a cymbal.
     Snare,
 }
 
@@ -2689,8 +2701,14 @@ mod tests {
     ///
     /// Measured through `laptop_band_energy`, the old premix scores -0.46 dB
     /// and fails; the current one scores +4.13. The other kits sit at +3.72
-    /// (wood) to +4.57 (beep), and the snare kit at +4.89, so a 2 dB floor
+    /// (wood) to +4.57 (beep), and the snare kit at +6.39, so a 2 dB floor
     /// has real room on both sides rather than being fitted to today's mix.
+    ///
+    /// NOTE that passing this is not the same as sounding good, and the
+    /// snare kit is the proof: its first version passed at +4.89 and was
+    /// still rejected as shy. A ratio says the accent beats its own beat; it
+    /// says nothing about whether either of them is loud enough to feel.
+    /// `the_snare_kit_is_not_quieter_than_the_drum_kit` is the other half.
     #[test]
     fn every_accent_is_louder_than_its_beat_on_a_small_speaker() {
         let sr = 48000;
@@ -2714,6 +2732,131 @@ mod tests {
                  which is the speaker that matters."
             );
         }
+    }
+
+    /// K-weighted energy: the loudness filter from ITU-R BS.1770, which is
+    /// what a LUFS meter measures through and what `laptop_band_energy` is
+    /// not.
+    ///
+    /// The two are needed for different questions and the snare kit is the
+    /// proof. Band-limited, the rejected kit and the drum kit were within
+    /// 0.2 dB of each other — the side-stick's 780 Hz wood sits right in the
+    /// middle of a 200 Hz-4 kHz pass-band, so it measured fine there while
+    /// carrying a quarter of `drum_low`'s energy. K-weighting is a gentle
+    /// high-frequency shelf over a 38 Hz high-pass, so it hears the whole
+    /// sound the way an ear weights it rather than through a keyhole, and it
+    /// put the same two kits 2.7 dB apart. Band-limiting answers "will a
+    /// laptop reproduce this"; K-weighting answers "is it loud".
+    ///
+    /// Two biquads, direct form 1, `f64` throughout. Test-only code, so the
+    /// cost of the state array does not matter; the coefficients are the
+    /// standard bilinear-transform designs the specification gives.
+    fn k_weighted_energy(buf: &[f32], sr: u32) -> f64 {
+        let sr = sr as f64;
+        let tau = 2.0 * std::f64::consts::PI;
+        // Stage 1 — the "head" shelf: +4 dB above ~1.7 kHz.
+        let (g, q, fc) = (3.99984385397f64, 0.7071752369554196f64, 1681.9744509555319f64);
+        let (amp, w0) = (10f64.powf(g / 40.0), tau * fc / sr);
+        let (alpha, c, sa) = (w0.sin() / (2.0 * q), w0.cos(), amp.sqrt());
+        let a0 = (amp + 1.0) - (amp - 1.0) * c + 2.0 * sa * alpha;
+        let shelf = (
+            [
+                amp * ((amp + 1.0) + (amp - 1.0) * c + 2.0 * sa * alpha) / a0,
+                -2.0 * amp * ((amp - 1.0) + (amp + 1.0) * c) / a0,
+                amp * ((amp + 1.0) + (amp - 1.0) * c - 2.0 * sa * alpha) / a0,
+            ],
+            [
+                2.0 * ((amp - 1.0) - (amp + 1.0) * c) / a0,
+                ((amp + 1.0) - (amp - 1.0) * c - 2.0 * sa * alpha) / a0,
+            ],
+        );
+        // Stage 2 — the 38 Hz high-pass, so subsonics cannot count as loud.
+        let (q, fc) = (0.5003270373238773f64, 38.13547087602444f64);
+        let w0 = tau * fc / sr;
+        let (alpha, c) = (w0.sin() / (2.0 * q), w0.cos());
+        let a0 = 1.0 + alpha;
+        let hp = (
+            [(1.0 + c) / 2.0 / a0, -(1.0 + c) / a0, (1.0 + c) / 2.0 / a0],
+            [-2.0 * c / a0, (1.0 - alpha) / a0],
+        );
+
+        let mut state = [[0.0f64; 4]; 2];
+        let mut energy = 0.0f64;
+        for &s in buf {
+            let mut v = s as f64;
+            for (i, (b, a)) in [shelf, hp].iter().enumerate() {
+                let st = &mut state[i];
+                let y = b[0] * v + b[1] * st[0] + b[2] * st[1] - a[0] * st[2] - a[1] * st[3];
+                st[1] = st[0];
+                st[0] = v;
+                st[3] = st[2];
+                st[2] = y;
+                v = y;
+            }
+            energy += v * v;
+        }
+        energy
+    }
+
+    /// THE OTHER HALF OF THE ACCENT TEST: loud enough to feel, not just
+    /// louder than itself.
+    ///
+    /// "The snare does not sound at all like the drums of a drum kit, it's
+    /// super underwhelming — I was expecting to feel it and all I got was a
+    /// shy sound." That kit passed every assertion in this file. It peaked
+    /// at 0.970 and its accent stood +4.89 dB over its own beat, and it was
+    /// still the quietest thing the app could play: a whole bar of it
+    /// measured -24.9 LUFS against the drum kit's -22.0, because a ratio
+    /// between two quiet sounds is still quiet.
+    ///
+    /// Almost all of the gap was the PLAIN BEAT, which is three of every
+    /// four events in a bar: 60 ms and 29 energy units against `drum_low`'s
+    /// 130 ms and 106. So this measures a bar — one accent plus three beats
+    /// at `BEAT_GAIN` — and holds the snare kit against the drum kit, the
+    /// one the owner has actually signed off. Only those two: they are both
+    /// drum kits, so it is a fair comparison, where `click` (a 20 ms burst
+    /// with all of its energy in-band) is not.
+    ///
+    /// The rejected kit scores -2.71 dB here. The current one scores +0.89,
+    /// and the two sub-assertions below are the ones with the teeth: the
+    /// rejected beat fails both of them outright.
+    #[test]
+    fn the_snare_kit_is_not_quieter_than_the_drum_kit() {
+        let sr = 48000;
+        let bank = SoundBank::new(sr);
+        let bar = |kit: SoundKit| {
+            let g = (BEAT_GAIN * BEAT_GAIN) as f64;
+            k_weighted_energy(bank.get(kit.high_id()), sr)
+                + 3.0 * k_weighted_energy(bank.get(kit.low_id()), sr) * g
+        };
+        let db = 10.0 * (bar(SoundKit::Snare) / bar(SoundKit::Drum)).log10();
+        assert!(
+            db > 0.0,
+            "a bar of the snare kit is {db:.2} dB against a bar of the drum kit. \
+             The drum kit is the one the owner accepted, so anything below it is \
+             the shy kit shipping again."
+        );
+
+        // And the specific thing that made it shy: the plain beat was a tick.
+        // A drum has a body, so it has a length and it has energy.
+        //
+        // Plain energy here, neither weighting: the question is whether there
+        // is a drum's worth of sound in the file at all, and both weightings
+        // would be answering a different one. `drum_low` is a hi-hat with 71%
+        // of its energy above 6 kHz, so K-weighting's treble shelf flatters it
+        // against a tom and the band-pass throws most of it away — the two
+        // sounds are only comparable on how much of them there is.
+        let beat = bank.get(SoundKit::Snare.low_id());
+        let ms = beat.len() as f64 * 1000.0 / sr as f64;
+        assert!(ms > 100.0, "the snare kit's beat is {ms:.0} ms, which is a tick");
+        let energy = |b: &[f32]| b.iter().map(|s| (s * s) as f64).sum::<f64>();
+        let vs = 10.0 * (energy(beat) / energy(bank.get(SoundId::DrumLow))).log10();
+        assert!(
+            vs > 0.0,
+            "the snare kit's beat carries {vs:.2} dB against `drum_low`. That is \
+             where the last version's shyness lived: 60 ms of side-stick, 5.6 dB \
+             down, under three beats out of every four."
+        );
     }
 
     /// A store written by a newer build can name a kit this one has never

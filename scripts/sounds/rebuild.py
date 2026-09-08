@@ -44,6 +44,40 @@ script for the full table.
    into harmonics that land where a small speaker works. Together they take
    the accent from −0.5 dB to +6.4 dB against the beat on a laptop.
 
+4. THE SNARE KIT, WHICH LEARNED POINT 3 AND STILL CAME OUT SHY. "The snare
+   does not sound at all like the drums of a drum kit, it's super
+   underwhelming — I was expecting to feel it and all I got was a shy sound."
+
+   The lesson from point 3 — put the energy where a speaker radiates — was
+   necessary and not sufficient, because it is a lesson about RATIOS. The
+   snare kit passed the band-limited accent test at +4.89 dB and was still
+   the quietest thing the app could play: one bar measured −24.9 LUFS
+   against the drum kit's −22.0. A ratio between two quiet sounds is quiet.
+
+   Three measured causes, in order of how much they mattered:
+
+     a. The plain beat was a side-stick, 60 ms and 29 energy units against
+        `drum_low`'s 130 ms and 106 — and three of every four events in a
+        bar are the plain beat. It also had 48% of its energy around 780 Hz,
+        which is a description of the `wood` kit, so most of what you heard
+        was a wood block belonging to a kit you had not chosen.
+     b. The snare's wire tail was truncated: 140 ms of a decay still at
+        −36 dBFS when the file ended. Loudness at a fixed peak comes from
+        duration, and the duration had been cut off.
+     c. Inside the accent, kick and snare were balanced by PEAK. A sine has
+        an 11 dB crest factor and noise has 20, so normalising both to 1.0
+        handed the kick 9 dB — 64.5% of the accent's energy ended up below
+        120 Hz and 9.5% in the whole range where a snare lives.
+
+   Rebuilt as a snare-and-kick over a tom, measured 44.1 kHz:
+
+     snare kit        one bar    accent vs beat   accent peak   beat energy
+     before         −24.9 LUFS      +5.03 dB           0.970            29
+     after          −21.5 LUFS      +6.50 dB           0.970           156
+
+   against a drum kit at −22.0 LUFS, +3.63 dB, and a `drum_low` of 106. The
+   accent's peak is unchanged, so nothing clips that did not before.
+
 THE TRANSFORM STAGE IS NOT IDEMPOTENT — running it twice adds a second beater
 to the kick. It refuses to run when every sample already ends in silence,
 which is true only after it has run. To re-run it, restore the originals:
@@ -207,56 +241,135 @@ def drum_body(sr):
     return fade_tail(_norm(shell * 0.55 + click * 1.5 + thwack * 1.1), sr)
 
 
+def _hit(t, decay, attack_ms=1.0):
+    """A struck envelope: a raised-cosine rise, then an exponential decay.
+
+    `np.exp(-t * d)` alone starts at 1.0 on sample zero, which is a step —
+    a DC jump that `_norm` then has to spend headroom on and that reads as a
+    click rather than as a stick. A 1 ms rise costs nothing audible and lets
+    the peak belong to the drum instead of to the discontinuity."""
+    a = np.clip(t / (attack_ms / 1000.0), 0, 1)
+    return 0.5 * (1 - np.cos(np.pi * a)) * np.exp(-t * decay)
+
+
 def _kick(sr):
-    """A kick with a pitch drop, the way a real head detunes as it stretches."""
-    n = int(sr * 150.0 / 1000)
+    """A kick with a pitch drop, the way a real head detunes as it stretches.
+
+    Tuned higher than the first version (148 → 57 Hz rather than 105 → 48) so
+    its fundamental lands where a speaker is still working, and 190 ms rather
+    than 150 so it thumps instead of clicking."""
+    n = int(sr * 190.0 / 1000)
     t = np.arange(n) / sr
-    f = 105 * np.exp(-t * 38) + 48
-    body = np.sin(2 * np.pi * np.cumsum(f) / sr) * np.exp(-t * 19)
-    beat = _band(_noise(n, 21), 700, 3800, sr) * np.exp(-t * 190) * 0.8
-    return _norm(body + beat * 0.55)
+    f = 148 * np.exp(-t * 44) + 57
+    body = np.sin(2 * np.pi * np.cumsum(f) / sr) * _hit(t, 17, 1.5)
+    beater = _band(_noise(n, 21), 700, 4200, sr) * np.exp(-t * 165)
+    return _norm(body + beater * 0.45)
 
 
 def _snare(sr):
-    """Shell tones plus the wires. The wires are the wide-band part, and they
-    are what makes this read as a drum rather than as a cymbal."""
-    n = int(sr * 140.0 / 1000)
+    """Shell tones plus the wires, and the wires are the point.
+
+    "The snare does not sound at all like the drums of a drum kit, it's super
+    underwhelming — I was expecting to feel it and all I got was a shy sound."
+
+    The first version of this was 140 ms with the wires decaying at 30/s, so
+    the file ended while the tail was still at −36 dBFS: cut off rather than
+    decayed. It measured a respectable peak and almost no loudness, which is
+    what "shy" sounds like. What a snare actually is, is a fast crack over a
+    slow wire ring, and it is the RING that carries the size — a decaying
+    noise bed adds energy for 250 ms without touching the peak, which is the
+    only currency available when the peak is already spent.
+
+    Three separate decays, therefore, instead of one:
+      - `stick`, 400/s, gone in 10 ms: the impact.
+      - `crack`, 85/s: the head, the part that says "snare" and not "cymbal".
+      - `ring`, 13/s over the full 300 ms: the wires, and the loudness.
+
+    The shell is three modes rather than two and is voiced a little higher
+    (196 Hz), a minor third above the tom that plays the other beats, so the
+    two drums are heard as two drums rather than as one drum at two
+    volumes."""
+    n = int(sr * 300.0 / 1000)
     t = np.arange(n) / sr
     shell = (
-        np.sin(2 * np.pi * 188 * t) * np.exp(-t * 30)
-        + np.sin(2 * np.pi * 331 * t) * np.exp(-t * 38) * 0.7
+        np.sin(2 * np.pi * 196 * t) * _hit(t, 24)
+        + np.sin(2 * np.pi * 292 * t) * _hit(t, 32) * 0.62
+        + np.sin(2 * np.pi * 421 * t) * _hit(t, 44) * 0.34
     )
-    wires = _band(_noise(n, 22), 260, 5200, sr) * np.exp(-t * 30)
-    crack = _band(_noise(n, 23), 1200, 4800, sr) * np.exp(-t * 130)
-    return _norm(shell * 0.75 + wires * 1.25 + crack * 0.9)
+    ring = _band(_noise(n, 22), 330, 8000, sr) * np.exp(-t * 13)
+    crack = _band(_noise(n, 23), 1100, 6500, sr) * np.exp(-t * 85)
+    stick = _band(_noise(n, 25), 2800, 9500, sr) * np.exp(-t * 400)
+    return _norm(shell * 0.60 + ring + crack * 0.55 + stick * 0.30)
 
 
 def snare_high(sr):
     """The SNARE kit's accent: kick and snare together, the backbeat of an
     actual kit. Mixed and limited here rather than in the engine, so the
-    balance is fixed in the file and there is no premix to normalise it away."""
-    k, s = _kick(sr), _snare(sr)
-    n = max(len(k), len(s))
+    balance is fixed in the file and there is no premix to normalise it away.
+
+    THE KICK IS THE JUNIOR PARTNER HERE, and it was not before. At gain 0.70
+    against a peak-normalised snare it carried four times the snare's energy,
+    74% of it below 120 Hz — the accent was a sub-bass kick with a whisper of
+    snare on it, which is the exact disease `drum_body` was written to cure,
+    reproduced in the kit that was supposed to be the cure. Measured: 64.5%
+    of the accent's energy under 120 Hz and 9.5% in the whole 250 Hz–6 kHz
+    range where a snare lives. At 0.50 it is 30% and 23%, and what you hear
+    first is a snare.
+
+    Balancing two layers by PEAK is the same mistake one level down: the
+    kick is a sine with an 11 dB crest factor and the snare is mostly noise
+    with 20 dB, so normalising both to 1.0 hands the kick 9 dB of loudness
+    for free. 0.50 is what a sweep of the mix's spectrum and its band-limited
+    energy chose, rather than what makes the two peaks match.
+
+    The kick lands 5 ms after the snare because a beater has further to
+    travel than a stick, and because two coincident attacks spend peak the
+    limiter then takes back off everything."""
+    s, k = _snare(sr), _kick(sr)
+    delay = int(sr * 5.0 / 1000)
+    n = max(len(s), delay + len(k))
     y = np.zeros(n)
     y[: len(s)] += s
-    y[: len(k)] += k * 0.70
+    y[delay : delay + len(k)] += k * 0.50
     return fade_tail(_saturate(y, 1.0), sr)
 
 
 def snare_low(sr):
-    """The SNARE kit's plain beat: a side-stick — wood on the rim with the
-    shell under it. Short and mid-focused on purpose, so it stays out of the
-    accent's way. Peak 0.85 rather than 0.97 is what sets this kit's accent
-    3 dB clear before the engine's BEAT_GAIN is even applied."""
-    n = int(sr * 60.0 / 1000)
+    """The SNARE kit's plain beat: a mid tom.
+
+    This was a side-stick, and the side-stick is most of why the kit did not
+    "sound at all like the drums of a drum kit". Two measured problems.
+
+    It was not a drum. 48% of its energy sat in 250–800 Hz around a 780 Hz
+    wood tone, which is a description of the `wood` kit's block — so three
+    beats in every four sounded like the kit the user did not choose.
+
+    And it was tiny: 60 ms and 29 energy units against `drum_low`'s 130 ms
+    and 106. Three quarters of the events in a bar were 5.6 dB below the kit
+    the owner is happy with, which is what dragged the whole kit to −24.9
+    LUFS against the drum kit's −22.0. A metronome is mostly its plain beat;
+    make that shy and the kit is shy however loud the accent is.
+
+    A tom fixes both at once: a struck head with a real fundamental (165 Hz,
+    a minor third below the snare so the two are distinguishable) and a shell
+    mode above it. `skin` and `stick` are carried at high gain on purpose —
+    the fundamental is what you feel on a real speaker, but it is under the
+    200 Hz that a laptop radiates, so the 380 Hz–8 kHz layers are the only
+    reason this is audible at all on the machine most people practise on.
+
+    Saturated at 1.5 rather than peak-normalised, for the reason in
+    `_saturate`: the noise layers have the loudness and the sine has the
+    peak, so dividing by the peak would throw the noise away. Peak 0.93,
+    not 0.97, because it plays under an accent that needs to dominate."""
+    n = int(sr * 145.0 / 1000)
     t = np.arange(n) / sr
-    wood = (
-        np.sin(2 * np.pi * 780 * t) * np.exp(-t * 105)
-        + np.sin(2 * np.pi * 1290 * t) * np.exp(-t * 150) * 0.6
-    )
-    shell = np.sin(2 * np.pi * 245 * t) * np.exp(-t * 60) * 0.45
-    tick = _band(_noise(n, 24), 1500, 6000, sr) * np.exp(-t * 260) * 0.9
-    return fade_tail(_norm(wood * 0.8 + shell + tick, 0.85), sr)
+    f = 45 * np.exp(-t * 42) + 165
+    head = np.sin(2 * np.pi * np.cumsum(f) / sr) * _hit(t, 36, 1.2)
+    mode = np.sin(2 * np.pi * 165 * 1.72 * t) * _hit(t, 50) * 0.45
+    skin = _band(_noise(n, 31), 380, 3000, sr) * np.exp(-t * 78)
+    stick = _band(_noise(n, 32), 2000, 8000, sr) * np.exp(-t * 330)
+    y = _norm(head + mode + skin * 1.5 + stick * 0.7)
+    return fade_tail(_saturate(y, 1.5, 0.93), sr)
 
 
 def synthesise(name, sr=SR):
