@@ -267,3 +267,33 @@ describe("DrillClimb", () => {
     expect(cells[6].classList.contains("lastrun")).toBe(true);
   });
 });
+
+describe("the last run's marks explain themselves", () => {
+  it("names the last run on the bars it reached, and not on the others", () => {
+    // The owner saw the bands under two columns and asked "what does that
+    // border bottom thingy mean?". The picture explains itself everywhere
+    // else — a cell says what clicking it will do — so the one mark that had
+    // no words was the one that needed them.
+    const { container } = render(
+      <DrillClimb
+        steps={[100, 110]}
+        barsPerStep={4}
+        currentStep={0}
+        barsInStep={0}
+        active={false}
+        cyclic={false}
+        lastRun={{ barsPerColumn: [4, 2], wallStep: 1, wallBar: 2, bpm: 110, bars: 2, daysAgo: 0, completed: false }}
+        onJump={() => {}}
+      />,
+    );
+    const cells = [...container.querySelectorAll(".drill-climb-cell")];
+    const marked = cells.filter((c) => c.className.includes("lastrun"));
+    expect(marked.length).toBe(6);
+    for (const c of marked) expect(c.getAttribute("title")).toContain("Last run");
+    for (const c of cells.filter((c) => !c.className.includes("lastrun"))) {
+      expect(c.getAttribute("title")).not.toContain("Last run");
+      // ...but it still says what a click does.
+      expect(c.getAttribute("title")).toContain("Start from");
+    }
+  });
+});

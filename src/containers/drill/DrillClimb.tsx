@@ -72,6 +72,17 @@ export function DrillClimb({
   onJump,
 }: DrillClimbProps) {
   const { t } = useTranslation();
+  /**
+   * What one bar of the climb says on hover.
+   *
+   * Always what a click will do. Plus, on a bar the last run reached, what
+   * the band under it means — the mark is 2px and its legend swatch is a
+   * dash, which is enough to notice and not enough to read.
+   */
+  const lastRunCellTip = (bpm: number, barIdx: number, reached: boolean) => {
+    const jump = t("drill.jumpTo", { bpm, bar: barIdx + 1 });
+    return reached ? `${jump} · ${t("drill.climbLegendLast")}` : jump;
+  };
   const scrollRef = useRef<HTMLDivElement>(null);
   const currentColRef = useRef<HTMLDivElement>(null);
 
@@ -219,8 +230,13 @@ export function DrillClimb({
                         key={barIdx}
                         type="button"
                         tabIndex={barIdx === 0 ? 0 : -1}
-                        title={t("drill.jumpTo", { bpm, bar: barIdx + 1 })}
-                        aria-label={t("drill.jumpTo", { bpm, bar: barIdx + 1 })}
+                        // A cell the last run reached says so on hover. The
+                        // mark under it is a 2px band, the legend swatch for
+                        // it is a dash, and the owner's reaction to seeing it
+                        // was "what does it mean?" — the picture explains
+                        // itself everywhere else, so this one should too.
+                        title={lastRunCellTip(bpm, barIdx, barIdx < lastBars)}
+                        aria-label={lastRunCellTip(bpm, barIdx, barIdx < lastBars)}
                         className={`drill-grid-cell drill-climb-cell ${barDone ? "done" : ""} ${barActive ? "current" : ""} ${barIdx < lastBars ? "lastrun" : ""}`}
                         data-first-cell={
                           stepIdx === 0 && barIdx === 0 ? "" : undefined
