@@ -10,9 +10,10 @@ import {
   renameChain,
   reorderSteps,
   setChainRepeat,
+  upsertChain,
   updateStep,
 } from "./chains";
-import type { ChainStep, Preset } from "../types";
+import type { Chain, ChainStep, Preset } from "../types";
 
 function preset(over: Partial<Preset> = {}): Preset {
   return {
@@ -213,5 +214,61 @@ describe("steps", () => {
         expect(new Set(chain.steps.map((s) => s.id))).toEqual(ids);
       }
     }
+  });
+});
+
+describe("upsertChain", () => {
+  const chain = (id: string, name = id): Chain => ({
+    id,
+    name,
+    createdAt: 0,
+    repeat: 1,
+    steps: [],
+  });
+
+  /**
+   * The bug the owner reported as "clicking on a created chain does nothing".
+   *
+   * `newChain` awaited `save_chain` and then APPENDED its chain to the list.
+   * The chain is in the store by the time that await returns, so a
+   * `list_chains` still in flight could resolve with it already present — and
+   * the mount effect fires two of those under StrictMode. The append then put
+   * one id in the list twice; React warned about duplicate keys, and
+   * reconciliation between two rows sharing an identity is undefined. They
+   * rendered as a single row stuck in rename mode, and clicking either did
+   * nothing.
+   *
+   * The interleaving is narrow and order-dependent — a listing that lands
+   * AFTER the append simply replaces the array and hides everything — so it is
+   * the LOGIC that is pinned here rather than the timing. A test that tried to
+   * stage the race passed against the bug, which is worse than no test.
+   */
+  it("does not add a chain that is already in the list", () => {
+    const a = chain("a");
+    const list = [chain("z"), a];
+    expect(upsertChain(list, a)).toBe(list);
+    expect(upsertChain(list, a).map((c) => c.id)).toEqual(["z", "a"]);
+  });
+
+  it("replaces by id rather than appending a second copy", () => {
+    const list = [chain("z"), chain("a", "old name")];
+    const renamed = chain("a", "new name");
+    const next = upsertChain(list, renamed);
+    expect(next.map((c) => c.id)).toEqual(["z", "a"]);
+    expect(next[1].name).toBe("new name");
+    // In place — the order of the library does not shuffle on a save.
+    expect(next).not.toBe(list);
+  });
+
+  it("appends one that is genuinely new", () => {
+    const list = [chain("z")];
+    expect(upsertChain(list, chain("a")).map((c) => c.id)).toEqual(["z", "a"]);
+  });
+
+  it("never produces a duplicate id, however many times it is applied", () => {
+    const a = chain("a");
+    let list: Chain[] = [];
+    for (let i = 0; i < 5; i++) list = upsertChain(list, a);
+    expect(list.map((c) => c.id)).toEqual(["a"]);
   });
 });

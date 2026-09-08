@@ -1932,10 +1932,15 @@ button.context-chip:hover,
   height: 16px;
 }
 
+/* One hover for all three. They used to have two: search and save lit a grey
+   surface with a border, while "new chain" washed the accent — because
+   `chain.css` gave that one button its own shape and its own hover. The
+   owner picked the accent one, so it is the only one now, and the override
+   that made them differ is gone. */
 .preset-sidebar-head-btn:hover {
-  color: var(--text-primary);
-  background: var(--surface-hover, rgba(255, 255, 255, 0.06));
-  border-color: var(--border);
+  color: var(--accent);
+  background: var(--accent-subtle);
+  border-color: transparent;
 }
 
 .preset-sidebar-head-btn.active {
@@ -1950,8 +1955,13 @@ button.context-chip:hover,
   content: attr(data-tip);
   position: absolute;
   top: calc(100% + 7px);
-  left: 50%;
-  transform: translateX(-50%) translateY(3px);
+  /* Anchored by its RIGHT edge, not centred. These buttons sit hard against
+     the rail's right edge, and the rail is `overflow: hidden` for its collapse
+     animation — so a centred tooltip on the last button was cut off half way
+     through its own word. Growing leftwards keeps it inside whatever the
+     sidebar's width is. */
+  right: 0;
+  transform: translateY(3px);
   padding: 5px 9px;
   border-radius: 6px;
   background: var(--bg-secondary);
@@ -1971,5 +1981,5 @@ button.context-chip:hover,
 .preset-sidebar-head-btn[data-tip]:hover::after,
 .preset-sidebar-head-btn[data-tip]:focus-visible::after {
   opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  transform: translateY(0);
 }

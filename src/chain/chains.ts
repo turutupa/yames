@@ -92,6 +92,29 @@ export function createChain(name: string, steps: ChainStep[] = []): Chain {
   };
 }
 
+/**
+ * `list` with `next` in it — replacing an entry of the same id, or appended.
+ *
+ * Both writers of the chain list need this, and one of them learned why the
+ * hard way. `newChain` awaits `save_chain` and then added its chain to the
+ * list; but the chain is in the STORE by the time that await returns, so a
+ * `list_chains` still in flight can resolve with it already present. Appending
+ * blind put one id in the list twice. React warned about duplicate keys, and
+ * reconciliation between two rows sharing an identity is undefined — they
+ * rendered as a single row stuck in rename mode, and clicking either did
+ * nothing, which is what the owner reported.
+ *
+ * Returns `list` itself when nothing changes, so React can skip the render.
+ */
+export function upsertChain(list: Chain[], next: Chain): Chain[] {
+  const at = list.findIndex((c) => c.id === next.id);
+  if (at === -1) return [...list, next];
+  if (list[at] === next) return list;
+  const copy = [...list];
+  copy[at] = next;
+  return copy;
+}
+
 export function renameChain(chain: Chain, name: string): Chain {
   return { ...chain, name };
 }

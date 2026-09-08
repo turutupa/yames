@@ -10,22 +10,11 @@
 
 /* =================== The library's chain rows =================== */
 
-.preset-sidebar-new-chain {
-  background: none;
-  border: none;
-  color: var(--text-tertiary);
-  cursor: pointer;
-  padding: 3px;
-  display: flex;
-  align-items: center;
-  border-radius: 5px;
-  transition: color 0.15s, background 0.15s;
-}
-
-.preset-sidebar-new-chain:hover {
-  color: var(--accent);
-  background: var(--accent-subtle);
-}
+/* `.preset-sidebar-new-chain` no longer restyles the button. It used to give
+   this one a different size, radius and hover from the search and save
+   buttons beside it; the accent hover it introduced is the one the owner
+   wanted, so it moved onto `.preset-sidebar-head-btn` where all three get it,
+   and the rest of the override went with it. */
 
 .preset-sidebar-item.chain-item {
   display: flex;

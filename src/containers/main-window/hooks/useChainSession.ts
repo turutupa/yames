@@ -5,6 +5,7 @@ import {
   createChain,
   presetToChainStep,
   renameChain as renameChainData,
+  upsertChain,
 } from "../../../chain";
 import {
   deleteChain as deleteChainIpc,
@@ -211,7 +212,10 @@ export function useChainSession({
   const newChain = useCallback(async () => {
     const created = createChain(t("chain.untitled"));
     await saveChainIpc(created).catch(() => {});
-    setChains((prev) => [...prev, created]);
+    // NOT a blind append. The await above is a window — the chain is in the
+    // store by the time it closes, so a `listChains()` still in flight can
+    // resolve with it already present. See `upsertChain`.
+    setChains((prev) => upsertChain(prev, created));
     loadChain(created);
     return created;
   }, [t, loadChain]);
@@ -219,7 +223,7 @@ export function useChainSession({
   const saveActiveChain = useCallback(async () => {
     if (!chain) return;
     await saveChainIpc(chain).catch(() => {});
-    setChains((prev) => (prev.some((c) => c.id === chain.id) ? prev.map((c) => (c.id === chain.id ? chain : c)) : [...prev, chain]));
+    setChains((prev) => upsertChain(prev, chain));
     setSaved(chain);
     if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
     setSaveFeedback(true);

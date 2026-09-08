@@ -9,6 +9,7 @@ export {
   presetToChainStep,
   removeStep,
   renameChain,
+  upsertChain,
   reorderSteps,
   setChainRepeat,
   updateStep,
