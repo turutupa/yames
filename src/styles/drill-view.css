@@ -514,11 +514,17 @@
 /* One sentence, under the picture rather than beside it: the track scrolls,
    and a note parked inside it leaves the screen along with the columns it is
    describing. */
+/* One line, reserved. This note exists only for a drill that has been run
+   before, and mounting it conditionally shifted everything above it every
+   time you switched between a drill that had one and a drill that did not.
+   `min-height` is the line it would occupy, so the row is the same height
+   empty or full. */
 .drill-climb-lastrun {
   margin: 0;
   font-size: 0.78rem;
   font-weight: 600;
   line-height: 1.5;
+  min-height: calc(0.78rem * 1.5);
   color: var(--text-tertiary);
 }
 

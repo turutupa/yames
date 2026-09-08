@@ -203,7 +203,14 @@ describe("DrillClimb", () => {
     const { container } = render(<DrillClimb {...base} />);
     expect(container.querySelectorAll(".drill-climb-cell.lastrun")).toHaveLength(0);
     expect(container.querySelectorAll(".drill-climb-wall")).toHaveLength(0);
-    expect(container.querySelector(".drill-climb-lastrun")).toBeNull();
+    // The note's ROW is still there — it reserves one line so the page does
+    // not jump when you switch between a drill that has a history and one
+    // that does not. What it must not do is say anything.
+    const note = container.querySelector(".drill-climb-lastrun") as HTMLElement;
+    expect(note).not.toBeNull();
+    expect(note.textContent).toBe("");
+    expect(note.hasAttribute("data-empty")).toBe(true);
+    expect(note.getAttribute("aria-hidden")).toBe("true");
   });
 
 
@@ -225,6 +232,24 @@ describe("DrillClimb", () => {
     const cell = container.querySelector(".drill-climb-cell");
     expect(cell?.getAttribute("title")).toContain("Start from");
     expect(cell?.getAttribute("title")).not.toContain("Last run");
+  });
+
+  it("keeps the note's row the same height with and without a note", () => {
+    // "If I click on a preset that has that message and another one that
+    // doesn't, everything moves." Mounting the note conditionally shifted
+    // every row above it. jsdom has no layout, so what is asserted is the
+    // structure that makes the heights equal: the same element, present in
+    // both states, with the height reserved in the stylesheet.
+    const withRun = render(<DrillClimb {...base} lastRun={lastRun} onJump={() => {}} />);
+    const a = withRun.container.querySelector(".drill-climb-lastrun");
+    expect(a?.textContent?.length).toBeGreaterThan(0);
+    expect(a?.hasAttribute("data-empty")).toBe(false);
+    withRun.unmount();
+
+    const without = render(<DrillClimb {...base} onJump={() => {}} />);
+    const b = without.container.querySelector(".drill-climb-lastrun");
+    expect(b).not.toBeNull();
+    expect(b?.tagName).toBe(a?.tagName);
   });
 
   it("says how far you got and when, and does not say why you stopped", () => {

@@ -245,9 +245,21 @@ export function DrillClimb({
           It says where you got and when. It does not say why you stopped —
           nothing records that, and "before the timing came apart" is a
           diagnosis a stop button cannot make. */}
-      {lastRun && (
-        <p className="drill-climb-lastrun">
-          {lastRun.completed
+      {/* Always rendered, empty when there is nothing to say. A drill that
+          has been run carries this line and one that has not does not, so
+          mounting it conditionally moved the whole page every time you
+          switched between them — the owner: "if I click on a preset that has
+          that message and another one that doesn't, everything moves".
+
+          The row reserves one line in the stylesheet. `aria-hidden` while it
+          is empty so a screen reader is not handed a blank paragraph. */}
+      <p
+        className="drill-climb-lastrun"
+        data-empty={lastRun ? undefined : ""}
+        aria-hidden={lastRun ? undefined : true}
+      >
+        {lastRun
+          ? lastRun.completed
             ? t("drill.lastRunCleared", {
                 bpm: lastRun.furthestBpm,
                 when: whenLastRun(lastRun.daysAgo),
@@ -256,9 +268,9 @@ export function DrillClimb({
                 bars: lastRun.furthestBars,
                 bpm: lastRun.furthestBpm,
                 when: whenLastRun(lastRun.daysAgo),
-              })}
-        </p>
-      )}
+              })
+          : null}
+      </p>
     </div>
   );
 }
