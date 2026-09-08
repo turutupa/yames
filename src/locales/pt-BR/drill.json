@@ -27,7 +27,6 @@
     "climbLegend": "Uma coluna por andamento · uma célula por compasso",
     "climbLegendDone": "Tocado",
     "climbLegendPlan": "Restante",
-    "climbLegendLast": "Última vez",
     "lastRunWall": "{{when}} você chegou a {{bars}} compassos a {{bpm}} BPM. Esse é o muro para mover hoje.",
     "lastRunCleared": "{{when}} você terminou isso a {{bpm}} BPM.",
     "lastRunToday": "Hoje",

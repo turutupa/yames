@@ -27,7 +27,6 @@
     "climbLegend": "Één kolom per tempo · één vakje per maat",
     "climbLegendDone": "Gespeeld",
     "climbLegendPlan": "Resterend",
-    "climbLegendLast": "Vorige keer",
     "lastRunWall": "{{when}} kwam je {{bars}} maten ver op {{bpm}} BPM. Dat is de muur die vanavond moet wijken.",
     "lastRunCleared": "{{when}} heb je dit afgemaakt op {{bpm}} BPM.",
     "lastRunToday": "Vandaag",

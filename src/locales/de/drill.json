@@ -27,7 +27,6 @@
     "climbLegend": "Eine Spalte pro Tempo · ein Feld pro Takt",
     "climbLegendDone": "Gespielt",
     "climbLegendPlan": "Verbleibend",
-    "climbLegendLast": "Letztes Mal",
     "lastRunWall": "{{when}} bist du {{bars}} Takte weit in {{bpm}} BPM gekommen. Das ist die Wand, die heute fallen soll.",
     "lastRunCleared": "{{when}} hast du das bei {{bpm}} BPM zu Ende gebracht.",
     "lastRunToday": "Heute",

@@ -27,7 +27,6 @@
     "climbLegend": "Jedna kolumna na tempo · jedno pole na takt",
     "climbLegendDone": "Zagrane",
     "climbLegendPlan": "Pozostało",
-    "climbLegendLast": "Poprzednio",
     "lastRunWall": "{{when}} dotarłeś do {{bars}} taktów przy {{bpm}} BPM. To ściana do przesunięcia dziś wieczorem.",
     "lastRunCleared": "{{when}} ukończyłeś to przy {{bpm}} BPM.",
     "lastRunToday": "Dziś",

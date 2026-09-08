@@ -72,17 +72,6 @@ export function DrillClimb({
   onJump,
 }: DrillClimbProps) {
   const { t } = useTranslation();
-  /**
-   * What one bar of the climb says on hover.
-   *
-   * Always what a click will do. Plus, on a bar the last run reached, what
-   * the band under it means — the mark is 2px and its legend swatch is a
-   * dash, which is enough to notice and not enough to read.
-   */
-  const lastRunCellTip = (bpm: number, barIdx: number, reached: boolean) => {
-    const jump = t("drill.jumpTo", { bpm, bar: barIdx + 1 });
-    return reached ? `${jump} · ${t("drill.climbLegendLast")}` : jump;
-  };
   const scrollRef = useRef<HTMLDivElement>(null);
   const currentColRef = useRef<HTMLDivElement>(null);
 
@@ -150,14 +139,6 @@ export function DrillClimb({
             <span className="drill-climb-swatch plan" aria-hidden="true" />
             {t("drill.climbLegendPlan")}
           </span>
-          {/* Only when there is one. A permanent "Last run" key over an empty
-              underlay would claim a history the app does not have. */}
-          {lastRun && (
-            <span className="drill-climb-key">
-              <span className="drill-climb-swatch last" aria-hidden="true" />
-              {t("drill.climbLegendLast")}
-            </span>
-          )}
         </span>
       </div>
       <div className="drill-climb-scroll" ref={scrollRef}>
@@ -166,10 +147,6 @@ export function DrillClimb({
             const isDone = active && !cyclic ? stepIdx < currentStep : false;
             const isCurrent = stepIdx === effectiveStep && active;
             const base = 140 + stepIdx * 24;
-            // Bars the last run played AT THIS TEMPO — the column index is
-            // not the past run's column index, and `lastRun.ts` explains at
-            // length why it must not be treated as one.
-            const lastBars = lastRun?.barsPerColumn[stepIdx] ?? 0;
             return (
               <div
                 key={stepIdx}
@@ -195,21 +172,6 @@ export function DrillClimb({
                     aria-hidden="true"
                   />
                 )}
-                {/* The wall. Drawn like the playhead but muted and static:
-                    the whole point of U3.3 is that it is on screen BEFORE you
-                    press start, so you can see what you are walking into.
-                    It stands at the trailing edge of the last bar the run
-                    played, not through its middle — that edge is where the
-                    playing stopped. */}
-                {lastRun?.wallStep === stepIdx && (
-                  <span
-                    className="drill-climb-wall"
-                    style={
-                      { "--climb-wall-bar": lastRun.wallBar } as React.CSSProperties
-                    }
-                    aria-hidden="true"
-                  />
-                )}
                 <div className="drill-climb-cells">
                   {Array.from({ length: barsPerStep }, (_, barIdx) => {
                     const barDone = isDone || (isCurrent && barIdx < barsInStep);
@@ -230,14 +192,9 @@ export function DrillClimb({
                         key={barIdx}
                         type="button"
                         tabIndex={barIdx === 0 ? 0 : -1}
-                        // A cell the last run reached says so on hover. The
-                        // mark under it is a 2px band, the legend swatch for
-                        // it is a dash, and the owner's reaction to seeing it
-                        // was "what does it mean?" — the picture explains
-                        // itself everywhere else, so this one should too.
-                        title={lastRunCellTip(bpm, barIdx, barIdx < lastBars)}
-                        aria-label={lastRunCellTip(bpm, barIdx, barIdx < lastBars)}
-                        className={`drill-grid-cell drill-climb-cell ${barDone ? "done" : ""} ${barActive ? "current" : ""} ${barIdx < lastBars ? "lastrun" : ""}`}
+                        title={t("drill.jumpTo", { bpm, bar: barIdx + 1 })}
+                        aria-label={t("drill.jumpTo", { bpm, bar: barIdx + 1 })}
+                        className={`drill-grid-cell drill-climb-cell ${barDone ? "done" : ""} ${barActive ? "current" : ""}`}
                         data-first-cell={
                           stepIdx === 0 && barIdx === 0 ? "" : undefined
                         }

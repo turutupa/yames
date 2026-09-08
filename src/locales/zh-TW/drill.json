@@ -27,7 +27,6 @@
     "climbLegend": "每個速度一欄 · 每小節一格",
     "climbLegendDone": "已彈",
     "climbLegendPlan": "剩餘",
-    "climbLegendLast": "上次",
     "lastRunWall": "{{when}}你在 {{bpm}} BPM 彈到了第 {{bars}} 小節。今晚就是要推倒這堵牆。",
     "lastRunCleared": "{{when}}你在 {{bpm}} BPM 完成了這個練習。",
     "lastRunToday": "今天",

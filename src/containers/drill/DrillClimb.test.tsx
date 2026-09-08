@@ -206,32 +206,25 @@ describe("DrillClimb", () => {
     expect(container.querySelector(".drill-climb-lastrun")).toBeNull();
   });
 
-  it("marks the bars the last run played, column by column", () => {
-    const { container } = render(<DrillClimb {...base} lastRun={lastRun} />);
-    const marked = cellsOf(container).map((c) => c.classList.contains("lastrun"));
-    expect(marked).toEqual([
-      true, true, true, true,
-      true, true, true, true,
-      true, true, false, false,
-    ]);
-  });
 
-  it("keys the underlay in the legend only when there is one", () => {
-    const { rerender } = render(<DrillClimb {...base} />);
-    expect(screen.queryByText("Last run")).not.toBeInTheDocument();
-    rerender(<DrillClimb {...base} lastRun={lastRun} />);
-    expect(screen.getByText("Last run")).toBeInTheDocument();
-  });
 
-  it("stands the wall in the column the last run stopped in", () => {
-    const { container } = render(<DrillClimb {...base} lastRun={lastRun} />);
-    const walls = container.querySelectorAll(".drill-climb-wall");
-    expect(walls).toHaveLength(1);
-    const col = walls[0].closest(".drill-climb-col") as HTMLElement;
-    expect(col.querySelector(".drill-climb-bpm")?.textContent).toBe("100");
-    // A COUNT of bars, not an index — the line stands after the last bar
-    // played rather than through the middle of it.
-    expect((walls[0] as HTMLElement).style.getPropertyValue("--climb-wall-bar")).toBe("2");
+
+  it("draws no marks for the last run on the chart itself", () => {
+    // Removed at the owner's call. They asked twice what the bands under the
+    // cells meant — "if it's not obvious to me the creator, should we remove
+    // it?" — and the sentence below the climb already says the same thing in
+    // words that need no decoding. A 2px band and a dash-shaped legend swatch
+    // were enough to notice and not enough to read.
+    const { container } = render(
+      <DrillClimb {...base} lastRun={lastRun} onJump={() => {}} />,
+    );
+    expect(container.querySelectorAll(".drill-climb-cell.lastrun")).toHaveLength(0);
+    expect(container.querySelector(".drill-climb-wall")).toBeNull();
+    expect(container.querySelector(".drill-climb-swatch.last")).toBeNull();
+    // ...and every cell still says what clicking it does.
+    const cell = container.querySelector(".drill-climb-cell");
+    expect(cell?.getAttribute("title")).toContain("Start from");
+    expect(cell?.getAttribute("title")).not.toContain("Last run");
   });
 
   it("says how far you got and when, and does not say why you stopped", () => {
@@ -254,46 +247,21 @@ describe("DrillClimb", () => {
     expect(screen.getByText(/finished this at 100 BPM/)).toHaveTextContent("yesterday");
   });
 
-  it("keeps the underlay under a run in progress rather than replacing it", () => {
-    // You watch tonight cover last time — so a bar can be both, and the
-    // cell's own three states are unaffected.
-    const { container } = render(
-      <DrillClimb {...base} lastRun={lastRun} active currentStep={1} barsInStep={2} />,
-    );
-    const cells = cellsOf(container);
-    expect(cells[4].classList.contains("done")).toBe(true);
-    expect(cells[4].classList.contains("lastrun")).toBe(true);
-    expect(cells[6].classList.contains("current")).toBe(true);
-    expect(cells[6].classList.contains("lastrun")).toBe(true);
-  });
-});
-
-describe("the last run's marks explain themselves", () => {
-  it("names the last run on the bars it reached, and not on the others", () => {
-    // The owner saw the bands under two columns and asked "what does that
-    // border bottom thingy mean?". The picture explains itself everywhere
-    // else — a cell says what clicking it will do — so the one mark that had
-    // no words was the one that needed them.
+  it("keeps the last run's sentence while a run is in progress", () => {
+    // The sentence is what survived; the marks on the chart did not. It has to
+    // stay on screen while you play, because the whole point is comparing the
+    // wall you hit last time against the one you are walking into now.
     const { container } = render(
       <DrillClimb
-        steps={[100, 110]}
-        barsPerStep={4}
-        currentStep={0}
-        barsInStep={0}
-        active={false}
-        cyclic={false}
-        lastRun={{ barsPerColumn: [4, 2], wallStep: 1, wallBar: 2, bpm: 110, bars: 2, daysAgo: 0, completed: false }}
+        {...base}
+        active
+        currentStep={1}
+        barsInStep={2}
+        lastRun={lastRun}
         onJump={() => {}}
       />,
     );
-    const cells = [...container.querySelectorAll(".drill-climb-cell")];
-    const marked = cells.filter((c) => c.className.includes("lastrun"));
-    expect(marked.length).toBe(6);
-    for (const c of marked) expect(c.getAttribute("title")).toContain("Last run");
-    for (const c of cells.filter((c) => !c.className.includes("lastrun"))) {
-      expect(c.getAttribute("title")).not.toContain("Last run");
-      // ...but it still says what a click does.
-      expect(c.getAttribute("title")).toContain("Start from");
-    }
+    expect(container.querySelector(".drill-climb-lastrun")).not.toBeNull();
   });
 });
+

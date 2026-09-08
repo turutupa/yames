@@ -27,7 +27,6 @@
     "climbLegend": "Una colonna per tempo · una casella per battuta",
     "climbLegendDone": "Suonato",
     "climbLegendPlan": "Rimanenti",
-    "climbLegendLast": "Ultima volta",
     "lastRunWall": "{{when}} sei arrivato a {{bars}} battute a {{bpm}} BPM. È il muro da spostare stasera.",
     "lastRunCleared": "{{when}} l'hai finito a {{bpm}} BPM.",
     "lastRunToday": "Oggi",
