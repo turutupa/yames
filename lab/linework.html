@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en" data-theme="obsidian">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Yames — technical linework concepts</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Manrope:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #110a0c; --bg-2: #1d1114;
+        --ink: #f7f0ea; --ink-dim: #cdb5a8; --ink-mute: #a08b7f;
+        --line-2: rgba(255,255,255,0.17);
+        --a1: #f59e0b;
+        --ff-display: "Bricolage Grotesque", system-ui, sans-serif;
+        --ff-body: "Manrope", system-ui, sans-serif;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: var(--ff-body); background: var(--bg); color: var(--ink);
+        padding: clamp(20px, 4vw, 56px); -webkit-font-smoothing: antialiased;
+      }
+      header { max-width: 940px; margin: 0 auto clamp(24px, 4vw, 40px); }
+      h1 { font-family: var(--ff-display); font-size: clamp(1.6rem,4vw,2.4rem); font-weight: 800; letter-spacing: -0.04em; }
+      header p { color: var(--ink-dim); margin-top: 10px; line-height: 1.6; }
+      .controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-top: 18px; font-size: 0.9rem; color: var(--ink-dim); }
+      .controls label { display: flex; align-items: center; gap: 8px; }
+      input[type=range] { accent-color: var(--a1); }
+      button { font: inherit; font-weight: 700; color: var(--bg); background: var(--a1); border: 0; border-radius: 999px; padding: 8px 18px; cursor: pointer; }
+      .grid { display: grid; gap: 24px; max-width: 1500px; margin: 0 auto; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+      .card { border: 1px solid var(--line-2); border-radius: 20px; background: linear-gradient(160deg, var(--bg-2), var(--bg)); padding: 22px; display: flex; flex-direction: column; gap: 12px; }
+      .card--wide { grid-column: 1 / -1; }
+      .card h2 { font-family: var(--ff-display); font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em; }
+      .kicker { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--a1); }
+      .card p { font-size: 0.88rem; line-height: 1.6; color: var(--ink-dim); }
+      .readout {
+        position: absolute; right: 22px; top: 20px; text-align: right;
+        display: flex; flex-direction: column; gap: 2px; pointer-events: none;
+      }
+      .ro-num { font-family: var(--ff-display); font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; color: var(--a1); }
+      .ro-lab { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em; color: var(--ink-mute); }
+      .stage { width: 100%; aspect-ratio: 4/3; border-radius: 12px; background: #0b0708; overflow: hidden; }
+      .stage--wide { aspect-ratio: 21 / 9; position: relative; }
+      .note { font-size: 0.8rem; color: var(--ink-mute); max-width: 940px; margin: 26px auto 0; line-height: 1.6; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Technical linework — three concepts</h1>
+      <p>
+        Edges only: 3D geometry rendered as line art, no fill, no lights, no
+        post-processing. Drag the sliders. Everything is procedural, so any of
+        it can be re-posed, re-coloured or exploded further.
+      </p>
+      <div class="controls">
+        <button id="spin" type="button">Pause spin</button>
+        <label>Explode <input id="ex" type="range" min="0" max="100" value="55" /></label>
+        <label>Tempo <input id="bpm" type="range" min="40" max="208" value="120" /> <span id="bpmv">120</span> BPM</label>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <p class="kicker">Concept 1</p>
+        <h2>The Exploded Metronome</h2>
+        <div class="stage" id="s1"></div>
+        <p>Case, movement plate, gear train, escape wheel, anchor, pendulum rod and sliding weight, bell. Drifts apart along its own axis; the rod swings at the tempo.</p>
+      </section>
+
+      <section class="card">
+        <p class="kicker">Concept 2</p>
+        <h2>The Escapement</h2>
+        <div class="stage" id="s2"></div>
+        <p>The mechanism that actually makes the tick: escape wheel and anchor. It steps one tooth per beat — the wheel only moves when the anchor lets it.</p>
+      </section>
+
+      <section class="card card--wide">
+        <p class="kicker">Concept 1b &mdash; the coach variant</p>
+        <h2>The Metronome That Notices</h2>
+        <div class="stage stage--wide" id="s4">
+          <div class="readout" id="ro">
+            <span class="ro-num" id="roNum">+0 ms</span>
+            <span class="ro-lab" id="roLab">IN THE POCKET</span>
+          </div>
+        </div>
+        <p>
+          The same machine, with one idea added: the rod is drawn twice. The
+          solid one is the beat. The dashed one is where the player actually
+          landed, and it lags behind. The gap between them is the drag &mdash;
+          annotated in milliseconds off a graduated arc, the way a technical
+          drawing calls out a tolerance.
+        </p>
+      </section>
+
+      <section class="card">
+        <p class="kicker">Concept 3</p>
+        <h2>The Practice Rig</h2>
+        <div class="stage" id="s3"></div>
+        <p>Laptop, floating widget, footswitch and MIDI pedal, exploded along the desk. Says "this fits your setup" without needing a photograph.</p>
+      </section>
+    </div>
+
+    <p class="note">
+      Rough: proportions and detail are first-pass. The point is to judge the
+      treatment. Line weight, density of detail and how far things explode are
+      all cheap to change — that is the tuning that separates this from looking
+      like a wireframe.
+    </p>
+
+    <script type="module">
+      import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js";
+
+      const AMBER = 0xf5a30b;
+      const DIM = 0x8a6a3a;
+
+      let spinning = true, explode = 0.55, bpm = 120;
+      const beatMs = () => 60000 / bpm;
+
+      document.getElementById("spin").addEventListener("click", (e) => {
+        spinning = !spinning;
+        e.target.textContent = spinning ? "Pause spin" : "Resume spin";
+      });
+      document.getElementById("ex").addEventListener("input", (e) => { explode = +e.target.value / 100; });
+      document.getElementById("bpm").addEventListener("input", (e) => {
+        bpm = +e.target.value; document.getElementById("bpmv").textContent = bpm;
+      });
+
+      /* Edge rendering is the whole technique: build solids, then throw the
+         faces away and keep the creases. A high segment count with a low
+         threshold angle gives the faceted, drafted look; smooth surfaces with
+         a high threshold give clean silhouettes. */
+      function edges(geo, colour = AMBER, threshold = 14, opacity = 0.9) {
+        const e = new THREE.EdgesGeometry(geo, threshold);
+        const m = new THREE.LineBasicMaterial({ color: colour, transparent: true, opacity });
+        return new THREE.LineSegments(e, m);
+      }
+
+      function gearGeo(teeth, r, toothH, thickness) {
+        const s = new THREE.Shape();
+        const step = (Math.PI * 2) / teeth;
+        for (let i = 0; i < teeth; i++) {
+          const a0 = i * step, a1 = a0 + step * 0.34, a2 = a0 + step * 0.5, a3 = a0 + step * 0.84;
+          const ro = r + toothH;
+          if (i === 0) s.moveTo(Math.cos(a0) * r, Math.sin(a0) * r);
+          else s.lineTo(Math.cos(a0) * r, Math.sin(a0) * r);
+          s.lineTo(Math.cos(a1) * ro, Math.sin(a1) * ro);
+          s.lineTo(Math.cos(a2) * ro, Math.sin(a2) * ro);
+          s.lineTo(Math.cos(a3) * r, Math.sin(a3) * r);
+        }
+        s.closePath();
+        const hole = new THREE.Path();
+        hole.absarc(0, 0, r * 0.22, 0, Math.PI * 2, true);
+        s.holes.push(hole);
+        return new THREE.ExtrudeGeometry(s, { depth: thickness, bevelEnabled: false, curveSegments: 6 });
+      }
+
+      function makeStage(el) {
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+        el.appendChild(renderer.domElement);
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 200);
+        const root = new THREE.Group();
+        scene.add(root);
+        function resize() {
+          const r = el.getBoundingClientRect();
+          renderer.setSize(r.width, r.height, false);
+          renderer.domElement.style.width = "100%";
+          renderer.domElement.style.height = "100%";
+          camera.aspect = r.width / Math.max(r.height, 1);
+          camera.updateProjectionMatrix();
+        }
+        resize();
+        addEventListener("resize", resize);
+        return { renderer, scene, camera, root };
+      }
+
+      /* ── 1. Exploded metronome ─────────────────────────────────────── */
+      const A = makeStage(document.getElementById("s1"));
+      A.camera.position.set(8.4, 4.8, 11.2);
+      A.camera.lookAt(0, 0.5, 0);
+      const partsA = [];
+      function addA(obj, offset) { partsA.push({ obj, base: obj.position.clone(), offset }); A.root.add(obj); }
+
+      // Case: a four-sided frustum, the classic Maelzel silhouette
+      const caseGeo = new THREE.CylinderGeometry(1.15, 2.3, 5.4, 4, 1, true);
+      const kase = edges(caseGeo, AMBER, 20);
+      kase.rotation.y = Math.PI / 4;
+      kase.position.y = 0;
+      addA(kase, new THREE.Vector3(0, 0, -3.2));
+
+      // Front plate with the BPM scale
+      const plate = new THREE.Group();
+      plate.add(edges(new THREE.BoxGeometry(1.5, 4.4, 0.08), AMBER, 20));
+      for (let i = 0; i < 17; i++) {
+        const t = edges(new THREE.BoxGeometry(i % 4 === 0 ? 0.55 : 0.3, 0.035, 0.05), DIM, 20, 0.75);
+        t.position.set(-0.35, -1.9 + i * 0.24, 0.07);
+        plate.add(t);
+      }
+      plate.position.set(0, 0.1, 1.25);
+      addA(plate, new THREE.Vector3(0, 0, 2.4));
+
+      // Movement plate + gear train
+      const movement = new THREE.Group();
+      movement.add(edges(new THREE.BoxGeometry(2.1, 2.6, 0.1), DIM, 20, 0.7));
+      const g1 = edges(gearGeo(26, 0.72, 0.11, 0.12), AMBER, 24);
+      g1.position.set(-0.42, 0.42, 0.12);
+      const g2 = edges(gearGeo(18, 0.5, 0.1, 0.12), AMBER, 24);
+      g2.position.set(0.55, -0.1, 0.12);
+      const g3 = edges(gearGeo(12, 0.32, 0.09, 0.12), AMBER, 24);
+      g3.position.set(-0.1, -0.85, 0.12);
+      movement.add(g1, g2, g3);
+      movement.position.set(0, -0.2, 0.2);
+      addA(movement, new THREE.Vector3(0, 0, 0.6));
+      const trainA = [g1, g2, g3];
+
+      // Escape wheel + anchor
+      const escGroup = new THREE.Group();
+      const escWheel = edges(gearGeo(20, 0.62, 0.16, 0.1), AMBER, 24);
+      const anchor = new THREE.Group();
+      anchor.add(edges(new THREE.BoxGeometry(1.5, 0.11, 0.1), AMBER, 20));
+      const pawlL = edges(new THREE.BoxGeometry(0.13, 0.42, 0.1), AMBER, 20); pawlL.position.set(-0.68, -0.2, 0);
+      const pawlR = edges(new THREE.BoxGeometry(0.13, 0.42, 0.1), AMBER, 20); pawlR.position.set(0.68, -0.2, 0);
+      anchor.add(pawlL, pawlR);
+      anchor.position.set(0, 0.72, 0.06);
+      escGroup.add(escWheel, anchor);
+      escGroup.position.set(0, 1.15, 0.2);
+      addA(escGroup, new THREE.Vector3(0, 0.5, 2.0));
+
+      // Pendulum rod + sliding weight
+      const pend = new THREE.Group();
+      const rod = edges(new THREE.BoxGeometry(0.1, 5.2, 0.1), AMBER, 20);
+      rod.position.y = 1.3;
+      const weight = edges(new THREE.BoxGeometry(0.72, 0.34, 0.26), AMBER, 20);
+      weight.position.y = 2.1;
+      const bob = edges(new THREE.CylinderGeometry(0.3, 0.3, 0.22, 16), AMBER, 14);
+      bob.rotation.x = Math.PI / 2; bob.position.y = -1.05;
+      pend.add(rod, weight, bob);
+      pend.position.set(0, 0.2, 0.5);
+      addA(pend, new THREE.Vector3(0, 1.1, 3.4));
+
+      // Bell
+      const bell = edges(new THREE.SphereGeometry(0.75, 20, 10, 0, Math.PI * 2, 0, Math.PI * 0.55), DIM, 16, 0.75);
+      bell.position.set(0, 2.6, -0.4);
+      addA(bell, new THREE.Vector3(0, 1.6, -2.2));
+
+      /* ── 2. Escapement ─────────────────────────────────────────────── */
+      const B = makeStage(document.getElementById("s2"));
+      B.camera.position.set(0.5, 1.1, 9.4);
+      B.camera.lookAt(0, 0.65, 0);
+      const escWheel2 = edges(gearGeo(24, 1.5, 0.34, 0.16), AMBER, 24);
+      const arbor = edges(new THREE.CylinderGeometry(0.09, 0.09, 0.9, 12), DIM, 14, 0.7);
+      arbor.rotation.x = Math.PI / 2;
+      const anchor2 = new THREE.Group();
+      anchor2.add(edges(new THREE.BoxGeometry(2.9, 0.17, 0.16), AMBER, 20));
+      const p2L = edges(new THREE.BoxGeometry(0.2, 0.62, 0.16), AMBER, 20); p2L.position.set(-1.32, -0.34, 0);
+      const p2R = edges(new THREE.BoxGeometry(0.2, 0.62, 0.16), AMBER, 20); p2R.position.set(1.32, -0.34, 0);
+      const stem = edges(new THREE.BoxGeometry(0.1, 1.5, 0.1), DIM, 20, 0.7); stem.position.y = 0.8;
+      anchor2.add(p2L, p2R, stem);
+      anchor2.position.y = 1.95;
+      B.root.add(escWheel2, arbor, anchor2);
+
+      /* ── 3. Practice rig ───────────────────────────────────────────── */
+      const C = makeStage(document.getElementById("s3"));
+      C.camera.position.set(6.5, 5.2, 9);
+      C.camera.lookAt(0, -0.4, 0);
+      const partsC = [];
+      function addC(obj, offset) { partsC.push({ obj, base: obj.position.clone(), offset }); C.root.add(obj); }
+
+      // Laptop: base + screen
+      const lap = new THREE.Group();
+      const base = edges(new THREE.BoxGeometry(5.2, 0.22, 3.4), AMBER, 20);
+      const keys = new THREE.Group();
+      for (let r = 0; r < 4; r++)
+        for (let c = 0; c < 12; c++) {
+          const k = edges(new THREE.BoxGeometry(0.3, 0.05, 0.24), DIM, 20, 0.5);
+          k.position.set(-1.9 + c * 0.35, 0.14, -0.75 + r * 0.34);
+          keys.add(k);
+        }
+      lap.add(base, keys);
+      const screen = edges(new THREE.BoxGeometry(5.2, 3.2, 0.16), AMBER, 20);
+      screen.position.set(0, 1.62, -1.62);
+      screen.rotation.x = -0.22;
+      lap.add(screen);
+      addC(lap, new THREE.Vector3(0, 0, -1.6));
+
+      // The floating widget, hovering off the screen
+      const widget = new THREE.Group();
+      widget.add(edges(new THREE.BoxGeometry(2.5, 0.7, 0.1), AMBER, 20));
+      for (let i = 0; i < 6; i++) {
+        const d = edges(new THREE.CylinderGeometry(0.07, 0.07, 0.06, 10), DIM, 14, 0.8);
+        d.rotation.x = Math.PI / 2; d.position.set(-0.7 + i * 0.28, -0.16, 0.07);
+        widget.add(d);
+      }
+      widget.position.set(1.1, 2.5, -0.4);
+      addC(widget, new THREE.Vector3(1.6, 1.5, 1.4));
+
+      // Footswitch
+      const foot = new THREE.Group();
+      foot.add(edges(new THREE.BoxGeometry(2.4, 0.5, 1.7), AMBER, 20));
+      for (let i = 0; i < 2; i++) {
+        const pad = edges(new THREE.CylinderGeometry(0.4, 0.4, 0.22, 18), AMBER, 14);
+        pad.position.set(-0.55 + i * 1.1, 0.3, 0);
+        foot.add(pad);
+      }
+      foot.position.set(-3.4, -1.5, 2.2);
+      addC(foot, new THREE.Vector3(-2.2, -0.8, 1.6));
+
+      // MIDI pedal
+      const pedal = new THREE.Group();
+      pedal.add(edges(new THREE.BoxGeometry(1.5, 0.4, 2.6), AMBER, 20));
+      const treadle = edges(new THREE.BoxGeometry(1.3, 0.16, 2.2), DIM, 20, 0.75);
+      treadle.position.y = 0.34; treadle.rotation.x = 0.16;
+      pedal.add(treadle);
+      pedal.position.set(3.3, -1.5, 2.4);
+      addC(pedal, new THREE.Vector3(2.4, -0.8, 1.8));
+
+      /* ── 1b. The coach variant ─────────────────────────────────────── */
+      const D = makeStage(document.getElementById("s4"));
+      D.camera.position.set(9.5, 3.4, 12.5);
+      D.camera.lookAt(0, 0.2, 0);
+      const partsD = [];
+      function addD(obj, offset) { partsD.push({ obj, base: obj.position.clone(), offset }); D.root.add(obj); }
+
+      const caseD = edges(new THREE.CylinderGeometry(1.15, 2.3, 5.4, 4, 1, true), AMBER, 20);
+      caseD.rotation.y = Math.PI / 4;
+      addD(caseD, new THREE.Vector3(0, 0, -2.6));
+
+      const movD = new THREE.Group();
+      movD.add(edges(new THREE.BoxGeometry(2.1, 2.6, 0.1), DIM, 20, 0.6));
+      const dg1 = edges(gearGeo(26, 0.72, 0.11, 0.12), AMBER, 24);
+      dg1.position.set(-0.42, 0.42, 0.12);
+      const dg2 = edges(gearGeo(18, 0.5, 0.1, 0.12), AMBER, 24);
+      dg2.position.set(0.55, -0.1, 0.12);
+      movD.add(dg1, dg2);
+      movD.position.set(0, -0.2, 0.2);
+      addD(movD, new THREE.Vector3(0, 0, 0.5));
+      const trainD = [dg1, dg2];
+
+      // The beat: the true rod.
+      const rodTrue = new THREE.Group();
+      const rt = edges(new THREE.BoxGeometry(0.1, 5.2, 0.1), AMBER, 20);
+      rt.position.y = 1.3;
+      const wt = edges(new THREE.BoxGeometry(0.72, 0.34, 0.26), AMBER, 20);
+      wt.position.y = 2.1;
+      rodTrue.add(rt, wt);
+      rodTrue.position.set(0, 0.2, 0.5);
+      addD(rodTrue, new THREE.Vector3(0, 0.6, 2.6));
+
+      /* The player: the same rod, dashed, lagging. The gap between the two
+         IS the drag — which is the whole claim of the section, drawn. */
+      const rodGhost = new THREE.Group();
+      function dashed(geo, colour, opacity) {
+        const e = new THREE.EdgesGeometry(geo, 20);
+        const m = new THREE.LineDashedMaterial({
+          color: colour, transparent: true, opacity, dashSize: 0.16, gapSize: 0.12,
+        });
+        const l = new THREE.LineSegments(e, m);
+        l.computeLineDistances();
+        return l;
+      }
+      const rg = dashed(new THREE.BoxGeometry(0.1, 5.2, 0.1), 0xff6ba6, 0.95);
+      rg.position.y = 1.3;
+      const wg = dashed(new THREE.BoxGeometry(0.72, 0.34, 0.26), 0xff6ba6, 0.95);
+      wg.position.y = 2.1;
+      rodGhost.add(rg, wg);
+      rodGhost.position.copy(rodTrue.position);
+      addD(rodGhost, new THREE.Vector3(0, 0.6, 2.6));
+
+      // A graduated arc under the swing, so the gap can be read off it.
+      const arcGroup = new THREE.Group();
+      const ARC_R = 4.2, ARC_SPAN = 0.5;
+      const arcPts = [];
+      for (let i = 0; i <= 48; i++) {
+        const a = -Math.PI / 2 + (-ARC_SPAN + (i / 48) * ARC_SPAN * 2);
+        arcPts.push(new THREE.Vector3(Math.cos(a) * ARC_R, Math.sin(a) * ARC_R + 3.6, 0));
+      }
+      arcGroup.add(new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(arcPts),
+        new THREE.LineBasicMaterial({ color: DIM, transparent: true, opacity: 0.65 })));
+      for (let i = -6; i <= 6; i++) {
+        const a = -Math.PI / 2 + (i / 6) * ARC_SPAN;
+        const major = i % 3 === 0;
+        const r0 = ARC_R - (major ? 0.34 : 0.18), r1 = ARC_R;
+        const g = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(Math.cos(a) * r0, Math.sin(a) * r0 + 3.6, 0),
+          new THREE.Vector3(Math.cos(a) * r1, Math.sin(a) * r1 + 3.6, 0),
+        ]);
+        arcGroup.add(new THREE.Line(g, new THREE.LineBasicMaterial({
+          color: major ? AMBER : DIM, transparent: true, opacity: major ? 0.9 : 0.5 })));
+      }
+      arcGroup.position.set(0, 0.2, 0.5);
+      addD(arcGroup, new THREE.Vector3(0, 0.6, 2.6));
+
+      // The callout: a leader line from the gap out to the readout.
+      const leaderGeo = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 0),
+      ]);
+      const leader = new THREE.Line(leaderGeo, new THREE.LineBasicMaterial({
+        color: 0xff6ba6, transparent: true, opacity: 0.8 }));
+      D.root.add(leader);
+
+      let dDrift = 0.075;
+      const roNum = document.getElementById("roNum");
+      const roLab = document.getElementById("roLab");
+
+      /* ── Loop ──────────────────────────────────────────────────────── */
+      let spin = 0, prev = performance.now(), beatAcc = 0, beat = 0;
+
+      function place(list, k) {
+        for (const p of list) {
+          p.obj.position.copy(p.base).addScaledVector(p.offset, k);
+        }
+      }
+
+      function tick(now) {
+        const dt = now - prev; prev = now;
+        if (spinning) spin += dt * 0.00016;
+        beatAcc += dt;
+        while (beatAcc >= beatMs()) { beatAcc -= beatMs(); beat++; }
+        const phase = beatAcc / beatMs();
+
+        // 1 — explode, spin, swing the rod
+        place(partsA, explode);
+        A.root.rotation.y = spin;
+        A.root.rotation.x = Math.sin(spin * 0.7) * 0.09;
+        pend.rotation.z = Math.sin((beat + phase) * Math.PI) * 0.16;
+        for (let i = 0; i < trainA.length; i++)
+          trainA[i].rotation.z = (i % 2 ? -1 : 1) * (beat + phase) * 0.5 / (i + 1);
+        A.renderer.render(A.scene, A.camera);
+
+        // 2 — the wheel steps one tooth per beat, the anchor rocks
+        const eased = phase < 0.35 ? phase / 0.35 : 1;
+        escWheel2.rotation.z = -((beat + eased) * (Math.PI * 2)) / 24;
+        anchor2.rotation.z = Math.sin((beat + phase) * Math.PI) * 0.17;
+        B.root.rotation.y = Math.sin(spin * 0.9) * 0.35;
+        B.renderer.render(B.scene, B.camera);
+
+        // 1b — the beat rod and the player's rod, and the gap between
+        dDrift += (Math.random() - 0.5) * 0.018;
+        dDrift = Math.max(-0.2, Math.min(0.2, dDrift * 0.9988));
+        place(partsD, explode);
+        D.root.rotation.y = Math.sin(spin * 0.5) * 0.28;
+        const swing = Math.sin((beat + phase) * Math.PI) * 0.42;
+        const swingLate = Math.sin((beat + phase - dDrift) * Math.PI) * 0.42;
+        rodTrue.rotation.z = swing;
+        rodGhost.rotation.z = swingLate;
+
+        const ms = Math.round(dDrift * beatMs());
+        roNum.textContent = (ms >= 0 ? "+" : "") + ms + " ms";
+        roLab.textContent = ms > 12 ? "DRAGGING" : ms < -12 ? "RUSHING" : "IN THE POCKET";
+        roNum.style.color = Math.abs(ms) > 12 ? "#ff6ba6" : "#f5a30b";
+
+        // Leader line from the two bob positions out to the annotation
+        const bobY = 0.2 + Math.cos(swing) * 4.0, bobY2 = 0.2 + Math.cos(swingLate) * 4.0;
+        const px1 = Math.sin(swing) * 4.0, px2 = Math.sin(swingLate) * 4.0;
+        leaderGeo.setFromPoints([
+          new THREE.Vector3(px1, bobY, 0.5),
+          new THREE.Vector3(px2, bobY2, 0.5),
+          new THREE.Vector3(px2 + 1.6, bobY2 + 1.1, 0.5),
+        ]);
+        leaderGeo.attributes.position.needsUpdate = true;
+        D.renderer.render(D.scene, D.camera);
+
+        // 3 — explode and turn
+        place(partsC, explode);
+        C.root.rotation.y = spin * 0.8;
+        C.root.rotation.x = Math.sin(spin * 0.6) * 0.06;
+        C.renderer.render(C.scene, C.camera);
+
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    </script>
+  </body>
+</html>

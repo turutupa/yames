@@ -83,20 +83,44 @@ far too much to show for one screen and nothing gets room to land.
 No download counts, star counts, testimonials or awards until they're real. Trust is carried by
 factual claims only: free, open source, works offline, nothing leaves your computer.
 
-### Open · B2 (warm/amber) vs B3 (spotlight hero) vs the current B
+### Decided — 2026-09-04 · B3 (spotlight hero) rejected, the fan stays
 
-Two single-variable variants are on the canvas:
+The tilted fan is the hero. B3 traded it for a single large app window; the owner wants the fan.
 
-- **B2 · Warm** — same layout, brand amber leading instead of cyan. Amber is warmer and more
-  "instrument"; cyan is colder and more "software".
-- **B3 · Spotlight** — same colour, one big app window instead of the fan, theme picker directly
-  underneath. Trades "variety at a glance" for "the product itself, and a switch you can touch
-  above the fold".
+### Decided — 2026-09-04 · The site lands on Obsidian (warm/amber)
 
-### Open · How the theme picker behaves
+Settled by the favicon. The mark is the one asset that cannot follow the theme picker — it is
+fixed across the tab, the dock and every store listing — so it carries the brand, and the brand is
+amber. Landing the page on Aurora would mean the tab icon and the page disagree at the moment of
+arrival, which is the most visible inconsistency available.
 
-The row under the hero is meant to recolour the page. Click or hover? Does it also swap the hero
-screenshot? Does the choice persist across page loads?
+It stays a one-word change: `LANDING_THEME` in `docs/site.js`, plus the `:root` token block in
+`docs/style.css` (which holds Obsidian so the page is still right if the pre-paint script never
+runs), the `data-theme` on `<html>`, the pre-paint fallback, and the LCP image preload.
+`?theme=<id>` still overrides for testing, and a visitor's own pick still wins on their next visit.
+
+### Decided — 2026-09-04 · The mark
+
+A Y knocked through a filled amber tile. Chosen over a metronome-silhouette mark, which is more
+ownable but turns to mush at 32px — and a favicon is seen at 16-32px essentially always. A filled
+colour block also stands out in a tab strip where nearly every other icon is a dark tile.
+
+`docs/favicon.svg` is the source of truth; `scripts/make-icons.py` renders the PNG sizes from the
+same geometry. There is no SVG rasteriser on this machine, so those numbers are duplicated —
+change both together.
+
+### Decided — 2026-09-04 · How the theme picker behaves
+
+Click, not hover — hover fires by accident and the whole page recolouring by accident is
+unpleasant. Choosing a theme:
+
+1. rolls the fan so that theme's card lands centre-stage (the "slot machine"),
+2. crossfades every page token to that theme's palette,
+3. recolours the live Zen canvas,
+4. persists to `localStorage`.
+
+Arrow keys move through the picker, which is marked up as a radiogroup. The selected swatch has a
+dot under it as well as a glow, so the selection is not carried by colour alone.
 
 ---
 
@@ -113,14 +137,15 @@ Four alternates with their bets and risks are on the canvas.
 "Stop skipping the metronome." stays as the closing call to action, where a challenge works
 better than it does on arrival.
 
-### Open · Currency in the `0 €` tile
+### Decided — 2026-09-04 · Currency in the price tile is localised
 
-Owner wants it localised. Approach: a small locale→symbol map read from the browser
-(`navigator.language`), defaulting to `$` — no server, no geo-IP service, ~10 lines. Worst case it
-guesses wrong and still reads as *zero money*.
+`CURRENCY_BY_REGION` in `docs/site.js` maps the region from `navigator.language` to a symbol,
+defaulting to `$`. Symbol leads for $/£/¥/₹ and trails for the rest, which is how those currencies
+are actually written. No server, no geo-IP service. Zero is zero in every currency, so a wrong
+guess still reads as *no money*.
 
-Decide: which symbols to cover, and whether the tile should instead just say **Free** (translates
-everywhere, loses the numeric rhythm of `< 1 ms` / `0 €` / `Offline`).
+Still worth revisiting if it ever looks odd in the wild: the tile could just say **Free**, which
+translates everywhere but loses the numeric rhythm of `< 1 ms` / `0 €` / `Offline`.
 
 ---
 
@@ -128,12 +153,23 @@ everywhere, loses the numeric rhythm of `< 1 ms` / `0 €` / `Offline`).
 
 Parked so they aren't forgotten:
 
-- Responsive / phone layout — the mockups are desktop at 1440. B's tilted fan and 3-up tile grid
-  both need a deliberate phone answer.
+- Motion is implemented and all of it sits behind `prefers-reduced-motion: reduce`: staggered
+  entrance on load, scroll-triggered reveals, parallax on the hero glows and the fan, the eyebrow
+  dot pulsing at 120 BPM, and the Zen canvas (which also stops when off-screen or when the tab is
+  hidden, so it costs nothing in the background).
+- Responsive / phone layout — the fan and the tile grid now collapse sensibly and there is no
+  horizontal overflow at 375px, but the phone layout deserves a proper look on a real device.
 - Light-mode site — the app ships five light themes; the site is dark only.
-- Open Graph image and favicon — `docs/og-image.png` is from the old design.
+- Open Graph image — redrawn 2026-09-04, set in the site's own faces, regenerable with
+  `scripts/make-og-image.py`. It still shows the Aurora palette while the site now lands on
+  Obsidian; worth deciding whether the card should be warm too.
+- `src-tauri/icons/` still holds the old desktop app icon, so the website and the app now
+  disagree. The app icons should be regenerated from the new mark.
 - Accessibility — the gradient-clipped headline text still needs a contrast check, and the
   selected theme swatch needs a non-colour cue (it is currently glow-only). Small-label contrast
   was fixed in the mockups on 2026-09-04: `#6f6890` on `#0a0020` was ~3.9:1, now `#9089ad` (~6:1).
   Carry the corrected value into the build; do not reintroduce `#6f6890` for text.
-- Changelog modal — kept from the current site, not yet designed into direction B.
+- Changelog — rebuilt against the new markup and reachable from the version badge in the footer.
+  The old release *timeline* rail was dropped; add it back only if it is missed.
+- The seven Zen visuals were rewritten for a single full-bleed canvas. The old page drew them
+  across two canvases with an "amplify" pass that no longer has anything to amplify.
