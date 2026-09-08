@@ -123,6 +123,53 @@ describe("DrillView", () => {
     ).not.toBeNull();
   });
 
+  it("keeps the readout one shape, so nothing after it moves", () => {
+    // The row re-flowed on every state change — a dash, then "STARTING IN 2"
+    // with the label FIRST, then "80" — and the dots and the step position
+    // slid back and forth under it.
+    //
+    // jsdom has no layout, so the pixel positions were verified in a browser
+    // (all four states put the dots at the same x, including the widest
+    // possible "300 BPM"). What is asserted here is the structure that makes
+    // that true: one `.drill-readout` with the number first and the label
+    // second, in every state, so the two fixed-width slots in the stylesheet
+    // always apply to the same elements.
+    const shape = (c: HTMLElement) => {
+      const readout = c.querySelector(".drill-readout");
+      return [...(readout?.children ?? [])].map((el) => el.className.split(" ")[0]);
+    };
+
+    const rest = render(
+      <DrillView state={drillState} currentBeat={null} animations={false} />,
+    );
+    expect(shape(rest.container)).toEqual(["drill-current-bpm", "drill-current-label"]);
+    rest.unmount();
+
+    const counting = render(
+      <DrillView
+        state={{
+          ...drillState,
+          countIn: { beats: 4, done: 2 },
+          speedRamp: { ...drillState.speedRamp, active: true },
+        }}
+        currentBeat={null}
+        animations={false}
+      />,
+    );
+    // Same two children in the same order — the count-in no longer leads with
+    // its label.
+    expect(shape(counting.container)).toEqual([
+      "drill-current-bpm",
+      "drill-current-label",
+    ]);
+    expect(
+      counting.container.querySelector(".drill-current-bpm")?.textContent,
+    ).toBe("2");
+    expect(
+      counting.container.querySelector(".drill-current-label")?.textContent,
+    ).toBe("Starting in");
+  });
+
   it("never takes the beat dots away — not at rest, not through the count-in", () => {
     // "The dots should NEVER disappear." They used to go twice over: with the
     // whole row while the drill was stopped, and again behind an inline

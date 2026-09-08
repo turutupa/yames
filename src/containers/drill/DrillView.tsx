@@ -612,19 +612,23 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
           the count-in case, so when the row was hidden they were the one thing
           that stayed on screen. */}
       <div className="drill-live" data-testid="drill-live">
-        {isWarmingUp ? (
-          <>
-            <span className="drill-warmup-label">{t("drill.startingIn")}</span>
-            <span className="drill-current-bpm drill-warmup-number">{warmupRemaining}</span>
-          </>
-        ) : (
-          <>
-            <span className="drill-current-bpm" data-idle={showLive ? undefined : ""}>
-              {showLive ? ramp.currentBpm : "—"}
-            </span>
-            <span className="drill-current-label">{t("drill.bpmUnit")}</span>
-          </>
-        )}
+        {/* One shape in all three states: a big number, then a small label
+            naming it. The count-in used to put its label FIRST and its number
+            second, so the row re-flowed every time the state changed — dash,
+            then "STARTING IN 2", then "80" — and the dots and the step
+            position slid back and forth under it. Both parts are fixed-width
+            slots in the stylesheet, so what follows them never moves. */}
+        <span className="drill-readout">
+          <span
+            className={`drill-current-bpm${isWarmingUp ? " drill-warmup-number" : ""}`}
+            data-idle={showLive || isWarmingUp ? undefined : ""}
+          >
+            {isWarmingUp ? warmupRemaining : showLive ? ramp.currentBpm : "—"}
+          </span>
+          <span className="drill-current-label">
+            {isWarmingUp ? t("drill.startingIn") : t("drill.bpmUnit")}
+          </span>
+        </span>
         <div className="drill-beat-dots">
           {Array.from({ length: beatsPerBar }, (_, beatIdx) => {
             const isBeatActive = ramp.active && !isWarmingUp && activeBeat === beatIdx && isDownbeat;

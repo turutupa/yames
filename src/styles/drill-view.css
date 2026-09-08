@@ -48,6 +48,33 @@
   letter-spacing: 0.1em;
 }
 
+/* The readout is two fixed slots so nothing after it moves.
+
+   The number is sized for three digits and set in tabular figures, so 2, 80
+   and 120 all occupy the same box; the label is sized for the longest word it
+   carries. Without this the row re-flowed on every state change and the beat
+   dots walked left and right under it — which is what the owner saw as
+   "elements move back and forth too much".
+
+   `min-width` rather than `width`, so a locale whose count-in phrase is longer
+   than the space simply grows the slot instead of clipping the word. */
+.drill-readout {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.drill-readout .drill-current-bpm {
+  min-width: 3.1ch;
+  text-align: left;
+}
+
+.drill-readout .drill-current-label {
+  min-width: 6.5rem;
+  white-space: nowrap;
+}
+
 .drill-warmup-label {
   font-size: 0.7rem;
   color: var(--text-muted);
