@@ -7,85 +7,68 @@ import { PresetSaveBar } from "../../components/presets/PresetSaveBar";
 import { ChainSaveBar } from "../../components/chain/ChainSaveBar";
 import { IS_MAC } from "../../hotkeys";
 
-/** Custom vertical fader — replaces <input type="range"> to avoid WebKit
- *  performance issues with writing-mode on range inputs. Uses pointer capture
- *  for reliable drag tracking even when cursor leaves the element. */
-function VolumeFader({
+/**
+ * A volume, as one of the context bar's chips: label, then a bar you drag.
+ *
+ * This replaces a hover popover holding two tall faders. The owner's
+ * objection was the obvious one — the chip already DREW a level bar, so it
+ * showed you the value and made you hover to change it, which is the worst of
+ * both. Now the bar is the control.
+ *
+ * `input[type=range]`, deliberately, where the popover's faders were hand-made
+ * divs. The note they carried said range inputs were avoided for "WebKit
+ * performance issues with writing-mode" — that is a VERTICAL range problem,
+ * and these are horizontal, so it does not apply. What the real input buys is
+ * everything the hand-made one had to leave out: arrow keys, Home/End,
+ * `aria-valuenow`, and a disabled state the platform understands. `isTypingTarget`
+ * already classes a range as non-typing, so hotkeys keep working while one has
+ * focus (that was a real bug once, with the tempo ruler).
+ */
+function VolumeChip({
+  icon,
   label,
+  name,
   value,
   onChange,
-  disabled,
+  disabled = false,
+  disabledHint,
 }: {
+  icon: React.ReactNode;
+  /** The short word on the chip — shed first when the window narrows. */
   label: string;
+  /** The full name, for assistive tech and the tooltip. */
+  name: string;
   value: number; // 0–100
+  /** Receives 0–1, matching `setVolume` and `setTtsVolume`. */
   onChange: (v: number) => void;
   disabled?: boolean;
+  /** Why it is disabled. Shown instead of the reading. */
+  disabledHint?: string;
 }) {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const fillRef = useRef<HTMLDivElement>(null);
-  const valueRef = useRef<HTMLSpanElement>(null);
-  const dragging = useRef(false);
-  const cachedRect = useRef<DOMRect | null>(null);
-  const pendingY = useRef<number | null>(null);
-  const rafId = useRef<number>(0);
-
-  useEffect(() => {
-    if (fillRef.current) fillRef.current.style.height = `${value}%`;
-    if (valueRef.current) valueRef.current.textContent = String(value);
-  }, [value]);
-
-  function calcValue(clientY: number): number {
-    const rect = cachedRect.current!;
-    const ratio = 1 - Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
-    return Math.round(ratio * 100);
-  }
-
-  function updateDisplay(v: number) {
-    if (fillRef.current) fillRef.current.style.height = `${v}%`;
-    if (valueRef.current) valueRef.current.textContent = String(v);
-  }
-
   return (
-    <div className={`volume-fader${disabled ? " volume-fader-disabled" : ""}`}>
-      <span ref={valueRef} className="volume-fader-value">{value}</span>
-      <div
-        ref={trackRef}
-        className="volume-fader-track"
-        style={{ cursor: disabled ? "not-allowed" : "grab", touchAction: "none" }}
-        onPointerDown={(e) => {
-          if (disabled) return;
-          e.preventDefault();
-          dragging.current = true;
-          cachedRect.current = trackRef.current!.getBoundingClientRect();
-          (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
-          e.currentTarget.style.cursor = "grabbing";
-          updateDisplay(calcValue(e.clientY));
-        }}
-        onPointerMove={(e) => {
-          if (!dragging.current) return;
-          // Coalesce rapid pointer events — only repaint once per animation frame
-          pendingY.current = e.clientY;
-          if (!rafId.current) {
-            rafId.current = requestAnimationFrame(() => {
-              rafId.current = 0;
-              if (pendingY.current !== null) updateDisplay(calcValue(pendingY.current));
-            });
-          }
-        }}
-        onPointerUp={(e) => {
-          if (!dragging.current) return;
-          dragging.current = false;
-          cancelAnimationFrame(rafId.current);
-          rafId.current = 0;
-          e.currentTarget.style.cursor = "grab";
-          const v = calcValue(e.clientY);
-          updateDisplay(v);
-          onChange(v / 100);
-        }}
-      >
-        <div ref={fillRef} className="volume-fader-fill" style={{ height: `${value}%` }} />
-      </div>
-      <span className="volume-fader-label">{label}</span>
+    <div
+      className={`context-chip context-chip-volume${disabled ? " context-chip-volume-off" : ""}`}
+      // The reading lives in the tooltip because the bar has no room for a
+      // number, and a bar with no number is unreadable at a glance below
+      // about a quarter full.
+      data-tooltip={disabled ? disabledHint : `${name} · ${value}%`}
+    >
+      {icon}
+      <span className="context-chip-label">{label}</span>
+      <input
+        type="range"
+        className="context-chip-range"
+        min={0}
+        max={100}
+        step={1}
+        value={value}
+        disabled={disabled}
+        aria-label={name}
+        onChange={(e) => onChange(Number(e.currentTarget.value) / 100)}
+        // Drives the track's fill, so the painted level and the value can
+        // never disagree.
+        style={{ "--level": `${value}%` } as React.CSSProperties}
+      />
     </div>
   );
 }
@@ -129,6 +112,30 @@ function MicIcon() {
       <rect x="9" y="3" width="6" height="11" rx="3" />
       <path d="M5.5 12a6.5 6.5 0 0 0 13 0" />
       <line x1="12" y1="18.5" x2="12" y2="21" />
+    </svg>
+  );
+}
+
+/* Speech, not a microphone: the input chip two along already uses a mic, and
+   two mics in one row would read as two halves of the same setting. */
+function VoiceIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M4 9v6" />
+      <path d="M8 5v14" />
+      <path d="M12 8v8" />
+      <path d="M16 4v16" />
+      <path d="M20 10v4" />
     </svg>
   );
 }
@@ -374,45 +381,28 @@ export function MainHeader({
           )}
         </div>
 
-        <div className="header-volume-wrap">
-          {/* The chip is the popover's handle, not a control of its own: the
-              two faders inside it are what change anything. It stays a button
-              so it is reachable from the keyboard, which opens the popover
-              through :focus-within. */}
-          <button
-            className="context-chip context-chip-volume"
-            aria-label={t("volume.metronome")}
-          >
-            <span className="context-chip-label">{t("volume.short")}</span>
-            <span className="context-chip-level" aria-hidden="true">
-              <span
-                className="context-chip-level-fill"
-                style={{ width: `${volumePercent}%` }}
-              />
-            </span>
-          </button>
-          <div className="header-volume-popover">
-            <VolumeFader
-              label={t("volume.metronome")}
-              value={volumePercent}
-              onChange={(v) => setVolume(v)}
-            />
-            <div
-              data-tooltip={
-                voiceEnabled
-                  ? undefined
-                  : t("tooltip.enableVoice")
-              }
-            >
-              <VolumeFader
-                label={t("volume.voice")}
-                value={ttsVolumePercent}
-                onChange={(v) => setTtsVolume(v)}
-                disabled={!voiceEnabled}
-              />
-            </div>
-          </div>
-        </div>
+        {/* Both volumes, on the bar. They were one chip and a hover popover;
+            the owner's case for bringing the voice out was that dropping into
+            Settings to balance the coach against the click is a trip you make
+            mid-practice. The voice chip is always rendered so the feature is
+            discoverable, and disabled with a reason until brain and voice are
+            ready — the same rule the popover's fader followed. */}
+        <VolumeChip
+          icon={<SpeakerIcon />}
+          label={t("volume.short")}
+          name={t("volume.metronome")}
+          value={volumePercent}
+          onChange={setVolume}
+        />
+        <VolumeChip
+          icon={<VoiceIcon />}
+          label={t("volume.voice")}
+          name={t("volume.voice")}
+          value={ttsVolumePercent}
+          onChange={setTtsVolume}
+          disabled={!voiceEnabled}
+          disabledHint={t("tooltip.enableVoice")}
+        />
 
         {/* A readout, not a switch — nothing in the bar turns the input on,
             so the chip does not pretend to. */}

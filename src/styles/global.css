@@ -117,7 +117,6 @@ kbd {
 [data-theme-group="light"] .bpm-slider::-webkit-slider-runnable-track { background: rgba(0,0,0,0.08); }
 
 /* Light theme: popovers, tooltips, tips */
-[data-theme-group="light"] .header-volume-popover { background: var(--bg-secondary); border-color: var(--border); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
 [data-theme-group="light"] .hotkey-action[data-tooltip]::after { background: var(--bg-secondary); border-color: var(--border); color: var(--text-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 [data-theme-group="light"] .drill-tip { background: var(--bg-secondary); border-color: var(--border); color: var(--text-secondary); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 [data-theme-group="light"] .track-stat-popover { background: var(--bg-secondary); border-color: var(--border); color: var(--text-secondary); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }

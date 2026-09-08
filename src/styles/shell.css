@@ -221,22 +221,6 @@ button.context-chip:hover,
 
 /* The volume chip carries its own readout: how loud the metronome is, drawn
    rather than written, so the answer survives the label being shed. */
-.context-chip-level {
-  display: block;
-  width: 54px;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--bg-raised);
-  overflow: hidden;
-}
-
-.context-chip-level-fill {
-  display: block;
-  height: 100%;
-  background: var(--accent);
-  transition: width 0.12s ease-out;
-}
-
 .context-chip[data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
@@ -263,10 +247,6 @@ button.context-chip:hover,
   transform: translateY(0);
 }
 
-.header-volume-wrap {
-  position: relative;
-}
-
 .header-sound-wrap {
   position: relative;
 }
@@ -289,218 +269,104 @@ button.context-chip:hover,
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
-/* Share and help live behind the "…" now. They are the two things in the bar
-   you reach for least, and hiding them is what bought the other three room
-   for their labels. */
 .header-more-menu {
   min-width: 150px;
 }
 
-/* ─── Header volume popover: iOS-style chunky pill faders ────────────────
- *
- * Two side-by-side vertical faders (Metronome, Voice). Built around a
- * native <input type="range"> with `writing-mode: vertical-lr; direction:
- * rtl;` so 0 sits at the bottom and 100 at the top.
- *
- * Visually: each fader is a wide rounded pill column. The track is the
- * empty/dim container; the fill is the accent-colored portion that
- * rises with the value. The fill itself IS the draggable surface — the
- * native thumb is transparent and the entire pill is the click/drag
- * target, so the user grabs the chunky bar directly (iOS-volume feel).
- *
- * `overflow: hidden` on the track clips the fill to the pill shape;
- * hover/active glow lives on the track so it escapes the clip.
- */
-.header-volume-popover {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%) translateY(-4px);
-  padding: 16px 20px 14px;
-  border-radius: 12px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  z-index: 100;
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity 0.15s,
-    visibility 0.15s,
-    transform 0.15s;
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  gap: 18px;
-}
+/* The two volumes sit side by side in the chip row. The chip that used to be
+   here was a button that opened a popover holding two tall faders — it DREW a
+   level bar and would not let you drag it, which is the worst of both. The bar
+   is the control now, and the voice is out of the popover and onto the bar
+   beside it, because balancing the coach against the click is something you do
+   mid-practice and not from a settings page.
 
-/* Hover opens it; focus-within opens it too, so the faders are reachable
-   without a pointer — the chip is a button for exactly that reason. */
-.header-volume-wrap:hover .header-volume-popover,
-.header-volume-wrap:focus-within .header-volume-popover {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(-50%) translateY(0);
-}
-
-/* Fixed column width so both faders are symmetric inside the popover.
- * Without this, each column would size to its widest child (the label),
- * making the wider "METRONOME" column push the slider track off-center
- * relative to the popover's midpoint. */
-.header-volume-popover .volume-fader {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  width: 72px;
-}
-
-.header-volume-popover .volume-fader-value {
-  font-size: 12px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-  color: var(--text-primary, rgba(255, 255, 255, 0.92));
-  min-width: 28px;
-  text-align: center;
-  user-select: none;
-}
-
-.header-volume-popover .volume-fader-label {
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-secondary, rgba(255, 255, 255, 0.6));
-  user-select: none;
-}
-
-/* Keep the fader visible (discoverability) but dim it and italicize the
- * label so it reads as "available but gated". Pointer events still flow
- * so the parent tooltip explains why. */
-.header-volume-popover .volume-fader-disabled {
-  opacity: 0.4;
-}
-
-.header-volume-popover .volume-fader-disabled .volume-fader-label {
-  font-style: italic;
-}
-
-/* Track = the rounded pill container. Fill rises inside it; clip it so
- * the fill's top edge follows the pill curve cleanly at any value. */
-.header-volume-popover .volume-fader-track {
-  position: relative;
-  width: 32px;
-  height: 144px;
-  background: rgba(255, 255, 255, 0.07);
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow:
-    inset 0 1px 1px rgba(0, 0, 0, 0.25),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
-}
-
-.header-volume-popover .volume-fader-fill {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(
-    to top,
-    var(--accent) 0%,
-    color-mix(in srgb, var(--accent) 86%, white 14%) 100%
-  );
-  /* Subtle top highlight so the fill's top edge reads as the "grab" line. */
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.12);
-  pointer-events: none;
-  transition: height 0.06s ease-out;
-}
-
-.header-volume-popover .volume-fader-disabled .volume-fader-fill {
-  background: rgba(255, 255, 255, 0.18);
-  box-shadow: none;
-}
-
-/* Native input layered over the entire track — invisible. The colored
- * fill behind it is what the user sees and "grabs"; the input just
- * captures pointer + keyboard input. */
-.header-volume-popover .volume-slider {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+   The range is styled to look like the readout it replaced: a 3px track with
+   an accent fill, and a thumb that only appears when the chip is hovered or
+   the control has focus, so the row stays as quiet as it was. */
+.context-chip-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 54px;
+  /* The bar reads as 3px; the input is taller so there is something to hit. */
+  height: 12px;
   margin: 0;
   padding: 0;
   background: transparent;
-  -webkit-appearance: none;
-  appearance: none;
-  writing-mode: vertical-lr;
-  direction: rtl;
-  outline: none;
-  border: none;
   cursor: pointer;
 }
 
-.header-volume-popover .volume-slider:disabled {
+.context-chip-range:disabled {
   cursor: not-allowed;
 }
 
-.header-volume-popover .volume-slider::-webkit-slider-runnable-track {
-  background: transparent;
-  border: none;
-  width: 100%;
-  height: 100%;
+/* Both targets are WebKit-derived — WebView2 on Windows is Chromium, macOS is
+   WKWebView — so the -webkit- pseudo-elements are the ones that matter. The
+   -moz- pair is here for the browser preview only. */
+.context-chip-range::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--accent) var(--level, 0%),
+    var(--bg-raised) var(--level, 0%)
+  );
 }
 
-.header-volume-popover .volume-slider::-moz-range-track {
-  background: transparent;
-  border: none;
-  width: 100%;
-  height: 100%;
+.context-chip-range::-moz-range-track {
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--accent) var(--level, 0%),
+    var(--bg-raised) var(--level, 0%)
+  );
 }
 
-/* The thumb is transparent — the colored fill behind the input is the
- * visible "handle". The thumb is still sized full-width so the hit area
- * matches the entire pill column. */
-.header-volume-popover .volume-slider::-webkit-slider-thumb {
+.context-chip-range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 32px;
-  height: 4px;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
+  width: 9px;
+  height: 9px;
+  margin-top: -3px;
   border: none;
-  cursor: grab;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.15s ease;
 }
 
-.header-volume-popover .volume-slider:active::-webkit-slider-thumb {
-  cursor: grabbing;
-}
-
-.header-volume-popover .volume-slider:disabled::-webkit-slider-thumb {
-  cursor: not-allowed;
-}
-
-.header-volume-popover .volume-slider::-moz-range-thumb {
-  width: 32px;
-  height: 4px;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
+.context-chip-range::-moz-range-thumb {
+  width: 9px;
+  height: 9px;
   border: none;
-  cursor: grab;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.15s ease;
 }
 
-.header-volume-popover .volume-slider:active::-moz-range-thumb {
-  cursor: grabbing;
+.context-chip-volume:hover .context-chip-range:not(:disabled)::-webkit-slider-thumb,
+.context-chip-range:focus-visible::-webkit-slider-thumb {
+  opacity: 1;
 }
 
-.header-volume-popover .volume-slider:disabled::-moz-range-thumb {
-  cursor: not-allowed;
+.context-chip-volume:hover .context-chip-range:not(:disabled)::-moz-range-thumb,
+.context-chip-range:focus-visible::-moz-range-thumb {
+  opacity: 1;
 }
+
+.context-chip-range:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* Disabled means "there is no voice set up yet", not "this is broken", so it
+   dims rather than disappearing — the tooltip carries the reason. */
+.context-chip-volume-off {
+  opacity: 0.45;
+}
+
 
 /* =================== Preset Sidebar =================== */
 .main-body {
@@ -1866,16 +1732,32 @@ button.context-chip:hover,
  * to a pixel rather than set to `display: none`, so a screen reader still
  * reads "Wood", "Listening" and "Edited" when there is no room to draw them. */
 
-/* 252 rail + 48 gutter + 325 chips + 16 + 279 context = 920. */
-@media (max-width: 919px) {
+/* The input chip goes second now, not first, and at 959 rather than 919.
+
+   It is a readout the transport also carries — but the transport only swaps
+   its sentence for that compact readout at 961. Shedding the chip at any
+   width ABOVE 961 opens a band where the input is reported nowhere, which is
+   the exact failure `Transport.test.tsx` describes. So this stays below it,
+   and the labels give up their space first instead.
+
+   That also makes the numbers agree with the paragraph above, which has
+   always said the labels are shed first and the input chip second. Until now
+   they were the other way round. */
+@media (max-width: 959px) {
   .context-chip-input {
     display: none;
   }
 }
 
-/* 252 + 48 + 196 chips + 16 + 279 = 791. Below it the labels and the pill's
-   word go together — they are the same kind of thing. */
-@media (max-width: 789px) {
+/* 252 rail + 48 gutter + 487 chips + 16 + 280 context = 1083 — the row's full
+   width, measured after the volume popover became two inline sliders, which
+   cost it 162px. This is the first thing to give, and the labels and the
+   pill's word go together because they are the same kind of thing.
+
+   Label-less with the input chip still there the row needs 970, so there is a
+   ~10px squeeze just above 959 that the context area absorbs by truncating
+   the preset name — the same way it always has. */
+@media (max-width: 1081px) {
   .context-chip-label,
   .preset-edited-label {
     position: absolute;
@@ -1909,11 +1791,12 @@ button.context-chip:hover,
 }
 
 /* Under 620px the rail is a strip of icons and the bar gets 184px back all at
-   once. This is only the level bar giving up the last of its resolution — the
-   labels do not come back, because a control that re-labels itself as you drag
-   a window smaller is harder to learn than one that does not. */
+   once. This is only the level bars giving up the last of their resolution —
+   the labels do not come back, because a control that re-labels itself as you
+   drag a window smaller is harder to learn than one that does not. There are
+   two of them now, so this is worth twice what it was. */
 @media (max-width: 619px) {
-  .context-chip-level {
+  .context-chip-range {
     width: 36px;
   }
 }

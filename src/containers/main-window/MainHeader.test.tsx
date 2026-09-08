@@ -70,24 +70,45 @@ describe("MainHeader — the output chips", () => {
     expect(props.setSoundOpen).toHaveBeenLastCalledWith(false);
   });
 
-  it("draws the metronome level on the volume chip", () => {
-    const { container, props, rerender } = setup({ volumePercent: 40 });
-    const fill = () => container.querySelector(".context-chip-level-fill") as HTMLElement;
-    expect(fill().style.width).toBe("40%");
-    rerender(<MainHeader {...props} volumePercent={90} />);
-    expect(fill().style.width).toBe("90%");
+  it("puts both volumes on the bar, as real sliders", () => {
+    // These were one chip and a hover popover. The chip DREW a level bar and
+    // would not let you drag it, and the voice level could not be seen at all
+    // without hovering — so both are their own control now.
+    const { container } = setup({ volumePercent: 40 });
+    const ranges = container.querySelectorAll<HTMLInputElement>(".context-chip-range");
+    expect(ranges.length).toBe(2);
+    expect(ranges[0].value).toBe("40");
+    // The painted fill is driven off the same value, so the two cannot drift.
+    expect(ranges[0].style.getPropertyValue("--level")).toBe("40%");
   });
 
-  it("keeps both faders behind the volume chip, and says why the voice one is off", () => {
-    // Parity: the metronome and the TTS voice are balanced in one place, and
-    // the voice fader stays visible-but-disabled so the feature is findable.
-    const { container } = setup({ voiceEnabled: false });
-    const faders = container.querySelectorAll(".header-volume-popover .volume-fader");
-    expect(faders.length).toBe(2);
-    expect(container.querySelector(".volume-fader-disabled")).not.toBeNull();
+  it("sends the metronome volume as a 0-1 gain, not a percentage", () => {
+    // `set_volume` takes 0..1. The slider counts in whole percent because a
+    // 0..1 range input would step in units of 1.
+    const { container } = setup({ volumePercent: 40 });
+    const range = container.querySelectorAll<HTMLInputElement>(".context-chip-range")[0];
+    fireEvent.change(range, { target: { value: "75" } });
+    expect(mockInvoke).toHaveBeenCalledWith("set_volume", { volume: 0.75 });
+  });
+
+  it("shows the voice volume, and says why it is off until a voice is set up", () => {
+    // Visible-but-disabled so the feature is findable — the same rule the
+    // popover's fader followed, kept now that it is on the bar.
+    const { container } = setup({ voiceEnabled: false, ttsVolume: 0.6 });
+    const voice = container.querySelectorAll<HTMLInputElement>(".context-chip-range")[1];
+    expect(voice.disabled).toBe(true);
+    expect(voice.value).toBe("60");
     expect(
       container.querySelector('[data-tooltip="Enable Practice Coach voice in Settings"]'),
     ).not.toBeNull();
+  });
+
+  it("lets the voice volume be changed once a voice is ready", () => {
+    const { container, props } = setup({ voiceEnabled: true, ttsVolume: 0.6 });
+    const voice = container.querySelectorAll<HTMLInputElement>(".context-chip-range")[1];
+    expect(voice.disabled).toBe(false);
+    fireEvent.change(voice, { target: { value: "30" } });
+    expect(props.setTtsVolume).toHaveBeenCalledWith(0.3);
   });
 
   it("reports the audio input in words", () => {
@@ -215,14 +236,17 @@ describe("MainHeader — the bar is one row", () => {
       }
       return out.join("\n");
     };
-    expect(at(919)).toContain(".context-chip-input {\n    display: none;");
-    expect(at(919)).not.toContain(".context-chip-label");
-    expect(at(789)).toContain(".context-chip-label");
+    // Labels first, then the duplicated readout — the order this file has
+    // always described in prose. The numbers used to say the opposite, and
+    // the volume sliders arriving in the row is what forced them to agree.
+    expect(at(1081)).toContain(".context-chip-label");
+    expect(at(1081)).not.toContain(".context-chip-input {\n    display: none;");
+    expect(at(959)).toContain(".context-chip-input {\n    display: none;");
     expect(css).not.toContain(".context-chip-volume {\n    display: none;");
   });
 
   it("clips a shed label rather than deleting it, so it is still read aloud", () => {
-    const narrow = css.slice(css.indexOf("@media (max-width: 789px) {"));
+    const narrow = css.slice(css.indexOf("@media (max-width: 1081px) {"));
     const rule = narrow.slice(
       narrow.indexOf(".context-chip-label"),
       narrow.indexOf("}", narrow.indexOf(".context-chip-label")),

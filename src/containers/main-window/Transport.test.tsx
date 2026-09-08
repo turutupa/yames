@@ -184,7 +184,7 @@ describe("Transport — what it sheds, and in what order", () => {
   };
 
   it("has the input readout in place before the context bar drops its chip", () => {
-    // The context bar sheds `.context-chip-input` at 919 on the stated
+    // The context bar sheds `.context-chip-input` at 959 on the stated
     // grounds that the transport reports the same state. So the transport's
     // compact readout has to be drawn by then — it arrives at 961, where the
     // row itself runs out of room for the sentence. Put the swap below the
@@ -192,7 +192,7 @@ describe("Transport — what it sheds, and in what order", () => {
     // the input nowhere.
     expect(at(961)).toContain(".transport-note {\n    display: none;");
     expect(at(961)).toContain(".transport-input-narrow {\n    display: flex;");
-    expect(at(919)).toContain(".context-chip-input {\n    display: none;");
+    expect(at(959)).toContain(".context-chip-input {\n    display: none;");
   });
 
   it("never hides the play button, at any width", () => {
