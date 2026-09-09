@@ -1119,13 +1119,20 @@ export function MainWindow() {
         {/* Behind the stage, not inside it: the stage caps its own width, and
             the room this figure needs is the part of the content region that
             the cap leaves over. */}
-        {/* Not while a setlist is playing. The player is one centred column
-            with a tempo you are meant to read from across the room, and a
-            sketch off to one side of it is the only other thing on screen —
-            so it stops being scenery and starts being the other object your
-            eye goes to. Every other beat screen has controls filling the
-            width for it to sit behind. */}
-        {view === "beat" && !setlistSession.setlistPlaying && (
+        {/* Not while a setlist is open, playing or not.
+
+            The player is one centred column with a tempo meant to be read
+            from across the room, and a sketch off to one side of it is the
+            only other thing on screen — so it stops being scenery and starts
+            being the other object your eye goes to. The editor is the same
+            problem from the other end: it is a column of text down the left,
+            so the drawing sits in open space beside it rather than behind
+            anything, and it lands on top of the tools of whichever step you
+            have open.
+
+            Scenery needs something to be scenery FOR. The plain metronome
+            has controls filling the width; neither setlist room does. */}
+        {view === "beat" && !setlistSession.setlist && (
           <MetronomeFigure
             bpm={state.bpm}
             isPlaying={state.isPlaying}
