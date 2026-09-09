@@ -78,12 +78,14 @@ unit-test harness needs a Common-Controls v6 manifest that
 
 | Prefix | Effect |
 |--------|--------|
-| `feat:` | triggers a versioned release via CI |
-| `fix:` | triggers a versioned release via CI |
+| `feat:` | a feature; does **not** release on its own |
+| `fix:` | a bug fix; does **not** release on its own |
 | `refactor:`, `chore:`, `docs:` | no release triggered |
+| `release …` | **this** is what cuts a release — every job in `release.yml` gates on it |
 
-Pick the prefix that matches the actual change scope. A docs-only edit should
-not bump a release.
+Pick the prefix that matches the actual change scope. Releasing is a separate,
+deliberate act: a `feat:` commit ships nothing on its own, and a docs-only edit
+should not bump a version.
 
 ## Pull request checklist
 
