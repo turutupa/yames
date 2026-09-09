@@ -1493,9 +1493,13 @@ span.meter-grouping-chip {
    Both are pinned to one centred band instead. `--stage-band` is the stage
    plus a gap plus the figure, and `max(0px, 50% - band/2)` is zero until the
    window is actually wider than that — so nothing moves until the gap would
-   otherwise open, and no breakpoint has to guess where that is. */
+   otherwise open, and no breakpoint has to guess where that is.
+
+   1176 stage + 60 gap + 290 figure. It was 1776 when the figure grew to
+   540px on a wide monitor; the figure is one size now, and a band sized for
+   the old one would have opened the very gap it exists to close. */
 .main-content[data-view="beat"] {
-  --stage-band: 1776px;
+  --stage-band: 1526px;
 }
 
 .main-content[data-view="beat"] > .view-transition-wrapper {
@@ -2035,8 +2039,9 @@ span.meter-grouping-chip {
 }
 
 /* =============== The metronome figure (background) =============== */
-/* A line drawing of the object the screen is named after, standing toward the
-   right of the content region with the controls lying across its left edge.
+/* A line drawing of the object the screen is named after, standing in the
+   top-right corner of the content region with the controls lying across its
+   left edge.
 
    It hangs off `.main-content`, not off the stage, and that is the whole
    trick: the stage caps itself at 1176px so the controls do not smear across
@@ -2045,31 +2050,45 @@ span.meter-grouping-chip {
    behind the ruler, which spans the full measure.
 
    It is scenery — no pointer events, aria-hidden — and it is gone below
-   1560px, where the strip is too thin for it to be anything but a smudge
-   under text. */
+   1100px, where the strip is too thin for it to be anything but a smudge
+   under text.
+
+   One size, everywhere. It used to grow into a 540px figure centred down the
+   right of a wide monitor, with this corner treatment as the fallback for a
+   laptop; the owner preferred the fallback — "having it always in that area
+   is cute and dedicated for it, and having it very big might be too much" —
+   so the corner is now the only place it lives. It is the app's mark, not a
+   backdrop, and a mark is the same size wherever it is stamped.
+
+   Anchored to the top rather than centred, because that is the one part of
+   the stage that stays empty: the tempo and the ruler are the left half of
+   the upper block, and the meter row and the subdivision cards claim the
+   width further down. */
 .metronome-figure {
   position: absolute;
-  /* Sat too low against the stage — the tempo and the ruler are the top half
-     of the screen and the figure should stand with them, not under them. */
-  top: 40%;
+  top: 96px;
   /* The right end of the same centred band the stage's left end is pinned to
-     — see `--stage-band`. Below that width this resolves to the old 1.5%. */
-  right: max(1.5%, calc(50% - var(--stage-band, 1776px) / 2));
-  transform: translateY(-50%);
-  width: min(40vw, 540px);
-  height: min(68vh, 600px);
+     — see `--stage-band`. Below that width this resolves to 1%. */
+  right: max(1%, calc(50% - var(--stage-band, 1526px) / 2));
+  width: min(28vw, 290px);
+  /* Short enough that the BOX clears the accent row, not just the drawing
+     inside it — `fit()` centres the figure in whatever space it is given,
+     so a tall box hides its overlap until a different window aspect brings
+     the ink down into the controls. */
+  height: min(33vh, 300px);
   pointer-events: none;
   z-index: 0;
   /* The whole drawing, rod included. This is the knob for "how present is the
      sketch", as distinct from `part.dim` (which parts of it are loud) and
-     `caseDim` (how far the body steps back while the rod is moving). */
-  opacity: 0.4;
+     `caseDim` (how far the body steps back while the rod is moving). Drawn
+     back, because it sits close to the controls it is scenery for. */
+  opacity: 0.3;
   transition: opacity 0.45s ease;
 }
 
 /* Playing, it earns a little more presence — still far under the controls. */
 .main-window[data-playing="true"] .metronome-figure {
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 /* The stage stacks above it and stays transparent: the figure is meant to
@@ -2077,42 +2096,6 @@ span.meter-grouping-chip {
 .main-content[data-view="beat"] > .view-transition-wrapper {
   position: relative;
   z-index: 1;
-}
-
-/* Below the width the full-height figure needs, it moves to the top-right
-   corner and gets smaller rather than disappearing. It is becoming the app's
-   mark, and a mark that is only there on a wide monitor is not one.
-
-   Anchored to the top rather than centred, because that is the one part of a
-   narrow stage that stays empty: the tempo and the ruler are the left half of
-   the upper block, and the meter row and the subdivision cards claim the
-   width further down. Drawn back a little as well — down here it sits closer
-   to the controls it is scenery for. */
-@media (max-width: 1559px) {
-  .metronome-figure {
-    top: 96px;
-    right: 1%;
-    transform: none;
-    width: min(28vw, 290px);
-    /* Short enough that the BOX clears the accent row, not just the drawing
-       inside it — `fit()` centres the figure in whatever space it is given,
-       so a tall box hides its overlap until a different window aspect brings
-       the ink down into the controls. */
-    height: min(33vh, 300px);
-    opacity: 0.3;
-  }
-
-  .main-window[data-playing="true"] .metronome-figure {
-    opacity: 0.4;
-  }
-
-  [data-theme-group="light"] .metronome-figure {
-    opacity: 0.5;
-  }
-
-  [data-theme-group="light"] .main-window[data-playing="true"] .metronome-figure {
-    opacity: 0.6;
-  }
 }
 
 /* Under 1100px the stage is a single column that uses its whole width, and
@@ -2129,9 +2112,15 @@ span.meter-grouping-chip {
    still short of it. Measured against every light theme's page colour, the
    figure's lines came out at 2.83–3.16:1 at 0.48 — under the 3:1 that a
    drawing (a "large / non-text" element) has to clear, and the owner read the
-   result as "hard to see". At 0.62 the lines reach roughly 4.0–4.6:1 and the
-   accent-coloured rod about 2.8–3.5:1, which is where it stops being a smudge
-   without becoming a second object competing with the controls. */
+   result as "hard to see". At 0.62 the lines reach roughly 4.2–4.8:1 and the
+   accent-coloured rod about 2.9–3.4:1, which is where it stops being a smudge
+   without becoming a second object competing with the controls.
+
+   These are the only light-theme values. The corner treatment used to carry
+   its own pair, 0.5 and 0.6, inside its media query, and those measured
+   under the same bar on a laptop: Sand's lines at 2.98:1 stopped, and five of
+   the six light themes between 2.75 and 2.99:1 while playing. When the corner
+   became the only treatment, the pair that clears 3:1 is the one that stayed. */
 [data-theme-group="light"] .metronome-figure {
   opacity: 0.62;
 }
