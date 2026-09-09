@@ -120,7 +120,8 @@
 
    The ring shape changes what "miss" means. A filled dot showed a miss by
    emptying itself; a ring is already empty, so it keeps the outline and takes
-   the miss colour — the dot stays visible and only its meaning changes. */
+   the miss colour — the dot stays visible and only its meaning changes.
+
    The scale is not repeated here: a classification is only ever set on the
    beat that is currently sounding, so `.playing` is always alongside it and
    has already done it. */

@@ -67,3 +67,94 @@ dev build with a different identifier. Restore it afterwards.
 - [x] `%APPDATA%\com.yames.metronome.o1check` was already gone.
 - **Kept on purpose:** `C:\yt06models` (2.7 GB, Qwen3-0.6B + Qwen3-4B). It is the only remaining copy of those weights and the optional jitter probe in §5 needs it. Delete it yourself if you would rather re-download.
 - Still on disk: 22 stale worktrees under `.claude/worktrees/`. All content-merged; `git worktree prune` after removing them is safe whenever you want the space.
+
+## 7. Setlists (U9, and the two-room split)
+
+The runtime has never run against the real audio engine — `REVAMP_PARITY.md`
+§6 says so, and unit tests cannot close it. This section is what closes it.
+Build a setlist of four or five short steps first: mix the trigger kinds so
+one ends on bars, one on a time, and one waits for you.
+
+**Upgrade path**
+- [ ] A build from before the rename had "chains" saved. Open this build: they
+      are all there, named the same, under **Setlists** in the sidebar. Nothing
+      is empty, nothing is duplicated.
+- [ ] Save an edit, quit, reopen: it persisted. (It is now stored under a
+      `setlists` key; the old `chains` key is read once and left alone.)
+
+**The editor**
+- [ ] Clicking a step opens it into its sentence; the row you clicked stays put
+      and the sentence opens beneath it.
+- [ ] Every phrase edits and is **audible immediately**: tempo, meter,
+      subdivision, sound, volume. The click changes as you change it. (This was
+      broken once — the phrases looked dead because the edit was being read
+      back off the engine and undone.)
+- [ ] The trigger phrase and the transition phrase open the same window, and it
+      lands where you clicked rather than off the bottom of a long setlist.
+- [ ] "+ Add a step" copies the step above it, not whatever the metronome was
+      last set to. On an empty setlist the first step takes the metronome's
+      current settings.
+- [ ] Reorder, duplicate and remove are on the open step only, and do what they
+      say. Removing the open step does not leave the editor stranded.
+
+**Triggers, live**
+- [ ] A **bars** step ends on the bar it says, and the switch lands on a
+      downbeat — count it. Nothing is cut in half (U9.3).
+- [ ] A **seconds** step ends within a beat of its time, and the player's
+      "bar N of M" agrees with what you are counting.
+- [ ] A **when I say** step waits indefinitely. The transport's *Skip to next*
+      goes solid amber while it waits — it is the only thing that moves the
+      setlist on.
+- [ ] Skip pressed mid-step lands on the next downbeat too, not instantly.
+
+**Transitions**
+- [ ] **Cut**: the next step starts on the next downbeat, at the new tempo.
+- [ ] **Count me in N bars**: the beats sound at the NEW step's tempo, and the
+      last of them is beat one of that step.
+- [ ] **Rest N bars**: silence for exactly that many bars, then the next step at
+      its own volume — the rest must not leave the volume down (U9.2).
+
+**The count-in at the top**
+- [ ] Set "Count in — 4 beats" and press Start: four beats at step one's tempo
+      before step one begins, with the player's big number counting them down.
+- [ ] "No count-in" starts immediately, the way it always did.
+- [ ] It does not fire again on the second pass of a repeating setlist.
+
+**Repeat and the end**
+- [ ] "Once through" stops at the end of the last step and the transport shows
+      it finished, rather than looping silently.
+- [ ] "3 times through" plays three passes. "Until I stop it" keeps going.
+- [ ] A last step set to *when I say* keeps playing until you stop the
+      transport.
+
+**The player**
+- [ ] Start swaps the editor for the player. The step's **name** is the largest
+      thing after the tempo, and both are readable from where you actually sit
+      with the guitar.
+- [ ] The dots follow the step's own grouping, and change when the step does.
+- [ ] The ribbon fills across the current step and marks the ones behind it.
+- [ ] "then <next step>" names what is coming; a clean cut says nothing extra.
+- [ ] **Edit the setlist** returns to the paragraph **without stopping the
+      run**, the running row is filled amber, and *Back to playing* returns.
+- [ ] Editing a step you are NOT hearing, mid-run, does not retune the one you
+      are hearing.
+
+**Fit**
+- [ ] At your smallest usable window, neither room overflows: nothing hides
+      behind the transport and nothing needs scrolling that should not.
+- [ ] A setlist of ~20 steps scrolls the list downward, in the themed lane, and
+      never sideways.
+
+## 8. Revamp regression (things that were fine and must still be)
+
+- [ ] Drill: the plan sentence still edits, the climb still scrolls, ascending
+      and descending drills both run and finish.
+- [ ] Sounds: click, wood, beep, drum and snare all sound, and the accent is
+      clearly the same instrument hit harder. Snare and drum on laptop speakers
+      as well as headphones.
+- [ ] Themes: every one, dark and light. Text stays legible on cards and inside
+      popovers, not just on the page.
+- [ ] Shell: dragging the window by the header and by empty stage works;
+      dragging a horizontal scrollbar scrolls it rather than moving the window;
+      clicking a setlist in the sidebar selects it (Windows and macOS both).
+- [ ] Zen and the floating widget still open, and follow the beat.

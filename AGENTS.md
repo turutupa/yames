@@ -272,7 +272,9 @@ Key rules:
 ## Commit / branch hygiene
 
 - Conventional prefixes: `feat:`, `fix:`, `refactor:`, `chore:`, `docs:`.
-- A commit message starting with `feat:` or `fix:` triggers a release
+- A commit message starting with `release` triggers a release — that is
+  what `release.yml` gates every one of its jobs on. `feat:` and `fix:`
+  do not, whatever they say about the change
   via the CI pipeline. Pick the prefix that matches the actual change
   scope — don't bump a release for a docs-only change.
 - Never run destructive git on uncommitted work (`reset --hard`,
