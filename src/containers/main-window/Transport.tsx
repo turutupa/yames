@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { durationLabel, type SetlistRemaining } from "../../components/setlist/format";
+import { spanLabel, type SetlistRemaining } from "../../components/setlist/format";
 
 interface TransportProps {
   view: "beat" | "drill";
@@ -197,7 +197,7 @@ export function Transport({
                     gap:
                       setlistRemaining.kind === "bars"
                         ? t("setlist.trigger.barsShort", { count: setlistRemaining.bars })
-                        : durationLabel(t, setlistRemaining.seconds),
+                        : spanLabel(t, setlistRemaining.seconds),
                   })}
             </span>
           )}

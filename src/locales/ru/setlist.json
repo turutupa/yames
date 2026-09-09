@@ -56,7 +56,8 @@
       "secondsShort_other": "{{count}} с",
       "minutesShort": "{{count}} мин",
       "minutesShort_one": "{{count}} мин",
-      "minutesShort_other": "{{count}} мин"
+      "minutesShort_other": "{{count}} мин",
+      "minutesSeconds": "{{minutes}}:{{seconds}}"
     },
     "gap": {
       "title": "Между этим шагом и следующим",

@@ -56,7 +56,8 @@
       "secondsShort_other": "{{count}} giây",
       "minutesShort": "{{count}} phút",
       "minutesShort_one": "{{count}} phút",
-      "minutesShort_other": "{{count}} phút"
+      "minutesShort_other": "{{count}} phút",
+      "minutesSeconds": "{{minutes}}:{{seconds}}"
     },
     "gap": {
       "title": "Giữa bước này và bước sau",

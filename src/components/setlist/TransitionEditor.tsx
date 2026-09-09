@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import type { SetlistStep, SetlistTransition, SetlistTrigger } from "../../types";
-import { durationLabel } from "./format";
+import { spanLabel } from "./format";
 
 interface TransitionEditorProps {
   step: SetlistStep;
@@ -234,7 +234,7 @@ export function TransitionEditor({ step, isLast, anchor, onChange, onClose }: Tr
       {trigger.kind === "seconds" && (
         <Stepper
           label={t("setlist.gap.after")}
-          value={durationLabel(t, trigger.seconds)}
+          value={spanLabel(t, trigger.seconds)}
           decreaseLabel={t("setlist.gap.lessTime")}
           increaseLabel={t("setlist.gap.moreTime")}
           onDecrease={() =>

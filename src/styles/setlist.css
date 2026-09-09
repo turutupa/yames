@@ -94,7 +94,23 @@
      `left` are set there from the phrase's own rect; the panel has no
      positioned ancestor to hang off any more. */
   position: fixed;
-  width: 320px;
+  /* Sized to its widest row, not to a number.
+
+     This was a hard 320px, and the three options under MOVE ON wrapped onto
+     two lines on macOS while fitting on one under Windows. Not resolution
+     and not scaling: the theme asks for `'SF Mono', 'Fira Code',
+     'JetBrains Mono', monospace` and each machine resolves that to a
+     different font, with different advance widths for the same 12px. A
+     fixed width can only ever be right for whichever font the author
+     happened to have.
+
+     So the panel takes the width its content needs, with a floor so short
+     rows do not look pinched and a ceiling so a long translation cannot
+     push it off screen. `TransitionEditor` measures `offsetWidth` after
+     layout to clamp its position, so a computed width is fine there. */
+  width: max-content;
+  min-width: 320px;
+  max-width: min(430px, calc(100vw - 24px));
   z-index: 60;
   background: var(--bg-panel);
   border: 1px solid var(--accent-subtle-hover);
@@ -116,18 +132,27 @@
   margin-top: 16px;
 }
 
+/* One row, always. The panel grows instead — a set of three mutually
+   exclusive choices reads as a set only while they are side by side. */
 .setlist-option-row {
   display: flex;
   gap: 5px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
+/* Every option is a surface; the chosen one is a LOUDER surface.
+
+   These used to be bare text with a border on the selected one, so a row of
+   three read as one button and two labels — the two you have not chosen did
+   not look like things you could choose. A quiet fill on all three says
+   "these are the options" before the accent says "and this is the one". */
 .setlist-option {
   padding: 7px 10px;
   border-radius: 8px;
   font-size: 12px;
+  white-space: nowrap;
   color: var(--text-secondary);
-  background: none;
+  background: color-mix(in srgb, var(--text-primary) 7%, transparent);
   border: 1px solid transparent;
   cursor: pointer;
   transition: color 0.15s, background 0.15s, border-color 0.15s;
@@ -135,12 +160,12 @@
 
 .setlist-option:hover {
   color: var(--text-primary);
-  background: var(--border);
+  background: color-mix(in srgb, var(--text-primary) 14%, transparent);
 }
 
 .setlist-option.on {
   background: var(--accent-subtle);
-  border-color: var(--accent-subtle-hover);
+  border-color: var(--accent);
   color: var(--accent);
   font-weight: 700;
 }

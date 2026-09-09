@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { meterLabel } from "../../utils/meter";
-import { durationLabel, stepSeconds, transitionLabel } from "./format";
+import { spanLabel, stepSeconds, transitionLabel } from "./format";
 import type { SetlistRemaining, Translate } from "./format";
 import type { Setlist, SetlistStep } from "../../types";
 
@@ -89,7 +89,7 @@ function leftLabel(
     });
   }
   if (remaining.kind === "seconds") {
-    const left = t("setlist.timeLeft", { duration: durationLabel(t, remaining.seconds) });
+    const left = t("setlist.timeLeft", { duration: spanLabel(t, remaining.seconds) });
     if (!totalBars) return left;
     const doneBars = Math.max(0, totalSeconds! - remaining.seconds) / perBar;
     return `${left} · ${t("setlist.barOf", {
