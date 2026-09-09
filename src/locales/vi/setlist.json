@@ -128,13 +128,6 @@
       "beats_other": "{{count}} phách",
       "fewer": "Bớt phách đếm vào",
       "more": "Thêm phách đếm vào"
-    },
-    "leave": {
-      "title": "Thay đổi chưa lưu",
-      "body": "“{{name}}” có thay đổi bạn chưa lưu.",
-      "save": "Lưu và đóng",
-      "discard": "Bỏ và đóng",
-      "cancel": "Tiếp tục sửa"
     }
   }
 }

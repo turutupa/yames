@@ -128,13 +128,6 @@
       "beats_other": "{{count}} temps",
       "fewer": "Moins de temps de décompte",
       "more": "Plus de temps de décompte"
-    },
-    "leave": {
-      "title": "Modifications non enregistrées",
-      "body": "« {{name}} » a des modifications non enregistrées.",
-      "save": "Enregistrer et fermer",
-      "discard": "Abandonner et fermer",
-      "cancel": "Continuer à modifier"
     }
   }
 }

@@ -9,7 +9,14 @@
     "durationMinSec": "{{m}}分 {{s}}秒",
     "durationSec": "{{s}}秒",
     "language": "言語",
-    "languageHint": "UIの言語。すぐに反映されます"
+    "languageHint": "UIの言語。すぐに反映されます",
+    "unsaved": {
+      "title": "保存していない変更",
+      "body": " に保存していない変更があります。",
+      "save": "保存",
+      "discard": "破棄",
+      "cancel": "編集を続ける"
+    }
   },
   "share": {
     "copyLink": "リンクをコピー"

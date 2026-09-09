@@ -128,13 +128,6 @@
       "beats_other": "{{count}} beats",
       "fewer": "Fewer count-in beats",
       "more": "More count-in beats"
-    },
-    "leave": {
-      "title": "Unsaved changes",
-      "body": "“{{name}}” has changes you have not saved.",
-      "save": "Save and close",
-      "discard": "Discard and close",
-      "cancel": "Keep editing"
     }
   }
 }

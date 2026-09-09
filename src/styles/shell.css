@@ -2074,3 +2074,155 @@ button.context-chip:hover,
   opacity: 1;
   transform: translateY(0);
 }
+
+/* =================== Unsaved changes ===================
+
+   Asked on the way out of anything that has edits only on screen — a
+   setlist, or a preset. It lives here rather than with either of them
+   because the question is the same one.
+
+   The owner, on the first version: "I didn't even know this existed." It was
+   a plain card with three buttons that wrapped two-and-one, which reads as a
+   layout accident rather than a question. */
+
+.unsaved-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  animation: unsaved-fade 0.14s ease-out;
+}
+
+.unsaved-card {
+  width: min(460px, calc(100vw - 48px));
+  padding: 24px 26px 20px;
+  border-radius: 16px;
+  background: var(--bg-panel);
+  /* A hairline of the accent rather than the border grey: this is the one
+     surface in the app that is asking rather than telling. */
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65);
+  display: flex;
+  flex-direction: column;
+  animation: unsaved-rise 0.18s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+@keyframes unsaved-fade {
+  from { opacity: 0; }
+}
+
+@keyframes unsaved-rise {
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .unsaved-overlay,
+  .unsaved-card {
+    animation: none;
+  }
+}
+
+.unsaved-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* The glyph is what makes it read as a question at a glance rather than as
+   another panel. Accent on its own tint, at the size of the title beside it. */
+.unsaved-glyph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 9px;
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.unsaved-title {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.unsaved-body {
+  margin: 14px 0 0;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* The name carries the sentence — it is the one word that says WHICH thing
+   you are about to walk away from. */
+.unsaved-name {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.unsaved-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.unsaved-spacer {
+  flex: 1;
+}
+
+.unsaved-actions button {
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 9px 15px;
+  border-radius: 9px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: none;
+  color: var(--text-muted);
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.unsaved-actions .unsaved-cancel:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover, rgba(255, 255, 255, 0.05));
+}
+
+.unsaved-actions .unsaved-discard {
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+.unsaved-actions .unsaved-discard:hover {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+/* Two selectors deep, because `.unsaved-actions button` above is (0,1,1) and
+   a lone class is (0,1,0) — the first version of this lost that race and the
+   primary button drew with no fill and dark ink on a dark panel, which
+   rendered as an empty box. */
+.unsaved-actions .unsaved-save {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+.unsaved-actions .unsaved-save:hover {
+  filter: brightness(1.08);
+}
+
+.unsaved-actions button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

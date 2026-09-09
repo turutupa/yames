@@ -88,7 +88,7 @@ import { useBpmEditing } from "./hooks/useBpmEditing";
 import { usePlaybackClock } from "./hooks/usePlaybackClock";
 import { useLibraryFit } from "./hooks/useLibraryFit";
 import { useSetlistSession } from "./hooks/useSetlistSession";
-import { LeaveSetlistDialog } from "../../components/setlist/LeaveSetlistDialog";
+import { UnsavedChangesDialog } from "../../components/UnsavedChangesDialog";
 import { SetlistParagraph } from "../../components/setlist/SetlistParagraph";
 import { SetlistPlayer } from "../../components/setlist/SetlistPlayer";
 import { useAudioError } from "./hooks/useAudioError";
@@ -584,27 +584,70 @@ export function MainWindow() {
    * afternoon of edits to a single keypress is the failure worth a dialog,
    * and a dialog that appears every time is one nobody reads.
    */
-  const [leaving, setLeaving] = useState(false);
   /**
-   * Close it, and let go of the row in the library.
+   * Close the setlist, and let go of the row in the library.
    *
    * You open a setlist by clicking its row, which focuses it. Escape then
    * closes the setlist and the row keeps the focus — and because Escape is a
-   * keyboard action the browser draws `:focus-visible` on it, so a dark ring
-   * sits in the sidebar around a setlist that is no longer open. The row has
-   * done its job; releasing it is what a mouse click would have implied
-   * anyway.
+   * keyboard action the browser draws `:focus-visible` on it, so a ring sits
+   * in the sidebar around a setlist that is no longer open. The row has done
+   * its job; releasing it is what a mouse click would have implied anyway.
    */
   const closeAndRelease = useCallback(() => {
     setlistSession.closeSetlist();
     const active = document.activeElement as HTMLElement | null;
     if (active && active.closest(".preset-sidebar")) active.blur();
   }, [setlistSession]);
+
+  /**
+   * The action waiting on an answer about unsaved work, or null.
+   *
+   * The first version of this guarded the two doors that CLOSED a setlist,
+   * which missed the way people actually lose edits: they do not close a
+   * thing, they open the next one. Clicking a different setlist, or a preset,
+   * threw the working copy away without a word — "it's so easy to forget to
+   * save the changes right now".
+   *
+   * So the gate is in front of the ACTION, not the screen, and it covers
+   * presets too: `activePreset` plus `presetDirty` is the same situation one
+   * object over, and `handlePresetUpdate` is its save.
+   */
+  const [pending, setPending] = useState<{
+    name: string;
+    save: () => void | Promise<unknown>;
+    run: () => void;
+  } | null>(null);
+
+  /**
+   * Run `action`, unless there is unsaved work in the way — then ask, and run
+   * it once the question is answered.
+   *
+   * A dirty SETLIST wins over a dirty preset when somehow both are true: the
+   * setlist is the thing on screen, and it is the one whose edits are not
+   * also visible as knob positions.
+   */
+  const guarded = useCallback(
+    (action: () => void) => {
+      if (setlistSession.setlist && setlistSession.dirty) {
+        setPending({
+          name: setlistSession.setlist.name,
+          save: setlistSession.saveActiveSetlist,
+          run: action,
+        });
+        return;
+      }
+      if (activePreset && presetDirty) {
+        setPending({ name: activePreset.name, save: handlePresetUpdate, run: action });
+        return;
+      }
+      action();
+    },
+    [setlistSession, activePreset, presetDirty, handlePresetUpdate],
+  );
   const askToLeave = useCallback(() => {
     if (!setlistSession.setlist) return;
-    if (setlistSession.dirty) setLeaving(true);
-    else closeAndRelease();
-  }, [setlistSession]);
+    guarded(closeAndRelease);
+  }, [setlistSession.setlist, guarded, closeAndRelease]);
 
   // Escape is the other door. Not while something is typed into, and not
   // while a popover owns the key — those close themselves first, and a
@@ -981,7 +1024,9 @@ export function MainWindow() {
           prevTab={prevTab}
           libraryOpen={sidebarOpen}
           onToggleLibrary={() => setSidebarOpen((o) => !o)}
-          onLoadPreset={handleLoadPreset}
+          // Loading a preset closes any open setlist, so it can discard a
+          // setlist's edits as easily as a preset's own.
+          onLoadPreset={(preset) => guarded(() => void handleLoadPreset(preset))}
           onActivePresetChange={handleActivePresetChange}
           presetShortcut={platformKey(keyBindings["toggle-sidebar"] || "")}
           setlists={setlistSession.setlists}
@@ -989,8 +1034,11 @@ export function MainWindow() {
           onLoadSetlist={(next) =>
             // Clicking the setlist you are already in is the way out of it,
             // the same way clicking the open tab closes it in most things
-            // with tabs. Any other setlist just loads.
-            next.id === setlistSession.setlist?.id ? askToLeave() : setlistSession.loadSetlist(next)
+            // with tabs. Any other setlist replaces this one — which is the
+            // commonest way to lose edits, so it goes through the gate.
+            next.id === setlistSession.setlist?.id
+              ? askToLeave()
+              : guarded(() => setlistSession.loadSetlist(next))
           }
           onNewSetlist={handleNewSetlist}
           onDeleteSetlist={setlistSession.deleteSetlist}
@@ -1085,20 +1133,20 @@ export function MainWindow() {
           />
         )}
 
-        {leaving && setlistSession.setlist && (
-          <LeaveSetlistDialog
-            name={setlistSession.setlist.name}
+        {pending && (
+          <UnsavedChangesDialog
+            name={pending.name}
             onSave={() => {
-              void setlistSession.saveActiveSetlist().then(() => {
-                setLeaving(false);
-                closeAndRelease();
-              });
+              const { save, run } = pending;
+              setPending(null);
+              void Promise.resolve(save()).then(run);
             }}
             onDiscard={() => {
-              setLeaving(false);
-              closeAndRelease();
+              const { run } = pending;
+              setPending(null);
+              run();
             }}
-            onCancel={() => setLeaving(false)}
+            onCancel={() => setPending(null)}
           />
         )}
 

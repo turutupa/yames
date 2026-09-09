@@ -128,13 +128,6 @@
       "beats_other": "{{count}} 拍",
       "fewer": "减少预备拍",
       "more": "增加预备拍"
-    },
-    "leave": {
-      "title": "未保存的更改",
-      "body": "“{{name}}”有尚未保存的更改。",
-      "save": "保存并关闭",
-      "discard": "放弃并关闭",
-      "cancel": "继续编辑"
     }
   }
 }

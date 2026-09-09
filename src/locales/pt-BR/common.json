@@ -9,7 +9,14 @@
     "durationMinSec": "{{m}}min {{s}}s",
     "durationSec": "{{s}}s",
     "language": "Idioma",
-    "languageHint": "Idioma da interface, aplicado na hora"
+    "languageHint": "Idioma da interface, aplicado na hora",
+    "unsaved": {
+      "title": "Alterações não salvas",
+      "body": " tem alterações que você não salvou.",
+      "save": "Salvar",
+      "discard": "Descartar",
+      "cancel": "Continuar editando"
+    }
   },
   "share": {
     "copyLink": "Copiar link"

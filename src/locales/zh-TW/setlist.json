@@ -128,13 +128,6 @@
       "beats_other": "{{count}} 拍",
       "fewer": "減少預備拍",
       "more": "增加預備拍"
-    },
-    "leave": {
-      "title": "未儲存的變更",
-      "body": "「{{name}}」有尚未儲存的變更。",
-      "save": "儲存並關閉",
-      "discard": "捨棄並關閉",
-      "cancel": "繼續編輯"
     }
   }
 }

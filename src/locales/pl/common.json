@@ -9,7 +9,14 @@
     "durationMinSec": "{{m}} min {{s}} s",
     "durationSec": "{{s}} s",
     "language": "Język",
-    "languageHint": "Język interfejsu, działa od razu"
+    "languageHint": "Język interfejsu, działa od razu",
+    "unsaved": {
+      "title": "Niezapisane zmiany",
+      "body": " ma niezapisane zmiany.",
+      "save": "Zapisz",
+      "discard": "Odrzuć",
+      "cancel": "Edytuj dalej"
+    }
   },
   "share": {
     "copyLink": "Kopiuj link"

@@ -128,13 +128,6 @@
       "beats_other": "{{count}} miar",
       "fewer": "Mniej miar odliczenia",
       "more": "Więcej miar odliczenia"
-    },
-    "leave": {
-      "title": "Niezapisane zmiany",
-      "body": "„{{name}}” ma niezapisane zmiany.",
-      "save": "Zapisz i zamknij",
-      "discard": "Odrzuć i zamknij",
-      "cancel": "Edytuj dalej"
     }
   }
 }
