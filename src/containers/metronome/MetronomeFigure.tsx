@@ -449,8 +449,21 @@ export function MetronomeFigure({ bpm, isPlaying, currentBeat }: MetronomeFigure
       // separation, which left the body of the metronome barely there for the
       // whole time anyone is actually looking at it. The rod's own treatment
       // is enough to carry the difference, so the case gives up much less.
+      //
+      // And 0.78 still gave up too much. Multiplied into the canvas's own
+      // opacity (0.3 stopped, 0.4 running; 0.62 and 0.72 on paper) it left
+      // the case lines measuring LOWER while running than stopped on every
+      // light theme — Ivory's from 4.3:1 against the page to 3.7:1 — and only
+      // level on the dark ones, so pressing play made the drawing fainter
+      // exactly when it started earning its presence. The owner asked for
+      // slightly more contrast in the lines while playing, and this is the
+      // knob that reaches the lines and not the rod: the rod is at its alpha
+      // ceiling, with a glow and a solid weight to separate it, so a raise
+      // in the shared opacity would have gone mostly to the part that needed
+      // none. At 0.9 the case measures 2.8:1 on Obsidian and 4.7:1 on Ivory
+      // running, a shade above its stopped self.
       const running = playing.current && !reduced;
-      const caseDim = running ? 0.78 : 1;
+      const caseDim = running ? 0.9 : 1;
 
       for (const part of STATIC_PARTS) {
         strokeMesh(part.geo, part.at, part.dim * caseDim, 0, scale, ox, oy, line);
