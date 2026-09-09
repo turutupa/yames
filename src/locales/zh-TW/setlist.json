@@ -60,7 +60,6 @@
       "minutesSeconds": "{{minutes}}:{{seconds}}"
     },
     "gap": {
-      "title": "這一步與下一步之間",
       "moveOn": "何時繼續",
       "whenISay": "等我示意",
       "afterBars": "過幾小節",

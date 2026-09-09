@@ -60,7 +60,6 @@
       "minutesSeconds": "{{minutes}}:{{seconds}}"
     },
     "gap": {
-      "title": "Tussen deze stap en de volgende",
       "moveOn": "Doorgaan",
       "whenISay": "Als ik het zeg",
       "afterBars": "Na maten",

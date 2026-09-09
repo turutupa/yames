@@ -60,7 +60,6 @@
       "minutesSeconds": "{{minutes}}:{{seconds}}"
     },
     "gap": {
-      "title": "このステップと次のステップのあいだ",
       "moveOn": "次へ進む条件",
       "whenISay": "合図したら",
       "afterBars": "小節数で",

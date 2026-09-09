@@ -60,7 +60,6 @@
       "minutesSeconds": "{{minutes}}:{{seconds}}"
     },
     "gap": {
-      "title": "Entre este paso y el siguiente",
       "moveOn": "Pasar al siguiente",
       "whenISay": "Cuando yo diga",
       "afterBars": "Tras unos compases",

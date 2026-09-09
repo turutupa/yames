@@ -60,7 +60,6 @@
       "minutesSeconds": "{{minutes}}:{{seconds}}"
     },
     "gap": {
-      "title": "이 단계와 다음 단계 사이",
       "moveOn": "넘어갈 시점",
       "whenISay": "신호하면",
       "afterBars": "몇 마디 뒤",

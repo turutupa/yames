@@ -60,7 +60,6 @@
       "minutesSeconds": "{{minutes}}:{{seconds}}"
     },
     "gap": {
-      "title": "Giữa bước này và bước sau",
       "moveOn": "Khi nào chuyển",
       "whenISay": "Khi tôi ra hiệu",
       "afterBars": "Sau số ô nhịp",

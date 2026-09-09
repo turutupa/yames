@@ -60,7 +60,6 @@
       "minutesSeconds": "{{minutes}}:{{seconds}}"
     },
     "gap": {
-      "title": "Между этим шагом и следующим",
       "moveOn": "Когда переходить",
       "whenISay": "По моему знаку",
       "afterBars": "Через такты",
