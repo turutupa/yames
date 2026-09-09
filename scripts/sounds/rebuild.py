@@ -147,7 +147,7 @@ script for the full table.
      snare kit        bar   accent vs beat  accent vs beat  accent  ring past
                      LUFS    200Hz–4kHz      K-weighted      peak    100 ms
      ring 13/s     −21.61     +5.77 dB        +7.03 dB      0.970     7.4%
-     ring 22/s     −22.15     +4.21 dB        +6.13 dB      0.970     1.2%
+     ring 22/s     −22.15     +4.24 dB        +6.13 dB      0.970     1.2%
      `drum` kit    −22.63     +3.63 dB        +3.84 dB      0.970       —
 
    The accent gives up 1.56 dB band-limited and lands in the `drum` kit's

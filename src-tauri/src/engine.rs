@@ -2713,19 +2713,26 @@ mod tests {
     /// the downbeat was the quietest thing in the bar. A broadband check
     /// cannot see that, and did not.
     ///
-    /// Measured through `laptop_band_energy`, the old premix scores -0.46 dB
-    /// and fails; the current one scores +3.67. The other kits sit at +3.74
-    /// (wood) to +4.58 (beep), and the snare kit at +5.78, so a 2 dB floor
-    /// has real room on both sides rather than being fitted to today's mix.
+    /// Measured through `laptop_band_energy`: the old drum premix scores
+    /// -0.46 dB and fails. Today every kit sits between +3.67 and +4.58 —
+    /// drum +3.67, wood +3.74, click +4.24, snare +4.24, beep +4.58 — so a
+    /// 2 dB floor has real room on both sides rather than being fitted to
+    /// today's mix.
     ///
     /// NOTE that passing this is not the same as sounding good, and the
-    /// snare kit is the proof TWICE OVER. Its first version passed at +4.89
-    /// and was rejected as shy. Its second scored +6.39 — the widest margin
-    /// of any kit — and was rejected again, because the margin was bought by
-    /// making the plain beat a different instrument from the accent: a mid
-    /// tom, whose loudness sat under the 200 Hz this filter starts at. It
-    /// now scores +5.78 with both sounds being the same drum, which is a
-    /// smaller number and a better kit.
+    /// snare kit is the proof THREE TIMES OVER. Its first version passed at
+    /// +4.89 and was rejected as shy. Its second scored +6.39 — the widest
+    /// margin of any kit — and was rejected again, because the margin was
+    /// bought by making the plain beat a different instrument from the
+    /// accent: a mid tom, whose loudness sat under the 200 Hz this filter
+    /// starts at. Its third scored +5.78 with both sounds finally being the
+    /// same drum, and was rejected a third time — "the accent is
+    /// disproportionally loud and noisy" — because a margin 1.2 dB wider
+    /// than the loudest other kit is not an accent, it is a shout. At +4.24
+    /// it is in the middle of the pack, which is where it belongs.
+    ///
+    /// Three rejections, and the score went UP, then down, then down again.
+    /// That is the whole lesson of this test: it is a floor, not a target.
     ///
     /// So a ratio says the accent beats its own beat. It does not say either
     /// of them is loud enough to feel — that is
