@@ -1,4 +1,5 @@
 import { IS_MAC, IS_WINDOWS, IS_LINUX } from "../hotkeys";
+import { AppMark } from "./AppMark";
 import { WindowControls } from "./WindowControls";
 
 /**
@@ -32,7 +33,7 @@ import { WindowControls } from "./WindowControls";
 export function TitleBar() {
   return (
     <div className="app-titlebar" {...(!IS_MAC && { "data-tauri-drag-region": "" })}>
-      <span className="app-mark" aria-hidden="true" />
+      <AppMark />
       <span className="app-wordmark">yames</span>
       {(IS_WINDOWS || IS_LINUX) && <WindowControls />}
     </div>
