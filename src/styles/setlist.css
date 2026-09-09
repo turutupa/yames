@@ -207,12 +207,35 @@
   color: var(--text-primary);
 }
 
+/* The value holds the width of the LONGEST thing it can say, so pressing
+   + or − moves the number and nothing else.
+
+   84px was not that width: "Once through" overflowed it, so the field grew,
+   and the buttons either side of it — and everything after them in the row —
+   walked left and right as you stepped through the values. The owner: "if
+   the inside value changes the width changes too and things move around".
+
+   `ch` rather than px because these are translated: German's "Bis ich
+   stoppe" and Russian's "Пока не остановлю" are not the width of "Until I
+   stop it", and a pixel figure measured against English would clip or waste
+   room in the other fourteen. */
 .setlist-stepper-value {
   font-size: 13px;
   font-weight: 700;
   color: var(--text-primary);
-  min-width: 84px;
+  min-width: 9ch;
   text-align: center;
+}
+
+/* "No count-in" is the longest of its set; "12 times through" and "Until I
+   stop it" are the longest of theirs. Sized per stepper rather than one
+   number for both, or the count-in would carry the repeat's slack. */
+.setlist-stepper-value.is-countin {
+  min-width: 13ch;
+}
+
+.setlist-stepper-value.is-repeat {
+  min-width: 17ch;
 }
 
 .setlist-editor-note {
@@ -791,103 +814,4 @@
   .setlist-player-left {
     margin-top: 18px;
   }
-}
-
-/* =================== Leaving a setlist ===================
-
-   Escape and clicking the setlist you are already in both close it. Both are
-   one gesture, which is the wrong amount of effort to spend losing an
-   afternoon of edits — so a DIRTY setlist asks first. A clean one closes
-   without a word, because a dialog that always appears is one nobody reads. */
-
-.setlist-leave-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(2px);
-}
-
-.setlist-leave-card {
-  width: min(400px, calc(100vw - 48px));
-  padding: 22px 24px 20px;
-  border-radius: 14px;
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow, 0 20px 60px rgba(0, 0, 0, 0.6));
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.setlist-leave-title {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-}
-
-.setlist-leave-body {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.55;
-  color: var(--text-primary);
-}
-
-.setlist-leave-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-  flex-wrap: wrap;
-}
-
-.setlist-leave-actions button {
-  font: inherit;
-  font-size: 12.5px;
-  font-weight: 700;
-  padding: 9px 14px;
-  border-radius: 9px;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  background: none;
-  color: var(--text-secondary);
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-}
-
-/* Save leads and takes focus: it is the recoverable choice, and the common
-   reason you are reading this is that you meant to leave AND meant to keep
-   the work.
-
-   Two selectors deep, because `.setlist-leave-actions button` above is
-   (0,1,1) and a lone `.setlist-leave-save` is (0,1,0) — it lost, so the
-   button drew with `background: none` and its dark `--accent-text` ink
-   landed on the dark panel. It rendered as an empty box, which is exactly
-   what it looked like on screen. */
-.setlist-leave-actions .setlist-leave-save {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-text);
-}
-
-.setlist-leave-actions .setlist-leave-save:hover {
-  filter: brightness(1.08);
-}
-
-.setlist-leave-actions .setlist-leave-discard:hover {
-  color: var(--accent);
-  border-color: var(--accent-subtle-hover);
-}
-
-.setlist-leave-actions .setlist-leave-cancel:hover {
-  color: var(--text-primary);
-  border-color: var(--text-faint);
-}
-
-.setlist-leave-actions button:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
 }

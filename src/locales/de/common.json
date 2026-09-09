@@ -9,7 +9,14 @@
     "durationMinSec": "{{m}} Min {{s}} Sek",
     "durationSec": "{{s}} Sek",
     "language": "Sprache",
-    "languageHint": "Sprache der Oberfläche, wirkt sofort"
+    "languageHint": "Sprache der Oberfläche, wirkt sofort",
+    "unsaved": {
+      "title": "Nicht gespeicherte Änderungen",
+      "body": " hat ungespeicherte Änderungen.",
+      "save": "Speichern",
+      "discard": "Verwerfen",
+      "cancel": "Weiter bearbeiten"
+    }
   },
   "share": {
     "copyLink": "Link kopieren"

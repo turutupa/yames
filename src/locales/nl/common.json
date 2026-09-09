@@ -9,7 +9,14 @@
     "durationMinSec": "{{m}} min {{s}} sec",
     "durationSec": "{{s}} sec",
     "language": "Taal",
-    "languageHint": "Taal van de interface, werkt direct"
+    "languageHint": "Taal van de interface, werkt direct",
+    "unsaved": {
+      "title": "Niet-opgeslagen wijzigingen",
+      "body": " heeft wijzigingen die je niet hebt opgeslagen.",
+      "save": "Opslaan",
+      "discard": "Weggooien",
+      "cancel": "Verder bewerken"
+    }
   },
   "share": {
     "copyLink": "Link kopiëren"

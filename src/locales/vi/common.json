@@ -9,7 +9,14 @@
     "durationMinSec": "{{m}} phút {{s}} giây",
     "durationSec": "{{s}} giây",
     "language": "Ngôn ngữ",
-    "languageHint": "Ngôn ngữ giao diện, áp dụng ngay"
+    "languageHint": "Ngôn ngữ giao diện, áp dụng ngay",
+    "unsaved": {
+      "title": "Thay đổi chưa lưu",
+      "body": " có thay đổi bạn chưa lưu.",
+      "save": "Lưu",
+      "discard": "Bỏ",
+      "cancel": "Tiếp tục sửa"
+    }
   },
   "share": {
     "copyLink": "Sao chép liên kết"

@@ -128,13 +128,6 @@
       "beats_other": "{{count}} Schläge",
       "fewer": "Weniger Einzählschläge",
       "more": "Mehr Einzählschläge"
-    },
-    "leave": {
-      "title": "Nicht gespeicherte Änderungen",
-      "body": "„{{name}}“ hat ungespeicherte Änderungen.",
-      "save": "Speichern und schließen",
-      "discard": "Verwerfen und schließen",
-      "cancel": "Weiter bearbeiten"
     }
   }
 }

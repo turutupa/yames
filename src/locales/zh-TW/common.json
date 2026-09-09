@@ -9,7 +9,14 @@
     "durationMinSec": "{{m}} 分 {{s}} 秒",
     "durationSec": "{{s}} 秒",
     "language": "語言",
-    "languageHint": "介面語言，立即生效"
+    "languageHint": "介面語言，立即生效",
+    "unsaved": {
+      "title": "未儲存的變更",
+      "body": " 有尚未儲存的變更。",
+      "save": "儲存",
+      "discard": "捨棄",
+      "cancel": "繼續編輯"
+    }
   },
   "share": {
     "copyLink": "複製連結"

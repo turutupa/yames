@@ -9,7 +9,14 @@
     "durationMinSec": "{{m}}분 {{s}}초",
     "durationSec": "{{s}}초",
     "language": "언어",
-    "languageHint": "UI 언어, 즉시 적용됩니다"
+    "languageHint": "UI 언어, 즉시 적용됩니다",
+    "unsaved": {
+      "title": "저장하지 않은 변경",
+      "body": "에 저장하지 않은 변경이 있습니다.",
+      "save": "저장",
+      "discard": "버리기",
+      "cancel": "계속 편집"
+    }
   },
   "share": {
     "copyLink": "링크 복사"

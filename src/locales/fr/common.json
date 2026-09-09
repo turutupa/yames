@@ -9,7 +9,14 @@
     "durationMinSec": "{{m}} min {{s}} s",
     "durationSec": "{{s}} s",
     "language": "Langue",
-    "languageHint": "Langue de l'interface, appliquée immédiatement"
+    "languageHint": "Langue de l'interface, appliquée immédiatement",
+    "unsaved": {
+      "title": "Modifications non enregistrées",
+      "body": " a des modifications non enregistrées.",
+      "save": "Enregistrer",
+      "discard": "Abandonner",
+      "cancel": "Continuer"
+    }
   },
   "share": {
     "copyLink": "Copier le lien"

@@ -9,7 +9,14 @@
     "durationMinSec": "{{m}} 分 {{s}} 秒",
     "durationSec": "{{s}} 秒",
     "language": "语言",
-    "languageHint": "界面语言，立即生效"
+    "languageHint": "界面语言，立即生效",
+    "unsaved": {
+      "title": "未保存的更改",
+      "body": " 有尚未保存的更改。",
+      "save": "保存",
+      "discard": "放弃",
+      "cancel": "继续编辑"
+    }
   },
   "share": {
     "copyLink": "复制链接"

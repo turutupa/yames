@@ -136,7 +136,7 @@ export function SetlistParagraph({
           >
             −
           </button>
-          <span className="setlist-stepper-value">
+          <span className="setlist-stepper-value is-countin">
             {setlist.countIn
               ? t("setlist.countIn.beats", { count: setlist.countIn })
               : t("setlist.countIn.off")}
@@ -163,7 +163,7 @@ export function SetlistParagraph({
           >
             −
           </button>
-          <span className="setlist-stepper-value">{repeatLabel(t, setlist.repeat)}</span>
+          <span className="setlist-stepper-value is-repeat">{repeatLabel(t, setlist.repeat)}</span>
           <button
             type="button"
             aria-label={t("setlist.repeat.more")}

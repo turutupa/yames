@@ -9,7 +9,14 @@
     "durationMinSec": "{{m}} dk {{s}} sn",
     "durationSec": "{{s}} sn",
     "language": "Dil",
-    "languageHint": "Arayüz dili, anında uygulanır"
+    "languageHint": "Arayüz dili, anında uygulanır",
+    "unsaved": {
+      "title": "Kaydedilmemiş değişiklikler",
+      "body": " kaydetmediğin değişiklikler içeriyor.",
+      "save": "Kaydet",
+      "discard": "Vazgeç",
+      "cancel": "Düzenlemeye devam et"
+    }
   },
   "share": {
     "copyLink": "Bağlantıyı kopyala"

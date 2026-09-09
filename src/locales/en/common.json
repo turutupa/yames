@@ -9,7 +9,14 @@
     "durationMinSec": "{{m}}m {{s}}s",
     "durationSec": "{{s}}s",
     "language": "Language",
-    "languageHint": "UI language, applies immediately"
+    "languageHint": "UI language, applies immediately",
+    "unsaved": {
+      "title": "Unsaved changes",
+      "body": " has changes you have not saved.",
+      "save": "Save",
+      "discard": "Discard",
+      "cancel": "Keep editing"
+    }
   },
   "share": {
     "copyLink": "Copy link"
