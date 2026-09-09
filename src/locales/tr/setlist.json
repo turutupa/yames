@@ -128,6 +128,13 @@
       "beats_other": "{{count}} vuruş",
       "fewer": "Daha az sayım vuruşu",
       "more": "Daha çok sayım vuruşu"
+    },
+    "leave": {
+      "title": "Kaydedilmemiş değişiklikler",
+      "body": "“{{name}}” kaydetmediğin değişiklikler içeriyor.",
+      "save": "Kaydet ve kapat",
+      "discard": "Vazgeç ve kapat",
+      "cancel": "Düzenlemeye devam et"
     }
   }
 }

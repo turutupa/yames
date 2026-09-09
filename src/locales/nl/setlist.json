@@ -128,6 +128,13 @@
       "beats_other": "{{count}} tellen",
       "fewer": "Minder tellen aftellen",
       "more": "Meer tellen aftellen"
+    },
+    "leave": {
+      "title": "Niet-opgeslagen wijzigingen",
+      "body": "“{{name}}” heeft wijzigingen die je niet hebt opgeslagen.",
+      "save": "Opslaan en sluiten",
+      "discard": "Weggooien en sluiten",
+      "cancel": "Verder bewerken"
     }
   }
 }

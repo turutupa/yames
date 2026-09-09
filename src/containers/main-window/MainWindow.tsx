@@ -88,6 +88,7 @@ import { useBpmEditing } from "./hooks/useBpmEditing";
 import { usePlaybackClock } from "./hooks/usePlaybackClock";
 import { useLibraryFit } from "./hooks/useLibraryFit";
 import { useSetlistSession } from "./hooks/useSetlistSession";
+import { LeaveSetlistDialog } from "../../components/setlist/LeaveSetlistDialog";
 import { SetlistParagraph } from "../../components/setlist/SetlistParagraph";
 import { SetlistPlayer } from "../../components/setlist/SetlistPlayer";
 import { useAudioError } from "./hooks/useAudioError";
@@ -575,6 +576,38 @@ export function MainWindow() {
 
   // Use measureBeat from the engine — it resets correctly when groups change mid-play,
   // unlike beat % beatsPerMeasure which produces misaligned values after a meter switch.
+  /**
+   * Leaving the setlist, from either door: Escape, or clicking the one you
+   * are already in.
+   *
+   * A clean setlist closes without a word. A dirty one asks — losing an
+   * afternoon of edits to a single keypress is the failure worth a dialog,
+   * and a dialog that appears every time is one nobody reads.
+   */
+  const [leaving, setLeaving] = useState(false);
+  const askToLeave = useCallback(() => {
+    if (!setlistSession.setlist) return;
+    if (setlistSession.dirty) setLeaving(true);
+    else setlistSession.closeSetlist();
+  }, [setlistSession]);
+
+  // Escape is the other door. Not while something is typed into, and not
+  // while a popover owns the key — those close themselves first, and a
+  // window-level handler that fired anyway would close the setlist out from
+  // under a field you were editing.
+  useEffect(() => {
+    if (!setlistSession.setlist) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      const el = document.activeElement as HTMLElement | null;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
+      if (document.querySelector('[role="dialog"], [role="alertdialog"]')) return;
+      askToLeave();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [setlistSession.setlist, askToLeave]);
+
   const activeBeat = currentBeat ? currentBeat.measureBeat : -1;
   const activeSub = currentBeat ? currentBeat.subdivision : -1;
   const isDownbeat = currentBeat?.isDownbeat ?? false;
@@ -938,7 +971,12 @@ export function MainWindow() {
           presetShortcut={platformKey(keyBindings["toggle-sidebar"] || "")}
           setlists={setlistSession.setlists}
           activeSetlistId={setlistSession.setlist?.id ?? null}
-          onLoadSetlist={setlistSession.loadSetlist}
+          onLoadSetlist={(next) =>
+            // Clicking the setlist you are already in is the way out of it,
+            // the same way clicking the open tab closes it in most things
+            // with tabs. Any other setlist just loads.
+            next.id === setlistSession.setlist?.id ? askToLeave() : setlistSession.loadSetlist(next)
+          }
           onNewSetlist={handleNewSetlist}
           onDeleteSetlist={setlistSession.deleteSetlist}
           onRenameSetlist={setlistSession.renameSetlist}
@@ -1023,6 +1061,23 @@ export function MainWindow() {
             bpm={state.bpm}
             isPlaying={state.isPlaying}
             currentBeat={currentBeat}
+          />
+        )}
+
+        {leaving && setlistSession.setlist && (
+          <LeaveSetlistDialog
+            name={setlistSession.setlist.name}
+            onSave={() => {
+              void setlistSession.saveActiveSetlist().then(() => {
+                setLeaving(false);
+                setlistSession.closeSetlist();
+              });
+            }}
+            onDiscard={() => {
+              setLeaving(false);
+              setlistSession.closeSetlist();
+            }}
+            onCancel={() => setLeaving(false)}
           />
         )}
 

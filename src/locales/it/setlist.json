@@ -128,6 +128,13 @@
       "beats_other": "{{count}} movimenti",
       "fewer": "Meno movimenti di intro",
       "more": "Più movimenti di intro"
+    },
+    "leave": {
+      "title": "Modifiche non salvate",
+      "body": "«{{name}}» ha modifiche non salvate.",
+      "save": "Salva e chiudi",
+      "discard": "Scarta e chiudi",
+      "cancel": "Continua a modificare"
     }
   }
 }

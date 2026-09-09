@@ -128,6 +128,13 @@
       "beats_other": "{{count}} tiempos",
       "fewer": "Menos tiempos de entrada",
       "more": "Más tiempos de entrada"
+    },
+    "leave": {
+      "title": "Cambios sin guardar",
+      "body": "«{{name}}» tiene cambios que no has guardado.",
+      "save": "Guardar y cerrar",
+      "discard": "Descartar y cerrar",
+      "cancel": "Seguir editando"
     }
   }
 }

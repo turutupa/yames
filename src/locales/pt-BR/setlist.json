@@ -128,6 +128,13 @@
       "beats_other": "{{count}} tempos",
       "fewer": "Menos tempos de contagem",
       "more": "Mais tempos de contagem"
+    },
+    "leave": {
+      "title": "Alterações não salvas",
+      "body": "“{{name}}” tem alterações que você não salvou.",
+      "save": "Salvar e fechar",
+      "discard": "Descartar e fechar",
+      "cancel": "Continuar editando"
     }
   }
 }
