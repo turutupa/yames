@@ -555,3 +555,66 @@ describe("the count-in at the top of a setlist", () => {
     expect(effects.map((e) => e.kind)).toEqual(["finished"]);
   });
 });
+
+describe("starting where you are looking", () => {
+  const three = setlistOf([
+    step("one", { kind: "bars", bars: 4 }),
+    step("two", { kind: "bars", bars: 4 }),
+    step("three", { kind: "bars", bars: 4 }),
+  ]);
+
+  it("begins on the step you asked for, and applies THAT step", () => {
+    // Pressing start while looking at step three and hearing step one is a
+    // surprise, and skipping twice to get back is a chore.
+    const { state, effects } = setlistReduce(three, IDLE_SETLIST_RUN, {
+      kind: "start",
+      seconds: 0,
+      from: 2,
+    });
+    expect(state.stepIndex).toBe(2);
+    expect(effects[0]).toEqual({ kind: "applyStep", index: 2, step: three.steps[2] });
+  });
+
+  it("begins at the top when nobody says otherwise", () => {
+    const { state, effects } = setlistReduce(three, IDLE_SETLIST_RUN, {
+      kind: "start",
+      seconds: 0,
+    });
+    expect(state.stepIndex).toBe(0);
+    expect(effects[0]).toEqual({ kind: "applyStep", index: 0, step: three.steps[0] });
+  });
+
+  it("clamps a selection that is no longer there", () => {
+    // Remove the step you had open, press start: the index outlives it, and
+    // an unclamped one would read off the end of the array.
+    for (const from of [7, -3, 2.7]) {
+      const { state } = setlistReduce(three, IDLE_SETLIST_RUN, { kind: "start", seconds: 0, from });
+      expect(state.stepIndex).toBeGreaterThanOrEqual(0);
+      expect(state.stepIndex).toBeLessThan(three.steps.length);
+    }
+  });
+
+  it("runs on from there rather than looping back to the top", () => {
+    // Starting at two must play two then three and finish — not two, one.
+    let state = setlistReduce(three, IDLE_SETLIST_RUN, { kind: "start", seconds: 0, from: 1 }).state;
+    const applied: number[] = [1];
+    for (let i = 0; i < 400 && state.phase !== "finished"; i++) {
+      const r = setlistReduce(three, state, { kind: "beat", isDownbeat: true, seconds: i });
+      state = r.state;
+      for (const e of r.effects) if (e.kind === "applyStep") applied.push(e.index);
+    }
+    expect(applied).toEqual([1, 2]);
+    expect(state.phase).toBe("finished");
+  });
+
+  it("counts you in at the step you started on, not at step one", () => {
+    const counted = { ...three, countIn: 4 };
+    const { effects } = setlistReduce(counted, IDLE_SETLIST_RUN, {
+      kind: "start",
+      seconds: 0,
+      from: 2,
+    });
+    expect(effects.map((e) => e.kind)).toEqual(["applyStep", "countIn"]);
+    expect(effects[0]).toMatchObject({ index: 2 });
+  });
+});

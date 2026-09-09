@@ -85,7 +85,8 @@
       "stepOf": "{{total}}단계 중 {{number}}단계",
       "nextIn": "{{gap}} 뒤 다음 단계",
       "nextWhenYouSay": "신호하면 다음 단계",
-      "skip": "다음으로 건너뛰기"
+      "skip": "다음으로 건너뛰기",
+      "startAtStep": "{{number}}단계부터 시작"
     },
     "nowShort": "재생 중",
     "emptyLead": "셋리스트는 단계를 순서대로 하나씩 재생합니다. 아래에서 첫 단계를 추가하세요.",

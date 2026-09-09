@@ -40,11 +40,21 @@ export function useSetlistRunner(
   setlist: Setlist | null,
   isPlaying: boolean,
   currentBeat: BeatEvent | null,
+  /** Index to begin on — the step the editor has open. */
+  startFrom = 0,
 ): SetlistRunner {
   const [state, setState] = useState<SetlistRunState>(IDLE_SETLIST_RUN);
   const stateRef = useRef(state);
   const setlistRef = useRef(setlist);
   setlistRef.current = setlist;
+  /**
+   * Read through a ref, never a dependency. The effect below starts the run
+   * when `isPlaying` turns true; if the starting index were in its dependency
+   * array, clicking a different step mid-run would re-dispatch `start` and
+   * restart the setlist under the player.
+   */
+  const startFromRef = useRef(startFrom);
+  startFromRef.current = startFrom;
 
   const startedAt = useRef<number | null>(null);
   const lastBeat = useRef<number | null>(null);
@@ -121,7 +131,7 @@ export function useSetlistRunner(
     }
     startedAt.current = Date.now();
     lastBeat.current = null;
-    dispatch({ kind: "start", seconds: 0 });
+    dispatch({ kind: "start", seconds: 0, from: startFromRef.current });
     const id = setInterval(() => setTick((t) => t + 1), 500);
     return () => clearInterval(id);
   }, [setlist?.id, isPlaying, dispatch, restoreRestVolume]);

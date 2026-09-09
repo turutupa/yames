@@ -85,7 +85,8 @@
       "stepOf": "ステップ {{number}} / {{total}}",
       "nextIn": "次まで {{gap}}",
       "nextWhenYouSay": "次は合図したら",
-      "skip": "次へ進む"
+      "skip": "次へ進む",
+      "startAtStep": "ステップ {{number}} から開始"
     },
     "nowShort": "再生中",
     "emptyLead": "セットリストはステップを順番に再生します。まず最初のステップを下から追加してください。",

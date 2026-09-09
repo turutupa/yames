@@ -85,7 +85,8 @@
       "stepOf": "Bước {{number}} trên {{total}}",
       "nextIn": "Còn {{gap}} tới bước sau",
       "nextWhenYouSay": "Bước sau khi bạn ra hiệu",
-      "skip": "Sang bước sau"
+      "skip": "Sang bước sau",
+      "startAtStep": "Bắt đầu từ bước {{number}}"
     },
     "nowShort": "Đang chạy",
     "emptyLead": "Setlist phát các bước theo thứ tự, lần lượt từng bước. Thêm bước đầu tiên bên dưới.",
