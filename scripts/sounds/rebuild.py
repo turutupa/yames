@@ -117,6 +117,59 @@ script for the full table.
    half of this kit the owner stopped complaining about, so it was not
    touched; every number above moved because the beat moved.
 
+6. THE SNARE KIT A THIRD TIME: COHERENT, AND NOW THE ACCENT IS TOO MUCH.
+   "The snare 'big' accent is really horrible, the other snare beats are
+   more subtle but the accent is disproportionally loud and noisy, can we
+   fix the accent to something more subtle but still an accent?"
+
+   Point 5 shipped point 4's accent unchanged, and point 4 had built that
+   accent for one job: to be loud enough to feel. It got there the way
+   `_snare` says — "the ring is where the loudness lives" — with a
+   330 Hz–8 kHz noise bed decaying at 13/s under the whole 300 ms. That was
+   the right answer against a side-stick and a tom. Once the plain beat was
+   the same drum struck softly, with its wires damped at 30/s, the bed was
+   the one thing left in the bar that did not sound like the drum the owner
+   had just said he liked. Measured, the ring was 73% of the accent's snare
+   energy, 55% of it above 4 kHz, and it still held 7.4% of its energy past
+   100 ms where the beat's ring holds 0.2%. "Loud" and "noisy" are the same
+   layer.
+
+   Two things were NOT the problem, and they are the two obvious levers.
+   The peak was not: by peak the accent stands +6.33 dB over its beat and
+   the `drum` kit's accent stands +6.49 over its own, so the onset was
+   already in proportion, and lowering the ceiling would have cut the part
+   of the hit nobody had complained about. And `crack` was not: it is 3% of
+   the energy, and pulling it RAISES the margin, because `_norm` hands back
+   at the peak whatever it takes off. So the wires damp at 22/s now instead
+   of 13/s, and nothing else moved — shell, kick, ceiling and `snare_low`
+   are byte-for-byte what point 5 shipped. Measured 44.1 kHz:
+
+     snare kit        bar   accent vs beat  accent vs beat  accent  ring past
+                     LUFS    200Hz–4kHz      K-weighted      peak    100 ms
+     ring 13/s     −21.61     +5.77 dB        +7.03 dB      0.970     7.4%
+     ring 22/s     −22.15     +4.21 dB        +6.13 dB      0.970     1.2%
+     `drum` kit    −22.63     +3.63 dB        +3.84 dB      0.970       —
+
+   The accent gives up 1.56 dB band-limited and lands in the `drum` kit's
+   territory, which is the accent the owner has already accepted; the bar
+   stays 0.48 dB louder than the drum kit's, so point 4 does not come back.
+   (The Rust guard tests measure the same files resampled to 48 kHz and
+   read +4.24 dB and a bar +0.65 dB over the drum kit; the drift between
+   the two rates is the resampler, and was there before this change.)
+   The ring was chosen over the ceiling on what each one costs: 13→22 spends
+   0.54 dB of bar loudness to take 1.56 dB off the margin, where a ceiling
+   of 0.85 spends 0.68 to take 1.14 — the tail carries loudness without
+   carrying accent, so it is the cheap thing to give up. And 22/s is still
+   slower than the beat's 30/s: the accent's wires are still thrown farther,
+   just not 2.3 times as far.
+
+   WHAT THIS DOES NOT FIX, if the complaint comes back. K-weighted, the
+   accent still stands +6.13 dB over its beat against the drum kit's +3.84,
+   and nearly all of that difference is the kick, which the band-pass cannot
+   see and headphones can. If the owner is listening on headphones and still
+   hears "disproportionate", the next lever is the kick's 0.50 in
+   `snare_high`, not the ring.
+
 THE TRANSFORM STAGE IS NOT IDEMPOTENT — running it twice adds a second beater
 to the kick. It refuses to run when every sample already ends in silence,
 which is true only after it has run. To re-run it, restore the originals:
@@ -319,7 +372,12 @@ SNARE_SHELL = ((196, 24, 1.00), (292, 32, 0.62), (421, 44, 0.34))
 # attack. The shell and ring GAINS are identical in both, because the drum
 # resonates the same way however hard you hit it — only the amount changes,
 # and `_norm` plus the ceiling in each caller set the amount.
-_HARD = (300.0, 13, 0.55, 0.30, (22, 23, 25))
+#
+# The hard stroke's ring decay was 13 and is 22: at 13 it was the loudest and
+# the noisiest thing in the bar by a margin the owner could hear — point 6 in
+# the module docstring — and it is the one number that turned the accent down
+# without touching the hit itself. Still slower than the soft stroke's 30.
+_HARD = (300.0, 22, 0.55, 0.30, (22, 23, 25))
 _SOFT = (190.0, 30, 0.36, 0.20, (52, 53, 55))
 
 
@@ -357,9 +415,18 @@ def _snare(sr, hard=True):
     rather than decayed. It measured a respectable peak and almost no
     loudness, which is what "shy" sounds like. A decaying noise bed adds
     energy for 250 ms without touching the peak, which is the only currency
-    available when the peak is already spent. So the accent keeps its 13/s
-    ring over the full 300 ms; only the soft stroke gives that up, and
-    `snare_low` explains what it buys back."""
+    available when the peak is already spent. So the accent keeps a ring
+    over the full 300 ms, and the soft stroke gives most of that up —
+    `snare_low` explains what it buys back.
+
+    THE RING IS ALSO WHERE THE NOISE LIVES, which is the same sentence read
+    from the other side. At 13/s the accent's ring was 73% of its snare
+    energy and was still hissing at −34 dBFS when the file ended; measured
+    against a beat whose wires damp at 30/s, that was "disproportionally
+    loud and noisy". It damps at 22/s now — still slower than the soft
+    stroke, so the accent's wires are still thrown farther — and the bed
+    holds 1.2% of its energy past 100 ms instead of 7.4%. Point 6 in the
+    module docstring has the whole table."""
     ms, ring_decay, crack_gain, stick_gain, seeds = _HARD if hard else _SOFT
     n = int(sr * ms / 1000)
     t = np.arange(n) / sr
@@ -401,7 +468,19 @@ def snare_high(sr):
     so it does more for "this is the downbeat" than another decibel of level
     would — and kick-with-snare is the most ordinary thing a drummer plays on
     a "1". Taking it out would have cost the band-limited margin and the bar
-    loudness at once, which is the complaint before this one."""
+    loudness at once, which is the complaint before this one.
+
+    THE ACCENT HAS BEEN TURNED DOWN ONCE, and it was the ring that moved,
+    not this mix. "The accent is disproportionally loud and noisy, can we
+    fix the accent to something more subtle but still an accent?" At +5.77 dB
+    band-limited over its beat it was 2.1 dB wider than the `drum` kit's
+    accent; with the wires damped at 22/s instead of 13/s it is +4.21, which
+    is that kit's territory. The kick's 0.50, the 5 ms, the drive and the
+    0.97 ceiling are as they were, because by PEAK the accent already stood
+    over its beat by the same +6.3 dB the drum kit's does — the onset was in
+    proportion; the tail was not. Point 6 in the module docstring has the
+    measurements, and names the kick as the next lever if "disproportionate"
+    turns out to have been said through headphones."""
     s, k = _snare(sr), _kick(sr)
     delay = int(sr * 5.0 / 1000)
     n = max(len(s), delay + len(k))
@@ -451,10 +530,16 @@ def snare_low(sr):
     already accepted. It also keeps something the beat categorically does not
     have: the kick underneath it.
 
+    (Those accent numbers are the ones this beat was tuned against, and the
+    accent has since been damped — point 6 — so the kit as shipped measures
+    −22.15 LUFS, +4.21 dB and +6.13 dB. This beat did not move: the owner
+    said he likes it.)
+
     190 ms rather than the accent's 300, and the wires damp at 30/s rather
-    than 13/s, because a soft stroke does not throw them as far. Still well
-    over the 100 ms that `the_snare_kit_is_not_quieter_than_the_drum_kit`
-    requires, and 126 energy units against `drum_low`'s 106.
+    than the accent's 22/s, because a soft stroke does not throw them as
+    far. Still well over the 100 ms that
+    `the_snare_kit_is_not_quieter_than_the_drum_kit` requires, and 127
+    energy units against `drum_low`'s 106.
 
     Saturated at 1.5 rather than peak-normalised, for the reason in
     `_saturate`: the noise layers have the loudness and the shell modes have
