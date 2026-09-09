@@ -192,7 +192,20 @@ function HelpGlyph() {
   );
 }
 
-export type MainView = "beat" | "drill" | "settings";
+/**
+ * `setlist` is a MODE, not a corner of the metronome.
+ *
+ * It lived inside `beat` first, on the argument that a setlist is the same
+ * metronome pointed at a routine. What settled it the other way is what the
+ * rail already means by a mode — a stage of its own, a transport verb of its
+ * own, and a library of its own — and a setlist had all three while pretending
+ * to be a fourth kind of thing on somebody else's tab.
+ *
+ * Configuring one is also the DRILL's flow rather than the metronome's: you
+ * write a plan out as sentences and press Start, and it runs itself and
+ * changes tempo as it goes. The metronome is knobs and a click.
+ */
+export type MainView = "beat" | "drill" | "setlist" | "settings";
 
 interface MainHeaderProps {
   state: AppState;

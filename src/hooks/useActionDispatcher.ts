@@ -16,12 +16,14 @@ import type { HotkeyAction } from "../hotkeys";
 import { FULLSCREEN_EXIT_DELAY } from "../hotkeys";
 import { meterKey, stepMeter } from "../utils/meter";
 
-export type ViewName = "beat" | "drill" | "settings";
+export type ViewName = "beat" | "drill" | "setlist" | "settings";
 
 interface ActionDispatcherArgs {
   view: ViewName;
   setView: (v: ViewName) => void;
-  prevTab: MutableRefObject<"beat" | "drill">;
+  prevTab: MutableRefObject<"beat" | "drill" | "setlist">;
+  /** Whether the setlist tab has one open — with none, there is nothing to start. */
+  setlistLoaded: boolean;
   state: AppState;
   isFullscreen: boolean;
   setIsFullscreen: (v: boolean) => void;
@@ -48,6 +50,7 @@ export function useActionDispatcher({
   view,
   setView,
   prevTab,
+  setlistLoaded,
   state,
   isFullscreen,
   setIsFullscreen,
@@ -82,7 +85,7 @@ export function useActionDispatcher({
           case "settings":
             if (view === "settings") setView(prevTab.current);
             else {
-              prevTab.current = view as "beat" | "drill";
+              prevTab.current = view as "beat" | "drill" | "setlist";
               setView("settings");
             }
             break;
@@ -112,7 +115,16 @@ export function useActionDispatcher({
             } else {
               startSpeedRamp();
             }
+          } else if (view === "setlist") {
+            // The setlist tab can be opened with nothing in it, and the play
+            // key there must not quietly start a bare metronome click behind
+            // an empty screen.
+            if (setlistLoaded) togglePlayback();
           } else if (view === "beat") {
+            // A setlist starts with the same transport the metronome does —
+            // the runner picks it up from `isPlaying`. Without this branch
+            // the play key would do nothing at all on the setlist tab, which
+            // is the shape of bug a new `view` value quietly introduces.
             togglePlayback();
           }
           break;

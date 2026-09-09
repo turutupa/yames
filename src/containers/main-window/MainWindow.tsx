@@ -89,6 +89,7 @@ import { usePlaybackClock } from "./hooks/usePlaybackClock";
 import { useLibraryFit } from "./hooks/useLibraryFit";
 import { useSetlistSession } from "./hooks/useSetlistSession";
 import { UnsavedChangesDialog } from "../../components/UnsavedChangesDialog";
+import { SetlistEmpty } from "../../components/setlist/SetlistEmpty";
 import { SetlistParagraph } from "../../components/setlist/SetlistParagraph";
 import { SetlistPlayer } from "../../components/setlist/SetlistPlayer";
 import { useAudioError } from "./hooks/useAudioError";
@@ -766,6 +767,7 @@ export function MainWindow() {
     view,
     setView,
     prevTab,
+    setlistLoaded: !!setlistSession.setlist,
     state,
     isFullscreen,
     setIsFullscreen,
@@ -1043,7 +1045,6 @@ export function MainWindow() {
           onNewSetlist={handleNewSetlist}
           onDeleteSetlist={setlistSession.deleteSetlist}
           onRenameSetlist={setlistSession.renameSetlist}
-          onAddPresetToSetlist={setlistSession.setlist ? setlistSession.addPresetAsStep : undefined}
           coachOpen={session.cardOpen}
           coachActive={session.active}
           coachListening={evaluation.enabled}
@@ -1132,7 +1133,7 @@ export function MainWindow() {
 
             Scenery needs something to be scenery FOR. The plain metronome
             has controls filling the width; neither setlist room does. */}
-        {view === "beat" && !setlistSession.setlist && (
+        {view === "beat" && (
           <MetronomeFigure
             bpm={state.bpm}
             isPlaying={state.isPlaying}
@@ -1166,8 +1167,8 @@ export function MainWindow() {
 
             Neither room stacks anything above the stage, so each gets the
             same 672px the metronome gets with no setlist loaded. */}
-        {view === "beat" && setlistSession.setlist ? (
-          setlistSession.setlistPlaying ? (
+        {view === "setlist" ? (
+          setlistSession.setlist && setlistSession.setlistPlaying ? (
             <SetlistPlayer
               setlist={setlistSession.setlist}
               step={setlistSession.runner.step!}
@@ -1181,7 +1182,7 @@ export function MainWindow() {
               countIn={state.countIn ?? { beats: 0, done: 0 }}
               onEdit={setlistSession.editWhileRunning}
             />
-          ) : (
+          ) : setlistSession.setlist ? (
             <SetlistParagraph
               setlist={setlistSession.setlist}
               selectedStepId={setlistSession.selectedStepId}
@@ -1192,6 +1193,11 @@ export function MainWindow() {
               onAddStep={setlistSession.addStepFromNow}
               onBackToPlaying={setlistSession.backToPlaying}
             />
+          ) : (
+            /* The tab standing up cold. A mode can be clicked with nothing
+               loaded — the one state this screen never had while it was a
+               corner of the metronome. */
+            <SetlistEmpty onNew={() => void handleNewSetlist()} />
           )
         ) : view === "beat" ? (
           <MetronomeView
@@ -1318,7 +1324,10 @@ export function MainWindow() {
             containerRef={contentRef}
           />
         )}
-        {(view === "beat" || view === "drill") && (
+        {/* Nothing to transport on an empty setlist tab. */}
+        {(view === "beat" ||
+          view === "drill" ||
+          (view === "setlist" && !!setlistSession.setlist)) && (
           <Transport
             view={view}
             isPlaying={state.isPlaying}
@@ -1347,7 +1356,7 @@ export function MainWindow() {
           />
         )}
       </div>
-      {(view === "beat" || view === "drill") && (
+      {(view === "beat" || view === "drill" || view === "setlist") && (
       <CoachCard
         open={session.cardOpen}
         active={session.active}

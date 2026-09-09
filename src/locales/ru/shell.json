@@ -1,6 +1,7 @@
 {
   "nav": {
     "metronome": "Метроном",
+    "setlist": "Сет-лист",
     "drill": "Темповая тренировка"
   },
   "tooltip": {
@@ -22,6 +23,7 @@
   "presets": {
     "title": "Пресеты",
     "titleDrill": "Тренировки",
+    "titleSetlist": "Сет-листы",
     "saveCurrent": "Сохранить текущие настройки",
     "search": "Поиск в библиотеке",
     "searchPlaceholder": "Поиск…",

@@ -1,6 +1,7 @@
 {
   "nav": {
     "metronome": "Metronome",
+    "setlist": "Setlist",
     "drill": "Drill"
   },
   "tooltip": {
@@ -22,6 +23,7 @@
   "presets": {
     "title": "Presets",
     "titleDrill": "Drills",
+    "titleSetlist": "Setlists",
     "saveCurrent": "Save current settings",
     "search": "Search the library",
     "searchPlaceholder": "Search...",

@@ -15,7 +15,7 @@ export interface PresetSidebarHandle {
 
 interface PresetSidebarProps {
   state: AppState;
-  view: "beat" | "drill";
+  view: "beat" | "drill" | "setlist";
   isOpen: boolean;
   onLoadPreset: (preset: Preset) => void;
   onActiveChange: (preset: Preset | null, dirty: boolean) => void;
@@ -32,8 +32,6 @@ interface PresetSidebarProps {
   onNewSetlist?: () => void;
   onDeleteSetlist?: (id: string) => void;
   onRenameSetlist?: (id: string, name: string) => void;
-  /** "Add this preset as a step" — offered only while a setlist is loaded. */
-  onAddPresetToSetlist?: (preset: Preset) => void;
 }
 
 function generateId(): string {
@@ -136,7 +134,6 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   onNewSetlist,
   onDeleteSetlist,
   onRenameSetlist,
-  onAddPresetToSetlist,
 }, ref) {
   const [allPresets, setAllPresets] = useState<Preset[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -172,6 +169,16 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   }, []);
 
   // Filter presets for the current view, then by search query
+  /**
+   * Which play tab a NEW preset would belong to.
+   *
+   * A preset is a metronome or a drill configuration; there is no such thing
+   * as a setlist preset. On the setlist tab the affordances that would call
+   * this are not rendered at all, so the fallback is unreachable — it exists
+   * so the type says what is true rather than being asserted away.
+   */
+  const presetView: "beat" | "drill" = view === "setlist" ? "beat" : view;
+
   const viewPresets = allPresets
     .filter((p) => p.view === view)
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -237,7 +244,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
       setAdding(false);
       return;
     }
-    const preset = stateToPreset(name, state, view);
+    const preset = stateToPreset(name, state, presetView);
     await savePreset(preset);
     setAllPresets((prev) => [...prev, preset]);
     setActiveId(preset.id);
@@ -274,7 +281,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
       const existing = allPresets.find((p) => p.id === id);
       if (!existing) return;
       const updated: Preset = {
-        ...stateToPreset(existing.name, state, view),
+        ...stateToPreset(existing.name, state, presetView),
         id: existing.id,
         createdAt: existing.createdAt,
       };
@@ -323,7 +330,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
       const existing = allPresets.find((p) => p.id === activeId);
       if (!existing) return;
       const updated: Preset = {
-        ...stateToPreset(existing.name, state, view),
+        ...stateToPreset(existing.name, state, presetView),
         id: existing.id,
         createdAt: existing.createdAt,
       };
@@ -356,9 +363,11 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
     </svg>
   );
 
-  // Only the metronome list carries setlists: a setlist step is a metronome
-  // configuration, and a drill is a ramp the setlist runtime has no way to run.
-  const showSetlists = view === "beat" && !!setlists;
+  // The setlist tab's library IS the setlists, and no other tab's carries
+  // them. This is what a mode buys that a section heading could not: each
+  // list holds one kind of thing, so nothing has to be labelled to be told
+  // apart, and the panel's title is true on every tab.
+  const showSetlists = view === "setlist" && !!setlists;
   const setlistList = showSetlists
     ? (search.trim()
         ? setlists!.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
@@ -385,7 +394,13 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               metronome and drills on the drill screen, and it already filters
               by `view`. Titling both PRESETS said one of them wrongly. */}
           <span className="preset-sidebar-title">
-            {t(view === "drill" ? "presets.titleDrill" : "presets.title")}
+            {t(
+              view === "drill"
+                ? "presets.titleDrill"
+                : view === "setlist"
+                  ? "presets.titleSetlist"
+                  : "presets.title",
+            )}
           </span>
           <div className="preset-sidebar-header-actions">
             <button
@@ -419,7 +434,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
                 {setlistIcon}
               </button>
             )}
-            {viewPresets.length < MAX_PRESETS && (
+            {!showSetlists && viewPresets.length < MAX_PRESETS && (
               <button
                 className="preset-sidebar-head-btn preset-sidebar-add"
                 onClick={() => setAdding(true)}
@@ -536,9 +551,13 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               )}
             </div>
           ))}
-          {setlistList.length > 0 && <div className="setlist-item-rule" aria-hidden="true" />}
+          {/* The rule separates setlists from presets; on the setlist tab
+              there are no presets under it to separate. */}
+          {setlistList.length > 0 && !showSetlists && (
+            <div className="setlist-item-rule" aria-hidden="true" />
+          )}
 
-          {adding && (
+          {!showSetlists && adding && (
             <div className="preset-sidebar-item adding">
               <input
                 ref={inputRef}
@@ -559,7 +578,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               />
             </div>
           )}
-          {presets.map((p) => (
+          {!showSetlists && presets.map((p) => (
             <button
               key={p.id}
               className={`preset-sidebar-item ${activeId === p.id ? "active" : ""} ${activeId === p.id && dirty ? "dirty" : ""}`}
@@ -599,7 +618,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               )}
             </button>
           ))}
-          {presets.length === 0 && !adding && (
+          {!showSetlists && presets.length === 0 && !adding && (
             search.trim() ? (
               <div className="preset-sidebar-empty">{t("presets.noResults")}</div>
             ) : (
@@ -650,20 +669,6 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
             {t("presets.rename")}
           </button>
           <button onClick={() => handleUpdate(contextMenu.id)}>{t("presets.update")}</button>
-          {/* U9.1's consolation: a step is a copy of a preset, so the two
-              directions stay one call each. Offered only while a setlist is
-              loaded — with nothing to add to, the row would be a dead end. */}
-          {onAddPresetToSetlist && (
-            <button
-              onClick={() => {
-                const p = allPresets.find((p) => p.id === contextMenu.id);
-                if (p) onAddPresetToSetlist(p);
-                setContextMenu(null);
-              }}
-            >
-              {t("setlist.addPresetAsStep")}
-            </button>
-          )}
           <button
             className="preset-context-delete"
             onClick={() => handleDelete(contextMenu.id)}

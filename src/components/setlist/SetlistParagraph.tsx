@@ -294,7 +294,6 @@ export function SetlistParagraph({
           <button type="button" className="setlist-add-row" onClick={onAddStep}>
             {t("setlist.addStepPlain")}
           </button>
-          <span className="setlist-paragraph-orlibrary">{t("setlist.orFromLibrary")}</span>
         </div>
       </div>
     </section>

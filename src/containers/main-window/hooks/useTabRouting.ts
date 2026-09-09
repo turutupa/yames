@@ -30,7 +30,7 @@ import type { MainView } from "../MainHeader";
  * applied (skipping `settings`, which is never persisted as a default).
  */
 
-export type PlayTab = "beat" | "drill";
+export type PlayTab = "beat" | "drill" | "setlist";
 
 export interface UseTabRoutingArgs {
   isPlaying: boolean;

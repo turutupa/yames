@@ -78,7 +78,7 @@ describe("useSetlistSession", () => {
     await act(async () => {
       result.current.loadSetlist(CHAIN);
     });
-    expect(setView).toHaveBeenCalledWith("beat");
+    expect(setView).toHaveBeenCalledWith("setlist");
     // Only one thing can be marked as loaded in the library.
     expect(onSetlistLoaded).toHaveBeenCalled();
     expect(result.current.selectedStepId).toBe("s1");

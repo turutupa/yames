@@ -103,7 +103,7 @@ interface UseSetlistSessionArgs {
   state: AppState;
   isPlaying: boolean;
   currentBeat: BeatEvent | null;
-  setView: (view: "beat") => void;
+  setView: (view: "setlist") => void;
   /** Loading a setlist takes the preset's place in the context bar. */
   onSetlistLoaded: () => void;
 }
@@ -215,7 +215,7 @@ export function useSetlistSession({
 
   const loadSetlist = useCallback(
     (next: Setlist) => {
-      setView("beat");
+      setView("setlist");
       onSetlistLoaded();
       setSetlist(next);
       setSaved(next);
@@ -327,8 +327,6 @@ export function useSetlistSession({
    * first step of an empty setlist has nothing above it and takes the engine's
    * current settings, which is the old behaviour exactly where it still makes
    * sense.
-   *
-   * Adding a preset from the library is unchanged; that is `addPresetAsStep`.
    */
   const addStepFromNow = useCallback(() => {
     if (!setlist) return;
@@ -344,11 +342,6 @@ export function useSetlistSession({
     setSetlist(addStep(setlist, step));
     setSelectedStepId(step.id);
   }, [setlist, state, t]);
-
-  /** U9.1's other direction: a preset copied in as a step, never referenced. */
-  const addPresetAsStep = useCallback((preset: Preset) => {
-    setSetlist((current) => (current ? addStep(current, presetToSetlistStep(preset)) : current));
-  }, []);
 
   const dirty = useMemo(
     () => (setlist && saved ? JSON.stringify(setlist) !== JSON.stringify(saved) : false),
@@ -377,7 +370,6 @@ export function useSetlistSession({
     deleteSetlist,
     renameSetlist,
     addStepFromNow,
-    addPresetAsStep,
     /** 1-based, for the transport's "Start at step 3". */
     startAt: setlist ? selectedIndex + 1 : 0,
     /** True while the setlist is on a step — the player's condition. */
