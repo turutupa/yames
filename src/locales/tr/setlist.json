@@ -56,7 +56,8 @@
       "secondsShort_other": "{{count}} sn",
       "minutesShort": "{{count}} dk",
       "minutesShort_one": "{{count}} dk",
-      "minutesShort_other": "{{count}} dk"
+      "minutesShort_other": "{{count}} dk",
+      "minutesSeconds": "{{minutes}}:{{seconds}}"
     },
     "gap": {
       "title": "Bu adımla sonraki adım arasında",

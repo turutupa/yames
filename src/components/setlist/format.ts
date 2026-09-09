@@ -34,6 +34,30 @@ export function durationLabel(t: Translate, seconds: number): string {
   return t("setlist.trigger.minutesShort", { count: Math.round(s / 60) });
 }
 
+/**
+ * A length of time, exactly — the number a control is setting, or a clock
+ * counting down.
+ *
+ * `durationLabel` rounds to whole minutes, which is right for an estimate
+ * and wrong for a value you are stepping: the trigger stepper moves in 15
+ * second jumps, so 60 → 75 → 90 rendered as "1 min", "1 min", "2 min" and
+ * the + button looked broken. It got worse further up, because more 15
+ * second steps fall inside each rounded minute — at two minutes, four
+ * presses in a row all read "2 min". The owner found it exactly there.
+ *
+ * So: seconds below a minute, whole minutes when it is one, and m:ss when
+ * it is not. The transport already shows elapsed time this way.
+ */
+export function spanLabel(t: Translate, seconds: number): string {
+  const s = Math.max(0, Math.round(seconds));
+  if (s < 60) return t("setlist.trigger.secondsShort", { count: s });
+  if (s % 60 === 0) return t("setlist.trigger.minutesShort", { count: s / 60 });
+  return t("setlist.trigger.minutesSeconds", {
+    minutes: Math.floor(s / 60),
+    seconds: String(s % 60).padStart(2, "0"),
+  });
+}
+
 /** What the chip in the gap says. */
 export function triggerLabel(t: Translate, trigger: SetlistTrigger): string {
   switch (trigger.kind) {
@@ -42,7 +66,8 @@ export function triggerLabel(t: Translate, trigger: SetlistTrigger): string {
     case "bars":
       return t("setlist.trigger.barsShort", { count: Math.max(0, Math.floor(trigger.bars)) });
     case "seconds":
-      return durationLabel(t, trigger.seconds);
+      // Exact: this is the step's own setting, not an estimate of it.
+      return spanLabel(t, trigger.seconds);
   }
 }
 

@@ -56,7 +56,8 @@
       "secondsShort_other": "{{count}}초",
       "minutesShort": "{{count}}분",
       "minutesShort_one": "{{count}}분",
-      "minutesShort_other": "{{count}}분"
+      "minutesShort_other": "{{count}}분",
+      "minutesSeconds": "{{minutes}}:{{seconds}}"
     },
     "gap": {
       "title": "이 단계와 다음 단계 사이",

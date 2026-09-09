@@ -56,7 +56,8 @@
       "secondsShort_other": "{{count}} 秒",
       "minutesShort": "{{count}} 分",
       "minutesShort_one": "{{count}} 分",
-      "minutesShort_other": "{{count}} 分"
+      "minutesShort_other": "{{count}} 分",
+      "minutesSeconds": "{{minutes}}:{{seconds}}"
     },
     "gap": {
       "title": "このステップと次のステップのあいだ",

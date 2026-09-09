@@ -677,8 +677,15 @@
 .drill-popover {
   position: absolute;
   z-index: 40;
-  width: 322px;
-  max-width: calc(100vw - 32px);
+  /* 322px is the artboard's width and the floor; the panel may grow past it
+     when the text inside needs it. The theme's font stack resolves to a
+     different face on each platform — SF Mono on macOS, whatever is
+     installed on Windows — and a width that fits one can wrap under
+     another. The ceiling is deliberately short of what six subdivision
+     cards need, so that grid keeps wrapping the way it is drawn. */
+  width: max-content;
+  min-width: 322px;
+  max-width: min(360px, calc(100vw - 32px));
   padding: 16px;
   border-radius: 13px;
   background: var(--bg-raised, var(--bg-panel));
@@ -733,6 +740,11 @@
   gap: 9px;
 }
 
+/* Choices sit on one line where they fit. The same fixed-width wrap that
+   hit the setlist's MOVE ON row applies here — the panel is sized by
+   `.drill-popover`, and a font substitution changes what fits. Six
+   subdivisions still wrap, deliberately: `min-width` on `.drill-choice`
+   makes six of them wider than any sane panel. */
 .drill-popover-choices {
   display: flex;
   flex-wrap: wrap;

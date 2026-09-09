@@ -56,7 +56,8 @@
       "secondsShort_other": "{{count}} 秒",
       "minutesShort": "{{count}} 分钟",
       "minutesShort_one": "{{count}} 分钟",
-      "minutesShort_other": "{{count}} 分钟"
+      "minutesShort_other": "{{count}} 分钟",
+      "minutesSeconds": "{{minutes}}:{{seconds}}"
     },
     "gap": {
       "title": "这一步与下一步之间",

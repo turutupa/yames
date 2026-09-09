@@ -56,7 +56,8 @@
       "secondsShort_other": "{{count}} s",
       "minutesShort": "{{count}} min",
       "minutesShort_one": "{{count}} min",
-      "minutesShort_other": "{{count}} min"
+      "minutesShort_other": "{{count}} min",
+      "minutesSeconds": "{{minutes}}:{{seconds}}"
     },
     "gap": {
       "title": "Między tym krokiem a następnym",
