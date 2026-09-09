@@ -60,7 +60,6 @@
       "minutesSeconds": "{{minutes}}:{{seconds}}"
     },
     "gap": {
-      "title": "Bu adımla sonraki adım arasında",
       "moveOn": "Ne zaman geçilsin",
       "whenISay": "Ben söyleyince",
       "afterBars": "Ölçü sonrası",

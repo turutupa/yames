@@ -39,7 +39,18 @@ import type { SetlistStep, SetlistTransition, SetlistTrigger, Subdivision } from
 const SUBDIVISIONS = [1, 2, 3, 4, 5, 6] as const;
 
 /** Which phrase, if any, has its window open. */
-type Field = "tempo" | "meter" | "sub" | "gap" | "name" | "sound" | "volume" | null;
+type Field =
+  | "tempo"
+  | "meter"
+  | "sub"
+  /** When this step ends. */
+  | "trigger"
+  /** How the next one arrives. */
+  | "transition"
+  | "name"
+  | "sound"
+  | "volume"
+  | null;
 
 interface StepSentenceProps {
   step: SetlistStep;
@@ -125,19 +136,19 @@ export function StepSentence({
 
       {/* The line the cards never had room for, and the one a setlist is
           actually for: how long this step lasts and how the next one arrives.
-          Both phrases open the same window, because "ends after two minutes"
-          and "then counts you in" are two halves of one decision. */}
+          A window each — they are two decisions, and one window holding both
+          was two headings and two steppers deep before you had read either. */}
       <div className="drill-plan setlist-plan-timing">
         <span className="setlist-plan-glue">
           {step.trigger.kind === "manual" ? t("setlist.said.runs") : t("setlist.said.for")}
         </span>
         <button
           type="button"
-          ref={anchor("gap")}
-          className={`drill-plan-token${open === "gap" ? " open" : ""}`}
-          aria-expanded={open === "gap"}
-          aria-label={t("setlist.gap.title")}
-          onClick={toggle("gap")}
+          ref={anchor("trigger")}
+          className={`drill-plan-token${open === "trigger" ? " open" : ""}`}
+          aria-expanded={open === "trigger"}
+          aria-label={t("setlist.gap.moveOn")}
+          onClick={toggle("trigger")}
         >
           <span className="drill-plan-value setlist-plan-mid">{triggerLabel(t, step.trigger)}</span>
         </button>
@@ -146,9 +157,11 @@ export function StepSentence({
         </span>
         <button
           type="button"
-          className={`drill-plan-token${open === "gap" ? " open" : ""}`}
-          aria-expanded={open === "gap"}
-          onClick={toggle("gap")}
+          ref={anchor("transition")}
+          className={`drill-plan-token${open === "transition" ? " open" : ""}`}
+          aria-expanded={open === "transition"}
+          aria-label={t("setlist.gap.getThereBy")}
+          onClick={toggle("transition")}
         >
           <span className="drill-plan-value setlist-plan-mid">
             {isLast ? t("setlist.said.theSetlistEnds") : transitionLabel(t, step.transition)}
@@ -221,6 +234,18 @@ export function StepSentence({
           note={note}
         >
           <DrillPopoverChoices label={t("metronome.meter")}>
+            {/* FREE holds the leftmost slot here exactly as it does on the
+                metronome's own meter row — it is a meter like the others, not
+                a modifier on one. It keeps the beat count and gives up the
+                grouping, which is why it sits beside the beats field below
+                rather than replacing it. */}
+            <button
+              className={`drill-choice ${step.freeMode ? "active" : ""}`}
+              aria-pressed={!!step.freeMode}
+              onClick={() => onChange({ freeMode: true })}
+            >
+              <span className="drill-choice-label">{t("metronome.free")}</span>
+            </button>
             {METER_PRESETS.map((preset) => (
               <button
                 key={preset.label}
@@ -243,7 +268,9 @@ export function StepSentence({
               min={1}
               max={12}
               label={t("drill.beats")}
-              onCommit={(n) => onChange({ beatGroups: [n], freeMode: false })}
+              // Keeps whichever mode you are in. Forcing `freeMode: false`
+              // here made the beats field silently drop you out of FREE.
+              onCommit={(n) => onChange({ beatGroups: [n] })}
             />
           </DrillPopoverRow>
         </DrillConfigPopover>
@@ -355,11 +382,23 @@ export function StepSentence({
         </DrillConfigPopover>
       )}
 
-      {open === "gap" && (
+      {open === "trigger" && (
         <TransitionEditor
           step={step}
+          section="trigger"
           isLast={isLast}
-          anchor={anchors.current.gap ?? null}
+          anchor={anchors.current.trigger ?? null}
+          onChange={gapPatch}
+          onClose={close}
+        />
+      )}
+
+      {open === "transition" && (
+        <TransitionEditor
+          step={step}
+          section="transition"
+          isLast={isLast}
+          anchor={anchors.current.transition ?? null}
           onChange={gapPatch}
           onClose={close}
         />

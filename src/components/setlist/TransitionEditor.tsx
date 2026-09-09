@@ -6,6 +6,18 @@ import { spanLabel } from "./format";
 
 interface TransitionEditorProps {
   step: SetlistStep;
+  /**
+   * Which half of the gap this window edits.
+   *
+   * It used to be both at once, opened from either phrase — so clicking
+   * "8 bars" gave you a window holding the trigger AND the transition, two
+   * headings, up to two steppers and two notes. Every other phrase in the
+   * sentence opens a window about itself; this one opened a form. The two
+   * decisions are genuinely separate — when this step ends, and how the next
+   * one arrives — so they get a window each, and each window is short enough
+   * to read at a glance.
+   */
+  section: "trigger" | "transition";
   /** True for the gap that ends a pass, which reads differently. (U9.6) */
   isLast: boolean;
   /**
@@ -81,7 +93,14 @@ function Stepper({
  * time-based gap does *not* fire at the second you set, it fires at the
  * next bar line after it.
  */
-export function TransitionEditor({ step, isLast, anchor, onChange, onClose }: TransitionEditorProps) {
+export function TransitionEditor({
+  step,
+  section,
+  isLast,
+  anchor,
+  onChange,
+  onClose,
+}: TransitionEditorProps) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
@@ -181,7 +200,7 @@ export function TransitionEditor({ step, isLast, anchor, onChange, onClose }: Tr
       className="setlist-transition-editor"
       ref={ref}
       role="dialog"
-      aria-label={t("setlist.gap.title")}
+      aria-label={section === "trigger" ? t("setlist.gap.moveOn") : t("setlist.gap.getThereBy")}
       style={
         pos
           ? { left: pos.left, top: pos.top }
@@ -191,124 +210,136 @@ export function TransitionEditor({ step, isLast, anchor, onChange, onClose }: Tr
             { left: 0, top: 0, opacity: 0, pointerEvents: "none" }
       }
     >
-      <div className="setlist-editor-label">{t("setlist.gap.moveOn")}</div>
-      <div className="setlist-option-row">
-        <button
-          type="button"
-          className={`setlist-option${trigger.kind === "manual" ? " on" : ""}`}
-          aria-pressed={trigger.kind === "manual"}
-          onClick={() => setTrigger({ kind: "manual" })}
-        >
-          {t("setlist.gap.whenISay")}
-        </button>
-        <button
-          type="button"
-          className={`setlist-option${trigger.kind === "bars" ? " on" : ""}`}
-          aria-pressed={trigger.kind === "bars"}
-          onClick={() => setTrigger({ kind: "bars", bars: trigger.kind === "bars" ? trigger.bars : 8 })}
-        >
-          {t("setlist.gap.afterBars")}
-        </button>
-        <button
-          type="button"
-          className={`setlist-option${trigger.kind === "seconds" ? " on" : ""}`}
-          aria-pressed={trigger.kind === "seconds"}
-          onClick={() =>
-            setTrigger({ kind: "seconds", seconds: trigger.kind === "seconds" ? trigger.seconds : 120 })
-          }
-        >
-          {t("setlist.gap.afterTime")}
-        </button>
-      </div>
+      {section === "trigger" && (
+        <>
+          <div className="setlist-editor-label">{t("setlist.gap.moveOn")}</div>
+          <div className="setlist-option-row">
+            <button
+              type="button"
+              className={`setlist-option${trigger.kind === "manual" ? " on" : ""}`}
+              aria-pressed={trigger.kind === "manual"}
+              onClick={() => setTrigger({ kind: "manual" })}
+            >
+              {t("setlist.gap.whenISay")}
+            </button>
+            <button
+              type="button"
+              className={`setlist-option${trigger.kind === "bars" ? " on" : ""}`}
+              aria-pressed={trigger.kind === "bars"}
+              onClick={() => setTrigger({ kind: "bars", bars: trigger.kind === "bars" ? trigger.bars : 8 })}
+            >
+              {t("setlist.gap.afterBars")}
+            </button>
+            <button
+              type="button"
+              className={`setlist-option${trigger.kind === "seconds" ? " on" : ""}`}
+              aria-pressed={trigger.kind === "seconds"}
+              onClick={() =>
+                setTrigger({ kind: "seconds", seconds: trigger.kind === "seconds" ? trigger.seconds : 120 })
+              }
+            >
+              {t("setlist.gap.afterTime")}
+            </button>
+          </div>
 
-      {trigger.kind === "bars" && (
-        <Stepper
-          label={t("setlist.gap.after")}
-          value={t("setlist.trigger.barsShort", { count: trigger.bars })}
-          decreaseLabel={t("setlist.gap.fewerBars")}
-          increaseLabel={t("setlist.gap.moreBars")}
-          onDecrease={() => setTrigger({ kind: "bars", bars: clamp(trigger.bars - 1, BAR_MIN, BAR_MAX) })}
-          onIncrease={() => setTrigger({ kind: "bars", bars: clamp(trigger.bars + 1, BAR_MIN, BAR_MAX) })}
-        />
-      )}
-      {trigger.kind === "seconds" && (
-        <Stepper
-          label={t("setlist.gap.after")}
-          value={spanLabel(t, trigger.seconds)}
-          decreaseLabel={t("setlist.gap.lessTime")}
-          increaseLabel={t("setlist.gap.moreTime")}
-          onDecrease={() =>
-            setTrigger({
-              kind: "seconds",
-              seconds: clamp(trigger.seconds - SECONDS_STEP, SECONDS_MIN, SECONDS_MAX),
-            })
-          }
-          onIncrease={() =>
-            setTrigger({
-              kind: "seconds",
-              seconds: clamp(trigger.seconds + SECONDS_STEP, SECONDS_MIN, SECONDS_MAX),
-            })
-          }
-        />
-      )}
-      {trigger.kind === "manual" && (
-        <p className="setlist-editor-note">
-          {isLast ? t("setlist.gap.manualLastNote") : t("setlist.gap.manualNote")}
-        </p>
-      )}
-
-      <div className="setlist-editor-label">{t("setlist.gap.getThereBy")}</div>
-      <div className="setlist-option-row">
-        <button
-          type="button"
-          className={`setlist-option${transition.kind === "cut" ? " on" : ""}`}
-          aria-pressed={transition.kind === "cut"}
-          onClick={() => setTransition({ kind: "cut" })}
-        >
-          {t("setlist.gap.cleanCut")}
-        </button>
-        <button
-          type="button"
-          className={`setlist-option${transition.kind === "countIn" ? " on" : ""}`}
-          aria-pressed={transition.kind === "countIn"}
-          onClick={() =>
-            setTransition({ kind: "countIn", bars: transition.kind === "countIn" ? transition.bars : 1 })
-          }
-        >
-          {t("setlist.gap.countMeIn")}
-        </button>
-        <button
-          type="button"
-          className={`setlist-option${transition.kind === "rest" ? " on" : ""}`}
-          aria-pressed={transition.kind === "rest"}
-          onClick={() =>
-            setTransition({ kind: "rest", bars: transition.kind === "rest" ? transition.bars : 1 })
-          }
-        >
-          {t("setlist.gap.restABar")}
-        </button>
-      </div>
-
-      {transition.kind === "rest" && (
-        <Stepper
-          label={t("setlist.gap.restFor")}
-          value={t("setlist.trigger.barsShort", { count: transition.bars })}
-          decreaseLabel={t("setlist.gap.fewerRestBars")}
-          increaseLabel={t("setlist.gap.moreRestBars")}
-          onDecrease={() => setTransition({ kind: "rest", bars: clamp(transition.bars - 1, 1, REST_MAX) })}
-          onIncrease={() => setTransition({ kind: "rest", bars: clamp(transition.bars + 1, 1, REST_MAX) })}
-        />
+          {trigger.kind === "bars" && (
+            <Stepper
+              label={t("setlist.gap.after")}
+              value={t("setlist.trigger.barsShort", { count: trigger.bars })}
+              decreaseLabel={t("setlist.gap.fewerBars")}
+              increaseLabel={t("setlist.gap.moreBars")}
+              onDecrease={() => setTrigger({ kind: "bars", bars: clamp(trigger.bars - 1, BAR_MIN, BAR_MAX) })}
+              onIncrease={() => setTrigger({ kind: "bars", bars: clamp(trigger.bars + 1, BAR_MIN, BAR_MAX) })}
+            />
+          )}
+          {trigger.kind === "seconds" && (
+            <Stepper
+              label={t("setlist.gap.after")}
+              value={spanLabel(t, trigger.seconds)}
+              decreaseLabel={t("setlist.gap.lessTime")}
+              increaseLabel={t("setlist.gap.moreTime")}
+              onDecrease={() =>
+                setTrigger({
+                  kind: "seconds",
+                  seconds: clamp(trigger.seconds - SECONDS_STEP, SECONDS_MIN, SECONDS_MAX),
+                })
+              }
+              onIncrease={() =>
+                setTrigger({
+                  kind: "seconds",
+                  seconds: clamp(trigger.seconds + SECONDS_STEP, SECONDS_MIN, SECONDS_MAX),
+                })
+              }
+            />
+          )}
+          {trigger.kind === "manual" && (
+            <p className="setlist-editor-note">
+              {isLast ? t("setlist.gap.manualLastNote") : t("setlist.gap.manualNote")}
+            </p>
+          )}
+        </>
       )}
 
-      {/* It plays now. The note this replaced said it did not — U9.5 has been
-          done, the engine's count-in is no longer the drill's, and a setlist can
-          arm one between steps. Kept as a plain explanation rather than a
-          warning because there is nothing left to warn about. */}
-      {transition.kind === "countIn" && (
-        <p className="setlist-editor-note">{t("setlist.gap.countInPlays")}</p>
+      {section === "transition" && (
+        <>
+          <div className="setlist-editor-label">{t("setlist.gap.getThereBy")}</div>
+          <div className="setlist-option-row">
+            <button
+              type="button"
+              className={`setlist-option${transition.kind === "cut" ? " on" : ""}`}
+              aria-pressed={transition.kind === "cut"}
+              onClick={() => setTransition({ kind: "cut" })}
+            >
+              {t("setlist.gap.cleanCut")}
+            </button>
+            <button
+              type="button"
+              className={`setlist-option${transition.kind === "countIn" ? " on" : ""}`}
+              aria-pressed={transition.kind === "countIn"}
+              onClick={() =>
+                setTransition({ kind: "countIn", bars: transition.kind === "countIn" ? transition.bars : 1 })
+              }
+            >
+              {t("setlist.gap.countMeIn")}
+            </button>
+            <button
+              type="button"
+              className={`setlist-option${transition.kind === "rest" ? " on" : ""}`}
+              aria-pressed={transition.kind === "rest"}
+              onClick={() =>
+                setTransition({ kind: "rest", bars: transition.kind === "rest" ? transition.bars : 1 })
+              }
+            >
+              {t("setlist.gap.restABar")}
+            </button>
+          </div>
+
+          {transition.kind === "rest" && (
+            <Stepper
+              label={t("setlist.gap.restFor")}
+              value={t("setlist.trigger.barsShort", { count: transition.bars })}
+              decreaseLabel={t("setlist.gap.fewerRestBars")}
+              increaseLabel={t("setlist.gap.moreRestBars")}
+              onDecrease={() => setTransition({ kind: "rest", bars: clamp(transition.bars - 1, 1, REST_MAX) })}
+              onIncrease={() => setTransition({ kind: "rest", bars: clamp(transition.bars + 1, 1, REST_MAX) })}
+            />
+          )}
+
+          {/* It plays now. The note this replaced said it did not — U9.5 has been
+              done, the engine's count-in is no longer the drill's, and a setlist can
+              arm one between steps. Kept as a plain explanation rather than a
+              warning because there is nothing left to warn about. */}
+          {transition.kind === "countIn" && (
+            <p className="setlist-editor-note">{t("setlist.gap.countInPlays")}</p>
+          )}
+        </>
       )}
 
-      <p className="setlist-editor-footnote">{t("setlist.gap.barFinishes")}</p>
+      {/* A trigger fact: it is about when the switch lands, not about how
+          the next step arrives. It stays with the half it explains. */}
+      {section === "trigger" && (
+        <p className="setlist-editor-footnote">{t("setlist.gap.barFinishes")}</p>
+      )}
     </div>,
     document.body,
   );
