@@ -19,6 +19,14 @@ describe("parseNotes", () => {
       { text: "b", bullet: true },
     ]);
   });
+
+  it("drops bold and heading markers but keeps the words", () => {
+    expect(parseNotes("## Yames 1.1\n**Fixed**\n- The **perfect** dot")).toEqual([
+      { text: "Yames 1.1", bullet: false },
+      { text: "Fixed", bullet: false },
+      { text: "The perfect dot", bullet: true },
+    ]);
+  });
 });
 
 describe("WhatsNewModal", () => {

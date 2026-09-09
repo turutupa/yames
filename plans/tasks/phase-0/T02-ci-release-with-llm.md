@@ -75,7 +75,7 @@ on each OS before publishing.
 
 ## Do not
 
-- Do not push a commit whose message starts with `release` or `feat:`
+- Do not push a commit whose message starts with `release`
   to `main`.
 - Do not change application code; if T01 left something un-buildable
   on a runner, report it instead of patching around it silently.

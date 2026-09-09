@@ -140,8 +140,9 @@ cargo test --manifest-path src-tauri/Cargo.toml --features coach-llm --lib   # o
 - **LLM eval gate (Phase 3 introduces it):** `bun run eval:coach` replays
   a prompt set against the loaded model and checks tool selection and
   grounding assertions (§7.1).
-- **Release hygiene:** `feat:` / `fix:` commit prefixes trigger a
-  release. Land phases on branches; squash with the right prefix.
+- **Release hygiene:** only a commit whose message starts with `release`
+  cuts a release (`release.yml` gates on it); `feat:` / `fix:` never do.
+  Land phases on branches; squash with the right prefix.
 - **Privacy:** audio is never persisted in release builds unless the
   user opts in per feature (Phase 4 record-listen). Keep the
   `cfg(debug_assertions)` guard in `session_audio.rs`.
