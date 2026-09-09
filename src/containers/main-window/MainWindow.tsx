@@ -87,9 +87,9 @@ import { useSoftClickPreview, SOFT_CLICK_BPM } from "./hooks/useSoftClickPreview
 import { useBpmEditing } from "./hooks/useBpmEditing";
 import { usePlaybackClock } from "./hooks/usePlaybackClock";
 import { useLibraryFit } from "./hooks/useLibraryFit";
-import { useChainSession } from "./hooks/useChainSession";
-import { ChainParagraph } from "../../components/chain/ChainParagraph";
-import { ChainPlayer } from "../../components/chain/ChainPlayer";
+import { useSetlistSession } from "./hooks/useSetlistSession";
+import { SetlistParagraph } from "../../components/setlist/SetlistParagraph";
+import { SetlistPlayer } from "../../components/setlist/SetlistPlayer";
 import { useAudioError } from "./hooks/useAudioError";
 import { AudioErrorNotice } from "./AudioErrorNotice";
 import {
@@ -160,7 +160,7 @@ export function MainWindow() {
   // toggle (the cursor reappears on the next mousemove). It's a
   // purely cosmetic platform quirk — no memory leak, no functional
   // bug — so we let it ride rather than maintaining a setTimeout-
-  // chain JS workaround. If users complain we can re-introduce a
+  // setlist JS workaround. If users complain we can re-introduce a
   // dedicated hook for it.
   const sidebarRef = useRef<PresetSidebarHandle>(null);
   const [activePreset, setActivePreset] = useState<Preset | null>(null);
@@ -266,14 +266,14 @@ export function MainWindow() {
     setPresetDirty(dirty);
   }, []);
 
-  // The chain the window has open (U9). With none loaded every one of these
+  // The setlist the window has open (U9). With none loaded every one of these
   // is inert and the metronome behaves exactly as it did.
-  const chainSession = useChainSession({
+  const setlistSession = useSetlistSession({
     state,
     isPlaying: state.isPlaying,
     currentBeat,
     setView,
-    onChainLoaded: () => {
+    onSetlistLoaded: () => {
       // The library marks what is loaded, and only one thing can be.
       sidebarRef.current?.clearActive();
       setActivePreset(null);
@@ -281,13 +281,13 @@ export function MainWindow() {
     },
   });
 
-  const handleNewChain = useCallback(async () => {
+  const handleNewSetlist = useCallback(async () => {
     setSidebarOpen(true);
-    const created = await chainSession.newChain();
+    const created = await setlistSession.newSetlist();
     // Same delay the preset "+" uses: let the library settle before the
     // name field appears under the caret.
-    setTimeout(() => sidebarRef.current?.triggerRenameChain(created.id), 150);
-  }, [chainSession.newChain]);
+    setTimeout(() => sidebarRef.current?.triggerRenameSetlist(created.id), 150);
+  }, [setlistSession.newSetlist]);
 
   const handlePresetSave = useCallback(() => {
     setSidebarOpen(true);
@@ -649,10 +649,10 @@ export function MainWindow() {
       }
     }
     if (preset.view === "drill" || preset.view === "beat") setView(preset.view);
-    // Loading a preset is loading a preset. Leaving the chain open would put
-    // the track over a stage the chain no longer describes.
-    chainSession.closeChain();
-  }, [setView, chainSession.closeChain]);
+    // Loading a preset is loading a preset. Leaving the setlist open would put
+    // the track over a stage the setlist no longer describes.
+    setlistSession.closeSetlist();
+  }, [setView, setlistSession.closeSetlist]);
 
 
   // Close dropdown on outside click
@@ -936,13 +936,13 @@ export function MainWindow() {
           onLoadPreset={handleLoadPreset}
           onActivePresetChange={handleActivePresetChange}
           presetShortcut={platformKey(keyBindings["toggle-sidebar"] || "")}
-          chains={chainSession.chains}
-          activeChainId={chainSession.chain?.id ?? null}
-          onLoadChain={chainSession.loadChain}
-          onNewChain={handleNewChain}
-          onDeleteChain={chainSession.deleteChain}
-          onRenameChain={chainSession.renameChain}
-          onAddPresetToChain={chainSession.chain ? chainSession.addPresetAsStep : undefined}
+          setlists={setlistSession.setlists}
+          activeSetlistId={setlistSession.setlist?.id ?? null}
+          onLoadSetlist={setlistSession.loadSetlist}
+          onNewSetlist={handleNewSetlist}
+          onDeleteSetlist={setlistSession.deleteSetlist}
+          onRenameSetlist={setlistSession.renameSetlist}
+          onAddPresetToSetlist={setlistSession.setlist ? setlistSession.addPresetAsStep : undefined}
           coachOpen={session.cardOpen}
           coachActive={session.active}
           coachListening={evaluation.enabled}
@@ -985,16 +985,16 @@ export function MainWindow() {
           onRevertPreset={
             activePreset ? () => void handleLoadPreset(activePreset) : undefined
           }
-          activeChain={chainSession.chain}
-          chainDirty={chainSession.dirty}
-          chainSaveFeedback={chainSession.saveFeedback}
-          onSaveChain={() => void chainSession.saveActiveChain()}
-          onRevertChain={chainSession.revertChain}
-          onRenameChain={() => {
-            const id = chainSession.chain?.id;
+          activeSetlist={setlistSession.setlist}
+          setlistDirty={setlistSession.dirty}
+          setlistSaveFeedback={setlistSession.saveFeedback}
+          onSaveSetlist={() => void setlistSession.saveActiveSetlist()}
+          onRevertSetlist={setlistSession.revertSetlist}
+          onRenameSetlist={() => {
+            const id = setlistSession.setlist?.id;
             if (!id) return;
             setSidebarOpen(true);
-            setTimeout(() => sidebarRef.current?.triggerRenameChain(id), 150);
+            setTimeout(() => sidebarRef.current?.triggerRenameSetlist(id), 150);
           }}
           listening={evaluation.enabled}
           soundOpen={soundOpen}
@@ -1027,37 +1027,39 @@ export function MainWindow() {
         )}
 
         <ViewTransition viewKey={view} themeId={state.theme} disabled={viewTransitions === "off"} level={viewTransitions} animStyle={animationStyle}>
-        {/* Chain mode is two rooms, and Start is the door between them.
-            Building a chain is desk work; playing one is done a metre back
+        {/* Setlist mode is two rooms, and Start is the door between them.
+            Building a setlist is desk work; playing one is done a metre back
             with a guitar in your hands. One stage was trying to hold both,
             and the cost was 309px spent above a metronome that then had 364px
             of the 523px it needs — overflowing with the scrollbar hidden.
 
             Neither room stacks anything above the stage, so each gets the
-            same 672px the metronome gets with no chain loaded. */}
-        {view === "beat" && chainSession.chain ? (
-          chainSession.chainPlaying ? (
-            <ChainPlayer
-              chain={chainSession.chain}
-              step={chainSession.runner.step!}
-              stepNumber={chainSession.runner.stepNumber}
-              stepCount={chainSession.runner.stepCount}
-              remaining={chainSession.runner.remaining}
+            same 672px the metronome gets with no setlist loaded. */}
+        {view === "beat" && setlistSession.setlist ? (
+          setlistSession.setlistPlaying ? (
+            <SetlistPlayer
+              setlist={setlistSession.setlist}
+              step={setlistSession.runner.step!}
+              stepNumber={setlistSession.runner.stepNumber}
+              stepCount={setlistSession.runner.stepCount}
+              remaining={setlistSession.runner.remaining}
               activeBeat={activeBeat}
               activeSub={activeSub}
               isDownbeat={isDownbeat}
               isPlaying={state.isPlaying}
-              onEdit={chainSession.editWhileRunning}
+              countIn={state.countIn ?? { beats: 0, done: 0 }}
+              onEdit={setlistSession.editWhileRunning}
             />
           ) : (
-            <ChainParagraph
-              chain={chainSession.chain}
-              selectedStepId={chainSession.selectedStepId}
-              onSelectStep={chainSession.selectStep}
-              runningIndex={chainSession.runningIndex}
-              onChange={chainSession.setChain}
-              onAddStep={chainSession.addStepFromNow}
-              onBackToPlaying={chainSession.backToPlaying}
+            <SetlistParagraph
+              setlist={setlistSession.setlist}
+              selectedStepId={setlistSession.selectedStepId}
+              onSelectStep={setlistSession.selectStep}
+              runningIndex={setlistSession.runningIndex}
+              onChange={setlistSession.setSetlist}
+              onPatchStep={setlistSession.patchStep}
+              onAddStep={setlistSession.addStepFromNow}
+              onBackToPlaying={setlistSession.backToPlaying}
             />
           )
         ) : view === "beat" ? (
@@ -1206,10 +1208,10 @@ export function MainWindow() {
             onTogglePlayback={() => togglePlayback()}
             onStartSpeedRamp={() => startSpeedRamp()}
             onStopSpeedRamp={() => stopSpeedRamp()}
-            chainStepNumber={chainSession.runner.stepNumber}
-            chainStepCount={chainSession.chain?.steps.length ?? 0}
-            chainRemaining={chainSession.runner.remaining}
-            onChainSkip={chainSession.runner.skip}
+            setlistStepNumber={setlistSession.runner.stepNumber}
+            setlistStepCount={setlistSession.setlist?.steps.length ?? 0}
+            setlistRemaining={setlistSession.runner.remaining}
+            onSetlistSkip={setlistSession.runner.skip}
           />
         )}
       </div>

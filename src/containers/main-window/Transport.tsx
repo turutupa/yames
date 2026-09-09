@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { durationLabel, type ChainRemaining } from "../../components/chain/format";
+import { durationLabel, type SetlistRemaining } from "../../components/setlist/format";
 
 interface TransportProps {
   view: "beat" | "drill";
@@ -23,14 +23,14 @@ interface TransportProps {
   onStartSpeedRamp: () => void;
   onStopSpeedRamp: () => void;
   /**
-   * The chain's counts (U9.7). A chain hides what a metronome normally shows
+   * The setlist's counts (U9.7). A setlist hides what a metronome normally shows
    * plainly — what it is about to do — so the transport has to say it.
-   * `chainStepCount` is 0 when no chain is loaded and the block is absent.
+   * `setlistStepCount` is 0 when no setlist is loaded and the block is absent.
    */
-  chainStepNumber?: number;
-  chainStepCount?: number;
-  chainRemaining?: ChainRemaining;
-  onChainSkip?: () => void;
+  setlistStepNumber?: number;
+  setlistStepCount?: number;
+  setlistRemaining?: SetlistRemaining;
+  onSetlistSkip?: () => void;
 }
 
 function clock(totalSeconds: number): string {
@@ -111,15 +111,15 @@ export function Transport({
   onTogglePlayback,
   onStartSpeedRamp,
   onStopSpeedRamp,
-  chainStepNumber = 0,
-  chainStepCount = 0,
-  chainRemaining,
-  onChainSkip,
+  setlistStepNumber = 0,
+  setlistStepCount = 0,
+  setlistRemaining,
+  onSetlistSkip,
 }: TransportProps) {
   const { t } = useTranslation();
   const running = view === "drill" ? speedRampActive : isPlaying;
   const anyRunning = isPlaying || speedRampActive;
-  const chained = view === "beat" && chainStepCount > 0;
+  const setlisted = view === "beat" && setlistStepCount > 0;
 
   return (
     <div
@@ -129,9 +129,9 @@ export function Transport({
       // which one it is looking at, and the readouts come before the drill
       // block — there is no previous-sibling selector to ask with.
       data-view={view}
-      // A loaded chain adds a third group to a row that was already measured
+      // A loaded setlist adds a third group to a row that was already measured
       // to the pixel, so the CSS has to be able to shed differently for it.
-      data-chain={chained ? "" : undefined}
+      data-setlist={setlisted ? "" : undefined}
       data-running={anyRunning ? "" : undefined}
     >
       <button
@@ -181,37 +181,48 @@ export function Transport({
       </div>
 
       {/* U9.7. Two steps that sound alike are indistinguishable without the
-          count, and a chain that is waiting on you looks identical to one
+          count, and a setlist that is waiting on you looks identical to one
           that is counting down — so `manual` says so in words rather than
           borrowing the shape of a countdown it cannot fill. */}
-      {chained && (
-        <div className="transport-chain">
-          <span className="transport-chain-count">
-            {t("chain.transport.stepOf", { number: chainStepNumber, total: chainStepCount })}
+      {setlisted && (
+        <div className="transport-setlist">
+          <span className="transport-setlist-count">
+            {t("setlist.transport.stepOf", { number: setlistStepNumber, total: setlistStepCount })}
           </span>
-          {chainRemaining && (
-            <span className="transport-chain-next">
-              {chainRemaining.kind === "manual"
-                ? t("chain.transport.nextWhenYouSay")
-                : t("chain.transport.nextIn", {
+          {setlistRemaining && (
+            <span className="transport-setlist-next">
+              {setlistRemaining.kind === "manual"
+                ? t("setlist.transport.nextWhenYouSay")
+                : t("setlist.transport.nextIn", {
                     gap:
-                      chainRemaining.kind === "bars"
-                        ? t("chain.trigger.barsShort", { count: chainRemaining.bars })
-                        : durationLabel(t, chainRemaining.seconds),
+                      setlistRemaining.kind === "bars"
+                        ? t("setlist.trigger.barsShort", { count: setlistRemaining.bars })
+                        : durationLabel(t, setlistRemaining.seconds),
                   })}
             </span>
           )}
           {/* Skipping arms a switch that lands on the next downbeat (U9.3), so
               it needs beats to land on. Stopped, there are none. */}
+          {/* Filled while the step is waiting on you, outlined otherwise.
+              On a "when I say" step this button is the ONLY thing that moves
+              the setlist on — nothing counts down and no bar runs out — so it
+              has to look like the thing to press rather than sit in the row
+              as a third piece of grey text. */}
           <button
             type="button"
             className="transport-skip"
-            onClick={onChainSkip}
+            data-waiting={setlistRemaining?.kind === "manual" ? "" : undefined}
+            onClick={onSetlistSkip}
             disabled={!isPlaying}
-            aria-label={t("chain.transport.skip")}
-            title={t("chain.transport.skip")}
+            aria-label={t("setlist.transport.skip")}
+            title={t("setlist.transport.skip")}
           >
-            {t("chain.transport.skip")}
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="6 5 14 12 6 19" />
+              <line x1="18" y1="5" x2="18" y2="19" />
+            </svg>
+            {t("setlist.transport.skip")}
           </button>
         </div>
       )}

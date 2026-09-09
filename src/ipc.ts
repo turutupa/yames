@@ -116,7 +116,7 @@ export async function configureSpeedRamp(config: {
   aggressiveness?: string;
   /**
    * Ticks per beat for the drill. Optional and passed through as null when
-   * absent, so a caller with no opinion — a chain step, MainWindow restoring
+   * absent, so a caller with no opinion — a setlist step, MainWindow restoring
    * a preset — leaves the setting where the user put it rather than silently
    * resetting the drill to quarter notes.
    */
@@ -389,27 +389,38 @@ export async function reorderPresets(ids: string[]): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Preset chains (U9)
+// Preset setlists (U9)
 // ---------------------------------------------------------------------------
-import type { Chain } from "./types";
+import type { Setlist } from "./types";
 
 /**
- * Chains live beside presets: same `settings.json` store, own `chains` key.
+ * Setlists live beside presets: same `settings.json` store, own `setlists` key.
  *
  * `commands.rs` keeps presets under `presets` there and Rust owns the
- * read-modify-write; a chain has no engine-side reader, so the same four
+ * read-modify-write; a setlist has no engine-side reader, so the same four
  * operations are done here through the store plugin instead of adding
  * commands Rust would never call itself. The array *is* the order — same
- * contract as `reorder_presets` — so the UI can drag chains around without
+ * contract as `reorder_presets` — so the UI can drag setlists around without
  * a sort key.
  */
-const CHAINS_KEY = "chains";
+const SETLISTS_KEY = "setlists";
+
+/**
+ * What setlists were saved under while they were called chains.
+ *
+ * The rename went all the way down, and the key is part of "all the way
+ * down" — but a key is also where somebody's work lives, so the old one is
+ * read once and carried over rather than abandoned. It is left in place
+ * afterwards: it costs a few hundred bytes in `settings.json` and it is the
+ * difference between an older build finding a routine and finding nothing.
+ */
+const LEGACY_CHAINS_KEY = "chains";
 
 /**
  * Arm a count-in of `beats` beats before whatever starts next.
  *
  * The drill arms one from its own setting when a ramp starts; this is how a
- * chain asks for the same thing between steps (U9.2). 0 disarms. The engine
+ * setlist asks for the same thing between steps (U9.2). 0 disarms. The engine
  * caps it at 8.
  */
 /** Which beats carry the accent. See `AccentMode` in the engine. */
@@ -421,45 +432,53 @@ export async function armCountIn(beats: number): Promise<void> {
   return invoke("arm_count_in", { beats: Math.max(0, Math.min(8, Math.round(beats))) });
 }
 
-export async function listChains(): Promise<Chain[]> {
-  const chains = await storeLoad<Chain[]>(CHAINS_KEY);
-  return Array.isArray(chains) ? chains : [];
+export async function listSetlists(): Promise<Setlist[]> {
+  const setlists = await storeLoad<Setlist[]>(SETLISTS_KEY);
+  if (Array.isArray(setlists)) return setlists;
+
+  // Nothing under the new key. Anyone who used this before the rename has
+  // their routines under the old one, so bring them across — once, because
+  // the write above makes the branch unreachable next time.
+  const legacy = await storeLoad<Setlist[]>(LEGACY_CHAINS_KEY);
+  if (!Array.isArray(legacy) || legacy.length === 0) return [];
+  await storeSave(SETLISTS_KEY, legacy);
+  return legacy;
 }
 
-/** Upsert by id, keeping the existing position. New chains go last. */
-export async function saveChain(chain: Chain): Promise<void> {
-  const chains = await listChains();
-  const at = chains.findIndex((c) => c.id === chain.id);
-  if (at >= 0) chains[at] = chain;
-  else chains.push(chain);
-  await storeSave(CHAINS_KEY, chains);
+/** Upsert by id, keeping the existing position. New setlists go last. */
+export async function saveSetlist(setlist: Setlist): Promise<void> {
+  const setlists = await listSetlists();
+  const at = setlists.findIndex((c) => c.id === setlist.id);
+  if (at >= 0) setlists[at] = setlist;
+  else setlists.push(setlist);
+  await storeSave(SETLISTS_KEY, setlists);
 }
 
-export async function deleteChain(id: string): Promise<void> {
-  const chains = await listChains();
+export async function deleteSetlist(id: string): Promise<void> {
+  const setlists = await listSetlists();
   await storeSave(
-    CHAINS_KEY,
-    chains.filter((c) => c.id !== id),
+    SETLISTS_KEY,
+    setlists.filter((c) => c.id !== id),
   );
 }
 
 /**
  * Ids not in `ids` keep their relative order at the end, so a reorder issued
- * against a stale list cannot silently drop a chain saved in another window.
+ * against a stale list cannot silently drop a setlist saved in another window.
  */
-export async function reorderChains(ids: string[]): Promise<void> {
-  const chains = await listChains();
-  const byId = new Map(chains.map((c) => [c.id, c]));
-  const ordered: Chain[] = [];
+export async function reorderSetlists(ids: string[]): Promise<void> {
+  const setlists = await listSetlists();
+  const byId = new Map(setlists.map((c) => [c.id, c]));
+  const ordered: Setlist[] = [];
   for (const id of ids) {
-    const chain = byId.get(id);
-    if (chain) {
-      ordered.push(chain);
+    const setlist = byId.get(id);
+    if (setlist) {
+      ordered.push(setlist);
       byId.delete(id);
     }
   }
-  for (const chain of chains) if (byId.has(chain.id)) ordered.push(chain);
-  await storeSave(CHAINS_KEY, ordered);
+  for (const setlist of setlists) if (byId.has(setlist.id)) ordered.push(setlist);
+  await storeSave(SETLISTS_KEY, ordered);
 }
 
 // ---------------------------------------------------------------------------

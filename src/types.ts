@@ -145,22 +145,22 @@ export type Preset = {
 };
 
 // ---------------------------------------------------------------------------
-// Preset chains (U9)
+// Preset setlists (U9)
 // ---------------------------------------------------------------------------
 
-/** When the gap after a step moves the chain on. (U9.2) */
-export type ChainTrigger =
+/** When the gap after a step moves the setlist on. (U9.2) */
+export type SetlistTrigger =
   | { kind: "manual" }
   | { kind: "bars"; bars: number }
   | { kind: "seconds"; seconds: number };
 
 /** How the next step arrives once the trigger has fired. (U9.2) */
-export type ChainTransition =
+export type SetlistTransition =
   | { kind: "cut" }
   | { kind: "countIn"; bars: number }
   | { kind: "rest"; bars: number };
 
-export type ChainStep = {
+export type SetlistStep = {
   id: string;
   name: string;
   /** A full configuration. Copied in, never referenced. (U9.1) */
@@ -173,22 +173,33 @@ export type ChainStep = {
   /**
    * How the gap AFTER this step behaves.
    *
-   * On the last step this is what ends the pass: it wraps the chain back to
-   * step 1, or — on the final pass — stops it. A chain with no way to say
+   * On the last step this is what ends the pass: it wraps the setlist back to
+   * step 1, or — on the final pass — stops it. A setlist with no way to say
    * when its last step is over could neither repeat nor stop on its own,
    * and U9.6 asks for both. `manual` there means "wait for me".
    */
-  trigger: ChainTrigger;
-  transition: ChainTransition;
+  trigger: SetlistTrigger;
+  transition: SetlistTransition;
 };
 
-export type Chain = {
+export type Setlist = {
   id: string;
   name: string;
   createdAt: number;
-  steps: ChainStep[];
+  steps: SetlistStep[];
   /** 1 = once through. 0 = until stopped. (U9.6) */
   repeat: number;
+  /**
+   * Beats counted out before the FIRST step, at that step's tempo. 0 or
+   * absent is none, which is what every setlist saved before this existed has.
+   *
+   * It belongs to the setlist rather than to the transport because it is a
+   * property of the routine: a warm-up you always want counted in stays
+   * counted in, and a burst you want to hit cold does not, without the two
+   * fighting over one global switch. Between steps the count-in is a
+   * `transition` and already worked; this is the one at the top.
+   */
+  countIn?: number;
 };
 
 // ---------------------------------------------------------------------------

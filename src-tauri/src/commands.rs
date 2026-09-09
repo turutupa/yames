@@ -530,7 +530,7 @@ pub fn configure_speed_ramp(
     cyclic: bool,
     warmup_beats: u8,
     aggressiveness: Option<String>,
-    // `Option` so a frontend that predates drill subdivisions -- or a chain
+    // `Option` so a frontend that predates drill subdivisions -- or a setlist
     // step with no opinion about them -- leaves the setting alone rather than
     // silently resetting it to quarter notes.
     subdivision: Option<u8>,
@@ -593,7 +593,7 @@ pub fn start_speed_ramp(
         s.speed_ramp.warmup_count = 0;
         // The drill's setting seeds the engine's count-in. `warmup_beats` is
         // still what the user toggles; `count_in` is what actually counts, and
-        // it belongs to the engine so a chain can use it too (U9.5).
+        // it belongs to the engine so a setlist can use it too (U9.5).
         s.count_in = crate::state::CountIn {
             beats: s.speed_ramp.warmup_beats,
             done: 0,
@@ -646,7 +646,7 @@ pub fn start_speed_ramp_from(
         s.speed_ramp.warmup_count = 0;
         // The drill's setting seeds the engine's count-in. `warmup_beats` is
         // still what the user toggles; `count_in` is what actually counts, and
-        // it belongs to the engine so a chain can use it too (U9.5).
+        // it belongs to the engine so a setlist can use it too (U9.5).
         s.count_in = crate::state::CountIn {
             beats: s.speed_ramp.warmup_beats,
             done: 0,
@@ -669,7 +669,7 @@ pub fn start_speed_ramp_from(
 /// Arm a count-in of `beats` beats before the next thing that starts.
 ///
 /// The drill arms one from its own setting when a ramp starts; this is how
-/// anything else asks for the same thing — a preset chain between steps
+/// anything else asks for the same thing — a setlist between its steps
 /// (U9.2). 0 disarms. Capped at 8, the same bound the drill's setting has.
 ///
 /// It is armed, not played: the beats sound when the engine next reaches a

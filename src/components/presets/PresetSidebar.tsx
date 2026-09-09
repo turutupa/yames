@@ -2,14 +2,14 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useSta
 import { useTranslation } from "react-i18next";
 import { deletePreset, listPresets, savePreset } from "../../ipc";
 import { meterLabel, presetBeatGroups, presetFreeMode } from "../../utils/meter";
-import type { AppState, Chain, Preset } from "../../types";
+import type { AppState, Setlist, Preset } from "../../types";
 
 export interface PresetSidebarHandle {
   triggerAdd: () => void;
   triggerUpdate: () => void;
   triggerRename: (id: string) => void;
-  triggerRenameChain: (id: string) => void;
-  /** Drop the loaded marker — a chain has taken the context bar. */
+  triggerRenameSetlist: (id: string) => void;
+  /** Drop the loaded marker — a setlist has taken the context bar. */
   clearActive: () => void;
 }
 
@@ -21,19 +21,19 @@ interface PresetSidebarProps {
   onActiveChange: (preset: Preset | null, dirty: boolean) => void;
   shortcut?: string;
   /**
-   * Chains share this list with presets (U9.4) — the word is precise here
+   * Setlists share this list with presets (U9.4) — the word is precise here
    * and nowhere else. They are the parent's state, not this component's:
-   * the stage edits the loaded chain continuously, and a second copy kept
+   * the stage edits the loaded setlist continuously, and a second copy kept
    * here would be stale between every keystroke.
    */
-  chains?: Chain[];
-  activeChainId?: string | null;
-  onLoadChain?: (chain: Chain) => void;
-  onNewChain?: () => void;
-  onDeleteChain?: (id: string) => void;
-  onRenameChain?: (id: string, name: string) => void;
-  /** "Add this preset as a step" — offered only while a chain is loaded. */
-  onAddPresetToChain?: (preset: Preset) => void;
+  setlists?: Setlist[];
+  activeSetlistId?: string | null;
+  onLoadSetlist?: (setlist: Setlist) => void;
+  onNewSetlist?: () => void;
+  onDeleteSetlist?: (id: string) => void;
+  onRenameSetlist?: (id: string, name: string) => void;
+  /** "Add this preset as a step" — offered only while a setlist is loaded. */
+  onAddPresetToSetlist?: (preset: Preset) => void;
 }
 
 function generateId(): string {
@@ -130,13 +130,13 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   onLoadPreset,
   onActiveChange,
   shortcut,
-  chains,
-  activeChainId,
-  onLoadChain,
-  onNewChain,
-  onDeleteChain,
-  onRenameChain,
-  onAddPresetToChain,
+  setlists,
+  activeSetlistId,
+  onLoadSetlist,
+  onNewSetlist,
+  onDeleteSetlist,
+  onRenameSetlist,
+  onAddPresetToSetlist,
 }, ref) {
   const [allPresets, setAllPresets] = useState<Preset[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -155,11 +155,11 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   } | null>(null);
   const [renaming, setRenaming] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
-  // Chains rename through the same field but never at the same time as a
+  // Setlists rename through the same field but never at the same time as a
   // preset, so the two ids are kept apart rather than sharing one slot that
   // would have to say which list it meant.
-  const [renamingChain, setRenamingChain] = useState<string | null>(null);
-  const [chainMenu, setChainMenu] = useState<{ id: string; x: number; y: number } | null>(null);
+  const [renamingSetlist, setRenamingSetlist] = useState<string | null>(null);
+  const [setlistMenu, setSetlistMenu] = useState<{ id: string; x: number; y: number } | null>(null);
   const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const renameRef = useRef<HTMLInputElement>(null);
@@ -212,24 +212,24 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
     if (searchOpen) searchRef.current?.focus();
   }, [searchOpen]);
   useEffect(() => {
-    if (renaming || renamingChain) {
+    if (renaming || renamingSetlist) {
       renameRef.current?.focus();
       renameRef.current?.select();
     }
-  }, [renaming, renamingChain]);
+  }, [renaming, renamingSetlist]);
 
-  // Close the chain context menu on an outside click, same rule as the
+  // Close the setlist context menu on an outside click, same rule as the
   // preset one above.
   useEffect(() => {
-    if (!chainMenu) return;
+    if (!setlistMenu) return;
     const handler = (e: MouseEvent) => {
       if (contextRef.current && !contextRef.current.contains(e.target as Node)) {
-        setChainMenu(null);
+        setSetlistMenu(null);
       }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [chainMenu]);
+  }, [setlistMenu]);
 
   const handleSave = useCallback(async () => {
     const name = newName.trim();
@@ -338,31 +338,31 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
       setRenaming(id);
     },
     clearActive: () => setActiveId(null),
-    triggerRenameChain: (id: string) => {
-      const chain = chains?.find((c) => c.id === id);
-      if (!chain) return;
-      setRenameValue(chain.name);
-      setRenamingChain(id);
+    triggerRenameSetlist: (id: string) => {
+      const setlist = setlists?.find((c) => c.id === id);
+      if (!setlist) return;
+      setRenameValue(setlist.name);
+      setRenamingSetlist(id);
     },
-  }), [activeId, allPresets, chains, state, view]);
+  }), [activeId, allPresets, setlists, state, view]);
 
   // Two links, joined. It is the one glyph in the row that says "several
-  // things in an order" without a word, which is what a list mixing chains
+  // things in an order" without a word, which is what a list mixing setlists
   // and presets needs at 11px.
-  const chainIcon = (
+  const setlistIcon = (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M9.5 14.5a4 4 0 0 1 0-5l2-2a4 4 0 0 1 5.7 5.7l-1 1" />
       <path d="M14.5 9.5a4 4 0 0 1 0 5l-2 2a4 4 0 0 1-5.7-5.7l1-1" />
     </svg>
   );
 
-  // Only the metronome list carries chains: a chain step is a metronome
-  // configuration, and a drill is a ramp the chain runtime has no way to run.
-  const showChains = view === "beat" && !!chains;
-  const chainList = showChains
+  // Only the metronome list carries setlists: a setlist step is a metronome
+  // configuration, and a drill is a ramp the setlist runtime has no way to run.
+  const showSetlists = view === "beat" && !!setlists;
+  const setlistList = showSetlists
     ? (search.trim()
-        ? chains!.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
-        : chains!)
+        ? setlists!.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
+        : setlists!)
     : [];
 
   return (
@@ -405,18 +405,18 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
                 <line x1="16" y1="16" x2="21" y2="21" />
               </svg>
             </button>
-            {/* A chain needs its own opener. The "+" beside it means "save
+            {/* A setlist needs its own opener. The "+" beside it means "save
                 what I have now as a preset" and is the first thing a new user
                 presses; overloading it with a menu would put a choice in
                 front of the gesture that has never needed one. */}
-            {showChains && onNewChain && (
+            {showSetlists && onNewSetlist && (
               <button
-                className="preset-sidebar-head-btn preset-sidebar-new-chain"
-                onClick={onNewChain}
-                aria-label={t("chain.newChain")}
-                data-tip={t("chain.newChain")}
+                className="preset-sidebar-head-btn preset-sidebar-new-setlist"
+                onClick={onNewSetlist}
+                aria-label={t("setlist.newSetlist")}
+                data-tip={t("setlist.newSetlist")}
               >
-                {chainIcon}
+                {setlistIcon}
               </button>
             )}
             {viewPresets.length < MAX_PRESETS && (
@@ -479,28 +479,28 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
         )}
 
         <div className="preset-sidebar-list">
-          {/* Chains sit above the presets and above the rule that separates
+          {/* Setlists sit above the presets and above the rule that separates
               them: they are the bigger thing, and a list that opened with
               four presets would bury them. */}
-          {chainList.map((c) => (
+          {setlistList.map((c) => (
             <div
               key={c.id}
-              className={`preset-sidebar-item chain-item ${activeChainId === c.id ? "active" : ""}`}
+              className={`preset-sidebar-item setlist-item ${activeSetlistId === c.id ? "active" : ""}`}
               role="button"
               tabIndex={0}
-              onClick={() => onLoadChain?.(c)}
+              onClick={() => onLoadSetlist?.(c)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
-                  onLoadChain?.(c);
+                  onLoadSetlist?.(c);
                 }
               }}
               onContextMenu={(e) => {
                 e.preventDefault();
-                setChainMenu({ id: c.id, x: e.clientX, y: e.clientY });
+                setSetlistMenu({ id: c.id, x: e.clientX, y: e.clientY });
               }}
             >
-              {renamingChain === c.id ? (
+              {renamingSetlist === c.id ? (
                 <input
                   ref={renameRef}
                   className="preset-sidebar-name-input"
@@ -508,16 +508,16 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
                   onChange={(e) => setRenameValue(e.target.value)}
                   onBlur={() => {
                     const name = renameValue.trim();
-                    if (name) onRenameChain?.(c.id, name);
-                    setRenamingChain(null);
+                    if (name) onRenameSetlist?.(c.id, name);
+                    setRenamingSetlist(null);
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       const name = renameValue.trim();
-                      if (name) onRenameChain?.(c.id, name);
-                      setRenamingChain(null);
+                      if (name) onRenameSetlist?.(c.id, name);
+                      setRenamingSetlist(null);
                     }
-                    if (e.key === "Escape") setRenamingChain(null);
+                    if (e.key === "Escape") setRenamingSetlist(null);
                     e.stopPropagation();
                   }}
                   onClick={(e) => e.stopPropagation()}
@@ -525,18 +525,18 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
                 />
               ) : (
                 <>
-                  <span className="chain-item-row">
-                    <span className="chain-item-glyph">{chainIcon}</span>
+                  <span className="setlist-item-row">
+                    <span className="setlist-item-glyph">{setlistIcon}</span>
                     <span className="preset-item-name">{c.name}</span>
                   </span>
-                  <span className="chain-item-sub">
-                    {t("chain.librarySteps", { count: c.steps.length })}
+                  <span className="setlist-item-sub">
+                    {t("setlist.librarySteps", { count: c.steps.length })}
                   </span>
                 </>
               )}
             </div>
           ))}
-          {chainList.length > 0 && <div className="chain-item-rule" aria-hidden="true" />}
+          {setlistList.length > 0 && <div className="setlist-item-rule" aria-hidden="true" />}
 
           {adding && (
             <div className="preset-sidebar-item adding">
@@ -651,17 +651,17 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
           </button>
           <button onClick={() => handleUpdate(contextMenu.id)}>{t("presets.update")}</button>
           {/* U9.1's consolation: a step is a copy of a preset, so the two
-              directions stay one call each. Offered only while a chain is
+              directions stay one call each. Offered only while a setlist is
               loaded — with nothing to add to, the row would be a dead end. */}
-          {onAddPresetToChain && (
+          {onAddPresetToSetlist && (
             <button
               onClick={() => {
                 const p = allPresets.find((p) => p.id === contextMenu.id);
-                if (p) onAddPresetToChain(p);
+                if (p) onAddPresetToSetlist(p);
                 setContextMenu(null);
               }}
             >
-              {t("chain.addPresetAsStep")}
+              {t("setlist.addPresetAsStep")}
             </button>
           )}
           <button
@@ -673,20 +673,20 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
         </div>
       )}
 
-      {chainMenu && (
+      {setlistMenu && (
         <div
           ref={contextRef}
           className="preset-context-menu"
-          style={{ top: chainMenu.y, left: chainMenu.x }}
+          style={{ top: setlistMenu.y, left: setlistMenu.x }}
         >
           <button
             onClick={() => {
-              const c = chains?.find((c) => c.id === chainMenu.id);
+              const c = setlists?.find((c) => c.id === setlistMenu.id);
               if (c) {
                 setRenameValue(c.name);
-                setRenamingChain(chainMenu.id);
+                setRenamingSetlist(setlistMenu.id);
               }
-              setChainMenu(null);
+              setSetlistMenu(null);
             }}
           >
             {t("presets.rename")}
@@ -694,11 +694,11 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
           <button
             className="preset-context-delete"
             onClick={() => {
-              onDeleteChain?.(chainMenu.id);
-              setChainMenu(null);
+              onDeleteSetlist?.(setlistMenu.id);
+              setSetlistMenu(null);
             }}
           >
-            {t("chain.deleteChain")}
+            {t("setlist.deleteSetlist")}
           </button>
         </div>
       )}

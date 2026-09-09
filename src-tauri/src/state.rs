@@ -78,7 +78,7 @@ impl Default for SpeedRamp {
 /// This used to live inside `SpeedRamp` and be gated on the ramp being active,
 /// which meant only a drill could have one. It is the same behaviour and the
 /// same sound — the drill's count-in has not changed at all — but it belongs
-/// to the engine now, so a preset chain can ask for one between steps
+/// to the engine now, so a setlist can ask for one between steps
 /// (UI_DECISIONS U9.2, U9.5).
 ///
 /// `beats` of 0 means no count-in is armed, which is the resting state. The
