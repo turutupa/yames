@@ -206,13 +206,38 @@ const ARC: Mesh = (() => {
  * setting should look fast.
  */
 export function rod(bobAt: number): Mesh {
+  const { shaft, weight } = rodBoxes(bobAt);
+  return merge(shaft, weight);
+}
+
+/**
+ * The rod's two boxes, kept apart. The figure strokes them as one mesh, but
+ * while it is running it paints the weight as a solid, and a solid needs its
+ * own eight points to find its faces in.
+ */
+export function rodBoxes(bobAt: number): { shaft: Mesh; weight: Mesh } {
   const LENGTH = 3.7;
   const BASE = 0.75;
   // 0.95 rather than 0.82: the weight uses nearly the whole shaft, so a
   // tempo change is visible without a side-by-side comparison.
   const y = BASE + (bobAt - 0.5) * LENGTH * 0.95;
-  return merge(box(0.09, LENGTH, 0.09, 0, BASE, 0), box(0.58, 0.28, 0.2, 0, y, 0));
+  return { shaft: box(0.09, LENGTH, 0.09, 0, BASE, 0), weight: box(0.58, 0.28, 0.2, 0, y, 0) };
 }
+
+/**
+ * The six faces of a `box()`, as indices into its eight points. Each is wound
+ * counter-clockwise seen from outside the box, so the cross product of its
+ * first two edges is the outward normal — which is how the figure decides
+ * which faces the camera can see, and how squarely each one meets the light.
+ */
+export const BOX_FACES: readonly (readonly [number, number, number, number])[] = [
+  [4, 5, 6, 7], // front, +z
+  [1, 0, 3, 2], // back, -z
+  [7, 6, 2, 3], // top, +y
+  [0, 1, 5, 4], // bottom, -y
+  [5, 1, 2, 6], // right, +x
+  [0, 4, 7, 3], // left, -x
+];
 
 /**
  * Everything that does not move, with where it sits and how brightly it is

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { STATIC_PARTS, rod, ROD_AT } from "./figureGeometry";
+import { STATIC_PARTS, rod, rodBoxes, BOX_FACES, ROD_AT } from "./figureGeometry";
 
 /**
  * The figure is redrawn every frame while the metronome plays, and every edge
@@ -73,5 +73,65 @@ describe("the figure's geometry", () => {
     // The pivot sits inside the case's footprint, not out in space.
     expect(Math.abs(ROD_AT[0])).toBeLessThan(1);
     expect(Math.abs(ROD_AT[1])).toBeLessThan(2);
+  });
+});
+
+/**
+ * While the metronome runs, the figure paints the weight as a solid. That
+ * needs the weight on its own — eight points it can find faces in — and it
+ * needs those faces wound so that "outward" is knowable, because a face wound
+ * the wrong way is culled when it should be drawn and drawn when it should be
+ * hidden. Canvas renders both mistakes as nothing in particular.
+ */
+describe("the rod's boxes", () => {
+  it("are the rod, split", () => {
+    // The stroked rod and the solid weight must agree on where everything is.
+    const whole = rod(0.6);
+    const { shaft, weight } = rodBoxes(0.6);
+    expect(shaft.pts).toHaveLength(8);
+    expect(weight.pts).toHaveLength(8);
+    expect(whole.pts).toEqual([...shaft.pts, ...weight.pts]);
+    expect(whole.edges).toHaveLength(shaft.edges.length + weight.edges.length);
+  });
+
+  it("puts the wide box in `weight`, not `shaft`", () => {
+    const { shaft, weight } = rodBoxes(0.5);
+    const width = (m: { pts: [number, number, number][] }) =>
+      Math.max(...m.pts.map((p) => p[0])) - Math.min(...m.pts.map((p) => p[0]));
+    expect(width(weight)).toBeGreaterThan(width(shaft));
+  });
+});
+
+describe("a box's faces", () => {
+  const { weight } = rodBoxes(0.5);
+  const centre = weight.pts
+    .reduce((c, p) => [c[0] + p[0], c[1] + p[1], c[2] + p[2]], [0, 0, 0])
+    .map((v) => v / weight.pts.length);
+
+  it("are six, with every edge of the box shared by exactly two", () => {
+    expect(BOX_FACES).toHaveLength(6);
+    const count = new Map<string, number>();
+    for (const f of BOX_FACES) {
+      for (let i = 0; i < 4; i++) {
+        const a = f[i], b = f[(i + 1) % 4];
+        const key = a < b ? `${a}-${b}` : `${b}-${a}`;
+        count.set(key, (count.get(key) ?? 0) + 1);
+      }
+    }
+    expect(count.size).toBe(12);
+    for (const [key, n] of count) expect(n, `edge ${key}`).toBe(2);
+  });
+
+  it("are all wound so their normals point out of the box", () => {
+    for (const f of BOX_FACES) {
+      const [a, b, c] = f.map((i) => weight.pts[i]);
+      const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+      const v = [c[0] - b[0], c[1] - b[1], c[2] - b[2]];
+      const n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+      // From the centre of the box to the face, along the normal: positive
+      // means the normal leaves the box.
+      const out = [a[0] - centre[0], a[1] - centre[1], a[2] - centre[2]];
+      expect(n[0] * out[0] + n[1] * out[1] + n[2] * out[2], `face ${f.join(",")}`).toBeGreaterThan(0);
+    }
   });
 });
