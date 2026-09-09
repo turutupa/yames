@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { BeatEvent } from "../../types";
-import { rod, ROD_AT, STATIC_PARTS, type Mesh } from "./figureGeometry";
+import { rod, rodBoxes, BOX_FACES, ROD_AT, STATIC_PARTS, type Mesh } from "./figureGeometry";
 import { MIN_BPM, MAX_BPM } from "../../constants/metronome";
 
 /**
@@ -37,6 +37,13 @@ import { MIN_BPM, MAX_BPM } from "../../constants/metronome";
  *
  * One swing per beat, not per subdivision: an escapement ticks at each end
  * of its travel, so a beat is a half-cycle and the rod alternates sides.
+ *
+ * **Running, the weight is solid.** Everything else stays line: the case,
+ * the works, the shaft. The weight is the one part that gets faces — lit
+ * from above and to the left, the lines behind it cleared — so the moving
+ * thing reads as a thing and not as a wire box sliding over the gears.
+ * Filling the whole rod was tried and made it a bar; a translucent wash was
+ * tried and made it mud. Stopped, it is a drawing again.
  */
 
 interface MetronomeFigureProps {
@@ -137,6 +144,8 @@ export function MetronomeFigure({ bpm, isPlaying, currentBeat }: MetronomeFigure
     if (!canvas || !ctx) return;
 
     const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
+    /** When this run began. The effect is rebuilt when play starts, so this is that instant. */
+    const runSince = performance.now();
     let raf = 0;
     let w = 0;
     let h = 0;
@@ -183,8 +192,12 @@ export function MetronomeFigure({ bpm, isPlaying, currentBeat }: MetronomeFigure
       return {
         line: rgb(cs.getPropertyValue("--text-primary"), "245,236,226"),
         accent: rgb(cs.getPropertyValue("--accent"), "245,163,11"),
+        /** Ink on paper: the theme group `applyTheme` stamps on the root. */
+        paper: document.documentElement.dataset.themeGroup === "light",
       };
     }
+    /** Whether the current frame is ink on paper; set per frame from `ink()`. */
+    let onPaper = false;
 
     /* Orientation. Fixed — the site's figure rocks, which is right for a
        hero and wrong for a thing that sits behind live controls all day.
@@ -210,26 +223,67 @@ export function MetronomeFigure({ bpm, isPlaying, currentBeat }: MetronomeFigure
     const cosPitch = Math.cos(PITCH);
     const sinPitch = Math.sin(PITCH);
 
-    /** World point to screen, with the perspective divide kept for depth. */
-    function project(
-      p: [number, number, number],
-      scale: number,
-      ox: number,
-      oy: number,
-    ): [number, number, number] {
+    type P3 = [number, number, number];
+
+    /* The camera: `D` is the focal distance of the perspective and `EYE_Z`
+       where the eye sits on the view axis, in world units. The divide below
+       is the site's `d / (d + z + 8)`, written with the eye named so the
+       solid weight can cull its faces against it. */
+    const D = 26;
+    const EYE_Z = -(D + 8);
+
+    /** World point to view space: x right, y up, z away from the camera. */
+    function toView(p: P3): P3 {
       const [x, y, z] = p;
       const x2 = x * cosYaw + z * sinYaw;
       const z2 = -x * sinYaw + z * cosYaw;
       const y2 = y * cosPitch - z2 * sinPitch;
       const z3 = y * sinPitch + z2 * cosPitch;
-      const d = 26;
-      const k = d / (d + z3 + 8);
-      return [ox + x2 * scale * k, oy - y2 * scale * k, k];
+      return [x2, y2, z3];
+    }
+
+    /** View point to screen, with the perspective divide kept for depth. */
+    function toScreen(v: P3, scale: number, ox: number, oy: number): P3 {
+      const k = D / (v[2] - EYE_Z);
+      return [ox + v[0] * scale * k, oy - v[1] * scale * k, k];
+    }
+
+    /** World point to screen, with the perspective divide kept for depth. */
+    function project(p: P3, scale: number, ox: number, oy: number): P3 {
+      return toScreen(toView(p), scale, ox, oy);
+    }
+
+    /** A part's points in the world: swung by `angle` about its origin, then set down at `at`. */
+    function placed(pts: P3[], at: P3, angle: number): P3[] {
+      const ca = Math.cos(angle);
+      const sa = Math.sin(angle);
+      return pts.map((p) => {
+        let [x, y] = p;
+        const z = p[2];
+        if (angle) {
+          const nx = x * ca - y * sa;
+          y = x * sa + y * ca;
+          x = nx;
+        }
+        return [x + at[0], y + at[1], z + at[2]];
+      });
+    }
+
+    /** One edge, shaded by its depth: what is further away fades. No lighting needed. */
+    function strokeEdge(p: P3, q: P3, dim: number, ink: string, weight: number) {
+      const depth = (p[2] + q[2]) / 2;
+      const alpha = Math.max(0.1, Math.min(1, (depth - 0.62) * 3.4)) * dim;
+      ctx!.strokeStyle = `rgba(${ink}, ${alpha.toFixed(3)})`;
+      ctx!.lineWidth = (0.85 + depth * 0.5) * weight;
+      ctx!.beginPath();
+      ctx!.moveTo(p[0], p[1]);
+      ctx!.lineTo(q[0], q[1]);
+      ctx!.stroke();
     }
 
     function strokeMesh(
       geo: Mesh,
-      at: [number, number, number],
+      at: P3,
       dim: number,
       angle: number,
       scale: number,
@@ -238,30 +292,98 @@ export function MetronomeFigure({ bpm, isPlaying, currentBeat }: MetronomeFigure
       ink: string,
       weight = 1,
     ) {
-      const ca = Math.cos(angle);
-      const sa = Math.sin(angle);
-      const proj = geo.pts.map((p) => {
-        let [x, y] = p;
-        const z = p[2];
-        if (angle) {
-          const nx = x * ca - y * sa;
-          y = x * sa + y * ca;
-          x = nx;
-        }
-        return project([x + at[0], y + at[1], z + at[2]], scale, ox, oy);
-      });
-      for (const [a2, b2] of geo.edges) {
-        const p = proj[a2];
-        const q = proj[b2];
-        // Depth cue: what is further away fades. No lighting needed.
-        const depth = (p[2] + q[2]) / 2;
-        const alpha = Math.max(0.1, Math.min(1, (depth - 0.62) * 3.4)) * dim;
-        ctx!.strokeStyle = `rgba(${ink}, ${alpha.toFixed(3)})`;
-        ctx!.lineWidth = (0.85 + depth * 0.5) * weight;
+      const proj = placed(geo.pts, at, angle).map((p) => project(p, scale, ox, oy));
+      for (const [a2, b2] of geo.edges) strokeEdge(proj[a2], proj[b2], dim, ink, weight);
+    }
+
+    /**
+     * Where the light comes from, in view space: above and to the left of the
+     * camera, a little in front of the object. Only the solid weight is lit;
+     * the wireframe around it has no faces to catch anything.
+     */
+    const LIGHT: P3 = (() => {
+      const l: P3 = [-0.45, 0.75, -0.5];
+      const n = Math.hypot(l[0], l[1], l[2]);
+      return [l[0] / n, l[1] / n, l[2] / n];
+    })();
+
+    /**
+     * A box painted as a solid rather than a wireframe.
+     *
+     * The faces the camera can see are found from their winding (see
+     * `BOX_FACES`), and each is shaded by how squarely it meets the light —
+     * as alpha, not as a second colour, so the one accent reads as a lit
+     * object on a dark theme and on a light one alike. Under the fill, the
+     * lines already drawn are erased first: a solid that let the case show
+     * through it would be glass, not a weight. Then only the edges of the
+     * visible faces are stroked, for the same reason.
+     *
+     */
+    function fillBox(
+      pts: P3[],
+      scale: number,
+      ox: number,
+      oy: number,
+      ink: string,
+      alpha: number,
+      dim: number,
+      weight: number,
+    ) {
+      const view = pts.map(toView);
+      const scr = view.map((v) => toScreen(v, scale, ox, oy));
+      const faces: { idx: readonly number[]; shade: number }[] = [];
+      for (const f of BOX_FACES) {
+        const [a, b, c] = f;
+        const ux = view[b][0] - view[a][0], uy = view[b][1] - view[a][1], uz = view[b][2] - view[a][2];
+        const vx = view[c][0] - view[b][0], vy = view[c][1] - view[b][1], vz = view[c][2] - view[b][2];
+        const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+        // Culled against the eye itself rather than the view axis: the
+        // perspective is mild, but a face square to the axis is still seen
+        // from off-centre.
+        let cx = 0, cy = 0, cz = 0;
+        for (const i of f) { cx += view[i][0] / 4; cy += view[i][1] / 4; cz += view[i][2] / 4; }
+        if (nx * -cx + ny * -cy + nz * (EYE_Z - cz) <= 0) continue;
+        const len = Math.hypot(nx, ny, nz) || 1;
+        const lambert = Math.max(0, (nx * LIGHT[0] + ny * LIGHT[1] + nz * LIGHT[2]) / len);
+        // How lit the face is, 0.5..1. More of the accent is brighter on a
+        // dark theme and darker on paper, so on paper the lit face is the
+        // one that gets LESS of it — otherwise the light would come from
+        // below on every light theme.
+        const lit = 0.5 + 0.5 * lambert;
+        faces.push({ idx: f, shade: onPaper ? 1.5 - lit : lit });
+      }
+
+      const trace = (idx: readonly number[]) => {
         ctx!.beginPath();
-        ctx!.moveTo(p[0], p[1]);
-        ctx!.lineTo(q[0], q[1]);
-        ctx!.stroke();
+        ctx!.moveTo(scr[idx[0]][0], scr[idx[0]][1]);
+        for (let i = 1; i < idx.length; i++) ctx!.lineTo(scr[idx[i]][0], scr[idx[i]][1]);
+        ctx!.closePath();
+      };
+
+      // The glow belongs to the lines. A shadow under the erase would clear a
+      // soft halo out of the case; under the fill it would double the light.
+      const glow = ctx!.shadowBlur;
+      ctx!.shadowBlur = 0;
+      ctx!.globalCompositeOperation = "destination-out";
+      ctx!.fillStyle = "rgba(0,0,0,1)";
+      for (const f of faces) { trace(f.idx); ctx!.fill(); }
+      ctx!.globalCompositeOperation = "source-over";
+      for (const f of faces) {
+        ctx!.fillStyle = `rgba(${ink}, ${(alpha * f.shade).toFixed(3)})`;
+        trace(f.idx);
+        ctx!.fill();
+      }
+      ctx!.shadowBlur = glow;
+
+      const seen = new Set<string>();
+      for (const f of faces) {
+        for (let i = 0; i < 4; i++) {
+          const a = f.idx[i], b = f.idx[(i + 1) % 4];
+          const key = a < b ? `${a}-${b}` : `${b}-${a}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          strokeEdge(scr[a], scr[b], dim, ink, weight);
+        }
       }
     }
 
@@ -311,7 +433,8 @@ export function MetronomeFigure({ bpm, isPlaying, currentBeat }: MetronomeFigure
       if (w === 0 || h === 0) resize();
       ctx!.clearRect(0, 0, w, h);
 
-      const { line, accent } = ink();
+      const { line, accent, paper } = ink();
+      onPaper = paper;
       const { scale, ox, oy } = fit();
       ctx!.lineCap = "round";
       ctx!.lineJoin = "round";
@@ -345,21 +468,25 @@ export function MetronomeFigure({ bpm, isPlaying, currentBeat }: MetronomeFigure
       // The rod carries a glow while running — alpha is already at its
       // ceiling, so more contrast has to come from light around the line
       // rather than from the line itself.
-      if (running) {
-        ctx!.shadowColor = `rgba(${accent}, 0.85)`;
-        ctx!.shadowBlur = 14;
+      if (!running) {
+        strokeMesh(rod(bobFor(tempo.current)), ROD_AT, ROD_DIM, angle, scale, ox, oy, accent);
+        return;
       }
-      strokeMesh(
-        rod(bobFor(tempo.current)),
-        ROD_AT,
-        ROD_DIM,
-        angle,
-        scale,
-        ox,
-        oy,
-        accent,
-        running ? 1.9 : 1,
-      );
+
+      // Running, the weight is a solid and the shaft stays a drawn line: the
+      // weight is the part of a metronome you watch, and one small lit block
+      // on a wireframe is a focal point where a filled rod was a bar. Both
+      // were tried; see `.claude/mockups/pendulum-*`.
+      //
+      // The solid arrives over the first third of a second rather than on
+      // the frame play is pressed; the canvas's own opacity eases over about
+      // the same stretch, so the two read as one change.
+      const { shaft, weight } = rodBoxes(bobFor(tempo.current));
+      const ramp = Math.min(1, (now - runSince) / 350);
+      ctx!.shadowColor = `rgba(${accent}, 0.85)`;
+      ctx!.shadowBlur = 14;
+      strokeMesh(shaft, ROD_AT, ROD_DIM, angle, scale, ox, oy, accent, 1.9);
+      fillBox(placed(weight.pts, ROD_AT, angle), scale, ox, oy, accent, 0.95 * ramp, ROD_DIM, 1.9);
       ctx!.shadowBlur = 0;
     }
 
