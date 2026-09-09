@@ -197,3 +197,33 @@ describe("the rest of the paragraph", () => {
     expect(screen.getByText("+ Add a step")).toBeTruthy();
   });
 });
+
+describe("a step is a control, not a div that happens to be clickable", () => {
+  it("says so in the DOM, which is what Windows clicks depend on", () => {
+    /*
+     * `useDrag` decides on mousedown whether the pointer is on a control or
+     * on window furniture, and it decides for the whole document. A bare
+     * `div` with an `onClick` fails that test, so on Windows `startDragging()`
+     * takes the mouse and the click never lands; macOS survives it because
+     * `startDragging()` rejects on a focused undecorated window.
+     *
+     * This is the second clickable `div` in this project to cost a
+     * Windows-only bug. The assertion is cheap and the bug is invisible on
+     * the machine most of this was written on.
+     */
+    const { container } = draw();
+    for (const block of container.querySelectorAll<HTMLElement>(".setlist-step")) {
+      expect(block.getAttribute("role")).toBe("button");
+      expect(block.getAttribute("tabindex")).toBe("0");
+    }
+  });
+
+  it("selects from the keyboard as well as the pointer", () => {
+    const onSelectStep = vi.fn();
+    const { container } = draw({ selectedStepId: "s1", onSelectStep });
+    const third = [...container.querySelectorAll<HTMLElement>(".setlist-step")][2];
+    third.focus();
+    third.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(onSelectStep).toHaveBeenCalledWith("s3");
+  });
+});

@@ -1495,11 +1495,19 @@ span.meter-grouping-chip {
    window is actually wider than that — so nothing moves until the gap would
    otherwise open, and no breakpoint has to guess where that is.
 
-   1176 stage + 60 gap + 290 figure. It was 1776 when the figure grew to
-   540px on a wide monitor; the figure is one size now, and a band sized for
-   the old one would have opened the very gap it exists to close. */
+   The band is the STAGE, and the figure hangs on its right edge rather than
+   beside it. It was 1176 + 60 gap + 290 figure, which put the sketch outside
+   the controls in its own column — and on a wide window that reads as two
+   objects with a hole between them, which is the thing this band was written
+   to prevent in the first place. The owner: "the figure hopefully stays
+   closer to the left, around at the end of the bpm bar, on top of the 3
+   accent options".
+
+   So it overlaps, which is what scenery at 30% opacity behind the controls
+   is for. Both are pinned to the same number, so the figure's right edge and
+   the stage's right edge are the same edge at every width. */
 .main-content[data-view="beat"] {
-  --stage-band: 1526px;
+  --stage-band: 1176px;
 }
 
 .main-content[data-view="beat"] > .view-transition-wrapper {
@@ -2069,7 +2077,7 @@ span.meter-grouping-chip {
   top: 96px;
   /* The right end of the same centred band the stage's left end is pinned to
      — see `--stage-band`. Below that width this resolves to 1%. */
-  right: max(1%, calc(50% - var(--stage-band, 1526px) / 2));
+  right: max(1%, calc(50% - var(--stage-band, 1176px) / 2));
   width: min(28vw, 290px);
   /* Short enough that the BOX clears the accent row, not just the drawing
      inside it — `fit()` centres the figure in whatever space it is given,
