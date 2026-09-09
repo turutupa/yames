@@ -1,6 +1,7 @@
 {
   "nav": {
     "metronome": "Metronom",
+    "setlist": "Setlista",
     "drill": "Rozbieg"
   },
   "tooltip": {
@@ -22,6 +23,7 @@
   "presets": {
     "title": "Presety",
     "titleDrill": "Rozbiegi",
+    "titleSetlist": "Setlisty",
     "saveCurrent": "Zapisz bieżące ustawienia",
     "search": "Szukaj w bibliotece",
     "searchPlaceholder": "Szukaj...",

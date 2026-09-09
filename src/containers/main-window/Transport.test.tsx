@@ -230,7 +230,7 @@ describe("Transport — what it sheds, and in what order", () => {
     const { unmount } = render(
       <Transport
         {...base}
-        view="beat"
+        view="setlist"
         setlistStepNumber={1}
         setlistStepCount={4}
         setlistRemaining={{ kind: "bars", bars: 5 }}
@@ -245,7 +245,7 @@ describe("Transport — what it sheds, and in what order", () => {
     render(
       <Transport
         {...base}
-        view="beat"
+        view="setlist"
         isPlaying
         setlistStepNumber={2}
         setlistStepCount={4}

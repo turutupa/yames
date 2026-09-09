@@ -815,3 +815,51 @@
     margin-top: 18px;
   }
 }
+
+/* ── The Setlist tab, cold ───────────────────────────────────────────────
+   A mode can be opened with nothing in it, which the setlist screen never
+   had to survive while it lived inside the metronome. Centred rather than
+   top-left: there is nothing else on the stage to align to. */
+.setlist-blank {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 14px;
+  min-height: 320px;
+  padding: 40px 24px;
+}
+
+.setlist-blank-title {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--text);
+  margin: 0;
+}
+
+.setlist-blank-lead {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text-muted);
+  max-width: 44ch;
+  margin: 0;
+}
+
+.setlist-blank-new {
+  margin-top: 4px;
+  padding: 9px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-text, #fff);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 120ms ease;
+}
+
+.setlist-blank-new:hover {
+  filter: brightness(1.08);
+}

@@ -1,6 +1,7 @@
 {
   "nav": {
     "metronome": "节拍器",
+    "setlist": "曲目单",
     "drill": "变速练习"
   },
   "tooltip": {
@@ -22,6 +23,7 @@
   "presets": {
     "title": "预设",
     "titleDrill": "变速练习",
+    "titleSetlist": "曲目单",
     "saveCurrent": "保存当前设置",
     "search": "搜索资料库",
     "searchPlaceholder": "搜索…",

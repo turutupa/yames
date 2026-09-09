@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { spanLabel, type SetlistRemaining } from "../../components/setlist/format";
 
 interface TransportProps {
-  view: "beat" | "drill";
+  view: "beat" | "drill" | "setlist";
   isPlaying: boolean;
   speedRampActive: boolean;
   isPulsing: boolean;
@@ -128,7 +128,7 @@ export function Transport({
   const { t } = useTranslation();
   const running = view === "drill" ? speedRampActive : isPlaying;
   const anyRunning = isPlaying || speedRampActive;
-  const setlisted = view === "beat" && setlistStepCount > 0;
+  const setlisted = view === "setlist" && setlistStepCount > 0;
 
   return (
     <div

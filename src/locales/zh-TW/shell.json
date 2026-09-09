@@ -1,6 +1,7 @@
 {
   "nav": {
     "metronome": "節拍器",
+    "setlist": "曲目單",
     "drill": "變速練習"
   },
   "tooltip": {
@@ -22,6 +23,7 @@
   "presets": {
     "title": "預設",
     "titleDrill": "變速練習",
+    "titleSetlist": "曲目單",
     "saveCurrent": "儲存目前設定",
     "search": "搜尋資料庫",
     "searchPlaceholder": "搜尋…",

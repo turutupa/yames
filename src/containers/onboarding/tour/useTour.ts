@@ -21,8 +21,19 @@ export type UseTourArgs = {
   /** Overridable for tests; defaults to the six stops. */
   stops?: TourStop[];
   /** The tab showing right now ("settings" is never a tour stop's home). */
-  view: TourView | "settings";
-  setView: (view: TourView) => void;
+  /**
+   * `setlist` is here because the app has that tab, not because the tour
+   * visits it — there is no setlist stop. It is accepted and ignored, which
+   * is honest; coercing it to "beat" would make the tour think it was on a
+   * screen it is not.
+   */
+  view: TourView | "setlist" | "settings";
+  /**
+   * Wider than `TourView` on purpose. The tour's STOPS are only ever beat or
+   * drill — there is no setlist stop — but it has to be able to put you back
+   * on the tab you opened it from, and that can be the setlist.
+   */
+  setView: (view: TourView | "setlist") => void;
   /**
    * O1's `migratedExistingUser`. When true and the tour has never been seen,
    * `offerVisible` turns on once.
@@ -42,7 +53,7 @@ export type UseTourResult = {
    * needed when the caller is leaving Settings in the same tick and the hook
    * would otherwise capture "settings".
    */
-  open: (restoreView?: TourView) => void;
+  open: (restoreView?: TourView | "setlist") => void;
   /** End the tour and record `tour.seenVersion`. */
   close: () => void;
   next: () => void;
@@ -74,7 +85,7 @@ export function useTour({
   const viewRef = useRef(view);
   viewRef.current = view;
   /** Tab to return to when the tour ends. */
-  const restoreRef = useRef<TourView | null>(null);
+  const restoreRef = useRef<TourView | "setlist" | null>(null);
 
   const isOpen = index >= 0 && index < stops.length;
   const stop = isOpen ? stops[index] : null;
@@ -104,7 +115,7 @@ export function useTour({
   }, []);
 
   // --- Lifecycle -----------------------------------------------------------
-  const open = useCallback((restoreView?: TourView) => {
+  const open = useCallback((restoreView?: TourView | "setlist") => {
     const current = viewRef.current;
     restoreRef.current =
       restoreView ?? (current === "settings" ? "beat" : current);

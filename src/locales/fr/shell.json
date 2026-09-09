@@ -1,6 +1,7 @@
 {
   "nav": {
     "metronome": "Métronome",
+    "setlist": "Setlist",
     "drill": "Rampe"
   },
   "tooltip": {
@@ -22,6 +23,7 @@
   "presets": {
     "title": "Préréglages",
     "titleDrill": "Rampes",
+    "titleSetlist": "Setlists",
     "saveCurrent": "Enregistrer les réglages actuels",
     "search": "Rechercher dans la bibliothèque",
     "searchPlaceholder": "Rechercher…",

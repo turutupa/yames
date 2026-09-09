@@ -9,7 +9,7 @@ function setup(overrides: Partial<React.ComponentProps<typeof Rail>> = {}) {
     state: DEFAULT_TEST_STATE,
     view: "beat" as const,
     setView: vi.fn(),
-    prevTab: { current: "beat" as "beat" | "drill" },
+    prevTab: { current: "beat" as "beat" | "drill" | "setlist" },
     libraryOpen: false,
     onToggleLibrary: vi.fn(),
     onLoadPreset: vi.fn(),
@@ -42,7 +42,7 @@ describe("Rail", () => {
     // promise with no date. Pocket Check is gone (U1.7), Paths is not here yet.
     const { container } = setup();
     const labels = [...container.querySelectorAll(".rail-mode-label")].map((n) => n.textContent);
-    expect(labels).toEqual(["Metronome", "Drill"]);
+    expect(labels).toEqual(["Metronome", "Setlist", "Drill"]);
   });
 
   it("switches mode and marks the current one for assistive tech", () => {
@@ -118,7 +118,7 @@ describe("Rail", () => {
   });
 
   it("remembers the mode it left when opening settings, and returns to it", () => {
-    const prevTab = { current: "beat" as "beat" | "drill" };
+    const prevTab = { current: "beat" as "beat" | "drill" | "setlist" };
     const setView = vi.fn();
     const { props, rerender } = setup({ view: "drill", prevTab, setView });
 

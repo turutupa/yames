@@ -11,7 +11,7 @@ interface RailProps {
   state: AppState;
   view: MainView;
   setView: (v: MainView) => void;
-  prevTab: { current: "beat" | "drill" };
+  prevTab: { current: "beat" | "drill" | "setlist" };
   /** The library section — the rail itself is always visible. */
   libraryOpen: boolean;
   onToggleLibrary: () => void;
@@ -25,7 +25,6 @@ interface RailProps {
   onNewSetlist: () => void;
   onDeleteSetlist: (id: string) => void;
   onRenameSetlist: (id: string, name: string) => void;
-  onAddPresetToSetlist?: (preset: Preset) => void;
   coachOpen: boolean;
   coachActive: boolean;
   coachListening: boolean;
@@ -42,6 +41,18 @@ const MODES = [
         <path d="M9 18V5l12-2v13" />
         <circle cx="6" cy="18" r="3" />
         <circle cx="18" cy="16" r="3" />
+      </>
+    ),
+  },
+  {
+    id: "setlist" as const,
+    labelKey: "nav.setlist",
+    // Two links joined — the same glyph the library rows carry, so the mode
+    // and its documents are recognisably the same thing.
+    icon: (
+      <>
+        <path d="M9.5 14.5a4 4 0 0 1 0-5l2-2a4 4 0 0 1 5.7 5.7l-1 1" />
+        <path d="M14.5 9.5a4 4 0 0 1 0 5l-2 2a4 4 0 0 1-5.7-5.7l1-1" />
       </>
     ),
   },
@@ -82,7 +93,6 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
     onNewSetlist,
     onDeleteSetlist,
     onRenameSetlist,
-    onAddPresetToSetlist,
     coachOpen,
     coachActive,
     coachListening,
@@ -92,7 +102,9 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
   sidebarRef,
 ) {
   const { t } = useTranslation();
-  const playView = view === "beat" || view === "drill" ? view : "beat";
+  // Settings is an overlay, not a library: it keeps whatever list was
+  // behind it, and "beat" is the one to fall back to.
+  const playView = view === "settings" ? "beat" : view;
 
   // The mockup writes "Ready" at the right of the coach's row. Three words
   // rather than one, because the row already knows more than that: a session
@@ -158,7 +170,6 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
             onNewSetlist={onNewSetlist}
             onDeleteSetlist={onDeleteSetlist}
             onRenameSetlist={onRenameSetlist}
-            onAddPresetToSetlist={onAddPresetToSetlist}
           />
         )}
       </div>

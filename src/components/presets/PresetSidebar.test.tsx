@@ -209,13 +209,20 @@ describe("PresetSidebar", () => {
       expect(input).not.toBeNull();
     });
   });
-  it("lists setlists beside the presets, with a glyph and a step count (U9.4)", async () => {
-    // "Setlist" is vague in isolation and precise here: in a list headed
-    // PRESETS, beside presets, the word says exactly what the row is.
+  it("gives the setlist tab a library of setlists and nothing else", async () => {
+    // One list per tab. Setlists used to sit above the presets under a
+    // PRESETS heading, which needed the word "setlist" on every row to be
+    // legible; on a tab of their own the rows say what they are by being
+    // the only thing there.
     setInvokeResponse("list_presets", () => [makePreset({ id: "a", name: "Slow Blues" })]);
     const onLoadSetlist = vi.fn();
     const { container } = render(
-      <PresetSidebar {...baseProps} setlists={[makeSetlist()]} onLoadSetlist={onLoadSetlist} />,
+      <PresetSidebar
+        {...baseProps}
+        view="setlist"
+        setlists={[makeSetlist()]}
+        onLoadSetlist={onLoadSetlist}
+      />,
     );
     const row = await waitFor(() => {
       const el = container.querySelector(".setlist-item");
@@ -223,40 +230,52 @@ describe("PresetSidebar", () => {
       return el as HTMLElement;
     });
     expect(within(row).getByText("Warm-up routine")).toBeInTheDocument();
-    expect(within(row).getByText("setlist · 2 steps")).toBeInTheDocument();
+    expect(within(row).getByText("2 steps")).toBeInTheDocument();
     expect(row.querySelector("svg")).not.toBeNull();
 
-    // A preset still loads a preset; a setlist loads a setlist.
     fireEvent.click(row);
     expect(onLoadSetlist).toHaveBeenCalledWith(expect.objectContaining({ id: "ch1" }));
-    fireEvent.click(screen.getByText("Slow Blues"));
-    expect(baseProps.onLoadPreset).toHaveBeenCalled();
+
+    // The presets are on their own tab, and so is the button that saves one.
+    expect(screen.queryByText("Slow Blues")).toBeNull();
+    expect(container.querySelector(".preset-sidebar-add")).toBeNull();
+    expect(container.querySelector(".preset-sidebar-title")?.textContent).toBe("Setlists");
   });
 
-  it("only the metronome list carries setlists", async () => {
-    // A step is a metronome configuration; a drill is a ramp the setlist
-    // runtime has no way to run.
+  it("keeps setlists off every other tab's library", async () => {
     setInvokeResponse("list_presets", () => []);
-    const { container } = render(
-      <PresetSidebar {...baseProps} view="drill" setlists={[makeSetlist()]} onLoadSetlist={vi.fn()} />,
-    );
-    await waitFor(() => expect(container.querySelector(".preset-sidebar-title")).not.toBeNull());
-    expect(container.querySelector(".setlist-item")).toBeNull();
+    for (const view of ["beat", "drill"] as const) {
+      const { container, unmount } = render(
+        <PresetSidebar {...baseProps} view={view} setlists={[makeSetlist()]} onLoadSetlist={vi.fn()} />,
+      );
+      await waitFor(() => expect(container.querySelector(".preset-sidebar-title")).not.toBeNull());
+      expect(container.querySelector(".setlist-item")).toBeNull();
+      unmount();
+    }
   });
 
-  it("keeps a separate opener for a new setlist", async () => {
-    // Overloading the "+" would put a menu in front of the gesture a new
-    // user reaches for first.
+  it("gives each tab the opener for the thing that tab holds", async () => {
+    // "Save current settings" is the gesture a new user reaches for first,
+    // and it means nothing on the setlist tab — there is no preset there to
+    // save. Each tab shows one opener, for its own kind of thing.
     setInvokeResponse("list_presets", () => []);
     const onNewSetlist = vi.fn();
+    const setlistTab = render(
+      <PresetSidebar {...baseProps} view="setlist" setlists={[]} onNewSetlist={onNewSetlist} />,
+    );
+    await waitFor(() => expect(screen.getByLabelText("New setlist")).toBeInTheDocument());
+    fireEvent.click(screen.getByLabelText("New setlist"));
+    expect(onNewSetlist).toHaveBeenCalled();
+    expect(document.querySelector(".preset-sidebar-add")).toBeNull();
+    setlistTab.unmount();
+
     render(<PresetSidebar {...baseProps} setlists={[]} onNewSetlist={onNewSetlist} />);
     const add = await waitFor(() => {
       const b = document.querySelector(".preset-sidebar-add") as HTMLButtonElement;
       expect(b).not.toBeNull();
       return b;
     });
-    fireEvent.click(screen.getByLabelText("New setlist"));
-    expect(onNewSetlist).toHaveBeenCalled();
+    expect(screen.queryByLabelText("New setlist")).toBeNull();
     fireEvent.click(add);
     await waitFor(() => expect(document.querySelector(".preset-sidebar-name-input")).not.toBeNull());
   });
