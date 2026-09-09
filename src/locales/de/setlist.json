@@ -85,7 +85,8 @@
       "stepOf": "Schritt {{number}} von {{total}}",
       "nextIn": "Nächster in {{gap}}",
       "nextWhenYouSay": "Nächster auf dein Zeichen",
-      "skip": "Zum nächsten"
+      "skip": "Zum nächsten",
+      "startAtStep": "Ab Schritt {{number}} starten"
     },
     "nowShort": "Jetzt",
     "emptyLead": "Eine Setlist spielt deine Schritte der Reihe nach ab. Füge unten den ersten hinzu.",

@@ -85,7 +85,8 @@
       "stepOf": "{{total}} adımdan {{number}}.",
       "nextIn": "Sonraki {{gap}} sonra",
       "nextWhenYouSay": "Sonraki, sen söyleyince",
-      "skip": "Sonrakine geç"
+      "skip": "Sonrakine geç",
+      "startAtStep": "{{number}}. adımdan başlat"
     },
     "nowShort": "Şimdi",
     "emptyLead": "Set listesi adımlarını sırayla, birbiri ardına çalar. İlkini aşağıya ekle.",

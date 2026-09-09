@@ -142,7 +142,17 @@ export function useSetlistSession({
    */
   const awaiting = useRef<string | null>(null);
 
-  const runner = useSetlistRunner(setlist, isPlaying, currentBeat);
+  /**
+    * The step a run would begin on: the one open in the editor.
+    *
+    * -1 (nothing selected) reads as the top, which is also what a setlist
+    * you have just loaded does — `loadSetlist` selects the first step.
+    */
+  const selectedIndex = Math.max(
+    0,
+    setlist?.steps.findIndex((s) => s.id === selectedStepId) ?? 0,
+  );
+  const runner = useSetlistRunner(setlist, isPlaying, currentBeat, selectedIndex);
 
   useEffect(() => {
     if (!isPlaying) setEditingWhileRunning(false);
@@ -368,6 +378,8 @@ export function useSetlistSession({
     renameSetlist,
     addStepFromNow,
     addPresetAsStep,
+    /** 1-based, for the transport's "Start at step 3". */
+    startAt: setlist ? selectedIndex + 1 : 0,
     /** True while the setlist is on a step — the player's condition. */
     setlistPlaying: runner.step !== null && !editingWhileRunning,
     editingWhileRunning,

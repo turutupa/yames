@@ -30,6 +30,14 @@ interface TransportProps {
   setlistStepNumber?: number;
   setlistStepCount?: number;
   setlistRemaining?: SetlistRemaining;
+  /**
+   * 1-based step a run would begin on, or 0 when no setlist is loaded.
+   *
+   * The button names it. Pressing play while looking at step four and
+   * hearing step one is a surprise, and it is the kind that makes you
+   * distrust the button rather than learn it.
+   */
+  setlistStartAt?: number;
   onSetlistSkip?: () => void;
 }
 
@@ -114,6 +122,7 @@ export function Transport({
   setlistStepNumber = 0,
   setlistStepCount = 0,
   setlistRemaining,
+  setlistStartAt = 0,
   onSetlistSkip,
 }: TransportProps) {
   const { t } = useTranslation();
@@ -160,14 +169,35 @@ export function Transport({
             {/* A drill is not played, it is run. The metronome's button starts
                 a sound; this one starts an exercise that lasts four minutes
                 and changes tempo on its own. */}
-            {view === "drill" ? t("transport.start") : t("common.play")}
+            {/* A drill is not played, it is run. The metronome's button
+                starts a sound; this one starts an exercise that lasts four
+                minutes and changes tempo on its own. A setlist is the same
+                kind of thing, and it also says WHERE it will start. */}
+            {view === "drill"
+              ? t("transport.start")
+              : setlisted
+                ? setlistStartAt > 1
+                  ? t("setlist.transport.startAtStep", { number: setlistStartAt })
+                  : t("transport.start")
+                : t("common.play")}
           </>
         )}
       </button>
 
       {playShortcut && <kbd className="transport-key">{playShortcut}</kbd>}
 
-      <div className="transport-readouts">
+      {/* Nothing has been counted yet, so there is nothing to say — a bar
+          count of 1 and 0:00 elapsed is furniture pretending to be a
+          reading. It stays MOUNTED and goes transparent rather than
+          unmounting, so the row does not resize the moment you press play;
+          `opacity`, not `visibility`, which inherits and has bitten this
+          codebase before. Once a run has happened the numbers stay, because
+          then they are the result of what you just did. */}
+      <div
+        className="transport-readouts"
+        data-idle={!anyRunning && elapsedSeconds === 0 ? "" : undefined}
+        aria-hidden={!anyRunning && elapsedSeconds === 0 ? true : undefined}
+      >
         <div className="transport-readout">
           {/* At rest this said "—". You are always about to play bar one, and
               a dash is a value the counter never actually holds. */}

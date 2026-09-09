@@ -85,7 +85,8 @@
       "stepOf": "Krok {{number}} z {{total}}",
       "nextIn": "Następny za {{gap}}",
       "nextWhenYouSay": "Następny na twój znak",
-      "skip": "Przejdź do następnego"
+      "skip": "Przejdź do następnego",
+      "startAtStep": "Zacznij od kroku {{number}}"
     },
     "nowShort": "Teraz",
     "emptyLead": "Setlista odtwarza kroki po kolei, jeden po drugim. Dodaj pierwszy poniżej.",

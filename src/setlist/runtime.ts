@@ -66,7 +66,13 @@ export type SetlistNext =
   | { kind: "end" };
 
 export type SetlistEvent =
-  | { kind: "start"; seconds: number }
+  /**
+   * Begin a run. `from` is the step to begin ON — the one you have open
+   * in the editor — because pressing start while looking at step four
+   * and hearing step one is a surprise, and skipping three times to get
+   * back is a chore. Out of range or absent means the top.
+   */
+  | { kind: "start"; seconds: number; from?: number }
   /** One engine beat. `seconds` is the run clock, from wall time. */
   | { kind: "beat"; isDownbeat: boolean; seconds: number }
   /** A manual trigger, or the transport's skip-ahead. (U9.2, U9.7) */
@@ -195,7 +201,7 @@ export function setlistReduce(
 ): SetlistReduction {
   switch (event.kind) {
     case "start":
-      return start(setlist, event.seconds);
+      return start(setlist, event.seconds, event.from);
     case "stop":
       return { state: IDLE_SETLIST_RUN, effects: [] };
     case "advance":
@@ -205,11 +211,15 @@ export function setlistReduce(
   }
 }
 
-function start(setlist: Setlist, seconds: number): SetlistReduction {
+function start(setlist: Setlist, seconds: number, from = 0): SetlistReduction {
   if (setlist.steps.length === 0) {
     return { state: { ...IDLE_SETLIST_RUN, phase: "finished" }, effects: [{ kind: "finished" }] };
   }
-  const effects: SetlistEffect[] = [{ kind: "applyStep", index: 0, step: setlist.steps[0] }];
+  // A stale selection must not start a run off the end of the setlist.
+  const index = Math.min(Math.max(0, Math.floor(from)), setlist.steps.length - 1);
+  const effects: SetlistEffect[] = [
+    { kind: "applyStep", index, step: setlist.steps[index] },
+  ];
   // After the step, never before it — the same ordering the between-steps
   // count-in has, and for the same reason: the beats have to sound at the
   // tempo of the step they are counting you into, and step one's tempo does
@@ -221,8 +231,9 @@ function start(setlist: Setlist, seconds: number): SetlistReduction {
     state: {
       ...IDLE_SETLIST_RUN,
       phase: "switching",
+      stepIndex: index,
       stepStartedAt: seconds,
-      // The first downbeat anchors step one; until then no bar has elapsed.
+      // The first downbeat anchors the step; until then no bar has elapsed.
       anchored: false,
     },
     effects,

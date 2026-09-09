@@ -85,7 +85,8 @@
       "stepOf": "Étape {{number}} sur {{total}}",
       "nextIn": "Suivante dans {{gap}}",
       "nextWhenYouSay": "Suivante quand vous le dites",
-      "skip": "Passer à la suivante"
+      "skip": "Passer à la suivante",
+      "startAtStep": "Démarrer à l'étape {{number}}"
     },
     "nowShort": "En cours",
     "emptyLead": "Une setlist joue vos étapes dans l'ordre, l'une après l'autre. Ajoutez la première ci-dessous.",

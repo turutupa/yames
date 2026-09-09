@@ -1211,6 +1211,7 @@ export function MainWindow() {
             setlistStepNumber={setlistSession.runner.stepNumber}
             setlistStepCount={setlistSession.setlist?.steps.length ?? 0}
             setlistRemaining={setlistSession.runner.remaining}
+            setlistStartAt={setlistSession.startAt}
             onSetlistSkip={setlistSession.runner.skip}
           />
         )}

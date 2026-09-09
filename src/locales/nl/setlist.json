@@ -85,7 +85,8 @@
       "stepOf": "Stap {{number}} van {{total}}",
       "nextIn": "Volgende over {{gap}}",
       "nextWhenYouSay": "Volgende als jij het zegt",
-      "skip": "Naar de volgende"
+      "skip": "Naar de volgende",
+      "startAtStep": "Start bij stap {{number}}"
     },
     "nowShort": "Nu",
     "emptyLead": "Een setlist speelt je stappen op volgorde af, de een na de ander. Voeg hieronder de eerste toe.",

@@ -85,7 +85,8 @@
       "stepOf": "第 {{number}} 步 / 共 {{total}} 步",
       "nextIn": "{{gap}} 后进入下一步",
       "nextWhenYouSay": "等你示意再进入下一步",
-      "skip": "跳到下一步"
+      "skip": "跳到下一步",
+      "startAtStep": "从第 {{number}} 步开始"
     },
     "nowShort": "正在播放",
     "emptyLead": "曲目单会按顺序逐个播放你的步骤。先在下面添加第一个。",

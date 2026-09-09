@@ -1627,6 +1627,13 @@ button.context-chip:hover,
    count is still on the stage, and Skip is a control, which readouts are not.
 
    Above this width all three fit and nothing is hidden. */
+/* Before the first bar there is nothing to report. Transparent rather than
+   unmounted, so pressing play does not resize the row it lives in. */
+.transport-readouts[data-idle] {
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* The setlist's counts in the transport. This block had no rule of its own, so
    its three spans ran together as "Step 2 of 4Next in 2 minSkip to next" —
    which nobody noticed while it sat under a strip of cards that said the same
