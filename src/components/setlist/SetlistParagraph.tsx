@@ -7,8 +7,7 @@ import {
   setSetlistCountIn,
   setSetlistRepeat,
 } from "../../setlist";
-import { meterLabel } from "../../utils/meter";
-import { setlistSeconds, durationLabel, repeatLabel, stepSaidQuietly, stepSaidTiming } from "./format";
+import { setlistSeconds, durationLabel, repeatLabel } from "./format";
 import { StepSentence } from "./StepSentence";
 import type { Setlist, SetlistStep } from "../../types";
 
@@ -96,9 +95,11 @@ export function SetlistParagraph({
 
   const total = setlistSeconds(setlist);
 
-  // A step opened near the bottom of a long setlist would open below the fold.
-  // Only when the SELECTION changes — not on every edit, or typing a tempo
-  // would drag the page around under the window you typed it in.
+  // Keep the selected step on screen — it is the one Start will begin on,
+  // so it has to be visible when the selection moves without a click (Start,
+  // a run advancing, a step being removed). Only on SELECTION changes: on
+  // every edit it would drag the page around under the window you are
+  // typing in.
   useEffect(() => {
     openRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [selectedStepId]);
@@ -176,87 +177,84 @@ export function SetlistParagraph({
 
       <div className="setlist-paragraph-list" ref={listRef}>
         {setlist.steps.map((step, index) => {
-          const open = step.id === selectedStepId;
+          const selected = step.id === selectedStepId;
           const running = index === runningIndex;
           const isLast = index === setlist.steps.length - 1;
-          const meter = step.freeMode ? t("metronome.free") : meterLabel(step.beatGroups);
-
-          if (open) {
-            return (
-              <div
-                className={`setlist-open-step${running ? " running" : ""}`}
-                key={step.id}
-                ref={openRef}
-              >
-                <span className="setlist-open-no">
-                  {running ? t("setlist.nowShort") : index + 1}
-                </span>
-                <StepSentence
-                  step={step}
-                  number={index + 1}
-                  total={setlist.steps.length}
-                  isLast={isLast}
-                  onChange={(next) => onPatchStep(step.id, next)}
-                />
-                {/* The four tools, on the open step only. On every card they
-                    were 31px of reserved height apiece for buttons that were
-                    invisible until hover; here they cost the nine closed rows
-                    nothing at all. */}
-                <div className="setlist-open-tools">
-                  <button
-                    type="button"
-                    aria-label={t("setlist.moveEarlier")}
-                    title={t("setlist.moveEarlier")}
-                    disabled={index === 0}
-                    onClick={() => onChange(reorderSteps(setlist, index, index - 1))}
-                  >
-                    <ToolIcon kind="up" />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={t("setlist.moveLater")}
-                    title={t("setlist.moveLater")}
-                    disabled={isLast}
-                    onClick={() => onChange(reorderSteps(setlist, index, index + 1))}
-                  >
-                    <ToolIcon kind="down" />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={t("setlist.duplicateStep")}
-                    title={t("setlist.duplicateStep")}
-                    onClick={() => onChange(duplicateStep(setlist, step.id))}
-                  >
-                    <ToolIcon kind="copy" />
-                  </button>
-                  <button
-                    type="button"
-                    className="setlist-open-remove"
-                    aria-label={t("setlist.removeStep")}
-                    title={t("setlist.removeStep")}
-                    onClick={() => onChange(removeStep(setlist, step.id))}
-                  >
-                    <ToolIcon kind="remove" />
-                  </button>
-                </div>
-              </div>
-            );
-          }
 
           return (
-            <button
-              type="button"
-              className={`setlist-row${running ? " running" : ""}`}
+            <div
+              className={`setlist-step${selected ? " selected" : ""}${running ? " running" : ""}`}
               key={step.id}
-              aria-current={running ? "step" : undefined}
-              title={t("setlist.selectStep")}
-              onClick={() => onSelectStep(step.id)}
+              ref={selected ? openRef : undefined}
+              onClick={() => {
+                if (!selected) onSelectStep(step.id);
+              }}
             >
-              <span className="setlist-row-no">{running ? t("setlist.nowShort") : index + 1}</span>
-              <span className="setlist-row-name">{step.name}</span>
-              <span className="setlist-row-said">{stepSaidQuietly(t, step, meter)}</span>
-              <span className="setlist-row-timing">{stepSaidTiming(t, step, isLast)}</span>
-            </button>
+              <span className="setlist-step-no">
+                {running ? t("setlist.nowShort") : index + 1}
+              </span>
+              <StepSentence
+                step={step}
+                number={index + 1}
+                total={setlist.steps.length}
+                isLast={isLast}
+                folded
+                onChange={(next) => onPatchStep(step.id, next)}
+              />
+              {/* On the step you are working with, and on hover. They are
+                  drawn on every step at `opacity: 0` so the row cannot
+                  change height when they appear — the same reservation the
+                  drill's last-run note needed, learned the same way. */}
+              <div className="setlist-step-tools">
+                <button
+                  type="button"
+                  aria-label={t("setlist.moveEarlier")}
+                  title={t("setlist.moveEarlier")}
+                  disabled={index === 0}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onChange(reorderSteps(setlist, index, index - 1));
+                  }}
+                >
+                  <ToolIcon kind="up" />
+                </button>
+                <button
+                  type="button"
+                  aria-label={t("setlist.moveLater")}
+                  title={t("setlist.moveLater")}
+                  disabled={isLast}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onChange(reorderSteps(setlist, index, index + 1));
+                  }}
+                >
+                  <ToolIcon kind="down" />
+                </button>
+                <button
+                  type="button"
+                  aria-label={t("setlist.duplicateStep")}
+                  title={t("setlist.duplicateStep")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onChange(duplicateStep(setlist, step.id));
+                  }}
+                >
+                  <ToolIcon kind="copy" />
+                </button>
+                <button
+                  type="button"
+                  className="setlist-step-remove"
+                  aria-label={t("setlist.removeStep")}
+                  title={t("setlist.removeStep")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onChange(removeStep(setlist, step.id));
+                  }}
+                >
+                  <ToolIcon kind="remove" />
+                </button>
+              </div>
+            </div>
           );
         })}
 

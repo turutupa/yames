@@ -18,7 +18,6 @@
     "revertTooltip": "Zur gespeicherten Setlist zurückkehren",
     "track": "Die Setlist",
     "stepDefaultName": "Schritt {{number}}",
-    "selectStep": "Diesen Schritt bearbeiten",
     "renameStep": "Diesen Schritt umbenennen",
     "moveEarlier": "Diesen Schritt nach vorn schieben",
     "moveLater": "Diesen Schritt nach hinten schieben",
@@ -103,10 +102,6 @@
     },
     "said": {
       "config": "{{bpm}} BPM, {{meter}}, {{subdivision}} · {{sound}}",
-      "untilISay": "bis ich es sage",
-      "forSpan": "für {{span}}",
-      "thenTransition": "{{trigger}}, dann {{transition}}",
-      "thenTheSetlistEnds": "{{trigger}}, dann endet die Setlist",
       "stepNote": "Schritt {{number}} von {{total}}",
       "runs": "läuft",
       "for": "für",
@@ -133,6 +128,13 @@
       "beats_other": "{{count}} Schläge",
       "fewer": "Weniger Einzählschläge",
       "more": "Mehr Einzählschläge"
+    },
+    "leave": {
+      "title": "Nicht gespeicherte Änderungen",
+      "body": "„{{name}}“ hat ungespeicherte Änderungen.",
+      "save": "Speichern und schließen",
+      "discard": "Verwerfen und schließen",
+      "cancel": "Weiter bearbeiten"
     }
   }
 }

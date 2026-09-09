@@ -18,7 +18,6 @@
     "revertTooltip": "Вернуться к сохранённому сет-листу",
     "track": "Сет-лист",
     "stepDefaultName": "Шаг {{number}}",
-    "selectStep": "Править этот шаг",
     "renameStep": "Переименовать этот шаг",
     "moveEarlier": "Переместить этот шаг раньше",
     "moveLater": "Переместить этот шаг позже",
@@ -103,10 +102,6 @@
     },
     "said": {
       "config": "{{bpm}} BPM, {{meter}}, {{subdivision}} · {{sound}}",
-      "untilISay": "пока я не скажу",
-      "forSpan": "{{span}}",
-      "thenTransition": "{{trigger}}, затем {{transition}}",
-      "thenTheSetlistEnds": "{{trigger}}, и сет-лист заканчивается",
       "stepNote": "Шаг {{number}} из {{total}}",
       "runs": "идёт",
       "for": "в течение",
@@ -133,6 +128,13 @@
       "beats_other": "{{count}} долей",
       "fewer": "Меньше долей отсчёта",
       "more": "Больше долей отсчёта"
+    },
+    "leave": {
+      "title": "Несохранённые изменения",
+      "body": "В «{{name}}» есть несохранённые изменения.",
+      "save": "Сохранить и закрыть",
+      "discard": "Отменить и закрыть",
+      "cancel": "Продолжить правку"
     }
   }
 }

@@ -5,12 +5,20 @@ import { SetlistParagraph } from "./SetlistParagraph";
 import type { Setlist, SetlistStep } from "../../types";
 
 /**
- * The editor half of setlist mode.
+ * The setlist, with every step open.
  *
- * What matters here is not that it draws — it is the two claims the design
- * rests on. A closed step is ONE line and carries no controls, which is where
- * the height came from; and the step you clicked is the only one holding an
- * editor, which is why the step card could stop being a card.
+ * It was one line per step and the clicked one expanded to 191px. That
+ * answered "which step am I editing" and not "how does this routine go" —
+ * the owner: "clicking on each step to verify how they are transitioning in
+ * between is annoying". Expanding at editing size measured 2,443px for twelve
+ * steps and showed three at a time, so the SIZE came down instead: the same
+ * sentence at reading size, about 75px, with nothing collapsed and nothing
+ * that grows.
+ *
+ * These assert what that buys — every step readable and editable without a
+ * click, and a layout that never changes under you — plus the one thing the
+ * mockup got wrong, which is that a setlist where every step looks identical
+ * has nothing to point at when the transport says "Start at step 3".
  */
 
 function step(over: Partial<SetlistStep> & { id: string; name: string }): SetlistStep {
@@ -27,158 +35,164 @@ function step(over: Partial<SetlistStep> & { id: string; name: string }): Setlis
   };
 }
 
-const CHAIN: Setlist = {
+const SETLIST: Setlist = {
   id: "c1",
   name: "Warm-up routine",
   createdAt: 0,
   repeat: 1,
   steps: [
     step({ id: "s1", name: "Loosen up", bpm: 70, subdivision: 1 }),
-    step({ id: "s2", name: "Alt picking", trigger: { kind: "seconds", seconds: 120 }, transition: { kind: "countIn", bars: 2 } }),
-    step({ id: "s3", name: "Odd meter", bpm: 88, subdivision: 2, beatGroups: [3, 2, 2], trigger: { kind: "manual" } }),
+    step({
+      id: "s2",
+      name: "Alt picking",
+      trigger: { kind: "seconds", seconds: 120 },
+      transition: { kind: "countIn", bars: 2 },
+    }),
+    step({
+      id: "s3",
+      name: "Odd meter",
+      bpm: 88,
+      subdivision: 2,
+      beatGroups: [3, 2, 2],
+      trigger: { kind: "manual" },
+    }),
   ],
 };
 
 function draw(over: Partial<Parameters<typeof SetlistParagraph>[0]> = {}) {
   return render(
     <SetlistParagraph
-      setlist={CHAIN}
+      setlist={SETLIST}
       selectedStepId="s1"
       onSelectStep={() => {}}
       runningIndex={-1}
       onChange={() => {}}
+      onPatchStep={() => {}}
       onAddStep={() => {}}
       {...over}
     />,
   );
 }
 
-describe("the setlist, as a paragraph", () => {
-  it("says a closed step in words, and gives it nothing to press", () => {
-    // The whole argument for the row: a step that is not being edited is a
-    // sentence you read, so it costs one line instead of a 136px card whose
-    // four tool buttons reserved 31px each while invisible.
-    const { container } = draw({ selectedStepId: "s1" });
-    const rows = container.querySelectorAll(".setlist-row");
-    expect(rows).toHaveLength(2); // s2 and s3; s1 is the open one
+const blocks = (c: HTMLElement) => [...c.querySelectorAll<HTMLElement>(".setlist-step")];
 
-    const alt = screen.getByText("Alt picking").closest(".setlist-row") as HTMLElement;
-    expect(alt.textContent).toContain("96 BPM");
-    expect(alt.textContent).toContain("4/4");
-    // The trigger, in the words a player would use, on the row itself.
-    expect(alt.textContent).toContain("2 min");
-    expect(alt.textContent).toContain("count in 2 bars");
-    // ...and no controls of its own beyond being the control.
-    expect(within(alt).queryAllByRole("button")).toHaveLength(0);
+describe("every step is open", () => {
+  it("draws all of them, not one", () => {
+    const { container } = draw();
+    expect(blocks(container)).toHaveLength(3);
+    expect(container.querySelectorAll(".setlist-sentence-folded")).toHaveLength(3);
   });
 
-  it("opens exactly one step, and only that one carries the tools", () => {
-    const { container } = draw({ selectedStepId: "s2" });
-    expect(container.querySelectorAll(".setlist-open-step")).toHaveLength(1);
-    expect(container.querySelectorAll(".setlist-sentence")).toHaveLength(1);
-
-    const open = container.querySelector(".setlist-open-step") as HTMLElement;
-    expect(open.textContent).toContain("Alt picking");
-    for (const name of ["Move this step earlier", "Move this step later", "Duplicate this step", "Remove this step"]) {
-      expect(within(open).getByRole("button", { name })).toBeTruthy();
+  it("says the whole routine without a click, handovers included", () => {
+    const { container } = draw();
+    const text = container.textContent ?? "";
+    for (const said of ["Loosen up", "Alt picking", "Odd meter", "70", "96", "88"]) {
+      expect(text).toContain(said);
     }
-    // The closed rows have none of them anywhere on the screen but here.
-    expect(screen.getAllByRole("button", { name: "Remove this step" })).toHaveLength(1);
+    // The complaint this exists for: every handover, at the same time.
+    expect(text).toContain("8 bars");
+    expect(text).toContain("2 min");
+    expect(text).toContain("when I say");
+    expect(text).toContain("count in 2 bars");
   });
 
-  it("clicking a closed step asks for it, and does not edit the setlist", () => {
-    const onSelectStep = vi.fn();
-    const onChange = vi.fn();
-    draw({ selectedStepId: "s1", onSelectStep, onChange });
+  it("makes the phrases reachable on every step, not just the selected one", () => {
+    // A phrase you can read but not press would be the collapsed row again
+    // with extra steps.
+    const { container } = draw({ selectedStepId: "s1" });
+    for (const block of blocks(container)) {
+      expect(within(block).getAllByRole("button").length).toBeGreaterThan(4);
+    }
+  });
 
-    screen.getByText("Odd meter").closest(".setlist-row")!.dispatchEvent(
-      new MouseEvent("click", { bubbles: true }),
-    );
-    expect(onSelectStep).toHaveBeenCalledWith("s3");
+  it("routes an edit through onPatchStep, which is what reaches the engine", async () => {
+    const onPatchStep = vi.fn();
+    const onChange = vi.fn();
+    const { container } = draw({ onPatchStep, onChange });
+    const third = blocks(container)[2];
+    await userEvent.click(within(third).getByText("eighth").closest("button")!);
+    await userEvent.click(await screen.findByText("Quarter"));
+    expect(onPatchStep).toHaveBeenCalledWith("s3", { subdivision: 1 });
+    // `onChange` replaces the whole setlist and does NOT reach the engine.
     expect(onChange).not.toHaveBeenCalled();
   });
+});
 
-  it("says a step that waits for you differently from one that counts", () => {
-    draw({ selectedStepId: "s1" });
-    const odd = screen.getByText("Odd meter").closest(".setlist-row") as HTMLElement;
-    expect(odd.textContent).toContain("until I say");
-    // ...and the last step ends the setlist rather than handing over.
-    expect(odd.textContent).toContain("the setlist ends");
+describe("which step Start will begin on", () => {
+  it("marks the selected one, and only it", () => {
+    // The mockup drew every step accented, which left "Start at step 3" with
+    // nothing on screen to point at.
+    const { container } = draw({ selectedStepId: "s2" });
+    const selected = container.querySelectorAll(".setlist-step.selected");
+    expect(selected).toHaveLength(1);
+    expect(selected[0].textContent).toContain("Alt picking");
   });
 
-  it("marks the running step even while you are editing another one", () => {
-    // Leaving the player does not stop the run, so the paragraph has to be
-    // able to say which step is sounding while you edit a different one.
+  it("selects a step when you click one you are not on", () => {
+    const onSelectStep = vi.fn();
+    const { container } = draw({ selectedStepId: "s1", onSelectStep });
+    blocks(container)[2].click();
+    expect(onSelectStep).toHaveBeenCalledWith("s3");
+  });
+
+  it("marks the running step separately from the selected one", () => {
+    // Leaving the player does not stop the run, so both marks exist at once
+    // and they are not the same mark.
     const { container } = draw({ selectedStepId: "s3", runningIndex: 0 });
-    const running = container.querySelector(".setlist-row.running") as HTMLElement;
-    expect(running).toBeTruthy();
+    const running = container.querySelector(".setlist-step.running")!;
+    const selected = container.querySelector(".setlist-step.selected")!;
     expect(running.textContent).toContain("Loosen up");
-    expect(running.getAttribute("aria-current")).toBe("step");
+    expect(selected.textContent).toContain("Odd meter");
+    expect(running).not.toBe(selected);
+  });
+});
+
+describe("nothing grows", () => {
+  it("gives every step its tools, so a row cannot change height by gaining them", () => {
+    // The cards reserved 31px apiece for buttons invisible until hover. These
+    // are drawn on every step and revealed with opacity — same reservation,
+    // no height.
+    const { container } = draw();
+    for (const block of blocks(container)) {
+      const tools = block.querySelector<HTMLElement>(".setlist-step-tools")!;
+      expect(within(tools).getAllByRole("button")).toHaveLength(4);
+    }
   });
 
+  it("keeps the tools working without selecting the step they sit on", () => {
+    const onChange = vi.fn();
+    const onSelectStep = vi.fn();
+    const { container } = draw({ selectedStepId: "s1", onChange, onSelectStep });
+    const third = blocks(container)[2];
+    within(third).getByRole("button", { name: "Remove this step" }).click();
+    expect(onChange).toHaveBeenCalled();
+    // Removing a step is not a request to edit it.
+    expect(onSelectStep).not.toHaveBeenCalled();
+  });
+});
+
+describe("the rest of the paragraph", () => {
   it("offers the way back to the player only while something is playing", async () => {
     const onBackToPlaying = vi.fn();
-    const { rerender } = render(
-      <SetlistParagraph
-        setlist={CHAIN}
-        selectedStepId="s1"
-        onSelectStep={() => {}}
-        runningIndex={-1}
-        onChange={() => {}}
-        onAddStep={() => {}}
-        onBackToPlaying={onBackToPlaying}
-      />,
-    );
+    const props = {
+      setlist: SETLIST,
+      selectedStepId: "s1",
+      onSelectStep: () => {},
+      onChange: () => {},
+      onPatchStep: () => {},
+      onAddStep: () => {},
+      onBackToPlaying,
+    };
+    const { rerender } = render(<SetlistParagraph {...props} runningIndex={-1} />);
     expect(screen.queryByText("Back to playing")).toBeNull();
 
-    rerender(
-      <SetlistParagraph
-        setlist={CHAIN}
-        selectedStepId="s1"
-        onSelectStep={() => {}}
-        runningIndex={1}
-        onChange={() => {}}
-        onAddStep={() => {}}
-        onBackToPlaying={onBackToPlaying}
-      />,
-    );
+    rerender(<SetlistParagraph {...props} runningIndex={1} />);
     await userEvent.click(screen.getByText("Back to playing"));
     expect(onBackToPlaying).toHaveBeenCalled();
   });
 
-  it("offers a count-in, and says none rather than zero", () => {
-    const onChange = vi.fn();
-    const { rerender } = render(
-      <SetlistParagraph
-        setlist={CHAIN}
-        selectedStepId="s1"
-        onSelectStep={() => {}}
-        runningIndex={-1}
-        onChange={onChange}
-        onAddStep={() => {}}
-      />,
-    );
-    // "0 beats" is not a length of anything. A setlist with no count-in says so.
-    expect(screen.getByText("No count-in")).toBeTruthy();
-
-    screen.getByRole("button", { name: "More count-in beats" }).click();
-    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ countIn: 1 }));
-
-    rerender(
-      <SetlistParagraph
-        setlist={{ ...CHAIN, countIn: 4 }}
-        selectedStepId="s1"
-        onSelectStep={() => {}}
-        runningIndex={-1}
-        onChange={onChange}
-        onAddStep={() => {}}
-      />,
-    );
-    expect(screen.getByText("4 beats")).toBeTruthy();
-  });
-
   it("an empty setlist says what a setlist is", () => {
-    draw({ setlist: { ...CHAIN, steps: [] }, selectedStepId: null });
+    draw({ setlist: { ...SETLIST, steps: [] }, selectedStepId: null });
     expect(screen.getByText(/plays your steps in order/i)).toBeTruthy();
     expect(screen.getByText("+ Add a step")).toBeTruthy();
   });

@@ -18,7 +18,6 @@
     "revertTooltip": "Quay lại setlist đã lưu",
     "track": "Setlist",
     "stepDefaultName": "Bước {{number}}",
-    "selectStep": "Sửa bước này",
     "renameStep": "Đổi tên bước này",
     "moveEarlier": "Chuyển bước này lên trước",
     "moveLater": "Chuyển bước này xuống sau",
@@ -103,10 +102,6 @@
     },
     "said": {
       "config": "{{bpm}} BPM, {{meter}}, {{subdivision}} · {{sound}}",
-      "untilISay": "cho đến khi tôi ra hiệu",
-      "forSpan": "trong {{span}}",
-      "thenTransition": "{{trigger}}, rồi {{transition}}",
-      "thenTheSetlistEnds": "{{trigger}}, rồi setlist kết thúc",
       "stepNote": "Bước {{number}} trên {{total}}",
       "runs": "chạy",
       "for": "trong",
@@ -133,6 +128,13 @@
       "beats_other": "{{count}} phách",
       "fewer": "Bớt phách đếm vào",
       "more": "Thêm phách đếm vào"
+    },
+    "leave": {
+      "title": "Thay đổi chưa lưu",
+      "body": "“{{name}}” có thay đổi bạn chưa lưu.",
+      "save": "Lưu và đóng",
+      "discard": "Bỏ và đóng",
+      "cancel": "Tiếp tục sửa"
     }
   }
 }

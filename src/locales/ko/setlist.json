@@ -18,7 +18,6 @@
     "revertTooltip": "저장된 셋리스트로 되돌리기",
     "track": "셋리스트",
     "stepDefaultName": "{{number}}단계",
-    "selectStep": "이 단계 편집",
     "renameStep": "이 단계 이름 바꾸기",
     "moveEarlier": "이 단계를 앞으로 옮기기",
     "moveLater": "이 단계를 뒤로 옮기기",
@@ -103,10 +102,6 @@
     },
     "said": {
       "config": "{{bpm}} BPM, {{meter}}, {{subdivision}} · {{sound}}",
-      "untilISay": "내가 말할 때까지",
-      "forSpan": "{{span}} 동안",
-      "thenTransition": "{{trigger}}, 그다음 {{transition}}",
-      "thenTheSetlistEnds": "{{trigger}}, 그리고 셋리스트가 끝납니다",
       "stepNote": "{{total}}단계 중 {{number}}단계",
       "runs": "계속",
       "for": "동안",
@@ -133,6 +128,13 @@
       "beats_other": "{{count}}박",
       "fewer": "카운트인 박 줄이기",
       "more": "카운트인 박 늘리기"
+    },
+    "leave": {
+      "title": "저장하지 않은 변경",
+      "body": "“{{name}}”에 저장하지 않은 변경이 있습니다.",
+      "save": "저장하고 닫기",
+      "discard": "버리고 닫기",
+      "cancel": "계속 편집"
     }
   }
 }

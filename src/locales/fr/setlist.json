@@ -18,7 +18,6 @@
     "revertTooltip": "Revenir à la setlist enregistrée",
     "track": "La setlist",
     "stepDefaultName": "Étape {{number}}",
-    "selectStep": "Modifier cette étape",
     "renameStep": "Renommer cette étape",
     "moveEarlier": "Déplacer cette étape vers la gauche",
     "moveLater": "Déplacer cette étape vers la droite",
@@ -103,10 +102,6 @@
     },
     "said": {
       "config": "{{bpm}} BPM, {{meter}}, {{subdivision}} · {{sound}}",
-      "untilISay": "jusqu'à ce que je le dise",
-      "forSpan": "pendant {{span}}",
-      "thenTransition": "{{trigger}}, puis {{transition}}",
-      "thenTheSetlistEnds": "{{trigger}}, puis la setlist se termine",
       "stepNote": "Étape {{number}} sur {{total}}",
       "runs": "tourne",
       "for": "pendant",
@@ -133,6 +128,13 @@
       "beats_other": "{{count}} temps",
       "fewer": "Moins de temps de décompte",
       "more": "Plus de temps de décompte"
+    },
+    "leave": {
+      "title": "Modifications non enregistrées",
+      "body": "« {{name}} » a des modifications non enregistrées.",
+      "save": "Enregistrer et fermer",
+      "discard": "Abandonner et fermer",
+      "cancel": "Continuer à modifier"
     }
   }
 }

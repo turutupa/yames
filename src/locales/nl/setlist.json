@@ -18,7 +18,6 @@
     "revertTooltip": "Terug naar de opgeslagen setlist",
     "track": "De setlist",
     "stepDefaultName": "Stap {{number}}",
-    "selectStep": "Deze stap bewerken",
     "renameStep": "Deze stap hernoemen",
     "moveEarlier": "Deze stap naar voren",
     "moveLater": "Deze stap naar achteren",
@@ -103,10 +102,6 @@
     },
     "said": {
       "config": "{{bpm}} BPM, {{meter}}, {{subdivision}} · {{sound}}",
-      "untilISay": "tot ik het zeg",
-      "forSpan": "{{span}} lang",
-      "thenTransition": "{{trigger}}, dan {{transition}}",
-      "thenTheSetlistEnds": "{{trigger}}, en dan stopt de setlist",
       "stepNote": "Stap {{number}} van {{total}}",
       "runs": "loopt",
       "for": "gedurende",
@@ -133,6 +128,13 @@
       "beats_other": "{{count}} tellen",
       "fewer": "Minder tellen aftellen",
       "more": "Meer tellen aftellen"
+    },
+    "leave": {
+      "title": "Niet-opgeslagen wijzigingen",
+      "body": "“{{name}}” heeft wijzigingen die je niet hebt opgeslagen.",
+      "save": "Opslaan en sluiten",
+      "discard": "Weggooien en sluiten",
+      "cancel": "Verder bewerken"
     }
   }
 }

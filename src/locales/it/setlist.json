@@ -18,7 +18,6 @@
     "revertTooltip": "Torna alla scaletta salvata",
     "track": "La scaletta",
     "stepDefaultName": "Passo {{number}}",
-    "selectStep": "Modifica questo passo",
     "renameStep": "Rinomina questo passo",
     "moveEarlier": "Sposta questo passo prima",
     "moveLater": "Sposta questo passo dopo",
@@ -103,10 +102,6 @@
     },
     "said": {
       "config": "{{bpm}} BPM, {{meter}}, {{subdivision}} · {{sound}}",
-      "untilISay": "finché non lo dico io",
-      "forSpan": "per {{span}}",
-      "thenTransition": "{{trigger}}, poi {{transition}}",
-      "thenTheSetlistEnds": "{{trigger}}, poi la scaletta finisce",
       "stepNote": "Passo {{number}} di {{total}}",
       "runs": "va avanti",
       "for": "per",
@@ -133,6 +128,13 @@
       "beats_other": "{{count}} movimenti",
       "fewer": "Meno movimenti di intro",
       "more": "Più movimenti di intro"
+    },
+    "leave": {
+      "title": "Modifiche non salvate",
+      "body": "«{{name}}» ha modifiche non salvate.",
+      "save": "Salva e chiudi",
+      "discard": "Scarta e chiudi",
+      "cancel": "Continua a modificare"
     }
   }
 }

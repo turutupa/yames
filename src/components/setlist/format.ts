@@ -125,38 +125,6 @@ export function transitionLabel(t: Translate, transition: SetlistTransition): st
   }
 }
 
-/**
- * A whole step in one line, for a row of the paragraph that is not open.
- *
- * "Alt picking — 96 BPM, 4/4, sixteenths · for 2 minutes, then count in 2
- * bars". Commas rather than the middots the cards used: a closed row is read,
- * not scanned, and it is the same sentence the open row says loudly. The name
- * is NOT in it — the row draws that itself, so it can be bold and ellipsised
- * on its own.
- */
-export function stepSaidQuietly(t: Translate, step: SetlistStep, meter: string): string {
-  const sound = t(`sound.${step.soundType}`);
-  return t("setlist.said.config", {
-    bpm: step.bpm,
-    meter,
-    subdivision: t(`subdiv.${step.subdivision}`).toLowerCase(),
-    sound: sound.toLowerCase(),
-  });
-}
-
-/** "for 2 minutes, then count in 2 bars" — the right half of a closed row. */
-export function stepSaidTiming(t: Translate, step: SetlistStep, isLast: boolean): string {
-  const trigger =
-    step.trigger.kind === "manual"
-      ? t("setlist.said.untilISay")
-      : t("setlist.said.forSpan", { span: triggerLabel(t, step.trigger) });
-  if (isLast) return t("setlist.said.thenTheSetlistEnds", { trigger });
-  return t("setlist.said.thenTransition", {
-    trigger,
-    transition: transitionLabel(t, step.transition).toLowerCase(),
-  });
-}
-
 /** "70 · 4/4 · Quarter" — the step card's second line. */
 export function stepConfigLabel(t: Translate, step: SetlistStep, meter: string): string {
   return `${step.bpm} · ${meter} · ${t(`subdiv.${step.subdivision}`)}`;

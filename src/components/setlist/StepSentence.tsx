@@ -62,6 +62,17 @@ interface StepSentenceProps {
   onChange: (patch: Partial<Omit<SetlistStep, "id">>) => void;
   /** Smaller type in the player, where the number is the loud thing instead. */
   quiet?: boolean;
+  /**
+   * Folded: the whole sentence at reading size rather than editing size.
+   *
+   * Every step in the setlist is drawn this way, so the routine can be read
+   * top to bottom without clicking into anything — which is what the owner
+   * asked for and what the collapsed row could never quite deliver, because
+   * a row is scanned and a sentence is read. The tokens are still tokens;
+   * folding changes the type size and moves the name and the sound onto the
+   * lines that were already there, it does not take anything away.
+   */
+  folded?: boolean;
 }
 
 export function StepSentence({
@@ -71,6 +82,7 @@ export function StepSentence({
   isLast,
   onChange,
   quiet,
+  folded,
 }: StepSentenceProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState<Field>(null);
@@ -94,8 +106,29 @@ export function StepSentence({
     onChange(patch);
 
   return (
-    <div className={`drill-plan-block setlist-sentence${quiet ? " setlist-sentence-quiet" : ""}`}>
+    <div
+      className={`drill-plan-block setlist-sentence${quiet ? " setlist-sentence-quiet" : ""}${
+        folded ? " setlist-sentence-folded" : ""
+      }`}
+    >
       <div className="drill-plan">
+        {/* Folded, the name leads its own sentence instead of sitting in the
+            quiet line underneath — at this size there is no quiet line left
+            to put it in, and a step you are reading wants its name first. */}
+        {folded && (
+          <button
+            type="button"
+            ref={anchor("name")}
+            className={`setlist-folded-name${open === "name" ? " open" : ""}`}
+            aria-expanded={open === "name"}
+            onClick={() => {
+              setNameDraft(step.name);
+              toggle("name")();
+            }}
+          >
+            {step.name}
+          </button>
+        )}
         <button
           type="button"
           ref={anchor("tempo")}
@@ -167,22 +200,50 @@ export function StepSentence({
             {isLast ? t("setlist.said.theSetlistEnds") : transitionLabel(t, step.transition)}
           </span>
         </button>
-      </div>
 
-      <div className="drill-plan-detail setlist-plan-detail">
+        {folded && (
+          <>
+            <span className="drill-plan-detail-sep" aria-hidden="true">·</span>
         <button
           type="button"
-          ref={anchor("name")}
-          className={`drill-plan-detail-token${open === "name" ? " open" : ""}`}
-          aria-expanded={open === "name"}
-          onClick={() => {
-            setNameDraft(step.name);
-            toggle("name")();
-          }}
+          ref={anchor("sound")}
+          className={`drill-plan-detail-token${open === "sound" ? " open" : ""}`}
+          aria-expanded={open === "sound"}
+          onClick={toggle("sound")}
         >
-          {`“${step.name}”`}
+          {t(`sound.${step.soundType}`).toLowerCase()}
         </button>
         <span className="drill-plan-detail-sep" aria-hidden="true">·</span>
+        <button
+          type="button"
+          ref={anchor("volume")}
+          className={`drill-plan-detail-token${open === "volume" ? " open" : ""}`}
+          aria-expanded={open === "volume"}
+          onClick={toggle("volume")}
+        >
+          {t("setlist.said.volume", { percent: Math.round(step.volume * 100) })}
+        </button>
+          </>
+        )}
+      </div>
+
+      {/* Unfolded only. Folded, the name is on the first line and the sound
+          and volume are on the second — see the timing row above. */}
+      {!folded && (
+        <div className="drill-plan-detail setlist-plan-detail">
+          <button
+            type="button"
+            ref={anchor("name")}
+            className={`drill-plan-detail-token${open === "name" ? " open" : ""}`}
+            aria-expanded={open === "name"}
+            onClick={() => {
+              setNameDraft(step.name);
+              toggle("name")();
+            }}
+          >
+            {`“${step.name}”`}
+          </button>
+          <span className="drill-plan-detail-sep" aria-hidden="true">·</span>
         <button
           type="button"
           ref={anchor("sound")}
@@ -203,6 +264,7 @@ export function StepSentence({
           {t("setlist.said.volume", { percent: Math.round(step.volume * 100) })}
         </button>
       </div>
+      )}
 
       {open === "tempo" && (
         <DrillConfigPopover

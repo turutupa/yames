@@ -18,7 +18,6 @@
     "revertTooltip": "回到已保存的曲目单",
     "track": "曲目单",
     "stepDefaultName": "第 {{number}} 步",
-    "selectStep": "编辑这一步",
     "renameStep": "重命名这一步",
     "moveEarlier": "把这一步往前移",
     "moveLater": "把这一步往后移",
@@ -103,10 +102,6 @@
     },
     "said": {
       "config": "{{bpm}} BPM，{{meter}}，{{subdivision}} · {{sound}}",
-      "untilISay": "直到我示意",
-      "forSpan": "持续 {{span}}",
-      "thenTransition": "{{trigger}}，然后{{transition}}",
-      "thenTheSetlistEnds": "{{trigger}}，然后这份曲目单就结束了",
       "stepNote": "第 {{number}} 步，共 {{total}} 步",
       "runs": "一直播放",
       "for": "持续",
@@ -133,6 +128,13 @@
       "beats_other": "{{count}} 拍",
       "fewer": "减少预备拍",
       "more": "增加预备拍"
+    },
+    "leave": {
+      "title": "未保存的更改",
+      "body": "“{{name}}”有尚未保存的更改。",
+      "save": "保存并关闭",
+      "discard": "放弃并关闭",
+      "cancel": "继续编辑"
     }
   }
 }
