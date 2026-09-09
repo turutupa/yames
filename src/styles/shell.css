@@ -83,13 +83,23 @@
   margin-left: 16px;
 }
 
+/* The mark is the app's icon, not a themed swatch.
+
+   It used to be `linear-gradient(--accent, --accent-2)` — a rounded square
+   that changed colour with the theme and looked like nothing in particular.
+   The window's own icon in the taskbar, one strip below it, is the ember: an
+   amber tile with the Y knocked through it. Two different marks a centimetre
+   apart, one of which was not the brand.
+
+   So it is the ember, drawn as an SVG at the size the favicon was designed
+   to read at, and it does NOT follow the theme — the icon beside it in the
+   taskbar cannot, so a mark that did would only ever match by accident. */
 .app-mark {
   align-self: center;
   width: 16px;
   height: 16px;
-  border-radius: 5px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
   flex-shrink: 0;
+  display: block;
 }
 
 .app-wordmark {
