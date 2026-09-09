@@ -41,13 +41,13 @@ const INTERACTIVE_ROLES = new Set([
  * grabbing the window by?
  *
  * This used to test tag names alone, and that cost a real bug — WINDOWS ONLY,
- * which is what made it hard to see. The chain rows in the library are
+ * which is what made it hard to see. The setlist rows in the library are
  * `<div role="button" tabIndex={0}>`, so they failed the tag test; mousedown
  * called `preventDefault()` and `startDragging()`, the OS took the mouse, and
  * the click never arrived. On macOS `startDragging()` REJECTS on a focused
  * undecorated window — see the note on the hook below — so the manual
  * fallback ran and the click survived. The owner found it as "on my Mac I can
- * click a chain and it goes active, on Windows the click does nothing".
+ * click a setlist and it goes active, on Windows the click does nothing".
  *
  * So: a role, a tabindex or `contenteditable` counts as much as a tag. Being
  * focusable is the honest definition of "the user aims at this".
@@ -69,12 +69,12 @@ function isInteractive(el: HTMLElement | null): boolean {
  * Did this mousedown land on a scrollbar rather than on the content?
  *
  * A scrollbar belongs to no element of its own. Chromium dispatches the
- * mousedown to the SCROLLING BOX — measured: clicking the chain track's
- * horizontal bar arrives with `target` = `.chain-track-strip` and
+ * mousedown to the SCROLLING BOX — measured: clicking the setlist track's
+ * horizontal bar arrives with `target` = `.setlist-track-strip` and
  * `offsetY` 154 against a `clientHeight` of 140 — so by the time
  * `isInteractive` sees it, it is looking at a plain `div` and says "furniture,
  * drag the window". Which is what happened: the owner grabbed the bar under a
- * long chain and the whole window came with it, on both platforms.
+ * long setlist and the whole window came with it, on both platforms.
  *
  * `offsetX`/`offsetY` are measured from the padding box, and `clientWidth`
  * and `clientHeight` are the padding box MINUS the scrollbar gutters, so
@@ -83,7 +83,7 @@ function isInteractive(el: HTMLElement | null): boolean {
  * hence the `direction` check.
  *
  * This only sees a scrollbar that occupies layout — a classic one. macOS
- * overlay bars measure zero, which is why the chain strip and the drill's
+ * overlay bars measure zero, which is why the setlist strip and the drill's
  * climb both style `::-webkit-scrollbar`: a styled bar is always classic.
  */
 function isOnScrollbar(el: HTMLElement, e: MouseEvent): boolean {

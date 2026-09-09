@@ -11,10 +11,10 @@
 /* Every stage scrolls when it has to.
  *
  * Beat used to be the exception — centred, `overflow: visible` — which was
- * fine while the metronome always fitted. Loading a chain puts the track above
+ * fine while the metronome always fitted. Loading a setlist puts the track above
  * it and it stops fitting: at 1440x900 the subdivision row rendered 44px BEHIND
  * the transport, unreadable and unclickable, with no scrollbar to admit it. A
- * short window did the same thing with no chain at all.
+ * short window did the same thing with no setlist at all.
  *
  * Centring and scrolling cannot both come from `justify-content`. A centred
  * flex column that overflows spills out of BOTH ends, and the half above the

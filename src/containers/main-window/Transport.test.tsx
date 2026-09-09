@@ -223,18 +223,18 @@ describe("Transport — what it sheds, and in what order", () => {
     expect(row).toContain("flex-shrink: 0");
     expect(row).toContain("white-space: nowrap");
   });
-  it("counts the chain's steps, and skipping needs beats to land on (U9.7)", () => {
-    // "Step 1 of 4" and "next in 5 bars" are the two things a chain hides
+  it("counts the setlist's steps, and skipping needs beats to land on (U9.7)", () => {
+    // "Step 1 of 4" and "next in 5 bars" are the two things a setlist hides
     // that a metronome shows plainly. Skip arms a switch for the next
     // downbeat, so stopped it has nothing to arm.
     const { unmount } = render(
       <Transport
         {...base}
         view="beat"
-        chainStepNumber={1}
-        chainStepCount={4}
-        chainRemaining={{ kind: "bars", bars: 5 }}
-        onChainSkip={vi.fn()}
+        setlistStepNumber={1}
+        setlistStepCount={4}
+        setlistRemaining={{ kind: "bars", bars: 5 }}
+        onSetlistSkip={vi.fn()}
       />,
     );
     expect(screen.getByText("Step 1 of 4")).toBeInTheDocument();
@@ -247,10 +247,10 @@ describe("Transport — what it sheds, and in what order", () => {
         {...base}
         view="beat"
         isPlaying
-        chainStepNumber={2}
-        chainStepCount={4}
-        chainRemaining={{ kind: "manual" }}
-        onChainSkip={vi.fn()}
+        setlistStepNumber={2}
+        setlistStepCount={4}
+        setlistRemaining={{ kind: "manual" }}
+        onSetlistSkip={vi.fn()}
       />,
     );
     // A manual gap is not a countdown and must not borrow the shape of one.
@@ -258,8 +258,8 @@ describe("Transport — what it sheds, and in what order", () => {
     expect(document.querySelector(".transport-skip")).not.toBeDisabled();
   });
 
-  it("says nothing about chains when none is loaded", () => {
+  it("says nothing about setlists when none is loaded", () => {
     render(<Transport {...base} view="beat" />);
-    expect(document.querySelector(".transport-chain")).toBeNull();
+    expect(document.querySelector(".transport-setlist")).toBeNull();
   });
 });

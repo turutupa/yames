@@ -8,12 +8,12 @@ import { useDrag } from "./useDrag";
  * before anything else sees the event.
  *
  * It used to decide by tag name alone, and that shipped a WINDOWS-ONLY bug.
- * The library's chain rows are `<div role="button" tabIndex={0}>`, so they
+ * The library's setlist rows are `<div role="button" tabIndex={0}>`, so they
  * failed the test; mousedown called `preventDefault()` and `startDragging()`,
  * the OS took the mouse, and the click never arrived. On macOS
  * `startDragging()` rejects on a focused undecorated window, the manual
  * fallback ran instead, and the click survived — which is why it looked like a
- * platform quirk rather than a bug. The owner: "on my Mac I can click a chain
+ * platform quirk rather than a bug. The owner: "on my Mac I can click a setlist
  * and it goes active, on this Windows machine the click does nothing".
  *
  * These assert the decision, not the drag: if `preventDefault` was called on
@@ -75,8 +75,8 @@ afterEach(() => {
 
 describe("what useDrag treats as a control", () => {
   it("leaves a div that says it is a button alone", () => {
-    // The exact shape of the library's chain rows, and the bug itself.
-    root.innerHTML = `<div role="button" tabindex="0"><span>Metal Chain</span></div>`;
+    // The exact shape of the library's setlist rows, and the bug itself.
+    root.innerHTML = `<div role="button" tabindex="0"><span>Metal Setlist</span></div>`;
     const row = root.firstElementChild as HTMLElement;
     expect(claimedByDrag(row)).toBe(false);
     // ...including when the click lands on something inside it.
@@ -105,13 +105,13 @@ describe("what useDrag treats as a control", () => {
 
   it("leaves a horizontal scrollbar alone, and the strip above it draggable", () => {
     /*
-     * The chain track, measured in the real engine: a mousedown on its
+     * The setlist track, measured in the real engine: a mousedown on its
      * scrollbar arrives with `target` = the strip itself and `offsetY` 154
      * against a `clientHeight` of 140. Nothing about the target says
      * "control", so before this the strip's bar was unusable — pressing it
-     * dragged the whole window instead of scrolling the chain.
+     * dragged the whole window instead of scrolling the setlist.
      */
-    root.innerHTML = `<div class="chain-track-strip"><div>step</div></div>`;
+    root.innerHTML = `<div class="setlist-track-strip"><div>step</div></div>`;
     const strip = root.firstElementChild as HTMLElement;
     scrollBox(strip, { clientWidth: 387, clientHeight: 140, offsetHeight: 155 });
 

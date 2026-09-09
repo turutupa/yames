@@ -12,7 +12,7 @@ interface DrillConfigPopoverProps {
   note?: string;
   /**
    * Selector for the block the window must clear, hung off the anchor. The
-   * drill's plan is the default; a chain step's sentence passes its own.
+   * drill's plan is the default; a setlist step's sentence passes its own.
    * Falling back to the anchor itself is what a token outside any block gets.
    */
   clears?: string;

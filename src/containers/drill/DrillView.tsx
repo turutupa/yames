@@ -270,7 +270,7 @@ export function DrillView({ state, currentBeat, autoCollapse = true, animations 
   const isDownbeat = currentBeat?.isDownbeat ?? false;
   // The live count-in is the engine's now, not the ramp's (U9.5). `ramp.active`
   // still gates the readout because this is the drill's screen and only a
-  // drill's count-in belongs on it — a chain's is reported by the transport.
+  // drill's count-in belongs on it — a setlist's is reported by the transport.
   // Defended rather than assumed. Rust fills this by serde default on the way
   // out, but a hot-reloaded frontend can render against a binary that predates
   // the field — and reading `.done` off nothing takes the whole screen down

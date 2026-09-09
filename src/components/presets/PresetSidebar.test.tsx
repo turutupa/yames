@@ -15,7 +15,7 @@ import { render, screen, fireEvent, waitFor, within } from "@testing-library/rea
 import { createRef } from "react";
 import { PresetSidebar, type PresetSidebarHandle } from "./PresetSidebar";
 import { setInvokeResponse, DEFAULT_TEST_STATE } from "../../test/mocks";
-import type { Chain, Preset } from "../../types";
+import type { Setlist, Preset } from "../../types";
 
 const makePreset = (overrides: Partial<Preset> = {}): Preset => ({
   id: "p1",
@@ -32,7 +32,7 @@ const makePreset = (overrides: Partial<Preset> = {}): Preset => ({
   ...overrides,
 });
 
-const makeChain = (overrides: Partial<Chain> = {}): Chain => ({
+const makeSetlist = (overrides: Partial<Setlist> = {}): Setlist => ({
   id: "ch1",
   name: "Warm-up routine",
   createdAt: 1700000000000,
@@ -209,54 +209,54 @@ describe("PresetSidebar", () => {
       expect(input).not.toBeNull();
     });
   });
-  it("lists chains beside the presets, with a glyph and a step count (U9.4)", async () => {
-    // "Chain" is vague in isolation and precise here: in a list headed
+  it("lists setlists beside the presets, with a glyph and a step count (U9.4)", async () => {
+    // "Setlist" is vague in isolation and precise here: in a list headed
     // PRESETS, beside presets, the word says exactly what the row is.
     setInvokeResponse("list_presets", () => [makePreset({ id: "a", name: "Slow Blues" })]);
-    const onLoadChain = vi.fn();
+    const onLoadSetlist = vi.fn();
     const { container } = render(
-      <PresetSidebar {...baseProps} chains={[makeChain()]} onLoadChain={onLoadChain} />,
+      <PresetSidebar {...baseProps} setlists={[makeSetlist()]} onLoadSetlist={onLoadSetlist} />,
     );
     const row = await waitFor(() => {
-      const el = container.querySelector(".chain-item");
+      const el = container.querySelector(".setlist-item");
       expect(el).not.toBeNull();
       return el as HTMLElement;
     });
     expect(within(row).getByText("Warm-up routine")).toBeInTheDocument();
-    expect(within(row).getByText("chain · 2 steps")).toBeInTheDocument();
+    expect(within(row).getByText("setlist · 2 steps")).toBeInTheDocument();
     expect(row.querySelector("svg")).not.toBeNull();
 
-    // A preset still loads a preset; a chain loads a chain.
+    // A preset still loads a preset; a setlist loads a setlist.
     fireEvent.click(row);
-    expect(onLoadChain).toHaveBeenCalledWith(expect.objectContaining({ id: "ch1" }));
+    expect(onLoadSetlist).toHaveBeenCalledWith(expect.objectContaining({ id: "ch1" }));
     fireEvent.click(screen.getByText("Slow Blues"));
     expect(baseProps.onLoadPreset).toHaveBeenCalled();
   });
 
-  it("only the metronome list carries chains", async () => {
-    // A step is a metronome configuration; a drill is a ramp the chain
+  it("only the metronome list carries setlists", async () => {
+    // A step is a metronome configuration; a drill is a ramp the setlist
     // runtime has no way to run.
     setInvokeResponse("list_presets", () => []);
     const { container } = render(
-      <PresetSidebar {...baseProps} view="drill" chains={[makeChain()]} onLoadChain={vi.fn()} />,
+      <PresetSidebar {...baseProps} view="drill" setlists={[makeSetlist()]} onLoadSetlist={vi.fn()} />,
     );
     await waitFor(() => expect(container.querySelector(".preset-sidebar-title")).not.toBeNull());
-    expect(container.querySelector(".chain-item")).toBeNull();
+    expect(container.querySelector(".setlist-item")).toBeNull();
   });
 
-  it("keeps a separate opener for a new chain", async () => {
+  it("keeps a separate opener for a new setlist", async () => {
     // Overloading the "+" would put a menu in front of the gesture a new
     // user reaches for first.
     setInvokeResponse("list_presets", () => []);
-    const onNewChain = vi.fn();
-    render(<PresetSidebar {...baseProps} chains={[]} onNewChain={onNewChain} />);
+    const onNewSetlist = vi.fn();
+    render(<PresetSidebar {...baseProps} setlists={[]} onNewSetlist={onNewSetlist} />);
     const add = await waitFor(() => {
       const b = document.querySelector(".preset-sidebar-add") as HTMLButtonElement;
       expect(b).not.toBeNull();
       return b;
     });
-    fireEvent.click(screen.getByLabelText("New chain"));
-    expect(onNewChain).toHaveBeenCalled();
+    fireEvent.click(screen.getByLabelText("New setlist"));
+    expect(onNewSetlist).toHaveBeenCalled();
     fireEvent.click(add);
     await waitFor(() => expect(document.querySelector(".preset-sidebar-name-input")).not.toBeNull());
   });

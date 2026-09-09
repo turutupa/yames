@@ -1833,7 +1833,7 @@ impl MetronomeEngine {
                         cached.ramp_active = s.speed_ramp.active;
                         cached.ramp_beats_per_bar = s.speed_ramp.beats_per_bar;
                         // No `speed_ramp.active` here any more: a count-in is
-                        // the engine's, not the drill's, so a chain step can
+                        // the engine's, not the drill's, so a setlist step can
                         // ask for one between steps (U9.5). `beats == 0` is the
                         // resting state, which is what keeps a plain Play from
                         // counting itself in.

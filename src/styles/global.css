@@ -31,7 +31,7 @@
  *
  * Without this the property is `normal`, and every scrollbar we have not
  * styled by hand is painted in the platform's LIGHT colours however dark the
- * theme is — a white lane with a grey thumb, which is what the chain track
+ * theme is — a white lane with a grey thumb, which is what the setlist track
  * showed on Windows. macOS hid the mistake: WKWebView's overlay scrollbar is
  * drawn by the OS and inverts itself against whatever is behind it, so the
  * same build looked correct there and wrong here. It was never theme-aware on

@@ -232,7 +232,7 @@ describe("DrillView", () => {
   it("counts the run in when the drill is warming up", () => {
     // The live counter is `state.countIn` now, not `speedRamp.warmupCount`
     // (U9.5) — the ramp still owns `warmupBeats` as the setting, and the
-    // engine owns the counting so a chain can use the same machinery.
+    // engine owns the counting so a setlist can use the same machinery.
     const warming: AppState = {
       ...drillState,
       countIn: { beats: 4, done: 1 },
@@ -399,7 +399,7 @@ describe("DrillView", () => {
     // The flag is still `cyclic` in the engine; only the word the musician
     // reads changed. "Cyclic" was engineering vocabulary, and "Repeat" would
     // have been wrong — the ramp turns round and descends rather than starting
-    // again, which is what the chain's repeat does.
+    // again, which is what the setlist's repeat does.
     fireEvent.click(screen.getByText("Options"));
     const cyclicLabel = screen.getByText("Up and down");
     const toggleBtn = cyclicLabel

@@ -2,9 +2,9 @@ import { useEffect, useRef, useState, type Ref } from "react";
 import { useTranslation } from "react-i18next";
 import { setSoundType, setVolume } from "../../ipc";
 import { SOUND_TYPES } from "../../constants/metronome";
-import type { AppState, Chain, Preset } from "../../types";
+import type { AppState, Setlist, Preset } from "../../types";
 import { PresetSaveBar } from "../../components/presets/PresetSaveBar";
-import { ChainSaveBar } from "../../components/chain/ChainSaveBar";
+import { SetlistSaveBar } from "../../components/setlist/SetlistSaveBar";
 import { IS_MAC } from "../../hotkeys";
 
 /**
@@ -206,13 +206,13 @@ interface MainHeaderProps {
   onSavePreset: () => void;
   /** Reload the active preset's stored values, throwing away the edits. */
   onRevertPreset?: () => void;
-  /** A loaded chain takes the context bar's left half (U9.4). */
-  activeChain: Chain | null;
-  chainDirty: boolean;
-  chainSaveFeedback: boolean;
-  onSaveChain: () => void;
-  onRevertChain: () => void;
-  onRenameChain: () => void;
+  /** A loaded setlist takes the context bar's left half (U9.4). */
+  activeSetlist: Setlist | null;
+  setlistDirty: boolean;
+  setlistSaveFeedback: boolean;
+  onSaveSetlist: () => void;
+  onRevertSetlist: () => void;
+  onRenameSetlist: () => void;
   soundOpen: boolean;
   setSoundOpen: (v: boolean | ((p: boolean) => boolean)) => void;
   soundDropdownRef: Ref<HTMLDivElement>;
@@ -269,12 +269,12 @@ export function MainHeader({
   onUpdatePreset,
   onSavePreset,
   onRevertPreset,
-  activeChain,
-  chainDirty,
-  chainSaveFeedback,
-  onSaveChain,
-  onRevertChain,
-  onRenameChain,
+  activeSetlist,
+  setlistDirty,
+  setlistSaveFeedback,
+  onSaveSetlist,
+  onRevertSetlist,
+  onRenameSetlist,
   soundOpen,
   setSoundOpen,
   soundDropdownRef,
@@ -323,16 +323,16 @@ export function MainHeader({
       {...(!IS_MAC && { "data-tauri-drag-region": "" })}
     >
       <div className="header-context">
-        {/* One or the other, never both: a chain and a preset are two answers
+        {/* One or the other, never both: a setlist and a preset are two answers
             to "what am I looking at", and the bar can only give one. */}
-        {view === "beat" && activeChain ? (
-          <ChainSaveBar
-            chain={activeChain}
-            dirty={chainDirty}
-            saveFeedback={chainSaveFeedback}
-            onRename={onRenameChain}
-            onSave={onSaveChain}
-            onRevert={onRevertChain}
+        {view === "beat" && activeSetlist ? (
+          <SetlistSaveBar
+            setlist={activeSetlist}
+            dirty={setlistDirty}
+            saveFeedback={setlistSaveFeedback}
+            onRename={onRenameSetlist}
+            onSave={onSaveSetlist}
+            onRevert={onRevertSetlist}
           />
         ) : (
           (view === "beat" || view === "drill") && (

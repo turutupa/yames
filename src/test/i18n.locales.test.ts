@@ -19,12 +19,12 @@ import path from "node:path";
 const LOCALES_DIR = path.resolve(process.cwd(), "src/locales");
 
 const NAMESPACES = [
-  "chain",
   "coach",
   "common",
   "drill",
   "metronome",
   "onboarding",
+  "setlist",
   "settings",
   "shell",
   "zen",
