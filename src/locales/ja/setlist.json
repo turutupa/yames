@@ -18,7 +18,6 @@
     "revertTooltip": "保存済みのセットリストに戻す",
     "track": "セットリスト",
     "stepDefaultName": "ステップ {{number}}",
-    "selectStep": "このステップを編集",
     "renameStep": "このステップの名前を変更",
     "moveEarlier": "このステップを前へ",
     "moveLater": "このステップを後ろへ",
@@ -103,10 +102,6 @@
     },
     "said": {
       "config": "{{bpm}} BPM、{{meter}}、{{subdivision}}・{{sound}}",
-      "untilISay": "合図するまで",
-      "forSpan": "{{span}}",
-      "thenTransition": "{{trigger}}、そのあと{{transition}}",
-      "thenTheSetlistEnds": "{{trigger}}、そこでセットリストは終わり",
       "stepNote": "ステップ {{number}} / {{total}}",
       "runs": "続く",
       "for": "の間",

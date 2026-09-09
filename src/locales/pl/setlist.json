@@ -18,7 +18,6 @@
     "revertTooltip": "Wróć do zapisanej setlisty",
     "track": "Setlista",
     "stepDefaultName": "Krok {{number}}",
-    "selectStep": "Edytuj ten krok",
     "renameStep": "Zmień nazwę tego kroku",
     "moveEarlier": "Przesuń ten krok wcześniej",
     "moveLater": "Przesuń ten krok później",
@@ -103,10 +102,6 @@
     },
     "said": {
       "config": "{{bpm}} BPM, {{meter}}, {{subdivision}} · {{sound}}",
-      "untilISay": "aż powiem",
-      "forSpan": "przez {{span}}",
-      "thenTransition": "{{trigger}}, potem {{transition}}",
-      "thenTheSetlistEnds": "{{trigger}}, i setlista się kończy",
       "stepNote": "Krok {{number}} z {{total}}",
       "runs": "gra",
       "for": "przez",

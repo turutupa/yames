@@ -18,7 +18,6 @@
     "revertTooltip": "Go back to the saved setlist",
     "track": "The setlist",
     "stepDefaultName": "Step {{number}}",
-    "selectStep": "Edit this step",
     "renameStep": "Rename this step",
     "moveEarlier": "Move this step earlier",
     "moveLater": "Move this step later",
@@ -103,10 +102,6 @@
     },
     "said": {
       "config": "{{bpm}} BPM, {{meter}}, {{subdivision}} · {{sound}}",
-      "untilISay": "until I say",
-      "forSpan": "for {{span}}",
-      "thenTransition": "{{trigger}}, then {{transition}}",
-      "thenTheSetlistEnds": "{{trigger}}, then the setlist ends",
       "stepNote": "Step {{number}} of {{total}}",
       "runs": "runs",
       "for": "for",

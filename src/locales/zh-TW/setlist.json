@@ -18,7 +18,6 @@
     "revertTooltip": "回到已儲存的曲目單",
     "track": "曲目單",
     "stepDefaultName": "第 {{number}} 步",
-    "selectStep": "編輯這一步",
     "renameStep": "重新命名這一步",
     "moveEarlier": "把這一步往前移",
     "moveLater": "把這一步往後移",
@@ -103,10 +102,6 @@
     },
     "said": {
       "config": "{{bpm}} BPM，{{meter}}，{{subdivision}} · {{sound}}",
-      "untilISay": "直到我示意",
-      "forSpan": "持續 {{span}}",
-      "thenTransition": "{{trigger}}，然後{{transition}}",
-      "thenTheSetlistEnds": "{{trigger}}，然後這份曲目單就結束了",
       "stepNote": "第 {{number}} 步，共 {{total}} 步",
       "runs": "持續播放",
       "for": "持續",
