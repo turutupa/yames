@@ -103,6 +103,51 @@ jobs:
           fi
           echo "tag=$VERSION" >> "$GITHUB_OUTPUT"
 
+      # The release notes are the body of the release commit — the one place
+      # the release skill already has the owner write them. tauri-action
+      # puts this string on the GitHub release AND into `latest.json` as
+      # `notes`, which the app shows after an update; editing the release
+      # page afterwards never reaches that file, and every matrix job
+      # rewrites the page's body when it finishes anyway. So the text has to
+      # be right here, once, and be true of this release only.
+      #
+      # Three renderers read it line by line (GitHub, the website's
+      # changelog, the app's what's-new dialog) and git wraps bodies at 72
+      # columns, so wrapped lines are joined back into their bullet or
+      # paragraph the way markdown would. Trailers are dropped. With no
+      # body, the subject's summary (`release vX.Y.Z — summary`) becomes the
+      # one bullet; with neither, the job stops here — before the build —
+      # rather than publish filler to every user's updater.
+      - name: Release notes from the commit message
+        id: notes
+        if: startsWith(github.event.head_commit.message, 'release')
+        shell: bash
+        env:
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          NOTES=$(printf '%s\n' "$COMMIT_MSG" | tail -n +2 | awk '
+            function flush() { if (have) print buf; have = 0 }
+            { sub(/\r$/, "") }
+            tolower($0) ~ /^(co-authored-by|signed-off-by):/ { next }
+            /^[ \t]*$/ { flush(); print ""; next }
+            /^[ \t]*[-*] / { flush(); buf = $0; have = 1; next }
+            { sub(/^[ \t]+/, ""); if (have) buf = buf " " $0; else { buf = $0; have = 1 } }
+            END { flush() }
+          ' | sed '/./,$!d')
+          if [ -z "$NOTES" ]; then
+            SUMMARY=$(printf '%s\n' "$COMMIT_MSG" | head -n 1 \
+              | sed -E -e 's/^release[ \t]*v?[0-9]+\.[0-9]+\.[0-9]+[ \t]*(—|–|-|:)?[ \t]*//' \
+                       -e 's/[ \t]*\[[^]]*\][ \t]*$//')
+            if [ -n "$SUMMARY" ]; then NOTES="- $SUMMARY"; fi
+          fi
+          if [ -z "$NOTES" ]; then
+            echo "::error::No release notes. Put them in the release commit's body, or a summary after the version in its subject (release vX.Y.Z — summary)."
+            exit 1
+          fi
+          printf 'Release notes:\n%s\n' "$NOTES"
+          D="NOTES_EOF_$RANDOM$RANDOM"
+          { echo "body<<$D"; printf '%s\n' "$NOTES"; echo "$D"; } >> "$GITHUB_OUTPUT"
+
       # Pinned to a tag: `@dev` is a moving branch, and this job is the only
       # thing standing between a `release …` commit and a published binary.
       # `args` is forwarded verbatim to `npx tauri build`, so the matrix'
@@ -128,26 +173,9 @@ jobs:
         with:
           tagName: ${{ steps.version.outputs.tag }}
           releaseName: 'Yames ${{ steps.version.outputs.tag }}'
-          releaseBody: |
-            ## Yames 1.0
-
-            ### Practice Coach (Beta)
-            - AI-powered live feedback while you play — runs fully locally, no internet required
-            - Real-time onset detection via **aubio** DSP engine with timing accuracy scoring
-            - Session evaluation pipeline with adaptive suggestions and TTS voice feedback
-            - Session history, coach chat UI, and audio input recording
-            - Multi-channel input picker with loopback diagnostics
-
-            ### Zen Mode — Radar Effect
-            - New **Radar** zen style: polar grid mesh with a smooth conic-gradient sweep wake and persistent blip dots
-            - **Cosmos** effect now draws connection lines between nearby particles forming triangular constellations
-            - Gravity effect tuned: slower orbits, reduced density, consistent across all themes
-
-            ### Polish
-            - Practice Coach labelled **Beta** in the card header and settings section
-            - Zen effect previews on the website for all 10 themes
-            - Back button arrow alignment fix in coach card
-            - Async Tauri commands — no more UI freeze on slow operations
+          # From the release commit (step above). Empty on a dispatch run,
+          # where there is no tag and so no release to put it on.
+          releaseBody: ${{ steps.notes.outputs.body }}
           releaseDraft: false
           prerelease: false
           tauriScript: npx tauri

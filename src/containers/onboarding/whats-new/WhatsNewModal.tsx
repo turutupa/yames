@@ -7,7 +7,9 @@
  * rendered as markdown — that would mean shipping a parser (and a sanitiser)
  * for text we do not control. Lines are shown verbatim, with a leading
  * "-"/"*" bullet turned into a real list item, which is what release notes
- * actually look like.
+ * actually look like. The one concession: the release skill labels sections
+ * `**New**` / `**Fixed**`, and GitHub renders that bold — here the asterisks
+ * would show, so bold and heading markers are dropped and the words kept.
  */
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -35,7 +37,10 @@ export function parseNotes(notes: string): { text: string; bullet: boolean }[] {
     .filter((line) => line.length > 0)
     .map((line) => {
       const bullet = /^[-*•]\s+/.test(line);
-      return { text: bullet ? line.replace(/^[-*•]\s+/, "") : line, bullet };
+      const text = (bullet ? line.replace(/^[-*•]\s+/, "") : line)
+        .replace(/^#{1,3}\s+/, "")
+        .replace(/\*\*(.+?)\*\*/g, "$1");
+      return { text, bullet };
     });
 }
 

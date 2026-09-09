@@ -23,9 +23,9 @@ is merged.
 ## Rules every worker follows
 
 - One branch per task: `phase0/t0N-short-name`. Open a PR; do not merge.
-- Commit prefixes `feat:` / `fix:` trigger a release from `main`. Use
-  them in the PR title only when the change deserves a release; use
-  `chore:` / `refactor:` for the commits themselves.
+- Only a commit message starting with `release` cuts a release from `main`
+  (`release.yml` gates on it). `feat:` / `fix:` describe scope and release
+  nothing; use `chore:` / `refactor:` for the commits themselves.
 - No file rewrites; surgical edits (AGENTS.md).
 - Validation chain after every step, in this order:
   `bun run tsc --noEmit` → `bun run test` → `bun run test:rust` →
