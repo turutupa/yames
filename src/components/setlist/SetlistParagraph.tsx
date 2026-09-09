@@ -186,7 +186,35 @@ export function SetlistParagraph({
               className={`setlist-step${selected ? " selected" : ""}${running ? " running" : ""}`}
               key={step.id}
               ref={selected ? openRef : undefined}
+              /*
+               * `role` and `tabIndex` are load-bearing, not decoration.
+               *
+               * `useDrag` decides on mousedown whether the pointer is on a
+               * control or on window furniture, and a bare `div` with an
+               * `onClick` looks like furniture — so on WINDOWS it called
+               * `startDragging()`, the OS took the mouse, and the click never
+               * arrived. macOS was fine because `startDragging()` rejects on
+               * a focused undecorated window and the manual fallback lets the
+               * click through. The owner found it exactly that way: "clicking
+               * on a step is not focusing it for me (I'm on Windows) — does
+               * work on Mac."
+               *
+               * This is the second time this project has paid for a clickable
+               * `div`; the first was the setlist rows in the library. Being
+               * focusable is the honest definition of "the user aims at this",
+               * and it makes the step keyboard-reachable at the same time.
+               */
+              role="button"
+              tabIndex={0}
+              aria-current={selected ? "true" : undefined}
               onClick={() => {
+                if (!selected) onSelectStep(step.id);
+              }}
+              onKeyDown={(e) => {
+                if (e.key !== "Enter" && e.key !== " ") return;
+                // Not when the key belongs to a phrase inside the step.
+                if (e.target !== e.currentTarget) return;
+                e.preventDefault();
                 if (!selected) onSelectStep(step.id);
               }}
             >

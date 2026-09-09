@@ -372,6 +372,35 @@
   background: var(--surface-hover, rgba(255, 255, 255, 0.03));
 }
 
+.setlist-step:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* A hairline between steps.
+
+   Six steps of the same routine are often the same tempo, the same meter and
+   the same handover — the owner's own "Metal Chain" is six identical lines —
+   and without a seam they read as one block of text rather than six things.
+   Under each step but the last, inset past the number so it reads as a rule
+   between entries rather than a box around them. */
+.setlist-step + .setlist-step {
+  border-top: 1px solid color-mix(in srgb, var(--text-primary) 7%, transparent);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* ...except where a fill already separates them. Two adjacent tints with a
+   line between look like a table; the fill is the seam. */
+.setlist-step.selected + .setlist-step,
+.setlist-step.running + .setlist-step,
+.setlist-step:hover + .setlist-step,
+.setlist-step.selected,
+.setlist-step.running,
+.setlist-step:hover {
+  border-top-color: transparent;
+}
+
 /* The one Start will begin on. Without this every step looked identical and
    "Start at step 3" had nothing on screen to point at. */
 .setlist-step.selected {
@@ -388,13 +417,13 @@
 }
 
 .setlist-step-no {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
-  letter-spacing: 0.1em;
-  color: var(--text-faint);
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
   width: 26px;
   flex: none;
-  padding-top: 8px;
+  padding-top: 6px;
   font-variant-numeric: tabular-nums;
 }
 

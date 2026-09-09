@@ -585,10 +585,25 @@ export function MainWindow() {
    * and a dialog that appears every time is one nobody reads.
    */
   const [leaving, setLeaving] = useState(false);
+  /**
+   * Close it, and let go of the row in the library.
+   *
+   * You open a setlist by clicking its row, which focuses it. Escape then
+   * closes the setlist and the row keeps the focus — and because Escape is a
+   * keyboard action the browser draws `:focus-visible` on it, so a dark ring
+   * sits in the sidebar around a setlist that is no longer open. The row has
+   * done its job; releasing it is what a mouse click would have implied
+   * anyway.
+   */
+  const closeAndRelease = useCallback(() => {
+    setlistSession.closeSetlist();
+    const active = document.activeElement as HTMLElement | null;
+    if (active && active.closest(".preset-sidebar")) active.blur();
+  }, [setlistSession]);
   const askToLeave = useCallback(() => {
     if (!setlistSession.setlist) return;
     if (setlistSession.dirty) setLeaving(true);
-    else setlistSession.closeSetlist();
+    else closeAndRelease();
   }, [setlistSession]);
 
   // Escape is the other door. Not while something is typed into, and not
@@ -1056,7 +1071,13 @@ export function MainWindow() {
         {/* Behind the stage, not inside it: the stage caps its own width, and
             the room this figure needs is the part of the content region that
             the cap leaves over. */}
-        {view === "beat" && (
+        {/* Not while a setlist is playing. The player is one centred column
+            with a tempo you are meant to read from across the room, and a
+            sketch off to one side of it is the only other thing on screen —
+            so it stops being scenery and starts being the other object your
+            eye goes to. Every other beat screen has controls filling the
+            width for it to sit behind. */}
+        {view === "beat" && !setlistSession.setlistPlaying && (
           <MetronomeFigure
             bpm={state.bpm}
             isPlaying={state.isPlaying}
@@ -1070,12 +1091,12 @@ export function MainWindow() {
             onSave={() => {
               void setlistSession.saveActiveSetlist().then(() => {
                 setLeaving(false);
-                setlistSession.closeSetlist();
+                closeAndRelease();
               });
             }}
             onDiscard={() => {
               setLeaving(false);
-              setlistSession.closeSetlist();
+              closeAndRelease();
             }}
             onCancel={() => setLeaving(false)}
           />
