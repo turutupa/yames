@@ -5,20 +5,30 @@
  * captures it, so the two can never disagree about what `?shot=drill` means.
  */
 
-/** Every theme in src/themes.ts, in the order the picker lists them. */
+/**
+ * Every theme in src/themes.ts, in that file's order.
+ *
+ * The dark themes come first and the light ones after, and the grouping is the
+ * point: a swatch row that reads dark, dark, light, light, dark makes you hunt.
+ * scenarios.test.ts asserts this matches `THEMES` element for element, not
+ * just as a set — appending to the end rather than inserting into the right
+ * group is exactly how it went wrong.
+ */
 export const SHOT_THEMES = [
+  // dark
   "mono",
   "obsidian",
   "velvet",
   "neon",
   "aurora",
+  "ash",
+  "ember",
+  // light
   "ivory",
   "arctic",
   "sand",
   "lavender",
   "prism",
-  "ash",
-  "ember",
   "manuscript",
 ] as const;
 
