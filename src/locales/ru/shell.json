@@ -81,6 +81,14 @@
   "tabs": {
     "library": "Библиотека"
   },
+  "mobileTabs": {
+    "metronome": "Клик",
+    "drill": "Темп",
+    "setlist": "Сет",
+    "settings": "Опции",
+    "library": "Архив",
+    "zen": "Дзен"
+  },
   "sheet": {
     "close": "Закрыть"
   }

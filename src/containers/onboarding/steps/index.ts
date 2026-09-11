@@ -23,12 +23,18 @@ import { IS_MOBILE } from "../../../platform";
 
 export const ONBOARDING_STEPS: WizardStepDef[] = [
   { id: "welcome", Component: WelcomeStep, hideInProgress: true },
-  { id: "instrument", Component: InstrumentStep },
+  // The instrument question has no consumer on a phone: the coach and the
+  // microphone evaluation were the only things that ever read the answer,
+  // and neither exists in the mobile build (M03d, plan §1). A question
+  // nothing acts on is dishonest, so it is cut here rather than kept and
+  // ignored — which also keeps `InstrumentStep` and its picker grid out of
+  // the phone bundle.
+  ...(IS_MOBILE ? [] : ([{ id: "instrument", Component: InstrumentStep }] as WizardStepDef[])),
   { id: "sound-look", Component: SoundLookStep },
-  // A phone gets four steps: welcome, instrument, sound & look, ready.
-  // Hands-free is footswitches, and the other three are the coach and the
-  // microphone that feeds it — none of which the mobile build has. Cutting
-  // them here is also what keeps their modules out of the bundle.
+  // A phone gets three steps: welcome, sound & look, ready. Hands-free is
+  // footswitches, and the other three are the coach and the microphone that
+  // feeds it — none of which the mobile build has. Cutting them here is also
+  // what keeps their modules out of the bundle.
   ...(IS_MOBILE
     ? []
     : ([

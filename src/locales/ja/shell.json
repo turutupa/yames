@@ -81,6 +81,14 @@
   "tabs": {
     "library": "ライブラリ"
   },
+  "mobileTabs": {
+    "metronome": "テンポ",
+    "drill": "練習",
+    "setlist": "セトリ",
+    "settings": "設定",
+    "library": "ライブラリ",
+    "zen": "禅"
+  },
   "sheet": {
     "close": "閉じる"
   }

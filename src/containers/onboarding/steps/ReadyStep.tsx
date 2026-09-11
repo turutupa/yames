@@ -38,12 +38,21 @@ export function ReadyStep(_props: WizardStepProps) {
   } = useWizardEnv();
 
   const rows: SummaryRow[] = [
-    {
-      key: "instrument",
-      label: t("onboarding.ready.rows.instrument"),
-      value: t(`instrument.${instrument}`),
-      target: "instrument",
-    },
+    // A phone never asks the instrument question (M03d, plan §1: nothing on
+    // mobile consumes the answer), so a summary row for it would be reporting
+    // a setup step the user was never offered — the same "greyed out for a
+    // feature that isn't there" the mobile plan forbids, applied to a summary
+    // instead of a tile.
+    ...(IS_MOBILE
+      ? []
+      : ([
+          {
+            key: "instrument",
+            label: t("onboarding.ready.rows.instrument"),
+            value: t(`instrument.${instrument}`),
+            target: "instrument",
+          },
+        ] as SummaryRow[])),
     {
       key: "sound",
       label: t("onboarding.ready.rows.sound"),

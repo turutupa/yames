@@ -81,6 +81,14 @@
   "tabs": {
     "library": "Libreria"
   },
+  "mobileTabs": {
+    "metronome": "Click",
+    "drill": "Rampa",
+    "setlist": "Scaletta",
+    "settings": "Opzioni",
+    "library": "Libreria",
+    "zen": "Zen"
+  },
   "sheet": {
     "close": "Chiudi"
   }

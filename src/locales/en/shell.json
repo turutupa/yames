@@ -81,6 +81,14 @@
   "tabs": {
     "library": "Library"
   },
+  "mobileTabs": {
+    "metronome": "Metronome",
+    "drill": "Drill",
+    "setlist": "Setlist",
+    "settings": "Settings",
+    "library": "Library",
+    "zen": "Zen"
+  },
   "sheet": {
     "close": "Close"
   }

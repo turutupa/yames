@@ -81,6 +81,14 @@
   "tabs": {
     "library": "라이브러리"
   },
+  "mobileTabs": {
+    "metronome": "메트로놈",
+    "drill": "연습",
+    "setlist": "셋리스트",
+    "settings": "설정",
+    "library": "보관함",
+    "zen": "젠"
+  },
   "sheet": {
     "close": "닫기"
   }

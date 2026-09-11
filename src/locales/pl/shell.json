@@ -81,6 +81,14 @@
   "tabs": {
     "library": "Biblioteka"
   },
+  "mobileTabs": {
+    "metronome": "Metronom",
+    "drill": "Rozbieg",
+    "setlist": "Setlista",
+    "settings": "Opcje",
+    "library": "Zasoby",
+    "zen": "Zen"
+  },
   "sheet": {
     "close": "Zamknij"
   }
