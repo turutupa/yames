@@ -1,12 +1,43 @@
-mod audio_input;
-mod calibration_cache;
+// ---------------------------------------------------------------------------
+// Module map — what a phone compiles, and what it does not (M01)
+//
+// MOBILE_IMPLEMENTATION_PLAN §1: the practice coach, the mic evaluation and
+// the voice do not exist in a mobile binary. Not greyed out — not compiled.
+// The modules below carry that decision:
+//
+//   * The always-compiled set is the metronome itself — engine, state, beat
+//     log, tempo context, drills, presets.
+//   * The `#[cfg(desktop)]` set is the coach / evaluation / voice stack, the
+//     window manager, and MIDI. The first of those is what links aubio
+//     (GPL, C) and llama.cpp, which is why it cannot and must not reach a
+//     phone; MIDI is here for a duller reason, namely that midir has no
+//     Android backend at all (see Cargo.toml). Those dependencies are matched
+//     by `[target.'cfg(not(any(target_os = "android", target_os = "ios")))'
+//     .dependencies]` in Cargo.toml, so a mobile build cannot pull them in
+//     even by accident.
+//
+// `desktop` / `mobile` are cfgs emitted by `tauri_build::build()`.
+// ---------------------------------------------------------------------------
+mod beat_log;
 mod clock;
-mod coach;
 mod commands;
+pub mod drill;
 mod engine;
 pub mod instrument;
+mod state;
+mod tempo_context;
+
+#[cfg(desktop)]
+mod audio_input;
+#[cfg(desktop)]
+mod calibration_cache;
+#[cfg(desktop)]
+mod coach;
+#[cfg(desktop)]
 mod midi;
+#[cfg(desktop)]
 mod models;
+#[cfg(desktop)]
 mod onset;
 // `session`, `session_log`, and `timing` are exposed `pub` so the
 // integration tests in `tests/dsp_fixtures.rs` can import
@@ -14,11 +45,15 @@ mod onset;
 // The crate's actual API surface is still defined by the Tauri command
 // handlers in `commands.rs` — these `pub` modules are an
 // implementation detail visible only to the test harness.
+#[cfg(desktop)]
 pub mod session;
+#[cfg(desktop)]
 mod session_audio;
+#[cfg(desktop)]
 pub mod session_log;
-mod state;
+#[cfg(desktop)]
 pub mod timing;
+#[cfg(desktop)]
 mod tts;
 
 /// Everything `src/bin/click-jitter-probe.rs` needs, and nothing more.
@@ -29,19 +64,27 @@ mod tts;
 /// implementation details of the Tauri command surface — this facade
 /// re-exports the exact handful of symbols the audio-safety gate uses.
 pub mod probe {
+    pub use crate::beat_log::create_beat_log;
     pub use crate::clock::now_ns;
     pub use crate::engine::{CallbackProbe, CallbackSample, MetronomeEngine};
     pub use crate::state::{create_shared_state, AppState, SharedState};
-    pub use crate::timing::create_beat_log;
 
-    #[cfg(feature = "coach-llm")]
+    // `desktop` as well as the feature: `coach-llm` still *exists* as a
+    // feature name on a mobile target (its optional dependency simply is not
+    // in that target's graph), so a stray `--features coach-llm-vulkan` on an
+    // Android build would otherwise reach for a `coach` module that is not
+    // compiled there and fail with `unresolved import crate::coach`.
+    #[cfg(all(desktop, feature = "coach-llm"))]
     pub use crate::coach::{create_shared_engine, generate, load_model, GenKind};
-    #[cfg(feature = "coach-llm")]
+    #[cfg(all(desktop, feature = "coach-llm"))]
     pub use crate::models::CURRENT_BRAIN_FAMILY;
 }
 
+#[cfg(desktop)]
 use audio_input::create_shared_audio_input;
+#[cfg(desktop)]
 use calibration_cache::create_shared_calibration_cache;
+#[cfg(desktop)]
 use coach::create_shared_engine;
 use commands::{
     cancel_model_download, clear_all_sessions, clear_calibration_cache_entry, clear_midi_binding,
@@ -63,25 +106,39 @@ use commands::{
     start_evaluation, start_model_download, start_playback, start_recording, start_speed_ramp,
     start_speed_ramp_from, start_voice_repair, stop_evaluation, stop_playback, stop_recording,
     arm_count_in, set_accent_mode, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
-    tts_stop, tts_voice_diagnostics, unload_coach_model, write_model_chunk, DownloadState,
+    tts_stop, tts_voice_diagnostics, unload_coach_model, write_model_chunk,
     EngineState,
 };
+#[cfg(desktop)]
+use commands::DownloadState;
+use beat_log::create_beat_log;
 use engine::MetronomeEngine;
+use state::create_shared_state;
+use std::sync::{Arc, Mutex};
+use tauri::Manager;
+use tauri_plugin_store::StoreExt;
+use tempo_context::{SharedTempoContext, TempoContext};
+
+// Desktop-only imports: the tray, the window manager, and the coach /
+// evaluation / voice stack (M01).
+#[cfg(desktop)]
 use midi::create_shared_midi;
-use onset::{create_shared_onset_detector, SharedTempoContext, TempoContext};
+#[cfg(desktop)]
+use onset::create_shared_onset_detector;
+#[cfg(desktop)]
 use session::create_shared_session_accumulator;
-use state::{create_shared_state, SharedState};
-use std::sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc, Mutex,
-};
+#[cfg(desktop)]
+use state::SharedState;
+#[cfg(desktop)]
+use std::sync::atomic::{AtomicBool, Ordering};
+#[cfg(desktop)]
 use tauri::{
     menu::{Menu, MenuItem},
     tray::TrayIconBuilder,
-    Manager,
 };
-use tauri_plugin_store::StoreExt;
-use timing::{create_beat_log, TimingAnalyzer};
+#[cfg(desktop)]
+use timing::TimingAnalyzer;
+#[cfg(desktop)]
 use tts::{create_shared_tts, create_shared_tts_active, create_shared_tts_dim};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -89,6 +146,8 @@ pub fn run() {
     // Loud, one-shot banner so the dev can see at process start whether
     // the session-audio WAV dump is armed. In release builds the gate is
     // always false (cfg(debug_assertions) gate inside is_enabled).
+    // There is no mic evaluation on a phone, so nothing to record (M01).
+    #[cfg(desktop)]
     if session_audio::is_enabled() {
         eprintln!(
             "[yames] session-audio recording ENABLED (debug build default). \
@@ -106,21 +165,30 @@ pub fn run() {
 
     // Startup-complete flag: gates the WindowEvent::Moved handler so that
     // position moves that happen during app initialization (centering, set_position
-    // restore) don't overwrite the persisted position in the store.
+    // restore) don't overwrite the persisted position in the store. A phone
+    // has no window to move.
+    #[cfg(desktop)]
     let startup_complete = Arc::new(AtomicBool::new(false));
+    #[cfg(desktop)]
     let startup_complete_events = Arc::clone(&startup_complete);
 
+    // The updater (stores update apps), the process plugin (nothing restarts
+    // an app on a phone) and decorum (a title bar) are desktop-only — plan §3.
     // tauri_plugin_decorum is Win/Linux only — its init() panics on macOS (cocoa null ptr).
     #[allow(unused_mut)]
-    let mut builder = tauri::Builder::default()
-        .plugin(tauri_plugin_store::Builder::default().build())
+    let mut builder =
+        tauri::Builder::default().plugin(tauri_plugin_store::Builder::default().build());
+
+    #[cfg(desktop)]
+    #[allow(unused_mut)]
+    let mut builder = builder
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init());
 
-    #[cfg(not(target_os = "macos"))]
+    #[cfg(all(desktop, not(target_os = "macos")))]
     let builder = builder.plugin(tauri_plugin_decorum::init());
 
-    builder.setup(move |app| {
+    let builder = builder.setup(move |app| {
             let shared_state = create_shared_state();
 
             // Restore saved settings from store
@@ -276,6 +344,14 @@ pub fn run() {
 
             // Start audio output device polling
             engine::start_audio_device_polling(app.handle().clone());
+
+            // Everything from here to the MIDI listener is the coach /
+            // evaluation / voice stack: the mic, the onset detector, the
+            // timing analyser, the session accumulator, the LLM engine, the
+            // calibration cache and Piper. None of it is compiled for a phone
+            // (M01), so none of it is managed there either.
+            #[cfg(desktop)]
+            {
             app.manage(create_shared_audio_input());
             app.manage(create_shared_onset_detector());
             app.manage(Arc::new(Mutex::new(TimingAnalyzer::new(beat_log))));
@@ -380,8 +456,14 @@ pub fn run() {
             // can interrupt the previous utterance instead of queueing.
             app.manage(create_shared_tts_active());
             app.manage(DownloadState(std::sync::Mutex::new(None)));
+            }
 
-            // Set up MIDI listener
+            // Set up MIDI listener. midir compiles on Android to a dummy
+            // backend that lists nothing, and the MIDI commands are
+            // desktop-only in v1 (plan §3.3) — so a phone does not start the
+            // device-polling thread either. iOS CoreMIDI is M07.
+            #[cfg(desktop)]
+            {
             let shared_midi = create_shared_midi();
             {
                 let listener = shared_midi.lock().unwrap();
@@ -400,7 +482,14 @@ pub fn run() {
                 }
             }
             app.manage(shared_midi);
+            }
 
+            // Everything from here to the end of `setup` is the window
+            // manager: the tray, the main window's saved size and position,
+            // and the floating widget. A phone has one fullscreen webview and
+            // none of it applies (plan §3.2).
+            #[cfg(desktop)]
+            {
             // Set up system tray
             let show_i = MenuItem::with_id(app, "show", "Show Yames", true, None::<&str>)?;
             let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
@@ -533,6 +622,7 @@ pub fn run() {
 
             // Mark startup complete so the Moved handler begins persisting positions.
             startup_complete.store(true, Ordering::Release);
+            }
 
             Ok(())
         })
@@ -626,8 +716,15 @@ pub fn run() {
             tts_list_voices,
             tts_voice_diagnostics,
             start_voice_repair,
-        ])
-        .on_window_event(move |window, event| {
+        ]);
+
+    // Window events are the window manager's: saving the main window's size
+    // and position, and tearing the audio engine down when the last window
+    // closes. A phone has one fullscreen webview that is never moved, resized
+    // or closed by the user, and the OS reclaims the process — so this whole
+    // handler is desktop-only (plan §3.2).
+    #[cfg(desktop)]
+    let builder = builder.on_window_event(move |window, event| {
             match event {
                 tauri::WindowEvent::CloseRequested { .. } => {
                     // Authoritative position save: read outer_position() right before
@@ -702,7 +799,9 @@ pub fn run() {
                 }
                 _ => {}
             }
-        })
+        });
+
+    builder
         .run(tauri::generate_context!())
         .expect("error while running Yames");
 }
@@ -713,6 +812,7 @@ pub fn run() {
 /// Always iterates all monitors (not just current_monitor) so that positions saved
 /// on secondary monitors are correctly accepted when the window starts hidden on
 /// the primary monitor.
+#[cfg(desktop)]
 pub(crate) fn is_position_visible(x: i32, y: i32, window: &tauri::WebviewWindow) -> bool {
     let margin = 100i32; // At least 100px of the window must remain on-screen
     if let Ok(monitors) = window.available_monitors() {

@@ -1,15 +1,44 @@
-use crate::audio_input::{AudioDevice, SharedAudioInput};
-use crate::coach::SharedCoachEngine;
 use crate::engine::MetronomeEngine;
 use crate::instrument::Instrument;
-use crate::midi::{MidiBinding, MidiDeviceInfo, MidiMsgType, SharedMidi};
-use crate::onset::{SharedOnsetDetector, SharedTempoContext};
-use crate::session::{CoachMode, SessionReport, SharedSessionAccumulator};
 use crate::state::{AppState, SharedState};
-use crate::timing::SharedTimingAnalyzer;
-use crate::tts::{SharedTts, SharedTtsActive, SharedTtsDim};
+use crate::tempo_context::SharedTempoContext;
 use std::sync::Mutex;
-use tauri::{AppHandle, Emitter, Manager, State};
+use tauri::{AppHandle, Emitter, State};
+// `Manager` is only needed by the window- and path-using commands, all of
+// which are desktop-only (M01).
+#[cfg(desktop)]
+use tauri::Manager;
+
+// The coach / evaluation / voice stack (M01). Compiled on desktop only; every
+// command that needs one of these types is `#[cfg(desktop)]` below, and the
+// `mobile` module answers under the same name on a phone.
+#[cfg(desktop)]
+use crate::audio_input::{AudioDevice, SharedAudioInput};
+#[cfg(desktop)]
+use crate::coach::SharedCoachEngine;
+// midir does not build for Android at all (see Cargo.toml), so `midi.rs` is
+// desktop-only in v1. M07 brings it back for iOS.
+#[cfg(desktop)]
+use crate::midi::{MidiBinding, MidiDeviceInfo, MidiMsgType, SharedMidi};
+#[cfg(desktop)]
+use crate::onset::SharedOnsetDetector;
+#[cfg(desktop)]
+use crate::session::{CoachMode, SessionReport, SharedSessionAccumulator};
+#[cfg(desktop)]
+use crate::timing::SharedTimingAnalyzer;
+#[cfg(desktop)]
+use crate::tts::{SharedTts, SharedTtsActive, SharedTtsDim};
+
+/// Mobile answers for the commands that only exist on desktop.
+///
+/// `tauri::generate_handler!` takes one flat list and cannot cfg individual
+/// entries, so every command stays registered on every platform and the
+/// *bodies* are what changes. The frontend never calls these on a phone
+/// (M02) — this is the safety net, not UX.
+#[cfg(mobile)]
+mod mobile;
+#[cfg(mobile)]
+pub use mobile::*;
 
 pub struct EngineState(pub Mutex<MetronomeEngine>);
 
@@ -63,6 +92,9 @@ pub fn should_persist_instrument(current: Instrument, stored: Option<&serde_json
 /// both startup call sites (`app_ready` here, and the floating widget's
 /// show/hide in `lib.rs`) — they must agree or a fresh install would show
 /// both windows at once.
+///
+/// Desktop-only: a phone has one webview and nothing is hidden at startup.
+#[cfg(desktop)]
 pub fn resolve_startup_window(stored: Option<&str>) -> String {
     stored.unwrap_or("main").to_string()
 }
@@ -238,6 +270,7 @@ pub fn set_playing(
     emit_state_changed(&state, &app_handle);
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn set_widget_mode(mode: String, state: State<SharedState>, app_handle: AppHandle) {
     {
@@ -248,6 +281,7 @@ pub fn set_widget_mode(mode: String, state: State<SharedState>, app_handle: AppH
     persist_state(&state, &app_handle);
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn set_always_on_top(enabled: bool, state: State<SharedState>, app_handle: AppHandle) {
     {
@@ -261,6 +295,7 @@ pub fn set_always_on_top(enabled: bool, state: State<SharedState>, app_handle: A
     persist_state(&state, &app_handle);
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn set_widget_always_on_top(enabled: bool, state: State<SharedState>, app_handle: AppHandle) {
     {
@@ -274,6 +309,7 @@ pub fn set_widget_always_on_top(enabled: bool, state: State<SharedState>, app_ha
     persist_state(&state, &app_handle);
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn show_main(app_handle: AppHandle, state: State<SharedState>) {
     if let Some(float_win) = app_handle.get_webview_window("floating") {
@@ -291,6 +327,7 @@ pub fn show_main(app_handle: AppHandle, state: State<SharedState>) {
     }
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn show_floating(app_handle: AppHandle) {
     if let Some(main_win) = app_handle.get_webview_window("main") {
@@ -332,6 +369,7 @@ pub fn set_instrument(instrument: String, state: State<SharedState>, app_handle:
     persist_state(&state, &app_handle);
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn set_volume(
     volume: f32,
@@ -357,6 +395,7 @@ pub fn set_volume(
     persist_state(&state, &app_handle);
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn save_window_position(label: String, x: i32, y: i32, app_handle: AppHandle) {
     use tauri_plugin_store::StoreExt;
@@ -761,6 +800,7 @@ pub fn get_active_tab(app_handle: AppHandle) -> String {
     "beat".to_string()
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn set_calibration_offset(offset: f64, app_handle: AppHandle) {
     use tauri_plugin_store::StoreExt;
@@ -769,6 +809,7 @@ pub fn set_calibration_offset(offset: f64, app_handle: AppHandle) {
     }
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn get_calibration_offset(app_handle: AppHandle) -> Option<f64> {
     use tauri_plugin_store::StoreExt;
@@ -791,6 +832,7 @@ pub fn get_calibration_offset(app_handle: AppHandle) -> Option<f64> {
 /// Returns the cached calibration entry for the current `(instrument,
 /// device)` pair (or `None`). Used by the Settings UI to render a
 /// "Calibrated for this gear" hint.
+#[cfg(desktop)]
 #[tauri::command]
 pub fn get_calibration_cache_entry(
     instrument_id: String,
@@ -808,6 +850,7 @@ pub fn get_calibration_cache_entry(
 /// Forget the cached calibration for one `(instrument, device)` pair
 /// — wired to the "Recalibrate" button. The next evaluation session
 /// for the pair re-converges from cold.
+#[cfg(desktop)]
 #[tauri::command]
 pub fn clear_calibration_cache_entry(
     instrument_id: String,
@@ -824,6 +867,7 @@ pub fn clear_calibration_cache_entry(
 /// Snapshot every cached entry. Used by support tooling and Settings'
 /// "show me what's cached" dev panel (not surfaced yet but cheap to
 /// expose now so we don't need a future schema migration).
+#[cfg(desktop)]
 #[tauri::command]
 pub fn list_calibration_cache(
     cal_cache: State<'_, crate::calibration_cache::SharedCalibrationCache>,
@@ -847,18 +891,27 @@ pub fn open_url(url: String) {
     {
         let _ = std::process::Command::new("xdg-open").arg(&url).spawn();
     }
+    #[cfg(mobile)]
+    {
+        // Nothing to hand a link to yet: there is no process to spawn on
+        // Android or iOS. The About and support links are the only callers,
+        // and M03 wires `tauri-plugin-opener` for them.
+        let _ = url;
+    }
 }
 
 // ---------------------------------------------------------------------------
 // MIDI Commands
 // ---------------------------------------------------------------------------
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn list_midi_devices(midi: State<SharedMidi>) -> Vec<MidiDeviceInfo> {
     let listener = midi.lock().unwrap();
     listener.list_devices()
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn connect_midi_device(
     device_name: String,
@@ -875,6 +928,7 @@ pub fn connect_midi_device(
     Ok(())
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn disconnect_midi_device(
     midi: State<SharedMidi>,
@@ -889,6 +943,7 @@ pub fn disconnect_midi_device(
     Ok(())
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn set_midi_binding(
     action: String,
@@ -917,6 +972,7 @@ pub fn set_midi_binding(
     Ok(())
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn clear_midi_binding(
     action: String,
@@ -929,12 +985,14 @@ pub fn clear_midi_binding(
     Ok(())
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn get_midi_bindings(midi: State<SharedMidi>) -> Vec<MidiBinding> {
     let listener = midi.lock().unwrap();
     listener.get_bindings()
 }
 
+#[cfg(desktop)]
 fn persist_midi_bindings(listener: &crate::midi::MidiListener, app_handle: &AppHandle) {
     use tauri_plugin_store::StoreExt;
     if let Ok(store) = app_handle.store("settings.json") {
@@ -1033,6 +1091,7 @@ pub fn reorder_presets(ids: Vec<String>, app_handle: AppHandle) -> Result<(), St
 // Audio Input / Evaluation Commands
 // ---------------------------------------------------------------------------
 
+#[cfg(desktop)]
 #[tauri::command]
 pub async fn list_audio_input_devices() -> Vec<AudioDevice> {
     tauri::async_runtime::spawn_blocking(|| crate::audio_input::AudioInput::list_devices())
@@ -1040,6 +1099,7 @@ pub async fn list_audio_input_devices() -> Vec<AudioDevice> {
         .unwrap_or_default()
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub async fn start_evaluation(
     device_name: Option<String>,
@@ -1294,6 +1354,7 @@ pub async fn start_evaluation(
     Ok(())
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub async fn stop_evaluation(
     audio_input: State<'_, SharedAudioInput>,
@@ -1415,6 +1476,7 @@ pub async fn stop_evaluation(
 /// Returns Ok(()) when the log was saved OR when there was nothing to save
 /// (no feedbacks AND no telemetry → an idle stop). Surface errors only
 /// for the "we wanted to save but the save itself failed" path.
+#[cfg(desktop)]
 fn persist_session_log(
     session_acc: &State<'_, SharedSessionAccumulator>,
     state: &State<'_, SharedState>,
@@ -1538,6 +1600,7 @@ fn persist_session_log(
     Ok(())
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn get_evaluation_state(audio_input: State<SharedAudioInput>) -> bool {
     let ai = audio_input.lock().unwrap_or_else(|e| e.into_inner());
@@ -1551,6 +1614,7 @@ pub fn get_evaluation_state(audio_input: State<SharedAudioInput>) -> bool {
 /// against fresh state. Per the plan, no `practice-segment-ended`
 /// event fires — the coach speaks the boundary via the forced
 /// `boundary_signal_a` gatekeeper event in the JS layer.
+#[cfg(desktop)]
 #[tauri::command]
 pub fn notify_settings_change(timing_analyzer: State<SharedTimingAnalyzer>) -> Result<(), String> {
     let ta = timing_analyzer
@@ -1566,6 +1630,7 @@ pub fn notify_settings_change(timing_analyzer: State<SharedTimingAnalyzer>) -> R
 /// Emits `practice-segment-ended` with `UserStopped` and calls
 /// `push_segment()` via the `on_segment_end` callback.
 /// Safe to call when no session is active (no-op).
+#[cfg(desktop)]
 #[tauri::command]
 pub fn close_open_segment(timing_analyzer: State<SharedTimingAnalyzer>) -> Result<(), String> {
     let ta = timing_analyzer
@@ -1575,6 +1640,7 @@ pub fn close_open_segment(timing_analyzer: State<SharedTimingAnalyzer>) -> Resul
     Ok(())
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub async fn get_session_report(
     session_acc: State<'_, SharedSessionAccumulator>,
@@ -1597,6 +1663,7 @@ pub async fn get_session_report(
 /// window buffer (`self.segments`) so mid-session mini-reports stay
 /// per-exercise. Merging the two would make exercise-N mini-reports show a
 /// cumulative score instead of exercise-N's individual score.
+#[cfg(desktop)]
 #[tauri::command]
 pub async fn get_final_session_report(
     session_acc: State<'_, SharedSessionAccumulator>,
@@ -1614,6 +1681,7 @@ pub async fn get_final_session_report(
     }
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub async fn clear_session(session_acc: State<'_, SharedSessionAccumulator>) -> Result<(), String> {
     // Mid-session clear: wipe only the per-segment mini-report window so
@@ -1630,6 +1698,7 @@ pub async fn clear_session(session_acc: State<'_, SharedSessionAccumulator>) -> 
     Ok(())
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn save_session(
     session: crate::session::SavedSession,
@@ -1654,6 +1723,7 @@ pub fn save_session(
     Ok(())
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn get_session_history(app_handle: AppHandle) -> Vec<crate::session::SavedSession> {
     use tauri_plugin_store::StoreExt;
@@ -1668,6 +1738,7 @@ pub fn get_session_history(app_handle: AppHandle) -> Vec<crate::session::SavedSe
         .unwrap_or_default()
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn delete_session(id: String, app_handle: AppHandle) -> Result<(), String> {
     use tauri_plugin_store::StoreExt;
@@ -1686,6 +1757,7 @@ pub fn delete_session(id: String, app_handle: AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn clear_all_sessions(app_handle: AppHandle) -> Result<(), String> {
     use tauri_plugin_store::StoreExt;
@@ -1698,7 +1770,7 @@ pub fn clear_all_sessions(app_handle: AppHandle) -> Result<(), String> {
     // sessions" is the one gesture a user has for "forget what I played", and
     // leaving the runs behind would mean the climb still draws last month's
     // wall after they asked for it to be gone.
-    let no_runs: Vec<crate::session::DrillRun> = Vec::new();
+    let no_runs: Vec<crate::drill::DrillRun> = Vec::new();
     store.set("drillRunHistory", serde_json::to_value(&no_runs).unwrap());
     Ok(())
 }
@@ -1713,27 +1785,27 @@ pub fn clear_all_sessions(app_handle: AppHandle) -> Result<(), String> {
 
 #[tauri::command]
 pub fn save_drill_run(
-    run: crate::session::DrillRun,
+    run: crate::drill::DrillRun,
     app_handle: AppHandle,
 ) -> Result<(), String> {
     use tauri_plugin_store::StoreExt;
     let store = app_handle
         .store("settings.json")
         .map_err(|e| e.to_string())?;
-    let mut history: Vec<crate::session::DrillRun> = store
+    let mut history: Vec<crate::drill::DrillRun> = store
         .get("drillRunHistory")
         .and_then(|v| serde_json::from_value(v.clone()).ok())
         .unwrap_or_default();
     // Newest first, the same order `get_session_history` hands back, so the
     // frontend's "the most recent comparable run" is a scan from index 0.
     history.insert(0, run);
-    history.truncate(crate::session::MAX_DRILL_RUN_HISTORY);
+    history.truncate(crate::drill::MAX_DRILL_RUN_HISTORY);
     store.set("drillRunHistory", serde_json::to_value(&history).unwrap());
     Ok(())
 }
 
 #[tauri::command]
-pub fn get_drill_runs(app_handle: AppHandle) -> Vec<crate::session::DrillRun> {
+pub fn get_drill_runs(app_handle: AppHandle) -> Vec<crate::drill::DrillRun> {
     use tauri_plugin_store::StoreExt;
     app_handle
         .store("settings.json")
@@ -1760,6 +1832,7 @@ pub fn get_drill_runs(app_handle: AppHandle) -> Vec<crate::session::DrillRun> {
 // in the UI.
 // ---------------------------------------------------------------------------
 
+#[cfg(desktop)]
 fn diagnostics_dir(app_handle: &AppHandle) -> Result<std::path::PathBuf, String> {
     app_handle
         .path()
@@ -1767,6 +1840,7 @@ fn diagnostics_dir(app_handle: &AppHandle) -> Result<std::path::PathBuf, String>
         .map_err(|e| format!("Failed to get app data dir: {e}"))
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn list_session_logs(app_handle: AppHandle) -> Result<Vec<String>, String> {
     let dir = diagnostics_dir(&app_handle)?;
@@ -1777,6 +1851,7 @@ pub fn list_session_logs(app_handle: AppHandle) -> Result<Vec<String>, String> {
         .collect())
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn get_session_log(path: String) -> Result<crate::session_log::SessionLog, String> {
     crate::session_log::load_log(std::path::Path::new(&path))
@@ -1785,6 +1860,7 @@ pub fn get_session_log(path: String) -> Result<crate::session_log::SessionLog, S
 /// Dump every persisted log into a single combined JSON file under
 /// `app_data_dir/exports/yames-session-logs-<unix>.json`. Returns the
 /// destination path so the frontend can show / reveal it.
+#[cfg(desktop)]
 #[tauri::command]
 pub fn export_session_logs(app_handle: AppHandle) -> Result<String, String> {
     let app_dir = diagnostics_dir(&app_handle)?;
@@ -1801,6 +1877,7 @@ pub fn export_session_logs(app_handle: AppHandle) -> Result<String, String> {
         .ok_or_else(|| "export path is not valid UTF-8".to_string())
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn clear_session_logs(app_handle: AppHandle) -> Result<(), String> {
     let dir = diagnostics_dir(&app_handle)?;
@@ -1811,6 +1888,7 @@ pub fn clear_session_logs(app_handle: AppHandle) -> Result<(), String> {
 // Audio Input Recording / Playback
 // ---------------------------------------------------------------------------
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn start_recording(audio_input: State<SharedAudioInput>) -> Result<(), String> {
     let ai = audio_input.lock().unwrap_or_else(|e| e.into_inner());
@@ -1821,12 +1899,14 @@ pub fn start_recording(audio_input: State<SharedAudioInput>) -> Result<(), Strin
     Ok(())
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn stop_recording(audio_input: State<SharedAudioInput>) -> f32 {
     let mut ai = audio_input.lock().unwrap_or_else(|e| e.into_inner());
     ai.stop_recording()
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn start_playback(
     audio_input: State<SharedAudioInput>,
@@ -1842,24 +1922,28 @@ pub fn start_playback(
     ai.start_playback(app_handle, output_device_name.as_deref())
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn stop_playback(audio_input: State<SharedAudioInput>) {
     let mut ai = audio_input.lock().unwrap_or_else(|e| e.into_inner());
     ai.stop_playback();
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn discard_recording(audio_input: State<SharedAudioInput>) {
     let mut ai = audio_input.lock().unwrap_or_else(|e| e.into_inner());
     ai.discard_recording();
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn get_waveform(audio_input: State<SharedAudioInput>) -> Vec<f32> {
     let ai = audio_input.lock().unwrap_or_else(|e| e.into_inner());
     ai.get_waveform(100)
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn set_input_gain(gain_db: f32, audio_input: State<SharedAudioInput>) {
     let gain_linear = 10.0_f32.powf(gain_db / 20.0);
@@ -1905,15 +1989,22 @@ pub fn set_audio_output_device(
 // Model download management
 // ---------------------------------------------------------------------------
 
+#[cfg(desktop)]
 use crate::models;
 
+/// The in-flight brain download's cancel flag. There is no brain on a phone
+/// (M01), so on mobile this is an empty marker: `lib.rs` still manages one
+/// piece of state under the same name, and nothing ever reads it.
+#[cfg(desktop)]
 pub struct DownloadState(pub std::sync::Mutex<Option<models::DownloadCancelFlag>>);
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn get_model_status(app_handle: AppHandle) -> Result<models::ModelStatus, String> {
     models::check_model_status(&app_handle)
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn write_model_chunk(
     app_handle: AppHandle,
@@ -1924,11 +2015,13 @@ pub fn write_model_chunk(
     models::write_model_file(&app_handle, &component, &filename, &data)
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn get_models_path(app_handle: AppHandle) -> Result<String, String> {
     models::get_models_path(&app_handle)
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub async fn delete_models(
     app_handle: AppHandle,
@@ -1963,6 +2056,7 @@ pub async fn delete_models(
     .map_err(|e| format!("delete_models join failed: {e}"))?
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn start_model_download(
     app_handle: AppHandle,
@@ -1983,6 +2077,7 @@ pub fn start_model_download(
     Ok(())
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn cancel_model_download(dl_state: State<DownloadState>) -> Result<(), String> {
     let mut guard = dl_state.0.lock().unwrap();
@@ -2003,6 +2098,7 @@ pub fn cancel_model_download(dl_state: State<DownloadState>) -> Result<(), Strin
 /// `async` + `spawn_blocking` because a cold GGUF load is seconds of
 /// blocking I/O; running it on the async runtime would stall every other
 /// command for that whole window.
+#[cfg(desktop)]
 #[tauri::command]
 pub async fn load_coach_model(
     app_handle: AppHandle,
@@ -2024,6 +2120,7 @@ pub async fn load_coach_model(
 /// Called when the user turns the brain tier off, before "Remove models"
 /// deletes the weights, and by the frontend's idle timer — the model is
 /// only meant to be resident while someone is practising.
+#[cfg(desktop)]
 #[tauri::command]
 pub async fn unload_coach_model(engine: State<'_, SharedCoachEngine>) -> Result<(), String> {
     let handle: SharedCoachEngine = engine.inner().clone();
@@ -2034,6 +2131,7 @@ pub async fn unload_coach_model(engine: State<'_, SharedCoachEngine>) -> Result<
         .map_err(|e| format!("unload_coach_model join failed: {e}"))?
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub async fn coach_generate(
     engine: State<'_, SharedCoachEngine>,
@@ -2067,6 +2165,7 @@ pub async fn coach_generate(
 /// Total physical RAM in MB, for the Studio-tier gate (ROADMAP §3: Studio
 /// is only offered at ≥ 16 GB). Returns 0 when the platform query fails,
 /// which the frontend treats as "unknown — don't block the user".
+#[cfg(desktop)]
 #[tauri::command]
 pub fn get_system_memory_mb() -> u64 {
     crate::models::system_memory_mb()
@@ -2080,6 +2179,7 @@ pub fn get_system_memory_mb() -> u64 {
 /// whole multi-gigabyte GGUF load. Opening Settings during a cold load
 /// therefore froze the window. Both now read the atomics in
 /// `CoachStatus`, which nobody holds.
+#[cfg(desktop)]
 #[tauri::command]
 pub async fn is_coach_loaded(engine: State<'_, SharedCoachEngine>) -> Result<bool, String> {
     Ok(engine.status().resident())
@@ -2092,6 +2192,7 @@ pub async fn is_coach_loaded(engine: State<'_, SharedCoachEngine>) -> Result<boo
 /// status line needs: weights present + `llm_compiled` + resident tells
 /// you whether the user is getting a real brain, a downloaded-but-
 /// unusable one, or the template coach.
+#[cfg(desktop)]
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct CoachCapabilities {
     /// Whether the binary was built with the `coach-llm` feature.
@@ -2145,6 +2246,7 @@ pub struct CoachCapabilities {
 /// Lock-free — see `is_coach_loaded`. The disk half reuses
 /// `check_model_status` rather than paying a second `fs::metadata` on the
 /// brain file.
+#[cfg(desktop)]
 #[tauri::command]
 pub async fn get_coach_capabilities(
     app_handle: AppHandle,
@@ -2173,6 +2275,7 @@ pub async fn get_coach_capabilities(
 // TTS
 // ---------------------------------------------------------------------------
 
+#[cfg(desktop)]
 #[tauri::command]
 pub async fn tts_speak(
     app_handle: AppHandle,
@@ -2289,11 +2392,13 @@ pub async fn tts_speak(
 /// path so clicking a second voice cuts off the first one's audio
 /// instead of queueing behind it. Idempotent — a no-op when nothing
 /// is currently speaking.
+#[cfg(desktop)]
 #[tauri::command]
 pub fn tts_stop(tts_active: State<'_, SharedTtsActive>) {
     crate::tts::cancel_active_speech(tts_active.inner());
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn tts_set_voice(tts: State<'_, SharedTts>, voice: String) {
     if let Ok(mut engine) = tts.lock() {
@@ -2304,6 +2409,7 @@ pub fn tts_set_voice(tts: State<'_, SharedTts>, voice: String) {
 /// Set the coach voice playback volume (0.0..=1.0). Stored on the TtsEngine
 /// and applied to the next utterance via the rodio `Sink`'s gain (it was
 /// `afplay -v` before speech playback moved in-process).
+#[cfg(desktop)]
 #[tauri::command]
 pub fn tts_set_volume(tts: State<'_, SharedTts>, volume: f32) {
     if let Ok(mut engine) = tts.lock() {
@@ -2311,6 +2417,7 @@ pub fn tts_set_volume(tts: State<'_, SharedTts>, volume: f32) {
     }
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn tts_list_voices(tts: State<'_, SharedTts>) -> Vec<(String, String)> {
     tts.lock()
@@ -2321,6 +2428,7 @@ pub fn tts_list_voices(tts: State<'_, SharedTts>) -> Vec<(String, String)> {
 /// Per-voice readiness for the Settings UI — the JS layer renders the
 /// download button when `engineMissing` OR `onnxMissing` OR `corrupted`,
 /// so the user can repair a single voice without nuking the brain.
+#[cfg(desktop)]
 #[tauri::command]
 pub fn tts_voice_diagnostics(tts: State<'_, SharedTts>) -> Vec<crate::tts::VoiceDiagnostic> {
     tts.lock()
@@ -2340,6 +2448,7 @@ pub fn tts_voice_diagnostics(tts: State<'_, SharedTts>) -> Vec<crate::tts::Voice
 /// unchanged. `tier` is omitted from the complete event so the
 /// frontend's "tier completed" branch doesn't false-fire — repairs
 /// don't change the active brain tier.
+#[cfg(desktop)]
 #[tauri::command]
 pub fn start_voice_repair(
     app_handle: AppHandle,
@@ -2364,6 +2473,7 @@ pub fn start_voice_repair(
 /// committed its first render. We re-read the saved position from the
 /// store and call set_position() + show() in one shot, so the window
 /// appears exactly where the user left it with no visible jump.
+#[cfg(desktop)]
 #[tauri::command]
 pub fn app_ready(app_handle: AppHandle) {
     use tauri_plugin_store::StoreExt;

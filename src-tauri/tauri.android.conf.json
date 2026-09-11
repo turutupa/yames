@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicklasxyz/tauri-v2-schema/main/tauri.conf.json",
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Yames",
+        "url": "index.html"
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "createUpdaterArtifacts": false
+  },
+  "plugins": {}
+}

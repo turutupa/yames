@@ -22,21 +22,78 @@ crate-type = ["lib", "cdylib", "staticlib"]
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
+# ---------------------------------------------------------------------------
+# What every platform compiles.
+#
+# MOBILE_IMPLEMENTATION_PLAN §3: the practice coach, the mic evaluation and
+# the voice are *not compiled* into a mobile binary. The gate is the
+# `[target.'cfg(not(any(target_os = "android", target_os = "ios")))'
+# .dependencies]` block further down rather than a Cargo feature, because the
+# Tauri CLI (2.10.x) has no `--no-default-features` flag on any subcommand —
+# `tauri android build` could not have turned a default feature off. Making
+# the dependency itself target-conditional needs no flag, and so cannot be
+# forgotten. See `src/lib.rs` for the matching module map.
+# ---------------------------------------------------------------------------
 [dependencies]
+# `tauri` itself stays here, features and all, and is deliberately NOT split
+# into the desktop block below. tauri-build's allowlist check
+# (tauri-build-2.5.6 `manifest.rs::find_dependency`) looks for `tauri` in
+# `[dependencies]` first and, finding it, never reads the target blocks — so a
+# split entry makes every desktop build fail with "add the `macos-private-api`
+# feature". Both features are inert off their platform (`macos-private-api`
+# forwards to macOS-only code; tauri declares the `tray-icon` crate under its
+# own desktop-only target block), so carrying them on a phone costs nothing.
 tauri = { version = "2", features = ["macos-private-api", "tray-icon"] }
-tauri-plugin-global-shortcut = "2"
 tauri-plugin-store = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 rodio = { version = "0.19", default-features = false, features = ["wav"] }
 cpal = "0.15"
-tauri-plugin-updater = "2"
-tauri-plugin-process = "2"
-tauri-plugin-decorum = "1"
-midir = "0.10"
 # Tauri already pulls tokio in transitively; declared explicitly so we can
 # use `tokio::task::spawn_blocking` from blocking command handlers.
 tokio = { version = "1", features = ["rt"] }
+
+audio_thread_priority = { version = "0.37.0", default-features = false }
+
+[features]
+default = []
+# CPU-only inference. Development machines and the CI fallback; also what
+# `cargo test --features coach-llm --lib` exercises.
+coach-llm = ["dep:llama-cpp-2", "dep:encoding_rs", "dep:num_cpus"]
+# Shipping features, one GPU backend per platform (ROADMAP §3: always try
+# the GPU first). llama.cpp falls back to CPU at runtime when no usable
+# device/driver is present, so a single binary serves both cases.
+coach-llm-metal = ["coach-llm", "llama-cpp-2/metal"]
+coach-llm-vulkan = ["coach-llm", "llama-cpp-2/vulkan"]
+
+
+# ---------------------------------------------------------------------------
+# Desktop only — the coach, the mic evaluation, the voice, the window manager.
+#
+# Everything here is unreachable from a mobile binary by construction: a phone
+# has one fullscreen webview and no window manager, and aubio (GPL-2+, C) +
+# llama.cpp are the two things the owner ruled out of a phone build outright
+# (plan §1). Cargo does not evaluate this block for `--target
+# aarch64-linux-android` / `aarch64-apple-ios`, so no NDK and no cmake are
+# needed to build for a phone.
+#
+# `tauri` is not here — see the note on it in `[dependencies]`.
+# ---------------------------------------------------------------------------
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-updater = "2"
+tauri-plugin-process = "2"
+tauri-plugin-decorum = "1"
+# midir. The plan (§3.3) expected this to compile on Android to a dummy
+# backend and stay in the mobile graph; it does not. midir 0.10.4's
+# `src/backend/mod.rs` selects a backend by `target_os` and has no arm for
+# `android` at all, so `backend` is empty and `common.rs` fails with
+# `unresolved imports backend::MidiInput, …`. There is nothing to gate around
+# it — the crate simply cannot be built for Android — so it leaves the mobile
+# graph entirely, along with `src/midi.rs`. midir *does* have a CoreMIDI arm
+# for `target_os = "ios"`; M07 (iOS Bluetooth MIDI, v1.1) turns this into
+# `cfg(not(target_os = "android"))` and un-gates the iOS half.
+midir = "0.10"
 # aubio — GPL-2+ MIR library for onset detection. The `static` feature
 # bundles the C source via aubio-sys (cmake required at build time) so
 # there is no runtime .dylib dependency. Requires cmake; on macOS:
@@ -56,24 +113,13 @@ llama-cpp-2 = { version = "0.1.146", optional = true }
 # has to be a direct dependency. Already in the graph underneath
 # llama-cpp-2, so this adds no package to Cargo.lock.
 encoding_rs = { version = "0.8", optional = true }
-audio_thread_priority = { version = "0.37.0", default-features = false }
+
 # Physical-core count for the inference thread budget (ROADMAP §3:
 # `n_threads = max(1, physical_cores - 2)`). std only exposes *logical*
 # CPUs; halving them as an SMT proxy under-counts by 2x on every machine
 # without hyper-threading (an 8-core M1 got 2 threads). Optional so a
 # default build does not pay for it.
 num_cpus = { version = "1", optional = true }
-
-[features]
-default = []
-# CPU-only inference. Development machines and the CI fallback; also what
-# `cargo test --features coach-llm --lib` exercises.
-coach-llm = ["dep:llama-cpp-2", "dep:encoding_rs", "dep:num_cpus"]
-# Shipping features, one GPU backend per platform (ROADMAP §3: always try
-# the GPU first). llama.cpp falls back to CPU at runtime when no usable
-# device/driver is present, so a single binary serves both cases.
-coach-llm-metal = ["coach-llm", "llama-cpp-2/metal"]
-coach-llm-vulkan = ["coach-llm", "llama-cpp-2/vulkan"]
 
 [target.'cfg(target_os = "macos")'.dependencies]
 coreaudio-sys = "0.2"
