@@ -16,7 +16,7 @@
 import "./test/mobileFlag"; // MUST be first — see the file.
 
 import { describe, it, expect, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { IS_MOBILE } from "./platform";
 import { MainWindow } from "./containers/main-window/MainWindow";
 import { MetronomeView } from "./containers/metronome/MetronomeView";
@@ -68,17 +68,43 @@ describe("MainWindow on a phone", () => {
     expect(screen.queryByText(/listening/i)).toBeNull();
   });
 
-  it("still has the three modes and the library", async () => {
+  // M03b: the 252px rail is gone on a phone and the four screens are a bottom
+  // tab bar, with the library as a sheet the bar opens rather than a drawer
+  // over the stage. The rail itself is untouched — `mobileComposition.desktop`
+  // is what proves it is still there with the flag off.
+  it("navigates from a bottom tab bar, not the rail", async () => {
     const { container } = render(<MainWindow />);
     await screen.findByText("120", { selector: ".bpm-input" });
-    const rail = screen.getByRole("navigation", { name: /modes/i });
-    expect(rail).toBeInTheDocument();
+
+    expect(container.querySelector(".rail")).toBeNull();
+    const tabs = screen.getByRole("navigation", { name: /screens/i });
+    expect(tabs).toBeInTheDocument();
     expect(
-      [...container.querySelectorAll(".rail-mode-label")].map((el) =>
-        el.textContent,
+      [...tabs.querySelectorAll(".mobile-tab[data-tab] .mobile-tab-label")].map(
+        (el) => el.textContent,
       ),
-    ).toEqual(["Metronome", "Setlist", "Drill"]);
-    expect(container.querySelector(".preset-sidebar")).not.toBeNull();
+    ).toEqual(["Metronome", "Drill", "Setlist", "Settings"]);
+
+    // Zen ships on a phone (plan §1) and the rail was its only door.
+    expect(container.querySelector(".mobile-tab-zen")).not.toBeNull();
+  });
+
+  it("opens the library as a sheet, and it starts closed", async () => {
+    render(<MainWindow />);
+    await screen.findByText("120", { selector: ".bpm-input" });
+
+    // Closed: nothing of the library is on screen, and the stage is not
+    // sitting behind a preset list nobody asked for.
+    expect(document.querySelector(".sheet--library")).toBeNull();
+    expect(document.querySelector(".preset-sidebar")).toBeNull();
+
+    fireEvent.click(document.querySelector(".mobile-tab-library") as HTMLElement);
+
+    const sheet = document.querySelector(".sheet--library");
+    expect(sheet).not.toBeNull();
+    expect(sheet?.querySelector(".preset-sidebar")).not.toBeNull();
+    // A scrim, so what is behind it reads as out of reach.
+    expect(document.querySelector(".sheet-scrim")).not.toBeNull();
   });
 });
 

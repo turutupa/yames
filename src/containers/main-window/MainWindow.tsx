@@ -46,6 +46,7 @@ import { useWhatsNew } from "../onboarding/whats-new/useWhatsNew";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { DrillView } from "../drill/DrillView";
 import { FullscreenView } from "../zen/FullscreenView";
+import { PresetSidebar } from "../../components/presets/PresetSidebar";
 import type { PresetSidebarHandle } from "../../components/presets/PresetSidebar";
 import { ThemeEffects } from "./ThemeEffects";
 import { MetronomeView } from "../metronome/MetronomeView";
@@ -53,6 +54,8 @@ import { MetronomeFigure } from "../metronome/MetronomeFigure";
 import { MainHeader } from "./MainHeader";
 import { TitleBar } from "../../components/TitleBar";
 import { Rail } from "./Rail";
+import { MobileTabBar } from "./MobileTabBar";
+import { Sheet } from "../../components/Sheet";
 import { Transport } from "./Transport";
 import { ViewTransition } from "../../components/ViewTransition";
 import { ZenTransition } from "../zen/ZenTransition";
@@ -162,7 +165,11 @@ export function MainWindow() {
     handleShareOption,
   } = useShareMenu();
   const [soundOpen, setSoundOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Open by default on a desktop, where it is a section of the rail with its
+  // own column. On a phone it is a sheet over the whole screen, and an app
+  // that starts with a sheet over it has hidden itself behind a preset list
+  // nobody asked for.
+  const [sidebarOpen, setSidebarOpen] = useState(!IS_MOBILE);
   // Note: WKWebView occasionally leaves the OS cursor "stale" for a
   // few frames after the sidebar's width transition or a play/pause
   // toggle (the cursor reappears on the next mousemove). It's a
@@ -685,8 +692,15 @@ export function MainWindow() {
     setBpm(clamped);
   };
 
-  // A narrow window cannot hold the library and a usable stage at once.
-  useLibraryFit(sidebarOpen, setSidebarOpen);
+  // A narrow window cannot hold the library and a usable stage at once. A
+  // phone never has that problem — the sheet is over the stage, not beside
+  // it — and the hook would slam it shut at every width the phone has.
+  if (!IS_MOBILE) useLibraryFit(sidebarOpen, setSidebarOpen);
+
+  // Which list the library shows. Settings is an overlay over a mode rather
+  // than a mode of its own, so it keeps whichever list was behind it — the
+  // same fallback the rail makes for its own copy of this panel.
+  const libraryView = view === "settings" ? "beat" : view;
 
   const { bar, elapsedSeconds } = usePlaybackClock(
     state.isPlaying || (state.speedRamp?.active ?? false),
@@ -974,7 +988,11 @@ export function MainWindow() {
       />
     </ZenTransition>
     <div
-      className={`main-window ${isOsFullscreen ? "os-fullscreen" : ""} ${IS_MAC ? "os-mac" : IS_WINDOWS ? "os-windows" : IS_LINUX ? "os-linux" : "os-other"}`}
+      // `is-mobile` is the hook every phone layout rule in shell.css and
+      // metronome.css hangs off. It is written from a build-time constant, so
+      // a desktop build never carries it and cannot reach those rules —
+      // which is why the phone layout is not a width breakpoint.
+      className={`main-window ${IS_MOBILE ? "is-mobile" : ""} ${isOsFullscreen ? "os-fullscreen" : ""} ${IS_MAC ? "os-mac" : IS_WINDOWS ? "os-windows" : IS_LINUX ? "os-linux" : "os-other"}`}
       data-playing={state.isPlaying}
       data-border={activeBorder}
     >
@@ -1044,6 +1062,10 @@ export function MainWindow() {
       )}
 
       <div className="main-body">
+        {/* A phone gets a bottom tab bar instead (below): 252px of rail on a
+            360px screen is two thirds of the app, and its library was a
+            drawer over the stage. See MobileTabBar.tsx. */}
+        {!IS_MOBILE && (
         <Rail
           ref={sidebarRef}
           state={state}
@@ -1077,6 +1099,7 @@ export function MainWindow() {
           onToggleCoach={session.toggleCard}
           onZen={() => setIsFullscreen(true)}
         />
+        )}
       <div
         ref={contentRef}
         className="main-content"
@@ -1434,6 +1457,58 @@ export function MainWindow() {
       />
       )}
       </div>{/* main-body */}
+
+      {/* The phone's navigation, and the library it opens. Both live outside
+          `.main-body` — the bar is the window's last row, under the transport,
+          and the sheet portals itself over everything (Sheet.tsx). */}
+      {IS_MOBILE && (
+        <MobileTabBar
+          view={view}
+          setView={setView}
+          prevTab={prevTab}
+          libraryOpen={sidebarOpen}
+          onToggleLibrary={() => setSidebarOpen((o) => !o)}
+          onZen={() => setIsFullscreen(true)}
+        />
+      )}
+
+      {IS_MOBILE && (
+        <Sheet
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          // Settings is an overlay over a mode, not a mode — the library it
+          // would show is the one belonging to the screen underneath.
+          title={t(
+            libraryView === "drill"
+              ? "presets.titleDrill"
+              : libraryView === "setlist"
+                ? "presets.titleSetlist"
+                : "presets.title",
+          )}
+          ownHeader
+          className="sheet--library"
+        >
+          <PresetSidebar
+            ref={sidebarRef}
+            state={state}
+            view={libraryView}
+            isOpen
+            onLoadPreset={(preset) => guarded(() => void handleLoadPreset(preset))}
+            onActiveChange={handleActivePresetChange}
+            setlists={setlistSession.setlists}
+            activeSetlistId={setlistSession.setlist?.id ?? null}
+            onLoadSetlist={(next) =>
+              next.id === setlistSession.setlist?.id
+                ? askToLeave()
+                : guarded(() => setlistSession.loadSetlist(next))
+            }
+            onNewSetlist={handleNewSetlist}
+            onDeleteSetlist={setlistSession.deleteSetlist}
+            onRenameSetlist={setlistSession.renameSetlist}
+          />
+        </Sheet>
+      )}
+
       {!IS_MOBILE && showResetConfirm && (
         <ResetKeybindingsConfirm
           onConfirm={resetAllBindings}
