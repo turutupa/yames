@@ -45,8 +45,10 @@
   transition: border-color 0.15s;
 }
 
-.bpm-clickable:hover {
-  border-color: rgba(255, 255, 255, 0.2);
+@media (hover: hover) {
+  .bpm-clickable:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+  }
 }
 
 .bpm-input::selection {
@@ -75,10 +77,12 @@
   border: 1px solid var(--accent-subtle-hover, rgba(233, 69, 96, 0.25));
 }
 
-.bpm-btn:hover {
-  background: var(--accent);
-  color: var(--accent-text, white);
-  border-color: var(--accent);
+@media (hover: hover) {
+  .bpm-btn:hover {
+    background: var(--accent);
+    color: var(--accent-text, white);
+    border-color: var(--accent);
+  }
 }
 
 /* Filled progress-bar style slider */
@@ -118,10 +122,12 @@
   align-self: center;
 }
 
-.tap-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-secondary);
-  border-color: rgba(255, 255, 255, 0.15);
+@media (hover: hover) {
+  .tap-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
 }
 
 .tap-btn.active {
@@ -212,8 +218,10 @@
   transition: opacity 0.15s;
 }
 
-.volume-slider:hover {
-  opacity: 1;
+@media (hover: hover) {
+  .volume-slider:hover {
+    opacity: 1;
+  }
 }
 
 .volume-slider::-webkit-slider-thumb {
@@ -267,9 +275,11 @@
   justify-content: center;
 }
 
-.sub-row-btn:hover {
-  background: color-mix(in srgb, var(--text-primary) 10%, transparent);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .sub-row-btn:hover {
+    background: color-mix(in srgb, var(--text-primary) 10%, transparent);
+    color: var(--text-primary);
+  }
 }
 
 .sub-row-btn svg {
@@ -309,9 +319,11 @@
   z-index: 100;
 }
 
-.sub-row-btn[data-tooltip]:hover::after {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
+@media (hover: hover) {
+  .sub-row-btn[data-tooltip]:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 /* Sound type header popover */
@@ -346,9 +358,11 @@
   text-align: left;
 }
 
-.header-sound-option:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .header-sound-option:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+  }
 }
 
 .header-sound-option.active {
@@ -389,12 +403,14 @@
   margin: 0 auto;
 }
 
-.play-btn:hover {
-  box-shadow:
-    0 6px 28px var(--accent-glow),
-    0 0 12px var(--accent-glow);
-  translate: 0 -1px;
-  color: var(--accent-text, white);
+@media (hover: hover) {
+  .play-btn:hover {
+    box-shadow:
+      0 6px 28px var(--accent-glow),
+      0 0 12px var(--accent-glow);
+    translate: 0 -1px;
+    color: var(--accent-text, white);
+  }
 }
 
 .play-btn.playing {
@@ -417,11 +433,13 @@
   margin-top: 4px;
 }
 
-.play-btn.secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: none;
-  transform: none;
-  color: var(--text-primary);
+@media (hover: hover) {
+  .play-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: none;
+    transform: none;
+    color: var(--text-primary);
+  }
 }
 
 /* =================== Beat Bars =================== */
@@ -455,10 +473,12 @@
   cursor: pointer;
 }
 
-.main-sub-btn:hover {
-  background: color-mix(in srgb, var(--text-primary) 10%, transparent);
-  border-color: color-mix(in srgb, var(--text-primary) 15%, transparent);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .main-sub-btn:hover {
+    background: color-mix(in srgb, var(--text-primary) 10%, transparent);
+    border-color: color-mix(in srgb, var(--text-primary) 15%, transparent);
+    color: var(--text-primary);
+  }
 }
 
 .main-sub-icon {
@@ -504,9 +524,11 @@
   text-align: left;
 }
 
-.sub-dropdown-item:hover {
-  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .sub-dropdown-item:hover {
+    background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+    color: var(--text-primary);
+  }
 }
 
 .sub-dropdown-item.active {
@@ -629,14 +651,18 @@
   pointer-events: none;
 }
 
-.beat-section:hover .beat-nav {
-  opacity: 1;
-  pointer-events: auto;
+@media (hover: hover) {
+  .beat-section:hover .beat-nav {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
-.beat-nav:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .beat-nav:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
+  }
 }
 
 .beat-nav-left {
@@ -913,9 +939,11 @@
     color 0.15s;
 }
 
-.time-sig-btn:hover {
-  background: color-mix(in srgb, var(--text-primary) 10%, transparent);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .time-sig-btn:hover {
+    background: color-mix(in srgb, var(--text-primary) 10%, transparent);
+    color: var(--text-primary);
+  }
 }
 
 .time-sig-btn.active {
@@ -973,9 +1001,11 @@
   transition: background 0.12s, border-color 0.12s, color 0.12s;
 }
 
-.meter-variant-chip:hover {
-  background: color-mix(in srgb, var(--text-primary) 10%, transparent);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .meter-variant-chip:hover {
+    background: color-mix(in srgb, var(--text-primary) 10%, transparent);
+    color: var(--text-primary);
+  }
 }
 
 .meter-variant-chip.active {
@@ -1186,9 +1216,11 @@
   transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 
-.meter-grouping-chip:hover {
-  color: var(--text-primary);
-  background: var(--surface-hover);
+@media (hover: hover) {
+  .meter-grouping-chip:hover {
+    color: var(--text-primary);
+    background: var(--surface-hover);
+  }
 }
 
 span.meter-grouping-chip {
@@ -1244,9 +1276,11 @@ span.meter-grouping-chip {
   transition: background 0.12s, color 0.12s;
 }
 
-.beat-stepper-btn:hover:not(:disabled) {
-  background: var(--surface-hover);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .beat-stepper-btn:hover:not(:disabled) {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
 }
 
 /* Grouped meters clamp at 1 and 16 beats rather than wrapping, because
@@ -1364,9 +1398,11 @@ span.meter-grouping-chip {
   font-weight: 800;
 }
 
-.sub-row-btn.active:hover {
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  color: var(--accent);
+@media (hover: hover) {
+  .sub-row-btn.active:hover {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
+  }
 }
 
 .sub-row-btn.active .sub-row-label {
@@ -1617,10 +1653,16 @@ span.meter-grouping-chip {
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-.main-content[data-view="beat"] .group-box:hover .group-display,
 .main-content[data-view="beat"] .group-box:focus-within .group-display {
   background: color-mix(in srgb, var(--text-primary) 4%, transparent);
   border-color: color-mix(in srgb, var(--text-primary) 9%, transparent);
+}
+
+@media (hover: hover) {
+  .main-content[data-view="beat"] .group-box:hover .group-display {
+    background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+    border-color: color-mix(in srgb, var(--text-primary) 9%, transparent);
+  }
 }
 
 /* 34px at rest, 46px under the beat that is sounding (the `.playing` scale
@@ -1841,10 +1883,12 @@ span.meter-grouping-chip {
   padding: 0;
 }
 
-.main-content[data-view="beat"] .bpm-btn:hover {
-  background: var(--surface-hover);
-  border-color: var(--text-tertiary);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .main-content[data-view="beat"] .bpm-btn:hover {
+    background: var(--surface-hover);
+    border-color: var(--text-tertiary);
+    color: var(--text-primary);
+  }
 }
 
 .main-content[data-view="beat"] .tap-btn {
@@ -1933,10 +1977,16 @@ span.meter-grouping-chip {
   right: 10px;
 }
 
-.meter-chip:hover,
 .meter-chip.open {
   background: var(--surface-hover);
   border-color: var(--text-tertiary);
+}
+
+@media (hover: hover) {
+  .meter-chip:hover {
+    background: var(--surface-hover);
+    border-color: var(--text-tertiary);
+  }
 }
 
 /* The part that changes without the meter changing: 7/8 as 3+2+2 and as
@@ -2191,8 +2241,10 @@ span.meter-grouping-chip {
     background 0.15s;
 }
 
-.accent-option:hover {
-  color: var(--text-primary);
+@media (hover: hover) {
+  .accent-option:hover {
+    color: var(--text-primary);
+  }
 }
 
 .accent-option.active {

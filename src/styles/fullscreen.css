@@ -284,8 +284,10 @@
   transition: opacity 0.3s ease;
 }
 
-.fullscreen-view:hover .fs-controls {
-  opacity: 0.9;
+@media (hover: hover) {
+  .fullscreen-view:hover .fs-controls {
+    opacity: 0.9;
+  }
 }
 
 .fs-ctrl-btn {
@@ -304,10 +306,12 @@
   transition: all 0.15s ease;
 }
 
-.fs-ctrl-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.9);
-  border-color: rgba(255, 255, 255, 0.3);
+@media (hover: hover) {
+  .fs-ctrl-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.9);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
 }
 
 .fs-ctrl-sub {
@@ -332,9 +336,11 @@
   padding: 0;
 }
 
-.fs-play-btn:hover {
-  transform: scale(1.08);
-  box-shadow: 0 4px 30px var(--accent-glow-strong);
+@media (hover: hover) {
+  .fs-play-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 30px var(--accent-glow-strong);
+  }
 }
 
 .fs-play-btn.playing {
@@ -354,8 +360,10 @@
   transition: opacity 0.3s ease;
 }
 
-.fullscreen-view:hover .fs-exit-hint {
-  opacity: 0.5;
+@media (hover: hover) {
+  .fullscreen-view:hover .fs-exit-hint {
+    opacity: 0.5;
+  }
 }
 
 /* =================== Zen Styles =================== */
@@ -374,12 +382,16 @@
   transition: opacity 0.3s ease;
 }
 
-.fullscreen-view:hover .zen-top-controls {
-  opacity: 0.7;
+@media (hover: hover) {
+  .fullscreen-view:hover .zen-top-controls {
+    opacity: 0.7;
+  }
 }
 
-.fullscreen-view:hover .zen-top-controls:hover {
-  opacity: 1;
+@media (hover: hover) {
+  .fullscreen-view:hover .zen-top-controls:hover {
+    opacity: 1;
+  }
 }
 
 .zen-top-btn {
@@ -398,10 +410,12 @@
   flex-shrink: 0;
 }
 
-.zen-top-btn:hover {
-  border-color: rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.9);
+@media (hover: hover) {
+  .zen-top-btn:hover {
+    border-color: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+  }
 }
 
 .zen-top-btn[data-tooltip]::after {
@@ -423,9 +437,11 @@
   z-index: 50;
 }
 
-.zen-top-btn[data-tooltip]:hover::after {
-  opacity: 1;
-  transform: translateY(-50%) translateX(0);
+@media (hover: hover) {
+  .zen-top-btn[data-tooltip]:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
 }
 
 /* Theme picker */
@@ -487,10 +503,12 @@
 .zen-theme-picker.open .zen-theme-option:nth-child(6) { transition-delay: 0.17s; }
 .zen-theme-picker.open .zen-theme-option:nth-child(7) { transition-delay: 0.20s; }
 
-.zen-theme-option:hover {
-  border-color: rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.9);
+@media (hover: hover) {
+  .zen-theme-option:hover {
+    border-color: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+  }
 }
 
 .zen-theme-option.active {
@@ -517,9 +535,11 @@
   transition: opacity 0.15s, transform 0.15s;
 }
 
-.zen-theme-option[data-tooltip]:hover::after {
-  opacity: 1;
-  transform: translateY(-50%) translateX(0);
+@media (hover: hover) {
+  .zen-theme-option[data-tooltip]:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
 }
 
 /* ─── Pulse — canvas-based, no CSS class needed ─── */
