@@ -7,7 +7,7 @@ import {
   formatForLLM,
   type Narrative,
 } from "../../../coach/narrative";
-import { coachGenerate, getSessionReport, clearSession, closeOpenSegment } from "../../../ipc";
+import { coachGenerate, getSessionReport, clearSession, closeOpenSegment } from "../../../ipc.desktop";
 import {
   accuracyPct,
   accuracyRatio,

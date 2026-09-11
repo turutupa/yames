@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
-import { showFloating } from "../../ipc";
+import { showFloating } from "../../ipc.desktop";
 import { markWidgetOpened } from "../onboarding/hints/hintRuntime";
 import { PresetSidebar } from "../../components/presets/PresetSidebar";
 import type { PresetSidebarHandle } from "../../components/presets/PresetSidebar";

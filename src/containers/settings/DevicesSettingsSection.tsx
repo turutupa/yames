@@ -2,13 +2,9 @@ import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { AudioOutputDevice } from "../../types";
-import {
-  clearCalibrationCacheEntry,
-  getCalibrationCacheEntry,
-  listAudioOutputDevices,
-  setAudioOutputDevice,
-} from "../../ipc";
-import type { CalibrationCacheEntry } from "../../ipc";
+import { listAudioOutputDevices, setAudioOutputDevice } from "../../ipc";
+import { clearCalibrationCacheEntry, getCalibrationCacheEntry } from "../../ipc.desktop";
+import type { CalibrationCacheEntry } from "../../ipc.desktop";
 import { AudioOutputDropdown } from "../../components/AudioOutputDropdown";
 import { AudioInputDropdown } from "../../components/AudioInputDropdown";
 import { MidiDeviceDropdown } from "../../components/MidiDeviceDropdown";

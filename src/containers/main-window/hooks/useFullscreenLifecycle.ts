@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { onFullscreenChanged } from "../../../ipc";
+import { onFullscreenChanged } from "../../../ipc.desktop";
 import { FULLSCREEN_EXIT_DELAY } from "../../../hotkeys";
 import type { MainView } from "../MainHeader";
 

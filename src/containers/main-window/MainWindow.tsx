@@ -11,27 +11,8 @@ import { useMetronome } from "../../hooks/useMetronome";
 import { useKeybindings } from "../../hooks/useKeybindings";
 import { useCoachDownload } from "../../hooks/useCoachDownload";
 import { useActionDispatcher } from "../../hooks/useActionDispatcher";
-import {
-  configureSpeedRamp,
-  downloadAndInstallUpdate,
-  setAlwaysOnTop,
-  setBpm,
-  setInstrument as setInstrumentBackend,
-  setSoundType,
-  setSubdivision,
-  setTheme,
-  setBeatGroups,
-  setFreeMode,
-  setVolume,
-  showFloating,
-  setWidgetAlwaysOnTop,
-  setWidgetMode,
-  startSpeedRamp,
-  stopSpeedRamp,
-  storeLoad,
-  storeSave,
-  togglePlayback,
-} from "../../ipc";
+import { configureSpeedRamp, setBpm, setInstrument as setInstrumentBackend, setSoundType, setSubdivision, setTheme, setBeatGroups, setFreeMode, setVolume, startSpeedRamp, stopSpeedRamp, storeLoad, storeSave, togglePlayback } from "../../ipc";
+import { downloadAndInstallUpdate, setAlwaysOnTop, showFloating, setWidgetAlwaysOnTop, setWidgetMode } from "../../ipc.desktop";
 import CoachCard from "../practice-coach/CoachCard";
 import "../../styles/main-window.css";
 import "../../styles/transitions.css";

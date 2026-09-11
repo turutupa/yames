@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getFinalSessionReport, stopEvaluation, getSessionHistory, saveSession, clearSession, coachGenerate, isCoachLoaded, ttsSpeak, onBeatFeedback, onAdaptiveEval, notifySettingsChange, clearCalibrationCacheEntry, onTtsSpeechStarted, onPracticeSegmentEnded } from "../ipc";
-import type { AdaptiveEvalRequest } from "../ipc";
+import { getFinalSessionReport, stopEvaluation, getSessionHistory, saveSession, clearSession, coachGenerate, isCoachLoaded, ttsSpeak, onBeatFeedback, onAdaptiveEval, notifySettingsChange, clearCalibrationCacheEntry, onTtsSpeechStarted, onPracticeSegmentEnded } from "../ipc.desktop";
+import type { AdaptiveEvalRequest } from "../ipc.desktop";
 import type { BeatFeedback, BrainTier, FeedChip, FeedMessage, SessionReport, SessionSegment } from "../types";
 import type { useEvaluation } from "./useEvaluation";
 import {

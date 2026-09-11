@@ -8,7 +8,7 @@ import type {
   VoiceMode,
   WidgetMode,
 } from "../../types";
-import type { ModelStatus, VoiceDiagnostic } from "../../ipc";
+import type { ModelStatus, VoiceDiagnostic } from "../../ipc.desktop";
 import type { useEvaluation } from "../../hooks/useEvaluation";
 import type { UseMidiReturn } from "../../hooks/useMidi";
 import type { BindingTarget } from "./KeybindingModals";

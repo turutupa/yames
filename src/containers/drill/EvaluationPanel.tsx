@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { clearSession, getSessionHistory, deleteSession, clearAllSessions } from "../../ipc";
+import { clearSession, getSessionHistory, deleteSession, clearAllSessions } from "../../ipc.desktop";
 import { FEEDBACK_COLORS } from "../../hooks/useEvaluation";
 import { ScoreRing, BreakdownBar, Histogram, ScoreBadge, MiniSparkline } from "./evaluation";
 import type { SessionReport, SavedSession } from "../../types";

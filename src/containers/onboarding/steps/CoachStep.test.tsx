@@ -9,7 +9,7 @@
  */
 import { describe, expect, it, vi } from "vitest";
 import { act, render, screen, waitFor, within } from "@testing-library/react";
-import type { ModelStatus } from "../../../ipc";
+import type { ModelStatus } from "../../../ipc.desktop";
 import { setInvokeResponse } from "../../../test/mocks";
 import { OnboardingWizard } from "../OnboardingWizard";
 import type { OnboardingContext, OnboardingState } from "../onboardingMachine";

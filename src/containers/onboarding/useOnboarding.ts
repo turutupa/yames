@@ -29,7 +29,8 @@
  * even against an older store poisoned by the old behaviour.
  */
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-import { getSessionHistory, listPresets, storeLoad, storeSave } from "../../ipc";
+import { listPresets, storeLoad, storeSave } from "../../ipc";
+import { getSessionHistory } from "../../ipc.desktop";
 import {
   INITIAL_ONBOARDING_STATE,
   isWizardOpen,

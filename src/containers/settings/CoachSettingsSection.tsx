@@ -9,18 +9,9 @@ import type {
   Verbosity,
   VoiceMode,
 } from "../../types";
-import type { CoachCapabilities, ModelStatus, VoiceDiagnostic } from "../../ipc";
-import {
-  deleteModels,
-  getCoachCapabilities,
-  getModelStatus,
-  onTtsSpeechEnded,
-  setInstrument as setInstrumentBackend,
-  storeSave,
-  ttsSetVoice,
-  ttsSpeak,
-  ttsStop,
-} from "../../ipc";
+import type { CoachCapabilities, ModelStatus, VoiceDiagnostic } from "../../ipc.desktop";
+import { setInstrument as setInstrumentBackend, storeSave } from "../../ipc";
+import { deleteModels, getCoachCapabilities, getModelStatus, onTtsSpeechEnded, ttsSetVoice, ttsSpeak, ttsStop } from "../../ipc.desktop";
 import { brainTierLabelKey } from "../../coach/brainTiers";
 import { InstrumentDropdown } from "../../components/InstrumentDropdown";
 import { formatBytes } from "./formatBytes";

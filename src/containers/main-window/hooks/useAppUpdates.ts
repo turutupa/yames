@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { getVersion } from "@tauri-apps/api/app";
-import { checkForUpdate, storeLoad, storeSave } from "../../../ipc";
+import { storeLoad, storeSave } from "../../../ipc";
+import { checkForUpdate } from "../../../ipc.desktop";
 import {
   WHATS_NEW_NOTES_KEY,
   type PendingNotes,

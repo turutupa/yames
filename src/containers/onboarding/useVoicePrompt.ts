@@ -12,7 +12,8 @@
  * chosen a voice — that user has nothing to pick.
  */
 import { useCallback, useEffect, useState } from "react";
-import { onDownloadComplete, storeLoad } from "../../ipc";
+import { storeLoad } from "../../ipc";
+import { onDownloadComplete } from "../../ipc.desktop";
 
 export type VoicePrompt = {
   visible: boolean;
