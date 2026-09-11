@@ -1,7 +1,7 @@
 {
   "name": "yames",
   "private": true,
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "Yames — Free desktop metronome built for real practice. MIDI footswitch control, sub-millisecond precision, zen mode, speed drills, presets, AI practice coach (coming soon). Hands stay on the instrument. macOS, Windows, Linux.",
   "license": "GPL-3.0-or-later",
   "homepage": "https://yames.app",
