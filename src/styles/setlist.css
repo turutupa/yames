@@ -158,9 +158,11 @@
   transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 
-.setlist-option:hover {
-  color: var(--text-primary);
-  background: color-mix(in srgb, var(--text-primary) 14%, transparent);
+@media (hover: hover) {
+  .setlist-option:hover {
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--text-primary) 14%, transparent);
+  }
 }
 
 .setlist-option.on {
@@ -203,8 +205,10 @@
   transition: color 0.15s;
 }
 
-.setlist-stepper-field button:hover {
-  color: var(--text-primary);
+@media (hover: hover) {
+  .setlist-stepper-field button:hover {
+    color: var(--text-primary);
+  }
 }
 
 /* The value holds the width of the LONGEST thing it can say, so pressing
@@ -361,9 +365,11 @@
   background-clip: padding-box;
 }
 
-.setlist-paragraph-list:hover::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--text-primary) 30%, transparent);
-  background-clip: padding-box;
+@media (hover: hover) {
+  .setlist-paragraph-list:hover::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--text-primary) 30%, transparent);
+    background-clip: padding-box;
+  }
 }
 
 /* Every step, always open, at reading size.
@@ -391,8 +397,10 @@
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-.setlist-step:hover {
-  background: var(--surface-hover, rgba(255, 255, 255, 0.03));
+@media (hover: hover) {
+  .setlist-step:hover {
+    background: var(--surface-hover, rgba(255, 255, 255, 0.03));
+  }
 }
 
 .setlist-step:focus-visible {
@@ -417,11 +425,16 @@
    line between look like a table; the fill is the seam. */
 .setlist-step.selected + .setlist-step,
 .setlist-step.running + .setlist-step,
-.setlist-step:hover + .setlist-step,
 .setlist-step.selected,
-.setlist-step.running,
-.setlist-step:hover {
+.setlist-step.running {
   border-top-color: transparent;
+}
+
+@media (hover: hover) {
+  .setlist-step:hover + .setlist-step,
+  .setlist-step:hover {
+    border-top-color: transparent;
+  }
 }
 
 /* The one Start will begin on. Without this every step looked identical and
@@ -500,8 +513,10 @@
   font-family: inherit;
 }
 
-.setlist-folded-name:hover {
-  border-bottom-color: var(--text-tertiary);
+@media (hover: hover) {
+  .setlist-folded-name:hover {
+    border-bottom-color: var(--text-tertiary);
+  }
 }
 
 .setlist-folded-name.open {
@@ -525,10 +540,15 @@
   transition: opacity 0.15s ease;
 }
 
-.setlist-step:hover .setlist-step-tools,
 .setlist-step.selected .setlist-step-tools,
 .setlist-step:focus-within .setlist-step-tools {
   opacity: 1;
+}
+
+@media (hover: hover) {
+  .setlist-step:hover .setlist-step-tools {
+    opacity: 1;
+  }
 }
 
 .setlist-step-tools button {
@@ -543,9 +563,11 @@
   transition: color 0.15s, background 0.15s;
 }
 
-.setlist-step-tools button:hover:not(:disabled) {
-  color: var(--text-primary);
-  background: var(--border);
+@media (hover: hover) {
+  .setlist-step-tools button:hover:not(:disabled) {
+    color: var(--text-primary);
+    background: var(--border);
+  }
 }
 
 .setlist-step-tools button:disabled {
@@ -553,8 +575,10 @@
   cursor: default;
 }
 
-.setlist-step-tools .setlist-step-remove:hover {
-  color: var(--accent);
+@media (hover: hover) {
+  .setlist-step-tools .setlist-step-remove:hover {
+    color: var(--accent);
+  }
 }
 
 .setlist-volume-range {
@@ -601,9 +625,11 @@
   transition: color 0.15s, border-color 0.15s;
 }
 
-.setlist-add-row:hover {
-  color: var(--text-primary);
-  border-color: var(--accent);
+@media (hover: hover) {
+  .setlist-add-row:hover {
+    color: var(--text-primary);
+    border-color: var(--accent);
+  }
 }
 
 .setlist-paragraph-orlibrary {
@@ -644,9 +670,11 @@
   cursor: pointer;
 }
 
-.setlist-player-edit:hover {
-  color: var(--text-primary);
-  background: var(--surface-hover, rgba(255, 255, 255, 0.05));
+@media (hover: hover) {
+  .setlist-player-edit:hover {
+    color: var(--text-primary);
+    background: var(--surface-hover, rgba(255, 255, 255, 0.05));
+  }
 }
 
 .setlist-player-where {
@@ -860,6 +888,67 @@
   transition: filter 120ms ease;
 }
 
-.setlist-blank-new:hover {
-  filter: brightness(1.08);
+@media (hover: hover) {
+  .setlist-blank-new:hover {
+    filter: brightness(1.08);
+  }
+}
+
+/* =================== Touch targets =================== */
+/* See the note at the foot of shell.css. */
+@media (pointer: coarse) {
+  .setlist-blank-new,
+  .setlist-add-row {
+    min-height: 44px;
+  }
+
+  /* The count-in and repeat steppers. Their minus and plus are 13x17 -- the
+     smallest controls in the app -- and they carry no class of their own, so
+     they are reached through the field that holds them.
+   *
+   * Inline there is room: 11px of gap to the label, which is a span and
+   * answers no taps, so 16px a side gives 45. Block there is not: at 360 the
+   * two fields stack 22px apart, so 11px a side is the ceiling and these land
+   * at 45x39. The last 5px is a row gap, and M03 owns it. */
+  .setlist-stepper-field button {
+    position: relative;
+  }
+
+  .setlist-stepper-field button::after {
+    content: "";
+    position: absolute;
+    inset: -11px -16px;
+  }
+
+  /* The per-step tools are 25x23 icons at the end of a step's title line and
+     the step's name sits right beside them, so the hit area grows and the row
+     does not. */
+  .setlist-step-tools button,
+  .setlist-step-remove {
+    position: relative;
+  }
+
+  .setlist-step-tools button::after,
+  .setlist-step-remove::after {
+    content: "";
+    position: absolute;
+    /* Four icons 2px apart: 1px is the whole inline budget. The row above and
+       below are 350px away, so the height reaches 45 and the width stays 27.
+       Spacing the four out is a layout change and M03 owns it. */
+    inset: -11px -1px;
+  }
+
+  /* The folded step's name is a dotted-underline button inside a sentence;
+     growing the box would lift the underline off the baseline it shares with
+     the words around it, and the step's own sentence sits 6px beneath. So the
+     reach is 3px -- 28x28, short of 44, and the note in M03-GAPS.md says so. */
+  .setlist-folded-name {
+    position: relative;
+  }
+
+  .setlist-folded-name::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+  }
 }

@@ -51,14 +51,18 @@
   padding: 0;
 }
 
-.wc-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 1);
+@media (hover: hover) {
+  .wc-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 1);
+  }
 }
 
-.wc-close:hover {
-  background: #c42b1c;
-  color: #fff;
+@media (hover: hover) {
+  .wc-close:hover {
+    background: #c42b1c;
+    color: #fff;
+  }
 }
 
 /* Minimize — horizontal line */

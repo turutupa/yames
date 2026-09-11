@@ -10,6 +10,9 @@
 .instrument-picker-overlay {
   position: fixed;
   inset: 0;
+  /* A centred dialog stays clear of a notch and a gesture bar; 0px on
+     desktop, where this changes nothing. */
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -75,9 +78,11 @@
   font-family: inherit;
 }
 
-.instrument-picker-card:hover {
-  border-color: var(--accent);
-  background: var(--bg-secondary);
+@media (hover: hover) {
+  .instrument-picker-card:hover {
+    border-color: var(--accent);
+    background: var(--bg-secondary);
+  }
 }
 
 .instrument-picker-card:active {
@@ -116,8 +121,10 @@
   transition: color 120ms ease;
 }
 
-.instrument-picker-skip:hover {
-  color: var(--text);
+@media (hover: hover) {
+  .instrument-picker-skip:hover {
+    color: var(--text);
+  }
 }
 
 @keyframes fade-in {

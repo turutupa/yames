@@ -105,10 +105,12 @@
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.fw-bpm-adj:hover {
-  background: color-mix(in srgb, var(--accent) 20%, transparent);
-  border-color: var(--accent-glow);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .fw-bpm-adj:hover {
+    background: color-mix(in srgb, var(--accent) 20%, transparent);
+    border-color: var(--accent-glow);
+    color: var(--text-primary);
+  }
 }
 
 .fw-play {
@@ -131,9 +133,11 @@
   box-shadow: 0 2px 8px var(--accent-glow);
 }
 
-.fw-play:hover {
-  box-shadow: 0 4px 16px var(--accent-glow-strong, var(--accent-glow));
-  transform: scale(1.05);
+@media (hover: hover) {
+  .fw-play:hover {
+    box-shadow: 0 4px 16px var(--accent-glow-strong, var(--accent-glow));
+    transform: scale(1.05);
+  }
 }
 
 .fw-play:active {
@@ -159,10 +163,12 @@
     background 0.2s;
 }
 
-.fw-settings:hover {
-  opacity: 1;
-  background: var(--btn-bg-hover, rgba(255, 255, 255, 0.12));
-  color: var(--text-primary);
+@media (hover: hover) {
+  .fw-settings:hover {
+    opacity: 1;
+    background: var(--btn-bg-hover, rgba(255, 255, 255, 0.12));
+    color: var(--text-primary);
+  }
 }
 
 /* =================== BOTTOM ROW: subdivision + beats =================== */
@@ -196,9 +202,11 @@
   white-space: nowrap;
 }
 
-.fw-sub-btn:hover {
-  background: color-mix(in srgb, var(--text-primary) 10%, transparent);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .fw-sub-btn:hover {
+    background: color-mix(in srgb, var(--text-primary) 10%, transparent);
+    color: var(--text-primary);
+  }
 }
 
 .fw-sub-icon {

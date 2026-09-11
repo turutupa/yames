@@ -326,15 +326,23 @@
   transition: background 0.15s ease;
 }
 
-.drill-climb-scroll:hover::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--text-primary) 30%, transparent);
-  background-clip: padding-box;
+@media (hover: hover) {
+  .drill-climb-scroll:hover::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--text-primary) 30%, transparent);
+    background-clip: padding-box;
+  }
 }
 
-.drill-climb-scroll::-webkit-scrollbar-thumb:hover,
 .drill-climb-scroll::-webkit-scrollbar-thumb:active {
   background: var(--accent);
   background-clip: padding-box;
+}
+
+@media (hover: hover) {
+  .drill-climb-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+    background-clip: padding-box;
+  }
 }
 
 .drill-climb-track {
@@ -491,9 +499,11 @@
   outline-offset: 2px;
 }
 
-.drill-climb .drill-climb-cells .drill-climb-cell:hover {
-  background: color-mix(in srgb, var(--accent) 45%, transparent);
-  transform: scaleY(1.08);
+@media (hover: hover) {
+  .drill-climb .drill-climb-cells .drill-climb-cell:hover {
+    background: color-mix(in srgb, var(--accent) 45%, transparent);
+    transform: scaleY(1.08);
+  }
 }
 
 .drill-climb .drill-climb-cells .drill-climb-cell.done {
@@ -777,9 +787,11 @@
     color 0.15s ease;
 }
 
-.drill-choice:hover {
-  background: color-mix(in srgb, var(--text-primary) 5%, var(--bg-panel));
-  color: var(--text-primary);
+@media (hover: hover) {
+  .drill-choice:hover {
+    background: color-mix(in srgb, var(--text-primary) 5%, var(--bg-panel));
+    color: var(--text-primary);
+  }
 }
 
 .drill-choice.active {
@@ -788,9 +800,11 @@
   color: var(--accent);
 }
 
-.drill-choice.active:hover {
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  color: var(--accent);
+@media (hover: hover) {
+  .drill-choice.active:hover {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
+  }
 }
 
 .drill-choice-label {
@@ -858,9 +872,11 @@
   flex-shrink: 0;
 }
 
-.drill-field-btn:hover:not(:disabled) {
-  background: var(--surface-hover);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .drill-field-btn:hover:not(:disabled) {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
 }
 
 .drill-field-btn:disabled {
@@ -964,9 +980,11 @@
     visibility 0.15s ease;
 }
 
-.drill-label-tip:hover .drill-tip {
-  visibility: visible;
-  opacity: 1;
+@media (hover: hover) {
+  .drill-label-tip:hover .drill-tip {
+    visibility: visible;
+    opacity: 1;
+  }
 }
 
 /* =================== What a mode does, on the mode ===================
@@ -1002,10 +1020,16 @@
     visibility 0.15s ease;
 }
 
-.drill-mode-wrap:hover .drill-mode-tip,
 .drill-mode-wrap:focus-within .drill-mode-tip {
   visibility: visible;
   opacity: 1;
+}
+
+@media (hover: hover) {
+  .drill-mode-wrap:hover .drill-mode-tip {
+    visibility: visible;
+    opacity: 1;
+  }
 }
 
 
@@ -1077,9 +1101,11 @@
     color 0.15s ease;
 }
 
-.drill-plan-detail-token:hover {
-  color: var(--text-secondary);
-  border-bottom-color: var(--text-tertiary);
+@media (hover: hover) {
+  .drill-plan-detail-token:hover {
+    color: var(--text-secondary);
+    border-bottom-color: var(--text-tertiary);
+  }
 }
 
 .drill-plan-detail-token.open {
@@ -1114,9 +1140,11 @@
     color 0.15s ease;
 }
 
-.drill-plan-token:hover {
-  background: var(--surface-hover);
-  border-bottom-color: var(--text-tertiary);
+@media (hover: hover) {
+  .drill-plan-token:hover {
+    background: var(--surface-hover);
+    border-bottom-color: var(--text-tertiary);
+  }
 }
 
 .drill-plan-token.open {
@@ -1359,5 +1387,35 @@
 @media (max-width: 559px) {
   .drill-mode-badge {
     display: none;
+  }
+}
+
+/* =================== Touch targets =================== */
+/* See the note at the foot of shell.css. The plan is written as a sentence
+   whose nouns are buttons, and their dotted underline sits on the same
+   baseline as the words around them -- so none of them may grow. Each keeps
+   its drawn size and reaches out with a transparent overlay instead.
+ *
+ * How far it may reach is set by the sentence, not by the 44px target: the
+ * plan's lines are 6px apart and its detail line's are 10px, so 3px a side is
+ * everything there is. That is enough for .drill-plan-token, whose 38px box
+ * lands exactly on 44. It is not enough for .drill-plan-detail-token, which
+ * is 22px tall and reaches 28 -- reaching 44 there would mean the "Quarter"
+ * you meant to tap and the "Options" on the line below sharing eleven pixels,
+ * and a control that answers a tap aimed at its neighbour is worse than one
+ * that is merely small. The line-height that would give it the room is a
+ * layout decision, and M03 owns it. Inline, 4px a side sits well inside the
+ * 22px the separators leave. */
+@media (pointer: coarse) {
+  .drill-plan-token,
+  .drill-plan-detail-token {
+    position: relative;
+  }
+
+  .drill-plan-token::after,
+  .drill-plan-detail-token::after {
+    content: "";
+    position: absolute;
+    inset: -3px -4px;
   }
 }

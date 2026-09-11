@@ -119,17 +119,21 @@
     color 0.2s;
 }
 
-.coach-card-pill:hover {
-  background: var(--accent);
-  color: var(--accent-text, white);
+@media (hover: hover) {
+  .coach-card-pill:hover {
+    background: var(--accent);
+    color: var(--accent-text, white);
+  }
 }
 
 .coach-card-pill.coach-active {
   color: var(--accent);
 }
 
-.coach-card-pill.coach-active:hover {
-  color: white;
+@media (hover: hover) {
+  .coach-card-pill.coach-active:hover {
+    color: white;
+  }
 }
 
 .coach-card-pill-label {
@@ -189,9 +193,11 @@
     background 0.15s;
 }
 
-.coach-card-header-btn:hover {
-  color: var(--text-primary);
-  background: color-mix(in srgb, var(--border) 30%, transparent);
+@media (hover: hover) {
+  .coach-card-header-btn:hover {
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--border) 30%, transparent);
+  }
 }
 
 .coach-card-end-btn {
@@ -202,10 +208,12 @@
   padding: 4px 12px;
 }
 
-.coach-card-end-btn:hover {
-  background: color-mix(in srgb, var(--feedback-miss) 15%, transparent);
-  border-color: var(--feedback-miss);
-  color: var(--feedback-miss);
+@media (hover: hover) {
+  .coach-card-end-btn:hover {
+    background: color-mix(in srgb, var(--feedback-miss) 15%, transparent);
+    border-color: var(--feedback-miss);
+    color: var(--feedback-miss);
+  }
 }
 
 .coach-card-start-btn {
@@ -216,10 +224,12 @@
   padding: 4px 12px;
 }
 
-.coach-card-start-btn:hover {
-  background: color-mix(in srgb, var(--accent) 15%, transparent);
-  border-color: var(--accent);
-  color: var(--accent);
+@media (hover: hover) {
+  .coach-card-start-btn:hover {
+    background: color-mix(in srgb, var(--accent) 15%, transparent);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
 }
 
 /* Tab bar */
@@ -248,8 +258,10 @@
   letter-spacing: 0.5px;
 }
 
-.coach-card-tab:hover {
-  color: var(--text-secondary);
+@media (hover: hover) {
+  .coach-card-tab:hover {
+    color: var(--text-secondary);
+  }
 }
 
 .coach-card-tab.active {
@@ -466,8 +478,10 @@
   text-align: left;
 }
 
-.coach-chip:hover {
-  background: color-mix(in srgb, var(--accent, var(--text-primary)) 22%, transparent);
+@media (hover: hover) {
+  .coach-chip:hover {
+    background: color-mix(in srgb, var(--accent, var(--text-primary)) 22%, transparent);
+  }
 }
 
 .coach-chip:active {
@@ -481,8 +495,10 @@
   font-style: italic;
 }
 
-.coach-chip-escape:hover {
-  background: color-mix(in srgb, var(--bg-card, var(--bg-secondary)) 85%, transparent);
+@media (hover: hover) {
+  .coach-chip-escape:hover {
+    background: color-mix(in srgb, var(--bg-card, var(--bg-secondary)) 85%, transparent);
+  }
 }
 
 /* Intervention affordance row (Phase 5).
@@ -515,8 +531,10 @@
   line-height: 1.2;
 }
 
-.coach-affordance-primary:hover {
-  filter: brightness(1.1);
+@media (hover: hover) {
+  .coach-affordance-primary:hover {
+    filter: brightness(1.1);
+  }
 }
 
 .coach-affordance-primary:active {
@@ -536,8 +554,10 @@
   line-height: 1.2;
 }
 
-.coach-affordance-secondary:hover {
-  background: color-mix(in srgb, var(--bg-card, var(--bg-secondary)) 50%, transparent);
+@media (hover: hover) {
+  .coach-affordance-secondary:hover {
+    background: color-mix(in srgb, var(--bg-card, var(--bg-secondary)) 50%, transparent);
+  }
 }
 
 /* Timestamp */
@@ -660,8 +680,10 @@
   transition: opacity 0.15s;
 }
 
-.coach-card-chat-send:hover:not(:disabled) {
-  opacity: 1;
+@media (hover: hover) {
+  .coach-card-chat-send:hover:not(:disabled) {
+    opacity: 1;
+  }
 }
 
 .coach-card-chat-send:disabled {
@@ -756,13 +778,15 @@
     background 0.15s;
 }
 
-.coach-history-card:hover {
-  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
-  background: color-mix(
-    in srgb,
-    var(--bg-card, var(--bg-secondary)) 95%,
-    transparent
-  );
+@media (hover: hover) {
+  .coach-history-card:hover {
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+    background: color-mix(
+      in srgb,
+      var(--bg-card, var(--bg-secondary)) 95%,
+      transparent
+    );
+  }
 }
 
 .coach-history-delete {
@@ -781,13 +805,17 @@
     color 0.15s;
 }
 
-.coach-history-card:hover .coach-history-delete {
-  opacity: 0.6;
+@media (hover: hover) {
+  .coach-history-card:hover .coach-history-delete {
+    opacity: 0.6;
+  }
 }
 
-.coach-history-delete:hover {
-  opacity: 1 !important;
-  color: var(--feedback-miss);
+@media (hover: hover) {
+  .coach-history-delete:hover {
+    opacity: 1 !important;
+    color: var(--feedback-miss);
+  }
 }
 
 .coach-history-card-top {
@@ -1001,8 +1029,10 @@
   transition: background 0.15s;
 }
 
-.coach-detail-delete-btn:hover {
-  background: color-mix(in srgb, var(--feedback-miss) 10%, transparent);
+@media (hover: hover) {
+  .coach-detail-delete-btn:hover {
+    background: color-mix(in srgb, var(--feedback-miss) 10%, transparent);
+  }
 }
 
 /* ─── Confirm Dialog ─── */
@@ -1053,8 +1083,10 @@
   color: var(--text-primary);
 }
 
-.coach-confirm-cancel:hover {
-  background: color-mix(in srgb, var(--border) 30%, transparent);
+@media (hover: hover) {
+  .coach-confirm-cancel:hover {
+    background: color-mix(in srgb, var(--border) 30%, transparent);
+  }
 }
 
 .coach-confirm-delete {
@@ -1063,8 +1095,10 @@
   border-color: var(--feedback-miss);
 }
 
-.coach-confirm-delete:hover {
-  opacity: 0.9;
+@media (hover: hover) {
+  .coach-confirm-delete:hover {
+    opacity: 0.9;
+  }
 }
 
 /* ─── Status Dot ─── */

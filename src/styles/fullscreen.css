@@ -275,7 +275,10 @@
 /* Controls bar */
 .fs-controls {
   position: absolute;
-  bottom: 48px;
+  /* Zen paints edge to edge, so every offset in here is measured from the
+     hardware's edge rather than the safe one. The insets are 0px on desktop
+     and on any phone without a gesture bar or a cut-out. */
+  bottom: calc(48px + var(--safe-bottom));
   z-index: 2;
   display: flex;
   align-items: center;
@@ -284,8 +287,10 @@
   transition: opacity 0.3s ease;
 }
 
-.fullscreen-view:hover .fs-controls {
-  opacity: 0.9;
+@media (hover: hover) {
+  .fullscreen-view:hover .fs-controls {
+    opacity: 0.9;
+  }
 }
 
 .fs-ctrl-btn {
@@ -304,10 +309,12 @@
   transition: all 0.15s ease;
 }
 
-.fs-ctrl-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.9);
-  border-color: rgba(255, 255, 255, 0.3);
+@media (hover: hover) {
+  .fs-ctrl-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.9);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
 }
 
 .fs-ctrl-sub {
@@ -332,9 +339,11 @@
   padding: 0;
 }
 
-.fs-play-btn:hover {
-  transform: scale(1.08);
-  box-shadow: 0 4px 30px var(--accent-glow-strong);
+@media (hover: hover) {
+  .fs-play-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 30px var(--accent-glow-strong);
+  }
 }
 
 .fs-play-btn.playing {
@@ -347,15 +356,17 @@
 /* Exit hint */
 .fs-exit-hint {
   position: absolute;
-  bottom: 16px;
+  bottom: calc(16px + var(--safe-bottom));
   font-size: 0.65rem;
   color: var(--text-muted);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
-.fullscreen-view:hover .fs-exit-hint {
-  opacity: 0.5;
+@media (hover: hover) {
+  .fullscreen-view:hover .fs-exit-hint {
+    opacity: 0.5;
+  }
 }
 
 /* =================== Zen Styles =================== */
@@ -364,8 +375,8 @@
 
 .zen-top-controls {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: calc(16px + var(--safe-top));
+  right: calc(16px + var(--safe-right));
   z-index: 2;
   display: flex;
   gap: 8px;
@@ -374,12 +385,16 @@
   transition: opacity 0.3s ease;
 }
 
-.fullscreen-view:hover .zen-top-controls {
-  opacity: 0.7;
+@media (hover: hover) {
+  .fullscreen-view:hover .zen-top-controls {
+    opacity: 0.7;
+  }
 }
 
-.fullscreen-view:hover .zen-top-controls:hover {
-  opacity: 1;
+@media (hover: hover) {
+  .fullscreen-view:hover .zen-top-controls:hover {
+    opacity: 1;
+  }
 }
 
 .zen-top-btn {
@@ -398,10 +413,12 @@
   flex-shrink: 0;
 }
 
-.zen-top-btn:hover {
-  border-color: rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.9);
+@media (hover: hover) {
+  .zen-top-btn:hover {
+    border-color: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+  }
 }
 
 .zen-top-btn[data-tooltip]::after {
@@ -423,9 +440,11 @@
   z-index: 50;
 }
 
-.zen-top-btn[data-tooltip]:hover::after {
-  opacity: 1;
-  transform: translateY(-50%) translateX(0);
+@media (hover: hover) {
+  .zen-top-btn[data-tooltip]:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
 }
 
 /* Theme picker */
@@ -487,10 +506,12 @@
 .zen-theme-picker.open .zen-theme-option:nth-child(6) { transition-delay: 0.17s; }
 .zen-theme-picker.open .zen-theme-option:nth-child(7) { transition-delay: 0.20s; }
 
-.zen-theme-option:hover {
-  border-color: rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.9);
+@media (hover: hover) {
+  .zen-theme-option:hover {
+    border-color: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+  }
 }
 
 .zen-theme-option.active {
@@ -517,9 +538,11 @@
   transition: opacity 0.15s, transform 0.15s;
 }
 
-.zen-theme-option[data-tooltip]:hover::after {
-  opacity: 1;
-  transform: translateY(-50%) translateX(0);
+@media (hover: hover) {
+  .zen-theme-option[data-tooltip]:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
 }
 
 /* ─── Pulse — canvas-based, no CSS class needed ─── */
@@ -527,3 +550,49 @@
 
 
 
+
+/* =================== Touch targets =================== */
+/* See the note at the foot of shell.css. Zen is the one screen where this is
+   not a comfort question: every control it has is revealed by hovering the
+   view, and the way out is a double-click that only .fs-exit-hint mentions.
+   Hover never happens on a phone, so without the three opacities below a
+   musician who taps Zen gets a full-screen number with no visible way back --
+   no exit button, no theme picker, and no hint that a double-tap is the
+   answer. */
+@media (pointer: coarse) {
+  .fs-controls {
+    opacity: 0.9;
+  }
+
+  .fs-exit-hint {
+    opacity: 0.5;
+  }
+
+  .zen-top-controls {
+    opacity: 0.7;
+  }
+
+  /* 36x36 with an 8px gap, and 40x40 in a row that already touches both edges
+     of a 360px screen -- so both reach 44 through their hit area rather than
+     by growing, and neither takes more of the gap than the gap has. */
+  .zen-top-btn {
+    position: relative;
+  }
+
+  /* ::before, because ::after is already this button's [data-tooltip]. */
+  .zen-top-btn::before {
+    content: "";
+    position: absolute;
+    inset: -4px;
+  }
+
+  .fs-ctrl-btn {
+    position: relative;
+  }
+
+  .fs-ctrl-btn::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+  }
+}

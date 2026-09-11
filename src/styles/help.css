@@ -82,9 +82,11 @@
   border-color: var(--border);
 }
 
-.help-btn-ghost:hover {
-  color: var(--text-primary);
-  background: var(--bg-hover, rgba(255, 255, 255, 0.04));
+@media (hover: hover) {
+  .help-btn-ghost:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover, rgba(255, 255, 255, 0.04));
+  }
 }
 
 .help-btn-primary {
@@ -92,8 +94,10 @@
   color: var(--accent-text, #fff);
 }
 
-.help-btn-primary:hover {
-  filter: brightness(1.08);
+@media (hover: hover) {
+  .help-btn-primary:hover {
+    filter: brightness(1.08);
+  }
 }
 
 /* ------------------------------ Menu ------------------------------------ */
@@ -127,9 +131,11 @@
     border-color 120ms ease;
 }
 
-.help-menu-item:hover:not(:disabled) {
-  background: var(--bg-hover, rgba(255, 255, 255, 0.05));
-  border-color: var(--border);
+@media (hover: hover) {
+  .help-menu-item:hover:not(:disabled) {
+    background: var(--bg-hover, rgba(255, 255, 255, 0.05));
+    border-color: var(--border);
+  }
 }
 
 .help-menu-item:focus-visible {
