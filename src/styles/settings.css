@@ -2028,6 +2028,20 @@
   opacity: 0.8;
 }
 
+/* An install that did not happen. Still clickable — clicking retries — so it
+   keeps the banner's own cursor and hover rather than reading as a dead
+   notice. Red rather than the accent, because this one is reporting rather
+   than offering — via the same `var(--danger, #e5484d)` fallback help.css
+   already uses, since no theme defines the token. */
+.update-banner-failed {
+  border-color: var(--danger, #e5484d);
+  color: var(--text-primary);
+}
+
+.update-banner-failed .update-banner-action {
+  color: var(--danger, #e5484d);
+}
+
 .update-banner .spinning {
   animation: spin 1s linear infinite;
 }

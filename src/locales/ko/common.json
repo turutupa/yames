@@ -31,6 +31,8 @@
   "updateBanner": {
     "available": "Yames v{{version}} 업데이트가 있습니다",
     "installRestart": "설치 및 재시작 →",
-    "updating": "Yames 업데이트 중…"
+    "updating": "Yames 업데이트 중…",
+    "failed": "업데이트 실패",
+    "retry": "다시 시도"
   }
 }

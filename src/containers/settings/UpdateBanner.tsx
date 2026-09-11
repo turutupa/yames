@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 
-type UpdateStatus = "idle" | "checking" | "available" | "downloading" | "up-to-date";
+import type { UpdateStatus } from "../main-window/hooks/useAppUpdates";
 
 const DownloadIcon = () => (
   <svg
@@ -27,10 +27,13 @@ const DownloadIcon = () => (
 export function UpdateBanner({
   updateStatus,
   latestVersion,
+  updateError,
   onInstall,
 }: {
   updateStatus: UpdateStatus;
   latestVersion: string;
+  /** Whatever the updater said. Not translated — see the note in the banner. */
+  updateError?: string | null;
   onInstall: () => void;
 }) {
   const { t } = useTranslation();
@@ -48,6 +51,21 @@ export function UpdateBanner({
       <div className="update-banner update-banner-downloading">
         <DownloadIcon />
         <span>{t("updateBanner.updating")}</span>
+      </div>
+    );
+  }
+  if (updateStatus === "failed") {
+    // The reason is shown verbatim rather than translated: it comes from the
+    // updater or the OS, and a guessed translation of an error is worse than
+    // an untranslated one. Clicking retries.
+    return (
+      <div className="update-banner update-banner-failed" onClick={onInstall}>
+        <DownloadIcon />
+        <span>
+          {t("updateBanner.failed")}
+          {updateError ? ` — ${updateError}` : ""}
+        </span>
+        <span className="update-banner-action">{t("updateBanner.retry")}</span>
       </div>
     );
   }

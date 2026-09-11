@@ -31,6 +31,8 @@
   "updateBanner": {
     "available": "Yames v{{version}} ist verfügbar",
     "installRestart": "Installieren & Neustart →",
-    "updating": "Yames wird aktualisiert…"
+    "updating": "Yames wird aktualisiert…",
+    "failed": "Update fehlgeschlagen",
+    "retry": "Erneut versuchen"
   }
 }
