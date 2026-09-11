@@ -111,6 +111,11 @@ export function MetronomeView({
                   onChange={(e) =>
                     setBpmEditValue(e.target.value.replace(/\D/g, ""))
                   }
+                  // Everything, selected, so the first digit typed replaces
+                  // the tempo instead of landing beside it. On focus rather
+                  // than on a timer after mount: `autoFocus` fires this
+                  // whatever order the commit and the event loop end up in.
+                  onFocus={(e) => e.currentTarget.select()}
                   onBlur={onCommitBpmEdit}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") onCommitBpmEdit();
@@ -119,9 +124,29 @@ export function MetronomeView({
                   autoFocus
                 />
               ) : (
+                /* `role` and `tabIndex` are load-bearing, not decoration.
+                   The window-drag handler asks `isInteractive` whether a
+                   mousedown landed on a control, and a bare span with an
+                   onClick answers no — so this read as window furniture and
+                   started a window drag, which calls `preventDefault()` and
+                   sets `user-select: none` on the body. The tempo still
+                   opened for editing and the selection was suppressed, so
+                   typing appended to the old number instead of replacing it.
+
+                   Third time in this codebase: see useDrag.ts's note, and the
+                   setlist steps. Anything clickable that is not a real
+                   control has to say so. */
                 <span
                   className="bpm-input bpm-clickable"
+                  role="button"
+                  tabIndex={0}
                   onClick={onStartBpmEdit}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      onStartBpmEdit();
+                    }
+                  }}
                 >
                   {state.bpm}
                 </span>

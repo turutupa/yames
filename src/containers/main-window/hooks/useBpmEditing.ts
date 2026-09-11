@@ -16,8 +16,10 @@ export function useBpmEditing(currentBpm: number, onCommit: (bpm: number) => voi
   const startBpmEdit = useCallback(() => {
     setBpmEditValue(String(currentBpm));
     setEditingBpm(true);
-    // After the input has mounted, so there is something to select.
-    setTimeout(() => bpmInputRef.current?.select(), 0);
+    // Selecting the old value is the input's own `onFocus` (MetronomeView).
+    // It was a `setTimeout(…, 0)` here, which had to land after React had
+    // committed the input and after `autoFocus` had focused it — an ordering
+    // nothing guaranteed.
   }, [currentBpm]);
 
   const commitBpmEdit = useCallback(() => {
