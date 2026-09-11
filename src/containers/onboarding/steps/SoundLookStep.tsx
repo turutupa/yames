@@ -22,6 +22,7 @@ import type { MutableRefObject } from "react";
 import { useTranslation } from "react-i18next";
 import { SOUND_TYPES } from "../../../constants/metronome";
 import { setSoundType, setTheme } from "../../../ipc";
+import { IS_MOBILE } from "../../../platform";
 import { getThemeById } from "../../../themes";
 import { useWizardEnv } from "../WizardContext";
 import type { WizardStepProps } from "./types";
@@ -207,8 +208,17 @@ export function SoundLookStep({ isActive }: WizardStepProps) {
       <h2 className="onboarding-step-title" id="onboarding-title">
         {t("onboarding.soundLook.title")}
       </h2>
+      {/* "Hover a card" is an instruction with no phone equivalent, and the
+          preview it describes cannot happen there (M03-GAPS). A tap already
+          does the whole job -- `pickSound` / `pickTheme` apply the choice as
+          well as confirming it, so a phone hears the click and sees the theme
+          the moment it taps -- so the phone build says that instead. */}
       <p className="onboarding-step-subtitle">
-        {t("onboarding.soundLook.subtitle")}
+        {t(
+          IS_MOBILE
+            ? "onboarding.soundLook.subtitleTouch"
+            : "onboarding.soundLook.subtitle",
+        )}
       </p>
 
       <div className="onboarding-sound-look">

@@ -1017,7 +1017,12 @@
 /* Minimum window (480x780): tighter padding, two-up instrument grid. */
 @media (max-width: 560px) {
   .onboarding-overlay {
-    padding: 12px;
+    /* The gutter shrinks; the hardware's insets do not. Written as a flat
+       12px, this rule was quietly undoing the safe-area padding the rule it
+       overrides sets, and on a phone with a notch or a gesture bar the card
+       would have sat under them. */
+    padding: calc(12px + var(--safe-top)) calc(12px + var(--safe-right))
+      calc(12px + var(--safe-bottom)) calc(12px + var(--safe-left));
   }
 
   .onboarding-card {

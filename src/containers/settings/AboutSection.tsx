@@ -65,16 +65,27 @@ export function AboutSection({
             </span>
           </div>
         )}
-        <div className="about-row">
-          <span className="about-label">{t("settings.about.platform")}</span>
-          <span className="about-value">{navigator.platform}</span>
-        </div>
-        <div className="about-row">
-          <span className="about-label">{t("settings.about.userAgent")}</span>
-          <span className="about-value about-value-small">
-            {navigator.userAgent}
-          </span>
-        </div>
+        {/* Two rows of diagnostics, for a desktop bug report. On a phone
+            `navigator.platform` reads "Linux armv8l" and the user agent is
+            four lines naming the browser engine and the word every string a
+            musician reads is forbidden to contain -- and neither is anything
+            they could act on or would paste anywhere. Musicians, not
+            developers (mobile plan §1). The version above is the one line
+            that matters for "which build am I on", and it stays. */}
+        {!IS_MOBILE && (
+          <>
+            <div className="about-row">
+              <span className="about-label">{t("settings.about.platform")}</span>
+              <span className="about-value">{navigator.platform}</span>
+            </div>
+            <div className="about-row">
+              <span className="about-label">{t("settings.about.userAgent")}</span>
+              <span className="about-value about-value-small">
+                {navigator.userAgent}
+              </span>
+            </div>
+          </>
+        )}
       </div>
       <div className="about-footer-divider"></div>
       <p className="about-footer">

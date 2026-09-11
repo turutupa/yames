@@ -18,6 +18,7 @@
     "soundLook": {
       "title": "소리와 모양",
       "subtitle": "카드에 마우스를 올리면 클릭 소리와 테마를 바로 확인할 수 있어요. 마음에 드는 것을 고르세요.",
+      "subtitleTouch": "카드를 누르면 클릭음을 듣거나 테마를 볼 수 있어요. 다른 카드를 누르면 바꿀 수 있습니다.",
       "soundHeading": "클릭 사운드",
       "themeHeading": "테마",
       "moreThemes": "더 많은 테마는 설정에서"

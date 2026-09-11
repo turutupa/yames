@@ -1419,3 +1419,66 @@
     inset: -3px -4px;
   }
 }
+
+/* =================== The climb, on a phone =================== */
+/* M03-GAPS ranked #2: at 360px the track ran 659px past the screen and what
+   you saw was a single orange playhead line where a chart should be. The
+   decision (M03c) is that the chart keeps its shape — same sixteen steps,
+   same two colours, same staircase — and becomes a scroller you can read:
+ *
+ *   · the cells go back to their full width. The narrow-window rules above
+ *     buy room by shrinking them, on the reasoning that a small window is a
+ *     small picture; a phone is not a small window, it is a narrow one, and a
+ *     7px bar is not a bar you can see. The width comes from scrolling
+ *     instead, which is what the track was already built to do.
+ *   · it snaps to a step, so a flick lands on a column rather than between
+ *     two. `proximity`, not `mandatory`: `DrillClimb` scrolls the playing
+ *     column to the centre itself, and a mandatory snap would argue with it.
+ *   · both edges fade, so it reads as "there is more this way" without a
+ *     scrollbar — a lane 8px tall under a thumb is decoration, not a control.
+ */
+@media (max-width: 480px) {
+  .drill-climb {
+    --climb-cell-w: 10px;
+    --climb-cell-gap: 3px;
+    --climb-col-gap: 12px;
+    /* And shorter. The track is `rise + one cell + 26px` tall and the columns
+       hang off its bottom, so a rise sized for a desktop window puts the
+       staircase below the fold on a phone and leaves the empty air above it
+       on screen -- which is what the 360px shot in M03-GAPS is a picture of:
+       a playhead line with no chart beside it. The staircase still rises; it
+       rises within the room a phone has. */
+    --climb-rise: clamp(72px, 14vh, 150px);
+  }
+
+  .drill-climb-scroll {
+    scroll-snap-type: x proximity;
+    /* The snap lands the column in the middle of the view, which is where the
+       run already keeps it. */
+    scroll-padding: 0 50%;
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 16px,
+      #000 calc(100% - 16px),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 16px,
+      #000 calc(100% - 16px),
+      transparent 100%
+    );
+  }
+
+  .drill-climb-col {
+    scroll-snap-align: center;
+  }
+
+  /* The tempo under each column is the label you read while scrolling, so it
+     stays legible rather than shrinking with the window. */
+  .drill-climb-bpm {
+    font-size: 0.72rem;
+  }
+}

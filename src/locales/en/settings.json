@@ -319,6 +319,7 @@
   "instrumentPicker": {
     "title": "What are you practicing on?",
     "subtitle": "Yames tunes onset detection and coaching feedback for your instrument. You can change this later in Settings.",
+    "subtitleMobile": "So Yames knows what you're practising on. You can change this later in Settings.",
     "skip": "Skip — I'll pick later"
   }
 }

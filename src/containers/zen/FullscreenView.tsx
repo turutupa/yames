@@ -191,6 +191,18 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
             </svg>
           </button>
         )}
+        {/* The way out, on a screen that has no Esc key and where a
+            double-tap is the zoom gesture. Zen is the one place in the app
+            you can get stuck: it covers everything, and until now the only
+            exit was a keystroke and a gesture that a phone spends on
+            something else. So the phone build draws the door. */}
+        {IS_MOBILE && (
+          <button className="zen-top-btn zen-exit-btn" onClick={exitFullscreen} aria-label={t("zen.exit")} data-tooltip={t("zen.exit")}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        )}
       </div>
 
       <div className="fs-content">
@@ -409,9 +421,12 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
         )}
       </div>
 
-      {/* Exit hint */}
+      {/* Exit hint. Two strings, not one: "Double-click or press Esc" is an
+          instruction a phone user cannot act on — there is no Esc, and a
+          double-tap is the zoom gesture — so the phone build names the
+          button above instead. */}
       <div className="fs-exit-hint">
-        {t("zen.exitHint")}
+        {t(IS_MOBILE ? "zen.exitHintTouch" : "zen.exitHint")}
       </div>
     </div>
   );

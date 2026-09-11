@@ -319,6 +319,7 @@
   "instrumentPicker": {
     "title": "你在用什麼樂器練習？",
     "subtitle": "Yames 會根據你的樂器調整起音偵測與教練回饋，之後可在設定中更改。",
+    "subtitleMobile": "讓 Yames 知道你在用什麼練習。之後可以在設定裡更改。",
     "skip": "跳過——之後再選"
   }
 }

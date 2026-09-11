@@ -18,6 +18,7 @@
     "soundLook": {
       "title": "Klang & Aussehen",
       "subtitle": "Fahre über eine Karte, um den Klick zu hören oder das Design zu sehen. Wähle, was dir gefällt.",
+      "subtitleTouch": "Tippe auf eine Karte, um den Klick zu hören oder das Design zu sehen. Tippe auf eine andere, um es dir anders zu überlegen.",
       "soundHeading": "Klick-Sound",
       "themeHeading": "Design",
       "moreThemes": "Mehr Designs in den Einstellungen"

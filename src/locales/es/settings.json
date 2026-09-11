@@ -319,6 +319,7 @@
   "instrumentPicker": {
     "title": "¿En qué practicas?",
     "subtitle": "Yames adapta la detección de inicio y el entrenamiento a tu instrumento. Puedes cambiarlo más tarde en Ajustes.",
+    "subtitleMobile": "Para que Yames sepa con qué practicas. Puedes cambiarlo luego en Ajustes.",
     "skip": "Saltar: elijo luego"
   }
 }

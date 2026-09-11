@@ -319,6 +319,7 @@
   "instrumentPicker": {
     "title": "Hangi enstrümanla çalışıyorsun?",
     "subtitle": "Yames, vuruş algılamayı ve koç geri bildirimini enstrümanına göre ayarlar. Bunu daha sonra Ayarlar'dan değiştirebilirsin.",
+    "subtitleMobile": "Yames neyle çalıştığını bilsin diye. Bunu sonra Ayarlar'dan değiştirebilirsin.",
     "skip": "Atla — daha sonra seçerim"
   }
 }

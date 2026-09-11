@@ -18,6 +18,7 @@
     "soundLook": {
       "title": "Suono e aspetto",
       "subtitle": "Passa sopra una scheda per sentire il click o vedere il tema. Scegli quello che ti piace.",
+      "subtitleTouch": "Tocca una scheda per sentire il clic o provare il tema. Toccane un'altra per cambiare idea.",
       "soundHeading": "Suono del click",
       "themeHeading": "Tema",
       "moreThemes": "Altri temi nelle Impostazioni"

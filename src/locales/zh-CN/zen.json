@@ -3,7 +3,9 @@
     "startingIn": "即将开始",
     "rampStep": "第 {{step}} 步",
     "fullscreen": "全屏",
+    "exit": "退出禅意",
     "exitHint": "双击或按 Esc 退出",
+    "exitHintTouch": "点按右上角的关闭按钮退出禅意",
     "styles": {
       "focus": "专注",
       "pulse": "脉冲",

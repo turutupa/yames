@@ -18,6 +18,7 @@
     "soundLook": {
       "title": "Ses ve görünüm",
       "subtitle": "Bir kartın üzerine gelerek klik sesini duy ya da temayı gör. Beğendiğini seç.",
+      "subtitleTouch": "Tıkı duymak ya da temayı denemek için bir karta dokun. Fikrini değiştirmek için başka birine dokun.",
       "soundHeading": "Klik sesi",
       "themeHeading": "Tema",
       "moreThemes": "Ayarlar'da daha fazla tema"

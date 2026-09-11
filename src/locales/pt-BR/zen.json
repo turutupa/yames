@@ -3,7 +3,9 @@
     "startingIn": "Começando em",
     "rampStep": "Passo {{step}}",
     "fullscreen": "Tela cheia",
+    "exit": "Sair do Modo Zen",
     "exitHint": "Duplo clique ou Esc para sair",
+    "exitHintTouch": "Toque no botão de fechar, no canto superior direito, para sair do Modo Zen",
     "styles": {
       "focus": "Foco",
       "pulse": "Pulso",

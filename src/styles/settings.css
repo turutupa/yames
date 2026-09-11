@@ -2447,3 +2447,104 @@
     min-height: 44px;
   }
 }
+
+/* =================== Phone widths =================== */
+/* Every row on this screen is `label + description | control`, and at 360px
+   neither half gives way: "UI language, applies immediately" wraps to one word
+   a line while the control it belongs to is squeezed into what is left
+   (M03-GAPS, ranked #3 — the single largest CSS job in M03).
+ *
+ * So below 480px the row stops being two columns and becomes two rows: the
+ * label and its description at full width, the control under them, also at
+ * full width. The label finally has a line to wrap on, the control is a thumb
+ * target rather than a sliver, and no rule above this one changes — desktop is
+ * untouched, and 480 is the desktop window's own minimum width, where the
+ * stacked form is the better one too.
+ *
+ * `max-width`, not `pointer: coarse`: this is a question about how much room
+ * the row has, and a narrow window has the same problem a phone does. */
+@media (max-width: 480px) {
+  .setting-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  /* The control half is a different element in every section — a dropdown
+     wrapper, a toggle group, a lone button — so the row says "whatever is not
+     the label" rather than naming six classes that would go stale. */
+  .setting-row > *:not(.setting-label) {
+    width: 100%;
+  }
+
+  .setting-row > .toggle-btn,
+  .setting-row .lang-select-btn,
+  .setting-row .setting-select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* The language menu hangs off the button, which is now the full width of
+     the card; without this it would still be 150px of it. */
+  .setting-row .lang-options {
+    left: 0;
+    right: 0;
+    min-width: 0;
+  }
+
+  /* A group of four or five two-word buttons wraps instead of running off the
+     edge; each one keeps its own width rather than being stretched to a fifth
+     of a line it no longer shares. */
+  .toggle-group {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .toggle-group .toggle-btn {
+    flex: 1 1 auto;
+  }
+
+  /* The theme picker was five `1fr` columns, and `1fr` is `minmax(auto, 1fr)`
+     — a column cannot shrink below the widest word in it, so thirteen themes
+     pushed the grid 137px past the screen (M03-GAPS). An explicit minimum lets
+     the grid decide how many columns the card can actually hold. */
+  .theme-grid {
+    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+    gap: 8px;
+  }
+
+  .theme-card {
+    min-width: 0;
+  }
+
+  .theme-card-name {
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+
+  /* Support's three donation links were one unwrapping row; the third fell off
+     the card. The share row already wrapped. */
+  .about-links {
+    flex-wrap: wrap;
+  }
+
+  /* Version, platform and the rest read better stacked than as a label pinned
+     left with a value pinned right of a 292px card. */
+  .about-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .about-value,
+  .about-value-small {
+    text-align: left;
+    max-width: 100%;
+  }
+
+  /* 22px of side padding is 44px of a 360px screen. */
+  .settings-section,
+  .hotkeys-section {
+    padding: 16px 14px;
+  }
+}

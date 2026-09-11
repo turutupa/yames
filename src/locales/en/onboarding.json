@@ -18,6 +18,7 @@
     "soundLook": {
       "title": "Sound & look",
       "subtitle": "Hover a card to hear the click or see the theme. Pick what you like.",
+      "subtitleTouch": "Tap a card to hear the click or try the theme. Tap another to change your mind.",
       "soundHeading": "Click sound",
       "themeHeading": "Theme",
       "moreThemes": "More themes in Settings"

@@ -562,14 +562,28 @@
 @media (pointer: coarse) {
   .fs-controls {
     opacity: 0.9;
+    /* Seven round buttons and six 12px gaps come to 368px, which is 8px more
+       than a 360px screen has. The gap gives way rather than the buttons:
+       they are the touch targets. `flex-wrap` is the floor under anything
+       narrower still. */
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: calc(100% - var(--safe-left) - var(--safe-right) - 16px);
   }
 
   .fs-exit-hint {
     opacity: 0.5;
+    /* It names the button now, which is a longer sentence than "press Esc". */
+    max-width: calc(100% - var(--safe-left) - var(--safe-right) - 32px);
+    text-align: center;
   }
 
+  /* Fully visible, not 0.7. On a desktop these appear when the pointer
+     arrives; on a phone nothing announces them, and one of them is the only
+     way out of a view that covers the whole screen. */
   .zen-top-controls {
-    opacity: 0.7;
+    opacity: 1;
   }
 
   /* 36x36 with an 8px gap, and 40x40 in a row that already touches both edges
@@ -594,5 +608,28 @@
     content: "";
     position: absolute;
     inset: -2px;
+  }
+}
+
+/* The way out, drawn.
+
+   It only exists on the phone build (`IS_MOBILE` in FullscreenView), because
+   a desktop has Esc and a double-click and adding a button there would change
+   a screen this task is not allowed to change. It is the same 36px circle as
+   its neighbour so the row stays a row, in the accent so it reads as the one
+   control on this screen that does something other than change the picture. */
+.zen-exit-btn {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 16%, rgba(255, 255, 255, 0.06));
+  color: rgba(255, 255, 255, 0.92);
+}
+
+@media (pointer: coarse) {
+  /* Bigger than the theme picker beside it: this is the one a musician
+     reaches for in a hurry, and M03a's 44px hit area is the floor, not the
+     target. */
+  .zen-exit-btn {
+    width: 44px;
+    height: 44px;
   }
 }

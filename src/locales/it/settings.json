@@ -319,6 +319,7 @@
   "instrumentPicker": {
     "title": "Che strumento stai suonando?",
     "subtitle": "Yames adatta il rilevamento dell'input e il feedback del coach al tuo strumento. Puoi cambiarlo in seguito nelle Impostazioni.",
+    "subtitleMobile": "Così Yames sa con cosa ti eserciti. Puoi cambiarlo più tardi nelle Impostazioni.",
     "skip": "Salta — lo sceglierò più tardi"
   }
 }

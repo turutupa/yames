@@ -3,7 +3,9 @@
     "startingIn": "Starting in",
     "rampStep": "Step {{step}}",
     "fullscreen": "Fullscreen",
+    "exit": "Leave Zen",
     "exitHint": "Double-click or press Esc to exit",
+    "exitHintTouch": "Tap the close button, top right, to leave Zen",
     "styles": {
       "focus": "Focus",
       "pulse": "Pulse",

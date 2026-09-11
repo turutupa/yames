@@ -18,6 +18,7 @@
     "soundLook": {
       "title": "Âm thanh và giao diện",
       "subtitle": "Di chuột lên một thẻ để nghe tiếng click hoặc xem giao diện. Chọn cái bạn thích.",
+      "subtitleTouch": "Chạm vào một thẻ để nghe tiếng gõ hoặc thử giao diện. Chạm thẻ khác nếu bạn đổi ý.",
       "soundHeading": "Âm thanh click",
       "themeHeading": "Giao diện",
       "moreThemes": "Thêm giao diện trong Cài đặt"

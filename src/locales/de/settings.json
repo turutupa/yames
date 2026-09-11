@@ -319,6 +319,7 @@
   "instrumentPicker": {
     "title": "Womit übst du?",
     "subtitle": "Yames stimmt Anschlagerkennung und Coaching auf dein Instrument ab. Du kannst das später in den Einstellungen ändern.",
+    "subtitleMobile": "Damit Yames weiß, worauf du übst. Du kannst das später in den Einstellungen ändern.",
     "skip": "Überspringen — wähle ich später"
   }
 }
