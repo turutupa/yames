@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en" data-theme="obsidian">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy Policy | Yames Metronome</title>
+    <meta
+      name="description"
+      content="Yames privacy policy. Yames is a metronome for musicians that keeps everything on your device: no accounts, no analytics, no ads, nothing sent anywhere."
+    />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://yames.app/privacy.html" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://yames.app/privacy.html" />
+    <meta property="og:title" content="Privacy Policy | Yames Metronome" />
+    <meta
+      property="og:description"
+      content="Yames keeps everything on your device: no accounts, no analytics, no ads, nothing sent anywhere."
+    />
+    <meta property="og:site_name" content="Yames Metronome" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="preload" href="style.css" as="style" />
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="manifest.json" />
+
+    <!-- Apply the saved/requested palette before first paint, same as index.html -->
+    <script>
+      (function () {
+        try {
+          var ids = ["mono","obsidian","velvet","neon","aurora","ivory","arctic","sand","lavender","prism"];
+          var q = new URLSearchParams(location.search).get("theme");
+          var saved = localStorage.getItem("yames-theme");
+          var t = ids.indexOf(q) > -1 ? q : (ids.indexOf(saved) > -1 ? saved : "obsidian");
+          document.documentElement.dataset.theme = t;
+        } catch (e) {}
+      })();
+    </script>
+
+    <style>
+      /* Plain content column. Everything else (colors, type, nav, foot)
+         comes from style.css so this page never drifts from the site. */
+      .legal {
+        position: relative;
+        z-index: 1;
+        max-width: 760px;
+        margin: 0 auto;
+        padding: clamp(48px, 8vw, 96px) var(--pad) clamp(64px, 10vw, 120px);
+      }
+      .legal h1 {
+        margin-bottom: 10px;
+      }
+      .legal .lede {
+        margin-bottom: 8px;
+      }
+      .legal__updated {
+        font-size: 0.85rem;
+        color: var(--ink-mute);
+        margin-bottom: 40px;
+      }
+      .legal section + section {
+        margin-top: 36px;
+      }
+      .legal h2 {
+        font-family: var(--ff-display);
+        font-size: clamp(1.2rem, 2vw, 1.5rem);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-bottom: 10px;
+      }
+      .legal .body {
+        margin-bottom: 10px;
+      }
+      .legal ul {
+        margin: 0 0 10px 1.1em;
+        padding: 0;
+        color: var(--ink-dim);
+        font-size: clamp(0.95rem, 1.1vw, 1rem);
+        line-height: 1.65;
+      }
+      .legal li {
+        margin-bottom: 6px;
+      }
+      .legal a {
+        color: var(--a1);
+      }
+      main {
+        padding-top: 80px;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="page-glow" aria-hidden="true">
+      <span class="page-glow__a"></span>
+      <span class="page-glow__b"></span>
+      <span class="page-glow__c"></span>
+    </div>
+
+    <header class="nav" id="nav">
+      <div class="nav__inner">
+        <a class="nav__brand" href="index.html">yames</a>
+        <nav class="nav__links" aria-label="Sections">
+          <a href="index.html">Home</a>
+          <a href="index.html#download">Download</a>
+          <a
+            href="https://github.com/turutupa/yames"
+            target="_blank"
+            rel="noopener"
+            >GitHub</a
+          >
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <article class="legal">
+        <p class="kicker">
+          <span class="eyebrow__dot" aria-hidden="true"></span>
+          Legal
+        </p>
+        <h1 class="h1">Privacy Policy</h1>
+        <p class="lede">
+          Short version: Yames does not collect anything. There is no
+          account, no analytics, and nothing about your practice ever
+          leaves your device.
+        </p>
+        <p class="legal__updated">Last updated September 11, 2026.</p>
+
+        <section>
+          <h2>What Yames stores</h2>
+          <p class="body">
+            Yames keeps its settings, presets, setlists, and drill
+            history in a small file on your own device — the same
+            place any app keeps its preferences. This is what lets
+            Yames remember your last tempo, your saved exercises, and
+            your practice history between sessions. It is never
+            uploaded, backed up to a server, or shared with anyone,
+            including the people who make Yames.
+          </p>
+        </section>
+
+        <section>
+          <h2>What Yames sends anywhere else</h2>
+          <p class="body">Nothing. Yames does not:</p>
+          <ul>
+            <li>create an account or ask for one</li>
+            <li>run analytics, crash reporting, or advertising</li>
+            <li>send your practice data, presets, or setlists anywhere</li>
+            <li>require an internet connection to work</li>
+          </ul>
+          <p class="body">
+            The desktop version can optionally check GitHub for app
+            updates and, if you turn on the practice coach, download a
+            model file once — both are actions you start, both only
+            talk to GitHub, and neither sends anything about you. The
+            mobile version does not do either: app updates come from
+            the app store you installed it from, and mobile does not
+            include the practice coach.
+          </p>
+        </section>
+
+        <section>
+          <h2>Permissions</h2>
+          <p class="body">
+            The mobile app does not request the microphone, camera,
+            contacts, location, or any other sensitive permission. It
+            asks only for what the operating system requires to play
+            sound and, on Android, to keep the click running while the
+            screen is off during a practice session.
+          </p>
+        </section>
+
+        <section>
+          <h2>Children</h2>
+          <p class="body">
+            Yames is a practice tool with no accounts, no user-generated
+            content shared with others, and no ads. It does not
+            knowingly collect information from anyone, of any age,
+            because it does not collect information at all.
+          </p>
+        </section>
+
+        <section>
+          <h2>Changes to this policy</h2>
+          <p class="body">
+            If this ever changes — for example, if a future version
+            adds an optional online feature — this page will say so
+            before that version ships, with the date above updated.
+          </p>
+        </section>
+
+        <section>
+          <h2>Contact</h2>
+          <p class="body">
+            Questions about this policy or about Yames:
+            <a
+              href="https://github.com/turutupa/yames/issues"
+              target="_blank"
+              rel="noopener"
+              >github.com/turutupa/yames/issues</a
+            >.
+          </p>
+        </section>
+      </article>
+    </main>
+
+    <footer class="foot">
+      <p class="foot__tag">Yet Another Metronome Everyone Skips</p>
+      <nav class="foot__links" aria-label="Footer">
+        <a href="index.html">Home</a>
+        <a href="https://github.com/turutupa/yames" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/turutupa/yames/issues/new" target="_blank" rel="noopener">Request a feature</a>
+        <a href="https://github.com/turutupa/yames/blob/main/LICENSE" target="_blank" rel="noopener">GPLv3</a>
+        <a href="privacy.html">Privacy</a>
+      </nav>
+    </footer>
+  </body>
+</html>
