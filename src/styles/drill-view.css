@@ -1394,8 +1394,18 @@
 /* See the note at the foot of shell.css. The plan is written as a sentence
    whose nouns are buttons, and their dotted underline sits on the same
    baseline as the words around them -- so none of them may grow. Each keeps
-   its drawn size and reaches out to 44 with a transparent overlay; the 4px of
-   inline reach is well inside the gaps the separators leave. */
+   its drawn size and reaches out with a transparent overlay instead.
+ *
+ * How far it may reach is set by the sentence, not by the 44px target: the
+ * plan's lines are 6px apart and its detail line's are 10px, so 3px a side is
+ * everything there is. That is enough for .drill-plan-token, whose 38px box
+ * lands exactly on 44. It is not enough for .drill-plan-detail-token, which
+ * is 22px tall and reaches 28 -- reaching 44 there would mean the "Quarter"
+ * you meant to tap and the "Options" on the line below sharing eleven pixels,
+ * and a control that answers a tap aimed at its neighbour is worse than one
+ * that is merely small. The line-height that would give it the room is a
+ * layout decision, and M03 owns it. Inline, 4px a side sits well inside the
+ * 22px the separators leave. */
 @media (pointer: coarse) {
   .drill-plan-token,
   .drill-plan-detail-token {
@@ -1406,6 +1416,6 @@
   .drill-plan-detail-token::after {
     content: "";
     position: absolute;
-    inset: -10px -4px;
+    inset: -3px -4px;
   }
 }

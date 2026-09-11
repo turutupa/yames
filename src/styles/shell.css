@@ -2379,7 +2379,11 @@
   .preset-sidebar-head-btn::before {
     content: "";
     position: absolute;
-    inset: -9px;
+    /* The two sit 2px apart, so 1px is the whole inline budget -- reaching 44
+       wide would mean each one answering taps aimed at the other. Vertically
+       the header has room, so the height is the one that gets there: 28x44,
+       and the 16px the width is short of is spacing M03 has to find. */
+    inset: -9px -1px;
   }
 
   .preset-save-btn,

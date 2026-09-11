@@ -914,12 +914,16 @@
   .setlist-step-remove::after {
     content: "";
     position: absolute;
-    inset: -10px -6px;
+    /* Four icons 2px apart: 1px is the whole inline budget. The row above and
+       below are 350px away, so the height reaches 45 and the width stays 27.
+       Spacing the four out is a layout change and M03 owns it. */
+    inset: -11px -1px;
   }
 
   /* The folded step's name is a dotted-underline button inside a sentence;
      growing the box would lift the underline off the baseline it shares with
-     the words around it. */
+     the words around it, and the step's own sentence sits 6px beneath. So the
+     reach is 3px -- 28x28, short of 44, and the note in M03-GAPS.md says so. */
   .setlist-folded-name {
     position: relative;
   }
@@ -927,6 +931,6 @@
   .setlist-folded-name::after {
     content: "";
     position: absolute;
-    inset: -11px -4px;
+    inset: -3px;
   }
 }
