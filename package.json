@@ -30,6 +30,7 @@
     "build": "tsc && vite build",
     "build:mobile": "node scripts/build-mobile.mjs",
     "check:mobile-bundle": "node scripts/check-mobile-bundle.mjs",
+    "check:css-hover": "node scripts/css-hover-audit.mjs",
     "preview": "vite preview",
     "tauri": "node scripts/tauri.mjs",
     "test": "vitest run",
