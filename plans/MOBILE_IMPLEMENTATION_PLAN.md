@@ -14,7 +14,7 @@
 > briefs live in `plans/tasks/mobile/`. Sizes are S / M / L as in
 > `ROADMAP.md` (≤1 day, ≤1 week, >1 week of agent-driven work).
 > **Branch policy:** long-lived feature branch `mobile`. Each task gets a
-> worktree on `mobile/m0N-short-name` and merges into `mobile`; `mobile`
+> worktree on `mob/m0N-short-name` and merges into `mobile`; `mobile`
 > merges to `main` when Android v1 is releasable. Nothing is committed
 > on `main` directly.
 

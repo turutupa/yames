@@ -1,6 +1,6 @@
 # M01 — Rust: compile the crate for Android and iOS without the coach
 
-Size: M. Branch: `mobile/m01-rust-gates`, from `mobile`. Blocks: M00's
+Size: M. Branch: `mob/m01-rust-gates`, from `mobile`. Blocks: M00's
 proper build, M04. Parallel-safe with M02, M03a, M05a (they do not
 touch `src-tauri/`).
 
@@ -81,7 +81,7 @@ management — and desktop builds and tests do not change at all.
 ## Steps
 
 1. Worktree sanity: `git log --oneline -1` must be the tip of `mobile`.
-   If not, `git checkout -B mobile/m01-rust-gates mobile`.
+   If not, `git checkout -B mob/m01-rust-gates mobile`.
 2. `rustup target add aarch64-linux-android aarch64-apple-ios` (may
    already be there).
 3. Extract `TempoContext` → `tempo_context.rs`. Desktop gates green.

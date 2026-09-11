@@ -1,8 +1,8 @@
 # M00 — Android spike: does Yames boot and keep time on a phone?
 
-Size: M. Branch: `mobile/m00-android-spike` (throwaway — never merged).
+Size: M. Branch: `mob/m00-android-spike` (throwaway — never merged).
 Deliverable: `plans/tasks/mobile/M00-FINDINGS.md` on its own branch
-`mobile/m00-findings`, merged into `mobile`. Blocks: M01.
+`mob/m00-findings`, merged into `mobile`. Blocks: M01.
 
 ## Goal
 
@@ -117,7 +117,7 @@ Install once:
    `~/.cargo/registry/src/*/cpal-0.15*/src/host/oboe/` and quote the
    relevant lines. If it does not, and step 6's numbers are poor, note
    that the fallback is driving the `oboe` crate directly.
-8. Write `M00-FINDINGS.md` (template below) on `mobile/m00-findings`,
+8. Write `M00-FINDINGS.md` (template below) on `mob/m00-findings`,
    branched from `mobile`, containing only the findings file and the
    screenshots. Open a PR against `mobile`. Leave the spike branch in
    place, unmerged, for reference.

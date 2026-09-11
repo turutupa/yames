@@ -1,6 +1,6 @@
 # M05a — Release prep that needs no build: privacy page, store copy, CI draft, licence text
 
-Size: S. Branch: `mobile/m05a-release-prep`, from `mobile`. Feeds M05
+Size: S. Branch: `mob/m05a-release-prep`, from `mobile`. Feeds M05
 and M06. Parallel-safe with everything; touches only `docs/`,
 `.github/workflows/`, `plans/`, `LICENSE`-adjacent text.
 

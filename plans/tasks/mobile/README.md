@@ -30,11 +30,11 @@ said go. Do not start M03 or M04 until M02 is merged into `mobile`.
 ## Branches
 
 - Long-lived feature branch: `mobile` (from `main`).
-- One worktree per task on `mobile/m0N-short-name`, branched from
+- One worktree per task on `mob/m0N-short-name`, branched from
   `mobile`. Open a PR against `mobile`, not `main`. Do not merge.
 - Worktrees created by the Agent tool may start on a stale branch.
   First command: `git log --oneline -1`; if it is not the tip of
-  `mobile`, `git checkout -B mobile/m0N-short-name origin/mobile`
+  `mobile`, `git checkout -B mob/m0N-short-name origin/mobile`
   (or the local `mobile`) before touching anything.
 - `mobile` merges to `main` once, when Android v1 is releasable.
 - Only a commit message starting with `release` cuts a release from

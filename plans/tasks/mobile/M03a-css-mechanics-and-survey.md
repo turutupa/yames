@@ -1,6 +1,6 @@
 # M03a — CSS mechanics for touch, and a phone-width survey
 
-Size: M. Branch: `mobile/m03a-css-mechanics`, from `mobile`. Feeds M03
+Size: M. Branch: `mob/m03a-css-mechanics`, from `mobile`. Feeds M03
 (the layout pass, which starts after M02 merges). Parallel-safe with
 M01 (`src-tauri/`), M02 (`src/**` except styles), M05a (docs, CI).
 
@@ -60,7 +60,7 @@ Two deliverables:
 ## Steps
 
 1. Worktree sanity: `git log --oneline -1` is the tip of `mobile`, or
-   `git checkout -B mobile/m03a-css-mechanics mobile`.
+   `git checkout -B mob/m03a-css-mechanics mobile`.
 2. Write `scripts/css-hover-audit.mjs`: lists every rule containing
    `:hover` that is not inside an `@media (hover: hover)` block, with
    file and line. Run it, record the count in the report.

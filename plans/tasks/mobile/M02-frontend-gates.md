@@ -1,6 +1,6 @@
 # M02 — Frontend: a mobile bundle with no coach and no desktop chrome
 
-Size: L. Branch: `mobile/m02-frontend-gates`, from `mobile`. Blocks:
+Size: L. Branch: `mob/m02-frontend-gates`, from `mobile`. Blocks:
 M03 (layout pass). Parallel-safe with M01 (owns `src-tauri/`), M03a
 (owns `src/styles/`), M05a (docs, CI).
 
