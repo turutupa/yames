@@ -204,11 +204,18 @@
   justify-content: center;
 }
 
-button.context-chip:hover,
 .context-chip-open {
   color: var(--text-primary);
   background: var(--bg-raised);
   border-color: color-mix(in srgb, var(--text-secondary) 35%, var(--border));
+}
+
+@media (hover: hover) {
+  button.context-chip:hover {
+    color: var(--text-primary);
+    background: var(--bg-raised);
+    border-color: color-mix(in srgb, var(--text-secondary) 35%, var(--border));
+  }
 }
 
 .context-chip-open {
@@ -252,9 +259,11 @@ button.context-chip:hover,
   z-index: 50;
 }
 
-.context-chip[data-tooltip]:hover::after {
-  opacity: 1;
-  transform: translateY(0);
+@media (hover: hover) {
+  .context-chip[data-tooltip]:hover::after {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .header-sound-wrap {
@@ -355,14 +364,24 @@ button.context-chip:hover,
   transition: opacity 0.15s ease;
 }
 
-.context-chip-volume:hover .context-chip-range:not(:disabled)::-webkit-slider-thumb,
 .context-chip-range:focus-visible::-webkit-slider-thumb {
   opacity: 1;
 }
 
-.context-chip-volume:hover .context-chip-range:not(:disabled)::-moz-range-thumb,
+@media (hover: hover) {
+  .context-chip-volume:hover .context-chip-range:not(:disabled)::-webkit-slider-thumb {
+    opacity: 1;
+  }
+}
+
 .context-chip-range:focus-visible::-moz-range-thumb {
   opacity: 1;
+}
+
+@media (hover: hover) {
+  .context-chip-volume:hover .context-chip-range:not(:disabled)::-moz-range-thumb {
+    opacity: 1;
+  }
 }
 
 .context-chip-range:focus-visible {
@@ -463,8 +482,10 @@ button.context-chip:hover,
   position: relative;
 }
 
-.preset-sidebar-item:hover {
-  background: rgba(255, 255, 255, 0.06);
+@media (hover: hover) {
+  .preset-sidebar-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
 }
 
 .preset-sidebar-item.active {
@@ -575,9 +596,11 @@ button.context-chip:hover,
     border-color 120ms ease;
 }
 
-.preset-sidebar-empty-state .empty-state-action:hover {
-  background: var(--bg-hover, rgba(255, 255, 255, 0.05));
-  border-color: var(--accent);
+@media (hover: hover) {
+  .preset-sidebar-empty-state .empty-state-action:hover {
+    background: var(--bg-hover, rgba(255, 255, 255, 0.05));
+    border-color: var(--accent);
+  }
 }
 
 .preset-sidebar-empty-state .empty-state-action:focus-visible {
@@ -657,12 +680,16 @@ button.context-chip:hover,
   cursor: pointer;
 }
 
-.preset-context-menu button:hover {
-  background: rgba(255, 255, 255, 0.08);
+@media (hover: hover) {
+  .preset-context-menu button:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
 }
 
-[data-theme-group="light"] .preset-context-menu button:hover {
-  background: rgba(0, 0, 0, 0.05);
+@media (hover: hover) {
+  [data-theme-group="light"] .preset-context-menu button:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
 }
 
 .preset-context-delete {
@@ -734,19 +761,23 @@ button.context-chip:hover,
     padding-left 0.15s ease;
 }
 
-.eval-action-btn:hover {
-  max-width: 160px;
-  border-radius: var(--radius-sm);
-  padding: 0 10px;
-  color: var(--accent);
-  border-color: var(--accent);
-  background: var(--accent-subtle);
+@media (hover: hover) {
+  .eval-action-btn:hover {
+    max-width: 160px;
+    border-radius: var(--radius-sm);
+    padding: 0 10px;
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-subtle);
+  }
 }
 
-.eval-action-btn:hover .eval-action-label {
-  max-width: 120px;
-  opacity: 1;
-  padding-left: 5px;
+@media (hover: hover) {
+  .eval-action-btn:hover .eval-action-label {
+    max-width: 120px;
+    opacity: 1;
+    padding-left: 5px;
+  }
 }
 
 .eval-action-active {
@@ -778,8 +809,10 @@ button.context-chip:hover,
   transition: color 0.15s;
 }
 
-.preset-active-name:hover {
-  color: var(--accent);
+@media (hover: hover) {
+  .preset-active-name:hover {
+    color: var(--accent);
+  }
 }
 
 /* "Edited", not a bullet. The dot is the glance; the word is what makes the
@@ -839,12 +872,16 @@ button.context-chip:hover,
   color: var(--text-tertiary);
 }
 
-.preset-text-btn:hover:not(:disabled) {
-  background: color-mix(in srgb, currentColor 12%, transparent);
+@media (hover: hover) {
+  .preset-text-btn:hover:not(:disabled) {
+    background: color-mix(in srgb, currentColor 12%, transparent);
+  }
 }
 
-.preset-text-btn--revert:hover:not(:disabled) {
-  color: var(--text-secondary);
+@media (hover: hover) {
+  .preset-text-btn--revert:hover:not(:disabled) {
+    color: var(--text-secondary);
+  }
 }
 
 /* Nothing to save reads as nothing to save. The button stays — its absence
@@ -883,13 +920,17 @@ button.context-chip:hover,
   white-space: nowrap;
 }
 
-.preset-save-btn:hover {
-  background: var(--accent);
-  color: var(--accent-text, white);
+@media (hover: hover) {
+  .preset-save-btn:hover {
+    background: var(--accent);
+    color: var(--accent-text, white);
+  }
 }
 
-.preset-save-btn:hover .preset-save-btn-label {
-  opacity: 1;
+@media (hover: hover) {
+  .preset-save-btn:hover .preset-save-btn-label {
+    opacity: 1;
+  }
 }
 
 /* The dirty and feedback modifiers of this button are gone: with a preset
@@ -979,9 +1020,11 @@ button.context-chip:hover,
   transition: background 0.15s ease, color 0.15s ease;
 }
 
-.rail-mode:hover {
-  background: var(--surface-hover);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .rail-mode:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
 }
 
 .rail-mode.active {
@@ -1040,9 +1083,11 @@ button.context-chip:hover,
   cursor: pointer;
 }
 
-.rail-library-reopen:hover {
-  background: var(--surface-hover);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .rail-library-reopen:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
 }
 
 .rail-footer {
@@ -1072,9 +1117,11 @@ button.context-chip:hover,
   transition: background 0.15s ease, color 0.15s ease;
 }
 
-.rail-action:hover {
-  background: var(--surface-hover);
-  color: var(--text-primary);
+@media (hover: hover) {
+  .rail-action:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
 }
 
 .rail-action.active {
@@ -1159,9 +1206,11 @@ button.context-chip:hover,
   box-shadow: 0 8px 24px -10px var(--accent-glow-strong);
 }
 
-.transport-play:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 28px -10px var(--accent-glow-strong);
+@media (hover: hover) {
+  .transport-play:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px -10px var(--accent-glow-strong);
+  }
 }
 
 .transport-play:active {
@@ -1296,8 +1345,10 @@ button.context-chip:hover,
   color: var(--text-secondary);
 }
 
-.transport-switch:hover {
-  color: var(--text-primary);
+@media (hover: hover) {
+  .transport-switch:hover {
+    color: var(--text-primary);
+  }
 }
 
 .transport-switch-track {
@@ -1415,12 +1466,18 @@ button.context-chip:hover,
   transition: opacity 0.45s ease;
 }
 
-.main-window[data-playing="true"] .rail:hover,
 .main-window[data-playing="true"] .rail:focus-within,
-.main-window[data-playing="true"] .main-header:hover,
 .main-window[data-playing="true"] .main-header:focus-within {
   opacity: 1;
   transition: opacity 0.12s ease;
+}
+
+@media (hover: hover) {
+  .main-window[data-playing="true"] .rail:hover,
+  .main-window[data-playing="true"] .main-header:hover {
+    opacity: 1;
+    transition: opacity 0.12s ease;
+  }
 }
 
 .rail,
@@ -1693,9 +1750,11 @@ button.context-chip:hover,
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
-.transport-skip:hover:not(:disabled) {
-  background: var(--accent-subtle);
-  border-color: var(--accent);
+@media (hover: hover) {
+  .transport-skip:hover:not(:disabled) {
+    background: var(--accent-subtle);
+    border-color: var(--accent);
+  }
 }
 
 .transport-skip[data-waiting]:not(:disabled) {
@@ -1705,8 +1764,10 @@ button.context-chip:hover,
   box-shadow: 0 0 0 4px var(--accent-subtle);
 }
 
-.transport-skip[data-waiting]:not(:disabled):hover {
-  filter: brightness(1.08);
+@media (hover: hover) {
+  .transport-skip[data-waiting]:not(:disabled):hover {
+    filter: brightness(1.08);
+  }
 }
 
 /* Stopped, it has no downbeat to land on. It stays in the row rather than
@@ -1981,8 +2042,10 @@ button.context-chip:hover,
   opacity: 0.75;
 }
 
-.rail-collapse:hover {
-  opacity: 1;
+@media (hover: hover) {
+  .rail-collapse:hover {
+    opacity: 1;
+  }
 }
 
 
@@ -2028,10 +2091,12 @@ button.context-chip:hover,
    `setlist.css` gave that one button its own shape and its own hover. The
    owner picked the accent one, so it is the only one now, and the override
    that made them differ is gone. */
-.preset-sidebar-head-btn:hover {
-  color: var(--accent);
-  background: var(--accent-subtle);
-  border-color: transparent;
+@media (hover: hover) {
+  .preset-sidebar-head-btn:hover {
+    color: var(--accent);
+    background: var(--accent-subtle);
+    border-color: transparent;
+  }
 }
 
 .preset-sidebar-head-btn.active {
@@ -2069,10 +2134,16 @@ button.context-chip:hover,
   z-index: 120;
 }
 
-.preset-sidebar-head-btn[data-tip]:hover::after,
 .preset-sidebar-head-btn[data-tip]:focus-visible::after {
   opacity: 1;
   transform: translateY(0);
+}
+
+@media (hover: hover) {
+  .preset-sidebar-head-btn[data-tip]:hover::after {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* =================== Unsaved changes ===================
@@ -2193,9 +2264,11 @@ button.context-chip:hover,
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
-.unsaved-actions .unsaved-cancel:hover {
-  color: var(--text-primary);
-  background: var(--surface-hover, rgba(255, 255, 255, 0.05));
+@media (hover: hover) {
+  .unsaved-actions .unsaved-cancel:hover {
+    color: var(--text-primary);
+    background: var(--surface-hover, rgba(255, 255, 255, 0.05));
+  }
 }
 
 .unsaved-actions .unsaved-discard {
@@ -2203,9 +2276,11 @@ button.context-chip:hover,
   color: var(--text-secondary);
 }
 
-.unsaved-actions .unsaved-discard:hover {
-  color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+@media (hover: hover) {
+  .unsaved-actions .unsaved-discard:hover {
+    color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  }
 }
 
 /* Two selectors deep, because `.unsaved-actions button` above is (0,1,1) and
@@ -2218,8 +2293,10 @@ button.context-chip:hover,
   color: var(--accent-text);
 }
 
-.unsaved-actions .unsaved-save:hover {
-  filter: brightness(1.08);
+@media (hover: hover) {
+  .unsaved-actions .unsaved-save:hover {
+    filter: brightness(1.08);
+  }
 }
 
 .unsaved-actions button:focus-visible {

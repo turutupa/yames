@@ -75,9 +75,11 @@
   font-family: inherit;
 }
 
-.instrument-picker-card:hover {
-  border-color: var(--accent);
-  background: var(--bg-secondary);
+@media (hover: hover) {
+  .instrument-picker-card:hover {
+    border-color: var(--accent);
+    background: var(--bg-secondary);
+  }
 }
 
 .instrument-picker-card:active {
@@ -116,8 +118,10 @@
   transition: color 120ms ease;
 }
 
-.instrument-picker-skip:hover {
-  color: var(--text);
+@media (hover: hover) {
+  .instrument-picker-skip:hover {
+    color: var(--text);
+  }
 }
 
 @keyframes fade-in {
