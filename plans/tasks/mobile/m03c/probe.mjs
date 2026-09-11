@@ -77,6 +77,27 @@ window.__p = {
     await window.__p.sleep(60);
     return el;
   },
+  /**
+   * Open Settings, by whichever door this build has.
+   *
+   * M03c was written against the icon rail; M03b replaced it on mobile with a
+   * bottom tab bar, where Settings is a .mobile-tab with a text label rather
+   * than a button with an aria-label. Trying both means one probe reads both
+   * branches and, after they merge, the merge.
+   */
+  async openSettings() {
+    const el = await window.__p.until(
+      () =>
+        document.querySelector('button[aria-label="Settings"]') ||
+        [...document.querySelectorAll(".mobile-tab")].find(
+          (b) => (b.textContent || "").trim().toLowerCase() === "settings",
+        ),
+      "a way into Settings",
+    );
+    el.click();
+    await window.__p.sleep(60);
+    return el;
+  },
   async clickText(sel, text) {
     const el = await window.__p.until(() => window.__p.byText(sel, text), sel + ' "' + text + '"');
     el.click();
@@ -199,7 +220,7 @@ const PHONE = [
     root: ".main-content",
     shot: "metronome",
     settle: 500,
-    drive: D(`await __p.click('button[aria-label="Settings"]', "the settings button");
+    drive: D(`await __p.openSettings();
               await __p.until(() => document.querySelector(".settings-section"), "the settings sheet");
               await __p.sleep(400); await __p.settingsSection(0);`),
   },
@@ -208,7 +229,7 @@ const PHONE = [
     root: ".main-content",
     shot: "metronome",
     settle: 500,
-    drive: D(`await __p.click('button[aria-label="Settings"]');
+    drive: D(`await __p.openSettings();
               await __p.until(() => document.querySelector(".settings-section"), "the settings sheet");
               await __p.sleep(400); await __p.settingsSection(1);`),
   },
@@ -217,7 +238,7 @@ const PHONE = [
     root: ".main-content",
     shot: "metronome",
     settle: 500,
-    drive: D(`await __p.click('button[aria-label="Settings"]');
+    drive: D(`await __p.openSettings();
               await __p.until(() => document.querySelector(".settings-section"), "the settings sheet");
               await __p.sleep(400); await __p.settingsSection(2);`),
   },
@@ -226,7 +247,7 @@ const PHONE = [
     root: ".main-content",
     shot: "metronome",
     settle: 500,
-    drive: D(`await __p.click('button[aria-label="Settings"]');
+    drive: D(`await __p.openSettings();
               await __p.until(() => document.querySelector(".settings-section"), "the settings sheet");
               await __p.sleep(400); await __p.settingsSection(3);`),
   },
@@ -235,7 +256,7 @@ const PHONE = [
     root: ".main-content",
     shot: "metronome",
     settle: 500,
-    drive: D(`await __p.click('button[aria-label="Settings"]');
+    drive: D(`await __p.openSettings();
               await __p.until(() => document.querySelector(".settings-section"), "the settings sheet");
               await __p.sleep(400); await __p.settingsSection(4);`),
   },
@@ -244,7 +265,7 @@ const PHONE = [
     root: ".main-content",
     shot: "metronome",
     settle: 500,
-    drive: D(`await __p.click('button[aria-label="Settings"]');
+    drive: D(`await __p.openSettings();
               await __p.until(() => document.querySelector(".settings-section"), "the settings sheet");
               await __p.sleep(400); await __p.settingsSection(0);
               await __p.click(".lang-select-btn");`),
@@ -270,7 +291,7 @@ const PHONE = [
     root: ".onboarding-overlay",
     shot: "metronome",
     settle: 600,
-    drive: D(`await __p.click('button[aria-label="Settings"]');
+    drive: D(`await __p.openSettings();
               await __p.until(() => document.querySelector(".settings-section"), "the settings sheet");
               await __p.sleep(400);
               await __p.clickText(".setting-row .toggle-btn", "Open");
@@ -282,7 +303,7 @@ const PHONE = [
     root: ".onboarding-overlay",
     shot: "metronome",
     settle: 600,
-    drive: D(`await __p.click('button[aria-label="Settings"]');
+    drive: D(`await __p.openSettings();
               await __p.until(() => document.querySelector(".settings-section"), "the settings sheet");
               await __p.sleep(400);
               await __p.clickText(".setting-row .toggle-btn", "Open");
@@ -297,7 +318,7 @@ const PHONE = [
     root: ".onboarding-overlay",
     shot: "metronome",
     settle: 600,
-    drive: D(`await __p.click('button[aria-label="Settings"]');
+    drive: D(`await __p.openSettings();
               await __p.until(() => document.querySelector(".settings-section"), "the settings sheet");
               await __p.sleep(400);
               await __p.clickText(".setting-row .toggle-btn", "Open");
@@ -315,7 +336,7 @@ const PHONE = [
     root: ".onboarding-overlay",
     shot: "metronome",
     settle: 600,
-    drive: D(`await __p.click('button[aria-label="Settings"]');
+    drive: D(`await __p.openSettings();
               await __p.until(() => document.querySelector(".settings-section"), "the settings sheet");
               await __p.sleep(400);
               await __p.clickText(".setting-row .toggle-btn", "Open");
@@ -354,7 +375,7 @@ const DESKTOP = [
     shot: "metronome",
     root: ".main-content",
     settle: 900,
-    drive: D(`await __p.click('button[aria-label="Settings"]');
+    drive: D(`await __p.openSettings();
               await __p.until(() => document.querySelector(".settings-section"), "the settings sheet");
               await __p.sleep(600);
               const s = document.querySelector('.main-content[data-view="settings"] .view-transition-wrapper');
@@ -395,7 +416,7 @@ const DESKTOP = [
     shot: "metronome",
     root: ".onboarding-overlay",
     settle: 900,
-    drive: D(`await __p.click('button[aria-label="Settings"]');
+    drive: D(`await __p.openSettings();
               await __p.until(() => document.querySelector(".settings-section"), "the settings sheet");
               await __p.sleep(400);
               await __p.clickText(".setting-row .toggle-btn", "Open");

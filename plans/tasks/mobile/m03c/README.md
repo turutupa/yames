@@ -43,6 +43,22 @@ no box may cross the viewport edge unless a deliberate horizontal scroller
 (`overflow-x: auto|scroll` with the vertical axis clipped, which is the
 climb chart and nothing else) sits between it and the root.
 
+## After M03b merges
+
+Checked on a throwaway merge of `mobile` (M03b's tab bar and sheets) into
+this branch: `tsc --noEmit`, `vitest run`, `check:css-hover` and
+`build:mobile` all pass, and every screen here still fits at all three
+widths with the rail gone and the bottom tab bar in its place — the
+settings card gets the 68px back and reads better for it.
+
+One thing breaks, and it is the harness, not a layout: `src/shots/main.tsx`
+enters Zen by clicking `[data-tour="zen-widget"]`, which the tab bar does
+not carry (its Zen tab is `.mobile-tab-zen`). So `?shot=zen` never reports
+ready on a merged mobile build, and the zen pictures here were taken before
+the merge. Whoever runs this next should drive Zen from the metronome shot
+by clicking either control — a two-line change in `src/shots/main.tsx`,
+which is a shared file no M03 task owned.
+
 ## `dialogs.html`
 
 The unsaved-changes dialog and the instrument picker cannot be reached
