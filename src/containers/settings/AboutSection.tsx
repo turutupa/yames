@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { IS_MOBILE } from "../../platform";
 
 type UpdateStatus = "idle" | "checking" | "available" | "downloading" | "up-to-date";
 
@@ -29,38 +30,41 @@ export function AboutSection({
           <span className="about-label">{t("settings.about.version")}</span>
           <span className="about-value">{appVersion}</span>
         </div>
-        <div className="about-row">
-          <span className="about-label">{t("settings.about.updates")}</span>
-          <span className="about-value">
-            {updateStatus === "checking" && (
-              <span className="update-status">{t("settings.about.checking")}</span>
-            )}
-            {updateStatus === "available" && (
-              <button
-                className="update-available-btn"
-                onClick={onInstallUpdate}
-              >
-                {t("settings.about.available", { version: latestVersion })}
-              </button>
-            )}
-            {updateStatus === "downloading" && (
-              <span className="update-status">{t("settings.about.updating")}</span>
-            )}
-            {updateStatus === "up-to-date" && (
-              <span className="update-status up-to-date">
-                {t("settings.about.upToDate")}
-              </span>
-            )}
-            {updateStatus === "idle" && (
-              <button
-                className="update-check-btn"
-                onClick={onCheckUpdate}
-              >
-                {t("settings.about.checkUpdates")}
-              </button>
-            )}
-          </span>
-        </div>
+        {/* The store updates a phone app; there is no in-app check. */}
+        {!IS_MOBILE && (
+          <div className="about-row">
+            <span className="about-label">{t("settings.about.updates")}</span>
+            <span className="about-value">
+              {updateStatus === "checking" && (
+                <span className="update-status">{t("settings.about.checking")}</span>
+              )}
+              {updateStatus === "available" && (
+                <button
+                  className="update-available-btn"
+                  onClick={onInstallUpdate}
+                >
+                  {t("settings.about.available", { version: latestVersion })}
+                </button>
+              )}
+              {updateStatus === "downloading" && (
+                <span className="update-status">{t("settings.about.updating")}</span>
+              )}
+              {updateStatus === "up-to-date" && (
+                <span className="update-status up-to-date">
+                  {t("settings.about.upToDate")}
+                </span>
+              )}
+              {updateStatus === "idle" && (
+                <button
+                  className="update-check-btn"
+                  onClick={onCheckUpdate}
+                >
+                  {t("settings.about.checkUpdates")}
+                </button>
+              )}
+            </span>
+          </div>
+        )}
         <div className="about-row">
           <span className="about-label">{t("settings.about.platform")}</span>
           <span className="about-value">{navigator.platform}</span>

@@ -11,6 +11,7 @@ import { MidiDeviceDropdown } from "../../components/MidiDeviceDropdown";
 import { ChannelDropdown } from "../../components/ChannelDropdown";
 import type { useEvaluation } from "../../hooks/useEvaluation";
 import type { UseMidiReturn } from "../../hooks/useMidi";
+import { IS_MOBILE } from "../../platform";
 
 type EvaluationLike = ReturnType<typeof useEvaluation>;
 type MidiLike = UseMidiReturn;
@@ -68,6 +69,9 @@ export function DevicesSettingsSection({
   const [calEntry, setCalEntry] = useState<CalibrationCacheEntry | null>(null);
   const inputDevice = evaluation.selectedDevice ?? null;
   useEffect(() => {
+    // Latency calibration belongs to the microphone, which a phone build
+    // never opens.
+    if (IS_MOBILE) return;
     let cancelled = false;
     getCalibrationCacheEntry(instrument, inputDevice)
       .then((entry) => {
@@ -125,91 +129,99 @@ export function DevicesSettingsSection({
         )}
       </div>
 
-      <div className="midi-device-section" style={{ marginTop: 28 }}>
-        <label className="midi-label devices-subsection-label">{t("settings.devices.audioInput")}</label>
-        <div className="midi-device-row">
-          <AudioInputDropdown
-            devices={evaluation.devices}
-            value={evaluation.selectedDevice ?? ""}
-            onChange={(val) => evaluation.selectDevice(val)}
-          />
-          <button
-            className="input-test-btn"
-            onClick={onOpenInputTest}
-            title={t("settings.devices.testAudioInput")}
-          >
-            {t("settings.devices.test")}
-          </button>
-        </div>
-        {/* Per-instrument calibration cache hint. Sits right under the
-            device dropdown so the user sees it before touching anything
-            else. Recalibrate button clears just this pair; other cached
-            combos survive. */}
-        {calEntry && (
-          <div className="calibration-cache-hint">
-            <span className="calibration-cache-text">
-              {t("settings.devices.calibrated", {
-                offset: `${calEntry.offsetMs >= 0 ? "+" : ""}${calEntry.offsetMs.toFixed(1)}`,
-              })}
-            </span>
+      {/* The audio INPUT half of this screen, and the MIDI half, are both
+          cut on a phone: there is no mic evaluation to feed and midir has
+          no Android backend. Output is all that is left, which is why the
+          section shrinks rather than showing two dead dropdowns. */}
+      {!IS_MOBILE && (
+        <>
+        <div className="midi-device-section" style={{ marginTop: 28 }}>
+          <label className="midi-label devices-subsection-label">{t("settings.devices.audioInput")}</label>
+          <div className="midi-device-row">
+            <AudioInputDropdown
+              devices={evaluation.devices}
+              value={evaluation.selectedDevice ?? ""}
+              onChange={(val) => evaluation.selectDevice(val)}
+            />
             <button
-              className="calibration-recalibrate-btn"
-              onClick={handleRecalibrate}
-              title={t("settings.devices.recalibrateHint")}
+              className="input-test-btn"
+              onClick={onOpenInputTest}
+              title={t("settings.devices.testAudioInput")}
             >
-              {t("settings.devices.recalibrate")}
+              {t("settings.devices.test")}
             </button>
           </div>
-        )}
-        {/* Channel picker — shown for any multi-channel device (≥ 2 ch).
-            Sits below the calibration hint using the same midi-dropdown
-            style. For interfaces (Scarlett etc.) channels 3/4 are loopback. */}
-        {deviceChannelCount > 1 && (
-          <div className="midi-device-row" style={{ marginTop: 8 }}>
-            <ChannelDropdown
-              channelCount={deviceChannelCount}
-              value={evaluation.selectedChannel}
-              isInterface={selectedInputDevice?.isInterface ?? false}
-              onChange={(ch) => evaluation.selectChannel(ch)}
-            />
-          </div>
-        )}
-        {evaluation.selectedChannel >= 2 && (selectedInputDevice?.isInterface ?? false) && (
-          <span className="channel-picker-hint" title={t("settings.devices.loopbackHint")}>
-            {t("settings.devices.loopback")}
-          </span>
-        )}
-      </div>
-
-      <div className="midi-device-section" style={{ marginTop: 28 }}>
-        <label className="midi-label devices-subsection-label">{t("settings.devices.midi")}</label>
-        <div className="midi-device-row">
-          <MidiDeviceDropdown
-            devices={midi.devices}
-            value={midi.connectedDevice || ""}
-            onChange={(val) => {
-              if (val) {
-                midi.connect(val);
-              } else {
-                midi.disconnect();
-              }
-            }}
-          />
-          <button
-            className="midi-refresh-btn"
-            onClick={() => midi.refreshDevices()}
-            title={t("settings.devices.refreshMidi")}
-          >
-            <RefreshIcon />
-          </button>
+          {/* Per-instrument calibration cache hint. Sits right under the
+              device dropdown so the user sees it before touching anything
+              else. Recalibrate button clears just this pair; other cached
+              combos survive. */}
+          {calEntry && (
+            <div className="calibration-cache-hint">
+              <span className="calibration-cache-text">
+                {t("settings.devices.calibrated", {
+                  offset: `${calEntry.offsetMs >= 0 ? "+" : ""}${calEntry.offsetMs.toFixed(1)}`,
+                })}
+              </span>
+              <button
+                className="calibration-recalibrate-btn"
+                onClick={handleRecalibrate}
+                title={t("settings.devices.recalibrateHint")}
+              >
+                {t("settings.devices.recalibrate")}
+              </button>
+            </div>
+          )}
+          {/* Channel picker — shown for any multi-channel device (≥ 2 ch).
+              Sits below the calibration hint using the same midi-dropdown
+              style. For interfaces (Scarlett etc.) channels 3/4 are loopback. */}
+          {deviceChannelCount > 1 && (
+            <div className="midi-device-row" style={{ marginTop: 8 }}>
+              <ChannelDropdown
+                channelCount={deviceChannelCount}
+                value={evaluation.selectedChannel}
+                isInterface={selectedInputDevice?.isInterface ?? false}
+                onChange={(ch) => evaluation.selectChannel(ch)}
+              />
+            </div>
+          )}
+          {evaluation.selectedChannel >= 2 && (selectedInputDevice?.isInterface ?? false) && (
+            <span className="channel-picker-hint" title={t("settings.devices.loopbackHint")}>
+              {t("settings.devices.loopback")}
+            </span>
+          )}
         </div>
-        {!midi.connectedDevice && midi.devices.length === 0 && (
-          <div className="midi-status">
-            <span className="midi-status-dot" />
-            {t("settings.devices.noMidi")}
+
+        <div className="midi-device-section" style={{ marginTop: 28 }}>
+          <label className="midi-label devices-subsection-label">{t("settings.devices.midi")}</label>
+          <div className="midi-device-row">
+            <MidiDeviceDropdown
+              devices={midi.devices}
+              value={midi.connectedDevice || ""}
+              onChange={(val) => {
+                if (val) {
+                  midi.connect(val);
+                } else {
+                  midi.disconnect();
+                }
+              }}
+            />
+            <button
+              className="midi-refresh-btn"
+              onClick={() => midi.refreshDevices()}
+              title={t("settings.devices.refreshMidi")}
+            >
+              <RefreshIcon />
+            </button>
           </div>
-        )}
-      </div>
+          {!midi.connectedDevice && midi.devices.length === 0 && (
+            <div className="midi-status">
+              <span className="midi-status-dot" />
+              {t("settings.devices.noMidi")}
+            </div>
+          )}
+        </div>
+        </>
+      )}
     </section>
   );
 }

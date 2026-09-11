@@ -6,6 +6,7 @@ import type { AppState, Setlist, Preset } from "../../types";
 import { PresetSaveBar } from "../../components/presets/PresetSaveBar";
 import { SetlistSaveBar } from "../../components/setlist/SetlistSaveBar";
 import { IS_MAC } from "../../hotkeys";
+import { IS_MOBILE } from "../../platform";
 
 /**
  * A volume, as one of the context bar's chips: label, then a bar you drag.
@@ -238,12 +239,13 @@ interface MainHeaderProps {
   volumePercent: number;
   /** TTS playback gain, 0..1 — kept in the same popover as the metronome
    *  slider so the user can balance the two in one place. */
-  ttsVolume: number;
-  setTtsVolume: (v: number) => void;
+  /** The coach's speaking volume. Absent on a phone — there is no voice. */
+  ttsVolume?: number;
+  setTtsVolume?: (v: number) => void;
   /** When true, the voice slider is interactive. The component is always
    *  rendered (even when the coach is off) so the feature is discoverable;
    *  it just disables the control until brain + voice are ready. */
-  voiceEnabled: boolean;
+  voiceEnabled?: boolean;
   /** Audio input is on. Status only — what turns it on lives elsewhere. */
   listening?: boolean;
   /**
@@ -296,9 +298,9 @@ export function MainHeader({
   setShareOpen,
   shareTooltip,
   volumePercent,
-  ttsVolume,
-  setTtsVolume,
-  voiceEnabled,
+  ttsVolume = 1,
+  setTtsVolume = () => {},
+  voiceEnabled = false,
   listening = false,
   onOpenHelp,
 }: MainHeaderProps) {
@@ -412,27 +414,33 @@ export function MainHeader({
           value={volumePercent}
           onChange={setVolume}
         />
-        <VolumeChip
-          icon={<VoiceIcon />}
-          label={t("volume.voice")}
-          name={t("volume.voice")}
-          value={ttsVolumePercent}
-          onChange={setTtsVolume}
-          disabled={!voiceEnabled}
-          disabledHint={t("tooltip.enableVoice")}
-        />
+        {/* The coach's voice and the microphone it listens on are both cut
+            on a phone, so neither chip is here — not greyed out, absent. */}
+        {!IS_MOBILE && (
+          <VolumeChip
+            icon={<VoiceIcon />}
+            label={t("volume.voice")}
+            name={t("volume.voice")}
+            value={ttsVolumePercent}
+            onChange={setTtsVolume}
+            disabled={!voiceEnabled}
+            disabledHint={t("tooltip.enableVoice")}
+          />
+        )}
 
         {/* A readout, not a switch — nothing in the bar turns the input on,
             so the chip does not pretend to. */}
-        <div
-          className={`context-chip context-chip-static context-chip-input${listening ? " listening" : ""}`}
-          role="status"
-        >
-          <MicIcon />
-          <span className="context-chip-label">
-            {listening ? t("transport.listening") : t("transport.inputOff")}
-          </span>
-        </div>
+        {!IS_MOBILE && (
+          <div
+            className={`context-chip context-chip-static context-chip-input${listening ? " listening" : ""}`}
+            role="status"
+          >
+            <MicIcon />
+            <span className="context-chip-label">
+              {listening ? t("transport.listening") : t("transport.inputOff")}
+            </span>
+          </div>
+        )}
 
         <div className="header-more-wrap" ref={moreWrapRef}>
           <button

@@ -20,6 +20,7 @@ import { BeatStepper } from "./BeatStepper";
 import { MeterPresets } from "./MeterPresets";
 import { SubdivisionIcon } from "../../components/MetronomeIcons";
 import DriftMeter from "../../components/DriftMeter";
+import { IS_MOBILE } from "../../platform";
 
 type Evaluation = ReturnType<typeof useEvaluation>;
 
@@ -86,6 +87,7 @@ export function MetronomeView({
   // index to the bar position the dot grid is drawn on. Only the beat
   // currently lit is ever tinted — same as the pre-grouping dot row.
   const dotFeedback = useMemo(() => {
+    if (IS_MOBILE) return undefined;
     if (!evaluation.enabled || !currentBeat) return undefined;
     const fb = evaluation.dotFeedback.get(currentBeat.beat);
     return fb ? new Map([[currentBeat.measureBeat, fb]]) : undefined;
@@ -170,7 +172,9 @@ export function MetronomeView({
               rest-state readout: the `MetronomePlaying` artboard gives this
               corner to the bar counter instead, and the docked transport
               already carries that. */}
-          <LastSession isPlaying={state.isPlaying} />
+          {/* Session history is the coach's, and the coach is not on a
+              phone — so the corner is simply empty there. */}
+          {!IS_MOBILE && <LastSession isPlaying={state.isPlaying} />}
         </div>
 
         <div
@@ -288,11 +292,15 @@ export function MetronomeView({
             are playing with the input on, how early or late you are is the most
             useful thing this screen can tell you. It sits under the dots
             because that is where the `MetronomePlaying` artboard puts it. */}
-        <DriftMeter
-          lastFeedback={evaluation.lastFeedback}
-          avgDeviation={evaluation.avgDeviation}
-          visible={evaluation.enabled && state.isPlaying}
-        />
+        {/* The live early/late needle reads the microphone, which a phone
+            build does not open. */}
+        {!IS_MOBILE && (
+          <DriftMeter
+            lastFeedback={evaluation.lastFeedback}
+            avgDeviation={evaluation.avgDeviation}
+            visible={evaluation.enabled && state.isPlaying}
+          />
+        )}
       </section>
 
       <section className="sub-section" data-tour="subdivision">

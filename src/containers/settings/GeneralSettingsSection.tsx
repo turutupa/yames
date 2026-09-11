@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { storeLoad, storeSave } from "../../ipc";
 import { getLanguages } from "../../i18n";
 import { resetHints } from "../onboarding/hints/hintRuntime";
+import { IS_MOBILE } from "../../platform";
 
 /**
  * General settings — auto-update, always-on-top, button flash, active border,
@@ -144,38 +145,44 @@ export function GeneralSettingsSection({
           )}
         </div>
       </div>
-      <div className="setting-row">
-        <div className="setting-label">
-          <label>{t("settings.general.checkUpdates")}</label>
-          <span className="setting-hint">
-            {t("settings.general.checkUpdatesHint")}
-          </span>
+      {/* The app store keeps a phone app up to date, and a phone has no
+          window to keep on top of anything. */}
+      {!IS_MOBILE && (
+        <>
+        <div className="setting-row">
+          <div className="setting-label">
+            <label>{t("settings.general.checkUpdates")}</label>
+            <span className="setting-hint">
+              {t("settings.general.checkUpdatesHint")}
+            </span>
+          </div>
+          <button
+            className={`toggle-btn ${autoCheckUpdates ? "active" : ""}`}
+            onClick={() => {
+              const next = !autoCheckUpdates;
+              setAutoCheckUpdates(next);
+              storeSave("autoCheckUpdates", next);
+            }}
+          >
+            {autoCheckUpdates ? t("common.on") : t("common.off")}
+          </button>
         </div>
-        <button
-          className={`toggle-btn ${autoCheckUpdates ? "active" : ""}`}
-          onClick={() => {
-            const next = !autoCheckUpdates;
-            setAutoCheckUpdates(next);
-            storeSave("autoCheckUpdates", next);
-          }}
-        >
-          {autoCheckUpdates ? t("common.on") : t("common.off")}
-        </button>
-      </div>
-      <div className="setting-row">
-        <div className="setting-label">
-          <label>{t("settings.general.alwaysOnTop")}</label>
-          <span className="setting-hint">
-            {t("settings.general.alwaysOnTopHint")}
-          </span>
+        <div className="setting-row">
+          <div className="setting-label">
+            <label>{t("settings.general.alwaysOnTop")}</label>
+            <span className="setting-hint">
+              {t("settings.general.alwaysOnTopHint")}
+            </span>
+          </div>
+          <button
+            className={`toggle-btn ${alwaysOnTop ? "active" : ""}`}
+            onClick={() => setAlwaysOnTop(!alwaysOnTop)}
+          >
+            {alwaysOnTop ? t("common.on") : t("common.off")}
+          </button>
         </div>
-        <button
-          className={`toggle-btn ${alwaysOnTop ? "active" : ""}`}
-          onClick={() => setAlwaysOnTop(!alwaysOnTop)}
-        >
-          {alwaysOnTop ? t("common.on") : t("common.off")}
-        </button>
-      </div>
+        </>
+      )}
       <div className="setting-row">
         <div className="setting-label">
           <label>{t("settings.general.buttonFlash")}</label>
@@ -245,7 +252,7 @@ export function GeneralSettingsSection({
       )}
       {/* The three first-run rows sit together, in the order a user meets
           them: rerun the wizard, retake the tour, bring the hints back. */}
-      {onTakeTour && (
+      {!IS_MOBILE && onTakeTour && (
         <div className="setting-row">
           <div className="setting-label">
             <label>{t("settings.general.takeTour")}</label>

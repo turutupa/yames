@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { spanLabel, type SetlistRemaining } from "../../components/setlist/format";
+import { IS_MOBILE } from "../../platform";
 
 interface TransportProps {
   view: "beat" | "drill" | "setlist";
@@ -305,26 +306,30 @@ export function Transport({
        * explicit grounds that the transport reports the same state — so the
        * compact readout has to come back at that width instead. The sentence
        * has no room there anyway. */}
-      {listening ? (
-        <div className="transport-input listening">
-          <MicIcon />
-          <span>{t("transport.listening")}</span>
-          <span className={`transport-signal ${hasSignal ? "on" : ""}`} aria-hidden="true" />
-        </div>
-      ) : (
-        <>
-          <div className="transport-note">
-            <CoachIcon />
-            <span>
-              {view === "drill" ? t("transport.coachQuiet") : t("transport.coachOnPlay")}
-            </span>
-          </div>
-          <div className="transport-input transport-input-narrow">
+      {/* All three of these states are the coach and the microphone it
+          listens on. A phone has neither, so the right end of the bar is
+          simply empty there rather than explaining an absent feature. */}
+      {!IS_MOBILE &&
+        (listening ? (
+          <div className="transport-input listening">
             <MicIcon />
-            <span>{t("transport.inputOff")}</span>
+            <span>{t("transport.listening")}</span>
+            <span className={`transport-signal ${hasSignal ? "on" : ""}`} aria-hidden="true" />
           </div>
-        </>
-      )}
+        ) : (
+          <>
+            <div className="transport-note">
+              <CoachIcon />
+              <span>
+                {view === "drill" ? t("transport.coachQuiet") : t("transport.coachOnPlay")}
+              </span>
+            </div>
+            <div className="transport-input transport-input-narrow">
+              <MicIcon />
+              <span>{t("transport.inputOff")}</span>
+            </div>
+          </>
+        ))}
     </div>
   );
 }

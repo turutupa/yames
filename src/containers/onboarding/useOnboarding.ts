@@ -31,6 +31,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { listPresets, storeLoad, storeSave } from "../../ipc";
 import { getSessionHistory } from "../../ipc.desktop";
+import { IS_MOBILE } from "../../platform";
 import {
   INITIAL_ONBOARDING_STATE,
   isWizardOpen,
@@ -130,7 +131,9 @@ export function useOnboarding(
           // A backend that can't answer is not evidence of prior use: fall
           // back to "no signal" so a broken probe can't silently retire the
           // wizard for a genuinely new user.
-          getSessionHistory().catch(() => []),
+          // Saved sessions are the coach’s, and a phone has no coach — so
+          // there a chosen instrument or a saved preset is the whole signal.
+          IS_MOBILE ? [] : getSessionHistory().catch(() => []),
           listPresets().catch(() => []),
         ]);
       if (cancelled) return;

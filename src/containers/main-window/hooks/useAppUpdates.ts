@@ -3,6 +3,7 @@ import type { Dispatch, SetStateAction } from "react";
 import { getVersion } from "@tauri-apps/api/app";
 import { storeLoad, storeSave } from "../../../ipc";
 import { checkForUpdate } from "../../../ipc.desktop";
+import { IS_MOBILE } from "../../../platform";
 import {
   WHATS_NEW_NOTES_KEY,
   type PendingNotes,
@@ -68,6 +69,9 @@ export function useAppUpdates(): AppUpdates {
   const [updateStatus, setUpdateStatus] = useState<UpdateStatus>("idle");
 
   const doUpdateCheck = useCallback(async () => {
+    // Stores update apps. Nothing on a phone asks this, and the guard is
+    // what keeps `tauri-plugin-updater` out of the mobile bundle.
+    if (IS_MOBILE) return;
     setUpdateStatus("checking");
     try {
       const ver = appVersion === "0.0.0" ? await getVersion() : appVersion;
@@ -93,7 +97,9 @@ export function useAppUpdates(): AppUpdates {
       const ver = await getVersion();
       setAppVersion(ver);
 
-      const shouldAutoCheck = acu !== undefined ? acu : true;
+      // The version itself is still wanted on a phone — What's New and the
+      // About section read it. Only the check is cut.
+      const shouldAutoCheck = !IS_MOBILE && (acu !== undefined ? acu : true);
       if (shouldAutoCheck) {
         const result = await checkForUpdate(ver);
         if (result.hasUpdate) {

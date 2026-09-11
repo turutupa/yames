@@ -15,7 +15,7 @@ import {
   scoredBeats,
 } from "../../../coach/reportStats";
 import { createSessionToken } from "../../../coach/sessionGuard";
-import { coachDebug } from "../../../coach/debug";
+import { coachDebug } from "../../../utils/debug";
 import { DEFAULT_MODE_CATALOG, PRO_MODE_CATALOG, TEMPLATE_CATALOG } from "../../../coach/templateCatalog";
 import { pickTemplate, createShuffleState } from "../../../coach/templates";
 import {
