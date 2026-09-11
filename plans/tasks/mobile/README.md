@@ -47,9 +47,25 @@ said go. Do not start M03 or M04 until M02 is merged into `mobile`.
   is on by default and `IS_MOBILE` is false by default; every desktop
   gate stays green: `bun run tsc --noEmit` → `bun run test` →
   `bun run test:rust` → `bun run test:dsp` → `bun run test:highbpm`.
-- Mobile gates, from M01 on:
-  `cargo check --manifest-path src-tauri/Cargo.toml --no-default-features --target aarch64-linux-android`
-  and, on a Mac, `--target aarch64-apple-ios`.
+- Mobile gates, from M01 on (exact commands; M01 replaced the planned
+  `practice-coach` Cargo feature with target-conditional dependencies, so
+  there is no `--no-default-features` to pass — the Tauri CLI has no such
+  flag on any subcommand):
+
+  ```sh
+  # Android. `--lib` because the mobile artifact is the cdylib/staticlib;
+  # the four DSP dev-tool bins under src-tauri/src/bin are desktop-only and
+  # do not compile for a phone. DOCS_RS=1 makes oboe-sys (cpal's Android
+  # audio backend) skip compiling its C++ half, which is the only reason a
+  # *type-check* would otherwise need the NDK. A real `tauri android build`
+  # still needs NDK_HOME.
+  DOCS_RS=1 cargo check --manifest-path src-tauri/Cargo.toml --lib --target aarch64-linux-android
+
+  # iOS — Mac only. On Windows this dies in objc2-exception-helper (no
+  # xcrun) and then, past that, in coreaudio-sys (no AudioUnit headers).
+  cargo check --manifest-path src-tauri/Cargo.toml --lib --target aarch64-apple-ios
+  ```
+
   From M02 on: `YAMES_MOBILE=1 npm run build && node scripts/check-mobile-bundle.mjs`.
 - The click is sacred. Nothing new runs on the cpal callback thread;
   `SharedState` is held no longer than today.
@@ -71,9 +87,10 @@ said go. Do not start M03 or M04 until M02 is merged into `mobile`.
   AGENTS.md "Building on Windows"). Export `LIBCLANG_PATH` and
   `VULKAN_SDK` as for desktop builds; the Android NDK path goes in
   `NDK_HOME`, the SDK in `ANDROID_HOME`, and a JDK 17 in `JAVA_HOME`.
-- `scripts/tauri.mjs` injects `--features coach-llm-vulkan` on Windows.
-  For mobile commands set `YAMES_DEV_NO_LLM=1` until M01 teaches the
-  wrapper about mobile targets.
+- `scripts/tauri.mjs` injects `--features coach-llm-vulkan` on Windows for
+  `dev` / `build` only. M01 taught it about `tauri android` / `tauri ios`:
+  those inject no feature and set `YAMES_MOBILE=1` in the child environment,
+  so `YAMES_DEV_NO_LLM=1` is no longer needed for mobile commands.
 - iOS work needs the Mac with Xcode. CI's `macos-latest` runner builds
   iOS for M06.
 - The Android test device is the owner's previous phone, available
