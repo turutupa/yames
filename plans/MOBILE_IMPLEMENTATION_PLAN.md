@@ -337,7 +337,9 @@ that reason.
 
 | Risk | Where it bites | Mitigation |
 |---|---|---|
-| cpal's Oboe backend does not request low-latency mode | M00 | Measure; fall back to the `oboe` crate directly |
+| cpal's Oboe backend does not request low-latency mode | M00 → M04 | **Confirmed by M00 (2026-09-11):** cpal 0.15.3 sets neither performance nor sharing mode and opens 44.1 kHz on a 48 kHz device. Tempo is exact (120 ticks / 60 s, 0.055 % drift); latency is not. M04 drives the `oboe` crate directly for the output stream. |
+| `oboe-sys` never links the C++ runtime; app dies at `System.loadLibrary` | M00 | Fixed on `mobile`: `build.rs` links `c++_shared` on Android |
+| System Back gesture kills the process mid-click | M00 → M04 | Back closes a sheet or backgrounds the app; foreground service keeps the click |
 | Android kills or throttles the process with the screen off | M04 | Foreground service with media notification; test 10 min screen-off |
 | Android System WebView / WKWebView differences (canvas zen effects, `backdrop-filter`, audio autoplay policies do not apply since audio is native) | M03 | Test on a low-end device; reduced-effects fallback already exists via reduced motion |
 | aubio-sys / bindgen against the Android NDK toolchain | M00, M01 | Not needed once `practice-coach` is off; M00 may stub it |

@@ -62,6 +62,37 @@ opens the About / support links in the system browser.
 - The click is sacred: the service must not touch the audio thread;
   it only keeps the process alive.
 
+## What M00 found that changes this task (read `M00-FINDINGS.md` first)
+
+- **cpal's Oboe backend never requests low-latency mode and opens the
+  stream at 44 100 Hz on a 48 kHz device** (cpal 0.15.3
+  `src/host/oboe/mod.rs` builds the stream with direction and format
+  only; no `set_performance_mode`, `set_sharing_mode`, `set_usage`).
+  Tempo accuracy is fine (120 ticks in 60 s, 0.055 % drift) but the
+  click's *latency* is whatever the default path gives, plus a resample.
+  Plan §6's fallback is now the expected path: drive the `oboe` crate
+  directly behind `cfg(target_os = "android")` for the output stream,
+  requesting `PerformanceMode::LowLatency`, `SharingMode::Exclusive`
+  (fall back to Shared), `Usage::Media`, the device's native sample
+  rate, and the same F32 interleaved callback the engine already fills.
+  Keep the engine's callback body identical; only the stream setup
+  changes. Measure with the probe M00 wired
+  (`M00-FINDINGS.md` "How the measurement was wired") before and after.
+- **The system Back gesture kills the process mid-click**
+  (`OnBackInvokedCallback is not enabled` in logcat). Back must: close
+  an open sheet if one is open, otherwise move the app to the
+  background (`moveTaskToBack`) while the click keeps going under the
+  foreground service. Handle it in the plugin's activity or via
+  `enableOnBackInvokedCallback` plus a JS bridge event the frontend
+  answers.
+- **`libc++_shared.so` must be in the APK.** `src-tauri/build.rs` now
+  links it on Android (landed on `mobile` from the spike); the Tauri
+  CLI copies the NDK's copy into `jniLibs/` once the `.so` declares it.
+  Verify it is present in your builds and say so.
+- **A debug APK is 264 MB and meaningless**; M05 measures a signed
+  release build. Do not spend time on size here.
+- `tauri android build` compiles the Rust library twice; budget it.
+
 ## Steps
 
 1. Worktree sanity; confirm `src-tauri/gen/android` exists or run
