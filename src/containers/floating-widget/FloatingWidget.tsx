@@ -226,7 +226,8 @@ export function FloatingWidget() {
   const startEdit = () => {
     setEditValue(String(state.bpm));
     setEditing(true);
-    setTimeout(() => inputRef.current?.select(), 0);
+    // The selection is the input's own `onFocus`; a timer here raced the
+    // commit that mounts it.
   };
 
   const commitEdit = () => {
@@ -243,6 +244,7 @@ export function FloatingWidget() {
       inputMode="numeric"
       value={editValue}
       onChange={(e) => setEditValue(e.target.value.replace(/\D/g, ""))}
+      onFocus={(e) => e.currentTarget.select()}
       onBlur={commitEdit}
       onKeyDown={(e) => {
         if (e.key === "Enter") commitEdit();
@@ -251,7 +253,20 @@ export function FloatingWidget() {
       autoFocus
     />
   ) : (
-    <span className="fw-bpm fw-bpm-clickable" onClick={startEdit}>
+    // A control, declared as one — the widget is dragged by its background
+    // too, and MetronomeView.tsx carries the note on why that matters here.
+    <span
+      className="fw-bpm fw-bpm-clickable"
+      role="button"
+      tabIndex={0}
+      onClick={startEdit}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          startEdit();
+        }
+      }}
+    >
       {state.bpm}
     </span>
   );
