@@ -100,8 +100,10 @@ async function drive() {
 
   if (shot!.zen) {
     // The rail's Zen button, by the anchor the tour already puts on it.
-    await until("the Zen button", () => !!document.querySelector('[data-tour="zen-widget"]'));
-    (document.querySelector('[data-tour="zen-widget"]') as HTMLButtonElement).click();
+    // Desktop reaches Zen from the rail; the phone build from its bottom tab bar.
+    const zenButton = '[data-tour="zen-widget"], .mobile-tab-zen';
+    await until("the Zen button", () => !!document.querySelector(zenButton));
+    (document.querySelector(zenButton) as HTMLButtonElement).click();
     await until("the Zen canvas", () => !!document.querySelector("[data-zen-style]"));
   }
 
