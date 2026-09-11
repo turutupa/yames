@@ -24,6 +24,9 @@
     { id: "sand", name: "Sand", bg: "#f5f0e8", accent: "#92400e" },
     { id: "lavender", name: "Lavender", bg: "#f5f0ff", accent: "#7c3aed" },
     { id: "prism", name: "Prism", bg: "#ffe0f0", accent: "#ff3d8a" },
+    { id: "ash", name: "Ash", bg: "#0e0f11", accent: "#c3ec4f" },
+    { id: "ember", name: "Ember", bg: "#110d0a", accent: "#ff7a3c" },
+    { id: "manuscript", name: "Manuscript", bg: "#f7f3ea", accent: "#26428f" },
   ];
 
   // Same seven the app ships (src/containers/zen/ZenEffects.tsx).
@@ -95,7 +98,7 @@
 
   const track = $("#fan-track");
 
-  /* The row is rendered three times over. With ten themes and the
+  /* The row is rendered three times over. With thirteen themes and the
      selected one centred, a selection near either end would otherwise
      run out of cards and leave the row stopping in mid-screen — which
      reads as the strip being cut off. Only the middle copy is real to
@@ -116,8 +119,10 @@
     const img = document.createElement("img");
     img.src = `img/metronome/${theme.id}-metronome.webp`;
     img.alt = primary ? `Yames in the ${theme.name} theme` : "";
+    // The shape of the files, so the card holds its place before the image
+    // arrives. Matches `aspect-ratio` in style.css and src/shots/scenarios.ts.
     img.width = 1400;
-    img.height = 1050;
+    img.height = 900;
     img.decoding = "async";
     // The landing theme's card is the LCP image; the rest can wait.
     const isLanding = primary && theme.id === currentTheme;

@@ -851,7 +851,12 @@ main,
   /* height:auto is load-bearing — the width/height attributes would
      otherwise pin the height and make aspect-ratio inert. */
   height: auto;
-  aspect-ratio: 4 / 3;
+  /* 14:9, the shape the shots are taken at. It was 4:3 when the app's controls
+     sat in a tall centred column; the rail redesign put them in a shorter one,
+     and a 4:3 frame spent its bottom fifth on empty background. This must
+     match src/shots/scenarios.ts and the width/height attributes site.js sets,
+     or the cards resize as the images arrive. */
+  aspect-ratio: 14 / 9;
   object-fit: cover;
   object-position: top center;
 }
