@@ -46,9 +46,9 @@ respectively; M05 waits for M03 + M04.
 ## Rules every worker follows
 
 - Surgical edits, no file rewrites (AGENTS.md).
-- Desktop must not change behaviour. The `practice-coach` Cargo feature
-  is on by default and `IS_MOBILE` is false by default; every desktop
-  gate stays green: `bun run tsc --noEmit` → `bun run test` →
+- Desktop must not change behaviour. The desktop-only dependencies are
+  target-conditional (no flag to forget) and `IS_MOBILE` is false by
+  default; every desktop gate stays green: `bun run tsc --noEmit` → `bun run test` →
   `bun run test:rust` → `bun run test:dsp` → `bun run test:highbpm`.
 - Mobile gates, from M01 on (exact commands; M01 replaced the planned
   `practice-coach` Cargo feature with target-conditional dependencies, so

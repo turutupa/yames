@@ -181,23 +181,42 @@ Verified against the code and the local cargo registry on 2026-09-11.
 
 ### Rust
 
-1. **Cargo feature `practice-coach`, on by default.**
-   `default = ["practice-coach"]`. It owns the modules and dependencies
-   listed in §2 and the coach / evaluation / TTS command handlers. The
-   existing `coach-llm`, `coach-llm-metal`, `coach-llm-vulkan` features
-   require it. Desktop builds do not change; `scripts/tauri.mjs` and
-   `release.yml` keep working because the default is on. Mobile builds
-   pass `--no-default-features`.
+1. **Target-conditional dependencies, not a Cargo feature** (settled
+   by M01, 2026-09-11). The first draft of this plan wanted a
+   `practice-coach` feature turned off with `--no-default-features`;
+   the Tauri CLI 2.10 has no such flag on any subcommand, so a phone
+   build could never have turned it off. Instead the coach, evaluation,
+   voice, MIDI and window-manager dependencies live in a
+   `[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]`
+   block and their modules are `#[cfg(desktop)]`. Cargo never evaluates
+   that block for a phone target, so no flag exists to forget. Desktop
+   builds, features and `Cargo.lock` are unchanged.
 2. **`#[cfg(desktop)]`** (tauri-build defines `desktop` / `mobile`) on:
    tray, `tauri-plugin-global-shortcut`, `tauri-plugin-updater`,
    `tauri-plugin-decorum`, `tauri-plugin-process`, the `floating`
-   window, `set_always_on_top`, `set_widget_*`, `show_floating`,
-   `show_main`, `save_window_position`, the `Moved` event handler, and
-   the `macos-private-api` / `tray-icon` Tauri features (moved to a
-   `[target.'cfg(not(any(target_os = "android", target_os = "ios")))']`
-   dependency block).
-3. **MIDI** stays compiled (midir's dummy backend on Android) but its
-   commands are `#[cfg(desktop)]` in v1 so the frontend has one rule.
+   window, the window commands, `save_window_position`, the `Moved`
+   handler, and the `WindowEvent` teardown. Every command stays
+   registered on every platform (`generate_handler!` cannot cfg
+   entries); the desktop-only bodies are answered by
+   `src-tauri/src/commands/mobile.rs` with an error or a no-op. The
+   `macos-private-api` / `tray-icon` Tauri features **stay on the base
+   `tauri` dependency**: tauri-build's allowlist check only reads
+   `[dependencies]`, so splitting `tauri` breaks every desktop build;
+   both features are inert off their platform.
+3. **MIDI is out of the Android graph entirely.** midir 0.10 has no
+   Android backend arm at all, not even a dummy, so it cannot compile
+   there. It lives in the desktop block with `src/midi.rs`. Its iOS
+   CoreMIDI arm is intact; M07 widens the cfg to
+   `not(target_os = "android")`.
+   Three types moved out of desktop-only modules so the engine and the
+   drills work without them: `TempoContext` → `tempo_context.rs`,
+   `BeatLog` / `BeatTick` → `beat_log.rs`, `DrillRun` → `drill.rs`.
+   The Android type-check needs no NDK when run as
+   `DOCS_RS=1 cargo check --lib --target aarch64-linux-android`
+   (`oboe-sys`, cpal's Android backend, skips its C++ build under that
+   variable); a real `tauri android build` needs `NDK_HOME`. The four
+   DSP dev-tool bins under `src/bin` do not build for a phone; M04
+   gates them if `tauri android build` turns out to compile bins.
 4. **`src-tauri/src/mobile/`** — a small in-tree Tauri mobile plugin
    with a Kotlin and a Swift side: `keep_awake(bool)`,
    `set_background_audio(bool)` (Android: start/stop a foreground
@@ -237,9 +256,12 @@ Verified against the code and the local cargo registry on 2026-09-11.
 
 ### Gates that prove the cut
 
-- `cargo check --no-default-features --target aarch64-linux-android`
-  and `--target aarch64-apple-ios` pass; `cargo build` (defaults) and
-  `npm run test:rust` on desktop stay green.
+- `DOCS_RS=1 cargo check --lib --target aarch64-linux-android` on any
+  host and `cargo check --lib --target aarch64-apple-ios` on the Mac
+  pass; `cargo tree --target aarch64-linux-android` shows none of
+  aubio, llama-cpp-2, midir, global-shortcut, updater, decorum;
+  `cargo build` (defaults) and `npm run test:rust` on desktop stay
+  green.
 - `YAMES_MOBILE=1 npm run build`, then `scripts/check-mobile-bundle.mjs`
   fails if `dist/` contains any of: `coachBrainTier`, `piper`,
   `start_evaluation`, `tts_speak`, `show_floating`, `globalShortcut`.
