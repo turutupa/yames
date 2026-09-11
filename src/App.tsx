@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { storeLoad } from "./ipc";
+import { IS_MOBILE } from "./platform";
 import i18n from "./i18n";
 import { MainWindow } from "./containers/main-window/MainWindow";
 import { FloatingWidget } from "./containers/floating-widget/FloatingWidget";
@@ -34,7 +35,10 @@ export default function App() {
     }
   }, []);
 
-  if (windowLabel === "floating") {
+  // One fullscreen webview on a phone: there is no second window to be, and
+  // no `?window=` to read. The flag is what keeps the widget out of the
+  // mobile bundle entirely — see src/platform.ts.
+  if (!IS_MOBILE && windowLabel === "floating") {
     return <FloatingWidget />;
   }
 

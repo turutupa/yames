@@ -1,6 +1,7 @@
 import { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
-import { showFloating } from "../../ipc";
+import { showFloating } from "../../ipc.desktop";
+import { IS_MOBILE } from "../../platform";
 import { markWidgetOpened } from "../onboarding/hints/hintRuntime";
 import { PresetSidebar } from "../../components/presets/PresetSidebar";
 import type { PresetSidebarHandle } from "../../components/presets/PresetSidebar";
@@ -175,6 +176,9 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
       </div>
 
       <div className="rail-footer">
+        {/* No coach on a phone, so no row for one — not a disabled one,
+            not a "coming soon" one. See the mobile plan §1. */}
+        {!IS_MOBILE && (
         <button
           className={`rail-action ${coachOpen ? "active" : ""}`}
           // The status is in the name, not only beside it: below 620px the
@@ -211,6 +215,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
             />
           )}
         </button>
+        )}
 
         <button
           className="rail-action"
@@ -237,6 +242,9 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
           <span className="rail-action-label">{t("tooltip.zen")}</span>
         </button>
 
+        {/* A phone has one fullscreen webview; there is no second window
+            to float. */}
+        {!IS_MOBILE && (
         <button
           className="rail-action"
           aria-label={t("tooltip.openWidget")}
@@ -266,6 +274,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
           </span>
           <span className="rail-action-label">{t("tooltip.openWidget")}</span>
         </button>
+        )}
 
         <button
           className={`rail-action ${view === "settings" ? "active" : ""}`}

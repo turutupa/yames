@@ -20,7 +20,7 @@
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getCoachCapabilities } from "../../../ipc";
+import { getCoachCapabilities } from "../../../ipc.desktop";
 import type { BrainTier, ModelTier } from "../../../types";
 import { useWizardEnv } from "../WizardContext";
 import {

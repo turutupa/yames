@@ -1,18 +1,9 @@
-import type { Dispatch, SetStateAction } from "react";
-import type {
-  AudioOutputDevice,
-  BrainTier,
-  CoachMode,
-  ModelTier,
-  Verbosity,
-  VoiceMode,
-  WidgetMode,
-} from "../../types";
-import type { ModelStatus, VoiceDiagnostic } from "../../ipc";
+import type { ComponentProps, Dispatch, SetStateAction } from "react";
+import type { AudioOutputDevice } from "../../types";
 import type { useEvaluation } from "../../hooks/useEvaluation";
 import type { UseMidiReturn } from "../../hooks/useMidi";
-import type { BindingTarget } from "./KeybindingModals";
 import { SHARE_OPTIONS } from "../../constants/metronome";
+import { IS_MOBILE } from "../../platform";
 import { UpdateBanner } from "./UpdateBanner";
 import { GeneralSettingsSection } from "./GeneralSettingsSection";
 import { AppearanceSettingsSection } from "./AppearanceSettingsSection";
@@ -37,7 +28,8 @@ interface SettingsViewProps {
   latestVersion: string;
   appVersion: string;
   doUpdateCheck: () => void;
-  downloadAndInstallUpdate: () => Promise<void>;
+  /** Absent on a phone: the store keeps the app up to date. */
+  downloadAndInstallUpdate?: () => Promise<void>;
 
   // General
   autoCheckUpdates: boolean;
@@ -72,48 +64,19 @@ interface SettingsViewProps {
   midi: UseMidiReturn;
   onOpenInputTest: () => void;
 
-  // Coach
-  coachBrainTier: BrainTier;
-  setCoachBrainTier: (tier: BrainTier) => void;
-  coachVoiceMode: VoiceMode;
-  setCoachVoiceMode: Dispatch<SetStateAction<VoiceMode>>;
-  coachVoiceName: string;
-  setCoachVoiceName: Dispatch<SetStateAction<string>>;
-  coachVerbosity: Verbosity;
-  setCoachVerbosity: Dispatch<SetStateAction<Verbosity>>;
-  coachMode: CoachMode;
-  setCoachMode: Dispatch<SetStateAction<CoachMode>>;
-  modelStatus: ModelStatus | null;
-  setModelStatus: Dispatch<SetStateAction<ModelStatus | null>>;
-  modelDownloading: boolean;
-  /** ROADMAP §3: Studio is only offered at >= 16 GB of RAM. */
-  studioAvailable: boolean;
-  standardAvailable: boolean;
-  /** A brain from a superseded model family is installed. */
-  brainUpdateAvailable: boolean;
-  availableVoices: [string, string][];
-  voiceDiagnostics: VoiceDiagnostic[];
+  // ── The three sections a phone does not have ──────────────────────────
+  //
+  // The coach, the floating widget and the hotkeys are cut from the mobile
+  // build entirely (mobile plan §1), so their props arrive as three
+  // bundles that are simply absent there. That is not only tidier than
+  // thirty-odd props threaded one by one — it is what lets Rollup drop the
+  // sections AND everything that would have fed them, which a list of
+  // individually-passed values cannot do.
+  coach?: Omit<ComponentProps<typeof CoachSettingsSection>, "instrument">;
+  widget?: ComponentProps<typeof WidgetSettingsSection>;
+  hotkeys?: Omit<ComponentProps<typeof HotkeysSettingsSection>, "midi">;
+  /** Shared with the devices section, so it stays on its own. */
   instrument: string;
-  setInstrument: Dispatch<SetStateAction<string>>;
-  onStartDownload: (tier: ModelTier) => void;
-  onRequestDownload: (tier: ModelTier) => void;
-
-  // Widget
-  widgetMode: WidgetMode;
-  setWidgetMode: (mode: WidgetMode) => void;
-  widgetAlwaysOnTop: boolean;
-  setWidgetAlwaysOnTop: (v: boolean) => void;
-
-  // Hotkeys
-  keyBindings: Record<string, string>;
-  globalBindings: Record<string, string>;
-  footBindings: Record<string, string>;
-  bindingFor: BindingTarget | null;
-  setBindingFor: Dispatch<SetStateAction<BindingTarget | null>>;
-  setPendingKeys: Dispatch<SetStateAction<string>>;
-  inputTestMode: boolean;
-  setInputTestMode: Dispatch<SetStateAction<boolean>>;
-  onResetRequest: () => void;
 
   // Support
   shareTooltip: boolean;
@@ -160,45 +123,15 @@ export function SettingsView({
   evaluation,
   midi,
   onOpenInputTest,
-  coachBrainTier,
-  setCoachBrainTier,
-  coachVoiceMode,
-  setCoachVoiceMode,
-  coachVoiceName,
-  setCoachVoiceName,
-  coachVerbosity,
-  setCoachVerbosity,
-  coachMode,
-  setCoachMode,
-  modelStatus,
-  setModelStatus,
-  modelDownloading,
-  studioAvailable,
-  standardAvailable,
-  brainUpdateAvailable,
-  availableVoices,
-  voiceDiagnostics,
+  coach,
+  widget,
+  hotkeys,
   instrument,
-  setInstrument,
-  onStartDownload,
-  onRequestDownload,
-  widgetMode,
-  setWidgetMode,
-  widgetAlwaysOnTop,
-  setWidgetAlwaysOnTop,
-  keyBindings,
-  globalBindings,
-  footBindings,
-  bindingFor,
-  setBindingFor,
-  setPendingKeys,
-  inputTestMode,
-  setInputTestMode,
-  onResetRequest,
   shareTooltip,
   onShareOption,
 }: SettingsViewProps) {
   const handleInstallUpdate = () => {
+    if (!downloadAndInstallUpdate) return;
     setUpdateStatus("downloading");
     downloadAndInstallUpdate().catch(() => {
       setUpdateStatus("available");
@@ -207,11 +140,14 @@ export function SettingsView({
 
   return (
     <>
-      <UpdateBanner
-        updateStatus={updateStatus}
-        latestVersion={latestVersion}
-        onInstall={handleInstallUpdate}
-      />
+      {/* Stores update apps; the in-app updater is desktop-only. */}
+      {!IS_MOBILE && (
+        <UpdateBanner
+          updateStatus={updateStatus}
+          latestVersion={latestVersion}
+          onInstall={handleInstallUpdate}
+        />
+      )}
       <GeneralSettingsSection
         autoCheckUpdates={autoCheckUpdates}
         setAutoCheckUpdates={setAutoCheckUpdates}
@@ -247,50 +183,16 @@ export function SettingsView({
         instrument={instrument}
       />
 
-      <CoachSettingsSection
-        coachBrainTier={coachBrainTier}
-        setCoachBrainTier={setCoachBrainTier}
-        coachVoiceMode={coachVoiceMode}
-        setCoachVoiceMode={setCoachVoiceMode}
-        coachVoiceName={coachVoiceName}
-        setCoachVoiceName={setCoachVoiceName}
-        coachVerbosity={coachVerbosity}
-        setCoachVerbosity={setCoachVerbosity}
-        coachMode={coachMode}
-        setCoachMode={setCoachMode}
-        modelStatus={modelStatus}
-        setModelStatus={setModelStatus}
-        modelDownloading={modelDownloading}
-        studioAvailable={studioAvailable}
-        standardAvailable={standardAvailable}
-        brainUpdateAvailable={brainUpdateAvailable}
-        availableVoices={availableVoices}
-        voiceDiagnostics={voiceDiagnostics}
-        instrument={instrument}
-        setInstrument={setInstrument}
-        onStartDownload={onStartDownload}
-        onRequestDownload={onRequestDownload}
-      />
-
-      <WidgetSettingsSection
-        widgetMode={widgetMode}
-        setWidgetMode={setWidgetMode}
-        widgetAlwaysOnTop={widgetAlwaysOnTop}
-        setWidgetAlwaysOnTop={setWidgetAlwaysOnTop}
-      />
-
-      <HotkeysSettingsSection
-        keyBindings={keyBindings}
-        globalBindings={globalBindings}
-        footBindings={footBindings}
-        bindingFor={bindingFor}
-        setBindingFor={setBindingFor}
-        setPendingKeys={setPendingKeys}
-        inputTestMode={inputTestMode}
-        setInputTestMode={setInputTestMode}
-        midi={midi}
-        onResetRequest={onResetRequest}
-      />
+      {/* The practice coach, the floating widget and the hotkeys are not
+          part of the phone app — no section, no greyed-out card, nothing
+          that says "coming soon" (mobile plan §1). */}
+      {!IS_MOBILE && coach && widget && hotkeys && (
+        <>
+          <CoachSettingsSection {...coach} instrument={instrument} />
+          <WidgetSettingsSection {...widget} />
+          <HotkeysSettingsSection {...hotkeys} midi={midi} />
+        </>
+      )}
 
       <SupportSection
         shareTooltip={shareTooltip}

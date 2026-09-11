@@ -16,7 +16,7 @@
  * paths are unit-testable without booting the whole session hook.
  */
 
-import type { AdaptiveEvalRequest } from "../ipc";
+import type { AdaptiveEvalRequest } from "../ipc.desktop";
 
 /** The move the engine made. Mirrors `AdaptiveEvalRequest["decision"]`. */
 export type AdaptiveDecision = "up" | "hold" | "down";

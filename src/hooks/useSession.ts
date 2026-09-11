@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getFinalSessionReport, stopEvaluation, getSessionHistory, saveSession, clearSession, coachGenerate, isCoachLoaded, ttsSpeak, onBeatFeedback, onAdaptiveEval, notifySettingsChange, clearCalibrationCacheEntry, onTtsSpeechStarted, onPracticeSegmentEnded } from "../ipc";
-import type { AdaptiveEvalRequest } from "../ipc";
+import { getFinalSessionReport, stopEvaluation, getSessionHistory, saveSession, clearSession, coachGenerate, isCoachLoaded, ttsSpeak, onBeatFeedback, onAdaptiveEval, notifySettingsChange, clearCalibrationCacheEntry, onTtsSpeechStarted, onPracticeSegmentEnded } from "../ipc.desktop";
+import type { AdaptiveEvalRequest } from "../ipc.desktop";
 import type { BeatFeedback, BrainTier, FeedChip, FeedMessage, SessionReport, SessionSegment } from "../types";
 import type { useEvaluation } from "./useEvaluation";
 import {
@@ -63,8 +63,8 @@ import {
 } from "../coach/interventions";
 import { accuracyPct, commentForScore, computeLegacyScore, computeRecentHitCompleteness, gradeForScore, rescoreReport, scoredBeats } from "../coach/reportStats";
 import { createSessionToken } from "../coach/sessionGuard";
-import { coachDebug } from "../coach/debug";
-import { meterKey } from "../utils/meter";
+import { coachDebug } from "../utils/debug";
+import { useMetronomeState } from "./useMetronomeState";
 import { useRealtimeTips } from "../containers/practice-coach/hooks/useRealtimeTips";
 import { useSegmentCoach } from "../containers/practice-coach/hooks/useSegmentCoach";
 
@@ -247,27 +247,23 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
   }, []);
 
   // ── D4 Signal A: settings-change tracking refs ────────────────
-  // Previous values used to detect BPM / preset / time-signature /
-  // instrument changes mid-session. Seeded on startSession so the
-  // first useEffect tick doesn't fire a false-positive boundary.
-  // These reflect the LAST COMMITTED state — i.e. the values at the
-  // moment the most recent `boundary_signal_a` event fired. They are
-  // NOT updated on every render so a burst of rapid changes (e.g.
-  // hammering -5 BPM six times) coalesces into a single event for
-  // the net change ("tempo down to 90 BPM") instead of six cards.
-  // Stable identity for the meter. `beatGroups` arrives as a fresh
-  // array on every state-changed event, so the boundary effect must
-  // depend on this string rather than the array reference.
-  const meterId = meterKey(beatGroups ?? [timeSignature]);
-  const prevBpmRef = useRef<number>(bpm);
-  const prevPresetIdRef = useRef<string | undefined>(presetId);
-  const prevTimeSignatureRef = useRef<number>(timeSignature);
-  const prevMeterKeyRef = useRef<string>(meterKey(beatGroups ?? [timeSignature]));
-  const prevInstrumentRef = useRef<string>(instrument);
-  // Debounce timer used to coalesce config-change bursts. Each new
-  // change resets the timer; the gatekeeper fires once the user
-  // settles (no further changes for BOUNDARY_DEBOUNCE_MS).
-  const boundaryDebounceRef = useRef<number | null>(null);
+  // The metronome settings the coach reacts to — tempo, meter, preset,
+  // instrument — and the bookkeeping that answers “has any of them moved
+  // since the last thing we said about them”. It lives in its own hook
+  // because none of it is about the coach: see useMetronomeState.ts.
+  //
+  // The committed baseline is NOT updated on every render, which is what
+  // makes a burst of rapid changes (hammering -5 BPM six times) coalesce
+  // into one event for the net change rather than six cards.
+  const metronome = useMetronomeState({
+    bpm,
+    timeSignature,
+    beatGroups,
+    presetId,
+    presetName,
+    instrument,
+  });
+  const meterId = metronome.meterId;
 
   // ── C4 first-4-beats hard rule: per-segment beat counter ──────
   // Counts beats since the current segment started. Resets on
@@ -938,54 +934,14 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
       // Sync refs while inactive so a config change before
       // session-start doesn't trigger a phantom event on the first
       // tick of the next session.
-      prevBpmRef.current = bpm;
-      prevPresetIdRef.current = presetId;
-      prevTimeSignatureRef.current = timeSignature;
-      prevMeterKeyRef.current = meterId;
-      prevInstrumentRef.current = instrument;
+      metronome.commit(metronome.snapshot);
       return;
     }
 
     // Compute net changes from last-committed state to current props.
     // Note: we DO NOT commit prev*Ref here — that happens in the timer
     // callback so rapid changes coalesce into a single boundary event.
-    const changes: { kind: string; from: string | number; to: string | number }[] = [];
-    if (prevBpmRef.current !== bpm) {
-      changes.push({
-        kind: bpm > prevBpmRef.current ? "bpm-up" : "bpm-down",
-        from: prevBpmRef.current,
-        to: bpm,
-      });
-    }
-    if (prevPresetIdRef.current !== presetId) {
-      changes.push({
-        kind: "preset",
-        from: prevPresetIdRef.current ?? "free play",
-        to: presetName ?? presetId ?? "free play",
-      });
-    }
-    if (prevTimeSignatureRef.current !== timeSignature) {
-      changes.push({
-        kind: "time-sig",
-        from: prevTimeSignatureRef.current,
-        to: timeSignature,
-      });
-    } else if (prevMeterKeyRef.current !== meterId) {
-      // Same bar length, different accent grouping — a real change the
-      // player hears, invisible to `timeSignature`.
-      changes.push({
-        kind: "grouping",
-        from: prevMeterKeyRef.current,
-        to: meterId,
-      });
-    }
-    if (prevInstrumentRef.current !== instrument) {
-      changes.push({
-        kind: "instrument",
-        from: prevInstrumentRef.current,
-        to: instrument,
-      });
-    }
+    const changes = metronome.changesSinceCommit();
     if (changes.length === 0) return;
 
     // Debounce window — long enough to absorb rapid -5/+5 button mashing
@@ -995,9 +951,9 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     // exactly the state observed when it was scheduled. Subsequent
     // changes cancel + reschedule via the cleanup below, so closure
     // staleness is not a concern.
-    const snapshot = { bpm, presetId, presetName, timeSignature, meterId, instrument };
+    const snapshot = metronome.snapshot;
     const timerId = window.setTimeout(() => {
-      boundaryDebounceRef.current = null;
+      metronome.settleTimer.current = null;
 
       // Collapse to a single forced event using the most "salient"
       // change. BPM beats preset beats time-sig beats instrument when
@@ -1012,11 +968,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
       // Commit the new committed-state BEFORE firing the gatekeeper
       // so any cascading effect re-runs see the post-commit state.
       const presetChanged = changes.some((c) => c.kind === "preset");
-      prevBpmRef.current = snapshot.bpm;
-      prevPresetIdRef.current = snapshot.presetId;
-      prevTimeSignatureRef.current = snapshot.timeSignature;
-      prevMeterKeyRef.current = snapshot.meterId;
-      prevInstrumentRef.current = snapshot.instrument;
+      metronome.commit(snapshot);
 
       // C1 narrative: log the preset change so the LLM sees the new
       // exercise when rephrasing the next mini-report. We append BEFORE
@@ -1098,16 +1050,13 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
       // Signal A is always-spoken (per plan + gatekeeper ALWAYS_SPOKEN).
       speakAndReveal(msgId, template, "urgent");
     }, BOUNDARY_DEBOUNCE_MS);
-    boundaryDebounceRef.current = timerId;
+    metronome.settleTimer.current = timerId;
 
     // Cleanup: every effect re-run (= a newer change arrived) and
     // unmount cancels the pending timer. This is what gives us the
     // debouncing behavior — each new click extends the window.
     return () => {
-      if (boundaryDebounceRef.current !== null) {
-        clearTimeout(boundaryDebounceRef.current);
-        boundaryDebounceRef.current = null;
-      }
+      metronome.cancelSettle();
     };
   }, [active, bpm, presetId, presetName, timeSignature, meterId, instrument, vocab, maybeSpeak, voiceMode, speakAndReveal]);
 
@@ -1183,11 +1132,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     const now = Date.now();
     // D4 Signal A — seed previous-value refs so the first effect tick
     // after session-start doesn't fire a false-positive change event.
-    prevBpmRef.current = bpm;
-    prevPresetIdRef.current = presetId;
-    prevTimeSignatureRef.current = timeSignature;
-    prevMeterKeyRef.current = meterKey(beatGroups ?? [timeSignature]);
-    prevInstrumentRef.current = instrument;
+    metronome.commit(metronome.snapshot);
     // Fresh segment for the first-4-beats hard rule. Counter ticks
     // up in the onBeatFeedback handler; the gatekeeper demotes spoken
     // events to written until it crosses FIRST_BEATS_TTS_FLOOR.
@@ -1631,10 +1576,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     // Cancel any pending Signal A debounce — a config change committed
     // post-endSession would fire boundary_signal_a against a null
     // gatekeeper and panic the realtime path.
-    if (boundaryDebounceRef.current !== null) {
-      window.clearTimeout(boundaryDebounceRef.current);
-      boundaryDebounceRef.current = null;
-    }
+    metronome.cancelSettle();
   }, [active, evaluation, bpm, timeSignature, startedAt, presetId, presetName, maybeSpeak, instrumentLabel]);
 
   // Chat: send a user question to the coach

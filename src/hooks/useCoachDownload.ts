@@ -1,19 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-  cancelModelDownload,
-  getModelStatus,
-  getSystemMemoryMb,
-  onDownloadComplete,
-  onDownloadProgress,
-  startModelDownload,
-  storeLoad,
-  storeSave,
-  ttsListVoices,
-  ttsSetVoice,
-  ttsSetVolume,
-  ttsVoiceDiagnostics,
-} from "../ipc";
-import type { DownloadProgress, ModelStatus, VoiceDiagnostic } from "../ipc";
+import { storeLoad, storeSave } from "../ipc";
+import { cancelModelDownload, getModelStatus, getSystemMemoryMb, onDownloadComplete, onDownloadProgress, startModelDownload, ttsListVoices, ttsSetVoice, ttsSetVolume, ttsVoiceDiagnostics } from "../ipc.desktop";
+import type { DownloadProgress, ModelStatus, VoiceDiagnostic } from "../ipc.desktop";
 import type { BrainTier, CoachMode, ModelTier, VoiceMode, Verbosity } from "../types";
 import { needsBrainUpdate, standardAvailable, studioAvailable } from "../coach/brainTiers";
 import { unloadCoach } from "./coachLoader";

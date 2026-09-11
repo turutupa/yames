@@ -1,0 +1,861 @@
+/**
+ * Desktop-only IPC.
+ *
+ * The commands in here reach something a phone does not have: the practice
+ * coach and its model downloads, the mic evaluation pipeline and its
+ * calibration cache, the voice, MIDI, the second window and the widget, the
+ * always-on-top flag, and the updater. M01 makes them return an error on a
+ * mobile build; this file is how the frontend guarantees it never asks.
+ *
+ * The rule is one-directional and absolute: modules on the mobile import
+ * graph import `./ipc`, desktop-only modules may import either, and NOTHING
+ * is re-exported from one file to the other. `scripts/check-mobile-bundle.mjs`
+ * fails the build if any of these command names reaches `dist/`.
+ *
+ * See `plans/MOBILE_IMPLEMENTATION_PLAN.md` §3 "Frontend".
+ */
+import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
+import type { ComponentScores, SegmentEndReason } from "./types";
+
+export async function setWidgetMode(mode: "compact" | "comfortable"): Promise<void> {
+  return invoke("set_widget_mode", { mode });
+}
+
+export async function setAlwaysOnTop(enabled: boolean): Promise<void> {
+  return invoke("set_always_on_top", { enabled });
+}
+
+export async function setWidgetAlwaysOnTop(enabled: boolean): Promise<void> {
+  return invoke("set_widget_always_on_top", { enabled });
+}
+
+export async function showMain(): Promise<void> {
+  return invoke("show_main");
+}
+
+export async function showFloating(): Promise<void> {
+  return invoke("show_floating");
+}
+
+/**
+ * Emitted by the engine AFTER an adaptive drill step has been applied.
+ *
+ * T07 — the tempo decision belongs to the engine (`adaptive_thresholds`
+ * in `engine.rs`). This payload reports the move that already happened
+ * so the coach can comment on it; there is no longer any way to push a
+ * decision back into the engine.
+ *
+ * `currentBpm` is the tempo the evaluated round was played at,
+ * `newBpm` the tempo the drill continues at.
+ */
+export type AdaptiveEvalRequest = {
+  currentBpm: number;
+  newBpm: number;
+  startBpm: number;
+  targetBpm: number;
+  accuracyPct: number;
+  aggressiveness: string;
+  currentStep: number;
+  decision: "up" | "hold" | "down";
+};
+
+export function onAdaptiveEval(callback: (req: AdaptiveEvalRequest) => void) {
+  return listen<AdaptiveEvalRequest>("adaptive-eval", (e) => callback(e.payload));
+}
+
+export function onFullscreenChanged(callback: (isFullscreen: boolean) => void) {
+  return listen<boolean>("fullscreen-changed", (e) => callback(e.payload));
+}
+
+export async function setCalibrationOffset(offset: number): Promise<void> {
+  return invoke("set_calibration_offset", { offset });
+}
+
+export async function getCalibrationOffset(): Promise<number | null> {
+  return invoke<number | null>("get_calibration_offset");
+}
+
+// ---------------------------------------------------------------------------
+// Per-instrument calibration cache (DSP plan §"Per-instrument calibration
+// cache"). The cache is read-mostly on the frontend — Settings renders a
+// "Calibrated for this device" hint plus a "Recalibrate" button that drops
+// the entry so the next session re-converges from scratch.
+// ---------------------------------------------------------------------------
+
+export interface CalibrationCacheEntry {
+  offsetMs: number;
+  confidence: number;
+  lastUpdatedSecs: number;
+}
+
+export interface CalibrationCachePair {
+  instrumentId: string;
+  deviceName: string;
+  entry: CalibrationCacheEntry;
+}
+
+// Rust serializes with snake_case for nested fields; map at the boundary so
+// the rest of the app uses camelCase consistently. Keeping this thin
+// adapter layer also lets us evolve the wire format without churning every
+// consumer.
+type RawEntry = {
+  offset_ms: number;
+  confidence: number;
+  last_updated_secs: number;
+};
+
+type RawPair = {
+  instrument_id: string;
+  device_name: string;
+  entry: RawEntry;
+};
+
+function adaptEntry(raw: RawEntry): CalibrationCacheEntry {
+  return {
+    offsetMs: raw.offset_ms,
+    confidence: raw.confidence,
+    lastUpdatedSecs: raw.last_updated_secs,
+  };
+}
+
+function adaptPair(raw: RawPair): CalibrationCachePair {
+  return {
+    instrumentId: raw.instrument_id,
+    deviceName: raw.device_name,
+    entry: adaptEntry(raw.entry),
+  };
+}
+
+export async function getCalibrationCacheEntry(
+  instrumentId: string,
+  deviceName: string | null,
+): Promise<CalibrationCacheEntry | null> {
+  const raw = await invoke<RawEntry | null>("get_calibration_cache_entry", {
+    instrumentId,
+    deviceName,
+  });
+  return raw ? adaptEntry(raw) : null;
+}
+
+export async function clearCalibrationCacheEntry(
+  instrumentId: string,
+  deviceName: string | null,
+): Promise<void> {
+  return invoke("clear_calibration_cache_entry", {
+    instrumentId,
+    deviceName,
+  });
+}
+
+export async function listCalibrationCache(): Promise<CalibrationCachePair[]> {
+  const raw = await invoke<RawPair[]>("list_calibration_cache");
+  return raw.map(adaptPair);
+}
+
+// Update checker — uses Tauri updater plugin for in-app updates
+import { check } from "@tauri-apps/plugin-updater";
+import { relaunch } from "@tauri-apps/plugin-process";
+
+export interface UpdateInfo {
+  hasUpdate: boolean;
+  currentVersion: string;
+  latestVersion: string;
+  releaseUrl: string;
+  /**
+   * The `notes` body from `latest.json`, when the endpoint had an update to
+   * describe. O8's what's-new modal caches this and replays it after the
+   * install, because `check()` returns null once you are on the latest build —
+   * which is exactly when the notes become worth reading.
+   */
+  notes?: string;
+}
+
+export async function checkForUpdate(currentVersion: string): Promise<UpdateInfo> {
+  const releaseUrl = "https://github.com/turutupa/yames/releases/latest";
+  try {
+    const update = await check();
+    if (update) {
+      return {
+        hasUpdate: true,
+        currentVersion,
+        latestVersion: update.version,
+        releaseUrl,
+        notes: update.body,
+      };
+    }
+    return { hasUpdate: false, currentVersion, latestVersion: currentVersion, releaseUrl };
+  } catch {
+    return { hasUpdate: false, currentVersion, latestVersion: currentVersion, releaseUrl };
+  }
+}
+
+export async function downloadAndInstallUpdate(): Promise<void> {
+  const update = await check();
+  if (update) {
+    await update.downloadAndInstall();
+    await relaunch();
+  }
+}
+
+// ---------------------------------------------------------------------------
+// MIDI
+// ---------------------------------------------------------------------------
+import type { MidiDeviceInfo, MidiBinding, MidiActivity, MidiMsgType } from "./types";
+
+export async function listMidiDevices(): Promise<MidiDeviceInfo[]> {
+  return invoke<MidiDeviceInfo[]>("list_midi_devices");
+}
+
+export async function connectMidiDevice(deviceName: string): Promise<void> {
+  return invoke("connect_midi_device", { deviceName });
+}
+
+export async function disconnectMidiDevice(): Promise<void> {
+  return invoke("disconnect_midi_device");
+}
+
+export async function setMidiBinding(
+  action: string,
+  channel: number | null,
+  msgType: MidiMsgType,
+  number: number,
+): Promise<void> {
+  return invoke("set_midi_binding", { action, channel, msgType, number });
+}
+
+export async function clearMidiBinding(action: string): Promise<void> {
+  return invoke("clear_midi_binding", { action });
+}
+
+export async function getMidiBindings(): Promise<MidiBinding[]> {
+  return invoke<MidiBinding[]>("get_midi_bindings");
+}
+
+export function onMidiAction(callback: (action: string) => void) {
+  return listen<{ action: string }>("midi-action", (e) => callback(e.payload.action));
+}
+
+export function onMidiActivity(callback: (activity: MidiActivity) => void) {
+  return listen<MidiActivity>("midi-activity", (e) => callback(e.payload));
+}
+
+export function onMidiDevicesChanged(callback: (devices: MidiDeviceInfo[]) => void) {
+  return listen<MidiDeviceInfo[]>("midi-devices-changed", (e) => callback(e.payload));
+}
+
+// ---------------------------------------------------------------------------
+// Audio Input / Evaluation
+// ---------------------------------------------------------------------------
+import type { AudioInputDevice, AudioSpectrum, BeatFeedback, InferredGridChanged, SessionReport } from "./types";
+
+export async function listAudioInputDevices(): Promise<AudioInputDevice[]> {
+  return invoke<AudioInputDevice[]>("list_audio_input_devices");
+}
+
+export function onAudioInputDevicesChanged(callback: (devices: AudioInputDevice[]) => void) {
+  return listen<AudioInputDevice[]>("audio-input-devices-changed", (e) => callback(e.payload));
+}
+
+export async function startEvaluation(deviceName?: string, inputChannel?: number, coachMode?: "default" | "pro"): Promise<void> {
+  return invoke("start_evaluation", {
+    deviceName: deviceName ?? null,
+    inputChannel: inputChannel ?? null,
+    coachMode: coachMode ?? null,
+  });
+}
+
+export async function stopEvaluation(): Promise<void> {
+  return invoke("stop_evaluation");
+}
+
+export async function getEvaluationState(): Promise<boolean> {
+  return invoke<boolean>("get_evaluation_state");
+}
+
+/**
+ * D4 — Signal A: tell the timing analyzer that the user changed
+ * settings (BPM, preset, time signature, or instrument). The analyzer
+ * closes the open segment with `SegmentEndReason::SettingsChange` so
+ * the next run of play scores against a fresh segment. Per the plan,
+ * NO `practice-segment-ended` event fires for this — the JS coach
+ * speaks the boundary directly via a forced `boundary_signal_a`
+ * gatekeeper event.
+ *
+ * Safe to call when no evaluation is running (the analyzer's flag
+ * is cleared on `start_evaluation`).
+ */
+export async function notifySettingsChange(): Promise<void> {
+  return invoke("notify_settings_change");
+}
+
+/**
+ * Force-close the open practice segment so `getSessionReport()` returns
+ * the IC/GA formula score instead of the legacy fallback. The analyzer
+ * loop picks this up within 5ms, emits `practice-segment-ended` with
+ * `UserStopped`, and calls `push_segment()`.
+ *
+ * Call this in the falling-edge handler BEFORE `getSessionReport()`.
+ * Safe when no session is active (no-op).
+ */
+export async function closeOpenSegment(): Promise<void> {
+  return invoke("close_open_segment");
+}
+
+export function onAudioSpectrum(callback: (spectrum: AudioSpectrum) => void) {
+  return listen<AudioSpectrum>("audio-spectrum", (e) => callback(e.payload));
+}
+
+export function onBeatFeedback(callback: (feedback: BeatFeedback) => void) {
+  return listen<BeatFeedback>("beat-feedback", (e) => callback(e.payload));
+}
+
+/**
+ * Path B — subscribe to rhythm-inference state changes. The Rust
+ * matcher's `RhythmInference` decides what divisor (1/2/3/4/6) the
+ * user is actually playing and emits an event whenever the locked
+ * state or divisor changes. The coach UI uses this to render the
+ * subtle "Tracking 16ths" caption (see `useInferredGrid` hook).
+ *
+ * The Rust side debounces — this callback only fires when the
+ * user-visible state actually changes, not on every refit (which runs
+ * every 5ms).
+ */
+export function onInferredGridChanged(callback: (grid: InferredGridChanged) => void) {
+  return listen<InferredGridChanged>("inferred-grid-changed", (e) => callback(e.payload));
+}
+
+/**
+ * D4 Signal B — subscribe to practice-segment-ended events. Fires from the
+ * Rust timing analyzer when an active segment closes due to activity-gap OR
+ * grid-discontinuity. SettingsChange segments close via Signal A and do NOT
+ * emit this event.
+ *
+ * The JS mini-report logic (useSegmentCoach.ts) drives off the `isPlaying`
+ * falling edge and does not consume this event. This listener is for
+ * gatekeeper scenarios that must react to the specific end-reason — in
+ * particular `"grid-discontinuity"` which signals the player drifted off-grid
+ * while still playing.
+ */
+export type PracticeSegmentEndedPayload = {
+  startMs: number;
+  endMs: number;
+  score: number;
+  componentScores: ComponentScores;
+  bpm: number;
+  instrument: string;
+  presetId?: string;
+  endReason: SegmentEndReason;
+  onsetCount: number;
+  beatCount: number;
+  totalOnsets: number;
+  spuriousOnsets: number;
+  onsetEfficiency: number;
+  inferredDivisor: number;
+  inferredDivisorConfidence: number;
+  playMode: "structured" | "noodling";
+};
+
+export function onPracticeSegmentEnded(
+  callback: (payload: PracticeSegmentEndedPayload) => void,
+) {
+  return listen<PracticeSegmentEndedPayload>(
+    "practice-segment-ended",
+    (e) => callback(e.payload),
+  );
+}
+
+export async function getSessionReport(): Promise<SessionReport | null> {
+  return invoke<SessionReport | null>("get_session_report");
+}
+
+/**
+ * Session-end report: reads from `all_segments` (never-cleared) so the
+ * score reflects every segment even after `clearSession()` wiped the
+ * per-exercise window mid-session.
+ *
+ * Use this in `endSession()` instead of `getSessionReport()`.
+ * Mid-session mini-reports must continue using `getSessionReport()` so
+ * they show per-exercise (not cumulative) scores.
+ */
+export async function getFinalSessionReport(): Promise<SessionReport | null> {
+  return invoke<SessionReport | null>("get_final_session_report");
+}
+
+export async function clearSession(): Promise<void> {
+  return invoke("clear_session");
+}
+
+// ---------------------------------------------------------------------------
+// Session History
+// ---------------------------------------------------------------------------
+import type { SavedSession } from "./types";
+
+export async function saveSession(session: SavedSession): Promise<void> {
+  return invoke("save_session", { session });
+}
+
+export async function getSessionHistory(): Promise<SavedSession[]> {
+  return invoke<SavedSession[]>("get_session_history");
+}
+
+export async function deleteSession(id: string): Promise<void> {
+  return invoke("delete_session", { id });
+}
+
+export async function clearAllSessions(): Promise<void> {
+  return invoke("clear_all_sessions");
+}
+
+// ---------------------------------------------------------------------------
+// Diagnostic Session Logs (D1)
+//
+// Heavier per-session JSON dumps written by the eval pipeline once
+// instrumentation is wired in (D2-D4). The shape mirrors `SessionLog`
+// in `src-tauri/src/session_log.rs`.
+// ---------------------------------------------------------------------------
+
+import type { SessionLog } from "./types";
+
+export async function listSessionLogs(): Promise<string[]> {
+  return invoke<string[]>("list_session_logs");
+}
+
+export async function getSessionLog(path: string): Promise<SessionLog> {
+  return invoke<SessionLog>("get_session_log", { path });
+}
+
+export async function exportSessionLogs(): Promise<string> {
+  return invoke<string>("export_session_logs");
+}
+
+export async function clearSessionLogs(): Promise<void> {
+  return invoke("clear_session_logs");
+}
+
+// ---------------------------------------------------------------------------
+// Audio Input Recording / Playback
+// ---------------------------------------------------------------------------
+
+export async function startRecording(): Promise<void> {
+  return invoke("start_recording");
+}
+
+export async function stopRecording(): Promise<number> {
+  return invoke<number>("stop_recording");
+}
+
+export async function startPlayback(): Promise<void> {
+  return invoke("start_playback");
+}
+
+export async function stopPlayback(): Promise<void> {
+  return invoke("stop_playback");
+}
+
+export async function discardRecording(): Promise<void> {
+  return invoke("discard_recording");
+}
+
+export async function getWaveform(): Promise<number[]> {
+  return invoke<number[]>("get_waveform");
+}
+
+export async function setInputGain(gainDb: number): Promise<void> {
+  return invoke("set_input_gain", { gainDb });
+}
+
+// ---------------------------------------------------------------------------
+// Model Management
+// ---------------------------------------------------------------------------
+
+export type ModelStatus = {
+  brainReady: boolean;
+  brainTier: string | null;
+  /**
+   * Which model family the downloaded brain belongs to. `"qwen3"` is
+   * current; `"legacy"` is anything installed before the Qwen3 refresh
+   * (Qwen2.5-1.5B / Phi-3.5-mini), detected by the absence of the
+   * `models/brain/model.json` marker. `null` when nothing is downloaded.
+   */
+  brainFamily: string | null;
+  brainSizeBytes: number;
+  voiceReady: boolean;
+  voiceSizeBytes: number;
+  /**
+   * Tier gates and the migration prompt, decided in Rust
+   * (`models::recommendations`) against the RAM the OS actually reports.
+   * The frontend consumes the booleans and owns none of the thresholds —
+   * the TS copy compared against a literal 16 GiB, which no real 16 GB
+   * Windows or Linux machine ever reports.
+   */
+  studioRecommended: boolean;
+  standardRecommended: boolean;
+  brainUpdateRecommended: boolean;
+};
+
+export type DownloadProgress = {
+  component: string;
+  downloadedBytes: number;
+  totalBytes: number;
+  fraction: number;
+  done: boolean;
+};
+
+export async function getModelStatus(): Promise<ModelStatus> {
+  return invoke<ModelStatus>("get_model_status");
+}
+
+/**
+ * Total physical RAM in MB, or 0 when the platform query failed.
+ * Gates the Studio brain tier (ROADMAP §3: offered only at >= 16 GB).
+ */
+export async function getSystemMemoryMb(): Promise<number> {
+  return invoke<number>("get_system_memory_mb");
+}
+
+export async function writeModelChunk(
+  component: string,
+  filename: string,
+  data: number[],
+): Promise<string> {
+  return invoke<string>("write_model_chunk", { component, filename, data });
+}
+
+export async function getModelsPath(): Promise<string> {
+  return invoke<string>("get_models_path");
+}
+
+/**
+ * Download a model file from a URL, streaming chunks to the Rust filesystem.
+ * Emits DownloadProgress-like callbacks so the UI can show progress.
+ */
+export async function downloadModelFile(
+  url: string,
+  component: string,
+  filename: string,
+  onProgress?: (downloaded: number, total: number) => void,
+  signal?: AbortSignal,
+): Promise<void> {
+  let response: Response;
+  try {
+    response = await fetch(url, { signal });
+  } catch (err) {
+    if (signal?.aborted) throw new Error("Download cancelled");
+    throw new Error("Could not reach server — check your internet connection");
+  }
+  if (!response.ok) throw new Error(`Server returned ${response.status} ${response.statusText}`);
+  const contentLength = Number(response.headers.get("content-length") ?? 0);
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error("No response body");
+
+  let downloaded = 0;
+  const chunks: Uint8Array[] = [];
+
+  while (true) {
+    if (signal?.aborted) {
+      await reader.cancel();
+      throw new Error("Download cancelled");
+    }
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    downloaded += value.length;
+    onProgress?.(downloaded, contentLength);
+  }
+
+  // Combine all chunks and write to disk via Rust
+  const full = new Uint8Array(downloaded);
+  let offset = 0;
+  for (const chunk of chunks) {
+    full.set(chunk, offset);
+    offset += chunk.length;
+  }
+
+  await writeModelChunk(component, filename, Array.from(full));
+}
+
+export async function deleteModels(): Promise<void> {
+  return invoke("delete_models");
+}
+
+// ---------------------------------------------------------------------------
+// Coach LLM Inference
+// ---------------------------------------------------------------------------
+
+/**
+ * Load the brain into memory. Idempotent on the Rust side: the same
+ * weights already resident is a no-op, and a load already in flight is
+ * not restarted. Prefer `ensureCoachLoaded()` from `hooks/coachLoader`,
+ * which also dedupes the in-flight promise on this side.
+ */
+export async function loadCoachModel(): Promise<boolean> {
+  return invoke<boolean>("load_coach_model");
+}
+
+/**
+ * Drop the resident worker and free its RAM. The model is only meant to
+ * be resident while someone is practising, so this is called when the
+ * brain tier is switched off and by the idle timer in `coachLoader`.
+ */
+export async function unloadCoachModel(): Promise<void> {
+  return invoke("unload_coach_model");
+}
+
+/**
+ * What kind of generation this is. Explicit rather than sniffed out of
+ * the prompt text: Rust picks the token budget and the template branch
+ * from it, and the timeout below comes from the same value.
+ */
+export type CoachGenKind =
+  | "tip"
+  | "greeting"
+  | "report"
+  | "summary"
+  | "chat"
+  | "drill";
+
+/**
+ * Hard timeout per generation kind, in milliseconds.
+ *
+ * One 3 s cap for everything came from the plan's C4 latency policy,
+ * which is written about the *tip* path — "the user never waits for the
+ * model". Applied to a session summary or a chat answer it just meant
+ * those never arrived on a CPU backend, since a 256-token answer cannot
+ * be produced in three seconds there. The budgets now match AGENTS.md's
+ * latency tiers: a tip must not delay the next thing the player hears,
+ * a report lands while they are already reading their score, and a
+ * summary or chat answer is something they are explicitly waiting for.
+ *
+ * On timeout this rejects with `Error("coach_generate_timeout")` so call
+ * sites fall back to their template path (every one has a try/catch or
+ * a `.catch()`).
+ */
+export const COACH_GENERATE_TIMEOUT_MS: Record<CoachGenKind, number> = {
+  tip: 3_000,
+  drill: 3_000,
+  greeting: 3_000,
+  report: 8_000,
+  summary: 15_000,
+  chat: 15_000,
+};
+
+export async function coachGenerate(
+  kind: CoachGenKind,
+  context: string,
+): Promise<string> {
+  const call = invoke<string>("coach_generate", { kind, context });
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      call,
+      new Promise<string>((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error("coach_generate_timeout")),
+          COACH_GENERATE_TIMEOUT_MS[kind],
+        );
+      }),
+    ]);
+  } finally {
+    // Without this the 15 s chat timer keeps the event loop (and, in
+    // tests, the fake clock) busy long after the call resolved.
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}
+
+export async function isCoachLoaded(): Promise<boolean> {
+  return invoke<boolean>("is_coach_loaded");
+}
+
+/**
+ * What the coach can actually do in this build, right now.
+ *
+ * Distinct from `ModelStatus`, which only answers "are the weights on
+ * disk". A release binary compiled without the `coach-llm` Cargo
+ * feature can have 2.4 GB of GGUF downloaded and still be unable to
+ * read a byte of it — `llmCompiled` is what tells the two apart.
+ */
+export type CoachCapabilities = {
+  /** Whether the binary was built with the `coach-llm` feature. */
+  llmCompiled: boolean;
+  /** Whether a real model is loaded in memory right now. */
+  modelResident: boolean;
+  /** Whether a load is in flight — the UI says "warming up". */
+  loading: boolean;
+  /**
+   * Compile-time llama.cpp backend. llama.cpp still falls back to CPU
+   * at runtime when no usable GPU is present, so `"vulkan"` does not
+   * guarantee GPU execution.
+   */
+  backend: "metal" | "vulkan" | "cpu" | "none";
+  /**
+   * Display name of the resident model, read from GGUF metadata
+   * ("Qwen3 4B"), or null when nothing is resident. It used to be the
+   * file name the downloader wrote, so the status line read
+   * "model.bin on vulkan".
+   */
+  modelName: string | null;
+  /**
+   * Why the last load did not produce a resident model (legacy weights,
+   * nothing downloaded, no LLM in this build), or null.
+   */
+  loadError: string | null;
+  /** Weights are on disk. Mirrors `ModelStatus.brainReady`. */
+  brainDownloaded: boolean;
+  /** Tier gates — see `ModelStatus`. */
+  studioRecommended: boolean;
+  standardRecommended: boolean;
+  brainUpdateRecommended: boolean;
+  /**
+   * Whether live mid-session tips actually reach the model (T04b).
+   *
+   * Deliberately not derivable from `backend` here: that is the
+   * compile-time feature string, so a GPU-less machine running the
+   * shipped Vulkan build still reports `"vulkan"`. This is the routing
+   * decision itself, taken from measured rephrase latency, so the UI
+   * cannot claim something the coach does not do.
+   */
+  tipsUseModel: boolean;
+  /**
+   * Measured median rephrase round-trip in ms, or null before the model
+   * has been asked for one. Null means "not measured yet", not "fast".
+   */
+  rephraseP50Ms: number | null;
+};
+
+export async function getCoachCapabilities(): Promise<CoachCapabilities> {
+  return invoke<CoachCapabilities>("get_coach_capabilities");
+}
+
+// ---------------------------------------------------------------------------
+// TTS (Text-to-Speech)
+// ---------------------------------------------------------------------------
+
+export async function ttsSpeak(text: string): Promise<void> {
+  return invoke("tts_speak", { text });
+}
+
+/**
+ * Subscribe to the "TTS audio is about to play" signal. The Rust side
+ * emits this AFTER Piper synthesis finishes but BEFORE the WAV starts
+ * playing — i.e. when the spinner-to-text swap should fire so the
+ * visible text lands within ~10-30ms of the first audible sample. The
+ * payload is empty; the consumer maintains its own pending-speech
+ * queue (FIFO) and pops the head on each event.
+ */
+export function onTtsSpeechStarted(callback: () => void) {
+  return listen<null>("tts-speech-started", () => callback());
+}
+
+/**
+ * Subscribe to the "TTS speech ended" signal — fires once per
+ * `tts_speak` invocation in every exit path: natural completion,
+ * cancellation via `tts_stop` (or another voice click), AND error.
+ * Used by the Settings voice-preview UI to clear the per-voice
+ * "speaking" indicator at the exact moment audio stops, instead of a
+ * coarse timer that didn't honour interrupts. Pair every increment of
+ * a pending-speech counter with a decrement here for a clean tally
+ * across rapid voice-button clicks.
+ */
+export function onTtsSpeechEnded(callback: () => void) {
+  return listen<null>("tts-speech-ended", () => callback());
+}
+
+export async function ttsSetVoice(voice: string): Promise<void> {
+  return invoke("tts_set_voice", { voice });
+}
+
+/**
+ * Set the coach voice playback volume (0.0..=1.0). Driven by the unified
+ * volume slider so the user can dial down the spoken feedback without
+ * touching the metronome gain.
+ */
+export async function ttsSetVolume(volume: number): Promise<void> {
+  return invoke("tts_set_volume", { volume });
+}
+
+export async function ttsListVoices(): Promise<[string, string][]> {
+  return invoke<[string, string][]>("tts_list_voices");
+}
+
+/**
+ * Interrupt any currently-playing TTS utterance (Piper synthesis, the
+ * in-process WAV playback that follows it, or the macOS `say` fallback).
+ * The Rust side bumps a generation counter: an in-flight Piper
+ * subprocess is killed by PID (`kill -9` / `taskkill /F`), and playback
+ * already under way sees the bumped generation on its next 20 ms poll
+ * and stops the rodio sink. Safe to call when nothing is playing (the
+ * counter still bumps, no kill is issued). Used by the voice preview UI
+ * so rapid clicks across voices feel snappy instead of queueing up.
+ */
+export async function ttsStop(): Promise<void> {
+  return invoke("tts_stop");
+}
+
+/**
+ * Per-voice diagnostic info from the Rust side. Mirrors the
+ * `VoiceDiagnostic` struct in `tts.rs` (serde renames the boolean fields
+ * to camelCase). `ready` is true only when:
+ *   - the Piper engine (`piper` / `piper.exe`) is on disk AND passed the
+ *     install-time smoke test
+ *   - the voice's .onnx file exists AND is larger than `MIN_ONNX_BYTES`
+ *   - the voice's .onnx.json sidecar exists
+ *
+ * The UI uses these flags to gate the per-voice download button — if
+ * any of `engineMissing`, `onnxMissing`, `jsonMissing`, or `corrupted`
+ * is true, the voice can't speak and the user needs to click "Repair".
+ */
+export interface VoiceDiagnostic {
+  id: string;
+  name: string;
+  ready: boolean;
+  corrupted: boolean;
+  onnxMissing: boolean;
+  jsonMissing: boolean;
+  engineMissing: boolean;
+  onnxBytes: number;
+  /**
+   * OS-specific remediation sentence, present only when `engineMissing`
+   * is true. Windows (antivirus quarantine), Linux (missing
+   * `espeak-ng-data`) and macOS (Gatekeeper) fail in different ways, so
+   * "engine missing" on its own gave the user nothing to act on. Emitted
+   * from Rust in English; skipped entirely when the engine is healthy.
+   */
+  engineHint?: string;
+}
+
+export async function ttsVoiceDiagnostics(): Promise<VoiceDiagnostic[]> {
+  return invoke<VoiceDiagnostic[]>("tts_voice_diagnostics");
+}
+
+/**
+ * Download (or re-download) a single voice's .onnx + .onnx.json. If the
+ * Piper engine itself is missing required dylibs, this also re-extracts
+ * the Piper tarball before pulling the voice. Emits the standard
+ * `model-download-progress` events; on success emits
+ * `model-download-complete` WITHOUT a `tier` field so the frontend
+ * doesn't clobber the active brain tier.
+ */
+export async function startVoiceRepair(voiceId: string): Promise<void> {
+  return invoke("start_voice_repair", { voiceId });
+}
+
+export function onDownloadProgress(callback: (progress: DownloadProgress) => void) {
+  return listen<DownloadProgress>("model-download-progress", (e) => callback(e.payload));
+}
+
+export function onDownloadComplete(callback: (result: { success: boolean; tier?: string; cancelled?: boolean; error?: string }) => void) {
+  return listen<{ success: boolean; tier?: string; cancelled?: boolean; error?: string }>("model-download-complete", (e) => callback(e.payload));
+}
+
+export async function startModelDownload(url: string, component: string, filename: string, tier: string): Promise<void> {
+  return invoke("start_model_download", { url, component, filename, tier });
+}
+
+export async function cancelModelDownload(): Promise<void> {
+  return invoke("cancel_model_download");
+}
+
+export function onPlaybackFinished(callback: () => void) {
+  return listen<void>("playback-finished", () => callback());
+}

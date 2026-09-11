@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { coachStatusLabel, coachTierLabel } from "./coachStatus";
-import type { CoachCapabilities } from "../../ipc";
+import type { CoachCapabilities } from "../../ipc.desktop";
 
 const caps = (over: Partial<CoachCapabilities> = {}): CoachCapabilities => ({
   llmCompiled: true,

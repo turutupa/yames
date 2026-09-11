@@ -8,6 +8,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { HintCard } from "../onboarding/hints/HintCard";
 import { useFirstTimeHint } from "../onboarding/hints/useFirstTimeHint";
 import { shouldHintZenFirst } from "../onboarding/hints/triggers";
+import { IS_MOBILE } from "../../platform";
 import "../../styles/fullscreen.css";
 
 interface FullscreenViewProps {
@@ -62,7 +63,7 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
   // `zen-first` (O7): this component only mounts inside Zen, so being here is
   // the trigger. The card renders inside the overlay — the overlay sits at
   // z-index 9999, well above the fixed hint layer MainWindow uses.
-  const zenHint = useFirstTimeHint("zen-first", shouldHintZenFirst(true));
+  const zenHint = useFirstTimeHint("zen-first", !IS_MOBILE && shouldHintZenFirst(true));
 
   // Restore zen style from store on mount
   useEffect(() => {
@@ -75,6 +76,9 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
     setThemeOpen(false);
   };
   const toggleFullscreen = async () => {
+    // Zen already fills a phone's screen; there is no window behind it to
+    // grow, and no always-on-top or webview focus to put back afterwards.
+    if (IS_MOBILE) return;
     const win = getCurrentWindow();
     const isFull = await win.isFullscreen();
     await win.setFullscreen(!isFull);
@@ -148,7 +152,7 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
     >
       <ZenEffects style={zenStyle} currentBeat={currentBeat} isPlaying={state.isPlaying} activeTab={activeTab} beatsPerMeasure={beatsPerMeasure} />
 
-      {zenHint.shouldShow && (
+      {!IS_MOBILE && zenHint.shouldShow && (
         <div className="zen-hint" onDoubleClick={(e) => e.stopPropagation()}>
           <HintCard id="zen-first" inline onDismiss={zenHint.markShown} />
         </div>
@@ -178,13 +182,15 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
             ))}
           </div>
         </div>
-        {/* Fullscreen toggle */}
-        <button className="zen-top-btn" onClick={toggleFullscreen} data-tooltip={t("zen.fullscreen")}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" />
-            <line x1="21" y1="3" x2="14" y2="10" /><line x1="3" y1="21" x2="10" y2="14" />
-          </svg>
-        </button>
+        {/* Fullscreen toggle — nothing to toggle on a phone. */}
+        {!IS_MOBILE && (
+          <button className="zen-top-btn" onClick={toggleFullscreen} data-tooltip={t("zen.fullscreen")}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" />
+              <line x1="21" y1="3" x2="14" y2="10" /><line x1="3" y1="21" x2="10" y2="14" />
+            </svg>
+          </button>
+        )}
       </div>
 
       <div className="fs-content">

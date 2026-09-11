@@ -11,9 +11,10 @@
  * reportability, stale-guard discard, …) logs a one-liner here when
  * enabled.
  *
- * Lives in `src/coach/*` rather than `src/hooks/useSession.ts` so any
- * future coach module (templates, gatekeeper, presetAwareness, …) can
- * import it without dragging the whole session hook along.
+ * Lives in `src/utils/` rather than `src/coach/`: two of its callers are
+ * not the coach at all (the drill ramp reconfigure and the preset loader
+ * log their own step failures here), and `src/coach/*` is cut from the
+ * mobile bundle, which a shared logger has no business being cut with.
  */
 export function coachDebug(...args: unknown[]): void {
   try {

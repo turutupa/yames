@@ -7,6 +7,7 @@
  * than a placeholder, and jumping to them is a no-op until they register.
  */
 import { useTranslation } from "react-i18next";
+import { IS_MOBILE } from "../../../platform";
 import { getThemeById } from "../../../themes";
 import { useWizardEnv } from "../WizardContext";
 import type { StepId } from "../onboardingMachine";
@@ -117,21 +118,24 @@ export function ReadyStep(_props: WizardStepProps) {
             </li>
           );
         })}
-        <li>
-          <div className="onboarding-summary-row onboarding-summary-static onboarding-summary-toggle">
-            <span className="onboarding-summary-label">
-              {t("onboarding.ready.alwaysOnTop")}
-            </span>
-            <button
-              type="button"
-              className={`toggle-btn ${alwaysOnTop ? "active" : ""}`}
-              aria-pressed={alwaysOnTop}
-              onClick={() => setAlwaysOnTop(!alwaysOnTop)}
-            >
-              {alwaysOnTop ? t("common.on") : t("common.off")}
-            </button>
-          </div>
-        </li>
+        {/* A phone has one fullscreen webview — nothing to stay on top of. */}
+        {!IS_MOBILE && (
+          <li>
+            <div className="onboarding-summary-row onboarding-summary-static onboarding-summary-toggle">
+              <span className="onboarding-summary-label">
+                {t("onboarding.ready.alwaysOnTop")}
+              </span>
+              <button
+                type="button"
+                className={`toggle-btn ${alwaysOnTop ? "active" : ""}`}
+                aria-pressed={alwaysOnTop}
+                onClick={() => setAlwaysOnTop(!alwaysOnTop)}
+              >
+                {alwaysOnTop ? t("common.on") : t("common.off")}
+              </button>
+            </div>
+          </li>
+        )}
       </ul>
 
       <div className="onboarding-ready-actions">

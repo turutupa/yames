@@ -25,7 +25,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, fireEvent } from "@testing-library/react";
 import { readStylesheet } from "../../test/readStyles";
 import { CoachDownloadConfirmDialog } from "./CoachDownloadStatus";
-import type { ModelStatus } from "../../ipc";
+import type { ModelStatus } from "../../ipc.desktop";
 
 const NOTHING_INSTALLED: ModelStatus = {
   brainReady: false,

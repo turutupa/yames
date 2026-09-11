@@ -16,7 +16,7 @@ import {
   type Vocabulary,
 } from "../../../coach/templates";
 import { TEMPLATE_CATALOG } from "../../../coach/templateCatalog";
-import { coachDebug } from "../../../coach/debug";
+import { coachDebug } from "../../../utils/debug";
 
 export function useRealtimeTips(params: {
   shuffleStateRef: MutableRefObject<ShuffleState>;

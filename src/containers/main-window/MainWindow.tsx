@@ -11,27 +11,16 @@ import { useMetronome } from "../../hooks/useMetronome";
 import { useKeybindings } from "../../hooks/useKeybindings";
 import { useCoachDownload } from "../../hooks/useCoachDownload";
 import { useActionDispatcher } from "../../hooks/useActionDispatcher";
+import { IS_MOBILE } from "../../platform";
 import {
-  configureSpeedRamp,
-  downloadAndInstallUpdate,
-  setAlwaysOnTop,
-  setBpm,
-  setInstrument as setInstrumentBackend,
-  setSoundType,
-  setSubdivision,
-  setTheme,
-  setBeatGroups,
-  setFreeMode,
-  setVolume,
-  showFloating,
-  setWidgetAlwaysOnTop,
-  setWidgetMode,
-  startSpeedRamp,
-  stopSpeedRamp,
-  storeLoad,
-  storeSave,
-  togglePlayback,
-} from "../../ipc";
+  INERT_EVALUATION,
+  INERT_INPUT_TESTER,
+  INERT_KEYBINDINGS,
+  INERT_MIDI,
+  INERT_SESSION,
+} from "../../platform.inert";
+import { configureSpeedRamp, setBpm, setInstrument as setInstrumentBackend, setSoundType, setSubdivision, setTheme, setBeatGroups, setFreeMode, setVolume, startSpeedRamp, stopSpeedRamp, storeLoad, storeSave, togglePlayback } from "../../ipc";
+import { downloadAndInstallUpdate, setAlwaysOnTop, showFloating, setWidgetAlwaysOnTop, setWidgetMode } from "../../ipc.desktop";
 import CoachCard from "../practice-coach/CoachCard";
 import "../../styles/main-window.css";
 import "../../styles/transitions.css";
@@ -72,7 +61,7 @@ import { useSession } from "../../hooks/useSession";
 import AudioInputTestModal from "../settings/AudioInputTestModal";
 import SettingsTimeline from "../settings/SettingsTimeline";
 import { InputTesterModal } from "../settings/InputTesterModal";
-import { coachDebug } from "../../coach/debug";
+import { coachDebug } from "../../utils/debug";
 import { presetBeatGroups, presetFreeMode } from "../../utils/meter";
 import { useShareMenu } from "./useShareMenu";
 import { ShareMenuPopover } from "./ShareMenuPopover";
@@ -123,13 +112,30 @@ import "../../styles/audio-input-test.css";
 
 export function MainWindow() {
   const { t } = useTranslation();
-  useDrag();
+  // A phone has one fullscreen webview, so there is nothing to keep on top
+  // of anything else. Settings and the wizard both drop the row; this is
+  // what keeps `set_always_on_top` out of the bundle with it.
+  const alwaysOnTopSetter = IS_MOBILE ? async () => {} : setAlwaysOnTop;
+  // Every hook below that reads `IS_MOBILE` is gated on a build-time
+  // constant, so the hook order never varies at runtime — see platform.ts.
+  // The window has no drag regions on a phone; it is the whole screen.
+  if (!IS_MOBILE) useDrag();
   const { state, currentBeat } = useMetronome();
   // Practice Coach model + voice state (must come before useEvaluation so
   // coachMode is available when wiring the startEvaluation IPC call).
-  const coach = useCoachDownload();
+  // The practice coach — the one hook whose INERT stand-in could not be
+  // used. Its shape names `coachBrainTier`, and a bundle that still says
+  // `coachBrainTier` anywhere is exactly what check-mobile-bundle.mjs
+  // fails on, stand-in or not. So on a phone this is null, and the cast
+  // below lets the desktop composition read it unchanged: every one of
+  // those reads is inside an `IS_MOBILE ? … :` branch or a `!IS_MOBILE &&`
+  // block, which is dead code on a mobile build. If one ever is not, the
+  // phone build throws on the spot rather than quietly rendering an empty
+  // coach — and the mobile composition tests are where that surfaces.
+  const coachOrNull = IS_MOBILE ? null : useCoachDownload();
+  const coach = coachOrNull as NonNullable<typeof coachOrNull>;
   const [inputTestOpen, setInputTestOpen] = useState(false);
-  const evaluation = useEvaluation({ coachMode: coach.coachMode });
+  const evaluation = IS_MOBILE ? INERT_EVALUATION : useEvaluation({ coachMode: coach.coachMode });
   // Active tab + transition rules (stop playback on tab change, persist,
   // restore on mount, scroll-to-top for track/settings) — owned by a
   // dedicated hook. `contentRef` is also returned so the scrollable
@@ -182,7 +188,7 @@ export function MainWindow() {
   // Spotlight tour (O6). It owns the tab while it runs — stop 4 is the drill
   // tab — and puts the user back where they were when it ends. Existing users
   // (O1's migration case) are offered it once through a toast.
-  const tour = useTour({
+  const tour = IS_MOBILE ? null : useTour({
     view,
     setView,
     offerWhen: onboarding.migratedExistingUser,
@@ -192,8 +198,8 @@ export function MainWindow() {
   const handleRequestTour = useCallback(() => {
     // CLOSE on W7 counts as completion, so the wizard tidies up as usual.
     onboarding.dispatch({ type: "CLOSE" });
-    tour.open("beat");
-  }, [onboarding.dispatch, tour.open]);
+    tour?.open("beat");
+  }, [onboarding.dispatch, tour?.open]);
 
   /** Persist an instrument choice + push the DSP profile to the backend. */
   const applyInstrument = useCallback((id: string) => {
@@ -204,7 +210,7 @@ export function MainWindow() {
     setInstrumentBackend(id as InstrumentId).catch(() => {});
   }, []);
 
-  const session = useSession({
+  const session = IS_MOBILE ? INERT_SESSION : useSession({
     evaluation,
     isPlaying: state.isPlaying,
     bpm: state.bpm,
@@ -324,13 +330,13 @@ export function MainWindow() {
     handleRemoveBinding,
     acceptKeyConflict,
     rejectKeyConflict,
-  } = useKeybindings();
+  } = IS_MOBILE ? INERT_KEYBINDINGS : useKeybindings();
 
   // Help menu (O8) — the header `?` and Cmd/Ctrl-/. Silenced while the wizard
   // or the tour owns the screen, and while a key-capture modal is listening,
   // so "/" lands where the user is looking.
-  const help = useHelpMenu(IS_MAC, {
-    disabled: onboarding.isOpen || tour.isOpen || !!bindingFor || inputTestOpen,
+  const help = IS_MOBILE ? null : useHelpMenu(IS_MAC, {
+    disabled: onboarding.isOpen || tour?.isOpen || !!bindingFor || inputTestOpen,
   });
 
   // Unified input tester — modal that captures keyboard/MIDI/gamepad and
@@ -344,7 +350,7 @@ export function MainWindow() {
     inputTestModeRef,
     appendLog: appendInputTestLog,
     clearLog: clearInputTestLog,
-  } = useInputTester();
+  } = IS_MOBILE ? INERT_INPUT_TESTER : useInputTester();
 
   // UI preferences (buttonFlash, activeBorder, drillAutoCollapse,
   // viewTransitions, animationStyle) — owned by a dedicated hook that
@@ -475,7 +481,10 @@ export function MainWindow() {
   // as W3 drives the single `useMidi`: a download started in the wizard is
   // the one the coach card, Settings and the wizard's own footer bar watch,
   // and it keeps running after the overlay closes.
-  const wizardCoach: WizardCoachEnv = useMemo(
+  // Undefined on a phone: the wizard has its own stand-ins for both of
+  // these, and its coach and audio-input steps are not in the mobile step
+  // registry at all.
+  const wizardCoach: WizardCoachEnv | undefined = IS_MOBILE ? undefined : useMemo(
     () => ({
       systemMemoryMb: coach.systemMemoryMb,
       modelStatus: coach.modelStatus,
@@ -503,7 +512,7 @@ export function MainWindow() {
   // drives the single `useMidi`: the device picked in the wizard is the device
   // the rest of the app uses, and W6's eight beats go through the normal
   // analyzer — the only path that leaves a real calibration seed behind.
-  const wizardEvaluation: WizardEvaluationEnv = useMemo(
+  const wizardEvaluation: WizardEvaluationEnv | undefined = IS_MOBILE ? undefined : useMemo(
     () => ({
       devices: evaluation.devices,
       selectedDevice: evaluation.selectedDevice,
@@ -537,9 +546,9 @@ export function MainWindow() {
   );
 
   // The voice question W4 leaves open, asked when the voices actually land.
-  const voicePrompt = useVoicePrompt();
+  const voicePrompt = IS_MOBILE ? null : useVoicePrompt();
   const openVoiceSettings = useCallback(() => {
-    voicePrompt.accept();
+    voicePrompt?.accept();
     setView("settings");
     // Same triple nudge as the theme detour: `setView` scrolls the pane to
     // the top on its own timer, so one early scroll gets overwritten.
@@ -763,7 +772,10 @@ export function MainWindow() {
   }, [soundOpen]);
 
   // Shared action dispatcher — called by keyboard handler and gamepad hook
-  const dispatchAction = useActionDispatcher({
+  // Nothing on a phone dispatches an action: no keyboard, no pedal, no
+  // gamepad. The dispatcher also drives the window APIs, which is the other
+  // reason it does not travel.
+  const dispatchAction = IS_MOBILE ? () => {} : useActionDispatcher({
     view,
     setView,
     prevTab,
@@ -783,7 +795,10 @@ export function MainWindow() {
     // not start the metronome behind it.
     // The onboarding overlay and the tour each own the keyboard while they are
     // up — Space must not start the metronome behind them.
-    if (bindingFor || onboarding.isOpen || tour.isOpen) return;
+    // No OS keyboard on a phone, and nothing to bind: this is what keeps
+    // the hotkey table and the combo parser out of the mobile bundle.
+    if (IS_MOBILE) return;
+    if (bindingFor || onboarding.isOpen || tour?.isOpen) return;
     const handler = (e: KeyboardEvent) => {
       // A range, a checkbox or a button holds no text, so a keypress with one
       // focused is a hotkey. See `isTypingTarget` — the tempo ruler is a range,
@@ -830,7 +845,7 @@ export function MainWindow() {
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [view, keyBindings, isFullscreen, bindingFor, setView, dispatchAction, inputTestMode, onboarding.isOpen, tour.isOpen]);
+  }, [view, keyBindings, isFullscreen, bindingFor, setView, dispatchAction, inputTestMode, onboarding.isOpen, tour?.isOpen]);
 
   // MIDI controller support. The dispatcher is silenced while the input
   // tester is open by reading `inputTestModeRef` (the ref pattern keeps
@@ -838,7 +853,9 @@ export function MainWindow() {
   // every toggle).
   const [midiAutoAccept, setMidiAutoAccept] = useState(false);
 
-  const midi = useMidi((action) => {
+  // midir has no Android backend and iOS Bluetooth MIDI is a v1.1 item
+  // (plan §1, M07), so v1 has one rule on a phone: there is no MIDI.
+  const midi = IS_MOBILE ? INERT_MIDI : useMidi((action) => {
     if (inputTestModeRef.current) return;
     // The wizard swallows keyboard hotkeys behind its overlay; a pedal press
     // while W3 is mapping must not drive the app either.
@@ -848,6 +865,7 @@ export function MainWindow() {
 
   // Accumulate MIDI activity into the tester log when test mode is on.
   useEffect(() => {
+    if (IS_MOBILE) return;
     if (!midi.lastActivity) return;
     if (inputTestMode) {
       const activity = midi.lastActivity;
@@ -865,7 +883,8 @@ export function MainWindow() {
   }, [inputTestMode, midi.lastActivity]);
 
   // Gamepad / footswitch support (merged into MIDI column)
-  useGamepad({
+  // No gamepad API worth supporting on a phone (plan §1).
+  if (!IS_MOBILE) useGamepad({
     enabled: true,
     onButtonPress:
       midi.learnMode
@@ -894,7 +913,10 @@ export function MainWindow() {
   // triggers and the one-per-session rate limit; MainWindow only supplies the
   // inputs and the three actions. `coach-ask` and `zen-first` are wired at
   // their own sites (the coach feed and the Zen overlay).
-  const appHint = useAppHints({
+  // Two of the three hints point at the floating widget and the hotkeys
+  // screen, neither of which a phone has; the third is written for a
+  // desktop layout (plan §6 Q2).
+  const appHint = IS_MOBILE ? null : useAppHints({
     view,
     bpm: state.bpm,
     subdivision: state.subdivision,
@@ -928,10 +950,14 @@ export function MainWindow() {
 
   // Fullscreen zen mode — rendered as overlay via ZenTransition below
   const zenExitHandler = useCallback(async () => {
-    const win = getCurrentWindow();
-    if (await win.isFullscreen()) {
-      await win.setFullscreen(false);
-      await new Promise((r) => setTimeout(r, FULLSCREEN_EXIT_DELAY));
+    // One fullscreen webview on a phone: leaving zen is a React state
+    // change and nothing else. There is no window to un-fullscreen.
+    if (!IS_MOBILE) {
+      const win = getCurrentWindow();
+      if (await win.isFullscreen()) {
+        await win.setFullscreen(false);
+        await new Promise((r) => setTimeout(r, FULLSCREEN_EXIT_DELAY));
+      }
     }
     setIsFullscreen(false);
     // alwaysOnTop + focus handled by the effect above
@@ -953,7 +979,7 @@ export function MainWindow() {
       data-border={activeBorder}
     >
       <ThemeEffects themeId={state.theme} currentBeat={currentBeat} isPlaying={state.isPlaying} />
-      <TitleBar />
+      {!IS_MOBILE && <TitleBar />}
 
       {onboarding.chipVisible && view !== "settings" && (
         <FinishSetupChip
@@ -982,7 +1008,7 @@ export function MainWindow() {
       {/* Hints stay out of the way of the wizard, of the tour (another
           anchored overlay — two cards pointing at the same UI is noise) and
           of Zen (which renders its own `zen-first` card inside the overlay). */}
-      {appHint && !onboarding.isOpen && !tour.isOpen && !isFullscreen && (
+      {!IS_MOBILE && appHint && !onboarding.isOpen && !tour?.isOpen && !isFullscreen && (
         <HintCard
           id={appHint.id}
           onAction={appHint.onAction}
@@ -991,7 +1017,7 @@ export function MainWindow() {
         />
       )}
 
-      {tour.offerVisible && view !== "settings" && (
+      {!IS_MOBILE && tour?.offerVisible && view !== "settings" && (
         <TourOfferToast
           onAccept={tour.acceptOffer}
           onDismiss={tour.dismissOffer}
@@ -1002,7 +1028,7 @@ export function MainWindow() {
       {/* W4 left the voice unchosen on purpose; the download that finished is
           what makes the question answerable (O4). Never over the wizard or
           over the Settings page it points at. */}
-      {voicePrompt.visible && view !== "settings" && !onboarding.isOpen && (
+      {!IS_MOBILE && voicePrompt?.visible && view !== "settings" && !onboarding.isOpen && (
         <CoachVoiceToast
           onAccept={openVoiceSettings}
           onDismiss={voicePrompt.dismiss}
@@ -1107,14 +1133,16 @@ export function MainWindow() {
           setShareOpen={setShareOpen}
           shareTooltip={shareTooltip}
           volumePercent={volumePercent}
-          ttsVolume={coach.ttsVolume}
-          setTtsVolume={coach.setTtsVolume}
+          ttsVolume={IS_MOBILE ? undefined : coach.ttsVolume}
+          setTtsVolume={IS_MOBILE ? undefined : coach.setTtsVolume}
           voiceEnabled={
-            coach.coachBrainTier !== "off" &&
-            coach.coachVoiceMode === "voice" &&
-            !!coach.modelStatus?.voiceReady
+            IS_MOBILE
+              ? undefined
+              : coach.coachBrainTier !== "off" &&
+                coach.coachVoiceMode === "voice" &&
+                !!coach.modelStatus?.voiceReady
           }
-          onOpenHelp={help.openMenu}
+          onOpenHelp={help?.openMenu}
         />
 
         {/* Behind the stage, not inside it: the stage caps its own width, and
@@ -1235,11 +1263,13 @@ export function MainWindow() {
             latestVersion={latestVersion}
             appVersion={appVersion}
             doUpdateCheck={doUpdateCheck}
-            downloadAndInstallUpdate={downloadAndInstallUpdate}
+            downloadAndInstallUpdate={
+              IS_MOBILE ? undefined : downloadAndInstallUpdate
+            }
             autoCheckUpdates={autoCheckUpdates}
             setAutoCheckUpdates={setAutoCheckUpdates}
             alwaysOnTop={state.alwaysOnTop}
-            setAlwaysOnTop={setAlwaysOnTop}
+            setAlwaysOnTop={alwaysOnTopSetter}
             buttonFlash={buttonFlash}
             setButtonFlash={setButtonFlash}
             activeBorder={activeBorder}
@@ -1254,7 +1284,7 @@ export function MainWindow() {
               // Leave settings first: no stop lives there, and the tour must
               // restore a real tab rather than the settings overlay.
               setView(prevTab.current);
-              tour.open(prevTab.current);
+              tour?.open(prevTab.current);
             }}
             themeId={state.theme}
             setTheme={setTheme}
@@ -1269,41 +1299,62 @@ export function MainWindow() {
             evaluation={evaluation}
             midi={midi}
             onOpenInputTest={() => setInputTestOpen(true)}
-            coachBrainTier={coach.coachBrainTier}
-            setCoachBrainTier={coach.setCoachBrainTier}
-            coachVoiceMode={coach.coachVoiceMode}
-            setCoachVoiceMode={coach.setCoachVoiceMode}
-            coachVoiceName={coach.coachVoiceName}
-            setCoachVoiceName={coach.setCoachVoiceName}
-            coachVerbosity={coach.coachVerbosity}
-            setCoachVerbosity={coach.setCoachVerbosity}
-            coachMode={coach.coachMode}
-            setCoachMode={coach.setCoachMode}
-            modelStatus={coach.modelStatus}
-            setModelStatus={coach.setModelStatus}
-            modelDownloading={coach.modelDownloading}
-            studioAvailable={coach.studioAvailable}
-            standardAvailable={coach.standardAvailable}
-            brainUpdateAvailable={coach.brainUpdateAvailable}
-            availableVoices={coach.availableVoices}
-            voiceDiagnostics={coach.voiceDiagnostics}
             instrument={instrument}
-            setInstrument={setInstrument}
-            onStartDownload={coach.handleStartDownload}
-            onRequestDownload={coach.setPendingDownloadTier}
-            widgetMode={state.mode}
-            setWidgetMode={setWidgetMode}
-            widgetAlwaysOnTop={state.widgetAlwaysOnTop}
-            setWidgetAlwaysOnTop={setWidgetAlwaysOnTop}
-            keyBindings={keyBindings}
-            globalBindings={globalBindings}
-            footBindings={footBindings}
-            bindingFor={bindingFor}
-            setBindingFor={setBindingFor}
-            setPendingKeys={setPendingKeys}
-            inputTestMode={inputTestMode}
-            setInputTestMode={setInputTestMode}
-            onResetRequest={() => setShowResetConfirm(true)}
+            coach={
+              // Three bundles rather than thirty props, and undefined on a
+              // phone — which is what lets Rollup drop the sections and
+              // everything that fed them.
+              IS_MOBILE
+                ? undefined
+                : {
+                    coachBrainTier: coach.coachBrainTier,
+                    setCoachBrainTier: coach.setCoachBrainTier,
+                    coachVoiceMode: coach.coachVoiceMode,
+                    setCoachVoiceMode: coach.setCoachVoiceMode,
+                    coachVoiceName: coach.coachVoiceName,
+                    setCoachVoiceName: coach.setCoachVoiceName,
+                    coachVerbosity: coach.coachVerbosity,
+                    setCoachVerbosity: coach.setCoachVerbosity,
+                    coachMode: coach.coachMode,
+                    setCoachMode: coach.setCoachMode,
+                    modelStatus: coach.modelStatus,
+                    setModelStatus: coach.setModelStatus,
+                    modelDownloading: coach.modelDownloading,
+                    studioAvailable: coach.studioAvailable,
+                    standardAvailable: coach.standardAvailable,
+                    brainUpdateAvailable: coach.brainUpdateAvailable,
+                    availableVoices: coach.availableVoices,
+                    voiceDiagnostics: coach.voiceDiagnostics,
+                    setInstrument,
+                    onStartDownload: coach.handleStartDownload,
+                    onRequestDownload: coach.setPendingDownloadTier,
+                  }
+            }
+            widget={
+              IS_MOBILE
+                ? undefined
+                : {
+                    widgetMode: state.mode,
+                    setWidgetMode,
+                    widgetAlwaysOnTop: state.widgetAlwaysOnTop,
+                    setWidgetAlwaysOnTop,
+                  }
+            }
+            hotkeys={
+              IS_MOBILE
+                ? undefined
+                : {
+                    keyBindings,
+                    globalBindings,
+                    footBindings,
+                    bindingFor,
+                    setBindingFor,
+                    setPendingKeys,
+                    inputTestMode,
+                    setInputTestMode,
+                    onResetRequest: () => setShowResetConfirm(true),
+                  }
+            }
             shareTooltip={shareTooltip}
             onShareOption={handleShareOption}
           />
@@ -1315,9 +1366,15 @@ export function MainWindow() {
               { id: "general", label: t("settings.tabs.general") },
               { id: "appearance", label: t("settings.tabs.appearance") },
               { id: "devices", label: t("settings.tabs.devices") },
-              { id: "smart-coach", label: t("settings.tabs.smartCoach") },
-              { id: "widget", label: t("settings.tabs.widget") },
-              { id: "hotkeys", label: t("settings.tabs.hotkeys") },
+              // The coach, the widget and the hotkeys are not on this
+              // screen on a phone, so the rail does not point at them.
+              ...(IS_MOBILE
+                ? []
+                : [
+                    { id: "smart-coach", label: t("settings.tabs.smartCoach") },
+                    { id: "widget", label: t("settings.tabs.widget") },
+                    { id: "hotkeys", label: t("settings.tabs.hotkeys") },
+                  ]),
               { id: "support", label: t("settings.tabs.support") },
               { id: "about", label: t("settings.tabs.about") },
             ]}
@@ -1356,7 +1413,7 @@ export function MainWindow() {
           />
         )}
       </div>
-      {(view === "beat" || view === "drill" || view === "setlist") && (
+      {!IS_MOBILE && (view === "beat" || view === "drill" || view === "setlist") && (
       <CoachCard
         open={session.cardOpen}
         active={session.active}
@@ -1377,14 +1434,14 @@ export function MainWindow() {
       />
       )}
       </div>{/* main-body */}
-      {showResetConfirm && (
+      {!IS_MOBILE && showResetConfirm && (
         <ResetKeybindingsConfirm
           onConfirm={resetAllBindings}
           onCancel={() => setShowResetConfirm(false)}
         />
       )}
 
-      {midi.pendingConflict && (
+      {!IS_MOBILE && midi.pendingConflict && (
         <MidiConflictDialog
           conflict={midi.pendingConflict}
           autoAccept={midiAutoAccept}
@@ -1394,7 +1451,7 @@ export function MainWindow() {
         />
       )}
 
-      {bindingFor && (
+      {!IS_MOBILE && bindingFor && (
         <KeybindingCaptureModal
           target={bindingFor}
           pendingKeys={pendingKeys}
@@ -1412,7 +1469,7 @@ export function MainWindow() {
       )}
 
       {/* Unified input tester modal */}
-      {inputTestMode && (
+      {!IS_MOBILE && inputTestMode && (
         <InputTesterModal
           log={inputTestLog}
           logRef={inputTestLogRef}
@@ -1421,7 +1478,7 @@ export function MainWindow() {
         />
       )}
 
-      {coach.pendingDownloadTier && (
+      {!IS_MOBILE && coach.pendingDownloadTier && (
         <CoachDownloadConfirmDialog
           modelStatus={coach.modelStatus}
           studioAvailable={coach.studioAvailable}
@@ -1435,7 +1492,7 @@ export function MainWindow() {
         />
       )}
 
-      {coach.modelDownloading && (
+      {!IS_MOBILE && coach.modelDownloading && (
         <DownloadProgressBar
           downloadProgress={coach.downloadProgress}
           downloadingTier={coach.downloadingTier}
@@ -1443,27 +1500,29 @@ export function MainWindow() {
         />
       )}
 
-      {coach.downloadError && (
+      {!IS_MOBILE && coach.downloadError && (
         <DownloadErrorBar
           error={coach.downloadError}
           onDismiss={() => coach.setDownloadError(null)}
         />
       )}
 
-      {coach.downloadSuccess && !coach.modelDownloading && (
+      {!IS_MOBILE && coach.downloadSuccess && !coach.modelDownloading && (
         <DownloadSuccessBar onDismiss={() => coach.setDownloadSuccess(false)} />
       )}
     </div>
-    <AudioInputTestModal
-      open={inputTestOpen}
-      onClose={() => setInputTestOpen(false)}
-      selectedDevice={evaluation.selectedDevice}
-      onDeviceChange={(d) => evaluation.selectDevice(d)}
-      initialDevices={evaluation.devices}
-      evaluationActive={evaluation.enabled}
-      inputChannel={evaluation.selectedChannel}
-      onChannelChange={(ch) => evaluation.selectChannel(ch)}
-    />
+    {!IS_MOBILE && (
+      <AudioInputTestModal
+        open={inputTestOpen}
+        onClose={() => setInputTestOpen(false)}
+        selectedDevice={evaluation.selectedDevice}
+        onDeviceChange={(d) => evaluation.selectDevice(d)}
+        initialDevices={evaluation.devices}
+        evaluationActive={evaluation.enabled}
+        inputChannel={evaluation.selectedChannel}
+        onChannelChange={(ch) => evaluation.selectChannel(ch)}
+      />
+    )}
     <OnboardingWizard
       state={onboarding.state}
       dispatch={onboarding.dispatch}
@@ -1473,7 +1532,7 @@ export function MainWindow() {
       onInstrumentChange={applyInstrument}
       soundType={state.soundType}
       themeId={state.theme}
-      coachTier={coach.coachBrainTier}
+      coachTier={IS_MOBILE ? "off" : coach.coachBrainTier}
       inputDeviceName={evaluation.selectedDevice}
       hasFootswitch={midi.bindings.length > 0 || Object.keys(footBindings).length > 0}
       midi={midi}
@@ -1481,7 +1540,7 @@ export function MainWindow() {
       coach={wizardCoach}
       evaluation={wizardEvaluation}
       alwaysOnTop={state.alwaysOnTop}
-      onAlwaysOnTopChange={setAlwaysOnTop}
+      onAlwaysOnTopChange={alwaysOnTopSetter}
       startSoftClick={startSoftClick}
       stopSoftClick={stopSoftClick}
       softClickPlaying={softClickPlaying}
@@ -1492,46 +1551,54 @@ export function MainWindow() {
       onRequestTour={handleRequestTour}
       animate={!reducedMotion}
     />
-    <Tour
-      open={tour.isOpen}
-      index={tour.index}
-      stop={tour.stop}
-      total={tour.total}
-      onNext={tour.next}
-      onPrev={tour.prev}
-      onClose={tour.close}
-      keyBindings={keyBindings}
-      animate={!reducedMotion}
-    />
-    <HelpMenu
-      open={help.panel === "menu"}
-      onClose={help.close}
-      appVersion={appVersion}
-      onTakeTour={() => {
-        // The tour has no stop in Settings, so leave first and hand it the
-        // tab it must restore — same contract the Settings entry uses.
-        const back = view === "settings" ? prevTab.current : (view as "beat" | "drill");
-        if (view === "settings") setView(back);
-        tour.open(back);
-      }}
-      onRunSetupAgain={() => {
-        if (view === "settings") setView(prevTab.current);
-        onboarding.open();
-      }}
-      onShowShortcuts={help.openShortcuts}
-      onReportProblem={help.reportProblem}
-      animate={!reducedMotion}
-    />
-    <ShortcutsSheet
-      open={help.panel === "shortcuts"}
-      onClose={help.close}
-      onBack={help.openMenu}
-      keyBindings={keyBindings}
-      globalBindings={globalBindings}
-      footBindings={footBindings}
-      midi={midi}
-      animate={!reducedMotion}
-    />
+    {/* The tour, the help menu and the shortcuts sheet are written for a
+        desktop layout with hotkeys, so a phone gets none of them (plan §6). */}
+    {!IS_MOBILE && tour && (
+      <Tour
+        open={tour.isOpen}
+        index={tour.index}
+        stop={tour.stop}
+        total={tour.total}
+        onNext={tour.next}
+        onPrev={tour.prev}
+        onClose={tour.close}
+        keyBindings={keyBindings}
+        animate={!reducedMotion}
+      />
+    )}
+    {!IS_MOBILE && help && (
+      <HelpMenu
+        open={help.panel === "menu"}
+        onClose={help.close}
+        appVersion={appVersion}
+        onTakeTour={() => {
+          // The tour has no stop in Settings, so leave first and hand it the
+          // tab it must restore — same contract the Settings entry uses.
+          const back = view === "settings" ? prevTab.current : (view as "beat" | "drill");
+          if (view === "settings") setView(back);
+          tour?.open(back);
+        }}
+        onRunSetupAgain={() => {
+          if (view === "settings") setView(prevTab.current);
+          onboarding.open();
+        }}
+        onShowShortcuts={help.openShortcuts}
+        onReportProblem={help.reportProblem}
+        animate={!reducedMotion}
+      />
+    )}
+    {!IS_MOBILE && help && (
+      <ShortcutsSheet
+        open={help.panel === "shortcuts"}
+        onClose={help.close}
+        onBack={help.openMenu}
+        keyBindings={keyBindings}
+        globalBindings={globalBindings}
+        footBindings={footBindings}
+        midi={midi}
+        animate={!reducedMotion}
+      />
+    )}
     <WhatsNewModal
       open={whatsNew.isOpen && !onboarding.isOpen}
       version={appVersion}

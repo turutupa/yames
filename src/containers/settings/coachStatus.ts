@@ -1,5 +1,5 @@
 import { backendLabel } from "../../coach/brainTiers";
-import type { CoachCapabilities } from "../../ipc";
+import type { CoachCapabilities } from "../../ipc.desktop";
 
 /**
  * Maps coach capabilities + on-disk model presence to the i18n key (and
