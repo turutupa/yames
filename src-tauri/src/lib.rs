@@ -69,9 +69,14 @@ pub mod probe {
     pub use crate::engine::{CallbackProbe, CallbackSample, MetronomeEngine};
     pub use crate::state::{create_shared_state, AppState, SharedState};
 
-    #[cfg(feature = "coach-llm")]
+    // `desktop` as well as the feature: `coach-llm` still *exists* as a
+    // feature name on a mobile target (its optional dependency simply is not
+    // in that target's graph), so a stray `--features coach-llm-vulkan` on an
+    // Android build would otherwise reach for a `coach` module that is not
+    // compiled there and fail with `unresolved import crate::coach`.
+    #[cfg(all(desktop, feature = "coach-llm"))]
     pub use crate::coach::{create_shared_engine, generate, load_model, GenKind};
-    #[cfg(feature = "coach-llm")]
+    #[cfg(all(desktop, feature = "coach-llm"))]
     pub use crate::models::CURRENT_BRAIN_FAMILY;
 }
 
