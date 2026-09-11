@@ -46,7 +46,11 @@ export type UpdateStatus =
   | "checking"
   | "available"
   | "up-to-date"
-  | "downloading";
+  | "downloading"
+  // An install that did not happen. Without this the banner went back to
+  // "available" on any failure, which looks exactly like the click doing
+  // nothing at all — and left the user guessing at the cause. (It was a VPN.)
+  | "failed";
 
 export interface AppUpdates {
   autoCheckUpdates: boolean;

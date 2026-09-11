@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 
-type UpdateStatus = "idle" | "checking" | "available" | "downloading" | "up-to-date";
+import type { UpdateStatus } from "../main-window/hooks/useAppUpdates";
 
 /**
  * About section — version, update status (with inline install button when an

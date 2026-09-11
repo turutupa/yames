@@ -315,10 +315,13 @@ export async function checkForUpdate(currentVersion: string): Promise<UpdateInfo
 
 export async function downloadAndInstallUpdate(): Promise<void> {
   const update = await check();
-  if (update) {
-    await update.downloadAndInstall();
-    await relaunch();
-  }
+  // Returning quietly here left the banner spinning on "Updating…" forever:
+  // the caller saw a resolved promise and had nothing to report. `check()`
+  // answers null when the endpoint cannot be reached as well as when there is
+  // genuinely nothing new, and the first of those is a failure.
+  if (!update) throw new Error("no update available — could not reach the update server");
+  await update.downloadAndInstall();
+  await relaunch();
 }
 
 // ---------------------------------------------------------------------------
