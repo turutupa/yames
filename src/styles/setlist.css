@@ -902,6 +902,24 @@
     min-height: 44px;
   }
 
+  /* The count-in and repeat steppers. Their minus and plus are 13x17 -- the
+     smallest controls in the app -- and they carry no class of their own, so
+     they are reached through the field that holds them.
+   *
+   * Inline there is room: 11px of gap to the label, which is a span and
+   * answers no taps, so 16px a side gives 45. Block there is not: at 360 the
+   * two fields stack 22px apart, so 11px a side is the ceiling and these land
+   * at 45x39. The last 5px is a row gap, and M03 owns it. */
+  .setlist-stepper-field button {
+    position: relative;
+  }
+
+  .setlist-stepper-field button::after {
+    content: "";
+    position: absolute;
+    inset: -11px -16px;
+  }
+
   /* The per-step tools are 25x23 icons at the end of a step's title line and
      the step's name sits right beside them, so the hit area grows and the row
      does not. */
