@@ -275,7 +275,10 @@
 /* Controls bar */
 .fs-controls {
   position: absolute;
-  bottom: 48px;
+  /* Zen paints edge to edge, so every offset in here is measured from the
+     hardware's edge rather than the safe one. The insets are 0px on desktop
+     and on any phone without a gesture bar or a cut-out. */
+  bottom: calc(48px + var(--safe-bottom));
   z-index: 2;
   display: flex;
   align-items: center;
@@ -353,7 +356,7 @@
 /* Exit hint */
 .fs-exit-hint {
   position: absolute;
-  bottom: 16px;
+  bottom: calc(16px + var(--safe-bottom));
   font-size: 0.65rem;
   color: var(--text-muted);
   opacity: 0;
@@ -372,8 +375,8 @@
 
 .zen-top-controls {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: calc(16px + var(--safe-top));
+  right: calc(16px + var(--safe-right));
   z-index: 2;
   display: flex;
   gap: 8px;

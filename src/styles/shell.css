@@ -7,9 +7,33 @@
  * edited, and the parts are contiguous runs of the original file imported in
  * the original order, so the cascade is unchanged. */
 
+/* =================== Safe areas =================== */
+/* A phone's screen is not all usable: a notch or a camera cut-out eats the top
+   strip, a rounded corner clips the sides, and the gesture bar owns a band at
+   the bottom. The browser reports each as an `env(safe-area-inset-*)`, but
+   only once the page opts in with `viewport-fit=cover` — and only on a device
+   that has them. Every desktop browser, and every phone browser before the
+   page opts in, resolves all four to the fallback, which is why the tokens
+   below are 0px everywhere today and this whole section is inert on desktop.
+ *
+ * They are named rather than used inline so a layout reads as "the gutter plus
+   whatever the hardware is taking" instead of a wall of env() calls, and so
+   M03 has one place to look. Use them as `calc(<the design's own spacing> +
+   var(--safe-left))`, never on their own: an inset is extra clearance the
+   hardware demands, not a replacement for the padding the design asked for. */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+}
+
 /* =================== Layout: fixed header + scrolling content =================== */
 .main-window {
   height: 100%;
+  /* Whatever sits first inside the window clears the status bar / notch. On
+     desktop this is 0 and the titlebar still starts at the window's top. */
+  padding-top: var(--safe-top);
   display: flex;
   flex-direction: column;
   background: var(--bg-primary);
@@ -943,7 +967,7 @@
   flex: 1;
   overflow: hidden;
   position: relative;
-  padding: 56px 24px 0;
+  padding: 56px calc(24px + var(--safe-right)) 0 calc(24px + var(--safe-left));
   display: flex;
   flex-direction: column;
   gap: 28px;
@@ -1179,8 +1203,13 @@
   display: flex;
   align-items: center;
   gap: 22px;
-  height: 76px;
-  padding: 0 24px;
+  /* The bar the stop button lives on is the last thing above a phone's
+     gesture bar, so it grows by the inset and pads its contents clear of it
+     rather than letting the swipe strip overlap the one control that must
+     always be reachable. Both terms are 0px on desktop, so the bar is the
+     same 76px it has always been. */
+  height: calc(76px + var(--safe-bottom));
+  padding: 0 24px var(--safe-bottom);
   margin: 0 -24px;
   border-top: 1px solid var(--border);
   background: var(--bg-secondary);
@@ -1966,7 +1995,7 @@
    now have the rail's top to themselves. */
 
 .main-content {
-  padding: 0 24px;
+  padding: 0 calc(24px + var(--safe-right)) 0 calc(24px + var(--safe-left));
 }
 
 /* The bar's own geometry — static, 56px, hairline-closed — is declared with
@@ -2160,6 +2189,9 @@
   position: fixed;
   inset: 0;
   z-index: 200;
+  /* A centred dialog stays clear of a notch and a gesture bar; 0px on
+     desktop, where this changes nothing. */
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
   display: flex;
   align-items: center;
   justify-content: center;
