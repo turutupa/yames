@@ -193,7 +193,8 @@
         "os-fullscreen": "Systeemvolledig scherm",
         "toggle-widget": "Widget aan/uit",
         "tab-1": "Metronoom-tabblad",
-        "tab-2": "Tempotraining-tabblad",
+        "tab-2": "Setlist-tabblad",
+        "tab-3": "Tempotraining-tabblad",
         "settings": "Instellingen",
         "toggle-sidebar": "Zijbalk schakelen",
         "toggle-coach": "Coach aan/uit"
@@ -216,7 +217,8 @@
         "os-fullscreen": "Systeemvolledig scherm aan/uit",
         "toggle-widget": "Overschakelen naar de zwevende widget",
         "tab-1": "Naar het Metronoom-tabblad",
-        "tab-2": "Naar het Tempotraining-tabblad",
+        "tab-2": "Naar het Setlist-tabblad",
+        "tab-3": "Naar het Tempotraining-tabblad",
         "settings": "Instellingen openen of sluiten",
         "toggle-sidebar": "De linkerzijbalk in- of uitklappen",
         "toggle-coach": "Open of sluit het oefencoach-paneel"

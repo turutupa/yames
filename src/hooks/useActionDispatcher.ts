@@ -70,16 +70,21 @@ export function useActionDispatcher({
       if (
         actionId === "tab-1" ||
         actionId === "tab-2" ||
+        actionId === "tab-3" ||
         actionId === "settings" ||
         actionId === "toggle-widget" ||
         actionId === "toggle-sidebar" ||
         actionId === "toggle-coach"
       ) {
         switch (actionId) {
+          // In rail order: Metronome, Setlist, Drill.
           case "tab-1":
             setView("beat");
             break;
           case "tab-2":
+            setView("setlist");
+            break;
+          case "tab-3":
             setView("drill");
             break;
           case "settings":
