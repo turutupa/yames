@@ -135,9 +135,7 @@ export function MainWindow() {
   const coachOrNull = IS_MOBILE ? null : useCoachDownload();
   const coach = coachOrNull as NonNullable<typeof coachOrNull>;
   const [inputTestOpen, setInputTestOpen] = useState(false);
-  const evaluation = IS_MOBILE
-    ? INERT_EVALUATION
-    : useEvaluation({ coachMode: coach.coachMode });
+  const evaluation = IS_MOBILE ? INERT_EVALUATION : useEvaluation({ coachMode: coach.coachMode });
   // Active tab + transition rules (stop playback on tab change, persist,
   // restore on mount, scroll-to-top for track/settings) — owned by a
   // dedicated hook. `contentRef` is also returned so the scrollable
@@ -190,13 +188,11 @@ export function MainWindow() {
   // Spotlight tour (O6). It owns the tab while it runs — stop 4 is the drill
   // tab — and puts the user back where they were when it ends. Existing users
   // (O1's migration case) are offered it once through a toast.
-  const tour = IS_MOBILE
-    ? null
-    : useTour({
+  const tour = IS_MOBILE ? null : useTour({
     view,
     setView,
-        offerWhen: onboarding.migratedExistingUser,
-      });
+    offerWhen: onboarding.migratedExistingUser,
+  });
 
   /** W7's "Show me around": finish the wizard, then start the tour. */
   const handleRequestTour = useCallback(() => {
@@ -339,12 +335,9 @@ export function MainWindow() {
   // Help menu (O8) — the header `?` and Cmd/Ctrl-/. Silenced while the wizard
   // or the tour owns the screen, and while a key-capture modal is listening,
   // so "/" lands where the user is looking.
-  const help = IS_MOBILE
-    ? null
-    : useHelpMenu(IS_MAC, {
-        disabled:
-          onboarding.isOpen || tour?.isOpen || !!bindingFor || inputTestOpen,
-      });
+  const help = IS_MOBILE ? null : useHelpMenu(IS_MAC, {
+    disabled: onboarding.isOpen || tour?.isOpen || !!bindingFor || inputTestOpen,
+  });
 
   // Unified input tester — modal that captures keyboard/MIDI/gamepad and
   // shows the mapped action. State, log buffer and the auto-scrolling
@@ -491,9 +484,7 @@ export function MainWindow() {
   // Undefined on a phone: the wizard has its own stand-ins for both of
   // these, and its coach and audio-input steps are not in the mobile step
   // registry at all.
-  const wizardCoach: WizardCoachEnv | undefined = IS_MOBILE
-    ? undefined
-    : useMemo(
+  const wizardCoach: WizardCoachEnv | undefined = IS_MOBILE ? undefined : useMemo(
     () => ({
       systemMemoryMb: coach.systemMemoryMb,
       modelStatus: coach.modelStatus,
@@ -521,9 +512,7 @@ export function MainWindow() {
   // drives the single `useMidi`: the device picked in the wizard is the device
   // the rest of the app uses, and W6's eight beats go through the normal
   // analyzer — the only path that leaves a real calibration seed behind.
-  const wizardEvaluation: WizardEvaluationEnv | undefined = IS_MOBILE
-    ? undefined
-    : useMemo(
+  const wizardEvaluation: WizardEvaluationEnv | undefined = IS_MOBILE ? undefined : useMemo(
     () => ({
       devices: evaluation.devices,
       selectedDevice: evaluation.selectedDevice,
@@ -786,9 +775,7 @@ export function MainWindow() {
   // Nothing on a phone dispatches an action: no keyboard, no pedal, no
   // gamepad. The dispatcher also drives the window APIs, which is the other
   // reason it does not travel.
-  const dispatchAction = IS_MOBILE
-    ? () => {}
-    : useActionDispatcher({
+  const dispatchAction = IS_MOBILE ? () => {} : useActionDispatcher({
     view,
     setView,
     prevTab,
@@ -798,9 +785,9 @@ export function MainWindow() {
     setIsFullscreen,
     setIsOsFullscreen,
     setSidebarOpen,
-        toggleCard: session.toggleCard,
-        forceWebviewFocus,
-      });
+    toggleCard: session.toggleCard,
+    forceWebviewFocus,
+  });
 
   // Unified local hotkey dispatcher — reads from keyBindings
   useEffect(() => {
@@ -868,15 +855,13 @@ export function MainWindow() {
 
   // midir has no Android backend and iOS Bluetooth MIDI is a v1.1 item
   // (plan §1, M07), so v1 has one rule on a phone: there is no MIDI.
-  const midi = IS_MOBILE
-    ? INERT_MIDI
-    : useMidi((action) => {
+  const midi = IS_MOBILE ? INERT_MIDI : useMidi((action) => {
     if (inputTestModeRef.current) return;
     // The wizard swallows keyboard hotkeys behind its overlay; a pedal press
     // while W3 is mapping must not drive the app either.
     if (onboarding.isOpen) return;
-        dispatchAction(action as HotkeyAction);
-      }, midiAutoAccept, inputTestMode);
+    dispatchAction(action as HotkeyAction);
+  }, midiAutoAccept, inputTestMode);
 
   // Accumulate MIDI activity into the tester log when test mode is on.
   useEffect(() => {
@@ -931,9 +916,7 @@ export function MainWindow() {
   // Two of the three hints point at the floating widget and the hotkeys
   // screen, neither of which a phone has; the third is written for a
   // desktop layout (plan §6 Q2).
-  const appHint = IS_MOBILE
-    ? null
-    : useAppHints({
+  const appHint = IS_MOBILE ? null : useAppHints({
     view,
     bpm: state.bpm,
     subdivision: state.subdivision,
@@ -955,9 +938,9 @@ export function MainWindow() {
         document
           .querySelector("section.hotkeys-section")
           ?.scrollIntoView({ behavior: "smooth", block: "start" });
-          }, 400);
-        },
-      });
+      }, 400);
+    },
+  });
 
   // Resize window based on current view
   const sliderPercent = ((state.bpm - 20) / (300 - 20)) * 100;
