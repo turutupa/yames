@@ -76,9 +76,14 @@ said go. Do not start M03 or M04 until M02 is merged into `mobile`.
   wrapper about mobile targets.
 - iOS work needs the Mac with Xcode. CI's `macos-latest` runner builds
   iOS for M06.
-- The owner's phone is a company device and is **not** a test device.
-  A dedicated Android phone with developer mode and no VPN is required
-  from M00 on; an iPhone from M06 on.
+- The Android test device is the owner's previous phone, available
+  after their phone swap. Until then the Android emulator carries all
+  build, gating and layout work. Only the audio measurement (M00 step
+  6), the screen-off and interruption gates (M04) and zen-effect
+  performance need real hardware; a brief that reaches one of those
+  without a device says so in its report and stops there. If the phone
+  runs a VPN, use `adb reverse tcp:1420 tcp:1420` over USB instead of
+  Wi-Fi for `tauri android dev`. An iPhone is needed from M06 on.
 
 ## Briefs
 

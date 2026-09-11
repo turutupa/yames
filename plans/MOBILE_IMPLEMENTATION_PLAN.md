@@ -164,10 +164,14 @@ Verified against the code and the local cargo registry on 2026-09-11.
   object.
 
 **Test devices.**
-- The owner's phone is a company device that takes no extra apps. It
-  cannot be the test device. Android v1 needs one dedicated Android
-  phone (any recent mid-range device; it must not run a VPN so
-  `tauri android dev` over LAN works). iOS needs an iPhone later.
+- The owner is swapping phones and keeps the old one as the Android
+  test device. Until it is free, the Android emulator (Windows) and the
+  iOS Simulator (Mac) carry all build, gating and layout work; only the
+  audio measurement (M00 step 6), the screen-off / interruption gates
+  (M04) and WebView performance on the zen effects need real hardware.
+  If the test phone runs a full-tunnel VPN, `adb reverse tcp:1420
+  tcp:1420` over USB replaces Wi-Fi for `tauri android dev`. iOS needs
+  an iPhone from M06 on.
 - Android development runs on the owner's Windows machine (Android
   Studio + SDK + NDK). iOS development needs the Mac.
 
@@ -320,7 +324,7 @@ that reason.
 | Versioning: one `version` across five platforms | M05 | Same string everywhere; `release.yml` `release` commit-message trigger unchanged |
 | Play closed test needs 12 human testers for 14 days | M05 | Start recruiting the day M05 starts, not when it ends |
 | GPL + App Store | M06 | Exception clause + PR #8 consent; aubio already out |
-| Owner's phone cannot be the test device | M00 onward | Buy one Android phone before M00 |
+| No physical device until the phone swap | M00 step 6, M04 gates | Everything else runs on the emulator; the two device-only checks wait, they do not block M01–M03 |
 
 Open questions to answer before the phase that needs them:
 
@@ -361,12 +365,18 @@ needing a device pass per release, and store listing maintenance.
 
 ---
 
-## 8. Sequencing and what to buy first
+## 8. Sequencing
 
-1. Buy a mid-range Android phone (no VPN, developer mode on).
-2. Install Android Studio, SDK, NDK, and the four Android Rust targets
-   on the Windows machine (M00 brief has the exact list).
-3. Run M00. Read `M00-FINDINGS.md`. Decide go / no-go on the numbers.
+1. Install Android Studio, SDK, NDK, an emulator image, and the four
+   Android Rust targets on the Windows machine (M00 brief has the
+   exact list).
+2. Run M00 steps 1–5 and 7 on the emulator now. Step 6 (the audio
+   measurement) runs the day the spare phone is free; the findings
+   file is written in two passes if needed.
+3. Read `M00-FINDINGS.md`. Decide go / no-go on the numbers. M01 and
+   M02 may start on the emulator-only findings; the go/no-go on the
+   audio path can arrive while they run, since they change nothing
+   about the engine.
 4. M01 → M02 → M03 in sequence (each depends on the previous). M04 can
    start in parallel with M03 once M01 is merged.
 5. M05 as soon as M03 and M04 are merged; recruit the 12 testers on

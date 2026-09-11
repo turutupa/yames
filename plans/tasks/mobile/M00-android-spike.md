@@ -52,11 +52,16 @@ number fastest. The findings file is the only artefact that survives.
   `FullscreenView.tsx`, `useFullscreenLifecycle.ts` and `ipc.ts`. On
   Android these reject; the UI may render but log errors. Note which
   ones throw; do not fix them properly.
-- The owner's own phone is a company device and cannot be used. Use
-  the dedicated test phone. It must be on the same Wi-Fi as the
-  laptop with no VPN, or `tauri android dev` cannot reach the Vite
-  dev server; the emulator is fine for steps 1–4 but useless for
-  step 6 (its audio path says nothing about real hardware).
+- The test phone is the owner's previous phone, available after their
+  phone swap. Steps 1–4 and 7 run on the Android emulator and do not
+  wait for it. Steps 5 and 6 need the physical phone: the emulator's
+  audio goes through the host's sound stack and says nothing about
+  real hardware. If the phone is not available when you reach step 5,
+  write the findings file with steps 5–6 marked "pending device" and
+  open the PR anyway; a second pass fills them in. For `tauri android
+  dev` on the phone, prefer `adb reverse tcp:1420 tcp:1420` over USB
+  so a VPN or Wi-Fi isolation on the phone cannot break the dev
+  server connection.
 
 ## Environment (Windows 11, owner's machine)
 
