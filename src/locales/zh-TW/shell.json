@@ -81,6 +81,14 @@
   "tabs": {
     "library": "資料庫"
   },
+  "mobileTabs": {
+    "metronome": "節拍器",
+    "drill": "練習",
+    "setlist": "曲目單",
+    "settings": "設定",
+    "library": "資料庫",
+    "zen": "禪意"
+  },
   "sheet": {
     "close": "關閉"
   }

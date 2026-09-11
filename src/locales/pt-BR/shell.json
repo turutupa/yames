@@ -81,6 +81,14 @@
   "tabs": {
     "library": "Biblioteca"
   },
+  "mobileTabs": {
+    "metronome": "Clique",
+    "drill": "Treino",
+    "setlist": "Setlist",
+    "settings": "Ajustes",
+    "library": "Presets",
+    "zen": "Zen"
+  },
   "sheet": {
     "close": "Fechar"
   }

@@ -81,11 +81,16 @@ const zenIcon = (
   </>
 );
 
+// `labelKey` is the short text painted on the tab (`mobileTabs.*` — chosen to
+// fit ~56px at 0.58rem in all 15 locales, M03d). `fullLabelKey` is the same
+// screen's existing full name, kept as the button's `aria-label` so a screen
+// reader still hears "Metronome" rather than the abbreviation a sighted user
+// reads off the bar.
 const TABS = [
-  { id: "beat" as const, labelKey: "nav.metronome", icon: beatIcon },
-  { id: "drill" as const, labelKey: "nav.drill", icon: drillIcon },
-  { id: "setlist" as const, labelKey: "nav.setlist", icon: setlistIcon },
-  { id: "settings" as const, labelKey: "tooltip.settings", icon: settingsIcon },
+  { id: "beat" as const, labelKey: "mobileTabs.metronome", fullLabelKey: "nav.metronome", icon: beatIcon },
+  { id: "drill" as const, labelKey: "mobileTabs.drill", fullLabelKey: "nav.drill", icon: drillIcon },
+  { id: "setlist" as const, labelKey: "mobileTabs.setlist", fullLabelKey: "nav.setlist", icon: setlistIcon },
+  { id: "settings" as const, labelKey: "mobileTabs.settings", fullLabelKey: "tooltip.settings", icon: settingsIcon },
 ];
 
 function Glyph({ children }: { children: React.ReactNode }) {
@@ -128,6 +133,7 @@ export function MobileTabBar({
           type="button"
           className={`mobile-tab ${view === tab.id ? "active" : ""}`}
           data-tab={tab.id}
+          aria-label={t(tab.fullLabelKey)}
           aria-current={view === tab.id ? "page" : undefined}
           onClick={() => {
             if (tab.id === "settings") {
@@ -150,16 +156,22 @@ export function MobileTabBar({
       <button
         type="button"
         className={`mobile-tab mobile-tab-library ${libraryOpen ? "active" : ""}`}
+        aria-label={t("tabs.library")}
         aria-expanded={libraryOpen}
         onClick={onToggleLibrary}
       >
         <Glyph>{libraryIcon}</Glyph>
-        <span className="mobile-tab-label">{t("tabs.library")}</span>
+        <span className="mobile-tab-label">{t("mobileTabs.library")}</span>
       </button>
 
-      <button type="button" className="mobile-tab mobile-tab-zen" onClick={onZen}>
+      <button
+        type="button"
+        className="mobile-tab mobile-tab-zen"
+        aria-label={t("tooltip.zen")}
+        onClick={onZen}
+      >
         <Glyph>{zenIcon}</Glyph>
-        <span className="mobile-tab-label">{t("tooltip.zen")}</span>
+        <span className="mobile-tab-label">{t("mobileTabs.zen")}</span>
       </button>
     </nav>
   );

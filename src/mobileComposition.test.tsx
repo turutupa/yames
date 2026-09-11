@@ -219,10 +219,12 @@ describe("SettingsView on a phone", () => {
 });
 
 describe("the onboarding wizard on a phone", () => {
-  it("is four steps: welcome, instrument, sound & look, ready", () => {
+  it("is three steps: welcome, sound & look, ready", () => {
+    // The instrument question is cut on a phone (M03d): nothing on mobile
+    // reads the answer, since the coach and the mic evaluation — its only
+    // consumers — do not exist there.
     expect(ONBOARDING_STEPS.map((s) => s.id)).toEqual([
       "welcome",
-      "instrument",
       "sound-look",
       "ready",
     ]);

@@ -81,6 +81,14 @@
   "tabs": {
     "library": "Bibliotheek"
   },
+  "mobileTabs": {
+    "metronome": "Klik",
+    "drill": "Tempo",
+    "setlist": "Setlist",
+    "settings": "Opties",
+    "library": "Presets",
+    "zen": "Zen"
+  },
   "sheet": {
     "close": "Sluiten"
   }

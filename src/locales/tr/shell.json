@@ -81,6 +81,14 @@
   "tabs": {
     "library": "Kitaplık"
   },
+  "mobileTabs": {
+    "metronome": "Metronom",
+    "drill": "Tempo",
+    "setlist": "Setlist",
+    "settings": "Ayarlar",
+    "library": "Kitaplık",
+    "zen": "Zen"
+  },
   "sheet": {
     "close": "Kapat"
   }

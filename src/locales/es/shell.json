@@ -81,6 +81,14 @@
   "tabs": {
     "library": "Biblioteca"
   },
+  "mobileTabs": {
+    "metronome": "Metro",
+    "drill": "Rampa",
+    "setlist": "Setlist",
+    "settings": "Ajustes",
+    "library": "Presets",
+    "zen": "Zen"
+  },
   "sheet": {
     "close": "Cerrar"
   }

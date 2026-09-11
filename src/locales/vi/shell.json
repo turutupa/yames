@@ -81,6 +81,14 @@
   "tabs": {
     "library": "Thư viện"
   },
+  "mobileTabs": {
+    "metronome": "Nhịp",
+    "drill": "Luyện",
+    "setlist": "Setlist",
+    "settings": "Cài đặt",
+    "library": "Thư viện",
+    "zen": "Thiền"
+  },
   "sheet": {
     "close": "Đóng"
   }

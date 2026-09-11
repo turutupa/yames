@@ -81,6 +81,14 @@
   "tabs": {
     "library": "资料库"
   },
+  "mobileTabs": {
+    "metronome": "节拍器",
+    "drill": "练习",
+    "setlist": "曲目单",
+    "settings": "设置",
+    "library": "资料库",
+    "zen": "禅意"
+  },
   "sheet": {
     "close": "关闭"
   }

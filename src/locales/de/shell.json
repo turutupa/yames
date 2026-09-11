@@ -81,6 +81,14 @@
   "tabs": {
     "library": "Bibliothek"
   },
+  "mobileTabs": {
+    "metronome": "Metronom",
+    "drill": "Tempo",
+    "setlist": "Setlist",
+    "settings": "Optionen",
+    "library": "Archiv",
+    "zen": "Zen"
+  },
   "sheet": {
     "close": "Schließen"
   }
