@@ -1,0 +1,240 @@
+/* sheet.css — the bottom sheet, and the two panels that use it.
+ *
+ * Nothing here is scoped by width, because nothing here renders off a phone:
+ * `Sheet` is only ever mounted behind `IS_MOBILE` (see src/components/Sheet.tsx).
+ * A desktop build never produces a `.sheet`, so none of these rules can reach
+ * it — which is why there is no `@media` around them and no risk to desktop
+ * parity.
+ *
+ * The sheet is portalled to `document.body`, outside `.main-window`, so it can
+ * cover the transport and the tab bar. That is deliberate: while the library
+ * is open the thing behind it is not live, and the scrim must say so.
+ */
+
+.sheet-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.sheet-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  animation: sheet-scrim-in 0.18s ease;
+}
+
+@keyframes sheet-scrim-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.sheet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  /* 85% of the viewport, as the brief asks. Anything taller stops reading as a
+     sheet over the screen and starts reading as a screen of its own — and the
+     strip of app left showing above it is what tells you where you will be
+     when it goes. */
+  max-height: 85vh;
+  border-radius: 18px 18px 0 0;
+  border-top: 1px solid var(--border);
+  background: var(--bg-panel);
+  box-shadow: 0 -18px 48px -20px rgba(0, 0, 0, 0.65);
+  /* The gesture bar sits under the sheet's bottom edge. Its own padding, not
+     the body's, because the body scrolls and padding on a scroller only shows
+     at the end of the scroll. */
+  padding-bottom: var(--safe-bottom);
+  animation: sheet-in 0.22s cubic-bezier(0.2, 0.8, 0.3, 1);
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.3, 1);
+  outline: none;
+}
+
+/* While a finger is on it the panel must track the finger exactly — a
+   transition here would make it lag behind and feel broken. It comes back for
+   the snap home when the finger lifts. */
+.sheet[data-dragging] {
+  transition: none;
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet,
+  .sheet-scrim {
+    animation: none;
+  }
+
+  .sheet {
+    transition: none;
+  }
+}
+
+/* The grip: the handle, and the generous band of nothing around it that makes
+   the handle draggable with a thumb rather than with a fingertip. */
+.sheet-grip {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 22px;
+  flex-shrink: 0;
+  touch-action: none;
+  cursor: grab;
+}
+
+.sheet-handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--text-faint);
+}
+
+.sheet-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px 0 18px;
+  min-height: 44px;
+  flex-shrink: 0;
+  touch-action: none;
+}
+
+/* The library hands in its own header, which is a flex row of its own. It has
+   to take the slack so the close button stays at the right edge. */
+.sheet-titlebar > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.sheet-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text-secondary);
+}
+
+.sheet-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .sheet-close:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
+}
+
+/* When the content brings its own header row there is no titlebar to sit in,
+   so the close button floats over the top-right corner of the panel and the
+   header pads itself clear of it. */
+.sheet-close--floating {
+  position: absolute;
+  top: 18px;
+  right: 6px;
+  z-index: 1;
+}
+
+.sheet-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 4px 14px 14px;
+}
+
+/* ── The library sheet ─────────────────────────────────────────────────────
+ *
+ * `PresetSidebar` is reused whole rather than forked: it already knows that
+ * the same panel lists presets on the metronome, drills on the drill screen
+ * and setlists in setlist mode, and a second copy of that would drift. What
+ * has to go is its drawer geometry — a 44/220px animated width, a right-hand
+ * border and 77px of header padding cut for the desktop titlebar. */
+
+.sheet--library .sheet-body {
+  display: flex;
+  padding: 0;
+}
+
+.sheet--library .preset-sidebar {
+  width: 100%;
+  min-width: 0;
+  flex: 1;
+  min-height: 0;
+  border-right: none;
+  background: transparent;
+  transition: none;
+}
+
+/* The library's own header row IS the sheet's title row — `ownHeader`. Its
+   77px of top padding was cut for the desktop titlebar the rail sat under;
+   here it needs the close button's width on the right instead. */
+.sheet--library .preset-sidebar-header {
+  padding: 0 52px 0 18px;
+  min-height: 44px;
+}
+
+/* The two header icons sat 2px apart and reached 28x44 (M03-GAPS). In the
+   sheet they are full targets with room between them. */
+.sheet--library .preset-sidebar-header-actions {
+  gap: 4px;
+}
+
+.sheet--library .preset-sidebar-head-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sheet--library .preset-sidebar-list {
+  padding: 4px 14px 14px;
+}
+
+/* ── The meter sheet ──────────────────────────────────────────────────────
+ *
+ * The desktop picker is one nowrap row of ten time signatures anchored to the
+ * chip — 286px wider than a 360px screen. Here the same ten buttons are a
+ * grid that wraps, which is the whole fix; nothing about what they do changes. */
+
+.sheet--meter .time-sig-row {
+  flex-wrap: wrap;
+  /* Left, not centred: the desktop row centres ten buttons on one line, and
+     centring the remainder of a wrapped grid leaves the last button floating
+     under the middle column with a hole either side of it. */
+  justify-content: flex-start;
+  max-width: none;
+  width: 100%;
+  gap: 8px;
+}
+
+.sheet--meter .time-sig-btn {
+  /* Three to a row at every phone width. `flex: 1` would have let a tenth
+     button stretch to fill the last line on its own. */
+  flex: 0 0 calc((100% - 16px) / 3);
+  min-height: 52px;
+  font-size: 0.92rem;
+  font-weight: 600;
+}

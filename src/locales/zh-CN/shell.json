@@ -77,5 +77,11 @@
     "expand": "展开侧边栏",
     "collapseWithShortcut": "折叠侧边栏 ({{shortcut}})",
     "expandWithShortcut": "展开侧边栏 ({{shortcut}})"
+  },
+  "tabs": {
+    "library": "资料库"
+  },
+  "sheet": {
+    "close": "关闭"
   }
 }

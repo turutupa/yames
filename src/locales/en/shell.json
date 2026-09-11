@@ -77,5 +77,11 @@
     "expand": "Expand sidebar",
     "collapseWithShortcut": "Collapse sidebar ({{shortcut}})",
     "expandWithShortcut": "Expand sidebar ({{shortcut}})"
+  },
+  "tabs": {
+    "library": "Library"
+  },
+  "sheet": {
+    "close": "Close"
   }
 }

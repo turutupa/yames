@@ -77,5 +77,11 @@
     "expand": "Rozwiń panel boczny",
     "collapseWithShortcut": "Zwiń panel boczny ({{shortcut}})",
     "expandWithShortcut": "Rozwiń panel boczny ({{shortcut}})"
+  },
+  "tabs": {
+    "library": "Biblioteka"
+  },
+  "sheet": {
+    "close": "Zamknij"
   }
 }

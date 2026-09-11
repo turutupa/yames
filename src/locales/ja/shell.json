@@ -77,5 +77,11 @@
     "expand": "サイドバーを展開",
     "collapseWithShortcut": "サイドバーを折りたたむ ({{shortcut}})",
     "expandWithShortcut": "サイドバーを展開 ({{shortcut}})"
+  },
+  "tabs": {
+    "library": "ライブラリ"
+  },
+  "sheet": {
+    "close": "閉じる"
   }
 }

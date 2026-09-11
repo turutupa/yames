@@ -77,5 +77,11 @@
     "expand": "Seitenleiste ausklappen",
     "collapseWithShortcut": "Seitenleiste einklappen ({{shortcut}})",
     "expandWithShortcut": "Seitenleiste ausklappen ({{shortcut}})"
+  },
+  "tabs": {
+    "library": "Bibliothek"
+  },
+  "sheet": {
+    "close": "Schließen"
   }
 }

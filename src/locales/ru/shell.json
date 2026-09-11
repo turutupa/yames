@@ -77,5 +77,11 @@
     "expand": "Развернуть боковую панель",
     "collapseWithShortcut": "Свернуть боковую панель ({{shortcut}})",
     "expandWithShortcut": "Развернуть боковую панель ({{shortcut}})"
+  },
+  "tabs": {
+    "library": "Библиотека"
+  },
+  "sheet": {
+    "close": "Закрыть"
   }
 }

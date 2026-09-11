@@ -2438,3 +2438,164 @@
     min-height: 44px;
   }
 }
+
+/* =================== The phone shell (M03b) ===============================
+ *
+ * Everything below is under `.main-window.is-mobile` or on a class only the
+ * phone build renders (`.mobile-tabs`). `is-mobile` is written by
+ * `MainWindow` from `IS_MOBILE`, which is a build-time constant — so a desktop
+ * build never carries the class, never renders the tab bar, and cannot reach
+ * a single rule here. That is deliberate rather than a width query: a desktop
+ * window dragged to 360px still has a rail, a pointer and a keyboard, and the
+ * answers below are the wrong ones for it.
+ */
+
+/* The bottom tab bar. Four screens, then a hairline, then the two things that
+   are not screens — the library (a sheet over what you are on) and Zen (a
+   mode of it). See MobileTabBar.tsx. */
+.mobile-tabs {
+  flex-shrink: 0;
+  display: flex;
+  align-items: stretch;
+  /* The last thing above the gesture bar. Same treatment as the transport:
+     the bar grows by the inset and pads its contents clear of it, so a swipe
+     strip never overlaps a tab. */
+  height: calc(58px + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  border-top: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+
+.mobile-tab {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 0 2px;
+  border: none;
+  border-top: 2px solid transparent;
+  background: transparent;
+  color: var(--text-tertiary);
+  font-family: inherit;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+/* The current screen is marked at the top edge, against the hairline, rather
+   than with the rail's left bar — there is no left edge to put it on. */
+.mobile-tab.active {
+  border-top-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.mobile-tab.active svg {
+  color: var(--accent);
+}
+
+/* The library is not a destination, so its open state is the second accent —
+   the app's colour for "this is a different kind of thing". */
+.mobile-tab-library.active {
+  border-top-color: var(--accent-2);
+  color: var(--text-primary);
+}
+
+.mobile-tab-library.active svg {
+  color: var(--accent-2);
+}
+
+.mobile-tab-label {
+  max-width: 100%;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-tabs-split {
+  flex: 0 0 1px;
+  align-self: center;
+  height: 26px;
+  background: var(--border);
+}
+
+/* While the click runs the furniture recedes, the same three rungs the rail
+   and the header follow (UI_DECISIONS U6.2). It comes back on focus; there is
+   no hover to come back on. */
+.main-window[data-playing="true"] .mobile-tabs {
+  opacity: 0.55;
+  transition: opacity 0.45s ease;
+}
+
+.main-window[data-playing="true"] .mobile-tabs:focus-within {
+  opacity: 1;
+  transition: opacity 0.12s ease;
+}
+
+.mobile-tabs {
+  transition: opacity 0.25s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main-window[data-playing="true"] .mobile-tabs,
+  .mobile-tabs {
+    transition: none;
+  }
+}
+
+/* The gutters. 24px each side was cut for a window that also had a 252px rail
+   beside it; on a 360px screen it is 13% of the width spent on nothing. The
+   safe-area terms stay, because a notch in landscape is not a gutter. */
+.main-window.is-mobile .main-content {
+  padding: 40px calc(14px + var(--safe-right)) 0 calc(14px + var(--safe-left));
+  gap: 18px;
+}
+
+.main-window.is-mobile .main-header {
+  margin: 0 -14px;
+  padding: 0 10px 0 14px;
+  height: 40px;
+}
+
+/* The transport keeps the stop button reachable and nothing else changes about
+   it; it only has to give back the 24px of gutter the content region no longer
+   has. */
+.main-window.is-mobile .transport {
+  margin: 0 -14px;
+  padding: 0 14px var(--safe-bottom);
+  gap: 14px;
+}
+
+/* The library is a sheet now, so the rail's own drawer geometry has nothing
+   to animate and nothing to sit beside. */
+.main-window.is-mobile .main-body {
+  min-height: 0;
+}
+
+/* The stage scrolls, the furniture does not.
+ *
+ * A desktop window is at least 780px tall and the beat view is laid out to
+ * fill it, vertically centred inside a region that never scrolls. A 360x800
+ * phone spends 174 of those pixels on the header, the transport and the tab
+ * bar, and the SUBDIVISION row fell off the bottom of what was left — clipped,
+ * with no way to reach it, because `.main-content` hides its overflow.
+ *
+ * So the view scrolls and the two things you must always be able to find do
+ * not: the transport keeps the stop button and the tab bar keeps the way out,
+ * both outside this box. Centring goes with it — content taller than its box
+ * cannot be centred in it without losing the top as well as the bottom.
+ *
+ * Beat and setlist only. Drill and settings have their own scrolling rules and
+ * belong to M03c. */
+.main-window.is-mobile .main-content[data-view="beat"] > .view-transition-wrapper,
+.main-window.is-mobile .main-content[data-view="setlist"] > .view-transition-wrapper {
+  justify-content: flex-start;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  gap: 20px;
+  padding-bottom: 16px;
+}

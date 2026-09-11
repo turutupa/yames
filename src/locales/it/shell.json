@@ -77,5 +77,11 @@
     "expand": "Espandi barra laterale",
     "collapseWithShortcut": "Comprimi barra laterale ({{shortcut}})",
     "expandWithShortcut": "Espandi barra laterale ({{shortcut}})"
+  },
+  "tabs": {
+    "library": "Libreria"
+  },
+  "sheet": {
+    "close": "Chiudi"
   }
 }
