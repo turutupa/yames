@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { METER_PRESETS, METER_VARIANTS } from "../../constants/metronome";
 import { setBeatGroups, setFreeMode } from "../../ipc";
 import { findMeterPreset, meterKey } from "../../utils/meter";
+import { Sheet } from "../../components/Sheet";
+import { IS_MOBILE } from "../../platform";
 
 interface MeterPresetsProps {
   beatGroups: number[];
@@ -48,7 +50,9 @@ export function MeterPresets({ beatGroups, freeMode, stepper }: MeterPresetsProp
     : (activePreset?.label ?? t("metronome.beatCount", { count: totalBeats }));
 
   useEffect(() => {
-    if (!open) return;
+    // On a phone the picker is a sheet portalled to the body, so "outside the
+    // picker" is every tap inside it. The sheet has its own three ways out.
+    if (!open || IS_MOBILE) return;
     const onDown = (e: MouseEvent) => {
       if (!pickerRef.current?.contains(e.target as Node)) setOpen(false);
     };
@@ -72,6 +76,38 @@ export function MeterPresets({ beatGroups, freeMode, stepper }: MeterPresetsProp
     await setBeatGroups(groups);
     setOpen(false);
   }
+
+  const timeSignatures = (
+    <div className="time-sig-row">
+      <button
+        key="free"
+        className={`time-sig-btn ${freeMode ? "active" : ""}`}
+        onClick={() => {
+          // `set_free_mode(true)` collapses `beat_groups` to `[total]` itself —
+          // the invariant "freeMode ⇒ one group" is owned by Rust, so no second
+          // `setBeatGroups` round-trip is needed.
+          setFreeMode(true);
+          setOpen(false);
+        }}
+      >
+        {t("metronome.free")}
+      </button>
+      {METER_PRESETS.map((preset) => (
+        <button
+          key={preset.label}
+          className={`time-sig-btn ${activePreset?.label === preset.label ? "active" : ""}`}
+          onClick={() => handleSelect(preset.groups)}
+        >
+          {preset.label}
+        </button>
+      ))}
+
+      {/* No grouping row here. The alternatives live on the meter row itself
+          now, one click away and visible without opening anything — having them
+          in both places meant the picker taught you a slower way to do
+          something the screen already offered. */}
+    </div>
+  );
 
   return (
     <div className="meter-presets" ref={pickerRef}>
@@ -142,38 +178,21 @@ export function MeterPresets({ beatGroups, freeMode, stepper }: MeterPresetsProp
         )}
       </div>
 
-      {open && (
-        <div className="meter-picker">
-          <div className="time-sig-row">
-            <button
-              key="free"
-              className={`time-sig-btn ${freeMode ? "active" : ""}`}
-              onClick={() => {
-                // `set_free_mode(true)` collapses `beat_groups` to `[total]`
-                // itself — the invariant "freeMode ⇒ one group" is owned by
-                // Rust, so no second `setBeatGroups` round-trip is needed.
-                setFreeMode(true);
-                setOpen(false);
-              }}
-            >
-              {t("metronome.free")}
-            </button>
-            {METER_PRESETS.map((preset) => (
-              <button
-                key={preset.label}
-                className={`time-sig-btn ${activePreset?.label === preset.label ? "active" : ""}`}
-                onClick={() => handleSelect(preset.groups)}
-              >
-                {preset.label}
-              </button>
-            ))}
-          </div>
-
-          {/* No grouping row here. The alternatives live on the meter row
-              itself now, one click away and visible without opening anything —
-              having them in both places meant the picker taught you a slower
-              way to do something the screen already offered. */}
-        </div>
+      {/* The same ten buttons either way. On a desktop they are one nowrap row
+          in a popover anchored to the chip; on a phone that row ran 286px past
+          a 360px screen (M03-GAPS #4), so it goes in a sheet and wraps into a
+          grid there. Nothing about what the buttons do changes. */}
+      {IS_MOBILE ? (
+        <Sheet
+          open={open}
+          onClose={() => setOpen(false)}
+          title={t("metronome.meter")}
+          className="sheet--meter"
+        >
+          {timeSignatures}
+        </Sheet>
+      ) : (
+        open && <div className="meter-picker">{timeSignatures}</div>
       )}
     </div>
   );

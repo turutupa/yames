@@ -2327,3 +2327,36 @@ span.meter-grouping-chip {
     background-position: left center;
   }
 }
+
+/* =================== The beat view on a phone (M03b) ======================
+ *
+ * Under `.main-window.is-mobile`, which only the phone build writes — so none
+ * of this can reach a desktop pixel at any window width. See the note at the
+ * foot of shell.css.
+ *
+ * The meter row was the beat view's whole overflow: 116px at 360, 86 at 390,
+ * 46 at 430, all of it `.meter-head` (M03-GAPS #5). Dropping the rail gives
+ * back 68px and the narrower gutters another 20, which covers 390 and 430 on
+ * their own — but not 360, and a row that fits by three pixels is a row that
+ * stops fitting in German. So the row wraps rather than being cut to fit: the
+ * label and the chip on one line, the bar's length and clicks/bar on the next,
+ * each of them whole. Nothing here shrinks a control or hides a number.
+ */
+
+.main-window.is-mobile .meter-head {
+  flex-wrap: wrap;
+  column-gap: 10px;
+  row-gap: 10px;
+}
+
+.main-window.is-mobile .beat-stepper-row {
+  gap: 10px;
+}
+
+/* The stage's 48px side padding was cut for a 1176px band on a desktop window.
+   On a 360px screen it is 96px — a quarter of the phone — spent on margin
+   twice over, since `.main-content` already pads the region. */
+.main-window.is-mobile .main-content[data-view="beat"] > .view-transition-wrapper {
+  padding-left: 0;
+  padding-right: 0;
+}

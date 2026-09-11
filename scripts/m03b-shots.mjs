@@ -192,10 +192,18 @@ class CDP {
     }
   }
 
-  send(method, params = {}, sessionId) {
+  send(method, params = {}, sessionId, timeoutMs = 20000) {
     const id = ++this.id;
     return new Promise((resolve, reject) => {
-      this.pending.set(id, { resolve, reject });
+      const timer = setTimeout(() => {
+        this.pending.delete(id);
+        reject(new Error(`${method} did not answer in ${timeoutMs}ms`));
+      }, timeoutMs);
+      const settle = (fn) => (v) => {
+        clearTimeout(timer);
+        fn(v);
+      };
+      this.pending.set(id, { resolve: settle(resolve), reject: settle(reject) });
       this.ws.send(JSON.stringify({ id, method, params, ...(sessionId && { sessionId }) }));
     });
   }
@@ -289,25 +297,34 @@ async function waitFor(cdp, sessionId, selector, timeoutMs = 8000) {
  * dismissal is a `mousedown` handler). `el.click()` fires only the last, which
  * would leave a picker open that a real tap would have closed — and photograph
  * a state the app cannot be in.
+ *
+ * Dispatched inside the page rather than through CDP's Input domain: with
+ * `Emulation.setEmitTouchEventsForMouse` on, `Input.dispatchMouseEvent` never
+ * answered here — the first click of the run hung the script indefinitely.
+ * The synthesised sequence is what the listeners actually read, and it cannot
+ * wedge.
  */
 async function clickSelector(cdp, sessionId, selector) {
   await waitFor(cdp, sessionId, selector);
-  const box = await evaluate(
+  const ok = await evaluate(
     cdp,
     sessionId,
-    `(() => { const el = document.querySelector(${JSON.stringify(selector)});
+    `(() => {
+      const el = document.querySelector(${JSON.stringify(selector)});
+      if (!el) return false;
       const r = el.getBoundingClientRect();
-      return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`,
+      const at = { clientX: r.x + r.width / 2, clientY: r.y + r.height / 2, bubbles: true, cancelable: true };
+      const pointer = { ...at, pointerId: 1, pointerType: "touch", isPrimary: true };
+      el.dispatchEvent(new PointerEvent("pointerdown", pointer));
+      el.dispatchEvent(new MouseEvent("mousedown", { ...at, button: 0, buttons: 1 }));
+      el.dispatchEvent(new PointerEvent("pointerup", pointer));
+      el.dispatchEvent(new MouseEvent("mouseup", { ...at, button: 0, buttons: 0 }));
+      el.dispatchEvent(new MouseEvent("click", { ...at, button: 0, buttons: 0 }));
+      return true;
+    })()`,
   );
-  for (const type of ["mousePressed", "mouseReleased"]) {
-    await cdp.send(
-      "Input.dispatchMouseEvent",
-      { type, x: box.x, y: box.y, button: "left", clickCount: 1, buttons: type === "mousePressed" ? 1 : 0 },
-      sessionId,
-    );
-    await sleep(30);
-  }
-  await sleep(220);
+  if (!ok) throw new Error(`nothing to click at ${selector}`);
+  await sleep(260);
 }
 
 /** The gate's own assertion, asked of the page. */
@@ -331,6 +348,20 @@ async function overflowReport(cdp, sessionId) {
           });
         }
       }
+      // "Cut off" is not only a horizontal question. The stage is a flex
+      // column inside a region that hides its overflow, and on a 800px-tall
+      // phone the beat view is taller than the room left between the header
+      // and the transport — so a section can be unreachable without a single
+      // element crossing a side edge. A stage that is taller than its box and
+      // cannot scroll is a bug; one that scrolls is a phone.
+      const stage = document.querySelector(".main-content > .view-transition-wrapper");
+      const stageState = stage
+        ? {
+            client: stage.clientHeight,
+            scroll: stage.scrollHeight,
+            overflowY: getComputedStyle(stage).overflowY,
+          }
+        : null;
       return {
         scrollWidth: doc.scrollWidth,
         innerWidth: window.innerWidth,
@@ -338,6 +369,7 @@ async function overflowReport(cdp, sessionId) {
         noHover: matchMedia("(hover: none)").matches,
         over: over.slice(0, 12),
         overCount: over.length,
+        stage: stageState,
       };
     })()`,
   );
@@ -393,6 +425,7 @@ async function parityRun(cdp, sessionId, port) {
       sessionId,
     );
     await cdp.send("Emulation.setTouchEmulationEnabled", { enabled: false }, sessionId);
+    await cdp.send("Page.navigate", { url: "about:blank" }, sessionId);
     await cdp.send(
       "Page.navigate",
       { url: `http://localhost:${port}/shots.html?shot=${screen.shot}&theme=ember&window=main` },
@@ -529,6 +562,7 @@ try {
             { enabled: true, configuration: "mobile" },
             sessionId,
           );
+          await cdp.send("Page.navigate", { url: "about:blank" }, sessionId);
           await cdp.send(
             "Page.navigate",
             { url: `http://localhost:${vitePort}/shots.html?shot=${screen.shot}&theme=ember&window=main` },
@@ -560,10 +594,15 @@ try {
           await writeFile(file, Buffer.from(data, "base64"));
           written++;
 
-          const ok = report.scrollWidth <= report.innerWidth;
+          const st = report.stage;
+          const clipped = !!st && st.scroll > st.client + 1 && st.overflowY !== "auto" && st.overflowY !== "scroll";
+          const ok = report.scrollWidth <= report.innerWidth && !clipped;
           if (!ok) failed++;
           console.log(
             ` ${ok ? "✓" : "✗"} scrollWidth ${report.scrollWidth} / innerWidth ${report.innerWidth}` +
+              (st
+                ? `, stage ${st.scroll}/${st.client} ${st.overflowY}${clipped ? " CLIPPED" : st.scroll > st.client + 1 ? " (scrolls)" : ""}`
+                : "") +
               (report.overCount ? `, ${report.overCount} element(s) past an edge` : ""),
           );
           if (report.overCount) {
