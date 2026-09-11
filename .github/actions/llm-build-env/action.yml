@@ -144,3 +144,34 @@ runs:
       if: runner.os == 'macOS'
       shell: bash
       run: cmake --version
+
+    # ------------------------------------------------------------------
+    # All platforms
+    # ------------------------------------------------------------------
+    # Do not build llama.cpp's HTTPS client.
+    #
+    # llama.cpp's `common` now pulls in `vendor/cpp-httplib`, and
+    # `LLAMA_OPENSSL` defaults ON, so every build looks for OpenSSL and links
+    # it. Yames never calls any of it: the model download is a fetch() in the
+    # frontend (src/hooks/useCoachDownload.ts), and the Rust side only ever
+    # opens a .gguf that is already on disk.
+    #
+    # Unused, it was still able to break the build. On macOS the job failed
+    # with "Target cpp-httplib links to OpenSSL::SSL but the target was not
+    # found" — `target_link_libraries` reached on a cached
+    # OPENSSL_VERSION_SUPPORTED while `find_package(OpenSSL)` was no longer
+    # producing the imported targets. x86_64 went first, then aarch64.
+    #
+    # `CMAKE_DISABLE_FIND_PACKAGE_<pkg>` is CMake's own switch for a
+    # non-REQUIRED find_package, and llama-cpp-sys-2's build.rs forwards every
+    # `CMAKE_*` environment variable straight to the configure, so this is the
+    # one knob that reaches it. cpp-httplib then takes its own
+    # "OpenSSL not found, HTTPS support disabled" branch and links nothing.
+    #
+    # Set for every platform, not only the one that broke: Linux and Windows
+    # pass today because OpenSSL happens to be findable there, which is luck
+    # rather than intent, and a build that differs per platform is how a
+    # release day surprise gets in.
+    - name: Do not look for OpenSSL
+      shell: bash
+      run: echo 'CMAKE_DISABLE_FIND_PACKAGE_OpenSSL=TRUE' >> "$GITHUB_ENV"
