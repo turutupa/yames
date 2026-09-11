@@ -1,205 +1,376 @@
-# Mobile (Android/iOS) Implementation Plan
+# Yames Mobile — Implementation Plan
 
-## Motivation
-
-Yames is a desktop metronome built with Tauri v2. Tauri v2 officially supports Android and iOS targets, making a mobile port technically feasible. However, the audio engine relies on desktop-specific assumptions (dedicated threads, spin-loop timing, rodio/cpal output) that don't translate directly to mobile platforms.
-
-This document outlines what can be reused, what must be rewritten, and key platform constraints to consider.
-
----
-
-## What Can Be Reused
-
-| Component | Reusable? | Notes |
-|-----------|-----------|-------|
-| Frontend UI (React) | ✅ Fully | WebView-based, works as-is with responsive tweaks |
-| Tauri IPC commands | ✅ Fully | Same command interface on mobile |
-| BPM/subdivision/accent logic | ✅ Fully | Pure math, no platform deps |
-| Speed ramp engine | ✅ Fully | State machine logic, platform-agnostic |
-| Theme system | ✅ Fully | CSS variables in webview |
-| Zen effects (Canvas) | ✅ Mostly | May need perf tuning on low-end Android |
-| Sound assets (WAV) | ✅ Fully | Embedded bytes, format is universal |
-| Audio timing strategy | ❌ Rewrite | Spin-loop + thread::sleep not viable on mobile |
-| Audio output (rodio/cpal) | ❌ Rewrite | Need platform-native audio APIs |
-| Window management | ❌ N/A | No floating widget, always-on-top, etc. on mobile |
-| Global shortcuts | ❌ N/A | No OS-level hotkeys on mobile |
-| Gamepad/footswitch | ⚠️ Partial | Bluetooth MIDI possible, HID gamepad unlikely |
+> **Status:** Active. Written 2026-09-11 from a code evaluation of `main`
+> at v1.0.4 (commit 2727948). Supersedes the May 2026 version of this
+> file, which predated the coach, voice, mic evaluation, setlists and
+> MIDI work and estimated the whole port at 2–3 weeks. That estimate is
+> void; see §7.
+> **Owner decision (2026-09-11):** *the smart coach is completely gone on
+> mobile.* Not greyed out, not "coming later" in the UI — not compiled,
+> not bundled, not rendered. Everything else the desktop app does
+> (metronome, zen mode, drills, setlists, presets, themes, languages)
+> ships.
+> **Audience:** the owner and the coding agents that implement it. Task
+> briefs live in `plans/tasks/mobile/`. Sizes are S / M / L as in
+> `ROADMAP.md` (≤1 day, ≤1 week, >1 week of agent-driven work).
+> **Branch policy:** long-lived feature branch `mobile`. Each task gets a
+> worktree on `mobile/m0N-short-name` and merges into `mobile`; `mobile`
+> merges to `main` when Android v1 is releasable. Nothing is committed
+> on `main` directly.
 
 ---
 
-## Audio Engine: Mobile Strategy
+## 1. Scope
 
-### The Problem
+### Ships in mobile v1
 
-The current engine (`engine.rs`) uses:
-1. **`thread::sleep`** for coarse timing → mobile OS may throttle background threads
-2. **`spin_loop` busy-wait** for sub-ms precision → will drain battery and trigger OS kills
-3. **rodio `Sink::append`** for playback → rodio uses cpal which has limited mobile support
+| Area | What | Notes |
+|---|---|---|
+| Metronome ("beat" view) | BPM, subdivision, accents / beat groups, sounds, volume, tap tempo, count-in, free mode | Engine ports as-is (§2) |
+| Drills | Speed ramps, drill plan, drill runs history | `save_drill_run` / `get_drill_runs` are plain store commands |
+| Setlists | Full setlist mode incl. Save | Pure frontend + store |
+| Zen / fullscreen | Fullscreen view with effects | Canvas perf on low-end Android is a risk (§6) |
+| Presets | Save, reorder, delete, apply | Sidebar becomes a bottom sheet (§4 M03) |
+| Themes, appearance | All themes, reduced motion | CSS variables, unchanged |
+| Languages | All 15 locales | i18n unchanged |
+| Settings | General, appearance, sound output, about, support | Devices section shrinks to output only |
+| Onboarding | Welcome → instrument → sound & look → ready | Coach, input, hands-free and hear-it-work steps are cut |
+| What's new | Kept | Trivial |
 
-### Recommended Approach: Platform Audio Callbacks
+### Cut on mobile (build-time)
 
-Instead of "push" timing (we decide when to play), use "pull" timing (the audio system asks us for samples):
+| Cut | Why it cannot or should not ship |
+|---|---|
+| Coach — LLM and template engine, feed, card, history, session detail, greeting, chips, interventions, brain download, coach settings | Owner decision. Also: Standard tier is Qwen3-4B with a 4 GB RAM floor and Studio is 8B; neither is phone-viable. |
+| Mic evaluation — audio input, onset detection (aubio), session accumulator, session logs, timing scoring, calibration cache, drift meter, input level meter, spectrum, last-session card, input test modals | It exists to feed the coach. It also needs mic permission, per-device latency calibration, and it is what links aubio (GPL) into the binary — the one thing that makes an App Store listing legally awkward (§5). |
+| Voice / TTS | Piper is a downloaded binary spawned as a subprocess. iOS forbids executing anything; Android forbids executing binaries from app storage. |
+| Floating widget, tray icon, always-on-top, saved window position, window controls, drag regions, title bar overlay | Mobile has one fullscreen webview and no window manager. |
+| Global shortcuts, hotkeys settings, keybinding modals, shortcuts sheet, gamepad | No OS hotkeys, no keyboard, no gamepad API worth supporting. |
+| Updater | Stores update apps. `tauri-plugin-updater` is desktop-only. |
+| MIDI (both platforms in v1) | `midir` has no Android backend (it compiles to a dummy). iOS has CoreMIDI and Bluetooth pedals work; that is the first v1.1 item (§4 M07), not v1. |
+| Tour, hints, help menu | Written for a desktop layout with hotkeys. Re-evaluate after M03; default is cut. |
 
-#### iOS — AVAudioEngine / Audio Unit
+"Cut" means three things, all enforced by gates: the Rust code is not
+compiled (Cargo feature, §3), the TypeScript is not in the bundle
+(build-time constant + lazy imports, §3), and the UI never mentions the
+feature (no greyed tiles — the ROADMAP's *honest status* principle, but
+stricter: absent, not disabled).
+
+### Non-goals for v1 (decided, do not re-litigate)
+
+- **No coach in any form**, including a "lite" 1.5B model or the
+  template coach. Revisit only as a separate plan after v1 ships.
+- **No mic evaluation.** Same reason.
+- **No PWA / web build instead of native.** iOS Safari suspends audio
+  when the screen locks or the tab is backgrounded, and has no Web MIDI.
+  A metronome that stops when the phone goes to sleep on a music stand
+  is worse than no metronome.
+- **No tablet-specific layout.** Phone-first; tablets get whatever the
+  ≥ 768 px layout does today, verified but not designed for.
+- **No landscape** in v1. Lock to portrait.
+- **No Android MIDI, no F-Droid, no Amazon store** in v1.
+
+---
+
+## 2. What the evaluation found (facts the plan rests on)
+
+Verified against the code and the local cargo registry on 2026-09-11.
+
+**Platform support is already there.**
+- Tauri 2 (CLI 2.10.1 in `node_modules`) targets iOS and Android;
+  `src-tauri/src/lib.rs` already carries
+  `#[cfg_attr(mobile, tauri::mobile_entry_point)]`. No `gen/android` or
+  `gen/apple` exists yet; `src-tauri/capabilities/default.json` is
+  desktop-shaped (two windows, global-shortcut, updater, decorum).
+- The per-platform config override pattern already exists
+  (`tauri.windows.conf.json`); `tauri.android.conf.json` and
+  `tauri.ios.conf.json` follow it.
+
+**The audio engine ports; it does not get rewritten.**
+- The May plan assumed a spin-loop engine. Today `engine.rs` renders
+  clicks inside the cpal output callback with a sample counter
+  (`build_output_stream` at `engine.rs:1771`, "Voice — an active sound
+  playing in the audio callback"). That is the pull model mobile needs.
+- `cpal 0.15` has a CoreAudio backend for iOS and an Oboe backend
+  (AAudio / OpenSL ES) for Android. `audio_thread_priority 0.37`
+  supports iOS and Android. `rodio` sits on cpal.
+- Still to do on top: iOS `AVAudioSession` category `.playback` and the
+  `audio` background mode; Android foreground service so the click
+  survives screen-off, plus audio-focus handling; interruption handling
+  (calls) on both. That is a small native plugin (§4 M04, M06).
+- Open: whether cpal's Oboe backend requests AAudio's low-latency
+  performance mode. M00 measures; if callback cadence is poor, the
+  fallback is driving the `oboe` crate directly behind
+  `cfg(target_os = "android")`.
+
+**The engine's only ties to the evaluation stack are small.**
+- `engine.rs` imports `onset::SharedTempoContext` (8 references) and
+  `timing::{BeatLog, BeatTick}`. `TempoContext` is three atomics
+  (`onset.rs:40`); it moves to its own module so `onset.rs` and the
+  aubio dependency can be feature-gated. `timing.rs` is pure Rust and
+  stays compiled; only its session-scoring callers go.
+- Modules that go behind the feature: `coach.rs`, `models.rs`, `tts.rs`,
+  `audio_input.rs`, `onset.rs`, `session.rs`, `session_audio.rs`,
+  `session_log.rs`, `calibration_cache.rs`; dependencies `aubio`,
+  `llama-cpp-2`, `encoding_rs`, `num_cpus`. `instrument.rs` is pure data
+  used by `state.rs` and stays.
+
+**The frontend cut is a gating pass across the tree, not a tab deletion.**
+- Views are `beat`, `drill`, `setlist`, `settings`, plus the fullscreen
+  overlay. There is no coach tab: the coach is composed into
+  `MainWindow.tsx` (CoachCard, useCoachDownload, useEvaluation,
+  useSession, CoachVoiceToast, useVoicePrompt), `MetronomeView`
+  (LastSession, and AccentControl / MeterPresets via `useSession`),
+  `SettingsView` (CoachSettingsSection, CoachDownloadStatus,
+  AudioInputTestModal, DevicesSettingsSection input half) and the
+  onboarding wizard (CoachStep, AudioInputStep, HearItWorkStep,
+  HandsFreeStep, coachRecommendation).
+- `src/coach/` (≈20 modules), `src/containers/practice-coach/`,
+  `src/hooks/useSession.ts` (2 398 lines), `useEvaluation.ts`,
+  `useCoachDownload.ts`, `coachLoader.ts` are coach/evaluation-only.
+- Window APIs are used in 8 non-test files: `WindowControls`,
+  `FloatingWidget`, `useFullscreenLifecycle`, `MainWindow`,
+  `FullscreenView`, `useActionDispatcher`, `useDrag`, `ipc.ts`.
+- `src/ipc.ts` wraps 87 Tauri commands; roughly a third are coach,
+  evaluation, TTS, MIDI or window commands.
+
+**The layout is close, not done.**
+- Desktop window: 800×900, minimum 480×780, single column. Phones are
+  360–430 px wide. 16k lines of CSS carry 44 media queries (mostly
+  `max-width: 560px` and `prefers-reduced-motion`), 214 `:hover` rules,
+  and 24 files with `keydown` handlers.
+- Missing: `env(safe-area-inset-*)`, 44 px touch targets, `@media
+  (hover: hover)` around hover styling, a bottom-sheet replacement for
+  the preset sidebar, and a phone pass over the onboarding wizard and
+  settings, the two largest CSS files.
+
+**Distribution facts.**
+- iOS: the App Store is the only public path. TestFlight builds expire
+  after 90 days. The owner already pays for the Apple Developer Program
+  (the release config signs with a Developer ID identity), so there is
+  no new cost. iOS builds need Xcode; CI's macOS runners can build and
+  upload to App Store Connect.
+- Android: a signed APK on GitHub Releases works today for anyone who
+  enables "install unknown apps", and Google Play costs a one-time 25 USD.
+  New personal Play accounts must run a closed test with at least 12
+  testers opted in for 14 continuous days before production access is
+  granted. Play requires a privacy-policy URL for every app.
+- Licensing: Yames is GPL-3. With aubio out of the mobile binary the
+  remaining GPL code is the owner's own plus one external contribution,
+  the i18n system from PR #8 (2026-09-02). Putting GPL code on the App
+  Store needs an explicit "App Store exception" from every copyright
+  holder; the owner can grant it for their code and should ask the
+  PR #8 author for a one-line consent. Without aubio, nobody else can
+  object.
+
+**Test devices.**
+- The owner's phone is a company device that takes no extra apps. It
+  cannot be the test device. Android v1 needs one dedicated Android
+  phone (any recent mid-range device; it must not run a VPN so
+  `tauri android dev` over LAN works). iOS needs an iPhone later.
+- Android development runs on the owner's Windows machine (Android
+  Studio + SDK + NDK). iOS development needs the Mac.
+
+---
+
+## 3. Architecture of the cut
+
+### Rust
+
+1. **Cargo feature `practice-coach`, on by default.**
+   `default = ["practice-coach"]`. It owns the modules and dependencies
+   listed in §2 and the coach / evaluation / TTS command handlers. The
+   existing `coach-llm`, `coach-llm-metal`, `coach-llm-vulkan` features
+   require it. Desktop builds do not change; `scripts/tauri.mjs` and
+   `release.yml` keep working because the default is on. Mobile builds
+   pass `--no-default-features`.
+2. **`#[cfg(desktop)]`** (tauri-build defines `desktop` / `mobile`) on:
+   tray, `tauri-plugin-global-shortcut`, `tauri-plugin-updater`,
+   `tauri-plugin-decorum`, `tauri-plugin-process`, the `floating`
+   window, `set_always_on_top`, `set_widget_*`, `show_floating`,
+   `show_main`, `save_window_position`, the `Moved` event handler, and
+   the `macos-private-api` / `tray-icon` Tauri features (moved to a
+   `[target.'cfg(not(any(target_os = "android", target_os = "ios")))']`
+   dependency block).
+3. **MIDI** stays compiled (midir's dummy backend on Android) but its
+   commands are `#[cfg(desktop)]` in v1 so the frontend has one rule.
+4. **`src-tauri/src/mobile/`** — a small in-tree Tauri mobile plugin
+   with a Kotlin and a Swift side: `keep_awake(bool)`,
+   `set_background_audio(bool)` (Android: start/stop a foreground
+   service with a media notification; iOS: AVAudioSession activate /
+   deactivate), and an `audio_interrupted` event the engine listens to.
+5. **Config:** `tauri.android.conf.json` and `tauri.ios.conf.json`
+   override `app.windows` to a single `main` window with no
+   `?window=` query, and drop the desktop plugins. A
+   `capabilities/mobile.json` scoped to `"platforms": ["android", "iOS"]`
+   grants only `core:default`, event, and store permissions.
+
+### Frontend
+
+1. **`src/platform.ts`** exports `IS_MOBILE`, backed by a Vite
+   `define` of `__YAMES_MOBILE__` from the `YAMES_MOBILE=1` environment
+   variable (the `tauri android|ios` scripts set it). Build-time, so
+   dead branches tree-shake; tests flip it with `vi.stubGlobal`.
+2. **Coach-only and desktop-only subtrees load through `React.lazy`
+   behind `if (!IS_MOBILE)`**, so the mobile bundle contains none of
+   `src/coach/`, `practice-coach/`, `floating-widget/`, `WindowControls`,
+   `TitleBar`, hotkeys UI, or the cut onboarding steps.
+3. **`src/ipc.ts` splits:** `ipc.ts` keeps the commands both platforms
+   have; `ipc.desktop.ts` holds coach, evaluation, TTS, MIDI, window and
+   updater calls and is imported only from desktop-only modules. A test
+   asserts nothing under the mobile import graph reaches
+   `ipc.desktop.ts`.
+4. **`useSession.ts`** is the hard part: `MetronomeView`,
+   `AccentControl`, `MeterPresets`, `FullscreenView` and
+   `useActionDispatcher` read it. The metronome-state slice it carries
+   for those callers is extracted into a coach-free hook; the
+   evaluation / coach slice stays desktop-only.
+5. **CSS:** `src/styles/mobile.css`, loaded only when `IS_MOBILE`, with
+   safe-area padding, touch targets and the sheet layouts; hover rules
+   across the existing files get wrapped in `@media (hover: hover)`.
+6. **Entry:** `App.tsx` drops the `floating` branch on mobile;
+   `index.html` gets `viewport-fit=cover`.
+
+### Gates that prove the cut
+
+- `cargo check --no-default-features --target aarch64-linux-android`
+  and `--target aarch64-apple-ios` pass; `cargo build` (defaults) and
+  `npm run test:rust` on desktop stay green.
+- `YAMES_MOBILE=1 npm run build`, then `scripts/check-mobile-bundle.mjs`
+  fails if `dist/` contains any of: `coachBrainTier`, `piper`,
+  `start_evaluation`, `tts_speak`, `show_floating`, `globalShortcut`.
+- Vitest composition tests render `MainWindow`, `MetronomeView`,
+  `SettingsView` and `OnboardingWizard` with `IS_MOBILE` both ways.
+- The click-jitter probe (or its callback-gap subset) runs on a real
+  Android device; the number goes in the task report.
+- The desktop manual checklist (`plans/MANUAL_TEST_CHECKLIST.md`) still
+  passes on a desktop build from the `mobile` branch before it merges.
+
+---
+
+## 4. Phases and tasks
 
 ```
-┌─────────────────────────────────────────┐
-│  Audio Render Callback (real-time thread)│
-│                                          │
-│  Called by CoreAudio every ~5ms          │
-│  Fill buffer with silence or click sample│
-│  Track sample position for beat timing   │
-└─────────────────────────────────────────┘
+M00 Android spike (throwaway)  ─►  M01 Rust gates  ─►  M02 frontend gates  ─►  M03 responsive pass
+                                                            │                          │
+                                                            └─►  M04 Android native plugin  ─►  M05 Android release
+                                                                                                        │
+                                                                                            M06 iOS  ─►  M07 iOS MIDI (v1.1)
 ```
 
-- **Latency:** ~5-12ms (excellent)
-- **API:** `AVAudioEngine` with `AVAudioSourceNode`, or raw Audio Units via `kAudioUnitSubType_RemoteIO`
-- **Rust binding:** Use `objc2` crate or write Swift bridge
-- **Background audio:** Requires `AVAudioSession` category `.playback` and background mode entitlement
+Full briefs: `plans/tasks/mobile/`. Summary:
 
-#### Android — Oboe (AAudio/OpenSL ES)
+| # | Task | Size | Deliverable | Gate |
+|---|---|---|---|---|
+| M00 | Android spike | M | `tauri android init` scaffold, app booting on a real device with whatever crude gates it takes, callback-cadence measurement, `M00-FINDINGS.md` | Findings file merged; spike branch discarded |
+| M01 | Rust: `practice-coach` feature + `cfg(desktop)` + `TempoContext` extraction | M | Desktop unchanged; mobile targets `cargo check` clean | The three cargo gates in §3 |
+| M02 | Frontend: `IS_MOBILE`, lazy subtrees, `ipc.desktop.ts`, `useSession` split | L | Mobile bundle free of coach / desktop code | Bundle check script + composition tests |
+| M03 | Responsive & touch pass | L | Beat, drill, setlist, settings, presets sheet, trimmed onboarding, zen at 360 / 390 / 430 px | Screenshots at three widths, hover-audit script, manual pass on device |
+| M04 | Android native plugin | M | Foreground service + notification, audio focus, wake lock, interruption event | Click keeps time for 10 min screen-off; survives an incoming call |
+| M05 | Android release | M | Signing keystore in CI, `release.yml` android job (APK + AAB), APK on Releases, Play listing, privacy policy page, website download section | Closed test running with ≥ 12 testers; APK installs from Releases |
+| M06 | iOS | L | `tauri ios init`, AVAudioSession plugin half, background mode, TestFlight from CI, App Store listing, GPL exception text + PR #8 consent | Build on TestFlight; review submitted |
+| M07 | iOS Bluetooth MIDI (v1.1) | M | midir CoreMIDI path enabled on iOS, footswitch bindings UI | Pedal starts / stops the click on device |
 
-```
-┌─────────────────────────────────────────┐
-│  Oboe Audio Callback (real-time thread)  │
-│                                          │
-│  Called by AAudio every ~10ms            │
-│  Fill buffer with silence or click sample│
-│  Track frame position for beat timing    │
-└─────────────────────────────────────────┘
-```
-
-- **Latency:** ~10-25ms (good on modern devices, 50-100ms on older ones)
-- **API:** Oboe C++ library (wraps AAudio on API 27+, falls back to OpenSL ES)
-- **Rust binding:** `oboe-rs` crate or FFI to C++ via `cxx`
-- **Background audio:** Requires foreground service with `FOREGROUND_SERVICE_MEDIA_PLAYBACK`
-
-### Timing in Callback Model
-
-Instead of sleeping until the next tick, the audio callback model works by counting samples:
-
-```rust
-struct MobileEngine {
-    sample_rate: u32,          // e.g. 48000
-    samples_per_tick: u32,     // (sample_rate * 60) / (bpm * subdivisions)
-    sample_counter: u32,       // counts up each callback
-    click_samples: Vec<i16>,   // decoded WAV click sound
-    click_position: usize,     // current playback position in click
-}
-
-fn audio_callback(buffer: &mut [i16], frames: u32) {
-    for frame in buffer.chunks_mut(channels) {
-        if self.sample_counter >= self.samples_per_tick {
-            self.sample_counter = 0;
-            self.click_position = 0; // trigger click
-            // emit beat event to frontend
-        }
-        // Mix click sample or silence
-        if self.click_position < self.click_samples.len() {
-            frame[0] = self.click_samples[self.click_position];
-            self.click_position += 1;
-        }
-        self.sample_counter += 1;
-    }
-}
-```
-
-**Advantages:**
-- Zero jitter — timing is sample-accurate (sub-sample precision)
-- No CPU waste — only runs when audio system needs data
-- Battery efficient — OS manages thread scheduling
-- Actually more precise than the desktop spin-loop approach
+M00 is not optional and is not to be skipped to "save a week": every
+estimate below assumes cpal's Oboe backend gives a stable callback on a
+mid-range phone. If it does not, M04 grows by a direct-Oboe engine
+backend and the total moves by two to three weeks.
 
 ---
 
-## Platform-Specific Considerations
+## 5. Distribution
 
-### iOS
+| | Android | iOS |
+|---|---|---|
+| Public path | GitHub Releases APK **and** Google Play | App Store only |
+| Cost | 25 USD once | Already paid (Developer Program) |
+| Gate before public | Play closed test: ≥ 12 testers, 14 days | App Review (days) |
+| Signing | Upload keystore, stored as CI secret | Distribution certificate + provisioning, App Store Connect API key in CI |
+| Updates | Play auto-updates; Releases users re-download | App Store |
+| Privacy | Privacy-policy URL required by Play; app collects nothing, page says so | Same page; "Data not collected" in App Privacy |
+| Licensing | None beyond GPL notice in About | App Store exception added to `LICENSE` notice for owner's code; consent from PR #8 author |
+| Build host | Windows (Android Studio, NDK) or Linux CI | macOS only (Xcode); CI `macos-latest` |
+| Test device | Dedicated Android phone, no VPN | iPhone |
 
-| Concern | Solution |
-|---------|----------|
-| Background audio | `AVAudioSession.setCategory(.playback)` + Info.plist `UIBackgroundModes: audio` |
-| Interruptions (calls, Siri) | Handle `AVAudioSession.interruptionNotification` — pause/resume |
-| Silent mode switch | `.playback` category ignores silent switch (correct for metronome) |
-| Screen lock | Audio continues; UI updates pause (acceptable) |
-| App Store review | Straightforward — utility app, no IAP needed |
-| Haptic feedback on beat | `UIImpactFeedbackGenerator` — nice optional feature |
+Order: Android ships first because both its paths are under the owner's
+control and the test device is cheap. iOS follows once M05 is out and
+the exception text is settled.
 
-### Android
-
-| Concern | Solution |
-|---------|----------|
-| Background playback | Foreground service with persistent notification |
-| Audio focus | Request `AUDIOFOCUS_GAIN` — duck or pause if lost |
-| Doze mode | Foreground service exempts from Doze |
-| Fragmentation | Oboe handles API level differences (AAudio vs OpenSL) |
-| Latency variance | Detect low-latency support via `AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER` |
-| Play Store | Straightforward — no special permissions beyond `FOREGROUND_SERVICE` |
-
----
-
-## UI Adaptations
-
-### Must Change
-- **Remove window controls** — no title bar drag, no minimize/maximize
-- **Remove floating widget** — not applicable on mobile
-- **Remove global shortcuts** — replace with media button handling
-- **Touch-friendly BPM control** — larger tap targets, swipe gestures for ±BPM
-- **Responsive layout** — already flex-based, but needs phone-width testing
-
-### Nice to Have
-- **Haptic pulse on beat** — physical feedback per tick
-- **Keep screen awake** — `WakeLock` on Android, `UIApplication.isIdleTimerDisabled` on iOS
-- **Tap tempo via screen tap** — already exists but ensure touch event handling
-- **Landscape mode** — optional, lock to portrait initially
-- **Bluetooth MIDI pedals** — CoreMIDI on iOS, Android MIDI API — reuse desktop MIDI plan
+**Why the "a lot of downloads" expectation needs tempering.** Mobile
+metronomes are a saturated store category with several apps above a
+million installs. Yames' desktop differentiators — footswitch control,
+the always-on-top widget, the local coach — are exactly the things that
+do not ship on mobile. What stands out on a phone is drills and
+setlists. Store discoverability, not the build, will decide the
+download count; M05 and M06 include listing copy and screenshots for
+that reason.
 
 ---
 
-## Dependency Changes
+## 6. Risks and open questions
 
-| Desktop | Mobile Replacement |
-|---------|-------------------|
-| `rodio` | Remove — use platform audio callbacks |
-| `cpal` | Remove — replaced by Oboe / CoreAudio |
-| `tauri-plugin-global-shortcut` | Remove — no mobile equivalent |
-| `tauri-plugin-store` | ✅ Keep — works on mobile |
-| (new) `oboe-rs` or `cxx` | Android audio callback |
-| (new) `objc2` or Swift bridge | iOS audio callback |
+| Risk | Where it bites | Mitigation |
+|---|---|---|
+| cpal's Oboe backend does not request low-latency mode | M00 | Measure; fall back to the `oboe` crate directly |
+| Android kills or throttles the process with the screen off | M04 | Foreground service with media notification; test 10 min screen-off |
+| Android System WebView / WKWebView differences (canvas zen effects, `backdrop-filter`, audio autoplay policies do not apply since audio is native) | M03 | Test on a low-end device; reduced-effects fallback already exists via reduced motion |
+| aubio-sys / bindgen against the Android NDK toolchain | M00, M01 | Not needed once `practice-coach` is off; M00 may stub it |
+| `scripts/tauri.mjs` injects `--features coach-llm-*` | M00, M01 | `YAMES_DEV_NO_LLM=1`; M01 teaches the wrapper about mobile targets |
+| `useSession` split regresses desktop metronome state | M02 | Existing vitest suites for MetronomeView / AccentControl / MeterPresets are the gate |
+| Versioning: one `version` across five platforms | M05 | Same string everywhere; `release.yml` `release` commit-message trigger unchanged |
+| Play closed test needs 12 human testers for 14 days | M05 | Start recruiting the day M05 starts, not when it ends |
+| GPL + App Store | M06 | Exception clause + PR #8 consent; aubio already out |
+| Owner's phone cannot be the test device | M00 onward | Buy one Android phone before M00 |
+
+Open questions to answer before the phase that needs them:
+
+1. **M03:** does the preset sidebar become a bottom sheet or a separate
+   route? Recommendation: bottom sheet, because presets are applied
+   mid-practice and a route change loses the beat view.
+2. **M03:** keep the tour and hints on mobile? Recommendation: cut in
+   v1; the trimmed onboarding is enough.
+3. **M04:** haptic pulse on the beat? Cheap on both platforms; ship it
+   off by default. Not a v1 blocker.
+4. **M05:** package name stays `com.yames.metronome`? Yes unless the
+   owner objects; it is what the desktop identifier is.
+5. **M06:** App Store exception wording — use the standard one the FSF
+   documents for GPL projects and add it to `LICENSE` and `About`.
 
 ---
 
-## Suggested Implementation Order
+## 7. Effort
 
-1. **Scaffold mobile targets** — `tauri android init` / `tauri ios init`
-2. **Get UI running** — verify webview renders correctly on both platforms
-3. **Implement iOS audio engine** — AVAudioSourceNode + sample-counting
-4. **Implement Android audio engine** — Oboe callback + sample-counting
-5. **Abstract engine trait** — shared interface between desktop and mobile engines
-6. **Remove desktop-only features** — conditional compile (`#[cfg(mobile)]`) for widget, shortcuts
-7. **Add mobile-specific features** — haptics, wake lock, media button handling
-8. **Test latency** — measure actual beat accuracy on real devices
-9. **UI polish** — responsive tweaks, touch targets, safe area insets
-
----
-
-## Estimated Effort
+Agent-driven work, with the owner testing on a device at the end of
+each task. Excludes waiting on Play's 14-day test and App Review.
 
 | Task | Effort |
-|------|--------|
-| iOS audio engine | 2-3 days |
-| Android audio engine (Oboe) | 3-4 days |
-| Engine trait abstraction | 1 day |
-| UI responsive/mobile tweaks | 2-3 days |
-| Platform-specific features (haptics, wake lock, etc.) | 1-2 days |
-| Testing on real devices | 2-3 days |
-| **Total** | **~2-3 weeks** |
+|---|---|
+| M00 Android spike | 1 week |
+| M01 Rust gates | 3–5 days |
+| M02 Frontend gates | 1–2 weeks |
+| M03 Responsive & touch pass | 2 weeks |
+| M04 Android native plugin | 1 week |
+| M05 Android release plumbing | 1 week |
+| **Android v1 total** | **6–8 weeks** |
+| M06 iOS | 2 weeks |
+| M07 iOS MIDI (v1.1) | 1 week |
+| **Both platforms** | **9–11 weeks** |
+
+Ongoing cost after v1: two more targets in the release matrix, each
+needing a device pass per release, and store listing maintenance.
 
 ---
 
-## Open Questions
+## 8. Sequencing and what to buy first
 
-- **Single codebase or separate engine files?** — Recommend `src-tauri/src/engine_desktop.rs` + `src-tauri/src/engine_mobile.rs` behind `#[cfg]` gates, sharing a common `EngineTrait`
-- **Ship as same app or separate listing?** — Probably separate (different UX expectations)
-- **Minimum OS versions?** — iOS 15+ (AVAudioSourceNode), Android API 27+ (AAudio via Oboe)
-- **Monetization on mobile?** — Free with optional tip jar? Or just free to match desktop?
+1. Buy a mid-range Android phone (no VPN, developer mode on).
+2. Install Android Studio, SDK, NDK, and the four Android Rust targets
+   on the Windows machine (M00 brief has the exact list).
+3. Run M00. Read `M00-FINDINGS.md`. Decide go / no-go on the numbers.
+4. M01 → M02 → M03 in sequence (each depends on the previous). M04 can
+   start in parallel with M03 once M01 is merged.
+5. M05 as soon as M03 and M04 are merged; recruit the 12 testers on
+   day one of M05.
+6. Merge `mobile` to `main` when the Android build passes the desktop
+   manual checklist on desktop and the M04 gates on device.
+7. M06, then M07.
