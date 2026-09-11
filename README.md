@@ -64,7 +64,7 @@ The metronome is a background tool. You should be focused on playing, not on the
 
 ## The Metronome
 
-The classic view. BPM control, subdivisions, time signatures, and a clean visual pulse that tracks every beat. Pick from 10+ handcrafted themes — dark, light, vibrant, minimal — and make it feel like yours.
+The classic view. BPM control, subdivisions, time signatures, and a clean visual pulse that tracks every beat. Pick from 13 handcrafted themes — dark, light, vibrant, minimal — and make it feel like yours.
 
 <p align="center">
   <img src="docs/img/metronome/obsidian-metronome.webp" alt="Yames metronome — Obsidian theme" width="380">
@@ -207,6 +207,11 @@ All keyboard shortcuts are rebindable. MIDI bindings are fully customizable — 
   <img src="docs/img/metronome/velvet-metronome.webp" width="260">
   <img src="docs/img/metronome/aurora-metronome.webp" width="260">
 </p>
+<p align="center">
+  <img src="docs/img/metronome/ash-metronome.webp" width="260">
+  <img src="docs/img/metronome/ember-metronome.webp" width="260">
+  <img src="docs/img/metronome/manuscript-metronome.webp" width="260">
+</p>
 </details>
 
 <details>
@@ -227,6 +232,11 @@ All keyboard shortcuts are rebindable. MIDI bindings are fully customizable — 
   <img src="docs/img/drill/velvet-drill.webp" width="260">
   <img src="docs/img/drill/aurora-drill.webp" width="260">
 </p>
+<p align="center">
+  <img src="docs/img/drill/ash-drill.webp" width="260">
+  <img src="docs/img/drill/ember-drill.webp" width="260">
+  <img src="docs/img/drill/manuscript-drill.webp" width="260">
+</p>
 </details>
 
 <details>
@@ -243,6 +253,12 @@ All keyboard shortcuts are rebindable. MIDI bindings are fully customizable — 
   <img src="docs/img/widget/ivory-widget.webp" width="200">
   <img src="docs/img/widget/mono-widget.webp" width="200">
   <img src="docs/img/widget/sand-widget.webp" width="200">
+</p>
+<p align="center">
+  <img src="docs/img/widget/ash-widget.webp" width="200">
+  <img src="docs/img/widget/ember-widget.webp" width="200">
+  <img src="docs/img/widget/manuscript-widget.webp" width="200">
+  <img src="docs/img/widget/velvet-widget.webp" width="200">
 </p>
 </details>
 
