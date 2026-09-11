@@ -135,3 +135,43 @@
     opacity: 1;
   }
 }
+
+/* =================== Phone widths =================== */
+/* `min-width: 480px` is a guaranteed 120px of overflow on a 360px screen and
+   90px on a 390px one — the modal is wider than the phone before anything
+   inside it is considered (M03-GAPS, surveyed by reading this file because
+   the picker only opens on a first launch the screenshot harness cannot
+   reach). The minimum was there to stop the card collapsing around a short
+   title on a wide window; a maximum does that job without also setting a
+   floor the hardware cannot meet.
+ *
+ * The grid is three columns of six instruments, which is two rows of three on
+ * a desktop and six slivers on a phone. Two columns, three rows.
+ *
+ * The overlay's gutter is its own, not the safe area's: M03a's insets keep the
+ * card off a notch, and this keeps it off the glass. */
+@media (max-width: 560px) {
+  .instrument-picker-overlay {
+    padding: calc(16px + var(--safe-top)) calc(16px + var(--safe-right))
+      calc(16px + var(--safe-bottom)) calc(16px + var(--safe-left));
+  }
+
+  .instrument-picker-modal {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    overflow-y: auto;
+    padding: 24px 20px;
+    gap: 16px;
+  }
+
+  .instrument-picker-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .instrument-picker-card {
+    padding: 14px 8px;
+  }
+}

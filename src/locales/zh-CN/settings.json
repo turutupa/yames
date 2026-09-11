@@ -319,6 +319,7 @@
   "instrumentPicker": {
     "title": "你在用什么乐器练习？",
     "subtitle": "Yames 会根据你的乐器调整起始检测与练习反馈，之后可在设置中更改。",
+    "subtitleMobile": "让 Yames 知道你在用什么练习。之后可以在设置里更改。",
     "skip": "跳过——之后再选"
   }
 }

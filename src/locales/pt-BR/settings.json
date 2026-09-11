@@ -319,6 +319,7 @@
   "instrumentPicker": {
     "title": "Com qual instrumento você pratica?",
     "subtitle": "O Yames ajusta a detecção de som e o feedback do coach para o seu instrumento. Você pode mudar isso depois em Configurações.",
+    "subtitleMobile": "Para o Yames saber com o que você pratica. Você pode mudar isso depois nas Configurações.",
     "skip": "Pular — escolho depois"
   }
 }

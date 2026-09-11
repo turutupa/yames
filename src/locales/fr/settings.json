@@ -319,6 +319,7 @@
   "instrumentPicker": {
     "title": "Sur quel instrument joues-tu ?",
     "subtitle": "Yames adapte la détection d'attaques et les retours du Coach à ton instrument. Tu pourras le changer plus tard dans les paramètres.",
+    "subtitleMobile": "Pour que Yames sache sur quoi tu travailles. Tu peux changer ça plus tard dans les Réglages.",
     "skip": "Passer — je choisirai plus tard"
   }
 }

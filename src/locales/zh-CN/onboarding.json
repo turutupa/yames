@@ -18,6 +18,7 @@
     "soundLook": {
       "title": "音色与外观",
       "subtitle": "把鼠标移到卡片上即可试听节拍音、预览主题。选一个你喜欢的。",
+      "subtitleTouch": "点按卡片试听节拍声或预览主题。想换就点另一张。",
       "soundHeading": "节拍音",
       "themeHeading": "主题",
       "moreThemes": "更多主题在设置中"

@@ -322,3 +322,55 @@ html[data-theme="sand"] .floating-play-btn.pulse {
   margin-left: auto;
   flex-shrink: 0;
 }
+
+/* =================== The unsaved-changes dialog, on a phone ===============
+ *
+ * Its own rules live in `shell.css`, which M03b is editing in parallel; these
+ * are here so the two tasks do not land in the same block. `overlays.css` is
+ * imported after `shell.css` by `main-window.css`, so at equal specificity
+ * these win, which is what an override wants.
+ *
+ * The row is Cancel | spacer | Discard, Save. Three buttons of "Keep editing"
+ * / "Don't save" / "Save" length have 260px of content box at 360px wide, and
+ * several locales are longer than English (German and Portuguese both are) --
+ * M03-GAPS flagged it as likely to wrap, and a wrapped two-and-one row reads
+ * as a layout accident on the one surface in the app that is asking rather
+ * than telling.
+ *
+ * So below 480px the three stack, in the order the question is answered:
+ * Save first because it is the recoverable one and already holds focus, then
+ * Discard, then the way back. Full width, because a stacked button that is
+ * not is a button you have to aim at. */
+@media (max-width: 480px) {
+  .unsaved-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  /* The spacer pushed the two on the right away from the one on the left. In
+     a column there is no left and right, and a flex item with `flex: 1` in a
+     column takes the height instead. */
+  .unsaved-spacer {
+    display: none;
+  }
+
+  .unsaved-actions .unsaved-save {
+    order: 1;
+  }
+
+  .unsaved-actions .unsaved-discard {
+    order: 2;
+  }
+
+  .unsaved-actions .unsaved-cancel {
+    order: 3;
+  }
+
+  .unsaved-actions button {
+    width: 100%;
+    /* The labels can breathe now; nothing has to be kept on one line. */
+    white-space: normal;
+  }
+}

@@ -319,6 +319,7 @@
   "instrumentPicker": {
     "title": "Op welk instrument oefen je?",
     "subtitle": "Yames stemt de detectie en coachingsfeedback af op je instrument. Je kunt dit later wijzigen in Instellingen.",
+    "subtitleMobile": "Zodat Yames weet waarop je oefent. Je kunt dit later wijzigen in Instellingen.",
     "skip": "Overslaan — kies ik later wel"
   }
 }

@@ -319,6 +319,7 @@
   "instrumentPicker": {
     "title": "Bạn luyện tập bằng nhạc cụ nào?",
     "subtitle": "Yames sẽ điều chỉnh khả năng phát hiện âm thanh và phản hồi huấn luyện cho phù hợp với nhạc cụ của bạn. Bạn có thể đổi sau trong Cài đặt.",
+    "subtitleMobile": "Để Yames biết bạn đang tập với nhạc cụ nào. Bạn có thể đổi sau trong Cài đặt.",
     "skip": "Bỏ qua — chọn sau"
   }
 }

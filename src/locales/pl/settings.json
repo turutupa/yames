@@ -319,6 +319,7 @@
   "instrumentPicker": {
     "title": "Na czym ćwiczysz?",
     "subtitle": "Yames dostraja wykrywanie dźwięku i wskazówki Trenera do Twojego instrumentu. Zmienisz to później w Ustawieniach.",
+    "subtitleMobile": "Żeby Yames wiedział, na czym ćwiczysz. Możesz to zmienić później w Ustawieniach.",
     "skip": "Pomiń — wybiorę później"
   }
 }

@@ -18,6 +18,7 @@
     "soundLook": {
       "title": "Dźwięk i wygląd",
       "subtitle": "Najedź na kartę, aby usłyszeć klik lub zobaczyć motyw. Wybierz to, co lubisz.",
+      "subtitleTouch": "Dotknij karty, aby usłyszeć klik albo zobaczyć motyw. Dotknij innej, aby zmienić zdanie.",
       "soundHeading": "Dźwięk kliknięcia",
       "themeHeading": "Motyw",
       "moreThemes": "Więcej motywów w Ustawieniach"

@@ -56,29 +56,40 @@ export function ReadyStep(_props: WizardStepProps) {
       value: getThemeById(themeId).name,
       target: "sound-look",
     },
-    {
-      key: "control",
-      label: t("onboarding.ready.rows.control"),
-      value: hasFootswitch
-        ? t("onboarding.ready.controlFootswitch")
-        : t("onboarding.ready.controlKeyboard"),
-      target: "hands-free",
-    },
-    {
-      key: "coach",
-      label: t("onboarding.ready.rows.coach"),
-      value:
-        coachTier === "off"
-          ? t("onboarding.ready.coachTiming")
-          : t("onboarding.ready.coachOn"),
-      target: "coach",
-    },
-    {
-      key: "input",
-      label: t("onboarding.ready.rows.input"),
-      value: inputDeviceName || t("onboarding.ready.inputNone"),
-      target: "audio-input",
-    },
+    // Three rows for three steps a phone does not have: the footswitch, the
+    // practice coach and the microphone. M02 cut the steps; the summary was
+    // still reporting their settings, so a phone showed "Practice coach:
+    // Timing feedback only" and "Audio input: Not set up" -- greyed-out
+    // status for features that are not in the build, which is the one thing
+    // the mobile plan's §1 forbids by name. A summary of a setup you were
+    // never offered is not a summary.
+    ...(IS_MOBILE
+      ? []
+      : ([
+          {
+            key: "control",
+            label: t("onboarding.ready.rows.control"),
+            value: hasFootswitch
+              ? t("onboarding.ready.controlFootswitch")
+              : t("onboarding.ready.controlKeyboard"),
+            target: "hands-free",
+          },
+          {
+            key: "coach",
+            label: t("onboarding.ready.rows.coach"),
+            value:
+              coachTier === "off"
+                ? t("onboarding.ready.coachTiming")
+                : t("onboarding.ready.coachOn"),
+            target: "coach",
+          },
+          {
+            key: "input",
+            label: t("onboarding.ready.rows.input"),
+            value: inputDeviceName || t("onboarding.ready.inputNone"),
+            target: "audio-input",
+          },
+        ] as SummaryRow[])),
   ];
 
   return (
@@ -146,7 +157,10 @@ export function ReadyStep(_props: WizardStepProps) {
         >
           {t("onboarding.ready.start")}
         </button>
-        {onRequestTour && (
+        {/* The tour is written around a desktop layout and its hotkeys, and
+            is cut on a phone (plan §1) -- Settings already drops its "Take
+            the tour" row. An offer that leads nowhere belongs nowhere. */}
+        {!IS_MOBILE && onRequestTour && (
           <button
             type="button"
             className="onboarding-btn onboarding-btn-ghost"

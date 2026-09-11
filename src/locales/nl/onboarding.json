@@ -18,6 +18,7 @@
     "soundLook": {
       "title": "Geluid en uiterlijk",
       "subtitle": "Beweeg over een kaart om de klik te horen of het thema te zien. Kies wat je mooi vindt.",
+      "subtitleTouch": "Tik op een kaart om de klik te horen of het thema te proberen. Tik op een andere om van gedachten te veranderen.",
       "soundHeading": "Klikgeluid",
       "themeHeading": "Thema",
       "moreThemes": "Meer thema's in Instellingen"

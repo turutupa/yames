@@ -18,6 +18,7 @@
     "soundLook": {
       "title": "Sonido y aspecto",
       "subtitle": "Pasa por encima de una tarjeta para oír el clic o ver el tema. Elige lo que te guste.",
+      "subtitleTouch": "Toca una tarjeta para oír el clic o probar el tema. Toca otra para cambiar de idea.",
       "soundHeading": "Sonido del clic",
       "themeHeading": "Tema",
       "moreThemes": "Más temas en Ajustes"
