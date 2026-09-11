@@ -333,9 +333,11 @@ export function MainHeader({
   }, [moreOpen]);
 
   return (
+    // The header doubles as the window’s drag area on Windows and Linux.
+    // A phone has no window to drag.
     <header
       className="main-header"
-      {...(!IS_MAC && { "data-tauri-drag-region": "" })}
+      {...(!IS_MOBILE && !IS_MAC && { "data-tauri-drag-region": "" })}
     >
       <div className="header-context">
         {/* Each tab's own object. The setlist tab answers "what am I looking

@@ -18,8 +18,6 @@ import {
   INERT_KEYBINDINGS,
   INERT_MIDI,
   INERT_SESSION,
-  INERT_WIZARD_COACH,
-  INERT_WIZARD_EVALUATION,
 } from "../../platform.inert";
 import { configureSpeedRamp, setBpm, setInstrument as setInstrumentBackend, setSoundType, setSubdivision, setTheme, setBeatGroups, setFreeMode, setVolume, startSpeedRamp, stopSpeedRamp, storeLoad, storeSave, togglePlayback } from "../../ipc";
 import { downloadAndInstallUpdate, setAlwaysOnTop, showFloating, setWidgetAlwaysOnTop, setWidgetMode } from "../../ipc.desktop";
@@ -490,8 +488,11 @@ export function MainWindow() {
   // as W3 drives the single `useMidi`: a download started in the wizard is
   // the one the coach card, Settings and the wizard's own footer bar watch,
   // and it keeps running after the overlay closes.
-  const wizardCoach: WizardCoachEnv = IS_MOBILE
-    ? INERT_WIZARD_COACH
+  // Undefined on a phone: the wizard has its own stand-ins for both of
+  // these, and its coach and audio-input steps are not in the mobile step
+  // registry at all.
+  const wizardCoach: WizardCoachEnv | undefined = IS_MOBILE
+    ? undefined
     : useMemo(
     () => ({
       systemMemoryMb: coach.systemMemoryMb,
@@ -520,8 +521,8 @@ export function MainWindow() {
   // drives the single `useMidi`: the device picked in the wizard is the device
   // the rest of the app uses, and W6's eight beats go through the normal
   // analyzer — the only path that leaves a real calibration seed behind.
-  const wizardEvaluation: WizardEvaluationEnv = IS_MOBILE
-    ? INERT_WIZARD_EVALUATION
+  const wizardEvaluation: WizardEvaluationEnv | undefined = IS_MOBILE
+    ? undefined
     : useMemo(
     () => ({
       devices: evaluation.devices,

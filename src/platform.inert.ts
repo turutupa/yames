@@ -23,10 +23,6 @@ import type { useKeybindings } from "./hooks/useKeybindings";
 import type { useSession } from "./hooks/useSession";
 import type { UseMidiReturn } from "./hooks/useMidi";
 import type { InputTester } from "./containers/main-window/hooks/useInputTester";
-import type {
-  WizardCoachEnv,
-  WizardEvaluationEnv,
-} from "./containers/onboarding/WizardContext";
 
 const noop = () => {};
 const asyncNoop = async () => {};
@@ -119,34 +115,4 @@ export const INERT_INPUT_TESTER: InputTester = {
   inputTestModeRef: { current: false },
   appendLog: noop,
   clearLog: noop,
-};
-
-/**
- * The wizard's view of the coach and the microphone.
- *
- * The mobile wizard is four steps — welcome, instrument, sound & look, ready
- * — and none of them reads either of these. They exist so `WizardEnv` keeps
- * one shape across both builds; the steps that would use them are not in the
- * mobile step registry at all (`containers/onboarding/steps/index.ts`).
- */
-export const INERT_WIZARD_COACH: WizardCoachEnv = {
-  systemMemoryMb: null,
-  modelStatus: null,
-  downloading: false,
-  downloadFraction: null,
-  startDownload: noop,
-  setBrainTier: noop,
-};
-
-export const INERT_WIZARD_EVALUATION: WizardEvaluationEnv = {
-  devices: [],
-  selectedDevice: undefined,
-  selectDevice: noop,
-  selectedChannel: 0,
-  selectChannel: noop,
-  listening: false,
-  setListening: noop,
-  spectrum: null,
-  lastFeedback: null,
-  avgDeviation: 0,
 };
