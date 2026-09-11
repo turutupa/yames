@@ -78,6 +78,10 @@
   --a3: #8b5cf6;
   --on-a1: #1a0e02;
   --fade-rgb: 17, 10, 12;
+  /* Stated rather than left to the :root copy above. Obsidian is the only
+     theme that would still be right without its own block, which made it the
+     only one whose block could go stale without anything showing. */
+  --zen-deepen: 46%;
 }
 
 [data-theme="velvet"] {
@@ -125,6 +129,44 @@
   --a3: #ffffff;
   --on-a1: #101010;
   --fade-rgb: 13, 13, 13;
+  --zen-deepen: 46%;
+}
+
+/* Ash and Ember are the two dark themes added after this file was written,
+   and until now they had no palette here at all: picking one left the page on
+   whichever theme was showing before, while the swatch said otherwise. Values
+   are the app's own tokens from src/themes.ts — --bg-primary, --bg-card,
+   --text-{primary,secondary,tertiary}, --accent, --accent-2, --accent-text —
+   so the website and the window agree about what the theme looks like. */
+[data-theme="ash"] {
+  --bg: #0e0f11;
+  --bg-2: #1a1d20;
+  --ink: #eceef0;
+  --ink-dim: #c2c7cc;
+  --ink-mute: #9aa1a8;
+  --line: rgba(255, 255, 255, 0.09);
+  --line-2: rgba(255, 255, 255, 0.17);
+  --a1: #c3ec4f;
+  --a2: #7aa2ff;
+  --a3: #ff3d8a;
+  --on-a1: #111404;
+  --fade-rgb: 14, 15, 17;
+  --zen-deepen: 46%;
+}
+
+[data-theme="ember"] {
+  --bg: #110d0a;
+  --bg-2: #1e1712;
+  --ink: #f5ece2;
+  --ink-dim: #d8c9b8;
+  --ink-mute: #b5a494;
+  --line: rgba(255, 255, 255, 0.09);
+  --line-2: rgba(255, 255, 255, 0.17);
+  --a1: #ff7a3c;
+  --a2: #35c4b0;
+  --a3: #8b5cf6;
+  --on-a1: #1a0d05;
+  --fade-rgb: 17, 13, 10;
   --zen-deepen: 46%;
 }
 
@@ -205,6 +247,24 @@
   --a3: #0e7490;
   --on-a1: #fff5f9;
   --fade-rgb: 255, 240, 246;
+  --zen-deepen: 93%;
+}
+
+[data-theme="manuscript"] {
+  --bg: #f7f3ea;
+  --bg-2: #ece5d6;
+  --ink: #1e1b16;
+  --ink-dim: #4a443a;
+  --ink-mute: #595247;
+  --line: rgba(30, 27, 22, 0.12);
+  --line-2: rgba(30, 27, 22, 0.24);
+  --a1: #26428f;
+  --a2: #2e694e;
+  /* The app has no third accent; an oxblood is the one a printed page would
+     have used for the same job, and it is the theme's whole idea. */
+  --a3: #8a3324;
+  --on-a1: #ffffff;
+  --fade-rgb: 247, 243, 234;
   --zen-deepen: 93%;
 }
 

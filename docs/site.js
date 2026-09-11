@@ -12,20 +12,25 @@
   /** Which Zen visual the band opens on. Must be one of ZEN_STYLES. */
   const LANDING_ZEN = "warp";
 
-  /** id + display name + the two swatch colours (bg, accent) from src/themes.ts */
+  /**
+   * id + display name + the two swatch colours (bg, accent) from src/themes.ts,
+   * in that file's order: the dark themes, then the light ones. Ash and Ember
+   * were appended when they were added, which stranded two dark swatches after
+   * the five light ones and broke the run in half.
+   */
   const THEMES = [
     { id: "mono", name: "Mono", bg: "#121212", accent: "#d4d4d4" },
     { id: "obsidian", name: "Obsidian", bg: "#0a0a0a", accent: "#f59e0b" },
     { id: "velvet", name: "Velvet", bg: "#110b1e", accent: "#8b5cf6" },
     { id: "neon", name: "Neon", bg: "#0c0c18", accent: "#06b6d4" },
     { id: "aurora", name: "Aurora", bg: "#0a0020", accent: "#00d4ff" },
+    { id: "ash", name: "Ash", bg: "#0e0f11", accent: "#c3ec4f" },
+    { id: "ember", name: "Ember", bg: "#110d0a", accent: "#ff7a3c" },
     { id: "ivory", name: "Ivory", bg: "#faf8f2", accent: "#b8860b" },
     { id: "arctic", name: "Arctic", bg: "#f0f4f8", accent: "#0369a1" },
     { id: "sand", name: "Sand", bg: "#f5f0e8", accent: "#92400e" },
     { id: "lavender", name: "Lavender", bg: "#f5f0ff", accent: "#7c3aed" },
     { id: "prism", name: "Prism", bg: "#ffe0f0", accent: "#ff3d8a" },
-    { id: "ash", name: "Ash", bg: "#0e0f11", accent: "#c3ec4f" },
-    { id: "ember", name: "Ember", bg: "#110d0a", accent: "#ff7a3c" },
     { id: "manuscript", name: "Manuscript", bg: "#f7f3ea", accent: "#26428f" },
   ];
 

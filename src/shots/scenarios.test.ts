@@ -46,14 +46,61 @@ function referencedImages(): { file: string; rel: string }[] {
 }
 
 describe("the screenshots the website is built on", () => {
-  it("shoots every theme the app ships", () => {
+  it("shoots every theme the app ships, in the app's order", () => {
     // A theme with no shot is a blank card; a shot for a theme that no longer
     // exists is a file nothing will ever ask for.
-    expect([...SHOT_THEMES].sort()).toEqual(THEMES.map((t) => t.id).sort());
+    //
+    // Order, not just membership: src/themes.ts groups the dark themes and
+    // then the light ones, and the website's swatch row and the app's own
+    // picker each render their list straight through. Ash and Ember were
+    // appended to the end of the website's, which showed up as two dark
+    // swatches stranded after the five light ones.
+    expect([...SHOT_THEMES]).toEqual(THEMES.map((t) => t.id));
+  });
+
+  it("keeps the dark and light themes in unbroken runs", () => {
+    // The grouping is what makes a row of thirteen swatches scannable, and it
+    // is a property of src/themes.ts that nothing else was checking.
+    const groups = THEMES.map((t) => t.group);
+    const changes = groups.filter((g, i) => g !== groups[i - 1]);
+    expect(changes, `themes change group ${changes.length} times: ${groups.join(", ")}`)
+      .toHaveLength(2);
+  });
+
+  it("gives every theme a palette, not just a swatch", () => {
+    // Two different files decide what a theme looks like on the page: site.js
+    // carries the swatch's two colours, and style.css carries the palette the
+    // whole page is painted from. Ash and Ember had the first and not the
+    // second, so choosing them repainted nothing — the page kept the previous
+    // theme's colours while the swatch underneath said otherwise.
+    //
+    // The token set is the union of what the theme blocks themselves define,
+    // so it needs no hand-kept list and grows on its own: add a token to one
+    // palette and every other palette has to answer for it. A block that
+    // defines most of a theme fails here too — a missing token falls back to
+    // the landing palette's amber rather than to nothing, which is the hardest
+    // kind of wrong to notice.
+    const blocks = new Map<string, string>();
+    for (const theme of SHOT_THEMES) {
+      const at = STYLE_CSS.indexOf(`[data-theme="${theme}"] {`);
+      expect(at, `style.css has no palette for "${theme}"`).toBeGreaterThan(-1);
+      blocks.set(theme, STYLE_CSS.slice(at, STYLE_CSS.indexOf("}", at)));
+    }
+    const tokens = new Set(
+      [...blocks.values()].flatMap((b) =>
+        [...b.matchAll(/(--[a-z0-9-]+):/g)].map((m) => m[1]),
+      ),
+    );
+
+    for (const [theme, block] of blocks) {
+      const defined = new Set([...block.matchAll(/(--[a-z0-9-]+):/g)].map((m) => m[1]));
+      const missing = [...tokens].filter((t) => !defined.has(t));
+      expect(missing, `${theme} does not set ${missing.join(", ")}`).toEqual([]);
+    }
   });
 
   it("gives the carousel a card for every theme, and no card without a file", () => {
-    expect(siteThemeIds().sort()).toEqual([...SHOT_THEMES].sort());
+    expect(siteThemeIds()).toEqual([...SHOT_THEMES]);
     for (const theme of siteThemeIds()) {
       const file = path.join(IMG_DIR, "metronome", `${theme}-metronome.webp`);
       expect(fs.existsSync(file), `site.js lists ${theme} but ${file} is missing`).toBe(true);
