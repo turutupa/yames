@@ -83,10 +83,10 @@
   },
   "mobileTabs": {
     "metronome": "Клик",
-    "drill": "Темп",
-    "setlist": "Сет",
+    "drill": "Разгон",
+    "setlist": "Сетлист",
     "settings": "Опции",
-    "library": "Архив",
+    "library": "Пресеты",
     "zen": "Дзен"
   },
   "sheet": {

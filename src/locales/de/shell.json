@@ -83,10 +83,10 @@
   },
   "mobileTabs": {
     "metronome": "Metronom",
-    "drill": "Tempo",
+    "drill": "Übung",
     "setlist": "Setlist",
     "settings": "Optionen",
-    "library": "Archiv",
+    "library": "Presets",
     "zen": "Zen"
   },
   "sheet": {
