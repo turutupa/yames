@@ -1,6 +1,6 @@
-use crate::onset::SharedTempoContext;
+use crate::beat_log::{BeatLog, BeatTick};
 use crate::state::SharedState;
-use crate::timing::{BeatLog, BeatTick};
+use crate::tempo_context::SharedTempoContext;
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use rodio::Source;
 use std::io::Cursor;
@@ -1055,8 +1055,13 @@ pub fn start_audio_device_polling(app_handle: AppHandle) {
                 // (only hits cpal when devices actually change, not every poll)
                 let devices = list_output_devices();
                 let _ = app_handle.emit("audio-devices-changed", &devices);
-                let input_devices = crate::audio_input::AudioInput::list_devices();
-                let _ = app_handle.emit("audio-input-devices-changed", &input_devices);
+                // Input devices exist only where the mic evaluation does —
+                // desktop (M01). A mobile build has no `audio_input` module.
+                #[cfg(desktop)]
+                {
+                    let input_devices = crate::audio_input::AudioInput::list_devices();
+                    let _ = app_handle.emit("audio-input-devices-changed", &input_devices);
+                }
                 last_count = current_count;
             }
         }
@@ -3391,7 +3396,7 @@ mod tests {
     #[test]
     fn a_failed_audio_setup_leaves_the_engine_startable_again() {
         let mut engine =
-            MetronomeEngine::new_with_forced_setup_failure(crate::timing::create_beat_log());
+            MetronomeEngine::new_with_forced_setup_failure(crate::beat_log::create_beat_log());
         let state = crate::state::create_shared_state();
 
         // First press of Play: the device will not open, and the caller is
@@ -3429,7 +3434,7 @@ mod tests {
         // its stream: silence, with `start` having reported success. Every
         // spawn must install its own flag.
         let mut engine =
-            MetronomeEngine::new_with_forced_setup_failure(crate::timing::create_beat_log());
+            MetronomeEngine::new_with_forced_setup_failure(crate::beat_log::create_beat_log());
         let state = crate::state::create_shared_state();
 
         let _ = engine.start_headless(state.clone());
@@ -3449,7 +3454,7 @@ mod tests {
         // the audio thread has not produced yet, because on the app path
         // that wait happens on the Tauri main thread and is a frozen window.
         let mut engine =
-            MetronomeEngine::new_with_forced_setup_failure(crate::timing::create_beat_log());
+            MetronomeEngine::new_with_forced_setup_failure(crate::beat_log::create_beat_log());
         let state = crate::state::create_shared_state();
         state.lock().unwrap().is_playing = true;
 
@@ -3482,7 +3487,7 @@ mod tests {
         }
         let alive = Arc::new(AtomicBool::new(true));
         let playing = Arc::new(AtomicBool::new(true));
-        let tempo: SharedTempoContext = Arc::new(crate::onset::TempoContext::new(120, 1));
+        let tempo: SharedTempoContext = Arc::new(crate::tempo_context::TempoContext::new(120, 1));
         tempo.set_playing(true);
         let (tx, rx) = mpsc::sync_channel::<Result<(), String>>(1);
 
@@ -3551,7 +3556,7 @@ mod tests {
         state.lock().unwrap().is_playing = true;
         let alive = Arc::new(AtomicBool::new(true));
         let playing = Arc::new(AtomicBool::new(true));
-        let tempo: SharedTempoContext = Arc::new(crate::onset::TempoContext::new(120, 1));
+        let tempo: SharedTempoContext = Arc::new(crate::tempo_context::TempoContext::new(120, 1));
         tempo.set_playing(true);
         let (tx, rx) = mpsc::sync_channel::<Result<(), String>>(1);
 

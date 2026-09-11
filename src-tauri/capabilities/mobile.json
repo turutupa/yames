@@ -1,0 +1,21 @@
+{
+  "identifier": "mobile",
+  "description": "Capabilities for the phone build. One fullscreen webview, no window manager, no coach: only the core APIs the metronome, drills, setlists and presets actually use, plus the settings store.",
+  "platforms": [
+    "android",
+    "iOS"
+  ],
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "core:event:default",
+    "core:window:allow-set-fullscreen",
+    "core:window:allow-is-fullscreen",
+    "store:allow-get",
+    "store:allow-set",
+    "store:allow-save",
+    "store:allow-load"
+  ]
+}
