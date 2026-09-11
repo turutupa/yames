@@ -3,7 +3,9 @@
     "startingIn": "잠시 후 시작",
     "rampStep": "{{step}}단계",
     "fullscreen": "전체 화면",
+    "exit": "젠 모드 종료",
     "exitHint": "더블클릭하거나 Esc를 눌러 종료",
+    "exitHintTouch": "오른쪽 위 닫기 버튼을 눌러 젠 모드를 종료하세요",
     "styles": {
       "focus": "집중",
       "pulse": "펄스",

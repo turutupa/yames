@@ -3,7 +3,9 @@
     "startingIn": "開始まで",
     "rampStep": "ステップ {{step}}",
     "fullscreen": "全画面",
+    "exit": "禅を終了",
     "exitHint": "ダブルクリックまたは Esc で終了",
+    "exitHintTouch": "右上の閉じるボタンをタップすると禅を終了します",
     "styles": {
       "focus": "フォーカス",
       "pulse": "パルス",

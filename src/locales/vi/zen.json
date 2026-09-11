@@ -3,7 +3,9 @@
     "startingIn": "Sắp bắt đầu",
     "rampStep": "Bước {{step}}",
     "fullscreen": "Toàn màn hình",
+    "exit": "Thoát Thiền",
     "exitHint": "Nhấn đúp hoặc phím Esc để thoát",
+    "exitHintTouch": "Chạm nút đóng ở góc trên bên phải để thoát Thiền",
     "styles": {
       "focus": "Tập trung",
       "pulse": "Nhịp đập",

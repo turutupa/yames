@@ -3,7 +3,9 @@
     "startingIn": "Başlamak üzere",
     "rampStep": "Adım {{step}}",
     "fullscreen": "Tam Ekran",
+    "exit": "Zen'den çık",
     "exitHint": "Çıkmak için çift tıkla veya Esc'ye bas",
+    "exitHintTouch": "Zen'den çıkmak için sağ üstteki kapatma düğmesine dokun",
     "styles": {
       "focus": "Odak",
       "pulse": "Nabız",
