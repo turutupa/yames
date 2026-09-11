@@ -24,8 +24,11 @@ M00 Android spike (throwaway branch, findings file is the deliverable)
                              └─► M07 iOS Bluetooth MIDI (v1.1)
 ```
 
-Do not start M01 until `M00-FINDINGS.md` is merged and the owner has
-said go. Do not start M03 or M04 until M02 is merged into `mobile`.
+**Owner's call on 2026-09-11: go as fast as parallelism allows.** M01,
+M02, M03a and M05a do not depend on M00's audio measurement and started
+the same day, each in its own worktree. M00 runs alongside them once the
+Android tooling is installed. M03 (layout) and M04 wait for M02 and M01
+respectively; M05 waits for M03 + M04.
 
 ## Branches
 
@@ -92,12 +95,14 @@ said go. Do not start M03 or M04 until M02 is merged into `mobile`.
 | `M00-android-spike.md` | Scaffold, boot on device, measure callback cadence, write findings | M |
 | `M01-rust-gates.md` | `practice-coach` feature, `cfg(desktop)`, `TempoContext` extraction, wrapper support | M |
 | `M02-frontend-gates.md` | `IS_MOBILE`, lazy subtrees, `ipc.desktop.ts`, `useSession` split, bundle check | L |
-| `M03-responsive-touch.md` | Phone layouts, safe areas, hover audit, presets sheet, trimmed onboarding | L |
+| `M03a-css-mechanics-and-survey.md` | Hover audit and wrapping, safe-area tokens, touch targets, phone-width survey | M |
+| `M03-responsive-touch.md` | Phone layouts, presets sheet, trimmed onboarding (after M02) | L |
 | `M04-android-native.md` | Foreground service, audio focus, wake lock, interruptions | M |
-| `M05-android-release.md` | Keystore, CI job, APK + AAB, Play listing, privacy page, website | M |
+| `M05a-release-prep.md` | Privacy page, store copy, dispatch-only Android CI draft, licence exception text, console checklist | S |
+| `M05-android-release.md` | Keystore, signed APK + AAB, Play closed test, website download section | M |
 | `M06-ios.md` | `tauri ios init`, AVAudioSession, TestFlight from CI, App Store listing, GPL exception | L |
 | `M07-ios-midi.md` | CoreMIDI footswitch on iOS | M |
 
-Only `M00-android-spike.md` is written today. The others are written
-when their predecessor merges, from the findings the predecessor
-produced.
+M00, M01, M02, M03a and M05a are written. M03, M04, M05, M06 and M07
+are written when their predecessor merges, from what the predecessor
+found.
