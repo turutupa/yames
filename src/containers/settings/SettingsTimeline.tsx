@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { IS_MOBILE } from "../../platform";
 import "../../styles/settings-timeline.css";
 
 interface Section {
@@ -52,6 +53,18 @@ function useAccentIsLight(): boolean {
   return light;
 }
 
+/**
+ * The tick rail down the right edge of Settings.
+ *
+ * Not on a phone. It is a hover-era scroll indicator: the ticks are 14x3px,
+ * the label only appears on hover, and the "you are here" popover it shows
+ * while scrolling lands on top of the section it is naming when the card is
+ * 292px wide. A thumb scrolls the sheet; it does not aim at a 3px tick
+ * (M03-GAPS open question 5, decided for M03c).
+ *
+ * Returned null from inside rather than gated at the call site because that
+ * call site is `MainWindow.tsx`, which M03b owns.
+ */
 export default function SettingsTimeline({ sections, containerRef }: SettingsTimelineProps) {
   const [activeIdx, setActiveIdx] = useState(0);
   const [scrolling, setScrolling] = useState(false);
@@ -141,7 +154,7 @@ export default function SettingsTimeline({ sections, containerRef }: SettingsTim
     [getScrollContainer]
   );
 
-  if (sections.length === 0) return null;
+  if (IS_MOBILE || sections.length === 0) return null;
 
   return (
     <div className="settings-timeline">
