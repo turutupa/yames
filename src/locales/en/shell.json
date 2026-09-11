@@ -79,7 +79,6 @@
     "expandWithShortcut": "Expand sidebar ({{shortcut}})"
   },
   "tabs": {
-    "label": "Screens",
     "library": "Library"
   },
   "sheet": {

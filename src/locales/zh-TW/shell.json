@@ -77,5 +77,11 @@
     "expand": "展開側邊欄",
     "collapseWithShortcut": "摺疊側邊欄 ({{shortcut}})",
     "expandWithShortcut": "展開側邊欄 ({{shortcut}})"
+  },
+  "tabs": {
+    "library": "資料庫"
+  },
+  "sheet": {
+    "close": "關閉"
   }
 }

@@ -77,5 +77,11 @@
     "expand": "Mở rộng thanh bên",
     "collapseWithShortcut": "Thu gọn thanh bên ({{shortcut}})",
     "expandWithShortcut": "Mở rộng thanh bên ({{shortcut}})"
+  },
+  "tabs": {
+    "library": "Thư viện"
+  },
+  "sheet": {
+    "close": "Đóng"
   }
 }

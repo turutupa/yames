@@ -117,7 +117,11 @@ export function MobileTabBar({
   const { t } = useTranslation();
 
   return (
-    <nav className="mobile-tabs" aria-label={t("tabs.label")}>
+    // The rail's own name, deliberately: this bar carries the same three
+    // things it did — the modes, the library, and Zen — so a second string
+    // saying the same thing in fifteen languages would only be a second thing
+    // to keep in step.
+    <nav className="mobile-tabs" aria-label={t("rail.label")}>
       {TABS.map((tab) => (
         <button
           key={tab.id}

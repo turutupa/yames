@@ -77,5 +77,11 @@
     "expand": "Expandir barra lateral",
     "collapseWithShortcut": "Recolher barra lateral ({{shortcut}})",
     "expandWithShortcut": "Expandir barra lateral ({{shortcut}})"
+  },
+  "tabs": {
+    "library": "Biblioteca"
+  },
+  "sheet": {
+    "close": "Fechar"
   }
 }

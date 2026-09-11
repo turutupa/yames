@@ -77,7 +77,7 @@ describe("MainWindow on a phone", () => {
     await screen.findByText("120", { selector: ".bpm-input" });
 
     expect(container.querySelector(".rail")).toBeNull();
-    const tabs = screen.getByRole("navigation", { name: /screens/i });
+    const tabs = screen.getByRole("navigation", { name: /modes/i });
     expect(tabs).toBeInTheDocument();
     expect(
       [...tabs.querySelectorAll(".mobile-tab[data-tab] .mobile-tab-label")].map(

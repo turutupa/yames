@@ -77,5 +77,11 @@
     "expand": "Zijbalk uitklappen",
     "collapseWithShortcut": "Zijbalk inklappen ({{shortcut}})",
     "expandWithShortcut": "Zijbalk uitklappen ({{shortcut}})"
+  },
+  "tabs": {
+    "library": "Bibliotheek"
+  },
+  "sheet": {
+    "close": "Sluiten"
   }
 }
