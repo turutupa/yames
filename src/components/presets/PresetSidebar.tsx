@@ -353,13 +353,14 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
     },
   }), [activeId, allPresets, setlists, state, view]);
 
-  // Two links, joined. It is the one glyph in the row that says "several
-  // things in an order" without a word, which is what a list mixing setlists
-  // and presets needs at 11px.
+  // The rail's setlist glyph at row size — lines with a play head, a list that
+  // runs in order. Rail.tsx has the note on why it is no longer a chain.
   const setlistIcon = (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M9.5 14.5a4 4 0 0 1 0-5l2-2a4 4 0 0 1 5.7 5.7l-1 1" />
-      <path d="M14.5 9.5a4 4 0 0 1 0 5l-2 2a4 4 0 0 1-5.7-5.7l1-1" />
+      <path d="M4 6.5h11" />
+      <path d="M4 12h7" />
+      <path d="M4 17.5h7" />
+      <path d="m14 10.75 7 4-7 4z" />
     </svg>
   );
 

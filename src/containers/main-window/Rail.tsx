@@ -47,12 +47,26 @@ const MODES = [
   {
     id: "setlist" as const,
     labelKey: "nav.setlist",
-    // Two links joined — the same glyph the library rows carry, so the mode
-    // and its documents are recognisably the same thing.
+    /**
+     * Lines with a play head: a list that runs in order.
+     *
+     * It was two chain links, from when the feature was called a chain of
+     * presets. The name went and the picture stayed — and a chain says
+     * "joined", which is the one thing a setlist is not about. What it is
+     * about is the order and the fact that it plays itself, and the queue
+     * glyph is the one every player already taught everybody to read.
+     *
+     * The lower two lines are short so the play head has its own space:
+     * sized up until it read at 12px in a library row, and no further,
+     * because past that its left edge starts touching the line ends and
+     * the whole glyph smears into one shape.
+     */
     icon: (
       <>
-        <path d="M9.5 14.5a4 4 0 0 1 0-5l2-2a4 4 0 0 1 5.7 5.7l-1 1" />
-        <path d="M14.5 9.5a4 4 0 0 1 0 5l-2 2a4 4 0 0 1-5.7-5.7l1-1" />
+        <path d="M4 6.5h11" />
+        <path d="M4 12h7" />
+        <path d="M4 17.5h7" />
+        <path d="m14 10.75 7 4-7 4z" />
       </>
     ),
   },
