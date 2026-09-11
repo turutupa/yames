@@ -255,3 +255,63 @@ describe("MainHeader — the bar is one row", () => {
     expect(rule).not.toContain("display: none");
   });
 });
+
+const SETLIST = {
+  id: "c1",
+  name: "Daily routine",
+  createdAt: 0,
+  repeat: 1,
+  steps: [],
+} as unknown as Parameters<typeof MainHeader>[0]["activeSetlist"];
+
+/**
+ * The context bar belongs to whichever tab's object you are looking at, and
+ * the wiring for that has now been wrong twice in the same direction.
+ *
+ * It first read `view === "beat" && activeSetlist`, from when a setlist was
+ * something you opened ON the metronome tab. Setlists became a mode, `view`
+ * became "setlist", and the bar silently stopped rendering — leaving no way
+ * to save a setlist at all except the dialog that catches you on the way out.
+ * Nothing failed; the save button simply was not there.
+ */
+describe("MainHeader — whose object the bar is for", () => {
+  const setlistProps = {
+    activeSetlist: SETLIST,
+    setlistDirty: true,
+    setlistSaveFeedback: false,
+    onSaveSetlist: vi.fn(),
+    onRevertSetlist: vi.fn(),
+    onRenameSetlist: vi.fn(),
+  };
+
+  it("gives the setlist tab a way to save the setlist", () => {
+    setup({ view: "setlist" as never, ...setlistProps });
+    const bar = document.querySelector(".setlist-save-area");
+    expect(bar).not.toBeNull();
+    expect(screen.getByText("Daily routine")).toBeInTheDocument();
+    expect(screen.getByText("Save")).toBeInTheDocument();
+  });
+
+  it("says so when there is nothing to save", () => {
+    setup({ view: "setlist" as never, ...setlistProps, setlistDirty: false });
+    expect(screen.getByText("No changes")).toBeInTheDocument();
+  });
+
+  it("saves when the button is pressed", () => {
+    const onSaveSetlist = vi.fn();
+    setup({ view: "setlist" as never, ...setlistProps, onSaveSetlist });
+    fireEvent.click(screen.getByText("Save"));
+    expect(onSaveSetlist).toHaveBeenCalled();
+  });
+
+  it("keeps the setlist's bar off the tabs whose object is a preset", () => {
+    // A setlist stays loaded while you visit the metronome — its bar must not
+    // follow it there, or the metronome tab would offer to save something
+    // that is not on screen.
+    for (const view of ["beat", "drill"] as const) {
+      setup({ view, ...setlistProps });
+      expect(document.querySelector(".setlist-save-area")).toBeNull();
+      cleanup();
+    }
+  });
+});

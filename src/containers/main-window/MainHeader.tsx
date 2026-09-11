@@ -336,9 +336,14 @@ export function MainHeader({
       {...(!IS_MAC && { "data-tauri-drag-region": "" })}
     >
       <div className="header-context">
-        {/* One or the other, never both: a setlist and a preset are two answers
-            to "what am I looking at", and the bar can only give one. */}
-        {view === "beat" && activeSetlist ? (
+        {/* Each tab's own object. The setlist tab answers "what am I looking
+            at" with a setlist; the metronome and drill tabs answer with a
+            preset. This used to read `view === "beat" && activeSetlist`,
+            because a setlist was something you opened ON the metronome tab —
+            and when setlists became a mode the bar stopped rendering at all,
+            which left no way to save a setlist except the modal that catches
+            you on the way out. */}
+        {view === "setlist" && activeSetlist ? (
           <SetlistSaveBar
             setlist={activeSetlist}
             dirty={setlistDirty}
