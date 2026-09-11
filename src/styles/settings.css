@@ -2433,3 +2433,17 @@
 .main-content[data-view="settings"] .view-transition-wrapper {
   padding-bottom: 24px;
 }
+
+/* =================== Touch targets =================== */
+/* See the note at the foot of shell.css. `.toggle-btn` is the app's general
+   two-state control and is used well beyond this file -- the drill view's
+   mode row is the same class -- so the one rule here covers all of them. */
+@media (pointer: coarse) {
+  .toggle-btn,
+  .instrument-dropdown-trigger,
+  .theme-card,
+  .about-link-btn,
+  .header-share-option {
+    min-height: 44px;
+  }
+}

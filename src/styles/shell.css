@@ -2335,3 +2335,102 @@
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* =================== Touch targets =================== */
+/* 44x44 CSS px is the floor both platforms' guidance puts under anything you
+   hit with a fingertip, and almost nothing in this app was drawn for one: the
+   window opens at 800x900 and the smallest it has ever had to survive is
+   480x780. Both are mouse sizes, and a mouse pointer is a single pixel.
+ *
+ * `pointer: coarse` is the query for "the primary input is a finger", so a
+ * desktop with a mouse matches none of this and nothing below changes what
+ * the owner sees. Two shapes are used, and which one applies is decided by
+ * the row rather than by taste:
+ *
+ *   - where the row has vertical room, the control grows with min-height,
+ *     which costs the layout nothing because rows lay out horizontally;
+ *   - where the row is horizontally tight -- the context bar and the preset
+ *     sidebar's header already run off a phone before anything grows -- the
+ *     visual keeps its size and a transparent ::after reaches out to 44
+ *     instead, so the hit area grows without pushing its neighbours further
+ *     off screen.
+ *
+ * Controls whose width comes from a flex container rather than from
+ * themselves are deliberately left alone: a min-width on those only moves the
+ * overflow around. They are a layout problem, and M03 owns it. */
+@media (pointer: coarse) {
+  .rail-mode,
+  .rail-action {
+    min-height: 44px;
+  }
+
+  .preset-sidebar-item {
+    min-height: 44px;
+  }
+
+  /* 26x26 icon buttons, in a header row a phone cannot fit as it is.
+     ::before, not ::after: these buttons already spend ::after on their
+     [data-tip] tooltip, and a second rule for the same pseudo-element would
+     fight it rather than sit beside it. */
+  .preset-sidebar-head-btn {
+    position: relative;
+  }
+
+  .preset-sidebar-head-btn::before {
+    content: "";
+    position: absolute;
+    inset: -9px;
+  }
+
+  .preset-save-btn,
+  .preset-text-btn {
+    min-height: 44px;
+  }
+
+  .context-chip {
+    min-height: 44px;
+  }
+
+  .context-chip-icon {
+    position: relative;
+  }
+
+  /* ::before for the same reason: ::after is the chip's tooltip. */
+  .context-chip-icon::before {
+    content: "";
+    position: absolute;
+    inset: 0 -6px;
+  }
+
+  /* The faders in the context bar are 54x12. The bar the eye reads is drawn
+     by the track pseudo-element, not by the input's own box, so the input can
+     be 44px tall without the bar getting any thicker. The thumb is the other
+     half of this: it is invisible until :hover on a desktop, and a screen
+     with no hover would otherwise show a volume control with no handle. */
+  .context-chip-range {
+    height: 44px;
+  }
+
+  .context-chip-range:not(:disabled)::-webkit-slider-thumb {
+    width: 14px;
+    height: 14px;
+    /* half the difference between the thumb and the 3px track */
+    margin-top: -5.5px;
+    opacity: 1;
+  }
+
+  .context-chip-range:not(:disabled)::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    opacity: 1;
+  }
+
+  .transport-skip {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .unsaved-actions button {
+    min-height: 44px;
+  }
+}

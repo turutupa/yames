@@ -1058,3 +1058,14 @@
     padding: 9px 12px;
   }
 }
+
+/* =================== Touch targets =================== */
+/* See the note at the foot of shell.css. */
+@media (pointer: coarse) {
+  .onboarding-btn,
+  .onboarding-theme-card,
+  .onboarding-sound-card,
+  .onboarding-more-themes {
+    min-height: 44px;
+  }
+}

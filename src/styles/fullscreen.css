@@ -550,3 +550,49 @@
 
 
 
+
+/* =================== Touch targets =================== */
+/* See the note at the foot of shell.css. Zen is the one screen where this is
+   not a comfort question: every control it has is revealed by hovering the
+   view, and the way out is a double-click that only .fs-exit-hint mentions.
+   Hover never happens on a phone, so without the three opacities below a
+   musician who taps Zen gets a full-screen number with no visible way back --
+   no exit button, no theme picker, and no hint that a double-tap is the
+   answer. */
+@media (pointer: coarse) {
+  .fs-controls {
+    opacity: 0.9;
+  }
+
+  .fs-exit-hint {
+    opacity: 0.5;
+  }
+
+  .zen-top-controls {
+    opacity: 0.7;
+  }
+
+  /* 36x36 with an 8px gap, and 40x40 in a row that already touches both edges
+     of a 360px screen -- so both reach 44 through their hit area rather than
+     by growing, and neither takes more of the gap than the gap has. */
+  .zen-top-btn {
+    position: relative;
+  }
+
+  /* ::before, because ::after is already this button's [data-tooltip]. */
+  .zen-top-btn::before {
+    content: "";
+    position: absolute;
+    inset: -4px;
+  }
+
+  .fs-ctrl-btn {
+    position: relative;
+  }
+
+  .fs-ctrl-btn::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+  }
+}

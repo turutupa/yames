@@ -893,3 +893,40 @@
     filter: brightness(1.08);
   }
 }
+
+/* =================== Touch targets =================== */
+/* See the note at the foot of shell.css. */
+@media (pointer: coarse) {
+  .setlist-blank-new,
+  .setlist-add-row {
+    min-height: 44px;
+  }
+
+  /* The per-step tools are 25x23 icons at the end of a step's title line and
+     the step's name sits right beside them, so the hit area grows and the row
+     does not. */
+  .setlist-step-tools button,
+  .setlist-step-remove {
+    position: relative;
+  }
+
+  .setlist-step-tools button::after,
+  .setlist-step-remove::after {
+    content: "";
+    position: absolute;
+    inset: -10px -6px;
+  }
+
+  /* The folded step's name is a dotted-underline button inside a sentence;
+     growing the box would lift the underline off the baseline it shares with
+     the words around it. */
+  .setlist-folded-name {
+    position: relative;
+  }
+
+  .setlist-folded-name::after {
+    content: "";
+    position: absolute;
+    inset: -11px -4px;
+  }
+}

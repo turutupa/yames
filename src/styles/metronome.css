@@ -2267,3 +2267,63 @@ span.meter-grouping-chip {
     margin-left: 0;
   }
 }
+
+/* =================== Touch targets =================== */
+/* See the note at the foot of shell.css for why this is `pointer: coarse` and
+   why some controls grow while others only widen their hit area. */
+@media (pointer: coarse) {
+  /* 26x26, in a meter row that already runs off a 390px screen. Growing the
+     buttons would push it further, so only the hit area reaches 44: the two
+     are 37px apart and this takes 9px a side, so the minus and the plus never
+     overlap. */
+  .beat-stepper-btn {
+    position: relative;
+  }
+
+  .beat-stepper-btn::after {
+    content: "";
+    position: absolute;
+    inset: -9px;
+  }
+
+  .accent-option,
+  .meter-chip,
+  .time-sig-btn,
+  .sub-dropdown-item {
+    min-height: 44px;
+  }
+
+  /* The arrows that page through the beat dots are opacity: 0 and
+     pointer-events: none until the beat section is hovered, which on a touch
+     screen is never -- so on a phone they are not merely hard to hit, they do
+     not exist. They keep their drawn size and reach out to 44. */
+  .beat-nav {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .beat-nav::after {
+    content: "";
+    position: absolute;
+    inset: -10px;
+  }
+
+  /* Both faders paint their bar as the input's own background rather than as
+     a track pseudo-element, so the box cannot simply grow. Painting that same
+     gradient as a band of its old height, centred in a 44px box, keeps the
+     bar exactly as thick as it was and gives the finger the rest. The caps
+     lose their 2px rounding, which is the whole visual cost. */
+  .volume-slider {
+    height: 44px;
+    background-repeat: no-repeat;
+    background-size: 100% 4px;
+    background-position: left center;
+  }
+
+  .bpm-slider {
+    height: 44px;
+    background-repeat: no-repeat;
+    background-size: 100% 10px;
+    background-position: left center;
+  }
+}
