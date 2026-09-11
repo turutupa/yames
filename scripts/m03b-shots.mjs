@@ -116,6 +116,18 @@ const SCREENS = [
     ],
   },
   {
+    // The library's own chrome inside the sheet: the search field it asks for
+    // rather than keeps, and the row of results under it.
+    id: "library-search",
+    shot: "metronome",
+    steps: [
+      { click: ".mobile-tab-library" },
+      { wait: ".sheet--library" },
+      { click: ".preset-sidebar-search-btn" },
+      { wait: ".preset-search-field" },
+    ],
+  },
+  {
     id: "meter-sheet",
     shot: "metronome",
     steps: [{ click: ".meter-chip" }, { wait: ".sheet--meter" }],
