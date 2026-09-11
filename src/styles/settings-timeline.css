@@ -31,9 +31,11 @@
   inset: -5px -6px;
 }
 
-.stl-tick:hover {
-  width: 20px;
-  background: color-mix(in srgb, var(--accent) 60%, transparent);
+@media (hover: hover) {
+  .stl-tick:hover {
+    width: 20px;
+    background: color-mix(in srgb, var(--accent) 60%, transparent);
+  }
 }
 
 .stl-tick.stl-visible {
@@ -65,8 +67,10 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
-.stl-tick:hover .stl-tooltip {
-  opacity: 1;
+@media (hover: hover) {
+  .stl-tick:hover .stl-tooltip {
+    opacity: 1;
+  }
 }
 
 /* Active section popover — visible while scrolling */

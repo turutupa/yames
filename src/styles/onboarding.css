@@ -110,8 +110,10 @@
   color: var(--accent-text, #fff);
 }
 
-.onboarding-btn-primary:hover {
-  filter: brightness(1.08);
+@media (hover: hover) {
+  .onboarding-btn-primary:hover {
+    filter: brightness(1.08);
+  }
 }
 
 .onboarding-btn-ghost {
@@ -119,9 +121,11 @@
   color: var(--text-secondary);
 }
 
-.onboarding-btn-ghost:hover:not(:disabled) {
-  color: var(--text-primary);
-  border-color: var(--accent);
+@media (hover: hover) {
+  .onboarding-btn-ghost:hover:not(:disabled) {
+    color: var(--text-primary);
+    border-color: var(--accent);
+  }
 }
 
 .onboarding-btn:disabled {
@@ -262,10 +266,16 @@
     background 120ms ease;
 }
 
-.onboarding-sound-card:hover,
 .onboarding-sound-card:focus-visible {
   border-color: var(--accent);
   background: var(--bg-secondary);
+}
+
+@media (hover: hover) {
+  .onboarding-sound-card:hover {
+    border-color: var(--accent);
+    background: var(--bg-secondary);
+  }
 }
 
 .onboarding-sound-card:focus-visible {
@@ -346,8 +356,10 @@
   transition: color 120ms ease;
 }
 
-.onboarding-more-themes:hover {
-  color: var(--accent);
+@media (hover: hover) {
+  .onboarding-more-themes:hover {
+    color: var(--accent);
+  }
 }
 
 .onboarding-more-themes:focus-visible {
@@ -464,9 +476,11 @@
   text-align: left;
 }
 
-button.onboarding-hf-device:hover {
-  border-color: var(--accent);
-  color: var(--text-primary);
+@media (hover: hover) {
+  button.onboarding-hf-device:hover {
+    border-color: var(--accent);
+    color: var(--text-primary);
+  }
 }
 
 .onboarding-hf-device.connected {
@@ -536,8 +550,10 @@ button.onboarding-hf-device:hover {
     background 120ms ease;
 }
 
-.onboarding-coach-card:hover:not(:disabled) {
-  border-color: var(--accent);
+@media (hover: hover) {
+  .onboarding-coach-card:hover:not(:disabled) {
+    border-color: var(--accent);
+  }
 }
 
 .onboarding-coach-card:focus-visible {
@@ -681,8 +697,10 @@ button.onboarding-hf-device:hover {
   transition: background 120ms ease;
 }
 
-.coach-voice-offer-accept:hover {
-  background: var(--accent-subtle);
+@media (hover: hover) {
+  .coach-voice-offer-accept:hover {
+    background: var(--accent-subtle);
+  }
 }
 
 .coach-voice-offer-dismiss {
@@ -867,8 +885,10 @@ button.onboarding-hf-device:hover {
     background 120ms ease;
 }
 
-button.onboarding-summary-row:hover {
-  border-color: var(--accent);
+@media (hover: hover) {
+  button.onboarding-summary-row:hover {
+    border-color: var(--accent);
+  }
 }
 
 /* Rows that lead nowhere yet: no hover, no pointer, no button affordance. */
@@ -934,17 +954,21 @@ button.onboarding-summary-row:hover {
   transition: color 120ms ease, background 120ms ease;
 }
 
-.finish-setup-chip-main:hover {
-  color: var(--accent);
-  background: var(--accent-subtle);
+@media (hover: hover) {
+  .finish-setup-chip-main:hover {
+    color: var(--accent);
+    background: var(--accent-subtle);
+  }
 }
 
 .finish-setup-chip-close {
   padding: 5px 8px;
 }
 
-.finish-setup-chip-close:hover {
-  color: var(--text-primary);
+@media (hover: hover) {
+  .finish-setup-chip-close:hover {
+    color: var(--text-primary);
+  }
 }
 
 @keyframes onboarding-fade-in {
