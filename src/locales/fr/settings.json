@@ -193,7 +193,8 @@
         "os-fullscreen": "Plein écran système",
         "toggle-widget": "Basculer le widget",
         "tab-1": "Onglet Métronome",
-        "tab-2": "Onglet Rampe",
+        "tab-2": "Onglet Setlist",
+        "tab-3": "Onglet Rampe",
         "settings": "Paramètres",
         "toggle-sidebar": "Basculer la barre latérale",
         "toggle-coach": "Basculer le Coach"
@@ -216,7 +217,8 @@
         "os-fullscreen": "Basculer le plein écran natif",
         "toggle-widget": "Basculer vers le widget flottant",
         "tab-1": "Passer à l'onglet Métronome",
-        "tab-2": "Passer à l'onglet Rampe",
+        "tab-2": "Passer à l'onglet Setlist",
+        "tab-3": "Passer à l'onglet Rampe",
         "settings": "Ouvrir ou fermer les paramètres",
         "toggle-sidebar": "Réduire ou développer la barre latérale gauche",
         "toggle-coach": "Ouvrir ou fermer le panneau du Coach"

@@ -193,7 +193,8 @@
         "os-fullscreen": "Sistem tam ekran",
         "toggle-widget": "Mini pencereyi aç/kapat",
         "tab-1": "Metronom sekmesi",
-        "tab-2": "Tempo Antrenmanı sekmesi",
+        "tab-2": "Set listesi sekmesi",
+        "tab-3": "Tempo Antrenmanı sekmesi",
         "settings": "Ayarlar",
         "toggle-sidebar": "Kenar çubuğunu aç/kapat",
         "toggle-coach": "Koç panelini aç/kapat"
@@ -216,7 +217,8 @@
         "os-fullscreen": "Sistem tam ekranını aç/kapat",
         "toggle-widget": "Mini pencereye geç",
         "tab-1": "Metronom sekmesine geç",
-        "tab-2": "Tempo Antrenmanı sekmesine geç",
+        "tab-2": "Set listesi sekmesine geç",
+        "tab-3": "Tempo Antrenmanı sekmesine geç",
         "settings": "Ayarları aç veya kapat",
         "toggle-sidebar": "Sol kenar çubuğunu daraltır veya genişletir",
         "toggle-coach": "Pratik Koçu panelini aç veya kapat"

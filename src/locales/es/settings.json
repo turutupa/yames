@@ -193,7 +193,8 @@
         "os-fullscreen": "Pantalla completa del sistema",
         "toggle-widget": "Alternar widget",
         "tab-1": "Pestaña Metrónomo",
-        "tab-2": "Pestaña Rampa de tempo",
+        "tab-2": "Pestaña Setlist",
+        "tab-3": "Pestaña Rampa de tempo",
         "settings": "Ajustes",
         "toggle-sidebar": "Alternar barra lateral",
         "toggle-coach": "Alternar entrenador"
@@ -216,7 +217,8 @@
         "os-fullscreen": "Alterna la pantalla completa nativa",
         "toggle-widget": "Cambia a la ventana flotante",
         "tab-1": "Cambia a la pestaña Metrónomo",
-        "tab-2": "Cambia a la pestaña Rampa de tempo",
+        "tab-2": "Cambia a la pestaña Setlist",
+        "tab-3": "Cambia a la pestaña Rampa de tempo",
         "settings": "Abre o cierra los ajustes",
         "toggle-sidebar": "Contraer o expandir la barra lateral izquierda",
         "toggle-coach": "Abre o cierra el panel del entrenador"

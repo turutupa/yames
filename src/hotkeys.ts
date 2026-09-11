@@ -33,6 +33,7 @@ export type HotkeyAction =
   | "toggle-coach"
   | "tab-1"
   | "tab-2"
+  | "tab-3"
   | "settings";
 
 export interface HotkeyEntry {
@@ -266,10 +267,25 @@ export const HOTKEYS: HotkeyEntry[] = [
     desc: "Switch to Metronome tab",
     group: "navigation",
   },
+  /**
+   * The numbers count down the rail, which reads Metronome, Setlist, Drill.
+   *
+   * That moved Drill from ⌘2 to ⌘3 when setlists became a mode. Keeping Drill
+   * on ⌘2 would have spared the habit once and then left every user for the
+   * rest of the app's life pressing ⌘2 for the third item and ⌘3 for the
+   * second. These are positional keys or they are arbitrary ones.
+   */
   {
     id: "tab-2",
-    action: "Drill tab",
+    action: "Setlist tab",
     key: "⌘2",
+    desc: "Switch to Setlist tab",
+    group: "navigation",
+  },
+  {
+    id: "tab-3",
+    action: "Drill tab",
+    key: "⌘3",
     desc: "Switch to Drill tab",
     group: "navigation",
   },

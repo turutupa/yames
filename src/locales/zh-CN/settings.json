@@ -193,7 +193,8 @@
         "os-fullscreen": "系统全屏",
         "toggle-widget": "切换小窗",
         "tab-1": "节拍器页",
-        "tab-2": "变速练习页",
+        "tab-2": "曲目单页",
+        "tab-3": "变速练习页",
         "settings": "设置",
         "toggle-sidebar": "切换侧边栏",
         "toggle-coach": "切换教练"
@@ -216,7 +217,8 @@
         "os-fullscreen": "切换系统全屏",
         "toggle-widget": "切换到悬浮小窗",
         "tab-1": "切换到节拍器页",
-        "tab-2": "切换到变速练习页",
+        "tab-2": "切换到曲目单页",
+        "tab-3": "切换到变速练习页",
         "settings": "打开或关闭设置",
         "toggle-sidebar": "折叠或展开左侧边栏",
         "toggle-coach": "打开或关闭练习教练面板"
