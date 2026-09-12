@@ -97,3 +97,38 @@ handler existed. It clears when W1's branch merges. Nobody else touches it.
   regenerates only the kits. Do not run it bare.
 - The kits are unauditioned by ear. The owner listens before they are
   called done.
+
+## `src/jam/diatonic.ts`, `chordShapes.ts`, `src/components/chords` (W9)
+
+- `chordsInKey(root, mode)`, `seventhsInKey(...)`, `chordTones`,
+  `chordPitchClasses`, `chordName(root, quality, keyRoot?)`, `noteName`.
+- `shapesFor(root, quality, { instrument })` → `PlacedShape[]` ordered along
+  the neck; `shapeCount`, `spellsChord`, `GUITAR_TUNING`, `BASS_TUNING`,
+  `MAX_FRET`, `SHAPES`. Every placement is test-verified to spell its chord.
+- Components: `ChordDiagram` (`size: "xs" | "sm" | "md"`, `selected`),
+  `KeyChordsStrip` (`root`, `mode`, `current?`, `onPick`, sevenths behind a
+  toggle), `ChordShapesRow` (`root`, `quality`, `instrument`,
+  `selectedIndex`, `onSelect`, a wrapping next-shape button). Every visible
+  word is a prop with an English default (`seventhsLabel`, `nextLabel`,
+  `sizeLabels`, `fretLabel`): **W8 passes translated strings in.**
+- Its `ChordQuality` is a strict superset of harmony's (adds `dim`, `aug`,
+  `sus2`, `sus4`, `add9`). **W8 widens `harmony.ts`'s union with those five,
+  makes `diatonic.ts` import `Chord`/`ChordQuality`/`PitchClass` from
+  harmony, and swaps in harmony's `chordName`.** One-directional, small.
+
+## The mode itself (W2)
+
+- Data: `src/jam/{grooves,feel,forms,compile,jams}.ts` with `index.ts`.
+  `compileJam(jam)` is where the bass and practice config get added.
+- Screen: `src/containers/jam/JamView.tsx` and neighbours,
+  `src/styles/jam.css`. Session and engine wiring:
+  `src/containers/main-window/hooks/useJamSession.ts` (loads, seeds the six
+  starters, sets meter before table, catches a missing `set_jam` and logs
+  once). Transport reads `formBar` / `chorus` when `view === "jam"`.
+- Locales: `src/locales/*/jam.json` exists in all fifteen; `nav.jam` and
+  `presets.titleJam` in `shell.json`; the `tab-4` hotkey strings live in
+  `settings.json` (the locale test forbids a top-level group in two files).
+- The tour's view union accepts `"jam"`; the three `"beat" | "drill"`
+  narrowings that lost the setlist on the way back from Settings are fixed
+  and pinned by a test.
+- `set_jam` is rejected by the engine until W1 merges; the click plays.
