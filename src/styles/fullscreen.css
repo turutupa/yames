@@ -621,13 +621,6 @@
   }
 }
 
-/* The way out, drawn.
-
-   It only exists on the phone build (`IS_MOBILE` in FullscreenView), because
-   a desktop has Esc and a double-click and adding a button there would change
-   a screen this task is not allowed to change. It is the same 36px circle as
-   its neighbour so the row stays a row, in the accent so it reads as the one
-   control on this screen that does something other than change the picture. */
 /* The phone build's own claim, independent of what the device says about its
    pointer. M05 read `(pointer: coarse) = false` and `(hover: hover) = false`
    out of the release WebView on the Android emulator: the coarse block above
@@ -638,6 +631,13 @@
   opacity: 1;
 }
 
+/* The way out, drawn.
+
+   It only exists on the phone build (`IS_MOBILE` in FullscreenView), because
+   a desktop has Esc and a double-click and adding a button there would change
+   a screen this task is not allowed to change. It is the same 36px circle as
+   its neighbour so the row stays a row, in the accent so it reads as the one
+   control on this screen that does something other than change the picture. */
 .zen-exit-btn {
   border-color: color-mix(in srgb, var(--accent) 55%, transparent);
   background: color-mix(in srgb, var(--accent) 16%, rgba(255, 255, 255, 0.06));
