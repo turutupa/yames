@@ -87,6 +87,155 @@
     },
     "transport": {
       "chorus": "Chorus"
+    },
+    "now": {
+      "label": "Agora",
+      "aria": "Tocando {{chord}}",
+      "next": "{{chord}} em {{count}} compassos",
+      "next_one": "{{chord}} em {{count}} compasso",
+      "next_other": "{{chord}} em {{count}} compassos",
+      "nextNow": "{{chord}} logo em seguida"
+    },
+    "fretboard": {
+      "label": "Braço",
+      "aria": "{{chord}} no braço"
+    },
+    "chords": {
+      "label": "Acordes",
+      "hint": "A harmonia na linha de compassos, e acima dela o acorde em que você está.",
+      "inKey": "Acordes em {{key}}",
+      "follow": "Seguir o jam",
+      "followHint": "Deixe as formas andarem com a harmonia, ou fixe-as em um acorde.",
+      "sevenths": "Sétimas",
+      "nextShape": "Próxima forma",
+      "sizeTriad": "tríade",
+      "sizeOpen": "aberta",
+      "sizeBarre": "pestana",
+      "sizeSeventh": "sétima",
+      "fret": "casa {{fret}}"
+    },
+    "key": {
+      "label": "Tom",
+      "mode": "Maior, menor ou blues",
+      "major": "Maior",
+      "minor": "Menor",
+      "blues": "Blues",
+      "majorNamed": "{{root}} maior",
+      "minorNamed": "{{root}} menor",
+      "bluesNamed": "blues em {{root}}"
+    },
+    "kit": {
+      "label": "Kit",
+      "room": "Sala",
+      "roomHint": "aberto, com a sala em volta",
+      "tight": "Seco",
+      "tightHint": "de perto, sem cauda",
+      "brushes": "Vassourinhas",
+      "brushesHint": "baixinho, para uma balada",
+      "electronic": "Eletrônico",
+      "electronicHint": "sintetizado e marcado"
+    },
+    "transposition": {
+      "label": "Você lê",
+      "concert": "Real",
+      "bb": "Si♭",
+      "eb": "Mi♭"
+    },
+    "setup": {
+      "label": "Tom, kit e a parte que você lê"
+    },
+    "band": {
+      "label": "A banda",
+      "lead": "tudo sintetizado, nada para baixar",
+      "drums": "Bateria",
+      "bass": "Baixo",
+      "keys": "Teclado",
+      "you": "Você",
+      "youPlay": "{{instrument}}",
+      "youHint": "a banda nunca toca o seu instrumento",
+      "out": "fora",
+      "hatsOnly": "só chimbau",
+      "inputOn": "Entrada ligada",
+      "inputOff": "Entrada desligada"
+    },
+    "bassStyle": {
+      "rock": "fundamentais no bumbo",
+      "shuffle": "uma levada de boogie",
+      "swing": "um walking bass",
+      "bossa": "a levada de bossa",
+      "waltz": "fundamental e quinta",
+      "sixeight": "fundamental e quinta",
+      "funk": "fundamentais sincopadas"
+    },
+    "practice": {
+      "label": "Estudo",
+      "dropOut": "Compassos em silêncio",
+      "dropOutEvery": "Silêncio a cada {{count}}",
+      "dropOutBarsLabel": "Quanto tempo a banda cala",
+      "forBars": "por {{count}} compassos",
+      "forBars_one": "por {{count}} compasso",
+      "forBars_other": "por {{count}} compassos",
+      "trade": "Revezamento",
+      "tradeN": "Grupos de {{count}}",
+      "tempo": "Treinador de andamento",
+      "tempoUp": "Andamento +{{step}}",
+      "tempoEveryLabel": "De quanto em quanto o andamento sobe",
+      "everyChoruses": "a cada {{count}} voltas",
+      "everyChoruses_one": "a cada {{count}} volta",
+      "everyChoruses_other": "a cada {{count}} voltas",
+      "climbing": "subindo de {{from}}"
+    },
+    "cue": {
+      "yours": "Seus quatro",
+      "silent": "Você sozinho",
+      "back": "A banda voltou"
+    },
+    "editor": {
+      "label": "Editor de groove",
+      "edit": "Editar o groove",
+      "makeYourOwn": "Faça o seu",
+      "name": "Nome do groove",
+      "yours": "Seu",
+      "pages": "Editar o compasso ou a virada",
+      "bar": "Compasso",
+      "fill": "Virada",
+      "reset": "Restaurar",
+      "done": "Pronto",
+      "gridBar": "O groove, um compasso",
+      "gridFill": "A virada, um compasso",
+      "hint": "Clique numa célula para alternar",
+      "meter": "{{beats}} tempos em {{subdivision}} · as colunas seguem o compasso",
+      "cell": "{{lane}}, tempo {{beat}}, tique {{tick}}: {{level}}",
+      "lanes": {
+        "hat": "Chimbau",
+        "snare": "Caixa",
+        "kick": "Bumbo",
+        "ride": "Ride"
+      },
+      "levels": {
+        "0": "nada",
+        "1": "toque",
+        "2": "acento",
+        "3": "fantasma"
+      },
+      "subdivision": {
+        "1": "semínimas",
+        "2": "colcheias",
+        "3": "tercinas",
+        "4": "semicolcheias",
+        "6": "sextinas"
+      }
     }
+  },
+  "scale": {
+    "major": "maior",
+    "naturalMinor": "menor natural",
+    "dorian": "dórica",
+    "mixolydian": "mixolídia",
+    "minorPentatonic": "pentatônica menor",
+    "majorPentatonic": "pentatônica maior",
+    "blues": "de blues",
+    "harmonicMinor": "menor harmônica",
+    "altered": "alterada"
   }
 }

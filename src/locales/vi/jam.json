@@ -87,6 +87,155 @@
     },
     "transport": {
       "chorus": "Chorus"
+    },
+    "now": {
+      "label": "Bây giờ",
+      "aria": "Đang là {{chord}}",
+      "next": "{{chord}} sau {{count}} ô nhịp",
+      "next_one": "{{chord}} sau {{count}} ô nhịp",
+      "next_other": "{{chord}} sau {{count}} ô nhịp",
+      "nextNow": "Tiếp theo là {{chord}}"
+    },
+    "fretboard": {
+      "label": "Cần đàn",
+      "aria": "{{chord}} trên cần đàn"
+    },
+    "chords": {
+      "label": "Hợp âm",
+      "hint": "Vòng hợp âm trên dải ô nhịp, và hợp âm bạn đang chơi ở trên.",
+      "inKey": "Hợp âm trong {{key}}",
+      "follow": "Bám theo bài",
+      "followHint": "Thế bấm chạy theo vòng hợp âm, hoặc ghim vào một hợp âm.",
+      "sevenths": "Hợp âm 7",
+      "nextShape": "Thế bấm sau",
+      "sizeTriad": "ba nốt",
+      "sizeOpen": "mở",
+      "sizeBarre": "chặn",
+      "sizeSeventh": "bậc 7",
+      "fret": "phím {{fret}}"
+    },
+    "key": {
+      "label": "Giọng",
+      "mode": "Trưởng, thứ hay blues",
+      "major": "Trưởng",
+      "minor": "Thứ",
+      "blues": "Blues",
+      "majorNamed": "{{root}} trưởng",
+      "minorNamed": "{{root}} thứ",
+      "bluesNamed": "blues giọng {{root}}"
+    },
+    "kit": {
+      "label": "Bộ trống",
+      "room": "Phòng",
+      "roomHint": "mở, có không gian phòng",
+      "tight": "Gọn",
+      "tightHint": "thu gần, không đuôi vang",
+      "brushes": "Chổi",
+      "brushesHint": "nhẹ, hợp với ballad",
+      "electronic": "Điện tử",
+      "electronicHint": "tổng hợp, chắc tiếng"
+    },
+    "transposition": {
+      "label": "Bạn đọc",
+      "concert": "Cao độ thật",
+      "bb": "Si♭",
+      "eb": "Mi♭"
+    },
+    "setup": {
+      "label": "Giọng, bộ trống và bè bạn đọc"
+    },
+    "band": {
+      "label": "Ban nhạc",
+      "lead": "tất cả đều tổng hợp, không phải tải gì",
+      "drums": "Trống",
+      "bass": "Bass",
+      "keys": "Phím",
+      "you": "Bạn",
+      "youPlay": "{{instrument}}",
+      "youHint": "ban nhạc không bao giờ chơi nhạc cụ của bạn",
+      "out": "nghỉ",
+      "hatsOnly": "chỉ hi-hat",
+      "inputOn": "Đầu vào bật",
+      "inputOff": "Đầu vào tắt"
+    },
+    "bassStyle": {
+      "rock": "nốt gốc theo trống cái",
+      "shuffle": "mẫu boogie",
+      "swing": "đường walking",
+      "bossa": "mẫu bossa",
+      "waltz": "nốt gốc và bậc năm",
+      "sixeight": "nốt gốc và bậc năm",
+      "funk": "nốt gốc đảo phách"
+    },
+    "practice": {
+      "label": "Luyện tập",
+      "dropOut": "Ô nhịp lặng",
+      "dropOutEvery": "Lặng mỗi {{count}} ô",
+      "dropOutBarsLabel": "Ban nhạc lặng bao lâu",
+      "forBars": "trong {{count}} ô nhịp",
+      "forBars_one": "trong {{count}} ô nhịp",
+      "forBars_other": "trong {{count}} ô nhịp",
+      "trade": "Đổi phiên",
+      "tradeN": "Mỗi {{count}} ô",
+      "tempo": "Luyện tốc độ",
+      "tempoUp": "Tốc độ +{{step}}",
+      "tempoEveryLabel": "Bao lâu thì tăng tốc độ",
+      "everyChoruses": "mỗi {{count}} vòng",
+      "everyChoruses_one": "mỗi {{count}} vòng",
+      "everyChoruses_other": "mỗi {{count}} vòng",
+      "climbing": "đang lên từ {{from}}"
+    },
+    "cue": {
+      "yours": "Bốn ô của bạn",
+      "silent": "Một mình bạn",
+      "back": "Ban nhạc vào lại"
+    },
+    "editor": {
+      "label": "Trình sửa groove",
+      "edit": "Sửa groove",
+      "makeYourOwn": "Tự tạo",
+      "name": "Tên groove",
+      "yours": "Của bạn",
+      "pages": "Sửa ô nhịp hoặc fill",
+      "bar": "Ô nhịp",
+      "fill": "Fill",
+      "reset": "Đặt lại",
+      "done": "Xong",
+      "gridBar": "Groove, một ô nhịp",
+      "gridFill": "Fill, một ô nhịp",
+      "hint": "Bấm vào ô để đổi",
+      "meter": "{{beats}} phách theo {{subdivision}} · các cột đi theo nhịp",
+      "cell": "{{lane}}, phách {{beat}}, nhịp nhỏ {{tick}}: {{level}}",
+      "lanes": {
+        "hat": "Hi-hat",
+        "snare": "Trống nhỏ",
+        "kick": "Trống cái",
+        "ride": "Ride"
+      },
+      "levels": {
+        "0": "không",
+        "1": "gõ",
+        "2": "nhấn",
+        "3": "mờ"
+      },
+      "subdivision": {
+        "1": "nốt đen",
+        "2": "nốt móc đơn",
+        "3": "chùm ba",
+        "4": "nốt móc kép",
+        "6": "chùm sáu"
+      }
     }
+  },
+  "scale": {
+    "major": "trưởng",
+    "naturalMinor": "thứ tự nhiên",
+    "dorian": "dorian",
+    "mixolydian": "mixolydian",
+    "minorPentatonic": "ngũ cung thứ",
+    "majorPentatonic": "ngũ cung trưởng",
+    "blues": "blues",
+    "harmonicMinor": "thứ hòa thanh",
+    "altered": "altered"
   }
 }

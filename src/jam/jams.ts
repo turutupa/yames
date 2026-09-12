@@ -25,6 +25,29 @@ export function clampCountIn(beats: number): number {
   return Math.max(0, Math.min(JAM_MAX_COUNT_IN, Math.round(beats || 0)));
 }
 
+/**
+ * The same count-in, in the new groove's meter.
+ *
+ * The setting the user chose is a number of BARS; beats are only how the
+ * engine takes it. So moving from a rock groove to a waltz keeps "one bar" and
+ * changes four beats into three, rather than counting four beats over a bar
+ * that is three long. Two bars stay two where they fit inside the engine's
+ * limit of eight and drop to one where they do not, because a count-in past
+ * the limit is not a count-in, it is a wait.
+ */
+export function carryCountIn(
+  beats: number,
+  fromBeatsPerBar: number,
+  toBeatsPerBar: number,
+): number {
+  if (beats <= 0) return 0;
+  const bars = Math.max(1, Math.round(beats / Math.max(1, fromBeatsPerBar)));
+  for (let n = bars; n >= 1; n--) {
+    if (n * toBeatsPerBar <= JAM_MAX_COUNT_IN) return n * toBeatsPerBar;
+  }
+  return 0;
+}
+
 export type NewJamFields = Partial<Omit<Jam, "id" | "name" | "createdAt">>;
 
 /**
@@ -52,7 +75,16 @@ export function createJam(name: string, fields: NewJamFields = {}): Jam {
     form,
     countIn: clampCountIn(fields.countIn ?? grooveById(grooveId).beatsPerBar),
     fills: fields.fills ?? true,
+    // The optional half of the record. Each is spread only when it was
+    // actually handed over, so "new jam" from the defaults writes the same
+    // small record it always did, and "another one like this one" carries
+    // the band, the key and the practice tools across with everything else.
     ...(fields.key ? { key: fields.key } : {}),
+    ...(fields.band ? { band: { ...fields.band } } : {}),
+    ...(fields.chords === undefined ? {} : { chords: fields.chords }),
+    ...(fields.practice ? { practice: { ...fields.practice } } : {}),
+    ...(fields.transposition ? { transposition: fields.transposition } : {}),
+    ...(fields.customGroove ? { customGroove: fields.customGroove } : {}),
   };
 }
 
@@ -122,7 +154,12 @@ export const STARTER_JAMS: readonly Jam[] = [
     form: { kind: "blues12", bars: 12 },
     countIn: 4,
     fills: true,
-    key: "A",
+    // A blues, not A major. The form plays I7 IV7 V7 either way, but the KEY
+    // is what the chords-in-the-key strip is drawn from, and A major does not
+    // contain A7 — so stored as major the strip had nothing to light while
+    // the band played the dominant it names.
+    key: "A blues",
+    chords: true,
   },
   {
     id: "jam-funk-e",
@@ -137,6 +174,7 @@ export const STARTER_JAMS: readonly Jam[] = [
     countIn: 4,
     fills: true,
     key: "E",
+    chords: true,
   },
   {
     id: "jam-bossa-dm",
@@ -151,6 +189,7 @@ export const STARTER_JAMS: readonly Jam[] = [
     countIn: 4,
     fills: true,
     key: "Dm",
+    chords: true,
   },
   {
     id: "jam-swing-f",
@@ -165,6 +204,7 @@ export const STARTER_JAMS: readonly Jam[] = [
     countIn: 4,
     fills: true,
     key: "F",
+    chords: true,
   },
   {
     id: "jam-rock-g",
@@ -179,6 +219,7 @@ export const STARTER_JAMS: readonly Jam[] = [
     countIn: 4,
     fills: true,
     key: "G",
+    chords: true,
   },
   {
     id: "jam-waltz-c",
@@ -193,5 +234,6 @@ export const STARTER_JAMS: readonly Jam[] = [
     countIn: 3,
     fills: true,
     key: "C",
+    chords: true,
   },
 ];

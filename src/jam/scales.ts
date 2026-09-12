@@ -240,7 +240,10 @@ export function scalesForChord(chord: Chord, key: Key): ScaleSuggestion[] {
 
     case "maj":
     case "maj7":
-    case "6": {
+    case "6":
+    // A major triad with a ninth on top. Nothing about the ninth changes
+    // which scale fits: it is already the second degree of both answers.
+    case "add9": {
       return build([
         ["major", key.mode === "minor" ? root : key.root],
         ["majorPentatonic", root],
@@ -256,6 +259,46 @@ export function scalesForChord(chord: Chord, key: Key): ScaleSuggestion[] {
 
     case "dim7": {
       return build([["harmonicMinor", pitchClass(root + 1)]]);
+    }
+
+    /**
+     * The triad the key strip offers that the forms never play: vii° of a
+     * major key, ii° of a minor one. Both live inside the key, so the key's
+     * own scale is the honest first answer — and a diminished triad is a
+     * dominant seventh with its root left off, so the harmonic minor a
+     * semitone above it is the same second answer `dim7` gets.
+     */
+    case "dim": {
+      return build([
+        [key.mode === "minor" ? "naturalMinor" : "major", key.root],
+        ["harmonicMinor", pitchClass(root + 1)],
+      ]);
+    }
+
+    /**
+     * An augmented triad is a raised fifth, which is an alteration and not a
+     * key. Altered from the chord root spells it; the key's harmonic minor is
+     * where the chord occurs naturally (on its third degree).
+     */
+    case "aug": {
+      return build([
+        ["altered", root],
+        ["harmonicMinor", key.root],
+      ]);
+    }
+
+    /**
+     * Sus chords have no third, so they say nothing about major or minor and
+     * the scale has to come from the key rather than from the chord. The
+     * second suggestion is the pentatonic that contains the suspended note
+     * itself — the ninth for sus2, the fourth for sus4.
+     */
+    case "sus2":
+    case "sus4": {
+      return build([
+        [key.mode === "minor" ? "naturalMinor" : "major", key.root],
+        [chord.quality === "sus2" ? "majorPentatonic" : "minorPentatonic", root],
+      ]);
     }
   }
 }

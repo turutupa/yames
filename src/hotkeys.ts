@@ -35,6 +35,14 @@ export type HotkeyAction =
   | "tab-2"
   | "tab-3"
   | "tab-4"
+  // Jam, hands-free (JAM_MODE §4.7). These exist so a MIDI footswitch can
+  // reach them: your hands are on the instrument, which is the whole point of
+  // playing over a band rather than setting one up.
+  | "jam-next-groove"
+  | "jam-prev-groove"
+  | "jam-trade"
+  | "jam-dropout"
+  | "jam-next-shape"
   | "settings";
 
 export interface HotkeyEntry {
@@ -44,7 +52,7 @@ export interface HotkeyEntry {
   id: HotkeyAction;
   desc: string;
   globalAllowed?: boolean;
-  group: "metronome" | "view" | "navigation";
+  group: "metronome" | "view" | "navigation" | "jam";
 }
 
 export const IS_MAC = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
@@ -318,12 +326,57 @@ export const HOTKEYS: HotkeyEntry[] = [
     desc: "Open or close the practice coach panel",
     group: "navigation",
   },
+  /**
+   * Jam, hands-free.
+   *
+   * These do nothing outside the Jam tab, which is why they are a group of
+   * their own rather than five more lines under Metronome, and why they take
+   * bare letters: they are safe to bind to a footswitch that is also sending
+   * play and stop, and the keys they use (G, X, D, S) are ones the metronome
+   * does not want.
+   */
+  {
+    id: "jam-next-groove",
+    action: "Next groove",
+    key: "G",
+    desc: "Step to the next groove without taking a hand off the instrument",
+    group: "jam",
+  },
+  {
+    id: "jam-prev-groove",
+    action: "Previous groove",
+    key: "⇧G",
+    desc: "Step back to the previous groove",
+    group: "jam",
+  },
+  {
+    id: "jam-trade",
+    action: "Trade fours",
+    key: "X",
+    desc: "Turn trading on or off — the band plays four bars, you play four",
+    group: "jam",
+  },
+  {
+    id: "jam-dropout",
+    action: "Drop-out bars",
+    key: "D",
+    desc: "Turn the drop-out bars on or off",
+    group: "jam",
+  },
+  {
+    id: "jam-next-shape",
+    action: "Next chord shape",
+    key: "S",
+    desc: "Page through the ways to play the chord you are on",
+    group: "jam",
+  },
 ];
 
 export const HOTKEY_GROUPS: { key: string; label: string }[] = [
   { key: "metronome", label: "Metronome" },
   { key: "view", label: "View" },
   { key: "navigation", label: "Navigation" },
+  { key: "jam", label: "Jam" },
 ];
 
 // Delay for macOS fullscreen exit animation to complete before restoring window state

@@ -87,6 +87,155 @@
     },
     "transport": {
       "chorus": "코러스"
+    },
+    "now": {
+      "label": "지금",
+      "aria": "{{chord}} 연주 중",
+      "next": "{{count}}마디 뒤 {{chord}}",
+      "next_one": "{{count}}마디 뒤 {{chord}}",
+      "next_other": "{{count}}마디 뒤 {{chord}}",
+      "nextNow": "다음은 {{chord}}"
+    },
+    "fretboard": {
+      "label": "지판",
+      "aria": "넥 위의 {{chord}}"
+    },
+    "chords": {
+      "label": "코드",
+      "hint": "마디 줄에 코드 진행을, 그 위에 지금 코드를 보여 줍니다.",
+      "inKey": "{{key}}의 코드",
+      "follow": "잼 따라가기",
+      "followHint": "폼이 코드 진행을 따라가게 하거나, 한 코드에 고정합니다.",
+      "sevenths": "7th",
+      "nextShape": "다음 폼",
+      "sizeTriad": "트라이어드",
+      "sizeOpen": "오픈",
+      "sizeBarre": "바레",
+      "sizeSeventh": "7th",
+      "fret": "{{fret}}프렛"
+    },
+    "key": {
+      "label": "키",
+      "mode": "장조, 단조, 블루스",
+      "major": "장조",
+      "minor": "단조",
+      "blues": "블루스",
+      "majorNamed": "{{root}} 장조",
+      "minorNamed": "{{root}} 단조",
+      "bluesNamed": "{{root}} 블루스"
+    },
+    "kit": {
+      "label": "킷",
+      "room": "룸",
+      "roomHint": "공간감이 살아 있는 열린 소리",
+      "tight": "타이트",
+      "tightHint": "가까이서, 여운 없이",
+      "brushes": "브러시",
+      "brushesHint": "조용하게, 발라드에",
+      "electronic": "일렉트로닉",
+      "electronicHint": "합성음, 단단한 어택"
+    },
+    "transposition": {
+      "label": "읽는 조",
+      "concert": "실음",
+      "bb": "B♭",
+      "eb": "E♭"
+    },
+    "setup": {
+      "label": "키, 킷, 그리고 읽는 파트"
+    },
+    "band": {
+      "label": "밴드",
+      "lead": "모두 합성음, 내려받을 것 없음",
+      "drums": "드럼",
+      "bass": "베이스",
+      "keys": "건반",
+      "you": "당신",
+      "youPlay": "{{instrument}}",
+      "youHint": "밴드는 당신의 악기를 연주하지 않습니다",
+      "out": "쉼",
+      "hatsOnly": "하이햇만",
+      "inputOn": "입력 켜짐",
+      "inputOff": "입력 꺼짐"
+    },
+    "bassStyle": {
+      "rock": "킥을 따라가는 루트",
+      "shuffle": "부기 패턴",
+      "swing": "워킹 라인",
+      "bossa": "보사 패턴",
+      "waltz": "루트와 5도",
+      "sixeight": "루트와 5도",
+      "funk": "당김음 루트"
+    },
+    "practice": {
+      "label": "연습",
+      "dropOut": "쉬는 마디",
+      "dropOutEvery": "{{count}}마디마다 쉼",
+      "dropOutBarsLabel": "밴드가 쉬는 길이",
+      "forBars": "{{count}}마디 동안",
+      "forBars_one": "{{count}}마디 동안",
+      "forBars_other": "{{count}}마디 동안",
+      "trade": "주고받기",
+      "tradeN": "{{count}}마디씩",
+      "tempo": "템포 트레이너",
+      "tempoUp": "템포 +{{step}}",
+      "tempoEveryLabel": "템포가 오르는 주기",
+      "everyChoruses": "{{count}}코러스마다",
+      "everyChoruses_one": "{{count}}코러스마다",
+      "everyChoruses_other": "{{count}}코러스마다",
+      "climbing": "{{from}}에서 오르는 중"
+    },
+    "cue": {
+      "yours": "당신 차례, 네 마디",
+      "silent": "당신 혼자",
+      "back": "밴드 복귀"
+    },
+    "editor": {
+      "label": "그루브 편집기",
+      "edit": "그루브 편집",
+      "makeYourOwn": "직접 만들기",
+      "name": "그루브 이름",
+      "yours": "내 것",
+      "pages": "마디 또는 필 편집",
+      "bar": "마디",
+      "fill": "필",
+      "reset": "되돌리기",
+      "done": "완료",
+      "gridBar": "그루브, 한 마디",
+      "gridFill": "필, 한 마디",
+      "hint": "칸을 눌러 바꿉니다",
+      "meter": "{{subdivision}}로 {{beats}}박 · 열은 박자를 따릅니다",
+      "cell": "{{lane}}, {{beat}}박, {{tick}}번째: {{level}}",
+      "lanes": {
+        "hat": "하이햇",
+        "snare": "스네어",
+        "kick": "킥",
+        "ride": "라이드"
+      },
+      "levels": {
+        "0": "없음",
+        "1": "타격",
+        "2": "악센트",
+        "3": "고스트"
+      },
+      "subdivision": {
+        "1": "4분음표",
+        "2": "8분음표",
+        "3": "셋잇단음표",
+        "4": "16분음표",
+        "6": "여섯잇단음표"
+      }
     }
+  },
+  "scale": {
+    "major": "장음계",
+    "naturalMinor": "자연 단음계",
+    "dorian": "도리안",
+    "mixolydian": "믹솔리디안",
+    "minorPentatonic": "마이너 펜타토닉",
+    "majorPentatonic": "메이저 펜타토닉",
+    "blues": "블루스",
+    "harmonicMinor": "화성 단음계",
+    "altered": "얼터드"
   }
 }

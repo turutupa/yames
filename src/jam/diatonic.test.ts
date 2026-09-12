@@ -9,6 +9,7 @@ import {
   noteName,
   seventhsInKey,
 } from "./diatonic";
+import { chordName as harmonyChordName } from "./harmony";
 
 /**
  * The chords in a key are the first thing a player checks, so they have to be
@@ -17,7 +18,7 @@ import {
 describe("chordsInKey", () => {
   it("gives A major its seven chords", () => {
     const chords = chordsInKey(9, "major");
-    expect(chords.map((c) => chordName(c.root, c.quality, 9))).toEqual([
+    expect(chords.map((c) => chordName(c.root, c.quality, { root: 9, mode: "major" }))).toEqual([
       "A",
       "Bm",
       "C#m",
@@ -31,7 +32,9 @@ describe("chordsInKey", () => {
 
   it("starts an A blues on A7 D7 E7", () => {
     const chords = chordsInKey(9, "blues");
-    expect(chords.slice(0, 3).map((c) => chordName(c.root, c.quality, 9))).toEqual(["A7", "D7", "E7"]);
+    expect(
+      chords.slice(0, 3).map((c) => chordName(c.root, c.quality, { root: 9, mode: "blues" })),
+    ).toEqual(["A7", "D7", "E7"]);
     expect(chords.map((c) => c.degree)).toEqual(["I7", "IV7", "V7", "bIII", "bVII"]);
   });
 
@@ -113,9 +116,9 @@ describe("chordTones", () => {
 
 describe("chordName", () => {
   it("follows the key's accidentals", () => {
-    expect(noteName(6, 2)).toBe("F#"); // in D, a sharp key
-    expect(noteName(6, 5)).toBe("Gb"); // in F, a flat key
-    expect(chordName(3, "maj7", 10)).toBe("Ebmaj7"); // in Bb
+    expect(noteName(6, { root: 2, mode: "major" })).toBe("F#"); // in D, a sharp key
+    expect(noteName(6, { root: 5, mode: "major" })).toBe("Gb"); // in F, a flat key
+    expect(chordName(3, "maj7", { root: 10, mode: "major" })).toBe("Ebmaj7"); // in Bb
     expect(chordName(1, "min")).toBe("C#m"); // no key given
   });
 
@@ -125,5 +128,35 @@ describe("chordName", () => {
     expect(chordName(11, "m7b5")).toBe("Bm7b5");
     expect(chordName(4, "sus4")).toBe("Esus4");
     expect(chordName(0, "add9")).toBe("Cadd9");
+  });
+});
+
+/**
+ * The merge with `harmony.ts`: one chord type, one spelling. A chord the key
+ * strip draws and the same chord on the form timeline have to come out as the
+ * same word, or the screen contradicts itself while you are reading it.
+ */
+describe("one spelling with harmony.ts", () => {
+  it("spells a minor key from its signature, not from its root", () => {
+    // D major is a sharp key; D MINOR borrows the B flat of F major, which is
+    // what every chart writes. The local table this file used to carry read
+    // the root alone and called that note A#.
+    expect(noteName(10, { root: 2, mode: "minor" })).toBe("Bb");
+    expect(chordName(10, "maj", { root: 2, mode: "minor" })).toBe("Bb");
+  });
+
+  it("names a chord the same way the form timeline does", () => {
+    const key = { root: 9, mode: "blues" } as const;
+    for (const chord of chordsInKey(key.root, key.mode)) {
+      expect(chordName(chord.root, chord.quality, key)).toBe(
+        harmonyChordName({ root: chord.root, quality: chord.quality }, key),
+      );
+    }
+  });
+
+  it("takes every quality the shape library knows", () => {
+    for (const quality of CHORD_QUALITIES) {
+      expect(chordName(0, quality).startsWith("C"), quality).toBe(true);
+    }
   });
 });

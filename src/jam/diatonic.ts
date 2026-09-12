@@ -9,38 +9,36 @@
  *
  * This module is theory as data — pure, deterministic, no model, no state.
  *
- * ## A note for the integrator
+ * ## Where the types live
  *
- * `src/jam/harmony.ts` (W4) owns the app's chord type, its note spelling and
- * its `chordName(chord, key)`. This file was written at the same time and so
- * carries its own minimal versions: `Chord`, `ChordQuality`, `chordTones`
- * and `chordName(root, quality, keyRoot?)`. The quality names are the same
- * set W4 uses, extended with the ones a chord-shape library needs (`sus2`,
- * `sus4`, `add9`, `dim`, `aug`). The spelling policy is the same one W4's
- * brief states — sharps for G D A E B F#, flats for F Bb Eb Ab Db — so
- * swapping this file's `chordName` for W4's should be a one-line change and
- * nothing else here depends on it.
+ * `src/jam/harmony.ts` owns the app's chord type, its note spelling and its
+ * key type; this file used to carry its own copies while the two were being
+ * written side by side. They are one now: `PitchClass`, `Chord`,
+ * `ChordQuality` and `KeyMode` are harmony's, re-exported here so the
+ * chord-shape library and the components that use it keep importing from
+ * one place. The five qualities a shape library needs and a twelve-bar form
+ * never plays — `dim`, `aug`, `sus2`, `sus4`, `add9` — are part of harmony's
+ * union too, which is what made the merge a re-export rather than a cast.
+ *
+ * Naming goes the same way: `chordName` with a key spells through harmony,
+ * so the chord in the key strip and the chord on the form timeline come out
+ * as the same word. Without a key there is no key signature to consult, and
+ * the loose spellings below are what a guitarist writes on a setlist.
  */
 
-/** 0 = C, 1 = C#/Db, … 11 = B. */
-export type PitchClass = number;
+import {
+  type Chord,
+  type ChordQuality,
+  type Key,
+  type KeyMode,
+  type PitchClass,
+  chordName as harmonyChordName,
+  chordSuffix,
+  noteName as harmonyNoteName,
+  spellingForKey,
+} from "./harmony";
 
-export type ChordQuality =
-  | "maj"
-  | "min"
-  | "dim"
-  | "aug"
-  | "7"
-  | "maj7"
-  | "m7"
-  | "m7b5"
-  | "dim7"
-  | "sus2"
-  | "sus4"
-  | "6"
-  | "m6"
-  | "add9"
-  | "9";
+export type { Chord, ChordQuality, Key, KeyMode, PitchClass };
 
 /** Every quality the shape library knows, in a stable order. */
 export const CHORD_QUALITIES: readonly ChordQuality[] = [
@@ -60,11 +58,6 @@ export const CHORD_QUALITIES: readonly ChordQuality[] = [
   "add9",
   "9",
 ];
-
-/** The minimal chord this file and the shape library need. */
-export type Chord = { root: PitchClass; quality: ChordQuality };
-
-export type KeyMode = "major" | "minor" | "blues";
 
 /**
  * What a chord is doing in the key, so the UI can colour it without knowing
@@ -125,53 +118,30 @@ export function chordPitchClasses(chord: Chord): PitchClass[] {
   return chordTones(chord.quality).map((t) => mod12(chord.root + t));
 }
 
-const SHARP_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-const FLAT_NAMES = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
-
 /**
  * What a note is called with no key to go on: the spellings a guitarist
  * writes on a setlist. C# rather than Db, Eb rather than D#.
+ *
+ * This is the only spelling table left in this file. Once a key is known,
+ * `harmony.ts` decides — it reads the key SIGNATURE rather than the root, so
+ * D minor comes out flat (Bb, as every chart writes it) even though D major
+ * is a sharp key, and a second table here would have disagreed with it.
  */
 const LOOSE_NAMES = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
 
-/** Keys that spell their accidentals with sharps, and the ones that use flats. */
-const SHARP_KEYS = new Set([7, 2, 9, 4, 11, 6]); // G D A E B F#
-const FLAT_KEYS = new Set([5, 10, 3, 8, 1]); // F Bb Eb Ab Db
-
 /**
- * The name of a note. Pass the key's root and it follows that key's
- * accidentals; leave it out and it uses the loose spellings above.
+ * The name of a note. Pass the key and it follows that key's signature;
+ * leave it out and it uses the loose spellings above.
  */
-export function noteName(pc: PitchClass, keyRoot?: PitchClass): string {
-  const i = mod12(pc);
-  if (keyRoot === undefined) return LOOSE_NAMES[i];
-  const key = mod12(keyRoot);
-  if (SHARP_KEYS.has(key)) return SHARP_NAMES[i];
-  if (FLAT_KEYS.has(key)) return FLAT_NAMES[i];
-  return LOOSE_NAMES[i];
+export function noteName(pc: PitchClass, key?: Key): string {
+  if (key === undefined) return LOOSE_NAMES[mod12(pc)];
+  return harmonyNoteName(pc, spellingForKey(key));
 }
 
-const QUALITY_SUFFIX: Record<ChordQuality, string> = {
-  maj: "",
-  min: "m",
-  dim: "dim",
-  aug: "aug",
-  "7": "7",
-  maj7: "maj7",
-  m7: "m7",
-  m7b5: "m7b5",
-  dim7: "dim7",
-  sus2: "sus2",
-  sus4: "sus4",
-  "6": "6",
-  m6: "m6",
-  add9: "add9",
-  "9": "9",
-};
-
-/** "A7", "Dm7", "Bb". `keyRoot` picks the accidentals; see `noteName`. */
-export function chordName(root: PitchClass, quality: ChordQuality, keyRoot?: PitchClass): string {
-  return noteName(root, keyRoot) + QUALITY_SUFFIX[quality];
+/** "A7", "Dm7", "Bb". `key` picks the accidentals; see `noteName`. */
+export function chordName(root: PitchClass, quality: ChordQuality, key?: Key): string {
+  if (key === undefined) return LOOSE_NAMES[mod12(root)] + chordSuffix(quality);
+  return harmonyChordName({ root, quality }, key);
 }
 
 type DegreeSeed = {

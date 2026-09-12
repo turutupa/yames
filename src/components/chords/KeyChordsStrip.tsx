@@ -42,6 +42,14 @@ export type KeyChordsStripProps = {
   sevenths?: boolean;
   onSeventhsChange?: (next: boolean) => void;
   seventhsLabel?: string;
+  /**
+   * Draw a grip for each chord, or just its name. Default on.
+   *
+   * Off for a player with no frets. A horn player still wants the chords of
+   * the key — those are music — but a row of guitar diagrams in front of them
+   * is furniture about somebody else's instrument.
+   */
+  diagrams?: boolean;
 };
 
 export function KeyChordsStrip({
@@ -53,6 +61,7 @@ export function KeyChordsStrip({
   sevenths,
   onSeventhsChange,
   seventhsLabel = "7ths",
+  diagrams = true,
 }: KeyChordsStripProps) {
   const [ownSevenths, setOwnSevenths] = useState(false);
   const showSevenths = sevenths ?? ownSevenths;
@@ -68,10 +77,10 @@ export function KeyChordsStrip({
     <div className="key-chords" data-testid="key-chords-strip">
       <div className="key-chords-row">
         {chords.map((chord) => {
-          const shape = shapesFor(chord.root, chord.quality, { instrument })[0];
+          const shape = diagrams ? shapesFor(chord.root, chord.quality, { instrument })[0] : null;
           const isCurrent =
             current !== null && current.root === chord.root && current.quality === chord.quality;
-          const name = chordName(chord.root, chord.quality, root);
+          const name = chordName(chord.root, chord.quality, { root, mode });
           return (
             <button
               key={chord.degree + "-" + String(chord.root)}

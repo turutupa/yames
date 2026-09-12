@@ -173,7 +173,8 @@
       "groups": {
         "metronome": "Máy đếm nhịp",
         "view": "Chế độ xem",
-        "navigation": "Điều hướng"
+        "navigation": "Điều hướng",
+        "jam": "Jam"
       },
       "actions": {
         "play": "Phát / Dừng",
@@ -198,7 +199,12 @@
         "tab-4": "Trang Jam",
         "settings": "Cài đặt",
         "toggle-sidebar": "Bật/tắt thanh bên",
-        "toggle-coach": "Bật/tắt huấn luyện viên"
+        "toggle-coach": "Bật/tắt huấn luyện viên",
+        "jam-next-groove": "Groove kế tiếp",
+        "jam-prev-groove": "Groove trước",
+        "jam-trade": "Đổi phiên",
+        "jam-dropout": "Ô nhịp lặng",
+        "jam-next-shape": "Thế bấm kế tiếp"
       },
       "descs": {
         "play": "Bắt đầu hoặc dừng máy đếm nhịp",
@@ -223,7 +229,12 @@
         "tab-4": "Chuyển sang trang Jam",
         "settings": "Mở hoặc đóng cài đặt",
         "toggle-sidebar": "Thu gọn hoặc mở rộng thanh bên trái",
-        "toggle-coach": "Mở hoặc đóng bảng huấn luyện viên"
+        "toggle-coach": "Mở hoặc đóng bảng huấn luyện viên",
+        "jam-next-groove": "Sang groove kế tiếp mà không rời tay khỏi nhạc cụ",
+        "jam-prev-groove": "Quay lại groove trước",
+        "jam-trade": "Bật hoặc tắt đổi phiên — bốn ô ban nhạc, bốn ô bạn",
+        "jam-dropout": "Bật hoặc tắt các ô nhịp lặng",
+        "jam-next-shape": "Lật qua các cách bấm hợp âm đang chơi"
       }
     },
     "inputTest": {

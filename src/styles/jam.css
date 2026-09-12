@@ -148,11 +148,13 @@
   width: 100%;
 }
 
-/* Eight across, as the setup board draws them: the kit of grooves is one row
-   you scan rather than a block you read, and at the stage's 1176px each card
-   still has 130px — room for a sixteen-tick glyph (80px) and its name. */
+/* Nine across: the eight grooves and the one you make yourself. The kit of
+   grooves is one row you scan rather than a block you read, and at the stage's
+   1176px each card still has 120px — room for a sixteen-tick glyph (80px) and
+   its name. The ninth card wrapping onto a line of its own made it look like
+   an afterthought rather than one of the choices. */
 .jam-cards-groove {
-  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-columns: repeat(9, minmax(0, 1fr));
 }
 
 .jam-cards-form {
@@ -445,13 +447,459 @@
   letter-spacing: 0.1em;
 }
 
+/* ── NOW: the chord you are on ─────────────────────────────────────────────
+   The largest thing on the screen, and deliberately larger than the tempo.
+   JAM_MODE §4.3: a player mid-chorus can read one thing, and the chord is the
+   one. Everything harmonic below it is about this chord and no other. */
+.jam-now {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  width: 100%;
+  /* Its own row. The alternative — sharing the tempo's line — had the chord,
+     the tempo and the feel controls all shrinking each other, and at 1176 the
+     feel control lost its last word off the right edge. */
+  margin-bottom: -6px;
+}
+
+.jam-now-chord {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.jam-now-name {
+  font-size: 4.4rem;
+  line-height: 0.86;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--text-primary);
+  /* "Bbmaj7" is twice as wide as "A". Wrapping it would put the quality on a
+     line of its own, which reads as two chords. */
+  white-space: nowrap;
+}
+
+.jam-now-side {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-bottom: 6px;
+  /* Fixed, so nothing beside it moves as the chord names change length. */
+  width: 172px;
+  flex: 0 0 auto;
+}
+
+.jam-now-next {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.jam-now-scales {
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--text-faint);
+}
+
+/* A link, not a button: the neck is a thing you glance at between choruses,
+   and it should not sit in the row of controls competing with them. */
+.jam-now-fretboard {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.jam-now-fretboard svg {
+  transition: transform 0.14s ease;
+}
+
+.jam-now-fretboard svg[data-open] {
+  transform: rotate(90deg);
+}
+
+/* ── The chords of the key, and their shapes ───────────────────────────── */
+.jam-chords {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.jam-chords-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.jam-fretboard {
+  align-self: flex-start;
+}
+
+/* The strip's scroller grows to fill its row, which is right on a screen that
+   is nothing but chords and wrong here: with five chords in the key it pushed
+   the sevenths toggle to the far side of an empty half-screen. Sized to its
+   content instead, so the control sits beside the thing it changes. */
+.jam-chords .key-chords-row {
+  flex: 0 1 auto;
+}
+
+.jam-chords .chord-shapes-head {
+  justify-content: flex-start;
+  gap: 16px;
+}
+
+/* ── The timeline's chord names and band states ────────────────────────── */
+.jam-timeline-cell {
+  /* Room for a chord name under the bar number, and only when there is one:
+     the cell keeps its height either way so the row does not jump when the
+     chords toggle goes on. */
+  flex-direction: column;
+  gap: 1px;
+}
+
+.jam-timeline-chord {
+  position: relative;
+  z-index: 1;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.jam-timeline-cell[data-current] .jam-timeline-chord {
+  color: var(--text-primary);
+}
+
+/* A bar the band sits out. Dimmed rather than marked, because the silence is
+   the absence of the band and the cell should look like less, not like more. */
+.jam-timeline-cell[data-band="silent"] {
+  opacity: 0.42;
+  border-style: dashed;
+}
+
+/* Your bars in a trade. Amber, the colour the app already uses for "this one
+   is yours" in the context bar. */
+.jam-timeline-cell[data-band="hatsOnly"] {
+  border-color: color-mix(in srgb, var(--warning, #fbbf24) 45%, transparent);
+  background: color-mix(in srgb, var(--warning, #fbbf24) 9%, transparent);
+}
+
+/* ── The band, one row per player ──────────────────────────────────────── */
+.jam-band {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.jam-band-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.jam-band-lead {
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--text-faint);
+}
+
+.jam-band-lane {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: var(--radius-md, 10px);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 7%, transparent);
+  background: color-mix(in srgb, var(--text-primary) 2%, transparent);
+}
+
+/* A player who is not in the band is still listed, faint: the row is where
+   you turn them back on, so removing it would hide its own control. */
+.jam-band-lane[data-off] {
+  background: none;
+  opacity: 0.5;
+}
+
+.jam-band-name {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 104px;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.jam-band-detail {
+  width: 150px;
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jam-band-live {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-grow: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* The bass's notes for this bar, one cell per tick. A rest is an empty cell
+   rather than a gap, so the row reads as a rhythm and not as a word. */
+.jam-band-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 19px;
+  border-radius: var(--radius-sm, 5px);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.jam-band-note[data-rest] {
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 6%, transparent);
+}
+
+.jam-band-state,
+.jam-band-hint {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-faint);
+}
+
+.jam-band-input {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-faint);
+}
+
+.jam-band-input[data-on] {
+  color: var(--success, #4ade80);
+}
+
+/* ── The practice tools ────────────────────────────────────────────────── */
+.jam-practice {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+}
+
+.jam-practice-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 10px 0 14px;
+  border-radius: var(--radius-md, 9px);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 7%, transparent);
+}
+
+.jam-practice-chip[data-on] {
+  border-color: color-mix(in srgb, var(--accent) 32%, transparent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.jam-practice-text,
+.jam-practice-step {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.jam-practice-step {
+  color: var(--text-faint);
+}
+
+/* ── Key, kit and the part you read ────────────────────────────────────── */
+.jam-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.jam-setup-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.jam-setup-row {
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.jam-setup-value {
+  margin-left: 8px;
+  color: var(--accent);
+  letter-spacing: 0;
+}
+
+/* Twelve roots in one row. A shape a player recognises — the chromatic scale
+   — where a dropdown of thirty-six would be a list to read. */
+.jam-keys {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.jam-key {
+  height: 34px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+  background: color-mix(in srgb, var(--text-primary) 3%, transparent);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.jam-key.active {
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+}
+
+.jam-cards-kit {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+/* ── The groove section's head, with the EDIT link ─────────────────────── */
+.jam-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.jam-link {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* ── The trading cue ───────────────────────────────────────────────────── */
+.jam-cue {
+  position: fixed;
+  right: 40px;
+  bottom: 108px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px 12px 14px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--warning, #fbbf24) 35%, transparent);
+  background: color-mix(in srgb, var(--warning, #fbbf24) 12%, var(--bg-elevated, #14131f));
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+  animation: jam-cue-in 0.18s ease-out;
+  pointer-events: none;
+}
+
+.jam-cue[data-state="full"] {
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-elevated, #14131f));
+  color: var(--accent);
+}
+
+.jam-cue:not([data-state="full"]) {
+  color: var(--warning, #fbbf24);
+}
+
+.jam-cue-text {
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+@keyframes jam-cue-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jam-cue {
+    animation: none;
+  }
+}
+
+/* ── The groove editor, docked to the bottom of the stage ──────────────── */
+.jam-editor-drawer {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  margin: 8px -48px 0;
+  padding: 0 48px 12px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--bg-base, #0b0a14) 14px
+  );
+}
+
 /* ── Narrower windows ─────────────────────────────────────────────────────
    The groove grid goes to two columns before the cards get too narrow for
    their names, and the tempo block stops sharing a row with the feel and
    intensity controls. */
 @media (max-width: 1279px) {
   .jam-cards-groove {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1279px) {
+  /* Four kits side by side stop being readable before the grooves do. */
+  .jam-cards-kit {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* The bass's note names are the first thing to go: the lane still says who
+     is playing and what they are playing, which is what the row is for. */
+  .jam-band-detail {
+    width: 118px;
   }
 }
 
@@ -486,7 +934,7 @@
   }
 
   .jam-cards-groove {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .main-content[data-view="jam"] .bpm-input {

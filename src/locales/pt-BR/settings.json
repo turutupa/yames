@@ -173,7 +173,8 @@
       "groups": {
         "metronome": "Metrônomo",
         "view": "Visualização",
-        "navigation": "Navegação"
+        "navigation": "Navegação",
+        "jam": "Jam"
       },
       "actions": {
         "play": "Tocar / Parar",
@@ -198,7 +199,12 @@
         "tab-4": "Aba Jam",
         "settings": "Configurações",
         "toggle-sidebar": "Alternar barra lateral",
-        "toggle-coach": "Alternar Coach"
+        "toggle-coach": "Alternar Coach",
+        "jam-next-groove": "Próximo groove",
+        "jam-prev-groove": "Groove anterior",
+        "jam-trade": "Revezamento",
+        "jam-dropout": "Compassos em silêncio",
+        "jam-next-shape": "Próxima forma"
       },
       "descs": {
         "play": "Inicia ou para o metrônomo",
@@ -223,7 +229,12 @@
         "tab-4": "Vai para a aba Jam",
         "settings": "Abre ou fecha as configurações",
         "toggle-sidebar": "Recolher ou expandir a barra lateral esquerda",
-        "toggle-coach": "Abre ou fecha o painel do coach"
+        "toggle-coach": "Abre ou fecha o painel do coach",
+        "jam-next-groove": "Ir para o próximo groove sem tirar a mão do instrumento",
+        "jam-prev-groove": "Voltar ao groove anterior",
+        "jam-trade": "Ligar ou desligar o revezamento — quatro compassos a banda, quatro você",
+        "jam-dropout": "Ligar ou desligar os compassos em silêncio",
+        "jam-next-shape": "Percorrer os jeitos de tocar o acorde atual"
       }
     },
     "inputTest": {

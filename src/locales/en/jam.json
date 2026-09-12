@@ -87,6 +87,155 @@
     },
     "transport": {
       "chorus": "Chorus"
+    },
+    "now": {
+      "label": "Now",
+      "aria": "Playing {{chord}}",
+      "next": "{{chord}} in {{count}} bars",
+      "next_one": "{{chord}} in {{count}} bar",
+      "next_other": "{{chord}} in {{count}} bars",
+      "nextNow": "{{chord}} next"
+    },
+    "fretboard": {
+      "label": "Fretboard",
+      "aria": "{{chord}} on the neck"
+    },
+    "chords": {
+      "label": "Chords",
+      "hint": "Put the changes on the timeline, and the chord you are on above it.",
+      "inKey": "Chords in {{key}}",
+      "follow": "Follow the jam",
+      "followHint": "Let the shapes move with the changes, or pin them to one chord.",
+      "sevenths": "7ths",
+      "nextShape": "Next shape",
+      "sizeTriad": "triad",
+      "sizeOpen": "open",
+      "sizeBarre": "barre",
+      "sizeSeventh": "7th",
+      "fret": "fret {{fret}}"
+    },
+    "key": {
+      "label": "Key",
+      "mode": "Major, minor or blues",
+      "major": "Major",
+      "minor": "Minor",
+      "blues": "Blues",
+      "majorNamed": "{{root}} major",
+      "minorNamed": "{{root}} minor",
+      "bluesNamed": "{{root}} blues"
+    },
+    "kit": {
+      "label": "Kit",
+      "room": "Room",
+      "roomHint": "open, with the room around it",
+      "tight": "Tight",
+      "tightHint": "close up, no tail",
+      "brushes": "Brushes",
+      "brushesHint": "quiet, for a ballad",
+      "electronic": "Electronic",
+      "electronicHint": "synthesised and punchy"
+    },
+    "transposition": {
+      "label": "You read",
+      "concert": "Concert",
+      "bb": "B♭",
+      "eb": "E♭"
+    },
+    "setup": {
+      "label": "Key, kit and the part you read"
+    },
+    "band": {
+      "label": "The band",
+      "lead": "everything synthesised, nothing to download",
+      "drums": "Drums",
+      "bass": "Bass",
+      "keys": "Keys",
+      "you": "You",
+      "youPlay": "{{instrument}}",
+      "youHint": "the band never plays your instrument",
+      "out": "out",
+      "hatsOnly": "hats only",
+      "inputOn": "Input on",
+      "inputOff": "Input off"
+    },
+    "bassStyle": {
+      "rock": "roots on the kick",
+      "shuffle": "a boogie figure",
+      "swing": "a walking line",
+      "bossa": "the bossa pattern",
+      "waltz": "root and fifth",
+      "sixeight": "root and fifth",
+      "funk": "syncopated roots"
+    },
+    "practice": {
+      "label": "Practice",
+      "dropOut": "Drop-out bars",
+      "dropOutEvery": "Drop out every {{count}}",
+      "dropOutBarsLabel": "How long the band drops out for",
+      "forBars": "for {{count}} bars",
+      "forBars_one": "for {{count}} bar",
+      "forBars_other": "for {{count}} bars",
+      "trade": "Trade",
+      "tradeN": "Trade {{count}}s",
+      "tempo": "Tempo trainer",
+      "tempoUp": "Tempo up {{step}}",
+      "tempoEveryLabel": "How often the tempo goes up",
+      "everyChoruses": "every {{count}} choruses",
+      "everyChoruses_one": "every {{count}} chorus",
+      "everyChoruses_other": "every {{count}} choruses",
+      "climbing": "climbing from {{from}}"
+    },
+    "cue": {
+      "yours": "Your four",
+      "silent": "You alone",
+      "back": "Band's back"
+    },
+    "editor": {
+      "label": "Groove editor",
+      "edit": "Edit the groove",
+      "makeYourOwn": "Make your own",
+      "name": "Groove name",
+      "yours": "Yours",
+      "pages": "Edit the bar or the fill",
+      "bar": "Bar",
+      "fill": "Fill",
+      "reset": "Reset",
+      "done": "Done",
+      "gridBar": "The groove, one bar",
+      "gridFill": "The fill, one bar",
+      "hint": "Click a cell to cycle",
+      "meter": "{{beats}} beats in {{subdivision}} · the columns follow the meter",
+      "cell": "{{lane}}, beat {{beat}}, tick {{tick}}: {{level}}",
+      "lanes": {
+        "hat": "Hat",
+        "snare": "Snare",
+        "kick": "Kick",
+        "ride": "Ride"
+      },
+      "levels": {
+        "0": "off",
+        "1": "hit",
+        "2": "accent",
+        "3": "ghost"
+      },
+      "subdivision": {
+        "1": "quarters",
+        "2": "eighths",
+        "3": "triplets",
+        "4": "sixteenths",
+        "6": "sextuplets"
+      }
     }
+  },
+  "scale": {
+    "major": "major",
+    "naturalMinor": "natural minor",
+    "dorian": "dorian",
+    "mixolydian": "mixolydian",
+    "minorPentatonic": "minor pentatonic",
+    "majorPentatonic": "major pentatonic",
+    "blues": "blues",
+    "harmonicMinor": "harmonic minor",
+    "altered": "altered"
   }
 }

@@ -43,9 +43,17 @@ const LINEUPS: Record<InstrumentId, JamLineup> = {
   other: { drums: true, bass: true, keys: false, you: "other" },
 };
 
-/** The band for a player of `instrument`. */
-export function lineupFor(instrument: InstrumentId): JamLineup {
-  return { ...(LINEUPS[instrument] ?? LINEUPS.other) };
+/**
+ * The band for a player of `instrument`.
+ *
+ * Takes a plain string, not an `InstrumentId`: the instrument comes out of
+ * the store, where a build older or newer than this one may have written
+ * something this build has never heard of. That is not a reason to have no
+ * band — an unknown instrument gets the rhythm section, which is the answer
+ * for everyone the list does not name anyway.
+ */
+export function lineupFor(instrument: InstrumentId | string): JamLineup {
+  return { ...(LINEUPS[instrument as InstrumentId] ?? LINEUPS.other) };
 }
 
 /**

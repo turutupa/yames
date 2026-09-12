@@ -173,7 +173,8 @@
       "groups": {
         "metronome": "Metronom",
         "view": "Ansicht",
-        "navigation": "Navigation"
+        "navigation": "Navigation",
+        "jam": "Jam"
       },
       "actions": {
         "play": "Start / Stopp",
@@ -198,7 +199,12 @@
         "tab-4": "Jam-Tab",
         "settings": "Einstellungen",
         "toggle-sidebar": "Seitenleiste umschalten",
-        "toggle-coach": "Coach umschalten"
+        "toggle-coach": "Coach umschalten",
+        "jam-next-groove": "Nächster Groove",
+        "jam-prev-groove": "Vorheriger Groove",
+        "jam-trade": "Wechselspiel",
+        "jam-dropout": "Aussetzer",
+        "jam-next-shape": "Nächster Griff"
       },
       "descs": {
         "play": "Starte oder stoppe das Metronom",
@@ -223,7 +229,12 @@
         "tab-4": "Zum Jam-Tab wechseln",
         "settings": "Einstellungen öffnen oder schließen",
         "toggle-sidebar": "Die linke Seitenleiste ein- oder ausklappen",
-        "toggle-coach": "Coach-Bedienfeld öffnen oder schließen"
+        "toggle-coach": "Coach-Bedienfeld öffnen oder schließen",
+        "jam-next-groove": "Zum nächsten Groove wechseln, ohne die Hand vom Instrument zu nehmen",
+        "jam-prev-groove": "Zurück zum vorherigen Groove",
+        "jam-trade": "Wechselspiel an oder aus — vier Takte die Band, vier Takte du",
+        "jam-dropout": "Die Aussetzer-Takte an- oder ausschalten",
+        "jam-next-shape": "Durch die Griffe des aktuellen Akkords blättern"
       }
     },
     "inputTest": {

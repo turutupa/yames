@@ -173,7 +173,8 @@
       "groups": {
         "metronome": "Metrónomo",
         "view": "Vista",
-        "navigation": "Navegación"
+        "navigation": "Navegación",
+        "jam": "Jam"
       },
       "actions": {
         "play": "Reproducir / Detener",
@@ -198,7 +199,12 @@
         "tab-4": "Pestaña Jam",
         "settings": "Ajustes",
         "toggle-sidebar": "Alternar barra lateral",
-        "toggle-coach": "Alternar entrenador"
+        "toggle-coach": "Alternar entrenador",
+        "jam-next-groove": "Siguiente groove",
+        "jam-prev-groove": "Groove anterior",
+        "jam-trade": "Intercambios",
+        "jam-dropout": "Compases en silencio",
+        "jam-next-shape": "Siguiente posición"
       },
       "descs": {
         "play": "Inicia o detiene el metrónomo",
@@ -223,7 +229,12 @@
         "tab-4": "Cambia a la pestaña Jam",
         "settings": "Abre o cierra los ajustes",
         "toggle-sidebar": "Contraer o expandir la barra lateral izquierda",
-        "toggle-coach": "Abre o cierra el panel del entrenador"
+        "toggle-coach": "Abre o cierra el panel del entrenador",
+        "jam-next-groove": "Pasar al siguiente groove sin soltar el instrumento",
+        "jam-prev-groove": "Volver al groove anterior",
+        "jam-trade": "Activar o desactivar los intercambios: cuatro compases la banda, cuatro tú",
+        "jam-dropout": "Activar o desactivar los compases en silencio",
+        "jam-next-shape": "Recorrer las formas de tocar el acorde actual"
       }
     },
     "inputTest": {

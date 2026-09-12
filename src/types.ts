@@ -541,6 +541,22 @@ export type SessionSegment = {
   timeSignature: number;
   startTime?: number;
   endTime?: number;
+  /**
+   * `"jam"` when this stretch was played over the band (JAM_MODE §3, principle
+   * 5). A band is louder than a click, and through speakers its hits land on
+   * the grid and the mic scores them as your notes, so a score from a jam is
+   * not comparable with a score from a bare click and nothing downstream
+   * should treat it as though it were.
+   *
+   * It lives on the SEGMENT rather than on `SavedSession` for two reasons.
+   * `SavedSession` is mirrored in Rust (`src-tauri/src/session.rs`) and has no
+   * free metadata field, so a flag added there from the frontend is dropped by
+   * serde on the way through and silently does not persist; `segments` is
+   * stored as raw JSON and comes back exactly as it was written. And it is the
+   * truer place anyway — you can leave the jam tab mid-session, and only the
+   * stretches actually played over a band should carry the caveat.
+   */
+  mode?: "jam";
 };
 
 /**

@@ -10,17 +10,24 @@ import {
   setSubdivision,
 } from "../../../ipc";
 import {
+  GROOVES,
   STARTER_JAMS,
+  carryCountIn,
   compileJam,
   createJam,
   duplicateJam as duplicateJamData,
   jamMeter,
+  lineupFor,
   renameJam as renameJamData,
   reorderJams as reorderJamsData,
+  tempoAfterChorus,
   upsertJam,
 } from "../../../jam";
-import type { Jam } from "../../../jam/types";
-import type { Subdivision } from "../../../types";
+import type { Chord } from "../../../jam/harmony";
+import type { Jam, JamEngineConfig } from "../../../jam";
+import { NO_PRACTICE } from "../../jam/PracticeRow";
+import type { GrooveEditorPage } from "../../jam/editor";
+import type { BeatEvent, Subdivision } from "../../../types";
 import { coachDebug } from "../../../coach/debug";
 
 /**
@@ -50,7 +57,48 @@ import { coachDebug } from "../../../coach/debug";
 /** Said once per session, not once per beat: the command may not exist yet. */
 let warnedAboutSetJam = false;
 
-function pushJam(jam: Jam): void {
+/**
+ * The last round trip `setJam` took, in milliseconds.
+ *
+ * Kept because the bar-ahead send below only works if a config posted on one
+ * downbeat has arrived before the next, and "it feels fine" is not a number.
+ * Read it from the console as `window.__yamesJamLatency` while a jam plays.
+ */
+export const jamLatency = { last: 0, worst: 0, sends: 0 };
+
+/** One `setJam`, timed, with the missing-command case said once. */
+async function sendJam(jam: Jam, config: JamEngineConfig | null): Promise<void> {
+  const started = performance.now();
+  try {
+    await setJam(config);
+  } catch (err) {
+    if (warnedAboutSetJam) return;
+    warnedAboutSetJam = true;
+    console.warn(
+      "[yames] set_jam is not available in this build — the click plays instead of the band",
+      err,
+    );
+    return;
+  } finally {
+    const took = performance.now() - started;
+    jamLatency.last = took;
+    jamLatency.sends += 1;
+    if (took > jamLatency.worst) jamLatency.worst = took;
+    if (typeof window !== "undefined") {
+      (window as unknown as { __yamesJamLatency?: typeof jamLatency }).__yamesJamLatency =
+        jamLatency;
+    }
+    if (took > 20) coachDebug("jam.send-slow", { jam: jam.id, ms: Math.round(took) });
+  }
+}
+
+/**
+ * The meter and the table, in that order — what a jam needs on the way in.
+ *
+ * Only on load and on an edit. Never per bar: re-sending the meter under a
+ * playing band would restack the bar on every downbeat.
+ */
+function pushJam(jam: Jam, config: JamEngineConfig): void {
   const { beatsPerBar, ticksPerBeat } = jamMeter(jam);
   void (async () => {
     // Each step is awaited so the engine sees them in order, and each is
@@ -60,28 +108,21 @@ function pushJam(jam: Jam): void {
       ["freeMode", () => setFreeMode(false)],
       ["beatGroups", () => setBeatGroups([beatsPerBar])],
       ["subdivision", () => setSubdivision(ticksPerBeat as Subdivision)],
-      ["jam", () => setJam(compileJam(jam))],
     ];
     for (const [name, run] of steps) {
       try {
         await run();
       } catch (err) {
-        // `set_jam` does not exist until the engine side lands. Saying so once
-        // is the difference between a known gap and a screen that looks
-        // broken; saying it on every edit would bury everything else.
-        if (name === "jam") {
-          if (warnedAboutSetJam) continue;
-          warnedAboutSetJam = true;
-          console.warn(
-            "[yames] set_jam is not available in this build — the click plays instead of the band",
-            err,
-          );
-          continue;
-        }
         coachDebug("jam.push-step-failed", { jam: jam.id, step: name, err });
       }
     }
+    await sendJam(jam, config);
   })();
+}
+
+/** What the engine is holding, as one comparable string. */
+function bassSignature(config: JamEngineConfig): string {
+  return config.bass ? config.bass.pitches.join(",") : "";
 }
 
 /** Take the band away and leave the metronome exactly as it was. */
@@ -95,9 +136,19 @@ interface UseJamSessionArgs {
   isPlaying: boolean;
   /** Loading a jam takes the preset's place in the context bar. */
   onJamLoaded: () => void;
+  /** What you play. The band is everything but that (JAM_MODE §3.1). */
+  instrument: string;
+  /** The latest tick, for the bar-ahead bass and the tempo trainer. */
+  currentBeat: BeatEvent | null;
 }
 
-export function useJamSession({ view, isPlaying, onJamLoaded }: UseJamSessionArgs) {
+export function useJamSession({
+  view,
+  isPlaying,
+  onJamLoaded,
+  instrument,
+  currentBeat,
+}: UseJamSessionArgs) {
   const { t } = useTranslation();
   const [jams, setJams] = useState<Jam[]>([]);
   /** The working copy — edited freely, written to the store only on Save. */
@@ -106,6 +157,39 @@ export function useJamSession({ view, isPlaying, onJamLoaded }: UseJamSessionArg
   const [saved, setSaved] = useState<Jam | null>(null);
   const [saveFeedback, setSaveFeedback] = useState(false);
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /**
+   * The tempo the trainer has climbed to, or null while it has not moved.
+   *
+   * Deliberately NOT the record's `bpm`. The trainer is something the jam is
+   * doing to you right now, not an edit you made to it: writing it back would
+   * mark the jam dirty for playing it, and pressing Save after a good long
+   * session would quietly file the jam at a tempo you never chose. Stop, and
+   * the jam is at its own tempo again.
+   */
+  const [trainedBpm, setTrainedBpm] = useState<number | null>(null);
+
+  /** The band, when the record has not been asked who is in it. */
+  const lineup = useMemo(() => {
+    const full = lineupFor(instrument);
+    return { drums: full.drums, bass: full.bass };
+  }, [instrument]);
+
+  /**
+   * What the screen is showing that the jam does not remember.
+   *
+   * The neck being open, which chord the shapes row is pinned to, which shape
+   * of it you are looking at, the groove editor being down. None of this
+   * belongs on the record — a jam is music, not a view — but all of it has to
+   * outlive a trip to the metronome tab and back, and the hotkeys have to
+   * reach it, so it lives here rather than inside `JamView`.
+   */
+  const [fretboardOpen, setFretboardOpen] = useState(false);
+  const [sevenths, setSevenths] = useState(false);
+  const [shapeIndex, setShapeIndex] = useState(0);
+  const [pinnedChord, setPinnedChord] = useState<Chord | null>(null);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editorPage, setEditorPage] = useState<GrooveEditorPage>("bar");
 
   /**
    * Seed once, on the first run that has no `jams` key at all.
@@ -150,15 +234,35 @@ export function useJamSession({ view, isPlaying, onJamLoaded }: UseJamSessionArg
    * the next reload.
    */
   const engineKey = jam
-    ? JSON.stringify([jam.grooveId, jam.feel, jam.intensity, jam.form, jam.fills, jam.kit])
+    ? JSON.stringify([
+        jam.grooveId,
+        jam.customGroove,
+        jam.feel,
+        jam.intensity,
+        jam.form,
+        jam.fills,
+        jam.kit,
+        jam.key,
+        jam.band ?? lineup,
+        jam.practice,
+      ])
     : null;
 
   useEffect(() => {
     if (view !== "jam" || !jam) {
       clearJam();
+      sentBassRef.current = null;
       return;
     }
-    pushJam(jam);
+    // Bar 0 on the way in. A jam that is already playing when the groove
+    // changes gets the right bar back on the next bar line below.
+    const config = compileJam(jam, { formBar: 0, lineup });
+    pushJam(jam, config);
+    // What the engine is now holding, so the next bar line can tell whether
+    // it has anything new to say. Recording `null` here would make the next
+    // downbeat re-send a bass the engine already has.
+    sentBassRef.current = bassSignature(config);
+    barRef.current = null;
     // `engineKey` rather than `jam`: everything the table is made of, and not
     // the tempo or the name. eslint would rather have `jam` here, and `jam`
     // here is the bug this line exists to avoid.
@@ -168,8 +272,97 @@ export function useJamSession({ view, isPlaying, onJamLoaded }: UseJamSessionArg
   /** The tempo, on its own, so changing it does not disturb the bar. */
   useEffect(() => {
     if (view !== "jam" || !jam) return;
+    setTrainedBpm(null);
     void setBpm(jam.bpm).catch(() => {});
   }, [view, jam?.bpm]);
+
+  /**
+   * The bass, one bar ahead of itself.
+   *
+   * The drums are one bar that repeats and the bass is not: over a twelve-bar
+   * blues the bass plays A under bar 1 and D under bar 5. So the config goes
+   * out again at every bar line where the NEXT bar's bass differs from the one
+   * the engine is holding — which over a one-chord jam is never, and over a
+   * blues is four times a chorus.
+   *
+   * One bar ahead, not this bar: a config posted on the downbeat of bar N
+   * arrives a few milliseconds into bar N, which is too late to be bar N's
+   * bass and exactly in time to be bar N+1's. **This is the half of the
+   * handshake the engine has to match** — a bass that arrives mid-bar belongs
+   * to the next bar line, not to the bar it landed in. `jamLatency` above is
+   * the number that says there is room for it.
+   */
+  const sentBassRef = useRef<string | null>(null);
+  const barRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (view !== "jam" || !jam || !currentBeat || !isPlaying) {
+      barRef.current = null;
+      return;
+    }
+    const at = `${currentBeat.chorus}:${currentBeat.formBar}`;
+    if (barRef.current === at) return;
+    barRef.current = at;
+
+    const next = compileJam(jam, { formBar: currentBeat.formBar + 1, lineup });
+    const signature = bassSignature(next);
+    if (sentBassRef.current === signature) return;
+    sentBassRef.current = signature;
+    void sendJam(jam, next);
+    // The bar is the trigger; the jam is read, not watched — an edit goes out
+    // through the effect above, which is the one that also carries the meter.
+    // `jam?.id` is in the list because a jam loaded while the click is already
+    // running arrives on no bar line at all, and without it the first bar of
+    // the new jam would be counted as the same bar as the last of the old.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, isPlaying, jam?.id, currentBeat?.chorus, currentBeat?.formBar]);
+
+  /**
+   * The tempo trainer: up a step every N choruses, on the downbeat.
+   *
+   * Applied when the CHORUS number changes rather than on a timer, so the
+   * change lands on a bar line and the chorus you are in is played at one
+   * tempo from start to finish. Drill's ramp wearing a band (JAM_MODE §4.2).
+   */
+  const chorusRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (view !== "jam" || !jam || !currentBeat || !isPlaying) {
+      chorusRef.current = null;
+      return;
+    }
+    const chorus = currentBeat.chorus;
+    const previous = chorusRef.current;
+    chorusRef.current = chorus;
+    if (previous === null || chorus <= previous) return;
+
+    const practice = jam.practice;
+    if (!practice || practice.tempoStep === 0 || practice.tempoEveryChoruses <= 0) return;
+
+    const from = trainedBpm ?? jam.bpm;
+    // The chorus that just FINISHED is the one being counted, so it is the
+    // one before the number that just arrived.
+    const to = tempoAfterChorus({
+      bpm: from,
+      chorus: previous,
+      tempoStep: practice.tempoStep,
+      tempoEveryChoruses: practice.tempoEveryChoruses,
+    });
+    if (to === from) return;
+    setTrainedBpm(to);
+    void setBpm(to).catch(() => {});
+    // `jam?.id` again: loading a jam onto a click that is already running has
+    // to anchor the count here, or the first chorus of the new jam is read as
+    // a continuation of the last one and its step is swallowed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, isPlaying, jam?.id, currentBeat?.chorus]);
+
+  /** Stop, and the jam is at its own tempo again. */
+  useEffect(() => {
+    if (isPlaying || trainedBpm === null) return;
+    setTrainedBpm(null);
+    if (view === "jam" && jam) void setBpm(jam.bpm).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPlaying]);
 
   const loadJam = useCallback(
     (next: Jam) => {
@@ -203,11 +396,14 @@ export function useJamSession({ view, isPlaying, onJamLoaded }: UseJamSessionArg
    * tempo, or the same tempo over a different form.
    */
   const newJam = useCallback(() => {
-    const created = createJam(t("jam.untitled"), jam ?? undefined);
+    // The band is written down at creation rather than left to the fallback,
+    // so a jam you made on a guitar still has a bass player the day you open
+    // it on the machine where you told the app you play bass.
+    const created = createJam(t("jam.untitled"), { ...(jam ?? {}), band: jam?.band ?? lineup });
     commit([...jams, created]);
     loadJam(created);
     return created;
-  }, [t, jam, jams, commit, loadJam]);
+  }, [t, jam, jams, commit, loadJam, lineup]);
 
   const saveActiveJam = useCallback(() => {
     if (!jam) return;
@@ -274,11 +470,120 @@ export function useJamSession({ view, isPlaying, onJamLoaded }: UseJamSessionArg
     [jam, saved],
   );
 
+  // -------------------------------------------------------------------------
+  // Hands-free (JAM_MODE §4.7). A footswitch sends the same action a key does.
+  // -------------------------------------------------------------------------
+
+  /** The next groove along, wrapping. Carries the count-in into its meter. */
+  const stepGroove = useCallback(
+    (by: number) => {
+      setActiveJam((current) => {
+        if (!current) return current;
+        const at = GROOVES.findIndex((g) => g.id === current.grooveId);
+        const next = GROOVES[(((at + by) % GROOVES.length) + GROOVES.length) % GROOVES.length];
+        const from = jamMeter(current).beatsPerBar;
+        return {
+          ...current,
+          grooveId: next.id,
+          // Stepping grooves with a footswitch has to keep the count-in in
+          // BARS, exactly as clicking a card does, or a hop from a waltz to a
+          // rock beat lands you on the wrong beat of bar one.
+          countIn: carryCountIn(current.countIn, from, next.beatsPerBar),
+          // A groove you step to is the preset, not the one you drew. Keeping
+          // the custom groove here would make the footswitch do nothing.
+          customGroove: undefined,
+        };
+      });
+    },
+    [],
+  );
+
+  /** Trading on or off, keeping the number of bars it was set to. */
+  const toggleTrade = useCallback(() => {
+    setActiveJam((current) => {
+      if (!current) return current;
+      const practice = current.practice ?? NO_PRACTICE;
+      return {
+        ...current,
+        practice: { ...practice, tradeBars: practice.tradeBars > 0 ? 0 : 4 },
+      };
+    });
+  }, []);
+
+  /** Drop-outs on or off, likewise. */
+  const toggleDropOut = useCallback(() => {
+    setActiveJam((current) => {
+      if (!current) return current;
+      const practice = current.practice ?? NO_PRACTICE;
+      const on = practice.dropOutEvery > 0 && practice.dropOutBars > 0;
+      return {
+        ...current,
+        practice: {
+          ...practice,
+          dropOutEvery: on ? 0 : practice.dropOutEvery || 8,
+          dropOutBars: practice.dropOutBars || 2,
+        },
+      };
+    });
+  }, []);
+
+  /**
+   * The next shape of the chord on screen.
+   *
+   * Wrapping is the row's own job — it knows how many shapes the chord has —
+   * so this only ever counts up, and `ChordShapesRow` brings it back round.
+   */
+  const nextShape = useCallback(() => setShapeIndex((i) => i + 1), []);
+
+  /**
+   * The hands-free actions as one stable object.
+   *
+   * One object rather than five props because they are one feature, and
+   * memoised because the action dispatcher lists its dependencies and a fresh
+   * object every render would rebuild it on every beat event.
+   */
+  const actions = useMemo(
+    () => ({
+      nextGroove: () => stepGroove(1),
+      prevGroove: () => stepGroove(-1),
+      toggleTrade,
+      toggleDropOut,
+      nextShape,
+    }),
+    [stepGroove, toggleTrade, toggleDropOut, nextShape],
+  );
+
+  const screen = useMemo(
+    () => ({
+      fretboardOpen,
+      toggleFretboard: () => setFretboardOpen((open) => !open),
+      sevenths,
+      setSevenths,
+      shapeIndex,
+      setShapeIndex,
+      pinnedChord,
+      setPinnedChord,
+      editorOpen,
+      setEditorOpen,
+      editorPage,
+      setEditorPage,
+    }),
+    [fretboardOpen, sevenths, shapeIndex, pinnedChord, editorOpen, editorPage],
+  );
+
   return {
     jams,
     jam,
     dirty,
     saveFeedback,
+    /** The band when the record has not been asked — what the toggles show. */
+    lineup,
+    /** What the screen is showing that the jam does not remember. */
+    screen,
+    /** Hands-free: a footswitch sends these exactly as a key does. */
+    actions,
+    /** Where the tempo trainer has got to, or null while it has not moved. */
+    trainedBpm,
     /** True while a jam is loaded and the transport would start the band. */
     playing: !!jam && isPlaying,
     loadJam,

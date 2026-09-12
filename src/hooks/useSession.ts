@@ -154,9 +154,19 @@ interface UseSessionOptions {
    * emit a false "made it to {endBpm}" summary.
    */
   drillCompleted?: boolean;
+  /**
+   * True while a jam is loaded on the Jam tab — that is, while a BAND is
+   * playing rather than a click.
+   *
+   * JAM_MODE §3, principle 5: a band is louder than a click, and through
+   * speakers its hits land on the grid and the mic scores them as your notes.
+   * Every segment recorded while this is true is tagged `mode: "jam"` so a
+   * score earned over the band is never read later as a clean one.
+   */
+  jamMode?: boolean;
 }
 
-export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGroups, presetId, presetName, voiceMode = "silent", coachVerbosity = "default", coachMode = "default", brainTier = "off", instrument = "electric-guitar", setBpm, inDrillRamp = false, drillStartBpm, drillTargetBpm, drillCompleted = false }: UseSessionOptions) {
+export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGroups, presetId, presetName, voiceMode = "silent", coachVerbosity = "default", coachMode = "default", brainTier = "off", instrument = "electric-guitar", setBpm, inDrillRamp = false, drillStartBpm, drillTargetBpm, drillCompleted = false, jamMode = false }: UseSessionOptions) {
   const instrumentLabel = instrument === "drums" ? "drums/percussion"
     : instrument === "electric-guitar" ? "electric guitar"
     : instrument === "acoustic-guitar" ? "acoustic guitar"
@@ -382,6 +392,11 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
   useEffect(() => { drillStartBpmRef.current = drillStartBpm; }, [drillStartBpm]);
   const drillTargetBpmRef = useRef(drillTargetBpm);
   useEffect(() => { drillTargetBpmRef.current = drillTargetBpm; }, [drillTargetBpm]);
+  // A ref, not a prop, for the same reason as the ramp above: the segment is
+  // closed from a long-lived callback, and what matters is whether the band
+  // was playing when it ended rather than which tab is open now.
+  const jamModeRef = useRef(jamMode);
+  useEffect(() => { jamModeRef.current = jamMode; }, [jamMode]);
   // Tracks the previous inDrillRamp value so the effect below can
   // detect the true→false transition that fires ramp_complete.
   const prevInDrillRampRef = useRef(inDrillRamp);
@@ -437,7 +452,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     coachVerbosity, coachMode,
     segmentReportsRef, segmentStartRef, prevSessionBestRef,
     narrativeRef, sessionIdRef, activeRef, playBpmRef,
-    beatsInSegmentRef, setMessages, setPlayMode,
+    beatsInSegmentRef, jamModeRef, setMessages, setPlayMode,
   });
 
   // Drill ramp-complete detection: fires when inDrillRamp transitions

@@ -96,6 +96,13 @@ export type JamFeel = "straight" | "shuffle" | "swing";
 export type JamIntensity = "soft" | "normal" | "loud";
 
 /**
+ * Concert pitch, or the part a Bb or Eb instrument reads. This is the union
+ * `TranspositionOption` in `./harmony` is; it lives here because the record
+ * carries it and `harmony.ts` already imports this file.
+ */
+export type JamTransposition = "concert" | "bb" | "eb";
+
+/**
  * The shapes on the setup board. `custom` carries its own bar count; the
  * others are fixed: blues12 = 12, loop8 = 8, bars16 = 16, aaba32 = 32,
  * one = 4.
@@ -122,13 +129,26 @@ export type Jam = {
   /** A fill on the last bar of every chorus and a crash on the one. */
   fills: boolean;
   /**
-   * Display only until Jam 2 brings chords: "A", "Dm". Optional so an old
-   * record without it still loads.
+   * The key, written the way `keyName` in `./harmony` writes it: "A", "Dm",
+   * "A blues". The MODE lives in this string — that is what the trailing "m"
+   * and " blues" are — so there is no second field to disagree with it, and
+   * `parseKey` reads it back. Optional, so a record from before keys still
+   * loads; a jam without one is read as C major.
    */
   key?: string;
+  /**
+   * What the player reads: concert pitch, or a Bb or Eb instrument's part.
+   * Display only — the band always plays in concert. Absent: concert.
+   */
+  transposition?: JamTransposition;
   /** A groove made in the editor, used instead of `grooveId` when present. */
   customGroove?: JamCustomGroove;
-  /** Who is in the band. Absent: drums only. */
+  /**
+   * Who is in the band. Absent means nobody has touched the toggles, and the
+   * band is then the lineup for the instrument you play — the band never
+   * plays your instrument (JAM_MODE §3.1). Touch a toggle and the answer
+   * becomes the record's, and stays the record's.
+   */
   band?: { drums: boolean; bass: boolean };
   /** Chords on the timeline and the NOW block. Absent: off. */
   chords?: boolean;

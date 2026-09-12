@@ -1,15 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type React from "react";
+import { useTranslation } from "react-i18next";
 import type { JamCustomGroove } from "../../../jam/types";
 import {
   EDITABLE_LANES,
-  LANE_LABELS,
-  LEVEL_LABELS,
-  cellLabel,
   cycleLevel,
   emptyPattern,
   isShuffleTick,
-  meterCaption,
   normalizePattern,
   setCell,
   tickLabel,
@@ -71,6 +68,7 @@ export function GrooveEditor({
   onDone,
   onReset,
 }: GrooveEditorProps) {
+  const { t } = useTranslation();
   const { beatsPerBar, ticksPerBeat } = value;
   const beats = Math.max(1, Math.round(beatsPerBar));
   const columns = beats * ticksPerBeat;
@@ -214,21 +212,24 @@ export function GrooveEditor({
           contentEditable
           suppressContentEditableWarning
           role="textbox"
-          aria-label="Groove name"
+          aria-label={t("jam.editor.name")}
           spellCheck={false}
           tabIndex={0}
           onBlur={commitName}
           onKeyDown={onNameKeyDown}
         />
-        <span className="jam-editor__pill">Yours</span>
+        <span className="jam-editor__pill">{t("jam.editor.yours")}</span>
         <span className="jam-editor__caption">
-          {meterCaption(beats, ticksPerBeat)}
+          {t("jam.editor.meter", {
+            beats,
+            subdivision: t(`jam.editor.subdivision.${ticksPerBeat}`),
+          })}
         </span>
         <span className="jam-editor__spacer" />
         <div
           className="jam-editor__pages"
           role="group"
-          aria-label="Edit the bar or the fill"
+          aria-label={t("jam.editor.pages")}
         >
           <button
             type="button"
@@ -236,7 +237,7 @@ export function GrooveEditor({
             aria-pressed={page === "bar"}
             onClick={() => onPageChange("bar")}
           >
-            Bar
+            {t("jam.editor.bar")}
           </button>
           <button
             type="button"
@@ -244,18 +245,18 @@ export function GrooveEditor({
             aria-pressed={page === "fill"}
             onClick={() => onPageChange("fill")}
           >
-            Fill
+            {t("jam.editor.fill")}
           </button>
         </div>
         <button type="button" className="jam-editor__text-btn" onClick={onReset}>
-          Reset
+          {t("jam.editor.reset")}
         </button>
         <button
           type="button"
           className="jam-editor__text-btn jam-editor__text-btn--done"
           onClick={onDone}
         >
-          Done
+          {t("jam.editor.done")}
         </button>
       </div>
 
@@ -264,9 +265,7 @@ export function GrooveEditor({
         ref={gridRef}
         onKeyDown={onGridKeyDown}
         role="group"
-        aria-label={
-          page === "fill" ? "The fill, one bar" : "The groove, one bar"
-        }
+        aria-label={page === "fill" ? t("jam.editor.gridFill") : t("jam.editor.gridBar")}
       >
         <div className="jam-editor__row jam-editor__row--beats" aria-hidden="true">
           <span className="jam-editor__lane-name" />
@@ -288,7 +287,7 @@ export function GrooveEditor({
 
         {EDITABLE_LANES.map((lane, laneIndex) => (
           <div className="jam-editor__row" key={lane}>
-            <span className="jam-editor__lane-name">{LANE_LABELS[lane]}</span>
+            <span className="jam-editor__lane-name">{t(`jam.editor.lanes.${lane}`)}</span>
             {Array.from({ length: beats }, (_, beat) => (
               <div className="jam-editor__group" key={beat}>
                 {Array.from({ length: ticksPerBeat }, (_, sub) => {
@@ -315,7 +314,12 @@ export function GrooveEditor({
                       tabIndex={
                         focus.lane === laneIndex && focus.tick === tick ? 0 : -1
                       }
-                      aria-label={cellLabel(lane, tick, ticksPerBeat, level)}
+                      aria-label={t("jam.editor.cell", {
+                        lane: t(`jam.editor.lanes.${lane}`),
+                        beat: Math.floor(tick / ticksPerBeat) + 1,
+                        tick: (tick % ticksPerBeat) + 1,
+                        level: t(`jam.editor.levels.${level}`),
+                      })}
                       onClick={(event) => {
                         setFocus({ lane: laneIndex, tick });
                         cycle(laneIndex, tick, event.shiftKey);
@@ -340,11 +344,13 @@ export function GrooveEditor({
             >
               {level > 0 ? <span className="jam-editor__dot" /> : null}
             </span>
-            <span className="jam-editor__legend-text">{LEVEL_LABELS[level]}</span>
+            <span className="jam-editor__legend-text">
+              {t(`jam.editor.levels.${level}`)}
+            </span>
           </span>
         ))}
         <span className="jam-editor__spacer" />
-        <span className="jam-editor__legend-hint">Click a cell to cycle</span>
+        <span className="jam-editor__legend-hint">{t("jam.editor.hint")}</span>
       </div>
     </div>
   );
