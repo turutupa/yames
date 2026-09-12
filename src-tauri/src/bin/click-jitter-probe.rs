@@ -86,6 +86,11 @@ struct Args {
     json: bool,
     dump_csv: Option<String>,
     jam: bool,
+    /// `--jam`, and replace the table from another thread every 350 ms
+    /// while the stream runs, alternating two tables that differ only in
+    /// their bass — the bar-ahead handshake the UI performs several times a
+    /// chorus. The gate then covers the handoff and the retirement path.
+    jam_swap: bool,
     /// Whether the tempo / resolution came from the command line, so `--jam`
     /// can supply its own 240 BPM sixteenths without overruling a run that
     /// asked for something else.
@@ -106,6 +111,7 @@ impl Default for Args {
             json: false,
             dump_csv: None,
             jam: false,
+            jam_swap: false,
             bpm_set: false,
             subdivision_set: false,
         }
@@ -155,6 +161,11 @@ fn parse_args() -> Result<Args, String> {
                 a.jam = true;
                 consumed = 1;
             }
+            "--jam-swap" => {
+                a.jam = true;
+                a.jam_swap = true;
+                consumed = 1;
+            }
             "-h" | "--help" => return Err("help".into()),
             other => return Err(format!("unknown flag {other}")),
         }
@@ -193,6 +204,8 @@ click-jitter-probe — ROADMAP §4 audio-safety gate
   --json             also print a one-line JSON summary
   --dump-csv <path>  write the raw per-callback capture for re-analysis
   --jam              play the busiest plausible jam instead of the click
+  --jam-swap         --jam, and swap the table from another thread every
+                     350 ms while playing (the bar-ahead bass handshake)
                      (16 ticks a bar, every lane, a fill, a crash on the
                      one) at 240 BPM / 16ths
 
@@ -567,12 +580,52 @@ fn main() -> ExitCode {
         args.seconds,
     );
 
+    // `--jam-swap`: another thread keeps replacing the table with one that
+    // differs only in its bass, the way the UI does at every bar line where
+    // the changes move. Each swap is deferred to the bar line by the engine
+    // and the replaced table is retired back to this thread, so this run is
+    // the one that measures the handoff, not just the mixing.
+    let swapper = if args.jam_swap {
+        let handoff = engine.jam_handoff();
+        let stop_swaps = Arc::new(std::sync::atomic::AtomicBool::new(false));
+        let flag = stop_swaps.clone();
+        let table_a = Arc::new(compile_jam(&busiest_jam()).expect("compiled above"));
+        let mut cfg_b = busiest_jam();
+        if let Some(ref mut b) = cfg_b.bass {
+            b.gain = 0.9;
+        }
+        let table_b =
+            Arc::new(compile_jam(&cfg_b).expect("the probe's swap table did not compile"));
+        let swaps = Arc::new(std::sync::atomic::AtomicU64::new(0));
+        let count = swaps.clone();
+        let handle = std::thread::spawn(move || {
+            let mut flip = false;
+            while !flag.load(Ordering::Relaxed) {
+                std::thread::sleep(Duration::from_millis(350));
+                handoff.set(Some(if flip { table_a.clone() } else { table_b.clone() }));
+                flip = !flip;
+                count.fetch_add(1, Ordering::Relaxed);
+            }
+        });
+        Some((handle, stop_swaps, swaps))
+    } else {
+        None
+    };
+
     std::thread::sleep(Duration::from_millis(args.warmup_ms));
     let window_start_ns = yames_lib::probe::now_ns();
     std::thread::sleep(Duration::from_secs(args.seconds));
 
     engine.shutdown();
     stop.store(true, Ordering::Relaxed);
+    let swaps_done = match swapper {
+        Some((handle, stop_swaps, swaps)) => {
+            stop_swaps.store(true, Ordering::Relaxed);
+            let _ = handle.join();
+            swaps.load(Ordering::Relaxed)
+        }
+        None => 0,
+    };
 
     let samples = cb_probe.snapshot();
     let sample_rate = cb_probe.sample_rate();
@@ -646,6 +699,9 @@ fn main() -> ExitCode {
     // the page, which is exactly the pair anyone compares.
     if args.jam {
         mode.push_str(" + --jam");
+    }
+    if args.jam_swap {
+        mode.push_str(&format!("-swap ({swaps_done} table swaps while playing)"));
     }
 
     println!("\n=== click-jitter-probe ===");

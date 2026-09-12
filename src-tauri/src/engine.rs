@@ -1023,34 +1023,115 @@ const MAX_VOICES: usize = 256;
 /// does it `try_lock` and clone the `Arc` — a refcount bump, not an
 /// allocation. The same shape `accent_mask` uses: decide off the audio
 /// thread, hand over a finished value.
-pub(crate) struct JamHandoff {
+pub struct JamHandoff {
     table: Mutex<Option<Arc<JamTable>>>,
     generation: AtomicU64,
+    /// Tables the audio thread has finished with, parked here so the LAST
+    /// reference is dropped on a thread that may free memory. The callback
+    /// never drops a table: dropping the last `Arc<JamTable>` frees its
+    /// `Vec`s, and with the bar-ahead bass a table is replaced several times
+    /// a chorus, at the bar line. Capacity is reserved once and never grown.
+    retired: Mutex<Vec<Arc<JamTable>>>,
 }
+
+/// How many replaced tables the command thread can be behind on before the
+/// audio thread has to park them itself. Sixteen is a whole chorus of
+/// bar-ahead sends with nobody draining.
+const JAM_RETIRED_CAP: usize = 16;
 
 impl JamHandoff {
     fn new() -> Self {
         Self {
             table: Mutex::new(None),
             generation: AtomicU64::new(0),
+            retired: Mutex::new(Vec::with_capacity(JAM_RETIRED_CAP)),
         }
     }
 
     /// Hand the engine a table, or `None` to take the band away and leave
     /// the plain click. Called from `set_jam`, never from the audio thread.
-    pub(crate) fn set(&self, table: Option<Arc<JamTable>>) {
+    pub fn set(&self, table: Option<Arc<JamTable>>) {
+        // Free what the audio thread has handed back, here, where freeing
+        // is allowed.
+        self.drain_retired();
         if let Ok(mut slot) = self.table.lock() {
             *slot = table;
+            // Bumped after the write, so a callback that sees the new
+            // generation is guaranteed to find the new table behind the lock
+            // — and only after a write that happened.
+            drop(slot);
+            self.generation.fetch_add(1, Ordering::Release);
         }
-        // Bumped after the write, so a callback that sees the new generation
-        // is guaranteed to find the new table behind the lock.
-        self.generation.fetch_add(1, Ordering::Release);
     }
+
+    /// Drop every retired table. Command thread only.
+    pub(crate) fn drain_retired(&self) {
+        if let Ok(mut r) = self.retired.lock() {
+            r.clear();
+        }
+    }
+
+    /// Audio thread: hand back a table it no longer reads. Never blocks and
+    /// never allocates; when the slot is busy or full the table comes back
+    /// in `Err` for the caller to park.
+    fn try_retire(&self, table: Arc<JamTable>) -> Result<(), Arc<JamTable>> {
+        match self.retired.try_lock() {
+            Ok(mut r) if r.len() < r.capacity() => {
+                r.push(table);
+                Ok(())
+            }
+            _ => Err(table),
+        }
+    }
+}
+
+/// The audio thread's own parking spaces, for tables it replaced while the
+/// retirement slot was busy. Flushed once per buffer. If even these are
+/// full — five replacements landing inside the one moment the command
+/// thread holds the retirement lock — the table is leaked rather than freed
+/// here: a few kilobytes lost is a price, a `free()` on the audio thread is
+/// the thing the whole engine is built to avoid.
+struct JamRetirement {
+    parked: [Option<Arc<JamTable>>; 4],
+}
+
+impl JamRetirement {
+    fn new() -> Self {
+        Self {
+            parked: [None, None, None, None],
+        }
+    }
+
+    fn retire(&mut self, handoff: &JamHandoff, table: Arc<JamTable>) {
+        if let Err(table) = handoff.try_retire(table) {
+            match self.parked.iter_mut().find(|s| s.is_none()) {
+                Some(slot) => *slot = Some(table),
+                None => std::mem::forget(table),
+            }
+        }
+    }
+
+    fn flush(&mut self, handoff: &JamHandoff) {
+        for slot in self.parked.iter_mut() {
+            if let Some(table) = slot.take() {
+                if let Err(back) = handoff.try_retire(table) {
+                    *slot = Some(back);
+                    return;
+                }
+            }
+        }
+    }
+}
+
+/// What the band does on `bar`, or `Full` with no band.
+#[inline]
+fn band_state_of(table: Option<&JamTable>, bar: u32) -> JamBandState {
+    table.map_or(JamBandState::Full, |t| t.band_state(bar))
 }
 
 /// Shared handle to the engine's jam slot. Cloned into the audio thread and
 /// into the Tauri command that fills it.
-pub(crate) type SharedJam = Arc<JamHandoff>;
+pub type SharedJam = Arc<JamHandoff>;
 
 /// What sounds on one tick.
 #[derive(Debug, PartialEq)]
@@ -2074,6 +2155,13 @@ impl MetronomeEngine {
         self.jam.set(table);
     }
 
+    /// The handoff itself, for the click-jitter probe's `--jam-swap`, which
+    /// replaces the table from another thread while the stream runs — the
+    /// one path a table installed before the stream opens never exercises.
+    pub fn jam_handoff(&self) -> SharedJam {
+        self.jam.clone()
+    }
+
     /// Hand the engine the same `TempoContext` the commands mirror into, so
     /// a failed device open can clear the onset detector's playing gate from
     /// the audio thread. Called once, at app setup.
@@ -2308,6 +2396,14 @@ impl MetronomeEngine {
             // "bar 3 of 12, chorus 2" is what the transport reads out.
             let mut jam_bar: u32 = 0;
             let mut jam_chorus: u32 = 1;
+            // Decided at the bar line and held for the bar, so a practice
+            // window or an edit landing mid-bar cannot change what the band
+            // is doing under a bar that has already started.
+            let mut jam_bar_state: JamBandState = JamBandState::Full;
+            // The form length the counters belong to. A table that changes
+            // while playing but keeps its form length keeps its place.
+            let mut jam_form_bars: u32 = 0;
+            let mut jam_retire = JamRetirement::new();
             // One report per loaded table, not one per tick.
             let mut jam_mismatch_reported = false;
             let mut was_playing = false;
@@ -2425,7 +2521,14 @@ impl MetronomeEngine {
                     if gen != cached.jam_generation {
                         if let Ok(slot) = jam_shared.table.try_lock() {
                             let incoming = slot.clone();
+                            drop(slot);
                             cached.jam_generation = gen;
+                            // Whatever this replaces is handed back, never
+                            // dropped here: the last reference to a table
+                            // frees memory, and this is the audio thread.
+                            if let Some(old) = cached.jam_pending.take() {
+                                jam_retire.retire(&jam_shared, old);
+                            }
                             // The UI posts the next bar's bass on this bar's
                             // downbeat. Same drummer, different bass: hold it
                             // for the bar line. Anything else plays now.
@@ -2437,18 +2540,26 @@ impl MetronomeEngine {
                             ) {
                                 cached.jam_pending = incoming;
                             } else {
+                                if let Some(old) = cached.jam.take() {
+                                    jam_retire.retire(&jam_shared, old);
+                                }
                                 cached.jam = incoming;
-                                cached.jam_pending = None;
                                 cached.jam_changed = true;
                             }
                         }
                     }
+                    // Cheap when nothing is parked, which is always, unless
+                    // the command thread was mid-drain at the wrong moment.
+                    jam_retire.flush(&jam_shared);
 
                     // ---- Not playing: silence ----
                     if !is_playing {
                         // A bass that was waiting for a bar line that never
                         // came is the right one to start from next time.
                         if let Some(p) = cached.jam_pending.take() {
+                            if let Some(old) = cached.jam.take() {
+                                jam_retire.retire(&jam_shared, old);
+                            }
                             cached.jam = Some(p);
                             cached.jam_changed = true;
                         }
@@ -2466,6 +2577,7 @@ impl MetronomeEngine {
                         measure_beat = 0;
                         jam_bar = 0;
                         jam_chorus = 1;
+                        jam_bar_state = band_state_of(cached.jam.as_deref(), 0);
                         return;
                     }
 
@@ -2482,6 +2594,7 @@ impl MetronomeEngine {
                         // form, whatever it was doing last time.
                         jam_bar = 0;
                         jam_chorus = 1;
+                        jam_bar_state = band_state_of(cached.jam.as_deref(), 0);
                         jam_mismatch_reported = false;
                         voices.clear();
                     }
@@ -2490,9 +2603,21 @@ impl MetronomeEngine {
                     // to the top: bar 1 of chorus 1 is where a band starts.
                     if cached.jam_changed {
                         cached.jam_changed = false;
-                        jam_bar = 0;
-                        jam_chorus = 1;
                         jam_mismatch_reported = false;
+                        // A band arriving while stopped, or a form of a
+                        // different length, starts at the top. A band that
+                        // changes while playing and keeps its form length
+                        // keeps its place: turning trading on at bar 9 is
+                        // not a reason to go back to bar 1, and the state
+                        // for the bar under way is not re-decided.
+                        let next_form = cached.jam.as_ref().map_or(0, |t| t.form_bars());
+                        if !is_playing || next_form != jam_form_bars {
+                            jam_bar = 0;
+                            jam_chorus = 1;
+                            jam_bar_state = band_state_of(cached.jam.as_deref(), 0);
+                            jam_bar_state = band_state_of(cached.jam.as_deref(), 0);
+                        }
+                        jam_form_bars = next_form;
                     }
 
                     // Audio-safety probe: commit this buffer's entry time,
@@ -2537,6 +2662,7 @@ impl MetronomeEngine {
                                 // mismatch check below will say out loud.
                                 jam_bar = 0;
                                 jam_chorus = 1;
+                                jam_bar_state = band_state_of(cached.jam.as_deref(), 0);
                                 jam_mismatch_reported = false;
                             }
 
@@ -2559,6 +2685,7 @@ impl MetronomeEngine {
                                 // band comes in on this tick.
                                 jam_bar = 0;
                                 jam_chorus = 1;
+                                jam_bar_state = band_state_of(cached.jam.as_deref(), 0);
                             }
 
                             // Bar length the engine wraps `measure_beat`
@@ -2634,9 +2761,17 @@ impl MetronomeEngine {
                             // a bar however busy the tick grid is — that is
                             // the whole point of deciding it here and not
                             // in the UI. `Full` whenever no jam is loaded.
-                            let band_state = match cached.jam {
-                                Some(ref t) => t.band_state(jam_bar),
-                                None => JamBandState::Full,
+                            let band_state = if cached.jam.is_some() {
+                                jam_bar_state
+                            } else {
+                                JamBandState::Full
+                            };
+                            // A band with no hat lane keeps its bass on your
+                            // bars instead: a drummer's band has no drums.
+                            let trade_keeps = if cached.jam.as_ref().map_or(true, |t| t.has_hat()) {
+                                JamLane::Hat
+                            } else {
+                                JamLane::Bass
                             };
 
                             // Spawn voice for this beat
@@ -2654,7 +2789,7 @@ impl MetronomeEngine {
                                         // keeps the time and nothing else
                                         // plays, bass included.
                                         if band_state == JamBandState::HatsOnly
-                                            && slot.lane != JamLane::Hat
+                                            && slot.lane != trade_keeps
                                         {
                                             continue;
                                         }
@@ -2775,12 +2910,16 @@ impl MetronomeEngine {
                                 // one the next tick reads. Same form, same
                                 // drums — only the bass bar moved.
                                 if let Some(p) = cached.jam_pending.take() {
+                                    if let Some(old) = cached.jam.take() {
+                                        jam_retire.retire(&jam_shared, old);
+                                    }
                                     cached.jam = Some(p);
                                 }
                                 if let Some(ref t) = cached.jam {
                                     let (b, c) = advance_form(jam_bar, jam_chorus, t.form_bars());
                                     jam_bar = b;
                                     jam_chorus = c;
+                                    jam_bar_state = t.band_state(b);
                                 }
                             }
 

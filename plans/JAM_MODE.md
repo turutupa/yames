@@ -253,6 +253,16 @@ about timing changes.
   kits. The bass and the keys are synthesised voices scheduled on the
   same table with a pitch per hit; the chord loop is a per-bar lookup of
   what pitch each lane plays.
+- **Replacing a table while playing.** The audio thread never drops a
+  table: the last `Arc<JamTable>` frees memory, so a replaced table is
+  handed back to the command thread (`JamHandoff::retired`) and the
+  callback keeps four parking spaces for the moment that slot is busy. A
+  table that differs only in its bass waits for the bar line
+  (`jam::swap_defers`); a table that changes the drummer applies at once
+  but keeps the form's place unless the form length changed; the band
+  state for a bar is decided at the bar line and held. The probe's
+  `--jam-swap` replaces the table every 350 ms while playing and is the
+  gate for all of it.
 - **Scoring.** Unchanged for timing. Drop-out bars and trading fours are
   windows where the band's own hits are absent, which the analyser can
   weight as the cleanest evidence. Pitch against the changes waits for

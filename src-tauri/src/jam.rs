@@ -413,6 +413,10 @@ pub struct JamTable {
     band_states: Vec<JamBandState>,
     /// Which kit the lanes resolved to. Diagnostics and tests only.
     pub kit: JamKit,
+    /// Whether any tick of the groove has a hat. A band without one — a
+    /// drummer's band, which has no drums at all, or a groove drawn without
+    /// hats — keeps its bass on your bars in a trade instead of going dead.
+    has_hat: bool,
     /// Everything about the table EXCEPT the bass line, hashed. Two tables
     /// with the same signature are the same drummer under a different bass
     /// bar, and that is the case the audio thread defers to the next bar
@@ -430,6 +434,12 @@ impl JamTable {
     /// which cannot happen, since the caller wraps at `form_bars` — reads as
     /// `Full`, so a bug is a band that plays rather than a panic.
     #[inline]
+    /// See the `has_hat` field.
+    #[inline]
+    pub fn has_hat(&self) -> bool {
+        self.has_hat
+    }
+
     pub fn band_state(&self, form_bar: u32) -> JamBandState {
         self.band_states
             .get(form_bar as usize)
@@ -626,6 +636,9 @@ pub fn compile(cfg: &JamConfig) -> Result<JamTable, String> {
         .map(|b| band_state_for_bar(b, cfg.form_bars, cfg.practice.as_ref()))
         .collect();
 
+    let has_hat = bar
+        .iter()
+        .any(|t| t.slots().iter().any(|s| s.lane == JamLane::Hat));
     Ok(JamTable {
         ticks_per_bar: ticks,
         form_bars: cfg.form_bars,
@@ -634,6 +647,7 @@ pub fn compile(cfg: &JamConfig) -> Result<JamTable, String> {
         crash_on_one: crash,
         band_states,
         kit,
+        has_hat,
         drums_signature: drums_signature(cfg),
         peak_before,
         peak_after,
