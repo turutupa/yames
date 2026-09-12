@@ -113,13 +113,17 @@ respectively; M05 waits for M03 + M04.
 | `M01-rust-gates.md` | `practice-coach` feature, `cfg(desktop)`, `TempoContext` extraction, wrapper support | M |
 | `M02-frontend-gates.md` | `IS_MOBILE`, lazy subtrees, `ipc.desktop.ts`, `useSession` split, bundle check | L |
 | `M03a-css-mechanics-and-survey.md` | Hover audit and wrapping, safe-area tokens, touch targets, phone-width survey | M |
-| `M03-responsive-touch.md` | Phone layouts, presets sheet, trimmed onboarding (after M02) | L |
-| `M04-android-native.md` | Foreground service, audio focus, wake lock, interruptions | M |
+| `M03b-phone-navigation-and-sheets.md` | Bottom tab bar, `Sheet` primitive, library and meter picker as sheets | L |
+| `M03c-phone-screens.md` | Settings rows stack, drill chart scroller, zen exit, onboarding, dialogs | L |
+| `M03d-phone-polish.md` | Three-step phone onboarding, tab labels per locale | S |
+| (M03e, no brief) | The two shot harnesses folded into `scripts/mobile-shots.mjs` | S |
+| `M04-android-native.md` | Direct Oboe stream, foreground service, audio focus, Back, keep-awake, links | M |
 | `M05a-release-prep.md` | Privacy page, store copy, dispatch-only Android CI draft, licence exception text, console checklist | S |
-| `M05-android-release.md` | Keystore, signed APK + AAB, Play closed test, website download section | M |
+| `M05-android-release.md` | Signing from secrets, versionCode, minified release proven on the emulator, store shots, website row, M04's loose ends | M |
 | `M06-ios.md` | `tauri ios init`, AVAudioSession, TestFlight from CI, App Store listing, GPL exception | L |
 | `M07-ios-midi.md` | CoreMIDI footswitch on iOS | M |
 
-M00, M01, M02, M03a and M05a are written. M03, M04, M05, M06 and M07
-are written when their predecessor merges, from what the predecessor
-found.
+Done and merged into `mobile` (2026-09-11): M00 findings, M01, M02,
+M03a–e, M04, M05a. Written, not started: M06. Not written: M07. Each
+finished task left a findings or report file next to its brief; read
+the predecessor's before starting the next.
