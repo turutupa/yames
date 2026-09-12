@@ -68,7 +68,7 @@
       "downloadUrl": "https://github.com/turutupa/yames/releases/latest",
       "applicationCategory": "MultimediaApplication",
       "applicationSubCategory": "Music",
-      "operatingSystem": "macOS, Windows, Linux",
+      "operatingSystem": "macOS, Windows, Linux, Android",
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -151,7 +151,7 @@
           "name": "Is Yames free?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes, Yames is completely free and open-source. You can download it for macOS, Windows, and Linux at no cost."
+            "text": "Yes, Yames is completely free and open-source. You can download it for macOS, Windows, Linux and Android at no cost."
           }
         },
         {
@@ -159,7 +159,7 @@
           "name": "What platforms does Yames support?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yames is available for macOS (Apple Silicon and Intel), Windows, and Linux. It is a native desktop application built with Rust and Tauri for optimal performance."
+            "text": "Yames is available for macOS (Apple Silicon and Intel), Windows, Linux and Android. It is a native application built with Rust and Tauri for optimal performance."
           }
         },
         {
@@ -486,7 +486,7 @@
         <div class="close__inner reveal">
           <h2 class="h1">Open it. Hit play. Disappear.</h2>
           <p class="lede">
-            macOS (Apple Silicon &amp; Intel), Windows and Linux.
+            macOS (Apple Silicon &amp; Intel), Windows, Linux &mdash; and Android.
           </p>
           <a
             class="btn btn--primary btn--lg"
@@ -495,6 +495,38 @@
           >
             Download Yames &mdash; free
           </a>
+          <!-- Android. One row, under the desktop button rather than beside
+               it: a phone is a second place to practise, not the main one, and
+               the pills above are wired to desktop builds. The link goes to the
+               same Releases page; the Play badge replaces the note once the
+               listing is live. -->
+          <div class="android-row">
+            <a
+              class="btn btn--sm"
+              id="android-btn"
+              href="https://github.com/turutupa/yames/releases/latest"
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="6" y="2" width="12" height="20" rx="2.5" />
+                <line x1="10.5" y1="18.5" x2="13.5" y2="18.5" />
+              </svg>
+              <span>Android</span>
+            </a>
+            <span class="android-note">
+              Install it straight from the file, or wait for it on Google Play.
+            </span>
+          </div>
+
           <div class="install" id="cli-install">
             <span class="brew-label">or install via terminal:</span>
             <code
