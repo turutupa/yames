@@ -12,6 +12,7 @@ import {
   displayTransposition,
   keyName,
   midiToName,
+  noteName,
   sameChord,
   spellingForKey,
   transposeChord,
@@ -257,7 +258,10 @@ export function JamView({
   const scaleLabels = useMemo(
     () =>
       scales.map((suggestion) => {
-        const root = midiToName(suggestion.root, spellingForKey(harmony.key));
+        // `noteName`, not `midiToName`: a suggestion's root is a PITCH CLASS,
+        // and putting one through the MIDI speller names the note in the
+        // octave below the piano ("A-1 mixolydian").
+        const root = noteName(suggestion.root, spellingForKey(harmony.key));
         // Not lower-cased on the way out: the locale files already write each
         // scale the way that language writes it, and German capitalises its
         // nouns whether or not English happens to.

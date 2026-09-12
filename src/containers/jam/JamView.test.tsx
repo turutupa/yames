@@ -281,3 +281,197 @@ describe("JamView — the controls", () => {
     expect(screen.getByText("Headphones keep the score honest.")).toBeInTheDocument();
   });
 });
+
+/**
+ * The chord you are on, and everything the screen says about it. This is the
+ * headline of the second pass the way the timeline was the headline of the
+ * first, and it is the part a player reads while their hands are busy.
+ */
+describe("JamView — the changes", () => {
+  it("puts the chord you are on above everything else", () => {
+    // The starter blues is in A, so bar 1 is A7 and bar 5 is D7. Queried
+    // through the NOW block rather than by text: A7 is also in seven cells of
+    // the timeline, which is the point of the timeline.
+    const { container } = setup({ currentBeat: beat(0), isPlaying: true });
+    expect(container.querySelector(".jam-now-name")?.textContent).toBe("A7");
+  });
+
+  it("counts to the next chord that actually changes, not to the next bar", () => {
+    // Bars 1 to 4 of a twelve-bar blues are all the I chord. "A7 in 1 bar"
+    // four times running tells a player nothing; "D7 in 4 bars" is the
+    // sentence they hold in their head.
+    setup({ currentBeat: beat(0), isPlaying: true });
+    expect(screen.getByText("D7 in 4 bars")).toBeInTheDocument();
+  });
+
+  it("offers scales that fit the chord, named from their own root", () => {
+    setup({ currentBeat: beat(0), isPlaying: true });
+    // A blues, so the first answer over the I7 is the mixolydian that spells
+    // the chord, and the minor pentatonic you bend against it.
+    const scales = screen.getByText(/mixolydian/).textContent ?? "";
+    expect(scales).toContain("A mixolydian");
+    expect(scales).toContain("A minor pentatonic");
+  });
+
+  it("writes the changes into the timeline cells", () => {
+    const { container } = setup({ currentBeat: beat(4), isPlaying: true });
+    const chords = [...container.querySelectorAll(".jam-timeline-chord")].map(
+      (c) => c.textContent,
+    );
+    expect(chords).toHaveLength(12);
+    // I I I I · IV IV I I · V IV I V — the shape of a twelve-bar blues.
+    expect(chords.slice(0, 4)).toEqual(["A7", "A7", "A7", "A7"]);
+    expect(chords.slice(4, 6)).toEqual(["D7", "D7"]);
+    expect(chords[8]).toBe("E7");
+  });
+
+  it("leaves the timeline bare when the chords are switched off", () => {
+    const { container } = setup({ jam: jamOf({ chords: false }) });
+    expect(container.querySelectorAll(".jam-timeline-chord")).toHaveLength(0);
+  });
+
+  it("shows the chords of the key, with the one you are on lit", () => {
+    setup({ currentBeat: beat(0), isPlaying: true });
+    const strip = screen.getByTestId("key-chords-strip");
+    const lit = within(strip)
+      .getAllByTestId("key-chord")
+      .filter((c) => c.getAttribute("aria-pressed") === "true");
+    expect(lit).toHaveLength(1);
+    expect(lit[0]).toHaveAttribute("aria-label", "A7");
+  });
+
+  it("gives a guitarist the shapes and a horn player only the chords", () => {
+    setup({ currentBeat: beat(0), isPlaying: true });
+    expect(screen.getByTestId("chord-shapes-row")).toBeInTheDocument();
+    cleanup();
+    // "other" is the horn, string and voice bucket: no neck, so no grips.
+    setup({ instrument: "other", currentBeat: beat(0), isPlaying: true });
+    expect(screen.queryByTestId("chord-shapes-row")).toBeNull();
+    expect(screen.getByTestId("key-chords-strip")).toBeInTheDocument();
+  });
+
+  it("writes the chart in the key the player reads", () => {
+    // A Bb instrument sounds a major second below written pitch, so its part
+    // is written two semitones up: the blues in A becomes a blues in B.
+    const { container } = setup({
+      jam: jamOf({ transposition: "bb" }),
+      currentBeat: beat(0),
+      isPlaying: true,
+    });
+    expect(container.querySelector(".jam-now-name")?.textContent).toBe("B7");
+  });
+});
+
+/** The tools that only make sense over a band (JAM_MODE §4.4). */
+describe("JamView — the practice tools", () => {
+  const practising = {
+    dropOutEvery: 8,
+    dropOutBars: 2,
+    tradeBars: 0,
+    tempoStep: 0,
+    tempoEveryChoruses: 0,
+  };
+
+  it("draws the silence a chorus before it arrives", () => {
+    // The point of drawing it ahead: a silence you can see coming is one you
+    // can count into. Over twelve bars with a window every 8 for 2, bars 9
+    // and 10 are the silent ones.
+    const { container } = setup({
+      jam: jamOf({ practice: practising }),
+      currentBeat: beat(0),
+      isPlaying: true,
+    });
+    const silent = [...container.querySelectorAll(".jam-timeline-cell")]
+      .map((c, i) => [i, c.getAttribute("data-band")] as const)
+      .filter(([, state]) => state === "silent")
+      .map(([i]) => i);
+    expect(silent).toEqual([8, 9]);
+  });
+
+  it("marks your bars in a trade", () => {
+    const { container } = setup({
+      jam: jamOf({ practice: { ...practising, dropOutEvery: 0, tradeBars: 4 } }),
+      currentBeat: beat(0),
+      isPlaying: true,
+    });
+    const yours = [...container.querySelectorAll(".jam-timeline-cell")]
+      .map((c, i) => [i, c.getAttribute("data-band")] as const)
+      .filter(([, state]) => state === "hatsOnly")
+      .map(([i]) => i);
+    // Band plays 0-3, you play 4-7, band plays 8-11.
+    expect(yours).toEqual([4, 5, 6, 7]);
+  });
+
+  it("turns drop-outs on from the switch and keeps the number it had", () => {
+    const { props } = setup({ jam: jamOf({ practice: { ...practising, dropOutEvery: 0 } }) });
+    fireEvent.click(screen.getByRole("switch", { name: "Drop-out bars" }));
+    expect(props.onEdit).toHaveBeenCalledWith({
+      practice: expect.objectContaining({ dropOutEvery: 8, dropOutBars: 2 }),
+    });
+  });
+
+  it("says the trainer is climbing rather than naming a tempo mark", () => {
+    // A tempo the trainer chose is not a tempo you set, so the marking under
+    // it says where it came from instead of what it is called.
+    setup({ jam: jamOf({ bpm: 92 }), trainedBpm: 104 });
+    expect(screen.getByText("104")).toBeInTheDocument();
+    expect(screen.getByText("climbing from 92")).toBeInTheDocument();
+  });
+
+  it("calls your four when the band drops to hats", () => {
+    const { rerender, props } = setup({
+      jam: jamOf({ practice: { ...practising, dropOutEvery: 0, tradeBars: 4 } }),
+      currentBeat: beat(0),
+      isPlaying: true,
+    });
+    expect(screen.queryByText("Your four")).toBeNull();
+    rerender(
+      <JamView
+        {...props}
+        currentBeat={{ ...beat(4), bandState: "hatsOnly" }}
+        isPlaying
+      />,
+    );
+    expect(screen.getByText("Your four")).toBeInTheDocument();
+  });
+});
+
+/** The editor is a drawer under the jam, not a screen you leave it for. */
+describe("JamView — the groove editor", () => {
+  it("copies the preset into a groove of your own when the drawer opens", () => {
+    const { props } = setup({ screen: screenState({ editorOpen: true }) });
+    expect(props.onEdit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        customGroove: expect.objectContaining({ name: "Shuffle", beatsPerBar: 4 }),
+      }),
+    );
+  });
+
+  it("mounts the grid once the jam has a groove of its own", () => {
+    setup({
+      screen: screenState({ editorOpen: true }),
+      jam: jamOf({
+        customGroove: {
+          name: "Mine",
+          beatsPerBar: 4,
+          ticksPerBeat: 2,
+          bar: {
+            kick: [1, 0, 0, 0, 1, 0, 0, 0],
+            snare: [0, 0, 0, 0, 0, 0, 0, 0],
+            hat: [0, 0, 0, 0, 0, 0, 0, 0],
+            ride: [0, 0, 0, 0, 0, 0, 0, 0],
+            crash: [0, 0, 0, 0, 0, 0, 0, 0],
+          },
+          fill: null,
+        },
+      }),
+    });
+    expect(screen.getByLabelText("The groove, one bar")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Done" })).toBeInTheDocument();
+  });
+
+  it("stays out of the way until it is opened", () => {
+    setup();
+    expect(screen.queryByLabelText("The groove, one bar")).toBeNull();
+  });
+});

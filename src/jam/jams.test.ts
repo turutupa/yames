@@ -171,8 +171,10 @@ describe("the starter jams", () => {
 
   it("sets the tempo, the form and the key the brief asks for", () => {
     const by = Object.fromEntries(STARTER_JAMS.map((j) => [j.name, j]));
+    // "A blues", not "A": the key is what the chords-in-the-key strip is drawn
+    // from, and A major does not contain the A7 the twelve-bar plays.
     expect([by["Slow blues in A"].bpm, by["Slow blues in A"].form.kind, by["Slow blues in A"].key])
-      .toEqual([92, "blues12", "A"]);
+      .toEqual([92, "blues12", "A blues"]);
     expect([by["Funk in E"].bpm, by["Funk in E"].form.kind, by["Funk in E"].key])
       .toEqual([104, "loop8", "E"]);
     expect([by["Bossa in D minor"].bpm, by["Bossa in D minor"].form.kind, by["Bossa in D minor"].key])

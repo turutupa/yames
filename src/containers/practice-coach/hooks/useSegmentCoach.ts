@@ -46,6 +46,12 @@ export function useSegmentCoach(params: {
   activeRef: MutableRefObject<boolean>;
   playBpmRef: MutableRefObject<number>;
   beatsInSegmentRef: MutableRefObject<number>;
+  /**
+   * Whether the stretch just played was played over the band. A ref, not a
+   * prop: the tab can change mid-session, and what matters is what was true
+   * when the segment ended.
+   */
+  jamModeRef: MutableRefObject<boolean>;
   // State setters
   setMessages: Dispatch<SetStateAction<FeedMessage[]>>;
   setPlayMode: Dispatch<SetStateAction<"structured" | "noodling" | undefined>>;
@@ -65,6 +71,7 @@ export function useSegmentCoach(params: {
     activeRef,
     playBpmRef,
     beatsInSegmentRef,
+    jamModeRef,
     setMessages,
     setPlayMode,
   } = params;
@@ -324,7 +331,17 @@ export function useSegmentCoach(params: {
           }
 
           const now = Date.now();
-          segmentReportsRef.current.push({ report, bpm: segmentBpm, timeSignature, startTime: segmentStartRef.current, endTime: now });
+          segmentReportsRef.current.push({
+            report,
+            bpm: segmentBpm,
+            timeSignature,
+            startTime: segmentStartRef.current,
+            endTime: now,
+            // A band is louder than a click, so a score earned over one is not
+            // comparable with a score earned over a bare metronome. The flag
+            // rides with the segment so nothing downstream has to guess.
+            ...(jamModeRef.current ? { mode: "jam" as const } : {}),
+          });
           // Reset the segment-start clock so the NEXT segment's startTime
           // in the timeline is measured from NOW, not from the session origin.
           segmentStartRef.current = now;

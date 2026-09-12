@@ -209,6 +209,16 @@ export function MainWindow() {
     setInstrumentBackend(id as InstrumentId).catch(() => {});
   }, []);
 
+  /**
+   * Whether a band is playing rather than a click.
+   *
+   * State set from an effect rather than read straight off `jamSession`,
+   * because the coach session is built before the jam session is — and the
+   * coach only needs to know by the time a segment ends, which is many beats
+   * later. See `UseSessionOptions.jamMode`.
+   */
+  const [jamModeActive, setJamModeActive] = useState(false);
+
   const session = useSession({
     evaluation,
     isPlaying: state.isPlaying,
@@ -235,6 +245,7 @@ export function MainWindow() {
     drillStartBpm: state.speedRamp?.startBpm,
     drillTargetBpm: state.speedRamp?.targetBpm,
     drillCompleted: state.speedRamp?.completed ?? false,
+    jamMode: jamModeActive,
   });
 
   /**
@@ -319,6 +330,10 @@ export function MainWindow() {
   useEffect(() => {
     closeJamRef.current = jamSession.closeJam;
   }, [jamSession.closeJam]);
+
+  useEffect(() => {
+    setJamModeActive(view === "jam" && !!jamSession.jam);
+  }, [view, jamSession.jam]);
 
   const handleNewJam = useCallback(() => {
     setSidebarOpen(true);

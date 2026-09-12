@@ -154,7 +154,11 @@ export const STARTER_JAMS: readonly Jam[] = [
     form: { kind: "blues12", bars: 12 },
     countIn: 4,
     fills: true,
-    key: "A",
+    // A blues, not A major. The form plays I7 IV7 V7 either way, but the KEY
+    // is what the chords-in-the-key strip is drawn from, and A major does not
+    // contain A7 — so stored as major the strip had nothing to light while
+    // the band played the dominant it names.
+    key: "A blues",
     chords: true,
   },
   {
