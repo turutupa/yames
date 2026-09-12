@@ -1826,15 +1826,16 @@
    that the transport still reports it — shedding it here too would leave the
    answer nowhere. */
 @media (max-width: 819px) {
+  /* The chevron-and-bar icon is the whole button here: it keeps its
+     `aria-label` and its `title`, so nothing is lost but the words. It used
+     to draw a `::after` beside the icon as well, whose content was a stray
+     U+0083 — a C1 control character, never a glyph — followed by an "A".
+     It rendered as an empty box on every platform whose font cannot draw
+     it, which on Android is all of them; M05b found it sitting in a store
+     screenshot. There was never anything for it to say. */
   .transport[data-setlist] .transport-skip {
     font-size: 0;
     padding: 0 11px;
-  }
-
-  .transport[data-setlist] .transport-skip::after {
-    content: "A";
-    font-size: 16px;
-    line-height: 1;
   }
 
   .transport[data-setlist] .transport-input span {
