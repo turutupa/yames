@@ -46,9 +46,43 @@ export type JamEngineConfig = {
   crashOnOne: boolean;
   /** Gain multiplier on every hit, 0.5..1.5. Soft 0.7, normal 1.0, loud 1.25. */
   intensity: number;
-  /** Reserved for kits. Only "room" exists today; the engine ignores it. */
+  /** Which kit plays the lanes: "room" | "tight" | "brushes" | "electronic". */
   kit: string;
+  /**
+   * The bass, when the band has one. One MIDI note number per tick, 0 for a
+   * rest, same length as the drum lanes. Absent or null: no bass.
+   */
+  bass?: JamBassLine | null;
+  /**
+   * Practice windows the engine applies per bar from its own form counter,
+   * so they land exactly on bar lines. Absent or null: the band plays every
+   * bar.
+   */
+  practice?: JamPracticeConfig | null;
 };
+
+export type JamBassLine = {
+  pitches: number[];
+  /** Gain multiplier on the bass voice, 0.5..1.5. */
+  gain: number;
+};
+
+/**
+ * What the band does on each bar of the form, decided by the engine from
+ * `formBar` and `chorus` so the change lands on the bar line.
+ *
+ * dropOut: every `everyBars` bars, the whole band goes silent for `bars`
+ * bars, then returns. trade: the band plays `bandBars` bars, then for
+ * `youBars` bars the drums play hats only and the bass rests; repeats.
+ * Both may be set; drop-out wins on a bar where both apply.
+ */
+export type JamPracticeConfig = {
+  dropOut: { everyBars: number; bars: number } | null;
+  trade: { bandBars: number; youBars: number } | null;
+};
+
+/** What the band is doing on a bar. Mirrored on every BeatEvent as `bandState`. */
+export type JamBandState = "full" | "hatsOnly" | "silent";
 
 // ---------------------------------------------------------------------------
 // The library item
@@ -88,6 +122,33 @@ export type Jam = {
    * record without it still loads.
    */
   key?: string;
+  /** A groove made in the editor, used instead of `grooveId` when present. */
+  customGroove?: JamCustomGroove;
+  /** Who is in the band. Absent: drums only. */
+  band?: { drums: boolean; bass: boolean };
+  /** Chords on the timeline and the NOW block. Absent: off. */
+  chords?: boolean;
+  /** The practice tools. Absent: none. */
+  practice?: JamPracticeSettings;
+};
+
+export type JamCustomGroove = {
+  name: string;
+  beatsPerBar: number;
+  ticksPerBeat: 1 | 2 | 3 | 4 | 6;
+  bar: JamPattern;
+  fill: JamPattern | null;
+};
+
+export type JamPracticeSettings = {
+  /** 0 = off; else every N bars the band drops out for `dropOutBars`. */
+  dropOutEvery: number;
+  dropOutBars: number;
+  /** 0 = off; else trade this many bars: band plays N, you play N. */
+  tradeBars: number;
+  /** 0 = off; else the tempo rises by `tempoStep` every `tempoEveryChoruses` choruses. */
+  tempoStep: number;
+  tempoEveryChoruses: number;
 };
 
 export const JAM_INTENSITY_GAIN: Record<JamIntensity, number> = {

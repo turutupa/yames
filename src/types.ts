@@ -93,6 +93,11 @@ export type BeatEvent = {
    */
   formBar: number;
   chorus: number;
+  /**
+   * What the band is doing on this bar: "full", "hatsOnly" (a trade, your
+   * bars) or "silent" (a drop-out). "full" when no jam is loaded.
+   */
+  bandState: "full" | "hatsOnly" | "silent";
 };
 
 // ---------------------------------------------------------------------------
