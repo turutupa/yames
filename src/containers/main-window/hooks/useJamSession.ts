@@ -277,20 +277,31 @@ export function useJamSession({
     if (view !== "jam" || !jam) {
       clearJam();
       sentBassRef.current = null;
+      loadedIdRef.current = null;
       return;
     }
-    // Bar 0 on the way in. A jam that is already playing when the groove
-    // changes gets the right bar back on the next bar line below.
-    const config = compileJam(jam, { formBar: 0, lineup });
+    // A load starts at bar 0. An edit to a jam that is already playing is a
+    // different thing: the engine applies a changed drummer at once and holds
+    // a changed bass for the bar line, so the bass this config carries is
+    // the NEXT bar's — the one the bar line is about to need — and the bar
+    // line after that goes on sending ahead as usual. Compiled for bar 0 it
+    // played bar 1's bass under bar 7 for a whole bar.
+    const isLoad = loadedIdRef.current !== jam.id;
+    const live = playingBarRef.current;
+    const editingLive = !isLoad && isPlaying && !countingIn && live !== null;
+    const config = compileJam(jam, { formBar: editingLive ? live + 1 : 0, lineup });
     pushJam(jam, config);
     // What the engine is now holding, so the next bar line can tell whether
     // it has anything new to say. Recording `null` here would make the next
     // downbeat re-send a bass the engine already has.
     sentBassRef.current = bassSignature(config);
-    barRef.current = null;
-    // Bar 0 is on its way, meter first. The bar-ahead effect below runs on
-    // this same commit and must not race past it — see `pushedRef`.
-    pushedRef.current = true;
+    loadedIdRef.current = jam.id;
+    if (!editingLive) {
+      barRef.current = null;
+      // Bar 0 is on its way, meter first. The bar-ahead effect below runs on
+      // this same commit and must not race past it — see `pushedRef`.
+      pushedRef.current = true;
+    }
     // `engineKey` rather than `jam`: everything the table is made of, and not
     // the tempo or the name. eslint would rather have `jam` here, and `jam`
     // here is the bug this line exists to avoid.
@@ -347,6 +358,10 @@ export function useJamSession({
    * follows.
    */
   const pushedRef = useRef(false);
+  /** The id the engine was last loaded with, so an edit is not taken for a load. */
+  const loadedIdRef = useRef<string | null>(null);
+  /** The bar the form is on right now, or null when not playing a bar. */
+  const playingBarRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (view !== "jam" || !jam || !currentBeat || !isPlaying || countingIn) {
@@ -355,12 +370,14 @@ export function useJamSession({
       // the first real bar line start the sequence again.
       barRef.current = null;
       pushedRef.current = false;
+      playingBarRef.current = null;
       return;
     }
     // A beat event from a build that does not fill `formBar` in yet leaves the
     // arithmetic below as NaN and the bass lookup on `undefined`. Bar one is
     // the honest answer to "which bar", and the click keeps its band.
     const bar = Number.isFinite(currentBeat.formBar) ? currentBeat.formBar : 0;
+    playingBarRef.current = bar;
     const at = `${currentBeat.chorus}:${bar}`;
     if (barRef.current === at) return;
     barRef.current = at;
