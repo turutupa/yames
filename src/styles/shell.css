@@ -2549,9 +2549,19 @@
 
 /* The gutters. 24px each side was cut for a window that also had a 252px rail
    beside it; on a 360px screen it is 13% of the width spent on nothing. The
-   safe-area terms stay, because a notch in landscape is not a gutter. */
+   safe-area terms stay, because a notch in landscape is not a gutter.
+
+   The top gutter is 0, and that is the phone's whole answer to what was above
+   the header. On desktop the region's 56px of top padding is the air between
+   the titlebar and the context bar; a phone has no titlebar, so the trimmed
+   40px was air above nothing — and it sat on top of `.main-window`'s own
+   `--safe-top`, which on a phone drawing behind the status bar is another 49.
+   Together they pushed the header about 150 device pixels down the screen
+   with nothing in the space (M05 store shot 01). The header is furniture: it
+   belongs directly under the status bar, the way an app bar does, and the
+   inset alone is what keeps it clear of it. */
 .main-window.is-mobile .main-content {
-  padding: 40px calc(14px + var(--safe-right)) 0 calc(14px + var(--safe-left));
+  padding: 0 calc(14px + var(--safe-right)) 0 calc(14px + var(--safe-left));
   gap: 18px;
 }
 
@@ -2563,10 +2573,17 @@
 
 /* The transport keeps the stop button reachable and nothing else changes about
    it; it only has to give back the 24px of gutter the content region no longer
-   has. */
+   has.
+
+   And it gives back the gesture-bar inset too. Both terms were written when
+   the transport was the last thing above the bottom edge; on a phone the tab
+   bar is below it and clears the pill for both of them (`.mobile-tabs`). Left
+   in, they were 24px of dead height in the middle of the screen the moment
+   the real inset arrived. */
 .main-window.is-mobile .transport {
+  height: 76px;
   margin: 0 -14px;
-  padding: 0 14px var(--safe-bottom);
+  padding: 0 14px;
   gap: 14px;
 }
 
