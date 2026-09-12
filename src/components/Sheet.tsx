@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
+import { IS_MOBILE } from "../platform";
+import { useBackDismiss } from "../mobile/backStack";
 
 interface SheetProps {
   open: boolean;
@@ -64,6 +66,13 @@ export function Sheet({ open, onClose, title, ownHeader, className, children }: 
   // snap-back transition.
   const [dragY, setDragY] = useState<number | null>(null);
   const drag = useRef<{ id: number; startY: number; startedAt: number } | null>(null);
+
+  // The system Back gesture, which on Android is the gesture people actually
+  // reach for to dismiss a sheet. One registration here covers every sheet in
+  // the app; with none open, Back sends the app to the background instead of
+  // killing it mid-click (M00 found it doing exactly that). Gated on the
+  // build-time constant so a desktop bundle never carries `src/mobile/`.
+  if (IS_MOBILE) useBackDismiss(open, onClose);
 
   // Escape, and the focus that was somewhere else before this opened.
   useEffect(() => {

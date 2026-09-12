@@ -234,9 +234,33 @@ export const mockListen = vi.fn(async (_event: string, _cb: unknown) => {
 // node_modules paths (not project-relative paths). Verified empirically.
 // ---------------------------------------------------------------------------
 
+/**
+ * A stand-in for Tauri's `Channel`, which the mobile plugin uses to push
+ * Android-side events (audio focus, the Back gesture, the notification's Stop
+ * button) into the webview. Every channel a test creates lands in
+ * `mockChannels`, so a test can deliver an event by calling
+ * `mockChannels.at(-1)!.onmessage!(...)`.
+ */
+export class MockChannel<T = unknown> {
+  static nextId = 1;
+  id = MockChannel.nextId++;
+  onmessage: ((message: T) => void) | null = null;
+  toJSON() {
+    return `__CHANNEL__:${this.id}`;
+  }
+}
+
+export const mockChannels: MockChannel<unknown>[] = [];
+
 vi.mock("@tauri-apps/api/core", () => ({
   invoke: (cmd: string, args?: Record<string, unknown>) =>
     mockInvoke(cmd, args),
+  Channel: class<T> extends MockChannel<T> {
+    constructor() {
+      super();
+      mockChannels.push(this as MockChannel<unknown>);
+    }
+  },
 }));
 
 vi.mock("@tauri-apps/api/event", () => ({

@@ -83,5 +83,11 @@
   },
   "sheet": {
     "close": "Fechar"
+  },
+  "playback": {
+    "notificationTitle": "Yames",
+    "notificationBody": "Tocando — {{bpm}} BPM",
+    "notificationStop": "Parar",
+    "notificationChannel": "Reprodução"
   }
 }
