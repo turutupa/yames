@@ -23,6 +23,7 @@ import { MetronomeView } from "./containers/metronome/MetronomeView";
 import { SettingsView } from "./containers/settings/SettingsView";
 import { OnboardingWizard } from "./containers/onboarding/OnboardingWizard";
 import { ONBOARDING_STEPS } from "./containers/onboarding/steps";
+import { SERVICE_START_DELAY_MS } from "./containers/main-window/hooks/useAndroidNative";
 import { INITIAL_ONBOARDING_STATE } from "./containers/onboarding/onboardingMachine";
 import { INERT_EVALUATION, INERT_MIDI } from "./platform.inert";
 import { DEFAULT_TEST_STATE, mockInvoke, mockListen, setInvokeResponse } from "./test/mocks";
@@ -120,6 +121,14 @@ describe("MainWindow on a phone", () => {
     expect(stateListener).toBeDefined();
     await act(async () => {
       stateListener!({ payload: { ...DEFAULT_TEST_STATE, isPlaying: true, bpm: 80 } });
+    });
+
+    // Real time, and longer than `SERVICE_START_DELAY_MS`: the hook's delay
+    // would swallow this on its own, and what is under test here is the guard
+    // that keeps the service away for as long as the demo runs — which is the
+    // whole time the wizard is open, not half a second.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, SERVICE_START_DELAY_MS + 200));
     });
 
     const started = mockInvoke.mock.calls
