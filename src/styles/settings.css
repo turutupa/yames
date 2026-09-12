@@ -362,7 +362,12 @@
    `--feedback-miss`, the same colour the download error bar uses. */
 .audio-error-notice {
   position: absolute;
-  top: 44px;
+  /* 44px into the app, whatever the hardware is taking above it. An absolutely
+     positioned box measures from the window's padding box, so on a phone
+     drawing behind the status bar the 44px alone landed the notice half inside
+     it and on top of the header — which now starts one status-bar inset down
+     and no further (M05b). 0px on desktop, where this changes nothing. */
+  top: calc(44px + var(--safe-top));
   left: 50%;
   transform: translateX(-50%);
   z-index: 200;
@@ -2521,18 +2526,33 @@
   /* The theme picker was five `1fr` columns, and `1fr` is `minmax(auto, 1fr)`
      — a column cannot shrink below the widest word in it, so thirteen themes
      pushed the grid 137px past the screen (M03-GAPS). An explicit minimum lets
-     the grid decide how many columns the card can actually hold. */
+     the grid decide how many columns the card can actually hold.
+
+     That minimum was 72px, and a name does not fit in 72px. "MANUSCRIPT" is
+     the longest of the thirteen and, measured on the phone at this size, it is
+     67px in the monospace stacks and **77px in the serif stack its own theme
+     uses** — so the card was always too narrow and `overflow-wrap: anywhere`
+     did exactly what it was told: "MANUSCRIP" on one line and a lone "T" on
+     the next (M05 store shot 06).
+
+     The fix is the width, not the wrapping. The minimum is measured against
+     that name in the widest face the app can fall back to; the side padding is
+     trimmed so the card spends its width on the label rather than on air; and
+     the label breaks between words again, never inside one. Three columns at
+     360px instead of four, and a whole name in every one of them — which is
+     what a name you can read costs on a phone. */
   .theme-grid {
-    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
     gap: 8px;
   }
 
   .theme-card {
     min-width: 0;
+    padding: 6px 3px;
   }
 
   .theme-card-name {
-    overflow-wrap: anywhere;
+    overflow-wrap: normal;
     text-align: center;
   }
 

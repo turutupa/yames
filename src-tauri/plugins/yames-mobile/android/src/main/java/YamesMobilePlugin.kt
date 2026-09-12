@@ -14,6 +14,8 @@ import android.webkit.WebView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import app.tauri.PermissionState
 import app.tauri.annotation.Command
 import app.tauri.annotation.InvokeArg
@@ -90,6 +92,19 @@ class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
     /** Kept so the permission callback can finish the play the user asked for. */
     private var pendingStart: BackgroundAudioArgs? = null
 
+    /**
+     * The last system-bar insets measured, kept because they are measured
+     * before the webview asks for them.
+     *
+     * The first layout pass happens while the page is still loading, so the
+     * one event that matters most — the one that tells the app where the
+     * status bar and the gesture bar are before it draws anything — would be
+     * sent into a channel that does not exist yet. `setEventChannel` replays
+     * this.
+     */
+    @Volatile
+    private var lastInsets: JSObject? = null
+
     private val focusListener =
         AudioManager.OnAudioFocusChangeListener { change ->
             // Three kinds, not the four the brief sketched. A phone call does
@@ -130,6 +145,7 @@ class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
     override fun load(webView: WebView) {
         activity.runOnUiThread {
             (activity as? AppCompatActivity)?.onBackPressedDispatcher?.addCallback(backCallback)
+            watchWindowInsets()
         }
         ClickService.onStopRequested = {
             emit(JSObject().put("event", "stop_requested"))
@@ -222,6 +238,10 @@ class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
     @Command
     fun setEventChannel(invoke: Invoke) {
         events = invoke.parseArgs(EventChannelArgs::class.java).channel
+        // The bars were measured before this channel existed; the app cannot
+        // lay itself out until it knows about them, so they go first.
+        lastInsets?.let { emit(it) }
+        activity.runOnUiThread { ViewCompat.requestApplyInsets(activity.window.decorView) }
         invoke.resolve()
     }
 
@@ -231,6 +251,51 @@ class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
 
     private fun emit(payload: JSObject) {
         events?.send(payload)
+    }
+
+    /**
+     * Tell the app where the status bar and the gesture bar actually are.
+     *
+     * The activity is edge-to-edge, so the webview is laid out behind both
+     * system bars — and the CSS answer to that, `env(safe-area-inset-*)`, is
+     * not the one it looks like. Those values describe the **display cutout**,
+     * not the system bars: on the emulator `safe-area-inset-top` is the
+     * camera cut-out's 128px and `safe-area-inset-bottom` is **0**, which is
+     * why the gesture pill sat straight on top of the tab labels. Nothing the
+     * web side can read would have told it otherwise.
+     *
+     * So the measurement comes from here, where the real numbers are, in CSS
+     * pixels — the unit the stylesheet thinks in, which on a webview laid out
+     * at `width=device-width, initial-scale=1` is the density-independent
+     * pixel. `systemBars()` is the status and navigation bars;
+     * `displayCutout()` is unioned in so a notch that is taller than the
+     * status bar still gets cleared.
+     *
+     * Sent on every change rather than once: the keyboard, and a system-bar
+     * mode the user changes in Android's own settings, both move these.
+     */
+    private fun watchWindowInsets() {
+        val decor = activity.window.decorView
+        ViewCompat.setOnApplyWindowInsetsListener(decor) { view, insets ->
+            val bars =
+                insets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout(),
+                )
+            val density = activity.resources.displayMetrics.density.toDouble()
+            val payload = JSObject()
+            payload.put("event", "window_insets")
+            payload.put("top", bars.top / density)
+            payload.put("right", bars.right / density)
+            payload.put("bottom", bars.bottom / density)
+            payload.put("left", bars.left / density)
+            lastInsets = payload
+            emit(payload)
+            // Not consumed, and the decor view's own handling still runs:
+            // this listener is here to read, not to change how the window
+            // lays itself out.
+            ViewCompat.onApplyWindowInsets(view, insets)
+        }
+        ViewCompat.requestApplyInsets(decor)
     }
 
     private fun startPlayback(args: BackgroundAudioArgs) {

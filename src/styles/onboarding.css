@@ -938,7 +938,10 @@
 /* ---- "Finish setup" chip ---- */
 .finish-setup-chip {
   position: absolute;
-  top: 44px;
+  /* Same slot, and the same reasoning, as `.audio-error-notice`: 44px into the
+     app, plus whatever the hardware is taking above it. Without the inset the
+     chip sat across the header on a phone. 0px on desktop. */
+  top: calc(44px + var(--safe-top));
   left: 50%;
   transform: translateX(-50%);
   z-index: 90;
