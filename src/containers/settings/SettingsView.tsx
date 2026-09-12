@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { ComponentProps, Dispatch, SetStateAction } from "react";
 import type { AudioOutputDevice } from "../../types";
 import type { useEvaluation } from "../../hooks/useEvaluation";
@@ -18,7 +19,8 @@ type ShareOption = (typeof SHARE_OPTIONS)[number];
 
 type ViewTransitionLevel = "off" | "subtle" | "smooth" | "expressive";
 type AnimationStyle = "fade" | "scale" | "blur" | "slide" | "reveal";
-type UpdateStatus = "idle" | "checking" | "available" | "up-to-date" | "downloading";
+// The union lives with the hook that owns the state.
+import type { UpdateStatus } from "../main-window/hooks/useAppUpdates";
 type Evaluation = ReturnType<typeof useEvaluation>;
 
 interface SettingsViewProps {
@@ -130,11 +132,20 @@ export function SettingsView({
   shareTooltip,
   onShareOption,
 }: SettingsViewProps) {
+  /** Why the last install attempt failed, for the banner to show. */
+  const [updateError, setUpdateError] = useState<string | null>(null);
+
   const handleInstallUpdate = () => {
     if (!downloadAndInstallUpdate) return;
     setUpdateStatus("downloading");
-    downloadAndInstallUpdate().catch(() => {
-      setUpdateStatus("available");
+    setUpdateError(null);
+    downloadAndInstallUpdate().catch((err: unknown) => {
+      // This used to reset to "available" and drop the reason, so a failed
+      // install was indistinguishable from a button that did nothing. The
+      // first real failure was a VPN blocking the download, and the app had
+      // no way to say so.
+      setUpdateError(err instanceof Error ? err.message : String(err));
+      setUpdateStatus("failed");
     });
   };
 
@@ -145,6 +156,7 @@ export function SettingsView({
         <UpdateBanner
           updateStatus={updateStatus}
           latestVersion={latestVersion}
+          updateError={updateError}
           onInstall={handleInstallUpdate}
         />
       )}

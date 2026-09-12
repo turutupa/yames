@@ -1,6 +1,6 @@
 [package]
 name = "yames"
-version = "1.0.4"
+version = "1.1.0"
 description = "Yet Another Metronome Everyone Skips — practice metronome with MIDI control, speed drills, and AI coach"
 authors = ["you"]
 license = "GPL-3.0-or-later"

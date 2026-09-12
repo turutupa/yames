@@ -193,7 +193,8 @@
         "os-fullscreen": "OS 전체 화면",
         "toggle-widget": "위젯 전환",
         "tab-1": "메트로놈 탭",
-        "tab-2": "템포 연습 탭",
+        "tab-2": "셋리스트 탭",
+        "tab-3": "템포 연습 탭",
         "settings": "설정",
         "toggle-sidebar": "사이드바 전환",
         "toggle-coach": "코치 전환"
@@ -216,7 +217,8 @@
         "os-fullscreen": "네이티브 전체 화면을 전환합니다",
         "toggle-widget": "플로팅 위젯으로 전환합니다",
         "tab-1": "메트로놈 탭으로 전환합니다",
-        "tab-2": "템포 연습 탭으로 전환합니다",
+        "tab-2": "셋리스트 탭으로 전환합니다",
+        "tab-3": "템포 연습 탭으로 전환합니다",
         "settings": "설정을 열거나 닫습니다",
         "toggle-sidebar": "왼쪽 사이드바를 접거나 펼칩니다",
         "toggle-coach": "연습 코치 패널을 열거나 닫습니다"

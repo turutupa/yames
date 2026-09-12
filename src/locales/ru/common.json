@@ -31,6 +31,8 @@
   "updateBanner": {
     "available": "Доступна новая версия Yames v{{version}}",
     "installRestart": "Установить и перезапустить →",
-    "updating": "Обновляю Yames…"
+    "updating": "Обновляю Yames…",
+    "failed": "Не удалось обновить",
+    "retry": "Повторить"
   }
 }

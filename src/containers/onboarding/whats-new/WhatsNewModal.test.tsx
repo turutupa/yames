@@ -4,6 +4,24 @@ import userEvent from "@testing-library/user-event";
 import { WhatsNewModal, parseNotes } from "./WhatsNewModal";
 
 describe("parseNotes", () => {
+  it("drops a horizontal rule instead of showing it as text", () => {
+    // Release notes use `---` between sections. This modal is a flat list with
+    // no divider to draw, and without the filter the rule arrived as a line
+    // reading "---" in the middle of the features.
+    expect(parseNotes("- one\n\n---\n\n- two")).toEqual([
+      { text: "one", bullet: true },
+      { text: "two", bullet: true },
+    ]);
+    for (const rule of ["***", "___", "-----"]) {
+      expect(parseNotes("- one\n" + rule + "\n- two"), rule).toHaveLength(2);
+    }
+  });
+
+  it("keeps a bullet that merely starts with a dash", () => {
+    // `- one` is a bullet, not a rule. The space is what tells them apart.
+    expect(parseNotes("- one")).toEqual([{ text: "one", bullet: true }]);
+  });
+
   it("keeps plain lines and unwraps bullets", () => {
     expect(parseNotes("Highlights\n- one\n* two\n• three")).toEqual([
       { text: "Highlights", bullet: false },

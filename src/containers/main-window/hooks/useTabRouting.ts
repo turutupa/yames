@@ -11,14 +11,14 @@ import type { MainView } from "../MainHeader";
 /**
  * Owns the active tab and the transition rules between tabs:
  *
- *   - `view`         — the currently displayed tab (beat / drill / track
+ *   - `view`         — the currently displayed tab (beat / setlist / drill
  *                      / settings).
  *   - `setView`      — wraps the raw setter with side effects: stops
  *                      playback when leaving a play-tab for another play-
  *                      tab, stops the speed-ramp drill when leaving drill
  *                      for settings, persists the new tab (excluding
  *                      `settings`, which is a transient overlay), and
- *                      scrolls track / settings content back to the top.
+ *                      scrolls the tab's content back to the top.
  *   - `prevTab`      — remembers the last "real" (non-settings) tab so
  *                      that closing settings returns to where the user
  *                      came from.
@@ -30,7 +30,20 @@ import type { MainView } from "../MainHeader";
  * applied (skipping `settings`, which is never persisted as a default).
  */
 
-export type PlayTab = "beat" | "drill" | "setlist";
+/**
+ * The tabs that are a place to be, as opposed to `settings`, which is an
+ * overlay you return from.
+ *
+ * A runtime array rather than only a type, because the persisted tab arrives
+ * as an unchecked string and something has to narrow it.
+ */
+export const PLAY_TABS = ["beat", "setlist", "drill"] as const;
+
+export type PlayTab = (typeof PLAY_TABS)[number];
+
+function isPlayTab(tab: string): tab is PlayTab {
+  return (PLAY_TABS as readonly string[]).includes(tab);
+}
 
 export interface UseTabRoutingArgs {
   isPlaying: boolean;
@@ -78,13 +91,23 @@ export function useTabRouting({
     [isPlaying, speedRampActive],
   );
 
-  // Restore last active tab on mount.
+  /**
+   * Restore the tab the app was last on.
+   *
+   * The guard is what makes the stored string safe to use, and it has to list
+   * every play tab: it said `beat || drill` for as long as those were the only
+   * two, so when setlists became a mode the app went on persisting "setlist"
+   * and then silently dropping it — quit on the setlist and you came back to
+   * the metronome. Derived from PLAY_TABS now, so the next mode cannot be
+   * forgotten here.
+   *
+   * `settings` is never persisted, so it can never arrive.
+   */
   useEffect(() => {
     getActiveTab().then((tab) => {
-      if (tab === "beat" || tab === "drill") {
-        setViewRaw(tab);
-        prevTab.current = tab;
-      }
+      if (!isPlayTab(tab)) return;
+      setViewRaw(tab);
+      prevTab.current = tab;
     });
   }, []);
 

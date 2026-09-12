@@ -31,6 +31,8 @@
   "updateBanner": {
     "available": "Yames v{{version}} 新版本可用",
     "installRestart": "安装并重启 →",
-    "updating": "正在更新 Yames…"
+    "updating": "正在更新 Yames…",
+    "failed": "更新失败",
+    "retry": "重试"
   }
 }

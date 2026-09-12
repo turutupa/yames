@@ -31,6 +31,8 @@
   "updateBanner": {
     "available": "Yames v{{version}} が利用可能です",
     "installRestart": "インストールして再起動 →",
-    "updating": "Yames を更新しています…"
+    "updating": "Yames を更新しています…",
+    "failed": "更新できませんでした",
+    "retry": "再試行"
   }
 }

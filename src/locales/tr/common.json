@@ -31,6 +31,8 @@
   "updateBanner": {
     "available": "Yames v{{version}} sürümü mevcut",
     "installRestart": "Kur ve Yeniden Başlat →",
-    "updating": "Yames güncelleniyor…"
+    "updating": "Yames güncelleniyor…",
+    "failed": "Güncelleme başarısız",
+    "retry": "Yeniden dene"
   }
 }

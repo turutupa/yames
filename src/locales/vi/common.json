@@ -31,6 +31,8 @@
   "updateBanner": {
     "available": "Đã có phiên bản Yames v{{version}}",
     "installRestart": "Cài đặt & Khởi động lại →",
-    "updating": "Đang cập nhật Yames…"
+    "updating": "Đang cập nhật Yames…",
+    "failed": "Cập nhật thất bại",
+    "retry": "Thử lại"
   }
 }

@@ -193,7 +193,8 @@
         "os-fullscreen": "Tela cheia do sistema",
         "toggle-widget": "Alternar widget",
         "tab-1": "Aba Metrônomo",
-        "tab-2": "Aba Treino",
+        "tab-2": "Aba Setlist",
+        "tab-3": "Aba Treino",
         "settings": "Configurações",
         "toggle-sidebar": "Alternar barra lateral",
         "toggle-coach": "Alternar Coach"
@@ -216,7 +217,8 @@
         "os-fullscreen": "Alterna a tela cheia nativa",
         "toggle-widget": "Alterna para o widget flutuante",
         "tab-1": "Vai para a aba Metrônomo",
-        "tab-2": "Vai para a aba Treino",
+        "tab-2": "Vai para a aba Setlist",
+        "tab-3": "Vai para a aba Treino",
         "settings": "Abre ou fecha as configurações",
         "toggle-sidebar": "Recolher ou expandir a barra lateral esquerda",
         "toggle-coach": "Abre ou fecha o painel do coach"

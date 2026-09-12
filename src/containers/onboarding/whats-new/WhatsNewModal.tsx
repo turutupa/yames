@@ -35,6 +35,10 @@ export function parseNotes(notes: string): { text: string; bullet: boolean }[] {
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter((line) => line.length > 0)
+    // A horizontal rule is neither a bullet nor a heading, so without this it
+    // fell through and appeared as a line reading "---". This modal is a flat
+    // list with no divider to draw, so the rule is dropped rather than shown.
+    .filter((line) => !/^([-*_])\1{2,}$/.test(line))
     .map((line) => {
       const bullet = /^[-*•]\s+/.test(line);
       const text = (bullet ? line.replace(/^[-*•]\s+/, "") : line)

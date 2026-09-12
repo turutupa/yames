@@ -31,6 +31,8 @@
   "updateBanner": {
     "available": "Yames v{{version}} is beschikbaar",
     "installRestart": "Installeren en herstarten →",
-    "updating": "Yames bijwerken…"
+    "updating": "Yames bijwerken…",
+    "failed": "Update mislukt",
+    "retry": "Opnieuw proberen"
   }
 }

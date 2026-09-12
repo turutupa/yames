@@ -417,7 +417,7 @@
   }
 
   /** Naive inline markdown — enough for GitHub release notes. */
-  function formatBody(text) {
+  function formatBody(text, version = "") {
     const inline = (raw) =>
       escHtml(raw)
         .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
@@ -430,8 +430,42 @@
     for (const line of text.split("\n")) {
       const trimmed = line.trim();
       if (!trimmed) continue;
-      // The version header is already rendered above the notes.
-      if (/^#{1,3}\s/.test(trimmed)) continue;
+
+      // A horizontal rule. Without this it falls through to the paragraph
+      // branch and renders as the literal text "---".
+      if (/^([-*_])\1{2,}$/.test(trimmed)) {
+        if (inList) {
+          html += "</ul>";
+          inList = false;
+        }
+        html += "<hr class=\"changelog-rule\">";
+        continue;
+      }
+
+      // Headings used to be dropped outright, on the grounds that "the version
+      // header is already rendered above the notes" — true of notes that open
+      // with `## Yames 1.0`, and quietly destructive of every other heading.
+      // v1.1.0's `## Setlists` vanished, and its six bullets appeared under
+      // nothing. Only a heading that repeats the version is skipped now; the
+      // rest are rendered.
+      const heading = trimmed.match(/^(#{1,3})\s+(.*)$/);
+      if (heading) {
+        if (inList) {
+          html += "</ul>";
+          inList = false;
+        }
+        // Compared as strings rather than through a built regex. The first
+        // attempt interpolated the version into a template literal, where
+        // `\s` is not an escape and collapses to a plain "s" — the pattern
+        // silently became `yamess*` and matched nothing.
+        const text = heading[2].trim();
+        const bare = text.replace(/^yames/i, "").trim().replace(/^v/i, "");
+        if (bare !== version) {
+          html += `<h4 class="changelog-heading">${inline(text)}</h4>`;
+        }
+        continue;
+      }
+
       // Space after the marker is required, so **bold** doesn't match.
       if (/^[-*] /.test(trimmed)) {
         if (!inList) {
@@ -553,7 +587,7 @@
           const hasNotes =
             rel.body && rel.body !== "Download Yames for your platform below.";
           const notes = hasNotes
-            ? formatBody(rel.body)
+            ? formatBody(rel.body, (rel.tag_name || "").replace(/^v/, ""))
             : '<span class="changelog-no-notes">Release artifacts only.</span>';
           return `<div class="changelog-release${i >= INITIAL_SHOW ? " changelog-hidden" : ""}">
               <div class="changelog-release-header">

@@ -1686,6 +1686,27 @@ main,
   margin-bottom: 5px;
 }
 
+/* A section title inside the notes — "Setlists", "New", "Fixed". Headings used
+   to be dropped by the renderer, so nothing here styled them. */
+.changelog-heading {
+  margin: 16px 0 6px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0.01em;
+}
+
+.changelog-heading:first-child {
+  margin-top: 0;
+}
+
+/* Faint: it separates, it should not draw the eye off the text either side. */
+.changelog-rule {
+  margin: 14px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
 .changelog-notes strong {
   color: var(--ink);
   font-weight: 700;

@@ -145,7 +145,15 @@ describe("locale files", () => {
   });
 
   it("Pocket Check left no strings behind", () => {
-    const stale = enKeys.filter((k) => k.includes("pocketCheck") || k.includes("tab-3"));
+    // `tab-3` used to be listed here too. Pocket Check was the third tab, so
+    // its hotkey strings survived its removal under that generic id — which is
+    // what this test was written to catch.
+    //
+    // The id has since been reissued: the rail is Metronome, Setlist, Drill,
+    // and Drill is tab-3. Keeping it on this list would now fail on a key that
+    // is in use. A key nothing calls is the i18n coverage test's job, and it
+    // catches that for every key rather than for two remembered ones.
+    const stale = enKeys.filter((k) => k.includes("pocketCheck"));
     expect(stale).toEqual([]);
   });
 });
