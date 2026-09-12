@@ -124,22 +124,37 @@ Release profile, signed, R8 on, resource shrinking on.
 
 | Artifact | Size |
 |---|---|
-| APK, arm64 only (`--apk --target aarch64`) | **ARM64_APK** |
-| APK, x86_64 only (the emulator build these gates ran on) | 12 698 155 bytes (12.1 MiB) |
-| AAB, all four ABIs | **AAB_SIZE** |
+| **APK, arm64 only** (`--apk --target aarch64`) — the one on Releases | **13 380 209 bytes (12.8 MiB)** |
+| APK, x86_64 only — the emulator build every gate below ran on | 12 698 155 bytes (12.1 MiB) |
+| **AAB, all four ABIs** — the one Play takes | **17 100 145 bytes (16.3 MiB)** |
 
-`libyames_lib.so`, uncompressed, per ABI:
+The native libraries, uncompressed, per ABI:
 
-| ABI | Bytes |
-|---|---|
-SO_TABLE
+| ABI | `libyames_lib.so` | `libc++_shared.so` |
+|---|---|---|
+| `arm64-v8a` | 9 643 008 | 1 822 720 |
+| `armeabi-v7a` | 6 659 964 | 1 524 360 |
+| `x86` | 9 329 432 | 1 602 440 |
+| `x86_64` | 9 157 568 | 1 632 144 |
+
+Read out of the AAB with `unzip -l`, uncompressed. An installed app carries
+exactly one row of that table: Play splits the bundle per device, and the APK
+on Releases is the arm64 one.
 
 For scale: M00 measured the **debug** x86_64 library at 128 MB unstripped.
 The release profile strips it, which is the whole difference. ROADMAP §5.0.1
 budgets 80 MB per platform; nothing here is close to it.
 
-`lib/<abi>/libc++_shared.so` (1 632 144 bytes) rides along in every ABI, for
-the `oboe-sys` reason M00 documented.
+`libc++_shared.so` rides along in every ABI for the `oboe-sys` reason M00
+documented: the crate compiles Oboe's C++ and then links none of the runtime
+it needs, so `build.rs` asks for `c++_shared` on Android and the Tauri CLI
+symlinks the NDK's copy into `jniLibs/` by itself.
+
+Both artifacts were signed with a throwaway 4096-bit RSA key generated for
+this task and **deleted afterwards**; `apksigner verify` reports one signer,
+v2 scheme, on the arm64 APK. The AAB carries `META-INF/YAMES-TH.RSA`, the
+same key. Nothing about the owner's real upload key was ever created, held
+or written down by this task.
 
 ---
 
