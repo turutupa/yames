@@ -28,6 +28,10 @@
 //!   --p99-ms <f>         jitter threshold, default 1.0
 //!   --json               emit a machine-readable summary line as well
 //!   --dump-csv <path>    write the raw per-callback capture for re-analysis
+//!   --jam                load the busiest plausible jam (16 ticks a bar,
+//!                        kick/snare/hat/ride, a fill and a crash on the one)
+//!                        at 240 BPM, so the gate covers the band as well as
+//!                        the click
 //! ```
 //!
 //! Exit codes: 0 pass, 1 gate failure, 2 setup/usage error.
@@ -62,7 +66,8 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use yames_lib::probe::{
-    create_beat_log, create_shared_state, CallbackProbe, CallbackSample, MetronomeEngine,
+    compile_jam, create_beat_log, create_shared_state, CallbackProbe, CallbackSample, JamConfig,
+    JamPattern, MetronomeEngine,
 };
 
 /// Pessimistic upper bound on callbacks per second used to size the
@@ -80,6 +85,12 @@ struct Args {
     p99_ms: f64,
     json: bool,
     dump_csv: Option<String>,
+    jam: bool,
+    /// Whether the tempo / resolution came from the command line, so `--jam`
+    /// can supply its own 240 BPM sixteenths without overruling a run that
+    /// asked for something else.
+    bpm_set: bool,
+    subdivision_set: bool,
 }
 
 impl Default for Args {
@@ -94,6 +105,9 @@ impl Default for Args {
             p99_ms: 1.0,
             json: false,
             dump_csv: None,
+            jam: false,
+            bpm_set: false,
+            subdivision_set: false,
         }
     }
 }
@@ -116,8 +130,14 @@ fn parse_args() -> Result<Args, String> {
         };
         let mut consumed = 2;
         match argv[i].as_str() {
-            "--bpm" => a.bpm = num(i)? as u16,
-            "--subdivision" => a.subdivision = num(i)? as u8,
+            "--bpm" => {
+                a.bpm = num(i)? as u16;
+                a.bpm_set = true;
+            }
+            "--subdivision" => {
+                a.subdivision = num(i)? as u8;
+                a.subdivision_set = true;
+            }
             "--seconds" => a.seconds = num(i)? as u64,
             "--warmup-ms" => a.warmup_ms = num(i)? as u64,
             "--p99-ms" => a.p99_ms = num(i)?,
@@ -131,6 +151,10 @@ fn parse_args() -> Result<Args, String> {
                 a.json = true;
                 consumed = 1;
             }
+            "--jam" => {
+                a.jam = true;
+                consumed = 1;
+            }
             "-h" | "--help" => return Err("help".into()),
             other => return Err(format!("unknown flag {other}")),
         }
@@ -141,6 +165,16 @@ fn parse_args() -> Result<Args, String> {
     }
     if a.bpm == 0 {
         return Err("--bpm must be >= 1".into());
+    }
+    // The band's own band: 240 BPM sixteenths is 16 ticks a bar at 16 ticks
+    // a second, which is the top of what a jam can ask the mixer for.
+    if a.jam {
+        if !a.bpm_set {
+            a.bpm = 240;
+        }
+        if !a.subdivision_set {
+            a.subdivision = 4;
+        }
     }
     Ok(a)
 }
@@ -158,6 +192,9 @@ click-jitter-probe — ROADMAP §4 audio-safety gate
   --p99-ms <f>       jitter threshold, default 1.0
   --json             also print a one-line JSON summary
   --dump-csv <path>  write the raw per-callback capture for re-analysis
+  --jam              play the busiest plausible jam instead of the click
+                     (16 ticks a bar, every lane, a fill, a crash on the
+                     one) at 240 BPM / 16ths
 
 exit 0 = pass, 1 = gate failure, 2 = setup error";
 
@@ -384,6 +421,40 @@ fn start_llm(_path: &str, _stop: Arc<AtomicBool>) -> Result<LlmRun, String> {
 
 // ---------------------------------------------------------------------------
 
+/// The busiest jam anyone could plausibly ask for, for `--jam`.
+///
+/// Sixteen ticks to the bar with every lane working, a fill on the last bar
+/// of a four-bar form where every lane plays every tick, and a crash on the
+/// one. The kick, the snare and the crash all ring out uncapped, so at 240
+/// BPM this keeps dozens of voices alive at once — which is the thing the
+/// gate has to cover. If the click survives this, it survives any groove the
+/// library can hold.
+fn busiest_jam() -> JamConfig {
+    JamConfig {
+        ticks_per_beat: 4,
+        beats_per_bar: 4,
+        bar: JamPattern {
+            kick: vec![2, 0, 0, 1, 1, 0, 1, 0, 2, 0, 0, 1, 1, 0, 1, 0],
+            snare: vec![0, 0, 3, 0, 2, 0, 0, 3, 0, 3, 0, 0, 2, 0, 3, 1],
+            hat: vec![1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3],
+            ride: vec![1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+            crash: vec![0; 16],
+        },
+        // Every lane on every tick: the worst bar the table can describe.
+        fill: Some(JamPattern {
+            kick: vec![1; 16],
+            snare: vec![2; 16],
+            hat: vec![1; 16],
+            ride: vec![1; 16],
+            crash: vec![0; 16],
+        }),
+        form_bars: 4,
+        crash_on_one: true,
+        intensity: 1.25,
+        kit: "room".to_string(),
+    }
+}
+
 fn main() -> ExitCode {
     let args = match parse_args() {
         Ok(a) => a,
@@ -441,6 +512,25 @@ fn main() -> ExitCode {
     }
 
     let mut engine = MetronomeEngine::new_with_probe(beat_log, cb_probe.clone());
+    if args.jam {
+        let cfg = busiest_jam();
+        match compile_jam(&cfg) {
+            Ok(table) => {
+                eprintln!(
+                    "[probe] jam loaded: {} ticks a bar, {} bars a chorus, fill on,                      crash on the one; worst tick {:.3} -> {:.3} after normalisation",
+                    table.ticks_per_bar(),
+                    table.form_bars(),
+                    table.peak_before,
+                    table.peak_after,
+                );
+                engine.set_jam_table(Some(Arc::new(table)));
+            }
+            Err(e) => {
+                eprintln!("error: the probe's own jam did not compile: {e}");
+                return ExitCode::from(2);
+            }
+        }
+    }
     if let Err(e) = engine.start_headless(state) {
         eprintln!("error: audio engine did not start: {e}");
         return ExitCode::from(2);

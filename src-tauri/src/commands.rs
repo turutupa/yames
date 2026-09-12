@@ -2410,6 +2410,40 @@ pub fn app_ready(app_handle: AppHandle) {
 }
 
 // ---------------------------------------------------------------------------
+// Jam (plans/JAM_MODE.md, plans/tasks/jam/BRIEF.md)
+// ---------------------------------------------------------------------------
+
+/// Hand the engine a band, or `null` to take it away and play the plain
+/// click again.
+///
+/// The config is validated and compiled into a lookup table here, on the
+/// command thread, and swapped into the engine behind an `Arc`. Nothing
+/// about a jam reaches `AppState`: the UI owns the jam *record* — it lives
+/// in the store beside presets and setlists — and the engine holds only the
+/// table it plays. So there is no `state-changed` emit and nothing to
+/// persist here.
+///
+/// A config that does not check out is rejected whole, with a message the
+/// caller can show. A half-applied groove is worse than no groove.
+///
+/// The caller is responsible for having ALREADY set the engine's subdivision
+/// to `ticksPerBeat` and its beat groups to `[beatsPerBar]`. The engine
+/// checks the product against its own bar on every tick and plays the click
+/// when they disagree, rather than guessing which column is which.
+#[tauri::command]
+pub fn set_jam(
+    config: Option<crate::jam::JamConfig>,
+    engine_state: State<EngineState>,
+) -> Result<(), String> {
+    let table = match config {
+        Some(ref cfg) => Some(std::sync::Arc::new(crate::jam::compile(cfg)?)),
+        None => None,
+    };
+    engine_state.0.lock().unwrap().set_jam_table(table);
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
 // Tests — the pure halves of the beat-group / free-mode commands. The
 // `#[tauri::command]` wrappers need a live `State` + `AppHandle`, so the
 // validation and the FREE-mode invariant are extracted above and tested here.
