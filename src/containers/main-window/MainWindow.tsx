@@ -273,6 +273,17 @@ export function MainWindow() {
     setPresetDirty(dirty);
   }, []);
 
+  /**
+   * `jamSession.closeJam`, reachable from callbacks defined before it exists.
+   *
+   * Loading a setlist has to put the jam away — one thing is loaded at a time,
+   * and a jam left open behind a setlist would go on writing its table to the
+   * engine. The setlist hook is built first, so it cannot name the jam hook
+   * directly; the ref is filled in below, once there is something to fill it
+   * with, and is a no-op until then.
+   */
+  const closeJamRef = useRef<() => void>(() => {});
+
   // The setlist the window has open (U9). With none loaded every one of these
   // is inert and the metronome behaves exactly as it did.
   const setlistSession = useSetlistSession({
@@ -285,6 +296,7 @@ export function MainWindow() {
       sidebarRef.current?.clearActive();
       setActivePreset(null);
       setPresetDirty(false);
+      closeJamRef.current();
     },
   });
 
@@ -301,6 +313,10 @@ export function MainWindow() {
       setlistSession.closeSetlist();
     },
   });
+
+  useEffect(() => {
+    closeJamRef.current = jamSession.closeJam;
+  }, [jamSession.closeJam]);
 
   const handleNewJam = useCallback(() => {
     setSidebarOpen(true);
@@ -667,9 +683,9 @@ export function MainWindow() {
    * Run `action`, unless there is unsaved work in the way — then ask, and run
    * it once the question is answered.
    *
-   * A dirty SETLIST wins over a dirty preset when somehow both are true: the
-   * setlist is the thing on screen, and it is the one whose edits are not
-   * also visible as knob positions.
+   * A dirty SETLIST or JAM wins over a dirty preset when somehow both are
+   * true: that one is the thing on screen, and it is the one whose edits are
+   * not also visible as knob positions.
    */
   const guarded = useCallback(
     (action: () => void) => {
@@ -681,13 +697,21 @@ export function MainWindow() {
         });
         return;
       }
+      if (jamSession.jam && jamSession.dirty) {
+        setPending({
+          name: jamSession.jam.name,
+          save: jamSession.saveActiveJam,
+          run: action,
+        });
+        return;
+      }
       if (activePreset && presetDirty) {
         setPending({ name: activePreset.name, save: handlePresetUpdate, run: action });
         return;
       }
       action();
     },
-    [setlistSession, activePreset, presetDirty, handlePresetUpdate],
+    [setlistSession, jamSession, activePreset, presetDirty, handlePresetUpdate],
   );
   const askToLeave = useCallback(() => {
     if (!setlistSession.setlist) return;
@@ -794,9 +818,11 @@ export function MainWindow() {
       }
     }
     if (preset.view === "drill" || preset.view === "beat") setView(preset.view);
-    // Loading a preset is loading a preset. Leaving the setlist open would put
-    // the track over a stage the setlist no longer describes.
+    // Loading a preset is loading a preset. Leaving the setlist or the jam open
+    // would put the stage over something it no longer describes — and a jam
+    // left loaded goes on writing its table to the engine.
     setlistSession.closeSetlist();
+    closeJamRef.current();
   }, [setView, setlistSession.closeSetlist]);
 
 
@@ -1105,9 +1131,11 @@ export function MainWindow() {
           // Clicking the jam you are already in is the way out of it, the same
           // gesture that closes an open setlist.
           onLoadJam={(next) =>
-            next.id === jamSession.jam?.id
-              ? jamSession.closeJam()
-              : guarded(() => jamSession.loadJam(next))
+            guarded(() =>
+              next.id === jamSession.jam?.id
+                ? jamSession.closeJam()
+                : jamSession.loadJam(next),
+            )
           }
           onNewJam={handleNewJam}
           onDeleteJam={jamSession.deleteJam}
