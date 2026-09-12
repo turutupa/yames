@@ -35,7 +35,10 @@ pub mod probe {
     /// The jitter probe's `--jam` flag builds a table directly: it runs the
     /// engine headless, with no Tauri command surface to call `set_jam`
     /// through.
-    pub use crate::jam::{compile as compile_jam, JamConfig, JamPattern, JamTable};
+    pub use crate::jam::{
+        band_state_for_bar, compile as compile_jam, JamBandState, JamBassLine, JamConfig,
+        JamDropOut, JamPattern, JamPracticeConfig, JamTable, JamTrade,
+    };
     pub use crate::state::{create_shared_state, AppState, SharedState};
     pub use crate::timing::create_beat_log;
 
