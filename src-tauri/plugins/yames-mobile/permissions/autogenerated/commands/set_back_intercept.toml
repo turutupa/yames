@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-set-back-intercept"
+description = "Enables the set_back_intercept command without any pre-configured scope."
+commands.allow = ["set_back_intercept"]
+
+[[permission]]
+identifier = "deny-set-back-intercept"
+description = "Denies the set_back_intercept command without any pre-configured scope."
+commands.deny = ["set_back_intercept"]

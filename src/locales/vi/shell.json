@@ -91,5 +91,12 @@
   },
   "sheet": {
     "close": "Đóng"
+  },
+  "playback": {
+    "notificationTitle": "Yames",
+    "notificationBody": "Đang phát — {{bpm}} BPM",
+    "notificationPaused": "Tạm dừng",
+    "notificationStop": "Dừng",
+    "notificationChannel": "Phát"
   }
 }

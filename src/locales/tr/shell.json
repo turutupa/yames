@@ -91,5 +91,12 @@
   },
   "sheet": {
     "close": "Kapat"
+  },
+  "playback": {
+    "notificationTitle": "Yames",
+    "notificationBody": "Çalıyor — {{bpm}} BPM",
+    "notificationPaused": "Duraklatıldı",
+    "notificationStop": "Durdur",
+    "notificationChannel": "Çalma"
   }
 }

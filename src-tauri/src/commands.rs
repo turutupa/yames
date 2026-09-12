@@ -893,9 +893,11 @@ pub fn open_url(url: String) {
     }
     #[cfg(mobile)]
     {
-        // Nothing to hand a link to yet: there is no process to spawn on
-        // Android or iOS. The About and support links are the only callers,
-        // and M03 wires `tauri-plugin-opener` for them.
+        // Nothing to hand a link to: there is no process to spawn on Android
+        // or iOS. M04 routed the About and support links — the only callers —
+        // through the `yames-mobile` plugin instead, from `src/ipc.ts`, so
+        // this command is never reached on a phone. Kept as a no-op because
+        // `generate_handler!` cannot cfg an entry out.
         let _ = url;
     }
 }

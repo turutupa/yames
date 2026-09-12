@@ -91,5 +91,12 @@
   },
   "sheet": {
     "close": "閉じる"
+  },
+  "playback": {
+    "notificationTitle": "Yames",
+    "notificationBody": "再生中 — {{bpm}} BPM",
+    "notificationPaused": "一時停止",
+    "notificationStop": "停止",
+    "notificationChannel": "再生"
   }
 }

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Merged into the app's manifest by the Android Gradle plugin.
+
+  FOREGROUND_SERVICE + FOREGROUND_SERVICE_MEDIA_PLAYBACK are what let the
+  click keep running once the screen goes off; POST_NOTIFICATIONS (Android 13
+  and up, prompted at runtime the first time you press play) is what lets the
+  notification that comes with it be seen. If the user says no to the prompt
+  the service still runs and the metronome still plays — they just do not get
+  the row in the shade.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application>
+        <service
+            android:name="com.yames.metronome.mobile.ClickService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+    </application>
+</manifest>

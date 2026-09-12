@@ -12,6 +12,8 @@ import { useKeybindings } from "../../hooks/useKeybindings";
 import { useCoachDownload } from "../../hooks/useCoachDownload";
 import { useActionDispatcher } from "../../hooks/useActionDispatcher";
 import { IS_MOBILE } from "../../platform";
+import { useAndroidNative } from "./hooks/useAndroidNative";
+import { useBackDismiss } from "../../mobile/backStack";
 import {
   INERT_EVALUATION,
   INERT_INPUT_TESTER,
@@ -976,6 +978,28 @@ export function MainWindow() {
     setIsFullscreen(false);
     // alwaysOnTop + focus handled by the effect above
   }, []);
+
+  // ---- The phone's native half (M04) ----
+  //
+  // Gated on a build-time constant, so the hook order never varies at runtime
+  // and a desktop build drops `src/mobile/` from the graph entirely — see
+  // platform.ts. The screen is kept awake for the three things you read with
+  // both hands on an instrument: the metronome running, a drill climbing, and
+  // zen. Not for settings.
+  if (IS_MOBILE)
+    useAndroidNative({
+      isPlaying: state.isPlaying,
+      bpm: state.speedRamp?.active ? state.speedRamp.currentBpm : state.bpm,
+      keepScreenOn:
+        state.isPlaying || isFullscreen || (state.speedRamp?.active ?? false),
+    });
+  // What the system Back gesture closes, outermost last. Sheets register
+  // themselves (see components/Sheet.tsx); these two are the app's own
+  // full-screen layers, and with the stack empty Back backgrounds the app
+  // with the click still going rather than killing it.
+  if (IS_MOBILE) useBackDismiss(isFullscreen, zenExitHandler);
+  const settingsBack = useCallback(() => setView(prevTab.current), [setView, prevTab]);
+  if (IS_MOBILE) useBackDismiss(view === "settings", settingsBack);
 
   return (
     <>

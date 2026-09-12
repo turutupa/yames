@@ -11,6 +11,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { load } from "@tauri-apps/plugin-store";
 import type { AppState, BeatEvent, InstrumentId, SpeedRamp, Subdivision } from "./types";
+import { IS_MOBILE } from "./platform";
+import { openUrlNative } from "./mobile/native";
 
 // Shared store instance (lazy singleton)
 let _store: Awaited<ReturnType<typeof load>> | null = null;
@@ -30,6 +32,13 @@ export async function storeLoad<T>(key: string): Promise<T | undefined> {
 }
 
 export async function openUrl(url: string): Promise<void> {
+  // The desktop `open_url` command spawns `open` / `start` / `xdg-open`, and
+  // there is no process to spawn on a phone — M01 left its mobile arm a no-op
+  // and the About and support links went nowhere. Routing them through the
+  // yames-mobile plugin's `Intent.ACTION_VIEW` is a smaller diff than adding
+  // a second opener plugin, and it folds away on desktop: `IS_MOBILE` is a
+  // build-time constant, so this branch is not in a desktop bundle at all.
+  if (IS_MOBILE) return openUrlNative(url);
   return invoke("open_url", { url });
 }
 

@@ -21,6 +21,12 @@
 mod beat_log;
 mod clock;
 mod commands;
+/// The phone's output stream. cpal stays the desktop device open; Android
+/// drives `oboe` directly because cpal's Oboe backend asks for neither the
+/// low-latency path nor the device's own sample rate (M04, from M00's
+/// measurement). The engine's callback body is shared and unchanged.
+#[cfg(target_os = "android")]
+mod android_audio;
 pub mod drill;
 mod engine;
 pub mod instrument;
@@ -187,6 +193,12 @@ pub fn run() {
 
     #[cfg(all(desktop, not(target_os = "macos")))]
     let builder = builder.plugin(tauri_plugin_decorum::init());
+
+    // The phone's own half: the foreground service that keeps the click going
+    // with the screen off, audio focus, the wake lock, the Back gesture and
+    // `open_url`. Android only until M06 writes the Swift side.
+    #[cfg(target_os = "android")]
+    let builder = builder.plugin(tauri_plugin_yames_mobile::init());
 
     let builder = builder.setup(move |app| {
             let shared_state = create_shared_state();
@@ -801,9 +813,33 @@ pub fn run() {
             }
         });
 
+    #[cfg(desktop)]
     builder
         .run(tauri::generate_context!())
         .expect("error while running Yames");
+
+    // A phone never fires `WindowEvent::Destroyed` or `CloseRequested` — M01
+    // made that whole handler desktop-only, which left nothing calling the
+    // engine's shutdown. `RunEvent::Exit` is the mobile equivalent: it is the
+    // last thing Tauri reports before the loop ends, and it is where the audio
+    // thread is joined and the Oboe stream released rather than left to the
+    // OS. (The OS does reclaim it either way; this is the orderly version, and
+    // it is what makes a relaunch start from a clean device.)
+    #[cfg(mobile)]
+    {
+        let app = builder
+            .build(tauri::generate_context!())
+            .expect("error while running Yames");
+        app.run(|app_handle, event| {
+            if matches!(event, tauri::RunEvent::Exit) {
+                if let Some(engine_state) = app_handle.try_state::<EngineState>() {
+                    if let Ok(mut engine) = engine_state.0.lock() {
+                        engine.shutdown();
+                    }
+                }
+            }
+        });
+    }
 }
 
 /// Check if a window position is at least partially visible on any available monitor.

@@ -5,10 +5,20 @@
     <!-- AndroidTV support -->
     <uses-feature android:name="android.software.leanback" android:required="false" />
 
+    <!--
+      `enableOnBackInvokedCallback`: M00 found the system Back gesture
+      finishing the activity mid-click, with logcat saying exactly why
+      ("OnBackInvokedCallback is not enabled for the application"). The
+      yames-mobile plugin registers a callback that closes an open sheet, or
+      sends the app to the background with the click still running; this flag
+      is what makes Android 13+ route Back to it, predictive-back animation
+      and all, instead of straight to "finish the activity".
+    -->
     <application
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/Theme.yames"
+        android:enableOnBackInvokedCallback="true"
         android:usesCleartextTraffic="${usesCleartextTraffic}">
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"

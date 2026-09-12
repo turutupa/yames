@@ -91,5 +91,12 @@
   },
   "sheet": {
     "close": "關閉"
+  },
+  "playback": {
+    "notificationTitle": "Yames",
+    "notificationBody": "正在播放 — {{bpm}} BPM",
+    "notificationPaused": "已暫停",
+    "notificationStop": "停止",
+    "notificationChannel": "播放"
   }
 }

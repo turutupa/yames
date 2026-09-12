@@ -91,5 +91,12 @@
   },
   "sheet": {
     "close": "닫기"
+  },
+  "playback": {
+    "notificationTitle": "Yames",
+    "notificationBody": "재생 중 — {{bpm}} BPM",
+    "notificationPaused": "일시정지",
+    "notificationStop": "정지",
+    "notificationChannel": "재생"
   }
 }

@@ -91,5 +91,12 @@
   },
   "sheet": {
     "close": "Закрыть"
+  },
+  "playback": {
+    "notificationTitle": "Yames",
+    "notificationBody": "Играет — {{bpm}} BPM",
+    "notificationPaused": "Пауза",
+    "notificationStop": "Стоп",
+    "notificationChannel": "Воспроизведение"
   }
 }
