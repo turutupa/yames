@@ -31,6 +31,7 @@
     "build:mobile": "node scripts/build-mobile.mjs",
     "check:mobile-bundle": "node scripts/check-mobile-bundle.mjs",
     "check:css-hover": "node scripts/css-hover-audit.mjs",
+    "shots:mobile": "node scripts/mobile-shots.mjs",
     "preview": "vite preview",
     "tauri": "node scripts/tauri.mjs",
     "test": "vitest run",
