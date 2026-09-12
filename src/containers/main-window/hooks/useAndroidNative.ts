@@ -27,6 +27,12 @@ import { setPlaying } from "../../../ipc";
 import { dismissTop } from "../../../mobile/backStack";
 import { keepAwake, listenToNative, setBackgroundAudio } from "../../../mobile/native";
 
+/**
+ * How long the transport has to stay live before the foreground service is
+ * started. See `liveSettled` below for why this is not zero.
+ */
+export const SERVICE_START_DELAY_MS = 500;
+
 interface Options {
   /** The engine's transport, as the backend reports it. */
   isPlaying: boolean;
@@ -112,27 +118,56 @@ export function useAndroidNative({ isPlaying, bpm, keepScreenOn }: Options) {
     // ran twice, so a double mount in React's strict mode is harmless.
   }, [stop, standAside]);
 
+  /**
+   * The transport, but only once it has been live long enough to mean it.
+   *
+   * Starting the foreground service is not free: on Android 13 and up the
+   * first one raises a permission dialog, and that dialog lands on whatever
+   * the user is looking at. So it must never fire for a transport that was
+   * only briefly true. One such blip is real and was caught on the first
+   * release build: the wizard's demo click is unwound as the wizard closes,
+   * and for the render between "the demo is no longer running" and "the
+   * engine has stopped" the transport reads as a user pressing play. The
+   * dialog arrived on the way out of setup, for a notification about a click
+   * that had already stopped.
+   *
+   * Half a second, and only on the way up — stopping is immediate, because a
+   * service that outlives playback is the thing the plan actually forbids.
+   * Nobody can tell that the row in the shade arrives half a second after the
+   * first beat; the app is in the foreground and not about to be killed.
+   */
+  const live = isPlaying || standingAside;
+  const [liveSettled, setLiveSettled] = useState(false);
+  useEffect(() => {
+    if (!live) {
+      setLiveSettled(false);
+      return;
+    }
+    const id = setTimeout(() => setLiveSettled(true), SERVICE_START_DELAY_MS);
+    return () => clearTimeout(id);
+  }, [live]);
+
   // The notification. Re-sent when the words would change — which is when the
   // tempo changes or the user switches language mid-practice — and not
   // otherwise, so a tempo dialled while stopped does not talk to Android 40
   // times.
   const lastNotification = useRef<string | null>(null);
   useEffect(() => {
-    // `standingAside` and not just `isPlaying`: see the comment on it. The
-    // service outlives the pause so the focus request does too, which is the
-    // only way the system will ever hand playback back.
-    const live = isPlaying || standingAside;
+    // `liveSettled` rather than `isPlaying`, for the two reasons above it:
+    // `standingAside` keeps the service (and with it the focus request) alive
+    // across a pause we mean to come back from, and the delay keeps it from
+    // starting for a transport that was only momentarily true.
     const text = {
       title: t("playback.notificationTitle"),
       body: isPlaying ? t("playback.notificationBody", { bpm }) : t("playback.notificationPaused"),
       stopLabel: t("playback.notificationStop"),
       channelName: t("playback.notificationChannel"),
     };
-    const signature = live ? `on:${text.title}:${text.body}:${text.stopLabel}` : "off";
+    const signature = liveSettled ? `on:${text.title}:${text.body}:${text.stopLabel}` : "off";
     if (signature === lastNotification.current) return;
     lastNotification.current = signature;
-    setBackgroundAudio(live, text).catch(() => {});
-  }, [isPlaying, standingAside, bpm, t]);
+    setBackgroundAudio(liveSettled, text).catch(() => {});
+  }, [liveSettled, isPlaying, bpm, t]);
 
   // Playing again — by the resume above, or because the user pressed play
   // themselves while the click was standing aside.
