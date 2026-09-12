@@ -20,10 +20,12 @@
 > on the emulator: exact tempo (120 ticks/60 s), survives 10 min
 > screen-off, pauses for a call and resumes, Back behaves. M05 merged:
 > signed release build machinery, R8-proven 12.8 MiB arm64 APK, store
-> assets, website row. `main` v1.1.0 merged in. M05b in progress:
-> system-bar insets (the gesture bar overlapped the tab labels) and
-> store shots in the default theme. **Nothing has run on a physical
-> phone yet.** Waiting on the owner: the upload keystore
+> assets, website row. `main` v1.1.0 merged in. M05b merged: the
+> Android system-bar insets reach CSS from Kotlin (the WebView's
+> `env()` reports only the display cutout, never the gesture bar), the
+> top gap is gone, store shots are in the default theme. Android v1 is
+> complete as far as the emulator can prove. **Nothing has run on a
+> physical phone yet.** Waiting on the owner: the upload keystore
 > (`M05-RELEASE-NOTES.md`), the Play developer account and twelve
 > testers, the spare phone.
 > **Branch policy:** long-lived feature branch `mobile`. Each task gets a

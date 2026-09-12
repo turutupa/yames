@@ -120,6 +120,7 @@ respectively; M05 waits for M03 + M04.
 | `M04-android-native.md` | Direct Oboe stream, foreground service, audio focus, Back, keep-awake, links | M |
 | `M05a-release-prep.md` | Privacy page, store copy, dispatch-only Android CI draft, licence exception text, console checklist | S |
 | `M05-android-release.md` | Signing from secrets, versionCode, minified release proven on the emulator, store shots, website row, M04's loose ends | M |
+| `M05b-android-insets-and-shots.md` | System-bar insets from Kotlin, the top gap, store shots in the default theme, Back-stack fix | S |
 | `M06-ios.md` | `tauri ios init`, AVAudioSession, TestFlight from CI, App Store listing, GPL exception | L |
 | `M07-ios-midi.md` | CoreMIDI footswitch on iOS | M |
 
