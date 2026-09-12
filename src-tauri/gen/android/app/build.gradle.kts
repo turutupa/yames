@@ -94,8 +94,13 @@ android {
                 storePassword = keystorePassword
                 keyAlias = releaseKeyAlias
                 keyPassword = releaseKeyPassword
-                // Play wants v2 at minimum; v1 keeps minSdk-24 sideloaders happy.
-                enableV1Signing = true
+                // v2 is the whole signature. v1 (the old JAR scheme) exists for
+                // Android 6 and earlier, which minSdk 24 already excludes, and
+                // asking for it here produced an APK that `apksigner verify`
+                // still reported as "v1 scheme: false" — AGP knows it is not
+                // needed. Said out loud rather than left as a flag that reads
+                // as true and is not.
+                enableV1Signing = false
                 enableV2Signing = true
             }
         }

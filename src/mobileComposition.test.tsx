@@ -16,7 +16,7 @@
 import "./test/mobileFlag"; // MUST be first — see the file.
 
 import { describe, it, expect, beforeEach } from "vitest";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { act, render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { IS_MOBILE } from "./platform";
 import { MainWindow } from "./containers/main-window/MainWindow";
 import { MetronomeView } from "./containers/metronome/MetronomeView";
@@ -25,7 +25,7 @@ import { OnboardingWizard } from "./containers/onboarding/OnboardingWizard";
 import { ONBOARDING_STEPS } from "./containers/onboarding/steps";
 import { INITIAL_ONBOARDING_STATE } from "./containers/onboarding/onboardingMachine";
 import { INERT_EVALUATION, INERT_MIDI } from "./platform.inert";
-import { DEFAULT_TEST_STATE, mockInvoke, setInvokeResponse } from "./test/mocks";
+import { DEFAULT_TEST_STATE, mockInvoke, mockListen, setInvokeResponse } from "./test/mocks";
 
 /** Nothing the user reads may say "coach", in any casing. */
 function expectNoCoachAnywhere() {
@@ -87,6 +87,45 @@ describe("MainWindow on a phone", () => {
 
     // Zen ships on a phone (plan §1) and the rail was its only door.
     expect(container.querySelector(".mobile-tab-zen")).not.toBeNull();
+  });
+
+  // M05, found on the first release build: a fresh install raised Android's
+  // "Allow Yames to send you notifications?" dialog over the welcome screen,
+  // before the user had pressed anything. The wizard demonstrates the app by
+  // running a soft 80 BPM click while it is open, that click is the engine's
+  // transport, and the transport is what starts the foreground service.
+  it("does not start the foreground service for the wizard's demo click", async () => {
+    mockInvoke.mockClear();
+    mockListen.mockClear();
+    render(<MainWindow />);
+
+    // The wizard is open (no saved onboarding version in the mocked store) and
+    // has asked the engine for its demo click, exactly as it does on a first
+    // launch.
+    await waitFor(() =>
+      expect(document.querySelector(".onboarding-overlay")).not.toBeNull(),
+    );
+    await waitFor(() =>
+      expect(
+        mockInvoke.mock.calls.some(([cmd]) => cmd === "toggle_playback"),
+      ).toBe(true),
+    );
+
+    // The engine answers the way it does in the app: it is now playing. This
+    // is the moment the guard exists for — the transport is live and no human
+    // pressed anything.
+    const stateListener = mockListen.mock.calls.find(
+      ([event]) => event === "state-changed",
+    )?.[1] as ((e: { payload: typeof DEFAULT_TEST_STATE }) => void) | undefined;
+    expect(stateListener).toBeDefined();
+    await act(async () => {
+      stateListener!({ payload: { ...DEFAULT_TEST_STATE, isPlaying: true, bpm: 80 } });
+    });
+
+    const started = mockInvoke.mock.calls
+      .filter(([cmd]) => cmd === "plugin:yames-mobile|set_background_audio")
+      .map(([, args]) => (args as { payload: { active: boolean } }).payload.active);
+    expect(started).not.toContain(true);
   });
 
   it("opens the library as a sheet, and it starts closed", async () => {
