@@ -1,6 +1,6 @@
 # W8 — the screen, second pass: the band, the changes, the tools, the editor
 
-Branch: `jam/w8-ui-band`, from `jam` AFTER W2 (the mode), W4 (harmony and
+Branch: `jam-w8-ui-band`, from `jam` AFTER W2 (the mode), W4 (harmony and
 fretboard), W5 (the band's brain) and W6 (the editor) have merged. Your
 area is `src/` and `src/locales/`; you may now edit the jam screen and its
 neighbours freely, but not `src-tauri/`. Read `plans/tasks/jam/BRIEF.md`

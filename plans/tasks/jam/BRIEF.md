@@ -54,7 +54,7 @@ length and plays the plain click when they disagree. Nobody guesses.
 Nothing is ever committed on `main`. The feature branch is **`jam`**. Your
 worktree may start on a stale branch: run `git log --oneline -1` first and,
 if it is not the tip of `jam`, run `git checkout -B <your-branch> jam`
-(W1: `jam/w1-engine`, W2: `jam/w2-ui`). Commit on your branch, small commits
+(W1: `jam-w1-engine`, W2: `jam-w2-ui`; hyphens, because git will not nest a branch under an existing `jam` ref). Commit on your branch, small commits
 with the repo's message style (`feat(jam): …`, `fix(jam): …`; the subject
 says what changed for the user, the body says why). **Do not push. Do not
 merge.** The orchestrator reviews, runs the gates independently, and merges

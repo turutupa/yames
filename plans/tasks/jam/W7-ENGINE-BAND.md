@@ -1,6 +1,6 @@
 # W7 — the engine, second pass: kits, the bass, practice windows
 
-Branch: `jam/w7-engine-band`, from `jam` AFTER W1 (the groove table) and W3
+Branch: `jam-w7-engine-band`, from `jam` AFTER W1 (the groove table) and W3
 (the kit sounds) have merged. Your area is `src-tauri/` only. Read
 `plans/tasks/jam/BRIEF.md` first, then `W1-ENGINE.md` for what already
 exists, `src-tauri/sounds/KITS.md` for the files W3 made, and the contract
