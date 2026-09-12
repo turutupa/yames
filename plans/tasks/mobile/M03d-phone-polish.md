@@ -38,9 +38,10 @@ count.
 2. Mobile step list → three steps; the "ready" summary must not
    mention an instrument. Composition test updated.
 3. `mobileTabs` keys in `en/shell.json`, then the other 14 locales
-   with labels that fit ~56 px at 0.58 rem (measure with the M03b
-   harness `scripts/m03b-shots.mjs` if you can; otherwise keep every
-   label ≤ 9 characters and say so).
+   with labels that fit ~56 px at 0.58 rem (measure with
+   `scripts/mobile-shots.mjs --only tab-drill --locale <code>` — M03e's
+   name for what this brief calls the M03b harness — if you can;
+   otherwise keep every label ≤ 9 characters and say so).
 4. Gates.
 
 ## Acceptance gate

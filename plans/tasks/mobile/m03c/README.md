@@ -17,15 +17,22 @@ Two caveats on reading them, both M03b's work and not this task's:
 
 ## Reproducing
 
+M03e (2026-09-11) folded this task's own driver and M03b's into one tool,
+`scripts/mobile-shots.mjs` at the repo root — the shots and the desktop
+parity probe are both there now:
+
 ```sh
-node plans/tasks/mobile/m03c/probe.mjs phone    # the shots + the overflow gate
-node plans/tasks/mobile/m03c/probe.mjs desktop --json before.json   # parity
+node scripts/mobile-shots.mjs                          # every screen, 360/390/430
+node scripts/mobile-shots.mjs --only settings-general   # one screen
+node scripts/mobile-shots.mjs --parity before.json      # desktop geometry snapshot
+node scripts/mobile-shots.mjs --parity after.json       # ... again, after a change
+node scripts/mobile-shots.mjs --parity-compare before.json after.json
 ```
 
-`probe.mjs --only <id>` does one screen. The desktop mode writes a
-geometry-and-colour snapshot of settings, drill, zen, the wizard, the
-unsaved dialog and the instrument picker at 1400×900 with a fine pointer;
-run it on the base revision and again after, and `diff` the two.
+The desktop parity mode writes a geometry-and-colour snapshot of settings,
+drill, zen, the wizard, the unsaved dialog and the instrument picker at
+1400×900 with a fine pointer; run it on the base revision and again after,
+and `--parity-compare` diffs the two.
 
 Known noise in the desktop snapshot, demonstrated by running it twice on
 one unchanged tree: `.voice-wave__bar` in the coach settings section (a
@@ -63,7 +70,10 @@ which is a shared file no M03 task owned.
 
 The unsaved-changes dialog and the instrument picker cannot be reached
 from `shots.html` — M03-GAPS surveyed both by reading the CSS, which is
-how `min-width: 480px` survived to this task. `dialogs.html` +
-`dialogs.tsx` mount the two components against the app's own stylesheets
-and i18n. They are not part of the app: `vite build` is given
-`index.html` as its only input, and nothing under `src/` imports them.
+how `min-width: 480px` survived to this task. This folder's own
+`dialogs.html` + `dialogs.tsx` used to mount the two components against
+the app's own stylesheets and i18n; M03e moved that pair to
+`src/shots/dialogs.html` (and `dialogs.tsx`) so `mobile-shots.mjs` can
+reach them alongside every other screen. Like `shots.html`, they are not
+part of the app: `vite build` is given `index.html` as its only input,
+and nothing under `src/` imports them.

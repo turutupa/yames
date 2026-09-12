@@ -5,23 +5,23 @@
  * dirty" — the unsaved-changes dialog has no door in the screenshot harness —
  * and the instrument picker "only opens on first launch, and the harness's
  * store has an instrument set". Both were surveyed by reading the CSS rather
- * than photographed, which is how a `min-width: 480px` survived to M03c.
+ * than photographed originally, which is how a `min-width: 480px` survived
+ * to M03c. This page (M03c, moved here by M03e so `mobile-shots.mjs` is the
+ * one tool for both) mounts the two components themselves, against the app's
+ * own stylesheets and i18n. It is not part of the app: `vite build` is given
+ * `index.html` as its only input, so nothing here reaches a release, same as
+ * `shots.html` and `main.tsx` next to it.
  *
- * So this page mounts the two components themselves, against the app's own
- * stylesheets and i18n. It is not part of the app: `vite build` is given
- * `index.html` as its only input, and nothing under `plans/` is imported by
- * anything in `src/`.
- *
- *   /plans/tasks/mobile/m03c/dialogs.html?which=unsaved
- *   /plans/tasks/mobile/m03c/dialogs.html?which=instrument
+ *   /src/shots/dialogs.html?which=unsaved
+ *   /src/shots/dialogs.html?which=instrument
  */
 import ReactDOM from "react-dom/client";
-import "../../../../src/i18n";
-import "../../../../src/styles/global.css";
-import "../../../../src/styles/main-window.css";
-import { applyTheme, getThemeById } from "../../../../src/themes";
-import { UnsavedChangesDialog } from "../../../../src/components/UnsavedChangesDialog";
-import { InstrumentPickerModal } from "../../../../src/components/InstrumentPickerModal";
+import "../i18n";
+import "../styles/global.css";
+import "../styles/main-window.css";
+import { applyTheme, getThemeById } from "../themes";
+import { UnsavedChangesDialog } from "../components/UnsavedChangesDialog";
+import { InstrumentPickerModal } from "../components/InstrumentPickerModal";
 
 const params = new URLSearchParams(window.location.search);
 applyTheme(getThemeById(params.get("theme") ?? "mono"));
