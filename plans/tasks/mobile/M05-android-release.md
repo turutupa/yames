@@ -45,6 +45,32 @@ Also: create the Play developer account (`PLAY-CONSOLE-CHECKLIST.md`)
 and recruit the twelve closed testers on day one — the 14-day clock
 does not start until they opt in.
 
+## Loose ends handed to this task by M04 (do them; they are small)
+
+- **Portrait lock** in `gen/android/app/src/main/AndroidManifest.xml`
+  (`android:screenOrientation="portrait"` on the activity). Every
+  phone layout assumes it (M03c). Nobody has added it yet.
+- **Remove the AndroidTV `leanback` `uses-feature`** the template put
+  in the manifest; Yames is not a TV app and Play will list it as one.
+- **A real monochrome notification icon** (`ic_stat_yames`, 24 dp,
+  white on transparent, from the app mark) instead of
+  `android.R.drawable.ic_media_play`.
+- **Hide the sound-output device picker on mobile**
+  (`DevicesSettingsSection`, behind `IS_MOBILE`): Android routes
+  output itself and `set_audio_output_device` is inert there.
+- **One sentence on the onboarding "ready" step on mobile** saying the
+  phone will ask permission to show a "playing" notification the first
+  time you press Play, and why (so the click keeps going with the
+  screen off). Musicians' words. All 15 locales.
+- **Prove R8 works with the plugin**: the release build is minified;
+  install it and run the M04 emulator gates once (screen-off, call,
+  Back, link). Add ProGuard keep rules only if something breaks and
+  say which.
+- **Read the granted audio mode from logcat** on the first real
+  phone (`asked LowLatency/Shared, got …`) and record it in the
+  release notes; the emulator refuses the fast path, a phone should
+  not.
+
 ## Steps
 
 1. Worktree sanity.
