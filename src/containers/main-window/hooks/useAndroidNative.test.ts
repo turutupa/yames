@@ -200,6 +200,62 @@ describe("the phone's native half", () => {
     expect(playingCalls()).toEqual([false]);
   });
 
+  // M05b: the store shots showed the gesture pill sitting on the tab labels
+  // and the header 150 device pixels below a status bar it was supposed to be
+  // tucked under. `env(safe-area-inset-*)` describes the display cutout, not
+  // the system bars — it reported the camera hole at the top and nothing at
+  // all at the bottom. The measurement comes from Android now, and this is
+  // where it lands.
+  describe("the system bars", () => {
+    const token = (name: string) =>
+      document.documentElement.style.getPropertyValue(name);
+
+    afterEach(() => {
+      for (const name of ["--safe-top", "--safe-right", "--safe-bottom", "--safe-left"]) {
+        document.documentElement.style.removeProperty(name);
+      }
+    });
+
+    it("writes the measured insets over the env() fallback", async () => {
+      mount(false);
+      await act(async () => {});
+
+      // The emulator's own numbers: a 128px status bar and a 63px gesture bar
+      // at density 2.625.
+      fromAndroid({
+        event: "window_insets",
+        top: 128 / 2.625,
+        right: 0,
+        bottom: 63 / 2.625,
+        left: 0,
+      });
+
+      expect(token("--safe-top")).toBe("48.76px");
+      expect(token("--safe-bottom")).toBe("24px");
+      expect(token("--safe-right")).toBe("0px");
+      expect(token("--safe-left")).toBe("0px");
+    });
+
+    it("leaves the tokens alone until Android says something", async () => {
+      mount(false);
+      await act(async () => {});
+      // Nothing inline, so `shell.css`'s `env()` declaration still stands —
+      // which is what desktop and the screenshot harness run on.
+      expect(token("--safe-top")).toBe("");
+      expect(token("--safe-bottom")).toBe("");
+    });
+
+    it("ignores a payload that would push the header off the screen", async () => {
+      mount(false);
+      await act(async () => {});
+      fromAndroid({ event: "window_insets", top: -40, right: 0, bottom: 24, left: NaN });
+
+      expect(token("--safe-top")).toBe("");
+      expect(token("--safe-left")).toBe("");
+      expect(token("--safe-bottom")).toBe("24px");
+    });
+  });
+
   it("hands a Back press to whatever the app has open", async () => {
     mount(false);
     await act(async () => {});

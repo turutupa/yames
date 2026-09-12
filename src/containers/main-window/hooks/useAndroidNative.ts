@@ -17,6 +17,11 @@
  *    taking playback for good stops it and does not bring it back. The Stop
  *    button in the notification stops it too. And the Back gesture closes
  *    whatever is open rather than killing the app.
+ * 4. **The system bars' real heights reach the stylesheet.** The app draws
+ *    behind the status bar and the gesture bar, and `env(safe-area-inset-*)`
+ *    does not describe either of them — see `WindowInsets` in
+ *    `src/mobile/native.ts`. The Android side measures them; this writes them
+ *    into the `--safe-*` tokens every layout already pads with.
  *
  * Mounted only on a phone (`IS_MOBILE`), so none of `src/mobile/` reaches a
  * desktop bundle.
@@ -25,6 +30,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { setPlaying } from "../../../ipc";
 import { dismissTop } from "../../../mobile/backStack";
+import type { WindowInsets } from "../../../mobile/native";
 import { keepAwake, listenToNative, setBackgroundAudio } from "../../../mobile/native";
 
 /**
@@ -32,6 +38,38 @@ import { keepAwake, listenToNative, setBackgroundAudio } from "../../../mobile/n
  * started. See `liveSettled` below for why this is not zero.
  */
 export const SERVICE_START_DELAY_MS = 500;
+
+/** The four tokens, in the order the Android side measures them. */
+const INSET_TOKENS: ReadonlyArray<[keyof WindowInsets, string]> = [
+  ["top", "--safe-top"],
+  ["right", "--safe-right"],
+  ["bottom", "--safe-bottom"],
+  ["left", "--safe-left"],
+];
+
+/**
+ * Write the measured system-bar insets over the `env()` fallback the tokens
+ * are declared with in `shell.css`.
+ *
+ * An inline custom property on `:root` beats the stylesheet's `:root` rule, so
+ * this is the whole mechanism — every `calc(<spacing> + var(--safe-bottom))`
+ * in the app starts clearing the gesture bar the moment the first event
+ * lands, and no layout needs to know where the number came from. Nothing
+ * writes these until Android says so, which is why a desktop build and the
+ * screenshot harness are untouched.
+ *
+ * Rounded to hundredths: the raw quotient is a repeating decimal on most
+ * densities (128 ÷ 2.625) and two places is far below a device pixel.
+ */
+export function applyWindowInsets(insets: WindowInsets) {
+  const root = document.documentElement.style;
+  for (const [side, token] of INSET_TOKENS) {
+    const value = insets[side];
+    // A garbled payload must not be able to shove the header off the screen.
+    if (!Number.isFinite(value) || value < 0) continue;
+    root.setProperty(token, `${Math.round(value * 100) / 100}px`);
+  }
+}
 
 interface Options {
   /** The engine's transport, as the backend reports it. */
@@ -79,6 +117,9 @@ export function useAndroidNative({ isPlaying, bpm, keepScreenOn }: Options) {
   useEffect(() => {
     listenToNative((event) => {
       switch (event.event) {
+        case "window_insets":
+          applyWindowInsets(event);
+          break;
         case "back_pressed":
           // The Android side only sends this while something is open; if the
           // stack has emptied in between, there is nothing to do — it will not

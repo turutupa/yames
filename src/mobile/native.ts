@@ -79,10 +79,29 @@ export type AudioInterruption =
   | "focus_gained"
   | "focus_lost_permanently";
 
+/**
+ * Where the system bars are, in CSS pixels.
+ *
+ * The web platform's own answer — `env(safe-area-inset-*)` — describes the
+ * display cutout and not the system bars, so on Android it reports the camera
+ * cut-out at the top and **nothing at all** at the bottom, where the gesture
+ * pill is. The Android side measures the bars properly and sends them here;
+ * `useAndroidNative` writes them into the `--safe-*` tokens the stylesheets
+ * already pad with. Desktop and the screenshot harness keep the `env()`
+ * fallback and never see one of these.
+ */
+export interface WindowInsets {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
+
 export type NativeEvent =
   | { event: "audio_interrupted"; kind: AudioInterruption }
   | { event: "back_pressed" }
-  | { event: "stop_requested" };
+  | { event: "stop_requested" }
+  | ({ event: "window_insets" } & WindowInsets);
 
 /**
  * Open the one channel every Android-side event arrives on.
