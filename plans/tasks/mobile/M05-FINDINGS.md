@@ -5,8 +5,7 @@
 > release APK** — not a debug build. That is the change from M04: every gate
 > here was repeated on the artifact people would actually install.
 >
-> The three things only hardware can answer are unchanged and listed at the
-> end.
+> What only hardware can answer is unchanged from M04 and listed at the end.
 
 ---
 
@@ -168,7 +167,7 @@ or written down by this task.
 | No permission prompt anywhere in setup | **Pass.** Focus stayed on `MainActivity` through every step of a fresh install. | — |
 | Click plays; the prompt arrives on the first Play | **Pass.** `GrantPermissionsActivity` on the first tap of Play and not before. | `m05/release-05-first-play-permission-prompt.png` |
 | Foreground service, with the real icon | **Pass.** "Yames / Playing — 120 BPM", `isForeground=true types=00000002`, channel `yames.playback`, category `transport`, one action. The small icon is the Y mark. | `m05/release-07-notification-shade.png` |
-| **10 minutes, screen off, 120 BPM** | **Pass, exactly.** **1242 ticks in 621.01 s of wall clock; 621.01 × 2 = 1242.02.** Twenty samples at 30 s intervals: `mWakefulness=Asleep` in all twenty, same pid throughout, service foreground in all twenty, the AAudio stream `state:started` at 48 000 Hz in all twenty. | `m05/soak` counters below |
+| **10 minutes, screen off, 120 BPM** | **Pass, exactly.** **1242 ticks in 621.01 s of wall clock; 621.01 × 2 = 1242.02.** Twenty samples at 30 s intervals: `mWakefulness=Asleep` in all twenty, same pid throughout, service foreground in all twenty, the AAudio stream `state:started` at 48 000 Hz in all twenty. counts and samples below the table |
 | Incoming call | **Pass.** Ring → `audio focus change -2 -> focus_lost` → paused, shade reads "Paused", service stays up. Hang up → `1 -> focus_gained` → playing again. | `m05/release-13-incoming-call-paused.png` |
 | Back closes a sheet | **Pass.** Library sheet open → Back → closed, app still foreground, still playing. | `m05/release-10-back-sheet-open.png`, `11-…` |
 | Back leaves zen | **Pass.** Returns to the metronome; does not background the app. | `m05/release-09-back-left-zen.png` |
@@ -180,6 +179,20 @@ or written down by this task.
 | Zen shows its exit button | **Pass**, after fix 3. The × in the accent circle, larger than the theme picker beside it, plus the hint naming it. | `m05/store/04-zen.png`, `m05/release-08-zen-exit-button.png` |
 | Presets save, load and delete | **Pass**, after fix 4. Three presets created by typing into the name field on the device. | `m05/store/05-presets.png` |
 | No app-level errors in logcat | **Pass.** Nothing from Yames at error level across every run. |
+
+**The soak, in full.** 120 BPM, quarter notes, screen off by
+`KEYCODE_POWER`. Every `beat` event the engine emitted was counted in the
+webview, which keeps receiving them with the screen off — a 66-second trial
+run first confirmed the method (131 ticks in 65.88 s, against 131.8
+expected). Over the ten minutes: **1242 counted, 1242.02 expected from the
+wall clock**, which is not one missed beat and no drift worth a decimal
+place. Alongside it, twenty samples 30 seconds apart, and all twenty say the
+same four things: asleep, same pid, service foreground with
+`types=00000002`, AAudio stream `state:started` at 48 000 Hz.
+
+M04 measured the same window on a *debug* build with the engine
+instrumented; this one is the shipping artifact, uninstrumented, counted from
+the outside.
 
 **The portrait caveat, stated plainly.** The A/B control for the rotate test
 is inconclusive: this AVD's display stayed at `ROTATION_0` for *every* app,
