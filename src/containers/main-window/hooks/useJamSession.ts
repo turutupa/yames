@@ -140,6 +140,17 @@ interface UseJamSessionArgs {
   instrument: string;
   /** The latest tick, for the bar-ahead bass and the tempo trainer. */
   currentBeat: BeatEvent | null;
+  /**
+   * True while the engine is counting the band in.
+   *
+   * The count-in runs on the tick grid and reports beats like any other bar,
+   * so without this the bar-ahead send below would treat the count as part of
+   * the form: a two-bar count crosses a bar line, the next bar's bass goes out
+   * inside it, and the engine applies it at the top of the form — so the first
+   * bar of the tune plays the second bar's bass. Nothing is sent while this is
+   * on; the config the load posted is already the right one for bar one.
+   */
+  countingIn: boolean;
 }
 
 export function useJamSession({
@@ -148,6 +159,7 @@ export function useJamSession({
   onJamLoaded,
   instrument,
   currentBeat,
+  countingIn,
 }: UseJamSessionArgs) {
   const { t } = useTranslation();
   const [jams, setJams] = useState<Jam[]>([]);
@@ -192,6 +204,18 @@ export function useJamSession({
   const [editorPage, setEditorPage] = useState<GrooveEditorPage>("bar");
 
   /**
+   * True once the library has been WRITTEN — a new jam, a delete, a reorder.
+   *
+   * The read from the store is a round trip, and a fast hand gets to "+"
+   * before it lands. Without this the resolved list would then be applied over
+   * the jam that was just made and it would be gone, and on a first run the
+   * six starters would be seeded on top of it as well. So a write wins: once
+   * the user has said something about the library, whatever the disk said
+   * before they said it is no longer news.
+   */
+  const touchedRef = useRef(false);
+
+  /**
    * Seed once, on the first run that has no `jams` key at all.
    *
    * `undefined` means nothing was ever saved; an empty array means the user
@@ -202,7 +226,7 @@ export function useJamSession({
     let alive = true;
     listJams()
       .then(async (stored) => {
-        if (!alive) return;
+        if (!alive || touchedRef.current) return;
         if (stored === undefined) {
           const seeded = [...STARTER_JAMS];
           setJams(seeded);
@@ -220,6 +244,7 @@ export function useJamSession({
 
   /** The whole list, to the store and to the UI, in one place. */
   const commit = useCallback((next: Jam[]) => {
+    touchedRef.current = true;
     setJams(next);
     void saveJams(next).catch(() => {});
   }, []);
@@ -263,18 +288,28 @@ export function useJamSession({
     // downbeat re-send a bass the engine already has.
     sentBassRef.current = bassSignature(config);
     barRef.current = null;
+    // Bar 0 is on its way, meter first. The bar-ahead effect below runs on
+    // this same commit and must not race past it — see `pushedRef`.
+    pushedRef.current = true;
     // `engineKey` rather than `jam`: everything the table is made of, and not
     // the tempo or the name. eslint would rather have `jam` here, and `jam`
     // here is the bug this line exists to avoid.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, engineKey]);
 
-  /** The tempo, on its own, so changing it does not disturb the bar. */
+  /**
+   * The tempo, on its own, so changing it does not disturb the bar.
+   *
+   * `jam?.id` is in the list beside the tempo because two jams can be saved at
+   * the same tempo. Without it, switching from a blues you had trained up to
+   * 140 onto another jam filed at the same BPM leaves the trainer's climb in
+   * place, and the new jam starts at a tempo it never asked for.
+   */
   useEffect(() => {
     if (view !== "jam" || !jam) return;
     setTrainedBpm(null);
     void setBpm(jam.bpm).catch(() => {});
-  }, [view, jam?.bpm]);
+  }, [view, jam?.id, jam?.bpm]);
 
   /**
    * The bass, one bar ahead of itself.
@@ -295,16 +330,46 @@ export function useJamSession({
   const sentBassRef = useRef<string | null>(null);
   const barRef = useRef<string | null>(null);
 
+  /**
+   * "The load above has bar 0 in flight; say nothing this bar."
+   *
+   * The load effect posts the meter and the table from inside an async
+   * function, so `setBeatGroups` and `setSubdivision` land in microtasks. This
+   * effect runs on the SAME commit, synchronously, and with the bar just
+   * re-anchored it would send the next bar's table straight away — before the
+   * meter it was written in. The engine checks the two against each other and
+   * refuses the table, so loading or switching a jam mid-song would quietly
+   * drop the band. One bar of silence from this effect is all it takes: the
+   * config the load is already posting IS bar 0's.
+   *
+   * Cleared on every bar line and on every way out, so a jam that was loaded
+   * while stopped does not swallow the first bar line of the take that
+   * follows.
+   */
+  const pushedRef = useRef(false);
+
   useEffect(() => {
-    if (view !== "jam" || !jam || !currentBeat || !isPlaying) {
+    if (view !== "jam" || !jam || !currentBeat || !isPlaying || countingIn) {
+      // A count-in is beats on the same grid but it is not the form, so the
+      // bar it reports is not a bar to send ahead of. Drop the anchor and let
+      // the first real bar line start the sequence again.
       barRef.current = null;
+      pushedRef.current = false;
       return;
     }
-    const at = `${currentBeat.chorus}:${currentBeat.formBar}`;
+    // A beat event from a build that does not fill `formBar` in yet leaves the
+    // arithmetic below as NaN and the bass lookup on `undefined`. Bar one is
+    // the honest answer to "which bar", and the click keeps its band.
+    const bar = Number.isFinite(currentBeat.formBar) ? currentBeat.formBar : 0;
+    const at = `${currentBeat.chorus}:${bar}`;
     if (barRef.current === at) return;
     barRef.current = at;
+    if (pushedRef.current) {
+      pushedRef.current = false;
+      return;
+    }
 
-    const next = compileJam(jam, { formBar: currentBeat.formBar + 1, lineup });
+    const next = compileJam(jam, { formBar: bar + 1, lineup });
     const signature = bassSignature(next);
     if (sentBassRef.current === signature) return;
     sentBassRef.current = signature;
@@ -315,7 +380,7 @@ export function useJamSession({
     // running arrives on no bar line at all, and without it the first bar of
     // the new jam would be counted as the same bar as the last of the old.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view, isPlaying, jam?.id, currentBeat?.chorus, currentBeat?.formBar]);
+  }, [view, isPlaying, countingIn, jam?.id, currentBeat?.chorus, currentBeat?.formBar]);
 
   /**
    * The tempo trainer: up a step every N choruses, on the downbeat.

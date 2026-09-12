@@ -318,6 +318,9 @@ export function MainWindow() {
     isPlaying: state.isPlaying,
     instrument,
     currentBeat,
+    // The engine counts the band in on the same tick grid it plays on, so the
+    // jam has to be told when a bar line is the count rather than the form.
+    countingIn: (state.countIn?.beats ?? 0) > 0,
     onJamLoaded: () => {
       // The library marks what is loaded, and only one thing can be.
       sidebarRef.current?.clearActive();
@@ -865,6 +868,7 @@ export function MainWindow() {
     prevTab,
     setlistLoaded: !!setlistSession.setlist,
     jamLoaded: !!jamSession.jam,
+    jamEditorOpen: jamSession.screen.editorOpen,
     onToggleJam: toggleJamPlayback,
     jamActions: jamSession.actions,
     state,

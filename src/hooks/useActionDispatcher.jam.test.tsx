@@ -5,9 +5,10 @@
 // things worth pinning are that they do what they say ON the jam tab, and that
 // they do NOTHING anywhere else — a stomp on the metronome tab must not
 // silently change a jam you are not looking at.
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useActionDispatcher, type ViewName } from "./useActionDispatcher";
+import { setBeatGroups, setSubdivision } from "../ipc";
 import type { AppState } from "../types";
 
 vi.mock("../ipc", () => ({
@@ -42,7 +43,12 @@ const STATE = {
   alwaysOnTop: false,
 } as unknown as AppState;
 
-function mount(view: ViewName, jamLoaded = true) {
+beforeEach(() => {
+  vi.mocked(setBeatGroups).mockClear();
+  vi.mocked(setSubdivision).mockClear();
+});
+
+function mount(view: ViewName, jamLoaded = true, jamEditorOpen = false) {
   const jamActions = {
     nextGroove: vi.fn(),
     prevGroove: vi.fn(),
@@ -57,6 +63,7 @@ function mount(view: ViewName, jamLoaded = true) {
       prevTab: { current: "beat" },
       setlistLoaded: false,
       jamLoaded,
+      jamEditorOpen,
       onToggleJam: vi.fn(),
       jamActions,
       state: STATE,
@@ -112,5 +119,68 @@ describe("the hands-free jam actions", () => {
     const { dispatch, jamActions } = mount("settings");
     dispatch("jam-trade");
     expect(jamActions.toggleTrade).not.toHaveBeenCalled();
+  });
+
+  it("stands aside while the groove editor is open", () => {
+    // The drawer is a grid you draw on, and `G` — the same stomp that steps
+    // the groove on stage — throws the drawn pattern away to go back to a
+    // preset. Nothing reachable by accident may delete work in progress.
+    const { dispatch, jamActions } = mount("jam", true, true);
+    dispatch("jam-next-groove");
+    dispatch("jam-prev-groove");
+    dispatch("jam-trade");
+    dispatch("jam-dropout");
+    dispatch("jam-next-shape");
+    expect(jamActions.nextGroove).not.toHaveBeenCalled();
+    expect(jamActions.prevGroove).not.toHaveBeenCalled();
+    expect(jamActions.toggleTrade).not.toHaveBeenCalled();
+    expect(jamActions.toggleDropOut).not.toHaveBeenCalled();
+    expect(jamActions.nextShape).not.toHaveBeenCalled();
+  });
+});
+
+/**
+ * The meter keys, on a jam.
+ *
+ * A jam is a meter plus a table, and the engine refuses the table when the two
+ * disagree — silently, because the plain click is a perfectly good sound. So
+ * these keys, which are right on the metronome tab, take the band away here
+ * and leave the screen animating a groove nobody can hear. The groove owns the
+ * meter on this tab.
+ */
+describe("the meter keys on the jam tab", () => {
+  const METER_KEYS = [
+    "sub-next",
+    "sub-prev",
+    "sub-1",
+    "sub-2",
+    "sub-3",
+    "sub-4",
+    "sig-next",
+    "sig-prev",
+  ] as const;
+
+  it("does not move the grid under a loaded jam", () => {
+    const { dispatch } = mount("jam");
+    for (const key of METER_KEYS) dispatch(key);
+    expect(setSubdivision).not.toHaveBeenCalled();
+    expect(setBeatGroups).not.toHaveBeenCalled();
+  });
+
+  it("still works on the metronome tab", () => {
+    // The guard is about the jam, not about the keys: nothing changes for
+    // anybody who never opens the tab.
+    const { dispatch } = mount("beat");
+    dispatch("sub-3");
+    dispatch("sig-next");
+    expect(setSubdivision).toHaveBeenCalledWith(3);
+    expect(setBeatGroups).toHaveBeenCalledTimes(1);
+  });
+
+  it("still works on the jam tab with nothing loaded", () => {
+    // An empty stage is the metronome with a different screen in front of it.
+    const { dispatch } = mount("jam", false);
+    dispatch("sub-2");
+    expect(setSubdivision).toHaveBeenCalledWith(2);
   });
 });
