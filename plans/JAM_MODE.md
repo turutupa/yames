@@ -277,6 +277,20 @@ plus the owner's ears for every sound.
 Jam 1 is the whole loop in §2 minus the last sentence. It is worth
 shipping on its own.
 
+**Status 2026-09-12 (evening).** Built in one day on the `jam` branch by
+nine workers in three waves, with the orchestrator reviewing and merging
+(briefs and integration notes in `plans/tasks/jam/`). On the branch:
+everything in Jam 1 and Jam 2 except spoken cues, plus from Jam 3 the
+transposition option and the session flag (as `SessionSegment.mode`), plus
+the chords-in-the-key strip and shape rows (§4.3). Not built: keys
+comping, recording, the setlist bridge, spoken cues, section skipping.
+Every gate green on the merged tree; the jitter probe with the heaviest
+kit and a bass under it shows zero missed beats and zero dropouts. Two
+things need the owner: the four kits are unauditioned by ear (§8.7), and
+the real-app run waited on the owner's own Yames instance holding port
+1420 all day, so the screens were verified in the shots harness and the
+audio path in the Rust tests.
+
 ---
 
 ## 8. Open questions
