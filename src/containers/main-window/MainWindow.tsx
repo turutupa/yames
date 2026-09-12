@@ -305,6 +305,8 @@ export function MainWindow() {
   const jamSession = useJamSession({
     view,
     isPlaying: state.isPlaying,
+    instrument,
+    currentBeat,
     onJamLoaded: () => {
       // The library marks what is loaded, and only one thing can be.
       sidebarRef.current?.clearActive();

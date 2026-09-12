@@ -11,7 +11,8 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { useJamSession } from "./useJamSession";
 import { STARTER_JAMS } from "../../../jam/jams";
 import { grooveById } from "../../../jam/grooves";
-import type { Jam } from "../../../jam/types";
+import type { Jam, JamEngineConfig } from "../../../jam/types";
+import type { BeatEvent } from "../../../types";
 
 const calls: Array<[string, unknown]> = [];
 const stored: { jams: Jam[] | undefined } = { jams: undefined };
@@ -65,11 +66,40 @@ beforeEach(() => {
   stored.jams = undefined;
 });
 
-function mount(view = "jam") {
+type Props = {
+  v: string;
+  playing?: boolean;
+  beat?: BeatEvent | null;
+  instrument?: string;
+};
+
+/** A tick, with only the two fields the jam cares about set apart. */
+function beatAt(formBar: number, chorus = 1, measureBeat = 0): BeatEvent {
+  return {
+    beat: 0,
+    measureBeat,
+    subdivision: 0,
+    isDownbeat: measureBeat === 0,
+    isAccent: measureBeat === 0,
+    formBar,
+    chorus,
+    bandState: "full",
+  };
+}
+
+function mount(view = "jam", extra: Omit<Props, "v"> = {}) {
   return renderHook(
-    ({ v }: { v: string }) =>
-      useJamSession({ view: v, isPlaying: false, onJamLoaded: () => {} }),
-    { initialProps: { v: view } },
+    ({ v, playing, beat, instrument }: Props) =>
+      useJamSession({
+        view: v,
+        isPlaying: playing ?? false,
+        onJamLoaded: () => {},
+        // A guitarist, so the band is drums and bass — the lineup that has
+        // something to say about every test below.
+        instrument: instrument ?? "electric-guitar",
+        currentBeat: beat ?? null,
+      }),
+    { initialProps: { v: view, ...extra } },
   );
 }
 
@@ -178,6 +208,165 @@ describe("what reaches the engine", () => {
     await waitFor(() => expect(result.current.jams).toHaveLength(6));
     expect(names("setBeatGroups")).toHaveLength(0);
     expect(names("setJam")).toEqual([null]);
+  });
+});
+
+/**
+ * The bass is the one part of the band that is not a loop, so it is the one
+ * part that can be late. These pin when it goes out and what is in it.
+ */
+describe("the bass, one bar ahead", () => {
+  async function loadedBlues(extra: Omit<Props, "v"> = {}) {
+    const harness = mount("jam", { playing: true, beat: beatAt(0), ...extra });
+    await waitFor(() => expect(harness.result.current.jams).toHaveLength(6));
+    const blues = harness.result.current.jams.find((j) => j.form.kind === "blues12")!;
+    act(() => harness.result.current.loadJam(blues));
+    await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
+    return harness;
+  }
+
+  function lastConfig(): JamEngineConfig {
+    const sent = names("setJam").filter((c) => c !== null);
+    return sent[sent.length - 1] as JamEngineConfig;
+  }
+
+  it("sends a bass line the same width as the drums", async () => {
+    await loadedBlues();
+    const config = lastConfig();
+    expect(config.bass).not.toBeNull();
+    expect(config.bass?.pitches).toHaveLength(config.beatsPerBar * config.ticksPerBeat);
+  });
+
+  it("posts the NEXT bar's bass on the bar line, not this one's", async () => {
+    const { rerender } = await loadedBlues();
+    calls.length = 0;
+
+    // Bar 4 of the blues arrives. Bar 5 is the IV chord, and that is the bass
+    // this send has to carry — it lands a few milliseconds into bar 4 and is
+    // in time for nothing except bar 5.
+    rerender({ v: "jam", playing: true, beat: beatAt(3) });
+    await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
+    const onBarFour = lastConfig().bass?.pitches;
+
+    calls.length = 0;
+    rerender({ v: "jam", playing: true, beat: beatAt(4) });
+    await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
+    const onBarFive = lastConfig().bass?.pitches;
+
+    expect(onBarFour).not.toEqual(onBarFive);
+  });
+
+  it("says nothing on a bar line where the bass does not change", async () => {
+    // A one-chord jam under a rock beat plays the same bar for ever, so every
+    // downbeat after the first has nothing to tell the engine. A shuffle
+    // would not qualify and should not: its boogie figure is two bars long,
+    // so its second bar really is different music.
+    const { result, rerender } = await loadedBlues();
+    act(() =>
+      result.current.editJam({
+        grooveId: "rock8",
+        feel: "straight",
+        form: { kind: "one", bars: 4 },
+      }),
+    );
+    await waitFor(() => expect(result.current.jam?.form.kind).toBe("one"));
+    rerender({ v: "jam", playing: true, beat: beatAt(0) });
+    await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
+
+    calls.length = 0;
+    rerender({ v: "jam", playing: true, beat: beatAt(1) });
+    await new Promise((r) => setTimeout(r, 10));
+    expect(names("setJam")).toHaveLength(0);
+  });
+
+  it("never re-sends the meter on a bar line", async () => {
+    // The meter restacks the bar. Doing that on every downbeat would rebuild
+    // the music under the player four times a chorus.
+    const { rerender } = await loadedBlues();
+    calls.length = 0;
+    for (const bar of [1, 2, 3, 4, 5, 6, 7, 8]) {
+      rerender({ v: "jam", playing: true, beat: beatAt(bar) });
+    }
+    await new Promise((r) => setTimeout(r, 10));
+    expect(names("setBeatGroups")).toHaveLength(0);
+    expect(names("setSubdivision")).toHaveLength(0);
+  });
+
+  it("leaves the bass out for a bass player", async () => {
+    await loadedBlues({ instrument: "bass" });
+    expect(lastConfig().bass).toBeNull();
+  });
+});
+
+/** Drill's ramp wearing a band: up a step every N choruses, on the downbeat. */
+describe("the tempo trainer", () => {
+  async function trained(step: number, every: number) {
+    const harness = mount("jam", { playing: true, beat: beatAt(0, 1) });
+    await waitFor(() => expect(harness.result.current.jams).toHaveLength(6));
+    act(() => harness.result.current.loadJam(harness.result.current.jams[0]));
+    act(() =>
+      harness.result.current.editJam({
+        practice: {
+          dropOutEvery: 0,
+          dropOutBars: 0,
+          tradeBars: 0,
+          tempoStep: step,
+          tempoEveryChoruses: every,
+        },
+      }),
+    );
+    await waitFor(() => expect(harness.result.current.jam?.practice).toBeTruthy());
+    return harness;
+  }
+
+  it("steps the tempo when a chorus ends, and only on the step", async () => {
+    const { result, rerender } = await trained(4, 2);
+    const start = result.current.jam!.bpm;
+    calls.length = 0;
+
+    // Chorus 1 ends, chorus 2 begins: not a step boundary.
+    rerender({ v: "jam", playing: true, beat: beatAt(0, 2) });
+    await new Promise((r) => setTimeout(r, 10));
+    expect(names("setBpm")).toHaveLength(0);
+
+    // Chorus 2 ends: two choruses done, so up four.
+    rerender({ v: "jam", playing: true, beat: beatAt(0, 3) });
+    await waitFor(() => expect(names("setBpm")).toEqual([start + 4]));
+    expect(result.current.trainedBpm).toBe(start + 4);
+  });
+
+  it("does not mark the jam dirty for playing it", async () => {
+    // The trainer is something the jam is doing to you, not an edit you made.
+    const { result, rerender } = await trained(4, 1);
+    act(() => result.current.saveActiveJam());
+    await waitFor(() => expect(result.current.dirty).toBe(false));
+    const saved = result.current.jam!.bpm;
+
+    rerender({ v: "jam", playing: true, beat: beatAt(0, 2) });
+    await waitFor(() => expect(result.current.trainedBpm).toBe(saved + 4));
+    expect(result.current.dirty).toBe(false);
+    expect(result.current.jam?.bpm).toBe(saved);
+  });
+
+  it("puts the jam back at its own tempo when you stop", async () => {
+    const { result, rerender } = await trained(4, 1);
+    const start = result.current.jam!.bpm;
+    rerender({ v: "jam", playing: true, beat: beatAt(0, 2) });
+    await waitFor(() => expect(result.current.trainedBpm).toBe(start + 4));
+    calls.length = 0;
+
+    rerender({ v: "jam", playing: false, beat: beatAt(0, 2) });
+    await waitFor(() => expect(names("setBpm")).toEqual([start]));
+    expect(result.current.trainedBpm).toBeNull();
+  });
+
+  it("stays put when the trainer is off", async () => {
+    const { result, rerender } = await trained(0, 0);
+    calls.length = 0;
+    rerender({ v: "jam", playing: true, beat: beatAt(0, 2) });
+    await new Promise((r) => setTimeout(r, 10));
+    expect(names("setBpm")).toHaveLength(0);
+    expect(result.current.trainedBpm).toBeNull();
   });
 });
 
