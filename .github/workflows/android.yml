@@ -61,9 +61,13 @@ jobs:
         if: inputs.tag != ''
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          # Through the environment, never interpolated into the script: an
+          # input that reaches `run:` as text is an input that can close the
+          # quoting and carry on as a command.
+          TAG: ${{ inputs.tag }}
         run: |
           if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
-            echo "::error::tag '${{ inputs.tag }}' was given but ANDROID_KEYSTORE_BASE64 is not set."
+            echo "::error::tag '$TAG' was given but ANDROID_KEYSTORE_BASE64 is not set."
             echo "::error::Add the four ANDROID_* secrets first, or run with an empty tag to build without publishing."
             exit 1
           fi
@@ -234,6 +238,6 @@ jobs:
         if: inputs.tag != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release upload "${{ inputs.tag }}" \
-            "${{ steps.outputs.outputs.apk }}" --clobber
+          TAG: ${{ inputs.tag }}
+          APK: ${{ steps.outputs.outputs.apk }}
+        run: gh release upload "$TAG" "$APK" --clobber
