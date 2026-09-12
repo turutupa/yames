@@ -13,6 +13,15 @@
 > **Audience:** the owner and the coding agents that implement it. Task
 > briefs live in `plans/tasks/mobile/`. Sizes are S / M / L as in
 > `ROADMAP.md` (≤1 day, ≤1 week, >1 week of agent-driven work).
+> **Status (end of 2026-09-11):** merged into `mobile` and re-verified:
+> M01 Rust gates, M02 frontend gates, M03a/b/c/d/e layout and harness,
+> M04 Android background audio and direct Oboe stream, M05a release
+> prep, M00 findings. Every desktop gate green throughout. Android runs
+> on the emulator: exact tempo (120 ticks/60 s), survives 10 min
+> screen-off, pauses for a call and resumes, Back behaves. **Nothing
+> has run on a physical phone yet.** M05 (signed release build) in
+> progress. Waiting on the owner: the upload keystore (M05 brief), the
+> Play developer account and twelve testers, the spare phone.
 > **Branch policy:** long-lived feature branch `mobile`. Each task gets a
 > worktree on `mob/m0N-short-name` and merges into `mobile`; `mobile`
 > merges to `main` when Android v1 is releasable. Nothing is committed
