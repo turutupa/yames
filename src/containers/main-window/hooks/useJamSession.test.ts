@@ -71,6 +71,7 @@ type Props = {
   playing?: boolean;
   beat?: BeatEvent | null;
   instrument?: string;
+  countingIn?: boolean;
 };
 
 /** A tick, with only the two fields the jam cares about set apart. */
@@ -89,7 +90,7 @@ function beatAt(formBar: number, chorus = 1, measureBeat = 0): BeatEvent {
 
 function mount(view = "jam", extra: Omit<Props, "v"> = {}) {
   return renderHook(
-    ({ v, playing, beat, instrument }: Props) =>
+    ({ v, playing, beat, instrument, countingIn }: Props) =>
       useJamSession({
         view: v,
         isPlaying: playing ?? false,
@@ -98,6 +99,7 @@ function mount(view = "jam", extra: Omit<Props, "v"> = {}) {
         // something to say about every test below.
         instrument: instrument ?? "electric-guitar",
         currentBeat: beat ?? null,
+        countingIn: countingIn ?? false,
       }),
     { initialProps: { v: view, ...extra } },
   );
@@ -295,6 +297,94 @@ describe("the bass, one bar ahead", () => {
   it("leaves the bass out for a bass player", async () => {
     await loadedBlues({ instrument: "bass" });
     expect(lastConfig().bass).toBeNull();
+  });
+
+  it("never overtakes the meter when a jam is switched mid-song", async () => {
+    // The load posts the meter and the table from inside an async function,
+    // so the meter lands a microtask later. This effect runs on the same
+    // commit, synchronously. Left to itself it posts the next bar's table
+    // first, the engine checks it against the meter it has not been given
+    // yet, refuses it, and the band is gone with nothing on screen to say so.
+    const { result } = mount("jam", { playing: true, beat: beatAt(0) });
+    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    const waltz = result.current.jams.find((j) => j.grooveId === "waltz")!;
+    act(() => result.current.loadJam(waltz));
+    await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
+    calls.length = 0;
+
+    // A blues, in another meter entirely, onto a click that is already going.
+    const blues = result.current.jams.find((j) => j.form.kind === "blues12")!;
+    act(() => result.current.loadJam(blues));
+    await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
+
+    const order = engineOrder();
+    expect(order.indexOf("setBeatGroups")).toBeGreaterThanOrEqual(0);
+    expect(order.indexOf("setJam")).toBeGreaterThan(order.indexOf("setSubdivision"));
+  });
+
+  it("still posts the next bar on the first bar line of a take", async () => {
+    // The guard above must cost exactly one send — the one the load is
+    // already making. Press play and the very first downbeat still has to
+    // hand the engine bar two, or bar two plays bar one's bass.
+    const { result, rerender } = mount("jam", { playing: false, beat: null });
+    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    const blues = result.current.jams.find((j) => j.form.kind === "blues12")!;
+    act(() => result.current.loadJam(blues));
+    await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
+    calls.length = 0;
+
+    rerender({ v: "jam", playing: true, beat: beatAt(0) });
+    await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
+  });
+
+  it("says nothing while the count-in is still counting", async () => {
+    // The count runs on the same tick grid the form does, so its bars look
+    // like bars. A two-bar count crosses a bar line, and a table posted
+    // inside it is applied at the top of the form — so bar one of the tune
+    // plays bar two's bass, every single time you press play.
+    const { result, rerender } = mount("jam", {
+      playing: true,
+      beat: beatAt(0),
+      countingIn: true,
+    });
+    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    const blues = result.current.jams.find((j) => j.form.kind === "blues12")!;
+    act(() => result.current.loadJam(blues));
+    await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
+    calls.length = 0;
+
+    // The second bar of the count.
+    rerender({ v: "jam", playing: true, beat: beatAt(1), countingIn: true });
+    await new Promise((r) => setTimeout(r, 10));
+    expect(names("setJam")).toHaveLength(0);
+
+    // And the top of the form, which is a bar line worth sending ahead of.
+    rerender({ v: "jam", playing: true, beat: beatAt(0), countingIn: false });
+    await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
+  });
+
+  it("keeps playing when a beat event arrives with no form bar on it", async () => {
+    // An older engine, or a tick that slipped through before the jam was
+    // registered. `undefined + 1` is NaN, the chord lookup comes back empty,
+    // and the whole hook used to throw inside the effect — which on this tab
+    // means a blank screen. Bar one is the honest answer.
+    const bare = beatAt(0) as Partial<BeatEvent>;
+    delete bare.formBar;
+    const { result, rerender } = mount("jam", { playing: true, beat: beatAt(0) });
+    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    const blues = result.current.jams.find((j) => j.form.kind === "blues12")!;
+    act(() => result.current.loadJam(blues));
+    await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
+    calls.length = 0;
+
+    expect(() =>
+      rerender({ v: "jam", playing: true, beat: bare as BeatEvent }),
+    ).not.toThrow();
+    await new Promise((r) => setTimeout(r, 10));
+    const sent = names("setJam").filter((c) => c !== null) as JamEngineConfig[];
+    for (const config of sent) {
+      expect(config.bass?.pitches.every((p) => Number.isFinite(p))).toBe(true);
+    }
   });
 });
 
