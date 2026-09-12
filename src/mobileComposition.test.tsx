@@ -16,16 +16,17 @@
 import "./test/mobileFlag"; // MUST be first — see the file.
 
 import { describe, it, expect, beforeEach } from "vitest";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { act, render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { IS_MOBILE } from "./platform";
 import { MainWindow } from "./containers/main-window/MainWindow";
 import { MetronomeView } from "./containers/metronome/MetronomeView";
 import { SettingsView } from "./containers/settings/SettingsView";
 import { OnboardingWizard } from "./containers/onboarding/OnboardingWizard";
 import { ONBOARDING_STEPS } from "./containers/onboarding/steps";
+import { SERVICE_START_DELAY_MS } from "./containers/main-window/hooks/useAndroidNative";
 import { INITIAL_ONBOARDING_STATE } from "./containers/onboarding/onboardingMachine";
 import { INERT_EVALUATION, INERT_MIDI } from "./platform.inert";
-import { DEFAULT_TEST_STATE, mockInvoke, setInvokeResponse } from "./test/mocks";
+import { DEFAULT_TEST_STATE, mockInvoke, mockListen, setInvokeResponse } from "./test/mocks";
 
 /** Nothing the user reads may say "coach", in any casing. */
 function expectNoCoachAnywhere() {
@@ -87,6 +88,53 @@ describe("MainWindow on a phone", () => {
 
     // Zen ships on a phone (plan §1) and the rail was its only door.
     expect(container.querySelector(".mobile-tab-zen")).not.toBeNull();
+  });
+
+  // M05, found on the first release build: a fresh install raised Android's
+  // "Allow Yames to send you notifications?" dialog over the welcome screen,
+  // before the user had pressed anything. The wizard demonstrates the app by
+  // running a soft 80 BPM click while it is open, that click is the engine's
+  // transport, and the transport is what starts the foreground service.
+  it("does not start the foreground service for the wizard's demo click", async () => {
+    mockInvoke.mockClear();
+    mockListen.mockClear();
+    render(<MainWindow />);
+
+    // The wizard is open (no saved onboarding version in the mocked store) and
+    // has asked the engine for its demo click, exactly as it does on a first
+    // launch.
+    await waitFor(() =>
+      expect(document.querySelector(".onboarding-overlay")).not.toBeNull(),
+    );
+    await waitFor(() =>
+      expect(
+        mockInvoke.mock.calls.some(([cmd]) => cmd === "toggle_playback"),
+      ).toBe(true),
+    );
+
+    // The engine answers the way it does in the app: it is now playing. This
+    // is the moment the guard exists for — the transport is live and no human
+    // pressed anything.
+    const stateListener = mockListen.mock.calls.find(
+      ([event]) => event === "state-changed",
+    )?.[1] as ((e: { payload: typeof DEFAULT_TEST_STATE }) => void) | undefined;
+    expect(stateListener).toBeDefined();
+    await act(async () => {
+      stateListener!({ payload: { ...DEFAULT_TEST_STATE, isPlaying: true, bpm: 80 } });
+    });
+
+    // Real time, and longer than `SERVICE_START_DELAY_MS`: the hook's delay
+    // would swallow this on its own, and what is under test here is the guard
+    // that keeps the service away for as long as the demo runs — which is the
+    // whole time the wizard is open, not half a second.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, SERVICE_START_DELAY_MS + 200));
+    });
+
+    const started = mockInvoke.mock.calls
+      .filter(([cmd]) => cmd === "plugin:yames-mobile|set_background_audio")
+      .map(([, args]) => (args as { payload: { active: boolean } }).payload.active);
+    expect(started).not.toContain(true);
   });
 
   it("opens the library as a sheet, and it starts closed", async () => {
@@ -198,17 +246,20 @@ describe("SettingsView on a phone", () => {
     onShareOption: () => {},
   };
 
-  it("shows general, appearance, output, support and about — and nothing else", async () => {
+  it("shows general, appearance, support and about — and nothing else", async () => {
     render(<SettingsView {...props} />);
 
     // The sections a phone keeps.
     expect(await screen.findByText("General")).toBeInTheDocument();
     expect(screen.getByText("Appearance")).toBeInTheDocument();
-    expect(screen.getByText("Devices")).toBeInTheDocument();
-    expect(screen.getByText("Audio Output")).toBeInTheDocument();
     expect(screen.getByText("About")).toBeInTheDocument();
 
-    // The three that are cut, plus the input half of Devices.
+    // Devices is gone entirely, heading and all. The input and MIDI halves
+    // were always cut; the output picker went with M05, because Android does
+    // its own routing and `set_audio_output_device` changes nothing there —
+    // so what was left was a heading over a dropdown that does nothing.
+    expect(screen.queryByText("Devices")).toBeNull();
+    expect(screen.queryByText("Audio Output")).toBeNull();
     expect(screen.queryByText("Audio Input")).toBeNull();
     expect(screen.queryByText("MIDI")).toBeNull();
     expect(screen.queryByText("Hotkeys")).toBeNull();
@@ -261,5 +312,38 @@ describe("the onboarding wizard on a phone", () => {
     expectNoCoachAnywhere();
     expect(screen.queryByText(/microphone/i)).toBeNull();
     expect(screen.queryByText(/footswitch/i)).toBeNull();
+  });
+
+  it("warns on the last step that the first Play raises a permission prompt", async () => {
+    render(
+      <OnboardingWizard
+        state={{
+          ...INITIAL_ONBOARDING_STATE,
+          status: "step",
+          stepId: "ready",
+        }}
+        dispatch={() => {}}
+        appVersion="1.0.4"
+        instrument="electric-guitar"
+        instrumentChosen
+        onInstrumentChange={() => {}}
+        soundType="click"
+        themeId="mono"
+        coachTier="off"
+        alwaysOnTop={false}
+        onAlwaysOnTopChange={() => {}}
+        startSoftClick={() => {}}
+        stopSoftClick={() => {}}
+        softClickPlaying={false}
+        onFinish={() => {}}
+      />,
+    );
+
+    // Not the wording, which is copy and will be reworded — that the phone
+    // says what it is about to ask for before it asks, rather than raising the
+    // prompt unannounced a second after the first Play (M04 findings).
+    expect(
+      await screen.findByText(/ask if Yames can show a notification/i),
+    ).toBeInTheDocument();
   });
 });

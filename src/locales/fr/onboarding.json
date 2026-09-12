@@ -115,6 +115,7 @@
     "ready": {
       "title": "Tout est prêt",
       "subtitle": "Modifiez ce que vous voulez ici, ou plus tard dans les Réglages.",
+      "notificationNote": "La première fois que vous appuyez sur Lecture, votre téléphone demande si Yames peut afficher une notification — dites oui et le clic continue même écran éteint.",
       "rows": {
         "instrument": "Instrument",
         "sound": "Son du clic",

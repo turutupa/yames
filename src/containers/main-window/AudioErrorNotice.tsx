@@ -24,8 +24,13 @@ import type { AudioErrorNotice as Notice } from "./audioError";
 
 export type AudioErrorNoticeProps = {
   notice: Notice;
-  /** Deep-links to Settings → Devices, where the output picker lives. */
-  onOpenSettings: () => void;
+  /**
+   * Deep-links to Settings → Devices, where the output picker lives.
+   * Omitted on a phone: Android routes output itself, there is no Devices
+   * section to land on, and a button that opens a page with nothing on it is
+   * worse than no button.
+   */
+  onOpenSettings?: () => void;
   onDismiss: () => void;
 };
 
@@ -54,13 +59,15 @@ export function AudioErrorNotice({
           </span>
         )}
       </div>
-      <button
-        type="button"
-        className="audio-error-notice-action"
-        onClick={onOpenSettings}
-      >
-        {t("audioError.openSettings")}
-      </button>
+      {onOpenSettings && (
+        <button
+          type="button"
+          className="audio-error-notice-action"
+          onClick={onOpenSettings}
+        >
+          {t("audioError.openSettings")}
+        </button>
+      )}
       <button
         type="button"
         className="audio-error-notice-dismiss"

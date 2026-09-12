@@ -74,7 +74,20 @@ export function Sheet({ open, onClose, title, ownHeader, className, children }: 
   // build-time constant so a desktop bundle never carries `src/mobile/`.
   if (IS_MOBILE) useBackDismiss(open, onClose);
 
+  // The latest `onClose`, without making it a dependency of anything.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   // Escape, and the focus that was somewhere else before this opened.
+  //
+  // `open` is the only dependency, and that is the whole point. Every call
+  // site passes an inline arrow for `onClose`, so its identity changes on
+  // every render of the screen behind the sheet — which, with the metronome
+  // running, is twice a second. With `onClose` in the array this effect ran
+  // that often, and each run moved focus back to the panel: the preset name
+  // field was blurred within a beat of appearing, and since it commits on
+  // blur, a preset could never be named on a phone. M05 found it trying to
+  // save one for a store screenshot.
   useEffect(() => {
     if (!open) return;
     const previous = document.activeElement as HTMLElement | null;
@@ -82,7 +95,7 @@ export function Sheet({ open, onClose, title, ownHeader, className, children }: 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.stopPropagation();
-        onClose();
+        onCloseRef.current();
       }
     };
     document.addEventListener("keydown", onKey);
@@ -90,7 +103,7 @@ export function Sheet({ open, onClose, title, ownHeader, className, children }: 
       document.removeEventListener("keydown", onKey);
       previous?.focus?.({ preventScroll: true });
     };
-  }, [open, onClose]);
+  }, [open]);
 
   // A sheet that opens while the last one is still sliding away would otherwise
   // keep the old drag offset and open part-way down the screen.

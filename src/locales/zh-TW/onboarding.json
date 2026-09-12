@@ -115,6 +115,7 @@
     "ready": {
       "title": "準備就緒",
       "subtitle": "可以在這裡修改，也可以稍後在設定中修改。",
+      "notificationNote": "第一次按下播放時，手機會詢問 Yames 是否可以顯示通知——同意後，關掉螢幕節拍聲也會繼續。",
       "rows": {
         "instrument": "樂器",
         "sound": "節拍音",

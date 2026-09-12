@@ -115,6 +115,7 @@
     "ready": {
       "title": "Je bent klaar",
       "subtitle": "Wijzig hier iets, of later in Instellingen.",
+      "notificationNote": "De eerste keer dat je op afspelen drukt, vraagt je telefoon of Yames een melding mag tonen — zeg ja en de klik loopt door met het scherm uit.",
       "rows": {
         "instrument": "Instrument",
         "sound": "Klikgeluid",

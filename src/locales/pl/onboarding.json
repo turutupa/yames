@@ -115,6 +115,7 @@
     "ready": {
       "title": "Wszystko gotowe",
       "subtitle": "Zmień coś tutaj albo później w Ustawieniach.",
+      "notificationNote": "Przy pierwszym naciśnięciu odtwarzania telefon zapyta, czy Yames może pokazywać powiadomienie — zgódź się, a klik będzie grał dalej przy wygaszonym ekranie.",
       "rows": {
         "instrument": "Instrument",
         "sound": "Dźwięk kliknięcia",

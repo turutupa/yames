@@ -115,6 +115,7 @@
     "ready": {
       "title": "You're ready",
       "subtitle": "Change anything here, or later in Settings.",
+      "notificationNote": "The first time you press play, your phone will ask if Yames can show a notification — say yes and the click keeps going with the screen off.",
       "rows": {
         "instrument": "Instrument",
         "sound": "Click sound",

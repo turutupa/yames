@@ -90,6 +90,16 @@ export function DevicesSettingsSection({
     setCalEntry(null);
   };
 
+  // The whole section is gone on a phone. The input and MIDI halves were
+  // already cut (below); the output picker goes now too, because M04 moved
+  // Android's output onto Oboe and let the system route it — `set_audio_
+  // output_device` does nothing there, and the saved device name is ignored.
+  // A dropdown that changes nothing is exactly the "greyed-out tile for a
+  // feature that isn't there" the mobile plan forbids, and with it gone the
+  // section has a heading and no content. Switching output on a phone is a
+  // thing you do in the system's own output picker, next to the volume.
+  if (IS_MOBILE) return null;
+
   return (
     // `id` is the deep-link target for the audio-failure notice, the same way
     // `settings-coach` is for O4's "Pick a voice" toast.

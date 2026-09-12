@@ -7,11 +7,11 @@
 // job is to name which of the three happened; everything below that name is
 // this hook, and this is where it is tested.
 import { act, renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mockChannels, mockInvoke } from "../../../test/mocks";
 import type { NativeEvent } from "../../../mobile/native";
 import { resetBackStack, useBackDismiss } from "../../../mobile/backStack";
-import { useAndroidNative } from "./useAndroidNative";
+import { SERVICE_START_DELAY_MS, useAndroidNative } from "./useAndroidNative";
 
 /** Deliver one Android-side event through the channel the hook opened. */
 function fromAndroid(event: NativeEvent) {
@@ -37,11 +37,31 @@ function mount(isPlaying: boolean) {
   );
 }
 
+/**
+ * Let the service-start delay elapse.
+ *
+ * The hook waits half a second before starting the foreground service, so
+ * that a transport which is only momentarily true never raises Android's
+ * notification prompt (see `SERVICE_START_DELAY_MS`). Every assertion about
+ * the service being *started* has to get past it; assertions about it being
+ * stopped do not, because stopping is immediate.
+ */
+async function settle() {
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(SERVICE_START_DELAY_MS + 1);
+  });
+}
+
 describe("the phone's native half", () => {
   beforeEach(() => {
+    vi.useFakeTimers();
     mockInvoke.mockClear();
     mockChannels.length = 0;
     resetBackStack();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("starts the foreground service when playback starts, and stops it when it stops", async () => {
@@ -55,7 +75,7 @@ describe("the phone's native half", () => {
 
     mockInvoke.mockClear();
     view.rerender({ playing: true });
-    await act(async () => {});
+    await settle();
     const payload = mockInvoke.mock.calls.find(
       ([cmd]) => cmd === "plugin:yames-mobile|set_background_audio",
     )?.[1] as { payload: Record<string, unknown> };
@@ -98,7 +118,7 @@ describe("the phone's native half", () => {
     // pause abandons audio focus, and an app that has abandoned focus is never
     // told it has it again — the click paused for the call and stayed paused.
     const view = mount(true);
-    await act(async () => {});
+    await settle();
     mockInvoke.mockClear();
 
     fromAndroid({ event: "audio_interrupted", kind: "focus_lost" });
@@ -132,7 +152,7 @@ describe("the phone's native half", () => {
 
   it("stops for good when another app takes over playback, and lets the service go", async () => {
     const view = mount(true);
-    await act(async () => {});
+    await settle();
     mockInvoke.mockClear();
 
     fromAndroid({ event: "audio_interrupted", kind: "focus_lost_permanently" });
@@ -145,6 +165,29 @@ describe("the phone's native half", () => {
       .filter(([cmd]) => cmd === "plugin:yames-mobile|set_background_audio")
       .at(-1)?.[1] as { payload: { active: boolean } } | undefined;
     expect(last?.payload.active).toBe(false);
+  });
+
+  // M05, on the first release build: the wizard's demo click is unwound as the
+  // wizard closes, and for the render between "the demo stopped" and "the
+  // engine stopped" the transport read as a user pressing play. Android raised
+  // its notification prompt on the way out of setup, for a click that had
+  // already stopped.
+  it("does not start the service for a transport that is only briefly live", async () => {
+    const view = mount(false);
+    await settle();
+    mockInvoke.mockClear();
+
+    view.rerender({ playing: true });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(SERVICE_START_DELAY_MS / 5);
+    });
+    view.rerender({ playing: false });
+    await settle();
+
+    const active = mockInvoke.mock.calls
+      .filter(([cmd]) => cmd === "plugin:yames-mobile|set_background_audio")
+      .map(([, args]) => (args as { payload: { active: boolean } }).payload.active);
+    expect(active).not.toContain(true);
   });
 
   it("stops when the notification's own button is pressed, and stays stopped", async () => {

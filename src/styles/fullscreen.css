@@ -369,6 +369,14 @@
   }
 }
 
+/* The phone build, saying so itself. See the note on `.zen-top-controls--touch`
+   below: `@media (pointer: coarse)` is a device's opinion, and the Android
+   emulator's WebView holds the wrong one. The hint names the exit button, so
+   on a phone it is the caption under the only way out. */
+.fs-exit-hint--touch {
+  opacity: 0.5;
+}
+
 /* =================== Zen Styles =================== */
 
 /* =================== Zen Top Controls =================== */
@@ -581,7 +589,9 @@
 
   /* Fully visible, not 0.7. On a desktop these appear when the pointer
      arrives; on a phone nothing announces them, and one of them is the only
-     way out of a view that covers the whole screen. */
+     way out of a view that covers the whole screen. Kept for a desktop
+     browser on a touchscreen; the phone build no longer relies on it, see
+     `.zen-top-controls--touch`. */
   .zen-top-controls {
     opacity: 1;
   }
@@ -611,6 +621,16 @@
   }
 }
 
+/* The phone build's own claim, independent of what the device says about its
+   pointer. M05 read `(pointer: coarse) = false` and `(hover: hover) = false`
+   out of the release WebView on the Android emulator: the coarse block above
+   never applied, `.zen-top-controls` stayed at opacity 0, and zen -- the one
+   screen that covers everything and has no Esc key -- had no visible door.
+   That is also why M00's zen screenshot has no exit button in it. */
+.zen-top-controls--touch {
+  opacity: 1;
+}
+
 /* The way out, drawn.
 
    It only exists on the phone build (`IS_MOBILE` in FullscreenView), because
@@ -624,12 +644,19 @@
   color: rgba(255, 255, 255, 0.92);
 }
 
+/* Bigger than the theme picker beside it: this is the one a musician reaches
+   for in a hurry, and M03a's 44px hit area is the floor, not the target. On
+   the build's own say-so rather than the media query, for the reason above --
+   the button that is hardest to hit should not be the one whose size depends
+   on the device being right about itself. */
 @media (pointer: coarse) {
-  /* Bigger than the theme picker beside it: this is the one a musician
-     reaches for in a hurry, and M03a's 44px hit area is the floor, not the
-     target. */
   .zen-exit-btn {
     width: 44px;
     height: 44px;
   }
+}
+
+.zen-top-controls--touch .zen-exit-btn {
+  width: 44px;
+  height: 44px;
 }

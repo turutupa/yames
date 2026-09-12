@@ -115,6 +115,7 @@
     "ready": {
       "title": "Todo listo",
       "subtitle": "Cambia lo que quieras aquí o luego en Ajustes.",
+      "notificationNote": "La primera vez que pulses play, el teléfono te preguntará si Yames puede mostrar una notificación: dile que sí y el clic seguirá sonando con la pantalla apagada.",
       "rows": {
         "instrument": "Instrumento",
         "sound": "Sonido del clic",

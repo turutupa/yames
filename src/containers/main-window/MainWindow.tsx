@@ -988,7 +988,15 @@ export function MainWindow() {
   // zen. Not for settings.
   if (IS_MOBILE)
     useAndroidNative({
-      isPlaying: state.isPlaying,
+      // `&& !softClickPlaying`: the wizard demonstrates the app by running a
+      // soft 80 BPM click while it is open, which is the transport as far as
+      // the engine is concerned. Passed through as "playing" it started the
+      // foreground service — and so raised Android's notification prompt — on
+      // the welcome screen of a first launch, before the user had pressed
+      // anything at all. A demo click needs no service: it stops when the
+      // wizard closes and nothing about it has to survive the screen going
+      // off.
+      isPlaying: state.isPlaying && !softClickPlaying,
       bpm: state.speedRamp?.active ? state.speedRamp.currentBpm : state.bpm,
       keepScreenOn:
         state.isPlaying || isFullscreen || (state.speedRamp?.active ?? false),
@@ -1039,10 +1047,15 @@ export function MainWindow() {
       {audioError.notice && (
         <AudioErrorNotice
           notice={audioError.notice}
-          onOpenSettings={() => {
-            audioError.dismiss();
-            openAudioSettings();
-          }}
+          onOpenSettings={
+            // No Devices section exists on a phone to deep-link into.
+            IS_MOBILE
+              ? undefined
+              : () => {
+                  audioError.dismiss();
+                  openAudioSettings();
+                }
+          }
           onDismiss={audioError.dismiss}
         />
       )}
