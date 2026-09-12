@@ -192,6 +192,13 @@ export type SetlistStep = {
    */
   trigger: SetlistTrigger;
   transition: SetlistTransition;
+  /**
+   * A step that is a jam (plans/JAM_MODE.md §8.5). The jam is loaded by id
+   * when the step starts and cleared when it ends; the fields above carry
+   * the jam's tempo and meter for the sentence and the engine. A jam that
+   * no longer exists plays as the plain metronome step it describes.
+   */
+  jamId?: string;
 };
 
 export type Setlist = {

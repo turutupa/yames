@@ -1150,7 +1150,7 @@ export function onPlaybackFinished(callback: () => void) {
 // Jam (plans/JAM_MODE.md, plans/tasks/jam/BRIEF.md)
 // ---------------------------------------------------------------------------
 
-import type { Jam, JamEngineConfig, JamPositionCommand } from "./jam/types";
+import type { Jam, JamEngineConfig, JamPositionCommand, JamTake } from "./jam/types";
 
 /**
  * Jams live beside presets and setlists in the same `settings.json` store,
@@ -1190,4 +1190,41 @@ export async function setJam(config: JamEngineConfig | null): Promise<void> {
  */
 export async function setJamPosition(command: JamPositionCommand): Promise<void> {
   return invoke("set_jam_position", { command });
+}
+
+// ---------------------------------------------------------------------------
+// Takes (plans/JAM_MODE.md §4.4): your playing with the band mixed in, kept
+// locally in the app's data directory, opt-in per jam. Nothing leaves the
+// machine.
+// ---------------------------------------------------------------------------
+
+/** Start recording; the engine mixes the mic and the band into one WAV. */
+export async function startTake(jamId: string): Promise<void> {
+  return invoke("start_take", { jamId });
+}
+
+/** Stop and keep the take, or `null` when nothing was recording. */
+export async function stopTake(): Promise<JamTake | null> {
+  return invoke("stop_take");
+}
+
+export async function listTakes(jamId: string): Promise<JamTake[]> {
+  return invoke("list_takes", { jamId });
+}
+
+export async function deleteTake(id: string): Promise<void> {
+  return invoke("delete_take", { id });
+}
+
+/** Play a take through the engine; the band is silent while it plays. */
+export async function playTake(id: string): Promise<void> {
+  return invoke("play_take", { id });
+}
+
+export async function stopTakePlayback(): Promise<void> {
+  return invoke("stop_take_playback");
+}
+
+export function onTakePlaybackEnded(callback: () => void) {
+  return listen<null>("take-playback-ended", () => callback());
 }

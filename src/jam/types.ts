@@ -65,7 +65,26 @@ export type JamEngineConfig = {
    * Absent or 0: the last bar only.
    */
   fillEvery?: number;
+  /**
+   * The keys, comping. One voicing per tick: up to four MIDI notes, an
+   * empty array for a rest. Same length as the drum lanes. Absent or null:
+   * no keys.
+   */
+  keys?: JamKeysLine | null;
+  /** Per-lane gain multipliers, 0..1.5. Absent: 1.0 each. */
+  mix?: JamMix;
+  /** What the count-in plays: the beep the drill uses, or the kit's sticks. */
+  countInSound?: JamCountInSound;
 };
+
+export type JamKeysLine = {
+  voicings: number[][];
+  /** Gain multiplier on the keys voice, 0.5..1.5. */
+  gain: number;
+};
+
+export type JamMix = { drums: number; bass: number; keys: number };
+export type JamCountInSound = "beep" | "sticks";
 
 /**
  * Where the form goes next. The engine applies both at the next bar line,
@@ -174,6 +193,38 @@ export type Jam = {
   practice?: JamPracticeSettings;
   /** Fills every N bars within the chorus as well as at its end. Absent or 0: end only. */
   fillEvery?: number;
+  /**
+   * The changes, typed in: one chord name per bar of the chorus ("A7",
+   * "Dm7", "Bb"), exactly `form.bars` long. Absent: the form's own
+   * progression for the key.
+   */
+  progression?: string[];
+  /**
+   * The meter, when it is not the groove's own: the beat groups the
+   * metronome's meter editor uses ([2, 2, 3] for 7/8) and the ticks per
+   * beat. A groove that does not fit the meter is replaced by the rule
+   * groove (kick on group starts, snare late in the group, hats on the
+   * subdivision). Absent: the groove's meter.
+   */
+  meter?: { beatGroups: number[]; ticksPerBeat: 1 | 2 | 3 | 4 | 6 };
+  /** Per-lane volume. Absent: 1.0 each. */
+  mix?: JamMix;
+  /** Absent: "beep". */
+  countInSound?: JamCountInSound;
+  /** Spoken cues (count-in, sections, "your four") where a voice is set up. Absent: off. */
+  cues?: boolean;
+  /** Record takes, opt-in. Absent: off. */
+  takes?: boolean;
+};
+
+/** A recorded take: your playing with the band mixed in, kept locally. */
+export type JamTake = {
+  id: string;
+  jamId: string;
+  createdAt: number;
+  durationSec: number;
+  /** Absolute path of the WAV in the app's data directory. */
+  path: string;
 };
 
 export type JamCustomGroove = {
