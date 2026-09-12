@@ -195,6 +195,7 @@
         "tab-1": "Pestaña Metrónomo",
         "tab-2": "Pestaña Setlist",
         "tab-3": "Pestaña Rampa de tempo",
+        "tab-4": "Pestaña Jam",
         "settings": "Ajustes",
         "toggle-sidebar": "Alternar barra lateral",
         "toggle-coach": "Alternar entrenador"
@@ -219,6 +220,7 @@
         "tab-1": "Cambia a la pestaña Metrónomo",
         "tab-2": "Cambia a la pestaña Setlist",
         "tab-3": "Cambia a la pestaña Rampa de tempo",
+        "tab-4": "Cambia a la pestaña Jam",
         "settings": "Abre o cierra los ajustes",
         "toggle-sidebar": "Contraer o expandir la barra lateral izquierda",
         "toggle-coach": "Abre o cierra el panel del entrenador"

@@ -195,6 +195,7 @@
         "tab-1": "Metronome tab",
         "tab-2": "Setlist tab",
         "tab-3": "Drill tab",
+        "tab-4": "Jam tab",
         "settings": "Settings",
         "toggle-sidebar": "Toggle Sidebar",
         "toggle-coach": "Toggle Coach"
@@ -219,6 +220,7 @@
         "tab-1": "Switch to Metronome tab",
         "tab-2": "Switch to Setlist tab",
         "tab-3": "Switch to Drill tab",
+        "tab-4": "Switch to Jam tab",
         "settings": "Open or close settings",
         "toggle-sidebar": "Collapse or expand the left sidebar",
         "toggle-coach": "Open or close the practice coach panel"

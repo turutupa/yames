@@ -1,0 +1,92 @@
+{
+  "jam": {
+    "badge": "JAM",
+    "newJam": "Nouveau jam",
+    "untitled": "Nouveau jam",
+    "deleteJam": "Supprimer le jam",
+    "duplicateJam": "Dupliquer le jam",
+    "copyName": "{{name}} copie",
+    "renameTooltip": "Renommer ce jam",
+    "reorderHint": "Glisser pour réordonner",
+    "edited": "Modifié",
+    "save": "Enregistrer",
+    "saved": "Enregistré",
+    "saveTooltip": "Enregistrer le jam tel quel",
+    "noChanges": "Aucun changement",
+    "revert": "Rétablir",
+    "revertTooltip": "Revenir au jam enregistré",
+    "noneOpenTitle": "Aucun jam ouvert",
+    "noneOpenLead": "Un jam, c'est un groupe sur lequel jouer : un groove, un tempo et une forme qui compte les mesures à ta place. Charges-en un depuis la bibliothèque, ou commences-en un nouveau.",
+    "headphones": "Au casque, la note reste honnête.",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "Groove",
+      "rock8": "Rock croches",
+      "rock16": "Rock doubles-croches",
+      "halfTime": "Half-time",
+      "shuffle": "Shuffle",
+      "waltz": "Valse",
+      "sixEight": "6/8",
+      "bossa": "Bossa",
+      "swingRide": "Swing à la ride"
+    },
+    "feel": {
+      "label": "Feel",
+      "straight": "Binaire",
+      "shuffle": "Shuffle",
+      "swing": "Swing"
+    },
+    "intensity": {
+      "label": "Intensité",
+      "soft": "Doux",
+      "normal": "Normal",
+      "loud": "Fort"
+    },
+    "form": {
+      "label": "Forme",
+      "blues12": "Blues 12 mesures",
+      "blues12Hint": "I · IV · V, le turnaround à la 12",
+      "loop8": "Boucle de 8 mesures",
+      "loop8Hint": "une grille, encore et encore",
+      "bars16": "16 mesures",
+      "bars16Hint": "deux moitiés",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "la forme des standards",
+      "one": "Un accord",
+      "oneHint": "juste le groove",
+      "custom": "La tienne",
+      "customHint": "autant de mesures que tu comptes",
+      "barsLabel": "Mesures",
+      "fewerBars": "Moins de mesures",
+      "moreBars": "Plus de mesures",
+      "barOf": "mesure {{current}} sur {{total}}",
+      "chorus": "chorus {{count}}",
+      "fillMark": "fill",
+      "section": "Section {{name}}"
+    },
+    "short": {
+      "blues12": "12 mesures",
+      "loop8": "8 mesures",
+      "bars16": "16 mesures",
+      "aaba32": "AABA",
+      "one": "1 accord",
+      "custom": "{{count}} mesures",
+      "custom_one": "{{count}} mesure",
+      "custom_other": "{{count}} mesures"
+    },
+    "countIn": {
+      "label": "Décompte",
+      "none": "Aucun",
+      "bars": "{{count}} mesures",
+      "bars_one": "{{count}} mesure",
+      "bars_other": "{{count}} mesures"
+    },
+    "fills": {
+      "label": "Fills",
+      "hint": "Un fill sur la dernière mesure du chorus, et une crash sur le un."
+    },
+    "transport": {
+      "chorus": "Chorus"
+    }
+  }
+}

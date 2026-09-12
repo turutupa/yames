@@ -1,0 +1,92 @@
+{
+  "jam": {
+    "badge": "JAM",
+    "newJam": "Nowy jam",
+    "untitled": "Nowy jam",
+    "deleteJam": "Usuń jam",
+    "duplicateJam": "Powiel jam",
+    "copyName": "{{name}} kopia",
+    "renameTooltip": "Zmień nazwę tego jamu",
+    "reorderHint": "Przeciągnij, aby zmienić kolejność",
+    "edited": "Zmieniono",
+    "save": "Zapisz",
+    "saved": "Zapisano",
+    "saveTooltip": "Zapisz jam w obecnej postaci",
+    "noChanges": "Brak zmian",
+    "revert": "Przywróć",
+    "revertTooltip": "Wróć do zapisanego jamu",
+    "noneOpenTitle": "Nie otwarto żadnego jamu",
+    "noneOpenLead": "Jam to zespół, nad którym grasz: groove, tempo i forma, która liczy takty za ciebie. Wczytaj jeden z biblioteki albo zacznij nowy.",
+    "headphones": "W słuchawkach ocena pozostaje uczciwa.",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "Groove",
+      "rock8": "Rock na ósemkach",
+      "rock16": "Rock na szesnastkach",
+      "halfTime": "Half-time",
+      "shuffle": "Shuffle",
+      "waltz": "Walc",
+      "sixEight": "6/8",
+      "bossa": "Bossa",
+      "swingRide": "Swing na ride"
+    },
+    "feel": {
+      "label": "Feel",
+      "straight": "Prosto",
+      "shuffle": "Shuffle",
+      "swing": "Swing"
+    },
+    "intensity": {
+      "label": "Intensywność",
+      "soft": "Cicho",
+      "normal": "Normalnie",
+      "loud": "Głośno"
+    },
+    "form": {
+      "label": "Forma",
+      "blues12": "Blues 12-taktowy",
+      "blues12Hint": "I · IV · V, zwrot w 12. takcie",
+      "loop8": "Pętla 8-taktowa",
+      "loop8Hint": "jeden przebieg, w kółko",
+      "bars16": "16 taktów",
+      "bars16Hint": "dwie połowy",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "forma standardów",
+      "one": "Jeden akord",
+      "oneHint": "sam groove",
+      "custom": "Własna",
+      "customHint": "tyle taktów, ile liczysz",
+      "barsLabel": "Takty",
+      "fewerBars": "Mniej taktów",
+      "moreBars": "Więcej taktów",
+      "barOf": "takt {{current}} z {{total}}",
+      "chorus": "chorus {{count}}",
+      "fillMark": "fill",
+      "section": "Część {{name}}"
+    },
+    "short": {
+      "blues12": "12 taktów",
+      "loop8": "8 taktów",
+      "bars16": "16 taktów",
+      "aaba32": "AABA",
+      "one": "1 akord",
+      "custom": "{{count}} taktów",
+      "custom_one": "{{count}} takt",
+      "custom_other": "{{count}} taktów"
+    },
+    "countIn": {
+      "label": "Odliczenie",
+      "none": "Brak",
+      "bars": "{{count}} taktów",
+      "bars_one": "{{count}} takt",
+      "bars_other": "{{count}} taktów"
+    },
+    "fills": {
+      "label": "Fille",
+      "hint": "Fill w ostatnim takcie chorusa i crash na raz."
+    },
+    "transport": {
+      "chorus": "Chorus"
+    }
+  }
+}

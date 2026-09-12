@@ -9,7 +9,7 @@ function setup(overrides: Partial<React.ComponentProps<typeof Rail>> = {}) {
     state: DEFAULT_TEST_STATE,
     view: "beat" as const,
     setView: vi.fn(),
-    prevTab: { current: "beat" as "beat" | "drill" | "setlist" },
+    prevTab: { current: "beat" as "beat" | "drill" | "setlist" | "jam" },
     libraryOpen: false,
     onToggleLibrary: vi.fn(),
     onLoadPreset: vi.fn(),
@@ -20,6 +20,14 @@ function setup(overrides: Partial<React.ComponentProps<typeof Rail>> = {}) {
     onNewSetlist: vi.fn(),
     onDeleteSetlist: vi.fn(),
     onRenameSetlist: vi.fn(),
+    jams: [],
+    activeJamId: null,
+    onLoadJam: vi.fn(),
+    onNewJam: vi.fn(),
+    onDeleteJam: vi.fn(),
+    onRenameJam: vi.fn(),
+    onDuplicateJam: vi.fn(),
+    onReorderJams: vi.fn(),
     coachOpen: false,
     coachActive: false,
     coachListening: false,
@@ -42,7 +50,7 @@ describe("Rail", () => {
     // promise with no date. Pocket Check is gone (U1.7), Paths is not here yet.
     const { container } = setup();
     const labels = [...container.querySelectorAll(".rail-mode-label")].map((n) => n.textContent);
-    expect(labels).toEqual(["Metronome", "Setlist", "Drill"]);
+    expect(labels).toEqual(["Metronome", "Setlist", "Drill", "Jam"]);
   });
 
   it("switches mode and marks the current one for assistive tech", () => {
@@ -118,7 +126,7 @@ describe("Rail", () => {
   });
 
   it("remembers the mode it left when opening settings, and returns to it", () => {
-    const prevTab = { current: "beat" as "beat" | "drill" | "setlist" };
+    const prevTab = { current: "beat" as "beat" | "drill" | "setlist" | "jam" };
     const setView = vi.fn();
     const { props, rerender } = setup({ view: "drill", prevTab, setView });
 
@@ -129,6 +137,23 @@ describe("Rail", () => {
     rerender(<Rail {...props} view="settings" />);
     fireEvent.click(screen.getByText("Settings"));
     expect(setView).toHaveBeenLastCalledWith("drill");
+  });
+
+  it("opens Jam, and comes back to it from Settings", () => {
+    // The Settings button used to read `view === "drill" ? "drill" : "beat"`,
+    // which sent anyone who opened Settings from the setlist or the jam back
+    // to the metronome. Two modes were added under that line before anyone
+    // noticed, so it is pinned here rather than left to be found a third time.
+    const prevTab = { current: "beat" as "beat" | "drill" | "setlist" | "jam" };
+    const setView = vi.fn();
+    const { props, rerender } = setup({ view: "jam", prevTab, setView });
+
+    fireEvent.click(screen.getByText("Settings"));
+    expect(prevTab.current).toBe("jam");
+
+    rerender(<Rail {...props} view="settings" />);
+    fireEvent.click(screen.getByText("Settings"));
+    expect(setView).toHaveBeenLastCalledWith("jam");
   });
 
   it("names every button, so the icon-only rail is still usable blind", () => {

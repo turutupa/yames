@@ -1,0 +1,92 @@
+{
+  "jam": {
+    "badge": "JAM",
+    "newJam": "New jam",
+    "untitled": "New jam",
+    "deleteJam": "Delete jam",
+    "duplicateJam": "Duplicate jam",
+    "copyName": "{{name}} copy",
+    "renameTooltip": "Rename this jam",
+    "reorderHint": "Drag to reorder",
+    "edited": "Edited",
+    "save": "Save",
+    "saved": "Saved",
+    "saveTooltip": "Save the jam as it is now",
+    "noChanges": "No changes",
+    "revert": "Revert",
+    "revertTooltip": "Go back to the saved jam",
+    "noneOpenTitle": "No jam open",
+    "noneOpenLead": "A jam is a band to play over: a groove, a tempo and a form that keeps your place for you. Load one from the library, or start a new one.",
+    "headphones": "Headphones keep the score honest.",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "Groove",
+      "rock8": "Rock 8ths",
+      "rock16": "Rock 16ths",
+      "halfTime": "Half-time",
+      "shuffle": "Shuffle",
+      "waltz": "Waltz",
+      "sixEight": "6/8",
+      "bossa": "Bossa",
+      "swingRide": "Swing ride"
+    },
+    "feel": {
+      "label": "Feel",
+      "straight": "Straight",
+      "shuffle": "Shuffle",
+      "swing": "Swing"
+    },
+    "intensity": {
+      "label": "Intensity",
+      "soft": "Soft",
+      "normal": "Normal",
+      "loud": "Loud"
+    },
+    "form": {
+      "label": "Form",
+      "blues12": "12-bar blues",
+      "blues12Hint": "I · IV · V, the turnaround on 12",
+      "loop8": "8-bar loop",
+      "loop8Hint": "one progression, round and round",
+      "bars16": "16-bar",
+      "bars16Hint": "two halves",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "the standard shape",
+      "one": "One chord",
+      "oneHint": "just the groove",
+      "custom": "Your own",
+      "customHint": "as many bars as you count",
+      "barsLabel": "Bars",
+      "fewerBars": "Fewer bars",
+      "moreBars": "More bars",
+      "barOf": "bar {{current}} of {{total}}",
+      "chorus": "chorus {{count}}",
+      "fillMark": "fill",
+      "section": "Section {{name}}"
+    },
+    "short": {
+      "blues12": "12-bar",
+      "loop8": "8-bar",
+      "bars16": "16-bar",
+      "aaba32": "AABA",
+      "one": "1 chord",
+      "custom": "{{count}} bars",
+      "custom_one": "{{count}} bar",
+      "custom_other": "{{count}} bars"
+    },
+    "countIn": {
+      "label": "Count-in",
+      "none": "None",
+      "bars": "{{count}} bars",
+      "bars_one": "{{count}} bar",
+      "bars_other": "{{count}} bars"
+    },
+    "fills": {
+      "label": "Fills",
+      "hint": "A fill on the last bar of the chorus, and a crash on the one."
+    },
+    "transport": {
+      "chorus": "Chorus"
+    }
+  }
+}

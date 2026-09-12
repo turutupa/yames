@@ -1,0 +1,197 @@
+/**
+ * Jam records — making them, renaming them, and the six that ship.
+ *
+ * Pure, like `setlist/setlists.ts`, and for the same reason: the library edits
+ * a jam across several clicks and a drag, and deciding when that reaches the
+ * store is the sidebar's call, not this module's. `saveJams` is one call away
+ * in `src/ipc.ts`.
+ */
+import { grooveById } from "./grooves";
+import { clampFormBars } from "./forms";
+import { JAM_MAX_COUNT_IN } from "./types";
+import type { Jam, JamForm } from "./types";
+
+/**
+ * The same scheme `setlists.ts` uses: sortable-ish by time, short enough to
+ * read in the store file, and random enough that duplicating a jam twice in
+ * one tick cannot collide.
+ */
+export function newId(): string {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
+}
+
+/** Beats counted in before bar 1. 0..8 — `arm_count_in`'s own limit. */
+export function clampCountIn(beats: number): number {
+  return Math.max(0, Math.min(JAM_MAX_COUNT_IN, Math.round(beats || 0)));
+}
+
+export type NewJamFields = Partial<Omit<Jam, "id" | "name" | "createdAt">>;
+
+/**
+ * A jam with everything filled in.
+ *
+ * The defaults are the plainest thing that plays: rock eighths, straight, an
+ * eight-bar loop, one bar counted in. `+` in the library hands the current
+ * jam's settings in on top, so "new" means "another one like this" rather than
+ * "start again".
+ */
+export function createJam(name: string, fields: NewJamFields = {}): Jam {
+  const grooveId = fields.grooveId ?? "rock8";
+  const form: JamForm = fields.form
+    ? { kind: fields.form.kind, bars: clampFormBars(fields.form.bars) }
+    : { kind: "loop8", bars: 8 };
+  return {
+    id: newId(),
+    name,
+    createdAt: Date.now(),
+    bpm: fields.bpm ?? 100,
+    grooveId,
+    feel: fields.feel ?? "straight",
+    intensity: fields.intensity ?? "normal",
+    kit: fields.kit ?? "room",
+    form,
+    countIn: clampCountIn(fields.countIn ?? grooveById(grooveId).beatsPerBar),
+    fills: fields.fills ?? true,
+    ...(fields.key ? { key: fields.key } : {}),
+  };
+}
+
+export function renameJam(jam: Jam, name: string): Jam {
+  const next = name.trim();
+  if (!next || next === jam.name) return jam;
+  return { ...jam, name: next };
+}
+
+/**
+ * `list` with `next` in it — replacing an entry of the same id, or appended.
+ *
+ * Blind appending is the bug `upsertSetlist` was written for: the jam is in
+ * the store by the time `saveJams` resolves, so a `listJams()` still in flight
+ * can come back with it already present, and two rows sharing an id render as
+ * one row that does nothing. Returns `list` itself when nothing changes, so
+ * React can skip the render.
+ */
+export function upsertJam(list: Jam[], next: Jam): Jam[] {
+  const at = list.findIndex((j) => j.id === next.id);
+  if (at === -1) return [...list, next];
+  if (list[at] === next) return list;
+  const out = [...list];
+  out[at] = next;
+  return out;
+}
+
+/** A copy, with a new id and a name that says it is one. */
+export function duplicateJam(jam: Jam, name: string): Jam {
+  return { ...jam, id: newId(), name, createdAt: Date.now() };
+}
+
+/**
+ * Move a jam within the list. Out-of-range indices leave the list alone, so a
+ * drag that ends outside the panel is a no-op rather than a reshuffle.
+ */
+export function reorderJams(list: Jam[], from: number, to: number): Jam[] {
+  if (from === to) return list;
+  if (from < 0 || from >= list.length || to < 0 || to >= list.length) return list;
+  const out = [...list];
+  const [moved] = out.splice(from, 1);
+  out.splice(to, 0, moved);
+  return out;
+}
+
+/**
+ * The six that ship, so the first press of Jam already plays (JAM_MODE §4.6).
+ *
+ * The names are not translated: "Slow blues in A" is a piece of music, the way
+ * a preset a user saved is, and translating it would make the library read
+ * differently from the one the next person's screenshot shows. The grooves and
+ * the forms they point at ARE translated — those are the app's words.
+ *
+ * The ids are stable rather than generated: they are seeded once per install
+ * and a fixed id keeps a re-seed from doubling the library.
+ */
+export const STARTER_JAMS: readonly Jam[] = [
+  {
+    id: "jam-slow-blues-a",
+    name: "Slow blues in A",
+    createdAt: 0,
+    bpm: 92,
+    grooveId: "shuffle",
+    feel: "shuffle",
+    intensity: "normal",
+    kit: "room",
+    form: { kind: "blues12", bars: 12 },
+    countIn: 4,
+    fills: true,
+    key: "A",
+  },
+  {
+    id: "jam-funk-e",
+    name: "Funk in E",
+    createdAt: 0,
+    bpm: 104,
+    grooveId: "rock16",
+    feel: "straight",
+    intensity: "normal",
+    kit: "room",
+    form: { kind: "loop8", bars: 8 },
+    countIn: 4,
+    fills: true,
+    key: "E",
+  },
+  {
+    id: "jam-bossa-dm",
+    name: "Bossa in D minor",
+    createdAt: 0,
+    bpm: 120,
+    grooveId: "bossa",
+    feel: "straight",
+    intensity: "soft",
+    kit: "room",
+    form: { kind: "bars16", bars: 16 },
+    countIn: 4,
+    fills: true,
+    key: "Dm",
+  },
+  {
+    id: "jam-swing-f",
+    name: "Swing in F",
+    createdAt: 0,
+    bpm: 160,
+    grooveId: "swingRide",
+    feel: "swing",
+    intensity: "normal",
+    kit: "room",
+    form: { kind: "aaba32", bars: 32 },
+    countIn: 4,
+    fills: true,
+    key: "F",
+  },
+  {
+    id: "jam-rock-g",
+    name: "Rock in G",
+    createdAt: 0,
+    bpm: 120,
+    grooveId: "rock8",
+    feel: "straight",
+    intensity: "loud",
+    kit: "room",
+    form: { kind: "loop8", bars: 8 },
+    countIn: 4,
+    fills: true,
+    key: "G",
+  },
+  {
+    id: "jam-waltz-c",
+    name: "Waltz in C",
+    createdAt: 0,
+    bpm: 140,
+    grooveId: "waltz",
+    feel: "straight",
+    intensity: "soft",
+    kit: "room",
+    form: { kind: "bars16", bars: 16 },
+    countIn: 3,
+    fills: true,
+    key: "C",
+  },
+];

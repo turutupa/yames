@@ -1,0 +1,92 @@
+{
+  "jam": {
+    "badge": "JAM",
+    "newJam": "Jam mới",
+    "untitled": "Jam mới",
+    "deleteJam": "Xóa jam",
+    "duplicateJam": "Nhân bản jam",
+    "copyName": "{{name}} bản sao",
+    "renameTooltip": "Đổi tên jam này",
+    "reorderHint": "Kéo để sắp xếp lại",
+    "edited": "Đã sửa",
+    "save": "Lưu",
+    "saved": "Đã lưu",
+    "saveTooltip": "Lưu jam như hiện tại",
+    "noChanges": "Không có thay đổi",
+    "revert": "Hoàn tác",
+    "revertTooltip": "Quay lại jam đã lưu",
+    "noneOpenTitle": "Chưa mở jam nào",
+    "noneOpenLead": "Một jam là ban nhạc để bạn chơi cùng: một groove, một tempo và một cấu trúc tự đếm ô nhịp thay bạn. Hãy tải một jam từ thư viện, hoặc tạo jam mới.",
+    "headphones": "Dùng tai nghe thì điểm số mới trung thực.",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "Groove",
+      "rock8": "Rock móc đơn",
+      "rock16": "Rock móc kép",
+      "halfTime": "Half-time",
+      "shuffle": "Shuffle",
+      "waltz": "Điệu valse",
+      "sixEight": "6/8",
+      "bossa": "Bossa",
+      "swingRide": "Swing ride"
+    },
+    "feel": {
+      "label": "Cảm giác",
+      "straight": "Đều",
+      "shuffle": "Shuffle",
+      "swing": "Swing"
+    },
+    "intensity": {
+      "label": "Cường độ",
+      "soft": "Nhẹ",
+      "normal": "Vừa",
+      "loud": "Mạnh"
+    },
+    "form": {
+      "label": "Cấu trúc",
+      "blues12": "Blues 12 ô nhịp",
+      "blues12Hint": "I · IV · V, turnaround ở ô 12",
+      "loop8": "Vòng 8 ô nhịp",
+      "loop8Hint": "một vòng hợp âm, lặp mãi",
+      "bars16": "16 ô nhịp",
+      "bars16Hint": "hai nửa",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "cấu trúc của các bản standard",
+      "one": "Một hợp âm",
+      "oneHint": "chỉ có groove",
+      "custom": "Của bạn",
+      "customHint": "bao nhiêu ô nhịp tùy bạn",
+      "barsLabel": "Ô nhịp",
+      "fewerBars": "Bớt ô nhịp",
+      "moreBars": "Thêm ô nhịp",
+      "barOf": "ô nhịp {{current}} trên {{total}}",
+      "chorus": "chorus {{count}}",
+      "fillMark": "fill",
+      "section": "Đoạn {{name}}"
+    },
+    "short": {
+      "blues12": "12 ô nhịp",
+      "loop8": "8 ô nhịp",
+      "bars16": "16 ô nhịp",
+      "aaba32": "AABA",
+      "one": "1 hợp âm",
+      "custom": "{{count}} ô nhịp",
+      "custom_one": "{{count}} ô nhịp",
+      "custom_other": "{{count}} ô nhịp"
+    },
+    "countIn": {
+      "label": "Đếm vào",
+      "none": "Không",
+      "bars": "{{count}} ô nhịp",
+      "bars_one": "{{count}} ô nhịp",
+      "bars_other": "{{count}} ô nhịp"
+    },
+    "fills": {
+      "label": "Fill",
+      "hint": "Một fill ở ô nhịp cuối của chorus, và một crash vào phách một."
+    },
+    "transport": {
+      "chorus": "Chorus"
+    }
+  }
+}

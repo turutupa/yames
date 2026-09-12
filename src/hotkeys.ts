@@ -34,6 +34,7 @@ export type HotkeyAction =
   | "tab-1"
   | "tab-2"
   | "tab-3"
+  | "tab-4"
   | "settings";
 
 export interface HotkeyEntry {
@@ -287,6 +288,13 @@ export const HOTKEYS: HotkeyEntry[] = [
     action: "Drill tab",
     key: "⌘3",
     desc: "Switch to Drill tab",
+    group: "navigation",
+  },
+  {
+    id: "tab-4",
+    action: "Jam tab",
+    key: "⌘4",
+    desc: "Switch to Jam tab",
     group: "navigation",
   },
   {

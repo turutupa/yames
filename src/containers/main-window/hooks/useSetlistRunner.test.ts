@@ -34,7 +34,7 @@ const CHAIN: Setlist = {
 };
 
 function beat(n: number, isDownbeat: boolean, subdivision = 0): BeatEvent {
-  return { beat: n, measureBeat: 0, subdivision, isDownbeat, isAccent: isDownbeat };
+  return { beat: n, measureBeat: 0, subdivision, isDownbeat, isAccent: isDownbeat, formBar: 0, chorus: 1 };
 }
 
 /** Args of every invoke of `command` so far. */

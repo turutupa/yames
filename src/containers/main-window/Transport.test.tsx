@@ -262,4 +262,33 @@ describe("Transport — what it sheds, and in what order", () => {
     render(<Transport {...base} view="beat" />);
     expect(document.querySelector(".transport-setlist")).toBeNull();
   });
+
+  it("counts the form rather than the run once a jam is playing", () => {
+    // On a jam the useful number is not how many bars have gone by, it is
+    // which bar of the twelve you are on — so the bar readout becomes
+    // "3 / 12" and the chorus gets a readout of its own.
+    render(
+      <Transport {...base} view="jam" isPlaying bar={27} jamFormBars={12} jamFormBar={2} jamChorus={3} />,
+    );
+    const readouts = [...document.querySelectorAll(".transport-value")].map((n) => n.textContent);
+    expect(readouts[0]).toBe("3 / 12");
+    expect(readouts[1]).toBe("3");
+    expect(screen.getByText("Chorus")).toBeInTheDocument();
+    // And the running total is gone: two bar counts would be two answers to
+    // the same question.
+    expect(readouts).not.toContain("27");
+  });
+
+  it("shows bar one of the form at rest, not a dash and not a zero", () => {
+    render(<Transport {...base} view="jam" jamFormBars={12} jamFormBar={7} jamChorus={4} />);
+    const readouts = [...document.querySelectorAll(".transport-value")].map((n) => n.textContent);
+    expect(readouts[0]).toBe("1 / 12");
+    expect(readouts[1]).toBe("1");
+  });
+
+  it("leaves the plain bar counter alone on every other tab", () => {
+    render(<Transport {...base} view="beat" isPlaying bar={27} />);
+    expect(document.querySelector(".transport-value")?.textContent).toBe("27");
+    expect(screen.queryByText("Chorus")).toBeNull();
+  });
 });

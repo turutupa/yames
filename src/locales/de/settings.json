@@ -195,6 +195,7 @@
         "tab-1": "Metronom-Tab",
         "tab-2": "Setlist-Tab",
         "tab-3": "Tempo-Training-Tab",
+        "tab-4": "Jam-Tab",
         "settings": "Einstellungen",
         "toggle-sidebar": "Seitenleiste umschalten",
         "toggle-coach": "Coach umschalten"
@@ -219,6 +220,7 @@
         "tab-1": "Zum Metronom-Tab wechseln",
         "tab-2": "Zum Setlist-Tab wechseln",
         "tab-3": "Zum Tempo-Training-Tab wechseln",
+        "tab-4": "Zum Jam-Tab wechseln",
         "settings": "Einstellungen öffnen oder schließen",
         "toggle-sidebar": "Die linke Seitenleiste ein- oder ausklappen",
         "toggle-coach": "Coach-Bedienfeld öffnen oder schließen"

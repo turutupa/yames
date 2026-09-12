@@ -195,6 +195,7 @@
         "tab-1": "Zakładka Metronom",
         "tab-2": "Zakładka Setlista",
         "tab-3": "Zakładka Rozbieg",
+        "tab-4": "Zakładka Jam",
         "settings": "Ustawienia",
         "toggle-sidebar": "Przełącz panel boczny",
         "toggle-coach": "Przełącz Trenera"
@@ -219,6 +220,7 @@
         "tab-1": "Przełącz na zakładkę Metronom",
         "tab-2": "Przełącz na zakładkę Setlista",
         "tab-3": "Przełącz na zakładkę Rozbieg",
+        "tab-4": "Przełącz na zakładkę Jam",
         "settings": "Otwórz lub zamknij ustawienia",
         "toggle-sidebar": "Zwija lub rozwija lewy panel boczny",
         "toggle-coach": "Otwórz lub zamknij panel trenera"

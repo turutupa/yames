@@ -197,6 +197,10 @@ export function installShotMock(shot: Shot, theme: string): void {
       subdivision: 0,
       isDownbeat: true,
       isAccent: opens.has(measureBeat),
+      // No jam runs in a screenshot, and these are what the engine reports
+      // when none is loaded: bar zero of the chorus, chorus one.
+      formBar: 0,
+      chorus: 1,
       beatsPerMeasure: total,
     });
     beatCount += 1;

@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "메트로놈",
     "setlist": "셋리스트",
-    "drill": "템포 연습"
+    "drill": "템포 연습",
+    "jam": "잼"
   },
   "tooltip": {
     "zen": "젠 모드",
@@ -24,6 +25,7 @@
     "title": "프리셋",
     "titleDrill": "템포 연습",
     "titleSetlist": "셋리스트",
+    "titleJam": "잼",
     "saveCurrent": "현재 설정 저장",
     "search": "라이브러리 검색",
     "searchPlaceholder": "검색…",

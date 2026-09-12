@@ -12,7 +12,7 @@ import type { MainView } from "../MainHeader";
  * Owns the active tab and the transition rules between tabs:
  *
  *   - `view`         — the currently displayed tab (beat / setlist / drill
- *                      / settings).
+ *                      / jam / settings).
  *   - `setView`      — wraps the raw setter with side effects: stops
  *                      playback when leaving a play-tab for another play-
  *                      tab, stops the speed-ramp drill when leaving drill
@@ -37,7 +37,7 @@ import type { MainView } from "../MainHeader";
  * A runtime array rather than only a type, because the persisted tab arrives
  * as an unchecked string and something has to narrow it.
  */
-export const PLAY_TABS = ["beat", "setlist", "drill"] as const;
+export const PLAY_TABS = ["beat", "setlist", "drill", "jam"] as const;
 
 export type PlayTab = (typeof PLAY_TABS)[number];
 
