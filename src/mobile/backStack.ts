@@ -16,7 +16,7 @@
  *
  * Only reachable on a phone: every caller is behind `IS_MOBILE`.
  */
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { setBackIntercept } from "./native";
 
 type Dismiss = () => void;
@@ -72,14 +72,36 @@ export function resetBackStack() {
 /**
  * Register a dismissible layer with the Back gesture for as long as it is open.
  *
- * `onClose` is read through a ref-free closure on purpose: it is called at most
- * once per Back press and always from the current render's stack entry, because
- * the effect re-registers whenever the callback identity changes.
+ * `open` is the only dependency, and — as with `Sheet`'s focus effect, which
+ * had the same shape of bug (M05 fix 4) — that is the whole point. Every call
+ * site passes an inline arrow for `onClose`, so its identity changes on every
+ * render of the screen it belongs to, which with the metronome running is
+ * twice a second. With `onClose` in the array this effect re-registered that
+ * often, and re-registering is not free here: the stack is **ordered**, and
+ * Back closes the top of it.
+ *
+ * React runs every passive cleanup before any of the effects that replace
+ * them, and both run child-before-parent. So with two layers open — the
+ * settings pane registered by `MainWindow` and a sheet registered inside it —
+ * one ordinary re-render unwound the stack `[settings, sheet]` and rebuilt it
+ * as `[sheet, settings]`. Back then closed the settings pane out from under
+ * an open sheet.
+ *
+ * The entry is therefore one stable function per mounted layer, which reads
+ * the latest `onClose` through a ref when Back actually arrives — so the
+ * newest closure still runs, and the registration outlives the renders.
  */
 export function useBackDismiss(open: boolean, onClose: Dismiss) {
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  // Stable for this hook's lifetime: it is both what sits in the stack and
+  // the key `remove` looks for, so it must not change between the two.
+  const dismiss = useCallback(() => onCloseRef.current(), []);
+
   useEffect(() => {
     if (!open) return;
-    push(onClose);
-    return () => remove(onClose);
-  }, [open, onClose]);
+    push(dismiss);
+    return () => remove(dismiss);
+  }, [open, dismiss]);
 }
