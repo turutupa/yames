@@ -125,6 +125,27 @@ num_cpus = { version = "1", optional = true }
 coreaudio-sys = "0.2"
 core-foundation-sys = "0.8"
 
+# ---------------------------------------------------------------------------
+# Android only.
+#
+# `oboe` is already in the graph — cpal 0.15 pulls it in as its Android audio
+# backend, with the same "0.6" requirement and the same `java-interface`
+# feature — so naming it here adds no package to Cargo.lock and no second copy
+# of the Oboe C++ sources. What it adds is the ability to *call* it, which
+# M00 showed is necessary: cpal's Oboe backend never asks for
+# `PerformanceMode::LowLatency` and opens 44.1 kHz into a 48 kHz device, so
+# `src/android_audio.rs` builds the output stream itself. See that file.
+# ---------------------------------------------------------------------------
+[target.'cfg(target_os = "android")'.dependencies]
+oboe = { version = "0.6", features = ["java-interface"] }
+# The five things a webview cannot do on Android: keep playing with the screen
+# off (a `mediaPlayback` foreground service), yield to a phone call (audio
+# focus), keep the screen awake, answer the Back gesture without dying, and
+# open a link. In-tree because none of it is reusable outside Yames and all of
+# it is one screen of Kotlin. iOS gets its own half in M06, which is when this
+# widens to `cfg(any(android, ios))`.
+tauri-plugin-yames-mobile = { path = "plugins/yames-mobile" }
+
 # Thread-priority control for the LLM inference worker (ROADMAP §3: the
 # generation thread runs *below normal* so it can never starve the audio
 # path) and the total-RAM query behind the Studio tier gate (§3: Studio is
