@@ -23,7 +23,7 @@
  *    two people have to read.
  */
 
-import type { JamFormKind } from "./types";
+import type { JamFormKind, JamTransposition } from "./types";
 import type { InstrumentId } from "../types";
 
 // ---------------------------------------------------------------------------
@@ -605,7 +605,7 @@ export function chordsForForm(kind: JamFormKind, bars: number, key: Key): Chord[
  * pitch, so its part is written two semitones up; an Eb instrument sounds a
  * major sixth below, so nine.
  */
-export type TranspositionOption = "concert" | "bb" | "eb";
+export type TranspositionOption = JamTransposition;
 
 export const TRANSPOSITION_OPTIONS: readonly TranspositionOption[] = ["concert", "bb", "eb"];
 

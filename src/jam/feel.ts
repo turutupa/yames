@@ -12,7 +12,7 @@
  * its own pattern: it is already the thing the conversion is trying to make,
  * and running it through again would only push its off-beats out of place.
  */
-import type { Groove, GrooveTicks } from "./grooves";
+import type { GrooveTicks } from "./grooves";
 import type { JamFeel, JamLevel, JamPattern, JamLane } from "./types";
 import { JAM_LANES } from "./types";
 
@@ -57,22 +57,38 @@ function softenOffBeats(pattern: JamPattern, beatsPerBar: number): JamPattern {
 }
 
 /**
+ * The least a thing has to be for a feel to apply to it: a meter and the two
+ * patterns. Written structurally so a groove the user drew in the editor — a
+ * `JamCustomGroove`, which carries a `name` instead of an id and may have no
+ * fill at all — swings exactly as a preset does. A feel that only worked on
+ * the eight shipped grooves would be a feel that stopped working the moment
+ * you made the groove your own.
+ */
+export type Feelable = {
+  beatsPerBar: number;
+  ticksPerBeat: GrooveTicks;
+  bar: JamPattern;
+  fill: JamPattern | null;
+};
+
+/**
  * `groove` as this feel plays it.
  *
  * Returns the groove itself when there is nothing to do, so a re-render that
  * recompiles a jam does not hand the engine a new table that is the same
- * table.
+ * table. The return type is the caller's own type, so applying a feel to a
+ * `Groove` still gives back a `Groove` with its id and name intact.
  */
-export function applyFeel(groove: Groove, feel: JamFeel): Groove {
+export function applyFeel<G extends Feelable>(groove: G, feel: JamFeel): G {
   if (feel === "straight") return groove;
   if (groove.ticksPerBeat !== 2) return groove;
 
   const ticksPerBeat: GrooveTicks = 3;
   let bar = patternToTriplets(groove.bar, groove.beatsPerBar);
-  let fill = patternToTriplets(groove.fill, groove.beatsPerBar);
+  let fill = groove.fill ? patternToTriplets(groove.fill, groove.beatsPerBar) : null;
   if (feel === "swing") {
     bar = softenOffBeats(bar, groove.beatsPerBar);
-    fill = softenOffBeats(fill, groove.beatsPerBar);
+    if (fill) fill = softenOffBeats(fill, groove.beatsPerBar);
   }
   return { ...groove, ticksPerBeat, bar, fill };
 }

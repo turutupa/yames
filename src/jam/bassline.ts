@@ -153,6 +153,15 @@ export const BASS_STYLE_FOR_GROOVE: Record<string, BassStyle> = {
   bossa: "bossa",
   waltz: "waltz",
   "six-eight": "sixeight",
+  // The ids `src/jam/grooves.ts` actually shipped with. `swingRide` is the
+  // one that matters: normalised it is "swingride", which no spelling of
+  // "swing" reaches, so without this line every swing jam got a rock bass
+  // under a ride cymbal.
+  rock8: "rock",
+  rock16: "rock",
+  halfTime: "rock",
+  sixEight: "sixeight",
+  swingRide: "swing",
 };
 
 function normaliseGrooveId(id: string): string {

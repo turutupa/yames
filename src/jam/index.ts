@@ -12,3 +12,7 @@ export * from "./feel";
 export * from "./forms";
 export * from "./compile";
 export * from "./jams";
+export * from "./bandChord";
+export * from "./lineup";
+export * from "./practice";
+export * from "./tempoTrainer";
