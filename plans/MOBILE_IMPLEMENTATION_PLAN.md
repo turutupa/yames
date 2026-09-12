@@ -18,10 +18,14 @@
 > M04 Android background audio and direct Oboe stream, M05a release
 > prep, M00 findings. Every desktop gate green throughout. Android runs
 > on the emulator: exact tempo (120 ticks/60 s), survives 10 min
-> screen-off, pauses for a call and resumes, Back behaves. **Nothing
-> has run on a physical phone yet.** M05 (signed release build) in
-> progress. Waiting on the owner: the upload keystore (M05 brief), the
-> Play developer account and twelve testers, the spare phone.
+> screen-off, pauses for a call and resumes, Back behaves. M05 merged:
+> signed release build machinery, R8-proven 12.8 MiB arm64 APK, store
+> assets, website row. `main` v1.1.0 merged in. M05b in progress:
+> system-bar insets (the gesture bar overlapped the tab labels) and
+> store shots in the default theme. **Nothing has run on a physical
+> phone yet.** Waiting on the owner: the upload keystore
+> (`M05-RELEASE-NOTES.md`), the Play developer account and twelve
+> testers, the spare phone.
 > **Branch policy:** long-lived feature branch `mobile`. Each task gets a
 > worktree on `mob/m0N-short-name` and merges into `mobile`; `mobile`
 > merges to `main` when Android v1 is releasable. Nothing is committed
