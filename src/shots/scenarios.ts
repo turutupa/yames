@@ -42,7 +42,26 @@ export interface Shot {
   /** Which of the app's two windows to mount. */
   window: "main" | "floating";
   /** The tab to open on. Absent for the widget, which has no tabs. */
-  tab?: "beat" | "drill";
+  tab?: "beat" | "drill" | "jam";
+  /**
+   * The Jam tab, with a jam actually on it.
+   *
+   * The tab opens empty — a jam is loaded by clicking one in the library, and
+   * nothing about the shot can be told from the empty state. `row` is which
+   * library row to click, `bar` is which bar of the form to photograph: the
+   * mode's whole subject is moving through a form, and bar one of chorus one
+   * is the one bar that says nothing about it.
+   */
+  jam?: {
+    row: number;
+    bar?: number;
+    /** Open the groove editor drawer before the capture. */
+    editor?: boolean;
+    /** Scroll this selector to the top of the stage — the screen is taller
+     *  than a window, and the band and the practice tools live below the
+     *  fold of the one the chord is in. */
+    scrollTo?: string;
+  };
   /** Enter Zen once the app has mounted. */
   zen?: boolean;
   /**
@@ -128,6 +147,67 @@ export const SHOTS: Shot[] = [
     width: 1400,
     height: 900,
     settleMs: 2600,
+  },
+  {
+    id: "jam",
+    suffix: "jam",
+    window: "main",
+    tab: "jam",
+    // The slow blues, part-way through its fifth bar: the chord has changed
+    // to the IV, the strip and the shapes row have followed it, and the
+    // timeline is lit somewhere other than the start.
+    // No `playing` — the transport is pressed after the jam is loaded, the
+    // way a person presses it. Starting the click before the jam was on the
+    // stage would count bars against no form at all.
+    jam: { row: 0, bar: 5 },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-band",
+    suffix: "jam-band",
+    window: "main",
+    tab: "jam",
+    // The lower half: the band's rows with the bass's notes for this bar, the
+    // practice tools, the grooves, and the key and kit.
+    jam: { row: 0, bar: 5, scrollTo: ".jam-band" },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-editor",
+    suffix: "jam-editor",
+    window: "main",
+    tab: "jam",
+    // The groove editor, docked under a jam that is still playing.
+    jam: { row: 0, bar: 3, editor: true, scrollTo: ".jam-band" },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-setup",
+    suffix: "jam-setup",
+    window: "main",
+    tab: "jam",
+    // Key, kit and the part you read — the half of the screen you touch once
+    // and then leave alone for an hour.
+    jam: { row: 0, scrollTo: ".jam-setup" },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-empty",
+    suffix: "jam-empty",
+    window: "main",
+    tab: "jam",
+    // The tab opened cold, which is the first thing anybody sees.
+    width: 1400,
+    height: 900,
+    settleMs: 400,
   },
   {
     id: "widget",

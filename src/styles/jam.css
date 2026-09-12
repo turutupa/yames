@@ -148,11 +148,13 @@
   width: 100%;
 }
 
-/* Eight across, as the setup board draws them: the kit of grooves is one row
-   you scan rather than a block you read, and at the stage's 1176px each card
-   still has 130px — room for a sixteen-tick glyph (80px) and its name. */
+/* Nine across: the eight grooves and the one you make yourself. The kit of
+   grooves is one row you scan rather than a block you read, and at the stage's
+   1176px each card still has 120px — room for a sixteen-tick glyph (80px) and
+   its name. The ninth card wrapping onto a line of its own made it look like
+   an afterthought rather than one of the choices. */
 .jam-cards-groove {
-  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-columns: repeat(9, minmax(0, 1fr));
 }
 
 .jam-cards-form {
@@ -452,24 +454,30 @@
 .jam-now {
   display: flex;
   align-items: flex-end;
-  gap: 20px;
-  min-width: 0;
+  gap: 18px;
+  width: 100%;
+  /* Its own row. The alternative — sharing the tempo's line — had the chord,
+     the tempo and the feel controls all shrinking each other, and at 1176 the
+     feel control lost its last word off the right edge. */
+  margin-bottom: -6px;
 }
 
 .jam-now-chord {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 4px;
-  min-width: 0;
 }
 
 .jam-now-name {
-  font-size: 4.6rem;
+  font-size: 4.4rem;
   line-height: 0.86;
   font-weight: 700;
   letter-spacing: -0.04em;
   color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
+  /* "Bbmaj7" is twice as wide as "A". Wrapping it would put the quality on a
+     line of its own, which reads as two chords. */
+  white-space: nowrap;
 }
 
 .jam-now-side {
@@ -477,7 +485,9 @@
   flex-direction: column;
   gap: 5px;
   padding-bottom: 6px;
-  min-width: 0;
+  /* Fixed, so nothing beside it moves as the chord names change length. */
+  width: 172px;
+  flex: 0 0 auto;
 }
 
 .jam-now-next {
@@ -535,6 +545,19 @@
 
 .jam-fretboard {
   align-self: flex-start;
+}
+
+/* The strip's scroller grows to fill its row, which is right on a screen that
+   is nothing but chords and wrong here: with five chords in the key it pushed
+   the sevenths toggle to the far side of an empty half-screen. Sized to its
+   content instead, so the control sits beside the thing it changes. */
+.jam-chords .key-chords-row {
+  flex: 0 1 auto;
+}
+
+.jam-chords .chord-shapes-head {
+  justify-content: flex-start;
+  gap: 16px;
 }
 
 /* ── The timeline's chord names and band states ────────────────────────── */
@@ -863,7 +886,7 @@
    intensity controls. */
 @media (max-width: 1279px) {
   .jam-cards-groove {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
 
@@ -911,7 +934,7 @@
   }
 
   .jam-cards-groove {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .main-content[data-view="jam"] .bpm-input {

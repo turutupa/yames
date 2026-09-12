@@ -255,9 +255,17 @@ export function JamView({
     [chord, harmony.key],
   );
 
+  /**
+   * Two, not three.
+   *
+   * `scalesForChord` offers up to three and they are all defensible, but this
+   * line sits beside the chord at the busiest moment there is. Two is what the
+   * design board asks for and what a player reads without stopping; the third
+   * is a tap away in the strip and on the neck below.
+   */
   const scaleLabels = useMemo(
     () =>
-      scales.map((suggestion) => {
+      scales.slice(0, 2).map((suggestion) => {
         // `noteName`, not `midiToName`: a suggestion's root is a PITCH CLASS,
         // and putting one through the MIDI speller names the note in the
         // octave below the piano ("A-1 mixolydian").
@@ -309,17 +317,21 @@ export function JamView({
     <div className="jam-view">
       <TradeCue bandState={bandState} isPlaying={isPlaying} />
 
-      <section className="bpm-section jam-head">
-        {jam.chords && chord ? (
-          <NowBlock
-            chord={chordName(chord, harmony.key)}
-            next={next}
-            scales={scaleLabels}
-            fretboardOpen={screen.fretboardOpen}
-            onToggleFretboard={neck ? screen.toggleFretboard : null}
-          />
-        ) : null}
+      {/* Its own row, above the tempo. The chord is the largest thing on the
+          screen and the one a player reads mid-chorus; sharing a line with the
+          tempo and the feel controls had all three fighting for the width at
+          every window size, and the chord is the one that must not lose. */}
+      {jam.chords && chord ? (
+        <NowBlock
+          chord={chordName(chord, harmony.key)}
+          next={next}
+          scales={scaleLabels}
+          fretboardOpen={screen.fretboardOpen}
+          onToggleFretboard={neck ? screen.toggleFretboard : null}
+        />
+      ) : null}
 
+      <section className="bpm-section jam-head">
         <div className="tempo-block">
           <span className="stage-label">{t("metronome.tempo")}</span>
           <div className="bpm-display">
@@ -478,13 +490,18 @@ export function JamView({
       <section className="jam-section">
         <div className="jam-section-head">
           <span className="stage-label">{t("jam.groove.label")}</span>
-          <button
-            type="button"
-            className="jam-link"
-            onClick={() => screen.setEditorOpen(true)}
-          >
-            {jam.customGroove ? t("jam.editor.edit") : t("jam.editor.editPreset")}
-          </button>
+          {/* Only once the groove IS yours. Before that the ninth card below
+              is the door, and two controls a hand's width apart both saying
+              "make this one yours" is one control too many. */}
+          {jam.customGroove && (
+            <button
+              type="button"
+              className="jam-link"
+              onClick={() => screen.setEditorOpen(true)}
+            >
+              {t("jam.editor.edit")}
+            </button>
+          )}
         </div>
         <div className="jam-cards jam-cards-groove">
           {GROOVES.map((groove) => (

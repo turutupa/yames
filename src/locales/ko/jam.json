@@ -193,7 +193,6 @@
     "editor": {
       "label": "그루브 편집기",
       "edit": "그루브 편집",
-      "editPreset": "내 것으로 만들기",
       "makeYourOwn": "직접 만들기",
       "name": "그루브 이름",
       "yours": "내 것",

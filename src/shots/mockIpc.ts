@@ -14,6 +14,9 @@
  */
 import { mockIPC, mockWindows } from "@tauri-apps/api/mocks";
 import type { Shot } from "./scenarios";
+import { STARTER_JAMS } from "../jam/jams";
+import { bandStateForBar } from "../jam/practice";
+import type { JamEngineConfig } from "../jam/types";
 
 /**
  * The library in the sidebar.
@@ -179,6 +182,17 @@ export function installShotMock(shot: Shot, theme: string): void {
   let beatTimer: ReturnType<typeof setTimeout> | undefined;
   let beatCount = 0;
 
+  /**
+   * The jam the "engine" is carrying, if any.
+   *
+   * The mock counts the form the way `engine.rs` does — bars from the first
+   * downbeat, chorus from the bar count — so the timeline, the NOW block and
+   * the band lanes all move in a screenshot exactly as they do in the app.
+   * Without it the jam screen photographs as bar one of chorus one for ever,
+   * which is the one state that says nothing about what the mode does.
+   */
+  let jamConfig: JamEngineConfig | null = null;
+
   function beatLoop() {
     clearTimeout(beatTimer);
     if (!STATE.isPlaying) return;
@@ -191,16 +205,32 @@ export function installShotMock(shot: Shot, theme: string): void {
       opens.add(cursor);
       cursor += g;
     }
+    // Bar zero of chorus one is what the engine reports with no jam loaded.
+    let formBar = 0;
+    let chorus = 1;
+    let bandState: "full" | "hatsOnly" | "silent" = "full";
+    if (jamConfig) {
+      const formBars = Math.max(1, jamConfig.formBars);
+      const bar = Math.floor(beatCount / total);
+      formBar = bar % formBars;
+      chorus = Math.floor(bar / formBars) + 1;
+      bandState = bandStateForBar({
+        formBar,
+        chorus,
+        formBars,
+        practice: jamConfig.practice,
+      });
+    }
+
     emit("beat", {
       beat: beatCount,
       measureBeat,
       subdivision: 0,
       isDownbeat: true,
       isAccent: opens.has(measureBeat),
-      // No jam runs in a screenshot, and these are what the engine reports
-      // when none is loaded: bar zero of the chorus, chorus one.
-      formBar: 0,
-      chorus: 1,
+      formBar,
+      chorus,
+      bandState,
       beatsPerMeasure: total,
     });
     beatCount += 1;
@@ -253,6 +283,13 @@ export function installShotMock(shot: Shot, theme: string): void {
       return null;
     },
     arm_count_in: () => null,
+    /**
+     * The jam library. The six that ship, so the Jam tab photographs with
+     * something in it — and so a click-through of the mode does not have to
+     * start by inventing a jam.
+     */
+    list_jams: () => [...STARTER_JAMS],
+    save_jams: () => null,
   };
 
   mockIPC(async (cmd, args) => {
@@ -298,6 +335,26 @@ export function installShotMock(shot: Shot, theme: string): void {
       return null;
     }
     if (cmd.startsWith("plugin:")) return null;
+
+    if (cmd === "set_jam") {
+      jamConfig = (a?.config as JamEngineConfig | null) ?? null;
+      // The bar count restarts with the jam, the way the engine's form
+      // counter does when a new table arrives.
+      if (!jamConfig) beatCount = 0;
+      return null;
+    }
+
+    if (cmd === "set_beat_groups" && Array.isArray(a?.groups)) {
+      STATE.beatGroups = a.groups as number[];
+      emit("state-changed", STATE);
+      return null;
+    }
+
+    if (cmd === "set_subdivision" && typeof a?.subdivision === "number") {
+      STATE.subdivision = a.subdivision;
+      emit("state-changed", STATE);
+      return null;
+    }
 
     if (cmd === "set_bpm" && typeof a?.bpm === "number") {
       STATE.bpm = a.bpm;
