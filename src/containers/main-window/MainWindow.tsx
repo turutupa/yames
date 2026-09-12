@@ -868,6 +868,7 @@ export function MainWindow() {
     prevTab,
     setlistLoaded: !!setlistSession.setlist,
     jamLoaded: !!jamSession.jam,
+    jamEditorOpen: jamSession.screen.editorOpen,
     onToggleJam: toggleJamPlayback,
     jamActions: jamSession.actions,
     state,

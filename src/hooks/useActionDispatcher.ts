@@ -27,6 +27,15 @@ interface ActionDispatcherArgs {
   /** Same for the jam tab, and the same reason: an empty stage starts nothing. */
   jamLoaded: boolean;
   /**
+   * Whether the groove editor drawer is down.
+   *
+   * While it is, the hands-free jam keys stand aside: `G` steps to the next
+   * preset groove, and stepping a groove throws `customGroove` away — which
+   * over an open editor means the pattern you are drawing disappears under
+   * your hands. Nothing you can press by accident may delete work in progress.
+   */
+  jamEditorOpen: boolean;
+  /**
    * Play, on the jam tab. Not `togglePlayback` — a jam with a count-in has to
    * arm it first, and only the window knows which jam is loaded.
    */
@@ -73,6 +82,7 @@ export function useActionDispatcher({
   prevTab,
   setlistLoaded,
   jamLoaded,
+  jamEditorOpen,
   onToggleJam,
   jamActions,
   state,
@@ -143,14 +153,35 @@ export function useActionDispatcher({
       if (view === "settings") return;
 
       /**
+       * On a jam, the groove owns the meter.
+       *
+       * A jam is a meter plus a table, and the engine refuses the table when
+       * `ticksPerBeat × beatsPerBar` disagrees with its own bar length. So the
+       * meter keys, which are exactly right on the metronome tab, are exactly
+       * wrong here: they move the engine's grid out from under the groove that
+       * was written on it, and the failure is silent — the plain click plays
+       * while the timeline keeps animating a band that stopped. The meter you
+       * want is the groove you pick, or the bar you draw in the editor.
+       */
+      if (
+        view === "jam" &&
+        jamLoaded &&
+        (actionId.startsWith("sub-") || actionId.startsWith("sig-"))
+      )
+        return;
+
+      /**
        * The jam actions, before the blur below.
        *
        * They only mean anything with a jam on the stage, and they mean
        * nothing anywhere else — pressing G on the metronome tab must not
-       * silently change a jam you are not looking at.
+       * silently change a jam you are not looking at. Nor over the groove
+       * editor: the drawer is a text-free surface you draw on, and the same
+       * `G` that is a footswitch stomp on stage would step the groove and take
+       * the half-finished pattern with it.
        */
       if (actionId.startsWith("jam-")) {
-        if (view !== "jam" || !jamLoaded) return;
+        if (view !== "jam" || !jamLoaded || jamEditorOpen) return;
         switch (actionId) {
           case "jam-next-groove":
             jamActions.nextGroove();
@@ -277,6 +308,7 @@ export function useActionDispatcher({
     [
       view,
       jamLoaded,
+      jamEditorOpen,
       onToggleJam,
       jamActions,
       state.bpm,
