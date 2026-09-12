@@ -2,9 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- AndroidTV support -->
-    <uses-feature android:name="android.software.leanback" android:required="false" />
-
     <!--
       `enableOnBackInvokedCallback`: M00 found the system Back gesture
       finishing the activity mid-click, with logcat saying exactly why
@@ -20,8 +17,15 @@
         android:theme="@style/Theme.yames"
         android:enableOnBackInvokedCallback="true"
         android:usesCleartextTraffic="${usesCleartextTraffic}">
+        <!--
+          Portrait only, in v1 (plan §1, "No landscape"). Every phone screen
+          M03 drew assumes a tall window: the bottom tab bar, the full-width
+          play button, the presets sheet. A tablet in a stand would be the
+          reason to revisit this, and nothing is designed for one yet.
+        -->
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
+            android:screenOrientation="portrait"
             android:launchMode="singleTask"
             android:label="@string/main_activity_title"
             android:name=".MainActivity"
@@ -29,8 +33,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-                <!-- AndroidTV support -->
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>
 
