@@ -50,6 +50,23 @@ one-line descriptions. Stored on the record, sent as `kit`.
 - A transposition option (concert / Bb / Eb) in the jam's setup, default
   concert.
 
+### 3b. The chords in the key, and their shapes (W9's components)
+
+- Under the NOW block, `KeyChordsStrip` from `src/components/chords` shows
+  the chords of the jam's key with the current chord highlighted; tapping
+  one opens `ChordShapesRow` for it, and the chosen shape is drawn on the
+  big `Fretboard` (adapt W9's local chord type to W4's `harmony.ts` types
+  in one small adapter in `src/jam/`; do not fork either module).
+- By default the row shows the CURRENT chord's shapes and advances with the
+  changes, so the shapes arrive one chord at a time while you play. A
+  "follow the jam" toggle pins the row to a tapped chord instead. Never a
+  wall of diagrams: one row, scrollable, sevenths behind a toggle
+  (plans/JAM_MODE.md §8.9).
+- A hotkey and MIDI action `jam-next-shape` steps the row, so a footswitch
+  can page through shapes.
+- Bass players get the bass shapes; everyone else gets the strip without
+  the row.
+
 ### 4. The practice tools
 
 - Drop-out bars (off / every 4 / 8 / 16, for 1 or 2 bars), trading (off /

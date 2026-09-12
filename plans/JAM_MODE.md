@@ -156,6 +156,19 @@ status, local and free and license-clean. Jam adds five of its own.
   bass, note names for everyone else, transposed for horns. This is where
   `LEARNING_PATHS_DECISIONS.md` D0.5 (theory inside the activity, from
   deterministic data) gets a second home.
+- **Chords in the key, and their shapes.** *Owner's request, 2026-09-12.*
+  Set a key and the jam shows the chords that live in it (I ii iii IV V vi
+  vii°, their sevenths, and the blues dominants), each as a small chord
+  diagram. Pick one and see every way to play it along the neck, from the
+  smallest triad to the seventh voicings: open shapes where they exist, the
+  movable shapes rooted on the sixth, fifth and fourth strings, and the
+  three-string triads on the top and middle string sets. The chord the jam
+  is on right now is the one shown by default, so the shapes arrive while
+  you play, one chord at a time, not as a sheet of eighty. Bass gets the
+  same for its four strings. The UX rule: never a wall of diagrams. One
+  chord at a time, the shapes ordered by where they sit on the neck, and a
+  "next shape" that a footswitch can press. Shape data is musical fact,
+  authored once as fret and finger numbers, not drawn from any book.
 
 ### 4.4 Practice tools that only make sense over a band
 
@@ -290,3 +303,9 @@ shipping on its own.
 - **8.7 Kit sound quality.** *open, taste.* The snare kit took several
   rounds to stop sounding "shy". Budget listening time for every kit.
 - **8.8 Mobile.** *deferred* to the mobile plan.
+- **8.9 How much chord-shape UI is right while playing.** *open.* The
+  chords-in-the-key panel could be a strip under the NOW block, a drawer,
+  or a page of its own you visit between choruses. Default for the first
+  build: a strip of the key's chords under NOW, the current chord's shapes
+  in a row beside the fretboard, the rest behind a tap. Revisit after the
+  owner has jammed with it.
