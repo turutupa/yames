@@ -228,28 +228,47 @@ export function parseKey(text: string): Key | null {
 export type ChordQuality =
   | "maj"
   | "min"
+  | "dim"
+  | "aug"
   | "7"
   | "maj7"
   | "m7"
   | "m7b5"
   | "dim7"
+  | "sus2"
+  | "sus4"
   | "6"
   | "m6"
+  | "add9"
   | "9";
 
 export type Chord = { root: PitchClass; quality: ChordQuality };
 
-/** What each quality is written as after the root. */
+/**
+ * What each quality is written as after the root.
+ *
+ * The five qualities the forms never produce — `dim`, `aug`, `sus2`, `sus4`,
+ * `add9` — are here because the chord-shape library knows how to play them
+ * and the key strip offers them (`src/jam/diatonic.ts` names the vii° of
+ * every major key `dim`). One union, one spelling: a chord named in the
+ * strip and the same chord named on the timeline have to come out the same
+ * word, so both go through this table.
+ */
 const QUALITY_SUFFIX: Record<ChordQuality, string> = {
   maj: "",
   min: "m",
+  dim: "dim",
+  aug: "aug",
   "7": "7",
   maj7: "maj7",
   m7: "m7",
   m7b5: "m7b5",
   dim7: "dim7",
+  sus2: "sus2",
+  sus4: "sus4",
   "6": "6",
   m6: "m6",
+  add9: "add9",
   "9": "9",
 };
 
@@ -257,15 +276,25 @@ const QUALITY_SUFFIX: Record<ChordQuality, string> = {
 const QUALITY_INTERVALS: Record<ChordQuality, readonly number[]> = {
   maj: [0, 4, 7],
   min: [0, 3, 7],
+  dim: [0, 3, 6],
+  aug: [0, 4, 8],
   "7": [0, 4, 7, 10],
   maj7: [0, 4, 7, 11],
   m7: [0, 3, 7, 10],
   m7b5: [0, 3, 6, 10],
   dim7: [0, 3, 6, 9],
+  sus2: [0, 2, 7],
+  sus4: [0, 5, 7],
   "6": [0, 4, 7, 9],
   m6: [0, 3, 7, 9],
+  add9: [0, 2, 4, 7],
   "9": [0, 4, 7, 10, 14],
 };
+
+/** The suffix a quality is written with — "", "m", "m7b5". */
+export function chordSuffix(quality: ChordQuality): string {
+  return QUALITY_SUFFIX[quality];
+}
 
 /** "A7", "Dm7", "Bb" — the chord as a musician writes it in this key. */
 export function chordName(chord: Chord, key: Key): string {

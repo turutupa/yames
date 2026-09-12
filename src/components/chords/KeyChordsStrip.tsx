@@ -71,7 +71,7 @@ export function KeyChordsStrip({
           const shape = shapesFor(chord.root, chord.quality, { instrument })[0];
           const isCurrent =
             current !== null && current.root === chord.root && current.quality === chord.quality;
-          const name = chordName(chord.root, chord.quality, root);
+          const name = chordName(chord.root, chord.quality, { root, mode });
           return (
             <button
               key={chord.degree + "-" + String(chord.root)}

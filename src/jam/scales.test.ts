@@ -22,16 +22,27 @@ import type { JamFormKind } from "./types";
 const MODES: KeyMode[] = ["major", "minor", "blues"];
 const ALL_ROOTS: PitchClass[] = Array.from({ length: 12 }, (_unused, i) => i);
 const FORM_KINDS: JamFormKind[] = ["blues12", "loop8", "bars16", "aaba32", "one", "custom"];
+/**
+ * Every quality in the union, not just the ones a form produces. The key
+ * strip offers the vii° of every major key and the ii° of every minor one,
+ * and the shape library knows the sus and augmented grips, so a player can
+ * land on any of these and the screen still owes them a scale.
+ */
 const QUALITIES: ChordQuality[] = [
   "maj",
   "min",
+  "dim",
+  "aug",
   "7",
   "maj7",
   "m7",
   "m7b5",
   "dim7",
+  "sus2",
+  "sus4",
   "6",
   "m6",
+  "add9",
   "9",
 ];
 
