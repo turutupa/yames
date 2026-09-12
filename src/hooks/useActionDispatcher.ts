@@ -16,14 +16,21 @@ import type { HotkeyAction } from "../hotkeys";
 import { FULLSCREEN_EXIT_DELAY } from "../hotkeys";
 import { meterKey, stepMeter } from "../utils/meter";
 
-export type ViewName = "beat" | "drill" | "setlist" | "settings";
+export type ViewName = "beat" | "drill" | "setlist" | "jam" | "settings";
 
 interface ActionDispatcherArgs {
   view: ViewName;
   setView: (v: ViewName) => void;
-  prevTab: MutableRefObject<"beat" | "drill" | "setlist">;
+  prevTab: MutableRefObject<"beat" | "drill" | "setlist" | "jam">;
   /** Whether the setlist tab has one open — with none, there is nothing to start. */
   setlistLoaded: boolean;
+  /** Same for the jam tab, and the same reason: an empty stage starts nothing. */
+  jamLoaded: boolean;
+  /**
+   * Play, on the jam tab. Not `togglePlayback` — a jam with a count-in has to
+   * arm it first, and only the window knows which jam is loaded.
+   */
+  onToggleJam: () => void;
   state: AppState;
   isFullscreen: boolean;
   setIsFullscreen: (v: boolean) => void;
@@ -51,6 +58,8 @@ export function useActionDispatcher({
   setView,
   prevTab,
   setlistLoaded,
+  jamLoaded,
+  onToggleJam,
   state,
   isFullscreen,
   setIsFullscreen,
@@ -71,13 +80,14 @@ export function useActionDispatcher({
         actionId === "tab-1" ||
         actionId === "tab-2" ||
         actionId === "tab-3" ||
+        actionId === "tab-4" ||
         actionId === "settings" ||
         actionId === "toggle-widget" ||
         actionId === "toggle-sidebar" ||
         actionId === "toggle-coach"
       ) {
         switch (actionId) {
-          // In rail order: Metronome, Setlist, Drill.
+          // In rail order: Metronome, Setlist, Drill, Jam.
           case "tab-1":
             setView("beat");
             break;
@@ -87,10 +97,13 @@ export function useActionDispatcher({
           case "tab-3":
             setView("drill");
             break;
+          case "tab-4":
+            setView("jam");
+            break;
           case "settings":
             if (view === "settings") setView(prevTab.current);
             else {
-              prevTab.current = view as "beat" | "drill" | "setlist";
+              prevTab.current = view as "beat" | "drill" | "setlist" | "jam";
               setView("settings");
             }
             break;
@@ -101,10 +114,13 @@ export function useActionDispatcher({
             showFloating();
             break;
           case "toggle-sidebar":
-            if (view === "beat" || view === "drill") setSidebarOpen((o) => !o);
+            if (view === "beat" || view === "drill" || view === "jam")
+              setSidebarOpen((o) => !o);
             break;
           case "toggle-coach":
-            if (view === "beat" || view === "drill") toggleCard();
+            // The coach listens on a jam exactly as it does on the metronome,
+            // so the key that opens it has to work there too.
+            if (view === "beat" || view === "drill" || view === "jam") toggleCard();
             break;
         }
         return;
@@ -125,6 +141,12 @@ export function useActionDispatcher({
             // key there must not quietly start a bare metronome click behind
             // an empty screen.
             if (setlistLoaded) togglePlayback();
+          } else if (view === "jam") {
+            // Same rule as the setlist: the jam tab can be open with nothing
+            // loaded, and the play key there must not start a bare click
+            // behind an empty screen. A loaded jam arms its count-in first,
+            // which is why this is the window's callback rather than a toggle.
+            if (jamLoaded) onToggleJam();
           } else if (view === "beat") {
             // A setlist starts with the same transport the metronome does —
             // the runner picks it up from `isPlaying`. Without this branch
@@ -209,6 +231,8 @@ export function useActionDispatcher({
     },
     [
       view,
+      jamLoaded,
+      onToggleJam,
       state.bpm,
       state.subdivision,
       // Stable key — `state.beatGroups` is a fresh array on every

@@ -1,0 +1,92 @@
+{
+  "jam": {
+    "badge": "JAM",
+    "newJam": "Nuovo jam",
+    "untitled": "Nuovo jam",
+    "deleteJam": "Elimina jam",
+    "duplicateJam": "Duplica jam",
+    "copyName": "{{name}} copia",
+    "renameTooltip": "Rinomina questo jam",
+    "reorderHint": "Trascina per riordinare",
+    "edited": "Modificato",
+    "save": "Salva",
+    "saved": "Salvato",
+    "saveTooltip": "Salva il jam com'è adesso",
+    "noChanges": "Nessuna modifica",
+    "revert": "Ripristina",
+    "revertTooltip": "Torna al jam salvato",
+    "noneOpenTitle": "Nessun jam aperto",
+    "noneOpenLead": "Un jam è una band su cui suonare: un groove, un tempo e una forma che tiene il segno al posto tuo. Caricane uno dalla libreria, o creane uno nuovo.",
+    "headphones": "Con le cuffie il punteggio resta onesto.",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "Groove",
+      "rock8": "Rock in ottavi",
+      "rock16": "Rock in sedicesimi",
+      "halfTime": "Half-time",
+      "shuffle": "Shuffle",
+      "waltz": "Valzer",
+      "sixEight": "6/8",
+      "bossa": "Bossa",
+      "swingRide": "Swing sul ride"
+    },
+    "feel": {
+      "label": "Feel",
+      "straight": "Dritto",
+      "shuffle": "Shuffle",
+      "swing": "Swing"
+    },
+    "intensity": {
+      "label": "Intensità",
+      "soft": "Piano",
+      "normal": "Normale",
+      "loud": "Forte"
+    },
+    "form": {
+      "label": "Forma",
+      "blues12": "Blues di 12 battute",
+      "blues12Hint": "I · IV · V, il turnaround alla 12",
+      "loop8": "Loop di 8 battute",
+      "loop8Hint": "un giro armonico, ancora e ancora",
+      "bars16": "16 battute",
+      "bars16Hint": "due metà",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "la forma degli standard",
+      "one": "Un accordo",
+      "oneHint": "solo il groove",
+      "custom": "La tua",
+      "customHint": "tutte le battute che conti",
+      "barsLabel": "Battute",
+      "fewerBars": "Meno battute",
+      "moreBars": "Più battute",
+      "barOf": "battuta {{current}} di {{total}}",
+      "chorus": "giro {{count}}",
+      "fillMark": "fill",
+      "section": "Sezione {{name}}"
+    },
+    "short": {
+      "blues12": "12 battute",
+      "loop8": "8 battute",
+      "bars16": "16 battute",
+      "aaba32": "AABA",
+      "one": "1 accordo",
+      "custom": "{{count}} battute",
+      "custom_one": "{{count}} battuta",
+      "custom_other": "{{count}} battute"
+    },
+    "countIn": {
+      "label": "Battute d'intro",
+      "none": "Nessuna",
+      "bars": "{{count}} battute",
+      "bars_one": "{{count}} battuta",
+      "bars_other": "{{count}} battute"
+    },
+    "fills": {
+      "label": "Fill",
+      "hint": "Un fill nell'ultima battuta del giro, e un crash sull'uno."
+    },
+    "transport": {
+      "chorus": "Giro"
+    }
+  }
+}

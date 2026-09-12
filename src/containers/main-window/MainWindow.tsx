@@ -12,6 +12,7 @@ import { useKeybindings } from "../../hooks/useKeybindings";
 import { useCoachDownload } from "../../hooks/useCoachDownload";
 import { useActionDispatcher } from "../../hooks/useActionDispatcher";
 import {
+  armCountIn,
   configureSpeedRamp,
   downloadAndInstallUpdate,
   setAlwaysOnTop,
@@ -56,6 +57,8 @@ import { WhatsNewModal } from "../onboarding/whats-new/WhatsNewModal";
 import { useWhatsNew } from "../onboarding/whats-new/useWhatsNew";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { DrillView } from "../drill/DrillView";
+import { JamView } from "../jam/JamView";
+import { JamEmpty } from "../jam/JamEmpty";
 import { FullscreenView } from "../zen/FullscreenView";
 import type { PresetSidebarHandle } from "../../components/presets/PresetSidebar";
 import { ThemeEffects } from "./ThemeEffects";
@@ -74,6 +77,7 @@ import SettingsTimeline from "../settings/SettingsTimeline";
 import { InputTesterModal } from "../settings/InputTesterModal";
 import { coachDebug } from "../../coach/debug";
 import { presetBeatGroups, presetFreeMode } from "../../utils/meter";
+import { formBars } from "../../jam/forms";
 import { useShareMenu } from "./useShareMenu";
 import { ShareMenuPopover } from "./ShareMenuPopover";
 import { useUiPreferences } from "./hooks/useUiPreferences";
@@ -88,6 +92,7 @@ import { useBpmEditing } from "./hooks/useBpmEditing";
 import { usePlaybackClock } from "./hooks/usePlaybackClock";
 import { useLibraryFit } from "./hooks/useLibraryFit";
 import { useSetlistSession } from "./hooks/useSetlistSession";
+import { useJamSession } from "./hooks/useJamSession";
 import { UnsavedChangesDialog } from "../../components/UnsavedChangesDialog";
 import { SetlistEmpty } from "../../components/setlist/SetlistEmpty";
 import { SetlistParagraph } from "../../components/setlist/SetlistParagraph";
@@ -282,6 +287,45 @@ export function MainWindow() {
       setPresetDirty(false);
     },
   });
+
+  // The jam the window has open (JAM_MODE). With none loaded every one of
+  // these is inert and the metronome behaves exactly as it did.
+  const jamSession = useJamSession({
+    view,
+    isPlaying: state.isPlaying,
+    onJamLoaded: () => {
+      // The library marks what is loaded, and only one thing can be.
+      sidebarRef.current?.clearActive();
+      setActivePreset(null);
+      setPresetDirty(false);
+      setlistSession.closeSetlist();
+    },
+  });
+
+  const handleNewJam = useCallback(() => {
+    setSidebarOpen(true);
+    const created = jamSession.newJam();
+    // Same delay the preset "+" uses: let the library settle before the name
+    // field appears under the caret.
+    setTimeout(() => sidebarRef.current?.triggerRenameJam(created.id), 150);
+  }, [jamSession.newJam]);
+
+  /**
+   * Play, on the jam tab.
+   *
+   * A jam with a count-in arms it before the transport starts, exactly the way
+   * `useSetlistRunner` does — the engine counts the beats out and then begins,
+   * so the band and the player start together rather than the band starting
+   * and the player catching up.
+   */
+  const toggleJamPlayback = useCallback(() => {
+    const jam = jamSession.jam;
+    if (!jam) return;
+    if (!state.isPlaying && jam.countIn > 0) {
+      void armCountIn(jam.countIn).catch(() => {});
+    }
+    void togglePlayback();
+  }, [jamSession.jam, state.isPlaying]);
 
   const handleNewSetlist = useCallback(async () => {
     setSidebarOpen(true);
@@ -671,9 +715,18 @@ export function MainWindow() {
   const activeSub = currentBeat ? currentBeat.subdivision : -1;
   const isDownbeat = currentBeat?.isDownbeat ?? false;
 
+  /**
+   * The tempo, from every control that sets one.
+   *
+   * On the jam tab the tempo belongs to the JAM, not to the engine: it is
+   * saved with the groove and the form, and the engine is downstream of the
+   * record. Writing only the engine would have made the tempo the one setting
+   * on that screen that Save did not save.
+   */
   const handleBpmChange = (value: number) => {
     const clamped = Math.max(20, Math.min(300, value));
     setBpm(clamped);
+    if (view === "jam") jamSession.editJam({ bpm: clamped });
   };
 
   // A narrow window cannot hold the library and a usable stage at once.
@@ -768,6 +821,8 @@ export function MainWindow() {
     setView,
     prevTab,
     setlistLoaded: !!setlistSession.setlist,
+    jamLoaded: !!jamSession.jam,
+    onToggleJam: toggleJamPlayback,
     state,
     isFullscreen,
     setIsFullscreen,
@@ -1045,6 +1100,20 @@ export function MainWindow() {
           onNewSetlist={handleNewSetlist}
           onDeleteSetlist={setlistSession.deleteSetlist}
           onRenameSetlist={setlistSession.renameSetlist}
+          jams={jamSession.jams}
+          activeJamId={jamSession.jam?.id ?? null}
+          // Clicking the jam you are already in is the way out of it, the same
+          // gesture that closes an open setlist.
+          onLoadJam={(next) =>
+            next.id === jamSession.jam?.id
+              ? jamSession.closeJam()
+              : guarded(() => jamSession.loadJam(next))
+          }
+          onNewJam={handleNewJam}
+          onDeleteJam={jamSession.deleteJam}
+          onRenameJam={jamSession.renameJam}
+          onDuplicateJam={jamSession.duplicateJam}
+          onReorderJams={jamSession.reorderJams}
           coachOpen={session.cardOpen}
           coachActive={session.active}
           coachListening={evaluation.enabled}
@@ -1097,6 +1166,17 @@ export function MainWindow() {
             if (!id) return;
             setSidebarOpen(true);
             setTimeout(() => sidebarRef.current?.triggerRenameSetlist(id), 150);
+          }}
+          activeJam={jamSession.jam}
+          jamDirty={jamSession.dirty}
+          jamSaveFeedback={jamSession.saveFeedback}
+          onSaveJam={jamSession.saveActiveJam}
+          onRevertJam={jamSession.revertJam}
+          onRenameJam={() => {
+            const id = jamSession.jam?.id;
+            if (!id) return;
+            setSidebarOpen(true);
+            setTimeout(() => sidebarRef.current?.triggerRenameJam(id), 150);
           }}
           listening={evaluation.enabled}
           soundOpen={soundOpen}
@@ -1221,6 +1301,30 @@ export function MainWindow() {
             onStartBpmEdit={startBpmEdit}
             onCommitBpmEdit={commitBpmEdit}
           />
+        ) : view === "jam" ? (
+          jamSession.jam ? (
+            <JamView
+              jam={jamSession.jam}
+              onEdit={jamSession.editJam}
+              currentBeat={currentBeat}
+              isPlaying={state.isPlaying}
+              tapActive={tapActive}
+              tapCount={tapCount}
+              tapPulse={tapPulse}
+              editingBpm={editingBpm}
+              bpmEditValue={bpmEditValue}
+              setBpmEditValue={setBpmEditValue}
+              setEditingBpm={setEditingBpm}
+              bpmInputRef={bpmInputRef}
+              onTap={handleTap}
+              onBpmChange={handleBpmChange}
+              onStartBpmEdit={startBpmEdit}
+              onCommitBpmEdit={commitBpmEdit}
+            />
+          ) : (
+            /* A mode can be clicked cold. */
+            <JamEmpty onNew={handleNewJam} />
+          )
         ) : view === "drill" ? (
           <DrillView
             state={state}
@@ -1327,7 +1431,8 @@ export function MainWindow() {
         {/* Nothing to transport on an empty setlist tab. */}
         {(view === "beat" ||
           view === "drill" ||
-          (view === "setlist" && !!setlistSession.setlist)) && (
+          (view === "setlist" && !!setlistSession.setlist) ||
+          (view === "jam" && !!jamSession.jam)) && (
           <Transport
             view={view}
             isPlaying={state.isPlaying}
@@ -1345,7 +1450,9 @@ export function MainWindow() {
               reconfigureRamp({ warmupBeats: state.speedRamp.warmupBeats > 0 ? 0 : 4 })
             }
             onToggleLoop={() => reconfigureRamp({ cyclic: !state.speedRamp.cyclic })}
-            onTogglePlayback={() => togglePlayback()}
+            onTogglePlayback={() =>
+              view === "jam" ? toggleJamPlayback() : togglePlayback()
+            }
             onStartSpeedRamp={() => startSpeedRamp()}
             onStopSpeedRamp={() => stopSpeedRamp()}
             setlistStepNumber={setlistSession.runner.stepNumber}
@@ -1353,10 +1460,13 @@ export function MainWindow() {
             setlistRemaining={setlistSession.runner.remaining}
             setlistStartAt={setlistSession.startAt}
             onSetlistSkip={setlistSession.runner.skip}
+            jamFormBars={jamSession.jam ? formBars(jamSession.jam.form) : 0}
+            jamFormBar={currentBeat?.formBar ?? 0}
+            jamChorus={currentBeat?.chorus ?? 1}
           />
         )}
       </div>
-      {(view === "beat" || view === "drill" || view === "setlist") && (
+      {(view === "beat" || view === "drill" || view === "setlist" || view === "jam") && (
       <CoachCard
         open={session.cardOpen}
         active={session.active}

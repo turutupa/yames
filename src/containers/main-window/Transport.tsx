@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { spanLabel, type SetlistRemaining } from "../../components/setlist/format";
 
 interface TransportProps {
-  view: "beat" | "drill" | "setlist";
+  view: "beat" | "drill" | "setlist" | "jam";
   isPlaying: boolean;
   speedRampActive: boolean;
   isPulsing: boolean;
@@ -39,6 +39,20 @@ interface TransportProps {
    */
   setlistStartAt?: number;
   onSetlistSkip?: () => void;
+  /**
+   * Where the jam is in its form (JAM_MODE §4.2). `jamFormBars` is 0 when no
+   * jam is loaded and the whole block is absent.
+   *
+   * This replaces the plain bar counter rather than sitting beside it: on a
+   * jam the useful number is not how many bars have gone by, it is which bar
+   * of the twelve you are on — that is the thing people lose, and two bar
+   * counts in one row would be two answers to the same question.
+   */
+  jamFormBars?: number;
+  /** 0-based bar within the chorus, from the latest beat event. */
+  jamFormBar?: number;
+  /** 1-based chorus count. */
+  jamChorus?: number;
 }
 
 function clock(totalSeconds: number): string {
@@ -124,11 +138,15 @@ export function Transport({
   setlistRemaining,
   setlistStartAt = 0,
   onSetlistSkip,
+  jamFormBars = 0,
+  jamFormBar = 0,
+  jamChorus = 1,
 }: TransportProps) {
   const { t } = useTranslation();
   const running = view === "drill" ? speedRampActive : isPlaying;
   const anyRunning = isPlaying || speedRampActive;
   const setlisted = view === "setlist" && setlistStepCount > 0;
+  const jammed = view === "jam" && jamFormBars > 0;
 
   return (
     <div
@@ -201,9 +219,22 @@ export function Transport({
         <div className="transport-readout">
           {/* At rest this said "—". You are always about to play bar one, and
               a dash is a value the counter never actually holds. */}
-          <span className="transport-value">{anyRunning ? bar : 1}</span>
+          {jammed ? (
+            <span className="transport-value transport-value-form">
+              {anyRunning ? jamFormBar + 1 : 1}
+              <span className="transport-of">{` / ${jamFormBars}`}</span>
+            </span>
+          ) : (
+            <span className="transport-value">{anyRunning ? bar : 1}</span>
+          )}
           <span className="transport-label">{t("transport.bar")}</span>
         </div>
+        {jammed && (
+          <div className="transport-readout">
+            <span className="transport-value">{anyRunning ? jamChorus : 1}</span>
+            <span className="transport-label">{t("jam.transport.chorus")}</span>
+          </div>
+        )}
         <div className="transport-readout">
           <span className="transport-value">{clock(elapsedSeconds)}</span>
           <span className="transport-label">{t("transport.elapsed")}</span>

@@ -2,20 +2,23 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useSta
 import { useTranslation } from "react-i18next";
 import { deletePreset, listPresets, savePreset } from "../../ipc";
 import { meterLabel, presetBeatGroups, presetFreeMode } from "../../utils/meter";
+import { formBars } from "../../jam/forms";
 import type { AppState, Setlist, Preset } from "../../types";
+import type { Jam } from "../../jam/types";
 
 export interface PresetSidebarHandle {
   triggerAdd: () => void;
   triggerUpdate: () => void;
   triggerRename: (id: string) => void;
   triggerRenameSetlist: (id: string) => void;
+  triggerRenameJam: (id: string) => void;
   /** Drop the loaded marker — a setlist has taken the context bar. */
   clearActive: () => void;
 }
 
 interface PresetSidebarProps {
   state: AppState;
-  view: "beat" | "drill" | "setlist";
+  view: "beat" | "drill" | "setlist" | "jam";
   isOpen: boolean;
   onLoadPreset: (preset: Preset) => void;
   onActiveChange: (preset: Preset | null, dirty: boolean) => void;
@@ -32,6 +35,32 @@ interface PresetSidebarProps {
   onNewSetlist?: () => void;
   onDeleteSetlist?: (id: string) => void;
   onRenameSetlist?: (id: string, name: string) => void;
+  /**
+   * Jams, on the jam tab. Same deal as setlists: the stage edits the loaded
+   * one continuously, so the list is the parent's state and this component
+   * only draws it. Ordering is the library's, which is why there is a
+   * reorder callback here and none for presets — presets sort by name.
+   */
+  jams?: Jam[];
+  activeJamId?: string | null;
+  onLoadJam?: (jam: Jam) => void;
+  onNewJam?: () => void;
+  onDeleteJam?: (id: string) => void;
+  onRenameJam?: (id: string, name: string) => void;
+  onDuplicateJam?: (id: string) => void;
+  onReorderJams?: (from: number, to: number) => void;
+}
+
+/** What a jam row says on its right: the tempo and the shape. */
+function jamSummary(
+  jam: Jam,
+  t: (key: string, opts?: Record<string, unknown>) => string,
+): string {
+  const form =
+    jam.form.kind === "custom"
+      ? t("jam.short.custom", { count: formBars(jam.form) })
+      : t(`jam.short.${jam.form.kind}`);
+  return t("jam.summary", { bpm: jam.bpm, form });
 }
 
 function generateId(): string {
@@ -134,6 +163,14 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   onNewSetlist,
   onDeleteSetlist,
   onRenameSetlist,
+  jams,
+  activeJamId,
+  onLoadJam,
+  onNewJam,
+  onDeleteJam,
+  onRenameJam,
+  onDuplicateJam,
+  onReorderJams,
 }, ref) {
   const [allPresets, setAllPresets] = useState<Preset[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -157,6 +194,18 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   // would have to say which list it meant.
   const [renamingSetlist, setRenamingSetlist] = useState<string | null>(null);
   const [setlistMenu, setSetlistMenu] = useState<{ id: string; x: number; y: number } | null>(null);
+  const [renamingJam, setRenamingJam] = useState<string | null>(null);
+  const [jamMenu, setJamMenu] = useState<{ id: string; x: number; y: number } | null>(null);
+  /**
+   * The jam being dragged, and the row it is currently over.
+   *
+   * A jam library is an ORDER — the one you warm up on first, the one you end
+   * on — so unlike presets it is not sorted for you, and the only way to
+   * express that order is to move the rows. The id rather than the index: the
+   * list can be filtered by the search field while a drag is in flight.
+   */
+  const [dragJamId, setDragJamId] = useState<string | null>(null);
+  const [dragOverJamId, setDragOverJamId] = useState<string | null>(null);
   const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const renameRef = useRef<HTMLInputElement>(null);
@@ -177,7 +226,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
    * this are not rendered at all, so the fallback is unreachable — it exists
    * so the type says what is true rather than being asserted away.
    */
-  const presetView: "beat" | "drill" = view === "setlist" ? "beat" : view;
+  const presetView: "beat" | "drill" = view === "beat" || view === "drill" ? view : "beat";
 
   const viewPresets = allPresets
     .filter((p) => p.view === view)
@@ -219,11 +268,11 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
     if (searchOpen) searchRef.current?.focus();
   }, [searchOpen]);
   useEffect(() => {
-    if (renaming || renamingSetlist) {
+    if (renaming || renamingSetlist || renamingJam) {
       renameRef.current?.focus();
       renameRef.current?.select();
     }
-  }, [renaming, renamingSetlist]);
+  }, [renaming, renamingSetlist, renamingJam]);
 
   // Close the setlist context menu on an outside click, same rule as the
   // preset one above.
@@ -237,6 +286,17 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [setlistMenu]);
+
+  useEffect(() => {
+    if (!jamMenu) return;
+    const handler = (e: MouseEvent) => {
+      if (contextRef.current && !contextRef.current.contains(e.target as Node)) {
+        setJamMenu(null);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [jamMenu]);
 
   const handleSave = useCallback(async () => {
     const name = newName.trim();
@@ -351,7 +411,13 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
       setRenameValue(setlist.name);
       setRenamingSetlist(id);
     },
-  }), [activeId, allPresets, setlists, state, view]);
+    triggerRenameJam: (id: string) => {
+      const jam = jams?.find((j) => j.id === id);
+      if (!jam) return;
+      setRenameValue(jam.name);
+      setRenamingJam(id);
+    },
+  }), [activeId, allPresets, setlists, jams, state, view]);
 
   // The rail's setlist glyph at row size — lines with a play head, a list that
   // runs in order. Rail.tsx has the note on why it is no longer a chain.
@@ -368,12 +434,45 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   // them. This is what a mode buys that a section heading could not: each
   // list holds one kind of thing, so nothing has to be labelled to be told
   // apart, and the panel's title is true on every tab.
+  // The band's lanes at row size — the rail's jam glyph, same four bars.
+  const jamIcon = (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M5 9v6" />
+      <path d="M10 5v14" />
+      <path d="M15 8v8" />
+      <path d="M20 11v2" />
+    </svg>
+  );
+
   const showSetlists = view === "setlist" && !!setlists;
   const setlistList = showSetlists
     ? (search.trim()
         ? setlists!.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
         : setlists!)
     : [];
+  const showJams = view === "jam" && !!jams;
+  const jamList = showJams
+    ? (search.trim()
+        ? jams!.filter((j) => j.name.toLowerCase().includes(search.toLowerCase()))
+        : jams!)
+    : [];
+
+  /**
+   * Finish a drag: move the dragged jam to where it was dropped.
+   *
+   * The indices are looked up in the FULL list rather than the filtered one —
+   * dropping row two of a search result onto row four must move the jam to the
+   * fourth jam's place in the library, not to the fourth row of a view that
+   * will not exist a keystroke later.
+   */
+  const dropJam = (targetId: string) => {
+    const from = jams?.findIndex((j) => j.id === dragJamId) ?? -1;
+    const to = jams?.findIndex((j) => j.id === targetId) ?? -1;
+    setDragJamId(null);
+    setDragOverJamId(null);
+    if (from === -1 || to === -1 || from === to) return;
+    onReorderJams?.(from, to);
+  };
 
   return (
     <>
@@ -400,7 +499,9 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
                 ? "presets.titleDrill"
                 : view === "setlist"
                   ? "presets.titleSetlist"
-                  : "presets.title",
+                  : view === "jam"
+                    ? "presets.titleJam"
+                    : "presets.title",
             )}
           </span>
           <div className="preset-sidebar-header-actions">
@@ -435,7 +536,20 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
                 {setlistIcon}
               </button>
             )}
-            {!showSetlists && viewPresets.length < MAX_PRESETS && (
+            {/* The jam tab's opener. It copies the loaded jam rather than
+                starting from nothing — "another one like this" is what a
+                player actually wants at the moment they press it. */}
+            {showJams && onNewJam && (
+              <button
+                className="preset-sidebar-head-btn preset-sidebar-new-jam"
+                onClick={onNewJam}
+                aria-label={t("jam.newJam")}
+                data-tip={t("jam.newJam")}
+              >
+                {jamIcon}
+              </button>
+            )}
+            {!showSetlists && !showJams && viewPresets.length < MAX_PRESETS && (
               <button
                 className="preset-sidebar-head-btn preset-sidebar-add"
                 onClick={() => setAdding(true)}
@@ -552,13 +666,92 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               )}
             </div>
           ))}
+          {jamList.map((j) => (
+            <div
+              key={j.id}
+              className={`preset-sidebar-item jam-item ${activeJamId === j.id ? "active" : ""}`}
+              role="button"
+              tabIndex={0}
+              draggable={!renamingJam}
+              data-dragging={dragJamId === j.id ? "" : undefined}
+              data-drag-over={dragOverJamId === j.id && dragJamId !== j.id ? "" : undefined}
+              title={t("jam.reorderHint")}
+              onClick={() => onLoadJam?.(j)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onLoadJam?.(j);
+                }
+              }}
+              onDragStart={(e) => {
+                setDragJamId(j.id);
+                e.dataTransfer.effectAllowed = "move";
+                // Firefox refuses to start a drag without data on it.
+                e.dataTransfer.setData("text/plain", j.id);
+              }}
+              onDragEnter={() => setDragOverJamId(j.id)}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                dropJam(j.id);
+              }}
+              onDragEnd={() => {
+                setDragJamId(null);
+                setDragOverJamId(null);
+              }}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                setJamMenu({ id: j.id, x: e.clientX, y: e.clientY });
+              }}
+            >
+              {renamingJam === j.id ? (
+                <input
+                  ref={renameRef}
+                  className="preset-sidebar-name-input"
+                  value={renameValue}
+                  onChange={(e) => setRenameValue(e.target.value)}
+                  onBlur={() => {
+                    const name = renameValue.trim();
+                    if (name) onRenameJam?.(j.id, name);
+                    setRenamingJam(null);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      const name = renameValue.trim();
+                      if (name) onRenameJam?.(j.id, name);
+                      setRenamingJam(null);
+                    }
+                    if (e.key === "Escape") setRenamingJam(null);
+                    e.stopPropagation();
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  maxLength={24}
+                />
+              ) : (
+                <>
+                  <span className="setlist-item-row">
+                    <span className="setlist-item-glyph">{jamIcon}</span>
+                    <span className="preset-item-name">{j.name}</span>
+                  </span>
+                  <span className="setlist-item-sub">{jamSummary(j, t)}</span>
+                </>
+              )}
+            </div>
+          ))}
+          {showJams && jamList.length === 0 && search.trim() && (
+            <div className="preset-sidebar-empty">{t("presets.noResults")}</div>
+          )}
+
           {/* The rule separates setlists from presets; on the setlist tab
               there are no presets under it to separate. */}
           {setlistList.length > 0 && !showSetlists && (
             <div className="setlist-item-rule" aria-hidden="true" />
           )}
 
-          {!showSetlists && adding && (
+          {!showSetlists && !showJams && adding && (
             <div className="preset-sidebar-item adding">
               <input
                 ref={inputRef}
@@ -579,7 +772,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               />
             </div>
           )}
-          {!showSetlists && presets.map((p) => (
+          {!showSetlists && !showJams && presets.map((p) => (
             <button
               key={p.id}
               className={`preset-sidebar-item ${activeId === p.id ? "active" : ""} ${activeId === p.id && dirty ? "dirty" : ""}`}
@@ -619,7 +812,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               )}
             </button>
           ))}
-          {!showSetlists && presets.length === 0 && !adding && (
+          {!showSetlists && !showJams && presets.length === 0 && !adding && (
             search.trim() ? (
               <div className="preset-sidebar-empty">{t("presets.noResults")}</div>
             ) : (
@@ -675,6 +868,44 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
             onClick={() => handleDelete(contextMenu.id)}
           >
             {t("presets.delete")}
+          </button>
+        </div>
+      )}
+
+      {jamMenu && (
+        <div
+          ref={contextRef}
+          className="preset-context-menu"
+          style={{ top: jamMenu.y, left: jamMenu.x }}
+        >
+          <button
+            onClick={() => {
+              const j = jams?.find((j) => j.id === jamMenu.id);
+              if (j) {
+                setRenameValue(j.name);
+                setRenamingJam(jamMenu.id);
+              }
+              setJamMenu(null);
+            }}
+          >
+            {t("presets.rename")}
+          </button>
+          <button
+            onClick={() => {
+              onDuplicateJam?.(jamMenu.id);
+              setJamMenu(null);
+            }}
+          >
+            {t("jam.duplicateJam")}
+          </button>
+          <button
+            className="preset-context-delete"
+            onClick={() => {
+              onDeleteJam?.(jamMenu.id);
+              setJamMenu(null);
+            }}
+          >
+            {t("jam.deleteJam")}
           </button>
         </div>
       )}

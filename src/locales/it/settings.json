@@ -195,6 +195,7 @@
         "tab-1": "Scheda Metronomo",
         "tab-2": "Scheda Scaletta",
         "tab-3": "Scheda Rampa",
+        "tab-4": "Scheda Jam",
         "settings": "Impostazioni",
         "toggle-sidebar": "Attiva/disattiva barra laterale",
         "toggle-coach": "Attiva/disattiva Coach"
@@ -219,6 +220,7 @@
         "tab-1": "Passa alla scheda Metronomo",
         "tab-2": "Passa alla scheda Scaletta",
         "tab-3": "Passa alla scheda Rampa",
+        "tab-4": "Passa alla scheda Jam",
         "settings": "Apri o chiudi le impostazioni",
         "toggle-sidebar": "Comprimi o espandi la barra laterale sinistra",
         "toggle-coach": "Apri o chiudi il pannello del coach"

@@ -1,0 +1,92 @@
+{
+  "jam": {
+    "badge": "JAM",
+    "newJam": "Nuevo jam",
+    "untitled": "Nuevo jam",
+    "deleteJam": "Eliminar jam",
+    "duplicateJam": "Duplicar jam",
+    "copyName": "{{name}} copia",
+    "renameTooltip": "Renombrar este jam",
+    "reorderHint": "Arrastra para reordenar",
+    "edited": "Editado",
+    "save": "Guardar",
+    "saved": "Guardado",
+    "saveTooltip": "Guardar el jam tal como está",
+    "noChanges": "Sin cambios",
+    "revert": "Descartar",
+    "revertTooltip": "Volver al jam guardado",
+    "noneOpenTitle": "No hay ningún jam abierto",
+    "noneOpenLead": "Un jam es una banda sobre la que tocar: un groove, un tempo y una forma que lleva la cuenta por ti. Carga uno de la biblioteca o empieza uno nuevo.",
+    "headphones": "Con auriculares la puntuación es honesta.",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "Groove",
+      "rock8": "Rock en corcheas",
+      "rock16": "Rock en semicorcheas",
+      "halfTime": "Half-time",
+      "shuffle": "Shuffle",
+      "waltz": "Vals",
+      "sixEight": "6/8",
+      "bossa": "Bossa",
+      "swingRide": "Swing con ride"
+    },
+    "feel": {
+      "label": "Feel",
+      "straight": "Recto",
+      "shuffle": "Shuffle",
+      "swing": "Swing"
+    },
+    "intensity": {
+      "label": "Intensidad",
+      "soft": "Suave",
+      "normal": "Normal",
+      "loud": "Fuerte"
+    },
+    "form": {
+      "label": "Forma",
+      "blues12": "Blues de 12 compases",
+      "blues12Hint": "I · IV · V, el giro en el 12",
+      "loop8": "Bucle de 8 compases",
+      "loop8Hint": "una progresión, una y otra vez",
+      "bars16": "16 compases",
+      "bars16Hint": "dos mitades",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "la forma de los estándares",
+      "one": "Un acorde",
+      "oneHint": "solo el groove",
+      "custom": "La tuya",
+      "customHint": "tantos compases como cuentes",
+      "barsLabel": "Compases",
+      "fewerBars": "Menos compases",
+      "moreBars": "Más compases",
+      "barOf": "compás {{current}} de {{total}}",
+      "chorus": "vuelta {{count}}",
+      "fillMark": "fill",
+      "section": "Sección {{name}}"
+    },
+    "short": {
+      "blues12": "12 compases",
+      "loop8": "8 compases",
+      "bars16": "16 compases",
+      "aaba32": "AABA",
+      "one": "1 acorde",
+      "custom": "{{count}} compases",
+      "custom_one": "{{count}} compás",
+      "custom_other": "{{count}} compases"
+    },
+    "countIn": {
+      "label": "Cuenta de entrada",
+      "none": "Ninguna",
+      "bars": "{{count}} compases",
+      "bars_one": "{{count}} compás",
+      "bars_other": "{{count}} compases"
+    },
+    "fills": {
+      "label": "Fills",
+      "hint": "Un fill en el último compás de la vuelta, y un crash en el uno."
+    },
+    "transport": {
+      "chorus": "Vuelta"
+    }
+  }
+}

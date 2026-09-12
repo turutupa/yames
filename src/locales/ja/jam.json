@@ -1,0 +1,92 @@
+{
+  "jam": {
+    "badge": "ジャム",
+    "newJam": "新しいジャム",
+    "untitled": "新しいジャム",
+    "deleteJam": "ジャムを削除",
+    "duplicateJam": "ジャムを複製",
+    "copyName": "{{name}} のコピー",
+    "renameTooltip": "このジャムの名前を変更",
+    "reorderHint": "ドラッグして並べ替え",
+    "edited": "編集済み",
+    "save": "保存",
+    "saved": "保存しました",
+    "saveTooltip": "今の状態でジャムを保存",
+    "noChanges": "変更なし",
+    "revert": "元に戻す",
+    "revertTooltip": "保存済みのジャムに戻す",
+    "noneOpenTitle": "開いているジャムはありません",
+    "noneOpenLead": "ジャムは、その上で弾くためのバンドです。グルーヴとテンポ、そして今どこにいるかを覚えていてくれるフォーム。ライブラリから読み込むか、新しく作ってください。",
+    "headphones": "ヘッドホンを使うと採点が正直になります。",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "グルーヴ",
+      "rock8": "ロック 8分",
+      "rock16": "ロック 16分",
+      "halfTime": "ハーフタイム",
+      "shuffle": "シャッフル",
+      "waltz": "ワルツ",
+      "sixEight": "6/8",
+      "bossa": "ボサノヴァ",
+      "swingRide": "スウィング・ライド"
+    },
+    "feel": {
+      "label": "フィール",
+      "straight": "ストレート",
+      "shuffle": "シャッフル",
+      "swing": "スウィング"
+    },
+    "intensity": {
+      "label": "強さ",
+      "soft": "弱め",
+      "normal": "ふつう",
+      "loud": "強め"
+    },
+    "form": {
+      "label": "フォーム",
+      "blues12": "12小節ブルース",
+      "blues12Hint": "I · IV · V、12小節目でターンアラウンド",
+      "loop8": "8小節ループ",
+      "loop8Hint": "ひとつの進行をぐるぐる",
+      "bars16": "16小節",
+      "bars16Hint": "前半と後半",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "スタンダードの形",
+      "one": "ワンコード",
+      "oneHint": "グルーヴだけ",
+      "custom": "自分で決める",
+      "customHint": "好きな小節数で",
+      "barsLabel": "小節数",
+      "fewerBars": "小節を減らす",
+      "moreBars": "小節を増やす",
+      "barOf": "{{total}} 小節中 {{current}} 小節目",
+      "chorus": "コーラス {{count}}",
+      "fillMark": "フィル",
+      "section": "セクション {{name}}"
+    },
+    "short": {
+      "blues12": "12小節",
+      "loop8": "8小節",
+      "bars16": "16小節",
+      "aaba32": "AABA",
+      "one": "1コード",
+      "custom": "{{count}} 小節",
+      "custom_one": "{{count}} 小節",
+      "custom_other": "{{count}} 小節"
+    },
+    "countIn": {
+      "label": "カウントイン",
+      "none": "なし",
+      "bars": "{{count}} 小節",
+      "bars_one": "{{count}} 小節",
+      "bars_other": "{{count}} 小節"
+    },
+    "fills": {
+      "label": "フィル",
+      "hint": "コーラス最後の小節にフィル、次の1拍目にクラッシュ。"
+    },
+    "transport": {
+      "chorus": "コーラス"
+    }
+  }
+}

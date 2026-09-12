@@ -1,0 +1,92 @@
+{
+  "jam": {
+    "badge": "JAM",
+    "newJam": "Yeni jam",
+    "untitled": "Yeni jam",
+    "deleteJam": "Jam'i sil",
+    "duplicateJam": "Jam'i çoğalt",
+    "copyName": "{{name}} kopya",
+    "renameTooltip": "Bu jam'i yeniden adlandır",
+    "reorderHint": "Sıralamak için sürükleyin",
+    "edited": "Düzenlendi",
+    "save": "Kaydet",
+    "saved": "Kaydedildi",
+    "saveTooltip": "Jam'i şu anki hâliyle kaydet",
+    "noChanges": "Değişiklik yok",
+    "revert": "Geri al",
+    "revertTooltip": "Kayıtlı jam'e dön",
+    "noneOpenTitle": "Açık jam yok",
+    "noneOpenLead": "Jam, üzerine çalacağın bir grup: bir groove, bir tempo ve nerede olduğunu senin yerine sayan bir form. Kitaplıktan birini yükle ya da yenisini başlat.",
+    "headphones": "Kulaklıkla puan dürüst kalır.",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "Groove",
+      "rock8": "Rock 8'lik",
+      "rock16": "Rock 16'lık",
+      "halfTime": "Half-time",
+      "shuffle": "Shuffle",
+      "waltz": "Vals",
+      "sixEight": "6/8",
+      "bossa": "Bossa",
+      "swingRide": "Swing ride"
+    },
+    "feel": {
+      "label": "Feel",
+      "straight": "Düz",
+      "shuffle": "Shuffle",
+      "swing": "Swing"
+    },
+    "intensity": {
+      "label": "Yoğunluk",
+      "soft": "Yumuşak",
+      "normal": "Normal",
+      "loud": "Yüksek"
+    },
+    "form": {
+      "label": "Form",
+      "blues12": "12 ölçülük blues",
+      "blues12Hint": "I · IV · V, 12. ölçüde dönüş",
+      "loop8": "8 ölçülük döngü",
+      "loop8Hint": "tek bir akor turu, döne döne",
+      "bars16": "16 ölçü",
+      "bars16Hint": "iki yarı",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "standartların formu",
+      "one": "Tek akor",
+      "oneHint": "sadece groove",
+      "custom": "Kendi formun",
+      "customHint": "kaç ölçü sayıyorsan o kadar",
+      "barsLabel": "Ölçü",
+      "fewerBars": "Daha az ölçü",
+      "moreBars": "Daha fazla ölçü",
+      "barOf": "{{total}} ölçüden {{current}}. ölçü",
+      "chorus": "chorus {{count}}",
+      "fillMark": "fill",
+      "section": "{{name}} bölümü"
+    },
+    "short": {
+      "blues12": "12 ölçü",
+      "loop8": "8 ölçü",
+      "bars16": "16 ölçü",
+      "aaba32": "AABA",
+      "one": "1 akor",
+      "custom": "{{count}} ölçü",
+      "custom_one": "{{count}} ölçü",
+      "custom_other": "{{count}} ölçü"
+    },
+    "countIn": {
+      "label": "Giriş sayımı",
+      "none": "Yok",
+      "bars": "{{count}} ölçü",
+      "bars_one": "{{count}} ölçü",
+      "bars_other": "{{count}} ölçü"
+    },
+    "fills": {
+      "label": "Fill'ler",
+      "hint": "Chorus'un son ölçüsünde bir fill, sonraki ilk vuruşta crash."
+    },
+    "transport": {
+      "chorus": "Chorus"
+    }
+  }
+}

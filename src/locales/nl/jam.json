@@ -1,0 +1,92 @@
+{
+  "jam": {
+    "badge": "JAM",
+    "newJam": "Nieuwe jam",
+    "untitled": "Nieuwe jam",
+    "deleteJam": "Jam verwijderen",
+    "duplicateJam": "Jam dupliceren",
+    "copyName": "{{name}} kopie",
+    "renameTooltip": "Deze jam hernoemen",
+    "reorderHint": "Sleep om te herschikken",
+    "edited": "Bewerkt",
+    "save": "Opslaan",
+    "saved": "Opgeslagen",
+    "saveTooltip": "De jam opslaan zoals die nu is",
+    "noChanges": "Geen wijzigingen",
+    "revert": "Herstellen",
+    "revertTooltip": "Terug naar de opgeslagen jam",
+    "noneOpenTitle": "Geen jam geopend",
+    "noneOpenLead": "Een jam is een band om overheen te spelen: een groove, een tempo en een vorm die voor jou de tel bijhoudt. Laad er een uit de bibliotheek, of begin een nieuwe.",
+    "headphones": "Met een koptelefoon blijft de score eerlijk.",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "Groove",
+      "rock8": "Rock achtsten",
+      "rock16": "Rock zestienden",
+      "halfTime": "Halftime",
+      "shuffle": "Shuffle",
+      "waltz": "Wals",
+      "sixEight": "6/8",
+      "bossa": "Bossa",
+      "swingRide": "Swing-ride"
+    },
+    "feel": {
+      "label": "Feel",
+      "straight": "Recht",
+      "shuffle": "Shuffle",
+      "swing": "Swing"
+    },
+    "intensity": {
+      "label": "Intensiteit",
+      "soft": "Zacht",
+      "normal": "Normaal",
+      "loud": "Luid"
+    },
+    "form": {
+      "label": "Vorm",
+      "blues12": "12-maats blues",
+      "blues12Hint": "I · IV · V, de turnaround in maat 12",
+      "loop8": "8-maats lus",
+      "loop8Hint": "één akkoordenreeks, rondje na rondje",
+      "bars16": "16 maten",
+      "bars16Hint": "twee helften",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "de vorm van de standards",
+      "one": "Eén akkoord",
+      "oneHint": "alleen de groove",
+      "custom": "Je eigen",
+      "customHint": "zoveel maten als je telt",
+      "barsLabel": "Maten",
+      "fewerBars": "Minder maten",
+      "moreBars": "Meer maten",
+      "barOf": "maat {{current}} van {{total}}",
+      "chorus": "chorus {{count}}",
+      "fillMark": "fill",
+      "section": "Deel {{name}}"
+    },
+    "short": {
+      "blues12": "12 maten",
+      "loop8": "8 maten",
+      "bars16": "16 maten",
+      "aaba32": "AABA",
+      "one": "1 akkoord",
+      "custom": "{{count}} maten",
+      "custom_one": "{{count}} maat",
+      "custom_other": "{{count}} maten"
+    },
+    "countIn": {
+      "label": "Inteltellen",
+      "none": "Geen",
+      "bars": "{{count}} maten",
+      "bars_one": "{{count}} maat",
+      "bars_other": "{{count}} maten"
+    },
+    "fills": {
+      "label": "Fills",
+      "hint": "Een fill in de laatste maat van het chorus, en een crash op de één."
+    },
+    "transport": {
+      "chorus": "Chorus"
+    }
+  }
+}

@@ -1,0 +1,423 @@
+/* jam.css — the Jam mode (plans/JAM_MODE.md).
+ *
+ * Almost nothing here is new furniture. The tempo block, the segmented
+ * controls, the cards and the stepper are the metronome stage's, reused by
+ * class; what this file adds is the arrangement, the groove glyph and the form
+ * timeline — the two things the mode owns and no other screen draws.
+ *
+ * Imported by `JamView.tsx`, the way `drill-view.css` is imported by
+ * `DrillView.tsx`, so a tab nobody opens costs nothing to parse. */
+
+/* The stage band, the same expression the other two modes use: inert until
+   the window genuinely has room to spare, so no breakpoint has to guess. */
+.main-content[data-view="jam"] {
+  --stage-band: 1176px;
+}
+
+.main-content[data-view="jam"] > .view-transition-wrapper {
+  align-self: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 1176px;
+  margin-left: max(0px, calc(50% - var(--stage-band) / 2));
+  padding-left: 48px;
+  padding-right: 48px;
+  /* This screen is five stacked sections and a timeline, so it overflows a
+     900px window long before it overflows a 1400px one. Same rule as every
+     other stage (transitions.css): align to the start and scroll. */
+  justify-content: flex-start;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.jam-view {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 100%;
+}
+
+/* ── Tempo, with feel and intensity beside it ───────────────────────────────
+   The setup board stacks these; at 1440 they fit on one row, and putting them
+   there keeps the groove cards — the part you actually browse — above the
+   fold. The controls are measured from the right so nothing moves when the
+   tempo goes from 99 to 100. */
+.jam-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  width: 100%;
+}
+
+.jam-head-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  padding-bottom: 6px;
+}
+
+.jam-segmented {
+  margin-left: auto;
+}
+
+/* The tempo is the largest thing on the metronome stage because that screen is
+   a tempo. Here the form timeline is the thing you look at while playing, so
+   the number is sized to be read across the room and no larger. */
+.main-content[data-view="jam"] .bpm-input {
+  font-size: 4rem;
+  font-weight: 200;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.main-content[data-view="jam"] .bpm-display {
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.main-content[data-view="jam"] .tempo-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.main-content[data-view="jam"] .tap-btn {
+  margin-left: 8px;
+}
+
+.jam-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+/* ── The cards ─────────────────────────────────────────────────────────────
+   `.sub-row-btn` is the metronome's subdivision tile — a raised panel with an
+   accent edge when it is chosen — and a groove is the same kind of choice, so
+   it is the same tile rather than a new one that looks nearly like it. */
+.jam-cards {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+}
+
+.jam-cards-groove {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.jam-cards-form {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.jam-card {
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 10px 10px;
+  min-height: 74px;
+}
+
+/* A form card carries a sentence under its name, so it is left-aligned where
+   a groove card is centred: two lines of centred text read as a poster. */
+.jam-card-form {
+  align-items: flex-start;
+  text-align: left;
+  gap: 5px;
+  min-height: 66px;
+  padding: 12px 14px;
+}
+
+.jam-card-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.jam-card-hint {
+  font-size: 0.68rem;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--text-faint);
+}
+
+.jam-card.active .jam-card-hint {
+  color: color-mix(in srgb, var(--accent) 70%, var(--text-faint));
+}
+
+/* ── The groove glyph ──────────────────────────────────────────────────────
+   Drawn from the pattern itself (GrooveGlyph.tsx), so the picture and the
+   table can never disagree. The rests are painted because a rest is a column
+   of the bar, not a gap in it. */
+.jam-glyph {
+  width: auto;
+  max-width: 100%;
+  height: 20px;
+  overflow: visible;
+}
+
+.jam-glyph-rest {
+  fill: currentColor;
+  opacity: 0.18;
+}
+
+.jam-glyph-hit {
+  fill: currentColor;
+  opacity: 0.7;
+}
+
+.jam-glyph-hit[data-level="2"] {
+  opacity: 1;
+}
+
+/* A ghost is a note you feel rather than hear, and it is drawn that way. */
+.jam-glyph-hit[data-level="3"] {
+  opacity: 0.4;
+}
+
+/* ── The row under the form cards ──────────────────────────────────────────
+   Bars (when the form is your own), count-in, fills. */
+.jam-form-row {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+  padding-top: 2px;
+}
+
+.jam-bars {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.jam-bars .beat-stepper-value {
+  min-width: 2ch;
+  text-align: center;
+}
+
+.jam-form-row .jam-segmented {
+  margin-left: 0;
+}
+
+.jam-switch {
+  margin-left: auto;
+}
+
+/* ── The form timeline ─────────────────────────────────────────────────────
+   The headline of the mode. One cell per bar, grouped into the form's
+   sections: twelve cells in a row are twelve of something, three fours are a
+   blues, and the seam is what does that work. */
+.jam-timeline-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.jam-timeline-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.jam-timeline-where {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.jam-timeline {
+  display: flex;
+  align-items: flex-end;
+  /* The gap BETWEEN groups is the seam. Bigger than the gap between cells by
+     enough to read as a boundary and not so big that thirty-two bars stop
+     looking like one line. */
+  gap: 16px;
+  width: 100%;
+}
+
+.jam-timeline-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.jam-timeline-name {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--text-faint);
+  line-height: 1;
+}
+
+.jam-timeline-cells {
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+}
+
+.jam-timeline-cell {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+
+.jam-timeline-number {
+  position: relative;
+  z-index: 1;
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.jam-timeline-cell[data-current] {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.jam-timeline-cell[data-current] .jam-timeline-number {
+  color: var(--accent);
+}
+
+/* The bar filling as it goes by. `transform` rather than `width` so it is a
+   compositor job: this repaints on every beat, next to an audio callback that
+   the roadmap says nothing may disturb. */
+.jam-timeline-progress {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  transition: transform 0.08s linear;
+  pointer-events: none;
+}
+
+/* The last bar of the chorus, when fills are on. A corner mark rather than a
+   word inside the cell: at thirty-two bars a cell is 24px wide. */
+.jam-timeline-cell[data-fill] {
+  border-color: color-mix(in srgb, var(--text-primary) 20%, transparent);
+}
+
+.jam-timeline-fill {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  z-index: 1;
+  font-size: 0.54rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-faint);
+  pointer-events: none;
+}
+
+/* Thirty-two bars in one line leaves no room for the word. The mark stays —
+   the cell's own border says it — and the label goes. */
+@media (max-width: 1279px) {
+  .jam-timeline-fill {
+    display: none;
+  }
+}
+
+/* ── The honest line (JAM_MODE §3, principle 5) ────────────────────────────
+   Quiet, but not hidden: it is the sentence that stops a flattered score from
+   going unexplained. */
+.jam-honest {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding-bottom: 4px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--text-faint);
+}
+
+/* ── The library row ──────────────────────────────────────────────────────
+   The jam rows borrow the setlist row wholesale; what they add is the drag,
+   which presets do not have because presets sort themselves by name. */
+.jam-item {
+  cursor: grab;
+}
+
+.jam-item[data-dragging] {
+  opacity: 0.45;
+  cursor: grabbing;
+}
+
+.jam-item[data-drag-over] {
+  box-shadow: inset 0 2px 0 0 var(--accent);
+}
+
+/* The badge in the context bar, beside the jam's name. */
+.jam-badge {
+  letter-spacing: 0.1em;
+}
+
+/* ── Narrower windows ─────────────────────────────────────────────────────
+   The groove grid goes to two columns before the cards get too narrow for
+   their names, and the tempo block stops sharing a row with the feel and
+   intensity controls. */
+@media (max-width: 1099px) {
+  .jam-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .jam-head-controls {
+    flex-direction: row;
+    align-items: center;
+    align-self: stretch;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .jam-head-controls .jam-segmented {
+    margin-left: 0;
+  }
+
+  .jam-cards-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 879px) {
+  .main-content[data-view="jam"] > .view-transition-wrapper {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .jam-cards-groove {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .main-content[data-view="jam"] .bpm-input {
+    font-size: 3rem;
+  }
+
+  /* A thirty-two bar form cannot keep its sections side by side this narrow,
+     so they wrap and the seam becomes a line break — which still reads as a
+     boundary, and is the only version of it that fits. */
+  .jam-timeline {
+    flex-wrap: wrap;
+    gap: 10px 16px;
+  }
+
+  .jam-timeline-group {
+    flex: 1 1 180px;
+  }
+}

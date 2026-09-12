@@ -1,0 +1,92 @@
+{
+  "jam": {
+    "badge": "잼",
+    "newJam": "새 잼",
+    "untitled": "새 잼",
+    "deleteJam": "잼 삭제",
+    "duplicateJam": "잼 복제",
+    "copyName": "{{name}} 복사본",
+    "renameTooltip": "이 잼 이름 바꾸기",
+    "reorderHint": "끌어서 순서 바꾸기",
+    "edited": "수정됨",
+    "save": "저장",
+    "saved": "저장됨",
+    "saveTooltip": "지금 상태 그대로 잼 저장",
+    "noChanges": "변경 사항 없음",
+    "revert": "되돌리기",
+    "revertTooltip": "저장된 잼으로 되돌리기",
+    "noneOpenTitle": "열린 잼이 없습니다",
+    "noneOpenLead": "잼은 그 위에서 연주할 밴드입니다. 그루브와 템포, 그리고 지금 어디인지 대신 세어 주는 형식. 라이브러리에서 불러오거나 새로 만들어 보세요.",
+    "headphones": "헤드폰을 쓰면 점수가 정직해집니다.",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "그루브",
+      "rock8": "록 8비트",
+      "rock16": "록 16비트",
+      "halfTime": "하프타임",
+      "shuffle": "셔플",
+      "waltz": "왈츠",
+      "sixEight": "6/8",
+      "bossa": "보사노바",
+      "swingRide": "스윙 라이드"
+    },
+    "feel": {
+      "label": "필",
+      "straight": "스트레이트",
+      "shuffle": "셔플",
+      "swing": "스윙"
+    },
+    "intensity": {
+      "label": "세기",
+      "soft": "약하게",
+      "normal": "보통",
+      "loud": "세게"
+    },
+    "form": {
+      "label": "형식",
+      "blues12": "12마디 블루스",
+      "blues12Hint": "I · IV · V, 12마디에서 턴어라운드",
+      "loop8": "8마디 루프",
+      "loop8Hint": "한 진행을 계속 돌린다",
+      "bars16": "16마디",
+      "bars16Hint": "두 부분",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "스탠더드의 형식",
+      "one": "원 코드",
+      "oneHint": "그루브만",
+      "custom": "직접 설정",
+      "customHint": "원하는 마디 수로",
+      "barsLabel": "마디",
+      "fewerBars": "마디 줄이기",
+      "moreBars": "마디 늘리기",
+      "barOf": "{{current}}/{{total}}마디",
+      "chorus": "코러스 {{count}}",
+      "fillMark": "필인",
+      "section": "{{name}} 섹션"
+    },
+    "short": {
+      "blues12": "12마디",
+      "loop8": "8마디",
+      "bars16": "16마디",
+      "aaba32": "AABA",
+      "one": "1코드",
+      "custom": "{{count}}마디",
+      "custom_one": "{{count}}마디",
+      "custom_other": "{{count}}마디"
+    },
+    "countIn": {
+      "label": "카운트인",
+      "none": "없음",
+      "bars": "{{count}}마디",
+      "bars_one": "{{count}}마디",
+      "bars_other": "{{count}}마디"
+    },
+    "fills": {
+      "label": "필인",
+      "hint": "코러스 마지막 마디에 필인, 그다음 첫 박에 크래시."
+    },
+    "transport": {
+      "chorus": "코러스"
+    }
+  }
+}

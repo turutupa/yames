@@ -1,0 +1,92 @@
+{
+  "jam": {
+    "badge": "JAM",
+    "newJam": "Novo jam",
+    "untitled": "Novo jam",
+    "deleteJam": "Excluir jam",
+    "duplicateJam": "Duplicar jam",
+    "copyName": "{{name}} cópia",
+    "renameTooltip": "Renomear este jam",
+    "reorderHint": "Arraste para reordenar",
+    "edited": "Editado",
+    "save": "Salvar",
+    "saved": "Salvo",
+    "saveTooltip": "Salvar o jam como está agora",
+    "noChanges": "Sem alterações",
+    "revert": "Reverter",
+    "revertTooltip": "Voltar ao jam salvo",
+    "noneOpenTitle": "Nenhum jam aberto",
+    "noneOpenLead": "Um jam é uma banda para tocar por cima: um groove, um andamento e uma forma que conta os compassos por você. Carregue um da biblioteca ou comece um novo.",
+    "headphones": "Com fones, a nota continua honesta.",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "Groove",
+      "rock8": "Rock em colcheias",
+      "rock16": "Rock em semicolcheias",
+      "halfTime": "Half-time",
+      "shuffle": "Shuffle",
+      "waltz": "Valsa",
+      "sixEight": "6/8",
+      "bossa": "Bossa",
+      "swingRide": "Swing no ride"
+    },
+    "feel": {
+      "label": "Levada",
+      "straight": "Reto",
+      "shuffle": "Shuffle",
+      "swing": "Swing"
+    },
+    "intensity": {
+      "label": "Intensidade",
+      "soft": "Suave",
+      "normal": "Normal",
+      "loud": "Forte"
+    },
+    "form": {
+      "label": "Forma",
+      "blues12": "Blues de 12 compassos",
+      "blues12Hint": "I · IV · V, a virada no 12",
+      "loop8": "Loop de 8 compassos",
+      "loop8Hint": "uma progressão, sem parar",
+      "bars16": "16 compassos",
+      "bars16Hint": "duas metades",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "a forma dos standards",
+      "one": "Um acorde",
+      "oneHint": "só o groove",
+      "custom": "A sua",
+      "customHint": "quantos compassos você contar",
+      "barsLabel": "Compassos",
+      "fewerBars": "Menos compassos",
+      "moreBars": "Mais compassos",
+      "barOf": "compasso {{current}} de {{total}}",
+      "chorus": "chorus {{count}}",
+      "fillMark": "virada",
+      "section": "Seção {{name}}"
+    },
+    "short": {
+      "blues12": "12 compassos",
+      "loop8": "8 compassos",
+      "bars16": "16 compassos",
+      "aaba32": "AABA",
+      "one": "1 acorde",
+      "custom": "{{count}} compassos",
+      "custom_one": "{{count}} compasso",
+      "custom_other": "{{count}} compassos"
+    },
+    "countIn": {
+      "label": "Contagem de entrada",
+      "none": "Nenhuma",
+      "bars": "{{count}} compassos",
+      "bars_one": "{{count}} compasso",
+      "bars_other": "{{count}} compassos"
+    },
+    "fills": {
+      "label": "Viradas",
+      "hint": "Uma virada no último compasso do chorus, e um crash no um."
+    },
+    "transport": {
+      "chorus": "Chorus"
+    }
+  }
+}

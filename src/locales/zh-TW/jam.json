@@ -1,0 +1,92 @@
+{
+  "jam": {
+    "badge": "即興伴奏",
+    "newJam": "新增即興伴奏",
+    "untitled": "新增即興伴奏",
+    "deleteJam": "刪除即興伴奏",
+    "duplicateJam": "複製即興伴奏",
+    "copyName": "{{name}} 複本",
+    "renameTooltip": "重新命名這個即興伴奏",
+    "reorderHint": "拖曳以重新排序",
+    "edited": "已修改",
+    "save": "儲存",
+    "saved": "已儲存",
+    "saveTooltip": "以目前的樣子儲存即興伴奏",
+    "noChanges": "沒有變更",
+    "revert": "還原",
+    "revertTooltip": "回到已儲存的即興伴奏",
+    "noneOpenTitle": "尚未開啟即興伴奏",
+    "noneOpenLead": "即興伴奏就是一支替你伴奏的樂團：一段鼓點、一個速度，還有一套替你數小節的曲式。從資料庫載入一個，或是新增一個。",
+    "headphones": "戴上耳機，評分才不會騙你。",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "鼓點",
+      "rock8": "搖滾八分",
+      "rock16": "搖滾十六分",
+      "halfTime": "半速",
+      "shuffle": "三連音搖擺",
+      "waltz": "華爾滋",
+      "sixEight": "6/8",
+      "bossa": "巴薩諾瓦",
+      "swingRide": "搖擺叮叮鈸"
+    },
+    "feel": {
+      "label": "律動",
+      "straight": "平均",
+      "shuffle": "三連音搖擺",
+      "swing": "搖擺"
+    },
+    "intensity": {
+      "label": "力度",
+      "soft": "輕",
+      "normal": "適中",
+      "loud": "重"
+    },
+    "form": {
+      "label": "曲式",
+      "blues12": "12 小節藍調",
+      "blues12Hint": "I · IV · V，第 12 小節回轉",
+      "loop8": "8 小節循環",
+      "loop8Hint": "一段和聲，一圈接一圈",
+      "bars16": "16 小節",
+      "bars16Hint": "前後兩半",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "爵士標準曲的結構",
+      "one": "單和弦",
+      "oneHint": "只有鼓點",
+      "custom": "自訂",
+      "customHint": "你數幾小節就是幾小節",
+      "barsLabel": "小節數",
+      "fewerBars": "減少小節",
+      "moreBars": "增加小節",
+      "barOf": "第 {{current}} / {{total}} 小節",
+      "chorus": "第 {{count}} 遍",
+      "fillMark": "過門",
+      "section": "{{name}} 段"
+    },
+    "short": {
+      "blues12": "12 小節",
+      "loop8": "8 小節",
+      "bars16": "16 小節",
+      "aaba32": "AABA",
+      "one": "單和弦",
+      "custom": "{{count}} 小節",
+      "custom_one": "{{count}} 小節",
+      "custom_other": "{{count}} 小節"
+    },
+    "countIn": {
+      "label": "預備拍",
+      "none": "無",
+      "bars": "{{count}} 小節",
+      "bars_one": "{{count}} 小節",
+      "bars_other": "{{count}} 小節"
+    },
+    "fills": {
+      "label": "過門",
+      "hint": "每一遍最後一小節打過門，下一小節的第一拍加一記銅鈸。"
+    },
+    "transport": {
+      "chorus": "遍數"
+    }
+  }
+}

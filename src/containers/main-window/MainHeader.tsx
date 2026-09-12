@@ -3,8 +3,10 @@ import { useTranslation } from "react-i18next";
 import { setSoundType, setVolume } from "../../ipc";
 import { SOUND_TYPES } from "../../constants/metronome";
 import type { AppState, Setlist, Preset } from "../../types";
+import type { Jam } from "../../jam/types";
 import { PresetSaveBar } from "../../components/presets/PresetSaveBar";
 import { SetlistSaveBar } from "../../components/setlist/SetlistSaveBar";
+import { JamSaveBar } from "../../components/jam/JamSaveBar";
 import { IS_MAC } from "../../hotkeys";
 
 /**
@@ -205,7 +207,7 @@ function HelpGlyph() {
  * write a plan out as sentences and press Start, and it runs itself and
  * changes tempo as it goes. The metronome is knobs and a click.
  */
-export type MainView = "beat" | "drill" | "setlist" | "settings";
+export type MainView = "beat" | "drill" | "setlist" | "jam" | "settings";
 
 interface MainHeaderProps {
   state: AppState;
@@ -226,6 +228,13 @@ interface MainHeaderProps {
   onSaveSetlist: () => void;
   onRevertSetlist: () => void;
   onRenameSetlist: () => void;
+  /** A loaded jam takes the same half of the bar, on its own tab. */
+  activeJam?: Jam | null;
+  jamDirty?: boolean;
+  jamSaveFeedback?: boolean;
+  onSaveJam?: () => void;
+  onRevertJam?: () => void;
+  onRenameJam?: () => void;
   soundOpen: boolean;
   setSoundOpen: (v: boolean | ((p: boolean) => boolean)) => void;
   soundDropdownRef: Ref<HTMLDivElement>;
@@ -288,6 +297,12 @@ export function MainHeader({
   onSaveSetlist,
   onRevertSetlist,
   onRenameSetlist,
+  activeJam = null,
+  jamDirty = false,
+  jamSaveFeedback = false,
+  onSaveJam,
+  onRevertJam,
+  onRenameJam,
   soundOpen,
   setSoundOpen,
   soundDropdownRef,
@@ -343,7 +358,16 @@ export function MainHeader({
             and when setlists became a mode the bar stopped rendering at all,
             which left no way to save a setlist except the modal that catches
             you on the way out. */}
-        {view === "setlist" && activeSetlist ? (
+        {view === "jam" && activeJam ? (
+          <JamSaveBar
+            jam={activeJam}
+            dirty={jamDirty}
+            saveFeedback={jamSaveFeedback}
+            onRename={() => onRenameJam?.()}
+            onSave={() => onSaveJam?.()}
+            onRevert={() => onRevertJam?.()}
+          />
+        ) : view === "setlist" && activeSetlist ? (
           <SetlistSaveBar
             setlist={activeSetlist}
             dirty={setlistDirty}

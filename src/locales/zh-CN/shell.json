@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "节拍器",
     "setlist": "曲目单",
-    "drill": "变速练习"
+    "drill": "变速练习",
+    "jam": "即兴伴奏"
   },
   "tooltip": {
     "zen": "禅意",
@@ -24,6 +25,7 @@
     "title": "预设",
     "titleDrill": "变速练习",
     "titleSetlist": "曲目单",
+    "titleJam": "即兴伴奏",
     "saveCurrent": "保存当前设置",
     "search": "搜索资料库",
     "searchPlaceholder": "搜索…",

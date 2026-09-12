@@ -195,6 +195,7 @@
         "tab-1": "Metronoom-tabblad",
         "tab-2": "Setlist-tabblad",
         "tab-3": "Tempotraining-tabblad",
+        "tab-4": "Jam-tabblad",
         "settings": "Instellingen",
         "toggle-sidebar": "Zijbalk schakelen",
         "toggle-coach": "Coach aan/uit"
@@ -219,6 +220,7 @@
         "tab-1": "Naar het Metronoom-tabblad",
         "tab-2": "Naar het Setlist-tabblad",
         "tab-3": "Naar het Tempotraining-tabblad",
+        "tab-4": "Naar het Jam-tabblad",
         "settings": "Instellingen openen of sluiten",
         "toggle-sidebar": "De linkerzijbalk in- of uitklappen",
         "toggle-coach": "Open of sluit het oefencoach-paneel"

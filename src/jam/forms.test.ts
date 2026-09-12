@@ -2,7 +2,14 @@
 // stop summing to the bar count, the timeline draws a form that is not the
 // form the engine is counting.
 import { describe, expect, it } from "vitest";
-import { JAM_FORM_KINDS, clampFormBars, formBars, formSections, sectionStarts } from "./forms";
+import {
+  JAM_FORM_KINDS,
+  clampFormBars,
+  formBars,
+  formSectionNames,
+  formSections,
+  sectionStarts,
+} from "./forms";
 import { JAM_FORM_BARS, JAM_MAX_FORM_BARS } from "./types";
 import type { JamFormKind } from "./types";
 
@@ -45,6 +52,21 @@ describe("forms", () => {
     expect(formSections({ kind: "bars16", bars: 16 })).toEqual([8, 8]);
     expect(formSections({ kind: "loop8", bars: 8 })).toEqual([8]);
     expect(formSections({ kind: "one", bars: 4 })).toEqual([4]);
+  });
+
+  it("letters AABA and leaves every other form's sections unnamed", () => {
+    // The letters are AABA's own name. A, B, C over the three fours of a blues
+    // would be a label no musician uses for that music.
+    expect(formSectionNames({ kind: "aaba32", bars: 32 })).toEqual(["A", "A", "B", "A"]);
+    expect(formSectionNames({ kind: "blues12", bars: 12 })).toEqual(["", "", ""]);
+    expect(formSectionNames({ kind: "loop8", bars: 8 })).toEqual([""]);
+  });
+
+  it("gives every section a name slot, however many there are", () => {
+    for (const kind of JAM_FORM_KINDS) {
+      const form = { kind, bars: 20 } as const;
+      expect(formSectionNames(form), kind).toHaveLength(formSections(form).length);
+    }
   });
 
   it("gives the timeline the bar each section starts on", () => {

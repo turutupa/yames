@@ -55,6 +55,20 @@ export function formSections(form: JamForm): number[] {
   }
 }
 
+/**
+ * What to write above each section, or an empty string for "nothing".
+ *
+ * Only AABA is lettered, because only there are the letters the form's own
+ * name — they are how the shape is described and how a player counts it. The
+ * three fours of a blues have no names, and inventing A, B, C for them would
+ * put a label on the screen that no musician uses for that music. The seam
+ * between sections is drawn either way; it is the seam that does the work.
+ */
+export function formSectionNames(form: JamForm): string[] {
+  if (form.kind === "aaba32") return ["A", "A", "B", "A"];
+  return formSections(form).map(() => "");
+}
+
 /** The 0-based bar each section starts on — what the timeline draws rules at. */
 export function sectionStarts(form: JamForm): number[] {
   const starts: number[] = [];
