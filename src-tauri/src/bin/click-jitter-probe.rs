@@ -66,8 +66,8 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use yames_lib::probe::{
-    compile_jam, create_beat_log, create_shared_state, CallbackProbe, CallbackSample, JamConfig,
-    JamPattern, MetronomeEngine,
+    compile_jam, create_beat_log, create_shared_state, CallbackProbe, CallbackSample, JamBassLine,
+    JamConfig, JamPattern, MetronomeEngine,
 };
 
 /// Pessimistic upper bound on callbacks per second used to size the
@@ -451,7 +451,23 @@ fn busiest_jam() -> JamConfig {
         form_bars: 4,
         crash_on_one: true,
         intensity: 1.25,
-        kit: "room".to_string(),
+        // The longest kit in the set: a 700 ms crash, a 400 ms ride and a
+        // 330 ms open hat (`src-tauri/sounds/KITS.md`). Voices that ring
+        // longer overlap more, and overlapping voices are what the mixer
+        // pays for, so brushes is the kit that costs the callback the most
+        // per tick — not the one anyone would pick for this groove.
+        kit: "brushes".to_string(),
+        // And a bass under it, on every tick. A note per sixteenth at
+        // 240 BPM is nobody's bass line; it is the maximum rate the table
+        // can ask the engine to spawn one, which is the number the gate is
+        // about.
+        bass: Some(JamBassLine {
+            pitches: vec![40, 45, 47, 52, 40, 45, 47, 52, 38, 43, 45, 50, 38, 43, 45, 50],
+            gain: 1.0,
+        }),
+        // The practice windows only ever take work away, so the probe runs
+        // without them: the busiest case is the band playing every bar.
+        practice: None,
     }
 }
 
