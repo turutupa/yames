@@ -8,6 +8,7 @@ import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import android.view.WindowManager
 import android.webkit.WebView
 import androidx.activity.OnBackPressedCallback
@@ -65,6 +66,10 @@ class EventChannelArgs {
     ],
 )
 class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
+    private companion object {
+        const val TAG = "YamesMobile"
+    }
+
     private val audioManager: AudioManager
         get() = activity.getSystemService(Activity.AUDIO_SERVICE) as AudioManager
 
@@ -101,6 +106,10 @@ class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
                     AudioManager.AUDIOFOCUS_LOSS -> "focus_lost_permanently"
                     else -> return@OnAudioFocusChangeListener
                 }
+            // Loud on purpose: audio focus is the one thing here that cannot
+            // be reproduced from the app's own side, so when a phone does
+            // something surprising this line is the whole diagnosis.
+            Log.i(TAG, "audio focus change $change -> $kind")
             emit(JSObject().put("event", "audio_interrupted").put("kind", kind))
         }
 
@@ -272,6 +281,7 @@ class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
                 )
             }
         holdingFocus = result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+        Log.i(TAG, "audio focus requested, granted=$holdingFocus")
     }
 
     private fun abandonFocus() {
@@ -284,5 +294,6 @@ class YamesMobilePlugin(private val activity: Activity) : Plugin(activity) {
             audioManager.abandonAudioFocus(focusListener)
         }
         holdingFocus = false
+        Log.i(TAG, "audio focus abandoned")
     }
 }

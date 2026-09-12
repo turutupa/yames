@@ -93,6 +93,31 @@ describe("the phone's native half", () => {
     expect(playingCalls()).toEqual([false, true]);
   });
 
+  it("keeps the service alive across a call, or it would never get focus back", async () => {
+    // The emulator caught this: tearing the service down on the way into the
+    // pause abandons audio focus, and an app that has abandoned focus is never
+    // told it has it again — the click paused for the call and stayed paused.
+    const view = mount(true);
+    await act(async () => {});
+    mockInvoke.mockClear();
+
+    fromAndroid({ event: "audio_interrupted", kind: "focus_lost" });
+    // The hook stopped playback, so re-render with what the backend now says.
+    view.rerender({ playing: false });
+    await act(async () => {});
+
+    const service = mockInvoke.mock.calls.filter(
+      ([cmd]) => cmd === "plugin:yames-mobile|set_background_audio",
+    );
+    expect(service.length).toBeGreaterThan(0);
+    for (const [, args] of service) {
+      expect((args as { payload: { active: boolean } }).payload.active).toBe(true);
+    }
+    // …and it says so, rather than claiming to be playing.
+    const last = service.at(-1)![1] as { payload: { body: string } };
+    expect(last.payload.body).not.toContain("120");
+  });
+
   it("does not start itself when focus comes back to a metronome that was already stopped", async () => {
     mount(false);
     await act(async () => {});
@@ -105,14 +130,21 @@ describe("the phone's native half", () => {
     expect(playingCalls()).toEqual([]);
   });
 
-  it("stops for good when another app takes over playback", async () => {
-    mount(true);
+  it("stops for good when another app takes over playback, and lets the service go", async () => {
+    const view = mount(true);
     await act(async () => {});
     mockInvoke.mockClear();
 
     fromAndroid({ event: "audio_interrupted", kind: "focus_lost_permanently" });
     fromAndroid({ event: "audio_interrupted", kind: "focus_gained" });
     expect(playingCalls()).toEqual([false]);
+
+    view.rerender({ playing: false });
+    await act(async () => {});
+    const last = mockInvoke.mock.calls
+      .filter(([cmd]) => cmd === "plugin:yames-mobile|set_background_audio")
+      .at(-1)?.[1] as { payload: { active: boolean } } | undefined;
+    expect(last?.payload.active).toBe(false);
   });
 
   it("stops when the notification's own button is pressed, and stays stopped", async () => {

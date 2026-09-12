@@ -87,6 +87,7 @@
   "playback": {
     "notificationTitle": "Yames",
     "notificationBody": "In riproduzione — {{bpm}} BPM",
+    "notificationPaused": "In pausa",
     "notificationStop": "Ferma",
     "notificationChannel": "Riproduzione"
   }

@@ -21,7 +21,7 @@
  * Mounted only on a phone (`IS_MOBILE`), so none of `src/mobile/` reaches a
  * desktop bundle.
  */
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { setPlaying } from "../../../ipc";
 import { dismissTop } from "../../../mobile/backStack";
@@ -45,13 +45,26 @@ export function useAndroidNative({ isPlaying, bpm, keepScreenOn }: Options) {
   isPlayingRef.current = isPlaying;
 
   /**
-   * Whether the pause currently in effect is ours.
+   * Whether the pause currently in effect is ours — we stood aside for
+   * something the system let through, and mean to come back.
    *
-   * Only a pause we caused may be undone by `focus_gained`. If the user pressed
-   * stop while a call was ringing, coming back to a metronome that started
-   * itself would be worse than doing nothing.
+   * Two things hang off it. First, only a pause we caused may be undone by
+   * `focus_gained`: if the user pressed stop while a call was ringing, coming
+   * back to a metronome that started itself would be worse than doing nothing.
+   * Second, and this is what the emulator caught, the foreground service and
+   * the focus request must *stay* while it is true. Tearing them down on the
+   * way into a pause abandons audio focus, and an app that has abandoned focus
+   * is never told it has it again — the click paused for the call and then sat
+   * there after the caller hung up. Held in state as well as a ref because the
+   * notification effect has to see it change; the ref is for the event channel,
+   * whose handler is built once and must not read a stale render.
    */
-  const pausedByInterruption = useRef(false);
+  const [standingAside, setStandingAside] = useState(false);
+  const standingAsideRef = useRef(false);
+  const standAside = useCallback((value: boolean) => {
+    standingAsideRef.current = value;
+    setStandingAside(value);
+  }, []);
 
   const stop = useCallback(() => {
     setPlaying(false).catch(() => {});
@@ -67,23 +80,29 @@ export function useAndroidNative({ isPlaying, bpm, keepScreenOn }: Options) {
           dismissTop();
           break;
         case "stop_requested":
-          pausedByInterruption.current = false;
+          standAside(false);
           stop();
           break;
         case "audio_interrupted":
           if (event.kind === "focus_lost") {
             if (isPlayingRef.current) {
-              pausedByInterruption.current = true;
+              standAside(true);
               stop();
             }
           } else if (event.kind === "focus_gained") {
-            if (pausedByInterruption.current) {
-              pausedByInterruption.current = false;
-              setPlaying(true).catch(() => {});
+            if (standingAsideRef.current) {
+              // Cleared by the effect below, when the backend confirms it is
+              // playing again — not here. Clearing it on the way in leaves one
+              // render where nothing is playing and nothing is standing aside,
+              // and the service and the focus request are torn down and rebuilt
+              // across it. Seventeen milliseconds is long enough for another app
+              // to take the focus we just got back.
+              setPlaying(true).catch(() => standAside(false));
             }
           } else {
-            // Permanent: another app owns playback now.
-            pausedByInterruption.current = false;
+            // Permanent: another app owns playback now. Let the service and
+            // the focus request go with it.
+            standAside(false);
             stop();
           }
           break;
@@ -91,7 +110,7 @@ export function useAndroidNative({ isPlaying, bpm, keepScreenOn }: Options) {
     }).catch(() => {});
     // Opened once. The plugin keeps one channel and replaces it if this ever
     // ran twice, so a double mount in React's strict mode is harmless.
-  }, [stop]);
+  }, [stop, standAside]);
 
   // The notification. Re-sent when the words would change — which is when the
   // tempo changes or the user switches language mid-practice — and not
@@ -99,17 +118,27 @@ export function useAndroidNative({ isPlaying, bpm, keepScreenOn }: Options) {
   // times.
   const lastNotification = useRef<string | null>(null);
   useEffect(() => {
+    // `standingAside` and not just `isPlaying`: see the comment on it. The
+    // service outlives the pause so the focus request does too, which is the
+    // only way the system will ever hand playback back.
+    const live = isPlaying || standingAside;
     const text = {
       title: t("playback.notificationTitle"),
-      body: t("playback.notificationBody", { bpm }),
+      body: isPlaying ? t("playback.notificationBody", { bpm }) : t("playback.notificationPaused"),
       stopLabel: t("playback.notificationStop"),
       channelName: t("playback.notificationChannel"),
     };
-    const signature = isPlaying ? `on:${text.title}:${text.body}:${text.stopLabel}` : "off";
+    const signature = live ? `on:${text.title}:${text.body}:${text.stopLabel}` : "off";
     if (signature === lastNotification.current) return;
     lastNotification.current = signature;
-    setBackgroundAudio(isPlaying, text).catch(() => {});
-  }, [isPlaying, bpm, t]);
+    setBackgroundAudio(live, text).catch(() => {});
+  }, [isPlaying, standingAside, bpm, t]);
+
+  // Playing again — by the resume above, or because the user pressed play
+  // themselves while the click was standing aside.
+  useEffect(() => {
+    if (isPlaying) standAside(false);
+  }, [isPlaying, standAside]);
 
   useEffect(() => {
     keepAwake(keepScreenOn).catch(() => {});

@@ -56,7 +56,11 @@ pub(crate) struct OutputFormat {
     pub sample_rate: u32,
     pub channels: usize,
     pub frames_per_burst: i32,
-    /// What `SharingMode::Exclusive` actually got us. Logged, not acted on.
+    /// Whether `SharingMode::Exclusive` was actually *granted* — read back
+    /// from the stream rather than inferred from the open succeeding. AAudio
+    /// does not refuse a sharing or performance mode it cannot give; it opens
+    /// the stream anyway and downgrades, so the stream itself is the only
+    /// honest source.
     pub exclusive: bool,
 }
 
@@ -163,7 +167,8 @@ pub(crate) fn probe_output_format() -> Result<OutputFormat, String> {
                     sample_rate: stream.get_sample_rate().max(0) as u32,
                     channels: 2,
                     frames_per_burst: stream.get_frames_per_burst(),
-                    exclusive,
+                    exclusive: exclusive
+                        && matches!(stream.get_sharing_mode(), SharingMode::Exclusive),
                 };
                 let _ = stream.close();
                 if fmt.sample_rate == 0 {
@@ -221,11 +226,16 @@ where
         let _ = stream.set_buffer_size_in_frames(burst * 2);
     }
 
+    // Asked *and* granted, because they differ and only the second is real.
+    // AAudio does not refuse a mode it cannot give — it opens the stream and
+    // downgrades — so a device that will not hand over the fast path says so
+    // here and nowhere else.
     eprintln!(
-        "[yames][android] oboe output: {} Hz, 2 ch, f32, api {:?}, {:?}, {:?}, \
-         burst {} frames, buffer {} frames",
+        "[yames][android] oboe output: {} Hz, 2 ch, f32, api {:?}; asked \
+         LowLatency/{:?}, got {:?}/{:?}; burst {} frames, buffer {} frames",
         opened_rate,
         stream.get_audio_api(),
+        sharing,
         stream.get_performance_mode(),
         stream.get_sharing_mode(),
         burst,
