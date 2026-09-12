@@ -53,9 +53,13 @@ export function FormTimeline({
   return (
     <section className="jam-timeline-section" aria-label={t("jam.form.label")}>
       <div className="jam-timeline-head">
-        <span className="stage-label">{t("jam.form.label")}</span>
-        {/* One sentence, live, so the place in the form is readable without
-            looking at the cells — and so a screen reader gets it at all. */}
+        {/* No FORM heading here: the cards above already carry one, and two of
+            them on one screen made it look like two different settings. The
+            row of numbered bars under the form cards needs no introduction —
+            what it needs is the sentence.
+
+            One sentence, live, so the place in the form is readable without
+            counting cells, and so a screen reader gets it at all. */}
         <span className="jam-timeline-where" role="status">
           {t("jam.form.chorus", { count: chorus })}
           {" · "}

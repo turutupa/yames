@@ -37,6 +37,16 @@
   width: 100%;
 }
 
+/* The stage is aligned to the start so that a long jam can scroll, which
+   leaves the empty state stranded at the top of an otherwise empty screen.
+   Auto margins put it back in the middle and collapse to nothing the moment
+   there is no room — the same trick the metronome and drill stages use, and
+   the reason neither of them can use `justify-content: center`. */
+.jam-blank {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
 /* ── Tempo, with feel and intensity beside it ───────────────────────────────
    The setup board stacks these; at 1440 they fit on one row, and putting them
    there keeps the groove cards — the part you actually browse — above the
@@ -44,6 +54,11 @@
    tempo goes from 99 to 100. */
 .jam-head {
   display: flex;
+  /* `.bpm-section` is a centred COLUMN — the metronome's whole stage is one
+     tempo, so that is right there and wrong here. Both halves have to be
+     restated: setting the direction without the alignment leaves the tempo
+     centred in a row it is supposed to start. */
+  flex-direction: row;
   align-items: flex-end;
   justify-content: space-between;
   gap: 24px;
@@ -83,7 +98,36 @@
   gap: 10px;
 }
 
+/* Round and outlined, the way the metronome draws them: they nudge the tempo,
+   they are not the thing you press to start playing. That is the transport's
+   job and it is the only filled control on either screen. Those rules are
+   written against `[data-view="beat"]`, so this tab has to ask for them — the
+   alternative was widening a selector that another worker owns. */
+.main-content[data-view="jam"] .bpm-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.main-content[data-view="jam"] .bpm-btn:hover {
+  background: var(--surface-hover);
+  border-color: var(--text-tertiary);
+  color: var(--text-primary);
+}
+
 .main-content[data-view="jam"] .tap-btn {
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 20px;
+  gap: 8px;
   margin-left: 8px;
 }
 
@@ -104,8 +148,11 @@
   width: 100%;
 }
 
+/* Eight across, as the setup board draws them: the kit of grooves is one row
+   you scan rather than a block you read, and at the stage's 1176px each card
+   still has 130px — room for a sixteen-tick glyph (80px) and its name. */
 .jam-cards-groove {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(8, minmax(0, 1fr));
 }
 
 .jam-cards-form {
@@ -222,10 +269,13 @@
   gap: 14px;
 }
 
+/* The timeline's only heading, and it is a reading rather than a label — the
+   FORM heading belongs to the cards above, and two of them on one screen read
+   as two different settings. */
 .jam-timeline-where {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--text-tertiary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
 }
 
@@ -353,6 +403,34 @@
   cursor: grab;
 }
 
+/* "120 · 16-bar" is longer than the "4 steps" this row was cut for, and it
+   wrapped onto a second line in the rail's 252px — which made every jam row a
+   different height.
+
+   The summary holds its width and the NAME gives way, because the summary is
+   short, fixed and the thing that tells two blues jams apart, while a name is
+   as long as its owner made it and is readable from its first few words. */
+.jam-item .setlist-item-sub {
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-left: 8px;
+}
+
+.jam-item .preset-item-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The loaded jam reads as loaded, the way a loaded setlist does. */
+.preset-sidebar-item.jam-item.active .setlist-item-glyph {
+  color: var(--accent);
+}
+
+.preset-sidebar-item.jam-item.active .setlist-item-sub {
+  color: var(--text-tertiary);
+}
+
 .jam-item[data-dragging] {
   opacity: 0.45;
   cursor: grabbing;
@@ -371,6 +449,12 @@
    The groove grid goes to two columns before the cards get too narrow for
    their names, and the tempo block stops sharing a row with the feel and
    intensity controls. */
+@media (max-width: 1279px) {
+  .jam-cards-groove {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 1099px) {
   .jam-head {
     flex-direction: column;
