@@ -37,12 +37,17 @@ in `src/jam/types.ts`: `JamEngineConfig.kit`, `bass` (`JamBassLine`),
 
 ### 3. Practice windows
 
-- From `practice` and the engine's own `jam_bar` / `jam_chorus` counters,
-  decide the band state per bar exactly as `src/jam/practice.ts` specifies
-  (read its tests; the two must agree): absolute bar `(chorus − 1) ×
-  form_bars + form_bar`; drop-out windows of `bars` starting at every
-  multiple of `everyBars` except bar 0; trading alternates `bandBars` full
-  and `youBars` hats-only from bar 0; drop-out wins.
+- From `practice` and the engine's own `jam_bar` counter, decide the band
+  state per bar exactly as `src/jam/practice.ts` does (read it and its
+  tests; the two must agree, or the drawn timeline and the heard band will
+  disagree). The rule is **phase-locked to the chorus**: everything is
+  computed from `form_bar`, the bar within the chorus, and restarts every
+  chorus. Drop-out: silent for `bars` bars starting at every multiple of
+  `everyBars` within the chorus, never at bar 0 itself (so with everyBars 8,
+  bars 2, form 12: bars 8–9 of every chorus). Trading: from bar 0 of every
+  chorus, `bandBars` full then `youBars` hats-only, repeating (4/4 on a
+  12-bar form: bars 4–7 hats-only, 12 is bar 0 of the next chorus and full
+  again). Drop-out wins where both apply.
 - `silent`: no table voices at all (the click is NOT played either; the
   point is silence). `hatsOnly`: only the hat lane, and no bass. `full`:
   everything. Decide the state once per bar at the bar line, never mid-bar.

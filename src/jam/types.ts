@@ -71,10 +71,14 @@ export type JamBassLine = {
  * What the band does on each bar of the form, decided by the engine from
  * `formBar` and `chorus` so the change lands on the bar line.
  *
- * dropOut: every `everyBars` bars, the whole band goes silent for `bars`
- * bars, then returns. trade: the band plays `bandBars` bars, then for
- * `youBars` bars the drums play hats only and the bass rests; repeats.
- * Both may be set; drop-out wins on a bar where both apply.
+ * Phase-locked to the chorus: both windows are computed from the bar within
+ * the chorus and restart at bar 0 of every chorus, so a silence lands on
+ * the same chord every time round (see src/jam/practice.ts).
+ * dropOut: within each chorus, every `everyBars` bars (never bar 0 itself)
+ * the whole band goes silent for `bars` bars, then returns. trade: from bar
+ * 0 of each chorus the band plays `bandBars` bars, then for `youBars` bars
+ * the drums play hats only and the bass rests; repeats. Both may be set;
+ * drop-out wins on a bar where both apply.
  */
 export type JamPracticeConfig = {
   dropOut: { everyBars: number; bars: number } | null;
