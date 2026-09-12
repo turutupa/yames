@@ -372,7 +372,7 @@ pub fn compile(cfg: &JamConfig) -> Result<JamTable, String> {
     // near that. A table scaled by that bound would be inaudible. So the
     // worst tick is actually rendered, once, here — off the audio thread,
     // only when the jam changes.
-    let base_peak = worst_tick_peak(&bar, fill.as_deref(), crash);
+    let base_peak = worst_tick_peak(&bar, fill.as_deref(), crash, cfg.form_bars);
 
     // Scale so that the busiest tick reaches the ceiling at LOUD and not
     // before, then apply the intensity the musician actually chose. A table
@@ -485,21 +485,30 @@ fn scale(ticks: &mut [JamTick], factor: f32) {
 
 /// Render every tick of the table and return the loudest peak any of them
 /// reaches. Allocates freely — this is the `set_jam` command thread.
-fn worst_tick_peak(bar: &[JamTick], fill: Option<&[JamTick]>, crash: Option<JamSlot>) -> f32 {
+fn worst_tick_peak(
+    bar: &[JamTick],
+    fill: Option<&[JamTick]>,
+    crash: Option<JamSlot>,
+    form_bars: u32,
+) -> f32 {
+    // Which table plays on bar 0 of the chorus — the only bar the crash
+    // lands on. A one-bar form makes the FILL bar 0 as well as the last bar,
+    // so the crash lands on the fill's first tick there and on the groove's
+    // everywhere else. Measuring it on both regardless would be safe and
+    // wrong: it over-normalises every form with a fill by the difference
+    // between a groove's downbeat and a fill's, which on the busiest table
+    // the probe can build is 1.6 dB of level thrown away for a bar that
+    // never happens.
+    let crash_on_fill = fill.is_some() && form_bars == 1;
+
     let mut worst = 0.0f32;
     for (i, t) in bar.iter().enumerate() {
-        // Tick 0 of bar 0 of a chorus carries the crash as well, and that is
-        // the tick most likely to clip.
-        let extra = if i == 0 { crash } else { None };
+        let extra = if i == 0 && !crash_on_fill { crash } else { None };
         worst = worst.max(tick_peak(t.slots(), extra));
     }
     if let Some(f) = fill {
         for (i, t) in f.iter().enumerate() {
-            // A one-bar form makes the fill bar 0 of the chorus too, so the
-            // crash lands on the fill's first tick. Measuring it on both
-            // costs nothing and is the difference between "measured" and
-            // "measured for the forms I thought of".
-            let extra = if i == 0 { crash } else { None };
+            let extra = if i == 0 && crash_on_fill { crash } else { None };
             worst = worst.max(tick_peak(t.slots(), extra));
         }
     }
@@ -832,7 +841,7 @@ mod tests {
         );
 
         // Re-measure the compiled slots rather than trusting the bookkeeping.
-        let measured = worst_tick_peak(&t.bar, t.fill.as_deref(), t.crash_on_one());
+        let measured = worst_tick_peak(&t.bar, t.fill.as_deref(), t.crash_on_one(), t.form_bars());
         assert!(
             measured <= JAM_TICK_CEILING + 1e-4,
             "the compiled table still renders a tick at {measured}"
@@ -899,6 +908,50 @@ mod tests {
                 .any(|s| s.sound == SoundId::Kick),
             "bar 0 of a 1-bar form is also its last bar"
         );
+    }
+
+    /// THE CRASH IS MEASURED WHERE IT ACTUALLY LANDS.
+    ///
+    /// The crash on the one hits bar 0 of the chorus. With a one-bar form
+    /// the fill IS bar 0, so it lands on the fill's first tick; with any
+    /// longer form it lands on the groove's. Measuring both regardless is
+    /// safe and wrong — it throws away level for a bar that never happens —
+    /// and measuring only the groove's leaves a one-bar form free to clip.
+    #[test]
+    fn the_crash_is_measured_against_whichever_bar_is_bar_zero() {
+        // A fill far louder on its downbeat than the groove is.
+        let with_form = |bars: u32| {
+            let mut cfg = rock_8ths();
+            cfg.form_bars = bars;
+            cfg.crash_on_one = true;
+            cfg.bar.kick = vec![1, 0, 0, 0, 0, 0, 0, 0];
+            cfg.bar.snare = vec![0; 8];
+            cfg.bar.hat = vec![0; 8];
+            cfg.fill = Some(JamPattern {
+                kick: vec![2; 8],
+                snare: vec![2; 8],
+                hat: vec![2; 8],
+                ride: vec![2; 8],
+                crash: vec![0; 8],
+            });
+            compile(&cfg).unwrap()
+        };
+        let one = with_form(1);
+        let four = with_form(4);
+        assert!(
+            one.peak_before > four.peak_before,
+            "a one-bar form stacks the crash on the fill's downbeat, so it must \
+             measure louder than a four-bar form ({:.3} vs {:.3})",
+            one.peak_before,
+            four.peak_before
+        );
+        for (name, t) in [("one-bar", &one), ("four-bar", &four)] {
+            assert!(
+                t.peak_after <= JAM_TICK_CEILING + 1e-4,
+                "the {name} form peaks at {:.3}, over the ceiling",
+                t.peak_after
+            );
+        }
     }
 
     #[test]
