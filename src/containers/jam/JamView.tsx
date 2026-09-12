@@ -36,6 +36,25 @@ interface JamViewProps {
 }
 
 /**
+ * The same count-in, in the new groove's meter.
+ *
+ * The setting the user chose is a number of BARS; beats are only how the
+ * engine takes it. So moving from a rock groove to a waltz keeps "one bar" and
+ * changes four beats into three, rather than counting four beats over a bar
+ * that is three long. Two bars stay two where they fit inside the engine's
+ * limit of eight and drop to one where they do not, because a count-in past
+ * the limit is not a count-in, it is a wait.
+ */
+function carryCountIn(beats: number, fromBeatsPerBar: number, toBeatsPerBar: number): number {
+  if (beats <= 0) return 0;
+  const bars = Math.max(1, Math.round(beats / Math.max(1, fromBeatsPerBar)));
+  for (let n = bars; n >= 1; n--) {
+    if (n * toBeatsPerBar <= JAM_MAX_COUNT_IN) return n * toBeatsPerBar;
+  }
+  return 0;
+}
+
+/**
  * A segmented control, in the stage's existing vocabulary.
  *
  * The same three-in-a-trough shape as the metronome's accent control, which is
@@ -246,9 +265,11 @@ export function JamView({
                 onEdit({
                   grooveId: groove.id,
                   // A groove carries its own meter, so the count-in has to
-                  // follow it: one bar of a waltz is three beats, not four,
-                  // and a count-in in the wrong meter lands you on beat two.
-                  countIn: jam.countIn > 0 ? Math.min(groove.beatsPerBar, JAM_MAX_COUNT_IN) : 0,
+                  // follow it. The setting is BARS and the engine takes beats:
+                  // one bar of a waltz is three beats, not four, and a
+                  // count-in left in the old meter lands you on beat two of
+                  // the first bar. Two bars stay two bars where they fit.
+                  countIn: carryCountIn(jam.countIn, meter.beatsPerBar, groove.beatsPerBar),
                 })
               }
             >

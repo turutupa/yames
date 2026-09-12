@@ -161,6 +161,20 @@ describe("JamView — the controls", () => {
     expect(props.onEdit).toHaveBeenCalledWith({ grooveId: "waltz", countIn: 0 });
   });
 
+  it("keeps two bars at two bars, and drops to one where two will not fit", () => {
+    // The setting is bars; beats are only how the engine takes it. Two bars of
+    // 4/4 is eight, which is the engine's whole limit — two bars of 6/8 would
+    // be twelve, and a count-in past the limit is a wait, not a count-in.
+    const rock = setup({ jam: jamOf({ grooveId: "rock8", countIn: 8 }) });
+    fireEvent.click(screen.getByText("Waltz"));
+    expect(rock.props.onEdit).toHaveBeenCalledWith({ grooveId: "waltz", countIn: 6 });
+    cleanup();
+
+    const waltz = setup({ jam: jamOf({ grooveId: "rock8", countIn: 8 }) });
+    fireEvent.click(screen.getByText("6/8"));
+    expect(waltz.props.onEdit).toHaveBeenCalledWith({ grooveId: "sixEight", countIn: 6 });
+  });
+
   it("offers a count-in only in whole bars the engine will actually take", () => {
     // Two bars of 6/8 is twelve beats, past `arm_count_in`'s limit of eight.
     // Offering it and clamping it would put a lie on the button.
