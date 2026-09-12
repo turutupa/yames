@@ -86,6 +86,13 @@ export type BeatEvent = {
    * engine is the only thing that knows which rule applied.
    */
   isAccent: boolean;
+  /**
+   * Where this tick sits in a jam's form (plans/JAM_MODE.md). `formBar` is
+   * the 0-based bar within the chorus, `chorus` is 1-based. Both count only
+   * while a jam is loaded in the engine; otherwise 0 and 1.
+   */
+  formBar: number;
+  chorus: number;
 };
 
 // ---------------------------------------------------------------------------

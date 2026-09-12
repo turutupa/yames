@@ -1145,3 +1145,41 @@ export async function cancelModelDownload(): Promise<void> {
 export function onPlaybackFinished(callback: () => void) {
   return listen<void>("playback-finished", () => callback());
 }
+
+// ---------------------------------------------------------------------------
+// Jam (plans/JAM_MODE.md, plans/tasks/jam/BRIEF.md)
+// ---------------------------------------------------------------------------
+
+import type { Jam, JamEngineConfig } from "./jam/types";
+
+/**
+ * Jams live beside presets and setlists in the same `settings.json` store,
+ * under their own key. Read-modify-write like setlists: a jam has no
+ * engine-side reader, the engine only ever sees the compiled table.
+ */
+const JAMS_KEY = "jams";
+
+/**
+ * `undefined` when nothing was ever saved under the key, so the caller can
+ * seed the starter jams exactly once. An empty array means the user deleted
+ * them all, and they stay deleted.
+ */
+export async function listJams(): Promise<Jam[] | undefined> {
+  const jams = await storeLoad<Jam[]>(JAMS_KEY);
+  return Array.isArray(jams) ? jams : undefined;
+}
+
+/** The whole list, in order. The UI owns ordering, the store keeps it. */
+export async function saveJams(jams: Jam[]): Promise<void> {
+  await storeSave(JAMS_KEY, jams);
+}
+
+/**
+ * Hand the engine a compiled jam, or `null` to take it away and play the
+ * plain click again. The UI sets the subdivision and the beat groups FIRST;
+ * the engine checks the product against its bar and plays the click if they
+ * disagree.
+ */
+export async function setJam(config: JamEngineConfig | null): Promise<void> {
+  return invoke("set_jam", { config });
+}

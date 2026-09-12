@@ -1,0 +1,54 @@
+{
+  "artboards": [
+    {
+      "file": "NewJam.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "1 · New jam, thirty seconds"
+    },
+    {
+      "file": "Main.dc.html",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "2 · Jamming"
+    },
+    {
+      "file": "TradingFours.dc.html",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "3 · Trading fours"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note-jam",
+      "x": 0,
+      "y": -400,
+      "w": 1440,
+      "text": "JAM — a mode of its own\n\nThe brief is plans/JAM_MODE.md. These three boards are the finished product, not the first release: the drummer and the form ship first, the bass and the chords come after. Drawn whole so the first release is shaped for where it is going.\n\nThis board is the setup. Feel, form, key, band, tempo, count-in. The band never plays your instrument, and onboarding already knows what that is. Everything here is a card you can tap with a plectrum in your hand."
+    },
+    {
+      "id": "note-playing",
+      "x": 1560,
+      "y": -400,
+      "w": 1440,
+      "text": "JAMMING\n\nThe chord you are on is the biggest thing on the screen, with the next one and a scale that works. The form timeline is the real headline for improvisers: bar 3 of 12, the turnaround marked, a fill before each change. Below it, the band as lanes you can hear and balance, and the practice tools that only make sense over a band: drop-out bars, trading fours, a tempo that climbs, a take you can record.\n\nThe coach in this mode is deliberately quiet. Today it is good at steady time and poor at improvisation, so here it listens and says nothing until you stop. What it should say, and whether it should behave more like a person in the room than a report, is an open question in the brief."
+    },
+    {
+      "id": "note-trade",
+      "x": 3120,
+      "y": -400,
+      "w": 1440,
+      "text": "TRADING FOURS\n\nThe band plays four bars, you play four. On your bars the drums drop to hats and the bass steps out, the timeline shows which bars are yours, and the cue is spoken, because your eyes are on the neck. Then eights, then twos. Drop-out bars are the same idea with silence instead of hats, and the score during the silence is the most honest score the app can produce, because nothing bleeds into the mic."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}
