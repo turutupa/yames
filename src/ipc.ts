@@ -1150,7 +1150,7 @@ export function onPlaybackFinished(callback: () => void) {
 // Jam (plans/JAM_MODE.md, plans/tasks/jam/BRIEF.md)
 // ---------------------------------------------------------------------------
 
-import type { Jam, JamEngineConfig } from "./jam/types";
+import type { Jam, JamEngineConfig, JamPositionCommand } from "./jam/types";
 
 /**
  * Jams live beside presets and setlists in the same `settings.json` store,
@@ -1182,4 +1182,12 @@ export async function saveJams(jams: Jam[]): Promise<void> {
  */
 export async function setJam(config: JamEngineConfig | null): Promise<void> {
   return invoke("set_jam", { config });
+}
+
+/**
+ * Move the form: jump to a bar, or loop a range of bars. The engine applies
+ * it at the next bar line, so the change lands where a musician expects it.
+ */
+export async function setJamPosition(command: JamPositionCommand): Promise<void> {
+  return invoke("set_jam_position", { command });
 }

@@ -59,6 +59,24 @@ export type JamEngineConfig = {
    * bar.
    */
   practice?: JamPracticeConfig | null;
+  /**
+   * Also play the fill on every bar whose 1-based number within the chorus
+   * is a multiple of this (4 or 8), not only on the last bar of the chorus.
+   * Absent or 0: the last bar only.
+   */
+  fillEvery?: number;
+};
+
+/**
+ * Where the form goes next. The engine applies both at the next bar line,
+ * never mid-bar, and reports the result on the next BeatEvent's `formBar`.
+ * `jumpTo` is consumed once; `loop` stays until replaced with null.
+ */
+export type JamPositionCommand = {
+  /** 0-based bar of the chorus to land on at the next bar line. */
+  jumpTo: number | null;
+  /** Loop bars start..end inclusive, 0-based within the chorus. */
+  loop: { start: number; end: number } | null;
 };
 
 export type JamBassLine = {
@@ -154,6 +172,8 @@ export type Jam = {
   chords?: boolean;
   /** The practice tools. Absent: none. */
   practice?: JamPracticeSettings;
+  /** Fills every N bars within the chorus as well as at its end. Absent or 0: end only. */
+  fillEvery?: number;
 };
 
 export type JamCustomGroove = {
