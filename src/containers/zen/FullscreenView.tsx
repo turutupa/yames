@@ -159,7 +159,20 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
       )}
 
       {/* Top-right controls: theme picker + fullscreen */}
-      <div className="zen-top-controls" onDoubleClick={(e) => e.stopPropagation()} ref={themePickerRef}>
+      {/* `--touch` on the phone build, and not a media query. These controls
+          are hidden until you hover the view, and `@media (pointer: coarse)`
+          was what un-hid them for a phone -- but a device can be wrong about
+          that, and M05 watched one be: the Android emulator's WebView reports
+          `(pointer: fine)` and `(hover: none)`, so the coarse block never
+          applied and zen had no visible way out. A Chromebook running the app,
+          or a phone with a mouse paired, would do the same. The build already
+          knows it is the phone build; the only exit from a screen that covers
+          everything should not rest on the device agreeing. */}
+      <div
+        className={`zen-top-controls${IS_MOBILE ? " zen-top-controls--touch" : ""}`}
+        onDoubleClick={(e) => e.stopPropagation()}
+        ref={themePickerRef}
+      >
         {/* Theme picker */}
         <div className={`zen-theme-picker ${themeOpen ? "open" : ""}`}>
           <button
@@ -425,7 +438,7 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
           instruction a phone user cannot act on — there is no Esc, and a
           double-tap is the zoom gesture — so the phone build names the
           button above instead. */}
-      <div className="fs-exit-hint">
+      <div className={`fs-exit-hint${IS_MOBILE ? " fs-exit-hint--touch" : ""}`}>
         {t(IS_MOBILE ? "zen.exitHintTouch" : "zen.exitHint")}
       </div>
     </div>
