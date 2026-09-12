@@ -494,8 +494,13 @@ fn worst_tick_peak(bar: &[JamTick], fill: Option<&[JamTick]>, crash: Option<JamS
         worst = worst.max(tick_peak(t.slots(), extra));
     }
     if let Some(f) = fill {
-        for t in f.iter() {
-            worst = worst.max(tick_peak(t.slots(), None));
+        for (i, t) in f.iter().enumerate() {
+            // A one-bar form makes the fill bar 0 of the chorus too, so the
+            // crash lands on the fill's first tick. Measuring it on both
+            // costs nothing and is the difference between "measured" and
+            // "measured for the forms I thought of".
+            let extra = if i == 0 { crash } else { None };
+            worst = worst.max(tick_peak(t.slots(), extra));
         }
     }
     worst
