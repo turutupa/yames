@@ -413,6 +413,11 @@ pub struct JamTable {
     band_states: Vec<JamBandState>,
     /// Which kit the lanes resolved to. Diagnostics and tests only.
     pub kit: JamKit,
+    /// Everything about the table EXCEPT the bass line, hashed. Two tables
+    /// with the same signature are the same drummer under a different bass
+    /// bar, and that is the case the audio thread defers to the next bar
+    /// line (see [`swap_defers`]).
+    drums_signature: u64,
     /// The loudest sample four bars of this band render, before and after
     /// the per-table normalisation, at the fastest tick the engine can
     /// produce. Diagnostics only; the audio thread never reads these.
@@ -629,9 +634,80 @@ pub fn compile(cfg: &JamConfig) -> Result<JamTable, String> {
         crash_on_one: crash,
         band_states,
         kit,
+        drums_signature: drums_signature(cfg),
         peak_before,
         peak_after,
     })
+}
+
+/// A hash of every field of the config except the bass line.
+///
+/// The UI posts the NEXT bar's bass on the downbeat of the current one
+/// (`useJamSession.ts`, "the half of the handshake the engine has to
+/// match"), so most configs the engine receives while playing differ from
+/// the one it holds only in `bass`. Those must wait for the bar line, or
+/// every bar plays the next bar's bass. A config that changes anything else
+/// — the groove, the kit, the intensity, the form, the practice windows —
+/// is the musician turning a dial, and that applies at once.
+fn drums_signature(cfg: &JamConfig) -> u64 {
+    use std::collections::hash_map::DefaultHasher;
+    use std::hash::{Hash, Hasher};
+    let mut h = DefaultHasher::new();
+    cfg.ticks_per_beat.hash(&mut h);
+    cfg.beats_per_bar.hash(&mut h);
+    for p in std::iter::once(&cfg.bar).chain(cfg.fill.iter()) {
+        p.kick.hash(&mut h);
+        p.snare.hash(&mut h);
+        p.hat.hash(&mut h);
+        p.ride.hash(&mut h);
+        p.crash.hash(&mut h);
+    }
+    cfg.fill.is_some().hash(&mut h);
+    cfg.form_bars.hash(&mut h);
+    cfg.crash_on_one.hash(&mut h);
+    cfg.intensity.to_bits().hash(&mut h);
+    format!("{:?}", JamKit::from_name(&cfg.kit)).hash(&mut h);
+    match cfg.practice {
+        Some(ref p) => {
+            true.hash(&mut h);
+            match p.drop_out {
+                Some(d) => (true, d.every_bars, d.bars).hash(&mut h),
+                None => false.hash(&mut h),
+            }
+            match p.trade {
+                Some(t) => (true, t.band_bars, t.you_bars).hash(&mut h),
+                None => false.hash(&mut h),
+            }
+        }
+        None => false.hash(&mut h),
+    }
+    h.finish()
+}
+
+/// Should the audio thread hold `incoming` until the next bar line instead
+/// of playing it now?
+///
+/// Only when the band is actually playing a table, the new one is the same
+/// drummer (same signature, same bar length) and just the bass moved. A
+/// table arriving while stopped, during the count-in, while no table is
+/// loaded, or with a different groove applies immediately: the first three
+/// have no bar line to wait for that matters, and the last is the musician
+/// asking for a change they want to hear now.
+pub fn swap_defers(
+    active: Option<&JamTable>,
+    incoming: Option<&JamTable>,
+    playing: bool,
+    warming_up: bool,
+) -> bool {
+    if !playing || warming_up {
+        return false;
+    }
+    match (active, incoming) {
+        (Some(a), Some(n)) => {
+            a.drums_signature == n.drums_signature && a.ticks_per_bar == n.ticks_per_bar
+        }
+        _ => false,
+    }
 }
 
 /// The bass line as one optional slot per tick.
@@ -867,6 +943,60 @@ fn worst_bar_peak(
 
 #[cfg(test)]
 mod tests {
+    mod deferral {
+        use super::super::*;
+
+        fn cfg(bass: Option<Vec<u8>>, kit: &str) -> JamConfig {
+            let z = vec![0u8; 8];
+            let mut kick = z.clone();
+            kick[0] = 2;
+            JamConfig {
+                ticks_per_beat: 2,
+                beats_per_bar: 4,
+                bar: JamPattern {
+                    kick,
+                    snare: z.clone(),
+                    hat: vec![1u8; 8],
+                    ride: z.clone(),
+                    crash: z.clone(),
+                },
+                fill: None,
+                form_bars: 12,
+                crash_on_one: true,
+                intensity: 1.0,
+                kit: kit.to_string(),
+                bass: bass.map(|pitches| JamBassLine { pitches, gain: 1.0 }),
+                practice: None,
+            }
+        }
+
+        #[test]
+        fn a_bass_only_change_waits_for_the_bar_line() {
+            let a = compile(&cfg(Some(vec![33, 0, 0, 0, 40, 0, 0, 0]), "room")).unwrap();
+            let n = compile(&cfg(Some(vec![38, 0, 0, 0, 45, 0, 0, 0]), "room")).unwrap();
+            assert_eq!(a.drums_signature, n.drums_signature);
+            assert!(swap_defers(Some(&a), Some(&n), true, false));
+        }
+
+        #[test]
+        fn a_kit_change_plays_now() {
+            let a = compile(&cfg(Some(vec![33, 0, 0, 0, 40, 0, 0, 0]), "room")).unwrap();
+            let n = compile(&cfg(Some(vec![33, 0, 0, 0, 40, 0, 0, 0]), "tight")).unwrap();
+            assert_ne!(a.drums_signature, n.drums_signature);
+            assert!(!swap_defers(Some(&a), Some(&n), true, false));
+        }
+
+        #[test]
+        fn nothing_waits_while_stopped_counting_in_or_unloaded() {
+            let a = compile(&cfg(Some(vec![33, 0, 0, 0, 40, 0, 0, 0]), "room")).unwrap();
+            let n = compile(&cfg(Some(vec![38, 0, 0, 0, 45, 0, 0, 0]), "room")).unwrap();
+            assert!(!swap_defers(Some(&a), Some(&n), false, false));
+            assert!(!swap_defers(Some(&a), Some(&n), true, true));
+            assert!(!swap_defers(None, Some(&n), true, false));
+            assert!(!swap_defers(Some(&a), None, true, false));
+        }
+    }
+
     use super::*;
 
     /// The room kit's voice for `v`. Most of these tests predate kits and

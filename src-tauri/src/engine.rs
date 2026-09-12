@@ -1152,6 +1152,11 @@ struct CachedParams {
     /// when `jam_generation` moves — an `Arc` clone is a refcount bump, and
     /// the callback does not do even that on a buffer where nothing changed.
     jam: Option<Arc<JamTable>>,
+    /// A table that arrived mid-bar and differs from `jam` only in its bass
+    /// line. Held here until the bar line, then made current — the engine's
+    /// half of the bar-ahead handshake the UI's `useJamSession.ts` describes.
+    /// See `jam::swap_defers`.
+    jam_pending: Option<Arc<JamTable>>,
     jam_generation: u64,
     /// Set on the buffer that picked up a new table (or dropped one), so the
     /// tick loop can put the form back to bar 0 / chorus 1.
@@ -2329,6 +2334,7 @@ impl MetronomeEngine {
                 jam: None,
                 jam_generation: 0,
                 jam_changed: false,
+                jam_pending: None,
             };
 
             // ---- Build output stream ----
@@ -2418,14 +2424,34 @@ impl MetronomeEngine {
                     let gen = jam_shared.generation.load(Ordering::Acquire);
                     if gen != cached.jam_generation {
                         if let Ok(slot) = jam_shared.table.try_lock() {
-                            cached.jam = slot.clone();
+                            let incoming = slot.clone();
                             cached.jam_generation = gen;
-                            cached.jam_changed = true;
+                            // The UI posts the next bar's bass on this bar's
+                            // downbeat. Same drummer, different bass: hold it
+                            // for the bar line. Anything else plays now.
+                            if crate::jam::swap_defers(
+                                cached.jam.as_deref(),
+                                incoming.as_deref(),
+                                is_playing,
+                                cached.ramp_warming_up,
+                            ) {
+                                cached.jam_pending = incoming;
+                            } else {
+                                cached.jam = incoming;
+                                cached.jam_pending = None;
+                                cached.jam_changed = true;
+                            }
                         }
                     }
 
                     // ---- Not playing: silence ----
                     if !is_playing {
+                        // A bass that was waiting for a bar line that never
+                        // came is the right one to start from next time.
+                        if let Some(p) = cached.jam_pending.take() {
+                            cached.jam = Some(p);
+                            cached.jam_changed = true;
+                        }
                         for s in data.iter_mut() {
                             *s = 0.0;
                         }
@@ -2745,6 +2771,12 @@ impl MetronomeEngine {
                             // reporting bar 0 of chorus 1 as the contract
                             // says it must.
                             if bar_complete {
+                                // The bar line: the held table becomes the
+                                // one the next tick reads. Same form, same
+                                // drums — only the bass bar moved.
+                                if let Some(p) = cached.jam_pending.take() {
+                                    cached.jam = Some(p);
+                                }
                                 if let Some(ref t) = cached.jam {
                                     let (b, c) = advance_form(jam_bar, jam_chorus, t.form_bars());
                                     jam_bar = b;
