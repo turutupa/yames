@@ -3722,7 +3722,8 @@ mod tests {
         let accent_db = 20.0 * (1.0f32 / BEAT_GAIN).log10();
         assert!(
             (3.0..=4.5).contains(&accent_db),
-            "accent sits {accent_db:.1} dB over the beat; under 3 it is not heard              as an accent and over 4.5 it shouts"
+            "accent sits {accent_db:.1} dB over the beat; under 3 it is not heard \
+             as an accent and over 4.5 it shouts"
         );
     }
 
@@ -5175,7 +5176,8 @@ mod tests {
             low_band_share(bank.get(SoundId::Kit(JamKit::Room, KitVoice::SnareHi)), sr);
         assert!(
             bass_low > snare_low * 2.0,
-            "the bass has {bass_low:.2} of its energy under 150 Hz and the snare              {snare_low:.2}; that is not a bass sitting under a drum kit"
+            "the bass has {bass_low:.2} of its energy under 150 Hz and the snare \
+             {snare_low:.2}; that is not a bass sitting under a drum kit"
         );
     }
 

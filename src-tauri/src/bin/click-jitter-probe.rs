@@ -533,7 +533,12 @@ fn main() -> ExitCode {
         match compile_jam(&cfg) {
             Ok(table) => {
                 eprintln!(
-                    "[probe] jam loaded: {} ticks a bar, {} bars a chorus, fill on,                      crash on the one; worst tick {:.3} -> {:.3} after normalisation",
+                    concat!(
+                        "[probe] jam loaded: {} kit, {} ticks a bar, {} bars a chorus, ",
+                        "fill on, crash on the one, bass on every tick; ",
+                        "loudest sample {:.3} -> {:.3} after normalisation"
+                    ),
+                    cfg.kit,
                     table.ticks_per_bar(),
                     table.form_bars(),
                     table.peak_before,
@@ -629,13 +634,19 @@ fn main() -> ExitCode {
     };
 
     // ---- Output ----
-    let mode = match &llm_summary {
+    let mut mode = match &llm_summary {
         None => "baseline (--no-llm)".to_string(),
         Some((backend, _, _, _)) => format!(
             "LLM backend={backend} YAMES_LLM_GPU_LAYERS={}",
             std::env::var("YAMES_LLM_GPU_LAYERS").unwrap_or_else(|_| "(unset)".into())
         ),
     };
+    // A pasted report has to say whether the band was playing. Two runs
+    // whose only difference is `--jam` were otherwise indistinguishable on
+    // the page, which is exactly the pair anyone compares.
+    if args.jam {
+        mode.push_str(" + --jam");
+    }
 
     println!("\n=== click-jitter-probe ===");
     println!("mode              {mode}");
