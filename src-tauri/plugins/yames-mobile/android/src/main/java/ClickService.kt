@@ -125,10 +125,11 @@ class ClickService : Service() {
             )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            // A system drawable, because a notification's small icon has to be
-            // a flat monochrome silhouette and the launcher icon is not one.
-            // M05 can draw a proper one.
-            .setSmallIcon(android.R.drawable.ic_media_play)
+            // The Yames mark, redrawn as a flat monochrome glyph: a
+            // notification's small icon keeps only the alpha channel, so the
+            // launcher icon cannot be reused (it would arrive as a white
+            // square). See res/drawable/ic_stat_yames.xml.
+            .setSmallIcon(R.drawable.ic_stat_yames)
             .setContentTitle(title)
             .setContentText(body)
             .setContentIntent(contentIntent)
