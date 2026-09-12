@@ -31,6 +31,20 @@ interface ActionDispatcherArgs {
    * arm it first, and only the window knows which jam is loaded.
    */
   onToggleJam: () => void;
+  /**
+   * The hands-free jam actions (JAM_MODE §4.7), for a footswitch.
+   *
+   * Passed in as one object rather than five callbacks because they are one
+   * feature and they all come from the same hook; the dispatcher's job here is
+   * only to decide that the jam tab is open and a jam is loaded.
+   */
+  jamActions: {
+    nextGroove: () => void;
+    prevGroove: () => void;
+    toggleTrade: () => void;
+    toggleDropOut: () => void;
+    nextShape: () => void;
+  };
   state: AppState;
   isFullscreen: boolean;
   setIsFullscreen: (v: boolean) => void;
@@ -60,6 +74,7 @@ export function useActionDispatcher({
   setlistLoaded,
   jamLoaded,
   onToggleJam,
+  jamActions,
   state,
   isFullscreen,
   setIsFullscreen,
@@ -126,6 +141,36 @@ export function useActionDispatcher({
         return;
       }
       if (view === "settings") return;
+
+      /**
+       * The jam actions, before the blur below.
+       *
+       * They only mean anything with a jam on the stage, and they mean
+       * nothing anywhere else — pressing G on the metronome tab must not
+       * silently change a jam you are not looking at.
+       */
+      if (actionId.startsWith("jam-")) {
+        if (view !== "jam" || !jamLoaded) return;
+        switch (actionId) {
+          case "jam-next-groove":
+            jamActions.nextGroove();
+            break;
+          case "jam-prev-groove":
+            jamActions.prevGroove();
+            break;
+          case "jam-trade":
+            jamActions.toggleTrade();
+            break;
+          case "jam-dropout":
+            jamActions.toggleDropOut();
+            break;
+          case "jam-next-shape":
+            jamActions.nextShape();
+            break;
+        }
+        return;
+      }
+
       if (document.activeElement instanceof HTMLElement)
         document.activeElement.blur();
       switch (actionId) {
@@ -233,6 +278,7 @@ export function useActionDispatcher({
       view,
       jamLoaded,
       onToggleJam,
+      jamActions,
       state.bpm,
       state.subdivision,
       // Stable key — `state.beatGroups` is a fresh array on every

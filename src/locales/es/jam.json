@@ -87,6 +87,156 @@
     },
     "transport": {
       "chorus": "Vuelta"
+    },
+    "now": {
+      "label": "Ahora",
+      "aria": "Suena {{chord}}",
+      "next": "{{chord}} en {{count}} compases",
+      "next_one": "{{chord}} en {{count}} compás",
+      "next_other": "{{chord}} en {{count}} compases",
+      "nextNow": "{{chord}} a continuación"
+    },
+    "fretboard": {
+      "label": "Diapasón",
+      "aria": "{{chord}} en el mástil"
+    },
+    "chords": {
+      "label": "Acordes",
+      "hint": "Pon los cambios en la línea de compases, y encima el acorde en el que estás.",
+      "inKey": "Acordes en {{key}}",
+      "follow": "Seguir el jam",
+      "followHint": "Que las posiciones se muevan con los cambios, o fíjalas a un acorde.",
+      "sevenths": "Séptimas",
+      "nextShape": "Siguiente posición",
+      "sizeTriad": "tríada",
+      "sizeOpen": "abierta",
+      "sizeBarre": "cejilla",
+      "sizeSeventh": "séptima",
+      "fret": "traste {{fret}}"
+    },
+    "key": {
+      "label": "Tonalidad",
+      "mode": "Mayor, menor o blues",
+      "major": "Mayor",
+      "minor": "Menor",
+      "blues": "Blues",
+      "majorNamed": "{{root}} mayor",
+      "minorNamed": "{{root}} menor",
+      "bluesNamed": "blues en {{root}}"
+    },
+    "kit": {
+      "label": "Batería",
+      "room": "Sala",
+      "roomHint": "abierta, con la sala alrededor",
+      "tight": "Seca",
+      "tightHint": "de cerca, sin cola",
+      "brushes": "Escobillas",
+      "brushesHint": "suave, para una balada",
+      "electronic": "Electrónica",
+      "electronicHint": "sintetizada y contundente"
+    },
+    "transposition": {
+      "label": "Tú lees",
+      "concert": "Real",
+      "bb": "Si♭",
+      "eb": "Mi♭"
+    },
+    "setup": {
+      "label": "Tonalidad, batería y la parte que lees"
+    },
+    "band": {
+      "label": "La banda",
+      "lead": "todo sintetizado, nada que descargar",
+      "drums": "Batería",
+      "bass": "Bajo",
+      "keys": "Teclados",
+      "you": "Tú",
+      "youPlay": "{{instrument}}",
+      "youHint": "la banda nunca toca tu instrumento",
+      "out": "fuera",
+      "hatsOnly": "solo charles",
+      "inputOn": "Entrada activa",
+      "inputOff": "Entrada apagada"
+    },
+    "bassStyle": {
+      "rock": "fundamentales sobre el bombo",
+      "shuffle": "una figura de boogie",
+      "swing": "una línea caminante",
+      "bossa": "el patrón de bossa",
+      "waltz": "fundamental y quinta",
+      "sixeight": "fundamental y quinta",
+      "funk": "fundamentales sincopadas"
+    },
+    "practice": {
+      "label": "Práctica",
+      "dropOut": "Compases en silencio",
+      "dropOutEvery": "Silencio cada {{count}}",
+      "dropOutBarsLabel": "Cuánto calla la banda",
+      "forBars": "durante {{count}} compases",
+      "forBars_one": "durante {{count}} compás",
+      "forBars_other": "durante {{count}} compases",
+      "trade": "Intercambios",
+      "tradeN": "Grupos de {{count}}",
+      "tempo": "Entrenador de tempo",
+      "tempoUp": "Tempo +{{step}}",
+      "tempoEveryLabel": "Cada cuánto sube el tempo",
+      "everyChoruses": "cada {{count}} vueltas",
+      "everyChoruses_one": "cada {{count}} vuelta",
+      "everyChoruses_other": "cada {{count}} vueltas",
+      "climbing": "subiendo desde {{from}}"
+    },
+    "cue": {
+      "yours": "Tus cuatro",
+      "silent": "Tú solo",
+      "back": "Vuelve la banda"
+    },
+    "editor": {
+      "label": "Editor de groove",
+      "edit": "Editar el groove",
+      "editPreset": "Hazlo tuyo",
+      "makeYourOwn": "Crea el tuyo",
+      "name": "Nombre del groove",
+      "yours": "Tuyo",
+      "pages": "Editar el compás o el fill",
+      "bar": "Compás",
+      "fill": "Fill",
+      "reset": "Restablecer",
+      "done": "Listo",
+      "gridBar": "El groove, un compás",
+      "gridFill": "El fill, un compás",
+      "hint": "Haz clic en una celda para cambiarla",
+      "meter": "{{beats}} pulsos en {{subdivision}} · las columnas siguen el compás",
+      "cell": "{{lane}}, pulso {{beat}}, tick {{tick}}: {{level}}",
+      "lanes": {
+        "hat": "Charles",
+        "snare": "Caja",
+        "kick": "Bombo",
+        "ride": "Ride"
+      },
+      "levels": {
+        "0": "apagado",
+        "1": "golpe",
+        "2": "acento",
+        "3": "fantasma"
+      },
+      "subdivision": {
+        "1": "negras",
+        "2": "corcheas",
+        "3": "tresillos",
+        "4": "semicorcheas",
+        "6": "seisillos"
+      }
     }
+  },
+  "scale": {
+    "major": "mayor",
+    "naturalMinor": "menor natural",
+    "dorian": "dórica",
+    "mixolydian": "mixolidia",
+    "minorPentatonic": "pentatónica menor",
+    "majorPentatonic": "pentatónica mayor",
+    "blues": "de blues",
+    "harmonicMinor": "menor armónica",
+    "altered": "alterada"
   }
 }

@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { formBars, formSectionNames, formSections } from "../../jam/forms";
-import type { JamForm } from "../../jam/types";
+import type { JamBandState, JamForm } from "../../jam/types";
 
 interface FormTimelineProps {
   form: JamForm;
@@ -14,6 +14,18 @@ interface FormTimelineProps {
   beat: number;
   beatsPerBar: number;
   isPlaying: boolean;
+  /**
+   * The chord of each bar, already spelled and transposed, or null when the
+   * jam is not showing chords. Exactly one entry per bar of the chorus.
+   */
+  chords?: (string | null)[] | null;
+  /**
+   * What the band will be doing on each bar of this chorus, worked out ahead
+   * of the bar line by `bandStatesForChorus`. Drawn BEFORE it happens, which
+   * is the whole point: a silence you can see coming is one you can count
+   * into, and a silence that arrives unannounced is one you fall out of.
+   */
+  bandStates?: JamBandState[] | null;
 }
 
 /**
@@ -40,6 +52,8 @@ export function FormTimeline({
   beat,
   beatsPerBar,
   isPlaying,
+  chords = null,
+  bandStates = null,
 }: FormTimelineProps) {
   const { t } = useTranslation();
   const total = formBars(form);
@@ -64,6 +78,7 @@ export function FormTimeline({
           {t("jam.form.chorus", { count: chorus })}
           {" · "}
           {t("jam.form.barOf", { current: current + 1, total })}
+          {chords?.[current] ? ` · ${chords[current]}` : ""}
         </span>
       </div>
       <div className="jam-timeline" data-playing={isPlaying ? "" : undefined}>
@@ -79,15 +94,21 @@ export function FormTimeline({
                 const index = bar++;
                 const lit = index === current;
                 const isFill = fills && index === total - 1;
+                const chord = chords?.[index] ?? null;
+                // "full" is the absence of a mark, not a mark of its own: a
+                // timeline where every cell says something says nothing.
+                const state = bandStates?.[index] ?? "full";
                 return (
                   <span
                     className="jam-timeline-cell"
                     key={index}
                     data-current={lit ? "" : undefined}
                     data-fill={isFill ? "" : undefined}
+                    data-band={state === "full" ? undefined : state}
                     aria-hidden="true"
                   >
                     <span className="jam-timeline-number">{index + 1}</span>
+                    {chord && <span className="jam-timeline-chord">{chord}</span>}
                     {lit && isPlaying && (
                       <span
                         className="jam-timeline-progress"

@@ -87,6 +87,156 @@
     },
     "transport": {
       "chorus": "コーラス"
+    },
+    "now": {
+      "label": "いま",
+      "aria": "{{chord}} が鳴っています",
+      "next": "{{count}} 小節後に {{chord}}",
+      "next_one": "{{count}} 小節後に {{chord}}",
+      "next_other": "{{count}} 小節後に {{chord}}",
+      "nextNow": "次は {{chord}}"
+    },
+    "fretboard": {
+      "label": "指板",
+      "aria": "ネック上の {{chord}}"
+    },
+    "chords": {
+      "label": "コード",
+      "hint": "小節の並びにコード進行を、その上に今のコードを表示します。",
+      "inKey": "{{key}} のコード",
+      "follow": "ジャムに追従",
+      "followHint": "フォームをコード進行に合わせて動かすか、ひとつのコードに固定します。",
+      "sevenths": "7th",
+      "nextShape": "次のフォーム",
+      "sizeTriad": "トライアド",
+      "sizeOpen": "オープン",
+      "sizeBarre": "バレー",
+      "sizeSeventh": "7th",
+      "fret": "{{fret}} フレット"
+    },
+    "key": {
+      "label": "キー",
+      "mode": "メジャー・マイナー・ブルース",
+      "major": "メジャー",
+      "minor": "マイナー",
+      "blues": "ブルース",
+      "majorNamed": "{{root}} メジャー",
+      "minorNamed": "{{root}} マイナー",
+      "bluesNamed": "{{root}} ブルース"
+    },
+    "kit": {
+      "label": "キット",
+      "room": "ルーム",
+      "roomHint": "部屋の響きを含んだ開いた音",
+      "tight": "タイト",
+      "tightHint": "近接、余韻なし",
+      "brushes": "ブラシ",
+      "brushesHint": "静かで、バラード向き",
+      "electronic": "エレクトロニック",
+      "electronicHint": "合成音で、輪郭がはっきり"
+    },
+    "transposition": {
+      "label": "読む調",
+      "concert": "実音",
+      "bb": "B♭",
+      "eb": "E♭"
+    },
+    "setup": {
+      "label": "キー、キット、読む譜面"
+    },
+    "band": {
+      "label": "バンド",
+      "lead": "すべて合成音、ダウンロードは不要",
+      "drums": "ドラム",
+      "bass": "ベース",
+      "keys": "キーボード",
+      "you": "あなた",
+      "youPlay": "{{instrument}}",
+      "youHint": "バンドはあなたの楽器を弾きません",
+      "out": "休み",
+      "hatsOnly": "ハイハットのみ",
+      "inputOn": "入力オン",
+      "inputOff": "入力オフ"
+    },
+    "bassStyle": {
+      "rock": "キックに合わせたルート",
+      "shuffle": "ブギのフレーズ",
+      "swing": "ウォーキングライン",
+      "bossa": "ボサのパターン",
+      "waltz": "ルートと5度",
+      "sixeight": "ルートと5度",
+      "funk": "シンコペーションしたルート"
+    },
+    "practice": {
+      "label": "練習",
+      "dropOut": "休止小節",
+      "dropOutEvery": "{{count}} 小節ごとに休止",
+      "dropOutBarsLabel": "バンドが休む長さ",
+      "forBars": "{{count}} 小節のあいだ",
+      "forBars_one": "{{count}} 小節のあいだ",
+      "forBars_other": "{{count}} 小節のあいだ",
+      "trade": "4バース",
+      "tradeN": "{{count}} 小節ずつ交替",
+      "tempo": "テンポトレーナー",
+      "tempoUp": "テンポ +{{step}}",
+      "tempoEveryLabel": "テンポが上がる頻度",
+      "everyChoruses": "{{count}} コーラスごと",
+      "everyChoruses_one": "{{count}} コーラスごと",
+      "everyChoruses_other": "{{count}} コーラスごと",
+      "climbing": "{{from}} から上昇中"
+    },
+    "cue": {
+      "yours": "あなたの4小節",
+      "silent": "あなただけ",
+      "back": "バンド復帰"
+    },
+    "editor": {
+      "label": "グルーヴエディタ",
+      "edit": "グルーヴを編集",
+      "editPreset": "自分のものにする",
+      "makeYourOwn": "自分で作る",
+      "name": "グルーヴ名",
+      "yours": "あなたの",
+      "pages": "小節かフィルを編集",
+      "bar": "小節",
+      "fill": "フィル",
+      "reset": "リセット",
+      "done": "完了",
+      "gridBar": "グルーヴ、1小節",
+      "gridFill": "フィル、1小節",
+      "hint": "セルをクリックで切り替え",
+      "meter": "{{subdivision}}で{{beats}}拍 · 列は拍子に従います",
+      "cell": "{{lane}}、{{beat}} 拍目、{{tick}} 番目：{{level}}",
+      "lanes": {
+        "hat": "ハイハット",
+        "snare": "スネア",
+        "kick": "キック",
+        "ride": "ライド"
+      },
+      "levels": {
+        "0": "なし",
+        "1": "打つ",
+        "2": "アクセント",
+        "3": "ゴースト"
+      },
+      "subdivision": {
+        "1": "4分音符",
+        "2": "8分音符",
+        "3": "3連符",
+        "4": "16分音符",
+        "6": "6連符"
+      }
     }
+  },
+  "scale": {
+    "major": "メジャー",
+    "naturalMinor": "ナチュラルマイナー",
+    "dorian": "ドリアン",
+    "mixolydian": "ミクソリディアン",
+    "minorPentatonic": "マイナーペンタトニック",
+    "majorPentatonic": "メジャーペンタトニック",
+    "blues": "ブルース",
+    "harmonicMinor": "ハーモニックマイナー",
+    "altered": "オルタード"
   }
 }

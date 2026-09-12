@@ -87,6 +87,156 @@
     },
     "transport": {
       "chorus": "Chorus"
+    },
+    "now": {
+      "label": "Maintenant",
+      "aria": "{{chord}} en cours",
+      "next": "{{chord}} dans {{count}} mesures",
+      "next_one": "{{chord}} dans {{count}} mesure",
+      "next_other": "{{chord}} dans {{count}} mesures",
+      "nextNow": "{{chord}} juste après"
+    },
+    "fretboard": {
+      "label": "Manche",
+      "aria": "{{chord}} sur le manche"
+    },
+    "chords": {
+      "label": "Accords",
+      "hint": "Les changements sur la frise, et l'accord en cours au-dessus.",
+      "inKey": "Accords en {{key}}",
+      "follow": "Suivre le jam",
+      "followHint": "Les positions suivent les changements, ou tu les fixes sur un accord.",
+      "sevenths": "Septièmes",
+      "nextShape": "Position suivante",
+      "sizeTriad": "triade",
+      "sizeOpen": "ouverte",
+      "sizeBarre": "barré",
+      "sizeSeventh": "septième",
+      "fret": "case {{fret}}"
+    },
+    "key": {
+      "label": "Tonalité",
+      "mode": "Majeur, mineur ou blues",
+      "major": "Majeur",
+      "minor": "Mineur",
+      "blues": "Blues",
+      "majorNamed": "{{root}} majeur",
+      "minorNamed": "{{root}} mineur",
+      "bluesNamed": "blues en {{root}}"
+    },
+    "kit": {
+      "label": "Kit",
+      "room": "Salle",
+      "roomHint": "ouvert, avec la pièce autour",
+      "tight": "Serré",
+      "tightHint": "de près, sans traîne",
+      "brushes": "Balais",
+      "brushesHint": "doux, pour une ballade",
+      "electronic": "Électronique",
+      "electronicHint": "synthétisé et percutant"
+    },
+    "transposition": {
+      "label": "Tu lis",
+      "concert": "Réel",
+      "bb": "Si♭",
+      "eb": "Mi♭"
+    },
+    "setup": {
+      "label": "Tonalité, kit et la partie que tu lis"
+    },
+    "band": {
+      "label": "Le groupe",
+      "lead": "tout est synthétisé, rien à télécharger",
+      "drums": "Batterie",
+      "bass": "Basse",
+      "keys": "Clavier",
+      "you": "Toi",
+      "youPlay": "{{instrument}}",
+      "youHint": "le groupe ne joue jamais ton instrument",
+      "out": "sortie",
+      "hatsOnly": "charleston seul",
+      "inputOn": "Entrée active",
+      "inputOff": "Entrée coupée"
+    },
+    "bassStyle": {
+      "rock": "fondamentales sur la grosse caisse",
+      "shuffle": "une figure boogie",
+      "swing": "une walking bass",
+      "bossa": "le motif bossa",
+      "waltz": "fondamentale et quinte",
+      "sixeight": "fondamentale et quinte",
+      "funk": "fondamentales syncopées"
+    },
+    "practice": {
+      "label": "Travail",
+      "dropOut": "Mesures à vide",
+      "dropOutEvery": "À vide toutes les {{count}}",
+      "dropOutBarsLabel": "Combien de temps le groupe se tait",
+      "forBars": "pendant {{count}} mesures",
+      "forBars_one": "pendant {{count}} mesure",
+      "forBars_other": "pendant {{count}} mesures",
+      "trade": "Échanges",
+      "tradeN": "Par {{count}}",
+      "tempo": "Entraîneur de tempo",
+      "tempoUp": "Tempo +{{step}}",
+      "tempoEveryLabel": "À quelle fréquence le tempo monte",
+      "everyChoruses": "tous les {{count}} tours",
+      "everyChoruses_one": "tous les {{count}} tour",
+      "everyChoruses_other": "tous les {{count}} tours",
+      "climbing": "en partant de {{from}}"
+    },
+    "cue": {
+      "yours": "À toi, quatre",
+      "silent": "Toi seul",
+      "back": "Le groupe revient"
+    },
+    "editor": {
+      "label": "Éditeur de groove",
+      "edit": "Modifier le groove",
+      "editPreset": "Le rendre tien",
+      "makeYourOwn": "Crée le tien",
+      "name": "Nom du groove",
+      "yours": "À toi",
+      "pages": "Modifier la mesure ou le fill",
+      "bar": "Mesure",
+      "fill": "Fill",
+      "reset": "Réinitialiser",
+      "done": "Terminé",
+      "gridBar": "Le groove, une mesure",
+      "gridFill": "Le fill, une mesure",
+      "hint": "Clique sur une case pour la faire tourner",
+      "meter": "{{beats}} temps en {{subdivision}} · les colonnes suivent la mesure",
+      "cell": "{{lane}}, temps {{beat}}, tick {{tick}} : {{level}}",
+      "lanes": {
+        "hat": "Charleston",
+        "snare": "Caisse claire",
+        "kick": "Grosse caisse",
+        "ride": "Ride"
+      },
+      "levels": {
+        "0": "rien",
+        "1": "frappe",
+        "2": "accent",
+        "3": "fantôme"
+      },
+      "subdivision": {
+        "1": "noires",
+        "2": "croches",
+        "3": "triolets",
+        "4": "doubles-croches",
+        "6": "sextolets"
+      }
     }
+  },
+  "scale": {
+    "major": "majeure",
+    "naturalMinor": "mineure naturelle",
+    "dorian": "dorien",
+    "mixolydian": "mixolydien",
+    "minorPentatonic": "pentatonique mineure",
+    "majorPentatonic": "pentatonique majeure",
+    "blues": "blues",
+    "harmonicMinor": "mineure harmonique",
+    "altered": "altérée"
   }
 }

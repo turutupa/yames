@@ -87,6 +87,156 @@
     },
     "transport": {
       "chorus": "Giro"
+    },
+    "now": {
+      "label": "Ora",
+      "aria": "Sta suonando {{chord}}",
+      "next": "{{chord}} fra {{count}} battute",
+      "next_one": "{{chord}} fra {{count}} battuta",
+      "next_other": "{{chord}} fra {{count}} battute",
+      "nextNow": "{{chord}} subito dopo"
+    },
+    "fretboard": {
+      "label": "Tastiera",
+      "aria": "{{chord}} sul manico"
+    },
+    "chords": {
+      "label": "Accordi",
+      "hint": "I cambi sulla linea delle battute, e sopra l'accordo su cui sei.",
+      "inKey": "Accordi in {{key}}",
+      "follow": "Segui il jam",
+      "followHint": "Le posizioni seguono i cambi, oppure le fissi su un accordo.",
+      "sevenths": "Settime",
+      "nextShape": "Posizione successiva",
+      "sizeTriad": "triade",
+      "sizeOpen": "aperta",
+      "sizeBarre": "barré",
+      "sizeSeventh": "settima",
+      "fret": "tasto {{fret}}"
+    },
+    "key": {
+      "label": "Tonalità",
+      "mode": "Maggiore, minore o blues",
+      "major": "Maggiore",
+      "minor": "Minore",
+      "blues": "Blues",
+      "majorNamed": "{{root}} maggiore",
+      "minorNamed": "{{root}} minore",
+      "bluesNamed": "blues in {{root}}"
+    },
+    "kit": {
+      "label": "Kit",
+      "room": "Sala",
+      "roomHint": "aperto, con la stanza intorno",
+      "tight": "Asciutto",
+      "tightHint": "da vicino, senza coda",
+      "brushes": "Spazzole",
+      "brushesHint": "sommesso, per una ballad",
+      "electronic": "Elettronico",
+      "electronicHint": "sintetizzato e deciso"
+    },
+    "transposition": {
+      "label": "Tu leggi",
+      "concert": "Reale",
+      "bb": "Si♭",
+      "eb": "Mi♭"
+    },
+    "setup": {
+      "label": "Tonalità, kit e la parte che leggi"
+    },
+    "band": {
+      "label": "La band",
+      "lead": "tutto sintetizzato, niente da scaricare",
+      "drums": "Batteria",
+      "bass": "Basso",
+      "keys": "Tastiere",
+      "you": "Tu",
+      "youPlay": "{{instrument}}",
+      "youHint": "la band non suona mai il tuo strumento",
+      "out": "fuori",
+      "hatsOnly": "solo charleston",
+      "inputOn": "Ingresso attivo",
+      "inputOff": "Ingresso spento"
+    },
+    "bassStyle": {
+      "rock": "fondamentali sulla cassa",
+      "shuffle": "una figura boogie",
+      "swing": "un walking bass",
+      "bossa": "il pattern bossa",
+      "waltz": "fondamentale e quinta",
+      "sixeight": "fondamentale e quinta",
+      "funk": "fondamentali sincopate"
+    },
+    "practice": {
+      "label": "Esercizio",
+      "dropOut": "Battute a vuoto",
+      "dropOutEvery": "A vuoto ogni {{count}}",
+      "dropOutBarsLabel": "Per quanto la band tace",
+      "forBars": "per {{count}} battute",
+      "forBars_one": "per {{count}} battuta",
+      "forBars_other": "per {{count}} battute",
+      "trade": "Scambi",
+      "tradeN": "A gruppi di {{count}}",
+      "tempo": "Allenatore di tempo",
+      "tempoUp": "Tempo +{{step}}",
+      "tempoEveryLabel": "Ogni quanto sale il tempo",
+      "everyChoruses": "ogni {{count}} giri",
+      "everyChoruses_one": "ogni {{count}} giro",
+      "everyChoruses_other": "ogni {{count}} giri",
+      "climbing": "partendo da {{from}}"
+    },
+    "cue": {
+      "yours": "Tocca a te, quattro",
+      "silent": "Tu da solo",
+      "back": "Rientra la band"
+    },
+    "editor": {
+      "label": "Editor del groove",
+      "edit": "Modifica il groove",
+      "editPreset": "Fallo tuo",
+      "makeYourOwn": "Creane uno tuo",
+      "name": "Nome del groove",
+      "yours": "Tuo",
+      "pages": "Modifica la battuta o il fill",
+      "bar": "Battuta",
+      "fill": "Fill",
+      "reset": "Ripristina",
+      "done": "Fatto",
+      "gridBar": "Il groove, una battuta",
+      "gridFill": "Il fill, una battuta",
+      "hint": "Clicca una cella per cambiarla",
+      "meter": "{{beats}} movimenti in {{subdivision}} · le colonne seguono il metro",
+      "cell": "{{lane}}, movimento {{beat}}, tick {{tick}}: {{level}}",
+      "lanes": {
+        "hat": "Charleston",
+        "snare": "Rullante",
+        "kick": "Cassa",
+        "ride": "Ride"
+      },
+      "levels": {
+        "0": "spento",
+        "1": "colpo",
+        "2": "accento",
+        "3": "fantasma"
+      },
+      "subdivision": {
+        "1": "semiminime",
+        "2": "crome",
+        "3": "terzine",
+        "4": "semicrome",
+        "6": "sestine"
+      }
     }
+  },
+  "scale": {
+    "major": "maggiore",
+    "naturalMinor": "minore naturale",
+    "dorian": "dorica",
+    "mixolydian": "misolidia",
+    "minorPentatonic": "pentatonica minore",
+    "majorPentatonic": "pentatonica maggiore",
+    "blues": "blues",
+    "harmonicMinor": "minore armonica",
+    "altered": "alterata"
   }
 }

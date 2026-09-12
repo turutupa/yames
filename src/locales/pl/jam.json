@@ -87,6 +87,156 @@
     },
     "transport": {
       "chorus": "Chorus"
+    },
+    "now": {
+      "label": "Teraz",
+      "aria": "Gra {{chord}}",
+      "next": "{{chord}} za {{count}} taktów",
+      "next_one": "{{chord}} za {{count}} takt",
+      "next_other": "{{chord}} za {{count}} taktów",
+      "nextNow": "Zaraz {{chord}}"
+    },
+    "fretboard": {
+      "label": "Gryf",
+      "aria": "{{chord}} na gryfie"
+    },
+    "chords": {
+      "label": "Akordy",
+      "hint": "Przebieg akordów na pasku taktów, a nad nim akord, na którym jesteś.",
+      "inKey": "Akordy w {{key}}",
+      "follow": "Idź za jamem",
+      "followHint": "Chwyty przesuwają się razem z akordami albo zostają przypięte do jednego.",
+      "sevenths": "Septymowe",
+      "nextShape": "Następny chwyt",
+      "sizeTriad": "trójdźwięk",
+      "sizeOpen": "otwarty",
+      "sizeBarre": "barowy",
+      "sizeSeventh": "septymowy",
+      "fret": "próg {{fret}}"
+    },
+    "key": {
+      "label": "Tonacja",
+      "mode": "Durowa, molowa albo bluesowa",
+      "major": "Dur",
+      "minor": "Moll",
+      "blues": "Blues",
+      "majorNamed": "{{root}}-dur",
+      "minorNamed": "{{root}}-moll",
+      "bluesNamed": "blues w {{root}}"
+    },
+    "kit": {
+      "label": "Zestaw",
+      "room": "Pokój",
+      "roomHint": "otwarty, z pomieszczeniem dookoła",
+      "tight": "Suchy",
+      "tightHint": "z bliska, bez wybrzmienia",
+      "brushes": "Miotełki",
+      "brushesHint": "cicho, do ballady",
+      "electronic": "Elektroniczny",
+      "electronicHint": "syntetyczny i zwarty"
+    },
+    "transposition": {
+      "label": "Czytasz",
+      "concert": "In C",
+      "bb": "B",
+      "eb": "Es"
+    },
+    "setup": {
+      "label": "Tonacja, zestaw i partia, którą czytasz"
+    },
+    "band": {
+      "label": "Zespół",
+      "lead": "wszystko syntezowane, nic do pobrania",
+      "drums": "Perkusja",
+      "bass": "Bas",
+      "keys": "Klawisze",
+      "you": "Ty",
+      "youPlay": "{{instrument}}",
+      "youHint": "zespół nigdy nie gra na twoim instrumencie",
+      "out": "pauza",
+      "hatsOnly": "tylko hi-hat",
+      "inputOn": "Wejście włączone",
+      "inputOff": "Wejście wyłączone"
+    },
+    "bassStyle": {
+      "rock": "prymy na stopie",
+      "shuffle": "figura boogie",
+      "swing": "linia walking",
+      "bossa": "wzór bossy",
+      "waltz": "pryma i kwinta",
+      "sixeight": "pryma i kwinta",
+      "funk": "synkopowane prymy"
+    },
+    "practice": {
+      "label": "Ćwiczenie",
+      "dropOut": "Takty ciszy",
+      "dropOutEvery": "Cisza co {{count}}",
+      "dropOutBarsLabel": "Jak długo zespół milczy",
+      "forBars": "przez {{count}} taktów",
+      "forBars_one": "przez {{count}} takt",
+      "forBars_other": "przez {{count}} taktów",
+      "trade": "Wymiana",
+      "tradeN": "Po {{count}}",
+      "tempo": "Trener tempa",
+      "tempoUp": "Tempo +{{step}}",
+      "tempoEveryLabel": "Jak często rośnie tempo",
+      "everyChoruses": "co {{count}} przebiegów",
+      "everyChoruses_one": "co {{count}} przebieg",
+      "everyChoruses_other": "co {{count}} przebiegów",
+      "climbing": "od {{from}} w górę"
+    },
+    "cue": {
+      "yours": "Twoje cztery",
+      "silent": "Ty sam",
+      "back": "Zespół wraca"
+    },
+    "editor": {
+      "label": "Edytor groove'u",
+      "edit": "Edytuj groove",
+      "editPreset": "Zrób go swoim",
+      "makeYourOwn": "Zrób własny",
+      "name": "Nazwa groove'u",
+      "yours": "Twój",
+      "pages": "Edytuj takt albo przejście",
+      "bar": "Takt",
+      "fill": "Przejście",
+      "reset": "Przywróć",
+      "done": "Gotowe",
+      "gridBar": "Groove, jeden takt",
+      "gridFill": "Przejście, jeden takt",
+      "hint": "Kliknij pole, aby je przełączyć",
+      "meter": "{{beats}} miary w {{subdivision}} · kolumny idą za metrum",
+      "cell": "{{lane}}, miara {{beat}}, tik {{tick}}: {{level}}",
+      "lanes": {
+        "hat": "Hi-hat",
+        "snare": "Werbel",
+        "kick": "Stopa",
+        "ride": "Ride"
+      },
+      "levels": {
+        "0": "cisza",
+        "1": "uderzenie",
+        "2": "akcent",
+        "3": "ghost"
+      },
+      "subdivision": {
+        "1": "ćwierćnutach",
+        "2": "ósemkach",
+        "3": "triolach",
+        "4": "szesnastkach",
+        "6": "sekstolach"
+      }
     }
+  },
+  "scale": {
+    "major": "durowa",
+    "naturalMinor": "molowa naturalna",
+    "dorian": "dorycka",
+    "mixolydian": "miksolidyjska",
+    "minorPentatonic": "pentatonika molowa",
+    "majorPentatonic": "pentatonika durowa",
+    "blues": "bluesowa",
+    "harmonicMinor": "molowa harmoniczna",
+    "altered": "alterowana"
   }
 }

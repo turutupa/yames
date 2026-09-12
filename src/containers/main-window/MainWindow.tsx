@@ -851,6 +851,7 @@ export function MainWindow() {
     setlistLoaded: !!setlistSession.setlist,
     jamLoaded: !!jamSession.jam,
     onToggleJam: toggleJamPlayback,
+    jamActions: jamSession.actions,
     state,
     isFullscreen,
     setIsFullscreen,
@@ -1338,6 +1339,11 @@ export function MainWindow() {
               onEdit={jamSession.editJam}
               currentBeat={currentBeat}
               isPlaying={state.isPlaying}
+              instrument={instrument}
+              lineup={jamSession.lineup}
+              trainedBpm={jamSession.trainedBpm}
+              listening={evaluation.enabled}
+              screen={jamSession.screen}
               tapActive={tapActive}
               tapCount={tapCount}
               tapPulse={tapPulse}

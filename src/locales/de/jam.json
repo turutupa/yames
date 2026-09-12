@@ -87,6 +87,156 @@
     },
     "transport": {
       "chorus": "Chorus"
+    },
+    "now": {
+      "label": "Jetzt",
+      "aria": "Es klingt {{chord}}",
+      "next": "{{chord}} in {{count}} Takten",
+      "next_one": "{{chord}} in {{count}} Takt",
+      "next_other": "{{chord}} in {{count}} Takten",
+      "nextNow": "{{chord}} kommt als Nächstes"
+    },
+    "fretboard": {
+      "label": "Griffbrett",
+      "aria": "{{chord}} auf dem Hals"
+    },
+    "chords": {
+      "label": "Akkorde",
+      "hint": "Die Wechsel auf die Leiste, und den Akkord, auf dem du bist, darüber.",
+      "inKey": "Akkorde in {{key}}",
+      "follow": "Dem Jam folgen",
+      "followHint": "Die Griffe wandern mit den Wechseln, oder du heftest sie an einen Akkord.",
+      "sevenths": "Septimen",
+      "nextShape": "Nächster Griff",
+      "sizeTriad": "Dreiklang",
+      "sizeOpen": "offen",
+      "sizeBarre": "Barré",
+      "sizeSeventh": "Septime",
+      "fret": "Bund {{fret}}"
+    },
+    "key": {
+      "label": "Tonart",
+      "mode": "Dur, Moll oder Blues",
+      "major": "Dur",
+      "minor": "Moll",
+      "blues": "Blues",
+      "majorNamed": "{{root}}-Dur",
+      "minorNamed": "{{root}}-Moll",
+      "bluesNamed": "{{root}}-Blues"
+    },
+    "kit": {
+      "label": "Kit",
+      "room": "Raum",
+      "roomHint": "offen, mit dem Raum drumherum",
+      "tight": "Trocken",
+      "tightHint": "nah dran, ohne Fahne",
+      "brushes": "Besen",
+      "brushesHint": "leise, für eine Ballade",
+      "electronic": "Elektronisch",
+      "electronicHint": "synthetisch und knackig"
+    },
+    "transposition": {
+      "label": "Du liest",
+      "concert": "Klingend",
+      "bb": "B",
+      "eb": "Es"
+    },
+    "setup": {
+      "label": "Tonart, Kit und die Stimme, die du liest"
+    },
+    "band": {
+      "label": "Die Band",
+      "lead": "alles synthetisiert, nichts zum Herunterladen",
+      "drums": "Schlagzeug",
+      "bass": "Bass",
+      "keys": "Keys",
+      "you": "Du",
+      "youPlay": "{{instrument}}",
+      "youHint": "die Band spielt nie dein Instrument",
+      "out": "raus",
+      "hatsOnly": "nur Hi-Hat",
+      "inputOn": "Eingang an",
+      "inputOff": "Eingang aus"
+    },
+    "bassStyle": {
+      "rock": "Grundtöne auf der Bassdrum",
+      "shuffle": "eine Boogie-Figur",
+      "swing": "eine Walking-Linie",
+      "bossa": "das Bossa-Muster",
+      "waltz": "Grundton und Quinte",
+      "sixeight": "Grundton und Quinte",
+      "funk": "synkopierte Grundtöne"
+    },
+    "practice": {
+      "label": "Üben",
+      "dropOut": "Aussetzer",
+      "dropOutEvery": "Aussetzer alle {{count}}",
+      "dropOutBarsLabel": "Wie lange die Band aussetzt",
+      "forBars": "für {{count}} Takte",
+      "forBars_one": "für {{count}} Takt",
+      "forBars_other": "für {{count}} Takte",
+      "trade": "Wechselspiel",
+      "tradeN": "Je {{count}} Takte",
+      "tempo": "Tempotrainer",
+      "tempoUp": "Tempo +{{step}}",
+      "tempoEveryLabel": "Wie oft das Tempo steigt",
+      "everyChoruses": "alle {{count}} Durchgänge",
+      "everyChoruses_one": "jeden {{count}}. Durchgang",
+      "everyChoruses_other": "alle {{count}} Durchgänge",
+      "climbing": "von {{from}} aufwärts"
+    },
+    "cue": {
+      "yours": "Deine vier",
+      "silent": "Du allein",
+      "back": "Band ist zurück"
+    },
+    "editor": {
+      "label": "Groove-Editor",
+      "edit": "Groove bearbeiten",
+      "editPreset": "Zu deinem machen",
+      "makeYourOwn": "Eigenen bauen",
+      "name": "Name des Grooves",
+      "yours": "Deiner",
+      "pages": "Takt oder Fill bearbeiten",
+      "bar": "Takt",
+      "fill": "Fill",
+      "reset": "Zurücksetzen",
+      "done": "Fertig",
+      "gridBar": "Der Groove, ein Takt",
+      "gridFill": "Das Fill, ein Takt",
+      "hint": "Zelle anklicken zum Durchschalten",
+      "meter": "{{beats}} Schläge in {{subdivision}} · die Spalten folgen dem Takt",
+      "cell": "{{lane}}, Schlag {{beat}}, Tick {{tick}}: {{level}}",
+      "lanes": {
+        "hat": "Hi-Hat",
+        "snare": "Snare",
+        "kick": "Bassdrum",
+        "ride": "Ride"
+      },
+      "levels": {
+        "0": "aus",
+        "1": "Schlag",
+        "2": "Akzent",
+        "3": "Ghost"
+      },
+      "subdivision": {
+        "1": "Vierteln",
+        "2": "Achteln",
+        "3": "Triolen",
+        "4": "Sechzehnteln",
+        "6": "Sextolen"
+      }
     }
+  },
+  "scale": {
+    "major": "Dur",
+    "naturalMinor": "natürliches Moll",
+    "dorian": "Dorisch",
+    "mixolydian": "Mixolydisch",
+    "minorPentatonic": "Moll-Pentatonik",
+    "majorPentatonic": "Dur-Pentatonik",
+    "blues": "Blues",
+    "harmonicMinor": "harmonisches Moll",
+    "altered": "Alteriert"
   }
 }

@@ -1,5 +1,4 @@
-import type { Groove } from "../../jam/grooves";
-import type { JamLane, JamLevel } from "../../jam/types";
+import type { JamLane, JamLevel, JamPattern } from "../../jam/types";
 
 /**
  * A groove, drawn from its own table.
@@ -26,7 +25,19 @@ const RADIUS: Record<Exclude<JamLevel, 0>, number> = { 1: 1.5, 2: 2.2, 3: 0.9 };
 const COLUMN = 5;
 const ROW = 6;
 
-export function GrooveGlyph({ groove }: { groove: Groove }) {
+/**
+ * The least a thing has to be to be drawn: a meter and a bar. Structural, so
+ * a groove you drew in the editor gets the same picture as a preset — it is
+ * the same table, and a glyph that only worked on the eight shipped grooves
+ * would leave the ninth card blank.
+ */
+export type GlyphGroove = {
+  beatsPerBar: number;
+  ticksPerBeat: number;
+  bar: JamPattern;
+};
+
+export function GrooveGlyph({ groove }: { groove: GlyphGroove }) {
   const ticks = groove.beatsPerBar * groove.ticksPerBeat;
   const width = ticks * COLUMN;
   const height = ROWS.length * ROW;

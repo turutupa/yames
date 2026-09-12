@@ -24,6 +24,28 @@ function beat(formBar: number, chorus = 1, measureBeat = 0): BeatEvent {
     isAccent: measureBeat === 0,
     formBar,
     chorus,
+    bandState: "full",
+  };
+}
+
+/** The screen state the view does not own — inert unless a test drives it. */
+function screenState(
+  overrides: Partial<React.ComponentProps<typeof JamView>["screen"]> = {},
+): React.ComponentProps<typeof JamView>["screen"] {
+  return {
+    fretboardOpen: false,
+    toggleFretboard: vi.fn(),
+    sevenths: false,
+    setSevenths: vi.fn(),
+    shapeIndex: 0,
+    setShapeIndex: vi.fn(),
+    pinnedChord: null,
+    setPinnedChord: vi.fn(),
+    editorOpen: false,
+    setEditorOpen: vi.fn(),
+    editorPage: "bar" as const,
+    setEditorPage: vi.fn(),
+    ...overrides,
   };
 }
 
@@ -33,6 +55,11 @@ function setup(overrides: Partial<React.ComponentProps<typeof JamView>> = {}) {
     onEdit: vi.fn(),
     currentBeat: null as BeatEvent | null,
     isPlaying: false,
+    instrument: "electric-guitar",
+    lineup: { drums: true, bass: true },
+    trainedBpm: null as number | null,
+    listening: false,
+    screen: screenState(),
     tapActive: false,
     tapCount: 0,
     tapPulse: false,
@@ -127,13 +154,42 @@ describe("JamView — the controls", () => {
     expect(screen.getByText("92")).toBeInTheDocument();
   });
 
-  it("offers the eight grooves and marks the one that is loaded", () => {
+  it("offers the eight grooves, a ninth card for one of your own, and marks the one that is loaded", () => {
     const { container } = setup({ jam: jamOf({ grooveId: "bossa" }) });
     const cards = container.querySelectorAll(".jam-cards-groove .jam-card");
-    expect(cards).toHaveLength(8);
+    // Eight presets and "Make your own". The ninth card is one of the choices
+    // rather than a mode to go and find, which is the difference between an
+    // editor people use and one they read about in a changelog.
+    expect(cards).toHaveLength(9);
+    expect(cards[8].textContent).toContain("Make your own");
     const pressed = [...cards].filter((c) => c.getAttribute("aria-pressed") === "true");
     expect(pressed).toHaveLength(1);
     expect(pressed[0].textContent).toContain("Bossa");
+  });
+
+  it("marks the ninth card instead once the groove is yours", () => {
+    const { container } = setup({
+      jam: jamOf({
+        grooveId: "bossa",
+        customGroove: {
+          name: "Mine",
+          beatsPerBar: 4,
+          ticksPerBeat: 2,
+          bar: {
+            kick: [1, 0, 0, 0, 1, 0, 0, 0],
+            snare: [0, 0, 0, 0, 0, 0, 0, 0],
+            hat: [0, 0, 0, 0, 0, 0, 0, 0],
+            ride: [0, 0, 0, 0, 0, 0, 0, 0],
+            crash: [0, 0, 0, 0, 0, 0, 0, 0],
+          },
+          fill: null,
+        },
+      }),
+    });
+    const cards = container.querySelectorAll(".jam-cards-groove .jam-card");
+    const pressed = [...cards].filter((c) => c.getAttribute("aria-pressed") === "true");
+    expect(pressed).toHaveLength(1);
+    expect(pressed[0].textContent).toContain("Mine");
   });
 
   it("draws each groove's glyph from its own pattern", () => {
@@ -141,7 +197,9 @@ describe("JamView — the controls", () => {
     // up advertising the old one.
     const { container } = setup();
     const glyphs = container.querySelectorAll(".jam-cards-groove .jam-glyph");
-    expect(glyphs).toHaveLength(8);
+    // Nine: the eight presets, plus the "make your own" card, which draws the
+    // groove that is loaded so it is never a blank square.
+    expect(glyphs).toHaveLength(9);
     // Rock eighths is 4 × 2 ticks over three lanes; the bossa is 4 × 4.
     expect(glyphs[0].querySelectorAll("circle")).toHaveLength(8 * 3);
     expect(glyphs[6].querySelectorAll("circle")).toHaveLength(16 * 3);
@@ -210,7 +268,7 @@ describe("JamView — the controls", () => {
 
   it("turns the fills off and on from one switch", () => {
     const { props } = setup();
-    const fills = screen.getByRole("switch");
+    const fills = screen.getByRole("switch", { name: "Fills" });
     expect(fills).toHaveAttribute("aria-checked", "true");
     fireEvent.click(fills);
     expect(props.onEdit).toHaveBeenCalledWith({ fills: false });

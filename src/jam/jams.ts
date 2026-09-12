@@ -25,6 +25,29 @@ export function clampCountIn(beats: number): number {
   return Math.max(0, Math.min(JAM_MAX_COUNT_IN, Math.round(beats || 0)));
 }
 
+/**
+ * The same count-in, in the new groove's meter.
+ *
+ * The setting the user chose is a number of BARS; beats are only how the
+ * engine takes it. So moving from a rock groove to a waltz keeps "one bar" and
+ * changes four beats into three, rather than counting four beats over a bar
+ * that is three long. Two bars stay two where they fit inside the engine's
+ * limit of eight and drop to one where they do not, because a count-in past
+ * the limit is not a count-in, it is a wait.
+ */
+export function carryCountIn(
+  beats: number,
+  fromBeatsPerBar: number,
+  toBeatsPerBar: number,
+): number {
+  if (beats <= 0) return 0;
+  const bars = Math.max(1, Math.round(beats / Math.max(1, fromBeatsPerBar)));
+  for (let n = bars; n >= 1; n--) {
+    if (n * toBeatsPerBar <= JAM_MAX_COUNT_IN) return n * toBeatsPerBar;
+  }
+  return 0;
+}
+
 export type NewJamFields = Partial<Omit<Jam, "id" | "name" | "createdAt">>;
 
 /**

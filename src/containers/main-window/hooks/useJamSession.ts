@@ -10,7 +10,9 @@ import {
   setSubdivision,
 } from "../../../ipc";
 import {
+  GROOVES,
   STARTER_JAMS,
+  carryCountIn,
   compileJam,
   createJam,
   duplicateJam as duplicateJamData,
@@ -21,7 +23,10 @@ import {
   tempoAfterChorus,
   upsertJam,
 } from "../../../jam";
+import type { Chord } from "../../../jam/harmony";
 import type { Jam, JamEngineConfig } from "../../../jam";
+import { NO_PRACTICE } from "../../jam/PracticeRow";
+import type { GrooveEditorPage } from "../../jam/editor";
 import type { BeatEvent, Subdivision } from "../../../types";
 import { coachDebug } from "../../../coach/debug";
 
@@ -169,6 +174,22 @@ export function useJamSession({
     const full = lineupFor(instrument);
     return { drums: full.drums, bass: full.bass };
   }, [instrument]);
+
+  /**
+   * What the screen is showing that the jam does not remember.
+   *
+   * The neck being open, which chord the shapes row is pinned to, which shape
+   * of it you are looking at, the groove editor being down. None of this
+   * belongs on the record — a jam is music, not a view — but all of it has to
+   * outlive a trip to the metronome tab and back, and the hotkeys have to
+   * reach it, so it lives here rather than inside `JamView`.
+   */
+  const [fretboardOpen, setFretboardOpen] = useState(false);
+  const [sevenths, setSevenths] = useState(false);
+  const [shapeIndex, setShapeIndex] = useState(0);
+  const [pinnedChord, setPinnedChord] = useState<Chord | null>(null);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editorPage, setEditorPage] = useState<GrooveEditorPage>("bar");
 
   /**
    * Seed once, on the first run that has no `jams` key at all.
@@ -449,6 +470,107 @@ export function useJamSession({
     [jam, saved],
   );
 
+  // -------------------------------------------------------------------------
+  // Hands-free (JAM_MODE §4.7). A footswitch sends the same action a key does.
+  // -------------------------------------------------------------------------
+
+  /** The next groove along, wrapping. Carries the count-in into its meter. */
+  const stepGroove = useCallback(
+    (by: number) => {
+      setActiveJam((current) => {
+        if (!current) return current;
+        const at = GROOVES.findIndex((g) => g.id === current.grooveId);
+        const next = GROOVES[(((at + by) % GROOVES.length) + GROOVES.length) % GROOVES.length];
+        const from = jamMeter(current).beatsPerBar;
+        return {
+          ...current,
+          grooveId: next.id,
+          // Stepping grooves with a footswitch has to keep the count-in in
+          // BARS, exactly as clicking a card does, or a hop from a waltz to a
+          // rock beat lands you on the wrong beat of bar one.
+          countIn: carryCountIn(current.countIn, from, next.beatsPerBar),
+          // A groove you step to is the preset, not the one you drew. Keeping
+          // the custom groove here would make the footswitch do nothing.
+          customGroove: undefined,
+        };
+      });
+    },
+    [],
+  );
+
+  /** Trading on or off, keeping the number of bars it was set to. */
+  const toggleTrade = useCallback(() => {
+    setActiveJam((current) => {
+      if (!current) return current;
+      const practice = current.practice ?? NO_PRACTICE;
+      return {
+        ...current,
+        practice: { ...practice, tradeBars: practice.tradeBars > 0 ? 0 : 4 },
+      };
+    });
+  }, []);
+
+  /** Drop-outs on or off, likewise. */
+  const toggleDropOut = useCallback(() => {
+    setActiveJam((current) => {
+      if (!current) return current;
+      const practice = current.practice ?? NO_PRACTICE;
+      const on = practice.dropOutEvery > 0 && practice.dropOutBars > 0;
+      return {
+        ...current,
+        practice: {
+          ...practice,
+          dropOutEvery: on ? 0 : practice.dropOutEvery || 8,
+          dropOutBars: practice.dropOutBars || 2,
+        },
+      };
+    });
+  }, []);
+
+  /**
+   * The next shape of the chord on screen.
+   *
+   * Wrapping is the row's own job — it knows how many shapes the chord has —
+   * so this only ever counts up, and `ChordShapesRow` brings it back round.
+   */
+  const nextShape = useCallback(() => setShapeIndex((i) => i + 1), []);
+
+  /**
+   * The hands-free actions as one stable object.
+   *
+   * One object rather than five props because they are one feature, and
+   * memoised because the action dispatcher lists its dependencies and a fresh
+   * object every render would rebuild it on every beat event.
+   */
+  const actions = useMemo(
+    () => ({
+      nextGroove: () => stepGroove(1),
+      prevGroove: () => stepGroove(-1),
+      toggleTrade,
+      toggleDropOut,
+      nextShape,
+    }),
+    [stepGroove, toggleTrade, toggleDropOut, nextShape],
+  );
+
+  const screen = useMemo(
+    () => ({
+      fretboardOpen,
+      toggleFretboard: () => setFretboardOpen((open) => !open),
+      sevenths,
+      setSevenths,
+      shapeIndex,
+      setShapeIndex,
+      pinnedChord,
+      setPinnedChord,
+      editorOpen,
+      setEditorOpen,
+      editorPage,
+      setEditorPage,
+    }),
+    [fretboardOpen, sevenths, shapeIndex, pinnedChord, editorOpen, editorPage],
+  );
+
   return {
     jams,
     jam,
@@ -456,6 +578,10 @@ export function useJamSession({
     saveFeedback,
     /** The band when the record has not been asked — what the toggles show. */
     lineup,
+    /** What the screen is showing that the jam does not remember. */
+    screen,
+    /** Hands-free: a footswitch sends these exactly as a key does. */
+    actions,
     /** Where the tempo trainer has got to, or null while it has not moved. */
     trainedBpm,
     /** True while a jam is loaded and the transport would start the band. */
