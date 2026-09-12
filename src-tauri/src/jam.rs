@@ -336,9 +336,9 @@ pub fn compile(cfg: &JamConfig) -> Result<JamTable, String> {
     // Compiled at intensity 1.0 and scaled once at the end, so the
     // normalisation below can see the groove's own shape rather than the
     // shape times whatever the musician set the dial to.
-    let mut bar = compile_pattern(&cfg.bar, ticks, 1.0, "bar")?;
+    let mut bar = compile_pattern(&cfg.bar, ticks, "bar")?;
     let mut fill = match cfg.fill {
-        Some(ref f) => Some(compile_pattern(f, ticks, 1.0, "fill")?),
+        Some(ref f) => Some(compile_pattern(f, ticks, "fill")?),
         None => None,
     };
 
@@ -414,12 +414,7 @@ pub fn compile(cfg: &JamConfig) -> Result<JamTable, String> {
     })
 }
 
-fn compile_pattern(
-    pattern: &JamPattern,
-    ticks: u32,
-    intensity: f32,
-    what: &str,
-) -> Result<Vec<JamTick>, String> {
+fn compile_pattern(pattern: &JamPattern, ticks: u32, what: &str) -> Result<Vec<JamTick>, String> {
     let mut out = vec![JamTick::EMPTY; ticks as usize];
     for (lane, cells) in pattern.lanes() {
         if cells.len() != ticks as usize {
@@ -440,7 +435,7 @@ fn compile_pattern(
             if level == 0 {
                 continue;
             }
-            if let Some(slot) = slot_for(lane, level, intensity) {
+            if let Some(slot) = slot_for(lane, level) {
                 out[i].push(slot, level == 2);
             }
         }
@@ -448,9 +443,12 @@ fn compile_pattern(
     Ok(out)
 }
 
-/// Lane and level to a sound, a gain and a ring-out.
-fn slot_for(lane: JamLane, level: u8, intensity: f32) -> Option<JamSlot> {
-    let g = LEVEL_GAIN[level as usize] * intensity;
+/// Lane and level to a sound, a gain and a ring-out. Intensity is NOT
+/// applied here: the table is compiled at its own level and scaled once, so
+/// the normalisation can measure the groove's shape rather than the shape
+/// times whatever the musician set the dial to.
+fn slot_for(lane: JamLane, level: u8) -> Option<JamSlot> {
+    let g = LEVEL_GAIN[level as usize];
     if g <= 0.0 {
         return None;
     }

@@ -686,11 +686,19 @@ struct Voice {
 /// This used to be a `with_capacity(32)` and nothing else, which was fine
 /// while the engine spawned exactly one voice per tick. A jam spawns up to
 /// six, and the kick, the snare and the crash all ring out uncapped, so a
-/// busy 16th-note groove at a slow tempo can legitimately have a couple of
-/// dozen alive at once. The number is a headroom figure, not a budget: it is
-/// allocated once when the audio thread starts, and every push is guarded so
-/// that reaching it drops a voice instead of reallocating on the audio
-/// thread. A groove that could actually reach 256 does not exist.
+/// busy 16th-note groove can legitimately have a couple of dozen alive at
+/// once.
+///
+/// A headroom figure, not a budget: the `Vec` is allocated once when the
+/// audio thread starts, and the jam's spawn — the only one that pushes more
+/// than a single voice — is guarded, so even a table nobody could write
+/// drops a drum rather than reallocating on the audio thread. The click's
+/// own push is left exactly as it was: it adds one voice per tick and the
+/// most it can keep alive is under a dozen, so a guard there could only ever
+/// be a way to silence a click.
+///
+/// `the_busiest_plausible_jam_fits_inside_the_preallocated_voices` measures
+/// the real number against this one.
 const MAX_VOICES: usize = 256;
 
 // ---------------------------------------------------------------------------
@@ -4335,7 +4343,6 @@ mod tests {
     /// never has to clamp.
     #[test]
     fn the_busiest_groove_never_makes_the_mixer_clamp() {
-        let bank = SoundBank::new(48000);
         let cfg = JamConfig {
             ticks_per_beat: 4,
             beats_per_bar: 4,
