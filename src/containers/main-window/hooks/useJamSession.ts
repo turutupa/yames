@@ -204,6 +204,18 @@ export function useJamSession({
   const [editorPage, setEditorPage] = useState<GrooveEditorPage>("bar");
 
   /**
+   * True once the library has been WRITTEN — a new jam, a delete, a reorder.
+   *
+   * The read from the store is a round trip, and a fast hand gets to "+"
+   * before it lands. Without this the resolved list would then be applied over
+   * the jam that was just made and it would be gone, and on a first run the
+   * six starters would be seeded on top of it as well. So a write wins: once
+   * the user has said something about the library, whatever the disk said
+   * before they said it is no longer news.
+   */
+  const touchedRef = useRef(false);
+
+  /**
    * Seed once, on the first run that has no `jams` key at all.
    *
    * `undefined` means nothing was ever saved; an empty array means the user
@@ -214,7 +226,7 @@ export function useJamSession({
     let alive = true;
     listJams()
       .then(async (stored) => {
-        if (!alive) return;
+        if (!alive || touchedRef.current) return;
         if (stored === undefined) {
           const seeded = [...STARTER_JAMS];
           setJams(seeded);
@@ -232,6 +244,7 @@ export function useJamSession({
 
   /** The whole list, to the store and to the UI, in one place. */
   const commit = useCallback((next: Jam[]) => {
+    touchedRef.current = true;
     setJams(next);
     void saveJams(next).catch(() => {});
   }, []);
@@ -284,12 +297,19 @@ export function useJamSession({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, engineKey]);
 
-  /** The tempo, on its own, so changing it does not disturb the bar. */
+  /**
+   * The tempo, on its own, so changing it does not disturb the bar.
+   *
+   * `jam?.id` is in the list beside the tempo because two jams can be saved at
+   * the same tempo. Without it, switching from a blues you had trained up to
+   * 140 onto another jam filed at the same BPM leaves the trainer's climb in
+   * place, and the new jam starts at a tempo it never asked for.
+   */
   useEffect(() => {
     if (view !== "jam" || !jam) return;
     setTrainedBpm(null);
     void setBpm(jam.bpm).catch(() => {});
-  }, [view, jam?.bpm]);
+  }, [view, jam?.id, jam?.bpm]);
 
   /**
    * The bass, one bar ahead of itself.

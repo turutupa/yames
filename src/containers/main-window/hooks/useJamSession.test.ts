@@ -15,10 +15,26 @@ import type { Jam, JamEngineConfig } from "../../../jam/types";
 import type { BeatEvent } from "../../../types";
 
 const calls: Array<[string, unknown]> = [];
-const stored: { jams: Jam[] | undefined } = { jams: undefined };
+/**
+ * The store, plus a latch on the READ.
+ *
+ * `hold` is how a test makes `listJams` take its time, which is the only way
+ * to get at what a fast hand does: press "+" before the library has come back
+ * from disk. The read answers with what was there WHEN IT WAS ASKED, exactly
+ * as a real round trip does — a write that happened in between is not
+ * something an in-flight read can know about.
+ */
+const stored: { jams: Jam[] | undefined; hold: Promise<void> | null } = {
+  jams: undefined,
+  hold: null,
+};
 
 vi.mock("../../../ipc", () => ({
-  listJams: () => Promise.resolve(stored.jams),
+  listJams: async () => {
+    const asked = stored.jams;
+    if (stored.hold) await stored.hold;
+    return asked;
+  },
   saveJams: (jams: Jam[]) => {
     calls.push(["saveJams", jams]);
     stored.jams = jams;
@@ -64,6 +80,7 @@ function engineOrder() {
 beforeEach(() => {
   calls.length = 0;
   stored.jams = undefined;
+  stored.hold = null;
 });
 
 type Props = {
@@ -113,6 +130,31 @@ describe("seeding", () => {
       STARTER_JAMS.map((j) => j.name),
     );
     expect(names("saveJams")).toHaveLength(1);
+  });
+
+  it("keeps a jam made before the library came back from disk", async () => {
+    // The read is a round trip and "+" is a click. Press it first and the
+    // resolved list used to land on top of the jam you just made — and on a
+    // first run the six starters landed on top of it too. A write wins.
+    let release!: () => void;
+    stored.hold = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+
+    const { result } = mount();
+    expect(result.current.jams).toHaveLength(0);
+    act(() => {
+      result.current.newJam();
+    });
+    const made = result.current.jams[0].id;
+    expect(result.current.jams).toHaveLength(1);
+
+    release();
+    stored.hold = null;
+    await new Promise((r) => setTimeout(r, 10));
+
+    expect(result.current.jams.map((j) => j.id)).toEqual([made]);
+    expect((stored.jams ?? []).map((j) => j.id)).toEqual([made]);
   });
 
   it("leaves a library the user emptied empty", async () => {
@@ -448,6 +490,23 @@ describe("the tempo trainer", () => {
     rerender({ v: "jam", playing: false, beat: beatAt(0, 2) });
     await waitFor(() => expect(names("setBpm")).toEqual([start]));
     expect(result.current.trainedBpm).toBeNull();
+  });
+
+  it("does not carry the climb onto the next jam", async () => {
+    // Two jams filed at the same tempo is not a coincidence, it is what a
+    // library of your own tunes looks like. Watching only the BPM meant
+    // loading the second one left the first one's trained tempo in place,
+    // and it started at a speed nobody chose.
+    const { result, rerender } = await trained(4, 1);
+    const start = result.current.jam!.bpm;
+    rerender({ v: "jam", playing: true, beat: beatAt(0, 2) });
+    await waitFor(() => expect(result.current.trainedBpm).toBe(start + 4));
+    calls.length = 0;
+
+    const other = { ...result.current.jams[1], bpm: start };
+    act(() => result.current.loadJam(other));
+    await waitFor(() => expect(result.current.trainedBpm).toBeNull());
+    expect(names("setBpm")).toContainEqual(start);
   });
 
   it("stays put when the trainer is off", async () => {
