@@ -860,6 +860,17 @@
 }
 
 /* ---- W7 summary ---- */
+/* The notification heads-up on the mobile ready step. Smaller than the
+   subtitle and set apart from the summary rows above it, because it is not a
+   setting you can change here -- it describes something the phone will do. */
+.onboarding-ready-note {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
 .onboarding-summary {
   list-style: none;
   margin: 0;

@@ -1039,10 +1039,15 @@ export function MainWindow() {
       {audioError.notice && (
         <AudioErrorNotice
           notice={audioError.notice}
-          onOpenSettings={() => {
-            audioError.dismiss();
-            openAudioSettings();
-          }}
+          onOpenSettings={
+            // No Devices section exists on a phone to deep-link into.
+            IS_MOBILE
+              ? undefined
+              : () => {
+                  audioError.dismiss();
+                  openAudioSettings();
+                }
+          }
           onDismiss={audioError.dismiss}
         />
       )}

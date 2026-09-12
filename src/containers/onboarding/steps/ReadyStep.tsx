@@ -158,6 +158,16 @@ export function ReadyStep(_props: WizardStepProps) {
         )}
       </ul>
 
+      {/* The one thing about a phone that the desktop app never had to warn
+          anyone about: the first Play raises a permission prompt the user did
+          not ask for, and saying no to it costs them the row in the shade that
+          keeps the click alive with the screen off. Said here, before they
+          press anything, it is a heads-up; said by the system a second after
+          Play, unannounced, it is an interruption in the middle of counting in. */}
+      {IS_MOBILE && (
+        <p className="onboarding-ready-note">{t("onboarding.ready.notificationNote")}</p>
+      )}
+
       <div className="onboarding-ready-actions">
         <button
           type="button"

@@ -198,17 +198,20 @@ describe("SettingsView on a phone", () => {
     onShareOption: () => {},
   };
 
-  it("shows general, appearance, output, support and about — and nothing else", async () => {
+  it("shows general, appearance, support and about — and nothing else", async () => {
     render(<SettingsView {...props} />);
 
     // The sections a phone keeps.
     expect(await screen.findByText("General")).toBeInTheDocument();
     expect(screen.getByText("Appearance")).toBeInTheDocument();
-    expect(screen.getByText("Devices")).toBeInTheDocument();
-    expect(screen.getByText("Audio Output")).toBeInTheDocument();
     expect(screen.getByText("About")).toBeInTheDocument();
 
-    // The three that are cut, plus the input half of Devices.
+    // Devices is gone entirely, heading and all. The input and MIDI halves
+    // were always cut; the output picker went with M05, because Android does
+    // its own routing and `set_audio_output_device` changes nothing there —
+    // so what was left was a heading over a dropdown that does nothing.
+    expect(screen.queryByText("Devices")).toBeNull();
+    expect(screen.queryByText("Audio Output")).toBeNull();
     expect(screen.queryByText("Audio Input")).toBeNull();
     expect(screen.queryByText("MIDI")).toBeNull();
     expect(screen.queryByText("Hotkeys")).toBeNull();
@@ -261,5 +264,38 @@ describe("the onboarding wizard on a phone", () => {
     expectNoCoachAnywhere();
     expect(screen.queryByText(/microphone/i)).toBeNull();
     expect(screen.queryByText(/footswitch/i)).toBeNull();
+  });
+
+  it("warns on the last step that the first Play raises a permission prompt", async () => {
+    render(
+      <OnboardingWizard
+        state={{
+          ...INITIAL_ONBOARDING_STATE,
+          status: "step",
+          stepId: "ready",
+        }}
+        dispatch={() => {}}
+        appVersion="1.0.4"
+        instrument="electric-guitar"
+        instrumentChosen
+        onInstrumentChange={() => {}}
+        soundType="click"
+        themeId="mono"
+        coachTier="off"
+        alwaysOnTop={false}
+        onAlwaysOnTopChange={() => {}}
+        startSoftClick={() => {}}
+        stopSoftClick={() => {}}
+        softClickPlaying={false}
+        onFinish={() => {}}
+      />,
+    );
+
+    // Not the wording, which is copy and will be reworded — that the phone
+    // says what it is about to ask for before it asks, rather than raising the
+    // prompt unannounced a second after the first Play (M04 findings).
+    expect(
+      await screen.findByText(/ask if Yames can show a notification/i),
+    ).toBeInTheDocument();
   });
 });

@@ -115,6 +115,7 @@
     "ready": {
       "title": "Đã sẵn sàng",
       "subtitle": "Thay đổi tại đây, hoặc sau này trong Cài đặt.",
+      "notificationNote": "Lần đầu bạn nhấn phát, điện thoại sẽ hỏi Yames có được hiện thông báo không — hãy đồng ý để tiếng gõ vẫn chạy khi tắt màn hình.",
       "rows": {
         "instrument": "Nhạc cụ",
         "sound": "Âm thanh click",

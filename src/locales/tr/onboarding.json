@@ -115,6 +115,7 @@
     "ready": {
       "title": "Hazırsın",
       "subtitle": "Buradan ya da sonra Ayarlar'dan değiştirebilirsin.",
+      "notificationNote": "Çalmaya ilk kez bastığında telefonun Yames’in bildirim gösterip gösteremeyeceğini soracak — izin ver, ekran kapalıyken de tık çalmaya devam etsin.",
       "rows": {
         "instrument": "Enstrüman",
         "sound": "Klik sesi",

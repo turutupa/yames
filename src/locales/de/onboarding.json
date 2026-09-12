@@ -115,6 +115,7 @@
     "ready": {
       "title": "Alles bereit",
       "subtitle": "Ändere hier etwas – oder später in den Einstellungen.",
+      "notificationNote": "Wenn du zum ersten Mal auf Start drückst, fragt dein Telefon, ob Yames eine Benachrichtigung anzeigen darf — sag ja, dann läuft der Klick auch bei ausgeschaltetem Bildschirm weiter.",
       "rows": {
         "instrument": "Instrument",
         "sound": "Klick-Sound",
