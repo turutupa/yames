@@ -78,6 +78,8 @@ describe("FullscreenView", () => {
       subdivision: 0,
       isDownbeat: true,
       isAccent: measureBeat === 0,
+      formBar: 0,
+      chorus: 1,
     });
 
     it("uses the meter total when the ramp is NOT active", () => {
