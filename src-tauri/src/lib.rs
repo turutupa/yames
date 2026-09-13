@@ -44,7 +44,7 @@ pub mod probe {
     /// The take recorder. `--jam-take` runs one during the measurement, so
     /// the gate covers the ring the output callback writes into and the
     /// writer thread draining it to disk underneath the stream.
-    pub use crate::take::{SharedTake, TakeHandoff, TakeRing, TakeSession};
+    pub use crate::take::{SharedTake, TakeHandoff, TakeRing, TakeSession, TakeStart};
 
     pub use crate::state::{create_shared_state, AppState, SharedState};
     pub use crate::timing::create_beat_log;

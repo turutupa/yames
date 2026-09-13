@@ -190,6 +190,16 @@ pub struct AudioInput {
     /// until `start_take`, so nothing is captured for a take until one is
     /// asked for.
     take_recording: Arc<AtomicBool>,
+    /// How many mono frames the input callback last delivered in one go, 0
+    /// before it has run.
+    ///
+    /// The take needs an input latency and cpal will not tell us one: the
+    /// stream is opened with `BufferSize::Default` and there is no input
+    /// equivalent of the CoreAudio latency query the output side uses. What
+    /// CAN be known honestly is how much audio the driver hands over at a
+    /// time, which is the part of the input path that dominates on every
+    /// machine anyone runs this on. See [`Self::input_latency_us`].
+    input_frames: Arc<AtomicU32>,
 }
 
 // Safety: AudioInput doesn't hold cpal::Stream — it lives on its own thread.
@@ -218,6 +228,7 @@ impl AudioInput {
             audio_levels: Arc::new(Mutex::new(Vec::new())),
             take_ring: Arc::new(Mutex::new(None)),
             take_recording: Arc::new(AtomicBool::new(false)),
+            input_frames: Arc::new(AtomicU32::new(0)),
         }
     }
 
@@ -354,6 +365,10 @@ impl AudioInput {
             *self.take_ring.lock().unwrap() = Some(take_ring.clone());
         }
         let take_recording = self.take_recording.clone();
+        let input_frames_cb = self.input_frames.clone();
+        // A new stream is a new buffer size; the old one is not evidence
+        // about this device.
+        self.input_frames.store(0, Ordering::SeqCst);
 
         // Optional session-audio recording (dev-only, env-gated). Initialize
         // BEFORE the capture thread launches so the cpal callback can see
@@ -520,6 +535,7 @@ impl AudioInput {
                     let mut cap_logged_f32 = false;
                     let take_ring_f32 = take_ring_cb.clone();
                     let take_on_f32 = take_recording_cb.clone();
+                    let frames_f32 = input_frames_cb.clone();
                     device.build_input_stream(
                     &config,
                     move |data: &[f32], _: &cpal::InputCallbackInfo| {
@@ -535,6 +551,9 @@ impl AudioInput {
                         if take_on_f32.load(Ordering::Relaxed) {
                             take_ring_f32.push(&mono);
                         }
+                        // How much the driver hands over at a time, for the
+                        // take's latency estimate. One relaxed store.
+                        frames_f32.store(mono.len() as u32, Ordering::Relaxed);
                         // Gate recording writes on the stream generation counter.
                         // Stale CoreAudio callbacks from a prior stream (cpal
                         // drop-tail) see a generation mismatch and skip the write,
@@ -599,6 +618,7 @@ impl AudioInput {
                     let mut cap_logged_i16 = false;
                     let take_ring_i16 = take_ring_cb.clone();
                     let take_on_i16 = take_recording_cb.clone();
+                    let frames_i16 = input_frames_cb.clone();
                     device.build_input_stream(
                     &config,
                     move |data: &[i16], _: &cpal::InputCallbackInfo| {
@@ -612,6 +632,7 @@ impl AudioInput {
                         if take_on_i16.load(Ordering::Relaxed) {
                             take_ring_i16.push(&mono);
                         }
+                        frames_i16.store(mono.len() as u32, Ordering::Relaxed);
                         if is_rec.load(Ordering::Relaxed)
                             && stream_gen_i16.load(Ordering::Relaxed) == my_gen_i16
                         {
@@ -776,6 +797,24 @@ impl AudioInput {
     /// what a UI sends when the user pressed stop twice.
     pub fn end_take_capture(&self) {
         self.take_recording.store(false, Ordering::SeqCst);
+    }
+
+    /// How late the mic's audio is by the time a command thread can see it,
+    /// in microseconds. 0 before the input callback has run once.
+    ///
+    /// One buffer of the input device, and only that. There is no input
+    /// counterpart to the CoreAudio output-latency query the engine uses,
+    /// and cpal opens the stream with `BufferSize::Default`, so this is what
+    /// can be measured rather than guessed: the driver's own buffer, seen by
+    /// watching how much of it arrives at a time. The A/D converter and the
+    /// bus add a little more that nobody here can see — an under-estimate
+    /// that leaves the mic fractionally late, which is the right way round
+    /// to be wrong, because over-correcting would put the player's response
+    /// AHEAD of the beat they were responding to.
+    pub fn input_latency_us(&self) -> u64 {
+        let frames = self.input_frames.load(Ordering::Relaxed) as u64;
+        let sr = self.sample_rate().max(1) as u64;
+        frames * 1_000_000 / sr
     }
 
     // ─── Recording ──────────────────────────────────────────────────

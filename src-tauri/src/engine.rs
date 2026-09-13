@@ -2514,6 +2514,16 @@ pub struct MetronomeEngine {
     /// take is written at the output rate and the take commands run on the
     /// command thread, so the number has to be readable from there.
     sample_rate: Arc<AtomicU32>,
+    /// How far ahead of the speakers the callback is working, in
+    /// microseconds: one buffer plus whatever the device says it holds. 0
+    /// before a stream has run.
+    ///
+    /// The callback has always computed this to timestamp beats. It is
+    /// published because the take needs it too: the mic hears the band
+    /// through the speakers, so the player's response arrives at the writer
+    /// a round trip late, and only the callback knows how long its buffer
+    /// is. One relaxed store a buffer, which is one instruction and no lock.
+    output_latency_us: Arc<AtomicU64>,
     /// Test-only: make the audio thread fail its setup without touching a
     /// real device, so the recovery path above can be exercised on a build
     /// machine that has a perfectly good sound card.
@@ -2535,6 +2545,7 @@ impl MetronomeEngine {
             jam: Arc::new(JamHandoff::new()),
             take: Arc::new(crate::take::TakeHandoff::new()),
             sample_rate: Arc::new(AtomicU32::new(0)),
+            output_latency_us: Arc::new(AtomicU64::new(0)),
             #[cfg(test)]
             force_setup_failure: false,
         }
@@ -2592,6 +2603,24 @@ impl MetronomeEngine {
             0 => None,
             sr => Some(sr),
         }
+    }
+
+    /// The same number, as the slot it lives in, so a thread that outlives
+    /// one command can WATCH it.
+    ///
+    /// The take writer holds this: a take is written at the rate the device
+    /// was running at when it started, and if the device changes underneath
+    /// it the rest of the file would be at the wrong speed. Watching a slot
+    /// is how it notices without asking the engine anything.
+    pub fn output_sample_rate_handle(&self) -> Arc<AtomicU32> {
+        self.sample_rate.clone()
+    }
+
+    /// How far ahead of the speakers the callback is working, in
+    /// microseconds, or 0 before a stream has run. Half of the round trip a
+    /// take has to pull the mic back by; the other half is the input side.
+    pub fn output_latency_us(&self) -> u64 {
+        self.output_latency_us.load(Ordering::Acquire)
     }
 
     /// Hand the engine the same `TempoContext` the commands mirror into, so
@@ -2707,6 +2736,7 @@ impl MetronomeEngine {
         let take_shared = self.take.clone();
         let take_event = self.take.clone();
         let take_sr_out = self.sample_rate.clone();
+        let out_latency_pub = self.output_latency_us.clone();
         let app_handle = EventSink(app_handle);
         #[cfg(test)]
         let force_setup_failure = self.force_setup_failure;
@@ -2914,6 +2944,10 @@ impl MetronomeEngine {
                     // reached the DAC yet).
                     let buffer_us = (frames as u64 * 1_000_000) / sr as u64;
                     let output_latency_us = buffer_us + device_latency_us_cb;
+                    // Published for the take writer, which has to know how
+                    // late the mic's version of the band is. One relaxed
+                    // store: no lock, no allocation, no branch.
+                    out_latency_pub.store(output_latency_us, Ordering::Relaxed);
 
                     let is_playing = playing_cb.load(Ordering::Relaxed);
 

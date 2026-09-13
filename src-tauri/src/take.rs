@@ -974,7 +974,39 @@ struct ActiveTake {
     /// duration without reading the file back.
     written: Arc<AtomicU64>,
     out_sr: u32,
+    /// Did `start_take` start the input stream itself? If it did, `stop_take`
+    /// gives it back — a take is not a reason for the microphone to stay
+    /// open for the rest of the session.
+    owns_input: bool,
     writer: Option<std::thread::JoinHandle<()>>,
+}
+
+/// Everything a take needs to know about the world it is being recorded in.
+///
+/// A struct rather than eight positional arguments, because half of them are
+/// rates and flags that read identically at a call site and swapping two of
+/// them would compile.
+pub struct TakeStart<'a> {
+    pub app_data: &'a Path,
+    pub jam_id: &'a str,
+    pub handoff: &'a SharedTake,
+    /// The input thread's ring and the rate it is filling at, or `None` when
+    /// there is no input running — a take with no mic in it is still a take
+    /// of the band, so this is a fact recorded rather than a reason to
+    /// refuse.
+    pub mic: Option<(Arc<TakeRing>, u32)>,
+    /// The rate the output device is running at. The take is written at it.
+    pub out_sr: u32,
+    /// The round trip: output latency plus input latency, in microseconds.
+    /// How much of the mic to throw away at the start so the player lands
+    /// on the beat they were playing to. See the writer.
+    pub round_trip_us: u64,
+    /// The engine's live output rate, watched by the writer so a device
+    /// change mid-take finishes the take instead of pitch-shifting the rest
+    /// of it. `None` in tests that have no engine.
+    pub out_sr_watch: Option<Arc<AtomicU32>>,
+    /// Did the caller start the input stream for this take?
+    pub owns_input: bool,
 }
 
 /// Everything the take commands own. One per app, behind a mutex, on the
@@ -994,21 +1026,25 @@ impl TakeSession {
         self.active.as_ref().map(|a| a.jam_id.as_str())
     }
 
-    /// Begin a take.
-    ///
-    /// `mic` is the input thread's ring and the rate it is filling at, or
-    /// `None` when there is no input running — a take with no mic in it is
-    /// still a take of the band, so this is a fact recorded rather than a
-    /// reason to refuse.
-    #[allow(clippy::too_many_arguments)]
-    pub fn start(
-        &mut self,
-        app_data: &Path,
-        jam_id: &str,
-        handoff: &SharedTake,
-        mic: Option<(Arc<TakeRing>, u32)>,
-        out_sr: u32,
-    ) -> Result<(), String> {
+    /// Did the take that is running start the input stream? Asked by
+    /// `stop_take` before it stops the take, because after that there is no
+    /// `ActiveTake` left to ask.
+    pub fn owns_input(&self) -> bool {
+        self.active.as_ref().is_some_and(|a| a.owns_input)
+    }
+
+    /// Begin a take. See [`TakeStart`] for what the world has to tell it.
+    pub fn start(&mut self, args: TakeStart) -> Result<(), String> {
+        let TakeStart {
+            app_data,
+            jam_id,
+            handoff,
+            mic,
+            out_sr,
+            round_trip_us,
+            out_sr_watch,
+            owns_input,
+        } = args;
         if let Some(running) = self.recording_jam() {
             return Err(if running == jam_id {
                 "a take is already recording".to_string()
@@ -1056,9 +1092,71 @@ impl TakeSession {
                     .map(|(_, in_sr)| LinearResampler::new(*in_sr, out_sr));
                 let backlog = (out_sr as f64 * MIC_BACKLOG_SECS) as usize;
                 let cap_samples = TAKE_MAX_SECS * out_sr as u64;
+                // ---- Lining the mic up with the band ----
+                //
+                // Two separate offsets, both settled on the first chunk of
+                // band that arrives, because that is the moment the take's
+                // clock starts and the only moment either can be measured
+                // against anything.
+                //
+                // 1. THE HEAD START. `begin_take_capture` runs before
+                //    `session.start` has finished creating the file and
+                //    handing the callback its ring, so by the time the band
+                //    exists the mic ring already holds however long that
+                //    took — ten to twenty-five milliseconds of the player
+                //    tuning up, which nothing downstream ever absorbed. It
+                //    is simply thrown away.
+                //
+                // 2. THE ROUND TRIP. The player is playing along with what
+                //    they HEAR, which is the band a full output latency after
+                //    the callback rendered it; their answer then takes an
+                //    input latency to reach this thread. So the mic samples
+                //    in hand at any moment are a response to band audio one
+                //    round trip older than the band audio being written
+                //    beside them, and mixing them as they come would put
+                //    every note the musician played late by that much. The
+                //    fix is to advance the mic — drop a round trip of it —
+                //    which is exactly as much as it is behind.
+                //
+                //    A take therefore opens with a round trip of band with
+                //    no mic under it, which is honest: the player had not
+                //    heard anything yet.
+                //
+                //    The figure is under-measured rather than over: the
+                //    input side is one driver buffer, with the converter and
+                //    the bus unaccounted for (see
+                //    `AudioInput::input_latency_us`). Being a little short
+                //    leaves the player fractionally late, which is the right
+                //    way round to be wrong — over-correcting would put their
+                //    answer AHEAD of the beat they answered.
+                let round_trip_samples =
+                    (round_trip_us.saturating_mul(out_sr as u64) / 1_000_000) as usize;
+                let mut band_started = false;
+                let mut mic_skip = 0usize;
 
                 loop {
                     let stopping = stop_for_writer.load(Ordering::Acquire);
+                    // THE DEVICE CHANGED UNDER THE TAKE. Everything from
+                    // here on would be rendered at a rate the file's header
+                    // does not claim, so the rest of the take would play
+                    // back at the wrong pitch with nothing in the file to
+                    // say so. The honest guard is to finish here: what was
+                    // recorded before the change is exactly what it says it
+                    // is, and the musician gets a take that ends where the
+                    // device did rather than one that goes sharp halfway
+                    // through.
+                    let live_sr = out_sr_watch
+                        .as_ref()
+                        .map_or(out_sr, |w| w.load(Ordering::Acquire));
+                    if live_sr != 0 && live_sr != out_sr {
+                        eprintln!(
+                            "[take] {} ends here: the output moved from {out_sr} Hz to \
+                             {live_sr} Hz mid-take",
+                            path_for_writer.display()
+                        );
+                        stop_for_writer.store(true, Ordering::Release);
+                        break;
+                    }
                     band_buf.clear();
                     band_for_writer.drain_into(&mut band_buf);
                     if let (Some((ring, _)), Some(rs)) = (mic_for_writer.as_ref(), &mut resampler) {
@@ -1068,12 +1166,28 @@ impl TakeSession {
                         // The mic's own clock is not the band's. If it runs
                         // ahead, throw the oldest away rather than let the
                         // queue grow for twenty minutes.
-                        while mic_ready.len() > backlog {
-                            mic_ready.pop_front();
+                        let over = mic_ready.len().saturating_sub(backlog);
+                        if over > 0 {
+                            mic_ready.drain(..over);
+                            // Those were the oldest, which is what the
+                            // alignment skip below wanted thrown away too.
+                            mic_skip = mic_skip.saturating_sub(over);
                         }
                     }
 
                     if !band_buf.is_empty() {
+                        if !band_started {
+                            // The first band ever seen: the take's clock
+                            // starts here. See the two offsets above.
+                            band_started = true;
+                            mic_ready.clear();
+                            mic_skip = round_trip_samples;
+                        }
+                        if mic_skip > 0 {
+                            let n = mic_skip.min(mic_ready.len());
+                            mic_ready.drain(..n);
+                            mic_skip -= n;
+                        }
                         let already = written_for_writer.load(Ordering::Relaxed);
                         let room = cap_samples.saturating_sub(already) as usize;
                         if room == 0 {
@@ -1153,6 +1267,7 @@ impl TakeSession {
             stop,
             written,
             out_sr,
+            owns_input,
             writer: Some(writer),
         });
         Ok(())
@@ -1220,6 +1335,28 @@ fn now_ms() -> u64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// `TakeStart` with the plain answers: no round trip to correct, no
+    /// engine to watch, and an input the take did not open. The tests that
+    /// care about one of those pass it explicitly.
+    fn plain<'a>(
+        root: &'a Path,
+        jam: &'a str,
+        handoff: &'a SharedTake,
+        mic: Option<(Arc<TakeRing>, u32)>,
+        out_sr: u32,
+    ) -> TakeStart<'a> {
+        TakeStart {
+            app_data: root,
+            jam_id: jam,
+            handoff,
+            mic,
+            out_sr,
+            round_trip_us: 0,
+            out_sr_watch: None,
+            owns_input: false,
+        }
+    }
 
     fn tmp_dir(name: &str) -> PathBuf {
         let base = std::env::temp_dir().join(format!(
@@ -1575,7 +1712,7 @@ mod tests {
         for jam in ["my jam", "my/jam"] {
             let mut session = TakeSession::default();
             session
-                .start(&root, jam, &handoff, None, 48_000)
+                .start(plain(&root, jam, &handoff, None, 48_000))
                 .expect("start");
             let ring = {
                 let mut seen = 0u64;
@@ -1930,13 +2067,7 @@ mod tests {
         let mic = Arc::new(TakeRing::new(48_000 * RING_SECS));
         let mut session = TakeSession::default();
         session
-            .start(
-                &root,
-                "blues",
-                &handoff,
-                Some((mic.clone(), 48_000)),
-                48_000,
-            )
+            .start(plain(&root, "blues", &handoff, Some((mic.clone(), 48_000)), 48_000))
             .expect("start");
         assert!(session.is_recording());
         assert_eq!(session.recording_jam(), Some("blues"));
@@ -1983,12 +2114,196 @@ mod tests {
         assert!(Path::new(&take.path).with_extension("json").exists());
     }
 
+    /// WHAT THE MIC HEARD BEFORE THE BAND EXISTED IS NOT IN THE TAKE.
+    ///
+    /// The bug this pins: `start_take` turns the mic on and only then
+    /// creates the file and hands the callback its ring. Ten to twenty-five
+    /// milliseconds pass in between, and every one of them was already in
+    /// the mic ring when the band's first sample arrived — so the file
+    /// opened with the player tuning up, laid over bar one, and every note
+    /// after it sat that far ahead of the band for the whole take. Nothing
+    /// downstream absorbed it: the band is the clock, so the offset never
+    /// closed.
+    #[test]
+    fn the_mic_that_arrived_before_the_band_is_not_in_the_take() {
+        let root = tmp_dir("head-start");
+        let handoff: SharedTake = Arc::new(TakeHandoff::new());
+        let mic = Arc::new(TakeRing::new(48_000 * RING_SECS));
+        let mut session = TakeSession::default();
+        session
+            .start(plain(&root, "blues", &handoff, Some((mic.clone(), 48_000)), 48_000))
+            .expect("start");
+        let band_ring = {
+            let mut seen = 0u64;
+            handoff.poll_record(&mut seen).unwrap().unwrap()
+        };
+
+        // A tenth of a second of mic before the band exists — the tuning-up
+        // the head start captures. Marked -1.0 so it is unmistakable.
+        mic.push(&vec![-1.0f32; 4_800]);
+        std::thread::sleep(std::time::Duration::from_millis(WRITER_TICK_MS * 3));
+
+        // Now the band starts, and the player plays with it.
+        for _ in 0..20 {
+            band_ring.push(&[0.25f32; 480]);
+            mic.push(&[0.5f32; 480]);
+            std::thread::sleep(std::time::Duration::from_millis(WRITER_TICK_MS));
+        }
+
+        let take = session.stop(&handoff).unwrap().expect("a take");
+        let (pcm, _) = decode_wav_bytes(&fs::read(&take.path).unwrap()).unwrap();
+        // 0.25 band over -1.0 mic is -0.75. Not one sample of the file may
+        // be it.
+        let head_start = pcm.iter().filter(|v| (**v + 0.75).abs() < 0.02).count();
+        assert_eq!(
+            head_start, 0,
+            "{head_start} samples of what the mic heard before the band existed"
+        );
+        // And the player IS in the take: 0.25 over 0.5 is 0.75.
+        let together = pcm.iter().filter(|v| (**v - 0.75).abs() < 0.02).count();
+        assert!(together > 1_000, "only {together} samples have the mic in them");
+    }
+
+    /// THE TAKE PULLS THE MIC FORWARD BY THE ROUND TRIP.
+    ///
+    /// The bug this pins: nothing subtracted the round trip at all. The
+    /// player plays along with what they HEAR, which is the band one output
+    /// latency after the callback rendered it, and their answer takes an
+    /// input latency to reach the writer — so every note they played landed
+    /// in the file that far behind the beat it answered, and a take recorded
+    /// to tell you whether you rush or drag said you dragged.
+    ///
+    /// A take therefore opens with a round trip of band and no mic under it,
+    /// which is the honest picture: the player had not heard anything yet.
+    #[test]
+    fn the_take_pulls_the_mic_forward_by_the_round_trip() {
+        let root = tmp_dir("round-trip");
+        let handoff: SharedTake = Arc::new(TakeHandoff::new());
+        let mic = Arc::new(TakeRing::new(48_000 * RING_SECS));
+        let mut session = TakeSession::default();
+        // 50 ms at 48 kHz is 2400 samples of mic to throw away.
+        let round_trip_us = 50_000u64;
+        let skipped = (round_trip_us * 48_000 / 1_000_000) as usize;
+        session
+            .start(TakeStart {
+                round_trip_us,
+                ..plain(&root, "blues", &handoff, Some((mic.clone(), 48_000)), 48_000)
+            })
+            .expect("start");
+        let band_ring = {
+            let mut seen = 0u64;
+            handoff.poll_record(&mut seen).unwrap().unwrap()
+        };
+
+        // Band and mic in lockstep, one writer tick at a time so the mic
+        // queue never runs long enough for the backlog trim to have an
+        // opinion.
+        for _ in 0..24 {
+            band_ring.push(&[0.25f32; 480]);
+            mic.push(&[0.5f32; 480]);
+            std::thread::sleep(std::time::Duration::from_millis(WRITER_TICK_MS));
+        }
+
+        let take = session.stop(&handoff).unwrap().expect("a take");
+        let (pcm, _) = decode_wav_bytes(&fs::read(&take.path).unwrap()).unwrap();
+        let band_alone = pcm.iter().filter(|v| (**v - 0.25).abs() < 0.02).count();
+        let together = pcm.iter().filter(|v| (**v - 0.75).abs() < 0.02).count();
+        assert!(
+            band_alone >= skipped,
+            "the take should open with {skipped} samples of band the player had not heard \
+             yet, and it has {band_alone}"
+        );
+        assert!(together > 3_000, "and then the player: {together} samples");
+    }
+
+    /// AN OUTPUT DEVICE CHANGE ENDS THE TAKE INSTEAD OF DETUNING IT.
+    ///
+    /// The bug this pins: the WAV's header says the rate the device was
+    /// running at when the take started, and the writer went on filling it
+    /// after the engine reopened on another device. Everything past the
+    /// change played back at the wrong speed and the file said nothing
+    /// about it — a take that goes sharp halfway through with no way to
+    /// know why. The simplest honest guard is to stop: what was recorded
+    /// before the change is exactly what the header claims.
+    #[test]
+    fn a_device_change_finishes_the_take_rather_than_detuning_the_rest() {
+        let root = tmp_dir("device-change");
+        let handoff: SharedTake = Arc::new(TakeHandoff::new());
+        let watch = Arc::new(AtomicU32::new(48_000));
+        let mut session = TakeSession::default();
+        session
+            .start(TakeStart {
+                out_sr_watch: Some(watch.clone()),
+                ..plain(&root, "blues", &handoff, None, 48_000)
+            })
+            .expect("start");
+        let band_ring = {
+            let mut seen = 0u64;
+            handoff.poll_record(&mut seen).unwrap().unwrap()
+        };
+
+        for _ in 0..10 {
+            band_ring.push(&[0.5f32; 480]);
+            std::thread::sleep(std::time::Duration::from_millis(WRITER_TICK_MS));
+        }
+
+        // The user plugs in an interface that runs at 44.1 kHz.
+        watch.store(44_100, Ordering::Release);
+        std::thread::sleep(std::time::Duration::from_millis(WRITER_TICK_MS * 4));
+
+        // The callback carries on for a moment before anyone stops it; none
+        // of it may reach the file.
+        for _ in 0..10 {
+            band_ring.push(&[0.5f32; 480]);
+            std::thread::sleep(std::time::Duration::from_millis(2));
+        }
+
+        let take = session.stop(&handoff).unwrap().expect("a take");
+        let (pcm, sr) = decode_wav_bytes(&fs::read(&take.path).unwrap()).unwrap();
+        assert_eq!(sr, 48_000, "the take is what its header says it is");
+        assert!(
+            (4_800..9_600).contains(&pcm.len()),
+            "the take should end at the device change, and it is {} samples",
+            pcm.len()
+        );
+    }
+
+    /// A take remembers whether it opened the microphone, because
+    /// `stop_take` has to know whether to close it and by then there is no
+    /// take left to ask.
+    #[test]
+    fn a_take_remembers_whether_it_opened_the_microphone() {
+        let root = tmp_dir("owns-input");
+        let handoff: SharedTake = Arc::new(TakeHandoff::new());
+        let mut session = TakeSession::default();
+        assert!(!session.owns_input(), "nothing is recording");
+
+        session
+            .start(TakeStart {
+                owns_input: true,
+                ..plain(&root, "blues", &handoff, None, 48_000)
+            })
+            .expect("start");
+        assert!(session.owns_input());
+        let _ = session.stop(&handoff);
+        assert!(!session.owns_input(), "and it is gone with the take");
+
+        // An input somebody else already had open is not the take's to close.
+        session
+            .start(plain(&root, "blues2", &handoff, None, 48_000))
+            .expect("start");
+        assert!(!session.owns_input());
+        let _ = session.stop(&handoff);
+    }
+
     #[test]
     fn a_take_of_nothing_is_not_kept() {
         let root = tmp_dir("empty");
         let handoff: SharedTake = Arc::new(TakeHandoff::new());
         let mut session = TakeSession::default();
-        session.start(&root, "blues", &handoff, None, 48_000).unwrap();
+        session
+            .start(plain(&root, "blues", &handoff, None, 48_000))
+            .unwrap();
         // Nothing is pushed: the user pressed record and stop with the band
         // stopped.
         assert!(session.stop(&handoff).unwrap().is_none());
@@ -2000,7 +2315,9 @@ mod tests {
         let root = tmp_dir("no-mic");
         let handoff: SharedTake = Arc::new(TakeHandoff::new());
         let mut session = TakeSession::default();
-        session.start(&root, "blues", &handoff, None, 48_000).unwrap();
+        session
+            .start(plain(&root, "blues", &handoff, None, 48_000))
+            .unwrap();
         let band_ring = {
             let mut seen = 0u64;
             handoff.poll_record(&mut seen).unwrap().unwrap()
@@ -2020,9 +2337,11 @@ mod tests {
         let root = tmp_dir("double");
         let handoff: SharedTake = Arc::new(TakeHandoff::new());
         let mut session = TakeSession::default();
-        session.start(&root, "blues", &handoff, None, 48_000).unwrap();
+        session
+            .start(plain(&root, "blues", &handoff, None, 48_000))
+            .unwrap();
         let err = session
-            .start(&root, "blues", &handoff, None, 48_000)
+            .start(plain(&root, "blues", &handoff, None, 48_000))
             .expect_err("one at a time");
         assert!(err.contains("already recording"), "{err}");
         let _ = session.stop(&handoff);
@@ -2038,7 +2357,7 @@ mod tests {
         }));
         let mut session = TakeSession::default();
         let err = session
-            .start(&root, "blues", &handoff, None, 48_000)
+            .start(plain(&root, "blues", &handoff, None, 48_000))
             .expect_err("not while a take is playing");
         assert!(err.contains("stop the take"), "{err}");
     }
@@ -2059,7 +2378,9 @@ mod tests {
         let root = tmp_dir("cap");
         let handoff: SharedTake = Arc::new(TakeHandoff::new());
         let mut session = TakeSession::default();
-        session.start(&root, "blues", &handoff, None, 4).unwrap();
+        session
+            .start(plain(&root, "blues", &handoff, None, 4))
+            .unwrap();
         let band_ring = {
             let mut seen = 0u64;
             handoff.poll_record(&mut seen).unwrap().unwrap()

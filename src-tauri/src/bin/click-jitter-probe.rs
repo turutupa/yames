@@ -79,6 +79,7 @@ use std::time::Duration;
 use yames_lib::probe::{
     compile_jam, create_beat_log, create_shared_state, CallbackProbe, CallbackSample, JamBassLine,
     JamConfig, JamKeysLine, JamMix, JamPattern, JamPosition, MetronomeEngine, TakeRing, TakeSession,
+    TakeStart,
 };
 
 /// Pessimistic upper bound on callbacks per second used to size the
@@ -755,8 +756,19 @@ fn main() -> ExitCode {
         let dir = std::env::temp_dir().join(format!("yames-probe-takes-{}", std::process::id()));
         let mic = Arc::new(TakeRing::new(44_100 * 4));
         let mut session = TakeSession::default();
-        if let Err(e) = session.start(&dir, "probe", &handoff, Some((mic.clone(), 44_100)), out_sr)
-        {
+        if let Err(e) = session.start(TakeStart {
+            app_data: &dir,
+            jam_id: "probe",
+            handoff: &handoff,
+            mic: Some((mic.clone(), 44_100)),
+            out_sr,
+            // The probe measures the writer, not the alignment: a synthetic
+            // mic has no round trip to correct and there is no device change
+            // to watch for in a headless run.
+            round_trip_us: 0,
+            out_sr_watch: Some(engine.output_sample_rate_handle()),
+            owns_input: false,
+        }) {
             eprintln!("error: could not start the probe's take: {e}");
             return ExitCode::from(2);
         }
