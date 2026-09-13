@@ -6,10 +6,30 @@ import { describe, expect, it } from "vitest";
 import { GROOVES, grooveById, grooveTickCount, ruleGroove, DEFAULT_GROOVE_ID } from "./grooves";
 import { JAM_LANES } from "./types";
 
-describe("the thirteen grooves", () => {
-  it("ships exactly thirteen, with unique ids", () => {
-    expect(GROOVES).toHaveLength(13);
-    expect(new Set(GROOVES.map((g) => g.id)).size).toBe(13);
+describe("the twenty grooves", () => {
+  it("ships exactly twenty, with unique ids", () => {
+    expect(GROOVES).toHaveLength(20);
+    expect(new Set(GROOVES.map((g) => g.id)).size).toBe(20);
+  });
+
+  it("keeps the first thirteen where the footswitch left them", () => {
+    // `stepGroove` in `useJamSession` steps this list in order, so the seven
+    // the vibes brought are appended and nothing before them moves.
+    expect(GROOVES.slice(0, 13).map((g) => g.id)).toEqual([
+      "rock8",
+      "rock16",
+      "halfTime",
+      "shuffle",
+      "waltz",
+      "sixEight",
+      "bossa",
+      "swingRide",
+      "funk",
+      "oneDrop",
+      "train",
+      "boomBap",
+      "fourOnFloor",
+    ]);
   });
 
   it("gives every lane of every bar and fill exactly one column per tick", () => {
@@ -90,6 +110,66 @@ describe("the thirteen grooves", () => {
     expect([1, 3, 5, 7].every((t) => four.bar.hat[t] !== 0)).toBe(true);
   });
 
+  it("writes the four drivers with no ghost note anywhere", () => {
+    // The whole point of B4: the owner could not get a raw drummer out of any
+    // setting, and a ghost note is the quietest thing on the kit. A ghost
+    // creeping back into one of these four is the bug this catches.
+    for (const id of ["hardRock", "stomp", "doubleKick", "twoStep"]) {
+      const g = grooveById(id);
+      for (const lane of JAM_LANES) {
+        expect(g.bar[lane], `${id} ${lane}`).not.toContain(3);
+      }
+    }
+  });
+
+  it("writes the seven the vibes brought the way they are played", () => {
+    // Hard rock: the hat OPEN on every off-beat (accent is the open hat),
+    // closed on every down, and a crash in the bar rather than once a chorus.
+    const hard = grooveById("hardRock");
+    expect([1, 3, 5, 7].every((t) => hard.bar.hat[t] === 2)).toBe(true);
+    expect([0, 2, 4, 6].every((t) => hard.bar.hat[t] === 1)).toBe(true);
+    expect(hard.bar.crash[0]).not.toBe(0);
+    expect(hard.bar.crash.slice(1).every((l) => l === 0)).toBe(true);
+
+    // Stomp: half-time, so the snare is on three and nowhere else.
+    const stomp = grooveById("stomp");
+    expect(stomp.bar.snare.flatMap((l, i) => (l ? [i] : []))).toEqual([4]);
+    expect(stomp.bar.kick.filter((l) => l !== 0).length).toBeGreaterThanOrEqual(4);
+    // The crash is the section's, not the bar's.
+    expect(stomp.bar.crash.every((l) => l === 0)).toBe(true);
+
+    // Double kick: a kick on every sixteenth, and a backbeat still on 2 and 4.
+    const dk = grooveById("doubleKick");
+    expect(dk.bar.kick.every((l) => l !== 0)).toBe(true);
+    expect(dk.bar.snare.flatMap((l, i) => (l ? [i] : []))).toEqual([4, 12]);
+
+    // Two-step: an accented backbeat and quarters on the hat — what tells it
+    // apart from rock eighths, which it would otherwise be.
+    const two = grooveById("twoStep");
+    expect([2, 6].every((t) => two.bar.snare[t] === 2)).toBe(true);
+    expect([1, 3, 5, 7].every((t) => two.bar.hat[t] === 0)).toBe(true);
+    expect([0, 2, 4, 6].every((t) => two.bar.hat[t] !== 0)).toBe(true);
+
+    // Samba: the surdo leans on two and four. That is the one thing that
+    // makes it a samba rather than a bossa played fast.
+    const samba = grooveById("samba");
+    expect(samba.bar.kick[4]).toBe(2);
+    expect(samba.bar.kick[12]).toBe(2);
+    expect(samba.bar.kick[0]).toBe(1);
+    expect(samba.bar.hat.every((l) => l !== 0)).toBe(true);
+
+    // Cha-cha: four, the "and" of four, one — written across the bar line.
+    const cha = grooveById("chaCha");
+    expect(cha.bar.snare.flatMap((l, i) => (l ? [i] : []))).toEqual([0, 6, 7]);
+
+    // Second line: a syncopated street-beat kick, ghosts on the snare, and
+    // its two accents — the backbeat on two and the push on the "a" of three.
+    const second = grooveById("secondLine");
+    expect(second.bar.snare).toContain(3);
+    expect(second.bar.snare.flatMap((l, i) => (l === 2 ? [i] : []))).toEqual([4, 11]);
+    expect([4, 12].every((t) => second.bar.kick[t] === 0)).toBe(true);
+  });
+
   it("carries the meter each groove is actually written in", () => {
     const meters = Object.fromEntries(
       GROOVES.map((g) => [g.id, [g.beatsPerBar, g.ticksPerBeat]]),
@@ -105,6 +185,13 @@ describe("the thirteen grooves", () => {
     expect(meters.oneDrop).toEqual([4, 2]);
     expect(meters.boomBap).toEqual([4, 2]);
     expect(meters.fourOnFloor).toEqual([4, 2]);
+    expect(meters.hardRock).toEqual([4, 2]);
+    expect(meters.stomp).toEqual([4, 2]);
+    expect(meters.doubleKick).toEqual([4, 4]);
+    expect(meters.twoStep).toEqual([4, 2]);
+    expect(meters.samba).toEqual([4, 4]);
+    expect(meters.chaCha).toEqual([4, 2]);
+    expect(meters.secondLine).toEqual([4, 4]);
   });
 
   it("leaves the shuffle's middle triplet empty — that is what a shuffle is", () => {
