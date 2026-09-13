@@ -69,9 +69,12 @@ describe("the list", () => {
     expect(screen.getByText(/It lands here when you stop/i)).toBeTruthy();
   });
 
-  it("makes the local-only promise every time, not once", () => {
+  it("does not print the local-only promise under every take", () => {
+    // It is said once, as a first-run hint at the moment recording is
+    // switched on (JAM_UX_DECISIONS A7). The same words, at the one moment
+    // they are news rather than furniture — see `onboarding.hints.jamTakes`.
     draw();
-    expect(screen.getByText(/Nothing is uploaded/i)).toBeTruthy();
+    expect(screen.queryByText(/Nothing is uploaded/i)).toBeNull();
   });
 });
 

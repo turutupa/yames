@@ -130,8 +130,43 @@ async function drive() {
       );
     }
 
+    /**
+     * The two docked sheets (JAM_UX_DECISIONS A1, A8).
+     *
+     * Opened through the context bar's own buttons, which is the only door a
+     * person has. Everything that used to be on the stage — the grooves, the
+     * key, the kit, the meter — is behind the first of them now, so most of
+     * the jam shots below start here.
+     */
+    if (shot!.jam.sheet) {
+      const wantedLabel = shot!.jam.sheet === "setup" ? "set up" : "chords";
+      await until("the context bar", () => !!document.querySelector(".jam-sheet-btn"));
+      const button = [...document.querySelectorAll<HTMLElement>(".jam-sheet-btn")].find(
+        (b) => (b.textContent ?? "").trim().toLowerCase() === wantedLabel,
+      );
+      if (!button) throw new Error(`no "${wantedLabel}" button in the context bar`);
+      button.click();
+      await until(
+        `the ${shot!.jam.sheet} sheet`,
+        () => !!document.querySelector(`.jam-sheet[data-sheet="${shot!.jam!.sheet}"]`),
+      );
+    }
+
+    if (shot!.jam.more) {
+      await until("the MORE toggle", () => !!document.querySelector(".jam-more-toggle"));
+      (document.querySelector(".jam-more-toggle") as HTMLElement).click();
+      await until("the MORE block", () => !!document.querySelector(".jam-more-body"));
+    }
+
+    if (shot!.jam.chordCard !== undefined) {
+      await until("the chord grid", () => !!document.querySelector(".jam-chord-card"));
+      const cards = document.querySelectorAll<HTMLElement>(".jam-chord-card");
+      cards[shot!.jam.chordCard].click();
+      await until("the shapes row", () => !!document.querySelector(".jam-chord-shapes"));
+    }
+
     if (shot!.jam.meter) {
-      // The meter buttons are in the setup block at the bottom of the stage.
+      // The meter buttons are inside MORE on the setup sheet.
       await until("the meter control", () => !!document.querySelector(".jam-meters"));
       const meters = [...document.querySelectorAll<HTMLElement>(".jam-meters .jam-meter")];
       const wantedMeter = meters.find((b) => b.textContent?.trim() === shot!.jam!.meter);

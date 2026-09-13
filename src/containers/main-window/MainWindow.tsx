@@ -348,6 +348,29 @@ export function MainWindow() {
     },
   });
 
+  // UI preferences (buttonFlash, activeBorder, drillAutoCollapse,
+  // viewTransitions, animationStyle, jamCues) — owned by a dedicated hook
+  // that hydrates them from the store on mount. Destructured here so the rest
+  // of MainWindow keeps referencing them as bare variables.
+  //
+  // Read before the jam session rather than after it: spoken cues are a
+  // preference now (JAM_UX_DECISIONS A4), and `useJamSession` is handed the
+  // answer rather than reading the store a second time.
+  const {
+    buttonFlash,
+    setButtonFlash,
+    activeBorder,
+    setActiveBorder,
+    drillAutoCollapse,
+    setDrillAutoCollapse,
+    viewTransitions,
+    setViewTransitions,
+    animationStyle,
+    setAnimationStyle,
+    jamCues,
+    setJamCues,
+  } = useUiPreferences();
+
   // The jam the window has open (JAM_MODE). With none loaded every one of
   // these is inert and the metronome behaves exactly as it did.
   const jamSession = useJamSession({
@@ -359,10 +382,11 @@ export function MainWindow() {
     // jam has to be told when a bar line is the count rather than the form.
     countingIn: (state.countIn?.beats ?? 0) > 0,
     // The count-in as numbers, for the spoken count, and whether there is a
-    // voice to speak it with. A jam with cues on and no voice installed is
-    // silent — see `shouldSpeak` in src/jam/cues.ts.
+    // voice to speak it with. Cues on with no voice installed is silent —
+    // see `shouldSpeak` in src/jam/cues.ts.
     countIn: state.countIn ?? { beats: 0, done: 0 },
     voiceReady: !!coach.modelStatus?.voiceReady,
+    cues: jamCues,
     // The metronome's own meter, so the jam can hand it back on the way out.
     // A jam sets the engine's subdivision and beat groups to the groove's, and
     // without this a trip through Jam quietly re-signatures the metronome tab.
@@ -549,22 +573,6 @@ export function MainWindow() {
     clearLog: clearInputTestLog,
   } = useInputTester();
 
-  // UI preferences (buttonFlash, activeBorder, drillAutoCollapse,
-  // viewTransitions, animationStyle) — owned by a dedicated hook that
-  // hydrates them from the store on mount. Destructured here so the rest
-  // of MainWindow keeps referencing them as bare variables.
-  const {
-    buttonFlash,
-    setButtonFlash,
-    activeBorder,
-    setActiveBorder,
-    drillAutoCollapse,
-    setDrillAutoCollapse,
-    viewTransitions,
-    setViewTransitions,
-    animationStyle,
-    setAnimationStyle,
-  } = useUiPreferences();
   // Audio output device list + selection — owned by a dedicated hook that
   // hydrates from the OS + persisted store and listens for hot-plug events.
   const {
@@ -912,10 +920,20 @@ export function MainWindow() {
         dialogOpen: !!document.querySelector('[role="dialog"], [role="alertdialog"]'),
         editorOpen: !!jamScreen?.editorOpen,
         editingBar: jamScreen?.editingBar ?? null,
+        setupOpen: !!jamScreen?.setupOpen,
+        chordsOpen: !!jamScreen?.chordsOpen,
       });
       if (target === "nothing") return;
       if (target === "chordPicker") {
         jamScreen?.setEditingBar(null);
+        return;
+      }
+      if (target === "setupSheet") {
+        jamScreen?.setSetupOpen(false);
+        return;
+      }
+      if (target === "chordSheet") {
+        jamScreen?.setChordsOpen(false);
         return;
       }
       guarded(() => {
@@ -1180,6 +1198,10 @@ export function MainWindow() {
     isPlaying: state.isPlaying,
     midiDevices: midi.devices,
     midiBindings: midi.bindings,
+    // The three Jam captions, as first-run hints (JAM_UX_DECISIONS A7).
+    jamLoaded: !!jamSession.jam,
+    jamSetupOpen: jamSession.screen.setupOpen,
+    jamTakesOn: !!jamSession.jam?.takes,
     onSavePreset: handlePresetSave,
     onOpenWidget: () => {
       void markWidgetOpened();
@@ -1411,6 +1433,21 @@ export function MainWindow() {
             setSidebarOpen(true);
             setTimeout(() => sidebarRef.current?.triggerRenameJam(id), 150);
           }}
+          // The two sheets. One open at a time: they occupy the same 640px on
+          // the right, and two of them stacked would be a screen with no jam
+          // left on it.
+          jamSetupOpen={jamSession.screen.setupOpen}
+          onToggleJamSetup={() => {
+            const next = !jamSession.screen.setupOpen;
+            jamSession.screen.setSetupOpen(next);
+            if (next) jamSession.screen.setChordsOpen(false);
+          }}
+          jamChordsOpen={jamSession.screen.chordsOpen}
+          onToggleJamChords={() => {
+            const next = !jamSession.screen.chordsOpen;
+            jamSession.screen.setChordsOpen(next);
+            if (next) jamSession.screen.setSetupOpen(false);
+          }}
           setlistsForJam={setlistSession.setlists}
           onAddJamToSetlist={(setlistId) => {
             const jam = jamSession.jam;
@@ -1557,16 +1594,19 @@ export function MainWindow() {
           jamSession.jam ? (
             <JamView
               jam={jamSession.jam}
+              jams={jamSession.jams}
               onEdit={jamSession.editJam}
+              onLoadJam={jamSession.loadJam}
               currentBeat={currentBeat}
               isPlaying={state.isPlaying}
               instrument={instrument}
               lineup={jamSession.lineup}
               trainedBpm={jamSession.trainedBpm}
               listening={evaluation.enabled}
-              voiceReady={!!coach.modelStatus?.voiceReady}
               takes={jamTakes}
               onToggleTakes={jamTakes.requestTakes}
+              onPreviewKit={jamSession.startKitPreview}
+              previewingKit={jamSession.previewKit}
               screen={jamSession.screen}
               position={jamSession.position}
               tapActive={tapActive}
@@ -1654,6 +1694,8 @@ export function MainWindow() {
             voiceDiagnostics={coach.voiceDiagnostics}
             instrument={instrument}
             setInstrument={setInstrument}
+            jamCues={jamCues}
+            setJamCues={setJamCues}
             onStartDownload={coach.handleStartDownload}
             onRequestDownload={coach.setPendingDownloadTier}
             widgetMode={state.mode}
