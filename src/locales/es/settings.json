@@ -173,7 +173,8 @@
       "groups": {
         "metronome": "Metrónomo",
         "view": "Vista",
-        "navigation": "Navegación"
+        "navigation": "Navegación",
+        "jam": "Jam"
       },
       "actions": {
         "play": "Reproducir / Detener",
@@ -195,9 +196,19 @@
         "tab-1": "Pestaña Metrónomo",
         "tab-2": "Pestaña Setlist",
         "tab-3": "Pestaña Rampa de tempo",
+        "tab-4": "Pestaña Jam",
         "settings": "Ajustes",
         "toggle-sidebar": "Alternar barra lateral",
-        "toggle-coach": "Alternar entrenador"
+        "toggle-coach": "Alternar entrenador",
+        "jam-next-groove": "Siguiente groove",
+        "jam-prev-groove": "Groove anterior",
+        "jam-trade": "Intercambios",
+        "jam-dropout": "Compases en silencio",
+        "jam-next-shape": "Siguiente posición",
+        "jam-next-section": "Siguiente sección",
+        "jam-prev-section": "Sección anterior",
+        "jam-loop-section": "Repetir esta sección",
+        "jam-take": "Grabar la toma"
       },
       "descs": {
         "play": "Inicia o detiene el metrónomo",
@@ -219,9 +230,19 @@
         "tab-1": "Cambia a la pestaña Metrónomo",
         "tab-2": "Cambia a la pestaña Setlist",
         "tab-3": "Cambia a la pestaña Rampa de tempo",
+        "tab-4": "Cambia a la pestaña Jam",
         "settings": "Abre o cierra los ajustes",
         "toggle-sidebar": "Contraer o expandir la barra lateral izquierda",
-        "toggle-coach": "Abre o cierra el panel del entrenador"
+        "toggle-coach": "Abre o cierra el panel del entrenador",
+        "jam-next-groove": "Pasar al siguiente groove sin soltar el instrumento",
+        "jam-prev-groove": "Volver al groove anterior",
+        "jam-trade": "Activar o desactivar los intercambios: cuatro compases la banda, cuatro tú",
+        "jam-dropout": "Activar o desactivar los compases en silencio",
+        "jam-next-shape": "Recorrer las formas de tocar el acorde actual",
+        "jam-next-section": "Saltar al principio de la siguiente sección en la barra de compás",
+        "jam-prev-section": "Volver al principio de la sección anterior en la barra de compás",
+        "jam-loop-section": "Poner en bucle la sección en la que estás, o quitarlo",
+        "jam-take": "Grabar la próxima vez que le des a tocar, o dejar de grabar"
       }
     },
     "inputTest": {

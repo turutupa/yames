@@ -86,6 +86,18 @@ export type BeatEvent = {
    * engine is the only thing that knows which rule applied.
    */
   isAccent: boolean;
+  /**
+   * Where this tick sits in a jam's form (plans/JAM_MODE.md). `formBar` is
+   * the 0-based bar within the chorus, `chorus` is 1-based. Both count only
+   * while a jam is loaded in the engine; otherwise 0 and 1.
+   */
+  formBar: number;
+  chorus: number;
+  /**
+   * What the band is doing on this bar: "full", "hatsOnly" (a trade, your
+   * bars) or "silent" (a drop-out). "full" when no jam is loaded.
+   */
+  bandState: "full" | "hatsOnly" | "silent";
 };
 
 // ---------------------------------------------------------------------------
@@ -180,6 +192,13 @@ export type SetlistStep = {
    */
   trigger: SetlistTrigger;
   transition: SetlistTransition;
+  /**
+   * A step that is a jam (plans/JAM_MODE.md §8.5). The jam is loaded by id
+   * when the step starts and cleared when it ends; the fields above carry
+   * the jam's tempo and meter for the sentence and the engine. A jam that
+   * no longer exists plays as the plain metronome step it describes.
+   */
+  jamId?: string;
 };
 
 export type Setlist = {
@@ -529,6 +548,22 @@ export type SessionSegment = {
   timeSignature: number;
   startTime?: number;
   endTime?: number;
+  /**
+   * `"jam"` when this stretch was played over the band (JAM_MODE §3, principle
+   * 5). A band is louder than a click, and through speakers its hits land on
+   * the grid and the mic scores them as your notes, so a score from a jam is
+   * not comparable with a score from a bare click and nothing downstream
+   * should treat it as though it were.
+   *
+   * It lives on the SEGMENT rather than on `SavedSession` for two reasons.
+   * `SavedSession` is mirrored in Rust (`src-tauri/src/session.rs`) and has no
+   * free metadata field, so a flag added there from the frontend is dropped by
+   * serde on the way through and silently does not persist; `segments` is
+   * stored as raw JSON and comes back exactly as it was written. And it is the
+   * truer place anyway — you can leave the jam tab mid-session, and only the
+   * stretches actually played over a band should carry the caveat.
+   */
+  mode?: "jam";
 };
 
 /**

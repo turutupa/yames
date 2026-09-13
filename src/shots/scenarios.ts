@@ -42,7 +42,52 @@ export interface Shot {
   /** Which of the app's two windows to mount. */
   window: "main" | "floating";
   /** The tab to open on. Absent for the widget, which has no tabs. */
-  tab?: "beat" | "drill";
+  tab?: "beat" | "drill" | "jam" | "setlist";
+  /**
+   * The Jam tab, with a jam actually on it.
+   *
+   * The tab opens empty — a jam is loaded by clicking one in the library, and
+   * nothing about the shot can be told from the empty state. `row` is which
+   * library row to click, `bar` is which bar of the form to photograph: the
+   * mode's whole subject is moving through a form, and bar one of chorus one
+   * is the one bar that says nothing about it.
+   */
+  jam?: {
+    row: number;
+    bar?: number;
+    /** Open the groove editor drawer before the capture. */
+    editor?: boolean;
+    /**
+     * Turn "Edit changes" on and open the picker on this bar (1-based).
+     *
+     * Pressed rather than poked, like everything else here: the EDIT CHANGES
+     * link and then the cell, which is the only route a person has.
+     */
+    editChords?: number;
+    /**
+     * Pick this meter before the capture, by its label ("7/8").
+     *
+     * A jam in seven is the one picture that says the mode is not four-four
+     * only, and it cannot be reached from a starter jam any other way.
+     */
+    meter?: string;
+    /** Scroll this selector to the top of the stage — the screen is taller
+     *  than a window, and the band and the practice tools live below the
+     *  fold of the one the chord is in. */
+    scrollTo?: string;
+  };
+  /**
+   * The Setlist tab, with a setlist actually on it.
+   *
+   * Same shape as `jam` above and for the same reason: the tab opens empty,
+   * and a setlist is loaded by clicking one in the library. `row` is which
+   * library row to click.
+   */
+  setlist?: {
+    row: number;
+    /** Scroll this selector to the top of the stage. */
+    scrollTo?: string;
+  };
   /** Enter Zen once the app has mounted. */
   zen?: boolean;
   /**
@@ -128,6 +173,143 @@ export const SHOTS: Shot[] = [
     width: 1400,
     height: 900,
     settleMs: 2600,
+  },
+  {
+    id: "jam",
+    suffix: "jam",
+    window: "main",
+    tab: "jam",
+    // The slow blues, part-way through its fifth bar: the chord has changed
+    // to the IV, the strip and the shapes row have followed it, and the
+    // timeline is lit somewhere other than the start.
+    // No `playing` — the transport is pressed after the jam is loaded, the
+    // way a person presses it. Starting the click before the jam was on the
+    // stage would count bars against no form at all.
+    jam: { row: 0, bar: 5 },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-band",
+    suffix: "jam-band",
+    window: "main",
+    tab: "jam",
+    // The lower half: the band's rows with the bass's notes for this bar, the
+    // practice tools, the grooves, and the key and kit.
+    jam: { row: 0, bar: 5, scrollTo: ".jam-band" },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-editor",
+    suffix: "jam-editor",
+    window: "main",
+    tab: "jam",
+    // The groove editor, docked under a jam that is still playing.
+    jam: { row: 0, bar: 3, editor: true, scrollTo: ".jam-band" },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-setup",
+    suffix: "jam-setup",
+    window: "main",
+    tab: "jam",
+    // Key, kit and the part you read — the half of the screen you touch once
+    // and then leave alone for an hour.
+    jam: { row: 0, scrollTo: ".jam-setup" },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-changes",
+    suffix: "jam-changes",
+    window: "main",
+    tab: "jam",
+    // The timeline in edit mode with the picker open on bar 5 — the one
+    // screen that says the changes are yours rather than the form's.
+    jam: { row: 0, editChords: 5, scrollTo: ".jam-timeline-section" },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-seven",
+    suffix: "jam-seven",
+    window: "main",
+    tab: "jam",
+    // A jam in 7/8: the meter control, and the sentence saying the groove
+    // does not fit it so the drummer plays the rule.
+    jam: { row: 0, meter: "7/8", scrollTo: ".jam-setup" },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-mix",
+    suffix: "jam-mix",
+    window: "main",
+    tab: "jam",
+    // The band's three rows with their volume sliders, and the keys row's
+    // comping style.
+    jam: { row: 0, bar: 5, scrollTo: ".jam-band" },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-zen",
+    suffix: "jam-zen",
+    window: "main",
+    tab: "jam",
+    // Zen over a jam: the chord and the beat, nothing else.
+    jam: { row: 0, bar: 5 },
+    zen: true,
+    zenStyle: "focus",
+    width: 1400,
+    height: 900,
+    settleMs: 1200,
+  },
+  {
+    id: "jam-takes",
+    suffix: "jam-takes",
+    window: "main",
+    tab: "jam",
+    // The shelf under the band: three takes of the slow blues, with the one
+    // in the middle playing and the band muted under it. The section is the
+    // only place in the app that keeps a file, so the picture has to show
+    // what that looks like rather than an empty heading.
+    jam: { row: 0, bar: 5, scrollTo: ".jam-practice" },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "setlist-jam",
+    suffix: "setlist-jam",
+    window: "main",
+    tab: "setlist",
+    // A routine that ends with ten minutes of playing: three plain steps and
+    // a jam step, which is the whole argument for JAM_MODE §8.5 in one
+    // screenshot.
+    setlist: { row: 0 },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-empty",
+    suffix: "jam-empty",
+    window: "main",
+    tab: "jam",
+    // The tab opened cold, which is the first thing anybody sees.
+    width: 1400,
+    height: 900,
+    settleMs: 400,
   },
   {
     id: "widget",

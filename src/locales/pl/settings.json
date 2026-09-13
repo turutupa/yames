@@ -173,7 +173,8 @@
       "groups": {
         "metronome": "Metronom",
         "view": "Widok",
-        "navigation": "Nawigacja"
+        "navigation": "Nawigacja",
+        "jam": "Jam"
       },
       "actions": {
         "play": "Odtwarzaj / Zatrzymaj",
@@ -195,9 +196,19 @@
         "tab-1": "Zakładka Metronom",
         "tab-2": "Zakładka Setlista",
         "tab-3": "Zakładka Rozbieg",
+        "tab-4": "Zakładka Jam",
         "settings": "Ustawienia",
         "toggle-sidebar": "Przełącz panel boczny",
-        "toggle-coach": "Przełącz Trenera"
+        "toggle-coach": "Przełącz Trenera",
+        "jam-next-groove": "Następny groove",
+        "jam-prev-groove": "Poprzedni groove",
+        "jam-trade": "Wymiana",
+        "jam-dropout": "Takty ciszy",
+        "jam-next-shape": "Następny chwyt",
+        "jam-next-section": "Następna część",
+        "jam-prev-section": "Poprzednia część",
+        "jam-loop-section": "Zapętl tę część",
+        "jam-take": "Nagraj takę"
       },
       "descs": {
         "play": "Uruchom lub zatrzymaj metronom",
@@ -219,9 +230,19 @@
         "tab-1": "Przełącz na zakładkę Metronom",
         "tab-2": "Przełącz na zakładkę Setlista",
         "tab-3": "Przełącz na zakładkę Rozbieg",
+        "tab-4": "Przełącz na zakładkę Jam",
         "settings": "Otwórz lub zamknij ustawienia",
         "toggle-sidebar": "Zwija lub rozwija lewy panel boczny",
-        "toggle-coach": "Otwórz lub zamknij panel trenera"
+        "toggle-coach": "Otwórz lub zamknij panel trenera",
+        "jam-next-groove": "Przejść do następnego groove'u bez odrywania rąk od instrumentu",
+        "jam-prev-groove": "Wrócić do poprzedniego groove'u",
+        "jam-trade": "Włączyć lub wyłączyć wymianę — cztery takty zespół, cztery ty",
+        "jam-dropout": "Włączyć lub wyłączyć takty ciszy",
+        "jam-next-shape": "Przewijać chwyty bieżącego akordu",
+        "jam-next-section": "Skoczyć na kresce taktowej na początek następnej części",
+        "jam-prev-section": "Wrócić na kresce taktowej na początek poprzedniej części",
+        "jam-loop-section": "Zapętlić część, w której jesteś, albo pętlę wyłączyć",
+        "jam-take": "Nagraj przy następnym starcie albo przerwij nagrywanie"
       }
     },
     "inputTest": {

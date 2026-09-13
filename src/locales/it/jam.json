@@ -1,0 +1,324 @@
+{
+  "jam": {
+    "badge": "JAM",
+    "newJam": "Nuovo jam",
+    "untitled": "Nuovo jam",
+    "deleteJam": "Elimina jam",
+    "duplicateJam": "Duplica jam",
+    "copyName": "{{name}} copia",
+    "renameTooltip": "Rinomina questo jam",
+    "reorderHint": "Trascina per riordinare",
+    "edited": "Modificato",
+    "save": "Salva",
+    "saved": "Salvato",
+    "saveTooltip": "Salva il jam com'è adesso",
+    "noChanges": "Nessuna modifica",
+    "revert": "Ripristina",
+    "revertTooltip": "Torna al jam salvato",
+    "noneOpenTitle": "Nessun jam aperto",
+    "noneOpenLead": "Un jam è una band su cui suonare: un groove, un tempo e una forma che tiene il segno al posto tuo. Caricane uno dalla libreria, o creane uno nuovo.",
+    "headphones": "Con le cuffie il punteggio resta onesto.",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "Groove",
+      "rock8": "Rock in ottavi",
+      "rock16": "Rock in sedicesimi",
+      "halfTime": "Half-time",
+      "shuffle": "Shuffle",
+      "waltz": "Valzer",
+      "sixEight": "6/8",
+      "bossa": "Bossa",
+      "swingRide": "Swing sul ride",
+      "funk": "Funk",
+      "oneDrop": "One drop",
+      "train": "Train beat",
+      "boomBap": "Boom bap",
+      "fourOnFloor": "Four on the floor",
+      "rule": "La regola"
+    },
+    "changes": {
+      "edit": "Modifica la griglia",
+      "done": "Fatto",
+      "hint": "Tocca una battuta per sceglierne l'accordo. Una pressione lunga funziona senza la modalità.",
+      "pickFor": "Battuta {{bar}}",
+      "root": "Fondamentale",
+      "quality": "Tipo",
+      "major": "magg",
+      "asTheForm": "Come la forma"
+    },
+    "meter": {
+      "label": "Metro",
+      "grooves": "Quello del groove",
+      "ticks": "Tick per movimento",
+      "doesNotFit": "{{groove}} non entra in {{meter}}; il batterista suona la regola."
+    },
+    "mix": {
+      "forLane": "Volume {{lane}}"
+    },
+    "keysStyle": {
+      "label": "Accompagnamento",
+      "pads": "tenuto per tutta la battuta",
+      "stabs": "in levare, con il rullante",
+      "padsShort": "Tappeti",
+      "stabsShort": "Stab"
+    },
+    "countInSound": {
+      "label": "Conteggio",
+      "beep": "Bip",
+      "sticks": "Bacchette"
+    },
+    "cues": {
+      "label": "Segnali parlati",
+      "hint": "Il conteggio, la sezione e «i tuoi quattro», detti ad alta voce — così gli occhi restano sul manico.",
+      "noVoice": "Serve la voce del coach. Installala nelle Impostazioni; fino ad allora i segnali restano sullo schermo.",
+      "n1": "uno",
+      "n2": "due",
+      "n3": "tre",
+      "n4": "quattro",
+      "n5": "cinque",
+      "n6": "sei",
+      "n7": "sette",
+      "n8": "otto"
+    },
+    "feel": {
+      "label": "Feel",
+      "straight": "Dritto",
+      "shuffle": "Shuffle",
+      "swing": "Swing"
+    },
+    "intensity": {
+      "label": "Intensità",
+      "soft": "Piano",
+      "normal": "Normale",
+      "loud": "Forte"
+    },
+    "form": {
+      "label": "Forma",
+      "blues12": "Blues di 12 battute",
+      "blues12Hint": "I · IV · V, il turnaround alla 12",
+      "loop8": "Loop di 8 battute",
+      "loop8Hint": "un giro armonico, ancora e ancora",
+      "bars16": "16 battute",
+      "bars16Hint": "due metà",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "la forma degli standard",
+      "one": "Un accordo",
+      "oneHint": "solo il groove",
+      "custom": "La tua",
+      "customHint": "tutte le battute che conti",
+      "barsLabel": "Battute",
+      "fewerBars": "Meno battute",
+      "moreBars": "Più battute",
+      "barOf": "battuta {{current}} di {{total}}",
+      "chorus": "giro {{count}}",
+      "fillMark": "fill",
+      "section": "Sezione {{name}}",
+      "looping": "loop battute {{start}}–{{end}}",
+      "startsAt": "parte dalla battuta {{bar}}",
+      "jumpTo": "Vai alla battuta {{bar}}",
+      "jumpPending": "alla prossima stanghetta",
+      "loopSection": "Ripeti le battute {{start}}–{{end}}",
+      "loopOff": "Smetti di ripetere"
+    },
+    "short": {
+      "blues12": "12 battute",
+      "loop8": "8 battute",
+      "bars16": "16 battute",
+      "aaba32": "AABA",
+      "one": "1 accordo",
+      "custom": "{{count}} battute",
+      "custom_one": "{{count}} battuta",
+      "custom_other": "{{count}} battute"
+    },
+    "countIn": {
+      "label": "Battute d'intro",
+      "none": "Nessuna",
+      "bars": "{{count}} battute",
+      "bars_one": "{{count}} battuta",
+      "bars_other": "{{count}} battute"
+    },
+    "fills": {
+      "label": "Fill",
+      "hint": "Dove cadono i fill, e un crash sull'uno.",
+      "off": "Nessuno",
+      "chorus": "Fine giro",
+      "every4": "Ogni 4",
+      "every8": "Ogni 8"
+    },
+    "transport": {
+      "chorus": "Giro"
+    },
+    "now": {
+      "label": "Ora",
+      "aria": "Sta suonando {{chord}}",
+      "next": "{{chord}} fra {{count}} battute",
+      "next_one": "{{chord}} fra {{count}} battuta",
+      "next_other": "{{chord}} fra {{count}} battute",
+      "nextNow": "{{chord}} subito dopo"
+    },
+    "fretboard": {
+      "label": "Tastiera",
+      "aria": "{{chord}} sul manico"
+    },
+    "chords": {
+      "label": "Accordi",
+      "hint": "I cambi sulla linea delle battute, e sopra l'accordo su cui sei.",
+      "inKey": "Accordi in {{key}}",
+      "follow": "Segui il jam",
+      "followHint": "Le posizioni seguono i cambi, oppure le fissi su un accordo.",
+      "sevenths": "Settime",
+      "nextShape": "Posizione successiva",
+      "sizeTriad": "triade",
+      "sizeOpen": "aperta",
+      "sizeBarre": "barré",
+      "sizeSeventh": "settima",
+      "fret": "tasto {{fret}}"
+    },
+    "key": {
+      "label": "Tonalità",
+      "mode": "Maggiore, minore o blues",
+      "major": "Maggiore",
+      "minor": "Minore",
+      "blues": "Blues",
+      "majorNamed": "{{root}} maggiore",
+      "minorNamed": "{{root}} minore",
+      "bluesNamed": "blues in {{root}}"
+    },
+    "kit": {
+      "label": "Kit",
+      "room": "Sala",
+      "roomHint": "aperto, con la stanza intorno",
+      "tight": "Asciutto",
+      "tightHint": "da vicino, senza coda",
+      "brushes": "Spazzole",
+      "brushesHint": "sommesso, per una ballad",
+      "electronic": "Elettronico",
+      "electronicHint": "sintetizzato e deciso"
+    },
+    "transposition": {
+      "label": "Tu leggi",
+      "concert": "Reale",
+      "bb": "Si♭",
+      "eb": "Mi♭"
+    },
+    "setup": {
+      "label": "Tonalità, kit e la parte che leggi"
+    },
+    "band": {
+      "label": "La band",
+      "lead": "tutto sintetizzato, niente da scaricare",
+      "drums": "Batteria",
+      "bass": "Basso",
+      "keys": "Tastiere",
+      "you": "Tu",
+      "youPlay": "{{instrument}}",
+      "youHint": "la band non suona mai il tuo strumento",
+      "out": "fuori",
+      "hatsOnly": "solo charleston",
+      "inputOn": "Ingresso attivo",
+      "inputOff": "Ingresso spento"
+    },
+    "bassStyle": {
+      "rock": "fondamentali sulla cassa",
+      "shuffle": "una figura boogie",
+      "swing": "un walking bass",
+      "bossa": "il pattern bossa",
+      "waltz": "fondamentale e quinta",
+      "sixeight": "fondamentale e quinta",
+      "funk": "fondamentali sincopate"
+    },
+    "practice": {
+      "label": "Esercizio",
+      "dropOut": "Battute a vuoto",
+      "dropOutEvery": "A vuoto ogni {{count}}",
+      "dropOutBarsLabel": "Per quanto la band tace",
+      "forBars": "per {{count}} battute",
+      "forBars_one": "per {{count}} battuta",
+      "forBars_other": "per {{count}} battute",
+      "trade": "Scambi",
+      "tradeN": "A gruppi di {{count}}",
+      "tempo": "Allenatore di tempo",
+      "tempoUp": "Tempo +{{step}}",
+      "tempoEveryLabel": "Ogni quanto sale il tempo",
+      "everyChoruses": "ogni {{count}} giri",
+      "everyChoruses_one": "ogni {{count}} giro",
+      "everyChoruses_other": "ogni {{count}} giri",
+      "climbing": "partendo da {{from}}"
+    },
+    "cue": {
+      "yours": "Tocca a te, quattro",
+      "silent": "Tu da solo",
+      "back": "Rientra la band"
+    },
+    "editor": {
+      "label": "Editor del groove",
+      "edit": "Modifica il groove",
+      "makeYourOwn": "Creane uno tuo",
+      "name": "Nome del groove",
+      "yours": "Tuo",
+      "pages": "Modifica la battuta o il fill",
+      "bar": "Battuta",
+      "fill": "Fill",
+      "reset": "Ripristina",
+      "done": "Fatto",
+      "gridBar": "Il groove, una battuta",
+      "gridFill": "Il fill, una battuta",
+      "hint": "Clicca una cella per cambiarla",
+      "meter": "{{beats}} movimenti in {{subdivision}} · le colonne seguono il metro",
+      "cell": "{{lane}}, movimento {{beat}}, tick {{tick}}: {{level}}",
+      "lanes": {
+        "hat": "Charleston",
+        "snare": "Rullante",
+        "kick": "Cassa",
+        "ride": "Ride"
+      },
+      "levels": {
+        "0": "spento",
+        "1": "colpo",
+        "2": "accento",
+        "3": "fantasma"
+      },
+      "subdivision": {
+        "1": "semiminime",
+        "2": "crome",
+        "3": "terzine",
+        "4": "semicrome",
+        "6": "sestine"
+      }
+    },
+    "takes": {
+      "label": "Registrazioni",
+      "record": "Registra la take",
+      "recording": "Registrazione",
+      "recordingNow": "Sta registrando. La take compare qui quando ti fermi.",
+      "empty": "Ancora niente di registrato. Attiva Registra la take e suona — tu e la band, tenuti qui per riascoltarti.",
+      "unavailable": "La registrazione non è disponibile in questa versione. Tutto il resto di questa schermata funziona come sempre.",
+      "play": "Riproduci questa take",
+      "stop": "Ferma",
+      "bandOff": "band in silenzio",
+      "delete": "Elimina",
+      "confirm": "La elimino? Non si torna indietro.",
+      "confirmDelete": "Elimina",
+      "confirmKeep": "Tieni",
+      "size": "circa {{megabytes}} MB sul disco",
+      "local": "Le take restano su questa macchina. Non viene caricato niente.",
+      "introTitle": "Sulle take",
+      "introWhat": "Una take sei tu insieme alla band, dalla prima battuta dopo le battute d'intro fino a quando ti fermi.",
+      "introWhere": "Viene scritta come file WAV nella cartella di questa app su questa macchina, e resta lì finché non la elimini.",
+      "introPrivate": "Non viene caricato niente, non viene analizzato niente, niente lascia la macchina.",
+      "introNotNow": "Non ora",
+      "introStart": "Registra le take"
+    }
+  },
+  "scale": {
+    "major": "maggiore",
+    "naturalMinor": "minore naturale",
+    "dorian": "dorica",
+    "mixolydian": "misolidia",
+    "minorPentatonic": "pentatonica minore",
+    "majorPentatonic": "pentatonica maggiore",
+    "blues": "blues",
+    "harmonicMinor": "minore armonica",
+    "altered": "alterata"
+  }
+}

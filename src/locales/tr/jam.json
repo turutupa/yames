@@ -1,0 +1,324 @@
+{
+  "jam": {
+    "badge": "JAM",
+    "newJam": "Yeni jam",
+    "untitled": "Yeni jam",
+    "deleteJam": "Jam'i sil",
+    "duplicateJam": "Jam'i çoğalt",
+    "copyName": "{{name}} kopya",
+    "renameTooltip": "Bu jam'i yeniden adlandır",
+    "reorderHint": "Sıralamak için sürükleyin",
+    "edited": "Düzenlendi",
+    "save": "Kaydet",
+    "saved": "Kaydedildi",
+    "saveTooltip": "Jam'i şu anki hâliyle kaydet",
+    "noChanges": "Değişiklik yok",
+    "revert": "Geri al",
+    "revertTooltip": "Kayıtlı jam'e dön",
+    "noneOpenTitle": "Açık jam yok",
+    "noneOpenLead": "Jam, üzerine çalacağın bir grup: bir groove, bir tempo ve nerede olduğunu senin yerine sayan bir form. Kitaplıktan birini yükle ya da yenisini başlat.",
+    "headphones": "Kulaklıkla puan dürüst kalır.",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "Groove",
+      "rock8": "Rock 8'lik",
+      "rock16": "Rock 16'lık",
+      "halfTime": "Half-time",
+      "shuffle": "Shuffle",
+      "waltz": "Vals",
+      "sixEight": "6/8",
+      "bossa": "Bossa",
+      "swingRide": "Swing ride",
+      "funk": "Funk",
+      "oneDrop": "One drop",
+      "train": "Train beat",
+      "boomBap": "Boom bap",
+      "fourOnFloor": "Four on the floor",
+      "rule": "Kural"
+    },
+    "changes": {
+      "edit": "Akorları düzenle",
+      "done": "Tamam",
+      "hint": "Akorunu belirlemek için bir ölçüye dokunun. Uzun basmak mod olmadan da çalışır.",
+      "pickFor": "{{bar}}. ölçü",
+      "root": "Kök ses",
+      "quality": "Akor türü",
+      "major": "maj",
+      "asTheForm": "Form neyse o"
+    },
+    "meter": {
+      "label": "Ölçü",
+      "grooves": "Groove'un ölçüsü",
+      "ticks": "Vuruş başına tik",
+      "doesNotFit": "{{groove}}, {{meter}} ölçüsüne sığmıyor; davulcu kuralı çalıyor."
+    },
+    "mix": {
+      "forLane": "{{lane}} sesi"
+    },
+    "keysStyle": {
+      "label": "Eşlik",
+      "pads": "ölçü boyunca tutulur",
+      "stabs": "vuruş dışında, trampetle birlikte",
+      "padsShort": "Pad",
+      "stabsShort": "Vurgu"
+    },
+    "countInSound": {
+      "label": "Giriş sayımı",
+      "beep": "Bip",
+      "sticks": "Baget"
+    },
+    "cues": {
+      "label": "Sesli uyarılar",
+      "hint": "Sayım, bölüm ve \"senin dördün\" yüksek sesle söylenir — gözünüz klavyede kalsın.",
+      "noVoice": "Koç sesi gerekir. Ayarlar'dan yükleyin; o zamana kadar uyarılar ekranda kalır.",
+      "n1": "bir",
+      "n2": "iki",
+      "n3": "üç",
+      "n4": "dört",
+      "n5": "beş",
+      "n6": "altı",
+      "n7": "yedi",
+      "n8": "sekiz"
+    },
+    "feel": {
+      "label": "Feel",
+      "straight": "Düz",
+      "shuffle": "Shuffle",
+      "swing": "Swing"
+    },
+    "intensity": {
+      "label": "Yoğunluk",
+      "soft": "Yumuşak",
+      "normal": "Normal",
+      "loud": "Yüksek"
+    },
+    "form": {
+      "label": "Form",
+      "blues12": "12 ölçülük blues",
+      "blues12Hint": "I · IV · V, 12. ölçüde dönüş",
+      "loop8": "8 ölçülük döngü",
+      "loop8Hint": "tek bir akor turu, döne döne",
+      "bars16": "16 ölçü",
+      "bars16Hint": "iki yarı",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "standartların formu",
+      "one": "Tek akor",
+      "oneHint": "sadece groove",
+      "custom": "Kendi formun",
+      "customHint": "kaç ölçü sayıyorsan o kadar",
+      "barsLabel": "Ölçü",
+      "fewerBars": "Daha az ölçü",
+      "moreBars": "Daha fazla ölçü",
+      "barOf": "{{total}} ölçüden {{current}}. ölçü",
+      "chorus": "chorus {{count}}",
+      "fillMark": "fill",
+      "section": "{{name}} bölümü",
+      "looping": "{{start}}–{{end}} ölçü döngüde",
+      "startsAt": "{{bar}}. ölçüden başlar",
+      "jumpTo": "{{bar}}. ölçüye git",
+      "jumpPending": "bir sonraki ölçü çizgisinde",
+      "loopSection": "{{start}}–{{end}} ölçüyü döngüye al",
+      "loopOff": "Döngüyü kapat"
+    },
+    "short": {
+      "blues12": "12 ölçü",
+      "loop8": "8 ölçü",
+      "bars16": "16 ölçü",
+      "aaba32": "AABA",
+      "one": "1 akor",
+      "custom": "{{count}} ölçü",
+      "custom_one": "{{count}} ölçü",
+      "custom_other": "{{count}} ölçü"
+    },
+    "countIn": {
+      "label": "Giriş sayımı",
+      "none": "Yok",
+      "bars": "{{count}} ölçü",
+      "bars_one": "{{count}} ölçü",
+      "bars_other": "{{count}} ölçü"
+    },
+    "fills": {
+      "label": "Fill'ler",
+      "hint": "Fill'lerin düştüğü yer, ve ilk vuruşta crash.",
+      "off": "Yok",
+      "chorus": "Chorus sonu",
+      "every4": "Her 4",
+      "every8": "Her 8"
+    },
+    "transport": {
+      "chorus": "Chorus"
+    },
+    "now": {
+      "label": "Şimdi",
+      "aria": "{{chord}} çalıyor",
+      "next": "{{count}} ölçü sonra {{chord}}",
+      "next_one": "{{count}} ölçü sonra {{chord}}",
+      "next_other": "{{count}} ölçü sonra {{chord}}",
+      "nextNow": "Sırada {{chord}}"
+    },
+    "fretboard": {
+      "label": "Klavye",
+      "aria": "Sapta {{chord}}"
+    },
+    "chords": {
+      "label": "Akorlar",
+      "hint": "Akor geçişlerini ölçü şeridine, üstüne de çaldığın akoru koyar.",
+      "inKey": "{{key}} akorları",
+      "follow": "Jam'i takip et",
+      "followHint": "Basışlar akorlarla birlikte ilerlesin ya da tek bir akora sabitlensin.",
+      "sevenths": "Yedililer",
+      "nextShape": "Sonraki basış",
+      "sizeTriad": "üçlü",
+      "sizeOpen": "açık",
+      "sizeBarre": "bare",
+      "sizeSeventh": "yedili",
+      "fret": "{{fret}}. perde"
+    },
+    "key": {
+      "label": "Ton",
+      "mode": "Majör, minör ya da blues",
+      "major": "Majör",
+      "minor": "Minör",
+      "blues": "Blues",
+      "majorNamed": "{{root}} majör",
+      "minorNamed": "{{root}} minör",
+      "bluesNamed": "{{root}} blues"
+    },
+    "kit": {
+      "label": "Set",
+      "room": "Oda",
+      "roomHint": "açık, odanın havasıyla",
+      "tight": "Sıkı",
+      "tightHint": "yakından, kuyruksuz",
+      "brushes": "Fırça",
+      "brushesHint": "sessiz, balad için",
+      "electronic": "Elektronik",
+      "electronicHint": "sentezlenmiş ve tok"
+    },
+    "transposition": {
+      "label": "Okuduğun",
+      "concert": "Gerçek ses",
+      "bb": "Si♭",
+      "eb": "Mi♭"
+    },
+    "setup": {
+      "label": "Ton, set ve okuduğun parti"
+    },
+    "band": {
+      "label": "Grup",
+      "lead": "hepsi sentezlendi, indirilecek bir şey yok",
+      "drums": "Davul",
+      "bass": "Bas",
+      "keys": "Klavye",
+      "you": "Sen",
+      "youPlay": "{{instrument}}",
+      "youHint": "grup asla senin enstrümanını çalmaz",
+      "out": "susuyor",
+      "hatsOnly": "sadece hi-hat",
+      "inputOn": "Giriş açık",
+      "inputOff": "Giriş kapalı"
+    },
+    "bassStyle": {
+      "rock": "kick üstünde kök sesler",
+      "shuffle": "boogie kalıbı",
+      "swing": "yürüyen bas",
+      "bossa": "bossa kalıbı",
+      "waltz": "kök ses ve beşli",
+      "sixeight": "kök ses ve beşli",
+      "funk": "senkoplu kök sesler"
+    },
+    "practice": {
+      "label": "Çalışma",
+      "dropOut": "Sessiz ölçüler",
+      "dropOutEvery": "Her {{count}} ölçüde sus",
+      "dropOutBarsLabel": "Grup ne kadar susuyor",
+      "forBars": "{{count}} ölçü boyunca",
+      "forBars_one": "{{count}} ölçü boyunca",
+      "forBars_other": "{{count}} ölçü boyunca",
+      "trade": "Sıra sana",
+      "tradeN": "{{count}}'erli",
+      "tempo": "Tempo çalıştırıcı",
+      "tempoUp": "Tempo +{{step}}",
+      "tempoEveryLabel": "Tempo ne sıklıkla artıyor",
+      "everyChoruses": "her {{count}} turda",
+      "everyChoruses_one": "her {{count}} turda",
+      "everyChoruses_other": "her {{count}} turda",
+      "climbing": "{{from}} değerinden yükseliyor"
+    },
+    "cue": {
+      "yours": "Senin dört ölçün",
+      "silent": "Yalnız sen",
+      "back": "Grup döndü"
+    },
+    "editor": {
+      "label": "Groove düzenleyici",
+      "edit": "Groove'u düzenle",
+      "makeYourOwn": "Kendin yap",
+      "name": "Groove adı",
+      "yours": "Seninki",
+      "pages": "Ölçüyü ya da fill'i düzenle",
+      "bar": "Ölçü",
+      "fill": "Fill",
+      "reset": "Sıfırla",
+      "done": "Tamam",
+      "gridBar": "Groove, tek ölçü",
+      "gridFill": "Fill, tek ölçü",
+      "hint": "Değiştirmek için bir kutuya tıkla",
+      "meter": "{{subdivision}} olarak {{beats}} vuruş · sütunlar ölçüyü izler",
+      "cell": "{{lane}}, {{beat}}. vuruş, {{tick}}. tık: {{level}}",
+      "lanes": {
+        "hat": "Hi-hat",
+        "snare": "Trampet",
+        "kick": "Kick",
+        "ride": "Ride"
+      },
+      "levels": {
+        "0": "yok",
+        "1": "vuruş",
+        "2": "aksan",
+        "3": "hayalet"
+      },
+      "subdivision": {
+        "1": "dörtlükler",
+        "2": "sekizlikler",
+        "3": "triole",
+        "4": "onaltılıklar",
+        "6": "sextole"
+      }
+    },
+    "takes": {
+      "label": "Kayıtlar",
+      "record": "Kaydı al",
+      "recording": "Kaydediliyor",
+      "recordingNow": "Kaydediliyor. Durdurduğunda buraya düşer.",
+      "empty": "Henüz bir şey kaydedilmedi. Kaydı al'ı aç ve çal — sen ve grup, sonra dinlemek için burada durur.",
+      "unavailable": "Bu sürümde kayıt yapılamıyor. Bu ekrandaki diğer her şey her zamanki gibi çalışıyor.",
+      "play": "Bu kaydı çal",
+      "stop": "Durdur",
+      "bandOff": "grup sessiz",
+      "delete": "Sil",
+      "confirm": "Silinsin mi? Geri alınamıyor.",
+      "confirmDelete": "Sil",
+      "confirmKeep": "Kalsın",
+      "size": "diskte yaklaşık {{megabytes}} MB",
+      "local": "Kayıtlar bu makinede kalır. Hiçbir şey yüklenmez.",
+      "introTitle": "Kayıtlar hakkında",
+      "introWhat": "Bir kayıt, giriş sayımından sonraki ilk ölçüden durana kadar sen ve grubun birlikte çaldığı sestir.",
+      "introWhere": "Bu makinede bu uygulamanın kendi klasörüne WAV dosyası olarak yazılır ve sen silene kadar orada kalır.",
+      "introPrivate": "Hiçbir şey yüklenmez, hiçbir şey incelenmez, hiçbir şey makineden çıkmaz.",
+      "introNotNow": "Şimdi değil",
+      "introStart": "Kayıt al"
+    }
+  },
+  "scale": {
+    "major": "majör",
+    "naturalMinor": "doğal minör",
+    "dorian": "dorian",
+    "mixolydian": "miksolidyen",
+    "minorPentatonic": "minör pentatonik",
+    "majorPentatonic": "majör pentatonik",
+    "blues": "blues",
+    "harmonicMinor": "armonik minör",
+    "altered": "altere"
+  }
+}

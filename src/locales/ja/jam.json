@@ -1,0 +1,324 @@
+{
+  "jam": {
+    "badge": "ジャム",
+    "newJam": "新しいジャム",
+    "untitled": "新しいジャム",
+    "deleteJam": "ジャムを削除",
+    "duplicateJam": "ジャムを複製",
+    "copyName": "{{name}} のコピー",
+    "renameTooltip": "このジャムの名前を変更",
+    "reorderHint": "ドラッグして並べ替え",
+    "edited": "編集済み",
+    "save": "保存",
+    "saved": "保存しました",
+    "saveTooltip": "今の状態でジャムを保存",
+    "noChanges": "変更なし",
+    "revert": "元に戻す",
+    "revertTooltip": "保存済みのジャムに戻す",
+    "noneOpenTitle": "開いているジャムはありません",
+    "noneOpenLead": "ジャムは、その上で弾くためのバンドです。グルーヴとテンポ、そして今どこにいるかを覚えていてくれるフォーム。ライブラリから読み込むか、新しく作ってください。",
+    "headphones": "ヘッドホンを使うと採点が正直になります。",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "グルーヴ",
+      "rock8": "ロック 8分",
+      "rock16": "ロック 16分",
+      "halfTime": "ハーフタイム",
+      "shuffle": "シャッフル",
+      "waltz": "ワルツ",
+      "sixEight": "6/8",
+      "bossa": "ボサノヴァ",
+      "swingRide": "スウィング・ライド",
+      "funk": "ファンク",
+      "oneDrop": "ワンドロップ",
+      "train": "トレインビート",
+      "boomBap": "ブーンバップ",
+      "fourOnFloor": "フォー・オン・ザ・フロア",
+      "rule": "ルール"
+    },
+    "changes": {
+      "edit": "コードを編集",
+      "done": "完了",
+      "hint": "小節をタップしてコードを決めます。長押しならモードなしでも変更できます。",
+      "pickFor": "{{bar}} 小節目",
+      "root": "ルート",
+      "quality": "コードの種類",
+      "major": "メジャー",
+      "asTheForm": "フォームどおり"
+    },
+    "meter": {
+      "label": "拍子",
+      "grooves": "グルーヴの拍子",
+      "ticks": "1拍あたりのティック",
+      "doesNotFit": "{{groove}} は {{meter}} に合いません。ドラムはルールで演奏します。"
+    },
+    "mix": {
+      "forLane": "{{lane}} の音量"
+    },
+    "keysStyle": {
+      "label": "バッキング",
+      "pads": "小節いっぱい伸ばす",
+      "stabs": "裏拍で、スネアと一緒に",
+      "padsShort": "パッド",
+      "stabsShort": "スタブ"
+    },
+    "countInSound": {
+      "label": "カウントイン",
+      "beep": "ビープ",
+      "sticks": "スティック"
+    },
+    "cues": {
+      "label": "音声ガイド",
+      "hint": "カウント、セクション、「あなたの4小節」を声で伝えます。目は指板に向けたままで。",
+      "noVoice": "コーチの音声が必要です。設定からインストールしてください。それまでガイドは画面に表示されます。",
+      "n1": "いち",
+      "n2": "に",
+      "n3": "さん",
+      "n4": "し",
+      "n5": "ご",
+      "n6": "ろく",
+      "n7": "なな",
+      "n8": "はち"
+    },
+    "feel": {
+      "label": "フィール",
+      "straight": "ストレート",
+      "shuffle": "シャッフル",
+      "swing": "スウィング"
+    },
+    "intensity": {
+      "label": "強さ",
+      "soft": "弱め",
+      "normal": "ふつう",
+      "loud": "強め"
+    },
+    "form": {
+      "label": "フォーム",
+      "blues12": "12小節ブルース",
+      "blues12Hint": "I · IV · V、12小節目でターンアラウンド",
+      "loop8": "8小節ループ",
+      "loop8Hint": "ひとつの進行をぐるぐる",
+      "bars16": "16小節",
+      "bars16Hint": "前半と後半",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "スタンダードの形",
+      "one": "ワンコード",
+      "oneHint": "グルーヴだけ",
+      "custom": "自分で決める",
+      "customHint": "好きな小節数で",
+      "barsLabel": "小節数",
+      "fewerBars": "小節を減らす",
+      "moreBars": "小節を増やす",
+      "barOf": "{{total}} 小節中 {{current}} 小節目",
+      "chorus": "コーラス {{count}}",
+      "fillMark": "フィル",
+      "section": "セクション {{name}}",
+      "looping": "{{start}}–{{end}} 小節をループ中",
+      "startsAt": "{{bar}} 小節目から開始",
+      "jumpTo": "{{bar}} 小節目へ",
+      "jumpPending": "次の小節線で",
+      "loopSection": "{{start}}–{{end}} 小節をループ",
+      "loopOff": "ループを解除"
+    },
+    "short": {
+      "blues12": "12小節",
+      "loop8": "8小節",
+      "bars16": "16小節",
+      "aaba32": "AABA",
+      "one": "1コード",
+      "custom": "{{count}} 小節",
+      "custom_one": "{{count}} 小節",
+      "custom_other": "{{count}} 小節"
+    },
+    "countIn": {
+      "label": "カウントイン",
+      "none": "なし",
+      "bars": "{{count}} 小節",
+      "bars_one": "{{count}} 小節",
+      "bars_other": "{{count}} 小節"
+    },
+    "fills": {
+      "label": "フィル",
+      "hint": "フィルの入る場所と、次の1拍目のクラッシュ。",
+      "off": "なし",
+      "chorus": "コーラス末",
+      "every4": "4小節ごと",
+      "every8": "8小節ごと"
+    },
+    "transport": {
+      "chorus": "コーラス"
+    },
+    "now": {
+      "label": "いま",
+      "aria": "{{chord}} が鳴っています",
+      "next": "{{count}} 小節後に {{chord}}",
+      "next_one": "{{count}} 小節後に {{chord}}",
+      "next_other": "{{count}} 小節後に {{chord}}",
+      "nextNow": "次は {{chord}}"
+    },
+    "fretboard": {
+      "label": "指板",
+      "aria": "ネック上の {{chord}}"
+    },
+    "chords": {
+      "label": "コード",
+      "hint": "小節の並びにコード進行を、その上に今のコードを表示します。",
+      "inKey": "{{key}} のコード",
+      "follow": "ジャムに追従",
+      "followHint": "フォームをコード進行に合わせて動かすか、ひとつのコードに固定します。",
+      "sevenths": "7th",
+      "nextShape": "次のフォーム",
+      "sizeTriad": "トライアド",
+      "sizeOpen": "オープン",
+      "sizeBarre": "バレー",
+      "sizeSeventh": "7th",
+      "fret": "{{fret}} フレット"
+    },
+    "key": {
+      "label": "キー",
+      "mode": "メジャー・マイナー・ブルース",
+      "major": "メジャー",
+      "minor": "マイナー",
+      "blues": "ブルース",
+      "majorNamed": "{{root}} メジャー",
+      "minorNamed": "{{root}} マイナー",
+      "bluesNamed": "{{root}} ブルース"
+    },
+    "kit": {
+      "label": "キット",
+      "room": "ルーム",
+      "roomHint": "部屋の響きを含んだ開いた音",
+      "tight": "タイト",
+      "tightHint": "近接、余韻なし",
+      "brushes": "ブラシ",
+      "brushesHint": "静かで、バラード向き",
+      "electronic": "エレクトロニック",
+      "electronicHint": "合成音で、輪郭がはっきり"
+    },
+    "transposition": {
+      "label": "読む調",
+      "concert": "実音",
+      "bb": "B♭",
+      "eb": "E♭"
+    },
+    "setup": {
+      "label": "キー、キット、読む譜面"
+    },
+    "band": {
+      "label": "バンド",
+      "lead": "すべて合成音、ダウンロードは不要",
+      "drums": "ドラム",
+      "bass": "ベース",
+      "keys": "キーボード",
+      "you": "あなた",
+      "youPlay": "{{instrument}}",
+      "youHint": "バンドはあなたの楽器を弾きません",
+      "out": "休み",
+      "hatsOnly": "ハイハットのみ",
+      "inputOn": "入力オン",
+      "inputOff": "入力オフ"
+    },
+    "bassStyle": {
+      "rock": "キックに合わせたルート",
+      "shuffle": "ブギのフレーズ",
+      "swing": "ウォーキングライン",
+      "bossa": "ボサのパターン",
+      "waltz": "ルートと5度",
+      "sixeight": "ルートと5度",
+      "funk": "シンコペーションしたルート"
+    },
+    "practice": {
+      "label": "練習",
+      "dropOut": "休止小節",
+      "dropOutEvery": "{{count}} 小節ごとに休止",
+      "dropOutBarsLabel": "バンドが休む長さ",
+      "forBars": "{{count}} 小節のあいだ",
+      "forBars_one": "{{count}} 小節のあいだ",
+      "forBars_other": "{{count}} 小節のあいだ",
+      "trade": "4バース",
+      "tradeN": "{{count}} 小節ずつ交替",
+      "tempo": "テンポトレーナー",
+      "tempoUp": "テンポ +{{step}}",
+      "tempoEveryLabel": "テンポが上がる頻度",
+      "everyChoruses": "{{count}} コーラスごと",
+      "everyChoruses_one": "{{count}} コーラスごと",
+      "everyChoruses_other": "{{count}} コーラスごと",
+      "climbing": "{{from}} から上昇中"
+    },
+    "cue": {
+      "yours": "あなたの4小節",
+      "silent": "あなただけ",
+      "back": "バンド復帰"
+    },
+    "editor": {
+      "label": "グルーヴエディタ",
+      "edit": "グルーヴを編集",
+      "makeYourOwn": "自分で作る",
+      "name": "グルーヴ名",
+      "yours": "あなたの",
+      "pages": "小節かフィルを編集",
+      "bar": "小節",
+      "fill": "フィル",
+      "reset": "リセット",
+      "done": "完了",
+      "gridBar": "グルーヴ、1小節",
+      "gridFill": "フィル、1小節",
+      "hint": "セルをクリックで切り替え",
+      "meter": "{{subdivision}}で{{beats}}拍 · 列は拍子に従います",
+      "cell": "{{lane}}、{{beat}} 拍目、{{tick}} 番目：{{level}}",
+      "lanes": {
+        "hat": "ハイハット",
+        "snare": "スネア",
+        "kick": "キック",
+        "ride": "ライド"
+      },
+      "levels": {
+        "0": "なし",
+        "1": "打つ",
+        "2": "アクセント",
+        "3": "ゴースト"
+      },
+      "subdivision": {
+        "1": "4分音符",
+        "2": "8分音符",
+        "3": "3連符",
+        "4": "16分音符",
+        "6": "6連符"
+      }
+    },
+    "takes": {
+      "label": "テイク",
+      "record": "テイクを録音",
+      "recording": "録音中",
+      "recordingNow": "録音中です。停止するとここに並びます。",
+      "empty": "まだ何も録音されていません。「テイクを録音」をオンにして弾いてください — あなたとバンドの演奏が、あとで聞き返せるようにここに残ります。",
+      "unavailable": "このバージョンでは録音を使えません。この画面の他の機能はこれまでどおり動きます。",
+      "play": "このテイクを再生",
+      "stop": "停止",
+      "bandOff": "バンドは無音",
+      "delete": "削除",
+      "confirm": "削除しますか？元には戻せません。",
+      "confirmDelete": "削除",
+      "confirmKeep": "残す",
+      "size": "ディスク上に約 {{megabytes}} MB",
+      "local": "テイクはこのマシンに残ります。アップロードはされません。",
+      "introTitle": "テイクについて",
+      "introWhat": "テイクとは、カウントイン後の最初の小節から停止するまでの、あなたとバンドをまとめた音です。",
+      "introWhere": "このマシンにあるこのアプリ専用のフォルダへ WAV ファイルとして保存され、削除するまでそこに残ります。",
+      "introPrivate": "何もアップロードされず、何も解析されず、何もこのマシンから出ません。",
+      "introNotNow": "今はしない",
+      "introStart": "テイクを録音する"
+    }
+  },
+  "scale": {
+    "major": "メジャー",
+    "naturalMinor": "ナチュラルマイナー",
+    "dorian": "ドリアン",
+    "mixolydian": "ミクソリディアン",
+    "minorPentatonic": "マイナーペンタトニック",
+    "majorPentatonic": "メジャーペンタトニック",
+    "blues": "ブルース",
+    "harmonicMinor": "ハーモニックマイナー",
+    "altered": "オルタード"
+  }
+}

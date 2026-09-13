@@ -128,6 +128,17 @@
       "beats_other": "{{count}} tiempos",
       "fewer": "Menos tiempos de entrada",
       "more": "Más tiempos de entrada"
+    },
+    "jam": {
+      "mark": "Este paso es un jam",
+      "addStep": "Añadir un jam",
+      "addTo": "Añadir al setlist…",
+      "barsOfForm": "{{count}} compases",
+      "barsOfForm_one": "{{count}} compás",
+      "barsOfForm_other": "{{count}} compases",
+      "said": "la banda",
+      "goneShort": "El jam ya no está",
+      "gone": "Ese jam ya no está en la biblioteca, así que este paso toca el clic que describe."
     }
   }
 }

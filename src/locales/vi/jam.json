@@ -1,0 +1,324 @@
+{
+  "jam": {
+    "badge": "JAM",
+    "newJam": "Jam mới",
+    "untitled": "Jam mới",
+    "deleteJam": "Xóa jam",
+    "duplicateJam": "Nhân bản jam",
+    "copyName": "{{name}} bản sao",
+    "renameTooltip": "Đổi tên jam này",
+    "reorderHint": "Kéo để sắp xếp lại",
+    "edited": "Đã sửa",
+    "save": "Lưu",
+    "saved": "Đã lưu",
+    "saveTooltip": "Lưu jam như hiện tại",
+    "noChanges": "Không có thay đổi",
+    "revert": "Hoàn tác",
+    "revertTooltip": "Quay lại jam đã lưu",
+    "noneOpenTitle": "Chưa mở jam nào",
+    "noneOpenLead": "Một jam là ban nhạc để bạn chơi cùng: một groove, một tempo và một cấu trúc tự đếm ô nhịp thay bạn. Hãy tải một jam từ thư viện, hoặc tạo jam mới.",
+    "headphones": "Dùng tai nghe thì điểm số mới trung thực.",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "Groove",
+      "rock8": "Rock móc đơn",
+      "rock16": "Rock móc kép",
+      "halfTime": "Half-time",
+      "shuffle": "Shuffle",
+      "waltz": "Điệu valse",
+      "sixEight": "6/8",
+      "bossa": "Bossa",
+      "swingRide": "Swing ride",
+      "funk": "Funk",
+      "oneDrop": "One drop",
+      "train": "Train beat",
+      "boomBap": "Boom bap",
+      "fourOnFloor": "Four on the floor",
+      "rule": "Quy tắc"
+    },
+    "changes": {
+      "edit": "Sửa vòng hợp âm",
+      "done": "Xong",
+      "hint": "Chạm vào một ô nhịp để đặt hợp âm. Nhấn giữ cũng được, không cần bật chế độ.",
+      "pickFor": "Ô nhịp {{bar}}",
+      "root": "Âm gốc",
+      "quality": "Loại hợp âm",
+      "major": "trưởng",
+      "asTheForm": "Theo cấu trúc"
+    },
+    "meter": {
+      "label": "Nhịp",
+      "grooves": "Nhịp của groove",
+      "ticks": "Tick mỗi phách",
+      "doesNotFit": "{{groove}} không vừa với {{meter}}; tay trống chơi theo quy tắc."
+    },
+    "mix": {
+      "forLane": "Âm lượng {{lane}}"
+    },
+    "keysStyle": {
+      "label": "Đệm",
+      "pads": "ngân suốt ô nhịp",
+      "stabs": "lệch phách, cùng với trống snare",
+      "padsShort": "Nền",
+      "stabsShort": "Chấm"
+    },
+    "countInSound": {
+      "label": "Đếm vào",
+      "beep": "Tiếng bíp",
+      "sticks": "Dùi trống"
+    },
+    "cues": {
+      "label": "Nhắc bằng giọng nói",
+      "hint": "Đếm vào, đoạn nhạc và \"bốn nhịp của bạn\" được nói ra, để mắt bạn ở lại trên cần đàn.",
+      "noVoice": "Cần giọng nói của huấn luyện viên. Hãy cài trong Cài đặt; trước đó các nhắc nhở vẫn hiện trên màn hình.",
+      "n1": "một",
+      "n2": "hai",
+      "n3": "ba",
+      "n4": "bốn",
+      "n5": "năm",
+      "n6": "sáu",
+      "n7": "bảy",
+      "n8": "tám"
+    },
+    "feel": {
+      "label": "Cảm giác",
+      "straight": "Đều",
+      "shuffle": "Shuffle",
+      "swing": "Swing"
+    },
+    "intensity": {
+      "label": "Cường độ",
+      "soft": "Nhẹ",
+      "normal": "Vừa",
+      "loud": "Mạnh"
+    },
+    "form": {
+      "label": "Cấu trúc",
+      "blues12": "Blues 12 ô nhịp",
+      "blues12Hint": "I · IV · V, turnaround ở ô 12",
+      "loop8": "Vòng 8 ô nhịp",
+      "loop8Hint": "một vòng hợp âm, lặp mãi",
+      "bars16": "16 ô nhịp",
+      "bars16Hint": "hai nửa",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "cấu trúc của các bản standard",
+      "one": "Một hợp âm",
+      "oneHint": "chỉ có groove",
+      "custom": "Của bạn",
+      "customHint": "bao nhiêu ô nhịp tùy bạn",
+      "barsLabel": "Ô nhịp",
+      "fewerBars": "Bớt ô nhịp",
+      "moreBars": "Thêm ô nhịp",
+      "barOf": "ô nhịp {{current}} trên {{total}}",
+      "chorus": "chorus {{count}}",
+      "fillMark": "fill",
+      "section": "Đoạn {{name}}",
+      "looping": "lặp ô nhịp {{start}}–{{end}}",
+      "startsAt": "bắt đầu từ ô nhịp {{bar}}",
+      "jumpTo": "Đến ô nhịp {{bar}}",
+      "jumpPending": "ở vạch nhịp kế tiếp",
+      "loopSection": "Lặp ô nhịp {{start}}–{{end}}",
+      "loopOff": "Ngừng lặp"
+    },
+    "short": {
+      "blues12": "12 ô nhịp",
+      "loop8": "8 ô nhịp",
+      "bars16": "16 ô nhịp",
+      "aaba32": "AABA",
+      "one": "1 hợp âm",
+      "custom": "{{count}} ô nhịp",
+      "custom_one": "{{count}} ô nhịp",
+      "custom_other": "{{count}} ô nhịp"
+    },
+    "countIn": {
+      "label": "Đếm vào",
+      "none": "Không",
+      "bars": "{{count}} ô nhịp",
+      "bars_one": "{{count}} ô nhịp",
+      "bars_other": "{{count}} ô nhịp"
+    },
+    "fills": {
+      "label": "Fill",
+      "hint": "Fill rơi vào đâu, và một crash vào phách một.",
+      "off": "Tắt",
+      "chorus": "Cuối chorus",
+      "every4": "Mỗi 4 ô",
+      "every8": "Mỗi 8 ô"
+    },
+    "transport": {
+      "chorus": "Chorus"
+    },
+    "now": {
+      "label": "Bây giờ",
+      "aria": "Đang là {{chord}}",
+      "next": "{{chord}} sau {{count}} ô nhịp",
+      "next_one": "{{chord}} sau {{count}} ô nhịp",
+      "next_other": "{{chord}} sau {{count}} ô nhịp",
+      "nextNow": "Tiếp theo là {{chord}}"
+    },
+    "fretboard": {
+      "label": "Cần đàn",
+      "aria": "{{chord}} trên cần đàn"
+    },
+    "chords": {
+      "label": "Hợp âm",
+      "hint": "Vòng hợp âm trên dải ô nhịp, và hợp âm bạn đang chơi ở trên.",
+      "inKey": "Hợp âm trong {{key}}",
+      "follow": "Bám theo bài",
+      "followHint": "Thế bấm chạy theo vòng hợp âm, hoặc ghim vào một hợp âm.",
+      "sevenths": "Hợp âm 7",
+      "nextShape": "Thế bấm sau",
+      "sizeTriad": "ba nốt",
+      "sizeOpen": "mở",
+      "sizeBarre": "chặn",
+      "sizeSeventh": "bậc 7",
+      "fret": "phím {{fret}}"
+    },
+    "key": {
+      "label": "Giọng",
+      "mode": "Trưởng, thứ hay blues",
+      "major": "Trưởng",
+      "minor": "Thứ",
+      "blues": "Blues",
+      "majorNamed": "{{root}} trưởng",
+      "minorNamed": "{{root}} thứ",
+      "bluesNamed": "blues giọng {{root}}"
+    },
+    "kit": {
+      "label": "Bộ trống",
+      "room": "Phòng",
+      "roomHint": "mở, có không gian phòng",
+      "tight": "Gọn",
+      "tightHint": "thu gần, không đuôi vang",
+      "brushes": "Chổi",
+      "brushesHint": "nhẹ, hợp với ballad",
+      "electronic": "Điện tử",
+      "electronicHint": "tổng hợp, chắc tiếng"
+    },
+    "transposition": {
+      "label": "Bạn đọc",
+      "concert": "Cao độ thật",
+      "bb": "Si♭",
+      "eb": "Mi♭"
+    },
+    "setup": {
+      "label": "Giọng, bộ trống và bè bạn đọc"
+    },
+    "band": {
+      "label": "Ban nhạc",
+      "lead": "tất cả đều tổng hợp, không phải tải gì",
+      "drums": "Trống",
+      "bass": "Bass",
+      "keys": "Phím",
+      "you": "Bạn",
+      "youPlay": "{{instrument}}",
+      "youHint": "ban nhạc không bao giờ chơi nhạc cụ của bạn",
+      "out": "nghỉ",
+      "hatsOnly": "chỉ hi-hat",
+      "inputOn": "Đầu vào bật",
+      "inputOff": "Đầu vào tắt"
+    },
+    "bassStyle": {
+      "rock": "nốt gốc theo trống cái",
+      "shuffle": "mẫu boogie",
+      "swing": "đường walking",
+      "bossa": "mẫu bossa",
+      "waltz": "nốt gốc và bậc năm",
+      "sixeight": "nốt gốc và bậc năm",
+      "funk": "nốt gốc đảo phách"
+    },
+    "practice": {
+      "label": "Luyện tập",
+      "dropOut": "Ô nhịp lặng",
+      "dropOutEvery": "Lặng mỗi {{count}} ô",
+      "dropOutBarsLabel": "Ban nhạc lặng bao lâu",
+      "forBars": "trong {{count}} ô nhịp",
+      "forBars_one": "trong {{count}} ô nhịp",
+      "forBars_other": "trong {{count}} ô nhịp",
+      "trade": "Đổi phiên",
+      "tradeN": "Mỗi {{count}} ô",
+      "tempo": "Luyện tốc độ",
+      "tempoUp": "Tốc độ +{{step}}",
+      "tempoEveryLabel": "Bao lâu thì tăng tốc độ",
+      "everyChoruses": "mỗi {{count}} vòng",
+      "everyChoruses_one": "mỗi {{count}} vòng",
+      "everyChoruses_other": "mỗi {{count}} vòng",
+      "climbing": "đang lên từ {{from}}"
+    },
+    "cue": {
+      "yours": "Bốn ô của bạn",
+      "silent": "Một mình bạn",
+      "back": "Ban nhạc vào lại"
+    },
+    "editor": {
+      "label": "Trình sửa groove",
+      "edit": "Sửa groove",
+      "makeYourOwn": "Tự tạo",
+      "name": "Tên groove",
+      "yours": "Của bạn",
+      "pages": "Sửa ô nhịp hoặc fill",
+      "bar": "Ô nhịp",
+      "fill": "Fill",
+      "reset": "Đặt lại",
+      "done": "Xong",
+      "gridBar": "Groove, một ô nhịp",
+      "gridFill": "Fill, một ô nhịp",
+      "hint": "Bấm vào ô để đổi",
+      "meter": "{{beats}} phách theo {{subdivision}} · các cột đi theo nhịp",
+      "cell": "{{lane}}, phách {{beat}}, nhịp nhỏ {{tick}}: {{level}}",
+      "lanes": {
+        "hat": "Hi-hat",
+        "snare": "Trống nhỏ",
+        "kick": "Trống cái",
+        "ride": "Ride"
+      },
+      "levels": {
+        "0": "không",
+        "1": "gõ",
+        "2": "nhấn",
+        "3": "mờ"
+      },
+      "subdivision": {
+        "1": "nốt đen",
+        "2": "nốt móc đơn",
+        "3": "chùm ba",
+        "4": "nốt móc kép",
+        "6": "chùm sáu"
+      }
+    },
+    "takes": {
+      "label": "Bản thu",
+      "record": "Thu bản này",
+      "recording": "Đang thu",
+      "recordingNow": "Đang thu. Bản thu sẽ hiện ở đây khi bạn dừng.",
+      "empty": "Chưa thu gì cả. Bật Thu bản này rồi chơi — bạn và ban nhạc, giữ ở đây để nghe lại.",
+      "unavailable": "Phiên bản này không thu được. Mọi thứ khác trên màn hình này vẫn hoạt động như cũ.",
+      "play": "Phát bản thu này",
+      "stop": "Dừng",
+      "bandOff": "ban nhạc im",
+      "delete": "Xóa",
+      "confirm": "Xóa nhé? Không hoàn tác được.",
+      "confirmDelete": "Xóa",
+      "confirmKeep": "Giữ",
+      "size": "khoảng {{megabytes}} MB trên đĩa",
+      "local": "Bản thu ở lại máy này. Không có gì được tải lên.",
+      "introTitle": "Về bản thu",
+      "introWhat": "Một bản thu là bạn cùng ban nhạc, từ ô nhịp đầu tiên sau đếm vào cho đến khi bạn dừng.",
+      "introWhere": "Nó được ghi thành tệp WAV trong thư mục riêng của ứng dụng trên máy này, và ở đó cho đến khi bạn xóa.",
+      "introPrivate": "Không có gì được tải lên, không có gì được phân tích, và không gì rời khỏi máy.",
+      "introNotNow": "Để sau",
+      "introStart": "Thu các bản"
+    }
+  },
+  "scale": {
+    "major": "trưởng",
+    "naturalMinor": "thứ tự nhiên",
+    "dorian": "dorian",
+    "mixolydian": "mixolydian",
+    "minorPentatonic": "ngũ cung thứ",
+    "majorPentatonic": "ngũ cung trưởng",
+    "blues": "blues",
+    "harmonicMinor": "thứ hòa thanh",
+    "altered": "altered"
+  }
+}

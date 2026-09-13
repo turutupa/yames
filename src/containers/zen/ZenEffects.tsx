@@ -12,7 +12,7 @@ interface ZenEffectsProps {
   style: ZenStyle;
   currentBeat: BeatEvent | null;
   isPlaying: boolean;
-  activeTab: "beat" | "drill";
+  activeTab: "beat" | "drill" | "jam";
   beatsPerMeasure: number;
 }
 

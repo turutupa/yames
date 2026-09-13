@@ -1,0 +1,324 @@
+{
+  "jam": {
+    "badge": "JAM",
+    "newJam": "Nowy jam",
+    "untitled": "Nowy jam",
+    "deleteJam": "Usuń jam",
+    "duplicateJam": "Powiel jam",
+    "copyName": "{{name}} kopia",
+    "renameTooltip": "Zmień nazwę tego jamu",
+    "reorderHint": "Przeciągnij, aby zmienić kolejność",
+    "edited": "Zmieniono",
+    "save": "Zapisz",
+    "saved": "Zapisano",
+    "saveTooltip": "Zapisz jam w obecnej postaci",
+    "noChanges": "Brak zmian",
+    "revert": "Przywróć",
+    "revertTooltip": "Wróć do zapisanego jamu",
+    "noneOpenTitle": "Nie otwarto żadnego jamu",
+    "noneOpenLead": "Jam to zespół, nad którym grasz: groove, tempo i forma, która liczy takty za ciebie. Wczytaj jeden z biblioteki albo zacznij nowy.",
+    "headphones": "W słuchawkach ocena pozostaje uczciwa.",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "Groove",
+      "rock8": "Rock na ósemkach",
+      "rock16": "Rock na szesnastkach",
+      "halfTime": "Half-time",
+      "shuffle": "Shuffle",
+      "waltz": "Walc",
+      "sixEight": "6/8",
+      "bossa": "Bossa",
+      "swingRide": "Swing na ride",
+      "funk": "Funk",
+      "oneDrop": "One drop",
+      "train": "Train beat",
+      "boomBap": "Boom bap",
+      "fourOnFloor": "Four on the floor",
+      "rule": "Reguła"
+    },
+    "changes": {
+      "edit": "Edytuj akordy",
+      "done": "Gotowe",
+      "hint": "Dotknij taktu, aby ustawić jego akord. Długie przytrzymanie działa bez trybu.",
+      "pickFor": "Takt {{bar}}",
+      "root": "Pryma",
+      "quality": "Rodzaj",
+      "major": "dur",
+      "asTheForm": "Jak forma"
+    },
+    "meter": {
+      "label": "Metrum",
+      "grooves": "Metrum groove'u",
+      "ticks": "Tyknięcia na miarę",
+      "doesNotFit": "{{groove}} nie mieści się w {{meter}}; perkusista gra regułę."
+    },
+    "mix": {
+      "forLane": "Głośność: {{lane}}"
+    },
+    "keysStyle": {
+      "label": "Akompaniament",
+      "pads": "trzymany przez cały takt",
+      "stabs": "na „i”, razem z werblem",
+      "padsShort": "Pady",
+      "stabsShort": "Akcenty"
+    },
+    "countInSound": {
+      "label": "Odliczanie",
+      "beep": "Sygnał",
+      "sticks": "Pałki"
+    },
+    "cues": {
+      "label": "Zapowiedzi głosowe",
+      "hint": "Odliczanie, sekcja i „twoje cztery” — powiedziane na głos, żeby wzrok został na gryfie.",
+      "noVoice": "Wymaga głosu trenera. Zainstaluj go w Ustawieniach; do tego czasu zapowiedzi zostają na ekranie.",
+      "n1": "raz",
+      "n2": "dwa",
+      "n3": "trzy",
+      "n4": "cztery",
+      "n5": "pięć",
+      "n6": "sześć",
+      "n7": "siedem",
+      "n8": "osiem"
+    },
+    "feel": {
+      "label": "Feel",
+      "straight": "Prosto",
+      "shuffle": "Shuffle",
+      "swing": "Swing"
+    },
+    "intensity": {
+      "label": "Intensywność",
+      "soft": "Cicho",
+      "normal": "Normalnie",
+      "loud": "Głośno"
+    },
+    "form": {
+      "label": "Forma",
+      "blues12": "Blues 12-taktowy",
+      "blues12Hint": "I · IV · V, zwrot w 12. takcie",
+      "loop8": "Pętla 8-taktowa",
+      "loop8Hint": "jeden przebieg, w kółko",
+      "bars16": "16 taktów",
+      "bars16Hint": "dwie połowy",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "forma standardów",
+      "one": "Jeden akord",
+      "oneHint": "sam groove",
+      "custom": "Własna",
+      "customHint": "tyle taktów, ile liczysz",
+      "barsLabel": "Takty",
+      "fewerBars": "Mniej taktów",
+      "moreBars": "Więcej taktów",
+      "barOf": "takt {{current}} z {{total}}",
+      "chorus": "chorus {{count}}",
+      "fillMark": "fill",
+      "section": "Część {{name}}",
+      "looping": "pętla takty {{start}}–{{end}}",
+      "startsAt": "start od taktu {{bar}}",
+      "jumpTo": "Do taktu {{bar}}",
+      "jumpPending": "na następnej kresce taktowej",
+      "loopSection": "Zapętl takty {{start}}–{{end}}",
+      "loopOff": "Wyłącz pętlę"
+    },
+    "short": {
+      "blues12": "12 taktów",
+      "loop8": "8 taktów",
+      "bars16": "16 taktów",
+      "aaba32": "AABA",
+      "one": "1 akord",
+      "custom": "{{count}} taktów",
+      "custom_one": "{{count}} takt",
+      "custom_other": "{{count}} taktów"
+    },
+    "countIn": {
+      "label": "Odliczenie",
+      "none": "Brak",
+      "bars": "{{count}} taktów",
+      "bars_one": "{{count}} takt",
+      "bars_other": "{{count}} taktów"
+    },
+    "fills": {
+      "label": "Fille",
+      "hint": "Gdzie wypadają fille, i crash na raz.",
+      "off": "Brak",
+      "chorus": "Koniec chorusa",
+      "every4": "Co 4",
+      "every8": "Co 8"
+    },
+    "transport": {
+      "chorus": "Chorus"
+    },
+    "now": {
+      "label": "Teraz",
+      "aria": "Gra {{chord}}",
+      "next": "{{chord}} za {{count}} taktów",
+      "next_one": "{{chord}} za {{count}} takt",
+      "next_other": "{{chord}} za {{count}} taktów",
+      "nextNow": "Zaraz {{chord}}"
+    },
+    "fretboard": {
+      "label": "Gryf",
+      "aria": "{{chord}} na gryfie"
+    },
+    "chords": {
+      "label": "Akordy",
+      "hint": "Przebieg akordów na pasku taktów, a nad nim akord, na którym jesteś.",
+      "inKey": "Akordy w {{key}}",
+      "follow": "Idź za jamem",
+      "followHint": "Chwyty przesuwają się razem z akordami albo zostają przypięte do jednego.",
+      "sevenths": "Septymowe",
+      "nextShape": "Następny chwyt",
+      "sizeTriad": "trójdźwięk",
+      "sizeOpen": "otwarty",
+      "sizeBarre": "barowy",
+      "sizeSeventh": "septymowy",
+      "fret": "próg {{fret}}"
+    },
+    "key": {
+      "label": "Tonacja",
+      "mode": "Durowa, molowa albo bluesowa",
+      "major": "Dur",
+      "minor": "Moll",
+      "blues": "Blues",
+      "majorNamed": "{{root}}-dur",
+      "minorNamed": "{{root}}-moll",
+      "bluesNamed": "blues w {{root}}"
+    },
+    "kit": {
+      "label": "Zestaw",
+      "room": "Pokój",
+      "roomHint": "otwarty, z pomieszczeniem dookoła",
+      "tight": "Suchy",
+      "tightHint": "z bliska, bez wybrzmienia",
+      "brushes": "Miotełki",
+      "brushesHint": "cicho, do ballady",
+      "electronic": "Elektroniczny",
+      "electronicHint": "syntetyczny i zwarty"
+    },
+    "transposition": {
+      "label": "Czytasz",
+      "concert": "In C",
+      "bb": "B",
+      "eb": "Es"
+    },
+    "setup": {
+      "label": "Tonacja, zestaw i partia, którą czytasz"
+    },
+    "band": {
+      "label": "Zespół",
+      "lead": "wszystko syntezowane, nic do pobrania",
+      "drums": "Perkusja",
+      "bass": "Bas",
+      "keys": "Klawisze",
+      "you": "Ty",
+      "youPlay": "{{instrument}}",
+      "youHint": "zespół nigdy nie gra na twoim instrumencie",
+      "out": "pauza",
+      "hatsOnly": "tylko hi-hat",
+      "inputOn": "Wejście włączone",
+      "inputOff": "Wejście wyłączone"
+    },
+    "bassStyle": {
+      "rock": "prymy na stopie",
+      "shuffle": "figura boogie",
+      "swing": "linia walking",
+      "bossa": "wzór bossy",
+      "waltz": "pryma i kwinta",
+      "sixeight": "pryma i kwinta",
+      "funk": "synkopowane prymy"
+    },
+    "practice": {
+      "label": "Ćwiczenie",
+      "dropOut": "Takty ciszy",
+      "dropOutEvery": "Cisza co {{count}}",
+      "dropOutBarsLabel": "Jak długo zespół milczy",
+      "forBars": "przez {{count}} taktów",
+      "forBars_one": "przez {{count}} takt",
+      "forBars_other": "przez {{count}} taktów",
+      "trade": "Wymiana",
+      "tradeN": "Po {{count}}",
+      "tempo": "Trener tempa",
+      "tempoUp": "Tempo +{{step}}",
+      "tempoEveryLabel": "Jak często rośnie tempo",
+      "everyChoruses": "co {{count}} przebiegów",
+      "everyChoruses_one": "co {{count}} przebieg",
+      "everyChoruses_other": "co {{count}} przebiegów",
+      "climbing": "od {{from}} w górę"
+    },
+    "cue": {
+      "yours": "Twoje cztery",
+      "silent": "Ty sam",
+      "back": "Zespół wraca"
+    },
+    "editor": {
+      "label": "Edytor groove'u",
+      "edit": "Edytuj groove",
+      "makeYourOwn": "Zrób własny",
+      "name": "Nazwa groove'u",
+      "yours": "Twój",
+      "pages": "Edytuj takt albo przejście",
+      "bar": "Takt",
+      "fill": "Przejście",
+      "reset": "Przywróć",
+      "done": "Gotowe",
+      "gridBar": "Groove, jeden takt",
+      "gridFill": "Przejście, jeden takt",
+      "hint": "Kliknij pole, aby je przełączyć",
+      "meter": "{{beats}} miary w {{subdivision}} · kolumny idą za metrum",
+      "cell": "{{lane}}, miara {{beat}}, tik {{tick}}: {{level}}",
+      "lanes": {
+        "hat": "Hi-hat",
+        "snare": "Werbel",
+        "kick": "Stopa",
+        "ride": "Ride"
+      },
+      "levels": {
+        "0": "cisza",
+        "1": "uderzenie",
+        "2": "akcent",
+        "3": "ghost"
+      },
+      "subdivision": {
+        "1": "ćwierćnutach",
+        "2": "ósemkach",
+        "3": "triolach",
+        "4": "szesnastkach",
+        "6": "sekstolach"
+      }
+    },
+    "takes": {
+      "label": "Nagrania",
+      "record": "Nagraj takę",
+      "recording": "Nagrywanie",
+      "recordingNow": "Nagrywanie. Take pojawi się tutaj, gdy przerwiesz.",
+      "empty": "Nic jeszcze nie nagrano. Włącz Nagraj takę i zagraj — ty i zespół, zapisani tutaj do odsłuchania.",
+      "unavailable": "W tej wersji nie można nagrywać. Reszta tego ekranu działa tak jak zawsze.",
+      "play": "Odtwórz tę takę",
+      "stop": "Zatrzymaj",
+      "bandOff": "zespół cicho",
+      "delete": "Usuń",
+      "confirm": "Usunąć? Tego nie da się cofnąć.",
+      "confirmDelete": "Usuń",
+      "confirmKeep": "Zostaw",
+      "size": "około {{megabytes}} MB na dysku",
+      "local": "Take zostają na tym komputerze. Nic nie jest wysyłane.",
+      "introTitle": "O take'ach",
+      "introWhat": "Take to ty razem z zespołem, od pierwszego taktu po odliczeniu aż do przerwania.",
+      "introWhere": "Zapisuje się jako plik WAV we własnym folderze tej aplikacji na tym komputerze i zostaje tam, dopóki go nie usuniesz.",
+      "introPrivate": "Nic nie jest wysyłane, nic nie jest analizowane i nic nie opuszcza tego komputera.",
+      "introNotNow": "Nie teraz",
+      "introStart": "Nagrywaj take"
+    }
+  },
+  "scale": {
+    "major": "durowa",
+    "naturalMinor": "molowa naturalna",
+    "dorian": "dorycka",
+    "mixolydian": "miksolidyjska",
+    "minorPentatonic": "pentatonika molowa",
+    "majorPentatonic": "pentatonika durowa",
+    "blues": "bluesowa",
+    "harmonicMinor": "molowa harmoniczna",
+    "altered": "alterowana"
+  }
+}

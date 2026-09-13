@@ -15,6 +15,7 @@ import { render, screen, fireEvent, waitFor, within } from "@testing-library/rea
 import { createRef } from "react";
 import { PresetSidebar, type PresetSidebarHandle } from "./PresetSidebar";
 import { setInvokeResponse, DEFAULT_TEST_STATE } from "../../test/mocks";
+import { STARTER_JAMS } from "../../jam/jams";
 import type { Setlist, Preset } from "../../types";
 
 const makePreset = (overrides: Partial<Preset> = {}): Preset => ({
@@ -278,5 +279,129 @@ describe("PresetSidebar", () => {
     expect(screen.queryByLabelText("New setlist")).toBeNull();
     fireEvent.click(add);
     await waitFor(() => expect(document.querySelector(".preset-sidebar-name-input")).not.toBeNull());
+  });
+});
+
+describe("PresetSidebar — the jam library", () => {
+  const jamProps = { ...baseProps, view: "jam" as const };
+
+  it("lists jams with their tempo and their shape", async () => {
+    // "92 · 12-bar" is what tells two blues jams apart in a list of six.
+    setInvokeResponse("list_presets", () => []);
+    render(<PresetSidebar {...jamProps} jams={[...STARTER_JAMS]} onLoadJam={vi.fn()} />);
+    expect(await screen.findByText("Slow blues in A")).toBeInTheDocument();
+    expect(screen.getByText("92 · 12-bar")).toBeInTheDocument();
+    expect(screen.getByText("Swing in F")).toBeInTheDocument();
+    expect(screen.getByText("160 · AABA")).toBeInTheDocument();
+  });
+
+  it("titles the panel for the thing it holds", async () => {
+    setInvokeResponse("list_presets", () => []);
+    const { container } = render(<PresetSidebar {...jamProps} jams={[]} />);
+    await waitFor(() =>
+      expect(container.querySelector(".preset-sidebar-title")?.textContent).toBe("Jams"),
+    );
+  });
+
+  it("keeps jams off every other tab's library, and presets off its own", async () => {
+    setInvokeResponse("list_presets", () => [makePreset({ name: "Funk Groove" })]);
+    for (const view of ["beat", "drill", "setlist"] as const) {
+      const { container, unmount } = render(
+        <PresetSidebar {...baseProps} view={view} jams={[...STARTER_JAMS]} onLoadJam={vi.fn()} />,
+      );
+      await waitFor(() => expect(container.querySelector(".preset-sidebar-title")).not.toBeNull());
+      expect(container.querySelector(".jam-item")).toBeNull();
+      unmount();
+    }
+
+    const { container } = render(
+      <PresetSidebar {...jamProps} jams={[...STARTER_JAMS]} onLoadJam={vi.fn()} />,
+    );
+    await waitFor(() => expect(container.querySelector(".jam-item")).not.toBeNull());
+    expect(screen.queryByText("Funk Groove")).toBeNull();
+  });
+
+  it("gives the jam tab its own opener", async () => {
+    setInvokeResponse("list_presets", () => []);
+    const onNewJam = vi.fn();
+    render(<PresetSidebar {...jamProps} jams={[]} onNewJam={onNewJam} />);
+    fireEvent.click(await screen.findByLabelText("New jam"));
+    expect(onNewJam).toHaveBeenCalled();
+    expect(document.querySelector(".preset-sidebar-add")).toBeNull();
+  });
+
+  it("loads the jam whose row was clicked", async () => {
+    setInvokeResponse("list_presets", () => []);
+    const onLoadJam = vi.fn();
+    render(<PresetSidebar {...jamProps} jams={[...STARTER_JAMS]} onLoadJam={onLoadJam} />);
+    fireEvent.click(await screen.findByText("Bossa in D minor"));
+    expect(onLoadJam).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "Bossa in D minor" }),
+    );
+  });
+
+  it("offers rename, duplicate and delete on a right-click", async () => {
+    setInvokeResponse("list_presets", () => []);
+    const onDuplicateJam = vi.fn();
+    const onDeleteJam = vi.fn();
+    render(
+      <PresetSidebar
+        {...jamProps}
+        jams={[...STARTER_JAMS]}
+        onLoadJam={vi.fn()}
+        onDuplicateJam={onDuplicateJam}
+        onDeleteJam={onDeleteJam}
+      />,
+    );
+    fireEvent.contextMenu(await screen.findByText("Rock in G"));
+    const menu = await waitFor(() => {
+      const m = document.querySelector(".preset-context-menu");
+      expect(m).not.toBeNull();
+      return m as HTMLElement;
+    });
+    expect([...menu.querySelectorAll("button")].map((b) => b.textContent)).toEqual([
+      "Rename",
+      "Duplicate jam",
+      "Delete jam",
+    ]);
+    fireEvent.click(within(menu).getByText("Duplicate jam"));
+    expect(onDuplicateJam).toHaveBeenCalled();
+  });
+
+  it("reorders by the library's own order, not by the filtered rows", async () => {
+    // Dropping row two of a search result onto row four must move the jam to
+    // the fourth jam's place in the LIBRARY — the filtered view will not exist
+    // a keystroke later.
+    setInvokeResponse("list_presets", () => []);
+    const onReorderJams = vi.fn();
+    render(
+      <PresetSidebar
+        {...jamProps}
+        jams={[...STARTER_JAMS]}
+        onLoadJam={vi.fn()}
+        onReorderJams={onReorderJams}
+      />,
+    );
+    const search = await openSearch();
+    fireEvent.change(search, { target: { value: "in " } });
+
+    const rows = await waitFor(() => {
+      const r = [...document.querySelectorAll(".jam-item")];
+      expect(r.length).toBeGreaterThan(2);
+      return r;
+    });
+    const data = { effectAllowed: "", dropEffect: "", setData: vi.fn() };
+    // "Funk in E" is library index 1; "Swing in F" is library index 3.
+    fireEvent.dragStart(rows[1], { dataTransfer: data });
+    fireEvent.drop(rows[3], { dataTransfer: data });
+    expect(onReorderJams).toHaveBeenCalledWith(1, 3);
+  });
+
+  it("says so when a search matches no jam", async () => {
+    setInvokeResponse("list_presets", () => []);
+    render(<PresetSidebar {...jamProps} jams={[...STARTER_JAMS]} onLoadJam={vi.fn()} />);
+    const search = await openSearch();
+    fireEvent.change(search, { target: { value: "polka" } });
+    expect(await screen.findByText("No results")).toBeInTheDocument();
   });
 });

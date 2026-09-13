@@ -173,7 +173,8 @@
       "groups": {
         "metronome": "Metrônomo",
         "view": "Visualização",
-        "navigation": "Navegação"
+        "navigation": "Navegação",
+        "jam": "Jam"
       },
       "actions": {
         "play": "Tocar / Parar",
@@ -195,9 +196,19 @@
         "tab-1": "Aba Metrônomo",
         "tab-2": "Aba Setlist",
         "tab-3": "Aba Treino",
+        "tab-4": "Aba Jam",
         "settings": "Configurações",
         "toggle-sidebar": "Alternar barra lateral",
-        "toggle-coach": "Alternar Coach"
+        "toggle-coach": "Alternar Coach",
+        "jam-next-groove": "Próximo groove",
+        "jam-prev-groove": "Groove anterior",
+        "jam-trade": "Revezamento",
+        "jam-dropout": "Compassos em silêncio",
+        "jam-next-shape": "Próxima forma",
+        "jam-next-section": "Próxima seção",
+        "jam-prev-section": "Seção anterior",
+        "jam-loop-section": "Repetir esta seção",
+        "jam-take": "Gravar a tomada"
       },
       "descs": {
         "play": "Inicia ou para o metrônomo",
@@ -219,9 +230,19 @@
         "tab-1": "Vai para a aba Metrônomo",
         "tab-2": "Vai para a aba Setlist",
         "tab-3": "Vai para a aba Treino",
+        "tab-4": "Vai para a aba Jam",
         "settings": "Abre ou fecha as configurações",
         "toggle-sidebar": "Recolher ou expandir a barra lateral esquerda",
-        "toggle-coach": "Abre ou fecha o painel do coach"
+        "toggle-coach": "Abre ou fecha o painel do coach",
+        "jam-next-groove": "Ir para o próximo groove sem tirar a mão do instrumento",
+        "jam-prev-groove": "Voltar ao groove anterior",
+        "jam-trade": "Ligar ou desligar o revezamento — quatro compassos a banda, quatro você",
+        "jam-dropout": "Ligar ou desligar os compassos em silêncio",
+        "jam-next-shape": "Percorrer os jeitos de tocar o acorde atual",
+        "jam-next-section": "Pular para o início da próxima seção na barra de compasso",
+        "jam-prev-section": "Voltar ao início da seção anterior na barra de compasso",
+        "jam-loop-section": "Pôr em loop a seção em que você está, ou tirar",
+        "jam-take": "Gravar na próxima vez que você tocar, ou parar de gravar"
       }
     },
     "inputTest": {

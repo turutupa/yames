@@ -1,0 +1,324 @@
+{
+  "jam": {
+    "badge": "JAM",
+    "newJam": "Nouveau jam",
+    "untitled": "Nouveau jam",
+    "deleteJam": "Supprimer le jam",
+    "duplicateJam": "Dupliquer le jam",
+    "copyName": "{{name}} copie",
+    "renameTooltip": "Renommer ce jam",
+    "reorderHint": "Glisser pour réordonner",
+    "edited": "Modifié",
+    "save": "Enregistrer",
+    "saved": "Enregistré",
+    "saveTooltip": "Enregistrer le jam tel quel",
+    "noChanges": "Aucun changement",
+    "revert": "Rétablir",
+    "revertTooltip": "Revenir au jam enregistré",
+    "noneOpenTitle": "Aucun jam ouvert",
+    "noneOpenLead": "Un jam, c'est un groupe sur lequel jouer : un groove, un tempo et une forme qui compte les mesures à ta place. Charges-en un depuis la bibliothèque, ou commences-en un nouveau.",
+    "headphones": "Au casque, la note reste honnête.",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "Groove",
+      "rock8": "Rock croches",
+      "rock16": "Rock doubles-croches",
+      "halfTime": "Half-time",
+      "shuffle": "Shuffle",
+      "waltz": "Valse",
+      "sixEight": "6/8",
+      "bossa": "Bossa",
+      "swingRide": "Swing à la ride",
+      "funk": "Funk",
+      "oneDrop": "One drop",
+      "train": "Train beat",
+      "boomBap": "Boom bap",
+      "fourOnFloor": "Four on the floor",
+      "rule": "La règle"
+    },
+    "changes": {
+      "edit": "Modifier la grille",
+      "done": "Terminé",
+      "hint": "Touchez une mesure pour choisir son accord. Un appui long marche sans le mode.",
+      "pickFor": "Mesure {{bar}}",
+      "root": "Fondamentale",
+      "quality": "Type",
+      "major": "maj",
+      "asTheForm": "Comme la forme"
+    },
+    "meter": {
+      "label": "Métrique",
+      "grooves": "Celle du groove",
+      "ticks": "Tics par temps",
+      "doesNotFit": "{{groove}} ne tient pas en {{meter}} ; le batteur joue la règle."
+    },
+    "mix": {
+      "forLane": "Volume {{lane}}"
+    },
+    "keysStyle": {
+      "label": "Accompagnement",
+      "pads": "tenu sur toute la mesure",
+      "stabs": "à contretemps, avec la caisse claire",
+      "padsShort": "Nappes",
+      "stabsShort": "Accents"
+    },
+    "countInSound": {
+      "label": "Décompte",
+      "beep": "Bip",
+      "sticks": "Baguettes"
+    },
+    "cues": {
+      "label": "Annonces parlées",
+      "hint": "Le décompte, la section et « tes quatre », dits à voix haute — vos yeux restent sur le manche.",
+      "noVoice": "Nécessite la voix du coach. Installez-la dans les Réglages ; en attendant, les annonces restent à l'écran.",
+      "n1": "un",
+      "n2": "deux",
+      "n3": "trois",
+      "n4": "quatre",
+      "n5": "cinq",
+      "n6": "six",
+      "n7": "sept",
+      "n8": "huit"
+    },
+    "feel": {
+      "label": "Feel",
+      "straight": "Binaire",
+      "shuffle": "Shuffle",
+      "swing": "Swing"
+    },
+    "intensity": {
+      "label": "Intensité",
+      "soft": "Doux",
+      "normal": "Normal",
+      "loud": "Fort"
+    },
+    "form": {
+      "label": "Forme",
+      "blues12": "Blues 12 mesures",
+      "blues12Hint": "I · IV · V, le turnaround à la 12",
+      "loop8": "Boucle de 8 mesures",
+      "loop8Hint": "une grille, encore et encore",
+      "bars16": "16 mesures",
+      "bars16Hint": "deux moitiés",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "la forme des standards",
+      "one": "Un accord",
+      "oneHint": "juste le groove",
+      "custom": "La tienne",
+      "customHint": "autant de mesures que tu comptes",
+      "barsLabel": "Mesures",
+      "fewerBars": "Moins de mesures",
+      "moreBars": "Plus de mesures",
+      "barOf": "mesure {{current}} sur {{total}}",
+      "chorus": "chorus {{count}}",
+      "fillMark": "fill",
+      "section": "Section {{name}}",
+      "looping": "boucle mesures {{start}}–{{end}}",
+      "startsAt": "démarre à la mesure {{bar}}",
+      "jumpTo": "Aller à la mesure {{bar}}",
+      "jumpPending": "à la prochaine barre de mesure",
+      "loopSection": "Boucler les mesures {{start}}–{{end}}",
+      "loopOff": "Arrêter la boucle"
+    },
+    "short": {
+      "blues12": "12 mesures",
+      "loop8": "8 mesures",
+      "bars16": "16 mesures",
+      "aaba32": "AABA",
+      "one": "1 accord",
+      "custom": "{{count}} mesures",
+      "custom_one": "{{count}} mesure",
+      "custom_other": "{{count}} mesures"
+    },
+    "countIn": {
+      "label": "Décompte",
+      "none": "Aucun",
+      "bars": "{{count}} mesures",
+      "bars_one": "{{count}} mesure",
+      "bars_other": "{{count}} mesures"
+    },
+    "fills": {
+      "label": "Fills",
+      "hint": "Où tombent les fills, et une crash sur le un.",
+      "off": "Aucun",
+      "chorus": "Fin de chorus",
+      "every4": "Toutes les 4",
+      "every8": "Toutes les 8"
+    },
+    "transport": {
+      "chorus": "Chorus"
+    },
+    "now": {
+      "label": "Maintenant",
+      "aria": "{{chord}} en cours",
+      "next": "{{chord}} dans {{count}} mesures",
+      "next_one": "{{chord}} dans {{count}} mesure",
+      "next_other": "{{chord}} dans {{count}} mesures",
+      "nextNow": "{{chord}} juste après"
+    },
+    "fretboard": {
+      "label": "Manche",
+      "aria": "{{chord}} sur le manche"
+    },
+    "chords": {
+      "label": "Accords",
+      "hint": "Les changements sur la frise, et l'accord en cours au-dessus.",
+      "inKey": "Accords en {{key}}",
+      "follow": "Suivre le jam",
+      "followHint": "Les positions suivent les changements, ou tu les fixes sur un accord.",
+      "sevenths": "Septièmes",
+      "nextShape": "Position suivante",
+      "sizeTriad": "triade",
+      "sizeOpen": "ouverte",
+      "sizeBarre": "barré",
+      "sizeSeventh": "septième",
+      "fret": "case {{fret}}"
+    },
+    "key": {
+      "label": "Tonalité",
+      "mode": "Majeur, mineur ou blues",
+      "major": "Majeur",
+      "minor": "Mineur",
+      "blues": "Blues",
+      "majorNamed": "{{root}} majeur",
+      "minorNamed": "{{root}} mineur",
+      "bluesNamed": "blues en {{root}}"
+    },
+    "kit": {
+      "label": "Kit",
+      "room": "Salle",
+      "roomHint": "ouvert, avec la pièce autour",
+      "tight": "Serré",
+      "tightHint": "de près, sans traîne",
+      "brushes": "Balais",
+      "brushesHint": "doux, pour une ballade",
+      "electronic": "Électronique",
+      "electronicHint": "synthétisé et percutant"
+    },
+    "transposition": {
+      "label": "Tu lis",
+      "concert": "Réel",
+      "bb": "Si♭",
+      "eb": "Mi♭"
+    },
+    "setup": {
+      "label": "Tonalité, kit et la partie que tu lis"
+    },
+    "band": {
+      "label": "Le groupe",
+      "lead": "tout est synthétisé, rien à télécharger",
+      "drums": "Batterie",
+      "bass": "Basse",
+      "keys": "Clavier",
+      "you": "Toi",
+      "youPlay": "{{instrument}}",
+      "youHint": "le groupe ne joue jamais ton instrument",
+      "out": "sortie",
+      "hatsOnly": "charleston seul",
+      "inputOn": "Entrée active",
+      "inputOff": "Entrée coupée"
+    },
+    "bassStyle": {
+      "rock": "fondamentales sur la grosse caisse",
+      "shuffle": "une figure boogie",
+      "swing": "une walking bass",
+      "bossa": "le motif bossa",
+      "waltz": "fondamentale et quinte",
+      "sixeight": "fondamentale et quinte",
+      "funk": "fondamentales syncopées"
+    },
+    "practice": {
+      "label": "Travail",
+      "dropOut": "Mesures à vide",
+      "dropOutEvery": "À vide toutes les {{count}}",
+      "dropOutBarsLabel": "Combien de temps le groupe se tait",
+      "forBars": "pendant {{count}} mesures",
+      "forBars_one": "pendant {{count}} mesure",
+      "forBars_other": "pendant {{count}} mesures",
+      "trade": "Échanges",
+      "tradeN": "Par {{count}}",
+      "tempo": "Entraîneur de tempo",
+      "tempoUp": "Tempo +{{step}}",
+      "tempoEveryLabel": "À quelle fréquence le tempo monte",
+      "everyChoruses": "tous les {{count}} tours",
+      "everyChoruses_one": "tous les {{count}} tour",
+      "everyChoruses_other": "tous les {{count}} tours",
+      "climbing": "en partant de {{from}}"
+    },
+    "cue": {
+      "yours": "À toi, quatre",
+      "silent": "Toi seul",
+      "back": "Le groupe revient"
+    },
+    "editor": {
+      "label": "Éditeur de groove",
+      "edit": "Modifier le groove",
+      "makeYourOwn": "Crée le tien",
+      "name": "Nom du groove",
+      "yours": "À toi",
+      "pages": "Modifier la mesure ou le fill",
+      "bar": "Mesure",
+      "fill": "Fill",
+      "reset": "Réinitialiser",
+      "done": "Terminé",
+      "gridBar": "Le groove, une mesure",
+      "gridFill": "Le fill, une mesure",
+      "hint": "Clique sur une case pour la faire tourner",
+      "meter": "{{beats}} temps en {{subdivision}} · les colonnes suivent la mesure",
+      "cell": "{{lane}}, temps {{beat}}, tick {{tick}} : {{level}}",
+      "lanes": {
+        "hat": "Charleston",
+        "snare": "Caisse claire",
+        "kick": "Grosse caisse",
+        "ride": "Ride"
+      },
+      "levels": {
+        "0": "rien",
+        "1": "frappe",
+        "2": "accent",
+        "3": "fantôme"
+      },
+      "subdivision": {
+        "1": "noires",
+        "2": "croches",
+        "3": "triolets",
+        "4": "doubles-croches",
+        "6": "sextolets"
+      }
+    },
+    "takes": {
+      "label": "Prises",
+      "record": "Enregistrer la prise",
+      "recording": "Enregistrement",
+      "recordingNow": "Enregistrement en cours. La prise apparaît ici quand tu arrêtes.",
+      "empty": "Rien d'enregistré pour l'instant. Active Enregistrer la prise et joue — toi et le groupe, gardés ici pour te réécouter.",
+      "unavailable": "L'enregistrement n'est pas disponible dans cette version. Tout le reste de cet écran fonctionne comme avant.",
+      "play": "Lire cette prise",
+      "stop": "Arrêter",
+      "bandOff": "groupe en silence",
+      "delete": "Supprimer",
+      "confirm": "La supprimer ? C'est sans retour.",
+      "confirmDelete": "Supprimer",
+      "confirmKeep": "Garder",
+      "size": "environ {{megabytes}} Mo sur le disque",
+      "local": "Les prises restent sur cette machine. Rien n'est envoyé.",
+      "introTitle": "À propos des prises",
+      "introWhat": "Une prise, c'est toi et le groupe mélangés, de la première mesure après le décompte jusqu'à ce que tu arrêtes.",
+      "introWhere": "Elle est écrite en WAV dans le dossier propre à cette application, sur cette machine, et y reste jusqu'à ce que tu la supprimes.",
+      "introPrivate": "Rien n'est envoyé, rien n'est analysé, rien ne quitte la machine.",
+      "introNotNow": "Pas maintenant",
+      "introStart": "Enregistrer les prises"
+    }
+  },
+  "scale": {
+    "major": "majeure",
+    "naturalMinor": "mineure naturelle",
+    "dorian": "dorien",
+    "mixolydian": "mixolydien",
+    "minorPentatonic": "pentatonique mineure",
+    "majorPentatonic": "pentatonique majeure",
+    "blues": "blues",
+    "harmonicMinor": "mineure harmonique",
+    "altered": "altérée"
+  }
+}

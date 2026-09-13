@@ -262,4 +262,75 @@ describe("Transport — what it sheds, and in what order", () => {
     render(<Transport {...base} view="beat" />);
     expect(document.querySelector(".transport-setlist")).toBeNull();
   });
+
+  it("counts the form rather than the run once a jam is playing", () => {
+    // On a jam the useful number is not how many bars have gone by, it is
+    // which bar of the twelve you are on — so the bar readout becomes
+    // "3 / 12" and the chorus gets a readout of its own.
+    render(
+      <Transport {...base} view="jam" isPlaying bar={27} jamFormBars={12} jamFormBar={2} jamChorus={3} />,
+    );
+    const readouts = [...document.querySelectorAll(".transport-value")].map((n) => n.textContent);
+    expect(readouts[0]).toBe("3 / 12");
+    expect(readouts[1]).toBe("3");
+    expect(screen.getByText("Chorus")).toBeInTheDocument();
+    // And the running total is gone: two bar counts would be two answers to
+    // the same question.
+    expect(readouts).not.toContain("27");
+  });
+
+  it("shows bar one of the form at rest, not a dash and not a zero", () => {
+    render(<Transport {...base} view="jam" jamFormBars={12} jamFormBar={7} jamChorus={4} />);
+    const readouts = [...document.querySelectorAll(".transport-value")].map((n) => n.textContent);
+    expect(readouts[0]).toBe("1 / 12");
+    expect(readouts[1]).toBe("1");
+  });
+
+  it("leaves the plain bar counter alone on every other tab", () => {
+    render(<Transport {...base} view="beat" isPlaying bar={27} />);
+    expect(document.querySelector(".transport-value")?.textContent).toBe("27");
+    expect(screen.queryByText("Chorus")).toBeNull();
+  });
+});
+
+/**
+ * The recording mark (JAM_MODE §4.4).
+ *
+ * It is on the transport rather than inside the jam screen because that is
+ * where the button that starts it lives: a microphone writing a file must
+ * never be invisible.
+ *
+ * The transport itself does not ask which tab is showing, and these pin that
+ * — a component that gated its own mark on the view would be a second opinion
+ * about when a take is running. Whether one CAN be running is `useJamTakes`'s
+ * question, and its answer is that a take ends when its jam leaves the engine.
+ */
+describe("the recording mark", () => {
+  it("is absent until a take is running", () => {
+    render(<Transport {...base} view="jam" />);
+    expect(document.querySelector(".transport-recording")).toBeNull();
+  });
+
+  it("shows the mark and the elapsed time while one is", () => {
+    render(<Transport {...base} view="jam" recording recordedSeconds={247} />);
+    const mark = document.querySelector(".transport-recording") as HTMLElement;
+    expect(mark).toBeTruthy();
+    expect(mark.textContent).toContain("4:07");
+    expect(mark.querySelector(".transport-recording-dot")).toBeTruthy();
+  });
+
+  it("draws the mark wherever it is told to, without asking about the tab", () => {
+    // The transport takes the recording state as a fact and draws it. Which
+    // tabs that fact can be true on is decided one level up.
+    for (const view of ["beat", "drill", "setlist", "jam"] as const) {
+      const { unmount } = render(<Transport {...base} view={view} recording recordedSeconds={5} />);
+      expect(document.querySelector(".transport-recording"), view).toBeTruthy();
+      unmount();
+    }
+  });
+
+  it("marks the bar so the row can shed differently while recording", () => {
+    render(<Transport {...base} view="jam" recording />);
+    expect(document.querySelector(".transport")?.hasAttribute("data-recording")).toBe(true);
+  });
 });

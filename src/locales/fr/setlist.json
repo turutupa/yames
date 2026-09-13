@@ -128,6 +128,17 @@
       "beats_other": "{{count}} temps",
       "fewer": "Moins de temps de décompte",
       "more": "Plus de temps de décompte"
+    },
+    "jam": {
+      "mark": "Cette étape est un jam",
+      "addStep": "Ajouter un jam",
+      "addTo": "Ajouter à une setlist…",
+      "barsOfForm": "{{count}} mesures",
+      "barsOfForm_one": "{{count}} mesure",
+      "barsOfForm_other": "{{count}} mesures",
+      "said": "le groupe",
+      "goneShort": "Le jam n'existe plus",
+      "gone": "Ce jam n'est plus dans la bibliothèque : cette étape joue donc le clic qu'elle décrit."
     }
   }
 }

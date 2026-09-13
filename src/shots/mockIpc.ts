@@ -14,6 +14,10 @@
  */
 import { mockIPC, mockWindows } from "@tauri-apps/api/mocks";
 import type { Shot } from "./scenarios";
+import { STARTER_JAMS } from "../jam/jams";
+import { jamToSetlistStep } from "../setlist/setlists";
+import { bandStateForBar } from "../jam/practice";
+import type { JamEngineConfig } from "../jam/types";
 
 /**
  * The library in the sidebar.
@@ -45,6 +49,20 @@ const DRILLS = [
       barsPerStep: 6, beatsPerBar: 4, mode: "zigzag", cyclic: true, warmupBeats: 4 } },
 ];
 
+/**
+ * The routine ends with the band (JAM_MODE §8.5).
+ *
+ * Built through `jamToSetlistStep` rather than hand-written, so the picture
+ * cannot show a step shape the app would never produce — the meter, the
+ * tempo and the fallback click are all copied from the starter jam exactly
+ * as pressing "Add a jam" would copy them.
+ */
+const JAM_STEP = {
+  ...jamToSetlistStep(STARTER_JAMS[0]),
+  trigger: { kind: "manual" as const },
+  transition: { kind: "cut" as const },
+};
+
 const SETLISTS = [
   {
     id: "c1", name: "Daily routine", createdAt: 1, repeat: 1, countIn: 0,
@@ -57,9 +75,24 @@ const SETLISTS = [
         trigger: { kind: "seconds", seconds: 120 }, transition: { kind: "countIn", bars: 2 } },
       { id: "s3", name: "Cool down", bpm: 60, subdivision: 1, timeSignature: 4,
         beatGroups: [4], soundType: "wood", volume: 0.7,
-        trigger: { kind: "manual" }, transition: { kind: "cut" } },
+        trigger: { kind: "bars", bars: 16 }, transition: { kind: "countIn", bars: 1 } },
+      JAM_STEP,
     ],
   },
+];
+
+/**
+ * Three takes of the slow blues, so the shelf photographs with something on
+ * it. Fixed timestamps rather than "an hour ago", so the picture is the same
+ * whenever it is taken.
+ */
+const TAKES = [
+  { id: "tk3", jamId: STARTER_JAMS[0].id, createdAt: new Date(2026, 1, 18, 20, 12).getTime(),
+    durationSec: 402, path: "takes/tk3.wav" },
+  { id: "tk2", jamId: STARTER_JAMS[0].id, createdAt: new Date(2026, 1, 18, 19, 51).getTime(),
+    durationSec: 247, path: "takes/tk2.wav" },
+  { id: "tk1", jamId: STARTER_JAMS[0].id, createdAt: new Date(2026, 1, 16, 11, 30).getTime(),
+    durationSec: 118, path: "takes/tk1.wav" },
 ];
 
 function baseState(theme: string) {
@@ -179,6 +212,32 @@ export function installShotMock(shot: Shot, theme: string): void {
   let beatTimer: ReturnType<typeof setTimeout> | undefined;
   let beatCount = 0;
 
+  /**
+   * The jam the "engine" is carrying, if any.
+   *
+   * The mock counts the form the way `engine.rs` does — bars from the first
+   * downbeat, chorus from the bar count — so the timeline, the NOW block and
+   * the band lanes all move in a screenshot exactly as they do in the app.
+   * Without it the jam screen photographs as bar one of chorus one for ever,
+   * which is the one state that says nothing about what the mode does.
+   */
+  let jamConfig: JamEngineConfig | null = null;
+
+  /**
+   * Where the form has been sent, the way `set_jam_position` sends it.
+   *
+   * Applied at the bar line and never mid-bar, which is the whole rule the
+   * real command is written around. Without it the harness would photograph a
+   * timeline with a loop drawn on it and a lit cell walking straight out of
+   * the loop, which is a picture of the feature not working.
+   */
+  let jamJumpTo: number | null = null;
+  let jamLoop: { start: number; end: number } | null = null;
+  /** Added to the bar the beat count implies, so a jump is a shift not a reset. */
+  let jamBarShift = 0;
+  /** The bar reported on the last beat, so a bar line is detectable. */
+  let jamLastBar: number | null = null;
+
   function beatLoop() {
     clearTimeout(beatTimer);
     if (!STATE.isPlaying) return;
@@ -191,12 +250,46 @@ export function installShotMock(shot: Shot, theme: string): void {
       opens.add(cursor);
       cursor += g;
     }
+    // Bar zero of chorus one is what the engine reports with no jam loaded.
+    let formBar = 0;
+    let chorus = 1;
+    let bandState: "full" | "hatsOnly" | "silent" = "full";
+    if (jamConfig) {
+      const formBars = Math.max(1, jamConfig.formBars);
+      const raw = Math.floor(beatCount / total);
+      // A bar line is the only place the form is allowed to move.
+      if (jamLastBar !== raw) {
+        jamLastBar = raw;
+        const at = (((raw + jamBarShift) % formBars) + formBars) % formBars;
+        if (jamJumpTo !== null) {
+          jamBarShift += jamJumpTo - at;
+          jamJumpTo = null;
+        } else if (jamLoop && at > jamLoop.end) {
+          // Off the end of the loop: back to its first bar. A loop does not
+          // start a new chorus, so only the bar moves.
+          jamBarShift += jamLoop.start - at;
+        }
+      }
+      const bar = raw + jamBarShift;
+      formBar = ((bar % formBars) + formBars) % formBars;
+      chorus = Math.floor(Math.max(0, raw) / formBars) + 1;
+      bandState = bandStateForBar({
+        formBar,
+        chorus,
+        formBars,
+        practice: jamConfig.practice,
+      });
+    }
+
     emit("beat", {
       beat: beatCount,
       measureBeat,
       subdivision: 0,
       isDownbeat: true,
       isAccent: opens.has(measureBeat),
+      formBar,
+      chorus,
+      bandState,
       beatsPerMeasure: total,
     });
     beatCount += 1;
@@ -211,7 +304,10 @@ export function installShotMock(shot: Shot, theme: string): void {
     else clearTimeout(beatTimer);
   }
 
-  const MAP: Record<string, () => unknown> = {
+  // Handlers take the command's own arguments, because some answers depend on
+  // them: `list_takes` is about ONE jam's shelf, and a mock that ignores which
+  // one cannot photograph an empty one.
+  const MAP: Record<string, (a?: Record<string, unknown>) => unknown> = {
     get_state: () => STATE,
     list_presets: () => [...PRESETS, ...DRILLS],
     get_active_tab: () => shot.tab ?? "beat",
@@ -249,6 +345,35 @@ export function installShotMock(shot: Shot, theme: string): void {
       return null;
     },
     arm_count_in: () => null,
+    /**
+     * The jam library. The six that ship, so the Jam tab photographs with
+     * something in it — and so a click-through of the mode does not have to
+     * start by inventing a jam.
+     */
+    list_jams: () => [...STARTER_JAMS],
+    save_jams: () => null,
+    /**
+     * The takes (JAM_MODE §4.4), of the jam that was asked about.
+     *
+     * Answered rather than left to fall through to `null`, because the
+     * section's whole point is what a shelf with recordings on it looks
+     * like — and because a rejection here is the "cannot record" state,
+     * which is a different picture.
+     *
+     * Filtered by `jamId`, like the real command: the fixtures are all on the
+     * first starter jam, so handing the same three back for every jam meant
+     * the empty shelf — the one a musician sees on every jam but the one they
+     * recorded — could not be photographed at all.
+     */
+    list_takes: (a) => TAKES.filter((take) => take.jamId === a?.jamId),
+    start_take: () => null,
+    stop_take: () => null,
+    delete_take: () => null,
+    play_take: () => null,
+    stop_take_playback: () => null,
+    // Under the 100 MB the section starts mentioning: the picture is of a
+    // shelf, not of a warning about one.
+    takes_dir_size: () => 46 * 1024 * 1024,
   };
 
   mockIPC(async (cmd, args) => {
@@ -295,13 +420,49 @@ export function installShotMock(shot: Shot, theme: string): void {
     }
     if (cmd.startsWith("plugin:")) return null;
 
+    if (cmd === "set_jam") {
+      jamConfig = (a?.config as JamEngineConfig | null) ?? null;
+      // The bar count restarts with the jam, the way the engine's form
+      // counter does when a new table arrives.
+      if (!jamConfig) {
+        beatCount = 0;
+        jamJumpTo = null;
+        jamLoop = null;
+        jamBarShift = 0;
+        jamLastBar = null;
+      }
+      return null;
+    }
+
+    if (cmd === "set_jam_position") {
+      const command = (a?.command ?? {}) as {
+        jumpTo?: number | null;
+        loop?: { start: number; end: number } | null;
+      };
+      jamJumpTo = typeof command.jumpTo === "number" ? command.jumpTo : null;
+      jamLoop = command.loop ?? null;
+      return null;
+    }
+
+    if (cmd === "set_beat_groups" && Array.isArray(a?.groups)) {
+      STATE.beatGroups = a.groups as number[];
+      emit("state-changed", STATE);
+      return null;
+    }
+
+    if (cmd === "set_subdivision" && typeof a?.subdivision === "number") {
+      STATE.subdivision = a.subdivision;
+      emit("state-changed", STATE);
+      return null;
+    }
+
     if (cmd === "set_bpm" && typeof a?.bpm === "number") {
       STATE.bpm = a.bpm;
       emit("state-changed", STATE);
       return null;
     }
 
-    return MAP[cmd]?.() ?? null;
+    return MAP[cmd]?.(a) ?? null;
   });
 
   // Already running for the shots that are of a running app, so the first

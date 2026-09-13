@@ -173,7 +173,8 @@
       "groups": {
         "metronome": "Métronome",
         "view": "Affichage",
-        "navigation": "Navigation"
+        "navigation": "Navigation",
+        "jam": "Jam"
       },
       "actions": {
         "play": "Lecture / Arrêt",
@@ -195,9 +196,19 @@
         "tab-1": "Onglet Métronome",
         "tab-2": "Onglet Setlist",
         "tab-3": "Onglet Rampe",
+        "tab-4": "Onglet Jam",
         "settings": "Paramètres",
         "toggle-sidebar": "Basculer la barre latérale",
-        "toggle-coach": "Basculer le Coach"
+        "toggle-coach": "Basculer le Coach",
+        "jam-next-groove": "Groove suivant",
+        "jam-prev-groove": "Groove précédent",
+        "jam-trade": "Échanges",
+        "jam-dropout": "Mesures à vide",
+        "jam-next-shape": "Position suivante",
+        "jam-next-section": "Section suivante",
+        "jam-prev-section": "Section précédente",
+        "jam-loop-section": "Boucler cette section",
+        "jam-take": "Enregistrer la prise"
       },
       "descs": {
         "play": "Démarrer ou arrêter le métronome",
@@ -219,9 +230,19 @@
         "tab-1": "Passer à l'onglet Métronome",
         "tab-2": "Passer à l'onglet Setlist",
         "tab-3": "Passer à l'onglet Rampe",
+        "tab-4": "Passer à l'onglet Jam",
         "settings": "Ouvrir ou fermer les paramètres",
         "toggle-sidebar": "Réduire ou développer la barre latérale gauche",
-        "toggle-coach": "Ouvrir ou fermer le panneau du Coach"
+        "toggle-coach": "Ouvrir ou fermer le panneau du Coach",
+        "jam-next-groove": "Passer au groove suivant sans lâcher l'instrument",
+        "jam-prev-groove": "Revenir au groove précédent",
+        "jam-trade": "Activer ou couper les échanges : quatre mesures le groupe, quatre mesures toi",
+        "jam-dropout": "Activer ou couper les mesures à vide",
+        "jam-next-shape": "Faire défiler les façons de jouer l'accord en cours",
+        "jam-next-section": "Sauter au début de la section suivante à la barre de mesure",
+        "jam-prev-section": "Revenir au début de la section précédente à la barre de mesure",
+        "jam-loop-section": "Mettre en boucle la section où tu es, ou l'en sortir",
+        "jam-take": "Enregistrer au prochain lancement, ou arrêter l'enregistrement"
       }
     },
     "inputTest": {

@@ -3,8 +3,11 @@ import { useTranslation } from "react-i18next";
 import { setSoundType, setVolume } from "../../ipc";
 import { SOUND_TYPES } from "../../constants/metronome";
 import type { AppState, Setlist, Preset } from "../../types";
+import type { Jam } from "../../jam/types";
 import { PresetSaveBar } from "../../components/presets/PresetSaveBar";
 import { SetlistSaveBar } from "../../components/setlist/SetlistSaveBar";
+import { JamSaveBar } from "../../components/jam/JamSaveBar";
+import { JamGlyph } from "../../components/jam/JamGlyph";
 import { IS_MAC } from "../../hotkeys";
 
 /**
@@ -205,7 +208,7 @@ function HelpGlyph() {
  * write a plan out as sentences and press Start, and it runs itself and
  * changes tempo as it goes. The metronome is knobs and a click.
  */
-export type MainView = "beat" | "drill" | "setlist" | "settings";
+export type MainView = "beat" | "drill" | "setlist" | "jam" | "settings";
 
 interface MainHeaderProps {
   state: AppState;
@@ -226,6 +229,24 @@ interface MainHeaderProps {
   onSaveSetlist: () => void;
   onRevertSetlist: () => void;
   onRenameSetlist: () => void;
+  /** A loaded jam takes the same half of the bar, on its own tab. */
+  activeJam?: Jam | null;
+  jamDirty?: boolean;
+  jamSaveFeedback?: boolean;
+  onSaveJam?: () => void;
+  onRevertJam?: () => void;
+  onRenameJam?: () => void;
+  /**
+   * The setlists a loaded jam can be dropped into (JAM_MODE §8.5).
+   *
+   * In the overflow rather than beside the jam's name: adding a jam to a
+   * routine is a thing you do once, in the afternoon you build the routine,
+   * and the context bar's left half is what you touch while playing. Absent
+   * or empty, the item is not offered — a submenu that opens on "no
+   * setlists" is a dead end you had to click to find.
+   */
+  setlistsForJam?: { id: string; name: string }[];
+  onAddJamToSetlist?: (setlistId: string) => void;
   soundOpen: boolean;
   setSoundOpen: (v: boolean | ((p: boolean) => boolean)) => void;
   soundDropdownRef: Ref<HTMLDivElement>;
@@ -288,6 +309,14 @@ export function MainHeader({
   onSaveSetlist,
   onRevertSetlist,
   onRenameSetlist,
+  activeJam = null,
+  jamDirty = false,
+  jamSaveFeedback = false,
+  onSaveJam,
+  onRevertJam,
+  onRenameJam,
+  setlistsForJam,
+  onAddJamToSetlist,
   soundOpen,
   setSoundOpen,
   soundDropdownRef,
@@ -310,17 +339,28 @@ export function MainHeader({
   // the popover is rendered there, at the window level; the menu that offers
   // it does not need to.
   const [moreOpen, setMoreOpen] = useState(false);
+  /** The "add to setlist" item, expanded into its list of setlists. */
+  const [addToSetlistOpen, setAddToSetlistOpen] = useState(false);
   const moreWrapRef = useRef<HTMLDivElement>(null);
   const helpAvailable = !!onOpenHelp && view !== "settings";
+  const canAddJamToSetlist =
+    view === "jam" && !!activeJam && !!onAddJamToSetlist && !!setlistsForJam?.length;
 
   useEffect(() => {
     if (!moreOpen) return;
     const onDown = (e: MouseEvent) => {
       if (moreWrapRef.current?.contains(e.target as Node)) return;
       setMoreOpen(false);
+      setAddToSetlistOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMoreOpen(false);
+      if (e.key !== "Escape") return;
+      // Claimed, so the window's own Escape doors stand aside. Without this
+      // one press shut the menu AND closed the jam or the setlist behind it,
+      // which is a long way from what "never mind" asked for.
+      e.preventDefault();
+      setMoreOpen(false);
+      setAddToSetlistOpen(false);
     };
     document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
@@ -343,7 +383,16 @@ export function MainHeader({
             and when setlists became a mode the bar stopped rendering at all,
             which left no way to save a setlist except the modal that catches
             you on the way out. */}
-        {view === "setlist" && activeSetlist ? (
+        {view === "jam" && activeJam ? (
+          <JamSaveBar
+            jam={activeJam}
+            dirty={jamDirty}
+            saveFeedback={jamSaveFeedback}
+            onRename={() => onRenameJam?.()}
+            onSave={() => onSaveJam?.()}
+            onRevert={() => onRevertJam?.()}
+          />
+        ) : view === "setlist" && activeSetlist ? (
           <SetlistSaveBar
             setlist={activeSetlist}
             dirty={setlistDirty}
@@ -442,6 +491,7 @@ export function MainHeader({
               // Opening the menu closes the share popover it launched, so the
               // two never overlap on the same anchor.
               setShareOpen(false);
+              setAddToSetlistOpen(false);
               setMoreOpen((o) => !o);
             }}
             aria-haspopup="menu"
@@ -459,6 +509,37 @@ export function MainHeader({
           </button>
           {moreOpen && (
             <div className="header-more-menu" role="menu">
+              {/* The jam, into a routine. First in the menu while a jam is
+                  loaded, because it is the only item here that is about the
+                  thing on the stage rather than about the app. */}
+              {canAddJamToSetlist && (
+                <>
+                  <button
+                    role="menuitem"
+                    className={`sub-dropdown-item${addToSetlistOpen ? " open" : ""}`}
+                    aria-expanded={addToSetlistOpen}
+                    onClick={() => setAddToSetlistOpen((open) => !open)}
+                  >
+                    <JamGlyph />
+                    <span>{t("setlist.jam.addTo")}</span>
+                  </button>
+                  {addToSetlistOpen &&
+                    setlistsForJam!.map((setlist) => (
+                      <button
+                        key={setlist.id}
+                        role="menuitem"
+                        className="sub-dropdown-item header-more-sub"
+                        onClick={() => {
+                          setMoreOpen(false);
+                          setAddToSetlistOpen(false);
+                          onAddJamToSetlist!(setlist.id);
+                        }}
+                      >
+                        <span>{setlist.name}</span>
+                      </button>
+                    ))}
+                </>
+              )}
               <button
                 role="menuitem"
                 className="sub-dropdown-item"

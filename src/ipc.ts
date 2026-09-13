@@ -1145,3 +1145,99 @@ export async function cancelModelDownload(): Promise<void> {
 export function onPlaybackFinished(callback: () => void) {
   return listen<void>("playback-finished", () => callback());
 }
+
+// ---------------------------------------------------------------------------
+// Jam (plans/JAM_MODE.md, plans/tasks/jam/BRIEF.md)
+// ---------------------------------------------------------------------------
+
+import type { Jam, JamEngineConfig, JamPositionCommand, JamTake } from "./jam/types";
+
+/**
+ * Jams live beside presets and setlists in the same `settings.json` store,
+ * under their own key. Read-modify-write like setlists: a jam has no
+ * engine-side reader, the engine only ever sees the compiled table.
+ */
+const JAMS_KEY = "jams";
+
+/**
+ * `undefined` when nothing was ever saved under the key, so the caller can
+ * seed the starter jams exactly once. An empty array means the user deleted
+ * them all, and they stay deleted.
+ */
+export async function listJams(): Promise<Jam[] | undefined> {
+  const jams = await storeLoad<Jam[]>(JAMS_KEY);
+  return Array.isArray(jams) ? jams : undefined;
+}
+
+/** The whole list, in order. The UI owns ordering, the store keeps it. */
+export async function saveJams(jams: Jam[]): Promise<void> {
+  await storeSave(JAMS_KEY, jams);
+}
+
+/**
+ * Hand the engine a compiled jam, or `null` to take it away and play the
+ * plain click again. The UI sets the subdivision and the beat groups FIRST;
+ * the engine checks the product against its bar and plays the click if they
+ * disagree.
+ */
+export async function setJam(config: JamEngineConfig | null): Promise<void> {
+  return invoke("set_jam", { config });
+}
+
+/**
+ * Move the form: jump to a bar, or loop a range of bars. The engine applies
+ * it at the next bar line, so the change lands where a musician expects it.
+ */
+export async function setJamPosition(command: JamPositionCommand): Promise<void> {
+  return invoke("set_jam_position", { command });
+}
+
+// ---------------------------------------------------------------------------
+// Takes (plans/JAM_MODE.md §4.4): your playing with the band mixed in, kept
+// locally in the app's data directory, opt-in per jam. Nothing leaves the
+// machine.
+// ---------------------------------------------------------------------------
+
+/** Start recording; the engine mixes the mic and the band into one WAV. */
+export async function startTake(jamId: string): Promise<void> {
+  return invoke("start_take", { jamId });
+}
+
+/** Stop and keep the take, or `null` when nothing was recording. */
+export async function stopTake(): Promise<JamTake | null> {
+  return invoke("stop_take");
+}
+
+export async function listTakes(jamId: string): Promise<JamTake[]> {
+  return invoke("list_takes", { jamId });
+}
+
+export async function deleteTake(id: string): Promise<void> {
+  return invoke("delete_take", { id });
+}
+
+/** Play a take through the engine; the band is silent while it plays. */
+export async function playTake(id: string): Promise<void> {
+  return invoke("play_take", { id });
+}
+
+export async function stopTakePlayback(): Promise<void> {
+  return invoke("stop_take_playback");
+}
+
+export function onTakePlaybackEnded(callback: () => void) {
+  return listen<null>("take-playback-ended", () => callback());
+}
+
+/**
+ * A take ran into the twenty-minute cap and finished itself; the engine has
+ * already kept it and written its record. Fires once per capped take.
+ */
+export function onTakeCapped(callback: () => void) {
+  return listen<null>("take-capped", () => callback());
+}
+
+/** Bytes the takes directory holds, across every jam. A fact about the disk, not about a take. */
+export async function takesDirSize(): Promise<number> {
+  return invoke("takes_dir_size");
+}

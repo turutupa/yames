@@ -1,0 +1,324 @@
+{
+  "jam": {
+    "badge": "JAM",
+    "newJam": "Nieuwe jam",
+    "untitled": "Nieuwe jam",
+    "deleteJam": "Jam verwijderen",
+    "duplicateJam": "Jam dupliceren",
+    "copyName": "{{name}} kopie",
+    "renameTooltip": "Deze jam hernoemen",
+    "reorderHint": "Sleep om te herschikken",
+    "edited": "Bewerkt",
+    "save": "Opslaan",
+    "saved": "Opgeslagen",
+    "saveTooltip": "De jam opslaan zoals die nu is",
+    "noChanges": "Geen wijzigingen",
+    "revert": "Herstellen",
+    "revertTooltip": "Terug naar de opgeslagen jam",
+    "noneOpenTitle": "Geen jam geopend",
+    "noneOpenLead": "Een jam is een band om overheen te spelen: een groove, een tempo en een vorm die voor jou de tel bijhoudt. Laad er een uit de bibliotheek, of begin een nieuwe.",
+    "headphones": "Met een koptelefoon blijft de score eerlijk.",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "Groove",
+      "rock8": "Rock achtsten",
+      "rock16": "Rock zestienden",
+      "halfTime": "Halftime",
+      "shuffle": "Shuffle",
+      "waltz": "Wals",
+      "sixEight": "6/8",
+      "bossa": "Bossa",
+      "swingRide": "Swing-ride",
+      "funk": "Funk",
+      "oneDrop": "One drop",
+      "train": "Train beat",
+      "boomBap": "Boom bap",
+      "fourOnFloor": "Four on the floor",
+      "rule": "De regel"
+    },
+    "changes": {
+      "edit": "Akkoorden bewerken",
+      "done": "Klaar",
+      "hint": "Tik op een maat om het akkoord te kiezen. Lang indrukken werkt ook zonder de modus.",
+      "pickFor": "Maat {{bar}}",
+      "root": "Grondtoon",
+      "quality": "Soort",
+      "major": "maj",
+      "asTheForm": "Zoals de vorm"
+    },
+    "meter": {
+      "label": "Maatsoort",
+      "grooves": "Die van de groove",
+      "ticks": "Ticks per tel",
+      "doesNotFit": "{{groove}} past niet in {{meter}}; de drummer speelt de regel."
+    },
+    "mix": {
+      "forLane": "Volume {{lane}}"
+    },
+    "keysStyle": {
+      "label": "Begeleiding",
+      "pads": "de hele maat aangehouden",
+      "stabs": "op de tegentel, met de snare",
+      "padsShort": "Pads",
+      "stabsShort": "Stabs"
+    },
+    "countInSound": {
+      "label": "Aftellen",
+      "beep": "Piep",
+      "sticks": "Stokken"
+    },
+    "cues": {
+      "label": "Gesproken aanwijzingen",
+      "hint": "Het aftellen, de sectie en \"jouw vier\", hardop gezegd — zo blijven je ogen op de hals.",
+      "noVoice": "Vereist de coachstem. Installeer die in Instellingen; tot dan blijven de aanwijzingen op het scherm.",
+      "n1": "één",
+      "n2": "twee",
+      "n3": "drie",
+      "n4": "vier",
+      "n5": "vijf",
+      "n6": "zes",
+      "n7": "zeven",
+      "n8": "acht"
+    },
+    "feel": {
+      "label": "Feel",
+      "straight": "Recht",
+      "shuffle": "Shuffle",
+      "swing": "Swing"
+    },
+    "intensity": {
+      "label": "Intensiteit",
+      "soft": "Zacht",
+      "normal": "Normaal",
+      "loud": "Luid"
+    },
+    "form": {
+      "label": "Vorm",
+      "blues12": "12-maats blues",
+      "blues12Hint": "I · IV · V, de turnaround in maat 12",
+      "loop8": "8-maats lus",
+      "loop8Hint": "één akkoordenreeks, rondje na rondje",
+      "bars16": "16 maten",
+      "bars16Hint": "twee helften",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "de vorm van de standards",
+      "one": "Eén akkoord",
+      "oneHint": "alleen de groove",
+      "custom": "Je eigen",
+      "customHint": "zoveel maten als je telt",
+      "barsLabel": "Maten",
+      "fewerBars": "Minder maten",
+      "moreBars": "Meer maten",
+      "barOf": "maat {{current}} van {{total}}",
+      "chorus": "chorus {{count}}",
+      "fillMark": "fill",
+      "section": "Deel {{name}}",
+      "looping": "lus maten {{start}}–{{end}}",
+      "startsAt": "begint bij maat {{bar}}",
+      "jumpTo": "Naar maat {{bar}}",
+      "jumpPending": "bij de volgende maatstreep",
+      "loopSection": "Maten {{start}}–{{end}} herhalen",
+      "loopOff": "Stoppen met herhalen"
+    },
+    "short": {
+      "blues12": "12 maten",
+      "loop8": "8 maten",
+      "bars16": "16 maten",
+      "aaba32": "AABA",
+      "one": "1 akkoord",
+      "custom": "{{count}} maten",
+      "custom_one": "{{count}} maat",
+      "custom_other": "{{count}} maten"
+    },
+    "countIn": {
+      "label": "Inteltellen",
+      "none": "Geen",
+      "bars": "{{count}} maten",
+      "bars_one": "{{count}} maat",
+      "bars_other": "{{count}} maten"
+    },
+    "fills": {
+      "label": "Fills",
+      "hint": "Waar de fills vallen, en een crash op de één.",
+      "off": "Uit",
+      "chorus": "Eind chorus",
+      "every4": "Elke 4",
+      "every8": "Elke 8"
+    },
+    "transport": {
+      "chorus": "Chorus"
+    },
+    "now": {
+      "label": "Nu",
+      "aria": "{{chord}} klinkt",
+      "next": "{{chord}} over {{count}} maten",
+      "next_one": "{{chord}} over {{count}} maat",
+      "next_other": "{{chord}} over {{count}} maten",
+      "nextNow": "{{chord}} hierna"
+    },
+    "fretboard": {
+      "label": "Toets",
+      "aria": "{{chord}} op de hals"
+    },
+    "chords": {
+      "label": "Akkoorden",
+      "hint": "De wisselingen op de maatbalk, en daarboven het akkoord waar je op zit.",
+      "inKey": "Akkoorden in {{key}}",
+      "follow": "Volg de jam",
+      "followHint": "Laat de grepen met de wisselingen meelopen, of zet ze vast op één akkoord.",
+      "sevenths": "Septiemen",
+      "nextShape": "Volgende greep",
+      "sizeTriad": "drieklank",
+      "sizeOpen": "open",
+      "sizeBarre": "barré",
+      "sizeSeventh": "septiem",
+      "fret": "fret {{fret}}"
+    },
+    "key": {
+      "label": "Toonsoort",
+      "mode": "Majeur, mineur of blues",
+      "major": "Majeur",
+      "minor": "Mineur",
+      "blues": "Blues",
+      "majorNamed": "{{root}} majeur",
+      "minorNamed": "{{root}} mineur",
+      "bluesNamed": "{{root}} blues"
+    },
+    "kit": {
+      "label": "Kit",
+      "room": "Ruimte",
+      "roomHint": "open, met de ruimte eromheen",
+      "tight": "Strak",
+      "tightHint": "dichtbij, zonder staart",
+      "brushes": "Bezems",
+      "brushesHint": "zacht, voor een ballad",
+      "electronic": "Elektronisch",
+      "electronicHint": "gesynthetiseerd en strak"
+    },
+    "transposition": {
+      "label": "Jij leest",
+      "concert": "Klinkend",
+      "bb": "Bes",
+      "eb": "Es"
+    },
+    "setup": {
+      "label": "Toonsoort, kit en de partij die je leest"
+    },
+    "band": {
+      "label": "De band",
+      "lead": "alles gesynthetiseerd, niets om te downloaden",
+      "drums": "Drums",
+      "bass": "Bas",
+      "keys": "Toetsen",
+      "you": "Jij",
+      "youPlay": "{{instrument}}",
+      "youHint": "de band speelt nooit jouw instrument",
+      "out": "eruit",
+      "hatsOnly": "alleen hi-hat",
+      "inputOn": "Ingang aan",
+      "inputOff": "Ingang uit"
+    },
+    "bassStyle": {
+      "rock": "grondtonen op de kick",
+      "shuffle": "een boogiefiguur",
+      "swing": "een walking bass",
+      "bossa": "het bossapatroon",
+      "waltz": "grondtoon en kwint",
+      "sixeight": "grondtoon en kwint",
+      "funk": "gesyncopeerde grondtonen"
+    },
+    "practice": {
+      "label": "Oefenen",
+      "dropOut": "Stilte-maten",
+      "dropOutEvery": "Stil om de {{count}}",
+      "dropOutBarsLabel": "Hoe lang de band zwijgt",
+      "forBars": "{{count}} maten lang",
+      "forBars_one": "{{count}} maat lang",
+      "forBars_other": "{{count}} maten lang",
+      "trade": "Wisselen",
+      "tradeN": "Per {{count}}",
+      "tempo": "Tempotrainer",
+      "tempoUp": "Tempo +{{step}}",
+      "tempoEveryLabel": "Hoe vaak het tempo omhoog gaat",
+      "everyChoruses": "elke {{count}} rondes",
+      "everyChoruses_one": "elke {{count}} ronde",
+      "everyChoruses_other": "elke {{count}} rondes",
+      "climbing": "klimmend vanaf {{from}}"
+    },
+    "cue": {
+      "yours": "Jouw vier",
+      "silent": "Jij alleen",
+      "back": "Band is terug"
+    },
+    "editor": {
+      "label": "Groove-editor",
+      "edit": "Groove bewerken",
+      "makeYourOwn": "Maak je eigen",
+      "name": "Naam van de groove",
+      "yours": "Van jou",
+      "pages": "De maat of de fill bewerken",
+      "bar": "Maat",
+      "fill": "Fill",
+      "reset": "Herstellen",
+      "done": "Klaar",
+      "gridBar": "De groove, één maat",
+      "gridFill": "De fill, één maat",
+      "hint": "Klik een vakje om door te schakelen",
+      "meter": "{{beats}} tellen in {{subdivision}} · de kolommen volgen de maat",
+      "cell": "{{lane}}, tel {{beat}}, tik {{tick}}: {{level}}",
+      "lanes": {
+        "hat": "Hi-hat",
+        "snare": "Snare",
+        "kick": "Kick",
+        "ride": "Ride"
+      },
+      "levels": {
+        "0": "uit",
+        "1": "slag",
+        "2": "accent",
+        "3": "ghost"
+      },
+      "subdivision": {
+        "1": "kwarten",
+        "2": "achtsten",
+        "3": "triolen",
+        "4": "zestienden",
+        "6": "sextolen"
+      }
+    },
+    "takes": {
+      "label": "Opnames",
+      "record": "Neem de take op",
+      "recording": "Opnemen",
+      "recordingNow": "Aan het opnemen. De take komt hier zodra je stopt.",
+      "empty": "Nog niets opgenomen. Zet Neem de take op aan en speel — jij en de band, hier bewaard om terug te luisteren.",
+      "unavailable": "Opnemen kan niet in deze versie. De rest van dit scherm werkt zoals altijd.",
+      "play": "Deze take afspelen",
+      "stop": "Stop",
+      "bandOff": "band stil",
+      "delete": "Verwijderen",
+      "confirm": "Verwijderen? Dit kan niet ongedaan worden gemaakt.",
+      "confirmDelete": "Verwijderen",
+      "confirmKeep": "Bewaren",
+      "size": "ongeveer {{megabytes}} MB op schijf",
+      "local": "Takes blijven op deze machine. Er wordt niets geüpload.",
+      "introTitle": "Over takes",
+      "introWhat": "Een take ben jij samen met de band, vanaf de eerste maat na het inteltellen tot je stopt.",
+      "introWhere": "Hij wordt als WAV-bestand weggeschreven in de eigen map van deze app op deze machine, en blijft daar tot je hem verwijdert.",
+      "introPrivate": "Er wordt niets geüpload, niets geanalyseerd, en niets verlaat deze machine.",
+      "introNotNow": "Nu niet",
+      "introStart": "Takes opnemen"
+    }
+  },
+  "scale": {
+    "major": "majeur",
+    "naturalMinor": "natuurlijk mineur",
+    "dorian": "dorisch",
+    "mixolydian": "mixolydisch",
+    "minorPentatonic": "mineur pentatonisch",
+    "majorPentatonic": "majeur pentatonisch",
+    "blues": "blues",
+    "harmonicMinor": "harmonisch mineur",
+    "altered": "altered"
+  }
+}

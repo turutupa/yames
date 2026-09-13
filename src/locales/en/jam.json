@@ -1,0 +1,324 @@
+{
+  "jam": {
+    "badge": "JAM",
+    "newJam": "New jam",
+    "untitled": "New jam",
+    "deleteJam": "Delete jam",
+    "duplicateJam": "Duplicate jam",
+    "copyName": "{{name}} copy",
+    "renameTooltip": "Rename this jam",
+    "reorderHint": "Drag to reorder",
+    "edited": "Edited",
+    "save": "Save",
+    "saved": "Saved",
+    "saveTooltip": "Save the jam as it is now",
+    "noChanges": "No changes",
+    "revert": "Revert",
+    "revertTooltip": "Go back to the saved jam",
+    "noneOpenTitle": "No jam open",
+    "noneOpenLead": "A jam is a band to play over: a groove, a tempo and a form that keeps your place for you. Load one from the library, or start a new one.",
+    "headphones": "Headphones keep the score honest.",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "Groove",
+      "rock8": "Rock 8ths",
+      "rock16": "Rock 16ths",
+      "halfTime": "Half-time",
+      "shuffle": "Shuffle",
+      "waltz": "Waltz",
+      "sixEight": "6/8",
+      "bossa": "Bossa",
+      "swingRide": "Swing ride",
+      "funk": "Funk",
+      "oneDrop": "One-drop",
+      "train": "Train beat",
+      "boomBap": "Boom bap",
+      "fourOnFloor": "Four on the floor",
+      "rule": "The rule"
+    },
+    "changes": {
+      "edit": "Edit changes",
+      "done": "Done",
+      "hint": "Tap a bar to set its chord. A long press works without the mode.",
+      "pickFor": "Bar {{bar}}",
+      "root": "Root",
+      "quality": "Quality",
+      "major": "maj",
+      "asTheForm": "As the form"
+    },
+    "meter": {
+      "label": "Meter",
+      "grooves": "The groove's",
+      "ticks": "Ticks per beat",
+      "doesNotFit": "{{groove}} does not fit {{meter}}; the drummer plays the rule."
+    },
+    "mix": {
+      "forLane": "{{lane}} volume"
+    },
+    "keysStyle": {
+      "label": "Comping",
+      "pads": "held through the bar",
+      "stabs": "off the beat, with the snare",
+      "padsShort": "Pads",
+      "stabsShort": "Stabs"
+    },
+    "countInSound": {
+      "label": "Count-in",
+      "beep": "Beep",
+      "sticks": "Sticks"
+    },
+    "cues": {
+      "label": "Spoken cues",
+      "hint": "The count, the section and \"your four\", said out loud — so your eyes stay on the neck.",
+      "noVoice": "Needs the coach voice. Install it in Settings; until then the cues stay on the screen.",
+      "n1": "one",
+      "n2": "two",
+      "n3": "three",
+      "n4": "four",
+      "n5": "five",
+      "n6": "six",
+      "n7": "seven",
+      "n8": "eight"
+    },
+    "feel": {
+      "label": "Feel",
+      "straight": "Straight",
+      "shuffle": "Shuffle",
+      "swing": "Swing"
+    },
+    "intensity": {
+      "label": "Intensity",
+      "soft": "Soft",
+      "normal": "Normal",
+      "loud": "Loud"
+    },
+    "form": {
+      "label": "Form",
+      "blues12": "12-bar blues",
+      "blues12Hint": "I · IV · V, the turnaround on 12",
+      "loop8": "8-bar loop",
+      "loop8Hint": "one progression, round and round",
+      "bars16": "16-bar",
+      "bars16Hint": "two halves",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "the standard shape",
+      "one": "One chord",
+      "oneHint": "just the groove",
+      "custom": "Your own",
+      "customHint": "as many bars as you count",
+      "barsLabel": "Bars",
+      "fewerBars": "Fewer bars",
+      "moreBars": "More bars",
+      "barOf": "bar {{current}} of {{total}}",
+      "chorus": "chorus {{count}}",
+      "fillMark": "fill",
+      "section": "Section {{name}}",
+      "looping": "looping bars {{start}}–{{end}}",
+      "startsAt": "starts at bar {{bar}}",
+      "jumpTo": "Go to bar {{bar}}",
+      "jumpPending": "at the next bar line",
+      "loopSection": "Loop bars {{start}}–{{end}}",
+      "loopOff": "Stop looping"
+    },
+    "short": {
+      "blues12": "12-bar",
+      "loop8": "8-bar",
+      "bars16": "16-bar",
+      "aaba32": "AABA",
+      "one": "1 chord",
+      "custom": "{{count}} bars",
+      "custom_one": "{{count}} bar",
+      "custom_other": "{{count}} bars"
+    },
+    "countIn": {
+      "label": "Count-in",
+      "none": "None",
+      "bars": "{{count}} bars",
+      "bars_one": "{{count}} bar",
+      "bars_other": "{{count}} bars"
+    },
+    "fills": {
+      "label": "Fills",
+      "hint": "Where the fills land, and a crash on the one.",
+      "off": "Off",
+      "chorus": "Chorus end",
+      "every4": "Every 4",
+      "every8": "Every 8"
+    },
+    "transport": {
+      "chorus": "Chorus"
+    },
+    "now": {
+      "label": "Now",
+      "aria": "Playing {{chord}}",
+      "next": "{{chord}} in {{count}} bars",
+      "next_one": "{{chord}} in {{count}} bar",
+      "next_other": "{{chord}} in {{count}} bars",
+      "nextNow": "{{chord}} next"
+    },
+    "fretboard": {
+      "label": "Fretboard",
+      "aria": "{{chord}} on the neck"
+    },
+    "chords": {
+      "label": "Chords",
+      "hint": "Put the changes on the timeline, and the chord you are on above it.",
+      "inKey": "Chords in {{key}}",
+      "follow": "Follow the jam",
+      "followHint": "Let the shapes move with the changes, or pin them to one chord.",
+      "sevenths": "7ths",
+      "nextShape": "Next shape",
+      "sizeTriad": "triad",
+      "sizeOpen": "open",
+      "sizeBarre": "barre",
+      "sizeSeventh": "7th",
+      "fret": "fret {{fret}}"
+    },
+    "key": {
+      "label": "Key",
+      "mode": "Major, minor or blues",
+      "major": "Major",
+      "minor": "Minor",
+      "blues": "Blues",
+      "majorNamed": "{{root}} major",
+      "minorNamed": "{{root}} minor",
+      "bluesNamed": "{{root}} blues"
+    },
+    "kit": {
+      "label": "Kit",
+      "room": "Room",
+      "roomHint": "open, with the room around it",
+      "tight": "Tight",
+      "tightHint": "close up, no tail",
+      "brushes": "Brushes",
+      "brushesHint": "quiet, for a ballad",
+      "electronic": "Electronic",
+      "electronicHint": "synthesised and punchy"
+    },
+    "transposition": {
+      "label": "You read",
+      "concert": "Concert",
+      "bb": "B♭",
+      "eb": "E♭"
+    },
+    "setup": {
+      "label": "Key, kit and the part you read"
+    },
+    "band": {
+      "label": "The band",
+      "lead": "everything synthesised, nothing to download",
+      "drums": "Drums",
+      "bass": "Bass",
+      "keys": "Keys",
+      "you": "You",
+      "youPlay": "{{instrument}}",
+      "youHint": "the band never plays your instrument",
+      "out": "out",
+      "hatsOnly": "hats only",
+      "inputOn": "Input on",
+      "inputOff": "Input off"
+    },
+    "bassStyle": {
+      "rock": "roots on the kick",
+      "shuffle": "a boogie figure",
+      "swing": "a walking line",
+      "bossa": "the bossa pattern",
+      "waltz": "root and fifth",
+      "sixeight": "root and fifth",
+      "funk": "syncopated roots"
+    },
+    "practice": {
+      "label": "Practice",
+      "dropOut": "Drop-out bars",
+      "dropOutEvery": "Drop out every {{count}}",
+      "dropOutBarsLabel": "How long the band drops out for",
+      "forBars": "for {{count}} bars",
+      "forBars_one": "for {{count}} bar",
+      "forBars_other": "for {{count}} bars",
+      "trade": "Trade",
+      "tradeN": "Trade {{count}}s",
+      "tempo": "Tempo trainer",
+      "tempoUp": "Tempo up {{step}}",
+      "tempoEveryLabel": "How often the tempo goes up",
+      "everyChoruses": "every {{count}} choruses",
+      "everyChoruses_one": "every {{count}} chorus",
+      "everyChoruses_other": "every {{count}} choruses",
+      "climbing": "climbing from {{from}}"
+    },
+    "cue": {
+      "yours": "Your four",
+      "silent": "You alone",
+      "back": "Band's back"
+    },
+    "editor": {
+      "label": "Groove editor",
+      "edit": "Edit the groove",
+      "makeYourOwn": "Make your own",
+      "name": "Groove name",
+      "yours": "Yours",
+      "pages": "Edit the bar or the fill",
+      "bar": "Bar",
+      "fill": "Fill",
+      "reset": "Reset",
+      "done": "Done",
+      "gridBar": "The groove, one bar",
+      "gridFill": "The fill, one bar",
+      "hint": "Click a cell to cycle",
+      "meter": "{{beats}} beats in {{subdivision}} · the columns follow the meter",
+      "cell": "{{lane}}, beat {{beat}}, tick {{tick}}: {{level}}",
+      "lanes": {
+        "hat": "Hat",
+        "snare": "Snare",
+        "kick": "Kick",
+        "ride": "Ride"
+      },
+      "levels": {
+        "0": "off",
+        "1": "hit",
+        "2": "accent",
+        "3": "ghost"
+      },
+      "subdivision": {
+        "1": "quarters",
+        "2": "eighths",
+        "3": "triplets",
+        "4": "sixteenths",
+        "6": "sextuplets"
+      }
+    },
+    "takes": {
+      "label": "Takes",
+      "record": "Record the take",
+      "recording": "Recording",
+      "recordingNow": "Recording. It lands here when you stop.",
+      "empty": "Nothing recorded yet. Turn on Record the take and play — you and the band, kept here to listen back to.",
+      "unavailable": "Recording is not available in this version. Everything else on this screen works as it always did.",
+      "play": "Play this take",
+      "stop": "Stop",
+      "bandOff": "band silent",
+      "delete": "Delete",
+      "confirm": "Delete it? There is no undo.",
+      "confirmDelete": "Delete",
+      "confirmKeep": "Keep",
+      "size": "about {{megabytes}} MB on disk",
+      "local": "Takes stay on this machine. Nothing is uploaded.",
+      "introTitle": "About takes",
+      "introWhat": "A take is you and the band, mixed together, from the first bar after the count-in until you stop.",
+      "introWhere": "It is written as a WAV file in this app's own folder on this machine, and it stays there until you delete it.",
+      "introPrivate": "Nothing is uploaded, nothing is analysed, and nothing leaves the machine.",
+      "introNotNow": "Not now",
+      "introStart": "Record takes"
+    }
+  },
+  "scale": {
+    "major": "major",
+    "naturalMinor": "natural minor",
+    "dorian": "dorian",
+    "mixolydian": "mixolydian",
+    "minorPentatonic": "minor pentatonic",
+    "majorPentatonic": "major pentatonic",
+    "blues": "blues",
+    "harmonicMinor": "harmonic minor",
+    "altered": "altered"
+  }
+}

@@ -1,0 +1,324 @@
+{
+  "jam": {
+    "badge": "잼",
+    "newJam": "새 잼",
+    "untitled": "새 잼",
+    "deleteJam": "잼 삭제",
+    "duplicateJam": "잼 복제",
+    "copyName": "{{name}} 복사본",
+    "renameTooltip": "이 잼 이름 바꾸기",
+    "reorderHint": "끌어서 순서 바꾸기",
+    "edited": "수정됨",
+    "save": "저장",
+    "saved": "저장됨",
+    "saveTooltip": "지금 상태 그대로 잼 저장",
+    "noChanges": "변경 사항 없음",
+    "revert": "되돌리기",
+    "revertTooltip": "저장된 잼으로 되돌리기",
+    "noneOpenTitle": "열린 잼이 없습니다",
+    "noneOpenLead": "잼은 그 위에서 연주할 밴드입니다. 그루브와 템포, 그리고 지금 어디인지 대신 세어 주는 형식. 라이브러리에서 불러오거나 새로 만들어 보세요.",
+    "headphones": "헤드폰을 쓰면 점수가 정직해집니다.",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "그루브",
+      "rock8": "록 8비트",
+      "rock16": "록 16비트",
+      "halfTime": "하프타임",
+      "shuffle": "셔플",
+      "waltz": "왈츠",
+      "sixEight": "6/8",
+      "bossa": "보사노바",
+      "swingRide": "스윙 라이드",
+      "funk": "펑크",
+      "oneDrop": "원 드롭",
+      "train": "트레인 비트",
+      "boomBap": "붐뱁",
+      "fourOnFloor": "포 온 더 플로어",
+      "rule": "규칙"
+    },
+    "changes": {
+      "edit": "코드 편집",
+      "done": "완료",
+      "hint": "마디를 눌러 코드를 정하세요. 길게 누르면 모드 없이도 바꿀 수 있습니다.",
+      "pickFor": "{{bar}}번째 마디",
+      "root": "근음",
+      "quality": "코드 종류",
+      "major": "메이저",
+      "asTheForm": "폼 그대로"
+    },
+    "meter": {
+      "label": "박자",
+      "grooves": "그루브의 박자",
+      "ticks": "한 박당 틱",
+      "doesNotFit": "{{groove}}은(는) {{meter}}에 맞지 않아 드러머가 규칙대로 연주합니다."
+    },
+    "mix": {
+      "forLane": "{{lane}} 음량"
+    },
+    "keysStyle": {
+      "label": "컴핑",
+      "pads": "한 마디 내내 지속",
+      "stabs": "엇박에서, 스네어와 함께",
+      "padsShort": "패드",
+      "stabsShort": "스탭"
+    },
+    "countInSound": {
+      "label": "카운트인",
+      "beep": "비프",
+      "sticks": "스틱"
+    },
+    "cues": {
+      "label": "음성 안내",
+      "hint": "카운트와 섹션, \"당신의 네 마디\"를 소리로 알려 줍니다. 시선은 지판에 두세요.",
+      "noVoice": "코치 음성이 필요합니다. 설정에서 설치하세요. 그때까지 안내는 화면에만 표시됩니다.",
+      "n1": "하나",
+      "n2": "둘",
+      "n3": "셋",
+      "n4": "넷",
+      "n5": "다섯",
+      "n6": "여섯",
+      "n7": "일곱",
+      "n8": "여덟"
+    },
+    "feel": {
+      "label": "필",
+      "straight": "스트레이트",
+      "shuffle": "셔플",
+      "swing": "스윙"
+    },
+    "intensity": {
+      "label": "세기",
+      "soft": "약하게",
+      "normal": "보통",
+      "loud": "세게"
+    },
+    "form": {
+      "label": "형식",
+      "blues12": "12마디 블루스",
+      "blues12Hint": "I · IV · V, 12마디에서 턴어라운드",
+      "loop8": "8마디 루프",
+      "loop8Hint": "한 진행을 계속 돌린다",
+      "bars16": "16마디",
+      "bars16Hint": "두 부분",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "스탠더드의 형식",
+      "one": "원 코드",
+      "oneHint": "그루브만",
+      "custom": "직접 설정",
+      "customHint": "원하는 마디 수로",
+      "barsLabel": "마디",
+      "fewerBars": "마디 줄이기",
+      "moreBars": "마디 늘리기",
+      "barOf": "{{current}}/{{total}}마디",
+      "chorus": "코러스 {{count}}",
+      "fillMark": "필인",
+      "section": "{{name}} 섹션",
+      "looping": "{{start}}–{{end}}마디 반복 중",
+      "startsAt": "{{bar}}마디에서 시작",
+      "jumpTo": "{{bar}}마디로",
+      "jumpPending": "다음 마디선에서",
+      "loopSection": "{{start}}–{{end}}마디 반복",
+      "loopOff": "반복 끄기"
+    },
+    "short": {
+      "blues12": "12마디",
+      "loop8": "8마디",
+      "bars16": "16마디",
+      "aaba32": "AABA",
+      "one": "1코드",
+      "custom": "{{count}}마디",
+      "custom_one": "{{count}}마디",
+      "custom_other": "{{count}}마디"
+    },
+    "countIn": {
+      "label": "카운트인",
+      "none": "없음",
+      "bars": "{{count}}마디",
+      "bars_one": "{{count}}마디",
+      "bars_other": "{{count}}마디"
+    },
+    "fills": {
+      "label": "필인",
+      "hint": "필인이 들어가는 자리, 그리고 첫 박의 크래시.",
+      "off": "없음",
+      "chorus": "코러스 끝",
+      "every4": "4마디마다",
+      "every8": "8마디마다"
+    },
+    "transport": {
+      "chorus": "코러스"
+    },
+    "now": {
+      "label": "지금",
+      "aria": "{{chord}} 연주 중",
+      "next": "{{count}}마디 뒤 {{chord}}",
+      "next_one": "{{count}}마디 뒤 {{chord}}",
+      "next_other": "{{count}}마디 뒤 {{chord}}",
+      "nextNow": "다음은 {{chord}}"
+    },
+    "fretboard": {
+      "label": "지판",
+      "aria": "넥 위의 {{chord}}"
+    },
+    "chords": {
+      "label": "코드",
+      "hint": "마디 줄에 코드 진행을, 그 위에 지금 코드를 보여 줍니다.",
+      "inKey": "{{key}}의 코드",
+      "follow": "잼 따라가기",
+      "followHint": "폼이 코드 진행을 따라가게 하거나, 한 코드에 고정합니다.",
+      "sevenths": "7th",
+      "nextShape": "다음 폼",
+      "sizeTriad": "트라이어드",
+      "sizeOpen": "오픈",
+      "sizeBarre": "바레",
+      "sizeSeventh": "7th",
+      "fret": "{{fret}}프렛"
+    },
+    "key": {
+      "label": "키",
+      "mode": "장조, 단조, 블루스",
+      "major": "장조",
+      "minor": "단조",
+      "blues": "블루스",
+      "majorNamed": "{{root}} 장조",
+      "minorNamed": "{{root}} 단조",
+      "bluesNamed": "{{root}} 블루스"
+    },
+    "kit": {
+      "label": "킷",
+      "room": "룸",
+      "roomHint": "공간감이 살아 있는 열린 소리",
+      "tight": "타이트",
+      "tightHint": "가까이서, 여운 없이",
+      "brushes": "브러시",
+      "brushesHint": "조용하게, 발라드에",
+      "electronic": "일렉트로닉",
+      "electronicHint": "합성음, 단단한 어택"
+    },
+    "transposition": {
+      "label": "읽는 조",
+      "concert": "실음",
+      "bb": "B♭",
+      "eb": "E♭"
+    },
+    "setup": {
+      "label": "키, 킷, 그리고 읽는 파트"
+    },
+    "band": {
+      "label": "밴드",
+      "lead": "모두 합성음, 내려받을 것 없음",
+      "drums": "드럼",
+      "bass": "베이스",
+      "keys": "건반",
+      "you": "당신",
+      "youPlay": "{{instrument}}",
+      "youHint": "밴드는 당신의 악기를 연주하지 않습니다",
+      "out": "쉼",
+      "hatsOnly": "하이햇만",
+      "inputOn": "입력 켜짐",
+      "inputOff": "입력 꺼짐"
+    },
+    "bassStyle": {
+      "rock": "킥을 따라가는 루트",
+      "shuffle": "부기 패턴",
+      "swing": "워킹 라인",
+      "bossa": "보사 패턴",
+      "waltz": "루트와 5도",
+      "sixeight": "루트와 5도",
+      "funk": "당김음 루트"
+    },
+    "practice": {
+      "label": "연습",
+      "dropOut": "쉬는 마디",
+      "dropOutEvery": "{{count}}마디마다 쉼",
+      "dropOutBarsLabel": "밴드가 쉬는 길이",
+      "forBars": "{{count}}마디 동안",
+      "forBars_one": "{{count}}마디 동안",
+      "forBars_other": "{{count}}마디 동안",
+      "trade": "주고받기",
+      "tradeN": "{{count}}마디씩",
+      "tempo": "템포 트레이너",
+      "tempoUp": "템포 +{{step}}",
+      "tempoEveryLabel": "템포가 오르는 주기",
+      "everyChoruses": "{{count}}코러스마다",
+      "everyChoruses_one": "{{count}}코러스마다",
+      "everyChoruses_other": "{{count}}코러스마다",
+      "climbing": "{{from}}에서 오르는 중"
+    },
+    "cue": {
+      "yours": "당신 차례, 네 마디",
+      "silent": "당신 혼자",
+      "back": "밴드 복귀"
+    },
+    "editor": {
+      "label": "그루브 편집기",
+      "edit": "그루브 편집",
+      "makeYourOwn": "직접 만들기",
+      "name": "그루브 이름",
+      "yours": "내 것",
+      "pages": "마디 또는 필 편집",
+      "bar": "마디",
+      "fill": "필",
+      "reset": "되돌리기",
+      "done": "완료",
+      "gridBar": "그루브, 한 마디",
+      "gridFill": "필, 한 마디",
+      "hint": "칸을 눌러 바꿉니다",
+      "meter": "{{subdivision}}로 {{beats}}박 · 열은 박자를 따릅니다",
+      "cell": "{{lane}}, {{beat}}박, {{tick}}번째: {{level}}",
+      "lanes": {
+        "hat": "하이햇",
+        "snare": "스네어",
+        "kick": "킥",
+        "ride": "라이드"
+      },
+      "levels": {
+        "0": "없음",
+        "1": "타격",
+        "2": "악센트",
+        "3": "고스트"
+      },
+      "subdivision": {
+        "1": "4분음표",
+        "2": "8분음표",
+        "3": "셋잇단음표",
+        "4": "16분음표",
+        "6": "여섯잇단음표"
+      }
+    },
+    "takes": {
+      "label": "테이크",
+      "record": "테이크 녹음",
+      "recording": "녹음 중",
+      "recordingNow": "녹음 중입니다. 멈추면 여기에 들어옵니다.",
+      "empty": "아직 녹음한 것이 없습니다. 테이크 녹음을 켜고 연주해 보세요 — 당신과 밴드가 다시 들을 수 있게 여기에 남습니다.",
+      "unavailable": "이 버전에서는 녹음을 쓸 수 없습니다. 이 화면의 다른 기능은 전부 그대로 동작합니다.",
+      "play": "이 테이크 재생",
+      "stop": "정지",
+      "bandOff": "밴드 음소거",
+      "delete": "삭제",
+      "confirm": "삭제할까요? 되돌릴 수 없습니다.",
+      "confirmDelete": "삭제",
+      "confirmKeep": "유지",
+      "size": "디스크에 약 {{megabytes}} MB",
+      "local": "테이크는 이 컴퓨터에만 남습니다. 업로드되지 않습니다.",
+      "introTitle": "테이크에 대하여",
+      "introWhat": "테이크는 카운트인 뒤 첫 마디부터 멈출 때까지, 당신과 밴드를 함께 담은 소리입니다.",
+      "introWhere": "이 컴퓨터의 앱 전용 폴더에 WAV 파일로 저장되며, 지우기 전까지 그곳에 남습니다.",
+      "introPrivate": "업로드도, 분석도 없으며, 아무것도 이 컴퓨터를 떠나지 않습니다.",
+      "introNotNow": "나중에",
+      "introStart": "테이크 녹음하기"
+    }
+  },
+  "scale": {
+    "major": "장음계",
+    "naturalMinor": "자연 단음계",
+    "dorian": "도리안",
+    "mixolydian": "믹솔리디안",
+    "minorPentatonic": "마이너 펜타토닉",
+    "majorPentatonic": "메이저 펜타토닉",
+    "blues": "블루스",
+    "harmonicMinor": "화성 단음계",
+    "altered": "얼터드"
+  }
+}

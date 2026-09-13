@@ -173,7 +173,8 @@
       "groups": {
         "metronome": "Metronomo",
         "view": "Vista",
-        "navigation": "Navigazione"
+        "navigation": "Navigazione",
+        "jam": "Jam"
       },
       "actions": {
         "play": "Avvia / Ferma",
@@ -195,9 +196,19 @@
         "tab-1": "Scheda Metronomo",
         "tab-2": "Scheda Scaletta",
         "tab-3": "Scheda Rampa",
+        "tab-4": "Scheda Jam",
         "settings": "Impostazioni",
         "toggle-sidebar": "Attiva/disattiva barra laterale",
-        "toggle-coach": "Attiva/disattiva Coach"
+        "toggle-coach": "Attiva/disattiva Coach",
+        "jam-next-groove": "Groove successivo",
+        "jam-prev-groove": "Groove precedente",
+        "jam-trade": "Scambi",
+        "jam-dropout": "Battute a vuoto",
+        "jam-next-shape": "Posizione successiva",
+        "jam-next-section": "Sezione successiva",
+        "jam-prev-section": "Sezione precedente",
+        "jam-loop-section": "Ripeti questa sezione",
+        "jam-take": "Registra la take"
       },
       "descs": {
         "play": "Avvia o ferma il metronomo",
@@ -219,9 +230,19 @@
         "tab-1": "Passa alla scheda Metronomo",
         "tab-2": "Passa alla scheda Scaletta",
         "tab-3": "Passa alla scheda Rampa",
+        "tab-4": "Passa alla scheda Jam",
         "settings": "Apri o chiudi le impostazioni",
         "toggle-sidebar": "Comprimi o espandi la barra laterale sinistra",
-        "toggle-coach": "Apri o chiudi il pannello del coach"
+        "toggle-coach": "Apri o chiudi il pannello del coach",
+        "jam-next-groove": "Passare al groove successivo senza staccare le mani dallo strumento",
+        "jam-prev-groove": "Tornare al groove precedente",
+        "jam-trade": "Attivare o disattivare gli scambi: quattro battute la band, quattro tu",
+        "jam-dropout": "Attivare o disattivare le battute a vuoto",
+        "jam-next-shape": "Scorrere i modi di suonare l'accordo attuale",
+        "jam-next-section": "Saltare all'inizio della sezione successiva alla stanghetta",
+        "jam-prev-section": "Tornare all'inizio della sezione precedente alla stanghetta",
+        "jam-loop-section": "Mettere in loop la sezione in cui sei, o toglierla",
+        "jam-take": "Registra alla prossima riproduzione, oppure smetti di registrare"
       }
     },
     "inputTest": {

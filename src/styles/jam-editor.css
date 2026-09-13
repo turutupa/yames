@@ -1,0 +1,338 @@
+/*
+ * The groove editor (plan §4.1, design/drummer/GrooveEditor.dc.html).
+ *
+ * Every colour below is a token from `TOKEN_CONTRACT` in `src/themes.ts`, so
+ * the editor follows all thirteen themes. The design file is drawn in one
+ * dark palette with cyan hits; read `--accent` wherever it shows cyan and
+ * `--bg-card` / `--border` wherever it shows the dark greys, and the two line
+ * up. There is not one hex code in this file, on purpose: a drum grid that
+ * hard-codes its own dark blue is a hole in the page on the light themes.
+ *
+ * The four cell states are drawn the way the design draws them — off is an
+ * empty box, a hit is a dot, an accent is a bigger dot with a glow, a ghost is
+ * a small dim one. Size and glow carry the difference rather than hue alone,
+ * which is what makes them tell apart on a monochrome theme and for a
+ * colour-blind reader.
+ */
+
+.jam-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  color: var(--text-primary);
+  font-weight: var(--font-weight, 500);
+}
+
+/* ---- header ------------------------------------------------------------- */
+
+.jam-editor__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.jam-editor__name {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-primary);
+  padding: 3px 6px;
+  margin: -3px -6px;
+  border-radius: var(--radius-sm);
+  /* `global.css` sets `user-select: none` on the body; an editable name that
+     cannot be selected is an editable name you cannot fix the middle of. */
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+  outline: none;
+  min-width: 40px;
+}
+
+.jam-editor__name:hover {
+  background: var(--surface-hover);
+}
+
+.jam-editor__name:focus-visible,
+.jam-editor__name:focus {
+  background: var(--surface-active);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+.jam-editor__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent-2);
+  background: var(--accent-2-subtle);
+  border-radius: 20px;
+  padding: 4px 10px;
+}
+
+.jam-editor__pill::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent-2);
+}
+
+.jam-editor__caption {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.jam-editor__spacer {
+  flex: 1 1 auto;
+}
+
+.jam-editor__pages {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-hover);
+}
+
+.jam-editor__page {
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 6px 13px;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-tertiary);
+}
+
+.jam-editor__page[aria-pressed="true"] {
+  background: var(--surface-active);
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.jam-editor__text-btn {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: transparent;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.jam-editor__text-btn:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+}
+
+.jam-editor__text-btn--done {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.jam-editor__page:focus-visible,
+.jam-editor__text-btn:focus-visible {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
+}
+
+/* ---- the grid ----------------------------------------------------------- */
+
+.jam-editor__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 18px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  /* A 7/8 bar in sextuplets is 42 columns. Let it scroll rather than squeeze
+     the cells below the width a finger can hit. */
+  overflow-x: auto;
+}
+
+.jam-editor__row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.jam-editor__row--beats {
+  /* The numbers sit right over the columns they name, so the label row uses
+     exactly the cell row's geometry with the padding removed. */
+  padding-bottom: 2px;
+}
+
+.jam-editor__lane-name {
+  width: 64px;
+  flex-shrink: 0;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.jam-editor__group {
+  flex: 1 1 0;
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+}
+
+.jam-editor__beat-num {
+  flex: 1 1 0;
+  min-width: 14px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.jam-editor__tick-label {
+  flex: 1 1 0;
+  min-width: 14px;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-faint);
+}
+
+/* ---- the cells ---------------------------------------------------------- */
+
+.jam-editor__cell {
+  flex: 1 1 0;
+  min-width: 14px;
+  /* 44px is the touch target the whole app uses; it is also what makes a
+     four-lane bar readable as a drum chart rather than a barcode. */
+  height: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  padding: 0;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.jam-editor__cell:hover {
+  border-color: var(--accent-glow);
+}
+
+.jam-editor__cell:active {
+  /* `global.css` shrinks every button on press; a 44px cell that jumps is
+     harder to hit twice in a row than one that does not. */
+  transform: none;
+}
+
+.jam-editor__cell:focus-visible,
+.jam-editor__cell:focus {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
+  /* Above the neighbouring cells' borders, so the ring is a whole ring. */
+  position: relative;
+  z-index: 1;
+}
+
+.jam-editor__dot {
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.jam-editor__cell--hit {
+  background: var(--accent-subtle);
+  border-color: var(--accent-glow);
+}
+
+.jam-editor__cell--hit .jam-editor__dot {
+  width: 9px;
+  height: 9px;
+}
+
+.jam-editor__cell--accent {
+  background: var(--accent-subtle-hover);
+  border-color: var(--accent-glow-strong);
+}
+
+.jam-editor__cell--accent .jam-editor__dot {
+  width: 13px;
+  height: 13px;
+  box-shadow: 0 0 10px var(--accent-glow-strong);
+}
+
+.jam-editor__cell--ghost {
+  background: transparent;
+  border-color: var(--accent-glow);
+}
+
+.jam-editor__cell--ghost .jam-editor__dot {
+  width: 5px;
+  height: 5px;
+  opacity: 0.6;
+}
+
+/*
+ * The middle of a triplet: where a shuffle leaves the gap. Drawn back so the
+ * swing is visible in the shape of the row — but only while it is empty, and
+ * never un-clickable, because a groove that fills it is a real groove.
+ */
+.jam-editor__cell--quiet.jam-editor__cell--off {
+  background: transparent;
+  opacity: 0.5;
+}
+
+/* The tick playing right now, down the whole column. */
+.jam-editor__cell--playing {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Focus wins the outline when both apply — you need to know where you are. */
+.jam-editor__cell--playing:focus-visible,
+.jam-editor__cell--playing:focus {
+  outline-color: var(--text-primary);
+  outline-offset: 2px;
+}
+
+/* ---- legend ------------------------------------------------------------- */
+
+.jam-editor__legend {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 0 4px;
+  flex-wrap: wrap;
+}
+
+.jam-editor__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.jam-editor__swatch {
+  flex: 0 0 auto;
+  width: 30px;
+  min-width: 30px;
+  height: 22px;
+  min-height: 22px;
+}
+
+.jam-editor__legend-text {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: capitalize;
+}
+
+.jam-editor__legend-hint {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-faint);
+}

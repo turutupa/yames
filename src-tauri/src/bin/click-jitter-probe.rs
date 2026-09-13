@@ -28,6 +28,21 @@
 //!   --p99-ms <f>         jitter threshold, default 1.0
 //!   --json               emit a machine-readable summary line as well
 //!   --dump-csv <path>    write the raw per-callback capture for re-analysis
+//!   --jam                load the busiest plausible jam (16 ticks a bar,
+//!                        kick/snare/hat/ride, a fill and a crash on the one)
+//!                        at 240 BPM, so the gate covers the band as well as
+//!                        the click. Needs --subdivision 4, which is the
+//!                        default; the run is refused at any other, because
+//!                        the engine would play the click instead
+//!   --jam-swap           --jam, and replace the table from another thread
+//!                        every 350 ms (the bar-ahead bass handshake)
+//!   --jam-move           --jam, and move the form while it plays: a loop
+//!                        set and a jump every 2 s. Combines with --jam-swap
+//!   --jam-take           --jam, and record a take for the whole run: the
+//!                        callback copies its mix into a lock-free ring and
+//!                        a writer thread resamples, mixes and writes it to
+//!                        a temporary WAV underneath the stream. Combines
+//!                        with the other two
 //! ```
 //!
 //! Exit codes: 0 pass, 1 gate failure, 2 setup/usage error.
@@ -62,7 +77,9 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use yames_lib::probe::{
-    create_beat_log, create_shared_state, CallbackProbe, CallbackSample, MetronomeEngine,
+    compile_jam, create_beat_log, create_shared_state, CallbackProbe, CallbackSample, JamBassLine,
+    JamConfig, JamKeysLine, JamMix, JamPattern, JamPosition, MetronomeEngine, TakeRing, TakeSession,
+    TakeStart,
 };
 
 /// Pessimistic upper bound on callbacks per second used to size the
@@ -80,6 +97,29 @@ struct Args {
     p99_ms: f64,
     json: bool,
     dump_csv: Option<String>,
+    jam: bool,
+    /// `--jam`, and replace the table from another thread every 350 ms
+    /// while the stream runs, alternating two tables that differ only in
+    /// their bass — the bar-ahead handshake the UI performs several times a
+    /// chorus. The gate then covers the handoff and the retirement path.
+    jam_swap: bool,
+    /// `--jam`, and move the form from another thread while the stream runs:
+    /// a loop set once and a jump every two seconds. The bar line then has
+    /// the whole of `next_form_position` to do rather than a single add,
+    /// and it does it inside the callback.
+    jam_move: bool,
+    /// `--jam`, and record a take of the whole run. The output callback
+    /// then copies every buffer into a ring, a synthetic 44.1 kHz "mic"
+    /// fills a second one, and a writer thread resamples, mixes and writes
+    /// both to disk while the measurement is running — which is the load a
+    /// take actually puts on the machine, and the one path where the audio
+    /// thread does work on behalf of the filesystem.
+    jam_take: bool,
+    /// Whether the tempo / resolution came from the command line, so `--jam`
+    /// can supply its own 240 BPM sixteenths without overruling a run that
+    /// asked for something else.
+    bpm_set: bool,
+    subdivision_set: bool,
 }
 
 impl Default for Args {
@@ -94,6 +134,12 @@ impl Default for Args {
             p99_ms: 1.0,
             json: false,
             dump_csv: None,
+            jam: false,
+            jam_swap: false,
+            jam_move: false,
+            jam_take: false,
+            bpm_set: false,
+            subdivision_set: false,
         }
     }
 }
@@ -116,8 +162,14 @@ fn parse_args() -> Result<Args, String> {
         };
         let mut consumed = 2;
         match argv[i].as_str() {
-            "--bpm" => a.bpm = num(i)? as u16,
-            "--subdivision" => a.subdivision = num(i)? as u8,
+            "--bpm" => {
+                a.bpm = num(i)? as u16;
+                a.bpm_set = true;
+            }
+            "--subdivision" => {
+                a.subdivision = num(i)? as u8;
+                a.subdivision_set = true;
+            }
             "--seconds" => a.seconds = num(i)? as u64,
             "--warmup-ms" => a.warmup_ms = num(i)? as u64,
             "--p99-ms" => a.p99_ms = num(i)?,
@@ -131,6 +183,25 @@ fn parse_args() -> Result<Args, String> {
                 a.json = true;
                 consumed = 1;
             }
+            "--jam" => {
+                a.jam = true;
+                consumed = 1;
+            }
+            "--jam-swap" => {
+                a.jam = true;
+                a.jam_swap = true;
+                consumed = 1;
+            }
+            "--jam-move" => {
+                a.jam = true;
+                a.jam_move = true;
+                consumed = 1;
+            }
+            "--jam-take" => {
+                a.jam = true;
+                a.jam_take = true;
+                consumed = 1;
+            }
             "-h" | "--help" => return Err("help".into()),
             other => return Err(format!("unknown flag {other}")),
         }
@@ -141,6 +212,30 @@ fn parse_args() -> Result<Args, String> {
     }
     if a.bpm == 0 {
         return Err("--bpm must be >= 1".into());
+    }
+    // The band's own band: 240 BPM sixteenths is 16 ticks a bar at 16 ticks
+    // a second, which is the top of what a jam can ask the mixer for.
+    if a.jam {
+        if !a.bpm_set {
+            a.bpm = 240;
+        }
+        if !a.subdivision_set {
+            a.subdivision = 4;
+        }
+        // The band's table is sixteen ticks to a 4/4 bar, and the engine
+        // compares that against `beats_per_measure * subdivision` on every
+        // tick. At any other resolution it plays the plain click and says so
+        // once — so `--jam --subdivision 3` would report a clean jam gate
+        // having measured no jam at all. Refuse rather than measure the
+        // wrong thing quietly.
+        if a.subdivision != 4 {
+            return Err(format!(
+                "--jam plays a sixteen-tick bar, so it needs --subdivision 4; at \
+                 --subdivision {} the engine falls back to the click and this run \
+                 would measure the click",
+                a.subdivision
+            ));
+        }
     }
     Ok(a)
 }
@@ -158,6 +253,17 @@ click-jitter-probe — ROADMAP §4 audio-safety gate
   --p99-ms <f>       jitter threshold, default 1.0
   --json             also print a one-line JSON summary
   --dump-csv <path>  write the raw per-callback capture for re-analysis
+  --jam              play the busiest plausible jam instead of the click
+  --jam-swap         --jam, and swap the table from another thread every
+                     350 ms while playing (the bar-ahead bass handshake)
+                     (16 ticks a bar, every lane, a fill, a crash on the
+                     one) at 240 BPM / 16ths
+  --jam-move         --jam, and move the form while playing: bars 2-4 of
+                     the form looped and a jump every 2 s. Combines with
+                     --jam-swap.
+  --jam-take         --jam, and record a take for the whole run (the
+                     callback's ring, a synthetic 44.1 kHz mic, and a
+                     writer thread on the disk). Combines with both.
 
 exit 0 = pass, 1 = gate failure, 2 = setup error";
 
@@ -384,6 +490,82 @@ fn start_llm(_path: &str, _stop: Arc<AtomicBool>) -> Result<LlmRun, String> {
 
 // ---------------------------------------------------------------------------
 
+/// The busiest jam anyone could plausibly ask for, for `--jam`.
+///
+/// Sixteen ticks to the bar with every lane working, a fill on the last bar
+/// of a four-bar form where every lane plays every tick, and a crash on the
+/// one. The kick, the snare and the crash all ring out uncapped, so at 240
+/// BPM this keeps dozens of voices alive at once — which is the thing the
+/// gate has to cover. If the click survives this, it survives any groove the
+/// library can hold.
+fn busiest_jam() -> JamConfig {
+    JamConfig {
+        ticks_per_beat: 4,
+        beats_per_bar: 4,
+        bar: JamPattern {
+            kick: vec![2, 0, 0, 1, 1, 0, 1, 0, 2, 0, 0, 1, 1, 0, 1, 0],
+            snare: vec![0, 0, 3, 0, 2, 0, 0, 3, 0, 3, 0, 0, 2, 0, 3, 1],
+            hat: vec![1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3],
+            ride: vec![1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+            crash: vec![0; 16],
+        },
+        // Every lane on every tick: the worst bar the table can describe.
+        fill: Some(JamPattern {
+            kick: vec![1; 16],
+            snare: vec![2; 16],
+            hat: vec![1; 16],
+            ride: vec![1; 16],
+            crash: vec![0; 16],
+        }),
+        form_bars: 4,
+        crash_on_one: true,
+        intensity: 1.25,
+        // The longest kit in the set: a 700 ms crash, a 400 ms ride and a
+        // 330 ms open hat (`src-tauri/sounds/KITS.md`). Voices that ring
+        // longer overlap more, and overlapping voices are what the mixer
+        // pays for, so brushes is the kit that costs the callback the most
+        // per tick — not the one anyone would pick for this groove.
+        kit: "brushes".to_string(),
+        // And a bass under it, on every tick. A note per sixteenth at
+        // 240 BPM is nobody's bass line; it is the maximum rate the table
+        // can ask the engine to spawn one, which is the number the gate is
+        // about.
+        bass: Some(JamBassLine {
+            pitches: vec![40, 45, 47, 52, 40, 45, 47, 52, 38, 43, 45, 50, 38, 43, 45, 50],
+            gain: 1.0,
+        }),
+        // The practice windows only ever take work away, so the probe runs
+        // without them: the busiest case is the band playing every bar.
+        practice: None,
+        fill_every: None,
+        // And a comping voice over the top. Four notes on every eighth is
+        // nobody's piano part; it is the maximum the table can ask for on
+        // the one lane that SUSTAINS, and sustaining voices are what the
+        // mixer pays for. Sixteen sixteenths of drums keep four to eight
+        // voices alive; this adds eight more that are still ringing when
+        // the next chord lands.
+        keys: Some(JamKeysLine {
+            voicings: (0..16)
+                .map(|t| {
+                    if t % 2 == 0 {
+                        vec![55, 60, 64, 67]
+                    } else {
+                        Vec::new()
+                    }
+                })
+                .collect(),
+            gain: 1.5,
+        }),
+        // Every lane as loud as the contract lets it be.
+        mix: Some(JamMix {
+            drums: 1.5,
+            bass: 1.5,
+            keys: 1.5,
+        }),
+        count_in_sound: None,
+    }
+}
+
 fn main() -> ExitCode {
     let args = match parse_args() {
         Ok(a) => a,
@@ -441,6 +623,30 @@ fn main() -> ExitCode {
     }
 
     let mut engine = MetronomeEngine::new_with_probe(beat_log, cb_probe.clone());
+    if args.jam {
+        let cfg = busiest_jam();
+        match compile_jam(&cfg) {
+            Ok(table) => {
+                eprintln!(
+                    concat!(
+                        "[probe] jam loaded: {} kit, {} ticks a bar, {} bars a chorus, ",
+                        "fill on, crash on the one, bass on every tick; ",
+                        "loudest sample {:.3} -> {:.3} after normalisation"
+                    ),
+                    cfg.kit,
+                    table.ticks_per_bar(),
+                    table.form_bars(),
+                    table.peak_before,
+                    table.peak_after,
+                );
+                engine.set_jam_table(Some(Arc::new(table)));
+            }
+            Err(e) => {
+                eprintln!("error: the probe's own jam did not compile: {e}");
+                return ExitCode::from(2);
+            }
+        }
+    }
     if let Err(e) = engine.start_headless(state) {
         eprintln!("error: audio engine did not start: {e}");
         return ExitCode::from(2);
@@ -456,12 +662,185 @@ fn main() -> ExitCode {
         args.seconds,
     );
 
+    // `--jam-swap`: another thread keeps replacing the table with one that
+    // differs only in its bass, the way the UI does at every bar line where
+    // the changes move. Each swap is deferred to the bar line by the engine
+    // and the replaced table is retired back to this thread, so this run is
+    // the one that measures the handoff, not just the mixing.
+    let swapper = if args.jam_swap {
+        let handoff = engine.jam_handoff();
+        let stop_swaps = Arc::new(std::sync::atomic::AtomicBool::new(false));
+        let flag = stop_swaps.clone();
+        let table_a = Arc::new(compile_jam(&busiest_jam()).expect("compiled above"));
+        let mut cfg_b = busiest_jam();
+        if let Some(ref mut b) = cfg_b.bass {
+            b.gain = 0.9;
+        }
+        let table_b =
+            Arc::new(compile_jam(&cfg_b).expect("the probe's swap table did not compile"));
+        let swaps = Arc::new(std::sync::atomic::AtomicU64::new(0));
+        let count = swaps.clone();
+        let handle = std::thread::spawn(move || {
+            let mut flip = false;
+            while !flag.load(Ordering::Relaxed) {
+                std::thread::sleep(Duration::from_millis(350));
+                handoff.set(Some(if flip { table_a.clone() } else { table_b.clone() }));
+                flip = !flip;
+                count.fetch_add(1, Ordering::Relaxed);
+            }
+        });
+        Some((handle, stop_swaps, swaps))
+    } else {
+        None
+    };
+
+    // `--jam-move`: the form itself moves while the stream runs. A loop over
+    // the last three bars of the four-bar form, and a jump every two
+    // seconds — two bars at 240 BPM — alternating between the first bar of
+    // the loop and the fill, which is the bar where every lane plays every
+    // tick. The bar line then runs the whole of the jump / loop / wrap rule
+    // on the audio thread instead of a single add, and the jump is a
+    // generation change the callback has to notice and consume.
+    //
+    // A jump command carries the loop with it: the contract's position is
+    // both halves at once, so a command that named only the jump would be
+    // asking for the loop to be taken away.
+    const PROBE_LOOP: (u32, u32) = (1, 3);
+    let mover = if args.jam_move {
+        let handoff = engine.jam_handoff();
+        handoff.set_position(JamPosition {
+            jump: None,
+            loop_bars: Some(PROBE_LOOP),
+        });
+        let stop_moves = Arc::new(AtomicBool::new(false));
+        let flag = stop_moves.clone();
+        let moves = Arc::new(AtomicU64::new(0));
+        let count = moves.clone();
+        let handle = std::thread::spawn(move || {
+            let mut to_fill = true;
+            while !flag.load(Ordering::Relaxed) {
+                std::thread::sleep(Duration::from_secs(2));
+                handoff.set_position(JamPosition {
+                    jump: Some(if to_fill { PROBE_LOOP.1 } else { PROBE_LOOP.0 }),
+                    loop_bars: Some(PROBE_LOOP),
+                });
+                to_fill = !to_fill;
+                count.fetch_add(1, Ordering::Relaxed);
+            }
+        });
+        Some((handle, stop_moves, moves))
+    } else {
+        None
+    };
+
+    // `--jam-take`: record a take for the whole run.
+    //
+    // This is the one place the audio callback does work on behalf of the
+    // filesystem, so it is the one the gate has to cover: every buffer is
+    // copied into a lock-free ring, and a writer thread drains it, resamples
+    // a synthetic 44.1 kHz "mic" against the output rate, mixes the two and
+    // writes 16-bit PCM to disk for the length of the measurement. The mic
+    // is synthetic because the probe runs headless with no input stream;
+    // what matters for the gate is that the writer is doing a take's real
+    // work — the resampler, the mix and the disk — while the stream runs.
+    let taker = if args.jam_take {
+        let handoff = engine.take_handoff();
+        let out_sr = match engine.output_sample_rate() {
+            Some(sr) => sr,
+            None => {
+                eprintln!("error: the output device never reported a rate, so --jam-take \
+                           has nothing to record");
+                return ExitCode::from(2);
+            }
+        };
+        let dir = std::env::temp_dir().join(format!("yames-probe-takes-{}", std::process::id()));
+        let mic = Arc::new(TakeRing::new(44_100 * 4));
+        let mut session = TakeSession::default();
+        if let Err(e) = session.start(TakeStart {
+            app_data: &dir,
+            jam_id: "probe",
+            handoff: &handoff,
+            mic: Some((mic.clone(), 44_100)),
+            out_sr,
+            // The probe measures the writer, not the alignment: a synthetic
+            // mic has no round trip to correct and there is no device change
+            // to watch for in a headless run.
+            round_trip_us: 0,
+            out_sr_watch: Some(engine.output_sample_rate_handle()),
+            owns_input: false,
+        }) {
+            eprintln!("error: could not start the probe's take: {e}");
+            return ExitCode::from(2);
+        }
+        eprintln!("[probe] recording a take into {}", dir.display());
+
+        // The synthetic mic: 44.1 kHz of a quiet tone, pushed in
+        // callback-sized chunks, so the writer's resampler and its mix both
+        // run for real rather than short-circuiting on matching rates.
+        let stop_mic = Arc::new(AtomicBool::new(false));
+        let flag = stop_mic.clone();
+        let mic_thread = std::thread::spawn(move || {
+            let mut phase = 0.0f32;
+            let step = std::f32::consts::TAU * 440.0 / 44_100.0;
+            while !flag.load(Ordering::Relaxed) {
+                let chunk: Vec<f32> = (0..441)
+                    .map(|_| {
+                        phase += step;
+                        0.1 * phase.sin()
+                    })
+                    .collect();
+                mic.push(&chunk);
+                std::thread::sleep(Duration::from_millis(10));
+            }
+        });
+        Some((session, handoff, stop_mic, mic_thread, dir))
+    } else {
+        None
+    };
+
     std::thread::sleep(Duration::from_millis(args.warmup_ms));
     let window_start_ns = yames_lib::probe::now_ns();
     std::thread::sleep(Duration::from_secs(args.seconds));
 
+    // The take stops BEFORE the engine, so the writer's last drain is of a
+    // ring the callback is still alive to have filled.
+    let take_summary = match taker {
+        Some((mut session, handoff, stop_mic, mic_thread, dir)) => {
+            stop_mic.store(true, Ordering::Relaxed);
+            let _ = mic_thread.join();
+            let recorded = session.stop(&handoff);
+            let summary = match recorded {
+                Ok(Some(t)) => {
+                    let bytes = std::fs::metadata(&t.path).map(|m| m.len()).unwrap_or(0);
+                    Some(format!("{:.1} s, {} bytes", t.duration_sec, bytes))
+                }
+                Ok(None) => Some("nothing was recorded".to_string()),
+                Err(e) => Some(format!("failed: {e}")),
+            };
+            let _ = std::fs::remove_dir_all(&dir);
+            summary
+        }
+        None => None,
+    };
+
     engine.shutdown();
     stop.store(true, Ordering::Relaxed);
+    let swaps_done = match swapper {
+        Some((handle, stop_swaps, swaps)) => {
+            stop_swaps.store(true, Ordering::Relaxed);
+            let _ = handle.join();
+            swaps.load(Ordering::Relaxed)
+        }
+        None => 0,
+    };
+    let moves_done = match mover {
+        Some((handle, stop_moves, moves)) => {
+            stop_moves.store(true, Ordering::Relaxed);
+            let _ = handle.join();
+            moves.load(Ordering::Relaxed)
+        }
+        None => 0,
+    };
 
     let samples = cb_probe.snapshot();
     let sample_rate = cb_probe.sample_rate();
@@ -523,13 +902,32 @@ fn main() -> ExitCode {
     };
 
     // ---- Output ----
-    let mode = match &llm_summary {
+    let mut mode = match &llm_summary {
         None => "baseline (--no-llm)".to_string(),
         Some((backend, _, _, _)) => format!(
             "LLM backend={backend} YAMES_LLM_GPU_LAYERS={}",
             std::env::var("YAMES_LLM_GPU_LAYERS").unwrap_or_else(|_| "(unset)".into())
         ),
     };
+    // A pasted report has to say whether the band was playing. Two runs
+    // whose only difference is `--jam` were otherwise indistinguishable on
+    // the page, which is exactly the pair anyone compares.
+    if args.jam {
+        mode.push_str(" + --jam");
+    }
+    if args.jam_swap {
+        mode.push_str(&format!("-swap ({swaps_done} table swaps while playing)"));
+    }
+    if args.jam_move {
+        mode.push_str(&format!(
+            " + --jam-move (bars {}-{} looped, {moves_done} jumps while playing)",
+            PROBE_LOOP.0 + 1,
+            PROBE_LOOP.1 + 1
+        ));
+    }
+    if let Some(ref t) = take_summary {
+        mode.push_str(&format!(" + --jam-take ({t})"));
+    }
 
     println!("\n=== click-jitter-probe ===");
     println!("mode              {mode}");

@@ -173,7 +173,8 @@
       "groups": {
         "metronome": "Metronome",
         "view": "View",
-        "navigation": "Navigation"
+        "navigation": "Navigation",
+        "jam": "Jam"
       },
       "actions": {
         "play": "Play / Stop",
@@ -195,9 +196,19 @@
         "tab-1": "Metronome tab",
         "tab-2": "Setlist tab",
         "tab-3": "Drill tab",
+        "tab-4": "Jam tab",
         "settings": "Settings",
         "toggle-sidebar": "Toggle Sidebar",
-        "toggle-coach": "Toggle Coach"
+        "toggle-coach": "Toggle Coach",
+        "jam-next-groove": "Next groove",
+        "jam-prev-groove": "Previous groove",
+        "jam-trade": "Trade fours",
+        "jam-dropout": "Drop-out bars",
+        "jam-next-shape": "Next chord shape",
+        "jam-next-section": "Next section",
+        "jam-prev-section": "Previous section",
+        "jam-loop-section": "Loop this section",
+        "jam-take": "Record the take"
       },
       "descs": {
         "play": "Start or stop the metronome",
@@ -219,9 +230,19 @@
         "tab-1": "Switch to Metronome tab",
         "tab-2": "Switch to Setlist tab",
         "tab-3": "Switch to Drill tab",
+        "tab-4": "Switch to Jam tab",
         "settings": "Open or close settings",
         "toggle-sidebar": "Collapse or expand the left sidebar",
-        "toggle-coach": "Open or close the practice coach panel"
+        "toggle-coach": "Open or close the practice coach panel",
+        "jam-next-groove": "Step to the next groove without taking a hand off the instrument",
+        "jam-prev-groove": "Step back to the previous groove",
+        "jam-trade": "Turn trading on or off — the band plays four bars, you play four",
+        "jam-dropout": "Turn the drop-out bars on or off",
+        "jam-next-shape": "Page through the ways to play the chord you are on",
+        "jam-next-section": "Jump to the start of the next section at the bar line",
+        "jam-prev-section": "Jump back to the start of the previous section at the bar line",
+        "jam-loop-section": "Loop the section you are in, or stop looping it",
+        "jam-take": "Record the next time you press play, or stop recording"
       }
     },
     "inputTest": {

@@ -173,7 +173,8 @@
       "groups": {
         "metronome": "メトロノーム",
         "view": "ビュー",
-        "navigation": "ナビゲーション"
+        "navigation": "ナビゲーション",
+        "jam": "ジャム"
       },
       "actions": {
         "play": "再生 / 停止",
@@ -195,9 +196,19 @@
         "tab-1": "メトロノームタブ",
         "tab-2": "セットリストタブ",
         "tab-3": "テンポ練習タブ",
+        "tab-4": "ジャムタブ",
         "settings": "設定",
         "toggle-sidebar": "サイドバーの切り替え",
-        "toggle-coach": "コーチ切替"
+        "toggle-coach": "コーチ切替",
+        "jam-next-groove": "次のグルーヴ",
+        "jam-prev-groove": "前のグルーヴ",
+        "jam-trade": "4バース",
+        "jam-dropout": "休止小節",
+        "jam-next-shape": "次のコードフォーム",
+        "jam-next-section": "次のセクション",
+        "jam-prev-section": "前のセクション",
+        "jam-loop-section": "このセクションをループ",
+        "jam-take": "テイクを録音"
       },
       "descs": {
         "play": "メトロノームを開始または停止",
@@ -219,9 +230,19 @@
         "tab-1": "メトロノームタブへ切り替える",
         "tab-2": "セットリストタブへ切り替える",
         "tab-3": "テンポ練習タブへ切り替える",
+        "tab-4": "ジャムタブへ切り替える",
         "settings": "設定を開くまたは閉じる",
         "toggle-sidebar": "左サイドバーを折りたたむ／展開する",
-        "toggle-coach": "練習コーチパネルを開くまたは閉じる"
+        "toggle-coach": "練習コーチパネルを開くまたは閉じる",
+        "jam-next-groove": "楽器から手を離さずに次のグルーヴへ進む",
+        "jam-prev-groove": "ひとつ前のグルーヴに戻る",
+        "jam-trade": "交替のオン・オフ — バンドが4小節、あなたが4小節",
+        "jam-dropout": "休止小節のオン・オフ",
+        "jam-next-shape": "いま鳴っているコードの押さえ方を順に見る",
+        "jam-next-section": "小節線で次のセクションの頭へ飛ぶ",
+        "jam-prev-section": "小節線でひとつ前のセクションの頭へ戻る",
+        "jam-loop-section": "いるセクションをループする、または解除する",
+        "jam-take": "次に再生したときに録音する、または録音をやめる"
       }
     },
     "inputTest": {

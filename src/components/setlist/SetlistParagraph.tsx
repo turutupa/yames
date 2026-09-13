@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   duplicateStep,
@@ -9,6 +9,8 @@ import {
 } from "../../setlist";
 import { setlistSeconds, durationLabel, repeatLabel } from "./format";
 import { StepSentence } from "./StepSentence";
+import { JamGlyph } from "../jam/JamGlyph";
+import type { Jam } from "../../jam";
 import type { Setlist, SetlistStep } from "../../types";
 
 /**
@@ -51,6 +53,17 @@ interface SetlistParagraphProps {
   onPatchStep: (stepId: string, patch: Partial<Omit<SetlistStep, "id">>) => void;
   /** A new step, built from the one above it. */
   onAddStep: () => void;
+  /**
+   * The jam library, so a step that points at one can be drawn as the jam it
+   * is and offered as something to add (JAM_MODE §8.5).
+   *
+   * The whole list rather than a lookup, because the add menu needs to show
+   * it and the sentences need to search it, and one array read twice is
+   * cheaper to reason about than two ways in.
+   */
+  jams?: Jam[];
+  /** A jam, added to this setlist as a step. Absent: the affordance is not shown. */
+  onAddJamStep?: (jam: Jam) => void;
   /** Back to the player, when you opened this while the setlist was running. */
   onBackToPlaying?: () => void;
 }
@@ -87,11 +100,40 @@ export function SetlistParagraph({
   onChange,
   onPatchStep,
   onAddStep,
+  jams,
+  onAddJamStep,
   onBackToPlaying,
 }: SetlistParagraphProps) {
   const { t } = useTranslation();
   const listRef = useRef<HTMLDivElement>(null);
   const openRef = useRef<HTMLDivElement>(null);
+  /** The jam picker at the foot of the list, open or shut. */
+  const [pickingJam, setPickingJam] = useState(false);
+  const jamPickerRef = useRef<HTMLDivElement>(null);
+
+  const jamFor = (step: SetlistStep) =>
+    step.jamId ? (jams?.find((j) => j.id === step.jamId) ?? null) : null;
+
+  useEffect(() => {
+    if (!pickingJam) return;
+    const onDown = (e: MouseEvent) => {
+      if (jamPickerRef.current?.contains(e.target as Node)) return;
+      setPickingJam(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      // Claimed, so the window's own Escape door stands aside: one press used
+      // to shut this picker and close the whole setlist behind it.
+      e.preventDefault();
+      setPickingJam(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [pickingJam]);
 
   const total = setlistSeconds(setlist);
 
@@ -227,6 +269,7 @@ export function SetlistParagraph({
                 total={setlist.steps.length}
                 isLast={isLast}
                 folded
+                jam={jamFor(step)}
                 onChange={(next) => onPatchStep(step.id, next)}
               />
               {/* On the step you are working with, and on hover. They are
@@ -294,6 +337,45 @@ export function SetlistParagraph({
           <button type="button" className="setlist-add-row" onClick={onAddStep}>
             {t("setlist.addStepPlain")}
           </button>
+          {/* A jam as a step, BESIDE the plain one rather than inside a menu on
+              it (JAM_MODE §8.5). The two are the two kinds of thing a setlist
+              can hold, and hiding one of them behind the other would make the
+              band a variation on a click instead of the other thing you can
+              put in a routine. Absent when the library is empty: an "add a
+              jam" button that opens on nothing teaches the wrong lesson. */}
+          {onAddJamStep && !!jams?.length && (
+            <div className="setlist-add-jam-wrap" ref={jamPickerRef}>
+              <button
+                type="button"
+                className={`setlist-add-row setlist-add-jam${pickingJam ? " open" : ""}`}
+                aria-haspopup="menu"
+                aria-expanded={pickingJam}
+                onClick={() => setPickingJam((open) => !open)}
+              >
+                <JamGlyph />
+                {t("setlist.jam.addStep")}
+              </button>
+              {pickingJam && (
+                <div className="setlist-jam-menu" role="menu">
+                  {jams.map((jam) => (
+                    <button
+                      key={jam.id}
+                      role="menuitem"
+                      type="button"
+                      className="sub-dropdown-item"
+                      onClick={() => {
+                        setPickingJam(false);
+                        onAddJamStep(jam);
+                      }}
+                    >
+                      <JamGlyph />
+                      <span>{jam.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </section>

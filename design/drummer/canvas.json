@@ -1,0 +1,130 @@
+{
+  "pages": [
+    {
+      "id": "page-1",
+      "name": "The design"
+    },
+    {
+      "id": "page-2",
+      "name": "Directions"
+    }
+  ],
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "page": "page-1",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "1 · A drummer, picked"
+    },
+    {
+      "file": "GrooveEditor.dc.html",
+      "page": "page-1",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "2 · Make it yours"
+    },
+    {
+      "file": "SoundMenu.dc.html",
+      "page": "page-1",
+      "x": 3120,
+      "y": 0,
+      "w": 640,
+      "h": 760,
+      "title": "3 · Where you find it"
+    },
+    {
+      "file": "DirectionB.dc.html",
+      "page": "page-2",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "B · A mode of its own"
+    },
+    {
+      "file": "DirectionC.dc.html",
+      "page": "page-2",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "C · A sound you shape"
+    },
+    {
+      "file": "DirectionD.dc.html",
+      "page": "page-2",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "D · A layer beside the stage"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note-intro",
+      "page": "page-1",
+      "x": 0,
+      "y": -330,
+      "w": 1440,
+      "text": "THE DRUMMER — direction A, on the stage as a sound\n\nThe idea: a groove you can play along to that is still the same sacred click underneath. Kick, snare and hat sit on the tick grid the metronome already runs, so drills, setlists and the timing score all keep working.\n\nWhat this board decides:\n· The drummer is a SOUND, not a mode. You pick it where you pick the click (board 3), and picking a click again turns it off. Presets and setlist steps already carry a sound, so a groove rides in that field with no new data.\n· The stage does not grow a picker. It gains one small strip under the beat dots: hat, snare, kick, one column per beat, lighting as it plays. The tempo readout never moves.\n· Subdivision is set by the groove. A shuffle is triplets with the middle one silent, which is why swing needs no new engine work.\n· The header chip names the groove, not \"Drummer\", so you can read what is playing at a glance.\n· The headphones line is the honesty rule: through speakers the drums land on the grid and the mic would score them as your notes.\n\nThree other homes for the same feature are on the Directions page."
+    },
+    {
+      "id": "note-editor",
+      "page": "page-1",
+      "x": 1560,
+      "y": -330,
+      "w": 1440,
+      "text": "MAKE IT YOURS — second release, drawn now so the presets are shaped for it\n\nA panel docked to the bottom edge, opened from EDIT on the strip or from \"Make your own\" in the sound menu. The tempo stays in view above it; the meter row, the strip and the subdivision row are underneath, because the grid's columns say the same thing.\n\nThe grid inherits its shape from the meter. Four beats in triplets gives twelve columns; switch the meter to 7/8 and you get seven. A custom groove can never disagree with the metronome.\n\nFour lanes, four cell states: off, hit, accent, ghost. Accent and ghost map onto the two snare dynamics the app already ships. The quiet middle column in each beat is the triplet tick a shuffle leaves empty — still clickable.\n\nA saved groove is global, like a kit: it appears in the sound menu for every preset, and editing it later changes it everywhere. No velocity lanes, no song mode, no fills: that is a drum machine, and this is a metronome you can jam with."
+    },
+    {
+      "id": "note-menu",
+      "page": "page-1",
+      "x": 3120,
+      "y": -330,
+      "w": 640,
+      "text": "WHERE YOU FIND IT\n\nThe existing sound menu, one section longer. Five clicks above the line, eight grooves below it, and a way to make your own at the bottom.\n\nEight presets, each declaring the meter it fits; odd meters fall back to a rule (kick on group starts, snare late in the group, hats on the subdivision)."
+    },
+    {
+      "id": "note-directions",
+      "page": "page-2",
+      "x": 0,
+      "y": -640,
+      "w": 1440,
+      "text": "THREE OTHER HOMES FOR THE DRUMMER\n\nSame feature, same engine underneath, same shell. What changes is WHERE IT LIVES, and that decides what it can grow into and what it costs the metronome.\n\nA · on the stage, as a sound (page one). The metronome gains one strip. Cheapest, and the drummer works in every mode for free; it can never grow beyond a pattern.\nB · a room of its own. A rail entry with grooves as its library and the bar as the hero. Room to grow (feel, fills, variations); the metronome stays untouched; but a groove has its own tempo and meter, so Drill and setlists cannot have a drummer without a bridge.\nC · a sound you shape in one place. A modal from the sound menu; the stage never changes. The pattern is invisible while you play.\nD · a layer beside the stage. A docked panel, like the coach's. The click stays on underneath and the drummer is optional on top; the stage narrows while it is open.\n\nWhat to decide first: is the drummer a sound, a place, or a layer? Everything else follows."
+    },
+    {
+      "id": "note-b",
+      "page": "page-2",
+      "x": 0,
+      "y": -330,
+      "w": 1440,
+      "text": "B · A MODE OF ITS OWN\n\nThe case: a home with room. Feel and fill controls have somewhere to live, the bar is big enough to edit in place while it plays, and the metronome never grows a pixel. The library under the rail entry becomes your grooves, each with its own tempo and meter, exactly the way presets work today.\n\nThe cost: a groove is a thing you go to. Drill cannot ramp it and a setlist step cannot name it without a link between two libraries. And the tempo, the one number the app is built around, becomes a secondary control in the corner."
+    },
+    {
+      "id": "note-c",
+      "page": "page-2",
+      "x": 1560,
+      "y": -330,
+      "w": 1440,
+      "text": "C · A SOUND YOU SHAPE\n\nThe case: zero change to the stage. You open the drummer from the sound menu, shape it in one place with a kit and a pattern, audition it, and from then on it is one more line in the sound list for any preset, drill or setlist step. The mental model is the simplest of the four: a drummer is a sound.\n\nThe cost: the pattern is invisible while you play. Nothing on the stage tells you where the backbeat is, and editing means stopping and opening a window, which is the opposite of eyes-free."
+    },
+    {
+      "id": "note-d",
+      "page": "page-2",
+      "x": 3120,
+      "y": -330,
+      "w": 1440,
+      "text": "D · A LAYER BESIDE THE STAGE\n\nThe case: the drummer is not a replacement for the click but something on top of it. A docked panel, the same shape as the coach's, with the grooves, the live bar and two switches: keep the click under the drums, and whether the drums count in the score. Close it and the metronome is exactly what it was.\n\nThe cost: the stage narrows by 380px while the panel is open, and the panel competes with the coach for the same edge. Two layers of sound also means two things to balance, and the honesty question (speakers, mic, score) is louder here because the click and the drums both play."
+    }
+  ],
+  "launch": {
+    "view": "canvas",
+    "page": "page-2"
+  }
+}

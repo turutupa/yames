@@ -13,6 +13,15 @@ use tauri::{AppHandle, Emitter, Manager, State};
 
 pub struct EngineState(pub Mutex<MetronomeEngine>);
 
+/// The normalisations `set_jam` has already worked out.
+///
+/// Managed state rather than a field on the engine, because it is not the
+/// engine's: it is a memo the command thread keeps for itself, and nothing
+/// on the audio side ever reads it. See `JamGainCache` in `jam.rs` for what
+/// it holds and what it is keyed on.
+#[derive(Default)]
+pub struct JamGainState(pub crate::jam::JamGainCache);
+
 /// Snapshot the current AppState and emit it on the `state-changed`
 /// event. Lock is dropped before the emit so the (synchronous-but-not-
 /// instant) serde serialization can't block any other thread waiting on
@@ -2409,6 +2418,286 @@ pub fn app_ready(app_handle: AppHandle) {
     let _ = main_win.set_focus();
 }
 
+// ---------------------------------------------------------------------------
+// Jam (plans/JAM_MODE.md, plans/tasks/jam/BRIEF.md)
+// ---------------------------------------------------------------------------
+
+/// Hand the engine a band, or `null` to take it away and play the plain
+/// click again.
+///
+/// The config is validated and compiled into a lookup table here, on the
+/// command thread, and swapped into the engine behind an `Arc`. Nothing
+/// about a jam reaches `AppState`: the UI owns the jam *record* — it lives
+/// in the store beside presets and setlists — and the engine holds only the
+/// table it plays. So there is no `state-changed` emit and nothing to
+/// persist here.
+///
+/// A config that does not check out is rejected whole, with a message the
+/// caller can show. A half-applied groove is worse than no groove.
+///
+/// The caller is responsible for having ALREADY set the engine's subdivision
+/// to `ticksPerBeat` and its beat groups to `[beatsPerBar]`. The engine
+/// checks the product against its own bar on every tick and plays the click
+/// when they disagree, rather than guessing which column is which.
+///
+/// Compiling renders four bars of the band to find out how loud it is, and
+/// the UI calls this four to six times a chorus to keep the bass a bar
+/// ahead. `JamGainState` remembers the measurements so those sends do not
+/// each pay for one — see `JamGainCache` in `jam.rs`.
+#[tauri::command]
+pub fn set_jam(
+    config: Option<crate::jam::JamConfig>,
+    engine_state: State<EngineState>,
+    jam_gain: State<JamGainState>,
+) -> Result<(), String> {
+    let table = match config {
+        Some(ref cfg) => Some(std::sync::Arc::new(crate::jam::compile_with(
+            cfg, &jam_gain.0,
+        )?)),
+        None => None,
+    };
+    engine_state.0.lock().unwrap().set_jam_table(table);
+    Ok(())
+}
+
+/// Move the form: jump to a bar, loop a range of bars, or clear both.
+///
+/// The engine applies it at the next bar line, so a footswitch pressed
+/// halfway through a bar finishes the bar first — which is where a musician
+/// expects the change to land, and the only place the band can change
+/// without the groove tearing.
+///
+/// The command carries both halves and replaces both, so "jump to the
+/// bridge" (`{ jumpTo: 16, loop: null }`) leaves a loop behind and "loop the
+/// turnaround" (`{ jumpTo: null, loop: {...} }`) sets one without moving
+/// yet. A bar that is not in the form is refused with a message and nothing
+/// changes: half a move is worse than none.
+///
+/// With no jam loaded there is no form to check against, so the position is
+/// accepted and held. It takes effect when a band arrives — or, if the new
+/// form is too short for the loop, it is quietly dropped there rather than
+/// looping bars that do not exist.
+#[tauri::command]
+pub fn set_jam_position(
+    command: crate::jam::JamPositionCommand,
+    engine_state: State<EngineState>,
+) -> Result<(), String> {
+    let engine = engine_state.0.lock().unwrap();
+    let position = crate::jam::validate_position(&command, engine.jam_form_bars())?;
+    engine.set_jam_position(position);
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Takes (plans/JAM_MODE.md §4.4, src-tauri/src/take.rs)
+// ---------------------------------------------------------------------------
+
+/// The take being recorded, if one is. Managed state rather than a field on
+/// the engine: the engine holds the audio-thread half (a ring to copy the
+/// band into, a buffer to play back), and this holds the writer thread, the
+/// file it is writing and the record it will hand back. Command thread only.
+#[derive(Default)]
+pub struct TakeState(pub Mutex<crate::take::TakeSession>);
+
+/// Where takes live: `<app data>/takes/<jam>/<timestamp>.wav`.
+///
+/// One resolution, used by every take command, so a build that resolves the
+/// data directory differently cannot end up writing takes in one place and
+/// listing them from another.
+fn takes_home(app_handle: &AppHandle) -> Result<std::path::PathBuf, String> {
+    app_handle
+        .path()
+        .app_data_dir()
+        .map_err(|e| format!("could not find where this app keeps its files: {e}"))
+}
+
+/// Start recording a take: your playing with the band mixed in.
+///
+/// Opt-in and local. The UI only calls this for a jam whose `takes` flag the
+/// user turned on, nothing is uploaded, and the file it writes is one the
+/// user can play back and delete from the same screen (`plans/JAM_MODE.md`
+/// §4.4, and the privacy rule in the header of `take.rs`).
+///
+/// The mic is the one the onset detector already listens to. If no input
+/// stream is running this starts the default one, the way `start_evaluation`
+/// does — a take is a recording, and a recording of a band with no player in
+/// it is not what anyone pressed the button for. If that fails, the take
+/// goes ahead as the band alone rather than being refused: half a take is
+/// worth more than none, and the UI can say which it got from the file.
+/// A stream started HERE is remembered, so `stop_take` can give it back.
+#[tauri::command]
+pub fn start_take(
+    jam_id: String,
+    engine_state: State<EngineState>,
+    audio_input: State<SharedAudioInput>,
+    take_state: State<TakeState>,
+    app_handle: AppHandle,
+) -> Result<(), String> {
+    let home = takes_home(&app_handle)?;
+    let (handoff, out_sr, out_sr_watch, output_latency_us) = {
+        let engine = engine_state.0.lock().unwrap();
+        (
+            engine.take_handoff(),
+            engine.output_sample_rate(),
+            engine.output_sample_rate_handle(),
+            engine.output_latency_us(),
+        )
+    };
+    let out_sr = out_sr
+        .ok_or_else(|| "the audio output has not started yet, so there is no band to record")?;
+
+    let (mic, owns_input, input_latency_us) = {
+        let mut ai = audio_input.lock().unwrap_or_else(|e| e.into_inner());
+        // Whether the mic was ALREADY running matters beyond this line: an
+        // input the coach or the drill had open is theirs and stays open,
+        // and one opened here is the take's and closes with it.
+        let mut owns_input = false;
+        if !ai.is_active() {
+            match ai.start(None, 0, app_handle.clone()) {
+                Ok(()) => owns_input = true,
+                Err(e) => eprintln!("[take] no microphone for this take: {e}"),
+            }
+        }
+        (ai.begin_take_capture(), owns_input, ai.input_latency_us())
+    };
+    if mic.is_none() {
+        eprintln!("[take] recording the band only — no input stream is running");
+    }
+
+    // The mic hears the band through the speakers, so what reaches the
+    // writer is a response to audio one full round trip old. The writer
+    // pulls the mic forward by this much at the start; see the comment on
+    // the two offsets there.
+    let round_trip_us = output_latency_us + input_latency_us;
+
+    let started = {
+        let mut session = take_state.0.lock().unwrap_or_else(|e| e.into_inner());
+        session.start(crate::take::TakeStart {
+            app_data: &home,
+            jam_id: &jam_id,
+            handoff: &handoff,
+            mic,
+            out_sr,
+            round_trip_us,
+            out_sr_watch: Some(out_sr_watch),
+            owns_input,
+        })
+    };
+    if started.is_err() {
+        // Nothing is going to drain the mic ring, so stop filling it — and
+        // hand back a stream nothing is going to use.
+        let mut ai = audio_input.lock().unwrap_or_else(|e| e.into_inner());
+        ai.end_take_capture();
+        if owns_input {
+            ai.stop();
+        }
+    }
+    started
+}
+
+/// Stop recording and keep the take. `null` when nothing was recording, or
+/// when the take turned out to have no audio in it — the user pressed record
+/// and stop without the band playing, and a row that plays silence is worse
+/// than no row.
+#[tauri::command]
+pub fn stop_take(
+    engine_state: State<EngineState>,
+    audio_input: State<SharedAudioInput>,
+    take_state: State<TakeState>,
+) -> Result<Option<crate::take::JamTake>, String> {
+    let handoff = engine_state.0.lock().unwrap().take_handoff();
+    // THE MIC KEEPS CAPTURING UNTIL THE BAND IS ON DISK.
+    //
+    // `session.stop` takes the ring off the callback and then waits for the
+    // writer to drain what the callback had already rendered — twenty-five
+    // to seventy-five milliseconds of band that has not reached the file
+    // yet, and which the player was still playing over. Lowering the mic
+    // first, as this used to, meant the writer found nothing to mix into
+    // that tail and the last note of every take was the band on its own.
+    let (result, owns_input) = {
+        let mut session = take_state.0.lock().unwrap_or_else(|e| e.into_inner());
+        let owns_input = session.owns_input();
+        (session.stop(&handoff), owns_input)
+    };
+    {
+        let mut ai = audio_input.lock().unwrap_or_else(|e| e.into_inner());
+        ai.end_take_capture();
+        // And a stream this take opened closes with it. One that was
+        // already running belongs to whoever opened it.
+        if owns_input {
+            ai.stop();
+        }
+    }
+    result
+}
+
+/// The takes of one jam, newest first. A jam with none is an empty list.
+#[tauri::command]
+pub fn list_takes(jam_id: String, app_handle: AppHandle) -> Result<Vec<crate::take::JamTake>, String> {
+    let home = takes_home(&app_handle)?;
+    crate::take::list_takes(&home, &jam_id)
+}
+
+/// Every byte the takes are using, across all jams.
+///
+/// Separate from `list_takes` rather than a field on each row, because it is
+/// a fact about the DIRECTORY and not about any one take: a jam with no
+/// takes of its own would report nothing, which is exactly the case where a
+/// disk full of somebody else's jams matters. The UI shows it when it gets
+/// large enough to be worth saying (W15).
+#[tauri::command]
+pub fn takes_dir_size(app_handle: AppHandle) -> Result<u64, String> {
+    Ok(crate::take::takes_dir_size(&takes_home(&app_handle)?))
+}
+
+/// Delete a take: the audio and its label together, permanently.
+#[tauri::command]
+pub fn delete_take(
+    id: String,
+    take_state: State<TakeState>,
+    app_handle: AppHandle,
+) -> Result<(), String> {
+    {
+        let session = take_state.0.lock().unwrap_or_else(|e| e.into_inner());
+        if session.is_recording() {
+            return Err("stop the take that is recording before deleting one".into());
+        }
+    }
+    crate::take::delete_take(&takes_home(&app_handle)?, &id)
+}
+
+/// Play a take back. The band and the click are both silent while it runs —
+/// listening back is not something you do over the top of a drummer.
+///
+/// The file is decoded here, on the command thread, and handed to the audio
+/// thread as one buffer; `take-playback-ended` arrives when it runs out.
+#[tauri::command]
+pub fn play_take(
+    id: String,
+    engine_state: State<EngineState>,
+    take_state: State<TakeState>,
+    app_handle: AppHandle,
+) -> Result<(), String> {
+    {
+        let session = take_state.0.lock().unwrap_or_else(|e| e.into_inner());
+        if session.is_recording() {
+            return Err("stop recording before playing a take back".into());
+        }
+    }
+    let play = crate::take::load_take(&takes_home(&app_handle)?, &id)?;
+    let handoff = engine_state.0.lock().unwrap().take_handoff();
+    handoff.set_play(Some(play));
+    Ok(())
+}
+
+/// Stop a take playing back and give the band the output again.
+#[tauri::command]
+pub fn stop_take_playback(engine_state: State<EngineState>) -> Result<(), String> {
+    let handoff = engine_state.0.lock().unwrap().take_handoff();
+    handoff.set_play(None);
+    handoff.drain_retired();
+    Ok(())
+}
 // ---------------------------------------------------------------------------
 // Tests — the pure halves of the beat-group / free-mode commands. The
 // `#[tauri::command]` wrappers need a live `State` + `AppHandle`, so the

@@ -1,0 +1,84 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "1 · Playing, calm"
+    },
+    {
+      "file": "Setup.dc.html",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "2 · Set up, a vibe first"
+    },
+    {
+      "file": "Variations.dc.html",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "3 · Rock, which one"
+    },
+    {
+      "file": "Chords.dc.html",
+      "x": 0,
+      "y": 1040,
+      "w": 1440,
+      "h": 900,
+      "title": "4 · The chord sheet"
+    },
+    {
+      "file": "Sounds.dc.html",
+      "x": 1560,
+      "y": 1040,
+      "w": 720,
+      "h": 620,
+      "title": "5 · The kit list"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note-playing",
+      "x": 0,
+      "y": -360,
+      "w": 1440,
+      "text": "JAM, SECOND PASS — the playing screen\n\nFive blocks and nothing that is set once per jam: the chord and the next change, the timeline, the tempo with feel and intensity beside it, the band as one row with a mute each, the practice switches. Shapes are gone from here (board 4). Everything else moved into Set up, the one new button in the header.\n\nThe example is a hard rock jam in E at 138 with drums alone, because that is the one the owner could not get out of the first build. Decisions A1, A5, A6, B1 in plans/JAM_UX_DECISIONS.md."
+    },
+    {
+      "id": "note-setup",
+      "x": 1560,
+      "y": -360,
+      "w": 1440,
+      "text": "SET UP — a sheet docked to the right\n\nVibe first: eight tiles, one tap each, that set the drummer, the kit, the tempo and the key together, and the sheet says which vibe the jam started from. Below it, four groups in the order a musician thinks: the drummer (six grooves that drive, feel, intensity, a kit dropdown with a preview, fills), the form (shape, count-in with its sound in one control, the key, edit changes), the band (drums alone until you ask), and More, collapsed: meter, what you read, takes. Ticks per beat is gone; spoken cues moved to Settings.\n\nDecisions A2, A3, A4, A7, B5, B7."
+    },
+    {
+      "id": "note-variations",
+      "x": 3120,
+      "y": -360,
+      "w": 1440,
+      "text": "ROCK, WHICH ONE — depth inside a vibe\n\nA vibe is a family, not a taste. Picking Rock shows a second row: classic, hard, punk, alt, ballad, half-time. Each is a groove, a kit, a feel and a loudness together, so a rock player has six bands before touching a single control — and one tuned to taste is saved as a jam of yours and can start the next one. Decision A9."
+    },
+    {
+      "id": "note-chords",
+      "x": 0,
+      "y": 680,
+      "w": 1440,
+      "text": "THE CHORD SHEET — opened on purpose\n\nThe owner's second-session note: the chords and the fretboard look great, but they should not keep changing. So on the playing screen only two things ever move on their own, the timeline and the chord you are on. Shapes live here, behind a Chords button: the key's chords each drawn once as their basic shape, a page you glance at; tap one and every way to play it opens below. Pin a shape and it sits in the corner of the playing screen and stays put. Following the jam is a switch, off. The fretboard is the same: opt in, one box for the key, static. Decision A8."
+    },
+    {
+      "id": "note-sounds",
+      "x": 1560,
+      "y": 680,
+      "w": 720,
+      "text": "THE KIT LIST\n\nRaw is the new built-in kit for rock, and the one to tune with your ears in the room. Below the line, your own samples: a folder of WAVs the app reads from disk and never ships, so a good sample pack is a real drummer. Preview plays two bars of the current groove on that kit.\n\nDecisions B2, B3, and the vibe-as-sound-set rule B8."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}

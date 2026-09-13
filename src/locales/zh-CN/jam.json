@@ -1,0 +1,324 @@
+{
+  "jam": {
+    "badge": "即兴伴奏",
+    "newJam": "新建即兴伴奏",
+    "untitled": "新建即兴伴奏",
+    "deleteJam": "删除即兴伴奏",
+    "duplicateJam": "复制即兴伴奏",
+    "copyName": "{{name}} 副本",
+    "renameTooltip": "重命名此即兴伴奏",
+    "reorderHint": "拖动以重新排序",
+    "edited": "已修改",
+    "save": "保存",
+    "saved": "已保存",
+    "saveTooltip": "按当前状态保存即兴伴奏",
+    "noChanges": "无更改",
+    "revert": "还原",
+    "revertTooltip": "回到已保存的即兴伴奏",
+    "noneOpenTitle": "尚未打开即兴伴奏",
+    "noneOpenLead": "即兴伴奏就是一支给你伴奏的乐队：一段鼓点、一个速度，还有一套替你数小节的曲式。从资料库里载入一个，或者新建一个。",
+    "headphones": "戴上耳机，评分才不会骗你。",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "鼓点",
+      "rock8": "摇滚八分",
+      "rock16": "摇滚十六分",
+      "halfTime": "半速",
+      "shuffle": "三连音摇摆",
+      "waltz": "华尔兹",
+      "sixEight": "6/8",
+      "bossa": "波萨诺瓦",
+      "swingRide": "摇摆叮叮镲",
+      "funk": "放克",
+      "oneDrop": "雷鬼 One Drop",
+      "train": "火车节奏",
+      "boomBap": "Boom Bap",
+      "fourOnFloor": "四踩底鼓",
+      "rule": "通用规则"
+    },
+    "changes": {
+      "edit": "编辑和弦",
+      "done": "完成",
+      "hint": "点一个小节来设定它的和弦。长按也可以，不必进入这个模式。",
+      "pickFor": "第 {{bar}} 小节",
+      "root": "根音",
+      "quality": "和弦类型",
+      "major": "大三",
+      "asTheForm": "跟着曲式"
+    },
+    "meter": {
+      "label": "拍号",
+      "grooves": "律动自带的",
+      "ticks": "每拍的格数",
+      "doesNotFit": "{{groove}} 不适合 {{meter}}，鼓手按通用规则演奏。"
+    },
+    "mix": {
+      "forLane": "{{lane}} 音量"
+    },
+    "keysStyle": {
+      "label": "伴奏",
+      "pads": "整小节延音",
+      "stabs": "在反拍上，跟着军鼓",
+      "padsShort": "铺底",
+      "stabsShort": "顿奏"
+    },
+    "countInSound": {
+      "label": "预备拍",
+      "beep": "提示音",
+      "sticks": "鼓棒"
+    },
+    "cues": {
+      "label": "语音提示",
+      "hint": "预备拍、段落和“该你四小节”都会念出来，你的眼睛可以一直看着指板。",
+      "noVoice": "需要教练语音。请在设置里安装；在那之前提示只显示在屏幕上。",
+      "n1": "一",
+      "n2": "二",
+      "n3": "三",
+      "n4": "四",
+      "n5": "五",
+      "n6": "六",
+      "n7": "七",
+      "n8": "八"
+    },
+    "feel": {
+      "label": "律动",
+      "straight": "平均",
+      "shuffle": "三连音摇摆",
+      "swing": "摇摆"
+    },
+    "intensity": {
+      "label": "力度",
+      "soft": "轻",
+      "normal": "适中",
+      "loud": "重"
+    },
+    "form": {
+      "label": "曲式",
+      "blues12": "12 小节布鲁斯",
+      "blues12Hint": "I · IV · V，第 12 小节回转",
+      "loop8": "8 小节循环",
+      "loop8Hint": "一段和声，一圈接一圈",
+      "bars16": "16 小节",
+      "bars16Hint": "前后两半",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "爵士标准曲的结构",
+      "one": "单和弦",
+      "oneHint": "只有鼓点",
+      "custom": "自定义",
+      "customHint": "你数多少小节就是多少",
+      "barsLabel": "小节数",
+      "fewerBars": "减少小节",
+      "moreBars": "增加小节",
+      "barOf": "第 {{current}} / {{total}} 小节",
+      "chorus": "第 {{count}} 遍",
+      "fillMark": "过门",
+      "section": "{{name}} 段",
+      "looping": "正在循环第 {{start}}–{{end}} 小节",
+      "startsAt": "从第 {{bar}} 小节开始",
+      "jumpTo": "跳到第 {{bar}} 小节",
+      "jumpPending": "在下一条小节线",
+      "loopSection": "循环第 {{start}}–{{end}} 小节",
+      "loopOff": "取消循环"
+    },
+    "short": {
+      "blues12": "12 小节",
+      "loop8": "8 小节",
+      "bars16": "16 小节",
+      "aaba32": "AABA",
+      "one": "单和弦",
+      "custom": "{{count}} 小节",
+      "custom_one": "{{count}} 小节",
+      "custom_other": "{{count}} 小节"
+    },
+    "countIn": {
+      "label": "预备拍",
+      "none": "无",
+      "bars": "{{count}} 小节",
+      "bars_one": "{{count}} 小节",
+      "bars_other": "{{count}} 小节"
+    },
+    "fills": {
+      "label": "过门",
+      "hint": "过门落在哪里，以及第一拍的吊镲。",
+      "off": "关",
+      "chorus": "每遍结尾",
+      "every4": "每 4 小节",
+      "every8": "每 8 小节"
+    },
+    "transport": {
+      "chorus": "遍数"
+    },
+    "now": {
+      "label": "当前",
+      "aria": "正在演奏 {{chord}}",
+      "next": "{{count}} 小节后 {{chord}}",
+      "next_one": "{{count}} 小节后 {{chord}}",
+      "next_other": "{{count}} 小节后 {{chord}}",
+      "nextNow": "下一个是 {{chord}}"
+    },
+    "fretboard": {
+      "label": "指板",
+      "aria": "琴颈上的 {{chord}}"
+    },
+    "chords": {
+      "label": "和弦",
+      "hint": "把和弦走向放进小节条，当前和弦放在上面。",
+      "inKey": "{{key}} 的和弦",
+      "follow": "跟着即兴走",
+      "followHint": "让指法跟着和弦走，或者钉在某一个和弦上。",
+      "sevenths": "七和弦",
+      "nextShape": "下一个指法",
+      "sizeTriad": "三和弦",
+      "sizeOpen": "开放",
+      "sizeBarre": "横按",
+      "sizeSeventh": "七和弦",
+      "fret": "第 {{fret}} 品"
+    },
+    "key": {
+      "label": "调",
+      "mode": "大调、小调或布鲁斯",
+      "major": "大调",
+      "minor": "小调",
+      "blues": "布鲁斯",
+      "majorNamed": "{{root}} 大调",
+      "minorNamed": "{{root}} 小调",
+      "bluesNamed": "{{root}} 布鲁斯"
+    },
+    "kit": {
+      "label": "鼓组",
+      "room": "房间",
+      "roomHint": "开阔，带着房间的空气感",
+      "tight": "紧实",
+      "tightHint": "近距离，没有尾音",
+      "brushes": "鼓刷",
+      "brushesHint": "安静，适合抒情曲",
+      "electronic": "电子",
+      "electronicHint": "合成音，颗粒分明"
+    },
+    "transposition": {
+      "label": "你读的谱",
+      "concert": "实音",
+      "bb": "降B",
+      "eb": "降E"
+    },
+    "setup": {
+      "label": "调、鼓组，以及你读的分谱"
+    },
+    "band": {
+      "label": "乐队",
+      "lead": "全部合成，无需下载",
+      "drums": "鼓",
+      "bass": "贝斯",
+      "keys": "键盘",
+      "you": "你",
+      "youPlay": "{{instrument}}",
+      "youHint": "乐队从不演奏你的乐器",
+      "out": "休止",
+      "hatsOnly": "只有踩镲",
+      "inputOn": "输入已开",
+      "inputOff": "输入已关"
+    },
+    "bassStyle": {
+      "rock": "跟着底鼓的根音",
+      "shuffle": "布基乐句",
+      "swing": "行走贝斯",
+      "bossa": "波萨型",
+      "waltz": "根音与五度",
+      "sixeight": "根音与五度",
+      "funk": "切分根音"
+    },
+    "practice": {
+      "label": "练习",
+      "dropOut": "留白小节",
+      "dropOutEvery": "每 {{count}} 小节留白",
+      "dropOutBarsLabel": "乐队停多久",
+      "forBars": "持续 {{count}} 小节",
+      "forBars_one": "持续 {{count}} 小节",
+      "forBars_other": "持续 {{count}} 小节",
+      "trade": "轮奏",
+      "tradeN": "每 {{count}} 小节一轮",
+      "tempo": "速度训练",
+      "tempoUp": "速度 +{{step}}",
+      "tempoEveryLabel": "多久提一次速",
+      "everyChoruses": "每 {{count}} 轮",
+      "everyChoruses_one": "每 {{count}} 轮",
+      "everyChoruses_other": "每 {{count}} 轮",
+      "climbing": "从 {{from}} 往上"
+    },
+    "cue": {
+      "yours": "你的四小节",
+      "silent": "只有你",
+      "back": "乐队回来了"
+    },
+    "editor": {
+      "label": "律动编辑器",
+      "edit": "编辑律动",
+      "makeYourOwn": "自己做一个",
+      "name": "律动名称",
+      "yours": "你的",
+      "pages": "编辑小节或过门",
+      "bar": "小节",
+      "fill": "过门",
+      "reset": "重置",
+      "done": "完成",
+      "gridBar": "律动，一小节",
+      "gridFill": "过门，一小节",
+      "hint": "点击格子切换",
+      "meter": "{{beats}} 拍，{{subdivision}} · 列跟随拍号",
+      "cell": "{{lane}}，第 {{beat}} 拍，第 {{tick}} 格：{{level}}",
+      "lanes": {
+        "hat": "踩镲",
+        "snare": "军鼓",
+        "kick": "底鼓",
+        "ride": "叮叮镲"
+      },
+      "levels": {
+        "0": "无",
+        "1": "击打",
+        "2": "重音",
+        "3": "弱音"
+      },
+      "subdivision": {
+        "1": "四分音符",
+        "2": "八分音符",
+        "3": "三连音",
+        "4": "十六分音符",
+        "6": "六连音"
+      }
+    },
+    "takes": {
+      "label": "录音",
+      "record": "录下这一遍",
+      "recording": "录音中",
+      "recordingNow": "正在录音。停下时会出现在这里。",
+      "empty": "还没有录任何东西。打开“录下这一遍”然后开弹 — 你和乐队会留在这里，供你回听。",
+      "unavailable": "这个版本不能录音。这个页面上的其他功能照常使用。",
+      "play": "播放这段录音",
+      "stop": "停止",
+      "bandOff": "乐队静音",
+      "delete": "删除",
+      "confirm": "删掉吗？无法撤销。",
+      "confirmDelete": "删除",
+      "confirmKeep": "保留",
+      "size": "磁盘上约 {{megabytes}} MB",
+      "local": "录音只留在这台机器上，不会上传。",
+      "introTitle": "关于录音",
+      "introWhat": "一段录音就是你和乐队合在一起的声音，从预备拍之后的第一小节到你停下为止。",
+      "introWhere": "它会以 WAV 文件写在这台机器上本应用自己的文件夹里，直到你删掉它。",
+      "introPrivate": "不上传、不分析，也不会离开这台机器。",
+      "introNotNow": "暂不",
+      "introStart": "开始录音"
+    }
+  },
+  "scale": {
+    "major": "大调",
+    "naturalMinor": "自然小调",
+    "dorian": "多利亚",
+    "mixolydian": "混合利底亚",
+    "minorPentatonic": "小调五声",
+    "majorPentatonic": "大调五声",
+    "blues": "布鲁斯",
+    "harmonicMinor": "和声小调",
+    "altered": "变化音阶"
+  }
+}

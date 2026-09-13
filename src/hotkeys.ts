@@ -34,6 +34,19 @@ export type HotkeyAction =
   | "tab-1"
   | "tab-2"
   | "tab-3"
+  | "tab-4"
+  // Jam, hands-free (JAM_MODE §4.7). These exist so a MIDI footswitch can
+  // reach them: your hands are on the instrument, which is the whole point of
+  // playing over a band rather than setting one up.
+  | "jam-next-groove"
+  | "jam-prev-groove"
+  | "jam-trade"
+  | "jam-dropout"
+  | "jam-next-shape"
+  | "jam-next-section"
+  | "jam-prev-section"
+  | "jam-loop-section"
+  | "jam-take"
   | "settings";
 
 export interface HotkeyEntry {
@@ -43,7 +56,7 @@ export interface HotkeyEntry {
   id: HotkeyAction;
   desc: string;
   globalAllowed?: boolean;
-  group: "metronome" | "view" | "navigation";
+  group: "metronome" | "view" | "navigation" | "jam";
 }
 
 export const IS_MAC = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
@@ -290,6 +303,13 @@ export const HOTKEYS: HotkeyEntry[] = [
     group: "navigation",
   },
   {
+    id: "tab-4",
+    action: "Jam tab",
+    key: "⌘4",
+    desc: "Switch to Jam tab",
+    group: "navigation",
+  },
+  {
     id: "settings",
     action: "Settings",
     key: "⌘,",
@@ -310,12 +330,102 @@ export const HOTKEYS: HotkeyEntry[] = [
     desc: "Open or close the practice coach panel",
     group: "navigation",
   },
+  /**
+   * Jam, hands-free.
+   *
+   * These do nothing outside the Jam tab, which is why they are a group of
+   * their own rather than five more lines under Metronome, and why they take
+   * bare letters: they are safe to bind to a footswitch that is also sending
+   * play and stop, and the keys they use (G, X, D, S) are ones the metronome
+   * does not want.
+   */
+  {
+    id: "jam-next-groove",
+    action: "Next groove",
+    key: "G",
+    desc: "Step to the next groove without taking a hand off the instrument",
+    group: "jam",
+  },
+  {
+    id: "jam-prev-groove",
+    action: "Previous groove",
+    key: "⇧G",
+    desc: "Step back to the previous groove",
+    group: "jam",
+  },
+  {
+    id: "jam-trade",
+    action: "Trade fours",
+    key: "X",
+    desc: "Turn trading on or off — the band plays four bars, you play four",
+    group: "jam",
+  },
+  {
+    id: "jam-dropout",
+    action: "Drop-out bars",
+    key: "D",
+    desc: "Turn the drop-out bars on or off",
+    group: "jam",
+  },
+  {
+    id: "jam-next-shape",
+    action: "Next chord shape",
+    key: "S",
+    desc: "Page through the ways to play the chord you are on",
+    group: "jam",
+  },
+  /**
+   * Moving through the form, hands-free.
+   *
+   * "Skip to the bridge with a footswitch" is JAM_MODE §4.2 in one line, and
+   * the reason these are keys at all: your hands are on the instrument, and
+   * the section you want is the one you are about to play, not the one you
+   * can reach the mouse in time for. N and L were free; ⇧N follows ⇧G.
+   */
+  {
+    id: "jam-next-section",
+    action: "Next section",
+    key: "N",
+    desc: "Jump to the start of the next section at the bar line",
+    group: "jam",
+  },
+  {
+    id: "jam-prev-section",
+    action: "Previous section",
+    key: "⇧N",
+    desc: "Jump back to the start of the previous section at the bar line",
+    group: "jam",
+  },
+  {
+    id: "jam-loop-section",
+    action: "Loop this section",
+    key: "L",
+    desc: "Loop the section you are in, or stop looping it",
+    group: "jam",
+  },
+  /**
+   * Recording, hands-free.
+   *
+   * It arms the NEXT play rather than starting a take now, which is the only
+   * behaviour a footswitch can have here: a take begins after the count-in,
+   * and a key that started one mid-chorus would produce a recording of the
+   * back half of a tune. R was free, and it is the letter every recorder in
+   * the world uses.
+   */
+  {
+    id: "jam-take",
+    action: "Record the take",
+    key: "R",
+    desc: "Record the next time you press play, or stop recording",
+    group: "jam",
+  },
 ];
 
 export const HOTKEY_GROUPS: { key: string; label: string }[] = [
   { key: "metronome", label: "Metronome" },
   { key: "view", label: "View" },
   { key: "navigation", label: "Navigation" },
+  { key: "jam", label: "Jam" },
 ];
 
 // Delay for macOS fullscreen exit animation to complete before restoring window state

@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "Metronom",
     "setlist": "Set listesi",
-    "drill": "Tempo Antrenmanı"
+    "drill": "Tempo Antrenmanı",
+    "jam": "Jam"
   },
   "tooltip": {
     "zen": "Zen",
@@ -24,6 +25,7 @@
     "title": "Ön Ayarlar",
     "titleDrill": "Antrenmanlar",
     "titleSetlist": "Set listeleri",
+    "titleJam": "Jam'ler",
     "saveCurrent": "Geçerli ayarları kaydet",
     "search": "Kitaplıkta ara",
     "searchPlaceholder": "Ara...",

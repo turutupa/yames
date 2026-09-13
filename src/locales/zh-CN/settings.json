@@ -173,7 +173,8 @@
       "groups": {
         "metronome": "节拍器",
         "view": "视图",
-        "navigation": "导航"
+        "navigation": "导航",
+        "jam": "即兴"
       },
       "actions": {
         "play": "播放 / 停止",
@@ -195,9 +196,19 @@
         "tab-1": "节拍器页",
         "tab-2": "曲目单页",
         "tab-3": "变速练习页",
+        "tab-4": "即兴伴奏页",
         "settings": "设置",
         "toggle-sidebar": "切换侧边栏",
-        "toggle-coach": "切换教练"
+        "toggle-coach": "切换教练",
+        "jam-next-groove": "下一个律动",
+        "jam-prev-groove": "上一个律动",
+        "jam-trade": "轮奏",
+        "jam-dropout": "留白小节",
+        "jam-next-shape": "下一个和弦指法",
+        "jam-next-section": "下一段",
+        "jam-prev-section": "上一段",
+        "jam-loop-section": "循环这一段",
+        "jam-take": "录下这一遍"
       },
       "descs": {
         "play": "开始或停止节拍器",
@@ -219,9 +230,19 @@
         "tab-1": "切换到节拍器页",
         "tab-2": "切换到曲目单页",
         "tab-3": "切换到变速练习页",
+        "tab-4": "切换到即兴伴奏页",
         "settings": "打开或关闭设置",
         "toggle-sidebar": "折叠或展开左侧边栏",
-        "toggle-coach": "打开或关闭练习教练面板"
+        "toggle-coach": "打开或关闭练习教练面板",
+        "jam-next-groove": "手不离开乐器就切到下一个律动",
+        "jam-prev-groove": "退回上一个律动",
+        "jam-trade": "打开或关闭轮奏——乐队四小节，你四小节",
+        "jam-dropout": "打开或关闭留白小节",
+        "jam-next-shape": "逐个翻看当前和弦的按法",
+        "jam-next-section": "在小节线上跳到下一段的开头",
+        "jam-prev-section": "在小节线上退回上一段的开头",
+        "jam-loop-section": "把正在演奏的这一段循环起来，或取消循环",
+        "jam-take": "下次按播放时录音，或停止录音"
       }
     },
     "inputTest": {

@@ -4,7 +4,7 @@ import { usePlaybackClock } from "./usePlaybackClock";
 import type { BeatEvent } from "../../../types";
 
 function beat(n: number, isDownbeat: boolean): BeatEvent {
-  return { beat: n, measureBeat: 0, subdivision: 0, isDownbeat, isAccent: isDownbeat };
+  return { beat: n, measureBeat: 0, subdivision: 0, isDownbeat, isAccent: isDownbeat, formBar: 0, chorus: 1 };
 }
 
 beforeEach(() => vi.useFakeTimers());

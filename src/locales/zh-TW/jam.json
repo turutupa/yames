@@ -1,0 +1,324 @@
+{
+  "jam": {
+    "badge": "即興伴奏",
+    "newJam": "新增即興伴奏",
+    "untitled": "新增即興伴奏",
+    "deleteJam": "刪除即興伴奏",
+    "duplicateJam": "複製即興伴奏",
+    "copyName": "{{name}} 複本",
+    "renameTooltip": "重新命名這個即興伴奏",
+    "reorderHint": "拖曳以重新排序",
+    "edited": "已修改",
+    "save": "儲存",
+    "saved": "已儲存",
+    "saveTooltip": "以目前的樣子儲存即興伴奏",
+    "noChanges": "沒有變更",
+    "revert": "還原",
+    "revertTooltip": "回到已儲存的即興伴奏",
+    "noneOpenTitle": "尚未開啟即興伴奏",
+    "noneOpenLead": "即興伴奏就是一支替你伴奏的樂團：一段鼓點、一個速度，還有一套替你數小節的曲式。從資料庫載入一個，或是新增一個。",
+    "headphones": "戴上耳機，評分才不會騙你。",
+    "summary": "{{bpm}} · {{form}}",
+    "groove": {
+      "label": "鼓點",
+      "rock8": "搖滾八分",
+      "rock16": "搖滾十六分",
+      "halfTime": "半速",
+      "shuffle": "三連音搖擺",
+      "waltz": "華爾滋",
+      "sixEight": "6/8",
+      "bossa": "巴薩諾瓦",
+      "swingRide": "搖擺叮叮鈸",
+      "funk": "放克",
+      "oneDrop": "雷鬼 One Drop",
+      "train": "火車節奏",
+      "boomBap": "Boom Bap",
+      "fourOnFloor": "四踩大鼓",
+      "rule": "通用規則"
+    },
+    "changes": {
+      "edit": "編輯和弦",
+      "done": "完成",
+      "hint": "點一個小節來設定它的和弦。長按也可以，不必進入這個模式。",
+      "pickFor": "第 {{bar}} 小節",
+      "root": "根音",
+      "quality": "和弦類型",
+      "major": "大三",
+      "asTheForm": "跟著曲式"
+    },
+    "meter": {
+      "label": "拍號",
+      "grooves": "律動自帶的",
+      "ticks": "每拍的格數",
+      "doesNotFit": "{{groove}} 不適合 {{meter}}，鼓手按通用規則演奏。"
+    },
+    "mix": {
+      "forLane": "{{lane}} 音量"
+    },
+    "keysStyle": {
+      "label": "伴奏",
+      "pads": "整小節延音",
+      "stabs": "在反拍上，跟著小鼓",
+      "padsShort": "鋪底",
+      "stabsShort": "頓奏"
+    },
+    "countInSound": {
+      "label": "預備拍",
+      "beep": "提示音",
+      "sticks": "鼓棒"
+    },
+    "cues": {
+      "label": "語音提示",
+      "hint": "預備拍、段落和「該你四小節」都會唸出來，你的眼睛可以一直看著指板。",
+      "noVoice": "需要教練語音。請在設定裡安裝；在那之前提示只顯示在螢幕上。",
+      "n1": "一",
+      "n2": "二",
+      "n3": "三",
+      "n4": "四",
+      "n5": "五",
+      "n6": "六",
+      "n7": "七",
+      "n8": "八"
+    },
+    "feel": {
+      "label": "律動",
+      "straight": "平均",
+      "shuffle": "三連音搖擺",
+      "swing": "搖擺"
+    },
+    "intensity": {
+      "label": "力度",
+      "soft": "輕",
+      "normal": "適中",
+      "loud": "重"
+    },
+    "form": {
+      "label": "曲式",
+      "blues12": "12 小節藍調",
+      "blues12Hint": "I · IV · V，第 12 小節回轉",
+      "loop8": "8 小節循環",
+      "loop8Hint": "一段和聲，一圈接一圈",
+      "bars16": "16 小節",
+      "bars16Hint": "前後兩半",
+      "aaba32": "AABA · 32",
+      "aaba32Hint": "爵士標準曲的結構",
+      "one": "單和弦",
+      "oneHint": "只有鼓點",
+      "custom": "自訂",
+      "customHint": "你數幾小節就是幾小節",
+      "barsLabel": "小節數",
+      "fewerBars": "減少小節",
+      "moreBars": "增加小節",
+      "barOf": "第 {{current}} / {{total}} 小節",
+      "chorus": "第 {{count}} 遍",
+      "fillMark": "過門",
+      "section": "{{name}} 段",
+      "looping": "正在循環第 {{start}}–{{end}} 小節",
+      "startsAt": "從第 {{bar}} 小節開始",
+      "jumpTo": "跳到第 {{bar}} 小節",
+      "jumpPending": "在下一條小節線",
+      "loopSection": "循環第 {{start}}–{{end}} 小節",
+      "loopOff": "取消循環"
+    },
+    "short": {
+      "blues12": "12 小節",
+      "loop8": "8 小節",
+      "bars16": "16 小節",
+      "aaba32": "AABA",
+      "one": "單和弦",
+      "custom": "{{count}} 小節",
+      "custom_one": "{{count}} 小節",
+      "custom_other": "{{count}} 小節"
+    },
+    "countIn": {
+      "label": "預備拍",
+      "none": "無",
+      "bars": "{{count}} 小節",
+      "bars_one": "{{count}} 小節",
+      "bars_other": "{{count}} 小節"
+    },
+    "fills": {
+      "label": "過門",
+      "hint": "過門落在哪裡，以及第一拍的銅鈸。",
+      "off": "關",
+      "chorus": "每遍結尾",
+      "every4": "每 4 小節",
+      "every8": "每 8 小節"
+    },
+    "transport": {
+      "chorus": "遍數"
+    },
+    "now": {
+      "label": "目前",
+      "aria": "正在演奏 {{chord}}",
+      "next": "{{count}} 小節後 {{chord}}",
+      "next_one": "{{count}} 小節後 {{chord}}",
+      "next_other": "{{count}} 小節後 {{chord}}",
+      "nextNow": "下一個是 {{chord}}"
+    },
+    "fretboard": {
+      "label": "指板",
+      "aria": "琴頸上的 {{chord}}"
+    },
+    "chords": {
+      "label": "和弦",
+      "hint": "把和弦進行放進小節列，目前的和弦放在上面。",
+      "inKey": "{{key}} 的和弦",
+      "follow": "跟著即興走",
+      "followHint": "讓指型跟著和弦走，或釘在某一個和弦上。",
+      "sevenths": "七和弦",
+      "nextShape": "下一個指型",
+      "sizeTriad": "三和弦",
+      "sizeOpen": "開放",
+      "sizeBarre": "封閉",
+      "sizeSeventh": "七和弦",
+      "fret": "第 {{fret}} 格"
+    },
+    "key": {
+      "label": "調",
+      "mode": "大調、小調或藍調",
+      "major": "大調",
+      "minor": "小調",
+      "blues": "藍調",
+      "majorNamed": "{{root}} 大調",
+      "minorNamed": "{{root}} 小調",
+      "bluesNamed": "{{root}} 藍調"
+    },
+    "kit": {
+      "label": "鼓組",
+      "room": "空間",
+      "roomHint": "開闊，帶著房間的空氣感",
+      "tight": "緊實",
+      "tightHint": "近距離，沒有尾音",
+      "brushes": "鼓刷",
+      "brushesHint": "安靜，適合抒情曲",
+      "electronic": "電子",
+      "electronicHint": "合成音，顆粒分明"
+    },
+    "transposition": {
+      "label": "你讀的譜",
+      "concert": "實音",
+      "bb": "降B",
+      "eb": "降E"
+    },
+    "setup": {
+      "label": "調、鼓組，以及你讀的分譜"
+    },
+    "band": {
+      "label": "樂團",
+      "lead": "全部合成，不必下載",
+      "drums": "鼓",
+      "bass": "貝斯",
+      "keys": "鍵盤",
+      "you": "你",
+      "youPlay": "{{instrument}}",
+      "youHint": "樂團從不演奏你的樂器",
+      "out": "休止",
+      "hatsOnly": "只有腳踏鈸",
+      "inputOn": "輸入已開",
+      "inputOff": "輸入已關"
+    },
+    "bassStyle": {
+      "rock": "跟著大鼓的根音",
+      "shuffle": "布基樂句",
+      "swing": "行走貝斯",
+      "bossa": "巴薩諾瓦型",
+      "waltz": "根音與五度",
+      "sixeight": "根音與五度",
+      "funk": "切分根音"
+    },
+    "practice": {
+      "label": "練習",
+      "dropOut": "留白小節",
+      "dropOutEvery": "每 {{count}} 小節留白",
+      "dropOutBarsLabel": "樂團停多久",
+      "forBars": "持續 {{count}} 小節",
+      "forBars_one": "持續 {{count}} 小節",
+      "forBars_other": "持續 {{count}} 小節",
+      "trade": "輪奏",
+      "tradeN": "每 {{count}} 小節一輪",
+      "tempo": "速度訓練",
+      "tempoUp": "速度 +{{step}}",
+      "tempoEveryLabel": "多久提一次速",
+      "everyChoruses": "每 {{count}} 輪",
+      "everyChoruses_one": "每 {{count}} 輪",
+      "everyChoruses_other": "每 {{count}} 輪",
+      "climbing": "從 {{from}} 往上"
+    },
+    "cue": {
+      "yours": "你的四小節",
+      "silent": "只有你",
+      "back": "樂團回來了"
+    },
+    "editor": {
+      "label": "律動編輯器",
+      "edit": "編輯律動",
+      "makeYourOwn": "自己做一個",
+      "name": "律動名稱",
+      "yours": "你的",
+      "pages": "編輯小節或過門",
+      "bar": "小節",
+      "fill": "過門",
+      "reset": "重設",
+      "done": "完成",
+      "gridBar": "律動，一小節",
+      "gridFill": "過門，一小節",
+      "hint": "點一下格子即可切換",
+      "meter": "{{beats}} 拍，{{subdivision}} · 欄位跟隨拍號",
+      "cell": "{{lane}}，第 {{beat}} 拍，第 {{tick}} 格：{{level}}",
+      "lanes": {
+        "hat": "腳踏鈸",
+        "snare": "小鼓",
+        "kick": "大鼓",
+        "ride": "疊音鈸"
+      },
+      "levels": {
+        "0": "無",
+        "1": "擊打",
+        "2": "重音",
+        "3": "弱音"
+      },
+      "subdivision": {
+        "1": "四分音符",
+        "2": "八分音符",
+        "3": "三連音",
+        "4": "十六分音符",
+        "6": "六連音"
+      }
+    },
+    "takes": {
+      "label": "錄音",
+      "record": "錄下這一遍",
+      "recording": "錄音中",
+      "recordingNow": "正在錄音。停下時會出現在這裡。",
+      "empty": "還沒有錄任何東西。打開「錄下這一遍」然後開彈 — 你和樂團會留在這裡，供你回聽。",
+      "unavailable": "這個版本不能錄音。這個畫面上的其他功能照常使用。",
+      "play": "播放這段錄音",
+      "stop": "停止",
+      "bandOff": "樂團靜音",
+      "delete": "刪除",
+      "confirm": "刪掉嗎？無法復原。",
+      "confirmDelete": "刪除",
+      "confirmKeep": "保留",
+      "size": "磁碟上約 {{megabytes}} MB",
+      "local": "錄音只留在這台機器上，不會上傳。",
+      "introTitle": "關於錄音",
+      "introWhat": "一段錄音就是你和樂團合在一起的聲音，從預備拍之後的第一小節到你停下為止。",
+      "introWhere": "它會以 WAV 檔案寫在這台機器上本應用程式自己的資料夾裡，直到你刪掉它。",
+      "introPrivate": "不上傳、不分析，也不會離開這台機器。",
+      "introNotNow": "暂不",
+      "introStart": "開始錄音"
+    }
+  },
+  "scale": {
+    "major": "大調",
+    "naturalMinor": "自然小調",
+    "dorian": "多利安",
+    "mixolydian": "米索利地安",
+    "minorPentatonic": "小調五聲",
+    "majorPentatonic": "大調五聲",
+    "blues": "藍調",
+    "harmonicMinor": "和聲小調",
+    "altered": "變化音階"
+  }
+}

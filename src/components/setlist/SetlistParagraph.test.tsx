@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SetlistParagraph } from "./SetlistParagraph";
 import type { Setlist, SetlistStep } from "../../types";
@@ -225,5 +225,31 @@ describe("a step is a control, not a div that happens to be clickable", () => {
     third.focus();
     third.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
     expect(onSelectStep).toHaveBeenCalledWith("s3");
+  });
+});
+
+describe("the jam picker at the foot of the list", () => {
+  const JAMS = [
+    { id: "j1", name: "Slow blues in A" },
+    { id: "j2", name: "Bossa" },
+  ] as unknown as Parameters<typeof SetlistParagraph>[0]["jams"];
+
+  it("takes Escape for itself, so the setlist behind it stays open", async () => {
+    // The window closes the loaded setlist on Escape. One press used to shut
+    // this picker and walk straight through that door as well, so changing
+    // your mind about adding a jam threw you out of the routine.
+    const user = userEvent.setup();
+    draw({ jams: JAMS, onAddJamStep: vi.fn() });
+    await user.click(screen.getByRole("button", { name: /jam/i }));
+    expect(screen.getByRole("menuitem", { name: /Slow blues in A/ })).toBeTruthy();
+
+    const escape = new KeyboardEvent("keydown", {
+      key: "Escape",
+      bubbles: true,
+      cancelable: true,
+    });
+    fireEvent(document, escape);
+    expect(screen.queryByRole("menuitem", { name: /Slow blues in A/ })).toBeNull();
+    expect(escape.defaultPrevented).toBe(true);
   });
 });

@@ -5,6 +5,7 @@ mod coach;
 mod commands;
 mod engine;
 pub mod instrument;
+mod jam;
 mod midi;
 mod models;
 mod onset;
@@ -18,6 +19,7 @@ pub mod session;
 mod session_audio;
 pub mod session_log;
 mod state;
+mod take;
 pub mod timing;
 mod tts;
 
@@ -31,6 +33,19 @@ mod tts;
 pub mod probe {
     pub use crate::clock::now_ns;
     pub use crate::engine::{CallbackProbe, CallbackSample, MetronomeEngine};
+    /// The jitter probe's `--jam` flag builds a table directly: it runs the
+    /// engine headless, with no Tauri command surface to call `set_jam`
+    /// through.
+    pub use crate::jam::{
+        band_state_for_bar, compile as compile_jam, JamBandState, JamBassLine, JamConfig,
+        JamDropOut, JamKeysLine, JamMix, JamPattern, JamPosition, JamPracticeConfig, JamTable,
+        JamTrade,
+    };
+    /// The take recorder. `--jam-take` runs one during the measurement, so
+    /// the gate covers the ring the output callback writes into and the
+    /// writer thread draining it to disk underneath the stream.
+    pub use crate::take::{SharedTake, TakeHandoff, TakeRing, TakeSession, TakeStart};
+
     pub use crate::state::{create_shared_state, AppState, SharedState};
     pub use crate::timing::create_beat_log;
 
@@ -62,9 +77,10 @@ use commands::{
     app_ready, set_volume, set_widget_always_on_top, set_widget_mode, show_floating, show_main,
     start_evaluation, start_model_download, start_playback, start_recording, start_speed_ramp,
     start_speed_ramp_from, start_voice_repair, stop_evaluation, stop_playback, stop_recording,
-    arm_count_in, set_accent_mode, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
+    arm_count_in, set_accent_mode, set_jam, set_jam_position, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
     tts_stop, tts_voice_diagnostics, unload_coach_model, write_model_chunk, DownloadState,
-    EngineState,
+    delete_take, list_takes, play_take, start_take, stop_take, stop_take_playback, takes_dir_size,
+    EngineState, JamGainState, TakeState,
 };
 use engine::MetronomeEngine;
 use midi::create_shared_midi;
@@ -273,6 +289,10 @@ pub fn run() {
             }
 
             app.manage(EngineState(Mutex::new(engine)));
+            // The `set_jam` normalisation memo. See `JamGainState`.
+            app.manage(JamGainState::default());
+            // The take being recorded, if one is. See `TakeState`.
+            app.manage(TakeState::default());
 
             // Start audio output device polling
             engine::start_audio_device_polling(app.handle().clone());
@@ -560,6 +580,15 @@ pub fn run() {
             start_speed_ramp_from,
             arm_count_in,
             set_accent_mode,
+            set_jam,
+            set_jam_position,
+            start_take,
+            stop_take,
+            list_takes,
+            delete_take,
+            play_take,
+            stop_take_playback,
+            takes_dir_size,
             stop_speed_ramp,
             set_active_tab,
             get_active_tab,
@@ -650,6 +679,54 @@ pub fn run() {
                             let _ = store.save(); // flush to disk before exit
                         }
                     }
+                    // A TAKE STILL RECORDING IS FINISHED BEFORE ANYTHING
+                    // ELSE HAPPENS.
+                    //
+                    // A take's WAV is written with a 44-byte header of
+                    // zeroes and patched with the real length when the
+                    // writer thread finishes; the sidecar with the record is
+                    // written after that. Quitting used to run straight past
+                    // both — `exit(0)` below is not a `Drop`, it takes the
+                    // process down — so an hour's playing left a file the
+                    // decoder refuses and a take the list never shows. The
+                    // whole point of the feature is being able to listen
+                    // back to it later.
+                    //
+                    // Before the engine shutdown, so the callback is still
+                    // there while the writer drains the last of the band,
+                    // and for ANY window, because `exit(0)` below is for any
+                    // window too.
+                    if let (Some(engine_state), Some(take_state)) = (
+                        window.try_state::<EngineState>(),
+                        window.try_state::<TakeState>(),
+                    ) {
+                        let handoff = engine_state
+                            .0
+                            .lock()
+                            .unwrap_or_else(|e| e.into_inner())
+                            .take_handoff();
+                        let mut session =
+                            take_state.0.lock().unwrap_or_else(|e| e.into_inner());
+                        if session.is_recording() {
+                            match session.stop(&handoff) {
+                                Ok(Some(take)) => eprintln!(
+                                    "[take] finished on quit: {} ({:.1}s)",
+                                    take.path, take.duration_sec
+                                ),
+                                Ok(None) => {}
+                                Err(e) => eprintln!("[take] could not finish on quit: {e}"),
+                            }
+                        }
+                    }
+                    if let Some(audio_input) =
+                        window.try_state::<crate::audio_input::SharedAudioInput>()
+                    {
+                        audio_input
+                            .lock()
+                            .unwrap_or_else(|e| e.into_inner())
+                            .end_take_capture();
+                    }
+
                     // Quit the entire app when user closes ANY window. The
                     // engine shutdown is destructive (rips down the audio
                     // thread); we gate it to the "main" window so closing
