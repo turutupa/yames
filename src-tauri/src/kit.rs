@@ -56,17 +56,36 @@ pub const KIT_FILES: [(&str, KitVoice); KIT_VOICES] = [
 /// crash is very often a ten-second wash with eight of them below −40 dB,
 /// and refusing that folder would be refusing a good kit over a tail nobody
 /// hears under a band.
+///
+/// It is also the bound on everything `set_jam` pays for a folder. See
+/// [`MAX_FOLDER_BYTES`].
 pub const MAX_VOICE_SECS: f64 = 2.0;
 
-/// The most decoded audio one folder may amount to, before the two-second
-/// cap is applied.
+/// How long the cut at [`MAX_VOICE_SECS`] takes to reach silence.
 ///
-/// Measured on the FILES' OWN headers rather than on what survives the cap,
-/// because what this protects is the decode itself: the cap cannot save you
-/// from reading and resampling three minutes of 96 kHz stereo eight times
-/// over. Sixty-four megabytes is about two and a half minutes of 44.1 kHz
-/// mono per voice across all eight — far more than a drum, and far less
-/// than a folder somebody pointed at their sample library by mistake.
+/// A cap that stopped mid-waveform would leave a step from whatever the
+/// sample happened to be doing at two seconds down to nothing, and a step is
+/// a click — audible on every hit of that drum, and worse on a cymbal, which
+/// is exactly the voice long enough to be cut. Five milliseconds is shorter
+/// than any transient anybody would notice losing and long enough that the
+/// edge is inaudible.
+const CAP_FADE_SECS: f64 = 0.005;
+
+/// The most audio one folder may declare, in decoded bytes.
+///
+/// **This is a sanity check on the folder, not a budget for the decode.**
+/// The decode is already bounded by [`MAX_VOICE_SECS`]: `decode_mono` stops
+/// reading at two seconds *at the source rate*, before a sample past it is
+/// touched, so eight ten-minute stems cost the same as eight one-second hits
+/// and no folder can make `set_jam` take longer than eight voices' worth of
+/// two seconds. What this cap is for is INTENT — sixty-four megabytes is
+/// about two and a half minutes of 44.1 kHz mono per voice across all eight,
+/// which is far more than a drum and is the signature of a folder somebody
+/// pointed at their sample library by mistake. Saying so is kinder than
+/// silently playing the first two seconds of eight songs.
+///
+/// Measured on the files' own headers, so the answer arrives before any
+/// decoding rather than after it.
 pub const MAX_FOLDER_BYTES: u64 = 64 * 1024 * 1024;
 
 /// The peak every decoded voice is put on.
@@ -111,6 +130,15 @@ pub struct CustomBank {
     voices: [Option<Vec<f32>>; KIT_VOICES],
     /// The rate every buffer above was resampled to. Diagnostics, the cache
     /// key, and the reason a device change re-decodes rather than detuning.
+    ///
+    /// The re-decode is FORCED, not hoped for: [`KitCache`] keys on this
+    /// rate, but nothing would make the app ask again while a table that
+    /// already holds a bank keeps playing, and that table's drums would be
+    /// a semitone and a half out on the new device. So
+    /// `MetronomeEngine::set_device` takes a table with a bank in it away
+    /// (`JamHandoff::drop_custom_kit`); the click plays until the next
+    /// bar-ahead `set_jam`, which is at most a bar, and that send decodes
+    /// the folder again at the rate the new device actually opened at.
     pub rate: u32,
     /// Which of [`KIT_FILES`] were found, in that order.
     pub found: Vec<&'static str>,
@@ -138,6 +166,37 @@ impl CustomBank {
     }
 }
 
+/// A folder with one half of the snare pair in it has both.
+///
+/// THIS IS THE DIFFERENCE BETWEEN A KIT AND A KIT WITH NO BACKBEAT.
+/// [`KIT_FILES`] maps `snare.wav` to `snare_hi` and `snare_soft.wav` to
+/// `snare_lo`, and `jam::slot_for` reaches for `snare_hi` only on an ACCENT
+/// (level 2). Most of the library writes its backbeat at level 1, which is
+/// `snare_lo` — so a folder holding nothing but `kick.wav` and `snare.wav`,
+/// which is the folder a musician is most likely to try first, played its
+/// kick from the folder and its snare from the built-in kit on nearly every
+/// groove in the app. Two drums that do not match, and no way to tell why.
+///
+/// The fix is rule 4 of `src-tauri/sounds/KITS.md` applied to somebody
+/// else's samples: the accent is the same drum hit harder, so half a pair is
+/// a whole pair. A folder with only the loud one uses it for the ghosts too
+/// (the level gain is what makes a ghost a ghost); a folder with only the
+/// soft one uses it for the backbeat. A folder with both keeps both, and
+/// [`CustomBank::found`] keeps reporting the FILES, so `inspect` and the
+/// screen still say honestly which of the eight are on disk.
+fn alias_snare_pair(voices: &mut [Option<Vec<f32>>; KIT_VOICES]) {
+    for (from, to) in [
+        (KitVoice::SnareHi, KitVoice::SnareLo),
+        (KitVoice::SnareLo, KitVoice::SnareHi),
+    ] {
+        if voices[to as usize].is_none() {
+            if let Some(buf) = voices[from as usize].clone() {
+                voices[to as usize] = Some(buf);
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 impl CustomBank {
     /// A bank with the named voices in it, without a folder.
@@ -146,21 +205,42 @@ impl CustomBank {
     /// and not about decoding: writing eight WAVs to disk to find out that
     /// a missing ride falls back to the built-in one would be testing this
     /// module twice and that one not at all.
-    pub fn for_tests(voices: &[KitVoice], rate: u32) -> Self {
+    ///
+    /// `secs` is the length of every voice, and it is a parameter because
+    /// the ceiling tests need it to be. [`MAX_VOICE_SECS`] is nearly three
+    /// times the longest drum this app ships (`brushes`' 700 ms crash), and
+    /// a headroom figure measured on 50 ms bursts says nothing at all about
+    /// a folder of two-second cymbals — the ring-out is the whole reason
+    /// voices stack. Pass [`MAX_VOICE_SECS`] to ask the hard question and a
+    /// short burst when the test is about which sound came out.
+    ///
+    /// The shape is a decaying sine, and the frequency differs per voice.
+    /// Both matter for the tests that measure a peak: eight copies of one
+    /// steady tone are phase-locked and add coherently, which is a signal no
+    /// drum kit is and a fixture no allowance could ever cover.
+    pub fn for_tests(voices: &[KitVoice], rate: u32, secs: f64) -> Self {
         let mut slots: [Option<Vec<f32>>; KIT_VOICES] = Default::default();
         for v in voices {
-            // A short burst on the bank's own peak, so a table compiled
-            // against it normalises the way a real folder would.
+            // Peaked on the bank's own peak, so a table compiled against it
+            // normalises the way a real folder would; decaying to a tenth of
+            // that by the end, which is roughly what a cymbal does over its
+            // audible tail.
+            let n = (secs * rate as f64) as usize;
+            let freq = 60.0 * 1.7f64.powi(*v as i32);
             slots[*v as usize] = Some(
-                (0..(0.05 * rate as f64) as usize)
+                (0..n)
                     .map(|i| {
-                        VOICE_PEAK
-                            * (2.0 * std::f64::consts::PI * 200.0 * i as f64 / rate as f64).sin()
-                                as f32
+                        let t = i as f64 / rate as f64;
+                        let env = (-t * (10.0f64).ln() / secs.max(1e-6)).exp();
+                        (VOICE_PEAK as f64
+                            * env
+                            * (2.0 * std::f64::consts::PI * freq * t).sin())
+                            as f32
                     })
                     .collect(),
             );
         }
+        alias_snare_pair(&mut slots);
         static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1 << 32);
         Self {
             id: NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
@@ -258,7 +338,12 @@ pub fn inspect(dir: &Path) -> Result<KitFolder, String> {
 ///
 /// [`MAX_VOICE_SECS`] is applied HERE, at the source rate and before a
 /// sample past it is read, so a ten-second crash costs two seconds of
-/// decoding and two seconds of sinc rather than ten of each.
+/// decoding and two seconds of sinc rather than ten of each — and no folder,
+/// whatever is in it, can make `set_jam` do more work than eight voices'
+/// worth of two seconds.
+///
+/// A sample that WAS cut is faded out over [`CAP_FADE_SECS`] on the way, so
+/// the cap is a decision about length and not a click. See [`MAX_VOICE_SECS`].
 fn decode_mono(path: &Path) -> Result<(Vec<f32>, u32), String> {
     let name = path
         .file_name()
@@ -273,6 +358,9 @@ fn decode_mono(path: &Path) -> Result<(Vec<f32>, u32), String> {
     }
 
     let max_frames = (MAX_VOICE_SECS * spec.sample_rate as f64) as usize;
+    // `duration()` is frames, from the header, before anything is read: it
+    // is how the fade below knows whether the cap actually cut anything.
+    let file_frames = reader.duration() as usize;
     let want = max_frames.max(1).saturating_mul(channels);
     // The interleaved samples, as f32 in −1..1. `samples::<i32>()` reads any
     // integer width hound supports, so one arm covers 8, 16, 24 and 32-bit.
@@ -315,13 +403,34 @@ fn decode_mono(path: &Path) -> Result<(Vec<f32>, u32), String> {
     // makes it 6 dB louder than a mono one, and the normalisation below
     // would then quietly undo the difference on the peak while leaving it
     // in the energy.
-    let mono: Vec<f32> = if channels >= 2 {
+    let mut mono: Vec<f32> = if channels >= 2 {
         raw.chunks(channels)
             .map(|frame| frame.iter().sum::<f32>() / channels as f32)
             .collect()
     } else {
         raw
     };
+
+    // THE CAP IS A DECISION ABOUT LENGTH, NOT A CLICK.
+    //
+    // Two seconds into a ten-second cymbal wash the waveform is still going,
+    // often near the top of a cycle, and stopping there leaves a step
+    // straight down to nothing. A step is broadband: it is a tick on every
+    // hit of that drum, it survives the resampler and the normalisation, and
+    // it is loudest on exactly the voice that gets cut. Five milliseconds of
+    // linear ramp costs nothing anybody can hear and removes it.
+    //
+    // Only when the file WAS cut. A sample that simply ends where it ends is
+    // the musician's own decision and is left alone.
+    if file_frames > max_frames {
+        let fade = ((CAP_FADE_SECS * spec.sample_rate as f64) as usize).min(mono.len());
+        if fade > 1 {
+            let start = mono.len() - fade;
+            for (i, s) in mono[start..].iter_mut().enumerate() {
+                *s *= 1.0 - (i as f32 / (fade - 1) as f32);
+            }
+        }
+    }
     Ok((mono, spec.sample_rate))
 }
 
@@ -378,7 +487,6 @@ fn load_capped(dir: &Path, rate: u32, max_bytes: u64) -> Result<CustomBank, Stri
 
     let mut voices: [Option<Vec<f32>>; KIT_VOICES] = Default::default();
     let mut found = Vec::new();
-    let mut bytes = 0usize;
     for (name, voice, path) in present {
         let (mono, src_rate) = decode_mono(&path)?;
         let mut buf = if src_rate == rate {
@@ -401,10 +509,21 @@ fn load_capped(dir: &Path, rate: u32, max_bytes: u64) -> Result<CustomBank, Stri
             *s *= g;
         }
 
-        bytes += buf.len() * std::mem::size_of::<f32>();
         voices[voice as usize] = Some(buf);
         found.push(name);
     }
+
+    // Half a snare pair is a whole snare pair. `found` is untouched, so the
+    // screen still reports the files that are really there — see
+    // `alias_snare_pair`, which is where the reasoning lives.
+    alias_snare_pair(&mut voices);
+    // Counted after the aliasing, so `bytes` is what this bank really holds
+    // — a folder with one snare in it carries that snare twice.
+    let bytes: usize = voices
+        .iter()
+        .flatten()
+        .map(|v| v.len() * std::mem::size_of::<f32>())
+        .sum();
 
     // One per decode, for the life of the process. Relaxed because nothing
     // is ordered against it: all that is asked of it is that no two banks
@@ -433,7 +552,26 @@ fn load_capped(dir: &Path, rate: u32, max_bytes: u64) -> Result<CustomBank, Stri
 struct Key {
     dir: PathBuf,
     rate: u32,
-    stamps: Vec<(String, u64, u64)>,
+    stamps: Vec<(String, u64, u128)>,
+}
+
+/// A modification time as a number, to the NANOSECOND.
+///
+/// Whole seconds is not enough resolution to be a cache key. Every write
+/// this cache has to notice happens while the app is open and the musician
+/// is working: render a snare out of a DAW, drop it in the folder, hear it.
+/// Two writes inside the same second — which is most of them — carry the
+/// same whole-second stamp, and if the file also happens to come out the
+/// same length (the same bounce of the same bar, re-EQ'd) the key does not
+/// move and the app keeps playing the old snare until it restarts.
+///
+/// `None` — a filesystem that does not report a modification time — is 0,
+/// which makes the key fall back to the path, the rate and the file size.
+fn stamp(modified: Option<std::time::SystemTime>) -> u128 {
+    modified
+        .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+        .map(|d| d.as_nanos())
+        .unwrap_or(0)
 }
 
 /// Stat the eight names and build the key. Cheap enough to run on every
@@ -448,13 +586,7 @@ fn key_for(dir: &Path, rate: u32) -> Result<Key, String> {
         };
         let meta = std::fs::metadata(path)
             .map_err(|e| format!("could not read {}: {e}", path.display()))?;
-        let modified = meta
-            .modified()
-            .ok()
-            .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
-            .map(|d| d.as_secs())
-            .unwrap_or(0);
-        stamps.push((name.to_string(), meta.len(), modified));
+        stamps.push((name.to_string(), meta.len(), stamp(meta.modified().ok())));
     }
     Ok(Key {
         dir: dir.to_path_buf(),
@@ -765,7 +897,13 @@ mod tests {
         }
     }
 
-    /// A long sample is CUT, not refused. See [`MAX_VOICE_SECS`].
+    /// A long sample is CUT, not refused — and the cut FADES.
+    ///
+    /// See [`MAX_VOICE_SECS`] and [`CAP_FADE_SECS`]. The fixture is a
+    /// six-second sine at full level, so two seconds in the waveform is
+    /// still going at full amplitude; without the ramp the buffer ends on a
+    /// step of whatever the sine happened to be doing, which is a click on
+    /// every hit of that cymbal.
     #[test]
     fn a_long_sample_is_capped_rather_than_rejected() {
         let scratch = Scratch::new("long");
@@ -780,11 +918,202 @@ mod tests {
             0.5,
         );
         let bank = load(scratch.path(), 48_000).expect("a long crash is still a crash");
-        let len = bank.voice(KitVoice::Crash).len();
+        let buf = bank.voice(KitVoice::Crash);
+        let len = buf.len();
         assert!(
             (len as i64 - 96_000).abs() <= 2,
             "six seconds of crash came out as {len} samples and the cap is two seconds"
         );
+        // The cut is silent. A 440 Hz sine at 48 kHz crosses zero every 55
+        // samples, so a buffer that simply STOPPED would end somewhere on
+        // the cycle — 0.9 at worst and a couple of tenths on average.
+        let last = buf[len - 1].abs();
+        assert!(
+            last < 0.01,
+            "the capped crash ends at {last}, which is a step and therefore a click"
+        );
+        // And the ramp is only the ramp: the cycle before it starts is still
+        // the drum at full height, so the fade took five milliseconds and
+        // not fifty.
+        let fade = (CAP_FADE_SECS * 48_000.0) as usize;
+        let before = buf[len - fade - 120..len - fade]
+            .iter()
+            .fold(0.0f32, |m, s| m.max(s.abs()));
+        assert!(
+            before > 0.5,
+            "the cycle before the fade peaks at {before}, so the fade is eating the cymbal"
+        );
+    }
+
+    /// A sample that ENDS on its own is not faded.
+    ///
+    /// The ramp is what the cap owes the musician for cutting their file. A
+    /// file the cap never touched is their own decision about where the drum
+    /// stops, and rewriting its last five milliseconds would be the app
+    /// editing samples it was only asked to play.
+    #[test]
+    fn a_short_sample_keeps_the_ending_the_musician_gave_it() {
+        let scratch = Scratch::new("short");
+        // A quarter of a second, ending mid-cycle at full amplitude on
+        // purpose: 440 Hz at 48 kHz is 109.09 samples a cycle, so 12 000
+        // samples is not a whole number of them.
+        write_sine(
+            &scratch.path().join("rim.wav"),
+            48_000,
+            1,
+            16,
+            false,
+            440.0,
+            0.25,
+            0.5,
+        );
+        let bank = load(scratch.path(), 48_000).expect("the folder loads");
+        let buf = bank.voice(KitVoice::Rim);
+        let tail = buf[buf.len() - 60..].iter().fold(0.0f32, |m, s| m.max(s.abs()));
+        assert!(
+            tail > 0.5,
+            "an uncapped file came back faded; its last cycle peaks at {tail}"
+        );
+    }
+
+    /// HALF A SNARE PAIR IS A WHOLE SNARE PAIR.
+    ///
+    /// The folder a musician is most likely to try first is a kick and a
+    /// snare. `snare.wav` is `snare_hi`, and `jam::slot_for` reaches for
+    /// `snare_hi` only on an ACCENT — so before this, that folder played its
+    /// kick and the built-in kit's snare on every groove in the library that
+    /// writes its backbeat at level 1, which is most of them.
+    ///
+    /// See [`alias_snare_pair`]. `found` still reports the files on disk,
+    /// which is what `inspect` and the screen tell the musician.
+    #[test]
+    fn a_folder_with_one_snare_plays_it_for_both_the_backbeat_and_the_ghosts() {
+        let scratch = Scratch::new("snare-hi");
+        write_sine(
+            &scratch.path().join("snare.wav"),
+            48_000,
+            1,
+            16,
+            false,
+            250.0,
+            0.15,
+            0.5,
+        );
+        let bank = load(scratch.path(), 48_000).expect("the folder loads");
+        assert!(bank.has(KitVoice::SnareHi));
+        assert!(
+            bank.has(KitVoice::SnareLo),
+            "a folder with snare.wav in it has no backbeat on a level-1 groove"
+        );
+        assert_eq!(
+            bank.voice(KitVoice::SnareHi),
+            bank.voice(KitVoice::SnareLo),
+            "the accent is the same drum hit harder (rule 4 of KITS.md)"
+        );
+        // The FILES are still reported honestly: the folder holds one snare
+        // and the screen must not claim two.
+        assert_eq!(bank.found, vec!["snare"]);
+        let seen = inspect(scratch.path()).expect("the folder is readable");
+        assert_eq!(seen.voices, vec!["snare"]);
+        assert!(seen.missing.contains(&"snare_soft".to_string()));
+
+        // And the mirror: a folder with only the soft one plays it on the
+        // backbeat rather than borrowing a snare that does not match.
+        let other = Scratch::new("snare-lo");
+        write_sine(
+            &other.path().join("snare_soft.wav"),
+            48_000,
+            1,
+            16,
+            false,
+            250.0,
+            0.15,
+            0.5,
+        );
+        let soft = load(other.path(), 48_000).expect("the folder loads");
+        assert!(soft.has(KitVoice::SnareHi) && soft.has(KitVoice::SnareLo));
+        assert_eq!(soft.found, vec!["snare_soft"]);
+
+        // A folder with BOTH keeps both, which is the whole point of there
+        // being two names.
+        let pair = Scratch::new("snare-pair");
+        write_sine(&pair.path().join("snare.wav"), 48_000, 1, 16, false, 250.0, 0.15, 0.5);
+        write_sine(&pair.path().join("snare_soft.wav"), 48_000, 1, 16, false, 180.0, 0.15, 0.5);
+        let both = load(pair.path(), 48_000).expect("the folder loads");
+        assert_ne!(
+            both.voice(KitVoice::SnareHi),
+            both.voice(KitVoice::SnareLo),
+            "two files in the folder and the app played one of them twice"
+        );
+    }
+
+    /// WHAT A FOLDER CAN COST `set_jam`, AS A NUMBER.
+    ///
+    /// [`MAX_FOLDER_BYTES`] is a sanity check on intent and NOT the bound on
+    /// the work, and the docs on both constants now say so — this is what
+    /// keeps that claim true. `decode_mono` stops at [`MAX_VOICE_SECS`] at
+    /// the source rate, so eight enormous files decode to exactly the same
+    /// eight two-second buffers eight small ones would, and `set_jam` cannot
+    /// be made slower by pointing it at a bigger folder.
+    ///
+    /// It matters because `set_jam` is a synchronous command: the decode
+    /// runs where the caller runs, so "how much work can a folder ask for"
+    /// is the same question as "how long can the window be busy".
+    #[test]
+    fn no_folder_can_cost_more_than_the_cap_however_long_its_files_are() {
+        let scratch = Scratch::new("bounded");
+        for (name, _) in KIT_FILES {
+            // Three times the cap each, at a rate above the output's.
+            write_sine(
+                &scratch.path().join(format!("{name}.wav")),
+                96_000,
+                1,
+                16,
+                false,
+                300.0,
+                MAX_VOICE_SECS * 3.0,
+                0.5,
+            );
+        }
+        let bank = load(scratch.path(), 48_000).expect("eight long drums are still a kit");
+        let ceiling = (MAX_VOICE_SECS * 48_000.0) as usize + 2;
+        for v in KitVoice::ALL {
+            let len = bank.voice(v).len();
+            assert!(
+                len <= ceiling,
+                "{} decoded to {len} samples against a cap of {ceiling}",
+                v.file_name()
+            );
+        }
+        assert!(
+            bank.bytes <= KIT_VOICES * ceiling * 4,
+            "the folder decoded to {} bytes, over eight voices' worth of the cap",
+            bank.bytes
+        );
+    }
+
+    /// THE CACHE KEY KEEPS THE NANOSECONDS.
+    ///
+    /// See [`stamp`]. Truncated to whole seconds, the two times below are
+    /// the same number — and a snare re-bounced and dropped in the folder
+    /// within a second of the last one, at the same length, would keep
+    /// playing the old sound until the app restarted.
+    #[test]
+    fn a_file_replaced_within_the_same_second_is_a_different_key() {
+        let base = std::time::UNIX_EPOCH + std::time::Duration::from_secs(1_757_000_000);
+        assert_ne!(
+            stamp(Some(base)),
+            stamp(Some(base + std::time::Duration::from_millis(1))),
+            "a millisecond apart is a different file, and whole seconds cannot see it"
+        );
+        assert_ne!(
+            stamp(Some(base)),
+            stamp(Some(base + std::time::Duration::from_nanos(100))),
+            "NTFS timestamps tick every 100 ns, so that is the resolution to keep"
+        );
+        // A filesystem that reports no time at all falls back on the path,
+        // the rate and the size rather than panicking.
+        assert_eq!(stamp(None), 0);
     }
 
     /// A folder of far too much audio is refused with a sentence, before a

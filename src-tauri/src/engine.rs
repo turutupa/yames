@@ -7454,7 +7454,7 @@ mod tests {
     fn a_custom_drum_is_read_from_the_table_and_never_from_the_bank() {
         let sr = 48000u32;
         let bank = SoundBank::new(sr);
-        let folder = crate::kit::CustomBank::for_tests(&[KitVoice::Kick], sr);
+        let folder = crate::kit::CustomBank::for_tests(&[KitVoice::Kick], sr, 0.05);
 
         // The folder's kick, through the folder.
         let custom = jam_sample(&bank, Some(&folder), SoundId::Custom(KitVoice::Kick));
@@ -7499,6 +7499,7 @@ mod tests {
         let folder = std::sync::Arc::new(crate::kit::CustomBank::for_tests(
             &[KitVoice::Kick, KitVoice::Hat],
             sr,
+            0.05,
         ));
 
         let mut cfg = rock_16ths();

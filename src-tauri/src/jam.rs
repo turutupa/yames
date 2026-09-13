@@ -2963,20 +2963,40 @@ mod tests {
     // Your own kit — a folder of samples, lane by lane
     // -----------------------------------------------------------------
 
-    /// A folder holding just these voices, at the reference rate.
+    /// A folder holding just these voices, at the reference rate, in short
+    /// bursts — for the tests that ask which SOUND a lane resolved to.
+    ///
+    /// The tests that ask how LOUD it comes out use [`long_folder`], because
+    /// a 50 ms burst cannot answer a question about ring-out.
     fn folder(voices: &[KitVoice]) -> Option<Arc<CustomBank>> {
-        Some(Arc::new(CustomBank::for_tests(voices, JAM_REFERENCE_SR)))
+        Some(Arc::new(CustomBank::for_tests(voices, JAM_REFERENCE_SR, 0.05)))
     }
 
-    /// Which sound a lane resolved to on tick `t`.
-    fn lane_sound(table: &JamTable, t: u32, lane: JamLane) -> Option<SoundId> {
+    /// The same, with every voice at the cap — the longest drum a folder is
+    /// allowed to hold, which is what the ceiling has to survive.
+    fn long_folder(voices: &[KitVoice], rate: u32) -> Option<Arc<CustomBank>> {
+        Some(Arc::new(CustomBank::for_tests(
+            voices,
+            rate,
+            crate::kit::MAX_VOICE_SECS,
+        )))
+    }
+
+    /// The whole slot a lane compiled to on tick `t` — gain and ring-out as
+    /// well as which drum.
+    fn slot_of(table: &JamTable, t: u32, lane: JamLane) -> Option<JamSlot> {
         table
             .tick(t, 0)
             .expect("in the bar")
             .slots()
             .iter()
             .find(|s| s.lane == lane)
-            .map(|s| s.sound)
+            .copied()
+    }
+
+    /// Which sound a lane resolved to on tick `t`.
+    fn lane_sound(table: &JamTable, t: u32, lane: JamLane) -> Option<SoundId> {
+        slot_of(table, t, lane).map(|s| s.sound)
     }
 
     /// VOICE BY VOICE, NOT ALL OR NOTHING.
@@ -3015,14 +3035,14 @@ mod tests {
         assert!(t.custom_kit().is_some());
     }
 
-    /// A soft snare is a different FILE, not the same one turned down.
+    /// A soft snare is a different FILE — and half a pair is a whole pair.
     ///
     /// `snare_soft.wav` is the ghost note and `snare.wav` is the backbeat,
     /// which is rule 4 of `KITS.md` applied to somebody else's samples: a
-    /// folder that has only the loud one should use it for both rather than
-    /// dropping the ghosts.
+    /// folder that has only the loud one uses it for both rather than
+    /// dropping the ghosts. See `kit::alias_snare_pair`.
     #[test]
-    fn the_soft_snare_is_its_own_file_and_falls_back_on_its_own() {
+    fn the_soft_snare_is_its_own_file_and_half_a_pair_is_a_whole_pair() {
         let mut cfg = rock_8ths();
         // Level 3 is a ghost note, which resolves to snare_lo.
         cfg.bar.snare = vec![0, 3, 2, 0, 0, 3, 2, 0];
@@ -3037,6 +3057,10 @@ mod tests {
             Some(SoundId::Custom(KitVoice::SnareHi))
         );
 
+        // Only `snare.wav`. Both halves are the musician's drum, because a
+        // folder that borrowed the built-in ghost would be two snares that
+        // do not match — and, far worse, would play the built-in one on
+        // every groove in the library that writes its backbeat at level 1.
         let loud_only = compile_with_kit(&cfg, folder(&[KitVoice::SnareHi])).unwrap();
         assert_eq!(
             lane_sound(&loud_only, 2, JamLane::Snare),
@@ -3044,8 +3068,47 @@ mod tests {
         );
         assert_eq!(
             lane_sound(&loud_only, 1, JamLane::Snare),
-            Some(SoundId::Kit(JamKit::Room, KitVoice::SnareLo)),
-            "no snare_soft.wav in the folder, so the ghost is the built-in one"
+            Some(SoundId::Custom(KitVoice::SnareLo)),
+            "the folder's only snare has to cover the ghosts too"
+        );
+
+        // And the mirror: only `snare_soft.wav` in the folder.
+        let soft_only = compile_with_kit(&cfg, folder(&[KitVoice::SnareLo])).unwrap();
+        assert_eq!(
+            lane_sound(&soft_only, 1, JamLane::Snare),
+            Some(SoundId::Custom(KitVoice::SnareLo))
+        );
+        assert_eq!(
+            lane_sound(&soft_only, 2, JamLane::Snare),
+            Some(SoundId::Custom(KitVoice::SnareHi)),
+            "the folder's only snare has to cover the backbeat too"
+        );
+    }
+
+    /// THE FOLDER A MUSICIAN ACTUALLY TRIES FIRST: A KICK AND A SNARE.
+    ///
+    /// The bug this pins is not subtle from a chair. Most of the library
+    /// writes its backbeat at level 1 — a plain hit, not an accent — and
+    /// level 1 resolves to `snare_lo`, which `KIT_FILES` maps to
+    /// `snare_soft.wav`. So a folder holding `kick.wav` and `snare.wav`
+    /// played the musician's kick against the app's snare on nearly every
+    /// groove there is, and the only way to hear the snare they had chosen
+    /// was to find a groove that accented the backbeat.
+    #[test]
+    fn a_kick_and_a_snare_in_a_folder_play_the_backbeat_of_an_unaccented_groove() {
+        let mut cfg = rock_8ths();
+        // The backbeat as most of the library writes it: level 1.
+        cfg.bar.snare = vec![0, 0, 1, 0, 0, 0, 1, 0];
+        let t = compile_with_kit(&cfg, folder(&[KitVoice::Kick, KitVoice::SnareHi])).unwrap();
+        assert_eq!(
+            lane_sound(&t, 0, JamLane::Kick),
+            Some(SoundId::Custom(KitVoice::Kick))
+        );
+        assert_eq!(
+            lane_sound(&t, 2, JamLane::Snare),
+            Some(SoundId::Custom(KitVoice::SnareLo)),
+            "the backbeat of a level-1 groove came from the built-in kit, so the \
+             folder's kick is playing against somebody else's snare"
         );
     }
 
