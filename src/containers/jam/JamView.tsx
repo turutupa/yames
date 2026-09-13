@@ -129,6 +129,12 @@ export interface JamScreenState {
 export interface JamPositionState {
   loop: BarRange | null;
   pendingJump: number | null;
+  /**
+   * The bar the form is on, or — while stopped — the one the next press of
+   * play will start on: the pending jump, else the loop's first bar, else the
+   * top. The section actions count from it and the timeline lights it.
+   */
+  currentBar: number;
   jumpTo: (bar: number) => void;
   toggleSectionLoop: (range: BarRange) => void;
 }
@@ -608,6 +614,7 @@ export function JamView({
         bandStates={bandStates}
         loop={position.loop}
         pendingJump={position.pendingJump}
+        startBar={position.currentBar}
         onJumpTo={position.jumpTo}
         onToggleSectionLoop={position.toggleSectionLoop}
         editingChords={screen.editingChords}

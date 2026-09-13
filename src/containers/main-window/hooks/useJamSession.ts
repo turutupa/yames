@@ -39,7 +39,7 @@ import type { BeatEvent } from "../../../types";
  * jam too (JAM_MODE §8.5) and the runner has to hand the engine exactly what
  * this hook hands it. See `jamEngine.ts` for the order and why it matters.
  */
-import { clearJam, lineSignature, pushJam, sendJam } from "./jamEngine";
+import { clearJam, lineSignature, meterSignature, pushJam, sendJam } from "./jamEngine";
 import type { MeterSnapshot } from "./jamEngine";
 
 /**
@@ -94,6 +94,24 @@ async function sendPosition(command: JamPositionCommand): Promise<void> {
   }
 }
 
+
+/**
+ * The bar the engine will play after this one.
+ *
+ * The engine's rule, mirrored here because the bass and the keys are sent one
+ * bar ahead and "ahead" has to mean the same thing on both sides: a jump it
+ * has been asked for wins, a loop wraps at its last bar, and otherwise the
+ * next bar is the next bar. Exported for the test that pins it.
+ */
+export function nextFormBar(
+  bar: number,
+  loop: BarRange | null,
+  pendingJump: number | null,
+): number {
+  if (pendingJump !== null) return pendingJump;
+  if (loop && bar >= loop.end) return loop.start;
+  return bar + 1;
+}
 
 /**
  * Where the send timings lived before the engine traffic moved out. Re-exported
@@ -367,10 +385,23 @@ export function useJamSession({
       // own restored meter a second time and call that a snapshot.
       const restore = restoreRef.current;
       restoreRef.current = null;
-      clearJam(restore);
+      /*
+       * Only if THIS hook is what put a band on the engine.
+       *
+       * The tab is not the only thing that loads a jam: a setlist step can BE
+       * one (JAM_MODE §8.5), and the runner puts it there while the window
+       * sits on the setlist tab with no jam of its own. An unconditional
+       * clear-down here fired on every tab change and on the very first
+       * render, so walking from Setlist to Metronome mid-run sent
+       * `setJam(null)` and killed the band under a step that was still
+       * playing — from a hook that had never loaded anything.
+       */
+      const mine = loadedIdRef.current !== null || restore !== null;
       sentBassRef.current = null;
+      sentMeterRef.current = null;
       voicingRef.current = null;
       loadedIdRef.current = null;
+      if (mine) clearJam(restore);
       return;
     }
     // The meter the jam found, taken once, before the jam overwrites it. Only
@@ -399,7 +430,20 @@ export function useJamSession({
       // range; an edit mid-take leads on from wherever it already was.
       previousVoicing: editingLive ? voicingRef.current : null,
     });
-    pushJam(jam, config);
+    /*
+     * The meter goes with the table only when the meter has MOVED.
+     *
+     * Every edit recompiles and re-sends, and most edits are not a meter: a
+     * mix slider fires `onEdit` per step of the drag, so a hand on the bass
+     * fader pushed free mode, the beat groups and the subdivision at it about
+     * thirty times a second — and the meter is what restacks the bar. The
+     * table alone is cheap and lands on the next bar line; the meter alone is
+     * the thing you can hear going wrong.
+     */
+    const meterNow = meterSignature(jam);
+    const meterMoved = sentMeterRef.current !== meterNow;
+    sentMeterRef.current = meterNow;
+    pushJam(jam, config, meterMoved);
     // What the engine is now holding, so the next bar line can tell whether
     // it has anything new to say. Recording `null` here would make the next
     // downbeat re-send a bass the engine already has.
@@ -449,6 +493,12 @@ export function useJamSession({
    * the number that says there is room for it.
    */
   const sentBassRef = useRef<string | null>(null);
+  /**
+   * The meter the engine was last given, so an edit that does not move it
+   * does not restack the bar. Null on the way out, because the metronome gets
+   * its own meter back there and the next push has to say the jam's again.
+   */
+  const sentMeterRef = useRef<string | null>(null);
   const barRef = useRef<string | null>(null);
   /**
    * The voicing the keys player's hand is on, carried across the sends.
@@ -481,6 +531,17 @@ export function useJamSession({
   const loadedIdRef = useRef<string | null>(null);
   /** The bar the form is on right now, or null when not playing a bar. */
   const playingBarRef = useRef<number | null>(null);
+  /**
+   * The loop and the jump, as the bar-ahead send has to read them.
+   *
+   * Refs rather than dependencies: the send is triggered by the bar line and
+   * only by the bar line. Watching the loop here would re-send the whole line
+   * the moment somebody pressed the loop button, in the middle of a bar.
+   */
+  const loopRef = useRef<BarRange | null>(loop);
+  loopRef.current = loop;
+  const pendingJumpRef = useRef<number | null>(pendingJump);
+  pendingJumpRef.current = pendingJump;
 
   useEffect(() => {
     if (view !== "jam" || !jam || !currentBeat || !isPlaying || countingIn) {
@@ -506,7 +567,12 @@ export function useJamSession({
     }
 
     const next = compileJam(jam, {
-      formBar: bar + 1,
+      // The bar the engine will actually play next, which over a loop or a
+      // pending jump is not `bar + 1`. Sending ahead of the wrong bar is the
+      // whole failure mode this send exists to prevent: with a section on
+      // repeat, every pass through the loop's first bar used to be played
+      // over the line of the bar AFTER the loop's end.
+      formBar: nextFormBar(bar, loopRef.current, pendingJumpRef.current),
       lineup,
       previousVoicing: voicingRef.current,
     });
@@ -707,16 +773,19 @@ export function useJamSession({
   }, [pendingJump, isPlaying, countingIn, currentBeat?.formBar, currentBeat?.chorus]);
 
   /**
-   * Which bar the section actions count from.
+   * Which bar the section actions count from, and which bar the readout names.
    *
    * The one playing, or — while stopped — the one the next press of play will
-   * start on, which is the pending jump if there is one and bar one if not.
+   * start on. Three answers in order, and they are the engine's own order for
+   * where a restart begins: a jump that has been asked for, else the loop's
+   * first bar, else the top of the form. Leaving the loop out of it made the
+   * screen say "bar 1" while the band was about to come in on bar 5.
    */
   const currentBar = useMemo(() => {
     if (isPlaying && currentBeat && Number.isFinite(currentBeat.formBar)) return currentBeat.formBar;
-    return pendingJump ?? 0;
+    return pendingJump ?? loop?.start ?? 0;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPlaying, currentBeat?.formBar, pendingJump]);
+  }, [isPlaying, currentBeat?.formBar, pendingJump, loop?.start]);
 
   /**
    * Go to a bar — at the next bar line, which is the engine's business.
@@ -976,8 +1045,12 @@ export function useJamSession({
    * rather than a sixth thing hanging off `screen`.
    */
   const position = useMemo(
-    () => ({ loop, pendingJump, jumpTo, toggleSectionLoop }),
-    [loop, pendingJump, jumpTo, toggleSectionLoop],
+    // `currentBar` goes with them: while stopped it is where the next press of
+    // play will start, and the timeline has to light that bar rather than the
+    // top of the form. One value, so the readout and the section actions can
+    // never disagree about which bar you are on.
+    () => ({ loop, pendingJump, currentBar, jumpTo, toggleSectionLoop }),
+    [loop, pendingJump, currentBar, jumpTo, toggleSectionLoop],
   );
 
   const screen = useMemo(

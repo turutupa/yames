@@ -92,6 +92,7 @@ function positionState(
   return {
     loop: null,
     pendingJump: null,
+    currentBar: 0,
     jumpTo: vi.fn(),
     toggleSectionLoop: vi.fn(),
     ...overrides,
@@ -253,8 +254,25 @@ describe("JamView — moving through the form", () => {
   });
 
   it("says where the take will start while the transport is stopped", () => {
-    setup({ isPlaying: false, position: positionState({ pendingJump: 4 }) });
+    setup({
+      isPlaying: false,
+      position: positionState({ pendingJump: 4, currentBar: 4 }),
+    });
     expect(screen.getByText(/starts at bar 5/)).toBeInTheDocument();
+  });
+
+  it("starts on the loop's first bar, and says so", () => {
+    // Stopped, with the bridge on repeat. The engine restarts at the loop's
+    // first bar, so a readout lighting bar one is a readout that is wrong
+    // about the one thing this timeline is for.
+    const { container } = setup({
+      isPlaying: false,
+      position: positionState({ loop: { start: 4, end: 7 }, currentBar: 4 }),
+    });
+    expect(screen.getByText(/starts at bar 5/)).toBeInTheDocument();
+    const lit = container.querySelectorAll(".jam-timeline-cell[data-current]");
+    expect(lit).toHaveLength(1);
+    expect(lit[0].textContent).toContain("5");
   });
 
   it("keeps the readout to the bar you are on once it is playing", () => {

@@ -65,12 +65,30 @@ export async function sendJam(jam: Jam, config: JamEngineConfig | null): Promise
 }
 
 /**
+ * The bar a jam stacks, as one comparable string.
+ *
+ * The three meter setters are the expensive half of a push — they restack the
+ * bar the engine is counting — so a caller that pushes on every edit needs a
+ * way to ask "has the meter actually moved?" without keeping its own copy of
+ * `jamMeter`'s rules. This is that question, and `pushJam`'s third argument is
+ * the answer.
+ */
+export function meterSignature(jam: Jam): string {
+  const { beatGroups, ticksPerBeat } = jamMeter(jam);
+  return `${beatGroups.join(",")}|${ticksPerBeat}`;
+}
+
+/**
  * The meter and the table, in that order — what a jam needs on the way in.
  *
  * Only on load and on an edit. Never per bar: re-sending the meter under a
  * playing band would restack the bar on every downbeat.
+ *
+ * `sendMeter` false sends the table on its own, for the edit that did not
+ * touch the meter — a mix slider, a chord typed into bar five. The order is
+ * still the order: nothing can arrive out of it when nothing is sent.
  */
-export function pushJam(jam: Jam, config: JamEngineConfig): void {
+export function pushJam(jam: Jam, config: JamEngineConfig, sendMeter = true): void {
   // The GROUPS, not `[beatsPerBar]`. A jam given a meter of its own carries
   // the grouping the metronome's editor writes ([2, 2, 3] for 7/8), and the
   // grouping is what makes a bar of seven audible as a bar of seven rather
@@ -81,11 +99,13 @@ export function pushJam(jam: Jam, config: JamEngineConfig): void {
     // Each step is awaited so the engine sees them in order, and each is
     // guarded so one rejecting does not take the rest with it — a jam that
     // applied its meter and nothing else is the worst of the failures.
-    const steps: Array<[string, () => Promise<unknown>]> = [
-      ["freeMode", () => setFreeMode(false)],
-      ["beatGroups", () => setBeatGroups(beatGroups)],
-      ["subdivision", () => setSubdivision(ticksPerBeat as Subdivision)],
-    ];
+    const steps: Array<[string, () => Promise<unknown>]> = sendMeter
+      ? [
+          ["freeMode", () => setFreeMode(false)],
+          ["beatGroups", () => setBeatGroups(beatGroups)],
+          ["subdivision", () => setSubdivision(ticksPerBeat as Subdivision)],
+        ]
+      : [];
     for (const [name, run] of steps) {
       try {
         await run();
