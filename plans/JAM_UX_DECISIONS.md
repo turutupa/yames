@@ -1,6 +1,6 @@
 # Jam, second pass — the UX and the sound
 
-> **Status:** Decided by default on 2026-09-12 (the owner: "the board looks very cool"); implementation on branch `jam-v2`, briefs in `plans/tasks/jam-v2/`. Working document. Started 2026-09-12 (night), after the owner's
+> **Status:** Decided by default on 2026-09-12 (the owner: "the board looks very cool"); implemented on branch `jam-v2` (pull request #51, on top of `jam`), briefs in `plans/tasks/jam-v2/`. Built 2026-09-13: every decision below is on the branch, two read-only reviews ran and all 22 findings are fixed, all gates green (3733 front-end tests, 460 engine tests, probe with a custom kit at p99 0.28 ms and zero dropouts). Waiting on the owner's ears for the Raw kit and the voices (`scripts/sounds/ab.html`) and on the merge of #50 and #51. Working document. Started 2026-09-12 (night), after the owner's
 > first session with the finished Jam on two machines.
 > **Purpose:** the first build delivered every feature in `JAM_MODE.md` and
 > the owner's verdict was: "a lot of polishing", "an overwhelming number of

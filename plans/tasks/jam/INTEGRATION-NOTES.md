@@ -153,3 +153,17 @@ handler existed. It clears when W1's branch merges. Nobody else touches it.
   defined.
 - The BRIEF's robocopy line breaks under the Bash tool (Git Bash rewrites
   `/E`); run it through PowerShell.
+
+## The second pass (W18–W23, branch `jam-v2`)
+
+Lives in `plans/tasks/jam-v2/` with its own BRIEF. What it adds on top of
+the exports above, for anyone integrating after it: `src/jam/vibes.ts`
+(`VIBES`, `applyVibe`, `vibeBundle`), `src/jam/intensity.ts`
+(`applyIntensityToGroove`), `src/jam/vibesContract.ts` (the adapter the
+screen reads: `VIBES`, `VIBE_IDS`, `VARIATION_IDS`, `applyVibe`,
+`applyIntensity`), the `hatOpen` lane on `JamPattern`, `bassVoice` /
+`keysVoice` / `customKit` on the config, the Raw kit (`KIT_COUNT` is 5),
+`pick_kit_folder` / `inspect_kit_folder` (both async on the command side
+after the review round — the folder dialog must never block the command
+thread). Sleep-based engine tests are a known source of flakes under a
+loaded suite; wait on a counter instead (`take.rs` `wait_until`).
