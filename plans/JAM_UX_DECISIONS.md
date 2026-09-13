@@ -86,6 +86,26 @@ time, Zen over a jam, the jam step in a setlist, the takes, the engine.
 - **A6 — The key's chord strip.** *open.* Proposed default: behind a
   "Chords in this key" toggle, off by default. The shapes row shows the
   current chord only and follows the jam; "Next shape" is its one control.
+- **A8 — Shapes are a cheat sheet, not a live view.** *open, from the
+  owner's second session.* "The fretboard and the chords are amazing, but
+  they shouldn't keep changing." Proposed default: on the playing screen
+  only two things ever change on their own, the timeline and the chord you
+  are on. Shapes leave it entirely. A "Chords" button opens a sheet with
+  the key's chords each drawn once as its basic shape (the open one or the
+  first barre), so it reads as a page you can glance at; tapping a chord
+  expands every way to play it. A shape can be pinned to the playing
+  screen and then stays put; following the jam is a switch on the sheet,
+  off by default. The fretboard is the same: opt in, and when open it
+  shows one scale for the key, the box you would use, not a scale that
+  swaps on every chord.
+- **A9 — Variations inside a vibe.** *open.* Proposed default: picking a
+  vibe shows a second row of variations, each a groove, a kit, a feel and
+  an intensity together: Rock → classic, hard, punk, alt, ballad,
+  half-time; Blues → shuffle, slow, Texas, boogie; Jazz → swing, ballad,
+  bossa, up-tempo; Funk → 16ths, half-time, New Orleans; and so on. Depth
+  for a player who lives in one family, without a single extra control.
+  A variation tuned to taste is saved as your own jam, and the vibe tile
+  can start from one of yours.
 - **A7 — Captions become first-run hints.** *open.* Proposed default: the
   four permanent captions move to the onboarding hint system, shown once
   each at the moment they apply; the headphones line stays as a tooltip on
@@ -124,6 +144,32 @@ time, Zen over a jam, the jam step in a setlist, the takes, the engine.
   the bass gains a pick attack and a shorter decay under rock and funk
   styles; the keys' stab style gets a shorter, drier envelope. Both stay
   off by default (B1), so this is second to B2 and B4.
+- **B8 — A vibe is a sound set.** *open, from the owner's question "how do
+  users of different styles get instruments of their style".* Proposed
+  default: every vibe bundles a kit, a bass voice, a keys voice, a groove
+  family, a feel, an intensity, a fill habit and a tempo range. Rock: Raw,
+  picked bass, organ. Hard rock and metal: Raw with double kick, driven
+  bass, no keys. Blues: Room, fingered bass, organ, shuffle. Jazz: Brushes,
+  upright, electric piano, swing ride. Funk: Tight, slap, clav stabs.
+  Latin: Room with rim, fingered, nylon-ish pad, bossa. Pop: Electronic,
+  synth bass, pad. The voices are the sound of the style; the pattern is
+  only its rhythm.
+- **B9 — The voice roster.** *open.* Proposed default: five bass voices
+  (fingered, picked, upright, slap, synth) and four keys voices (electric
+  piano, organ, clav, pad), each its own synthesis recipe — envelope,
+  harmonics, filter, attack noise — built at bank time like the kits.
+  Drums stay the one place your own samples replace the synthesis (B3),
+  because a drum is one hit and a bass is a whole instrument. Every voice
+  is a dropdown in the setup under its player, so a vibe's choice can be
+  overridden without leaving the vibe.
+- **B10 — Tuned by listening, against references.** *open.* Proposed
+  default: every vibe gets a reference card, two or three well-known
+  tracks with the tempo, feel and sound named, and its voices are tuned
+  A/B against them with the owner in the room for the styles the owner
+  plays and with a bass player and a jazz player for the ones the owner
+  does not. Every vibe tile gets a two-bar preview so a user hears the
+  band before committing. The first four kits were measured and never
+  heard; this is the rule that prevents a repeat.
 - **B7 — Kit choice on the vibe tile, not a separate card row.** *open.*
   Proposed default: the vibe sets the kit; the kit control becomes a
   dropdown under The drummer, with a preview button that plays two bars.
@@ -139,6 +185,12 @@ time, Zen over a jam, the jam step in a setlist, the takes, the engine.
   *decided 2026-09-12.* B2, B4 and B6 are auditioned A/B in a session with
   the owner before they are called done. A measurement script is a gate,
   not a verdict.
+- **C4 — A jam is a file.** *deferred, noted now because it costs nothing.*
+  A jam is a small JSON record, so jams can be exported and imported as
+  files with no cloud and no accounts. A community of rock players building
+  rock jams covers more taste than the stock set ever will. Not in the
+  second pass; the record format should not be changed in ways that make
+  it harder.
 - **C3 — Its own pull request.** *decided 2026-09-12.* The second pass lands
   as a PR on top of #50, so the first build is judged as built and the
   redesign on its own.
