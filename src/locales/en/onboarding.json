@@ -153,6 +153,15 @@
       "midiPlugged": {
         "body": "A MIDI device is connected but nothing is mapped. Map a pedal to Play/Stop?",
         "action": "Open Hotkeys"
+      },
+      "jamSynth": {
+        "body": "The whole band is synthesised — nothing to download, nothing to install."
+      },
+      "jamBand": {
+        "body": "The band never plays your instrument. Bass and keys are one tap each."
+      },
+      "jamTakes": {
+        "body": "Takes stay on this machine. Nothing is uploaded."
       }
     },
     "tour": {

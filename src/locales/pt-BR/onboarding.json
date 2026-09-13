@@ -153,6 +153,15 @@
       "midiPlugged": {
         "body": "Há um dispositivo MIDI conectado, mas nada mapeado. Mapear um pedal para Tocar/Parar?",
         "action": "Abrir atalhos"
+      },
+      "jamSynth": {
+        "body": "A banda inteira é sintetizada: nada para baixar, nada para instalar."
+      },
+      "jamBand": {
+        "body": "A banda nunca toca o seu instrumento. Baixo e teclado ficam a um toque."
+      },
+      "jamTakes": {
+        "body": "As gravações ficam nesta máquina. Nada é enviado."
       }
     },
     "tour": {

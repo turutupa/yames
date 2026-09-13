@@ -34,7 +34,10 @@
       "train": "Train beat",
       "boomBap": "Boom bap",
       "fourOnFloor": "Four on the floor",
-      "rule": "La règle"
+      "rule": "La règle",
+      "hardRock": "Hard rock",
+      "stomp": "Stomp",
+      "doubleKick": "Double grosse caisse"
     },
     "changes": {
       "edit": "Modifier la grille",
@@ -49,7 +52,6 @@
     "meter": {
       "label": "Métrique",
       "grooves": "Celle du groove",
-      "ticks": "Tics par temps",
       "doesNotFit": "{{groove}} ne tient pas en {{meter}} ; le batteur joue la règle."
     },
     "mix": {
@@ -90,7 +92,8 @@
       "label": "Intensité",
       "soft": "Doux",
       "normal": "Normal",
-      "loud": "Fort"
+      "loud": "Fort",
+      "hint": "Fort supprime les ghost notes et ouvre le charley ; doux le referme."
     },
     "form": {
       "label": "Forme",
@@ -118,7 +121,8 @@
       "jumpTo": "Aller à la mesure {{bar}}",
       "jumpPending": "à la prochaine barre de mesure",
       "loopSection": "Boucler les mesures {{start}}–{{end}}",
-      "loopOff": "Arrêter la boucle"
+      "loopOff": "Arrêter la boucle",
+      "shape": "Structure"
     },
     "short": {
       "blues12": "12 mesures",
@@ -133,9 +137,9 @@
     "countIn": {
       "label": "Décompte",
       "none": "Aucun",
-      "bars": "{{count}} mesures",
-      "bars_one": "{{count}} mesure",
-      "bars_other": "{{count}} mesures"
+      "barsAnd": "{{count}} mesures · {{sound}}",
+      "barsAnd_one": "{{count}} mesure · {{sound}}",
+      "barsAnd_other": "{{count}} mesures · {{sound}}"
     },
     "fills": {
       "label": "Fills",
@@ -158,7 +162,8 @@
     },
     "fretboard": {
       "label": "Manche",
-      "aria": "{{chord}} sur le manche"
+      "aria": "{{chord}} sur le manche",
+      "staysPut": "{{scale}}, la position à la case {{fret}} · reste en place pendant que tu joues"
     },
     "chords": {
       "label": "Accords",
@@ -167,12 +172,19 @@
       "follow": "Suivre le jam",
       "followHint": "Les positions suivent les changements, ou tu les fixes sur un accord.",
       "sevenths": "Septièmes",
-      "nextShape": "Position suivante",
       "sizeTriad": "triade",
       "sizeOpen": "ouverte",
       "sizeBarre": "barré",
       "sizeSeventh": "septième",
-      "fret": "case {{fret}}"
+      "fret": "case {{fret}}",
+      "sheetLead": "une page qu'on regarde, pas une vue qui bouge",
+      "sizeLabel": "Triades ou septièmes",
+      "triads": "Triades",
+      "everyWay": "{{chord}}, toutes les façons de le jouer",
+      "lowToHigh": "du grave à l'aigu sur le manche",
+      "pin": "Épingler celui-ci",
+      "unpin": "Détacher",
+      "pinnedAria": "{{chord}}, épinglé à l'écran"
     },
     "key": {
       "label": "Tonalité",
@@ -193,7 +205,29 @@
       "brushes": "Balais",
       "brushesHint": "doux, pour une ballade",
       "electronic": "Électronique",
-      "electronicHint": "synthétisé et percutant"
+      "electronicHint": "synthétisé et percutant",
+      "raw": "Brut",
+      "rawHint": "un batteur rock dans une pièce sèche",
+      "preview": "Écouter",
+      "previewStop": "Arrêter",
+      "builtIn": "Fournis",
+      "yours": "Les tiens",
+      "forget": "Retirer",
+      "chooseFolder": "Un dossier avec tes samples…",
+      "folderHint": "grosse caisse, caisse claire, charley, charley ouvert, ride, rim, crash · rien ne quitte cette machine",
+      "folderUnavailable": "Tes propres samples ne sont pas disponibles dans cette version.",
+      "foundVoices": "Trouvé : {{voices}}.",
+      "fallbackVoices": "{{voices}} viennent de {{kit}}.",
+      "voice": {
+        "kick": "grosse caisse",
+        "snare": "caisse claire",
+        "snare_soft": "caisse claire douce",
+        "hat": "charley",
+        "hat_open": "charley ouvert",
+        "ride": "ride",
+        "rim": "rim",
+        "crash": "crash"
+      }
     },
     "transposition": {
       "label": "Tu lis",
@@ -201,18 +235,15 @@
       "bb": "Si♭",
       "eb": "Mi♭"
     },
-    "setup": {
-      "label": "Tonalité, kit et la partie que tu lis"
-    },
+    "setup": {},
     "band": {
       "label": "Le groupe",
-      "lead": "tout est synthétisé, rien à télécharger",
+      "lead": "batterie seule jusqu'à ce que tu demandes",
       "drums": "Batterie",
       "bass": "Basse",
       "keys": "Clavier",
       "you": "Toi",
       "youPlay": "{{instrument}}",
-      "youHint": "le groupe ne joue jamais ton instrument",
       "out": "sortie",
       "hatsOnly": "charleston seul",
       "inputOn": "Entrée active",
@@ -301,13 +332,86 @@
       "confirmDelete": "Supprimer",
       "confirmKeep": "Garder",
       "size": "environ {{megabytes}} Mo sur le disque",
-      "local": "Les prises restent sur cette machine. Rien n'est envoyé.",
       "introTitle": "À propos des prises",
       "introWhat": "Une prise, c'est toi et le groupe mélangés, de la première mesure après le décompte jusqu'à ce que tu arrêtes.",
       "introWhere": "Elle est écrite en WAV dans le dossier propre à cette application, sur cette machine, et y reste jusqu'à ce que tu la supprimes.",
       "introPrivate": "Rien n'est envoyé, rien n'est analysé, rien ne quitte la machine.",
       "introNotNow": "Pas maintenant",
       "introStart": "Enregistrer les prises"
+    },
+    "sheet": {
+      "setUp": "Réglages",
+      "done": "Terminé"
+    },
+    "vibe": {
+      "label": "Vibe",
+      "lead": "un appui règle le batteur, le kit, le tempo et la tonalité",
+      "startedFrom": "parti du vibe {{vibe}}",
+      "unavailable": "Les vibes ne sont pas encore dans cette version — tout le reste fonctionne.",
+      "rock": "Rock",
+      "hardRock": "Hard rock",
+      "blues": "Blues",
+      "funk": "Funk",
+      "jazz": "Jazz",
+      "latin": "Latin",
+      "pop": "Pop",
+      "metal": "Metal"
+    },
+    "variation": {
+      "label": "{{vibe}}, lequel",
+      "lead": "chacun réunit un groove, un kit, un feel et un volume",
+      "aria": "Façons de jouer ce vibe",
+      "count": "{{count}} façons de le jouer",
+      "count_one": "{{count}} façon de le jouer",
+      "count_other": "{{count}} façons de le jouer",
+      "yours": "Un des tiens",
+      "yoursEmpty": "aucun enregistré",
+      "classic": "Classique",
+      "hard": "Dur",
+      "punk": "Punk",
+      "alt": "Alternatif",
+      "ballad": "Ballade",
+      "halfTime": "Half-time",
+      "driving": "Poussé",
+      "stomp": "Stomp",
+      "doubleKick": "Double grosse caisse",
+      "shuffle": "Shuffle",
+      "slow": "Lent",
+      "texas": "Texas",
+      "boogie": "Boogie",
+      "sixteenths": "Doubles-croches",
+      "newOrleans": "New Orleans",
+      "swing": "Swing",
+      "bossa": "Bossa",
+      "upTempo": "Rapide",
+      "samba": "Samba",
+      "rumba": "Rumba",
+      "songo": "Songo",
+      "eighths": "Croches",
+      "thrash": "Thrash",
+      "midTempo": "Tempo moyen"
+    },
+    "drummer": {
+      "label": "Le batteur"
+    },
+    "more": {
+      "label": "Plus",
+      "lead": "mesure · ce que tu lis · prises"
+    },
+    "bassVoice": {
+      "label": "Son",
+      "fingered": "Aux doigts",
+      "picked": "Au médiator",
+      "upright": "Contrebasse",
+      "slap": "Slap",
+      "synth": "Synthé"
+    },
+    "keysVoice": {
+      "label": "Son",
+      "epiano": "Piano électrique",
+      "organ": "Orgue",
+      "clav": "Clav",
+      "pad": "Pad"
     }
   },
   "scale": {

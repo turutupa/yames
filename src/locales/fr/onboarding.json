@@ -153,6 +153,15 @@
       "midiPlugged": {
         "body": "Un appareil MIDI est connecté mais rien n'est assigné. Assigner une pédale à Lecture/Arrêt ?",
         "action": "Ouvrir les raccourcis"
+      },
+      "jamSynth": {
+        "body": "Tout le groupe est synthétisé : rien à télécharger, rien à installer."
+      },
+      "jamBand": {
+        "body": "Le groupe ne joue jamais ton instrument. La basse et les claviers sont à un appui."
+      },
+      "jamTakes": {
+        "body": "Les prises restent sur cette machine. Rien n'est envoyé."
       }
     },
     "tour": {

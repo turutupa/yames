@@ -34,7 +34,10 @@
       "train": "火车节奏",
       "boomBap": "Boom Bap",
       "fourOnFloor": "四踩底鼓",
-      "rule": "通用规则"
+      "rule": "通用规则",
+      "hardRock": "硬摇滚",
+      "stomp": "跺步",
+      "doubleKick": "双踩"
     },
     "changes": {
       "edit": "编辑和弦",
@@ -49,7 +52,6 @@
     "meter": {
       "label": "拍号",
       "grooves": "律动自带的",
-      "ticks": "每拍的格数",
       "doesNotFit": "{{groove}} 不适合 {{meter}}，鼓手按通用规则演奏。"
     },
     "mix": {
@@ -90,7 +92,8 @@
       "label": "力度",
       "soft": "轻",
       "normal": "适中",
-      "loud": "重"
+      "loud": "重",
+      "hint": "重会去掉幽灵音、把踩镲打开；轻则合上。"
     },
     "form": {
       "label": "曲式",
@@ -118,7 +121,8 @@
       "jumpTo": "跳到第 {{bar}} 小节",
       "jumpPending": "在下一条小节线",
       "loopSection": "循环第 {{start}}–{{end}} 小节",
-      "loopOff": "取消循环"
+      "loopOff": "取消循环",
+      "shape": "曲式"
     },
     "short": {
       "blues12": "12 小节",
@@ -133,9 +137,9 @@
     "countIn": {
       "label": "预备拍",
       "none": "无",
-      "bars": "{{count}} 小节",
-      "bars_one": "{{count}} 小节",
-      "bars_other": "{{count}} 小节"
+      "barsAnd": "{{count}} 小节 · {{sound}}",
+      "barsAnd_one": "{{count}} 小节 · {{sound}}",
+      "barsAnd_other": "{{count}} 小节 · {{sound}}"
     },
     "fills": {
       "label": "过门",
@@ -158,7 +162,8 @@
     },
     "fretboard": {
       "label": "指板",
-      "aria": "琴颈上的 {{chord}}"
+      "aria": "琴颈上的 {{chord}}",
+      "staysPut": "{{scale}}，第 {{fret}} 品的把位 · 弹的时候不会动"
     },
     "chords": {
       "label": "和弦",
@@ -167,12 +172,19 @@
       "follow": "跟着即兴走",
       "followHint": "让指法跟着和弦走，或者钉在某一个和弦上。",
       "sevenths": "七和弦",
-      "nextShape": "下一个指法",
       "sizeTriad": "三和弦",
       "sizeOpen": "开放",
       "sizeBarre": "横按",
       "sizeSeventh": "七和弦",
-      "fret": "第 {{fret}} 品"
+      "fret": "第 {{fret}} 品",
+      "sheetLead": "一页拿来瞄一眼的谱，不是会动的画面",
+      "sizeLabel": "三和弦或七和弦",
+      "triads": "三和弦",
+      "everyWay": "{{chord}} 的所有按法",
+      "lowToHigh": "沿着琴颈由低到高",
+      "pin": "钉住这个",
+      "unpin": "取消钉住",
+      "pinnedAria": "{{chord}}，已钉在屏幕上"
     },
     "key": {
       "label": "调",
@@ -193,7 +205,29 @@
       "brushes": "鼓刷",
       "brushesHint": "安静，适合抒情曲",
       "electronic": "电子",
-      "electronicHint": "合成音，颗粒分明"
+      "electronicHint": "合成音，颗粒分明",
+      "raw": "生猛",
+      "rawHint": "干声房间里的摇滚鼓手",
+      "preview": "试听",
+      "previewStop": "停止",
+      "builtIn": "内置",
+      "yours": "你的",
+      "forget": "移除",
+      "chooseFolder": "一个装着你自己采样的文件夹…",
+      "folderHint": "底鼓、军鼓、踩镲、开镲、叮叮镲、边击、吊镲 · 什么都不会离开这台电脑",
+      "folderUnavailable": "这个版本用不了你自己的采样。",
+      "foundVoices": "找到：{{voices}}。",
+      "fallbackVoices": "{{voices}}来自{{kit}}。",
+      "voice": {
+        "kick": "底鼓",
+        "snare": "军鼓",
+        "snare_soft": "轻军鼓",
+        "hat": "踩镲",
+        "hat_open": "开镲",
+        "ride": "叮叮镲",
+        "rim": "边击",
+        "crash": "吊镲"
+      }
     },
     "transposition": {
       "label": "你读的谱",
@@ -201,18 +235,15 @@
       "bb": "降B",
       "eb": "降E"
     },
-    "setup": {
-      "label": "调、鼓组，以及你读的分谱"
-    },
+    "setup": {},
     "band": {
       "label": "乐队",
-      "lead": "全部合成，无需下载",
+      "lead": "先只有鼓，要谁再加谁",
       "drums": "鼓",
       "bass": "贝斯",
       "keys": "键盘",
       "you": "你",
       "youPlay": "{{instrument}}",
-      "youHint": "乐队从不演奏你的乐器",
       "out": "休止",
       "hatsOnly": "只有踩镲",
       "inputOn": "输入已开",
@@ -301,13 +332,86 @@
       "confirmDelete": "删除",
       "confirmKeep": "保留",
       "size": "磁盘上约 {{megabytes}} MB",
-      "local": "录音只留在这台机器上，不会上传。",
       "introTitle": "关于录音",
       "introWhat": "一段录音就是你和乐队合在一起的声音，从预备拍之后的第一小节到你停下为止。",
       "introWhere": "它会以 WAV 文件写在这台机器上本应用自己的文件夹里，直到你删掉它。",
       "introPrivate": "不上传、不分析，也不会离开这台机器。",
       "introNotNow": "暂不",
       "introStart": "开始录音"
+    },
+    "sheet": {
+      "setUp": "设置",
+      "done": "完成"
+    },
+    "vibe": {
+      "label": "风格",
+      "lead": "一下就定好鼓手、鼓组、速度和调",
+      "startedFrom": "从「{{vibe}}」风格开始",
+      "unavailable": "这个版本还没有风格，下面的设置照常可用。",
+      "rock": "摇滚",
+      "hardRock": "硬摇滚",
+      "blues": "布鲁斯",
+      "funk": "放克",
+      "jazz": "爵士",
+      "latin": "拉丁",
+      "pop": "流行",
+      "metal": "金属"
+    },
+    "variation": {
+      "label": "{{vibe}}，哪一种",
+      "lead": "每一种都同时定好节奏型、鼓组、律动和力度",
+      "aria": "这个风格的几种打法",
+      "count": "{{count}} 种打法",
+      "count_one": "{{count}} 种打法",
+      "count_other": "{{count}} 种打法",
+      "yours": "你自己的",
+      "yoursEmpty": "还没有保存",
+      "classic": "经典",
+      "hard": "重",
+      "punk": "朋克",
+      "alt": "另类",
+      "ballad": "抒情",
+      "halfTime": "半速",
+      "driving": "推进",
+      "stomp": "跺步",
+      "doubleKick": "双踩",
+      "shuffle": "Shuffle",
+      "slow": "慢速",
+      "texas": "德州",
+      "boogie": "布基",
+      "sixteenths": "十六分",
+      "newOrleans": "新奥尔良",
+      "swing": "摇摆",
+      "bossa": "Bossa",
+      "upTempo": "快速",
+      "samba": "桑巴",
+      "rumba": "伦巴",
+      "songo": "Songo",
+      "eighths": "八分",
+      "thrash": "鞭击",
+      "midTempo": "中速"
+    },
+    "drummer": {
+      "label": "鼓手"
+    },
+    "more": {
+      "label": "更多",
+      "lead": "拍号 · 你读的调 · 录音"
+    },
+    "bassVoice": {
+      "label": "音色",
+      "fingered": "指弹",
+      "picked": "拨片",
+      "upright": "立贝斯",
+      "slap": "击弦",
+      "synth": "合成"
+    },
+    "keysVoice": {
+      "label": "音色",
+      "epiano": "电钢",
+      "organ": "风琴",
+      "clav": "克拉维",
+      "pad": "铺底"
     }
   },
   "scale": {

@@ -34,7 +34,10 @@
       "train": "トレインビート",
       "boomBap": "ブーンバップ",
       "fourOnFloor": "フォー・オン・ザ・フロア",
-      "rule": "ルール"
+      "rule": "ルール",
+      "hardRock": "ハードロック",
+      "stomp": "ストンプ",
+      "doubleKick": "ツーバス"
     },
     "changes": {
       "edit": "コードを編集",
@@ -49,7 +52,6 @@
     "meter": {
       "label": "拍子",
       "grooves": "グルーヴの拍子",
-      "ticks": "1拍あたりのティック",
       "doesNotFit": "{{groove}} は {{meter}} に合いません。ドラムはルールで演奏します。"
     },
     "mix": {
@@ -90,7 +92,8 @@
       "label": "強さ",
       "soft": "弱め",
       "normal": "ふつう",
-      "loud": "強め"
+      "loud": "強め",
+      "hint": "強くするとゴーストノートが消えてハイハットが開き、弱くすると閉じます。"
     },
     "form": {
       "label": "フォーム",
@@ -118,7 +121,8 @@
       "jumpTo": "{{bar}} 小節目へ",
       "jumpPending": "次の小節線で",
       "loopSection": "{{start}}–{{end}} 小節をループ",
-      "loopOff": "ループを解除"
+      "loopOff": "ループを解除",
+      "shape": "型"
     },
     "short": {
       "blues12": "12小節",
@@ -133,9 +137,9 @@
     "countIn": {
       "label": "カウントイン",
       "none": "なし",
-      "bars": "{{count}} 小節",
-      "bars_one": "{{count}} 小節",
-      "bars_other": "{{count}} 小節"
+      "barsAnd": "{{count}} 小節 · {{sound}}",
+      "barsAnd_one": "{{count}} 小節 · {{sound}}",
+      "barsAnd_other": "{{count}} 小節 · {{sound}}"
     },
     "fills": {
       "label": "フィル",
@@ -158,7 +162,8 @@
     },
     "fretboard": {
       "label": "指板",
-      "aria": "ネック上の {{chord}}"
+      "aria": "ネック上の {{chord}}",
+      "staysPut": "{{scale}}、{{fret}} フレットのポジション · 弾いている間も動きません"
     },
     "chords": {
       "label": "コード",
@@ -167,12 +172,19 @@
       "follow": "ジャムに追従",
       "followHint": "フォームをコード進行に合わせて動かすか、ひとつのコードに固定します。",
       "sevenths": "7th",
-      "nextShape": "次のフォーム",
       "sizeTriad": "トライアド",
       "sizeOpen": "オープン",
       "sizeBarre": "バレー",
       "sizeSeventh": "7th",
-      "fret": "{{fret}} フレット"
+      "fret": "{{fret}} フレット",
+      "sheetLead": "ちらっと見るページ。動く画面ではありません",
+      "sizeLabel": "三和音か 7th か",
+      "triads": "三和音",
+      "everyWay": "{{chord}} の押さえ方すべて",
+      "lowToHigh": "ネックの低い方から高い方へ",
+      "pin": "これを固定",
+      "unpin": "固定を解除",
+      "pinnedAria": "{{chord}}、画面に固定中"
     },
     "key": {
       "label": "キー",
@@ -193,7 +205,29 @@
       "brushes": "ブラシ",
       "brushesHint": "静かで、バラード向き",
       "electronic": "エレクトロニック",
-      "electronicHint": "合成音で、輪郭がはっきり"
+      "electronicHint": "合成音で、輪郭がはっきり",
+      "raw": "ロウ",
+      "rawHint": "デッドな部屋のロックドラマー",
+      "preview": "試聴",
+      "previewStop": "停止",
+      "builtIn": "内蔵",
+      "yours": "自分の音",
+      "forget": "外す",
+      "chooseFolder": "自分のサンプルのフォルダ…",
+      "folderHint": "キック、スネア、ハイハット、オープンハイハット、ライド、リム、クラッシュ · 何もこの端末から出ません",
+      "folderUnavailable": "このビルドでは自分のサンプルは使えません。",
+      "foundVoices": "見つかった音: {{voices}}。",
+      "fallbackVoices": "{{voices}} は {{kit}} から鳴ります。",
+      "voice": {
+        "kick": "キック",
+        "snare": "スネア",
+        "snare_soft": "弱いスネア",
+        "hat": "ハイハット",
+        "hat_open": "オープンハイハット",
+        "ride": "ライド",
+        "rim": "リム",
+        "crash": "クラッシュ"
+      }
     },
     "transposition": {
       "label": "読む調",
@@ -201,18 +235,15 @@
       "bb": "B♭",
       "eb": "E♭"
     },
-    "setup": {
-      "label": "キー、キット、読む譜面"
-    },
+    "setup": {},
     "band": {
       "label": "バンド",
-      "lead": "すべて合成音、ダウンロードは不要",
+      "lead": "呼ぶまではドラムだけ",
       "drums": "ドラム",
       "bass": "ベース",
       "keys": "キーボード",
       "you": "あなた",
       "youPlay": "{{instrument}}",
-      "youHint": "バンドはあなたの楽器を弾きません",
       "out": "休み",
       "hatsOnly": "ハイハットのみ",
       "inputOn": "入力オン",
@@ -301,13 +332,86 @@
       "confirmDelete": "削除",
       "confirmKeep": "残す",
       "size": "ディスク上に約 {{megabytes}} MB",
-      "local": "テイクはこのマシンに残ります。アップロードはされません。",
       "introTitle": "テイクについて",
       "introWhat": "テイクとは、カウントイン後の最初の小節から停止するまでの、あなたとバンドをまとめた音です。",
       "introWhere": "このマシンにあるこのアプリ専用のフォルダへ WAV ファイルとして保存され、削除するまでそこに残ります。",
       "introPrivate": "何もアップロードされず、何も解析されず、何もこのマシンから出ません。",
       "introNotNow": "今はしない",
       "introStart": "テイクを録音する"
+    },
+    "sheet": {
+      "setUp": "セットアップ",
+      "done": "完了"
+    },
+    "vibe": {
+      "label": "バイブ",
+      "lead": "ひとタップでドラマー、キット、テンポ、キーが決まる",
+      "startedFrom": "{{vibe}} のバイブから",
+      "unavailable": "このビルドにはまだバイブがありません。下の設定はすべて使えます。",
+      "rock": "ロック",
+      "hardRock": "ハードロック",
+      "blues": "ブルース",
+      "funk": "ファンク",
+      "jazz": "ジャズ",
+      "latin": "ラテン",
+      "pop": "ポップ",
+      "metal": "メタル"
+    },
+    "variation": {
+      "label": "{{vibe}}、どれで",
+      "lead": "どれもグルーヴ・キット・フィール・音量がセット",
+      "aria": "このバイブの弾き方",
+      "count": "{{count}} 通りの演り方",
+      "count_one": "{{count}} 通りの演り方",
+      "count_other": "{{count}} 通りの演り方",
+      "yours": "自分のジャム",
+      "yoursEmpty": "まだ保存されていません",
+      "classic": "クラシック",
+      "hard": "ハード",
+      "punk": "パンク",
+      "alt": "オルタナ",
+      "ballad": "バラード",
+      "halfTime": "ハーフタイム",
+      "driving": "ドライブ",
+      "stomp": "ストンプ",
+      "doubleKick": "ツーバス",
+      "shuffle": "シャッフル",
+      "slow": "スロー",
+      "texas": "テキサス",
+      "boogie": "ブギ",
+      "sixteenths": "16分",
+      "newOrleans": "ニューオーリンズ",
+      "swing": "スウィング",
+      "bossa": "ボサ",
+      "upTempo": "アップテンポ",
+      "samba": "サンバ",
+      "rumba": "ルンバ",
+      "songo": "ソンゴ",
+      "eighths": "8分",
+      "thrash": "スラッシュ",
+      "midTempo": "ミドルテンポ"
+    },
+    "drummer": {
+      "label": "ドラマー"
+    },
+    "more": {
+      "label": "その他",
+      "lead": "拍子 · 読む譜 · 録音"
+    },
+    "bassVoice": {
+      "label": "音色",
+      "fingered": "指弾き",
+      "picked": "ピック弾き",
+      "upright": "ウッドベース",
+      "slap": "スラップ",
+      "synth": "シンセ"
+    },
+    "keysVoice": {
+      "label": "音色",
+      "epiano": "エレピ",
+      "organ": "オルガン",
+      "clav": "クラビ",
+      "pad": "パッド"
     }
   },
   "scale": {
