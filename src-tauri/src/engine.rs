@@ -1818,6 +1818,39 @@ impl JamHandoff {
         }
     }
 
+    /// A DEVICE CHANGE TAKES A FOLDER'S DRUMS AWAY. Command thread only;
+    /// returns whether it took anything.
+    ///
+    /// A table survives a device change on purpose — switch headphones
+    /// mid-jam and the band is still there (see
+    /// [`MetronomeEngine::set_jam_table`]) — and that is right for every
+    /// table but one. The shipped kits are decoded by the audio thread's own
+    /// `SoundBank`, which is rebuilt at the new rate when the stream
+    /// reopens. A folder of the musician's drums is not: it was decoded and
+    /// resampled once, on the command thread, at the rate the OLD device
+    /// opened at, and it is baked into the table. Play it on a 44.1 kHz
+    /// device after a 48 kHz one and every drum is a semitone and a half
+    /// flat, for as long as the jam is loaded, with nothing to tell the
+    /// musician why.
+    ///
+    /// `kit::KitCache` already keys on the rate, so the fix is only to make
+    /// the app ASK again. Taking the table away does that: the plain click
+    /// plays, and the next bar-ahead `set_jam` — at most a bar later, and
+    /// the UI sends four to six a chorus — decodes the folder at the rate
+    /// the new device actually opened at and hands the band back in tune. A
+    /// bar of click is a smaller lie than a chorus of flat drums.
+    pub(crate) fn drop_custom_kit(&self) -> bool {
+        let holds = self
+            .table
+            .lock()
+            .map(|t| t.as_deref().is_some_and(|t| t.custom_kit().is_some()))
+            .unwrap_or(false);
+        if holds {
+            self.set(None);
+        }
+        holds
+    }
+
     /// Drop every retired table. Command thread only.
     pub(crate) fn drain_retired(&self) {
         if let Ok(mut r) = self.retired.lock() {
@@ -1843,8 +1876,20 @@ impl JamHandoff {
 /// retirement slot was busy. Flushed once per buffer. If even these are
 /// full — five replacements landing inside the one moment the command
 /// thread holds the retirement lock — the table is leaked rather than freed
-/// here: a few kilobytes lost is a price, a `free()` on the audio thread is
-/// the thing the whole engine is built to avoid.
+/// here: memory lost is a price, a `free()` on the audio thread is the thing
+/// the whole engine is built to avoid.
+///
+/// **What "leaked" costs is no longer a few kilobytes.** A table used to be
+/// its own ticks and nothing else; one that names a folder of the
+/// musician's drums carries the decoded samples too, up to
+/// `kit::MAX_FOLDER_BYTES` — sixty-four megabytes — because the drums and
+/// the table that names them are deliberately one object, swapped and
+/// retired together (see `kit.rs`). The trade does not change: the audio
+/// thread still must not free, and this path still needs five retirements
+/// to collide inside one held lock, which has never been observed. But the
+/// number is worth writing down, because "a few kilobytes" would make it
+/// look like a path nobody has to care about, and a repeat of it would be a
+/// folder's worth of memory each time.
 struct JamRetirement {
     parked: [Option<Arc<JamTable>>; 4],
 }
@@ -1875,6 +1920,47 @@ impl JamRetirement {
             }
         }
     }
+}
+
+/// WHICH DECODE a table's drums came from, or `None` for a table whose
+/// drums are all the app's own.
+///
+/// `CustomBank::id` and not the folder path: a musician who replaces
+/// `snare.wav` while the app is open has the same path and a different
+/// drum, and the whole reason that id exists is that the path cannot tell
+/// the two apart (see `kit.rs`).
+///
+/// Used on the audio thread, on the one buffer where a table changes, to
+/// answer "are the drums still ringing the same drums?".
+#[inline]
+fn custom_bank_id(table: Option<&JamTable>) -> Option<u64> {
+    table.and_then(|t| t.custom_kit()).map(|c| c.id)
+}
+
+/// A DRUM STILL RINGING OUT OF THE OLD FOLDER IS A CLICK IN THE NEW ONE.
+///
+/// A [`Voice`] is a [`SoundId`] and an offset, and `SoundId::Custom` names a
+/// DRUM rather than a decode: the samples behind it are whichever folder the
+/// table the callback is holding carries. So a crash 200 ms into its wash
+/// when the musician points the app at a different folder — or replaces
+/// `crash.wav` on disk, which is the same thing to the cache — does not
+/// stop. It carries on at sample 9 600 of somebody else's cymbal, which is a
+/// step from one waveform straight to another in the middle of a note. That
+/// is a click, and on a crash it is a loud one.
+///
+/// Stopping those voices is the honest answer: the drum they were playing no
+/// longer exists. Everything from the bank — the click, the shipped kits,
+/// the bass, the keys — rings on untouched, because their buffers did not
+/// move.
+///
+/// Audio-thread safe: `Vec::retain` keeps its allocation and [`Voice`] owns
+/// nothing, so this is a memmove and no more.
+#[inline]
+fn stop_voices_on_kit_change(voices: &mut Vec<Voice>, before: Option<u64>, after: Option<u64>) {
+    if before == after {
+        return;
+    }
+    voices.retain(|v| !matches!(v.sound_id, SoundId::Custom(_)));
 }
 
 /// What the band does on `bar`, or `Full` with no band.
@@ -3202,6 +3288,19 @@ impl MetronomeEngine {
     ) -> Result<(), String> {
         eprintln!("[yames] Setting audio output device: {:?}", name);
         let was_playing = self.playing.load(Ordering::SeqCst);
+        // A table built on a folder of the musician's own drums was decoded
+        // at the OLD device's rate and would play flat or sharp on the new
+        // one. Taking it away makes the next bar-ahead `set_jam` decode it
+        // again at the rate this device opens at; see
+        // `JamHandoff::drop_custom_kit`, which is where the reasoning lives.
+        // Every other table survives the change, which is the promise
+        // `set_jam_table` makes.
+        if self.jam.drop_custom_kit() {
+            eprintln!(
+                "[yames] the jam's drums came from a folder and were decoded for the \
+                 old device; the band returns on the next bar"
+            );
+        }
         self.device_name = name;
         // Fully tear down the old thread/stream
         self.shutdown();
@@ -3568,10 +3667,17 @@ impl MetronomeEngine {
                             ) {
                                 cached.jam_pending = incoming;
                             } else {
+                                // Which folder the drums still ringing came
+                                // out of, before and after. A different one
+                                // stops them; see
+                                // `stop_voices_on_kit_change`.
+                                let before = custom_bank_id(cached.jam.as_deref());
+                                let after = custom_bank_id(incoming.as_deref());
                                 if let Some(old) = cached.jam.take() {
                                     jam_retire.retire(&jam_shared, old);
                                 }
                                 cached.jam = incoming;
+                                stop_voices_on_kit_change(&mut voices, before, after);
                                 cached.jam_changed = true;
                                 cached.count_in_slot =
                                     count_in_slot_of(cached.jam.as_deref());
@@ -4120,6 +4226,15 @@ impl MetronomeEngine {
                                 // The bar line: the held table becomes the
                                 // one the next tick reads. Same form, same
                                 // drums — only the bass bar moved.
+                                //
+                                // No custom voice has to be stopped here,
+                                // and that is a property rather than an
+                                // oversight: a table is only ever HELD when
+                                // its `drums_signature` matches the one
+                                // playing, and that signature hashes
+                                // `CustomBank::id`. A different folder is
+                                // never a deferred swap; it plays now,
+                                // through the branch above.
                                 if let Some(p) = cached.jam_pending.take() {
                                     if let Some(old) = cached.jam.take() {
                                         jam_retire.retire(&jam_shared, old);
@@ -7482,6 +7597,142 @@ mod tests {
         ] {
             assert_eq!(jam_sample(&bank, Some(&folder), id), bank.get(id));
             assert_eq!(jam_sample(&bank, None, id), bank.get(id));
+        }
+    }
+
+    /// A DEVICE CHANGE TAKES A FOLDER'S DRUMS AWAY, AND ONLY A FOLDER'S.
+    ///
+    /// The samples in a `CustomBank` were resampled once, on the command
+    /// thread, at the rate the device that was open then handed out. Switch
+    /// from a 48 kHz interface to a 44.1 kHz one and every one of those
+    /// drums is a semitone and a half flat for as long as the jam stays
+    /// loaded, because nothing would otherwise make the app decode the
+    /// folder again — `KitCache` keys on the rate, but only a `set_jam` asks
+    /// it anything, and a table already playing does not ask.
+    ///
+    /// So the table goes, the plain click plays, and the next bar-ahead send
+    /// brings the band back in tune. A table with no folder in it survives
+    /// the change untouched, which is the promise `set_jam_table` makes:
+    /// switch headphones mid-jam and the band is still there.
+    #[test]
+    fn a_device_change_takes_a_folder_of_drums_away_and_leaves_every_other_band() {
+        let cfg = rock_16ths();
+
+        // No folder: a device change must not touch it.
+        let plain = std::sync::Arc::new(crate::jam::compile(&cfg).unwrap());
+        let handoff = JamHandoff::new();
+        handoff.set(Some(plain));
+        let before = handoff.generation.load(Ordering::Acquire);
+        assert!(!handoff.drop_custom_kit(), "a shipped kit was thrown away");
+        assert!(
+            handoff.table.lock().unwrap().is_some(),
+            "switching headphones mid-jam took the band away"
+        );
+        assert_eq!(
+            handoff.generation.load(Ordering::Acquire),
+            before,
+            "nothing changed, so the callback should not have been woken"
+        );
+
+        // A folder: it has to go, and the audio thread has to be told.
+        let folder = std::sync::Arc::new(crate::kit::CustomBank::for_tests(
+            &[KitVoice::Kick, KitVoice::SnareHi],
+            48_000,
+            0.05,
+        ));
+        let mine =
+            std::sync::Arc::new(crate::jam::compile_with_kit(&cfg, Some(folder)).unwrap());
+        handoff.set(Some(mine));
+        let before = handoff.generation.load(Ordering::Acquire);
+        assert!(handoff.drop_custom_kit(), "the folder's drums were kept");
+        assert!(
+            handoff.table.lock().unwrap().is_none(),
+            "a kit decoded for the old device is still loaded, and it is out of tune"
+        );
+        assert!(
+            handoff.generation.load(Ordering::Acquire) > before,
+            "the table went and the callback was never told"
+        );
+
+        // And with nothing loaded at all it is a no-op rather than a panic:
+        // a device change with no jam is the common case.
+        assert!(!handoff.drop_custom_kit());
+    }
+
+    /// A MID-RING KIT CHANGE STOPS THE DRUMS THAT CAME OUT OF THE OLD ONE.
+    ///
+    /// `SoundId::Custom` names a drum and not a decode, so a crash 200 ms
+    /// into its wash goes on reading at sample 9 600 — of whatever folder
+    /// the NEW table carries. Two waveforms spliced mid-note is a click.
+    /// See `stop_voices_on_kit_change`.
+    #[test]
+    fn changing_the_folder_mid_wash_stops_the_old_folders_drums() {
+        let a = std::sync::Arc::new(crate::kit::CustomBank::for_tests(
+            &[KitVoice::Crash],
+            48_000,
+            0.05,
+        ));
+        let b = std::sync::Arc::new(crate::kit::CustomBank::for_tests(
+            &[KitVoice::Crash],
+            48_000,
+            0.05,
+        ));
+        assert_ne!(a.id, b.id, "two decodes are two banks, whatever the path was");
+
+        let cfg = rock_16ths();
+        let ta = crate::jam::compile_with_kit(&cfg, Some(a.clone())).unwrap();
+        let tb = crate::jam::compile_with_kit(&cfg, Some(b)).unwrap();
+        let same = crate::jam::compile_with_kit(&cfg, Some(a)).unwrap();
+        let shipped = crate::jam::compile(&cfg).unwrap();
+
+        // Mid-wash: a custom crash, a shipped crash and a bass note.
+        let ringing = || -> Vec<Voice> {
+            [
+                SoundId::Custom(KitVoice::Crash),
+                SoundId::Kit(JamKit::Room, KitVoice::Crash),
+                SoundId::Bass(BassVoice::Fingered, 4),
+            ]
+            .into_iter()
+            .map(|sound_id| Voice {
+                sound_id,
+                position: 9_600,
+                amplitude: 1.0,
+                max_samples: 0,
+            })
+            .collect()
+        };
+
+        // A different folder: the folder's drums stop, everything else
+        // rings on.
+        let mut voices = ringing();
+        stop_voices_on_kit_change(
+            &mut voices,
+            custom_bank_id(Some(&ta)),
+            custom_bank_id(Some(&tb)),
+        );
+        assert_eq!(
+            voices.len(),
+            2,
+            "a drum from the old folder is still reading, out of the new folder's buffer"
+        );
+        assert!(!voices.iter().any(|v| matches!(v.sound_id, SoundId::Custom(_))));
+
+        // The SAME folder — which is every bar-ahead send of a jam whose kit
+        // has not changed — must not cut the cymbal short.
+        let mut voices = ringing();
+        stop_voices_on_kit_change(
+            &mut voices,
+            custom_bank_id(Some(&ta)),
+            custom_bank_id(Some(&same)),
+        );
+        assert_eq!(voices.len(), 3, "a bar-ahead send silenced a ringing cymbal");
+
+        // Unloading the jam, and loading one whose drums are the app's own,
+        // both leave a custom voice with no buffer behind it.
+        for after in [None, Some(&shipped)] {
+            let mut voices = ringing();
+            stop_voices_on_kit_change(&mut voices, custom_bank_id(Some(&ta)), custom_bank_id(after));
+            assert_eq!(voices.len(), 2);
         }
     }
 
