@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   countInCue,
-  countInPhraseCue,
+  countInPhraseCues,
   perBeatCountFits,
   sectionCue,
   shouldSpeak,
@@ -40,11 +40,18 @@ describe("the count", () => {
     expect(countInCue(-1)).toBeNull();
   });
 
-  it("has one sentence to fall back on when the beats are too close together", () => {
-    expect(countInPhraseCue(4)).toEqual({ key: "jam.cues.countPhrase", params: { count: 4 } });
-    expect(countInPhraseCue(0)).toBeNull();
+  it("has the whole count to fall back on when the beats are too close together", () => {
+    // The numbers, for the caller to join — the same four words, not a
+    // second string a translator could write differently.
+    expect(countInPhraseCues(4).map((c) => c.key)).toEqual([
+      "jam.cues.n1",
+      "jam.cues.n2",
+      "jam.cues.n3",
+      "jam.cues.n4",
+    ]);
+    expect(countInPhraseCues(0)).toEqual([]);
     // Never longer than the count the engine can arm.
-    expect(countInPhraseCue(99)).toEqual({ key: "jam.cues.countPhrase", params: { count: 8 } });
+    expect(countInPhraseCues(99)).toHaveLength(8);
   });
 
   it("counts beat by beat only while an utterance fits inside a beat", () => {

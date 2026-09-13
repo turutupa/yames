@@ -61,18 +61,52 @@ function MicIcon() {
   );
 }
 
+function KeysIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="2.5" y="6" width="19" height="12" rx="1.6" />
+      <line x1="8.8" y1="6" x2="8.8" y2="18" />
+      <line x1="15.2" y1="6" x2="15.2" y2="18" />
+      <rect x="6.6" y="6" width="2.6" height="6.6" fill="currentColor" stroke="none" />
+      <rect x="13" y="6" width="2.6" height="6.6" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export type BandLaneId = "drums" | "bass" | "keys";
+
 interface Lane {
-  id: "drums" | "bass";
+  id: BandLaneId;
   on: boolean;
   /** "Shuffle · Room kit", "roots and fifths" — what this player is doing. */
   detail: string;
   /** The bass's note names for this bar; empty for the drums. */
   notes?: string[];
+  /** This lane's gain, 0..1.5. */
+  volume: number;
+  /**
+   * A control that belongs to this player and nobody else — the keys row's
+   * comping style. Drawn between the detail and the notes, where the row has
+   * room and where it reads as "and this is how".
+   */
+  extra?: React.ReactNode;
 }
 
 interface BandLanesProps {
   lanes: Lane[];
-  onToggle: (id: "drums" | "bass") => void;
+  onToggle: (id: BandLaneId) => void;
+  /** Per-lane volume, 0..1.5. The mix, as opposed to the mute. */
+  onVolume: (id: BandLaneId, volume: number) => void;
   /** What the band is doing on the bar being played. */
   bandState: JamBandState;
   isPlaying: boolean;
@@ -81,6 +115,9 @@ interface BandLanesProps {
   /** Whether the mic is listening, so the "you" lane says something true. */
   listening: boolean;
 }
+
+/** The loudest a lane goes. The contract's own ceiling for a gain. */
+const MAX_GAIN = 1.5;
 
 /**
  * The band, one row per player, and you at the bottom.
@@ -91,14 +128,18 @@ interface BandLanesProps {
  * the screen that tells a bass-curious guitarist what the line under them
  * actually is — and the "you" row says what the app thinks you are holding.
  *
- * Volume per lane is not here. A mute is: it is the toggle that decides
- * whether the player is in the band at all, and it is the one that has to
- * survive a save (JAM_MODE §3.1 — a bass player's band has no bass in it, and
- * that is a fact about the jam, not about this session's mix).
+ * Volume and mute are both here now, and they are different things. The
+ * TOGGLE decides whether the player is in the band at all, and it survives a
+ * save because it is a fact about the jam (JAM_MODE §3.1 — a bass player's
+ * band has no bass in it). The SLIDER is how loud that player is, which is a
+ * fact about the room you are in: a drummer through the same speakers as a
+ * bass is a different balance from a drummer in headphones, and turning the
+ * kit down is not the same as sending it home.
  */
 export function BandLanes({
   lanes,
   onToggle,
+  onVolume,
   bandState,
   isPlaying,
   youLabel,
@@ -107,10 +148,17 @@ export function BandLanes({
   const { t } = useTranslation();
 
   /** What a lane is doing right now — silent, on hats, or playing. */
-  function liveState(id: "drums" | "bass"): string | null {
+  function liveState(id: BandLaneId): string | null {
     if (!isPlaying || bandState === "full") return null;
     if (bandState === "silent") return t("jam.band.out");
+    // Only the drummer keeps the hats through a trade; everyone else is out.
     return id === "drums" ? t("jam.band.hatsOnly") : t("jam.band.out");
+  }
+
+  function laneIcon(id: BandLaneId) {
+    if (id === "drums") return <DrumsIcon />;
+    if (id === "bass") return <BassIcon />;
+    return <KeysIcon />;
   }
 
   return (
@@ -125,10 +173,11 @@ export function BandLanes({
         return (
           <div className="jam-band-lane" key={lane.id} data-off={lane.on ? undefined : ""}>
             <span className="jam-band-name">
-              {lane.id === "drums" ? <DrumsIcon /> : <BassIcon />}
+              {laneIcon(lane.id)}
               {t(`jam.band.${lane.id}`)}
             </span>
             <span className="jam-band-detail">{lane.detail}</span>
+            {lane.extra ? <span className="jam-band-extra">{lane.extra}</span> : null}
             <span className="jam-band-live">
               {live ? (
                 <span className="jam-band-state">{live}</span>
@@ -140,6 +189,25 @@ export function BandLanes({
                 ))
               ) : null}
             </span>
+            {/* The mix. Disabled with the player, because turning up somebody
+                who is not in the band is a control that does nothing, and a
+                slider that does nothing is worse than no slider. */}
+            <label className="jam-band-volume">
+              <span className="sr-only">
+                {t("jam.mix.forLane", { lane: t(`jam.band.${lane.id}`) })}
+              </span>
+              <input
+                type="range"
+                min={0}
+                max={MAX_GAIN}
+                step={0.05}
+                value={lane.volume}
+                disabled={!lane.on}
+                aria-label={t("jam.mix.forLane", { lane: t(`jam.band.${lane.id}`) })}
+                onChange={(e) => onVolume(lane.id, Number(e.target.value))}
+              />
+              <span className="jam-band-volume-value">{Math.round(lane.volume * 100)}</span>
+            </label>
             <button
               type="button"
               role="switch"

@@ -33,7 +33,52 @@
       "oneDrop": "One drop",
       "train": "Train beat",
       "boomBap": "Boom bap",
-      "fourOnFloor": "Four on the floor"
+      "fourOnFloor": "Four on the floor",
+      "rule": "De regel"
+    },
+    "changes": {
+      "edit": "Akkoorden bewerken",
+      "done": "Klaar",
+      "hint": "Tik op een maat om het akkoord te kiezen. Lang indrukken werkt ook zonder de modus.",
+      "pickFor": "Maat {{bar}}",
+      "root": "Grondtoon",
+      "quality": "Soort",
+      "major": "maj",
+      "asTheForm": "Zoals de vorm"
+    },
+    "meter": {
+      "label": "Maatsoort",
+      "grooves": "Die van de groove",
+      "ticks": "Ticks per tel",
+      "doesNotFit": "{{groove}} past niet in {{meter}}; de drummer speelt de regel."
+    },
+    "mix": {
+      "forLane": "Volume {{lane}}"
+    },
+    "keysStyle": {
+      "label": "Begeleiding",
+      "pads": "de hele maat aangehouden",
+      "stabs": "op de tegentel, met de snare",
+      "padsShort": "Pads",
+      "stabsShort": "Stabs"
+    },
+    "countInSound": {
+      "label": "Aftellen",
+      "beep": "Piep",
+      "sticks": "Stokken"
+    },
+    "cues": {
+      "label": "Gesproken aanwijzingen",
+      "hint": "Het aftellen, de sectie en \"jouw vier\", hardop gezegd — zo blijven je ogen op de hals.",
+      "noVoice": "Vereist de coachstem. Installeer die in Instellingen; tot dan blijven de aanwijzingen op het scherm.",
+      "n1": "één",
+      "n2": "twee",
+      "n3": "drie",
+      "n4": "vier",
+      "n5": "vijf",
+      "n6": "zes",
+      "n7": "zeven",
+      "n8": "acht"
     },
     "feel": {
       "label": "Feel",

@@ -33,7 +33,52 @@
       "oneDrop": "One drop",
       "train": "Train beat",
       "boomBap": "Boom bap",
-      "fourOnFloor": "Four on the floor"
+      "fourOnFloor": "Four on the floor",
+      "rule": "Kural"
+    },
+    "changes": {
+      "edit": "Akorları düzenle",
+      "done": "Tamam",
+      "hint": "Akorunu belirlemek için bir ölçüye dokunun. Uzun basmak mod olmadan da çalışır.",
+      "pickFor": "{{bar}}. ölçü",
+      "root": "Kök ses",
+      "quality": "Akor türü",
+      "major": "maj",
+      "asTheForm": "Form neyse o"
+    },
+    "meter": {
+      "label": "Ölçü",
+      "grooves": "Groove'un ölçüsü",
+      "ticks": "Vuruş başına tik",
+      "doesNotFit": "{{groove}}, {{meter}} ölçüsüne sığmıyor; davulcu kuralı çalıyor."
+    },
+    "mix": {
+      "forLane": "{{lane}} sesi"
+    },
+    "keysStyle": {
+      "label": "Eşlik",
+      "pads": "ölçü boyunca tutulur",
+      "stabs": "vuruş dışında, trampetle birlikte",
+      "padsShort": "Pad",
+      "stabsShort": "Vurgu"
+    },
+    "countInSound": {
+      "label": "Giriş sayımı",
+      "beep": "Bip",
+      "sticks": "Baget"
+    },
+    "cues": {
+      "label": "Sesli uyarılar",
+      "hint": "Sayım, bölüm ve \"senin dördün\" yüksek sesle söylenir — gözünüz klavyede kalsın.",
+      "noVoice": "Koç sesi gerekir. Ayarlar'dan yükleyin; o zamana kadar uyarılar ekranda kalır.",
+      "n1": "bir",
+      "n2": "iki",
+      "n3": "üç",
+      "n4": "dört",
+      "n5": "beş",
+      "n6": "altı",
+      "n7": "yedi",
+      "n8": "sekiz"
     },
     "feel": {
       "label": "Feel",

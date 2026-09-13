@@ -33,7 +33,52 @@
       "oneDrop": "One Drop",
       "train": "Train Beat",
       "boomBap": "Boom Bap",
-      "fourOnFloor": "Four on the Floor"
+      "fourOnFloor": "Four on the Floor",
+      "rule": "Die Regel"
+    },
+    "changes": {
+      "edit": "Wechsel bearbeiten",
+      "done": "Fertig",
+      "hint": "Tippe auf einen Takt, um seinen Akkord zu setzen. Langes Drücken geht auch ohne den Modus.",
+      "pickFor": "Takt {{bar}}",
+      "root": "Grundton",
+      "quality": "Akkordart",
+      "major": "Dur",
+      "asTheForm": "Wie die Form"
+    },
+    "meter": {
+      "label": "Taktart",
+      "grooves": "Die des Grooves",
+      "ticks": "Ticks pro Schlag",
+      "doesNotFit": "{{groove}} passt nicht zu {{meter}}; der Schlagzeuger spielt die Regel."
+    },
+    "mix": {
+      "forLane": "Lautstärke {{lane}}"
+    },
+    "keysStyle": {
+      "label": "Begleitung",
+      "pads": "über den ganzen Takt gehalten",
+      "stabs": "neben dem Schlag, mit der Snare",
+      "padsShort": "Flächen",
+      "stabsShort": "Stabs"
+    },
+    "countInSound": {
+      "label": "Einzähler",
+      "beep": "Piep",
+      "sticks": "Sticks"
+    },
+    "cues": {
+      "label": "Gesprochene Ansagen",
+      "hint": "Der Einzähler, der Formteil und „deine vier“ — laut gesagt, damit dein Blick am Griffbrett bleibt.",
+      "noVoice": "Braucht die Coach-Stimme. Installiere sie in den Einstellungen; bis dahin bleiben die Ansagen auf dem Bildschirm.",
+      "n1": "eins",
+      "n2": "zwei",
+      "n3": "drei",
+      "n4": "vier",
+      "n5": "fünf",
+      "n6": "sechs",
+      "n7": "sieben",
+      "n8": "acht"
     },
     "feel": {
       "label": "Feeling",

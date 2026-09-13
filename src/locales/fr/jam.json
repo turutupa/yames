@@ -33,7 +33,52 @@
       "oneDrop": "One drop",
       "train": "Train beat",
       "boomBap": "Boom bap",
-      "fourOnFloor": "Four on the floor"
+      "fourOnFloor": "Four on the floor",
+      "rule": "La règle"
+    },
+    "changes": {
+      "edit": "Modifier la grille",
+      "done": "Terminé",
+      "hint": "Touchez une mesure pour choisir son accord. Un appui long marche sans le mode.",
+      "pickFor": "Mesure {{bar}}",
+      "root": "Fondamentale",
+      "quality": "Type",
+      "major": "maj",
+      "asTheForm": "Comme la forme"
+    },
+    "meter": {
+      "label": "Métrique",
+      "grooves": "Celle du groove",
+      "ticks": "Tics par temps",
+      "doesNotFit": "{{groove}} ne tient pas en {{meter}} ; le batteur joue la règle."
+    },
+    "mix": {
+      "forLane": "Volume {{lane}}"
+    },
+    "keysStyle": {
+      "label": "Accompagnement",
+      "pads": "tenu sur toute la mesure",
+      "stabs": "à contretemps, avec la caisse claire",
+      "padsShort": "Nappes",
+      "stabsShort": "Accents"
+    },
+    "countInSound": {
+      "label": "Décompte",
+      "beep": "Bip",
+      "sticks": "Baguettes"
+    },
+    "cues": {
+      "label": "Annonces parlées",
+      "hint": "Le décompte, la section et « tes quatre », dits à voix haute — vos yeux restent sur le manche.",
+      "noVoice": "Nécessite la voix du coach. Installez-la dans les Réglages ; en attendant, les annonces restent à l'écran.",
+      "n1": "un",
+      "n2": "deux",
+      "n3": "trois",
+      "n4": "quatre",
+      "n5": "cinq",
+      "n6": "six",
+      "n7": "sept",
+      "n8": "huit"
     },
     "feel": {
       "label": "Feel",

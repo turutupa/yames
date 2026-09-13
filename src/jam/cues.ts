@@ -65,11 +65,20 @@ export function countInCue(beat: number): JamCue | null {
  * fallback, and it is a real fallback rather than a worse version of the same
  * thing: one utterance starting on beat one, at the tempo the count is going
  * to be read at anyway.
+ *
+ * The NUMBERS, for the caller to translate and join, rather than a sentence
+ * of its own: "one two three four" is four words this app already has in
+ * fifteen languages, and a separate `countPhrase` string would be a second
+ * place for a translator to write them — differently.
  */
-export function countInPhraseCue(beats: number): JamCue | null {
+export function countInPhraseCues(beats: number): JamCue[] {
   const total = Math.min(MAX_COUNT, Math.max(0, Math.trunc(beats)));
-  if (total < 1) return null;
-  return { key: "jam.cues.countPhrase", params: { count: total } };
+  const out: JamCue[] = [];
+  for (let beat = 0; beat < total; beat++) {
+    const cue = countInCue(beat);
+    if (cue) out.push(cue);
+  }
+  return out;
 }
 
 /**

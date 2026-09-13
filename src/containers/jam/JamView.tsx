@@ -5,19 +5,30 @@ import { GROOVES } from "../../jam/grooves";
 import { carryCountIn } from "../../jam/jams";
 import { JAM_FORM_KINDS, clampFormBars, formBars } from "../../jam/forms";
 import type { BarRange } from "../../jam/forms";
-import { jamBand, jamGroove, jamKey, jamBassLine } from "../../jam/compile";
+import {
+  jamBand,
+  jamGroove,
+  jamGrooveFitsMeter,
+  jamKey,
+  jamBassLine,
+  jamKeysStyle,
+  jamMix,
+  jamWrittenGroove,
+} from "../../jam/compile";
+import { progressionEdit, withChordAt } from "../../jam/progression";
+import { jamHarmony, nextChange } from "../../jam/display";
+import { JAM_KEYS_STYLES } from "../../jam/keysline";
+import { ChordPicker } from "./ChordPicker";
 import { bandStatesForChorus, practiceConfigFrom } from "../../jam/practice";
 import {
   chordName,
-  chordsForForm,
   displayTransposition,
   keyName,
   midiToName,
   noteName,
-  sameChord,
+  parseChordName,
   spellingForKey,
   transposeChord,
-  transposeKey,
 } from "../../jam/harmony";
 import { SCALE_NAMES_EN, scalesForChord } from "../../jam/scales";
 import { bassStyleForGroove } from "../../jam/bassline";
@@ -104,6 +115,12 @@ export interface JamScreenState {
   setEditorOpen: (open: boolean) => void;
   editorPage: "bar" | "fill";
   setEditorPage: (page: "bar" | "fill") => void;
+  /** "Edit changes" is on: a tap on the timeline picks a chord. */
+  editingChords: boolean;
+  setEditingChords: (on: boolean) => void;
+  /** Which bar the chord picker is open on, or null. */
+  editingBar: number | null;
+  setEditingBar: (bar: number | null) => void;
 }
 
 /** Moving through the form — the half of the screen that is not an edit. */
@@ -128,6 +145,8 @@ interface JamViewProps {
   trainedBpm: number | null;
   /** Whether the mic is on, so the "you" lane says something true. */
   listening: boolean;
+  /** Whether a voice is installed, so the cues toggle can say something true. */
+  voiceReady: boolean;
   screen: JamScreenState;
   /**
    * Where the form is being sent: the loop, the jump waiting for a bar line,
@@ -216,6 +235,7 @@ export function JamView({
   lineup,
   trainedBpm,
   listening,
+  voiceReady,
   screen,
   position,
   tapActive,
@@ -274,15 +294,10 @@ export function JamView({
    * player's chart, including the grips — which is what they asked for by
    * choosing Bb.
    */
-  const harmony = useMemo(() => {
-    const concert = jamKey(jam);
-    const semitones = displayTransposition(jam.transposition ?? "concert");
-    const key = transposeKey(concert, semitones);
-    const chords = chordsForForm(jam.form.kind, bars, concert).map((chord) =>
-      transposeChord(chord, semitones),
-    );
-    return { key, chords };
-  }, [jam, bars]);
+  // `jamHarmony` rather than a copy of it here: Zen draws the same chord from
+  // the same function, and two answers to "what chord are we on" is two
+  // chances for the stage and Zen to disagree.
+  const harmony = useMemo(() => jamHarmony(jam), [jam]);
 
   /** Which bar's chord is under your hands: the one playing, or bar one. */
   const at = isPlaying ? Math.min(Math.max(formBar, 0), bars - 1) : 0;
@@ -295,16 +310,10 @@ export function JamView({
    * times running tells you nothing. "D7 in 4 bars" is the sentence a player
    * holds in their head.
    */
-  const next = useMemo(() => {
-    if (!chord || bars <= 1) return null;
-    for (let ahead = 1; ahead <= bars; ahead += 1) {
-      const candidate = harmony.chords[(at + ahead) % bars];
-      if (candidate && !sameChord(candidate, chord)) {
-        return { name: chordName(candidate, harmony.key), inBars: ahead };
-      }
-    }
-    return null;
-  }, [chord, bars, at, harmony]);
+  const next = useMemo(
+    () => nextChange(harmony.chords, at, harmony.key),
+    [harmony, at],
+  );
 
   const scales = useMemo(
     () => (chord ? scalesForChord(chord, harmony.key) : []),
@@ -370,6 +379,71 @@ export function JamView({
   const grooveName = jam.customGroove
     ? jam.customGroove.name
     : t(`jam.groove.${jam.grooveId}`, { defaultValue: jam.grooveId });
+
+  /**
+   * Which bars carry a chord of the user's own.
+   *
+   * Drawn on the cell so "edit changes" shows what you have already changed
+   * rather than making you tap thirty-two bars to find out. A bar that is
+   * still the form's looks like every other bar, which is right: most of them
+   * are, and marking those would mark everything.
+   */
+  const ownChords = useMemo(
+    () => Array.from({ length: bars }, (_unused, i) => !!jam.progression?.[i]?.trim()),
+    [jam.progression, bars],
+  );
+
+  /**
+   * One bar's chord written down, or cleared.
+   *
+   * The picker speaks in the pitch the player READS, because that is what the
+   * timeline beside it shows — a Bb player picking "D7" means the D7 on their
+   * part. The record is CONCERT, so the name is transposed back on the way in
+   * and re-spelled from the concert key. Without this a Bb jam would move up
+   * a tone every time you edited a bar and looked at it again.
+   */
+  const setChordAt = (bar: number, name: string) => {
+    const semitones = displayTransposition(jam.transposition ?? "concert");
+    let stored = name;
+    if (name) {
+      const read = parseChordName(name);
+      // Unreadable is impossible from the picker's own buttons, but the guard
+      // is what keeps a bad name out of the record rather than into it.
+      if (!read) return;
+      stored = chordName(transposeChord(read, -semitones), harmony.concert);
+    }
+    onEdit({ progression: progressionEdit(withChordAt(jam.progression, bars, bar, stored), bars) });
+  };
+
+  const editingBar =
+    screen.editingBar !== null && screen.editingBar >= 0 && screen.editingBar < bars
+      ? screen.editingBar
+      : null;
+
+  /**
+   * A change to the form, with the changes brought along.
+   *
+   * The progression is exactly `form.bars` long or it is wrong, and the form
+   * is the thing that changes its length — so the one goes with the other
+   * through here rather than being refitted by whoever remembers to. The rule
+   * itself (new bars are "as the form", the tail is dropped) lives in
+   * `progression.ts` and is documented there.
+   */
+  const editForm = (next: { kind: JamFormKind; bars: number }) => {
+    const total = formBars(next);
+    onEdit({
+      form: next,
+      progression: progressionEdit(jam.progression, total),
+    });
+    // A picker open on a bar the form no longer has has nothing to edit.
+    if (screen.editingBar !== null && screen.editingBar >= total) screen.setEditingBar(null);
+  };
+
+  /** The mix as the sliders show it, defaults filled in. */
+  const mix = jamMix(jam);
+  const written = jamWrittenGroove(jam);
+  const grooveFits = jamGrooveFitsMeter(jam);
+  const keysStyle = jamKeysStyle(jam);
 
   return (
     <div className="jam-view">
@@ -516,25 +590,83 @@ export function JamView({
         pendingJump={position.pendingJump}
         onJumpTo={position.jumpTo}
         onToggleSectionLoop={position.toggleSectionLoop}
+        editingChords={screen.editingChords}
+        editingBar={editingBar}
+        // The changes are only editable when the timeline is showing them.
+        // A chord picker on a timeline of bare bar numbers would write
+        // music nothing on the screen displays.
+        onEditChord={jam.chords ? (bar: number) => screen.setEditingBar(bar) : null}
+        ownChords={ownChords}
       />
+
+      {jam.chords && editingBar !== null && (
+        <ChordPicker
+          bar={editingBar}
+          current={harmony.chords[editingBar] ?? null}
+          followsForm={!ownChords[editingBar]}
+          playedKey={harmony.key}
+          onPick={(name) => setChordAt(editingBar, name)}
+          onClose={() => screen.setEditingBar(null)}
+        />
+      )}
 
       <BandLanes
         lanes={[
           {
             id: "drums",
             on: band.drums,
-            detail: `${grooveName} · ${t(`jam.kit.${jam.kit}`, { defaultValue: jam.kit })}`,
+            detail: grooveFits
+              ? `${grooveName} · ${t(`jam.kit.${jam.kit}`, { defaultValue: jam.kit })}`
+              : // The card above still says Shuffle, and it is still selected;
+                // this row says what is actually being played.
+                `${t("jam.groove.rule")} · ${t(`jam.kit.${jam.kit}`, { defaultValue: jam.kit })}`,
+            volume: mix.drums,
           },
           {
             id: "bass",
             on: band.bass,
             detail: t(`jam.bassStyle.${bassStyleForGroove(jam.customGroove ? "" : jam.grooveId)}`),
             notes: bassNotes,
+            volume: mix.bass,
+          },
+          {
+            id: "keys",
+            on: !!band.keys,
+            detail: t(`jam.keysStyle.${keysStyle}`),
+            volume: mix.keys,
+            // The comping style belongs to this player and to nobody else, so
+            // it lives on their row rather than in the setup block — you
+            // change it while listening to it, which is the only way to
+            // choose between a pad and a stab.
+            extra: (
+              <span className="jam-keys-style" role="group" aria-label={t("jam.keysStyle.label")}>
+                {JAM_KEYS_STYLES.map((style) => (
+                  <button
+                    key={style}
+                    type="button"
+                    className={`jam-keys-style-btn${keysStyle === style ? " active" : ""}`}
+                    aria-pressed={keysStyle === style}
+                    disabled={!band.keys}
+                    onClick={() => onEdit({ keysStyle: style })}
+                  >
+                    {t(`jam.keysStyle.${style}Short`)}
+                  </button>
+                ))}
+              </span>
+            ),
           },
         ]}
         onToggle={(id) =>
-          onEdit({ band: { ...band, [id]: !band[id] } })
+          onEdit({
+            band: {
+              drums: band.drums,
+              bass: band.bass,
+              keys: !!band.keys,
+              [id]: id === "keys" ? !band.keys : !band[id],
+            },
+          })
         }
+        onVolume={(id, volume) => onEdit({ mix: { ...mix, [id]: volume } })}
         bandState={bandState}
         isPlaying={isPlaying}
         youLabel={t("jam.band.youPlay", {
@@ -615,7 +747,32 @@ export function JamView({
       <div className="stage-divider" aria-hidden="true" />
 
       <section className="jam-section">
-        <span className="stage-label">{t("jam.form.label")}</span>
+        <div className="jam-section-head">
+          <span className="stage-label">{t("jam.form.label")}</span>
+          {/* The way in to your own changes. Only where the timeline is
+              showing chords, because the mode's whole affordance is tapping
+              the chord on the cell — with chords off there is nothing on the
+              cell to tap. A long press on a cell does the same thing without
+              the mode, for the one bar you want to fix mid-tune. */}
+          {jam.chords && (
+            <button
+              type="button"
+              className={`jam-link${screen.editingChords ? " active" : ""}`}
+              aria-pressed={screen.editingChords}
+              title={t("jam.changes.hint")}
+              onClick={() => {
+                const next = !screen.editingChords;
+                screen.setEditingChords(next);
+                // Leaving the mode closes the panel: a picker left open over
+                // a timeline that has gone back to jumping is a control
+                // pointing at the wrong thing.
+                if (!next) screen.setEditingBar(null);
+              }}
+            >
+              {screen.editingChords ? t("jam.changes.done") : t("jam.changes.edit")}
+            </button>
+          )}
+        </div>
         <div className="jam-cards jam-cards-form">
           {JAM_FORM_KINDS.map((kind: JamFormKind) => (
             <button
@@ -624,13 +781,11 @@ export function JamView({
               className={`sub-row-btn jam-card jam-card-form${jam.form.kind === kind ? " active" : ""}`}
               aria-pressed={jam.form.kind === kind}
               onClick={() =>
-                onEdit({
-                  form: {
-                    kind,
-                    // Switching to "your own" starts from the length you were
-                    // already looking at, so the timeline does not jump.
-                    bars: kind === "custom" ? bars : formBars({ kind, bars }),
-                  },
+                editForm({
+                  kind,
+                  // Switching to "your own" starts from the length you were
+                  // already looking at, so the timeline does not jump.
+                  bars: kind === "custom" ? bars : formBars({ kind, bars }),
                 })
               }
             >
@@ -649,7 +804,7 @@ export function JamView({
                   className="beat-stepper-btn"
                   aria-label={t("jam.form.fewerBars")}
                   disabled={bars <= 1}
-                  onClick={() => onEdit({ form: { kind: "custom", bars: clampFormBars(bars - 1) } })}
+                  onClick={() => editForm({ kind: "custom", bars: clampFormBars(bars - 1) })}
                 >
                   −
                 </button>
@@ -658,7 +813,7 @@ export function JamView({
                   className="beat-stepper-btn"
                   aria-label={t("jam.form.moreBars")}
                   disabled={bars >= JAM_MAX_FORM_BARS}
-                  onClick={() => onEdit({ form: { kind: "custom", bars: clampFormBars(bars + 1) } })}
+                  onClick={() => editForm({ kind: "custom", bars: clampFormBars(bars + 1) })}
                 >
                   +
                 </button>
@@ -701,6 +856,28 @@ export function JamView({
         onTransposition={(transposition: TranspositionOption) => onEdit({ transposition })}
         chords={!!jam.chords}
         onChords={(on) => onEdit({ chords: on })}
+        meter={jam.meter ?? null}
+        grooveMeter={{ beatsPerBar: written.beatsPerBar, ticksPerBeat: written.ticksPerBeat }}
+        grooveName={grooveName}
+        grooveFits={grooveFits}
+        onMeter={(next) =>
+          onEdit({
+            meter: next ?? undefined,
+            // The count-in is a number of BARS wearing a number of beats, so
+            // a new meter has to carry it exactly as a new groove does — a
+            // four-beat count into a bar of seven lands you nowhere.
+            countIn: carryCountIn(
+              jam.countIn,
+              meter.beatsPerBar,
+              next ? next.beatGroups.reduce((sum, n) => sum + n, 0) : written.beatsPerBar,
+            ),
+          })
+        }
+        countInSound={jam.countInSound ?? "beep"}
+        onCountInSound={(countInSound) => onEdit({ countInSound })}
+        cues={!!jam.cues}
+        onCues={(on) => onEdit({ cues: on })}
+        voiceReady={voiceReady}
       />
 
       {/* JAM_MODE §3, principle 5. A band is louder than a click, and through

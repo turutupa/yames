@@ -78,6 +78,8 @@ import { InputTesterModal } from "../settings/InputTesterModal";
 import { coachDebug } from "../../coach/debug";
 import { presetBeatGroups, presetFreeMode } from "../../utils/meter";
 import { formBars } from "../../jam/forms";
+import { barInView, jamHarmony, nextChange } from "../../jam/display";
+import { chordName } from "../../jam/harmony";
 import { useShareMenu } from "./useShareMenu";
 import { ShareMenuPopover } from "./ShareMenuPopover";
 import { useUiPreferences } from "./hooks/useUiPreferences";
@@ -321,6 +323,11 @@ export function MainWindow() {
     // The engine counts the band in on the same tick grid it plays on, so the
     // jam has to be told when a bar line is the count rather than the form.
     countingIn: (state.countIn?.beats ?? 0) > 0,
+    // The count-in as numbers, for the spoken count, and whether there is a
+    // voice to speak it with. A jam with cues on and no voice installed is
+    // silent — see `shouldSpeak` in src/jam/cues.ts.
+    countIn: state.countIn ?? { beats: 0, done: 0 },
+    voiceReady: !!coach.modelStatus?.voiceReady,
     // The metronome's own meter, so the jam can hand it back on the way out.
     // A jam sets the engine's subdivision and beat groups to the groove's, and
     // without this a trip through Jam quietly re-signatures the metronome tab.
@@ -345,6 +352,30 @@ export function MainWindow() {
   useEffect(() => {
     setJamModeActive(view === "jam" && !!jamSession.jam);
   }, [view, jamSession.jam]);
+
+  /**
+   * What Zen shows over a jam: the chord, the next one, the place in the form.
+   *
+   * Worked out here rather than inside `FullscreenView` because it is the jam
+   * screen's own harmony — the same `jamHarmony` the stage draws from, so the
+   * big chord in Zen and the big chord on the stage cannot be two different
+   * chords. Null with no jam loaded, and Zen is Zen as it always was.
+   */
+  const zenJam = useMemo(() => {
+    const jam = jamSession.jam;
+    if (!jam) return null;
+    const harmony = jamHarmony(jam);
+    const bars = formBars(jam.form);
+    const at = barInView(jam, currentBeat?.formBar ?? 0, state.isPlaying);
+    const chord = harmony.chords[at] ?? null;
+    return {
+      chord: chord ? chordName(chord, harmony.key) : null,
+      next: nextChange(harmony.chords, at, harmony.key),
+      bar: at,
+      bars,
+      chorus: currentBeat?.chorus ?? 1,
+    };
+  }, [jamSession.jam, currentBeat?.formBar, currentBeat?.chorus, state.isPlaying]);
 
   const handleNewJam = useCallback(() => {
     setSidebarOpen(true);
@@ -1054,7 +1085,8 @@ export function MainWindow() {
       <FullscreenView
         state={state}
         currentBeat={currentBeat}
-        activeTab={view === "drill" ? "drill" : "beat"}
+        activeTab={view === "drill" ? "drill" : view === "jam" && jamSession.jam ? "jam" : "beat"}
+        jam={zenJam}
         onExit={zenExitHandler}
       />
     </ZenTransition>
@@ -1370,6 +1402,7 @@ export function MainWindow() {
               lineup={jamSession.lineup}
               trainedBpm={jamSession.trainedBpm}
               listening={evaluation.enabled}
+              voiceReady={!!coach.modelStatus?.voiceReady}
               screen={jamSession.screen}
               position={jamSession.position}
               tapActive={tapActive}

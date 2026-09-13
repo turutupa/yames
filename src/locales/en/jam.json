@@ -33,7 +33,52 @@
       "oneDrop": "One-drop",
       "train": "Train beat",
       "boomBap": "Boom bap",
-      "fourOnFloor": "Four on the floor"
+      "fourOnFloor": "Four on the floor",
+      "rule": "The rule"
+    },
+    "changes": {
+      "edit": "Edit changes",
+      "done": "Done",
+      "hint": "Tap a bar to set its chord. A long press works without the mode.",
+      "pickFor": "Bar {{bar}}",
+      "root": "Root",
+      "quality": "Quality",
+      "major": "maj",
+      "asTheForm": "As the form"
+    },
+    "meter": {
+      "label": "Meter",
+      "grooves": "The groove's",
+      "ticks": "Ticks per beat",
+      "doesNotFit": "{{groove}} does not fit {{meter}}; the drummer plays the rule."
+    },
+    "mix": {
+      "forLane": "{{lane}} volume"
+    },
+    "keysStyle": {
+      "label": "Comping",
+      "pads": "held through the bar",
+      "stabs": "off the beat, with the snare",
+      "padsShort": "Pads",
+      "stabsShort": "Stabs"
+    },
+    "countInSound": {
+      "label": "Count-in",
+      "beep": "Beep",
+      "sticks": "Sticks"
+    },
+    "cues": {
+      "label": "Spoken cues",
+      "hint": "The count, the section and \"your four\", said out loud — so your eyes stay on the neck.",
+      "noVoice": "Needs the coach voice. Install it in Settings; until then the cues stay on the screen.",
+      "n1": "one",
+      "n2": "two",
+      "n3": "three",
+      "n4": "four",
+      "n5": "five",
+      "n6": "six",
+      "n7": "seven",
+      "n8": "eight"
     },
     "feel": {
       "label": "Feel",

@@ -33,7 +33,52 @@
       "oneDrop": "One drop",
       "train": "Train beat",
       "boomBap": "Boom bap",
-      "fourOnFloor": "Four on the floor"
+      "fourOnFloor": "Four on the floor",
+      "rule": "Reguła"
+    },
+    "changes": {
+      "edit": "Edytuj akordy",
+      "done": "Gotowe",
+      "hint": "Dotknij taktu, aby ustawić jego akord. Długie przytrzymanie działa bez trybu.",
+      "pickFor": "Takt {{bar}}",
+      "root": "Pryma",
+      "quality": "Rodzaj",
+      "major": "dur",
+      "asTheForm": "Jak forma"
+    },
+    "meter": {
+      "label": "Metrum",
+      "grooves": "Metrum groove'u",
+      "ticks": "Tyknięcia na miarę",
+      "doesNotFit": "{{groove}} nie mieści się w {{meter}}; perkusista gra regułę."
+    },
+    "mix": {
+      "forLane": "Głośność: {{lane}}"
+    },
+    "keysStyle": {
+      "label": "Akompaniament",
+      "pads": "trzymany przez cały takt",
+      "stabs": "na „i”, razem z werblem",
+      "padsShort": "Pady",
+      "stabsShort": "Akcenty"
+    },
+    "countInSound": {
+      "label": "Odliczanie",
+      "beep": "Sygnał",
+      "sticks": "Pałki"
+    },
+    "cues": {
+      "label": "Zapowiedzi głosowe",
+      "hint": "Odliczanie, sekcja i „twoje cztery” — powiedziane na głos, żeby wzrok został na gryfie.",
+      "noVoice": "Wymaga głosu trenera. Zainstaluj go w Ustawieniach; do tego czasu zapowiedzi zostają na ekranie.",
+      "n1": "raz",
+      "n2": "dwa",
+      "n3": "trzy",
+      "n4": "cztery",
+      "n5": "pięć",
+      "n6": "sześć",
+      "n7": "siedem",
+      "n8": "osiem"
     },
     "feel": {
       "label": "Feel",

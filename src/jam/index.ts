@@ -12,6 +12,7 @@ export * from "./feel";
 export * from "./forms";
 export * from "./compile";
 export * from "./progression";
+export * from "./display";
 export * from "./keysline";
 export * from "./cues";
 export * from "./jams";
