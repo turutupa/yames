@@ -39,4 +39,27 @@ describe("jamEscapeTarget", () => {
   it("leaves the groove editor to its own Done", () => {
     expect(jamEscapeTarget({ ...OPEN, editorOpen: true })).toBe("nothing");
   });
+
+  /**
+   * The two sheets (plans/JAM_UX_DECISIONS.md A1, A8). Escape closes them
+   * before the jam, or the first press of "never mind" on the setup sheet
+   * would throw away the tune behind it.
+   */
+  it("closes the setup sheet instead of the jam behind it", () => {
+    expect(jamEscapeTarget({ ...OPEN, setupOpen: true })).toBe("setupSheet");
+  });
+
+  it("closes the chord sheet instead of the jam behind it", () => {
+    expect(jamEscapeTarget({ ...OPEN, chordsOpen: true })).toBe("chordSheet");
+  });
+
+  it("closes the picker before the sheet it was opened from", () => {
+    expect(jamEscapeTarget({ ...OPEN, setupOpen: true, editingBar: 4 })).toBe("chordPicker");
+  });
+
+  it("gives the setup sheet the key when both are somehow down", () => {
+    // Only one is ever open — the header's buttons close the other — but the
+    // order has to be decided somewhere rather than by render order.
+    expect(jamEscapeTarget({ ...OPEN, setupOpen: true, chordsOpen: true })).toBe("setupSheet");
+  });
 });
