@@ -6999,7 +6999,7 @@ mod tests {
     /// beat through the band a laptop radiates, because essentially all of
     /// it was sub-120 Hz kick. Every kick in `KITS.md` carries a mid-band
     /// body layer for that reason, and this is what says it is still there
-    /// — in all four kits, and in whatever a fifth one arrives with.
+    /// — in every kit the app ships, and in whatever the next one arrives with.
     ///
     /// The floor is −12 dB against the kit's own hat, not 0: a kick is
     /// allowed to be felt more than heard, but not to vanish. `brushes` is
@@ -7080,7 +7080,7 @@ mod tests {
     fn the_jam_reference_bank_matches_the_real_one() {
         /// The margin `JAM_TICK_CEILING` reserves. 0.90 × 1.077 = 0.97.
         const ALLOWED_OVERSHOOT: f32 = 1.077;
-        // Every sound a jam table can name: all four kits, every voice, and
+        // Every sound a jam table can name: every kit, every voice, and
         // every note of the bass. The bass is synthesised per rate rather
         // than resampled, so it has no imaging to overshoot — which is
         // exactly why it is in the list: if that ever stops being true the

@@ -2511,6 +2511,11 @@ mod tests {
             cfg.bar.kick = vec![2; 8];
             cfg.bar.snare = vec![2; 8];
             cfg.bar.hat = vec![2; 8];
+            // The open hat is a lane of the pattern too, and it is the one
+            // that RINGS — four ticks against the closed hat's nine tenths
+            // of one — so a normalisation measured without it would be
+            // measured on a quieter bar than the table can hold.
+            cfg.bar.hat_open = vec![2; 8];
             cfg.bar.crash = vec![2; 8];
             compile(&cfg).unwrap()
         };
@@ -2531,7 +2536,7 @@ mod tests {
         }
         assert!(
             peaks.windows(2).any(|w| (w[0] - w[1]).abs() > 1e-3),
-            "all four kits measured the same worst tick ({peaks:?}); one kit is \
+            "every kit measured the same worst tick ({peaks:?}); one kit is \
              being normalised against another's sounds"
         );
     }
