@@ -1530,6 +1530,17 @@ struct CachedParams {
     /// was recorded through whatever device was there then and is being
     /// played out of whatever is there now, so the step is a ratio.
     take_play_pos: f64,
+    /// Has THIS playback already been reported as finished?
+    ///
+    /// A take that has run out keeps running out: the buffer after it, and
+    /// every buffer after that, reads past the end and would raise the
+    /// "it ended" flag again, and the event loop's 50 ms pass would emit
+    /// `take-playback-ended` twenty times a second until the user pressed
+    /// stop. The flag on the handoff is consumed by the reader, so it cannot
+    /// answer "have I said this already?" — only the callback knows which
+    /// playback it is on, so the latch lives here beside `take_play_pos` and
+    /// is cleared where that is, when a new take is installed.
+    take_play_ended: bool,
 }
 
 /// The count-in sound a table asks for, or the beep when there is no table.
@@ -1539,6 +1550,27 @@ struct CachedParams {
 #[inline]
 fn count_in_slot_of(table: Option<&JamTable>) -> Option<crate::jam::JamSlot> {
     table.and_then(|t| t.count_in_slot())
+}
+
+/// Should a buffer that ran off the end of a take raise the "it ended" flag?
+///
+/// The first one does; the ones after it do not. Once playback has run out
+/// it STAYS run out — `sample_at` returns `None` for every buffer after,
+/// forever, and the event loop wakes every 50 ms — so without the latch the
+/// UI is told the take finished twenty times a second until somebody
+/// presses stop. `already` is the callback's own copy, cleared when a new
+/// take is installed, because the flag on the handoff is consumed by the
+/// reader and cannot answer "have I said this already?".
+///
+/// Pure, and on the audio thread, for the reason [`jam_play`] and
+/// [`accent_for`] are: the rule is testable without a sound card.
+#[inline]
+fn should_report_take_end(ran_out: bool, already: &mut bool) -> bool {
+    if !ran_out || *already {
+        return false;
+    }
+    *already = true;
+    true
 }
 
 /// Should this tick be played as an accent (the "high" sound)?
@@ -2793,6 +2825,7 @@ impl MetronomeEngine {
                 take_play: None,
                 take_play_generation: 0,
                 take_play_pos: 0.0,
+                take_play_ended: false,
             };
 
             // ---- Build output stream ----
@@ -2958,6 +2991,9 @@ impl MetronomeEngine {
                         }
                         cached.take_play = incoming;
                         cached.take_play_pos = 0.0;
+                        // A new take (or none) is a new playback, and the
+                        // next time IT runs out is news again.
+                        cached.take_play_ended = false;
                     }
                     take_retire.flush(&take_shared);
 
@@ -2987,8 +3023,9 @@ impl MetronomeEngine {
                             }
                             cached.take_play_pos += step;
                         }
-                        if ended {
-                            // The event thread emits `take-playback-ended`;
+                        if should_report_take_end(ended, &mut cached.take_play_ended) {
+                            // Once per playback, not once per buffer. The
+                            // event thread emits `take-playback-ended`;
                             // saying it here would mean an `emit` on the
                             // audio thread, which locks and allocates.
                             take_shared.note_ended();
@@ -5576,6 +5613,46 @@ mod tests {
             (0, JamBandState::Full),
             "the contract's values for a plain click"
         );
+    }
+
+    /// A TAKE THAT FINISHED SAYS SO ONCE.
+    ///
+    /// The bug this pins: the callback raised the "it ended" flag on every
+    /// buffer after the take ran out, and the event loop's 50 ms pass turned
+    /// each one into a `take-playback-ended`, so the UI was told the take
+    /// had finished twenty times a second for as long as it was left alone.
+    /// Running out is not an event that happens once by itself — it is a
+    /// state the playback stays in — so the "once" has to be a latch.
+    #[test]
+    fn a_take_that_ran_out_is_only_reported_once() {
+        let play = crate::take::TakePlayback {
+            pcm: std::sync::Arc::new(vec![0.1f32; 8]),
+            sample_rate: 48_000,
+        };
+        let mut pos = 0.0f64;
+        let mut ended_latch = false;
+        let mut reports = 0;
+        // Two hundred buffers of eight frames each: the first few are the
+        // take, and every one after it reads past the end.
+        for _ in 0..200 {
+            let mut ran_out = false;
+            for _ in 0..8 {
+                if play.sample_at(pos).is_none() {
+                    ran_out = true;
+                }
+                pos += play.step(48_000);
+            }
+            if should_report_take_end(ran_out, &mut ended_latch) {
+                reports += 1;
+            }
+        }
+        assert_eq!(reports, 1, "one ending, not one per buffer");
+
+        // And a new take installed clears the latch — the callback does that
+        // where it resets `take_play_pos` — so the NEXT one can end too.
+        ended_latch = false;
+        assert!(should_report_take_end(true, &mut ended_latch));
+        assert!(!should_report_take_end(true, &mut ended_latch));
     }
 
     /// The handoff, end to end, without a sound card: the command thread
