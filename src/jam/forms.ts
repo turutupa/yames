@@ -79,3 +79,88 @@ export function sectionStarts(form: JamForm): number[] {
   }
   return starts;
 }
+
+/** A run of bars, 0-based and inclusive at both ends — what a loop is. */
+export type BarRange = { start: number; end: number };
+
+/**
+ * Each section as the range of bars it covers, inclusive.
+ *
+ * Inclusive because that is what `JamPositionCommand.loop` is, and a loop of a
+ * section is the only thing this is for. Converting between half-open and
+ * inclusive at the call site is exactly the off-by-one that would loop three
+ * bars of a four-bar section and be blamed on the engine.
+ */
+export function sectionRanges(form: JamForm): BarRange[] {
+  const ranges: BarRange[] = [];
+  let cursor = 0;
+  for (const length of formSections(form)) {
+    ranges.push({ start: cursor, end: cursor + length - 1 });
+    cursor += length;
+  }
+  return ranges;
+}
+
+/** Which section a bar falls in, 0-based. Out-of-range bars clamp to an end. */
+export function sectionIndexAt(form: JamForm, bar: number): number {
+  const ranges = sectionRanges(form);
+  if (ranges.length === 0) return 0;
+  for (let i = 0; i < ranges.length; i += 1) {
+    if (bar <= ranges[i].end) return i;
+  }
+  return ranges.length - 1;
+}
+
+/**
+ * The section you land on stepping `by` sections from `bar`, wrapping.
+ *
+ * Wrapping rather than stopping: a footswitch pressed on the last section of a
+ * chorus means "round to the top", not "do nothing" — the form is a circle and
+ * the button that walks it should be too.
+ */
+export function stepSection(form: JamForm, bar: number, by: number): BarRange {
+  const ranges = sectionRanges(form);
+  const at = sectionIndexAt(form, bar);
+  const count = ranges.length;
+  return ranges[(((at + by) % count) + count) % count];
+}
+
+// ---------------------------------------------------------------------------
+// Fills
+// ---------------------------------------------------------------------------
+
+/**
+ * The choices the Fills control offers, as `fillEvery` values.
+ *
+ * 0 is the chorus end and nothing else, which is what the contract's
+ * `fillEvery` means when it is absent or zero. "Off" is not in this list
+ * because off is `fills: false` — a separate switch on the record, and the
+ * one the crash on the one hangs off as well.
+ */
+export const JAM_FILL_EVERY_CHOICES: readonly number[] = [0, 4, 8];
+
+/**
+ * Does this bar carry a fill?
+ *
+ * The last bar of the chorus always does when fills are on — that is the
+ * gesture the crash on the next one answers — and `fillEvery` adds every bar
+ * whose 1-BASED number within the chorus is a multiple of it. One-based
+ * because that is what the contract says and what a player counts: "a fill
+ * every four bars" means bars 4, 8 and 12, not bars 5, 9 and 13.
+ */
+export function barHasFill(args: {
+  /** 0-based bar within the chorus. */
+  index: number;
+  /** Bars in the chorus. */
+  total: number;
+  fills: boolean;
+  /** 0 or absent: the last bar only. */
+  fillEvery?: number;
+}): boolean {
+  const { index, total, fills } = args;
+  if (!fills || total <= 0 || index < 0 || index >= total) return false;
+  if (index === total - 1) return true;
+  const every = Math.trunc(args.fillEvery ?? 0);
+  if (every <= 0) return false;
+  return (index + 1) % every === 0;
+}

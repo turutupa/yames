@@ -49,6 +49,19 @@ function screenState(
   };
 }
 
+/** Where the form is being sent. Inert unless a test drives it. */
+function positionState(
+  overrides: Partial<React.ComponentProps<typeof JamView>["position"]> = {},
+): React.ComponentProps<typeof JamView>["position"] {
+  return {
+    loop: null,
+    pendingJump: null,
+    jumpTo: vi.fn(),
+    toggleSectionLoop: vi.fn(),
+    ...overrides,
+  };
+}
+
 function setup(overrides: Partial<React.ComponentProps<typeof JamView>> = {}) {
   const props = {
     jam: jamOf(),
@@ -60,6 +73,7 @@ function setup(overrides: Partial<React.ComponentProps<typeof JamView>> = {}) {
     trainedBpm: null as number | null,
     listening: false,
     screen: screenState(),
+    position: positionState(),
     tapActive: false,
     tapCount: 0,
     tapPulse: false,
@@ -146,6 +160,130 @@ describe("JamView — the form timeline", () => {
       [...container.querySelectorAll(".jam-timeline-name")].map((n) => n.textContent),
     ).toEqual(["A", "A", "B", "A"]);
   });
+
+  it("marks every bar that carries a fill, not only the last one", () => {
+    const marks = (root: HTMLElement) =>
+      [...root.querySelectorAll(".jam-timeline-cell[data-fill] .jam-timeline-number")].map(
+        (n) => n.textContent,
+      );
+
+    const { container, rerender, props } = setup({
+      jam: jamOf({ fills: true, fillEvery: 4 }),
+    });
+    expect(marks(container)).toEqual(["4", "8", "12"]);
+
+    // Eight into twelve does not go, and the chorus end keeps its fill: it is
+    // the one the crash on the next one answers.
+    rerender(<JamView {...props} jam={jamOf({ fills: true, fillEvery: 8 })} />);
+    expect(marks(container)).toEqual(["8", "12"]);
+  });
+});
+
+/**
+ * Moving through the form.
+ *
+ * The timeline stopped being a readout and became the control that says "not
+ * from the top — from the bridge". What is worth pinning is that it asks for
+ * the bar at the next bar line rather than pretending to have moved, and that
+ * the practice tools drawn ahead do not shift when a loop is set.
+ */
+describe("JamView — moving through the form", () => {
+  const cells = (container: HTMLElement) =>
+    [...container.querySelectorAll(".jam-timeline-cell")] as HTMLButtonElement[];
+
+  it("asks for the bar you click", () => {
+    const { container, props } = setup();
+    fireEvent.click(cells(container)[6]);
+    expect(props.position.jumpTo).toHaveBeenCalledWith(6);
+  });
+
+  it("marks the bar it is on the way to without lighting it", () => {
+    // Two bright cells would be two answers to "where am I". The one playing
+    // stays the lit one; the one asked for gets a mark of its own.
+    const { container } = setup({
+      currentBeat: beat(1),
+      isPlaying: true,
+      position: positionState({ pendingJump: 8 }),
+    });
+    const pending = container.querySelectorAll(".jam-timeline-cell[data-pending]");
+    expect(pending).toHaveLength(1);
+    expect(pending[0].textContent).toContain("9");
+    const lit = container.querySelectorAll(".jam-timeline-cell[data-current]");
+    expect(lit).toHaveLength(1);
+    expect(lit[0].textContent).toContain("2");
+  });
+
+  it("says where the take will start while the transport is stopped", () => {
+    setup({ isPlaying: false, position: positionState({ pendingJump: 4 }) });
+    expect(screen.getByText(/starts at bar 5/)).toBeInTheDocument();
+  });
+
+  it("keeps the readout to the bar you are on once it is playing", () => {
+    // With the band running the pending cell says it, and the sentence has a
+    // live bar to report.
+    setup({
+      currentBeat: beat(1),
+      isPlaying: true,
+      position: positionState({ pendingJump: 4 }),
+    });
+    expect(screen.queryByText(/starts at bar/)).not.toBeInTheDocument();
+  });
+
+  it("offers a loop on every section and says which bars are looping", () => {
+    const { container, props } = setup();
+    const loops = container.querySelectorAll(".jam-timeline-loop");
+    expect(loops).toHaveLength(3);
+    fireEvent.click(loops[1]);
+    expect(props.position.toggleSectionLoop).toHaveBeenCalledWith({ start: 4, end: 7 });
+  });
+
+  it("marks the looped bars and names them in the header", () => {
+    const { container } = setup({ position: positionState({ loop: { start: 4, end: 7 } }) });
+    const looped = [...container.querySelectorAll(".jam-timeline-cell[data-looped]")].map(
+      (c) => c.querySelector(".jam-timeline-number")?.textContent,
+    );
+    expect(looped).toEqual(["5", "6", "7", "8"]);
+    expect(screen.getByText("looping bars 5–8")).toBeInTheDocument();
+    // And exactly one section's button reads as pressed.
+    const pressed = [...container.querySelectorAll(".jam-timeline-loop")].filter(
+      (b) => b.getAttribute("aria-pressed") === "true",
+    );
+    expect(pressed).toHaveLength(1);
+  });
+
+  it("leaves the drawn-ahead band states where the chorus put them when a loop is set", () => {
+    // The practice windows are phase-locked to the CHORUS, and a loop does not
+    // start a new chorus. If the timeline ever recomputed them from a
+    // loop-relative bar, a looped bridge would silence a different bar every
+    // time round and the drop-out you counted into would move.
+    const practice = {
+      dropOutEvery: 4,
+      dropOutBars: 1,
+      tradeBars: 0,
+      tempoStep: 0,
+      tempoEveryChoruses: 0,
+    };
+    const jam = jamOf({ practice });
+    const withoutLoop = setup({ jam, currentBeat: beat(0), isPlaying: true });
+    const before = [...withoutLoop.container.querySelectorAll(".jam-timeline-cell")].map((c) =>
+      c.getAttribute("data-band"),
+    );
+    cleanup();
+
+    const withLoop = setup({
+      jam,
+      currentBeat: beat(0),
+      isPlaying: true,
+      position: positionState({ loop: { start: 4, end: 7 } }),
+    });
+    const after = [...withLoop.container.querySelectorAll(".jam-timeline-cell")].map((c) =>
+      c.getAttribute("data-band"),
+    );
+    expect(after).toEqual(before);
+    // And the drop-out really is drawn, or the check above is comparing two
+    // rows of nothing.
+    expect(before.some((state) => state === "silent")).toBe(true);
+  });
 });
 
 describe("JamView — the controls", () => {
@@ -154,14 +292,14 @@ describe("JamView — the controls", () => {
     expect(screen.getByText("92")).toBeInTheDocument();
   });
 
-  it("offers the eight grooves, a ninth card for one of your own, and marks the one that is loaded", () => {
+  it("offers the thirteen grooves, a card for one of your own, and marks the one that is loaded", () => {
     const { container } = setup({ jam: jamOf({ grooveId: "bossa" }) });
     const cards = container.querySelectorAll(".jam-cards-groove .jam-card");
-    // Eight presets and "Make your own". The ninth card is one of the choices
-    // rather than a mode to go and find, which is the difference between an
-    // editor people use and one they read about in a changelog.
-    expect(cards).toHaveLength(9);
-    expect(cards[8].textContent).toContain("Make your own");
+    // Thirteen presets and "Make your own". The last card is one of the
+    // choices rather than a mode to go and find, which is the difference
+    // between an editor people use and one they read about in a changelog.
+    expect(cards).toHaveLength(14);
+    expect(cards[13].textContent).toContain("Make your own");
     const pressed = [...cards].filter((c) => c.getAttribute("aria-pressed") === "true");
     expect(pressed).toHaveLength(1);
     expect(pressed[0].textContent).toContain("Bossa");
@@ -197,9 +335,9 @@ describe("JamView — the controls", () => {
     // up advertising the old one.
     const { container } = setup();
     const glyphs = container.querySelectorAll(".jam-cards-groove .jam-glyph");
-    // Nine: the eight presets, plus the "make your own" card, which draws the
-    // groove that is loaded so it is never a blank square.
-    expect(glyphs).toHaveLength(9);
+    // Fourteen: the thirteen presets, plus the "make your own" card, which
+    // draws the groove that is loaded so it is never a blank square.
+    expect(glyphs).toHaveLength(14);
     // Rock eighths is 4 × 2 ticks over three lanes; the bossa is 4 × 4.
     expect(glyphs[0].querySelectorAll("circle")).toHaveLength(8 * 3);
     expect(glyphs[6].querySelectorAll("circle")).toHaveLength(16 * 3);
@@ -266,12 +404,36 @@ describe("JamView — the controls", () => {
     expect(screen.getByLabelText("More bars")).toBeDisabled();
   });
 
-  it("turns the fills off and on from one switch", () => {
-    const { props } = setup();
-    const fills = screen.getByRole("switch", { name: "Fills" });
-    expect(fills).toHaveAttribute("aria-checked", "true");
-    fireEvent.click(fills);
-    expect(props.onEdit).toHaveBeenCalledWith({ fills: false });
+  it("offers the four fill choices and marks the one the record is on", () => {
+    // Off, the chorus end, every four bars, every eight. Two fields on the
+    // record and one control on the screen: "off, or every eight bars" is one
+    // decision, and the switch it replaced could only say two of the four.
+    const { container } = setup();
+    const groups = [...container.querySelectorAll(".jam-segmented")];
+    const fills = groups.find((g) => g.getAttribute("aria-label") === "Fills")!;
+    const options = [...fills.querySelectorAll(".accent-option")];
+    expect(options.map((o) => o.textContent)).toEqual([
+      "Off",
+      "Chorus end",
+      "Every 4",
+      "Every 8",
+    ]);
+    // The starter jam has fills on and no `fillEvery`, which is the end only.
+    expect(options.filter((o) => o.getAttribute("aria-pressed") === "true")).toHaveLength(1);
+    expect(options[1]).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("writes both fields when the fill choice changes", () => {
+    const { props, rerender } = setup();
+    fireEvent.click(screen.getByText("Every 4"));
+    expect(props.onEdit).toHaveBeenCalledWith({ fills: true, fillEvery: 4 });
+
+    // And off zeroes the count rather than leaving a record that says "no
+    // fills, every four bars" — two readers could disagree about that, and one
+    // of them is the engine.
+    rerender(<JamView {...props} jam={jamOf({ fills: true, fillEvery: 4 })} />);
+    fireEvent.click(screen.getByText("Off"));
+    expect(props.onEdit).toHaveBeenCalledWith({ fills: false, fillEvery: 0 });
   });
 
   it("says what a band through speakers does to the score", () => {

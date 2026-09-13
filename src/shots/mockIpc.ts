@@ -193,6 +193,21 @@ export function installShotMock(shot: Shot, theme: string): void {
    */
   let jamConfig: JamEngineConfig | null = null;
 
+  /**
+   * Where the form has been sent, the way `set_jam_position` sends it.
+   *
+   * Applied at the bar line and never mid-bar, which is the whole rule the
+   * real command is written around. Without it the harness would photograph a
+   * timeline with a loop drawn on it and a lit cell walking straight out of
+   * the loop, which is a picture of the feature not working.
+   */
+  let jamJumpTo: number | null = null;
+  let jamLoop: { start: number; end: number } | null = null;
+  /** Added to the bar the beat count implies, so a jump is a shift not a reset. */
+  let jamBarShift = 0;
+  /** The bar reported on the last beat, so a bar line is detectable. */
+  let jamLastBar: number | null = null;
+
   function beatLoop() {
     clearTimeout(beatTimer);
     if (!STATE.isPlaying) return;
@@ -211,9 +226,23 @@ export function installShotMock(shot: Shot, theme: string): void {
     let bandState: "full" | "hatsOnly" | "silent" = "full";
     if (jamConfig) {
       const formBars = Math.max(1, jamConfig.formBars);
-      const bar = Math.floor(beatCount / total);
-      formBar = bar % formBars;
-      chorus = Math.floor(bar / formBars) + 1;
+      const raw = Math.floor(beatCount / total);
+      // A bar line is the only place the form is allowed to move.
+      if (jamLastBar !== raw) {
+        jamLastBar = raw;
+        const at = (((raw + jamBarShift) % formBars) + formBars) % formBars;
+        if (jamJumpTo !== null) {
+          jamBarShift += jamJumpTo - at;
+          jamJumpTo = null;
+        } else if (jamLoop && at > jamLoop.end) {
+          // Off the end of the loop: back to its first bar. A loop does not
+          // start a new chorus, so only the bar moves.
+          jamBarShift += jamLoop.start - at;
+        }
+      }
+      const bar = raw + jamBarShift;
+      formBar = ((bar % formBars) + formBars) % formBars;
+      chorus = Math.floor(Math.max(0, raw) / formBars) + 1;
       bandState = bandStateForBar({
         formBar,
         chorus,
@@ -340,7 +369,23 @@ export function installShotMock(shot: Shot, theme: string): void {
       jamConfig = (a?.config as JamEngineConfig | null) ?? null;
       // The bar count restarts with the jam, the way the engine's form
       // counter does when a new table arrives.
-      if (!jamConfig) beatCount = 0;
+      if (!jamConfig) {
+        beatCount = 0;
+        jamJumpTo = null;
+        jamLoop = null;
+        jamBarShift = 0;
+        jamLastBar = null;
+      }
+      return null;
+    }
+
+    if (cmd === "set_jam_position") {
+      const command = (a?.command ?? {}) as {
+        jumpTo?: number | null;
+        loop?: { start: number; end: number } | null;
+      };
+      jamJumpTo = typeof command.jumpTo === "number" ? command.jumpTo : null;
+      jamLoop = command.loop ?? null;
       return null;
     }
 
