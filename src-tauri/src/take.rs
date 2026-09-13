@@ -299,6 +299,11 @@ pub struct TakeHandoff {
     /// because the callback must not allocate and the event loop is already
     /// awake every 50 ms.
     ended: AtomicBool,
+    /// Raised by the WRITER thread when a take hits [`TAKE_MAX_SECS`], and
+    /// lowered by the event thread, which turns it into `take-capped`. The
+    /// same shape as `ended` and for the same reason at the far end: the
+    /// event loop is the one thread here that may `emit`.
+    capped: AtomicBool,
     retired: Mutex<Vec<Retired>>,
 }
 
@@ -320,6 +325,7 @@ impl TakeHandoff {
             play: Mutex::new(None),
             play_generation: AtomicU64::new(0),
             ended: AtomicBool::new(false),
+            capped: AtomicBool::new(false),
             retired: Mutex::new(Vec::with_capacity(TAKE_RETIRED_CAP)),
         }
     }
@@ -328,6 +334,12 @@ impl TakeHandoff {
     /// it copying. Command thread only.
     pub fn set_record(&self, ring: Option<Arc<TakeRing>>) {
         self.drain_retired();
+        // A take starting is a take that has not hit the cap. Clearing it
+        // here rather than on the way out means a cap nobody collected
+        // cannot be reported against the NEXT take.
+        if ring.is_some() {
+            self.capped.store(false, Ordering::Release);
+        }
         if let Ok(mut slot) = self.record.lock() {
             *slot = ring;
             // Bumped AFTER the write, so a callback that sees the new
@@ -350,6 +362,16 @@ impl TakeHandoff {
         }
     }
 
+    /// Is the callback still being asked to copy the band somewhere? Only
+    /// the tests ask; the commands know from [`TakeSession`].
+    #[cfg(test)]
+    fn is_recording_into_a_ring(&self) -> bool {
+        self.record
+            .lock()
+            .map(|r| r.is_some())
+            .unwrap_or_else(|e| e.into_inner().is_some())
+    }
+
     /// Is a take playing? The commands need it to refuse to start recording
     /// over the top of one.
     pub fn is_playing_back(&self) -> bool {
@@ -368,6 +390,17 @@ impl TakeHandoff {
     /// Audio thread: say a playback ran off its end.
     pub(crate) fn note_ended(&self) {
         self.ended.store(true, Ordering::Release);
+    }
+
+    /// Event thread: has a take hit the cap since the last time anyone
+    /// asked? Consumes the flag, so `take-capped` is emitted exactly once.
+    pub fn take_capped(&self) -> bool {
+        self.capped.swap(false, Ordering::AcqRel)
+    }
+
+    /// Writer thread: say a take stopped at [`TAKE_MAX_SECS`].
+    fn note_capped(&self) {
+        self.capped.store(true, Ordering::Release);
     }
 
     /// Drop everything the audio thread handed back. Command thread only.
@@ -1006,6 +1039,7 @@ impl TakeSession {
             .map_err(|e| format!("could not open the take for writing: {e}"))?;
 
         let band_for_writer = band_ring.clone();
+        let handoff_for_writer = handoff.clone();
         let stop_for_writer = stop.clone();
         let written_for_writer = written.clone();
         let mic_for_writer = mic.clone();
@@ -1022,7 +1056,6 @@ impl TakeSession {
                     .map(|(_, in_sr)| LinearResampler::new(*in_sr, out_sr));
                 let backlog = (out_sr as f64 * MIC_BACKLOG_SECS) as usize;
                 let cap_samples = TAKE_MAX_SECS * out_sr as u64;
-                let mut capped = false;
 
                 loop {
                     let stopping = stop_for_writer.load(Ordering::Acquire);
@@ -1044,24 +1077,40 @@ impl TakeSession {
                         let already = written_for_writer.load(Ordering::Relaxed);
                         let room = cap_samples.saturating_sub(already) as usize;
                         if room == 0 {
-                            if !capped {
-                                capped = true;
-                                eprintln!(
-                                    "[take] {} reached the {TAKE_MAX_SECS}s cap and stopped \
-                                     growing",
-                                    path_for_writer.display()
-                                );
-                            }
-                        } else {
-                            let n = room.min(band_buf.len());
-                            mix_chunk(&band_buf[..n], &mut mic_ready, &mut mixed);
-                            if let Err(e) = wav.push(&mixed) {
-                                eprintln!("[take] writing stopped: {e}");
-                                break;
-                            }
-                            written_for_writer
-                                .fetch_add(mixed.len() as u64, Ordering::Release);
+                            // THE CAP FINISHES THE TAKE; it does not go on
+                            // quietly throwing audio away. Before this the
+                            // writer sat in its loop with the band still
+                            // being copied into a ring nobody was draining,
+                            // and the only sign the user got was that the
+                            // file had stopped growing — no message, and a
+                            // stop button that appeared to work for as long
+                            // as they left it.
+                            eprintln!(
+                                "[take] {} reached the {TAKE_MAX_SECS}s cap and finished there",
+                                path_for_writer.display()
+                            );
+                            // The callback stops copying, so nothing fills a
+                            // ring with no consumer and the drop counter
+                            // below does not accuse the writer of falling
+                            // behind when it had simply finished.
+                            handoff_for_writer.set_record(None);
+                            // The event loop turns this into `take-capped`;
+                            // the writer may not `emit` any more than the
+                            // audio thread may.
+                            handoff_for_writer.note_capped();
+                            // And the flag `stop_take` reads, so a stop that
+                            // arrives afterwards finds a take already done
+                            // rather than one it has to ask to finish.
+                            stop_for_writer.store(true, Ordering::Release);
+                            break;
                         }
+                        let n = room.min(band_buf.len());
+                        mix_chunk(&band_buf[..n], &mut mic_ready, &mut mixed);
+                        if let Err(e) = wav.push(&mixed) {
+                            eprintln!("[take] writing stopped: {e}");
+                            break;
+                        }
+                        written_for_writer.fetch_add(mixed.len() as u64, Ordering::Release);
                     }
 
                     if stopping && band_buf.is_empty() {
@@ -2024,6 +2073,27 @@ mod tests {
             sent += n;
             std::thread::sleep(std::time::Duration::from_millis(WRITER_TICK_MS + 5));
         }
+        // THE CAP FINISHES THE TAKE AND SAYS SO. Before this the writer
+        // set a `capped` local, logged once and went on looping: the file
+        // stopped growing, the callback went on copying the band into a ring
+        // with no consumer, and the user was told nothing at all. The screen
+        // now hears `take-capped` — this is the flag the event loop turns
+        // into it — and the take is already finalised when it does.
+        let mut waited = 0;
+        while !handoff.take_capped() && waited < 200 {
+            std::thread::sleep(std::time::Duration::from_millis(WRITER_TICK_MS));
+            waited += 1;
+        }
+        assert!(waited < 200, "the cap should have raised the flag");
+        // Consumed, so the screen is told once and not on every pass.
+        assert!(!handoff.take_capped(), "and only once");
+        // And the callback was told to stop copying, so nothing is still
+        // filling a ring nobody drains.
+        assert!(
+            !handoff.is_recording_into_a_ring(),
+            "the cap should have taken the ring away from the callback"
+        );
+
         let take = session.stop(&handoff).unwrap().expect("a take");
         let (pcm, _) = decode_wav_bytes(&fs::read(&take.path).unwrap()).unwrap();
         assert_eq!(pcm.len(), cap, "the take should stop exactly at the cap");
@@ -2032,5 +2102,21 @@ mod tests {
             "a capped take is {TAKE_MAX_SECS} s, not {}",
             take.duration_sec
         );
+    }
+
+    /// A NEW TAKE DOES NOT INHERIT THE LAST ONE'S CAP.
+    #[test]
+    fn a_take_starting_clears_a_cap_nobody_collected() {
+        let handoff = TakeHandoff::new();
+        handoff.note_capped();
+        handoff.set_record(Some(Arc::new(TakeRing::new(16))));
+        assert!(
+            !handoff.take_capped(),
+            "the new take is twenty minutes from its own cap"
+        );
+        // And taking the ring away is not itself a cap.
+        handoff.note_capped();
+        handoff.set_record(None);
+        assert!(handoff.take_capped(), "the cap still has to be reported");
     }
 }

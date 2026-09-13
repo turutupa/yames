@@ -3716,6 +3716,12 @@ impl MetronomeEngine {
                 if take_event.take_ended() {
                     let _ = app_handle.emit("take-playback-ended", ());
                 }
+                // And a take that ran into the twenty-minute cap. Raised by
+                // the WRITER thread rather than the callback, but read here
+                // for the same reason: this is the thread that may emit.
+                if take_event.take_capped() {
+                    let _ = app_handle.emit("take-capped", ());
+                }
                 let notif = match rx.recv_timeout(Duration::from_millis(50)) {
                     Ok(n) => n,
                     Err(mpsc::RecvTimeoutError::Timeout) => {
