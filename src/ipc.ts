@@ -1228,3 +1228,8 @@ export async function stopTakePlayback(): Promise<void> {
 export function onTakePlaybackEnded(callback: () => void) {
   return listen<null>("take-playback-ended", () => callback());
 }
+
+/** Bytes the takes directory holds, across every jam. A fact about the disk, not about a take. */
+export async function takesDirSize(): Promise<number> {
+  return invoke("takes_dir_size");
+}

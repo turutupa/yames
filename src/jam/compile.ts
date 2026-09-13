@@ -246,7 +246,9 @@ export function jamKeysLine(
     style: jamKeysStyle(jam),
     meter: { beatsPerBar: groove.beatsPerBar, ticksPerBeat: groove.ticksPerBeat },
     previous,
-    gain: jam.mix?.keys ?? 1,
+    // The lane's volume travels once, in `mix.keys`; the engine multiplies
+    // `gain` and `mix.keys`, so sending it here too applied it squared.
+    gain: 1,
   });
 }
 
