@@ -1276,6 +1276,24 @@ impl TakeSession {
     /// Finish the take and write its sidecar. `None` when nothing was
     /// recording, which is not an error: a stop with no take running is what
     /// a UI sends when the user pressed stop twice.
+    /// Samples the writer has committed so far. Tests wait on this instead
+    /// of on the clock, because a loaded machine schedules the writer when
+    /// it likes and a sleep only ever guessed.
+    #[cfg(test)]
+    fn written_samples(&self) -> u64 {
+        self.active
+            .as_ref()
+            .map_or(0, |a| a.written.load(Ordering::Acquire))
+    }
+
+    /// Has the writer decided the take is over (the cap, a device change)?
+    #[cfg(test)]
+    fn writer_finished(&self) -> bool {
+        self.active
+            .as_ref()
+            .map_or(true, |a| a.stop.load(Ordering::Acquire))
+    }
+
     pub fn stop(&mut self, handoff: &SharedTake) -> Result<Option<JamTake>, String> {
         let Some(mut active) = self.active.take() else {
             return Ok(None);
@@ -1367,6 +1385,19 @@ mod tests {
         let _ = fs::remove_dir_all(&base);
         fs::create_dir_all(&base).unwrap();
         base
+    }
+
+    /// Poll a fact for up to four seconds, two orders of magnitude past
+    /// what the writer needs even on a machine running the whole suite.
+    fn wait_until(what: &str, mut ready: impl FnMut() -> bool) {
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(4);
+        while !ready() {
+            assert!(
+                std::time::Instant::now() < deadline,
+                "waited four seconds for {what}"
+            );
+            std::thread::sleep(std::time::Duration::from_millis(2));
+        }
     }
 
     // ---- The ring ----
@@ -2244,25 +2275,29 @@ mod tests {
 
         for _ in 0..10 {
             band_ring.push(&[0.5f32; 480]);
-            std::thread::sleep(std::time::Duration::from_millis(WRITER_TICK_MS));
         }
+        // Wait for the writer to have committed all of it. On the clock this
+        // was a guess that lost under a loaded test run: the writer had
+        // drained only part of the ring when the rate moved, and the file
+        // came up short of what the test had pushed.
+        wait_until("the writer commits the band", || session.written_samples() >= 4_800);
 
         // The user plugs in an interface that runs at 44.1 kHz.
         watch.store(44_100, Ordering::Release);
-        std::thread::sleep(std::time::Duration::from_millis(WRITER_TICK_MS * 4));
+        wait_until("the writer notices the device change", || session.writer_finished());
 
         // The callback carries on for a moment before anyone stops it; none
         // of it may reach the file.
         for _ in 0..10 {
             band_ring.push(&[0.5f32; 480]);
-            std::thread::sleep(std::time::Duration::from_millis(2));
         }
 
         let take = session.stop(&handoff).unwrap().expect("a take");
         let (pcm, sr) = decode_wav_bytes(&fs::read(&take.path).unwrap()).unwrap();
         assert_eq!(sr, 48_000, "the take is what its header says it is");
-        assert!(
-            (4_800..9_600).contains(&pcm.len()),
+        assert_eq!(
+            pcm.len(),
+            4_800,
             "the take should end at the device change, and it is {} samples",
             pcm.len()
         );
