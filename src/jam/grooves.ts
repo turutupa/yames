@@ -351,3 +351,113 @@ export function grooveById(id: string): Groove {
 export function grooveTickCount(g: Pick<Groove, "beatsPerBar" | "ticksPerBeat">): number {
   return g.beatsPerBar * g.ticksPerBeat;
 }
+
+/** The id the rule groove answers to, so a card can say which one is playing. */
+export const RULE_GROOVE_ID = "rule";
+
+/**
+ * How far apart two eighths are at this resolution.
+ *
+ * Sixteenths give two ticks to an eighth, eighths give one, and a triplet beat
+ * gives the shuffle's long-short — which is what an eighth IS in a triplet
+ * feel, and the reason this rounds rather than refusing. A beat with one tick
+ * has no eighths to play, so the figure lands on the beat.
+ */
+function eighthStep(ticksPerBeat: GrooveTicks): number {
+  return ticksPerBeat >= 2 ? Math.round(ticksPerBeat / 2) : 1;
+}
+
+/**
+ * A drummer for a meter nobody wrote a groove for (JAM_MODE §4.1).
+ *
+ * Thirteen grooves is thirteen grooves, and none of them is in 7/8. The
+ * alternative to a rule is a jam in seven with no drummer in it, so: **kick on
+ * the first beat of each group, snare on the last beat of every group of two
+ * or more, hats on every tick.** That is not a groove anyone would name, and
+ * it is exactly what a drummer sight-reading an odd bar plays — the groups are
+ * the bar's own accents, and putting the kick on them is what makes 3+2+2
+ * audible as 3+2+2 rather than as seven of something.
+ *
+ * A group of ONE gets a kick and no snare: a backbeat inside a single beat
+ * would land on the same tick as the kick and read as a flam rather than as
+ * time.
+ *
+ * The fill is snare eighths over the LAST GROUP, with the other lanes out of
+ * the way — the same shape `fillFor` gives the written grooves, measured in
+ * the bar's own last group rather than in two beats, because two beats of a
+ * 3+2+2 bar is a group and a half and would start the fill mid-group.
+ *
+ * `beatGroups` is the metronome's own meter array ([3, 2, 2] for 7/8), so a
+ * jam and the metronome tab mean the same thing by "the meter".
+ */
+export function ruleGroove(beatGroups: number[], ticksPerBeat: GrooveTicks): Groove {
+  // Dropped, not clamped: a group of 0 in a saved meter is junk, and turning
+  // it into a group of 1 would silently lengthen the bar rather than ignore
+  // the entry that made no sense.
+  const groups = beatGroups
+    .map((n) => Math.trunc(n))
+    .filter((n) => Number.isFinite(n) && n > 0);
+  const safe = groups.length > 0 ? groups : [4];
+  const beatsPerBar = safe.reduce((sum, n) => sum + n, 0);
+  const length = beatsPerBar * ticksPerBeat;
+
+  const bar: JamPattern = {
+    kick: silent(length),
+    snare: silent(length),
+    hat: silent(length),
+    ride: silent(length),
+    crash: silent(length),
+  };
+
+  let beat = 0;
+  for (const group of safe) {
+    // The group's first beat is where the bar leans, so it takes the kick and
+    // the accent — this is the tick the engine would accent anyway.
+    bar.kick[beat * ticksPerBeat] = 2;
+    // The backbeat, as late in the group as there is room for one.
+    if (group >= 2) bar.snare[(beat + group - 1) * ticksPerBeat] = 1;
+    beat += group;
+  }
+  // The subdivision, accented where a group opens, so the hats spell the
+  // grouping out even when the kick is buried under the band.
+  let cursor = 0;
+  for (const group of safe) {
+    for (let i = 0; i < group * ticksPerBeat; i++) {
+      const tick = cursor + i;
+      bar.hat[tick] = i === 0 ? 2 : 1;
+    }
+    cursor += group * ticksPerBeat;
+  }
+
+  const lastGroup = safe[safe.length - 1];
+  const fillFrom = (beatsPerBar - lastGroup) * ticksPerBeat;
+  const fill: JamPattern = {
+    kick: [...bar.kick],
+    snare: [...bar.snare],
+    hat: [...bar.hat],
+    ride: [...bar.ride],
+    crash: [...bar.crash],
+  };
+  const step = eighthStep(ticksPerBeat);
+  for (let tick = fillFrom; tick < length; tick++) {
+    fill.kick[tick] = 0;
+    fill.hat[tick] = 0;
+    fill.ride[tick] = 0;
+    fill.crash[tick] = 0;
+    const into = tick - fillFrom;
+    // An accent on each beat of the group with the eighths filled in between,
+    // which is the plainest fill there is and the one that reads as "here
+    // comes the top" rather than as a solo.
+    fill.snare[tick] =
+      into % ticksPerBeat === 0 ? 2 : into % step === 0 ? 1 : 0;
+  }
+
+  return {
+    id: RULE_GROOVE_ID,
+    nameKey: `jam.groove.${RULE_GROOVE_ID}`,
+    beatsPerBar,
+    ticksPerBeat,
+    bar,
+    fill,
+  };
+}

@@ -24,17 +24,22 @@
  */
 import { applyFeel } from "./feel";
 import { formBars } from "./forms";
-import { grooveById } from "./grooves";
+import { grooveById, ruleGroove } from "./grooves";
 import { bassLineFor, bassStyleForGroove } from "./bassline";
 import { bassChordFrom } from "./bandChord";
-import { chordsForForm, parseKey } from "./harmony";
+import { parseKey } from "./harmony";
+import { chordsForJam } from "./progression";
+import { keysLineFor } from "./keysline";
 import { practiceConfigFrom } from "./practice";
 import { JAM_INTENSITY_GAIN, JAM_LANES } from "./types";
 import type { Key } from "./harmony";
 import type {
   Jam,
   JamEngineConfig,
+  JamKeysLine,
+  JamKeysStyle,
   JamLevel,
+  JamMix,
   JamPattern,
   JamBassLine,
 } from "./types";
@@ -42,18 +47,24 @@ import type {
 /** A jam with no readable key is read as C major rather than as no key. */
 const DEFAULT_KEY: Key = { root: 0, mode: "major" };
 
-export type JamBand = { drums: boolean; bass: boolean };
+export type JamBand = { drums: boolean; bass: boolean; keys?: boolean };
 
 /** Drums and nobody else, for a caller that has no lineup to hand. */
-const DRUMS_ONLY: JamBand = { drums: true, bass: false };
+const DRUMS_ONLY: JamBand = { drums: true, bass: false, keys: false };
 
 export type JamCompileOptions = {
   /**
-   * Which bar of the chorus to compile the BASS for, 0-based. Everything else
-   * in the config is the same on every bar. Default 0, which is what a jam
-   * that has not started yet is about to play.
+   * Which bar of the chorus to compile the BASS and the KEYS for, 0-based.
+   * Everything else in the config is the same on every bar. Default 0, which
+   * is what a jam that has not started yet is about to play.
    */
   formBar?: number;
+  /**
+   * The voicing the keys player's hand was last on, so the next bar leads
+   * away from it rather than jumping back to root position. Absent on the
+   * first bar of a take.
+   */
+  previousVoicing?: number[] | null;
   /**
    * Who is in the band when the record does not say — the lineup for the
    * instrument you play (`lineupFor` in `./lineup`).
@@ -78,14 +89,19 @@ export function jamKey(jam: Jam): Key {
 }
 
 /**
- * The groove a jam plays — the one drawn in the editor if there is one, the
- * preset otherwise, with the feel already applied to whichever it is.
+ * The groove as it is WRITTEN — the one drawn in the editor if there is one,
+ * the preset otherwise, with the feel already applied to whichever it is.
  *
  * A custom groove is not a variant of the preset it started from; it replaces
  * it. Feel and intensity still sit on top, because those are how the same
  * groove is played rather than which groove it is.
+ *
+ * This is the groove's OWN meter, before `jam.meter` gets a say. Nearly every
+ * caller wants `jamGroove` below instead; this one exists because the meter
+ * control has to be able to say what the groove was written for in order to
+ * offer "the groove's own".
  */
-export function jamGroove(jam: Jam): {
+export function jamWrittenGroove(jam: Jam): {
   beatsPerBar: number;
   ticksPerBeat: 1 | 2 | 3 | 4 | 6;
   bar: JamPattern;
@@ -98,6 +114,53 @@ export function jamGroove(jam: Jam): {
     ticksPerBeat: preset.ticksPerBeat,
     bar: preset.bar,
     fill: preset.fill,
+  };
+}
+
+/** The beat groups a jam runs in: the meter it was given, or the groove's own. */
+export function jamBeatGroups(jam: Jam): number[] {
+  const chosen = jam.meter?.beatGroups?.filter((n) => Number.isFinite(n) && n > 0);
+  if (chosen && chosen.length > 0) return chosen.map((n) => Math.trunc(n));
+  return [jamWrittenGroove(jam).beatsPerBar];
+}
+
+/**
+ * Does the groove fit the meter the jam is set to?
+ *
+ * Both halves have to agree — a shuffle is four beats of TRIPLETS, and asking
+ * for it in four beats of sixteenths is as much a mismatch as asking for it in
+ * seven. When this is false the drummer plays the rule instead, and the setup
+ * screen says so in those words rather than silently swapping the groove out
+ * from under the card that still looks selected.
+ */
+export function jamGrooveFitsMeter(jam: Jam): boolean {
+  if (!jam.meter) return true;
+  const written = jamWrittenGroove(jam);
+  const beats = jamBeatGroups(jam).reduce((sum, n) => sum + n, 0);
+  return beats === written.beatsPerBar && jam.meter.ticksPerBeat === written.ticksPerBeat;
+}
+
+/**
+ * The groove the jam actually plays.
+ *
+ * The written one where the meter fits it, and the rule groove where it does
+ * not (JAM_MODE §4.1: "odd meters fall back to a rule … so a 7/8 jam still has
+ * a drummer"). Not a refusal and not a silent re-bar: the bar the engine gets
+ * is the meter you asked for, and the drummer plays something honest in it.
+ */
+export function jamGroove(jam: Jam): {
+  beatsPerBar: number;
+  ticksPerBeat: 1 | 2 | 3 | 4 | 6;
+  bar: JamPattern;
+  fill: JamPattern | null;
+} {
+  if (jamGrooveFitsMeter(jam)) return jamWrittenGroove(jam);
+  const rule = ruleGroove(jamBeatGroups(jam), jam.meter!.ticksPerBeat);
+  return {
+    beatsPerBar: rule.beatsPerBar,
+    ticksPerBeat: rule.ticksPerBeat,
+    bar: rule.bar,
+    fill: rule.fill,
   };
 }
 
@@ -126,7 +189,11 @@ export function jamBassLine(jam: Jam, formBar: number, lineup?: JamBand): JamBas
   if (bars <= 0) return null;
 
   const key = jamKey(jam);
-  const chords = chordsForForm(jam.form.kind, bars, key);
+  // The changes the jam is actually on: yours where you typed one, the form's
+  // everywhere else. The bass follows the progression for the same reason the
+  // timeline does — there is one set of changes, and a bass playing the
+  // form's while the screen shows yours is the worst bug this mode could have.
+  const chords = chordsForJam(jam.form, key, jam.progression);
   const index = ((Math.trunc(formBar) % bars) + bars) % bars;
 
   return bassLineFor({
@@ -144,6 +211,54 @@ export function jamBassLine(jam: Jam, formBar: number, lineup?: JamBand): JamBas
     style: bassStyleForGroove(jam.customGroove ? "" : jam.grooveId),
     barIndex: index,
   });
+}
+
+/** How the keys comp on this jam. Absent: pads, the quieter of the two. */
+export function jamKeysStyle(jam: Jam): JamKeysStyle {
+  return jam.keysStyle === "stabs" ? "stabs" : "pads";
+}
+
+/**
+ * The keys for one bar of the form, or null when nobody is on them.
+ *
+ * Like the bass, per bar and not per jam: the voicing is of the chord in THIS
+ * bar. `previous` is the voicing the last bar struck, so the hand moves from
+ * where it was rather than resetting to root position every bar line — the
+ * caller (`useJamSession`) remembers it across the sends.
+ */
+export function jamKeysLine(
+  jam: Jam,
+  formBar: number,
+  lineup?: JamBand,
+  previous?: number[] | null,
+): JamKeysLine | null {
+  if (!jamBand(jam, lineup).keys) return null;
+  const bars = formBars(jam.form);
+  if (bars <= 0) return null;
+  const groove = jamGroove(jam);
+  const chords = chordsForJam(jam.form, jamKey(jam), jam.progression);
+  const index = ((Math.trunc(formBar) % bars) + bars) % bars;
+  const chord = chords[index];
+  if (!chord) return null;
+  return keysLineFor({
+    chord,
+    groove: groove.bar,
+    style: jamKeysStyle(jam),
+    meter: { beatsPerBar: groove.beatsPerBar, ticksPerBeat: groove.ticksPerBeat },
+    previous,
+    gain: jam.mix?.keys ?? 1,
+  });
+}
+
+/** Per-lane volume, clamped to what the contract allows. Absent: 1.0 each. */
+export function jamMix(jam: Jam): JamMix {
+  const clamp = (value: number | undefined) =>
+    Math.max(0, Math.min(1.5, Number.isFinite(value) ? (value as number) : 1));
+  return {
+    drums: clamp(jam.mix?.drums),
+    bass: clamp(jam.mix?.bass),
+    keys: clamp(jam.mix?.keys),
+  };
 }
 
 export function compileJam(jam: Jam, options: JamCompileOptions = {}): JamEngineConfig {
@@ -174,11 +289,40 @@ export function compileJam(jam: Jam, options: JamCompileOptions = {}): JamEngine
     // remember not to act on: `fill` is already null there, and two switches
     // that have to agree is one too many.
     fillEvery: fill ? Math.max(0, Math.trunc(jam.fillEvery ?? 0)) : 0,
+    keys: jamKeysLine(jam, options.formBar ?? 0, options.lineup, options.previousVoicing),
+    mix: jamMix(jam),
+    // The sticks are the drummer counting the band in on the rim, which is
+    // what a drummer does; the beep is the drill's, and it is what you want
+    // when the kit is what you are trying to hear.
+    countInSound: jam.countInSound === "sticks" ? "sticks" : "beep",
   };
 }
 
-/** The meter a jam runs in — what the UI sets on the engine before sending. */
-export function jamMeter(jam: Jam): { beatsPerBar: number; ticksPerBeat: 1 | 2 | 3 | 4 | 6 } {
+/**
+ * The meter a jam runs in — what the UI sets on the engine before sending.
+ *
+ * `beatGroups` is the meter as the metronome's own editor writes it ([3, 2, 2]
+ * for 7/8) and `beatsPerBar` is their sum, which is what the contract's check
+ * is against. Both, rather than one derived at each call site: the engine is
+ * told the GROUPS, because a 7/8 bar accented 3+2+2 and one accented 2+2+3 are
+ * the same seven ticks and very different music, and the jam that asked for
+ * one must not get the other.
+ */
+export function jamMeter(jam: Jam): {
+  beatsPerBar: number;
+  ticksPerBeat: 1 | 2 | 3 | 4 | 6;
+  beatGroups: number[];
+} {
   const groove = jamGroove(jam);
-  return { beatsPerBar: groove.beatsPerBar, ticksPerBeat: groove.ticksPerBeat };
+  const groups = jamBeatGroups(jam);
+  const summed = groups.reduce((sum, n) => sum + n, 0);
+  // The groove is the authority on the bar's LENGTH — when the meter did not
+  // fit, `jamGroove` already returned the rule groove built for these very
+  // groups, so the two agree. When they somehow do not, the table wins,
+  // because the table is what the engine checks.
+  return {
+    beatsPerBar: groove.beatsPerBar,
+    ticksPerBeat: groove.ticksPerBeat,
+    beatGroups: summed === groove.beatsPerBar ? groups : [groove.beatsPerBar],
+  };
 }

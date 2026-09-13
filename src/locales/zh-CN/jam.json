@@ -33,7 +33,52 @@
       "oneDrop": "雷鬼 One Drop",
       "train": "火车节奏",
       "boomBap": "Boom Bap",
-      "fourOnFloor": "四踩底鼓"
+      "fourOnFloor": "四踩底鼓",
+      "rule": "通用规则"
+    },
+    "changes": {
+      "edit": "编辑和弦",
+      "done": "完成",
+      "hint": "点一个小节来设定它的和弦。长按也可以，不必进入这个模式。",
+      "pickFor": "第 {{bar}} 小节",
+      "root": "根音",
+      "quality": "和弦类型",
+      "major": "大三",
+      "asTheForm": "跟着曲式"
+    },
+    "meter": {
+      "label": "拍号",
+      "grooves": "律动自带的",
+      "ticks": "每拍的格数",
+      "doesNotFit": "{{groove}} 不适合 {{meter}}，鼓手按通用规则演奏。"
+    },
+    "mix": {
+      "forLane": "{{lane}} 音量"
+    },
+    "keysStyle": {
+      "label": "伴奏",
+      "pads": "整小节延音",
+      "stabs": "在反拍上，跟着军鼓",
+      "padsShort": "铺底",
+      "stabsShort": "顿奏"
+    },
+    "countInSound": {
+      "label": "预备拍",
+      "beep": "提示音",
+      "sticks": "鼓棒"
+    },
+    "cues": {
+      "label": "语音提示",
+      "hint": "预备拍、段落和“该你四小节”都会念出来，你的眼睛可以一直看着指板。",
+      "noVoice": "需要教练语音。请在设置里安装；在那之前提示只显示在屏幕上。",
+      "n1": "一",
+      "n2": "二",
+      "n3": "三",
+      "n4": "四",
+      "n5": "五",
+      "n6": "六",
+      "n7": "七",
+      "n8": "八"
     },
     "feel": {
       "label": "律动",

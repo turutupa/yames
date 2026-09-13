@@ -991,6 +991,234 @@
   border-style: dashed;
 }
 
+/* ── Your own changes ──────────────────────────────────────────────────────
+   Edit mode has to look like a different mode without redrawing the
+   timeline: the cells are the same cells and the place in the form still has
+   to be readable while you are editing it. So the cell keeps everything it
+   had and gains an outline, and the bar being picked gains the accent. */
+
+.jam-timeline-cell[data-editable] {
+  cursor: text;
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--text-primary) 22%, transparent);
+}
+
+.jam-timeline-cell[data-editable]:not(:disabled):hover {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.jam-timeline-cell[data-editing] {
+  border-style: solid;
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+/* A bar whose chord is yours rather than the form's. A dot, not a colour:
+   the cell already says four things with colour (current, fill, band state,
+   loop) and a fifth would be a code nobody could read. */
+.jam-timeline-cell[data-own-chord] .jam-timeline-chord::after {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  margin-left: 3px;
+  border-radius: 50%;
+  vertical-align: middle;
+  background: var(--accent);
+}
+
+.jam-chord-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md, 10px);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  background: color-mix(in srgb, var(--accent) 4%, transparent);
+}
+
+.jam-chord-picker-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.jam-chord-picker-now {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.jam-chord-qualities {
+  display: grid;
+  grid-template-columns: repeat(15, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.jam-chord-quality {
+  height: 30px;
+  padding: 0 2px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+  background: color-mix(in srgb, var(--text-primary) 3%, transparent);
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jam-chord-quality.active {
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+}
+
+.jam-chord-clear {
+  align-self: flex-start;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px dashed color-mix(in srgb, var(--text-primary) 20%, transparent);
+  background: none;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-faint);
+}
+
+.jam-chord-clear.active {
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  color: var(--accent);
+}
+
+.jam-link.active {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── The meter ─────────────────────────────────────────────────────────── */
+
+.jam-meters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.jam-meter {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+  background: color-mix(in srgb, var(--text-primary) 3%, transparent);
+  cursor: pointer;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.jam-meter.active {
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+}
+
+/* Said plainly, and not in red: the drummer playing the rule is a working
+   jam, not an error. */
+.jam-meter-note {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--text-faint);
+}
+
+/* ── The mix, and the keys player ──────────────────────────────────────── */
+
+.jam-band-volume {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 118px;
+  flex-shrink: 0;
+}
+
+.jam-band-volume input[type="range"] {
+  width: 82px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* A slider for somebody who is not in the band would be a control that does
+   nothing, which is worse than no control. */
+.jam-band-volume input[type="range"]:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.jam-band-volume-value {
+  width: 26px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--text-faint);
+}
+
+.jam-band-extra {
+  flex-shrink: 0;
+}
+
+.jam-keys-style {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.jam-keys-style-btn {
+  height: 24px;
+  padding: 0 9px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+  background: none;
+  cursor: pointer;
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--text-faint);
+}
+
+.jam-keys-style-btn.active {
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  color: var(--accent);
+}
+
+.jam-keys-style-btn:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* ── The spoken cues ───────────────────────────────────────────────────── */
+
+.jam-cues {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* The caption is load-bearing, not decoration: without a voice installed the
+   switch does nothing, and this is the only thing that says why. */
+.jam-cues-hint {
+  max-width: 340px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--text-faint);
+}
+
 @media (max-width: 1279px) {
   /* Four kits side by side stop being readable before the grooves do. */
   .jam-cards-kit {
@@ -1052,5 +1280,21 @@
 
   .jam-timeline-group {
     flex: 1 1 180px;
+  }
+
+  /* Fifteen qualities in a row stop being tappable well before the roots do,
+     so they wrap into as many rows as they need. */
+  .jam-chord-qualities {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+
+  /* The band row runs out of width here, and the mix is the part that can
+     move: the name, what they are playing and the mute all have to stay. */
+  .jam-band-volume {
+    width: 84px;
+  }
+
+  .jam-band-volume input[type="range"] {
+    width: 52px;
   }
 }

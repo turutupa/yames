@@ -33,7 +33,52 @@
       "oneDrop": "One drop",
       "train": "Train beat",
       "boomBap": "Boom bap",
-      "fourOnFloor": "Four on the floor"
+      "fourOnFloor": "Four on the floor",
+      "rule": "La regola"
+    },
+    "changes": {
+      "edit": "Modifica la griglia",
+      "done": "Fatto",
+      "hint": "Tocca una battuta per sceglierne l'accordo. Una pressione lunga funziona senza la modalità.",
+      "pickFor": "Battuta {{bar}}",
+      "root": "Fondamentale",
+      "quality": "Tipo",
+      "major": "magg",
+      "asTheForm": "Come la forma"
+    },
+    "meter": {
+      "label": "Metro",
+      "grooves": "Quello del groove",
+      "ticks": "Tick per movimento",
+      "doesNotFit": "{{groove}} non entra in {{meter}}; il batterista suona la regola."
+    },
+    "mix": {
+      "forLane": "Volume {{lane}}"
+    },
+    "keysStyle": {
+      "label": "Accompagnamento",
+      "pads": "tenuto per tutta la battuta",
+      "stabs": "in levare, con il rullante",
+      "padsShort": "Tappeti",
+      "stabsShort": "Stab"
+    },
+    "countInSound": {
+      "label": "Conteggio",
+      "beep": "Bip",
+      "sticks": "Bacchette"
+    },
+    "cues": {
+      "label": "Segnali parlati",
+      "hint": "Il conteggio, la sezione e «i tuoi quattro», detti ad alta voce — così gli occhi restano sul manico.",
+      "noVoice": "Serve la voce del coach. Installala nelle Impostazioni; fino ad allora i segnali restano sullo schermo.",
+      "n1": "uno",
+      "n2": "due",
+      "n3": "tre",
+      "n4": "quattro",
+      "n5": "cinque",
+      "n6": "sei",
+      "n7": "sette",
+      "n8": "otto"
     },
     "feel": {
       "label": "Feel",

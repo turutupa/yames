@@ -93,6 +93,52 @@
   letter-spacing: 0.3em;
 }
 
+/* ── Zen over a jam (JAM_MODE §4.7) ────────────────────────────────────────
+   The chord and the beat, nothing else. The chord takes the tempo's own
+   typography — the same weight and the same accent when the band is
+   playing — because it is the same thing in the same place: the one number
+   or word the screen exists to show you from across a room.
+
+   A little smaller than 10rem, and for a reason rather than for taste: the
+   tempo is three digits and a chord can be seven characters ("Bbm7b5"). At
+   the BPM size that runs off a laptop screen at the width the tab is
+   usually open at. */
+
+.fs-jam-chord {
+  font-size: 7.5rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text-primary);
+  transition: color 0.2s;
+}
+
+.fullscreen-view[data-playing="true"] .fs-jam-chord {
+  color: var(--accent);
+}
+
+.fs-jam-next {
+  min-height: 1.6em;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.fs-jam-where {
+  display: flex;
+  gap: 1.6em;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 899px) {
+  .fs-jam-chord {
+    font-size: 4.5rem;
+  }
+}
+
 .fs-warmup-label {
   font-size: 1rem;
   color: var(--text-muted);

@@ -33,7 +33,52 @@
       "oneDrop": "One drop",
       "train": "Train beat",
       "boomBap": "Boom bap",
-      "fourOnFloor": "Four on the floor"
+      "fourOnFloor": "Four on the floor",
+      "rule": "La regla"
+    },
+    "changes": {
+      "edit": "Editar la armonía",
+      "done": "Listo",
+      "hint": "Toca un compás para poner su acorde. Una pulsación larga funciona sin el modo.",
+      "pickFor": "Compás {{bar}}",
+      "root": "Fundamental",
+      "quality": "Tipo",
+      "major": "may",
+      "asTheForm": "Como la forma"
+    },
+    "meter": {
+      "label": "Compás",
+      "grooves": "El del groove",
+      "ticks": "Pulsos por tiempo",
+      "doesNotFit": "{{groove}} no entra en {{meter}}; el batería toca la regla."
+    },
+    "mix": {
+      "forLane": "Volumen de {{lane}}"
+    },
+    "keysStyle": {
+      "label": "Acompañamiento",
+      "pads": "sostenido durante todo el compás",
+      "stabs": "a contratiempo, con la caja",
+      "padsShort": "Pads",
+      "stabsShort": "Golpes"
+    },
+    "countInSound": {
+      "label": "Cuenta de entrada",
+      "beep": "Pitido",
+      "sticks": "Baquetas"
+    },
+    "cues": {
+      "label": "Avisos hablados",
+      "hint": "La cuenta, la sección y «tus cuatro», dichos en voz alta, para que no apartes la vista del mástil.",
+      "noVoice": "Necesita la voz del coach. Instálala en Ajustes; hasta entonces los avisos se quedan en pantalla.",
+      "n1": "uno",
+      "n2": "dos",
+      "n3": "tres",
+      "n4": "cuatro",
+      "n5": "cinco",
+      "n6": "seis",
+      "n7": "siete",
+      "n8": "ocho"
     },
     "feel": {
       "label": "Feel",

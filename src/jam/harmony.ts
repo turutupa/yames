@@ -301,6 +301,114 @@ export function chordName(chord: Chord, key: Key): string {
   return `${noteName(chord.root, spellingForKey(key))}${QUALITY_SUFFIX[chord.quality]}`;
 }
 
+/**
+ * Every spelling of a quality this parser accepts, longest first.
+ *
+ * `QUALITY_SUFFIX` is what we WRITE; this is what we agree to read, and the
+ * two are deliberately not the same size. A chord typed by a person arrives
+ * from a real chart: the minor seventh is `m7` in a rock book, `-7` in a jazz
+ * one and `min7` in a hymnal, the major seventh is `maj7` or `Δ` or `M7`, and
+ * the diminished is `dim` or `°`. All of them are the same chord, and a
+ * picker that only understood its own spelling would reject the chart the
+ * user is reading from.
+ *
+ * Longest first is load-bearing rather than tidy: `m7b5` starts with `m7`
+ * which starts with `m`, so a shortest-first walk would read `Am7b5` as A
+ * minor with `7b5` left over. The list is sorted by length at module load, so
+ * an entry appended in the wrong place still matches in the right order.
+ */
+const QUALITY_SPELLINGS: ReadonlyArray<readonly [string, ChordQuality]> = [
+  ["", "maj"],
+  ["maj", "maj"],
+  ["M", "maj"],
+  ["m", "min"],
+  ["min", "min"],
+  ["-", "min"],
+  ["dim", "dim"],
+  ["°", "dim"],
+  ["o", "dim"],
+  ["aug", "aug"],
+  ["+", "aug"],
+  ["7", "7"],
+  ["dom7", "7"],
+  ["maj7", "maj7"],
+  ["Maj7", "maj7"],
+  ["M7", "maj7"],
+  ["Δ", "maj7"],
+  ["Δ7", "maj7"],
+  ["m7", "m7"],
+  ["min7", "m7"],
+  ["-7", "m7"],
+  ["m7b5", "m7b5"],
+  ["min7b5", "m7b5"],
+  ["-7b5", "m7b5"],
+  ["ø", "m7b5"],
+  ["ø7", "m7b5"],
+  ["half-dim", "m7b5"],
+  ["dim7", "dim7"],
+  ["°7", "dim7"],
+  ["o7", "dim7"],
+  ["sus2", "sus2"],
+  ["sus4", "sus4"],
+  ["sus", "sus4"],
+  ["6", "6"],
+  ["maj6", "6"],
+  ["m6", "m6"],
+  ["min6", "m6"],
+  ["-6", "m6"],
+  ["add9", "add9"],
+  ["9", "9"],
+  ["dom9", "9"],
+];
+
+/** The same list, longest spelling first, so the walk below is greedy. */
+const QUALITY_SPELLINGS_BY_LENGTH = [...QUALITY_SPELLINGS].sort(
+  (a, b) => b[0].length - a[0].length,
+);
+
+/**
+ * `chordName` read backwards: "Bb" → B♭ major, "A#m7" → A♯ minor seventh.
+ *
+ * The inverse of `chordName` in the only sense that matters — every chord
+ * `chordName` can write comes back as the chord it was written from
+ * (`harmony.test.ts` round-trips all twelve roots against all fifteen
+ * qualities) — and rather more besides, because the text this reads is
+ * typed by a person off a chart rather than produced by us. See
+ * `QUALITY_SPELLINGS` for what it agrees to read.
+ *
+ * Null for anything unreadable, so a name out of a saved record can be
+ * checked rather than trusted: a progression is fifteen strings the user
+ * typed, and one of them being "??" must leave the other fourteen playing.
+ *
+ * The ROOT is a pitch class, so the spelling is thrown away: "A#" and "Bb"
+ * are the same chord, and which of the two goes back on screen is the key's
+ * business (`spellingForKey`), not the typist's. That is the whole reason a
+ * progression is stored as text and read through here rather than kept as
+ * whatever the user happened to type.
+ */
+export function parseChordName(text: string): Chord | null {
+  const trimmed = (text ?? "").trim();
+  if (!trimmed) return null;
+  const match = /^([A-Ga-g])([#b♯♭]*)(.*)$/.exec(trimmed);
+  if (!match) return null;
+  const [, letter, accidentals, rest] = match;
+
+  let root = LETTER_PITCH_CLASSES[letter.toLowerCase()];
+  if (root === undefined) return null;
+  for (const accidental of accidentals) root += accidental === "#" || accidental === "♯" ? 1 : -1;
+
+  // A slash bass ("D/F#") is a voicing instruction, not a different chord, and
+  // nothing in this mode plays an inversion the user asked for by name. The
+  // chord is read and the bass note dropped, which is better than refusing a
+  // name a player would reasonably write.
+  const suffix = rest.split("/")[0].trim();
+
+  for (const [spelling, quality] of QUALITY_SPELLINGS_BY_LENGTH) {
+    if (suffix === spelling) return { root: pitchClass(root), quality };
+  }
+  return null;
+}
+
 /** Semitones above the root for a quality, root first. */
 export function chordIntervals(quality: ChordQuality): readonly number[] {
   return QUALITY_INTERVALS[quality];

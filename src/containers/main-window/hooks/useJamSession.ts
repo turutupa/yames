@@ -9,28 +9,38 @@ import {
   setJam,
   setJamPosition,
   setSubdivision,
+  ttsSpeak,
 } from "../../../ipc";
 import {
   GROOVES,
   STARTER_JAMS,
   carryCountIn,
   compileJam,
+  countInCue,
+  countInPhraseCues,
   createJam,
   duplicateJam as duplicateJamData,
   formBars,
+  formSectionNames,
   jamMeter,
+  lastVoicing,
   lineupFor,
+  perBeatCountFits,
   renameJam as renameJamData,
   reorderJams as reorderJamsData,
+  sectionCue,
   sectionRanges,
   sectionIndexAt,
+  sectionStarts,
+  shouldSpeak,
   stepSection,
   tempoAfterChorus,
+  tradeCue,
   upsertJam,
 } from "../../../jam";
 import type { BarRange } from "../../../jam";
 import type { Chord } from "../../../jam/harmony";
-import type { Jam, JamEngineConfig, JamPositionCommand } from "../../../jam";
+import type { Jam, JamBandState, JamEngineConfig, JamPositionCommand } from "../../../jam";
 import { NO_PRACTICE } from "../../jam/PracticeRow";
 import type { GrooveEditorPage } from "../../jam/editor";
 import type { BeatEvent, Subdivision } from "../../../types";
@@ -126,20 +136,62 @@ async function sendJam(jam: Jam, config: JamEngineConfig | null): Promise<void> 
 }
 
 /**
+ * What one spoken cue costs, in milliseconds, end to end.
+ *
+ * Kept for the same reason `jamLatency` is: the per-beat count only works if
+ * an utterance is synthesised and started inside one beat, and "it feels fine"
+ * is not a number. Piper synthesises to a WAV before it plays, so this is
+ * measured rather than assumed, and `perBeatCountFits` reads it to decide
+ * whether to count beat by beat or to say the whole count as one phrase.
+ * Read it from the console as `window.__yamesJamSpeech` while a jam plays.
+ */
+export const jamSpeechLatency = { last: 0, worst: 0, says: 0 };
+
+/**
+ * Say one thing, and time it. Never throws: a cue is never a requirement.
+ *
+ * Every cue this speaks is also on the screen, so a voice that is missing,
+ * busy or broken costs the player nothing. That is what lets this swallow the
+ * error rather than surfacing one — there is no failure here worth a dialog.
+ */
+async function speakCue(text: string): Promise<void> {
+  const started = performance.now();
+  try {
+    await ttsSpeak(text);
+  } catch {
+    /* No voice, or a voice that is busy. The screen already said it. */
+  } finally {
+    const took = performance.now() - started;
+    jamSpeechLatency.last = took;
+    jamSpeechLatency.says += 1;
+    if (took > jamSpeechLatency.worst) jamSpeechLatency.worst = took;
+    if (typeof window !== "undefined") {
+      (window as unknown as { __yamesJamSpeech?: typeof jamSpeechLatency }).__yamesJamSpeech =
+        jamSpeechLatency;
+    }
+  }
+}
+
+/**
  * The meter and the table, in that order — what a jam needs on the way in.
  *
  * Only on load and on an edit. Never per bar: re-sending the meter under a
  * playing band would restack the bar on every downbeat.
  */
 function pushJam(jam: Jam, config: JamEngineConfig): void {
-  const { beatsPerBar, ticksPerBeat } = jamMeter(jam);
+  // The GROUPS, not `[beatsPerBar]`. A jam given a meter of its own carries
+  // the grouping the metronome's editor writes ([2, 2, 3] for 7/8), and the
+  // grouping is what makes a bar of seven audible as a bar of seven rather
+  // than as seven of something. A jam with no meter of its own has one group,
+  // which is exactly what this used to send.
+  const { beatGroups, ticksPerBeat } = jamMeter(jam);
   void (async () => {
     // Each step is awaited so the engine sees them in order, and each is
     // guarded so one rejecting does not take the rest with it — a jam that
     // applied its meter and nothing else is the worst of the failures.
     const steps: Array<[string, () => Promise<unknown>]> = [
       ["freeMode", () => setFreeMode(false)],
-      ["beatGroups", () => setBeatGroups([beatsPerBar])],
+      ["beatGroups", () => setBeatGroups(beatGroups)],
       ["subdivision", () => setSubdivision(ticksPerBeat as Subdivision)],
     ];
     for (const [name, run] of steps) {
@@ -153,9 +205,19 @@ function pushJam(jam: Jam, config: JamEngineConfig): void {
   })();
 }
 
-/** What the engine is holding, as one comparable string. */
-function bassSignature(config: JamEngineConfig): string {
-  return config.bass ? config.bass.pitches.join(",") : "";
+/**
+ * What the engine is holding of the per-bar lines, as one comparable string.
+ *
+ * Both lines, not just the bass. They change on the same trigger — the chord
+ * under the next bar — but not always together: over a one-chord jam neither
+ * moves, and over a blues the keys re-voice on a bar where the walking bass
+ * happens to repeat itself. Comparing only the bass would hold a stale voicing
+ * under a changed chord.
+ */
+function lineSignature(config: JamEngineConfig): string {
+  const bass = config.bass ? config.bass.pitches.join(",") : "";
+  const keys = config.keys ? config.keys.voicings.map((v) => v.join(".")).join(",") : "";
+  return `${bass}|${keys}`;
 }
 
 /**
@@ -219,6 +281,21 @@ interface UseJamSessionArgs {
    */
   countingIn: boolean;
   /**
+   * How the count-in is going, for the spoken count: `done` is how many of
+   * `beats` have sounded. `countingIn` above is the same fact as a boolean,
+   * and is what the bar-ahead send needs; the cues need the number.
+   */
+  countIn?: { beats: number; done: number };
+  /**
+   * Whether a voice is installed (`ModelStatus.voiceReady`).
+   *
+   * Half of the spoken-cues decision, the other half being the jam's own
+   * toggle — see `shouldSpeak` in `src/jam/cues.ts`. Passed in rather than
+   * read here so this hook stays the thing that decides WHEN to speak and
+   * never the thing that decides whether a voice exists.
+   */
+  voiceReady?: boolean;
+  /**
    * The metronome's own meter, as the app state holds it right now.
    *
    * Read only at the moment the first jam is pushed, and handed back when the
@@ -236,6 +313,8 @@ export function useJamSession({
   instrument,
   currentBeat,
   countingIn,
+  countIn,
+  voiceReady = false,
   meter,
 }: UseJamSessionArgs) {
   const { t } = useTranslation();
@@ -279,6 +358,16 @@ export function useJamSession({
   const [pinnedChord, setPinnedChord] = useState<Chord | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorPage, setEditorPage] = useState<GrooveEditorPage>("bar");
+  /**
+   * "Edit changes", and the bar the picker is open on.
+   *
+   * Screen state and not the record's: which bar you happen to have a picker
+   * open on is not something a jam should remember, and neither is whether
+   * you were in the mode. The CHANGES themselves are the record's — they go
+   * on `jam.progression` through `editJam` like every other edit.
+   */
+  const [editingChords, setEditingChords] = useState(false);
+  const [editingBar, setEditingBar] = useState<number | null>(null);
 
   /**
    * Where the form has been told to go, and what it has been told to repeat.
@@ -377,6 +466,15 @@ export function useJamSession({
         jam.key,
         jam.band ?? lineup,
         jam.practice,
+        // The fourth pass. Every one of these changes the table, the meter or
+        // a line in it, so every one of them has to re-send: a chord typed
+        // into bar five that the engine never hears is the bug this list
+        // exists to prevent.
+        jam.progression,
+        jam.meter,
+        jam.mix,
+        jam.keysStyle,
+        jam.countInSound,
       ])
     : null;
 
@@ -390,6 +488,7 @@ export function useJamSession({
       restoreRef.current = null;
       clearJam(restore);
       sentBassRef.current = null;
+      voicingRef.current = null;
       loadedIdRef.current = null;
       return;
     }
@@ -412,12 +511,19 @@ export function useJamSession({
     const isLoad = loadedIdRef.current !== jam.id;
     const live = playingBarRef.current;
     const editingLive = !isLoad && isPlaying && !countingIn && live !== null;
-    const config = compileJam(jam, { formBar: editingLive ? live + 1 : 0, lineup });
+    const config = compileJam(jam, {
+      formBar: editingLive ? live + 1 : 0,
+      lineup,
+      // A load starts the keys player's hand fresh, in the middle of the
+      // range; an edit mid-take leads on from wherever it already was.
+      previousVoicing: editingLive ? voicingRef.current : null,
+    });
     pushJam(jam, config);
     // What the engine is now holding, so the next bar line can tell whether
     // it has anything new to say. Recording `null` here would make the next
     // downbeat re-send a bass the engine already has.
-    sentBassRef.current = bassSignature(config);
+    sentBassRef.current = lineSignature(config);
+    voicingRef.current = lastVoicing(config.keys);
     loadedIdRef.current = jam.id;
     if (!editingLive) {
       barRef.current = null;
@@ -463,6 +569,15 @@ export function useJamSession({
    */
   const sentBassRef = useRef<string | null>(null);
   const barRef = useRef<string | null>(null);
+  /**
+   * The voicing the keys player's hand is on, carried across the sends.
+   *
+   * Voice leading is a fact about two CONSECUTIVE bars, and each bar is
+   * compiled on its own — so somebody has to remember where the hand was, and
+   * it is this. Reset on the way out and on a load, so a new take starts in
+   * the middle of the range instead of wherever the last one happened to end.
+   */
+  const voicingRef = useRef<number[] | null>(null);
 
   /**
    * "The load above has bar 0 in flight; say nothing this bar."
@@ -509,10 +624,15 @@ export function useJamSession({
       return;
     }
 
-    const next = compileJam(jam, { formBar: bar + 1, lineup });
-    const signature = bassSignature(next);
+    const next = compileJam(jam, {
+      formBar: bar + 1,
+      lineup,
+      previousVoicing: voicingRef.current,
+    });
+    const signature = lineSignature(next);
     if (sentBassRef.current === signature) return;
     sentBassRef.current = signature;
+    voicingRef.current = lastVoicing(next.keys);
     void sendJam(jam, next);
     // The bar is the trigger; the jam is read, not watched — an edit goes out
     // through the effect above, which is the one that also carries the meter.
@@ -568,6 +688,109 @@ export function useJamSession({
     if (view === "jam" && jam) void setBpm(jam.bpm).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPlaying]);
+
+  // -------------------------------------------------------------------------
+  // Spoken cues (JAM_MODE §4.7). Your eyes are on the neck.
+  // -------------------------------------------------------------------------
+
+  /**
+   * Whether this jam is speaking at all: the toggle AND a voice.
+   *
+   * With no voice installed this is false and every effect below is a no-op —
+   * silent, with no error and nothing to dismiss. Every cue is also on the
+   * screen, so a jam without a voice is not a jam missing anything.
+   */
+  const speaking = shouldSpeak({ cues: jam?.cues, voiceReady });
+
+  /**
+   * The count: "one, two, three, four", on the beats, at the tempo.
+   *
+   * Beat by beat where an utterance fits inside a beat, and as one phrase
+   * where it does not — `perBeatCountFits` reads the measurement the last cue
+   * left in `jamSpeechLatency`. That is not a nicety: at 160 BPM a beat is
+   * 375 ms, and a synthesiser that takes 400 says "two" over the downbeat.
+   * The whole-phrase fallback starts on the first beat and is a real count
+   * rather than a worse version of the same one.
+   */
+  const spokenCountRef = useRef(-1);
+  useEffect(() => {
+    const beats = countIn?.beats ?? 0;
+    const done = countIn?.done ?? 0;
+    if (!speaking || view !== "jam" || !jam || beats <= 0) {
+      spokenCountRef.current = -1;
+      return;
+    }
+    if (done === spokenCountRef.current) return;
+    const previous = spokenCountRef.current;
+    spokenCountRef.current = done;
+
+    const perBeat = perBeatCountFits({
+      bpm: trainedBpm ?? jam.bpm,
+      speechMs: jamSpeechLatency.says > 0 ? jamSpeechLatency.worst : null,
+    });
+    if (!perBeat) {
+      // One utterance, on the first beat of the count and nowhere else.
+      if (previous !== -1 || done > 1) return;
+      const phrase = countInPhraseCues(beats)
+        .map((cue) => t(cue.key, cue.params))
+        .join(" ");
+      if (phrase) void speakCue(phrase);
+      return;
+    }
+    // `done` is how many beats have sounded, so the one that just did is
+    // number `done` — and nothing has sounded yet at zero.
+    if (done < 1) return;
+    const cue = countInCue(done - 1);
+    if (cue) void speakCue(t(cue.key, cue.params));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [speaking, view, jam?.id, countIn?.beats, countIn?.done]);
+
+  /**
+   * "Your four" and "band's back", on the bar line the band hands over.
+   *
+   * On the CHANGE and not on every bar of it — `tradeCue` takes both states
+   * for exactly that reason. The same two words `TradeCue` puts in the corner,
+   * so what you hear and what you see are one string.
+   */
+  const spokenStateRef = useRef<JamBandState | null>(null);
+  useEffect(() => {
+    if (!speaking || view !== "jam" || !jam || !isPlaying || countingIn || !currentBeat) {
+      spokenStateRef.current = null;
+      return;
+    }
+    const current = currentBeat.bandState ?? "full";
+    const previous = spokenStateRef.current;
+    spokenStateRef.current = current;
+    const cue = tradeCue({ previous, current });
+    if (cue) void speakCue(t(cue.key, cue.params));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [speaking, view, jam?.id, isPlaying, countingIn, currentBeat?.bandState]);
+
+  /**
+   * The section, on the bar it starts on, when it has a name.
+   *
+   * Only AABA names its sections. A blues is three fours and no musician
+   * calls them A, B and C, so nothing is said there — a voice announcing
+   * every four bars would be the first thing anybody turned off.
+   */
+  const spokenSectionRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!speaking || view !== "jam" || !jam || !isPlaying || countingIn || !currentBeat) {
+      spokenSectionRef.current = null;
+      return;
+    }
+    const bar = Number.isFinite(currentBeat.formBar) ? currentBeat.formBar : 0;
+    const at = `${currentBeat.chorus}:${bar}`;
+    if (spokenSectionRef.current === at) return;
+    spokenSectionRef.current = at;
+    const cue = sectionCue({
+      bar,
+      starts: sectionStarts(jam.form),
+      names: formSectionNames(jam.form),
+    });
+    if (cue) void speakCue(t(cue.key, cue.params));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [speaking, view, jam?.id, isPlaying, countingIn, currentBeat?.chorus, currentBeat?.formBar]);
 
   // -------------------------------------------------------------------------
   // Moving through the form (JAM_MODE §4.2)
@@ -890,8 +1113,21 @@ export function useJamSession({
       setEditorOpen,
       editorPage,
       setEditorPage,
+      editingChords,
+      setEditingChords,
+      editingBar,
+      setEditingBar,
     }),
-    [fretboardOpen, sevenths, shapeIndex, pinnedChord, editorOpen, editorPage],
+    [
+      fretboardOpen,
+      sevenths,
+      shapeIndex,
+      pinnedChord,
+      editorOpen,
+      editorPage,
+      editingChords,
+      editingBar,
+    ],
   );
 
   return {

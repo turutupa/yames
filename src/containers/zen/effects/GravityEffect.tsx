@@ -20,7 +20,7 @@ interface Dot {
  *
  * Live BPM is measured from beat intervals, smoothed with an EMA.
  */
-export function GravityEffect({ currentBeat, isPlaying, activeTab: _activeTab }: { currentBeat: BeatEvent | null; isPlaying: boolean; activeTab: "beat" | "drill" }) {
+export function GravityEffect({ currentBeat, isPlaying, activeTab: _activeTab }: { currentBeat: BeatEvent | null; isPlaying: boolean; activeTab: "beat" | "drill" | "jam" }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef(0);
   const dotsRef = useRef<Dot[]>([]);

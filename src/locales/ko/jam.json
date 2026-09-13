@@ -33,7 +33,52 @@
       "oneDrop": "원 드롭",
       "train": "트레인 비트",
       "boomBap": "붐뱁",
-      "fourOnFloor": "포 온 더 플로어"
+      "fourOnFloor": "포 온 더 플로어",
+      "rule": "규칙"
+    },
+    "changes": {
+      "edit": "코드 편집",
+      "done": "완료",
+      "hint": "마디를 눌러 코드를 정하세요. 길게 누르면 모드 없이도 바꿀 수 있습니다.",
+      "pickFor": "{{bar}}번째 마디",
+      "root": "근음",
+      "quality": "코드 종류",
+      "major": "메이저",
+      "asTheForm": "폼 그대로"
+    },
+    "meter": {
+      "label": "박자",
+      "grooves": "그루브의 박자",
+      "ticks": "한 박당 틱",
+      "doesNotFit": "{{groove}}은(는) {{meter}}에 맞지 않아 드러머가 규칙대로 연주합니다."
+    },
+    "mix": {
+      "forLane": "{{lane}} 음량"
+    },
+    "keysStyle": {
+      "label": "컴핑",
+      "pads": "한 마디 내내 지속",
+      "stabs": "엇박에서, 스네어와 함께",
+      "padsShort": "패드",
+      "stabsShort": "스탭"
+    },
+    "countInSound": {
+      "label": "카운트인",
+      "beep": "비프",
+      "sticks": "스틱"
+    },
+    "cues": {
+      "label": "음성 안내",
+      "hint": "카운트와 섹션, \"당신의 네 마디\"를 소리로 알려 줍니다. 시선은 지판에 두세요.",
+      "noVoice": "코치 음성이 필요합니다. 설정에서 설치하세요. 그때까지 안내는 화면에만 표시됩니다.",
+      "n1": "하나",
+      "n2": "둘",
+      "n3": "셋",
+      "n4": "넷",
+      "n5": "다섯",
+      "n6": "여섯",
+      "n7": "일곱",
+      "n8": "여덟"
     },
     "feel": {
       "label": "필",

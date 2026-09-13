@@ -33,7 +33,52 @@
       "oneDrop": "One drop",
       "train": "Train beat",
       "boomBap": "Boom bap",
-      "fourOnFloor": "Four on the floor"
+      "fourOnFloor": "Four on the floor",
+      "rule": "A regra"
+    },
+    "changes": {
+      "edit": "Editar a harmonia",
+      "done": "Pronto",
+      "hint": "Toque num compasso para definir o acorde. Um toque longo funciona sem o modo.",
+      "pickFor": "Compasso {{bar}}",
+      "root": "Fundamental",
+      "quality": "Tipo",
+      "major": "mai",
+      "asTheForm": "Como a forma"
+    },
+    "meter": {
+      "label": "Compasso",
+      "grooves": "O do groove",
+      "ticks": "Ticks por tempo",
+      "doesNotFit": "{{groove}} não cabe em {{meter}}; o baterista toca a regra."
+    },
+    "mix": {
+      "forLane": "Volume de {{lane}}"
+    },
+    "keysStyle": {
+      "label": "Acompanhamento",
+      "pads": "sustentado pelo compasso inteiro",
+      "stabs": "no contratempo, com a caixa",
+      "padsShort": "Pads",
+      "stabsShort": "Pancadas"
+    },
+    "countInSound": {
+      "label": "Contagem",
+      "beep": "Bipe",
+      "sticks": "Baquetas"
+    },
+    "cues": {
+      "label": "Avisos falados",
+      "hint": "A contagem, a seção e \"seus quatro\", ditos em voz alta — seus olhos ficam no braço.",
+      "noVoice": "Precisa da voz do coach. Instale nas Configurações; até lá os avisos ficam na tela.",
+      "n1": "um",
+      "n2": "dois",
+      "n3": "três",
+      "n4": "quatro",
+      "n5": "cinco",
+      "n6": "seis",
+      "n7": "sete",
+      "n8": "oito"
     },
     "feel": {
       "label": "Levada",

@@ -28,6 +28,16 @@ function beat(formBar: number, chorus = 1, measureBeat = 0): BeatEvent {
   };
 }
 
+/**
+ * The row of groove cards.
+ *
+ * Some groove names are also meter names — "6/8" is a groove AND a meter
+ * preset — so a query for one by text has to say which control it means.
+ */
+function grooveCards(container: HTMLElement): HTMLElement {
+  return container.querySelector(".jam-cards-groove") as HTMLElement;
+}
+
 /** The screen state the view does not own — inert unless a test drives it. */
 function screenState(
   overrides: Partial<React.ComponentProps<typeof JamView>["screen"]> = {},
@@ -45,6 +55,10 @@ function screenState(
     setEditorOpen: vi.fn(),
     editorPage: "bar" as const,
     setEditorPage: vi.fn(),
+    editingChords: false,
+    setEditingChords: vi.fn(),
+    editingBar: null,
+    setEditingBar: vi.fn(),
     ...overrides,
   };
 }
@@ -72,6 +86,7 @@ function setup(overrides: Partial<React.ComponentProps<typeof JamView>> = {}) {
     lineup: { drums: true, bass: true },
     trainedBpm: null as number | null,
     listening: false,
+    voiceReady: false,
     screen: screenState(),
     position: positionState(),
     tapActive: false,
@@ -367,7 +382,9 @@ describe("JamView — the controls", () => {
     cleanup();
 
     const waltz = setup({ jam: jamOf({ grooveId: "rock8", countIn: 8 }) });
-    fireEvent.click(screen.getByText("6/8"));
+    // Scoped to the groove cards: "6/8" is also a meter preset now, and the
+    // two are different controls that happen to be named the same thing.
+    fireEvent.click(within(grooveCards(waltz.container)).getByText("6/8"));
     expect(waltz.props.onEdit).toHaveBeenCalledWith({ grooveId: "sixEight", countIn: 6 });
   });
 
@@ -635,5 +652,165 @@ describe("JamView — the groove editor", () => {
   it("stays out of the way until it is opened", () => {
     setup();
     expect(screen.queryByLabelText("The groove, one bar")).toBeNull();
+  });
+});
+
+/**
+ * Your own changes. The timeline's cells become chord buttons, and what they
+ * write is a progression exactly as long as the form.
+ */
+describe("JamView — editing the changes", () => {
+  const withChords = (overrides: Partial<Jam> = {}) =>
+    jamOf({ chords: true, key: "A blues", form: { kind: "blues12", bars: 12 }, ...overrides });
+
+  it("offers the way in only where the timeline is showing chords", () => {
+    setup({ jam: withChords() });
+    expect(screen.getByRole("button", { name: "Edit changes" })).toBeInTheDocument();
+    cleanup();
+    setup({ jam: jamOf({ chords: false }) });
+    expect(screen.queryByRole("button", { name: "Edit changes" })).toBeNull();
+  });
+
+  it("turns the cells into chord buttons in edit mode", () => {
+    const { container } = setup({
+      jam: withChords(),
+      screen: screenState({ editingChords: true }),
+    });
+    const cells = container.querySelectorAll(".jam-timeline-cell[data-editable]");
+    expect(cells).toHaveLength(12);
+    // The label says what a tap will do, so a screen reader is told the truth.
+    expect(screen.getByRole("button", { name: "Bar 5" })).toBeInTheDocument();
+  });
+
+  it("goes to the bar rather than editing it when the mode is off", () => {
+    const position = positionState();
+    const { container } = setup({ jam: withChords(), position });
+    const cell = container.querySelectorAll(".jam-timeline-cell")[4] as HTMLElement;
+    fireEvent.click(cell);
+    expect(position.jumpTo).toHaveBeenCalledWith(4);
+  });
+
+  it("opens the picker on the bar that was tapped", () => {
+    const setEditingBar = vi.fn();
+    const { container } = setup({
+      jam: withChords(),
+      screen: screenState({ editingChords: true, setEditingBar }),
+    });
+    fireEvent.click(container.querySelectorAll(".jam-timeline-cell")[4] as HTMLElement);
+    expect(setEditingBar).toHaveBeenCalledWith(4);
+  });
+
+  it("writes the chord onto that bar, and keeps the progression form-length", () => {
+    const { props } = setup({
+      jam: withChords(),
+      screen: screenState({ editingChords: true, editingBar: 4 }),
+    });
+    // The picker is showing; pick a quality for the bar.
+    fireEvent.click(screen.getByRole("button", { name: "m7" }));
+    const patch = props.onEdit.mock.calls.at(-1)![0];
+    expect(patch.progression).toHaveLength(12);
+    expect(patch.progression[4]).toMatch(/m7$/);
+    // Every other bar is still the form's.
+    expect(patch.progression.filter((name: string) => name)).toHaveLength(1);
+  });
+
+  it("clears a bar back to the form rather than deleting it", () => {
+    const { props } = setup({
+      jam: withChords({ progression: ["Bb", ...Array(11).fill("")] }),
+      screen: screenState({ editingChords: true, editingBar: 0 }),
+    });
+    fireEvent.click(screen.getByRole("button", { name: "As the form" }));
+    // The last chord cleared means no progression at all, not twelve blanks.
+    expect(props.onEdit).toHaveBeenCalledWith({ progression: undefined });
+  });
+
+  it("refits the progression when the form changes under it", () => {
+    const { props } = setup({
+      jam: withChords({ progression: ["Bb", "C", ...Array(10).fill("")] }),
+    });
+    fireEvent.click(screen.getByText("8-bar loop"));
+    const patch = props.onEdit.mock.calls.at(-1)![0];
+    expect(patch.form).toEqual({ kind: "loop8", bars: 8 });
+    expect(patch.progression).toHaveLength(8);
+    // The bars you wrote are still the bars you wrote.
+    expect(patch.progression[0]).toBe("Bb");
+    expect(patch.progression[1]).toBe("C");
+  });
+
+  it("shows the progression's chord on the timeline, not the form's", () => {
+    const { container } = setup({ jam: withChords({ progression: ["Bbmaj7", ...Array(11).fill("")] }) });
+    const first = container.querySelectorAll(".jam-timeline-cell")[0];
+    // Stored "Bbmaj7", drawn "A#maj7": A blues is a sharp key, and how the
+    // name was spelled going in is forgotten on purpose — the spelling that
+    // comes back out is the key's (`spellingForKey`), never the typist's.
+    expect(first.querySelector(".jam-timeline-chord")?.textContent).toBe("A#maj7");
+    // And marks it as yours.
+    expect(first.hasAttribute("data-own-chord")).toBe(true);
+  });
+});
+
+/** The meter, the mix, the keys player and the spoken cues. */
+describe("JamView — the fourth pass's controls", () => {
+  it("runs in the groove's own meter until told otherwise", () => {
+    const { container } = setup();
+    const active = container.querySelectorAll(".jam-meter.active");
+    expect(active).toHaveLength(1);
+    expect(active[0].textContent).toBe("The groove's");
+  });
+
+  it("says which groove does not fit the meter it was given", () => {
+    setup({ jam: jamOf({ grooveId: "shuffle", meter: { beatGroups: [2, 2, 3], ticksPerBeat: 2 } }) });
+    expect(screen.getByText(/does not fit/)).toBeInTheDocument();
+    // And the band row says what is actually playing.
+    expect(screen.getByText(/The rule/)).toBeInTheDocument();
+  });
+
+  it("carries the count-in into the new meter, in bars", () => {
+    const { props } = setup({ jam: jamOf({ grooveId: "rock8", countIn: 8 }) });
+    fireEvent.click(screen.getByRole("button", { name: "3/4" }));
+    // The resolution comes along unchanged — the starter jam is a shuffle, so
+    // it is running in triplets, and picking a meter says nothing about that.
+    // Two bars of 4/4 is eight beats; two bars of 3/4 is six.
+    expect(props.onEdit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        meter: { beatGroups: [3], ticksPerBeat: 3 },
+        countIn: 6,
+      }),
+    );
+  });
+
+  it("gives every player a volume, and disables it for one who is out", () => {
+    const { container } = setup({ jam: jamOf({ band: { drums: true, bass: false, keys: false } }) });
+    const sliders = container.querySelectorAll<HTMLInputElement>(".jam-band-volume input");
+    expect(sliders).toHaveLength(3);
+    expect(sliders[0].disabled).toBe(false);
+    expect(sliders[1].disabled).toBe(true);
+  });
+
+  it("writes a volume to the mix without disturbing the others", () => {
+    const { container, props } = setup();
+    const slider = container.querySelector<HTMLInputElement>(".jam-band-volume input")!;
+    fireEvent.change(slider, { target: { value: "0.5" } });
+    expect(props.onEdit).toHaveBeenCalledWith({ mix: { drums: 0.5, bass: 1, keys: 1 } });
+  });
+
+  it("has a keys row with a comping style", () => {
+    const { props } = setup({ jam: jamOf({ band: { drums: true, bass: true, keys: true } }) });
+    fireEvent.click(screen.getByRole("button", { name: "Stabs" }));
+    expect(props.onEdit).toHaveBeenCalledWith({ keysStyle: "stabs" });
+  });
+
+  it("offers the sticks as well as the beep", () => {
+    const { props } = setup();
+    fireEvent.click(screen.getByRole("button", { name: "Sticks" }));
+    expect(props.onEdit).toHaveBeenCalledWith({ countInSound: "sticks" });
+  });
+
+  it("says where the voice comes from when there is not one", () => {
+    setup({ voiceReady: false });
+    expect(screen.getByText(/Needs the coach voice/)).toBeInTheDocument();
+    cleanup();
+    setup({ voiceReady: true });
+    expect(screen.queryByText(/Needs the coach voice/)).toBeNull();
   });
 });

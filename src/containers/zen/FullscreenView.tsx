@@ -10,11 +10,33 @@ import { useFirstTimeHint } from "../onboarding/hints/useFirstTimeHint";
 import { shouldHintZenFirst } from "../onboarding/hints/triggers";
 import "../../styles/fullscreen.css";
 
+/**
+ * What Zen shows over a jam: the chord, the next one, the place in the form.
+ *
+ * Everything here is already worked out by the jam screen — spelled from the
+ * key, transposed to the part the player reads — and handed over rather than
+ * recomputed, so the chord in Zen and the chord on the stage can never be two
+ * different chords.
+ */
+export interface ZenJam {
+  /** The chord now, as a musician writes it. */
+  chord: string | null;
+  /** The next chord that is DIFFERENT, and how many bars off it is. */
+  next: { name: string; inBars: number } | null;
+  /** 0-based bar within the chorus, and how many there are. */
+  bar: number;
+  bars: number;
+  /** 1-based chorus count. */
+  chorus: number;
+}
+
 interface FullscreenViewProps {
   state: AppState;
   currentBeat: BeatEvent | null;
-  activeTab: "beat" | "drill";
+  activeTab: "beat" | "drill" | "jam";
   onExit: () => void;
+  /** The jam on the stage, when there is one. Absent: Zen as it always was. */
+  jam?: ZenJam | null;
 }
 
 const SUBDIVISION_LABELS: Record<Subdivision, string> = {
@@ -33,9 +55,37 @@ function zenStyleIcon(s: ZenStyle) {
   }
 }
 
-export function FullscreenView({ state, currentBeat, activeTab, onExit }: FullscreenViewProps) {
+export function FullscreenView({
+  state,
+  currentBeat,
+  activeTab,
+  onExit,
+  jam = null,
+}: FullscreenViewProps) {
   const { t } = useTranslation();
   const ramp = state.speedRamp;
+  /**
+   * Zen for jams (JAM_MODE §4.7): the chord and the beat, nothing else.
+   *
+   * Not a third layout so much as a different centre. The beat dots stay,
+   * because the beat is half of what the sentence "the chord and the beat"
+   * asks for and because they are the one thing on this screen you read
+   * without looking at it. What goes is everything that is not the music in
+   * front of you: the tempo, the ramp, the meter buttons. A jam in Zen is for
+   * playing, and a number you would only change between tunes is a number you
+   * can leave the screen to change.
+   */
+  const zenJam = activeTab === "jam" ? jam : null;
+  /**
+   * The tempo, subdivision and meter buttons along the bottom.
+   *
+   * The metronome tab's own, and only its own. The drill never had them
+   * (its numbers belong to the ramp), and a jam must not: its meter comes
+   * from the jam and its subdivision from the groove, so a button that set
+   * either would be a button that quietly puts the band out of step with the
+   * bar the engine is checking it against.
+   */
+  const metronomeControls = activeTab === "beat";
   const meterBeats = Math.max(2, meterTotal(state.beatGroups ?? [state.timeSignature]));
   // `activeBeat` is the engine's `measureBeat`, so the dot count has to
   // come from the SAME source the engine wraps it against: the ramp's
@@ -188,7 +238,28 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
       </div>
 
       <div className="fs-content">
-        {/* BPM display */}
+        {/* The jam's centre: the chord now, the chord next, and where you are
+            in the form. The chord is the largest thing on the screen, exactly
+            as it is on the stage — one chord at a time (JAM_MODE §4.3). */}
+        {zenJam ? (
+          <div className="fs-center fs-jam">
+            <div className="fs-jam-chord">{zenJam.chord ?? "—"}</div>
+            <div className="fs-jam-next">
+              {zenJam.next
+                ? t("jam.now.next", { chord: zenJam.next.name, count: zenJam.next.inBars })
+                : /* A one-chord jam has no next chord, and a blank line is a
+                     better answer than repeating the chord above. */
+                  " "}
+            </div>
+            <div className="fs-jam-where">
+              <span className="fs-jam-bar">
+                {t("jam.form.barOf", { current: zenJam.bar + 1, total: zenJam.bars })}
+              </span>
+              <span className="fs-jam-chorus">{t("jam.form.chorus", { count: zenJam.chorus })}</span>
+            </div>
+          </div>
+        ) : (
+        /* BPM display */
         <div className="fs-center">
           {activeTab === "drill" && (
             <div className="fs-ramp-info" style={{ visibility: ramp.active && !(ramp.warmupCount < ramp.warmupBeats) ? "visible" : "hidden" }}>
@@ -208,6 +279,7 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
             </>
           )}
         </div>
+        )}
 
         {/* Beat visualization — grouped to reflect meter structure */}
         <div className="fs-beats" style={{ visibility: isWarmingUp ? 'hidden' : 'visible' }}>
@@ -353,13 +425,13 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
 
       {/* Subtle controls */}
       <div className="fs-controls" onDoubleClick={(e) => e.stopPropagation()}>
-        {activeTab !== "drill" && (
+        {metronomeControls && (
           <>
             <button className="fs-ctrl-btn" onClick={() => setBpm(Math.max(20, state.bpm - 5))}>−5</button>
             <button className="fs-ctrl-btn" onClick={() => setBpm(Math.max(20, state.bpm - 1))}>−1</button>
           </>
         )}
-        {activeTab !== "drill" && (
+        {metronomeControls && (
           <button className="fs-ctrl-btn fs-ctrl-sub" onClick={() => {
             const next = (state.subdivision === 6 ? 1 : state.subdivision + 1) as Subdivision;
             setSubdivision(next);
@@ -384,7 +456,7 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
           </button>
         )}
 
-        {activeTab !== "drill" && (
+        {metronomeControls && (
           <button className="fs-ctrl-btn fs-ctrl-sub" onClick={() => {
             // useSession fires the debounced coach boundary; calling
             // notifySettingsChange() here closed the segment early.
@@ -395,7 +467,7 @@ export function FullscreenView({ state, currentBeat, activeTab, onExit }: Fullsc
               : meterLabel(state.beatGroups ?? [state.timeSignature])}
           </button>
         )}
-        {activeTab !== "drill" && (
+        {metronomeControls && (
           <>
             <button className="fs-ctrl-btn" onClick={() => setBpm(Math.min(300, state.bpm + 1))}>+1</button>
             <button className="fs-ctrl-btn" onClick={() => setBpm(Math.min(300, state.bpm + 5))}>+5</button>

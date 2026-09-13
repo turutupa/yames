@@ -87,6 +87,16 @@ export type JamMix = { drums: number; bass: number; keys: number };
 export type JamCountInSound = "beep" | "sticks";
 
 /**
+ * How the keys player comps. `pads` is a whole-bar voicing on beat one;
+ * `stabs` is the chord off the beat, answering the snare.
+ *
+ * On the record rather than in `src/jam/keysline.ts` because the record
+ * carries it and `keysline.ts` already imports this file — the same reason
+ * `JamTransposition` lives here and `harmony.ts` re-exports it.
+ */
+export type JamKeysStyle = "pads" | "stabs";
+
+/**
  * Where the form goes next. The engine applies both at the next bar line,
  * never mid-bar, and reports the result on the next BeatEvent's `formBar`.
  * `jumpTo` is consumed once; `loop` stays until replaced with null.
@@ -186,7 +196,7 @@ export type Jam = {
    * plays your instrument (JAM_MODE §3.1). Touch a toggle and the answer
    * becomes the record's, and stays the record's.
    */
-  band?: { drums: boolean; bass: boolean };
+  band?: { drums: boolean; bass: boolean; keys?: boolean };
   /** Chords on the timeline and the NOW block. Absent: off. */
   chords?: boolean;
   /** The practice tools. Absent: none. */
@@ -207,6 +217,8 @@ export type Jam = {
    * subdivision). Absent: the groove's meter.
    */
   meter?: { beatGroups: number[]; ticksPerBeat: 1 | 2 | 3 | 4 | 6 };
+  /** How the keys comp, when there are keys. Absent: "pads". */
+  keysStyle?: JamKeysStyle;
   /** Per-lane volume. Absent: 1.0 each. */
   mix?: JamMix;
   /** Absent: "beep". */

@@ -33,7 +33,52 @@
       "oneDrop": "One drop",
       "train": "Train beat",
       "boomBap": "Boom bap",
-      "fourOnFloor": "Four on the floor"
+      "fourOnFloor": "Four on the floor",
+      "rule": "Quy tắc"
+    },
+    "changes": {
+      "edit": "Sửa vòng hợp âm",
+      "done": "Xong",
+      "hint": "Chạm vào một ô nhịp để đặt hợp âm. Nhấn giữ cũng được, không cần bật chế độ.",
+      "pickFor": "Ô nhịp {{bar}}",
+      "root": "Âm gốc",
+      "quality": "Loại hợp âm",
+      "major": "trưởng",
+      "asTheForm": "Theo cấu trúc"
+    },
+    "meter": {
+      "label": "Nhịp",
+      "grooves": "Nhịp của groove",
+      "ticks": "Tick mỗi phách",
+      "doesNotFit": "{{groove}} không vừa với {{meter}}; tay trống chơi theo quy tắc."
+    },
+    "mix": {
+      "forLane": "Âm lượng {{lane}}"
+    },
+    "keysStyle": {
+      "label": "Đệm",
+      "pads": "ngân suốt ô nhịp",
+      "stabs": "lệch phách, cùng với trống snare",
+      "padsShort": "Nền",
+      "stabsShort": "Chấm"
+    },
+    "countInSound": {
+      "label": "Đếm vào",
+      "beep": "Tiếng bíp",
+      "sticks": "Dùi trống"
+    },
+    "cues": {
+      "label": "Nhắc bằng giọng nói",
+      "hint": "Đếm vào, đoạn nhạc và \"bốn nhịp của bạn\" được nói ra, để mắt bạn ở lại trên cần đàn.",
+      "noVoice": "Cần giọng nói của huấn luyện viên. Hãy cài trong Cài đặt; trước đó các nhắc nhở vẫn hiện trên màn hình.",
+      "n1": "một",
+      "n2": "hai",
+      "n3": "ba",
+      "n4": "bốn",
+      "n5": "năm",
+      "n6": "sáu",
+      "n7": "bảy",
+      "n8": "tám"
     },
     "feel": {
       "label": "Cảm giác",

@@ -3,7 +3,7 @@
 // checks are the only thing between a mistyped lane string and a jam that
 // looks loaded and sounds like a metronome.
 import { describe, expect, it } from "vitest";
-import { GROOVES, grooveById, grooveTickCount, DEFAULT_GROOVE_ID } from "./grooves";
+import { GROOVES, grooveById, grooveTickCount, ruleGroove, DEFAULT_GROOVE_ID } from "./grooves";
 import { JAM_LANES } from "./types";
 
 describe("the thirteen grooves", () => {
@@ -156,6 +156,115 @@ describe("the fill", () => {
     const g = grooveById("rock8");
     // Two beats of eighths: accent, hit, accent, hit.
     expect(g.fill.snare.slice(4)).toEqual([2, 1, 2, 1]);
+  });
+});
+
+/**
+ * The drummer for a meter nobody wrote a groove for. Thirteen grooves is
+ * thirteen grooves and none of them is in seven, so the alternative to this
+ * rule is a jam in seven with no drummer in it (JAM_MODE §4.1).
+ */
+describe("the rule groove", () => {
+  it("puts the kick on the first beat of every group", () => {
+    // 5/4 as 3+2, eighths: groups open on beats 0 and 3, which is ticks 0 and 6.
+    const g = ruleGroove([3, 2], 2);
+    expect(g.beatsPerBar).toBe(5);
+    expect(g.ticksPerBeat).toBe(2);
+    expect(g.bar.kick).toEqual([2, 0, 0, 0, 0, 0, 2, 0, 0, 0]);
+  });
+
+  it("puts the snare on the last beat of every group of two or more", () => {
+    // 3+2: the last beats are 2 and 4, which is ticks 4 and 8.
+    expect(ruleGroove([3, 2], 2).bar.snare).toEqual([0, 0, 0, 0, 1, 0, 0, 0, 1, 0]);
+    // A group of one has no room for a backbeat: it would land on the kick.
+    expect(ruleGroove([1, 3], 1).bar.snare).toEqual([0, 0, 0, 1]);
+  });
+
+  it("puts hats on every tick, accented where a group opens", () => {
+    // 7/8 as 2+2+3, eighths: fourteen ticks, accents at 0, 4 and 8.
+    const g = ruleGroove([2, 2, 3], 2);
+    expect(g.bar.hat).toEqual([2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1]);
+  });
+
+  it("builds 7/8 as 2+2+3 in sixteenths at the right width", () => {
+    const g = ruleGroove([2, 2, 3], 4);
+    expect(g.beatsPerBar).toBe(7);
+    expect(grooveTickCount(g)).toBe(28);
+    for (const lane of JAM_LANES) {
+      expect(g.bar[lane], `bar.${lane}`).toHaveLength(28);
+      expect(g.fill[lane], `fill.${lane}`).toHaveLength(28);
+    }
+    // Kicks on beats 0, 2 and 4 — ticks 0, 8 and 16 at four ticks a beat.
+    expect(g.bar.kick.flatMap((level, i) => (level ? [i] : []))).toEqual([0, 8, 16]);
+    // Snares on beats 1, 3 and 6 — ticks 4, 12 and 24.
+    expect(g.bar.snare.flatMap((level, i) => (level ? [i] : []))).toEqual([4, 12, 24]);
+  });
+
+  it("builds 5/4 as 3+2 in sixteenths at the right width", () => {
+    const g = ruleGroove([3, 2], 4);
+    expect(grooveTickCount(g)).toBe(20);
+    expect(g.bar.kick.flatMap((level, i) => (level ? [i] : []))).toEqual([0, 12]);
+    expect(g.bar.snare.flatMap((level, i) => (level ? [i] : []))).toEqual([8, 16]);
+  });
+
+  it("plays snare eighths over the last group as its fill", () => {
+    // 2+2+3 in eighths: the last group is beats 4-6, ticks 8-13. Every tick
+    // is an eighth here, so the snare plays all six, accented on each beat.
+    const g = ruleGroove([2, 2, 3], 2);
+    expect(g.fill.snare.slice(8)).toEqual([2, 1, 2, 1, 2, 1]);
+    // Everything else is out of the way so the fill is heard as a fill.
+    expect(g.fill.kick.slice(8)).toEqual([0, 0, 0, 0, 0, 0]);
+    expect(g.fill.hat.slice(8)).toEqual([0, 0, 0, 0, 0, 0]);
+    // The bar up to the fill is the groove, unchanged — a fill that threw the
+    // whole bar away would stop the time dead.
+    expect(g.fill.hat.slice(0, 8)).toEqual(g.bar.hat.slice(0, 8));
+  });
+
+  it("plays eighths, not sixteenths, when the bar is written in sixteenths", () => {
+    // 3+2 in sixteenths: the last group is beats 3-4, ticks 12-19, and an
+    // eighth is two ticks — accent, rest, hit, rest, accent, rest, hit, rest.
+    const g = ruleGroove([3, 2], 4);
+    expect(g.fill.snare.slice(12)).toEqual([2, 0, 1, 0, 2, 0, 1, 0]);
+  });
+
+  it("gives every lane one column per tick, for every meter and resolution", () => {
+    for (const groups of [[2], [3], [4], [3, 2], [2, 3], [2, 2, 3], [3, 2, 2], [3, 3, 3, 3]]) {
+      for (const ticks of [1, 2, 3, 4, 6] as const) {
+        const g = ruleGroove(groups, ticks);
+        const width = grooveTickCount(g);
+        expect(width).toBe(groups.reduce((sum, n) => sum + n, 0) * ticks);
+        for (const lane of JAM_LANES) {
+          expect(g.bar[lane], `${groups}/${ticks} bar.${lane}`).toHaveLength(width);
+          expect(g.fill[lane], `${groups}/${ticks} fill.${lane}`).toHaveLength(width);
+        }
+      }
+    }
+  });
+
+  it("writes only the four levels a drummer plays", () => {
+    for (const groups of [[3, 2], [2, 2, 3]]) {
+      for (const ticks of [2, 4] as const) {
+        const g = ruleGroove(groups, ticks);
+        for (const lane of JAM_LANES) {
+          for (const level of [...g.bar[lane], ...g.fill[lane]]) {
+            expect([0, 1, 2, 3]).toContain(level);
+          }
+        }
+      }
+    }
+  });
+
+  it("falls back to a bar of four rather than to no bar at all", () => {
+    // A meter array out of a saved record can be empty or nonsense; a jam
+    // with no drummer would be the worse answer.
+    expect(ruleGroove([], 2).beatsPerBar).toBe(4);
+    expect(ruleGroove([0, -3], 2).beatsPerBar).toBe(4);
+  });
+
+  it("leaves the crash to the engine", () => {
+    const g = ruleGroove([2, 2, 3], 2);
+    expect(g.bar.crash.every((level) => level === 0)).toBe(true);
+    expect(g.fill.crash.every((level) => level === 0)).toBe(true);
   });
 });
 

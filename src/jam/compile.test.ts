@@ -4,8 +4,10 @@
 // like a metronome — so the length check runs over every starter jam and
 // every combination of groove and feel.
 import { describe, expect, it } from "vitest";
-import { compileJam, jamKey, jamMeter, type JamBand } from "./compile";
-import { GROOVES } from "./grooves";
+import { compileJam, jamGrooveFitsMeter, jamKey, jamMeter, type JamBand } from "./compile";
+import { GROOVES, ruleGroove } from "./grooves";
+import { lastVoicing } from "./keysline";
+import { withChordAt } from "./progression";
 import { STARTER_JAMS, createJam } from "./jams";
 import { JAM_INTENSITY_GAIN, JAM_LANES } from "./types";
 import type { Jam, JamFeel, JamIntensity, JamPattern } from "./types";
@@ -41,14 +43,20 @@ describe("compileJam", () => {
   });
 
   it("says the same meter the UI has to set on the engine first", () => {
-    // The contract: subdivision = ticksPerBeat, beat groups = [beatsPerBar].
-    // Two answers that disagree is the mismatch the engine refuses.
+    // The contract: subdivision = ticksPerBeat, beat groups sum to
+    // beatsPerBar. Two answers that disagree is the mismatch the engine
+    // refuses.
     for (const jam of STARTER_JAMS) {
       const config = compileJam(jam);
-      expect(jamMeter(jam), jam.name).toEqual({
-        beatsPerBar: config.beatsPerBar,
-        ticksPerBeat: config.ticksPerBeat,
-      });
+      const meter = jamMeter(jam);
+      expect(meter.beatsPerBar, jam.name).toBe(config.beatsPerBar);
+      expect(meter.ticksPerBeat, jam.name).toBe(config.ticksPerBeat);
+      // A jam with no meter of its own is one group: the groove's own bar.
+      expect(meter.beatGroups, jam.name).toEqual([config.beatsPerBar]);
+      expect(
+        meter.beatGroups.reduce((sum, n) => sum + n, 0),
+        jam.name,
+      ).toBe(config.beatsPerBar);
     }
   });
 
@@ -244,6 +252,146 @@ describe("compileJam, the band", () => {
     expect(jamKey(createJam("x", { key: "A blues" }))).toEqual({ root: 9, mode: "blues" });
     expect(jamKey(createJam("x"))).toEqual({ root: 0, mode: "major" });
     expect(jamKey(createJam("x", { key: "wombat" }))).toEqual({ root: 0, mode: "major" });
+  });
+});
+
+describe("a meter the groove was not written for", () => {
+  /** A shuffle is four beats of triplets; 7/8 in eighths is neither. */
+  const sevenEight = { beatGroups: [2, 2, 3], ticksPerBeat: 2 as const };
+
+  it("plays the groove as written when the meter matches it", () => {
+    const jam = createJam("x", {
+      grooveId: "rock8",
+      meter: { beatGroups: [4], ticksPerBeat: 2 },
+    });
+    expect(jamGrooveFitsMeter(jam)).toBe(true);
+    expect(compileJam(jam).bar).toEqual(compileJam(createJam("x", { grooveId: "rock8" })).bar);
+  });
+
+  it("plays the rule instead when it does not, rather than refusing the meter", () => {
+    const jam = createJam("x", { grooveId: "shuffle", meter: sevenEight });
+    expect(jamGrooveFitsMeter(jam)).toBe(false);
+    const config = compileJam(jam);
+    expect(config.beatsPerBar).toBe(7);
+    expect(config.ticksPerBeat).toBe(2);
+    expect(config.bar).toEqual(ruleGroove([2, 2, 3], 2).bar);
+  });
+
+  it("sends the engine the GROUPS, because 3+2+2 and 2+2+3 are different bars", () => {
+    const front = createJam("x", { meter: { beatGroups: [3, 2, 2], ticksPerBeat: 2 } });
+    const back = createJam("x", { meter: sevenEight });
+    expect(jamMeter(front).beatGroups).toEqual([3, 2, 2]);
+    expect(jamMeter(back).beatGroups).toEqual([2, 2, 3]);
+    // Same seven beats either way — that is what makes the grouping the only
+    // thing telling them apart.
+    expect(jamMeter(front).beatsPerBar).toBe(7);
+    expect(jamMeter(back).beatsPerBar).toBe(7);
+  });
+
+  it("keeps every lane the width the engine will check it against", () => {
+    for (const groups of [[3, 2], [2, 2, 3], [3, 3, 3]]) {
+      for (const ticksPerBeat of [2, 4] as const) {
+        const jam = createJam("x", { grooveId: "bossa", meter: { beatGroups: groups, ticksPerBeat } });
+        expectWellFormed(jam, `${groups} / ${ticksPerBeat}`);
+        const config = compileJam(jam);
+        expect(config.beatsPerBar).toBe(groups.reduce((sum, n) => sum + n, 0));
+        expect(config.ticksPerBeat).toBe(ticksPerBeat);
+      }
+    }
+  });
+
+  it("gives the bass and the keys the new tick count too", () => {
+    const jam = createJam("x", {
+      grooveId: "shuffle",
+      meter: sevenEight,
+      band: { drums: true, bass: true, keys: true },
+      key: "A blues",
+    });
+    const config = compileJam(jam);
+    expect(config.bass?.pitches).toHaveLength(14);
+    expect(config.keys?.voicings).toHaveLength(14);
+  });
+});
+
+describe("the keys, the mix and the sticks", () => {
+  it("sends no keys when nobody is on them", () => {
+    expect(compileJam(createJam("x", { band: { drums: true, bass: true } })).keys).toBeNull();
+    expect(
+      compileJam(createJam("x", { band: { drums: true, bass: true, keys: false } })).keys,
+    ).toBeNull();
+  });
+
+  it("sends a voicing per tick when somebody is", () => {
+    const config = compileJam(
+      createJam("x", { band: { drums: true, bass: false, keys: true }, key: "C" }),
+    );
+    expect(config.keys?.voicings).toHaveLength(config.beatsPerBar * config.ticksPerBeat);
+    const struck = config.keys!.voicings.filter((v) => v.length > 0);
+    expect(struck.length).toBeGreaterThan(0);
+    for (const voicing of struck) expect(voicing.length).toBeLessThanOrEqual(4);
+  });
+
+  it("comps the way the record says, pads unless told otherwise", () => {
+    const band = { drums: true, bass: false, keys: true };
+    const pads = compileJam(createJam("x", { band, key: "C" }));
+    const stabs = compileJam(createJam("x", { band, key: "C", keysStyle: "stabs" }));
+    // A pad is beat one and nothing else; stabs are off the beat.
+    expect(pads.keys!.voicings.flatMap((v, i) => (v.length ? [i] : []))).toEqual([0]);
+    expect(stabs.keys!.voicings.flatMap((v, i) => (v.length ? [i] : []))).toEqual([3, 7]);
+  });
+
+  it("leads the keys away from the voicing the last bar ended on", () => {
+    const jam = createJam("x", {
+      band: { drums: true, bass: false, keys: true },
+      key: "A blues",
+      form: { kind: "blues12", bars: 12 },
+    });
+    const first = compileJam(jam, { formBar: 0 });
+    const previous = lastVoicing(first.keys!);
+    const next = compileJam(jam, { formBar: 4, previousVoicing: previous });
+    const struck = lastVoicing(next.keys!)!;
+    for (const note of struck) {
+      expect(Math.min(...previous!.map((p) => Math.abs(p - note)))).toBeLessThanOrEqual(5);
+    }
+  });
+
+  it("sends a mix of ones when the record has none", () => {
+    expect(compileJam(createJam("x")).mix).toEqual({ drums: 1, bass: 1, keys: 1 });
+  });
+
+  it("sends the mix the record carries, clamped", () => {
+    expect(compileJam(createJam("x", { mix: { drums: 0.4, bass: 1.2, keys: 0 } })).mix).toEqual({
+      drums: 0.4,
+      bass: 1.2,
+      keys: 0,
+    });
+    expect(compileJam(createJam("x", { mix: { drums: -1, bass: 9, keys: 1 } })).mix).toEqual({
+      drums: 0,
+      bass: 1.5,
+      keys: 1,
+    });
+  });
+
+  it("counts in with the beep unless the sticks were asked for", () => {
+    expect(compileJam(createJam("x")).countInSound).toBe("beep");
+    expect(compileJam(createJam("x", { countInSound: "sticks" })).countInSound).toBe("sticks");
+    expect(compileJam(createJam("x", { countInSound: "beep" })).countInSound).toBe("beep");
+  });
+});
+
+describe("the changes the band plays", () => {
+  it("are the progression's where there is one", () => {
+    const jam = createJam("x", {
+      key: "A blues",
+      form: { kind: "blues12", bars: 12 },
+      band: { drums: true, bass: true },
+      progression: withChordAt([], 12, 0, "Bb"),
+    });
+    expect(jam.progression?.[0]).toBe("Bb");
+    const withOwn = compileJam(jam, { formBar: 0 });
+    const withForm = compileJam({ ...jam, progression: undefined }, { formBar: 0 });
+    // The bass under bar one is now under a Bb, not the blues' own A7.
+    expect(withOwn.bass?.pitches).not.toEqual(withForm.bass?.pitches);
   });
 });
 

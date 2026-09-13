@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   barHasFill,
@@ -47,7 +48,24 @@ interface FormTimelineProps {
   onJumpTo?: ((bar: number) => void) | null;
   /** Toggle the loop on a section. Absent: no loop affordance is drawn. */
   onToggleSectionLoop?: ((range: BarRange) => void) | null;
+  /**
+   * "Edit changes" is on: a tap picks the bar's chord instead of going there.
+   *
+   * A mode rather than a modifier, because the two things a cell can do are
+   * both one tap and both wanted often — and because a player with a
+   * plectrum in their hand has no spare modifier key (JAM_MODE §3.4).
+   */
+  editingChords?: boolean;
+  /** Which bar the picker is open on, so the cell can say so. */
+  editingBar?: number | null;
+  /** Pick this bar's chord. Absent: chords cannot be edited from here. */
+  onEditChord?: ((bar: number) => void) | null;
+  /** Which bars carry a chord of the user's own, for the mark. */
+  ownChords?: readonly boolean[] | null;
 }
+
+/** How long a press has to be to count as "I meant the chord, not the bar". */
+const LONG_PRESS_MS = 450;
 
 /** Two ranges are the same loop when both ends agree. */
 function sameRange(a: BarRange | null | undefined, b: BarRange): boolean {
@@ -95,8 +113,43 @@ export function FormTimeline({
   pendingJump = null,
   onJumpTo = null,
   onToggleSectionLoop = null,
+  editingChords = false,
+  editingBar = null,
+  onEditChord = null,
+  ownChords = null,
 }: FormTimelineProps) {
   const { t } = useTranslation();
+
+  /**
+   * The long press, so the changes are reachable without the mode.
+   *
+   * Held on the cell rather than per-cell state: only one press is in flight
+   * at a time, and a timer per bar would be thirty-two timers to clean up.
+   * `fired` is what stops the click that follows the press from ALSO being
+   * read as a jump — a long press is one gesture, not two.
+   */
+  const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pressFired = useRef(false);
+
+  const cancelPress = useCallback(() => {
+    if (pressTimer.current) clearTimeout(pressTimer.current);
+    pressTimer.current = null;
+  }, []);
+
+  useEffect(() => cancelPress, [cancelPress]);
+
+  const startPress = useCallback(
+    (bar: number) => {
+      if (!onEditChord) return;
+      pressFired.current = false;
+      cancelPress();
+      pressTimer.current = setTimeout(() => {
+        pressFired.current = true;
+        onEditChord(bar);
+      }, LONG_PRESS_MS);
+    },
+    [onEditChord, cancelPress],
+  );
   const total = formBars(form);
   const sections = formSections(form);
   const ranges = sectionRanges(form);
@@ -209,7 +262,16 @@ export function FormTimeline({
                   const state = bandStates?.[index] ?? "full";
                   const isPending = pending === index;
                   const inLoop = !!loop && index >= loop.start && index <= loop.end;
-                  const label = t("jam.form.jumpTo", { bar: index + 1 });
+                  const canEdit = !!onEditChord;
+                  const editable = canEdit && editingChords;
+                  const isEditing = editingBar === index;
+                  const own = !!ownChords?.[index];
+                  // In edit mode the cell is a chord button; out of it, the
+                  // bar it goes to. One label, so what a screen reader is told
+                  // is what a tap will do.
+                  const label = editable
+                    ? t("jam.changes.pickFor", { bar: index + 1 })
+                    : t("jam.form.jumpTo", { bar: index + 1 });
                   return (
                     <button
                       type="button"
@@ -220,10 +282,27 @@ export function FormTimeline({
                       data-band={state === "full" ? undefined : state}
                       data-pending={isPending ? "" : undefined}
                       data-looped={inLoop ? "" : undefined}
-                      disabled={!onJumpTo}
+                      data-editable={editable ? "" : undefined}
+                      data-editing={isEditing ? "" : undefined}
+                      data-own-chord={own ? "" : undefined}
+                      disabled={!onJumpTo && !editable}
                       aria-label={label}
                       title={label}
-                      onClick={onJumpTo ? () => onJumpTo(index) : undefined}
+                      onPointerDown={canEdit ? () => startPress(index) : undefined}
+                      onPointerUp={canEdit ? cancelPress : undefined}
+                      onPointerLeave={canEdit ? cancelPress : undefined}
+                      onPointerCancel={canEdit ? cancelPress : undefined}
+                      onClick={() => {
+                        // The long press already did something; the click that
+                        // ends it is part of the same gesture, not a jump.
+                        if (pressFired.current) {
+                          pressFired.current = false;
+                          return;
+                        }
+                        cancelPress();
+                        if (editable) onEditChord!(index);
+                        else onJumpTo?.(index);
+                      }}
                     >
                       <span className="jam-timeline-number">{index + 1}</span>
                       {chord && <span className="jam-timeline-chord">{chord}</span>}

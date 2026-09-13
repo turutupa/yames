@@ -17,7 +17,7 @@ interface Dot {
  * so tempo changes feel responsive without becoming dizzying at high BPM.
  * Live BPM is derived from beat intervals with EMA smoothing.
  */
-export function RadarEffect({ currentBeat, isPlaying, activeTab: _activeTab, beatsPerMeasure: _beatsPerMeasure }: { currentBeat: BeatEvent | null; isPlaying: boolean; activeTab: "beat" | "drill"; beatsPerMeasure: number }) {
+export function RadarEffect({ currentBeat, isPlaying, activeTab: _activeTab, beatsPerMeasure: _beatsPerMeasure }: { currentBeat: BeatEvent | null; isPlaying: boolean; activeTab: "beat" | "drill" | "jam"; beatsPerMeasure: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef(0);
   const radarAngleRef = useRef(0);

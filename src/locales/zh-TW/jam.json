@@ -33,7 +33,52 @@
       "oneDrop": "雷鬼 One Drop",
       "train": "火車節奏",
       "boomBap": "Boom Bap",
-      "fourOnFloor": "四踩大鼓"
+      "fourOnFloor": "四踩大鼓",
+      "rule": "通用規則"
+    },
+    "changes": {
+      "edit": "編輯和弦",
+      "done": "完成",
+      "hint": "點一個小節來設定它的和弦。長按也可以，不必進入這個模式。",
+      "pickFor": "第 {{bar}} 小節",
+      "root": "根音",
+      "quality": "和弦類型",
+      "major": "大三",
+      "asTheForm": "跟著曲式"
+    },
+    "meter": {
+      "label": "拍號",
+      "grooves": "律動自帶的",
+      "ticks": "每拍的格數",
+      "doesNotFit": "{{groove}} 不適合 {{meter}}，鼓手按通用規則演奏。"
+    },
+    "mix": {
+      "forLane": "{{lane}} 音量"
+    },
+    "keysStyle": {
+      "label": "伴奏",
+      "pads": "整小節延音",
+      "stabs": "在反拍上，跟著小鼓",
+      "padsShort": "鋪底",
+      "stabsShort": "頓奏"
+    },
+    "countInSound": {
+      "label": "預備拍",
+      "beep": "提示音",
+      "sticks": "鼓棒"
+    },
+    "cues": {
+      "label": "語音提示",
+      "hint": "預備拍、段落和「該你四小節」都會唸出來，你的眼睛可以一直看著指板。",
+      "noVoice": "需要教練語音。請在設定裡安裝；在那之前提示只顯示在螢幕上。",
+      "n1": "一",
+      "n2": "二",
+      "n3": "三",
+      "n4": "四",
+      "n5": "五",
+      "n6": "六",
+      "n7": "七",
+      "n8": "八"
     },
     "feel": {
       "label": "律動",
