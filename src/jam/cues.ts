@@ -84,18 +84,40 @@ export function countInPhraseCues(beats: number): JamCue[] {
 /**
  * Whether the count can be spoken beat by beat at this tempo.
  *
- * One utterance has to be synthesised, started and finished inside one beat,
- * or the count walks over itself. `speechMs` is what the machine measured for
- * the last one it said; with nothing measured yet the answer is yes, because
- * the first cue is how it gets measured and refusing to try would mean never
- * finding out.
+ * ## The measurement, and the answer it gave
  *
- * The margin is deliberate: a count that lands 90% of the way through the beat
- * is not a count, it is a stumble.
+ * Measured on the owner's laptop against the installed Piper and
+ * `en_US-lessac-medium`, ten runs of a single count word, warm:
+ *
+ * | | median | range |
+ * |---|---|---|
+ * | synthesis | 458 ms | 396–507 ms |
+ * | the spoken word itself | 654 ms | 631–770 ms |
+ *
+ * (The first call after a cold start is 1770 ms — the model load.) One cue
+ * therefore costs about **1.11 s** from asking to finished, and cues cannot
+ * overlap, because `tts_speak` synthesises to a WAV and plays it to the end.
+ *
+ * A beat is 652 ms at the slow blues' 92 BPM, 600 ms at 100 and 375 ms at the
+ * swing starter's 160. So **the count does not fit beat by beat** — and not
+ * merely because synthesis is slow: the WORD "one" is 654 ms of audio, longer
+ * than the beat at anything above about 92 BPM. Even a synthesiser that cost
+ * nothing would still be talking over the next beat. Per-beat counting needs
+ * a beat longer than 1.11 s, which is 54 BPM.
+ *
+ * So the jam says the whole count as one phrase, and this function is what
+ * would turn the other behaviour on for a machine and a voice fast enough.
+ * **Nothing measured yet counts as "does not fit"** — deliberately the other
+ * way round from a first draft that tried once to find out, because the way
+ * you find out is by stumbling over the first count-in a user ever hears,
+ * and the measurement above says which answer that experiment would give.
+ *
+ * The margin is 70% of the beat: a count that lands nine tenths of the way
+ * through is not a count, it is a stumble.
  */
 export function perBeatCountFits(args: { bpm: number; speechMs: number | null }): boolean {
   const { bpm, speechMs } = args;
-  if (speechMs === null) return true;
+  if (speechMs === null) return false;
   if (!Number.isFinite(bpm) || bpm <= 0) return false;
   const beatMs = 60000 / bpm;
   return speechMs <= beatMs * 0.7;

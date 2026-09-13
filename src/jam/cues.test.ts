@@ -62,8 +62,23 @@ describe("the count", () => {
     expect(perBeatCountFits({ bpm: 200, speechMs: 300 })).toBe(false);
   });
 
-  it("tries once before it knows, because trying is how it finds out", () => {
-    expect(perBeatCountFits({ bpm: 100, speechMs: null })).toBe(true);
+  it("says the phrase until something has actually been measured", () => {
+    // The way you would "find out by trying" is by stumbling over the first
+    // count-in a user ever hears, and the measurement in `cues.ts` already
+    // says which answer that experiment gives.
+    expect(perBeatCountFits({ bpm: 100, speechMs: null })).toBe(false);
+    expect(perBeatCountFits({ bpm: 40, speechMs: null })).toBe(false);
+  });
+
+  it("does not fit at any tempo a jam runs at, on the measured voice", () => {
+    // Measured: 458 ms to synthesise a count word plus 654 ms to say it.
+    const measured = 458 + 654;
+    for (const bpm of [92, 100, 120, 140, 160]) {
+      expect(perBeatCountFits({ bpm, speechMs: measured }), `${bpm} BPM`).toBe(false);
+    }
+    // It would fit on a machine an order of magnitude quicker, which is the
+    // only reason the per-beat path is still here.
+    expect(perBeatCountFits({ bpm: 100, speechMs: 120 })).toBe(true);
   });
 });
 

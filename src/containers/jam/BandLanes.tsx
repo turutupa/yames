@@ -192,10 +192,10 @@ export function BandLanes({
             {/* The mix. Disabled with the player, because turning up somebody
                 who is not in the band is a control that does nothing, and a
                 slider that does nothing is worse than no slider. */}
-            <label className="jam-band-volume">
-              <span className="sr-only">
-                {t("jam.mix.forLane", { lane: t(`jam.band.${lane.id}`) })}
-              </span>
+            {/* A div, not a label: the input carries its own `aria-label`, and
+                a label element wrapping it as well would announce the lane
+                twice. */}
+            <div className="jam-band-volume">
               <input
                 type="range"
                 min={0}
@@ -207,7 +207,7 @@ export function BandLanes({
                 onChange={(e) => onVolume(lane.id, Number(e.target.value))}
               />
               <span className="jam-band-volume-value">{Math.round(lane.volume * 100)}</span>
-            </label>
+            </div>
             <button
               type="button"
               role="switch"

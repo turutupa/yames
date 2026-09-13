@@ -130,6 +130,36 @@ async function drive() {
       );
     }
 
+    if (shot!.jam.meter) {
+      // The meter buttons are in the setup block at the bottom of the stage.
+      await until("the meter control", () => !!document.querySelector(".jam-meters"));
+      const meters = [...document.querySelectorAll<HTMLElement>(".jam-meters .jam-meter")];
+      const wantedMeter = meters.find((b) => b.textContent?.trim() === shot!.jam!.meter);
+      if (!wantedMeter) throw new Error(`no meter button "${shot!.jam.meter}"`);
+      wantedMeter.click();
+      await until("the rule-groove note", () => !!document.querySelector(".jam-meter-note"));
+    }
+
+    if (shot!.jam.editChords) {
+      // The mode first, then the cell — the two presses a person makes.
+      await until("the EDIT CHANGES link", () =>
+        [...document.querySelectorAll(".jam-link")].some((b) =>
+          (b.textContent ?? "").toLowerCase().includes("edit changes"),
+        ),
+      );
+      const edit = [...document.querySelectorAll<HTMLElement>(".jam-link")].find((b) =>
+        (b.textContent ?? "").toLowerCase().includes("edit changes"),
+      )!;
+      edit.click();
+      await until(
+        "the editable cells",
+        () => !!document.querySelector(".jam-timeline-cell[data-editable]"),
+      );
+      const cells = document.querySelectorAll<HTMLElement>(".jam-timeline-cell");
+      cells[shot!.jam.editChords - 1].click();
+      await until("the chord picker", () => !!document.querySelector(".jam-chord-picker"));
+    }
+
     if (shot!.jam.editor) {
       // The "make your own" card, which is the last one in the groove row and
       // the door a person actually opens the editor through.

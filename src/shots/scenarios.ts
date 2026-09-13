@@ -57,6 +57,20 @@ export interface Shot {
     bar?: number;
     /** Open the groove editor drawer before the capture. */
     editor?: boolean;
+    /**
+     * Turn "Edit changes" on and open the picker on this bar (1-based).
+     *
+     * Pressed rather than poked, like everything else here: the EDIT CHANGES
+     * link and then the cell, which is the only route a person has.
+     */
+    editChords?: number;
+    /**
+     * Pick this meter before the capture, by its label ("7/8").
+     *
+     * A jam in seven is the one picture that says the mode is not four-four
+     * only, and it cannot be reached from a starter jam any other way.
+     */
+    meter?: string;
     /** Scroll this selector to the top of the stage — the screen is taller
      *  than a window, and the band and the practice tools live below the
      *  fold of the one the chord is in. */
@@ -198,6 +212,55 @@ export const SHOTS: Shot[] = [
     width: 1400,
     height: 900,
     settleMs: 400,
+  },
+  {
+    id: "jam-changes",
+    suffix: "jam-changes",
+    window: "main",
+    tab: "jam",
+    // The timeline in edit mode with the picker open on bar 5 — the one
+    // screen that says the changes are yours rather than the form's.
+    jam: { row: 0, editChords: 5, scrollTo: ".jam-timeline-section" },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-seven",
+    suffix: "jam-seven",
+    window: "main",
+    tab: "jam",
+    // A jam in 7/8: the meter control, and the sentence saying the groove
+    // does not fit it so the drummer plays the rule.
+    jam: { row: 0, meter: "7/8", scrollTo: ".jam-setup" },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-mix",
+    suffix: "jam-mix",
+    window: "main",
+    tab: "jam",
+    // The band's three rows with their volume sliders, and the keys row's
+    // comping style.
+    jam: { row: 0, bar: 5, scrollTo: ".jam-band" },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-zen",
+    suffix: "jam-zen",
+    window: "main",
+    tab: "jam",
+    // Zen over a jam: the chord and the beat, nothing else.
+    jam: { row: 0, bar: 5 },
+    zen: true,
+    zenStyle: "focus",
+    width: 1400,
+    height: 900,
+    settleMs: 1200,
   },
   {
     id: "jam-empty",
