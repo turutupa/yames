@@ -679,6 +679,54 @@ pub fn run() {
                             let _ = store.save(); // flush to disk before exit
                         }
                     }
+                    // A TAKE STILL RECORDING IS FINISHED BEFORE ANYTHING
+                    // ELSE HAPPENS.
+                    //
+                    // A take's WAV is written with a 44-byte header of
+                    // zeroes and patched with the real length when the
+                    // writer thread finishes; the sidecar with the record is
+                    // written after that. Quitting used to run straight past
+                    // both — `exit(0)` below is not a `Drop`, it takes the
+                    // process down — so an hour's playing left a file the
+                    // decoder refuses and a take the list never shows. The
+                    // whole point of the feature is being able to listen
+                    // back to it later.
+                    //
+                    // Before the engine shutdown, so the callback is still
+                    // there while the writer drains the last of the band,
+                    // and for ANY window, because `exit(0)` below is for any
+                    // window too.
+                    if let (Some(engine_state), Some(take_state)) = (
+                        window.try_state::<EngineState>(),
+                        window.try_state::<TakeState>(),
+                    ) {
+                        let handoff = engine_state
+                            .0
+                            .lock()
+                            .unwrap_or_else(|e| e.into_inner())
+                            .take_handoff();
+                        let mut session =
+                            take_state.0.lock().unwrap_or_else(|e| e.into_inner());
+                        if session.is_recording() {
+                            match session.stop(&handoff) {
+                                Ok(Some(take)) => eprintln!(
+                                    "[take] finished on quit: {} ({:.1}s)",
+                                    take.path, take.duration_sec
+                                ),
+                                Ok(None) => {}
+                                Err(e) => eprintln!("[take] could not finish on quit: {e}"),
+                            }
+                        }
+                    }
+                    if let Some(audio_input) =
+                        window.try_state::<crate::audio_input::SharedAudioInput>()
+                    {
+                        audio_input
+                            .lock()
+                            .unwrap_or_else(|e| e.into_inner())
+                            .end_take_capture();
+                    }
+
                     // Quit the entire app when user closes ANY window. The
                     // engine shutdown is destructive (rips down the audio
                     // thread); we gate it to the "main" window so closing

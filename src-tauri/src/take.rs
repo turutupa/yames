@@ -2332,6 +2332,65 @@ mod tests {
         assert!((pcm[100] - 0.5).abs() < 0.01, "the band alone, at its own level");
     }
 
+    /// A TAKE NOBODY STOPPED IS NOT A TAKE, WHICH IS WHY QUITTING HAS TO
+    /// STOP ONE.
+    ///
+    /// The WAV is opened with 44 bytes of zeroes where the header goes and
+    /// patched with the real length only when the writer finishes; the
+    /// sidecar with the record is written after that. So a take still
+    /// running when the process ends is a file the decoder refuses and a row
+    /// the list shows as zero seconds long — an hour of playing that cannot
+    /// be listened back to, which is the whole point of the feature.
+    ///
+    /// This is the stake behind the window-close handler in `lib.rs`, which
+    /// now finishes an active take before `exit(0)`. `exit(0)` is not a
+    /// `Drop`: nothing else would have run.
+    #[test]
+    fn a_take_is_only_readable_once_something_stops_it() {
+        let root = tmp_dir("quit");
+        let handoff: SharedTake = Arc::new(TakeHandoff::new());
+        let mut session = TakeSession::default();
+        session
+            .start(plain(&root, "blues", &handoff, None, 48_000))
+            .expect("start");
+        let band_ring = {
+            let mut seen = 0u64;
+            handoff.poll_record(&mut seen).unwrap().unwrap()
+        };
+        for _ in 0..8 {
+            band_ring.push(&[0.4f32; 480]);
+            std::thread::sleep(std::time::Duration::from_millis(WRITER_TICK_MS));
+        }
+
+        // On disk right now — which is what quitting without stopping would
+        // leave behind.
+        let dir = root.join(TAKES_DIR).join(safe_dir_name("blues").unwrap());
+        let path = fs::read_dir(&dir)
+            .unwrap()
+            .flatten()
+            .map(|e| e.path())
+            .find(|p| p.extension().and_then(|e| e.to_str()) == Some("wav"))
+            .expect("the take is being written");
+        assert!(
+            decode_wav_bytes(&fs::read(&path).unwrap()).is_err(),
+            "an unfinished take is 44 bytes of zeroes where the header goes"
+        );
+        assert_eq!(duration_of(&path), 0.0, "and it reads as no time at all");
+        assert!(
+            !path.with_extension("json").exists(),
+            "and it has no record beside it"
+        );
+
+        // Stopping it is what makes it a take — the header patched, the
+        // sidecar written, the audio readable.
+        let take = session.stop(&handoff).unwrap().expect("a take");
+        let (pcm, sr) = decode_wav_bytes(&fs::read(&take.path).unwrap()).unwrap();
+        assert_eq!(sr, 48_000);
+        assert!(!pcm.is_empty());
+        assert!(Path::new(&take.path).with_extension("json").exists());
+        assert!(take.duration_sec > 0.0);
+    }
+
     #[test]
     fn a_second_take_is_refused_while_one_is_running() {
         let root = tmp_dir("double");
