@@ -19,6 +19,7 @@ pub mod session;
 mod session_audio;
 pub mod session_log;
 mod state;
+mod take;
 pub mod timing;
 mod tts;
 
@@ -37,8 +38,14 @@ pub mod probe {
     /// through.
     pub use crate::jam::{
         band_state_for_bar, compile as compile_jam, JamBandState, JamBassLine, JamConfig,
-        JamDropOut, JamPattern, JamPosition, JamPracticeConfig, JamTable, JamTrade,
+        JamDropOut, JamKeysLine, JamMix, JamPattern, JamPosition, JamPracticeConfig, JamTable,
+        JamTrade,
     };
+    /// The take recorder. `--jam-take` runs one during the measurement, so
+    /// the gate covers the ring the output callback writes into and the
+    /// writer thread draining it to disk underneath the stream.
+    pub use crate::take::{SharedTake, TakeHandoff, TakeRing, TakeSession};
+
     pub use crate::state::{create_shared_state, AppState, SharedState};
     pub use crate::timing::create_beat_log;
 
@@ -72,7 +79,8 @@ use commands::{
     start_speed_ramp_from, start_voice_repair, stop_evaluation, stop_playback, stop_recording,
     arm_count_in, set_accent_mode, set_jam, set_jam_position, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
     tts_stop, tts_voice_diagnostics, unload_coach_model, write_model_chunk, DownloadState,
-    EngineState, JamGainState,
+    delete_take, list_takes, play_take, start_take, stop_take, stop_take_playback, takes_dir_size,
+    EngineState, JamGainState, TakeState,
 };
 use engine::MetronomeEngine;
 use midi::create_shared_midi;
@@ -283,6 +291,8 @@ pub fn run() {
             app.manage(EngineState(Mutex::new(engine)));
             // The `set_jam` normalisation memo. See `JamGainState`.
             app.manage(JamGainState::default());
+            // The take being recorded, if one is. See `TakeState`.
+            app.manage(TakeState::default());
 
             // Start audio output device polling
             engine::start_audio_device_polling(app.handle().clone());
@@ -572,6 +582,13 @@ pub fn run() {
             set_accent_mode,
             set_jam,
             set_jam_position,
+            start_take,
+            stop_take,
+            list_takes,
+            delete_take,
+            play_take,
+            stop_take_playback,
+            takes_dir_size,
             stop_speed_ramp,
             set_active_tab,
             get_active_tab,
