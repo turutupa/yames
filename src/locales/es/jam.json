@@ -220,6 +220,8 @@
       "chooseFolder": "Una carpeta con tus samples…",
       "folderHint": "bombo, caja, charles, charles abierto, ride, aro, crash · nada sale de este equipo",
       "folderUnavailable": "Los samples propios no están en esta versión.",
+      "folderEmpty": "No hay sonidos de batería en esa carpeta: no se cargó nada.",
+      "folderRefused": "Esa carpeta no se pudo cargar. Suena el kit incluido.",
       "foundVoices": "Encontrado: {{voices}}.",
       "fallbackVoices": "{{voices}} vienen de {{kit}}.",
       "voice": {

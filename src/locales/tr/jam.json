@@ -220,6 +220,8 @@
       "chooseFolder": "Kendi sample'larının olduğu bir klasör…",
       "folderHint": "kick, trampet, hi-hat, açık hi-hat, ride, rim, crash · hiçbir şey bu bilgisayardan çıkmaz",
       "folderUnavailable": "Kendi sample'ların bu sürümde yok.",
+      "folderEmpty": "O klasörde davul sesi yok — hiçbir şey yüklenmedi.",
+      "folderRefused": "O klasör yüklenemedi. Yerleşik kit çalıyor.",
       "foundVoices": "Bulundu: {{voices}}.",
       "fallbackVoices": "{{voices}} {{kit}} setinden geliyor.",
       "voice": {

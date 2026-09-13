@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import {
   listJams,
@@ -47,7 +47,15 @@ import type { BeatEvent } from "../../../types";
  * jam too (JAM_MODE §8.5) and the runner has to hand the engine exactly what
  * this hook hands it. See `jamEngine.ts` for the order and why it matters.
  */
-import { clearJam, lineSignature, meterSignature, pushJam, sendJam } from "./jamEngine";
+import {
+  clearJam,
+  jamSendRefusal,
+  lineSignature,
+  meterSignature,
+  pushJam,
+  sendJam,
+  subscribeJamSend,
+} from "./jamEngine";
 import type { MeterSnapshot } from "./jamEngine";
 
 /**
@@ -310,6 +318,14 @@ export function useJamSession({
    * the fifth avoids that.
    */
   const [previewKit, setPreviewKit] = useState<string | null>(null);
+  /**
+   * The engine's standing refusal, if it has one.
+   *
+   * Read from the module rather than kept here because the sends happen in
+   * `jamEngine`, on their own, with no React around them — and because the
+   * setlist runner sends jams through the same door.
+   */
+  const sendRefusal = useSyncExternalStore(subscribeJamSend, jamSendRefusal, jamSendRefusal);
   /** Bar lines seen since the preview started. Two, then it is over. */
   const previewBarsRef = useRef(0);
   /** True when the preview is what pressed play, so it is what presses stop. */
@@ -1320,6 +1336,12 @@ export function useJamSession({
     /** The kit a Preview is sounding, and the button that starts one. */
     previewKit,
     startKitPreview,
+    /**
+     * True while the engine is refusing a configuration that names a folder
+     * of your own samples — so the kit picker can say so instead of leaving
+     * the built-in kit playing under a folder that looks chosen.
+     */
+    customKitRefused: !!sendRefusal?.customKit,
     /** True while a jam is loaded and the transport would start the band. */
     playing: !!jam && isPlaying,
     loadJam,

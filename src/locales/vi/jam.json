@@ -220,6 +220,8 @@
       "chooseFolder": "Một thư mục sample của bạn…",
       "folderHint": "kick, snare, hi-hat, hi-hat mở, ride, rim, crash · không gì rời khỏi máy này",
       "folderUnavailable": "Bản này chưa hỗ trợ sample riêng.",
+      "folderEmpty": "Thư mục đó không có tiếng trống nào — không nạp được gì.",
+      "folderRefused": "Không nạp được thư mục đó. Bộ trống có sẵn đang chơi.",
       "foundVoices": "Tìm thấy: {{voices}}.",
       "fallbackVoices": "{{voices}} lấy từ {{kit}}.",
       "voice": {

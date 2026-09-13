@@ -220,6 +220,8 @@
       "chooseFolder": "一個裝著你自己取樣的資料夾…",
       "folderHint": "大鼓、小鼓、腳踏鈸、開鈸、疊音鈸、邊擊、碎音鈸 · 什麼都不會離開這台電腦",
       "folderUnavailable": "這個版本用不了你自己的取樣。",
+      "folderEmpty": "這個資料夾裡沒有鼓的聲音，什麼都沒載入。",
+      "folderRefused": "這個資料夾載不進來，現在響的是內建鼓組。",
       "foundVoices": "找到：{{voices}}。",
       "fallbackVoices": "{{voices}}來自{{kit}}。",
       "voice": {

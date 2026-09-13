@@ -220,6 +220,8 @@
       "chooseFolder": "Una cartella con i tuoi sample…",
       "folderHint": "cassa, rullante, charleston, charleston aperto, ride, rim, crash · niente esce da questo computer",
       "folderUnavailable": "I sample tuoi non sono disponibili in questa build.",
+      "folderEmpty": "Nessun suono di batteria in quella cartella: non è stato caricato niente.",
+      "folderRefused": "Quella cartella non si è caricata. Sta suonando il kit incluso.",
       "foundVoices": "Trovati: {{voices}}.",
       "fallbackVoices": "{{voices}} arrivano da {{kit}}.",
       "voice": {

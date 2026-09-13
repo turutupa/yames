@@ -124,6 +124,63 @@ describe("a folder of your own", () => {
     expect(ipc.inspect).not.toHaveBeenCalled();
   });
 
+  it("turns down a folder with no drums in it", async () => {
+    // The inspection only FAILS when the directory cannot be read. A folder
+    // of guitar loops comes back happily with an empty voice list, and
+    // adopting that wrote a custom kit the engine refuses and a row that said
+    // "Found ." — a kit chosen, and silence where the drums were.
+    ipc.pick.mockResolvedValue("/home/you/loops");
+    ipc.inspect.mockResolvedValue({ voices: [], missing: ["kick", "snare"] });
+    const { props } = draw();
+    open();
+    fireEvent.click(screen.getByText("A folder of your samples…"));
+
+    await waitFor(() => expect(screen.getAllByText(/No drum sounds/).length).toBeGreaterThan(0));
+    expect(props.onCustomKit).not.toHaveBeenCalled();
+    // The menu stays open, so the answer is next to the button that asked.
+    expect(screen.getByRole("listbox")).toBeInTheDocument();
+  });
+
+  it("turns down a folder it could not read, rather than swallowing it", async () => {
+    // `inspectKitFolder(...).catch(() => null)` used to hand back null and
+    // the row adopted the folder anyway, with nothing found and nothing said.
+    ipc.pick.mockResolvedValue("/home/you/gone");
+    ipc.inspect.mockRejectedValue(new Error("no such directory"));
+    const { props } = draw();
+    open();
+    fireEvent.click(screen.getByText("A folder of your samples…"));
+
+    await waitFor(() => expect(screen.getAllByText(/No drum sounds/).length).toBeGreaterThan(0));
+    expect(props.onCustomKit).not.toHaveBeenCalled();
+  });
+
+  it("says when the engine will not have the folder it was given", async () => {
+    // The band keeps playing the built-in kit under a row that says the
+    // folder is chosen. It used to be a `console.warn` and nothing else.
+    draw({ customKit: { dir: "C:/s/mine", name: "mine" }, refused: true });
+    expect(screen.getByText(/would not load/)).toBeInTheDocument();
+  });
+
+  it("says nothing about a refusal there is no folder for", () => {
+    draw({ customKit: null, refused: true });
+    expect(screen.queryByText(/would not load/)).toBeNull();
+  });
+
+  it("closes the menu on Escape, and leaves the sheet behind it alone", () => {
+    // The dropdown is on the setup sheet, and the sheet closes on Escape too.
+    // Unclaimed, one press put both away and the kit list took the sheet with
+    // it — so `JamSelect`'s rule holds here as well: one Escape, one thing.
+    const onSheetKey = vi.fn();
+    document.addEventListener("keydown", onSheetKey);
+    draw();
+    open();
+    expect(screen.getByRole("listbox")).toBeInTheDocument();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("listbox")).toBeNull();
+    expect(onSheetKey).not.toHaveBeenCalled();
+    document.removeEventListener("keydown", onSheetKey);
+  });
+
   it("says so on a build that has no such command, rather than looking dead", async () => {
     ipc.pick.mockRejectedValue(new Error("command pick_kit_folder not found"));
     const { props } = draw();

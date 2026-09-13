@@ -220,6 +220,8 @@
       "chooseFolder": "내 샘플이 든 폴더…",
       "folderHint": "킥, 스네어, 하이햇, 오픈 하이햇, 라이드, 림, 크래시 · 이 기기를 벗어나지 않습니다",
       "folderUnavailable": "이 빌드에서는 내 샘플을 쓸 수 없습니다.",
+      "folderEmpty": "그 폴더에는 드럼 소리가 없습니다. 아무것도 불러오지 않았습니다.",
+      "folderRefused": "그 폴더를 불러오지 못했습니다. 내장 키트가 연주됩니다.",
       "foundVoices": "찾은 소리: {{voices}}.",
       "fallbackVoices": "{{voices}}은(는) {{kit}}에서 납니다.",
       "voice": {

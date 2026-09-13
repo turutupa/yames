@@ -101,6 +101,8 @@ interface JamSetupSheetProps {
   /** Two bars of the current groove on a kit, through the engine (B7). */
   onPreviewKit: (kit: string) => void;
   previewingKit: string | null;
+  /** True while the engine is refusing a folder of your own samples (B3). */
+  customKitRefused?: boolean;
   /** The groove editor's door, which lives on this sheet now. */
   onOpenEditor: () => void;
   /** "Edit changes" — the sheet turns the mode on and the timeline behind it obeys. */
@@ -135,6 +137,7 @@ export function JamSetupSheet({
   lineup,
   onPreviewKit,
   previewingKit,
+  customKitRefused = false,
   onOpenEditor,
   editingChords,
   onEditingChords,
@@ -290,6 +293,7 @@ export function JamSetupSheet({
             onCustomKit={(customKit) => onEdit({ customKit })}
             onPreview={onPreviewKit}
             previewing={previewingKit}
+            refused={customKitRefused}
           />
           <Segmented
             label={t("jam.fills.label")}

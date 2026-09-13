@@ -220,6 +220,8 @@
       "chooseFolder": "一个装着你自己采样的文件夹…",
       "folderHint": "底鼓、军鼓、踩镲、开镲、叮叮镲、边击、吊镲 · 什么都不会离开这台电脑",
       "folderUnavailable": "这个版本用不了你自己的采样。",
+      "folderEmpty": "这个文件夹里没有鼓的声音，什么都没加载。",
+      "folderRefused": "这个文件夹加载不了，现在响的是内置鼓组。",
       "foundVoices": "找到：{{voices}}。",
       "fallbackVoices": "{{voices}}来自{{kit}}。",
       "voice": {

@@ -220,6 +220,8 @@
       "chooseFolder": "自分のサンプルのフォルダ…",
       "folderHint": "キック、スネア、ハイハット、オープンハイハット、ライド、リム、クラッシュ · 何もこの端末から出ません",
       "folderUnavailable": "このビルドでは自分のサンプルは使えません。",
+      "folderEmpty": "そのフォルダにドラムの音がありません。何も読み込みませんでした。",
+      "folderRefused": "そのフォルダは読み込めませんでした。内蔵キットが鳴っています。",
       "foundVoices": "見つかった音: {{voices}}。",
       "fallbackVoices": "{{voices}} は {{kit}} から鳴ります。",
       "voice": {

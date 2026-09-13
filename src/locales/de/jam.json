@@ -220,6 +220,8 @@
       "chooseFolder": "Ein Ordner mit deinen Samples…",
       "folderHint": "Kick, Snare, Hi-Hat, offene Hi-Hat, Ride, Rim, Crash · nichts verlässt diesen Rechner",
       "folderUnavailable": "Eigene Samples gibt es in diesem Build nicht.",
+      "folderEmpty": "In diesem Ordner sind keine Drum-Sounds — es wurde nichts geladen.",
+      "folderRefused": "Dieser Ordner ließ sich nicht laden. Es spielt das eingebaute Kit.",
       "foundVoices": "Gefunden: {{voices}}.",
       "fallbackVoices": "{{voices}} kommen von {{kit}}.",
       "voice": {

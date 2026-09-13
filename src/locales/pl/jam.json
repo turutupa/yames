@@ -220,6 +220,8 @@
       "chooseFolder": "Folder z twoimi samplami…",
       "folderHint": "stopa, werbel, hi-hat, otwarty hi-hat, ride, rim, crash · nic nie opuszcza tego komputera",
       "folderUnavailable": "Własnych sampli nie ma w tej wersji.",
+      "folderEmpty": "W tym folderze nie ma dźwięków perkusji — nic nie zostało wczytane.",
+      "folderRefused": "Tego folderu nie udało się wczytać. Gra wbudowany zestaw.",
       "foundVoices": "Znaleziono: {{voices}}.",
       "fallbackVoices": "{{voices}} pochodzą z {{kit}}.",
       "voice": {

@@ -220,6 +220,8 @@
       "chooseFolder": "Un dossier avec tes samples…",
       "folderHint": "grosse caisse, caisse claire, charley, charley ouvert, ride, rim, crash · rien ne quitte cette machine",
       "folderUnavailable": "Tes propres samples ne sont pas disponibles dans cette version.",
+      "folderEmpty": "Aucun son de batterie dans ce dossier : rien n'a été chargé.",
+      "folderRefused": "Ce dossier n'a pas pu être chargé. C'est le kit intégré qui joue.",
       "foundVoices": "Trouvé : {{voices}}.",
       "fallbackVoices": "{{voices}} viennent de {{kit}}.",
       "voice": {

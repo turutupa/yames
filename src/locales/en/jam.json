@@ -220,6 +220,8 @@
       "chooseFolder": "A folder of your samples…",
       "folderHint": "kick, snare, hat, open hat, ride, rim, crash · nothing leaves this machine",
       "folderUnavailable": "Your own samples are not available in this build.",
+      "folderEmpty": "No drum sounds in that folder — nothing was loaded.",
+      "folderRefused": "That folder would not load. The built-in kit is playing.",
       "foundVoices": "Found {{voices}}.",
       "fallbackVoices": "{{voices}} come from {{kit}}.",
       "voice": {

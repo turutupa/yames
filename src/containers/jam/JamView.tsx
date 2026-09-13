@@ -124,6 +124,8 @@ interface JamViewProps {
   /** Two bars of the current groove on a kit, through the engine (B7). */
   onPreviewKit?: (kit: string) => void;
   previewingKit?: string | null;
+  /** True while the engine is refusing a folder of your own samples (B3). */
+  customKitRefused?: boolean;
   screen: JamScreenState;
   /**
    * Where the form is being sent: the loop, the jump waiting for a bar line,
@@ -176,6 +178,7 @@ export function JamView({
   onToggleTakes,
   onPreviewKit,
   previewingKit = null,
+  customKitRefused = false,
   screen,
   position,
   tapActive,
@@ -593,6 +596,7 @@ export function JamView({
           lineup={lineup}
           onPreviewKit={(kit) => onPreviewKit?.(kit)}
           previewingKit={previewingKit}
+          customKitRefused={customKitRefused}
           onOpenEditor={() => screen.setEditorOpen(true)}
           editingChords={screen.editingChords}
           onEditingChords={(on) => {

@@ -220,6 +220,8 @@
       "chooseFolder": "Uma pasta com seus samples…",
       "folderHint": "bumbo, caixa, chimbal, chimbal aberto, ride, aro, crash · nada sai desta máquina",
       "folderUnavailable": "Samples próprios não estão nesta versão.",
+      "folderEmpty": "Não há sons de bateria nessa pasta — nada foi carregado.",
+      "folderRefused": "Essa pasta não pôde ser carregada. O kit interno está tocando.",
       "foundVoices": "Encontrado: {{voices}}.",
       "fallbackVoices": "{{voices}} vêm de {{kit}}.",
       "voice": {
