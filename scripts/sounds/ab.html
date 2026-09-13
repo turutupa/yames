@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jam kits — A/B</title>
+<style>
+  :root {
+    --bg: #14161a; --panel: #1c1f25; --line: #2a2f38; --ink: #e8eaee;
+    --dim: #9aa2ae; --hot: #ff7043; --ok: #6fcf97; --accent: #7aa2f7;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 28px 24px 60px; background: var(--bg); color: var(--ink);
+    font: 15px/1.55 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.09em;
+       color: var(--dim); margin: 30px 0 10px; font-weight: 600; }
+  p.sub { color: var(--dim); margin: 0 0 22px; max-width: 68ch; }
+  .card { background: var(--panel); border: 1px solid var(--line);
+          border-radius: 10px; padding: 16px 18px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  button {
+    font: inherit; font-weight: 600; color: var(--ink); background: #262b33;
+    border: 1px solid var(--line); border-radius: 7px; padding: 9px 15px;
+    cursor: pointer; transition: background .12s, border-color .12s;
+  }
+  button:hover:not(:disabled) { background: #2f3540; border-color: #3d4450; }
+  button:disabled { opacity: .4; cursor: default; }
+  button.kit.on { background: var(--hot); border-color: var(--hot); color: #16181c; }
+  button.big { padding: 11px 20px; }
+  button.voice { font-weight: 500; padding: 7px 12px; font-size: 14px; }
+  .kits { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+  label { color: var(--dim); font-size: 14px; display: inline-flex;
+          align-items: center; gap: 8px; }
+  input[type=range] { accent-color: var(--hot); width: 170px; vertical-align: middle; }
+  .bpm { font-variant-numeric: tabular-nums; color: var(--ink); min-width: 4ch;
+         display: inline-block; font-weight: 600; }
+  .beats { display: flex; gap: 4px; margin: 14px 0 2px; }
+  .beat { flex: 1; height: 6px; border-radius: 3px; background: #262b33; }
+  .beat.lit { background: var(--hot); }
+  .beat.bar1 { opacity: 1; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; margin-top: 6px; }
+  th, td { text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--line); }
+  th { color: var(--dim); font-weight: 600; font-size: 12px;
+       text-transform: uppercase; letter-spacing: 0.06em; }
+  td.num { font-variant-numeric: tabular-nums; text-align: right; padding-right: 18px; }
+  code { background: #262b33; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+  .warn { background: #3a2118; border: 1px solid #7a3b22; color: #ffc9a8;
+          border-radius: 8px; padding: 14px 16px; margin-bottom: 20px; }
+  .hint { color: var(--dim); font-size: 13.5px; margin: 8px 0 0; }
+  .blind { color: var(--accent); font-weight: 600; }
+  .status { color: var(--dim); font-size: 13.5px; min-height: 1.4em; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Jam kits — A/B</h1>
+<p class="sub">
+  The same two bars of rock, played by each kit in turn, so the five can be
+  compared by ear rather than by table. Every voice is peak 0.900 in the file;
+  the mix below applies one set of per-voice levels to <em>all</em> kits, the
+  way the engine does, so what you hear is the difference between the files
+  and nothing else.
+</p>
+
+<div id="fileWarn" class="warn" hidden>
+  <strong>This page needs a local server.</strong> Opened straight off disk, the
+  browser refuses to read the WAVs. From the repository root run
+  <code>python -m http.server 8123</code> and then open
+  <code>http://localhost:8123/scripts/sounds/ab.html</code>.
+</div>
+
+<div class="card">
+  <div class="kits" id="kits"></div>
+  <p class="hint">Click a kit while it is looping and it swaps at the top of the next bar — that is the comparison that matters.</p>
+
+  <div class="beats" id="beats"></div>
+
+  <div class="row" style="margin-top:14px">
+    <button class="big" id="play">Play the loop</button>
+    <button class="big" id="once">Two bars, once</button>
+    <button class="big" id="round">Round robin — all five</button>
+    <label style="margin-left:6px">
+      Tempo <input type="range" id="bpm" min="60" max="180" value="104" step="1">
+      <span class="bpm" id="bpmOut">104</span>
+    </label>
+    <label style="margin-left:10px">
+      <input type="checkbox" id="ride"> Ride, not hats
+    </label>
+  </div>
+
+  <div class="row" style="margin-top:12px">
+    <button id="blind">Blind test</button>
+    <button id="reveal" disabled>Reveal</button>
+    <span class="status" id="status"></span>
+  </div>
+  <p class="hint">Blind test picks a kit at random and hides which. Judge it, then reveal.</p>
+</div>
+
+<h2>One voice at a time</h2>
+<div class="card">
+  <div class="row" id="voices"></div>
+  <p class="hint">
+    For naming what to change. The knobs behind each voice are listed in
+    <code>generate_sounds.py</code> under <code>RAW_SPEC</code> — "more wire",
+    "more click", "less ring" each point at one number.
+  </p>
+</div>
+
+<h2>The groove</h2>
+<div class="card">
+  <table>
+    <thead><tr><th>voice</th><th>bar 1</th><th>bar 2</th><th class="num">level</th></tr></thead>
+    <tbody id="chart"></tbody>
+  </table>
+  <p class="hint">
+    Straight 8ths, backbeat on 2 and 4, the kick pushing the &amp; of 3, two
+    ghost notes so the soft snare is audible, an open hat lifting the end of
+    each bar, and a crash on the one. Positions are 16ths; 1&nbsp;e&nbsp;&amp;&nbsp;a.
+  </p>
+</div>
+
+</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// No library, on purpose: this page has to keep working with nothing installed
+// and no build step, for as long as the kits exist.
+//
+// Web Audio rather than <audio> elements because the thing being judged IS the
+// transient. An <audio> tag fires when it feels like it, tens of milliseconds
+// late and differently each time, and a kick that arrives late does not sound
+// punchy — it sounds like a different kick. Every hit here is scheduled against
+// the audio clock ahead of time.
+// ---------------------------------------------------------------------------
+
+const KITS = ["room", "tight", "brushes", "electronic", "raw"];
+const VOICES = ["kick", "snare_hi", "snare_lo", "hat", "hat_open", "ride", "rim", "crash"];
+const DIR = "../../src-tauri/sounds/";
+
+// One mix for every kit. The files are all peak 0.900 — timbre and duration
+// live in the file, balance lives here, which is exactly the split KITS.md
+// describes. Change these and you are no longer comparing kits.
+const MIX = {
+  kick: 1.00, snare_hi: 0.85, snare_lo: 0.30, hat: 0.40,
+  hat_open: 0.42, ride: 0.45, rim: 0.50, crash: 0.55,
+};
+
+// Two bars on a 16th grid, 32 steps. Kept as step lists because that is how a
+// drummer reads it and how the engine's groove table stores it.
+const GROOVE = {
+  kick:     [0, 10, 16, 22, 26],
+  snare_hi: [4, 12, 20, 28],
+  snare_lo: [7, 23, 31],
+  hat:      [0, 2, 4, 6, 8, 10, 12, 16, 18, 20, 22, 24, 26, 28],
+  hat_open: [14, 30],
+  crash:    [0],
+};
+const STEPS = 32;
+
+let ctx = null;
+const buffers = {};
+let current = "raw";
+let looping = false;
+let roundRobin = false;
+let blindOrder = null;
+let bpm = 104;
+let onRide = false;
+
+// --- loading ---------------------------------------------------------------
+
+async function load() {
+  ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+  const jobs = [];
+  for (const kit of KITS) {
+    for (const v of VOICES) {
+      const name = `kit_${kit}_${v}.wav`;
+      jobs.push(
+        fetch(DIR + name)
+          .then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+          .then((b) => ctx.decodeAudioData(b))
+          .then((buf) => { buffers[`${kit}/${v}`] = buf; })
+      );
+    }
+  }
+  await Promise.all(jobs);
+}
+
+let ready = null;
+function ensure() {
+  if (!ready) {
+    ready = load().catch((e) => {
+      document.getElementById("fileWarn").hidden = false;
+      ready = null;
+      throw e;
+    });
+  }
+  return ready;
+}
+
+// --- scheduling ------------------------------------------------------------
+
+function hit(kit, voice, when, gain) {
+  const buf = buffers[`${kit}/${voice}`];
+  if (!buf) return;
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  const g = ctx.createGain();
+  g.gain.value = gain;
+  src.connect(g).connect(ctx.destination);
+  src.start(when);
+}
+
+function stepSeconds() { return 60 / bpm / 4; }
+
+/** Schedule the two bars for one kit starting at `at`. Returns its end time. */
+function scheduleBars(kit, at) {
+  const s = stepSeconds();
+  for (const voice of Object.keys(GROOVE)) {
+    // "Ride, not hats" moves the time-keeping to the ride without changing a
+    // single position, so the ride is judged inside the groove rather than as
+    // an isolated ping. Nothing else about the two bars moves.
+    let v = voice;
+    if (onRide) {
+      if (voice === "hat") v = "ride";
+      else if (voice === "hat_open") continue;
+    }
+    for (const step of GROOVE[voice]) {
+      hit(kit, v, at + step * s, MIX[v]);
+    }
+  }
+  return at + STEPS * s;
+}
+
+// The loop scheduler runs a little ahead of the clock and hands over between
+// kits only at a bar line, so switching kits never moves the beat.
+let nextTime = 0;
+let timer = null;
+let barIndex = 0;
+let litFrom = 0;
+
+function pump() {
+  // Schedule anything that starts inside the next 250 ms. The kit is read
+  // fresh on every pass, so clicking a different kit takes effect at the next
+  // bar line and never at a beat — swapping mid-bar would move the groove and
+  // the groove is the one thing this page must hold constant.
+  const horizon = ctx.currentTime + 0.25;
+  while (nextTime < horizon) {
+    const kit = blindOrder || (roundRobin ? KITS[barIndex % KITS.length] : current);
+    litFrom = nextTime;
+    nextTime = scheduleBars(kit, nextTime);
+    barIndex++;
+    if (roundRobin) setKitButtons(kit);
+  }
+}
+
+function start(mode) {
+  ensure().then(() => {
+    if (ctx.state === "suspended") ctx.resume();
+    stop();
+    looping = true;
+    barIndex = 0;
+    nextTime = ctx.currentTime + 0.08;
+    roundRobin = mode === "round";
+    pump();
+    timer = setInterval(pump, 60);
+    tick();
+    document.getElementById("play").textContent = "Stop";
+  });
+}
+
+function stop() {
+  looping = false;
+  roundRobin = false;
+  if (timer) clearInterval(timer);
+  timer = null;
+  document.getElementById("play").textContent = "Play the loop";
+  paintBeats(-1);
+}
+
+// --- the beat lamps --------------------------------------------------------
+
+function paintBeats(active) {
+  const els = document.querySelectorAll(".beat");
+  els.forEach((el, i) => el.classList.toggle("lit", i === active));
+}
+
+function tick() {
+  if (!looping) return;
+  const s = stepSeconds();
+  const into = ctx.currentTime - litFrom;
+  const step = Math.floor(into / s);
+  paintBeats(step >= 0 && step < STEPS ? Math.floor(step / 4) : -1);
+  requestAnimationFrame(tick);
+}
+
+// --- UI --------------------------------------------------------------------
+
+function setKitButtons(kit) {
+  document.querySelectorAll("button.kit").forEach((b) => {
+    b.classList.toggle("on", !blindOrder && b.dataset.kit === kit);
+  });
+}
+
+const kitsEl = document.getElementById("kits");
+for (const kit of KITS) {
+  const b = document.createElement("button");
+  b.className = "kit" + (kit === current ? " on" : "");
+  b.dataset.kit = kit;
+  b.textContent = kit;
+  b.onclick = () => {
+    current = kit;
+    roundRobin = false;
+    blindOrder = null;
+    document.getElementById("reveal").disabled = true;
+    document.getElementById("status").textContent = "";
+    setKitButtons(kit);
+    if (!looping) start("loop");
+  };
+  kitsEl.appendChild(b);
+}
+
+const beatsEl = document.getElementById("beats");
+for (let i = 0; i < 8; i++) {
+  const d = document.createElement("div");
+  d.className = "beat";
+  beatsEl.appendChild(d);
+}
+
+document.getElementById("play").onclick = () => (looping ? stop() : start("loop"));
+document.getElementById("once").onclick = () => {
+  ensure().then(() => {
+    if (ctx.state === "suspended") ctx.resume();
+    stop();
+    scheduleBars(blindOrder || current, ctx.currentTime + 0.08);
+  });
+};
+document.getElementById("round").onclick = () => {
+  blindOrder = null;
+  document.getElementById("reveal").disabled = true;
+  start("round");
+};
+
+document.getElementById("blind").onclick = () => {
+  blindOrder = KITS[Math.floor(Math.random() * KITS.length)];
+  document.getElementById("reveal").disabled = false;
+  document.getElementById("status").innerHTML =
+    '<span class="blind">Playing one of the five. Which one is it?</span>';
+  document.querySelectorAll("button.kit").forEach((b) => b.classList.remove("on"));
+  start("loop");
+};
+document.getElementById("reveal").onclick = () => {
+  document.getElementById("status").innerHTML =
+    'It was <span class="blind">' + blindOrder + "</span>.";
+  const was = blindOrder;
+  blindOrder = null;
+  current = was;
+  setKitButtons(was);
+  document.getElementById("reveal").disabled = true;
+};
+
+const rideEl = document.getElementById("ride");
+rideEl.onchange = () => { onRide = rideEl.checked; drawChart(); };
+
+const bpmEl = document.getElementById("bpm");
+bpmEl.oninput = () => {
+  bpm = +bpmEl.value;
+  document.getElementById("bpmOut").textContent = bpm;
+};
+
+const voicesEl = document.getElementById("voices");
+for (const v of VOICES) {
+  const b = document.createElement("button");
+  b.className = "voice";
+  b.textContent = v;
+  b.onclick = () =>
+    ensure().then(() => {
+      if (ctx.state === "suspended") ctx.resume();
+      hit(blindOrder || current, v, ctx.currentTime + 0.03, MIX[v]);
+    });
+  voicesEl.appendChild(b);
+}
+
+// The groove chart, written out of the same table the scheduler reads so the
+// two can never disagree.
+const NAMES = ["1", "e", "&", "a"];
+function barText(steps, bar) {
+  const cells = [];
+  for (let i = 0; i < 16; i++) {
+    cells.push(steps.includes(bar * 16 + i) ? "x" : "·");
+    if (i % 4 === 3) cells.push(" ");
+  }
+  return cells.join("");
+}
+const chart = document.getElementById("chart");
+function drawChart() {
+  chart.innerHTML = "";
+  for (const v of VOICES) {
+    let steps = GROOVE[v];
+    if (onRide) {
+      if (v === "hat" || v === "hat_open") steps = null;
+      else if (v === "ride") steps = GROOVE.hat;
+    }
+    // Only the voices this groove actually strikes. `rim` — and the `ride` or
+    // the hats, depending on the toggle — are auditioned one at a time above;
+    // an empty row of dots says nothing.
+    if (!steps || !steps.length) continue;
+    const tr = document.createElement("tr");
+    tr.innerHTML =
+      "<td>" + v + "</td>" +
+      '<td><code>' + barText(steps, 0) + "</code></td>" +
+      '<td><code>' + barText(steps, 1) + "</code></td>" +
+      '<td class="num">' + MIX[v].toFixed(2) + "</td>";
+    chart.appendChild(tr);
+  }
+}
+drawChart();
+
+if (location.protocol === "file:") {
+  document.getElementById("fileWarn").hidden = false;
+}
+</script>
+</body>
+</html>

@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyBassVoice,
   approachNote,
   bassLineFor,
   bassRoot,
   bassStyleForGroove,
+  BASS_VOICE_HOLD_BEATS,
+  sustainedRuns,
   BASS_MAX_MIDI,
   BASS_MIN_MIDI,
   BASS_STYLE_FOR_GROOVE,
@@ -16,7 +19,7 @@ import {
   type BassLineInput,
   type BassStyle,
 } from "./bassline";
-import type { JamFeel, JamLevel, JamPattern } from "./types";
+import type { JamBassVoice, JamFeel, JamLevel, JamPattern } from "./types";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -531,5 +534,191 @@ describe("funk", () => {
       });
       for (const p of played(pitches)) expect(p).toBeLessThanOrEqual(BASS_MAX_MIDI);
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The voice (plans/JAM_UX_DECISIONS.md B9)
+// ---------------------------------------------------------------------------
+
+const EVERY_VOICE: readonly JamBassVoice[] = [
+  "fingered",
+  "picked",
+  "upright",
+  "slap",
+  "synth",
+];
+
+/** How long each note of a line sounds for, note by note. */
+const lengths = (pitches: number[]) => sustainedRuns(pitches).map((r) => r.length);
+
+/** A line with a voice on it. The plain `line` helper above never sets one. */
+function voiced(voice: JamBassVoice, over: Partial<BassLineInput> = {}): number[] {
+  const beatsPerBar = over.beatsPerBar ?? 4;
+  const ticksPerBeat = over.ticksPerBeat ?? 4;
+  return bassLineFor({
+    groove: over.groove ?? emptyPattern(beatsPerBar * ticksPerBeat),
+    feel: over.feel ?? "straight",
+    chords: over.chords ?? { bar: A7, next: A7 },
+    beatsPerBar,
+    ticksPerBeat,
+    style: over.style ?? "rock",
+    barIndex: over.barIndex,
+    voice,
+  }).pitches;
+}
+
+describe("how long a note is", () => {
+  it("leaves the line alone when nobody said which bass", () => {
+    // Every caller from before voices existed still gets what it always got.
+    expect(lengths(line({ style: "rock", groove: kickOn(16, [0, 8]) }))).toEqual([1, 1]);
+  });
+
+  it("holds a picked note for half a beat and an upright one for two", () => {
+    const groove = kickOn(16, [0, 8]);
+    const picked = voiced("picked", { groove });
+    const upright = voiced("upright", { groove });
+    // Four ticks to the beat: half a beat is two ticks, two beats is eight.
+    expect(lengths(picked)).toEqual([2, 2]);
+    // Both roots are the same note, so the first one stops a tick short of
+    // the second — otherwise the two would read as one long note and the
+    // re-attack would be gone. The second has the rest of the bar.
+    expect(lengths(upright)).toEqual([7, 8]);
+    // And the attacks never move — the voice changes the length, not the line.
+    expect(sustainedRuns(picked).map((r) => r.start)).toEqual([0, 8]);
+    expect(sustainedRuns(upright).map((r) => r.start)).toEqual([0, 8]);
+  });
+
+  it("orders the five voices short to long", () => {
+    const of = (voice: JamBassVoice) => lengths(voiced(voice, { groove: kickOn(16, [0]) }))[0];
+    expect(of("slap")).toBe(2);
+    expect(of("picked")).toBe(2);
+    expect(of("fingered")).toBe(4);
+    expect(of("upright")).toBe(8);
+    // Synth holds until the next note, and there is not one: the whole bar.
+    expect(of("synth")).toBe(16);
+    expect(BASS_VOICE_HOLD_BEATS.synth).toBe(Infinity);
+  });
+
+  it("never lets a hold swallow the note after it", () => {
+    // An upright holds two beats, but the next attack is one beat away.
+    const pitches = applyBassVoice([45, 0, 0, 0, 50, 0, 0, 0], {
+      voice: "upright",
+      ticksPerBeat: 4,
+    });
+    expect(pitches).toEqual([45, 45, 45, 45, 50, 50, 50, 50]);
+    expect(sustainedRuns(pitches)).toEqual([
+      { start: 0, length: 4, pitch: 45 },
+      { start: 4, length: 4, pitch: 50 },
+    ]);
+  });
+
+  it("reads two of the same note in a row as one held note", () => {
+    // The convention the contract has no field for: a repeated pitch is a
+    // hold, and the engine re-attacks only where the pitch changes.
+    expect(sustainedRuns([45, 45, 45, 0])).toEqual([{ start: 0, length: 3, pitch: 45 }]);
+    expect(sustainedRuns([45, 0, 45, 0])).toEqual([
+      { start: 0, length: 1, pitch: 45 },
+      { start: 2, length: 1, pitch: 45 },
+    ]);
+  });
+
+  it("does not extend a note the style already repeated", () => {
+    // A double-kick bar puts a root on every sixteenth. That is one held note
+    // under the rule, and the hold must not run past it trying to grow it.
+    const pitches = applyBassVoice(new Array<number>(16).fill(45), {
+      voice: "upright",
+      ticksPerBeat: 4,
+    });
+    expect(pitches).toEqual(new Array<number>(16).fill(45));
+    expect(sustainedRuns(pitches)).toEqual([{ start: 0, length: 16, pitch: 45 }]);
+  });
+
+  it("keeps the bar exactly as long as it was, for every style and voice", () => {
+    for (const style of ALL_STYLES) {
+      for (const voice of EVERY_VOICE) {
+        const pitches = voiced(voice, {
+          style,
+          groove: kickOn(16, [0, 3, 8, 11]),
+          chords: { bar: A7, next: D7 },
+        });
+        expect(pitches, `${style}/${voice}`).toHaveLength(16);
+        for (const p of played(pitches)) {
+          expect(p, `${style}/${voice}`).toBeGreaterThanOrEqual(BASS_MIN_MIDI);
+          expect(p, `${style}/${voice}`).toBeLessThanOrEqual(BASS_MAX_MIDI);
+        }
+      }
+    }
+  });
+
+  it("does not move a single attack, for any style or voice", () => {
+    // The voice is phrasing. Where the notes are struck is the style's, and a
+    // voice that moved one would be writing a different bass part.
+    for (const style of ALL_STYLES) {
+      const plain = line({
+        style,
+        groove: kickOn(16, [0, 3, 8, 11]),
+        chords: { bar: A7, next: D7 },
+      });
+      const attacks = sustainedRuns(plain).map((r) => ({ start: r.start, pitch: r.pitch }));
+      for (const voice of EVERY_VOICE) {
+        const pitches = voiced(voice, {
+          style,
+          groove: kickOn(16, [0, 3, 8, 11]),
+          chords: { bar: A7, next: D7 },
+        });
+        expect(
+          sustainedRuns(pitches).map((r) => ({ start: r.start, pitch: r.pitch })),
+          `${style}/${voice}`,
+        ).toEqual(attacks);
+      }
+    }
+  });
+
+  it("holds across the tick a shuffle swallows", () => {
+    // The middle triplet is where nothing is struck. A held note sounds
+    // through it, which is exactly what a hold is for.
+    const pitches = voiced("upright", {
+      style: "shuffle",
+      feel: "shuffle",
+      ticksPerBeat: 3,
+      groove: emptyPattern(12),
+      barIndex: 0,
+    });
+    expect(pitches).toHaveLength(12);
+    // One note a beat, each held to the next: four runs of three.
+    expect(lengths(pitches)).toEqual([3, 3, 3, 3]);
+  });
+
+  it("leaves a tick of air before a re-attack of the same note", () => {
+    // "Hold" and "strike it again" are the same three numbers otherwise, and
+    // the rule cannot read both. So the hold stops one tick short, and only
+    // where the next note is the same pitch.
+    expect(applyBassVoice([45, 0, 0, 0, 45, 0, 0, 0], { voice: "synth", ticksPerBeat: 4 })).toEqual(
+      [45, 45, 45, 0, 45, 45, 45, 45],
+    );
+    // A different pitch needs no gap: the change of number is the attack.
+    expect(applyBassVoice([45, 0, 0, 0, 50, 0, 0, 0], { voice: "synth", ticksPerBeat: 4 })).toEqual(
+      [45, 45, 45, 45, 50, 50, 50, 50],
+    );
+    // Back to back on adjacent ticks: nothing to shorten, both survive.
+    expect(applyBassVoice([45, 45, 0, 0], { voice: "synth", ticksPerBeat: 4 })).toEqual([
+      45, 45, 45, 45,
+    ]);
+  });
+
+  it("gives a one-tick beat a one-tick note however long the voice is", () => {
+    // 6/8 is written one tick to the beat. Half a beat rounds below a tick,
+    // and the shortest anything can be is the tick it was written on.
+    expect(applyBassVoice([45, 0, 0, 50, 0, 0], { voice: "picked", ticksPerBeat: 1 })).toEqual([
+      45, 0, 0, 50, 0, 0,
+    ]);
+  });
+
+  it("does not touch the array it was given", () => {
+    const source = [45, 0, 0, 0];
+    const out = applyBassVoice(source, { voice: "synth", ticksPerBeat: 4 });
+    expect(source).toEqual([45, 0, 0, 0]);
+    expect(out).toEqual([45, 45, 45, 45]);
   });
 });

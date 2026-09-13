@@ -34,7 +34,14 @@
       "train": "Train beat",
       "boomBap": "Boom bap",
       "fourOnFloor": "Four on the floor",
-      "rule": "The rule"
+      "rule": "The rule",
+      "hardRock": "Hard rock",
+      "stomp": "Stomp",
+      "doubleKick": "Double kick",
+      "twoStep": "Two-step",
+      "samba": "Samba",
+      "chaCha": "Cha-cha",
+      "secondLine": "Second line"
     },
     "changes": {
       "edit": "Edit changes",
@@ -49,7 +56,6 @@
     "meter": {
       "label": "Meter",
       "grooves": "The groove's",
-      "ticks": "Ticks per beat",
       "doesNotFit": "{{groove}} does not fit {{meter}}; the drummer plays the rule."
     },
     "mix": {
@@ -90,7 +96,8 @@
       "label": "Intensity",
       "soft": "Soft",
       "normal": "Normal",
-      "loud": "Loud"
+      "loud": "Loud",
+      "hint": "Loud drops the ghost notes and lands a crash; soft plays the backbeat light and leaves the crash out."
     },
     "form": {
       "label": "Form",
@@ -118,7 +125,8 @@
       "jumpTo": "Go to bar {{bar}}",
       "jumpPending": "at the next bar line",
       "loopSection": "Loop bars {{start}}–{{end}}",
-      "loopOff": "Stop looping"
+      "loopOff": "Stop looping",
+      "shape": "Shape"
     },
     "short": {
       "blues12": "12-bar",
@@ -133,9 +141,9 @@
     "countIn": {
       "label": "Count-in",
       "none": "None",
-      "bars": "{{count}} bars",
-      "bars_one": "{{count}} bar",
-      "bars_other": "{{count}} bars"
+      "barsAnd": "{{count}} bars · {{sound}}",
+      "barsAnd_one": "{{count}} bar · {{sound}}",
+      "barsAnd_other": "{{count}} bars · {{sound}}"
     },
     "fills": {
       "label": "Fills",
@@ -158,7 +166,8 @@
     },
     "fretboard": {
       "label": "Fretboard",
-      "aria": "{{chord}} on the neck"
+      "aria": "{{chord}} on the neck",
+      "staysPut": "{{scale}}, the box at fret {{fret}} · stays put while you play"
     },
     "chords": {
       "label": "Chords",
@@ -167,12 +176,19 @@
       "follow": "Follow the jam",
       "followHint": "Let the shapes move with the changes, or pin them to one chord.",
       "sevenths": "7ths",
-      "nextShape": "Next shape",
       "sizeTriad": "triad",
       "sizeOpen": "open",
       "sizeBarre": "barre",
       "sizeSeventh": "7th",
-      "fret": "fret {{fret}}"
+      "fret": "fret {{fret}}",
+      "sheetLead": "a page to glance at, not a view that moves",
+      "sizeLabel": "Triads or 7ths",
+      "triads": "Triads",
+      "everyWay": "{{chord}}, every way to play it",
+      "lowToHigh": "low to high on the neck",
+      "pin": "Pin this one",
+      "unpin": "Unpin",
+      "pinnedAria": "{{chord}}, pinned to the screen"
     },
     "key": {
       "label": "Key",
@@ -193,7 +209,31 @@
       "brushes": "Brushes",
       "brushesHint": "quiet, for a ballad",
       "electronic": "Electronic",
-      "electronicHint": "synthesised and punchy"
+      "electronicHint": "synthesised and punchy",
+      "raw": "Raw",
+      "rawHint": "a rock drummer in a dry room",
+      "preview": "Preview",
+      "previewStop": "Stop",
+      "builtIn": "Built in",
+      "yours": "Yours",
+      "forget": "Forget",
+      "chooseFolder": "A folder of your samples…",
+      "folderHint": "kick, snare, hat, open hat, ride, rim, crash · nothing leaves this machine",
+      "folderUnavailable": "Your own samples are not available in this build.",
+      "folderEmpty": "No drum sounds in that folder — nothing was loaded.",
+      "folderRefused": "That folder would not load. The built-in kit is playing.",
+      "foundVoices": "Found {{voices}}.",
+      "fallbackVoices": "{{voices}} come from {{kit}}.",
+      "voice": {
+        "kick": "kick",
+        "snare": "snare",
+        "snare_soft": "soft snare",
+        "hat": "hat",
+        "hat_open": "open hat",
+        "ride": "ride",
+        "rim": "rim",
+        "crash": "crash"
+      }
     },
     "transposition": {
       "label": "You read",
@@ -201,18 +241,15 @@
       "bb": "B♭",
       "eb": "E♭"
     },
-    "setup": {
-      "label": "Key, kit and the part you read"
-    },
+    "setup": {},
     "band": {
       "label": "The band",
-      "lead": "everything synthesised, nothing to download",
+      "lead": "drums alone until you ask",
       "drums": "Drums",
       "bass": "Bass",
       "keys": "Keys",
       "you": "You",
       "youPlay": "{{instrument}}",
-      "youHint": "the band never plays your instrument",
       "out": "out",
       "hatsOnly": "hats only",
       "inputOn": "Input on",
@@ -301,13 +338,92 @@
       "confirmDelete": "Delete",
       "confirmKeep": "Keep",
       "size": "about {{megabytes}} MB on disk",
-      "local": "Takes stay on this machine. Nothing is uploaded.",
       "introTitle": "About takes",
       "introWhat": "A take is you and the band, mixed together, from the first bar after the count-in until you stop.",
       "introWhere": "It is written as a WAV file in this app's own folder on this machine, and it stays there until you delete it.",
       "introPrivate": "Nothing is uploaded, nothing is analysed, and nothing leaves the machine.",
       "introNotNow": "Not now",
       "introStart": "Record takes"
+    },
+    "sheet": {
+      "setUp": "Set up",
+      "done": "Done"
+    },
+    "vibe": {
+      "label": "Vibe",
+      "lead": "one tap sets the drummer, the kit, the tempo and the key",
+      "startedFrom": "started from the {{vibe}} vibe",
+      "unavailable": "The vibes are not in this build yet — everything below still works.",
+      "rock": "Rock",
+      "hardRock": "Hard rock",
+      "blues": "Blues",
+      "funk": "Funk",
+      "jazz": "Jazz",
+      "latin": "Latin",
+      "pop": "Pop",
+      "metal": "Metal",
+      "country": "Country"
+    },
+    "variation": {
+      "label": "{{vibe}}, which one",
+      "lead": "each is a groove, a kit, a feel and a loudness together",
+      "aria": "Ways to play this vibe",
+      "count": "{{count}} ways to play it",
+      "count_one": "{{count}} way to play it",
+      "count_other": "{{count}} ways to play it",
+      "yours": "One of yours",
+      "yoursEmpty": "none saved yet",
+      "classic": "Classic",
+      "hard": "Hard",
+      "punk": "Punk",
+      "alt": "Alt",
+      "ballad": "Ballad",
+      "halfTime": "Half-time",
+      "stomp": "Stomp",
+      "doubleKick": "Double kick",
+      "shuffle": "Shuffle",
+      "slow": "Slow",
+      "texas": "Texas",
+      "boogie": "Boogie",
+      "sixteenths": "16ths",
+      "newOrleans": "New Orleans",
+      "swing": "Swing",
+      "bossa": "Bossa",
+      "upTempo": "Up-tempo",
+      "samba": "Samba",
+      "thrash": "Thrash",
+      "openHats": "Open hats",
+      "driving16ths": "Driving 16ths",
+      "bossaJazz": "Bossa jazz",
+      "chaCha": "Cha-cha",
+      "straight": "Straight",
+      "fourOnFloor": "Four on the floor",
+      "halfTimeStomp": "Half-time stomp",
+      "train": "Train",
+      "twoStep": "Two-step",
+      "waltz": "Waltz"
+    },
+    "drummer": {
+      "label": "The drummer"
+    },
+    "more": {
+      "label": "More",
+      "lead": "meter · what you read · takes"
+    },
+    "bassVoice": {
+      "label": "Voice",
+      "fingered": "Fingered",
+      "picked": "Picked",
+      "upright": "Upright",
+      "slap": "Slap",
+      "synth": "Synth"
+    },
+    "keysVoice": {
+      "label": "Voice",
+      "epiano": "Electric piano",
+      "organ": "Organ",
+      "clav": "Clav",
+      "pad": "Pad"
     }
   },
   "scale": {

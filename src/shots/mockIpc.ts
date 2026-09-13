@@ -374,6 +374,15 @@ export function installShotMock(shot: Shot, theme: string): void {
     // Under the 100 MB the section starts mentioning: the picture is of a
     // shelf, not of a warning about one.
     takes_dir_size: () => 46 * 1024 * 1024,
+    // A folder of your own samples (JAM_UX_DECISIONS B3). Named after a real
+    // free pack so the row reads like something a person would actually point
+    // at, and short one voice — the interesting picture is the sentence that
+    // says where the missing one comes from, not a folder with all eight.
+    pick_kit_folder: () => "C:\\Users\\you\\Samples\\Studio Kit",
+    inspect_kit_folder: () => ({
+      voices: ["kick", "snare", "hat", "hat_open", "ride", "rim", "crash"],
+      missing: ["snare_soft"],
+    }),
   };
 
   mockIPC(async (cmd, args) => {

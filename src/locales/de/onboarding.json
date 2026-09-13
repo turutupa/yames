@@ -153,6 +153,15 @@
       "midiPlugged": {
         "body": "Ein MIDI-Gerät ist verbunden, aber nichts ist zugewiesen. Pedal auf Start/Stopp legen?",
         "action": "Tastenkürzel öffnen"
+      },
+      "jamSynth": {
+        "body": "Die ganze Band ist synthetisiert — nichts herunterzuladen, nichts zu installieren."
+      },
+      "jamBand": {
+        "body": "Die Band spielt nie dein Instrument. Bass und Keys sind je ein Tipp entfernt."
+      },
+      "jamTakes": {
+        "body": "Aufnahmen bleiben auf diesem Rechner. Nichts wird hochgeladen."
       }
     },
     "tour": {

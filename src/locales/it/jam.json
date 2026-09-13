@@ -34,7 +34,14 @@
       "train": "Train beat",
       "boomBap": "Boom bap",
       "fourOnFloor": "Four on the floor",
-      "rule": "La regola"
+      "rule": "La regola",
+      "hardRock": "Hard rock",
+      "stomp": "Stomp",
+      "doubleKick": "Doppio pedale",
+      "twoStep": "Two-step",
+      "samba": "Samba",
+      "chaCha": "Cha cha",
+      "secondLine": "Second line"
     },
     "changes": {
       "edit": "Modifica la griglia",
@@ -49,7 +56,6 @@
     "meter": {
       "label": "Metro",
       "grooves": "Quello del groove",
-      "ticks": "Tick per movimento",
       "doesNotFit": "{{groove}} non entra in {{meter}}; il batterista suona la regola."
     },
     "mix": {
@@ -90,7 +96,8 @@
       "label": "Intensità",
       "soft": "Piano",
       "normal": "Normale",
-      "loud": "Forte"
+      "loud": "Forte",
+      "hint": "Forte toglie le ghost note e mette un crash; piano suona il backbeat leggero e lascia stare il crash."
     },
     "form": {
       "label": "Forma",
@@ -118,7 +125,8 @@
       "jumpTo": "Vai alla battuta {{bar}}",
       "jumpPending": "alla prossima stanghetta",
       "loopSection": "Ripeti le battute {{start}}–{{end}}",
-      "loopOff": "Smetti di ripetere"
+      "loopOff": "Smetti di ripetere",
+      "shape": "Struttura"
     },
     "short": {
       "blues12": "12 battute",
@@ -133,9 +141,9 @@
     "countIn": {
       "label": "Battute d'intro",
       "none": "Nessuna",
-      "bars": "{{count}} battute",
-      "bars_one": "{{count}} battuta",
-      "bars_other": "{{count}} battute"
+      "barsAnd": "{{count}} battute · {{sound}}",
+      "barsAnd_one": "{{count}} battuta · {{sound}}",
+      "barsAnd_other": "{{count}} battute · {{sound}}"
     },
     "fills": {
       "label": "Fill",
@@ -158,7 +166,8 @@
     },
     "fretboard": {
       "label": "Tastiera",
-      "aria": "{{chord}} sul manico"
+      "aria": "{{chord}} sul manico",
+      "staysPut": "{{scale}}, la posizione al tasto {{fret}} · resta ferma mentre suoni"
     },
     "chords": {
       "label": "Accordi",
@@ -167,12 +176,19 @@
       "follow": "Segui il jam",
       "followHint": "Le posizioni seguono i cambi, oppure le fissi su un accordo.",
       "sevenths": "Settime",
-      "nextShape": "Posizione successiva",
       "sizeTriad": "triade",
       "sizeOpen": "aperta",
       "sizeBarre": "barré",
       "sizeSeventh": "settima",
-      "fret": "tasto {{fret}}"
+      "fret": "tasto {{fret}}",
+      "sheetLead": "una pagina da guardare, non una vista che si muove",
+      "sizeLabel": "Triadi o settime",
+      "triads": "Triadi",
+      "everyWay": "{{chord}}, tutti i modi di suonarlo",
+      "lowToHigh": "dal grave all'acuto sul manico",
+      "pin": "Fissa questa",
+      "unpin": "Togli",
+      "pinnedAria": "{{chord}}, fissato sullo schermo"
     },
     "key": {
       "label": "Tonalità",
@@ -193,7 +209,31 @@
       "brushes": "Spazzole",
       "brushesHint": "sommesso, per una ballad",
       "electronic": "Elettronico",
-      "electronicHint": "sintetizzato e deciso"
+      "electronicHint": "sintetizzato e deciso",
+      "raw": "Grezzo",
+      "rawHint": "un batterista rock in una stanza asciutta",
+      "preview": "Ascolta",
+      "previewStop": "Ferma",
+      "builtIn": "Inclusi",
+      "yours": "I tuoi",
+      "forget": "Rimuovi",
+      "chooseFolder": "Una cartella con i tuoi sample…",
+      "folderHint": "cassa, rullante, charleston, charleston aperto, ride, rim, crash · niente esce da questo computer",
+      "folderUnavailable": "I sample tuoi non sono disponibili in questa build.",
+      "folderEmpty": "Nessun suono di batteria in quella cartella: non è stato caricato niente.",
+      "folderRefused": "Quella cartella non si è caricata. Sta suonando il kit incluso.",
+      "foundVoices": "Trovati: {{voices}}.",
+      "fallbackVoices": "{{voices}} arrivano da {{kit}}.",
+      "voice": {
+        "kick": "cassa",
+        "snare": "rullante",
+        "snare_soft": "rullante piano",
+        "hat": "charleston",
+        "hat_open": "charleston aperto",
+        "ride": "ride",
+        "rim": "rim",
+        "crash": "crash"
+      }
     },
     "transposition": {
       "label": "Tu leggi",
@@ -201,18 +241,15 @@
       "bb": "Si♭",
       "eb": "Mi♭"
     },
-    "setup": {
-      "label": "Tonalità, kit e la parte che leggi"
-    },
+    "setup": {},
     "band": {
       "label": "La band",
-      "lead": "tutto sintetizzato, niente da scaricare",
+      "lead": "solo batteria finché non chiedi altro",
       "drums": "Batteria",
       "bass": "Basso",
       "keys": "Tastiere",
       "you": "Tu",
       "youPlay": "{{instrument}}",
-      "youHint": "la band non suona mai il tuo strumento",
       "out": "fuori",
       "hatsOnly": "solo charleston",
       "inputOn": "Ingresso attivo",
@@ -301,13 +338,92 @@
       "confirmDelete": "Elimina",
       "confirmKeep": "Tieni",
       "size": "circa {{megabytes}} MB sul disco",
-      "local": "Le take restano su questa macchina. Non viene caricato niente.",
       "introTitle": "Sulle take",
       "introWhat": "Una take sei tu insieme alla band, dalla prima battuta dopo le battute d'intro fino a quando ti fermi.",
       "introWhere": "Viene scritta come file WAV nella cartella di questa app su questa macchina, e resta lì finché non la elimini.",
       "introPrivate": "Non viene caricato niente, non viene analizzato niente, niente lascia la macchina.",
       "introNotNow": "Non ora",
       "introStart": "Registra le take"
+    },
+    "sheet": {
+      "setUp": "Impostazioni",
+      "done": "Fatto"
+    },
+    "vibe": {
+      "label": "Vibe",
+      "lead": "un tocco imposta il batterista, il kit, il tempo e la tonalità",
+      "startedFrom": "partito dal vibe {{vibe}}",
+      "unavailable": "I vibe non ci sono ancora in questa build — tutto il resto funziona.",
+      "rock": "Rock",
+      "hardRock": "Hard rock",
+      "blues": "Blues",
+      "funk": "Funk",
+      "jazz": "Jazz",
+      "latin": "Latin",
+      "pop": "Pop",
+      "metal": "Metal",
+      "country": "Country"
+    },
+    "variation": {
+      "label": "{{vibe}}, quale",
+      "lead": "ognuno è un groove, un kit, un feel e un volume insieme",
+      "aria": "Modi di suonare questo vibe",
+      "count": "{{count}} modi di suonarlo",
+      "count_one": "{{count}} modo di suonarlo",
+      "count_other": "{{count}} modi di suonarlo",
+      "yours": "Uno dei tuoi",
+      "yoursEmpty": "nessuno salvato",
+      "classic": "Classico",
+      "hard": "Duro",
+      "punk": "Punk",
+      "alt": "Alternativo",
+      "ballad": "Ballata",
+      "halfTime": "Half-time",
+      "stomp": "Stomp",
+      "doubleKick": "Doppio pedale",
+      "shuffle": "Shuffle",
+      "slow": "Lento",
+      "texas": "Texas",
+      "boogie": "Boogie",
+      "sixteenths": "Sedicesimi",
+      "newOrleans": "New Orleans",
+      "swing": "Swing",
+      "bossa": "Bossa",
+      "upTempo": "Veloce",
+      "samba": "Samba",
+      "thrash": "Thrash",
+      "openHats": "Hi-hat aperti",
+      "driving16ths": "Sedicesimi che spingono",
+      "bossaJazz": "Bossa jazz",
+      "chaCha": "Cha cha",
+      "straight": "Dritto",
+      "fourOnFloor": "Four on the floor",
+      "halfTimeStomp": "Stomp a metà tempo",
+      "train": "Train",
+      "twoStep": "Two-step",
+      "waltz": "Valzer"
+    },
+    "drummer": {
+      "label": "Il batterista"
+    },
+    "more": {
+      "label": "Altro",
+      "lead": "metro · cosa leggi · registrazioni"
+    },
+    "bassVoice": {
+      "label": "Suono",
+      "fingered": "Con le dita",
+      "picked": "Col plettro",
+      "upright": "Contrabbasso",
+      "slap": "Slap",
+      "synth": "Synth"
+    },
+    "keysVoice": {
+      "label": "Suono",
+      "epiano": "Piano elettrico",
+      "organ": "Organo",
+      "clav": "Clav",
+      "pad": "Pad"
     }
   },
   "scale": {

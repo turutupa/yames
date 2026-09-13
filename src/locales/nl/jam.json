@@ -34,7 +34,14 @@
       "train": "Train beat",
       "boomBap": "Boom bap",
       "fourOnFloor": "Four on the floor",
-      "rule": "De regel"
+      "rule": "De regel",
+      "hardRock": "Hardrock",
+      "stomp": "Stomp",
+      "doubleKick": "Dubbele bassdrum",
+      "twoStep": "Two-step",
+      "samba": "Samba",
+      "chaCha": "Cha-cha",
+      "secondLine": "Second line"
     },
     "changes": {
       "edit": "Akkoorden bewerken",
@@ -49,7 +56,6 @@
     "meter": {
       "label": "Maatsoort",
       "grooves": "Die van de groove",
-      "ticks": "Ticks per tel",
       "doesNotFit": "{{groove}} past niet in {{meter}}; de drummer speelt de regel."
     },
     "mix": {
@@ -90,7 +96,8 @@
       "label": "Intensiteit",
       "soft": "Zacht",
       "normal": "Normaal",
-      "loud": "Luid"
+      "loud": "Luid",
+      "hint": "Luid laat de ghost notes weg en zet een crash; zacht speelt de backbeat licht en laat de crash weg."
     },
     "form": {
       "label": "Vorm",
@@ -118,7 +125,8 @@
       "jumpTo": "Naar maat {{bar}}",
       "jumpPending": "bij de volgende maatstreep",
       "loopSection": "Maten {{start}}–{{end}} herhalen",
-      "loopOff": "Stoppen met herhalen"
+      "loopOff": "Stoppen met herhalen",
+      "shape": "Vorm"
     },
     "short": {
       "blues12": "12 maten",
@@ -133,9 +141,9 @@
     "countIn": {
       "label": "Inteltellen",
       "none": "Geen",
-      "bars": "{{count}} maten",
-      "bars_one": "{{count}} maat",
-      "bars_other": "{{count}} maten"
+      "barsAnd": "{{count}} maten · {{sound}}",
+      "barsAnd_one": "{{count}} maat · {{sound}}",
+      "barsAnd_other": "{{count}} maten · {{sound}}"
     },
     "fills": {
       "label": "Fills",
@@ -158,7 +166,8 @@
     },
     "fretboard": {
       "label": "Toets",
-      "aria": "{{chord}} op de hals"
+      "aria": "{{chord}} op de hals",
+      "staysPut": "{{scale}}, de positie op fret {{fret}} · blijft staan terwijl je speelt"
     },
     "chords": {
       "label": "Akkoorden",
@@ -167,12 +176,19 @@
       "follow": "Volg de jam",
       "followHint": "Laat de grepen met de wisselingen meelopen, of zet ze vast op één akkoord.",
       "sevenths": "Septiemen",
-      "nextShape": "Volgende greep",
       "sizeTriad": "drieklank",
       "sizeOpen": "open",
       "sizeBarre": "barré",
       "sizeSeventh": "septiem",
-      "fret": "fret {{fret}}"
+      "fret": "fret {{fret}}",
+      "sheetLead": "een blad om even naar te kijken, geen beeld dat beweegt",
+      "sizeLabel": "Drieklanken of septiemen",
+      "triads": "Drieklanken",
+      "everyWay": "{{chord}}, alle manieren om het te spelen",
+      "lowToHigh": "van laag naar hoog over de hals",
+      "pin": "Deze vastzetten",
+      "unpin": "Losmaken",
+      "pinnedAria": "{{chord}}, vastgezet op het scherm"
     },
     "key": {
       "label": "Toonsoort",
@@ -193,7 +209,31 @@
       "brushes": "Bezems",
       "brushesHint": "zacht, voor een ballad",
       "electronic": "Elektronisch",
-      "electronicHint": "gesynthetiseerd en strak"
+      "electronicHint": "gesynthetiseerd en strak",
+      "raw": "Rauw",
+      "rawHint": "een rockdrummer in een droge ruimte",
+      "preview": "Beluisteren",
+      "previewStop": "Stop",
+      "builtIn": "Meegeleverd",
+      "yours": "Van jou",
+      "forget": "Verwijderen",
+      "chooseFolder": "Een map met je eigen samples…",
+      "folderHint": "bassdrum, snare, hi-hat, open hi-hat, ride, rim, crash · er verlaat niets deze machine",
+      "folderUnavailable": "Eigen samples zitten niet in deze build.",
+      "folderEmpty": "Geen drumgeluiden in die map — er is niets geladen.",
+      "folderRefused": "Die map kon niet worden geladen. De ingebouwde kit speelt.",
+      "foundVoices": "Gevonden: {{voices}}.",
+      "fallbackVoices": "{{voices}} komen van {{kit}}.",
+      "voice": {
+        "kick": "bassdrum",
+        "snare": "snare",
+        "snare_soft": "zachte snare",
+        "hat": "hi-hat",
+        "hat_open": "open hi-hat",
+        "ride": "ride",
+        "rim": "rim",
+        "crash": "crash"
+      }
     },
     "transposition": {
       "label": "Jij leest",
@@ -201,18 +241,15 @@
       "bb": "Bes",
       "eb": "Es"
     },
-    "setup": {
-      "label": "Toonsoort, kit en de partij die je leest"
-    },
+    "setup": {},
     "band": {
       "label": "De band",
-      "lead": "alles gesynthetiseerd, niets om te downloaden",
+      "lead": "alleen drums tot je meer vraagt",
       "drums": "Drums",
       "bass": "Bas",
       "keys": "Toetsen",
       "you": "Jij",
       "youPlay": "{{instrument}}",
-      "youHint": "de band speelt nooit jouw instrument",
       "out": "eruit",
       "hatsOnly": "alleen hi-hat",
       "inputOn": "Ingang aan",
@@ -301,13 +338,92 @@
       "confirmDelete": "Verwijderen",
       "confirmKeep": "Bewaren",
       "size": "ongeveer {{megabytes}} MB op schijf",
-      "local": "Takes blijven op deze machine. Er wordt niets geüpload.",
       "introTitle": "Over takes",
       "introWhat": "Een take ben jij samen met de band, vanaf de eerste maat na het inteltellen tot je stopt.",
       "introWhere": "Hij wordt als WAV-bestand weggeschreven in de eigen map van deze app op deze machine, en blijft daar tot je hem verwijdert.",
       "introPrivate": "Er wordt niets geüpload, niets geanalyseerd, en niets verlaat deze machine.",
       "introNotNow": "Nu niet",
       "introStart": "Takes opnemen"
+    },
+    "sheet": {
+      "setUp": "Instellen",
+      "done": "Klaar"
+    },
+    "vibe": {
+      "label": "Vibe",
+      "lead": "één tik zet de drummer, het kit, het tempo en de toonsoort",
+      "startedFrom": "begonnen bij de vibe {{vibe}}",
+      "unavailable": "De vibes zitten nog niet in deze build — alles hieronder werkt gewoon.",
+      "rock": "Rock",
+      "hardRock": "Hardrock",
+      "blues": "Blues",
+      "funk": "Funk",
+      "jazz": "Jazz",
+      "latin": "Latin",
+      "pop": "Pop",
+      "metal": "Metal",
+      "country": "Country"
+    },
+    "variation": {
+      "label": "{{vibe}}, welke",
+      "lead": "elk is een groove, een kit, een feel en een volume tegelijk",
+      "aria": "Manieren om deze vibe te spelen",
+      "count": "{{count}} manieren om het te spelen",
+      "count_one": "{{count}} manier om het te spelen",
+      "count_other": "{{count}} manieren om het te spelen",
+      "yours": "Een van jou",
+      "yoursEmpty": "nog niets bewaard",
+      "classic": "Klassiek",
+      "hard": "Hard",
+      "punk": "Punk",
+      "alt": "Alternatief",
+      "ballad": "Ballad",
+      "halfTime": "Halftime",
+      "stomp": "Stomp",
+      "doubleKick": "Dubbele bassdrum",
+      "shuffle": "Shuffle",
+      "slow": "Traag",
+      "texas": "Texas",
+      "boogie": "Boogie",
+      "sixteenths": "16den",
+      "newOrleans": "New Orleans",
+      "swing": "Swing",
+      "bossa": "Bossa",
+      "upTempo": "Snel",
+      "samba": "Samba",
+      "thrash": "Thrash",
+      "openHats": "Open hi-hats",
+      "driving16ths": "Stuwende zestienden",
+      "bossaJazz": "Bossa-jazz",
+      "chaCha": "Cha-cha",
+      "straight": "Recht",
+      "fourOnFloor": "Four on the floor",
+      "halfTimeStomp": "Half-time stomp",
+      "train": "Train",
+      "twoStep": "Two-step",
+      "waltz": "Wals"
+    },
+    "drummer": {
+      "label": "De drummer"
+    },
+    "more": {
+      "label": "Meer",
+      "lead": "maatsoort · wat je leest · opnames"
+    },
+    "bassVoice": {
+      "label": "Klank",
+      "fingered": "Met vingers",
+      "picked": "Met plectrum",
+      "upright": "Contrabas",
+      "slap": "Slap",
+      "synth": "Synth"
+    },
+    "keysVoice": {
+      "label": "Klank",
+      "epiano": "Elektrische piano",
+      "organ": "Orgel",
+      "clav": "Clav",
+      "pad": "Pad"
     }
   },
   "scale": {

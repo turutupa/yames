@@ -153,6 +153,15 @@
       "midiPlugged": {
         "body": "Er is een MIDI-apparaat verbonden maar niets toegewezen. Pedaal aan Afspelen/Stoppen koppelen?",
         "action": "Sneltoetsen openen"
+      },
+      "jamSynth": {
+        "body": "De hele band is gesynthetiseerd — niets te downloaden, niets te installeren."
+      },
+      "jamBand": {
+        "body": "De band speelt nooit jouw instrument. Bas en keys zijn elk één tik."
+      },
+      "jamTakes": {
+        "body": "Opnames blijven op deze machine. Er wordt niets geüpload."
       }
     },
     "tour": {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bandDescription, lineupFor } from "./lineup";
+import { bandDescription, lineupFor, startingBand } from "./lineup";
 import type { InstrumentId } from "../types";
 
 const EVERY_INSTRUMENT: InstrumentId[] = [
@@ -100,5 +100,40 @@ describe("bandDescription", () => {
 
   it("says nothing rather than something wrong for an empty band", () => {
     expect(bandDescription({ drums: false, bass: false, keys: false, you: "other" })).toEqual([]);
+  });
+});
+
+/**
+ * Who a brand new jam starts with (plans/JAM_UX_DECISIONS.md B1).
+ *
+ * The first session's verdict: a guitarist's jam opened with a bass player
+ * already under everything, and "drums alone" was one toggle away that nobody
+ * would find. `lineupFor` still says what is OFFERED; this says what is ON.
+ */
+describe("startingBand", () => {
+  it("gives everyone the drummer and nobody else", () => {
+    for (const instrument of ["electric-guitar", "acoustic-guitar", "bass", "piano", "other"]) {
+      expect(startingBand(instrument)).toEqual({ drums: true, bass: false, keys: false });
+    }
+  });
+
+  it("gives a drummer a bass player, because drums alone is nothing to play against", () => {
+    expect(startingBand("drums")).toEqual({ drums: false, bass: true, keys: false });
+  });
+
+  it("never puts your own instrument on stage", () => {
+    // The rule the mode is built on still governs the default, even though
+    // the default is now smaller than the lineup.
+    for (const instrument of EVERY_INSTRUMENT) {
+      const band = startingBand(instrument);
+      const you = lineupFor(instrument).you;
+      if (you === "drums") expect(band.drums).toBe(false);
+      if (you === "bass") expect(band.bass).toBe(false);
+      if (you === "keys") expect(band.keys).toBe(false);
+    }
+  });
+
+  it("gives an instrument it has never heard of the drummer", () => {
+    expect(startingBand("theremin")).toEqual({ drums: true, bass: false, keys: false });
   });
 });

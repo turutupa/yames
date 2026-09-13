@@ -31,6 +31,17 @@ serde_json = "1"
 rodio = { version = "0.19", default-features = false, features = ["wav"] }
 cpal = "0.15"
 tauri-plugin-updater = "2"
+# The native folder picker behind `pick_kit_folder` — a kit of your own
+# samples is a folder you point the app at (plans/JAM_UX_DECISIONS.md B3),
+# and only the OS can draw that dialog. Apache-2.0 OR MIT, like Tauri
+# itself, so it changes nothing about what this app may ship.
+tauri-plugin-dialog = "2"
+# WAV decoding for those folders. Already in the graph under rodio, which
+# is why this adds no package to Cargo.lock — declared directly because
+# rodio's own decoder narrows every file to i16 and PANICS on a spec it
+# does not implement, and a file the user chose must be REFUSED with a
+# message, never crash the command. Apache-2.0.
+hound = "3"
 tauri-plugin-process = "2"
 tauri-plugin-decorum = "1"
 midir = "0.10"

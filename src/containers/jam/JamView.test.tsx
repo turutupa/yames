@@ -2,6 +2,7 @@
 // headline of the whole mode (JAM_MODE §4.2), it is the only thing on the
 // screen driven by the engine rather than by the record, and "which bar of
 // the twelve am I on" is the question the mode exists to answer.
+import { GROOVES } from "../../jam/grooves";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup, within } from "@testing-library/react";
 import { createRef } from "react";
@@ -59,6 +60,10 @@ function screenState(
     setEditingChords: vi.fn(),
     editingBar: null,
     setEditingBar: vi.fn(),
+    setupOpen: false,
+    setSetupOpen: vi.fn(),
+    chordsOpen: false,
+    setChordsOpen: vi.fn(),
     ...overrides,
   };
 }
@@ -102,16 +107,19 @@ function positionState(
 function setup(overrides: Partial<React.ComponentProps<typeof JamView>> = {}) {
   const props = {
     jam: jamOf(),
+    jams: [] as Jam[],
     onEdit: vi.fn(),
+    onLoadJam: vi.fn(),
     currentBeat: null as BeatEvent | null,
     isPlaying: false,
     instrument: "electric-guitar",
     lineup: { drums: true, bass: true },
     trainedBpm: null as number | null,
     listening: false,
-    voiceReady: false,
     takes: takesState(),
     onToggleTakes: vi.fn(),
+    onPreviewKit: vi.fn(),
+    previewingKit: null as string | null,
     screen: screenState(),
     position: positionState(),
     tapActive: false,
@@ -130,6 +138,42 @@ function setup(overrides: Partial<React.ComponentProps<typeof JamView>> = {}) {
   };
   const utils = render(<JamView {...props} />);
   return { ...utils, props };
+}
+
+/**
+ * The same stage with the SETUP SHEET down (JAM_UX_DECISIONS A1).
+ *
+ * Everything you set once an hour lives on the sheet now, so a test about the
+ * groove cards or the form has to open it first — which is also what a person
+ * does. `screenState` is threaded through so a test can still override the
+ * rest of the screen state.
+ */
+function sheet(
+  overrides: Partial<React.ComponentProps<typeof JamView>> = {},
+  screenOverrides: Partial<React.ComponentProps<typeof JamView>["screen"]> = {},
+) {
+  return setup({ ...overrides, screen: screenState({ setupOpen: true, ...screenOverrides }) });
+}
+
+/** The same, with the CHORD SHEET down (A8). */
+function chordSheet(
+  overrides: Partial<React.ComponentProps<typeof JamView>> = {},
+  screenOverrides: Partial<React.ComponentProps<typeof JamView>["screen"]> = {},
+) {
+  return setup({ ...overrides, screen: screenState({ chordsOpen: true, ...screenOverrides }) });
+}
+
+/**
+ * The setup sheet with MORE expanded — the meter, what you read, and takes.
+ *
+ * Collapsed by default (A3) and opened by a click, because that is the only
+ * way a person gets there and the collapse is itself the decision under test
+ * everywhere else on this sheet.
+ */
+function sheetWithMore(overrides: Partial<React.ComponentProps<typeof JamView>> = {}) {
+  const rendered = sheet(overrides);
+  fireEvent.click(rendered.container.querySelector(".jam-more-toggle") as HTMLElement);
+  return rendered;
 }
 
 afterEach(() => {
@@ -349,21 +393,21 @@ describe("JamView — the controls", () => {
     expect(screen.getByText("92")).toBeInTheDocument();
   });
 
-  it("offers the thirteen grooves, a card for one of your own, and marks the one that is loaded", () => {
-    const { container } = setup({ jam: jamOf({ grooveId: "bossa" }) });
+  it("offers every groove, a card for one of your own, and marks the one that is loaded", () => {
+    const { container } = sheet({ jam: jamOf({ grooveId: "bossa" }) });
     const cards = container.querySelectorAll(".jam-cards-groove .jam-card");
-    // Thirteen presets and "Make your own". The last card is one of the
+    // Every preset and "Make your own". The last card is one of the
     // choices rather than a mode to go and find, which is the difference
     // between an editor people use and one they read about in a changelog.
-    expect(cards).toHaveLength(14);
-    expect(cards[13].textContent).toContain("Make your own");
+    expect(cards).toHaveLength(GROOVES.length + 1);
+    expect(cards[GROOVES.length].textContent).toContain("Make your own");
     const pressed = [...cards].filter((c) => c.getAttribute("aria-pressed") === "true");
     expect(pressed).toHaveLength(1);
     expect(pressed[0].textContent).toContain("Bossa");
   });
 
-  it("marks the ninth card instead once the groove is yours", () => {
-    const { container } = setup({
+  it("marks the last card instead once the groove is yours", () => {
+    const { container } = sheet({
       jam: jamOf({
         grooveId: "bossa",
         customGroove: {
@@ -390,11 +434,11 @@ describe("JamView — the controls", () => {
   it("draws each groove's glyph from its own pattern", () => {
     // The picture IS the table, so a groove whose pattern changes cannot end
     // up advertising the old one.
-    const { container } = setup();
+    const { container } = sheet();
     const glyphs = container.querySelectorAll(".jam-cards-groove .jam-glyph");
     // Fourteen: the thirteen presets, plus the "make your own" card, which
     // draws the groove that is loaded so it is never a blank square.
-    expect(glyphs).toHaveLength(14);
+    expect(glyphs).toHaveLength(GROOVES.length + 1);
     // Rock eighths is 4 × 2 ticks over three lanes; the bossa is 4 × 4.
     expect(glyphs[0].querySelectorAll("circle")).toHaveLength(8 * 3);
     expect(glyphs[6].querySelectorAll("circle")).toHaveLength(16 * 3);
@@ -403,13 +447,13 @@ describe("JamView — the controls", () => {
   it("carries the count-in over to the new groove's meter", () => {
     // One bar of a waltz is three beats, not four. A count-in in the wrong
     // meter lands you on beat two of the first bar.
-    const { props } = setup({ jam: jamOf({ grooveId: "rock8", countIn: 4 }) });
+    const { props } = sheet({ jam: jamOf({ grooveId: "rock8", countIn: 4 }) });
     fireEvent.click(screen.getByText("Waltz"));
     expect(props.onEdit).toHaveBeenCalledWith({ grooveId: "waltz", countIn: 3 });
   });
 
   it("leaves a count-in of none alone when the groove changes", () => {
-    const { props } = setup({ jam: jamOf({ grooveId: "rock8", countIn: 0 }) });
+    const { props } = sheet({ jam: jamOf({ grooveId: "rock8", countIn: 0 }) });
     fireEvent.click(screen.getByText("Waltz"));
     expect(props.onEdit).toHaveBeenCalledWith({ grooveId: "waltz", countIn: 0 });
   });
@@ -418,12 +462,12 @@ describe("JamView — the controls", () => {
     // The setting is bars; beats are only how the engine takes it. Two bars of
     // 4/4 is eight, which is the engine's whole limit — two bars of 6/8 would
     // be twelve, and a count-in past the limit is a wait, not a count-in.
-    const rock = setup({ jam: jamOf({ grooveId: "rock8", countIn: 8 }) });
+    const rock = sheet({ jam: jamOf({ grooveId: "rock8", countIn: 8 }) });
     fireEvent.click(screen.getByText("Waltz"));
     expect(rock.props.onEdit).toHaveBeenCalledWith({ grooveId: "waltz", countIn: 6 });
     cleanup();
 
-    const waltz = setup({ jam: jamOf({ grooveId: "rock8", countIn: 8 }) });
+    const waltz = sheet({ jam: jamOf({ grooveId: "rock8", countIn: 8 }) });
     // Scoped to the groove cards: "6/8" is also a meter preset now, and the
     // two are different controls that happen to be named the same thing.
     fireEvent.click(within(grooveCards(waltz.container)).getByText("6/8"));
@@ -433,30 +477,52 @@ describe("JamView — the controls", () => {
   it("offers a count-in only in whole bars the engine will actually take", () => {
     // Two bars of 6/8 is twelve beats, past `arm_count_in`'s limit of eight.
     // Offering it and clamping it would put a lie on the button.
-    const { container } = setup({ jam: jamOf({ grooveId: "sixEight", countIn: 6 }) });
-    const groups = [...container.querySelectorAll(".jam-segmented")];
-    const countIn = groups.find((g) => g.getAttribute("aria-label") === "Count-in")!;
-    expect(countIn.querySelectorAll(".accent-option")).toHaveLength(2);
+    sheet({ jam: jamOf({ grooveId: "sixEight", countIn: 6 }) });
+    fireEvent.click(screen.getByRole("button", { name: /Count-in/ }));
+    const options = screen.getAllByRole("option");
+    // None, and one bar in each of the two sounds. Two bars is not offered
+    // at all rather than offered and quietly clamped to something else.
+    expect(options.map((o) => o.textContent)).toEqual([
+      "None",
+      "1 bar · Beep",
+      "1 bar · Sticks",
+    ]);
+  });
+
+  it("merges the count-in's length and its sound into one choice", () => {
+    // It used to be two controls a screen apart. Nobody sets one without the
+    // other — "one bar of sticks" is a single thing a drummer says out loud.
+    const { props } = sheet({ jam: jamOf({ grooveId: "rock8", countIn: 4 }) });
+    fireEvent.click(screen.getByRole("button", { name: /Count-in/ }));
+    fireEvent.click(screen.getByRole("option", { name: "2 bars · Sticks" }));
+    expect(props.onEdit).toHaveBeenCalledWith({ countIn: 8, countInSound: "sticks" });
   });
 
   it("switches the form and keeps the length the timeline was showing", () => {
-    const { props } = setup();
-    fireEvent.click(screen.getByText("Your own"));
-    expect(props.onEdit).toHaveBeenCalledWith({ form: { kind: "custom", bars: 12 } });
+    const { props } = sheet();
+    fireEvent.click(screen.getByRole("button", { name: /Shape/ }));
+    fireEvent.click(screen.getByRole("option", { name: /Your own/ }));
+    expect(props.onEdit).toHaveBeenCalledWith(
+      expect.objectContaining({ form: { kind: "custom", bars: 12 } }),
+    );
   });
 
   it("shows the bar stepper only on a form of your own", () => {
-    const { container, rerender, props } = setup();
+    const { container, rerender, props } = sheet();
     expect(container.querySelector(".jam-bars")).toBeNull();
 
-    rerender(<JamView {...props} jam={jamOf({ form: { kind: "custom", bars: 5 } })} />);
+    rerender(
+      <JamView {...props} jam={jamOf({ form: { kind: "custom", bars: 5 } })} />,
+    );
     expect(container.querySelector(".jam-bars")).not.toBeNull();
     fireEvent.click(screen.getByLabelText("More bars"));
-    expect(props.onEdit).toHaveBeenCalledWith({ form: { kind: "custom", bars: 6 } });
+    expect(props.onEdit).toHaveBeenCalledWith(
+      expect.objectContaining({ form: { kind: "custom", bars: 6 } }),
+    );
   });
 
   it("holds the bar stepper inside 1..64", () => {
-    const { rerender, props } = setup({ jam: jamOf({ form: { kind: "custom", bars: 1 } }) });
+    const { rerender, props } = sheet({ jam: jamOf({ form: { kind: "custom", bars: 1 } }) });
     expect(screen.getByLabelText("Fewer bars")).toBeDisabled();
 
     rerender(<JamView {...props} jam={jamOf({ form: { kind: "custom", bars: 64 } })} />);
@@ -467,7 +533,7 @@ describe("JamView — the controls", () => {
     // Off, the chorus end, every four bars, every eight. Two fields on the
     // record and one control on the screen: "off, or every eight bars" is one
     // decision, and the switch it replaced could only say two of the four.
-    const { container } = setup();
+    const { container } = sheet();
     const groups = [...container.querySelectorAll(".jam-segmented")];
     const fills = groups.find((g) => g.getAttribute("aria-label") === "Fills")!;
     const options = [...fills.querySelectorAll(".accent-option")];
@@ -483,23 +549,50 @@ describe("JamView — the controls", () => {
   });
 
   it("writes both fields when the fill choice changes", () => {
-    const { props, rerender } = setup();
+    const { props, rerender } = sheet();
     fireEvent.click(screen.getByText("Every 4"));
     expect(props.onEdit).toHaveBeenCalledWith({ fills: true, fillEvery: 4 });
 
     // And off zeroes the count rather than leaving a record that says "no
     // fills, every four bars" — two readers could disagree about that, and one
     // of them is the engine.
-    rerender(<JamView {...props} jam={jamOf({ fills: true, fillEvery: 4 })} />);
+    rerender(
+      <JamView
+        {...props}
+        jam={jamOf({ fills: true, fillEvery: 4 })}
+        screen={screenState({ setupOpen: true })}
+      />,
+    );
     fireEvent.click(screen.getByText("Off"));
     expect(props.onEdit).toHaveBeenCalledWith({ fills: false, fillEvery: 0 });
   });
 
-  it("says what a band through speakers does to the score", () => {
-    // JAM_MODE §3, principle 5 — the one line on this screen that is there to
-    // stop a flattered score from going unexplained.
-    setup();
-    expect(screen.getByText("Headphones keep the score honest.")).toBeInTheDocument();
+  it("says what a band through speakers does to the score, on the input chip", () => {
+    // JAM_MODE §3, principle 5. It used to be printed under the stage
+    // forever; it is the input chip's tooltip now (JAM_UX_DECISIONS A7),
+    // which is the one place on the playing screen where it is about to
+    // matter.
+    const { container } = setup();
+    expect(container.querySelector(".jam-band-input")).toHaveAttribute(
+      "title",
+      "Headphones keep the score honest.",
+    );
+  });
+
+  it("keeps the playing screen to five blocks", () => {
+    // A1: the chord, the timeline, the tempo, the band, the practice
+    // switches. Nothing else — no groove cards, no key picker, no kit, no
+    // takes shelf. Those are the sheet's, and this is the assertion that
+    // stops them creeping back one at a time.
+    const { container } = setup();
+    expect(container.querySelector(".jam-cards-groove")).toBeNull();
+    expect(container.querySelector(".jam-keys")).toBeNull();
+    expect(container.querySelector(".jam-takes")).toBeNull();
+    expect(container.querySelector(".jam-sheet")).toBeNull();
+    expect(container.querySelector(".jam-now")).not.toBeNull();
+    expect(container.querySelector(".jam-timeline")).not.toBeNull();
+    expect(container.querySelector(".jam-band")).not.toBeNull();
+    expect(container.querySelector(".jam-practice")).not.toBeNull();
   });
 });
 
@@ -551,24 +644,14 @@ describe("JamView — the changes", () => {
     expect(container.querySelectorAll(".jam-timeline-chord")).toHaveLength(0);
   });
 
-  it("shows the chords of the key, with the one you are on lit", () => {
-    setup({ currentBeat: beat(0), isPlaying: true });
-    const strip = screen.getByTestId("key-chords-strip");
-    const lit = within(strip)
-      .getAllByTestId("key-chord")
-      .filter((c) => c.getAttribute("aria-pressed") === "true");
-    expect(lit).toHaveLength(1);
-    expect(lit[0]).toHaveAttribute("aria-label", "A7");
-  });
-
-  it("gives a guitarist the shapes and a horn player only the chords", () => {
-    setup({ currentBeat: beat(0), isPlaying: true });
-    expect(screen.getByTestId("chord-shapes-row")).toBeInTheDocument();
-    cleanup();
-    // "other" is the horn, string and voice bucket: no neck, so no grips.
-    setup({ instrument: "other", currentBeat: beat(0), isPlaying: true });
+  it("keeps the shapes off the playing screen entirely", () => {
+    // A8, in the owner's words: "the fretboard and the chords are amazing,
+    // but they shouldn't keep changing." Only two things move on their own
+    // here now — the timeline and the chord you are on.
+    const { container } = setup({ currentBeat: beat(0), isPlaying: true });
+    expect(container.querySelector(".jam-chord-grid")).toBeNull();
     expect(screen.queryByTestId("chord-shapes-row")).toBeNull();
-    expect(screen.getByTestId("key-chords-strip")).toBeInTheDocument();
+    expect(container.querySelector(".jam-fretboard")).toBeNull();
   });
 
   it("writes the chart in the key the player reads", () => {
@@ -580,6 +663,122 @@ describe("JamView — the changes", () => {
       isPlaying: true,
     });
     expect(container.querySelector(".jam-now-name")?.textContent).toBe("B7");
+  });
+});
+
+/**
+ * The two sheets, and the one thing either of them leaves behind
+ * (plans/JAM_UX_DECISIONS.md A1, A8).
+ */
+describe("JamView — the sheets", () => {
+  it("draws neither until it is asked", () => {
+    const { container } = setup();
+    expect(container.querySelector(".jam-sheet")).toBeNull();
+  });
+
+  it("puts the setup sheet over the playing screen, dimmed", () => {
+    const { container } = sheet();
+    const drawn = container.querySelector('.jam-sheet[data-sheet="setup"]');
+    expect(drawn).not.toBeNull();
+    // Dimmed, because setting up is a thing you do INSTEAD of playing.
+    expect(container.querySelector(".jam-sheet-scrim")).not.toBeNull();
+  });
+
+  it("names the vibe the jam started from, on the sheet's own head", () => {
+    sheet({ jam: jamOf({ vibe: "rock" }) });
+    expect(screen.getByText("started from the Rock vibe")).toBeInTheDocument();
+  });
+
+  it("closes on Done", () => {
+    const setSetupOpen = vi.fn();
+    sheet({}, { setSetupOpen });
+    fireEvent.click(screen.getByRole("button", { name: "Done" }));
+    expect(setSetupOpen).toHaveBeenCalledWith(false);
+  });
+
+  it("does not dim the screen behind the chord sheet", () => {
+    // It is a page you glance at WHILE playing; dimming the timeline would be
+    // dimming the reason you opened it.
+    const { container } = chordSheet();
+    expect(container.querySelector('.jam-sheet[data-sheet="chords"]')).not.toBeNull();
+    expect(container.querySelector(".jam-sheet-scrim")).toBeNull();
+  });
+
+  it("draws the key's chords once each, as one basic shape", () => {
+    const { container } = chordSheet();
+    // A blues key has five chords, one card each — a page, not a wall.
+    expect(container.querySelectorAll(".jam-chord-card")).toHaveLength(5);
+    // And no shapes row until you tap one: nothing here moves unless asked.
+    expect(container.querySelector(".jam-chord-shapes")).toBeNull();
+  });
+
+  it("expands every way to play a chord when it is tapped", () => {
+    const setPinnedChord = vi.fn();
+    const { container } = chordSheet({}, { setPinnedChord });
+    fireEvent.click(container.querySelectorAll(".jam-chord-card")[0] as HTMLElement);
+    expect(setPinnedChord).toHaveBeenCalledWith(expect.objectContaining({ root: 9 }));
+  });
+
+  it("keeps Follow the jam off until it is switched on", () => {
+    const { props } = chordSheet();
+    const follow = screen.getByRole("switch", { name: /Follow the jam/ });
+    expect(follow).toHaveAttribute("aria-checked", "false");
+    fireEvent.click(follow);
+    expect(props.onEdit).toHaveBeenCalledWith({ shapesFollow: true });
+  });
+
+  it("pins a shape onto the record, and unpins it again", () => {
+    // A pinned shape is the answer to "the chords shouldn't keep changing":
+    // it goes on the record, so it survives a trip to the metronome tab.
+    const expanded = { root: 9 as const, quality: "7" as const };
+    const { props } = chordSheet({}, { pinnedChord: expanded, shapeIndex: 0 });
+    fireEvent.click(screen.getByRole("button", { name: "Pin this one" }));
+    const patch = props.onEdit.mock.calls.at(-1)![0];
+    expect(patch.pinnedShape).toMatchObject({ root: 9, quality: "7", index: 0 });
+  });
+
+  it("pins the grip you are looking at, not any grip of that chord", () => {
+    // An A7 has several shapes on a guitar and pinning "the barre at the
+    // fifth" is a real thing to want. Comparing only the chord had the button
+    // read "Unpin" over a shape that was not the pinned one — and pressing it
+    // threw the pin away rather than moving it.
+    const expanded = { root: 9 as const, quality: "7" as const };
+    const { props } = chordSheet(
+      { jam: jamOf({ pinnedShape: { root: 9, quality: "7", index: 0 } }) },
+      { pinnedChord: expanded, shapeIndex: 2 },
+    );
+    expect(screen.getByRole("button", { name: "Pin this one" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Pin this one" }));
+    expect(props.onEdit.mock.calls.at(-1)![0].pinnedShape).toMatchObject({ index: 2 });
+  });
+
+  it("draws the pinned shape in the corner of the playing screen, and only there", () => {
+    const { container, props } = setup({
+      jam: jamOf({ pinnedShape: { root: 9, quality: "7", index: 0 } }),
+    });
+    const pinned = container.querySelector(".jam-pinned");
+    expect(pinned).not.toBeNull();
+    // It does not move: the sheet is shut and nothing on this screen is
+    // driving it.
+    expect(container.querySelector(".jam-chord-grid")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Unpin" }));
+    expect(props.onEdit).toHaveBeenCalledWith({ pinnedShape: null });
+  });
+
+  it("draws no pinned shape for a player with no neck", () => {
+    const { container } = setup({
+      instrument: "other",
+      jam: jamOf({ pinnedShape: { root: 9, quality: "7", index: 0 } }),
+    });
+    expect(container.querySelector(".jam-pinned")).toBeNull();
+  });
+
+  it("shows the fretboard as one static box for the key", () => {
+    const { container } = chordSheet({}, { fretboardOpen: true });
+    expect(container.querySelector(".jam-fretboard")).not.toBeNull();
+    // The sentence that says it will not move — which is the whole promise.
+    expect(screen.getByText(/stays put while you play/)).toBeInTheDocument();
   });
 });
 
@@ -706,10 +905,10 @@ describe("JamView — editing the changes", () => {
     jamOf({ chords: true, key: "A blues", form: { kind: "blues12", bars: 12 }, ...overrides });
 
   it("offers the way in only where the timeline is showing chords", () => {
-    setup({ jam: withChords() });
+    sheet({ jam: withChords() });
     expect(screen.getByRole("button", { name: "Edit changes" })).toBeInTheDocument();
     cleanup();
-    setup({ jam: jamOf({ chords: false }) });
+    sheet({ jam: jamOf({ chords: false }) });
     expect(screen.queryByRole("button", { name: "Edit changes" })).toBeNull();
   });
 
@@ -767,10 +966,11 @@ describe("JamView — editing the changes", () => {
   });
 
   it("refits the progression when the form changes under it", () => {
-    const { props } = setup({
+    const { props } = sheet({
       jam: withChords({ progression: ["Bb", "C", ...Array(10).fill("")] }),
     });
-    fireEvent.click(screen.getByText("8-bar loop"));
+    fireEvent.click(screen.getByRole("button", { name: /Shape/ }));
+    fireEvent.click(screen.getByRole("option", { name: /8-bar loop/ }));
     const patch = props.onEdit.mock.calls.at(-1)![0];
     expect(patch.form).toEqual({ kind: "loop8", bars: 8 });
     expect(patch.progression).toHaveLength(8);
@@ -794,21 +994,21 @@ describe("JamView — editing the changes", () => {
 /** The meter, the mix, the keys player and the spoken cues. */
 describe("JamView — the fourth pass's controls", () => {
   it("runs in the groove's own meter until told otherwise", () => {
-    const { container } = setup();
+    const { container } = sheetWithMore();
     const active = container.querySelectorAll(".jam-meter.active");
     expect(active).toHaveLength(1);
     expect(active[0].textContent).toBe("The groove's");
   });
 
   it("says which groove does not fit the meter it was given", () => {
-    setup({ jam: jamOf({ grooveId: "shuffle", meter: { beatGroups: [2, 2, 3], ticksPerBeat: 2 } }) });
+    sheet({ jam: jamOf({ grooveId: "shuffle", meter: { beatGroups: [2, 2, 3], ticksPerBeat: 2 } }) });
     expect(screen.getByText(/does not fit/)).toBeInTheDocument();
     // And the band row says what is actually playing.
     expect(screen.getByText(/The rule/)).toBeInTheDocument();
   });
 
   it("carries the count-in into the new meter, in bars", () => {
-    const { props } = setup({ jam: jamOf({ grooveId: "rock8", countIn: 8 }) });
+    const { props } = sheetWithMore({ jam: jamOf({ grooveId: "rock8", countIn: 8 }) });
     fireEvent.click(screen.getByRole("button", { name: "3/4" }));
     // The resolution comes along unchanged — the starter jam is a shuffle, so
     // it is running in triplets, and picking a meter says nothing about that.
@@ -842,17 +1042,40 @@ describe("JamView — the fourth pass's controls", () => {
     expect(props.onEdit).toHaveBeenCalledWith({ keysStyle: "stabs" });
   });
 
-  it("offers the sticks as well as the beep", () => {
-    const { props } = setup();
-    fireEvent.click(screen.getByRole("button", { name: "Sticks" }));
-    expect(props.onEdit).toHaveBeenCalledWith({ countInSound: "sticks" });
+  it("unpins the shape in the corner when the key moves", () => {
+    // A pinned grip belongs to the key it was pinned in. Left alone, a G shape
+    // sat in the corner of a jam in B flat, drawn as if it were the chord to
+    // play — and nothing on the screen would ever move it again.
+    const { props } = sheet({ jam: jamOf({ pinnedShape: { root: 9, quality: "7", index: 0 } }) });
+    fireEvent.click(screen.getByRole("button", { name: "C" }));
+    expect(props.onEdit.mock.calls.at(-1)![0]).toMatchObject({ pinnedShape: null });
+
+    fireEvent.click(screen.getByRole("button", { name: "Minor" }));
+    expect(props.onEdit.mock.calls.at(-1)![0]).toMatchObject({ pinnedShape: null });
   });
 
-  it("says where the voice comes from when there is not one", () => {
-    setup({ voiceReady: false });
-    expect(screen.getByText(/Needs the coach voice/)).toBeInTheDocument();
+  it("unpins it when the part you read is transposed", () => {
+    // Harder version of the same thing: every chord NAME moves, so the grip
+    // keeps its diagram and loses its label.
+    const { props } = sheetWithMore({
+      instrument: "other",
+      jam: jamOf({ pinnedShape: { root: 9, quality: "7", index: 0 } }),
+    });
+    fireEvent.click(screen.getByRole("button", { name: "B♭" }));
+    expect(props.onEdit.mock.calls.at(-1)![0]).toMatchObject({
+      transposition: "bb",
+      pinnedShape: null,
+    });
+  });
+
+  it("shows the transposition row only to a player who reads a transposed part", () => {
+    // A guitar, a bass and a piano all read concert pitch, so the control is
+    // furniture for the three instruments most people who open this app
+    // play (A4).
+    sheetWithMore({ instrument: "electric-guitar" });
+    expect(screen.queryByRole("group", { name: "You read" })).toBeNull();
     cleanup();
-    setup({ voiceReady: true });
-    expect(screen.queryByText(/Needs the coach voice/)).toBeNull();
+    sheetWithMore({ instrument: "other" });
+    expect(screen.getByRole("group", { name: "You read" })).toBeInTheDocument();
   });
 });

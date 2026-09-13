@@ -153,6 +153,15 @@
       "midiPlugged": {
         "body": "Hay un dispositivo MIDI conectado pero nada asignado. ¿Asignas un pedal a Reproducir/Parar?",
         "action": "Abrir atajos"
+      },
+      "jamSynth": {
+        "body": "Toda la banda está sintetizada: nada que descargar, nada que instalar."
+      },
+      "jamBand": {
+        "body": "La banda nunca toca tu instrumento. El bajo y el teclado están a un toque."
+      },
+      "jamTakes": {
+        "body": "Las tomas se quedan en este equipo. No se sube nada."
       }
     },
     "tour": {

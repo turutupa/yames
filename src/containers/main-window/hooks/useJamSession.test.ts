@@ -65,6 +65,12 @@ vi.mock("../../../ipc", () => ({
     calls.push(["setJamPosition", command]);
     return Promise.resolve();
   },
+  // The kit preview presses play on its own when the band is stopped (B7).
+  togglePlayback: () => {
+    calls.push(["togglePlayback", null]);
+    return Promise.resolve();
+  },
+  ttsSpeak: () => Promise.resolve(),
 }));
 
 vi.mock("react-i18next", () => ({
@@ -245,6 +251,22 @@ describe("what reaches the engine", () => {
     await waitFor(() => expect(names("setBpm")).toEqual([108]));
     expect(names("setJam")).toHaveLength(0);
     expect(names("setBeatGroups")).toHaveLength(0);
+  });
+
+  it("sends a fill habit the moment it changes", async () => {
+    // "Every 4 bars" is its own field on the config. It used to be missing
+    // from the key that decides whether to re-send, so the drummer went on
+    // filling at the chorus end until some unrelated edit pushed it.
+    const { result } = mount();
+    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    const rock = result.current.jams.find((j) => j.grooveId === "rock8")!;
+    act(() => result.current.loadJam({ ...rock, fills: true, fillEvery: 0 }));
+    await waitFor(() => expect(names("setJam")).toHaveLength(1));
+    calls.length = 0;
+
+    act(() => result.current.editJam({ fillEvery: 4 }));
+    await waitFor(() => expect(names("setJam")).toHaveLength(1));
+    expect((names("setJam")[0] as JamEngineConfig).fillEvery).toBe(4);
   });
 
   it("takes the band away when you leave the tab, and brings it back", async () => {
@@ -664,6 +686,60 @@ describe("the library", () => {
     expect(created.bpm).toBe(bossa.bpm);
   });
 
+  it("starts a jam made from nothing with the drummer and nobody else", async () => {
+    // plans/JAM_UX_DECISIONS.md B1. The first session's complaint was that a
+    // guitarist's brand new jam opened with a bass line already under
+    // everything, and "drums alone" was one toggle away nobody would find.
+    const { result } = mount("jam", { instrument: "electric-guitar" });
+    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    act(() => {
+      result.current.newJam();
+    });
+    await waitFor(() => expect(result.current.jams).toHaveLength(7));
+    expect(result.current.jam!.band).toEqual({ drums: true, bass: false, keys: false });
+  });
+
+  it("gives a drummer's new jam a bass player instead", async () => {
+    // A drummer with drums alone has nothing to play against, and the band
+    // still never plays your instrument.
+    const { result } = mount("jam", { instrument: "drums" });
+    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    act(() => {
+      result.current.newJam();
+    });
+    await waitFor(() => expect(result.current.jams).toHaveLength(7));
+    expect(result.current.jam!.band).toEqual({ drums: false, bass: true, keys: false });
+  });
+
+  it("opens the setup sheet on a new jam, and Play closes it", async () => {
+    // A1. A new jam has nothing set, so the sheet is where you are; the
+    // moment the band comes in, the thing you need is the timeline behind it.
+    const { result, rerender } = mount("jam");
+    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    expect(result.current.screen.setupOpen).toBe(false);
+
+    act(() => {
+      result.current.newJam();
+    });
+    await waitFor(() => expect(result.current.screen.setupOpen).toBe(true));
+
+    rerender({ v: "jam", playing: true });
+    await waitFor(() => expect(result.current.screen.setupOpen).toBe(false));
+  });
+
+  it("takes both sheets away with the jam", async () => {
+    // A sheet left down would be the first thing the NEXT jam showed,
+    // describing the one before it.
+    const { result } = mount();
+    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    act(() => result.current.loadJam(result.current.jams[0]));
+    act(() => result.current.screen.setChordsOpen(true));
+    await waitFor(() => expect(result.current.screen.chordsOpen).toBe(true));
+
+    act(() => result.current.closeJam());
+    await waitFor(() => expect(result.current.screen.chordsOpen).toBe(false));
+  });
+
   it("puts a duplicate next to the jam it came from", async () => {
     const { result } = mount();
     await waitFor(() => expect(result.current.jams).toHaveLength(6));
@@ -927,5 +1003,83 @@ describe("the metronome's meter", () => {
     await waitFor(() => expect(names("setJam")).toHaveLength(1));
     expect(names("setBeatGroups")).toHaveLength(0);
     expect(names("setSubdivision")).toHaveLength(0);
+  });
+});
+
+/**
+ * The two-bar kit audition (JAM_UX_DECISIONS B7), from a STOPPED transport.
+ *
+ * The path nothing covered, and the one that was broken: `isPlaying` is the
+ * engine's state event coming back, so on the render right after the preview
+ * presses play it is still false. The preview's own clock read that as
+ * "somebody pressed stop", cancelled itself, closed the sheet its button
+ * lives on — and left the transport running, because the press it had already
+ * sent arrived a moment later with nothing left to end it.
+ */
+describe("the kit preview", () => {
+  it("waits for the transport it started instead of cancelling itself", async () => {
+    const { result, rerender } = await loaded();
+    act(() => result.current.screen.setSetupOpen(true));
+
+    act(() => result.current.startKitPreview("brushes"));
+    // Play has been pressed and the engine has not answered yet.
+    expect(names("togglePlayback")).toHaveLength(1);
+    expect(result.current.previewKit).toBe("brushes");
+    // The sheet the Preview button sits on is still there, and the audition
+    // is still on. This is the render that used to end both.
+    expect(result.current.screen.setupOpen).toBe(true);
+
+    rerender({ v: "jam", playing: true, beat: beatAt(0) });
+    expect(result.current.previewKit).toBe("brushes");
+    expect(result.current.screen.setupOpen).toBe(true);
+    const config = names("setJam")
+      .filter((c) => c !== null)
+      .pop() as JamEngineConfig;
+    expect(config.kit).toBe("brushes");
+
+    // Two bar lines, and it puts the transport back where it found it.
+    rerender({ v: "jam", playing: true, beat: beatAt(1) });
+    rerender({ v: "jam", playing: true, beat: beatAt(2) });
+    await waitFor(() => expect(result.current.previewKit).toBeNull());
+    expect(names("togglePlayback")).toHaveLength(2);
+  });
+
+  it("ends when the player stops the transport under it, and stops there", async () => {
+    // The other half of the same waiting rule: once the transport has been
+    // HEARD, a stop is a stop. Pressing play again on the way out would leave
+    // a band playing that the player had just silenced.
+    const { result, rerender } = await loaded();
+    act(() => result.current.startKitPreview("tight"));
+    rerender({ v: "jam", playing: true, beat: beatAt(0) });
+    expect(result.current.previewKit).toBe("tight");
+
+    rerender({ v: "jam", playing: false, beat: beatAt(0) });
+    await waitFor(() => expect(result.current.previewKit).toBeNull());
+    expect(names("togglePlayback")).toHaveLength(1);
+  });
+
+  it("leaves the transport alone when the band was already playing", async () => {
+    // Auditioning INTO the take. Nothing presses play, and nothing presses
+    // stop: the preview simply ends and the kit goes back.
+    const { result, rerender } = await loaded((jams) => jams[0], {
+      playing: true,
+      beat: beatAt(0),
+    });
+    act(() => result.current.startKitPreview("electronic"));
+    expect(names("togglePlayback")).toHaveLength(0);
+
+    rerender({ v: "jam", playing: true, beat: beatAt(1) });
+    rerender({ v: "jam", playing: true, beat: beatAt(2) });
+    rerender({ v: "jam", playing: true, beat: beatAt(3) });
+    await waitFor(() => expect(result.current.previewKit).toBeNull());
+    expect(names("togglePlayback")).toHaveLength(0);
+  });
+
+  it("closes the setup sheet on a play that is not a preview", async () => {
+    // The rule the fix must not have broken (A1).
+    const { result, rerender } = await loaded();
+    act(() => result.current.screen.setSetupOpen(true));
+    rerender({ v: "jam", playing: true });
+    await waitFor(() => expect(result.current.screen.setupOpen).toBe(false));
   });
 });

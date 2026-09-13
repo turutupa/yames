@@ -65,6 +65,8 @@ export function CoachSettingsSection({
   voiceDiagnostics,
   instrument,
   setInstrument,
+  jamCues,
+  setJamCues,
   onStartDownload,
   onRequestDownload,
 }: {
@@ -88,6 +90,9 @@ export function CoachSettingsSection({
   voiceDiagnostics: VoiceDiagnostic[];
   instrument: string;
   setInstrument: Dispatch<SetStateAction<string>>;
+  /** Spoken cues on the Jam tab (JAM_UX_DECISIONS A4). */
+  jamCues: boolean;
+  setJamCues: Dispatch<SetStateAction<boolean>>;
   onStartDownload: (tier: ModelTier) => void;
   onRequestDownload: (tier: ModelTier) => void;
 }) {
@@ -476,6 +481,36 @@ export function CoachSettingsSection({
               }}
             >
               {t(`settings.coach.voiceModes.${mode}`)}
+            </button>
+          ))}
+        </div>
+      </div>
+      {/* The jam's spoken cues (plans/JAM_UX_DECISIONS.md A4).
+          It used to be a switch on every jam's setup screen, which made a
+          preference into a property of a tune: a player who wanted to be told
+          "your four" had to say so once per jam they owned. It is one switch
+          now, here with the other things that speak, and it is silent without
+          a voice installed for exactly the same reason the rest of this
+          section is. */}
+      <div className="setting-row">
+        <div className="setting-label">
+          <label>{t("jam.cues.label")}</label>
+          <span className="setting-hint">
+            {modelStatus?.voiceReady ? t("jam.cues.hint") : t("jam.cues.noVoice")}
+          </span>
+        </div>
+        <div className="toggle-group">
+          {([false, true] as const).map((on) => (
+            <button
+              key={String(on)}
+              className={`toggle-btn ${jamCues === on ? "active" : ""}`}
+              disabled={!modelStatus?.voiceReady}
+              onClick={() => {
+                setJamCues(on);
+                storeSave("jamCues", on);
+              }}
+            >
+              {t(on ? "common.on" : "common.off")}
             </button>
           ))}
         </div>

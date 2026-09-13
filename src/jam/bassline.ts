@@ -26,7 +26,7 @@
  * needs, and the integrator adapts it when harmony arrives.
  */
 
-import type { JamBassLine, JamFeel, JamPattern } from "./types";
+import type { JamBassLine, JamBassVoice, JamFeel, JamPattern } from "./types";
 
 // ---------------------------------------------------------------------------
 // Range
@@ -179,6 +179,28 @@ export const BASS_STYLE_FOR_GROOVE: Record<string, BassStyle> = {
   train: "rock",
   boomBap: "rock",
   fourOnFloor: "rock",
+  /**
+   * The seven the vibes brought (plans/JAM_UX_DECISIONS.md B4).
+   *
+   * Four of the drivers are `rock` again — roots on the kick — and again that
+   * writes four different parts, because the four kicks are different. Under
+   * double kick it is a root on every sixteenth, which the voice rule below
+   * reads as one held note; under the stomp it is the four heavy ones and
+   * nothing else; under two-step it is the walking rhythm the drum is already
+   * playing.
+   *
+   * Samba and cha-cha get the bossa line — root down, fifth pushed onto the
+   * "and" — which is the figure all three of those styles share. The second
+   * line gets `funk`: the root on the one and octave pops wherever the street
+   * beat's bass drum lands, which is exactly how that part is played.
+   */
+  hardRock: "rock",
+  stomp: "rock",
+  doubleKick: "rock",
+  twoStep: "rock",
+  samba: "bossa",
+  chaCha: "bossa",
+  secondLine: "funk",
 };
 
 function normaliseGrooveId(id: string): string {
@@ -196,6 +218,124 @@ const NORMALISED_STYLES: Record<string, BassStyle> = Object.fromEntries(
  */
 export function bassStyleForGroove(grooveId: string): BassStyle {
   return NORMALISED_STYLES[normaliseGrooveId(grooveId)] ?? "rock";
+}
+
+// ---------------------------------------------------------------------------
+// The voice, and how long a note is
+// ---------------------------------------------------------------------------
+
+/**
+ * How long each bass voice holds a note, in beats.
+ *
+ * This is the only difference the voice makes to the LINE. Everything else a
+ * voice is — the pick attack, the thumb, the round-wound growl of an upright,
+ * the filter on a synth — is synthesis, and lives on the audio side
+ * (plans/JAM_UX_DECISIONS.md B9). What lives here is note length, because
+ * note length is written in the notes and a synthesiser cannot invent it:
+ * a picked bass is short and separated, a slap line is shorter still and all
+ * space, a fingered line lets the note ring for its beat, an upright rings
+ * past it, and a synth bass holds until the next note or the bar ends.
+ *
+ * ## How a length is written
+ *
+ * `JamBassLine` has `pitches` and `gain` and nothing else — no durations —
+ * and the contract is not ours to grow. So the length is written in the
+ * phrasing, with one rule:
+ *
+ * > **The same pitch on consecutive ticks is ONE note held, not two notes.**
+ *
+ * A run of `[45, 45, 45, 0]` is a dotted half of A; `[45, 0, 45, 0]` is two
+ * separate As. The engine re-attacks only where the pitch CHANGES from the
+ * tick before, so a hold costs it nothing and a rest ends the note. Read a
+ * line back with `sustainedRuns` rather than by counting non-zero ticks.
+ *
+ * Two ticks is the shortest anything can be held, so a voice whose hold
+ * rounds below one tick simply gets one tick — the note as it was written,
+ * which is the short, separated attack `picked` and `slap` are asking for
+ * anyway.
+ */
+export const BASS_VOICE_HOLD_BEATS: Record<JamBassVoice, number> = {
+  picked: 0.5,
+  slap: 0.5,
+  fingered: 1,
+  upright: 2,
+  // Held: the note runs to whatever comes next, which for a synth bass is
+  // the whole point. `Infinity` rather than a big number, so the maths below
+  // says "until the next note" instead of "for a very long time".
+  synth: Infinity,
+};
+
+/**
+ * `pitches`, with each note held for as long as its voice holds a note.
+ *
+ * Pure, and a copy: the caller's array is not touched. A note is extended
+ * over the ticks that follow it until either its voice's hold runs out, the
+ * next note starts, or the bar ends — so a hold can never swallow the note
+ * after it, and the line's attacks land exactly where the style put them.
+ *
+ * A rest (`0`) is never extended, and a note is never shortened: this only
+ * ever fills silence that was already after the note.
+ *
+ * ## The one place the hold stops short
+ *
+ * A held note runs up to the next attack — unless that attack is the SAME
+ * pitch, in which case it stops one tick earlier and leaves a rest. It has
+ * to: "hold" and "strike the same note again" are the same three ticks of
+ * the same number otherwise, and the rule cannot read both. So a rock line
+ * with roots on the kick at 1 and the "a" of 1 comes back as two notes with
+ * a hair of silence between them, which is what a bass player's fingers do
+ * anyway. The rest is one tick, and only one.
+ */
+export function applyBassVoice(
+  pitches: readonly number[],
+  a: { voice: JamBassVoice; ticksPerBeat: number },
+): number[] {
+  const out = [...pitches];
+  const beats = BASS_VOICE_HOLD_BEATS[a.voice];
+  const ticks = a.ticksPerBeat > 0 ? a.ticksPerBeat : 1;
+  const hold = Number.isFinite(beats) ? Math.max(1, Math.round(beats * ticks)) : out.length;
+  if (hold <= 1) return out;
+
+  // Runs, not ticks: a style that already repeated a pitch wrote a hold, and
+  // that hold is ONE note whose length is measured from where it was struck.
+  // Walking it tick by tick would either re-start the hold on every tick of
+  // it or refuse to lengthen it at all.
+  const runs = sustainedRuns(pitches);
+  for (let i = 0; i < runs.length; i += 1) {
+    const run = runs[i];
+    const after = run.start + run.length;
+    const nextRun = runs[i + 1];
+    const next = nextRun ? nextRun.start : out.length;
+    // Room up to the next attack, minus the tick that keeps a same-pitch
+    // attack readable as an attack.
+    const until = nextRun && nextRun.pitch === run.pitch ? next - 1 : next;
+    const end = Math.min(run.start + hold, until);
+    for (let u = after; u < end; u += 1) out[u] = run.pitch;
+  }
+  return out;
+}
+
+/** One note of a line: where it is struck, how many ticks it sounds for, its pitch. */
+export type BassRun = { start: number; length: number; pitch: number };
+
+/**
+ * A line read as notes rather than as ticks — the hold rule above, applied.
+ *
+ * This is what the engine wants (attack here, hold for this long) and what a
+ * test wants (did the picked line come out shorter than the upright one).
+ * Consecutive ticks at the same pitch are one run; a rest or a different
+ * pitch ends it.
+ */
+export function sustainedRuns(pitches: readonly number[]): BassRun[] {
+  const runs: BassRun[] = [];
+  for (let t = 0; t < pitches.length; t += 1) {
+    const pitch = pitches[t];
+    if (!pitch) continue;
+    const last = runs[runs.length - 1];
+    if (last && last.pitch === pitch && last.start + last.length === t) last.length += 1;
+    else runs.push({ start: t, length: 1, pitch });
+  }
+  return runs;
 }
 
 // ---------------------------------------------------------------------------
@@ -259,6 +399,16 @@ export type BassLineInput = {
    * whether it is the first or second bar of a two-bar boogie phrase.
    */
   barIndex?: number;
+  /**
+   * Which bass is playing. It does not change WHICH notes the style picks —
+   * a walking line walks whoever is holding the instrument — only how long
+   * each one is held (`applyBassVoice`).
+   *
+   * Absent means "leave the phrasing alone": every note is one tick, which is
+   * what this module wrote before voices existed and what a caller that has
+   * no voice to hand should still get.
+   */
+  voice?: JamBassVoice;
 };
 
 /** The bass for one bar. Gain is 1.0; the intensity multiplier is the mix's job. */
@@ -297,7 +447,12 @@ export function bassLineFor(input: BassLineInput): JamBassLine {
   for (let t = 0; t < length; t += 1) {
     if (pitches[t] !== 0) pitches[t] = toBassRange(pitches[t]);
   }
-  return { pitches, gain: 1.0 };
+  // Last, and after the folding: the hold rule compares pitches, and two
+  // spellings of the same note an octave apart are two notes, not a hold.
+  const voiced = input.voice
+    ? applyBassVoice(pitches, { voice: input.voice, ticksPerBeat })
+    : pitches;
+  return { pitches: voiced, gain: 1.0 };
 }
 
 /**

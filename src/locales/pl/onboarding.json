@@ -153,6 +153,15 @@
       "midiPlugged": {
         "body": "Urządzenie MIDI jest podłączone, ale nic nie jest przypisane. Przypisać pedał do Start/Stop?",
         "action": "Otwórz skróty"
+      },
+      "jamSynth": {
+        "body": "Cały zespół jest syntezowany — nic do pobrania, nic do instalowania."
+      },
+      "jamBand": {
+        "body": "Zespół nigdy nie gra na twoim instrumencie. Bas i klawisze to jedno dotknięcie."
+      },
+      "jamTakes": {
+        "body": "Nagrania zostają na tym komputerze. Nic nie jest wysyłane."
       }
     },
     "tour": {

@@ -153,6 +153,15 @@
       "midiPlugged": {
         "body": "Có thiết bị MIDI đang kết nối nhưng chưa gán gì. Gán bàn đạp cho Phát/Dừng nhé?",
         "action": "Mở phím tắt"
+      },
+      "jamSynth": {
+        "body": "Cả ban nhạc đều là âm tổng hợp — không phải tải, không phải cài."
+      },
+      "jamBand": {
+        "body": "Ban nhạc không bao giờ chơi nhạc cụ của bạn. Bass và keys chỉ cách một chạm."
+      },
+      "jamTakes": {
+        "body": "Bản ghi nằm lại trên máy này. Không có gì được tải lên."
       }
     },
     "tour": {

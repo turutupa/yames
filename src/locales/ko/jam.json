@@ -34,7 +34,14 @@
       "train": "트레인 비트",
       "boomBap": "붐뱁",
       "fourOnFloor": "포 온 더 플로어",
-      "rule": "규칙"
+      "rule": "규칙",
+      "hardRock": "하드록",
+      "stomp": "스톰프",
+      "doubleKick": "투베이스",
+      "twoStep": "투스텝",
+      "samba": "삼바",
+      "chaCha": "차차",
+      "secondLine": "세컨드 라인"
     },
     "changes": {
       "edit": "코드 편집",
@@ -49,7 +56,6 @@
     "meter": {
       "label": "박자",
       "grooves": "그루브의 박자",
-      "ticks": "한 박당 틱",
       "doesNotFit": "{{groove}}은(는) {{meter}}에 맞지 않아 드러머가 규칙대로 연주합니다."
     },
     "mix": {
@@ -90,7 +96,8 @@
       "label": "세기",
       "soft": "약하게",
       "normal": "보통",
-      "loud": "세게"
+      "loud": "세게",
+      "hint": "세게는 고스트 노트를 빼고 크래시를 넣고, 여리게는 백비트를 가볍게 치고 크래시를 뺍니다."
     },
     "form": {
       "label": "형식",
@@ -118,7 +125,8 @@
       "jumpTo": "{{bar}}마디로",
       "jumpPending": "다음 마디선에서",
       "loopSection": "{{start}}–{{end}}마디 반복",
-      "loopOff": "반복 끄기"
+      "loopOff": "반복 끄기",
+      "shape": "형태"
     },
     "short": {
       "blues12": "12마디",
@@ -133,9 +141,9 @@
     "countIn": {
       "label": "카운트인",
       "none": "없음",
-      "bars": "{{count}}마디",
-      "bars_one": "{{count}}마디",
-      "bars_other": "{{count}}마디"
+      "barsAnd": "{{count}}마디 · {{sound}}",
+      "barsAnd_one": "{{count}}마디 · {{sound}}",
+      "barsAnd_other": "{{count}}마디 · {{sound}}"
     },
     "fills": {
       "label": "필인",
@@ -158,7 +166,8 @@
     },
     "fretboard": {
       "label": "지판",
-      "aria": "넥 위의 {{chord}}"
+      "aria": "넥 위의 {{chord}}",
+      "staysPut": "{{scale}}, {{fret}}프렛 포지션 · 연주하는 동안 그대로입니다"
     },
     "chords": {
       "label": "코드",
@@ -167,12 +176,19 @@
       "follow": "잼 따라가기",
       "followHint": "폼이 코드 진행을 따라가게 하거나, 한 코드에 고정합니다.",
       "sevenths": "7th",
-      "nextShape": "다음 폼",
       "sizeTriad": "트라이어드",
       "sizeOpen": "오픈",
       "sizeBarre": "바레",
       "sizeSeventh": "7th",
-      "fret": "{{fret}}프렛"
+      "fret": "{{fret}}프렛",
+      "sheetLead": "흘깃 보는 페이지, 움직이는 화면이 아닙니다",
+      "sizeLabel": "3화음 또는 7th",
+      "triads": "3화음",
+      "everyWay": "{{chord}}, 잡는 방법 전부",
+      "lowToHigh": "넥의 낮은 쪽에서 높은 쪽으로",
+      "pin": "이걸 고정",
+      "unpin": "고정 해제",
+      "pinnedAria": "{{chord}}, 화면에 고정됨"
     },
     "key": {
       "label": "키",
@@ -193,7 +209,31 @@
       "brushes": "브러시",
       "brushesHint": "조용하게, 발라드에",
       "electronic": "일렉트로닉",
-      "electronicHint": "합성음, 단단한 어택"
+      "electronicHint": "합성음, 단단한 어택",
+      "raw": "로우",
+      "rawHint": "건조한 방의 록 드러머",
+      "preview": "미리 듣기",
+      "previewStop": "정지",
+      "builtIn": "기본 제공",
+      "yours": "내 것",
+      "forget": "빼기",
+      "chooseFolder": "내 샘플이 든 폴더…",
+      "folderHint": "킥, 스네어, 하이햇, 오픈 하이햇, 라이드, 림, 크래시 · 이 기기를 벗어나지 않습니다",
+      "folderUnavailable": "이 빌드에서는 내 샘플을 쓸 수 없습니다.",
+      "folderEmpty": "그 폴더에는 드럼 소리가 없습니다. 아무것도 불러오지 않았습니다.",
+      "folderRefused": "그 폴더를 불러오지 못했습니다. 내장 키트가 연주됩니다.",
+      "foundVoices": "찾은 소리: {{voices}}.",
+      "fallbackVoices": "{{voices}}은(는) {{kit}}에서 납니다.",
+      "voice": {
+        "kick": "킥",
+        "snare": "스네어",
+        "snare_soft": "여린 스네어",
+        "hat": "하이햇",
+        "hat_open": "오픈 하이햇",
+        "ride": "라이드",
+        "rim": "림",
+        "crash": "크래시"
+      }
     },
     "transposition": {
       "label": "읽는 조",
@@ -201,18 +241,15 @@
       "bb": "B♭",
       "eb": "E♭"
     },
-    "setup": {
-      "label": "키, 킷, 그리고 읽는 파트"
-    },
+    "setup": {},
     "band": {
       "label": "밴드",
-      "lead": "모두 합성음, 내려받을 것 없음",
+      "lead": "부르기 전까지는 드럼만",
       "drums": "드럼",
       "bass": "베이스",
       "keys": "건반",
       "you": "당신",
       "youPlay": "{{instrument}}",
-      "youHint": "밴드는 당신의 악기를 연주하지 않습니다",
       "out": "쉼",
       "hatsOnly": "하이햇만",
       "inputOn": "입력 켜짐",
@@ -301,13 +338,92 @@
       "confirmDelete": "삭제",
       "confirmKeep": "유지",
       "size": "디스크에 약 {{megabytes}} MB",
-      "local": "테이크는 이 컴퓨터에만 남습니다. 업로드되지 않습니다.",
       "introTitle": "테이크에 대하여",
       "introWhat": "테이크는 카운트인 뒤 첫 마디부터 멈출 때까지, 당신과 밴드를 함께 담은 소리입니다.",
       "introWhere": "이 컴퓨터의 앱 전용 폴더에 WAV 파일로 저장되며, 지우기 전까지 그곳에 남습니다.",
       "introPrivate": "업로드도, 분석도 없으며, 아무것도 이 컴퓨터를 떠나지 않습니다.",
       "introNotNow": "나중에",
       "introStart": "테이크 녹음하기"
+    },
+    "sheet": {
+      "setUp": "설정",
+      "done": "완료"
+    },
+    "vibe": {
+      "label": "바이브",
+      "lead": "한 번 누르면 드러머, 킷, 템포, 조성이 정해집니다",
+      "startedFrom": "{{vibe}} 바이브에서 시작",
+      "unavailable": "이 빌드에는 아직 바이브가 없습니다. 아래 설정은 모두 됩니다.",
+      "rock": "록",
+      "hardRock": "하드록",
+      "blues": "블루스",
+      "funk": "펑크",
+      "jazz": "재즈",
+      "latin": "라틴",
+      "pop": "팝",
+      "metal": "메탈",
+      "country": "컨트리"
+    },
+    "variation": {
+      "label": "{{vibe}}, 어느 쪽",
+      "lead": "각각 그루브, 킷, 필, 세기를 한 번에 정합니다",
+      "aria": "이 바이브를 연주하는 방식",
+      "count": "{{count}}가지 연주법",
+      "count_one": "{{count}}가지 연주법",
+      "count_other": "{{count}}가지 연주법",
+      "yours": "내 잼",
+      "yoursEmpty": "아직 저장한 게 없습니다",
+      "classic": "클래식",
+      "hard": "하드",
+      "punk": "펑크",
+      "alt": "얼터너티브",
+      "ballad": "발라드",
+      "halfTime": "하프타임",
+      "stomp": "스톰프",
+      "doubleKick": "투베이스",
+      "shuffle": "셔플",
+      "slow": "느리게",
+      "texas": "텍사스",
+      "boogie": "부기",
+      "sixteenths": "16분",
+      "newOrleans": "뉴올리언스",
+      "swing": "스윙",
+      "bossa": "보사",
+      "upTempo": "빠르게",
+      "samba": "삼바",
+      "thrash": "스래시",
+      "openHats": "오픈 하이햇",
+      "driving16ths": "몰아치는 16분",
+      "bossaJazz": "보사 재즈",
+      "chaCha": "차차",
+      "straight": "스트레이트",
+      "fourOnFloor": "포 온 더 플로어",
+      "halfTimeStomp": "하프타임 스톰프",
+      "train": "트레인",
+      "twoStep": "투스텝",
+      "waltz": "왈츠"
+    },
+    "drummer": {
+      "label": "드러머"
+    },
+    "more": {
+      "label": "더 보기",
+      "lead": "박자 · 읽는 조 · 녹음"
+    },
+    "bassVoice": {
+      "label": "음색",
+      "fingered": "핑거",
+      "picked": "피크",
+      "upright": "더블베이스",
+      "slap": "슬랩",
+      "synth": "신스"
+    },
+    "keysVoice": {
+      "label": "음색",
+      "epiano": "일렉 피아노",
+      "organ": "오르간",
+      "clav": "클라비",
+      "pad": "패드"
     }
   },
   "scale": {

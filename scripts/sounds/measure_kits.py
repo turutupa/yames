@@ -39,7 +39,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 SND = os.path.join(ROOT, "src-tauri", "sounds")
 
-KITS = ("room", "tight", "brushes", "electronic")
+KITS = ("room", "tight", "brushes", "electronic", "raw")
 VOICES = ("kick", "snare_hi", "snare_lo", "hat", "hat_open", "ride", "rim", "crash")
 
 # The engine's own floor, from `every_accent_is_louder_than_its_beat_on_a_

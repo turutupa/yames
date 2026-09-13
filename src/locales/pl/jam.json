@@ -34,7 +34,14 @@
       "train": "Train beat",
       "boomBap": "Boom bap",
       "fourOnFloor": "Four on the floor",
-      "rule": "Reguła"
+      "rule": "Reguła",
+      "hardRock": "Hard rock",
+      "stomp": "Stomp",
+      "doubleKick": "Podwójna stopa",
+      "twoStep": "Two-step",
+      "samba": "Samba",
+      "chaCha": "Cza-cza",
+      "secondLine": "Second line"
     },
     "changes": {
       "edit": "Edytuj akordy",
@@ -49,7 +56,6 @@
     "meter": {
       "label": "Metrum",
       "grooves": "Metrum groove'u",
-      "ticks": "Tyknięcia na miarę",
       "doesNotFit": "{{groove}} nie mieści się w {{meter}}; perkusista gra regułę."
     },
     "mix": {
@@ -90,7 +96,8 @@
       "label": "Intensywność",
       "soft": "Cicho",
       "normal": "Normalnie",
-      "loud": "Głośno"
+      "loud": "Głośno",
+      "hint": "Głośno wyrzuca ghost noty i dokłada crash; cicho gra backbeat lekko i pomija crash."
     },
     "form": {
       "label": "Forma",
@@ -118,7 +125,8 @@
       "jumpTo": "Do taktu {{bar}}",
       "jumpPending": "na następnej kresce taktowej",
       "loopSection": "Zapętl takty {{start}}–{{end}}",
-      "loopOff": "Wyłącz pętlę"
+      "loopOff": "Wyłącz pętlę",
+      "shape": "Kształt"
     },
     "short": {
       "blues12": "12 taktów",
@@ -133,9 +141,9 @@
     "countIn": {
       "label": "Odliczenie",
       "none": "Brak",
-      "bars": "{{count}} taktów",
-      "bars_one": "{{count}} takt",
-      "bars_other": "{{count}} taktów"
+      "barsAnd": "{{count}} takty · {{sound}}",
+      "barsAnd_one": "{{count}} takt · {{sound}}",
+      "barsAnd_other": "{{count}} takty · {{sound}}"
     },
     "fills": {
       "label": "Fille",
@@ -158,7 +166,8 @@
     },
     "fretboard": {
       "label": "Gryf",
-      "aria": "{{chord}} na gryfie"
+      "aria": "{{chord}} na gryfie",
+      "staysPut": "{{scale}}, pozycja na progu {{fret}} · stoi w miejscu, kiedy grasz"
     },
     "chords": {
       "label": "Akordy",
@@ -167,12 +176,19 @@
       "follow": "Idź za jamem",
       "followHint": "Chwyty przesuwają się razem z akordami albo zostają przypięte do jednego.",
       "sevenths": "Septymowe",
-      "nextShape": "Następny chwyt",
       "sizeTriad": "trójdźwięk",
       "sizeOpen": "otwarty",
       "sizeBarre": "barowy",
       "sizeSeventh": "septymowy",
-      "fret": "próg {{fret}}"
+      "fret": "próg {{fret}}",
+      "sheetLead": "strona, na którą się zerka, a nie widok, który się rusza",
+      "sizeLabel": "Trójdźwięki albo septymowe",
+      "triads": "Trójdźwięki",
+      "everyWay": "{{chord}}, wszystkie chwyty",
+      "lowToHigh": "od niskich do wysokich po gryfie",
+      "pin": "Przypnij ten",
+      "unpin": "Odepnij",
+      "pinnedAria": "{{chord}}, przypięty do ekranu"
     },
     "key": {
       "label": "Tonacja",
@@ -193,7 +209,31 @@
       "brushes": "Miotełki",
       "brushesHint": "cicho, do ballady",
       "electronic": "Elektroniczny",
-      "electronicHint": "syntetyczny i zwarty"
+      "electronicHint": "syntetyczny i zwarty",
+      "raw": "Surowy",
+      "rawHint": "perkusista rockowy w suchym pomieszczeniu",
+      "preview": "Posłuchaj",
+      "previewStop": "Stop",
+      "builtIn": "Wbudowane",
+      "yours": "Twoje",
+      "forget": "Usuń",
+      "chooseFolder": "Folder z twoimi samplami…",
+      "folderHint": "stopa, werbel, hi-hat, otwarty hi-hat, ride, rim, crash · nic nie opuszcza tego komputera",
+      "folderUnavailable": "Własnych sampli nie ma w tej wersji.",
+      "folderEmpty": "W tym folderze nie ma dźwięków perkusji — nic nie zostało wczytane.",
+      "folderRefused": "Tego folderu nie udało się wczytać. Gra wbudowany zestaw.",
+      "foundVoices": "Znaleziono: {{voices}}.",
+      "fallbackVoices": "{{voices}} pochodzą z {{kit}}.",
+      "voice": {
+        "kick": "stopa",
+        "snare": "werbel",
+        "snare_soft": "cichy werbel",
+        "hat": "hi-hat",
+        "hat_open": "otwarty hi-hat",
+        "ride": "ride",
+        "rim": "rim",
+        "crash": "crash"
+      }
     },
     "transposition": {
       "label": "Czytasz",
@@ -201,18 +241,15 @@
       "bb": "B",
       "eb": "Es"
     },
-    "setup": {
-      "label": "Tonacja, zestaw i partia, którą czytasz"
-    },
+    "setup": {},
     "band": {
       "label": "Zespół",
-      "lead": "wszystko syntezowane, nic do pobrania",
+      "lead": "sama perkusja, dopóki nie poprosisz",
       "drums": "Perkusja",
       "bass": "Bas",
       "keys": "Klawisze",
       "you": "Ty",
       "youPlay": "{{instrument}}",
-      "youHint": "zespół nigdy nie gra na twoim instrumencie",
       "out": "pauza",
       "hatsOnly": "tylko hi-hat",
       "inputOn": "Wejście włączone",
@@ -301,13 +338,92 @@
       "confirmDelete": "Usuń",
       "confirmKeep": "Zostaw",
       "size": "około {{megabytes}} MB na dysku",
-      "local": "Take zostają na tym komputerze. Nic nie jest wysyłane.",
       "introTitle": "O take'ach",
       "introWhat": "Take to ty razem z zespołem, od pierwszego taktu po odliczeniu aż do przerwania.",
       "introWhere": "Zapisuje się jako plik WAV we własnym folderze tej aplikacji na tym komputerze i zostaje tam, dopóki go nie usuniesz.",
       "introPrivate": "Nic nie jest wysyłane, nic nie jest analizowane i nic nie opuszcza tego komputera.",
       "introNotNow": "Nie teraz",
       "introStart": "Nagrywaj take"
+    },
+    "sheet": {
+      "setUp": "Ustawienia",
+      "done": "Gotowe"
+    },
+    "vibe": {
+      "label": "Vibe",
+      "lead": "jedno dotknięcie ustawia perkusistę, zestaw, tempo i tonację",
+      "startedFrom": "zaczęte od vibe'u {{vibe}}",
+      "unavailable": "Vibe'ów jeszcze nie ma w tej wersji — wszystko poniżej działa.",
+      "rock": "Rock",
+      "hardRock": "Hard rock",
+      "blues": "Blues",
+      "funk": "Funk",
+      "jazz": "Jazz",
+      "latin": "Latin",
+      "pop": "Pop",
+      "metal": "Metal",
+      "country": "Country"
+    },
+    "variation": {
+      "label": "{{vibe}}, który",
+      "lead": "każdy to groove, zestaw, feel i głośność razem",
+      "aria": "Sposoby grania tego vibe'u",
+      "count": "{{count}} sposobów grania",
+      "count_one": "{{count}} sposób grania",
+      "count_other": "{{count}} sposobów grania",
+      "yours": "Jeden z twoich",
+      "yoursEmpty": "nic jeszcze nie zapisano",
+      "classic": "Klasyczny",
+      "hard": "Ostry",
+      "punk": "Punk",
+      "alt": "Alternatywny",
+      "ballad": "Ballada",
+      "halfTime": "Half-time",
+      "stomp": "Stomp",
+      "doubleKick": "Podwójna stopa",
+      "shuffle": "Shuffle",
+      "slow": "Wolny",
+      "texas": "Texas",
+      "boogie": "Boogie",
+      "sixteenths": "Szesnastki",
+      "newOrleans": "New Orleans",
+      "swing": "Swing",
+      "bossa": "Bossa",
+      "upTempo": "Szybki",
+      "samba": "Samba",
+      "thrash": "Thrash",
+      "openHats": "Otwarte hi-haty",
+      "driving16ths": "Napędzające szesnastki",
+      "bossaJazz": "Bossa jazz",
+      "chaCha": "Cza-cza",
+      "straight": "Prosto",
+      "fourOnFloor": "Four on the floor",
+      "halfTimeStomp": "Stomp na pół tempa",
+      "train": "Train",
+      "twoStep": "Two-step",
+      "waltz": "Walc"
+    },
+    "drummer": {
+      "label": "Perkusista"
+    },
+    "more": {
+      "label": "Więcej",
+      "lead": "metrum · co czytasz · nagrania"
+    },
+    "bassVoice": {
+      "label": "Brzmienie",
+      "fingered": "Palcami",
+      "picked": "Kostką",
+      "upright": "Kontrabas",
+      "slap": "Slap",
+      "synth": "Synth"
+    },
+    "keysVoice": {
+      "label": "Brzmienie",
+      "epiano": "Piano elektryczne",
+      "organ": "Organy",
+      "clav": "Clav",
+      "pad": "Pad"
     }
   },
   "scale": {

@@ -163,6 +163,37 @@ function build(entries: Array<[ScaleId, PitchClass]>): ScaleSuggestion[] {
  * harmonic minor a semitone above the chord root, which is the scale that
  * chord is the seventh of. One suggestion; the bar is half a bar long.
  */
+/**
+ * The scale for a KEY, not for a chord — the box the neck draws and leaves
+ * alone (JAM_UX_DECISIONS A8).
+ *
+ * "The fretboard and the chords are amazing, but they shouldn't keep
+ * changing." A scale chosen per chord swaps under your hands every four bars,
+ * and the thing a player actually wants on the wall is one box for the tune:
+ * minor pentatonic for a blues, natural minor for a minor key, the major
+ * scale for a major one. Best first, and the list is short on purpose.
+ */
+export function scalesForKey(key: Key): ScaleSuggestion[] {
+  if (key.mode === "blues") {
+    return build([
+      ["minorPentatonic", key.root],
+      ["blues", key.root],
+      ["mixolydian", key.root],
+    ]);
+  }
+  if (key.mode === "minor") {
+    return build([
+      ["minorPentatonic", key.root],
+      ["naturalMinor", key.root],
+      ["dorian", key.root],
+    ]);
+  }
+  return build([
+    ["majorPentatonic", key.root],
+    ["major", key.root],
+  ]);
+}
+
 export function scalesForChord(chord: Chord, key: Key): ScaleSuggestion[] {
   const root = pitchClass(chord.root);
   /** Where this chord sits in the key, in semitones above the tonic. */

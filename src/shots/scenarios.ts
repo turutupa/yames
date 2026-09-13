@@ -75,6 +75,19 @@ export interface Shot {
      *  than a window, and the band and the practice tools live below the
      *  fold of the one the chord is in. */
     scrollTo?: string;
+    /**
+     * Open one of the two docked sheets first (JAM_UX_DECISIONS A1, A8).
+     *
+     * The playing screen is five blocks now, and everything else — grooves,
+     * key, kit, meter, takes — is behind the "Set up" button in the context
+     * bar. The chord sheet is behind "Chords". Pressed rather than poked,
+     * like the library row above.
+     */
+    sheet?: "setup" | "chords";
+    /** Expand the setup sheet's MORE block: meter, what you read, takes. */
+    more?: boolean;
+    /** Tap this chord on the chord sheet (0-based) to expand its shapes. */
+    chordCard?: number;
   };
   /**
    * The Setlist tab, with a setlist actually on it.
@@ -207,8 +220,9 @@ export const SHOTS: Shot[] = [
     suffix: "jam-editor",
     window: "main",
     tab: "jam",
-    // The groove editor, docked under a jam that is still playing.
-    jam: { row: 0, bar: 3, editor: true, scrollTo: ".jam-band" },
+    // The groove editor, docked under a jam that is still playing. The way
+    // in is the last card of the groove row, which lives on the setup sheet.
+    jam: { row: 0, bar: 3, sheet: "setup", editor: true },
     width: 1400,
     height: 900,
     settleMs: 400,
@@ -218,9 +232,10 @@ export const SHOTS: Shot[] = [
     suffix: "jam-setup",
     window: "main",
     tab: "jam",
-    // Key, kit and the part you read — the half of the screen you touch once
-    // and then leave alone for an hour.
-    jam: { row: 0, scrollTo: ".jam-setup" },
+    // The setup sheet, docked to the right with the playing screen dimmed
+    // behind it: the vibe tiles, the drummer, the form and the band — the
+    // half of the mode you touch once and then leave alone for an hour.
+    jam: { row: 0, sheet: "setup" },
     width: 1400,
     height: 900,
     settleMs: 400,
@@ -231,8 +246,10 @@ export const SHOTS: Shot[] = [
     window: "main",
     tab: "jam",
     // The timeline in edit mode with the picker open on bar 5 — the one
-    // screen that says the changes are yours rather than the form's.
-    jam: { row: 0, editChords: 5, scrollTo: ".jam-timeline-section" },
+    // screen that says the changes are yours rather than the form's. EDIT
+    // CHANGES lives on the setup sheet; the cells it unlocks are on the
+    // playing screen behind it, which is the point of a docked sheet.
+    jam: { row: 0, sheet: "setup", editChords: 5 },
     width: 1400,
     height: 900,
     settleMs: 400,
@@ -243,8 +260,9 @@ export const SHOTS: Shot[] = [
     window: "main",
     tab: "jam",
     // A jam in 7/8: the meter control, and the sentence saying the groove
-    // does not fit it so the drummer plays the rule.
-    jam: { row: 0, meter: "7/8", scrollTo: ".jam-setup" },
+    // does not fit it so the drummer plays the rule. Both are inside MORE
+    // now, which is where a thing true of one jam in twenty belongs.
+    jam: { row: 0, sheet: "setup", more: true, meter: "7/8", scrollTo: ".jam-more-body" },
     width: 1400,
     height: 900,
     settleMs: 400,
@@ -257,6 +275,20 @@ export const SHOTS: Shot[] = [
     // The band's three rows with their volume sliders, and the keys row's
     // comping style.
     jam: { row: 0, bar: 5, scrollTo: ".jam-band" },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-chords",
+    suffix: "jam-chords",
+    window: "main",
+    tab: "jam",
+    // The chord sheet, open over a jam that is playing: the key's chords as
+    // one basic shape each, and every way to play the first of them expanded
+    // underneath. The playing screen is NOT dimmed behind it, which is the
+    // difference between a cheat sheet and a dialog (A8).
+    jam: { row: 0, bar: 5, sheet: "chords", chordCard: 0 },
     width: 1400,
     height: 900,
     settleMs: 400,
@@ -279,11 +311,10 @@ export const SHOTS: Shot[] = [
     suffix: "jam-takes",
     window: "main",
     tab: "jam",
-    // The shelf under the band: three takes of the slow blues, with the one
-    // in the middle playing and the band muted under it. The section is the
-    // only place in the app that keeps a file, so the picture has to show
+    // The shelf inside MORE: three takes of the slow blues. The section is
+    // the only place in the app that keeps a file, so the picture has to show
     // what that looks like rather than an empty heading.
-    jam: { row: 0, bar: 5, scrollTo: ".jam-practice" },
+    jam: { row: 0, sheet: "setup", more: true, scrollTo: ".jam-takes" },
     width: 1400,
     height: 900,
     settleMs: 400,
