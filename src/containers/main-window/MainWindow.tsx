@@ -380,14 +380,6 @@ export function MainWindow() {
     },
   });
 
-  /**
-   * The loaded jam's takes (JAM_MODE §4.4).
-   *
-   * At the window level rather than inside `JamView`, and for the same reason
-   * the transport's mark is on the transport: a take runs while you wander
-   * off to the metronome tab to check something, and a recorder that lived in
-   * the screen would stop the moment the screen unmounted.
-   */
   /*
    * Wrapped, because it is the root of a chain of fresh objects.
    *
@@ -400,6 +392,16 @@ export function MainWindow() {
     (takes: boolean) => jamSession.editJam({ takes }),
     [jamSession.editJam],
   );
+
+  /**
+   * The loaded jam's takes (JAM_MODE §4.4).
+   *
+   * At the window level rather than inside `JamView` because both ends of
+   * recording are the window's: the mark it puts on the transport, and the
+   * TAB, which is how the hook knows the jam has left the engine. A take
+   * belongs to the jam on the engine and ends when that jam does, so leaving
+   * the Jam tab ends it — see `useJamTakes`.
+   */
   const jamTakes = useJamTakes({
     jam: jamSession.jam,
     view,
