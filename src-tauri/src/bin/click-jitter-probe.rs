@@ -38,6 +38,8 @@
 //!                        every 350 ms (the bar-ahead bass handshake)
 //!   --jam-move           --jam, and move the form while it plays: a loop
 //!                        set and a jump every 2 s. Combines with --jam-swap
+//!   --jam-kit <dir>      --jam, with the drums decoded from a folder of
+//!                        your own WAVs. Combines with the three below
 //!   --jam-take           --jam, and record a take for the whole run: the
 //!                        callback copies its mix into a lock-free ring and
 //!                        a writer thread resamples, mixes and writes it to
@@ -77,7 +79,8 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use yames_lib::probe::{
-    compile_jam, create_beat_log, create_shared_state, CallbackProbe, CallbackSample, JamBassLine,
+    compile_jam, compile_jam_with_kit, create_beat_log, create_shared_state, load_kit,
+    CallbackProbe, CallbackSample, CustomBank, JamBassLine,
     JamConfig, JamKeysLine, JamMix, JamPattern, JamPosition, MetronomeEngine, TakeRing, TakeSession,
     TakeStart,
 };
@@ -115,6 +118,11 @@ struct Args {
     /// take actually puts on the machine, and the one path where the audio
     /// thread does work on behalf of the filesystem.
     jam_take: bool,
+    /// `--jam`, and play the drums out of this folder of WAVs instead of a
+    /// built-in kit. The one sound source the audio thread reads that was
+    /// not compiled into the binary: decoded on the command thread, handed
+    /// over inside the table, and retired with it.
+    jam_kit: Option<String>,
     /// Whether the tempo / resolution came from the command line, so `--jam`
     /// can supply its own 240 BPM sixteenths without overruling a run that
     /// asked for something else.
@@ -138,6 +146,7 @@ impl Default for Args {
             jam_swap: false,
             jam_move: false,
             jam_take: false,
+            jam_kit: None,
             bpm_set: false,
             subdivision_set: false,
         }
@@ -202,6 +211,10 @@ fn parse_args() -> Result<Args, String> {
                 a.jam_take = true;
                 consumed = 1;
             }
+            "--jam-kit" => {
+                a.jam = true;
+                a.jam_kit = Some(value(i)?.to_string());
+            }
             "-h" | "--help" => return Err("help".into()),
             other => return Err(format!("unknown flag {other}")),
         }
@@ -264,6 +277,13 @@ click-jitter-probe — ROADMAP §4 audio-safety gate
   --jam-take         --jam, and record a take for the whole run (the
                      callback's ring, a synthetic 44.1 kHz mic, and a
                      writer thread on the disk). Combines with both.
+  --jam-kit <dir>    --jam, with the drums coming from a folder of your
+                     own WAVs (kick, snare, snare_soft, hat, hat_open,
+                     ride, rim, crash) rather than a built-in kit. The
+                     folder is decoded at the device's own rate once the
+                     stream is open, handed to the callback inside the
+                     table, and swapped and retired with it. Combines
+                     with all three above.
 
 exit 0 = pass, 1 = gate failure, 2 = setup error";
 
@@ -563,6 +583,9 @@ fn busiest_jam() -> JamConfig {
             keys: 1.5,
         }),
         count_in_sound: None,
+        bass_voice: None,
+        keys_voice: None,
+        custom_kit: None,
     }
 }
 
@@ -652,6 +675,48 @@ fn main() -> ExitCode {
         return ExitCode::from(2);
     }
 
+    // `--jam-kit`: the musician's own drums, decoded HERE rather than
+    // above, because a folder is resampled to the output rate and the
+    // output rate is not a thing anyone knows until the device has opened.
+    // Installing it now also makes this a live handoff into a running
+    // stream, which is more of a test than a table set before the first
+    // buffer, not less. It lands inside the warm-up window the measurement
+    // already excludes.
+    let custom_kit: Option<Arc<CustomBank>> = match args.jam_kit {
+        Some(ref dir) => {
+            let rate = engine.output_sample_rate().unwrap_or(48_000);
+            let bank = match load_kit(std::path::Path::new(dir), rate) {
+                Ok(b) => Arc::new(b),
+                Err(e) => {
+                    eprintln!("error: --jam-kit {dir}: {e}");
+                    return ExitCode::from(2);
+                }
+            };
+            eprintln!(
+                "[probe] custom kit from {dir}: {} at {} Hz, {:.1} MB decoded",
+                bank.found.join(", "),
+                bank.rate,
+                bank.bytes as f64 / (1024.0 * 1024.0),
+            );
+            match compile_jam_with_kit(&busiest_jam(), Some(bank.clone())) {
+                Ok(table) => {
+                    eprintln!(
+                        "[probe] jam recompiled on the custom kit; loudest sample \
+                         {:.3} -> {:.3} after normalisation",
+                        table.peak_before, table.peak_after,
+                    );
+                    engine.set_jam_table(Some(Arc::new(table)));
+                }
+                Err(e) => {
+                    eprintln!("error: the probe's jam did not compile on that kit: {e}");
+                    return ExitCode::from(2);
+                }
+            }
+            Some(bank)
+        }
+        None => None,
+    };
+
     eprintln!(
         "[probe] {} BPM / subdivision {} ({:.1} ticks/s, {:.2} ms apart), warmup {} ms, window {} s",
         args.bpm,
@@ -671,13 +736,21 @@ fn main() -> ExitCode {
         let handoff = engine.jam_handoff();
         let stop_swaps = Arc::new(std::sync::atomic::AtomicBool::new(false));
         let flag = stop_swaps.clone();
-        let table_a = Arc::new(compile_jam(&busiest_jam()).expect("compiled above"));
+        // Both tables carry the same kit, so a swap is the bar-ahead bass
+        // handshake and not a kit change — and the `Arc<CustomBank>` inside
+        // them is the SAME one, which is what the cache achieves in the app
+        // and what makes a swap a refcount bump rather than a decode.
+        let table_a = Arc::new(
+            compile_jam_with_kit(&busiest_jam(), custom_kit.clone()).expect("compiled above"),
+        );
         let mut cfg_b = busiest_jam();
         if let Some(ref mut b) = cfg_b.bass {
             b.gain = 0.9;
         }
-        let table_b =
-            Arc::new(compile_jam(&cfg_b).expect("the probe's swap table did not compile"));
+        let table_b = Arc::new(
+            compile_jam_with_kit(&cfg_b, custom_kit.clone())
+                .expect("the probe's swap table did not compile"),
+        );
         let swaps = Arc::new(std::sync::atomic::AtomicU64::new(0));
         let count = swaps.clone();
         let handle = std::thread::spawn(move || {
@@ -927,6 +1000,11 @@ fn main() -> ExitCode {
     }
     if let Some(ref t) = take_summary {
         mode.push_str(&format!(" + --jam-take ({t})"));
+    }
+    // Last, because `--jam-swap` is spelled by appending "-swap" to the
+    // "--jam" above it and anything in between turns it into nonsense.
+    if let Some(ref dir) = args.jam_kit {
+        mode.push_str(&format!(" + --jam-kit ({dir})"));
     }
 
     println!("\n=== click-jitter-probe ===");
