@@ -617,9 +617,14 @@ export function useJamSession({
   /**
    * Go to a bar — at the next bar line, which is the engine's business.
    *
-   * The loop goes with it, unchanged: a jump inside a looped section is a jump
-   * inside a looped section, and re-sending the loop is how the one command
-   * says both things without a second round trip that could half-apply.
+   * The loop goes with it. Inside the looped bars it is re-sent unchanged: a
+   * jump inside a looped section is a jump inside a looped section, and the
+   * one command says both things without a second round trip that could
+   * half-apply. Outside them the loop MOVES to the section the target bar is
+   * in: the engine's rule is that the loop catches a jump, so a jump that
+   * left the loop where it was would land straight back at its start and
+   * "next section" would do nothing with a loop on. Looping and stepping
+   * sections together means "loop the next one now".
    */
   const jumpTo = useCallback(
     (bar: number) => {
@@ -627,8 +632,14 @@ export function useJamSession({
       const total = formBars(jam.form);
       if (total <= 0) return;
       const target = Math.min(Math.max(Math.trunc(bar), 0), total - 1);
+      let nextLoop = loop;
+      if (loop && (target < loop.start || target > loop.end)) {
+        const ranges = sectionRanges(jam.form);
+        nextLoop = ranges[sectionIndexAt(jam.form, target)] ?? null;
+        setLoop(nextLoop);
+      }
       setPendingJump(target);
-      void sendPosition({ jumpTo: target, loop });
+      void sendPosition({ jumpTo: target, loop: nextLoop });
     },
     [jam, loop],
   );
