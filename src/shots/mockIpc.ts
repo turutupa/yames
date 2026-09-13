@@ -15,6 +15,7 @@
 import { mockIPC, mockWindows } from "@tauri-apps/api/mocks";
 import type { Shot } from "./scenarios";
 import { STARTER_JAMS } from "../jam/jams";
+import { jamToSetlistStep } from "../setlist/setlists";
 import { bandStateForBar } from "../jam/practice";
 import type { JamEngineConfig } from "../jam/types";
 
@@ -48,6 +49,20 @@ const DRILLS = [
       barsPerStep: 6, beatsPerBar: 4, mode: "zigzag", cyclic: true, warmupBeats: 4 } },
 ];
 
+/**
+ * The routine ends with the band (JAM_MODE §8.5).
+ *
+ * Built through `jamToSetlistStep` rather than hand-written, so the picture
+ * cannot show a step shape the app would never produce — the meter, the
+ * tempo and the fallback click are all copied from the starter jam exactly
+ * as pressing "Add a jam" would copy them.
+ */
+const JAM_STEP = {
+  ...jamToSetlistStep(STARTER_JAMS[0]),
+  trigger: { kind: "manual" as const },
+  transition: { kind: "cut" as const },
+};
+
 const SETLISTS = [
   {
     id: "c1", name: "Daily routine", createdAt: 1, repeat: 1, countIn: 0,
@@ -60,9 +75,24 @@ const SETLISTS = [
         trigger: { kind: "seconds", seconds: 120 }, transition: { kind: "countIn", bars: 2 } },
       { id: "s3", name: "Cool down", bpm: 60, subdivision: 1, timeSignature: 4,
         beatGroups: [4], soundType: "wood", volume: 0.7,
-        trigger: { kind: "manual" }, transition: { kind: "cut" } },
+        trigger: { kind: "bars", bars: 16 }, transition: { kind: "countIn", bars: 1 } },
+      JAM_STEP,
     ],
   },
+];
+
+/**
+ * Three takes of the slow blues, so the shelf photographs with something on
+ * it. Fixed timestamps rather than "an hour ago", so the picture is the same
+ * whenever it is taken.
+ */
+const TAKES = [
+  { id: "tk3", jamId: STARTER_JAMS[0].id, createdAt: new Date(2026, 1, 18, 20, 12).getTime(),
+    durationSec: 402, path: "takes/tk3.wav" },
+  { id: "tk2", jamId: STARTER_JAMS[0].id, createdAt: new Date(2026, 1, 18, 19, 51).getTime(),
+    durationSec: 247, path: "takes/tk2.wav" },
+  { id: "tk1", jamId: STARTER_JAMS[0].id, createdAt: new Date(2026, 1, 16, 11, 30).getTime(),
+    durationSec: 118, path: "takes/tk1.wav" },
 ];
 
 function baseState(theme: string) {
@@ -319,6 +349,20 @@ export function installShotMock(shot: Shot, theme: string): void {
      */
     list_jams: () => [...STARTER_JAMS],
     save_jams: () => null,
+    /**
+     * The takes (JAM_MODE §4.4).
+     *
+     * Answered rather than left to fall through to `null`, because the
+     * section's whole point is what a shelf with recordings on it looks
+     * like — and because a rejection here is the "cannot record" state,
+     * which is a different picture.
+     */
+    list_takes: () => [...TAKES],
+    start_take: () => null,
+    stop_take: () => null,
+    delete_take: () => null,
+    play_take: () => null,
+    stop_take_playback: () => null,
   };
 
   mockIPC(async (cmd, args) => {
