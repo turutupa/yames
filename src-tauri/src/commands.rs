@@ -2524,6 +2524,7 @@ fn takes_home(app_handle: &AppHandle) -> Result<std::path::PathBuf, String> {
 /// it is not what anyone pressed the button for. If that fails, the take
 /// goes ahead as the band alone rather than being refused: half a take is
 /// worth more than none, and the UI can say which it got from the file.
+/// A stream started HERE is remembered, so `stop_take` can give it back.
 #[tauri::command]
 pub fn start_take(
     jam_id: String,
@@ -2533,32 +2534,63 @@ pub fn start_take(
     app_handle: AppHandle,
 ) -> Result<(), String> {
     let home = takes_home(&app_handle)?;
-    let (handoff, out_sr) = {
+    let (handoff, out_sr, out_sr_watch, output_latency_us) = {
         let engine = engine_state.0.lock().unwrap();
-        (engine.take_handoff(), engine.output_sample_rate())
+        (
+            engine.take_handoff(),
+            engine.output_sample_rate(),
+            engine.output_sample_rate_handle(),
+            engine.output_latency_us(),
+        )
     };
     let out_sr = out_sr
         .ok_or_else(|| "the audio output has not started yet, so there is no band to record")?;
 
-    let mic = {
+    let (mic, owns_input, input_latency_us) = {
         let mut ai = audio_input.lock().unwrap_or_else(|e| e.into_inner());
+        // Whether the mic was ALREADY running matters beyond this line: an
+        // input the coach or the drill had open is theirs and stays open,
+        // and one opened here is the take's and closes with it.
+        let mut owns_input = false;
         if !ai.is_active() {
-            if let Err(e) = ai.start(None, 0, app_handle.clone()) {
-                eprintln!("[take] no microphone for this take: {e}");
+            match ai.start(None, 0, app_handle.clone()) {
+                Ok(()) => owns_input = true,
+                Err(e) => eprintln!("[take] no microphone for this take: {e}"),
             }
         }
-        ai.begin_take_capture()
+        (ai.begin_take_capture(), owns_input, ai.input_latency_us())
     };
     if mic.is_none() {
         eprintln!("[take] recording the band only — no input stream is running");
     }
 
-    let mut session = take_state.0.lock().unwrap_or_else(|e| e.into_inner());
-    let started = session.start(&home, &jam_id, &handoff, mic, out_sr);
+    // The mic hears the band through the speakers, so what reaches the
+    // writer is a response to audio one full round trip old. The writer
+    // pulls the mic forward by this much at the start; see the comment on
+    // the two offsets there.
+    let round_trip_us = output_latency_us + input_latency_us;
+
+    let started = {
+        let mut session = take_state.0.lock().unwrap_or_else(|e| e.into_inner());
+        session.start(crate::take::TakeStart {
+            app_data: &home,
+            jam_id: &jam_id,
+            handoff: &handoff,
+            mic,
+            out_sr,
+            round_trip_us,
+            out_sr_watch: Some(out_sr_watch),
+            owns_input,
+        })
+    };
     if started.is_err() {
-        // Nothing is going to drain the mic ring, so stop filling it.
-        let ai = audio_input.lock().unwrap_or_else(|e| e.into_inner());
+        // Nothing is going to drain the mic ring, so stop filling it — and
+        // hand back a stream nothing is going to use.
+        let mut ai = audio_input.lock().unwrap_or_else(|e| e.into_inner());
         ai.end_take_capture();
+        if owns_input {
+            ai.stop();
+        }
     }
     started
 }
@@ -2573,13 +2605,30 @@ pub fn stop_take(
     audio_input: State<SharedAudioInput>,
     take_state: State<TakeState>,
 ) -> Result<Option<crate::take::JamTake>, String> {
-    {
-        let ai = audio_input.lock().unwrap_or_else(|e| e.into_inner());
-        ai.end_take_capture();
-    }
     let handoff = engine_state.0.lock().unwrap().take_handoff();
-    let mut session = take_state.0.lock().unwrap_or_else(|e| e.into_inner());
-    session.stop(&handoff)
+    // THE MIC KEEPS CAPTURING UNTIL THE BAND IS ON DISK.
+    //
+    // `session.stop` takes the ring off the callback and then waits for the
+    // writer to drain what the callback had already rendered — twenty-five
+    // to seventy-five milliseconds of band that has not reached the file
+    // yet, and which the player was still playing over. Lowering the mic
+    // first, as this used to, meant the writer found nothing to mix into
+    // that tail and the last note of every take was the band on its own.
+    let (result, owns_input) = {
+        let mut session = take_state.0.lock().unwrap_or_else(|e| e.into_inner());
+        let owns_input = session.owns_input();
+        (session.stop(&handoff), owns_input)
+    };
+    {
+        let mut ai = audio_input.lock().unwrap_or_else(|e| e.into_inner());
+        ai.end_take_capture();
+        // And a stream this take opened closes with it. One that was
+        // already running belongs to whoever opened it.
+        if owns_input {
+            ai.stop();
+        }
+    }
+    result
 }
 
 /// The takes of one jam, newest first. A jam with none is an empty list.

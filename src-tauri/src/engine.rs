@@ -6,7 +6,7 @@ use crate::timing::{BeatLog, BeatTick};
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use rodio::Source;
 use std::io::Cursor;
-use std::sync::atomic::{AtomicBool, AtomicU32, AtomicU64, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicI64, AtomicU32, AtomicU64, AtomicUsize, Ordering};
 use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
 use std::time::Duration;
@@ -1166,6 +1166,18 @@ pub struct JamHandoff {
     /// there is no last reference to drop on the audio thread.
     position: Mutex<JamPosition>,
     position_generation: AtomicU64,
+    /// How many bars the form of the table currently handed over has, or
+    /// [`NO_FORM`] before there is one.
+    ///
+    /// Here so that [`JamHandoff::set`] can tell a NEW FORM from the SAME
+    /// FORM ARRIVING AGAIN. The bar-ahead bass and keys send a fresh table
+    /// on almost every bar line, and re-checking the position against each
+    /// of them threw away a jump the musician had just asked for: press the
+    /// footswitch in the window between two bass sends and the jump was
+    /// gone, the band carried on, and the marker on the timeline never
+    /// cleared. A form that is the same length has the same bar numbers, so
+    /// there is nothing to re-check and the position is left alone.
+    last_form_bars: AtomicI64,
     /// Tables the audio thread has finished with, parked here so the LAST
     /// reference is dropped on a thread that may free memory. The callback
     /// never drops a table: dropping the last `Arc<JamTable>` frees its
@@ -1179,6 +1191,10 @@ pub struct JamHandoff {
 /// bar-ahead sends with nobody draining.
 const JAM_RETIRED_CAP: usize = 16;
 
+/// [`JamHandoff::last_form_bars`] when no table is loaded. A real form is
+/// 1..=64 bars, so -1 cannot collide with one.
+const NO_FORM: i64 = -1;
+
 impl JamHandoff {
     fn new() -> Self {
         Self {
@@ -1186,6 +1202,7 @@ impl JamHandoff {
             generation: AtomicU64::new(0),
             position: Mutex::new(JamPosition::default()),
             position_generation: AtomicU64::new(0),
+            last_form_bars: AtomicI64::new(NO_FORM),
             retired: Mutex::new(Vec::with_capacity(JAM_RETIRED_CAP)),
         }
     }
@@ -1210,7 +1227,16 @@ impl JamHandoff {
             drop(slot);
             self.generation.fetch_add(1, Ordering::Release);
         }
-        self.reposition(|p| p.for_table(form_bars), false);
+        // ...but only when the form actually changed LENGTH. `set_jam` is
+        // also the bar-ahead bass and keys send, which arrives on almost
+        // every bar line with the same twelve bars it had before; a jump
+        // waiting for the next bar line has to survive that, or a footswitch
+        // pressed in the wrong tenth of a second does nothing at all. Same
+        // number of bars, same bar numbers, nothing to re-check.
+        let encoded = form_bars.map_or(NO_FORM, i64::from);
+        if self.last_form_bars.swap(encoded, Ordering::AcqRel) != encoded {
+            self.reposition(|p| p.for_table(form_bars), false);
+        }
     }
 
     /// Hand the audio thread somewhere to be at the next bar line. Called
@@ -1444,26 +1470,55 @@ fn next_form_position(
     (bar, chorus, left)
 }
 
-/// Put the form back to the top, and say what the band does there.
+/// What the band does on a bar the form is being PUT at rather than moved
+/// to — the restart's other half, and the clamp that keeps a bar number
+/// nobody computed here out of the band-state table.
+#[inline]
+fn form_at(table: Option<&JamTable>, bar: u32) -> (u32, JamBandState) {
+    let bar = match table {
+        Some(t) => bar.min(t.form_bars().saturating_sub(1)),
+        None => 0,
+    };
+    (bar, band_state_of(table, bar))
+}
+
+/// Put the form back to the top, and say what the band does there — and
+/// what is left of the position afterwards.
 ///
-/// The top is bar 0, or the first bar of the loop when one is set: press
-/// stop and play again with the turnaround looped and you want the
-/// turnaround, not one bar of the head first. Rule 2 above, applied at the
-/// other place the engine chooses a form position — starting, the count-in
-/// handing over, a new form arriving, the meter changing under one.
+/// The top is, in the order a musician would say it:
+///
+/// 1. **The pending jump, if there is one** — and it is CONSUMED here. This
+///    is what the screen already says out loud: `useJamSession.ts` documents
+///    `currentBar` while stopped as "the one the next press of play will
+///    start on, which is the pending jump if there is one". Before this the
+///    engine disagreed with the drawing: it started at the top of the loop,
+///    left the jump pending, and the bar line at the end of bar 1 then took
+///    it — so pressing play after picking a bar gave you one wrong bar
+///    first.
+/// 2. **The first bar of the loop**, when one is set: press stop and play
+///    again with the turnaround looped and you want the turnaround, not one
+///    bar of the head first.
+/// 3. **Bar 0.**
+///
+/// The caller decides whether the consumption sticks: while the transport is
+/// STOPPED this runs every buffer, only to say where play would start, and
+/// there the leftover is thrown away. It is stored back at the moments the
+/// transport actually starts.
 ///
 /// With no band at all it is bar 0 and `Full`, which is what the contract
 /// says `formBar` and `bandState` mean on a plain click.
 #[inline]
-fn form_restart(table: Option<&JamTable>, position: JamPosition) -> (u32, JamBandState) {
-    let bar = match table {
-        Some(t) => position
-            .loop_bars
-            .map_or(0, |(start, _)| start)
-            .min(t.form_bars().saturating_sub(1)),
-        None => 0,
+fn form_restart(
+    table: Option<&JamTable>,
+    position: JamPosition,
+) -> (u32, JamBandState, JamPosition) {
+    let mut left = position;
+    let target = match left.jump.take() {
+        Some(j) => j,
+        None => left.loop_bars.map_or(0, |(start, _)| start),
     };
-    (bar, band_state_of(table, bar))
+    let (bar, state) = form_at(table, target);
+    (bar, state, left)
 }
 
 // ---------------------------------------------------------------------------
@@ -1530,6 +1585,17 @@ struct CachedParams {
     /// was recorded through whatever device was there then and is being
     /// played out of whatever is there now, so the step is a ratio.
     take_play_pos: f64,
+    /// Has THIS playback already been reported as finished?
+    ///
+    /// A take that has run out keeps running out: the buffer after it, and
+    /// every buffer after that, reads past the end and would raise the
+    /// "it ended" flag again, and the event loop's 50 ms pass would emit
+    /// `take-playback-ended` twenty times a second until the user pressed
+    /// stop. The flag on the handoff is consumed by the reader, so it cannot
+    /// answer "have I said this already?" — only the callback knows which
+    /// playback it is on, so the latch lives here beside `take_play_pos` and
+    /// is cleared where that is, when a new take is installed.
+    take_play_ended: bool,
 }
 
 /// The count-in sound a table asks for, or the beep when there is no table.
@@ -1539,6 +1605,27 @@ struct CachedParams {
 #[inline]
 fn count_in_slot_of(table: Option<&JamTable>) -> Option<crate::jam::JamSlot> {
     table.and_then(|t| t.count_in_slot())
+}
+
+/// Should a buffer that ran off the end of a take raise the "it ended" flag?
+///
+/// The first one does; the ones after it do not. Once playback has run out
+/// it STAYS run out — `sample_at` returns `None` for every buffer after,
+/// forever, and the event loop wakes every 50 ms — so without the latch the
+/// UI is told the take finished twenty times a second until somebody
+/// presses stop. `already` is the callback's own copy, cleared when a new
+/// take is installed, because the flag on the handoff is consumed by the
+/// reader and cannot answer "have I said this already?".
+///
+/// Pure, and on the audio thread, for the reason [`jam_play`] and
+/// [`accent_for`] are: the rule is testable without a sound card.
+#[inline]
+fn should_report_take_end(ran_out: bool, already: &mut bool) -> bool {
+    if !ran_out || *already {
+        return false;
+    }
+    *already = true;
+    true
 }
 
 /// Should this tick be played as an accent (the "high" sound)?
@@ -2427,6 +2514,16 @@ pub struct MetronomeEngine {
     /// take is written at the output rate and the take commands run on the
     /// command thread, so the number has to be readable from there.
     sample_rate: Arc<AtomicU32>,
+    /// How far ahead of the speakers the callback is working, in
+    /// microseconds: one buffer plus whatever the device says it holds. 0
+    /// before a stream has run.
+    ///
+    /// The callback has always computed this to timestamp beats. It is
+    /// published because the take needs it too: the mic hears the band
+    /// through the speakers, so the player's response arrives at the writer
+    /// a round trip late, and only the callback knows how long its buffer
+    /// is. One relaxed store a buffer, which is one instruction and no lock.
+    output_latency_us: Arc<AtomicU64>,
     /// Test-only: make the audio thread fail its setup without touching a
     /// real device, so the recovery path above can be exercised on a build
     /// machine that has a perfectly good sound card.
@@ -2448,6 +2545,7 @@ impl MetronomeEngine {
             jam: Arc::new(JamHandoff::new()),
             take: Arc::new(crate::take::TakeHandoff::new()),
             sample_rate: Arc::new(AtomicU32::new(0)),
+            output_latency_us: Arc::new(AtomicU64::new(0)),
             #[cfg(test)]
             force_setup_failure: false,
         }
@@ -2505,6 +2603,24 @@ impl MetronomeEngine {
             0 => None,
             sr => Some(sr),
         }
+    }
+
+    /// The same number, as the slot it lives in, so a thread that outlives
+    /// one command can WATCH it.
+    ///
+    /// The take writer holds this: a take is written at the rate the device
+    /// was running at when it started, and if the device changes underneath
+    /// it the rest of the file would be at the wrong speed. Watching a slot
+    /// is how it notices without asking the engine anything.
+    pub fn output_sample_rate_handle(&self) -> Arc<AtomicU32> {
+        self.sample_rate.clone()
+    }
+
+    /// How far ahead of the speakers the callback is working, in
+    /// microseconds, or 0 before a stream has run. Half of the round trip a
+    /// take has to pull the mic back by; the other half is the input side.
+    pub fn output_latency_us(&self) -> u64 {
+        self.output_latency_us.load(Ordering::Acquire)
     }
 
     /// Hand the engine the same `TempoContext` the commands mirror into, so
@@ -2620,6 +2736,7 @@ impl MetronomeEngine {
         let take_shared = self.take.clone();
         let take_event = self.take.clone();
         let take_sr_out = self.sample_rate.clone();
+        let out_latency_pub = self.output_latency_us.clone();
         let app_handle = EventSink(app_handle);
         #[cfg(test)]
         let force_setup_failure = self.force_setup_failure;
@@ -2749,6 +2866,12 @@ impl MetronomeEngine {
             // "bar 3 of 12, chorus 2" is what the transport reads out.
             let mut jam_bar: u32 = 0;
             let mut jam_chorus: u32 = 1;
+            // Where THIS press of play put the form. Remembered because the
+            // count-in restarts the form a second time when it hands over —
+            // and by then the pending jump that decided the bar has been
+            // consumed, so recomputing it would land on the top of the loop
+            // instead of where the musician pointed.
+            let mut jam_start_bar: u32 = 0;
             // Decided at the bar line and held for the bar, so a practice
             // window or an edit landing mid-bar cannot change what the band
             // is doing under a bar that has already started.
@@ -2793,6 +2916,7 @@ impl MetronomeEngine {
                 take_play: None,
                 take_play_generation: 0,
                 take_play_pos: 0.0,
+                take_play_ended: false,
             };
 
             // ---- Build output stream ----
@@ -2820,6 +2944,10 @@ impl MetronomeEngine {
                     // reached the DAC yet).
                     let buffer_us = (frames as u64 * 1_000_000) / sr as u64;
                     let output_latency_us = buffer_us + device_latency_us_cb;
+                    // Published for the take writer, which has to know how
+                    // late the mic's version of the band is. One relaxed
+                    // store: no lock, no allocation, no branch.
+                    out_latency_pub.store(output_latency_us, Ordering::Relaxed);
 
                     let is_playing = playing_cb.load(Ordering::Relaxed);
 
@@ -2958,6 +3086,9 @@ impl MetronomeEngine {
                         }
                         cached.take_play = incoming;
                         cached.take_play_pos = 0.0;
+                        // A new take (or none) is a new playback, and the
+                        // next time IT runs out is news again.
+                        cached.take_play_ended = false;
                     }
                     take_retire.flush(&take_shared);
 
@@ -2987,8 +3118,9 @@ impl MetronomeEngine {
                             }
                             cached.take_play_pos += step;
                         }
-                        if ended {
-                            // The event thread emits `take-playback-ended`;
+                        if should_report_take_end(ended, &mut cached.take_play_ended) {
+                            // Once per playback, not once per buffer. The
+                            // event thread emits `take-playback-ended`;
                             // saying it here would mean an `emit` on the
                             // audio thread, which locks and allocates.
                             take_shared.note_ended();
@@ -3039,10 +3171,18 @@ impl MetronomeEngine {
                         beat_count = 0;
                         sub_count = 0;
                         measure_beat = 0;
-                        let (bar, state) = form_restart(cached.jam.as_deref(), cached.jam_position);
+                        // A PEEK, not a consumption: this runs on every
+                        // buffer the transport is stopped for, and all it is
+                        // doing is saying where the next press of play would
+                        // start. Spending the jump here would spend it
+                        // several thousand times a second and leave nothing
+                        // for the press itself.
+                        let (bar, state, _) =
+                            form_restart(cached.jam.as_deref(), cached.jam_position);
                         jam_bar = bar;
                         jam_chorus = 1;
                         jam_bar_state = state;
+                        jam_start_bar = bar;
                         return;
                     }
 
@@ -3055,13 +3195,18 @@ impl MetronomeEngine {
                         beat_count = 0;
                         sub_count = 0;
                         measure_beat = 0;
-                        // Press play and the band starts at the top of the
-                        // form, whatever it was doing last time — the top of
-                        // the loop, when one is set.
-                        let (bar, state) = form_restart(cached.jam.as_deref(), cached.jam_position);
+                        // Press play and the band starts where the screen
+                        // said it would: the bar the musician picked, else
+                        // the top of the loop, else the top of the form. The
+                        // jump is SPENT here — the press of play is what it
+                        // was waiting for.
+                        let (bar, state, left) =
+                            form_restart(cached.jam.as_deref(), cached.jam_position);
+                        cached.jam_position = left;
                         jam_bar = bar;
                         jam_chorus = 1;
                         jam_bar_state = state;
+                        jam_start_bar = bar;
                         jam_mismatch_reported = false;
                         voices.clear();
                     }
@@ -3079,11 +3224,13 @@ impl MetronomeEngine {
                         // for the bar under way is not re-decided.
                         let next_form = cached.jam.as_ref().map_or(0, |t| t.form_bars());
                         if !is_playing || next_form != jam_form_bars {
-                            let (bar, state) =
+                            let (bar, state, left) =
                                 form_restart(cached.jam.as_deref(), cached.jam_position);
+                            cached.jam_position = left;
                             jam_bar = bar;
                             jam_chorus = 1;
                             jam_bar_state = state;
+                            jam_start_bar = bar;
                         }
                         jam_form_bars = next_form;
                     }
@@ -3131,11 +3278,13 @@ impl MetronomeEngine {
                                 // starts again with it — and the table is
                                 // very likely the wrong width now, which the
                                 // mismatch check below will say out loud.
-                                let (bar, state) =
+                                let (bar, state, left) =
                                     form_restart(cached.jam.as_deref(), cached.jam_position);
+                                cached.jam_position = left;
                                 jam_bar = bar;
                                 jam_chorus = 1;
                                 jam_bar_state = state;
+                                jam_start_bar = bar;
                                 jam_mismatch_reported = false;
                             }
 
@@ -3153,11 +3302,15 @@ impl MetronomeEngine {
                                 sub_count = 0;
                                 measure_beat = 0;
                                 is_warmup_transition = true;
-                                // ...and bar 1 of chorus 1 of the form. The
-                                // count-in beeps over the top of nothing; the
-                                // band comes in on this tick.
+                                // ...and back to the bar this press of play
+                                // started on. The count-in beeps over the top
+                                // of nothing, but its bar lines have moved
+                                // the form on and one of them may have spent
+                                // the jump, so the bar is the one remembered
+                                // at the press rather than one worked out
+                                // again from a position that is now empty.
                                 let (bar, state) =
-                                    form_restart(cached.jam.as_deref(), cached.jam_position);
+                                    form_at(cached.jam.as_deref(), jam_start_bar);
                                 jam_bar = bar;
                                 jam_chorus = 1;
                                 jam_bar_state = state;
@@ -3596,6 +3749,12 @@ impl MetronomeEngine {
                 // `emit` locks and allocates.
                 if take_event.take_ended() {
                     let _ = app_handle.emit("take-playback-ended", ());
+                }
+                // And a take that ran into the twenty-minute cap. Raised by
+                // the WRITER thread rather than the callback, but read here
+                // for the same reason: this is the thread that may emit.
+                if take_event.take_capped() {
+                    let _ = app_handle.emit("take-capped", ());
                 }
                 let notif = match rx.recv_timeout(Duration::from_millis(50)) {
                     Ok(n) => n,
@@ -5557,25 +5716,117 @@ mod tests {
         });
         let table = compile_jam(&cfg).unwrap();
 
-        let (bar, state) = form_restart(Some(&table), JamPosition::default());
+        let (bar, state, _) = form_restart(Some(&table), JamPosition::default());
         assert_eq!((bar, state), (0, JamBandState::Full));
 
         // Bars 5-8 of a twelve-bar form are the four you play in a 4/4
         // trade, so restarting into the loop has to restart into that state
         // as well — the band state is read off the bar, not assumed.
-        let (bar, state) = form_restart(Some(&table), looping(4, 7));
+        let (bar, state, _) = form_restart(Some(&table), looping(4, 7));
         assert_eq!((bar, state), (4, JamBandState::HatsOnly));
 
         // A loop that outran its form cannot index past the end.
-        let (bar, state) = form_restart(Some(&table), looping(40, 47));
+        let (bar, state, _) = form_restart(Some(&table), looping(40, 47));
         assert_eq!((bar, state), (11, table.band_state(11)));
 
         // No band: bar 0, full, whatever the position says.
+        let (bar, state, _) = form_restart(None, looping(4, 7));
         assert_eq!(
-            form_restart(None, looping(4, 7)),
+            (bar, state),
             (0, JamBandState::Full),
             "the contract's values for a plain click"
         );
+    }
+
+    /// PRESS PLAY WITH A BAR PICKED AND YOU START ON THAT BAR.
+    ///
+    /// The bug this pins: a restart went to the top of the loop (or bar 0)
+    /// and left the jump pending, so the bar line at the END of the first
+    /// bar was what finally took it. You picked the bridge, pressed play,
+    /// and heard one bar of the head first.
+    ///
+    /// The screen already states the rule this now follows —
+    /// `useJamSession.ts` on `currentBar`: "while stopped, the one the next
+    /// press of play will start on, which is the pending jump if there is
+    /// one." The engine agrees with the drawing now.
+    #[test]
+    fn starting_again_starts_on_the_bar_that_was_picked() {
+        let mut cfg = practising_band();
+        cfg.form_bars = 12;
+        cfg.practice = Some(JamPracticeConfig {
+            drop_out: None,
+            trade: Some(JamTrade {
+                band_bars: 4,
+                you_bars: 4,
+            }),
+        });
+        let table = compile_jam(&cfg).unwrap();
+
+        // A jump on its own: bar 8, and the band state read off bar 8.
+        let (bar, state, left) = form_restart(Some(&table), at(8));
+        assert_eq!(bar, 8);
+        assert_eq!(state, table.band_state(8));
+        assert_eq!(left.jump, None, "the press of play is what it waited for");
+
+        // A jump WITH a loop set: the jump wins. The musician asked for that
+        // bar after setting the loop, so it is the newer instruction.
+        let picked = JamPosition {
+            jump: Some(2),
+            loop_bars: Some((8, 11)),
+        };
+        let (bar, _, left) = form_restart(Some(&table), picked);
+        assert_eq!(bar, 2, "the bar that was picked, not the top of the loop");
+        assert_eq!(left.loop_bars, Some((8, 11)), "and the loop is still set");
+
+        // No jump: the top of the loop, exactly as before.
+        let (bar, _, _) = form_restart(Some(&table), looping(8, 11));
+        assert_eq!(bar, 8);
+
+        // A jump past the end of the form is clamped, not indexed — the
+        // command surface refuses those, and the audio thread does not
+        // trust a number it did not compute.
+        let (bar, _, _) = form_restart(Some(&table), at(99));
+        assert_eq!(bar, 11);
+    }
+
+    /// A TAKE THAT FINISHED SAYS SO ONCE.
+    ///
+    /// The bug this pins: the callback raised the "it ended" flag on every
+    /// buffer after the take ran out, and the event loop's 50 ms pass turned
+    /// each one into a `take-playback-ended`, so the UI was told the take
+    /// had finished twenty times a second for as long as it was left alone.
+    /// Running out is not an event that happens once by itself — it is a
+    /// state the playback stays in — so the "once" has to be a latch.
+    #[test]
+    fn a_take_that_ran_out_is_only_reported_once() {
+        let play = crate::take::TakePlayback {
+            pcm: std::sync::Arc::new(vec![0.1f32; 8]),
+            sample_rate: 48_000,
+        };
+        let mut pos = 0.0f64;
+        let mut ended_latch = false;
+        let mut reports = 0;
+        // Two hundred buffers of eight frames each: the first few are the
+        // take, and every one after it reads past the end.
+        for _ in 0..200 {
+            let mut ran_out = false;
+            for _ in 0..8 {
+                if play.sample_at(pos).is_none() {
+                    ran_out = true;
+                }
+                pos += play.step(48_000);
+            }
+            if should_report_take_end(ran_out, &mut ended_latch) {
+                reports += 1;
+            }
+        }
+        assert_eq!(reports, 1, "one ending, not one per buffer");
+
+        // And a new take installed clears the latch — the callback does that
+        // where it resets `take_play_pos` — so the NEXT one can end too.
+        ended_latch = false;
+        assert!(should_report_take_end(true, &mut ended_latch));
+        assert!(!should_report_take_end(true, &mut ended_latch));
     }
 
     /// The handoff, end to end, without a sound card: the command thread
@@ -5627,6 +5878,65 @@ mod tests {
         four.form_bars = 4;
         handoff.set(Some(Arc::new(compile_jam(&four).unwrap())));
         assert_eq!(handoff.position(), JamPosition::default());
+    }
+
+    /// THE BAR-AHEAD BASS MUST NOT SWALLOW A FOOTSWITCH.
+    ///
+    /// The bug this pins: `set_jam` is not only "load a jam". It is also the
+    /// bar-ahead send the UI posts on almost every bar line so the bass and
+    /// the keys know next bar's chord — four to six a chorus. Each one ended
+    /// with the position being re-checked against the new table, and the
+    /// re-check drops a pending jump unconditionally, so a jump asked for in
+    /// the window between two of those sends was thrown away before the bar
+    /// line it was waiting for: the band played straight on and the marker
+    /// the UI had drawn never cleared.
+    ///
+    /// The same twelve bars arriving again is not a new set of bar numbers.
+    #[test]
+    fn a_bar_ahead_table_of_the_same_length_keeps_a_pending_jump() {
+        let handoff = JamHandoff::new();
+        let mut cfg = practising_band();
+        cfg.form_bars = 12;
+        let table = || Some(Arc::new(compile_jam(&cfg).unwrap()));
+
+        handoff.set(table());
+        handoff.set_position(JamPosition {
+            jump: Some(9),
+            loop_bars: Some((8, 11)),
+        });
+        let before = handoff.position_generation.load(Ordering::Acquire);
+
+        // A chorus of bar-ahead sends, all twelve bars long.
+        for _ in 0..6 {
+            handoff.set(table());
+        }
+        assert_eq!(
+            handoff.position().jump,
+            Some(9),
+            "the jump was still waiting for its bar line"
+        );
+        assert_eq!(handoff.position().loop_bars, Some((8, 11)));
+        assert_eq!(
+            handoff.position_generation.load(Ordering::Acquire),
+            before,
+            "and the callback was not woken to be handed what it already has"
+        );
+
+        // A form of a DIFFERENT length is a different set of bar numbers,
+        // and there the jump still goes: bar 9 of an eight-bar loop is not
+        // the bar anybody pointed at.
+        let mut eight = practising_band();
+        eight.form_bars = 8;
+        handoff.set(Some(Arc::new(compile_jam(&eight).unwrap())));
+        assert_eq!(handoff.position().jump, None);
+
+        // And taking the band away is a change too.
+        handoff.set_position(JamPosition {
+            jump: Some(3),
+            loop_bars: None,
+        });
+        handoff.set(None);
+        assert_eq!(handoff.position().jump, None);
     }
 
     /// A LOCK THAT PANICKED MUST NOT LOOK LIKE A TABLE THAT ARRIVED.
