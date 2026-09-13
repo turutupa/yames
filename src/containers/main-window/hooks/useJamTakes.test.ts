@@ -208,6 +208,37 @@ describe("the recording lifecycle", () => {
     await settle();
     expect(ipc.stopTake).toHaveBeenCalledTimes(1);
   });
+
+  it("ends the take when another jam takes the stage", async () => {
+    // The engine files a take under the id it was STARTED with. Left running,
+    // the recorder went on writing under the blues while the screen was on
+    // the bossa — and the finished take landed on the bossa's shelf.
+    const other: Jam = { ...STARTER_JAMS[1], id: "j2", takes: true };
+    ipc.stopTake.mockResolvedValue(take({ id: "fresh", jamId: "j1" }));
+    const { result, rerender } = mount({ isPlaying: true });
+    await settle();
+    expect(ipc.startTake).toHaveBeenCalledWith("j1");
+    expect(result.current.recording).toBe(true);
+
+    act(() => rerender({ jam: other, isPlaying: true, countingIn: false }));
+    await settle();
+
+    expect(ipc.stopTake).toHaveBeenCalledTimes(1);
+    expect(result.current.recording).toBe(false);
+    // And the blues' take is not on the bossa's shelf.
+    expect(result.current.takes.map((t) => t.id)).not.toContain("fresh");
+  });
+
+  it("keeps a take that ended on the jam it was recorded under", async () => {
+    // The other half of the same rule: stopping the transport on the jam you
+    // recorded still puts the take at the top of that jam's list.
+    ipc.stopTake.mockResolvedValue(take({ id: "fresh", jamId: "j1" }));
+    const { result, rerender } = mount({ isPlaying: true });
+    await settle();
+    act(() => rerender({ jam: JAM, isPlaying: false, countingIn: false }));
+    await settle();
+    expect(result.current.takes.map((t) => t.id)).toEqual(["fresh"]);
+  });
 });
 
 describe("playing one back", () => {
@@ -272,6 +303,35 @@ describe("deleting one", () => {
     expect(ipc.deleteTake).toHaveBeenCalledWith("a");
     // And the folder is a different size than the screen thought.
     expect(ipc.takesDirSize.mock.calls.length).toBeGreaterThan(1);
+  });
+
+  it("stops the sound when the take being deleted is the one playing", async () => {
+    // Clearing the row's lit state is not the same as stopping the file. The
+    // engine went on playing a take that was being deleted, with the band
+    // still muted behind it and no row left to press stop on.
+    ipc.listTakes.mockResolvedValue([take({ id: "a" }), take({ id: "b" })]);
+    const { result } = mount();
+    await settle();
+    act(() => result.current.play("a"));
+    await settle();
+    expect(result.current.playingId).toBe("a");
+
+    act(() => result.current.remove("a"));
+    expect(result.current.playingId).toBeNull();
+    await settle();
+    expect(ipc.stopTakePlayback).toHaveBeenCalledTimes(1);
+  });
+
+  it("says nothing about playback when the take being deleted is not playing", async () => {
+    ipc.listTakes.mockResolvedValue([take({ id: "a" }), take({ id: "b" })]);
+    const { result } = mount();
+    await settle();
+    act(() => result.current.play("a"));
+    await settle();
+    act(() => result.current.remove("b"));
+    await settle();
+    expect(ipc.stopTakePlayback).not.toHaveBeenCalled();
+    expect(result.current.playingId).toBe("a");
   });
 
   it("puts the row back when the file did not go", async () => {

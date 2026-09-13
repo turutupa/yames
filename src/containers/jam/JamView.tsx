@@ -159,10 +159,10 @@ interface JamViewProps {
    * The jam's takes: the shelf, whether the build can record at all, and what
    * is playing back (JAM_MODE §4.4).
    *
-   * Passed in whole rather than assembled here because recording outlives the
-   * screen — a take runs while you are on the metronome tab looking something
-   * up, and a hook that lived inside this component would stop the moment the
-   * component unmounted.
+   * Passed in whole rather than assembled here because recording is the
+   * window's business on both ends: the mark it puts on the transport, and
+   * the tab it watches to know when the jam has left the engine — which is
+   * when the take ends. A hook inside this component could see neither.
    */
   takes: JamTakesState;
   /**
