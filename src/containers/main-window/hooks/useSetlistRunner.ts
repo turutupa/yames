@@ -150,7 +150,23 @@ export function useSetlistRunner(
     // A setlist of plain steps never touched the band, and must not send a
     // command saying it did.
     const carried = playingJamRef.current !== null || jamRestoreRef.current !== null;
-    const restore = jamRestoreRef.current;
+    /*
+     * Only a run that ENDS on the jam step has a meter to give back.
+     *
+     * The pocket is filled on the run's first jam step and emptied here, so a
+     * routine of "blues, then alternate picking" restored the meter the
+     * metronome had before the whole run — over the picking step's own, which
+     * the runner had set one step earlier and which was the meter actually
+     * playing. Worse than an audible glitch: the session's mirror reads the
+     * engine back into the selected step while stopped, so the restored meter
+     * was written into that step and the setlist went dirty. A saved routine
+     * quietly acquiring a meter nobody chose is data loss with a Save button
+     * in front of it.
+     *
+     * A jam step that is still the one playing is the only case where the
+     * meter on the engine is the jam's, and the only case worth undoing.
+     */
+    const restore = playingJamRef.current ? jamRestoreRef.current : null;
     jamRestoreRef.current = null;
     playingJamRef.current = null;
     jamLinesRef.current = null;

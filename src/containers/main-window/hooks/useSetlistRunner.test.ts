@@ -307,6 +307,29 @@ describe("a setlist step that is a jam", () => {
     expect(callsTo("set_free_mode")).toContainEqual({ enabled: true });
   });
 
+  it("leaves the plain step's own meter alone when the run ends on it", async () => {
+    // The pocket is filled on the first jam step of the run. A routine of
+    // "blues, then alternate picking" that is stopped during the picking used
+    // to hand back the meter from before the WHOLE run, over the picking
+    // step's own — which the runner had set one step earlier and which is the
+    // meter actually playing. The band still goes; the meter stays put.
+    const { result, rerender } = mountJammed(jammed());
+    act(() => rerender({ b: null, playing: true }));
+    act(() => rerender({ b: beat(0, true), playing: true }));
+    act(() => rerender({ b: beat(4, true), playing: true }));
+    await settle();
+    expect(result.current.stepNumber).toBe(2);
+    mockInvoke.mockClear();
+
+    act(() => rerender({ b: null, playing: false }));
+    await settle();
+
+    expect(callsTo("set_jam")).toContainEqual({ config: null });
+    expect(callsTo("set_beat_groups")).toEqual([]);
+    expect(callsTo("set_subdivision")).toEqual([]);
+    expect(callsTo("set_free_mode")).toEqual([]);
+  });
+
   it("says nothing about the band on a setlist that has none", async () => {
     // One `set_jam(null)` per plain step is the reconciliation every step
     // does; what must not happen is the run END sending one on a routine
