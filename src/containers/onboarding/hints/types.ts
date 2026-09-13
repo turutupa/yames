@@ -23,7 +23,18 @@ export type HintId =
   | "coach-ask"
   | "zen-first"
   | "widget-discover"
-  | "midi-plugged";
+  | "midi-plugged"
+  /**
+   * The three Jam captions (plans/JAM_UX_DECISIONS.md A7).
+   *
+   * "Everything synthesised", "the band never plays your instrument" and
+   * "takes stay on this machine" were all true, all worth saying once, and
+   * all printed on the screen forever. They are hints now — said at the
+   * moment each applies, and then never again.
+   */
+  | "jam-synth"
+  | "jam-band"
+  | "jam-takes";
 
 /** Every hint id, in the order §5 lists them. */
 export const HINT_IDS: readonly HintId[] = [
@@ -33,6 +44,9 @@ export const HINT_IDS: readonly HintId[] = [
   "zen-first",
   "widget-discover",
   "midi-plugged",
+  "jam-synth",
+  "jam-band",
+  "jam-takes",
 ] as const;
 
 /** `hints.<id>` — the "already shown" flag for one hint. */
@@ -68,4 +82,7 @@ export const HINT_I18N_KEY: Record<HintId, string> = {
   "zen-first": "zenFirst",
   "widget-discover": "widgetDiscover",
   "midi-plugged": "midiPlugged",
+  "jam-synth": "jamSynth",
+  "jam-band": "jamBand",
+  "jam-takes": "jamTakes",
 };
