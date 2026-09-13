@@ -253,6 +253,22 @@ describe("what reaches the engine", () => {
     expect(names("setBeatGroups")).toHaveLength(0);
   });
 
+  it("sends a fill habit the moment it changes", async () => {
+    // "Every 4 bars" is its own field on the config. It used to be missing
+    // from the key that decides whether to re-send, so the drummer went on
+    // filling at the chorus end until some unrelated edit pushed it.
+    const { result } = mount();
+    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    const rock = result.current.jams.find((j) => j.grooveId === "rock8")!;
+    act(() => result.current.loadJam({ ...rock, fills: true, fillEvery: 0 }));
+    await waitFor(() => expect(names("setJam")).toHaveLength(1));
+    calls.length = 0;
+
+    act(() => result.current.editJam({ fillEvery: 4 }));
+    await waitFor(() => expect(names("setJam")).toHaveLength(1));
+    expect((names("setJam")[0] as JamEngineConfig).fillEvery).toBe(4);
+  });
+
   it("takes the band away when you leave the tab, and brings it back", async () => {
     const { result, rerender } = mount();
     await waitFor(() => expect(result.current.jams).toHaveLength(6));

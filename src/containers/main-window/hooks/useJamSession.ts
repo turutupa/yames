@@ -434,6 +434,10 @@ export function useJamSession({
         jam.intensity,
         jam.form,
         jam.fills,
+        // Both halves of the fill switch. "Every 4 bars" is a field of its
+        // own on the config, so a key that only watched `fills` sat on the
+        // change until something else moved and then sent it as a surprise.
+        jam.fillEvery,
         jam.kit,
         jam.key,
         jam.band ?? lineup,
