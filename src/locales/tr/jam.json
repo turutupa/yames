@@ -34,7 +34,14 @@
       "train": "Train beat",
       "boomBap": "Boom bap",
       "fourOnFloor": "Four on the floor",
-      "rule": "Kural"
+      "rule": "Kural",
+      "hardRock": "Hard rock",
+      "stomp": "Stomp",
+      "doubleKick": "Çift pedal",
+      "twoStep": "Two-step",
+      "samba": "Samba",
+      "chaCha": "Ça ça",
+      "secondLine": "Second line"
     },
     "changes": {
       "edit": "Akorları düzenle",
@@ -49,7 +56,6 @@
     "meter": {
       "label": "Ölçü",
       "grooves": "Groove'un ölçüsü",
-      "ticks": "Vuruş başına tik",
       "doesNotFit": "{{groove}}, {{meter}} ölçüsüne sığmıyor; davulcu kuralı çalıyor."
     },
     "mix": {
@@ -90,7 +96,8 @@
       "label": "Yoğunluk",
       "soft": "Yumuşak",
       "normal": "Normal",
-      "loud": "Yüksek"
+      "loud": "Yüksek",
+      "hint": "Yüksek, ghost note'ları atar ve hi-hat'i açar; alçak kapatır."
     },
     "form": {
       "label": "Form",
@@ -118,7 +125,8 @@
       "jumpTo": "{{bar}}. ölçüye git",
       "jumpPending": "bir sonraki ölçü çizgisinde",
       "loopSection": "{{start}}–{{end}} ölçüyü döngüye al",
-      "loopOff": "Döngüyü kapat"
+      "loopOff": "Döngüyü kapat",
+      "shape": "Yapı"
     },
     "short": {
       "blues12": "12 ölçü",
@@ -133,9 +141,9 @@
     "countIn": {
       "label": "Giriş sayımı",
       "none": "Yok",
-      "bars": "{{count}} ölçü",
-      "bars_one": "{{count}} ölçü",
-      "bars_other": "{{count}} ölçü"
+      "barsAnd": "{{count}} ölçü · {{sound}}",
+      "barsAnd_one": "{{count}} ölçü · {{sound}}",
+      "barsAnd_other": "{{count}} ölçü · {{sound}}"
     },
     "fills": {
       "label": "Fill'ler",
@@ -158,7 +166,8 @@
     },
     "fretboard": {
       "label": "Klavye",
-      "aria": "Sapta {{chord}}"
+      "aria": "Sapta {{chord}}",
+      "staysPut": "{{scale}}, {{fret}}. perdedeki kalıp · çalarken yerinde durur"
     },
     "chords": {
       "label": "Akorlar",
@@ -167,12 +176,19 @@
       "follow": "Jam'i takip et",
       "followHint": "Basışlar akorlarla birlikte ilerlesin ya da tek bir akora sabitlensin.",
       "sevenths": "Yedililer",
-      "nextShape": "Sonraki basış",
       "sizeTriad": "üçlü",
       "sizeOpen": "açık",
       "sizeBarre": "bare",
       "sizeSeventh": "yedili",
-      "fret": "{{fret}}. perde"
+      "fret": "{{fret}}. perde",
+      "sheetLead": "göz atılacak bir sayfa, hareket eden bir görüntü değil",
+      "sizeLabel": "Üçlüler ya da yedililer",
+      "triads": "Üçlüler",
+      "everyWay": "{{chord}}, çalmanın her yolu",
+      "lowToHigh": "sapta pesten tize",
+      "pin": "Bunu sabitle",
+      "unpin": "Çöz",
+      "pinnedAria": "{{chord}}, ekrana sabitlendi"
     },
     "key": {
       "label": "Ton",
@@ -193,7 +209,29 @@
       "brushes": "Fırça",
       "brushesHint": "sessiz, balad için",
       "electronic": "Elektronik",
-      "electronicHint": "sentezlenmiş ve tok"
+      "electronicHint": "sentezlenmiş ve tok",
+      "raw": "Ham",
+      "rawHint": "kuru bir odada bir rock davulcusu",
+      "preview": "Dinle",
+      "previewStop": "Durdur",
+      "builtIn": "Yerleşik",
+      "yours": "Seninkiler",
+      "forget": "Kaldır",
+      "chooseFolder": "Kendi sample'larının olduğu bir klasör…",
+      "folderHint": "kick, trampet, hi-hat, açık hi-hat, ride, rim, crash · hiçbir şey bu bilgisayardan çıkmaz",
+      "folderUnavailable": "Kendi sample'ların bu sürümde yok.",
+      "foundVoices": "Bulundu: {{voices}}.",
+      "fallbackVoices": "{{voices}} {{kit}} setinden geliyor.",
+      "voice": {
+        "kick": "kick",
+        "snare": "trampet",
+        "snare_soft": "yumuşak trampet",
+        "hat": "hat",
+        "hat_open": "açık hi-hat",
+        "ride": "ride",
+        "rim": "rim",
+        "crash": "crash"
+      }
     },
     "transposition": {
       "label": "Okuduğun",
@@ -201,18 +239,15 @@
       "bb": "Si♭",
       "eb": "Mi♭"
     },
-    "setup": {
-      "label": "Ton, set ve okuduğun parti"
-    },
+    "setup": {},
     "band": {
       "label": "Grup",
-      "lead": "hepsi sentezlendi, indirilecek bir şey yok",
+      "lead": "sen isteyene kadar sadece davul",
       "drums": "Davul",
       "bass": "Bas",
       "keys": "Klavye",
       "you": "Sen",
       "youPlay": "{{instrument}}",
-      "youHint": "grup asla senin enstrümanını çalmaz",
       "out": "susuyor",
       "hatsOnly": "sadece hi-hat",
       "inputOn": "Giriş açık",
@@ -301,13 +336,97 @@
       "confirmDelete": "Sil",
       "confirmKeep": "Kalsın",
       "size": "diskte yaklaşık {{megabytes}} MB",
-      "local": "Kayıtlar bu makinede kalır. Hiçbir şey yüklenmez.",
       "introTitle": "Kayıtlar hakkında",
       "introWhat": "Bir kayıt, giriş sayımından sonraki ilk ölçüden durana kadar sen ve grubun birlikte çaldığı sestir.",
       "introWhere": "Bu makinede bu uygulamanın kendi klasörüne WAV dosyası olarak yazılır ve sen silene kadar orada kalır.",
       "introPrivate": "Hiçbir şey yüklenmez, hiçbir şey incelenmez, hiçbir şey makineden çıkmaz.",
       "introNotNow": "Şimdi değil",
       "introStart": "Kayıt al"
+    },
+    "sheet": {
+      "setUp": "Kurulum",
+      "done": "Tamam"
+    },
+    "vibe": {
+      "label": "Vibe",
+      "lead": "tek dokunuş davulcuyu, seti, tempoyu ve tonu ayarlar",
+      "startedFrom": "{{vibe}} vibe'ından başladı",
+      "unavailable": "Vibe'lar bu sürümde henüz yok — aşağıdaki her şey çalışıyor.",
+      "rock": "Rock",
+      "hardRock": "Hard rock",
+      "blues": "Blues",
+      "funk": "Funk",
+      "jazz": "Jazz",
+      "latin": "Latin",
+      "pop": "Pop",
+      "metal": "Metal",
+      "country": "Country"
+    },
+    "variation": {
+      "label": "{{vibe}}, hangisi",
+      "lead": "her biri bir groove, bir set, bir feel ve bir gürlük birlikte",
+      "aria": "Bu vibe'ı çalma biçimleri",
+      "count": "{{count}} çalma biçimi",
+      "count_one": "{{count}} çalma biçimi",
+      "count_other": "{{count}} çalma biçimi",
+      "yours": "Seninkilerden biri",
+      "yoursEmpty": "henüz kaydedilmedi",
+      "classic": "Klasik",
+      "hard": "Sert",
+      "punk": "Punk",
+      "alt": "Alternatif",
+      "ballad": "Balad",
+      "halfTime": "Half-time",
+      "driving": "İtekleyen",
+      "stomp": "Stomp",
+      "doubleKick": "Çift pedal",
+      "shuffle": "Shuffle",
+      "slow": "Yavaş",
+      "texas": "Texas",
+      "boogie": "Boogie",
+      "sixteenths": "16'lık",
+      "newOrleans": "New Orleans",
+      "swing": "Swing",
+      "bossa": "Bossa",
+      "upTempo": "Hızlı",
+      "samba": "Samba",
+      "rumba": "Rumba",
+      "songo": "Songo",
+      "eighths": "8'lik",
+      "thrash": "Thrash",
+      "midTempo": "Orta tempo",
+      "openHats": "Açık hi-hat",
+      "driving16ths": "Sürükleyici 16'lıklar",
+      "bossaJazz": "Bossa caz",
+      "chaCha": "Ça ça",
+      "straight": "Düz",
+      "fourOnFloor": "Four on the floor",
+      "halfTimeStomp": "Yarım tempo stomp",
+      "train": "Train",
+      "twoStep": "Two-step",
+      "waltz": "Vals"
+    },
+    "drummer": {
+      "label": "Davulcu"
+    },
+    "more": {
+      "label": "Daha fazla",
+      "lead": "ölçü · ne okuduğun · kayıtlar"
+    },
+    "bassVoice": {
+      "label": "Tını",
+      "fingered": "Parmakla",
+      "picked": "Penayla",
+      "upright": "Kontrbas",
+      "slap": "Slap",
+      "synth": "Synth"
+    },
+    "keysVoice": {
+      "label": "Tını",
+      "epiano": "Elektrikli piyano",
+      "organ": "Org",
+      "clav": "Clav",
+      "pad": "Pad"
     }
   },
   "scale": {

@@ -5,9 +5,12 @@ import { describe, expect, it } from "vitest";
 import {
   STARTER_JAMS,
   clampCountIn,
+  countInChoiceId,
+  countInChoices,
   createJam,
   duplicateJam,
   newId,
+  parseCountInChoice,
   renameJam,
   reorderJams,
   upsertJam,
@@ -199,5 +202,93 @@ describe("the starter jams", () => {
       expect(jam.countIn, jam.name).toBe(grooveById(jam.grooveId).beatsPerBar);
       expect(jam.fills, jam.name).toBe(true);
     }
+  });
+});
+
+/**
+ * The count-in, as ONE control (plans/JAM_UX_DECISIONS.md A4).
+ *
+ * It used to be two: how many bars, and what they sounded like, a screen
+ * apart. "One bar of sticks" is a single thing a drummer says out loud, so it
+ * is one dropdown now — and these three functions are the whole of the merge.
+ */
+describe("the count-in, merged", () => {
+  it("writes an id a dropdown can carry, and reads it back", () => {
+    const choice = { beats: 4, sound: "sticks" as const };
+    expect(countInChoiceId(choice)).toBe("4|sticks");
+    expect(parseCountInChoice("4|sticks")).toEqual(choice);
+  });
+
+  it("collapses every no-count-in to the same id, whatever sound it carried", () => {
+    // A record that says "no count-in, on the sticks" is a record two readers
+    // can disagree about, and one of them draws the control.
+    expect(countInChoiceId({ beats: 0, sound: "sticks" })).toBe("0");
+    expect(parseCountInChoice("0")).toEqual({ beats: 0, sound: "beep" });
+  });
+
+  it("reads anything unreadable as no count-in", () => {
+    expect(parseCountInChoice("wombat")).toEqual({ beats: 0, sound: "beep" });
+    expect(parseCountInChoice("")).toEqual({ beats: 0, sound: "beep" });
+    expect(parseCountInChoice("-4|beep")).toEqual({ beats: 0, sound: "beep" });
+  });
+
+  it("offers none, one bar and two bars in each sound", () => {
+    expect(countInChoices(4).map(countInChoiceId)).toEqual([
+      "0",
+      "4|beep",
+      "4|sticks",
+      "8|beep",
+      "8|sticks",
+    ]);
+  });
+
+  it("does not offer two bars where two bars will not fit", () => {
+    // Two bars of 6/8 is twelve beats, past `arm_count_in`'s limit of eight.
+    // Not offered, rather than offered and quietly clamped to something that
+    // is not two bars.
+    expect(countInChoices(6).map(countInChoiceId)).toEqual(["0", "6|beep", "6|sticks"]);
+  });
+
+  it("never offers a count-in past the engine's limit", () => {
+    for (const beatsPerBar of [1, 2, 3, 4, 5, 6, 7, 8, 9, 12]) {
+      for (const choice of countInChoices(beatsPerBar)) {
+        expect(choice.beats, `${beatsPerBar} per bar`).toBeLessThanOrEqual(JAM_MAX_COUNT_IN);
+      }
+    }
+  });
+});
+
+/** The second pass's optional half, carried by "another one like this one". */
+describe("createJam and the vibe", () => {
+  it("carries the vibe, the variation, the voices and your own kit", () => {
+    const source = createJam("a", {
+      vibe: "rock",
+      variation: "punk",
+      bassVoice: "picked",
+      keysVoice: "organ",
+      customKit: { dir: "C:/samples/mine", name: "mine" },
+    });
+    expect(source.vibe).toBe("rock");
+    expect(source.variation).toBe("punk");
+    expect(source.bassVoice).toBe("picked");
+    expect(source.keysVoice).toBe("organ");
+    expect(source.customKit).toEqual({ dir: "C:/samples/mine", name: "mine" });
+  });
+
+  it("leaves them off a jam that never had them", () => {
+    // The plainest new jam writes the same small record it always did.
+    const plain = createJam("a");
+    expect("vibe" in plain).toBe(false);
+    expect("customKit" in plain).toBe(false);
+  });
+
+  it("does not carry the chord sheet's own state", () => {
+    // Where you left a cheat sheet is not part of the music.
+    const copy = createJam("a", {
+      pinnedShape: { root: 4, quality: "min", index: 2 },
+      shapesFollow: true,
+    });
+    expect("pinnedShape" in copy).toBe(false);
+    expect("shapesFollow" in copy).toBe(false);
   });
 });

@@ -228,10 +228,17 @@ export function BandLanes({
           {t("jam.band.you")}
         </span>
         <span className="jam-band-detail">{youLabel}</span>
-        <span className="jam-band-live">
-          <span className="jam-band-hint">{t("jam.band.youHint")}</span>
-        </span>
-        <span className="jam-band-input" data-on={listening ? "" : undefined}>
+        <span className="jam-band-live" />
+        {/* The honesty line, said where it applies rather than as a caption
+            under the whole screen (JAM_UX_DECISIONS A7). A band through
+            speakers lands on the grid and the mic scores its hits as your
+            notes; this chip is the only place on the playing screen where
+            that is about to matter, so it is the one that says so. */}
+        <span
+          className="jam-band-input"
+          data-on={listening ? "" : undefined}
+          title={t("jam.headphones")}
+        >
           {listening ? t("jam.band.inputOn") : t("jam.band.inputOff")}
         </span>
       </div>

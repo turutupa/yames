@@ -34,7 +34,14 @@
       "train": "火車節奏",
       "boomBap": "Boom Bap",
       "fourOnFloor": "四踩大鼓",
-      "rule": "通用規則"
+      "rule": "通用規則",
+      "hardRock": "硬搖滾",
+      "stomp": "跺步",
+      "doubleKick": "雙踏",
+      "twoStep": "兩步舞",
+      "samba": "森巴",
+      "chaCha": "恰恰",
+      "secondLine": "紐奧良遊行"
     },
     "changes": {
       "edit": "編輯和弦",
@@ -49,7 +56,6 @@
     "meter": {
       "label": "拍號",
       "grooves": "律動自帶的",
-      "ticks": "每拍的格數",
       "doesNotFit": "{{groove}} 不適合 {{meter}}，鼓手按通用規則演奏。"
     },
     "mix": {
@@ -90,7 +96,8 @@
       "label": "力度",
       "soft": "輕",
       "normal": "適中",
-      "loud": "重"
+      "loud": "重",
+      "hint": "重會去掉幽靈音、把腳踏鈸打開；輕則合上。"
     },
     "form": {
       "label": "曲式",
@@ -118,7 +125,8 @@
       "jumpTo": "跳到第 {{bar}} 小節",
       "jumpPending": "在下一條小節線",
       "loopSection": "循環第 {{start}}–{{end}} 小節",
-      "loopOff": "取消循環"
+      "loopOff": "取消循環",
+      "shape": "曲式"
     },
     "short": {
       "blues12": "12 小節",
@@ -133,9 +141,9 @@
     "countIn": {
       "label": "預備拍",
       "none": "無",
-      "bars": "{{count}} 小節",
-      "bars_one": "{{count}} 小節",
-      "bars_other": "{{count}} 小節"
+      "barsAnd": "{{count}} 小節 · {{sound}}",
+      "barsAnd_one": "{{count}} 小節 · {{sound}}",
+      "barsAnd_other": "{{count}} 小節 · {{sound}}"
     },
     "fills": {
       "label": "過門",
@@ -158,7 +166,8 @@
     },
     "fretboard": {
       "label": "指板",
-      "aria": "琴頸上的 {{chord}}"
+      "aria": "琴頸上的 {{chord}}",
+      "staysPut": "{{scale}}，第 {{fret}} 格的把位 · 彈的時候不會動"
     },
     "chords": {
       "label": "和弦",
@@ -167,12 +176,19 @@
       "follow": "跟著即興走",
       "followHint": "讓指型跟著和弦走，或釘在某一個和弦上。",
       "sevenths": "七和弦",
-      "nextShape": "下一個指型",
       "sizeTriad": "三和弦",
       "sizeOpen": "開放",
       "sizeBarre": "封閉",
       "sizeSeventh": "七和弦",
-      "fret": "第 {{fret}} 格"
+      "fret": "第 {{fret}} 格",
+      "sheetLead": "一頁拿來瞄一眼的譜，不是會動的畫面",
+      "sizeLabel": "三和弦或七和弦",
+      "triads": "三和弦",
+      "everyWay": "{{chord}} 的所有按法",
+      "lowToHigh": "沿著琴頸由低到高",
+      "pin": "釘住這個",
+      "unpin": "取消釘住",
+      "pinnedAria": "{{chord}}，已釘在畫面上"
     },
     "key": {
       "label": "調",
@@ -193,7 +209,29 @@
       "brushes": "鼓刷",
       "brushesHint": "安靜，適合抒情曲",
       "electronic": "電子",
-      "electronicHint": "合成音，顆粒分明"
+      "electronicHint": "合成音，顆粒分明",
+      "raw": "生猛",
+      "rawHint": "乾聲房間裡的搖滾鼓手",
+      "preview": "試聽",
+      "previewStop": "停止",
+      "builtIn": "內建",
+      "yours": "你的",
+      "forget": "移除",
+      "chooseFolder": "一個裝著你自己取樣的資料夾…",
+      "folderHint": "大鼓、小鼓、腳踏鈸、開鈸、疊音鈸、邊擊、碎音鈸 · 什麼都不會離開這台電腦",
+      "folderUnavailable": "這個版本用不了你自己的取樣。",
+      "foundVoices": "找到：{{voices}}。",
+      "fallbackVoices": "{{voices}}來自{{kit}}。",
+      "voice": {
+        "kick": "大鼓",
+        "snare": "小鼓",
+        "snare_soft": "輕小鼓",
+        "hat": "腳踏鈸",
+        "hat_open": "開鈸",
+        "ride": "疊音鈸",
+        "rim": "邊擊",
+        "crash": "碎音鈸"
+      }
     },
     "transposition": {
       "label": "你讀的譜",
@@ -201,18 +239,15 @@
       "bb": "降B",
       "eb": "降E"
     },
-    "setup": {
-      "label": "調、鼓組，以及你讀的分譜"
-    },
+    "setup": {},
     "band": {
       "label": "樂團",
-      "lead": "全部合成，不必下載",
+      "lead": "先只有鼓，要誰再加誰",
       "drums": "鼓",
       "bass": "貝斯",
       "keys": "鍵盤",
       "you": "你",
       "youPlay": "{{instrument}}",
-      "youHint": "樂團從不演奏你的樂器",
       "out": "休止",
       "hatsOnly": "只有腳踏鈸",
       "inputOn": "輸入已開",
@@ -301,13 +336,97 @@
       "confirmDelete": "刪除",
       "confirmKeep": "保留",
       "size": "磁碟上約 {{megabytes}} MB",
-      "local": "錄音只留在這台機器上，不會上傳。",
       "introTitle": "關於錄音",
       "introWhat": "一段錄音就是你和樂團合在一起的聲音，從預備拍之後的第一小節到你停下為止。",
       "introWhere": "它會以 WAV 檔案寫在這台機器上本應用程式自己的資料夾裡，直到你刪掉它。",
       "introPrivate": "不上傳、不分析，也不會離開這台機器。",
       "introNotNow": "暂不",
       "introStart": "開始錄音"
+    },
+    "sheet": {
+      "setUp": "設定",
+      "done": "完成"
+    },
+    "vibe": {
+      "label": "風格",
+      "lead": "一下就定好鼓手、鼓組、速度和調",
+      "startedFrom": "從「{{vibe}}」風格開始",
+      "unavailable": "這個版本還沒有風格，下面的設定照常可用。",
+      "rock": "搖滾",
+      "hardRock": "硬搖滾",
+      "blues": "藍調",
+      "funk": "放克",
+      "jazz": "爵士",
+      "latin": "拉丁",
+      "pop": "流行",
+      "metal": "金屬",
+      "country": "鄉村"
+    },
+    "variation": {
+      "label": "{{vibe}}，哪一種",
+      "lead": "每一種都同時定好節奏型、鼓組、律動和力度",
+      "aria": "這個風格的幾種打法",
+      "count": "{{count}} 種打法",
+      "count_one": "{{count}} 種打法",
+      "count_other": "{{count}} 種打法",
+      "yours": "你自己的",
+      "yoursEmpty": "還沒有儲存",
+      "classic": "經典",
+      "hard": "重",
+      "punk": "龐克",
+      "alt": "另類",
+      "ballad": "抒情",
+      "halfTime": "半速",
+      "driving": "推進",
+      "stomp": "跺步",
+      "doubleKick": "雙踏",
+      "shuffle": "Shuffle",
+      "slow": "慢速",
+      "texas": "德州",
+      "boogie": "布基",
+      "sixteenths": "十六分",
+      "newOrleans": "紐奧良",
+      "swing": "搖擺",
+      "bossa": "Bossa",
+      "upTempo": "快速",
+      "samba": "森巴",
+      "rumba": "倫巴",
+      "songo": "Songo",
+      "eighths": "八分",
+      "thrash": "鞭擊",
+      "midTempo": "中速",
+      "openHats": "開鈸",
+      "driving16ths": "推進十六分",
+      "bossaJazz": "波薩爵士",
+      "chaCha": "恰恰",
+      "straight": "直拍",
+      "fourOnFloor": "四拍踩鈸",
+      "halfTimeStomp": "半拍重踩",
+      "train": "火車節奏",
+      "twoStep": "兩步舞",
+      "waltz": "華爾滋"
+    },
+    "drummer": {
+      "label": "鼓手"
+    },
+    "more": {
+      "label": "更多",
+      "lead": "拍號 · 你讀的調 · 錄音"
+    },
+    "bassVoice": {
+      "label": "音色",
+      "fingered": "指彈",
+      "picked": "撥片",
+      "upright": "低音提琴",
+      "slap": "擊弦",
+      "synth": "合成"
+    },
+    "keysVoice": {
+      "label": "音色",
+      "epiano": "電鋼",
+      "organ": "風琴",
+      "clav": "克拉維",
+      "pad": "鋪底"
     }
   },
   "scale": {

@@ -34,7 +34,14 @@
       "train": "Train beat",
       "boomBap": "Boom bap",
       "fourOnFloor": "Four on the floor",
-      "rule": "Quy tắc"
+      "rule": "Quy tắc",
+      "hardRock": "Hard rock",
+      "stomp": "Stomp",
+      "doubleKick": "Đạp đôi",
+      "twoStep": "Two-step",
+      "samba": "Samba",
+      "chaCha": "Cha-cha",
+      "secondLine": "Second line"
     },
     "changes": {
       "edit": "Sửa vòng hợp âm",
@@ -49,7 +56,6 @@
     "meter": {
       "label": "Nhịp",
       "grooves": "Nhịp của groove",
-      "ticks": "Tick mỗi phách",
       "doesNotFit": "{{groove}} không vừa với {{meter}}; tay trống chơi theo quy tắc."
     },
     "mix": {
@@ -90,7 +96,8 @@
       "label": "Cường độ",
       "soft": "Nhẹ",
       "normal": "Vừa",
-      "loud": "Mạnh"
+      "loud": "Mạnh",
+      "hint": "Lớn bỏ ghost note và mở hi-hat; nhỏ thì đóng lại."
     },
     "form": {
       "label": "Cấu trúc",
@@ -118,7 +125,8 @@
       "jumpTo": "Đến ô nhịp {{bar}}",
       "jumpPending": "ở vạch nhịp kế tiếp",
       "loopSection": "Lặp ô nhịp {{start}}–{{end}}",
-      "loopOff": "Ngừng lặp"
+      "loopOff": "Ngừng lặp",
+      "shape": "Cấu trúc"
     },
     "short": {
       "blues12": "12 ô nhịp",
@@ -133,9 +141,9 @@
     "countIn": {
       "label": "Đếm vào",
       "none": "Không",
-      "bars": "{{count}} ô nhịp",
-      "bars_one": "{{count}} ô nhịp",
-      "bars_other": "{{count}} ô nhịp"
+      "barsAnd": "{{count}} ô nhịp · {{sound}}",
+      "barsAnd_one": "{{count}} ô nhịp · {{sound}}",
+      "barsAnd_other": "{{count}} ô nhịp · {{sound}}"
     },
     "fills": {
       "label": "Fill",
@@ -158,7 +166,8 @@
     },
     "fretboard": {
       "label": "Cần đàn",
-      "aria": "{{chord}} trên cần đàn"
+      "aria": "{{chord}} trên cần đàn",
+      "staysPut": "{{scale}}, thế bấm ở phím {{fret}} · đứng yên trong lúc bạn chơi"
     },
     "chords": {
       "label": "Hợp âm",
@@ -167,12 +176,19 @@
       "follow": "Bám theo bài",
       "followHint": "Thế bấm chạy theo vòng hợp âm, hoặc ghim vào một hợp âm.",
       "sevenths": "Hợp âm 7",
-      "nextShape": "Thế bấm sau",
       "sizeTriad": "ba nốt",
       "sizeOpen": "mở",
       "sizeBarre": "chặn",
       "sizeSeventh": "bậc 7",
-      "fret": "phím {{fret}}"
+      "fret": "phím {{fret}}",
+      "sheetLead": "một trang để liếc, không phải khung hình chạy liên tục",
+      "sizeLabel": "Hợp âm ba hay hợp âm 7",
+      "triads": "Hợp âm ba",
+      "everyWay": "{{chord}}, mọi cách bấm",
+      "lowToHigh": "từ thấp lên cao trên cần đàn",
+      "pin": "Ghim thế này",
+      "unpin": "Bỏ ghim",
+      "pinnedAria": "{{chord}}, đã ghim lên màn hình"
     },
     "key": {
       "label": "Giọng",
@@ -193,7 +209,29 @@
       "brushes": "Chổi",
       "brushesHint": "nhẹ, hợp với ballad",
       "electronic": "Điện tử",
-      "electronicHint": "tổng hợp, chắc tiếng"
+      "electronicHint": "tổng hợp, chắc tiếng",
+      "raw": "Thô",
+      "rawHint": "một tay trống rock trong phòng khô",
+      "preview": "Nghe thử",
+      "previewStop": "Dừng",
+      "builtIn": "Có sẵn",
+      "yours": "Của bạn",
+      "forget": "Bỏ",
+      "chooseFolder": "Một thư mục sample của bạn…",
+      "folderHint": "kick, snare, hi-hat, hi-hat mở, ride, rim, crash · không gì rời khỏi máy này",
+      "folderUnavailable": "Bản này chưa hỗ trợ sample riêng.",
+      "foundVoices": "Tìm thấy: {{voices}}.",
+      "fallbackVoices": "{{voices}} lấy từ {{kit}}.",
+      "voice": {
+        "kick": "kick",
+        "snare": "snare",
+        "snare_soft": "snare nhẹ",
+        "hat": "hat",
+        "hat_open": "hi-hat mở",
+        "ride": "ride",
+        "rim": "rim",
+        "crash": "crash"
+      }
     },
     "transposition": {
       "label": "Bạn đọc",
@@ -201,18 +239,15 @@
       "bb": "Si♭",
       "eb": "Mi♭"
     },
-    "setup": {
-      "label": "Giọng, bộ trống và bè bạn đọc"
-    },
+    "setup": {},
     "band": {
       "label": "Ban nhạc",
-      "lead": "tất cả đều tổng hợp, không phải tải gì",
+      "lead": "chỉ trống cho tới khi bạn gọi thêm",
       "drums": "Trống",
       "bass": "Bass",
       "keys": "Phím",
       "you": "Bạn",
       "youPlay": "{{instrument}}",
-      "youHint": "ban nhạc không bao giờ chơi nhạc cụ của bạn",
       "out": "nghỉ",
       "hatsOnly": "chỉ hi-hat",
       "inputOn": "Đầu vào bật",
@@ -301,13 +336,97 @@
       "confirmDelete": "Xóa",
       "confirmKeep": "Giữ",
       "size": "khoảng {{megabytes}} MB trên đĩa",
-      "local": "Bản thu ở lại máy này. Không có gì được tải lên.",
       "introTitle": "Về bản thu",
       "introWhat": "Một bản thu là bạn cùng ban nhạc, từ ô nhịp đầu tiên sau đếm vào cho đến khi bạn dừng.",
       "introWhere": "Nó được ghi thành tệp WAV trong thư mục riêng của ứng dụng trên máy này, và ở đó cho đến khi bạn xóa.",
       "introPrivate": "Không có gì được tải lên, không có gì được phân tích, và không gì rời khỏi máy.",
       "introNotNow": "Để sau",
       "introStart": "Thu các bản"
+    },
+    "sheet": {
+      "setUp": "Thiết lập",
+      "done": "Xong"
+    },
+    "vibe": {
+      "label": "Vibe",
+      "lead": "một chạm là xong tay trống, bộ trống, nhịp độ và giọng",
+      "startedFrom": "bắt đầu từ vibe {{vibe}}",
+      "unavailable": "Bản này chưa có vibe — mọi thứ bên dưới vẫn chạy.",
+      "rock": "Rock",
+      "hardRock": "Hard rock",
+      "blues": "Blues",
+      "funk": "Funk",
+      "jazz": "Jazz",
+      "latin": "Latin",
+      "pop": "Pop",
+      "metal": "Metal",
+      "country": "Country"
+    },
+    "variation": {
+      "label": "{{vibe}}, kiểu nào",
+      "lead": "mỗi kiểu gồm groove, bộ trống, feel và độ lớn cùng lúc",
+      "aria": "Các cách chơi vibe này",
+      "count": "{{count}} cách chơi",
+      "count_one": "{{count}} cách chơi",
+      "count_other": "{{count}} cách chơi",
+      "yours": "Một bản của bạn",
+      "yoursEmpty": "chưa lưu bản nào",
+      "classic": "Cổ điển",
+      "hard": "Nặng",
+      "punk": "Punk",
+      "alt": "Alt",
+      "ballad": "Ballad",
+      "halfTime": "Half-time",
+      "driving": "Đẩy tới",
+      "stomp": "Stomp",
+      "doubleKick": "Đạp đôi",
+      "shuffle": "Shuffle",
+      "slow": "Chậm",
+      "texas": "Texas",
+      "boogie": "Boogie",
+      "sixteenths": "Móc kép",
+      "newOrleans": "New Orleans",
+      "swing": "Swing",
+      "bossa": "Bossa",
+      "upTempo": "Nhanh",
+      "samba": "Samba",
+      "rumba": "Rumba",
+      "songo": "Songo",
+      "eighths": "Móc đơn",
+      "thrash": "Thrash",
+      "midTempo": "Nhịp vừa",
+      "openHats": "Hi-hat mở",
+      "driving16ths": "Nốt 16 dồn dập",
+      "bossaJazz": "Bossa jazz",
+      "chaCha": "Cha-cha",
+      "straight": "Thẳng",
+      "fourOnFloor": "Four on the floor",
+      "halfTimeStomp": "Stomp nửa nhịp",
+      "train": "Train",
+      "twoStep": "Two-step",
+      "waltz": "Waltz"
+    },
+    "drummer": {
+      "label": "Tay trống"
+    },
+    "more": {
+      "label": "Thêm",
+      "lead": "loại nhịp · thứ bạn đọc · bản ghi"
+    },
+    "bassVoice": {
+      "label": "Âm sắc",
+      "fingered": "Gảy ngón",
+      "picked": "Gảy pick",
+      "upright": "Contrabass",
+      "slap": "Slap",
+      "synth": "Synth"
+    },
+    "keysVoice": {
+      "label": "Âm sắc",
+      "epiano": "Piano điện",
+      "organ": "Organ",
+      "clav": "Clav",
+      "pad": "Pad"
     }
   },
   "scale": {

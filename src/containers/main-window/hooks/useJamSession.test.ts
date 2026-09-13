@@ -65,6 +65,12 @@ vi.mock("../../../ipc", () => ({
     calls.push(["setJamPosition", command]);
     return Promise.resolve();
   },
+  // The kit preview presses play on its own when the band is stopped (B7).
+  togglePlayback: () => {
+    calls.push(["togglePlayback", null]);
+    return Promise.resolve();
+  },
+  ttsSpeak: () => Promise.resolve(),
 }));
 
 vi.mock("react-i18next", () => ({
@@ -662,6 +668,60 @@ describe("the library", () => {
     expect(created.grooveId).toBe(bossa.grooveId);
     expect(created.form).toEqual(bossa.form);
     expect(created.bpm).toBe(bossa.bpm);
+  });
+
+  it("starts a jam made from nothing with the drummer and nobody else", async () => {
+    // plans/JAM_UX_DECISIONS.md B1. The first session's complaint was that a
+    // guitarist's brand new jam opened with a bass line already under
+    // everything, and "drums alone" was one toggle away nobody would find.
+    const { result } = mount("jam", { instrument: "electric-guitar" });
+    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    act(() => {
+      result.current.newJam();
+    });
+    await waitFor(() => expect(result.current.jams).toHaveLength(7));
+    expect(result.current.jam!.band).toEqual({ drums: true, bass: false, keys: false });
+  });
+
+  it("gives a drummer's new jam a bass player instead", async () => {
+    // A drummer with drums alone has nothing to play against, and the band
+    // still never plays your instrument.
+    const { result } = mount("jam", { instrument: "drums" });
+    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    act(() => {
+      result.current.newJam();
+    });
+    await waitFor(() => expect(result.current.jams).toHaveLength(7));
+    expect(result.current.jam!.band).toEqual({ drums: false, bass: true, keys: false });
+  });
+
+  it("opens the setup sheet on a new jam, and Play closes it", async () => {
+    // A1. A new jam has nothing set, so the sheet is where you are; the
+    // moment the band comes in, the thing you need is the timeline behind it.
+    const { result, rerender } = mount("jam");
+    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    expect(result.current.screen.setupOpen).toBe(false);
+
+    act(() => {
+      result.current.newJam();
+    });
+    await waitFor(() => expect(result.current.screen.setupOpen).toBe(true));
+
+    rerender({ v: "jam", playing: true });
+    await waitFor(() => expect(result.current.screen.setupOpen).toBe(false));
+  });
+
+  it("takes both sheets away with the jam", async () => {
+    // A sheet left down would be the first thing the NEXT jam showed,
+    // describing the one before it.
+    const { result } = mount();
+    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    act(() => result.current.loadJam(result.current.jams[0]));
+    act(() => result.current.screen.setChordsOpen(true));
+    await waitFor(() => expect(result.current.screen.chordsOpen).toBe(true));
+
+    act(() => result.current.closeJam());
+    await waitFor(() => expect(result.current.screen.chordsOpen).toBe(false));
   });
 
   it("puts a duplicate next to the jam it came from", async () => {

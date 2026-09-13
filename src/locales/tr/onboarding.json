@@ -153,6 +153,15 @@
       "midiPlugged": {
         "body": "Bir MIDI cihazı bağlı ama hiçbir eşleme yok. Bir pedalı Oynat/Durdur'a bağlayalım mı?",
         "action": "Kısayolları aç"
+      },
+      "jamSynth": {
+        "body": "Grubun tamamı sentezlenmiş — indirilecek, kurulacak bir şey yok."
+      },
+      "jamBand": {
+        "body": "Grup senin çaldığın enstrümanı asla çalmaz. Bas ve klavye birer dokunuş uzakta."
+      },
+      "jamTakes": {
+        "body": "Kayıtlar bu bilgisayarda kalır. Hiçbir şey yüklenmez."
       }
     },
     "tour": {

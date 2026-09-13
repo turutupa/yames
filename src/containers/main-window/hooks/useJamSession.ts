@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { listJams, saveJams, setBpm, setJamPosition, ttsSpeak } from "../../../ipc";
+import {
+  listJams,
+  saveJams,
+  setBpm,
+  setJamPosition,
+  togglePlayback,
+  ttsSpeak,
+} from "../../../ipc";
 import {
   GROOVES,
   STARTER_JAMS,
@@ -23,6 +30,7 @@ import {
   sectionIndexAt,
   sectionStarts,
   shouldSpeak,
+  startingBand,
   stepSection,
   tempoAfterChorus,
   tradeCue,
@@ -188,12 +196,21 @@ interface UseJamSessionArgs {
   /**
    * Whether a voice is installed (`ModelStatus.voiceReady`).
    *
-   * Half of the spoken-cues decision, the other half being the jam's own
-   * toggle — see `shouldSpeak` in `src/jam/cues.ts`. Passed in rather than
+   * Half of the spoken-cues decision, the other half being the preference
+   * below — see `shouldSpeak` in `src/jam/cues.ts`. Passed in rather than
    * read here so this hook stays the thing that decides WHEN to speak and
    * never the thing that decides whether a voice exists.
    */
   voiceReady?: boolean;
+  /**
+   * Spoken cues, from Settings › Coach › Voice (JAM_UX_DECISIONS A4).
+   *
+   * A preference, not a property of a tune. Every jam used to carry its own
+   * switch, so a player who wanted to be told "your four" had to say so once
+   * per jam. `Jam.cues` is still on the record for the jams that set it, and
+   * nothing reads it any more.
+   */
+  cues?: boolean;
   /**
    * The metronome's own meter, as the app state holds it right now.
    *
@@ -214,6 +231,7 @@ export function useJamSession({
   countingIn,
   countIn,
   voiceReady = false,
+  cues = false,
   meter,
 }: UseJamSessionArgs) {
   const { t } = useTranslation();
@@ -267,6 +285,35 @@ export function useJamSession({
    */
   const [editingChords, setEditingChords] = useState(false);
   const [editingBar, setEditingBar] = useState<number | null>(null);
+
+  /**
+   * The two docked sheets (JAM_UX_DECISIONS A1, A8).
+   *
+   * The jam screen is two states now: a PLAYING screen of five blocks, and
+   * everything you set once behind a button. Which sheet is down is screen
+   * state for exactly the reason the neck is — a jam is music, not a view —
+   * but it has to survive a trip to the metronome tab, and Escape has to
+   * reach it, so it lives up here with the rest.
+   */
+  const [setupOpen, setSetupOpen] = useState(false);
+  const [chordsOpen, setChordsOpen] = useState(false);
+
+  /**
+   * The kit a Preview button is sounding, or null (JAM_UX_DECISIONS B7).
+   *
+   * Session state, and deliberately not an edit: a preview is you listening to
+   * a kit, not you choosing one, and writing it to the record would mark the
+   * jam dirty for a two-bar audition. The engine hears it because the push
+   * below compiles from `engineJam`, which is the record with this kit over
+   * the top — the same path the real kit takes, which is the point of the
+   * feature. The first four kits were measured and never heard; this is how
+   * the fifth avoids that.
+   */
+  const [previewKit, setPreviewKit] = useState<string | null>(null);
+  /** Bar lines seen since the preview started. Two, then it is over. */
+  const previewBarsRef = useRef(0);
+  /** True when the preview is what pressed play, so it is what presses stop. */
+  const previewStartedRef = useRef(false);
 
   /**
    * Where the form has been told to go, and what it has been told to repeat.
@@ -353,6 +400,22 @@ export function useJamSession({
    * is what makes changing the groove audible on the next bar rather than on
    * the next reload.
    */
+  /**
+   * The jam as the ENGINE hears it: the record, with a kit being previewed
+   * over the top.
+   *
+   * One derived value rather than a branch at each send, so the preview cannot
+   * reach the drums and miss the bar-ahead bass. `customKit` is dropped along
+   * with it — auditioning the built-in Raw while a folder of your own samples
+   * is selected has to actually play Raw.
+   */
+  const engineJam = useMemo(
+    () => (jam && previewKit ? { ...jam, kit: previewKit, customKit: null } : jam),
+    [jam, previewKit],
+  );
+  const engineJamRef = useRef<Jam | null>(engineJam);
+  engineJamRef.current = engineJam;
+
   const engineKey = jam
     ? JSON.stringify([
         jam.grooveId,
@@ -374,6 +437,13 @@ export function useJamSession({
         jam.mix,
         jam.keysStyle,
         jam.countInSound,
+        // The second pass. The voices and a folder of your own samples change
+        // what the band SOUNDS like, and the kit being previewed changes it
+        // for two bars — all three have to re-send or the audition is silent.
+        jam.bassVoice,
+        jam.keysVoice,
+        jam.customKit,
+        previewKit,
       ])
     : null;
 
@@ -426,7 +496,10 @@ export function useJamSession({
     // Stopped, the engine restarts at the pending jump, else the loop's first
     // bar, else 0 — so that is the bar this table's bass and keys are for.
     const restartBar = pendingJumpRef.current ?? loopRef.current?.start ?? 0;
-    const config = compileJam(jam, {
+    // `engineJam`, not `jam`: a kit being previewed is part of what the engine
+    // is being asked to play. Everything else on this line is the record's.
+    const sending = engineJam ?? jam;
+    const config = compileJam(sending, {
       formBar: editingLive ? live + 1 : restartBar,
       lineup,
       // A load starts the keys player's hand fresh, in the middle of the
@@ -443,10 +516,10 @@ export function useJamSession({
      * table alone is cheap and lands on the next bar line; the meter alone is
      * the thing you can hear going wrong.
      */
-    const meterNow = meterSignature(jam);
+    const meterNow = meterSignature(sending);
     const meterMoved = sentMeterRef.current !== meterNow;
     sentMeterRef.current = meterNow;
-    pushJam(jam, config, meterMoved);
+    pushJam(sending, config, meterMoved);
     // What the engine is now holding, so the next bar line can tell whether
     // it has anything new to say. Recording `null` here would make the next
     // downbeat re-send a bass the engine already has.
@@ -569,7 +642,10 @@ export function useJamSession({
       return;
     }
 
-    const next = compileJam(jam, {
+    // Read through the ref, not watched: a preview starting mid-bar goes out
+    // through the effect above, which is the one that carries the meter.
+    const sending = engineJamRef.current ?? jam;
+    const next = compileJam(sending, {
       // The bar the engine will actually play next, which over a loop or a
       // pending jump is not `bar + 1`. Sending ahead of the wrong bar is the
       // whole failure mode this send exists to prevent: with a section on
@@ -583,7 +659,7 @@ export function useJamSession({
     if (sentBassRef.current === signature) return;
     sentBassRef.current = signature;
     voicingRef.current = lastVoicing(next.keys);
-    void sendJam(jam, next);
+    void sendJam(sending, next);
     // The bar is the trigger; the jam is read, not watched — an edit goes out
     // through the effect above, which is the one that also carries the meter.
     // `jam?.id` is in the list because a jam loaded while the click is already
@@ -650,7 +726,7 @@ export function useJamSession({
    * silent, with no error and nothing to dismiss. Every cue is also on the
    * screen, so a jam without a voice is not a jam missing anything.
    */
-  const speaking = shouldSpeak({ cues: jam?.cues, voiceReady });
+  const speaking = shouldSpeak({ cues, voiceReady });
 
   /**
    * The count: "one, two, three, four", on the beats, at the tempo.
@@ -861,7 +937,24 @@ export function useJamSession({
   const closeJam = useCallback(() => {
     setActiveJam(null);
     setSaved(null);
+    // The sheets belong to the jam that was open. Left down, they would be
+    // the first thing the NEXT jam showed, describing the one before it.
+    setSetupOpen(false);
+    setChordsOpen(false);
   }, []);
+
+  /**
+   * Play puts the setup sheet away (A1).
+   *
+   * The sheet is where you decide; the playing screen is where you read. The
+   * moment the band comes in, the thing you need is the timeline it is dimming
+   * — so pressing play is also the third way to close it, beside Done and
+   * Escape. The chord sheet stays: it is a cheat sheet, and reading it while
+   * you play is what it is for.
+   */
+  useEffect(() => {
+    if (isPlaying) setSetupOpen(false);
+  }, [isPlaying]);
 
   /**
    * An edit from the stage. It lands in the working copy, which re-sends the
@@ -881,13 +974,22 @@ export function useJamSession({
    */
   const newJam = useCallback(() => {
     // The band is written down at creation rather than left to the fallback,
-    // so a jam you made on a guitar still has a bass player the day you open
-    // it on the machine where you told the app you play bass.
-    const created = createJam(t("jam.untitled"), { ...(jam ?? {}), band: jam?.band ?? lineup });
+    // so a jam you made on a guitar still has the band you gave it the day you
+    // open it on the machine where you told the app you play bass. With no jam
+    // to copy it is the drummer and nobody else (JAM_UX_DECISIONS B1) — a
+    // brand new jam that opens with a bass line under it is the first thing
+    // the owner asked us to stop doing.
+    const created = createJam(t("jam.untitled"), {
+      ...(jam ?? {}),
+      band: jam?.band ?? startingBand(instrument),
+    });
     commit([...jams, created]);
     loadJam(created);
+    // A new jam has nothing set, so the sheet is where you are (A1). The
+    // playing screen behind it is a form nobody has chosen yet.
+    setSetupOpen(true);
     return created;
-  }, [t, jam, jams, commit, loadJam, lineup]);
+  }, [t, jam, jams, commit, loadJam, instrument]);
 
   const saveActiveJam = useCallback(() => {
     if (!jam) return;
@@ -1012,6 +1114,76 @@ export function useJamSession({
   }, []);
 
   /**
+   * Two bars of the current groove on another kit (JAM_UX_DECISIONS B7).
+   *
+   * Through the normal engine path and nothing else: the kit goes over the
+   * record, the push effect compiles and sends exactly as it would for a real
+   * edit, and what you hear is the band you would get. A second sample player
+   * would be a second answer to "what does this kit sound like", and it would
+   * be the one that was wrong.
+   *
+   * Pressing it while stopped starts the transport with no count-in — a count
+   * before a two-bar audition is more count than audition — and stops it
+   * again at the end. Pressing it while the band already plays leaves the
+   * transport alone; you are auditioning INTO the take, which is the better
+   * way to choose a kit anyway.
+   */
+  const stopKitPreview = useCallback(() => {
+    setPreviewKit(null);
+    previewBarsRef.current = 0;
+    if (!previewStartedRef.current) return;
+    previewStartedRef.current = false;
+    void togglePlayback().catch(() => {});
+  }, []);
+
+  const startKitPreview = useCallback(
+    (kit: string) => {
+      previewBarsRef.current = 0;
+      setPreviewKit((current) => {
+        if (current === kit) {
+          // The same button again is Stop. The transport is put back by the
+          // effect below, which sees the preview end either way.
+          return null;
+        }
+        return kit;
+      });
+      if (previewKit === kit) {
+        if (previewStartedRef.current) {
+          previewStartedRef.current = false;
+          void togglePlayback().catch(() => {});
+        }
+        return;
+      }
+      if (!isPlaying && !previewStartedRef.current) {
+        previewStartedRef.current = true;
+        void togglePlayback().catch(() => {});
+      }
+    },
+    [isPlaying, previewKit],
+  );
+
+  /**
+   * The preview's own clock: two bar lines, then back to the jam's kit.
+   *
+   * Counted in BARS off the engine's own beat events rather than on a timer,
+   * so it is two bars at any tempo and it ends on a bar line like everything
+   * else this mode does.
+   */
+  useEffect(() => {
+    if (!previewKit) return;
+    if (!isPlaying) {
+      // Somebody pressed stop under it. The audition is over and the
+      // transport is already where it should be.
+      previewStartedRef.current = false;
+      setPreviewKit(null);
+      previewBarsRef.current = 0;
+      return;
+    }
+    previewBarsRef.current += 1;
+    if (previewBarsRef.current > 2) stopKitPreview();
+  }, [previewKit, isPlaying, currentBeat?.chorus, currentBeat?.formBar, stopKitPreview]);
+
+  /**
    * The next shape of the chord on screen.
    *
    * Wrapping is the row's own job — it knows how many shapes the chord has —
@@ -1074,6 +1246,10 @@ export function useJamSession({
       setEditingChords,
       editingBar,
       setEditingBar,
+      setupOpen,
+      setSetupOpen,
+      chordsOpen,
+      setChordsOpen,
     }),
     [
       fretboardOpen,
@@ -1084,6 +1260,8 @@ export function useJamSession({
       editorPage,
       editingChords,
       editingBar,
+      setupOpen,
+      chordsOpen,
     ],
   );
 
@@ -1102,6 +1280,9 @@ export function useJamSession({
     position,
     /** Where the tempo trainer has got to, or null while it has not moved. */
     trainedBpm,
+    /** The kit a Preview is sounding, and the button that starts one. */
+    previewKit,
+    startKitPreview,
     /** True while a jam is loaded and the transport would start the band. */
     playing: !!jam && isPlaying,
     loadJam,

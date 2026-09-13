@@ -97,6 +97,9 @@ interface SettingsViewProps {
   voiceDiagnostics: VoiceDiagnostic[];
   instrument: string;
   setInstrument: Dispatch<SetStateAction<string>>;
+  /** Spoken cues on the Jam tab — a preference now (JAM_UX_DECISIONS A4). */
+  jamCues: boolean;
+  setJamCues: Dispatch<SetStateAction<boolean>>;
   onStartDownload: (tier: ModelTier) => void;
   onRequestDownload: (tier: ModelTier) => void;
 
@@ -182,6 +185,8 @@ export function SettingsView({
   voiceDiagnostics,
   instrument,
   setInstrument,
+  jamCues,
+  setJamCues,
   onStartDownload,
   onRequestDownload,
   widgetMode,
@@ -280,6 +285,8 @@ export function SettingsView({
         voiceDiagnostics={voiceDiagnostics}
         instrument={instrument}
         setInstrument={setInstrument}
+        jamCues={jamCues}
+        setJamCues={setJamCues}
         onStartDownload={onStartDownload}
         onRequestDownload={onRequestDownload}
       />

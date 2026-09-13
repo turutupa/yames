@@ -13,7 +13,12 @@
  * only part of it worth arguing about. The DOM questions — is something being
  * typed into, is a dialog up — are answered there and passed in as booleans.
  */
-export type JamEscapeTarget = "nothing" | "chordPicker" | "jam";
+export type JamEscapeTarget =
+  | "nothing"
+  | "chordPicker"
+  | "setupSheet"
+  | "chordSheet"
+  | "jam";
 
 export interface JamEscapeState {
   /** Focus is in an input, a textarea or a contenteditable. */
@@ -24,6 +29,10 @@ export interface JamEscapeState {
   editorOpen: boolean;
   /** The bar the chord picker is open on, or null when it is shut. */
   editingBar: number | null;
+  /** The setup sheet is docked to the right (JAM_UX_DECISIONS A1). */
+  setupOpen?: boolean;
+  /** The chord sheet is docked to the right (A8). */
+  chordsOpen?: boolean;
 }
 
 /**
@@ -40,8 +49,15 @@ export function jamEscapeTarget({
   dialogOpen,
   editorOpen,
   editingBar,
+  setupOpen,
+  chordsOpen,
 }: JamEscapeState): JamEscapeTarget {
   if (typing || dialogOpen || editorOpen) return "nothing";
   if (editingBar !== null) return "chordPicker";
+  // The picker is opened FROM the setup sheet, so it is inside it and goes
+  // first. Between the two sheets the setup one wins: it dims the screen
+  // behind it and the chord sheet does not, so it is the one that is "open".
+  if (setupOpen) return "setupSheet";
+  if (chordsOpen) return "chordSheet";
   return "jam";
 }

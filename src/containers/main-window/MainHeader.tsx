@@ -236,6 +236,11 @@ interface MainHeaderProps {
   onSaveJam?: () => void;
   onRevertJam?: () => void;
   onRenameJam?: () => void;
+  /** The jam's two docked sheets, opened from here (JAM_UX_DECISIONS A1, A8). */
+  jamSetupOpen?: boolean;
+  onToggleJamSetup?: () => void;
+  jamChordsOpen?: boolean;
+  onToggleJamChords?: () => void;
   /**
    * The setlists a loaded jam can be dropped into (JAM_MODE §8.5).
    *
@@ -315,6 +320,10 @@ export function MainHeader({
   onSaveJam,
   onRevertJam,
   onRenameJam,
+  jamSetupOpen = false,
+  onToggleJamSetup,
+  jamChordsOpen = false,
+  onToggleJamChords,
   setlistsForJam,
   onAddJamToSetlist,
   soundOpen,
@@ -391,6 +400,10 @@ export function MainHeader({
             onRename={() => onRenameJam?.()}
             onSave={() => onSaveJam?.()}
             onRevert={() => onRevertJam?.()}
+            setupOpen={jamSetupOpen}
+            onSetup={onToggleJamSetup}
+            chordsOpen={jamChordsOpen}
+            onChords={onToggleJamChords}
           />
         ) : view === "setlist" && activeSetlist ? (
           <SetlistSaveBar

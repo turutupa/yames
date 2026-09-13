@@ -8,6 +8,18 @@ interface JamSaveBarProps {
   onRename: () => void;
   onSave: () => void;
   onRevert: () => void;
+  /**
+   * The two sheets (plans/JAM_UX_DECISIONS.md A1, A8).
+   *
+   * Their buttons live here rather than on the stage because the stage IS the
+   * playing screen now, and a button that opens a sheet over it is not one of
+   * the five things a player reads while playing. The context bar is where the
+   * app already answers "what am I looking at, and what can I do to it".
+   */
+  setupOpen?: boolean;
+  onSetup?: () => void;
+  chordsOpen?: boolean;
+  onChords?: () => void;
 }
 
 /**
@@ -27,6 +39,10 @@ export function JamSaveBar({
   onRename,
   onSave,
   onRevert,
+  setupOpen = false,
+  onSetup,
+  chordsOpen = false,
+  onChords,
 }: JamSaveBarProps) {
   const { t } = useTranslation();
   return (
@@ -63,6 +79,27 @@ export function JamSaveBar({
           title={t("jam.revertTooltip")}
         >
           <span className="preset-save-btn-label">{t("jam.revert")}</span>
+        </button>
+      )}
+
+      {onSetup && (
+        <button
+          type="button"
+          className={`jam-sheet-btn${setupOpen ? " active" : ""}`}
+          aria-pressed={setupOpen}
+          onClick={onSetup}
+        >
+          {t("jam.sheet.setUp")}
+        </button>
+      )}
+      {onChords && (
+        <button
+          type="button"
+          className={`jam-sheet-btn${chordsOpen ? " active" : ""}`}
+          aria-pressed={chordsOpen}
+          onClick={onChords}
+        >
+          {t("jam.chords.label")}
         </button>
       )}
     </div>

@@ -10,7 +10,7 @@ import { grooveById } from "./grooves";
 import { clampFormBars, formBars } from "./forms";
 import { progressionEdit } from "./progression";
 import { JAM_MAX_COUNT_IN } from "./types";
-import type { Jam, JamForm } from "./types";
+import type { Jam, JamCountInSound, JamForm } from "./types";
 
 /**
  * The same scheme `setlists.ts` uses: sortable-ish by time, short enough to
@@ -47,6 +47,52 @@ export function carryCountIn(
     if (n * toBeatsPerBar <= JAM_MAX_COUNT_IN) return n * toBeatsPerBar;
   }
   return 0;
+}
+
+/**
+ * The count-in, as ONE decision (JAM_UX_DECISIONS A4).
+ *
+ * It used to be two controls a screen apart: how many bars, and what they
+ * sounded like. Nobody sets one without the other — "one bar of sticks" is a
+ * single thing a drummer says out loud — so they are one control now, and
+ * these three functions are the whole of the merge, kept here beside
+ * `carryCountIn` because they are the same field's rules.
+ *
+ * The id is what the dropdown carries: `"0"` for none, `"<beats>|<sound>"`
+ * otherwise. Beats and not bars, because beats are what the engine takes and
+ * the meter is what turns one into the other.
+ */
+export type CountInChoice = { beats: number; sound: JamCountInSound };
+
+export function countInChoiceId(choice: CountInChoice): string {
+  return choice.beats <= 0 ? "0" : `${choice.beats}|${choice.sound}`;
+}
+
+/** Read one back. Anything unreadable is "no count-in", which is always safe. */
+export function parseCountInChoice(id: string): CountInChoice {
+  const [rawBeats, rawSound] = id.split("|");
+  const beats = clampCountIn(Number(rawBeats));
+  if (beats <= 0) return { beats: 0, sound: "beep" };
+  return { beats, sound: rawSound === "sticks" ? "sticks" : "beep" };
+}
+
+/**
+ * Every count-in a jam in this meter can have: none, then one and two bars in
+ * each sound.
+ *
+ * Two bars of 6/8 is twelve beats, which is past the engine's limit of eight —
+ * so that option is not offered there, rather than offered and quietly clamped
+ * to something that is not two bars.
+ */
+export function countInChoices(beatsPerBar: number): CountInChoice[] {
+  const out: CountInChoice[] = [{ beats: 0, sound: "beep" }];
+  for (const bars of [1, 2]) {
+    const beats = bars * Math.max(1, Math.trunc(beatsPerBar));
+    if (beats > JAM_MAX_COUNT_IN) continue;
+    out.push({ beats, sound: "beep" });
+    out.push({ beats, sound: "sticks" });
+  }
+  return out;
 }
 
 export type NewJamFields = Partial<Omit<Jam, "id" | "name" | "createdAt">>;
@@ -110,6 +156,17 @@ export function createJam(name: string, fields: NewJamFields = {}): Jam {
     ...(fields.keysStyle ? { keysStyle: fields.keysStyle } : {}),
     ...(fields.countInSound ? { countInSound: fields.countInSound } : {}),
     ...(fields.cues === undefined ? {} : { cues: fields.cues }),
+    // The second pass's half: the vibe the jam started from, the voices the
+    // bass and keys play with, and a kit of your own samples. Carried like the
+    // rest, so "another one like this one" is still the Hard rock vibe with
+    // the same picked bass under it. The chord sheet's own state — the pinned
+    // shape and whether it follows the jam — is deliberately NOT carried: it
+    // is where you happened to leave a cheat sheet, not part of the music.
+    ...(fields.vibe ? { vibe: fields.vibe } : {}),
+    ...(fields.variation ? { variation: fields.variation } : {}),
+    ...(fields.bassVoice ? { bassVoice: fields.bassVoice } : {}),
+    ...(fields.keysVoice ? { keysVoice: fields.keysVoice } : {}),
+    ...(fields.customKit ? { customKit: { ...fields.customKit } } : {}),
   };
 }
 

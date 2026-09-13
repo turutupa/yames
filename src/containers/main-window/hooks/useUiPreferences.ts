@@ -11,6 +11,7 @@ import { storeLoad } from "../../../ipc";
  *   - `drillAutoCollapse`  — auto-collapse the drill panel between segments
  *   - `viewTransitions`    — global tab-transition intensity
  *   - `animationStyle`     — preferred CSS animation family for transitions
+ *   - `jamCues`            — speak the jam's count, sections and "your four"
  *
  * Each value is loaded from the Tauri store on mount; the *save* side is
  * handled inside the individual `<setting-row>` controls (they call
@@ -49,6 +50,16 @@ export interface UiPreferences {
   setViewTransitions: Dispatch<SetStateAction<ViewTransitionLevel>>;
   animationStyle: AnimationStyle;
   setAnimationStyle: Dispatch<SetStateAction<AnimationStyle>>;
+  /**
+   * Spoken cues on the Jam tab (plans/JAM_UX_DECISIONS.md A4).
+   *
+   * A preference, not a property of a tune. It used to be a switch on every
+   * jam's setup, which meant a player who wanted to be told "your four" had
+   * to turn it on again for each jam they owned. It lives in
+   * Settings -> Coach -> Voice now, with the other things that speak.
+   */
+  jamCues: boolean;
+  setJamCues: Dispatch<SetStateAction<boolean>>;
 }
 
 export function useUiPreferences(): UiPreferences {
@@ -59,6 +70,7 @@ export function useUiPreferences(): UiPreferences {
     useState<ViewTransitionLevel>("smooth");
   const [animationStyle, setAnimationStyle] =
     useState<AnimationStyle>("scale");
+  const [jamCues, setJamCues] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -83,6 +95,9 @@ export function useUiPreferences(): UiPreferences {
         }
       }
 
+      const jc = await storeLoad<boolean>("jamCues");
+      if (jc !== undefined) setJamCues(jc);
+
       const as = await storeLoad<string>("animationStyle");
       if (as && ANIMATION_STYLES.includes(as as AnimationStyle)) {
         setAnimationStyle(as as AnimationStyle);
@@ -101,5 +116,7 @@ export function useUiPreferences(): UiPreferences {
     setViewTransitions,
     animationStyle,
     setAnimationStyle,
+    jamCues,
+    setJamCues,
   };
 }

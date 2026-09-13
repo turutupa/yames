@@ -57,6 +57,32 @@ export function lineupFor(instrument: InstrumentId | string): JamLineup {
 }
 
 /**
+ * Who a BRAND NEW jam starts with: the drummer, and nobody else.
+ *
+ * Not `lineupFor` (JAM_UX_DECISIONS B1). The first session's verdict was that
+ * a guitarist's jam opened with a bass player already under everything, and
+ * "drums alone" was one toggle away that nobody would find. So the rule the
+ * mode is built on — the band never plays your instrument — still governs
+ * what is OFFERED, and this governs what is ON: a drummer gets a bass player,
+ * because a drummer with drums alone has nothing to play against, and
+ * everyone else gets the drummer they came for. Bass and keys are one tap
+ * each in the band row.
+ *
+ * A jam already on the record keeps whatever it says; this is only the answer
+ * for a jam that does not exist yet.
+ */
+export function startingBand(instrument: InstrumentId | string): {
+  drums: boolean;
+  bass: boolean;
+  keys: boolean;
+} {
+  const you = lineupFor(instrument).you;
+  return you === "drums"
+    ? { drums: false, bass: true, keys: false }
+    : { drums: true, bass: false, keys: false };
+}
+
+/**
  * The band as a list of locale keys, in the order they are named on stage:
  * drums, bass, keys. The UI translates each and joins them — "drums · bass".
  * An empty list means the band has nobody in it, which the UI says in its own

@@ -165,9 +165,10 @@ export function TakesSection({
         </ul>
       )}
 
-      {/* The promise, on the screen that makes it, every time. It is one line
-          and it is the reason this feature is allowed to exist at all. */}
-      {available !== false && <p className="jam-takes-note">{t("jam.takes.local")}</p>}
+      {/* The promise used to be printed here forever. It is said once now, as
+          a first-run hint at the moment recording is switched on
+          (JAM_UX_DECISIONS A7) — the same words, at the one moment they are
+          news rather than furniture. */}
     </section>
   );
 }

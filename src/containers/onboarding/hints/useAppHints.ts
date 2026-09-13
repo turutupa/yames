@@ -57,6 +57,18 @@ export type UseAppHintsArgs = {
   onOpenWidget: () => void;
   /** Opens Settings → Hotkeys (`midi-plugged`). */
   onOpenHotkeys: () => void;
+  /**
+   * The three Jam captions, as the moments they apply (A7).
+   *
+   * `jamLoaded` is a band on the screen — which is when "everything is
+   * synthesised" is news. `jamSetupOpen` is the setup sheet, whose band block
+   * is the one place the lineup rule can be read. `jamTakesOn` is recording
+   * being switched on, which is the only moment the promise about the disk
+   * matters.
+   */
+  jamLoaded?: boolean;
+  jamSetupOpen?: boolean;
+  jamTakesOn?: boolean;
 };
 
 export function useAppHints(args: UseAppHintsArgs): ActiveAppHint | null {
@@ -85,6 +97,14 @@ export function useAppHints(args: UseAppHintsArgs): ActiveAppHint | null {
       shouldHintMidiPlugged({ devices: midiDevices, bindings: midiBindings }),
   );
 
+  // The three that used to be captions. Each fires on the Jam tab at the
+  // moment its sentence is true and not before — the takes one in particular
+  // must not appear to somebody who has never turned recording on.
+  const onJam = view === "jam" && !!args.jamLoaded;
+  const jamSynth = useFirstTimeHint("jam-synth", onJam);
+  const jamBand = useFirstTimeHint("jam-band", onJam && !!args.jamSetupOpen);
+  const jamTakes = useFirstTimeHint("jam-takes", onJam && !!args.jamTakesOn);
+
   if (drill.shouldShow) {
     return { id: "drill-first-open", markShown: drill.markShown };
   }
@@ -109,6 +129,12 @@ export function useAppHints(args: UseAppHintsArgs): ActiveAppHint | null {
       markShown: midi.markShown,
     };
   }
+  // Last of the nine, and in this order: the takes promise is the one with a
+  // consequence, so it wins the session's one slot over the two that are
+  // only good to know.
+  if (jamTakes.shouldShow) return { id: "jam-takes", markShown: jamTakes.markShown };
+  if (jamBand.shouldShow) return { id: "jam-band", markShown: jamBand.markShown };
+  if (jamSynth.shouldShow) return { id: "jam-synth", markShown: jamSynth.markShown };
   return null;
 }
 
