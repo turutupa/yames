@@ -262,7 +262,7 @@ export const SHOTS: Shot[] = [
     // A jam in 7/8: the meter control, and the sentence saying the groove
     // does not fit it so the drummer plays the rule. Both are inside MORE
     // now, which is where a thing true of one jam in twenty belongs.
-    jam: { row: 0, sheet: "setup", more: true, meter: "7/8" },
+    jam: { row: 0, sheet: "setup", more: true, meter: "7/8", scrollTo: ".jam-more-body" },
     width: 1400,
     height: 900,
     settleMs: 400,
@@ -314,7 +314,7 @@ export const SHOTS: Shot[] = [
     // The shelf inside MORE: three takes of the slow blues. The section is
     // the only place in the app that keeps a file, so the picture has to show
     // what that looks like rather than an empty heading.
-    jam: { row: 0, sheet: "setup", more: true },
+    jam: { row: 0, sheet: "setup", more: true, scrollTo: ".jam-takes" },
     width: 1400,
     height: 900,
     settleMs: 400,

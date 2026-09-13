@@ -267,11 +267,14 @@ export function ChordSheet({
                 <span className="jam-chord-shape-label">
                   {t(`jam.chords.size${sizeKey(shape.size)}`)}
                 </span>
-                <span className="jam-chord-shape-fret">
-                  {shape.position === 0
-                    ? t("jam.chords.sizeOpen")
-                    : t("jam.chords.fret", { fret: shape.position })}
-                </span>
+                {/* Where it sits, for the shapes that have somewhere to sit.
+                    An open shape is at the nut by definition, and a label
+                    reading "open · open" says nothing twice. */}
+                {shape.position > 0 && (
+                  <span className="jam-chord-shape-fret">
+                    {t("jam.chords.fret", { fret: shape.position })}
+                  </span>
+                )}
               </button>
             ))}
           </div>

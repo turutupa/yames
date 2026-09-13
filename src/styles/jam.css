@@ -1540,8 +1540,16 @@
   gap: 16px;
 }
 
-.jam-sheet-row .jam-segmented {
+.jam-sheet-row .jam-segmented,
+.jam-chord-switches .jam-segmented {
   margin-left: 0;
+}
+
+/* A link on a group head sits against the right edge, whether or not the
+   group has a lead sentence to take the slack for it. */
+.jam-sheet-group-head .jam-link,
+.jam-sheet-group-head .transport-switch {
+  margin-left: auto;
 }
 
 .jam-sheet-note {
@@ -1844,6 +1852,11 @@
 
 .jam-player-volume input[type="range"] {
   width: 96px;
+  /* The stage's slider, not the browser's: a range left unstyled comes out in
+     the OS accent colour, which is the one colour on this screen that is not
+     the theme's. */
+  accent-color: var(--accent);
+  cursor: pointer;
 }
 
 /* ── MORE, collapsed (A3) ──────────────────────────────────────────────── */
@@ -1934,6 +1947,12 @@
 }
 
 .jam-chord-switches .jam-switch {
+  margin-left: 0;
+}
+
+/* The fretboard switch opens its own section, so it leads the row rather
+   than being pushed to the far side of an empty one. */
+.jam-chord-neck .jam-sheet-group-head .transport-switch {
   margin-left: 0;
 }
 
