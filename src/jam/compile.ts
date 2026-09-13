@@ -31,6 +31,7 @@ import { parseKey } from "./harmony";
 import { chordsForJam } from "./progression";
 import { keysLineFor } from "./keysline";
 import { practiceConfigFrom } from "./practice";
+import { applyIntensity } from "./vibesContract";
 import { JAM_INTENSITY_GAIN, JAM_LANES } from "./types";
 import type { Key } from "./harmony";
 import type {
@@ -264,7 +265,20 @@ export function jamMix(jam: Jam): JamMix {
 }
 
 export function compileJam(jam: Jam, options: JamCompileOptions = {}): JamEngineConfig {
-  const groove = jamGroove(jam);
+  /**
+   * The groove as it will be PLAYED — intensity shaping included.
+   *
+   * Loud used to be a gain and nothing else, so a drummer told to play loud
+   * played the same ghost notes 25% louder (JAM_UX_DECISIONS B5). It is a
+   * pattern now: ghosts go, the hats open on the off-beats, a crash lands on
+   * the section starts, and the reverse for Soft. The gain still travels in
+   * `intensity` below, because the two together are what "loud" means.
+   *
+   * Applied here and not in `jamGroove`, deliberately: the bass line and the
+   * meter are worked out from the groove as WRITTEN, and a hat that opened
+   * must not move a bass note or re-bar the tune.
+   */
+  const groove = applyIntensity(jamGroove(jam), jam.intensity);
   // Muting the drummer is not the same as removing them: the table still has
   // to be the right width, because the engine checks it against the bar it
   // already runs. A silent drummer is every cell at zero.
@@ -297,6 +311,16 @@ export function compileJam(jam: Jam, options: JamCompileOptions = {}): JamEngine
     // what a drummer does; the beep is the drill's, and it is what you want
     // when the kit is what you are trying to hear.
     countInSound: jam.countInSound === "sticks" ? "sticks" : "beep",
+    // Which recipe the bass and the keys are synthesised from (B9). Absent on
+    // the record means the engine's own default, which is what every jam
+    // saved before the voices existed wants.
+    ...(jam.bassVoice ? { bassVoice: jam.bassVoice } : {}),
+    ...(jam.keysVoice ? { keysVoice: jam.keysVoice } : {}),
+    // A folder of your own samples (B3). Only the path travels: the NAME is
+    // for the dropdown to draw and means nothing to the audio thread, and the
+    // engine falls back to the built-in kit named above for any voice the
+    // folder does not hold.
+    ...(jam.customKit?.dir ? { customKit: { dir: jam.customKit.dir } } : {}),
   };
 }
 
