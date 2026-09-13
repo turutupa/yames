@@ -51,11 +51,16 @@ export const VIBE_IDS = [
 export type VibeId = (typeof VIBE_IDS)[number];
 
 /**
- * Every variation id any vibe may offer, across all eight (A9).
+ * Every variation id any vibe offers, across all nine (A9).
  *
  * The same contract as `VIBE_IDS` and for the same reason — `jam.variation.<id>`
  * exists in all fifteen locales for each of these. Several vibes share one:
  * "ballad" is a rock variation and a jazz one, and it is the same word.
+ *
+ * Every id here is one the data actually uses, and `vibesContract.test.ts`
+ * checks both directions: a variation with no id here would draw as its own
+ * id, and an id here that no vibe offers is a word fifteen translators were
+ * asked for and nobody will ever read.
  */
 export const VARIATION_IDS = [
   "classic",
@@ -64,7 +69,6 @@ export const VARIATION_IDS = [
   "alt",
   "ballad",
   "halfTime",
-  "driving",
   "stomp",
   "doubleKick",
   "shuffle",
@@ -77,11 +81,7 @@ export const VARIATION_IDS = [
   "bossa",
   "upTempo",
   "samba",
-  "rumba",
-  "songo",
-  "eighths",
   "thrash",
-  "midTempo",
   "openHats",
   "driving16ths",
   "bossaJazz",

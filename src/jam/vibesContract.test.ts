@@ -10,7 +10,10 @@
  * plays the groove as written rather than something half-shaped.
  */
 import { describe, expect, it } from "vitest";
+import fs from "node:fs";
+import path from "node:path";
 import { VARIATION_IDS, VIBES, VIBE_IDS, applyIntensity, applyVibe } from "./vibesContract";
+import { GROOVES } from "./grooves";
 import type { ShapedGroove, Vibe } from "./vibesContract";
 import { createJam } from "./jams";
 import type { Jam } from "./types";
@@ -215,6 +218,55 @@ describe("the ids the locale files carry", () => {
 
   it("names every variation once", () => {
     expect(new Set(VARIATION_IDS).size).toBe(VARIATION_IDS.length);
+  });
+
+  /**
+   * The gate this list exists for, and it was never run.
+   *
+   * An id with no key draws as its own id — "halfTimeStomp" on a chip, in
+   * every language — and a key with no id is a word fifteen translators were
+   * asked for that nobody will ever read. English is the file that decides:
+   * `src/test/i18n.locales.test.ts` already holds the other fourteen to
+   * exactly its key set, so a key here is a key everywhere.
+   */
+  const english = JSON.parse(
+    fs.readFileSync(path.resolve(process.cwd(), "src/locales/en/jam.json"), "utf8"),
+  ).jam as Record<string, Record<string, unknown>>;
+
+  it("has a name for every vibe, variation and groove", () => {
+    for (const id of VIBE_IDS) expect(english.vibe[id], `jam.vibe.${id}`).toBeTypeOf("string");
+    for (const id of VARIATION_IDS) {
+      expect(english.variation[id], `jam.variation.${id}`).toBeTypeOf("string");
+    }
+    for (const groove of GROOVES) {
+      expect(english.groove[groove.id], `jam.groove.${groove.id}`).toBeTypeOf("string");
+    }
+  });
+
+  it("carries no name for a vibe, variation or groove that is gone", () => {
+    // The keys under these three groups are all ids but for the handful the
+    // screens use for their own labels; anything else is a leftover.
+    const spare: Record<string, readonly string[]> = {
+      vibe: ["label", "lead", "startedFrom", "unavailable"],
+      variation: ["label", "lead", "aria", "count", "count_one", "count_other", "yours", "yoursEmpty"],
+      groove: ["label", "rule"],
+    };
+    const known: Record<string, readonly string[]> = {
+      vibe: VIBE_IDS,
+      variation: VARIATION_IDS,
+      groove: GROOVES.map((g) => g.id),
+    };
+    for (const group of ["vibe", "variation", "groove"]) {
+      const strays = Object.keys(english[group]).filter(
+        (key) => !spare[group].includes(key) && !known[group].includes(key),
+      );
+      expect(strays, group).toEqual([]);
+    }
+  });
+
+  it("offers no variation the data never uses", () => {
+    const used = new Set(VIBES.flatMap((v) => v.variations.map((x) => x.id)));
+    expect([...VARIATION_IDS].filter((id) => !used.has(id))).toEqual([]);
   });
 
   it("ships every vibe the data carries, each with an id the locales know", () => {

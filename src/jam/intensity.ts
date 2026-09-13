@@ -117,7 +117,9 @@ function loud(pattern: JamPattern, meter: IntensityMeter): JamPattern {
   }
   const already = out.hatOpen;
   const open: JamLevel[] = new Array<JamLevel>(out.hat.length).fill(0);
-  if (already) for (let t = 0; t < already.length && t < open.length; t += 1) open[t] = already[t];
+  if (already) {
+    for (let t = 0; t < already.length && t < open.length; t += 1) open[t] = already[t];
+  }
   let opened = already !== undefined;
   for (let t = 0; t < out.hat.length; t += 1) {
     if (out.hat[t] === 0 || !isOffBeat(t, meter.ticksPerBeat)) continue;
