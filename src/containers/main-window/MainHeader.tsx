@@ -355,6 +355,10 @@ export function MainHeader({
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
+      // Claimed, so the window's own Escape doors stand aside. Without this
+      // one press shut the menu AND closed the jam or the setlist behind it,
+      // which is a long way from what "never mind" asked for.
+      e.preventDefault();
       setMoreOpen(false);
       setAddToSetlistOpen(false);
     };

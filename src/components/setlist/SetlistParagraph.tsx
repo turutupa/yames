@@ -121,7 +121,11 @@ export function SetlistParagraph({
       setPickingJam(false);
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setPickingJam(false);
+      if (e.key !== "Escape") return;
+      // Claimed, so the window's own Escape door stands aside: one press used
+      // to shut this picker and close the whole setlist behind it.
+      e.preventDefault();
+      setPickingJam(false);
     };
     document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
