@@ -337,7 +337,7 @@ const KIT_WAVS: [[&[u8]; KIT_VOICES]; KIT_COUNT] = [
 /// not quite enough of it. A downbeat you have to listen for is not a
 /// downbeat. 0.65 puts the difference at 3 to 4 dB, which is where an accent
 /// reads without shouting.
-const BEAT_GAIN: f32 = 0.65;
+pub(crate) const BEAT_GAIN: f32 = 0.65;
 
 /// Subdivisions, quieter again. Kept at the same ratio to `BEAT_GAIN` it had
 /// at 0.75/0.35, so lifting the accent does not also raise the ticks between
@@ -642,6 +642,113 @@ fn bass_note(midi: u8, sr: u32) -> Vec<f32> {
     out
 }
 
+// ---------------------------------------------------------------------------
+// The keys — a synthesised bank, one buffer per semitone
+// ---------------------------------------------------------------------------
+
+/// C3, the bottom of the comping range. Mirrors the range `JamKeysLine`
+/// promises in `src/jam/types.ts`: a voicing is four MIDI notes in 48..=84.
+pub const KEYS_MIN_MIDI: u8 = 48;
+/// C6. Above this a comping voice stops being harmony and starts being a
+/// melody competing with the one you are playing.
+pub const KEYS_MAX_MIDI: u8 = 84;
+/// Thirty-seven semitones, C3 to C6 inclusive — three octaves.
+pub const KEYS_NOTES: usize = (KEYS_MAX_MIDI - KEYS_MIN_MIDI + 1) as usize;
+
+/// Concert pitch, the same A the bass is tuned to.
+const KEYS_TUNING_HZ: f64 = 440.0;
+/// How long one note's buffer is. The cap in the table usually cuts it
+/// shorter (a voicing rings until the next one or the bar line); this is the
+/// longest a note can ring.
+const KEYS_NOTE_SECS: f64 = 0.70;
+/// The exponential the body decays on. `KEYS_NOTE_SECS / 3` puts the note
+/// 26 dB down by the time the buffer ends, where the release taper takes
+/// over — the same shape the bass uses, three times longer.
+const KEYS_DECAY_TAU: f64 = KEYS_NOTE_SECS / 3.0;
+/// A raised-cosine fade-in. Three milliseconds is the attack an electric
+/// piano has: enough to be a struck note rather than an organ stop, short
+/// enough that the chord still lands on the tick.
+const KEYS_ATTACK_SECS: f64 = 0.003;
+/// A touch of second and third harmonic, which is what stops the voice being
+/// a sine. Both stay well under 0.5 so they cannot move a zero crossing and
+/// the tuning stays measurable — see `the_keys_bank_is_in_tune`.
+const KEYS_SECOND_HARMONIC: f64 = 0.30;
+const KEYS_THIRD_HARMONIC: f64 = 0.15;
+/// The harmonics die faster than the fundamental, which is the whole
+/// character of a struck string: bright for a moment, then a tone. Halves
+/// and thirds of the body's own decay.
+const KEYS_SECOND_TAU: f64 = KEYS_DECAY_TAU / 2.0;
+const KEYS_THIRD_TAU: f64 = KEYS_DECAY_TAU / 3.0;
+/// The last fifth of the buffer is taken to true zero with a raised cosine.
+/// Rule 6 of `src-tauri/sounds/KITS.md`, and the same reason the bass has
+/// one: land the decay on zero, do not cut it there.
+const KEYS_RELEASE_FRACTION: f64 = 0.2;
+/// Every note is normalised to this — the ceiling the kit files and the bass
+/// hold. The files carry timbre, the engine carries balance: what keeps the
+/// keys UNDER the band is `KEYS_TRIM` in `jam.rs`, not a quiet bank.
+const KEYS_PEAK: f32 = 0.9;
+
+/// One note of the comping voice, synthesised.
+///
+/// A soft electric-piano-ish tone: a sine fundamental with a touch of second
+/// and third harmonic that decay faster than it does, a three-millisecond
+/// attack and a ~700 ms exponential tail. It exists to put harmony under
+/// what you are playing, so it is deliberately plain — no bell partials, no
+/// tremolo, nothing that would pull an ear off the neck.
+///
+/// Like the bass, every component is a sine of an integer multiple of the
+/// fundamental's phase, so every one of them is zero where the fundamental
+/// is and the buffer's zero crossings sit exactly on the period. That is
+/// what makes the tuning measurable rather than asserted.
+///
+/// Runs once per note when the bank is built — never on the audio thread.
+fn keys_note(midi: u8, sr: u32) -> Vec<f32> {
+    let sr_f = sr as f64;
+    let freq = KEYS_TUNING_HZ * 2f64.powf((midi as f64 - 69.0) / 12.0);
+    let len = (KEYS_NOTE_SECS * sr_f) as usize;
+    if len == 0 || freq <= 0.0 {
+        return Vec::new();
+    }
+    let w = 2.0 * std::f64::consts::PI * freq / sr_f;
+    let attack = (KEYS_ATTACK_SECS * sr_f).max(1.0);
+    let release_from = (len as f64 * (1.0 - KEYS_RELEASE_FRACTION)) as usize;
+    // The third harmonic of the top note is 3.1 kHz, so nothing here is ever
+    // near Nyquist at any rate a device hands out. Guarded anyway: a bank
+    // built at some future 8 kHz rate should lose the partial, not alias it.
+    let nyquist = sr_f * 0.45;
+
+    let mut out = vec![0.0f32; len];
+    for (i, s) in out.iter_mut().enumerate() {
+        let t = i as f64 / sr_f;
+        let phase = w * i as f64;
+        let mut v = phase.sin() * (-t / KEYS_DECAY_TAU).exp();
+        if freq * 2.0 < nyquist {
+            v += KEYS_SECOND_HARMONIC * (2.0 * phase).sin() * (-t / KEYS_SECOND_TAU).exp();
+        }
+        if freq * 3.0 < nyquist {
+            v += KEYS_THIRD_HARMONIC * (3.0 * phase).sin() * (-t / KEYS_THIRD_TAU).exp();
+        }
+        let mut env = 1.0;
+        if (i as f64) < attack {
+            let x = i as f64 / attack;
+            env *= 0.5 - 0.5 * (std::f64::consts::PI * x).cos();
+        }
+        if i >= release_from && len > release_from {
+            let x = (i - release_from) as f64 / (len - release_from) as f64;
+            env *= 0.5 + 0.5 * (std::f64::consts::PI * x).cos();
+        }
+        *s = (v * env) as f32;
+    }
+    let peak = out.iter().fold(0.0f32, |m, s| m.max(s.abs()));
+    if peak > 0.0 {
+        let g = KEYS_PEAK / peak;
+        for s in out.iter_mut() {
+            *s *= g;
+        }
+    }
+    out
+}
+
 /// Public for `jam.rs`: a jam table is compiled off the audio thread and
 /// stores the sound each drum plays, so the identifier travels with the
 /// table — including out through the `probe` facade, which is what makes
@@ -674,6 +781,10 @@ pub enum SoundId {
     /// range reads as silence rather than a panic; `jam.rs` has already
     /// rejected any pitch that could get here.
     Bass(u8),
+    /// Jam: one note of the comping keys, indexed `midi − KEYS_MIN_MIDI`. A
+    /// voicing spawns one of these per note. Out of range reads as silence,
+    /// for the same reason the bass does.
+    Keys(u8),
 }
 
 struct SoundBank {
@@ -697,6 +808,8 @@ struct SoundBank {
     kits: [[Vec<f32>; KIT_VOICES]; KIT_COUNT],
     /// The bass, one buffer per semitone from [`BASS_MIN_MIDI`] up.
     bass: Vec<Vec<f32>>,
+    /// The comping keys, one buffer per semitone from [`KEYS_MIN_MIDI`] up.
+    keys: Vec<Vec<f32>>,
 }
 
 impl SoundBank {
@@ -831,9 +944,18 @@ impl SoundBank {
             .collect();
         debug_assert_eq!(bass.len(), BASS_NOTES, "the bass bank is E1 to G3");
 
+        // And whoever is on the keys. Synthesised for the same reasons, and
+        // three octaves rather than the bass's two and a bit, because a
+        // voicing is four notes that have to fit between the bass and you.
+        let keys: Vec<Vec<f32>> = (KEYS_MIN_MIDI..=KEYS_MAX_MIDI)
+            .map(|midi| keys_note(midi, sr))
+            .collect();
+        debug_assert_eq!(keys.len(), KEYS_NOTES, "the keys bank is C3 to C6");
+
         Self {
             kits,
             bass,
+            keys,
             drum_metal,
             drum_crash,
             click_high: decode_wav(CLICK_HIGH, sr),
@@ -877,6 +999,7 @@ impl SoundBank {
             // A bounds check, not a decision: an out-of-range note is
             // silence on the audio thread rather than a panic in it.
             SoundId::Bass(i) => self.bass.get(i as usize).map_or(&[][..], |v| &v[..]),
+            SoundId::Keys(i) => self.keys.get(i as usize).map_or(&[][..], |v| &v[..]),
         }
     }
 }
@@ -1387,6 +1510,20 @@ struct CachedParams {
     /// Set on the buffer that picked up a new table (or dropped one), so the
     /// tick loop can put the form back to bar 0 / chorus 1.
     jam_changed: bool,
+    /// What the count-in beats play: `None` is the beep the drill has always
+    /// used, `Some(slot)` is the kit's sticks. Read off the table WHENEVER
+    /// THE TABLE CHANGES and never per tick — that is the whole reason it is
+    /// a field here rather than a call into `cached.jam` in the tick loop.
+    count_in_slot: Option<crate::jam::JamSlot>,
+}
+
+/// The count-in sound a table asks for, or the beep when there is no table.
+///
+/// One line, called at each of the (three) places `cached.jam` is assigned,
+/// so the decision is made when the table changes and nowhere else.
+#[inline]
+fn count_in_slot_of(table: Option<&JamTable>) -> Option<crate::jam::JamSlot> {
+    table.and_then(|t| t.count_in_slot())
 }
 
 /// Should this tick be played as an accent (the "high" sound)?
@@ -2596,6 +2733,7 @@ impl MetronomeEngine {
                 jam_pending: None,
                 jam_position: JamPosition::default(),
                 jam_position_generation: 0,
+                count_in_slot: None,
             };
 
             // ---- Build output stream ----
@@ -2710,6 +2848,8 @@ impl MetronomeEngine {
                                 }
                                 cached.jam = incoming;
                                 cached.jam_changed = true;
+                                cached.count_in_slot =
+                                    count_in_slot_of(cached.jam.as_deref());
                             }
                         }
                     }
@@ -2745,6 +2885,7 @@ impl MetronomeEngine {
                             }
                             cached.jam = Some(p);
                             cached.jam_changed = true;
+                            cached.count_in_slot = count_in_slot_of(cached.jam.as_deref());
                         }
                         for s in data.iter_mut() {
                             *s = 0.0;
@@ -3044,11 +3185,47 @@ impl MetronomeEngine {
                                         max_samples: 0,
                                     });
                                 }
+                            } else if cached.ramp_warming_up && !is_last_warmup {
+                                // The count-in. Which sound it makes was
+                                // decided when the table arrived, not here:
+                                // `count_in_slot` is `None` for the beep the
+                                // drill has always used and `Some` for the
+                                // loaded kit's sticks.
+                                //
+                                // Sticks are a drummer counting, so they land
+                                // ON THE BEATS and nowhere else. The beep
+                                // keeps every tick it has always had — the
+                                // drill's count-in is not this task's to
+                                // change, and a jam that has not asked for
+                                // sticks must sound exactly as it did.
+                                match cached.count_in_slot {
+                                    Some(slot) if is_downbeat => {
+                                        if voices.len() < MAX_VOICES {
+                                            voices.push(Voice {
+                                                sound_id: slot.sound,
+                                                position: 0,
+                                                amplitude: slot.gain * cached.volume,
+                                                max_samples: 0,
+                                            });
+                                        }
+                                    }
+                                    // A sticks count-in is silent between the
+                                    // beats: four clicks, not sixteen.
+                                    Some(_) => {}
+                                    None => {
+                                        if voices.len() < MAX_VOICES {
+                                            voices.push(Voice {
+                                                sound_id: SoundId::BeepHigh,
+                                                position: 0,
+                                                amplitude: 0.6 * cached.volume,
+                                                max_samples: cap_samples,
+                                            });
+                                        }
+                                    }
+                                }
                             } else {
-                                // Regular / warmup / subdivision
-                                let (sid, amp) = if cached.ramp_warming_up && !is_last_warmup {
-                                    (SoundId::BeepHigh, 0.6)
-                                } else if is_downbeat {
+                                // Regular / subdivision
+                                let (sid, amp) = if is_downbeat {
                                     (cached.kit.low_id(), BEAT_GAIN)
                                 } else {
                                     (cached.kit.low_id(), SUB_GAIN)
@@ -3117,6 +3294,8 @@ impl MetronomeEngine {
                                         jam_retire.retire(&jam_shared, old);
                                     }
                                     cached.jam = Some(p);
+                                    cached.count_in_slot =
+                                        count_in_slot_of(cached.jam.as_deref());
                                 }
                                 // Then where the form goes: a jump the
                                 // musician asked for, otherwise the next
@@ -4798,6 +4977,9 @@ mod tests {
             bass: None,
             practice: None,
             fill_every: None,
+            keys: None,
+            mix: None,
+            count_in_sound: None,
         }
     }
 
@@ -5437,6 +5619,29 @@ mod tests {
             }),
             practice: None,
             fill_every: None,
+            // And a comping voice over the top of all of it: a four-note
+            // chord on every eighth is nobody's piano part, it is the
+            // maximum the table can ask the mixer for on the one lane that
+            // SUSTAINS. The drums are transients that get out of each
+            // other's way; four notes ringing for 700 ms do not.
+            keys: Some(crate::jam::JamKeysLine {
+                voicings: (0..16)
+                    .map(|t| {
+                        if t % 2 == 0 {
+                            vec![55, 60, 64, 67]
+                        } else {
+                            Vec::new()
+                        }
+                    })
+                    .collect(),
+                gain: 1.5,
+            }),
+            mix: Some(crate::jam::JamMix {
+                drums: 1.5,
+                bass: 1.5,
+                keys: 1.5,
+            }),
+            count_in_sound: None,
         }
     }
 
@@ -5531,6 +5736,9 @@ mod tests {
             bass: None,
             practice: None,
             fill_every: None,
+            keys: None,
+            mix: None,
+            count_in_sound: None,
         };
         let table = compile_jam(&cfg).unwrap();
         for bpm in [40.0f64, 120.0, 300.0] {
@@ -5835,6 +6043,301 @@ mod tests {
             bass_low > snare_low * 2.0,
             "the bass has {bass_low:.2} of its energy under 150 Hz and the snare \
              {snare_low:.2}; that is not a bass sitting under a drum kit"
+        );
+    }
+
+    // -----------------------------------------------------------------
+    // The keys
+    // -----------------------------------------------------------------
+
+    /// A jam with a comping voice: one four-note voicing per half bar,
+    /// nothing but a snare accent on the backbeat to measure it against.
+    ///
+    /// The voicings are Am7 and D7 around middle C, which is where a pianist
+    /// comps behind a soloist rather than on top of one.
+    fn comping(gain: f32) -> JamConfig {
+        let mut v: Vec<Vec<u8>> = vec![Vec::new(); 16];
+        v[0] = vec![57, 60, 64, 67]; // Am7
+        v[8] = vec![50, 54, 57, 60]; // D7
+        JamConfig {
+            ticks_per_beat: 4,
+            beats_per_bar: 4,
+            bar: JamPattern {
+                kick: vec![0; 16],
+                snare: vec![0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                hat: vec![0; 16],
+                ride: vec![0; 16],
+                crash: vec![0; 16],
+            },
+            fill: None,
+            form_bars: 4,
+            crash_on_one: false,
+            intensity: 1.0,
+            kit: "room".to_string(),
+            bass: None,
+            practice: None,
+            fill_every: None,
+            keys: Some(crate::jam::JamKeysLine { voicings: v, gain }),
+            mix: None,
+            count_in_sound: None,
+        }
+    }
+
+    /// Every keys slot on a tick of a compiled table.
+    fn keys_on(table: &JamTable, tick: u32) -> Vec<crate::jam::JamSlot> {
+        table
+            .tick(tick, 0)
+            .expect("in the bar")
+            .slots()
+            .iter()
+            .filter(|s| s.lane == crate::jam::JamLane::Keys)
+            .copied()
+            .collect()
+    }
+
+    /// THE KEYS HAVE TO BE IN TUNE, FOR THE REASON THE BASS DOES.
+    ///
+    /// Worse, in fact: a bass a few cents out is a wobble under the band, a
+    /// comping chord a few cents out is four wrong notes at once against the
+    /// one you are fretting. Measured the same way and held to the same
+    /// cent, and for the same reason it CAN be measured that way — every
+    /// component of a keys note is `sin(n·φ)`, so the zero crossings sit on
+    /// the fundamental's period whatever the harmonics are doing.
+    #[test]
+    fn the_keys_bank_is_in_tune() {
+        for sr in [44100u32, 48000] {
+            let bank = SoundBank::new(sr);
+            for i in 0..KEYS_NOTES {
+                let midi = KEYS_MIN_MIDI + i as u8;
+                let buf = bank.get(SoundId::Keys(i as u8));
+                assert!(!buf.is_empty(), "MIDI {midi} is silent");
+
+                let want = 440.0 * 2f64.powf((midi as f64 - 69.0) / 12.0);
+                let got = fundamental_hz(buf, sr);
+                let cents = 1200.0 * (got / want).log2();
+                assert!(
+                    cents.abs() < 1.0,
+                    "MIDI {midi} at {sr} Hz came out {got:.4} Hz against {want:.4} — \
+                     {cents:.3} cents off"
+                );
+            }
+        }
+    }
+
+    /// Thirty-seven notes, C3 to C6, none clipping, none a whisper, each one
+    /// starting from silence and landing on it.
+    #[test]
+    fn the_keys_bank_is_thirty_seven_notes_that_ring() {
+        let sr = 48000;
+        let bank = SoundBank::new(sr);
+        assert_eq!(KEYS_NOTES, 37, "C3 to C6 inclusive is thirty-seven notes");
+        let want_len = (KEYS_NOTE_SECS * sr as f64) as usize;
+        for i in 0..KEYS_NOTES {
+            let midi = KEYS_MIN_MIDI + i as u8;
+            let buf = bank.get(SoundId::Keys(i as u8));
+            let peak = buf.iter().fold(0.0f32, |m, s| m.max(s.abs()));
+            assert!(
+                (peak - KEYS_PEAK).abs() < 1e-4,
+                "MIDI {midi} peaks at {peak}, and the bank normalises every note \
+                 to {KEYS_PEAK}"
+            );
+            assert_eq!(buf.len(), want_len, "MIDI {midi} is the wrong length");
+            // Rule 6 of KITS.md: land the decay on zero, do not cut it there.
+            assert!(
+                buf[buf.len() - 1].abs() < 1e-6,
+                "MIDI {midi} ends at {}, which is a click",
+                buf[buf.len() - 1]
+            );
+            // And three milliseconds of attack at the front, for the same
+            // reason at the other end.
+            assert!(
+                buf[0].abs() < 1e-3,
+                "MIDI {midi} starts at {}, which is the click the attack exists \
+                 to prevent",
+                buf[0]
+            );
+        }
+        // A bank that had slipped an octave would still be in tune and still
+        // be the wrong instrument.
+        let bottom = 440.0 * 2f64.powf((KEYS_MIN_MIDI as f64 - 69.0) / 12.0);
+        assert!(
+            (130.0..131.5).contains(&bottom),
+            "the bottom note is {bottom:.2} Hz, and C3 is 130.81"
+        );
+    }
+
+    /// THE KEYS SIT UNDER THE BAND, OR THEY ARE NOT COMPING.
+    ///
+    /// A four-note voicing sustained across half a bar against ONE snare
+    /// transient is a fight the chord wins on energy alone unless the engine
+    /// holds it down — and a comping voice that wins that fight has stopped
+    /// being accompaniment. `KEYS_TRIM` in `jam.rs` is the number that holds
+    /// it down; this is what says the number still does.
+    ///
+    /// Measured through the same 200 Hz-4 kHz band-pass every other level
+    /// claim in this file uses — a laptop speaker, which is what most of
+    /// this gets played on — and over the SAME window for both, one beat at
+    /// 120 BPM. A common window is the honest comparison: measuring each
+    /// sound over its own length would reward the snare for being short.
+    ///
+    /// The floor is the 6 dB `plans/tasks/jam/W14-ENGINE-KEYS-TAKES.md`
+    /// asks for, not today's margin, so the trim can be nudged by ear
+    /// without this test having to move.
+    #[test]
+    fn the_keys_sit_under_the_snare_on_a_small_speaker() {
+        let sr = 48000u32;
+        let bank = SoundBank::new(sr);
+        let table = compile_jam(&comping(1.0)).unwrap();
+        // 120 BPM sixteenths: a tick is 125 ms, a beat is 500 ms.
+        let tick_samples = (sr as f64 * 60.0 / 120.0 / 4.0) as usize;
+        let window = tick_samples * 4;
+
+        // One sound, or a chord of them, rendered on its own into a window
+        // of one beat, with the callback's own cap arithmetic.
+        let render = |slots: &[crate::jam::JamSlot]| -> Vec<f32> {
+            let mut out = vec![0.0f32; window];
+            for slot in slots {
+                let buf = bank.get(slot.sound);
+                let limit = if slot.cap_ticks > 0.0 {
+                    ((tick_samples as f32 * slot.cap_ticks) as usize).min(buf.len())
+                } else {
+                    buf.len()
+                };
+                for (o, v) in out.iter_mut().zip(buf.iter().take(limit)) {
+                    *o += v * slot.gain;
+                }
+            }
+            out
+        };
+
+        let keys = keys_on(&table, 0);
+        assert_eq!(keys.len(), 4, "the voicing should be four notes");
+        let snare: Vec<crate::jam::JamSlot> = table
+            .tick(4, 0)
+            .expect("tick 4")
+            .slots()
+            .iter()
+            .filter(|s| s.lane == crate::jam::JamLane::Snare)
+            .copied()
+            .collect();
+        assert_eq!(snare.len(), 1, "the backbeat should be one snare");
+
+        let k = laptop_band_energy(&render(&keys), sr);
+        let s = laptop_band_energy(&render(&snare), sr);
+        let db = 10.0 * (k / s.max(1e-30)).log10();
+        eprintln!("[keys] a four-note voicing measures {db:.2} dB against the snare accent");
+        assert!(
+            db <= -6.0,
+            "a four-note voicing is {db:.2} dB against the snare accent through a \
+             200 Hz-4 kHz band-pass; comping has to sit at least 6 dB under the \
+             band, and this is on top of it"
+        );
+        // And not so far under that the harmony is a rumour.
+        assert!(
+            db > -30.0,
+            "a four-note voicing is {db:.2} dB against the snare accent, which is \
+             harmony nobody will hear"
+        );
+    }
+
+    /// A VOICING RINGS UNTIL THE NEXT ONE, AND STOPS AT THE BAR LINE.
+    ///
+    /// The bass's rule applied to a chord, and it matters more here: four
+    /// notes smeared into the next chord is not a sustain, it is a wrong
+    /// chord.
+    #[test]
+    fn a_voicing_rings_until_the_next_chord_and_no_further() {
+        let table = compile_jam(&comping(1.0)).unwrap();
+        // Am7 on tick 0 runs to the D7 on tick 8, and no further.
+        let first = keys_on(&table, 0);
+        assert_eq!(first.len(), 4);
+        for s in &first {
+            assert_eq!(s.cap_ticks, 8.0, "the first chord should stop at the next");
+        }
+        // D7 on tick 8 runs to the bar line at tick 16.
+        let second = keys_on(&table, 8);
+        assert_eq!(second.len(), 4);
+        for s in &second {
+            assert_eq!(
+                s.cap_ticks, 8.0,
+                "the last chord should stop at the bar line"
+            );
+        }
+        // And nothing at all on the ticks between.
+        for t in [1u32, 4, 7, 9, 15] {
+            assert!(
+                keys_on(&table, t).is_empty(),
+                "tick {t} should be a rest for the keys"
+            );
+        }
+    }
+
+    /// THE COMPING PLAYS THROUGH THE FILL.
+    ///
+    /// The drummer fills; the band does not stop playing the changes. Same
+    /// rule the bass has, checked because the fill is a different table and
+    /// a merge that missed it would be silent for one bar in twelve.
+    #[test]
+    fn the_keys_keep_the_changes_through_a_fill() {
+        let mut cfg = comping(1.0);
+        cfg.fill = Some(JamPattern {
+            kick: vec![1; 16],
+            snare: vec![1; 16],
+            hat: vec![0; 16],
+            ride: vec![0; 16],
+            crash: vec![0; 16],
+        });
+        let table = compile_jam(&cfg).unwrap();
+        // Bar 3 of a four-bar form is the fill bar.
+        let on_fill = table
+            .tick(0, 3)
+            .expect("tick 0 of the fill")
+            .slots()
+            .iter()
+            .filter(|s| s.lane == crate::jam::JamLane::Keys)
+            .count();
+        assert_eq!(
+            on_fill, 4,
+            "the keys should play the chord through the drummer's fill"
+        );
+    }
+
+    /// A trading bar drops the keys with everything else that is not the
+    /// hat. Your four bars are yours; a chord under them is the band still
+    /// playing.
+    #[test]
+    fn your_bars_in_a_trade_have_no_keys_on_them() {
+        let mut cfg = comping(1.0);
+        cfg.bar.hat = vec![1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0];
+        cfg.form_bars = 8;
+        cfg.practice = Some(JamPracticeConfig {
+            drop_out: None,
+            trade: Some(JamTrade {
+                band_bars: 4,
+                you_bars: 4,
+            }),
+        });
+        let table = compile_jam(&cfg).unwrap();
+        assert_eq!(table.band_state(0), JamBandState::Full);
+        assert_eq!(table.band_state(4), JamBandState::HatsOnly);
+        // The table still holds the chord on bar 4 — the callback is what
+        // drops it, by lane, and `JamLane::Keys` is not the hat.
+        let tick = table.tick(0, 4).expect("tick 0 of bar 4");
+        let kept = tick
+            .slots()
+            .iter()
+            .filter(|s| s.lane == crate::jam::JamLane::Hat)
+            .count();
+        let dropped = tick
+            .slots()
+            .iter()
+            .filter(|s| s.lane == crate::jam::JamLane::Keys)
+            .count();
+        assert_eq!(kept, 1, "the hat keeps the time on your bars");
+        assert_eq!(
+            dropped, 4,
+            "the chord is in the table and the callback's lane filter is what \
+             takes it off"
         );
     }
 

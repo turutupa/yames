@@ -516,6 +516,9 @@ fn busiest_jam() -> JamConfig {
         // without them: the busiest case is the band playing every bar.
         practice: None,
         fill_every: None,
+        keys: None,
+        mix: None,
+        count_in_sound: None,
     }
 }
 

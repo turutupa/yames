@@ -26,6 +26,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::engine::{
     jam_reference_sample, JamKit, KitVoice, SoundId, BASS_MAX_MIDI, BASS_MIN_MIDI, JAM_REFERENCE_SR,
+    KEYS_MAX_MIDI, KEYS_MIN_MIDI,
 };
 
 // ---------------------------------------------------------------------------
@@ -35,10 +36,15 @@ use crate::engine::{
 /// The lanes a `JamPattern` carries: kick, snare, hat, ride, crash.
 pub const JAM_PATTERN_LANES: usize = 5;
 
-/// Five drums and the bass. The array on every tick is this wide, so a tick
-/// is a fixed-size value the audio thread can read without a bounds surprise
-/// or a heap touch.
-pub const JAM_MAX_SLOTS: usize = JAM_PATTERN_LANES + 1;
+/// The most notes one keys voicing may hold. Four is a seventh chord, which
+/// is as much harmony as a comping voice should put under a soloist; five
+/// would be a pianist showing off.
+pub const JAM_MAX_VOICING: usize = 4;
+
+/// Five drums, the bass, and up to four notes of one keys voicing. The array
+/// on every tick is this wide, so a tick is a fixed-size value the audio
+/// thread can read without a bounds surprise or a heap touch.
+pub const JAM_MAX_SLOTS: usize = JAM_PATTERN_LANES + 1 + JAM_MAX_VOICING;
 
 /// `JAM_MAX_FORM_BARS` in `src/jam/types.ts`.
 pub const JAM_MAX_FORM_BARS: u32 = 64;
@@ -116,6 +122,40 @@ const INTENSITY_MAX: f32 = 1.5;
 const BASS_GAIN_MIN: f32 = 0.5;
 const BASS_GAIN_MAX: f32 = 1.5;
 
+/// `JamKeysLine.gain` bounds from the contract, clamped the same way.
+const KEYS_GAIN_MIN: f32 = 0.5;
+const KEYS_GAIN_MAX: f32 = 1.5;
+
+/// `JamMix` bounds from the contract: 0..1.5 per lane, so a lane can be
+/// taken all the way off. Clamped rather than rejected, like every other
+/// gain here.
+const MIX_MIN: f32 = 0.0;
+const MIX_MAX: f32 = 1.5;
+
+/// The keys, trimmed, so the band stays a band.
+///
+/// Every synthesised bank peaks at 0.9 like the kit files do — the files
+/// carry timbre, the engine carries balance (`src-tauri/sounds/KITS.md`) —
+/// and this is the balance for a comping voice. A voicing is FOUR notes at
+/// once, sustained for most of a bar, against a snare that is one transient:
+/// at the same slot gain the chord is the loudest thing in the room and the
+/// drummer disappears behind it.
+///
+/// The measurement, made by `the_keys_sit_under_the_snare_on_a_small_speaker`
+/// in `engine.rs`: at the bank's own level a four-note voicing comes out
+/// **+4.96 dB against the snare accent** — the chord is the loudest thing in
+/// the bar, and that is with a groove that is nothing but a backbeat. 0.07
+/// is 23 dB off that, which puts the voicing at **−7.7 dB**: past the 6 dB
+/// `plans/tasks/jam/W14-ENGINE-KEYS-TAKES.md` asks for, and still a chord a
+/// player can hear the harmony of rather than a rumour of one.
+///
+/// It is a starting point for ears, not a finished balance. The musician has
+/// `keys.gain` (0.5..1.5) and `mix.keys` (0..1.5) over the top of it, so the
+/// range this trim opens is 0.035 to 0.157 — a bit under half to a bit over
+/// double. The test's floor is the brief's 6 dB and not today's 7.7, so the
+/// trim can move by ear without the test having to.
+const KEYS_TRIM: f32 = 0.07;
+
 /// The fastest the metronome runs: `set_bpm` clamps to 20..=300. With the
 /// contract's `ticksPerBeat` of 6 that is a tick every 33 ms, and a short
 /// tick is what makes voices pile up — see [`worst_bar_peak`].
@@ -188,6 +228,10 @@ pub enum JamLane {
     /// and is merged into the same ticks when the table is compiled, so the
     /// audio thread has one list to walk instead of two.
     Bass,
+    /// Not a row of `JamPattern` either. One note of a keys voicing; a
+    /// voicing puts up to four of these on the same tick, and they carry the
+    /// same lane so a trading bar drops all of them together.
+    Keys,
 }
 
 impl JamLane {
@@ -199,6 +243,7 @@ impl JamLane {
             Self::Ride => "ride",
             Self::Crash => "crash",
             Self::Bass => "bass",
+            Self::Keys => "keys",
         }
     }
 }
@@ -238,6 +283,85 @@ pub struct JamConfig {
     /// only, which is what a fill has always meant here.
     #[serde(default)]
     pub fill_every: Option<u32>,
+    /// The keys, comping. Absent or null: nobody on the keys.
+    #[serde(default)]
+    pub keys: Option<JamKeysLine>,
+    /// Per-lane balance. Absent: 1.0 each, which is the band as the grooves
+    /// were written.
+    #[serde(default)]
+    pub mix: Option<JamMix>,
+    /// What the count-in plays. Absent: the beep the drill uses.
+    #[serde(default)]
+    pub count_in_sound: Option<JamCountInSound>,
+}
+
+/// One voicing per tick, up to four MIDI notes each, an empty array for a
+/// rest. The mirror of `JamKeysLine` in `src/jam/types.ts`.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct JamKeysLine {
+    pub voicings: Vec<Vec<u8>>,
+    /// Gain multiplier on the keys voice, 0.5..1.5.
+    pub gain: f32,
+}
+
+/// Per-lane balance. The mirror of `JamMix` in `src/jam/types.ts`.
+///
+/// Resolved into the slots when the table is compiled, so the audio thread
+/// never reads it — a mix is three multiplications on the command thread,
+/// not three more fields for the callback to look up per tick.
+#[derive(Debug, Clone, Copy, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct JamMix {
+    pub drums: f32,
+    pub bass: f32,
+    pub keys: f32,
+}
+
+impl Default for JamMix {
+    fn default() -> Self {
+        Self {
+            drums: 1.0,
+            bass: 1.0,
+            keys: 1.0,
+        }
+    }
+}
+
+impl JamMix {
+    /// The mix as the compiler will actually use it. Non-finite reads as
+    /// 1.0 — a NaN in a store is a jam that plays, not a silent band.
+    fn clamped(self) -> Self {
+        let one = |v: f32| {
+            if v.is_finite() {
+                v.clamp(MIX_MIN, MIX_MAX)
+            } else {
+                1.0
+            }
+        };
+        Self {
+            drums: one(self.drums),
+            bass: one(self.bass),
+            keys: one(self.keys),
+        }
+    }
+}
+
+/// What the count-in plays. The mirror of `JamCountInSound`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum JamCountInSound {
+    /// The beep the drill counts in with. What a count-in has always been.
+    Beep,
+    /// The kit's rim, played like a drummer clicking sticks: on the beats,
+    /// and nothing in between.
+    Sticks,
+}
+
+impl Default for JamCountInSound {
+    fn default() -> Self {
+        Self::Beep
+    }
 }
 
 /// One MIDI note per tick, `0` for a rest, the same length as the drum
@@ -540,6 +664,10 @@ pub struct JamTable {
     /// modulo arithmetic; the state is constant within a bar either way,
     /// which is what "decided at the bar line" means.
     band_states: Vec<JamBandState>,
+    /// What the count-in plays over this band, decided here rather than per
+    /// tick: `None` is the beep the drill uses, `Some(slot)` is the kit's
+    /// rim at the beat gain. The callback reads one `Copy` field.
+    count_in_slot: Option<JamSlot>,
     /// Which kit the lanes resolved to. Diagnostics and tests only.
     pub kit: JamKit,
     /// Whether any tick of the groove has a hat. A band without one — a
@@ -598,6 +726,17 @@ impl JamTable {
     #[inline]
     pub fn crash_on_one(&self) -> Option<JamSlot> {
         self.crash_on_one
+    }
+
+    /// What the count-in beats play over this band: `None` for the beep the
+    /// drill has always used, `Some(slot)` for the kit's sticks.
+    ///
+    /// Decided when the table is compiled — when the count-in is armed the
+    /// callback reads this once, and it is the same answer for every beat of
+    /// the count. Nothing here is worked out per tick.
+    #[inline]
+    pub fn count_in_slot(&self) -> Option<JamSlot> {
+        self.count_in_slot
     }
 
     /// Does this table have a fill bar?
@@ -808,12 +947,17 @@ fn compile_measured(cfg: &JamConfig, base_peak: Option<f32>) -> Result<JamTable,
     // string and never asks which kit a lane belongs to.
     let kit = JamKit::from_name(&cfg.kit);
 
+    // The balance between the lanes, resolved into the slots below. The
+    // audio thread never sees a mix: it is three multiplications here, on
+    // the command thread, once per jam.
+    let mix = cfg.mix.unwrap_or_default().clamped();
+
     // Compiled at intensity 1.0 and scaled once at the end, so the
     // normalisation below can see the groove's own shape rather than the
     // shape times whatever the musician set the dial to.
-    let mut bar = compile_pattern(&cfg.bar, ticks, kit, "bar")?;
+    let mut bar = compile_pattern(&cfg.bar, ticks, kit, mix.drums, "bar")?;
     let mut fill = match cfg.fill {
-        Some(ref f) => Some(compile_pattern(f, ticks, kit, "fill")?),
+        Some(ref f) => Some(compile_pattern(f, ticks, kit, mix.drums, "fill")?),
         None => None,
     };
 
@@ -821,12 +965,27 @@ fn compile_measured(cfg: &JamConfig, base_peak: Option<f32>) -> Result<JamTable,
     // audio thread to walk — and into the fill as well as the groove: a bass
     // player keeps walking while the drummer plays a fill.
     if let Some(ref line) = cfg.bass {
-        let slots = compile_bass(line, ticks)?;
+        let slots = compile_bass(line, ticks, mix.bass)?;
         for (i, slot) in slots.iter().enumerate() {
             if let Some(s) = *slot {
                 bar[i].push(s);
                 if let Some(ref mut f) = fill {
                     f[i].push(s);
+                }
+            }
+        }
+    }
+
+    // And the keys, into the same ticks and the same fill, for the same
+    // reason: a comping player keeps playing the changes while the drummer
+    // fills. One slot per note of the voicing.
+    if let Some(ref line) = cfg.keys {
+        let slots = compile_keys(line, ticks, mix.keys)?;
+        for (i, voicing) in slots.iter().enumerate() {
+            for s in voicing.iter() {
+                bar[i].push(*s);
+                if let Some(ref mut f) = fill {
+                    f[i].push(*s);
                 }
             }
         }
@@ -845,7 +1004,7 @@ fn compile_measured(cfg: &JamConfig, base_peak: Option<f32>) -> Result<JamTable,
         } else {
             Some(JamSlot {
                 sound: SoundId::Kit(kit, KitVoice::Crash),
-                gain: LEVEL_GAIN[2],
+                gain: LEVEL_GAIN[2] * mix.drums,
                 cap_ticks: 0.0,
                 lane: JamLane::Crash,
                 accent: true,
@@ -917,6 +1076,27 @@ fn compile_measured(cfg: &JamConfig, base_peak: Option<f32>) -> Result<JamTable,
         .map(|b| band_state_for_bar(b, cfg.form_bars, cfg.practice.as_ref()))
         .collect();
 
+    // What the count-in plays over this band. Worked out here so the audio
+    // thread never decides it — not when the count-in is armed, and
+    // certainly not per tick.
+    //
+    // Deliberately outside everything above it: the sticks are not scaled by
+    // the intensity dial, the per-table normalisation or the mix. A count-in
+    // happens before the band and alone, so none of the arithmetic that
+    // keeps four voices out of each other's way applies to it — and a
+    // count-in nobody can hear because the drums were mixed down is a bug,
+    // not a balance.
+    let count_in_slot = match cfg.count_in_sound.unwrap_or_default() {
+        JamCountInSound::Beep => None,
+        JamCountInSound::Sticks => Some(JamSlot {
+            sound: SoundId::Kit(kit, KitVoice::Rim),
+            gain: crate::engine::BEAT_GAIN,
+            cap_ticks: 0.0,
+            lane: JamLane::Snare,
+            accent: false,
+        }),
+    };
+
     let has_hat = bar
         .iter()
         .any(|t| t.slots().iter().any(|s| s.lane == JamLane::Hat));
@@ -928,6 +1108,7 @@ fn compile_measured(cfg: &JamConfig, base_peak: Option<f32>) -> Result<JamTable,
         fill_every,
         crash_on_one: crash,
         band_states,
+        count_in_slot,
         kit,
         has_hat,
         drums_signature: drums_signature(cfg),
@@ -937,15 +1118,16 @@ fn compile_measured(cfg: &JamConfig, base_peak: Option<f32>) -> Result<JamTable,
     })
 }
 
-/// A hash of every field of the config except the bass line.
+/// A hash of every field of the config except the bass line and the keys.
 ///
-/// The UI posts the NEXT bar's bass on the downbeat of the current one
-/// (`useJamSession.ts`, "the half of the handshake the engine has to
-/// match"), so most configs the engine receives while playing differ from
-/// the one it holds only in `bass`. Those must wait for the bar line, or
-/// every bar plays the next bar's bass. A config that changes anything else
-/// — the groove, the kit, the intensity, the form, the practice windows —
-/// is the musician turning a dial, and that applies at once.
+/// The UI posts the NEXT bar's bass and voicings on the downbeat of the
+/// current one (`useJamSession.ts`, "the half of the handshake the engine
+/// has to match"), so most configs the engine receives while playing differ
+/// from the one it holds only in `bass` and `keys`. Those must wait for the
+/// bar line, or every bar plays the next bar's changes. A config that
+/// changes anything else — the groove, the kit, the intensity, the form, the
+/// practice windows, the mix — is the musician turning a dial, and that
+/// applies at once.
 fn drums_signature(cfg: &JamConfig) -> u64 {
     use std::collections::hash_map::DefaultHasher;
     use std::hash::Hasher;
@@ -954,14 +1136,15 @@ fn drums_signature(cfg: &JamConfig) -> u64 {
     h.finish()
 }
 
-/// Everything that decides what four bars of this band RENDER — the drums
-/// and the bass — and nothing that does not.
+/// Everything that decides what four bars of this band RENDER — the drums,
+/// the bass and the keys — and nothing that does not.
 ///
 /// The key [`JamGainCache`] remembers a measurement under. It is deliberately
 /// a different question from [`drums_signature`]: that one asks "is this the
 /// same drummer, so the swap can wait for the bar line?", this one asks "is
-/// this the same sound, so the measurement still holds?". The bass answers
-/// the second and not the first, which is the whole point of having two.
+/// this the same sound, so the measurement still holds?". The bass and the
+/// keys answer the second and not the first, which is the whole point of
+/// having two.
 fn render_signature(cfg: &JamConfig) -> u64 {
     use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
@@ -975,6 +1158,19 @@ fn render_signature(cfg: &JamConfig) -> u64 {
             // two stores holding 2.0 and 3.0 are the same bass at 1.5.
             let gain = if b.gain.is_finite() {
                 b.gain.clamp(BASS_GAIN_MIN, BASS_GAIN_MAX)
+            } else {
+                1.0
+            };
+            gain.to_bits().hash(&mut h);
+        }
+        None => false.hash(&mut h),
+    }
+    match cfg.keys {
+        Some(ref k) => {
+            true.hash(&mut h);
+            k.voicings.hash(&mut h);
+            let gain = if k.gain.is_finite() {
+                k.gain.clamp(KEYS_GAIN_MIN, KEYS_GAIN_MAX)
             } else {
                 1.0
             };
@@ -1014,6 +1210,20 @@ fn hash_drums(cfg: &JamConfig, h: &mut impl std::hash::Hasher) {
     cfg.crash_on_one.hash(h);
     cfg.intensity.to_bits().hash(h);
     format!("{:?}", JamKit::from_name(&cfg.kit)).hash(h);
+    // The mix is a dial, not a bar of music: turning the keys down is a
+    // change you have to hear now, not at the next bar line. Hashed
+    // clamped, because that is the value the compiler uses.
+    let mix = cfg.mix.unwrap_or_default().clamped();
+    (
+        mix.drums.to_bits(),
+        mix.bass.to_bits(),
+        mix.keys.to_bits(),
+    )
+        .hash(h);
+    // Which sound the count-in makes is not part of the band, but it IS part
+    // of the table, and a table that differs only in it must not be
+    // mistaken for the same one and held back to a bar line.
+    (cfg.count_in_sound.unwrap_or_default() == JamCountInSound::Sticks).hash(h);
     match cfg.practice {
         Some(ref p) => {
             true.hash(h);
@@ -1063,7 +1273,11 @@ pub fn swap_defers(
 /// slower than the note's own 450 ms turns into a chord — four roots and a
 /// fifth all sounding at once — which is the difference between a bass
 /// player and a drone.
-fn compile_bass(line: &JamBassLine, ticks: u32) -> Result<Vec<Option<JamSlot>>, String> {
+fn compile_bass(
+    line: &JamBassLine,
+    ticks: u32,
+    mix: f32,
+) -> Result<Vec<Option<JamSlot>>, String> {
     if line.pitches.len() != ticks as usize {
         return Err(format!(
             "bass.pitches has {} entries, and this bar is {ticks} ticks long",
@@ -1083,7 +1297,7 @@ fn compile_bass(line: &JamBassLine, ticks: u32) -> Result<Vec<Option<JamSlot>>, 
         line.gain.clamp(BASS_GAIN_MIN, BASS_GAIN_MAX)
     } else {
         1.0
-    };
+    } * mix;
 
     let n = ticks as usize;
     let mut out: Vec<Option<JamSlot>> = vec![None; n];
@@ -1105,10 +1319,85 @@ fn compile_bass(line: &JamBassLine, ticks: u32) -> Result<Vec<Option<JamSlot>>, 
     Ok(out)
 }
 
+/// The keys line as up to four slots per tick.
+///
+/// The cap is the bass's rule applied to a chord: a voicing rings until the
+/// next voicing or the end of the bar, whichever comes first. Without it the
+/// bar's changes pile on top of each other and a ii–V–I comes out as one
+/// eleven-note cluster — the difference between a comping player and a
+/// sustain pedal nobody let go of.
+///
+/// Every note of a voicing gets the same cap and the same gain, so the chord
+/// speaks and stops as one thing rather than as four notes that happen to
+/// have started together.
+fn compile_keys(
+    line: &JamKeysLine,
+    ticks: u32,
+    mix: f32,
+) -> Result<Vec<Vec<JamSlot>>, String> {
+    if line.voicings.len() != ticks as usize {
+        return Err(format!(
+            "keys.voicings has {} entries, and this bar is {ticks} ticks long",
+            line.voicings.len()
+        ));
+    }
+    for (i, v) in line.voicings.iter().enumerate() {
+        if v.len() > JAM_MAX_VOICING {
+            return Err(format!(
+                "keys.voicings tick {i} has {} notes; a voicing is at most \
+                 {JAM_MAX_VOICING}",
+                v.len()
+            ));
+        }
+        for &n in v.iter() {
+            if !(KEYS_MIN_MIDI..=KEYS_MAX_MIDI).contains(&n) {
+                return Err(format!(
+                    "keys.voicings tick {i} has MIDI {n}; the keys run \
+                     {KEYS_MIN_MIDI} to {KEYS_MAX_MIDI} (C3 to C6), and an empty \
+                     voicing is the rest"
+                ));
+            }
+        }
+    }
+    // Clamped, not rejected. See INTENSITY_MIN.
+    let gain = if line.gain.is_finite() {
+        line.gain.clamp(KEYS_GAIN_MIN, KEYS_GAIN_MAX)
+    } else {
+        1.0
+    } * mix
+        * KEYS_TRIM;
+
+    let n = ticks as usize;
+    let mut out: Vec<Vec<JamSlot>> = vec![Vec::new(); n];
+    for i in 0..n {
+        if line.voicings[i].is_empty() {
+            continue;
+        }
+        let next = (i + 1..n)
+            .find(|&j| !line.voicings[j].is_empty())
+            .unwrap_or(n);
+        out[i] = line.voicings[i]
+            .iter()
+            .map(|&note| JamSlot {
+                sound: SoundId::Keys(note - KEYS_MIN_MIDI),
+                gain,
+                cap_ticks: (next - i) as f32,
+                lane: JamLane::Keys,
+                // A chord is never an accent. The dots mark the drummer's
+                // backbeat, and comping on every tick would light all of
+                // them.
+                accent: false,
+            })
+            .collect();
+    }
+    Ok(out)
+}
+
 fn compile_pattern(
     pattern: &JamPattern,
     ticks: u32,
     kit: JamKit,
+    mix: f32,
     what: &str,
 ) -> Result<Vec<JamTick>, String> {
     let mut out = vec![JamTick::EMPTY; ticks as usize];
@@ -1131,7 +1420,8 @@ fn compile_pattern(
             if level == 0 {
                 continue;
             }
-            if let Some(slot) = slot_for(lane, level, kit) {
+            if let Some(mut slot) = slot_for(lane, level, kit) {
+                slot.gain *= mix;
                 out[i].push(slot);
             }
         }
@@ -1171,8 +1461,9 @@ fn slot_for(lane: JamLane, level: u8, kit: JamKit) -> Option<JamSlot> {
         JamLane::Hat => (KitVoice::Hat, g, HAT_CAP_TICKS),
         JamLane::Ride => (KitVoice::Ride, g * RIDE_TRIM, RIDE_CAP_TICKS),
         JamLane::Crash => (KitVoice::Crash, g, 0.0),
-        // The bass has its own array in the config and its own compiler.
-        JamLane::Bass => return None,
+        // The bass and the keys have their own arrays in the config and
+        // their own compilers.
+        JamLane::Bass | JamLane::Keys => return None,
     };
     Some(JamSlot {
         sound: SoundId::Kit(kit, voice),
@@ -1314,6 +1605,9 @@ mod tests {
                 bass: bass.map(|pitches| JamBassLine { pitches, gain: 1.0 }),
                 practice: None,
                 fill_every: None,
+                keys: None,
+                mix: None,
+                count_in_sound: None,
             }
         }
 
@@ -1375,6 +1669,9 @@ mod tests {
             bass: None,
             practice: None,
             fill_every: None,
+            keys: None,
+            mix: None,
+            count_in_sound: None,
         }
     }
 
@@ -1642,6 +1939,9 @@ mod tests {
             bass: None,
             practice: None,
             fill_every: None,
+            keys: None,
+            mix: None,
+            count_in_sound: None,
         };
         let t = compile(&cfg).unwrap();
         assert!(
@@ -1938,6 +2238,9 @@ mod tests {
             bass: Some(JamBassLine { pitches, gain: 1.0 }),
             practice: None,
             fill_every: None,
+            keys: None,
+            mix: None,
+            count_in_sound: None,
         }
     }
 
@@ -2452,6 +2755,9 @@ mod form_tests {
             bass: None,
             practice: None,
             fill_every: None,
+            keys: None,
+            mix: None,
+            count_in_sound: None,
         }
     }
 
@@ -2808,3 +3114,479 @@ mod form_tests {
     }
 }
 
+// ---------------------------------------------------------------------------
+// The keys, the mix, and the sticks
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod band_tests {
+    use super::*;
+    use crate::engine::{JamKit, KitVoice, SoundId, BEAT_GAIN, KEYS_MAX_MIDI, KEYS_MIN_MIDI};
+
+    /// A bar with one drum, one bass note and one chord on tick 0, so every
+    /// lane is present and each one can be found by name.
+    fn one_of_everything() -> JamConfig {
+        let mut voicings: Vec<Vec<u8>> = vec![Vec::new(); 4];
+        voicings[0] = vec![60, 64, 67];
+        JamConfig {
+            ticks_per_beat: 1,
+            beats_per_bar: 4,
+            bar: JamPattern {
+                kick: vec![1, 0, 0, 0],
+                snare: vec![0, 0, 2, 0],
+                hat: vec![1, 1, 1, 1],
+                ride: vec![0; 4],
+                crash: vec![0; 4],
+            },
+            fill: None,
+            form_bars: 4,
+            crash_on_one: false,
+            intensity: 1.0,
+            kit: "room".to_string(),
+            bass: Some(JamBassLine {
+                pitches: vec![40, 0, 0, 0],
+                gain: 1.0,
+            }),
+            practice: None,
+            fill_every: None,
+            keys: Some(JamKeysLine {
+                voicings,
+                gain: 1.0,
+            }),
+            mix: None,
+            count_in_sound: None,
+        }
+    }
+
+    fn lane_gain(table: &JamTable, tick: u32, lane: JamLane) -> f32 {
+        table
+            .tick(tick, 0)
+            .expect("in the bar")
+            .slots()
+            .iter()
+            .find(|s| s.lane == lane)
+            .map(|s| s.gain)
+            .unwrap_or_else(|| panic!("no {} on tick {tick}", lane.name()))
+    }
+
+    fn lane_count(table: &JamTable, tick: u32, lane: JamLane) -> usize {
+        table
+            .tick(tick, 0)
+            .expect("in the bar")
+            .slots()
+            .iter()
+            .filter(|s| s.lane == lane)
+            .count()
+    }
+
+    // ---- The keys ----
+
+    #[test]
+    fn a_voicing_becomes_one_slot_per_note_of_the_chord() {
+        let table = compile(&one_of_everything()).unwrap();
+        assert_eq!(lane_count(&table, 0, JamLane::Keys), 3, "a triad is three notes");
+        assert_eq!(lane_count(&table, 1, JamLane::Keys), 0, "and the rest is a rest");
+        // The notes are the ones asked for, indexed off the bottom of the bank.
+        let notes: Vec<SoundId> = table
+            .tick(0, 0)
+            .unwrap()
+            .slots()
+            .iter()
+            .filter(|s| s.lane == JamLane::Keys)
+            .map(|s| s.sound)
+            .collect();
+        assert_eq!(
+            notes,
+            vec![
+                SoundId::Keys(60 - KEYS_MIN_MIDI),
+                SoundId::Keys(64 - KEYS_MIN_MIDI),
+                SoundId::Keys(67 - KEYS_MIN_MIDI),
+            ]
+        );
+    }
+
+    #[test]
+    fn a_keys_line_that_is_not_this_bar_is_rejected_whole() {
+        let mut cfg = one_of_everything();
+        cfg.keys = Some(JamKeysLine {
+            voicings: vec![Vec::new(); 3],
+            gain: 1.0,
+        });
+        let err = compile(&cfg).expect_err("three voicings is not a four-tick bar");
+        assert!(err.contains("keys.voicings has 3"), "{err}");
+    }
+
+    #[test]
+    fn a_voicing_of_five_notes_is_refused_rather_than_truncated() {
+        let mut cfg = one_of_everything();
+        cfg.keys = Some(JamKeysLine {
+            voicings: vec![vec![60, 62, 64, 65, 67], Vec::new(), Vec::new(), Vec::new()],
+            gain: 1.0,
+        });
+        let err = compile(&cfg).expect_err("five notes is not a voicing");
+        assert!(err.contains("at most 4"), "{err}");
+    }
+
+    #[test]
+    fn a_note_outside_the_keys_range_is_refused() {
+        // 0 is a rest for the BASS; for the keys the rest is an empty
+        // voicing, so a literal zero here is a note nobody can play.
+        for bad in [KEYS_MIN_MIDI - 1, KEYS_MAX_MIDI + 1, 0] {
+            let mut cfg = one_of_everything();
+            cfg.keys = Some(JamKeysLine {
+                voicings: vec![vec![bad], Vec::new(), Vec::new(), Vec::new()],
+                gain: 1.0,
+            });
+            let err = compile(&cfg)
+                .err()
+                .unwrap_or_else(|| panic!("MIDI {bad} should be refused"));
+            assert!(err.contains(&format!("MIDI {bad}")), "{err}");
+        }
+    }
+
+    #[test]
+    fn the_keys_gain_is_clamped_rather_than_obeyed() {
+        let quiet = {
+            let mut cfg = one_of_everything();
+            cfg.keys.as_mut().unwrap().gain = 0.5;
+            compile(&cfg).unwrap()
+        };
+        let absurd = {
+            let mut cfg = one_of_everything();
+            cfg.keys.as_mut().unwrap().gain = 40.0;
+            compile(&cfg).unwrap()
+        };
+        let nonsense = {
+            let mut cfg = one_of_everything();
+            cfg.keys.as_mut().unwrap().gain = f32::NAN;
+            compile(&cfg).unwrap()
+        };
+        let clamped = {
+            let mut cfg = one_of_everything();
+            cfg.keys.as_mut().unwrap().gain = KEYS_GAIN_MAX;
+            compile(&cfg).unwrap()
+        };
+        assert!(
+            lane_gain(&absurd, 0, JamLane::Keys) > 0.0
+                && (lane_gain(&absurd, 0, JamLane::Keys) - lane_gain(&clamped, 0, JamLane::Keys))
+                    .abs()
+                    < 1e-6,
+            "a gain of 40 should play at {KEYS_GAIN_MAX}"
+        );
+        assert!(
+            lane_gain(&quiet, 0, JamLane::Keys) < lane_gain(&clamped, 0, JamLane::Keys),
+            "0.5 should be quieter than 1.5"
+        );
+        assert!(
+            lane_gain(&nonsense, 0, JamLane::Keys) > 0.0,
+            "a NaN in the store is a band that plays at 1.0, not a silent one"
+        );
+    }
+
+    #[test]
+    fn the_keys_are_held_down_by_the_trim_and_not_by_the_bank() {
+        // The whole reason `KEYS_TRIM` exists: at the level the bank hands
+        // out, a chord is louder than the backbeat. This is the arithmetic
+        // half of the claim; `the_keys_sit_under_the_snare_on_a_small_speaker`
+        // in `engine.rs` is the measured half.
+        let table = compile(&one_of_everything()).unwrap();
+        let keys = lane_gain(&table, 0, JamLane::Keys);
+        let snare = lane_gain(&table, 2, JamLane::Snare);
+        assert!(
+            keys < snare * 0.5,
+            "a keys note at {keys} against a snare accent at {snare} is not comping"
+        );
+    }
+
+    // ---- The mix ----
+
+    #[test]
+    fn the_mix_multiplies_the_lane_it_names_and_no_other() {
+        let plain = compile(&one_of_everything()).unwrap();
+        let mut cfg = one_of_everything();
+        cfg.mix = Some(JamMix {
+            drums: 0.5,
+            bass: 1.0,
+            keys: 1.0,
+        });
+        let quieter = compile(&cfg).unwrap();
+        // The comparison has to be against the UNNORMALISED level: a table
+        // with quieter drums may be scaled differently, and that is the
+        // point of measuring the ratio between two lanes of the SAME table
+        // rather than one lane across two.
+        let ratio = |t: &JamTable| lane_gain(t, 0, JamLane::Kick) / lane_gain(t, 0, JamLane::Bass);
+        assert!(
+            (ratio(&quieter) - ratio(&plain) * 0.5).abs() < 1e-5,
+            "drums at 0.5 should be half as loud against the bass; {} vs {}",
+            ratio(&quieter),
+            ratio(&plain)
+        );
+    }
+
+    #[test]
+    fn each_lane_of_the_mix_moves_its_own_lane() {
+        let base = compile(&one_of_everything()).unwrap();
+        let base_ratio =
+            lane_gain(&base, 0, JamLane::Keys) / lane_gain(&base, 0, JamLane::Kick);
+        let mut cfg = one_of_everything();
+        cfg.mix = Some(JamMix {
+            drums: 1.0,
+            bass: 1.0,
+            keys: 0.25,
+        });
+        let t = compile(&cfg).unwrap();
+        let ratio = lane_gain(&t, 0, JamLane::Keys) / lane_gain(&t, 0, JamLane::Kick);
+        assert!(
+            (ratio - base_ratio * 0.25).abs() < 1e-6,
+            "the keys at 0.25 should be a quarter as loud against the kick"
+        );
+    }
+
+    #[test]
+    fn a_lane_mixed_to_zero_is_silent_and_the_rest_still_play() {
+        let mut cfg = one_of_everything();
+        cfg.mix = Some(JamMix {
+            drums: 1.0,
+            bass: 0.0,
+            keys: 1.0,
+        });
+        let t = compile(&cfg).unwrap();
+        assert_eq!(
+            lane_gain(&t, 0, JamLane::Bass),
+            0.0,
+            "a bass mixed all the way down is silent"
+        );
+        assert!(lane_gain(&t, 0, JamLane::Kick) > 0.0, "the drums keep playing");
+        assert!(lane_gain(&t, 0, JamLane::Keys) > 0.0, "so do the keys");
+    }
+
+    #[test]
+    fn the_mix_is_clamped_rather_than_obeyed() {
+        let at_max = {
+            let mut cfg = one_of_everything();
+            cfg.mix = Some(JamMix {
+                drums: MIX_MAX,
+                bass: 1.0,
+                keys: 1.0,
+            });
+            compile(&cfg).unwrap()
+        };
+        let absurd = {
+            let mut cfg = one_of_everything();
+            cfg.mix = Some(JamMix {
+                drums: 12.0,
+                bass: 1.0,
+                keys: 1.0,
+            });
+            compile(&cfg).unwrap()
+        };
+        let negative = {
+            let mut cfg = one_of_everything();
+            cfg.mix = Some(JamMix {
+                drums: -3.0,
+                bass: 1.0,
+                keys: 1.0,
+            });
+            compile(&cfg).unwrap()
+        };
+        let nonsense = {
+            let mut cfg = one_of_everything();
+            cfg.mix = Some(JamMix {
+                drums: f32::INFINITY,
+                bass: 1.0,
+                keys: 1.0,
+            });
+            compile(&cfg).unwrap()
+        };
+        let ratio = |t: &JamTable| lane_gain(t, 0, JamLane::Kick) / lane_gain(t, 0, JamLane::Bass);
+        assert!(
+            (ratio(&absurd) - ratio(&at_max)).abs() < 1e-5,
+            "a mix of 12 should play at {MIX_MAX}"
+        );
+        assert_eq!(
+            lane_gain(&negative, 0, JamLane::Kick),
+            0.0,
+            "a negative mix is off, not inverted"
+        );
+        let plain = compile(&one_of_everything()).unwrap();
+        assert!(
+            (ratio(&nonsense) - ratio(&plain)).abs() < 1e-5,
+            "an infinity in the store is a band at 1.0"
+        );
+    }
+
+    #[test]
+    fn the_mix_is_a_dial_the_musician_hears_now() {
+        // Turning a lane down has to apply at once, not at the next bar
+        // line — it is the same kind of change as the intensity dial. So
+        // two tables that differ only in the mix must NOT look like the
+        // same drummer to `swap_defers`.
+        let a = std::sync::Arc::new(compile(&one_of_everything()).unwrap());
+        let mut cfg = one_of_everything();
+        cfg.mix = Some(JamMix {
+            drums: 0.4,
+            bass: 1.0,
+            keys: 1.0,
+        });
+        let b = std::sync::Arc::new(compile(&cfg).unwrap());
+        assert!(
+            !swap_defers(Some(&a), Some(&b), true, false),
+            "a mix change must be heard now"
+        );
+    }
+
+    #[test]
+    fn a_new_chord_waits_for_the_bar_line_the_way_a_new_bass_bar_does() {
+        // The UI posts the next bar's bass AND the next bar's voicings on
+        // this bar's downbeat. Both have to wait, or the band plays the next
+        // bar's changes over this one.
+        let a = std::sync::Arc::new(compile(&one_of_everything()).unwrap());
+        let mut cfg = one_of_everything();
+        cfg.keys.as_mut().unwrap().voicings[0] = vec![62, 65, 69];
+        let b = std::sync::Arc::new(compile(&cfg).unwrap());
+        assert!(
+            swap_defers(Some(&a), Some(&b), true, false),
+            "a chord change is the same drummer under different changes"
+        );
+    }
+
+    // ---- The sticks ----
+
+    #[test]
+    fn a_count_in_is_a_beep_unless_the_jam_asks_for_sticks() {
+        let table = compile(&one_of_everything()).unwrap();
+        assert!(
+            table.count_in_slot().is_none(),
+            "no countInSound means the beep the drill has always used"
+        );
+        let mut cfg = one_of_everything();
+        cfg.count_in_sound = Some(JamCountInSound::Beep);
+        assert!(compile(&cfg).unwrap().count_in_slot().is_none());
+    }
+
+    #[test]
+    fn sticks_are_the_loaded_kits_rim_at_the_beat_gain() {
+        for kit in JamKit::ALL {
+            let mut cfg = one_of_everything();
+            cfg.kit = kit.name().to_string();
+            cfg.count_in_sound = Some(JamCountInSound::Sticks);
+            let slot = compile(&cfg)
+                .unwrap()
+                .count_in_slot()
+                .unwrap_or_else(|| panic!("{} should count in with sticks", kit.name()));
+            assert_eq!(slot.sound, SoundId::Kit(kit, KitVoice::Rim));
+            assert_eq!(slot.gain, BEAT_GAIN);
+            assert_eq!(slot.cap_ticks, 0.0, "a stick click rings out");
+            assert!(!slot.accent, "a count-in beat is not a backbeat");
+        }
+    }
+
+    #[test]
+    fn the_sticks_are_not_moved_by_the_intensity_the_mix_or_the_normalisation() {
+        // A count-in happens before the band and alone, so none of the
+        // arithmetic that keeps four voices out of each other's way applies
+        // to it — and a count-in nobody can hear because the drums were
+        // mixed down is a bug, not a balance.
+        let mut loud = one_of_everything();
+        loud.count_in_sound = Some(JamCountInSound::Sticks);
+        loud.intensity = 1.25;
+        loud.mix = Some(JamMix {
+            drums: 0.0,
+            bass: 1.0,
+            keys: 1.0,
+        });
+        // ...and a groove busy enough to be normalised down.
+        loud.bar.kick = vec![2; 4];
+        loud.bar.snare = vec![2; 4];
+        loud.bar.crash = vec![2; 4];
+        let slot = compile(&loud).unwrap().count_in_slot().expect("sticks");
+        assert_eq!(
+            slot.gain, BEAT_GAIN,
+            "the count-in is the beat gain whatever the band is doing"
+        );
+    }
+
+    #[test]
+    fn changing_the_count_in_sound_is_heard_now() {
+        // It is not part of the band, but it IS part of the table, and a
+        // table that differs only in it must not be mistaken for the same
+        // one and held back to a bar line.
+        let a = std::sync::Arc::new(compile(&one_of_everything()).unwrap());
+        let mut cfg = one_of_everything();
+        cfg.count_in_sound = Some(JamCountInSound::Sticks);
+        let b = std::sync::Arc::new(compile(&cfg).unwrap());
+        assert!(!swap_defers(Some(&a), Some(&b), true, false));
+    }
+
+    // ---- The contract's spelling ----
+
+    #[test]
+    fn the_fourth_pass_fields_deserialise_from_the_contracts_camel_case() {
+        let json = serde_json::json!({
+            "ticksPerBeat": 1,
+            "beatsPerBar": 4,
+            "bar": {
+                "kick": [1, 0, 0, 0],
+                "snare": [0, 0, 2, 0],
+                "hat": [1, 1, 1, 1],
+                "ride": [0, 0, 0, 0],
+                "crash": [0, 0, 0, 0],
+            },
+            "fill": null,
+            "formBars": 12,
+            "crashOnOne": true,
+            "intensity": 1.0,
+            "kit": "tight",
+            "keys": {
+                "voicings": [[60, 64, 67], [], [], []],
+                "gain": 1.1,
+            },
+            "mix": { "drums": 0.8, "bass": 1.2, "keys": 0.6 },
+            "countInSound": "sticks",
+        });
+        let cfg: JamConfig = serde_json::from_value(json).expect("the contract's own spelling");
+        let keys = cfg.keys.as_ref().expect("keys");
+        assert_eq!(keys.voicings[0], vec![60, 64, 67]);
+        assert!(keys.voicings[1].is_empty());
+        assert!((keys.gain - 1.1).abs() < 1e-6);
+        let mix = cfg.mix.expect("mix");
+        assert!((mix.drums - 0.8).abs() < 1e-6);
+        assert!((mix.bass - 1.2).abs() < 1e-6);
+        assert!((mix.keys - 0.6).abs() < 1e-6);
+        assert_eq!(cfg.count_in_sound, Some(JamCountInSound::Sticks));
+        // And it compiles into a band with a chord and a stick count.
+        let table = compile(&cfg).expect("compiles");
+        assert_eq!(lane_count(&table, 0, JamLane::Keys), 3);
+        assert!(table.count_in_slot().is_some());
+    }
+
+    #[test]
+    fn a_jam_from_before_any_of_this_still_loads() {
+        // `keys`, `mix` and `countInSound` are all optional in the contract,
+        // and a record written by the build before this one has none of
+        // them. It has to play, not fail to parse.
+        let json = serde_json::json!({
+            "ticksPerBeat": 1,
+            "beatsPerBar": 4,
+            "bar": {
+                "kick": [1, 0, 0, 0],
+                "snare": [0, 0, 2, 0],
+                "hat": [1, 1, 1, 1],
+                "ride": [0, 0, 0, 0],
+                "crash": [0, 0, 0, 0],
+            },
+            "fill": null,
+            "formBars": 12,
+            "crashOnOne": true,
+            "intensity": 1.0,
+            "kit": "room",
+        });
+        let cfg: JamConfig = serde_json::from_value(json).expect("an older record still loads");
+        assert!(cfg.keys.is_none());
+        assert!(cfg.mix.is_none());
+        assert!(cfg.count_in_sound.is_none());
+        let table = compile(&cfg).expect("compiles");
+        assert_eq!(lane_count(&table, 0, JamLane::Keys), 0);
+        assert!(table.count_in_slot().is_none());
+    }
+}
