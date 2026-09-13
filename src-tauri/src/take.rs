@@ -1017,7 +1017,13 @@ impl TakeSession {
                     eprintln!("[take] could not finish the WAV: {e}");
                 }
             })
-            .map_err(|e| format!("could not start the take writer: {e}"))?;
+            .map_err(|e| {
+                // The writer owned the open file and has just been dropped
+                // with it, leaving a 44-byte WAV of nothing. A take that
+                // never started must not appear in the list.
+                let _ = fs::remove_file(&path);
+                format!("could not start the take writer: {e}")
+            })?;
 
         // Only now does anything start recording: the ring the callback is
         // about to write into has a thread draining it, and the file it

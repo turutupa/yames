@@ -1244,11 +1244,13 @@ fn hash_drums(cfg: &JamConfig, h: &mut impl std::hash::Hasher) {
 /// of playing it now?
 ///
 /// Only when the band is actually playing a table, the new one is the same
-/// drummer (same signature, same bar length) and just the bass moved. A
-/// table arriving while stopped, during the count-in, while no table is
-/// loaded, or with a different groove applies immediately: the first three
-/// have no bar line to wait for that matters, and the last is the musician
-/// asking for a change they want to hear now.
+/// drummer (same signature, same bar length) and just the CHANGES moved —
+/// the bass line, the keys voicings, or both, which is what the UI posts a
+/// bar ahead. A table arriving while stopped, during the count-in, while no
+/// table is loaded, or with a different groove, kit, intensity, mix or
+/// count-in sound applies immediately: the first three have no bar line to
+/// wait for that matters, and the rest are the musician turning a dial and
+/// wanting to hear it.
 pub fn swap_defers(
     active: Option<&JamTable>,
     incoming: Option<&JamTable>,

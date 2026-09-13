@@ -1118,10 +1118,12 @@ struct Voice {
 ///
 /// This used to be a `with_capacity(32)` and nothing else, which was fine
 /// while the engine spawned exactly one voice per tick. A jam spawns up to
-/// seven — five drums, the bass and the crash on the one — and the kick, the
-/// snare and the crash all ring out uncapped, so a busy 16th-note groove can
-/// legitimately have a couple of dozen alive at once. With the longest kit
-/// in the set (`brushes`, a 700 ms crash) the measured worst is 24.
+/// ELEVEN — five drums, the bass, four notes of a keys voicing and the crash
+/// on the one — and the kick, the snare, the crash and every keys note ring
+/// out for most of a bar, so a busy 16th-note groove with a chord on every
+/// eighth can legitimately have dozens alive at once. With the longest kit
+/// in the set (`brushes`, a 700 ms crash) over a 700 ms keys tail, the
+/// measured worst is well inside this.
 ///
 /// A headroom figure, not a budget: the `Vec` is allocated once when the
 /// audio thread starts, and EVERY push into it is guarded, so even a table
