@@ -23,8 +23,13 @@ export const JAM_LANES: readonly JamLane[] = ["kick", "snare", "hat", "ride", "c
 /**
  * One bar, one row per drum. Every array has exactly
  * `beatsPerBar × ticksPerBeat` entries, tick 0 first.
+ *
+ * `hatOpen` is the open hi-hat as its own row (second pass, B5): a level in
+ * it plays the kit's open hat instead of the closed one on that tick.
+ * Optional, so every pattern ever saved still reads; absent means closed
+ * hats only. The editor may show it as a fifth lane.
  */
-export type JamPattern = Record<JamLane, JamLevel[]>;
+export type JamPattern = Record<JamLane, JamLevel[]> & { hatOpen?: JamLevel[] };
 
 /**
  * What the engine receives. The UI is responsible for having ALREADY set the
