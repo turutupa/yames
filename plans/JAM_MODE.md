@@ -287,7 +287,16 @@ plus the owner's ears for every sound.
 Jam 1 is the whole loop in §2 minus the last sentence. It is worth
 shipping on its own.
 
-**Status 2026-09-12 (evening).** Built in one day on the `jam` branch by
+**Status 2026-09-12 (night).** The whole plan is on the `jam` branch:
+every item in Jam 1, 2 and 3, plus the chords-in-the-key strip and
+shapes, built by seventeen workers in five waves with two review rounds
+(twenty-three verified findings, all fixed with tests). Gates green on
+the final tree; the probe passes with the table swapping, the form
+moving and a take recording at once. The one thing the owner said on
+first sight: the screen is overwhelming. The UX evaluation is §8.10 and
+is the first thing to do next.
+
+**Status 2026-09-12 (evening, superseded).** Built in one day on the `jam` branch by
 nine workers in three waves, with the orchestrator reviewing and merging
 (briefs and integration notes in `plans/tasks/jam/`). On the branch:
 everything in Jam 1 and Jam 2 except spoken cues, plus from Jam 3 the
@@ -327,6 +336,17 @@ audio path in the Rust tests.
 - **8.7 Kit sound quality.** *open, taste.* The snare kit took several
   rounds to stop sounding "shy". Budget listening time for every kit.
 - **8.8 Mobile.** *deferred* to the mobile plan.
+- **8.10 The screen is one page, and it should be two states.** *open,
+  the owner's first reaction 2026-09-12.* Twenty-three blocks on one
+  scroll: everything set once per jam drawn at the same weight as the
+  chord you are on. Proposed: a playing state with five blocks (NOW,
+  timeline, tempo and feel, the band as one row, the practice switches)
+  and a setup sheet behind one button (groove, form, extras); the key's
+  chord strip behind a toggle with only the current chord's shapes
+  showing; ticks per beat gone from the setup; transposition only for
+  non-guitar instruments; count-in bars and sound as one control; cues
+  in Settings; the permanent captions moved to first-run hints. Front-end
+  only, half a day, its own PR on top of this one.
 - **8.9 How much chord-shape UI is right while playing.** *open.* The
   chords-in-the-key panel could be a strip under the NOW block, a drawer,
   or a page of its own you visit between choruses. Default for the first

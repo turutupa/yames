@@ -423,8 +423,11 @@ export function useJamSession({
     const isLoad = loadedIdRef.current !== jam.id;
     const live = playingBarRef.current;
     const editingLive = !isLoad && isPlaying && !countingIn && live !== null;
+    // Stopped, the engine restarts at the pending jump, else the loop's first
+    // bar, else 0 — so that is the bar this table's bass and keys are for.
+    const restartBar = pendingJumpRef.current ?? loopRef.current?.start ?? 0;
     const config = compileJam(jam, {
-      formBar: editingLive ? live + 1 : 0,
+      formBar: editingLive ? live + 1 : restartBar,
       lineup,
       // A load starts the keys player's hand fresh, in the middle of the
       // range; an edit mid-take leads on from wherever it already was.
