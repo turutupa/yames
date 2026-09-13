@@ -526,6 +526,11 @@ fn busiest_jam() -> JamConfig {
             kick: vec![2, 0, 0, 1, 1, 0, 1, 0, 2, 0, 0, 1, 1, 0, 1, 0],
             snare: vec![0, 0, 3, 0, 2, 0, 0, 3, 0, 3, 0, 0, 2, 0, 3, 1],
             hat: vec![1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3],
+            // The wash on the last sixteenth of each beat, where a drummer
+            // opens it. It is a lane of its own now (B5), and it rings four
+            // ticks, so it is one more voice the mixer carries across the
+            // bar line.
+            hat_open: vec![0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
             ride: vec![1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
             crash: vec![0; 16],
         },
@@ -534,6 +539,7 @@ fn busiest_jam() -> JamConfig {
             kick: vec![1; 16],
             snare: vec![2; 16],
             hat: vec![1; 16],
+            hat_open: vec![1; 16],
             ride: vec![1; 16],
             crash: vec![0; 16],
         }),

@@ -2459,6 +2459,31 @@ pub fn app_ready(app_handle: AppHandle) {
 /// inside the `Arc<JamTable>`, which is what makes the drums and the
 /// samples behind them one thing the audio thread can swap and retire
 /// together; see `JamTable::custom` in `jam.rs`.
+///
+/// **This command stays synchronous, and that is a decision, not an
+/// oversight.** A synchronous `#[tauri::command]` runs on the main thread,
+/// so the first send of a jam whose kit is a folder holds the window for as
+/// long as the decode takes. Two things make that the right trade:
+///
+/// * **The work is bounded, and small.** `kit::MAX_FOLDER_BYTES` is a
+///   sanity check on what the musician pointed at, not a budget for this
+///   thread: `decode_mono` stops reading at `kit::MAX_VOICE_SECS` at the
+///   SOURCE rate, so eight ten-minute stems cost exactly what eight
+///   one-second hits cost — eight voices of two seconds, read, resampled
+///   and normalised. That is tens of milliseconds, once per folder, and
+///   `no_folder_can_cost_more_than_the_cap_however_long_its_files_are` in
+///   `kit.rs` is what holds it there.
+/// * **Order is worth more than those milliseconds.** The UI fires these
+///   without a queue — four to six a chorus, each carrying the NEXT bar's
+///   bass (`useJamSession.ts`) — and the main thread is what puts them in
+///   the order they were sent. Off it, a send that missed the cache and a
+///   send that hit it are two threads racing, and the loser overwrites the
+///   winner: the band plays last bar's bass line over this bar's chord.
+///   The engine has no sequence number to notice that, and adding one to
+///   save a hitch nobody has reported would be the wrong end to start from.
+///
+/// The dialog next door is the opposite call for the opposite reason — it
+/// is unbounded and it deadlocks — which is what makes this one a choice.
 #[tauri::command]
 pub fn set_jam(
     config: Option<crate::jam::JamConfig>,
@@ -2500,14 +2525,21 @@ pub fn set_jam(
 ///
 /// A native folder dialog, and nothing else: the folder is READ on this
 /// machine when a jam that names it is loaded, and no file is copied,
-/// moved, uploaded or written. `null` when they cancel.
+/// moved, uploaded or written. `None` when they cancel.
 ///
-/// Blocking rather than async because a `#[tauri::command]` that is not
-/// `async` already runs off the main thread, and the alternative — a
-/// channel and a callback — would be machinery in front of a question with
-/// one answer.
+/// **`async fn`, and it has to be.** A `#[tauri::command]` that is not
+/// `async` runs inline on the thread that dispatched the IPC message, which
+/// is the main thread — and `blocking_pick_folder` asks the main thread to
+/// put a dialog up and then waits for the answer. On the main thread that is
+/// a deadlock in one move: the request to open the window is queued behind
+/// the call that is waiting for it, no dialog ever appears, and the whole
+/// app stops responding with no error and nothing on screen. An `async`
+/// command runs on Tauri's own runtime instead, so the main thread is free
+/// to run the dialog it was asked for. This is the shape
+/// `tauri-plugin-dialog` documents for the blocking pickers, and it is the
+/// shape the rest of this file's heavy commands already use.
 #[tauri::command]
-pub fn pick_kit_folder(app: AppHandle) -> Option<String> {
+pub async fn pick_kit_folder(app: AppHandle) -> Option<String> {
     use tauri_plugin_dialog::DialogExt;
     app.dialog()
         .file()
@@ -2522,8 +2554,15 @@ pub fn pick_kit_folder(app: AppHandle) -> Option<String> {
 /// decoded. The UI asks this while the musician is still choosing, so it has
 /// to be cheap enough to sit behind a hover; the decoding happens in
 /// `set_jam`, once, when a jam that names the folder is actually loaded.
+///
+/// `async` for a smaller reason than its neighbour above, and a real one: a
+/// directory listing is not always cheap. The folder the musician just
+/// picked can be on a network share, a sleeping external drive or a synced
+/// folder that has to be hydrated, and `read_dir` on any of those is
+/// seconds. Off the main thread, that is a spinner; on it, it is the window
+/// not repainting.
 #[tauri::command]
-pub fn inspect_kit_folder(dir: String) -> Result<crate::kit::KitFolder, String> {
+pub async fn inspect_kit_folder(dir: String) -> Result<crate::kit::KitFolder, String> {
     crate::kit::inspect(std::path::Path::new(&dir))
 }
 
@@ -3037,6 +3076,39 @@ mod tests {
             Some(&stored_other)
         ));
         assert!(should_persist_instrument(Instrument::Bass, Some(&stored)));
+    }
+
+    // -----------------------------------------------------------------------
+    // Your own kit — the two commands that go looking for a folder
+    // -----------------------------------------------------------------------
+
+    /// THE FOLDER DIALOG MUST NOT BE A SYNCHRONOUS COMMAND.
+    ///
+    /// A `#[tauri::command]` that is not `async` runs inline on the thread
+    /// that dispatched the IPC message — the main thread — and
+    /// `blocking_pick_folder` asks the MAIN THREAD to put a dialog up and
+    /// then waits for the answer. On the main thread that is a deadlock in
+    /// one move: the request to open the dialog queues behind the call
+    /// waiting for it, so no dialog ever appears and the window stops
+    /// responding, with nothing on screen and nothing in the log to say
+    /// why. The musician's only clue is that "Choose a folder…" kills the
+    /// app.
+    ///
+    /// A compile-time claim rather than a runtime one, because a deadlock
+    /// cannot be asserted on: this only type-checks while `pick_kit_folder`
+    /// returns a future, so a change back to a plain `fn` breaks the build
+    /// here instead of the app on somebody's desk.
+    #[test]
+    fn the_folder_dialog_runs_off_the_main_thread() {
+        fn only_an_async_command<F: std::future::Future>(_: fn(AppHandle) -> F) {}
+        only_an_async_command(pick_kit_folder);
+
+        // And its neighbour, for the smaller version of the same reason: a
+        // `read_dir` on a network share or a sleeping external drive is
+        // seconds, and seconds on the main thread is a window that does not
+        // repaint.
+        fn only_an_async_inspect<F: std::future::Future>(_: fn(String) -> F) {}
+        only_an_async_inspect(inspect_kit_folder);
     }
 
     // -----------------------------------------------------------------------

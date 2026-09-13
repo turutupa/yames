@@ -507,10 +507,11 @@ impl JamKit {
 
 /// One drum of a kit. The order is the column order of [`KIT_WAVS`].
 ///
-/// `HatOpen` and `Rim` have no lane in `JamPattern` today — no groove in the
-/// library plays them. They are decoded and addressable anyway so the groove
-/// editor can grow a lane without the engine changing underneath it, which
-/// is cheaper than adding two files and two bank entries later.
+/// `HatOpen` is a row of `JamPattern` (`hatOpen`, optional, second pass B5)
+/// and `Rim` is the sticks count-in; every one of the eight is reachable
+/// from a table. That is what the first pass decoded them for: they were
+/// addressable before anything played them, so growing a lane cost a row in
+/// the pattern and nothing in the bank.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum KitVoice {
     Kick,
@@ -1656,12 +1657,23 @@ struct Voice {
 ///
 /// This used to be a `with_capacity(32)` and nothing else, which was fine
 /// while the engine spawned exactly one voice per tick. A jam spawns up to
-/// ELEVEN — five drums, the bass, four notes of a keys voicing and the crash
+/// TWELVE — six drums, the bass, four notes of a keys voicing and the crash
 /// on the one — and the kick, the snare, the crash and every keys note ring
 /// out for most of a bar, so a busy 16th-note groove with a chord on every
 /// eighth can legitimately have dozens alive at once. With the longest kit
 /// in the set (`brushes`, a 700 ms crash) over a 700 ms keys tail, the
 /// measured worst is well inside this.
+///
+/// A FOLDER OF THE MUSICIAN'S OWN DRUMS IS THE HARD CASE, and it is the one
+/// this number now has to answer for. A custom voice may be
+/// `kit::MAX_VOICE_SECS` long — nearly three times the longest drum the app
+/// ships — and the kick, the snare and the crash are the lanes that are not
+/// capped at all, so at 300 BPM sixteenths (a 50 ms tick) each of them can
+/// keep forty copies alive out of one lane. Three uncapped lanes on every
+/// tick is a hundred and twenty, plus the capped lanes, the crash on the
+/// one, the bass and four keys notes. That is the arithmetic; the
+/// measurement is `a_folder_of_two_second_drums_stays_under_the_ceiling`,
+/// which renders it rather than reasoning about it.
 ///
 /// A headroom figure, not a budget: the `Vec` is allocated once when the
 /// audio thread starts, and EVERY push into it is guarded, so even a table
@@ -1818,6 +1830,39 @@ impl JamHandoff {
         }
     }
 
+    /// A DEVICE CHANGE TAKES A FOLDER'S DRUMS AWAY. Command thread only;
+    /// returns whether it took anything.
+    ///
+    /// A table survives a device change on purpose — switch headphones
+    /// mid-jam and the band is still there (see
+    /// [`MetronomeEngine::set_jam_table`]) — and that is right for every
+    /// table but one. The shipped kits are decoded by the audio thread's own
+    /// `SoundBank`, which is rebuilt at the new rate when the stream
+    /// reopens. A folder of the musician's drums is not: it was decoded and
+    /// resampled once, on the command thread, at the rate the OLD device
+    /// opened at, and it is baked into the table. Play it on a 44.1 kHz
+    /// device after a 48 kHz one and every drum is a semitone and a half
+    /// flat, for as long as the jam is loaded, with nothing to tell the
+    /// musician why.
+    ///
+    /// `kit::KitCache` already keys on the rate, so the fix is only to make
+    /// the app ASK again. Taking the table away does that: the plain click
+    /// plays, and the next bar-ahead `set_jam` — at most a bar later, and
+    /// the UI sends four to six a chorus — decodes the folder at the rate
+    /// the new device actually opened at and hands the band back in tune. A
+    /// bar of click is a smaller lie than a chorus of flat drums.
+    pub(crate) fn drop_custom_kit(&self) -> bool {
+        let holds = self
+            .table
+            .lock()
+            .map(|t| t.as_deref().is_some_and(|t| t.custom_kit().is_some()))
+            .unwrap_or(false);
+        if holds {
+            self.set(None);
+        }
+        holds
+    }
+
     /// Drop every retired table. Command thread only.
     pub(crate) fn drain_retired(&self) {
         if let Ok(mut r) = self.retired.lock() {
@@ -1843,8 +1888,20 @@ impl JamHandoff {
 /// retirement slot was busy. Flushed once per buffer. If even these are
 /// full — five replacements landing inside the one moment the command
 /// thread holds the retirement lock — the table is leaked rather than freed
-/// here: a few kilobytes lost is a price, a `free()` on the audio thread is
-/// the thing the whole engine is built to avoid.
+/// here: memory lost is a price, a `free()` on the audio thread is the thing
+/// the whole engine is built to avoid.
+///
+/// **What "leaked" costs is no longer a few kilobytes.** A table used to be
+/// its own ticks and nothing else; one that names a folder of the
+/// musician's drums carries the decoded samples too, up to
+/// `kit::MAX_FOLDER_BYTES` — sixty-four megabytes — because the drums and
+/// the table that names them are deliberately one object, swapped and
+/// retired together (see `kit.rs`). The trade does not change: the audio
+/// thread still must not free, and this path still needs five retirements
+/// to collide inside one held lock, which has never been observed. But the
+/// number is worth writing down, because "a few kilobytes" would make it
+/// look like a path nobody has to care about, and a repeat of it would be a
+/// folder's worth of memory each time.
 struct JamRetirement {
     parked: [Option<Arc<JamTable>>; 4],
 }
@@ -1875,6 +1932,47 @@ impl JamRetirement {
             }
         }
     }
+}
+
+/// WHICH DECODE a table's drums came from, or `None` for a table whose
+/// drums are all the app's own.
+///
+/// `CustomBank::id` and not the folder path: a musician who replaces
+/// `snare.wav` while the app is open has the same path and a different
+/// drum, and the whole reason that id exists is that the path cannot tell
+/// the two apart (see `kit.rs`).
+///
+/// Used on the audio thread, on the one buffer where a table changes, to
+/// answer "are the drums still ringing the same drums?".
+#[inline]
+fn custom_bank_id(table: Option<&JamTable>) -> Option<u64> {
+    table.and_then(|t| t.custom_kit()).map(|c| c.id)
+}
+
+/// A DRUM STILL RINGING OUT OF THE OLD FOLDER IS A CLICK IN THE NEW ONE.
+///
+/// A [`Voice`] is a [`SoundId`] and an offset, and `SoundId::Custom` names a
+/// DRUM rather than a decode: the samples behind it are whichever folder the
+/// table the callback is holding carries. So a crash 200 ms into its wash
+/// when the musician points the app at a different folder — or replaces
+/// `crash.wav` on disk, which is the same thing to the cache — does not
+/// stop. It carries on at sample 9 600 of somebody else's cymbal, which is a
+/// step from one waveform straight to another in the middle of a note. That
+/// is a click, and on a crash it is a loud one.
+///
+/// Stopping those voices is the honest answer: the drum they were playing no
+/// longer exists. Everything from the bank — the click, the shipped kits,
+/// the bass, the keys — rings on untouched, because their buffers did not
+/// move.
+///
+/// Audio-thread safe: `Vec::retain` keeps its allocation and [`Voice`] owns
+/// nothing, so this is a memmove and no more.
+#[inline]
+fn stop_voices_on_kit_change(voices: &mut Vec<Voice>, before: Option<u64>, after: Option<u64>) {
+    if before == after {
+        return;
+    }
+    voices.retain(|v| !matches!(v.sound_id, SoundId::Custom(_)));
 }
 
 /// What the band does on `bar`, or `Full` with no band.
@@ -3202,6 +3300,19 @@ impl MetronomeEngine {
     ) -> Result<(), String> {
         eprintln!("[yames] Setting audio output device: {:?}", name);
         let was_playing = self.playing.load(Ordering::SeqCst);
+        // A table built on a folder of the musician's own drums was decoded
+        // at the OLD device's rate and would play flat or sharp on the new
+        // one. Taking it away makes the next bar-ahead `set_jam` decode it
+        // again at the rate this device opens at; see
+        // `JamHandoff::drop_custom_kit`, which is where the reasoning lives.
+        // Every other table survives the change, which is the promise
+        // `set_jam_table` makes.
+        if self.jam.drop_custom_kit() {
+            eprintln!(
+                "[yames] the jam's drums came from a folder and were decoded for the \
+                 old device; the band returns on the next bar"
+            );
+        }
         self.device_name = name;
         // Fully tear down the old thread/stream
         self.shutdown();
@@ -3568,10 +3679,17 @@ impl MetronomeEngine {
                             ) {
                                 cached.jam_pending = incoming;
                             } else {
+                                // Which folder the drums still ringing came
+                                // out of, before and after. A different one
+                                // stops them; see
+                                // `stop_voices_on_kit_change`.
+                                let before = custom_bank_id(cached.jam.as_deref());
+                                let after = custom_bank_id(incoming.as_deref());
                                 if let Some(old) = cached.jam.take() {
                                     jam_retire.retire(&jam_shared, old);
                                 }
                                 cached.jam = incoming;
+                                stop_voices_on_kit_change(&mut voices, before, after);
                                 cached.jam_changed = true;
                                 cached.count_in_slot =
                                     count_in_slot_of(cached.jam.as_deref());
@@ -4120,6 +4238,15 @@ impl MetronomeEngine {
                                 // The bar line: the held table becomes the
                                 // one the next tick reads. Same form, same
                                 // drums — only the bass bar moved.
+                                //
+                                // No custom voice has to be stopped here,
+                                // and that is a property rather than an
+                                // oversight: a table is only ever HELD when
+                                // its `drums_signature` matches the one
+                                // playing, and that signature hashes
+                                // `CustomBank::id`. A different folder is
+                                // never a deferred swap; it plays now,
+                                // through the branch above.
                                 if let Some(p) = cached.jam_pending.take() {
                                     if let Some(old) = cached.jam.take() {
                                         jam_retire.retire(&jam_shared, old);
@@ -5828,6 +5955,7 @@ mod tests {
             ticks_per_beat: 4,
             beats_per_bar: 4,
             bar: JamPattern {
+                hat_open: Vec::new(),
                 kick: vec![1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
                 snare: vec![0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0],
                 hat: vec![1, 0, 3, 0, 1, 0, 3, 0, 1, 0, 3, 0, 1, 0, 3, 0],
@@ -6617,16 +6745,22 @@ mod tests {
                     kick: vec![2; 16],
                     snare: vec![2; 16],
                     hat: vec![2; 16],
+                    // The open hat is a row of the pattern too (B5), and it
+                    // is the row that rings: every other lane the editor can
+                    // fill is either a transient or capped at 0.9 of a tick.
+                    hat_open: vec![2; 16],
                     ride: vec![2; 16],
                     crash: vec![2; 16],
                 }
             } else {
                 // Busy, and something a person might actually play: the
-                // jitter probe's groove.
+                // jitter probe's groove, with the wash on the last
+                // sixteenth of each beat where a drummer would open it.
                 JamPattern {
                     kick: vec![2, 0, 0, 1, 1, 0, 1, 0, 2, 0, 0, 1, 1, 0, 1, 0],
                     snare: vec![0, 0, 3, 0, 2, 0, 0, 3, 0, 3, 0, 0, 2, 0, 3, 1],
                     hat: vec![1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3],
+                    hat_open: vec![0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
                     ride: vec![1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
                     crash: vec![0; 16],
                 }
@@ -6738,6 +6872,81 @@ mod tests {
         }
     }
 
+    /// A FOLDER OF TWO-SECOND DRUMS, RENDERED — the ceiling's hardest case,
+    /// and the one nothing measured until now.
+    ///
+    /// `INTERFERENCE_ALLOWANCE` in `jam.rs` was measured on the shipped
+    /// kits, whose longest voice is `brushes`' 700 ms crash, and the test
+    /// named for custom kits ran on 50 ms fixtures. `kit::MAX_VOICE_SECS` is
+    /// two seconds, and the kick, the snare and the crash are not capped at
+    /// all — so a musician who points Yames at a folder of real cymbals gets
+    /// nearly three times the ring-out every published number was taken
+    /// against. At 300 BPM sixteenths a tick is 50 ms, so one uncapped lane
+    /// on every tick keeps forty copies of the same drum alive.
+    ///
+    /// Two claims, the same two the shipped kits answer: the band does not
+    /// reach the mixer's clamp, and the voice count stays inside the
+    /// preallocated `MAX_VOICES` so the callback never has to reallocate.
+    /// Both across the whole tempo range and every rate a device hands out.
+    #[test]
+    fn a_folder_of_two_second_drums_stays_under_the_ceiling() {
+        const SHIPPED_VOLUME: f32 = 0.8;
+        // Built once and shared by both grooves: a `SoundBank` decodes every
+        // shipped kit file at its rate, and four of them is most of what
+        // this test would otherwise cost.
+        let reference = SoundBank::new(JAM_REFERENCE_SR);
+        let others: Vec<(u32, SoundBank)> = [22050u32, 44100, 96000]
+            .into_iter()
+            .map(|sr| (sr, SoundBank::new(sr)))
+            .collect();
+        for (lawnmower, volume) in [(false, 1.0f32), (true, SHIPPED_VOLUME)] {
+            // Every voice at the cap, decoded at the reference rate — the
+            // rate `worst_bar_peak` measures at, so what this renders is
+            // exactly what the normalisation thought it was scaling.
+            let folder = std::sync::Arc::new(crate::kit::CustomBank::for_tests(
+                &KitVoice::ALL,
+                JAM_REFERENCE_SR,
+                crate::kit::MAX_VOICE_SECS,
+            ));
+            let cfg = busy_band(JamKit::Room, lawnmower);
+            let table = crate::jam::compile_with_kit(&cfg, Some(folder)).unwrap();
+            assert!(table.custom_kit().is_some());
+
+            let mut worst_voices = 0usize;
+            let mut check = |bpm: u32, sr: u32, bank: &SoundBank| {
+                let tick_samples = (sr as f64 * 60.0 / bpm as f64 / 4.0) as usize;
+                let r = render_jam(&table, bank, 2, tick_samples, volume);
+                assert!(
+                    r.peak <= 1.0,
+                    "two-second custom drums at {bpm} BPM / {sr} Hz rendered {:.3} at \
+                     volume {volume}, so the mixer clamped and the user heard a \
+                     square wave",
+                    r.peak
+                );
+                assert!(
+                    r.max_voices < MAX_VOICES,
+                    "two-second custom drums kept {} voices alive at once against a \
+                     ceiling of {MAX_VOICES}; the callback would have dropped drums",
+                    r.max_voices
+                );
+                worst_voices = worst_voices.max(r.max_voices);
+            };
+            for bpm in (40..=300).step_by(20) {
+                check(bpm, JAM_REFERENCE_SR, &reference);
+            }
+            for (sr, bank) in others.iter() {
+                for bpm in [120u32, 300] {
+                    check(bpm, *sr, bank);
+                }
+            }
+            eprintln!(
+                "[jam] two-second custom kit, {}: {worst_voices} voices at once \
+                 against a ceiling of {MAX_VOICES}",
+                if lawnmower { "every lane every tick" } else { "a playable groove" }
+            );
+        }
+    }
+
     /// The voice ceiling is preallocated, so exceeding it would mean the
     /// audio thread reallocating mid-buffer. The busiest thing the jitter
     /// probe can ask for has to fit inside it with room to spare.
@@ -6748,6 +6957,7 @@ mod tests {
             ticks_per_beat: 4,
             beats_per_bar: 4,
             bar: JamPattern {
+                hat_open: Vec::new(),
                 kick: vec![1; 16],
                 snare: vec![2; 16],
                 hat: vec![1; 16],
@@ -6789,7 +6999,7 @@ mod tests {
     /// beat through the band a laptop radiates, because essentially all of
     /// it was sub-120 Hz kick. Every kick in `KITS.md` carries a mid-band
     /// body layer for that reason, and this is what says it is still there
-    /// — in all four kits, and in whatever a fifth one arrives with.
+    /// — in every kit the app ships, and in whatever the next one arrives with.
     ///
     /// The floor is −12 dB against the kit's own hat, not 0: a kick is
     /// allowed to be felt more than heard, but not to vanish. `brushes` is
@@ -6870,7 +7080,7 @@ mod tests {
     fn the_jam_reference_bank_matches_the_real_one() {
         /// The margin `JAM_TICK_CEILING` reserves. 0.90 × 1.077 = 0.97.
         const ALLOWED_OVERSHOOT: f32 = 1.077;
-        // Every sound a jam table can name: all four kits, every voice, and
+        // Every sound a jam table can name: every kit, every voice, and
         // every note of the bass. The bass is synthesised per rate rather
         // than resampled, so it has no imaging to overshoot — which is
         // exactly why it is in the list: if that ever stops being true the
@@ -7320,6 +7530,7 @@ mod tests {
             ticks_per_beat: 4,
             beats_per_bar: 4,
             bar: JamPattern {
+                hat_open: Vec::new(),
                 kick: vec![0; 16],
                 snare: vec![0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 hat: vec![0; 16],
@@ -7454,7 +7665,7 @@ mod tests {
     fn a_custom_drum_is_read_from_the_table_and_never_from_the_bank() {
         let sr = 48000u32;
         let bank = SoundBank::new(sr);
-        let folder = crate::kit::CustomBank::for_tests(&[KitVoice::Kick], sr);
+        let folder = crate::kit::CustomBank::for_tests(&[KitVoice::Kick], sr, 0.05);
 
         // The folder's kick, through the folder.
         let custom = jam_sample(&bank, Some(&folder), SoundId::Custom(KitVoice::Kick));
@@ -7485,6 +7696,142 @@ mod tests {
         }
     }
 
+    /// A DEVICE CHANGE TAKES A FOLDER'S DRUMS AWAY, AND ONLY A FOLDER'S.
+    ///
+    /// The samples in a `CustomBank` were resampled once, on the command
+    /// thread, at the rate the device that was open then handed out. Switch
+    /// from a 48 kHz interface to a 44.1 kHz one and every one of those
+    /// drums is a semitone and a half flat for as long as the jam stays
+    /// loaded, because nothing would otherwise make the app decode the
+    /// folder again — `KitCache` keys on the rate, but only a `set_jam` asks
+    /// it anything, and a table already playing does not ask.
+    ///
+    /// So the table goes, the plain click plays, and the next bar-ahead send
+    /// brings the band back in tune. A table with no folder in it survives
+    /// the change untouched, which is the promise `set_jam_table` makes:
+    /// switch headphones mid-jam and the band is still there.
+    #[test]
+    fn a_device_change_takes_a_folder_of_drums_away_and_leaves_every_other_band() {
+        let cfg = rock_16ths();
+
+        // No folder: a device change must not touch it.
+        let plain = std::sync::Arc::new(crate::jam::compile(&cfg).unwrap());
+        let handoff = JamHandoff::new();
+        handoff.set(Some(plain));
+        let before = handoff.generation.load(Ordering::Acquire);
+        assert!(!handoff.drop_custom_kit(), "a shipped kit was thrown away");
+        assert!(
+            handoff.table.lock().unwrap().is_some(),
+            "switching headphones mid-jam took the band away"
+        );
+        assert_eq!(
+            handoff.generation.load(Ordering::Acquire),
+            before,
+            "nothing changed, so the callback should not have been woken"
+        );
+
+        // A folder: it has to go, and the audio thread has to be told.
+        let folder = std::sync::Arc::new(crate::kit::CustomBank::for_tests(
+            &[KitVoice::Kick, KitVoice::SnareHi],
+            48_000,
+            0.05,
+        ));
+        let mine =
+            std::sync::Arc::new(crate::jam::compile_with_kit(&cfg, Some(folder)).unwrap());
+        handoff.set(Some(mine));
+        let before = handoff.generation.load(Ordering::Acquire);
+        assert!(handoff.drop_custom_kit(), "the folder's drums were kept");
+        assert!(
+            handoff.table.lock().unwrap().is_none(),
+            "a kit decoded for the old device is still loaded, and it is out of tune"
+        );
+        assert!(
+            handoff.generation.load(Ordering::Acquire) > before,
+            "the table went and the callback was never told"
+        );
+
+        // And with nothing loaded at all it is a no-op rather than a panic:
+        // a device change with no jam is the common case.
+        assert!(!handoff.drop_custom_kit());
+    }
+
+    /// A MID-RING KIT CHANGE STOPS THE DRUMS THAT CAME OUT OF THE OLD ONE.
+    ///
+    /// `SoundId::Custom` names a drum and not a decode, so a crash 200 ms
+    /// into its wash goes on reading at sample 9 600 — of whatever folder
+    /// the NEW table carries. Two waveforms spliced mid-note is a click.
+    /// See `stop_voices_on_kit_change`.
+    #[test]
+    fn changing_the_folder_mid_wash_stops_the_old_folders_drums() {
+        let a = std::sync::Arc::new(crate::kit::CustomBank::for_tests(
+            &[KitVoice::Crash],
+            48_000,
+            0.05,
+        ));
+        let b = std::sync::Arc::new(crate::kit::CustomBank::for_tests(
+            &[KitVoice::Crash],
+            48_000,
+            0.05,
+        ));
+        assert_ne!(a.id, b.id, "two decodes are two banks, whatever the path was");
+
+        let cfg = rock_16ths();
+        let ta = crate::jam::compile_with_kit(&cfg, Some(a.clone())).unwrap();
+        let tb = crate::jam::compile_with_kit(&cfg, Some(b)).unwrap();
+        let same = crate::jam::compile_with_kit(&cfg, Some(a)).unwrap();
+        let shipped = crate::jam::compile(&cfg).unwrap();
+
+        // Mid-wash: a custom crash, a shipped crash and a bass note.
+        let ringing = || -> Vec<Voice> {
+            [
+                SoundId::Custom(KitVoice::Crash),
+                SoundId::Kit(JamKit::Room, KitVoice::Crash),
+                SoundId::Bass(BassVoice::Fingered, 4),
+            ]
+            .into_iter()
+            .map(|sound_id| Voice {
+                sound_id,
+                position: 9_600,
+                amplitude: 1.0,
+                max_samples: 0,
+            })
+            .collect()
+        };
+
+        // A different folder: the folder's drums stop, everything else
+        // rings on.
+        let mut voices = ringing();
+        stop_voices_on_kit_change(
+            &mut voices,
+            custom_bank_id(Some(&ta)),
+            custom_bank_id(Some(&tb)),
+        );
+        assert_eq!(
+            voices.len(),
+            2,
+            "a drum from the old folder is still reading, out of the new folder's buffer"
+        );
+        assert!(!voices.iter().any(|v| matches!(v.sound_id, SoundId::Custom(_))));
+
+        // The SAME folder — which is every bar-ahead send of a jam whose kit
+        // has not changed — must not cut the cymbal short.
+        let mut voices = ringing();
+        stop_voices_on_kit_change(
+            &mut voices,
+            custom_bank_id(Some(&ta)),
+            custom_bank_id(Some(&same)),
+        );
+        assert_eq!(voices.len(), 3, "a bar-ahead send silenced a ringing cymbal");
+
+        // Unloading the jam, and loading one whose drums are the app's own,
+        // both leave a custom voice with no buffer behind it.
+        for after in [None, Some(&shipped)] {
+            let mut voices = ringing();
+            stop_voices_on_kit_change(&mut voices, custom_bank_id(Some(&ta)), custom_bank_id(after));
+            assert_eq!(voices.len(), 2);
+        }
+    }
+
     /// A band on somebody else's drums renders, tick for tick, where the
     /// groove says.
     ///
@@ -7499,6 +7846,7 @@ mod tests {
         let folder = std::sync::Arc::new(crate::kit::CustomBank::for_tests(
             &[KitVoice::Kick, KitVoice::Hat],
             sr,
+            0.05,
         ));
 
         let mut cfg = rock_16ths();
@@ -7701,6 +8049,7 @@ mod tests {
     fn the_keys_keep_the_changes_through_a_fill() {
         let mut cfg = comping(1.0);
         cfg.fill = Some(JamPattern {
+            hat_open: Vec::new(),
             kick: vec![1; 16],
             snare: vec![1; 16],
             hat: vec![0; 16],
