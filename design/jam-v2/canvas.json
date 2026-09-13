@@ -1,0 +1,54 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "1 · Playing, calm"
+    },
+    {
+      "file": "Setup.dc.html",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "2 · Set up, a vibe first"
+    },
+    {
+      "file": "Sounds.dc.html",
+      "x": 3120,
+      "y": 0,
+      "w": 720,
+      "h": 620,
+      "title": "3 · The kit list"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note-playing",
+      "x": 0,
+      "y": -360,
+      "w": 1440,
+      "text": "JAM, SECOND PASS — the playing screen\n\nFive blocks and nothing that is set once per jam: the chord and the next change, the timeline, the tempo with feel and intensity beside it, the band as one row with a mute each, the practice switches. The shapes row is collapsed behind one link at the right of the practice row. Everything else moved into Set up, the one new button in the header.\n\nThe example is a hard rock jam in E at 138 with drums alone, because that is the one the owner could not get out of the first build. Decisions A1, A5, A6, B1 in plans/JAM_UX_DECISIONS.md."
+    },
+    {
+      "id": "note-setup",
+      "x": 1560,
+      "y": -360,
+      "w": 1440,
+      "text": "SET UP — a sheet docked to the right\n\nVibe first: eight tiles, one tap each, that set the drummer, the kit, the tempo and the key together, and the sheet says which vibe the jam started from. Below it, four groups in the order a musician thinks: the drummer (six grooves that drive, feel, intensity, a kit dropdown with a preview, fills), the form (shape, count-in with its sound in one control, the key, edit changes), the band (drums alone until you ask), and More, collapsed: meter, what you read, takes. Ticks per beat is gone; spoken cues moved to Settings.\n\nDecisions A2, A3, A4, A7, B5, B7."
+    },
+    {
+      "id": "note-sounds",
+      "x": 3120,
+      "y": -360,
+      "w": 720,
+      "text": "THE KIT LIST\n\nRaw is the new built-in kit for rock, and the one to tune with your ears in the room. Below the line, your own samples: a folder of WAVs the app reads from disk and never ships, so a good sample pack is a real drummer. Preview plays two bars of the current groove on that kit.\n\nDecisions B2, B3."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}
