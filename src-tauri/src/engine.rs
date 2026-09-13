@@ -1470,26 +1470,55 @@ fn next_form_position(
     (bar, chorus, left)
 }
 
-/// Put the form back to the top, and say what the band does there.
+/// What the band does on a bar the form is being PUT at rather than moved
+/// to — the restart's other half, and the clamp that keeps a bar number
+/// nobody computed here out of the band-state table.
+#[inline]
+fn form_at(table: Option<&JamTable>, bar: u32) -> (u32, JamBandState) {
+    let bar = match table {
+        Some(t) => bar.min(t.form_bars().saturating_sub(1)),
+        None => 0,
+    };
+    (bar, band_state_of(table, bar))
+}
+
+/// Put the form back to the top, and say what the band does there — and
+/// what is left of the position afterwards.
 ///
-/// The top is bar 0, or the first bar of the loop when one is set: press
-/// stop and play again with the turnaround looped and you want the
-/// turnaround, not one bar of the head first. Rule 2 above, applied at the
-/// other place the engine chooses a form position — starting, the count-in
-/// handing over, a new form arriving, the meter changing under one.
+/// The top is, in the order a musician would say it:
+///
+/// 1. **The pending jump, if there is one** — and it is CONSUMED here. This
+///    is what the screen already says out loud: `useJamSession.ts` documents
+///    `currentBar` while stopped as "the one the next press of play will
+///    start on, which is the pending jump if there is one". Before this the
+///    engine disagreed with the drawing: it started at the top of the loop,
+///    left the jump pending, and the bar line at the end of bar 1 then took
+///    it — so pressing play after picking a bar gave you one wrong bar
+///    first.
+/// 2. **The first bar of the loop**, when one is set: press stop and play
+///    again with the turnaround looped and you want the turnaround, not one
+///    bar of the head first.
+/// 3. **Bar 0.**
+///
+/// The caller decides whether the consumption sticks: while the transport is
+/// STOPPED this runs every buffer, only to say where play would start, and
+/// there the leftover is thrown away. It is stored back at the moments the
+/// transport actually starts.
 ///
 /// With no band at all it is bar 0 and `Full`, which is what the contract
 /// says `formBar` and `bandState` mean on a plain click.
 #[inline]
-fn form_restart(table: Option<&JamTable>, position: JamPosition) -> (u32, JamBandState) {
-    let bar = match table {
-        Some(t) => position
-            .loop_bars
-            .map_or(0, |(start, _)| start)
-            .min(t.form_bars().saturating_sub(1)),
-        None => 0,
+fn form_restart(
+    table: Option<&JamTable>,
+    position: JamPosition,
+) -> (u32, JamBandState, JamPosition) {
+    let mut left = position;
+    let target = match left.jump.take() {
+        Some(j) => j,
+        None => left.loop_bars.map_or(0, |(start, _)| start),
     };
-    (bar, band_state_of(table, bar))
+    let (bar, state) = form_at(table, target);
+    (bar, state, left)
 }
 
 // ---------------------------------------------------------------------------
@@ -2807,6 +2836,12 @@ impl MetronomeEngine {
             // "bar 3 of 12, chorus 2" is what the transport reads out.
             let mut jam_bar: u32 = 0;
             let mut jam_chorus: u32 = 1;
+            // Where THIS press of play put the form. Remembered because the
+            // count-in restarts the form a second time when it hands over —
+            // and by then the pending jump that decided the bar has been
+            // consumed, so recomputing it would land on the top of the loop
+            // instead of where the musician pointed.
+            let mut jam_start_bar: u32 = 0;
             // Decided at the bar line and held for the bar, so a practice
             // window or an edit landing mid-bar cannot change what the band
             // is doing under a bar that has already started.
@@ -3102,10 +3137,18 @@ impl MetronomeEngine {
                         beat_count = 0;
                         sub_count = 0;
                         measure_beat = 0;
-                        let (bar, state) = form_restart(cached.jam.as_deref(), cached.jam_position);
+                        // A PEEK, not a consumption: this runs on every
+                        // buffer the transport is stopped for, and all it is
+                        // doing is saying where the next press of play would
+                        // start. Spending the jump here would spend it
+                        // several thousand times a second and leave nothing
+                        // for the press itself.
+                        let (bar, state, _) =
+                            form_restart(cached.jam.as_deref(), cached.jam_position);
                         jam_bar = bar;
                         jam_chorus = 1;
                         jam_bar_state = state;
+                        jam_start_bar = bar;
                         return;
                     }
 
@@ -3118,13 +3161,18 @@ impl MetronomeEngine {
                         beat_count = 0;
                         sub_count = 0;
                         measure_beat = 0;
-                        // Press play and the band starts at the top of the
-                        // form, whatever it was doing last time — the top of
-                        // the loop, when one is set.
-                        let (bar, state) = form_restart(cached.jam.as_deref(), cached.jam_position);
+                        // Press play and the band starts where the screen
+                        // said it would: the bar the musician picked, else
+                        // the top of the loop, else the top of the form. The
+                        // jump is SPENT here — the press of play is what it
+                        // was waiting for.
+                        let (bar, state, left) =
+                            form_restart(cached.jam.as_deref(), cached.jam_position);
+                        cached.jam_position = left;
                         jam_bar = bar;
                         jam_chorus = 1;
                         jam_bar_state = state;
+                        jam_start_bar = bar;
                         jam_mismatch_reported = false;
                         voices.clear();
                     }
@@ -3142,11 +3190,13 @@ impl MetronomeEngine {
                         // for the bar under way is not re-decided.
                         let next_form = cached.jam.as_ref().map_or(0, |t| t.form_bars());
                         if !is_playing || next_form != jam_form_bars {
-                            let (bar, state) =
+                            let (bar, state, left) =
                                 form_restart(cached.jam.as_deref(), cached.jam_position);
+                            cached.jam_position = left;
                             jam_bar = bar;
                             jam_chorus = 1;
                             jam_bar_state = state;
+                            jam_start_bar = bar;
                         }
                         jam_form_bars = next_form;
                     }
@@ -3194,11 +3244,13 @@ impl MetronomeEngine {
                                 // starts again with it — and the table is
                                 // very likely the wrong width now, which the
                                 // mismatch check below will say out loud.
-                                let (bar, state) =
+                                let (bar, state, left) =
                                     form_restart(cached.jam.as_deref(), cached.jam_position);
+                                cached.jam_position = left;
                                 jam_bar = bar;
                                 jam_chorus = 1;
                                 jam_bar_state = state;
+                                jam_start_bar = bar;
                                 jam_mismatch_reported = false;
                             }
 
@@ -3216,11 +3268,15 @@ impl MetronomeEngine {
                                 sub_count = 0;
                                 measure_beat = 0;
                                 is_warmup_transition = true;
-                                // ...and bar 1 of chorus 1 of the form. The
-                                // count-in beeps over the top of nothing; the
-                                // band comes in on this tick.
+                                // ...and back to the bar this press of play
+                                // started on. The count-in beeps over the top
+                                // of nothing, but its bar lines have moved
+                                // the form on and one of them may have spent
+                                // the jump, so the bar is the one remembered
+                                // at the press rather than one worked out
+                                // again from a position that is now empty.
                                 let (bar, state) =
-                                    form_restart(cached.jam.as_deref(), cached.jam_position);
+                                    form_at(cached.jam.as_deref(), jam_start_bar);
                                 jam_bar = bar;
                                 jam_chorus = 1;
                                 jam_bar_state = state;
@@ -5620,25 +5676,77 @@ mod tests {
         });
         let table = compile_jam(&cfg).unwrap();
 
-        let (bar, state) = form_restart(Some(&table), JamPosition::default());
+        let (bar, state, _) = form_restart(Some(&table), JamPosition::default());
         assert_eq!((bar, state), (0, JamBandState::Full));
 
         // Bars 5-8 of a twelve-bar form are the four you play in a 4/4
         // trade, so restarting into the loop has to restart into that state
         // as well — the band state is read off the bar, not assumed.
-        let (bar, state) = form_restart(Some(&table), looping(4, 7));
+        let (bar, state, _) = form_restart(Some(&table), looping(4, 7));
         assert_eq!((bar, state), (4, JamBandState::HatsOnly));
 
         // A loop that outran its form cannot index past the end.
-        let (bar, state) = form_restart(Some(&table), looping(40, 47));
+        let (bar, state, _) = form_restart(Some(&table), looping(40, 47));
         assert_eq!((bar, state), (11, table.band_state(11)));
 
         // No band: bar 0, full, whatever the position says.
+        let (bar, state, _) = form_restart(None, looping(4, 7));
         assert_eq!(
-            form_restart(None, looping(4, 7)),
+            (bar, state),
             (0, JamBandState::Full),
             "the contract's values for a plain click"
         );
+    }
+
+    /// PRESS PLAY WITH A BAR PICKED AND YOU START ON THAT BAR.
+    ///
+    /// The bug this pins: a restart went to the top of the loop (or bar 0)
+    /// and left the jump pending, so the bar line at the END of the first
+    /// bar was what finally took it. You picked the bridge, pressed play,
+    /// and heard one bar of the head first.
+    ///
+    /// The screen already states the rule this now follows —
+    /// `useJamSession.ts` on `currentBar`: "while stopped, the one the next
+    /// press of play will start on, which is the pending jump if there is
+    /// one." The engine agrees with the drawing now.
+    #[test]
+    fn starting_again_starts_on_the_bar_that_was_picked() {
+        let mut cfg = practising_band();
+        cfg.form_bars = 12;
+        cfg.practice = Some(JamPracticeConfig {
+            drop_out: None,
+            trade: Some(JamTrade {
+                band_bars: 4,
+                you_bars: 4,
+            }),
+        });
+        let table = compile_jam(&cfg).unwrap();
+
+        // A jump on its own: bar 8, and the band state read off bar 8.
+        let (bar, state, left) = form_restart(Some(&table), at(8));
+        assert_eq!(bar, 8);
+        assert_eq!(state, table.band_state(8));
+        assert_eq!(left.jump, None, "the press of play is what it waited for");
+
+        // A jump WITH a loop set: the jump wins. The musician asked for that
+        // bar after setting the loop, so it is the newer instruction.
+        let picked = JamPosition {
+            jump: Some(2),
+            loop_bars: Some((8, 11)),
+        };
+        let (bar, _, left) = form_restart(Some(&table), picked);
+        assert_eq!(bar, 2, "the bar that was picked, not the top of the loop");
+        assert_eq!(left.loop_bars, Some((8, 11)), "and the loop is still set");
+
+        // No jump: the top of the loop, exactly as before.
+        let (bar, _, _) = form_restart(Some(&table), looping(8, 11));
+        assert_eq!(bar, 8);
+
+        // A jump past the end of the form is clamped, not indexed — the
+        // command surface refuses those, and the audio thread does not
+        // trust a number it did not compute.
+        let (bar, _, _) = form_restart(Some(&table), at(99));
+        assert_eq!(bar, 11);
     }
 
     /// A TAKE THAT FINISHED SAYS SO ONCE.
