@@ -169,6 +169,11 @@ export function compileJam(jam: Jam, options: JamCompileOptions = {}): JamEngine
     kit: jam.kit || "room",
     bass: jamBassLine(jam, options.formBar ?? 0, options.lineup),
     practice: jam.practice ? practiceConfigFrom(jam.practice) : null,
+    // A fill every four or eight bars as well as at the chorus end. Zero when
+    // fills are off at all, rather than a number the engine would have to
+    // remember not to act on: `fill` is already null there, and two switches
+    // that have to agree is one too many.
+    fillEvery: fill ? Math.max(0, Math.trunc(jam.fillEvery ?? 0)) : 0,
   };
 }
 

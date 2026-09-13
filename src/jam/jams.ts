@@ -82,6 +82,10 @@ export function createJam(name: string, fields: NewJamFields = {}): Jam {
     ...(fields.key ? { key: fields.key } : {}),
     ...(fields.band ? { band: { ...fields.band } } : {}),
     ...(fields.chords === undefined ? {} : { chords: fields.chords }),
+    // How often the fills land, when it is not just the chorus end. Carried
+    // like the rest of the optional half: "another one like this one" means
+    // the drummer still plays every four bars.
+    ...(fields.fillEvery ? { fillEvery: fields.fillEvery } : {}),
     ...(fields.practice ? { practice: { ...fields.practice } } : {}),
     ...(fields.transposition ? { transposition: fields.transposition } : {}),
     ...(fields.customGroove ? { customGroove: fields.customGroove } : {}),

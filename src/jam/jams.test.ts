@@ -58,6 +58,13 @@ describe("createJam", () => {
     expect(jam.key).toBe("Bb");
   });
 
+  it("carries how often the fills land, and writes nothing when there is nothing to carry", () => {
+    expect(createJam("x", { fills: true, fillEvery: 4 }).fillEvery).toBe(4);
+    // A jam that never asked for one keeps the field off its record, the way
+    // the key and the band do — an old record and a new default look the same.
+    expect("fillEvery" in createJam("x")).toBe(false);
+  });
+
   it("holds a custom form and a count-in to what the engine will take", () => {
     expect(createJam("x", { form: { kind: "custom", bars: 500 } }).form.bars).toBe(64);
     expect(createJam("x", { countIn: 99 }).countIn).toBe(JAM_MAX_COUNT_IN);
