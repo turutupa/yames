@@ -132,3 +132,24 @@ handler existed. It clears when W1's branch merges. Nobody else touches it.
   narrowings that lost the setlist on the way back from Settings are fixed
   and pinned by a test.
 - `set_jam` is rejected by the engine until W1 merges; the click plays.
+
+## Waves four and five (W11–W13)
+
+- Position: `set_jam_position` is registered; the engine applies jump and
+  loop at the bar line, a loop catches a jump, a wrap the loop catches is
+  not a chorus, restart begins at the loop's first bar. The UI moves the
+  loop to the target section when a jump leaves it (`jumpTo` in
+  `useJamSession.ts`).
+- The gain memo in `compile()` is keyed on the whole table (bass included)
+  in a 64-entry ring: `bass.gain` can move the rendered peak by 40%, so a
+  drums-only key was unsafe (W11 measured it).
+- `Jam.band.keys` and `Jam.keysStyle` were added additively by W13; the
+  engine mirror is unchanged. `chordsForJam` is the one place the changes
+  come from (progression or the form's default).
+- Spoken counts do not fit a beat: Piper's "one" is 654 ms of audio and
+  1.1 s end to end, so the count is one phrase (`perBeatCountFits` says
+  "does not fit" until measured otherwise).
+- `.sr-only` is now defined in `global.css`; it was used since W8 and never
+  defined.
+- The BRIEF's robocopy line breaks under the Bash tool (Git Bash rewrites
+  `/E`); run it through PowerShell.
