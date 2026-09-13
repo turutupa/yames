@@ -10,6 +10,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { useJamSession } from "./useJamSession";
 import { STARTER_JAMS } from "../../../jam/jams";
+import { compileJam } from "../../../jam/compile";
 import { grooveById } from "../../../jam/grooves";
 import type { Jam, JamEngineConfig, JamPositionCommand } from "../../../jam/types";
 import type { BeatEvent } from "../../../types";
@@ -96,6 +97,14 @@ type Props = {
   /** The metronome's own meter, which the jam borrows and gives back. */
   meter?: { subdivision: number; beatGroups: number[]; freeMode: boolean };
 };
+
+/**
+ * The band a guitarist gets, which is what `mount` asks for below.
+ *
+ * Spelled out so a test can compile the same config the hook does and compare
+ * the two: what the engine was handed, against what it should have been.
+ */
+const LINEUP = { drums: true, bass: true };
 
 /** A tick, with only the two fields the jam cares about set apart. */
 function beatAt(formBar: number, chorus = 1, measureBeat = 0): BeatEvent {
@@ -254,11 +263,29 @@ describe("what reaches the engine", () => {
     expect(names("setJam")[0]).not.toBeNull();
   });
 
-  it("sends nothing but the clear-down while the jam tab is empty", async () => {
+  it("sends nothing at all while no jam of this tab's is loaded", async () => {
+    // Not even the clear-down. A setlist step can BE a jam and the runner puts
+    // it on the engine while this hook holds nothing; a `setJam(null)` from
+    // here would take that band away, from a hook that never loaded anything.
     const { result } = mount();
     await waitFor(() => expect(result.current.jams).toHaveLength(6));
     expect(names("setBeatGroups")).toHaveLength(0);
-    expect(names("setJam")).toEqual([null]);
+    expect(names("setJam")).toHaveLength(0);
+  });
+
+  it("leaves a band it did not put there alone when the tab changes", async () => {
+    // The setlist runner's jam step, and the player wanders from Setlist to
+    // Metronome to check something. This hook has no jam; every tab change
+    // used to send `setJam(null)` anyway and the drummer stopped mid-step.
+    const { result, rerender } = mount("setlist");
+    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    calls.length = 0;
+
+    rerender({ v: "beat" });
+    rerender({ v: "drill" });
+    rerender({ v: "settings" });
+    await new Promise((r) => setTimeout(r, 10));
+    expect(names("setJam")).toHaveLength(0);
   });
 });
 
@@ -341,6 +368,71 @@ describe("the bass, one bar ahead", () => {
     await new Promise((r) => setTimeout(r, 10));
     expect(names("setBeatGroups")).toHaveLength(0);
     expect(names("setSubdivision")).toHaveLength(0);
+  });
+
+  it("never re-sends the meter for an edit that is not a meter", async () => {
+    // A mix slider fires `onEdit` per step of the drag — about thirty times a
+    // second. Every one of them used to push free mode, the beat groups and
+    // the subdivision, which is the bar being restacked under a playing band
+    // thirty times a second. The table still goes: the gains are in it.
+    const { result } = await loadedBlues();
+    calls.length = 0;
+
+    for (const bass of [0.9, 0.8, 0.7, 0.6]) {
+      act(() => result.current.editJam({ mix: { drums: 1, bass, keys: 1 } }));
+      await waitFor(() => expect(result.current.jam?.mix?.bass).toBe(bass));
+    }
+    await new Promise((r) => setTimeout(r, 10));
+
+    expect(names("setFreeMode")).toHaveLength(0);
+    expect(names("setBeatGroups")).toHaveLength(0);
+    expect(names("setSubdivision")).toHaveLength(0);
+    expect(names("setJam").length).toBeGreaterThan(0);
+  });
+
+  it("sends the loop's first bar at the loop's end, not the bar after it", async () => {
+    // The engine wraps a loop at the bar line, so the bar after the loop's
+    // last one is its FIRST one. Sending `bar + 1` there put the line of the
+    // bar after the loop under the loop's own top, on every single pass.
+    const { result, rerender } = await loadedBlues();
+    act(() => result.current.position.toggleSectionLoop({ start: 4, end: 7 }));
+    await waitFor(() => expect(result.current.position.loop).toEqual({ start: 4, end: 7 }));
+
+    for (const bar of [4, 5, 6]) {
+      rerender({ v: "jam", playing: true, beat: beatAt(bar) });
+      await new Promise((r) => setTimeout(r, 5));
+    }
+    calls.length = 0;
+
+    // Bar 7 is the loop's last. What plays next is bar 4 — the IV — and not
+    // bar 8, which is the V.
+    rerender({ v: "jam", playing: true, beat: beatAt(7) });
+    await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
+
+    const jam = result.current.jam!;
+    const wrapped = compileJam(jam, { formBar: 4, lineup: LINEUP });
+    const straight = compileJam(jam, { formBar: 8, lineup: LINEUP });
+    expect(lastConfig().bass?.pitches).toEqual(wrapped.bass?.pitches);
+    expect(wrapped.bass?.pitches).not.toEqual(straight.bass?.pitches);
+  });
+
+  it("sends the bar a pending jump is heading for, not the next one along", async () => {
+    // A jump is applied at the next bar line, so the next bar is the target.
+    // The bar after the one you happen to be on is the one bar it is not.
+    const { result, rerender } = await loadedBlues();
+    rerender({ v: "jam", playing: true, beat: beatAt(1) });
+    await new Promise((r) => setTimeout(r, 5));
+
+    act(() => result.current.position.jumpTo(8));
+    await waitFor(() => expect(result.current.position.pendingJump).toBe(8));
+    calls.length = 0;
+
+    rerender({ v: "jam", playing: true, beat: beatAt(2) });
+    await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
+
+    const jam = result.current.jam!;
+    const target = compileJam(jam, { formBar: 8, lineup: LINEUP });
+    expect(lastConfig().bass?.pitches).toEqual(target.bass?.pitches);
   });
 
   it("leaves the bass out for a bass player", async () => {
@@ -691,6 +783,28 @@ describe("moving through the form", () => {
       { start: 8, end: 11 },
       null,
     ]);
+  });
+
+  it("names the bar play will start on, loop and all", async () => {
+    // Stopped, with the bridge on repeat: the next press of play starts on the
+    // loop's first bar, and a readout saying "bar 1" is a readout that is
+    // wrong about the one thing this timeline exists to tell you.
+    const { result } = await loaded();
+    expect(result.current.position.currentBar).toBe(0);
+
+    act(() => result.current.position.toggleSectionLoop({ start: 4, end: 7 }));
+    await waitFor(() => expect(result.current.position.currentBar).toBe(4));
+
+    // A jump wins over the loop, which is the engine's own order for a restart.
+    act(() => result.current.position.jumpTo(6));
+    await waitFor(() => expect(result.current.position.currentBar).toBe(6));
+  });
+
+  it("reads the bar off the beat events while the band plays", async () => {
+    const { result, rerender } = await loaded((jams) => jams[0], { playing: true });
+    act(() => result.current.position.toggleSectionLoop({ start: 4, end: 7 }));
+    rerender({ v: "jam", playing: true, beat: beatAt(5) });
+    await waitFor(() => expect(result.current.position.currentBar).toBe(5));
   });
 
   it("clears the loop on the way out of the tab, and tells the engine", async () => {

@@ -56,11 +56,15 @@ interface TransportProps {
   /**
    * A take is being recorded (JAM_MODE §4.4).
    *
-   * On the transport rather than on the jam screen, and that is the whole
-   * point of putting it here: the transport is the one frame that is on every
-   * tab, so a take that is running while you have wandered off to the
-   * metronome to check something still says it is running. A microphone
-   * writing a file must never be invisible.
+   * On the transport rather than inside the jam screen because the transport
+   * is the frame the button that started it sits in: the mark belongs beside
+   * Play, where the eye already is, and a microphone writing a file must
+   * never be invisible.
+   *
+   * It is never seen from another tab, and that is not an oversight. A take
+   * belongs to the jam on the engine, and leaving the Jam tab takes that jam
+   * off it — so the take ends there rather than going on recording your
+   * playing over a band that is no longer playing. See `useJamTakes`.
    */
   recording?: boolean;
   /** Seconds of the take so far. */

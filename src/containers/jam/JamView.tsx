@@ -129,6 +129,12 @@ export interface JamScreenState {
 export interface JamPositionState {
   loop: BarRange | null;
   pendingJump: number | null;
+  /**
+   * The bar the form is on, or — while stopped — the one the next press of
+   * play will start on: the pending jump, else the loop's first bar, else the
+   * top. The section actions count from it and the timeline lights it.
+   */
+  currentBar: number;
   jumpTo: (bar: number) => void;
   toggleSectionLoop: (range: BarRange) => void;
 }
@@ -153,10 +159,10 @@ interface JamViewProps {
    * The jam's takes: the shelf, whether the build can record at all, and what
    * is playing back (JAM_MODE §4.4).
    *
-   * Passed in whole rather than assembled here because recording outlives the
-   * screen — a take runs while you are on the metronome tab looking something
-   * up, and a hook that lived inside this component would stop the moment the
-   * component unmounted.
+   * Passed in whole rather than assembled here because recording is the
+   * window's business on both ends: the mark it puts on the transport, and
+   * the tab it watches to know when the jam has left the engine — which is
+   * when the take ends. A hook inside this component could see neither.
    */
   takes: JamTakesState;
   /**
@@ -608,6 +614,7 @@ export function JamView({
         bandStates={bandStates}
         loop={position.loop}
         pendingJump={position.pendingJump}
+        startBar={position.currentBar}
         onJumpTo={position.jumpTo}
         onToggleSectionLoop={position.toggleSectionLoop}
         editingChords={screen.editingChords}

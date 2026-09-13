@@ -156,6 +156,22 @@ describe("MainHeader — the overflow", () => {
     fireEvent.mouseDown(document.body);
     expect(screen.queryByRole("menuitem", { name: "Share" })).toBeNull();
   });
+
+  it("takes Escape for itself, so the jam behind it stays open", () => {
+    // The window has its own Escape doors — they close the loaded jam and the
+    // loaded setlist. One press used to shut this menu AND walk through one of
+    // those, which is a long way from what "never mind" asked for.
+    setup();
+    fireEvent.click(screen.getByRole("button", { name: "More" }));
+    const escape = new KeyboardEvent("keydown", {
+      key: "Escape",
+      bubbles: true,
+      cancelable: true,
+    });
+    fireEvent(document, escape);
+    expect(screen.queryByRole("menuitem", { name: "Share" })).toBeNull();
+    expect(escape.defaultPrevented).toBe(true);
+  });
 });
 
 describe("MainHeader — the preset context", () => {

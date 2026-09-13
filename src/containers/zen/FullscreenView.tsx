@@ -37,6 +37,18 @@ interface FullscreenViewProps {
   onExit: () => void;
   /** The jam on the stage, when there is one. Absent: Zen as it always was. */
   jam?: ZenJam | null;
+  /**
+   * A band is loaded on the ENGINE, whichever tab put it there.
+   *
+   * Not the same question as `activeTab === "jam"`: a setlist step can be a
+   * jam (JAM_MODE §8.5), and while one of those runs the tab is the setlist,
+   * which maps to "beat" here. The meter and subdivision buttons belong to
+   * the metronome tab alone, and a press of one while a band is playing puts
+   * the table out of step with the bar the engine checks it against — so the
+   * engine drops the band and plays the plain click, with nothing on screen
+   * to say why.
+   */
+  jamOnEngine?: boolean;
 }
 
 const SUBDIVISION_LABELS: Record<Subdivision, string> = {
@@ -61,6 +73,7 @@ export function FullscreenView({
   activeTab,
   onExit,
   jam = null,
+  jamOnEngine = false,
 }: FullscreenViewProps) {
   const { t } = useTranslation();
   const ramp = state.speedRamp;
@@ -84,8 +97,13 @@ export function FullscreenView({
    * from the jam and its subdivision from the groove, so a button that set
    * either would be a button that quietly puts the band out of step with the
    * bar the engine is checking it against.
+   *
+   * `activeTab` is not enough to ask that with. A setlist step can BE a jam,
+   * and a setlist maps to "beat" here — so while a jam step ran, the buttons
+   * that break a band were live in Zen with the band playing behind them.
+   * The question is whether there is a band, not which tab is showing.
    */
-  const metronomeControls = activeTab === "beat";
+  const metronomeControls = activeTab === "beat" && !jamOnEngine;
   const meterBeats = Math.max(2, meterTotal(state.beatGroups ?? [state.timeSignature]));
   // `activeBeat` is the engine's `measureBeat`, so the dot count has to
   // come from the SAME source the engine wraps it against: the ramp's

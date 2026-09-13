@@ -13,8 +13,9 @@ import { act, renderHook } from "@testing-library/react";
 import { useSetlistSession } from "./useSetlistSession";
 import { DEFAULT_TEST_STATE, mockInvoke } from "../../../test/mocks";
 import { STARTER_JAMS } from "../../../jam/jams";
+import { jamToSetlistStep } from "../../../setlist";
 import type { Jam } from "../../../jam/types";
-import type { AppState, Setlist } from "../../../types";
+import type { AppState, BeatEvent, Setlist, SetlistStep } from "../../../types";
 
 const CHAIN: Setlist = {
   id: "c1",
@@ -380,6 +381,149 @@ describe("adding a jam to a setlist", () => {
     });
     expect(result.current.setlist!.steps).toHaveLength(3);
     expect(result.current.setlist!.steps[2].jamId).toBe("j1");
+  });
+});
+
+/**
+ * The end of a run, from the session's side.
+ *
+ * The runner hands the metronome its meter back when a run stops, and this
+ * hook reads the engine back into the selected step while stopped. Put the two
+ * together and a meter handed back over the wrong step is not a glitch you
+ * hear — it is a meter written into a saved file.
+ */
+describe("a run that ends on a plain step", () => {
+  /** The metronome's own meter before the run: nothing a step would choose. */
+  const BEFORE_RUN = { subdivision: 1, beatGroups: [7], freeMode: true };
+
+  const ROUTINE: Setlist = {
+    id: "c-run",
+    name: "Routine",
+    createdAt: 0,
+    repeat: 1,
+    steps: [
+      {
+        ...jamToSetlistStep(JAM),
+        id: "s-jam",
+        trigger: { kind: "bars", bars: 1 },
+        transition: { kind: "cut" },
+      },
+      CHAIN.steps[1],
+    ],
+  };
+
+  function downbeat(n: number): BeatEvent {
+    return {
+      beat: n,
+      measureBeat: 0,
+      subdivision: 0,
+      isDownbeat: true,
+      isAccent: true,
+      formBar: 0,
+      chorus: 1,
+    };
+  }
+
+  /** A step's own configuration, as the engine would report it back. */
+  function asState(step: SetlistStep, over: Partial<AppState> = {}): AppState {
+    return {
+      ...DEFAULT_TEST_STATE,
+      bpm: step.bpm,
+      subdivision: step.subdivision,
+      beatGroups: [...step.beatGroups],
+      freeMode: step.freeMode ?? false,
+      soundType: step.soundType,
+      volume: step.volume,
+      ...over,
+    } as AppState;
+  }
+
+  /** What the engine was last TOLD its meter is, or the fallback if nothing. */
+  function engineMeter(fallback: typeof BEFORE_RUN) {
+    const last = (cmd: string) => {
+      const calls = mockInvoke.mock.calls.filter((c) => c[0] === cmd);
+      return calls.length
+        ? (calls[calls.length - 1][1] as Record<string, unknown> | undefined)
+        : undefined;
+    };
+    return {
+      subdivision: (last("set_subdivision")?.subdivision as number) ?? fallback.subdivision,
+      beatGroups: (last("set_beat_groups")?.groups as number[]) ?? fallback.beatGroups,
+      freeMode: (last("set_free_mode")?.enabled as boolean) ?? fallback.freeMode,
+    };
+  }
+
+  async function settle() {
+    await act(async () => {
+      for (let i = 0; i < 12; i += 1) await Promise.resolve();
+    });
+  }
+
+  it("does not write the pre-run meter into the step it stopped on", async () => {
+    // A routine of "blues, then alternate picking", stopped during the
+    // picking. The meter in the pocket belongs to before the whole run, and
+    // handing it back there put it on the engine over the picking step's own
+    // — where this hook's mirror read it straight back out and filed it in
+    // the step. A saved routine acquiring a meter nobody chose.
+    const setView = vi.fn();
+    const { result, rerender } = renderHook(
+      ({ state, isPlaying, beat }: { state: AppState; isPlaying: boolean; beat: BeatEvent | null }) =>
+        useSetlistSession({
+          state,
+          isPlaying,
+          currentBeat: beat,
+          setView,
+          onSetlistLoaded: vi.fn(),
+          jamContext: {
+            getJam: (id) => (id === JAM.id ? JAM : null),
+            lineup: { drums: true, bass: true },
+            meter: BEFORE_RUN,
+          },
+        }),
+      {
+        initialProps: {
+          state: DEFAULT_TEST_STATE as AppState,
+          isPlaying: false,
+          beat: null as BeatEvent | null,
+        },
+      },
+    );
+
+    act(() => result.current.loadSetlist(ROUTINE));
+    // The engine catches up with the jam step, which is what clears the wait.
+    // The mirror never writes onto a jam step, so this costs nothing.
+    const jamStep = result.current.setlist!.steps[0];
+    const plain = result.current.setlist!.steps[1];
+    act(() => rerender({ state: asState(jamStep), isPlaying: false, beat: null }));
+    expect(result.current.dirty).toBe(false);
+
+    act(() => rerender({ state: asState(jamStep), isPlaying: true, beat: null }));
+    act(() => rerender({ state: asState(jamStep), isPlaying: true, beat: downbeat(0) }));
+    act(() => rerender({ state: asState(jamStep), isPlaying: true, beat: downbeat(4) }));
+    await settle();
+    expect(result.current.runningIndex).toBe(1);
+
+    // The engine is on the plain step now, and says so.
+    act(() => rerender({ state: asState(plain), isPlaying: true, beat: downbeat(4) }));
+    mockInvoke.mockClear();
+
+    act(() => rerender({ state: asState(plain), isPlaying: false, beat: null }));
+    await settle();
+
+    // Whatever the run said on its way out, echoed back the way the engine
+    // would echo it.
+    const after = engineMeter({
+      subdivision: plain.subdivision,
+      beatGroups: plain.beatGroups,
+      freeMode: plain.freeMode ?? false,
+    });
+    act(() => rerender({ state: asState(plain, after), isPlaying: false, beat: null }));
+
+    const stopped = result.current.setlist!.steps[1];
+    expect(stopped.subdivision).toBe(plain.subdivision);
+    expect(stopped.beatGroups).toEqual(plain.beatGroups);
+    expect(stopped.freeMode).toBe(plain.freeMode ?? false);
+    expect(result.current.dirty).toBe(false);
   });
 });
 

@@ -226,4 +226,37 @@ describe("FullscreenView — a jam", () => {
     const { container } = renderJam({ next: null });
     expect(container.querySelector(".fs-jam-next")?.textContent?.trim()).toBe("");
   });
+
+  it("puts the meter buttons away for a jam STEP of a setlist too", () => {
+    // A setlist step can be a jam, and a setlist reads as "beat" here — so
+    // the two controls that break a band were live in Zen with the band
+    // playing behind them. Pressing one sets a meter the loaded table was not
+    // written for, the engine refuses the table, and the drummer disappears
+    // with nothing on screen to say why.
+    const { container } = render(
+      <FullscreenView
+        state={DEFAULT_TEST_STATE}
+        currentBeat={null}
+        activeTab="beat"
+        jamOnEngine
+        onExit={vi.fn()}
+      />,
+    );
+    expect(container.querySelectorAll(".fs-ctrl-btn").length).toBe(0);
+    // Everything else the metronome tab has in Zen is untouched.
+    expect(container.querySelector(".fs-bpm")?.textContent).toContain("120");
+    expect(container.querySelector(".fs-play-btn")).not.toBeNull();
+  });
+
+  it("leaves them alone on the metronome tab with no band anywhere", () => {
+    const { container } = render(
+      <FullscreenView
+        state={DEFAULT_TEST_STATE}
+        currentBeat={null}
+        activeTab="beat"
+        onExit={vi.fn()}
+      />,
+    );
+    expect(container.querySelectorAll(".fs-ctrl-btn").length).toBeGreaterThan(0);
+  });
 });

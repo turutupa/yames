@@ -304,7 +304,10 @@ export function installShotMock(shot: Shot, theme: string): void {
     else clearTimeout(beatTimer);
   }
 
-  const MAP: Record<string, () => unknown> = {
+  // Handlers take the command's own arguments, because some answers depend on
+  // them: `list_takes` is about ONE jam's shelf, and a mock that ignores which
+  // one cannot photograph an empty one.
+  const MAP: Record<string, (a?: Record<string, unknown>) => unknown> = {
     get_state: () => STATE,
     list_presets: () => [...PRESETS, ...DRILLS],
     get_active_tab: () => shot.tab ?? "beat",
@@ -350,14 +353,19 @@ export function installShotMock(shot: Shot, theme: string): void {
     list_jams: () => [...STARTER_JAMS],
     save_jams: () => null,
     /**
-     * The takes (JAM_MODE §4.4).
+     * The takes (JAM_MODE §4.4), of the jam that was asked about.
      *
      * Answered rather than left to fall through to `null`, because the
      * section's whole point is what a shelf with recordings on it looks
      * like — and because a rejection here is the "cannot record" state,
      * which is a different picture.
+     *
+     * Filtered by `jamId`, like the real command: the fixtures are all on the
+     * first starter jam, so handing the same three back for every jam meant
+     * the empty shelf — the one a musician sees on every jam but the one they
+     * recorded — could not be photographed at all.
      */
-    list_takes: () => [...TAKES],
+    list_takes: (a) => TAKES.filter((take) => take.jamId === a?.jamId),
     start_take: () => null,
     stop_take: () => null,
     delete_take: () => null,
@@ -454,7 +462,7 @@ export function installShotMock(shot: Shot, theme: string): void {
       return null;
     }
 
-    return MAP[cmd]?.() ?? null;
+    return MAP[cmd]?.(a) ?? null;
   });
 
   // Already running for the shots that are of a running app, so the first

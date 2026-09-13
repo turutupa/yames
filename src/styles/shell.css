@@ -2228,9 +2228,10 @@ button.context-chip:hover,
 }
 
 /* â”€â”€ The recording mark (JAM_MODE Â§4.4) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-   On the transport, so it is on every tab: a microphone writing a file must
-   never be invisible because you wandered off to the metronome to look
-   something up. A red dot, the word, and the clock â€” nothing to press,
+   On the transport, beside the button that starts it: a microphone writing
+   a file must never be invisible. A take ends when its jam leaves the engine
+   (`useJamTakes`), so this is a Jam-tab sight in practice.
+   A red dot, the word, and the clock â€” nothing to press,
    because stopping a take is stopping the transport and there is already a
    button for that two inches to the left. */
 .transport-recording {

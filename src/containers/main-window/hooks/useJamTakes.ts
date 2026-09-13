@@ -140,6 +140,16 @@ export function useJamTakes({
 
   /** So `stop` can tell "we started one" from "the transport merely stopped". */
   const recordingRef = useRef(false);
+  /**
+   * The jam the take now recording belongs to.
+   *
+   * A take is a recording of a jam, and the engine files it under the id it
+   * was started with. Loading another jam mid-take left the recorder running
+   * under the old id and put the finished take on the NEW jam's shelf — a
+   * recording of the blues filed under the bossa, which is a thing you only
+   * find out about when you play it back a week later.
+   */
+  const recordingJamRef = useRef<string | null>(null);
   const startedAt = useRef<number | null>(null);
   const jamId = jam?.id ?? null;
   /** The loaded jam's id for listeners that outlive a render. */
@@ -233,6 +243,7 @@ export function useJamTakes({
   useEffect(() => {
     const unlisten = onTakeCapped(() => {
       recordingRef.current = false;
+      recordingJamRef.current = null;
       startedAt.current = null;
       setRecording(false);
       setRecordedSeconds(0);
@@ -245,12 +256,21 @@ export function useJamTakes({
   }, [refresh]);
 
   /**
-   * Start on the first bar after the count-in; stop with the transport.
+   * Start on the first bar after the count-in; end when the jam does.
    *
    * `jam?.takes` is read here rather than at the moment play is pressed, so
    * turning the switch on mid-tune does NOT start recording half a take —
    * the hands-free key says "record the next one", and this is what makes
    * that true.
+   *
+   * A take ends when its jam leaves the engine, and there are three ways for
+   * that to happen: the transport stops, the switch goes off, or the jam is
+   * no longer the one loaded on the Jam tab. That last one covers both
+   * switching jams and leaving the tab — the tab's own jam is taken off the
+   * engine when you leave it, and a recorder still writing your playing over
+   * a band that is no longer there would be recording something nobody asked
+   * for. So the mark on the transport is never seen from another tab: there
+   * is nothing to see, because the take has ended.
    */
   const armed = view === "jam" && !!jam?.takes && available !== false;
   useEffect(() => {
@@ -258,6 +278,7 @@ export function useJamTakes({
       const id = jamId;
       if (!id) return;
       recordingRef.current = true;
+      recordingJamRef.current = id;
       startedAt.current = Date.now();
       setRecording(true);
       setRecordedSeconds(0);
@@ -266,6 +287,7 @@ export function useJamTakes({
         // the section switches to saying this build cannot record — which is
         // the truth, and better than a red dot over nothing.
         recordingRef.current = false;
+        recordingJamRef.current = null;
         startedAt.current = null;
         setRecording(false);
         setAvailable(false);
@@ -273,8 +295,9 @@ export function useJamTakes({
       return;
     }
 
-    if (recordingRef.current && (!isPlaying || !armed)) {
+    if (recordingRef.current && (!isPlaying || !armed || recordingJamRef.current !== jamId)) {
       recordingRef.current = false;
+      recordingJamRef.current = null;
       startedAt.current = null;
       setRecording(false);
       setRecordedSeconds(0);
@@ -283,13 +306,18 @@ export function useJamTakes({
           // `null` is the engine saying nothing was recording, which is not a
           // failure and not a take.
           if (!take) return;
+          // The folder grew, whoever the take belongs to.
+          void refreshSize();
+          // Onto the shelf only if it is THIS jam's shelf. A take that ended
+          // because another jam took the stage belongs to the one it was
+          // recorded under, and putting it at the top of the new jam's list
+          // would be the app telling you a lie you cannot check.
+          if (take.jamId !== jamIdRef.current) return;
           // The take the engine just handed back, not a re-read of the shelf:
           // `listTakes` is a round trip the engine has no obligation to have
           // finished writing into, and a re-read that lands first would drop
           // the take you just played off the top of the list.
           setTakes((prev) => sortTakes([take, ...prev]));
-          // The folder DID just grow, though, and that is a different fact.
-          void refreshSize();
         })
         .catch(() => {});
     }
@@ -327,7 +355,14 @@ export function useJamTakes({
       // been asked, and a row that lingers while the disk empties is a row
       // people click twice.
       setTakes((prev) => prev.filter((take) => take.id !== id));
-      if (playingId === id) setPlayingId(null);
+      if (playingId === id) {
+        // The controls going quiet is not the same as the sound stopping.
+        // Clearing `playingId` on its own left the engine playing a file that
+        // was about to be deleted, with no row on the screen to stop it from
+        // and the band still muted behind it.
+        setPlayingId(null);
+        void stopTakePlayback().catch(() => {});
+      }
       void deleteTake(id)
         // Either way the folder is a different size than the screen thinks,
         // and on a failure the row has to come back too.

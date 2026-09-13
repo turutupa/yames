@@ -104,6 +104,7 @@ import { SetlistParagraph } from "../../components/setlist/SetlistParagraph";
 import { SetlistPlayer } from "../../components/setlist/SetlistPlayer";
 import { useAudioError } from "./hooks/useAudioError";
 import { AudioErrorNotice } from "./AudioErrorNotice";
+import { jamEscapeTarget } from "./jamEscape";
 import {
   CoachDownloadConfirmDialog,
   DownloadProgressBar,
@@ -379,20 +380,34 @@ export function MainWindow() {
     },
   });
 
+  /*
+   * Wrapped, because it is the root of a chain of fresh objects.
+   *
+   * An inline arrow here made `requestTakes` new every render, which made
+   * `jamActions` new, which made the global hotkey dispatcher new — so the
+   * window's keydown listener was torn down and re-registered on every beat
+   * event. `editJam` is itself stable, so this has no dependencies.
+   */
+  const setJamTakes = useCallback(
+    (takes: boolean) => jamSession.editJam({ takes }),
+    [jamSession.editJam],
+  );
+
   /**
    * The loaded jam's takes (JAM_MODE §4.4).
    *
-   * At the window level rather than inside `JamView`, and for the same reason
-   * the transport's mark is on the transport: a take runs while you wander
-   * off to the metronome tab to check something, and a recorder that lived in
-   * the screen would stop the moment the screen unmounted.
+   * At the window level rather than inside `JamView` because both ends of
+   * recording are the window's: the mark it puts on the transport, and the
+   * TAB, which is how the hook knows the jam has left the engine. A take
+   * belongs to the jam on the engine and ends when that jam does, so leaving
+   * the Jam tab ends it — see `useJamTakes`.
    */
   const jamTakes = useJamTakes({
     jam: jamSession.jam,
     view,
     isPlaying: state.isPlaying,
     countingIn: (state.countIn?.beats ?? 0) > 0,
-    onSetTakes: (takes) => jamSession.editJam({ takes }),
+    onSetTakes: setJamTakes,
   });
 
   useEffect(() => {
@@ -874,23 +889,43 @@ export function MainWindow() {
     if (active && active.closest(".preset-sidebar")) active.blur();
   }, []);
 
-  // Escape is the jam's other door too, with the same guards as the setlist's.
+  /*
+   * Escape is the jam's other door too, with the same guards as the setlist's.
+   *
+   * The dependency list is picked apart rather than `jamSession`, which is a
+   * fresh object literal on every render: with the whole session in it this
+   * listener was torn down and re-registered on every beat event, sixteen
+   * times a bar.
+   */
+  const jamScreen = jamSession.screen;
+  const closeJam = jamSession.closeJam;
+  const jamLoaded = !!jamSession.jam;
   useEffect(() => {
-    if (view !== "jam" || !jamSession.jam) return;
+    if (view !== "jam" || !jamLoaded) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape" || e.defaultPrevented) return;
       const el = document.activeElement as HTMLElement | null;
-      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
-      if (document.querySelector('[role="dialog"], [role="alertdialog"]')) return;
-      if (jamSession.screen?.editorOpen) return;
+      // The innermost thing open is what gets put away; `jamEscapeTarget` is
+      // that order, on its own, with a test on it.
+      const target = jamEscapeTarget({
+        typing: !!el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable),
+        dialogOpen: !!document.querySelector('[role="dialog"], [role="alertdialog"]'),
+        editorOpen: !!jamScreen?.editorOpen,
+        editingBar: jamScreen?.editingBar ?? null,
+      });
+      if (target === "nothing") return;
+      if (target === "chordPicker") {
+        jamScreen?.setEditingBar(null);
+        return;
+      }
       guarded(() => {
-        jamSession.closeJam();
+        closeJam();
         releaseSidebarFocus();
       });
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [view, jamSession, guarded, releaseSidebarFocus]);
+  }, [view, jamLoaded, jamScreen, closeJam, guarded, releaseSidebarFocus]);
 
   const activeBeat = currentBeat ? currentBeat.measureBeat : -1;
   const activeSub = currentBeat ? currentBeat.subdivision : -1;
@@ -1188,6 +1223,9 @@ export function MainWindow() {
         currentBeat={currentBeat}
         activeTab={view === "drill" ? "drill" : view === "jam" && jamSession.jam ? "jam" : "beat"}
         jam={zenJam}
+        // Whichever tab put it there: the jam tab's own, or a setlist step
+        // that is a jam, which reads as "beat" above and is still a band.
+        jamOnEngine={(view === "jam" && !!jamSession.jam) || !!setlistSession.runner.jam}
         onExit={zenExitHandler}
       />
     </ZenTransition>

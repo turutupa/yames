@@ -44,6 +44,16 @@ interface FormTimelineProps {
   loop?: BarRange | null;
   /** A bar asked for that the form has not reached yet, or null. */
   pendingJump?: number | null;
+  /**
+   * The bar the next press of play will start on — `position.currentBar`.
+   *
+   * Worked out by `useJamSession` and handed over rather than guessed at here,
+   * because the engine's restart rule has three parts (a pending jump, else
+   * the loop's first bar, else the top) and this component knowing two of them
+   * would be a second answer to the same question. While the band plays it is
+   * ignored: the beat events say where the form is.
+   */
+  startBar?: number;
   /** Click a bar to go there at the next bar line. Absent: cells are inert. */
   onJumpTo?: ((bar: number) => void) | null;
   /** Toggle the loop on a section. Absent: no loop affordance is drawn. */
@@ -111,6 +121,7 @@ export function FormTimeline({
   bandStates = null,
   loop = null,
   pendingJump = null,
+  startBar = 0,
   onJumpTo = null,
   onToggleSectionLoop = null,
   editingChords = false,
@@ -154,7 +165,9 @@ export function FormTimeline({
   const sections = formSections(form);
   const ranges = sectionRanges(form);
   const names = formSectionNames(form);
-  const current = isPlaying ? Math.min(Math.max(formBar, 0), total - 1) : 0;
+  // Playing: where the form is. Stopped: where it will start — which with a
+  // section on repeat is the loop's first bar, not the top of the tune.
+  const current = Math.min(Math.max(isPlaying ? formBar : startBar, 0), total - 1);
   /** How far through the current bar, 0..1 — the lit cell's fill. */
   const through = isPlaying && beatsPerBar > 0 ? Math.min(1, (beat + 1) / beatsPerBar) : 0;
   /** The pending bar, only while it is a bar this form has. */
@@ -179,9 +192,13 @@ export function FormTimeline({
           {chords?.[current] ? ` · ${chords[current]}` : ""}
           {/* Where the next press of play will start. Only while stopped: with
               the band running the pending cell says it, and the sentence has
-              the bar you are ON to report. */}
-          {!isPlaying && pending !== null
-            ? ` · ${t("jam.form.startsAt", { bar: pending + 1 })}`
+              the bar you are ON to report.
+
+              The same `startBar` the lit cell uses, so the two halves of the
+              sentence cannot name different bars. Left out at the top of the
+              form, where "starts at bar 1" is the one case nobody needs told. */}
+          {!isPlaying && current > 0
+            ? ` · ${t("jam.form.startsAt", { bar: current + 1 })}`
             : ""}
         </span>
         {loop && (

@@ -296,10 +296,14 @@ describe("Transport — what it sheds, and in what order", () => {
 /**
  * The recording mark (JAM_MODE §4.4).
  *
- * It is on the transport rather than on the jam screen because the transport
- * is the one frame that is on every tab: a take that is running while you
- * have wandered off to the metronome to check something still has to say so.
- * A microphone writing a file must never be invisible.
+ * It is on the transport rather than inside the jam screen because that is
+ * where the button that starts it lives: a microphone writing a file must
+ * never be invisible.
+ *
+ * The transport itself does not ask which tab is showing, and these pin that
+ * — a component that gated its own mark on the view would be a second opinion
+ * about when a take is running. Whether one CAN be running is `useJamTakes`'s
+ * question, and its answer is that a take ends when its jam leaves the engine.
  */
 describe("the recording mark", () => {
   it("is absent until a take is running", () => {
@@ -315,8 +319,9 @@ describe("the recording mark", () => {
     expect(mark.querySelector(".transport-recording-dot")).toBeTruthy();
   });
 
-  it("says so on every tab, not only on the jam", () => {
-    // The point of putting it here is that it survives a trip to another tab.
+  it("draws the mark wherever it is told to, without asking about the tab", () => {
+    // The transport takes the recording state as a fact and draws it. Which
+    // tabs that fact can be true on is decided one level up.
     for (const view of ["beat", "drill", "setlist", "jam"] as const) {
       const { unmount } = render(<Transport {...base} view={view} recording recordedSeconds={5} />);
       expect(document.querySelector(".transport-recording"), view).toBeTruthy();
