@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { megabytes, takeLength, takesBytes, TAKES_SIZE_NOTICE_BYTES } from "../../jam/takes";
+import { megabytes, takeLength, TAKES_SIZE_NOTICE_BYTES } from "../../jam/takes";
 import type { JamTake } from "../../jam/types";
 import { formatDate } from "../practice-coach/coachCardHelpers";
 
@@ -44,6 +44,14 @@ interface TakesSectionProps {
   takes: JamTake[];
   /** True while the transport is recording one. The list waits for it. */
   recording: boolean;
+  /**
+   * Bytes the takes folder holds, across every jam, as the engine reports it.
+   *
+   * The whole folder rather than this jam's shelf: a disk filling up is a fact
+   * about the disk, and the jam in front of you can have two takes on it while
+   * the library has ninety.
+   */
+  dirBytes: number;
   /** The take playing back, or null. */
   playingId: string | null;
   onPlay: (id: string) => void;
@@ -55,6 +63,7 @@ export function TakesSection({
   available,
   takes,
   recording,
+  dirBytes,
   playingId,
   onPlay,
   onStop,
@@ -71,8 +80,7 @@ export function TakesSection({
    */
   const [confirming, setConfirming] = useState<string | null>(null);
 
-  const bytes = takesBytes(takes);
-  const heavy = bytes >= TAKES_SIZE_NOTICE_BYTES;
+  const heavy = dirBytes >= TAKES_SIZE_NOTICE_BYTES;
 
   return (
     <section className="jam-takes" aria-label={t("jam.takes.label")}>
@@ -82,7 +90,7 @@ export function TakesSection({
             number here would be clutter on a screen read at arm's length. */}
         {available && heavy && (
           <span className="jam-takes-size">
-            {t("jam.takes.size", { megabytes: megabytes(bytes) })}
+            {t("jam.takes.size", { megabytes: megabytes(dirBytes) })}
           </span>
         )}
       </div>

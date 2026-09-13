@@ -1,12 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  TAKES_SIZE_NOTICE_BYTES,
-  TAKE_BYTES_PER_SECOND,
-  megabytes,
-  sortTakes,
-  takeLength,
-  takesBytes,
-} from "./takes";
+import { TAKES_SIZE_NOTICE_BYTES, megabytes, sortTakes, takeLength } from "./takes";
 import type { JamTake } from "./types";
 
 function take(over: Partial<JamTake> = {}): JamTake {
@@ -37,41 +30,20 @@ describe("sortTakes", () => {
   });
 });
 
-describe("takesBytes", () => {
-  it("adds up what the shelf is costing", () => {
-    expect(takesBytes([take({ durationSec: 10 }), take({ durationSec: 20 })])).toBe(
-      30 * TAKE_BYTES_PER_SECOND,
-    );
-  });
-
-  it("is nothing for an empty shelf", () => {
-    expect(takesBytes([])).toBe(0);
-  });
-
-  it("cannot be talked into a negative by a duration that makes no sense", () => {
-    expect(takesBytes([take({ durationSec: -5 })])).toBe(0);
-  });
-
-  it("crosses the notice threshold somewhere around a quarter of an hour", () => {
-    // The number exists to warn that the folder is filling up, and a warning
-    // that arrives after an afternoon of playing is no warning. Roughly
-    // eighteen minutes is the shape of it; the exact figure is arithmetic.
-    const seconds = TAKES_SIZE_NOTICE_BYTES / TAKE_BYTES_PER_SECOND;
-    expect(seconds).toBeGreaterThan(10 * 60);
-    expect(seconds).toBeLessThan(30 * 60);
-    expect(takesBytes([take({ durationSec: seconds - 1 })])).toBeLessThan(
-      TAKES_SIZE_NOTICE_BYTES,
-    );
-    expect(takesBytes([take({ durationSec: seconds + 1 })])).toBeGreaterThan(
-      TAKES_SIZE_NOTICE_BYTES,
-    );
+describe("the notice threshold", () => {
+  it("is a round hundred megabytes, in the units a disk is measured in", () => {
+    // Whole binary megabytes, so the sentence on screen and the figure the
+    // file manager shows are the same number.
+    expect(TAKES_SIZE_NOTICE_BYTES).toBe(100 * 1024 * 1024);
+    expect(megabytes(TAKES_SIZE_NOTICE_BYTES)).toBe(100);
   });
 });
 
 describe("megabytes", () => {
   it("is whole megabytes — a tenth of one is not a fact anybody acts on", () => {
-    expect(megabytes(TAKES_SIZE_NOTICE_BYTES)).toBe(100);
     expect(megabytes(1024 * 1024 * 3.4)).toBe(3);
+    expect(megabytes(1024 * 1024 * 247)).toBe(247);
+    expect(megabytes(0)).toBe(0);
   });
 });
 

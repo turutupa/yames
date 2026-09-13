@@ -711,6 +711,7 @@ export function JamView({
         available={takes.available}
         takes={takes.takes}
         recording={takes.recording}
+        dirBytes={takes.dirBytes}
         playingId={takes.playingId}
         onPlay={takes.play}
         onStop={takes.stopPlayback}

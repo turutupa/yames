@@ -9,6 +9,7 @@ import {
   stopTakePlayback,
   storeLoad,
   storeSave,
+  takesDirSize,
 } from "../../../ipc";
 import { sortTakes } from "../../../jam";
 import type { Jam, JamTake } from "../../../jam";
@@ -56,6 +57,14 @@ export type JamTakesState = {
   recordedSeconds: number;
   /** The take playing back, or null. The band is silent while one plays. */
   playingId: string | null;
+  /**
+   * Bytes the takes folder holds, across every jam — 0 until the engine says.
+   *
+   * The whole folder and not this jam's shelf, because a disk filling up is a
+   * fact about the disk: the jam in front of you can have two takes on it
+   * while the library has ninety.
+   */
+  dirBytes: number;
   play: (id: string) => void;
   stopPlayback: () => void;
   remove: (id: string) => void;
@@ -116,6 +125,7 @@ export function useJamTakes({
   const [recording, setRecording] = useState(false);
   const [recordedSeconds, setRecordedSeconds] = useState(0);
   const [playingId, setPlayingId] = useState<string | null>(null);
+  const [dirBytes, setDirBytes] = useState(0);
   const [introOpen, setIntroOpen] = useState(false);
   /**
    * Whether the dialog has been read, as far as we know.
@@ -139,18 +149,41 @@ export function useJamTakes({
    * can list takes can record them, and asking twice would leave a window in
    * which the screen believed two different things.
    */
-  const refresh = useCallback(async (id: string) => {
+  /**
+   * What the folder holds, across every jam.
+   *
+   * Its own call and its own failure: a size that could not be read is a
+   * sentence the screen leaves out, not a shelf it refuses to draw. Re-read
+   * whenever the folder changes — a take kept, a take deleted — because it is
+   * the only number here that is about the disk rather than about this jam.
+   */
+  const refreshSize = useCallback(async () => {
     try {
-      const list = await listTakes(id);
-      setTakes(sortTakes(Array.isArray(list) ? list : []));
-      setAvailable(true);
+      const bytes = await takesDirSize();
+      setDirBytes(Number.isFinite(bytes) ? bytes : 0);
     } catch {
-      // Not an error to report. This build does not record, the section says
-      // so, and everything else on the screen is unaffected.
-      setTakes([]);
-      setAvailable(false);
+      setDirBytes(0);
     }
   }, []);
+
+  const refresh = useCallback(
+    async (id: string) => {
+      try {
+        const list = await listTakes(id);
+        setTakes(sortTakes(Array.isArray(list) ? list : []));
+        setAvailable(true);
+      } catch {
+        // Not an error to report. This build does not record, the section
+        // says so, and everything else on the screen is unaffected.
+        setTakes([]);
+        setAvailable(false);
+        setDirBytes(0);
+        return;
+      }
+      await refreshSize();
+    },
+    [refreshSize],
+  );
 
   useEffect(() => {
     if (!jamId) {
@@ -226,11 +259,18 @@ export function useJamTakes({
         .then((take) => {
           // `null` is the engine saying nothing was recording, which is not a
           // failure and not a take.
-          if (take) setTakes((prev) => sortTakes([take, ...prev]));
+          if (!take) return;
+          // The take the engine just handed back, not a re-read of the shelf:
+          // `listTakes` is a round trip the engine has no obligation to have
+          // finished writing into, and a re-read that lands first would drop
+          // the take you just played off the top of the list.
+          setTakes((prev) => sortTakes([take, ...prev]));
+          // The folder DID just grow, though, and that is a different fact.
+          void refreshSize();
         })
         .catch(() => {});
     }
-  }, [armed, isPlaying, countingIn, jamId]);
+  }, [armed, isPlaying, countingIn, jamId, refreshSize]);
 
   /** The elapsed time on the transport's mark. Half-second, not per frame. */
   useEffect(() => {
@@ -265,11 +305,13 @@ export function useJamTakes({
       // people click twice.
       setTakes((prev) => prev.filter((take) => take.id !== id));
       if (playingId === id) setPlayingId(null);
-      void deleteTake(id).catch(() => {
-        // It did not go. Put it back rather than tell a comfortable lie about
-        // a file that is still on the disk.
-        if (jamId) void refresh(jamId);
-      });
+      void deleteTake(id)
+        // Either way the folder is a different size than the screen thinks,
+        // and on a failure the row has to come back too.
+        .catch(() => {})
+        .finally(() => {
+          if (jamId) void refresh(jamId);
+        });
     },
     [playingId, jamId, refresh],
   );
@@ -307,6 +349,7 @@ export function useJamTakes({
     recording,
     recordedSeconds,
     playingId,
+    dirBytes,
     play,
     stopPlayback,
     remove,

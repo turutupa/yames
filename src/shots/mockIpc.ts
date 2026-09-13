@@ -363,6 +363,9 @@ export function installShotMock(shot: Shot, theme: string): void {
     delete_take: () => null,
     play_take: () => null,
     stop_take_playback: () => null,
+    // Under the 100 MB the section starts mentioning: the picture is of a
+    // shelf, not of a warning about one.
+    takes_dir_size: () => 46 * 1024 * 1024,
   };
 
   mockIPC(async (cmd, args) => {

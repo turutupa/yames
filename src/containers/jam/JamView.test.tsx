@@ -73,6 +73,7 @@ function takesState(
     recording: false,
     recordedSeconds: 0,
     playingId: null,
+    dirBytes: 0,
     play: vi.fn(),
     stopPlayback: vi.fn(),
     remove: vi.fn(),

@@ -20,34 +20,18 @@ export function sortTakes(takes: readonly JamTake[]): JamTake[] {
 }
 
 /**
- * How many bytes a second of take costs.
- *
- * 48 kHz, 16-bit, one channel — you and the band mixed down to a mono WAV,
- * which is what "your playing with the band mixed in" is. It is an ESTIMATE
- * and it is labelled as one on screen, because `JamTake` carries a duration
- * and not a size: the honest fix is a `bytes` field on the record, and until
- * the engine offers one this is arithmetic rather than a reading.
- *
- * It errs high rather than low on purpose. The number exists to warn you that
- * the folder is filling up, and a warning that arrives late is no warning.
- */
-export const TAKE_BYTES_PER_SECOND = 48000 * 2;
-
-/** Roughly what a shelf of takes is costing, in bytes. */
-export function takesBytes(takes: readonly JamTake[]): number {
-  return takes.reduce(
-    (total, take) => total + Math.max(0, take.durationSec) * TAKE_BYTES_PER_SECOND,
-    0,
-  );
-}
-
-/**
  * When the size is worth saying out loud.
  *
- * 100 MB is roughly eighteen minutes of playing. Below it the folder is not a
- * problem and a number would only be clutter on a screen that is meant to be
- * read while holding a guitar; above it, you are keeping more than you are
- * listening to, and the app should say so rather than let a disk fill quietly.
+ * The figure itself is a READING, not arithmetic: `takesDirSize()` asks the
+ * engine what the folder holds, across every jam, because that is the fact a
+ * disk filling up is actually about — one jam's shelf can be small while the
+ * library's is not.
+ *
+ * 100 MB is roughly a quarter of an hour of playing. Below it the folder is
+ * not a problem and a number would only be clutter on a screen meant to be
+ * read while holding a guitar; above it you are keeping more than you are
+ * listening to, and the app should say so rather than let a disk fill
+ * quietly.
  */
 export const TAKES_SIZE_NOTICE_BYTES = 100 * 1024 * 1024;
 

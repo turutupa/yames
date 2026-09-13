@@ -26,6 +26,7 @@ vi.mock("../../../ipc", () => ({
   playTake: vi.fn(() => Promise.resolve()),
   stopTakePlayback: vi.fn(() => Promise.resolve()),
   onTakePlaybackEnded: vi.fn(() => Promise.resolve(() => {})),
+  takesDirSize: vi.fn(() => Promise.resolve(0)),
   storeLoad: vi.fn(() => Promise.resolve(undefined)),
   storeSave: vi.fn(() => Promise.resolve()),
 }));
@@ -66,6 +67,7 @@ beforeEach(() => {
   ipc.playTake.mockImplementation(() => Promise.resolve());
   ipc.stopTakePlayback.mockImplementation(() => Promise.resolve());
   ipc.onTakePlaybackEnded.mockImplementation(() => Promise.resolve(() => {}));
+  ipc.takesDirSize.mockImplementation(() => Promise.resolve(0));
   ipc.storeLoad.mockImplementation(() => Promise.resolve(undefined));
   ipc.storeSave.mockImplementation(() => Promise.resolve());
 });
@@ -89,6 +91,25 @@ describe("the shelf", () => {
     mount({ jam: null });
     await settle();
     expect(ipc.listTakes).not.toHaveBeenCalled();
+  });
+
+  it("reads the folder size from the engine rather than guessing it", async () => {
+    // A guess from the durations would be wrong in both directions, and the
+    // question is about the DISK — the whole folder, every jam.
+    ipc.takesDirSize.mockResolvedValue(123_456_789);
+    const { result } = mount();
+    await settle();
+    expect(result.current.dirBytes).toBe(123_456_789);
+  });
+
+  it("leaves the size out rather than the shelf when only the size fails", async () => {
+    ipc.listTakes.mockResolvedValue([take()]);
+    ipc.takesDirSize.mockRejectedValue(new Error("no such command"));
+    const { result } = mount();
+    await settle();
+    expect(result.current.available).toBe(true);
+    expect(result.current.takes).toHaveLength(1);
+    expect(result.current.dirBytes).toBe(0);
   });
 });
 
@@ -149,6 +170,8 @@ describe("the recording lifecycle", () => {
     expect(ipc.stopTake).toHaveBeenCalledTimes(1);
     expect(result.current.recording).toBe(false);
     expect(result.current.takes.map((t) => t.id)).toEqual(["fresh"]);
+    // The folder just grew by however long you played, so it is asked again.
+    expect(ipc.takesDirSize.mock.calls.length).toBeGreaterThan(1);
   });
 
   it("keeps no take when the engine says nothing was recording", async () => {
@@ -245,6 +268,8 @@ describe("deleting one", () => {
     expect(result.current.takes.map((t) => t.id)).toEqual(["b"]);
     await settle();
     expect(ipc.deleteTake).toHaveBeenCalledWith("a");
+    // And the folder is a different size than the screen thought.
+    expect(ipc.takesDirSize.mock.calls.length).toBeGreaterThan(1);
   });
 
   it("puts the row back when the file did not go", async () => {

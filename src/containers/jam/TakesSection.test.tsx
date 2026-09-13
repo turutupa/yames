@@ -10,7 +10,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { TakesSection } from "./TakesSection";
-import { TAKES_SIZE_NOTICE_BYTES, TAKE_BYTES_PER_SECOND } from "../../jam/takes";
+import { TAKES_SIZE_NOTICE_BYTES } from "../../jam/takes";
 import type { JamTake } from "../../jam/types";
 
 function take(over: Partial<JamTake> = {}): JamTake {
@@ -31,6 +31,7 @@ function draw(over: Partial<React.ComponentProps<typeof TakesSection>> = {}) {
     available: true as boolean | null,
     takes: [take()],
     recording: false,
+    dirBytes: 0,
     playingId: null as string | null,
     onPlay: vi.fn(),
     onStop: vi.fn(),
@@ -146,13 +147,24 @@ describe("deleting one", () => {
 
 describe("the folder size", () => {
   it("is silent until the folder is worth mentioning", () => {
-    draw();
+    draw({ dirBytes: TAKES_SIZE_NOTICE_BYTES - 1 });
     expect(screen.queryByText(/MB on disk/i)).toBeNull();
   });
 
   it("says it once there is more kept than listened to", () => {
-    const seconds = (TAKES_SIZE_NOTICE_BYTES * 2) / TAKE_BYTES_PER_SECOND;
-    draw({ takes: [take({ durationSec: seconds })] });
+    draw({ dirBytes: TAKES_SIZE_NOTICE_BYTES * 2 });
     expect(screen.getByText(/about 200 MB on disk/i)).toBeTruthy();
+  });
+
+  it("is the WHOLE folder, not this jam's shelf", () => {
+    // A disk filling up is a fact about the disk: the jam in front of you can
+    // have one short take on it while the library has ninety long ones.
+    draw({ takes: [take({ durationSec: 4 })], dirBytes: TAKES_SIZE_NOTICE_BYTES * 3 });
+    expect(screen.getByText(/about 300 MB on disk/i)).toBeTruthy();
+  });
+
+  it("says nothing about size on a build that cannot record", () => {
+    draw({ available: false, takes: [], dirBytes: TAKES_SIZE_NOTICE_BYTES * 2 });
+    expect(screen.queryByText(/MB on disk/i)).toBeNull();
   });
 });
