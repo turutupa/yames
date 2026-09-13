@@ -38,6 +38,11 @@
 //!                        every 350 ms (the bar-ahead bass handshake)
 //!   --jam-move           --jam, and move the form while it plays: a loop
 //!                        set and a jump every 2 s. Combines with --jam-swap
+//!   --jam-take           --jam, and record a take for the whole run: the
+//!                        callback copies its mix into a lock-free ring and
+//!                        a writer thread resamples, mixes and writes it to
+//!                        a temporary WAV underneath the stream. Combines
+//!                        with the other two
 //! ```
 //!
 //! Exit codes: 0 pass, 1 gate failure, 2 setup/usage error.
@@ -73,7 +78,7 @@ use std::time::Duration;
 
 use yames_lib::probe::{
     compile_jam, create_beat_log, create_shared_state, CallbackProbe, CallbackSample, JamBassLine,
-    JamConfig, JamPattern, JamPosition, MetronomeEngine,
+    JamConfig, JamKeysLine, JamMix, JamPattern, JamPosition, MetronomeEngine, TakeRing, TakeSession,
 };
 
 /// Pessimistic upper bound on callbacks per second used to size the
@@ -102,6 +107,13 @@ struct Args {
     /// the whole of `next_form_position` to do rather than a single add,
     /// and it does it inside the callback.
     jam_move: bool,
+    /// `--jam`, and record a take of the whole run. The output callback
+    /// then copies every buffer into a ring, a synthetic 44.1 kHz "mic"
+    /// fills a second one, and a writer thread resamples, mixes and writes
+    /// both to disk while the measurement is running — which is the load a
+    /// take actually puts on the machine, and the one path where the audio
+    /// thread does work on behalf of the filesystem.
+    jam_take: bool,
     /// Whether the tempo / resolution came from the command line, so `--jam`
     /// can supply its own 240 BPM sixteenths without overruling a run that
     /// asked for something else.
@@ -124,6 +136,7 @@ impl Default for Args {
             jam: false,
             jam_swap: false,
             jam_move: false,
+            jam_take: false,
             bpm_set: false,
             subdivision_set: false,
         }
@@ -181,6 +194,11 @@ fn parse_args() -> Result<Args, String> {
             "--jam-move" => {
                 a.jam = true;
                 a.jam_move = true;
+                consumed = 1;
+            }
+            "--jam-take" => {
+                a.jam = true;
+                a.jam_take = true;
                 consumed = 1;
             }
             "-h" | "--help" => return Err("help".into()),
@@ -242,6 +260,9 @@ click-jitter-probe — ROADMAP §4 audio-safety gate
   --jam-move         --jam, and move the form while playing: bars 2-4 of
                      the form looped and a jump every 2 s. Combines with
                      --jam-swap.
+  --jam-take         --jam, and record a take for the whole run (the
+                     callback's ring, a synthetic 44.1 kHz mic, and a
+                     writer thread on the disk). Combines with both.
 
 exit 0 = pass, 1 = gate failure, 2 = setup error";
 
@@ -516,8 +537,30 @@ fn busiest_jam() -> JamConfig {
         // without them: the busiest case is the band playing every bar.
         practice: None,
         fill_every: None,
-        keys: None,
-        mix: None,
+        // And a comping voice over the top. Four notes on every eighth is
+        // nobody's piano part; it is the maximum the table can ask for on
+        // the one lane that SUSTAINS, and sustaining voices are what the
+        // mixer pays for. Sixteen sixteenths of drums keep four to eight
+        // voices alive; this adds eight more that are still ringing when
+        // the next chord lands.
+        keys: Some(JamKeysLine {
+            voicings: (0..16)
+                .map(|t| {
+                    if t % 2 == 0 {
+                        vec![55, 60, 64, 67]
+                    } else {
+                        Vec::new()
+                    }
+                })
+                .collect(),
+            gain: 1.5,
+        }),
+        // Every lane as loud as the contract lets it be.
+        mix: Some(JamMix {
+            drums: 1.5,
+            bass: 1.5,
+            keys: 1.5,
+        }),
         count_in_sound: None,
     }
 }
@@ -689,9 +732,84 @@ fn main() -> ExitCode {
         None
     };
 
+    // `--jam-take`: record a take for the whole run.
+    //
+    // This is the one place the audio callback does work on behalf of the
+    // filesystem, so it is the one the gate has to cover: every buffer is
+    // copied into a lock-free ring, and a writer thread drains it, resamples
+    // a synthetic 44.1 kHz "mic" against the output rate, mixes the two and
+    // writes 16-bit PCM to disk for the length of the measurement. The mic
+    // is synthetic because the probe runs headless with no input stream;
+    // what matters for the gate is that the writer is doing a take's real
+    // work — the resampler, the mix and the disk — while the stream runs.
+    let taker = if args.jam_take {
+        let handoff = engine.take_handoff();
+        let out_sr = match engine.output_sample_rate() {
+            Some(sr) => sr,
+            None => {
+                eprintln!("error: the output device never reported a rate, so --jam-take \
+                           has nothing to record");
+                return ExitCode::from(2);
+            }
+        };
+        let dir = std::env::temp_dir().join(format!("yames-probe-takes-{}", std::process::id()));
+        let mic = Arc::new(TakeRing::new(44_100 * 4));
+        let mut session = TakeSession::default();
+        if let Err(e) = session.start(&dir, "probe", &handoff, Some((mic.clone(), 44_100)), out_sr)
+        {
+            eprintln!("error: could not start the probe's take: {e}");
+            return ExitCode::from(2);
+        }
+        eprintln!("[probe] recording a take into {}", dir.display());
+
+        // The synthetic mic: 44.1 kHz of a quiet tone, pushed in
+        // callback-sized chunks, so the writer's resampler and its mix both
+        // run for real rather than short-circuiting on matching rates.
+        let stop_mic = Arc::new(AtomicBool::new(false));
+        let flag = stop_mic.clone();
+        let mic_thread = std::thread::spawn(move || {
+            let mut phase = 0.0f32;
+            let step = std::f32::consts::TAU * 440.0 / 44_100.0;
+            while !flag.load(Ordering::Relaxed) {
+                let chunk: Vec<f32> = (0..441)
+                    .map(|_| {
+                        phase += step;
+                        0.1 * phase.sin()
+                    })
+                    .collect();
+                mic.push(&chunk);
+                std::thread::sleep(Duration::from_millis(10));
+            }
+        });
+        Some((session, handoff, stop_mic, mic_thread, dir))
+    } else {
+        None
+    };
+
     std::thread::sleep(Duration::from_millis(args.warmup_ms));
     let window_start_ns = yames_lib::probe::now_ns();
     std::thread::sleep(Duration::from_secs(args.seconds));
+
+    // The take stops BEFORE the engine, so the writer's last drain is of a
+    // ring the callback is still alive to have filled.
+    let take_summary = match taker {
+        Some((mut session, handoff, stop_mic, mic_thread, dir)) => {
+            stop_mic.store(true, Ordering::Relaxed);
+            let _ = mic_thread.join();
+            let recorded = session.stop(&handoff);
+            let summary = match recorded {
+                Ok(Some(t)) => {
+                    let bytes = std::fs::metadata(&t.path).map(|m| m.len()).unwrap_or(0);
+                    Some(format!("{:.1} s, {} bytes", t.duration_sec, bytes))
+                }
+                Ok(None) => Some("nothing was recorded".to_string()),
+                Err(e) => Some(format!("failed: {e}")),
+            };
+            let _ = std::fs::remove_dir_all(&dir);
+            summary
+        }
+        None => None,
+    };
 
     engine.shutdown();
     stop.store(true, Ordering::Relaxed);
@@ -794,6 +912,9 @@ fn main() -> ExitCode {
             PROBE_LOOP.0 + 1,
             PROBE_LOOP.1 + 1
         ));
+    }
+    if let Some(ref t) = take_summary {
+        mode.push_str(&format!(" + --jam-take ({t})"));
     }
 
     println!("\n=== click-jitter-probe ===");

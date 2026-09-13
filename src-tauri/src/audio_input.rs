@@ -10,6 +10,7 @@ use tauri::{AppHandle, Emitter, Manager};
 
 use crate::session_audio::{self, SessionAudioRecorder};
 use crate::session_log::AudioLevelSnapshot;
+use crate::take::TakeRing;
 
 /// Monotonically increasing stream instance counter. Each call to
 /// `AudioInput::start()` increments this before spawning the capture thread,
@@ -173,6 +174,22 @@ pub struct AudioInput {
     /// the paired WAV itself is unreliable (the WAV writer suffers the
     /// same stall as the DSP would).
     audio_levels: Arc<Mutex<Vec<AudioLevelSnapshot>>>,
+    /// Where a jam take collects your playing (JAM_MODE §4.4, `take.rs`).
+    ///
+    /// A lock-free ring rather than the `Mutex<Vec<f32>>` `recording_buf`
+    /// is: that one drops a frame whenever the lock is contended, which for
+    /// the input tester is fine (a missing 10 ms does not change what the
+    /// DSP saw) and for a take is not — every sample the mic misses is a
+    /// sample of drift against the band it is being mixed with.
+    ///
+    /// Allocated once per `start()`, so the closure holds its own `Arc` and
+    /// the callback never takes a lock to find it. This mutex is only ever
+    /// touched by command threads.
+    take_ring: Arc<Mutex<Option<Arc<TakeRing>>>>,
+    /// Whether the input callback writes into [`Self::take_ring`]. Down
+    /// until `start_take`, so nothing is captured for a take until one is
+    /// asked for.
+    take_recording: Arc<AtomicBool>,
 }
 
 // Safety: AudioInput doesn't hold cpal::Stream — it lives on its own thread.
@@ -199,6 +216,8 @@ impl AudioInput {
             session_recorder: Arc::new(Mutex::new(None)),
             last_session_audio_path: Arc::new(Mutex::new(None)),
             audio_levels: Arc::new(Mutex::new(Vec::new())),
+            take_ring: Arc::new(Mutex::new(None)),
+            take_recording: Arc::new(AtomicBool::new(false)),
         }
     }
 
@@ -318,6 +337,24 @@ impl AudioInput {
             *ring = RingBuffer::new(sr as usize * 4);
         }
 
+        // The take ring, sized for this device rate. Allocated here, once
+        // per stream, so the callback below holds its own `Arc` and never
+        // takes a lock to find it — and so a take started later costs the
+        // input thread nothing but an `AtomicBool` it is already reading.
+        //
+        // A stream restarting mid-take (a device change) leaves the take
+        // writer holding the OLD ring: it stops receiving mic samples, the
+        // band keeps the clock, and the rest of the take is the band alone.
+        // A restart mid-take is the user changing audio device while
+        // recording, and losing the mic from that point is the honest
+        // outcome — the alternative is a file whose two halves are recorded
+        // through different microphones with no gap to say so.
+        let take_ring = Arc::new(TakeRing::new(sr as usize * 4));
+        {
+            *self.take_ring.lock().unwrap() = Some(take_ring.clone());
+        }
+        let take_recording = self.take_recording.clone();
+
         // Optional session-audio recording (dev-only, env-gated). Initialize
         // BEFORE the capture thread launches so the cpal callback can see
         // a non-None recorder from the first frame. `session_audio::is_enabled()`
@@ -367,6 +404,8 @@ impl AudioInput {
         let self_session_recorder = self.session_recorder.clone();
         let audio_levels_cb = self.audio_levels.clone();
         let recording_max_cb = self.recording_max.clone();
+        let take_ring_cb = take_ring;
+        let take_recording_cb = take_recording;
         // Bump the generation counter and capture the new value. Each closure
         // bakes in `my_gen` and only writes to `recording_buf` when the global
         // counter still matches — stale CoreAudio callbacks (cpal drop-tail)
@@ -479,6 +518,8 @@ impl AudioInput {
                     let my_gen_f32 = my_gen;
                     let mut level_acc = LevelAcc::new();
                     let mut cap_logged_f32 = false;
+                    let take_ring_f32 = take_ring_cb.clone();
+                    let take_on_f32 = take_recording_cb.clone();
                     device.build_input_stream(
                     &config,
                     move |data: &[f32], _: &cpal::InputCallbackInfo| {
@@ -486,6 +527,13 @@ impl AudioInput {
                         let mono: Vec<f32> = data.chunks(channels).map(|f| f[ch] * g).collect();
                         if let Ok(mut r) = ring_for_callback.try_lock() {
                             r.write(&mono);
+                        }
+                        // A jam take, if one is running. Lock-free and
+                        // unconditional apart from one relaxed load, so the
+                        // input path costs nothing when nobody is recording
+                        // and never drops a sample when somebody is.
+                        if take_on_f32.load(Ordering::Relaxed) {
+                            take_ring_f32.push(&mono);
                         }
                         // Gate recording writes on the stream generation counter.
                         // Stale CoreAudio callbacks from a prior stream (cpal
@@ -549,6 +597,8 @@ impl AudioInput {
                     let my_gen_i16 = my_gen;
                     let mut level_acc = LevelAcc::new();
                     let mut cap_logged_i16 = false;
+                    let take_ring_i16 = take_ring_cb.clone();
+                    let take_on_i16 = take_recording_cb.clone();
                     device.build_input_stream(
                     &config,
                     move |data: &[i16], _: &cpal::InputCallbackInfo| {
@@ -558,6 +608,9 @@ impl AudioInput {
                             .collect();
                         if let Ok(mut r) = ring_for_callback.try_lock() {
                             r.write(&mono);
+                        }
+                        if take_on_i16.load(Ordering::Relaxed) {
+                            take_ring_i16.push(&mono);
                         }
                         if is_rec.load(Ordering::Relaxed)
                             && stream_gen_i16.load(Ordering::Relaxed) == my_gen_i16
@@ -624,6 +677,12 @@ impl AudioInput {
 
     pub fn stop(&mut self) {
         self.is_recording.store(false, Ordering::SeqCst);
+        // A take outlives the stream it was capturing through: the band is
+        // still playing and the writer is still going, so the take carries
+        // on without the mic rather than ending here. What must stop is the
+        // writing, or a restarted stream's callback would keep filling a
+        // ring the take has already been told about.
+        self.take_recording.store(false, Ordering::SeqCst);
         self.stop_playback();
         self.alive.store(false, Ordering::SeqCst);
         if let Some(handle) = self.capture_thread.take() {
@@ -692,6 +751,31 @@ impl AudioInput {
     pub fn take_audio_levels(&self) -> Vec<AudioLevelSnapshot> {
         let mut guard = self.audio_levels.lock().unwrap();
         std::mem::take(&mut *guard)
+    }
+
+    // ─── Takes (JAM_MODE §4.4, `take.rs`) ───────────────────────────
+
+    /// Start feeding a jam take, and say where and at what rate.
+    ///
+    /// `None` when no input stream is running — the caller decides whether
+    /// to start one or to record the band alone. The ring is emptied before
+    /// the flag goes up, so a take begins with what the mic hears from now
+    /// and not with whatever was left behind by the last one.
+    pub fn begin_take_capture(&self) -> Option<(Arc<TakeRing>, u32)> {
+        if !self.is_active() {
+            return None;
+        }
+        let ring = self.take_ring.lock().ok()?.clone()?;
+        let sr = *self.sample_rate.lock().ok()?;
+        ring.reset();
+        self.take_recording.store(true, Ordering::SeqCst);
+        Some((ring, sr))
+    }
+
+    /// Stop feeding a take. Idempotent — a stop with nothing recording is
+    /// what a UI sends when the user pressed stop twice.
+    pub fn end_take_capture(&self) {
+        self.take_recording.store(false, Ordering::SeqCst);
     }
 
     // ─── Recording ──────────────────────────────────────────────────

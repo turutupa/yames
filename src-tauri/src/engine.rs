@@ -1,6 +1,7 @@
 use crate::jam::{JamBandState, JamLane, JamPosition, JamTable, JamTick};
 use crate::onset::SharedTempoContext;
 use crate::state::SharedState;
+use crate::take::SharedTake;
 use crate::timing::{BeatLog, BeatTick};
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use rodio::Source;
@@ -1515,6 +1516,18 @@ struct CachedParams {
     /// THE TABLE CHANGES and never per tick — that is the whole reason it is
     /// a field here rather than a call into `cached.jam` in the tick loop.
     count_in_slot: Option<crate::jam::JamSlot>,
+    /// Where the band is copied while a take records, or `None`. Cloned out
+    /// of the shared slot only when its generation moves.
+    take_record: Option<Arc<crate::take::TakeRing>>,
+    take_record_generation: u64,
+    /// The take being played back, if one is: the samples, the rate they
+    /// were recorded at, and how far through them the callback is.
+    take_play: Option<crate::take::TakePlayback>,
+    take_play_generation: u64,
+    /// Position in `take_play.pcm`, in SOURCE samples, as a float — the take
+    /// was recorded through whatever device was there then and is being
+    /// played out of whatever is there now, so the step is a ratio.
+    take_play_pos: f64,
 }
 
 /// The count-in sound a table asks for, or the beep when there is no table.
@@ -2403,6 +2416,15 @@ pub struct MetronomeEngine {
     /// table — nothing about a jam belongs in the state blob that crosses to
     /// the frontend on every change.
     jam: SharedJam,
+    /// Where a take waits to be recorded into or played back. On the engine
+    /// for the reason the band is: it belongs to the audio path, survives a
+    /// device change, and has no business in the state blob that crosses to
+    /// the frontend on every change.
+    take: SharedTake,
+    /// The rate the audio thread opened its device at, 0 before it has. The
+    /// take is written at the output rate and the take commands run on the
+    /// command thread, so the number has to be readable from there.
+    sample_rate: Arc<AtomicU32>,
     /// Test-only: make the audio thread fail its setup without touching a
     /// real device, so the recovery path above can be exercised on a build
     /// machine that has a perfectly good sound card.
@@ -2422,6 +2444,8 @@ impl MetronomeEngine {
             callback_probe: None,
             tempo_ctx: None,
             jam: Arc::new(JamHandoff::new()),
+            take: Arc::new(crate::take::TakeHandoff::new()),
+            sample_rate: Arc::new(AtomicU32::new(0)),
             #[cfg(test)]
             force_setup_failure: false,
         }
@@ -2460,6 +2484,25 @@ impl MetronomeEngine {
     /// one path a table installed before the stream opens never exercises.
     pub fn jam_handoff(&self) -> SharedJam {
         self.jam.clone()
+    }
+
+    /// The take slot: where `start_take` hands the callback a ring to copy
+    /// the band into, and `play_take` hands it a take to stream.
+    pub fn take_handoff(&self) -> SharedTake {
+        self.take.clone()
+    }
+
+    /// The rate the audio thread is actually running at, or `None` before it
+    /// opens a device.
+    ///
+    /// A take is written at the output rate, so the command that starts one
+    /// has to know it — and it is a property of the device that opened, not
+    /// of anything the app chose.
+    pub fn output_sample_rate(&self) -> Option<u32> {
+        match self.sample_rate.load(Ordering::Acquire) {
+            0 => None,
+            sr => Some(sr),
+        }
     }
 
     /// Hand the engine the same `TempoContext` the commands mirror into, so
@@ -2572,6 +2615,9 @@ impl MetronomeEngine {
         let adaptive_score = self.adaptive_score.clone();
         let callback_probe = self.callback_probe.clone();
         let jam_shared = self.jam.clone();
+        let take_shared = self.take.clone();
+        let take_event = self.take.clone();
+        let take_sr_out = self.sample_rate.clone();
         let app_handle = EventSink(app_handle);
         #[cfg(test)]
         let force_setup_failure = self.force_setup_failure;
@@ -2667,6 +2713,11 @@ impl MetronomeEngine {
             let state_cb = state.clone();
             let sr = sample_rate;
 
+            // The rate a take is written at. Published before the stream
+            // opens rather than after, so a `start_take` racing the first
+            // buffer finds a rate rather than nothing.
+            take_sr_out.store(sample_rate, Ordering::Release);
+
             // Audio-safety probe (ROADMAP §4). `None` in the app.
             if let Some(ref p) = callback_probe {
                 p.set_sample_rate(sample_rate);
@@ -2704,6 +2755,7 @@ impl MetronomeEngine {
             // while playing but keeps its form length keeps its place.
             let mut jam_form_bars: u32 = 0;
             let mut jam_retire = JamRetirement::new();
+            let mut take_retire = crate::take::TakeParking::new();
             // One report per loaded table, not one per tick.
             let mut jam_mismatch_reported = false;
             let mut was_playing = false;
@@ -2734,6 +2786,11 @@ impl MetronomeEngine {
                 jam_position: JamPosition::default(),
                 jam_position_generation: 0,
                 count_in_slot: None,
+                take_record: None,
+                take_record_generation: 0,
+                take_play: None,
+                take_play_generation: 0,
+                take_play_pos: 0.0,
             };
 
             // ---- Build output stream ----
@@ -2875,6 +2932,79 @@ impl MetronomeEngine {
                         }
                     }
 
+                    // ---- The take ----
+                    //
+                    // The same handshake the band uses, twice: one relaxed
+                    // load per buffer each for "is a take recording?" and
+                    // "is a take playing?", a `try_lock` only when one of
+                    // them moved, and whatever the change replaces handed
+                    // BACK rather than dropped here. Dropping the last
+                    // `Arc<Vec<f32>>` of a twenty-minute take would free a
+                    // hundred megabytes under the mixer.
+                    if let Some(incoming) =
+                        take_shared.poll_record(&mut cached.take_record_generation)
+                    {
+                        if let Some(old) = cached.take_record.take() {
+                            take_retire.retire_ring(&take_shared, old);
+                        }
+                        cached.take_record = incoming;
+                    }
+                    if let Some(incoming) = take_shared.poll_play(&mut cached.take_play_generation)
+                    {
+                        if let Some(old) = cached.take_play.take() {
+                            take_retire.retire_pcm(&take_shared, old.pcm);
+                        }
+                        cached.take_play = incoming;
+                        cached.take_play_pos = 0.0;
+                    }
+                    take_retire.flush(&take_shared);
+
+                    // ---- A take playing back ----
+                    //
+                    // BEFORE the `is_playing` gate, because listening back
+                    // is something you do with the band stopped — and the
+                    // band and the click are both silent while it runs, so
+                    // this branch is the whole output. Streamed straight out
+                    // of the decoded buffer with a linear step, because the
+                    // take was recorded through whatever device was there
+                    // then and is coming out of whatever is there now.
+                    if let Some(ref play) = cached.take_play {
+                        let step = play.step(sr);
+                        let mut ended = false;
+                        for frame_idx in 0..frames {
+                            let v = match play.sample_at(cached.take_play_pos) {
+                                Some(v) => v,
+                                None => {
+                                    ended = true;
+                                    0.0
+                                }
+                            };
+                            let out = (v * cached.volume).clamp(-1.0, 1.0);
+                            for ch in 0..channels {
+                                data[frame_idx * channels + ch] = out;
+                            }
+                            cached.take_play_pos += step;
+                        }
+                        if ended {
+                            // The event thread emits `take-playback-ended`;
+                            // saying it here would mean an `emit` on the
+                            // audio thread, which locks and allocates.
+                            take_shared.note_ended();
+                        }
+                        // The transport is where it was; the band starts
+                        // from the top when the listening is over.
+                        if was_playing {
+                            voices.clear();
+                            was_playing = false;
+                        }
+                        sample_counter = 0;
+                        next_beat_sample = 0;
+                        beat_count = 0;
+                        sub_count = 0;
+                        measure_beat = 0;
+                        return;
+                    }
+
                     // ---- Not playing: silence ----
                     if !is_playing {
                         // A bass that was waiting for a bar line that never
@@ -2889,6 +3019,14 @@ impl MetronomeEngine {
                         }
                         for s in data.iter_mut() {
                             *s = 0.0;
+                        }
+                        // A take running while the band is stopped records
+                        // the silence, and has to: the band is the take's
+                        // clock, so a buffer the callback did not report is
+                        // a buffer of mic audio that would slide forward
+                        // against everything after it.
+                        if let Some(ref ring) = cached.take_record {
+                            ring.push_strided(data, channels);
                         }
                         if was_playing {
                             voices.clear();
@@ -3380,6 +3518,17 @@ impl MetronomeEngine {
                         sample_counter += 1;
                     }
 
+                    // ---- The take, if one is recording ----
+                    //
+                    // The band exactly as the device is about to hear it,
+                    // taken once per buffer rather than once per frame: a
+                    // strided read of what was just written costs one
+                    // acquire load and one release store for the whole
+                    // buffer, and the ring can neither allocate nor block.
+                    if let Some(ref ring) = cached.take_record {
+                        ring.push_strided(data, channels);
+                    }
+
                     // Remove finished voices (once per buffer)
                     voices.retain(|v| {
                         let buf = sounds.get(v.sound_id);
@@ -3438,6 +3587,14 @@ impl MetronomeEngine {
             let mut current_session: u64 = 0;
 
             while alive.load(Ordering::SeqCst) {
+                // A take that ran off its own end. Checked here, at the top
+                // of every pass — including the timeout pass, which is the
+                // only one that runs while a take plays with the band
+                // stopped — because the audio thread cannot emit: an
+                // `emit` locks and allocates.
+                if take_event.take_ended() {
+                    let _ = app_handle.emit("take-playback-ended", ());
+                }
                 let notif = match rx.recv_timeout(Duration::from_millis(50)) {
                     Ok(n) => n,
                     Err(mpsc::RecvTimeoutError::Timeout) => {
