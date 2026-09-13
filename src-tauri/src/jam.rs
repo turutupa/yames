@@ -314,10 +314,28 @@ pub struct JamPattern {
     /// `#[serde(default)]` and the empty case in [`compile_pattern`] are
     /// for. A row that IS sent is held to the same length as every other:
     /// half a lane is a bug in the caller, not a groove.
-    #[serde(default)]
+    ///
+    /// `null` reads as absent as well as missing. The contract spells the
+    /// row `hatOpen?: JamLevel[]`, so what the UI sends is the key or
+    /// nothing — but a jam that has been through a store, a JSON round trip
+    /// or a later build is a real thing, and every other optional field here
+    /// already accepts a null. Rejecting one would take the whole band away
+    /// and play the click over an empty row.
+    #[serde(default, deserialize_with = "lane_or_none")]
     pub hat_open: Vec<u8>,
     pub ride: Vec<u8>,
     pub crash: Vec<u8>,
+}
+
+/// An optional lane: the cells, or nothing at all, whichever arrived.
+///
+/// `null` and a missing key both come out as an empty row. See
+/// [`JamPattern::hat_open`], which is the only field that needs it.
+fn lane_or_none<'de, D>(d: D) -> Result<Vec<u8>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    Ok(Option::<Vec<u8>>::deserialize(d)?.unwrap_or_default())
 }
 
 impl JamPattern {
@@ -3465,6 +3483,17 @@ mod tests {
             "intensity": 1.0, "kit": "room"
         }"#;
         let parsed: JamConfig = serde_json::from_str(json).expect("a jam saved before the row");
+        assert!(parsed.bar.hat_open.is_empty());
+        assert!(compile(&parsed).is_ok());
+
+        // And an explicit null reads the same way, rather than taking the
+        // whole band away over an empty row.
+        let nulled = json.replace(
+            r#""crash": [0,0,0,0,0,0,0,0] }"#,
+            r#""crash": [0,0,0,0,0,0,0,0], "hatOpen": null }"#,
+        );
+        assert_ne!(nulled, json, "the fixture stopped containing what it patches");
+        let parsed: JamConfig = serde_json::from_str(&nulled).expect("a null row is no row");
         assert!(parsed.bar.hat_open.is_empty());
         assert!(compile(&parsed).is_ok());
     }
