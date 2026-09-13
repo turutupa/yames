@@ -249,7 +249,8 @@ def gen_drum(is_kick: bool, duration_ms: int = 50, sample_rate: int = 44100):
 # ===========================================================================
 # JAM KITS — kit_<kit>_<voice>.wav
 #
-# Four kits of eight voices for Jam mode (plans/JAM_MODE.md §4.1). Nothing
+# Five kits of eight voices for Jam mode (plans/JAM_MODE.md §4.1, and the
+# fifth from decision-log entry B2 — its own section is further down). Nothing
 # here touches the generators above; these are new files under new names.
 #
 # WHY THIS SECTION DOES NOT USE THE GENERATORS ABOVE. The kits are built from
@@ -534,11 +535,12 @@ def _kv_crash(spec, kit, sr):
     return _kfinish(y, sr, c['drive'], spec['room'] * 0.6)
 
 
-# --- the four kits ---------------------------------------------------------
+# --- the first four kits ---------------------------------------------------
 #
-# Read down a column rather than across a row: the same voice across four kits
-# is where the kits differ from each other, and that is the comparison that
-# matters when one of them sounds wrong.
+# Read down a column rather than across a row: the same voice across the kits
+# is where they differ from each other, and that is the comparison that
+# matters when one of them sounds wrong. `raw` is the fifth and it is defined
+# in its own section below, because it brings its own kick and snare builders.
 
 KIT_SPECS = {
     # What the app's Drum kit already is, in a room. Medium decays, a real
@@ -663,6 +665,268 @@ KIT_SPECS = {
     },
 }
 
+# ===========================================================================
+# RAW — a rock drummer close-miked in a dry room
+#
+# The fifth kit, and the first one built to a verdict rather than to a spec.
+# The owner heard the four above and said they were "the soundtrack of a
+# porno": smooth, soft, no transient. Decision log entry B2 is the answer and
+# B10 is the rule that comes with it — this kit is judged by ear, A/B against
+# the other four (`scripts/sounds/ab.html`), and the measurement below is the
+# gate rather than the verdict.
+#
+# WHAT MAKES A HIT SOUND HARD, given that every file here peaks at the same
+# 0.900 and so cannot simply be louder:
+#
+#   A. A TRANSIENT THAT ARRIVES BEFORE THE PITCH DOES. The four kits above
+#      rise into their hit over 1-5 ms with a band-limited "click" that is
+#      really a second body layer. Raw puts 2-4 ms of 2.5-8 kHz noise and a
+#      pair of high sine bursts in front of everything else. That is the
+#      beater and the stick, and it is the part a listener calls "attack".
+#   B. A HELD PEAK, NOT A DECAY FROM SAMPLE ZERO. `_rhold` keeps the body at
+#      full for ~20 ms before the exponential starts. A drum hit into a close
+#      mic through a compressor does exactly this, and it is why a rock kick
+#      reads as a punch in the chest and a soft one reads as a knock.
+#   C. A COMPRESSOR, BECAUSE THE PEAK IS THE BUDGET. `_rcomp` pulls the
+#      transient down and lets the normalisation pull the whole hit back up:
+#      the same ceiling, more energy under it. This is rule 5 of the section
+#      above taken one step further — tanh saturates the sum, the compressor
+#      shapes it first.
+#   D. NO ROOM. `room` is 0.0. Every millisecond of decay here belongs to the
+#      drum. A dry room is the whole brief.
+#
+# The three of those that add energy (B, C and the saturation) all add it in
+# the mid band, which is why Raw's margins come out the widest in the set
+# without the kick becoming a shout: the energy went where a laptop speaker
+# can radiate it, not into the sub-bass where the original drum accent hid.
+# ===========================================================================
+
+def _rhold(t, attack_ms, hold_ms, decay):
+    """Fast attack, a HELD peak, then the exponential decay.
+
+    `_rb._hit` starts decaying on the sample after the rise, so its loudest
+    20 ms is already 20-30% down. Holding the peak flat for the length of a
+    stick's contact with a head is most of the difference between "punch" and
+    "thump", and it costs nothing in peak because the peak is where it
+    already was."""
+    a = np.clip(t / (attack_ms / 1000.0), 0, 1)
+    rise = 0.5 * (1 - np.cos(np.pi * a))
+    return rise * np.exp(-np.maximum(t - hold_ms / 1000.0, 0.0) * decay)
+
+
+def _rcomp(x, sr, thresh, ratio, attack_ms, release_ms, look_ms=3.0):
+    """A feed-forward compressor with a LOOK-AHEAD peak detector.
+
+    The look-ahead is not a refinement, it is the whole thing working. The
+    first version of this had a plain 0.5 ms attack, and measured, raw's
+    snare came out with an 18.7 dB crest factor and its peak at 0.2 ms — the
+    highest crest and the LOWEST in-band energy of all five kits. That is
+    what an attack time means: a detector that starts reacting when the
+    transient arrives has already let it through, and since every file here
+    is peak-normalised afterwards, one 0.2 ms spike then sets the ceiling for
+    the whole hit and the drum underneath it is normalised down to fit.
+
+    Running the detector on a forward maximum of |x| over the look-ahead
+    window lets the gain be already down when the stick lands. The click is
+    still there — it is simply no longer the only thing in the file that is
+    loud. This is the same trick that makes a mastering limiter transparent,
+    and it is exactly the currency rule 3 above cares about: peak spent on a
+    0.2 ms spike buys no loudness at all.
+
+    Sample-by-sample for the follower because the release is recursive; a few
+    thousand iterations per voice, milliseconds to run. Deterministic — pure
+    arithmetic on the buffer, no state outside the call."""
+    n = len(x)
+    a = np.abs(x)
+    look = max(int(sr * look_ms / 1000.0), 1)
+    if look > 1 and n > look:
+        pad = np.concatenate([a, np.zeros(look - 1)])
+        a = np.max(np.lib.stride_tricks.sliding_window_view(pad, look), axis=1)
+    ca = math.exp(-1.0 / max(sr * attack_ms / 1000.0, 1.0))
+    cr = math.exp(-1.0 / max(sr * release_ms / 1000.0, 1.0))
+    gain = np.ones(n)
+    e = 0.0
+    exp = 1.0 / ratio - 1.0
+    for i in range(n):
+        v = a[i]
+        c = ca if v > e else cr
+        e = c * e + (1.0 - c) * v
+        if e > thresh:
+            gain[i] = (e / thresh) ** exp
+    return x * gain
+
+
+def _rfinish(y, sr, comp, drive):
+    """Compress, normalise, saturate, release, ceiling, fade.
+
+    Not the same order as `_kfinish`, and the difference is deliberate: the
+    RELEASE MOVED AFTER THE SATURATION. `_kfinish` runs `_krelease` first, so
+    the tail is zero — and then `_rb._saturate` subtracts the mean of what it
+    just made, which lifts that zeroed tail back off the axis by exactly the
+    mean. On the first four kits the tail is far enough down that it does not
+    matter. Raw's kick is compressed with a 110 ms release, so it arrives at
+    150 ms still near -38 dBFS, the 4 ms `fade_tail` then windowed away a step
+    that size, and the DC came out at 1.7e-04 against the measurement script's
+    2e-04 limit — a gate passing at 85% of its wall is a gate about to fail on
+    somebody else's tweak. Releasing last drops it to 2.6e-05 and changes the
+    band energy by 0.1 in 29.9, which is nothing.
+
+    The room stage is gone because Raw has no room."""
+    if comp:
+        y = _rcomp(y, sr, *comp)
+    y = _rb._norm(y, 1.0)
+    y = _rb._saturate(y, drive, ceil=1.0)
+    y = _krelease(y)
+    return _rb.fade_tail(_rb._norm(y, KIT_PEAK), sr)
+
+
+def _rv_kick(spec, kit, sr):
+    """Click, body, sub — in that order of arrival, which is the point.
+
+    `click` is the 2-4 ms of high noise; `ping` is the pair of high sine
+    bursts under it that stop the click being a hiss (the same trick as the
+    hi-hat's partials, three octaves of it). `body` is the mid-band layer
+    rule 1 makes mandatory. `sweep` is the pitch: it starts around 80 Hz and
+    is at 50 within 15 ms, which is a rock kick and not an 808 — the
+    `electronic` kick above takes 60 ms to make the same drop and that is
+    exactly why it reads as a boom instead of a hit."""
+    k = spec['kick']
+    n = int(sr * k['ms'] / 1000)
+    t = np.arange(n) / sr
+    f0, f1, drop = k['sweep']
+    freq = (f0 - f1) * np.exp(-t * drop) + f1
+    env = _rhold(t, k['attack'], k['hold'], k['decay'])
+    y = np.sin(2 * np.pi * np.cumsum(freq) / sr) * env
+    if k['modes']:
+        y = y + sum(
+            np.sin(2 * np.pi * f * t) * _rhold(t, k['attack'], k['hold'] * 0.5, dec) * g
+            for f, dec, g in k['modes']
+        ) * k['mode_gain']
+    band, dec, gain = k['body']
+    y = y + _knoise(kit, 'kick', 'body', n, band, sr, dec) * _rhold(
+        t, k['attack'], k['hold'], 0.0) * gain
+    band, dec, gain = k['click']
+    y = y + _knoise(kit, 'kick', 'click', n, band, sr, dec) * gain
+    for j, f in enumerate(k['ping']):
+        y = y + np.sin(2 * np.pi * f * t) * np.exp(-t * k['ping_decay']) * k['ping_gain']
+    return _rfinish(y, sr, k['comp'], k['drive'])
+
+
+def _rv_snare(spec, kit, sr, hard):
+    """Wire over drum, and the wire is the louder of the two.
+
+    Rule 4 still holds — one drum at two dynamics, sharing `shell_sweep`.
+    What the arm changes here is the amount of wire, whether there is a
+    rimshot on it, and how long the ring lasts. The soft hit is the same
+    drum with less wire and no click; it is NOT a quieter file, and every
+    file in the set still peaks at 0.900.
+
+    The body sweeps 250 → 180 Hz. A snare head detunes as it stretches just
+    as a kick head does, and a fixed 180 Hz sine is the sound the owner
+    called smooth."""
+    s = spec['snare']
+    d = s['hi'] if hard else s['lo']
+    tag = 'snare_hi' if hard else 'snare_lo'
+    n = int(sr * d['ms'] / 1000)
+    t = np.arange(n) / sr
+
+    f0, f1, drop = s['shell_sweep']
+    freq = (f0 - f1) * np.exp(-t * drop) + f1
+    body = np.sin(2 * np.pi * np.cumsum(freq) / sr) * _rhold(
+        t, s['attack'], d['hold'], d['body_decay'])
+    body = body + sum(
+        np.sin(2 * np.pi * f * t) * _rhold(t, s['attack'], d['hold'] * 0.5, dec) * g
+        for f, dec, g in s['modes']
+    ) * s['mode_gain']
+
+    wire = _knoise(kit, tag, 'wire', n, s['wire'], sr, d['wire_decay']) * _rhold(
+        t, 0.25, d['hold'], 0.0)
+    y = body * s['body_gain'] + wire * d['wire']
+
+    if d.get('rimshot'):
+        band, dec, gain = s['rimshot']
+        y = y + _knoise(kit, tag, 'rimshot', n, band, sr, dec) * gain
+        y = y + sum(
+            np.sin(2 * np.pi * f * t) * np.exp(-t * dec) * g
+            for f, dec, g in s['rim_modes']
+        )
+    return _rfinish(y, sr, d['comp'], d['drive'])
+
+
+# The kit itself. Registered into KIT_SPECS at the bottom of this section
+# rather than written inline up there, because the `build` overrides name
+# functions that do not exist yet when KIT_SPECS is evaluated — and because
+# keeping Raw in one block is what lets the owner say "more wire" and have
+# somebody find the number without reading four other kits first.
+#
+# The knobs, in the owner's words:
+#   "more click"     kick['click'] gain, and kick['ping_gain'] under it
+#   "more thump"     kick['body'] gain; kick['hold'] for how long it lasts
+#   "more wire"      snare hi/lo['wire']
+#   "more crack"     snare['rimshot'] gain — the hard hit only
+#   "less ring"      snare hi/lo['wire_decay'] up, ['body_decay'] up
+#   "harder"         ['comp'] ratio up or threshold down, then ['drive'] up
+#   "brighter hats"  hat/hat_open['band'] and ['partials'] up
+RAW_SPEC = {
+    # A dry room is the brief. Not "a small room" — none.
+    'room': 0.0,
+    'kick': dict(
+        ms=150,
+        # 82 Hz to 50 with a 120/s drop: it is at 55 Hz inside 15 ms. The
+        # `electronic` kick takes 60 ms to make the same move, which is the
+        # difference between a hit and a boom.
+        sweep=(82.0, 50.0, 120.0), attack=0.6, hold=22.0, decay=26.0,
+        modes=((180, 70, 0.55), (320, 110, 0.28)), mode_gain=0.34,
+        # The layer a laptop actually radiates, held flat under the hold so
+        # the thump has a length rather than only an onset.
+        body=((170, 1700), 34.0, 1.30),
+        # 2-4 ms of beater. 700/s decay is 1.4 ms to -8 dB.
+        click=((2500, 8000), 700.0, 0.55),
+        ping=(2950, 5900), ping_decay=520.0, ping_gain=0.22,
+        comp=(0.32, 4.5, 0.5, 110.0), drive=2.4),
+    'snare': dict(
+        # One drum, two dynamics: both hits sweep 250 → 178 Hz on the same
+        # two overtones. Rule 4 above.
+        shell_sweep=(250.0, 178.0, 90.0), attack=0.4,
+        modes=((330, 46, 0.40), (476, 60, 0.22)), mode_gain=0.30,
+        # Under 1.0 on purpose: the wire is meant to be the louder layer.
+        body_gain=0.55, wire=(1500, 6000),
+        rimshot=((2200, 9000), 900.0, 0.75),
+        rim_modes=((1180, 260, 0.30), (2360, 320, 0.18)),
+        hi=dict(ms=205, hold=16.0, body_decay=24.0, wire_decay=16.0, wire=1.60,
+                rimshot=True, comp=(0.22, 8.0, 0.5, 90.0), drive=3.2),
+        # The same drum with a third of the wire, no rimshot, a shorter hold
+        # and a faster body — NOT a quieter file. It still peaks at 0.900 and
+        # the engine's gain is what makes it a ghost note.
+        lo=dict(ms=150, hold=6.0, body_decay=38.0, wire_decay=30.0, wire=0.45,
+                comp=(0.35, 3.5, 0.8, 90.0), drive=1.90)),
+    # Short and metallic. The partial gain is the highest in the set: a rock
+    # hat is a pair of struck plates, not a hiss.
+    'hat': dict(ms=52, band=(6800, 15200), decay=105.0,
+                partials=(7000, 9450, 12100, 15000), partial_gain=0.40, drive=1.9),
+    'hat_open': dict(ms=240, band=(6400, 14200), decay=17.0,
+                     partials=(7000, 9450, 12100, 15000), partial_gain=0.34, drive=1.6),
+    # Ping-forward: 0.85 against Brushes' 0.55, and a wash that decays at 13
+    # against Brushes' 5. You ride the bell of this one.
+    'ride': dict(ms=300, ping=(560, 790, 1140, 1530), ping_decay=9.0, ping_gain=0.85,
+                 wash=(3200, 12000), wash_decay=13.0, stick=(3500, 10500),
+                 stick_gain=0.55, drive=1.1),
+    # Woody: the `low` layer is the biggest in the set (0.45) and the modes
+    # sit where a rim rings, which is what stops it being the hat's cousin.
+    'rim': dict(ms=48, click=((1300, 5200), 300.0, 1.0), low=((420, 1400), 200.0, 0.45),
+                modes=((1800, 230, 0.55), (2760, 290, 0.30)), drive=1.4),
+    'crash': dict(ms=660, partials=(440, 620, 875, 1240, 1750, 2470, 3490, 4940, 6990, 9880),
+                  partial_gain=0.42, wash=(700, 15000), decay=6.2, drive=1.1),
+    'build': {
+        'kick': lambda s, k, sr: _rv_kick(s, k, sr),
+        'snare_hi': lambda s, k, sr: _rv_snare(s, k, sr, True),
+        'snare_lo': lambda s, k, sr: _rv_snare(s, k, sr, False),
+    },
+}
+
+KIT_SPECS['raw'] = RAW_SPEC
+
+
 # Name → builder. The order is the order the files are written and reported.
 KIT_VOICES = (
     ('kick', lambda s, k, sr: _kv_kick(s, k, sr)),
@@ -683,6 +947,10 @@ def generate_jam_kits(sounds_dir, sr=KIT_SR):
     written = []
     for kit, spec in KIT_SPECS.items():
         for voice, build in KIT_VOICES:
+            # A kit may bring its own builder for a voice. `raw` does, for the
+            # kick and both snares, because a held peak and a compressor are
+            # not knobs the first four kits' voices have — see the RAW section.
+            build = spec.get('build', {}).get(voice, build)
             name = 'kit_{}_{}.wav'.format(kit, voice)
             path = os.path.join(sounds_dir, name)
             _rb.write(path, build(spec, kit, sr), sr)
