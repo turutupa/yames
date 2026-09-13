@@ -128,6 +128,17 @@
       "beats_other": "{{count}}박",
       "fewer": "카운트인 박 줄이기",
       "more": "카운트인 박 늘리기"
+    },
+    "jam": {
+      "mark": "이 단계는 잼입니다",
+      "addStep": "잼 추가",
+      "addTo": "셋리스트에 추가…",
+      "barsOfForm": "{{count}}마디",
+      "barsOfForm_one": "{{count}}마디",
+      "barsOfForm_other": "{{count}}마디",
+      "said": "밴드",
+      "goneShort": "잼이 없습니다",
+      "gone": "그 잼은 더 이상 라이브러리에 없어서, 이 단계는 적혀 있는 클릭을 연주합니다."
     }
   }
 }

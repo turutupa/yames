@@ -36,6 +36,8 @@ interface RailProps {
   onRenameJam: (id: string, name: string) => void;
   onDuplicateJam: (id: string) => void;
   onReorderJams: (from: number, to: number) => void;
+  /** A jam, into a setlist, from the library's own context menu (JAM_MODE 8.5). */
+  onAddJamToSetlist?: (jamId: string, setlistId: string) => void;
   coachOpen: boolean;
   coachActive: boolean;
   coachListening: boolean;
@@ -148,6 +150,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
     onRenameJam,
     onDuplicateJam,
     onReorderJams,
+    onAddJamToSetlist,
     coachOpen,
     coachActive,
     coachListening,
@@ -233,6 +236,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
             onRenameJam={onRenameJam}
             onDuplicateJam={onDuplicateJam}
             onReorderJams={onReorderJams}
+            onAddJamToSetlist={onAddJamToSetlist}
           />
         )}
       </div>

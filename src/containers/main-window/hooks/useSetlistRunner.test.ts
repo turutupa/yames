@@ -8,6 +8,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 import { useSetlistRunner } from "./useSetlistRunner";
 import { mockInvoke } from "../../../test/mocks";
+import { jamToSetlistStep } from "../../../setlist";
+import { STARTER_JAMS } from "../../../jam/jams";
+import type { Jam } from "../../../jam/types";
 import type { BeatEvent, Setlist, SetlistStep, SetlistTrigger } from "../../../types";
 
 function step(name: string, bpm: number, trigger: SetlistTrigger): SetlistStep {
@@ -179,5 +182,177 @@ describe("useSetlistRunner", () => {
     mockInvoke.mockClear();
     act(() => rerender({ b: null, playing: false }));
     expect(callsTo("set_volume")).toContainEqual({ volume: 0.42 });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// A jam as a step (JAM_MODE §8.5)
+// ---------------------------------------------------------------------------
+
+/**
+ * Let the pushes finish.
+ *
+ * `pushJam` and `clearJam` await each setter so the engine SEES them in order,
+ * which means only the first of them has been made by the time a synchronous
+ * `act()` returns. Anything asserting on the order — which is the whole point
+ * of these tests — has to let the microtasks run first.
+ */
+async function settle() {
+  await act(async () => {
+    for (let i = 0; i < 12; i += 1) await Promise.resolve();
+  });
+}
+
+/** The order every invoke went out in, so a sequence can be asserted on. */
+function order(...commands: string[]) {
+  return mockInvoke.mock.calls.map((c) => c[0]).filter((c) => commands.includes(c as string));
+}
+
+const JAM: Jam = { ...STARTER_JAMS[0], id: "j1", bpm: 92 };
+
+/** A setlist whose first step is that jam and whose second is a plain click. */
+function jammed(over: Partial<SetlistStep> = {}): Setlist {
+  return {
+    id: "c-jam",
+    name: "Routine",
+    createdAt: 0,
+    repeat: 1,
+    steps: [
+      { ...jamToSetlistStep(JAM), trigger: { kind: "bars", bars: 1 }, ...over },
+      step("after", 120, { kind: "manual" }),
+    ],
+  };
+}
+
+function mountJammed(
+  setlist: Setlist,
+  jams: Jam[] = [JAM],
+  meter = { subdivision: 4, beatGroups: [7], freeMode: true },
+) {
+  return renderHook(
+    ({ b, playing }: { b: BeatEvent | null; playing: boolean }) =>
+      useSetlistRunner(setlist, playing, b, 0, {
+        getJam: (id) => jams.find((j) => j.id === id) ?? null,
+        lineup: { drums: true, bass: true },
+        meter,
+      }),
+    { initialProps: { b: null as BeatEvent | null, playing: false } },
+  );
+}
+
+describe("a setlist step that is a jam", () => {
+  it("sends the meter before the table, the way the jam tab does", async () => {
+    // The engine checks `ticksPerBeat × beatsPerBar` against its own bar and
+    // refuses a table that disagrees — by playing the plain click, silently.
+    // A table that arrives before its meter is checked against the PREVIOUS
+    // one, so this order is the whole contract.
+    const { rerender } = mountJammed(jammed());
+    act(() => rerender({ b: null, playing: true }));
+    await settle();
+
+    const seen = order("set_free_mode", "set_beat_groups", "set_subdivision", "set_jam");
+    expect(seen.indexOf("set_jam")).toBeGreaterThan(seen.indexOf("set_beat_groups"));
+    expect(seen.indexOf("set_jam")).toBeGreaterThan(seen.indexOf("set_subdivision"));
+    expect(seen.indexOf("set_beat_groups")).toBeGreaterThan(seen.indexOf("set_free_mode"));
+  });
+
+  it("hands the engine a table, and the step's own tempo beside it", async () => {
+    const { rerender } = mountJammed(jammed());
+    act(() => rerender({ b: null, playing: true }));
+    await settle();
+    const config = callsTo("set_jam").at(-1) as { config: { formBars: number } | null };
+    expect(config.config).not.toBeNull();
+    expect(config.config!.formBars).toBe(12);
+    expect(callsTo("set_bpm")).toContainEqual({ bpm: 92 });
+  });
+
+  it("exposes the running jam, so the player can draw the form", () => {
+    const { result, rerender } = mountJammed(jammed());
+    act(() => rerender({ b: null, playing: true }));
+    expect(result.current.jam?.id).toBe("j1");
+  });
+
+  it("takes the band away when a plain step follows, and leaves its meter alone", async () => {
+    const { result, rerender } = mountJammed(jammed());
+    act(() => rerender({ b: null, playing: true }));
+    act(() => rerender({ b: beat(0, true), playing: true }));
+    await settle();
+    mockInvoke.mockClear();
+    // The downbeat of bar two is where the one-bar gap comes due.
+    act(() => rerender({ b: beat(4, true), playing: true }));
+    await settle();
+
+    expect(result.current.stepNumber).toBe(2);
+    expect(result.current.jam).toBeNull();
+    expect(callsTo("set_jam")).toContainEqual({ config: null });
+    // The plain step is about to set its own meter; handing back a remembered
+    // one here would undo it on the beat it landed.
+    expect(callsTo("set_beat_groups")).toEqual([{ groups: [4] }]);
+  });
+
+  it("gives the metronome its own meter back when the run stops", async () => {
+    // The jam set the engine's subdivision and beat groups to the groove's,
+    // and those are engine state, not jam state. A player who came in from
+    // 7/8 must not find their own setting quietly gone.
+    const { rerender } = mountJammed(jammed());
+    act(() => rerender({ b: null, playing: true }));
+    await settle();
+    mockInvoke.mockClear();
+    act(() => rerender({ b: null, playing: false }));
+    await settle();
+
+    expect(callsTo("set_jam")).toContainEqual({ config: null });
+    expect(callsTo("set_beat_groups")).toContainEqual({ groups: [7] });
+    expect(callsTo("set_subdivision")).toContainEqual({ subdivision: 4 });
+    expect(callsTo("set_free_mode")).toContainEqual({ enabled: true });
+  });
+
+  it("says nothing about the band on a setlist that has none", async () => {
+    // One `set_jam(null)` per plain step is the reconciliation every step
+    // does; what must not happen is the run END sending one on a routine
+    // that never had a band in it.
+    const { rerender } = mount();
+    act(() => rerender({ b: null, playing: true }));
+    act(() => rerender({ b: beat(0, true), playing: true }));
+    mockInvoke.mockClear();
+    act(() => rerender({ b: null, playing: false }));
+    await settle();
+    expect(callsTo("set_jam")).toEqual([]);
+  });
+
+  it("plays a deleted jam's step as the plain step it describes", () => {
+    // The step still carries the tempo, the meter and the sound the jam gave
+    // it, so it plays. What it must not do is leave a table on the engine.
+    const { result, rerender } = mountJammed(jammed(), []);
+    act(() => rerender({ b: null, playing: true }));
+    expect(result.current.jam).toBeNull();
+    expect(callsTo("set_jam")).toEqual([{ config: null }]);
+    expect(callsTo("set_bpm")).toContainEqual({ bpm: 92 });
+    expect(callsTo("set_beat_groups")).toContainEqual({ groups: [4] });
+  });
+
+  it("sends the next bar's bass at the bar line, and only when it moves", async () => {
+    // Over a twelve-bar blues the bass plays A under bar 1 and D under bar 5.
+    // Without this the drummer would be right and the bass a chord behind for
+    // the whole step.
+    const long = jammed({ trigger: { kind: "manual" } });
+    const { rerender } = mountJammed(long);
+    act(() => rerender({ b: null, playing: true }));
+    await settle();
+    mockInvoke.mockClear();
+
+    // Bar 0's config is already in flight from the load; this bar line says
+    // nothing, which is what stops the table overtaking its own meter.
+    act(() => rerender({ b: { ...beat(0, true), formBar: 0 }, playing: true }));
+    expect(callsTo("set_jam")).toEqual([]);
+
+    // Bars 1, 2 and 3 of a blues are all the I, so nothing has to be said
+    // until the bar before the IV.
+    act(() => rerender({ b: { ...beat(4, true), formBar: 1 }, playing: true }));
+    act(() => rerender({ b: { ...beat(8, true), formBar: 2 }, playing: true }));
+    act(() => rerender({ b: { ...beat(12, true), formBar: 3 }, playing: true }));
+    const sends = callsTo("set_jam") as { config: unknown }[];
+    expect(sends.every((s) => s.config !== null)).toBe(true);
+    expect(sends.length).toBeGreaterThan(0);
   });
 });

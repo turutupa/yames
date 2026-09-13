@@ -128,6 +128,17 @@
       "beats_other": "{{count}} vuruş",
       "fewer": "Daha az sayım vuruşu",
       "more": "Daha çok sayım vuruşu"
+    },
+    "jam": {
+      "mark": "Bu adım bir jam",
+      "addStep": "Bir jam ekle",
+      "addTo": "Set listesine ekle…",
+      "barsOfForm": "{{count}} ölçü",
+      "barsOfForm_one": "{{count}} ölçü",
+      "barsOfForm_other": "{{count}} ölçü",
+      "said": "grup",
+      "goneShort": "Jam artık yok",
+      "gone": "O jam artık kütüphanede yok, bu yüzden bu adım tarif ettiği kliği çalıyor."
     }
   }
 }

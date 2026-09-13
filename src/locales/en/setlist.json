@@ -128,6 +128,17 @@
       "beats_other": "{{count}} beats",
       "fewer": "Fewer count-in beats",
       "more": "More count-in beats"
+    },
+    "jam": {
+      "mark": "This step is a jam",
+      "addStep": "Add a jam",
+      "addTo": "Add to setlist…",
+      "barsOfForm": "{{count}} bars",
+      "barsOfForm_one": "{{count}} bar",
+      "barsOfForm_other": "{{count}} bars",
+      "said": "the band",
+      "goneShort": "The jam is gone",
+      "gone": "That jam is no longer in the library, so this step plays the click it describes."
     }
   }
 }

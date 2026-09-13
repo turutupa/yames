@@ -6,6 +6,8 @@ export {
   DEFAULT_TRIGGER,
   duplicateSetlist,
   duplicateStep,
+  jamStepBars,
+  jamToSetlistStep,
   presetToSetlistStep,
   removeStep,
   renameSetlist,

@@ -128,6 +128,17 @@
       "beats_other": "{{count}} Schläge",
       "fewer": "Weniger Einzählschläge",
       "more": "Mehr Einzählschläge"
+    },
+    "jam": {
+      "mark": "Dieser Schritt ist ein Jam",
+      "addStep": "Jam hinzufügen",
+      "addTo": "Zur Setlist hinzufügen…",
+      "barsOfForm": "{{count}} Takte",
+      "barsOfForm_one": "{{count}} Takt",
+      "barsOfForm_other": "{{count}} Takte",
+      "said": "die Band",
+      "goneShort": "Der Jam ist weg",
+      "gone": "Dieser Jam ist nicht mehr in der Bibliothek, also spielt dieser Schritt den Klick, den er beschreibt."
     }
   }
 }

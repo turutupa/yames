@@ -2,6 +2,9 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { StepSentence } from "./StepSentence";
+import { jamToSetlistStep } from "../../setlist";
+import { STARTER_JAMS } from "../../jam/jams";
+import type { Jam } from "../../jam/types";
 import type { SetlistStep } from "../../types";
 
 /**
@@ -25,13 +28,20 @@ const STEP: SetlistStep = {
   transition: { kind: "countIn", bars: 2 },
 };
 
-function draw(over: Partial<SetlistStep> = {}, onChange = vi.fn()) {
+function draw(
+  over: Partial<SetlistStep> = {},
+  onChange = vi.fn(),
+  jam: Jam | null = null,
+  folded = false,
+) {
   const result = render(
     <StepSentence
       step={{ ...STEP, ...over }}
       number={2}
       total={4}
       isLast={false}
+      jam={jam}
+      folded={folded}
       onChange={onChange}
     />,
   );
@@ -112,5 +122,78 @@ describe("the meter window", () => {
     for (const call of onChange.mock.calls) {
       expect(call[0]).not.toHaveProperty("freeMode", false);
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// A jam as a step (JAM_MODE §8.5)
+// ---------------------------------------------------------------------------
+
+const BLUES: Jam = { ...STARTER_JAMS[0], name: "Slow blues in A", bpm: 92 };
+
+/**
+ * The step the library's "add a jam" would produce, drawn as the paragraph
+ * draws it — folded, which is every row of a setlist you are reading.
+ */
+function drawJamStep(jam: Jam | null = BLUES, over: Partial<SetlistStep> = {}) {
+  const step = { ...jamToSetlistStep(BLUES), ...over };
+  return draw(step, vi.fn(), jam, true);
+}
+
+describe("a step that is a jam", () => {
+  it("reads as the jam: its name, its tempo, and one chorus", () => {
+    // "Slow blues in A · 92 · 12 bars" — the three facts you need to know
+    // which step of the routine this is without opening anything.
+    const { container } = drawJamStep();
+    expect(screen.getByText("Slow blues in A")).toBeTruthy();
+    expect(screen.getByText("92")).toBeTruthy();
+    expect(screen.getByText("12 bars")).toBeTruthy();
+    expect(container.querySelector(".setlist-jam-mark")).toBeTruthy();
+  });
+
+  it("does not offer the meter, because the meter belongs to the groove", () => {
+    // A meter picked here would move the engine's grid out from under the
+    // table the groove was written on, and the engine's way of refusing a
+    // table it cannot check is to play the plain click, silently.
+    drawJamStep();
+    expect(screen.queryByLabelText("Meter")).toBeNull();
+    expect(screen.queryByLabelText("Subdivision")).toBeNull();
+  });
+
+  it("still offers the tempo, which is the routine's to change", () => {
+    // The step carries a copy, and the runner sends the copy: playing a jam
+    // slower in one routine than in another is the point of a copy.
+    drawJamStep();
+    expect(screen.getByText("92").closest("button")).toBeTruthy();
+  });
+
+  it("keeps the trigger and the transition exactly as any step has them", () => {
+    drawJamStep(BLUES, { trigger: { kind: "bars", bars: 48 }, transition: { kind: "countIn", bars: 2 } });
+    expect(screen.getByText("48 bars")).toBeTruthy();
+    expect(screen.getByText(/count in/i)).toBeTruthy();
+  });
+
+  it("says the band rather than offering a click to choose", () => {
+    drawJamStep();
+    expect(screen.getByText("the band")).toBeTruthy();
+    expect(screen.queryByText("beep")).toBeNull();
+  });
+
+  it("says so when the jam is gone, and gives the controls back", () => {
+    // The step still has a tempo, a meter and a sound, so it plays — as a
+    // click. That is the honest outcome, and it is not what the row looks
+    // like it will do unless the row says so.
+    const { container } = drawJamStep(null);
+    expect(screen.getByText(/no longer in the library/i)).toBeTruthy();
+    expect(container.querySelector(".setlist-jam-mark[data-gone]")).toBeTruthy();
+    expect(screen.getByLabelText("Meter")).toBeTruthy();
+    expect(screen.getByLabelText("Subdivision")).toBeTruthy();
+  });
+
+  it("leaves an ordinary step completely alone", () => {
+    const { container } = draw();
+    expect(container.querySelector(".setlist-jam-mark")).toBeNull();
+    expect(screen.queryByText(/no longer in the library/i)).toBeNull();
+    expect(screen.getByLabelText("Meter")).toBeTruthy();
   });
 });

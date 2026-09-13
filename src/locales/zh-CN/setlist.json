@@ -128,6 +128,17 @@
       "beats_other": "{{count}} 拍",
       "fewer": "减少预备拍",
       "more": "增加预备拍"
+    },
+    "jam": {
+      "mark": "这一步是即兴伴奏",
+      "addStep": "添加即兴伴奏",
+      "addTo": "添加到曲目单…",
+      "barsOfForm": "{{count}} 小节",
+      "barsOfForm_one": "{{count}} 小节",
+      "barsOfForm_other": "{{count}} 小节",
+      "said": "乐队",
+      "goneShort": "即兴伴奏已不在",
+      "gone": "那个即兴伴奏已不在库里，所以这一步只会按它写的节拍器声音来响。"
     }
   }
 }
