@@ -356,7 +356,7 @@ pub struct JamConfig {
     pub crash_on_one: bool,
     /// Gain multiplier on every hit, 0.5..1.5.
     pub intensity: f32,
-    /// Which kit plays the lanes: "room", "tight", "brushes", "electronic".
+    /// Which kit plays the lanes: "room", "tight", "brushes", "electronic", "raw".
     /// Anything else is "room" — see [`JamKit::from_name`].
     #[serde(default)]
     pub kit: String,
@@ -2364,6 +2364,7 @@ mod tests {
             ("tight", JamKit::Tight),
             ("brushes", JamKit::Brushes),
             ("electronic", JamKit::Electronic),
+            ("raw", JamKit::Raw),
         ] {
             let mut c = cfg.clone();
             c.kit = name.to_string();
@@ -2426,7 +2427,7 @@ mod tests {
             compile(&cfg).unwrap()
         };
         let mut peaks = Vec::new();
-        for kit in ["room", "tight", "brushes", "electronic"] {
+        for kit in ["room", "tight", "brushes", "electronic", "raw"] {
             let t = busy(kit);
             assert!(
                 t.peak_after <= JAM_TICK_CEILING + 1e-4,

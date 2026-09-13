@@ -323,6 +323,19 @@ const KIT_WAVS: [[&[u8]; KIT_VOICES]; KIT_COUNT] = [
         include_bytes!("../sounds/kit_electronic_rim.wav"),
         include_bytes!("../sounds/kit_electronic_crash.wav"),
     ],
+    // raw — a rock drummer close-miked in a dry room: a click on the kick,
+    // wire over the snare body, compressed envelopes, no room tail. The kit
+    // the owner asked for after the first four came out smooth.
+    [
+        include_bytes!("../sounds/kit_raw_kick.wav"),
+        include_bytes!("../sounds/kit_raw_snare_hi.wav"),
+        include_bytes!("../sounds/kit_raw_snare_lo.wav"),
+        include_bytes!("../sounds/kit_raw_hat.wav"),
+        include_bytes!("../sounds/kit_raw_hat_open.wav"),
+        include_bytes!("../sounds/kit_raw_ride.wav"),
+        include_bytes!("../sounds/kit_raw_rim.wav"),
+        include_bytes!("../sounds/kit_raw_crash.wav"),
+    ],
 ];
 
 // ---------------------------------------------------------------------------
@@ -440,7 +453,7 @@ fn decode_wav(wav_bytes: &'static [u8], target_sr: u32) -> Vec<f32> {
 // ---------------------------------------------------------------------------
 
 /// How many kits [`KIT_WAVS`] holds, and how many voices each one has.
-pub const KIT_COUNT: usize = 4;
+pub const KIT_COUNT: usize = 5;
 pub const KIT_VOICES: usize = 8;
 
 /// The peak every kit file carries, and the peak every decoded kit buffer is
@@ -458,11 +471,13 @@ pub enum JamKit {
     Tight,
     Brushes,
     Electronic,
+    Raw,
 }
 
 impl JamKit {
     /// Every kit, in the order [`KIT_WAVS`] lists them.
-    pub const ALL: [JamKit; KIT_COUNT] = [Self::Room, Self::Tight, Self::Brushes, Self::Electronic];
+    pub const ALL: [JamKit; KIT_COUNT] =
+        [Self::Room, Self::Tight, Self::Brushes, Self::Electronic, Self::Raw];
 
     /// The name the contract uses (`Jam.kit` in `src/jam/types.ts`).
     pub fn name(self) -> &'static str {
@@ -471,6 +486,7 @@ impl JamKit {
             Self::Tight => "tight",
             Self::Brushes => "brushes",
             Self::Electronic => "electronic",
+            Self::Raw => "raw",
         }
     }
 
@@ -483,6 +499,7 @@ impl JamKit {
             "tight" => Self::Tight,
             "brushes" => Self::Brushes,
             "electronic" => Self::Electronic,
+            "raw" => Self::Raw,
             _ => Self::Room,
         }
     }
