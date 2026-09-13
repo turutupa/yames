@@ -176,7 +176,7 @@ export function useSetlistRunner(
     setPlayingJam(null);
     // Even with nothing to restore: a run that ended on a jam step has left a
     // table on the engine, and the metronome tab is not a band.
-    if (carried) clearJam(restore);
+    if (carried) void clearJam(restore);
   }, []);
   // Re-render while a seconds gap counts down; the reduced state only moves
   // on beats, which at 40 bpm is once every second and a half.

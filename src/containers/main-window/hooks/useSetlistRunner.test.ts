@@ -57,9 +57,12 @@ function mount(setlist: Setlist | null = CHAIN) {
 }
 
 describe("useSetlistRunner", () => {
-  it("applies the first step when the transport starts", () => {
+  it("applies the first step when the transport starts", async () => {
     const { rerender } = mount();
     act(() => rerender({ b: null, playing: true }));
+    // The meter waits on the band being taken away first (`applySetlistStep`),
+    // so it lands a microtask later than the tempo does.
+    await settle();
     expect(callsTo("set_bpm")).toContainEqual({ bpm: 80 });
     expect(callsTo("set_beat_groups")).toContainEqual({ groups: [4] });
     expect(callsTo("set_sound_type")).toContainEqual({ soundType: "click" });
@@ -307,6 +310,26 @@ describe("a setlist step that is a jam", () => {
     expect(callsTo("set_free_mode")).toContainEqual({ enabled: true });
   });
 
+  it("takes the table away before the plain step's meter, not after", async () => {
+    // The same contract read from the other end: the engine checks a meter
+    // against the table it is holding, so a 4/4 sent while a shuffled
+    // twelve-eight table is still loaded is a meter it may refuse — silently,
+    // by playing the plain click in the wrong bar length.
+    const { rerender } = mountJammed(jammed());
+    act(() => rerender({ b: null, playing: true }));
+    act(() => rerender({ b: beat(0, true), playing: true }));
+    await settle();
+    mockInvoke.mockClear();
+
+    act(() => rerender({ b: beat(4, true), playing: true }));
+    await settle();
+
+    const seen = order("set_jam", "set_subdivision", "set_beat_groups", "set_free_mode");
+    expect(seen[0]).toBe("set_jam");
+    expect(seen.indexOf("set_subdivision")).toBeGreaterThan(seen.indexOf("set_jam"));
+    expect(seen.indexOf("set_beat_groups")).toBeGreaterThan(seen.indexOf("set_jam"));
+  });
+
   it("leaves the plain step's own meter alone when the run ends on it", async () => {
     // The pocket is filled on the first jam step of the run. A routine of
     // "blues, then alternate picking" that is stopped during the picking used
@@ -343,11 +366,12 @@ describe("a setlist step that is a jam", () => {
     expect(callsTo("set_jam")).toEqual([]);
   });
 
-  it("plays a deleted jam's step as the plain step it describes", () => {
+  it("plays a deleted jam's step as the plain step it describes", async () => {
     // The step still carries the tempo, the meter and the sound the jam gave
     // it, so it plays. What it must not do is leave a table on the engine.
     const { result, rerender } = mountJammed(jammed(), []);
     act(() => rerender({ b: null, playing: true }));
+    await settle();
     expect(result.current.jam).toBeNull();
     expect(callsTo("set_jam")).toEqual([{ config: null }]);
     expect(callsTo("set_bpm")).toContainEqual({ bpm: 92 });

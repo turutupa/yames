@@ -151,9 +151,13 @@ export function lineSignature(config: JamEngineConfig): string {
  * `restore` of `null` takes the table away and leaves the meter alone — which
  * is what a setlist wants between a jam step and the plain step after it,
  * because that step carries a meter of its own and is about to set it.
+ *
+ * The promise is returned so a caller with a meter to send NEXT can wait for
+ * the table to be gone first. It never rejects: every step inside is guarded,
+ * because a meter that did not go back is a setting the user finds missing.
  */
-export function clearJam(restore: MeterSnapshot | null): void {
-  void (async () => {
+export function clearJam(restore: MeterSnapshot | null): Promise<void> {
+  return (async () => {
     try {
       await setJam(null);
     } catch {

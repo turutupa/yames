@@ -401,7 +401,7 @@ export function useJamSession({
       sentMeterRef.current = null;
       voicingRef.current = null;
       loadedIdRef.current = null;
-      if (mine) clearJam(restore);
+      if (mine) void clearJam(restore);
       return;
     }
     // The meter the jam found, taken once, before the jam overwrites it. Only
