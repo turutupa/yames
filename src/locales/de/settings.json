@@ -207,7 +207,8 @@
         "jam-next-shape": "Nächster Griff",
         "jam-next-section": "Nächster Teil",
         "jam-prev-section": "Vorheriger Teil",
-        "jam-loop-section": "Diesen Teil loopen"
+        "jam-loop-section": "Diesen Teil loopen",
+        "jam-take": "Take aufnehmen"
       },
       "descs": {
         "play": "Starte oder stoppe das Metronom",
@@ -240,7 +241,8 @@
         "jam-next-shape": "Durch die Griffe des aktuellen Akkords blättern",
         "jam-next-section": "Am Taktstrich an den Anfang des nächsten Teils springen",
         "jam-prev-section": "Am Taktstrich zurück an den Anfang des vorherigen Teils",
-        "jam-loop-section": "Den Teil, in dem du bist, in die Schleife nehmen oder wieder freigeben"
+        "jam-loop-section": "Den Teil, in dem du bist, in die Schleife nehmen oder wieder freigeben",
+        "jam-take": "Beim nächsten Play aufnehmen, oder die Aufnahme beenden"
       }
     },
     "inputTest": {

@@ -1298,3 +1298,168 @@
     width: 52px;
   }
 }
+
+/* â”€â”€ Takes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   The shelf under the band (JAM_MODE Â§4.4). Rows rather than cards: a take
+   has three facts â€” when, how long, and a play button â€” and three facts in a
+   card is a card mostly made of padding. */
+.jam-takes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.jam-takes-size {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-faint);
+}
+
+.jam-takes-empty {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-faint);
+}
+
+.jam-takes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.jam-take {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: var(--radius-md, 9px);
+  border: 1px solid transparent;
+}
+
+.jam-take:hover {
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+}
+
+.jam-take[data-playing] {
+  border-color: color-mix(in srgb, var(--accent) 32%, transparent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.jam-take-play {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 14%, transparent);
+  background: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.jam-take-play.playing {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.jam-take-play:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.jam-take-when {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.jam-take-length,
+.jam-take-bandoff {
+  font-size: 0.72rem;
+  color: var(--text-faint);
+}
+
+.jam-take-bandoff {
+  color: var(--accent);
+}
+
+.jam-take-spacer {
+  flex: 1 1 auto;
+}
+
+/* Drawn at zero opacity on every row so a row cannot change height when the
+   button appears â€” the same reservation the setlist's step tools needed,
+   learned the same way. */
+.jam-take-delete {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-faint);
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.jam-take:hover .jam-take-delete,
+.jam-take-delete:focus-visible {
+  opacity: 1;
+}
+
+.jam-take-delete:disabled {
+  cursor: default;
+}
+
+.jam-take-confirm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.7rem;
+  color: var(--text-faint);
+}
+
+.jam-take-confirm button {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+/* There is no undo. The one button that destroys something says so in the
+   one colour on this screen that means "this is not reversible". */
+.jam-take-confirm-yes {
+  color: var(--danger, #f87171);
+}
+
+.jam-takes-note {
+  margin: 0;
+  font-size: 0.68rem;
+  color: var(--text-faint);
+}
+
+/* The dialog is the app's one modal card, widened a little: three sentences
+   at the unsaved dialog's width would be three very short lines. */
+.jam-takes-card {
+  max-width: 420px;
+}
+
+.jam-takes-card .unsaved-body p {
+  margin: 0 0 8px;
+}
+
+.jam-takes-card .unsaved-body p:last-child {
+  margin-bottom: 0;
+}

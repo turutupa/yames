@@ -56,6 +56,7 @@ interface ActionDispatcherArgs {
     nextSection: () => void;
     prevSection: () => void;
     loopSection: () => void;
+    toggleTakes: () => void;
   };
   state: AppState;
   isFullscreen: boolean;
@@ -209,6 +210,9 @@ export function useActionDispatcher({
             break;
           case "jam-loop-section":
             jamActions.loopSection();
+            break;
+          case "jam-take":
+            jamActions.toggleTakes();
             break;
         }
         return;

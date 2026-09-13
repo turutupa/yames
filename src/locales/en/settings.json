@@ -207,7 +207,8 @@
         "jam-next-shape": "Next chord shape",
         "jam-next-section": "Next section",
         "jam-prev-section": "Previous section",
-        "jam-loop-section": "Loop this section"
+        "jam-loop-section": "Loop this section",
+        "jam-take": "Record the take"
       },
       "descs": {
         "play": "Start or stop the metronome",
@@ -240,7 +241,8 @@
         "jam-next-shape": "Page through the ways to play the chord you are on",
         "jam-next-section": "Jump to the start of the next section at the bar line",
         "jam-prev-section": "Jump back to the start of the previous section at the bar line",
-        "jam-loop-section": "Loop the section you are in, or stop looping it"
+        "jam-loop-section": "Loop the section you are in, or stop looping it",
+        "jam-take": "Record the next time you press play, or stop recording"
       }
     },
     "inputTest": {

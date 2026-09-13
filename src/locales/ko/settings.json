@@ -207,7 +207,8 @@
         "jam-next-shape": "다음 코드 폼",
         "jam-next-section": "다음 섹션",
         "jam-prev-section": "이전 섹션",
-        "jam-loop-section": "이 섹션 반복"
+        "jam-loop-section": "이 섹션 반복",
+        "jam-take": "테이크 녹음"
       },
       "descs": {
         "play": "메트로놈을 시작하거나 정지합니다",
@@ -240,7 +241,8 @@
         "jam-next-shape": "지금 코드의 잡는 방법을 차례로 넘기기",
         "jam-next-section": "마디선에서 다음 섹션의 첫 마디로 건너뛰기",
         "jam-prev-section": "마디선에서 이전 섹션의 첫 마디로 돌아가기",
-        "jam-loop-section": "지금 있는 섹션을 반복하거나 반복을 끄기"
+        "jam-loop-section": "지금 있는 섹션을 반복하거나 반복을 끄기",
+        "jam-take": "다음에 재생할 때 녹음하거나 녹음을 멈춥니다"
       }
     },
     "inputTest": {

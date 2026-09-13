@@ -285,6 +285,29 @@
         "4": "Sechzehnteln",
         "6": "Sextolen"
       }
+    },
+    "takes": {
+      "label": "Takes",
+      "record": "Take aufnehmen",
+      "recording": "Nimmt auf",
+      "recordingNow": "Nimmt auf. Der Take erscheint hier, sobald du stoppst.",
+      "empty": "Noch nichts aufgenommen. Schalte „Take aufnehmen“ ein und spiel los — du und die Band, hier zum Nachhören.",
+      "unavailable": "Aufnehmen ist in dieser Version nicht möglich. Alles andere auf diesem Bildschirm funktioniert wie immer.",
+      "play": "Diesen Take abspielen",
+      "stop": "Stopp",
+      "bandOff": "Band stumm",
+      "delete": "Löschen",
+      "confirm": "Wirklich löschen? Das lässt sich nicht rückgängig machen.",
+      "confirmDelete": "Löschen",
+      "confirmKeep": "Behalten",
+      "size": "etwa {{megabytes}} MB auf der Festplatte",
+      "local": "Takes bleiben auf diesem Rechner. Nichts wird hochgeladen.",
+      "introTitle": "Über Takes",
+      "introWhat": "Ein Take bist du zusammen mit der Band, vom ersten Takt nach dem Einzähler bis du stoppst.",
+      "introWhere": "Er wird als WAV-Datei im eigenen Ordner dieser App auf diesem Rechner gespeichert und bleibt dort, bis du ihn löschst.",
+      "introPrivate": "Nichts wird hochgeladen, nichts wird ausgewertet, nichts verlässt diesen Rechner.",
+      "introNotNow": "Jetzt nicht",
+      "introStart": "Takes aufnehmen"
     }
   },
   "scale": {

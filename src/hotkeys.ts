@@ -46,6 +46,7 @@ export type HotkeyAction =
   | "jam-next-section"
   | "jam-prev-section"
   | "jam-loop-section"
+  | "jam-take"
   | "settings";
 
 export interface HotkeyEntry {
@@ -400,6 +401,22 @@ export const HOTKEYS: HotkeyEntry[] = [
     action: "Loop this section",
     key: "L",
     desc: "Loop the section you are in, or stop looping it",
+    group: "jam",
+  },
+  /**
+   * Recording, hands-free.
+   *
+   * It arms the NEXT play rather than starting a take now, which is the only
+   * behaviour a footswitch can have here: a take begins after the count-in,
+   * and a key that started one mid-chorus would produce a recording of the
+   * back half of a tune. R was free, and it is the letter every recorder in
+   * the world uses.
+   */
+  {
+    id: "jam-take",
+    action: "Record the take",
+    key: "R",
+    desc: "Record the next time you press play, or stop recording",
     group: "jam",
   },
 ];

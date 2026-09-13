@@ -207,7 +207,8 @@
         "jam-next-shape": "Thế bấm kế tiếp",
         "jam-next-section": "Đoạn kế tiếp",
         "jam-prev-section": "Đoạn trước",
-        "jam-loop-section": "Lặp đoạn này"
+        "jam-loop-section": "Lặp đoạn này",
+        "jam-take": "Thu bản này"
       },
       "descs": {
         "play": "Bắt đầu hoặc dừng máy đếm nhịp",
@@ -240,7 +241,8 @@
         "jam-next-shape": "Lật qua các cách bấm hợp âm đang chơi",
         "jam-next-section": "Nhảy tới đầu đoạn kế tiếp ngay ở vạch nhịp",
         "jam-prev-section": "Quay về đầu đoạn trước ngay ở vạch nhịp",
-        "jam-loop-section": "Lặp đoạn bạn đang chơi, hoặc bỏ lặp"
+        "jam-loop-section": "Lặp đoạn bạn đang chơi, hoặc bỏ lặp",
+        "jam-take": "Thu vào lần phát tiếp theo, hoặc dừng thu"
       }
     },
     "inputTest": {

@@ -285,6 +285,29 @@
         "4": "doubles-croches",
         "6": "sextolets"
       }
+    },
+    "takes": {
+      "label": "Prises",
+      "record": "Enregistrer la prise",
+      "recording": "Enregistrement",
+      "recordingNow": "Enregistrement en cours. La prise apparaît ici quand tu arrêtes.",
+      "empty": "Rien d'enregistré pour l'instant. Active Enregistrer la prise et joue — toi et le groupe, gardés ici pour te réécouter.",
+      "unavailable": "L'enregistrement n'est pas disponible dans cette version. Tout le reste de cet écran fonctionne comme avant.",
+      "play": "Lire cette prise",
+      "stop": "Arrêter",
+      "bandOff": "groupe en silence",
+      "delete": "Supprimer",
+      "confirm": "La supprimer ? C'est sans retour.",
+      "confirmDelete": "Supprimer",
+      "confirmKeep": "Garder",
+      "size": "environ {{megabytes}} Mo sur le disque",
+      "local": "Les prises restent sur cette machine. Rien n'est envoyé.",
+      "introTitle": "À propos des prises",
+      "introWhat": "Une prise, c'est toi et le groupe mélangés, de la première mesure après le décompte jusqu'à ce que tu arrêtes.",
+      "introWhere": "Elle est écrite en WAV dans le dossier propre à cette application, sur cette machine, et y reste jusqu'à ce que tu la supprimes.",
+      "introPrivate": "Rien n'est envoyé, rien n'est analysé, rien ne quitte la machine.",
+      "introNotNow": "Pas maintenant",
+      "introStart": "Enregistrer les prises"
     }
   },
   "scale": {

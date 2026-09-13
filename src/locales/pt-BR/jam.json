@@ -285,6 +285,29 @@
         "4": "semicolcheias",
         "6": "sextinas"
       }
+    },
+    "takes": {
+      "label": "Gravações",
+      "record": "Gravar a tomada",
+      "recording": "Gravando",
+      "recordingNow": "Gravando. A tomada aparece aqui quando você parar.",
+      "empty": "Ainda não há nada gravado. Ligue Gravar a tomada e toque — você e a banda, guardados aqui para ouvir depois.",
+      "unavailable": "Gravar não está disponível nesta versão. Todo o resto desta tela funciona como sempre.",
+      "play": "Tocar esta tomada",
+      "stop": "Parar",
+      "bandOff": "banda em silêncio",
+      "delete": "Excluir",
+      "confirm": "Excluir? Não dá para desfazer.",
+      "confirmDelete": "Excluir",
+      "confirmKeep": "Manter",
+      "size": "cerca de {{megabytes}} MB no disco",
+      "local": "As tomadas ficam nesta máquina. Nada é enviado.",
+      "introTitle": "Sobre as tomadas",
+      "introWhat": "Uma tomada é você e a banda juntos, do primeiro compasso depois da contagem de entrada até você parar.",
+      "introWhere": "Ela é gravada como um arquivo WAV na pasta própria deste app nesta máquina, e fica lá até você excluir.",
+      "introPrivate": "Nada é enviado, nada é analisado e nada sai desta máquina.",
+      "introNotNow": "Agora não",
+      "introStart": "Gravar tomadas"
     }
   },
   "scale": {

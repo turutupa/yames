@@ -292,3 +292,40 @@ describe("Transport — what it sheds, and in what order", () => {
     expect(screen.queryByText("Chorus")).toBeNull();
   });
 });
+
+/**
+ * The recording mark (JAM_MODE §4.4).
+ *
+ * It is on the transport rather than on the jam screen because the transport
+ * is the one frame that is on every tab: a take that is running while you
+ * have wandered off to the metronome to check something still has to say so.
+ * A microphone writing a file must never be invisible.
+ */
+describe("the recording mark", () => {
+  it("is absent until a take is running", () => {
+    render(<Transport {...base} view="jam" />);
+    expect(document.querySelector(".transport-recording")).toBeNull();
+  });
+
+  it("shows the mark and the elapsed time while one is", () => {
+    render(<Transport {...base} view="jam" recording recordedSeconds={247} />);
+    const mark = document.querySelector(".transport-recording") as HTMLElement;
+    expect(mark).toBeTruthy();
+    expect(mark.textContent).toContain("4:07");
+    expect(mark.querySelector(".transport-recording-dot")).toBeTruthy();
+  });
+
+  it("says so on every tab, not only on the jam", () => {
+    // The point of putting it here is that it survives a trip to another tab.
+    for (const view of ["beat", "drill", "setlist", "jam"] as const) {
+      const { unmount } = render(<Transport {...base} view={view} recording recordedSeconds={5} />);
+      expect(document.querySelector(".transport-recording"), view).toBeTruthy();
+      unmount();
+    }
+  });
+
+  it("marks the bar so the row can shed differently while recording", () => {
+    render(<Transport {...base} view="jam" recording />);
+    expect(document.querySelector(".transport")?.hasAttribute("data-recording")).toBe(true);
+  });
+});

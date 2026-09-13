@@ -95,6 +95,9 @@ import { usePlaybackClock } from "./hooks/usePlaybackClock";
 import { useLibraryFit } from "./hooks/useLibraryFit";
 import { useSetlistSession } from "./hooks/useSetlistSession";
 import { useJamSession } from "./hooks/useJamSession";
+import { useJamTakes } from "./hooks/useJamTakes";
+import { TakesIntroDialog } from "../jam/TakesIntroDialog";
+import type { Jam, JamBand } from "../../jam";
 import { UnsavedChangesDialog } from "../../components/UnsavedChangesDialog";
 import { SetlistEmpty } from "../../components/setlist/SetlistEmpty";
 import { SetlistParagraph } from "../../components/setlist/SetlistParagraph";
@@ -297,6 +300,19 @@ export function MainWindow() {
    */
   const closeJamRef = useRef<() => void>(() => {});
 
+  /**
+   * The jam library and the lineup, reachable from the setlist hook.
+   *
+   * Same shape as `closeJamRef` and for the same reason: a setlist step can
+   * BE a jam (JAM_MODE §8.5), so the runner has to be able to look one up by
+   * id, and the library lives in the jam hook, which is built second. Filled
+   * in during the render below rather than from an effect — the runner reads
+   * it only at the moment a step starts, and a value one commit stale there
+   * would be a jam loaded from yesterday's library.
+   */
+  const jamsRef = useRef<Jam[]>([]);
+  const jamLineupRef = useRef<JamBand | undefined>(undefined);
+
   // The setlist the window has open (U9). With none loaded every one of these
   // is inert and the metronome behaves exactly as it did.
   const setlistSession = useSetlistSession({
@@ -310,6 +326,24 @@ export function MainWindow() {
       setActivePreset(null);
       setPresetDirty(false);
       closeJamRef.current();
+    },
+    /*
+     * What a jam STEP needs. Every field is read through a ref by the runner,
+     * so this object being new on every render costs nothing — and it has to
+     * be new, because `meter` is the engine's live meter and the whole point
+     * of it is that the run hands back whatever was there when it started.
+     */
+    jamContext: {
+      getJam: (id: string) => jamsRef.current.find((j) => j.id === id) ?? null,
+      get lineup() {
+        return jamLineupRef.current;
+      },
+      meter: {
+        subdivision: state.subdivision,
+        beatGroups: state.beatGroups,
+        freeMode: state.freeMode,
+      },
+      countingIn: (state.countIn?.beats ?? 0) > 0,
     },
   });
 
@@ -345,9 +379,30 @@ export function MainWindow() {
     },
   });
 
+  /**
+   * The loaded jam's takes (JAM_MODE §4.4).
+   *
+   * At the window level rather than inside `JamView`, and for the same reason
+   * the transport's mark is on the transport: a take runs while you wander
+   * off to the metronome tab to check something, and a recorder that lived in
+   * the screen would stop the moment the screen unmounted.
+   */
+  const jamTakes = useJamTakes({
+    jam: jamSession.jam,
+    view,
+    isPlaying: state.isPlaying,
+    countingIn: (state.countIn?.beats ?? 0) > 0,
+    onSetTakes: (takes) => jamSession.editJam({ takes }),
+  });
+
   useEffect(() => {
     closeJamRef.current = jamSession.closeJam;
   }, [jamSession.closeJam]);
+
+  // During the render, not from an effect: a jam step that starts on this
+  // commit must find the library this commit is drawing.
+  jamsRef.current = jamSession.jams;
+  jamLineupRef.current = jamSession.lineup;
 
   useEffect(() => {
     setJamModeActive(view === "jam" && !!jamSession.jam);
@@ -376,6 +431,20 @@ export function MainWindow() {
       chorus: currentBeat?.chorus ?? 1,
     };
   }, [jamSession.jam, currentBeat?.formBar, currentBeat?.chorus, state.isPlaying]);
+
+  /**
+   * The hands-free jam actions, with recording added.
+   *
+   * Combined here rather than inside `useJamSession` because turning takes on
+   * is the one action that can stop and ask a question, and the question is
+   * the window's — `useJamTakes` owns both halves of it. Memoised because the
+   * dispatcher lists this object as a dependency and a fresh one every render
+   * would rebuild it on every beat event.
+   */
+  const jamActions = useMemo(
+    () => ({ ...jamSession.actions, toggleTakes: () => jamTakes.requestTakes(!jamSession.jam?.takes) }),
+    [jamSession.actions, jamSession.jam?.takes, jamTakes.requestTakes],
+  );
 
   const handleNewJam = useCallback(() => {
     setSidebarOpen(true);
@@ -909,7 +978,10 @@ export function MainWindow() {
     jamLoaded: !!jamSession.jam,
     jamEditorOpen: jamSession.screen.editorOpen,
     onToggleJam: toggleJamPlayback,
-    jamActions: jamSession.actions,
+    // The record switch goes through the same gate the on-screen one does —
+    // including the first-time dialog — so a footswitch cannot start a
+    // recording nobody has been told about.
+    jamActions,
     state,
     isFullscreen,
     setIsFullscreen,
@@ -1204,6 +1276,10 @@ export function MainWindow() {
           onRenameJam={jamSession.renameJam}
           onDuplicateJam={jamSession.duplicateJam}
           onReorderJams={jamSession.reorderJams}
+          onAddJamToSetlist={(jamId, setlistId) => {
+            const jam = jamSession.jams.find((j) => j.id === jamId);
+            if (jam) void setlistSession.addJamToSetlist(setlistId, jam);
+          }}
           coachOpen={session.cardOpen}
           coachActive={session.active}
           coachListening={evaluation.enabled}
@@ -1268,6 +1344,11 @@ export function MainWindow() {
             setSidebarOpen(true);
             setTimeout(() => sidebarRef.current?.triggerRenameJam(id), 150);
           }}
+          setlistsForJam={setlistSession.setlists}
+          onAddJamToSetlist={(setlistId) => {
+            const jam = jamSession.jam;
+            if (jam) void setlistSession.addJamToSetlist(setlistId, jam);
+          }}
           listening={evaluation.enabled}
           soundOpen={soundOpen}
           setSoundOpen={setSoundOpen}
@@ -1311,6 +1392,16 @@ export function MainWindow() {
           />
         )}
 
+        {/* Asked once, before the first take is ever recorded. Beside the
+            unsaved-changes dialog because they are the app's two modals and
+            they wear the same card. */}
+        {jamTakes.introOpen && (
+          <TakesIntroDialog
+            onConfirm={jamTakes.confirmIntro}
+            onCancel={jamTakes.cancelIntro}
+          />
+        )}
+
         {pending && (
           <UnsavedChangesDialog
             name={pending.name}
@@ -1350,6 +1441,8 @@ export function MainWindow() {
               isDownbeat={isDownbeat}
               isPlaying={state.isPlaying}
               countIn={state.countIn ?? { beats: 0, done: 0 }}
+              jam={setlistSession.runner.jam}
+              currentBeat={currentBeat}
               onEdit={setlistSession.editWhileRunning}
             />
           ) : setlistSession.setlist ? (
@@ -1361,6 +1454,8 @@ export function MainWindow() {
               onChange={setlistSession.setSetlist}
               onPatchStep={setlistSession.patchStep}
               onAddStep={setlistSession.addStepFromNow}
+              jams={jamSession.jams}
+              onAddJamStep={setlistSession.addJamStep}
               onBackToPlaying={setlistSession.backToPlaying}
             />
           ) : (
@@ -1403,6 +1498,8 @@ export function MainWindow() {
               trainedBpm={jamSession.trainedBpm}
               listening={evaluation.enabled}
               voiceReady={!!coach.modelStatus?.voiceReady}
+              takes={jamTakes}
+              onToggleTakes={jamTakes.requestTakes}
               screen={jamSession.screen}
               position={jamSession.position}
               tapActive={tapActive}
@@ -1560,6 +1657,8 @@ export function MainWindow() {
             jamFormBars={jamSession.jam ? formBars(jamSession.jam.form) : 0}
             jamFormBar={currentBeat?.formBar ?? 0}
             jamChorus={currentBeat?.chorus ?? 1}
+            recording={jamTakes.recording}
+            recordedSeconds={jamTakes.recordedSeconds}
           />
         )}
       </div>

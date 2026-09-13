@@ -285,6 +285,29 @@
         "4": "semicorcheas",
         "6": "seisillos"
       }
+    },
+    "takes": {
+      "label": "Tomas",
+      "record": "Grabar la toma",
+      "recording": "Grabando",
+      "recordingNow": "Grabando. La toma aparece aquí cuando pares.",
+      "empty": "Todavía no hay nada grabado. Activa Grabar la toma y toca — tú y la banda, aquí para escucharlo después.",
+      "unavailable": "Grabar no está disponible en esta versión. Todo lo demás de esta pantalla funciona igual que siempre.",
+      "play": "Reproducir esta toma",
+      "stop": "Parar",
+      "bandOff": "banda en silencio",
+      "delete": "Eliminar",
+      "confirm": "¿La elimino? No se puede deshacer.",
+      "confirmDelete": "Eliminar",
+      "confirmKeep": "Conservar",
+      "size": "unos {{megabytes}} MB en el disco",
+      "local": "Las tomas se quedan en este ordenador. No se sube nada.",
+      "introTitle": "Sobre las tomas",
+      "introWhat": "Una toma eres tú con la banda, mezclados, desde el primer compás tras la cuenta de entrada hasta que pares.",
+      "introWhere": "Se guarda como un archivo WAV en la carpeta propia de esta app en este ordenador, y se queda ahí hasta que la elimines.",
+      "introPrivate": "No se sube nada, no se analiza nada y nada sale de este ordenador.",
+      "introNotNow": "Ahora no",
+      "introStart": "Grabar tomas"
     }
   },
   "scale": {

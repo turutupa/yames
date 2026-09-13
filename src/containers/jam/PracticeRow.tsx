@@ -20,6 +20,20 @@ const TEMPO_EVERY = [1, 2];
 interface PracticeRowProps {
   value: JamPracticeSettings;
   onChange: (next: JamPracticeSettings) => void;
+  /**
+   * Recording is on for this jam (`Jam.takes`), and the switch that changes it.
+   *
+   * It sits in this row and not with the band's lanes because it is a
+   * practice tool in exactly the sense the other three are: it is something
+   * the app does to your session rather than a member of the band. Listening
+   * back is how improvisers improve (JAM_MODE §4.4), and it belongs beside
+   * the drop-outs that make there be something worth listening back to.
+   *
+   * Absent on a build whose engine has no take commands, so the row does not
+   * offer a switch that cannot do anything.
+   */
+  takes?: boolean;
+  onTakes?: (next: boolean) => void;
 }
 
 /**
@@ -36,7 +50,7 @@ interface PracticeRowProps {
  * Off is `0` on both halves of a pair, so a switch turned off keeps the number
  * it had and turning it back on does not ask again.
  */
-export function PracticeRow({ value, onChange }: PracticeRowProps) {
+export function PracticeRow({ value, onChange, takes, onTakes }: PracticeRowProps) {
   const { t } = useTranslation();
 
   const dropOutOn = value.dropOutEvery > 0 && value.dropOutBars > 0;
@@ -171,6 +185,31 @@ export function PracticeRow({ value, onChange }: PracticeRowProps) {
           <span className="transport-switch-track" aria-hidden="true" />
         </button>
       </div>
+
+      {/* Record the take. Last in the row, because it is the only one of the
+          four that produces a FILE — everything to its left changes what you
+          hear and nothing else. */}
+      {onTakes && (
+        <div className="jam-practice-chip jam-practice-takes" data-on={takes ? "" : undefined}>
+          <button
+            type="button"
+            className="jam-practice-text"
+            onClick={() => onTakes(!takes)}
+          >
+            {t("jam.takes.record")}
+          </button>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={!!takes}
+            aria-label={t("jam.takes.record")}
+            className={`transport-switch jam-switch ${takes ? "on" : ""}`}
+            onClick={() => onTakes(!takes)}
+          >
+            <span className="transport-switch-track" aria-hidden="true" />
+          </button>
+        </div>
+      )}
     </section>
   );
 }
