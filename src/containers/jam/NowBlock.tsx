@@ -7,7 +7,11 @@ interface NowBlockProps {
   next: { name: string; inBars: number } | null;
   /** Up to three, best first, already named and rooted ("A mixolydian"). */
   scales: string[];
-  /** Shown only where there is a neck to show — guitar and bass. */
+  /**
+   * The way through to the chord sheet, shown only where there is a neck to
+   * show — guitar and bass. `open` is whether that sheet is down, so the
+   * chevron points the way it is about to go.
+   */
   fretboardOpen: boolean;
   onToggleFretboard: (() => void) | null;
 }

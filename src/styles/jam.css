@@ -57,7 +57,7 @@
    there keeps the groove cards — the part you actually browse — above the
    fold. The controls are measured from the right so nothing moves when the
    tempo goes from 99 to 100. */
-.jam-head {
+.jam-top {
   display: flex;
   /* `.bpm-section` is a centred COLUMN — the metronome's whole stage is one
      tempo, so that is right there and wrong here. Both halves have to be
@@ -390,21 +390,10 @@
   }
 }
 
-/* ── The honest line (JAM_MODE §3, principle 5) ────────────────────────────
-   Quiet, but not hidden: it is the sentence that stops a flattered score from
-   going unexplained. */
-.jam-honest {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  padding-bottom: 4px;
-  font-size: 0.76rem;
-  font-weight: 500;
-  color: var(--text-faint);
-}
+/* The honest line used to be printed under the stage forever. It is the
+   input chip's tooltip now (JAM_UX_DECISIONS A7), which is where it applies.
 
-/* ── The library row ──────────────────────────────────────────────────────
+   ── The library row ──────────────────────────────────────────────────────
    The jam rows borrow the setlist row wholesale; what they add is the drag,
    which presets do not have because presets sort themselves by name. */
 .jam-item {
@@ -533,37 +522,10 @@
   transform: rotate(90deg);
 }
 
-/* ── The chords of the key, and their shapes ───────────────────────────── */
-.jam-chords {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
-  min-width: 0;
-}
-
-.jam-chords-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
+/* The chords of the key left the playing screen entirely (A8). They are the
+   chord sheet's now, at the foot of this file. */
 .jam-fretboard {
   align-self: flex-start;
-}
-
-/* The strip's scroller grows to fill its row, which is right on a screen that
-   is nothing but chords and wrong here: with five chords in the key it pushed
-   the sevenths toggle to the far side of an empty half-screen. Sized to its
-   content instead, so the control sits beside the thing it changes. */
-.jam-chords .key-chords-row {
-  flex: 0 1 auto;
-}
-
-.jam-chords .chord-shapes-head {
-  justify-content: flex-start;
-  gap: 16px;
 }
 
 /* ── The timeline's chord names and band states ────────────────────────── */
@@ -692,8 +654,7 @@
   border: 1px solid color-mix(in srgb, var(--text-primary) 6%, transparent);
 }
 
-.jam-band-state,
-.jam-band-hint {
+.jam-band-state {
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--text-faint);
@@ -748,14 +709,7 @@
   color: var(--text-faint);
 }
 
-/* ── Key, kit and the part you read ────────────────────────────────────── */
-.jam-setup {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  width: 100%;
-}
-
+/* ── Key, meter and the part you read — the setup sheet's blocks ───────── */
 .jam-setup-block {
   display: flex;
   flex-direction: column;
@@ -798,12 +752,6 @@
   border-color: color-mix(in srgb, var(--accent) 50%, transparent);
   background: color-mix(in srgb, var(--accent) 12%, transparent);
   color: var(--accent);
-}
-
-.jam-cards-kit {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
 }
 
 /* ── The groove section's head, with the EDIT link ─────────────────────── */
@@ -1206,30 +1154,11 @@
   opacity: 0.5;
 }
 
-/* ── The spoken cues ───────────────────────────────────────────────────── */
-
-.jam-cues {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-/* The caption is load-bearing, not decoration: without a voice installed the
-   switch does nothing, and this is the only thing that says why. */
-.jam-cues-hint {
-  max-width: 340px;
-  font-size: 0.7rem;
-  font-weight: 500;
-  line-height: 1.45;
-  color: var(--text-faint);
-}
+/* The spoken cues moved to Settings › Coach › Voice (A4). They are a
+   preference, not a property of a tune, and they had no business being set
+   once per jam. */
 
 @media (max-width: 1279px) {
-  /* Four kits side by side stop being readable before the grooves do. */
-  .jam-cards-kit {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   /* The bass's note names are the first thing to go: the lane still says who
      is playing and what they are playing, which is what the row is for. */
   .jam-band-detail {
@@ -1238,7 +1167,7 @@
 }
 
 @media (max-width: 1099px) {
-  .jam-head {
+  .jam-top {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
@@ -1467,4 +1396,661 @@
 
 .jam-takes-card .unsaved-body p:last-child {
   margin-bottom: 0;
+}
+
+/* ══ The second pass ══════════════════════════════════════════════════════
+   plans/JAM_UX_DECISIONS.md. The screen became two states: a PLAYING screen
+   of five blocks, and two sheets docked to the right of it — setup (A1) and
+   the chord sheet (A8). Everything below is those two and the pieces they
+   are built from. */
+
+/* ── The context bar's two buttons ─────────────────────────────────────── */
+.jam-sheet-btn {
+  margin-left: 4px;
+  padding: 5px 12px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.jam-sheet-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.jam-sheet-btn.active {
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+}
+
+/* ── The dock ──────────────────────────────────────────────────────────────
+   Portalled into `.main-content` (see JamSheet.tsx): "under the header, above
+   the transport" is a fact about the WINDOW, and the stage it would otherwise
+   live in is a scrolling column capped at 1176px. The header is 56px and the
+   transport 76px, both declared in shell.css and both `flex-shrink: 0`. */
+.jam-sheet {
+  position: absolute;
+  top: 56px;
+  bottom: 76px;
+  right: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  width: 640px;
+  max-width: 100%;
+  border-left: 1px solid var(--border);
+  background: var(--bg-secondary);
+  box-shadow: -18px 0 40px -24px rgba(0, 0, 0, 0.65);
+}
+
+/* The setup sheet dims what is behind it because it is a decision you make
+   instead of playing. The chord sheet does not: it is a page you glance at
+   WHILE playing, and dimming the timeline would be dimming the reason you
+   opened it. */
+.jam-sheet-scrim {
+  position: absolute;
+  inset: 56px 0 76px 0;
+  z-index: 29;
+  background: color-mix(in srgb, var(--bg-primary) 62%, transparent);
+}
+
+.jam-sheet-head {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.jam-sheet-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.jam-sheet-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.jam-sheet-sub {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-faint);
+}
+
+.jam-sheet-done {
+  flex-shrink: 0;
+  padding: 6px 16px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.jam-sheet-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 18px 20px 28px;
+}
+
+.jam-sheet-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.jam-sheet-group-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* The one line under a heading that says what the group is for. It takes the
+   slack so a link on the right sits against the edge. */
+.jam-sheet-lead {
+  flex: 1;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--text-faint);
+}
+
+.jam-sheet-row {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.jam-sheet-row .jam-segmented {
+  margin-left: 0;
+}
+
+.jam-sheet-note {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--text-faint);
+}
+
+/* The sheet is 640px, so the groove grid is six across rather than seven and
+   the drop is a whole row rather than a card left dangling. */
+.jam-sheet .jam-cards-groove {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+/* ── The vibe tiles (A2) ───────────────────────────────────────────────── */
+.jam-vibes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.jam-vibe {
+  align-items: flex-start;
+  text-align: left;
+  gap: 4px;
+  min-height: 58px;
+  padding: 10px 12px;
+}
+
+/* ── The variations of the picked vibe (A9) ────────────────────────────── */
+.jam-variations-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.jam-variations {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.jam-chip {
+  padding: 6px 13px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
+  background: color-mix(in srgb, var(--text-primary) 3%, transparent);
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.jam-chip:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.jam-chip.active {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+
+/* "One of yours", set off by a rule: your saved jams are a different KIND of
+   thing from the ways of playing that ship, and a chip row that mixed them
+   would read as nine variations of which three happen to be named after
+   tunes. */
+.jam-chip-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding-left: 10px;
+  border-left: 1px solid var(--border);
+}
+
+.jam-chip-group-label,
+.jam-chip-empty {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.jam-chip-own {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ── The dropdowns (the shape, the count-in, the kit, the voices) ──────── */
+.jam-select,
+.jam-kit-picker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.jam-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--text-primary) 3%, transparent);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.jam-dropdown:hover,
+.jam-dropdown.open {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.jam-dropdown:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.jam-dropdown-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.jam-dropdown-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jam-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  min-width: 260px;
+  max-width: 420px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 4px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  box-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.6);
+}
+
+.jam-select[data-compact] .jam-dropdown-menu {
+  min-width: 190px;
+}
+
+.jam-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--radius-sm, 6px);
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  color: var(--text-secondary);
+}
+
+.jam-dropdown-item:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.jam-dropdown-item.active {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+}
+
+.jam-dropdown-item:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.jam-dropdown-item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.jam-dropdown-item-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.jam-dropdown-item-hint {
+  font-size: 0.68rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.jam-dropdown-section {
+  padding: 8px 10px 4px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--text-faint);
+}
+
+.jam-dropdown-rule {
+  height: 1px;
+  margin: 4px 8px;
+  background: var(--border);
+}
+
+/* ── The kit dropdown's own parts (B3, B7) ─────────────────────────────── */
+.jam-kit-preview,
+.jam-kit-forget {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.jam-kit-preview:hover,
+.jam-kit-forget:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.jam-kit-preview.active {
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  color: var(--accent);
+}
+
+/* What the folder turned out to hold — seven of the eight, and where the
+   eighth is coming from. One line, under the control, wrapping. */
+.jam-kit-found {
+  margin: 0;
+  max-width: 420px;
+  font-size: 0.68rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--text-faint);
+}
+
+/* ── The band's three players, on the sheet ────────────────────────────── */
+.jam-player {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--text-primary) 5%, transparent);
+}
+
+.jam-player:last-of-type {
+  border-bottom: none;
+}
+
+.jam-player[data-off] {
+  opacity: 0.65;
+}
+
+.jam-player .jam-switch {
+  margin-left: 0;
+  min-width: 92px;
+}
+
+.jam-player-volume {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.jam-player-volume input[type="range"] {
+  width: 96px;
+}
+
+/* ── MORE, collapsed (A3) ──────────────────────────────────────────────── */
+.jam-sheet-more {
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+.jam-more-toggle {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  color: var(--text-secondary);
+}
+
+.jam-more-toggle svg[data-open] {
+  transform: rotate(180deg);
+}
+
+.jam-more-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 6px;
+}
+
+.jam-more-body .jam-switch {
+  margin-left: 0;
+  align-self: flex-start;
+}
+
+/* ── The chord sheet (A8) ──────────────────────────────────────────────────
+   A page you glance at. Nothing on it moves unless you ask it to, which is the
+   entire reason it is not on the playing screen. */
+.jam-chord-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.jam-chord-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px 8px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+  background: color-mix(in srgb, var(--text-primary) 3%, transparent);
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.jam-chord-card:hover {
+  background: var(--surface-hover);
+}
+
+.jam-chord-card.active {
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.jam-chord-card-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.jam-chord-card-degree {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+}
+
+.jam-chord-switches {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.jam-chord-switches .jam-switch {
+  margin-left: 0;
+}
+
+.jam-chord-ways,
+.jam-chord-neck {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Low to high on the neck, scrolling sideways: five ways to play a minor
+   seventh is five boxes, and stacking them would push the fretboard off the
+   sheet. */
+.jam-chord-shapes {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.jam-chord-shape {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 6px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid transparent;
+  background: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.jam-chord-shape.active {
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.jam-chord-shape-label {
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+.jam-chord-shape-fret {
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: var(--text-faint);
+}
+
+/* ── The pinned grip, on the playing screen ────────────────────────────── */
+.jam-pinned {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
+.jam-pinned-unpin {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.jam-pinned-unpin:hover {
+  color: var(--accent);
+}
+
+/* With chords off there is no NOW chord to draw, and the row would collapse
+   onto the tempo. The groove's name stands in — it is what the band is
+   playing, which is what NOW means on a jam with no changes. */
+.jam-now-quiet {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.jam-now-quiet .jam-now-name {
+  font-size: 2.2rem;
+}
+
+/* ── Narrower windows ────────────────────────────────────────────────────
+   The sheet is the first thing to give: below 1180px a 640px dock leaves the
+   timeline unreadable, so it takes the whole region and the playing screen
+   waits behind it. */
+@media (max-width: 1179px) {
+  .jam-sheet {
+    width: 100%;
+    border-left: none;
+  }
+
+  .jam-sheet .jam-cards-groove {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 879px) {
+  .jam-vibes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .jam-chord-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .jam-sheet .jam-cards-groove {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
