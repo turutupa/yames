@@ -1221,6 +1221,9 @@ export function MainWindow() {
         currentBeat={currentBeat}
         activeTab={view === "drill" ? "drill" : view === "jam" && jamSession.jam ? "jam" : "beat"}
         jam={zenJam}
+        // Whichever tab put it there: the jam tab's own, or a setlist step
+        // that is a jam, which reads as "beat" above and is still a band.
+        jamOnEngine={(view === "jam" && !!jamSession.jam) || !!setlistSession.runner.jam}
         onExit={zenExitHandler}
       />
     </ZenTransition>
