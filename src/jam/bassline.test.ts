@@ -145,7 +145,35 @@ describe("the groove decides the style", () => {
   });
 
   it("falls back to roots on the kick for a groove it has never seen", () => {
-    expect(bassStyleForGroove("reggae-one-drop")).toBe("rock");
+    expect(bassStyleForGroove("no-such-groove")).toBe("rock");
+  });
+
+  it("gives every groove that ships a style, by its own id", () => {
+    // The fallback above is a safety net, not the plan. A groove whose id is
+    // not in the table gets `rock` and nobody finds out, so this is the check
+    // that says the table was actually updated when the picker was.
+    for (const id of [
+      "rock8",
+      "rock16",
+      "halfTime",
+      "shuffle",
+      "waltz",
+      "sixEight",
+      "bossa",
+      "swingRide",
+      "funk",
+      "oneDrop",
+      "train",
+      "boomBap",
+      "fourOnFloor",
+    ]) {
+      expect(BASS_STYLE_FOR_GROOVE[id], `${id} has no bass style`).toBeDefined();
+    }
+    expect(bassStyleForGroove("funk")).toBe("funk");
+    expect(bassStyleForGroove("oneDrop")).toBe("rock");
+    expect(bassStyleForGroove("train")).toBe("rock");
+    expect(bassStyleForGroove("boomBap")).toBe("rock");
+    expect(bassStyleForGroove("fourOnFloor")).toBe("rock");
   });
 });
 

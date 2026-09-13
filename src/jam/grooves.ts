@@ -1,5 +1,5 @@
 /**
- * The eight grooves the drummer knows, written as tables on the tick grid.
+ * The thirteen grooves the drummer knows, written as tables on the tick grid.
  *
  * A groove is one bar wide. Columns are the ticks of that bar — beats per bar
  * times ticks per beat, tick 0 first — and rows are the drums. Nothing here
@@ -140,8 +140,14 @@ function groove(
 }
 
 /**
- * The eight, in the order the picker draws them: the four you reach for
- * first, then the three that carry their own meter, then the jazz one.
+ * The thirteen, in the order the picker draws them: the four you reach for
+ * first, then the three that carry their own meter, then the jazz one, then
+ * the five that came later — the ones you go looking for by name rather than
+ * land on by accident.
+ *
+ * Appended rather than interleaved, and deliberately: the footswitch steps
+ * this list in order (`stepGroove` in `useJamSession`), so re-sorting it would
+ * move every groove out from under the stomp that used to reach it.
  */
 export const GROOVES: readonly Groove[] = [
   /* Kick on one and three, backbeat on two and four, eighths on the hat with
@@ -252,6 +258,84 @@ export const GROOVES: readonly Groove[] = [
       kick: "o.. o.. o.. o..",
       hat: "... x.. ... x..",
       ride: "X.x x.x x.x x.x",
+    }),
+  ),
+  /* Funk. The kick never lands where the hat accents it: one, the "a" of one,
+     the "a" of two and the "and" of three, so the bar leans forward the whole
+     way through. The snare's ghosts are the groove — the two that follow the
+     backbeat are the ones a drum machine leaves out — and the hat accents one
+     and three so the syncopation has something square to pull against. */
+  groove(
+    "funk",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X..x ...x ..x. ....",
+      snare: ".oo. X.oo .oo. X.o.",
+      hat: "Xxxx xxxx Xxxx xxxx",
+    }),
+  ),
+  /* Reggae one-drop. Beat one is empty — that is the drop the name is about —
+     and the kick and the side stick land together on three. Hats on the
+     off-beats and nothing on the down, so the bar floats instead of marching.
+
+     The side stick is written on the snare lane at ghost level: the contract's
+     five lanes are kick, snare, hat, ride and crash (`JamLane`), so there is
+     no rim lane to put it on, and a ghost is the quiet snare the kits have. */
+  groove(
+    "oneDrop",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: ".. .. X. ..",
+      snare: ".. .. o. ..",
+      hat: ".x .x .x .x",
+    }),
+  ),
+  /* Train beat. Sixteenths on the snare with the accent on every "and" —
+     brushes on a snare head is what this is played with, and the accent
+     pattern is what makes it a train rather than a roll. Kick on one and
+     three underneath, and nothing on the hat: both hands are on the snare. */
+  groove(
+    "train",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... .... x... ....",
+      snare: "xxXx xxXx xxXx xxXx",
+    }),
+  ),
+  /* Boom bap. Kick on one and the "and" of two, snare on two and four, and
+     eighths on the hat with the last one accented — the open hat that pulls
+     the bar over into the next one. It is drawn as an accent rather than an
+     open hat because the contract's lanes have no open-hat row; the kits have
+     the voice, and the lane set is the engine's to grow. */
+  groove(
+    "boomBap",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. .x .. ..",
+      snare: ".. x. .. x.",
+      hat: "Xx xx xx xX",
+    }),
+  ),
+  /* Four on the floor. A kick on every beat, the backbeat on two and four,
+     and the hat only on the off-beats — the one groove here where the hat is
+     never on a downbeat, which is what makes the off-beats lift. */
+  groove(
+    "fourOnFloor",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. x. x. x.",
+      snare: ".. x. .. x.",
+      hat: ".x .x .x .x",
     }),
   ),
 ];
