@@ -314,6 +314,16 @@ export function useJamSession({
   const previewBarsRef = useRef(0);
   /** True when the preview is what pressed play, so it is what presses stop. */
   const previewStartedRef = useRef(false);
+  /**
+   * True once the transport has actually been HEARD playing under this
+   * preview.
+   *
+   * `isPlaying` arrives from the engine's state event, so between the press
+   * and the answer a preview that started the transport looks exactly like
+   * one somebody stopped. This is the difference: before the answer, wait;
+   * after it, a stop is a stop.
+   */
+  const previewLiveRef = useRef(false);
 
   /**
    * Where the form has been told to go, and what it has been told to repeat.
@@ -953,7 +963,11 @@ export function useJamSession({
    * you play is what it is for.
    */
   useEffect(() => {
-    if (isPlaying) setSetupOpen(false);
+    // Unless a kit preview is what pressed play. The Preview buttons are ON
+    // the sheet (B7), so closing it on the transport the preview started
+    // would take the kit list away from the hand that was auditioning it —
+    // and the audition it interrupted was two bars long.
+    if (isPlaying && !previewStartedRef.current) setSetupOpen(false);
   }, [isPlaying]);
 
   /**
@@ -1131,6 +1145,7 @@ export function useJamSession({
   const stopKitPreview = useCallback(() => {
     setPreviewKit(null);
     previewBarsRef.current = 0;
+    previewLiveRef.current = false;
     if (!previewStartedRef.current) return;
     previewStartedRef.current = false;
     void togglePlayback().catch(() => {});
@@ -1139,6 +1154,7 @@ export function useJamSession({
   const startKitPreview = useCallback(
     (kit: string) => {
       previewBarsRef.current = 0;
+      previewLiveRef.current = false;
       setPreviewKit((current) => {
         if (current === kit) {
           // The same button again is Stop. The transport is put back by the
@@ -1172,13 +1188,30 @@ export function useJamSession({
   useEffect(() => {
     if (!previewKit) return;
     if (!isPlaying) {
+      // Stopped — but which kind of stopped?
+      //
+      // `isPlaying` is the engine's own state event coming back, so on the
+      // render right after a preview pressed play it is STILL false: the
+      // press has gone out and the answer has not come back. Reading that as
+      // "somebody pressed stop" cancelled the audition on the frame it
+      // started, closed the sheet behind it and left the transport running
+      // with no preview to end it. So a preview that started the transport
+      // waits here for the event it is expecting.
+      //
+      // It waits ONCE, though: `previewLiveRef` goes up the moment the
+      // transport is actually heard, so a player who presses stop mid-preview
+      // still ends it — and ends it without pressing play again on the way
+      // out, because the transport is already stopped.
+      if (previewStartedRef.current && !previewLiveRef.current) return;
       // Somebody pressed stop under it. The audition is over and the
       // transport is already where it should be.
       previewStartedRef.current = false;
+      previewLiveRef.current = false;
       setPreviewKit(null);
       previewBarsRef.current = 0;
       return;
     }
+    previewLiveRef.current = true;
     previewBarsRef.current += 1;
     if (previewBarsRef.current > 2) stopKitPreview();
   }, [previewKit, isPlaying, currentBeat?.chorus, currentBeat?.formBar, stopKitPreview]);
