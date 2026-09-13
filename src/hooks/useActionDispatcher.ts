@@ -53,6 +53,9 @@ interface ActionDispatcherArgs {
     toggleTrade: () => void;
     toggleDropOut: () => void;
     nextShape: () => void;
+    nextSection: () => void;
+    prevSection: () => void;
+    loopSection: () => void;
   };
   state: AppState;
   isFullscreen: boolean;
@@ -197,6 +200,15 @@ export function useActionDispatcher({
             break;
           case "jam-next-shape":
             jamActions.nextShape();
+            break;
+          case "jam-next-section":
+            jamActions.nextSection();
+            break;
+          case "jam-prev-section":
+            jamActions.prevSection();
+            break;
+          case "jam-loop-section":
+            jamActions.loopSection();
             break;
         }
         return;

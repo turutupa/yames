@@ -28,7 +28,12 @@
       "waltz": "Valsa",
       "sixEight": "6/8",
       "bossa": "Bossa",
-      "swingRide": "Swing no ride"
+      "swingRide": "Swing no ride",
+      "funk": "Funk",
+      "oneDrop": "One drop",
+      "train": "Train beat",
+      "boomBap": "Boom bap",
+      "fourOnFloor": "Four on the floor"
     },
     "feel": {
       "label": "Levada",
@@ -62,7 +67,13 @@
       "barOf": "compasso {{current}} de {{total}}",
       "chorus": "chorus {{count}}",
       "fillMark": "virada",
-      "section": "Seção {{name}}"
+      "section": "Seção {{name}}",
+      "looping": "loop dos compassos {{start}}–{{end}}",
+      "startsAt": "começa no compasso {{bar}}",
+      "jumpTo": "Ir para o compasso {{bar}}",
+      "jumpPending": "na próxima barra de compasso",
+      "loopSection": "Repetir os compassos {{start}}–{{end}}",
+      "loopOff": "Parar de repetir"
     },
     "short": {
       "blues12": "12 compassos",
@@ -83,7 +94,11 @@
     },
     "fills": {
       "label": "Viradas",
-      "hint": "Uma virada no último compasso do chorus, e um crash no um."
+      "hint": "Onde caem as viradas, e um crash no um.",
+      "off": "Nenhuma",
+      "chorus": "Fim do chorus",
+      "every4": "A cada 4",
+      "every8": "A cada 8"
     },
     "transport": {
       "chorus": "Chorus"

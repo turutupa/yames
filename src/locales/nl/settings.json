@@ -204,7 +204,10 @@
         "jam-prev-groove": "Vorige groove",
         "jam-trade": "Wisselen",
         "jam-dropout": "Stilte-maten",
-        "jam-next-shape": "Volgende greep"
+        "jam-next-shape": "Volgende greep",
+        "jam-next-section": "Volgend deel",
+        "jam-prev-section": "Vorig deel",
+        "jam-loop-section": "Dit deel herhalen"
       },
       "descs": {
         "play": "Start of stop de metronoom",
@@ -234,7 +237,10 @@
         "jam-prev-groove": "Terug naar de vorige groove",
         "jam-trade": "Wisselen aan of uit — vier maten de band, vier maten jij",
         "jam-dropout": "De stilte-maten aan of uit zetten",
-        "jam-next-shape": "Door de grepen van het huidige akkoord bladeren"
+        "jam-next-shape": "Door de grepen van het huidige akkoord bladeren",
+        "jam-next-section": "Bij de maatstreep naar het begin van het volgende deel springen",
+        "jam-prev-section": "Bij de maatstreep terug naar het begin van het vorige deel",
+        "jam-loop-section": "Het deel waar je in zit herhalen, of daarmee stoppen"
       }
     },
     "inputTest": {

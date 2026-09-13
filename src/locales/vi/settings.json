@@ -204,7 +204,10 @@
         "jam-prev-groove": "Groove trước",
         "jam-trade": "Đổi phiên",
         "jam-dropout": "Ô nhịp lặng",
-        "jam-next-shape": "Thế bấm kế tiếp"
+        "jam-next-shape": "Thế bấm kế tiếp",
+        "jam-next-section": "Đoạn kế tiếp",
+        "jam-prev-section": "Đoạn trước",
+        "jam-loop-section": "Lặp đoạn này"
       },
       "descs": {
         "play": "Bắt đầu hoặc dừng máy đếm nhịp",
@@ -234,7 +237,10 @@
         "jam-prev-groove": "Quay lại groove trước",
         "jam-trade": "Bật hoặc tắt đổi phiên — bốn ô ban nhạc, bốn ô bạn",
         "jam-dropout": "Bật hoặc tắt các ô nhịp lặng",
-        "jam-next-shape": "Lật qua các cách bấm hợp âm đang chơi"
+        "jam-next-shape": "Lật qua các cách bấm hợp âm đang chơi",
+        "jam-next-section": "Nhảy tới đầu đoạn kế tiếp ngay ở vạch nhịp",
+        "jam-prev-section": "Quay về đầu đoạn trước ngay ở vạch nhịp",
+        "jam-loop-section": "Lặp đoạn bạn đang chơi, hoặc bỏ lặp"
       }
     },
     "inputTest": {

@@ -204,7 +204,10 @@
         "jam-prev-groove": "上一個律動",
         "jam-trade": "輪奏",
         "jam-dropout": "留白小節",
-        "jam-next-shape": "下一個和弦指型"
+        "jam-next-shape": "下一個和弦指型",
+        "jam-next-section": "下一段",
+        "jam-prev-section": "上一段",
+        "jam-loop-section": "循環這一段"
       },
       "descs": {
         "play": "開始或停止節拍器",
@@ -234,7 +237,10 @@
         "jam-prev-groove": "退回上一個律動",
         "jam-trade": "開啟或關閉輪奏——樂團四小節，你四小節",
         "jam-dropout": "開啟或關閉留白小節",
-        "jam-next-shape": "逐一翻看目前和弦的按法"
+        "jam-next-shape": "逐一翻看目前和弦的按法",
+        "jam-next-section": "在小節線上跳到下一段的開頭",
+        "jam-prev-section": "在小節線上退回上一段的開頭",
+        "jam-loop-section": "把正在演奏的這一段循環起來，或取消循環"
       }
     },
     "inputTest": {
