@@ -97,7 +97,7 @@
       "soft": "Piano",
       "normal": "Normale",
       "loud": "Forte",
-      "hint": "Forte toglie le ghost note e apre il charleston; piano lo chiude."
+      "hint": "Forte toglie le ghost note e mette un crash; piano suona il backbeat leggero e lascia stare il crash."
     },
     "form": {
       "label": "Forma",

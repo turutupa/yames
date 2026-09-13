@@ -97,7 +97,7 @@
       "soft": "Doux",
       "normal": "Normal",
       "loud": "Fort",
-      "hint": "Fort supprime les ghost notes et ouvre le charley ; doux le referme."
+      "hint": "Fort supprime les ghost notes et pose un crash ; doux joue le backbeat en douceur et laisse le crash de côté."
     },
     "form": {
       "label": "Forme",

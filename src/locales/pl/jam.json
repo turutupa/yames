@@ -97,7 +97,7 @@
       "soft": "Cicho",
       "normal": "Normalnie",
       "loud": "Głośno",
-      "hint": "Głośno wyrzuca ghost noty i otwiera hi-hat; cicho go zamyka."
+      "hint": "Głośno wyrzuca ghost noty i dokłada crash; cicho gra backbeat lekko i pomija crash."
     },
     "form": {
       "label": "Forma",

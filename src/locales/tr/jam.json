@@ -97,7 +97,7 @@
       "soft": "Yumuşak",
       "normal": "Normal",
       "loud": "Yüksek",
-      "hint": "Yüksek, ghost note'ları atar ve hi-hat'i açar; alçak kapatır."
+      "hint": "Yüksek, ghost note'ları atar ve bir crash koyar; alçak, backbeat'i hafif çalar ve crash'i çalmaz."
     },
     "form": {
       "label": "Form",

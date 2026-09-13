@@ -195,8 +195,9 @@ describe("applyIntensity, now that the shaping is wired", () => {
     expect(loud.bar.snare).toHaveLength(8);
     // The ghost on the snare is gone.
     expect(loud.bar.snare[6]).not.toBe(3);
-    // The off-beat hats open (accent level, the engine's open-hat convention).
-    expect(loud.bar.hat[1]).toBe(2);
+    // The off-beat hats leave the closed lane for the open-hat row.
+    expect(loud.bar.hat[1]).toBe(0);
+    expect(loud.bar.hatOpen?.[1]).toBe(1);
   });
 
   it("makes soft quieter in the pattern, on the same grid", () => {

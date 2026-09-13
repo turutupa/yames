@@ -29,6 +29,10 @@ function toTriplets(source: JamLevel[], beatsPerBar: number): JamLevel[] {
 function patternToTriplets(pattern: JamPattern, beatsPerBar: number): JamPattern {
   const out = {} as JamPattern;
   for (const lane of JAM_LANES) out[lane] = toTriplets(pattern[lane], beatsPerBar);
+  // The open-hat row rides along. It is not one of `JAM_LANES` — it is an
+  // optional sixth row (`JamPattern.hatOpen`) — and a conversion that dropped
+  // it would silently close every open hat in a groove the moment it swung.
+  if (pattern.hatOpen) out.hatOpen = toTriplets(pattern.hatOpen, beatsPerBar);
   return out;
 }
 
@@ -43,6 +47,10 @@ const SOFTENED: readonly JamLane[] = ["hat", "ride"];
 
 function softenOffBeats(pattern: JamPattern, beatsPerBar: number): JamPattern {
   const out = {} as JamPattern;
+  // Carried, not softened. A ghosted open hat is not a thing anybody plays:
+  // the stroke is open BECAUSE it is the one being leaned on, so swing brushes
+  // the closed hat beside it and leaves this row as written.
+  if (pattern.hatOpen) out.hatOpen = [...pattern.hatOpen];
   for (const lane of JAM_LANES) {
     const row = [...pattern[lane]];
     if (SOFTENED.includes(lane)) {

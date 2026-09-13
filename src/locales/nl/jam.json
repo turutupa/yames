@@ -97,7 +97,7 @@
       "soft": "Zacht",
       "normal": "Normaal",
       "loud": "Luid",
-      "hint": "Luid laat de ghost notes weg en opent de hi-hat; zacht sluit hem."
+      "hint": "Luid laat de ghost notes weg en zet een crash; zacht speelt de backbeat licht en laat de crash weg."
     },
     "form": {
       "label": "Vorm",

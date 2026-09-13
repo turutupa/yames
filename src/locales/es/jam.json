@@ -97,7 +97,7 @@
       "soft": "Suave",
       "normal": "Normal",
       "loud": "Fuerte",
-      "hint": "Fuerte quita las notas fantasma y abre el charles; suave lo cierra."
+      "hint": "Fuerte quita las notas fantasma y mete un crash; suave toca el backbeat flojo y deja el crash fuera."
     },
     "form": {
       "label": "Forma",

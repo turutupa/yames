@@ -107,20 +107,32 @@ describe("loud", () => {
     }
   });
 
-  it("opens the hat on the off-beats and leaves the downbeats where they are", () => {
-    // Rock eighths: hats on every tick, accented on the beat. Loud leaves the
-    // beats accented and raises the off-beats to accent too — an accent on
-    // the hat lane IS the hat opening.
+  it("moves the off-beat hats to the open row and leaves the downbeats alone", () => {
+    // Rock eighths: hats on every tick, accented on the beat. The off-beats
+    // leave the closed lane entirely and land in `hatOpen` — one stroke,
+    // played open. Raising them to an accent instead, which is what this did
+    // before, asked the CLOSED hat to be louder and called it open.
     const g = grooveById("rock8");
     const out = applyIntensity(g.bar, "loud", meterOf(g));
-    expect(out.hat).toEqual([2, 2, 1, 2, 1, 2, 1, 2]);
+    expect(out.hat).toEqual([2, 0, 1, 0, 1, 0, 1, 0]);
+    expect(out.hatOpen).toEqual([0, 1, 0, 1, 0, 1, 0, 1]);
   });
 
   it("does not open a hat that is not being played", () => {
-    // The one-drop's hats are off-beat only; the downbeats stay silent.
+    // The one-drop's hats are off-beat only; the downbeats stay silent in
+    // both rows.
     const g = grooveById("oneDrop");
     const out = applyIntensity(g.bar, "loud", meterOf(g));
-    expect(out.hat).toEqual([0, 2, 0, 2, 0, 2, 0, 2]);
+    expect(out.hat).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
+    expect(out.hatOpen).toEqual([0, 1, 0, 1, 0, 1, 0, 1]);
+  });
+
+  it("writes no open row for a groove with nothing to open", () => {
+    // Six-eight counts one tick to the beat, so it has no off-beats at all.
+    // An empty row on every table would be a lane the engine reads past to
+    // learn nothing.
+    const g = grooveById("sixEight");
+    expect(applyIntensity(g.bar, "loud", meterOf(g)).hatOpen).toBeUndefined();
   });
 
   it("finds the off-beats of a triplet grid", () => {
@@ -131,7 +143,8 @@ describe("loud", () => {
     expect(isOffBeat(2, 3)).toBe(true);
     const g = grooveById("shuffle");
     const out = applyIntensity(g.bar, "loud", meterOf(g));
-    expect([2, 5, 8, 11].every((t) => out.hat[t] === 2)).toBe(true);
+    expect([2, 5, 8, 11].every((t) => out.hatOpen![t] === 1)).toBe(true);
+    expect([2, 5, 8, 11].every((t) => out.hat[t] === 0)).toBe(true);
     // The downbeats keep the level the groove wrote — the shuffle accents
     // only the one — because loud opens hats, it does not accent everything.
     expect(out.hat[0]).toBe(2);
@@ -187,6 +200,62 @@ describe("soft", () => {
   });
 });
 
+/**
+ * The open hat as a row of its own (`JamPattern.hatOpen`), which is the whole
+ * of B5's "opens the hats": the engine has one voice per lane, so an accent
+ * on the closed-hat lane was only ever a louder closed hat.
+ */
+describe("the open-hat row", () => {
+  const withOpen: JamPattern = {
+    kick: [1, 0, 0, 0],
+    snare: [0, 0, 1, 0],
+    hat: [1, 0, 1, 0],
+    ride: [0, 0, 0, 0],
+    crash: [0, 0, 0, 0],
+    hatOpen: [0, 1, 0, 0],
+  };
+  const meter = { beatsPerBar: 2, ticksPerBeat: 2 } as const;
+
+  it("comes back exactly as wide as the closed lane", () => {
+    const up = applyIntensity(withOpen, "loud", meter);
+    expect(up.hatOpen).toHaveLength(up.hat.length);
+  });
+
+  it("keeps what was already open when loud opens more", () => {
+    const up = applyIntensity(withOpen, "loud", meter);
+    expect(up.hatOpen).toEqual([0, 1, 0, 0]);
+    // The closed hats were both on the beat here, so nothing else moved.
+    expect(up.hat).toEqual([1, 0, 1, 0]);
+  });
+
+  it("closes onto the hat when soft, rather than losing the stroke", () => {
+    // A quiet drummer still plays the off-beat; they just do not let it ring.
+    const down = applyIntensity(withOpen, "soft", meter);
+    expect(down.hatOpen).toEqual([0, 0, 0, 0]);
+    expect(down.hat).toEqual([1, 1, 1, 0]);
+  });
+
+  it("does not edit the pattern it was handed", () => {
+    const before = JSON.stringify(withOpen);
+    applyIntensity(withOpen, "loud", meter);
+    applyIntensity(withOpen, "soft", meter);
+    expect(JSON.stringify(withOpen)).toBe(before);
+  });
+
+  it("survives a change of grid, and does not get brushed by swing", () => {
+    // `applyFeel` moves every row onto the triplet grid. A conversion that
+    // dropped this one would silently close every open hat the moment a
+    // groove swung — and softening it would be a ghosted open hat, which is
+    // not a thing anybody plays.
+    const swung = applyFeel(
+      { beatsPerBar: 2, ticksPerBeat: 2 as const, bar: withOpen, fill: null },
+      "swing",
+    );
+    expect(swung.ticksPerBeat).toBe(3);
+    expect(swung.bar.hatOpen).toEqual([0, 0, 1, 0, 0, 0]);
+  });
+});
+
 describe("a whole groove", () => {
   it("puts the bar and the fill through the same rules", () => {
     const g = grooveById("funk");
@@ -215,9 +284,11 @@ describe("a whole groove", () => {
     expect(swung.ticksPerBeat).toBe(3);
     const out = applyIntensityToGroove(swung, "loud");
     expect(out.bar.hat).toHaveLength(12);
-    // Swing dropped the off-beat hats to ghosts; loud takes them back up, and
-    // up to an accent, because they are off the beat.
-    expect([2, 5, 8, 11].every((t) => out.bar.hat[t] === 2)).toBe(true);
+    // Swing dropped the off-beat hats to ghosts; loud takes them out of the
+    // closed lane and opens them, because they are off the beat.
+    expect(out.bar.hatOpen).toHaveLength(12);
+    expect([2, 5, 8, 11].every((t) => out.bar.hatOpen![t] === 1)).toBe(true);
+    expect([2, 5, 8, 11].every((t) => out.bar.hat[t] === 0)).toBe(true);
   });
 
   it("works on the rule groove, in seven", () => {

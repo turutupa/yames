@@ -21,9 +21,19 @@
  * |---|---|---|
  * | ghosts | become hits (3 → 1) | — |
  * | snare | — | hits and accents become ghosts |
- * | hat, off-beats | rise to accent, which is the hat opening | — |
+ * | hat, off-beats | move to the `hatOpen` row | — |
  * | hat | — | accents close to hits |
+ * | hatOpen | — | closes back onto the hat, and the row empties |
  * | crash | one on tick 0 | the lane is cleared |
+ *
+ * The open hat is a ROW now (`JamPattern.hatOpen`, second pass), not a level.
+ * It used to be an accent on the closed-hat lane, by a convention written
+ * down in `./grooves` — and the engine has one voice per lane, so what "Loud
+ * opens the hats" actually produced was a louder closed hat. A drummer told
+ * to play loud does not hit the hat harder on the off-beats, they let it
+ * ring. Moving the stroke to its own row is the honest version, and it is
+ * honest in the other direction too: until the engine plays that row, those
+ * off-beats are silent rather than wrong.
  *
  * Normal is the groove as it was written, returned unchanged and by
  * reference, so a re-render that re-applies it does not hand the engine a new
@@ -31,7 +41,8 @@
  *
  * Pure. Every lane comes back exactly as long as it went in, because a lane
  * that changed length is a bar the engine refuses — silently, by playing the
- * plain click.
+ * plain click. `hatOpen` counts: where it is written it is the width of the
+ * closed-hat lane, and where nothing opens it is not written at all.
  */
 import type { GrooveTicks } from "./grooves";
 import { JAM_LANES } from "./types";
@@ -50,10 +61,17 @@ export function isOffBeat(tick: number, ticksPerBeat: number): boolean {
   return ticksPerBeat > 1 && tick % ticksPerBeat !== 0;
 }
 
-/** A copy with every lane its own array, so nothing below edits the caller's. */
+/**
+ * A copy with every lane its own array, so nothing below edits the caller's.
+ *
+ * `hatOpen` is copied only where it exists: a pattern with no open hats has
+ * no row, and inventing an empty one would put a lane in every table the
+ * engine has to read past.
+ */
 function copy(pattern: JamPattern): JamPattern {
   const out = {} as JamPattern;
   for (const lane of JAM_LANES) out[lane] = [...(pattern[lane] ?? [])];
+  if (pattern.hatOpen) out.hatOpen = [...pattern.hatOpen];
   return out;
 }
 
@@ -78,9 +96,14 @@ export function applyIntensity(
  * Ghosts become hits everywhere — that is the "no ghost notes" the driving
  * grooves are written with, applied to the ones that have them, and it is the
  * single biggest difference between a bar that sounds programmed and one that
- * sounds hit. The hat's off-beats rise to accent, which by the convention in
- * `./grooves` is the hat opening; a hat that was silent on an off-beat stays
- * silent, because opening a hat that is not being played is not a thing.
+ * sounds hit.
+ *
+ * The hat's off-beats MOVE: out of the closed-hat lane and into `hatOpen`, at
+ * a hit, because that is one stroke played one way and not two strokes. A hat
+ * that was silent on an off-beat stays silent, because opening a hat that is
+ * not being played is not a thing. Raising the level instead — the old rule —
+ * asked the closed hat to be louder and called it open.
+ *
  * And a crash on tick 0, at accent, because that is where a drummer starting
  * loud puts one.
  */
@@ -92,9 +115,17 @@ function loud(pattern: JamPattern, meter: IntensityMeter): JamPattern {
       if (row[t] === 3) row[t] = 1;
     }
   }
+  const already = out.hatOpen;
+  const open: JamLevel[] = new Array<JamLevel>(out.hat.length).fill(0);
+  if (already) for (let t = 0; t < already.length && t < open.length; t += 1) open[t] = already[t];
+  let opened = already !== undefined;
   for (let t = 0; t < out.hat.length; t += 1) {
-    if (out.hat[t] !== 0 && isOffBeat(t, meter.ticksPerBeat)) out.hat[t] = 2;
+    if (out.hat[t] === 0 || !isOffBeat(t, meter.ticksPerBeat)) continue;
+    open[t] = 1;
+    out.hat[t] = 0;
+    opened = true;
   }
+  if (opened) out.hatOpen = open;
   if (out.crash.length > 0) out.crash[0] = 2;
   return out;
 }
@@ -109,11 +140,15 @@ function loud(pattern: JamPattern, meter: IntensityMeter): JamPattern {
  * crash lane goes to zero, so a fill lands without a cymbal on the other side
  * of it.
  *
+ * An open hat closes rather than disappearing: a stroke in `hatOpen` comes
+ * back as an ordinary hit on the closed lane, and the row is left empty. A
+ * quiet drummer still plays the off-beat, they just do not let it ring.
+ *
  * The kick keeps its levels. A kick demoted to a ghost stops being the pulse,
  * and a jam with no findable pulse is not a quiet jam, it is a broken one —
  * the same reason `applyFeel`'s swing softens only the hat and the ride.
  *
- * No meter needed: none of these three rules asks where the beats are.
+ * No meter needed: none of these rules asks where the beats are.
  */
 function soft(pattern: JamPattern): JamPattern {
   const out = copy(pattern);
@@ -123,6 +158,12 @@ function soft(pattern: JamPattern): JamPattern {
   }
   for (let t = 0; t < out.hat.length; t += 1) {
     if (out.hat[t] === 2) out.hat[t] = 1;
+  }
+  if (out.hatOpen) {
+    for (let t = 0; t < out.hatOpen.length; t += 1) {
+      if (out.hatOpen[t] !== 0 && (out.hat[t] ?? 0) === 0) out.hat[t] = 1;
+    }
+    out.hatOpen = new Array<JamLevel>(out.hatOpen.length).fill(0);
   }
   out.crash = new Array<JamLevel>(out.crash.length).fill(0);
   return out;

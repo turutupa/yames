@@ -97,7 +97,7 @@
       "soft": "Soft",
       "normal": "Normal",
       "loud": "Loud",
-      "hint": "Loud drops the ghost notes and opens the hats; soft closes them."
+      "hint": "Loud drops the ghost notes and lands a crash; soft plays the backbeat light and leaves the crash out."
     },
     "form": {
       "label": "Form",

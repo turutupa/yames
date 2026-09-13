@@ -97,7 +97,7 @@
       "soft": "Nhẹ",
       "normal": "Vừa",
       "loud": "Mạnh",
-      "hint": "Lớn bỏ ghost note và mở hi-hat; nhỏ thì đóng lại."
+      "hint": "Lớn bỏ ghost note và thêm một cú crash; nhỏ đánh backbeat nhẹ và bỏ crash."
     },
     "form": {
       "label": "Cấu trúc",

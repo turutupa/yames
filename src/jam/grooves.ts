@@ -16,14 +16,18 @@
  * than programmed, so they are written in rather than left for the intensity
  * control to invent.
  *
- * **An accent on the hat lane is an OPEN hat.** The contract's five lanes
- * (`JamLane`) have no open-hat row, and the kits all have the voice, so the
- * convention is the level: a hat at level 2 is the hat opening. It is what
- * boom bap's last eighth already meant, it is what `applyIntensity`'s Loud
- * writes on the off-beats (`src/jam/intensity.ts`), and the groove editor
- * reads it the same way. Written down here because a convention that lives in
- * three files and nowhere else is a convention that will be broken by the
- * fourth.
+ * **The open hat is a row, and these tables do not use it yet.** The contract
+ * grew one in the second pass (`JamPattern.hatOpen`), because the convention
+ * that came before it — an accent on the closed-hat lane MEANS the hat
+ * opening — was a convention the engine never knew: one lane, one voice, so
+ * what an accent actually produced was a louder closed hat. `applyIntensity`'s
+ * Loud writes the row now (`src/jam/intensity.ts`).
+ *
+ * The tables below still write their open hats as accents, and until they are
+ * moved over that is what they sound like: hard, not open. It is written down
+ * where it happens — hard rock, boom bap — rather than left as a convention
+ * three files deep, because the next person to read an accent here should
+ * know which of the two things it is.
  */
 import type { JamLevel, JamPattern } from "./types";
 
@@ -319,9 +323,10 @@ export const GROOVES: readonly Groove[] = [
   ),
   /* Boom bap. Kick on one and the "and" of two, snare on two and four, and
      eighths on the hat with the last one accented — the open hat that pulls
-     the bar over into the next one. It is drawn as an accent rather than an
-     open hat because the contract's lanes have no open-hat row; the kits have
-     the voice, and the lane set is the engine's to grow. */
+     the bar over into the next one. The accent is the old convention and it
+     plays as a hard closed hat, not an open one; the contract has a `hatOpen`
+     row for it now (see the header), and moving this stroke over is a change
+     for the day the engine plays that row. */
   groove(
     "boomBap",
     4,
@@ -360,9 +365,11 @@ export const GROOVES: readonly Groove[] = [
   // first pass told with its groove names.
   // ---------------------------------------------------------------------
 
-  /* Hard rock. Straight eighths with the hat OPEN on every off-beat — the
-     accent level is the open hat (see the header) — a kick that pushes the
-     bar over on the "and" of four, and a crash on the one.
+  /* Hard rock. Straight eighths with the hat meant to be OPEN on every
+     off-beat, written as accents — which is the old convention and plays as a
+     hard closed hat until the strokes move to the `hatOpen` row (see the
+     header) — a kick that pushes the bar over on the "and" of four, and a
+     crash on the one.
 
      The crash is written into the bar rather than left to `crashOnOne`,
      because `crashOnOne` is once a chorus and this is the groove where the

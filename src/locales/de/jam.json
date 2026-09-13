@@ -97,7 +97,7 @@
       "soft": "Leise",
       "normal": "Normal",
       "loud": "Laut",
-      "hint": "Laut lässt die Ghost Notes weg und öffnet die Hi-Hat; leise schließt sie."
+      "hint": "Laut lässt die Ghost Notes weg und setzt ein Crash; leise spielt den Backbeat leicht und lässt das Crash weg."
     },
     "form": {
       "label": "Form",
