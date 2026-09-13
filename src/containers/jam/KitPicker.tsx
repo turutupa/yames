@@ -25,6 +25,15 @@ interface KitPickerProps {
   onPreview: ((kit: string) => void) | null;
   /** The kit a preview is currently sounding, so its button can say Stop. */
   previewing: string | null;
+  /**
+   * True while the engine is refusing a configuration that names the folder.
+   *
+   * The one failure a musician can actually cause with their own samples, and
+   * the one that used to be invisible: the band keeps playing the built-in
+   * kit, the row still says the folder is chosen, and the only account of it
+   * was a `console.warn` nobody has open.
+   */
+  refused?: boolean;
 }
 
 /** The last path segment, which is what a person calls the folder. */
@@ -86,6 +95,7 @@ export function KitPicker({
   onCustomKit,
   onPreview,
   previewing,
+  refused = false,
 }: KitPickerProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -98,6 +108,8 @@ export function KitPicker({
    */
   const [found, setFound] = useState<{ voices: string[]; missing: string[] } | null>(null);
   const [unavailable, setUnavailable] = useState(false);
+  /** A folder with no drums in it — chosen, inspected, and turned down. */
+  const [empty, setEmpty] = useState(false);
   const [busy, setBusy] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
 
@@ -107,8 +119,21 @@ export function KitPicker({
       if (wrapRef.current?.contains(e.target as Node)) return;
       setOpen(false);
     };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      // Claimed, exactly as `JamSelect` claims it: this menu is what Escape
+      // puts away, not the setup sheet the menu is standing on. One Escape,
+      // one thing closed.
+      e.preventDefault();
+      e.stopPropagation();
+      setOpen(false);
+    };
     document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey, true);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey, true);
+    };
   }, [open]);
 
   /**
@@ -119,6 +144,13 @@ export function KitPicker({
    * says which of the eight voices were found and which will fall back to the
    * built-in kit. A folder with a kick and a snare in it is a perfectly good
    * kit, and the user should be able to see that it is.
+   *
+   * A folder with NO drums in it is not. The inspection only fails outright
+   * when the directory cannot be read; a folder of guitar loops comes back
+   * perfectly happily with an empty voice list, and adopting that wrote a
+   * custom kit the engine would refuse and a row that said "Found ." So an
+   * empty inspection — and one that did not come back at all — is turned
+   * down here, with the menu left open and the reason under the button.
    */
   const chooseFolder = async () => {
     setBusy(true);
@@ -126,7 +158,14 @@ export function KitPicker({
       const dir = await pickKitFolder();
       if (!dir) return;
       const inspection = await inspectKitFolder(dir).catch(() => null);
+      if (!inspection || inspection.voices.length === 0) {
+        setFound(null);
+        setEmpty(true);
+        setUnavailable(false);
+        return;
+      }
       setFound(inspection);
+      setEmpty(false);
       setUnavailable(false);
       onCustomKit({ dir, name: folderName(dir) });
       setOpen(false);
@@ -260,7 +299,11 @@ export function KitPicker({
             <span className="jam-dropdown-item-text">
               <span className="jam-dropdown-item-name">{t("jam.kit.chooseFolder")}</span>
               <span className="jam-dropdown-item-hint">
-                {unavailable ? t("jam.kit.folderUnavailable") : t("jam.kit.folderHint")}
+                {unavailable
+                  ? t("jam.kit.folderUnavailable")
+                  : empty
+                    ? t("jam.kit.folderEmpty")
+                    : t("jam.kit.folderHint")}
               </span>
             </span>
           </button>
@@ -291,6 +334,12 @@ export function KitPicker({
       {unavailable && !customKit && (
         <p className="jam-kit-found">{t("jam.kit.folderUnavailable")}</p>
       )}
+      {/* Said under the control as well as on the row, so it survives the
+          menu closing — the same courtesy the unavailable build gets. */}
+      {empty && !customKit && <p className="jam-kit-found">{t("jam.kit.folderEmpty")}</p>}
+      {/* And the one the engine says: the folder was taken, and the band is
+          playing the built-in kit under it anyway. */}
+      {refused && customKit && <p className="jam-kit-found">{t("jam.kit.folderRefused")}</p>}
     </div>
   );
 }

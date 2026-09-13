@@ -97,7 +97,7 @@
       "soft": "Piano",
       "normal": "Normale",
       "loud": "Forte",
-      "hint": "Forte toglie le ghost note e apre il charleston; piano lo chiude."
+      "hint": "Forte toglie le ghost note e mette un crash; piano suona il backbeat leggero e lascia stare il crash."
     },
     "form": {
       "label": "Forma",
@@ -220,6 +220,8 @@
       "chooseFolder": "Una cartella con i tuoi sample…",
       "folderHint": "cassa, rullante, charleston, charleston aperto, ride, rim, crash · niente esce da questo computer",
       "folderUnavailable": "I sample tuoi non sono disponibili in questa build.",
+      "folderEmpty": "Nessun suono di batteria in quella cartella: non è stato caricato niente.",
+      "folderRefused": "Quella cartella non si è caricata. Sta suonando il kit incluso.",
       "foundVoices": "Trovati: {{voices}}.",
       "fallbackVoices": "{{voices}} arrivano da {{kit}}.",
       "voice": {
@@ -377,7 +379,6 @@
       "alt": "Alternativo",
       "ballad": "Ballata",
       "halfTime": "Half-time",
-      "driving": "Spinto",
       "stomp": "Stomp",
       "doubleKick": "Doppio pedale",
       "shuffle": "Shuffle",
@@ -390,11 +391,7 @@
       "bossa": "Bossa",
       "upTempo": "Veloce",
       "samba": "Samba",
-      "rumba": "Rumba",
-      "songo": "Songo",
-      "eighths": "Ottavi",
       "thrash": "Thrash",
-      "midTempo": "Tempo medio",
       "openHats": "Hi-hat aperti",
       "driving16ths": "Sedicesimi che spingono",
       "bossaJazz": "Bossa jazz",

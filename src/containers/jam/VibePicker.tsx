@@ -63,7 +63,7 @@ export function VibePicker({ jam, jams, onApply, onLoadOwn }: VibePickerProps) {
                 type="button"
                 className={`sub-row-btn jam-card jam-vibe${on ? " active" : ""}`}
                 aria-pressed={on}
-                onClick={() => onApply(applyVibe(vibe))}
+                onClick={() => onApply(applyVibe(jam, vibe))}
               >
                 <span className="jam-card-title">
                   {t(`jam.vibe.${vibe.id}`, { defaultValue: vibe.id })}
@@ -98,7 +98,7 @@ export function VibePicker({ jam, jams, onApply, onLoadOwn }: VibePickerProps) {
                   type="button"
                   className={`jam-chip${on ? " active" : ""}`}
                   aria-pressed={on}
-                  onClick={() => onApply(applyVibe(picked, variation.id))}
+                  onClick={() => onApply(applyVibe(jam, picked, variation.id))}
                 >
                   {t(`jam.variation.${variation.id}`, { defaultValue: variation.id })}
                 </button>

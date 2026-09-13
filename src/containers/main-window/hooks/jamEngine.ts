@@ -26,6 +26,48 @@ import { coachDebug } from "../../../coach/debug";
 /** Said once per session, not once per beat: the command may not exist yet. */
 let warnedAboutSetJam = false;
 
+/**
+ * The last `setJam` the engine refused, or null when the last one landed.
+ *
+ * A refusal used to be a `console.warn` and nothing else, which is fine for
+ * "this build has no such command" and wrong for the one case a musician can
+ * actually cause: a folder of their own samples that the engine will not load
+ * (B3). The band keeps playing the built-in kit, the picker still says the
+ * folder is chosen, and the only account of what happened is in a console
+ * nobody has open. So the refusal is state now, and the screen can say so.
+ *
+ * `customKit` is whether the config that was refused had a folder on it —
+ * which is what turns a developer's line into a sentence worth showing.
+ */
+export type JamSendRefusal = { at: number; customKit: boolean };
+
+let refusal: JamSendRefusal | null = null;
+const refusalWatchers = new Set<() => void>();
+
+/** Subscribe to refusals, `useSyncExternalStore` style. Returns the undo. */
+export function subscribeJamSend(listener: () => void): () => void {
+  refusalWatchers.add(listener);
+  return () => {
+    refusalWatchers.delete(listener);
+  };
+}
+
+/** The standing refusal, or null. The same object until it changes. */
+export function jamSendRefusal(): JamSendRefusal | null {
+  return refusal;
+}
+
+function setRefusal(next: JamSendRefusal | null): void {
+  if (refusal === next) return;
+  refusal = next;
+  for (const watcher of [...refusalWatchers]) watcher();
+}
+
+/** For tests, and for a screen that wants to dismiss the notice. */
+export function clearJamSendRefusal(): void {
+  setRefusal(null);
+}
+
 /** The metronome's own meter, remembered so the jam can hand it back. */
 export type MeterSnapshot = { subdivision: number; beatGroups: number[]; freeMode: boolean };
 
@@ -43,7 +85,9 @@ export async function sendJam(jam: Jam, config: JamEngineConfig | null): Promise
   const started = performance.now();
   try {
     await setJam(config);
+    setRefusal(null);
   } catch (err) {
+    setRefusal({ at: Date.now(), customKit: !!config?.customKit });
     if (warnedAboutSetJam) return;
     warnedAboutSetJam = true;
     console.warn(

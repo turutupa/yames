@@ -97,7 +97,7 @@
       "soft": "Leise",
       "normal": "Normal",
       "loud": "Laut",
-      "hint": "Laut lässt die Ghost Notes weg und öffnet die Hi-Hat; leise schließt sie."
+      "hint": "Laut lässt die Ghost Notes weg und setzt ein Crash; leise spielt den Backbeat leicht und lässt das Crash weg."
     },
     "form": {
       "label": "Form",
@@ -220,6 +220,8 @@
       "chooseFolder": "Ein Ordner mit deinen Samples…",
       "folderHint": "Kick, Snare, Hi-Hat, offene Hi-Hat, Ride, Rim, Crash · nichts verlässt diesen Rechner",
       "folderUnavailable": "Eigene Samples gibt es in diesem Build nicht.",
+      "folderEmpty": "In diesem Ordner sind keine Drum-Sounds — es wurde nichts geladen.",
+      "folderRefused": "Dieser Ordner ließ sich nicht laden. Es spielt das eingebaute Kit.",
       "foundVoices": "Gefunden: {{voices}}.",
       "fallbackVoices": "{{voices}} kommen von {{kit}}.",
       "voice": {
@@ -377,7 +379,6 @@
       "alt": "Alternative",
       "ballad": "Ballade",
       "halfTime": "Halftime",
-      "driving": "Treibend",
       "stomp": "Stomp",
       "doubleKick": "Doppelfußmaschine",
       "shuffle": "Shuffle",
@@ -390,11 +391,7 @@
       "bossa": "Bossa",
       "upTempo": "Schnell",
       "samba": "Samba",
-      "rumba": "Rumba",
-      "songo": "Songo",
-      "eighths": "8tel",
       "thrash": "Thrash",
-      "midTempo": "Midtempo",
       "openHats": "Offene Hi-Hats",
       "driving16ths": "Treibende Sechzehntel",
       "bossaJazz": "Bossa-Jazz",

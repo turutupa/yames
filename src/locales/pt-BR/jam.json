@@ -97,7 +97,7 @@
       "soft": "Suave",
       "normal": "Normal",
       "loud": "Forte",
-      "hint": "Alto tira as ghost notes e abre o chimbal; baixo fecha."
+      "hint": "Alto tira as ghost notes e mete um crash; baixo toca o backbeat leve e deixa o crash de fora."
     },
     "form": {
       "label": "Forma",
@@ -220,6 +220,8 @@
       "chooseFolder": "Uma pasta com seus samples…",
       "folderHint": "bumbo, caixa, chimbal, chimbal aberto, ride, aro, crash · nada sai desta máquina",
       "folderUnavailable": "Samples próprios não estão nesta versão.",
+      "folderEmpty": "Não há sons de bateria nessa pasta — nada foi carregado.",
+      "folderRefused": "Essa pasta não pôde ser carregada. O kit interno está tocando.",
       "foundVoices": "Encontrado: {{voices}}.",
       "fallbackVoices": "{{voices}} vêm de {{kit}}.",
       "voice": {
@@ -377,7 +379,6 @@
       "alt": "Alternativo",
       "ballad": "Balada",
       "halfTime": "Half-time",
-      "driving": "Puxado",
       "stomp": "Stomp",
       "doubleKick": "Bumbo duplo",
       "shuffle": "Shuffle",
@@ -390,11 +391,7 @@
       "bossa": "Bossa",
       "upTempo": "Rápido",
       "samba": "Samba",
-      "rumba": "Rumba",
-      "songo": "Songo",
-      "eighths": "Colcheias",
       "thrash": "Thrash",
-      "midTempo": "Meio-tempo",
       "openHats": "Hi-hats abertos",
       "driving16ths": "Semicolcheias com pegada",
       "bossaJazz": "Bossa jazz",

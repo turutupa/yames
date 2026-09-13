@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import {
   listJams,
@@ -47,7 +47,15 @@ import type { BeatEvent } from "../../../types";
  * jam too (JAM_MODE §8.5) and the runner has to hand the engine exactly what
  * this hook hands it. See `jamEngine.ts` for the order and why it matters.
  */
-import { clearJam, lineSignature, meterSignature, pushJam, sendJam } from "./jamEngine";
+import {
+  clearJam,
+  jamSendRefusal,
+  lineSignature,
+  meterSignature,
+  pushJam,
+  sendJam,
+  subscribeJamSend,
+} from "./jamEngine";
 import type { MeterSnapshot } from "./jamEngine";
 
 /**
@@ -310,10 +318,28 @@ export function useJamSession({
    * the fifth avoids that.
    */
   const [previewKit, setPreviewKit] = useState<string | null>(null);
+  /**
+   * The engine's standing refusal, if it has one.
+   *
+   * Read from the module rather than kept here because the sends happen in
+   * `jamEngine`, on their own, with no React around them — and because the
+   * setlist runner sends jams through the same door.
+   */
+  const sendRefusal = useSyncExternalStore(subscribeJamSend, jamSendRefusal, jamSendRefusal);
   /** Bar lines seen since the preview started. Two, then it is over. */
   const previewBarsRef = useRef(0);
   /** True when the preview is what pressed play, so it is what presses stop. */
   const previewStartedRef = useRef(false);
+  /**
+   * True once the transport has actually been HEARD playing under this
+   * preview.
+   *
+   * `isPlaying` arrives from the engine's state event, so between the press
+   * and the answer a preview that started the transport looks exactly like
+   * one somebody stopped. This is the difference: before the answer, wait;
+   * after it, a stop is a stop.
+   */
+  const previewLiveRef = useRef(false);
 
   /**
    * Where the form has been told to go, and what it has been told to repeat.
@@ -424,6 +450,10 @@ export function useJamSession({
         jam.intensity,
         jam.form,
         jam.fills,
+        // Both halves of the fill switch. "Every 4 bars" is a field of its
+        // own on the config, so a key that only watched `fills` sat on the
+        // change until something else moved and then sent it as a surprise.
+        jam.fillEvery,
         jam.kit,
         jam.key,
         jam.band ?? lineup,
@@ -953,7 +983,11 @@ export function useJamSession({
    * you play is what it is for.
    */
   useEffect(() => {
-    if (isPlaying) setSetupOpen(false);
+    // Unless a kit preview is what pressed play. The Preview buttons are ON
+    // the sheet (B7), so closing it on the transport the preview started
+    // would take the kit list away from the hand that was auditioning it —
+    // and the audition it interrupted was two bars long.
+    if (isPlaying && !previewStartedRef.current) setSetupOpen(false);
   }, [isPlaying]);
 
   /**
@@ -1131,6 +1165,7 @@ export function useJamSession({
   const stopKitPreview = useCallback(() => {
     setPreviewKit(null);
     previewBarsRef.current = 0;
+    previewLiveRef.current = false;
     if (!previewStartedRef.current) return;
     previewStartedRef.current = false;
     void togglePlayback().catch(() => {});
@@ -1139,6 +1174,7 @@ export function useJamSession({
   const startKitPreview = useCallback(
     (kit: string) => {
       previewBarsRef.current = 0;
+      previewLiveRef.current = false;
       setPreviewKit((current) => {
         if (current === kit) {
           // The same button again is Stop. The transport is put back by the
@@ -1172,13 +1208,30 @@ export function useJamSession({
   useEffect(() => {
     if (!previewKit) return;
     if (!isPlaying) {
+      // Stopped — but which kind of stopped?
+      //
+      // `isPlaying` is the engine's own state event coming back, so on the
+      // render right after a preview pressed play it is STILL false: the
+      // press has gone out and the answer has not come back. Reading that as
+      // "somebody pressed stop" cancelled the audition on the frame it
+      // started, closed the sheet behind it and left the transport running
+      // with no preview to end it. So a preview that started the transport
+      // waits here for the event it is expecting.
+      //
+      // It waits ONCE, though: `previewLiveRef` goes up the moment the
+      // transport is actually heard, so a player who presses stop mid-preview
+      // still ends it — and ends it without pressing play again on the way
+      // out, because the transport is already stopped.
+      if (previewStartedRef.current && !previewLiveRef.current) return;
       // Somebody pressed stop under it. The audition is over and the
       // transport is already where it should be.
       previewStartedRef.current = false;
+      previewLiveRef.current = false;
       setPreviewKit(null);
       previewBarsRef.current = 0;
       return;
     }
+    previewLiveRef.current = true;
     previewBarsRef.current += 1;
     if (previewBarsRef.current > 2) stopKitPreview();
   }, [previewKit, isPlaying, currentBeat?.chorus, currentBeat?.formBar, stopKitPreview]);
@@ -1283,6 +1336,12 @@ export function useJamSession({
     /** The kit a Preview is sounding, and the button that starts one. */
     previewKit,
     startKitPreview,
+    /**
+     * True while the engine is refusing a configuration that names a folder
+     * of your own samples — so the kit picker can say so instead of leaving
+     * the built-in kit playing under a folder that looks chosen.
+     */
+    customKitRefused: !!sendRefusal?.customKit,
     /** True while a jam is loaded and the transport would start the band. */
     playing: !!jam && isPlaying,
     loadJam,

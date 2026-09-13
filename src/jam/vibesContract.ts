@@ -26,8 +26,7 @@ import type {
   JamKeysVoice,
   JamPattern,
 } from "./types";
-import { JAM_FORM_BARS } from "./types";
-import { VIBES as VIBE_DATA, vibeBundle } from "./vibes";
+import { VIBES as VIBE_DATA, applyVibe as applyVibeToJam, vibeBundle } from "./vibes";
 import { applyIntensityToGroove } from "./intensity";
 
 /**
@@ -52,11 +51,16 @@ export const VIBE_IDS = [
 export type VibeId = (typeof VIBE_IDS)[number];
 
 /**
- * Every variation id any vibe may offer, across all eight (A9).
+ * Every variation id any vibe offers, across all nine (A9).
  *
  * The same contract as `VIBE_IDS` and for the same reason — `jam.variation.<id>`
  * exists in all fifteen locales for each of these. Several vibes share one:
  * "ballad" is a rock variation and a jazz one, and it is the same word.
+ *
+ * Every id here is one the data actually uses, and `vibesContract.test.ts`
+ * checks both directions: a variation with no id here would draw as its own
+ * id, and an id here that no vibe offers is a word fifteen translators were
+ * asked for and nobody will ever read.
  */
 export const VARIATION_IDS = [
   "classic",
@@ -65,7 +69,6 @@ export const VARIATION_IDS = [
   "alt",
   "ballad",
   "halfTime",
-  "driving",
   "stomp",
   "doubleKick",
   "shuffle",
@@ -78,11 +81,7 @@ export const VARIATION_IDS = [
   "bossa",
   "upTempo",
   "samba",
-  "rumba",
-  "songo",
-  "eighths",
   "thrash",
-  "midTempo",
   "openHats",
   "driving16ths",
   "bossaJazz",
@@ -188,28 +187,60 @@ export const VIBES: readonly Vibe[] = VIBE_DATA.map((v) => ({
   }),
 }));
 
-/** The bundle a vibe writes, with a variation's values over the top. */
-export function applyVibe(vibe: Vibe, variationId?: string): VibePatch {
-  const variation = vibe.variations.find((v) => v.id === variationId) ?? null;
+/**
+ * The patch a tile writes, for the jam it is being tapped over.
+ *
+ * It takes the JAM because four of the things a vibe does cannot be worked
+ * out from the bundle alone, and this used to be a second, poorer answer to
+ * the question `vibes.ts` already answers:
+ *
+ * - **The meter override goes.** Left on, a jam that had ever been given a
+ *   meter of its own landed on the RULE groove for every tile after it — the
+ *   waltz in four, the bossa in seven, one tap and no drummer.
+ * - **The count-in is carried, not copied**, so "one bar" stays one bar when
+ *   the bar changes length. Copied, it became a raw beat count that the
+ *   count-in dropdown could not name and drew as its own id.
+ * - **The progression is refitted** to the new form's length; a progression
+ *   that is not exactly `form.bars` long is the one thing the record must
+ *   never hold.
+ * - **The custom groove and the custom kit go.** Both win over the bundle's
+ *   own `grooveId` and `kit` wherever they are set, so leaving either on has
+ *   the tile look applied while the drummer plays and sounds like something
+ *   else.
+ *
+ * So this delegates: `vibes.ts` decides, and the patch is what it decided,
+ * flattened back into the shape `editJam` merges. The screen's flat `Vibe`
+ * adds nothing to the bundle — every field on it is a field of the bundle —
+ * which is what makes delegation safe, and `vibesContract.test.ts` is what
+ * keeps that true.
+ */
+export function applyVibe(jam: Jam, vibe: Vibe, variationId?: string): VibePatch {
+  const next = applyVibeToJam(jam, vibe.id, variationId);
+  // An id the data does not know. `applyVibeToJam` hands the jam straight
+  // back, and the honest patch for that is no patch at all.
+  if (next === jam) return {};
   return {
-    vibe: vibe.id,
-    ...(variation ? { variation: variation.id } : { variation: undefined }),
-    grooveId: variation?.grooveId ?? vibe.grooveId,
-    kit: variation?.kit ?? vibe.kit,
-    feel: variation?.feel ?? vibe.feel,
-    intensity: variation?.intensity ?? vibe.intensity,
-    bpm: variation?.bpm ?? vibe.bpm,
-    bassVoice: vibe.bassVoice,
-    keysVoice: vibe.keysVoice,
-    band: { ...vibe.band },
-    fills: vibe.fills,
-    fillEvery: vibe.fillEvery,
-    key: vibe.key,
-    ...(vibe.form ? { form: { kind: vibe.form, bars: JAM_FORM_BARS[vibe.form] } } : {}),
-    // A vibe is a fresh start, not a layer: a groove you drew by hand is not
-    // "the Rock vibe", and leaving it on would have the tile look applied
-    // while the drummer played something else entirely.
-    customGroove: undefined,
+    vibe: next.vibe,
+    // Present-and-undefined rather than absent, in both directions: the patch
+    // is merged over the record, so a field a tile CLEARS has to arrive.
+    variation: next.variation,
+    grooveId: next.grooveId,
+    kit: next.kit,
+    feel: next.feel,
+    intensity: next.intensity,
+    bpm: next.bpm,
+    bassVoice: next.bassVoice,
+    keysVoice: next.keysVoice,
+    band: next.band ? { ...next.band } : undefined,
+    fills: next.fills,
+    fillEvery: next.fillEvery,
+    key: next.key,
+    form: next.form,
+    countIn: next.countIn,
+    progression: next.progression,
+    customGroove: next.customGroove,
+    customKit: next.customKit,
+    meter: next.meter,
   };
 }
 

@@ -199,6 +199,13 @@ export function emptyPattern(
  * Force a pattern to the width the meter says it should be, filling in
  * missing lanes and cells and dropping anything past the end.
  *
+ * The five lanes and no more: the optional `hatOpen` row is dropped here, and
+ * by `resizePattern` below, on purpose and consistently. The editor has no
+ * lane to draw it in, and a row that survived a pass through the grid would
+ * be state the player can neither see nor remove — playing under a bar they
+ * think they have in front of them. A groove drawn by hand is what the grid
+ * shows; the row belongs to the shaping (`applyIntensity`), which runs after.
+ *
  * This exists because a `JamCustomGroove` can arrive from the store, written
  * by an older build with a different meter. The editor would otherwise draw a
  * ragged grid, or crash reading a lane that is not there; the engine would

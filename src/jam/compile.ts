@@ -165,7 +165,15 @@ export function jamGroove(jam: Jam): {
   };
 }
 
-/** Every lane at zero, the same width as `pattern`. */
+/**
+ * Every lane at zero, the same width as `pattern`.
+ *
+ * The optional `hatOpen` row is dropped rather than zeroed, which is the one
+ * place in the compiler where the row does not travel: a silent drummer has
+ * nothing to open, and a row of zeros would be state the engine reads past on
+ * every bar to learn nothing. Everywhere else the bar and the fill go to the
+ * engine exactly as the groove wrote them — untouched, this row included.
+ */
 function silenced(pattern: JamPattern): JamPattern {
   const out = {} as JamPattern;
   for (const lane of JAM_LANES) {
@@ -270,9 +278,10 @@ export function compileJam(jam: Jam, options: JamCompileOptions = {}): JamEngine
    *
    * Loud used to be a gain and nothing else, so a drummer told to play loud
    * played the same ghost notes 25% louder (JAM_UX_DECISIONS B5). It is a
-   * pattern now: ghosts go, the hats open on the off-beats, a crash lands on
-   * the section starts, and the reverse for Soft. The gain still travels in
-   * `intensity` below, because the two together are what "loud" means.
+   * pattern now: ghosts go, the off-beat hats move to the open-hat row, a
+   * crash lands on the section starts, and the reverse for Soft. The gain
+   * still travels in `intensity` below, because the two together are what
+   * "loud" means.
    *
    * Applied here and not in `jamGroove`, deliberately: the bass line and the
    * meter are worked out from the groove as WRITTEN, and a hat that opened

@@ -101,6 +101,8 @@ interface JamSetupSheetProps {
   /** Two bars of the current groove on a kit, through the engine (B7). */
   onPreviewKit: (kit: string) => void;
   previewingKit: string | null;
+  /** True while the engine is refusing a folder of your own samples (B3). */
+  customKitRefused?: boolean;
   /** The groove editor's door, which lives on this sheet now. */
   onOpenEditor: () => void;
   /** "Edit changes" — the sheet turns the mode on and the timeline behind it obeys. */
@@ -135,6 +137,7 @@ export function JamSetupSheet({
   lineup,
   onPreviewKit,
   previewingKit,
+  customKitRefused = false,
   onOpenEditor,
   editingChords,
   onEditingChords,
@@ -290,6 +293,7 @@ export function JamSetupSheet({
             onCustomKit={(customKit) => onEdit({ customKit })}
             onPreview={onPreviewKit}
             previewing={previewingKit}
+            refused={customKitRefused}
           />
           <Segmented
             label={t("jam.fills.label")}
@@ -387,7 +391,12 @@ export function JamSetupSheet({
         {/* The key, as two rows rather than a dropdown of thirty-six: twelve
             roots and three modes is a shape a player recognises. The roots are
             written sharp here and only here — a key picker has no key to spell
-            itself in yet, since that is what you are choosing. */}
+            itself in yet, since that is what you are choosing.
+
+            Both rows unpin the shape in the corner. A pinned grip belongs to
+            the key it was pinned in, and a G shape left in the corner of a jam
+            you moved to B flat is a chord that is not in the tune — drawn as
+            if it were the one to play. */}
         <div className="jam-setup-block">
           <span className="stage-label">
             {t("jam.key.label")}
@@ -400,7 +409,7 @@ export function JamSetupSheet({
                 type="button"
                 className={`jam-key${key.root === root ? " active" : ""}`}
                 aria-pressed={key.root === root}
-                onClick={() => onEdit({ key: keyName({ ...key, root }) })}
+                onClick={() => onEdit({ key: keyName({ ...key, root }), pinnedShape: null })}
               >
                 {noteName(root, "sharp")}
               </button>
@@ -414,7 +423,7 @@ export function JamSetupSheet({
                   type="button"
                   className={`accent-option${key.mode === mode ? " active" : ""}`}
                   aria-pressed={key.mode === mode}
-                  onClick={() => onEdit({ key: keyName({ ...key, mode }) })}
+                  onClick={() => onEdit({ key: keyName({ ...key, mode }), pinnedShape: null })}
                 >
                   {t(`jam.key.${mode}`)}
                 </button>
@@ -583,6 +592,9 @@ export function JamSetupSheet({
               </div>
             </div>
 
+            {/* Transposing unpins too, and for the harder version of the same
+                reason: the chord names all move, so the grip in the corner
+                keeps its diagram and loses its name. */}
             {transpositionApplies(instrument) && (
               <div
                 className="accent-control jam-segmented"
@@ -599,7 +611,7 @@ export function JamSetupSheet({
                         (jam.transposition ?? "concert") === option ? " active" : ""
                       }`}
                       aria-pressed={(jam.transposition ?? "concert") === option}
-                      onClick={() => onEdit({ transposition: option })}
+                      onClick={() => onEdit({ transposition: option, pinnedShape: null })}
                     >
                       {t(`jam.transposition.${option}`)}
                     </button>

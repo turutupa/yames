@@ -132,8 +132,17 @@ export function ChordSheet({
     : null;
 
   const pin = jam.pinnedShape ?? null;
+  // The INDEX counts, not only the chord. An A7 has five grips on a guitar
+  // and pinning "the barre at the fifth" while the open one is pinned is a
+  // real thing to want; without the index the button read "Unpin" over a
+  // shape that was not the pinned one, and pressing it threw away the pin
+  // you had rather than moving it.
   const isPinned =
-    !!pin && !!picked && pin.root === picked.root && pin.quality === picked.quality;
+    !!pin &&
+    !!picked &&
+    pin.root === picked.root &&
+    pin.quality === picked.quality &&
+    pin.index === shapes.indexOf(picked);
 
   /**
    * The neck, static.

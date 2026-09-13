@@ -97,7 +97,7 @@
       "soft": "Yumuşak",
       "normal": "Normal",
       "loud": "Yüksek",
-      "hint": "Yüksek, ghost note'ları atar ve hi-hat'i açar; alçak kapatır."
+      "hint": "Yüksek, ghost note'ları atar ve bir crash koyar; alçak, backbeat'i hafif çalar ve crash'i çalmaz."
     },
     "form": {
       "label": "Form",
@@ -220,6 +220,8 @@
       "chooseFolder": "Kendi sample'larının olduğu bir klasör…",
       "folderHint": "kick, trampet, hi-hat, açık hi-hat, ride, rim, crash · hiçbir şey bu bilgisayardan çıkmaz",
       "folderUnavailable": "Kendi sample'ların bu sürümde yok.",
+      "folderEmpty": "O klasörde davul sesi yok — hiçbir şey yüklenmedi.",
+      "folderRefused": "O klasör yüklenemedi. Yerleşik kit çalıyor.",
       "foundVoices": "Bulundu: {{voices}}.",
       "fallbackVoices": "{{voices}} {{kit}} setinden geliyor.",
       "voice": {
@@ -377,7 +379,6 @@
       "alt": "Alternatif",
       "ballad": "Balad",
       "halfTime": "Half-time",
-      "driving": "İtekleyen",
       "stomp": "Stomp",
       "doubleKick": "Çift pedal",
       "shuffle": "Shuffle",
@@ -390,11 +391,7 @@
       "bossa": "Bossa",
       "upTempo": "Hızlı",
       "samba": "Samba",
-      "rumba": "Rumba",
-      "songo": "Songo",
-      "eighths": "8'lik",
       "thrash": "Thrash",
-      "midTempo": "Orta tempo",
       "openHats": "Açık hi-hat",
       "driving16ths": "Sürükleyici 16'lıklar",
       "bossaJazz": "Bossa caz",

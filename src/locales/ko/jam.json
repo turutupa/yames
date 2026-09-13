@@ -97,7 +97,7 @@
       "soft": "약하게",
       "normal": "보통",
       "loud": "세게",
-      "hint": "세게는 고스트 노트를 빼고 하이햇을 열고, 여리게는 닫습니다."
+      "hint": "세게는 고스트 노트를 빼고 크래시를 넣고, 여리게는 백비트를 가볍게 치고 크래시를 뺍니다."
     },
     "form": {
       "label": "형식",
@@ -220,6 +220,8 @@
       "chooseFolder": "내 샘플이 든 폴더…",
       "folderHint": "킥, 스네어, 하이햇, 오픈 하이햇, 라이드, 림, 크래시 · 이 기기를 벗어나지 않습니다",
       "folderUnavailable": "이 빌드에서는 내 샘플을 쓸 수 없습니다.",
+      "folderEmpty": "그 폴더에는 드럼 소리가 없습니다. 아무것도 불러오지 않았습니다.",
+      "folderRefused": "그 폴더를 불러오지 못했습니다. 내장 키트가 연주됩니다.",
       "foundVoices": "찾은 소리: {{voices}}.",
       "fallbackVoices": "{{voices}}은(는) {{kit}}에서 납니다.",
       "voice": {
@@ -377,7 +379,6 @@
       "alt": "얼터너티브",
       "ballad": "발라드",
       "halfTime": "하프타임",
-      "driving": "몰아치는",
       "stomp": "스톰프",
       "doubleKick": "투베이스",
       "shuffle": "셔플",
@@ -390,11 +391,7 @@
       "bossa": "보사",
       "upTempo": "빠르게",
       "samba": "삼바",
-      "rumba": "룸바",
-      "songo": "송고",
-      "eighths": "8분",
       "thrash": "스래시",
-      "midTempo": "중간 템포",
       "openHats": "오픈 하이햇",
       "driving16ths": "몰아치는 16분",
       "bossaJazz": "보사 재즈",

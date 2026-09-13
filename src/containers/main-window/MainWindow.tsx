@@ -1607,6 +1607,7 @@ export function MainWindow() {
               onToggleTakes={jamTakes.requestTakes}
               onPreviewKit={jamSession.startKitPreview}
               previewingKit={jamSession.previewKit}
+              customKitRefused={jamSession.customKitRefused}
               screen={jamSession.screen}
               position={jamSession.position}
               tapActive={tapActive}

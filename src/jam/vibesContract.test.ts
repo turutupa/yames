@@ -10,86 +10,167 @@
  * plays the groove as written rather than something half-shaped.
  */
 import { describe, expect, it } from "vitest";
+import fs from "node:fs";
+import path from "node:path";
 import { VARIATION_IDS, VIBES, VIBE_IDS, applyIntensity, applyVibe } from "./vibesContract";
+import { GROOVES } from "./grooves";
 import type { ShapedGroove, Vibe } from "./vibesContract";
+import { createJam } from "./jams";
+import type { Jam } from "./types";
 
-const ROCK: Vibe = {
-  id: "rock",
-  grooveId: "rock8",
-  kit: "tight",
-  feel: "straight",
-  intensity: "normal",
-  bassVoice: "picked",
-  keysVoice: "organ",
-  band: { drums: true, bass: false, keys: false },
-  fills: true,
-  fillEvery: 0,
-  bpm: 120,
-  key: "E",
-  variations: [
-    {
-      id: "punk",
-      grooveId: "rock16",
-      kit: "raw",
-      feel: "straight",
-      intensity: "loud",
-      bpm: 180,
-    },
-  ],
-};
+const ROCK = VIBES.find((v) => v.id === "rock")!;
+const jamOf = (overrides: Partial<Jam> = {}): Jam => ({ ...createJam("check"), ...overrides });
 
 describe("applyVibe", () => {
   it("sets the drummer, the kit, the voices, the tempo and the key in one patch", () => {
-    expect(applyVibe(ROCK)).toMatchObject({
+    expect(applyVibe(jamOf(), ROCK)).toMatchObject({
       vibe: "rock",
-      grooveId: "rock8",
-      kit: "tight",
-      feel: "straight",
-      intensity: "normal",
-      bassVoice: "picked",
-      keysVoice: "organ",
-      band: { drums: true, bass: false, keys: false },
-      fills: true,
-      fillEvery: 0,
-      bpm: 120,
-      key: "E",
+      grooveId: ROCK.grooveId,
+      kit: ROCK.kit,
+      feel: ROCK.feel,
+      intensity: ROCK.intensity,
+      bassVoice: ROCK.bassVoice,
+      keysVoice: ROCK.keysVoice,
+      band: { ...ROCK.band },
+      fills: ROCK.fills,
+      fillEvery: ROCK.fillEvery,
+      bpm: ROCK.bpm,
+      key: ROCK.key,
     });
   });
 
   it("lets a variation win, and names itself on the record", () => {
-    const patch = applyVibe(ROCK, "punk");
+    const punk = ROCK.variations.find((v) => v.id === "punk")!;
+    const patch = applyVibe(jamOf(), ROCK, "punk");
     expect(patch.variation).toBe("punk");
-    expect(patch.grooveId).toBe("rock16");
-    expect(patch.kit).toBe("raw");
-    expect(patch.intensity).toBe("loud");
-    expect(patch.bpm).toBe(180);
+    expect(patch.grooveId).toBe(punk.grooveId);
+    expect(patch.kit).toBe(punk.kit);
+    expect(patch.intensity).toBe(punk.intensity);
+    expect(patch.bpm).toBe(punk.bpm);
     // The voices are the vibe's; a variation is a way of PLAYING it (A9), not
     // a different band.
-    expect(patch.bassVoice).toBe("picked");
+    expect(patch.bassVoice).toBe(ROCK.bassVoice);
   });
 
   it("clears the variation when the tile itself is tapped again", () => {
     // Rock, plain, is not Rock-punk with the label rubbed off.
-    expect(applyVibe(ROCK).variation).toBeUndefined();
+    const punked = jamOf(applyVibe(jamOf(), ROCK, "punk"));
+    expect(applyVibe(punked, ROCK).variation).toBeUndefined();
   });
 
   it("ignores a variation the vibe does not have rather than half-applying it", () => {
-    const patch = applyVibe(ROCK, "songo");
+    const patch = applyVibe(jamOf(), ROCK, "chaCha");
     expect(patch.variation).toBeUndefined();
-    expect(patch.grooveId).toBe("rock8");
+    expect(patch.grooveId).toBe(ROCK.grooveId);
   });
 
   it("drops a groove you drew by hand", () => {
     // A custom groove is not "the Rock vibe", and leaving it on would have the
     // tile look applied while the drummer played something else.
-    expect(applyVibe(ROCK).customGroove).toBeUndefined();
-    expect("customGroove" in applyVibe(ROCK)).toBe(true);
+    const drawn: Jam["customGroove"] = {
+      name: "mine",
+      beatsPerBar: 4,
+      ticksPerBeat: 2,
+      bar: {
+        kick: [1, 0, 0, 0, 0, 0, 0, 0],
+        snare: [0, 0, 0, 0, 1, 0, 0, 0],
+        hat: [0, 0, 0, 0, 0, 0, 0, 0],
+        ride: [0, 0, 0, 0, 0, 0, 0, 0],
+        crash: [0, 0, 0, 0, 0, 0, 0, 0],
+      },
+      fill: null,
+    };
+    const patch = applyVibe(jamOf({ customGroove: drawn }), ROCK);
+    expect(patch.customGroove).toBeUndefined();
+    expect("customGroove" in patch).toBe(true);
+  });
+
+  it("drops a kit of your own samples with it", () => {
+    // Same rule, same reason: the folder wins over the bundle's kit, so a
+    // tile that left it on would look applied and sound like the kit before.
+    const patch = applyVibe(jamOf({ customKit: { dir: "C:/s/mine", name: "mine" } }), ROCK);
+    expect(patch.customKit).toBeUndefined();
+    expect("customKit" in patch).toBe(true);
+  });
+
+  it("clears a meter override, so the vibe's own groove fits", () => {
+    // The finding this delegation exists for: with the override left on, a
+    // jam that had ever been given a meter landed on the RULE groove for
+    // every tile after it.
+    const patch = applyVibe(jamOf({ meter: { beatGroups: [7], ticksPerBeat: 4 } }), ROCK);
+    expect(patch.meter).toBeUndefined();
+    expect("meter" in patch).toBe(true);
+  });
+
+  it("carries the count-in as BARS rather than copying a beat count", () => {
+    // A waltz is three beats to the bar. One bar of count-in stays one bar,
+    // which is 3 — not the 4 the four-beat jam counted, which is a number the
+    // count-in dropdown cannot name and used to draw as its own id.
+    const country = VIBES.find((v) => v.id === "country")!;
+    const inFour = jamOf({ grooveId: "rock8", countIn: 4 });
+    expect(applyVibe(inFour, country, "waltz").countIn).toBe(3);
+  });
+
+  it("refits the progression to the form the vibe brings", () => {
+    // A progression that is not exactly `form.bars` long is the one thing the
+    // record must never hold.
+    const blues = VIBES.find((v) => v.id === "blues")!;
+    const eight = jamOf({
+      form: { kind: "loop8", bars: 8 },
+      progression: ["C", "C", "F", "F", "G", "G", "C", "C"],
+    });
+    const patch = applyVibe(eight, blues);
+    expect(patch.progression).toHaveLength(patch.form!.bars);
+  });
+
+  it("hands back no patch at all for an id the data does not have", () => {
+    const made: Vibe = { ...ROCK, id: "skiffle" as Vibe["id"] };
+    expect(applyVibe(jamOf(), made)).toEqual({});
   });
 
   it("gives the band a copy, not the vibe's own object", () => {
-    const patch = applyVibe(ROCK);
+    const patch = applyVibe(jamOf(), ROCK);
     patch.band!.bass = true;
     expect(ROCK.band.bass).toBe(false);
+  });
+
+  it("adds nothing to the bundle the data does not already carry", () => {
+    // Which is what makes delegating to `vibes.ts` safe. Every field on the
+    // screen's flat `Vibe` — and on its variations — has to come back in the
+    // patch with the value the data gave it, or the flat shape has grown a
+    // field the delegation silently drops.
+    for (const vibe of VIBES) {
+      const patch = applyVibe(jamOf(), vibe);
+      expect([patch.vibe, patch.grooveId, patch.kit, patch.feel, patch.intensity], vibe.id).toEqual(
+        [vibe.id, vibe.grooveId, vibe.kit, vibe.feel, vibe.intensity],
+      );
+      expect([patch.bassVoice, patch.keysVoice, patch.bpm, patch.key], vibe.id).toEqual([
+        vibe.bassVoice,
+        vibe.keysVoice,
+        vibe.bpm,
+        vibe.key,
+      ]);
+      expect([patch.fills, patch.fillEvery, patch.band], vibe.id).toEqual([
+        vibe.fills,
+        vibe.fillEvery,
+        { ...vibe.band },
+      ]);
+      if (vibe.form) expect(patch.form?.kind, vibe.id).toBe(vibe.form);
+      for (const variation of vibe.variations) {
+        const one = applyVibe(jamOf(), vibe, variation.id);
+        expect(
+          [one.variation, one.grooveId, one.kit, one.feel, one.intensity, one.bpm],
+          `${vibe.id}/${variation.id}`,
+        ).toEqual([
+          variation.id,
+          variation.grooveId,
+          variation.kit,
+          variation.feel,
+          variation.intensity,
+          variation.bpm,
+        ]);
+      }
+    }
   });
 });
 
@@ -117,8 +198,9 @@ describe("applyIntensity, now that the shaping is wired", () => {
     expect(loud.bar.snare).toHaveLength(8);
     // The ghost on the snare is gone.
     expect(loud.bar.snare[6]).not.toBe(3);
-    // The off-beat hats open (accent level, the engine's open-hat convention).
-    expect(loud.bar.hat[1]).toBe(2);
+    // The off-beat hats leave the closed lane for the open-hat row.
+    expect(loud.bar.hat[1]).toBe(0);
+    expect(loud.bar.hatOpen?.[1]).toBe(1);
   });
 
   it("makes soft quieter in the pattern, on the same grid", () => {
@@ -136,6 +218,55 @@ describe("the ids the locale files carry", () => {
 
   it("names every variation once", () => {
     expect(new Set(VARIATION_IDS).size).toBe(VARIATION_IDS.length);
+  });
+
+  /**
+   * The gate this list exists for, and it was never run.
+   *
+   * An id with no key draws as its own id — "halfTimeStomp" on a chip, in
+   * every language — and a key with no id is a word fifteen translators were
+   * asked for that nobody will ever read. English is the file that decides:
+   * `src/test/i18n.locales.test.ts` already holds the other fourteen to
+   * exactly its key set, so a key here is a key everywhere.
+   */
+  const english = JSON.parse(
+    fs.readFileSync(path.resolve(process.cwd(), "src/locales/en/jam.json"), "utf8"),
+  ).jam as Record<string, Record<string, unknown>>;
+
+  it("has a name for every vibe, variation and groove", () => {
+    for (const id of VIBE_IDS) expect(english.vibe[id], `jam.vibe.${id}`).toBeTypeOf("string");
+    for (const id of VARIATION_IDS) {
+      expect(english.variation[id], `jam.variation.${id}`).toBeTypeOf("string");
+    }
+    for (const groove of GROOVES) {
+      expect(english.groove[groove.id], `jam.groove.${groove.id}`).toBeTypeOf("string");
+    }
+  });
+
+  it("carries no name for a vibe, variation or groove that is gone", () => {
+    // The keys under these three groups are all ids but for the handful the
+    // screens use for their own labels; anything else is a leftover.
+    const spare: Record<string, readonly string[]> = {
+      vibe: ["label", "lead", "startedFrom", "unavailable"],
+      variation: ["label", "lead", "aria", "count", "count_one", "count_other", "yours", "yoursEmpty"],
+      groove: ["label", "rule"],
+    };
+    const known: Record<string, readonly string[]> = {
+      vibe: VIBE_IDS,
+      variation: VARIATION_IDS,
+      groove: GROOVES.map((g) => g.id),
+    };
+    for (const group of ["vibe", "variation", "groove"]) {
+      const strays = Object.keys(english[group]).filter(
+        (key) => !spare[group].includes(key) && !known[group].includes(key),
+      );
+      expect(strays, group).toEqual([]);
+    }
+  });
+
+  it("offers no variation the data never uses", () => {
+    const used = new Set(VIBES.flatMap((v) => v.variations.map((x) => x.id)));
+    expect([...VARIATION_IDS].filter((id) => !used.has(id))).toEqual([]);
   });
 
   it("ships every vibe the data carries, each with an id the locales know", () => {

@@ -97,7 +97,7 @@
       "soft": "Zacht",
       "normal": "Normaal",
       "loud": "Luid",
-      "hint": "Luid laat de ghost notes weg en opent de hi-hat; zacht sluit hem."
+      "hint": "Luid laat de ghost notes weg en zet een crash; zacht speelt de backbeat licht en laat de crash weg."
     },
     "form": {
       "label": "Vorm",
@@ -220,6 +220,8 @@
       "chooseFolder": "Een map met je eigen samples…",
       "folderHint": "bassdrum, snare, hi-hat, open hi-hat, ride, rim, crash · er verlaat niets deze machine",
       "folderUnavailable": "Eigen samples zitten niet in deze build.",
+      "folderEmpty": "Geen drumgeluiden in die map — er is niets geladen.",
+      "folderRefused": "Die map kon niet worden geladen. De ingebouwde kit speelt.",
       "foundVoices": "Gevonden: {{voices}}.",
       "fallbackVoices": "{{voices}} komen van {{kit}}.",
       "voice": {
@@ -377,7 +379,6 @@
       "alt": "Alternatief",
       "ballad": "Ballad",
       "halfTime": "Halftime",
-      "driving": "Stuwend",
       "stomp": "Stomp",
       "doubleKick": "Dubbele bassdrum",
       "shuffle": "Shuffle",
@@ -390,11 +391,7 @@
       "bossa": "Bossa",
       "upTempo": "Snel",
       "samba": "Samba",
-      "rumba": "Rumba",
-      "songo": "Songo",
-      "eighths": "8sten",
       "thrash": "Thrash",
-      "midTempo": "Middentempo",
       "openHats": "Open hi-hats",
       "driving16ths": "Stuwende zestienden",
       "bossaJazz": "Bossa-jazz",

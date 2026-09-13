@@ -176,6 +176,23 @@ describe("compileJam, the band", () => {
     expect(compileJam(jam, { lineup: { drums: true, bass: true } }).bass).toBeNull();
   });
 
+  it("hands the open-hat row to the engine exactly as the shaping wrote it", () => {
+    // The row is optional and is not one of `JAM_LANES`, so every helper on
+    // the way to the engine has to be asked about it by name. Loud is what
+    // writes it (B5); the compiler's job is to not lose it.
+    const jam = createJam("x", { grooveId: "rock8", feel: "straight", intensity: "loud" });
+    const config = compileJam(jam);
+    const ticks = config.beatsPerBar * config.ticksPerBeat;
+    expect(config.bar.hatOpen).toHaveLength(ticks);
+    expect(config.bar.hatOpen!.some((cell) => cell !== 0)).toBe(true);
+    // And the closed lane gave those strokes up rather than doubling them.
+    for (let t = 0; t < ticks; t += 1) {
+      if (config.bar.hatOpen![t] !== 0) expect(config.bar.hat[t], `@${t}`).toBe(0);
+    }
+    // Normal writes no row at all, and the compiler does not invent one.
+    expect(compileJam(createJam("x", { grooveId: "rock8" })).bar.hatOpen).toBeUndefined();
+  });
+
   it("silences the drummer without changing the width of the table", () => {
     const jam = createJam("x", { key: "A", band: { drums: false, bass: true }, fills: true });
     const config = compileJam(jam);

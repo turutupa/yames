@@ -97,7 +97,7 @@
       "soft": "轻",
       "normal": "适中",
       "loud": "重",
-      "hint": "重会去掉幽灵音、把踩镲打开；轻则合上。"
+      "hint": "重会去掉幽灵音、加一记吊镲；轻则把重拍打轻、不打吊镲。"
     },
     "form": {
       "label": "曲式",
@@ -220,6 +220,8 @@
       "chooseFolder": "一个装着你自己采样的文件夹…",
       "folderHint": "底鼓、军鼓、踩镲、开镲、叮叮镲、边击、吊镲 · 什么都不会离开这台电脑",
       "folderUnavailable": "这个版本用不了你自己的采样。",
+      "folderEmpty": "这个文件夹里没有鼓的声音，什么都没加载。",
+      "folderRefused": "这个文件夹加载不了，现在响的是内置鼓组。",
       "foundVoices": "找到：{{voices}}。",
       "fallbackVoices": "{{voices}}来自{{kit}}。",
       "voice": {
@@ -377,7 +379,6 @@
       "alt": "另类",
       "ballad": "抒情",
       "halfTime": "半速",
-      "driving": "推进",
       "stomp": "跺步",
       "doubleKick": "双踩",
       "shuffle": "Shuffle",
@@ -390,11 +391,7 @@
       "bossa": "Bossa",
       "upTempo": "快速",
       "samba": "桑巴",
-      "rumba": "伦巴",
-      "songo": "Songo",
-      "eighths": "八分",
       "thrash": "鞭击",
-      "midTempo": "中速",
       "openHats": "开镲",
       "driving16ths": "推进十六分",
       "bossaJazz": "波萨爵士",

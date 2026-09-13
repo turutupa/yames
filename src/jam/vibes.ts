@@ -433,6 +433,10 @@ export function vibeBundle(vibe: JamVibe, variationId?: string | null): JamVibeB
  * - **The custom groove goes.** It wins over `grooveId` wherever it is set
  *   (`jamWrittenGroove` in `./compile`), so leaving it would mean tapping
  *   Metal and hearing the bar you drew last week.
+ * - **A kit of your own samples goes with it**, and for the same reason: a
+ *   folder of WAVs wins over the bundle's `kit`, so leaving it on would have
+ *   the Brushes tile look applied while your rock kit played under it. A
+ *   vibe is a sound set (B8), and the kit is half of the sound.
  * - **The meter override goes.** A vibe's groove carries its own meter, and a
  *   waltz under a leftover 4/4 override does not fit it — the drummer would
  *   fall back to the rule groove, which is nobody's idea of a country waltz.
@@ -479,6 +483,7 @@ export function applyVibe(jam: Jam, vibeId: string, variationId?: string): Jam {
   if (chosen) next.variation = chosen.id;
   else delete next.variation;
   delete next.customGroove;
+  delete next.customKit;
   delete next.meter;
   if (progression) next.progression = progression;
   else delete next.progression;

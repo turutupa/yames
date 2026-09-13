@@ -97,7 +97,7 @@
       "soft": "Suave",
       "normal": "Normal",
       "loud": "Fuerte",
-      "hint": "Fuerte quita las notas fantasma y abre el charles; suave lo cierra."
+      "hint": "Fuerte quita las notas fantasma y mete un crash; suave toca el backbeat flojo y deja el crash fuera."
     },
     "form": {
       "label": "Forma",
@@ -220,6 +220,8 @@
       "chooseFolder": "Una carpeta con tus samples…",
       "folderHint": "bombo, caja, charles, charles abierto, ride, aro, crash · nada sale de este equipo",
       "folderUnavailable": "Los samples propios no están en esta versión.",
+      "folderEmpty": "No hay sonidos de batería en esa carpeta: no se cargó nada.",
+      "folderRefused": "Esa carpeta no se pudo cargar. Suena el kit incluido.",
       "foundVoices": "Encontrado: {{voices}}.",
       "fallbackVoices": "{{voices}} vienen de {{kit}}.",
       "voice": {
@@ -377,7 +379,6 @@
       "alt": "Alternativo",
       "ballad": "Balada",
       "halfTime": "Half-time",
-      "driving": "Con empuje",
       "stomp": "Stomp",
       "doubleKick": "Doble bombo",
       "shuffle": "Shuffle",
@@ -390,11 +391,7 @@
       "bossa": "Bossa",
       "upTempo": "Rápido",
       "samba": "Samba",
-      "rumba": "Rumba",
-      "songo": "Songo",
-      "eighths": "Corcheas",
       "thrash": "Thrash",
-      "midTempo": "Medio tiempo",
       "openHats": "Hi-hats abiertos",
       "driving16ths": "Semicorcheas con empuje",
       "bossaJazz": "Bossa jazz",

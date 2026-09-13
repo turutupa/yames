@@ -269,6 +269,16 @@ describe("applying a vibe", () => {
     expect(jamGroove(jam).ticksPerBeat).toBe(4);
   });
 
+  it("drops a kit of your own samples, the way it drops a drawn groove", () => {
+    // The folder wins over the bundle's `kit` wherever it is set, so a vibe
+    // that left it on would look applied and sound like the kit before it —
+    // and a vibe is a sound set (B8), so the kit is half of what was tapped.
+    const mine = createJam("mine", { customKit: { dir: "C:/samples/mine", name: "mine" } });
+    const jam = applyVibe(mine, "jazz");
+    expect(jam.customKit).toBeUndefined();
+    expect(jam.kit).toBe("brushes");
+  });
+
   it("throws away a meter override, so the waltz is allowed to be in three", () => {
     const inSeven = createJam("mine", { meter: { beatGroups: [3, 2, 2], ticksPerBeat: 2 } });
     const jam = applyVibe(inSeven, "country", "waltz");
