@@ -737,6 +737,21 @@ describe("JamView — the sheets", () => {
     expect(patch.pinnedShape).toMatchObject({ root: 9, quality: "7", index: 0 });
   });
 
+  it("pins the grip you are looking at, not any grip of that chord", () => {
+    // An A7 has several shapes on a guitar and pinning "the barre at the
+    // fifth" is a real thing to want. Comparing only the chord had the button
+    // read "Unpin" over a shape that was not the pinned one — and pressing it
+    // threw the pin away rather than moving it.
+    const expanded = { root: 9 as const, quality: "7" as const };
+    const { props } = chordSheet(
+      { jam: jamOf({ pinnedShape: { root: 9, quality: "7", index: 0 } }) },
+      { pinnedChord: expanded, shapeIndex: 2 },
+    );
+    expect(screen.getByRole("button", { name: "Pin this one" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Pin this one" }));
+    expect(props.onEdit.mock.calls.at(-1)![0].pinnedShape).toMatchObject({ index: 2 });
+  });
+
   it("draws the pinned shape in the corner of the playing screen, and only there", () => {
     const { container, props } = setup({
       jam: jamOf({ pinnedShape: { root: 9, quality: "7", index: 0 } }),
@@ -1025,6 +1040,32 @@ describe("JamView — the fourth pass's controls", () => {
     const { props } = setup({ jam: jamOf({ band: { drums: true, bass: true, keys: true } }) });
     fireEvent.click(screen.getByRole("button", { name: "Stabs" }));
     expect(props.onEdit).toHaveBeenCalledWith({ keysStyle: "stabs" });
+  });
+
+  it("unpins the shape in the corner when the key moves", () => {
+    // A pinned grip belongs to the key it was pinned in. Left alone, a G shape
+    // sat in the corner of a jam in B flat, drawn as if it were the chord to
+    // play — and nothing on the screen would ever move it again.
+    const { props } = sheet({ jam: jamOf({ pinnedShape: { root: 9, quality: "7", index: 0 } }) });
+    fireEvent.click(screen.getByRole("button", { name: "C" }));
+    expect(props.onEdit.mock.calls.at(-1)![0]).toMatchObject({ pinnedShape: null });
+
+    fireEvent.click(screen.getByRole("button", { name: "Minor" }));
+    expect(props.onEdit.mock.calls.at(-1)![0]).toMatchObject({ pinnedShape: null });
+  });
+
+  it("unpins it when the part you read is transposed", () => {
+    // Harder version of the same thing: every chord NAME moves, so the grip
+    // keeps its diagram and loses its label.
+    const { props } = sheetWithMore({
+      instrument: "other",
+      jam: jamOf({ pinnedShape: { root: 9, quality: "7", index: 0 } }),
+    });
+    fireEvent.click(screen.getByRole("button", { name: "B♭" }));
+    expect(props.onEdit.mock.calls.at(-1)![0]).toMatchObject({
+      transposition: "bb",
+      pinnedShape: null,
+    });
   });
 
   it("shows the transposition row only to a player who reads a transposed part", () => {
