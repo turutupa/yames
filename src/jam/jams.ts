@@ -7,7 +7,8 @@
  * in `src/ipc.ts`.
  */
 import { grooveById } from "./grooves";
-import { clampFormBars } from "./forms";
+import { clampFormBars, formBars } from "./forms";
+import { progressionEdit } from "./progression";
 import { JAM_MAX_COUNT_IN } from "./types";
 import type { Jam, JamForm } from "./types";
 
@@ -89,6 +90,26 @@ export function createJam(name: string, fields: NewJamFields = {}): Jam {
     ...(fields.practice ? { practice: { ...fields.practice } } : {}),
     ...(fields.transposition ? { transposition: fields.transposition } : {}),
     ...(fields.customGroove ? { customGroove: fields.customGroove } : {}),
+    // The fourth pass's half of the optional record. Carried the same way and
+    // for the same reason: "another one like this one" has to mean the meter,
+    // the changes and the mix as well, or the "+" button quietly hands back a
+    // jam in 4/4 when the one on the stage is in seven.
+    //
+    // The progression is refitted rather than copied, because the new jam may
+    // have been given a different form on the way in and a progression that
+    // is not exactly `form.bars` long is the one thing this record must never
+    // hold (see `progression.ts`).
+    ...(fields.meter
+      ? { meter: { beatGroups: [...fields.meter.beatGroups], ticksPerBeat: fields.meter.ticksPerBeat } }
+      : {}),
+    ...(() => {
+      const progression = progressionEdit(fields.progression, formBars(form));
+      return progression ? { progression } : {};
+    })(),
+    ...(fields.mix ? { mix: { ...fields.mix } } : {}),
+    ...(fields.keysStyle ? { keysStyle: fields.keysStyle } : {}),
+    ...(fields.countInSound ? { countInSound: fields.countInSound } : {}),
+    ...(fields.cues === undefined ? {} : { cues: fields.cues }),
   };
 }
 

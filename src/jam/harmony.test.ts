@@ -10,6 +10,7 @@ import {
   nameToMidi,
   nameToPitchClass,
   noteName,
+  parseChordName,
   parseKey,
   pitchClass,
   romanToChord,
@@ -20,6 +21,7 @@ import {
   transposePitchClass,
   transpositionForInstrument,
   type Chord,
+  type ChordQuality,
   type Key,
   type KeyMode,
   type PitchClass,
@@ -28,6 +30,24 @@ import { JAM_FORM_BARS, type JamFormKind } from "./types";
 
 const MODES: KeyMode[] = ["major", "minor", "blues"];
 const ALL_ROOTS: PitchClass[] = Array.from({ length: 12 }, (_unused, i) => i);
+/** Every quality the union has, so a new one fails the round trip rather than skipping it. */
+const ALL_QUALITIES: ChordQuality[] = [
+  "maj",
+  "min",
+  "dim",
+  "aug",
+  "7",
+  "maj7",
+  "m7",
+  "m7b5",
+  "dim7",
+  "sus2",
+  "sus4",
+  "6",
+  "m6",
+  "add9",
+  "9",
+];
 const FORM_KINDS: JamFormKind[] = ["blues12", "loop8", "bars16", "aaba32", "one", "custom"];
 
 /** The chord symbols of a form, as they would be printed on the timeline. */
@@ -418,6 +438,67 @@ describe("the key as a saved string", () => {
     expect(parseKey("Bb minor")).toEqual({ root: 10, mode: "minor" });
     expect(parseKey("")).toBeNull();
     expect(parseKey("banana")).toBeNull();
+  });
+});
+
+describe("parseChordName", () => {
+  /**
+   * The round trip is the contract: a progression is stored as the text
+   * `chordName` writes and read back through `parseChordName`. Anything this
+   * loop misses is a chord that would come back as "as the form" the next
+   * time the jam was opened.
+   */
+  it("reads back every chord chordName can write, in every key", () => {
+    for (const mode of MODES) {
+      for (const keyRoot of ALL_ROOTS) {
+        const key: Key = { root: keyRoot, mode };
+        for (const quality of ALL_QUALITIES) {
+          for (const root of ALL_ROOTS) {
+            const chord: Chord = { root, quality };
+            const written = chordName(chord, key);
+            expect(parseChordName(written), written).toEqual(chord);
+          }
+        }
+      }
+    }
+  });
+
+  it("takes either spelling of an accidental", () => {
+    expect(parseChordName("Bb")).toEqual({ root: 10, quality: "maj" });
+    expect(parseChordName("A#")).toEqual({ root: 10, quality: "maj" });
+    expect(parseChordName("B♭m7")).toEqual({ root: 10, quality: "m7" });
+    expect(parseChordName("A♯m7")).toEqual({ root: 10, quality: "m7" });
+  });
+
+  it("takes the spellings a chart uses, not only the ones we write", () => {
+    expect(parseChordName("CΔ")).toEqual({ root: 0, quality: "maj7" });
+    expect(parseChordName("CΔ7")).toEqual({ root: 0, quality: "maj7" });
+    expect(parseChordName("CM7")).toEqual({ root: 0, quality: "maj7" });
+    expect(parseChordName("C-7")).toEqual({ root: 0, quality: "m7" });
+    expect(parseChordName("Cmin7")).toEqual({ root: 0, quality: "m7" });
+    expect(parseChordName("C°")).toEqual({ root: 0, quality: "dim" });
+    expect(parseChordName("C°7")).toEqual({ root: 0, quality: "dim7" });
+    expect(parseChordName("Cø")).toEqual({ root: 0, quality: "m7b5" });
+    expect(parseChordName("C+")).toEqual({ root: 0, quality: "aug" });
+    expect(parseChordName("Csus")).toEqual({ root: 0, quality: "sus4" });
+  });
+
+  it("reads a slash chord as the chord over the slash", () => {
+    expect(parseChordName("D/F#")).toEqual({ root: 2, quality: "maj" });
+    expect(parseChordName("Dm7/G")).toEqual({ root: 2, quality: "m7" });
+  });
+
+  it("is tolerant of the space either side, and of nothing at all", () => {
+    expect(parseChordName("  A7 ")).toEqual({ root: 9, quality: "7" });
+    expect(parseChordName("")).toBeNull();
+    expect(parseChordName("   ")).toBeNull();
+  });
+
+  it("returns null rather than a guess for anything unreadable", () => {
+    expect(parseChordName("H")).toBeNull();
+    expect(parseChordName("banana")).toBeNull();
+    expect(parseChordName("A7?")).toBeNull();
+    expect(parseChordName("7")).toBeNull();
   });
 });
 
