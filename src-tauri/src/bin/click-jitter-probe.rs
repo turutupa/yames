@@ -31,7 +31,13 @@
 //!   --jam                load the busiest plausible jam (16 ticks a bar,
 //!                        kick/snare/hat/ride, a fill and a crash on the one)
 //!                        at 240 BPM, so the gate covers the band as well as
-//!                        the click
+//!                        the click. Needs --subdivision 4, which is the
+//!                        default; the run is refused at any other, because
+//!                        the engine would play the click instead
+//!   --jam-swap           --jam, and replace the table from another thread
+//!                        every 350 ms (the bar-ahead bass handshake)
+//!   --jam-move           --jam, and move the form while it plays: a loop
+//!                        set and a jump every 2 s. Combines with --jam-swap
 //! ```
 //!
 //! Exit codes: 0 pass, 1 gate failure, 2 setup/usage error.
@@ -67,7 +73,7 @@ use std::time::Duration;
 
 use yames_lib::probe::{
     compile_jam, create_beat_log, create_shared_state, CallbackProbe, CallbackSample, JamBassLine,
-    JamConfig, JamPattern, MetronomeEngine,
+    JamConfig, JamPattern, JamPosition, MetronomeEngine,
 };
 
 /// Pessimistic upper bound on callbacks per second used to size the
@@ -91,6 +97,11 @@ struct Args {
     /// their bass — the bar-ahead handshake the UI performs several times a
     /// chorus. The gate then covers the handoff and the retirement path.
     jam_swap: bool,
+    /// `--jam`, and move the form from another thread while the stream runs:
+    /// a loop set once and a jump every two seconds. The bar line then has
+    /// the whole of `next_form_position` to do rather than a single add,
+    /// and it does it inside the callback.
+    jam_move: bool,
     /// Whether the tempo / resolution came from the command line, so `--jam`
     /// can supply its own 240 BPM sixteenths without overruling a run that
     /// asked for something else.
@@ -112,6 +123,7 @@ impl Default for Args {
             dump_csv: None,
             jam: false,
             jam_swap: false,
+            jam_move: false,
             bpm_set: false,
             subdivision_set: false,
         }
@@ -166,6 +178,11 @@ fn parse_args() -> Result<Args, String> {
                 a.jam_swap = true;
                 consumed = 1;
             }
+            "--jam-move" => {
+                a.jam = true;
+                a.jam_move = true;
+                consumed = 1;
+            }
             "-h" | "--help" => return Err("help".into()),
             other => return Err(format!("unknown flag {other}")),
         }
@@ -185,6 +202,20 @@ fn parse_args() -> Result<Args, String> {
         }
         if !a.subdivision_set {
             a.subdivision = 4;
+        }
+        // The band's table is sixteen ticks to a 4/4 bar, and the engine
+        // compares that against `beats_per_measure * subdivision` on every
+        // tick. At any other resolution it plays the plain click and says so
+        // once — so `--jam --subdivision 3` would report a clean jam gate
+        // having measured no jam at all. Refuse rather than measure the
+        // wrong thing quietly.
+        if a.subdivision != 4 {
+            return Err(format!(
+                "--jam plays a sixteen-tick bar, so it needs --subdivision 4; at \
+                 --subdivision {} the engine falls back to the click and this run \
+                 would measure the click",
+                a.subdivision
+            ));
         }
     }
     Ok(a)
@@ -208,6 +239,9 @@ click-jitter-probe — ROADMAP §4 audio-safety gate
                      350 ms while playing (the bar-ahead bass handshake)
                      (16 ticks a bar, every lane, a fill, a crash on the
                      one) at 240 BPM / 16ths
+  --jam-move         --jam, and move the form while playing: bars 2-4 of
+                     the form looped and a jump every 2 s. Combines with
+                     --jam-swap.
 
 exit 0 = pass, 1 = gate failure, 2 = setup error";
 
@@ -481,6 +515,7 @@ fn busiest_jam() -> JamConfig {
         // The practice windows only ever take work away, so the probe runs
         // without them: the busiest case is the band playing every bar.
         practice: None,
+        fill_every: None,
     }
 }
 
@@ -612,6 +647,45 @@ fn main() -> ExitCode {
         None
     };
 
+    // `--jam-move`: the form itself moves while the stream runs. A loop over
+    // the last three bars of the four-bar form, and a jump every two
+    // seconds — two bars at 240 BPM — alternating between the first bar of
+    // the loop and the fill, which is the bar where every lane plays every
+    // tick. The bar line then runs the whole of the jump / loop / wrap rule
+    // on the audio thread instead of a single add, and the jump is a
+    // generation change the callback has to notice and consume.
+    //
+    // A jump command carries the loop with it: the contract's position is
+    // both halves at once, so a command that named only the jump would be
+    // asking for the loop to be taken away.
+    const PROBE_LOOP: (u32, u32) = (1, 3);
+    let mover = if args.jam_move {
+        let handoff = engine.jam_handoff();
+        handoff.set_position(JamPosition {
+            jump: None,
+            loop_bars: Some(PROBE_LOOP),
+        });
+        let stop_moves = Arc::new(AtomicBool::new(false));
+        let flag = stop_moves.clone();
+        let moves = Arc::new(AtomicU64::new(0));
+        let count = moves.clone();
+        let handle = std::thread::spawn(move || {
+            let mut to_fill = true;
+            while !flag.load(Ordering::Relaxed) {
+                std::thread::sleep(Duration::from_secs(2));
+                handoff.set_position(JamPosition {
+                    jump: Some(if to_fill { PROBE_LOOP.1 } else { PROBE_LOOP.0 }),
+                    loop_bars: Some(PROBE_LOOP),
+                });
+                to_fill = !to_fill;
+                count.fetch_add(1, Ordering::Relaxed);
+            }
+        });
+        Some((handle, stop_moves, moves))
+    } else {
+        None
+    };
+
     std::thread::sleep(Duration::from_millis(args.warmup_ms));
     let window_start_ns = yames_lib::probe::now_ns();
     std::thread::sleep(Duration::from_secs(args.seconds));
@@ -623,6 +697,14 @@ fn main() -> ExitCode {
             stop_swaps.store(true, Ordering::Relaxed);
             let _ = handle.join();
             swaps.load(Ordering::Relaxed)
+        }
+        None => 0,
+    };
+    let moves_done = match mover {
+        Some((handle, stop_moves, moves)) => {
+            stop_moves.store(true, Ordering::Relaxed);
+            let _ = handle.join();
+            moves.load(Ordering::Relaxed)
         }
         None => 0,
     };
@@ -702,6 +784,13 @@ fn main() -> ExitCode {
     }
     if args.jam_swap {
         mode.push_str(&format!("-swap ({swaps_done} table swaps while playing)"));
+    }
+    if args.jam_move {
+        mode.push_str(&format!(
+            " + --jam-move (bars {}-{} looped, {moves_done} jumps while playing)",
+            PROBE_LOOP.0 + 1,
+            PROBE_LOOP.1 + 1
+        ));
     }
 
     println!("\n=== click-jitter-probe ===");
