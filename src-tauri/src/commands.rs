@@ -22,6 +22,15 @@ pub struct EngineState(pub Mutex<MetronomeEngine>);
 #[derive(Default)]
 pub struct JamGainState(pub crate::jam::JamGainCache);
 
+/// The kit folder `set_jam` has already decoded.
+///
+/// Managed state for the reason `JamGainState` is, and against the same
+/// traffic: the UI re-sends the whole config four to six times a chorus to
+/// keep the bass a bar ahead, and decoding eight WAVs on each of those
+/// would be a folder read per bar. See `KitCache` in `kit.rs`.
+#[derive(Default)]
+pub struct JamKitState(pub crate::kit::KitCache);
+
 /// Snapshot the current AppState and emit it on the `state-changed`
 /// event. Lock is dropped before the emit so the (synchronous-but-not-
 /// instant) serde serialization can't block any other thread waiting on
@@ -2444,20 +2453,78 @@ pub fn app_ready(app_handle: AppHandle) {
 /// the UI calls this four to six times a chorus to keep the bass a bar
 /// ahead. `JamGainState` remembers the measurements so those sends do not
 /// each pay for one — see `JamGainCache` in `jam.rs`.
+/// A kit of the musician's own samples is decoded HERE too, on this thread,
+/// before the table is compiled — and cached by folder, file mtimes and
+/// output rate, so only the first send of a jam pays for it. It travels
+/// inside the `Arc<JamTable>`, which is what makes the drums and the
+/// samples behind them one thing the audio thread can swap and retire
+/// together; see `JamTable::custom` in `jam.rs`.
 #[tauri::command]
 pub fn set_jam(
     config: Option<crate::jam::JamConfig>,
     engine_state: State<EngineState>,
     jam_gain: State<JamGainState>,
+    jam_kit: State<JamKitState>,
 ) -> Result<(), String> {
     let table = match config {
-        Some(ref cfg) => Some(std::sync::Arc::new(crate::jam::compile_with(
-            cfg, &jam_gain.0,
-        )?)),
+        Some(ref cfg) => {
+            let custom = match cfg.custom_kit {
+                Some(ref k) => {
+                    // The rate the device is actually running at, so the
+                    // folder is decoded once at the rate it will be played
+                    // at. Before a device opens there is nothing to ask, and
+                    // the reference rate is the honest guess — the next
+                    // `set_jam` after the stream starts re-decodes, and with
+                    // the bar-ahead handshake that is at most a bar away.
+                    let rate = engine_state
+                        .0
+                        .lock()
+                        .unwrap()
+                        .output_sample_rate()
+                        .unwrap_or(crate::engine::JAM_REFERENCE_SR);
+                    Some(jam_kit.0.get_or_load(std::path::Path::new(&k.dir), rate)?)
+                }
+                None => None,
+            };
+            Some(std::sync::Arc::new(crate::jam::compile_with(
+                cfg, &jam_gain.0, custom,
+            )?))
+        }
         None => None,
     };
     engine_state.0.lock().unwrap().set_jam_table(table);
     Ok(())
+}
+
+/// Ask the musician for a folder of drum samples.
+///
+/// A native folder dialog, and nothing else: the folder is READ on this
+/// machine when a jam that names it is loaded, and no file is copied,
+/// moved, uploaded or written. `null` when they cancel.
+///
+/// Blocking rather than async because a `#[tauri::command]` that is not
+/// `async` already runs off the main thread, and the alternative — a
+/// channel and a callback — would be machinery in front of a question with
+/// one answer.
+#[tauri::command]
+pub fn pick_kit_folder(app: AppHandle) -> Option<String> {
+    use tauri_plugin_dialog::DialogExt;
+    app.dialog()
+        .file()
+        .blocking_pick_folder()
+        .and_then(|p| p.into_path().ok())
+        .map(|p| p.to_string_lossy().into_owned())
+}
+
+/// Which of the eight voices a folder holds, and which it does not.
+///
+/// A directory listing and nothing more — no file is opened and no audio is
+/// decoded. The UI asks this while the musician is still choosing, so it has
+/// to be cheap enough to sit behind a hover; the decoding happens in
+/// `set_jam`, once, when a jam that names the folder is actually loaded.
+#[tauri::command]
+pub fn inspect_kit_folder(dir: String) -> Result<crate::kit::KitFolder, String> {
+    crate::kit::inspect(std::path::Path::new(&dir))
 }
 
 /// Move the form: jump to a bar, loop a range of bars, or clear both.
