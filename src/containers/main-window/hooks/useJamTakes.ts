@@ -3,6 +3,7 @@ import {
   deleteTake,
   listTakes,
   onTakePlaybackEnded,
+  onTakeCapped,
   playTake,
   startTake,
   stopTake,
@@ -141,6 +142,9 @@ export function useJamTakes({
   const recordingRef = useRef(false);
   const startedAt = useRef<number | null>(null);
   const jamId = jam?.id ?? null;
+  /** The loaded jam's id for listeners that outlive a render. */
+  const jamIdRef = useRef<string | null>(null);
+  jamIdRef.current = jamId;
 
   /**
    * The shelf, re-read.
@@ -220,6 +224,25 @@ export function useJamTakes({
       void unlisten.then((off) => off()).catch(() => {});
     };
   }, []);
+
+  /**
+   * A take ran into the twenty-minute cap. The engine has finished and kept
+   * it on its own, so the mark comes off the transport and the shelf is
+   * re-read rather than left waiting for a stop that already happened.
+   */
+  useEffect(() => {
+    const unlisten = onTakeCapped(() => {
+      recordingRef.current = false;
+      startedAt.current = null;
+      setRecording(false);
+      setRecordedSeconds(0);
+      const id = jamIdRef.current;
+      if (id) void refresh(id);
+    });
+    return () => {
+      void unlisten.then((off) => off()).catch(() => {});
+    };
+  }, [refresh]);
 
   /**
    * Start on the first bar after the count-in; stop with the transport.

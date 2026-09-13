@@ -26,6 +26,7 @@ vi.mock("../../../ipc", () => ({
   playTake: vi.fn(() => Promise.resolve()),
   stopTakePlayback: vi.fn(() => Promise.resolve()),
   onTakePlaybackEnded: vi.fn(() => Promise.resolve(() => {})),
+  onTakeCapped: vi.fn(() => Promise.resolve(() => {})),
   takesDirSize: vi.fn(() => Promise.resolve(0)),
   storeLoad: vi.fn(() => Promise.resolve(undefined)),
   storeSave: vi.fn(() => Promise.resolve()),
@@ -67,6 +68,7 @@ beforeEach(() => {
   ipc.playTake.mockImplementation(() => Promise.resolve());
   ipc.stopTakePlayback.mockImplementation(() => Promise.resolve());
   ipc.onTakePlaybackEnded.mockImplementation(() => Promise.resolve(() => {}));
+  ipc.onTakeCapped.mockImplementation(() => Promise.resolve(() => {}));
   ipc.takesDirSize.mockImplementation(() => Promise.resolve(0));
   ipc.storeLoad.mockImplementation(() => Promise.resolve(undefined));
   ipc.storeSave.mockImplementation(() => Promise.resolve());

@@ -1229,6 +1229,14 @@ export function onTakePlaybackEnded(callback: () => void) {
   return listen<null>("take-playback-ended", () => callback());
 }
 
+/**
+ * A take ran into the twenty-minute cap and finished itself; the engine has
+ * already kept it and written its record. Fires once per capped take.
+ */
+export function onTakeCapped(callback: () => void) {
+  return listen<null>("take-capped", () => callback());
+}
+
 /** Bytes the takes directory holds, across every jam. A fact about the disk, not about a take. */
 export async function takesDirSize(): Promise<number> {
   return invoke("takes_dir_size");
