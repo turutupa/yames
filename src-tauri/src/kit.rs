@@ -367,12 +367,12 @@ fn load_capped(dir: &Path, rate: u32, max_bytes: u64) -> Result<CustomBank, Stri
     }
     if declared > max_bytes {
         return Err(format!(
-            "{} is {:.0} MB of audio decoded, and a kit is capped at {} MB — \
+            "{} is {:.1} MB of audio decoded, and a kit is capped at {:.1} MB — \
              point Yames at a folder of single drum hits rather than at a \
              sample library",
             dir.display(),
             declared as f64 / (1024.0 * 1024.0),
-            max_bytes / (1024 * 1024),
+            max_bytes as f64 / (1024.0 * 1024.0),
         ));
     }
 
