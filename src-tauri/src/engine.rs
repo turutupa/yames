@@ -507,10 +507,11 @@ impl JamKit {
 
 /// One drum of a kit. The order is the column order of [`KIT_WAVS`].
 ///
-/// `HatOpen` and `Rim` have no lane in `JamPattern` today — no groove in the
-/// library plays them. They are decoded and addressable anyway so the groove
-/// editor can grow a lane without the engine changing underneath it, which
-/// is cheaper than adding two files and two bank entries later.
+/// `HatOpen` is a row of `JamPattern` (`hatOpen`, optional, second pass B5)
+/// and `Rim` is the sticks count-in; every one of the eight is reachable
+/// from a table. That is what the first pass decoded them for: they were
+/// addressable before anything played them, so growing a lane cost a row in
+/// the pattern and nothing in the bank.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum KitVoice {
     Kick,
@@ -1656,12 +1657,23 @@ struct Voice {
 ///
 /// This used to be a `with_capacity(32)` and nothing else, which was fine
 /// while the engine spawned exactly one voice per tick. A jam spawns up to
-/// ELEVEN — five drums, the bass, four notes of a keys voicing and the crash
+/// TWELVE — six drums, the bass, four notes of a keys voicing and the crash
 /// on the one — and the kick, the snare, the crash and every keys note ring
 /// out for most of a bar, so a busy 16th-note groove with a chord on every
 /// eighth can legitimately have dozens alive at once. With the longest kit
 /// in the set (`brushes`, a 700 ms crash) over a 700 ms keys tail, the
 /// measured worst is well inside this.
+///
+/// A FOLDER OF THE MUSICIAN'S OWN DRUMS IS THE HARD CASE, and it is the one
+/// this number now has to answer for. A custom voice may be
+/// `kit::MAX_VOICE_SECS` long — nearly three times the longest drum the app
+/// ships — and the kick, the snare and the crash are the lanes that are not
+/// capped at all, so at 300 BPM sixteenths (a 50 ms tick) each of them can
+/// keep forty copies alive out of one lane. Three uncapped lanes on every
+/// tick is a hundred and twenty, plus the capped lanes, the crash on the
+/// one, the bass and four keys notes. That is the arithmetic; the
+/// measurement is `a_folder_of_two_second_drums_stays_under_the_ceiling`,
+/// which renders it rather than reasoning about it.
 ///
 /// A headroom figure, not a budget: the `Vec` is allocated once when the
 /// audio thread starts, and EVERY push into it is guarded, so even a table
@@ -5943,6 +5955,7 @@ mod tests {
             ticks_per_beat: 4,
             beats_per_bar: 4,
             bar: JamPattern {
+                hat_open: Vec::new(),
                 kick: vec![1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
                 snare: vec![0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0],
                 hat: vec![1, 0, 3, 0, 1, 0, 3, 0, 1, 0, 3, 0, 1, 0, 3, 0],
@@ -6732,16 +6745,22 @@ mod tests {
                     kick: vec![2; 16],
                     snare: vec![2; 16],
                     hat: vec![2; 16],
+                    // The open hat is a row of the pattern too (B5), and it
+                    // is the row that rings: every other lane the editor can
+                    // fill is either a transient or capped at 0.9 of a tick.
+                    hat_open: vec![2; 16],
                     ride: vec![2; 16],
                     crash: vec![2; 16],
                 }
             } else {
                 // Busy, and something a person might actually play: the
-                // jitter probe's groove.
+                // jitter probe's groove, with the wash on the last
+                // sixteenth of each beat where a drummer would open it.
                 JamPattern {
                     kick: vec![2, 0, 0, 1, 1, 0, 1, 0, 2, 0, 0, 1, 1, 0, 1, 0],
                     snare: vec![0, 0, 3, 0, 2, 0, 0, 3, 0, 3, 0, 0, 2, 0, 3, 1],
                     hat: vec![1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3],
+                    hat_open: vec![0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
                     ride: vec![1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
                     crash: vec![0; 16],
                 }
@@ -6853,6 +6872,81 @@ mod tests {
         }
     }
 
+    /// A FOLDER OF TWO-SECOND DRUMS, RENDERED — the ceiling's hardest case,
+    /// and the one nothing measured until now.
+    ///
+    /// `INTERFERENCE_ALLOWANCE` in `jam.rs` was measured on the shipped
+    /// kits, whose longest voice is `brushes`' 700 ms crash, and the test
+    /// named for custom kits ran on 50 ms fixtures. `kit::MAX_VOICE_SECS` is
+    /// two seconds, and the kick, the snare and the crash are not capped at
+    /// all — so a musician who points Yames at a folder of real cymbals gets
+    /// nearly three times the ring-out every published number was taken
+    /// against. At 300 BPM sixteenths a tick is 50 ms, so one uncapped lane
+    /// on every tick keeps forty copies of the same drum alive.
+    ///
+    /// Two claims, the same two the shipped kits answer: the band does not
+    /// reach the mixer's clamp, and the voice count stays inside the
+    /// preallocated `MAX_VOICES` so the callback never has to reallocate.
+    /// Both across the whole tempo range and every rate a device hands out.
+    #[test]
+    fn a_folder_of_two_second_drums_stays_under_the_ceiling() {
+        const SHIPPED_VOLUME: f32 = 0.8;
+        // Built once and shared by both grooves: a `SoundBank` decodes every
+        // shipped kit file at its rate, and four of them is most of what
+        // this test would otherwise cost.
+        let reference = SoundBank::new(JAM_REFERENCE_SR);
+        let others: Vec<(u32, SoundBank)> = [22050u32, 44100, 96000]
+            .into_iter()
+            .map(|sr| (sr, SoundBank::new(sr)))
+            .collect();
+        for (lawnmower, volume) in [(false, 1.0f32), (true, SHIPPED_VOLUME)] {
+            // Every voice at the cap, decoded at the reference rate — the
+            // rate `worst_bar_peak` measures at, so what this renders is
+            // exactly what the normalisation thought it was scaling.
+            let folder = std::sync::Arc::new(crate::kit::CustomBank::for_tests(
+                &KitVoice::ALL,
+                JAM_REFERENCE_SR,
+                crate::kit::MAX_VOICE_SECS,
+            ));
+            let cfg = busy_band(JamKit::Room, lawnmower);
+            let table = crate::jam::compile_with_kit(&cfg, Some(folder)).unwrap();
+            assert!(table.custom_kit().is_some());
+
+            let mut worst_voices = 0usize;
+            let mut check = |bpm: u32, sr: u32, bank: &SoundBank| {
+                let tick_samples = (sr as f64 * 60.0 / bpm as f64 / 4.0) as usize;
+                let r = render_jam(&table, bank, 2, tick_samples, volume);
+                assert!(
+                    r.peak <= 1.0,
+                    "two-second custom drums at {bpm} BPM / {sr} Hz rendered {:.3} at \
+                     volume {volume}, so the mixer clamped and the user heard a \
+                     square wave",
+                    r.peak
+                );
+                assert!(
+                    r.max_voices < MAX_VOICES,
+                    "two-second custom drums kept {} voices alive at once against a \
+                     ceiling of {MAX_VOICES}; the callback would have dropped drums",
+                    r.max_voices
+                );
+                worst_voices = worst_voices.max(r.max_voices);
+            };
+            for bpm in (40..=300).step_by(20) {
+                check(bpm, JAM_REFERENCE_SR, &reference);
+            }
+            for (sr, bank) in others.iter() {
+                for bpm in [120u32, 300] {
+                    check(bpm, *sr, bank);
+                }
+            }
+            eprintln!(
+                "[jam] two-second custom kit, {}: {worst_voices} voices at once \
+                 against a ceiling of {MAX_VOICES}",
+                if lawnmower { "every lane every tick" } else { "a playable groove" }
+            );
+        }
+    }
+
     /// The voice ceiling is preallocated, so exceeding it would mean the
     /// audio thread reallocating mid-buffer. The busiest thing the jitter
     /// probe can ask for has to fit inside it with room to spare.
@@ -6863,6 +6957,7 @@ mod tests {
             ticks_per_beat: 4,
             beats_per_bar: 4,
             bar: JamPattern {
+                hat_open: Vec::new(),
                 kick: vec![1; 16],
                 snare: vec![2; 16],
                 hat: vec![1; 16],
@@ -7435,6 +7530,7 @@ mod tests {
             ticks_per_beat: 4,
             beats_per_bar: 4,
             bar: JamPattern {
+                hat_open: Vec::new(),
                 kick: vec![0; 16],
                 snare: vec![0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 hat: vec![0; 16],
@@ -7953,6 +8049,7 @@ mod tests {
     fn the_keys_keep_the_changes_through_a_fill() {
         let mut cfg = comping(1.0);
         cfg.fill = Some(JamPattern {
+            hat_open: Vec::new(),
             kick: vec![1; 16],
             snare: vec![1; 16],
             hat: vec![0; 16],

@@ -37,15 +37,16 @@ use crate::kit::CustomBank;
 // Limits — mirrored from src/jam/types.ts
 // ---------------------------------------------------------------------------
 
-/// The lanes a `JamPattern` carries: kick, snare, hat, ride, crash.
-pub const JAM_PATTERN_LANES: usize = 5;
+/// The lanes a `JamPattern` carries: kick, snare, hat, hat_open, ride,
+/// crash.
+pub const JAM_PATTERN_LANES: usize = 6;
 
 /// The most notes one keys voicing may hold. Four is a seventh chord, which
 /// is as much harmony as a comping voice should put under a soloist; five
 /// would be a pianist showing off.
 pub const JAM_MAX_VOICING: usize = 4;
 
-/// Five drums, the bass, and up to four notes of one keys voicing. The array
+/// Six drums, the bass, and up to four notes of one keys voicing. The array
 /// on every tick is this wide, so a tick is a fixed-size value the audio
 /// thread can read without a bounds surprise or a heap touch.
 pub const JAM_MAX_SLOTS: usize = JAM_PATTERN_LANES + 1 + JAM_MAX_VOICING;
@@ -83,6 +84,25 @@ const RIDE_TRIM: f32 = 0.7;
 /// The hat is capped at 0.9 of a tick, exactly like today's plain beat, so a
 /// closed hat stays closed instead of smearing into the next sixteenth.
 const HAT_CAP_TICKS: f32 = 0.9;
+
+/// The open hat rings a beat, and no further.
+///
+/// An open hat is the one drum whose whole point is that it is still there
+/// on the next tick — a drummer opens it on the "and" and the wash carries
+/// into the downbeat, which is why it is a row of its own rather than a
+/// louder closed hat (`plans/JAM_UX_DECISIONS.md` B5). So it is capped long
+/// rather than short, like the ride.
+///
+/// It is capped and not left to ring out, which is what the kick, the snare
+/// and the crash do, for two reasons and they are both about a row somebody
+/// can fill in by hand. Musically, a real drummer's foot closes the hat;
+/// an open hat that is still washing four beats later is a cymbal, not a
+/// hat. Mechanically, this is the only long voice a pattern can write on
+/// EVERY tick, and a folder's own open hat may be [`crate::kit::
+/// MAX_VOICE_SECS`] long — at 300 BPM sixteenths that is forty of them alive
+/// at once out of one lane. Four ticks is a beat at sixteenths, half a bar
+/// at eighths, and bounds the lane at four.
+const HAT_OPEN_CAP_TICKS: f32 = 4.0;
 
 /// The ride rings three ticks — long enough to read as a wash under the
 /// groove, short enough that a 16th-note ride pattern does not stack up.
@@ -255,8 +275,8 @@ const MAX_BPM: f32 = 300.0;
 /// thing a single render cannot see: overlapping copies of a drum interfere,
 /// and whether they add or cancel depends on the tempo.
 ///
-/// The numbers, measured across 40–300 BPM in 5 BPM steps on all four kits
-/// at the tempo each table is normalised for:
+/// The numbers, measured across 40–300 BPM in 5 BPM steps on every shipped
+/// kit at the tempo each table is normalised for:
 ///
 /// * A busy but playable groove — the jitter probe's, sixteen ticks with
 ///   kick, snare, hats, ride and a walking bass — varies by at most 10%
@@ -279,12 +299,23 @@ const INTERFERENCE_ALLOWANCE: f32 = 1.10;
 
 /// One bar, one row per drum. Every array has exactly
 /// `beatsPerBar × ticksPerBeat` entries, tick 0 first.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Default, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct JamPattern {
     pub kick: Vec<u8>,
     pub snare: Vec<u8>,
     pub hat: Vec<u8>,
+    /// The open hi-hat, as its own row (`JamPattern.hatOpen` in
+    /// `src/jam/types.ts`, second pass, B5).
+    ///
+    /// **Optional, and empty means none.** Every pattern the app has ever
+    /// saved was written before this row existed, so a config that does not
+    /// carry it has to load and play exactly as it did — which is what
+    /// `#[serde(default)]` and the empty case in [`compile_pattern`] are
+    /// for. A row that IS sent is held to the same length as every other:
+    /// half a lane is a bug in the caller, not a groove.
+    #[serde(default)]
+    pub hat_open: Vec<u8>,
     pub ride: Vec<u8>,
     pub crash: Vec<u8>,
 }
@@ -295,6 +326,7 @@ impl JamPattern {
             (JamLane::Kick, &self.kick),
             (JamLane::Snare, &self.snare),
             (JamLane::Hat, &self.hat),
+            (JamLane::HatOpen, &self.hat_open),
             (JamLane::Ride, &self.ride),
             (JamLane::Crash, &self.crash),
         ]
@@ -312,6 +344,10 @@ pub enum JamLane {
     Kick,
     Snare,
     Hat,
+    /// The open hi-hat. Its own lane, so a trading bar that drops the band
+    /// "to hats only" keeps both of them and a groove can put the wash on
+    /// the "and" without the closed hat moving.
+    HatOpen,
     Ride,
     Crash,
     /// Not a row of `JamPattern` — the bass is its own array in the config
@@ -330,6 +366,7 @@ impl JamLane {
             Self::Kick => "kick",
             Self::Snare => "snare",
             Self::Hat => "hat",
+            Self::HatOpen => "hatOpen",
             Self::Ride => "ride",
             Self::Crash => "crash",
             Self::Bass => "bass",
@@ -1375,6 +1412,7 @@ fn hash_drums(cfg: &JamConfig, custom: Option<&CustomBank>, h: &mut impl std::ha
         p.kick.hash(h);
         p.snare.hash(h);
         p.hat.hash(h);
+        p.hat_open.hash(h);
         p.ride.hash(h);
         p.crash.hash(h);
     }
@@ -1599,6 +1637,13 @@ fn compile_pattern(
 ) -> Result<Vec<JamTick>, String> {
     let mut out = vec![JamTick::EMPTY; ticks as usize];
     for (lane, cells) in pattern.lanes() {
+        // The open hat is the one optional row: absent is how every pattern
+        // saved before it existed arrives, and it means no open hat rather
+        // than a malformed bar. Sent at all, it is held to the same length
+        // as the rest — a half-filled lane is a caller's bug.
+        if lane == JamLane::HatOpen && cells.is_empty() {
+            continue;
+        }
         if cells.len() != ticks as usize {
             return Err(format!(
                 "{what}.{} has {} cells, and this bar is {ticks} ticks long",
@@ -1661,6 +1706,10 @@ fn slot_for(
             (voice, g, 0.0)
         }
         JamLane::Hat => (KitVoice::Hat, g, HAT_CAP_TICKS),
+        // The wash, not a louder closed hat: its own file in every kit and
+        // its own row in the pattern. Rung long, like the ride, and for the
+        // same reason — see `HAT_OPEN_CAP_TICKS`.
+        JamLane::HatOpen => (KitVoice::HatOpen, g, HAT_OPEN_CAP_TICKS),
         JamLane::Ride => (KitVoice::Ride, g * RIDE_TRIM, RIDE_CAP_TICKS),
         JamLane::Crash => (KitVoice::Crash, g, 0.0),
         // The bass and the keys have their own arrays in the config and
@@ -1770,27 +1819,62 @@ fn worst_bar_peak(
                 None
             };
             for slot in t.slots().iter().chain(extra.iter()) {
-                // The reference bank for everything shipped, the
-                // musician's own folder for a custom drum. The folder was
-                // decoded at the OUTPUT rate and this render is at
-                // `JAM_REFERENCE_SR`, and that is fine for the same reason
-                // the shipped kits are: every voice is peak-normalised
-                // after resampling (`kit::VOICE_PEAK`), so the height of a
-                // drum is the same number at every rate.
-                let buf = match slot.sound {
-                    SoundId::Custom(v) => custom.map_or(&[][..], |c| c.voice(v)),
-                    other => jam_reference_sample(other),
+                // The reference bank for everything shipped, the musician's
+                // own folder for a custom drum.
+                //
+                // A shipped voice is already at `JAM_REFERENCE_SR`, so it is
+                // read a sample at a time. A FOLDER IS NOT: it was decoded
+                // at whatever rate the device opened at, and this render
+                // runs at the reference rate. Walked one for one, a 96 kHz
+                // folder would render every drum at half speed and twice the
+                // length — twice the ring-out to stack, `cap_ticks` cutting
+                // it at half the musical duration it names, and a peak that
+                // is not the one the device will produce. So a custom voice
+                // is walked at its own rate's stride.
+                //
+                // Nearest neighbour, deliberately: this is a measurement of
+                // a PEAK over four bars and the resampler's own error is
+                // 120 dB below the signal (`kit.rs`), so interpolating here
+                // would cost time to move a number nothing reads.
+                //
+                // The HEIGHT needs no correction at any rate: every voice is
+                // peak-normalised after resampling (`kit::VOICE_PEAK`), the
+                // same reason the shipped kits can be measured this way.
+                let (buf, stride) = match slot.sound {
+                    SoundId::Custom(v) => (
+                        custom.map_or(&[][..], |c| c.voice(v)),
+                        custom.map_or(1.0f64, |c| {
+                            c.rate as f64 / JAM_REFERENCE_SR as f64
+                        }),
+                    ),
+                    other => (jam_reference_sample(other), 1.0f64),
+                };
+                // How long this drum is IN THIS RENDER'S SAMPLES.
+                let ring = if stride == 1.0 {
+                    buf.len()
+                } else {
+                    (buf.len() as f64 / stride) as usize
                 };
                 // The callback's own arithmetic: `cap_ticks` becomes samples
                 // with the tick length, 0.0 means play the sample out.
                 let limit = if slot.cap_ticks > 0.0 {
-                    ((tick_samples as f32 * slot.cap_ticks) as usize).min(buf.len())
+                    ((tick_samples as f32 * slot.cap_ticks) as usize).min(ring)
                 } else {
-                    buf.len()
+                    ring
                 };
                 let n = limit.min(total.saturating_sub(start));
-                for (a, v) in acc[start..start + n].iter_mut().zip(buf.iter()) {
-                    *a += v * slot.gain;
+                if stride == 1.0 {
+                    for (a, v) in acc[start..start + n].iter_mut().zip(buf.iter()) {
+                        *a += v * slot.gain;
+                    }
+                } else {
+                    for k in 0..n {
+                        let src = (k as f64 * stride) as usize;
+                        match buf.get(src) {
+                            Some(v) => acc[start + k] += v * slot.gain,
+                            None => break,
+                        }
+                    }
                 }
             }
         }
@@ -1815,6 +1899,7 @@ mod tests {
                 ticks_per_beat: 2,
                 beats_per_bar: 4,
                 bar: JamPattern {
+                    hat_open: Vec::new(),
                     kick,
                     snare: z.clone(),
                     hat: vec![1u8; 8],
@@ -1882,6 +1967,7 @@ mod tests {
             ticks_per_beat: 2,
             beats_per_bar: 4,
             bar: JamPattern {
+                hat_open: Vec::new(),
                 kick: vec![1, 0, 0, 0, 1, 0, 0, 0],
                 snare: vec![0, 0, 2, 0, 0, 0, 2, 0],
                 hat: vec![1, 3, 1, 3, 1, 3, 1, 3],
@@ -2155,6 +2241,7 @@ mod tests {
             ticks_per_beat: 4,
             beats_per_bar: 4,
             bar: JamPattern {
+                hat_open: Vec::new(),
                 kick: vec![1; 16],
                 snare: vec![2; 16],
                 hat: vec![1; 16],
@@ -2283,6 +2370,7 @@ mod tests {
             cfg.bar.snare = vec![0; 8];
             cfg.bar.hat = vec![0; 8];
             cfg.fill = Some(JamPattern {
+                hat_open: Vec::new(),
                 kick: vec![2; 8],
                 snare: vec![2; 8],
                 hat: vec![2; 8],
@@ -2459,6 +2547,7 @@ mod tests {
             ticks_per_beat: 4,
             beats_per_bar: 4,
             bar: JamPattern {
+                hat_open: Vec::new(),
                 kick: vec![0; n],
                 snare: vec![0; n],
                 hat: vec![0; n],
@@ -2551,6 +2640,7 @@ mod tests {
         let mut cfg = with_bass(vec![40, 0, 0, 0, 45, 0, 0, 0, 47, 0, 0, 0, 52, 0, 0, 0]);
         cfg.form_bars = 4;
         cfg.fill = Some(JamPattern {
+            hat_open: Vec::new(),
             kick: vec![0; 16],
             snare: vec![2; 16],
             hat: vec![0; 16],
@@ -3208,6 +3298,222 @@ mod tests {
         assert!(t.peak_after > 0.0, "and it is not silent");
     }
 
+    /// THE SAME, WITH THE LONGEST DRUMS A FOLDER IS ALLOWED TO HOLD.
+    ///
+    /// The test above ran on 50 ms bursts, and 50 ms cannot answer the
+    /// question the ceiling is about. `kit::MAX_VOICE_SECS` is two seconds —
+    /// nearly three times the longest voice this app ships (`brushes`'
+    /// 700 ms crash) — and the kick, the snare and the crash are not capped
+    /// at all, so at the fastest tick the engine can produce each of them
+    /// keeps forty copies of a two-second sample alive out of one lane. That
+    /// is the case `JAM_TICK_CEILING` and `INTERFERENCE_ALLOWANCE` were
+    /// never measured against, and it is the one a musician with a sample
+    /// pack of real cymbals actually loads.
+    ///
+    /// Every lane accented on every tick, at the loudest intensity, with the
+    /// crash on the one over the top of it.
+    #[test]
+    fn a_folder_of_two_second_drums_is_held_under_the_ceiling() {
+        let mut cfg = rock_8ths();
+        cfg.ticks_per_beat = 4;
+        cfg.intensity = 1.25;
+        cfg.crash_on_one = true;
+        cfg.bar.kick = vec![2; 16];
+        cfg.bar.snare = vec![2; 16];
+        cfg.bar.hat = vec![2; 16];
+        cfg.bar.hat_open = vec![2; 16];
+        cfg.bar.ride = vec![2; 16];
+        cfg.bar.crash = vec![0; 16];
+        let bank = long_folder(&KitVoice::ALL, JAM_REFERENCE_SR);
+        let t = compile_with_kit(&cfg, bank).unwrap();
+        assert!(
+            t.peak_after <= JAM_TICK_CEILING + 1e-4,
+            "eight two-second drums render {} after normalisation, over the ceiling",
+            t.peak_after
+        );
+        assert!(t.peak_after > 0.0, "and it is not silent");
+        // And the normalisation actually had to WORK: a fixture this dense
+        // that came out unscaled would mean the render never saw the tails,
+        // which is the bug this test exists for.
+        assert!(
+            t.base_peak > JAM_TICK_CEILING,
+            "eight two-second drums on every tick rendered {} before normalisation, \
+             which is quieter than the ceiling — the ring-out is not being measured",
+            t.base_peak
+        );
+    }
+
+    /// A FOLDER IS MEASURED AT THE RATE IT WAS DECODED AT.
+    ///
+    /// `worst_bar_peak` renders at `JAM_REFERENCE_SR`, and the shipped banks
+    /// are at that rate too, so for years the render could walk a buffer one
+    /// sample at a time. A folder is not: it is decoded at whatever rate the
+    /// device opened at. Walked one for one, a 96 kHz folder renders every
+    /// drum at half speed and twice the length — twice the ring-out to
+    /// stack, and `cap_ticks` cutting a hat at half the musical time it
+    /// names — and a 44.1 kHz one renders sharp and short.
+    ///
+    /// The fixture is the same drums in real time at three rates, so the
+    /// measurement has to come out the same. It does not have to come out
+    /// EXACTLY the same — nearest neighbour resampling and the rates not
+    /// dividing evenly are both real — but a 2:1 error in every duration is
+    /// not a rounding difference, and that is the size of the bug.
+    #[test]
+    fn a_custom_kit_measures_the_same_at_every_device_rate() {
+        let mut cfg = rock_8ths();
+        cfg.ticks_per_beat = 4;
+        cfg.bar.kick = vec![2, 0, 0, 1, 1, 0, 1, 0, 2, 0, 0, 1, 1, 0, 1, 0];
+        cfg.bar.snare = vec![0, 0, 3, 0, 2, 0, 0, 3, 0, 3, 0, 0, 2, 0, 3, 1];
+        cfg.bar.hat = vec![1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3];
+        cfg.bar.hat_open = vec![0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1];
+        cfg.bar.ride = vec![0; 16];
+        cfg.bar.crash = vec![0; 16];
+
+        let voices = [
+            KitVoice::Kick,
+            KitVoice::SnareHi,
+            KitVoice::SnareLo,
+            KitVoice::Hat,
+            KitVoice::HatOpen,
+        ];
+        let at = |rate: u32| {
+            compile_with_kit(&cfg, long_folder(&voices, rate))
+                .unwrap()
+                .base_peak
+        };
+        let reference = at(JAM_REFERENCE_SR);
+        assert!(reference > 0.0, "the reference render is silent");
+        for rate in [44_100u32, 88_200, 96_000] {
+            let got = at(rate);
+            let ratio = got / reference;
+            assert!(
+                (0.9..=1.1).contains(&ratio),
+                "the same drums decoded at {rate} Hz measure {got:.4} against \
+                 {reference:.4} at {JAM_REFERENCE_SR} Hz — a factor of {ratio:.3}, \
+                 so the render is walking the folder at the wrong speed"
+            );
+        }
+    }
+
+    // -----------------------------------------------------------------
+    // The open hat — its own row
+    // -----------------------------------------------------------------
+
+    /// The open hat is its own DRUM, not a louder closed one.
+    #[test]
+    fn the_open_hat_lane_plays_the_open_hat() {
+        let mut cfg = rock_8ths();
+        cfg.bar.hat_open = vec![0, 1, 0, 0, 0, 0, 0, 2];
+        let t = compile(&cfg).unwrap();
+
+        assert_eq!(
+            lane_sound(&t, 1, JamLane::HatOpen),
+            Some(room(KitVoice::HatOpen))
+        );
+        assert_eq!(
+            lane_sound(&t, 7, JamLane::HatOpen),
+            Some(room(KitVoice::HatOpen))
+        );
+        // The closed hat is untouched on those ticks: two rows, two drums,
+        // and a groove can play both at once.
+        assert_eq!(lane_sound(&t, 1, JamLane::Hat), Some(room(KitVoice::Hat)));
+        assert!(lane_sound(&t, 0, JamLane::HatOpen).is_none());
+
+        // It rings like a ride and not like a closed hat — a wash that
+        // carries into the next tick is the whole reason the row exists.
+        let open = slot_of(&t, 1, JamLane::HatOpen).unwrap();
+        let closed = slot_of(&t, 1, JamLane::Hat).unwrap();
+        assert!(
+            open.cap_ticks > closed.cap_ticks,
+            "the open hat is capped at {} ticks and the closed one at {}",
+            open.cap_ticks,
+            closed.cap_ticks
+        );
+        assert_eq!(open.cap_ticks, HAT_OPEN_CAP_TICKS);
+    }
+
+    /// A PATTERN SAVED BEFORE THE ROW EXISTED STILL PLAYS.
+    ///
+    /// Every jam in the library, and every jam anybody has written, was
+    /// saved without `hatOpen`. Absent has to mean "no open hat", not "a
+    /// malformed bar" — which is what the length check would have made it.
+    #[test]
+    fn a_pattern_with_no_open_hat_row_is_a_pattern_and_not_an_error() {
+        let cfg = rock_8ths();
+        assert!(cfg.bar.hat_open.is_empty());
+        let t = compile(&cfg).unwrap();
+        for tick in 0..8 {
+            assert!(
+                lane_sound(&t, tick, JamLane::HatOpen).is_none(),
+                "tick {tick} grew an open hat out of an absent row"
+            );
+        }
+
+        // And it really is absent rather than defaulted to zeroes by the
+        // caller: serde has to fill it in, because the UI does not send it.
+        let json = r#"{
+            "ticksPerBeat": 2, "beatsPerBar": 4,
+            "bar": { "kick": [1,0,0,0,1,0,0,0], "snare": [0,0,2,0,0,0,2,0],
+                     "hat": [1,1,1,1,1,1,1,1], "ride": [0,0,0,0,0,0,0,0],
+                     "crash": [0,0,0,0,0,0,0,0] },
+            "fill": null, "formBars": 4, "crashOnOne": false,
+            "intensity": 1.0, "kit": "room"
+        }"#;
+        let parsed: JamConfig = serde_json::from_str(json).expect("a jam saved before the row");
+        assert!(parsed.bar.hat_open.is_empty());
+        assert!(compile(&parsed).is_ok());
+    }
+
+    /// Sent at all, the row is a whole bar. Half a lane is a caller's bug
+    /// and is refused with a sentence, like every other malformed row.
+    #[test]
+    fn half_an_open_hat_row_is_refused_like_any_other_lane() {
+        let mut cfg = rock_8ths();
+        cfg.bar.hat_open = vec![1, 0, 0];
+        let err = compile(&cfg).expect_err("three cells is not a bar of eight");
+        assert!(
+            err.contains("hatOpen") && err.contains("3 cells"),
+            "the message has to name the row and the length: {err:?}"
+        );
+    }
+
+    /// The folder's open hat wins, and a folder without one borrows the
+    /// built-in kit's — the same rule every other lane follows.
+    #[test]
+    fn the_open_hat_comes_from_the_folder_when_the_folder_has_one() {
+        let mut cfg = rock_8ths();
+        cfg.kit = "tight".into();
+        cfg.bar.hat_open = vec![0, 1, 0, 0, 0, 1, 0, 0];
+
+        let mine = compile_with_kit(&cfg, folder(&[KitVoice::HatOpen])).unwrap();
+        assert_eq!(
+            lane_sound(&mine, 1, JamLane::HatOpen),
+            Some(SoundId::Custom(KitVoice::HatOpen))
+        );
+
+        let without = compile_with_kit(&cfg, folder(&[KitVoice::Kick])).unwrap();
+        assert_eq!(
+            lane_sound(&without, 1, JamLane::HatOpen),
+            Some(SoundId::Kit(JamKit::Tight, KitVoice::HatOpen))
+        );
+    }
+
+    /// Changing the open-hat row is the drummer changing, so it plays now
+    /// rather than waiting for the bar line — and it is a different render,
+    /// so the gain memo must not hand one row's measurement to the other.
+    #[test]
+    fn an_open_hat_edit_is_a_new_drummer_and_a_new_measurement() {
+        let a = rock_8ths();
+        let mut b = a.clone();
+        b.bar.hat_open = vec![0, 0, 0, 1, 0, 0, 0, 1];
+
+        let ta = compile(&a).unwrap();
+        let tb = compile(&b).unwrap();
+        assert_ne!(ta.drums_signature, tb.drums_signature);
+        assert!(!swap_defers(Some(&ta), Some(&tb), true, false));
+        assert_ne!(render_signature(&a, None), render_signature(&b, None));
+    }
+
     /// The voices are chosen when the table is compiled, and the config's
     /// spelling never reaches the audio thread.
     #[test]
@@ -3273,6 +3579,7 @@ mod form_tests {
             ticks_per_beat: 2,
             beats_per_bar: 4,
             bar: JamPattern {
+                hat_open: Vec::new(),
                 kick: vec![1, 0, 0, 0, 1, 0, 0, 0],
                 snare: vec![0, 0, 2, 0, 0, 0, 2, 0],
                 hat: vec![1, 3, 1, 3, 1, 3, 1, 3],
@@ -3281,6 +3588,7 @@ mod form_tests {
             },
             // A fill nobody could mistake for the groove: no kick at all.
             fill: Some(JamPattern {
+                hat_open: Vec::new(),
                 kick: z.clone(),
                 snare: vec![2, 1, 2, 1, 2, 1, 2, 1],
                 hat: z.clone(),
@@ -3674,6 +3982,7 @@ mod band_tests {
             ticks_per_beat: 1,
             beats_per_bar: 4,
             bar: JamPattern {
+                hat_open: Vec::new(),
                 kick: vec![1, 0, 0, 0],
                 snare: vec![0, 0, 2, 0],
                 hat: vec![1, 1, 1, 1],
