@@ -75,6 +75,16 @@ export type JamEngineConfig = {
   mix?: JamMix;
   /** What the count-in plays: the beep the drill uses, or the kit's sticks. */
   countInSound?: JamCountInSound;
+  /** Which synthesis recipe the bass and keys use. Absent: "fingered" / "epiano". */
+  bassVoice?: JamBassVoice;
+  keysVoice?: JamKeysVoice;
+  /**
+   * A kit of your own samples: a folder on this machine holding any of
+   * kick, snare, snare_soft, hat, hat_open, ride, rim, crash as WAV. Voices
+   * the folder lacks come from the built-in kit named in `kit`. Decoded off
+   * the audio thread when the table is compiled. Absent or null: built-in.
+   */
+  customKit?: { dir: string } | null;
 };
 
 export type JamKeysLine = {
@@ -227,7 +237,25 @@ export type Jam = {
   cues?: boolean;
   /** Record takes, opt-in. Absent: off. */
   takes?: boolean;
+  /**
+   * Second pass (plans/JAM_UX_DECISIONS.md). The vibe the jam started from
+   * and its variation, the voices the bass and keys play with, a kit of your
+   * own samples, and what the chord sheet keeps on the playing screen.
+   */
+  vibe?: string;
+  variation?: string;
+  bassVoice?: JamBassVoice;
+  keysVoice?: JamKeysVoice;
+  /** A folder of WAVs on this machine used as the kit; wins over `kit`. */
+  customKit?: { dir: string; name: string } | null;
+  /** One shape pinned to the playing screen, or none. */
+  pinnedShape?: { root: number; quality: string; index: number } | null;
+  /** The chord sheet follows the jam (off by default). */
+  shapesFollow?: boolean;
 };
+
+export type JamBassVoice = "fingered" | "picked" | "upright" | "slap" | "synth";
+export type JamKeysVoice = "epiano" | "organ" | "clav" | "pad";
 
 /** A recorded take: your playing with the band mixed in, kept locally. */
 export type JamTake = {

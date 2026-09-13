@@ -1241,3 +1241,17 @@ export function onTakeCapped(callback: () => void) {
 export async function takesDirSize(): Promise<number> {
   return invoke("takes_dir_size");
 }
+
+/**
+ * Ask the user for a folder of drum samples (a native folder dialog). Resolves
+ * to the folder path, or null when they cancel. The folder is read on this
+ * machine and never copied or uploaded.
+ */
+export async function pickKitFolder(): Promise<string | null> {
+  return invoke("pick_kit_folder");
+}
+
+/** What a kit folder holds: which of the eight voices were found as WAV. */
+export async function inspectKitFolder(dir: string): Promise<{ voices: string[]; missing: string[] }> {
+  return invoke("inspect_kit_folder", { dir });
+}
