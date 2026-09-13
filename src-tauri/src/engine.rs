@@ -6,7 +6,7 @@ use crate::timing::{BeatLog, BeatTick};
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use rodio::Source;
 use std::io::Cursor;
-use std::sync::atomic::{AtomicBool, AtomicU32, AtomicU64, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicI64, AtomicU32, AtomicU64, AtomicUsize, Ordering};
 use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
 use std::time::Duration;
@@ -1166,6 +1166,18 @@ pub struct JamHandoff {
     /// there is no last reference to drop on the audio thread.
     position: Mutex<JamPosition>,
     position_generation: AtomicU64,
+    /// How many bars the form of the table currently handed over has, or
+    /// [`NO_FORM`] before there is one.
+    ///
+    /// Here so that [`JamHandoff::set`] can tell a NEW FORM from the SAME
+    /// FORM ARRIVING AGAIN. The bar-ahead bass and keys send a fresh table
+    /// on almost every bar line, and re-checking the position against each
+    /// of them threw away a jump the musician had just asked for: press the
+    /// footswitch in the window between two bass sends and the jump was
+    /// gone, the band carried on, and the marker on the timeline never
+    /// cleared. A form that is the same length has the same bar numbers, so
+    /// there is nothing to re-check and the position is left alone.
+    last_form_bars: AtomicI64,
     /// Tables the audio thread has finished with, parked here so the LAST
     /// reference is dropped on a thread that may free memory. The callback
     /// never drops a table: dropping the last `Arc<JamTable>` frees its
@@ -1179,6 +1191,10 @@ pub struct JamHandoff {
 /// bar-ahead sends with nobody draining.
 const JAM_RETIRED_CAP: usize = 16;
 
+/// [`JamHandoff::last_form_bars`] when no table is loaded. A real form is
+/// 1..=64 bars, so -1 cannot collide with one.
+const NO_FORM: i64 = -1;
+
 impl JamHandoff {
     fn new() -> Self {
         Self {
@@ -1186,6 +1202,7 @@ impl JamHandoff {
             generation: AtomicU64::new(0),
             position: Mutex::new(JamPosition::default()),
             position_generation: AtomicU64::new(0),
+            last_form_bars: AtomicI64::new(NO_FORM),
             retired: Mutex::new(Vec::with_capacity(JAM_RETIRED_CAP)),
         }
     }
@@ -1210,7 +1227,16 @@ impl JamHandoff {
             drop(slot);
             self.generation.fetch_add(1, Ordering::Release);
         }
-        self.reposition(|p| p.for_table(form_bars), false);
+        // ...but only when the form actually changed LENGTH. `set_jam` is
+        // also the bar-ahead bass and keys send, which arrives on almost
+        // every bar line with the same twelve bars it had before; a jump
+        // waiting for the next bar line has to survive that, or a footswitch
+        // pressed in the wrong tenth of a second does nothing at all. Same
+        // number of bars, same bar numbers, nothing to re-check.
+        let encoded = form_bars.map_or(NO_FORM, i64::from);
+        if self.last_form_bars.swap(encoded, Ordering::AcqRel) != encoded {
+            self.reposition(|p| p.for_table(form_bars), false);
+        }
     }
 
     /// Hand the audio thread somewhere to be at the next bar line. Called
@@ -5704,6 +5730,65 @@ mod tests {
         four.form_bars = 4;
         handoff.set(Some(Arc::new(compile_jam(&four).unwrap())));
         assert_eq!(handoff.position(), JamPosition::default());
+    }
+
+    /// THE BAR-AHEAD BASS MUST NOT SWALLOW A FOOTSWITCH.
+    ///
+    /// The bug this pins: `set_jam` is not only "load a jam". It is also the
+    /// bar-ahead send the UI posts on almost every bar line so the bass and
+    /// the keys know next bar's chord — four to six a chorus. Each one ended
+    /// with the position being re-checked against the new table, and the
+    /// re-check drops a pending jump unconditionally, so a jump asked for in
+    /// the window between two of those sends was thrown away before the bar
+    /// line it was waiting for: the band played straight on and the marker
+    /// the UI had drawn never cleared.
+    ///
+    /// The same twelve bars arriving again is not a new set of bar numbers.
+    #[test]
+    fn a_bar_ahead_table_of_the_same_length_keeps_a_pending_jump() {
+        let handoff = JamHandoff::new();
+        let mut cfg = practising_band();
+        cfg.form_bars = 12;
+        let table = || Some(Arc::new(compile_jam(&cfg).unwrap()));
+
+        handoff.set(table());
+        handoff.set_position(JamPosition {
+            jump: Some(9),
+            loop_bars: Some((8, 11)),
+        });
+        let before = handoff.position_generation.load(Ordering::Acquire);
+
+        // A chorus of bar-ahead sends, all twelve bars long.
+        for _ in 0..6 {
+            handoff.set(table());
+        }
+        assert_eq!(
+            handoff.position().jump,
+            Some(9),
+            "the jump was still waiting for its bar line"
+        );
+        assert_eq!(handoff.position().loop_bars, Some((8, 11)));
+        assert_eq!(
+            handoff.position_generation.load(Ordering::Acquire),
+            before,
+            "and the callback was not woken to be handed what it already has"
+        );
+
+        // A form of a DIFFERENT length is a different set of bar numbers,
+        // and there the jump still goes: bar 9 of an eight-bar loop is not
+        // the bar anybody pointed at.
+        let mut eight = practising_band();
+        eight.form_bars = 8;
+        handoff.set(Some(Arc::new(compile_jam(&eight).unwrap())));
+        assert_eq!(handoff.position().jump, None);
+
+        // And taking the band away is a change too.
+        handoff.set_position(JamPosition {
+            jump: Some(3),
+            loop_bars: None,
+        });
+        handoff.set(None);
+        assert_eq!(handoff.position().jump, None);
     }
 
     /// A LOCK THAT PANICKED MUST NOT LOOK LIKE A TABLE THAT ARRIVED.
