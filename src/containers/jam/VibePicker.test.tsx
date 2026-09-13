@@ -95,11 +95,14 @@ describe("the vibe tiles", () => {
   it("applies the whole bundle on one tap", () => {
     const { props } = draw();
     fireEvent.click(screen.getByRole("button", { name: /Rock/ }));
-    expect(props.onApply).toHaveBeenCalledWith(applyVibe(ROCK));
+    // The patch is worked out FOR this jam — the tile clears its meter
+    // override, carries its count-in and refits its changes — so the
+    // expectation is the same call with the same jam.
+    expect(props.onApply).toHaveBeenCalledWith(applyVibe(props.jam, ROCK));
     // The thirty-second rule made real: the drummer, the kit, the voices, the
     // tempo and the key, all from one press.
     const patch = props.onApply.mock.calls[0][0];
-    expect(patch).toMatchObject({ grooveId: "rock8", kit: "tight", bpm: 120, key: "E" });
+    expect(patch).toMatchObject({ vibe: "rock", grooveId: "rock8", bpm: 120 });
   });
 
   it("marks the vibe the jam started from", () => {
@@ -129,7 +132,11 @@ describe("the variations of the picked vibe", () => {
     const { props } = draw({ jam: jamOf({ vibe: "rock" }) });
     fireEvent.click(screen.getByRole("button", { name: "Punk" }));
     const patch = props.onApply.mock.calls[0][0];
-    expect(patch).toMatchObject({ variation: "punk", grooveId: "rock16", kit: "raw", bpm: 180 });
+    // The variation's own bundle, over the vibe's, worked out for this jam —
+    // which is `applyVibe`'s job and is pinned in `vibesContract.test.ts`.
+    // What the picker has to get right is that it asked for THIS variation.
+    expect(patch.variation).toBe("punk");
+    expect(patch).toEqual(applyVibe(props.jam, ROCK, "punk"));
   });
 
   it("shows nothing for a vibe with one way of playing it", () => {
