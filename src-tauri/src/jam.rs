@@ -50,6 +50,12 @@ pub const JAM_MAX_TICKS_PER_BAR: usize = 16 * 6;
 /// Legal `ticksPerBeat` values, from the contract's union type.
 const TICKS_PER_BEAT: [u32; 5] = [1, 2, 3, 4, 6];
 
+/// Legal `fillEvery` values. 0 is "the last bar of the chorus only", which
+/// is what a fill meant before this existed; the UI offers 4 and 8 and
+/// nothing else, because a fill every bar or every two is not a fill, it is
+/// the groove.
+const FILL_EVERY: [u32; 3] = [0, 4, 8];
+
 /// How loud a cell is, by level: 0 off, 1 hit, 2 accent, 3 ghost. Applied
 /// *before* intensity and the master volume.
 pub const LEVEL_GAIN: [f32; 4] = [0.0, 0.8, 1.0, 0.35];
@@ -227,6 +233,11 @@ pub struct JamConfig {
     /// every bar.
     #[serde(default)]
     pub practice: Option<JamPracticeConfig>,
+    /// Also play the fill on every bar whose 1-based number within the
+    /// chorus is a multiple of this. Absent or 0: the last bar of the chorus
+    /// only, which is what a fill has always meant here.
+    #[serde(default)]
+    pub fill_every: Option<u32>,
 }
 
 /// One MIDI note per tick, `0` for a rest, the same length as the drum
@@ -324,6 +335,121 @@ pub fn band_state_for_bar(
 }
 
 // ---------------------------------------------------------------------------
+// Moving through the form — jump and loop
+// ---------------------------------------------------------------------------
+
+/// The serde mirror of `JamPositionCommand` in `src/jam/types.ts`.
+///
+/// One command carries BOTH halves of where the form goes, and it replaces
+/// both. Sending `{ jumpTo: 3, loop: null }` leaves the loop off; sending
+/// `{ jumpTo: null, loop: { start: 8, end: 11 } }` sets a loop and asks for
+/// no jump. That is the contract's "`loop` stays until replaced with null":
+/// the *engine* keeps it between commands, and a command that names it
+/// `null` is the thing that takes it away.
+#[derive(Debug, Clone, Copy, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct JamPositionCommand {
+    /// 0-based bar of the chorus to land on at the next bar line.
+    #[serde(default)]
+    pub jump_to: Option<u32>,
+    /// Bars `start..=end`, 0-based within the chorus.
+    ///
+    /// Renamed by hand: `rename_all` would make this `loopBars`, and the
+    /// contract's field is `loop` — which cannot be a Rust identifier.
+    #[serde(default, rename = "loop")]
+    pub loop_bars: Option<JamLoop>,
+}
+
+/// A loop range from the contract: inclusive at both ends, 0-based.
+#[derive(Debug, Clone, Copy, Deserialize)]
+pub struct JamLoop {
+    pub start: u32,
+    pub end: u32,
+}
+
+/// Where the form goes, as the audio thread reads it.
+///
+/// `Copy` and eight bytes wide on purpose: the callback takes a snapshot of
+/// it behind a `try_lock` when the generation counter moves, and there is
+/// nothing to free afterwards — no retirement path, no `Arc`, no allocation.
+/// The table has all of that because it owns `Vec`s; this owns nothing.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct JamPosition {
+    /// Consumed at the next bar line, then gone.
+    pub jump: Option<u32>,
+    /// Held until a command replaces it, or a new table makes it impossible.
+    pub loop_bars: Option<(u32, u32)>,
+}
+
+impl JamPosition {
+    /// What is left of this position once a table of `form_bars` bars is
+    /// loaded (or `None` for no table at all).
+    ///
+    /// A pending jump is dropped: "bar 9" of a 12-bar blues and "bar 9" of
+    /// an eight-bar loop are not the same place, and a jump the musician
+    /// asked for against the old form is a worse answer than no jump. The
+    /// loop is kept when it still fits, because a musician looping the
+    /// turnaround while they edit the bass line means to keep looping it —
+    /// and the bar-ahead bass send is a new table several times a chorus.
+    #[must_use]
+    pub fn for_table(self, form_bars: Option<u32>) -> Self {
+        let loop_bars = match (self.loop_bars, form_bars) {
+            (Some((s, e)), Some(n)) if e >= n || s > e => None,
+            (keep, _) => keep,
+        };
+        Self {
+            jump: None,
+            loop_bars,
+        }
+    }
+}
+
+/// Check a `set_jam_position` command against the form that is loaded.
+///
+/// `form_bars` is `None` when no jam is loaded, and then nothing can be
+/// checked and nothing is refused: the position is stored, ignored while
+/// there is no band, and re-checked by [`JamPosition::for_table`] the moment
+/// a table arrives. Refusing it instead would mean the order the UI happens
+/// to send two commands in decides whether a loop survives.
+pub fn validate_position(
+    cmd: &JamPositionCommand,
+    form_bars: Option<u32>,
+) -> Result<JamPosition, String> {
+    if let Some(l) = cmd.loop_bars {
+        if l.start > l.end {
+            return Err(format!(
+                "the loop starts at bar {} and ends at bar {}; the start cannot be \
+                 after the end",
+                l.start + 1,
+                l.end + 1
+            ));
+        }
+    }
+    if let Some(n) = form_bars {
+        if let Some(j) = cmd.jump_to {
+            if j >= n {
+                return Err(format!(
+                    "there is no bar {} to jump to; this form is {n} bars long",
+                    j + 1
+                ));
+            }
+        }
+        if let Some(l) = cmd.loop_bars {
+            if l.end >= n {
+                return Err(format!(
+                    "the loop ends at bar {}, and this form is {n} bars long",
+                    l.end + 1
+                ));
+            }
+        }
+    }
+    Ok(JamPosition {
+        jump: cmd.jump_to,
+        loop_bars: cmd.loop_bars.map(|l| (l.start, l.end)),
+    })
+}
+
+// ---------------------------------------------------------------------------
 // The compiled table
 // ---------------------------------------------------------------------------
 
@@ -400,6 +526,9 @@ pub struct JamTable {
     form_bars: u32,
     bar: Vec<JamTick>,
     fill: Option<Vec<JamTick>>,
+    /// Play the fill on every bar whose 1-based number in the chorus is a
+    /// multiple of this, as well as on the last bar. 0 is the last bar only.
+    fill_every: u32,
     /// The crash on the one, already mixed to the table's normalisation.
     /// `None` when the jam did not ask for one, or when the groove's own
     /// crash lane already hits tick 0 — two crashes on the same sample is a
@@ -427,19 +556,23 @@ pub struct JamTable {
     /// produce. Diagnostics only; the audio thread never reads these.
     pub peak_before: f32,
     pub peak_after: f32,
+    /// The same measurement at intensity 1.0 — the number the normalisation
+    /// is computed from, and the one [`JamGainCache`] remembers so the next
+    /// table with the same drums does not have to render four bars again.
+    pub base_peak: f32,
 }
 
 impl JamTable {
-    /// What the band does on bar `form_bar` of the chorus. Out of range —
-    /// which cannot happen, since the caller wraps at `form_bars` — reads as
-    /// `Full`, so a bug is a band that plays rather than a panic.
-    #[inline]
     /// See the `has_hat` field.
     #[inline]
     pub fn has_hat(&self) -> bool {
         self.has_hat
     }
 
+    /// What the band does on bar `form_bar` of the chorus. Out of range —
+    /// which cannot happen, since the caller wraps at `form_bars` — reads as
+    /// `Full`, so a bug is a band that plays rather than a panic.
+    #[inline]
     pub fn band_state(&self, form_bar: u32) -> JamBandState {
         self.band_states
             .get(form_bar as usize)
@@ -473,9 +606,22 @@ impl JamTable {
         self.fill.is_some()
     }
 
+    /// Does the fill play on bar `jam_bar` (0-based within the chorus)?
+    ///
+    /// Always on the last bar of the chorus — that is what a fill is — and,
+    /// when `fillEvery` is set, on every bar whose 1-based number in the
+    /// chorus is a multiple of it. With `fillEvery` 4 on a 12-bar blues that
+    /// is bars 4, 8 and 12 as the musician counts them, which is where a
+    /// drummer puts them.
+    #[inline]
+    pub fn fill_bar(&self, jam_bar: u32) -> bool {
+        let counted = jam_bar + 1;
+        counted >= self.form_bars || (self.fill_every > 0 && counted % self.fill_every == 0)
+    }
+
     /// What the band plays at `tick_index` of bar `jam_bar` (0-based within
-    /// the chorus). The fill replaces the groove on the last bar of the
-    /// chorus when the jam has one.
+    /// the chorus). The fill replaces the groove on the bars
+    /// [`JamTable::fill_bar`] names, when the jam has one.
     ///
     /// `None` only when the tick index is outside the bar, which the caller
     /// has already ruled out by comparing `ticks_per_bar`; it is a bounds
@@ -483,10 +629,112 @@ impl JamTable {
     #[inline]
     pub fn tick(&self, tick_index: u32, jam_bar: u32) -> Option<&JamTick> {
         let table = match self.fill {
-            Some(ref f) if jam_bar + 1 >= self.form_bars => f,
+            Some(ref f) if self.fill_bar(jam_bar) => f,
             _ => &self.bar,
         };
         table.get(tick_index as usize)
+    }
+}
+
+/// How many measurements the memo remembers.
+///
+/// One per bar of the longest chorus the contract allows, because that is
+/// the shape of the traffic: the bar-ahead handshake sends the SAME handful
+/// of bass bars round and round, one per chord of the form, every chorus. A
+/// memo this size covers any form the app can hold, so after the first time
+/// round nothing is ever measured twice. It costs twelve bytes an entry.
+const JAM_GAIN_MEMO: usize = JAM_MAX_FORM_BARS as usize;
+
+/// The normalisations the command thread has already worked out.
+///
+/// [`compile`] renders four bars of the band to find out how loud it
+/// actually is, and that render is the expensive part of loading a jam. It
+/// runs on every `set_jam` — and the UI sends one four to six times a
+/// chorus, because the bar-ahead bass has to arrive a bar early
+/// (`useJamSession.ts`). Those sends walk the same few bass bars round the
+/// form again and again, so from the second chorus on, every one of them is
+/// asking for a number that has already been measured.
+///
+/// **The key is the whole table, bass included** ([`render_signature`]) —
+/// not the drums alone. Keying on the drums and letting a changed bass share
+/// the answer looks safe and is not: measured on the jitter probe's groove,
+/// moving `bass.gain` across the range the contract allows (0.5 to 1.5, and
+/// the store can hold either) moves the rendered peak of the room kit from
+/// 2.08 to 2.95, and changing which note sits under the crash on the one
+/// moves it another 8%. Both are far more than the 10%
+/// [`INTERFERENCE_ALLOWANCE`] the ceiling holds in reserve. Normalising a
+/// loud bass against a quiet one's measurement renders 1.075 at full volume
+/// on the room kit, which is the mixer clamping — the exact thing
+/// `the_busiest_groove_never_makes_the_mixer_clamp` exists to forbid.
+///
+/// A hit is therefore the same table, and the number it hands back is the
+/// number a cold compile would have produced, bit for bit.
+///
+/// Two things are deliberately left OUT of the key, because neither can
+/// change the measurement:
+///
+/// * **Intensity.** The table is compiled at 1.0 and rendered at 1.0; the
+///   musician's dial is applied afterwards. So dragging the intensity
+///   slider re-uses the measurement instead of re-rendering four bars per
+///   frame of the drag.
+/// * **The practice windows.** They decide which bars the band plays, never
+///   what a bar sounds like.
+///
+/// `the_gain_cache_never_lets_a_changed_bass_reach_the_clamp` in `engine.rs`
+/// is what holds that to a number: it renders every kit at every rate and
+/// across the tempo range with the memo in play.
+pub struct JamGainCache {
+    memo: std::sync::Mutex<GainMemo>,
+}
+
+/// A ring of remembered measurements. Small and linear on purpose: sixty-four
+/// `u64` comparisons on the command thread is nothing, and a `HashMap` here
+/// would be a data structure to explain rather than one to read.
+struct GainMemo {
+    entries: Vec<(u64, f32)>,
+    next: usize,
+}
+
+impl Default for JamGainCache {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl JamGainCache {
+    pub fn new() -> Self {
+        Self {
+            memo: std::sync::Mutex::new(GainMemo {
+                entries: Vec::with_capacity(JAM_GAIN_MEMO),
+                next: 0,
+            }),
+        }
+    }
+
+    /// The remembered peak for this exact table, if it has been measured.
+    fn get(&self, signature: u64) -> Option<f32> {
+        match self.memo.lock() {
+            Ok(m) => m
+                .entries
+                .iter()
+                .find(|&&(sig, _)| sig == signature)
+                .map(|&(_, peak)| peak),
+            // A poisoned memo is a memo miss, never a wrong number: the
+            // render is the source of truth and only ever costs time.
+            Err(_) => None,
+        }
+    }
+
+    fn put(&self, signature: u64, peak: f32) {
+        if let Ok(mut m) = self.memo.lock() {
+            if m.entries.len() < JAM_GAIN_MEMO {
+                m.entries.push((signature, peak));
+                return;
+            }
+            let slot = m.next % JAM_GAIN_MEMO;
+            m.entries[slot] = (signature, peak);
+            m.next = slot + 1;
+        }
     }
 }
 
@@ -500,6 +748,26 @@ impl JamTable {
 /// does not check out is rejected whole: the engine keeps whatever it had,
 /// so a malformed jam can never leave the band half-loaded.
 pub fn compile(cfg: &JamConfig) -> Result<JamTable, String> {
+    compile_measured(cfg, None)
+}
+
+/// [`compile`], reusing the normalisation the same drums produced last time.
+///
+/// This is the entry point `set_jam` uses. See [`JamGainCache`] for what is
+/// being reused and why a changed bass line may share it.
+pub fn compile_with(cfg: &JamConfig, cache: &JamGainCache) -> Result<JamTable, String> {
+    let signature = render_signature(cfg);
+    let remembered = cache.get(signature);
+    let table = compile_measured(cfg, remembered)?;
+    if remembered.is_none() {
+        cache.put(signature, table.base_peak);
+    }
+    Ok(table)
+}
+
+/// `base_peak`, when the caller already knows it, skips the four-bar render.
+/// `None` measures it.
+fn compile_measured(cfg: &JamConfig, base_peak: Option<f32>) -> Result<JamTable, String> {
     if !TICKS_PER_BEAT.contains(&cfg.ticks_per_beat) {
         return Err(format!(
             "ticksPerBeat is {}, which is not one of {:?}",
@@ -516,6 +784,13 @@ pub fn compile(cfg: &JamConfig) -> Result<JamTable, String> {
         return Err(format!(
             "formBars is {}, and a chorus is 1 to {} bars",
             cfg.form_bars, JAM_MAX_FORM_BARS
+        ));
+    }
+    let fill_every = cfg.fill_every.unwrap_or(0);
+    if !FILL_EVERY.contains(&fill_every) {
+        return Err(format!(
+            "fillEvery is {fill_every}; a fill lands every 4 or 8 bars, or 0 for \
+             the end of the chorus only"
         ));
     }
 
@@ -590,13 +865,19 @@ pub fn compile(cfg: &JamConfig) -> Result<JamTable, String> {
     // near that. A table scaled by that bound would be inaudible. So the
     // band is actually rendered, once, here — off the audio thread, only
     // when the jam changes.
-    let base_peak = worst_bar_peak(
-        &bar,
-        fill.as_deref(),
-        crash,
-        cfg.form_bars,
-        cfg.ticks_per_beat,
-    );
+    //
+    // Unless the caller already knows the answer: the same drums under a
+    // different bass bar render the same peak, and the UI sends one of those
+    // several times a chorus. See [`JamGainCache`].
+    let base_peak = base_peak.unwrap_or_else(|| {
+        worst_bar_peak(
+            &bar,
+            fill.as_deref(),
+            crash,
+            cfg.form_bars,
+            cfg.ticks_per_beat,
+        )
+    });
 
     // Scale so that the loudest sample reaches the ceiling at LOUD and not
     // before, then apply the intensity the musician actually chose. A table
@@ -644,6 +925,7 @@ pub fn compile(cfg: &JamConfig) -> Result<JamTable, String> {
         form_bars: cfg.form_bars,
         bar,
         fill,
+        fill_every,
         crash_on_one: crash,
         band_states,
         kit,
@@ -651,6 +933,7 @@ pub fn compile(cfg: &JamConfig) -> Result<JamTable, String> {
         drums_signature: drums_signature(cfg),
         peak_before,
         peak_after,
+        base_peak,
     })
 }
 
@@ -665,37 +948,86 @@ pub fn compile(cfg: &JamConfig) -> Result<JamTable, String> {
 /// is the musician turning a dial, and that applies at once.
 fn drums_signature(cfg: &JamConfig) -> u64 {
     use std::collections::hash_map::DefaultHasher;
+    use std::hash::Hasher;
+    let mut h = DefaultHasher::new();
+    hash_drums(cfg, &mut h);
+    h.finish()
+}
+
+/// Everything that decides what four bars of this band RENDER — the drums
+/// and the bass — and nothing that does not.
+///
+/// The key [`JamGainCache`] remembers a measurement under. It is deliberately
+/// a different question from [`drums_signature`]: that one asks "is this the
+/// same drummer, so the swap can wait for the bar line?", this one asks "is
+/// this the same sound, so the measurement still holds?". The bass answers
+/// the second and not the first, which is the whole point of having two.
+fn render_signature(cfg: &JamConfig) -> u64 {
+    use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
     let mut h = DefaultHasher::new();
-    cfg.ticks_per_beat.hash(&mut h);
-    cfg.beats_per_bar.hash(&mut h);
-    for p in std::iter::once(&cfg.bar).chain(cfg.fill.iter()) {
-        p.kick.hash(&mut h);
-        p.snare.hash(&mut h);
-        p.hat.hash(&mut h);
-        p.ride.hash(&mut h);
-        p.crash.hash(&mut h);
-    }
-    cfg.fill.is_some().hash(&mut h);
-    cfg.form_bars.hash(&mut h);
-    cfg.crash_on_one.hash(&mut h);
-    cfg.intensity.to_bits().hash(&mut h);
-    format!("{:?}", JamKit::from_name(&cfg.kit)).hash(&mut h);
-    match cfg.practice {
-        Some(ref p) => {
+    hash_drums(cfg, &mut h);
+    match cfg.bass {
+        Some(ref b) => {
             true.hash(&mut h);
-            match p.drop_out {
-                Some(d) => (true, d.every_bars, d.bars).hash(&mut h),
-                None => false.hash(&mut h),
-            }
-            match p.trade {
-                Some(t) => (true, t.band_bars, t.you_bars).hash(&mut h),
-                None => false.hash(&mut h),
-            }
+            b.pitches.hash(&mut h);
+            // The clamped value, because that is the one the render uses:
+            // two stores holding 2.0 and 3.0 are the same bass at 1.5.
+            let gain = if b.gain.is_finite() {
+                b.gain.clamp(BASS_GAIN_MIN, BASS_GAIN_MAX)
+            } else {
+                1.0
+            };
+            gain.to_bits().hash(&mut h);
         }
         None => false.hash(&mut h),
     }
     h.finish()
+}
+
+/// The half both signatures share.
+///
+/// `intensity` is in here because [`swap_defers`] needs it: turning the band
+/// up is a change you have to hear now, not at the next bar line. The memo
+/// would not have needed it — the table is compiled and rendered at 1.0 and
+/// scaled afterwards, so intensity cannot move the measurement — and it
+/// costs one render per intensity. The UI offers three, so the memo holds
+/// three entries for the same groove instead of one. That is cheaper than a
+/// third signature to explain.
+fn hash_drums(cfg: &JamConfig, h: &mut impl std::hash::Hasher) {
+    use std::hash::Hash;
+    cfg.ticks_per_beat.hash(h);
+    cfg.beats_per_bar.hash(h);
+    for p in std::iter::once(&cfg.bar).chain(cfg.fill.iter()) {
+        p.kick.hash(h);
+        p.snare.hash(h);
+        p.hat.hash(h);
+        p.ride.hash(h);
+        p.crash.hash(h);
+    }
+    cfg.fill.is_some().hash(h);
+    // Which bars the fill lands on is the drummer's business, not the bass
+    // player's: turning it on has to be heard now, and it changes which bar
+    // of the table the loudest tick lives in.
+    cfg.fill_every.unwrap_or(0).hash(h);
+    cfg.form_bars.hash(h);
+    cfg.crash_on_one.hash(h);
+    cfg.intensity.to_bits().hash(h);
+    format!("{:?}", JamKit::from_name(&cfg.kit)).hash(h);
+    match cfg.practice {
+        Some(ref p) => {
+            true.hash(h);
+            match p.drop_out {
+                Some(d) => (true, d.every_bars, d.bars).hash(h),
+                None => false.hash(h),
+            }
+            match p.trade {
+                Some(t) => (true, t.band_bars, t.you_bars).hash(h),
+                None => false.hash(h),
+            }
+        }
+        None => false.hash(h),
+    }
 }
 
 /// Should the audio thread hold `incoming` until the next bar line instead
@@ -981,6 +1313,7 @@ mod tests {
                 kit: kit.to_string(),
                 bass: bass.map(|pitches| JamBassLine { pitches, gain: 1.0 }),
                 practice: None,
+                fill_every: None,
             }
         }
 
@@ -1041,6 +1374,7 @@ mod tests {
             kit: "room".into(),
             bass: None,
             practice: None,
+            fill_every: None,
         }
     }
 
@@ -1307,6 +1641,7 @@ mod tests {
             kit: "room".into(),
             bass: None,
             practice: None,
+            fill_every: None,
         };
         let t = compile(&cfg).unwrap();
         assert!(
@@ -1602,6 +1937,7 @@ mod tests {
             kit: "room".into(),
             bass: Some(JamBassLine { pitches, gain: 1.0 }),
             practice: None,
+            fill_every: None,
         }
     }
 
@@ -2075,8 +2411,400 @@ mod tests {
         let cfg: JamConfig = serde_json::from_str(older).expect("an older jam must still load");
         assert!(cfg.bass.is_none());
         assert!(cfg.practice.is_none());
+        assert!(cfg.fill_every.is_none());
         let t = compile(&cfg).unwrap();
         assert!((0..12).all(|b| t.band_state(b) == JamBandState::Full));
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Tests — moving through the form, fills every N bars, and the gain memo
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod form_tests {
+    use super::*;
+
+    fn twelve_bar() -> JamConfig {
+        let z = vec![0u8; 8];
+        JamConfig {
+            ticks_per_beat: 2,
+            beats_per_bar: 4,
+            bar: JamPattern {
+                kick: vec![1, 0, 0, 0, 1, 0, 0, 0],
+                snare: vec![0, 0, 2, 0, 0, 0, 2, 0],
+                hat: vec![1, 3, 1, 3, 1, 3, 1, 3],
+                ride: z.clone(),
+                crash: z.clone(),
+            },
+            // A fill nobody could mistake for the groove: no kick at all.
+            fill: Some(JamPattern {
+                kick: z.clone(),
+                snare: vec![2, 1, 2, 1, 2, 1, 2, 1],
+                hat: z.clone(),
+                ride: z.clone(),
+                crash: z,
+            }),
+            form_bars: 12,
+            crash_on_one: false,
+            intensity: 1.0,
+            kit: "room".into(),
+            bass: None,
+            practice: None,
+            fill_every: None,
+        }
+    }
+
+    fn cmd(jump_to: Option<u32>, loop_bars: Option<(u32, u32)>) -> JamPositionCommand {
+        JamPositionCommand {
+            jump_to,
+            loop_bars: loop_bars.map(|(start, end)| JamLoop { start, end }),
+        }
+    }
+
+    // ---- The command, and what it is checked against ----
+
+    #[test]
+    fn a_bar_the_form_has_is_accepted_and_one_it_does_not_is_refused() {
+        let form = Some(12);
+        assert_eq!(
+            validate_position(&cmd(Some(11), None), form).unwrap(),
+            JamPosition {
+                jump: Some(11),
+                loop_bars: None
+            }
+        );
+        let refused = validate_position(&cmd(Some(12), None), form).unwrap_err();
+        assert!(
+            refused.contains("13") && refused.contains("12 bars"),
+            "the message has to name the bar and the form: {refused}"
+        );
+    }
+
+    #[test]
+    fn a_loop_has_to_fit_the_form_and_point_forwards() {
+        let form = Some(12);
+        assert_eq!(
+            validate_position(&cmd(None, Some((4, 7))), form).unwrap(),
+            JamPosition {
+                jump: None,
+                loop_bars: Some((4, 7))
+            }
+        );
+        assert!(
+            validate_position(&cmd(None, Some((0, 11))), form).is_ok(),
+            "the whole form is a legal loop"
+        );
+        assert!(validate_position(&cmd(None, Some((8, 12))), form)
+            .unwrap_err()
+            .contains("13"));
+        let backwards = validate_position(&cmd(None, Some((7, 4))), form).unwrap_err();
+        assert!(
+            backwards.contains("cannot be after"),
+            "a loop that ends before it starts says so: {backwards}"
+        );
+    }
+
+    #[test]
+    fn a_move_with_no_band_is_kept_rather_than_refused() {
+        // Nothing to check it against, so nothing is refused: the UI may set
+        // a loop before it loads a jam, and the order two commands happen to
+        // arrive in must not decide whether the loop survives.
+        let far = validate_position(&cmd(Some(40), Some((30, 39))), None).unwrap();
+        assert_eq!(far.jump, Some(40));
+        assert_eq!(far.loop_bars, Some((30, 39)));
+        // ...and the table it lands on is what actually decides.
+        assert_eq!(far.for_table(Some(12)), JamPosition::default());
+        // A backwards loop is refused even with no band: it is not a
+        // question about the form.
+        assert!(validate_position(&cmd(None, Some((9, 2))), None).is_err());
+    }
+
+    #[test]
+    fn a_new_table_drops_the_jump_and_keeps_a_loop_that_still_fits() {
+        let pending = JamPosition {
+            jump: Some(3),
+            loop_bars: Some((4, 7)),
+        };
+        // Same twelve bars: the loop is still the turnaround the musician
+        // set, and the jump is stale by the time the table lands.
+        assert_eq!(
+            pending.for_table(Some(12)),
+            JamPosition {
+                jump: None,
+                loop_bars: Some((4, 7))
+            }
+        );
+        // A seven-bar form has no bar 8 for the loop to end on.
+        assert_eq!(pending.for_table(Some(7)), JamPosition::default());
+        // Exactly long enough is long enough: bars 5-8 of an eight-bar loop
+        // are the eight-bar loop's second half, and they exist.
+        assert_eq!(
+            pending.for_table(Some(8)).loop_bars,
+            Some((4, 7)),
+            "bar 8 of an eight-bar form is the last one, not one too many"
+        );
+        // The band going away leaves the loop for the next one.
+        assert_eq!(pending.for_table(None).loop_bars, Some((4, 7)));
+        assert_eq!(pending.for_table(None).jump, None);
+    }
+
+    #[test]
+    fn the_contract_camel_case_reaches_the_position() {
+        let c: JamPositionCommand =
+            serde_json::from_str(r#"{"jumpTo":7,"loop":{"start":4,"end":11}}"#).unwrap();
+        assert_eq!(c.jump_to, Some(7));
+        let p = validate_position(&c, Some(12)).unwrap();
+        assert_eq!(p.loop_bars, Some((4, 11)));
+        // Both halves nullable, and both null is "no jump, no loop".
+        let cleared: JamPositionCommand =
+            serde_json::from_str(r#"{"jumpTo":null,"loop":null}"#).unwrap();
+        assert_eq!(
+            validate_position(&cleared, Some(12)).unwrap(),
+            JamPosition::default()
+        );
+    }
+
+    // ---- Fills every N bars ----
+
+    #[test]
+    fn a_fill_every_four_lands_on_bars_four_eight_and_twelve() {
+        let mut cfg = twelve_bar();
+        cfg.fill_every = Some(4);
+        let t = compile(&cfg).unwrap();
+        let counted: Vec<u32> = (0..12).filter(|&b| t.fill_bar(b)).map(|b| b + 1).collect();
+        assert_eq!(counted, vec![4, 8, 12], "as a drummer counts the bars");
+
+        // And it really is the fill that plays there, not the groove: the
+        // fill has no kick and the groove opens with one.
+        let kick = |bar: u32| {
+            t.tick(0, bar)
+                .unwrap()
+                .slots()
+                .iter()
+                .any(|s| s.lane == JamLane::Kick)
+        };
+        assert!(kick(0) && kick(1) && kick(2), "bars 1-3 are the groove");
+        assert!(!kick(3), "bar 4 is the fill");
+        assert!(kick(4), "bar 5 is the groove again");
+    }
+
+    #[test]
+    fn a_fill_every_eight_still_fills_the_end_of_the_chorus() {
+        let mut cfg = twelve_bar();
+        cfg.fill_every = Some(8);
+        let t = compile(&cfg).unwrap();
+        let counted: Vec<u32> = (0..12).filter(|&b| t.fill_bar(b)).map(|b| b + 1).collect();
+        assert_eq!(
+            counted,
+            vec![8, 12],
+            "the last bar of the chorus is a fill whatever fillEvery says"
+        );
+    }
+
+    #[test]
+    fn no_fill_every_is_the_end_of_the_chorus_and_nothing_else() {
+        let t = compile(&twelve_bar()).unwrap();
+        let counted: Vec<u32> = (0..12).filter(|&b| t.fill_bar(b)).map(|b| b + 1).collect();
+        assert_eq!(counted, vec![12]);
+    }
+
+    #[test]
+    fn a_fill_every_the_ui_does_not_offer_is_refused() {
+        for every in [1u32, 2, 3, 5, 6, 7, 9, 16] {
+            let mut cfg = twelve_bar();
+            cfg.fill_every = Some(every);
+            let e = compile(&cfg).unwrap_err();
+            assert!(
+                e.contains("fillEvery") && e.contains("4 or 8"),
+                "{every} should be refused with a message that says what is \
+                 allowed: {e}"
+            );
+        }
+        for every in [0u32, 4, 8] {
+            let mut cfg = twelve_bar();
+            cfg.fill_every = Some(every);
+            assert!(compile(&cfg).is_ok(), "fillEvery {every} is on the list");
+        }
+    }
+
+    #[test]
+    fn turning_fills_up_is_a_change_the_drummer_makes_now() {
+        // Where the fill lands is not a bass change, so it must not be held
+        // to the next bar line the way the bar-ahead bass is.
+        let a = compile(&twelve_bar()).unwrap();
+        let mut moved = twelve_bar();
+        moved.fill_every = Some(4);
+        let b = compile(&moved).unwrap();
+        assert!(!swap_defers(Some(&a), Some(&b), true, false));
+    }
+
+    // ---- The normalisation memo ----
+
+    fn walking(pitches: Vec<u8>) -> JamConfig {
+        let mut cfg = twelve_bar();
+        cfg.bass = Some(JamBassLine {
+            pitches,
+            gain: 1.0,
+        });
+        cfg
+    }
+
+    /// THE BAR-AHEAD BASS, ROUND AND ROUND.
+    ///
+    /// The traffic the memo exists for: the UI walks the same few bass bars
+    /// round the form, once per chorus, for as long as the jam plays. The
+    /// first time round measures each of them; from the second on, nothing
+    /// is measured at all.
+    #[test]
+    fn the_bass_bars_of_a_form_are_measured_once_each_and_never_again() {
+        let cache = JamGainCache::new();
+        // E1 to G3 is the bass's range, and these stay inside it.
+        let chords: Vec<Vec<u8>> = vec![
+            vec![40, 0, 45, 0, 47, 0, 52, 0],
+            vec![45, 0, 50, 0, 52, 0, 33, 0],
+            vec![35, 0, 40, 0, 42, 0, 47, 0],
+            vec![40, 0, 47, 0, 45, 0, 40, 0],
+        ];
+        let first: Vec<f32> = chords
+            .iter()
+            .map(|p| compile_with(&walking(p.clone()), &cache).unwrap().base_peak)
+            .collect();
+        // Every one of them is the number a cold compile would produce.
+        for (p, want) in chords.iter().zip(&first) {
+            assert_eq!(compile(&walking(p.clone())).unwrap().base_peak, *want);
+        }
+        // Second chorus: the same four bars, and the memo has all of them.
+        for (p, want) in chords.iter().zip(&first) {
+            let again = compile_with(&walking(p.clone()), &cache).unwrap();
+            assert_eq!(again.base_peak, *want);
+            assert!(cache.get(render_signature(&walking(p.clone()))).is_some());
+        }
+    }
+
+    /// A DIFFERENT BASS IS A DIFFERENT MEASUREMENT.
+    ///
+    /// The tempting version of this memo keys on the drums alone and lets a
+    /// changed bass line share the answer. It does not hold: on the jitter
+    /// probe's groove, the same drums with the bass at 0.5 render 2.08 and
+    /// at 1.5 render 2.95 — 42% — and normalising the loud one against the
+    /// quiet one's number puts the room kit at 1.075 at full volume, which
+    /// is the mixer clamping. `the_gain_cache_never_lets_a_changed_bass_
+    /// reach_the_clamp` in `engine.rs` is the rendered half of this claim;
+    /// this is the arithmetic half.
+    #[test]
+    fn a_bass_the_memo_has_not_seen_is_measured_rather_than_guessed() {
+        let quiet = {
+            let mut c = walking(vec![40, 0, 0, 0, 0, 0, 0, 0]);
+            c.bass.as_mut().unwrap().gain = 0.5;
+            c
+        };
+        let loud = {
+            let mut c = walking(vec![40, 0, 45, 0, 47, 0, 52, 0]);
+            c.bass.as_mut().unwrap().gain = 1.5;
+            c
+        };
+        assert_ne!(
+            render_signature(&quiet),
+            render_signature(&loud),
+            "the bass has to be in the key, or the loud table borrows the \
+             quiet one's headroom"
+        );
+        // The drums, though, are the same drummer — which is a different
+        // question, and the one the bar-line deferral asks.
+        assert_eq!(drums_signature(&quiet), drums_signature(&loud));
+
+        let cache = JamGainCache::new();
+        let measured = compile_with(&quiet, &cache).unwrap();
+        let after = compile_with(&loud, &cache).unwrap();
+        assert!(
+            after.base_peak > measured.base_peak,
+            "a bass three times as loud is louder, and a memo that said \
+             otherwise would be normalising the wrong table"
+        );
+        assert_eq!(after.base_peak, compile(&loud).unwrap().base_peak);
+    }
+
+    #[test]
+    fn a_change_the_drummer_hears_misses_the_memo() {
+        let cache = JamGainCache::new();
+        let plain = compile_with(&twelve_bar(), &cache).unwrap();
+        let mut louder = twelve_bar();
+        louder.bar.crash = vec![2, 0, 0, 0, 0, 0, 0, 0];
+        let crashing = compile_with(&louder, &cache).unwrap();
+        assert!(
+            crashing.base_peak > plain.base_peak,
+            "a crash on the one is louder than no crash"
+        );
+        // Both are remembered, so going back is a hit rather than a render.
+        assert_eq!(
+            compile_with(&twelve_bar(), &cache).unwrap().base_peak,
+            plain.base_peak
+        );
+    }
+
+    #[test]
+    fn a_memo_that_has_never_seen_this_table_measures_it() {
+        let cache = JamGainCache::new();
+        let with_memo = compile_with(&twelve_bar(), &cache).unwrap();
+        let without = compile(&twelve_bar()).unwrap();
+        assert_eq!(with_memo.peak_after, without.peak_after);
+        assert_eq!(with_memo.base_peak, without.base_peak);
+    }
+
+    /// Intensity is applied after the render, so it cannot move the number
+    /// the memo holds — and the three the UI offers must not each cost four
+    /// bars of rendering more than once.
+    #[test]
+    fn the_intensity_dial_does_not_change_what_was_measured() {
+        let cache = JamGainCache::new();
+        let mut seen = Vec::new();
+        for intensity in [0.7f32, 1.0, 1.25] {
+            let mut cfg = twelve_bar();
+            cfg.intensity = intensity;
+            let t = compile_with(&cfg, &cache).unwrap();
+            seen.push(t.base_peak);
+            // The level the musician hears does move with the dial.
+            assert!(t.peak_after > 0.0);
+        }
+        assert!(
+            seen.windows(2).all(|w| w[0] == w[1]),
+            "the measurement is taken at 1.0 and scaled afterwards: {seen:?}"
+        );
+    }
+
+    /// The memo is a ring, so a form longer than it can hold keeps working —
+    /// it just measures the bars that fell off the end again.
+    #[test]
+    fn a_memo_that_fills_up_forgets_the_oldest_and_stays_correct() {
+        let cache = JamGainCache::new();
+        // Two notes carry the counter so every line is distinct and every
+        // pitch stays inside the bass's E1-to-G3 range.
+        let line = |n: usize| {
+            walking(vec![
+                28 + (n % 28) as u8,
+                0,
+                28 + (n / 28) as u8,
+                0,
+                47,
+                0,
+                52,
+                0,
+            ])
+        };
+        let total = JAM_GAIN_MEMO + 8;
+        for n in 0..total {
+            let cfg = line(n);
+            let t = compile_with(&cfg, &cache).unwrap();
+            assert_eq!(
+                t.base_peak,
+                compile(&cfg).unwrap().base_peak,
+                "entry {n} came back wrong"
+            );
+        }
+        // The most recent are still remembered; the first ones are gone.
+        assert!(cache.get(render_signature(&line(total - 1))).is_some());
+        assert!(cache.get(render_signature(&line(0))).is_none());
     }
 }
 

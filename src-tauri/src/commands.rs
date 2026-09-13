@@ -13,6 +13,15 @@ use tauri::{AppHandle, Emitter, Manager, State};
 
 pub struct EngineState(pub Mutex<MetronomeEngine>);
 
+/// The normalisations `set_jam` has already worked out.
+///
+/// Managed state rather than a field on the engine, because it is not the
+/// engine's: it is a memo the command thread keeps for itself, and nothing
+/// on the audio side ever reads it. See `JamGainCache` in `jam.rs` for what
+/// it holds and what it is keyed on.
+#[derive(Default)]
+pub struct JamGainState(pub crate::jam::JamGainCache);
+
 /// Snapshot the current AppState and emit it on the `state-changed`
 /// event. Lock is dropped before the emit so the (synchronous-but-not-
 /// instant) serde serialization can't block any other thread waiting on
@@ -2430,16 +2439,52 @@ pub fn app_ready(app_handle: AppHandle) {
 /// to `ticksPerBeat` and its beat groups to `[beatsPerBar]`. The engine
 /// checks the product against its own bar on every tick and plays the click
 /// when they disagree, rather than guessing which column is which.
+///
+/// Compiling renders four bars of the band to find out how loud it is, and
+/// the UI calls this four to six times a chorus to keep the bass a bar
+/// ahead. `JamGainState` remembers the measurements so those sends do not
+/// each pay for one — see `JamGainCache` in `jam.rs`.
 #[tauri::command]
 pub fn set_jam(
     config: Option<crate::jam::JamConfig>,
     engine_state: State<EngineState>,
+    jam_gain: State<JamGainState>,
 ) -> Result<(), String> {
     let table = match config {
-        Some(ref cfg) => Some(std::sync::Arc::new(crate::jam::compile(cfg)?)),
+        Some(ref cfg) => Some(std::sync::Arc::new(crate::jam::compile_with(
+            cfg, &jam_gain.0,
+        )?)),
         None => None,
     };
     engine_state.0.lock().unwrap().set_jam_table(table);
+    Ok(())
+}
+
+/// Move the form: jump to a bar, loop a range of bars, or clear both.
+///
+/// The engine applies it at the next bar line, so a footswitch pressed
+/// halfway through a bar finishes the bar first — which is where a musician
+/// expects the change to land, and the only place the band can change
+/// without the groove tearing.
+///
+/// The command carries both halves and replaces both, so "jump to the
+/// bridge" (`{ jumpTo: 16, loop: null }`) leaves a loop behind and "loop the
+/// turnaround" (`{ jumpTo: null, loop: {...} }`) sets one without moving
+/// yet. A bar that is not in the form is refused with a message and nothing
+/// changes: half a move is worse than none.
+///
+/// With no jam loaded there is no form to check against, so the position is
+/// accepted and held. It takes effect when a band arrives — or, if the new
+/// form is too short for the loop, it is quietly dropped there rather than
+/// looping bars that do not exist.
+#[tauri::command]
+pub fn set_jam_position(
+    command: crate::jam::JamPositionCommand,
+    engine_state: State<EngineState>,
+) -> Result<(), String> {
+    let engine = engine_state.0.lock().unwrap();
+    let position = crate::jam::validate_position(&command, engine.jam_form_bars())?;
+    engine.set_jam_position(position);
     Ok(())
 }
 

@@ -37,7 +37,7 @@ pub mod probe {
     /// through.
     pub use crate::jam::{
         band_state_for_bar, compile as compile_jam, JamBandState, JamBassLine, JamConfig,
-        JamDropOut, JamPattern, JamPracticeConfig, JamTable, JamTrade,
+        JamDropOut, JamPattern, JamPosition, JamPracticeConfig, JamTable, JamTrade,
     };
     pub use crate::state::{create_shared_state, AppState, SharedState};
     pub use crate::timing::create_beat_log;
@@ -70,9 +70,9 @@ use commands::{
     app_ready, set_volume, set_widget_always_on_top, set_widget_mode, show_floating, show_main,
     start_evaluation, start_model_download, start_playback, start_recording, start_speed_ramp,
     start_speed_ramp_from, start_voice_repair, stop_evaluation, stop_playback, stop_recording,
-    arm_count_in, set_accent_mode, set_jam, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
+    arm_count_in, set_accent_mode, set_jam, set_jam_position, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
     tts_stop, tts_voice_diagnostics, unload_coach_model, write_model_chunk, DownloadState,
-    EngineState,
+    EngineState, JamGainState,
 };
 use engine::MetronomeEngine;
 use midi::create_shared_midi;
@@ -281,6 +281,8 @@ pub fn run() {
             }
 
             app.manage(EngineState(Mutex::new(engine)));
+            // The `set_jam` normalisation memo. See `JamGainState`.
+            app.manage(JamGainState::default());
 
             // Start audio output device polling
             engine::start_audio_device_polling(app.handle().clone());
@@ -569,6 +571,7 @@ pub fn run() {
             arm_count_in,
             set_accent_mode,
             set_jam,
+            set_jam_position,
             stop_speed_ramp,
             set_active_tab,
             get_active_tab,
