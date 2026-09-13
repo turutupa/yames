@@ -28,7 +28,12 @@
       "waltz": "Wals",
       "sixEight": "6/8",
       "bossa": "Bossa",
-      "swingRide": "Swing-ride"
+      "swingRide": "Swing-ride",
+      "funk": "Funk",
+      "oneDrop": "One drop",
+      "train": "Train beat",
+      "boomBap": "Boom bap",
+      "fourOnFloor": "Four on the floor"
     },
     "feel": {
       "label": "Feel",
@@ -62,7 +67,13 @@
       "barOf": "maat {{current}} van {{total}}",
       "chorus": "chorus {{count}}",
       "fillMark": "fill",
-      "section": "Deel {{name}}"
+      "section": "Deel {{name}}",
+      "looping": "lus maten {{start}}–{{end}}",
+      "startsAt": "begint bij maat {{bar}}",
+      "jumpTo": "Naar maat {{bar}}",
+      "jumpPending": "bij de volgende maatstreep",
+      "loopSection": "Maten {{start}}–{{end}} herhalen",
+      "loopOff": "Stoppen met herhalen"
     },
     "short": {
       "blues12": "12 maten",
@@ -83,7 +94,11 @@
     },
     "fills": {
       "label": "Fills",
-      "hint": "Een fill in de laatste maat van het chorus, en een crash op de één."
+      "hint": "Waar de fills vallen, en een crash op de één.",
+      "off": "Uit",
+      "chorus": "Eind chorus",
+      "every4": "Elke 4",
+      "every8": "Elke 8"
     },
     "transport": {
       "chorus": "Chorus"

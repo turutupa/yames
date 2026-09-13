@@ -6,10 +6,10 @@ import { describe, expect, it } from "vitest";
 import { GROOVES, grooveById, grooveTickCount, DEFAULT_GROOVE_ID } from "./grooves";
 import { JAM_LANES } from "./types";
 
-describe("the eight grooves", () => {
-  it("ships exactly eight, with unique ids", () => {
-    expect(GROOVES).toHaveLength(8);
-    expect(new Set(GROOVES.map((g) => g.id)).size).toBe(8);
+describe("the thirteen grooves", () => {
+  it("ships exactly thirteen, with unique ids", () => {
+    expect(GROOVES).toHaveLength(13);
+    expect(new Set(GROOVES.map((g) => g.id)).size).toBe(13);
   });
 
   it("gives every lane of every bar and fill exactly one column per tick", () => {
@@ -36,13 +36,58 @@ describe("the eight grooves", () => {
     for (const g of GROOVES) expect(g.nameKey).toBe(`jam.groove.${g.id}`);
   });
 
-  it("puts something on the one of every groove", () => {
+  it("puts something on the one of every groove but the one-drop", () => {
     // A bar whose first column is empty starts with a hole, and the crash the
     // engine lands there has nothing to land with.
+    //
+    // The one-drop is the exception, and it is the exception on purpose: the
+    // empty one IS the groove. Naming it here rather than loosening the rule
+    // keeps the check honest for the other twelve — a mistyped lane string in
+    // a rock beat is still a hole, and still caught.
     for (const g of GROOVES) {
+      if (g.id === "oneDrop") continue;
       const onTheOne = JAM_LANES.some((lane) => g.bar[lane][0] !== 0);
       expect(onTheOne, `${g.id} plays nothing on the one`).toBe(true);
     }
+    const oneDrop = grooveById("oneDrop");
+    expect(JAM_LANES.every((lane) => oneDrop.bar[lane][0] === 0)).toBe(true);
+  });
+
+  it("writes the five later grooves the way they are played", () => {
+    // Each of these is a one-line answer to "what makes it that groove", and
+    // each is the line a retyped lane string would break.
+    const funk = grooveById("funk");
+    // The kick never lands on beats 2, 3 or 4 — that is the syncopation.
+    expect([4, 8, 12].every((t) => funk.bar.kick[t] === 0)).toBe(true);
+    expect(funk.bar.snare).toContain(3);
+
+    // The one-drop: kick and side stick together on three, hats off-beat only.
+    const oneDrop = grooveById("oneDrop");
+    expect(oneDrop.bar.kick[4]).not.toBe(0);
+    expect(oneDrop.bar.snare[4]).toBe(3);
+    expect([0, 2, 4, 6].every((t) => oneDrop.bar.hat[t] === 0)).toBe(true);
+    expect([1, 3, 5, 7].every((t) => oneDrop.bar.hat[t] !== 0)).toBe(true);
+
+    // The train: sixteenths all the way, accented on every "and".
+    const train = grooveById("train");
+    expect(train.bar.snare.every((l) => l !== 0)).toBe(true);
+    expect([2, 6, 10, 14].every((t) => train.bar.snare[t] === 2)).toBe(true);
+    expect(train.bar.kick.filter((l) => l !== 0)).toHaveLength(2);
+
+    // Boom bap: one and the "and" of two, backbeat on two and four, and the
+    // accented last eighth that stands in for the open hat.
+    const boomBap = grooveById("boomBap");
+    expect(boomBap.bar.kick[0]).not.toBe(0);
+    expect(boomBap.bar.kick[3]).not.toBe(0);
+    expect(boomBap.bar.snare[2]).not.toBe(0);
+    expect(boomBap.bar.snare[6]).not.toBe(0);
+    expect(boomBap.bar.hat[7]).toBe(2);
+
+    // Four on the floor: every beat, and the hat on none of them.
+    const four = grooveById("fourOnFloor");
+    expect([0, 2, 4, 6].every((t) => four.bar.kick[t] !== 0)).toBe(true);
+    expect([0, 2, 4, 6].every((t) => four.bar.hat[t] === 0)).toBe(true);
+    expect([1, 3, 5, 7].every((t) => four.bar.hat[t] !== 0)).toBe(true);
   });
 
   it("carries the meter each groove is actually written in", () => {
@@ -55,6 +100,11 @@ describe("the eight grooves", () => {
     expect(meters.swingRide).toEqual([4, 3]);
     expect(meters.bossa).toEqual([4, 4]);
     expect(meters.rock16).toEqual([4, 4]);
+    expect(meters.funk).toEqual([4, 4]);
+    expect(meters.train).toEqual([4, 4]);
+    expect(meters.oneDrop).toEqual([4, 2]);
+    expect(meters.boomBap).toEqual([4, 2]);
+    expect(meters.fourOnFloor).toEqual([4, 2]);
   });
 
   it("leaves the shuffle's middle triplet empty — that is what a shuffle is", () => {

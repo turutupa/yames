@@ -204,7 +204,10 @@
         "jam-prev-groove": "Önceki groove",
         "jam-trade": "Sıra sana",
         "jam-dropout": "Sessiz ölçüler",
-        "jam-next-shape": "Sonraki akor basışı"
+        "jam-next-shape": "Sonraki akor basışı",
+        "jam-next-section": "Sonraki bölüm",
+        "jam-prev-section": "Önceki bölüm",
+        "jam-loop-section": "Bu bölümü döngüye al"
       },
       "descs": {
         "play": "Metronomu başlat veya durdur",
@@ -234,7 +237,10 @@
         "jam-prev-groove": "Bir önceki groove'a dön",
         "jam-trade": "Sırayla çalmayı aç ya da kapat — dört ölçü grup, dört ölçü sen",
         "jam-dropout": "Sessiz ölçüleri aç ya da kapat",
-        "jam-next-shape": "Çaldığın akorun basış biçimleri arasında gez"
+        "jam-next-shape": "Çaldığın akorun basış biçimleri arasında gez",
+        "jam-next-section": "Ölçü çizgisinde sonraki bölümün başına atla",
+        "jam-prev-section": "Ölçü çizgisinde önceki bölümün başına dön",
+        "jam-loop-section": "İçinde olduğun bölümü döngüye al ya da döngüden çıkar"
       }
     },
     "inputTest": {

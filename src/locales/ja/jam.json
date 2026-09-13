@@ -28,7 +28,12 @@
       "waltz": "ワルツ",
       "sixEight": "6/8",
       "bossa": "ボサノヴァ",
-      "swingRide": "スウィング・ライド"
+      "swingRide": "スウィング・ライド",
+      "funk": "ファンク",
+      "oneDrop": "ワンドロップ",
+      "train": "トレインビート",
+      "boomBap": "ブーンバップ",
+      "fourOnFloor": "フォー・オン・ザ・フロア"
     },
     "feel": {
       "label": "フィール",
@@ -62,7 +67,13 @@
       "barOf": "{{total}} 小節中 {{current}} 小節目",
       "chorus": "コーラス {{count}}",
       "fillMark": "フィル",
-      "section": "セクション {{name}}"
+      "section": "セクション {{name}}",
+      "looping": "{{start}}–{{end}} 小節をループ中",
+      "startsAt": "{{bar}} 小節目から開始",
+      "jumpTo": "{{bar}} 小節目へ",
+      "jumpPending": "次の小節線で",
+      "loopSection": "{{start}}–{{end}} 小節をループ",
+      "loopOff": "ループを解除"
     },
     "short": {
       "blues12": "12小節",
@@ -83,7 +94,11 @@
     },
     "fills": {
       "label": "フィル",
-      "hint": "コーラス最後の小節にフィル、次の1拍目にクラッシュ。"
+      "hint": "フィルの入る場所と、次の1拍目のクラッシュ。",
+      "off": "なし",
+      "chorus": "コーラス末",
+      "every4": "4小節ごと",
+      "every8": "8小節ごと"
     },
     "transport": {
       "chorus": "コーラス"

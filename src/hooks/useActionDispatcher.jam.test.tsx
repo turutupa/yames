@@ -55,6 +55,9 @@ function mount(view: ViewName, jamLoaded = true, jamEditorOpen = false) {
     toggleTrade: vi.fn(),
     toggleDropOut: vi.fn(),
     nextShape: vi.fn(),
+    nextSection: vi.fn(),
+    prevSection: vi.fn(),
+    loopSection: vi.fn(),
   };
   const { result } = renderHook(() =>
     useActionDispatcher({
@@ -86,11 +89,17 @@ describe("the hands-free jam actions", () => {
     dispatch("jam-trade");
     dispatch("jam-dropout");
     dispatch("jam-next-shape");
+    dispatch("jam-next-section");
+    dispatch("jam-prev-section");
+    dispatch("jam-loop-section");
     expect(jamActions.nextGroove).toHaveBeenCalledTimes(1);
     expect(jamActions.prevGroove).toHaveBeenCalledTimes(1);
     expect(jamActions.toggleTrade).toHaveBeenCalledTimes(1);
     expect(jamActions.toggleDropOut).toHaveBeenCalledTimes(1);
     expect(jamActions.nextShape).toHaveBeenCalledTimes(1);
+    expect(jamActions.nextSection).toHaveBeenCalledTimes(1);
+    expect(jamActions.prevSection).toHaveBeenCalledTimes(1);
+    expect(jamActions.loopSection).toHaveBeenCalledTimes(1);
   });
 
   it("does nothing on another tab", () => {
@@ -98,8 +107,10 @@ describe("the hands-free jam actions", () => {
       const { dispatch, jamActions } = mount(view);
       dispatch("jam-next-groove");
       dispatch("jam-trade");
+      dispatch("jam-loop-section");
       expect(jamActions.nextGroove, view).not.toHaveBeenCalled();
       expect(jamActions.toggleTrade, view).not.toHaveBeenCalled();
+      expect(jamActions.loopSection, view).not.toHaveBeenCalled();
     }
   });
 
@@ -131,11 +142,15 @@ describe("the hands-free jam actions", () => {
     dispatch("jam-trade");
     dispatch("jam-dropout");
     dispatch("jam-next-shape");
+    dispatch("jam-next-section");
+    dispatch("jam-loop-section");
     expect(jamActions.nextGroove).not.toHaveBeenCalled();
     expect(jamActions.prevGroove).not.toHaveBeenCalled();
     expect(jamActions.toggleTrade).not.toHaveBeenCalled();
     expect(jamActions.toggleDropOut).not.toHaveBeenCalled();
     expect(jamActions.nextShape).not.toHaveBeenCalled();
+    expect(jamActions.nextSection).not.toHaveBeenCalled();
+    expect(jamActions.loopSection).not.toHaveBeenCalled();
   });
 });
 

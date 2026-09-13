@@ -28,7 +28,12 @@
       "waltz": "Điệu valse",
       "sixEight": "6/8",
       "bossa": "Bossa",
-      "swingRide": "Swing ride"
+      "swingRide": "Swing ride",
+      "funk": "Funk",
+      "oneDrop": "One drop",
+      "train": "Train beat",
+      "boomBap": "Boom bap",
+      "fourOnFloor": "Four on the floor"
     },
     "feel": {
       "label": "Cảm giác",
@@ -62,7 +67,13 @@
       "barOf": "ô nhịp {{current}} trên {{total}}",
       "chorus": "chorus {{count}}",
       "fillMark": "fill",
-      "section": "Đoạn {{name}}"
+      "section": "Đoạn {{name}}",
+      "looping": "lặp ô nhịp {{start}}–{{end}}",
+      "startsAt": "bắt đầu từ ô nhịp {{bar}}",
+      "jumpTo": "Đến ô nhịp {{bar}}",
+      "jumpPending": "ở vạch nhịp kế tiếp",
+      "loopSection": "Lặp ô nhịp {{start}}–{{end}}",
+      "loopOff": "Ngừng lặp"
     },
     "short": {
       "blues12": "12 ô nhịp",
@@ -83,7 +94,11 @@
     },
     "fills": {
       "label": "Fill",
-      "hint": "Một fill ở ô nhịp cuối của chorus, và một crash vào phách một."
+      "hint": "Fill rơi vào đâu, và một crash vào phách một.",
+      "off": "Tắt",
+      "chorus": "Cuối chorus",
+      "every4": "Mỗi 4 ô",
+      "every8": "Mỗi 8 ô"
     },
     "transport": {
       "chorus": "Chorus"

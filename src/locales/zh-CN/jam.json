@@ -28,7 +28,12 @@
       "waltz": "华尔兹",
       "sixEight": "6/8",
       "bossa": "波萨诺瓦",
-      "swingRide": "摇摆叮叮镲"
+      "swingRide": "摇摆叮叮镲",
+      "funk": "放克",
+      "oneDrop": "雷鬼 One Drop",
+      "train": "火车节奏",
+      "boomBap": "Boom Bap",
+      "fourOnFloor": "四踩底鼓"
     },
     "feel": {
       "label": "律动",
@@ -62,7 +67,13 @@
       "barOf": "第 {{current}} / {{total}} 小节",
       "chorus": "第 {{count}} 遍",
       "fillMark": "过门",
-      "section": "{{name}} 段"
+      "section": "{{name}} 段",
+      "looping": "正在循环第 {{start}}–{{end}} 小节",
+      "startsAt": "从第 {{bar}} 小节开始",
+      "jumpTo": "跳到第 {{bar}} 小节",
+      "jumpPending": "在下一条小节线",
+      "loopSection": "循环第 {{start}}–{{end}} 小节",
+      "loopOff": "取消循环"
     },
     "short": {
       "blues12": "12 小节",
@@ -83,7 +94,11 @@
     },
     "fills": {
       "label": "过门",
-      "hint": "每一遍最后一小节打过门，下一小节的第一拍加一记吊镲。"
+      "hint": "过门落在哪里，以及第一拍的吊镲。",
+      "off": "关",
+      "chorus": "每遍结尾",
+      "every4": "每 4 小节",
+      "every8": "每 8 小节"
     },
     "transport": {
       "chorus": "遍数"

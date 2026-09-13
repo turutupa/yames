@@ -321,6 +321,14 @@ export function MainWindow() {
     // The engine counts the band in on the same tick grid it plays on, so the
     // jam has to be told when a bar line is the count rather than the form.
     countingIn: (state.countIn?.beats ?? 0) > 0,
+    // The metronome's own meter, so the jam can hand it back on the way out.
+    // A jam sets the engine's subdivision and beat groups to the groove's, and
+    // without this a trip through Jam quietly re-signatures the metronome tab.
+    meter: {
+      subdivision: state.subdivision,
+      beatGroups: state.beatGroups,
+      freeMode: state.freeMode,
+    },
     onJamLoaded: () => {
       // The library marks what is loaded, and only one thing can be.
       sidebarRef.current?.clearActive();
@@ -1363,6 +1371,7 @@ export function MainWindow() {
               trainedBpm={jamSession.trainedBpm}
               listening={evaluation.enabled}
               screen={jamSession.screen}
+              position={jamSession.position}
               tapActive={tapActive}
               tapCount={tapCount}
               tapPulse={tapPulse}

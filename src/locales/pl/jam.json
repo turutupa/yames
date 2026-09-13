@@ -28,7 +28,12 @@
       "waltz": "Walc",
       "sixEight": "6/8",
       "bossa": "Bossa",
-      "swingRide": "Swing na ride"
+      "swingRide": "Swing na ride",
+      "funk": "Funk",
+      "oneDrop": "One drop",
+      "train": "Train beat",
+      "boomBap": "Boom bap",
+      "fourOnFloor": "Four on the floor"
     },
     "feel": {
       "label": "Feel",
@@ -62,7 +67,13 @@
       "barOf": "takt {{current}} z {{total}}",
       "chorus": "chorus {{count}}",
       "fillMark": "fill",
-      "section": "Część {{name}}"
+      "section": "Część {{name}}",
+      "looping": "pętla takty {{start}}–{{end}}",
+      "startsAt": "start od taktu {{bar}}",
+      "jumpTo": "Do taktu {{bar}}",
+      "jumpPending": "na następnej kresce taktowej",
+      "loopSection": "Zapętl takty {{start}}–{{end}}",
+      "loopOff": "Wyłącz pętlę"
     },
     "short": {
       "blues12": "12 taktów",
@@ -83,7 +94,11 @@
     },
     "fills": {
       "label": "Fille",
-      "hint": "Fill w ostatnim takcie chorusa i crash na raz."
+      "hint": "Gdzie wypadają fille, i crash na raz.",
+      "off": "Brak",
+      "chorus": "Koniec chorusa",
+      "every4": "Co 4",
+      "every8": "Co 8"
     },
     "transport": {
       "chorus": "Chorus"

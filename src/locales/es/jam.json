@@ -28,7 +28,12 @@
       "waltz": "Vals",
       "sixEight": "6/8",
       "bossa": "Bossa",
-      "swingRide": "Swing con ride"
+      "swingRide": "Swing con ride",
+      "funk": "Funk",
+      "oneDrop": "One drop",
+      "train": "Train beat",
+      "boomBap": "Boom bap",
+      "fourOnFloor": "Four on the floor"
     },
     "feel": {
       "label": "Feel",
@@ -62,7 +67,13 @@
       "barOf": "compás {{current}} de {{total}}",
       "chorus": "vuelta {{count}}",
       "fillMark": "fill",
-      "section": "Sección {{name}}"
+      "section": "Sección {{name}}",
+      "looping": "bucle de los compases {{start}}–{{end}}",
+      "startsAt": "empieza en el compás {{bar}}",
+      "jumpTo": "Ir al compás {{bar}}",
+      "jumpPending": "en la próxima barra de compás",
+      "loopSection": "Repetir los compases {{start}}–{{end}}",
+      "loopOff": "Dejar de repetir"
     },
     "short": {
       "blues12": "12 compases",
@@ -83,7 +94,11 @@
     },
     "fills": {
       "label": "Fills",
-      "hint": "Un fill en el último compás de la vuelta, y un crash en el uno."
+      "hint": "Dónde caen los fills, y un crash en el uno.",
+      "off": "Ninguno",
+      "chorus": "Fin de vuelta",
+      "every4": "Cada 4",
+      "every8": "Cada 8"
     },
     "transport": {
       "chorus": "Vuelta"

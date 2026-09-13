@@ -68,6 +68,40 @@ describe("compileJam", () => {
     expect(off.crashOnOne).toBe(false);
   });
 
+  it("passes the fills-every-N count through, and zeroes it when fills are off", () => {
+    // The contract: absent or 0 is the chorus end only, 4 and 8 add the bars
+    // in between. Both fields go out together so the engine never has to hold
+    // "no fills, every four bars" and decide which half to believe.
+    expect(compileJam(createJam("x", { fills: true })).fillEvery).toBe(0);
+    expect(compileJam(createJam("x", { fills: true, fillEvery: 4 })).fillEvery).toBe(4);
+    expect(compileJam(createJam("x", { fills: true, fillEvery: 8 })).fillEvery).toBe(8);
+    expect(compileJam(createJam("x", { fills: false, fillEvery: 4 })).fillEvery).toBe(0);
+  });
+
+  it("zeroes the count for a custom groove that has no fill drawn yet", () => {
+    // Nothing to play every four bars either. `fill` is null here, and a
+    // `fillEvery` beside a null fill is a number the engine cannot act on.
+    const jam = createJam("x", { fills: true, fillEvery: 4 });
+    const mine = compileJam({
+      ...jam,
+      customGroove: {
+        name: "Mine",
+        beatsPerBar: 4,
+        ticksPerBeat: 2,
+        bar: {
+          kick: [1, 0, 0, 0, 1, 0, 0, 0],
+          snare: [0, 0, 0, 0, 0, 0, 0, 0],
+          hat: [0, 0, 0, 0, 0, 0, 0, 0],
+          ride: [0, 0, 0, 0, 0, 0, 0, 0],
+          crash: [0, 0, 0, 0, 0, 0, 0, 0],
+        },
+        fill: null,
+      },
+    });
+    expect(mine.fill).toBeNull();
+    expect(mine.fillEvery).toBe(0);
+  });
+
   it("hands the engine a gain rather than the word", () => {
     for (const intensity of ["soft", "normal", "loud"] as JamIntensity[]) {
       expect(compileJam(createJam("x", { intensity })).intensity).toBe(

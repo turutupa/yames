@@ -28,7 +28,12 @@
       "waltz": "Waltz",
       "sixEight": "6/8",
       "bossa": "Bossa",
-      "swingRide": "Swing ride"
+      "swingRide": "Swing ride",
+      "funk": "Funk",
+      "oneDrop": "One-drop",
+      "train": "Train beat",
+      "boomBap": "Boom bap",
+      "fourOnFloor": "Four on the floor"
     },
     "feel": {
       "label": "Feel",
@@ -62,7 +67,13 @@
       "barOf": "bar {{current}} of {{total}}",
       "chorus": "chorus {{count}}",
       "fillMark": "fill",
-      "section": "Section {{name}}"
+      "section": "Section {{name}}",
+      "looping": "looping bars {{start}}–{{end}}",
+      "startsAt": "starts at bar {{bar}}",
+      "jumpTo": "Go to bar {{bar}}",
+      "jumpPending": "at the next bar line",
+      "loopSection": "Loop bars {{start}}–{{end}}",
+      "loopOff": "Stop looping"
     },
     "short": {
       "blues12": "12-bar",
@@ -83,7 +94,11 @@
     },
     "fills": {
       "label": "Fills",
-      "hint": "A fill on the last bar of the chorus, and a crash on the one."
+      "hint": "Where the fills land, and a crash on the one.",
+      "off": "Off",
+      "chorus": "Chorus end",
+      "every4": "Every 4",
+      "every8": "Every 8"
     },
     "transport": {
       "chorus": "Chorus"

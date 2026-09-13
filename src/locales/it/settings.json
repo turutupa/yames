@@ -204,7 +204,10 @@
         "jam-prev-groove": "Groove precedente",
         "jam-trade": "Scambi",
         "jam-dropout": "Battute a vuoto",
-        "jam-next-shape": "Posizione successiva"
+        "jam-next-shape": "Posizione successiva",
+        "jam-next-section": "Sezione successiva",
+        "jam-prev-section": "Sezione precedente",
+        "jam-loop-section": "Ripeti questa sezione"
       },
       "descs": {
         "play": "Avvia o ferma il metronomo",
@@ -234,7 +237,10 @@
         "jam-prev-groove": "Tornare al groove precedente",
         "jam-trade": "Attivare o disattivare gli scambi: quattro battute la band, quattro tu",
         "jam-dropout": "Attivare o disattivare le battute a vuoto",
-        "jam-next-shape": "Scorrere i modi di suonare l'accordo attuale"
+        "jam-next-shape": "Scorrere i modi di suonare l'accordo attuale",
+        "jam-next-section": "Saltare all'inizio della sezione successiva alla stanghetta",
+        "jam-prev-section": "Tornare all'inizio della sezione precedente alla stanghetta",
+        "jam-loop-section": "Mettere in loop la sezione in cui sei, o toglierla"
       }
     },
     "inputTest": {

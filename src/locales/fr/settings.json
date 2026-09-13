@@ -204,7 +204,10 @@
         "jam-prev-groove": "Groove précédent",
         "jam-trade": "Échanges",
         "jam-dropout": "Mesures à vide",
-        "jam-next-shape": "Position suivante"
+        "jam-next-shape": "Position suivante",
+        "jam-next-section": "Section suivante",
+        "jam-prev-section": "Section précédente",
+        "jam-loop-section": "Boucler cette section"
       },
       "descs": {
         "play": "Démarrer ou arrêter le métronome",
@@ -234,7 +237,10 @@
         "jam-prev-groove": "Revenir au groove précédent",
         "jam-trade": "Activer ou couper les échanges : quatre mesures le groupe, quatre mesures toi",
         "jam-dropout": "Activer ou couper les mesures à vide",
-        "jam-next-shape": "Faire défiler les façons de jouer l'accord en cours"
+        "jam-next-shape": "Faire défiler les façons de jouer l'accord en cours",
+        "jam-next-section": "Sauter au début de la section suivante à la barre de mesure",
+        "jam-prev-section": "Revenir au début de la section précédente à la barre de mesure",
+        "jam-loop-section": "Mettre en boucle la section où tu es, ou l'en sortir"
       }
     },
     "inputTest": {

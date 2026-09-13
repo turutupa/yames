@@ -11,7 +11,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { useJamSession } from "./useJamSession";
 import { STARTER_JAMS } from "../../../jam/jams";
 import { grooveById } from "../../../jam/grooves";
-import type { Jam, JamEngineConfig } from "../../../jam/types";
+import type { Jam, JamEngineConfig, JamPositionCommand } from "../../../jam/types";
 import type { BeatEvent } from "../../../types";
 
 const calls: Array<[string, unknown]> = [];
@@ -60,6 +60,10 @@ vi.mock("../../../ipc", () => ({
     calls.push(["setJam", config]);
     return Promise.resolve();
   },
+  setJamPosition: (command: unknown) => {
+    calls.push(["setJamPosition", command]);
+    return Promise.resolve();
+  },
 }));
 
 vi.mock("react-i18next", () => ({
@@ -89,6 +93,8 @@ type Props = {
   beat?: BeatEvent | null;
   instrument?: string;
   countingIn?: boolean;
+  /** The metronome's own meter, which the jam borrows and gives back. */
+  meter?: { subdivision: number; beatGroups: number[]; freeMode: boolean };
 };
 
 /** A tick, with only the two fields the jam cares about set apart. */
@@ -107,7 +113,7 @@ function beatAt(formBar: number, chorus = 1, measureBeat = 0): BeatEvent {
 
 function mount(view = "jam", extra: Omit<Props, "v"> = {}) {
   return renderHook(
-    ({ v, playing, beat, instrument, countingIn }: Props) =>
+    ({ v, playing, beat, instrument, countingIn, meter }: Props) =>
       useJamSession({
         view: v,
         isPlaying: playing ?? false,
@@ -117,6 +123,7 @@ function mount(view = "jam", extra: Omit<Props, "v"> = {}) {
         instrument: instrument ?? "electric-guitar",
         currentBeat: beat ?? null,
         countingIn: countingIn ?? false,
+        meter,
       }),
     { initialProps: { v: view, ...extra } },
   );
@@ -603,5 +610,208 @@ describe("the library", () => {
     act(() => result.current.renameJam(target.id, "Tuesday blues"));
     await waitFor(() => expect(result.current.jam?.name).toBe("Tuesday blues"));
     expect(result.current.dirty).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Moving through the form (JAM_MODE §4.2)
+// ---------------------------------------------------------------------------
+
+/** Every position command sent, in order. */
+function positions() {
+  return names("setJamPosition") as JamPositionCommand[];
+}
+
+/** A jam on the stage, with the library settled and the call log wiped. */
+async function loaded(
+  pick: (jams: Jam[]) => Jam = (jams) => jams[0],
+  extra: Omit<Props, "v"> = {},
+) {
+  const harness = mount("jam", extra);
+  await waitFor(() => expect(harness.result.current.jams).toHaveLength(6));
+  const jam = pick(harness.result.current.jams);
+  act(() => harness.result.current.loadJam(jam));
+  await waitFor(() => expect(harness.result.current.jam?.id).toBe(jam.id));
+  calls.length = 0;
+  return harness;
+}
+
+describe("moving through the form", () => {
+  it("asks for the bar you clicked, and keeps the loop that was already set", async () => {
+    const { result } = await loaded();
+
+    act(() => result.current.position.toggleSectionLoop({ start: 4, end: 7 }));
+    act(() => result.current.position.jumpTo(5));
+
+    expect(positions()).toEqual([
+      { jumpTo: null, loop: { start: 4, end: 7 } },
+      { jumpTo: 5, loop: { start: 4, end: 7 } },
+    ]);
+    // And the screen says what it asked for, so the click does not look
+    // ignored during the bar before the bar line.
+    expect(result.current.position.pendingJump).toBe(5);
+  });
+
+  it("holds a jump inside the form rather than naming a bar that is not there", async () => {
+    const { result } = await loaded(); // the blues: twelve bars
+    act(() => result.current.position.jumpTo(99));
+    act(() => result.current.position.jumpTo(-4));
+    expect(positions().map((c) => c.jumpTo)).toEqual([11, 0]);
+  });
+
+  it("clears the pending mark when a beat event lands on the bar", async () => {
+    const { result, rerender } = await loaded((jams) => jams[0], { playing: true });
+
+    act(() => result.current.position.jumpTo(8));
+    expect(result.current.position.pendingJump).toBe(8);
+
+    // A bar that is not the one asked for leaves the mark alone: the engine
+    // applies a jump at the NEXT bar line, so one bar of not-yet is expected.
+    rerender({ v: "jam", playing: true, beat: beatAt(3) });
+    expect(result.current.position.pendingJump).toBe(8);
+
+    rerender({ v: "jam", playing: true, beat: beatAt(8) });
+    await waitFor(() => expect(result.current.position.pendingJump).toBeNull());
+  });
+
+  it("turns one loop off by pressing it again, and only ever holds one", async () => {
+    const { result } = await loaded();
+
+    act(() => result.current.position.toggleSectionLoop({ start: 0, end: 3 }));
+    expect(result.current.position.loop).toEqual({ start: 0, end: 3 });
+
+    // A different section replaces it rather than joining it.
+    act(() => result.current.position.toggleSectionLoop({ start: 8, end: 11 }));
+    expect(result.current.position.loop).toEqual({ start: 8, end: 11 });
+
+    act(() => result.current.position.toggleSectionLoop({ start: 8, end: 11 }));
+    expect(result.current.position.loop).toBeNull();
+    expect(positions().map((c) => c.loop)).toEqual([
+      { start: 0, end: 3 },
+      { start: 8, end: 11 },
+      null,
+    ]);
+  });
+
+  it("clears the loop on the way out of the tab, and tells the engine", async () => {
+    const { result, rerender } = await loaded();
+    act(() => result.current.position.toggleSectionLoop({ start: 4, end: 7 }));
+    calls.length = 0;
+
+    rerender({ v: "beat" });
+    await waitFor(() => expect(result.current.position.loop).toBeNull());
+    expect(positions()).toEqual([{ jumpTo: null, loop: null }]);
+  });
+
+  it("clears the loop when another jam takes the stage", async () => {
+    // It was a loop of THAT jam's bridge. Inheriting it is the bug that gets
+    // reported as "the new one skips".
+    const { result } = await loaded();
+    act(() => result.current.position.toggleSectionLoop({ start: 4, end: 7 }));
+    act(() => result.current.loadJam(result.current.jams[1]));
+    await waitFor(() => expect(result.current.position.loop).toBeNull());
+  });
+
+  it("steps sections at the bar line, wrapping round the form", async () => {
+    // The swing standard: AABA, four sections of eight.
+    const { result } = await loaded((jams) => jams.find((j) => j.form.kind === "aaba32")!, {
+      playing: true,
+      beat: beatAt(0),
+    });
+
+    act(() => result.current.actions.nextSection());
+    expect(positions()[0].jumpTo).toBe(8);
+
+    // From bar 0, "previous" wraps to the last section rather than doing
+    // nothing: the form is a circle.
+    act(() => result.current.actions.prevSection());
+    expect(positions()[1].jumpTo).toBe(24);
+  });
+
+  it("loops the section the form is in from one press", async () => {
+    const { result } = await loaded((jams) => jams[0], { playing: true, beat: beatAt(6) });
+
+    // Bar 6 of a twelve-bar blues is the middle four.
+    act(() => result.current.actions.loopSection());
+    expect(result.current.position.loop).toEqual({ start: 4, end: 7 });
+    expect(positions()[0]).toEqual({ jumpTo: null, loop: { start: 4, end: 7 } });
+
+    act(() => result.current.actions.loopSection());
+    expect(result.current.position.loop).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The meter given back
+// ---------------------------------------------------------------------------
+
+describe("the metronome's meter", () => {
+  const SEVEN_EIGHT = { subdivision: 4, beatGroups: [7], freeMode: false };
+
+  /** A jam pushed from a 7/8 metronome in sixteenths. */
+  async function fromSevenEight() {
+    const harness = mount("beat", { meter: SEVEN_EIGHT });
+    await waitFor(() => expect(harness.result.current.jams).toHaveLength(6));
+    act(() => harness.result.current.loadJam(harness.result.current.jams[0]));
+    harness.rerender({ v: "jam", meter: SEVEN_EIGHT });
+    await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
+    return harness;
+  }
+
+  it("gives back the meter the jam borrowed when the tab is left", async () => {
+    // Enter Jam from a 7/8 metronome in sixteenths; leave; the engine is asked
+    // for 7/8 in sixteenths again. Without this a trip through Jam quietly
+    // re-signatures the metronome tab, and nothing on screen says so.
+    const { rerender } = await fromSevenEight();
+    calls.length = 0;
+
+    // The engine is now in the blues's meter, which is what the metronome tab
+    // would otherwise be left holding.
+    rerender({ v: "beat", meter: { subdivision: 3, beatGroups: [4], freeMode: false } });
+    await waitFor(() => expect(names("setBeatGroups")).toHaveLength(1));
+
+    expect(names("setBeatGroups")[0]).toEqual([7]);
+    expect(names("setSubdivision")[0]).toBe(4);
+    expect(names("setFreeMode")[0]).toBe(false);
+    // The band goes before the meter: the engine checks the two against each
+    // other, and a meter arriving under a loaded table is one it may refuse.
+    const order = engineOrder();
+    expect(order.indexOf("setJam")).toBeLessThan(order.indexOf("setBeatGroups"));
+  });
+
+  it("remembers the meter the jam found, not the one the jam set", async () => {
+    // Switching grooves inside the tab must not overwrite the snapshot with a
+    // waltz's three, or leaving hands the metronome the waltz instead of 7/8.
+    const { result, rerender } = await fromSevenEight();
+
+    const waltz = result.current.jams.find((j) => j.grooveId === "waltz")!;
+    act(() => result.current.loadJam(waltz));
+    rerender({ v: "jam", meter: { subdivision: 2, beatGroups: [3], freeMode: false } });
+    await waitFor(() => expect(result.current.jam?.grooveId).toBe("waltz"));
+    calls.length = 0;
+
+    rerender({ v: "beat", meter: { subdivision: 2, beatGroups: [3], freeMode: false } });
+    await waitFor(() => expect(names("setBeatGroups")).toHaveLength(1));
+    expect(names("setBeatGroups")[0]).toEqual([7]);
+    expect(names("setSubdivision")[0]).toBe(4);
+  });
+
+  it("gives it back when the jam is closed with the tab still open", async () => {
+    const { result } = await fromSevenEight();
+    calls.length = 0;
+
+    act(() => result.current.closeJam());
+    await waitFor(() => expect(names("setBeatGroups")).toHaveLength(1));
+    expect(names("setBeatGroups")[0]).toEqual([7]);
+  });
+
+  it("says nothing about the meter when it was never given one", async () => {
+    // A caller that does not pass the metronome's meter gets the old
+    // behaviour: the band goes away and nothing else is touched.
+    const { rerender } = await loaded();
+    rerender({ v: "beat" });
+    await waitFor(() => expect(names("setJam")).toHaveLength(1));
+    expect(names("setBeatGroups")).toHaveLength(0);
+    expect(names("setSubdivision")).toHaveLength(0);
   });
 });

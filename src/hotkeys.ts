@@ -43,6 +43,9 @@ export type HotkeyAction =
   | "jam-trade"
   | "jam-dropout"
   | "jam-next-shape"
+  | "jam-next-section"
+  | "jam-prev-section"
+  | "jam-loop-section"
   | "settings";
 
 export interface HotkeyEntry {
@@ -368,6 +371,35 @@ export const HOTKEYS: HotkeyEntry[] = [
     action: "Next chord shape",
     key: "S",
     desc: "Page through the ways to play the chord you are on",
+    group: "jam",
+  },
+  /**
+   * Moving through the form, hands-free.
+   *
+   * "Skip to the bridge with a footswitch" is JAM_MODE §4.2 in one line, and
+   * the reason these are keys at all: your hands are on the instrument, and
+   * the section you want is the one you are about to play, not the one you
+   * can reach the mouse in time for. N and L were free; ⇧N follows ⇧G.
+   */
+  {
+    id: "jam-next-section",
+    action: "Next section",
+    key: "N",
+    desc: "Jump to the start of the next section at the bar line",
+    group: "jam",
+  },
+  {
+    id: "jam-prev-section",
+    action: "Previous section",
+    key: "⇧N",
+    desc: "Jump back to the start of the previous section at the bar line",
+    group: "jam",
+  },
+  {
+    id: "jam-loop-section",
+    action: "Loop this section",
+    key: "L",
+    desc: "Loop the section you are in, or stop looping it",
     group: "jam",
   },
 ];

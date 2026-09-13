@@ -7,6 +7,7 @@ import {
   setBpm,
   setFreeMode,
   setJam,
+  setJamPosition,
   setSubdivision,
 } from "../../../ipc";
 import {
@@ -16,15 +17,20 @@ import {
   compileJam,
   createJam,
   duplicateJam as duplicateJamData,
+  formBars,
   jamMeter,
   lineupFor,
   renameJam as renameJamData,
   reorderJams as reorderJamsData,
+  sectionRanges,
+  sectionIndexAt,
+  stepSection,
   tempoAfterChorus,
   upsertJam,
 } from "../../../jam";
+import type { BarRange } from "../../../jam";
 import type { Chord } from "../../../jam/harmony";
-import type { Jam, JamEngineConfig } from "../../../jam";
+import type { Jam, JamEngineConfig, JamPositionCommand } from "../../../jam";
 import { NO_PRACTICE } from "../../jam/PracticeRow";
 import type { GrooveEditorPage } from "../../jam/editor";
 import type { BeatEvent, Subdivision } from "../../../types";
@@ -56,6 +62,33 @@ import { coachDebug } from "../../../coach/debug";
 
 /** Said once per session, not once per beat: the command may not exist yet. */
 let warnedAboutSetJam = false;
+/** Likewise for the position command, which arrives with the engine's jumps. */
+let warnedAboutSetJamPosition = false;
+
+/**
+ * Ask the form to move, and say once if the engine cannot hear it.
+ *
+ * The screen keeps its own answer either way: a click on bar 7 marks bar 7 as
+ * pending whether or not the command landed, because the marker is the UI
+ * telling you what it asked for, not a reading of what the engine did. On a
+ * build without `set_jam_position` that leaves a mark that never clears, which
+ * is the honest picture of a jump that never happened.
+ */
+async function sendPosition(command: JamPositionCommand): Promise<void> {
+  try {
+    await setJamPosition(command);
+  } catch (err) {
+    if (warnedAboutSetJamPosition) return;
+    warnedAboutSetJamPosition = true;
+    console.warn(
+      "[yames] set_jam_position is not available in this build — the form plays straight through",
+      err,
+    );
+  }
+}
+
+/** The metronome's own meter, remembered so the jam can hand it back. */
+type MeterSnapshot = { subdivision: number; beatGroups: number[]; freeMode: boolean };
 
 /**
  * The last round trip `setJam` took, in milliseconds.
@@ -125,9 +158,43 @@ function bassSignature(config: JamEngineConfig): string {
   return config.bass ? config.bass.pitches.join(",") : "";
 }
 
-/** Take the band away and leave the metronome exactly as it was. */
-function clearJam(): void {
-  void setJam(null).catch(() => {});
+/**
+ * Take the band away, and give the metronome back the meter it came in with.
+ *
+ * `setJam(null)` alone is not enough, and the bug it leaves is a quiet one: a
+ * jam sets the engine's subdivision and beat groups to the groove's, and those
+ * are engine state, not jam state. Walk out of a bossa and the metronome tab
+ * is a metronome again — in sixteenths, in four — whatever it was before. A
+ * player who came in from 7/8 finds their own setting gone and no message
+ * saying so.
+ *
+ * So the meter the jam found is remembered on the way in and handed back on
+ * the way out, in the same order it was taken: free mode, groups, subdivision.
+ * The table goes first, because the engine checks the two against each other
+ * and a meter that arrives while a table is still loaded is a meter it may
+ * refuse.
+ */
+function clearJam(restore: MeterSnapshot | null): void {
+  void (async () => {
+    try {
+      await setJam(null);
+    } catch {
+      /* The command may not exist yet; the meter still has to go back. */
+    }
+    if (!restore) return;
+    const steps: Array<() => Promise<unknown>> = [
+      () => setFreeMode(restore.freeMode),
+      () => setBeatGroups(restore.beatGroups),
+      () => setSubdivision(restore.subdivision as Subdivision),
+    ];
+    for (const run of steps) {
+      try {
+        await run();
+      } catch {
+        /* One step failing must not take the other two with it. */
+      }
+    }
+  })();
 }
 
 interface UseJamSessionArgs {
@@ -151,6 +218,15 @@ interface UseJamSessionArgs {
    * on; the config the load posted is already the right one for bar one.
    */
   countingIn: boolean;
+  /**
+   * The metronome's own meter, as the app state holds it right now.
+   *
+   * Read only at the moment the first jam is pushed, and handed back when the
+   * tab is left. Passing it in rather than reading the engine keeps this hook
+   * the only thing that writes to the engine's meter — a read-back would race
+   * the write the jam itself is making.
+   */
+  meter?: MeterSnapshot;
 }
 
 export function useJamSession({
@@ -160,6 +236,7 @@ export function useJamSession({
   instrument,
   currentBeat,
   countingIn,
+  meter,
 }: UseJamSessionArgs) {
   const { t } = useTranslation();
   const [jams, setJams] = useState<Jam[]>([]);
@@ -202,6 +279,36 @@ export function useJamSession({
   const [pinnedChord, setPinnedChord] = useState<Chord | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorPage, setEditorPage] = useState<GrooveEditorPage>("bar");
+
+  /**
+   * Where the form has been told to go, and what it has been told to repeat.
+   *
+   * Session state rather than record state, and deliberately: looping the
+   * bridge for ten minutes is something you are doing to a jam this afternoon,
+   * not a property of the tune. Saving it would mean a jam that opens looping
+   * four bars a week later with nobody remembering why.
+   */
+  const [loop, setLoop] = useState<BarRange | null>(null);
+  /**
+   * The bar the form is on its way to, until a beat event lands there.
+   *
+   * The engine applies a jump at the next bar line, so between the click and
+   * that line there is a bar of nothing-has-happened-yet. Without this the
+   * click would look ignored, and the second click — on the same cell, a beat
+   * later — is how a player finds out the hard way that it was not.
+   */
+  const [pendingJump, setPendingJump] = useState<number | null>(null);
+
+  /**
+   * The metronome's meter, as of the last render, and the copy the jam took.
+   *
+   * The live one is a ref so the push effect can read it without re-running
+   * every time the engine reports a new subdivision — which it does, loudly,
+   * the moment a jam sets one.
+   */
+  const meterRef = useRef<MeterSnapshot | undefined>(meter);
+  meterRef.current = meter;
+  const restoreRef = useRef<MeterSnapshot | null>(null);
 
   /**
    * True once the library has been WRITTEN — a new jam, a delete, a reorder.
@@ -275,10 +382,26 @@ export function useJamSession({
 
   useEffect(() => {
     if (view !== "jam" || !jam) {
-      clearJam();
+      // The meter goes back with the band. `restoreRef` is nulled here rather
+      // than inside `clearJam` so a second pass through this branch — React
+      // runs effects twice in development — does not hand the metronome its
+      // own restored meter a second time and call that a snapshot.
+      const restore = restoreRef.current;
+      restoreRef.current = null;
+      clearJam(restore);
       sentBassRef.current = null;
       loadedIdRef.current = null;
       return;
+    }
+    // The meter the jam found, taken once, before the jam overwrites it. Only
+    // the FIRST push: by the second the engine is already in the groove's
+    // meter, and remembering that would be remembering the jam.
+    if (!restoreRef.current && meterRef.current) {
+      restoreRef.current = {
+        subdivision: meterRef.current.subdivision,
+        beatGroups: [...meterRef.current.beatGroups],
+        freeMode: meterRef.current.freeMode,
+      };
     }
     // A load starts at bar 0. An edit to a jam that is already playing is a
     // different thing: the engine applies a changed drummer at once and holds
@@ -445,6 +568,98 @@ export function useJamSession({
     if (view === "jam" && jam) void setBpm(jam.bpm).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPlaying]);
+
+  // -------------------------------------------------------------------------
+  // Moving through the form (JAM_MODE §4.2)
+  // -------------------------------------------------------------------------
+
+  /** Is anything set, for the effect that clears without watching the state. */
+  const positionSetRef = useRef(false);
+  positionSetRef.current = loop !== null || pendingJump !== null;
+
+  /**
+   * A loop belongs to the jam it was drawn on, and to this sitting of it.
+   *
+   * Leaving the tab or putting another jam on the stage clears it, and tells
+   * the engine so — otherwise the next jam's bar 5 inherits the last one's
+   * bridge, which is the kind of bug that gets reported as "it skips".
+   */
+  const positionKeyRef = useRef<string | null>(null);
+  useEffect(() => {
+    const key = view === "jam" && jam ? jam.id : null;
+    if (positionKeyRef.current === key) return;
+    positionKeyRef.current = key;
+    if (!positionSetRef.current) return;
+    setLoop(null);
+    setPendingJump(null);
+    void sendPosition({ jumpTo: null, loop: null });
+  }, [view, jam?.id]);
+
+  /** The jump has landed when a beat event reports the bar it asked for. */
+  useEffect(() => {
+    if (pendingJump === null || !isPlaying || countingIn || !currentBeat) return;
+    const bar = Number.isFinite(currentBeat.formBar) ? currentBeat.formBar : 0;
+    if (bar === pendingJump) setPendingJump(null);
+  }, [pendingJump, isPlaying, countingIn, currentBeat?.formBar, currentBeat?.chorus]);
+
+  /**
+   * Which bar the section actions count from.
+   *
+   * The one playing, or — while stopped — the one the next press of play will
+   * start on, which is the pending jump if there is one and bar one if not.
+   */
+  const currentBar = useMemo(() => {
+    if (isPlaying && currentBeat && Number.isFinite(currentBeat.formBar)) return currentBeat.formBar;
+    return pendingJump ?? 0;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPlaying, currentBeat?.formBar, pendingJump]);
+
+  /**
+   * Go to a bar — at the next bar line, which is the engine's business.
+   *
+   * The loop goes with it, unchanged: a jump inside a looped section is a jump
+   * inside a looped section, and re-sending the loop is how the one command
+   * says both things without a second round trip that could half-apply.
+   */
+  const jumpTo = useCallback(
+    (bar: number) => {
+      if (!jam) return;
+      const total = formBars(jam.form);
+      if (total <= 0) return;
+      const target = Math.min(Math.max(Math.trunc(bar), 0), total - 1);
+      setPendingJump(target);
+      void sendPosition({ jumpTo: target, loop });
+    },
+    [jam, loop],
+  );
+
+  /** One loop at a time: pressing the one that is on turns it off. */
+  const toggleSectionLoop = useCallback(
+    (range: BarRange) => {
+      const off = !!loop && loop.start === range.start && loop.end === range.end;
+      const next = off ? null : range;
+      setLoop(next);
+      void sendPosition({ jumpTo: null, loop: next });
+    },
+    [loop],
+  );
+
+  /** The next or previous section's first bar, wrapping round the form. */
+  const stepToSection = useCallback(
+    (by: number) => {
+      if (!jam) return;
+      jumpTo(stepSection(jam.form, currentBar, by).start);
+    },
+    [jam, currentBar, jumpTo],
+  );
+
+  /** Loop the section the form is in, or stop looping it. */
+  const loopCurrentSection = useCallback(() => {
+    if (!jam) return;
+    const ranges = sectionRanges(jam.form);
+    const range = ranges[sectionIndexAt(jam.form, currentBar)];
+    if (range) toggleSectionLoop(range);
+  }, [jam, currentBar, toggleSectionLoop]);
 
   const loadJam = useCallback(
     (next: Jam) => {
@@ -631,8 +846,23 @@ export function useJamSession({
       toggleTrade,
       toggleDropOut,
       nextShape,
+      nextSection: () => stepToSection(1),
+      prevSection: () => stepToSection(-1),
+      loopSection: loopCurrentSection,
     }),
-    [stepGroove, toggleTrade, toggleDropOut, nextShape],
+    [stepGroove, toggleTrade, toggleDropOut, nextShape, stepToSection, loopCurrentSection],
+  );
+
+  /**
+   * Where the form is being sent, as one object for the screen.
+   *
+   * The timeline is the only control here that does not write to the record —
+   * moving through a form is not an edit to it — so it gets its own bundle
+   * rather than a sixth thing hanging off `screen`.
+   */
+  const position = useMemo(
+    () => ({ loop, pendingJump, jumpTo, toggleSectionLoop }),
+    [loop, pendingJump, jumpTo, toggleSectionLoop],
   );
 
   const screen = useMemo(
@@ -664,6 +894,8 @@ export function useJamSession({
     screen,
     /** Hands-free: a footswitch sends these exactly as a key does. */
     actions,
+    /** The loop, the pending jump, and the two ways to move the form. */
+    position,
     /** Where the tempo trainer has got to, or null while it has not moved. */
     trainedBpm,
     /** True while a jam is loaded and the transport would start the band. */

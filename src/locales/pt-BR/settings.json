@@ -204,7 +204,10 @@
         "jam-prev-groove": "Groove anterior",
         "jam-trade": "Revezamento",
         "jam-dropout": "Compassos em silêncio",
-        "jam-next-shape": "Próxima forma"
+        "jam-next-shape": "Próxima forma",
+        "jam-next-section": "Próxima seção",
+        "jam-prev-section": "Seção anterior",
+        "jam-loop-section": "Repetir esta seção"
       },
       "descs": {
         "play": "Inicia ou para o metrônomo",
@@ -234,7 +237,10 @@
         "jam-prev-groove": "Voltar ao groove anterior",
         "jam-trade": "Ligar ou desligar o revezamento — quatro compassos a banda, quatro você",
         "jam-dropout": "Ligar ou desligar os compassos em silêncio",
-        "jam-next-shape": "Percorrer os jeitos de tocar o acorde atual"
+        "jam-next-shape": "Percorrer os jeitos de tocar o acorde atual",
+        "jam-next-section": "Pular para o início da próxima seção na barra de compasso",
+        "jam-prev-section": "Voltar ao início da seção anterior na barra de compasso",
+        "jam-loop-section": "Pôr em loop a seção em que você está, ou tirar"
       }
     },
     "inputTest": {

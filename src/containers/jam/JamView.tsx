@@ -4,6 +4,7 @@ import { getTempoMarking } from "../../constants/metronome";
 import { GROOVES } from "../../jam/grooves";
 import { carryCountIn } from "../../jam/jams";
 import { JAM_FORM_KINDS, clampFormBars, formBars } from "../../jam/forms";
+import type { BarRange } from "../../jam/forms";
 import { jamBand, jamGroove, jamKey, jamBassLine } from "../../jam/compile";
 import { bandStatesForChorus, practiceConfigFrom } from "../../jam/practice";
 import {
@@ -45,6 +46,43 @@ import "../../styles/jam.css";
 const FEELS: JamFeel[] = ["straight", "shuffle", "swing"];
 const INTENSITIES: JamIntensity[] = ["soft", "normal", "loud"];
 
+/**
+ * The Fills control, as the four things a player would say out loud.
+ *
+ * They are two fields on the record — `fills` and `fillEvery` — because the
+ * engine needs them apart: `fills` is what the crash on the one hangs off as
+ * well, and `fillEvery` is a count. On screen they are one control, because
+ * "off, or every eight bars" is one decision.
+ */
+const FILL_CHOICES = ["off", "chorus", "every4", "every8"] as const;
+type FillChoice = (typeof FILL_CHOICES)[number];
+
+/** Which of the four a record is showing. */
+export function fillsChoiceOf(jam: Pick<Jam, "fills" | "fillEvery">): FillChoice {
+  if (!jam.fills) return "off";
+  const every = Math.trunc(jam.fillEvery ?? 0);
+  if (every === 4) return "every4";
+  if (every === 8) return "every8";
+  return "chorus";
+}
+
+/** What picking one writes back. */
+export function fillsEditFor(choice: FillChoice): { fills: boolean; fillEvery: number } {
+  switch (choice) {
+    case "off":
+      // `fillEvery` is zeroed rather than left where it was: a record that
+      // says "no fills, every four bars" is a record two readers can disagree
+      // about, and one of them is the engine.
+      return { fills: false, fillEvery: 0 };
+    case "every4":
+      return { fills: true, fillEvery: 4 };
+    case "every8":
+      return { fills: true, fillEvery: 8 };
+    case "chorus":
+      return { fills: true, fillEvery: 0 };
+  }
+}
+
 /** Which neck a player has, if any. Horns and voices get the chords only. */
 function neckFor(instrument: string): Instrument | null {
   if (instrument === "bass") return "bass";
@@ -68,6 +106,14 @@ export interface JamScreenState {
   setEditorPage: (page: "bar" | "fill") => void;
 }
 
+/** Moving through the form — the half of the screen that is not an edit. */
+export interface JamPositionState {
+  loop: BarRange | null;
+  pendingJump: number | null;
+  jumpTo: (bar: number) => void;
+  toggleSectionLoop: (range: BarRange) => void;
+}
+
 interface JamViewProps {
   jam: Jam;
   /** Every edit lands on the working copy, which recompiles and re-sends. */
@@ -83,6 +129,12 @@ interface JamViewProps {
   /** Whether the mic is on, so the "you" lane says something true. */
   listening: boolean;
   screen: JamScreenState;
+  /**
+   * Where the form is being sent: the loop, the jump waiting for a bar line,
+   * and the two ways to change them. From `useJamSession`, which owns the
+   * traffic — the timeline asks, it does not send.
+   */
+  position: JamPositionState;
   /** The metronome's tempo controls, shared rather than built again. */
   tapActive: boolean;
   tapCount: number;
@@ -110,14 +162,17 @@ function Segmented<T extends string>({
   options,
   value,
   onChange,
+  hint,
 }: {
   label: string;
   options: { id: T; label: string; disabled?: boolean }[];
   value: T;
   onChange: (id: T) => void;
+  /** A sentence on hover, for a control whose four words are not the whole story. */
+  hint?: string;
 }) {
   return (
-    <div className="accent-control jam-segmented" role="group" aria-label={label}>
+    <div className="accent-control jam-segmented" role="group" aria-label={label} title={hint}>
       <span className="stage-label accent-label">{label}</span>
       <div className="accent-options">
         {options.map((option) => (
@@ -162,6 +217,7 @@ export function JamView({
   trainedBpm,
   listening,
   screen,
+  position,
   tapActive,
   tapCount,
   tapPulse,
@@ -309,6 +365,8 @@ export function JamView({
     return line.pitches.map((midi) => (midi === 0 ? "" : midiToName(midi, spelling).slice(0, -1)));
   }, [jam, at, band.bass, lineup, harmony.key]);
 
+  const fillsChoice = fillsChoiceOf(jam);
+
   const grooveName = jam.customGroove
     ? jam.customGroove.name
     : t(`jam.groove.${jam.grooveId}`, { defaultValue: jam.grooveId });
@@ -446,6 +504,7 @@ export function JamView({
       <FormTimeline
         form={jam.form}
         fills={jam.fills}
+        fillEvery={jam.fillEvery ?? 0}
         formBar={formBar}
         chorus={chorus}
         beat={currentBeat?.measureBeat ?? 0}
@@ -453,6 +512,10 @@ export function JamView({
         isPlaying={isPlaying}
         chords={timelineChords}
         bandStates={bandStates}
+        loop={position.loop}
+        pendingJump={position.pendingJump}
+        onJumpTo={position.jumpTo}
+        onToggleSectionLoop={position.toggleSectionLoop}
       />
 
       <BandLanes
@@ -610,17 +673,20 @@ export function JamView({
             onChange={(beats) => onEdit({ countIn: Number(beats) })}
           />
 
-          <button
-            type="button"
-            role="switch"
-            aria-checked={jam.fills}
-            className={`transport-switch jam-switch ${jam.fills ? "on" : ""}`}
-            title={t("jam.fills.hint")}
-            onClick={() => onEdit({ fills: !jam.fills })}
-          >
-            <span className="transport-switch-track" aria-hidden="true" />
-            {t("jam.fills.label")}
-          </button>
+          {/* Fills used to be a switch. It is a choice now because "off" and
+              "at the end of the chorus" are two different musics and the
+              switch could only say one of them — and because a fill every
+              four bars is what a drummer does over an eight-bar loop, which
+              was unreachable while the only fill was the last bar of the
+              form. Two fields on the record, one control: `fills` is whether
+              there are any, `fillEvery` is how often on top of the end. */}
+          <Segmented
+            label={t("jam.fills.label")}
+            value={fillsChoice}
+            options={FILL_CHOICES.map((id) => ({ id, label: t(`jam.fills.${id}`) }))}
+            onChange={(choice) => onEdit(fillsEditFor(choice))}
+            hint={t("jam.fills.hint")}
+          />
         </div>
       </section>
 

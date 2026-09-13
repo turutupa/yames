@@ -162,6 +162,23 @@ export const BASS_STYLE_FOR_GROOVE: Record<string, BassStyle> = {
   halfTime: "rock",
   sixEight: "sixeight",
   swingRide: "swing",
+  /**
+   * The five that came later.
+   *
+   * Four of them are `rock` — roots on the kick — and that is not a shrug: the
+   * rock line reads the groove's own kick lane, so the same style writes four
+   * different bass parts under these four drummers. Under the one-drop, whose
+   * kick is on three and nowhere else, it puts the root on three with the side
+   * stick, which is what a reggae bass does. Under four-on-the-floor it plays
+   * every beat and takes the octave on the "and" of the bar when the chord is
+   * about to change. Under the train beat it is one and three, and under boom
+   * bap it is one and the "and" of two. Funk is the one that needs its own
+   * line rather than the kick's, and it already has one above.
+   */
+  oneDrop: "rock",
+  train: "rock",
+  boomBap: "rock",
+  fourOnFloor: "rock",
 };
 
 function normaliseGrooveId(id: string): string {

@@ -28,7 +28,12 @@
       "waltz": "Vals",
       "sixEight": "6/8",
       "bossa": "Bossa",
-      "swingRide": "Swing ride"
+      "swingRide": "Swing ride",
+      "funk": "Funk",
+      "oneDrop": "One drop",
+      "train": "Train beat",
+      "boomBap": "Boom bap",
+      "fourOnFloor": "Four on the floor"
     },
     "feel": {
       "label": "Feel",
@@ -62,7 +67,13 @@
       "barOf": "{{total}} ölçüden {{current}}. ölçü",
       "chorus": "chorus {{count}}",
       "fillMark": "fill",
-      "section": "{{name}} bölümü"
+      "section": "{{name}} bölümü",
+      "looping": "{{start}}–{{end}} ölçü döngüde",
+      "startsAt": "{{bar}}. ölçüden başlar",
+      "jumpTo": "{{bar}}. ölçüye git",
+      "jumpPending": "bir sonraki ölçü çizgisinde",
+      "loopSection": "{{start}}–{{end}} ölçüyü döngüye al",
+      "loopOff": "Döngüyü kapat"
     },
     "short": {
       "blues12": "12 ölçü",
@@ -83,7 +94,11 @@
     },
     "fills": {
       "label": "Fill'ler",
-      "hint": "Chorus'un son ölçüsünde bir fill, sonraki ilk vuruşta crash."
+      "hint": "Fill'lerin düştüğü yer, ve ilk vuruşta crash.",
+      "off": "Yok",
+      "chorus": "Chorus sonu",
+      "every4": "Her 4",
+      "every8": "Her 8"
     },
     "transport": {
       "chorus": "Chorus"

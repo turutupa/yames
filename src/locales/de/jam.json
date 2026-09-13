@@ -28,7 +28,12 @@
       "waltz": "Walzer",
       "sixEight": "6/8",
       "bossa": "Bossa",
-      "swingRide": "Swing-Ride"
+      "swingRide": "Swing-Ride",
+      "funk": "Funk",
+      "oneDrop": "One Drop",
+      "train": "Train Beat",
+      "boomBap": "Boom Bap",
+      "fourOnFloor": "Four on the Floor"
     },
     "feel": {
       "label": "Feeling",
@@ -62,7 +67,13 @@
       "barOf": "Takt {{current}} von {{total}}",
       "chorus": "Chorus {{count}}",
       "fillMark": "Fill",
-      "section": "Teil {{name}}"
+      "section": "Teil {{name}}",
+      "looping": "Schleife Takt {{start}}–{{end}}",
+      "startsAt": "beginnt bei Takt {{bar}}",
+      "jumpTo": "Zu Takt {{bar}}",
+      "jumpPending": "beim nächsten Taktstrich",
+      "loopSection": "Takt {{start}}–{{end}} in Schleife",
+      "loopOff": "Schleife beenden"
     },
     "short": {
       "blues12": "12 Takte",
@@ -83,7 +94,11 @@
     },
     "fills": {
       "label": "Fills",
-      "hint": "Ein Fill im letzten Takt des Chorus und ein Crash auf der Eins."
+      "hint": "Wo die Fills landen — und ein Crash auf der Eins.",
+      "off": "Aus",
+      "chorus": "Chorus-Ende",
+      "every4": "Alle 4",
+      "every8": "Alle 8"
     },
     "transport": {
       "chorus": "Chorus"

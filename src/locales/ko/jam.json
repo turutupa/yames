@@ -28,7 +28,12 @@
       "waltz": "왈츠",
       "sixEight": "6/8",
       "bossa": "보사노바",
-      "swingRide": "스윙 라이드"
+      "swingRide": "스윙 라이드",
+      "funk": "펑크",
+      "oneDrop": "원 드롭",
+      "train": "트레인 비트",
+      "boomBap": "붐뱁",
+      "fourOnFloor": "포 온 더 플로어"
     },
     "feel": {
       "label": "필",
@@ -62,7 +67,13 @@
       "barOf": "{{current}}/{{total}}마디",
       "chorus": "코러스 {{count}}",
       "fillMark": "필인",
-      "section": "{{name}} 섹션"
+      "section": "{{name}} 섹션",
+      "looping": "{{start}}–{{end}}마디 반복 중",
+      "startsAt": "{{bar}}마디에서 시작",
+      "jumpTo": "{{bar}}마디로",
+      "jumpPending": "다음 마디선에서",
+      "loopSection": "{{start}}–{{end}}마디 반복",
+      "loopOff": "반복 끄기"
     },
     "short": {
       "blues12": "12마디",
@@ -83,7 +94,11 @@
     },
     "fills": {
       "label": "필인",
-      "hint": "코러스 마지막 마디에 필인, 그다음 첫 박에 크래시."
+      "hint": "필인이 들어가는 자리, 그리고 첫 박의 크래시.",
+      "off": "없음",
+      "chorus": "코러스 끝",
+      "every4": "4마디마다",
+      "every8": "8마디마다"
     },
     "transport": {
       "chorus": "코러스"

@@ -148,13 +148,14 @@
   width: 100%;
 }
 
-/* Nine across: the eight grooves and the one you make yourself. The kit of
-   grooves is one row you scan rather than a block you read, and at the stage's
-   1176px each card still has 120px — room for a sixteen-tick glyph (80px) and
-   its name. The ninth card wrapping onto a line of its own made it look like
-   an afterthought rather than one of the choices. */
+/* Seven across, twice: the thirteen grooves and the one you make yourself.
+   Fourteen in one line would give each card 78px, which is narrower than the
+   sixteen-tick glyph it has to draw. Two full rows of seven is the one split
+   that leaves no short line at the bottom — a last row with a single card in
+   it reads as an afterthought rather than as one of the choices, which is
+   exactly what the ninth card used to look like before it went inline. */
 .jam-cards-groove {
-  grid-template-columns: repeat(9, minmax(0, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
 }
 
 .jam-cards-form {
@@ -888,6 +889,106 @@
   .jam-cards-groove {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
+}
+
+/* ── Moving through the form ───────────────────────────────────────────────
+   The timeline stopped being a readout and became a control: every bar is a
+   button and every section can be looped. The rule holding this together is
+   that none of it may shout — the cell you are ON is the one thing on the row
+   that is allowed to be bright, and a hover, a loop and a pending jump all
+   have to stay quieter than that or the place-in-the-form reading is lost. */
+
+.jam-timeline-loop-note {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.jam-timeline-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  /* The row exists whether or not the section is lettered, so the cells of a
+     blues and the cells of an AABA start at the same height. */
+  min-height: 12px;
+}
+
+/* Small, grey, and only interesting on hover — a section's loop button sits
+   above music you are reading, and thirty-two bars of AABA would otherwise be
+   four bright arrows competing with the bar you are playing. */
+.jam-timeline-loop {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  width: 16px;
+  height: 12px;
+  border: 0;
+  background: none;
+  color: var(--text-faint);
+  opacity: 0.55;
+  cursor: pointer;
+  transition: color 0.12s ease, opacity 0.12s ease;
+}
+
+.jam-timeline-loop:hover {
+  opacity: 1;
+  color: var(--text-secondary);
+}
+
+.jam-timeline-loop.active {
+  opacity: 1;
+  color: var(--accent);
+}
+
+.jam-timeline-cell {
+  /* The cells are buttons now. Everything a button brings with it and this row
+     does not want, taken away in one place. */
+  appearance: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: center;
+}
+
+.jam-timeline-cell:disabled {
+  cursor: default;
+}
+
+.jam-timeline-cell:not(:disabled):hover {
+  border-color: color-mix(in srgb, var(--text-primary) 26%, transparent);
+  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+}
+
+/* A looped bar is inside a bracket, not painted a colour: the loop is a
+   boundary — these bars and not those — and a wash over four cells competes
+   with the lit one for the eye. */
+.jam-timeline-cell[data-looped] {
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+}
+
+/* The bar the form is on its way to. A caret on the leading edge rather than a
+   fill: nothing is playing there yet, and two bright cells would be two
+   answers to "where am I". */
+.jam-timeline-next {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  z-index: 2;
+  background: var(--accent);
+  pointer-events: none;
+}
+
+.jam-timeline-cell[data-pending] {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  border-style: dashed;
 }
 
 @media (max-width: 1279px) {
