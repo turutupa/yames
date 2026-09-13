@@ -45,6 +45,11 @@
 .jam-blank {
   margin-top: auto;
   margin-bottom: auto;
+  /* The stage column aligns its children to the start so a long jam reads
+     from the left; the blank state is the one child that should not, or it
+     hugs the left edge of an otherwise empty screen. */
+  align-self: center;
+  width: 100%;
 }
 
 /* ── Tempo, with feel and intensity beside it ───────────────────────────────

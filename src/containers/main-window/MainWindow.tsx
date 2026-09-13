@@ -794,6 +794,35 @@ export function MainWindow() {
     return () => window.removeEventListener("keydown", onKey);
   }, [setlistSession.setlist, askToLeave]);
 
+  /**
+   * The row in the library keeps the focus a click gave it. Space would then
+   * press the row again — and pressing the open jam's row is the gesture
+   * that closes it — so the first Space after loading a jam un-selected it
+   * instead of playing. Releasing the row hands Space back to the transport.
+   */
+  const releaseSidebarFocus = useCallback(() => {
+    const active = document.activeElement as HTMLElement | null;
+    if (active && active.closest(".preset-sidebar")) active.blur();
+  }, []);
+
+  // Escape is the jam's other door too, with the same guards as the setlist's.
+  useEffect(() => {
+    if (view !== "jam" || !jamSession.jam) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      const el = document.activeElement as HTMLElement | null;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
+      if (document.querySelector('[role="dialog"], [role="alertdialog"]')) return;
+      if (jamSession.screen?.editorOpen) return;
+      guarded(() => {
+        jamSession.closeJam();
+        releaseSidebarFocus();
+      });
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [view, jamSession, guarded, releaseSidebarFocus]);
+
   const activeBeat = currentBeat ? currentBeat.measureBeat : -1;
   const activeSub = currentBeat ? currentBeat.subdivision : -1;
   const isDownbeat = currentBeat?.isDownbeat ?? false;
@@ -1193,11 +1222,11 @@ export function MainWindow() {
           // Clicking the jam you are already in is the way out of it, the same
           // gesture that closes an open setlist.
           onLoadJam={(next) =>
-            guarded(() =>
-              next.id === jamSession.jam?.id
-                ? jamSession.closeJam()
-                : jamSession.loadJam(next),
-            )
+            guarded(() => {
+              if (next.id === jamSession.jam?.id) jamSession.closeJam();
+              else jamSession.loadJam(next);
+              releaseSidebarFocus();
+            })
           }
           onNewJam={handleNewJam}
           onDeleteJam={jamSession.deleteJam}
