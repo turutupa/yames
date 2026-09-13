@@ -363,7 +363,7 @@ const SUB_GAIN: f32 = 0.30;
                 // Blackman window over the whole kernel
             // Normalising by the taps actually used keeps the level steady at
             // the edges, where half the kernel hangs off the end of the sample.
-fn resample(mono: &[f32], source_sr: u32, target_sr: u32) -> Vec<f32> {
+pub(crate) fn resample(mono: &[f32], source_sr: u32, target_sr: u32) -> Vec<f32> {
     if source_sr == target_sr {
         return mono.to_vec();
     }
@@ -535,7 +535,203 @@ impl KitVoice {
 }
 
 // ---------------------------------------------------------------------------
-// The bass — a synthesised bank, one buffer per semitone
+// The pitched voices — one synthesised bank per voice, per semitone
+// ---------------------------------------------------------------------------
+//
+// EVERY PARTIAL IN THIS SECTION IS `sin(n · φ)` AND EVERY ENVELOPE IS
+// POSITIVE. That is not a stylistic preference, it is what makes the tuning
+// of nine instruments measurable rather than asserted.
+//
+// A sine of an integer multiple of the fundamental's phase is zero wherever
+// the fundamental is, and multiplying by a positive scalar cannot move a
+// zero crossing. So however elaborate a recipe gets — a slap's snap, an
+// organ's drawbars, a pad's filter — the buffer's upward zero crossings
+// still sit exactly on the fundamental's period, and
+// `the_bass_bank_is_in_tune` / `the_keys_bank_is_in_tune` can read the pitch
+// straight off the samples.
+//
+// Two things follow, and both are rules rather than suggestions:
+//
+// * **No noise layers.** A picked bass's click and a slap's snap are BANDS
+//   OF HIGH HARMONICS with a very short decay, not filtered noise. They
+//   sound the same and they cannot move a crossing.
+// * **No time-domain filters.** "A saw through a low-pass" is built as a
+//   harmonic series whose amplitudes carry the filter's MAGNITUDE response
+//   ([`one_pole_magnitude`]). A real one-pole would also carry its phase
+//   response, which shifts every partial by a different amount and turns
+//   the tuning measurement into a guess.
+//
+// Nothing here runs on the audio thread: a bank is built once, when a
+// device opens, and the voice a jam plays is chosen when the table is
+// compiled.
+
+/// Concert pitch. Every note in every bank is `440 × 2^((midi − 69) / 12)`.
+const TUNING_HZ: f64 = 440.0;
+
+/// The peak every note of every bank is normalised to — the same ceiling
+/// the kit files carry, for the same reason: **the banks carry timbre, the
+/// engine carries balance**. What holds a slap bass down against a fingered
+/// one is `BASS_VOICE_TRIM` in `jam.rs`, not a quieter bank.
+const VOICE_PEAK: f32 = 0.9;
+
+/// The highest partial any recipe is allowed to place, as a fraction of the
+/// sample rate. Anything at or above this is dropped rather than aliased —
+/// a clav's eighth harmonic at the top of the keys range is 8.4 kHz, which
+/// is fine at 44.1 kHz and would fold back at 16.
+const PARTIAL_CEILING: f64 = 0.45;
+
+/// A raised-cosine fade from 0 to 1 over `x ∈ [0, 1]`. Positive throughout,
+/// so it can be used as an envelope without touching a zero crossing.
+#[inline]
+fn fade_in(x: f64) -> f64 {
+    0.5 - 0.5 * (std::f64::consts::PI * x.clamp(0.0, 1.0)).cos()
+}
+
+/// The same curve the other way up: 1 down to 0.
+#[inline]
+fn fade_out(x: f64) -> f64 {
+    0.5 + 0.5 * (std::f64::consts::PI * x.clamp(0.0, 1.0)).cos()
+}
+
+/// The magnitude response of a one-pole low-pass at `cutoff`, evaluated at
+/// `freq`. Magnitude only — see the section note on why the phase is thrown
+/// away deliberately.
+#[inline]
+fn one_pole_magnitude(freq: f64, cutoff: f64) -> f64 {
+    1.0 / (1.0 + (freq / cutoff).powi(2)).sqrt()
+}
+
+/// One partial of a recipe: which harmonic, how loud, and how fast it dies.
+///
+/// `tau` is the exponential the partial decays on, in seconds; [`HELD`]
+/// means it does not decay at all, which is what an organ drawbar does.
+#[derive(Clone, Copy)]
+struct Partial {
+    n: u32,
+    amp: f64,
+    tau: f64,
+}
+
+/// A partial — or a whole note — that holds its level until the release.
+const HELD: f64 = f64::MAX;
+
+/// Sum a recipe's partials at one instant.
+///
+/// `phase` is `2π·f0·t` with `t` in seconds from the start of the note.
+/// `top` is the highest harmonic this sample rate can carry; above it a
+/// partial is dropped rather than folded back into the audible band.
+#[inline]
+fn partials_at(recipe: &[Partial], phase: f64, t: f64, top: u32) -> f64 {
+    let mut v = 0.0;
+    for p in recipe {
+        if p.n > top {
+            continue;
+        }
+        let a = if p.tau == HELD {
+            p.amp
+        } else {
+            p.amp * (-t / p.tau).exp()
+        };
+        // Below a millionth of full scale a partial is arithmetic, not
+        // sound; skipping it is what keeps a fourteen-partial slap from
+        // costing fourteen sines for the whole of its tail.
+        if a.abs() < 1e-6 {
+            continue;
+        }
+        v += a * (p.n as f64 * phase).sin();
+    }
+    v
+}
+
+/// Everything one voice's note needs, so the nine recipes below are data
+/// and there is one synthesiser rather than nine.
+struct Recipe {
+    /// How long the buffer is, in seconds. The table's cap usually cuts a
+    /// note shorter; this is the longest it can ring.
+    secs: f64,
+    /// The fade-in at the front, in seconds. Two milliseconds is "does not
+    /// click"; a hundred and eighty is a pad swelling.
+    attack_secs: f64,
+    /// The exponential the whole note decays on, or [`HELD`] for a voice
+    /// that sustains until its release.
+    body_tau: f64,
+    /// How much of the tail is taken to true zero with a raised cosine.
+    /// Rule 6 of `src-tauri/sounds/KITS.md`: land the decay on zero, do not
+    /// cut it there.
+    release_fraction: f64,
+    /// The harmonics that make up the tone.
+    partials: &'static [Partial],
+    /// A one-pole low-pass applied to the partials' AMPLITUDES, as a
+    /// multiple of the note's own fundamental — so the filter tracks the
+    /// pitch instead of making the bottom of the range muddy and the top
+    /// thin — clamped to the Hz range that follows it. `None` is no filter.
+    filter: Option<(f64, f64, f64)>,
+}
+
+/// One note of one voice.
+///
+/// Runs once per note when a bank is built — never on the audio thread.
+fn voice_note(recipe: &Recipe, midi: u8, sr: u32) -> Vec<f32> {
+    let sr_f = sr as f64;
+    let freq = TUNING_HZ * 2f64.powf((midi as f64 - 69.0) / 12.0);
+    let len = (recipe.secs * sr_f) as usize;
+    if len == 0 || freq <= 0.0 {
+        return Vec::new();
+    }
+    let w = 2.0 * std::f64::consts::PI * freq / sr_f;
+    let attack = (recipe.attack_secs * sr_f).max(1.0);
+    let release_from = (len as f64 * (1.0 - recipe.release_fraction)) as usize;
+    // The highest harmonic this rate can carry without folding back.
+    let top = ((PARTIAL_CEILING * sr_f / freq) as u32).max(1);
+
+    // The filter, resolved into per-partial gains once rather than per
+    // sample. A one-pole's magnitude does not change with time, so this is
+    // the whole of it.
+    let filtered: Vec<Partial> = match recipe.filter {
+        Some((mult, lo, hi)) => {
+            let cutoff = (freq * mult).clamp(lo, hi);
+            recipe
+                .partials
+                .iter()
+                .map(|p| Partial {
+                    amp: p.amp * one_pole_magnitude(freq * p.n as f64, cutoff),
+                    ..*p
+                })
+                .collect()
+        }
+        None => recipe.partials.to_vec(),
+    };
+
+    let mut out = vec![0.0f32; len];
+    for (i, s) in out.iter_mut().enumerate() {
+        let t = i as f64 / sr_f;
+        let phase = w * i as f64;
+        let v = partials_at(&filtered, phase, t, top);
+        let mut env = if recipe.body_tau == HELD {
+            1.0
+        } else {
+            (-t / recipe.body_tau).exp()
+        };
+        if (i as f64) < attack {
+            env *= fade_in(i as f64 / attack);
+        }
+        if i >= release_from && len > release_from {
+            env *= fade_out((i - release_from) as f64 / (len - release_from) as f64);
+        }
+        *s = (v * env) as f32;
+    }
+    let peak = out.iter().fold(0.0f32, |m, s| m.max(s.abs()));
+    if peak > 0.0 {
+        let g = VOICE_PEAK / peak;
+        for s in out.iter_mut() {
+            *s *= g;
+        }
+    }
+    out
+}
+
+// ---------------------------------------------------------------------------
+// The bass — five voices, twenty-eight notes each
 // ---------------------------------------------------------------------------
 
 /// E1, the bottom of a four-string bass. Mirrors `BASS_MIN_MIDI` in
@@ -546,105 +742,250 @@ pub const BASS_MAX_MIDI: u8 = 55;
 /// Twenty-eight semitones, E1 to G3 inclusive.
 pub const BASS_NOTES: usize = (BASS_MAX_MIDI - BASS_MIN_MIDI + 1) as usize;
 
-/// Concert pitch. Every note in the bank is `440 × 2^((midi − 69) / 12)`.
-const BASS_TUNING_HZ: f64 = 440.0;
-/// How long one note's buffer is. The cap in the table usually cuts it
-/// shorter (see `bass` in `jam.rs`); this is the longest a note can ring.
-const BASS_NOTE_SECS: f64 = 0.45;
-/// The exponential the body decays on. 0.15 s puts the note 26 dB down by
-/// the time the buffer ends, which is where the release taper takes over —
-/// a plucked bass, not an organ.
-const BASS_DECAY_TAU: f64 = 0.15;
-/// A raised-cosine fade-in, so a note that starts mid-waveform is not a
-/// click. Two milliseconds is under a tenth of a cycle at E1 and inaudible
-/// as a delay; the note still starts on the sample the tick lands on.
-const BASS_ATTACK_SECS: f64 = 0.002;
-/// The saw-ish attack: how fast the bite dies. 12 ms is a finger on a
-/// string, not a synth.
-const BASS_BITE_SECS: f64 = 0.012;
-/// How much of that bite there is.
-const BASS_BITE: f64 = 0.35;
-/// A touch of second harmonic, which is what stops a bass being a sine.
-/// Under 0.5, so it cannot move a zero crossing and the tuning stays
-/// measurable — see `the_bass_bank_is_in_tune`.
-const BASS_SECOND_HARMONIC: f64 = 0.22;
-/// The last fifth of the buffer is taken to true zero with a raised cosine.
-/// Rule 6 of `src-tauri/sounds/KITS.md`: land the decay on zero, do not cut
-/// it there. A 4 ms cut at 41 Hz is a sixth of a cycle — an amplitude step,
-/// and a DC offset an order of magnitude above everything else.
-const BASS_RELEASE_FRACTION: f64 = 0.2;
-/// Every note is normalised to this. The same ceiling the kit files hold,
-/// for the same reason: the files carry timbre, the engine carries balance.
-const BASS_PEAK: f32 = 0.9;
+/// How many bass voices there are. `JamBassVoice` in `src/jam/types.ts` is
+/// the same five words.
+pub const BASS_VOICE_COUNT: usize = 5;
 
-/// One note of the bass, synthesised.
+/// Which bass the band has. `bassVoice` on the config names one of these;
+/// an unknown name is [`BassVoice::Fingered`], for the reason an unknown kit
+/// is `room` — a jam saved by a later build that knows more voices must
+/// still play.
 ///
-/// A sine fundamental with a touch of second harmonic and a short saw-ish
-/// attack, decaying exponentially. It has to sit *under* drums, not solo, so
-/// it is deliberately plain: everything above the second harmonic is gone
-/// within 12 ms, and what is left is a fundamental a guitarist can hear the
-/// root of while playing over it.
-///
-/// The saw is a truncated harmonic series rather than a real ramp. A ramp at
-/// 41 Hz has partials past Nyquist at every device rate and would alias into
-/// an audible buzz; summing `sin(n·φ)/n` up to a partial count chosen from
-/// the note's own frequency cannot. It also keeps the tuning measurable:
-/// every component is a sine of an integer multiple of φ, so every one of
-/// them is zero where the fundamental is, and the buffer's zero crossings
-/// sit exactly on the period. The envelopes are positive scalars and cannot
-/// move them either.
-///
-/// Runs once per note when the bank is built — never on the audio thread.
-fn bass_note(midi: u8, sr: u32) -> Vec<f32> {
-    let sr_f = sr as f64;
-    let freq = BASS_TUNING_HZ * 2f64.powf((midi as f64 - 69.0) / 12.0);
-    let len = (BASS_NOTE_SECS * sr_f) as usize;
-    if len == 0 || freq <= 0.0 {
-        return Vec::new();
-    }
-    let w = 2.0 * std::f64::consts::PI * freq / sr_f;
-    // Band-limited by construction: the highest partial sits at 45% of the
-    // sample rate at worst, and twelve is as much bite as a bass wants.
-    let partials = ((0.45 * sr_f / freq) as usize).clamp(1, 12);
-    let attack = (BASS_ATTACK_SECS * sr_f).max(1.0);
-    let release_from = (len as f64 * (1.0 - BASS_RELEASE_FRACTION)) as usize;
+/// **The audio thread never sees one of these as a name.** It is resolved
+/// into the `SoundId` when the table is compiled, in the `set_jam` command,
+/// exactly as a kit is.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum BassVoice {
+    /// The pluck the first pass shipped, with a little more attack on it.
+    Fingered,
+    /// A plectrum: a sharp click, a faster decay, more second harmonic.
+    Picked,
+    /// A double bass — soft attack, thump, short sustain, low-passed.
+    Upright,
+    /// Thumb and pop: a bright transient, a snap, then nothing.
+    Slap,
+    /// A saw through a low-pass, held. The one bass voice that sustains.
+    Synth,
+}
 
-    let mut out = vec![0.0f32; len];
-    for (i, s) in out.iter_mut().enumerate() {
-        let t = i as f64 / sr_f;
-        let phase = w * i as f64;
-        let mut v = phase.sin() + BASS_SECOND_HARMONIC * (2.0 * phase).sin();
-        let bite = (-t / BASS_BITE_SECS).exp();
-        if bite > 1e-4 {
-            let mut saw = 0.0;
-            for n in 1..=partials {
-                saw += (phase * n as f64).sin() / n as f64;
-            }
-            v += BASS_BITE * bite * saw;
-        }
-        let mut env = (-t / BASS_DECAY_TAU).exp();
-        if (i as f64) < attack {
-            let x = i as f64 / attack;
-            env *= 0.5 - 0.5 * (std::f64::consts::PI * x).cos();
-        }
-        if i >= release_from && len > release_from {
-            let x = (i - release_from) as f64 / (len - release_from) as f64;
-            env *= 0.5 + 0.5 * (std::f64::consts::PI * x).cos();
-        }
-        *s = (v * env) as f32;
-    }
-    let peak = out.iter().fold(0.0f32, |m, s| m.max(s.abs()));
-    if peak > 0.0 {
-        let g = BASS_PEAK / peak;
-        for s in out.iter_mut() {
-            *s *= g;
+impl BassVoice {
+    /// Every voice, in the order the bank stores them.
+    pub const ALL: [BassVoice; BASS_VOICE_COUNT] = [
+        Self::Fingered,
+        Self::Picked,
+        Self::Upright,
+        Self::Slap,
+        Self::Synth,
+    ];
+
+    /// The name the contract uses (`JamBassVoice` in `src/jam/types.ts`).
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::Fingered => "fingered",
+            Self::Picked => "picked",
+            Self::Upright => "upright",
+            Self::Slap => "slap",
+            Self::Synth => "synth",
         }
     }
-    out
+
+    /// Read a voice out of a config. Unknown names are `fingered`; case is
+    /// ignored, because a hand-edited store is a real thing.
+    pub fn from_name(name: &str) -> Self {
+        match name.trim().to_ascii_lowercase().as_str() {
+            "picked" => Self::Picked,
+            "upright" => Self::Upright,
+            "slap" => Self::Slap,
+            "synth" => Self::Synth,
+            _ => Self::Fingered,
+        }
+    }
+
+    fn recipe(self) -> &'static Recipe {
+        match self {
+            Self::Fingered => &FINGERED,
+            Self::Picked => &PICKED,
+            Self::Upright => &UPRIGHT,
+            Self::Slap => &SLAP,
+            Self::Synth => &SYNTH_BASS,
+        }
+    }
+}
+
+/// The pluck the first pass shipped, with more finger on it.
+///
+/// A sine fundamental, a touch of second harmonic, and a short saw-ish bite
+/// that is gone in a few hundredths of a second. The bite is a truncated
+/// harmonic series rather than a real ramp: a ramp at 41 Hz has partials
+/// past Nyquist at every device rate and would buzz.
+static FINGERED: Recipe = Recipe {
+    secs: 0.45,
+    attack_secs: 0.002,
+    body_tau: 0.15,
+    release_fraction: 0.2,
+    partials: &[
+        Partial { n: 1, amp: 1.0, tau: HELD },
+        Partial { n: 2, amp: 0.22, tau: HELD },
+        // The bite: a truncated saw, `BITE / n` on every partial including
+        // the fundamental, exactly as the first pass built it — the same
+        // series, one entry per harmonic instead of a loop.
+        //
+        // 0.42 over 14 ms, where the first pass had 0.35 over 12. That is
+        // the whole of "a little more attack" (B9), and it is deliberately
+        // the smallest change that could be: the fingered bass is what
+        // every jam already saved on this machine plays, so it has to still
+        // be recognisably the same instrument.
+        Partial { n: 1, amp: 0.420, tau: 0.014 },
+        Partial { n: 2, amp: 0.210, tau: 0.014 },
+        Partial { n: 3, amp: 0.140, tau: 0.014 },
+        Partial { n: 4, amp: 0.105, tau: 0.014 },
+        Partial { n: 5, amp: 0.084, tau: 0.014 },
+        Partial { n: 6, amp: 0.070, tau: 0.014 },
+        Partial { n: 7, amp: 0.060, tau: 0.014 },
+        Partial { n: 8, amp: 0.053, tau: 0.014 },
+        Partial { n: 9, amp: 0.047, tau: 0.014 },
+        Partial { n: 10, amp: 0.042, tau: 0.014 },
+        Partial { n: 11, amp: 0.038, tau: 0.014 },
+        Partial { n: 12, amp: 0.035, tau: 0.014 },
+    ],
+    filter: None,
+};
+
+
+/// A plectrum. Everything the finger does, faster and harder.
+///
+/// The click is a band of high harmonics with a six-millisecond decay —
+/// audibly a pick hitting a wound string, mathematically still `sin(n·φ)`,
+/// so the tuning stays measurable. The body dies in 110 ms rather than 150,
+/// which is what makes a picked line articulate instead of blurred.
+static PICKED: Recipe = Recipe {
+    secs: 0.38,
+    attack_secs: 0.001,
+    body_tau: 0.11,
+    release_fraction: 0.2,
+    partials: &[
+        Partial { n: 1, amp: 1.0, tau: HELD },
+        Partial { n: 2, amp: 0.30, tau: HELD },
+        Partial { n: 3, amp: 0.14, tau: 0.030 },
+        // The click.
+        Partial { n: 6, amp: 0.22, tau: 0.006 },
+        Partial { n: 7, amp: 0.22, tau: 0.006 },
+        Partial { n: 8, amp: 0.20, tau: 0.006 },
+        Partial { n: 9, amp: 0.18, tau: 0.005 },
+        Partial { n: 10, amp: 0.17, tau: 0.005 },
+        Partial { n: 11, amp: 0.15, tau: 0.005 },
+        Partial { n: 12, amp: 0.14, tau: 0.004 },
+        Partial { n: 13, amp: 0.12, tau: 0.004 },
+        Partial { n: 14, amp: 0.11, tau: 0.004 },
+        Partial { n: 15, amp: 0.10, tau: 0.004 },
+        Partial { n: 16, amp: 0.09, tau: 0.003 },
+    ],
+    filter: None,
+};
+
+/// A double bass. Gut, not steel.
+///
+/// A twelve-millisecond fade-in is the finger pulling the string rather than
+/// striking it; the low-pass at two and a half times the fundamental takes
+/// nearly everything above the second harmonic away, which is what makes it
+/// a thump with a pitch instead of a note with an edge. Short sustain: a
+/// hundred milliseconds, so a walking line is a series of thumps and not a
+/// drone.
+static UPRIGHT: Recipe = Recipe {
+    secs: 0.32,
+    attack_secs: 0.012,
+    body_tau: 0.10,
+    release_fraction: 0.25,
+    partials: &[
+        Partial { n: 1, amp: 1.0, tau: HELD },
+        Partial { n: 2, amp: 0.34, tau: 0.060 },
+        Partial { n: 3, amp: 0.18, tau: 0.035 },
+        Partial { n: 4, amp: 0.10, tau: 0.025 },
+        Partial { n: 5, amp: 0.06, tau: 0.020 },
+    ],
+    // 2.5 × the fundamental, held between 110 and 400 Hz: the top of the
+    // range would otherwise get a filter five times higher than the bottom
+    // and stop being the same instrument.
+    filter: Some((2.5, 110.0, 400.0)),
+};
+
+/// Thumb and pop.
+///
+/// Two transients rather than one, because that is what the technique is: a
+/// very bright three-millisecond crack as the thumb drives the string onto
+/// the fretboard, a twenty-five-millisecond snap in the upper mids as it
+/// comes back off, and a body that is gone in ninety. Nothing here
+/// sustains; a slap line is percussion with pitches.
+static SLAP: Recipe = Recipe {
+    secs: 0.36,
+    attack_secs: 0.001,
+    body_tau: 0.09,
+    release_fraction: 0.2,
+    partials: &[
+        Partial { n: 1, amp: 1.0, tau: HELD },
+        Partial { n: 2, amp: 0.26, tau: 0.070 },
+        // The snap.
+        Partial { n: 3, amp: 0.34, tau: 0.025 },
+        Partial { n: 4, amp: 0.30, tau: 0.025 },
+        Partial { n: 5, amp: 0.26, tau: 0.022 },
+        Partial { n: 6, amp: 0.22, tau: 0.022 },
+        Partial { n: 7, amp: 0.20, tau: 0.020 },
+        // The crack.
+        Partial { n: 10, amp: 0.26, tau: 0.003 },
+        Partial { n: 12, amp: 0.24, tau: 0.003 },
+        Partial { n: 14, amp: 0.22, tau: 0.003 },
+        Partial { n: 16, amp: 0.20, tau: 0.0025 },
+        Partial { n: 18, amp: 0.18, tau: 0.0025 },
+        Partial { n: 20, amp: 0.16, tau: 0.002 },
+    ],
+    filter: None,
+};
+
+/// A saw through a low-pass, held.
+///
+/// The one bass voice that does not die on its own: the envelope decays over
+/// six hundred milliseconds rather than a hundred and fifty, so a synth bass
+/// under a pop groove is a line and not a series of plucks. The table's cap
+/// still ends the note where the next one starts, which is what stops it
+/// becoming a drone.
+static SYNTH_BASS: Recipe = Recipe {
+    secs: 0.55,
+    attack_secs: 0.004,
+    body_tau: 0.35,
+    release_fraction: 0.2,
+    partials: &[
+        Partial { n: 1, amp: 1.0, tau: HELD },
+        Partial { n: 2, amp: 0.500, tau: HELD },
+        Partial { n: 3, amp: 0.333, tau: HELD },
+        Partial { n: 4, amp: 0.250, tau: HELD },
+        Partial { n: 5, amp: 0.200, tau: HELD },
+        Partial { n: 6, amp: 0.167, tau: HELD },
+        Partial { n: 7, amp: 0.143, tau: HELD },
+        Partial { n: 8, amp: 0.125, tau: HELD },
+        Partial { n: 9, amp: 0.111, tau: HELD },
+        Partial { n: 10, amp: 0.100, tau: HELD },
+        Partial { n: 11, amp: 0.091, tau: HELD },
+        Partial { n: 12, amp: 0.083, tau: HELD },
+    ],
+    // The filter IS the voice, and it is set LOW on purpose. A saw with
+    // nothing over it is a buzz, and a buzz is not a bass: measured through
+    // the small-speaker band-pass, this recipe with the cutoff at four times
+    // the fundamental came out **+14.9 dB** against the fingered bass, which
+    // is not a voice that needs trimming, it is the wrong instrument. At
+    // twice the fundamental only the first two harmonics survive at any
+    // strength, which is the round synth bass a pop record has — and it
+    // lands close enough to the others that `BASS_VOICE_TRIM` is a balance
+    // rather than a rescue.
+    filter: Some((2.0, 120.0, 500.0)),
+};
+
+/// One note of the bass, in one voice.
+fn bass_note(voice: BassVoice, midi: u8, sr: u32) -> Vec<f32> {
+    voice_note(voice.recipe(), midi, sr)
 }
 
 // ---------------------------------------------------------------------------
-// The keys — a synthesised bank, one buffer per semitone
+// The keys — four voices, thirty-seven notes each
 // ---------------------------------------------------------------------------
 
 /// C3, the bottom of the comping range. Mirrors the range `JamKeysLine`
@@ -656,98 +997,166 @@ pub const KEYS_MAX_MIDI: u8 = 84;
 /// Thirty-seven semitones, C3 to C6 inclusive — three octaves.
 pub const KEYS_NOTES: usize = (KEYS_MAX_MIDI - KEYS_MIN_MIDI + 1) as usize;
 
-/// Concert pitch, the same A the bass is tuned to.
-const KEYS_TUNING_HZ: f64 = 440.0;
-/// How long one note's buffer is. The cap in the table usually cuts it
-/// shorter (a voicing rings until the next one or the bar line); this is the
-/// longest a note can ring.
-const KEYS_NOTE_SECS: f64 = 0.70;
-/// The exponential the body decays on. `KEYS_NOTE_SECS / 3` puts the note
-/// 26 dB down by the time the buffer ends, where the release taper takes
-/// over — the same shape the bass uses, three times longer.
-const KEYS_DECAY_TAU: f64 = KEYS_NOTE_SECS / 3.0;
-/// A raised-cosine fade-in. Three milliseconds is the attack an electric
-/// piano has: enough to be a struck note rather than an organ stop, short
-/// enough that the chord still lands on the tick.
-const KEYS_ATTACK_SECS: f64 = 0.003;
-/// A touch of second and third harmonic, which is what stops the voice being
-/// a sine. Both stay well under 0.5 so they cannot move a zero crossing and
-/// the tuning stays measurable — see `the_keys_bank_is_in_tune`.
-const KEYS_SECOND_HARMONIC: f64 = 0.30;
-const KEYS_THIRD_HARMONIC: f64 = 0.15;
-/// The harmonics die faster than the fundamental, which is the whole
-/// character of a struck string: bright for a moment, then a tone. Halves
-/// and thirds of the body's own decay.
-const KEYS_SECOND_TAU: f64 = KEYS_DECAY_TAU / 2.0;
-const KEYS_THIRD_TAU: f64 = KEYS_DECAY_TAU / 3.0;
-/// The last fifth of the buffer is taken to true zero with a raised cosine.
-/// Rule 6 of `src-tauri/sounds/KITS.md`, and the same reason the bass has
-/// one: land the decay on zero, do not cut it there.
-const KEYS_RELEASE_FRACTION: f64 = 0.2;
-/// Every note is normalised to this — the ceiling the kit files and the bass
-/// hold. The files carry timbre, the engine carries balance: what keeps the
-/// keys UNDER the band is `KEYS_TRIM` in `jam.rs`, not a quiet bank.
-const KEYS_PEAK: f32 = 0.9;
+/// How many keys voices there are. `JamKeysVoice` in `src/jam/types.ts` is
+/// the same four words.
+pub const KEYS_VOICE_COUNT: usize = 4;
 
-/// One note of the comping voice, synthesised.
-///
-/// A soft electric-piano-ish tone: a sine fundamental with a touch of second
-/// and third harmonic that decay faster than it does, a three-millisecond
-/// attack and a ~700 ms exponential tail. It exists to put harmony under
-/// what you are playing, so it is deliberately plain — no bell partials, no
-/// tremolo, nothing that would pull an ear off the neck.
-///
-/// Like the bass, every component is a sine of an integer multiple of the
-/// fundamental's phase, so every one of them is zero where the fundamental
-/// is and the buffer's zero crossings sit exactly on the period. That is
-/// what makes the tuning measurable rather than asserted.
-///
-/// Runs once per note when the bank is built — never on the audio thread.
-fn keys_note(midi: u8, sr: u32) -> Vec<f32> {
-    let sr_f = sr as f64;
-    let freq = KEYS_TUNING_HZ * 2f64.powf((midi as f64 - 69.0) / 12.0);
-    let len = (KEYS_NOTE_SECS * sr_f) as usize;
-    if len == 0 || freq <= 0.0 {
-        return Vec::new();
-    }
-    let w = 2.0 * std::f64::consts::PI * freq / sr_f;
-    let attack = (KEYS_ATTACK_SECS * sr_f).max(1.0);
-    let release_from = (len as f64 * (1.0 - KEYS_RELEASE_FRACTION)) as usize;
-    // The third harmonic of the top note is 3.1 kHz, so nothing here is ever
-    // near Nyquist at any rate a device hands out. Guarded anyway: a bank
-    // built at some future 8 kHz rate should lose the partial, not alias it.
-    let nyquist = sr_f * 0.45;
+/// Who is on the keys. Resolved into the `SoundId` when the table is
+/// compiled, like the bass and the kit; unknown names are `epiano`.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum KeysVoice {
+    /// The electric piano the first pass shipped.
+    Epiano,
+    /// Drawbars, no decay, and the click a tonewheel makes on the key.
+    Organ,
+    /// Very short, very bright, percussive.
+    Clav,
+    /// Slow attack, long release, filtered.
+    Pad,
+}
 
-    let mut out = vec![0.0f32; len];
-    for (i, s) in out.iter_mut().enumerate() {
-        let t = i as f64 / sr_f;
-        let phase = w * i as f64;
-        let mut v = phase.sin() * (-t / KEYS_DECAY_TAU).exp();
-        if freq * 2.0 < nyquist {
-            v += KEYS_SECOND_HARMONIC * (2.0 * phase).sin() * (-t / KEYS_SECOND_TAU).exp();
-        }
-        if freq * 3.0 < nyquist {
-            v += KEYS_THIRD_HARMONIC * (3.0 * phase).sin() * (-t / KEYS_THIRD_TAU).exp();
-        }
-        let mut env = 1.0;
-        if (i as f64) < attack {
-            let x = i as f64 / attack;
-            env *= 0.5 - 0.5 * (std::f64::consts::PI * x).cos();
-        }
-        if i >= release_from && len > release_from {
-            let x = (i - release_from) as f64 / (len - release_from) as f64;
-            env *= 0.5 + 0.5 * (std::f64::consts::PI * x).cos();
-        }
-        *s = (v * env) as f32;
-    }
-    let peak = out.iter().fold(0.0f32, |m, s| m.max(s.abs()));
-    if peak > 0.0 {
-        let g = KEYS_PEAK / peak;
-        for s in out.iter_mut() {
-            *s *= g;
+impl KeysVoice {
+    /// Every voice, in the order the bank stores them.
+    pub const ALL: [KeysVoice; KEYS_VOICE_COUNT] =
+        [Self::Epiano, Self::Organ, Self::Clav, Self::Pad];
+
+    /// The name the contract uses (`JamKeysVoice` in `src/jam/types.ts`).
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::Epiano => "epiano",
+            Self::Organ => "organ",
+            Self::Clav => "clav",
+            Self::Pad => "pad",
         }
     }
-    out
+
+    /// Unknown names are `epiano`, case ignored.
+    pub fn from_name(name: &str) -> Self {
+        match name.trim().to_ascii_lowercase().as_str() {
+            "organ" => Self::Organ,
+            "clav" => Self::Clav,
+            "pad" => Self::Pad,
+            _ => Self::Epiano,
+        }
+    }
+
+    fn recipe(self) -> &'static Recipe {
+        match self {
+            Self::Epiano => &EPIANO,
+            Self::Organ => &ORGAN,
+            Self::Clav => &CLAV,
+            Self::Pad => &PAD,
+        }
+    }
+}
+
+/// The electric piano the first pass shipped, unchanged.
+///
+/// A sine fundamental with a touch of second and third harmonic that decay
+/// faster than it does — bright for a moment, then a tone, which is the
+/// whole character of a struck string. Three milliseconds of attack: a
+/// struck note rather than an organ stop, short enough that the chord still
+/// lands on the tick.
+static EPIANO: Recipe = Recipe {
+    secs: 0.70,
+    attack_secs: 0.003,
+    // A third of the buffer, which puts the note 26 dB down by the time the
+    // release taper takes over.
+    body_tau: 0.70 / 3.0,
+    release_fraction: 0.2,
+    partials: &[
+        Partial { n: 1, amp: 1.0, tau: HELD },
+        // Halves and thirds of the body's own decay.
+        Partial { n: 2, amp: 0.30, tau: 0.70 / 6.0 },
+        Partial { n: 3, amp: 0.15, tau: 0.70 / 9.0 },
+    ],
+    filter: None,
+};
+
+/// A tonewheel organ.
+///
+/// Drawbars rather than a decaying harmonic series: 8', 4', 2⅔', 2' and the
+/// mixtures above them, all of them HELD, because an organ does not decay —
+/// it is on until you take your hand off. That is why this buffer is 1.2 s
+/// where the electric piano's is 0.7: the note has to hold a half-bar chord
+/// at a hundred and twenty, and the table's cap is what should end it, not
+/// the sample running out.
+///
+/// The click is the tonewheel contact bouncing, which on a real one is a
+/// broadband tick lasting about four milliseconds. Here it is the top of the
+/// drawbar series with a four-millisecond decay: the same sound, and one
+/// that cannot move a zero crossing.
+static ORGAN: Recipe = Recipe {
+    secs: 1.20,
+    attack_secs: 0.002,
+    body_tau: HELD,
+    release_fraction: 0.15,
+    partials: &[
+        Partial { n: 1, amp: 1.0, tau: HELD },
+        Partial { n: 2, amp: 0.55, tau: HELD },
+        Partial { n: 3, amp: 0.40, tau: HELD },
+        Partial { n: 4, amp: 0.30, tau: HELD },
+        Partial { n: 6, amp: 0.18, tau: HELD },
+        Partial { n: 8, amp: 0.12, tau: HELD },
+        // The key click.
+        Partial { n: 10, amp: 0.30, tau: 0.004 },
+        Partial { n: 12, amp: 0.28, tau: 0.004 },
+        Partial { n: 14, amp: 0.25, tau: 0.003 },
+        Partial { n: 16, amp: 0.22, tau: 0.003 },
+    ],
+    filter: None,
+};
+
+/// A clavinet. A plucked string with a pickup under it.
+///
+/// Two hundred and twenty milliseconds end to end, which is the point: a
+/// clav part is rhythm, and a clav that rings is a harpsichord. Bright all
+/// the way up the series, with the upper partials dying first, so a chord
+/// speaks and is gone before the next sixteenth.
+static CLAV: Recipe = Recipe {
+    secs: 0.22,
+    attack_secs: 0.001,
+    body_tau: 0.09,
+    release_fraction: 0.25,
+    partials: &[
+        Partial { n: 1, amp: 1.0, tau: HELD },
+        Partial { n: 2, amp: 0.62, tau: 0.070 },
+        Partial { n: 3, amp: 0.48, tau: 0.050 },
+        Partial { n: 4, amp: 0.36, tau: 0.035 },
+        Partial { n: 5, amp: 0.28, tau: 0.025 },
+        Partial { n: 6, amp: 0.22, tau: 0.020 },
+        Partial { n: 7, amp: 0.17, tau: 0.015 },
+        Partial { n: 8, amp: 0.13, tau: 0.012 },
+    ],
+    filter: None,
+};
+
+/// A pad. The voice that is not supposed to be noticed.
+///
+/// A hundred and eighty milliseconds of attack means it never marks a beat —
+/// which is the point, and the reason a pad under a bossa or a pop groove
+/// does not fight the drummer. Nearly half the buffer is release, so it
+/// fades rather than stops. Filtered at twice the fundamental, so what is
+/// left is warmth rather than harmony you have to listen past.
+static PAD: Recipe = Recipe {
+    secs: 1.40,
+    attack_secs: 0.180,
+    body_tau: HELD,
+    release_fraction: 0.45,
+    partials: &[
+        Partial { n: 1, amp: 1.0, tau: HELD },
+        Partial { n: 2, amp: 0.45, tau: HELD },
+        Partial { n: 3, amp: 0.28, tau: HELD },
+        Partial { n: 4, amp: 0.18, tau: HELD },
+        Partial { n: 5, amp: 0.12, tau: HELD },
+        Partial { n: 6, amp: 0.08, tau: HELD },
+    ],
+    filter: Some((2.0, 200.0, 1400.0)),
+};
+
+/// One note of the keys, in one voice.
+fn keys_note(voice: KeysVoice, midi: u8, sr: u32) -> Vec<f32> {
+    voice_note(voice.recipe(), midi, sr)
 }
 
 /// Public for `jam.rs`: a jam table is compiled off the audio thread and
@@ -778,14 +1187,26 @@ pub enum SoundId {
     /// the table is compiled, in the `set_jam` command — never on the audio
     /// thread.
     Kit(JamKit, KitVoice),
-    /// Jam: one note of the bass, indexed `midi − BASS_MIN_MIDI`. Out of
-    /// range reads as silence rather than a panic; `jam.rs` has already
+    /// Jam: one note of one bass voice, indexed `midi − BASS_MIN_MIDI`. Out
+    /// of range reads as silence rather than a panic; `jam.rs` has already
     /// rejected any pitch that could get here.
-    Bass(u8),
-    /// Jam: one note of the comping keys, indexed `midi − KEYS_MIN_MIDI`. A
+    Bass(BassVoice, u8),
+    /// Jam: one note of one keys voice, indexed `midi − KEYS_MIN_MIDI`. A
     /// voicing spawns one of these per note. Out of range reads as silence,
     /// for the same reason the bass does.
-    Keys(u8),
+    Keys(KeysVoice, u8),
+    /// Jam: one drum of the musician's OWN kit — a folder of WAVs on this
+    /// machine (`plans/JAM_UX_DECISIONS.md` B3).
+    ///
+    /// The only `SoundId` the [`SoundBank`] cannot answer, because the bank
+    /// is built when a device opens and this folder is chosen long
+    /// afterwards. It is resolved against the [`crate::kit::CustomBank`] the
+    /// loaded table carries — see [`jam_sample`], which is what the audio
+    /// thread actually calls. A table that names a custom voice always
+    /// carries the bank that holds it: they are the same `Arc<JamTable>`,
+    /// so they arrive together and retire together and there is no window
+    /// in which one is present without the other.
+    Custom(KitVoice),
 }
 
 struct SoundBank {
@@ -807,10 +1228,12 @@ struct SoundBank {
     drum_crash: Vec<f32>,
     /// The jam kits, `[kit][voice]`, laid out like [`KIT_WAVS`].
     kits: [[Vec<f32>; KIT_VOICES]; KIT_COUNT],
-    /// The bass, one buffer per semitone from [`BASS_MIN_MIDI`] up.
-    bass: Vec<Vec<f32>>,
-    /// The comping keys, one buffer per semitone from [`KEYS_MIN_MIDI`] up.
-    keys: Vec<Vec<f32>>,
+    /// The bass, `[voice][semitone from BASS_MIN_MIDI]`, laid out in the
+    /// order [`BassVoice::ALL`] lists them.
+    bass: [Vec<Vec<f32>>; BASS_VOICE_COUNT],
+    /// The comping keys, `[voice][semitone from KEYS_MIN_MIDI]`, laid out in
+    /// the order [`KeysVoice::ALL`] lists them.
+    keys: [Vec<Vec<f32>>; KEYS_VOICE_COUNT],
 }
 
 impl SoundBank {
@@ -937,21 +1360,83 @@ impl SoundBank {
             })
         });
 
-        // And the bass player. Synthesised rather than sampled: 28 notes of
-        // recorded bass would be megabytes for a tone whose whole job is to
-        // be plain and in tune.
-        let bass: Vec<Vec<f32>> = (BASS_MIN_MIDI..=BASS_MAX_MIDI)
-            .map(|midi| bass_note(midi, sr))
-            .collect();
-        debug_assert_eq!(bass.len(), BASS_NOTES, "the bass bank is E1 to G3");
-
-        // And whoever is on the keys. Synthesised for the same reasons, and
-        // three octaves rather than the bass's two and a bit, because a
+        // And the bass player — five of them, because a fingered bass under
+        // a blues and a slap under a funk groove are different instruments
+        // and not the same instrument at different volumes
+        // (`plans/JAM_UX_DECISIONS.md` B9).
+        //
+        // Synthesised rather than sampled: 28 notes × 5 voices of recorded
+        // bass would be tens of megabytes of files for tones whose whole job
+        // is to be plain and in tune. Built here, once, when the device
+        // opens — never on the audio thread, and never per jam.
+        // ...and whoever is on the keys, four of them for the same reason,
+        // three octaves each rather than the bass's two and a bit, because a
         // voicing is four notes that have to fit between the bass and you.
-        let keys: Vec<Vec<f32>> = (KEYS_MIN_MIDI..=KEYS_MAX_MIDI)
-            .map(|midi| keys_note(midi, sr))
-            .collect();
-        debug_assert_eq!(keys.len(), KEYS_NOTES, "the keys bank is C3 to C6");
+        //
+        // NINE THREADS, ONE PER VOICE, BECAUSE THIS IS THE DELAY BEFORE THE
+        // FIRST CLICK. Building all nine in sequence measures 646 ms of the
+        // 964 a whole bank costs on the owner's laptop
+        // (`the_pitched_banks_cost_what_they_are_documented_to_cost`), and
+        // this runs every time an audio device opens — at start-up, and
+        // again whenever the musician changes output. Two hundred and
+        // eighty-eight independent buffers is the easiest parallel problem
+        // there is, and the longest single voice (the pad, at 1.4 s a note)
+        // sets the floor.
+        //
+        // Safe to do here and nowhere near the callback: the stream has not
+        // been built yet, let alone started, so these threads compete with
+        // nothing that has a deadline. `scope` is what lets them borrow
+        // `sr` and end before this function returns.
+        let (bass, keys) = std::thread::scope(|scope| {
+            let bass_jobs: Vec<_> = BassVoice::ALL
+                .iter()
+                .map(|&voice| {
+                    scope.spawn(move || {
+                        (BASS_MIN_MIDI..=BASS_MAX_MIDI)
+                            .map(|midi| bass_note(voice, midi, sr))
+                            .collect::<Vec<Vec<f32>>>()
+                    })
+                })
+                .collect();
+            let keys_jobs: Vec<_> = KeysVoice::ALL
+                .iter()
+                .map(|&voice| {
+                    scope.spawn(move || {
+                        (KEYS_MIN_MIDI..=KEYS_MAX_MIDI)
+                            .map(|midi| keys_note(voice, midi, sr))
+                            .collect::<Vec<Vec<f32>>>()
+                    })
+                })
+                .collect();
+            let mut bass_jobs = bass_jobs.into_iter();
+            let mut keys_jobs = keys_jobs.into_iter();
+            // Collected back in the order they were spawned, which is the
+            // order `BassVoice::ALL` and `KeysVoice::ALL` list them — and
+            // therefore the order `SoundBank::get` indexes them by.
+            let bass: [Vec<Vec<f32>>; BASS_VOICE_COUNT] = std::array::from_fn(|_| {
+                bass_jobs
+                    .next()
+                    .expect("one job per voice")
+                    .join()
+                    .expect("synthesising a bass note cannot fail")
+            });
+            let keys: [Vec<Vec<f32>>; KEYS_VOICE_COUNT] = std::array::from_fn(|_| {
+                keys_jobs
+                    .next()
+                    .expect("one job per voice")
+                    .join()
+                    .expect("synthesising a keys note cannot fail")
+            });
+            (bass, keys)
+        });
+        debug_assert!(
+            bass.iter().all(|v| v.len() == BASS_NOTES),
+            "every bass voice is E1 to G3"
+        );
+        debug_assert!(
+            keys.iter().all(|v| v.len() == KEYS_NOTES),
+            "every keys voice is C3 to C6"
+        );
 
         Self {
             kits,
@@ -999,8 +1484,17 @@ impl SoundBank {
             SoundId::Kit(kit, voice) => &self.kits[kit as usize][voice as usize],
             // A bounds check, not a decision: an out-of-range note is
             // silence on the audio thread rather than a panic in it.
-            SoundId::Bass(i) => self.bass.get(i as usize).map_or(&[][..], |v| &v[..]),
-            SoundId::Keys(i) => self.keys.get(i as usize).map_or(&[][..], |v| &v[..]),
+            SoundId::Bass(voice, i) => self.bass[voice as usize]
+                .get(i as usize)
+                .map_or(&[][..], |v| &v[..]),
+            SoundId::Keys(voice, i) => self.keys[voice as usize]
+                .get(i as usize)
+                .map_or(&[][..], |v| &v[..]),
+            // Not the bank's to answer — see the variant. The audio thread
+            // goes through `jam_sample`, which has the loaded table's own
+            // kit; anything else asking is asking the wrong object, and
+            // silence is the answer that cannot make a noise nobody meant.
+            SoundId::Custom(_) => &[],
         }
     }
 }
@@ -1019,6 +1513,33 @@ pub(crate) const JAM_REFERENCE_SR: u32 = 48_000;
 pub(crate) fn jam_reference_sample(id: SoundId) -> &'static [f32] {
     static BANK: std::sync::OnceLock<SoundBank> = std::sync::OnceLock::new();
     BANK.get_or_init(|| SoundBank::new(JAM_REFERENCE_SR)).get(id)
+}
+
+/// The samples behind a slot the band is playing: the bank for everything
+/// shipped, the loaded table's own folder for a custom drum.
+///
+/// The one place `SoundId::Custom` is answered, and the reason it can be
+/// answered on the audio thread without a lock or an allocation: the bank
+/// travels INSIDE the `Arc<JamTable>` that names it. Whatever table the
+/// callback is reading, the drums it names and the folder they came from
+/// are the same object, so there is no ordering to get wrong and nothing to
+/// look up.
+///
+/// A custom voice with no table behind it renders silence rather than a
+/// wrong drum. That happens for exactly one thing: a kick still ringing
+/// when the musician unloads the jam, which now stops where it used to ring
+/// out. A quarter-second of decay against never resolving a dangling sound
+/// on the audio thread is the trade, and it is the right way round.
+#[inline]
+fn jam_sample<'a>(
+    bank: &'a SoundBank,
+    custom: Option<&'a crate::kit::CustomBank>,
+    id: SoundId,
+) -> &'a [f32] {
+    match id {
+        SoundId::Custom(voice) => custom.map_or(&[][..], |c| c.voice(voice)),
+        other => bank.get(other),
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -3649,10 +4170,18 @@ impl MetronomeEngine {
                             next_beat_sample = sample_counter + tick_samples;
                         }
 
-                        // Mix all active voices
+                        // Mix all active voices.
+                        //
+                        // `custom_kit` is the musician's own folder, when
+                        // the loaded table has one. Read off `cached.jam`
+                        // rather than looked up: it is a field of the table
+                        // the callback is already holding, so it costs one
+                        // `Option` map per frame and cannot be out of step
+                        // with the drums that name it.
+                        let custom_kit = cached.jam.as_deref().and_then(|t| t.custom_kit());
                         let mut mix = 0.0f32;
                         for voice in voices.iter_mut() {
-                            let buf = sounds.get(voice.sound_id);
+                            let buf = jam_sample(&sounds, custom_kit, voice.sound_id);
                             let limit = if voice.max_samples > 0 {
                                 voice.max_samples.min(buf.len())
                             } else {
@@ -3685,8 +4214,9 @@ impl MetronomeEngine {
                     }
 
                     // Remove finished voices (once per buffer)
+                    let custom_kit = cached.jam.as_deref().and_then(|t| t.custom_kit());
                     voices.retain(|v| {
-                        let buf = sounds.get(v.sound_id);
+                        let buf = jam_sample(&sounds, custom_kit, v.sound_id);
                         let limit = if v.max_samples > 0 {
                             v.max_samples.min(buf.len())
                         } else {
@@ -5298,6 +5828,9 @@ mod tests {
             keys: None,
             mix: None,
             count_in_sound: None,
+            bass_voice: None,
+            keys_voice: None,
+            custom_kit: None,
         }
     }
 
@@ -5356,10 +5889,14 @@ mod tests {
                     }
                 }
                 max_voices = max_voices.max(voices.len());
+                // `jam_sample` and not `bank.get`, so this harness resolves
+                // a drum exactly the way the callback does — including a
+                // table whose kit is a folder on the musician's machine.
+                let kit = table.custom_kit();
                 for _ in 0..tick_samples {
                     let mut mix = 0.0f32;
                     for v in voices.iter_mut() {
-                        let buf = bank.get(v.sound_id);
+                        let buf = jam_sample(bank, kit, v.sound_id);
                         let limit = if v.max_samples > 0 {
                             v.max_samples.min(buf.len())
                         } else {
@@ -5374,7 +5911,7 @@ mod tests {
                     pos += 1;
                 }
                 voices.retain(|v| {
-                    let buf = bank.get(v.sound_id);
+                    let buf = jam_sample(bank, kit, v.sound_id);
                     let limit = if v.max_samples > 0 {
                         v.max_samples.min(buf.len())
                     } else {
@@ -6111,6 +6648,9 @@ mod tests {
                 keys: 1.5,
             }),
             count_in_sound: None,
+            bass_voice: None,
+            keys_voice: None,
+            custom_kit: None,
         }
     }
 
@@ -6208,6 +6748,9 @@ mod tests {
             keys: None,
             mix: None,
             count_in_sound: None,
+            bass_voice: None,
+            keys_voice: None,
+            custom_kit: None,
         };
         let table = compile_jam(&cfg).unwrap();
         for bpm in [40.0f64, 120.0, 300.0] {
@@ -6324,11 +6867,13 @@ mod tests {
                 ));
             }
         }
-        for i in 0..BASS_NOTES {
-            ids.push((
-                format!("bass MIDI {}", BASS_MIN_MIDI as usize + i),
-                SoundId::Bass(i as u8),
-            ));
+        for voice in BassVoice::ALL {
+            for i in 0..BASS_NOTES {
+                ids.push((
+                    format!("{} bass MIDI {}", voice.name(), BASS_MIN_MIDI as usize + i),
+                    SoundId::Bass(voice, i as u8),
+                ));
+            }
         }
 
         for sr in [22050u32, 44100, 48000, 88200, 96000] {
@@ -6355,43 +6900,98 @@ mod tests {
     // The bass
     // -----------------------------------------------------------------
 
-    /// The fundamental of a buffer, in Hz, from its positive-going zero
-    /// crossings.
+    /// The phase of `x` at frequency `f`, over `len` samples from `start`.
     ///
-    /// Zero crossings and not autocorrelation, because for this waveform
-    /// they are EXACT rather than merely good: every component of a bass
-    /// note is `sin(n·φ)` for an integer `n`, so every one of them is zero
-    /// wherever the fundamental is, and the envelopes are positive scalars
-    /// that cannot move a zero. Linear interpolation between the samples
-    /// either side of a crossing then puts the period well inside a
-    /// hundredth of a sample, and the estimate is taken over the whole
-    /// window rather than one period.
+    /// Hann-windowed, because the thing being measured sits next to its own
+    /// harmonics: a rectangular window's sidelobes fall off as 1/Δf and an
+    /// organ's second drawbar at 0.55 would then leak several percent into
+    /// the fundamental's bin and rotate it. Hann's fall as 1/Δf³, which puts
+    /// the leak below anything that could move the answer by a hundredth of
+    /// a cent.
     ///
-    /// The window skips the first 40 ms, where the saw-ish attack is still
-    /// audible and its partials could add crossings of their own, and stops
-    /// at 300 ms, before the amplitude gets small enough for `f32`
-    /// quantisation to invent one.
-    fn fundamental_hz(buf: &[f32], sr: u32) -> f64 {
-        let from = (0.040 * sr as f64) as usize;
-        let to = ((0.300 * sr as f64) as usize).min(buf.len());
-        let mut first = f64::NAN;
-        let mut last = f64::NAN;
-        let mut count = 0usize;
-        for i in from + 1..to {
-            let (a, b) = (buf[i - 1] as f64, buf[i] as f64);
-            if a <= 0.0 && b > 0.0 {
-                // Where the line between the two samples crosses zero.
-                let t = (i - 1) as f64 + (-a) / (b - a);
-                if count == 0 {
-                    first = t;
-                }
-                last = t;
-                count += 1;
-            }
+    /// The phase reference is the START OF THE BUFFER, not the start of the
+    /// block, so two blocks at different offsets are directly comparable —
+    /// which is the whole measurement below.
+    fn phase_at(x: &[f64], sr: f64, f: f64, start: usize, len: usize) -> f64 {
+        let (mut re, mut im) = (0.0f64, 0.0f64);
+        let w = 2.0 * std::f64::consts::PI / len as f64;
+        for i in 0..len {
+            let window = 0.5 - 0.5 * (w * i as f64).cos();
+            let t = (start + i) as f64 / sr;
+            let v = x[start + i] * window;
+            let a = 2.0 * std::f64::consts::PI * f * t;
+            re += v * a.cos();
+            im -= v * a.sin();
         }
-        assert!(count >= 3, "only {count} zero crossings in the window");
-        let period = (last - first) / (count - 1) as f64;
-        sr as f64 / period
+        im.atan2(re)
+    }
+
+    /// The fundamental of a pitched buffer, to a small fraction of a cent.
+    ///
+    /// ZERO CROSSINGS USED TO DO THIS AND THE ORGAN IS WHY THEY NO LONGER
+    /// CAN. Counting upward crossings is exact for a waveform that crosses
+    /// zero exactly twice a cycle, which every voice the first pass had did:
+    /// a sine with a second harmonic under 0.3 has no other crossings to
+    /// find. A tonewheel organ's drawbars are 0.55, 0.40 and 0.30, and a
+    /// composite like that dips back through zero inside the cycle — so the
+    /// count came out doubled and the measurement reported the note an
+    /// octave up. It did so at 44.1 kHz and not at 48, which is the worst
+    /// kind of wrong: a test that depends on the sample rate for a fact that
+    /// does not.
+    ///
+    /// So the pitch is measured the way a phase-locked loop would. The phase
+    /// of the buffer at a candidate frequency is taken over two blocks a
+    /// known distance apart, and however far it has drifted between them IS
+    /// the frequency error: `Δf = Δφ / 2πΔt`. Three passes with the blocks
+    /// further apart each time.
+    ///
+    /// **The first pass is what keeps this honest.** It is seeded with the
+    /// frequency the caller expects, which sounds like assuming the answer
+    /// and is not: its blocks are four tenths of a period apart, so the
+    /// range it can lock onto is everything from an octave below the guess
+    /// to well over an octave above it. An octave slip, an A-435 tuning or
+    /// an off-by-one in the note index all land inside that range and are
+    /// therefore REPORTED, at their real value, rather than folded back onto
+    /// the guess. The later passes only sharpen a number that is already
+    /// within a few cents.
+    fn fundamental_hz_near(buf: &[f32], sr: u32, guess: f64) -> f64 {
+        let sr_f = sr as f64;
+        // Past the attack — a click is not a pitch — and no further than the
+        // release taper, or the buffer's end for the short voices.
+        let from = (0.040 * sr_f) as usize;
+        let to = ((0.320 * sr_f) as usize).min(buf.len());
+        assert!(
+            to > from + (0.020 * sr_f) as usize,
+            "only {} samples of steady tone to measure",
+            to.saturating_sub(from)
+        );
+        let mut x: Vec<f64> = buf[from..to].iter().map(|&s| s as f64).collect();
+        // A decaying note is not symmetric about zero, and a DC term would
+        // sit in every block's window as a phase-free constant.
+        let mean = x.iter().sum::<f64>() / x.len() as f64;
+        for v in x.iter_mut() {
+            *v -= mean;
+        }
+        let n = x.len();
+
+        let mut f = guess;
+        for periods in [0.4f64, 4.0, 40.0] {
+            let gap = ((periods / f) * sr_f) as usize;
+            // The last pass does not fit for the low notes — forty periods
+            // of E1 is a second of audio and a bass note is under half of
+            // one. Four periods is already a hundredth of a cent there.
+            if gap == 0 || gap * 2 >= n {
+                continue;
+            }
+            let len = n - gap;
+            let d = phase_at(&x, sr_f, f, gap, len) - phase_at(&x, sr_f, f, 0, len);
+            // Into (−π, π]: a drift of more than half a cycle is outside the
+            // pass's capture range by construction.
+            let two_pi = 2.0 * std::f64::consts::PI;
+            let d = d - two_pi * (d / two_pi).round();
+            f += d / (two_pi * (gap as f64 / sr_f));
+        }
+        f
     }
 
     /// THE BASS HAS TO BE IN TUNE, OR IT IS WORSE THAN NO BASS.
@@ -6402,23 +7002,33 @@ mod tests {
     /// orders of magnitude tighter than anything a synthesis mistake would
     /// produce, so this catches an octave slip, an A-435 tuning or an
     /// off-by-one in the note index and stays quiet otherwise.
+    /// ALL FIVE OF THEM, which is the point of measuring rather than
+    /// asserting: a slap has a fourteen-partial crack on the front of it and
+    /// a synth bass is a filtered saw, and neither of those is allowed to
+    /// move the pitch by so much as a cent. They cannot, because every
+    /// partial in this file is `sin(n·φ)` and every envelope is positive —
+    /// and this is what says so about the samples rather than about the
+    /// comment.
     #[test]
     fn the_bass_bank_is_in_tune() {
         for sr in [44100u32, 48000] {
             let bank = SoundBank::new(sr);
-            for i in 0..BASS_NOTES {
-                let midi = BASS_MIN_MIDI + i as u8;
-                let buf = bank.get(SoundId::Bass(i as u8));
-                assert!(!buf.is_empty(), "MIDI {midi} is silent");
+            for voice in BassVoice::ALL {
+                let what = voice.name();
+                for i in 0..BASS_NOTES {
+                    let midi = BASS_MIN_MIDI + i as u8;
+                    let buf = bank.get(SoundId::Bass(voice, i as u8));
+                    assert!(!buf.is_empty(), "{what} MIDI {midi} is silent");
 
-                let want = 440.0 * 2f64.powf((midi as f64 - 69.0) / 12.0);
-                let got = fundamental_hz(buf, sr);
-                let cents = 1200.0 * (got / want).log2();
-                assert!(
-                    cents.abs() < 1.0,
-                    "MIDI {midi} at {sr} Hz came out {got:.4} Hz against {want:.4} — \
-                     {cents:.3} cents off"
-                );
+                    let want = 440.0 * 2f64.powf((midi as f64 - 69.0) / 12.0);
+                    let got = fundamental_hz_near(buf, sr, want);
+                    let cents = 1200.0 * (got / want).log2();
+                    assert!(
+                        cents.abs() < 1.0,
+                        "{what} MIDI {midi} at {sr} Hz came out {got:.4} Hz against \
+                         {want:.4} — {cents:.3} cents off"
+                    );
+                }
             }
         }
     }
@@ -6431,30 +7041,188 @@ mod tests {
         assert_eq!(BASS_NOTES, 28);
         assert_eq!(BASS_MIN_MIDI, 28, "E1, the bottom of a four-string bass");
         assert_eq!(BASS_MAX_MIDI, 55, "G3");
+        assert_eq!(BassVoice::ALL.len(), BASS_VOICE_COUNT);
         for sr in [22050u32, 44100, 48000, 88200, 96000] {
             let bank = SoundBank::new(sr);
-            for i in 0..BASS_NOTES {
-                let buf = bank.get(SoundId::Bass(i as u8));
-                let peak = buf.iter().fold(0.0f32, |m, s| m.max(s.abs()));
-                assert!(
-                    peak <= 0.9 + 1e-4,
-                    "MIDI {} peaks at {peak} at {sr} Hz",
-                    BASS_MIN_MIDI + i as u8
-                );
-                assert!(
-                    peak > 0.85,
-                    "MIDI {} peaks at {peak}, which is not the bank's level",
-                    BASS_MIN_MIDI + i as u8
-                );
-                // Lands on zero rather than being cut there — rule 6 of
-                // KITS.md, and the kicks are why: a step at 41 Hz is a fifth
-                // of a cycle and shows up as DC.
-                let tail = buf[buf.len() - 1].abs();
-                assert!(tail < 1e-5, "MIDI {} ends at {tail}", BASS_MIN_MIDI + i as u8);
+            for voice in BassVoice::ALL {
+                let what = voice.name();
+                for i in 0..BASS_NOTES {
+                    let buf = bank.get(SoundId::Bass(voice, i as u8));
+                    let midi = BASS_MIN_MIDI + i as u8;
+                    let peak = buf.iter().fold(0.0f32, |m, s| m.max(s.abs()));
+                    assert!(
+                        peak <= 0.9 + 1e-4,
+                        "{what} MIDI {midi} peaks at {peak} at {sr} Hz"
+                    );
+                    assert!(
+                        peak > 0.85,
+                        "{what} MIDI {midi} peaks at {peak}, which is not the bank's level"
+                    );
+                    // Lands on zero rather than being cut there — rule 6 of
+                    // KITS.md, and the kicks are why: a step at 41 Hz is a
+                    // fifth of a cycle and shows up as DC.
+                    let tail = buf[buf.len() - 1].abs();
+                    assert!(tail < 1e-5, "{what} MIDI {midi} ends at {tail}");
+                    // And starts from it, for the same reason at the other
+                    // end. Every voice has a fade-in, even the millisecond
+                    // ones a pick and a slap get.
+                    assert!(
+                        buf[0].abs() < 1e-3,
+                        "{what} MIDI {midi} starts at {}, which is a click",
+                        buf[0]
+                    );
+                }
+                // Out of range is silence, not a panic on the audio thread.
+                assert!(bank.get(SoundId::Bass(voice, BASS_NOTES as u8)).is_empty());
+                assert!(bank.get(SoundId::Bass(voice, 255)).is_empty());
             }
-            // Out of range is silence, not a panic on the audio thread.
-            assert!(bank.get(SoundId::Bass(BASS_NOTES as u8)).is_empty());
-            assert!(bank.get(SoundId::Bass(255)).is_empty());
+        }
+    }
+
+    /// WHAT NINE VOICES COST, AND A CEILING ON IT.
+    ///
+    /// The first pass had one bass and one keys voice; this one has five and
+    /// four, and every note of every one of them is a decoded buffer that
+    /// lives for as long as the audio device is open. That is a real cost
+    /// and it is worth a number rather than a shrug — and worth a ceiling,
+    /// because the cheapest way to make it enormous is to give a pad a
+    /// ten-second tail without noticing that it is thirty-seven notes long.
+    ///
+    /// Measured at 48 kHz: **34.4 MB**, of which the keys are 23.8 and the
+    /// bass 10.6. The pad (9.5) and the organ (8.1) are three quarters of
+    /// the keys' share between them, which is what a voice that sustains
+    /// costs — and the clav, which is over in 220 ms, is 1.5. There are two
+    /// of these banks in a running app at most: the device's own, and the
+    /// 48 kHz reference `jam.rs` measures tables against. The second is
+    /// built lazily on the first `set_jam`, so a musician who never opens
+    /// Jam pays for neither.
+    ///
+    /// The ceiling is 48 MB, a third above today, so a recipe can grow a
+    /// tail by ear without this test moving — and a recipe that doubles one
+    /// trips it.
+    ///
+    /// The TIME is printed for the same reason and not asserted on, because
+    /// a wall clock on a shared machine is a fact about the machine. For the
+    /// record, on the owner's laptop in a release build: a whole bank builds
+    /// in 530-720 ms, of which the nine pitched voices are about 200 —
+    /// they are synthesised nine threads wide, and were 650 ms in a row
+    /// before that.
+    #[test]
+    fn the_pitched_banks_cost_what_they_are_documented_to_cost() {
+        let sr = 48_000u32;
+        // The build is timed as well as measured. It happens once, on the
+        // thread that opens the audio device, so it is a delay before the
+        // first click and not a hitch during one — but it is a delay, and a
+        // recipe that made it seconds long should be visible here rather
+        // than in a bug report about a slow start.
+        let began = std::time::Instant::now();
+        let bank = SoundBank::new(sr);
+        eprintln!(
+            "[banks] one whole SoundBank at {sr} Hz took {:.0} ms to build",
+            began.elapsed().as_secs_f64() * 1000.0
+        );
+        let of = |v: &[Vec<f32>]| -> usize { v.iter().map(|n| n.len() * 4).sum() };
+        let bass: usize = bank.bass.iter().map(|v| of(v)).sum();
+        let keys: usize = bank.keys.iter().map(|v| of(v)).sum();
+        let mb = |b: usize| b as f64 / (1024.0 * 1024.0);
+        eprintln!(
+            "[banks] bass {:.1} MB, keys {:.1} MB, {:.1} MB in total at {sr} Hz",
+            mb(bass),
+            mb(keys),
+            mb(bass + keys)
+        );
+        for (what, voices) in [("bass", &bank.bass[..]), ("keys", &bank.keys[..])] {
+            for (i, v) in voices.iter().enumerate() {
+                eprintln!("[banks]   {what} voice {i}: {:.2} MB", mb(of(v)));
+            }
+        }
+        assert!(
+            mb(bass + keys) < 48.0,
+            "the pitched banks are {:.1} MB, and the budget is 48",
+            mb(bass + keys)
+        );
+    }
+
+    /// FIVE VOICES, NOT FIVE VOLUMES.
+    ///
+    /// Every note of every bank is normalised to a peak of 0.9, which is the
+    /// right thing for a bank and says nothing at all about loudness: a slap
+    /// puts a third of its energy where a laptop speaker works and an
+    /// upright puts almost none there, so at equal peaks the slap is several
+    /// decibels louder. Switching the bass voice would then be switching the
+    /// volume, and the musician would go looking for the level control that
+    /// had moved on its own.
+    ///
+    /// `BASS_VOICE_TRIM` in `jam.rs` is what holds them together; this is
+    /// what says it still does. Measured through the same 200 Hz-4 kHz
+    /// band-pass as every other level claim in this file, one note (E2)
+    /// rendered into a common window of one beat at 120 BPM — a common
+    /// window because measuring each voice over its own length would reward
+    /// the short ones for being short.
+    ///
+    /// The gate is the brief's 3 dB and not today's fraction of one, so the
+    /// recipes can be tuned by ear (`plans/JAM_UX_DECISIONS.md` C2 — the
+    /// owner listens) without this test having to move every time.
+    #[test]
+    fn every_bass_voice_lands_at_the_same_level() {
+        let sr = 48000u32;
+        let bank = SoundBank::new(sr);
+        let tick_samples = (sr as f64 * 60.0 / 120.0 / 4.0) as usize;
+        let window = tick_samples * 4;
+
+        let level = |voice: BassVoice| -> f64 {
+            let mut cfg = rock_16ths();
+            cfg.bar.kick = vec![0; 16];
+            cfg.bar.snare = vec![0; 16];
+            cfg.bar.hat = vec![0; 16];
+            cfg.bass_voice = Some(voice.name().to_string());
+            let mut pitches = vec![0u8; 16];
+            pitches[0] = 40; // E2, the middle of a bass line.
+            cfg.bass = Some(JamBassLine { pitches, gain: 1.0 });
+            let t = compile_jam(&cfg).unwrap();
+            let slot = t
+                .tick(0, 0)
+                .expect("tick 0")
+                .slots()
+                .iter()
+                .find(|s| s.lane == crate::jam::JamLane::Bass)
+                .copied()
+                .expect("a bass note on tick 0");
+            // THE TABLE'S OWN NORMALISATION HAS TO BE UNDONE HERE, or this
+            // measures nothing. A table holding one bass note and no drums
+            // is scaled so that note reaches the ceiling — which cancels
+            // the trim exactly, and made the first version of this test
+            // report every voice at its untrimmed level and pass the two
+            // that happened to fall under the ceiling. `peak_after /
+            // peak_before` IS that scaling, so dividing it back out leaves
+            // the voice's own level, which is what the trim is about.
+            let undo = t.peak_before / t.peak_after.max(1e-9);
+            let buf = bank.get(slot.sound);
+            let mut out = vec![0.0f32; window];
+            for (o, v) in out.iter_mut().zip(buf.iter()) {
+                *o += v * slot.gain * undo;
+            }
+            laptop_band_energy(&out, sr)
+        };
+
+        // Measured first and judged afterwards, so a failure prints the
+        // whole set: "the slap is 6 dB up" is a number to trim by, and the
+        // one voice that tripped the assert first is not.
+        let reference = level(BassVoice::Fingered);
+        let measured: Vec<(BassVoice, f64)> = BassVoice::ALL
+            .iter()
+            .map(|&v| (v, 10.0 * (level(v) / reference.max(1e-30)).log10()))
+            .collect();
+        for (voice, db) in measured.iter() {
+            eprintln!("[bass] {:8} {db:+.2} dB against fingered", voice.name());
+        }
+        for &(voice, db) in measured.iter() {
+            assert!(
+                db.abs() <= 3.0,
+                "the {} bass is {db:+.2} dB against the fingered one through a \
+                 small speaker; BASS_VOICE_TRIM is what is supposed to stop that",
+                voice.name()
+            );
         }
     }
 
@@ -6505,7 +7273,10 @@ mod tests {
         // cascaded one-poles at 150 Hz, so it takes a bite out of an 82 Hz
         // fundamental too, and what the number means is only visible next
         // to another instrument.
-        let bass_low = low_band_share(bank.get(SoundId::Bass(40 - BASS_MIN_MIDI)), sr);
+        let bass_low = low_band_share(
+            bank.get(SoundId::Bass(BassVoice::Fingered, 40 - BASS_MIN_MIDI)),
+            sr,
+        );
         let snare_low =
             low_band_share(bank.get(SoundId::Kit(JamKit::Room, KitVoice::SnareHi)), sr);
         assert!(
@@ -6549,6 +7320,9 @@ mod tests {
             keys: Some(crate::jam::JamKeysLine { voicings: v, gain }),
             mix: None,
             count_in_sound: None,
+            bass_voice: None,
+            keys_voice: None,
+            custom_kit: None,
         }
     }
 
@@ -6576,55 +7350,70 @@ mod tests {
     fn the_keys_bank_is_in_tune() {
         for sr in [44100u32, 48000] {
             let bank = SoundBank::new(sr);
-            for i in 0..KEYS_NOTES {
-                let midi = KEYS_MIN_MIDI + i as u8;
-                let buf = bank.get(SoundId::Keys(i as u8));
-                assert!(!buf.is_empty(), "MIDI {midi} is silent");
+            for voice in KeysVoice::ALL {
+                let what = voice.name();
+                for i in 0..KEYS_NOTES {
+                    let midi = KEYS_MIN_MIDI + i as u8;
+                    let buf = bank.get(SoundId::Keys(voice, i as u8));
+                    assert!(!buf.is_empty(), "{what} MIDI {midi} is silent");
 
-                let want = 440.0 * 2f64.powf((midi as f64 - 69.0) / 12.0);
-                let got = fundamental_hz(buf, sr);
-                let cents = 1200.0 * (got / want).log2();
-                assert!(
-                    cents.abs() < 1.0,
-                    "MIDI {midi} at {sr} Hz came out {got:.4} Hz against {want:.4} — \
-                     {cents:.3} cents off"
-                );
+                    let want = 440.0 * 2f64.powf((midi as f64 - 69.0) / 12.0);
+                    let got = fundamental_hz_near(buf, sr, want);
+                    let cents = 1200.0 * (got / want).log2();
+                    assert!(
+                        cents.abs() < 1.0,
+                        "{what} MIDI {midi} at {sr} Hz came out {got:.4} Hz against \
+                         {want:.4} — {cents:.3} cents off"
+                    );
+                }
             }
         }
     }
 
-    /// Thirty-seven notes, C3 to C6, none clipping, none a whisper, each one
-    /// starting from silence and landing on it.
+    /// Thirty-seven notes in each of four voices, C3 to C6, none clipping,
+    /// none a whisper, each one starting from silence and landing on it.
+    ///
+    /// The lengths differ on purpose and are checked against the recipes
+    /// rather than against one number: a clav that rings is a harpsichord
+    /// and an organ that stops is a piano, so 0.22 s and 1.20 s are the
+    /// voices and not a mistake.
     #[test]
     fn the_keys_bank_is_thirty_seven_notes_that_ring() {
         let sr = 48000;
         let bank = SoundBank::new(sr);
         assert_eq!(KEYS_NOTES, 37, "C3 to C6 inclusive is thirty-seven notes");
-        let want_len = (KEYS_NOTE_SECS * sr as f64) as usize;
-        for i in 0..KEYS_NOTES {
-            let midi = KEYS_MIN_MIDI + i as u8;
-            let buf = bank.get(SoundId::Keys(i as u8));
-            let peak = buf.iter().fold(0.0f32, |m, s| m.max(s.abs()));
-            assert!(
-                (peak - KEYS_PEAK).abs() < 1e-4,
-                "MIDI {midi} peaks at {peak}, and the bank normalises every note \
-                 to {KEYS_PEAK}"
-            );
-            assert_eq!(buf.len(), want_len, "MIDI {midi} is the wrong length");
-            // Rule 6 of KITS.md: land the decay on zero, do not cut it there.
-            assert!(
-                buf[buf.len() - 1].abs() < 1e-6,
-                "MIDI {midi} ends at {}, which is a click",
-                buf[buf.len() - 1]
-            );
-            // And three milliseconds of attack at the front, for the same
-            // reason at the other end.
-            assert!(
-                buf[0].abs() < 1e-3,
-                "MIDI {midi} starts at {}, which is the click the attack exists \
-                 to prevent",
-                buf[0]
-            );
+        assert_eq!(KeysVoice::ALL.len(), KEYS_VOICE_COUNT);
+        for voice in KeysVoice::ALL {
+            let what = voice.name();
+            let want_len = (voice.recipe().secs * sr as f64) as usize;
+            for i in 0..KEYS_NOTES {
+                let midi = KEYS_MIN_MIDI + i as u8;
+                let buf = bank.get(SoundId::Keys(voice, i as u8));
+                let peak = buf.iter().fold(0.0f32, |m, s| m.max(s.abs()));
+                assert!(
+                    (peak - VOICE_PEAK).abs() < 1e-4,
+                    "{what} MIDI {midi} peaks at {peak}, and the bank normalises \
+                     every note to {VOICE_PEAK}"
+                );
+                assert_eq!(buf.len(), want_len, "{what} MIDI {midi} is the wrong length");
+                // Rule 6 of KITS.md: land the decay on zero, do not cut it
+                // there. The organ and the pad do not decay at all, so for
+                // them this is entirely the release taper's doing — which is
+                // exactly the thing worth checking.
+                assert!(
+                    buf[buf.len() - 1].abs() < 1e-6,
+                    "{what} MIDI {midi} ends at {}, which is a click",
+                    buf[buf.len() - 1]
+                );
+                // And an attack at the front, for the same reason at the
+                // other end.
+                assert!(
+                    buf[0].abs() < 1e-3,
+                    "{what} MIDI {midi} starts at {}, which is the click the attack \
+                     exists to prevent",
+                    buf[0]
+                );
+            }
         }
         // A bank that had slipped an octave would still be in tune and still
         // be the wrong instrument.
@@ -6633,6 +7422,151 @@ mod tests {
             (130.0..131.5).contains(&bottom),
             "the bottom note is {bottom:.2} Hz, and C3 is 130.81"
         );
+    }
+
+    /// A CUSTOM DRUM REACHES THE MIXER, AND A MISSING ONE DOES NOT REACH
+    /// THE WRONG BANK.
+    ///
+    /// `jam_sample` is the one function that answers `SoundId::Custom`, and
+    /// it is a two-line match in the hottest loop in the program, so it is
+    /// worth saying out loud what it has to get right: a custom voice comes
+    /// from the table's own folder, a built-in one comes from the bank, and
+    /// a custom voice with no folder behind it is SILENT rather than an
+    /// index into something else.
+    #[test]
+    fn a_custom_drum_is_read_from_the_table_and_never_from_the_bank() {
+        let sr = 48000u32;
+        let bank = SoundBank::new(sr);
+        let folder = crate::kit::CustomBank::for_tests(&[KitVoice::Kick], sr);
+
+        // The folder's kick, through the folder.
+        let custom = jam_sample(&bank, Some(&folder), SoundId::Custom(KitVoice::Kick));
+        assert!(!custom.is_empty(), "the folder has a kick and it did not come out");
+        assert_ne!(
+            custom,
+            bank.get(SoundId::Kit(JamKit::Room, KitVoice::Kick)),
+            "that is the built-in kick, not the folder's"
+        );
+
+        // A voice the folder does not hold reads as silence here. `jam.rs`
+        // is what makes sure no table ever names one — this is the audio
+        // thread refusing to make a noise nobody asked for if it ever does.
+        assert!(jam_sample(&bank, Some(&folder), SoundId::Custom(KitVoice::Ride)).is_empty());
+        // And so does a custom voice with no folder at all, which is the
+        // one drum still ringing when the musician unloads the jam.
+        assert!(jam_sample(&bank, None, SoundId::Custom(KitVoice::Kick)).is_empty());
+
+        // Everything else is the bank, unchanged, folder or no folder.
+        for id in [
+            SoundId::ClickHigh,
+            SoundId::Kit(JamKit::Brushes, KitVoice::Crash),
+            SoundId::Bass(BassVoice::Slap, 4),
+            SoundId::Keys(KeysVoice::Organ, 4),
+        ] {
+            assert_eq!(jam_sample(&bank, Some(&folder), id), bank.get(id));
+            assert_eq!(jam_sample(&bank, None, id), bank.get(id));
+        }
+    }
+
+    /// A band on somebody else's drums renders, tick for tick, where the
+    /// groove says.
+    ///
+    /// The render harness the other jam tests use, pointed at a table whose
+    /// kick is a folder's: what it proves is that a `SoundId::Custom` makes
+    /// it all the way from `slot_for` through the table, the handoff and
+    /// the mixer to a sample in the buffer.
+    #[test]
+    fn a_jam_on_a_custom_kit_renders_on_the_ticks_it_names() {
+        let sr = 48000u32;
+        let bank = SoundBank::new(sr);
+        let folder = std::sync::Arc::new(crate::kit::CustomBank::for_tests(
+            &[KitVoice::Kick, KitVoice::Hat],
+            sr,
+        ));
+
+        let mut cfg = rock_16ths();
+        cfg.bar.kick = vec![2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0];
+        cfg.bar.snare = vec![0; 16];
+        cfg.bar.hat = vec![0; 16];
+        let table = crate::jam::compile_with_kit(&cfg, Some(folder)).unwrap();
+        assert!(table.custom_kit().is_some());
+
+        let tick_samples = sr as usize * 60 / 120 / 4;
+        let r = render_jam(&table, &bank, 1, tick_samples, 1.0);
+        let energy = |t: usize| -> f64 {
+            r.samples[t * tick_samples..(t + 1) * tick_samples]
+                .iter()
+                .map(|s| (s * s) as f64)
+                .sum()
+        };
+        assert!(energy(0) > 1.0, "the folder's kick did not sound on tick 0");
+        assert!(energy(8) > 1.0, "nor on tick 8");
+        assert!(
+            energy(4) < energy(0) * 0.05,
+            "something is sounding on tick 4, where the groove is empty"
+        );
+    }
+
+    /// FOUR VOICES, NOT FOUR VOLUMES — the keys' half of
+    /// `every_bass_voice_lands_at_the_same_level`, and the organ is why it
+    /// is needed.
+    ///
+    /// An organ does not decay: over a common window it carries several
+    /// times an electric piano's energy at the same peak, so at equal trims
+    /// picking "organ" in the setup sheet would be picking "louder". Held to
+    /// the same 3 dB through the same band-pass, one four-note voicing over
+    /// one beat at 120 BPM, against the electric piano the first pass
+    /// shipped. `KEYS_VOICE_TRIM` in `jam.rs` is the number this is about.
+    ///
+    /// It measures the voicing as the TABLE renders it, `KEYS_TRIM` and all,
+    /// so what it compares is what a musician would hear when they change
+    /// the dropdown and nothing else.
+    #[test]
+    fn every_keys_voice_lands_at_the_same_level() {
+        let sr = 48000u32;
+        let bank = SoundBank::new(sr);
+        let tick_samples = (sr as f64 * 60.0 / 120.0 / 4.0) as usize;
+        let window = tick_samples * 4;
+
+        let level = |voice: KeysVoice| -> f64 {
+            let mut cfg = comping(1.0);
+            cfg.bar.snare = vec![0; 16];
+            cfg.keys_voice = Some(voice.name().to_string());
+            let t = compile_jam(&cfg).unwrap();
+            // The same correction the bass's version explains.
+            let undo = t.peak_before / t.peak_after.max(1e-9);
+            let mut out = vec![0.0f32; window];
+            for slot in keys_on(&t, 0) {
+                let buf = bank.get(slot.sound);
+                let limit = if slot.cap_ticks > 0.0 {
+                    ((tick_samples as f32 * slot.cap_ticks) as usize).min(buf.len())
+                } else {
+                    buf.len()
+                };
+                for (o, v) in out.iter_mut().zip(buf.iter().take(limit)) {
+                    *o += v * slot.gain * undo;
+                }
+            }
+            laptop_band_energy(&out, sr)
+        };
+
+        // Measured first, judged afterwards — see the bass's version.
+        let reference = level(KeysVoice::Epiano);
+        let measured: Vec<(KeysVoice, f64)> = KeysVoice::ALL
+            .iter()
+            .map(|&v| (v, 10.0 * (level(v) / reference.max(1e-30)).log10()))
+            .collect();
+        for (voice, db) in measured.iter() {
+            eprintln!("[keys] {:8} {db:+.2} dB against epiano", voice.name());
+        }
+        for &(voice, db) in measured.iter() {
+            assert!(
+                db.abs() <= 3.0,
+                "the {} is {db:+.2} dB against the electric piano through a small \
+                 speaker; KEYS_VOICE_TRIM is what is supposed to stop that",
+                voice.name()
+            );
+        }
     }
 
     /// THE KEYS SIT UNDER THE BAND, OR THEY ARE NOT COMPING.
@@ -7167,7 +8101,7 @@ mod tests {
                         pitches: pitches.clone(),
                         gain: *gain,
                     });
-                    let table = compile_with(&cfg, &cache).unwrap();
+                    let table = compile_with(&cfg, &cache, None).unwrap();
                     assert_eq!(
                         table.base_peak,
                         compile_jam(&cfg).unwrap().base_peak,

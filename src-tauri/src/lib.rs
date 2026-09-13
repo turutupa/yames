@@ -6,6 +6,7 @@ mod commands;
 mod engine;
 pub mod instrument;
 mod jam;
+mod kit;
 mod midi;
 mod models;
 mod onset;
@@ -37,10 +38,14 @@ pub mod probe {
     /// engine headless, with no Tauri command surface to call `set_jam`
     /// through.
     pub use crate::jam::{
-        band_state_for_bar, compile as compile_jam, JamBandState, JamBassLine, JamConfig,
-        JamDropOut, JamKeysLine, JamMix, JamPattern, JamPosition, JamPracticeConfig, JamTable,
-        JamTrade,
+        band_state_for_bar, compile as compile_jam, compile_with_kit as compile_jam_with_kit,
+        JamBandState, JamBassLine, JamConfig, JamDropOut, JamKeysLine, JamMix, JamPattern,
+        JamPosition, JamPracticeConfig, JamTable, JamTrade,
     };
+    /// The musician's own drums. `--jam-kit <dir>` decodes a folder and
+    /// plays the band out of it, so the gate covers the one sound source
+    /// the audio thread reads that was not compiled into the binary.
+    pub use crate::kit::{load as load_kit, CustomBank};
     /// The take recorder. `--jam-take` runs one during the measurement, so
     /// the gate covers the ring the output callback writes into and the
     /// writer thread draining it to disk underneath the stream.
@@ -77,10 +82,10 @@ use commands::{
     app_ready, set_volume, set_widget_always_on_top, set_widget_mode, show_floating, show_main,
     start_evaluation, start_model_download, start_playback, start_recording, start_speed_ramp,
     start_speed_ramp_from, start_voice_repair, stop_evaluation, stop_playback, stop_recording,
-    arm_count_in, set_accent_mode, set_jam, set_jam_position, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
+    arm_count_in, inspect_kit_folder, pick_kit_folder, set_accent_mode, set_jam, set_jam_position, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
     tts_stop, tts_voice_diagnostics, unload_coach_model, write_model_chunk, DownloadState,
     delete_take, list_takes, play_take, start_take, stop_take, stop_take_playback, takes_dir_size,
-    EngineState, JamGainState, TakeState,
+    EngineState, JamGainState, JamKitState, TakeState,
 };
 use engine::MetronomeEngine;
 use midi::create_shared_midi;
@@ -131,6 +136,11 @@ pub fn run() {
     let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_updater::Builder::new().build())
+        // The native folder picker behind `pick_kit_folder`. Only the
+        // Rust side uses it — `pick_kit_folder` is our own command —
+        // so nothing in the frontend invokes a `plugin:dialog|…`
+        // command and no capability has to be widened for it.
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_process::init());
 
     #[cfg(not(target_os = "macos"))]
@@ -291,6 +301,9 @@ pub fn run() {
             app.manage(EngineState(Mutex::new(engine)));
             // The `set_jam` normalisation memo. See `JamGainState`.
             app.manage(JamGainState::default());
+            // The decoded kit folder, so the bar-ahead sends do not each
+            // re-read eight WAVs. See `KitCache` in `kit.rs`.
+            app.manage(JamKitState::default());
             // The take being recorded, if one is. See `TakeState`.
             app.manage(TakeState::default());
 
@@ -582,6 +595,8 @@ pub fn run() {
             set_accent_mode,
             set_jam,
             set_jam_position,
+            pick_kit_folder,
+            inspect_kit_folder,
             start_take,
             stop_take,
             list_takes,
