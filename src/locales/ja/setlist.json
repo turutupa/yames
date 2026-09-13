@@ -128,6 +128,17 @@
       "beats_other": "{{count}} 拍",
       "fewer": "カウントを減らす",
       "more": "カウントを増やす"
+    },
+    "jam": {
+      "mark": "このステップはジャムです",
+      "addStep": "ジャムを追加",
+      "addTo": "セットリストに追加…",
+      "barsOfForm": "{{count}} 小節",
+      "barsOfForm_one": "{{count}} 小節",
+      "barsOfForm_other": "{{count}} 小節",
+      "said": "バンド",
+      "goneShort": "ジャムがありません",
+      "gone": "そのジャムはライブラリにないため、このステップは書かれているクリックを鳴らします。"
     }
   }
 }

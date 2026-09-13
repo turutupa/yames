@@ -207,7 +207,8 @@
         "jam-next-shape": "下一個和弦指型",
         "jam-next-section": "下一段",
         "jam-prev-section": "上一段",
-        "jam-loop-section": "循環這一段"
+        "jam-loop-section": "循環這一段",
+        "jam-take": "錄下這一遍"
       },
       "descs": {
         "play": "開始或停止節拍器",
@@ -240,7 +241,8 @@
         "jam-next-shape": "逐一翻看目前和弦的按法",
         "jam-next-section": "在小節線上跳到下一段的開頭",
         "jam-prev-section": "在小節線上退回上一段的開頭",
-        "jam-loop-section": "把正在演奏的這一段循環起來，或取消循環"
+        "jam-loop-section": "把正在演奏的這一段循環起來，或取消循環",
+        "jam-take": "下次按播放時錄音，或停止錄音"
       }
     },
     "inputTest": {

@@ -863,3 +863,109 @@
 .setlist-blank-new:hover {
   filter: brightness(1.08);
 }
+
+/* â”€â”€ A jam as a step (JAM_MODE Â§8.5) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   A jam step is a step: the same row, the same sentence, the same tools. What
+   marks it is the glyph and the accent on it, because "this one is a band"
+   has to be readable while scanning the routine top to bottom â€” which is what
+   the paragraph is for. Anything louder would make the jam steps the subject
+   of a screen whose subject is the order. */
+.setlist-jam-mark {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  margin-right: 2px;
+  color: var(--accent);
+}
+
+/* The jam is gone. Grey, because the mark is now describing something that
+   is not there â€” an accent-coloured badge for a missing band would be the
+   screen looking pleased with itself. */
+.setlist-jam-mark[data-gone] {
+  color: var(--text-faint);
+}
+
+/* "12 bars" stands where the meter token would be, and it is not a control:
+   the meter belongs to the groove. Same size and weight as the value it
+   replaces, so the line does not change shape between step kinds. */
+.setlist-jam-bars {
+  color: var(--text-secondary);
+}
+
+.setlist-jam-said {
+  color: var(--text-faint);
+}
+
+.setlist-jam-gone {
+  margin: 4px 0 0;
+  font-size: 0.7rem;
+  color: var(--text-faint);
+}
+
+/* The two ways to add something, side by side at the foot of the list. */
+.setlist-add-jam-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.setlist-add-jam {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.setlist-add-jam.open {
+  color: var(--accent);
+}
+
+.setlist-jam-menu {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 4px;
+  border-radius: var(--radius-md, 9px);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
+  background: var(--bg-elevated, var(--bg-secondary));
+  box-shadow: 0 8px 24px rgb(0 0 0 / 28%);
+}
+
+/* Above the button rather than below it: the row is the last thing in the
+   list, so a menu opening downwards would open off the bottom of the stage. */
+.setlist-jam-menu .sub-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+}
+
+/* â”€â”€ The jam's place in the form, in the player â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   Under the step's own countdown, because the two answer different questions
+   and a player two metres back needs both: the form says what to play next,
+   the countdown says how long there is left to play it. */
+.setlist-player-jam {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.setlist-player-jam-chord {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.setlist-player-jam-next {
+  font-size: 0.8rem;
+  color: var(--text-faint);
+}

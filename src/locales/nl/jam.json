@@ -285,6 +285,29 @@
         "4": "zestienden",
         "6": "sextolen"
       }
+    },
+    "takes": {
+      "label": "Opnames",
+      "record": "Neem de take op",
+      "recording": "Opnemen",
+      "recordingNow": "Aan het opnemen. De take komt hier zodra je stopt.",
+      "empty": "Nog niets opgenomen. Zet Neem de take op aan en speel — jij en de band, hier bewaard om terug te luisteren.",
+      "unavailable": "Opnemen kan niet in deze versie. De rest van dit scherm werkt zoals altijd.",
+      "play": "Deze take afspelen",
+      "stop": "Stop",
+      "bandOff": "band stil",
+      "delete": "Verwijderen",
+      "confirm": "Verwijderen? Dit kan niet ongedaan worden gemaakt.",
+      "confirmDelete": "Verwijderen",
+      "confirmKeep": "Bewaren",
+      "size": "ongeveer {{megabytes}} MB op schijf",
+      "local": "Takes blijven op deze machine. Er wordt niets geüpload.",
+      "introTitle": "Over takes",
+      "introWhat": "Een take ben jij samen met de band, vanaf de eerste maat na het inteltellen tot je stopt.",
+      "introWhere": "Hij wordt als WAV-bestand weggeschreven in de eigen map van deze app op deze machine, en blijft daar tot je hem verwijdert.",
+      "introPrivate": "Er wordt niets geüpload, niets geanalyseerd, en niets verlaat deze machine.",
+      "introNotNow": "Nu niet",
+      "introStart": "Takes opnemen"
     }
   },
   "scale": {

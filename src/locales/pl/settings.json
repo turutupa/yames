@@ -207,7 +207,8 @@
         "jam-next-shape": "Następny chwyt",
         "jam-next-section": "Następna część",
         "jam-prev-section": "Poprzednia część",
-        "jam-loop-section": "Zapętl tę część"
+        "jam-loop-section": "Zapętl tę część",
+        "jam-take": "Nagraj takę"
       },
       "descs": {
         "play": "Uruchom lub zatrzymaj metronom",
@@ -240,7 +241,8 @@
         "jam-next-shape": "Przewijać chwyty bieżącego akordu",
         "jam-next-section": "Skoczyć na kresce taktowej na początek następnej części",
         "jam-prev-section": "Wrócić na kresce taktowej na początek poprzedniej części",
-        "jam-loop-section": "Zapętlić część, w której jesteś, albo pętlę wyłączyć"
+        "jam-loop-section": "Zapętlić część, w której jesteś, albo pętlę wyłączyć",
+        "jam-take": "Nagraj przy następnym starcie albo przerwij nagrywanie"
       }
     },
     "inputTest": {

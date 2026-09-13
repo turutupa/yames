@@ -5,6 +5,7 @@ import { meterLabel, presetBeatGroups, presetFreeMode } from "../../utils/meter"
 import { formBars } from "../../jam/forms";
 import type { AppState, Setlist, Preset } from "../../types";
 import type { Jam } from "../../jam/types";
+import { JamGlyph } from "../jam/JamGlyph";
 
 export interface PresetSidebarHandle {
   triggerAdd: () => void;
@@ -49,6 +50,16 @@ interface PresetSidebarProps {
   onRenameJam?: (id: string, name: string) => void;
   onDuplicateJam?: (id: string) => void;
   onReorderJams?: (from: number, to: number) => void;
+  /**
+   * "Add to setlist…" on a jam's context menu (JAM_MODE §8.5).
+   *
+   * The jam library is on the Jam tab and the setlists are on the Setlist
+   * tab, so this is the one place in the app where the two lists meet — which
+   * is exactly why the item belongs here as well as in the jam screen's
+   * overflow: you decide a jam belongs in a routine while you are looking at
+   * the library, not while you are playing it.
+   */
+  onAddJamToSetlist?: (jamId: string, setlistId: string) => void;
 }
 
 /** What a jam row says on its right: the tempo and the shape. */
@@ -171,6 +182,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   onRenameJam,
   onDuplicateJam,
   onReorderJams,
+  onAddJamToSetlist,
 }, ref) {
   const [allPresets, setAllPresets] = useState<Preset[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -196,6 +208,8 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   const [setlistMenu, setSetlistMenu] = useState<{ id: string; x: number; y: number } | null>(null);
   const [renamingJam, setRenamingJam] = useState<string | null>(null);
   const [jamMenu, setJamMenu] = useState<{ id: string; x: number; y: number } | null>(null);
+  /** The jam menu's "add to setlist" item, expanded into the setlists. */
+  const [jamMenuSetlists, setJamMenuSetlists] = useState(false);
   /**
    * The jam being dragged, and the row it is currently over.
    *
@@ -288,7 +302,12 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   }, [setlistMenu]);
 
   useEffect(() => {
-    if (!jamMenu) return;
+    if (!jamMenu) {
+      // Shut with the menu, or the next right-click opens on a list the user
+      // did not ask for.
+      setJamMenuSetlists(false);
+      return;
+    }
     const handler = (e: MouseEvent) => {
       if (contextRef.current && !contextRef.current.contains(e.target as Node)) {
         setJamMenu(null);
@@ -434,15 +453,9 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   // them. This is what a mode buys that a section heading could not: each
   // list holds one kind of thing, so nothing has to be labelled to be told
   // apart, and the panel's title is true on every tab.
-  // The band's lanes at row size — the rail's jam glyph, same four bars.
-  const jamIcon = (
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M5 9v6" />
-      <path d="M10 5v14" />
-      <path d="M15 8v8" />
-      <path d="M20 11v2" />
-    </svg>
-  );
+  // The band's lanes at row size — the rail's jam glyph, same four bars, and
+  // now the same component the setlist's jam steps draw.
+  const jamIcon = <JamGlyph />;
 
   const showSetlists = view === "setlist" && !!setlists;
   const setlistList = showSetlists
@@ -898,6 +911,32 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
           >
             {t("jam.duplicateJam")}
           </button>
+          {/* Only with somewhere to put it. An item that opens on an empty
+              list is a click that teaches nothing. */}
+          {onAddJamToSetlist && !!setlists?.length && (
+            <>
+              <button
+                className={jamMenuSetlists ? "preset-context-open" : undefined}
+                aria-expanded={jamMenuSetlists}
+                onClick={() => setJamMenuSetlists((open) => !open)}
+              >
+                {t("setlist.jam.addTo")}
+              </button>
+              {jamMenuSetlists &&
+                setlists!.map((setlist) => (
+                  <button
+                    key={setlist.id}
+                    className="preset-context-sub"
+                    onClick={() => {
+                      onAddJamToSetlist(jamMenu.id, setlist.id);
+                      setJamMenu(null);
+                    }}
+                  >
+                    {setlist.name}
+                  </button>
+                ))}
+            </>
+          )}
           <button
             className="preset-context-delete"
             onClick={() => {

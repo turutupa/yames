@@ -285,6 +285,29 @@
         "4": "nốt móc kép",
         "6": "chùm sáu"
       }
+    },
+    "takes": {
+      "label": "Bản thu",
+      "record": "Thu bản này",
+      "recording": "Đang thu",
+      "recordingNow": "Đang thu. Bản thu sẽ hiện ở đây khi bạn dừng.",
+      "empty": "Chưa thu gì cả. Bật Thu bản này rồi chơi — bạn và ban nhạc, giữ ở đây để nghe lại.",
+      "unavailable": "Phiên bản này không thu được. Mọi thứ khác trên màn hình này vẫn hoạt động như cũ.",
+      "play": "Phát bản thu này",
+      "stop": "Dừng",
+      "bandOff": "ban nhạc im",
+      "delete": "Xóa",
+      "confirm": "Xóa nhé? Không hoàn tác được.",
+      "confirmDelete": "Xóa",
+      "confirmKeep": "Giữ",
+      "size": "khoảng {{megabytes}} MB trên đĩa",
+      "local": "Bản thu ở lại máy này. Không có gì được tải lên.",
+      "introTitle": "Về bản thu",
+      "introWhat": "Một bản thu là bạn cùng ban nhạc, từ ô nhịp đầu tiên sau đếm vào cho đến khi bạn dừng.",
+      "introWhere": "Nó được ghi thành tệp WAV trong thư mục riêng của ứng dụng trên máy này, và ở đó cho đến khi bạn xóa.",
+      "introPrivate": "Không có gì được tải lên, không có gì được phân tích, và không gì rời khỏi máy.",
+      "introNotNow": "Để sau",
+      "introStart": "Thu các bản"
     }
   },
   "scale": {

@@ -63,6 +63,28 @@ function screenState(
   };
 }
 
+/** The takes shelf. Empty and available unless a test says otherwise. */
+function takesState(
+  overrides: Partial<React.ComponentProps<typeof JamView>["takes"]> = {},
+): React.ComponentProps<typeof JamView>["takes"] {
+  return {
+    available: true,
+    takes: [],
+    recording: false,
+    recordedSeconds: 0,
+    playingId: null,
+    dirBytes: 0,
+    play: vi.fn(),
+    stopPlayback: vi.fn(),
+    remove: vi.fn(),
+    requestTakes: vi.fn(),
+    introOpen: false,
+    confirmIntro: vi.fn(),
+    cancelIntro: vi.fn(),
+    ...overrides,
+  };
+}
+
 /** Where the form is being sent. Inert unless a test drives it. */
 function positionState(
   overrides: Partial<React.ComponentProps<typeof JamView>["position"]> = {},
@@ -87,6 +109,8 @@ function setup(overrides: Partial<React.ComponentProps<typeof JamView>> = {}) {
     trainedBpm: null as number | null,
     listening: false,
     voiceReady: false,
+    takes: takesState(),
+    onToggleTakes: vi.fn(),
     screen: screenState(),
     position: positionState(),
     tapActive: false,

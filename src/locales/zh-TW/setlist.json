@@ -128,6 +128,17 @@
       "beats_other": "{{count}} 拍",
       "fewer": "減少預備拍",
       "more": "增加預備拍"
+    },
+    "jam": {
+      "mark": "這一步是即興伴奏",
+      "addStep": "新增即興伴奏",
+      "addTo": "加入曲目單…",
+      "barsOfForm": "{{count}} 小節",
+      "barsOfForm_one": "{{count}} 小節",
+      "barsOfForm_other": "{{count}} 小節",
+      "said": "樂團",
+      "goneShort": "即興伴奏已不在",
+      "gone": "那個即興伴奏已不在書庫裡，所以這一步只會按它寫的節拍器聲音來響。"
     }
   }
 }

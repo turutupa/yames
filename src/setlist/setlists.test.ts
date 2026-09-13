@@ -5,6 +5,8 @@ import {
   createSetlist,
   duplicateSetlist,
   duplicateStep,
+  jamStepBars,
+  jamToSetlistStep,
   presetToSetlistStep,
   removeStep,
   renameSetlist,
@@ -14,6 +16,8 @@ import {
   upsertSetlist,
   updateStep,
 } from "./setlists";
+import { STARTER_JAMS } from "../jam/jams";
+import type { Jam } from "../jam/types";
 import type { Setlist, SetlistStep, Preset } from "../types";
 
 function preset(over: Partial<Preset> = {}): Preset {
@@ -300,5 +304,85 @@ describe("the count-in at the top of a setlist", () => {
 
   it("a new setlist has none, like every setlist saved before it existed", () => {
     expect(createSetlist("Warm-up").countIn).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// A jam as a step (JAM_MODE §8.5)
+// ---------------------------------------------------------------------------
+
+function jam(over: Partial<Jam> = {}): Jam {
+  return { ...STARTER_JAMS[0], ...over };
+}
+
+describe("jamToSetlistStep", () => {
+  it("copies the jam rather than pointing at it, and keeps the id as well", () => {
+    // U9.1 both ways: the step is a COPY, so it still plays if the jam is
+    // deleted — and it carries `jamId`, so while the jam exists it is the
+    // band that plays rather than the copy.
+    const source = jam({ name: "Slow blues in A", bpm: 92 });
+    const step = jamToSetlistStep(source);
+    expect(step.jamId).toBe(source.id);
+    expect(step.name).toBe("Slow blues in A");
+    expect(step.bpm).toBe(92);
+    expect(step.id).not.toBe(source.id);
+  });
+
+  it("takes the jam's meter, groups and all", () => {
+    // The engine checks `ticksPerBeat × beatsPerBar` against its own bar, so a
+    // step whose meter disagrees with the groove's is a step that plays the
+    // plain click. Groups, not the sum: 3+2+2 and 2+2+3 are different music.
+    const step = jamToSetlistStep(jam({ meter: { beatGroups: [3, 2, 2], ticksPerBeat: 2 } }));
+    expect(step.beatGroups.reduce((a, b) => a + b, 0)).toBe(7);
+    expect(step.beatGroups).toEqual([3, 2, 2]);
+    expect(step.subdivision).toBe(2);
+    expect(step.freeMode).toBe(false);
+  });
+
+  it("falls back to the jam's count-in sound, not to whatever is loaded", () => {
+    // The sound only ever sounds on the day the jam has been deleted, and it
+    // has to be the same sound every time — a step that borrowed the app's
+    // current click would play something different on each occasion.
+    expect(jamToSetlistStep(jam({ countInSound: "beep" })).soundType).toBe("beep");
+    expect(jamToSetlistStep(jam({ countInSound: "sticks" })).soundType).toBe("wood");
+    expect(jamToSetlistStep(jam({ countInSound: undefined })).soundType).toBe("beep");
+  });
+
+  it("starts with a gap that cannot run away, and takes one when given", () => {
+    expect(jamToSetlistStep(jam()).trigger).toEqual({ kind: "manual" });
+    const step = jamToSetlistStep(jam(), { trigger: { kind: "bars", bars: 48 } });
+    expect(step.trigger).toEqual({ kind: "bars", bars: 48 });
+  });
+
+  it("gives every step its own id, so two of the same jam are two rows", () => {
+    const source = jam();
+    expect(jamToSetlistStep(source).id).not.toBe(jamToSetlistStep(source).id);
+  });
+
+  it("survives being duplicated as the same jam", () => {
+    // A duplicated jam step is still that jam: copying the row must not
+    // quietly turn the band into a click.
+    const setlist = addStep(createSetlist("Routine"), jamToSetlistStep(jam()));
+    const copied = duplicateStep(setlist, setlist.steps[0].id);
+    expect(copied.steps).toHaveLength(2);
+    expect(copied.steps[1].jamId).toBe(setlist.steps[0].jamId);
+    expect(copied.steps[1].id).not.toBe(setlist.steps[0].id);
+  });
+
+  it("drops the jam when the step is saved as a preset — a preset is a click", () => {
+    const preset = setlistStepToPreset(jamToSetlistStep(jam()));
+    expect(preset).not.toHaveProperty("jamId");
+  });
+});
+
+describe("jamStepBars", () => {
+  it("is the length of one chorus", () => {
+    expect(jamStepBars(jam({ form: { kind: "blues12", bars: 12 } }))).toBe(12);
+    expect(jamStepBars(jam({ form: { kind: "aaba32", bars: 32 } }))).toBe(32);
+  });
+
+  it("is zero for a jam that is no longer there", () => {
+    expect(jamStepBars(null)).toBe(0);
+    expect(jamStepBars(undefined)).toBe(0);
   });
 });

@@ -42,7 +42,7 @@ export interface Shot {
   /** Which of the app's two windows to mount. */
   window: "main" | "floating";
   /** The tab to open on. Absent for the widget, which has no tabs. */
-  tab?: "beat" | "drill" | "jam";
+  tab?: "beat" | "drill" | "jam" | "setlist";
   /**
    * The Jam tab, with a jam actually on it.
    *
@@ -74,6 +74,18 @@ export interface Shot {
     /** Scroll this selector to the top of the stage — the screen is taller
      *  than a window, and the band and the practice tools live below the
      *  fold of the one the chord is in. */
+    scrollTo?: string;
+  };
+  /**
+   * The Setlist tab, with a setlist actually on it.
+   *
+   * Same shape as `jam` above and for the same reason: the tab opens empty,
+   * and a setlist is loaded by clicking one in the library. `row` is which
+   * library row to click.
+   */
+  setlist?: {
+    row: number;
+    /** Scroll this selector to the top of the stage. */
     scrollTo?: string;
   };
   /** Enter Zen once the app has mounted. */
@@ -261,6 +273,33 @@ export const SHOTS: Shot[] = [
     width: 1400,
     height: 900,
     settleMs: 1200,
+  },
+  {
+    id: "jam-takes",
+    suffix: "jam-takes",
+    window: "main",
+    tab: "jam",
+    // The shelf under the band: three takes of the slow blues, with the one
+    // in the middle playing and the band muted under it. The section is the
+    // only place in the app that keeps a file, so the picture has to show
+    // what that looks like rather than an empty heading.
+    jam: { row: 0, bar: 5, scrollTo: ".jam-practice" },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "setlist-jam",
+    suffix: "setlist-jam",
+    window: "main",
+    tab: "setlist",
+    // A routine that ends with ten minutes of playing: three plain steps and
+    // a jam step, which is the whole argument for JAM_MODE §8.5 in one
+    // screenshot.
+    setlist: { row: 0 },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
   },
   {
     id: "jam-empty",

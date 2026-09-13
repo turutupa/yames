@@ -176,6 +176,29 @@ async function drive() {
     }
   }
 
+  /**
+   * A setlist, loaded and open in the paragraph.
+   *
+   * By clicking the library row, like the jam above and for the same reason:
+   * a shot taken through any other door is a picture of a state the app
+   * cannot reach.
+   */
+  if (shot!.setlist) {
+    const rows = ".preset-sidebar-item.setlist-item";
+    await until(
+      "the setlist library",
+      () => document.querySelectorAll(rows).length > shot!.setlist!.row,
+    );
+    (document.querySelectorAll(rows)[shot!.setlist!.row] as HTMLElement).click();
+    await until("the setlist paragraph", () => !!document.querySelector(".setlist-paragraph"));
+
+    if (shot!.setlist.scrollTo) {
+      await until(shot!.setlist.scrollTo, () => !!document.querySelector(shot!.setlist!.scrollTo!));
+      document.querySelector(shot!.setlist.scrollTo)!.scrollIntoView({ block: "start" });
+      await new Promise((r) => requestAnimationFrame(r));
+    }
+  }
+
   if (shot!.zen) {
     // The rail's Zen button, by the anchor the tour already puts on it.
     await until("the Zen button", () => !!document.querySelector('[data-tour="zen-widget"]'));

@@ -128,6 +128,17 @@
       "beats_other": "{{count}} movimenti",
       "fewer": "Meno movimenti di intro",
       "more": "Più movimenti di intro"
+    },
+    "jam": {
+      "mark": "Questo passo è un jam",
+      "addStep": "Aggiungi un jam",
+      "addTo": "Aggiungi alla scaletta…",
+      "barsOfForm": "{{count}} battute",
+      "barsOfForm_one": "{{count}} battuta",
+      "barsOfForm_other": "{{count}} battute",
+      "said": "la band",
+      "goneShort": "Il jam non c'è più",
+      "gone": "Quel jam non è più nella libreria, quindi questo passo suona il clic che descrive."
     }
   }
 }

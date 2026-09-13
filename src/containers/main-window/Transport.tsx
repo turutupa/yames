@@ -53,6 +53,18 @@ interface TransportProps {
   jamFormBar?: number;
   /** 1-based chorus count. */
   jamChorus?: number;
+  /**
+   * A take is being recorded (JAM_MODE §4.4).
+   *
+   * On the transport rather than on the jam screen, and that is the whole
+   * point of putting it here: the transport is the one frame that is on every
+   * tab, so a take that is running while you have wandered off to the
+   * metronome to check something still says it is running. A microphone
+   * writing a file must never be invisible.
+   */
+  recording?: boolean;
+  /** Seconds of the take so far. */
+  recordedSeconds?: number;
 }
 
 function clock(totalSeconds: number): string {
@@ -141,6 +153,8 @@ export function Transport({
   jamFormBars = 0,
   jamFormBar = 0,
   jamChorus = 1,
+  recording = false,
+  recordedSeconds = 0,
 }: TransportProps) {
   const { t } = useTranslation();
   const running = view === "drill" ? speedRampActive : isPlaying;
@@ -160,6 +174,7 @@ export function Transport({
       // to the pixel, so the CSS has to be able to shed differently for it.
       data-setlist={setlisted ? "" : undefined}
       data-running={anyRunning ? "" : undefined}
+      data-recording={recording ? "" : undefined}
     >
       <button
         className={`transport-play ${anyRunning ? "playing" : ""} ${isPulsing ? "pulse" : ""}`}
@@ -285,6 +300,17 @@ export function Transport({
             </svg>
             {t("setlist.transport.skip")}
           </button>
+        </div>
+      )}
+
+      {/* The red dot and the clock. Beside the readouts, before the drill's
+          own block, so it lands in the same place on every tab — a mark that
+          moves about is a mark you have to look for. */}
+      {recording && (
+        <div className="transport-recording" role="status">
+          <span className="transport-recording-dot" aria-hidden="true" />
+          <span className="transport-recording-label">{t("jam.takes.recording")}</span>
+          <span className="transport-recording-clock">{clock(recordedSeconds)}</span>
         </div>
       )}
 

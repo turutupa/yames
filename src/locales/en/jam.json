@@ -285,6 +285,29 @@
         "4": "sixteenths",
         "6": "sextuplets"
       }
+    },
+    "takes": {
+      "label": "Takes",
+      "record": "Record the take",
+      "recording": "Recording",
+      "recordingNow": "Recording. It lands here when you stop.",
+      "empty": "Nothing recorded yet. Turn on Record the take and play — you and the band, kept here to listen back to.",
+      "unavailable": "Recording is not available in this version. Everything else on this screen works as it always did.",
+      "play": "Play this take",
+      "stop": "Stop",
+      "bandOff": "band silent",
+      "delete": "Delete",
+      "confirm": "Delete it? There is no undo.",
+      "confirmDelete": "Delete",
+      "confirmKeep": "Keep",
+      "size": "about {{megabytes}} MB on disk",
+      "local": "Takes stay on this machine. Nothing is uploaded.",
+      "introTitle": "About takes",
+      "introWhat": "A take is you and the band, mixed together, from the first bar after the count-in until you stop.",
+      "introWhere": "It is written as a WAV file in this app's own folder on this machine, and it stays there until you delete it.",
+      "introPrivate": "Nothing is uploaded, nothing is analysed, and nothing leaves the machine.",
+      "introNotNow": "Not now",
+      "introStart": "Record takes"
     }
   },
   "scale": {

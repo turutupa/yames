@@ -128,6 +128,17 @@
       "beats_other": "{{count}} phách",
       "fewer": "Bớt phách đếm vào",
       "more": "Thêm phách đếm vào"
+    },
+    "jam": {
+      "mark": "Bước này là một jam",
+      "addStep": "Thêm một jam",
+      "addTo": "Thêm vào setlist…",
+      "barsOfForm": "{{count}} ô nhịp",
+      "barsOfForm_one": "{{count}} ô nhịp",
+      "barsOfForm_other": "{{count}} ô nhịp",
+      "said": "ban nhạc",
+      "goneShort": "Jam không còn nữa",
+      "gone": "Jam đó không còn trong thư viện, nên bước này chơi tiếng click mà nó mô tả."
     }
   }
 }

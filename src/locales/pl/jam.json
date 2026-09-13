@@ -285,6 +285,29 @@
         "4": "szesnastkach",
         "6": "sekstolach"
       }
+    },
+    "takes": {
+      "label": "Nagrania",
+      "record": "Nagraj takę",
+      "recording": "Nagrywanie",
+      "recordingNow": "Nagrywanie. Take pojawi się tutaj, gdy przerwiesz.",
+      "empty": "Nic jeszcze nie nagrano. Włącz Nagraj takę i zagraj — ty i zespół, zapisani tutaj do odsłuchania.",
+      "unavailable": "W tej wersji nie można nagrywać. Reszta tego ekranu działa tak jak zawsze.",
+      "play": "Odtwórz tę takę",
+      "stop": "Zatrzymaj",
+      "bandOff": "zespół cicho",
+      "delete": "Usuń",
+      "confirm": "Usunąć? Tego nie da się cofnąć.",
+      "confirmDelete": "Usuń",
+      "confirmKeep": "Zostaw",
+      "size": "około {{megabytes}} MB na dysku",
+      "local": "Take zostają na tym komputerze. Nic nie jest wysyłane.",
+      "introTitle": "O take'ach",
+      "introWhat": "Take to ty razem z zespołem, od pierwszego taktu po odliczeniu aż do przerwania.",
+      "introWhere": "Zapisuje się jako plik WAV we własnym folderze tej aplikacji na tym komputerze i zostaje tam, dopóki go nie usuniesz.",
+      "introPrivate": "Nic nie jest wysyłane, nic nie jest analizowane i nic nie opuszcza tego komputera.",
+      "introNotNow": "Nie teraz",
+      "introStart": "Nagrywaj take"
     }
   },
   "scale": {

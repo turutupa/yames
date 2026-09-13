@@ -19,4 +19,5 @@ export * from "./jams";
 export * from "./bandChord";
 export * from "./lineup";
 export * from "./practice";
+export * from "./takes";
 export * from "./tempoTrainer";

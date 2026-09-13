@@ -2226,3 +2226,91 @@ button.context-chip:hover,
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* â”€â”€ The recording mark (JAM_MODE Â§4.4) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   On the transport, so it is on every tab: a microphone writing a file must
+   never be invisible because you wandered off to the metronome to look
+   something up. A red dot, the word, and the clock â€” nothing to press,
+   because stopping a take is stopping the transport and there is already a
+   button for that two inches to the left. */
+.transport-recording {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px;
+  height: 26px;
+  border-radius: 13px;
+  border: 1px solid color-mix(in srgb, var(--danger, #f87171) 34%, transparent);
+  background: color-mix(in srgb, var(--danger, #f87171) 8%, transparent);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--danger, #f87171);
+  white-space: nowrap;
+}
+
+.transport-recording-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--danger, #f87171);
+  animation: transport-recording-pulse 1.8s ease-in-out infinite;
+}
+
+/* The dot breathes rather than blinks. A hard blink at the edge of vision is
+   the shape an ERROR takes in this app, and a take running normally is not
+   one; reduced motion turns it off entirely and the dot simply stays lit,
+   which says the same thing. */
+@keyframes transport-recording-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .transport-recording-dot {
+    animation: none;
+  }
+}
+
+.transport-recording-clock {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+/* The coach's sentence is the first thing to go: it is an explanation, and a
+   take that is running is a fact. */
+@media (max-width: 1100px) {
+  .transport[data-recording] .transport-note {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .transport[data-recording] .transport-recording-label {
+    display: none;
+  }
+}
+
+/* â”€â”€ "Add to setlistâ€¦", expanded (JAM_MODE Â§8.5) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   The setlists are listed inside the menu that offered them rather than in a
+   flyout beside it. A flyout needs a hover corridor and a placement rule, and
+   this list is at most a handful of one-word names: indenting them under the
+   item they belong to says the same thing with nothing to get wrong. */
+.preset-context-menu .preset-context-open {
+  color: var(--accent);
+}
+
+.preset-context-menu .preset-context-sub {
+  padding-left: 26px;
+  color: var(--text-secondary);
+}
+
+.header-more-menu .header-more-sub {
+  padding-left: 34px;
+  color: var(--text-secondary);
+}
+
+.header-more-menu .sub-dropdown-item.open {
+  color: var(--accent);
+}

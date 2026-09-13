@@ -128,6 +128,17 @@
       "beats_other": "{{count}} tellen",
       "fewer": "Minder tellen aftellen",
       "more": "Meer tellen aftellen"
+    },
+    "jam": {
+      "mark": "Deze stap is een jam",
+      "addStep": "Een jam toevoegen",
+      "addTo": "Aan setlist toevoegen…",
+      "barsOfForm": "{{count}} maten",
+      "barsOfForm_one": "{{count}} maat",
+      "barsOfForm_other": "{{count}} maten",
+      "said": "de band",
+      "goneShort": "De jam is weg",
+      "gone": "Die jam staat niet meer in de bibliotheek, dus deze stap speelt de klik die hij beschrijft."
     }
   }
 }

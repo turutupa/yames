@@ -207,7 +207,8 @@
         "jam-next-shape": "Próxima forma",
         "jam-next-section": "Próxima seção",
         "jam-prev-section": "Seção anterior",
-        "jam-loop-section": "Repetir esta seção"
+        "jam-loop-section": "Repetir esta seção",
+        "jam-take": "Gravar a tomada"
       },
       "descs": {
         "play": "Inicia ou para o metrônomo",
@@ -240,7 +241,8 @@
         "jam-next-shape": "Percorrer os jeitos de tocar o acorde atual",
         "jam-next-section": "Pular para o início da próxima seção na barra de compasso",
         "jam-prev-section": "Voltar ao início da seção anterior na barra de compasso",
-        "jam-loop-section": "Pôr em loop a seção em que você está, ou tirar"
+        "jam-loop-section": "Pôr em loop a seção em que você está, ou tirar",
+        "jam-take": "Gravar na próxima vez que você tocar, ou parar de gravar"
       }
     },
     "inputTest": {

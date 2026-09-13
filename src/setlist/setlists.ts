@@ -10,6 +10,9 @@
  */
 import type { Setlist, SetlistStep, Preset } from "../types";
 import { presetBeatGroups, presetFreeMode } from "../utils/meter";
+import { jamMeter } from "../jam/compile";
+import { formBars } from "../jam/forms";
+import type { Jam } from "../jam/types";
 
 /**
  * Same scheme as `PresetSidebar`'s: sortable-ish by time, short enough to
@@ -52,6 +55,65 @@ export function presetToSetlistStep(
     trigger: gap?.trigger ?? DEFAULT_TRIGGER,
     transition: gap?.transition ?? DEFAULT_TRANSITION,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Jam → step (JAM_MODE §8.5)
+// ---------------------------------------------------------------------------
+
+/**
+ * The click a jam step falls back to.
+ *
+ * A jam has no click of its own — it has a band — so the only sound on the
+ * record is the one it counts you in with, and that is what the step takes.
+ * `sticks` is the drummer on the rim, and `wood` is the nearest thing the
+ * metronome owns; `beep` is a sound type by that name already.
+ *
+ * This matters on exactly one day: the day the jam has been deleted and the
+ * step plays as the plain metronome step it describes. A step that fell back
+ * to whatever the app happened to be set to would sound like a different
+ * step every time it did.
+ */
+const JAM_STEP_SOUND: Record<string, string> = { beep: "beep", sticks: "wood" };
+
+/**
+ * "Add this jam as a step."
+ *
+ * The jam is COPIED, exactly as a preset is (U9.1): its tempo, its meter and
+ * its sound land in the fields the step already has, and `jamId` is the one
+ * thing that points back. That is not redundancy — it is what lets a jam step
+ * whose jam has been deleted go on playing as the plain step it describes,
+ * and it is what the sentence reads to draw the step without loading anything.
+ *
+ * The groups, not `[beatsPerBar]`: a jam in 7/8 accented 3+2+2 has to arrive
+ * in the setlist as 3+2+2, for the same reason `pushJam` sends the groups.
+ */
+export function jamToSetlistStep(
+  jam: Jam,
+  gap?: { trigger?: SetlistStep["trigger"]; transition?: SetlistStep["transition"] },
+): SetlistStep {
+  const meter = jamMeter(jam);
+  return {
+    id: newId(),
+    name: jam.name,
+    bpm: jam.bpm,
+    subdivision: meter.ticksPerBeat,
+    beatGroups: [...meter.beatGroups],
+    // A jam is never free: the whole thing is a table on a counted bar.
+    freeMode: false,
+    soundType: JAM_STEP_SOUND[jam.countInSound ?? "beep"] ?? "beep",
+    // Loud enough to be the band rather than a click under one. The metronome's
+    // own default, which is what every other new step gets.
+    volume: 0.7,
+    trigger: gap?.trigger ?? DEFAULT_TRIGGER,
+    transition: gap?.transition ?? DEFAULT_TRANSITION,
+    jamId: jam.id,
+  };
+}
+
+/** How many bars one chorus of a jam step's jam runs to. 0 when it is gone. */
+export function jamStepBars(jam: Jam | null | undefined): number {
+  return jam ? formBars(jam.form) : 0;
 }
 
 /**

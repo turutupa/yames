@@ -207,7 +207,8 @@
         "jam-next-shape": "Sonraki akor basışı",
         "jam-next-section": "Sonraki bölüm",
         "jam-prev-section": "Önceki bölüm",
-        "jam-loop-section": "Bu bölümü döngüye al"
+        "jam-loop-section": "Bu bölümü döngüye al",
+        "jam-take": "Kaydı al"
       },
       "descs": {
         "play": "Metronomu başlat veya durdur",
@@ -240,7 +241,8 @@
         "jam-next-shape": "Çaldığın akorun basış biçimleri arasında gez",
         "jam-next-section": "Ölçü çizgisinde sonraki bölümün başına atla",
         "jam-prev-section": "Ölçü çizgisinde önceki bölümün başına dön",
-        "jam-loop-section": "İçinde olduğun bölümü döngüye al ya da döngüden çıkar"
+        "jam-loop-section": "İçinde olduğun bölümü döngüye al ya da döngüden çıkar",
+        "jam-take": "Bir sonraki çalışında kaydet veya kaydı durdur"
       }
     },
     "inputTest": {

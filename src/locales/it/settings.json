@@ -207,7 +207,8 @@
         "jam-next-shape": "Posizione successiva",
         "jam-next-section": "Sezione successiva",
         "jam-prev-section": "Sezione precedente",
-        "jam-loop-section": "Ripeti questa sezione"
+        "jam-loop-section": "Ripeti questa sezione",
+        "jam-take": "Registra la take"
       },
       "descs": {
         "play": "Avvia o ferma il metronomo",
@@ -240,7 +241,8 @@
         "jam-next-shape": "Scorrere i modi di suonare l'accordo attuale",
         "jam-next-section": "Saltare all'inizio della sezione successiva alla stanghetta",
         "jam-prev-section": "Tornare all'inizio della sezione precedente alla stanghetta",
-        "jam-loop-section": "Mettere in loop la sezione in cui sei, o toglierla"
+        "jam-loop-section": "Mettere in loop la sezione in cui sei, o toglierla",
+        "jam-take": "Registra alla prossima riproduzione, oppure smetti di registrare"
       }
     },
     "inputTest": {

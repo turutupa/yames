@@ -285,6 +285,29 @@
         "4": "semicrome",
         "6": "sestine"
       }
+    },
+    "takes": {
+      "label": "Registrazioni",
+      "record": "Registra la take",
+      "recording": "Registrazione",
+      "recordingNow": "Sta registrando. La take compare qui quando ti fermi.",
+      "empty": "Ancora niente di registrato. Attiva Registra la take e suona — tu e la band, tenuti qui per riascoltarti.",
+      "unavailable": "La registrazione non è disponibile in questa versione. Tutto il resto di questa schermata funziona come sempre.",
+      "play": "Riproduci questa take",
+      "stop": "Ferma",
+      "bandOff": "band in silenzio",
+      "delete": "Elimina",
+      "confirm": "La elimino? Non si torna indietro.",
+      "confirmDelete": "Elimina",
+      "confirmKeep": "Tieni",
+      "size": "circa {{megabytes}} MB sul disco",
+      "local": "Le take restano su questa macchina. Non viene caricato niente.",
+      "introTitle": "Sulle take",
+      "introWhat": "Una take sei tu insieme alla band, dalla prima battuta dopo le battute d'intro fino a quando ti fermi.",
+      "introWhere": "Viene scritta come file WAV nella cartella di questa app su questa macchina, e resta lì finché non la elimini.",
+      "introPrivate": "Non viene caricato niente, non viene analizzato niente, niente lascia la macchina.",
+      "introNotNow": "Non ora",
+      "introStart": "Registra le take"
     }
   },
   "scale": {

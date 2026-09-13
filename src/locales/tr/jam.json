@@ -285,6 +285,29 @@
         "4": "onaltılıklar",
         "6": "sextole"
       }
+    },
+    "takes": {
+      "label": "Kayıtlar",
+      "record": "Kaydı al",
+      "recording": "Kaydediliyor",
+      "recordingNow": "Kaydediliyor. Durdurduğunda buraya düşer.",
+      "empty": "Henüz bir şey kaydedilmedi. Kaydı al'ı aç ve çal — sen ve grup, sonra dinlemek için burada durur.",
+      "unavailable": "Bu sürümde kayıt yapılamıyor. Bu ekrandaki diğer her şey her zamanki gibi çalışıyor.",
+      "play": "Bu kaydı çal",
+      "stop": "Durdur",
+      "bandOff": "grup sessiz",
+      "delete": "Sil",
+      "confirm": "Silinsin mi? Geri alınamıyor.",
+      "confirmDelete": "Sil",
+      "confirmKeep": "Kalsın",
+      "size": "diskte yaklaşık {{megabytes}} MB",
+      "local": "Kayıtlar bu makinede kalır. Hiçbir şey yüklenmez.",
+      "introTitle": "Kayıtlar hakkında",
+      "introWhat": "Bir kayıt, giriş sayımından sonraki ilk ölçüden durana kadar sen ve grubun birlikte çaldığı sestir.",
+      "introWhere": "Bu makinede bu uygulamanın kendi klasörüne WAV dosyası olarak yazılır ve sen silene kadar orada kalır.",
+      "introPrivate": "Hiçbir şey yüklenmez, hiçbir şey incelenmez, hiçbir şey makineden çıkmaz.",
+      "introNotNow": "Şimdi değil",
+      "introStart": "Kayıt al"
     }
   },
   "scale": {

@@ -41,6 +41,7 @@ import type {
   JamPracticeSettings,
 } from "../../jam/types";
 import type { Chord, TranspositionOption } from "../../jam/harmony";
+import type { JamTakesState } from "../main-window/hooks/useJamTakes";
 import type { Instrument } from "../../jam/chordShapes";
 import type { BeatEvent } from "../../types";
 import { GrooveGlyph } from "./GrooveGlyph";
@@ -49,6 +50,7 @@ import { NowBlock } from "./NowBlock";
 import { ChordsPanel } from "./ChordsPanel";
 import { BandLanes } from "./BandLanes";
 import { PracticeRow, NO_PRACTICE } from "./PracticeRow";
+import { TakesSection } from "./TakesSection";
 import { TradeCue } from "./TradeCue";
 import { JamSetup } from "./JamSetup";
 import { GrooveEditorDrawer } from "./GrooveEditorDrawer";
@@ -147,6 +149,22 @@ interface JamViewProps {
   listening: boolean;
   /** Whether a voice is installed, so the cues toggle can say something true. */
   voiceReady: boolean;
+  /**
+   * The jam's takes: the shelf, whether the build can record at all, and what
+   * is playing back (JAM_MODE §4.4).
+   *
+   * Passed in whole rather than assembled here because recording outlives the
+   * screen — a take runs while you are on the metronome tab looking something
+   * up, and a hook that lived inside this component would stop the moment the
+   * component unmounted.
+   */
+  takes: JamTakesState;
+  /**
+   * Recording turned on or off for this jam. Not an `onEdit` of `takes`
+   * directly: the first time it is turned on there is a dialog to show, and
+   * the answer to it belongs to the window rather than to this screen.
+   */
+  onToggleTakes: (next: boolean) => void;
   screen: JamScreenState;
   /**
    * Where the form is being sent: the loop, the jump waiting for a bar line,
@@ -236,6 +254,8 @@ export function JamView({
   trainedBpm,
   listening,
   voiceReady,
+  takes,
+  onToggleTakes,
   screen,
   position,
   tapActive,
@@ -678,6 +698,24 @@ export function JamView({
       <PracticeRow
         value={practice}
         onChange={(next: JamPracticeSettings) => onEdit({ practice: next })}
+        takes={!!jam.takes}
+        // Withheld on a build whose engine has no take commands, so the row
+        // does not offer a switch with nothing behind it. `null` is "we have
+        // not asked yet" and the switch stays, because it almost always will.
+        onTakes={takes.available === false ? undefined : onToggleTakes}
+      />
+
+      {/* Below the band, which is where listening back belongs: it is what
+          you do between choruses, not while playing. */}
+      <TakesSection
+        available={takes.available}
+        takes={takes.takes}
+        recording={takes.recording}
+        dirBytes={takes.dirBytes}
+        playingId={takes.playingId}
+        onPlay={takes.play}
+        onStop={takes.stopPlayback}
+        onDelete={takes.remove}
       />
 
       <div className="stage-divider" aria-hidden="true" />

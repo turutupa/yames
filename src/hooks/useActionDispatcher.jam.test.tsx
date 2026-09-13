@@ -58,6 +58,7 @@ function mount(view: ViewName, jamLoaded = true, jamEditorOpen = false) {
     nextSection: vi.fn(),
     prevSection: vi.fn(),
     loopSection: vi.fn(),
+    toggleTakes: vi.fn(),
   };
   const { result } = renderHook(() =>
     useActionDispatcher({
@@ -92,6 +93,7 @@ describe("the hands-free jam actions", () => {
     dispatch("jam-next-section");
     dispatch("jam-prev-section");
     dispatch("jam-loop-section");
+    dispatch("jam-take");
     expect(jamActions.nextGroove).toHaveBeenCalledTimes(1);
     expect(jamActions.prevGroove).toHaveBeenCalledTimes(1);
     expect(jamActions.toggleTrade).toHaveBeenCalledTimes(1);
@@ -100,6 +102,7 @@ describe("the hands-free jam actions", () => {
     expect(jamActions.nextSection).toHaveBeenCalledTimes(1);
     expect(jamActions.prevSection).toHaveBeenCalledTimes(1);
     expect(jamActions.loopSection).toHaveBeenCalledTimes(1);
+    expect(jamActions.toggleTakes).toHaveBeenCalledTimes(1);
   });
 
   it("does nothing on another tab", () => {
@@ -108,9 +111,13 @@ describe("the hands-free jam actions", () => {
       dispatch("jam-next-groove");
       dispatch("jam-trade");
       dispatch("jam-loop-section");
+      dispatch("jam-take");
       expect(jamActions.nextGroove, view).not.toHaveBeenCalled();
       expect(jamActions.toggleTrade, view).not.toHaveBeenCalled();
       expect(jamActions.loopSection, view).not.toHaveBeenCalled();
+      // A stomp on the metronome tab must not start a recording of a jam you
+      // are not even looking at.
+      expect(jamActions.toggleTakes, view).not.toHaveBeenCalled();
     }
   });
 

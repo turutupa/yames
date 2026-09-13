@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import {
   addStep,
   createSetlist,
+  jamToSetlistStep,
   presetToSetlistStep,
   renameSetlist as renameSetlistData,
   updateStep,
@@ -14,9 +15,11 @@ import {
   saveSetlist as saveSetlistIpc,
 } from "../../../ipc";
 import { meterKey } from "../../../utils/meter";
+import type { Jam } from "../../../jam";
 import type { AppState, BeatEvent, Setlist, SetlistStep, Preset } from "../../../types";
 import { applySetlistStep } from "./applySetlistStep";
 import { useSetlistRunner } from "./useSetlistRunner";
+import type { SetlistJamContext } from "./useSetlistRunner";
 
 /**
  * The setlist the window has open: which one, which step you are editing, and
@@ -106,6 +109,15 @@ interface UseSetlistSessionArgs {
   setView: (view: "setlist") => void;
   /** Loading a setlist takes the preset's place in the context bar. */
   onSetlistLoaded: () => void;
+  /**
+   * Everything a jam STEP needs (JAM_MODE 8.5), or absent on a mount that has
+   * no jam library to look into.
+   *
+   * It arrives as one object rather than as three props because the runner
+   * reads all of it through one ref, and because the whole of it is optional
+   * together: a setlist of plain steps never asks any of these questions.
+   */
+  jamContext?: SetlistJamContext;
 }
 
 export function useSetlistSession({
@@ -114,6 +126,7 @@ export function useSetlistSession({
   currentBeat,
   setView,
   onSetlistLoaded,
+  jamContext,
 }: UseSetlistSessionArgs) {
   const { t } = useTranslation();
   const [setlists, setSetlists] = useState<Setlist[]>([]);
@@ -152,7 +165,7 @@ export function useSetlistSession({
     0,
     setlist?.steps.findIndex((s) => s.id === selectedStepId) ?? 0,
   );
-  const runner = useSetlistRunner(setlist, isPlaying, currentBeat, selectedIndex);
+  const runner = useSetlistRunner(setlist, isPlaying, currentBeat, selectedIndex, jamContext);
 
   useEffect(() => {
     if (!isPlaying) setEditingWhileRunning(false);
@@ -165,10 +178,30 @@ export function useSetlistSession({
     };
   }, []);
 
-  const applyAndAwait = useCallback((step: SetlistStep) => {
-    awaiting.current = stepSignature(step);
-    applySetlistStep(step);
-  }, []);
+  /**
+   * The jam a step points at, or null - including when it has been deleted.
+   *
+   * Through the context's getter rather than a list of jams held here: the
+   * library belongs to `useJamSession`, which is built after this hook, and a
+   * copy kept on this side would be a second library to keep in step.
+   */
+  const jamFor = useCallback(
+    (step: SetlistStep): Jam | null =>
+      step.jamId && jamContext ? jamContext.getJam(step.jamId) : null,
+    [jamContext],
+  );
+
+  const applyAndAwait = useCallback(
+    (step: SetlistStep) => {
+      awaiting.current = stepSignature(step);
+      // A jam step puts its band on the engine while you edit it too, for the
+      // reason the metronome under the track exists at all: the controls are
+      // the step's own, and a jam step you cannot hear is a step you are
+      // editing blind.
+      applySetlistStep(step, jamFor(step), jamContext?.lineup);
+    },
+    [jamFor, jamContext],
+  );
 
   const selectStep = useCallback(
     (stepId: string) => {
@@ -201,6 +234,18 @@ export function useSetlistSession({
     }
     const step = setlist.steps.find((s) => s.id === selectedStepId);
     if (!step || stepSignature(step) === engineSignature) return;
+    /*
+     * Never onto a jam step.
+     *
+     * A jam step's meter is the jam's, and the jam is what put it on the
+     * engine - so the mirror would read the groove's own subdivision back out
+     * and write it onto the step as though the user had chosen it. Worse, a
+     * jam whose groove does not fit its meter is played by the rule groove in
+     * a DIFFERENT bar length, and the step would quietly acquire that instead
+     * of the one it was made from. The step's fields are a copy of the jam,
+     * and only the jam gets to change them.
+     */
+    if (step.jamId) return;
     setSetlist((current) =>
       current
         ? {
@@ -343,6 +388,49 @@ export function useSetlistSession({
     setSelectedStepId(step.id);
   }, [setlist, state, t]);
 
+  /**
+   * A jam, added to the setlist as a step (JAM_MODE 8.5).
+   *
+   * Appended rather than inserted at the selection, the way `addStepFromNow`
+   * appends: "add ten minutes of playing at the end" is what the feature is
+   * for, and a jam landing in the middle of a routine is a drag away.
+   */
+  const addJamStep = useCallback(
+    (jam: Jam) => {
+      if (!setlist) return null;
+      const step = jamToSetlistStep(jam);
+      const next = addStep(setlist, step);
+      setSetlist(next);
+      setSelectedStepId(step.id);
+      // Selecting it points the engine at it, exactly as clicking the row
+      // would - and while the setlist runs it must not, because the runner
+      // owns the engine then.
+      if (!isPlaying) applyAndAwait(step);
+      return step;
+    },
+    [setlist, isPlaying, applyAndAwait],
+  );
+
+  /** The same, into a setlist that is not the one on screen. */
+  const addJamToSetlist = useCallback(
+    async (setlistId: string, jam: Jam) => {
+      const target =
+        setlist?.id === setlistId ? setlist : setlists.find((c) => c.id === setlistId);
+      if (!target) return;
+      if (setlist?.id === setlistId) {
+        addJamStep(jam);
+        return;
+      }
+      // Not the open one, so there is no working copy to go dirty: the step
+      // lands in the store and in the library at once, which is what makes
+      // "add to setlist" from the jam tab a thing you do and forget.
+      const next = addStep(target, jamToSetlistStep(jam));
+      await saveSetlistIpc(next).catch(() => {});
+      setSetlists((prev) => upsertSetlist(prev, next));
+    },
+    [setlist, setlists, addJamStep],
+  );
+
   const dirty = useMemo(
     () => (setlist && saved ? JSON.stringify(setlist) !== JSON.stringify(saved) : false),
     [setlist, saved],
@@ -370,6 +458,9 @@ export function useSetlistSession({
     deleteSetlist,
     renameSetlist,
     addStepFromNow,
+    /** A jam as a step, in the open setlist or in a named one. */
+    addJamStep,
+    addJamToSetlist,
     /** 1-based, for the transport's "Start at step 3". */
     startAt: setlist ? selectedIndex + 1 : 0,
     /** True while the setlist is on a step — the player's condition. */

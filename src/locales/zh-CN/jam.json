@@ -285,6 +285,29 @@
         "4": "十六分音符",
         "6": "六连音"
       }
+    },
+    "takes": {
+      "label": "录音",
+      "record": "录下这一遍",
+      "recording": "录音中",
+      "recordingNow": "正在录音。停下时会出现在这里。",
+      "empty": "还没有录任何东西。打开“录下这一遍”然后开弹 — 你和乐队会留在这里，供你回听。",
+      "unavailable": "这个版本不能录音。这个页面上的其他功能照常使用。",
+      "play": "播放这段录音",
+      "stop": "停止",
+      "bandOff": "乐队静音",
+      "delete": "删除",
+      "confirm": "删掉吗？无法撤销。",
+      "confirmDelete": "删除",
+      "confirmKeep": "保留",
+      "size": "磁盘上约 {{megabytes}} MB",
+      "local": "录音只留在这台机器上，不会上传。",
+      "introTitle": "关于录音",
+      "introWhat": "一段录音就是你和乐队合在一起的声音，从预备拍之后的第一小节到你停下为止。",
+      "introWhere": "它会以 WAV 文件写在这台机器上本应用自己的文件夹里，直到你删掉它。",
+      "introPrivate": "不上传、不分析，也不会离开这台机器。",
+      "introNotNow": "暂不",
+      "introStart": "开始录音"
     }
   },
   "scale": {
