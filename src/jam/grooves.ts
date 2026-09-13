@@ -1,5 +1,5 @@
 /**
- * The thirteen grooves the drummer knows, written as tables on the tick grid.
+ * The twenty grooves the drummer knows, written as tables on the tick grid.
  *
  * A groove is one bar wide. Columns are the ticks of that bar — beats per bar
  * times ticks per beat, tick 0 first — and rows are the drums. Nothing here
@@ -15,6 +15,15 @@
  * ghost. Ghosts are what make a funk sixteenth-note groove sound played rather
  * than programmed, so they are written in rather than left for the intensity
  * control to invent.
+ *
+ * **An accent on the hat lane is an OPEN hat.** The contract's five lanes
+ * (`JamLane`) have no open-hat row, and the kits all have the voice, so the
+ * convention is the level: a hat at level 2 is the hat opening. It is what
+ * boom bap's last eighth already meant, it is what `applyIntensity`'s Loud
+ * writes on the off-beats (`src/jam/intensity.ts`), and the groove editor
+ * reads it the same way. Written down here because a convention that lives in
+ * three files and nowhere else is a convention that will be broken by the
+ * fourth.
  */
 import type { JamLevel, JamPattern } from "./types";
 
@@ -140,10 +149,10 @@ function groove(
 }
 
 /**
- * The thirteen, in the order the picker draws them: the four you reach for
+ * The twenty, in the order the picker draws them: the four you reach for
  * first, then the three that carry their own meter, then the jazz one, then
  * the five that came later — the ones you go looking for by name rather than
- * land on by accident.
+ * land on by accident — and last the seven the vibes brought with them.
  *
  * Appended rather than interleaved, and deliberately: the footswitch steps
  * this list in order (`stepGroove` in `useJamSession`), so re-sorting it would
@@ -336,6 +345,135 @@ export const GROOVES: readonly Groove[] = [
       kick: "X. x. x. x.",
       snare: ".. x. .. x.",
       hat: ".x .x .x .x",
+    }),
+  ),
+
+  // ---------------------------------------------------------------------
+  // The seven the vibes brought (plans/JAM_UX_DECISIONS.md B4, A9).
+  //
+  // The first four are the ones that DRIVE, and what they have in common is
+  // what they leave out: no ghost notes anywhere. The owner's verdict on the
+  // first pass was that the band sounds smooth; a ghost note is the quietest
+  // thing on the kit, and four grooves' worth of them under a rock tempo is
+  // most of why. The last three are the ones the Latin and Funk vibes need
+  // by name — a "Samba" tile that plays a fast bossa is the same lie the
+  // first pass told with its groove names.
+  // ---------------------------------------------------------------------
+
+  /* Hard rock. Straight eighths with the hat OPEN on every off-beat — the
+     accent level is the open hat (see the header) — a kick that pushes the
+     bar over on the "and" of four, and a crash on the one.
+
+     The crash is written into the bar rather than left to `crashOnOne`,
+     because `crashOnOne` is once a chorus and this is the groove where the
+     cymbal is part of the beat. It is a hit and not an accent: every bar is
+     often enough without it also being the loudest thing in the room. */
+  groove(
+    "hardRock",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. .. x. .x",
+      snare: ".. x. .. x.",
+      hat: "xX xX xX xX",
+      crash: "x. .. .. ..",
+    }),
+  ),
+  /* Stomp. Half-time — the backbeat is on three and nowhere else — with the
+     kick doing the work: one, two, four and the "and" of four. Quarters on
+     the hat and nothing else, because the space between the kicks is the
+     groove. The crash belongs to the section, so it is `crashOnOne`'s. */
+  groove(
+    "stomp",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. x. .. xx",
+      snare: ".. .. X. ..",
+      hat: "x. x. x. x.",
+    }),
+  ),
+  /* Double kick. Sixteenths on the kick, unbroken, under a backbeat that
+     stays exactly where a backbeat goes — two and four, accented, so the bar
+     is still countable at two hundred. Eighths on the hat above.
+
+     The bass under this one is `rock`, which puts a root on every kick. That
+     is sixteen roots a bar, which reads as one held note under the voice
+     rule (`applyBassVoice` in `./bassline`) — which is what a bass player
+     does under a double-kick roll. */
+  groove(
+    "doubleKick",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "Xxxx xxxx Xxxx xxxx",
+      snare: ".... X... .... X...",
+      hat: "X.x. x.x. x.x. x.x.",
+    }),
+  ),
+  /* Two-step. The country dance floor: an accented backbeat, quarters on the
+     hat, and a kick on one, the "and" of two, three and the "and" of four,
+     which is the walking bass line's own rhythm played on the drum. Fast —
+     the vibe sets it near 170 — and it is the tempo that makes it a
+     two-step rather than a rock beat. */
+  groove(
+    "twoStep",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. .x x. .x",
+      snare: ".. X. .. X.",
+      hat: "x. x. x. x.",
+    }),
+  ),
+  /* Samba. The surdo is the kick, and it leans on two and four — that is the
+     one thing that makes a samba a samba rather than a fast bossa — with the
+     shaker running sixteenths above it and the tamborim answering off the
+     beat on the snare at ghost level. */
+  groove(
+    "samba",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "x... X... x... X...",
+      snare: "..o. o..o ..o. o..o",
+      hat: "Xxxx xxxx Xxxx xxxx",
+    }),
+  ),
+  /* Cha-cha. The name is the figure: four, the "and" of four, one. It is
+     written across the bar line — the last two ticks and the first — so the
+     loop plays it whole every time round. Cowbell on the quarters, accented
+     on one and three, and the kick on one and three under it. */
+  groove(
+    "chaCha",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. .. x. ..",
+      snare: "x. .. .. xx",
+      hat: "X. x. X. x.",
+    }),
+  ),
+  /* Second line. The New Orleans street beat: a bass drum that syncopates all
+     the way through the bar and a snare that rolls in ghosts with two
+     accents — the backbeat on two, and the "a" of three, which is the push
+     that makes the bar walk instead of march. Quarters on the hat, quietly,
+     because both hands are busy. */
+  groove(
+    "secondLine",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X..x ..x. x... ..x.",
+      snare: ".oo. Xo.o .ooX o.o.",
+      hat: "x... x... x... x...",
     }),
   ),
 ];

@@ -6,6 +6,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup, within } from "@testing-library/react";
 import { createRef } from "react";
 import { JamView } from "./JamView";
+import { GROOVES } from "../../jam/grooves";
 import { STARTER_JAMS } from "../../jam/jams";
 import type { Jam } from "../../jam/types";
 import type { BeatEvent } from "../../types";
@@ -349,14 +350,17 @@ describe("JamView — the controls", () => {
     expect(screen.getByText("92")).toBeInTheDocument();
   });
 
-  it("offers the thirteen grooves, a card for one of your own, and marks the one that is loaded", () => {
+  it("offers every groove, a card for one of your own, and marks the one that is loaded", () => {
     const { container } = setup({ jam: jamOf({ grooveId: "bossa" }) });
     const cards = container.querySelectorAll(".jam-cards-groove .jam-card");
-    // Thirteen presets and "Make your own". The last card is one of the
-    // choices rather than a mode to go and find, which is the difference
-    // between an editor people use and one they read about in a changelog.
-    expect(cards).toHaveLength(14);
-    expect(cards[13].textContent).toContain("Make your own");
+    // Every preset and "Make your own". Counted off `GROOVES` rather than
+    // written out, because the list grows — the vibes brought seven with
+    // them — and a number in a test is one more place to remember. The last
+    // card is one of the choices rather than a mode to go and find, which is
+    // the difference between an editor people use and one they read about in
+    // a changelog.
+    expect(cards).toHaveLength(GROOVES.length + 1);
+    expect(cards[GROOVES.length].textContent).toContain("Make your own");
     const pressed = [...cards].filter((c) => c.getAttribute("aria-pressed") === "true");
     expect(pressed).toHaveLength(1);
     expect(pressed[0].textContent).toContain("Bossa");
@@ -392,9 +396,9 @@ describe("JamView — the controls", () => {
     // up advertising the old one.
     const { container } = setup();
     const glyphs = container.querySelectorAll(".jam-cards-groove .jam-glyph");
-    // Fourteen: the thirteen presets, plus the "make your own" card, which
-    // draws the groove that is loaded so it is never a blank square.
-    expect(glyphs).toHaveLength(14);
+    // Every preset, plus the "make your own" card, which draws the groove
+    // that is loaded so it is never a blank square.
+    expect(glyphs).toHaveLength(GROOVES.length + 1);
     // Rock eighths is 4 × 2 ticks over three lanes; the bossa is 4 × 4.
     expect(glyphs[0].querySelectorAll("circle")).toHaveLength(8 * 3);
     expect(glyphs[6].querySelectorAll("circle")).toHaveLength(16 * 3);
