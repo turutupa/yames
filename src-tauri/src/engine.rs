@@ -7400,6 +7400,401 @@ mod tests {
         }
     }
 
+    // -----------------------------------------------------------------
+    // The drum bus
+    // -----------------------------------------------------------------
+
+    /// THE NUMBER THIS WHOLE PASS EXISTS FOR.
+    ///
+    /// `plans/JAM_SOUND.md` §1: "the jam's drums play 9–13 dB quieter than
+    /// the metronome's own Drum accent, because the band is peak-scaled so
+    /// the busiest possible sample never reaches the ceiling". Every groove
+    /// in the library paid, on every hit, for the one pattern nobody writes.
+    ///
+    /// So the comparison is the one the owner made: a rock groove at normal
+    /// intensity, through the band's own path, against ONE hit of the
+    /// metronome's Drum accent through the click's path, both at the same
+    /// volume and both through the 200 Hz-4 kHz band a laptop radiates —
+    /// which is the speaker this gets practised on.
+    ///
+    /// Measured per second over the same window, so a band that is playing
+    /// eight hits a bar is not rewarded for having more of them: what is
+    /// compared is how loud the two things are, which is what an ear
+    /// compares.
+    #[test]
+    fn the_band_is_not_quieter_than_the_metronome_it_replaces() {
+        let sr = 48_000u32;
+        let bank = SoundBank::new(sr);
+        // 120 BPM sixteenths: a bar is two seconds.
+        let tick_samples = (sr as f64 * 60.0 / 120.0 / 4.0) as usize;
+        let table = compile_jam(&rock_16ths()).unwrap();
+        let r = render_jam_at(&table, &bank, 2, tick_samples, 1.0, sr, true);
+        let window = r.samples.len();
+        let band = laptop_band_energy(&r.samples, sr) / window as f64;
+
+        // The metronome's own accent, on the beat, over the same window:
+        // one downbeat every four ticks, which is what the click plays.
+        let accent = bank.get(SoundId::DrumAccent);
+        let mut click = vec![0.0f32; window];
+        let mut at = 0usize;
+        while at < window {
+            for (i, v) in accent.iter().enumerate() {
+                if at + i < window {
+                    click[at + i] += v;
+                }
+            }
+            at += tick_samples * 4;
+        }
+        let metronome = laptop_band_energy(&click, sr) / window as f64;
+
+        let db = 10.0 * (band / metronome.max(1e-30)).log10();
+        eprintln!(
+            "[jam] a rock groove against the metronome's Drum accent: {db:+.1} dB \
+             (was -9 to -13 before this pass)"
+        );
+        assert!(
+            db > -6.0,
+            "the band is {db:.1} dB under the metronome's own accent, and the \
+             whole point of this pass was that it was 9 to 13"
+        );
+        // ...and not the other way round either: a band that shouted over
+        // the click it replaces would be a different complaint.
+        assert!(db < 12.0, "the band is {db:.1} dB OVER the metronome's accent");
+    }
+
+
+    /// A FULL-SCALE SUM COMES OUT AT FULL SCALE AND NEVER ABOVE IT.
+    ///
+    /// The tanh stage is a soft clipper normalised to pass through 1.0:
+    /// `tanh(x·d)/tanh(d)`. Under full scale it is nearly a straight line —
+    /// which is what makes it glue rather than an effect — at full scale it
+    /// is exactly unity, and above it the curve bends rather than breaking.
+    #[test]
+    fn the_bus_passes_full_scale_at_full_scale_and_bends_above_it() {
+        for drive in [1.0f32, 1.6] {
+            let shape = 1.0 / drive.tanh();
+            let curve = |x: f32| (x * drive).tanh() * shape;
+            assert!((curve(1.0) - 1.0).abs() < 1e-5, "drive {drive} is not unity at 1.0");
+            assert!(curve(0.0).abs() < 1e-9);
+            // Monotone, and never over 1.0 anywhere below it.
+            let mut last = 0.0f32;
+            for i in 0..=1000 {
+                let x = i as f32 / 1000.0;
+                let y = curve(x);
+                assert!(y >= last, "the curve turned back at {x}");
+                assert!(y <= 1.0 + 1e-5, "drive {drive} reaches {y} at {x}");
+                last = y;
+            }
+            // ...and it bends: a drive that did nothing would be a straight
+            // line, and 0.5 in would come out at 0.5.
+            assert!(
+                curve(0.5) > 0.5,
+                "drive {drive} is a wire, not a saturator: 0.5 -> {}",
+                curve(0.5)
+            );
+        }
+        // A HARDER DRIVE BENDS HARDER, which is what `raw` asks for.
+        let soft = (0.5f32 * 1.0).tanh() / 1.0f32.tanh();
+        let hard = (0.5f32 * 1.6).tanh() / 1.6f32.tanh();
+        assert!(hard > soft, "raw's drive is doing nothing: {hard} against {soft}");
+    }
+
+    /// THE BAND ARRIVING AT THE SAFETY CLAMP COMES OUT UNDER FULL SCALE.
+    ///
+    /// `jam.rs` lets a table render up to 2.5 before the bus, because the bus
+    /// is what holds it down — that is the whole trade this pass makes. So
+    /// the bus has to actually hold it: fed a steady 2.5 it must settle well
+    /// inside full scale, and it must get there in the five milliseconds its
+    /// attack promises rather than clipping on the way.
+    #[test]
+    fn the_bus_holds_the_safety_clamp_under_full_scale() {
+        let sr = 48_000u32;
+        for drive in [1.0f32, 1.6] {
+            let mut bus = DrumBus::new(sr);
+            bus.set_drive(drive, 1.0 / drive.tanh());
+            let mut worst = 0.0f32;
+            let mut settled = 0.0f32;
+            // A quarter of a second of a full-scale-and-a-half band, which
+            // is the busiest thing the clamp allows.
+            for i in 0..sr / 4 {
+                let (l, r) = bus.process(2.5, -2.5);
+                worst = worst.max(l.abs()).max(r.abs());
+                if i > sr / 8 {
+                    settled = l.abs();
+                }
+            }
+            eprintln!(
+                "[bus] drive {drive}: 2.5 in, worst {worst:.3}, settled {settled:.3}"
+            );
+            assert!(
+                worst <= 1.0,
+                "drive {drive} let {worst:.3} through, so the mixer clamped"
+            );
+            assert!(
+                settled < 0.8,
+                "drive {drive} settles at {settled:.3}, which is not a compressor"
+            );
+            // And it is not a gate: the band is still most of full scale.
+            assert!(settled > 0.4, "drive {drive} settles at {settled:.3}, a whisper");
+        }
+    }
+
+    /// A QUIET BAND GOES THROUGH UNTOUCHED.
+    ///
+    /// Below −6 dBFS the compressor is not working, so a ballad at soft
+    /// intensity is the groove as it was written plus a little saturation —
+    /// which is the point of a threshold.
+    #[test]
+    fn the_bus_leaves_a_quiet_band_alone() {
+        let mut bus = DrumBus::new(48_000);
+        let mut worst = 0.0f32;
+        for _ in 0..4_800 {
+            let (l, _) = bus.process(0.3, 0.3);
+            // The tanh lifts it a little — that is the saturation — and the
+            // compressor does nothing at all.
+            worst = worst.max((l - 0.3f32.tanh() / 1.0f32.tanh()).abs());
+        }
+        assert!(worst < 1e-5, "the compressor moved a band under the threshold by {worst}");
+    }
+
+    /// THE CLICK DOES NOT GO THROUGH ANY OF THIS.
+    ///
+    /// Its timing and its path are unchanged by every line of this pass: it
+    /// is summed mono, where it always was, and added after the bus. A
+    /// `Voice::click` is what carries that, and this is what says it does.
+    #[test]
+    fn the_click_is_not_a_band_voice() {
+        let v = Voice::click(SoundId::ClickHigh, 0.8, 0);
+        assert!(!v.band, "the click went through the drum bus");
+        assert_eq!(v.amp_l, v.amp_r, "the click was panned");
+        assert_eq!(v.delay, 0, "the click drifted");
+        assert_eq!(v.fade_len, 0, "the click can be choked");
+        assert_eq!(v.voice, NOT_A_DRUM, "the click is a drum");
+    }
+
+    // -----------------------------------------------------------------
+    // The choke
+    // -----------------------------------------------------------------
+
+    /// A CLOSED HAT FADES THE OPEN ONE OUT OVER TWENTY MILLISECONDS.
+    ///
+    /// `plans/JAM_SOUND.md` §2.4: before this, an open hat rang across every
+    /// off-beat into the next beat, which is worst at Loud where the grooves
+    /// use open hats most. On the audio thread the choke is a flag and a
+    /// counter on the ringing voice and nothing else — no allocation, no
+    /// second pass, no lookup.
+    #[test]
+    fn a_closed_hat_fades_the_open_one_out_over_twenty_milliseconds() {
+        let sr = 48_000u32;
+        let choke = (CHOKE_FADE_SECS * sr as f32) as u32;
+        let mut cfg = rock_16ths();
+        cfg.bar.hat = vec![0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        cfg.bar.hat_open = vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        cfg.bar.kick = vec![0; 16];
+        cfg.bar.snare = vec![0; 16];
+        cfg.bar.ride = vec![0; 16];
+        let table = compile_jam(&cfg).unwrap();
+
+        let open = table
+            .tick(0, 0)
+            .unwrap()
+            .slots()
+            .iter()
+            .find(|s| s.lane == JamLane::HatOpen)
+            .copied()
+            .expect("an open hat on tick 0");
+        let hat = table
+            .tick(4, 0)
+            .unwrap()
+            .slots()
+            .iter()
+            .find(|s| s.lane == JamLane::Hat)
+            .copied()
+            .expect("a closed hat on tick 4");
+
+        let mut voices = Vec::new();
+        spawn_band_voice(&mut voices, &open, 1.0, 0, 0, 16, 3000, 0, choke);
+        assert_eq!(voices.len(), 1);
+        assert_eq!(voices[0].fade_len, 0, "nothing has closed it yet");
+        assert_eq!(voices[0].choke_gain(), 1.0);
+
+        // The stick lands. The wash starts fading and the hat does not.
+        spawn_band_voice(&mut voices, &hat, 1.0, 0, 4, 16, 3000, 0, choke);
+        assert_eq!(voices.len(), 2);
+        assert_eq!(voices[0].fade_len, choke, "the closed hat did not close the wash");
+        assert_eq!(voices[0].fade_left, choke);
+        assert_eq!(voices[1].fade_len, 0, "the hat choked itself");
+
+        // A LINEAR RAMP TO NOTHING, and then the voice is finished — which
+        // is what `retain` reads, so a choked drum stops costing the mixer
+        // anything at all.
+        let mut seen = Vec::new();
+        for _ in 0..choke {
+            seen.push(voices[0].choke_gain());
+            voices[0].fade_left -= 1;
+        }
+        assert!((seen[0] - 1.0).abs() < 1e-6);
+        assert!(seen.windows(2).all(|w| w[1] < w[0]), "the fade is not monotone");
+        // One step short of nothing, because the ramp is `left / len` and
+        // the voice is retired on the sample after the last one it played.
+        assert!(
+            *seen.last().unwrap() <= 1.5 / choke as f32,
+            "the fade ends at {}",
+            seen.last().unwrap()
+        );
+        assert!(voices[0].done(1_000_000), "a choked voice never finishes");
+
+        // A SECOND STICK DOES NOT RESTART THE FADE. Two closed hats in a row
+        // must not make the open one last longer than one would.
+        let mut voices = Vec::new();
+        spawn_band_voice(&mut voices, &open, 1.0, 0, 0, 16, 3000, 0, choke);
+        spawn_band_voice(&mut voices, &hat, 1.0, 0, 4, 16, 3000, 0, choke);
+        voices[0].fade_left = choke / 2;
+        spawn_band_voice(&mut voices, &hat, 1.0, 0, 8, 16, 3000, 0, choke);
+        assert_eq!(voices[0].fade_left, choke / 2, "the second stick restarted the fade");
+    }
+
+    /// NOTHING ELSE IS CHOKED.
+    ///
+    /// A crash is its decay, and a kick that stopped when the next hat
+    /// landed would be a band with no bottom. The mask is what makes that a
+    /// fact about the data rather than about the loop.
+    #[test]
+    fn a_hat_does_not_silence_the_rest_of_the_kit() {
+        let sr = 48_000u32;
+        let choke = (CHOKE_FADE_SECS * sr as f32) as u32;
+        let mut cfg = rock_16ths();
+        cfg.crash_on_one = true;
+        let table = compile_jam(&cfg).unwrap();
+        let hat = table
+            .tick(0, 0)
+            .unwrap()
+            .slots()
+            .iter()
+            .find(|s| s.lane == JamLane::Hat)
+            .copied()
+            .expect("a hat on tick 0");
+
+        let mut voices = Vec::new();
+        for tick in 0..16u32 {
+            if let Some(t) = table.tick(tick, 0) {
+                for slot in t.slots() {
+                    spawn_band_voice(&mut voices, slot, 1.0, 0, tick, 16, 3000, 0, choke);
+                }
+            }
+        }
+        if let Some(crash) = table.crash_on_one() {
+            spawn_band_voice(&mut voices, &crash, 1.0, 0, 0, 16, 3000, 0, choke);
+        }
+        spawn_band_voice(&mut voices, &hat, 1.0, 0, 15, 16, 3000, 0, choke);
+
+        for v in voices.iter() {
+            if v.voice == KitVoice::HatOpen as u8 {
+                continue;
+            }
+            assert_eq!(
+                v.fade_len, 0,
+                "voice {} was choked and nothing in a kit chokes it",
+                v.voice
+            );
+        }
+    }
+
+    /// THE DRIFT REACHES THE VOICE, AND THE KICK ON THE ONE NEVER MOVES.
+    ///
+    /// The downbeat is where the band agrees it is. A drummer who pushed
+    /// that would be a drummer nobody could play with — so every other hit
+    /// gets nought to three milliseconds and the kick on tick 0 gets none.
+    #[test]
+    fn the_drift_pushes_every_hit_but_the_kick_on_the_one() {
+        let sr = 48_000u32;
+        let drift_frames = (crate::jam::DRIFT_MAX_SECS * sr as f32) as u32;
+        let mut cfg = rock_16ths();
+        cfg.bar.kick = vec![2; 16];
+        let table = compile_jam(&cfg).unwrap();
+
+        let mut late = Vec::new();
+        for bar in 0..4u32 {
+            for tick in 0..16u32 {
+                let mut voices = Vec::new();
+                for slot in table.tick(tick, bar).unwrap().slots() {
+                    spawn_band_voice(&mut voices, slot, 1.0, bar, tick, 16, 3000, drift_frames, 960);
+                }
+                for v in voices.iter() {
+                    assert!(
+                        v.delay <= drift_frames,
+                        "bar {bar} tick {tick} pushed {} frames, past the 3 ms bound",
+                        v.delay
+                    );
+                    if v.voice == KitVoice::Kick as u8 && tick == 0 {
+                        assert_eq!(v.delay, 0, "the kick on the one moved, on bar {bar}");
+                    }
+                    late.push(v.delay);
+                }
+            }
+        }
+        // And it is not all zero, which would be the drift missing.
+        assert!(late.iter().any(|d| *d > 0), "nothing drifted at all");
+        // The gain wanders too, and by no more than the contract's 2%.
+        let mut voices = Vec::new();
+        let slot = table.tick(1, 0).unwrap().slots()[0];
+        spawn_band_voice(&mut voices, &slot, 1.0, 0, 1, 16, 3000, drift_frames, 960);
+        let ratio = voices[0].amp_l / (slot.gain * slot.pan_l);
+        assert!(
+            (1.0 - crate::jam::DRIFT_GAIN..=1.0 + crate::jam::DRIFT_GAIN).contains(&ratio),
+            "one hit came out {ratio} of its slot's gain"
+        );
+    }
+
+    /// A ROUND ROBIN IS CHOSEN ON THE TICK, AND THE TABLE NEVER STORES ONE.
+    #[test]
+    fn the_round_robin_is_decided_when_the_tick_is_scheduled() {
+        let kit = std::sync::Arc::new(crate::kit::KitBank::layered_for_tests(
+            &[KitVoice::Kick, KitVoice::Snare, KitVoice::Hat],
+            48_000,
+            0.05,
+            2,
+            3,
+        ));
+        let mut cfg = rock_16ths();
+        cfg.bar.hat = vec![1; 16];
+        let table = crate::jam::compile_with_kit(&cfg, kit).unwrap();
+
+        // The TABLE says round robin 0 on every tick — the choice is not
+        // there to be got wrong.
+        for tick in 0..16u32 {
+            for slot in table.tick(tick, 0).unwrap().slots() {
+                if let SoundId::Band { robin, .. } = slot.sound {
+                    assert_eq!(robin, 0, "the table stored a round robin");
+                }
+            }
+        }
+
+        // The SPAWN chooses, and a hat on every sixteenth is never the same
+        // recording twice in a row.
+        let mut last: Option<u8> = None;
+        for tick in 0..16u32 {
+            let mut voices = Vec::new();
+            let slot = table
+                .tick(tick, 0)
+                .unwrap()
+                .slots()
+                .iter()
+                .find(|s| s.lane == JamLane::Hat)
+                .copied()
+                .expect("a hat");
+            spawn_band_voice(&mut voices, &slot, 1.0, 0, tick, 16, 3000, 0, 960);
+            let SoundId::Band { robin, .. } = voices[0].sound_id else {
+                panic!("a hat is not a drum");
+            };
+            assert!(robin < 3);
+            if let Some(previous) = last {
+                assert_ne!(robin, previous, "tick {tick} repeated round robin {robin}");
+            }
+            last = Some(robin);
+        }
+    }
+
     /// A KIT IS THE SAME KIT ON EVERY DEVICE.
     ///
     /// `jam.rs` renders a table to find out whether it is absurd, and the
