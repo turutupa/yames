@@ -515,9 +515,93 @@ describe("compileJam applies the moment", () => {
 
   it("switches the engine's own fills off under an arrangement, so nothing doubles", () => {
     const config = compileJam(rock({ mode: "build" }), { formBar: 0, chorus: 2 });
-    expect(config.fill).toBeNull();
+    // The engine lands a fill on the chorus's last bar and every `fillEvery`
+    // bars and crashes on the one. An arrangement decides all three per bar
+    // and puts them in `bar`, so all three are off here.
     expect(config.fillEvery).toBe(0);
     expect(config.crashOnOne).toBe(false);
+    // The row still travels, and `pickup` is what says it is not a fill: the
+    // engine spends it on the count-in's last beat and lands it nowhere.
+    expect(config.pickup).toBe(true);
+  });
+
+  it("sends the pickup when the intro asks for one and there is a count to play it on", () => {
+    // rock8 is four beats of eighths and a new jam counts in a bar of them,
+    // so the default Build jam is played in.
+    const jam = rock({ mode: "build" });
+    expect(jam.countIn).toBe(4);
+    const config = compileJam(jam, { formBar: 0, chorus: 1 });
+    expect(config.pickup).toBe(true);
+    // And the row it rides on is the `big` fill: the whole fill with its last
+    // stroke at peak, which is where the engine cuts the last beat from.
+    expect(config.fill).not.toBeNull();
+    const last = config.fill!.snare.length - 1;
+    const struck = (["kick", "snare", "tomHi", "tomLo"] as const)
+      .map((lane) => config.fill![lane]?.[last] ?? 0)
+      .filter((level) => level !== 0);
+    expect(struck.length, "the pickup ends on something").toBeGreaterThan(0);
+    expect(struck.every((level) => level === 4), "and it ends at peak").toBe(true);
+  });
+
+  it("does not play a jam in that did not ask to be, or cannot be", () => {
+    // A cold start: the arrangement says the band just begins.
+    expect(compileJam(rock({ mode: "build", intro: "none" }), { formBar: 0, chorus: 1 }).pickup)
+      .toBeUndefined();
+    // A loop is the band as it always was, count-in and all.
+    expect(compileJam(rock({ mode: "loop" }), { formBar: 0, chorus: 1 }).pickup).toBeUndefined();
+    // A count-in shorter than a bar: a pickup out of two beats is most of the
+    // count, so the drummer counts it instead.
+    expect(
+      compileJam(rock({ mode: "build" }, { countIn: 2 }), { formBar: 0, chorus: 1 }).pickup,
+    ).toBeUndefined();
+    // No count-in at all: there is no beat to play it on.
+    expect(
+      compileJam(rock({ mode: "build" }, { countIn: 0 }), { formBar: 0, chorus: 1 }).pickup,
+    ).toBeUndefined();
+    // A drummer nobody asked for cannot play one.
+    expect(
+      compileJam(rock({ mode: "build" }, { band: { drums: false, bass: true, keys: true } }), {
+        formBar: 0,
+        chorus: 1,
+      }).pickup,
+    ).toBeUndefined();
+    // And the Fills switch vetoes it, because the pickup is a fill: a jam
+    // with the switch off would otherwise have exactly one fill in it, played
+    // before the tune started.
+    expect(
+      compileJam(rock({ mode: "build" }, { fills: false }), { formBar: 0, chorus: 1 }).pickup,
+    ).toBeUndefined();
+  });
+
+  it("plays a jam in exactly when the band crashes into bar one", () => {
+    // The pickup and that crash are one gesture, so they cannot disagree.
+    for (const arrangement of [
+      { mode: "build" } as const,
+      { mode: "build", intro: "none" } as const,
+      { mode: "song", choruses: 2 } as const,
+      { mode: "loop" } as const,
+    ]) {
+      for (const fills of [true, false]) {
+        const jam = rock(arrangement, { fills });
+        const config = compileJam(jam, { formBar: 0, chorus: 1 });
+        const answered = arrangement.mode !== "loop" && bandMoment(jam, 1, 0).crash;
+        expect(!!config.pickup, `${arrangement.mode}/${arrangement.intro}/fills:${fills}`).toBe(
+          answered,
+        );
+      }
+    }
+  });
+
+  it("carries the pickup on every bar, because the count-in reads whatever is loaded", () => {
+    // The count-in runs against the table the engine is HOLDING, and the
+    // bar-ahead sender replaces that table every bar. A pickup set only on
+    // bar one would be a pickup that depended on which bar the last send was.
+    const jam = rock({ mode: "song", choruses: 3 });
+    for (let chorus = 1; chorus <= 3; chorus += 1) {
+      for (let bar = 0; bar < 12; bar += 1) {
+        expect(compileJam(jam, { formBar: bar, chorus }).pickup, `${chorus}:${bar}`).toBe(true);
+      }
+    }
   });
 
   it("puts the fill's last beat over the bar at a seam, and the whole fill into a chorus", () => {

@@ -620,6 +620,22 @@ pub struct JamConfig {
     /// What the count-in plays. Absent: the beep the drill uses.
     #[serde(default)]
     pub count_in_sound: Option<JamCountInSound>,
+    /// Does the drummer play you in?
+    ///
+    /// The last beat the count-in sounds is handed to the band instead: the
+    /// fill's last beat, kick, snare and toms, straight into bar one. It is
+    /// the half of `intro: "fill"` that nothing in the compiler could reach
+    /// before, because the count-in is played by the engine from its own
+    /// counter and `jam_play` hands every one of those ticks back to the
+    /// click.
+    ///
+    /// **It also says what `fill` is FOR.** A table that carries a pickup
+    /// spends its fill row on the pickup and plays no bar-line fill — an
+    /// arrangement decides its fills per bar and puts them in `bar`, so the
+    /// engine's own last-bar-of-the-chorus rule would play a second one over
+    /// the top. One row, one job, said once.
+    #[serde(default)]
+    pub pickup: Option<bool>,
     /// Which bass the band has: "fingered", "picked", "upright", "slap",
     /// "synth". Absent or unknown: fingered, which is the voice the first
     /// pass shipped — see [`BassVoice::from_name`].
@@ -1102,6 +1118,16 @@ pub struct JamTable {
     /// Play the fill on every bar whose 1-based number in the chorus is a
     /// multiple of this, as well as on the last bar. 0 is the last bar only.
     fill_every: u32,
+    /// The bar BEFORE bar one: one beat of drums the band plays over the
+    /// count-in's last beat, or `None` for a jam with no pickup.
+    ///
+    /// Exactly `ticks_per_beat` ticks, cut from the fill's last beat with
+    /// everything but the kick, the snare and the toms taken out — a pickup
+    /// is what a drummer's hands do on the way into the tune, and hats,
+    /// cymbals, bass and keys have not started yet. Built here, at the same
+    /// level as the band it leads into, so the audio thread indexes one
+    /// short row and decides nothing.
+    pickup: Option<Vec<JamTick>>,
     /// The crash on the one, already mixed to the table's normalisation.
     /// `None` when the jam did not ask for one, or when the groove's own
     /// crash lane already hits tick 0 — two crashes on the same sample is a
@@ -1274,6 +1300,25 @@ impl JamTable {
     #[inline]
     pub fn has_fill(&self) -> bool {
         self.fill.is_some()
+    }
+
+    /// Does the drummer play this jam in? See the `pickup` field.
+    #[inline]
+    pub fn has_pickup(&self) -> bool {
+        self.pickup.is_some()
+    }
+
+    /// What the band plays on tick `tick_in_beat` of the pickup — the count-in
+    /// beat before bar one.
+    ///
+    /// `None` when this jam has no pickup, which is every jam that loops, and
+    /// `None` past the end of the row, which the caller has already ruled out
+    /// by checking the table's width against its own bar. The audio thread
+    /// reads this exactly the way it reads [`JamTable::tick`]: an index into a
+    /// row that was decided when the table was compiled.
+    #[inline]
+    pub fn pickup_tick(&self, tick_in_beat: u32) -> Option<&JamTick> {
+        self.pickup.as_ref()?.get(tick_in_beat as usize)
     }
 
     /// Does the fill play on bar `jam_bar` (0-based within the chorus)?
@@ -1765,6 +1810,26 @@ fn compile_measured(
     let peak_before = base_peak * intensity;
     let peak_after = base_peak * total;
 
+    // ---- The pickup, and what it costs the fill row ----
+    //
+    // Cut AFTER the scaling above, because a pickup is the band: it leads
+    // straight into bar one and has to arrive at the level bar one is played
+    // at. (The count-in's own sticks, a few lines down, are the opposite case
+    // and say so.)
+    //
+    // And the fill row goes with it. A table asks for a pickup only under an
+    // arrangement, and an arrangement writes its fills into `bar` per bar —
+    // so leaving the engine's own "fill on the last bar of the chorus" rule
+    // pointed at this row would play a second fill over the first. The row
+    // travels for the pickup; the pickup is what it is spent on.
+    let pickup = if cfg.pickup.unwrap_or(false) {
+        fill.as_deref()
+            .map(|f| pickup_beat(f, cfg.ticks_per_beat))
+    } else {
+        None
+    };
+    let fill = if pickup.is_some() { None } else { fill };
+
     // One state per bar of the chorus, decided now rather than on the audio
     // thread. Phase-locked, so this is the same list every chorus.
     let band_states: Vec<JamBandState> = (0..cfg.form_bars)
@@ -1821,6 +1886,7 @@ fn compile_measured(
         bar,
         fill,
         fill_every,
+        pickup,
         crash_on_one: crash,
         band_states,
         count_in_slot,
@@ -1935,6 +2001,11 @@ fn hash_drums(
     // player's: turning it on has to be heard now, and it changes which bar
     // of the table the loudest tick lives in.
     cfg.fill_every.unwrap_or(0).hash(h);
+    // Whether the fill row is a bar-line fill or a pickup is the drummer's
+    // business too, and it decides which bars the table has: with a pickup
+    // the last bar of the chorus plays the groove, without one it plays the
+    // fill. Two tables that disagree about that are two drummers.
+    cfg.pickup.unwrap_or(false).hash(h);
     cfg.form_bars.hash(h);
     cfg.crash_on_one.hash(h);
     cfg.intensity.to_bits().hash(h);
@@ -2510,6 +2581,45 @@ fn scale(ticks: &mut [JamTick], factor: f32) {
             s.gain *= factor;
         }
     }
+}
+
+/// The pickup: the fill's LAST BEAT, hands only.
+///
+/// Two decisions, and a drummer would recognise both.
+///
+/// **The last beat**, because that is the part of a fill that is a pickup.
+/// The compiler sends the whole fill row — it is the same row the `big` fill
+/// is cut from, topped off on its last tick — and the beat that leads into
+/// the downbeat is the end of it.
+///
+/// **Kick, snare and toms and nothing else.** A pickup happens before the
+/// tune: the hats have not started, the ride has not started, a crash here
+/// would step on the one that answers it a beat later, and the bass player
+/// and the keys player are still counting. What is left is what the hands
+/// are doing, which is what a fill is made of anyway
+/// (`plans/JAM_SOUND.md` §2.9).
+///
+/// A fill shorter than a beat cannot happen — a bar is at least one beat and
+/// a fill is a full bar — but the start index is saturating rather than
+/// trusting, because the alternative is arithmetic that underflows into a
+/// row the audio thread then reads.
+fn pickup_beat(fill: &[JamTick], ticks_per_beat: u32) -> Vec<JamTick> {
+    let from = fill.len().saturating_sub(ticks_per_beat.max(1) as usize);
+    fill[from..]
+        .iter()
+        .map(|tick| {
+            let mut out = JamTick::EMPTY;
+            for slot in tick.slots() {
+                if matches!(
+                    slot.lane,
+                    JamLane::Kick | JamLane::Snare | JamLane::TomHi | JamLane::TomLo
+                ) {
+                    out.push(*slot);
+                }
+            }
+            out
+        })
+        .collect()
 }
 
 /// Render four bars of the band and return the loudest sample in them.
@@ -3264,6 +3374,144 @@ mod tests {
         assert!(
             !last.slots().iter().any(|s| is(s.sound, KitVoice::Kick)),
             "the last bar of the chorus is the fill"
+        );
+    }
+
+    /// A fill of toms and a snare, so the pickup has something to cut from,
+    /// and a hat right through it, so there is something to leave behind.
+    fn rock_8ths_with_a_tom_fill() -> JamConfig {
+        let mut cfg = rock_8ths();
+        let mut fill = cfg.bar.clone();
+        fill.kick = vec![1, 0, 0, 0, 0, 0, 0, 0];
+        fill.snare = vec![0, 0, 2, 0, 0, 0, 0, 0];
+        fill.hat = vec![1, 1, 1, 1, 1, 1, 1, 1];
+        fill.tom_hi = vec![0, 0, 0, 0, 2, 1, 0, 0];
+        fill.tom_lo = vec![0, 0, 0, 0, 0, 0, 2, 4];
+        cfg.fill = Some(fill);
+        cfg
+    }
+
+    /// The pickup is the fill's LAST BEAT, and only what a drummer's hands
+    /// are doing: the toms are in it, the hat that plays straight through
+    /// the fill is not.
+    #[test]
+    fn the_pickup_is_the_fills_last_beat_and_nothing_but_the_hands() {
+        let mut cfg = rock_8ths_with_a_tom_fill();
+        cfg.pickup = Some(true);
+        let t = compile(&cfg).unwrap();
+        assert!(t.has_pickup(), "the config asked to be played in");
+
+        // Two ticks to the beat, so the pickup is ticks 6 and 7 of the fill.
+        let first = t.pickup_tick(0).expect("the pickup's first tick");
+        let second = t.pickup_tick(1).expect("the pickup's second tick");
+        assert!(
+            t.pickup_tick(2).is_none(),
+            "a pickup is one beat and not a tick more"
+        );
+
+        assert!(
+            first.slots().iter().any(|s| s.lane == JamLane::TomLo),
+            "the floor tom on the fill's seventh tick"
+        );
+        assert!(
+            second.slots().iter().any(|s| s.lane == JamLane::TomLo),
+            "and the one that lands on the eighth"
+        );
+        for (n, tick) in [first, second].iter().enumerate() {
+            assert!(
+                !tick.slots().iter().any(|s| s.lane == JamLane::Hat),
+                "tick {n} of the pickup kept a hat; the tune has not started"
+            );
+            assert!(
+                !tick.slots().iter().any(|s| s.lane == JamLane::Crash
+                    || s.lane == JamLane::Ride
+                    || s.lane == JamLane::Bass
+                    || s.lane == JamLane::Keys),
+                "tick {n} of the pickup kept something that is not a hand"
+            );
+        }
+    }
+
+    /// The pickup SPENDS the fill row. An arrangement writes its fills into
+    /// the bar, so a table that carries a pickup must not also play the
+    /// engine's own fill on the last bar of the chorus — that would be two
+    /// fills over each other.
+    #[test]
+    fn a_table_with_a_pickup_plays_no_fill_at_the_bar_line() {
+        let mut cfg = rock_8ths_with_a_tom_fill();
+        cfg.form_bars = 4;
+
+        // Without the pickup the row is what it has always been.
+        let looped = compile(&cfg).unwrap();
+        assert!(looped.has_fill());
+        assert!(!looped.has_pickup());
+        assert!(
+            looped
+                .tick(6, 3)
+                .unwrap()
+                .slots()
+                .iter()
+                .any(|s| s.lane == JamLane::TomLo),
+            "the last bar of the chorus is the fill"
+        );
+
+        // With it, the last bar of the chorus is the groove again.
+        cfg.pickup = Some(true);
+        let played_in = compile(&cfg).unwrap();
+        assert!(played_in.has_pickup());
+        assert!(!played_in.has_fill(), "the fill row was spent on the pickup");
+        for bar in 0..4 {
+            assert!(
+                !played_in
+                    .tick(6, bar)
+                    .unwrap()
+                    .slots()
+                    .iter()
+                    .any(|s| s.lane == JamLane::TomLo),
+                "bar {bar} of 4 played a fill the arrangement did not write"
+            );
+        }
+    }
+
+    /// Asking to be played in with nothing to play is not a pickup, and not
+    /// an error either: a groove nobody drew a fill for counts in as it did
+    /// before, and keeps its fill row, because there is none to spend.
+    #[test]
+    fn a_pickup_without_a_fill_is_no_pickup_at_all() {
+        let mut cfg = rock_8ths();
+        cfg.pickup = Some(true);
+        let t = compile(&cfg).unwrap();
+        assert!(!t.has_pickup());
+        assert!(t.pickup_tick(0).is_none());
+    }
+
+    /// The pickup arrives at the level of the band it leads into — it IS the
+    /// band, a beat early, so the intensity dial moves it with everything
+    /// else. (The count-in's sticks are the opposite case: see
+    /// `a_count_in_is_a_beep_unless_the_jam_asks_for_sticks`.)
+    #[test]
+    fn the_pickup_is_played_at_the_bands_own_level() {
+        let mut soft = rock_8ths_with_a_tom_fill();
+        soft.pickup = Some(true);
+        soft.intensity = 0.7;
+        let mut loud = soft.clone();
+        loud.intensity = 1.25;
+
+        let gain_of = |cfg: &JamConfig| {
+            compile(cfg)
+                .unwrap()
+                .pickup_tick(1)
+                .expect("the pickup's last tick")
+                .slots()
+                .iter()
+                .map(|s| s.gain)
+                .fold(0.0f32, f32::max)
+        };
+        let quiet = gain_of(&soft);
+        let hard = gain_of(&loud);
+        assert!(
+            hard > quiet * 1.5,
+            "the dial moved the band and left the pickup behind: {quiet} then {hard}"
         );
     }
 
@@ -6092,8 +6340,46 @@ mod band_tests {
         assert!(cfg.keys.is_none());
         assert!(cfg.mix.is_none());
         assert!(cfg.count_in_sound.is_none());
+        assert!(cfg.pickup.is_none(), "nobody was played in before this");
         let table = compile(&cfg).expect("compiles");
         assert_eq!(lane_count(&table, 0, JamLane::Keys), 0);
         assert!(table.count_in_slot().is_none());
+        assert!(!table.has_pickup());
+    }
+
+    #[test]
+    fn the_pickup_deserialises_from_the_contracts_camel_case() {
+        let json = serde_json::json!({
+            "ticksPerBeat": 1,
+            "beatsPerBar": 4,
+            "bar": {
+                "kick": [1, 0, 0, 0],
+                "snare": [0, 0, 2, 0],
+                "hat": [1, 1, 1, 1],
+                "ride": [0, 0, 0, 0],
+                "crash": [0, 0, 0, 0],
+            },
+            "fill": {
+                "kick": [1, 0, 0, 0],
+                "snare": [0, 2, 2, 4],
+                "hat": [1, 1, 1, 1],
+                "ride": [0, 0, 0, 0],
+                "crash": [0, 0, 0, 0],
+            },
+            "formBars": 8,
+            "crashOnOne": false,
+            "intensity": 1.0,
+            "kit": "room",
+            "pickup": true,
+        });
+        let cfg: JamConfig = serde_json::from_value(json).expect("the contract's own spelling");
+        assert_eq!(cfg.pickup, Some(true));
+        let table = compile(&cfg).expect("compiles");
+        // One tick to the beat, so the pickup is the fill's fourth tick: the
+        // snare at peak, and not the hat beside it.
+        let tick = table.pickup_tick(0).expect("a pickup");
+        assert_eq!(tick.slots().len(), 1, "the hands and nothing else");
+        assert_eq!(tick.slots()[0].lane, JamLane::Snare);
+        assert!(table.pickup_tick(1).is_none());
     }
 }

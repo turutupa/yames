@@ -79,7 +79,13 @@ export type JamEngineConfig = {
   beatsPerBar: number;
   /** The groove. */
   bar: JamPattern;
-  /** Played instead of `bar` on the last bar of every chorus, when set. */
+  /**
+   * What the drummer plays that is not the groove.
+   *
+   * Played instead of `bar` on the last bar of every chorus — unless `pickup`
+   * is set, and then this row is the pickup and lands on no bar at all. See
+   * `pickup` below for why one row does both jobs.
+   */
   fill: JamPattern | null;
   /** Bars in one chorus of the form, 1..64. */
   formBars: number;
@@ -170,6 +176,23 @@ export type JamEngineConfig = {
    * Absent or false: the form goes round again, as it always has.
    */
   endsForm?: boolean;
+  /**
+   * The drummer plays you in: the last beat the count-in would have sounded
+   * is the fill's last beat instead, kick, snare and toms, straight into bar
+   * one.
+   *
+   * It is the other half of `intro: "fill"` — the crash on bar one is the
+   * half the arrangement can write into a bar, and this is the half that
+   * happens before bar one exists, where nothing but the engine's own
+   * counter is running.
+   *
+   * **It also says what `fill` is.** A table with this set spends its fill
+   * row on the pickup and plays no bar-line fill, because an arrangement
+   * writes its fills into `bar` and a second one on the chorus's last bar
+   * would play over the first. Absent or false: `fill` is a fill, which is
+   * every jam that loops.
+   */
+  pickup?: boolean;
 };
 
 export type JamKeysLine = {

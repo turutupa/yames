@@ -576,12 +576,45 @@ export function compileJam(jam: Jam, options: JamCompileOptions = {}): JamEngine
    * would play two fills over each other and crash on downbeats the plan said
    * nothing about. One place decides; here it is said once.
    */
-  const fill =
+  const barLineFill =
     !arranged && jam.fills && groove.fill
       ? drumsOff
         ? silenced(groove.fill)
         : groove.fill
       : null;
+  /**
+   * Does the drummer play this jam IN?
+   *
+   * `intro: "fill"` is ONE gesture in two halves: a pickup on the count-in's
+   * last beat, and the crash on bar one that answers it. The crash half is
+   * the arrangement's, and it is asked for here rather than re-derived —
+   * `bandMoment(jam, 1, 0).crash` is the whole question "does this band come
+   * in on the one", intro and the Fills switch and all, and a second rule
+   * spelling out the same conditions is a second rule to keep in step.
+   *
+   * What is left are the three things that decide whether the pickup CAN be
+   * played. A count-in of at least a bar, because a pickup cut out of a
+   * two-beat count is most of the count. A drummer who is playing at all. And
+   * a fill written for this groove, because nothing here invents one
+   * (`barForMoment` says the same about the bar).
+   */
+  const comesInOnTheOne = arranged && bandMoment(jam, 1, 0).crash;
+  const pickup =
+    comesInOnTheOne && !drumsOff && !!groove.fill && jam.countIn >= groove.beatsPerBar;
+  /**
+   * The pickup travels on the FILL ROW, and the engine is told what it is for.
+   *
+   * There is one row on the wire for "what the drummer plays that is not the
+   * groove", and under an arrangement it is free — the fills are in the bar.
+   * So the pickup rides it and `pickup` says which of the two things it is;
+   * the engine spends it on the count-in's last beat and plays no bar-line
+   * fill (`jam.rs`, `pickup_beat`). Two rows would mean two ways for the
+   * drums to arrive and a second width to keep in step with the first.
+   *
+   * `toppedOff` because the pickup is the end of the `big` fill: the gesture
+   * that answers a crash, with its last stroke at peak.
+   */
+  const fill = barLineFill ?? (pickup && groove.fill ? toppedOff(groove.fill) : null);
   const meter = { beatsPerBar: groove.beatsPerBar, ticksPerBeat: groove.ticksPerBeat };
   const bassLine = jamBassLine(jam, formBar, options.lineup);
   const keysLine = jamKeysLine(jam, formBar, options.lineup, options.previousVoicing);
@@ -620,9 +653,13 @@ export function compileJam(jam: Jam, options: JamCompileOptions = {}): JamEngine
     practice: jam.practice ? practiceConfigFrom(jam.practice) : null,
     // A fill every four or eight bars as well as at the chorus end. Zero when
     // fills are off at all, rather than a number the engine would have to
-    // remember not to act on: `fill` is already null there, and two switches
-    // that have to agree is one too many.
-    fillEvery: fill ? Math.max(0, Math.trunc(jam.fillEvery ?? 0)) : 0,
+    // remember not to act on: `barLineFill` is already null there, and two
+    // switches that have to agree is one too many.
+    //
+    // `barLineFill` and not `fill`: a row carrying a pickup is not a fill the
+    // engine lands on bars, and asking it to land one every four would be
+    // exactly the second fill `pickup` exists to prevent.
+    fillEvery: barLineFill ? Math.max(0, Math.trunc(jam.fillEvery ?? 0)) : 0,
     keys: arranged ? keysForMoment(keysLine, moment) : keysLine,
     mix: jamMix(jam),
     // The sticks are the drummer counting the band in on the rim, which is
@@ -647,6 +684,11 @@ export function compileJam(jam: Jam, options: JamCompileOptions = {}): JamEngine
     // `ending` is set on exactly one bar of a Song and on nothing else, so it
     // is the whole of the question. No second rule to keep in step with it.
     ...(moment.ending ? { endsForm: true } : {}),
+    // The pickup: the count-in's last beat, played rather than counted. Sent
+    // on every bar the way the rest of the table is, because the table the
+    // engine is holding when the count-in runs is whichever one was last
+    // loaded — and absent rather than false under `loop`, like the two above.
+    ...(pickup ? { pickup: true } : {}),
   };
 }
 

@@ -2322,7 +2322,8 @@ enum JamPlay<'a> {
 ///
 /// * **The count-in.** `arm_count_in`'s beeps own those beats. The band comes
 ///   in on the transition tick, which is beat 0 of the real thing, so
-///   `counting_in` is false there.
+///   `counting_in` is false there. **Except for the pickup**, which is the
+///   one thing the band plays before bar one — see `pickup` below.
 /// * **The speed ramp.** A drill ramps the *click*; while `ramp_active` the
 ///   table is ignored on purpose. Playing a groove through a tempo ramp is
 ///   Jam 2, and doing it by accident today would mean a drill whose bar
@@ -2331,10 +2332,21 @@ enum JamPlay<'a> {
 ///   beat groups BEFORE calling `set_jam` (`plans/tasks/jam/BRIEF.md`); when
 ///   it has not, the engine plays the click rather than guessing which
 ///   column of the table is which beat.
+///
+/// And ONE thing takes a tick off the count-in and gives it to the band:
+///
+/// * **The pickup.** `pickup` is true on every tick of the last beat the
+///   count-in would have sounded, and only when a table asked to be played in
+///   ([`JamTable::pickup_tick`]). The band plays the fill's last beat there
+///   and the count-in is silent for it, which is a drummer counting three and
+///   playing the fourth. A table with no pickup row answers `Click` and the
+///   count-in sounds exactly as it always has — the whole rule is that
+///   lookup, so a jam that did not ask for a pickup cannot get one.
 #[allow(clippy::too_many_arguments)]
 fn jam_play(
     table: Option<&JamTable>,
     counting_in: bool,
+    pickup: bool,
     ramp_active: bool,
     beats_per_measure: u32,
     subdivision: u32,
@@ -2343,11 +2355,22 @@ fn jam_play(
     jam_bar: u32,
 ) -> JamPlay<'_> {
     let table = match table {
-        Some(t) if !counting_in && !ramp_active => t,
+        // The pickup is inside the count-in, so it is asked FIRST: after the
+        // count-in's own arm, and still never over a drill's ramp.
+        Some(t) if !ramp_active && (pickup || !counting_in) => t,
         _ => return JamPlay::Click,
     };
     if table.ticks_per_bar() != beats_per_measure.saturating_mul(subdivision) {
         return JamPlay::Mismatch;
+    }
+    if pickup {
+        // A table with no pickup hands the beat back to the count-in, which
+        // is the difference between "this jam has no pickup" and "this jam
+        // has a silent one".
+        return match table.pickup_tick(sub_count) {
+            Some(t) => JamPlay::Band(t),
+            None => JamPlay::Click,
+        };
     }
     match table.tick(measure_beat * subdivision + sub_count, jam_bar) {
         Some(t) => JamPlay::Band(t),
@@ -2355,6 +2378,36 @@ fn jam_play(
         // index is a click, never a panic on the audio thread.
         None => JamPlay::Mismatch,
     }
+}
+
+/// Is this count-in beat the PICKUP — the last beat before bar one?
+///
+/// Pure, and beside [`jam_play`] for the reason [`accent_for`] is: it is a
+/// rule, it runs on the audio thread, and it has to be testable without a
+/// sound card.
+///
+/// The arithmetic is the whole of it, and it is settled the moment the
+/// count-in is armed. A count-in of `beats` beats sounds `beats - 1` of them
+/// and hands the last one to bar one — that is what `arm_count_in` means by
+/// "the last of them becomes beat 0 of what follows" — so the pickup is the
+/// beat before that: the last one the count-in actually plays, whether the
+/// count is two bars, one bar, or shorter than a bar.
+///
+/// ASKED ON A DOWNBEAT AND ONLY ON A DOWNBEAT. `warmup_count` is beats DONE,
+/// and the event thread counts a beat done as soon as its downbeat is
+/// reported — several buffers before the beat is over — so on the later ticks
+/// of the pickup beat this would answer "no". A fill cut into sixteenths is a
+/// whole beat of ticks, so the tick loop asks here once and latches the
+/// answer for the beat (`jam_in_pickup`). `is_last_warmup` never needed that
+/// because it is a question about a downbeat.
+#[inline]
+fn is_pickup_beat(warming_up: bool, warmup_count: u8, warmup_beats: u8) -> bool {
+    warming_up
+        // Not bar one: that beat belongs to the form, and this is the same
+        // test `is_last_warmup` makes in the tick loop.
+        && warmup_count.saturating_add(1) < warmup_beats
+        // The one before it.
+        && warmup_count.saturating_add(2) >= warmup_beats
 }
 
 /// Move the form on by one bar: 0-based bar within the chorus, 1-based
@@ -3899,6 +3952,18 @@ impl MetronomeEngine {
             // later — see the tick loop for why it is not spent where it is
             // raised.
             let mut jam_ending_armed = false;
+            // Is the beat under way the PICKUP — the count-in beat the
+            // drummer plays instead of counting?
+            //
+            // Decided once, at that beat's downbeat, and held for the rest of
+            // it, because the number it is decided from moves underneath a
+            // beat. `warmup_count` is beats DONE, and the event thread counts
+            // this beat as done the moment its downbeat is reported — several
+            // buffers before the beat is over. `is_last_warmup` never noticed
+            // because it only ever asks on a downbeat; a pickup is a whole
+            // beat of a fill, sixteenths and all, so it has to ask on every
+            // tick and get the same answer. One bool, beside the two above.
+            let mut jam_in_pickup = false;
             let mut jam_retire = JamRetirement::new();
             let mut take_retire = crate::take::TakeParking::new();
             // One report per loaded table, not one per tick.
@@ -4254,6 +4319,12 @@ impl MetronomeEngine {
                         // on its first tick.
                         jam_ending_armed = false;
                         jam_ending_cancelled = false;
+                        // And a pickup held over from the last one. The first
+                        // tick of a press of Play is a downbeat, so this
+                        // would be decided again a moment later anyway — but
+                        // a latch nobody clears is a latch somebody has to
+                        // reason about.
+                        jam_in_pickup = false;
                         voices.clear();
                     }
 
@@ -4414,6 +4485,22 @@ impl MetronomeEngine {
                             // that changes is which drums sound on it. The
                             // rules live in `jam_play`, which is pure.
                             let counting_in = cached.ramp_warming_up && !is_last_warmup;
+                            // THE PICKUP. The one beat of the count-in the
+                            // drummer plays rather than counts — whether
+                            // there is anything to play is `jam_play`'s
+                            // question, and whether the table asked for one
+                            // was settled when it was compiled. Here it is
+                            // three integer comparisons on numbers the
+                            // callback is already holding, ON THE DOWNBEAT
+                            // and held from there: see `jam_in_pickup`.
+                            if is_downbeat {
+                                jam_in_pickup = is_pickup_beat(
+                                    cached.ramp_warming_up,
+                                    cached.warmup_count,
+                                    cached.warmup_beats,
+                                );
+                            }
+                            let is_pickup = jam_in_pickup && cached.ramp_warming_up;
                             // Where in the bar this tick is. The round robin
                             // and the drift are both functions of it, and it
                             // is the same arithmetic `jam_play` indexes the
@@ -4430,6 +4517,7 @@ impl MetronomeEngine {
                             let jam_tick = match jam_play(
                                 cached.jam.as_deref(),
                                 counting_in,
+                                is_pickup,
                                 cached.ramp_active,
                                 beats_per_measure,
                                 subdivision,
@@ -4456,7 +4544,18 @@ impl MetronomeEngine {
                             // a bar however busy the tick grid is — that is
                             // the whole point of deciding it here and not
                             // in the UI. `Full` whenever no jam is loaded.
-                            let band_state = if cached.jam.is_some() {
+                            //
+                            // And `Full` on the pickup, which is not a bar of
+                            // the form at all: the count-in's bar lines move
+                            // the form on while nothing is playing, so the
+                            // state sitting in `jam_bar_state` at that moment
+                            // belongs to whatever bar the counter happened to
+                            // land on — a trading bar or a drop-out window
+                            // that would swallow the one gesture the drummer
+                            // makes before the tune.
+                            let band_state = if is_pickup {
+                                JamBandState::Full
+                            } else if cached.jam.is_some() {
                                 jam_bar_state
                             } else {
                                 JamBandState::Full
@@ -4510,7 +4609,14 @@ impl MetronomeEngine {
                                 // drop-out never opens on it and a trade
                                 // always starts with the band — but the
                                 // state is checked rather than assumed.
-                                if measure_beat == 0
+                                //
+                                // Never on the pickup, whose tick 0 can land
+                                // on `measure_beat` 0 when the count-in is a
+                                // couple of beats long. A crash on the way IN
+                                // to the tune is the cymbal that answers the
+                                // pickup arriving a beat before the pickup.
+                                if !is_pickup
+                                    && measure_beat == 0
                                     && sub_count == 0
                                     && jam_bar == 0
                                     && band_state == JamBandState::Full
@@ -4710,7 +4816,16 @@ impl MetronomeEngine {
                                 // Without it a one-bar song would end on the
                                 // count-in's own bar line, before a note of
                                 // it had been played.
+                                //
+                                // AND THE PICKUP IS NOT A BAR THE BAND
+                                // PLAYED. It is one beat, before the form
+                                // starts, and with a count-in whose length is
+                                // not a whole number of bars it can be the
+                                // last tick of the count-in's own bar — which
+                                // without this would be a bar the band
+                                // "played", and a song that ended on it.
                                 jam_ending_armed = jam_tick.is_some()
+                                    && !is_pickup
                                     && !jam_ending_cancelled
                                     && cached.jam.as_deref().is_some_and(|t| t.ends_form());
                                 jam_ending_cancelled = false;
@@ -7808,23 +7923,23 @@ mod tests {
 
         // 4 beats x 4 ticks = 16. The band plays.
         assert!(matches!(
-            jam_play(Some(&table), false, false, 4, 4, 0, 0, 0),
+            jam_play(Some(&table), false, false, false, 4, 4, 0, 0, 0),
             JamPlay::Band(_)
         ));
 
         // Same bar, eighth notes: 8 ticks, not 16.
         assert_eq!(
-            jam_play(Some(&table), false, false, 4, 2, 0, 0, 0),
+            jam_play(Some(&table), false, false, false, 4, 2, 0, 0, 0),
             JamPlay::Mismatch
         );
         // Same resolution, a 3/4 bar: 12 ticks, not 16.
         assert_eq!(
-            jam_play(Some(&table), false, false, 3, 4, 0, 0, 0),
+            jam_play(Some(&table), false, false, false, 3, 4, 0, 0, 0),
             JamPlay::Mismatch
         );
         // And a meter wide enough to overflow the product.
         assert_eq!(
-            jam_play(Some(&table), false, false, u32::MAX, 4, 0, 0, 0),
+            jam_play(Some(&table), false, false, false, u32::MAX, 4, 0, 0, 0),
             JamPlay::Mismatch
         );
     }
@@ -7834,17 +7949,17 @@ mod tests {
     fn the_count_in_and_the_ramp_keep_the_click() {
         let table = compile_jam(&rock_16ths()).unwrap();
         assert_eq!(
-            jam_play(Some(&table), true, false, 4, 4, 0, 0, 0),
+            jam_play(Some(&table), true, false, false, 4, 4, 0, 0, 0),
             JamPlay::Click,
             "the count-in beeps; the band waits"
         );
         assert_eq!(
-            jam_play(Some(&table), false, true, 4, 4, 0, 0, 0),
+            jam_play(Some(&table), false, false, true, 4, 4, 0, 0, 0),
             JamPlay::Click,
             "a drill ramps the click. Combining the two is Jam 2"
         );
         assert_eq!(
-            jam_play(None, false, false, 4, 4, 0, 0, 0),
+            jam_play(None, false, false, false, 4, 4, 0, 0, 0),
             JamPlay::Click,
             "no jam, no band"
         );
@@ -7855,9 +7970,170 @@ mod tests {
         // own bar line, which it would otherwise reach before a note of it
         // had sounded.
         assert!(matches!(
-            jam_play(Some(&table), false, false, 4, 4, 0, 0, 0),
+            jam_play(Some(&table), false, false, false, 4, 4, 0, 0, 0),
             JamPlay::Band(_)
         ));
+    }
+
+    /// `rock_16ths`, with a tom fill and the pickup switched on: the fixture
+    /// for a jam whose drummer plays it in.
+    fn rock_16ths_played_in() -> JamConfig {
+        let mut cfg = rock_16ths();
+        let mut fill = cfg.bar.clone();
+        fill.kick = vec![0; 16];
+        fill.snare = vec![0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0];
+        fill.hat = vec![1; 16];
+        fill.tom_hi = vec![0; 16];
+        fill.tom_lo = vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 4];
+        cfg.fill = Some(fill);
+        cfg.pickup = Some(true);
+        cfg
+    }
+
+    /// THE PICKUP, THROUGH THE SAME FUNCTION EVERY OTHER TICK GOES THROUGH.
+    ///
+    /// Three clicks and a fill: the beats of the count-in before the last one
+    /// are the click they have always been, and the last one is the band.
+    #[test]
+    fn the_last_beat_of_the_count_in_is_the_band_when_a_jam_asks_to_be_played_in() {
+        let table = compile_jam(&rock_16ths_played_in()).unwrap();
+        assert!(table.has_pickup());
+
+        // The count-in's earlier beats. `pickup` is false on every tick of
+        // them, and the answer is the click.
+        for sub in 0..4u32 {
+            assert_eq!(
+                jam_play(Some(&table), true, false, false, 4, 4, 0, sub, 0),
+                JamPlay::Click,
+                "tick {sub} of a beat that is still being counted"
+            );
+        }
+
+        // And the pickup beat, every tick of it, out of the fill's last beat.
+        for sub in 0..4u32 {
+            match jam_play(Some(&table), true, true, false, 4, 4, 0, sub, 0) {
+                JamPlay::Band(tick) => {
+                    let expected = table.pickup_tick(sub).unwrap();
+                    assert_eq!(
+                        tick, expected,
+                        "tick {sub} of the pickup read the wrong cell"
+                    );
+                    assert!(
+                        !tick.slots().iter().any(|s| s.lane == JamLane::Hat),
+                        "tick {sub} of the pickup kept a hat"
+                    );
+                }
+                other => panic!("tick {sub} of the pickup gave {other:?}"),
+            }
+        }
+        // The floor tom is in there — this is a fill, not a beep.
+        assert!(table
+            .pickup_tick(3)
+            .unwrap()
+            .slots()
+            .iter()
+            .any(|s| s.lane == JamLane::TomLo));
+    }
+
+    /// A jam that did not ask to be played in cannot be, and neither can a
+    /// drill: the pickup is a table's own answer, and a ramp still owns the
+    /// click whatever the count-in is doing.
+    #[test]
+    fn nobody_is_played_in_who_did_not_ask() {
+        let plain = compile_jam(&rock_16ths()).unwrap();
+        assert!(!plain.has_pickup());
+        assert_eq!(
+            jam_play(Some(&plain), true, true, false, 4, 4, 0, 0, 0),
+            JamPlay::Click,
+            "no pickup row means the count-in keeps the beat"
+        );
+
+        let played_in = compile_jam(&rock_16ths_played_in()).unwrap();
+        assert_eq!(
+            jam_play(Some(&played_in), true, true, true, 4, 4, 0, 0, 0),
+            JamPlay::Click,
+            "a drill ramps the click, pickup or no pickup"
+        );
+        assert_eq!(
+            jam_play(None, true, true, false, 4, 4, 0, 0, 0),
+            JamPlay::Click,
+            "no jam, no band, and nothing to be played in by"
+        );
+        // And a table that does not fit the bar is a mismatch on the pickup
+        // for the same reason it is on every other tick: the engine will not
+        // guess which column of the row is which tick.
+        assert_eq!(
+            jam_play(Some(&played_in), true, true, false, 4, 2, 0, 0, 0),
+            JamPlay::Mismatch
+        );
+    }
+
+    /// WHICH BEAT THE PICKUP IS, AND THE TAKE BOUNDARY.
+    ///
+    /// A count-in of `beats` beats sounds `beats - 1` of them and hands the
+    /// last to bar one. The pickup is the beat before that — so it is always
+    /// inside the count-in and never the beat the form starts on, which is
+    /// what keeps it out of a take: a take starts when the count-in is spent,
+    /// and the count-in is not spent until the beat AFTER the pickup.
+    #[test]
+    fn the_pickup_is_the_last_beat_the_count_in_plays_and_never_bar_one() {
+        // One bar of 4/4, as the setup sheet offers it: beats 0, 1 and 2 are
+        // counted, beat 2 is the pickup, and beat 3 is the downbeat.
+        assert!(!is_pickup_beat(true, 0, 4));
+        assert!(!is_pickup_beat(true, 1, 4));
+        assert!(is_pickup_beat(true, 2, 4));
+        assert!(
+            !is_pickup_beat(true, 3, 4),
+            "beat 3 is bar one, not a pickup"
+        );
+
+        // Two bars of 4/4: the same rule, one bar later.
+        assert!(is_pickup_beat(true, 6, 8));
+        for done in 0..6u8 {
+            assert!(
+                !is_pickup_beat(true, done, 8),
+                "beat {done} is still a count"
+            );
+        }
+
+        // Shorter than a bar — a three-beat count-in, or the shortest one
+        // there is — and the pickup is still its last beat.
+        assert!(is_pickup_beat(true, 1, 3));
+        assert!(is_pickup_beat(true, 0, 2));
+
+        // Nothing at all: a count-in of one beat IS bar one, and a count-in
+        // of none is not running.
+        assert!(!is_pickup_beat(true, 0, 1));
+        assert!(!is_pickup_beat(true, 0, 0));
+        assert!(!is_pickup_beat(false, 2, 4), "no count-in, no pickup");
+
+        // AND WHY THE TICK LOOP LATCHES IT. The beat is counted DONE as soon
+        // as its downbeat is reported, so a beat that was the pickup on its
+        // first tick is not the pickup any more a few buffers later. On a
+        // groove in sixteenths that would be one cell of the fill and three
+        // beeps, which is why `jam_in_pickup` holds the downbeat's answer.
+        assert!(is_pickup_beat(true, 2, 4), "asked on the downbeat");
+        assert!(
+            !is_pickup_beat(true, 3, 4),
+            "and asked again once it is counted"
+        );
+
+        // THE TAKE BOUNDARY, as a property rather than an example: over every
+        // count-in the engine can be armed with, the pickup is never the beat
+        // that becomes bar one, and there is at most one of it.
+        for beats in 0..=8u8 {
+            let pickups = (0..=8u8).filter(|&done| is_pickup_beat(true, done, beats));
+            assert!(
+                pickups.clone().count() <= 1,
+                "{beats} beats gave more than one pickup"
+            );
+            for done in pickups {
+                assert!(
+                    done + 1 < beats,
+                    "the pickup at {done} of {beats} IS bar one, so it would be in the take"
+                );
+            }
+        }
     }
 
     /// Every tick of the bar reaches the column it should.
@@ -7866,7 +8142,7 @@ mod tests {
         let table = compile_jam(&rock_16ths()).unwrap();
         for beat in 0..4u32 {
             for sub in 0..4u32 {
-                match jam_play(Some(&table), false, false, 4, 4, beat, sub, 0) {
+                match jam_play(Some(&table), false, false, false, 4, 4, beat, sub, 0) {
                     JamPlay::Band(t) => {
                         let expected = table.tick(beat * 4 + sub, 0).unwrap();
                         assert_eq!(t, expected, "beat {beat} sub {sub} read the wrong column");
@@ -8287,7 +8563,7 @@ mod tests {
         // `jam_play` hands back the FILL's tick on bar 1 of a two-bar form,
         // and the groove's on bar 0 — which is the only way a tom lane
         // written into a fill ever reaches the callback.
-        let tick_of = |bar: u32, tick: u32| match jam_play(Some(&table), false, false, 4, 4, tick / 4, tick % 4, bar) {
+        let tick_of = |bar: u32, tick: u32| match jam_play(Some(&table), false, false, false, 4, 4, tick / 4, tick % 4, bar) {
             JamPlay::Band(t) => t,
             other => panic!("bar {bar} tick {tick} came back as {other:?}"),
         };
@@ -10783,7 +11059,7 @@ mod tests {
     fn no_jam_means_the_click() {
         for subdivision in [1u32, 2, 3, 4, 6] {
             assert_eq!(
-                jam_play(None, false, false, 4, subdivision, 0, 0, 0),
+                jam_play(None, false, false, false, 4, subdivision, 0, 0, 0),
                 JamPlay::Click
             );
         }
