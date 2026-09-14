@@ -1192,6 +1192,22 @@ export async function setJamPosition(command: JamPositionCommand): Promise<void>
   return invoke("set_jam_position", { command });
 }
 
+/**
+ * The tune finished itself.
+ *
+ * A `song` arrangement marks its last bar `endsForm` (plans/tasks/jam-v4/BRIEF.md
+ * A1); the engine plays that bar out, stops, and says so here. No payload: the
+ * only thing the UI needs to know is that it happened, and which jam it was is
+ * the one it has open.
+ *
+ * A build whose engine never emits it is not a broken build — it is a build
+ * where a song simply goes round again, which is what every build did before
+ * the arrangement existed.
+ */
+export function onJamEnded(callback: () => void) {
+  return listen<null>("jam-ended", () => callback());
+}
+
 // ---------------------------------------------------------------------------
 // Takes (plans/JAM_MODE.md §4.4): your playing with the band mixed in, kept
 // locally in the app's data directory, opt-in per jam. Nothing leaves the

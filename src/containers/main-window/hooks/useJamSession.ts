@@ -2,15 +2,18 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { useTranslation } from "react-i18next";
 import {
   listJams,
+  onJamEnded,
   saveJams,
   setBpm,
   setJamPosition,
+  setPlaying,
   togglePlayback,
   ttsSpeak,
 } from "../../../ipc";
 import {
   GROOVES,
   STARTER_JAMS,
+  bandMoment,
   carryCountIn,
   compileJam,
   countInCue,
@@ -22,6 +25,7 @@ import {
   jamMeter,
   lastVoicing,
   lineupFor,
+  momentKey,
   perBeatCountFits,
   renameJam as renameJamData,
   reorderJams as reorderJamsData,
@@ -130,6 +134,30 @@ export function nextFormBar(
   if (pendingJump !== null) return pendingJump;
   if (loop && bar >= loop.end) return loop.start;
   return bar + 1;
+}
+
+/**
+ * The chorus the engine will be on after this bar.
+ *
+ * The bass needed the next BAR; the arrangement needs the next bar AND the
+ * next time round, because what the band plays on bar one depends on whether
+ * it is the first time round or the fourth (plans/tasks/jam-v4/BRIEF.md A1).
+ *
+ * The count goes up when the form rolls over of its own accord and at no other
+ * time. A loop does not start a new chorus — that is the rule the timeline
+ * already draws its practice marks by — and neither does a bar you asked to
+ * jump to: pressing "go to bar 1" is moving inside the tune, not playing it
+ * again from the top.
+ */
+export function nextChorus(
+  bar: number,
+  chorus: number,
+  total: number,
+  loop: BarRange | null,
+  pendingJump: number | null,
+): number {
+  if (pendingJump !== null || loop) return chorus;
+  return bar >= total - 1 ? chorus + 1 : chorus;
 }
 
 /**
@@ -575,6 +603,11 @@ export function useJamSession({
       // A load starts the keys player's hand fresh, in the middle of the
       // range; an edit mid-take leads on from wherever it already was.
       previousVoicing: editingLive ? voicingRef.current : null,
+      // Which time round the form (A1). A load starts the arrangement at the
+      // top, whatever the engine was counting before; an edit mid-take belongs
+      // to the chorus the band is actually on, or the whole plan would restart
+      // because somebody moved the bass fader.
+      chorus: editingLive ? (playingChorusRef.current ?? 1) : 1,
     });
     /*
      * The meter goes with the table only when the meter has MOVED.
@@ -592,8 +625,16 @@ export function useJamSession({
     pushJam(sending, config, meterMoved);
     // What the engine is now holding, so the next bar line can tell whether
     // it has anything new to say. Recording `null` here would make the next
-    // downbeat re-send a bass the engine already has.
-    sentBassRef.current = lineSignature(config);
+    // downbeat re-send a bass the engine already has. Written in exactly the
+    // shape the bar line below writes it, moment and all — two spellings of
+    // one signature is a comparison that is always false.
+    sentBassRef.current = `${lineSignature(config)}|${momentKey(
+      bandMoment(
+        sending,
+        editingLive ? (playingChorusRef.current ?? 1) : 1,
+        editingLive ? live + 1 : restartBar,
+      ),
+    )}`;
     voicingRef.current = lastVoicing(config.keys);
     loadedIdRef.current = jam.id;
     if (!editingLive) {
@@ -678,6 +719,14 @@ export function useJamSession({
   /** The bar the form is on right now, or null when not playing a bar. */
   const playingBarRef = useRef<number | null>(null);
   /**
+   * The chorus the form is on right now, or null when not playing.
+   *
+   * Its own ref rather than the tempo trainer's `chorusRef` below: that one is
+   * a record of the chorus that has been ACTED on, and reading it here would
+   * couple an arrangement to whether a trainer step had fired.
+   */
+  const playingChorusRef = useRef<number | null>(null);
+  /**
    * The loop and the jump, as the bar-ahead send has to read them.
    *
    * Refs rather than dependencies: the send is triggered by the bar line and
@@ -697,6 +746,7 @@ export function useJamSession({
       barRef.current = null;
       pushedRef.current = false;
       playingBarRef.current = null;
+      playingChorusRef.current = null;
       return;
     }
     // A beat event from a build that does not fill `formBar` in yet leaves the
@@ -704,6 +754,7 @@ export function useJamSession({
     // the honest answer to "which bar", and the click keeps its band.
     const bar = Number.isFinite(currentBeat.formBar) ? currentBeat.formBar : 0;
     playingBarRef.current = bar;
+    playingChorusRef.current = Number.isFinite(currentBeat.chorus) ? currentBeat.chorus : 1;
     const at = `${currentBeat.chorus}:${bar}`;
     if (barRef.current === at) return;
     barRef.current = at;
@@ -715,17 +766,39 @@ export function useJamSession({
     // Read through the ref, not watched: a preview starting mid-bar goes out
     // through the effect above, which is the one that carries the meter.
     const sending = engineJamRef.current ?? jam;
+    // The bar the engine will actually play next, which over a loop or a
+    // pending jump is not `bar + 1`. Sending ahead of the wrong bar is the
+    // whole failure mode this send exists to prevent: with a section on
+    // repeat, every pass through the loop's first bar used to be played over
+    // the line of the bar AFTER the loop's end. And the time round the form
+    // that bar belongs to, for the same reason and by the same rule (A1).
+    const aheadBar = nextFormBar(bar, loopRef.current, pendingJumpRef.current);
+    const aheadChorus = nextChorus(
+      bar,
+      playingChorusRef.current ?? 1,
+      formBars(sending.form),
+      loopRef.current,
+      pendingJumpRef.current,
+    );
     const next = compileJam(sending, {
-      // The bar the engine will actually play next, which over a loop or a
-      // pending jump is not `bar + 1`. Sending ahead of the wrong bar is the
-      // whole failure mode this send exists to prevent: with a section on
-      // repeat, every pass through the loop's first bar used to be played
-      // over the line of the bar AFTER the loop's end.
-      formBar: nextFormBar(bar, loopRef.current, pendingJumpRef.current),
+      formBar: aheadBar,
       lineup,
       previousVoicing: voicingRef.current,
+      chorus: aheadChorus,
     });
-    const signature = lineSignature(next);
+    /**
+     * What the engine is holding, as one string — the two lines AND what the
+     * arrangement is asking the band for.
+     *
+     * The lines alone were enough while every bar asked for the same thing.
+     * They are not any more: over a one-chord Build the bass and the keys
+     * repeat themselves all the way round, so a signature made of those would
+     * be identical on the bar a breakdown starts, and the send that carries
+     * the breakdown would be dropped as a duplicate.
+     */
+    const signature = `${lineSignature(next)}|${momentKey(
+      bandMoment(sending, aheadChorus, aheadBar),
+    )}`;
     if (sentBassRef.current === signature) return;
     sentBassRef.current = signature;
     voicingRef.current = lastVoicing(next.keys);
@@ -737,6 +810,34 @@ export function useJamSession({
     // the new jam would be counted as the same bar as the last of the old.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, isPlaying, countingIn, jam?.id, currentBeat?.chorus, currentBeat?.formBar]);
+
+  /**
+   * The tune finished itself (A1).
+   *
+   * A `song` arrangement marks its last bar, the engine plays it out and says
+   * `jam-ended`, and the transport has to go to STOPPED — not merely quiet.
+   * `setPlaying(false)` rather than `togglePlayback()` on purpose: a toggle
+   * that arrives after the engine has already stopped itself would start the
+   * band again, and "the tune ended and then it started again" is the worst
+   * possible answer to a feature whose whole point is an ending.
+   *
+   * Stopped rather than quiet is also what finishes the take. `useJamTakes`
+   * ends one when `isPlaying` goes false, exactly as it does for the stop
+   * button — no second path, no take left open at the end of a song.
+   *
+   * The listener is up for the life of the tab rather than only while a song
+   * is playing: the engine is under no obligation to wait for a subscription
+   * taken after the last bar, and a build with no such event never fires it.
+   */
+  useEffect(() => {
+    if (view !== "jam" || !jam) return;
+    const unlisten = onJamEnded(() => {
+      void setPlaying(false).catch(() => {});
+    });
+    return () => {
+      void unlisten.then((off) => off()).catch(() => {});
+    };
+  }, [view, jam?.id]);
 
   /**
    * The tempo trainer: up a step every N choruses, on the downbeat.
