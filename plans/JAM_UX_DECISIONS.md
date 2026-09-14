@@ -110,6 +110,54 @@ time, Zen over a jam, the jam step in a setlist, the takes, the engine.
   each at the moment they apply; the headphones line stays as a tooltip on
   the input chip.
 
+- **A10 — The chord sheet is a true cheat sheet.** *decided 2026-09-13 by the
+  owner ("create a true cheatsheet… the proper way").* The owner's session
+  with the A8 sheet: "only major and 7ths chords? … the user should be able
+  to see ALL chords for all keys, or filter by the chords the user can play
+  in the key of the current jam. Feels incomplete." It was: the sheet showed
+  the seven (eight, five) chords that belong to the key and nothing else,
+  the library's fifteen chord types were hidden, and the rock player's
+  first chord, the power chord, did not exist. The sheet becomes two pages:
+  - **In key** (the default, what A8 built) gains a four-way flavour:
+    **Triads · 7ths · Colours · Power**. Colours are the sus2, sus4, add9,
+    6 and 9 chords whose every note lies in the key, grouped by degree.
+    Power is every degree as a two-note power chord (I5, IV5, V5…). The
+    flavour a jam opens on follows the vibe: rock, hard rock and metal
+    open on Power; jazz and blues on 7ths; the rest on Triads.
+  - **All chords** is the browser: a row of twelve roots spelled the way
+    the key spells them, and for the chosen root every chord type the
+    library knows, each drawn once as its basic shape, grouped Basic /
+    Sevenths / Colours. A chord that fits the current key carries a small
+    mark; a switch, **Only in key**, off by default, hides the rest. This
+    is the owner's "filter by what I can play" without hiding anything
+    from the player who wants to look something up.
+  - Tapping a card on either page opens "every way to play it" underneath,
+    and **Pin** works from both pages: a shape found in the browser can sit
+    on the playing screen too. Follow the jam and the static fretboard stay
+    as A8 left them.
+  - **Power chords are a chord type**, not a drawing: `"5"` joins the
+    quality union, the band plays it without a third (bass root and fifth,
+    keys root, fifth and octave), the progression editor can pick it, and
+    the library has guitar and bass shapes for it on every root.
+  A chord "fits the key" when every one of its notes is in the key's note
+  set, and that set is derived from the chords already listed for the key
+  (for a major key that is exactly the seven scale notes; for minor it adds
+  the raised seventh the V7 carries; for a blues it is the union of the
+  five blues chords' notes). One rule, no second scale table.
+- **A11 — Everything that appears, arrives.** *decided 2026-09-13 by the
+  owner ("clicking on chords just shows the sidebar but it should smoothly
+  do the entry animation").* Both sheets slide in from the right and out
+  again; the scrim fades; the groove editor drawer rises from the bottom;
+  "every way to play it", a vibe's variation row, the pinned shape and the
+  first-run hints unfold and fold. One vocabulary for all of it: an enter
+  of 240 ms and an exit of 160 ms on the app's standard easing, declared
+  once as tokens, driven by a presence primitive that keeps a closing
+  surface mounted until its exit finishes. It honours the OS reduced-motion
+  setting, the app's own View transitions "off", and the Mono theme, in
+  which case surfaces appear and vanish in one frame as they do today.
+  Nothing inside a sheet animates on its own: the sheet moves, its content
+  does not.
+
 ---
 
 ## B. The sound
