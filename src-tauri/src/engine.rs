@@ -8014,7 +8014,10 @@ mod tests {
             match jam_play(Some(&table), true, true, false, 4, 4, 0, sub, 0) {
                 JamPlay::Band(tick) => {
                     let expected = table.pickup_tick(sub).unwrap();
-                    assert_eq!(tick, expected, "tick {sub} of the pickup read the wrong cell");
+                    assert_eq!(
+                        tick, expected,
+                        "tick {sub} of the pickup read the wrong cell"
+                    );
                     assert!(
                         !tick.slots().iter().any(|s| s.lane == JamLane::Hat),
                         "tick {sub} of the pickup kept a hat"
@@ -8079,12 +8082,18 @@ mod tests {
         assert!(!is_pickup_beat(true, 0, 4));
         assert!(!is_pickup_beat(true, 1, 4));
         assert!(is_pickup_beat(true, 2, 4));
-        assert!(!is_pickup_beat(true, 3, 4), "beat 3 is bar one, not a pickup");
+        assert!(
+            !is_pickup_beat(true, 3, 4),
+            "beat 3 is bar one, not a pickup"
+        );
 
         // Two bars of 4/4: the same rule, one bar later.
         assert!(is_pickup_beat(true, 6, 8));
         for done in 0..6u8 {
-            assert!(!is_pickup_beat(true, done, 8), "beat {done} is still a count");
+            assert!(
+                !is_pickup_beat(true, done, 8),
+                "beat {done} is still a count"
+            );
         }
 
         // Shorter than a bar — a three-beat count-in, or the shortest one
@@ -8104,14 +8113,20 @@ mod tests {
         // groove in sixteenths that would be one cell of the fill and three
         // beeps, which is why `jam_in_pickup` holds the downbeat's answer.
         assert!(is_pickup_beat(true, 2, 4), "asked on the downbeat");
-        assert!(!is_pickup_beat(true, 3, 4), "and asked again once it is counted");
+        assert!(
+            !is_pickup_beat(true, 3, 4),
+            "and asked again once it is counted"
+        );
 
         // THE TAKE BOUNDARY, as a property rather than an example: over every
         // count-in the engine can be armed with, the pickup is never the beat
         // that becomes bar one, and there is at most one of it.
         for beats in 0..=8u8 {
             let pickups = (0..=8u8).filter(|&done| is_pickup_beat(true, done, beats));
-            assert!(pickups.clone().count() <= 1, "{beats} beats gave more than one pickup");
+            assert!(
+                pickups.clone().count() <= 1,
+                "{beats} beats gave more than one pickup"
+            );
             for done in pickups {
                 assert!(
                     done + 1 < beats,
