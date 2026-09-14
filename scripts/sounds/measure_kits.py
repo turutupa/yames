@@ -66,6 +66,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 SND = os.path.join(ROOT, "src-tauri", "sounds")
 KITS_DIR = os.path.join(SND, "kits")
+VOICES_DIR = os.path.join(SND, "voices")
 
 # The five synthesised kits in their pre-folder form. Checked only while the
 # files are still there.
@@ -417,6 +418,261 @@ def kit_margins(man, files):
 # The legacy flat kits
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Melodic voices
+# ---------------------------------------------------------------------------
+#
+# A voice is a folder too, and almost every check above is the same check: a
+# file is still peak 0.900, still lands on zero at both ends, still carries no
+# DC and still has to be in the manifest. What is NOT the same is everything
+# that comes from a bank having pitch, and those are the four below.
+#
+#  * A bank does not hold every note. `notes` says which pitches were really
+#    recorded and the engine BUILDS the rest by resampling the nearest, so the
+#    number that says whether a bank is dense enough is the worst gap it
+#    leaves — `voices::MAX_STRETCH_SEMITONES`, three semitones, past which the
+#    formants move with the pitch and a bass stops being that bass.
+#  * A bank is mono, where a kit is stereo. `engine::Voice::stereo` is the
+#    field that says so and the loader folds anything else, quietly.
+#  * A note is capped by MEMORY and not by the bar. A kit file is a transient;
+#    a bass note rings as long as it was held, and the bank lives decoded at
+#    every note of the range by layers by round robins — so the cap in the
+#    render recipe is the difference between a folder that ships and one that
+#    does not, and `resident` below is the number it was chosen against.
+#  * A recorded note needs a release, because the line's cap ends it mid-ring
+#    and a step to zero is a click on every note of every walking line.
+
+# What the engine will ask each voice for: `engine::BASS_MIN_MIDI`..`BASS_MAX_MIDI`
+# and the same pair for the keys. A bank is built for the whole of this range
+# whatever it sampled.
+VOICE_RANGE = {
+    "bass_fingered": (28, 55),
+    "bass_picked": (28, 55),
+    "bass_upright": (28, 55),
+    "bass_slap": (28, 55),
+    "epiano": (48, 84),
+}
+
+# The render brief's cap per voice, in seconds. The loader's own ceiling is
+# `voices::MAX_NOTE_SECS` below; these are tighter and are what keeps a bank
+# resident in tens of megabytes rather than hundreds.
+VOICE_NOTE_CAP_S = {
+    "bass_fingered": 2.0,
+    "bass_picked": 2.0,
+    "bass_upright": 2.0,
+    "bass_slap": 2.0,
+    "epiano": 2.5,
+}
+
+# `voices::MAX_NOTE_SECS`, `MAX_STRETCH_SEMITONES`, `MAX_LAYERS`, `MAX_RR`,
+# `MAX_RELEASE_MS` and `MAX_BANK_BYTES`.
+VOICE_MAX_SECONDS = 4.0
+MAX_STRETCH = 3
+VOICE_MAX_LAYERS = 4
+VOICE_MAX_RR = 3
+VOICE_MAX_RELEASE_MS = 250.0
+VOICE_MAX_BANK_BYTES = 96 * 1024 * 1024
+
+# How many layers the engine can actually reach. `jam::voice_layer` maps a
+# line's gain to 1, 2 or 3 and clamps to the bank, so a fourth layer is a file
+# nothing will ever index — legal, and worth a word.
+VOICE_USEFUL_LAYERS = 3
+
+
+def find_voices():
+    if not os.path.isdir(VOICES_DIR):
+        return []
+    return sorted(
+        d for d in os.listdir(VOICES_DIR)
+        if os.path.isfile(os.path.join(VOICES_DIR, d, "voice.json"))
+    )
+
+
+def parse_note_name(stem):
+    """`40.3.2` -> `(40, 3, 2)`, and the defaults the loader accepts."""
+    bits = stem.split(".")
+    if not 1 <= len(bits) <= 3:
+        return None
+    try:
+        midi = int(bits[0])
+        layer = int(bits[1]) if len(bits) > 1 else 1
+        rr = int(bits[2]) if len(bits) > 2 else 1
+    except ValueError:
+        return None
+    if not 0 <= midi <= 127:
+        return None
+    if not 1 <= layer <= VOICE_MAX_LAYERS or not 1 <= rr <= VOICE_MAX_RR:
+        return None
+    return midi, layer, rr
+
+
+def bank_stretch(notes, low, high):
+    """The furthest the engine will stretch a sample, over the whole range.
+
+    `voices::build_bank`'s own arithmetic: every note the band can ask for is
+    built from the NEAREST sampled one, so this is the largest distance any
+    note in the range sits from the nearest entry in `notes`.
+    """
+    if not notes:
+        return 99, low
+    worst, where = 0, low
+    for midi in range(low, high + 1):
+        d = min(abs(midi - n) for n in notes)
+        if d > worst:
+            worst, where = d, midi
+    return worst, where
+
+
+def bank_resident(files, notes, low, high, layers, rr):
+    """How much memory this bank decodes into, in bytes.
+
+    The reason the render caps exist, so it is measured rather than assumed.
+    The engine builds every note of the range from the nearest sample, and a
+    note built UP is shorter than the sample it came from and one built down
+    is longer — a semitone is six per cent — so this walks the range the way
+    `build_bank` does instead of multiplying an average. Four bytes a frame,
+    because a built note is `f32` and mono.
+    """
+    total = 0
+    for midi in range(low, high + 1):
+        near = min(notes, key=lambda n: (abs(n - midi), n))
+        ratio = 2.0 ** ((midi - near) / 12.0)
+        for li in range(1, layers + 1):
+            for ri in range(1, rr + 1):
+                m = files.get((near, li, ri))
+                if m is None:
+                    continue
+                total += int(m["n"] / ratio) * 4
+    return total
+
+
+def measure_voice(voice, problems):
+    vdir = os.path.join(VOICES_DIR, voice)
+    with open(os.path.join(vdir, "voice.json"), encoding="utf-8") as fh:
+        man = json.load(fh)
+
+    for field in ("id", "name", "credit", "licence", "rate", "channels",
+                  "layers", "rr", "trim_db", "release_ms", "notes"):
+        if field not in man:
+            problems.append("%s/voice.json: no %r" % (voice, field))
+    if man.get("id") != voice:
+        problems.append("%s/voice.json: id is %r but the folder is %r"
+                        % (voice, man.get("id"), voice))
+    if voice not in VOICE_RANGE:
+        problems.append("%s: not one of the five voice ids the contract names" % voice)
+
+    layers = int(man.get("layers", 1))
+    rr = int(man.get("rr", 1))
+    notes = [int(n) for n in man.get("notes", [])]
+    if layers > VOICE_MAX_LAYERS:
+        problems.append("%s: %d layers, and the loader clamps at %d"
+                        % (voice, layers, VOICE_MAX_LAYERS))
+    if rr > VOICE_MAX_RR:
+        problems.append("%s: %d round robins, and the loader clamps at %d"
+                        % (voice, rr, VOICE_MAX_RR))
+    if notes != sorted(set(notes)):
+        problems.append("%s: notes are not sorted and unique, and the loader sorts them"
+                        % voice)
+    if not notes:
+        problems.append("%s: names no notes, and a bank is the notes it was recorded at"
+                        % voice)
+    release = float(man.get("release_ms", 60.0))
+    if release > VOICE_MAX_RELEASE_MS:
+        problems.append("%s: release_ms %.0f, over the %.0f the loader clamps to"
+                        % (voice, release, VOICE_MAX_RELEASE_MS))
+    if float(man.get("trim_db", 0.0)) > 0.0:
+        problems.append("%s: trim_db %+.2f is positive, which asks the engine past "
+                        "the 0.900 ceiling every file was written at"
+                        % (voice, float(man.get("trim_db", 0.0))))
+
+    files = {}
+    for midi in notes:
+        for li in range(1, layers + 1):
+            for ri in range(1, rr + 1):
+                name = "%d.%d.%d.wav" % (midi, li, ri)
+                path = os.path.join(vdir, name)
+                if not os.path.isfile(path):
+                    problems.append("%s: the manifest promises %s and it is not there"
+                                    % (voice, name))
+                    continue
+                x, sr, ch = read(path)
+                m = stats(path, x, sr, ch)
+                m["midi"], m["layer"], m["rr"] = midi, li, ri
+                files[(midi, li, ri)] = m
+
+                if m["sr"] != man.get("rate"):
+                    problems.append("%s/%s: %d Hz, the manifest says %s"
+                                    % (voice, name, m["sr"], man.get("rate")))
+                if m["ch"] != man.get("channels"):
+                    problems.append("%s/%s: %d channels, the manifest says %s"
+                                    % (voice, name, m["ch"], man.get("channels")))
+                # Mono is the contract and not a preference: the mixer reads a
+                # melodic buffer as one channel, and a stereo file is folded.
+                if m["ch"] != 1:
+                    problems.append("%s/%s: %d channels, and a melodic bank is mono"
+                                    % (voice, name, m["ch"]))
+                if m["clipped"]:
+                    problems.append("%s/%s: %d samples at full scale"
+                                    % (voice, name, m["clipped"]))
+                if m["peak"] > 0.902:
+                    problems.append("%s/%s: peak %.4f, over the 0.900 ceiling"
+                                    % (voice, name, m["peak"]))
+                if m["ms"] > VOICE_MAX_SECONDS * 1000.0 + 0.5:
+                    problems.append("%s/%s: %.0f ms, over the %.1f s the loader allows"
+                                    % (voice, name, m["ms"], VOICE_MAX_SECONDS))
+                cap = VOICE_NOTE_CAP_S.get(voice)
+                if cap and m["ms"] > cap * 1000.0 + 0.5:
+                    problems.append("%s/%s: %.0f ms, over the %.2f s cap for %s"
+                                    % (voice, name, m["ms"], cap, voice))
+                if m["tail_db"] > -60.0:
+                    problems.append(
+                        "%s/%s: ends at %.1f dBFS — truncated mid-ring, so the step "
+                        "is a click" % (voice, name, m["tail_db"]))
+                if m["head_db"] > -60.0:
+                    problems.append("%s/%s: starts at %.1f dBFS, not on zero"
+                                    % (voice, name, m["head_db"]))
+                if abs(m["dc"]) > 2e-4:
+                    problems.append("%s/%s: DC offset %.4f" % (voice, name, m["dc"]))
+
+    for name in sorted(os.listdir(vdir)):
+        if not name.endswith(".wav"):
+            continue
+        key = parse_note_name(name[:-4])
+        if key is None or key not in files:
+            problems.append("%s: %s is on disk but not in the manifest" % (voice, name))
+
+    low, high = VOICE_RANGE.get(voice, (min(notes or [0]), max(notes or [0])))
+    stretch, where = bank_stretch(notes, low, high)
+    if stretch > MAX_STRETCH:
+        problems.append(
+            "%s: MIDI %d is %d semitones from the nearest sample, and past %d the "
+            "engine is not playing that instrument any more"
+            % (voice, where, stretch, MAX_STRETCH))
+    resident = bank_resident(files, notes, low, high, layers, rr) if files and notes else 0
+    if resident > VOICE_MAX_BANK_BYTES:
+        problems.append("%s: %.1f MB decoded, over the %.0f MB a bank may hold"
+                        % (voice, resident / 1048576.0,
+                           VOICE_MAX_BANK_BYTES / 1048576.0))
+
+    return man, files, {
+        "range": (low, high),
+        "stretch": stretch,
+        "stretch_at": where,
+        "resident": resident,
+    }
+
+
+def voice_notes(man, bank):
+    """The one-line remarks a voice earns, rather than a problem."""
+    out = []
+    if int(man.get("layers", 1)) > VOICE_USEFUL_LAYERS:
+        out.append("layer %d is a file `voice_layer` never asks for"
+                   % int(man.get("layers")))
+    if bank["stretch"] == MAX_STRETCH:
+        out.append("sits on the three-semitone limit at MIDI %d" % bank["stretch_at"])
+    return out
+
+
 def legacy_present():
     return all(
         os.path.isfile(os.path.join(SND, "kit_%s_%s.wav" % (k, v)))
@@ -486,15 +742,23 @@ def main():
     only = None
     if "--kit" in sys.argv:
         only = sys.argv[sys.argv.index("--kit") + 1]
+    only_voice = None
+    if "--voice" in sys.argv:
+        only_voice = sys.argv[sys.argv.index("--voice") + 1]
 
     problems = []
-    kits = [k for k in find_kits() if only in (None, k)]
+    kits = [] if only_voice else [k for k in find_kits() if only in (None, k)]
     measured = {}
     for kit in kits:
         measured[kit] = measure_kit(kit, problems)
 
+    voices = [] if only else [v for v in find_voices() if only_voice in (None, v)]
+    voiced = {}
+    for voice in voices:
+        voiced[voice] = measure_voice(voice, problems)
+
     legacy = None
-    if only is None and legacy_present():
+    if only is None and only_voice is None and legacy_present():
         legacy = measure_legacy(problems)
 
     if as_md:
@@ -524,6 +788,21 @@ def main():
                      "%+.2f dB" % sn if sn is not None else "-",
                      "%+.2f dB" % kh if kh is not None else "-",
                      sum(m["bytes"] for m in files.values()) / 1048576.0))
+        if voices:
+            print()
+            print("| voice | notes | range | worst stretch | layers | rr | files "
+                  "| longest | size | resident | trim_db | release |")
+            print("|---|---|---|---|---|---|---|---|---|---|---|---|")
+            for voice in voices:
+                man, files, bank = voiced[voice]
+                print("| `%s` | %d | %d-%d | %d | %d | %d | %d | %.2f s | %.2f MB "
+                      "| %.1f MB | %+.2f | %.0f ms |"
+                      % (voice, len(man["notes"]), bank["range"][0], bank["range"][1],
+                         bank["stretch"], man["layers"], man["rr"], len(files),
+                         max(m["ms"] for m in files.values()) / 1000.0,
+                         sum(m["bytes"] for m in files.values()) / 1048576.0,
+                         bank["resident"] / 1048576.0,
+                         float(man.get("trim_db", 0.0)), float(man["release_ms"])))
     else:
         for kit in kits:
             man, files = measured[kit]
@@ -561,6 +840,35 @@ def main():
                          else "UNDER THE %.1f dB FLOOR" % MARGIN_FLOOR_DB))
             print()
 
+        for voice in voices:
+            man, files, bank = voiced[voice]
+            total = sum(m["bytes"] for m in files.values())
+            print("=== %s (%s) ===  %d files, %.2f MB on disk, %.1f MB decoded, "
+                  "%d Hz, %d ch" % (voice, man.get("name", "?"), len(files),
+                                    total / 1048576.0, bank["resident"] / 1048576.0,
+                                    man.get("rate", 0), man.get("channels", 0)))
+            print("  %d notes sampled for MIDI %d-%d; the engine builds the other %d"
+                  % (len(man["notes"]), bank["range"][0], bank["range"][1],
+                     bank["range"][1] - bank["range"][0] + 1 - len(
+                         [n for n in man["notes"]
+                          if bank["range"][0] <= n <= bank["range"][1]])))
+            print("  notes: %s" % " ".join(str(n) for n in man["notes"]))
+            print("  %d layers x %d rr   peak %.3f   longest %6.1f ms   trim %+5.2f dB"
+                  "   release %3.0f ms"
+                  % (man["layers"], man["rr"],
+                     max(m["peak"] for m in files.values()),
+                     max(m["ms"] for m in files.values()),
+                     float(man.get("trim_db", 0.0)), float(man["release_ms"])))
+            print("  worst stretch %d semitone%s (at MIDI %d)   tail %6.1f dBFS"
+                  "   dc %+.1e"
+                  % (bank["stretch"], "" if bank["stretch"] == 1 else "s",
+                     bank["stretch_at"],
+                     max(m["tail_db"] for m in files.values()),
+                     max((m["dc"] for m in files.values()), key=abs)))
+            for note in voice_notes(man, bank):
+                print("  note: %s" % note)
+            print()
+
         if legacy:
             rows, margins = legacy
             for kit in LEGACY_KITS:
@@ -587,9 +895,16 @@ def main():
         raise SystemExit(1)
     if not as_md:
         n = len(kits) + (len(LEGACY_KITS) if legacy else 0)
-        print("%d kits within spec: peak at or under 0.900, no clipping, every file" % n)
-        print("inside its cap and landing on zero, every margin over the engine's")
-        print("%.1f dB floor." % MARGIN_FLOOR_DB)
+        if n:
+            print("%d kits within spec: peak at or under 0.900, no clipping, every file" % n)
+            print("inside its cap and landing on zero, every margin over the engine's")
+            print("%.1f dB floor." % MARGIN_FLOOR_DB)
+        if voices:
+            print("%d voices within spec: mono, peak at or under 0.900, every note "
+                  "inside" % len(voices))
+            print("its cap and landing on zero, every manifest describing the folder "
+                  "beside it,")
+            print("and no note further than %d semitones from a sample." % MAX_STRETCH)
 
 
 if __name__ == "__main__":
