@@ -80,6 +80,7 @@ export type BassChordQuality =
   | "m7"
   | "maj"
   | "min"
+  | "5"
   | "m7b5"
   | "dim7"
   | "6"
@@ -90,12 +91,18 @@ export type BassChordQuality =
 export type BassChord = { rootMidi: number; quality: BassChordQuality };
 
 /**
- * Semitones above the root, lowest first. Index 1 is always the third and
- * index 2 always the fifth, which is what the styles below rely on.
+ * Semitones above the root, lowest first. Index 1 is the third and index 2
+ * the fifth, which is what the styles below rely on — except on the power
+ * chord, which has no third to be at index 1, so the two readers just below
+ * find those degrees rather than counting to them.
  */
 export const CHORD_INTERVALS: Record<BassChordQuality, readonly number[]> = {
   maj: [0, 4, 7],
   min: [0, 3, 7],
+  // The power chord, straight through from the chord symbol: root and fifth,
+  // no third. Under a guitarist playing fifths, a bass that added a third
+  // would be the one instrument in the room disagreeing about the chord.
+  "5": [0, 7],
   "7": [0, 4, 7, 10],
   maj7: [0, 4, 7, 11],
   m7: [0, 3, 7, 10],
@@ -111,14 +118,24 @@ export function chordTones(chord: BassChord): number[] {
   return [...CHORD_INTERVALS[chord.quality]];
 }
 
-/** The third: 4 semitones on a major-ish chord, 3 on a minor-ish one. */
+/**
+ * The third: 4 semitones on a major-ish chord, 3 on a minor-ish one.
+ *
+ * A power chord has none, and the honest answer there is its fifth — the next
+ * note it actually has. A figure that would have walked through the third
+ * walks through the fifth twice instead, which sounds like a rock bass line
+ * and not like a bass player contradicting the guitar.
+ */
 export function chordThird(chord: BassChord): number {
   return CHORD_INTERVALS[chord.quality][1];
 }
 
 /** The fifth: 7, or 6 on a half-diminished or diminished chord. */
 export function chordFifth(chord: BassChord): number {
-  return CHORD_INTERVALS[chord.quality][2];
+  const tones = CHORD_INTERVALS[chord.quality];
+  // Index 2 in every chord built out of thirds; on the power chord, whose two
+  // notes ARE the root and the fifth, it is the one right above the root.
+  return tones.length > 2 ? tones[2] : tones[1];
 }
 
 /**
