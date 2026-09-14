@@ -562,6 +562,30 @@ pub struct JamConfig {
     /// kit named in `kit`, exactly as before.
     #[serde(default)]
     pub custom_kit: Option<JamCustomKit>,
+    /// WHEN this table takes over from the one playing.
+    ///
+    /// Absent or `"now"` is what a jam has always done: a change the
+    /// musician made is heard on the next tick, and only the bar-ahead bass
+    /// and keys wait for the bar line (see [`swap_defers`]). `"barLine"`
+    /// makes the WHOLE table wait, drums included.
+    ///
+    /// It exists because an arrangement is written a bar ahead. The sender
+    /// posts the next bar's groove during this one — a breakdown chorus
+    /// dropping to the hats, a stop-time bar, a fill scaled to the dynamics
+    /// — and every one of those is a change to the drums, which today
+    /// arrives at once and puts the next bar's drummer a bar early. Asking
+    /// for the bar line is the sender saying "this is next bar's, not
+    /// this bar's".
+    #[serde(default)]
+    pub apply_at: Option<ApplyAt>,
+    /// Does the form END when the bar carrying this table completes?
+    ///
+    /// `song` sets it on the last bar of the last chorus. The engine stops
+    /// there the way a press of Stop would, and says so once with
+    /// `jam-ended`. Absent or false: the band plays on, which is every jam
+    /// that is a loop.
+    #[serde(default)]
+    pub ends_form: Option<bool>,
     /// Does this groove's snare lane mean the CROSS-STICK where it writes a
     /// ghost?
     ///
@@ -572,6 +596,23 @@ pub struct JamConfig {
     /// guess about tempo or feel. Absent or false: a ghost is a ghost.
     #[serde(default)]
     pub snare_ghost_is_rim: Option<bool>,
+}
+
+/// When a table takes over. The mirror of `JamEngineConfig.applyAt` in
+/// `src/jam/types.ts`.
+///
+/// An unknown value is not possible — serde refuses one and the whole
+/// config is rejected with a message, which is the right answer for a field
+/// whose two values mean opposite things about timing.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ApplyAt {
+    /// The next tick. What a jam has always done.
+    #[default]
+    Now,
+    /// The next downbeat, whatever changed — the groove, the kit, the
+    /// intensity, the mix, all of it.
+    BarLine,
 }
 
 /// A folder of WAVs on this machine, used as the kit. The mirror of
@@ -1027,6 +1068,15 @@ pub struct JamTable {
     /// bar, and that is the case the audio thread defers to the next bar
     /// line (see [`swap_defers`]).
     drums_signature: u64,
+    /// Does this table wait for the next downbeat, whatever changed?
+    ///
+    /// `applyAt: "barLine"` on the config. Out of both signatures on
+    /// purpose: it says WHEN a table arrives, not what it sounds like, so
+    /// it must not make the gain memo re-measure the same band and must not
+    /// make the same drummer look like a different one.
+    apply_at_bar_line: bool,
+    /// Does the form end when the bar carrying this table completes?
+    ends_form: bool,
     /// The loudest sample four bars of this band render, before and after
     /// the per-table normalisation, at the fastest tick the engine can
     /// produce. Diagnostics only; the audio thread never reads these.
@@ -1075,6 +1125,22 @@ impl JamTable {
     #[inline]
     pub fn form_bars(&self) -> u32 {
         self.form_bars
+    }
+
+    /// Does the form end when the bar carrying this table completes?
+    ///
+    /// Read on the audio thread at the bar line, once per bar, off a table
+    /// it is already holding.
+    #[inline]
+    pub fn ends_form(&self) -> bool {
+        self.ends_form
+    }
+
+    /// Does this table wait for the next downbeat? See
+    /// [`JamConfig::apply_at`].
+    #[inline]
+    pub fn apply_at_bar_line(&self) -> bool {
+        self.apply_at_bar_line
     }
 
     /// The crash to add on tick 0 of bar 0 of a chorus, if any.
@@ -1562,6 +1628,8 @@ fn compile_measured(
         bank,
         has_hat,
         drums_signature,
+        apply_at_bar_line: cfg.apply_at.unwrap_or_default() == ApplyAt::BarLine,
+        ends_form: cfg.ends_form.unwrap_or(false),
         peak_before,
         peak_after,
         base_peak,
@@ -1713,14 +1781,24 @@ fn hash_drums(cfg: &JamConfig, bank: &KitBank, h: &mut impl std::hash::Hasher) {
 /// Should the audio thread hold `incoming` until the next bar line instead
 /// of playing it now?
 ///
-/// Only when the band is actually playing a table, the new one is the same
-/// drummer (same signature, same bar length) and just the CHANGES moved —
-/// the bass line, the keys voicings, or both, which is what the UI posts a
-/// bar ahead. A table arriving while stopped, during the count-in, while no
-/// table is loaded, or with a different groove, kit, intensity, mix or
-/// count-in sound applies immediately: the first three have no bar line to
-/// wait for that matters, and the rest are the musician turning a dial and
-/// wanting to hear it.
+/// Two reasons a table waits, and they are asked in this order.
+///
+/// **The table said so.** `applyAt: "barLine"` holds the WHOLE table, drums
+/// included — see [`JamConfig::apply_at`]. An arrangement is written a bar
+/// ahead, and a breakdown chorus that arrived at once would put the next
+/// bar's drummer in this bar.
+///
+/// **Only the changes moved.** The old rule, and it still stands for
+/// everything the sender does not mark: the new table is the same drummer
+/// (same signature, same bar length) and just the bass line or the keys
+/// voicings differ, which is what the bar-ahead handshake posts. A table
+/// with a different groove, kit, intensity, mix or count-in sound is the
+/// musician turning a dial and applies at once.
+///
+/// A table arriving while stopped, during the count-in, or while no table
+/// is loaded applies immediately whatever it says: there is no bar line to
+/// wait for that matters, and a band held back from a bar that never comes
+/// is a band that never arrives.
 pub fn swap_defers(
     active: Option<&JamTable>,
     incoming: Option<&JamTable>,
@@ -1732,7 +1810,8 @@ pub fn swap_defers(
     }
     match (active, incoming) {
         (Some(a), Some(n)) => {
-            a.drums_signature == n.drums_signature && a.ticks_per_bar == n.ticks_per_bar
+            n.apply_at_bar_line
+                || (a.drums_signature == n.drums_signature && a.ticks_per_bar == n.ticks_per_bar)
         }
         _ => false,
     }
@@ -2389,6 +2468,112 @@ mod tests {
             assert!(!swap_defers(Some(&a), Some(&n), true, true));
             assert!(!swap_defers(None, Some(&n), true, false));
             assert!(!swap_defers(Some(&a), None, true, false));
+        }
+
+        /// A DRUM CHANGE PLAYS NOW UNLESS THE TABLE ASKS FOR THE BAR LINE.
+        ///
+        /// Which is the whole of `applyAt`: the same pair of tables, the
+        /// same different kit, deferred or not according to one field.
+        #[test]
+        fn a_bar_line_table_waits_even_when_the_drums_changed() {
+            let a = compile(&cfg(Some(vec![33, 0, 0, 0, 40, 0, 0, 0]), "room")).unwrap();
+            let mut later = cfg(Some(vec![33, 0, 0, 0, 40, 0, 0, 0]), "tight");
+            later.apply_at = Some(ApplyAt::BarLine);
+            let n = compile(&later).unwrap();
+            assert_ne!(a.drums_signature, n.drums_signature);
+            assert!(swap_defers(Some(&a), Some(&n), true, false));
+        }
+
+        /// ...and it is the INCOMING table that decides, not the one
+        /// playing. A jam that asked for the bar line once does not hold
+        /// every edit after it back.
+        #[test]
+        fn the_arriving_table_is_the_one_that_asks() {
+            let mut first = cfg(Some(vec![33, 0, 0, 0, 40, 0, 0, 0]), "room");
+            first.apply_at = Some(ApplyAt::BarLine);
+            let a = compile(&first).unwrap();
+            let n = compile(&cfg(Some(vec![33, 0, 0, 0, 40, 0, 0, 0]), "tight")).unwrap();
+            assert!(!swap_defers(Some(&a), Some(&n), true, false));
+        }
+
+        /// `applyAt` says WHEN, never WHAT. Two tables that differ only in
+        /// it are the same band, so the four-bar measurement one of them
+        /// paid for is the other's too, and a deferred bass send following a
+        /// deferred arrangement bar is still the same drummer.
+        #[test]
+        fn asking_for_the_bar_line_does_not_make_it_a_different_band() {
+            let now = compile(&cfg(Some(vec![33, 0, 0, 0, 40, 0, 0, 0]), "room")).unwrap();
+            let mut waits = cfg(Some(vec![33, 0, 0, 0, 40, 0, 0, 0]), "room");
+            waits.apply_at = Some(ApplyAt::BarLine);
+            let waits = compile(&waits).unwrap();
+            assert_eq!(now.drums_signature, waits.drums_signature);
+            let bank = reference_bank("room").unwrap();
+            assert_eq!(
+                render_signature(&cfg(Some(vec![33, 0, 0, 0, 40, 0, 0, 0]), "room"), &bank),
+                render_signature(
+                    &{
+                        let mut c = cfg(Some(vec![33, 0, 0, 0, 40, 0, 0, 0]), "room");
+                        c.apply_at = Some(ApplyAt::BarLine);
+                        c
+                    },
+                    &bank
+                )
+            );
+        }
+
+        /// The contract's spelling, off the wire. `"barLine"` and nothing
+        /// else — a value nobody defined is a config rejected with a
+        /// message, because the two values mean opposite things about time.
+        #[test]
+        fn apply_at_reads_the_contracts_words() {
+            let of = |json: &str| -> Result<Option<ApplyAt>, String> {
+                serde_json::from_str::<JamConfig>(json)
+                    .map(|c| c.apply_at)
+                    .map_err(|e| e.to_string())
+            };
+            let base = r#""ticksPerBeat":2,"beatsPerBar":4,
+                "bar":{"kick":[2,0,0,0,0,0,0,0],"snare":[0,0,0,0,0,0,0,0],
+                       "hat":[1,1,1,1,1,1,1,1],"ride":[0,0,0,0,0,0,0,0],
+                       "crash":[0,0,0,0,0,0,0,0]},
+                "formBars":4,"crashOnOne":false,"intensity":1.0"#;
+            assert_eq!(of(&format!("{{{base}}}")).unwrap(), None);
+            assert_eq!(
+                of(&format!("{{{base},\"applyAt\":\"now\"}}")).unwrap(),
+                Some(ApplyAt::Now)
+            );
+            assert_eq!(
+                of(&format!("{{{base},\"applyAt\":\"barLine\"}}")).unwrap(),
+                Some(ApplyAt::BarLine)
+            );
+            assert!(of(&format!("{{{base},\"applyAt\":\"bar_line\"}}")).is_err());
+            assert!(of(&format!("{{{base},\"applyAt\":\"soon\"}}")).is_err());
+        }
+
+        /// `endsForm` reaches the table, and a jam that does not carry it
+        /// does not end — which is every jam that is a loop, including
+        /// every one already saved.
+        #[test]
+        fn only_a_bar_that_says_so_ends_the_form() {
+            let plain = compile(&cfg(None, "room")).unwrap();
+            assert!(!plain.ends_form());
+            let mut last = cfg(None, "room");
+            last.ends_form = Some(true);
+            assert!(compile(&last).unwrap().ends_form());
+            let mut not_last = cfg(None, "room");
+            not_last.ends_form = Some(false);
+            assert!(!compile(&not_last).unwrap().ends_form());
+        }
+
+        /// An ending is a fact about one bar, not about the band, so it is
+        /// out of the signature: a `song`'s last bar and the bar before it
+        /// carry the same drums, and the memo must not measure them twice.
+        #[test]
+        fn ending_the_form_does_not_make_it_a_different_band() {
+            let a = compile(&cfg(None, "room")).unwrap();
+            let mut last = cfg(None, "room");
+            last.ends_form = Some(true);
+            let b = compile(&last).unwrap();
+            assert_eq!(a.drums_signature, b.drums_signature);
         }
     }
 

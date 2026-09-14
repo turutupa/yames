@@ -2264,6 +2264,26 @@ fn next_form_position(
     (bar, chorus, left)
 }
 
+/// Does a position the musician just sent cancel a pending ending?
+///
+/// A jam whose bar carries `endsForm` stops when that bar completes —
+/// unless somebody reached for the footswitch first. A jump or a loop asked
+/// for during the bar is somebody saying they are not finished, and the app
+/// stopping under their hand would be the app deciding it knew better.
+///
+/// A command that names NEITHER is asking for neither: `{ jumpTo: null,
+/// loop: null }` clears a loop, and clearing a loop on the last bar of a
+/// song is not a reason to play another chorus. That is also what keeps the
+/// housekeeping [`JamHandoff::set`] does on a new form out of it — that only
+/// ever takes a jump or a loop AWAY.
+///
+/// Pure, and on the audio thread, for the reason [`jam_play`] and
+/// [`next_form_position`] are: the rule is testable without a sound card.
+#[inline]
+fn position_cancels_an_ending(position: JamPosition) -> bool {
+    position.jump.is_some() || position.loop_bars.is_some()
+}
+
 /// What the band does on a bar the form is being PUT at rather than moved
 /// to — the restart's other half, and the clamp that keeps a bar number
 /// nobody computed here out of the band-state table.
@@ -2546,6 +2566,15 @@ struct BeatNotification {
     /// played instead. True only on the first such tick after a table
     /// arrives — the event thread says so once, not thirteen times a second.
     jam_bar_mismatch: bool,
+    /// The bar that just completed carried `endsForm`, and the band has
+    /// stopped.
+    ///
+    /// The audio thread has ALREADY lowered the transport flag by the time
+    /// this arrives — the band must stop on the downbeat, and the event
+    /// thread sleeps the output latency before it does anything. What is
+    /// left for the event thread is the half that needs a lock: the app
+    /// state, and the word.
+    jam_form_ended: bool,
 }
 
 // ---------------------------------------------------------------------------
@@ -3557,6 +3586,10 @@ impl MetronomeEngine {
         let exit_state = state.clone();
         let exit_sink = app_handle.clone();
         let exit_tempo = self.tempo_ctx.clone();
+        // The event loop's own handle, for a jam that ends its own form:
+        // that is a stop, and a stop takes the onset detector's playing gate
+        // down with it.
+        let end_tempo = self.tempo_ctx.clone();
         let handle = thread::spawn(move || {
             // Lowers `alive` / `playing` however this thread leaves, and
             // answers `start` exactly once. See `AudioThreadExit`.
@@ -3696,6 +3729,19 @@ impl MetronomeEngine {
             // The form length the counters belong to. A table that changes
             // while playing but keeps its form length keeps its place.
             let mut jam_form_bars: u32 = 0;
+            // Has somebody moved the form during the bar under way?
+            //
+            // A jam that ends its form stops when the bar carrying
+            // `endsForm` completes — unless the musician asked for a jump or
+            // a loop first, which says they are not finished. Cleared at
+            // every bar line, so the cancellation covers the bar it arrived
+            // in and no more.
+            let mut jam_ending_cancelled = false;
+            // Is the next downbeat the one the song ends on? Raised at the
+            // bar line of a bar carrying `endsForm` and spent one tick
+            // later — see the tick loop for why it is not spent where it is
+            // raised.
+            let mut jam_ending_armed = false;
             let mut jam_retire = JamRetirement::new();
             let mut take_retire = crate::take::TakeParking::new();
             // One report per loaded table, not one per tick.
@@ -3892,6 +3938,10 @@ impl MetronomeEngine {
                             cached.jam_position = *p;
                             drop(p);
                             cached.jam_position_generation = pos_gen;
+                            // Somebody moving the form is somebody who is
+                            // not finished. See `position_cancels_an_ending`.
+                            jam_ending_cancelled |=
+                                position_cancels_an_ending(cached.jam_position);
                         }
                     }
 
@@ -4041,6 +4091,12 @@ impl MetronomeEngine {
                         jam_bar_state = state;
                         jam_start_bar = bar;
                         jam_mismatch_reported = false;
+                        // A press of Play is a new tune. An ending armed by
+                        // the last one — which is how the transport went
+                        // down in the first place — must not stop this one
+                        // on its first tick.
+                        jam_ending_armed = false;
+                        jam_ending_cancelled = false;
                         voices.clear();
                     }
 
@@ -4092,10 +4148,31 @@ impl MetronomeEngine {
                     let tick_samples = (tick_duration_secs * sr as f64) as u64;
                     let cap_samples = (tick_samples as f64 * 0.9) as usize;
 
+                    // Did the form end inside THIS buffer?
+                    //
+                    // Once it has, no further tick of this buffer sounds and
+                    // nothing is ringing: the band stops on the downbeat it
+                    // said it would, not a buffer and a bit later. The
+                    // transport flag is already false by then, so the next
+                    // buffer takes the silent path at the top.
+                    let mut form_ended_here = false;
+
                     // ---- Per-frame processing ----
                     for frame_idx in 0..frames {
                         // Beat boundary
-                        if sample_counter >= next_beat_sample {
+                        if !form_ended_here && sample_counter >= next_beat_sample {
+                            // THIS IS THE DOWNBEAT THE SONG ENDED ON.
+                            //
+                            // Armed at the bar line a tick ago, fired here,
+                            // where the next bar would have begun. The tick
+                            // is walked through to the end anyway — the
+                            // notification is what carries the news, and the
+                            // voices this tick spawns are taken back below
+                            // before a sample of them is mixed, so nothing
+                            // of the bar that never started is heard.
+                            let form_ends_now = jam_ending_armed;
+                            jam_ending_armed = false;
+
                             // If beat_groups changed mid-play, reset bar BEFORE
                             // is_downbeat is computed so this tick IS the new beat 0.
                             if cached.beat_groups_changed {
@@ -4438,23 +4515,57 @@ impl MetronomeEngine {
                             // reporting bar 0 of chorus 1 as the contract
                             // says it must.
                             if bar_complete {
-                                // The bar line: the held table becomes the
-                                // one the next tick reads. Same form, same
-                                // drums — only the bass bar moved.
+                                // DOES THE FORM END AT THE NEXT DOWNBEAT?
+                                // Asked of the table that played THIS bar,
+                                // before the held one takes over — the bar
+                                // that carries `endsForm` is the bar that
+                                // just finished, not the one arriving.
                                 //
-                                // No custom voice has to be stopped here,
-                                // and that is a property rather than an
-                                // oversight: a table is only ever HELD when
-                                // its `drums_signature` matches the one
-                                // playing, and that signature hashes
-                                // `CustomBank::id`. A different folder is
-                                // never a deferred swap; it plays now,
-                                // through the branch above.
+                                // ARMED HERE AND FIRED A TICK LATER, and the
+                                // difference is the last sixteenth of the
+                                // song. `bar_complete` is raised after the
+                                // bar's LAST TICK HAS BEEN SPAWNED and
+                                // before a sample of it has been rendered;
+                                // stopping here would spawn that tick and
+                                // take it straight back, and a tune would
+                                // end one tick before its end. So the flag
+                                // waits for the tick that would have been
+                                // the next downbeat, which is where the
+                                // silence belongs.
+                                //
+                                // A jump or a loop the musician asked for
+                                // during the bar cancels it: somebody
+                                // reaching for the footswitch on the last
+                                // bar of the last chorus is somebody who is
+                                // not finished, and stopping under their
+                                // hand would be the app deciding it knew
+                                // better.
+                                jam_ending_armed = !jam_ending_cancelled
+                                    && cached.jam.as_deref().is_some_and(|t| t.ends_form());
+                                jam_ending_cancelled = false;
+                                // The bar line: the held table becomes the
+                                // one the next tick reads.
+                                //
+                                // Everything the immediate branch does is
+                                // done here too, and after `applyAt` that is
+                                // no longer belt and braces. A table used to
+                                // be HELD only when its `drums_signature`
+                                // matched the one playing — same drums, same
+                                // decode, so nothing ringing had to stop and
+                                // the bus kept its drive. An arrangement
+                                // asks for the bar line whatever changed, so
+                                // the drums, the kit, the folder and the
+                                // drive can all move across this line.
                                 if let Some(p) = cached.jam_pending.take() {
+                                    let before = bank_id(cached.jam.as_deref());
+                                    let after = bank_id(Some(&p));
                                     if let Some(old) = cached.jam.take() {
                                         jam_retire.retire(&jam_shared, old);
                                     }
+                                    bus.set_drive(p.bus_drive, p.bus_shape);
+                                    jam_form_bars = p.form_bars();
                                     cached.jam = Some(p);
+                                    stop_voices_on_kit_change(&mut voices, before, after);
                                     cached.count_in_slot =
                                         count_in_slot_of(cached.jam.as_deref());
                                 }
@@ -4503,7 +4614,36 @@ impl MetronomeEngine {
                                 jam_chorus: notif_jam_chorus,
                                 jam_band_state: notif_band_state,
                                 jam_bar_mismatch: jam_mismatch,
+                                jam_form_ended: form_ends_now,
                             });
+
+                            // AND THE TUNE ENDS.
+                            //
+                            // The transport flag goes down HERE, on the
+                            // audio thread, on the downbeat the form ended
+                            // on — not on the event thread, which sleeps the
+                            // output latency before it says anything and
+                            // would leave a bar of band playing after the
+                            // end of the song. The event thread's half is
+                            // the state and the word (`jam-ended`), which is
+                            // where a `lock()` and an `emit` belong.
+                            //
+                            // It is the same atomic `stop` writes, so this
+                            // is a stop and not a special case: the next
+                            // buffer takes the silent path at the top, the
+                            // stream stays open, and the next press of Play
+                            // starts the form again.
+                            if form_ends_now {
+                                form_ended_here = true;
+                                playing_cb.store(false, Ordering::SeqCst);
+                                // Nothing rings across the end, and nothing
+                                // of the bar that never started is heard: a
+                                // stop clears the voices, and so does this.
+                                // `Vec::clear` keeps its allocation and a
+                                // `Voice` owns nothing, so it is a length
+                                // written to zero.
+                                voices.clear();
+                            }
 
                             // Audio-safety probe: one audible tick rendered
                             // into this buffer. Counting here (rather than
@@ -4714,6 +4854,48 @@ impl MetronomeEngine {
                          beat groups before set_jam. Playing the click.",
                         notif.beats_per_bar, notif.subdivision_total
                     );
+                }
+
+                // ---- The tune ended ----
+                //
+                // The band has already stopped: the audio thread lowered the
+                // transport flag on the downbeat, because everything below
+                // here sleeps the output latency first and a band that
+                // played on through it would overrun the end of the song.
+                // What is left is the half that needs a lock and a window:
+                // the app state a press of Stop would have written, and the
+                // one word the UI is waiting for.
+                //
+                // Checked BEFORE the session gate, because the stop is what
+                // ends the session and a notification that arrived with it
+                // is not stale.
+                if notif.jam_form_ended {
+                    {
+                        let mut s = state.lock().unwrap();
+                        s.is_playing = false;
+                        // A stop spends the count-in, whichever door it came
+                        // through — and an ending is a door. Without this
+                        // the next press of Play counts out the beats a jam
+                        // armed before the song finished itself.
+                        s.count_in = crate::state::CountIn::default();
+                        let sc = s.clone();
+                        drop(s);
+                        let _ = app_handle.emit("state-changed", &sc);
+                    }
+                    // The onset detector gates on this: left true, it would
+                    // go on scoring a room with no click in it.
+                    if let Some(ref t) = end_tempo {
+                        t.set_playing(false);
+                    }
+                    // No payload. "The song is over" is the whole message;
+                    // where it ended is on the last `beat` event, which the
+                    // UI already has.
+                    let _ = app_handle.emit("jam-ended", ());
+                    // And no `beat` for this one. The tick this notification
+                    // rode in on is the downbeat the song did NOT play — it
+                    // made no sound, and a playhead moved onto a bar nobody
+                    // heard would be the screen disagreeing with the room.
+                    continue;
                 }
 
                 // Session tracking — ignore stale notifications from previous
@@ -6955,6 +7137,441 @@ mod tests {
         });
         handoff.set(None);
         assert_eq!(handoff.position().jump, None);
+    }
+
+    // -----------------------------------------------------------------
+    // `applyAt` and `endsForm` — the arrangement's two engine additions
+    // -----------------------------------------------------------------
+
+    /// The callback's table handshake, walked on the tick grid.
+    ///
+    /// Deliberately a copy of the callback's order of operations rather than
+    /// a shared helper, for the same reason `render_jam` is one: a change in
+    /// the callback that this does not follow shows up as a failing
+    /// assertion instead of as a harness that quietly moved with it. The
+    /// order it copies is the one that matters — a table is picked up at the
+    /// TOP of a buffer, `swap_defers` decides whether it plays or waits, and
+    /// a waiting one becomes current at the bar line, after the bar's last
+    /// tick has already been read.
+    ///
+    /// `sends` is `(bar, tick, table)`: a `set_jam` landing just before that
+    /// tick would have been played. What comes back is, per bar and per
+    /// tick, which lanes the band actually sounded — which is what "plays on
+    /// the NEXT downbeat and not this one" is a claim about.
+    fn play_the_handshake(
+        initial: &Arc<JamTable>,
+        sends: &[(u32, u32, Arc<JamTable>)],
+        bars: u32,
+    ) -> Vec<Vec<Vec<JamLane>>> {
+        let ticks = initial.ticks_per_bar();
+        let mut current: Option<Arc<JamTable>> = Some(initial.clone());
+        let mut pending: Option<Arc<JamTable>> = None;
+        let mut jam_bar = 0u32;
+        let mut out = Vec::new();
+        for bar in 0..bars {
+            let mut played = Vec::new();
+            for tick in 0..ticks {
+                // The top of a buffer: whatever `set_jam` handed over.
+                if let Some((_, _, t)) = sends.iter().find(|(b, k, _)| *b == bar && *k == tick) {
+                    let incoming = Some(t.clone());
+                    if crate::jam::swap_defers(
+                        current.as_deref(),
+                        incoming.as_deref(),
+                        true,
+                        false,
+                    ) {
+                        pending = incoming;
+                    } else {
+                        current = incoming;
+                    }
+                }
+                played.push(
+                    current
+                        .as_deref()
+                        .and_then(|t| t.tick(tick, jam_bar))
+                        .map(|t| t.slots().iter().map(|s| s.lane).collect::<Vec<_>>())
+                        .unwrap_or_default(),
+                );
+            }
+            // The bar line: the held table becomes the one the next tick
+            // reads, and then the form moves.
+            if let Some(p) = pending.take() {
+                current = Some(p);
+            }
+            if let Some(ref t) = current {
+                let (b, _, _) =
+                    next_form_position(jam_bar, 1, t.form_bars(), JamPosition::default());
+                jam_bar = b;
+            }
+            out.push(played);
+        }
+        out
+    }
+
+    /// Which ticks of a bar had a kick on them.
+    fn kicks_on(bar: &[Vec<JamLane>]) -> Vec<usize> {
+        bar.iter()
+            .enumerate()
+            .filter(|(_, lanes)| lanes.contains(&JamLane::Kick))
+            .map(|(i, _)| i)
+            .collect()
+    }
+
+    /// A four-on-the-floor bar and a bar with the kick on the ANDs — two
+    /// grooves an ear tells apart on the first tick.
+    fn kick_on(ticks: &[usize]) -> JamConfig {
+        let mut cfg = rock_16ths();
+        cfg.form_bars = 4;
+        cfg.bar.kick = vec![0; 16];
+        for &t in ticks {
+            cfg.bar.kick[t] = 2;
+        }
+        cfg.bar.snare = vec![0; 16];
+        cfg.bar.hat = vec![0; 16];
+        cfg
+    }
+
+    /// A BAR-LINE TABLE PLAYS ON THE NEXT DOWNBEAT AND NOT ON THIS ONE.
+    ///
+    /// The whole of `applyAt`, measured where it has to be true: the tick
+    /// grid. The arrangement's sender posts the next bar's groove ON this
+    /// bar's downbeat — a breakdown dropping to the hats, a stop-time bar, a
+    /// fill scaled to the dynamics — and every one of those is a change to
+    /// the DRUMS, which the old rule played at once. That put next bar's
+    /// drummer a bar early, on every bar of every arrangement.
+    ///
+    /// So the same send is run twice, differing in one field, and what is
+    /// asserted is which ticks the kick landed on.
+    #[test]
+    fn a_bar_line_table_sent_at_the_downbeat_plays_on_the_next_downbeat() {
+        let four_on_the_floor = Arc::new(compile_jam(&kick_on(&[0, 4, 8, 12])).unwrap());
+        let mut next_bar = kick_on(&[2, 6, 10, 14]);
+
+        // Sent at tick 0 of bar 1, asking for the bar line.
+        next_bar.apply_at = Some(crate::jam::ApplyAt::BarLine);
+        let waits = Arc::new(compile_jam(&next_bar).unwrap());
+        let played = play_the_handshake(
+            &four_on_the_floor,
+            &[(1, 0, waits)],
+            4,
+        );
+        assert_eq!(kicks_on(&played[0]), vec![0, 4, 8, 12], "bar 0, untouched");
+        assert_eq!(
+            kicks_on(&played[1]),
+            vec![0, 4, 8, 12],
+            "the bar the table arrived in is the drummer who was already playing it"
+        );
+        assert_eq!(
+            kicks_on(&played[2]),
+            vec![2, 6, 10, 14],
+            "and the next downbeat is where the new drummer comes in"
+        );
+
+        // The same send without `applyAt`, which is a musician turning a
+        // dial: heard on the next tick, mid-bar, exactly as before.
+        next_bar.apply_at = None;
+        let now = Arc::new(compile_jam(&next_bar).unwrap());
+        let played = play_the_handshake(&four_on_the_floor, &[(1, 0, now)], 4);
+        assert_eq!(kicks_on(&played[0]), vec![0, 4, 8, 12]);
+        assert_eq!(
+            kicks_on(&played[1]),
+            vec![2, 6, 10, 14],
+            "a change with no `applyAt` on it still plays at once"
+        );
+    }
+
+    /// ...and a table that arrives mid-bar asking for the bar line waits for
+    /// the END of that bar, not for the tick after it. The rest of the bar
+    /// is the drummer who started it.
+    #[test]
+    fn a_bar_line_table_sent_mid_bar_finishes_the_bar_first() {
+        let four_on_the_floor = Arc::new(compile_jam(&kick_on(&[0, 4, 8, 12])).unwrap());
+        let mut next_bar = kick_on(&[2, 6, 10, 14]);
+        next_bar.apply_at = Some(crate::jam::ApplyAt::BarLine);
+        let waits = Arc::new(compile_jam(&next_bar).unwrap());
+        let played = play_the_handshake(&four_on_the_floor, &[(0, 5, waits)], 3);
+        assert_eq!(
+            kicks_on(&played[0]),
+            vec![0, 4, 8, 12],
+            "the bar it landed in finished the way it started"
+        );
+        assert_eq!(kicks_on(&played[1]), vec![2, 6, 10, 14]);
+    }
+
+    /// The callback's frame loop, ending included, into a real take ring.
+    ///
+    /// A copy of the callback's arithmetic for the same reason `render_jam`
+    /// is one — and this one has to carry the part `render_jam` does not:
+    /// BUFFERS. The ending is a decision made inside a buffer, at a tick
+    /// that is very unlikely to be a buffer boundary, and what happens to
+    /// the rest of that buffer is the whole question a take asks. So this
+    /// runs a fixed buffer size across the bar line, pushes every buffer
+    /// into the ring the way the callback does, and lowers the transport
+    /// flag where the callback lowers it.
+    ///
+    /// `bars` is ONE TABLE PER BAR OF THE FORM, which is what the bar-ahead
+    /// sender actually produces: the same band all the way round, and
+    /// `endsForm` on the last bar only. It is also what makes this a
+    /// comparison — the same run with a plain table in the last slot is the
+    /// band that does not stop.
+    ///
+    /// Returns the drained ring and the frame the form ended on.
+    #[allow(clippy::too_many_arguments)]
+    fn take_of_a_band(
+        bars: &[&JamTable],
+        bank: &SoundBank,
+        sr: u32,
+        tick_samples: u64,
+        buffer_frames: usize,
+        buffers: usize,
+    ) -> (Vec<f32>, Option<usize>) {
+        let table = bars[0];
+        let ring = crate::take::TakeRing::new(buffer_frames * buffers + 1);
+        let mut voices: Vec<Voice> = Vec::new();
+        let mut bus = DrumBus::new(sr);
+        bus.set_drive(table.bus_drive, table.bus_shape);
+        let choke_frames = (CHOKE_FADE_SECS * sr as f32) as u32;
+        let drift_frames = (DRIFT_MAX_SECS * sr as f32) as u32;
+        let ticks_per_bar = table.ticks_per_bar();
+        let kit = table.kit_bank();
+
+        let mut data = vec![0.0f32; buffer_frames];
+        let mut sample_counter = 0u64;
+        let mut next_beat_sample = 0u64;
+        let mut tick_index = 0u32;
+        let mut jam_bar = 0u32;
+        let mut playing = true;
+        let mut armed = false;
+        let mut ended_at: Option<usize> = None;
+        let mut frames_written = 0usize;
+
+        for _ in 0..buffers {
+            if !playing {
+                // The callback's silent path: zeroes out, and the ring gets
+                // them, because the band is the take's clock.
+                data.iter_mut().for_each(|s| *s = 0.0);
+                ring.push_strided(&data, 1);
+                frames_written += buffer_frames;
+                continue;
+            }
+            let mut form_ended_here = false;
+            for frame in 0..buffer_frames {
+                if !form_ended_here && sample_counter >= next_beat_sample {
+                    // Armed a tick ago, spent here — the callback's order.
+                    let form_ends_now = armed;
+                    armed = false;
+                    // Whichever table the bar-ahead sender put on this bar.
+                    let playing_table = bars[jam_bar as usize % bars.len()];
+                    if let Some(tick) = playing_table.tick(tick_index, jam_bar) {
+                        for slot in tick.slots() {
+                            spawn_band_voice(
+                                &mut voices,
+                                slot,
+                                1.0,
+                                jam_bar,
+                                tick_index,
+                                ticks_per_bar,
+                                tick_samples,
+                                drift_frames,
+                                choke_frames,
+                            );
+                        }
+                    }
+                    tick_index += 1;
+                    if tick_index >= ticks_per_bar {
+                        tick_index = 0;
+                        // The bar line, in the callback's order: the ending
+                        // is asked of the table that played THIS bar, then
+                        // the form moves.
+                        armed = playing_table.ends_form();
+                        let (b, _, _) = next_form_position(
+                            jam_bar,
+                            1,
+                            table.form_bars(),
+                            JamPosition::default(),
+                        );
+                        jam_bar = b;
+                    }
+                    next_beat_sample = sample_counter + tick_samples;
+                    if form_ends_now {
+                        form_ended_here = true;
+                        playing = false;
+                        voices.clear();
+                        ended_at = Some(frames_written + frame);
+                    }
+                }
+                let mut band_l = 0.0f32;
+                let mut band_r = 0.0f32;
+                for v in voices.iter_mut() {
+                    if v.delay > 0 {
+                        v.delay -= 1;
+                        continue;
+                    }
+                    let buf = jam_sample(bank, Some(kit), v.sound_id);
+                    let n = if v.stereo { buf.len() / 2 } else { buf.len() };
+                    let limit = if v.max_samples > 0 {
+                        v.max_samples.min(n)
+                    } else {
+                        n
+                    };
+                    if v.position < limit {
+                        let g = v.choke_gain();
+                        let (l, r) = if v.stereo {
+                            (buf[2 * v.position], buf[2 * v.position + 1])
+                        } else {
+                            (buf[v.position], buf[v.position])
+                        };
+                        band_l += l * v.amp_l * g;
+                        band_r += r * v.amp_r * g;
+                    }
+                    if v.fade_left > 0 {
+                        v.fade_left -= 1;
+                    }
+                    v.position += 1;
+                }
+                let (l, r) = bus.process(band_l, band_r);
+                data[frame] = ((l + r) * 0.5).clamp(-1.0, 1.0);
+                sample_counter += 1;
+            }
+            voices.retain(|v| {
+                let buf = jam_sample(bank, Some(kit), v.sound_id);
+                let n = if v.stereo { buf.len() / 2 } else { buf.len() };
+                !v.done(n)
+            });
+            ring.push_strided(&data, 1);
+            frames_written += buffer_frames;
+        }
+        let mut out = Vec::new();
+        ring.drain_into(&mut out);
+        (out, ended_at)
+    }
+
+    /// AN ENDING DURING A TAKE LEAVES A WHOLE TAKE.
+    ///
+    /// The risk the ending carries: a transport that goes down as soon as
+    /// the engine knows the song is over takes the last bar of the recording
+    /// with it, and a musician who played a whole chorus gets back all of it
+    /// but the end. So the ending is decided on the audio thread, at the bar
+    /// line, with the bar already rendered — and the way to say that as a
+    /// fact is to record the same band twice, once with the ending honoured
+    /// and once without, and compare.
+    ///
+    /// Bit for bit up to the last downbeat, then silence. Nothing of the
+    /// song is missing and nothing of the band leaks past its end.
+    #[test]
+    fn an_ending_during_a_take_leaves_a_whole_take() {
+        let sr = 48_000u32;
+        let bank = SoundBank::new(sr);
+        let mut cfg = rock_16ths();
+        cfg.form_bars = 4;
+        // A hit on the last tick of the bar, so "the last bar is all there"
+        // is a claim about the last tick and not about the last downbeat.
+        cfg.bar.snare[15] = 2;
+        let plain = compile_jam(&cfg).unwrap();
+        // The bar-ahead sender's last bar, and the only thing about it that
+        // differs: `endsForm` says nothing about what the band plays, so the
+        // two runs below are the same band bar for bar.
+        cfg.ends_form = Some(true);
+        cfg.apply_at = Some(crate::jam::ApplyAt::BarLine);
+        let last = compile_jam(&cfg).unwrap();
+
+        // 120 BPM sixteenths, and a buffer that is not a whole number of
+        // ticks: 256 frames against a 6 000-frame tick, so the bar line
+        // lands inside a buffer rather than on the edge of one.
+        let tick_samples = (sr as u64) * 60 / 120 / 4;
+        let bar_frames = tick_samples as usize * plain.ticks_per_bar() as usize;
+        let buffer_frames = 256usize;
+        // Eight bars' worth of buffers: twice the form, so the ending has a
+        // second chorus to fail to stop.
+        let buffers = (bar_frames * 8).div_ceil(buffer_frames);
+
+        let ending = [&plain, &plain, &plain, &last];
+        let looping = [&plain, &plain, &plain, &plain];
+        let (ended, at) =
+            take_of_a_band(&ending, &bank, sr, tick_samples, buffer_frames, buffers);
+        let (whole, none) =
+            take_of_a_band(&looping, &bank, sr, tick_samples, buffer_frames, buffers);
+        assert_eq!(none, None, "the control run must not stop");
+
+        let at = at.expect("the form ended");
+        assert_eq!(
+            at,
+            bar_frames * plain.form_bars() as usize,
+            "the song ended somewhere other than the downbeat after its last bar"
+        );
+
+        // Every sample of the song is the one the band would have played.
+        assert_eq!(ended.len(), whole.len());
+        for i in 0..at {
+            assert_eq!(
+                ended[i], whole[i],
+                "the take and the band disagree at frame {i} of {at}"
+            );
+        }
+        // And the last bar is really in it, not a bar of decay.
+        let last_bar: f64 = ended[at - bar_frames..at]
+            .iter()
+            .map(|s| (s * s) as f64)
+            .sum();
+        let last_tick: f64 = ended[at - tick_samples as usize..at]
+            .iter()
+            .map(|s| (s * s) as f64)
+            .sum();
+        assert!(last_bar > 1.0, "the last bar of the take is silent");
+        assert!(
+            last_tick > 0.01,
+            "the take stops before the last tick of the last bar"
+        );
+        // Nothing after the end of the song.
+        for (i, s) in ended[at..].iter().enumerate() {
+            assert_eq!(*s, 0.0, "the band played on {i} frames past the end");
+        }
+    }
+
+    /// A MUSICIAN WHO MOVES THE FORM IS NOT FINISHED.
+    ///
+    /// The rule that keeps a song from stopping under somebody's hand: a
+    /// jump or a loop asked for during the last bar cancels its ending. A
+    /// command that names neither is asking for neither — clearing a loop is
+    /// not a request for another chorus — which is also what keeps the
+    /// housekeeping a new table does out of it, since that only ever takes a
+    /// jump or a loop away.
+    #[test]
+    fn a_jump_or_a_loop_cancels_an_ending_and_clearing_one_does_not() {
+        assert!(position_cancels_an_ending(at(8)), "a jump");
+        assert!(position_cancels_an_ending(looping(4, 7)), "a loop");
+        assert!(
+            position_cancels_an_ending(JamPosition {
+                jump: Some(2),
+                loop_bars: Some((0, 3)),
+            }),
+            "both at once"
+        );
+        assert!(
+            !position_cancels_an_ending(JamPosition::default()),
+            "`{{ jumpTo: null, loop: null }}` clears a loop and asks for nothing"
+        );
+    }
+
+    /// A ONE-BAR TUNE ENDS AFTER ITS ONE BAR.
+    ///
+    /// The smallest case, and the one that catches an ending fired where it
+    /// is armed rather than a tick later: with a single bar there is no
+    /// earlier bar for the mistake to hide in, and the stop lands either on
+    /// the downbeat or a sixteenth before it.
+    #[test]
+    fn a_form_that_ends_does_not_come_round_again() {
+        let sr = 48_000u32;
+        let bank = SoundBank::new(sr);
+        let mut cfg = rock_16ths();
+        cfg.form_bars = 1;
+        cfg.ends_form = Some(true);
+        let table = compile_jam(&cfg).unwrap();
+        let tick_samples = (sr as u64) * 60 / 120 / 4;
+        let bar_frames = tick_samples as usize * table.ticks_per_bar() as usize;
+        let buffers = (bar_frames * 3).div_ceil(256);
+        let (_, at) = take_of_a_band(&[&table], &bank, sr, tick_samples, 256, buffers);
+        assert_eq!(at, Some(bar_frames));
     }
 
     /// A LOCK THAT PANICKED MUST NOT LOOK LIKE A TABLE THAT ARRIVED.
