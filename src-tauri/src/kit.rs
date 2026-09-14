@@ -1348,13 +1348,18 @@ fn build_bank(
             // measured, which is what its own files carry.
             source_peak[v as usize]
         };
-        // The peak AFTER the resampler, because that is the buffer the audio
-        // thread will read and the ringing is what has to come back out.
-        let after = buffers
-            .iter()
-            .flat_map(|b| b.iter())
-            .fold(0.0f32, |m, s| m.max(s.abs()));
-        let level = if after > 0.0 { target / after } else { 1.0 };
+        // On the peak the SOURCE carried, never the peak after the resampler.
+        // A windowed sinc rings around a hard transient: the Club kit's
+        // closed hat, 0.900 in its file, came out of the 48 → 96 kHz walk
+        // peaking at 1.28 — one sample of overshoot on the attack, which is
+        // the reconstruction of what sits between the file's samples and is
+        // what a DAC renders anyway. Dividing by THAT peak pulled the whole
+        // voice down 3 dB on every device that was not 48 kHz, and a kit
+        // that is 3 dB quieter on one device than another is the thing this
+        // block exists to prevent. Energy is what "the same kit" means, the
+        // resampler preserves it to a tenth of a dB, and the overshoot is
+        // the bus's and the mixer's to hold.
+        let level = target / source_peak[v as usize];
         // And the balance the render tool measured, on top. `trim_db` is the
         // kit's own business; the LANE trims (a ride sits under a hat) live
         // in `jam.rs`, because they are true of every kit.

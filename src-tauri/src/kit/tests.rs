@@ -156,10 +156,11 @@ fn every_kit_the_app_ships_decodes_from_its_own_folder() {
         ] {
             assert!(bank.has(v), "{id} has no {}", v.file_name());
         }
-        // And the snare is a PAIR, which is what `snare_lo` and `snare_hi`
-        // became: two layers of one drum rather than two drums.
+        // And the snare has LAYERS: the pair `snare_lo` and `snare_hi`
+        // became for the synthesised kits, or the four a recorded kit
+        // carries — two layers of one drum rather than two drums, either way.
         let snare = bank.voice(KitVoice::Snare).expect("a snare");
-        assert_eq!(snare.layers(), 2, "{id}'s snare lost a layer in the move");
+        assert!(snare.layers() >= 2, "{id}'s snare lost a layer in the move");
         assert_ne!(
             bank.sample(KitVoice::Snare as u8, 0, 0),
             bank.sample(KitVoice::Snare as u8, 1, 0),
@@ -171,26 +172,50 @@ fn every_kit_the_app_ships_decodes_from_its_own_folder() {
 /// A KIT IS NOT LOUDER ON ONE DEVICE THAN ANOTHER.
 ///
 /// The resampler is not level-preserving on a bright transient — a windowed
-/// sinc rings around one, and a kit is nothing but bright transients. Before
-/// the clamp in `build_bank`, `tight`'s closed hat peaked at 0.900 in its
-/// own 44.1 kHz file and 1.12 resampled to 48 kHz, which is the same kit
-/// 2 dB louder for no reason the musician can hear or control.
+/// sinc rings around one, and a kit is nothing but bright transients:
+/// `tight`'s closed hat peaks at 0.900 in its own 44.1 kHz file and 1.12
+/// resampled to 48 kHz; the Club hat, 0.900 at 48 kHz, reaches 1.28 at 96.
+/// The loader once divided every voice by that post-resample peak, and
+/// that made the Club kit 3 dB quieter on a 96 kHz device than on a 48 kHz
+/// one — the same kit at a different level for no reason the musician can
+/// hear or control. So the level is decided on the SOURCE peak, the
+/// overshoot is left as the reconstruction it is, and what this test holds
+/// is what "the same" means: ENERGY, within a decibel of the file's own
+/// rate, and a peak that is ringing rather than a level.
 #[test]
 fn a_shipped_kit_is_the_same_height_at_every_rate() {
-    let room = shipped_index("room").expect("the room kit");
-    for rate in [44_100, 48_000, 88_200, 96_000] {
-        let bank = load_shipped(room, rate).expect("the room kit loads");
-        for v in KitVoice::ALL {
-            let Some(voice) = bank.voice(v) else { continue };
-            for l in 0..voice.layers() {
-                for r in 0..voice.rr() {
-                    let p = peak(bank.sample(v as u8, l, r));
-                    assert!(
-                        p <= VOICE_PEAK + 1e-4,
-                        "{} layer {l} at {rate} Hz peaks at {p}, over the {VOICE_PEAK} \
-                         ceiling every kit is held to",
-                        v.file_name()
-                    );
+    let energy =
+        |s: &[f32], rate: u32| s.iter().map(|x| (x * x) as f64).sum::<f64>() / rate as f64;
+    // A synthesised kit at its 44.1 kHz and a recorded one at its 48: the
+    // bank built AT the files' own rate is the one nothing was resampled
+    // for, and the one the others are held to.
+    for (id, native_rate) in [("room", 44_100u32), ("club", 48_000u32)] {
+        let index = shipped_index(id).expect(id);
+        let native = load_shipped(index, native_rate).expect("loads at its own rate");
+        for rate in [44_100, 48_000, 88_200, 96_000] {
+            let bank = load_shipped(index, rate).expect("the kit loads");
+            for v in KitVoice::ALL {
+                let Some(voice) = bank.voice(v) else { continue };
+                for l in 0..voice.layers() {
+                    for r in 0..voice.rr() {
+                        let here = bank.sample(v as u8, l, r);
+                        let there = native.sample(v as u8, l, r);
+                        let p = peak(here);
+                        assert!(
+                            p <= 1.5,
+                            "{id} {} layer {l} at {rate} Hz peaks at {p}, which is a level, \
+                             not ringing",
+                            v.file_name()
+                        );
+                        let apart =
+                            10.0 * (energy(here, rate) / energy(there, native_rate)).log10();
+                        assert!(
+                            apart.abs() < 1.0,
+                            "{id} {} layer {l} carries {apart:+.2} dB at {rate} Hz against \
+                             {native_rate}",
+                            v.file_name()
+                        );
+                    }
                 }
             }
         }

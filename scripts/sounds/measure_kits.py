@@ -321,7 +321,14 @@ def measure_kit(kit, problems):
                     problems.append(
                         "%s/%s: ends at %.1f dBFS — truncated mid-decay, so the step is a click"
                         % (kit, name, m["tail_db"]))
-                if m["head_db"] > -60.0:
+                # A recorded file starts on zero because the render tool
+                # puts 2 ms of silence and a 1 ms fade in front of the
+                # transient. The synthesised files start ON their transient
+                # by construction (generate_sounds.py has always written
+                # them that way, and the engine has always played them), so
+                # the rule is the render tool's, not theirs.
+                synthesised = str(man.get("credit", "")).startswith("Synthesised")
+                if m["head_db"] > -60.0 and not synthesised:
                     problems.append("%s/%s: starts at %.1f dBFS, not on zero"
                                     % (kit, name, m["head_db"]))
                 # 2e-4 rather than a round 1e-3: the loosest synthesised voice

@@ -7916,9 +7916,11 @@ mod tests {
             buf.iter().map(|s| (s * s) as f64).sum::<f64>() / sr as f64
         }
         /// How far apart the same drum's ENERGY may measure across rates.
-        /// See above: this is the ripple the peak division took off, not a
-        /// resampler error. The worst is printed.
-        const ALLOWED: f64 = 3.0;
+        /// The resampler keeps white noise within a tenth of a dB, so a
+        /// whole decibel is generous; it was 3.0 while the loader divided
+        /// by the post-resample peak, and that rule cost the Club hat
+        /// exactly 3 dB at 96 kHz. The worst is printed.
+        const ALLOWED: f64 = 1.0;
         /// ...but only at rates a hi-hat FITS IN.
         ///
         /// At 22.05 kHz the Nyquist is 11 kHz and `brushes`' closed hat
@@ -7954,16 +7956,20 @@ mod tests {
                     };
                     let (va, vb) = (voice_peak(&here), voice_peak(&reference));
                     assert!(vb > 0.0, "{id} {} is silent", v.file_name());
+                    // The PEAK is allowed to differ: a windowed sinc rings
+                    // around a hard transient, and the overshoot it puts
+                    // between two of the file's samples is the waveform a
+                    // DAC would have drawn there anyway (the Club hat
+                    // reaches 1.28 at 96 kHz, the ride 1.07 at 44.1). A
+                    // bank sample over full scale is data, not output: the
+                    // lane gains sit well under 1.0 and the band goes
+                    // through the bus, whose own test holds the ceiling.
+                    // What may not happen is ringing out of all proportion
+                    // — and the energy below is what has to match.
                     assert!(
-                        (va - vb).abs() < 1e-3,
-                        "{id} {} peaks at {va:.4} at {sr} Hz against {vb:.4} at \
-                         {JAM_REFERENCE_SR}",
-                        v.file_name()
-                    );
-                    assert!(
-                        va <= crate::kit::VOICE_PEAK + 1e-3,
-                        "{id} {} peaks at {va:.4}, over the ceiling the files \
-                         themselves carry",
+                        va <= 1.5,
+                        "{id} {} peaks at {va:.4} at {sr} Hz, which is not ringing, \
+                         it is a level",
                         v.file_name()
                     );
                     for l in 0..bank.layers() {

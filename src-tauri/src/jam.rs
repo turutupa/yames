@@ -3086,7 +3086,7 @@ mod tests {
             "formBars": 12,
             "crashOnOne": true,
             "intensity": 1.6,
-            "kit": "studio",
+            "kit": "attic",
             "snareGhostIsRim": true
         }"#;
         let cfg: JamConfig = serde_json::from_str(json).expect("the UI's own spelling");
@@ -3096,10 +3096,11 @@ mod tests {
         assert_eq!(cfg.snare_ghost_is_rim, Some(true));
         assert_eq!(cfg.intensity, 1.6);
 
-        // AND A KIT THIS BUILD HAS NEVER HEARD OF STILL PLAYS. "studio" is a
-        // folder that arrives with the recorded kits; a jam that named it
-        // and would not load is a worse failure than one that loads on the
-        // drums the app already has.
+        // AND A KIT THIS BUILD HAS NEVER HEARD OF STILL PLAYS. "attic" is a
+        // kit a later build might ship (this test once said "studio", and
+        // then the recorded kits arrived and it was real); a jam that named
+        // it and would not load is a worse failure than one that loads on
+        // the drums the app already has.
         let t = compile(&cfg).expect("a jam naming a kit this build lacks must still play");
         assert_eq!(t.kit.name(), "room", "an unknown kit is the fallback");
         assert!(is(slot_of(&t, 4, JamLane::TomHi).unwrap().sound, KitVoice::Snare));
@@ -3798,9 +3799,14 @@ mod tests {
     #[test]
     fn the_bass_counts_towards_the_worst_tick() {
         let mut cfg = with_bass(vec![40; 16]);
-        cfg.bar.kick = vec![2; 16];
-        cfg.bar.snare = vec![2; 16];
-        cfg.bar.crash = vec![2; 16];
+        // Ghosted drums, so the bass is the loudest thing on every tick and
+        // the comparison does not hang on whether its root lands on the
+        // same sample as a kick's ringing peak. (It did, once: with the
+        // drums at accent, the bass's low note met the kick's overshoot
+        // out of phase and the "with" peak came out a hair UNDER.)
+        cfg.bar.kick = vec![3; 16];
+        cfg.bar.snare = vec![3; 16];
+        cfg.bar.crash = vec![3; 16];
         cfg.intensity = 1.6;
         let with = compile(&cfg).unwrap();
         cfg.bass = None;
