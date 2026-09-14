@@ -7400,6 +7400,97 @@ mod tests {
         }
     }
 
+    /// A FILL OF TOMS AT THE TOP LEVEL REACHES THE MIXER.
+    ///
+    /// Two new lanes and a new level, walked the whole way: `jam_play` picks
+    /// the tick out of the table the fill bar names, the callback's own
+    /// spawn turns each slot into a ringing voice, and the mixer renders it.
+    /// Every step between the groove and the speaker is a place a lane the
+    /// engine did not know about would go quietly missing.
+    #[test]
+    fn a_fill_of_toms_at_the_top_level_is_heard_through_jam_play() {
+        let sr = 48_000u32;
+        let bank = SoundBank::new(sr);
+        let mut cfg = rock_16ths();
+        cfg.form_bars = 2;
+        // A fill that is nothing but toms, ramping to the peak — which is
+        // what `plans/JAM_SOUND.md` §2.9 asks a fill to be.
+        cfg.fill = Some(crate::jam::JamPattern {
+            kick: vec![0; 16],
+            snare: vec![0; 16],
+            hat: vec![0; 16],
+            ride: vec![0; 16],
+            crash: vec![0; 16],
+            tom_hi: vec![1, 0, 2, 0, 3, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            tom_lo: vec![0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 0, 3, 0, 4, 0],
+            ..Default::default()
+        });
+        // A kit with real toms, so the lanes are not resolving through the
+        // fallback chain — that is a different test.
+        let kit = std::sync::Arc::new(crate::kit::KitBank::layered_for_tests(
+            &[
+                KitVoice::Kick,
+                KitVoice::Snare,
+                KitVoice::Hat,
+                KitVoice::TomHi,
+                KitVoice::TomLo,
+                KitVoice::Crash,
+            ],
+            sr,
+            0.08,
+            4,
+            1,
+        ));
+        let table = crate::jam::compile_with_kit(&cfg, kit).unwrap();
+
+        // `jam_play` hands back the FILL's tick on bar 1 of a two-bar form,
+        // and the groove's on bar 0 — which is the only way a tom lane
+        // written into a fill ever reaches the callback.
+        let tick_of = |bar: u32, tick: u32| match jam_play(Some(&table), false, false, 4, 4, tick / 4, tick % 4, bar) {
+            JamPlay::Band(t) => t,
+            other => panic!("bar {bar} tick {tick} came back as {other:?}"),
+        };
+        let toms = |bar: u32, tick: u32| {
+            tick_of(bar, tick)
+                .slots()
+                .iter()
+                .filter(|s| matches!(s.lane, JamLane::TomHi | JamLane::TomLo))
+                .count()
+        };
+        assert_eq!(toms(0, 6), 0, "the groove has no toms");
+        assert_eq!(toms(1, 6), 1, "the fill's high tom did not reach jam_play");
+        assert_eq!(toms(1, 14), 1, "nor its floor tom");
+
+        // The ramp is four different strokes, not one at four volumes: the
+        // LAYER climbs with the level, which is the whole point of the fifth
+        // one.
+        let layers: Vec<u8> = [0u32, 2, 4, 6]
+            .iter()
+            .map(|t| {
+                let slot = tick_of(1, *t).slots()[0];
+                match slot.sound {
+                    SoundId::Band { layer, .. } => layer,
+                    other => panic!("a tom came out as {other:?}"),
+                }
+            })
+            .collect();
+        assert_eq!(layers, vec![1, 2, 0, 3], "the ramp is {layers:?}");
+
+        // And it renders. Both halves of the fill bar make a sound, and the
+        // groove bar does not put toms into them.
+        let tick_samples = 3000;
+        let r = render_jam(&table, &bank, 2, tick_samples, 1.0);
+        let energy = |t: usize| -> f64 {
+            r.samples[t * tick_samples..(t + 1) * tick_samples]
+                .iter()
+                .map(|s| (s * s) as f64)
+                .sum()
+        };
+        // Bar 1 starts at tick 16.
+        assert!(energy(16 + 6) > 1.0, "the high tom rendered nothing");
+        assert!(energy(16 + 14) > 1.0, "the floor tom rendered nothing");
+    }
+
     // -----------------------------------------------------------------
     // The drum bus
     // -----------------------------------------------------------------
