@@ -145,6 +145,25 @@ export function jamArrangement(jam: Pick<Jam, "arrangement">): ResolvedArrangeme
   };
 }
 
+/*
+ * A note on `intro`, so nobody goes looking for the half of it that is not
+ * here.
+ *
+ * The brief asks for a pickup fill on the count-in's LAST BAR. That bar is not
+ * the arrangement's to write: `bandMoment` is asked about a bar of the form,
+ * the count-in happens before bar one exists, and the engine plays it from its
+ * own counter and its own sound (`countInSound`) rather than from the table.
+ * There is no field on `JamEngineConfig` that reaches it, and the contract for
+ * this pass is fixed.
+ *
+ * So what `intro` decides here is the other half of the same gesture, and the
+ * half a player actually hears as the band arriving: the CRASH on bar one of
+ * chorus one. "Fill" means the band comes in on it — the answer to a pickup,
+ * whether or not anything counted them in — and "none" means they just start.
+ * Every chorus after the first is marked either way, because coming round to
+ * the top of the form is a different event from starting.
+ */
+
 // ---------------------------------------------------------------------------
 // The style: which music is this, and what does that music do
 // ---------------------------------------------------------------------------
