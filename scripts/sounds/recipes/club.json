@@ -1,0 +1,141 @@
+{
+  "id": "club",
+  "name": "Club",
+  "credit": "Virtuosity Drums — Versilian Studios and Karoryfer Samples, performed by Austin McMahon",
+  "licence": "CC0-1.0",
+
+  "_what": [
+    "Austin McMahon's kit at Virtuosity in Boston, recorded the way a live",
+    "club date is recorded. Six mic positions; this recipe uses four of them.",
+    "`lofi` is the vintage mic and is a colour, not a kit — left out. `perc`",
+    "is the VSCO percussion and is not a drum kit voice.",
+    "",
+    "swap_stereo is on because the overheads are imaged from in front of the",
+    "kit: measured on the source, the hat sits 3.3 dB right and the ride",
+    "3.9 dB left. The brief wants the drummer's seat, and one honest channel",
+    "swap on the stereo mics turns the whole kit round at once — hat left,",
+    "ride right, high tom left of low tom — without inventing a pan that the",
+    "room never had. The mono close mics stay centred, which is where a kick",
+    "and a snare belong either way.",
+    "",
+    "No `pan` is written into kit.json for this kit: the stereo image is in",
+    "the files, because it is the real one the overheads captured. The",
+    "manifest's pan field is for kits whose voices arrive mono."
+  ],
+
+  "source": {
+    "format": "sfz",
+    "root": "${YAMES_SAMPLES}/virtuosity_drums",
+    "programs": "Programs"
+  },
+
+  "rate": 48000,
+  "swap_stereo": true,
+  "layer_step_db": 4.5,
+  "balance_window_s": 0.4,
+  "min_kick_over_hat_db": 2.5,
+  "dc_block_hz": 22.0,
+  "fade_in_ms": 1.0,
+  "fade_out_ms": 30.0,
+  "floor_db": -60.0,
+  "seed": 1743,
+
+  "_spacing": [
+    "4.5 dB is the default step between layers and it is what the cymbals",
+    "get, because the library gives them three or four dynamics and that is",
+    "the whole range there is. The snare, the toms and the cross-stick are",
+    "sampled 16 to 36 dynamics deep over 30-odd dB, and 4.5 dB steps spend",
+    "all four layers inside the top third of that — four flavours of a",
+    "backbeat and no ghost note. They get 8 dB, which puts layer 1 on a",
+    "genuinely soft stroke."
+  ],
+
+  "_balance": [
+    "dB relative to the snare's accent layer, as K-weighted loudness over the",
+    "first 400 ms — how loud each drum seems when it is struck. These are the",
+    "numbers to argue with when the owner says 'less hat'; the render tool",
+    "measures what it got and writes the difference into trim_db, so the",
+    "files never change when the balance does."
+  ],
+  "balance": {
+    "kick": -1.0,
+    "snare": 0.0,
+    "rim": -8.0,
+    "hat": -9.0,
+    "hat_open": -6.0,
+    "hat_pedal": -14.0,
+    "ride": -7.0,
+    "ride_bell": -5.0,
+    "crash": -4.0,
+    "tom_hi": -2.0,
+    "tom_lo": -2.0
+  },
+
+  "_mix": [
+    "close 1.0, overheads 0.7, room 0.35 is the brief's live-recording",
+    "default and it is what the drums use. The cymbals and toms have no close",
+    "mic in this library, so the overheads become the close mic at 1.0 and",
+    "`mid` — the mid-distance pair — supplies the proximity the overheads",
+    "lack. Every mic is time-aligned onto the heaviest-weighted one before",
+    "it is summed; the room arrives 6-10 ms late on this kit."
+  ],
+
+  "voices": {
+    "kick": {
+      "articulation": "kick_snon",
+      "mix": { "kickmic": 1.0, "oh": 0.7, "room": 0.35 },
+      "layers": 4, "rr": 3, "cap_s": 0.8
+    },
+    "snare": {
+      "articulation": "snare_center",
+      "mix": { "snaremic": 1.0, "oh": 0.7, "room": 0.35 },
+      "layers": 4, "rr": 3, "cap_s": 1.0, "layer_step_db": 8.0
+    },
+    "rim": {
+      "articulation": "snare_crossstick",
+      "mix": { "snaremic": 1.0, "oh": 0.6, "room": 0.3 },
+      "layers": 2, "rr": 2, "cap_s": 0.5, "layer_step_db": 8.0
+    },
+    "hat": {
+      "articulation": "hh_closed",
+      "mix": { "oh": 1.0, "mid": 0.4, "room": 0.25 },
+      "layers": 4, "rr": 3, "cap_s": 0.4
+    },
+    "hat_open": {
+      "articulation": "hh_open",
+      "mix": { "oh": 1.0, "mid": 0.4, "room": 0.3 },
+      "layers": 3, "rr": 2, "cap_s": 1.5,
+      "choked_by": ["hat", "hat_pedal"]
+    },
+    "hat_pedal": {
+      "articulation": "hh_pedal",
+      "mix": { "oh": 1.0, "mid": 0.4, "room": 0.25 },
+      "layers": 2, "rr": 2, "cap_s": 0.4
+    },
+    "ride": {
+      "articulation": "ride_ride",
+      "mix": { "oh": 1.0, "mid": 0.45, "room": 0.3 },
+      "layers": 4, "rr": 3, "cap_s": 2.5
+    },
+    "ride_bell": {
+      "articulation": "ride_bell",
+      "mix": { "oh": 1.0, "mid": 0.45, "room": 0.3 },
+      "layers": 2, "rr": 2, "cap_s": 2.0
+    },
+    "crash": {
+      "articulation": "crash_crash",
+      "mix": { "oh": 1.0, "mid": 0.45, "room": 0.35 },
+      "layers": 3, "rr": 2, "cap_s": 3.0
+    },
+    "tom_hi": {
+      "articulation": "htom_center",
+      "mix": { "oh": 1.0, "mid": 0.6, "room": 0.35 },
+      "layers": 3, "rr": 2, "cap_s": 1.5, "layer_step_db": 8.0
+    },
+    "tom_lo": {
+      "articulation": "ltom_center",
+      "mix": { "oh": 1.0, "mid": 0.6, "room": 0.35 },
+      "layers": 3, "rr": 2, "cap_s": 1.5, "layer_step_db": 8.0
+    }
+  }
+}

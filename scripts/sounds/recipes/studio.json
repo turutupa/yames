@@ -1,0 +1,129 @@
+{
+  "id": "studio",
+  "name": "Studio",
+  "credit": "DRSKit by the DrumGizmo project, CC BY 4.0",
+  "licence": "CC-BY-4.0",
+
+  "_what": [
+    "DRSKit 2.1, thirteen mic channels, 'from jazz to rock'. Every stroke of",
+    "an instrument is one 13-channel WAV at 44.1 kHz; the tool resamples to",
+    "the contract's 48 kHz.",
+    "",
+    "No swap_stereo here, unlike Club: measured on the source, DRSKit's",
+    "overheads are already in the drummer's seat — the hat and the left crash",
+    "sit left, the ride and the right crash sit right, and the toms run",
+    "high-left to low-right. The close mics are mono, so this is the kit",
+    "where the recipe's `pan` does real work: it places each of them inside",
+    "the image the overheads already have.",
+    "",
+    "DrumGizmo has no round robins. It has 11 to 30 strokes per instrument,",
+    "every one at a different power, so every round robin here is a",
+    "neighbouring dynamic — a different performance of nearly the same",
+    "stroke, which is what a round robin is."
+  ],
+
+  "source": {
+    "format": "drumgizmo",
+    "root": "${YAMES_SAMPLES}/drskit",
+    "kit_file": "DRSKit_full.xml",
+    "pairs": {
+      "oh": ["OHL", "OHR"],
+      "amb": ["AmbL", "AmbR"]
+    }
+  },
+
+  "rate": 48000,
+  "swap_stereo": false,
+  "layer_step_db": 8.0,
+  "balance_window_s": 0.4,
+  "min_kick_over_hat_db": 2.5,
+  "dc_block_hz": 22.0,
+  "fade_in_ms": 1.0,
+  "fade_out_ms": 30.0,
+  "floor_db": -60.0,
+  "seed": 2131,
+
+  "_polarity": [
+    "The snare's bottom mic points up at the wires while the top mic points",
+    "down at the head, so the two are wired in opposition and summing them as",
+    "they arrive cancels most of the drum. Measured on DRSKit's hardest",
+    "snare stroke the correlation between them is -0.47, and the tool inverts",
+    "the bottom mic and says so. It is an opt-in list rather than a blanket",
+    "rule because between an overhead and a close cymbal mic a negative",
+    "correlation is a path-length difference, not a wiring one."
+  ],
+  "flip_if_opposed": ["Snare_bottom"],
+
+  "balance": {
+    "kick": -1.0,
+    "snare": 0.0,
+    "rim": -8.0,
+    "hat": -9.0,
+    "hat_open": -6.0,
+    "hat_pedal": -14.0,
+    "ride": -7.0,
+    "ride_bell": -5.0,
+    "crash": -4.0,
+    "tom_hi": -2.0,
+    "tom_lo": -2.0
+  },
+
+  "voices": {
+    "kick": {
+      "articulation": "Kdrum_with_contact",
+      "mix": { "Kdrum_back": 1.0, "Kdrum_front": 0.7, "oh": 0.8, "amb": 0.4 },
+      "layers": 4, "rr": 3, "cap_s": 0.8, "pan": 0.0
+    },
+    "snare": {
+      "articulation": "Snare",
+      "mix": { "Snare_top": 1.0, "Snare_bottom": 0.5, "oh": 0.8, "amb": 0.4 },
+      "layers": 4, "rr": 3, "cap_s": 1.0, "pan": 0.0
+    },
+    "rim": {
+      "articulation": "Snare_rim",
+      "mix": { "Snare_top": 1.0, "Snare_bottom": 0.4, "oh": 0.8, "amb": 0.4 },
+      "layers": 2, "rr": 2, "cap_s": 0.5, "pan": 0.0
+    },
+    "hat": {
+      "articulation": "Hihat_closed",
+      "mix": { "Hihat": 1.0, "oh": 0.8, "amb": 0.4 },
+      "layers": 4, "rr": 3, "cap_s": 0.4, "pan": -0.25
+    },
+    "hat_open": {
+      "articulation": "Hihat_open",
+      "mix": { "Hihat": 1.0, "oh": 0.8, "amb": 0.4 },
+      "layers": 3, "rr": 2, "cap_s": 1.5, "pan": -0.25,
+      "choked_by": ["hat", "hat_pedal"]
+    },
+    "hat_pedal": {
+      "articulation": "Hihat_foot",
+      "mix": { "Hihat": 1.0, "oh": 0.8, "amb": 0.4 },
+      "layers": 2, "rr": 2, "cap_s": 0.4, "pan": -0.25
+    },
+    "ride": {
+      "articulation": "Ride_tip",
+      "mix": { "Ride": 1.0, "oh": 0.8, "amb": 0.4 },
+      "layers": 4, "rr": 3, "cap_s": 2.5, "pan": 0.25
+    },
+    "ride_bell": {
+      "articulation": "Ride_tip_bell",
+      "mix": { "Ride": 1.0, "oh": 0.8, "amb": 0.4 },
+      "layers": 2, "rr": 2, "cap_s": 2.0, "pan": 0.25
+    },
+    "crash": {
+      "articulation": "Crash_left_tip",
+      "mix": { "oh": 1.0, "amb": 0.4 },
+      "layers": 3, "rr": 2, "cap_s": 3.0, "pan": -0.3
+    },
+    "tom_hi": {
+      "articulation": "Tom1",
+      "mix": { "Tom1": 1.0, "oh": 0.8, "amb": 0.4 },
+      "layers": 3, "rr": 2, "cap_s": 1.5, "pan": -0.3
+    },
+    "tom_lo": {
+      "articulation": "Tom3",
+      "mix": { "Tom3": 1.0, "oh": 0.8, "amb": 0.4 },
+      "layers": 3, "rr": 2, "cap_s": 1.5, "pan": 0.3
+    }
+  }
+}
