@@ -1,22 +1,30 @@
 # The jam kits
 
-Five drum kits for Jam mode, eight voices each, all synthesised. Written by
-the `--kits` section of `generate_sounds.py`; every number below is measured
-by `scripts/sounds/measure_kits.py` and can be regenerated rather than
-trusted:
+Seven drum kits for Jam mode. Five are synthesised, eight voices each, written
+by the `--kits` section of `generate_sounds.py`. Two are **recorded** — Club
+and Studio — with eleven voices, up to four velocity layers and three round
+robins each, rendered from public-domain and CC-BY sample libraries by
+`scripts/sounds/render_kit.py`. Every number below is measured by
+`scripts/sounds/measure_kits.py` and can be regenerated rather than trusted:
 
 ```sh
-python generate_sounds.py --kits         # write the 40 files
-python scripts/sounds/measure_kits.py    # check them, print this table
+python generate_sounds.py --kits                     # the 40 synthesised files
+python scripts/sounds/render_kit.py \
+    scripts/sounds/recipes/club.json \
+    src-tauri/sounds/kits/club                       # a recorded kit
+python scripts/sounds/measure_kits.py                # check them, print the tables
 ```
 
-Both are deterministic — seeded noise and arithmetic, no input files — so a
-rebuild produces the same bytes. Verified across two runs: all 40 files
-byte-identical.
+The synthesised ones are deterministic — seeded noise and arithmetic, no input
+files — so a rebuild produces the same bytes. Verified across two runs: all 40
+files byte-identical. The recorded ones are deterministic given the same
+library and recipe, apart from the dither, which is seeded from the recipe.
 
-**To hear them rather than read them:** `scripts/sounds/ab.html` plays the
-same two bars of rock on each kit, with one set of per-voice levels applied to
-all five, and swaps kits at a bar line so the comparison is like for like. It
+**To hear them rather than read them:** `scripts/sounds/ab.html` plays the same
+two bars of rock on every kit it can find and swaps kits at a bar line, so the
+comparison is like for like. It plays each kit the way the engine will — the
+level picks the layer, the round robin cycles, `trim_db` carries the balance —
+so what you hear is the difference between kits and not between mixes. It
 needs a local server, because a browser will not read WAVs off `file://`:
 
 ```sh
@@ -31,14 +39,21 @@ python -m http.server 8123      # from the repository root
 
 ## For the engine
 
-Mono, 16-bit, 44.1 kHz, peak 0.900 in every file. Voice names are stable;
-`include_bytes!` them as `kit_<kit>_<voice>.wav`.
+A kit is a folder: `sounds/kits/<id>/kit.json` and beside it
+`<voice>.<layer>.<rr>.wav`. The recorded kits are 16-bit, 48 kHz, **stereo**;
+the five synthesised ones are 16-bit, 44.1 kHz, mono, and the loader resamples
+and duplicates. Peak is 0.900 in every file of every kit.
 
 **Peak is uniform on purpose.** The files carry timbre and duration and the
-engine carries balance. `snare_lo` is *not* pre-attenuated — it is the same
-drum struck softly, at the same ceiling, and the per-voice gain makes it a
-backbeat or a ghost note. Anything that wants a hit to be quieter should
-turn it down rather than asking for a quieter file.
+engine carries balance. A soft layer is *not* pre-attenuated — it is the same
+drum struck softly, at the same ceiling, and the engine's level gain makes it
+a backbeat or a ghost note. Anything that wants a hit to be quieter should
+turn it down rather than asking for a quieter file. Between *voices*, the
+balance is `trim_db` in the manifest; between *layers* of one voice, it is
+`LEVEL_GAIN`.
+
+The table below is the five synthesised kits in their flat pre-folder form.
+The recorded kits have their own table further down.
 
 | kit | voice | file | peak | duration | size |
 |---|---|---|---|---|---|
@@ -88,6 +103,10 @@ file ends at true zero (−180 dBFS) and the largest DC offset in the set is
 7.9e−05 (`kit_raw_rim.wav`), against a 2e−04 limit.
 
 ## The small-speaker margins
+
+This section is about the five synthesised kits; what the same measurement
+means for a kit with velocity layers is under **The recorded kits** below, and
+the difference matters.
 
 Measured through the 200 Hz–4 kHz band-pass a laptop speaker roughly
 radiates — `laptop_band_energy` in `src-tauri/src/engine.rs`, ported
@@ -154,7 +173,252 @@ transient shows up: Raw's snare is 14.4 dB, Brushes' is 12.4 dB and Room's is
 17.0 dB. Raw sits between them on purpose — compressed enough to be loud, not
 so compressed that the stick disappears.
 
-## The kits
+## The recorded kits
+
+Two of the seven are not synthesised. They are rendered from sample libraries
+whose licences allow redistribution, by `scripts/sounds/render_kit.py` and a
+recipe, and **nothing from the libraries is in this repository** — only the
+rendered kit. To re-render either one you need the library on disk and one
+environment variable:
+
+```sh
+set YAMES_SAMPLES=C:\path\to\_samples          # the folder that holds them
+python scripts/sounds/render_kit.py scripts/sounds/recipes/club.json \
+       src-tauri/sounds/kits/club
+```
+
+| kit | library | licence | get it from |
+|---|---|---|---|
+| club | Virtuosity Drums | CC0-1.0 | `github.com/sfzinstruments/virtuosity_drums` (~1.2 GB, git clone) |
+| studio | DRSKit 2.1 | CC BY 4.0 | `drumgizmo.org/wiki/doku.php?id=kits` (2.8 GB zip, unpacks to 4.0 GB) |
+
+### The credit lines, as they must appear
+
+CC0 requires nothing and CC BY requires attribution, so one of these is a
+courtesy and one is a condition — but both are in the manifests and both
+belong on the About screen, because a musician who likes a kit should be able
+to find out whose drums they are.
+
+```
+Virtuosity Drums — Versilian Studios and Karoryfer Samples, performed by Austin McMahon
+DRSKit by the DrumGizmo project, CC BY 4.0
+```
+
+### What the render tool decided, and why
+
+Four things in `render_kit.py` are not bulk conversion. Each is there because
+a measurement came back with an answer nobody expected, and each is written up
+in the module's own docstring; the short version:
+
+1. **Layers are chosen by loudness, not by velocity index.** Virtuosity's snare
+   walks 34 dB across 36 velocity steps but spends eleven of them inside 3 dB.
+   Cut that into four equal *index* bands and two of the four layers are the
+   same sound.
+2. **Round robins come from the source where it has them, and from
+   neighbouring velocities where it does not.** Virtuosity is split down the
+   middle: its cymbals have three or four real round robins per velocity and
+   its drums have none — but its drums have 16 to 36 velocities. DRSKit has no
+   round robins at all and 11 to 30 strokes per instrument. A stroke one notch
+   softer is a different performance, which is what a round robin is for. No
+   file is used twice inside a voice.
+3. **The mics are time-aligned before they are summed.** Virtuosity's room mic
+   arrives 6 to 10 ms after the close mic. Summed as they come that is a comb
+   filter on every transient: a kick with a hole in it rather than a kick in a
+   room. The alignment runs on energy envelopes, not waveforms — correlating a
+   50 Hz kick against a room mic locks onto whichever cycle happens to match
+   and reports a lag one period out.
+4. **Peak is uniform; the balance is in the manifest.** Every file leaves at
+   0.900 like every other sound in the app, so a layer carries its timbre and
+   its duration and nothing else. `trim_db` per voice carries the balance.
+
+### The balance is K-weighted, and that is a departure
+
+The brief for this work said to set `trim_db` through the small-speaker
+band-pass that the rest of this document lives by. Doing that produces a kit
+that is wrong on every device, and the reason is the band-pass working exactly
+as designed: it cannot see a 55 Hz drum. Measured on Club, it puts the kick
+**10 dB under the snare** at the same peak, so a balance derived from it hands
+the kick a **+9 dB** trim — a kick that peaks at two and a half times full
+scale. It puts the hat 13 dB down for the mirror-image reason, a hi-hat living
+at 8–15 kHz and the low-pass sitting at 4 kHz.
+
+So the balance is set with **BS.1770 K-weighting over a fixed 400 ms window**,
+which is the standard answer to "how loud do these two different sounds seem",
+can see both ends of a kit, and on the same files puts the kick 6.6 dB *over*
+the snare — which is what a kick does. The window is fixed because energy
+summed over a whole file is partly a measure of how long the file is: a three
+second crash accumulates 2.4 dB more than its own first 400 ms.
+
+**The band-pass keeps the job it has always had.** It is the gate, in
+`measure_kits.py`, and both margins below are measured through it.
+
+### The pulse constraint
+
+A perceptual balance is right about what a kit sounds like on headphones and
+is not sufficient, because this app is a metronome first and the owner
+practises on a laptop. Balanced by ear, Club's jazz kick lands **5.1 dB under
+its own hi-hat** through the band-pass a laptop speaker radiates. So after the
+balance, the tool checks that margin and, if the kick does not clear the hat
+by 2.5 dB, closes the gap from both ends — half by letting the kick up, half
+by taking the hat down. It says so when it does, because it is a departure
+from what the recipe asked for:
+
+| kit | what the balance gave | correction | result |
+|---|---|---|---|
+| club | −5.13 dB | kick +3.8, hat −3.8 | **+2.52 dB** |
+| studio | +1.20 dB | kick +0.7, hat −0.7 | **+2.53 dB** |
+
+Club needs 7.6 dB of it and Studio 1.4 dB, and that difference is the single
+clearest number separating the two kits: DRSKit's kick has real midrange in
+it and Virtuosity's does not.
+
+### What the margins mean once a kit has layers
+
+`measure_kits.py` keeps every check it had — peak, clipping, DC, both ends on
+zero, duration — and both small-speaker margins. But for a layered kit the
+margins are measured **as the engine plays them**, with the contract's own
+fixed gains applied, and the raw file-to-file number is printed beside them.
+
+The reason is worth reading before changing it. Every file in a recorded kit
+is peak 0.900, and a real snare struck at 36 velocities and normalised to one
+peak carries almost exactly the same energy through a 200 Hz–4 kHz window:
+measured across the whole of Virtuosity's snare, softest stroke to hardest,
+the spread is **2.5 dB and it is not even monotonic**. The five synthesised
+kits clear the 2.0 dB floor by 3 to 6 dB because `snare_lo` was *built* with a
+third of the wire and a faster decay. That is a luxury a recording does not
+have. What separates a ghost from a backbeat in a recorded kit is
+`LEVEL_GAIN`, which is fixed by the contract and is as much a part of the kit
+as the files are.
+
+| kit | files | snare accent vs ghost | of which the files | kick vs hat (trimmed) | kit size |
+|---|---|---|---|---|---|
+| club | 81 | +6.79 dB | −0.15 dB | +2.52 dB | 18.44 MB |
+| studio | 84 | +4.44 dB | −2.49 dB | +2.53 dB | 18.49 MB |
+
+Studio's files do 2.5 dB of the work and Club's do none — Virtuosity's soft
+snare is, at equal peak, very slightly *brighter* in the band than its hard
+one, because a hard stroke drives the shell far more than it drives the stick.
+
+### The table
+
+| kit | voice | layers | rr | rr from | peak | longest | trim dB | size |
+|---|---|---|---|---|---|---|---|---|
+| club | `kick` | 4 | 3 | source | 0.900 | 800 ms | −4.5 | 1801 KB |
+| club | `snare` | 4 | 3 | neighbours | 0.900 | 1000 ms | +0.0 | 1637 KB |
+| club | `rim` | 2 | 2 | neighbours | 0.900 | 377 ms | −2.0 | 264 KB |
+| club | `hat` | 4 | 3 | source | 0.900 | 400 ms | −3.8 | 884 KB |
+| club | `hat_open` | 3 | 2 | source | 0.900 | 1500 ms | −3.0 | 1688 KB |
+| club | `hat_pedal` | 2 | 2 | source | 0.900 | 400 ms | −12.3 | 300 KB |
+| club | `ride` | 3 | 3 | source | 0.900 | 2500 ms | +0.0 | 4219 KB |
+| club | `ride_bell` | 2 | 2 | source | 0.900 | 2000 ms | −7.0 | 1500 KB |
+| club | `crash` | 3 | 2 | source | 0.900 | 3000 ms | −13.7 | 3375 KB |
+| club | `tom_hi` | 3 | 2 | neighbours | 0.900 | 1500 ms | −4.9 | 1526 KB |
+| club | `tom_lo` | 3 | 2 | neighbours | 0.900 | 1500 ms | −3.6 | 1688 KB |
+| studio | `kick` | 4 | 3 | neighbours | 0.900 | 800 ms | −3.6 | 1780 KB |
+| studio | `snare` | 4 | 3 | neighbours | 0.900 | 518 ms | +0.0 | 950 KB |
+| studio | `rim` | 2 | 2 | neighbours | 0.900 | 245 ms | −4.6 | 168 KB |
+| studio | `hat` | 4 | 3 | neighbours | 0.900 | 400 ms | −11.1 | 663 KB |
+| studio | `hat_open` | 3 | 2 | neighbours | 0.900 | 1500 ms | −13.4 | 1688 KB |
+| studio | `hat_pedal` | 2 | 2 | neighbours | 0.900 | 400 ms | −14.5 | 263 KB |
+| studio | `ride` | 4 | 3 | neighbours | 0.900 | 2500 ms | −10.1 | 5575 KB |
+| studio | `ride_bell` | 2 | 2 | neighbours | 0.900 | 2000 ms | −7.8 | 1500 KB |
+| studio | `crash` | 3 | 2 | neighbours | 0.900 | 3000 ms | −4.6 | 3375 KB |
+| studio | `tom_hi` | 3 | 2 | neighbours | 0.900 | 1500 ms | −0.1 | 1279 KB |
+| studio | `tom_lo` | 3 | 2 | neighbours | 0.900 | 1500 ms | −3.0 | 1688 KB |
+
+Both kits land inside the 10–20 MB the brief asks for, with the ride and the
+crash the two biggest voices in each — they are the two that earn their length,
+and they are the first two caps to shorten if a kit ever has to lose weight.
+
+### club — a jazz kit, recorded like a live date
+
+Austin McMahon's kit at Virtuosity in Boston, six mixable mic positions, the
+library's own description a contemporary jazz kit recorded in the style of a
+live club date. Four of the six mics are used: `kickmic` and `snaremic` close,
+`oh` overhead, `mid` as a closer pair for the cymbals and toms, `room` behind.
+`lofi` is the vintage mic and is a colour rather than a kit; `perc` is VSCO
+percussion and is not a drum voice. Weights are the brief's live-recording
+default — close 1.0, overheads 0.7, room 0.35 — and the cymbals and toms,
+which have no close mic in this library, use the overheads as their close mic
+at 1.0 with `mid` at 0.4–0.6 for proximity.
+
+**The stereo image is the overheads' own, turned round.** Measured on the
+source, this library is imaged from *in front of* the kit: the hat sits 3.3 dB
+right and the ride 3.9 dB left. The brief wants the drummer's seat, so the
+recipe swaps the channels of the stereo mics — one swap, and the whole kit
+turns at once: hat left, ride right, high tom left of low tom, exactly as the
+brief describes, without a pan being invented anywhere. The mono close mics
+stay centred, which is where a kick and a snare belong either way. Because the
+image is in the files and is the real one, **no `pan` is written into
+`kit.json`**; that field is for kits whose voices arrive mono.
+
+**What the source would not give.** The ride has three velocity levels and not
+four, so it ships with three layers; the engine's clamp sends a peak hit to
+layer 3. Everything else met the contract. The snare, cross-stick and toms are
+sampled 16 to 36 velocities deep with no round robins, so their round robins
+are neighbouring dynamics, and their layers are spaced 8 dB apart rather than
+the default 4.5 — at 4.5 dB all four layers sit in the top third of the range,
+which is four flavours of a backbeat and no ghost note.
+
+### studio — DRSKit, thirteen channels
+
+"From jazz to rock", thirteen mic channels, 11 to 30 strokes per instrument
+and every one a different power. Mixed with the close mic at 1.0, the
+overheads at 0.8 and the ambience at 0.4; the kick takes both its mics
+(`Kdrum_back` 1.0, `Kdrum_front` 0.7) and the snare takes both of its
+(`Snare_top` 1.0, `Snare_bottom` 0.5).
+
+**No channel swap here.** Measured on the source, DRSKit's overheads are
+*already* in the drummer's seat — hat and left crash left, ride and right
+crash right, toms running high-left to low-right. This is the kit where the
+recipe's `pan` does real work, because its close mics arrive mono and have to
+be placed inside the image the overheads already have.
+
+**The snare's bottom mic is wired in opposition**, as a bottom mic usually is:
+it points up at the wires while the top mic points down at the head, so the
+two move against each other and summing them as they arrive cancels most of
+the drum. Measured correlation on the hardest stroke: **−0.47**. The recipe
+lists `Snare_bottom` under `flip_if_opposed`, the tool measures it, inverts it
+and says so. It is an opt-in list rather than a blanket rule because between
+an overhead and a close cymbal mic a negative correlation is a path-length
+difference and flipping it would be wrong.
+
+The library is 44.1 kHz and the contract is 48 kHz, so every stroke is
+resampled on the way through.
+
+**DRSKit's whisker articulations are a recorded Brushes kit waiting for a
+recipe.** There are nine of them — `Snare_whisker`, `Snare_circle_whisker`,
+`Hihat_closed_whisker`, `Hihat_open_whisker`, `Ride_whisker`,
+`Crash_left_whisker`, `Crash_right_whisker` and `Tom1`–`Tom3_whisker` — a
+complete brushed kit in the same thirteen channels, already downloaded, under
+the same CC BY 4.0 line. A `brushes-recorded.json` is `studio.json` with the
+articulation names changed and softer caps, which is half a day when the owner
+asks for it, and it would retire the synthesised Brushes kit the way Club and
+Studio retire the other four.
+
+### What to change first if the owner says…
+
+Every phrase below names one field in `scripts/sounds/recipes/<kit>.json`, so
+a verdict is a one-line edit and a re-render rather than an investigation.
+Re-render, then re-run `measure_kits.py`: the margins are a gate.
+
+| if the owner says… | the field | which way |
+|---|---|---|
+| more room, more air | `voices.<v>.mix.room` (club) / `.amb` (studio) | up, 0.35 → 0.5 |
+| drier, closer, tighter | the same | down, 0.35 → 0.2 |
+| more crack on the snare | `voices.snare.mix.snaremic` / `Snare_top` | up; then `Snare_bottom` up for wire |
+| less hat | `balance.hat` | down, −9 → −12 |
+| the hats are lost | `balance.hat` | up; watch the kick-vs-hat gate |
+| the kick is not there | `balance.kick` | up, −1 → +2 |
+| the crash swamps it | `balance.crash` | down, −4 → −7 |
+| the ghost notes are too loud | nothing here — that is `LEVEL_GAIN[3]` in the engine | |
+| the soft hits sound like the loud ones | `voices.<v>.layer_step_db` | up, 4.5 → 8 |
+| machine-gun on fast hats | `voices.hat.rr` | up to 3, if the source has them |
+| the kit is too big | `voices.ride.cap_s` then `voices.crash.cap_s` | down; round robins last |
+| the stereo is backwards | `swap_stereo` | flip it |
+| the cymbals are washy | `voices.<v>.mix.oh` down, close mic up | |
+
+## The synthesised kits
 
 **room** — the app's Drum kit, in a room. This is the familiar one and the
 safe default: a kick with a real shell under it, a medium snare on the same
