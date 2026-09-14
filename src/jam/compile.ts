@@ -313,7 +313,7 @@ export function compileJam(jam: Jam, options: JamCompileOptions = {}): JamEngine
     // the way the voices below are absent — a switch that is only ever off
     // reads better missing than present and empty.
     ...(groove.snareGhostIsRim ? { snareGhostIsRim: true } : {}),
-    kit: jam.kit || "room",
+    kit: jam.kit || "studio",
     bass: jamBassLine(jam, options.formBar ?? 0, options.lineup),
     practice: jam.practice ? practiceConfigFrom(jam.practice) : null,
     // A fill every four or eight bars as well as at the chorus end. Zero when

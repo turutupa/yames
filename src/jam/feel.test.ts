@@ -96,10 +96,18 @@ describe("applyFeel", () => {
     }
   });
 
-  it("shuffles the fill along with the groove", () => {
+  it("shuffles the fill along with the groove, toms and all", () => {
     const swung = applyFeel(grooveById("rock8"), "shuffle");
-    expect(swung.fill.snare).toHaveLength(grooveTickCount(swung));
-    // The figure's own off-beats moved with everything else.
-    expect(swung.fill.snare.slice(6)).toEqual([2, 0, 1, 2, 0, 1]);
+    const ticks = grooveTickCount(swung);
+    expect(swung.fill.snare).toHaveLength(ticks);
+    // The run-up: two snare hits on beat three, now long-short.
+    expect(swung.fill.snare.slice(6)).toEqual([1, 0, 1, 0, 0, 0]);
+    // And the gesture the fill IS — the high tom's accent and the low tom's
+    // peak on the last beat — moved with it rather than being dropped on the
+    // floor by the conversion, which is the bug this catches.
+    expect(swung.fill.tomHi).toHaveLength(ticks);
+    expect(swung.fill.tomLo).toHaveLength(ticks);
+    expect(swung.fill.tomHi?.slice(9)).toEqual([2, 0, 0]);
+    expect(swung.fill.tomLo?.slice(9)).toEqual([0, 0, 4]);
   });
 });

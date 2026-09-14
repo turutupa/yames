@@ -2,20 +2,39 @@
 // bar the engine will refuse — silently, by playing the plain click. These
 // checks are the only thing between a mistyped lane string and a jam that
 // looks loaded and sounds like a metronome.
+//
+// The third pass added a second job: the rules in plans/tasks/jam-v3/BRIEF.md
+// §2 are what make these tables read as a drummer rather than as a machine,
+// and every one of them is the sort of thing that decays quietly under an
+// edit. A hat row flattened back to one level, a ghost that crept onto a
+// backbeat, a fill that stopped at the snare — none of those break anything,
+// they just take the person back out of the drums. So they are tested.
 import { describe, expect, it } from "vitest";
 import { GROOVES, grooveById, grooveTickCount, ruleGroove, DEFAULT_GROOVE_ID } from "./grooves";
-import { JAM_LANES } from "./types";
+import type { Groove } from "./grooves";
+import { JAM_LANES, JAM_OPTIONAL_LANES } from "./types";
+import type { JamLevel } from "./types";
 
-describe("the twenty grooves", () => {
-  it("ships exactly twenty, with unique ids", () => {
-    expect(GROOVES).toHaveLength(20);
-    expect(new Set(GROOVES.map((g) => g.id)).size).toBe(20);
+/** The ticks of one beat, as indices into a bar. */
+function beatTicks(g: Groove, beat: number): number[] {
+  return Array.from({ length: g.ticksPerBeat }, (_, i) => beat * g.ticksPerBeat + i);
+}
+
+/** The hat as it is actually played: the closed row and the open one together. */
+function hatLine(g: Groove): JamLevel[] {
+  return g.bar.hat.map((level, t) => Math.max(level, g.bar.hatOpen?.[t] ?? 0));
+}
+
+describe("the twenty-five grooves", () => {
+  it("ships exactly twenty-five, with unique ids", () => {
+    expect(GROOVES).toHaveLength(25);
+    expect(new Set(GROOVES.map((g) => g.id)).size).toBe(25);
   });
 
-  it("keeps the first thirteen where the footswitch left them", () => {
-    // `stepGroove` in `useJamSession` steps this list in order, so the seven
-    // the vibes brought are appended and nothing before them moves.
-    expect(GROOVES.slice(0, 13).map((g) => g.id)).toEqual([
+  it("keeps the first twenty where the footswitch left them", () => {
+    // `stepGroove` in `useJamSession` steps this list in order, so everything
+    // a later pass adds is appended and nothing before it moves.
+    expect(GROOVES.slice(0, 20).map((g) => g.id)).toEqual([
       "rock8",
       "rock16",
       "halfTime",
@@ -29,6 +48,23 @@ describe("the twenty grooves", () => {
       "train",
       "boomBap",
       "fourOnFloor",
+      "hardRock",
+      "stomp",
+      "doubleKick",
+      "twoStep",
+      "samba",
+      "chaCha",
+      "secondLine",
+    ]);
+  });
+
+  it("adds the five the third pass wrote, in the order the picker draws them", () => {
+    expect(GROOVES.slice(20).map((g) => g.id)).toEqual([
+      "ballad",
+      "slowBlues",
+      "jazzWaltz",
+      "motown",
+      "mambo",
     ]);
   });
 
@@ -39,14 +75,20 @@ describe("the twenty grooves", () => {
         expect(g.bar[lane], `${g.id} bar.${lane}`).toHaveLength(ticks);
         expect(g.fill[lane], `${g.id} fill.${lane}`).toHaveLength(ticks);
       }
+      // The optional rows are absent or full width — never ragged, and never
+      // an empty row carried around for nothing.
+      for (const lane of JAM_OPTIONAL_LANES) {
+        if (g.bar[lane]) expect(g.bar[lane], `${g.id} bar.${lane}`).toHaveLength(ticks);
+        if (g.fill[lane]) expect(g.fill[lane], `${g.id} fill.${lane}`).toHaveLength(ticks);
+      }
     }
   });
 
-  it("writes only the four levels a drummer plays", () => {
+  it("writes only the five levels a drummer plays", () => {
     for (const g of GROOVES) {
-      for (const lane of JAM_LANES) {
-        for (const level of [...g.bar[lane], ...g.fill[lane]]) {
-          expect([0, 1, 2, 3], `${g.id} ${lane}`).toContain(level);
+      for (const lane of [...JAM_LANES, ...JAM_OPTIONAL_LANES]) {
+        for (const level of [...(g.bar[lane] ?? []), ...(g.fill[lane] ?? [])]) {
+          expect([0, 1, 2, 3, 4], `${g.id} ${lane}`).toContain(level);
         }
       }
     }
@@ -62,8 +104,7 @@ describe("the twenty grooves", () => {
     //
     // The one-drop is the exception, and it is the exception on purpose: the
     // empty one IS the groove. Naming it here rather than loosening the rule
-    // keeps the check honest for the other twelve — a mistyped lane string in
-    // a rock beat is still a hole, and still caught.
+    // keeps the check honest for the other twenty-four.
     for (const g of GROOVES) {
       if (g.id === "oneDrop") continue;
       const onTheOne = JAM_LANES.some((lane) => g.bar[lane][0] !== 0);
@@ -72,7 +113,175 @@ describe("the twenty grooves", () => {
     const oneDrop = grooveById("oneDrop");
     expect(JAM_LANES.every((lane) => oneDrop.bar[lane][0] === 0)).toBe(true);
   });
+});
 
+/**
+ * The rules from the third pass's brief — the ones that are the difference
+ * between a table and a drummer.
+ */
+describe("what makes them sound played", () => {
+  it("never writes a row of one level on the hat or the ride", () => {
+    // A hat row of identical strokes is the loudest tell that nobody played
+    // this (plans/JAM_SOUND.md §2.9). Two strokes or fewer have no pattern to
+    // flatten — the swing ride's foot on two and four, the jazz waltz's — so
+    // the rule starts at three.
+    for (const g of GROOVES) {
+      for (const [name, row] of [
+        ["hat", hatLine(g)],
+        ["ride", g.bar.ride],
+      ] as const) {
+        const struck = row.filter((l) => l !== 0);
+        if (struck.length < 3) continue;
+        expect(new Set(struck).size, `${g.id} ${name} is flat`).toBeGreaterThan(1);
+      }
+    }
+  });
+
+  it("accents the beat and hits the off-beat on every eighth-note hat", () => {
+    for (const id of ["rock8", "halfTime", "waltz", "boomBap", "ballad", "motown"]) {
+      const g = grooveById(id);
+      const line = hatLine(g);
+      for (let beat = 0; beat < g.beatsPerBar; beat += 1) {
+        const [on, off] = beatTicks(g, beat);
+        expect(line[on], `${id} beat ${beat + 1}`).toBe(2);
+        expect(line[off], `${id} "and" of ${beat + 1}`).toBe(1);
+      }
+    }
+  });
+
+  it("writes accent / ghost / hit / ghost on every sixteenth-note hat", () => {
+    // The hand coming down hard, up light, down, up. One figure, and most of
+    // the difference between these four tables and the ones a box plays.
+    for (const id of ["rock16", "funk", "bossa", "samba"]) {
+      const g = grooveById(id);
+      expect(g.ticksPerBeat).toBe(4);
+      for (let beat = 0; beat < 4; beat += 1) {
+        expect(g.bar.hat.slice(beat * 4, beat * 4 + 4), `${id} beat ${beat + 1}`).toEqual([
+          2, 3, 1, 3,
+        ]);
+      }
+    }
+  });
+
+  it("never puts a ghost on a backbeat", () => {
+    // Beats two and four, in the grooves that HAVE a backbeat — a snare
+    // accent somewhere. The grooves whose quiet snare is a cross-stick have
+    // no backbeat at all and are not being tested for one: their level-3
+    // strokes are the figure, not a filler between louder strokes.
+    for (const g of GROOVES) {
+      if (g.beatsPerBar !== 4) continue;
+      if (!g.bar.snare.includes(2)) continue;
+      for (const beat of [1, 3]) {
+        const tick = beat * g.ticksPerBeat;
+        expect(g.bar.snare[tick], `${g.id} ghost on beat ${beat + 1}`).not.toBe(3);
+      }
+    }
+  });
+
+  it("writes ghosts only where the style has them", () => {
+    const withGhosts = GROOVES.filter((g) => g.bar.snare.includes(3)).map((g) => g.id);
+    expect(withGhosts.sort()).toEqual(
+      [
+        // The cross-stick grooves: every one of their snare strokes is a rim
+        // click, which is why they set the flag.
+        "ballad",
+        "bossa",
+        "chaCha",
+        "oneDrop",
+        // And the styles whose groove IS the quiet strokes between the loud
+        // ones.
+        "boomBap",
+        "funk",
+        "halfTime",
+        "rock16",
+        "samba",
+        "secondLine",
+        "shuffle",
+        "slowBlues",
+      ].sort(),
+    );
+  });
+
+  it("says which grooves play the rim rather than a ghost", () => {
+    const rim = GROOVES.filter((g) => g.snareGhostIsRim).map((g) => g.id);
+    expect(rim).toEqual(["bossa", "oneDrop", "chaCha", "ballad"]);
+    for (const id of rim) {
+      const g = grooveById(id);
+      // A cross-stick groove has no backbeat to contradict it: every stroke
+      // on its snare lane is the click.
+      expect(g.bar.snare.filter((l) => l !== 0 && l !== 3), id).toEqual([]);
+    }
+  });
+
+  it("accents the backbeat wherever there is one", () => {
+    // Two and four in a bar of four, three in a half-time bar — and an accent
+    // rather than a hit, because that is what a backbeat is.
+    for (const [id, beats] of [
+      ["rock8", [1, 3]],
+      ["rock16", [1, 3]],
+      ["funk", [1, 3]],
+      ["motown", [1, 3]],
+      ["twoStep", [1, 3]],
+      ["doubleKick", [1, 3]],
+      ["hardRock", [1, 3]],
+      ["halfTime", [2]],
+      ["stomp", [2]],
+      ["slowBlues", [1, 3]],
+    ] as const) {
+      const g = grooveById(id);
+      for (const beat of beats) {
+        expect(g.bar.snare[beat * g.ticksPerBeat], `${id} beat ${beat + 1}`).toBe(2);
+      }
+    }
+  });
+
+  it("accents the kick on the downbeat and hits it on the way through", () => {
+    for (const g of GROOVES) {
+      if (g.bar.kick[0] === 0) continue;
+      // The swing ride and the jazz waltz feather the bass drum: a ghost all
+      // the way through, which is the part rather than a quiet version of it.
+      if (g.bar.kick[0] === 3) continue;
+      // And the samba's surdo leans on two and four rather than on the one.
+      // That is the one thing that makes it a samba, so it is named here
+      // rather than allowed for by loosening the rule.
+      if (g.id === "samba") {
+        expect(g.bar.kick[0]).toBe(1);
+        continue;
+      }
+      expect(g.bar.kick[0], `${g.id} kick on the one`).toBe(2);
+    }
+    // And the double kick alternates, so sixteen of them a bar stay countable.
+    expect(grooveById("doubleKick").bar.kick).toEqual([
+      2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1,
+    ]);
+  });
+
+  it("writes the open hats in the row the engine can hear", () => {
+    // Hard rock and boom bap used to mean "open" by writing an accent on the
+    // closed-hat lane, which the engine had no way to know: one lane, one
+    // voice, so what it produced was a louder closed hat.
+    const hard = grooveById("hardRock");
+    expect(hard.bar.hatOpen).toEqual([0, 1, 0, 1, 0, 1, 0, 1]);
+    expect([1, 3, 5, 7].every((t) => hard.bar.hat[t] === 0)).toBe(true);
+    expect([0, 2, 4, 6].every((t) => hard.bar.hat[t] === 2)).toBe(true);
+
+    // Boom bap opens one stroke: the last eighth, which pulls the bar over.
+    const boom = grooveById("boomBap");
+    expect(boom.bar.hatOpen).toEqual([0, 0, 0, 0, 0, 0, 0, 1]);
+    expect(boom.bar.hat[7]).toBe(0);
+  });
+
+  it("keeps a crash in the bar only where the cymbal is part of the beat", () => {
+    // Everywhere else the crash belongs to the section, and it is
+    // `crashOnOne`'s to land.
+    const withCrash = GROOVES.filter((g) => g.bar.crash.some((l) => l !== 0)).map((g) => g.id);
+    expect(withCrash).toEqual(["hardRock"]);
+    const hard = grooveById("hardRock");
+    expect(hard.bar.crash[0]).toBe(2);
+  });
+});
+
+describe("the grooves, one by one", () => {
   it("writes the five later grooves the way they are played", () => {
     // Each of these is a one-line answer to "what makes it that groove", and
     // each is the line a retyped lane string would break.
@@ -81,7 +290,7 @@ describe("the twenty grooves", () => {
     expect([4, 8, 12].every((t) => funk.bar.kick[t] === 0)).toBe(true);
     expect(funk.bar.snare).toContain(3);
 
-    // The one-drop: kick and side stick together on three, hats off-beat only.
+    // The one-drop: kick and cross-stick together on three, hats off-beat only.
     const oneDrop = grooveById("oneDrop");
     expect(oneDrop.bar.kick[4]).not.toBe(0);
     expect(oneDrop.bar.snare[4]).toBe(3);
@@ -95,13 +304,13 @@ describe("the twenty grooves", () => {
     expect(train.bar.kick.filter((l) => l !== 0)).toHaveLength(2);
 
     // Boom bap: one and the "and" of two, backbeat on two and four, and the
-    // accented last eighth that stands in for the open hat.
+    // ghosts under each backbeat.
     const boomBap = grooveById("boomBap");
     expect(boomBap.bar.kick[0]).not.toBe(0);
     expect(boomBap.bar.kick[3]).not.toBe(0);
-    expect(boomBap.bar.snare[2]).not.toBe(0);
-    expect(boomBap.bar.snare[6]).not.toBe(0);
-    expect(boomBap.bar.hat[7]).toBe(2);
+    expect(boomBap.bar.snare[2]).toBe(2);
+    expect(boomBap.bar.snare[6]).toBe(2);
+    expect(boomBap.bar.snare[1]).toBe(3);
 
     // Four on the floor: every beat, and the hat on none of them.
     const four = grooveById("fourOnFloor");
@@ -123,19 +332,10 @@ describe("the twenty grooves", () => {
   });
 
   it("writes the seven the vibes brought the way they are played", () => {
-    // Hard rock: the hat OPEN on every off-beat (accent is the open hat),
-    // closed on every down, and a crash in the bar rather than once a chorus.
-    const hard = grooveById("hardRock");
-    expect([1, 3, 5, 7].every((t) => hard.bar.hat[t] === 2)).toBe(true);
-    expect([0, 2, 4, 6].every((t) => hard.bar.hat[t] === 1)).toBe(true);
-    expect(hard.bar.crash[0]).not.toBe(0);
-    expect(hard.bar.crash.slice(1).every((l) => l === 0)).toBe(true);
-
     // Stomp: half-time, so the snare is on three and nowhere else.
     const stomp = grooveById("stomp");
     expect(stomp.bar.snare.flatMap((l, i) => (l ? [i] : []))).toEqual([4]);
     expect(stomp.bar.kick.filter((l) => l !== 0).length).toBeGreaterThanOrEqual(4);
-    // The crash is the section's, not the bar's.
     expect(stomp.bar.crash.every((l) => l === 0)).toBe(true);
 
     // Double kick: a kick on every sixteenth, and a backbeat still on 2 and 4.
@@ -158,9 +358,11 @@ describe("the twenty grooves", () => {
     expect(samba.bar.kick[0]).toBe(1);
     expect(samba.bar.hat.every((l) => l !== 0)).toBe(true);
 
-    // Cha-cha: four, the "and" of four, one — written across the bar line.
+    // Cha-cha: four, the "and" of four, one — written across the bar line,
+    // and played on the rim.
     const cha = grooveById("chaCha");
     expect(cha.bar.snare.flatMap((l, i) => (l ? [i] : []))).toEqual([0, 6, 7]);
+    expect(cha.snareGhostIsRim).toBe(true);
 
     // Second line: a syncopated street-beat kick, ghosts on the snare, and
     // its two accents — the backbeat on two and the push on the "a" of three.
@@ -168,6 +370,41 @@ describe("the twenty grooves", () => {
     expect(second.bar.snare).toContain(3);
     expect(second.bar.snare.flatMap((l, i) => (l === 2 ? [i] : []))).toEqual([4, 11]);
     expect([4, 12].every((t) => second.bar.kick[t] === 0)).toBe(true);
+    // Beat four is left empty: the push has just happened, and a ghost on the
+    // backbeat would take it away.
+    expect(second.bar.snare[12]).toBe(0);
+  });
+
+  it("writes the five the third pass added the way they are played", () => {
+    // Ballad: the kick on one and three, and a cross-stick on two and four.
+    const ballad = grooveById("ballad");
+    expect(ballad.snareGhostIsRim).toBe(true);
+    expect(ballad.bar.snare.flatMap((l, i) => (l ? [i] : []))).toEqual([2, 6]);
+    expect(ballad.bar.snare[2]).toBe(3);
+
+    // Slow blues: twelve-eight — all three triplets on the hat, every beat.
+    const slow = grooveById("slowBlues");
+    expect([slow.beatsPerBar, slow.ticksPerBeat]).toEqual([4, 3]);
+    expect(slow.bar.hat.every((l) => l !== 0)).toBe(true);
+    expect(slow.bar.snare[2]).toBe(3);
+    expect(slow.bar.snare[3]).toBe(2);
+
+    // Jazz waltz: three, and the ride carries it because there is no backbeat.
+    const jw = grooveById("jazzWaltz");
+    expect([jw.beatsPerBar, jw.ticksPerBeat]).toEqual([3, 3]);
+    expect(jw.bar.snare.every((l) => l === 0)).toBe(true);
+    expect(jw.bar.ride.flatMap((l, i) => (l ? [i] : []))).toEqual([0, 3, 5, 6, 8]);
+    expect(jw.bar.kick[0]).toBe(3);
+
+    // Motown: the snare on all four, accented on two and four.
+    const motown = grooveById("motown");
+    expect(motown.bar.snare).toEqual([1, 0, 2, 0, 1, 0, 2, 0]);
+
+    // Mambo: the bell on the ride, the tumbao on the kick, no snare at all.
+    const mambo = grooveById("mambo");
+    expect(mambo.bar.snare.every((l) => l === 0)).toBe(true);
+    expect(mambo.bar.ride.flatMap((l, i) => (l ? [i] : []))).toEqual([0, 4, 6, 8, 12, 14]);
+    expect(mambo.bar.kick.flatMap((l, i) => (l ? [i] : []))).toEqual([0, 6, 12]);
   });
 
   it("carries the meter each groove is actually written in", () => {
@@ -192,6 +429,11 @@ describe("the twenty grooves", () => {
     expect(meters.samba).toEqual([4, 4]);
     expect(meters.chaCha).toEqual([4, 2]);
     expect(meters.secondLine).toEqual([4, 4]);
+    expect(meters.ballad).toEqual([4, 2]);
+    expect(meters.slowBlues).toEqual([4, 3]);
+    expect(meters.jazzWaltz).toEqual([3, 3]);
+    expect(meters.motown).toEqual([4, 2]);
+    expect(meters.mambo).toEqual([4, 4]);
   });
 
   it("leaves the shuffle's middle triplet empty — that is what a shuffle is", () => {
@@ -205,8 +447,12 @@ describe("the twenty grooves", () => {
 
   it("gives the swing ride its ride and the rock grooves their hat", () => {
     // The lane a groove is played on is part of what it is called.
-    expect(grooveById("swingRide").bar.ride.some((l) => l !== 0)).toBe(true);
-    expect(grooveById("swingRide").bar.hat.filter((l) => l !== 0)).toHaveLength(2);
+    const swing = grooveById("swingRide");
+    expect(swing.bar.ride.some((l) => l !== 0)).toBe(true);
+    expect(swing.bar.hat.filter((l) => l !== 0)).toHaveLength(2);
+    // And the ride leans on two and four, which is what swing is.
+    expect([0, 6].every((t) => swing.bar.ride[t] === 1)).toBe(true);
+    expect([3, 9].every((t) => swing.bar.ride[t] === 2)).toBe(true);
     expect(grooveById("rock8").bar.hat.every((l) => l !== 0)).toBe(true);
     expect(grooveById("rock8").bar.ride.every((l) => l === 0)).toBe(true);
   });
@@ -219,36 +465,124 @@ describe("the twenty grooves", () => {
 });
 
 describe("the fill", () => {
-  it("keeps the groove going until the last two beats, then plays snare", () => {
+  it("gives every fill two tom rows the width of the bar", () => {
     for (const g of GROOVES) {
-      const figureBeats = Math.min(2, g.beatsPerBar);
-      const from = (g.beatsPerBar - figureBeats) * g.ticksPerBeat;
-      // Up to the figure, the fill IS the groove — the time never stops.
-      for (let i = 0; i < from; i++) {
-        for (const lane of JAM_LANES) {
-          expect(g.fill[lane][i], `${g.id} ${lane} @${i}`).toBe(g.bar[lane][i]);
-        }
-      }
-      // From there, snare alone, and every tick of it.
-      for (let i = from; i < grooveTickCount(g); i++) {
-        expect(g.fill.kick[i], `${g.id} kick @${i}`).toBe(0);
-        expect(g.fill.hat[i], `${g.id} hat @${i}`).toBe(0);
-        expect(g.fill.ride[i], `${g.id} ride @${i}`).toBe(0);
-        expect(g.fill.snare[i], `${g.id} snare @${i}`).not.toBe(0);
+      const ticks = grooveTickCount(g);
+      expect(g.fill.tomHi, `${g.id} fill.tomHi`).toHaveLength(ticks);
+      expect(g.fill.tomLo, `${g.id} fill.tomLo`).toHaveLength(ticks);
+      // And the BAR does not carry them: most grooves never leave the snare.
+      expect(g.bar.tomHi, `${g.id} bar.tomHi`).toBeUndefined();
+      expect(g.bar.tomLo, `${g.id} bar.tomLo`).toBeUndefined();
+    }
+  });
+
+  it("ends every fill on the low tom, at a peak", () => {
+    // The last tick of the bar, and the loudest thing in it. The crash the
+    // engine puts on the next bar's one is the answer to it.
+    for (const g of GROOVES) {
+      const last = grooveTickCount(g) - 1;
+      expect(g.fill.tomLo?.[last], `${g.id} fill does not peak`).toBe(4);
+      for (const lane of JAM_LANES) {
+        expect(g.fill[lane][last], `${g.id} ${lane} under the peak`).toBe(0);
       }
     }
   });
 
-  it("accents the beat inside the figure", () => {
+  it("walks snare → high tom → low tom across the last beat", () => {
+    for (const g of GROOVES) {
+      const ticks = grooveTickCount(g);
+      const lastBeat = ticks - g.ticksPerBeat;
+      const highs = g.fill.tomHi!.flatMap((l, i) => (l ? [i] : []));
+      const lows = g.fill.tomLo!.flatMap((l, i) => (l ? [i] : []));
+      // Everything is in the last beat, the high tom before the low one, and
+      // the high tom at an accent under the low tom's peak.
+      expect(lows, g.id).toEqual([ticks - 1]);
+      for (const i of highs) {
+        expect(i, `${g.id} tomHi @${i}`).toBeGreaterThanOrEqual(lastBeat);
+        expect(i, `${g.id} tomHi @${i}`).toBeLessThan(ticks - 1);
+        expect(g.fill.tomHi![i], `${g.id} tomHi @${i}`).toBe(2);
+      }
+      // One tick to a beat has no room for a walk; everything else has one.
+      if (g.ticksPerBeat > 1) expect(highs.length, `${g.id} has no high tom`).toBeGreaterThan(0);
+    }
+  });
+
+  it("keeps the time going up to the fill, and leans on the last backbeat", () => {
+    for (const g of GROOVES) {
+      const ticks = grooveTickCount(g);
+      const from = g.fill.snare.findIndex((_, i) => {
+        // The fill starts where the bar stops being itself on every lane but
+        // the snare — which is the honest way to find it from outside.
+        return (
+          i > 0 &&
+          JAM_LANES.filter((l) => l !== "snare").every((l) => g.fill[l][i] === 0) &&
+          JAM_LANES.filter((l) => l !== "snare").some((l) => g.bar[l][i] !== 0)
+        );
+      });
+      if (from < 0) continue;
+      for (let i = 0; i < from; i += 1) {
+        for (const lane of JAM_LANES) {
+          if (lane === "snare") continue;
+          expect(g.fill[lane][i], `${g.id} ${lane} @${i}`).toBe(g.bar[lane][i]);
+        }
+        // The snare is the bar's too, with one edit: the last backbeat before
+        // the fill is played as a peak.
+        const before = g.bar.snare[i];
+        const after = g.fill.snare[i];
+        expect(after === before || (before === 2 && after === 4), `${g.id} snare @${i}`).toBe(
+          true,
+        );
+      }
+      // At most one peak in the front of the bar, and it is the LAST accent.
+      const peaks = g.fill.snare.slice(0, from).flatMap((l, i) => (l === 4 ? [i] : []));
+      expect(peaks.length, `${g.id} peaks`).toBeLessThanOrEqual(1);
+      if (peaks.length === 1) {
+        const accents = g.bar.snare.slice(0, from).flatMap((l, i) => (l === 2 ? [i] : []));
+        expect(peaks[0], g.id).toBe(accents[accents.length - 1]);
+      }
+      expect(ticks).toBeGreaterThan(from);
+    }
+  });
+
+  it("gives the half-time grooves and the ballad one beat of fill, not two", () => {
+    // A bar already counted in halves has no room for a two-beat fill without
+    // the fill becoming the bar.
+    for (const id of ["halfTime", "stomp", "ballad"]) {
+      const g = grooveById(id);
+      const ticks = grooveTickCount(g);
+      // Beat three is still the groove.
+      const beatThree = 2 * g.ticksPerBeat;
+      expect(g.fill.hat[beatThree], `${id} hat on three`).toBe(g.bar.hat[beatThree]);
+      expect(ticks - g.ticksPerBeat).toBe(3 * g.ticksPerBeat);
+    }
+    // Against rock eighths, which loses beats three AND four.
+    const rock = grooveById("rock8");
+    expect(rock.fill.hat.slice(4).every((l) => l === 0)).toBe(true);
+  });
+
+  it("writes rock eighths' fill out in full, because it is the shape of all of them", () => {
     const g = grooveById("rock8");
-    // Two beats of eighths: accent, hit, accent, hit.
-    expect(g.fill.snare.slice(4)).toEqual([2, 1, 2, 1]);
+    // Beats one and two: the groove, with the backbeat on two taken to a peak.
+    expect(g.fill.kick).toEqual([2, 0, 0, 0, 0, 0, 0, 0]);
+    expect(g.fill.hat).toEqual([2, 1, 2, 1, 0, 0, 0, 0]);
+    // Beat three: the run-up. Beat four: the high tom, then the low tom's peak.
+    expect(g.fill.snare).toEqual([0, 0, 4, 0, 1, 1, 0, 0]);
+    expect(g.fill.tomHi).toEqual([0, 0, 0, 0, 0, 0, 2, 0]);
+    expect(g.fill.tomLo).toEqual([0, 0, 0, 0, 0, 0, 0, 4]);
+  });
+
+  it("silences an open hat across the fill", () => {
+    // Otherwise the toms play over a cymbal that is still ringing from the
+    // bar this fill replaced.
+    const hard = grooveById("hardRock");
+    expect(hard.fill.hatOpen?.slice(4).every((l) => l === 0)).toBe(true);
+    expect(hard.fill.hatOpen?.slice(0, 4)).toEqual(hard.bar.hatOpen?.slice(0, 4));
   });
 });
 
 /**
- * The drummer for a meter nobody wrote a groove for. Thirteen grooves is
- * thirteen grooves and none of them is in seven, so the alternative to this
+ * The drummer for a meter nobody wrote a groove for. Twenty-five grooves is
+ * twenty-five grooves and none of them is in seven, so the alternative to this
  * rule is a jam in seven with no drummer in it (JAM_MODE §4.1).
  */
 describe("the rule groove", () => {
@@ -260,11 +594,12 @@ describe("the rule groove", () => {
     expect(g.bar.kick).toEqual([2, 0, 0, 0, 0, 0, 2, 0, 0, 0]);
   });
 
-  it("puts the snare on the last beat of every group of two or more", () => {
-    // 3+2: the last beats are 2 and 4, which is ticks 4 and 8.
-    expect(ruleGroove([3, 2], 2).bar.snare).toEqual([0, 0, 0, 0, 1, 0, 0, 0, 1, 0]);
+  it("accents the snare on the last beat of every group of two or more", () => {
+    // 3+2: the last beats are 2 and 4, which is ticks 4 and 8. An accent,
+    // because a backbeat is an accent wherever it lands.
+    expect(ruleGroove([3, 2], 2).bar.snare).toEqual([0, 0, 0, 0, 2, 0, 0, 0, 2, 0]);
     // A group of one has no room for a backbeat: it would land on the kick.
-    expect(ruleGroove([1, 3], 1).bar.snare).toEqual([0, 0, 0, 1]);
+    expect(ruleGroove([1, 3], 1).bar.snare).toEqual([0, 0, 0, 2]);
   });
 
   it("puts hats on every tick, accented where a group opens", () => {
@@ -281,6 +616,8 @@ describe("the rule groove", () => {
       expect(g.bar[lane], `bar.${lane}`).toHaveLength(28);
       expect(g.fill[lane], `fill.${lane}`).toHaveLength(28);
     }
+    expect(g.fill.tomHi).toHaveLength(28);
+    expect(g.fill.tomLo).toHaveLength(28);
     // Kicks on beats 0, 2 and 4 — ticks 0, 8 and 16 at four ticks a beat.
     expect(g.bar.kick.flatMap((level, i) => (level ? [i] : []))).toEqual([0, 8, 16]);
     // Snares on beats 1, 3 and 6 — ticks 4, 12 and 24.
@@ -294,24 +631,32 @@ describe("the rule groove", () => {
     expect(g.bar.snare.flatMap((level, i) => (level ? [i] : []))).toEqual([8, 16]);
   });
 
-  it("plays snare eighths over the last group as its fill", () => {
-    // 2+2+3 in eighths: the last group is beats 4-6, ticks 8-13. Every tick
-    // is an eighth here, so the snare plays all six, accented on each beat.
+  it("runs the snare over the last group and finishes on the toms", () => {
+    // 2+2+3 in eighths: the last group is beats 4-6, ticks 8-13. The snare
+    // runs the first two of those beats, then the high tom and the low tom's
+    // peak take the last one.
     const g = ruleGroove([2, 2, 3], 2);
-    expect(g.fill.snare.slice(8)).toEqual([2, 1, 2, 1, 2, 1]);
+    expect(g.fill.snare.slice(8)).toEqual([1, 1, 1, 1, 0, 0]);
+    expect(g.fill.tomHi!.slice(12)).toEqual([2, 0]);
+    expect(g.fill.tomLo!.slice(12)).toEqual([0, 4]);
     // Everything else is out of the way so the fill is heard as a fill.
     expect(g.fill.kick.slice(8)).toEqual([0, 0, 0, 0, 0, 0]);
     expect(g.fill.hat.slice(8)).toEqual([0, 0, 0, 0, 0, 0]);
-    // The bar up to the fill is the groove, unchanged — a fill that threw the
-    // whole bar away would stop the time dead.
+    // The bar up to the fill is the groove — a fill that threw the whole bar
+    // away would stop the time dead — bar the last backbeat, which is leaned
+    // on: beat 3, tick 6.
     expect(g.fill.hat.slice(0, 8)).toEqual(g.bar.hat.slice(0, 8));
+    expect(g.fill.snare[6]).toBe(4);
+    expect(g.bar.snare[6]).toBe(2);
   });
 
-  it("plays eighths, not sixteenths, when the bar is written in sixteenths", () => {
-    // 3+2 in sixteenths: the last group is beats 3-4, ticks 12-19, and an
-    // eighth is two ticks — accent, rest, hit, rest, accent, rest, hit, rest.
+  it("fills at the bar's own resolution, however fine it is", () => {
+    // 3+2 in sixteenths: the last group is beats 3-4, ticks 12-19. Beat 4 is
+    // the run-up, and beat 5 walks off the snare onto the toms.
     const g = ruleGroove([3, 2], 4);
-    expect(g.fill.snare.slice(12)).toEqual([2, 0, 1, 0, 2, 0, 1, 0]);
+    expect(g.fill.snare.slice(12)).toEqual([1, 1, 1, 1, 1, 1, 0, 0]);
+    expect(g.fill.tomHi!.slice(16)).toEqual([0, 0, 2, 0]);
+    expect(g.fill.tomLo!.slice(16)).toEqual([0, 0, 0, 4]);
   });
 
   it("gives every lane one column per tick, for every meter and resolution", () => {
@@ -324,17 +669,20 @@ describe("the rule groove", () => {
           expect(g.bar[lane], `${groups}/${ticks} bar.${lane}`).toHaveLength(width);
           expect(g.fill[lane], `${groups}/${ticks} fill.${lane}`).toHaveLength(width);
         }
+        expect(g.fill.tomLo, `${groups}/${ticks} fill.tomLo`).toHaveLength(width);
+        // However odd the bar, the fill still ends on the peak.
+        expect(g.fill.tomLo![width - 1], `${groups}/${ticks} peak`).toBe(4);
       }
     }
   });
 
-  it("writes only the four levels a drummer plays", () => {
+  it("writes only the five levels a drummer plays", () => {
     for (const groups of [[3, 2], [2, 2, 3]]) {
       for (const ticks of [2, 4] as const) {
         const g = ruleGroove(groups, ticks);
-        for (const lane of JAM_LANES) {
-          for (const level of [...g.bar[lane], ...g.fill[lane]]) {
-            expect([0, 1, 2, 3]).toContain(level);
+        for (const lane of [...JAM_LANES, ...JAM_OPTIONAL_LANES]) {
+          for (const level of [...(g.bar[lane] ?? []), ...(g.fill[lane] ?? [])]) {
+            expect([0, 1, 2, 3, 4]).toContain(level);
           }
         }
       }
@@ -352,6 +700,10 @@ describe("the rule groove", () => {
     const g = ruleGroove([2, 2, 3], 2);
     expect(g.bar.crash.every((level) => level === 0)).toBe(true);
     expect(g.fill.crash.every((level) => level === 0)).toBe(true);
+  });
+
+  it("never claims a cross-stick for a bar nobody wrote", () => {
+    expect(ruleGroove([2, 2, 3], 2).snareGhostIsRim).toBeUndefined();
   });
 });
 

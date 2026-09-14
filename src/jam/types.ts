@@ -101,7 +101,12 @@ export type JamEngineConfig = {
    * struct is `#[serde(rename_all = "camelCase")]`.
    */
   snareGhostIsRim?: boolean;
-  /** Which kit plays the lanes: "room" | "tight" | "brushes" | "electronic". */
+  /**
+   * Which kit plays the lanes. The two recorded ones — "club" and "studio" —
+   * and the five synthesised ones behind them: "raw", "room", "tight",
+   * "brushes", "electronic". The list lives in `JAM_KIT_IDS` (`./vibes`),
+   * where a test can check that no bundle names one that does not exist.
+   */
   kit: string;
   /**
    * The bass, when the band has one. One MIDI note number per tick, 0 for a
@@ -233,7 +238,7 @@ export type Jam = {
   grooveId: string;
   feel: JamFeel;
   intensity: JamIntensity;
-  /** Only "room" today. Kept on the record so saved jams survive more kits. */
+  /** One of `JAM_KIT_IDS`. Kept on the record so saved jams survive more kits. */
   kit: string;
   form: JamForm;
   /** Beats counted in before bar 1. 0..8, the engine's own limit. */
