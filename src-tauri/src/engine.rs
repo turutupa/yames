@@ -6565,7 +6565,7 @@ mod tests {
     // ─── Jam — the band on the tick grid ─────────────────────────────────
 
     use crate::jam::{
-        compile as compile_jam, JamBassLine, JamConfig, JamDropOut, JamPattern, JamPracticeConfig,
+        compile_synth as compile_jam, JamBassLine, JamConfig, JamDropOut, JamPattern, JamPracticeConfig,
         JamTable, JamTrade,
     };
 

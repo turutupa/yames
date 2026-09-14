@@ -589,3 +589,82 @@ fn the_rational_approximation_is_exact_when_it_can_be() {
         );
     }
 }
+
+/// EVERY BANK THE APP SHIPS DECODES FROM ITS OWN FOLDER, AND IS IN TUNE.
+///
+/// The kits have this test; the melodic banks did not, and the only proof
+/// the four recorded voices loaded was sixteen other tests failing when
+/// they arrived. Each shipped folder is loaded at 48 kHz over the range the
+/// band asks for, has at least two layers, and one sampled note measures
+/// at its own pitch within five cents.
+#[test]
+fn every_shipped_bank_decodes_from_its_own_folder() {
+    let ids = super::shipped_ids();
+    assert!(!ids.is_empty(), "no melodic banks are shipped");
+    for id in ids {
+        let index = super::shipped_index(&id).unwrap();
+        let (low, high) = if id.starts_with("bass_") {
+            (crate::engine::BASS_MIN_MIDI, crate::engine::BASS_MAX_MIDI)
+        } else {
+            (48u8, 84u8)
+        };
+        let bank = super::load_shipped(index, 48_000, low, high)
+            .unwrap_or_else(|e| panic!("{id} did not load: {e}"));
+        assert!(bank.layers() >= 2, "{id} has {} layer(s)", bank.layers());
+        assert!(bank.notes() > 0, "{id} has no notes");
+        let mid = ((low as u16 + high as u16) / 2) as u8;
+        // `sample` takes the index a table stores, which is `midi - low`.
+        let buf = bank.sample(mid - bank.low(), 0, 0);
+        assert!(!buf.is_empty(), "{id} has nothing at MIDI {mid}");
+        // Not `frequency_of`: a recorded bass carries harmonics that add
+        // zero crossings, and a crossing count reads a fingered F2 a major
+        // third sharp. The period is found where the note best matches a
+        // copy of itself, searched a quarter tone either side of the pitch
+        // the bank claims.
+        // On the SUSTAIN, past the first quarter second: a plucked upright's
+        // attack reads twenty cents flat to any estimator while the string
+        // settles, and the note the ear tunes to is the one that follows.
+        let sustain = &buf[buf.len().min(12_000)..buf.len().min(36_000)];
+        let got = frequency_by_autocorrelation(sustain, 48_000, hz(mid));
+        let off = cents(got, hz(mid));
+        assert!(
+            off.abs() < 5.0,
+            "{id} at MIDI {mid} sounds {got:.2} Hz, {off:+.1} cents out"
+        );
+    }
+}
+
+/// The fundamental of `buf` near `expect` Hz: the lag within a quarter tone
+/// of the expected period that maximises the normalised autocorrelation
+/// over the first half second, refined by a parabola through its
+/// neighbours.
+fn frequency_by_autocorrelation(buf: &[f32], sr: u32, expect: f64) -> f64 {
+    let n = buf.len().min(sr as usize / 2);
+    let x = &buf[..n];
+    let period = sr as f64 / expect;
+    let (lo, hi) = ((period / 1.03).floor() as usize, (period * 1.03).ceil() as usize);
+    let energy: f64 = x.iter().map(|v| (*v as f64) * (*v as f64)).sum();
+    assert!(energy > 0.0, "silence");
+    let score = |lag: usize| -> f64 {
+        if lag == 0 || lag >= n {
+            return f64::MIN;
+        }
+        let mut acc = 0.0f64;
+        for i in lag..n {
+            acc += x[i] as f64 * x[i - lag] as f64;
+        }
+        acc / energy
+    };
+    let mut best = (f64::MIN, lo);
+    for lag in lo..=hi {
+        let sc = score(lag);
+        if sc > best.0 {
+            best = (sc, lag);
+        }
+    }
+    let (l, r) = (score(best.1 - 1), score(best.1 + 1));
+    let denom = l - 2.0 * best.0 + r;
+    let refine = if denom.abs() > 1e-12 { 0.5 * (l - r) / denom } else { 0.0 };
+    sr as f64 / (best.1 as f64 + refine)
+}
+

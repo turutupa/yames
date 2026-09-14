@@ -1427,6 +1427,29 @@ pub fn compile(cfg: &JamConfig) -> Result<JamTable, String> {
     compile_measured(cfg, None, reference_bank(&cfg.kit)?, voices)
 }
 
+/// [`compile`] with the bass and keys on their synthesised recipes,
+/// whatever banks ship.
+///
+/// The recorded banks landed under `sounds/voices/` after most of the
+/// tests below were written, and sixteen of them stopped meaning what they
+/// said: a test asserting which synthesised note a pitch becomes was
+/// suddenly looking at a recorded one, and a level measured through the
+/// synthesised `SoundBank` came back silent because the table now named a
+/// bank that `SoundBank` does not hold. The test modules shadow `compile`
+/// with this, so a test that says nothing about recordings tests the
+/// recipe it was written against; a test that wants a recorded bank says
+/// so through [`compile_with_voices`], and the shipped folders have a
+/// test of their own in `voices/tests.rs`.
+#[cfg(test)]
+pub(crate) fn compile_synth(cfg: &JamConfig) -> Result<JamTable, String> {
+    compile_measured(
+        cfg,
+        None,
+        reference_bank(&cfg.kit)?,
+        JamVoices { bass: None, keys: None },
+    )
+}
+
 /// The kit a name means, decoded once per process at [`JAM_REFERENCE_SR`].
 ///
 /// For everything that has no audio device to ask: the tests, the four-bar
@@ -2854,6 +2877,11 @@ mod tests {
     }
 
     use super::*;
+
+    /// See `compile_synth`: these tests were written against the recipes.
+    fn compile(cfg: &JamConfig) -> Result<JamTable, String> {
+        super::compile_synth(cfg)
+    }
 
     /// Which drum a slot's sound names, or `None` for the bass and the
     /// keys.
@@ -5179,6 +5207,11 @@ mod tests {
 mod form_tests {
     use super::*;
 
+    /// See `compile_synth`: these tests were written against the recipes.
+    fn compile(cfg: &JamConfig) -> Result<JamTable, String> {
+        super::compile_synth(cfg)
+    }
+
     fn twelve_bar() -> JamConfig {
         let z = vec![0u8; 8];
         JamConfig {
@@ -5580,6 +5613,11 @@ mod form_tests {
 #[cfg(test)]
 mod band_tests {
     use super::*;
+
+    /// See `compile_synth`: these tests were written against the recipes.
+    fn compile(cfg: &JamConfig) -> Result<JamTable, String> {
+        super::compile_synth(cfg)
+    }
     use crate::engine::{JamKit, KitVoice, SoundId, BEAT_GAIN, KEYS_MAX_MIDI, KEYS_MIN_MIDI};
 
     /// A bar with one drum, one bass note and one chord on tick 0, so every
