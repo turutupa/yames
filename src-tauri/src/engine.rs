@@ -1515,6 +1515,23 @@ struct Voice {
     /// is summed, mono, exactly where it always was, and the band is
     /// saturated, compressed and panned around it.
     band: bool,
+    /// Is this voice's buffer INTERLEAVED STEREO?
+    ///
+    /// A ROUTING QUESTION AND A LAYOUT QUESTION ARE NOT THE SAME QUESTION,
+    /// and for one pass they shared a field. `band` was read as both — "goes
+    /// through the bus" and "is a pair of samples per frame" — which is true
+    /// of a drum and false of the bass, the keys and a recorded melodic
+    /// note, all of which are mono and all of which go through the bus.
+    /// Read as a pair, a mono buffer is decimated by two: the bass came out
+    /// an OCTAVE UP and half as long, on every jam, and every test that
+    /// measured it measured energy in a window or a slot's own buffer, so
+    /// none of them could see it. `a_bass_note_sounds_at_the_pitch_it_was_
+    /// written_at` is the one that can.
+    ///
+    /// It is the same rule `jam::worst_bar_peak` already used to measure a
+    /// table — `matches!(slot.sound, SoundId::Band { .. })` — so the clamp
+    /// and the mixer now agree about what the band is.
+    stereo: bool,
 }
 
 /// [`Voice::voice`] for everything that is not a drum — the click, the
@@ -1542,6 +1559,7 @@ impl Voice {
             fade_left: 0,
             fade_len: 0,
             band: false,
+            stereo: false,
         }
     }
 }
@@ -1662,6 +1680,9 @@ fn spawn_band_voice(
         fade_left: 0,
         fade_len: 0,
         band: true,
+        // A drum is a pair of samples a frame; the bass, the keys and a
+        // recorded melodic note are one. See `Voice::stereo`.
+        stereo: matches!(sound_id, SoundId::Band { .. }),
     });
 }
 
@@ -4336,6 +4357,9 @@ impl MetronomeEngine {
                                                 fade_left: 0,
                                                 fade_len: 0,
                                                 band: true,
+                                                // The kit's cross-stick, and
+                                                // a drum is a pair.
+                                                stereo: true,
                                             });
                                         }
                                     }
@@ -4521,32 +4545,36 @@ impl MetronomeEngine {
                                 continue;
                             }
                             let buf = jam_sample(&sounds, kit, voice.sound_id);
-                            if voice.band {
-                                // Interleaved stereo, so a frame is two
-                                // samples and the length is half the slice.
-                                let frames = buf.len() / 2;
-                                let limit = if voice.max_samples > 0 {
-                                    voice.max_samples.min(frames)
-                                } else {
-                                    frames
-                                };
-                                if voice.position < limit {
-                                    let choke = voice.choke_gain();
-                                    band_l += buf[2 * voice.position] * voice.amp_l * choke;
-                                    band_r += buf[2 * voice.position + 1] * voice.amp_r * choke;
-                                }
-                                if voice.fade_left > 0 {
-                                    voice.fade_left -= 1;
-                                }
+                            // A drum is interleaved stereo, so a frame is
+                            // two samples; everything else is one. See
+                            // `Voice::stereo` — this used to ask `band`,
+                            // which is a different question.
+                            let frames = if voice.stereo {
+                                buf.len() / 2
                             } else {
-                                let limit = if voice.max_samples > 0 {
-                                    voice.max_samples.min(buf.len())
+                                buf.len()
+                            };
+                            let limit = if voice.max_samples > 0 {
+                                voice.max_samples.min(frames)
+                            } else {
+                                frames
+                            };
+                            if voice.position < limit {
+                                if voice.band {
+                                    let choke = voice.choke_gain();
+                                    let (l, r) = if voice.stereo {
+                                        (buf[2 * voice.position], buf[2 * voice.position + 1])
+                                    } else {
+                                        (buf[voice.position], buf[voice.position])
+                                    };
+                                    band_l += l * voice.amp_l * choke;
+                                    band_r += r * voice.amp_r * choke;
                                 } else {
-                                    buf.len()
-                                };
-                                if voice.position < limit {
                                     click += buf[voice.position] * voice.amp_l;
                                 }
+                            }
+                            if voice.band && voice.fade_left > 0 {
+                                voice.fade_left -= 1;
                             }
                             voice.position += 1;
                         }
@@ -4594,7 +4622,7 @@ impl MetronomeEngine {
                     let kit = cached.jam.as_deref().map(|t| t.kit_bank());
                     voices.retain(|v| {
                         let buf = jam_sample(&sounds, kit, v.sound_id);
-                        let frames = if v.band { buf.len() / 2 } else { buf.len() };
+                        let frames = if v.stereo { buf.len() / 2 } else { buf.len() };
                         !v.done(frames)
                     });
                 },
@@ -6326,7 +6354,7 @@ mod tests {
                         // `jam_sample` and not `bank.get`, so this harness
                         // resolves a drum exactly the way the callback does.
                         let buf = jam_sample(bank, Some(kit), v.sound_id);
-                        let frames = if v.band { buf.len() / 2 } else { buf.len() };
+                        let frames = if v.stereo { buf.len() / 2 } else { buf.len() };
                         let limit = if v.max_samples > 0 {
                             v.max_samples.min(frames)
                         } else {
@@ -6334,12 +6362,17 @@ mod tests {
                         };
                         if v.position < limit {
                             let g = v.choke_gain();
-                            if v.band {
-                                l += buf[2 * v.position] * v.amp_l * g;
-                                r += buf[2 * v.position + 1] * v.amp_r * g;
+                            let (sl, sr) = if v.stereo {
+                                (buf[2 * v.position], buf[2 * v.position + 1])
                             } else {
-                                l += buf[v.position] * v.amp_l;
-                                r += buf[v.position] * v.amp_r;
+                                (buf[v.position], buf[v.position])
+                            };
+                            if v.band {
+                                l += sl * v.amp_l * g;
+                                r += sr * v.amp_r * g;
+                            } else {
+                                l += sl * v.amp_l;
+                                r += sr * v.amp_r;
                             }
                         }
                         if v.band && v.fade_left > 0 {
@@ -6354,7 +6387,7 @@ mod tests {
                 }
                 voices.retain(|v| {
                     let buf = jam_sample(bank, Some(kit), v.sound_id);
-                    let frames = if v.band { buf.len() / 2 } else { buf.len() };
+                    let frames = if v.stereo { buf.len() / 2 } else { buf.len() };
                     !v.done(frames)
                 });
             }
@@ -8415,6 +8448,63 @@ mod tests {
         );
     }
 
+    /// A BASS NOTE COMES OUT OF THE MIXER AT THE PITCH IT WAS WRITTEN AT.
+    ///
+    /// The one claim nothing else in this file makes. Every other bass test
+    /// measures a slot's own buffer, or energy in a window, and a note an
+    /// octave out passes all of them: it is the same tone with the same
+    /// envelope, half as long and twice as fast, and a band-pass at
+    /// 200 Hz-4 kHz cannot tell those apart.
+    ///
+    /// So this one renders the band the way the callback does and counts
+    /// zero crossings. E2 is MIDI 40, which is 82.41 Hz, and the fingered
+    /// recipe is a fundamental with a fifth of a second harmonic over it
+    /// once the bite has died - two crossings a period and nothing else,
+    /// which is what makes the count a frequency.
+    #[test]
+    fn a_bass_note_sounds_at_the_pitch_it_was_written_at() {
+        let sr = 48_000u32;
+        let bank = SoundBank::new(sr);
+        let mut cfg = rock_16ths();
+        cfg.bar.kick = vec![0; 16];
+        cfg.bar.snare = vec![0; 16];
+        cfg.bar.hat = vec![0; 16];
+        let mut pitches = vec![0u8; 16];
+        pitches[0] = 40; // E2 — 440 × 2^((40 − 69) / 12) = 82.41 Hz.
+        cfg.bass = Some(JamBassLine { pitches, gain: 1.0 });
+        let table = compile_jam(&cfg).unwrap();
+        // 120 BPM sixteenths, one bar, no bus: the tanh would not move a
+        // zero crossing, but a measurement of a pitch should not have a
+        // compressor in it either.
+        let tick_samples = sr as usize * 60 / 120 / 4;
+        let r = render_jam_at(&table, &bank, 1, tick_samples, 1.0, sr, false);
+
+        // From 20 ms in — past the bite, whose twelve harmonics cross zero
+        // wherever they like — to where the note has decayed into the noise
+        // floor of an f32 sum.
+        let from = (0.020 * sr as f64) as usize;
+        let to = (0.240 * sr as f64) as usize;
+        let (mut first, mut last, mut count) = (f64::NAN, f64::NAN, 0usize);
+        for i in from + 1..to {
+            let (a, b) = (r.samples[i - 1] as f64, r.samples[i] as f64);
+            if a <= 0.0 && b > 0.0 {
+                let t = (i - 1) as f64 + (-a) / (b - a);
+                if count == 0 {
+                    first = t;
+                }
+                last = t;
+                count += 1;
+            }
+        }
+        assert!(count >= 8, "only {count} crossings — that is not a note");
+        let hz = sr as f64 / ((last - first) / (count - 1) as f64);
+        eprintln!("[bass] E2 rendered through the mixer at {hz:.2} Hz");
+        assert!(
+            (hz - 82.41).abs() < 1.0,
+            "E2 came out of the mixer at {hz:.2} Hz and E2 is 82.41 Hz"
+        );
+    }
+
     // -----------------------------------------------------------------
     // The keys
     // -----------------------------------------------------------------
@@ -8721,6 +8811,7 @@ mod tests {
                     fade_left: 0,
                     fade_len: 0,
                     band: true,
+                    stereo: true,
                 },
                 Voice::click(SoundId::Bass(BassVoice::Fingered, 4), 1.0, 0),
             ]
@@ -9207,7 +9298,7 @@ mod tests {
                 let mut mix = 0.0f32;
                 for v in voices.iter_mut() {
                     let buf = jam_sample(bank, Some(kit), v.sound_id);
-                    let frames = if v.band { buf.len() / 2 } else { buf.len() };
+                    let frames = if v.stereo { buf.len() / 2 } else { buf.len() };
                     let limit = if v.max_samples > 0 {
                         v.max_samples.min(frames)
                     } else {
@@ -9217,7 +9308,7 @@ mod tests {
                         // Down the middle: what this harness measures is
                         // WHICH LANES sounded, and a stereo fold would make
                         // a placed drum look quieter than it is.
-                        mix += if v.band {
+                        mix += if v.stereo {
                             (buf[2 * v.position] * v.amp_l + buf[2 * v.position + 1] * v.amp_r)
                                 * 0.5
                         } else {
@@ -9231,7 +9322,7 @@ mod tests {
             }
             voices.retain(|v| {
                 let buf = jam_sample(bank, Some(kit), v.sound_id);
-                let frames = if v.band { buf.len() / 2 } else { buf.len() };
+                let frames = if v.stereo { buf.len() / 2 } else { buf.len() };
                 !v.done(frames)
             });
         }
