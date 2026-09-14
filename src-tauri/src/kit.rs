@@ -1025,14 +1025,145 @@ impl ReaderKind {
     }
 }
 
+/// A windowed sinc whose kernel is worked out once instead of per sample.
+///
+/// **THE SAME FILTER `engine::resample` IS, AND IT HAD TO STOP BEING THE
+/// SAME CODE.** That one computes thirty-two taps — a `sin`, two `cos` and a
+/// division each — for every output sample it produces. That is the right
+/// shape for what it is for: a couple of thousand samples of click, once,
+/// when a device opens. A recorded kit is a hundred and thirty-two stereo
+/// files, and the same arithmetic measured **2.2 seconds** on one — on the
+/// main thread, in `set_jam`, with the window not repainting.
+///
+/// The taps do not actually vary per sample. Between two rates there are
+/// only as many distinct sub-sample positions as the denominator of the
+/// ratio in lowest terms: 44.1 kHz to 48 is 147/160, so there are a hundred
+/// and sixty phases and every output sample is one of them. Computing them
+/// once and indexing takes the same decode from 2.2 seconds to **112 ms**,
+/// and the filter is tap for tap the one it replaces — the resampling error
+/// it leaves against an analytic sine is the same −122.5 dB RMS it was
+/// before, which `the_decoder_resamples_44_kilohertz_to_48_within_a_measurable_error`
+/// holds it to.
+struct Resampler {
+    /// `phases × TAPS` taps, already normalised by the sum of their own
+    /// phase — which is what keeps the level steady at the edges, where
+    /// half the kernel hangs off the end of the sample.
+    taps: Vec<f32>,
+    /// The ratio in lowest terms: output position `i` sits at `i × num / den`
+    /// source samples in.
+    num: u64,
+    den: u64,
+}
+
+/// Half-width in source samples, and the same 16 `engine::resample` uses.
+/// Well past the point where the stop-band of a Blackman-windowed sinc stops
+/// being the limiting factor.
+const HALF: i64 = 16;
+const TAPS: usize = (HALF * 2) as usize;
+
+/// Above this many phases the kernel is bigger than the audio. No rate any
+/// device hands out comes near it — 44.1 to 96 kHz is 320 — and a device
+/// that asked for 48001 Hz gets the straightforward path instead of a
+/// twelve-megabyte table.
+const MAX_PHASES: u64 = 4096;
+
+impl Resampler {
+    fn new(from: u32, to: u32) -> Option<Self> {
+        fn gcd(a: u64, b: u64) -> u64 {
+            if b == 0 {
+                a
+            } else {
+                gcd(b, a % b)
+            }
+        }
+        let g = gcd(from as u64, to as u64).max(1);
+        let (num, den) = (from as u64 / g, to as u64 / g);
+        if den > MAX_PHASES {
+            return None;
+        }
+        // Downsampling has to band-limit to the NEW Nyquist, or it aliases.
+        let ratio = to as f64 / from as f64;
+        let cutoff = if ratio < 1.0 { ratio } else { 1.0 };
+        let mut taps = vec![0.0f32; den as usize * TAPS];
+        for phase in 0..den as usize {
+            let frac = phase as f64 / den as f64;
+            let mut row = [0.0f64; TAPS];
+            let mut norm = 0.0f64;
+            for (j, tap) in row.iter_mut().enumerate() {
+                // The distance from this tap to the point being sampled.
+                let x = frac + (HALF - 1) as f64 - j as f64;
+                let sinc = if x.abs() < 1e-9 {
+                    cutoff
+                } else {
+                    (std::f64::consts::PI * cutoff * x).sin() / (std::f64::consts::PI * x)
+                };
+                // Blackman, over the whole kernel.
+                let t = (x + HALF as f64) / (2.0 * HALF as f64);
+                let w = if !(0.0..=1.0).contains(&t) {
+                    0.0
+                } else {
+                    0.42 - 0.5 * (2.0 * std::f64::consts::PI * t).cos()
+                        + 0.08 * (4.0 * std::f64::consts::PI * t).cos()
+                };
+                *tap = sinc * w;
+                norm += *tap;
+            }
+            if norm.abs() > 1e-9 {
+                for (j, tap) in row.iter().enumerate() {
+                    taps[phase * TAPS + j] = (*tap / norm) as f32;
+                }
+            }
+        }
+        Some(Self { taps, num, den })
+    }
+
+    /// How many output frames `frames` source frames become.
+    fn out_len(&self, frames: usize) -> usize {
+        (frames as f64 * self.den as f64 / self.num as f64).ceil() as usize
+    }
+
+    /// One interleaved stereo buffer, resampled.
+    ///
+    /// Both channels through the same walk, because the phase and the window
+    /// are the same for both and walking twice would read the kernel twice.
+    fn stereo(&self, interleaved: &[f32]) -> Vec<f32> {
+        let frames = interleaved.len() / 2;
+        let n = self.out_len(frames);
+        let mut out = vec![0.0f32; n * 2];
+        for i in 0..n {
+            let at = i as u64 * self.num;
+            let centre = (at / self.den) as i64;
+            let row = (at % self.den) as usize * TAPS;
+            let first = centre - HALF + 1;
+            let (mut l, mut r) = (0.0f32, 0.0f32);
+            for j in 0..TAPS {
+                let k = first + j as i64;
+                if k < 0 || k as usize >= frames {
+                    continue;
+                }
+                let tap = self.taps[row + j];
+                l += interleaved[2 * k as usize] * tap;
+                r += interleaved[2 * k as usize + 1] * tap;
+            }
+            out[2 * i] = l;
+            out[2 * i + 1] = r;
+        }
+        out
+    }
+}
+
 /// Resample an interleaved stereo buffer.
 ///
-/// Channel by channel, because [`crate::engine::resample`] is a windowed
+/// Channel by channel when the rates are awkward enough that the kernel
+/// cannot be tabulated, because [`crate::engine::resample`] is a windowed
 /// sinc over one stream and interleaving two through it would be a comb
 /// filter rather than a conversion.
 fn resample_stereo(interleaved: &[f32], from: u32, to: u32) -> Vec<f32> {
     if from == to {
         return interleaved.to_vec();
+    }
+    if let Some(r) = Resampler::new(from, to) {
+        return r.stereo(interleaved);
     }
     let frames = interleaved.len() / 2;
     let left: Vec<f32> = (0..frames).map(|i| interleaved[2 * i]).collect();

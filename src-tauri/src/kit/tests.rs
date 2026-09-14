@@ -968,16 +968,35 @@ fn the_decode_is_quick_enough_to_run_on_the_command_thread() {
         bank.bytes as f64 / (1024.0 * 1024.0),
         millis
     );
+    // ...and the same kit onto a device that is not at its own rate, which
+    // is the expensive path and the one a musician's own folder usually
+    // takes: the same decode plus a thirty-two-tap windowed sinc over every
+    // sample of every file.
+    let started = std::time::Instant::now();
+    load(scratch.path(), 44_100).expect("a 4 x 3 stereo kit resamples");
+    let resampled = started.elapsed().as_secs_f64() * 1000.0;
+    eprintln!("[kit] the same kit onto a 44.1 kHz device: {resampled:.0} ms");
     assert_eq!(bank.found.len(), KIT_VOICES);
     for v in KitVoice::ALL {
         let voice = bank.voice(v).expect("every voice");
         assert_eq!((voice.layers(), voice.rr()), (4, 3));
     }
     let gate = if cfg!(debug_assertions) { 12_000.0 } else { 1_500.0 };
+    for (what, took) in [("at its own rate", millis), ("resampled", resampled)] {
+        assert!(
+            took < gate,
+            "a 4 x 3 stereo kit took {took:.0} ms to decode {what}, against a gate \
+             of {gate:.0} — that is not a window anybody would call responsive, and \
+             it is far enough over to be a decode that went quadratic"
+        );
+    }
+    // THE RESAMPLE IS NOT AN ORDER OF MAGNITUDE. It was, before the kernel
+    // stopped being recomputed for every output sample: 60 ms became 2.2
+    // seconds, on the main thread, with the window not repainting. See
+    // `Resampler`.
     assert!(
-        millis < gate,
-        "a 4 x 3 stereo kit took {millis:.0} ms to decode against a gate of \
-         {gate:.0} — that is not a window anybody would call responsive, and \
-         it is far enough over to be a decode that went quadratic"
+        resampled < millis.max(1.0) * 8.0,
+        "resampling cost {resampled:.0} ms against {millis:.0} ms without it, \
+         which is the per-sample kernel back again"
     );
 }
