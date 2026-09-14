@@ -40,6 +40,14 @@
 //!                        set and a jump every 2 s. Combines with --jam-swap
 //!   --jam-kit <dir>      --jam, with the drums decoded from a folder of
 //!                        your own WAVs. Combines with the three below
+//!   --jam-voice <dir>    --jam, with the BASS AND THE KEYS played out of a
+//!                        folder of recorded notes rather than out of the
+//!                        synthesised recipes. That is a mono buffer through
+//!                        the drum bus, a round robin decided on the tick,
+//!                        and a raised-cosine release on every note the
+//!                        line's cap ends — the one per-sample `cos`
+//!                        anywhere near the callback, and the reason this
+//!                        flag exists
 //!   --jam-take           --jam, and record a take for the whole run: the
 //!                        callback copies its mix into a lock-free ring and
 //!                        a writer thread resamples, mixes and writes it to
@@ -79,11 +87,17 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use yames_lib::probe::{
-    compile_jam, compile_jam_with_kit, create_beat_log, create_shared_state, load_kit,
-    reference_bank, CallbackProbe, CallbackSample, JamBassLine, KitBank,
-    JamConfig, JamKeysLine, JamMix, JamPattern, JamPosition, MetronomeEngine, TakeRing, TakeSession,
-    TakeStart,
+    compile_jam, compile_jam_with_voices, create_beat_log,
+    create_shared_state, load_kit, load_voice_bank, reference_bank, CallbackProbe, CallbackSample,
+    JamBassLine, JamConfig, JamKeysLine, JamMix, JamPattern, JamPosition, JamVoices, KitBank,
+    MelodicBank, MetronomeEngine, TakeRing, TakeSession, TakeStart,
 };
+
+/// The bass's range, mirrored from `engine.rs`. The probe builds a melodic
+/// bank by hand, so it has to say which notes the band can ask for.
+const PROBE_BASS_RANGE: (u8, u8) = (28, 55);
+/// And the comping range.
+const PROBE_KEYS_RANGE: (u8, u8) = (48, 84);
 
 /// Pessimistic upper bound on callbacks per second used to size the
 /// preallocated arena: 4000/s is a 0.25 ms buffer at 48 kHz, well below
@@ -118,6 +132,15 @@ struct Args {
     /// take actually puts on the machine, and the one path where the audio
     /// thread does work on behalf of the filesystem.
     jam_take: bool,
+    /// `--jam`, and play the bass and the keys out of this folder of
+    /// recorded notes instead of the synthesised recipes.
+    ///
+    /// ONE FOLDER FOR BOTH LINES, and it works because the loader is asked
+    /// for a range rather than told one: it builds whatever notes the band
+    /// can ask for out of whatever notes the folder holds. A bank that spans
+    /// the band covers a bass and a comping voice at once, and one that does
+    /// not says so on the console and still plays.
+    jam_voice: Option<String>,
     /// `--jam`, and play the drums out of this folder of WAVs instead of a
     /// built-in kit. The one sound source the audio thread reads that was
     /// not compiled into the binary: decoded on the command thread, handed
@@ -147,6 +170,7 @@ impl Default for Args {
             jam_move: false,
             jam_take: false,
             jam_kit: None,
+            jam_voice: None,
             bpm_set: false,
             subdivision_set: false,
         }
@@ -210,6 +234,11 @@ fn parse_args() -> Result<Args, String> {
                 a.jam = true;
                 a.jam_take = true;
                 consumed = 1;
+            }
+            "--jam-voice" => {
+                a.jam = true;
+                a.jam_voice = Some(value(i)?.to_string());
+                i += 2;
             }
             "--jam-kit" => {
                 a.jam = true;
@@ -277,6 +306,9 @@ click-jitter-probe — ROADMAP §4 audio-safety gate
   --jam-take         --jam, and record a take for the whole run (the
                      callback's ring, a synthetic 44.1 kHz mic, and a
                      writer thread on the disk). Combines with both.
+  --jam-voice <dir>  --jam, with the bass and the keys coming from a folder
+                     of recorded notes rather than from the synthesised
+                     recipes. Combines with the others
   --jam-kit <dir>    --jam, with the drums coming from a folder of your
                      own WAVs (kick, snare, snare_soft, hat, hat_open,
                      ride, rim, crash) rather than a built-in kit. The
@@ -726,24 +758,83 @@ fn main() -> ExitCode {
                 bank.rate,
                 bank.bytes as f64 / (1024.0 * 1024.0),
             );
-            match compile_jam_with_kit(&busiest_jam(), bank.clone()) {
-                Ok(table) => {
-                    eprintln!(
-                        "[probe] jam recompiled on the custom kit; loudest sample \
-                         {:.3} -> {:.3} after normalisation",
-                        table.peak_before, table.peak_after,
-                    );
-                    engine.set_jam_table(Some(Arc::new(table)));
-                }
-                Err(e) => {
-                    eprintln!("error: the probe's jam did not compile on that kit: {e}");
-                    return ExitCode::from(2);
-                }
-            }
             Some(bank)
         }
         None => None,
     };
+
+    // `--jam-voice`: recorded bass and keys, built HERE for the reason the
+    // kit is decoded here — a bank's notes are built at the OUTPUT rate, and
+    // the output rate is not a thing anyone knows until the device has
+    // opened. One folder, asked for two ranges.
+    let voices: JamVoices = match args.jam_voice {
+        Some(ref dir) => {
+            let rate = engine.output_sample_rate().unwrap_or(48_000);
+            let path = std::path::Path::new(dir);
+            let build = |low: u8, high: u8| -> Result<Arc<MelodicBank>, String> {
+                load_voice_bank(path, rate, low, high).map(Arc::new)
+            };
+            let (bass, keys) = match (
+                build(PROBE_BASS_RANGE.0, PROBE_BASS_RANGE.1),
+                build(PROBE_KEYS_RANGE.0, PROBE_KEYS_RANGE.1),
+            ) {
+                (Ok(b), Ok(k)) => (b, k),
+                (Err(e), _) | (_, Err(e)) => {
+                    eprintln!("error: --jam-voice {dir}: {e}");
+                    return ExitCode::from(2);
+                }
+            };
+            for (what, bank) in [("bass", &bass), ("keys", &keys)] {
+                eprintln!(
+                    "[probe] {what} from {dir}: {} notes x {} layers x {} rr at {} Hz, \
+                     {:.1} MB, {} ms release, furthest note {} semitones from its sample",
+                    bank.notes(),
+                    bank.layers(),
+                    bank.rr(),
+                    bank.rate,
+                    bank.bytes as f64 / (1024.0 * 1024.0),
+                    bank.release_frames * 1000 / bank.rate.max(1),
+                    bank.worst_stretch,
+                );
+            }
+            JamVoices {
+                bass: Some(bass),
+                keys: Some(keys),
+            }
+        }
+        None => JamVoices::default(),
+    };
+
+    // Either flag means the table the stream opened with is the wrong one,
+    // so it is recompiled and handed over live — which is more of a test
+    // than a table set before the first buffer, not less. It lands inside
+    // the warm-up window the measurement already excludes.
+    if args.jam_kit.is_some() || args.jam_voice.is_some() {
+        let bank = match custom_kit.clone() {
+            Some(b) => b,
+            None => match reference_bank(&busiest_jam().kit) {
+                Ok(b) => b,
+                Err(e) => {
+                    eprintln!("error: the probe's kit did not decode: {e}");
+                    return ExitCode::from(2);
+                }
+            },
+        };
+        match compile_jam_with_voices(&busiest_jam(), bank, voices.clone()) {
+            Ok(table) => {
+                eprintln!(
+                    "[probe] jam recompiled on the folders it was given; loudest \
+                     sample {:.3} -> {:.3} after normalisation",
+                    table.peak_before, table.peak_after,
+                );
+                engine.set_jam_table(Some(Arc::new(table)));
+            }
+            Err(e) => {
+                eprintln!("error: the probe's jam did not compile on those folders: {e}");
+                return ExitCode::from(2);
+            }
+        }
+    }
 
     eprintln!(
         "[probe] {} BPM / subdivision {} ({:.1} ticks/s, {:.2} ms apart), warmup {} ms, window {} s",
@@ -772,14 +863,17 @@ fn main() -> ExitCode {
             Some(b) => b,
             None => reference_bank(&busiest_jam().kit).expect("the probe's kit decodes"),
         };
-        let table_a =
-            Arc::new(compile_jam_with_kit(&busiest_jam(), bank.clone()).expect("compiled above"));
+        let table_a = Arc::new(
+            compile_jam_with_voices(&busiest_jam(), bank.clone(), voices.clone())
+                .expect("compiled above"),
+        );
         let mut cfg_b = busiest_jam();
         if let Some(ref mut b) = cfg_b.bass {
             b.gain = 0.9;
         }
         let table_b = Arc::new(
-            compile_jam_with_kit(&cfg_b, bank).expect("the probe's swap table did not compile"),
+            compile_jam_with_voices(&cfg_b, bank, voices.clone())
+                .expect("the probe's swap table did not compile"),
         );
         let swaps = Arc::new(std::sync::atomic::AtomicU64::new(0));
         let count = swaps.clone();
@@ -1033,6 +1127,9 @@ fn main() -> ExitCode {
     }
     // Last, because `--jam-swap` is spelled by appending "-swap" to the
     // "--jam" above it and anything in between turns it into nonsense.
+    if let Some(ref dir) = args.jam_voice {
+        mode.push_str(&format!(" + --jam-voice ({dir})"));
+    }
     if let Some(ref dir) = args.jam_kit {
         mode.push_str(&format!(" + --jam-kit ({dir})"));
     }

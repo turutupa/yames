@@ -31,6 +31,16 @@ pub struct JamGainState(pub crate::jam::JamGainCache);
 #[derive(Default)]
 pub struct JamKitState(pub crate::kit::KitCache);
 
+/// The melodic banks `set_jam` has already built.
+///
+/// Managed state for the reason `JamKitState` is, and against the same
+/// traffic — with more to lose on a miss: building a bass bank is twenty-
+/// eight notes resampled from twelve, which is a hundred milliseconds on the
+/// command thread, and paying it four to six times a chorus would be a
+/// hitch on every bar line. See `VoiceCache` in `voices.rs`.
+#[derive(Default)]
+pub struct JamVoiceState(pub crate::voices::VoiceCache);
+
 /// Snapshot the current AppState and emit it on the `state-changed`
 /// event. Lock is dropped before the emit so the (synchronous-but-not-
 /// instant) serde serialization can't block any other thread waiting on
@@ -2506,6 +2516,7 @@ pub fn set_jam(
     engine_state: State<EngineState>,
     jam_gain: State<JamGainState>,
     jam_kit: State<JamKitState>,
+    jam_voices: State<JamVoiceState>,
 ) -> Result<(), String> {
     let table = match config {
         Some(ref cfg) => {
@@ -2519,19 +2530,19 @@ pub fn set_jam(
             // of a second of start-up for drums nobody asked for. The cache
             // makes all but the first send of a jam a stat and an `Arc`
             // clone — see `KitCache` in `kit.rs`.
+            // The rate the device is actually running at, so the kit and the
+            // melodic banks are built once at the rate they will be played
+            // at. Before a device opens there is nothing to ask, and the
+            // reference rate is the honest guess — the next `set_jam` after
+            // the stream starts rebuilds, and with the bar-ahead handshake
+            // that is at most a bar away.
+            let rate = engine_state
+                .0
+                .lock()
+                .unwrap()
+                .output_sample_rate()
+                .unwrap_or(crate::engine::JAM_REFERENCE_SR);
             let bank = {
-                // The rate the device is actually running at, so the kit is
-                // decoded once at the rate it will be played at. Before a
-                // device opens there is nothing to ask, and the reference
-                // rate is the honest guess — the next `set_jam` after the
-                // stream starts re-decodes, and with the bar-ahead
-                // handshake that is at most a bar away.
-                let rate = engine_state
-                    .0
-                    .lock()
-                    .unwrap()
-                    .output_sample_rate()
-                    .unwrap_or(crate::engine::JAM_REFERENCE_SR);
                 let shipped = crate::engine::JamKit::from_name(&cfg.kit).0;
                 match cfg.custom_kit {
                     // A FOLDER IS A KIT WITH A KIT BEHIND IT. A voice the
@@ -2550,8 +2561,16 @@ pub fn set_jam(
                     None => jam_kit.0.shipped(shipped, rate)?,
                 }
             };
+            // AND WHICH BASS AND WHICH KEYS, at the same rate and through
+            // the same shape of cache. A voice whose folder ships plays the
+            // recording; one whose folder does not — and `synth`, `organ`,
+            // `clav` and `pad`, which are synthesisers in real life — plays
+            // the recipe it always has. Resolved here, on the command
+            // thread, so the audio thread receives notes rather than a
+            // decision.
+            let voices = crate::jam::resolve_voices(cfg, &jam_voices.0, rate)?;
             Some(std::sync::Arc::new(crate::jam::compile_with(
-                cfg, &jam_gain.0, bank,
+                cfg, &jam_gain.0, bank, voices,
             )?))
         }
         None => None,
