@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { deletePreset, listPresets, savePreset } from "../../ipc";
 import { meterLabel, presetBeatGroups, presetFreeMode } from "../../utils/meter";
 import { formBars } from "../../jam/forms";
+import { VIBES } from "../../jam/vibes";
 import type { AppState, Setlist, Preset } from "../../types";
 import type { Jam } from "../../jam/types";
 import { JamGlyph } from "../jam/JamGlyph";
@@ -220,6 +221,15 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
    */
   const [dragJamId, setDragJamId] = useState<string | null>(null);
   const [dragOverJamId, setDragOverJamId] = useState<string | null>(null);
+  /**
+   * Which style the jam library is showing, or null for all of them.
+   *
+   * Fifty starters is a library rather than a shelf (JAM_KILLER §2 A3), and
+   * "the blues ones" is how a player asks for a third of it. A vibe rather
+   * than a groove family: a jam is a piece of music, and what it belongs to is
+   * the tile it came off, not the table its drummer reads.
+   */
+  const [jamVibe, setJamVibe] = useState<string | null>(null);
   const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const renameRef = useRef<HTMLInputElement>(null);
@@ -465,9 +475,22 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
     : [];
   const showJams = view === "jam" && !!jams;
   const jamList = showJams
-    ? (search.trim()
-        ? jams!.filter((j) => j.name.toLowerCase().includes(search.toLowerCase()))
-        : jams!)
+    ? jams!.filter(
+        (j) =>
+          (!search.trim() || j.name.toLowerCase().includes(search.toLowerCase())) &&
+          (!jamVibe || j.vibe === jamVibe),
+      )
+    : [];
+  /**
+   * The chips to offer: only the styles the library actually holds.
+   *
+   * A chip for a vibe nobody has a jam in is a chip that empties the list, and
+   * a filter that can show you nothing is a filter people stop trusting. The
+   * current one is kept even when it empties, so the row does not rearrange
+   * itself under the finger that just tapped it.
+   */
+  const jamVibes = showJams
+    ? VIBES.filter((v) => v.id === jamVibe || jams!.some((j) => j.vibe === v.id))
     : [];
 
   /**
@@ -621,6 +644,33 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
         </div>
         )}
 
+        {/* The jam library's style filter (A3). Above the list rather than in
+            the header: it narrows what is under it, and a control that lives
+            beside the search field would read as another way to search. */}
+        {showJams && jamVibes.length > 1 && (
+          <div className="preset-sidebar-filter" role="group" aria-label={t("jam.filter.style")}>
+            <button
+              type="button"
+              className={`preset-sidebar-chip${jamVibe === null ? " active" : ""}`}
+              aria-pressed={jamVibe === null}
+              onClick={() => setJamVibe(null)}
+            >
+              {t("jam.filter.all")}
+            </button>
+            {jamVibes.map((v) => (
+              <button
+                key={v.id}
+                type="button"
+                className={`preset-sidebar-chip${jamVibe === v.id ? " active" : ""}`}
+                aria-pressed={jamVibe === v.id}
+                onClick={() => setJamVibe(jamVibe === v.id ? null : v.id)}
+              >
+                {t(v.nameKey)}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="preset-sidebar-list">
           {/* Setlists sit above the presets and above the rule that separates
               them: they are the bigger thing, and a list that opened with
@@ -754,7 +804,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               )}
             </div>
           ))}
-          {showJams && jamList.length === 0 && search.trim() && (
+          {showJams && jamList.length === 0 && (search.trim() || jamVibe) && (
             <div className="preset-sidebar-empty">{t("presets.noResults")}</div>
           )}
 

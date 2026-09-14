@@ -449,8 +449,16 @@ describe("the bar before this one", () => {
 
 describe("the tables cover the content", () => {
   it("files every groove in the picker under a family", () => {
-    const missing = GROOVES.filter((groove) => !(groove.id in FAMILY_FOR_GROOVE));
+    // Through `styleFamily` rather than through the table alone: the content
+    // pass landed `Groove.family`, so the table in front of it is now only the
+    // eighteen grooves whose arrangement differs from their shelf, and the
+    // other ninety-seven answer for themselves.
+    const missing = GROOVES.filter((groove) => !FAMILY_PLAN[styleFamily({ grooveId: groove.id })]);
     expect(missing.map((g) => g.id)).toEqual([]);
+    // And the table's own entries still win where they disagree with a shelf.
+    for (const [id, family] of Object.entries(FAMILY_FOR_GROOVE)) {
+      expect(styleFamily({ grooveId: id }), id).toBe(family);
+    }
   });
 
   it("files every vibe tile under a family", () => {

@@ -168,7 +168,7 @@ function mount(view = "jam", extra: Omit<Props, "v"> = {}) {
 describe("seeding", () => {
   it("seeds the six starters the first time, and saves them", async () => {
     const { result } = mount();
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     expect(result.current.jams.map((j) => j.name)).toEqual(
       STARTER_JAMS.map((j) => j.name),
     );
@@ -213,7 +213,7 @@ describe("seeding", () => {
 describe("what reaches the engine", () => {
   it("sets the meter before the table, every time", async () => {
     const { result } = mount();
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     calls.length = 0;
 
     act(() => result.current.loadJam(result.current.jams[2])); // the bossa
@@ -227,7 +227,7 @@ describe("what reaches the engine", () => {
 
   it("sends the meter the compiled table is actually written in", async () => {
     const { result } = mount();
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     calls.length = 0;
 
     const waltz = result.current.jams.find((j) => j.grooveId === "waltz")!;
@@ -246,7 +246,7 @@ describe("what reaches the engine", () => {
 
   it("follows the feel onto the triplet grid", async () => {
     const { result } = mount();
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     const rock = result.current.jams.find((j) => j.grooveId === "rock8")!;
     act(() => result.current.loadJam(rock));
     await waitFor(() => expect(names("setJam")).toHaveLength(1));
@@ -263,7 +263,7 @@ describe("what reaches the engine", () => {
     // Re-sending the meter on every nudge of the BPM would rebuild the bar
     // under a player mid-chorus.
     const { result } = mount();
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     act(() => result.current.loadJam(result.current.jams[0]));
     await waitFor(() => expect(names("setJam")).toHaveLength(1));
     calls.length = 0;
@@ -279,7 +279,7 @@ describe("what reaches the engine", () => {
     // from the key that decides whether to re-send, so the drummer went on
     // filling at the chorus end until some unrelated edit pushed it.
     const { result } = mount();
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     const rock = result.current.jams.find((j) => j.grooveId === "rock8")!;
     act(() => result.current.loadJam({ ...rock, fills: true, fillEvery: 0 }));
     await waitFor(() => expect(names("setJam")).toHaveLength(1));
@@ -292,7 +292,7 @@ describe("what reaches the engine", () => {
 
   it("takes the band away when you leave the tab, and brings it back", async () => {
     const { result, rerender } = mount();
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     act(() => result.current.loadJam(result.current.jams[0]));
     await waitFor(() => expect(names("setJam")).toHaveLength(1));
     calls.length = 0;
@@ -311,7 +311,7 @@ describe("what reaches the engine", () => {
     // it on the engine while this hook holds nothing; a `setJam(null)` from
     // here would take that band away, from a hook that never loaded anything.
     const { result } = mount();
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     expect(names("setBeatGroups")).toHaveLength(0);
     expect(names("setJam")).toHaveLength(0);
   });
@@ -321,7 +321,7 @@ describe("what reaches the engine", () => {
     // Metronome to check something. This hook has no jam; every tab change
     // used to send `setJam(null)` anyway and the drummer stopped mid-step.
     const { result, rerender } = mount("setlist");
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     calls.length = 0;
 
     rerender({ v: "beat" });
@@ -339,7 +339,7 @@ describe("what reaches the engine", () => {
 describe("the bass, one bar ahead", () => {
   async function loadedBlues(extra: Omit<Props, "v"> = {}) {
     const harness = mount("jam", { playing: true, beat: beatAt(0), ...extra });
-    await waitFor(() => expect(harness.result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(harness.result.current.jams).toHaveLength(STARTER_JAMS.length));
     const blues = harness.result.current.jams.find((j) => j.form.kind === "blues12")!;
     act(() => harness.result.current.loadJam(blues));
     await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
@@ -490,7 +490,7 @@ describe("the bass, one bar ahead", () => {
     // first, the engine checks it against the meter it has not been given
     // yet, refuses it, and the band is gone with nothing on screen to say so.
     const { result } = mount("jam", { playing: true, beat: beatAt(0) });
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     const waltz = result.current.jams.find((j) => j.grooveId === "waltz")!;
     act(() => result.current.loadJam(waltz));
     await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
@@ -511,7 +511,7 @@ describe("the bass, one bar ahead", () => {
     // already making. Press play and the very first downbeat still has to
     // hand the engine bar two, or bar two plays bar one's bass.
     const { result, rerender } = mount("jam", { playing: false, beat: null });
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     const blues = result.current.jams.find((j) => j.form.kind === "blues12")!;
     act(() => result.current.loadJam(blues));
     await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
@@ -531,7 +531,7 @@ describe("the bass, one bar ahead", () => {
       beat: beatAt(0),
       countingIn: true,
     });
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     const blues = result.current.jams.find((j) => j.form.kind === "blues12")!;
     act(() => result.current.loadJam(blues));
     await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
@@ -555,7 +555,7 @@ describe("the bass, one bar ahead", () => {
     const bare = beatAt(0) as Partial<BeatEvent>;
     delete bare.formBar;
     const { result, rerender } = mount("jam", { playing: true, beat: beatAt(0) });
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     const blues = result.current.jams.find((j) => j.form.kind === "blues12")!;
     act(() => result.current.loadJam(blues));
     await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
@@ -576,7 +576,7 @@ describe("the bass, one bar ahead", () => {
 describe("the tempo trainer", () => {
   async function trained(step: number, every: number) {
     const harness = mount("jam", { playing: true, beat: beatAt(0, 1) });
-    await waitFor(() => expect(harness.result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(harness.result.current.jams).toHaveLength(STARTER_JAMS.length));
     act(() => harness.result.current.loadJam(harness.result.current.jams[0]));
     act(() =>
       harness.result.current.editJam({
@@ -664,7 +664,7 @@ describe("the tempo trainer", () => {
 describe("the library", () => {
   it("saves an edit only when you ask it to, and says so meanwhile", async () => {
     const { result } = mount();
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     act(() => result.current.loadJam(result.current.jams[0]));
     expect(result.current.dirty).toBe(false);
 
@@ -679,7 +679,7 @@ describe("the library", () => {
 
   it("throws the edits away on revert", async () => {
     const { result } = mount();
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     const original = result.current.jams[0].bpm;
     act(() => result.current.loadJam(result.current.jams[0]));
     act(() => result.current.editJam({ bpm: 108 }));
@@ -693,13 +693,13 @@ describe("the library", () => {
   it("makes a new jam from the one that is loaded", async () => {
     // "+" means "another one like this", not "start again".
     const { result } = mount();
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     const bossa = result.current.jams[2];
     act(() => result.current.loadJam(bossa));
     act(() => {
       result.current.newJam();
     });
-    await waitFor(() => expect(result.current.jams).toHaveLength(7));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length + 1));
     const created = result.current.jam!;
     expect(created.id).not.toBe(bossa.id);
     expect(created.grooveId).toBe(bossa.grooveId);
@@ -712,11 +712,11 @@ describe("the library", () => {
     // guitarist's brand new jam opened with a bass line already under
     // everything, and "drums alone" was one toggle away nobody would find.
     const { result } = mount("jam", { instrument: "electric-guitar" });
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     act(() => {
       result.current.newJam();
     });
-    await waitFor(() => expect(result.current.jams).toHaveLength(7));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length + 1));
     expect(result.current.jam!.band).toEqual({ drums: true, bass: false, keys: false });
   });
 
@@ -724,11 +724,11 @@ describe("the library", () => {
     // A drummer with drums alone has nothing to play against, and the band
     // still never plays your instrument.
     const { result } = mount("jam", { instrument: "drums" });
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     act(() => {
       result.current.newJam();
     });
-    await waitFor(() => expect(result.current.jams).toHaveLength(7));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length + 1));
     expect(result.current.jam!.band).toEqual({ drums: false, bass: true, keys: false });
   });
 
@@ -736,7 +736,7 @@ describe("the library", () => {
     // A1. A new jam has nothing set, so the sheet is where you are; the
     // moment the band comes in, the thing you need is the timeline behind it.
     const { result, rerender } = mount("jam");
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     expect(result.current.screen.setupOpen).toBe(false);
 
     act(() => {
@@ -752,7 +752,7 @@ describe("the library", () => {
     // A sheet left down would be the first thing the NEXT jam showed,
     // describing the one before it.
     const { result } = mount();
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     act(() => result.current.loadJam(result.current.jams[0]));
     act(() => result.current.screen.setChordsOpen(true));
     await waitFor(() => expect(result.current.screen.chordsOpen).toBe(true));
@@ -763,17 +763,17 @@ describe("the library", () => {
 
   it("puts a duplicate next to the jam it came from", async () => {
     const { result } = mount();
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     const source = result.current.jams[1];
     act(() => result.current.duplicateJam(source.id));
-    await waitFor(() => expect(result.current.jams).toHaveLength(7));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length + 1));
     expect(result.current.jams[2].grooveId).toBe(source.grooveId);
     expect(result.current.jams[2].id).not.toBe(source.id);
   });
 
   it("keeps the order the library is dragged into", async () => {
     const { result } = mount();
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     const first = result.current.jams[0].id;
     act(() => result.current.reorderJams(0, 3));
     await waitFor(() => expect(result.current.jams[3].id).toBe(first));
@@ -783,17 +783,17 @@ describe("the library", () => {
 
   it("closes a jam it deletes, and leaves the others alone", async () => {
     const { result } = mount();
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     const doomed = result.current.jams[0];
     act(() => result.current.loadJam(doomed));
     act(() => result.current.deleteJam(doomed.id));
-    await waitFor(() => expect(result.current.jams).toHaveLength(5));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length - 1));
     expect(result.current.jam).toBeNull();
   });
 
   it("does not go dirty over a rename", async () => {
     const { result } = mount();
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     const target = result.current.jams[0];
     act(() => result.current.loadJam(target));
     act(() => result.current.renameJam(target.id, "Tuesday blues"));
@@ -817,7 +817,7 @@ async function loaded(
   extra: Omit<Props, "v"> = {},
 ) {
   const harness = mount("jam", extra);
-  await waitFor(() => expect(harness.result.current.jams).toHaveLength(6));
+  await waitFor(() => expect(harness.result.current.jams).toHaveLength(STARTER_JAMS.length));
   const jam = pick(harness.result.current.jams);
   act(() => harness.result.current.loadJam(jam));
   await waitFor(() => expect(harness.result.current.jam?.id).toBe(jam.id));
@@ -962,7 +962,7 @@ describe("the metronome's meter", () => {
   /** A jam pushed from a 7/8 metronome in sixteenths. */
   async function fromSevenEight() {
     const harness = mount("beat", { meter: SEVEN_EIGHT });
-    await waitFor(() => expect(harness.result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(harness.result.current.jams).toHaveLength(STARTER_JAMS.length));
     act(() => harness.result.current.loadJam(harness.result.current.jams[0]));
     harness.rerender({ v: "jam", meter: SEVEN_EIGHT });
     await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
@@ -1306,7 +1306,7 @@ describe("the vibe preview", () => {
 describe("Jam now", () => {
   it("makes the jam its instrument asks for and counts the band in", async () => {
     const { result } = mount("jam", { instrument: "bass" });
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     calls.length = 0;
 
     act(() => {
@@ -1315,8 +1315,10 @@ describe("Jam now", () => {
 
     // A bass player gets funk (the plan's table), named for the vibe, saved.
     expect(result.current.jam?.vibe).toBe("funk");
-    expect(result.current.jams).toHaveLength(7);
-    expect(result.current.jams[6].id).toBe(result.current.jam?.id);
+    expect(result.current.jams).toHaveLength(STARTER_JAMS.length + 1);
+    // Appended, so it is the last row of the library rather than one of the
+    // fifty that ship.
+    expect(result.current.jams[STARTER_JAMS.length].id).toBe(result.current.jam?.id);
     expect(names("saveJams")).toHaveLength(1);
     // The point is to be playing, not to be setting up.
     expect(result.current.screen.setupOpen).toBe(false);
@@ -1334,21 +1336,21 @@ describe("Jam now", () => {
 
   it("starts the one it already made instead of making another", async () => {
     const { result, rerender } = mount("jam", { instrument: "electric-guitar" });
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
 
     act(() => {
       result.current.jamNow();
     });
     const first = result.current.jam!.id;
     await waitFor(() => expect(names("togglePlayback")).toHaveLength(1));
-    expect(result.current.jams).toHaveLength(7);
+    expect(result.current.jams).toHaveLength(STARTER_JAMS.length + 1);
 
     // Pressed again, with the band already playing it.
     rerender({ v: "jam", playing: true, beat: beatAt(0), instrument: "electric-guitar" });
     act(() => {
       result.current.jamNow();
     });
-    expect(result.current.jams).toHaveLength(7);
+    expect(result.current.jams).toHaveLength(STARTER_JAMS.length + 1);
     expect(result.current.jam!.id).toBe(first);
     // Already playing: a second press must not stop it.
     expect(names("togglePlayback")).toHaveLength(1);
@@ -1356,7 +1358,7 @@ describe("Jam now", () => {
 
   it("gives a guitarist rock", async () => {
     const { result } = mount("jam", { instrument: "acoustic-guitar" });
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     act(() => {
       result.current.jamNow();
     });
@@ -1367,7 +1369,7 @@ describe("Jam now", () => {
     // Its own test rather than a second mount: the store is module state, so
     // a second harness in one test reads the library the first one wrote.
     const { result } = mount("jam", { instrument: "piano" });
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     act(() => {
       result.current.jamNow();
     });
@@ -1382,7 +1384,7 @@ describe("Jam now", () => {
 describe("the arrangement, one bar ahead", () => {
   async function arranged(arrangement: Jam["arrangement"], patch: Partial<Jam> = {}) {
     const harness = mount("jam", { playing: true, beat: beatAt(0) });
-    await waitFor(() => expect(harness.result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(harness.result.current.jams).toHaveLength(STARTER_JAMS.length));
     const blues = harness.result.current.jams.find((j) => j.form.kind === "blues12")!;
     act(() => harness.result.current.loadJam(blues));
     await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));

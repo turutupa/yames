@@ -1,5 +1,5 @@
 /**
- * Jam records — making them, renaming them, and the six that ship.
+ * Jam records — making them, renaming them, and the fifty that ship.
  *
  * Pure, like `setlist/setlists.ts`, and for the same reason: the library edits
  * a jam across several clicks and a drag, and deciding when that reaches the
@@ -9,8 +9,15 @@
 import { grooveById } from "./grooves";
 import { clampFormBars, formBars } from "./forms";
 import { progressionEdit } from "./progression";
-import { JAM_MAX_COUNT_IN } from "./types";
-import type { Jam, JamCountInSound, JamForm } from "./types";
+import { JAM_FORM_BARS, JAM_MAX_COUNT_IN } from "./types";
+import type {
+  Jam,
+  JamCountInSound,
+  JamFeel,
+  JamForm,
+  JamFormKind,
+  JamIntensity,
+} from "./types";
 
 /**
  * The same scheme `setlists.ts` uses: sortable-ish by time, short enough to
@@ -225,7 +232,97 @@ export function reorderJams(list: Jam[], from: number, to: number): Jam[] {
 }
 
 /**
- * The six that ship, so the first press of Jam already plays (JAM_MODE §4.6).
+ * The other forty-four (plans/JAM_KILLER.md §2 A3), and what builds them.
+ *
+ * Six starters is enough to prove the mode works and not enough to open the
+ * app twice. Fifty is a library: five or six for each of the nine vibes, each
+ * one a piece of music a player would recognise from its name alone — "Jump
+ * blues in B flat", "Rhythm changes in B flat", "Two-step in A" — with the
+ * changes that actually go under it rather than the same I–IV–V fifty times.
+ *
+ * The six below are written out longhand because each carries an argument in
+ * its comments. The forty-four after them go through `starter`, which is the
+ * same record with the four fields that never vary — the creation date, the
+ * count-in, the chords and the fills — filled in once.
+ */
+
+/** The changes of a section, played round until `bars` are full. */
+function round(section: readonly string[], bars: number): string[] {
+  const out: string[] = [];
+  for (let i = 0; i < bars; i += 1) out.push(section[i % section.length]);
+  return out;
+}
+
+/**
+ * The twelve bars, as the shape rather than as twelve strings each time.
+ *
+ * This is the blues as a form — one, four, one, one, four, four, one, one,
+ * five, four, one, turnaround — and the three jams that use it differ in their
+ * chords, not in their shape. The ones whose shape is its own (the quick
+ * change, the jazz blues, the minor blues) write their twelve out.
+ */
+function twelveBar(one: string, four: string, five: string): string[] {
+  return [one, four, one, one, four, four, one, one, five, four, one, five];
+}
+
+/**
+ * Rhythm changes, as its two sections.
+ *
+ * The A is the I–vi–ii–V everybody learns first; the B is four dominants a
+ * fifth apart, two bars each, arriving on the five. One chord per bar — the
+ * downbeat of each — because that is what a progression is here.
+ */
+const RHYTHM_A = ["Bbmaj7", "Cm7", "Dm7", "Cm7", "Bbmaj7", "Cm7", "Bbmaj7", "F7"];
+const RHYTHM_B = ["D7", "D7", "G7", "G7", "C7", "C7", "F7", "F7"];
+
+/** A medium-up AABA of the plainest kind: a vamp, and a bridge to the four. */
+const UPTEMPO_A = ["Cmaj7", "Am7", "Dm7", "G7", "Cmaj7", "Am7", "Dm7", "G7"];
+const UPTEMPO_B = ["Fmaj7", "Fmaj7", "Bb7", "Bb7", "Cmaj7", "Cmaj7", "D7", "G7"];
+
+type StarterFields = {
+  bpm: number;
+  grooveId: string;
+  feel: JamFeel;
+  intensity: JamIntensity;
+  kit: string;
+  form: Exclude<JamFormKind, "custom">;
+  key: string;
+  vibe: string;
+  variation: string;
+  /** Exactly `JAM_FORM_BARS[form]` entries. Checked in `jams.test.ts`. */
+  progression: string[];
+};
+
+/**
+ * One curated jam.
+ *
+ * The count-in is one bar of the groove's own meter, which is the only answer
+ * that is right for a waltz as well as for a rock tune, and the chords are on
+ * because a jam whose changes you cannot read is a drum loop.
+ */
+function starter(id: string, name: string, fields: StarterFields): Jam {
+  return {
+    id,
+    name,
+    createdAt: 0,
+    bpm: fields.bpm,
+    grooveId: fields.grooveId,
+    feel: fields.feel,
+    intensity: fields.intensity,
+    kit: fields.kit,
+    form: { kind: fields.form, bars: JAM_FORM_BARS[fields.form] },
+    countIn: grooveById(fields.grooveId).beatsPerBar,
+    fills: true,
+    key: fields.key,
+    chords: true,
+    vibe: fields.vibe,
+    variation: fields.variation,
+    progression: fields.progression,
+  };
+}
+
+/**
+ * The fifty that ship, so the first press of Jam already plays (JAM_MODE §4.6).
  *
  * The names are not translated: "Slow blues in A" is a piece of music, the way
  * a preset a user saved is, and translating it would make the library read
@@ -234,6 +331,11 @@ export function reorderJams(list: Jam[], from: number, to: number): Jam[] {
  *
  * The ids are stable rather than generated: they are seeded once per install
  * and a fixed id keeps a re-seed from doubling the library.
+ *
+ * Every one of them names the vibe and the variation it belongs to, which is
+ * what the library's style filter reads and what lets the setup sheet say
+ * where a jam came from. The six the first pass wrote are first and unchanged
+ * but for that pair of fields.
  */
 export const STARTER_JAMS: readonly Jam[] = [
   {
@@ -254,6 +356,8 @@ export const STARTER_JAMS: readonly Jam[] = [
     // the band played the dominant it names.
     key: "A blues",
     chords: true,
+    vibe: "blues",
+    variation: "shuffle",
   },
   {
     id: "jam-funk-e",
@@ -269,6 +373,8 @@ export const STARTER_JAMS: readonly Jam[] = [
     fills: true,
     key: "E",
     chords: true,
+    vibe: "funk",
+    variation: "sixteenths",
   },
   {
     id: "jam-bossa-dm",
@@ -284,6 +390,8 @@ export const STARTER_JAMS: readonly Jam[] = [
     fills: true,
     key: "Dm",
     chords: true,
+    vibe: "latin",
+    variation: "bossa",
   },
   {
     id: "jam-swing-f",
@@ -299,6 +407,8 @@ export const STARTER_JAMS: readonly Jam[] = [
     fills: true,
     key: "F",
     chords: true,
+    vibe: "jazz",
+    variation: "swing",
   },
   {
     id: "jam-rock-g",
@@ -314,6 +424,8 @@ export const STARTER_JAMS: readonly Jam[] = [
     fills: true,
     key: "G",
     chords: true,
+    vibe: "rock",
+    variation: "classic",
   },
   {
     id: "jam-waltz-c",
@@ -329,5 +441,575 @@ export const STARTER_JAMS: readonly Jam[] = [
     fills: true,
     key: "C",
     chords: true,
+    vibe: "country",
+    variation: "waltz",
   },
+
+  // --- Rock -----------------------------------------------------------
+  starter("jam-rock-hard-e", "Hard eighths in E", {
+    bpm: 132,
+    grooveId: "hardRock",
+    feel: "straight",
+    intensity: "loud",
+    kit: "studio",
+    form: "loop8",
+    key: "E",
+    vibe: "rock",
+    variation: "hard",
+    // I–bVII–IV, the three chords every rock riff since 1969 is made of.
+    progression: round(["E5", "E5", "D5", "A5"], 8),
+  }),
+  starter("jam-rock-punk-c", "Punk in C", {
+    bpm: 176,
+    grooveId: "hardRock",
+    feel: "straight",
+    intensity: "loud",
+    kit: "studio",
+    form: "loop8",
+    key: "C",
+    vibe: "rock",
+    variation: "punk",
+    progression: round(["C", "G", "Am", "F"], 8),
+  }),
+  starter("jam-rock-alt-am", "Alt in A minor", {
+    bpm: 112,
+    grooveId: "rock16",
+    feel: "straight",
+    intensity: "normal",
+    kit: "studio",
+    form: "loop8",
+    key: "Am",
+    vibe: "rock",
+    variation: "alt",
+    progression: round(["Am", "F", "C", "G"], 8),
+  }),
+  starter("jam-rock-ballad-d", "Rock ballad in D", {
+    bpm: 72,
+    grooveId: "ballad",
+    feel: "straight",
+    intensity: "soft",
+    kit: "studio",
+    form: "bars16",
+    key: "D",
+    vibe: "rock",
+    variation: "ballad",
+    progression: round(["D", "A", "Bm", "G"], 16),
+  }),
+  starter("jam-rock-half-em", "Half-time in E minor", {
+    bpm: 88,
+    grooveId: "halfTime",
+    feel: "straight",
+    intensity: "normal",
+    kit: "studio",
+    form: "loop8",
+    key: "Em",
+    vibe: "rock",
+    variation: "halfTime",
+    progression: round(["Em", "C", "G", "D"], 8),
+  }),
+
+  // --- Hard rock ------------------------------------------------------
+  starter("jam-hardrock-e", "Hard rock in E", {
+    bpm: 132,
+    grooveId: "hardRock",
+    feel: "straight",
+    intensity: "loud",
+    kit: "studio",
+    form: "loop8",
+    key: "E",
+    vibe: "hardRock",
+    variation: "openHats",
+    progression: ["E5", "E5", "G5", "A5", "E5", "E5", "G5", "D5"],
+  }),
+  starter("jam-hardrock-stomp-a", "Stomp in A", {
+    bpm: 108,
+    grooveId: "stomp",
+    feel: "straight",
+    intensity: "loud",
+    kit: "studio",
+    form: "loop8",
+    key: "A",
+    vibe: "hardRock",
+    variation: "stomp",
+    progression: ["A5", "A5", "C5", "D5", "A5", "A5", "G5", "D5"],
+  }),
+  starter("jam-hardrock-16-g", "Driving 16ths in G", {
+    bpm: 144,
+    grooveId: "rock16",
+    feel: "straight",
+    intensity: "loud",
+    kit: "studio",
+    form: "loop8",
+    key: "G",
+    vibe: "hardRock",
+    variation: "driving16ths",
+    progression: round(["G5", "F5", "C5", "G5"], 8),
+  }),
+  starter("jam-hardrock-riff-d", "Riff in D", {
+    bpm: 126,
+    grooveId: "rockGrunge",
+    feel: "straight",
+    intensity: "loud",
+    kit: "studio",
+    form: "loop8",
+    key: "D",
+    vibe: "hardRock",
+    variation: "openHats",
+    progression: ["D5", "D5", "F5", "G5", "D5", "D5", "C5", "G5"],
+  }),
+  starter("jam-hardrock-big-b", "Big riff in B", {
+    bpm: 96,
+    grooveId: "rockGarage",
+    feel: "straight",
+    intensity: "loud",
+    kit: "studio",
+    form: "loop8",
+    key: "B",
+    vibe: "hardRock",
+    variation: "stomp",
+    progression: ["B5", "B5", "D5", "E5", "B5", "B5", "A5", "E5"],
+  }),
+
+  // --- Blues ----------------------------------------------------------
+  starter("jam-blues-shuffle-e", "Shuffle blues in E", {
+    bpm: 112,
+    grooveId: "shuffle",
+    feel: "shuffle",
+    intensity: "normal",
+    kit: "studio",
+    form: "blues12",
+    key: "E blues",
+    vibe: "blues",
+    variation: "shuffle",
+    progression: twelveBar("E7", "A7", "B7"),
+  }),
+  starter("jam-blues-slow-g", "Slow blues in G", {
+    bpm: 62,
+    grooveId: "slowBlues",
+    feel: "straight",
+    intensity: "soft",
+    kit: "studio",
+    form: "blues12",
+    key: "G blues",
+    vibe: "blues",
+    variation: "slow",
+    // The quick change: bar two goes to the four, which is what a slow blues
+    // has the room for and a fast shuffle usually does not.
+    progression: ["G7", "C7", "G7", "G7", "C7", "C7", "G7", "G7", "D7", "C7", "G7", "D7"],
+  }),
+  starter("jam-blues-texas-c", "Texas shuffle in C", {
+    bpm: 116,
+    grooveId: "bluesTexas",
+    feel: "shuffle",
+    intensity: "loud",
+    kit: "studio",
+    form: "blues12",
+    key: "C blues",
+    vibe: "blues",
+    variation: "texas",
+    progression: twelveBar("C7", "F7", "G7"),
+  }),
+  starter("jam-blues-jump-bb", "Jump blues in B flat", {
+    bpm: 150,
+    grooveId: "bluesJump",
+    feel: "shuffle",
+    intensity: "normal",
+    kit: "club",
+    form: "blues12",
+    key: "Bb blues",
+    vibe: "blues",
+    variation: "boogie",
+    // The jazz blues turnaround: a six chord in bar eight and a ii–V home.
+    progression: ["Bb7", "Eb7", "Bb7", "Bb7", "Eb7", "Eb7", "Bb7", "G7", "Cm7", "F7", "Bb7", "F7"],
+  }),
+  starter("jam-blues-minor-dm", "Minor blues in D minor", {
+    bpm: 76,
+    grooveId: "slowBlues",
+    feel: "straight",
+    intensity: "normal",
+    kit: "studio",
+    form: "blues12",
+    key: "Dm",
+    vibe: "blues",
+    variation: "slow",
+    // A minor blues is not the major one with a flat third: bars nine and ten
+    // are bVI and V, which is where the whole form turns.
+    progression: [
+      "Dm7", "Dm7", "Dm7", "Dm7", "Gm7", "Gm7", "Dm7", "Dm7", "Bb7", "A7", "Dm7", "A7",
+    ],
+  }),
+
+  // --- Funk and soul --------------------------------------------------
+  starter("jam-funk-one-dm", "One chord in D minor", {
+    bpm: 98,
+    grooveId: "funkFunkyDrummer",
+    feel: "straight",
+    intensity: "normal",
+    kit: "club",
+    form: "one",
+    key: "Dm",
+    vibe: "funk",
+    variation: "sixteenths",
+    progression: round(["Dm7"], 4),
+  }),
+  starter("jam-funk-nola-f", "Second line in F", {
+    bpm: 96,
+    grooveId: "secondLine",
+    feel: "straight",
+    intensity: "normal",
+    kit: "club",
+    form: "loop8",
+    key: "F",
+    vibe: "funk",
+    variation: "newOrleans",
+    progression: ["F7", "Bb7", "F7", "C7", "F7", "Bb7", "F7", "F7"],
+  }),
+  starter("jam-funk-motown-c", "Motown in C", {
+    bpm: 128,
+    grooveId: "motown",
+    feel: "straight",
+    intensity: "normal",
+    kit: "club",
+    form: "loop8",
+    key: "C",
+    vibe: "funk",
+    variation: "sixteenths",
+    progression: round(["C", "Am", "F", "G"], 8),
+  }),
+  starter("jam-funk-gogo-eb", "Go-go in E flat", {
+    bpm: 102,
+    grooveId: "funkGoGo",
+    feel: "straight",
+    intensity: "normal",
+    kit: "club",
+    form: "loop8",
+    key: "Eb",
+    vibe: "funk",
+    variation: "sixteenths",
+    progression: ["Eb7", "Eb7", "Eb7", "Eb7", "Ab7", "Ab7", "Eb7", "Eb7"],
+  }),
+  starter("jam-funk-slowjam-bb", "Slow jam in B flat", {
+    bpm: 68,
+    grooveId: "funkSlowJam",
+    feel: "straight",
+    intensity: "soft",
+    kit: "club",
+    form: "bars16",
+    key: "Bb",
+    vibe: "funk",
+    variation: "halfTime",
+    progression: round(["Bbmaj7", "Gm7", "Ebmaj7", "F7"], 16),
+  }),
+
+  // --- Jazz -----------------------------------------------------------
+  starter("jam-jazz-rhythm-bb", "Rhythm changes in B flat", {
+    bpm: 200,
+    grooveId: "swingRide",
+    feel: "swing",
+    intensity: "normal",
+    kit: "club",
+    form: "aaba32",
+    key: "Bb",
+    vibe: "jazz",
+    variation: "upTempo",
+    // A A B A, written as the sections rather than as thirty-two strings: the
+    // bridge is a cycle of dominants and the A is the I–vi–ii–V everybody
+    // learns first. One chord per bar, which is the downbeat of each.
+    progression: [
+      ...RHYTHM_A, ...RHYTHM_A, ...RHYTHM_B, ...RHYTHM_A,
+    ],
+  }),
+  starter("jam-jazz-minor-gm", "Minor ii-V in G minor", {
+    bpm: 132,
+    grooveId: "swingRide",
+    feel: "swing",
+    intensity: "soft",
+    kit: "club",
+    form: "bars16",
+    key: "Gm",
+    vibe: "jazz",
+    variation: "swing",
+    // The cycle every minor standard runs on: down the relative major, then
+    // the half-diminished two and the altered five home.
+    progression: round(
+      ["Cm7", "F7", "Bbmaj7", "Ebmaj7", "Am7b5", "D7", "Gm6", "Gm6"],
+      16,
+    ),
+  }),
+  starter("jam-jazz-ballad-eb", "Jazz ballad in E flat", {
+    bpm: 64,
+    grooveId: "ballad",
+    feel: "swing",
+    intensity: "soft",
+    kit: "club",
+    form: "bars16",
+    key: "Eb",
+    vibe: "jazz",
+    variation: "ballad",
+    progression: round(["Ebmaj7", "Cm7", "Fm7", "Bb7"], 16),
+  }),
+  starter("jam-jazz-bossa-am", "Bossa jazz in A minor", {
+    bpm: 132,
+    grooveId: "bossa",
+    feel: "straight",
+    intensity: "soft",
+    kit: "club",
+    form: "bars16",
+    key: "Am",
+    vibe: "jazz",
+    variation: "bossaJazz",
+    progression: round(
+      ["Am7", "D7", "Gmaj7", "Cmaj7", "F#m7b5", "B7", "Em7", "Em7"],
+      16,
+    ),
+  }),
+  starter("jam-jazz-up-c", "Up-tempo in C", {
+    bpm: 210,
+    grooveId: "jazzUpTempo",
+    feel: "swing",
+    intensity: "normal",
+    kit: "club",
+    form: "aaba32",
+    key: "C",
+    vibe: "jazz",
+    variation: "upTempo",
+    progression: [...UPTEMPO_A, ...UPTEMPO_A, ...UPTEMPO_B, ...UPTEMPO_A],
+  }),
+
+  // --- Latin ----------------------------------------------------------
+  starter("jam-latin-samba-c", "Samba in C", {
+    bpm: 100,
+    grooveId: "samba",
+    feel: "straight",
+    intensity: "loud",
+    kit: "club",
+    form: "bars16",
+    key: "C",
+    vibe: "latin",
+    variation: "samba",
+    progression: round(["Cmaj7", "A7", "Dm7", "G7"], 16),
+  }),
+  starter("jam-latin-chacha-am", "Cha-cha in A minor", {
+    bpm: 120,
+    grooveId: "chaCha",
+    feel: "straight",
+    intensity: "normal",
+    kit: "club",
+    form: "loop8",
+    key: "Am",
+    vibe: "latin",
+    variation: "chaCha",
+    // Two chords and a lifetime: the vamp every cha-cha band plays.
+    progression: round(["Am7", "Am7", "D7", "D7"], 8),
+  }),
+  starter("jam-latin-son-g", "Son in G", {
+    bpm: 96,
+    grooveId: "latinSon",
+    feel: "straight",
+    intensity: "normal",
+    kit: "club",
+    form: "bars16",
+    key: "G",
+    vibe: "latin",
+    variation: "bossa",
+    progression: round(["Gmaj7", "Gmaj7", "D7", "D7"], 16),
+  }),
+  starter("jam-latin-mambo-fm", "Mambo in F minor", {
+    bpm: 190,
+    grooveId: "mambo",
+    feel: "straight",
+    intensity: "loud",
+    kit: "club",
+    form: "loop8",
+    key: "Fm",
+    vibe: "latin",
+    variation: "samba",
+    progression: ["Fm7", "Fm7", "Bb7", "Bb7", "Fm7", "Fm7", "C7", "C7"],
+  }),
+  starter("jam-latin-bolero-em", "Bolero in E minor", {
+    bpm: 76,
+    grooveId: "latinBolero",
+    feel: "straight",
+    intensity: "soft",
+    kit: "club",
+    form: "bars16",
+    key: "Em",
+    vibe: "latin",
+    variation: "bossa",
+    progression: round(["Em7", "Am7", "B7", "Em7"], 16),
+  }),
+
+  // --- Pop and dance --------------------------------------------------
+  starter("jam-pop-c", "Pop in C", {
+    bpm: 112,
+    grooveId: "rock8",
+    feel: "straight",
+    intensity: "normal",
+    kit: "studio",
+    form: "loop8",
+    key: "C",
+    vibe: "pop",
+    variation: "straight",
+    progression: round(["C", "G", "Am", "F"], 8),
+  }),
+  starter("jam-pop-dance-am", "Four on the floor in A minor", {
+    bpm: 124,
+    grooveId: "fourOnFloor",
+    feel: "straight",
+    intensity: "normal",
+    kit: "electronic",
+    form: "loop8",
+    key: "Am",
+    vibe: "pop",
+    variation: "fourOnFloor",
+    progression: round(["Am", "F", "C", "G"], 8),
+  }),
+  starter("jam-pop-disco-em", "Disco in E minor", {
+    bpm: 118,
+    grooveId: "popDisco",
+    feel: "straight",
+    intensity: "normal",
+    kit: "electronic",
+    form: "loop8",
+    key: "Em",
+    vibe: "pop",
+    variation: "fourOnFloor",
+    progression: ["Em7", "Am7", "Em7", "Am7", "Cmaj7", "D", "Em7", "Em7"],
+  }),
+  starter("jam-pop-ballad-f", "Pop ballad in F", {
+    bpm: 76,
+    grooveId: "popBallad",
+    feel: "straight",
+    intensity: "soft",
+    kit: "studio",
+    form: "bars16",
+    key: "F",
+    vibe: "pop",
+    variation: "ballad",
+    progression: round(["F", "Dm", "Bb", "C"], 16),
+  }),
+  starter("jam-pop-house-dm", "House in D minor", {
+    bpm: 124,
+    grooveId: "popHouse",
+    feel: "straight",
+    intensity: "normal",
+    kit: "electronic",
+    form: "loop8",
+    key: "Dm",
+    vibe: "pop",
+    variation: "fourOnFloor",
+    progression: ["Dm7", "Dm7", "Gm7", "Gm7", "Bbmaj7", "Bbmaj7", "A7", "A7"],
+  }),
+
+  // --- Metal and punk -------------------------------------------------
+  starter("jam-metal-em", "Metal in E minor", {
+    bpm: 160,
+    grooveId: "doubleKick",
+    feel: "straight",
+    intensity: "loud",
+    kit: "studio",
+    form: "loop8",
+    key: "Em",
+    vibe: "metal",
+    variation: "doubleKick",
+    progression: ["E5", "E5", "G5", "F5", "E5", "E5", "C5", "D5"],
+  }),
+  starter("jam-metal-gallop-dm", "Gallop in D minor", {
+    bpm: 168,
+    grooveId: "metalGallop",
+    feel: "straight",
+    intensity: "loud",
+    kit: "studio",
+    form: "loop8",
+    key: "Dm",
+    vibe: "metal",
+    variation: "doubleKick",
+    progression: ["D5", "D5", "F5", "C5", "D5", "D5", "Bb5", "C5"],
+  }),
+  starter("jam-metal-stomp-am", "Half-time stomp in A minor", {
+    bpm: 92,
+    grooveId: "stomp",
+    feel: "straight",
+    intensity: "loud",
+    kit: "studio",
+    form: "loop8",
+    key: "Am",
+    vibe: "metal",
+    variation: "halfTimeStomp",
+    progression: ["A5", "A5", "F5", "G5", "A5", "A5", "C5", "G5"],
+  }),
+  starter("jam-metal-thrash-em", "Thrash in E minor", {
+    bpm: 190,
+    grooveId: "metalThrash",
+    feel: "straight",
+    intensity: "loud",
+    kit: "studio",
+    form: "loop8",
+    key: "Em",
+    vibe: "metal",
+    variation: "thrash",
+    progression: ["E5", "E5", "E5", "G5", "E5", "E5", "F5", "E5"],
+  }),
+  starter("jam-metal-doom-bm", "Doom in B minor", {
+    bpm: 66,
+    grooveId: "metalDoom",
+    feel: "straight",
+    intensity: "loud",
+    kit: "studio",
+    form: "loop8",
+    key: "Bm",
+    vibe: "metal",
+    variation: "halfTimeStomp",
+    progression: ["B5", "B5", "B5", "B5", "D5", "D5", "C5", "C5"],
+  }),
+
+  // --- Country and folk -----------------------------------------------
+  starter("jam-country-train-g", "Train beat in G", {
+    bpm: 120,
+    grooveId: "train",
+    feel: "straight",
+    intensity: "normal",
+    kit: "studio",
+    form: "loop8",
+    key: "G",
+    vibe: "country",
+    variation: "train",
+    progression: ["G", "G", "C", "C", "G", "D", "G", "G"],
+  }),
+  starter("jam-country-twostep-a", "Two-step in A", {
+    bpm: 168,
+    grooveId: "twoStep",
+    feel: "straight",
+    intensity: "normal",
+    kit: "studio",
+    form: "loop8",
+    key: "A",
+    vibe: "country",
+    variation: "twoStep",
+    progression: ["A", "A", "D", "D", "A", "E", "A", "A"],
+  }),
+  starter("jam-country-shuffle-d", "Country shuffle in D", {
+    bpm: 116,
+    grooveId: "countryShuffle",
+    feel: "shuffle",
+    intensity: "normal",
+    kit: "studio",
+    form: "loop8",
+    key: "D",
+    vibe: "country",
+    variation: "train",
+    progression: ["D", "D", "G", "G", "D", "A", "D", "D"],
+  }),
+  starter("jam-country-ballad-c", "Country ballad in C", {
+    bpm: 68,
+    grooveId: "countryBallad",
+    feel: "straight",
+    intensity: "soft",
+    kit: "studio",
+    form: "bars16",
+    key: "C",
+    vibe: "country",
+    variation: "train",
+    progression: round(["C", "Am", "F", "G"], 16),
+  }),
 ];

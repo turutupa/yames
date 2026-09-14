@@ -84,7 +84,88 @@ export type Groove = {
    * on the four grooves that are played that way; absent everywhere else.
    */
   snareGhostIsRim?: boolean;
+  /**
+   * Which shelf of the record shop this came off. The picker groups by it and
+   * the chip row filters by it, which is the only way a hundred and fifteen
+   * cards is a library rather than a wall.
+   */
+  family: GrooveFamily;
+  /**
+   * What a player would say about it besides its name: "sixteenths, ghosts,
+   * half-time". Not on screen — the cards carry a name and a glyph and have no
+   * room for more — and written down anyway, because the moment a groove is
+   * being authored is the only moment anybody knows which words are true of
+   * it, and a search that has to guess them later will guess wrong.
+   */
+  tags: readonly GrooveTag[];
 };
+
+/**
+ * The nine shelves. Not genres — a genre argument has no end — but the nine
+ * headings a drummer's own practice book has, which is a different and much
+ * shorter list: the ones where the same tag would be a lie about the other
+ * eight.
+ *
+ * "funk" carries soul and hip-hop, "pop" carries dance and electronic,
+ * "country" carries folk, "metal" carries punk, and "world" is everything
+ * whose bar is not a Western backbeat — which is one shelf here not because
+ * those musics are one thing but because nine tiles is the most a chip row
+ * can hold before it stops being a row.
+ */
+export const GROOVE_FAMILIES = [
+  "rock",
+  "blues",
+  "funk",
+  "jazz",
+  "latin",
+  "pop",
+  "metal",
+  "country",
+  "world",
+] as const;
+
+export type GrooveFamily = (typeof GROOVE_FAMILIES)[number];
+
+/**
+ * The closed vocabulary a groove's `tags` are drawn from.
+ *
+ * Closed rather than free text, and tested: two grooves that both swing have
+ * to say so with the same word or the word is worth nothing.
+ */
+export const GROOVE_TAGS = [
+  // What the bar is made of.
+  "quarters",
+  "eighths",
+  "sixteenths",
+  "triplets",
+  "sextuplets",
+  // How it is counted.
+  "shuffle",
+  "swing",
+  "halfTime",
+  "doubleTime",
+  "twoFeel",
+  "three",
+  "six",
+  "odd",
+  // What the hands are doing.
+  "ghosts",
+  "crossStick",
+  "openHats",
+  "ride",
+  "bell",
+  "brushes",
+  // What it does to the room.
+  "backbeat",
+  "driving",
+  "sparse",
+  "syncopated",
+  "offbeat",
+  "fourOnFloor",
+  "clave",
+] as const;
+
+export type GrooveTag = (typeof GROOVE_TAGS)[number];
 
 /** An all-silent lane of the right length — every pattern starts from these. */
 function silent(length: number): JamLevel[] {
@@ -240,6 +321,10 @@ function fillFor(
 }
 
 type GrooveOptions = {
+  /** Which shelf. Required: a groove nobody filed is a groove nobody finds. */
+  family: GrooveFamily;
+  /** Two to four words from `GROOVE_TAGS`. Required for the same reason. */
+  tags: readonly GrooveTag[];
   /** The quiet snare is the rim, not a ghost. */
   rim?: boolean;
   /** One beat of fill rather than two — the half-time grooves and ballads. */
@@ -251,7 +336,7 @@ function groove(
   beatsPerBar: number,
   ticksPerBeat: GrooveTicks,
   bar: JamPattern,
-  options: GrooveOptions = {},
+  options: GrooveOptions,
 ): Groove {
   return {
     id,
@@ -261,6 +346,8 @@ function groove(
     bar,
     fill: fillFor(beatsPerBar, ticksPerBeat, bar, options.shortFill === true),
     ...(options.rim ? { snareGhostIsRim: true } : {}),
+    family: options.family,
+    tags: options.tags,
   };
 }
 
@@ -295,6 +382,7 @@ export const GROOVES: readonly Groove[] = [
       snare: ".. X. .. X.",
       hat: "Xx Xx Xx Xx",
     }),
+    { family: "rock", tags: ["eighths", "backbeat", "driving"] },
   ),
   /* Rock sixteenths. The kick syncopates against the hat all the way through;
      the snare's ghosts fill the gaps around the backbeat.
@@ -315,6 +403,7 @@ export const GROOVES: readonly Groove[] = [
       snare: "..o. X..o .o.. X.o.",
       hat: "Xoxo Xoxo Xoxo Xoxo",
     }),
+    { family: "rock", tags: ["sixteenths", "ghosts", "syncopated"] },
   ),
   /* Half-time. The backbeat moves to three and the bar feels half as fast,
      which is what everybody means by half-time. The hat keeps the eighths so
@@ -335,7 +424,7 @@ export const GROOVES: readonly Groove[] = [
       snare: ".. .o X. .o",
       hat: "Xx Xx Xx Xx",
     }),
-    { shortFill: true },
+    { family: "rock", tags: ["halfTime", "eighths", "ghosts"], shortFill: true },
   ),
   /* Shuffle. Triplets with the middle one silent — the long-short that is a
      shuffle, and the reason a shuffle needs no engine change (JAM_MODE §4.1).
@@ -354,6 +443,7 @@ export const GROOVES: readonly Groove[] = [
       snare: "..o X.. ..o X..",
       hat: "X.x X.x X.x X.x",
     }),
+    { family: "blues", tags: ["shuffle", "triplets", "ghosts"] },
   ),
   /* Waltz. Three. Kick on the one, snare on two and three — the oom-pah-pah
      every waltz is, and the one groove here that is not in four.
@@ -372,6 +462,7 @@ export const GROOVES: readonly Groove[] = [
       snare: ".. X. X.",
       hat: "Xx Xx Xx",
     }),
+    { family: "country", tags: ["three", "eighths"] },
   ),
   /* Six-eight. Six eighths in two groups of three: the accent on four is the
      second pulse, and the snare answers it. Written one tick to the beat, so
@@ -390,6 +481,7 @@ export const GROOVES: readonly Groove[] = [
       snare: "... X..",
       hat: "Xxx Xxx",
     }),
+    { family: "country", tags: ["six", "eighths"] },
   ),
   /* Bossa. The cross-stick on the 3-2 clave, a shaker's sixteenths above it,
      and a bass drum that walks under both. Sixteenths, because the clave lands
@@ -412,7 +504,7 @@ export const GROOVES: readonly Groove[] = [
       snare: "o..o ..o. ..o. o...",
       hat: "Xoxo Xoxo Xoxo Xoxo",
     }),
-    { rim: true },
+    { family: "latin", tags: ["sixteenths", "crossStick", "clave"], rim: true },
   ),
   /* Swing ride. Spang-a-lang, the hat closing on two and four with the foot,
      and a feathered kick under all of it.
@@ -439,6 +531,7 @@ export const GROOVES: readonly Groove[] = [
       hat: "... x.. ... x..",
       ride: "x.x X.x x.x X.x",
     }),
+    { family: "jazz", tags: ["swing", "triplets", "ride"] },
   ),
   /* Funk. The kick never lands where the hat accents it: one, the "a" of one,
      the "a" of two and the "and" of three, so the bar leans forward the whole
@@ -460,6 +553,7 @@ export const GROOVES: readonly Groove[] = [
       snare: ".oo. X.oo .oo. X.o.",
       hat: "Xoxo Xoxo Xoxo Xoxo",
     }),
+    { family: "funk", tags: ["sixteenths", "ghosts", "syncopated"] },
   ),
   /* One-drop. Beat one is empty — that is the drop the name is about — and the
      kick and the cross-stick land together on three.
@@ -481,7 +575,7 @@ export const GROOVES: readonly Groove[] = [
       snare: ".. .. o. ..",
       hat: ".X .x .X .x",
     }),
-    { rim: true },
+    { family: "world", tags: ["eighths", "crossStick", "offbeat", "sparse"], rim: true },
   ),
   /* Train beat. Sixteenths on the snare with the accent on every "and" —
      brushes on a snare head is what this is played with, and the accent
@@ -501,6 +595,7 @@ export const GROOVES: readonly Groove[] = [
       kick: "X... .... x... ....",
       snare: "xxXx xxXx xxXx xxXx",
     }),
+    { family: "country", tags: ["sixteenths", "brushes", "driving"] },
   ),
   /* Boom bap. Kick on one and the "and" of two, backbeat on two and four.
 
@@ -522,6 +617,7 @@ export const GROOVES: readonly Groove[] = [
       hat: "Xx Xx Xx X.",
       hatOpen: ".. .. .. .x",
     }),
+    { family: "funk", tags: ["eighths", "ghosts", "openHats"] },
   ),
   /* Four on the floor. A kick on every beat, the backbeat on two and four.
 
@@ -541,6 +637,7 @@ export const GROOVES: readonly Groove[] = [
       snare: ".. X. .. X.",
       hat: ".X .x .X .x",
     }),
+    { family: "pop", tags: ["fourOnFloor", "offbeat", "driving"] },
   ),
 
   // ---------------------------------------------------------------------
@@ -581,6 +678,7 @@ export const GROOVES: readonly Groove[] = [
       hatOpen: ".x .x .x .x",
       crash: "X. .. .. ..",
     }),
+    { family: "rock", tags: ["eighths", "openHats", "driving"] },
   ),
   /* Stomp. Half-time — the backbeat is on three and nowhere else — with the
      kick doing the work: one, two, four and the "and" of four.
@@ -600,7 +698,7 @@ export const GROOVES: readonly Groove[] = [
       snare: ".. .. X. ..",
       hat: "X. x. X. x.",
     }),
-    { shortFill: true },
+    { family: "rock", tags: ["halfTime", "quarters", "driving"], shortFill: true },
   ),
   /* Double kick. Sixteenths on the kick, unbroken, under a backbeat that stays
      exactly where a backbeat goes — two and four, accented, so the bar is
@@ -627,6 +725,7 @@ export const GROOVES: readonly Groove[] = [
       snare: ".... X... .... X...",
       hat: "X.x. X.x. X.x. X.x.",
     }),
+    { family: "metal", tags: ["sixteenths", "driving", "backbeat"] },
   ),
   /* Two-step. The country dance floor: an accented backbeat, quarters on the
      hat, and a kick on one, the "and" of two, three and the "and" of four,
@@ -647,6 +746,7 @@ export const GROOVES: readonly Groove[] = [
       snare: ".. X. .. X.",
       hat: "X. x. X. x.",
     }),
+    { family: "country", tags: ["quarters", "backbeat", "driving"] },
   ),
   /* Samba. The surdo is the kick, and it leans on two and four — that is the
      one thing that makes a samba a samba rather than a fast bossa.
@@ -667,6 +767,7 @@ export const GROOVES: readonly Groove[] = [
       snare: "..o. o..o ..o. o..o",
       hat: "Xoxo Xoxo Xoxo Xoxo",
     }),
+    { family: "latin", tags: ["sixteenths", "ghosts", "clave"] },
   ),
   /* Cha-cha. The name is the figure: four, the "and" of four, one. It is
      written across the bar line — the last two ticks and the first — so the
@@ -687,7 +788,7 @@ export const GROOVES: readonly Groove[] = [
       snare: "o. .. .. oo",
       hat: "X. x. X. x.",
     }),
-    { rim: true },
+    { family: "latin", tags: ["crossStick", "quarters", "clave"], rim: true },
   ),
   /* Second line. The New Orleans street beat: a bass drum that syncopates all
      the way through the bar and a snare that rolls in ghosts with two accents
@@ -711,6 +812,7 @@ export const GROOVES: readonly Groove[] = [
       snare: ".oo. Xo.o .ooX .oo.",
       hat: "X... x... X... x...",
     }),
+    { family: "funk", tags: ["sixteenths", "ghosts", "syncopated"] },
   ),
 
   // ---------------------------------------------------------------------
@@ -743,7 +845,7 @@ export const GROOVES: readonly Groove[] = [
       snare: ".. o. .. o.",
       hat: "Xx Xx Xx Xx",
     }),
-    { rim: true, shortFill: true },
+    { family: "pop", tags: ["eighths", "crossStick", "sparse"], rim: true, shortFill: true },
   ),
   /* Slow blues. Twelve-eight: four beats of triplets, all three played, at the
      tempo The Thrill Is Gone is called at.
@@ -766,6 +868,7 @@ export const GROOVES: readonly Groove[] = [
       snare: "..o X.. ..o X..",
       hat: "Xxx Xxx Xxx Xxx",
     }),
+    { family: "blues", tags: ["triplets", "ghosts", "sparse"] },
   ),
   /* Jazz waltz. Three, swung: the ride plays one, two, the "let" of two,
      three, the "let" of three, and the foot closes the hat on two and three.
@@ -786,6 +889,7 @@ export const GROOVES: readonly Groove[] = [
       hat: "... x.. x..",
       ride: "X.. x.x x.x",
     }),
+    { family: "jazz", tags: ["three", "swing", "ride"] },
   ),
   /* Motown. The snare on all four beats — a hit on one and three, an accent on
      two and four — which is the thing that makes a Motown record feel like it
@@ -805,6 +909,7 @@ export const GROOVES: readonly Groove[] = [
       snare: "x. X. x. X.",
       hat: "Xx Xx Xx Xx",
     }),
+    { family: "funk", tags: ["eighths", "backbeat", "driving"] },
   ),
   /* Mambo. The bell on the ride, the tumbao on the kick, and the shaker on the
      "and" of every beat.
@@ -829,6 +934,1409 @@ export const GROOVES: readonly Groove[] = [
       hat: "..X. ..x. ..X. ..x.",
       ride: "X... x.x. X... x.x.",
     }),
+    { family: "latin", tags: ["sixteenths", "bell", "clave"] },
+  ),
+  // =====================================================================
+  // The fourth pass: twenty-five grooves to a hundred and fifteen
+  // (plans/JAM_KILLER.md §2 A3).
+  //
+  // Twenty-five is a demo. A hundred and fifteen is the book a drummer
+  // actually owns: per family, the variations a working player would name
+  // out loud and reach for by name. Every one of them was written on paper
+  // against a record — the reference is on the card in
+  // plans/JAM_REFERENCES.md and in the two lines above each table — and not
+  // one of them was produced by a loop stamping out variants, because a
+  // variant nobody played is a row in a list, not a groove.
+  //
+  // They are APPENDED, family block after family block, for the reason the
+  // first twenty were: the footswitch steps this list in order.
+  // =====================================================================
+
+  // --- Rock -----------------------------------------------------------
+
+  /* Quarter hats. The hat on the beats only, so the guitar has the whole
+     off-beat: the loudest rock beat there is, played with the fewest strokes.
+     "Highway to Hell" — AC/DC, 1979. */
+  groove(
+    "rockQuarters",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. .. x. ..",
+      snare: ".. X. .. X.",
+      hat: "X. x. X. x.",
+    }),
+    { family: "rock", tags: ["quarters", "backbeat", "driving"] },
+  ),
+  /* Driving eighths. Rock eighths with the kick pushed into the back half of
+     the bar — the "and" of three and the four, leaning the bar forward.
+     "Learn to Fly" — Foo Fighters, 1999. */
+  groove(
+    "rockDriving",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. .. .x x.",
+      snare: ".. X. .. X.",
+      hat: "Xx Xx Xx Xx",
+    }),
+    { family: "rock", tags: ["eighths", "driving", "backbeat"] },
+  ),
+  /* Rock ride. The same bar with the right hand moved to the cymbal, which is
+     what a drummer does the moment the chorus arrives.
+     "Won't Get Fooled Again" — The Who, 1971. */
+  groove(
+    "rockRide",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. .. x. .x",
+      snare: ".. X. .. X.",
+      ride: "Xx Xx Xx Xx",
+    }),
+    { family: "rock", tags: ["eighths", "ride", "driving"] },
+  ),
+  /* Anthem stomp. Two feet and a clap, and nothing on the cymbals at all —
+     the one groove here whose power is entirely in what it leaves out.
+     "We Will Rock You" — Queen, 1977. */
+  groove(
+    "rockAnthem",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. x. .. ..",
+      snare: ".. .. X. ..",
+    }),
+    { family: "rock", tags: ["halfTime", "sparse", "backbeat"], shortFill: true },
+  ),
+  /* Grunge. Eighths with the hat opening under the backbeat, so every two and
+     four arrives with a cymbal already ringing.
+     "Smells Like Teen Spirit" — Nirvana, 1991. */
+  groove(
+    "rockGrunge",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. .x .. x.",
+      snare: ".. X. .. X.",
+      hat: "Xx X. Xx X.",
+      hatOpen: ".. .x .. .x",
+    }),
+    { family: "rock", tags: ["eighths", "openHats", "driving"] },
+  ),
+  /* Motorik. Sixteenths that never stop and a snare that lands on the "and" of
+     three as well as the backbeat — the bar as a wheel rather than a phrase.
+     "Hallogallo" — Neu!, 1972. */
+  groove(
+    "rockMotorik",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... ..x. x... ....",
+      snare: ".... X... ..x. X...",
+      hat: "Xoxo Xoxo Xoxo Xoxo",
+    }),
+    { family: "rock", tags: ["sixteenths", "driving", "backbeat"] },
+  ),
+  /* Funk rock. The funk bar played with a rock backbeat: the ghosts stay, the
+     kick stays crooked, and the snare hits like a rock snare.
+     "Can't Stop" — Red Hot Chili Peppers, 2002. */
+  groove(
+    "rockFunkRock",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... .x.. ..x. x..x",
+      snare: "..o. X... .o.. X.o.",
+      hat: "Xoxo Xoxo Xoxo Xoxo",
+    }),
+    { family: "rock", tags: ["sixteenths", "ghosts", "syncopated"] },
+  ),
+  /* Twelve-eight rock. Four beats of triplets under a plain backbeat, the ride
+     carrying all three of them: the slow-dance bar of every early rock record.
+     "Unchained Melody" — The Righteous Brothers, 1965. */
+  groove(
+    "rockTwelveEight",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "X.. ... x.. .x.",
+      snare: "... X.. ... X..",
+      hat: "... x.. ... x..",
+      ride: "Xxx Xxx Xxx Xxx",
+    }),
+    { family: "rock", tags: ["triplets", "ride", "backbeat"] },
+  ),
+  /* Half-time shuffle. Triplets ghosted all the way through with one backbeat,
+     on three: the hardest bar in this file to play and the best to hear.
+     "Rosanna" — Toto, 1982. */
+  groove(
+    "rockHalfShuffle",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "X.. ... ..x ...",
+      snare: ".oo .oo X.o .oo",
+      hat: "X.x X.x X.x X.x",
+    }),
+    { family: "rock", tags: ["halfTime", "shuffle", "ghosts"], shortFill: true },
+  ),
+  /* Garage. Half-time, quarters on the hat, and a kick that answers itself on
+     the "and" of four — two players' worth of noise from one riff.
+     "Seven Nation Army" — The White Stripes, 2003. */
+  groove(
+    "rockGarage",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. .. x. .x",
+      snare: ".. .. X. ..",
+      hat: "X. x. X. x.",
+    }),
+    { family: "rock", tags: ["halfTime", "quarters", "sparse"], shortFill: true },
+  ),
+  /* Boogie rock. The shuffle at rock volume: the long-short on the hat, the
+     kick catching the skip note at the end of every other beat.
+     "Rockin' All Over the World" — Status Quo, 1977. */
+  groove(
+    "rockBoogie",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "X.. ..x x.. ..x",
+      snare: "... X.. ... X..",
+      hat: "X.x X.x X.x X.x",
+    }),
+    { family: "rock", tags: ["shuffle", "triplets", "driving"] },
+  ),
+  /* Surf. Both hands on the snare running sixteenths with the accent on the
+     beat — where the train beat accents the "and", this one accents the count.
+     "Wipe Out" — The Surfaris, 1963. */
+  groove(
+    "rockSurf",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... .... x... ....",
+      snare: "Xxxx Xxxx Xxxx Xxxx",
+    }),
+    { family: "rock", tags: ["sixteenths", "doubleTime", "driving"] },
+  ),
+  /* Rock waltz. Three beats, swung, with the backbeat on two: a waltz played
+     by a trio that has never been to a ballroom.
+     "Manic Depression" — The Jimi Hendrix Experience, 1967. */
+  groove(
+    "rockWaltz",
+    3,
+    3,
+    kit({
+      length: 9,
+      kick: "X.. ... ..x",
+      snare: "... X.. ...",
+      hat: "X.x X.x X.x",
+    }),
+    { family: "rock", tags: ["three", "shuffle", "driving"] },
+  ),
+
+  // --- Blues ----------------------------------------------------------
+
+  /* Texas shuffle. The shuffle with a ghost on every skip note: the stutter
+     under the backbeat that a straight shuffle does not have.
+     "Pride and Joy" — Stevie Ray Vaughan and Double Trouble, 1983. */
+  groove(
+    "bluesTexas",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "X.. ..x x.. ..x",
+      snare: "..o X.o ..o X.o",
+      hat: "X.x X.x X.x X.x",
+    }),
+    { family: "blues", tags: ["shuffle", "triplets", "ghosts"] },
+  ),
+  /* Chicago shuffle. The shuffle moved to the ride with the hat closing on the
+     backbeat under it — a big-band habit that came south with the players.
+     "Every Day I Have the Blues" — B.B. King, 1955. */
+  groove(
+    "bluesChicago",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "X.. ... x.. ...",
+      snare: "... X.. ... X..",
+      hat: "... x.. ... x..",
+      ride: "X.x X.x X.x X.x",
+    }),
+    { family: "blues", tags: ["shuffle", "ride", "twoFeel"] },
+  ),
+  /* Jump blues. The shuffle at a dance tempo, with the snare answering itself
+     on the skip note after each backbeat — the chunk a big band swings on.
+     "Caldonia" — Louis Jordan and His Tympany Five, 1945. */
+  groove(
+    "bluesJump",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "X.. x.. x.. x..",
+      snare: "... X.x ... X.x",
+      ride: "X.x X.x X.x X.x",
+    }),
+    { family: "blues", tags: ["shuffle", "ride", "driving"] },
+  ),
+  /* Blues rhumba. A straight sixteenth bar with the kick on the clave, which
+     is what a Chicago band heard on the radio and kept.
+     "Hoochie Coochie Man" — Muddy Waters, 1954. */
+  groove(
+    "bluesRhumba",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X..x ..x. .... ..x.",
+      snare: ".... X... .... X...",
+      hat: "Xoxo Xoxo Xoxo Xoxo",
+    }),
+    { family: "blues", tags: ["sixteenths", "clave", "backbeat"] },
+  ),
+  /* Boogie. The shuffle with the kick riding the skip notes and a snare that
+     spills over the bar line into the next one.
+     "Boom Boom" — John Lee Hooker, 1962. */
+  groove(
+    "bluesBoogie",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "X.. ..x x.. ..x",
+      snare: "... X.. ... X.x",
+      hat: "X.x X.x X.x X.x",
+    }),
+    { family: "blues", tags: ["shuffle", "triplets", "driving"] },
+  ),
+  /* Straight blues. Sixteenths, no triplet anywhere: the bar that arrived when
+     the blues met soul, and the one a shuffle player has to be told about.
+     "Born Under a Bad Sign" — Albert King, 1967. */
+  groove(
+    "bluesStraight",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... ..x. .x.. ..x.",
+      snare: ".... X... .... X...",
+      hat: "Xoxo Xoxo Xoxo Xoxo",
+    }),
+    { family: "blues", tags: ["sixteenths", "backbeat", "syncopated"] },
+  ),
+  /* Stop time. Everybody hits the one and then gets out of the way; the hat
+     keeps the quarters so the band knows where the next one is.
+     "Mannish Boy" — Muddy Waters, 1955. */
+  groove(
+    "bluesStopTime",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. .. .. ..",
+      snare: "X. .. .. ..",
+      hat: "X. x. X. x.",
+    }),
+    { family: "blues", tags: ["sparse", "quarters"] },
+  ),
+  /* Swamp blues. A half-time shuffle played behind the beat with almost no
+     kick in it: the bar sounds like it is being remembered rather than played.
+     "I'm a King Bee" — Slim Harpo, 1957. */
+  groove(
+    "bluesSwamp",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "X.. ... ... ..x",
+      snare: "... ..o X.. ..o",
+      hat: "X.x X.x X.x X.x",
+    }),
+    { family: "blues", tags: ["halfTime", "shuffle", "ghosts"], shortFill: true },
+  ),
+
+  // --- Funk and soul --------------------------------------------------
+
+  /* Funky drummer. The most sampled bar ever recorded: ghosts everywhere, the
+     backbeats untouched, and one open hat on the "and" of three.
+     "Funky Drummer" — James Brown, 1970. */
+  groove(
+    "funkFunkyDrummer",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X..x ...x ..x. ....",
+      snare: "..o. X..o .o.o X.o.",
+      hat: "Xoxo Xoxo Xo.o Xoxo",
+      hatOpen: ".... .... ..x. ....",
+    }),
+    { family: "funk", tags: ["sixteenths", "ghosts", "openHats"] },
+  ),
+  /* Purdie shuffle. Half-time, triplets, and a ghost on every one of them that
+     is not the backbeat — the hardest quiet groove there is.
+     "Home at Last" — Steely Dan, 1977. */
+  groove(
+    "funkPurdie",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "X.. ... ..x ...",
+      snare: ".oo .oo X.o .oo",
+      hat: "Xxx Xxx Xxx Xxx",
+    }),
+    { family: "funk", tags: ["halfTime", "triplets", "ghosts"], shortFill: true },
+  ),
+  /* Meters funk. New Orleans sixteenths: the kick leaves the downbeat almost
+     immediately and the snare answers it a sixteenth late, every time.
+     "Cissy Strut" — The Meters, 1969. */
+  groove(
+    "funkMeters",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... ...x ..x. x...",
+      snare: "..o. X.o. ..o. X..o",
+      hat: "Xoxo Xoxo Xoxo Xoxo",
+    }),
+    { family: "funk", tags: ["sixteenths", "ghosts", "syncopated"] },
+  ),
+  /* Soul backbeat. Eighths, a backbeat you could set a building on, and one
+     extra snare on the last eighth pulling the bar over.
+     "Respect" — Aretha Franklin, 1967. */
+  groove(
+    "funkSoul",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. .x x. ..",
+      snare: ".. X. .. Xx",
+      hat: "Xx Xx Xx Xx",
+    }),
+    { family: "funk", tags: ["eighths", "backbeat", "driving"] },
+  ),
+  /* Stax. Quarters on the hat, the backbeat placed deliberately late, and one
+     ghost before three — a whole studio's sound in four strokes.
+     "Green Onions" — Booker T. & the M.G.'s, 1962. */
+  groove(
+    "funkStax",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. .. x. .x",
+      snare: ".. X. .o X.",
+      hat: "X. x. X. x.",
+    }),
+    { family: "funk", tags: ["quarters", "backbeat", "ghosts"] },
+  ),
+  /* Boogaloo. The bar between the shuffle and the funk: straight sixteenths
+     with a kick that keeps arriving a sixteenth early.
+     "Get Out of My Life, Woman" — Lee Dorsey, 1966. */
+  groove(
+    "funkBoogaloo",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... ..x. .x.. ..x.",
+      snare: "..o. X..o ..o. X...",
+      hat: "Xoxo Xoxo Xoxo Xoxo",
+    }),
+    { family: "funk", tags: ["sixteenths", "ghosts", "syncopated"] },
+  ),
+  /* Go-go. The pocket beat: two snares side by side across the bar line of
+     beat four, which is the swing that makes a go-go band a go-go band.
+     "Bustin' Loose" — Chuck Brown & the Soul Searchers, 1978. */
+  groove(
+    "funkGoGo",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X..x ..x. .... .x..",
+      snare: "..o. X..o .o.X X.o.",
+      hat: "Xoxo Xoxo Xoxo Xoxo",
+    }),
+    { family: "funk", tags: ["sixteenths", "ghosts", "syncopated"] },
+  ),
+  /* New jack swing. Sixteenths with the second of every pair pushed late — the
+     swung machine groove, written on a sextuplet grid because that is where it
+     actually lands. "My Prerogative" — Bobby Brown, 1988. */
+  groove(
+    "funkNewJack",
+    4,
+    6,
+    kit({
+      length: 24,
+      kick: "X..... ....x. ..x... ....x.",
+      snare: "...... X....o ..o... X.....",
+      hat: "X.ox.o X.ox.o X.ox.o X.ox.o",
+    }),
+    { family: "funk", tags: ["sextuplets", "shuffle", "ghosts"] },
+  ),
+  /* Gospel shout. Twelve-eight with the backbeat hit like a tambourine and the
+     kick catching the last triplet of three on its way to four.
+     "Oh Happy Day" — The Edwin Hawkins Singers, 1969. */
+  groove(
+    "funkGospel",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "X.. ... x.x ...",
+      snare: "... X.. ..o X..",
+      hat: "Xxx Xxx Xxx Xxx",
+    }),
+    { family: "funk", tags: ["triplets", "backbeat", "ghosts"] },
+  ),
+  /* Slow jam. Half-time soul: one backbeat, a sixteenth hat over it, and two
+     ghosts marking where the other backbeat would have been.
+     "Let's Get It On" — Marvin Gaye, 1973. */
+  groove(
+    "funkSlowJam",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... .... ..x. .x..",
+      snare: ".... ..o. X... ..o.",
+      hat: "Xoxo Xoxo Xoxo Xoxo",
+    }),
+    { family: "funk", tags: ["halfTime", "sixteenths", "ghosts"], shortFill: true },
+  ),
+
+  // --- Jazz -----------------------------------------------------------
+
+  /* Brushes. The left hand sweeps the head while the right taps the quarters
+     on it, and the ride still swings above both.
+     "My Funny Valentine" — Chet Baker, 1954. */
+  groove(
+    "jazzBrushes",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "o.. o.. o.. o..",
+      snare: "X.. x.. X.. x..",
+      hat: "... x.. ... x..",
+      ride: "x.x X.x x.x X.x",
+    }),
+    { family: "jazz", tags: ["swing", "brushes", "triplets"] },
+  ),
+  /* Up-tempo swing. Past about two hundred and forty the ride stops playing
+     every skip note and keeps the ones after two and four.
+     "Cherokee" — Clifford Brown and Max Roach, 1955. */
+  groove(
+    "jazzUpTempo",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "o.. ... ... ...",
+      hat: "... x.. ... x..",
+      ride: "X.. x.x X.. x.x",
+    }),
+    { family: "jazz", tags: ["swing", "ride", "driving"] },
+  ),
+  /* Two feel. The ride in halves and a bass drum on one and three: what the
+     first chorus of a standard is played in before the band goes to four.
+     "Take the 'A' Train" — Duke Ellington and His Orchestra, 1941. */
+  groove(
+    "jazzTwoFeel",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "o.. ... o.. ...",
+      hat: "... x.. ... x..",
+      ride: "X.x ... X.x ...",
+    }),
+    { family: "jazz", tags: ["swing", "twoFeel", "ride"] },
+  ),
+  /* Jazz ballad. Brushes on one and three, the ride marking the beats, and
+     nothing else at all — a bar mostly made of the room.
+     "Blue in Green" — Miles Davis, 1959. */
+  groove(
+    "jazzBallad",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "o.. ... ... ...",
+      snare: "x.. ... x.. ...",
+      hat: "... x.. ... x..",
+      ride: "X.. x.. X.. x..",
+    }),
+    { family: "jazz", tags: ["swing", "brushes", "sparse"], shortFill: true },
+  ),
+  /* Five. Five beats grouped three and two, swung, with the snare figure
+     landing on three and on the last triplet of four.
+     "Take Five" — The Dave Brubeck Quartet, 1959. */
+  groove(
+    "jazzFive",
+    5,
+    3,
+    kit({
+      length: 15,
+      kick: "o.. ... ... o.. ...",
+      snare: "... ... X.. ..X ...",
+      hat: "... x.. ... ... x..",
+      ride: "X.x x.x x.x X.x x.x",
+    }),
+    { family: "jazz", tags: ["odd", "swing", "ride"] },
+  ),
+  /* Bebop. The ride, the foot on two and four, and the snare dropping comping
+     accents where the horn line leaves a hole.
+     "Now's the Time" — Charlie Parker, 1945. */
+  groove(
+    "jazzBebop",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "o.. ..x ... ...",
+      snare: "... ..o ... X..",
+      hat: "... x.. ... x..",
+      ride: "x.x X.x x.x X.x",
+    }),
+    { family: "jazz", tags: ["swing", "ride", "ghosts"] },
+  ),
+  /* Big band. The hat chick on two and four played hard enough to lead
+     seventeen people, a real bass drum, and a set-up on the last triplet.
+     "Corner Pocket" — Count Basie and His Orchestra, 1955. */
+  groove(
+    "jazzBigBand",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "X.. ... x.. ...",
+      snare: "... ... ... ..X",
+      hat: "... X.. ... X..",
+      ride: "X.x x.x X.x x.x",
+    }),
+    { family: "jazz", tags: ["swing", "ride", "twoFeel"] },
+  ),
+  /* Hard bop. Swing with the backbeat put back in on purpose, and a kick that
+     answers the ride instead of hiding under it.
+     "Moanin'" — Art Blakey and the Jazz Messengers, 1958. */
+  groove(
+    "jazzHardBop",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "X.. ..x ... ..x",
+      snare: "... X.. ... X..",
+      hat: "... x.. ... x..",
+      ride: "x.x X.x x.x X.x",
+    }),
+    { family: "jazz", tags: ["swing", "ride", "backbeat"] },
+  ),
+  /* Soul jazz. A shuffled ride over an organ trio's backbeat, with a ghost
+     tucked in behind each snare.
+     "Back at the Chicken Shack" — Jimmy Smith, 1960. */
+  groove(
+    "jazzSoulJazz",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "X.. ... x.. ..x",
+      snare: "... X.o ... X.o",
+      hat: "... x.. ... x..",
+      ride: "X.x X.x X.x X.x",
+    }),
+    { family: "jazz", tags: ["shuffle", "ride", "ghosts"] },
+  ),
+  /* Trad jazz. A two-beat bar with a press roll running into every backbeat,
+     which is what a drummer played before the ride cymbal existed.
+     "West End Blues" — Louis Armstrong and His Hot Five, 1928. */
+  groove(
+    "jazzTrad",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "X.. ... x.. ...",
+      snare: "..x X.. ..x X..",
+      hat: "X.. x.. X.. x..",
+    }),
+    { family: "jazz", tags: ["swing", "twoFeel", "triplets"] },
+  ),
+
+  // --- Latin ----------------------------------------------------------
+
+  /* Son. The cross-stick on the son clave with the bass drum playing the
+     tumbao underneath — the bar every other Cuban groove is measured against.
+     "Chan Chan" — Buena Vista Social Club, 1997. */
+  groove(
+    "latinSon",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... ..x. .... x...",
+      snare: "o..o ..o. ..o. o...",
+      hat: "X.x. X.x. X.x. X.x.",
+    }),
+    { family: "latin", tags: ["crossStick", "clave", "eighths"], rim: true },
+  ),
+  /* Guaguancó. The rumba clave — the third stroke a sixteenth later than the
+     son's — over the same tumbao. One note apart, and a different dance.
+     "Ran Kan Kan" — Tito Puente, 1949. */
+  groove(
+    "latinGuaguanco",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... .... ..x. x...",
+      snare: "o..o ...o ..o. o...",
+      hat: "X.x. X.x. X.x. X.x.",
+    }),
+    { family: "latin", tags: ["crossStick", "clave", "sixteenths"], rim: true },
+  ),
+  /* Cascara. The shell pattern, played on the side of the timbale and written
+     here on the ride, with the maracas answering on the off-beats.
+     "Manteca" — Dizzy Gillespie, 1947. */
+  groove(
+    "latinCascara",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. .x .. x.",
+      hat: ".X .x .X .x",
+      ride: "X. xx .x .x",
+    }),
+    { family: "latin", tags: ["clave", "eighths", "bell"] },
+  ),
+  /* Songo. The bar that put a kit drummer inside a Cuban band: the tumbao on
+     the kick, the timbale accent on the last sixteenth of two and of four.
+     "Sandunguera" — Los Van Van, 1985. */
+  groove(
+    "latinSongo",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... ..x. .... ..x.",
+      snare: "..o. ...X ..o. ...X",
+      hat: "Xoxo Xoxo Xoxo Xoxo",
+    }),
+    { family: "latin", tags: ["sixteenths", "ghosts", "syncopated"] },
+  ),
+  /* Merengue. A tambora gallop over a kick on every beat, fast enough that the
+     bar is counted in two and danced in one.
+     "Ojalá Que Llueva Café" — Juan Luis Guerra, 1989. */
+  groove(
+    "latinMerengue",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... x... x... x...",
+      snare: "X.xx ..x. X.xx ..x.",
+      hat: "X.x. X.x. X.x. X.x.",
+    }),
+    { family: "latin", tags: ["sixteenths", "driving", "twoFeel"] },
+  ),
+  /* Bolero. The cinquillo on the rim — long, short-short, long, short — slow
+     enough that every one of the five strokes is a decision.
+     "Bésame Mucho" — Trío Los Panchos, 1944. */
+  groove(
+    "latinBolero",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. .. x. ..",
+      snare: "o. oo .o o.",
+      hat: "X. x. X. x.",
+    }),
+    { family: "latin", tags: ["crossStick", "sparse", "eighths"], rim: true, shortFill: true },
+  ),
+  /* Baião. The zabumba: a deep stroke on one and another on the "and" of two,
+     with the triangle keeping the eighths and the rim on the off-beats.
+     "Asa Branca" — Luiz Gonzaga, 1947. */
+  groove(
+    "latinBaiao",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... ..x. x... ..x.",
+      snare: ".... ..o. .... ..o.",
+      hat: "X.x. X.x. X.x. X.x.",
+    }),
+    { family: "latin", tags: ["crossStick", "syncopated", "sixteenths"], rim: true },
+  ),
+  /* Partido alto. The surdo leans on two and four like a samba's, and the
+     snare plays the pandeiro's answer around it.
+     "Taj Mahal" — Jorge Ben, 1972. */
+  groove(
+    "latinPartidoAlto",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "x... X... x... X...",
+      snare: "..o. .o.X ..o. .o.X",
+      hat: "Xoxo Xoxo Xoxo Xoxo",
+    }),
+    { family: "latin", tags: ["sixteenths", "ghosts", "syncopated"] },
+  ),
+  /* Bossa two-three. The same clave turned round, so the bar opens on the two
+     side. A guitarist counting in the wrong half hears it immediately.
+     "The Girl from Ipanema" — Stan Getz and João Gilberto, 1964. */
+  groove(
+    "latinBossa23",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... ..x. x... ..x.",
+      snare: "..o. o... o..o ..o.",
+      hat: "Xoxo Xoxo Xoxo Xoxo",
+    }),
+    { family: "latin", tags: ["crossStick", "clave", "sixteenths"], rim: true },
+  ),
+  /* Afro-Cuban six-eight. The seven-stroke bell across twelve pulses, with the
+     conga answering on the second triplet of two and of four.
+     "Afro Blue" — Mongo Santamaría, 1959. */
+  groove(
+    "latinAfro68",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "X.. ... x.. ...",
+      snare: "... o.. ... o..",
+      hat: "... x.. ... x..",
+      ride: "X.x x.x X.x .x.",
+    }),
+    { family: "latin", tags: ["triplets", "bell", "clave", "ghosts"] },
+  ),
+
+  // --- Pop and dance --------------------------------------------------
+
+  /* Disco. Four on the floor, a sixteenth hat, and the hat opening on every
+     off-beat — the lift that makes the kick feel like it is rising.
+     "Le Freak" — Chic, 1978. */
+  groove(
+    "popDisco",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... x... x... x...",
+      snare: ".... X... .... X...",
+      hat: "Xo.o Xo.o Xo.o Xo.o",
+      hatOpen: "..x. ..x. ..x. ..x.",
+    }),
+    { family: "pop", tags: ["fourOnFloor", "openHats", "sixteenths"] },
+  ),
+  /* House. Disco with the hands taken away: the kick on every beat, a clap on
+     two and four, and one hat on each off-beat and nowhere else.
+     "Your Love" — Frankie Knuckles, 1987. */
+  groove(
+    "popHouse",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... x... x... x...",
+      snare: ".... X... .... X...",
+      hat: "..X. ..o. ..X. ..o.",
+    }),
+    { family: "pop", tags: ["fourOnFloor", "offbeat", "sparse"] },
+  ),
+  /* Electro. The first drum machine bar that swung: the kick abandons the beat
+     entirely after one and the backbeat holds the whole thing together.
+     "Planet Rock" — Afrika Bambaataa and the Soulsonic Force, 1982. */
+  groove(
+    "popElectro",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... ...x ..x. .x..",
+      snare: ".... X... .... X...",
+      hat: "Xoxo Xoxo Xoxo Xoxo",
+    }),
+    { family: "pop", tags: ["sixteenths", "syncopated", "driving"] },
+  ),
+  /* Drum and bass. A breakbeat at double the tempo the music is felt at: two
+     backbeats, ghosts between them, and almost no kick.
+     "Inner City Life" — Goldie, 1995. */
+  groove(
+    "popDnb",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... .... ..x. ....",
+      snare: ".... X..o ..o. X...",
+      hat: "Xoxo Xoxo Xoxo Xoxo",
+    }),
+    { family: "pop", tags: ["sixteenths", "ghosts", "doubleTime"] },
+  ),
+  /* Breakbeat. A sampled funk bar played back harder than anyone played it:
+     the kick doubled at the top and the snare ghosting into four.
+     "Firestarter" — The Prodigy, 1996. */
+  groove(
+    "popBreakbeat",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X..x ..x. .... x...",
+      snare: "..o. X... ..o. X.o.",
+      hat: "X.x. X.x. X.x. X.x.",
+    }),
+    { family: "pop", tags: ["sixteenths", "ghosts", "driving"] },
+  ),
+  /* Trap. Half-time, almost no kick, and the hat breaking into a triplet roll
+     on four — written on a sextuplet grid because that is what a roll is.
+     "Turn Down for What" — DJ Snake and Lil Jon, 2013. */
+  groove(
+    "popTrap",
+    4,
+    6,
+    kit({
+      length: 24,
+      kick: "X..... ....x. ...... ..x...",
+      snare: "...... ...... X..... ......",
+      hat: "X..x.. X..x.. X..x.. XxxXxx",
+    }),
+    { family: "pop", tags: ["halfTime", "sextuplets", "sparse"], shortFill: true },
+  ),
+  /* Reggaetón. Dembow: a ghost a sixteenth before each backbeat, so the snare
+     arrives as a pair every time. "Gasolina" — Daddy Yankee, 2004. */
+  groove(
+    "popReggaeton",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... .... x... ....",
+      snare: "...o X... ...o X...",
+      hat: "X.x. X.x. X.x. X.x.",
+    }),
+    { family: "pop", tags: ["sixteenths", "syncopated", "ghosts"] },
+  ),
+  /* Synth-pop. A machine bar: one kick, one backbeat, a sixteenth hat and a
+     single open stroke at the end to prove a person chose it.
+     "Just Can't Get Enough" — Depeche Mode, 1981. */
+  groove(
+    "popSynthPop",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... .... x... ..x.",
+      snare: ".... X... .... X...",
+      hat: "X.x. X.x. X.x. X...",
+      hatOpen: ".... .... .... ..x.",
+    }),
+    { family: "pop", tags: ["sixteenths", "openHats", "sparse"] },
+  ),
+  /* Stadium. Half-time at a walking tempo with a sixteenth hat over it: one
+     backbeat, and the rest of the bar left for forty thousand people.
+     "Viva la Vida" — Coldplay, 2008. */
+  groove(
+    "popStadium",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... ..x. .... .x..",
+      snare: ".... .... X... ....",
+      hat: "X.x. X.x. X.x. X.x.",
+    }),
+    { family: "pop", tags: ["halfTime", "sixteenths", "sparse"], shortFill: true },
+  ),
+  /* UK garage. Two-step: the backbeats kept and everything between them
+     swung, on the sextuplet grid where the skip actually lands.
+     "Re-Rewind" — Artful Dodger featuring Craig David, 1999. */
+  groove(
+    "popUkGarage",
+    4,
+    6,
+    kit({
+      length: 24,
+      kick: "X..... ...... ....x. ......",
+      snare: "...... X..... ...... X.....",
+      hat: "X.ox.o X.ox.o X.ox.o X.ox.o",
+    }),
+    { family: "pop", tags: ["sextuplets", "shuffle", "offbeat"] },
+  ),
+  /* Pop ballad. A sixteenth hat under a backbeat played with the whole arm,
+     and a kick that arrives twice a bar and means it.
+     "I Will Always Love You" — Whitney Houston, 1992. */
+  groove(
+    "popBallad",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... .... x..x ....",
+      snare: ".... X... .... X...",
+      hat: "Xoxo Xoxo Xoxo Xoxo",
+    }),
+    { family: "pop", tags: ["sixteenths", "backbeat", "sparse"], shortFill: true },
+  ),
+  /* Indie disco. Four on the floor under an eighth-note hat, with an extra
+     snare on the "and" of three that makes the chorus break into a run.
+     "Take Me Out" — Franz Ferdinand, 2004. */
+  groove(
+    "popIndie",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. x. x. x.",
+      snare: ".. X. .x X.",
+      hat: "Xx Xx Xx Xx",
+    }),
+    { family: "pop", tags: ["fourOnFloor", "eighths", "driving"] },
+  ),
+
+  // --- Metal and punk -------------------------------------------------
+
+  /* Gallop. Three kicks to a beat — long, short, short — under a plain
+     backbeat: the bar a downpicked riff is written on top of.
+     "The Trooper" — Iron Maiden, 1983. */
+  groove(
+    "metalGallop",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X.xx x.xx x.xx x.xx",
+      snare: ".... X... .... X...",
+      hat: "X.x. X.x. X.x. X.x.",
+    }),
+    { family: "metal", tags: ["sixteenths", "driving", "doubleTime"] },
+  ),
+  /* Blast beat. Kick and snare alternating sixteenths with the ride on the
+     kick's half, and the backbeat still audible inside it.
+     "You Suffer" — Napalm Death, 1987. */
+  groove(
+    "metalBlast",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X.x. x.x. x.x. x.x.",
+      snare: ".x.x Xx.x .x.x Xx.x",
+      ride: "X.x. x.x. X.x. x.x.",
+    }),
+    { family: "metal", tags: ["sixteenths", "driving", "doubleTime"] },
+  ),
+  /* Thrash. The skank beat: a kick on every count and a snare on every
+     off-beat, which at two hundred is felt as one long snare roll.
+     "Master of Puppets" — Metallica, 1986. */
+  groove(
+    "metalThrash",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. x. x. x.",
+      snare: ".X .x .X .x",
+      hat: "X. x. X. x.",
+    }),
+    { family: "metal", tags: ["eighths", "driving", "doubleTime"] },
+  ),
+  /* D-beat. The kick lands a hair after the off-beat and again before four:
+     one riff, one bar, forty years of hardcore records.
+     "Realities of War" — Discharge, 1980. */
+  groove(
+    "metalDbeat",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. .x x. .x",
+      snare: ".. X. .. X.",
+      hat: "X. x. X. x.",
+    }),
+    { family: "metal", tags: ["eighths", "driving", "backbeat"] },
+  ),
+  /* Breakdown. Half-time groove metal: the snare waits for three while the
+     kick works sixteenths around the riff's accents.
+     "Walk" — Pantera, 1990. */
+  groove(
+    "metalBreakdown",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X..x ..x. .... x..x",
+      snare: ".... .... X... ....",
+      hat: "X.x. X.x. X.x. X.x.",
+    }),
+    { family: "metal", tags: ["halfTime", "sixteenths", "driving"], shortFill: true },
+  ),
+  /* Doom. Twelve-eight taken as slowly as a band can hold it: the ride rolls,
+     the snare arrives once, and the bar lasts as long as it likes.
+     "Black Sabbath" — Black Sabbath, 1970. */
+  groove(
+    "metalDoom",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "X.. ... ... ..x",
+      snare: "... ... X.. ...",
+      ride: "Xxx Xxx Xxx Xxx",
+    }),
+    { family: "metal", tags: ["halfTime", "triplets", "sparse"], shortFill: true },
+  ),
+  /* Djent. Kicks in pairs at the top of every beat against a ride on the
+     quarters, so the riff's displacement is audible against something square.
+     "Bleed" — Meshuggah, 2008. */
+  groove(
+    "metalDjent",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "Xx.. xx.. xx.. xx..",
+      snare: ".... X... .... X...",
+      ride: "X... x... X... x...",
+    }),
+    { family: "metal", tags: ["sixteenths", "driving", "syncopated"] },
+  ),
+  /* Punk eighths. Four on the floor with the hat on the beats, which is the
+     whole trick: the kick and the hand land together, every time.
+     "Blitzkrieg Bop" — Ramones, 1976. */
+  groove(
+    "punkEighths",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. x. x. x.",
+      snare: ".. X. .. X.",
+      hat: "X. x. X. x.",
+    }),
+    { family: "metal", tags: ["eighths", "fourOnFloor", "driving"] },
+  ),
+  /* Skank. The snare on all four and the hat on all four off-beats: a bar with
+     no backbeat because every beat is one.
+     "American Jesus" — Bad Religion, 1993. */
+  groove(
+    "punkSkank",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. .. x. ..",
+      snare: "X. X. X. X.",
+      hat: ".X .x .X .x",
+    }),
+    { family: "metal", tags: ["eighths", "offbeat", "driving"] },
+  ),
+
+  // --- Country and folk -----------------------------------------------
+
+  /* Country shuffle. The blues shuffle with the ghosts taken out and the
+     backbeat placed dead centre — a dance floor, not a juke joint.
+     "Swinging Doors" — Merle Haggard, 1966. */
+  groove(
+    "countryShuffle",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "X.. ... x.. ...",
+      snare: "... X.. ... X..",
+      hat: "X.x X.x X.x X.x",
+    }),
+    { family: "country", tags: ["shuffle", "triplets", "backbeat"] },
+  ),
+  /* Boom-chick. Bass drum, backbeat, and nothing above them: the two-feel a
+     bass and a rhythm guitar already play, with a drummer agreeing.
+     "Hey Good Lookin'" — Hank Williams, 1951. */
+  groove(
+    "countryBoomChick",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. .. x. ..",
+      snare: ".. X. .. X.",
+    }),
+    { family: "country", tags: ["twoFeel", "brushes", "sparse"] },
+  ),
+  /* Bluegrass. Brushes running sixteenths with the accent on the count rather
+     than the "and" — a mandolin chop with a drummer's hands.
+     "Blue Moon of Kentucky" — Bill Monroe, 1947. */
+  groove(
+    "countryBluegrass",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... .... x... ....",
+      snare: "xxxx Xxxx xxxx Xxxx",
+    }),
+    { family: "country", tags: ["sixteenths", "brushes", "twoFeel"] },
+  ),
+  /* Rockabilly. A shuffle with a press stroke leading into every backbeat and
+     the kick catching the skip note, under a slapped upright.
+     "Blue Suede Shoes" — Carl Perkins, 1956. */
+  groove(
+    "countryRockabilly",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "X.. ..x x.. ..x",
+      snare: "..x X.. ..x X..",
+      hat: "X.x X.x X.x X.x",
+    }),
+    { family: "country", tags: ["shuffle", "twoFeel", "driving"] },
+  ),
+  /* Country ballad. Twelve-eight with brushes: a sweep on one and three, the
+     backbeat swept rather than struck, the ride rolling under both.
+     "Crazy" — Patsy Cline, 1961. */
+  groove(
+    "countryBallad",
+    4,
+    3,
+    kit({
+      length: 12,
+      kick: "X.. ... x.. ...",
+      snare: "x.. X.. x.. X..",
+      ride: "Xxx Xxx Xxx Xxx",
+    }),
+    { family: "country", tags: ["triplets", "brushes", "sparse"], shortFill: true },
+  ),
+  /* Outlaw. Sixteenths on the hat with the kick doubling on the last sixteenth
+     of one and of three — the push that made Nashville sound like Texas.
+     "Are You Sure Hank Done It This Way" — Waylon Jennings, 1975. */
+  groove(
+    "countryOutlaw",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X..x .... x..x ....",
+      snare: ".... X... .... X...",
+      hat: "Xoxo Xoxo Xoxo Xoxo",
+    }),
+    { family: "country", tags: ["sixteenths", "driving", "backbeat"] },
+  ),
+
+  // --- World ----------------------------------------------------------
+
+  /* Afrobeat. Ghosts and backbeats over a kick that plays only one and the
+     "and" of three, with the hat opening on every off-beat.
+     "Water No Get Enemy" — Fela Kuti, 1975. */
+  groove(
+    "worldAfrobeat",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... ..x. .... ..x.",
+      snare: "..o. X..o ..o. X...",
+      hat: "Xo.o Xo.o Xo.o Xo.o",
+      hatOpen: "..x. ..x. ..x. ..x.",
+    }),
+    { family: "world", tags: ["sixteenths", "openHats", "ghosts"] },
+  ),
+  /* Steppers. Reggae with the kick on all four — the "four on the floor" a
+     reggae band means, under a cross-stick that still waits for three.
+     "Exodus" — Bob Marley and The Wailers, 1977. */
+  groove(
+    "worldSteppers",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. x. x. x.",
+      snare: ".. .. o. ..",
+      hat: ".X .x .X .x",
+    }),
+    { family: "world", tags: ["crossStick", "fourOnFloor", "offbeat"], rim: true },
+  ),
+  /* Rockers. The militant one: the kick on every beat, a sixteenth hat, and a
+     struck snare on three rather than a rim click.
+     "Right Time" — The Mighty Diamonds, 1976. */
+  groove(
+    "worldRockers",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... x... x... x...",
+      snare: ".... ..o. X... ..o.",
+      hat: "Xoxo Xoxo Xoxo Xoxo",
+    }),
+    { family: "world", tags: ["sixteenths", "fourOnFloor", "halfTime", "ghosts"], shortFill: true },
+  ),
+  /* Rocksteady. Ska slowed to a walk: the hat accents the off-beat instead of
+     the count, and the rim waits for three.
+     "Rock Steady" — Alton Ellis, 1966. */
+  groove(
+    "worldRocksteady",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. .. x. ..",
+      snare: ".. .. o. ..",
+      hat: "xX xX xX xX",
+    }),
+    { family: "world", tags: ["crossStick", "offbeat", "eighths"], rim: true },
+  ),
+  /* Ska. Fast, with everything the band plays landing on the off-beat and the
+     drums refusing to: kick and backbeat square, hat between them.
+     "Guns of Navarone" — The Skatalites, 1965. */
+  groove(
+    "worldSka",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. .. x. ..",
+      snare: ".. X. .. X.",
+      hat: ".X .x .X .x",
+    }),
+    { family: "world", tags: ["offbeat", "eighths", "driving"] },
+  ),
+  /* Bhangra. The dhol chaal: a stroke on the last sixteenth of every beat, so
+     the bar gallops into each count instead of landing on it.
+     "Gur Nalo Ishq Mitha" — Malkit Singh, 1990. */
+  groove(
+    "worldBhangra",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X..x .... x..x ....",
+      snare: "...o X..o ...o X..o",
+      hat: "X.x. X.x. X.x. X.x.",
+    }),
+    { family: "world", tags: ["sixteenths", "driving", "ghosts"] },
+  ),
+  /* Rumba flamenca. The cajón: a bass tone on one and on the "and" of two,
+     slaps on the backbeat, palmas filling the sixteenths between.
+     "Bamboléo" — Gipsy Kings, 1987. */
+  groove(
+    "worldRumbaFlamenca",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... ..x. .... ..x.",
+      snare: ".... X..o .... X..o",
+      hat: "X.x. X.x. X.x. X.x.",
+    }),
+    { family: "world", tags: ["sixteenths", "clave", "ghosts"] },
+  ),
+  /* Tango. The marcato in four with the rim playing three-three-two across it,
+     which is the argument the dance is made of.
+     "Libertango" — Ástor Piazzolla, 1974. */
+  groove(
+    "worldTango",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. .. x. ..",
+      snare: "o. .o .. o.",
+      hat: "X. x. X. x.",
+    }),
+    { family: "world", tags: ["crossStick", "syncopated", "quarters"], rim: true },
+  ),
+  /* Freylekhs. The klezmer bulgar: three-three-two on the bass drum under a
+     backbeat that never moves, which is what makes the limp danceable.
+     "Der Heyser Bulgar" — Naftule Brandwein, 1923. */
+  groove(
+    "worldKlezmer",
+    4,
+    2,
+    kit({
+      length: 8,
+      kick: "X. .x .. x.",
+      snare: ".. X. .. X.",
+      hat: "Xx Xx Xx Xx",
+    }),
+    { family: "world", tags: ["eighths", "syncopated", "driving"] },
+  ),
+  /* Cumbia. The guacharaca on the off-beats and a stroke on the last sixteenth
+     of every beat, pulling the bar forward one step at a time.
+     "Cómo Te Voy a Olvidar" — Los Ángeles Azules, 1996. */
+  groove(
+    "worldCumbia",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... .... x... ....",
+      snare: "...x X... ...x X...",
+      hat: "..X. ..x. ..X. ..x.",
+    }),
+    { family: "world", tags: ["sixteenths", "offbeat", "driving"] },
+  ),
+  /* Highlife. The bell carries the bar and the snare only marks two and four:
+     a dance band's answer to the clave, played on the rim of a cymbal.
+     "All for You" — E.T. Mensah and the Tempos, 1952. */
+  groove(
+    "worldHighlife",
+    4,
+    4,
+    kit({
+      length: 16,
+      kick: "X... ..x. .... ..x.",
+      snare: ".... X... .... X...",
+      ride: "X..x ..x. x..x ..x.",
+    }),
+    { family: "world", tags: ["bell", "sixteenths", "clave"] },
+  ),
+  /* Ruchenitsa. Seven counted two-two-three, a village dance rather than a
+     record: the kick opens each group and the snare closes the ones with room.
+     No reference track — this one is older than recording. */
+  groove(
+    "worldBalkan",
+    7,
+    1,
+    kit({
+      length: 7,
+      kick: "X. x. x..",
+      snare: ".X .X ..X",
+      hat: "Xx Xx Xxx",
+    }),
+    { family: "world", tags: ["odd", "eighths", "driving"] },
   ),
 ];
 
@@ -842,6 +2350,23 @@ export function grooveById(id: string): Groove {
 /** How many ticks one bar of this groove has. */
 export function grooveTickCount(g: Pick<Groove, "beatsPerBar" | "ticksPerBeat">): number {
   return g.beatsPerBar * g.ticksPerBeat;
+}
+
+/**
+ * The grooves on one shelf, in the order the file writes them.
+ *
+ * In file order rather than alphabetical, and deliberately: the first card of
+ * every family is the one a player who does not know the others should land
+ * on — Rock eighths, the shuffle, the bossa — and sorting by name would put
+ * "Afrobeat" in front of the reggae a world chip was tapped for.
+ */
+export function groovesInFamily(family: GrooveFamily): Groove[] {
+  return GROOVES.filter((g) => g.family === family);
+}
+
+/** Every groove carrying this tag, whatever shelf it is on. */
+export function groovesWithTag(tag: GrooveTag): Groove[] {
+  return GROOVES.filter((g) => g.tags.includes(tag));
 }
 
 /** The id the rule groove answers to, so a card can say which one is playing. */
@@ -920,5 +2445,10 @@ export function ruleGroove(beatGroups: number[], ticksPerBeat: GrooveTicks): Gro
     ticksPerBeat,
     bar,
     fill,
+    // Filed under "rock" because it has to be filed somewhere and the shelf is
+    // never seen: the rule groove is built on demand for a meter nobody wrote
+    // a groove for, and it is not in `GROOVES`, so no chip row ever draws it.
+    family: "rock",
+    tags: ["odd"],
   };
 }

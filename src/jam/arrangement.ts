@@ -52,6 +52,7 @@
  * turns a groove into an arrangement; there is only what that music does.
  */
 import { formBars, sectionStarts } from "./forms";
+import { GROOVES } from "./grooves";
 import type { Jam, JamIntensity } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -338,6 +339,15 @@ export function styleFamily(jam: Pick<Jam, "grooveId" | "customGroove" | "vibe">
   if (!jam.customGroove) {
     const byGroove = lookup(FAMILY_FOR_GROOVE, jam.grooveId);
     if (byGroove) return byGroove;
+    // Then the groove's own shelf. The table above stays in front of it on
+    // purpose: the picker's shelf answers "where would a player look for
+    // this", and the arrangement's answer to "what does this music DO" is not
+    // always the same word — a 6/8 is filed under folk in the picker and
+    // arranged like a slow blues, because that is the shape of the bar. The
+    // eighteen entries above are where the two disagree; everything else takes
+    // the family it is filed under and needs no second table.
+    const groove = GROOVES.find((g) => g.id === jam.grooveId);
+    if (groove) return groove.family;
   }
   return lookup(FAMILY_FOR_VIBE, jam.vibe) ?? "rock";
 }

@@ -2,7 +2,7 @@
 // headline of the whole mode (JAM_MODE §4.2), it is the only thing on the
 // screen driven by the engine rather than by the record, and "which bar of
 // the twelve am I on" is the question the mode exists to answer.
-import { GROOVES } from "../../jam/grooves";
+import { GROOVES, GROOVE_FAMILIES, groovesInFamily } from "../../jam/grooves";
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { render, screen, fireEvent, cleanup, within } from "@testing-library/react";
 import { createRef } from "react";
@@ -30,13 +30,32 @@ function beat(formBar: number, chorus = 1, measureBeat = 0): BeatEvent {
 }
 
 /**
- * The row of groove cards.
+ * The groove picker: the chip row, the shelves, and the "make your own" card.
  *
  * Some groove names are also meter names — "6/8" is a groove AND a meter
  * preset — so a query for one by text has to say which control it means.
  */
 function grooveCards(container: HTMLElement): HTMLElement {
-  return container.querySelector(".jam-cards-groove") as HTMLElement;
+  return container.querySelector(".jam-groove-shelves") as HTMLElement;
+}
+
+/**
+ * Open the "All" shelf, so every groove is on screen at once.
+ *
+ * The picker opens on the shelf the loaded jam's groove is on (a hundred and
+ * fifteen cards in one grid is a wall), so a test that means "every groove"
+ * has to say so.
+ */
+function allGrooves(container: HTMLElement): HTMLElement {
+  const shelves = grooveCards(container);
+  fireEvent.click(within(shelves).getByText("All"));
+  return shelves;
+}
+
+/** Where a groove's card sits with "All" open: shelf by shelf, not file order. */
+function shelfIndex(id: string): number {
+  const ordered = GROOVE_FAMILIES.flatMap((family) => groovesInFamily(family));
+  return ordered.findIndex((g) => g.id === id);
 }
 
 /** The screen state the view does not own — inert unless a test drives it. */
@@ -405,9 +424,21 @@ describe("JamView — the controls", () => {
     expect(screen.getByText("92")).toBeInTheDocument();
   });
 
+  it("opens on the shelf the loaded groove is on", () => {
+    // A hundred and fifteen cards in one grid is a wall. The picker follows
+    // the jam, so the card that is selected is the one you are looking at.
+    const { container } = sheet({ jam: jamOf({ grooveId: "bossa" }) });
+    const shelves = grooveCards(container);
+    const cards = shelves.querySelectorAll(".jam-cards-groove .jam-card");
+    // The Latin shelf, plus "Make your own" under it.
+    expect(cards).toHaveLength(groovesInFamily("latin").length + 1);
+    expect(within(shelves).getByText("Latin")).toHaveAttribute("aria-pressed", "true");
+    expect(within(shelves).queryByText("Motown")).toBeNull();
+  });
+
   it("offers every groove, a card for one of your own, and marks the one that is loaded", () => {
     const { container } = sheet({ jam: jamOf({ grooveId: "bossa" }) });
-    const cards = container.querySelectorAll(".jam-cards-groove .jam-card");
+    const cards = allGrooves(container).querySelectorAll(".jam-cards-groove .jam-card");
     // Every preset and "Make your own". The last card is one of the
     // choices rather than a mode to go and find, which is the difference
     // between an editor people use and one they read about in a changelog.
@@ -447,26 +478,28 @@ describe("JamView — the controls", () => {
     // The picture IS the table, so a groove whose pattern changes cannot end
     // up advertising the old one.
     const { container } = sheet();
-    const glyphs = container.querySelectorAll(".jam-cards-groove .jam-glyph");
-    // Fourteen: the thirteen presets, plus the "make your own" card, which
-    // draws the groove that is loaded so it is never a blank square.
+    const glyphs = allGrooves(container).querySelectorAll(".jam-cards-groove .jam-glyph");
+    // Every preset, plus the "make your own" card, which draws the groove
+    // that is loaded so it is never a blank square.
     expect(glyphs).toHaveLength(GROOVES.length + 1);
-    // Rock eighths is 4 × 2 ticks over three lanes; the bossa is 4 × 4.
-    expect(glyphs[0].querySelectorAll("circle")).toHaveLength(8 * 3);
-    expect(glyphs[6].querySelectorAll("circle")).toHaveLength(16 * 3);
+    // Rock eighths is 4 × 2 ticks over three lanes; the bossa is 4 × 4. Found
+    // by shelf rather than by index into GROOVES: with "All" open the cards
+    // are drawn family block after family block, not in file order.
+    expect(glyphs[shelfIndex("rock8")].querySelectorAll("circle")).toHaveLength(8 * 3);
+    expect(glyphs[shelfIndex("bossa")].querySelectorAll("circle")).toHaveLength(16 * 3);
   });
 
   it("carries the count-in over to the new groove's meter", () => {
     // One bar of a waltz is three beats, not four. A count-in in the wrong
     // meter lands you on beat two of the first bar.
-    const { props } = sheet({ jam: jamOf({ grooveId: "rock8", countIn: 4 }) });
-    fireEvent.click(screen.getByText("Waltz"));
+    const { container, props } = sheet({ jam: jamOf({ grooveId: "rock8", countIn: 4 }) });
+    fireEvent.click(within(allGrooves(container)).getByText("Waltz"));
     expect(props.onEdit).toHaveBeenCalledWith({ grooveId: "waltz", countIn: 3 });
   });
 
   it("leaves a count-in of none alone when the groove changes", () => {
-    const { props } = sheet({ jam: jamOf({ grooveId: "rock8", countIn: 0 }) });
-    fireEvent.click(screen.getByText("Waltz"));
+    const { container, props } = sheet({ jam: jamOf({ grooveId: "rock8", countIn: 0 }) });
+    fireEvent.click(within(allGrooves(container)).getByText("Waltz"));
     expect(props.onEdit).toHaveBeenCalledWith({ grooveId: "waltz", countIn: 0 });
   });
 
@@ -475,14 +508,14 @@ describe("JamView — the controls", () => {
     // 4/4 is eight, which is the engine's whole limit — two bars of 6/8 would
     // be twelve, and a count-in past the limit is a wait, not a count-in.
     const rock = sheet({ jam: jamOf({ grooveId: "rock8", countIn: 8 }) });
-    fireEvent.click(screen.getByText("Waltz"));
+    fireEvent.click(within(allGrooves(rock.container)).getByText("Waltz"));
     expect(rock.props.onEdit).toHaveBeenCalledWith({ grooveId: "waltz", countIn: 6 });
     cleanup();
 
     const waltz = sheet({ jam: jamOf({ grooveId: "rock8", countIn: 8 }) });
     // Scoped to the groove cards: "6/8" is also a meter preset now, and the
     // two are different controls that happen to be named the same thing.
-    fireEvent.click(within(grooveCards(waltz.container)).getByText("6/8"));
+    fireEvent.click(within(allGrooves(waltz.container)).getByText("6/8"));
     expect(waltz.props.onEdit).toHaveBeenCalledWith({ grooveId: "sixEight", countIn: 6 });
   });
 
@@ -922,6 +955,45 @@ describe("JamView — editing the changes", () => {
     cleanup();
     sheet({ jam: jamOf({ chords: false }) });
     expect(screen.queryByRole("button", { name: "Edit changes" })).toBeNull();
+  });
+
+  it("offers Paste chords whether or not the timeline is showing any", () => {
+    // Pasting a chart is how a jam GETS chords, so hiding the door behind the
+    // switch it is meant to turn on would be a door into a locked room.
+    sheet({ jam: jamOf({ chords: false }) });
+    expect(screen.getByRole("button", { name: "Paste chords" })).toBeInTheDocument();
+  });
+
+  it("says what it has understood while you type, and then applies it", () => {
+    const { props } = sheet({ jam: withChords() });
+    fireEvent.click(screen.getByRole("button", { name: "Paste chords" }));
+    const box = screen.getByLabelText("Paste a chord chart");
+    fireEvent.change(box, { target: { value: "| Am | F | C | G | D/F# | ?? |" } });
+    // Six bars, the key the four diatonic ones are in, and the two symbols it
+    // did something lossy with — the slash chord's bass and the unreadable one.
+    expect(screen.getByText(/6 bars/)).toBeInTheDocument();
+    expect(screen.getByText(/key of Am/)).toBeInTheDocument();
+    expect(screen.getByText(/D\/F#, \?\?/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Use these chords" }));
+    expect(props.onEdit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        form: { kind: "custom", bars: 6 },
+        key: "Am",
+        progression: ["Am", "F", "C", "G", "D", ""],
+        chords: true,
+      }),
+    );
+  });
+
+  it("will not apply a chart it found no chords in", () => {
+    const { props } = sheet({ jam: withChords() });
+    fireEvent.click(screen.getByRole("button", { name: "Paste chords" }));
+    fireEvent.change(screen.getByLabelText("Paste a chord chart"), {
+      target: { value: "the quick brown fox" },
+    });
+    expect(screen.getByRole("button", { name: "Use these chords" })).toBeDisabled();
+    expect(props.onEdit).not.toHaveBeenCalled();
   });
 
   it("turns the cells into chord buttons in edit mode", () => {

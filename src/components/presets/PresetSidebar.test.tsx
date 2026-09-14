@@ -404,4 +404,49 @@ describe("PresetSidebar — the jam library", () => {
     fireEvent.change(search, { target: { value: "polka" } });
     expect(await screen.findByText("No results")).toBeInTheDocument();
   });
+
+  it("narrows the library to one style, and back", async () => {
+    // Fifty starters is a library, and "the blues ones" is how a player asks
+    // for a third of it (JAM_KILLER §2 A3).
+    setInvokeResponse("list_presets", () => []);
+    const { container } = render(
+      <PresetSidebar {...jamProps} jams={[...STARTER_JAMS]} onLoadJam={vi.fn()} />,
+    );
+    await screen.findByText("Slow blues in A");
+    const filter = container.querySelector(".preset-sidebar-filter") as HTMLElement;
+    fireEvent.click(within(filter).getByText("Blues"));
+    const shown = [...container.querySelectorAll(".jam-item .preset-item-name")].map(
+      (n) => n.textContent,
+    );
+    expect(shown).toContain("Slow blues in A");
+    expect(shown).not.toContain("Swing in F");
+    expect(shown).toHaveLength(STARTER_JAMS.filter((j) => j.vibe === "blues").length);
+
+    // Tapping the chip again is the way back, and so is "All styles".
+    fireEvent.click(within(filter).getByText("Blues"));
+    expect(container.querySelectorAll(".jam-item")).toHaveLength(STARTER_JAMS.length);
+  });
+
+  it("offers a chip only for a style the library actually holds", async () => {
+    // A chip that empties the list is a filter people stop trusting.
+    setInvokeResponse("list_presets", () => []);
+    const onlyBlues = STARTER_JAMS.filter((j) => j.vibe === "blues");
+    const { container } = render(
+      <PresetSidebar {...jamProps} jams={[...onlyBlues, STARTER_JAMS[3]]} onLoadJam={vi.fn()} />,
+    );
+    await screen.findByText("Slow blues in A");
+    const chips = [...container.querySelectorAll(".preset-sidebar-chip")].map(
+      (c) => c.textContent,
+    );
+    expect(chips).toEqual(["All styles", "Blues", "Jazz"]);
+  });
+
+  it("keeps the style filter off every other tab", async () => {
+    setInvokeResponse("list_presets", () => []);
+    const { container } = render(
+      <PresetSidebar {...baseProps} view="beat" jams={[...STARTER_JAMS]} onLoadJam={vi.fn()} />,
+    );
+    await waitFor(() => expect(container.querySelector(".preset-sidebar-list")).not.toBeNull());
+    expect(container.querySelector(".preset-sidebar-filter")).toBeNull();
+  });
 });
