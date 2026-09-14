@@ -158,6 +158,33 @@ async function drive() {
       await until("the MORE block", () => !!document.querySelector(".jam-more-body"));
     }
 
+    /**
+     * The chord sheet's page, its reading and its filter (A10).
+     *
+     * By the label on the segment, not by an index: the four flavours are in
+     * an order the data decides, and a shot pointing at "the third one" would
+     * quietly photograph a different page the day that order changed.
+     */
+    const pressInSheet = async (label: string) => {
+      await until(`the "${label}" control`, () =>
+        [...document.querySelectorAll(".jam-sheet .accent-option, .jam-sheet .jam-switch")].some(
+          (b) => (b.textContent ?? "").trim() === label,
+        ),
+      );
+      const button = [...document.querySelectorAll<HTMLElement>(
+        ".jam-sheet .accent-option, .jam-sheet .jam-switch",
+      )].find((b) => (b.textContent ?? "").trim() === label);
+      if (!button) throw new Error(`no "${label}" control on the sheet`);
+      button.click();
+    };
+
+    if (shot!.jam.chordPage) await pressInSheet(shot!.jam.chordPage);
+    if (shot!.jam.chordFlavour) await pressInSheet(shot!.jam.chordFlavour);
+    if (shot!.jam.onlyInKey) {
+      await pressInSheet("Only in key");
+      await until("the filtered grid", () => !!document.querySelector(".jam-chord-card"));
+    }
+
     if (shot!.jam.chordCard !== undefined) {
       await until("the chord grid", () => !!document.querySelector(".jam-chord-card"));
       const cards = document.querySelectorAll<HTMLElement>(".jam-chord-card");

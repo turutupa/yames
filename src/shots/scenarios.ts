@@ -88,6 +88,17 @@ export interface Shot {
     more?: boolean;
     /** Tap this chord on the chord sheet (0-based) to expand its shapes. */
     chordCard?: number;
+    /**
+     * The chord sheet's page and reading (JAM_UX_DECISIONS A10).
+     *
+     * `chordPage` presses In key or All chords; `chordFlavour` presses one of
+     * the four segments on the In key page; `onlyInKey` flips the browser's
+     * filter. Pressed rather than poked, like everything else here: the
+     * controls are on the sheet and a person has no other way to reach them.
+     */
+    chordPage?: "In key" | "All chords";
+    chordFlavour?: "Triads" | "7ths" | "Colours" | "Power";
+    onlyInKey?: boolean;
   };
   /**
    * The Setlist tab, with a setlist actually on it.
@@ -289,6 +300,45 @@ export const SHOTS: Shot[] = [
     // underneath. The playing screen is NOT dimmed behind it, which is the
     // difference between a cheat sheet and a dialog (A8).
     jam: { row: 0, bar: 5, sheet: "chords", chordCard: 0 },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-chords-colours",
+    suffix: "jam-chords-colours",
+    window: "main",
+    tab: "jam",
+    // The In key page at Colours: the sus, add9, 6 and 9 chords of the key,
+    // gathered under the degree each belongs to. The page that says the sheet
+    // knows more than seven chords (A10).
+    jam: { row: 0, bar: 5, sheet: "chords", chordFlavour: "Colours" },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-chords-power",
+    suffix: "jam-chords-power",
+    window: "main",
+    tab: "jam",
+    // Every degree as a power chord — I5, IV5, V5 — with the real two-note
+    // grips under them. A rock jam opens here without being asked.
+    jam: { row: 0, bar: 5, sheet: "chords", chordFlavour: "Power" },
+    width: 1400,
+    height: 900,
+    settleMs: 400,
+  },
+  {
+    id: "jam-chords-all",
+    suffix: "jam-chords-all",
+    window: "main",
+    tab: "jam",
+    // The browser: twelve roots spelled the way this key spells them, every
+    // chord type under the chosen one, grouped Basic / Sevenths / Colours,
+    // with the filter on so only what fits the key is left. The owner's
+    // "filter by what I can play" (A10).
+    jam: { row: 0, bar: 5, sheet: "chords", chordPage: "All chords", onlyInKey: true },
     width: 1400,
     height: 900,
     settleMs: 400,

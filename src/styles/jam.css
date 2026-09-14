@@ -1455,6 +1455,36 @@
 .main-content.has-jam-sheet.jam-sheet-wide > .view-transition-wrapper {
   padding-right: var(--jam-sheet-width);
 }
+
+/* A stage in push mode is narrow whatever the window is doing.
+   1400px of content region minus the sheet's 640 leaves at most 760 for the
+   stage, which is under every threshold the block at the bottom of this file
+   reflows at — and not one of those thresholds can see it, because they ask
+   the WINDOW how wide it is and the window is 1920. So the narrow-stage
+   layout is asserted here as well: the tempo drops under the chord instead of
+   sharing a row with it, and the bass lane gives up its note names. Without
+   this the feel, intensity and tempo controls run on under the sheet. */
+.main-content.has-jam-sheet.jam-sheet-wide .jam-top {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.main-content.has-jam-sheet.jam-sheet-wide .jam-head-controls {
+  flex-direction: row;
+  align-items: center;
+  align-self: stretch;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.main-content.has-jam-sheet.jam-sheet-wide .jam-head-controls .jam-segmented {
+  margin-left: 0;
+}
+
+.main-content.has-jam-sheet.jam-sheet-wide .jam-band-detail {
+  width: 118px;
+}
 .jam-sheet {
   position: absolute;
   top: 56px;
