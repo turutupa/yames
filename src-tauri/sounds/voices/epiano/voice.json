@@ -7,7 +7,7 @@
   "channels": 1,
   "layers": 3,
   "rr": 1,
-  "trim_db": -2.54,
+  "trim_db": -2.53,
   "release_ms": 250,
   "notes": [
     45,
