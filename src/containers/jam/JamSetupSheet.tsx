@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { GROOVES } from "../../jam/grooves";
+import { GROOVE_FAMILIES, grooveById, groovesInFamily } from "../../jam/grooves";
+import type { Groove, GrooveFamily } from "../../jam/grooves";
 import { JAM_FORM_KINDS, clampFormBars, formBars } from "../../jam/forms";
 import {
   carryCountIn,
@@ -174,6 +175,47 @@ export function JamSetupSheet({
     ? jam.customGroove.name
     : t(`jam.groove.${jam.grooveId}`, { defaultValue: jam.grooveId });
 
+  /**
+   * Which shelf of grooves is open.
+   *
+   * `null` means "follow the jam", which is the default and what makes a vibe
+   * tile leave the right shelf open behind it. A chip sets it, and it stays
+   * set for as long as the sheet is: a player browsing Latin grooves is
+   * browsing Latin grooves, and having the row jump back under them on every
+   * tap would be the picker arguing.
+   */
+  const [pickedFamily, setPickedFamily] = useState<GrooveFamily | "all" | null>(null);
+  const grooveFamily: GrooveFamily | "all" =
+    pickedFamily ?? (jam.customGroove ? "all" : grooveById(jam.grooveId).family);
+
+  /** One groove card. The same button whichever shelf it is drawn under. */
+  const grooveCard = (groove: Groove) => {
+    const active = !jam.customGroove && jam.grooveId === groove.id;
+    return (
+      <button
+        key={groove.id}
+        type="button"
+        className={`sub-row-btn jam-card${active ? " active" : ""}`}
+        aria-pressed={active}
+        onClick={() =>
+          onEdit({
+            grooveId: groove.id,
+            // A groove carries its own meter, so the count-in has to follow
+            // it. The setting is BARS and the engine takes beats: one bar of
+            // a waltz is three beats, not four.
+            countIn: carryCountIn(jam.countIn, meter.beatsPerBar, groove.beatsPerBar),
+            // Picking a preset is picking a preset. The groove you drew is
+            // still on the record until you pick one.
+            customGroove: undefined,
+          })
+        }
+      >
+        <GrooveGlyph groove={groove} />
+        <span className="sub-row-label">{t(`jam.groove.${groove.id}`)}</span>
+      </button>
+    );
+  };
+
   const countIn = { beats: jam.countIn, sound: jam.countInSound ?? "beep" };
   const countInOptions = useMemo(
     () =>
@@ -229,46 +271,70 @@ export function JamSetupSheet({
           ) : undefined
         }
       >
-        <div className="jam-cards jam-cards-groove">
-          {GROOVES.map((groove) => (
-            <button
-              key={groove.id}
-              type="button"
-              className={`sub-row-btn jam-card${
-                !jam.customGroove && jam.grooveId === groove.id ? " active" : ""
-              }`}
-              aria-pressed={!jam.customGroove && jam.grooveId === groove.id}
-              onClick={() =>
-                onEdit({
-                  grooveId: groove.id,
-                  // A groove carries its own meter, so the count-in has to
-                  // follow it. The setting is BARS and the engine takes beats:
-                  // one bar of a waltz is three beats, not four.
-                  countIn: carryCountIn(jam.countIn, meter.beatsPerBar, groove.beatsPerBar),
-                  // Picking a preset is picking a preset. The groove you drew
-                  // is still on the record until you pick one.
-                  customGroove: undefined,
-                })
-              }
-            >
-              <GrooveGlyph groove={groove} />
-              <span className="sub-row-label">{t(`jam.groove.${groove.id}`)}</span>
-            </button>
-          ))}
-
-          {/* The last card. A groove of your own is one of the choices, not a
-              mode you have to find. */}
-          <button
-            type="button"
-            className={`sub-row-btn jam-card jam-card-mine${jam.customGroove ? " active" : ""}`}
-            aria-pressed={!!jam.customGroove}
-            onClick={onOpenEditor}
+        {/* A hundred and fifteen cards in one grid is a wall, not a picker
+            (A3). So: a chip row of the nine shelves, and the cards of one
+            shelf at a time — with "All" still there for the person who wants
+            to scroll the whole book. The row follows the jam by default, so
+            tapping the Latin vibe leaves the Latin shelf open rather than
+            leaving the selected card somewhere off screen. */}
+        <div className="jam-groove-shelves">
+          <div
+            className="jam-variations jam-family-chips"
+            role="group"
+            aria-label={t("jam.family.label")}
           >
-            <GrooveGlyph groove={meter} />
-            <span className="sub-row-label">
-              {jam.customGroove ? jam.customGroove.name : t("jam.editor.makeYourOwn")}
-            </span>
-          </button>
+            <button
+              type="button"
+              className={`jam-chip${grooveFamily === "all" ? " active" : ""}`}
+              aria-pressed={grooveFamily === "all"}
+              onClick={() => setPickedFamily("all")}
+            >
+              {t("jam.family.all")}
+            </button>
+            {GROOVE_FAMILIES.map((id) => (
+              <button
+                key={id}
+                type="button"
+                className={`jam-chip${grooveFamily === id ? " active" : ""}`}
+                aria-pressed={grooveFamily === id}
+                onClick={() => setPickedFamily(id)}
+              >
+                {t(`jam.family.${id}`)}
+              </button>
+            ))}
+          </div>
+
+          {grooveFamily === "all" ? (
+            GROOVE_FAMILIES.map((id) => (
+              <div key={id} className="jam-family-block">
+                <span className="stage-label">{t(`jam.family.${id}`)}</span>
+                <div className="jam-cards jam-cards-groove">
+                  {groovesInFamily(id).map(grooveCard)}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="jam-cards jam-cards-groove">
+              {groovesInFamily(grooveFamily).map(grooveCard)}
+            </div>
+          )}
+
+          {/* The last card, under whichever shelf is open. A groove of your
+              own is one of the choices, not a mode you have to find — and it
+              is on no shelf, because nobody else has heard it. */}
+          <div className="jam-cards jam-cards-groove">
+            <button
+              type="button"
+              className={`sub-row-btn jam-card jam-card-mine${jam.customGroove ? " active" : ""}`}
+              aria-pressed={!!jam.customGroove}
+              onClick={onOpenEditor}
+            >
+              <GrooveGlyph groove={meter} />
+              <span className="sub-row-label">
+                {jam.customGroove ? jam.customGroove.name : t("jam.editor.makeYourOwn")}
+              </span>
+            </button>
+          </div>
         </div>
 
         <div className="jam-sheet-row">

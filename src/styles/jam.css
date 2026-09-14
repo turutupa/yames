@@ -1618,6 +1618,34 @@
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
+/* ── The groove shelves (fourth pass, A3) ──────────────────────────────────
+   A hundred and fifteen cards needs a chip row above it and a heading over
+   each block when "All" is open, or the picker is a wall the eye slides off.
+   The chips are the vibe row's chips: one chip is one chip, and a second
+   pill shape on the same sheet would read as a second kind of control. */
+.jam-groove-shelves {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.jam-family-chips {
+  margin-bottom: 2px;
+}
+
+.jam-family-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Enough air between shelves that the heading belongs to the block under it
+   rather than floating between two. */
+.jam-family-block + .jam-family-block {
+  margin-top: 12px;
+}
+
 /* ── The vibe tiles (A2) ───────────────────────────────────────────────── */
 .jam-vibes {
   display: grid;

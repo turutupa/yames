@@ -9,11 +9,32 @@
 // edit. A hat row flattened back to one level, a ghost that crept onto a
 // backbeat, a fill that stopped at the snare — none of those break anything,
 // they just take the person back out of the drums. So they are tested.
+//
+// The fourth pass took the file from twenty-five tables to a hundred and
+// fifteen, which changes what these checks are FOR. At twenty-five, an
+// enumerated list of "the grooves with ghosts" was a description anybody
+// could read; at a hundred and fifteen it would be a second copy of the file.
+// So the lists that name grooves one by one now cover the original
+// twenty-five — the ones a reader can hold in their head — and everything
+// after them is held by rules that apply to all of it.
 import { describe, expect, it } from "vitest";
-import { GROOVES, grooveById, grooveTickCount, ruleGroove, DEFAULT_GROOVE_ID } from "./grooves";
+import {
+  GROOVES,
+  GROOVE_FAMILIES,
+  GROOVE_TAGS,
+  grooveById,
+  grooveTickCount,
+  groovesInFamily,
+  groovesWithTag,
+  ruleGroove,
+  DEFAULT_GROOVE_ID,
+} from "./grooves";
 import type { Groove } from "./grooves";
 import { JAM_LANES, JAM_OPTIONAL_LANES } from "./types";
 import type { JamLevel } from "./types";
+
+/** The twenty-five the third pass left, which several checks still name. */
+const FIRST_TWENTY_FIVE = GROOVES.slice(0, 25);
 
 /** The ticks of one beat, as indices into a bar. */
 function beatTicks(g: Groove, beat: number): number[] {
@@ -25,10 +46,10 @@ function hatLine(g: Groove): JamLevel[] {
   return g.bar.hat.map((level, t) => Math.max(level, g.bar.hatOpen?.[t] ?? 0));
 }
 
-describe("the twenty-five grooves", () => {
-  it("ships exactly twenty-five, with unique ids", () => {
-    expect(GROOVES).toHaveLength(25);
-    expect(new Set(GROOVES.map((g) => g.id)).size).toBe(25);
+describe("the grooves it ships", () => {
+  it("ships a hundred and fifteen, with unique ids", () => {
+    expect(GROOVES).toHaveLength(115);
+    expect(new Set(GROOVES.map((g) => g.id)).size).toBe(115);
   });
 
   it("keeps the first twenty where the footswitch left them", () => {
@@ -58,14 +79,106 @@ describe("the twenty-five grooves", () => {
     ]);
   });
 
-  it("adds the five the third pass wrote, in the order the picker draws them", () => {
-    expect(GROOVES.slice(20).map((g) => g.id)).toEqual([
+  it("keeps the five the third pass wrote where they were", () => {
+    expect(GROOVES.slice(20, 25).map((g) => g.id)).toEqual([
       "ballad",
       "slowBlues",
       "jazzWaltz",
       "motown",
       "mambo",
     ]);
+  });
+
+  it("appends the fourth pass's ninety after them, family block by family block", () => {
+    // Appended for the same reason everything before them was: the footswitch
+    // steps this list in order, so inserting a Latin groove among the rock
+    // ones would move every groove after it out from under the stomp that
+    // used to reach it.
+    const added = GROOVES.slice(25);
+    expect(added).toHaveLength(90);
+    expect(added.map((g) => g.family)).toEqual([
+      ...Array<string>(13).fill("rock"),
+      ...Array<string>(8).fill("blues"),
+      ...Array<string>(10).fill("funk"),
+      ...Array<string>(10).fill("jazz"),
+      ...Array<string>(10).fill("latin"),
+      ...Array<string>(12).fill("pop"),
+      ...Array<string>(9).fill("metal"),
+      ...Array<string>(6).fill("country"),
+      ...Array<string>(12).fill("world"),
+    ]);
+  });
+
+  it("files every groove on a shelf, with the counts the brief asked for", () => {
+    // The rough targets in plans/tasks/jam-v4/W31-CONTENT.md §1. Written out
+    // because "about a hundred and twenty" is not something a test can check
+    // and "eighteen rock grooves" is.
+    const counts = Object.fromEntries(
+      GROOVE_FAMILIES.map((f) => [f, groovesInFamily(f).length]),
+    );
+    expect(counts).toEqual({
+      rock: 18,
+      blues: 10,
+      funk: 14,
+      jazz: 12,
+      latin: 14,
+      pop: 14,
+      metal: 10,
+      country: 10,
+      world: 13,
+    });
+    // And nothing is on a shelf that does not exist, which is what makes the
+    // chip row's nine chips the whole library rather than most of it.
+    const shelved = GROOVE_FAMILIES.reduce((sum, f) => sum + counts[f], 0);
+    expect(shelved).toBe(GROOVES.length);
+  });
+
+  it("gives every groove two or more tags, all from the closed vocabulary", () => {
+    // Free text would make the tags worth nothing: two grooves that both swing
+    // have to say so with the same word or nobody can search for either.
+    for (const g of GROOVES) {
+      expect(g.tags.length, `${g.id} tags`).toBeGreaterThanOrEqual(2);
+      expect(new Set(g.tags).size, `${g.id} repeats a tag`).toBe(g.tags.length);
+      for (const tag of g.tags) expect(GROOVE_TAGS, `${g.id} tag`).toContain(tag);
+    }
+    // Every word in the vocabulary is on at least one groove — a tag nothing
+    // carries is a word somebody meant to use and did not.
+    for (const tag of GROOVE_TAGS) {
+      expect(groovesWithTag(tag).length, `nothing is tagged ${tag}`).toBeGreaterThan(0);
+    }
+  });
+
+  it("says how every groove is counted", () => {
+    // Not which grid it is written on — a bossa is written in sixteenths and
+    // played in eighths, and the player's word is the second one. What every
+    // groove must carry is SOME answer to "how does it go": a subdivision, a
+    // feel, or a meter. A groove tagged only "sparse" and "driving" has been
+    // described and not identified.
+    const counted = [
+      "quarters",
+      "eighths",
+      "sixteenths",
+      "triplets",
+      "sextuplets",
+      "shuffle",
+      "swing",
+      "halfTime",
+      "doubleTime",
+      "twoFeel",
+      "three",
+      "six",
+      "odd",
+      "fourOnFloor",
+      "offbeat",
+    ];
+    for (const g of GROOVES) {
+      expect(g.tags.some((t) => counted.includes(t)), `${g.id} is not counted`).toBe(true);
+    }
+    // And the one grid nobody would describe any other way: six ticks to the
+    // beat is a sextuplet bar, whatever else is true of it.
+    for (const g of GROOVES) {
+      if (g.ticksPerBeat === 6) expect(g.tags, g.id).toContain("sextuplets");
+    }
   });
 
   it("gives every lane of every bar and fill exactly one column per tick", () => {
@@ -178,8 +291,8 @@ describe("what makes them sound played", () => {
     }
   });
 
-  it("writes ghosts only where the style has them", () => {
-    const withGhosts = GROOVES.filter((g) => g.bar.snare.includes(3)).map((g) => g.id);
+  it("writes ghosts only where the style has them, among the original twenty-five", () => {
+    const withGhosts = FIRST_TWENTY_FIVE.filter((g) => g.bar.snare.includes(3)).map((g) => g.id);
     expect(withGhosts.sort()).toEqual(
       [
         // The cross-stick grooves: every one of their snare strokes is a rim
@@ -202,9 +315,36 @@ describe("what makes them sound played", () => {
     );
   });
 
+  it("says a groove has ghosts in the tags whenever its snare does", () => {
+    // The rule that replaces the list above for the other ninety. The two
+    // have to agree, or the tag is decoration: a ghosted snare is tagged
+    // "ghosts" unless the quiet strokes are cross-sticks, which is a
+    // different sound and says so with `snareGhostIsRim`.
+    const disagreeing: string[] = [];
+    for (const g of GROOVES) {
+      if (g.snareGhostIsRim) {
+        expect(g.tags, `${g.id} plays the rim`).toContain("crossStick");
+        continue;
+      }
+      if (g.bar.snare.includes(3) !== g.tags.includes("ghosts")) disagreeing.push(g.id);
+    }
+    expect(disagreeing).toEqual([]);
+  });
+
   it("says which grooves play the rim rather than a ghost", () => {
     const rim = GROOVES.filter((g) => g.snareGhostIsRim).map((g) => g.id);
-    expect(rim).toEqual(["bossa", "oneDrop", "chaCha", "ballad"]);
+    // The four the third pass wrote are still the first four, in order.
+    expect(rim.slice(0, 4)).toEqual(["bossa", "oneDrop", "chaCha", "ballad"]);
+    expect(rim.slice(4)).toEqual([
+      "latinSon",
+      "latinGuaguanco",
+      "latinBolero",
+      "latinBaiao",
+      "latinBossa23",
+      "worldSteppers",
+      "worldRocksteady",
+      "worldTango",
+    ]);
     for (const id of rim) {
       const g = grooveById(id);
       // A cross-stick groove has no backbeat to contradict it: every stroke
@@ -241,11 +381,12 @@ describe("what makes them sound played", () => {
       // The swing ride and the jazz waltz feather the bass drum: a ghost all
       // the way through, which is the part rather than a quiet version of it.
       if (g.bar.kick[0] === 3) continue;
-      // And the samba's surdo leans on two and four rather than on the one.
-      // That is the one thing that makes it a samba, so it is named here
-      // rather than allowed for by loosening the rule.
-      if (g.id === "samba") {
-        expect(g.bar.kick[0]).toBe(1);
+      // And a surdo leans on two and four rather than on the one. That is the
+      // one thing that makes a samba a samba rather than a fast bossa, and it
+      // is the same in a partido alto, so the two are named here rather than
+      // allowed for by loosening the rule for everybody.
+      if (g.id === "samba" || g.id === "latinPartidoAlto") {
+        expect(g.bar.kick[0], g.id).toBe(1);
         continue;
       }
       expect(g.bar.kick[0], `${g.id} kick on the one`).toBe(2);
@@ -510,16 +651,19 @@ describe("the fill", () => {
   it("keeps the time going up to the fill, and leans on the last backbeat", () => {
     for (const g of GROOVES) {
       const ticks = grooveTickCount(g);
-      const from = g.fill.snare.findIndex((_, i) => {
-        // The fill starts where the bar stops being itself on every lane but
-        // the snare — which is the honest way to find it from outside.
-        return (
-          i > 0 &&
-          JAM_LANES.filter((l) => l !== "snare").every((l) => g.fill[l][i] === 0) &&
-          JAM_LANES.filter((l) => l !== "snare").some((l) => g.bar[l][i] !== 0)
-        );
-      });
-      if (from < 0) continue;
+      // The fill starts one tick after the last stroke the fill still plays on
+      // a lane other than the snare — which is the honest way to find it from
+      // outside, and unlike "the first tick where those lanes go quiet" it
+      // does not mistake a hole in the groove for the edge of the fill. The
+      // cascara has nothing at all on beat three, and under the old reading
+      // its fill appeared to start there.
+      const others = JAM_LANES.filter((l) => l !== "snare");
+      let last = -1;
+      for (let i = 0; i < ticks; i += 1) {
+        if (others.some((l) => g.fill[l][i] !== 0)) last = i;
+      }
+      const from = last + 1;
+      if (from <= 0 || from >= ticks) continue;
       for (let i = 0; i < from; i += 1) {
         for (const lane of JAM_LANES) {
           if (lane === "snare") continue;
