@@ -133,6 +133,32 @@
       "loopOff": "Stoppen met herhalen",
       "shape": "Vorm"
     },
+    "arrangement": {
+      "label": "Arrangement",
+      "loop": "Lus",
+      "build": "Opbouw",
+      "song": "Nummer",
+      "loopLead": "Eén groove, rondje na rondje, tot jij stopt.",
+      "buildLead": "De band houdt zich in bij de eerste ronde, gaat open als het nummer terugkomt en zakt onderweg terug naar bassdrum en hi-hat.",
+      "songLead": "Bouwt {{choruses}} rondes op, daarna eindigt de band het nummer samen.",
+      "choruses": "Rondes",
+      "fewerChoruses": "Minder rondes",
+      "moreChoruses": "Meer rondes",
+      "breakdown": "Breakdown",
+      "breakdownOff": "Nooit",
+      "breakdownEvery": "elke {{choruses}} rondes",
+      "breakdownHint": "Hoe vaak de band een halve ronde alleen bassdrum en hi-hat speelt."
+    },
+    "dynamics": {
+      "soft": "zacht",
+      "normal": "hele band",
+      "loud": "luid",
+      "breakdown": "breakdown",
+      "stopTime": "stop-time",
+      "endingHold": "laatste akkoord, naklinkend",
+      "endingStop": "laatste klap, meteen stil",
+      "crash": "crash"
+    },
     "short": {
       "blues12": "12 maten",
       "loop8": "8 maten",
