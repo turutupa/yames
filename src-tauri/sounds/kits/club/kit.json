@@ -9,7 +9,7 @@
     "kick": {
       "layers": 4,
       "rr": 3,
-      "trim_db": -4.0
+      "trim_db": -4.5
     },
     "snare": {
       "layers": 4,
@@ -29,7 +29,7 @@
     "hat_open": {
       "layers": 3,
       "rr": 2,
-      "trim_db": -2.9,
+      "trim_db": -3.0,
       "choked_by": [
         "hat",
         "hat_pedal"
@@ -38,7 +38,7 @@
     "hat_pedal": {
       "layers": 2,
       "rr": 2,
-      "trim_db": -12.0
+      "trim_db": -12.3
     },
     "ride": {
       "layers": 3,
@@ -48,22 +48,22 @@
     "ride_bell": {
       "layers": 2,
       "rr": 2,
-      "trim_db": -6.9
+      "trim_db": -7.0
     },
     "crash": {
       "layers": 3,
       "rr": 2,
-      "trim_db": -13.6
+      "trim_db": -13.7
     },
     "tom_hi": {
       "layers": 3,
       "rr": 2,
-      "trim_db": -4.7
+      "trim_db": -4.9
     },
     "tom_lo": {
       "layers": 3,
       "rr": 2,
-      "trim_db": -3.1
+      "trim_db": -3.6
     }
   }
 }

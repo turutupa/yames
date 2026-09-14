@@ -238,79 +238,111 @@ class SfzSource(object):
 class DrumGizmoSource(object):
     """DRSKit and the other DrumGizmo kits.
 
-    One XML per instrument under `Instruments/<Name>/<Name>.xml`. Its
-    `<audiofiles>` block maps a channel name to a file; its `<samples>` block
-    lists strokes, each with a `power` attribute and an `<audiofile>` per
-    channel giving `filechannel` into that file. `power` is the library's own
-    measure of how hard the stroke was, so it plays the part `vl` plays in an
-    SFZ: ascending, one group per distinct power.
+    A kit XML at the root (`DRSKit_full.xml` and friends) lists the channels
+    and points at one XML per instrument. Each instrument's `<samples>` block
+    lists strokes with a `power` attribute — the library's own measure of how
+    hard the stroke was, so it plays the part `vl` plays in an SFZ — and an
+    `<audiofile>` per channel. In DRSKit every channel of a stroke lives in
+    ONE 13-channel WAV and `filechannel` indexes into it, which is why reads
+    are cached: a four-mic mix would otherwise open and decode the same file
+    four times.
+
+    Round robins: DrumGizmo does not have them. It has 11 to 30 strokes per
+    instrument with every power different, which the layer picker treats as a
+    deep velocity ladder and borrows neighbours from, exactly as it does for
+    Virtuosity's drums.
+
+    STEREO PAIRS. The overheads and the ambience arrive as two mono channels
+    (`OHL`/`OHR`, `AmbL`/`AmbR`), not as a stereo file, so the recipe names
+    them as a pair and they are recombined into one stereo source here. Summed
+    to mono instead — which is what treating them as two separate mics would
+    do — the kit loses the entire stereo image, which is most of what "a kit
+    in a room" means on headphones.
     """
 
     format = "drumgizmo"
 
     def __init__(self, root, cfg):
         self.root = root
-        # The zip unpacks to a single directory; accept either the directory
-        # that holds drumkit.xml or its parent.
-        self.kitdir = _find_dir_with(root, "drumkit.xml")
-        if self.kitdir is None:
-            raise SystemExit("no drumkit.xml under %s" % root)
-        self.channels = self._read_channels()
+        name = cfg.get("kit_file", "drumkit.xml")
+        self.kitdir, self.kitfile = self._find_kit(root, name)
+        self.pairs = cfg.get("pairs", {})
+        self.channels, self.instruments = self._read_kit()
 
-    def _read_channels(self):
-        tree = ET.parse(os.path.join(self.kitdir, "drumkit.xml"))
-        names = []
-        for el in tree.getroot().iter():
-            if _tag(el) == "channel" and el.get("name"):
-                names.append(el.get("name"))
-        return names
+    @staticmethod
+    def _find_kit(root, name):
+        for base, dirs, files in os.walk(root):
+            if name in files:
+                return base, os.path.join(base, name)
+            dirs[:] = [d for d in dirs if d.lower() != "samples"]
+        raise SystemExit("no %s under %s" % (name, root))
 
-    def _instrument_dir(self, name):
-        for cand in (
-            os.path.join(self.kitdir, "Instruments", name),
-            os.path.join(self.kitdir, "instruments", name),
-        ):
-            if os.path.isdir(cand):
-                return cand
-        raise SystemExit("no instrument %r under %s" % (name, self.kitdir))
+    def _read_kit(self):
+        root = ET.parse(self.kitfile).getroot()
+        channels = [el.get("name") for el in root.iter()
+                    if _tag(el) == "channel" and el.get("name")]
+        instruments = {}
+        for el in root.iter():
+            if _tag(el) == "instrument" and el.get("name"):
+                rel = (el.get("file") or "").replace("\\", "/")
+                instruments[el.get("name")] = os.path.normpath(
+                    os.path.join(self.kitdir, rel)) if rel else None
+        return channels, instruments
+
+    def _instrument_xml(self, name):
+        path = self.instruments.get(name)
+        if path and os.path.isfile(path):
+            return path
+        # Not in this kit variant's list: fall back to the folder layout.
+        cand = os.path.join(self.kitdir, name, "%s.xml" % name)
+        if os.path.isfile(cand):
+            return cand
+        raise SystemExit(
+            "no instrument %r in %s (have: %s)"
+            % (name, os.path.basename(self.kitfile),
+               ", ".join(sorted(self.instruments)[:6]) + " ...")
+        )
 
     def takes(self, articulation, mics):
-        """`articulation` is the instrument name; `mics` are channel names."""
-        idir = self._instrument_dir(articulation)
-        xmls = [f for f in os.listdir(idir) if f.lower().endswith(".xml")]
-        if not xmls:
-            raise SystemExit("no XML in %s" % idir)
-        root = ET.parse(os.path.join(idir, xmls[0])).getroot()
+        """`articulation` is the instrument name; `mics` are channels or pairs."""
+        xml = self._instrument_xml(articulation)
+        idir = os.path.dirname(xml)
+        root = ET.parse(xml).getroot()
+
+        # Which raw channels each requested mic needs.
+        wanted = {}
+        for mic in mics:
+            wanted[mic] = list(self.pairs.get(mic, [mic]))
+        every = set(c for chans in wanted.values() for c in chans)
 
         takes = []
         for i, sample in enumerate(el for el in root.iter() if _tag(el) == "sample"):
-            power = sample.get("power")
             try:
-                power = float(power)
+                power = float(sample.get("power"))
             except (TypeError, ValueError):
                 power = float(i)
-            files = {}
+            raw = {}
             for af in (el for el in sample.iter() if _tag(el) == "audiofile"):
                 ch = af.get("channel")
                 rel = (af.get("file") or "").replace("\\", "/")
-                if not ch or ch not in mics or not rel:
+                if not ch or ch not in every or not rel:
                     continue
                 path = os.path.normpath(os.path.join(idir, rel))
-                if os.path.isfile(path):
-                    # filechannel is 1-based into a possibly multi-channel file.
-                    try:
-                        fc = int(af.get("filechannel", "1")) - 1
-                    except ValueError:
-                        fc = 0
-                    files[ch] = (path, fc)
+                if not os.path.isfile(path):
+                    continue
+                try:
+                    fc = int(af.get("filechannel", "1")) - 1
+                except ValueError:
+                    fc = 0
+                raw[ch] = (path, fc)
+            files = {}
+            for mic, chans in wanted.items():
+                got = [raw[c] for c in chans if c in raw]
+                if len(got) == len(chans) and got:
+                    files[mic] = got if len(got) > 1 else got[0]
             if files:
-                takes.append(Take(power, len(takes), files))
+                takes.append(Take(power, 0, files))
         takes.sort(key=lambda t: t.vel)
-        # DrumGizmo strokes are a continuum of powers rather than discrete
-        # velocity steps with round robins inside them; group equal powers so
-        # the layer picker sees the same shape it sees from an SFZ.
-        for t in takes:
-            t.rr = 0
         return takes
 
 
@@ -345,17 +377,58 @@ SOURCES = {"sfz": SfzSource, "drumgizmo": DrumGizmoSource}
 # Audio helpers
 # ---------------------------------------------------------------------------
 
+_READ_CACHE = collections.OrderedDict()
+_CACHE_MAX = 24
+
+
+def _read_file(path):
+    """Whole-file read, with a small cache.
+
+    DRSKit puts all thirteen mics of one stroke in a single WAV, so a four-mic
+    mix asks for the same file four times and a stereo pair asks twice more.
+    Twenty-four entries holds the handful any one stroke touches.
+    """
+    hit = _READ_CACHE.get(path)
+    if hit is not None:
+        _READ_CACHE.move_to_end(path)
+        return hit
+    x, sr = sf.read(path, always_2d=True, dtype="float64")
+    _READ_CACHE[path] = (x, sr)
+    if len(_READ_CACHE) > _CACHE_MAX:
+        _READ_CACHE.popitem(last=False)
+    return x, sr
+
+
 def read_stereo(path, filechannel=None):
-    """Read a sample file as float64 stereo at its own rate.
+    """Read a sample file as float64 at its own rate.
 
     A mono file stays mono here (one column) so the caller can pan it; a
     stereo file keeps its image. `filechannel` picks one channel out of a
     multi-channel file, which is how DrumGizmo stores its 13 mics.
     """
-    x, sr = sf.read(path, always_2d=True, dtype="float64")
+    x, sr = _read_file(path)
     if filechannel is not None and x.shape[1] > filechannel:
         x = x[:, filechannel:filechannel + 1]
     return x, sr
+
+
+def load_entry(entry):
+    """One mic's audio for one stroke, whatever shape the library stores it in.
+
+    A path (SFZ, mono or stereo), a (path, filechannel) pair (one channel of a
+    DrumGizmo multichannel file), or a list of two of those (a DrumGizmo
+    stereo pair such as OHL/OHR, recombined into one stereo source here).
+    """
+    if isinstance(entry, list):
+        cols, sr = [], None
+        for path, fc in entry:
+            x, sr = read_stereo(path, fc)
+            cols.append(x[:, 0])
+        n = min(len(c) for c in cols)
+        return np.column_stack([c[:n] for c in cols]), sr
+    if isinstance(entry, tuple):
+        return read_stereo(entry[0], entry[1])
+    return read_stereo(entry)
 
 
 def resample_to(x, sr, target):
@@ -458,9 +531,10 @@ def measure_takes(source, takes, mic, rate):
     this is for, and every mic hears the same performance get harder.
     """
     for t in takes:
-        entry = t.files.get(mic) or next(iter(t.files.values()))
-        path, fc = entry if isinstance(entry, tuple) else (entry, None)
-        x, sr = read_stereo(path, fc)
+        entry = t.files.get(mic)
+        if entry is None:
+            entry = next(iter(t.files.values()))
+        x, sr = load_entry(entry)
         t.rms = rms_db(x, sr)
     return takes
 
@@ -550,19 +624,33 @@ def pick_rr(group, rr, all_keys, groups, anchors, used_files):
 
 
 def _take_key(t):
+    """A hashable identity for one stroke, so no file is used twice."""
     entry = sorted(t.files.items())[0][1]
-    return entry[0] if isinstance(entry, tuple) else entry
+    if isinstance(entry, list):
+        return tuple(entry)
+    if isinstance(entry, tuple):
+        return entry
+    return entry
 
 
 # ---------------------------------------------------------------------------
 # Rendering one stroke
 # ---------------------------------------------------------------------------
 
-def render_take(take, mix, pan, swap_stereo, rate, align_to=None):
+def render_take(take, mix, pan, swap_stereo, rate, align_to=None, flip_if_opposed=()):
     """Mix one stroke's mics into stereo at `rate`.
 
     The highest-weighted mic is the alignment reference and the length the
     others are trimmed or padded to; everything else is advanced onto it.
+
+    `flip_if_opposed` names mics whose polarity is checked against the
+    reference once they are aligned, and inverted when it is opposite. It
+    exists for a snare's bottom mic, which points at the wires from
+    underneath: the head moves away from it as it moves towards the top mic,
+    so the two are wired in opposition and summing them as they come cancels
+    most of the drum. It is an opt-in list and not a blanket rule, because
+    between an overhead and a close cymbal mic a negative correlation is
+    usually a path-length difference and flipping it would be wrong.
     """
     weights = {m: w for m, w in mix.items() if w and m in take.files}
     if not weights:
@@ -571,9 +659,7 @@ def render_take(take, mix, pan, swap_stereo, rate, align_to=None):
 
     loaded = {}
     for mic in weights:
-        entry = take.files[mic]
-        path, fc = entry if isinstance(entry, tuple) else (entry, None)
-        x, sr = read_stereo(path, fc)
+        x, sr = load_entry(take.files[mic])
         x = resample_to(x, sr, rate)
         if swap_stereo and x.shape[1] == 2:
             x = x[:, ::-1]
@@ -584,16 +670,24 @@ def render_take(take, mix, pan, swap_stereo, rate, align_to=None):
     n = len(ref)
     acc = np.zeros((n, 2), dtype=np.float64)
     lags = {}
+    flipped = []
     for mic, x in loaded.items():
         if mic != ref_mic:
             lag = align(ref_mono, x.mean(axis=1), rate)
             lags[mic] = lag
             x = shift(x, lag)
+        if mic in flip_if_opposed and mic != ref_mic:
+            m = min(len(ref_mono), len(x))
+            if m > 64:
+                r = float(np.dot(ref_mono[:m], x[:m].mean(axis=1)))
+                if r < 0:
+                    x = -x
+                    flipped.append(mic)
         y = to_stereo(x, pan)
         if len(y) < n:
             y = np.vstack((y, np.zeros((n - len(y), 2))))
         acc += weights[mic] * y[:n]
-    return acc, lags
+    return acc, lags, flipped
 
 
 def dc_block(x, rate, hz):
@@ -606,12 +700,35 @@ def dc_block(x, rate, hz):
     is at 55 Hz and which therefore loses nothing at all to a 22 Hz corner. It
     also very slightly RAISES the in-band energy, because the headroom the
     rumble was eating goes back to the drum.
+
+    ZERO-PHASE, which matters twice over. A one-way filter settles over about
+    fifty milliseconds at this corner, and on DRSKit's short strokes — a snare
+    that is over in half a second — that settling tail IS the offset: filtered
+    forwards only, its softest snares came out at 3e-04 against a 2e-04 guard,
+    having gone in clean. Run forwards and backwards the settling cancels. And
+    a drum sample is judged on its transient: a zero-phase filter does not
+    move the attack in time relative to the body, which a one-way filter with
+    a 20 ms group delay at the bottom quietly does.
+
+    PADDED WITH REAL SILENCE, which is the part that is easy to get wrong. A
+    22 Hz filter needs thousands of samples to settle, and DRSKit's files are
+    trimmed so tightly that the stroke begins almost at sample zero — there is
+    nothing for it to settle on. Filtered without that headroom its hats came
+    out at 1.7e-03, nearly ten times the guard and worse than no filter at
+    all. Two hundred milliseconds of silence at each end gives the filter
+    somewhere to start and stop, and is thrown away afterwards.
     """
     if not hz:
         return x
-    from scipy.signal import butter, sosfilt
+    from scipy.signal import butter, sosfiltfilt
     sos = butter(2, hz, "highpass", fs=rate, output="sos")
-    return sosfilt(sos, x, axis=0)
+    n = x.shape[0]
+    if n < 64:
+        return x
+    pad = int(rate * 0.2)
+    z = np.zeros((pad, x.shape[1]), dtype=np.float64)
+    y = sosfiltfilt(sos, np.vstack((z, x, z)), axis=0, padlen=0)
+    return y[pad:pad + n]
 
 
 def trim_and_fade(x, rate, cap_s, floor_db=-60.0, fade_in_ms=1.0, fade_out_ms=30.0,
@@ -659,14 +776,36 @@ def trim_and_fade(x, rate, cap_s, floor_db=-60.0, fade_in_ms=1.0, fade_out_ms=30
 
     y = np.array(x[start:end], dtype=np.float64)
 
+    # The fades, and the window they describe, kept so the offset below can be
+    # taken out without undoing them.
+    win = np.ones(len(y))
     fi = min(int(rate * fade_in_ms / 1000.0), len(y) // 4)
     if fi > 1:
-        w = 0.5 - 0.5 * np.cos(np.linspace(0.0, math.pi, fi))
-        y[:fi] *= w[:, None]
+        win[:fi] = 0.5 - 0.5 * np.cos(np.linspace(0.0, math.pi, fi))
     fo = min(int(rate * fade_out_ms / 1000.0), len(y) // 2)
     if fo > 1:
-        w = 0.5 + 0.5 * np.cos(np.linspace(0.0, math.pi, fo))
-        y[-fo:] *= w[:, None]
+        win[-fo:] = 0.5 + 0.5 * np.cos(np.linspace(0.0, math.pi, fo))
+    y *= win[:, None]
+
+    # A struck drum is not a symmetric waveform. The beater pushes the head one
+    # way and the head comes back more slowly than it went, so a real recording
+    # of one has a small non-zero mean over any window you cut — and it is NOT
+    # low-frequency content that a high-pass can take out. Measured on DRSKit's
+    # kick: -7.3e-04 unfiltered, -6.6e-04 through 22 Hz, and WORSE at 35, 50 and
+    # 70 Hz, because by then the filter's own transient is adding more than the
+    # rumble it removes. Peak normalisation then multiplies whatever is left,
+    # which is why it shows up worst on the softest layers.
+    #
+    # So take it off directly — but shaped by the fade window rather than as a
+    # flat constant. A flat subtraction is what `KITS.md` warns about: it lifts
+    # a tail that had landed on zero back off the axis and the 30 ms fade then
+    # windows away a step. Weighted by the window, the correction is zero
+    # exactly where the file has to be zero.
+    s = float(np.sum(win))
+    if s > 0:
+        y -= (y.mean(axis=0) * len(y) / s) * win[:, None]
+        y *= win[:, None]
+
     y[0] = 0.0
     y[-1] = 0.0
     return y
@@ -785,17 +924,21 @@ def render(recipe, outdir):
         total = 0
         rr_source = "source"
         lag_seen = {}
+        flips = set()
         for li, group in enumerate(groups, start=1):
             picks, how = pick_rr(group, want_rr, all_keys, by_key, anchors, used_files)
             if how == "neighbours":
                 rr_source = "neighbours"
             for ri, take in enumerate(picks, start=1):
                 got = render_take(take, cfg["mix"], pan, swap, rate,
-                                  cfg.get("align_to"))
+                                  cfg.get("align_to"),
+                                  tuple(cfg.get("flip_if_opposed",
+                                                recipe.get("flip_if_opposed", ()))))
                 if got is None:
                     continue
-                mixed, lags = got
+                mixed, lags, flipped = got
                 lag_seen.update(lags)
+                flips.update(flipped)
                 mixed = dc_block(mixed, rate,
                                  float(cfg.get("dc_block_hz",
                                                recipe.get("dc_block_hz", 22.0))))
@@ -835,6 +978,9 @@ def render(recipe, outdir):
         )
         if cfg.get("choked_by"):
             manifest_voices[voice]["choked_by"] = list(cfg["choked_by"])
+        if flips:
+            notes.append("%s: %s came in with opposite polarity and was inverted"
+                         % (voice, ", ".join(sorted(flips))))
         _log("  %-10s %s  layers %d  rr %d (%s)  longest %.2f s  %6.1f KB"
              % (voice, art, n_layers, n_rr, rr_source, longest, total / 1024.0))
 
