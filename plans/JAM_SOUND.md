@@ -1,6 +1,10 @@
 # Why the drums sound like that, and how they get to sound like a band
 
-> **Status:** evaluation, 2026-09-13, at the owner's request after two
+> **Status:** GREEN-LIT 2026-09-13 by the owner ("Green light. You are the
+> orchestrator"); built on branch `jam-v3` by W26 (engine), W27 (render tool,
+> the Club and Studio kits), W28 (grooves with dynamics, kit data); the
+> contract is `plans/tasks/jam-v3/BRIEF.md`. Both sources are on this
+> machine under `Dev\_samples`. Was: evaluation, 2026-09-13, at the owner's request after two
 > sessions with Jam v2: "when I tested earlier the drums were very
 > underwhelming, and when you play with a drummer it is usually the
 > opposite… full-on evaluation, any means necessary, otherwise Jam makes
