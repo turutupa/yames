@@ -4698,7 +4698,20 @@ impl MetronomeEngine {
                                 // not finished, and stopping under their
                                 // hand would be the app deciding it knew
                                 // better.
-                                jam_ending_armed = !jam_ending_cancelled
+                                //
+                                // AND ONLY A BAR THE BAND ACTUALLY PLAYED
+                                // CAN END THE FORM. `jam_tick` is the tick
+                                // that just sounded out of the table, so it
+                                // is `None` through a count-in, through a
+                                // drill's ramp and over a table whose bar is
+                                // not this engine's bar — see `jam_play`,
+                                // and `the_count_in_and_the_ramp_keep_the_
+                                // click` for the three cases as a test.
+                                // Without it a one-bar song would end on the
+                                // count-in's own bar line, before a note of
+                                // it had been played.
+                                jam_ending_armed = jam_tick.is_some()
+                                    && !jam_ending_cancelled
                                     && cached.jam.as_deref().is_some_and(|t| t.ends_form());
                                 jam_ending_cancelled = false;
                                 // The bar line: the held table becomes the
@@ -7525,6 +7538,11 @@ mod tests {
                     armed = false;
                     // Whichever table the bar-ahead sender put on this bar.
                     let playing_table = bars[jam_bar as usize % bars.len()];
+                    // Did the BAND play this tick? The callback asks
+                    // `jam_play`, which answers `Click` through a count-in
+                    // and a ramp; here there is neither, so the table is the
+                    // whole of the question.
+                    let band_played = playing_table.tick(tick_index, jam_bar).is_some();
                     if let Some(tick) = playing_table.tick(tick_index, jam_bar) {
                         for slot in tick.slots() {
                             spawn_band_voice(
@@ -7546,7 +7564,7 @@ mod tests {
                         // The bar line, in the callback's order: the ending
                         // is asked of the table that played THIS bar, then
                         // the form moves.
-                        armed = playing_table.ends_form();
+                        armed = band_played && playing_table.ends_form();
                         let (b, _, _) = next_form_position(
                             jam_bar,
                             1,
@@ -7830,6 +7848,16 @@ mod tests {
             JamPlay::Click,
             "no jam, no band"
         );
+        // AND THESE THREE ARE ALSO WHAT STOPS A SONG ENDING BEFORE IT
+        // STARTS. The tick loop arms an `endsForm` ending only on a bar the
+        // band actually played, and "actually played" is this function
+        // answering `Band` — so a one-bar song cannot end on the count-in's
+        // own bar line, which it would otherwise reach before a note of it
+        // had sounded.
+        assert!(matches!(
+            jam_play(Some(&table), false, false, 4, 4, 0, 0, 0),
+            JamPlay::Band(_)
+        ));
     }
 
     /// Every tick of the bar reaches the column it should.
