@@ -528,7 +528,10 @@ export function bandMoment(
   // plays it. Never on chorus one — you cannot leave a soloist out there
   // before the tune has been round once — and never in a breakdown chorus,
   // which has already had its event.
-  if (plan.stopTime && bar === last && chorusAt > 1 && chorusAt % 2 === 0) {
+  //
+  // And never on a form shorter than a phrase. Stop-time is one bar out of
+  // twelve; one bar out of two is not a gesture, it is half the tune missing.
+  if (plan.stopTime && bars >= 4 && bar === last && chorusAt > 1 && chorusAt % 2 === 0) {
     return {
       intensity,
       drums: "stopTime",
