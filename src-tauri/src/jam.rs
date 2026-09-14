@@ -502,7 +502,11 @@ impl JamLane {
 
 /// What the engine receives from `set_jam`. Field for field, camelCase, the
 /// mirror of `JamEngineConfig`.
-#[derive(Debug, Clone, Deserialize)]
+/// `Default` is for the tests and the probe, which build a config by hand
+/// and should not have to name every field the contract has grown. Serde
+/// does not use it — every optional field carries its own
+/// `#[serde(default)]` — so a config off the wire is unaffected.
+#[derive(Debug, Clone, Default, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct JamConfig {
     pub ticks_per_beat: u32,
@@ -1152,7 +1156,7 @@ const JAM_GAIN_MEMO: usize = JAM_MAX_FORM_BARS as usize;
 /// the store can hold either) moves the rendered peak of the room kit from
 /// 2.08 to 2.95, and changing which note sits under the crash on the one
 /// moves it another 8%. Both are far more than the 10%
-/// [`INTERFERENCE_ALLOWANCE`] the ceiling holds in reserve. Normalising a
+/// the safety clamp allows for. Normalising a
 /// loud bass against a quiet one's measurement renders 1.075 at full volume
 /// on the room kit, which is the mixer clamping — the exact thing
 /// `the_busiest_groove_never_makes_the_mixer_clamp` exists to forbid.
@@ -1401,9 +1405,11 @@ fn compile_measured(
         }
     }
 
-    // The crash on the one. Level 2, because arriving at the top of the form
-    // is the loudest thing the band does; the groove's own crash lane keeps
-    // whatever level it was written with.
+    // The crash on the one. LEVEL 4 — the peak — because arriving at the top
+    // of the form is the loudest thing the band does, and with layers that
+    // means the hardest stroke the kit was recorded with rather than the
+    // same cymbal turned up. The groove's own crash lane keeps whatever
+    // level it was written with.
     let mut crash = if cfg.crash_on_one {
         let already = bar
             .first()
@@ -1412,7 +1418,7 @@ fn compile_measured(
         if already {
             None
         } else {
-            slot_for(JamLane::Crash, 2, &voicing)
+            slot_for(JamLane::Crash, 4, &voicing)
         }
     } else {
         None
@@ -1496,10 +1502,19 @@ fn compile_measured(
             KitVoice::Rim,
             1,
             JamLane::Snare,
-            crate::engine::BEAT_GAIN / voicing.mix.max(1e-6),
+            crate::engine::BEAT_GAIN,
             0.0,
             false,
-        ),
+        )
+        .map(|mut slot| {
+            // `voice_slot` folds the drums' mix into every slot it makes,
+            // and this one must not carry it: a musician who pulled the
+            // drums to nothing still has to be counted in. Put back what
+            // the mix took, on the one slot in the table that is not part
+            // of the band.
+            slot.gain = crate::engine::BEAT_GAIN;
+            slot
+        }),
     };
 
     let has_hat = bar
@@ -2307,6 +2322,7 @@ mod tests {
                     hat: vec![1u8; 8],
                     ride: z.clone(),
                     crash: z.clone(),
+                    ..Default::default()
                 },
                 fill: None,
                 form_bars: 12,
@@ -2322,6 +2338,7 @@ mod tests {
                 bass_voice: None,
                 keys_voice: None,
                 custom_kit: None,
+                ..Default::default()
             }
         }
 
@@ -2354,12 +2371,30 @@ mod tests {
 
     use super::*;
 
-    /// The room kit's voice for `v`. Most of these tests predate kits and
-    /// asserted on a bare `SoundId`; what they were really checking is that
-    /// the lane reached the right drum, and "room" is the kit they were
-    /// written against.
-    fn room(v: KitVoice) -> SoundId {
-        SoundId::Kit(JamKit::Room, v)
+    /// Which drum a slot's sound names, or `None` for the bass and the
+    /// keys.
+    ///
+    /// Most of these tests predate layers and asserted on a bare `SoundId`;
+    /// what they were really checking is that the lane reached the right
+    /// DRUM, which is a question the layer and the round robin do not change.
+    /// The tests that care which layer say so separately.
+    fn drum(sound: SoundId) -> Option<KitVoice> {
+        match sound {
+            SoundId::Band { voice, .. } => KitVoice::ALL.get(voice as usize).copied(),
+            _ => None,
+        }
+    }
+
+    /// Which layer a slot reaches, 0-based.
+    fn layer_of(sound: SoundId) -> Option<u8> {
+        match sound {
+            SoundId::Band { layer, .. } => Some(layer),
+            _ => None,
+        }
+    }
+
+    fn is(sound: SoundId, v: KitVoice) -> bool {
+        drum(sound) == Some(v)
     }
 
     /// A 4/4 rock bar at 8ths: kick on 1 and 3, snare on 2 and 4, hat
@@ -2375,6 +2410,7 @@ mod tests {
                 hat: vec![1, 3, 1, 3, 1, 3, 1, 3],
                 ride: vec![0; 8],
                 crash: vec![0; 8],
+                ..Default::default()
             },
             fill: None,
             form_bars: 4,
@@ -2390,6 +2426,7 @@ mod tests {
             bass_voice: None,
             keys_voice: None,
             custom_kit: None,
+            ..Default::default()
         }
     }
 
@@ -2403,19 +2440,19 @@ mod tests {
         // Tick 0: kick + hat, no snare.
         let tick0 = t.tick(0, 0).unwrap();
         assert_eq!(tick0.slots().len(), 2);
-        assert_eq!(tick0.slots()[0].sound, room(KitVoice::Kick));
-        assert_eq!(tick0.slots()[1].sound, room(KitVoice::Hat));
+        assert!(is(tick0.slots()[0].sound, KitVoice::Kick));
+        assert!(is(tick0.slots()[1].sound, KitVoice::Hat));
         assert!(!tick0.is_accent(), "the kick is a hit here, not an accent");
 
         // Tick 2 is beat 2: the backbeat, an accent, on the high snare.
         let back = t.tick(2, 0).unwrap();
         assert!(back.is_accent(), "a level-2 snare must read as an accent");
-        assert!(back.slots().iter().any(|s| s.sound == room(KitVoice::SnareHi)));
+        assert!(back.slots().iter().any(|s| is(s.sound, KitVoice::Snare)));
 
         // Tick 1 is a ghosted hat and nothing else.
         let off = t.tick(1, 0).unwrap();
         assert_eq!(off.slots().len(), 1);
-        assert_eq!(off.slots()[0].sound, room(KitVoice::Hat));
+        assert!(is(off.slots()[0].sound, KitVoice::Hat));
     }
 
     /// Hit 0.8, accent 1.0, ghost 0.35 — the contract's levels, as ratios.
@@ -2442,11 +2479,115 @@ mod tests {
             gain(0) / accent
         );
         assert!(
-            (gain(2) / accent - 0.35).abs() < 1e-5,
-            "a ghost is 0.35 of an accent, got {}",
+            (gain(2) / accent - 0.45).abs() < 1e-5,
+            "a ghost is 0.45 of an accent, got {}",
             gain(2) / accent
         );
         assert_eq!(t.tick(3, 0).unwrap().slots().len(), 0, "level 0 is silence");
+    }
+
+    /// A LEVEL IS A STROKE, NOT A FADER, and this is where that becomes
+    /// true. `plans/JAM_SOUND.md` §2.2: a real ghost note is a different
+    /// sound from a backbeat, not a quiet copy, and with one sample per drum
+    /// soft and loud were the same colour — which is the "flat" feeling
+    /// under every groove in the library.
+    ///
+    /// The snare is the voice to measure it on, because it is the one the
+    /// five synthesised kits already carry two layers of: `snare_lo` became
+    /// layer 1 and `snare_hi` layer 2. A ghost reaches the soft one and
+    /// everything above it the hard one.
+    #[test]
+    fn a_ghost_is_a_different_stroke_and_a_peak_is_the_hardest_one() {
+        let mut cfg = rock_8ths();
+        cfg.bar.kick = vec![0; 8];
+        cfg.bar.hat = vec![0; 8];
+        // ghost, hit, accent, peak.
+        cfg.bar.snare = vec![3, 1, 2, 4, 0, 0, 0, 0];
+        let t = compile(&cfg).unwrap();
+        let layer = |i| layer_of(t.tick(i, 0).unwrap().slots()[0].sound).unwrap();
+        assert_eq!(layer(0), 0, "a ghost is the softest layer there is");
+        assert_eq!(layer(1), 1, "a hit is the one above it");
+        // The room kit has two snare layers, so accent and peak both clamp
+        // to the hardest — and that is the point of clamping rather than
+        // refusing: a kit with fewer layers plays exactly as it always did.
+        assert_eq!(layer(2), 1, "an accent reaches as high as this kit goes");
+        assert_eq!(layer(3), 1, "and so does a peak");
+        // And the two layers are different recordings, which is the whole
+        // claim: before this pass they were one file at two volumes.
+        let bank = reference_bank("room").unwrap();
+        assert_ne!(
+            bank.sample(KitVoice::Snare as u8, 0, 0),
+            bank.sample(KitVoice::Snare as u8, 1, 0),
+            "the ghost and the backbeat are the same recording"
+        );
+        // A peak is as loud as an accent. What makes it the top of a fill is
+        // the layer, not the gain.
+        let gain = |i| t.tick(i, 0).unwrap().slots()[0].gain;
+        assert!((gain(3) - gain(2)).abs() < 1e-6, "a peak is an accent's gain");
+    }
+
+    /// LEVEL 4 IS LEGAL EVERYWHERE A LEVEL IS READ, and level 5 is not.
+    #[test]
+    fn a_peak_is_a_level_and_anything_above_it_is_refused() {
+        for lane in 0..4 {
+            let mut cfg = rock_8ths();
+            let row = vec![4u8; 8];
+            match lane {
+                0 => cfg.bar.kick = row,
+                1 => cfg.bar.snare = row,
+                2 => cfg.bar.ride = row,
+                _ => cfg.bar.crash = row,
+            }
+            assert!(compile(&cfg).is_ok(), "level 4 was refused on lane {lane}");
+        }
+        let mut cfg = rock_8ths();
+        cfg.bar.kick = vec![5, 0, 0, 0, 0, 0, 0, 0];
+        let err = compile(&cfg).expect_err("level 5 is not a level");
+        assert!(err.contains("4 peak"), "the message has to list them: {err:?}");
+    }
+
+    /// THE TOM LANES: absent is silent, present is a drum, and a kit with no
+    /// toms plays the fallback rather than nothing.
+    #[test]
+    fn the_tom_lanes_play_toms_and_absent_is_silent() {
+        // Absent, which is every groove written before this pass.
+        let t = compile(&rock_8ths()).unwrap();
+        for i in 0..8 {
+            assert!(
+                !t.tick(i, 0).unwrap().slots().iter().any(|s| matches!(
+                    drum(s.sound),
+                    Some(KitVoice::TomHi) | Some(KitVoice::TomLo)
+                )),
+                "a tom sounded on tick {i} of a groove with no tom rows"
+            );
+        }
+
+        let mut cfg = rock_8ths();
+        cfg.bar.kick = vec![0; 8];
+        cfg.bar.snare = vec![0; 8];
+        cfg.bar.hat = vec![0; 8];
+        cfg.bar.tom_hi = vec![2, 0, 0, 0, 0, 0, 0, 0];
+        cfg.bar.tom_lo = vec![0, 2, 0, 0, 0, 0, 0, 0];
+        let t = compile(&cfg).unwrap();
+        // The five synthesised kits have no toms, so both lanes resolve
+        // through the contract's chain: tom_lo to tom_hi to the snare's
+        // second layer at 0.8. A fill on a kit without toms is a fill, not a
+        // silence.
+        let hi = t.tick(0, 0).unwrap().slots()[0];
+        let lo = t.tick(1, 0).unwrap().slots()[0];
+        assert!(is(hi.sound, KitVoice::Snare), "the high tom fell through to {:?}", drum(hi.sound));
+        assert!(is(lo.sound, KitVoice::Snare));
+        assert_eq!(hi.lane, JamLane::TomHi, "the LANE is still a tom lane");
+        assert_eq!(lo.lane, JamLane::TomLo);
+        assert!(
+            (hi.gain - LEVEL_GAIN[2] * 0.8).abs() < 1e-6,
+            "the substitution costs 0.8 and came out at {}",
+            hi.gain
+        );
+        // A half-filled tom row is a caller's bug, like every other lane.
+        let mut bad = cfg.clone();
+        bad.bar.tom_hi = vec![1, 0];
+        assert!(compile(&bad).is_err());
     }
 
     /// The ride is its own cymbal now, and it is trimmed under the hat.
@@ -2467,8 +2608,8 @@ mod tests {
         let t = compile(&cfg).unwrap();
         let hat = t.tick(0, 0).unwrap().slots()[0];
         let ride = t.tick(1, 0).unwrap().slots()[0];
-        assert_eq!(hat.sound, room(KitVoice::Hat));
-        assert_eq!(ride.sound, room(KitVoice::Ride), "the ride is the ride");
+        assert!(is(hat.sound, KitVoice::Hat));
+        assert!(is(ride.sound, KitVoice::Ride), "the ride is the ride");
         assert!((ride.gain - hat.gain * RIDE_TRIM).abs() < 1e-6);
         assert!(ride.cap_ticks > hat.cap_ticks, "the ride rings longer");
     }
@@ -2507,8 +2648,8 @@ mod tests {
     #[test]
     fn an_impossible_level_or_meter_is_rejected() {
         let mut cfg = rock_8ths();
-        cfg.bar.kick[3] = 4;
-        assert!(compile(&cfg).is_err(), "level 4 does not exist");
+        cfg.bar.kick[3] = 5;
+        assert!(compile(&cfg).is_err(), "level 5 does not exist");
 
         let mut cfg = rock_8ths();
         cfg.ticks_per_beat = 5;
@@ -2537,10 +2678,13 @@ mod tests {
             t.tick(0, 0).unwrap().slots()[0].gain
         };
         // Anything under the floor lands on the floor, anything over the
-        // top lands on the top. The range itself is 0.5..1.5.
+        // top lands on the top. The range is 0.5..1.6 — soft is 0.6 and
+        // loud is 1.6 now, because with the bus underneath it a dial whose
+        // three stops are within 5 dB of each other is a dial nobody can
+        // hear turning.
         assert_eq!(kick_gain(0.05), kick_gain(0.5), "clamped up to 0.5");
         assert_eq!(kick_gain(-3.0), kick_gain(0.5), "a negative jam is still a jam");
-        assert_eq!(kick_gain(9.0), kick_gain(1.5), "clamped down to 1.5");
+        assert_eq!(kick_gain(9.0), kick_gain(1.6), "clamped down to 1.6");
         assert!(
             kick_gain(f32::NAN) > 0.0,
             "a NaN intensity must not silence the band"
@@ -2552,13 +2696,15 @@ mod tests {
     ///
     /// The first version of the normalisation scaled every table so its
     /// worst tick hit the ceiling, which meant soft, normal and loud all
-    /// came out at exactly the same level on any groove busy enough to
-    /// trip it: the musician turns the dial and nothing happens. The
-    /// ceiling now leaves room for "loud" instead.
+    /// came out at exactly the same level on any groove busy enough to trip
+    /// it: the musician turns the dial and nothing happens. The clamp only
+    /// fires on a table nobody writes now, so the dial reaches the band
+    /// intact on every groove in the library.
     #[test]
     fn soft_normal_and_loud_are_three_different_levels() {
         let peak = |intensity| {
-            // Busy enough that the normalisation definitely fires.
+            // Busy — and it is deliberately NOT busy enough to trip the
+            // clamp, because that is the case the dial has to survive.
             let mut cfg = rock_8ths();
             cfg.intensity = intensity;
             cfg.bar.kick = vec![2; 8];
@@ -2567,18 +2713,19 @@ mod tests {
             cfg.bar.crash = vec![2; 8];
             compile(&cfg).unwrap().peak_after
         };
-        let (soft, normal, loud) = (peak(0.7), peak(1.0), peak(1.25));
+        let (soft, normal, loud) = (peak(0.6), peak(1.0), peak(1.6));
         assert!(
             soft < normal && normal < loud,
             "soft {soft:.3}, normal {normal:.3}, loud {loud:.3} — the dial does nothing"
         );
-        assert!(
-            loud <= JAM_TICK_CEILING + 1e-4,
-            "loud peaks at {loud:.3}, over the ceiling"
-        );
         // And they are spaced the way the contract says: the ratios survive.
-        assert!((normal / soft - 1.0 / 0.7).abs() < 1e-3);
-        assert!((loud / normal - 1.25).abs() < 1e-3);
+        assert!((normal / soft - 1.0 / 0.6).abs() < 1e-3);
+        assert!((loud / normal - 1.6).abs() < 1e-3);
+        // A 8.5 dB spread, which is a dial you can hear rather than one you
+        // have to be told about.
+        let spread = 20.0 * (loud / soft).log10();
+        eprintln!("[jam] soft to loud: {spread:.1} dB");
+        assert!(spread > 6.0, "soft to loud is only {spread:.1} dB");
     }
 
     #[test]
@@ -2598,12 +2745,12 @@ mod tests {
                 .unwrap()
                 .slots()
                 .iter()
-                .any(|s| s.sound == room(KitVoice::Kick));
+                .any(|s| is(s.sound, KitVoice::Kick));
             assert!(has_kick, "bar {bar} of 4 is still the groove");
         }
         let last = t.tick(0, 3).unwrap();
         assert!(
-            !last.slots().iter().any(|s| s.sound == room(KitVoice::Kick)),
+            !last.slots().iter().any(|s| is(s.sound, KitVoice::Kick)),
             "the last bar of the chorus is the fill"
         );
     }
@@ -2614,7 +2761,7 @@ mod tests {
         cfg.crash_on_one = true;
         let t = compile(&cfg).unwrap();
         let crash = t.crash_on_one().expect("the jam asked for a crash");
-        assert_eq!(crash.sound, room(KitVoice::Crash));
+        assert!(is(crash.sound, KitVoice::Crash));
         assert_eq!(crash.cap_ticks, 0.0, "a crash rings out");
 
         // A groove that already crashes on tick 0 does not get a second one.
@@ -2631,14 +2778,16 @@ mod tests {
         assert!(compile(&rock_8ths()).unwrap().crash_on_one().is_none());
     }
 
-    /// THE BAND THAT WOULD HAVE CLIPPED.
+    /// THE SAFETY CLAMP, ON THE TABLE IT EXISTS FOR.
     ///
-    /// Kick, snare accent, hat, ride and crash on every tick at intensity
-    /// 1.25 is the loudest thing Jam can produce. The mixer clamps, but a
-    /// clamped sum is a square wave, and the point of the per-table
-    /// normalisation is that the ear never finds out.
+    /// Kick, snare, hat, ride and crash on every tick at the loudest
+    /// intensity there is: the loudest thing Jam can describe, and nobody's
+    /// groove. It is not held to full scale any more — the bus does that —
+    /// but it IS held to [`JAM_SAFETY_CLAMP`], because a band arriving at
+    /// five times full scale is asking a compressor for something no
+    /// compressor makes musical.
     #[test]
-    fn the_busiest_band_stays_inside_full_scale() {
+    fn the_busiest_band_is_held_at_the_safety_clamp() {
         let cfg = JamConfig {
             ticks_per_beat: 4,
             beats_per_bar: 4,
@@ -2648,12 +2797,13 @@ mod tests {
                 snare: vec![2; 16],
                 hat: vec![1; 16],
                 ride: vec![1; 16],
-                crash: vec![2; 16],
+                crash: vec![4; 16],
+                ..Default::default()
             },
             fill: None,
             form_bars: 4,
             crash_on_one: true,
-            intensity: 1.5,
+            intensity: 1.6,
             kit: "room".into(),
             bass: None,
             practice: None,
@@ -2664,31 +2814,37 @@ mod tests {
             bass_voice: None,
             keys_voice: None,
             custom_kit: None,
+            ..Default::default()
         };
         let t = compile(&cfg).unwrap();
         assert!(
-            t.peak_before > JAM_TICK_CEILING,
-            "this fixture is supposed to be the one that clips; it peaked at {}",
-            t.peak_before
-        );
-        assert!(
-            t.peak_after <= JAM_TICK_CEILING + 1e-4,
-            "after normalisation the worst tick is {} — still clipping",
-            t.peak_after
+            t.base_peak > JAM_SAFETY_CLAMP,
+            "this fixture is supposed to be the absurd one; it rendered {}",
+            t.base_peak
         );
 
-        // Re-measure the compiled slots rather than trusting the bookkeeping.
+        // Re-measure the compiled slots rather than trusting the
+        // bookkeeping. The clamp is applied at intensity 1.0, so what the
+        // table renders is the clamp times whatever the dial was set to.
         let measured = worst_bar_peak(
             &t.bar,
             t.fill.as_deref(),
             t.crash_on_one(),
             t.form_bars(),
             cfg.ticks_per_beat,
-            None,
+            t.kit_bank(),
         );
         assert!(
-            measured <= JAM_TICK_CEILING + 1e-4,
+            measured <= JAM_SAFETY_CLAMP * cfg.intensity + 1e-2,
             "the compiled table still renders a tick at {measured}"
+        );
+        // AND WHAT THE BUS DOES WITH IT IS UNDER FULL SCALE. That is the
+        // claim the clamp exists to make true — a band at the clamp is a
+        // band arriving hot, which is what a drum bus is for.
+        let out = bus_steady_state(JAM_SAFETY_CLAMP, t.bus_drive);
+        assert!(
+            out < 1.0,
+            "the clamp lets {JAM_SAFETY_CLAMP} through the bus at {out}"
         );
 
         // Gentle: the groove's own balance survives the scaling.
@@ -2697,7 +2853,7 @@ mod tests {
         let snare = tick
             .slots()
             .iter()
-            .find(|s| s.sound == room(KitVoice::SnareHi))
+            .find(|s| is(s.sound, KitVoice::Snare))
             .unwrap();
         assert!(
             (snare.gain / kick.gain - 1.0 / 0.8).abs() < 1e-4,
@@ -2717,13 +2873,15 @@ mod tests {
             "a rock beat at normal intensity peaks at {:.3}, which is a whisper",
             t.peak_after
         );
-        assert!(
-            t.peak_after <= JAM_TICK_CEILING + 1e-4,
-            "a rock beat peaks at {:.3}, over the ceiling",
-            t.peak_after
+        // AND IT IS NOT SCALED AT ALL. This is the 9 to 13 dB
+        // (`plans/JAM_SOUND.md` §1): a rock beat used to pay, on every hit,
+        // for the busiest table anybody could write. It does not any more.
+        assert_eq!(
+            t.peak_before, t.peak_after,
+            "a rock beat was scaled, and nothing about it is absurd"
         );
         // A groove quiet enough not to need the headroom keeps its level
-        // untouched — the normalisation is not a fader on everything.
+        // untouched too — the clamp is not a fader on everything.
         let mut quiet = rock_8ths();
         quiet.bar.kick = vec![3, 0, 0, 0, 0, 0, 0, 0];
         quiet.bar.snare = vec![0; 8];
@@ -2731,9 +2889,50 @@ mod tests {
         let q = compile(&quiet).unwrap();
         assert_eq!(
             q.tick(0, 0).unwrap().slots()[0].gain,
-            0.35,
+            LEVEL_GAIN[3],
             "a lone ghost note needs no headroom and must not be scaled"
         );
+    }
+
+    /// THE SCALING RULE, AT 2.4 AND AT 2.6.
+    ///
+    /// The contract: "a table is scaled only when its worst tick exceeds
+    /// 2.5 before the bus". Measured on the arithmetic rather than on a
+    /// groove, because finding two grooves that render either side of one
+    /// number would be a test about the fixtures.
+    #[test]
+    fn a_table_is_scaled_only_above_two_and_a_half() {
+        let scaled = |base: f32| {
+            if base > JAM_SAFETY_CLAMP {
+                JAM_SAFETY_CLAMP / base
+            } else {
+                1.0
+            }
+        };
+        assert_eq!(scaled(2.4), 1.0, "2.4 is under the clamp and keeps its level");
+        assert_eq!(scaled(2.5), 1.0, "and so is the clamp itself");
+        assert!(scaled(2.6) < 1.0, "2.6 is over it");
+        assert!(
+            (2.6 * scaled(2.6) - JAM_SAFETY_CLAMP).abs() < 1e-5,
+            "a scaled table lands on the clamp and not below it"
+        );
+        assert_eq!(JAM_SAFETY_CLAMP, 2.5);
+    }
+
+    /// What the bus does to a steady input, for the tests above to lean on.
+    ///
+    /// The same two stages `DrumBus` runs on the audio thread, settled: the
+    /// tanh with this kit's drive, then the compressor's gain at its own
+    /// steady state. Written here rather than reached for across the module
+    /// boundary because `DrumBus` is the callback's and this is arithmetic.
+    fn bus_steady_state(input: f32, drive: f32) -> f32 {
+        let shaped = (input * drive).tanh() / drive.tanh();
+        // Threshold −6 dBFS, ratio 3:1.
+        if shaped > 0.5 {
+            shaped * (0.5 / shaped).powf(1.0 - 1.0 / 3.0)
+        } else {
+            shaped
+        }
     }
 
     #[test]
@@ -2749,7 +2948,7 @@ mod tests {
                 .unwrap()
                 .slots()
                 .iter()
-                .any(|s| s.sound == room(KitVoice::Kick)),
+                .any(|s| is(s.sound, KitVoice::Kick)),
             "bar 0 of a 1-bar form is also its last bar"
         );
     }
@@ -2778,6 +2977,7 @@ mod tests {
                 hat: vec![2; 8],
                 ride: vec![2; 8],
                 crash: vec![0; 8],
+                ..Default::default()
             });
             compile(&cfg).unwrap()
         };
@@ -2792,7 +2992,7 @@ mod tests {
         );
         for (name, t) in [("one-bar", &one), ("four-bar", &four)] {
             assert!(
-                t.peak_after <= JAM_TICK_CEILING + 1e-4,
+                t.peak_after <= JAM_SAFETY_CLAMP + 1e-4,
                 "the {name} form peaks at {:.3}, over the ceiling",
                 t.peak_after
             );
@@ -2849,32 +3049,28 @@ mod tests {
         cfg.bar.ride = vec![0, 0, 0, 0, 1, 0, 0, 0];
         cfg.bar.crash = vec![0, 0, 0, 0, 0, 1, 0, 0];
 
-        for (name, kit) in [
-            ("room", JamKit::Room),
-            ("tight", JamKit::Tight),
-            ("brushes", JamKit::Brushes),
-            ("electronic", JamKit::Electronic),
-            ("raw", JamKit::Raw),
-        ] {
+        for name in ["room", "tight", "brushes", "electronic", "raw"] {
             let mut c = cfg.clone();
             c.kit = name.to_string();
             let t = compile(&c).unwrap();
-            assert_eq!(t.kit, kit);
-            let voice = |tick: u32| t.tick(tick, 0).unwrap().slots()[0].sound;
-            assert_eq!(voice(0), SoundId::Kit(kit, KitVoice::Kick), "{name} kick");
+            assert_eq!(t.kit, JamKit::from_name(name));
+            assert_eq!(t.kit.name(), name);
+            // And the drums really are that kit's, which is a claim about
+            // the BANK the table carries rather than about a `SoundId` that
+            // no longer names a kit at all.
+            assert_eq!(t.kit_bank().id_name, name);
+            let slot = |tick: u32| t.tick(tick, 0).unwrap().slots()[0];
+            assert!(is(slot(0).sound, KitVoice::Kick), "{name} kick");
+            assert!(is(slot(1).sound, KitVoice::Snare), "{name} accent");
+            assert!(is(slot(2).sound, KitVoice::Snare), "{name} hit");
             assert_eq!(
-                voice(1),
-                SoundId::Kit(kit, KitVoice::SnareHi),
+                layer_of(slot(1).sound),
+                Some(1),
                 "{name}: an accent is the drum hit harder"
             );
-            assert_eq!(
-                voice(2),
-                SoundId::Kit(kit, KitVoice::SnareLo),
-                "{name}: a plain hit is the same drum, softer"
-            );
-            assert_eq!(voice(3), SoundId::Kit(kit, KitVoice::Hat), "{name} hat");
-            assert_eq!(voice(4), SoundId::Kit(kit, KitVoice::Ride), "{name} ride");
-            assert_eq!(voice(5), SoundId::Kit(kit, KitVoice::Crash), "{name} crash");
+            assert!(is(slot(3).sound, KitVoice::Hat), "{name} hat");
+            assert!(is(slot(4).sound, KitVoice::Ride), "{name} ride");
+            assert!(is(slot(5).sound, KitVoice::Crash), "{name} crash");
         }
     }
 
@@ -2888,17 +3084,35 @@ mod tests {
     #[test]
     fn an_unknown_kit_is_the_room_kit() {
         for (name, expected) in [
-            ("", JamKit::Room),
-            ("ROOM", JamKit::Room),
-            (" Tight ", JamKit::Tight),
-            ("vibraphone", JamKit::Room),
-            ("808", JamKit::Room),
+            ("", "room"),
+            ("ROOM", "room"),
+            (" Tight ", "tight"),
+            ("vibraphone", "room"),
+            ("808", "room"),
         ] {
             let mut cfg = rock_8ths();
             cfg.kit = name.to_string();
             let t = compile(&cfg).expect("an unknown kit must still compile");
-            assert_eq!(t.kit, expected, "kit {name:?}");
+            assert_eq!(t.kit.name(), expected, "kit {name:?}");
         }
+    }
+
+    /// ADDING A KIT IS ADDING A FOLDER, and the engine finds it by looking.
+    ///
+    /// Nothing names the five kits in Rust any more — `build.rs` walks
+    /// `sounds/kits/*/kit.json`. This is what says the walk reached the
+    /// config: a name in a jam finds the folder of the same name, and the
+    /// index it resolves to is stable enough to be a cache key.
+    #[test]
+    fn the_kits_are_whatever_folders_are_there() {
+        let ids = crate::kit::shipped_ids();
+        for name in ids.iter() {
+            let mut cfg = rock_8ths();
+            cfg.kit = name.clone();
+            let t = compile(&cfg).expect("a shipped kit compiles");
+            assert_eq!(&t.kit.name(), name);
+        }
+        assert_eq!(JamKit::all().len(), ids.len());
     }
 
     /// Each kit gets its own normalisation, because each kit has its own
@@ -2909,7 +3123,7 @@ mod tests {
         let busy = |kit: &str| {
             let mut cfg = rock_8ths();
             cfg.kit = kit.to_string();
-            cfg.intensity = 1.25;
+            cfg.intensity = 1.6;
             cfg.bar.kick = vec![2; 8];
             cfg.bar.snare = vec![2; 8];
             cfg.bar.hat = vec![2; 8];
@@ -2925,8 +3139,8 @@ mod tests {
         for kit in ["room", "tight", "brushes", "electronic", "raw"] {
             let t = busy(kit);
             assert!(
-                t.peak_after <= JAM_TICK_CEILING + 1e-4,
-                "{kit} peaks at {:.3}, over the ceiling",
+                t.peak_after <= JAM_SAFETY_CLAMP * 1.6 + 1e-2,
+                "{kit} peaks at {:.3}, over the clamp",
                 t.peak_after
             );
             assert!(
@@ -2960,6 +3174,7 @@ mod tests {
                 hat: vec![0; n],
                 ride: vec![0; n],
                 crash: vec![0; n],
+                ..Default::default()
             },
             fill: None,
             form_bars: 4,
@@ -2975,6 +3190,7 @@ mod tests {
             bass_voice: None,
             keys_voice: None,
             custom_kit: None,
+            ..Default::default()
         }
     }
 
@@ -3053,6 +3269,7 @@ mod tests {
             hat: vec![0; 16],
             ride: vec![0; 16],
             crash: vec![0; 16],
+            ..Default::default()
         });
         let t = compile(&cfg).unwrap();
         let on_fill = t
@@ -3135,7 +3352,7 @@ mod tests {
         cfg.bar.kick = vec![2; 16];
         cfg.bar.snare = vec![2; 16];
         cfg.bar.crash = vec![2; 16];
-        cfg.intensity = 1.25;
+        cfg.intensity = 1.6;
         let with = compile(&cfg).unwrap();
         cfg.bass = None;
         let without = compile(&cfg).unwrap();
@@ -3146,8 +3363,8 @@ mod tests {
             without.peak_before
         );
         assert!(
-            with.peak_after <= JAM_TICK_CEILING + 1e-4,
-            "a band with a bass peaks at {:.3}, over the ceiling",
+            with.peak_after <= JAM_SAFETY_CLAMP * 1.6 + 1e-2,
+            "a band with a bass peaks at {:.3}, over the clamp",
             with.peak_after
         );
     }
@@ -3426,7 +3643,7 @@ mod tests {
         );
 
         let t = compile(&cfg).unwrap();
-        assert_eq!(t.kit, JamKit::Brushes);
+        assert_eq!(t.kit.name(), "brushes");
         assert_eq!(t.band_state(0), JamBandState::Full);
         assert_eq!(t.band_state(4), JamBandState::HatsOnly);
         assert_eq!(t.band_state(8), JamBandState::Silent);
@@ -3465,18 +3682,21 @@ mod tests {
     ///
     /// The tests that ask how LOUD it comes out use [`long_folder`], because
     /// a 50 ms burst cannot answer a question about ring-out.
-    fn folder(voices: &[KitVoice]) -> Option<Arc<CustomBank>> {
-        Some(Arc::new(CustomBank::for_tests(voices, JAM_REFERENCE_SR, 0.05)))
+    fn folder(voices: &[KitVoice]) -> Arc<KitBank> {
+        Arc::new(KitBank::for_tests(voices, JAM_REFERENCE_SR, 0.05))
+    }
+
+    /// The same folder, with the kit named in `kit` behind it — which is
+    /// what `set_jam` builds, and what makes a folder with two drums in it a
+    /// real kit rather than a band with two drums.
+    fn folder_over(voices: &[KitVoice], kit: &str) -> Arc<KitBank> {
+        crate::kit::with_fallback(&folder(voices), &reference_bank(kit).unwrap())
     }
 
     /// The same, with every voice at the cap — the longest drum a folder is
-    /// allowed to hold, which is what the ceiling has to survive.
-    fn long_folder(voices: &[KitVoice], rate: u32) -> Option<Arc<CustomBank>> {
-        Some(Arc::new(CustomBank::for_tests(
-            voices,
-            rate,
-            crate::kit::MAX_VOICE_SECS,
-        )))
+    /// allowed to hold, which is what the clamp has to survive.
+    fn long_folder(voices: &[KitVoice], rate: u32) -> Arc<KitBank> {
+        Arc::new(KitBank::for_tests(voices, rate, crate::kit::MAX_VOICE_SECS))
     }
 
     /// The whole slot a lane compiled to on tick `t` — gain and ring-out as
@@ -3491,9 +3711,24 @@ mod tests {
             .copied()
     }
 
-    /// Which sound a lane resolved to on tick `t`.
-    fn lane_sound(table: &JamTable, t: u32, lane: JamLane) -> Option<SoundId> {
-        slot_of(table, t, lane).map(|s| s.sound)
+    /// Which drum a lane resolved to on tick `t`.
+    fn lane_voice(table: &JamTable, t: u32, lane: JamLane) -> Option<KitVoice> {
+        slot_of(table, t, lane).and_then(|s| drum(s.sound))
+    }
+
+    /// Which samples a lane resolved to on tick `t`, out of `bank`. The one
+    /// way to say "that drum came from the folder and not from the kit
+    /// behind it" now that both live in one bank.
+    fn lane_samples<'a>(
+        table: &JamTable,
+        bank: &'a KitBank,
+        t: u32,
+        lane: JamLane,
+    ) -> Option<&'a [f32]> {
+        match slot_of(table, t, lane)?.sound {
+            SoundId::Band { voice, layer, robin } => Some(bank.sample(voice, layer, robin)),
+            _ => None,
+        }
     }
 
     /// VOICE BY VOICE, NOT ALL OR NOTHING.
@@ -3507,103 +3742,103 @@ mod tests {
     fn voices_the_folder_lacks_come_from_the_built_in_kit() {
         let mut cfg = rock_8ths();
         cfg.kit = "tight".into();
-        let t = compile_with_kit(&cfg, folder(&[KitVoice::Kick, KitVoice::SnareHi])).unwrap();
+        let own = folder(&[KitVoice::Kick, KitVoice::Snare]);
+        let behind = reference_bank("tight").unwrap();
+        let bank = crate::kit::with_fallback(&own, &behind);
+        let t = compile_with_kit(&cfg, bank.clone()).unwrap();
 
         // Tick 0 is kick + hat; tick 2 is the snare accent.
         assert_eq!(
-            lane_sound(&t, 0, JamLane::Kick),
-            Some(SoundId::Custom(KitVoice::Kick)),
+            lane_samples(&t, &bank, 0, JamLane::Kick),
+            Some(own.sample(KitVoice::Kick as u8, 0, 0)),
             "the folder has a kick and the band should be playing it"
         );
-        assert_eq!(
-            lane_sound(&t, 2, JamLane::Snare),
-            Some(SoundId::Custom(KitVoice::SnareHi)),
-            "level 2 is the accent, which is snare_hi — `snare.wav` in the folder"
-        );
+        assert!(is(
+            slot_of(&t, 2, JamLane::Snare).unwrap().sound,
+            KitVoice::Snare
+        ));
         // The hat is not in the folder, so it is the kit named in `kit` —
         // and `tight`, not `room`, because the config said so.
         assert_eq!(
-            lane_sound(&t, 0, JamLane::Hat),
-            Some(SoundId::Kit(JamKit::Tight, KitVoice::Hat)),
+            lane_samples(&t, &bank, 0, JamLane::Hat),
+            Some(behind.sample(KitVoice::Hat as u8, 0, 0)),
             "the folder has no hat, so the hat comes from the built-in kit"
         );
-        // And the table carries the folder, which is what lets the audio
-        // thread answer `SoundId::Custom` without a lock.
-        assert!(t.custom_kit().is_some());
+        // And the table carries the drums, which is what lets the audio
+        // thread answer `SoundId::Band` without a lock.
+        assert_eq!(t.kit_bank().id, bank.id);
     }
 
-    /// A soft snare is a different FILE — and half a pair is a whole pair.
+    /// A SOFT SNARE IS A DIFFERENT RECORDING, AND HALF A PAIR IS A WHOLE
+    /// PAIR.
     ///
-    /// `snare_soft.wav` is the ghost note and `snare.wav` is the backbeat,
-    /// which is rule 4 of `KITS.md` applied to somebody else's samples: a
-    /// folder that has only the loud one uses it for both rather than
-    /// dropping the ghosts. See `kit::alias_snare_pair`.
+    /// `snare_soft.wav` is the ghost and `snare.wav` the backbeat, which is
+    /// two layers of one drum now rather than two voices. The rule that
+    /// survives from the second pass is the one that matters from a chair: a
+    /// folder that has only one of them uses it for both, because a folder
+    /// that borrowed the app's ghost would be two snares that do not match —
+    /// and would play the borrowed one on every groove in the library that
+    /// writes its backbeat at level 1, which is most of them.
+    ///
+    /// The layer clamp in `resolve_voice` is what does it now, and it is the
+    /// same clamp that makes a one-layer kit play every level.
     #[test]
-    fn the_soft_snare_is_its_own_file_and_half_a_pair_is_a_whole_pair() {
+    fn one_snare_in_a_folder_covers_the_backbeat_and_the_ghosts() {
         let mut cfg = rock_8ths();
-        // Level 3 is a ghost note, which resolves to snare_lo.
+        // A ghost, then the backbeat.
         cfg.bar.snare = vec![0, 3, 2, 0, 0, 3, 2, 0];
 
-        let both = compile_with_kit(&cfg, folder(&[KitVoice::SnareHi, KitVoice::SnareLo])).unwrap();
-        assert_eq!(
-            lane_sound(&both, 1, JamLane::Snare),
-            Some(SoundId::Custom(KitVoice::SnareLo))
-        );
-        assert_eq!(
-            lane_sound(&both, 2, JamLane::Snare),
-            Some(SoundId::Custom(KitVoice::SnareHi))
-        );
+        // Two layers: the ghost is the soft one and the backbeat the hard.
+        let both = Arc::new(KitBank::layered_for_tests(
+            &[KitVoice::Snare],
+            JAM_REFERENCE_SR,
+            0.05,
+            2,
+            1,
+        ));
+        let t = compile_with_kit(&cfg, both).unwrap();
+        assert_eq!(layer_of(slot_of(&t, 1, JamLane::Snare).unwrap().sound), Some(0));
+        assert_eq!(layer_of(slot_of(&t, 2, JamLane::Snare).unwrap().sound), Some(1));
 
-        // Only `snare.wav`. Both halves are the musician's drum, because a
-        // folder that borrowed the built-in ghost would be two snares that
-        // do not match — and, far worse, would play the built-in one on
-        // every groove in the library that writes its backbeat at level 1.
-        let loud_only = compile_with_kit(&cfg, folder(&[KitVoice::SnareHi])).unwrap();
-        assert_eq!(
-            lane_sound(&loud_only, 2, JamLane::Snare),
-            Some(SoundId::Custom(KitVoice::SnareHi))
-        );
-        assert_eq!(
-            lane_sound(&loud_only, 1, JamLane::Snare),
-            Some(SoundId::Custom(KitVoice::SnareLo)),
-            "the folder's only snare has to cover the ghosts too"
-        );
-
-        // And the mirror: only `snare_soft.wav` in the folder.
-        let soft_only = compile_with_kit(&cfg, folder(&[KitVoice::SnareLo])).unwrap();
-        assert_eq!(
-            lane_sound(&soft_only, 1, JamLane::Snare),
-            Some(SoundId::Custom(KitVoice::SnareLo))
-        );
-        assert_eq!(
-            lane_sound(&soft_only, 2, JamLane::Snare),
-            Some(SoundId::Custom(KitVoice::SnareHi)),
-            "the folder's only snare has to cover the backbeat too"
-        );
+        // One layer: both strokes are it. Not silence, and not the app's.
+        let one = folder(&[KitVoice::Snare]);
+        let t = compile_with_kit(&cfg, one.clone()).unwrap();
+        for tick in [1, 2] {
+            assert_eq!(
+                lane_samples(&t, &one, tick, JamLane::Snare),
+                Some(one.sample(KitVoice::Snare as u8, 0, 0)),
+                "tick {tick} did not play the folder's only snare"
+            );
+        }
+        // And they are still different STROKES, because the level gain is
+        // what a one-layer kit has left.
+        let ghost = slot_of(&t, 1, JamLane::Snare).unwrap();
+        let back = slot_of(&t, 2, JamLane::Snare).unwrap();
+        assert!(ghost.gain < back.gain);
     }
 
     /// THE FOLDER A MUSICIAN ACTUALLY TRIES FIRST: A KICK AND A SNARE.
     ///
-    /// The bug this pins is not subtle from a chair. Most of the library
-    /// writes its backbeat at level 1 — a plain hit, not an accent — and
-    /// level 1 resolves to `snare_lo`, which `KIT_FILES` maps to
-    /// `snare_soft.wav`. So a folder holding `kick.wav` and `snare.wav`
-    /// played the musician's kick against the app's snare on nearly every
-    /// groove there is, and the only way to hear the snare they had chosen
-    /// was to find a groove that accented the backbeat.
+    /// Most of the library writes its backbeat at level 1 — a plain hit, not
+    /// an accent. Before the second pass that resolved to a voice the folder
+    /// did not have, so a folder holding `kick.wav` and `snare.wav` played
+    /// the musician's kick against the app's snare on nearly every groove
+    /// there is. The layer clamp is what keeps that fixed.
     #[test]
     fn a_kick_and_a_snare_in_a_folder_play_the_backbeat_of_an_unaccented_groove() {
         let mut cfg = rock_8ths();
         // The backbeat as most of the library writes it: level 1.
         cfg.bar.snare = vec![0, 0, 1, 0, 0, 0, 1, 0];
-        let t = compile_with_kit(&cfg, folder(&[KitVoice::Kick, KitVoice::SnareHi])).unwrap();
+        let own = folder(&[KitVoice::Kick, KitVoice::Snare]);
+        let bank = crate::kit::with_fallback(&own, &reference_bank("room").unwrap());
+        let t = compile_with_kit(&cfg, bank.clone()).unwrap();
         assert_eq!(
-            lane_sound(&t, 0, JamLane::Kick),
-            Some(SoundId::Custom(KitVoice::Kick))
+            lane_samples(&t, &bank, 0, JamLane::Kick),
+            Some(own.sample(KitVoice::Kick as u8, 0, 0))
         );
         assert_eq!(
-            lane_sound(&t, 2, JamLane::Snare),
-            Some(SoundId::Custom(KitVoice::SnareLo)),
+            lane_samples(&t, &bank, 2, JamLane::Snare),
+            Some(own.sample(KitVoice::Snare as u8, 0, 0)),
             "the backbeat of a level-1 groove came from the built-in kit, so the \
              folder's kick is playing against somebody else's snare"
         );
@@ -3620,26 +3855,68 @@ mod tests {
         let mut cfg = rock_8ths();
         cfg.crash_on_one = true;
         cfg.count_in_sound = Some(JamCountInSound::Sticks);
-        let t = compile_with_kit(&cfg, folder(&[KitVoice::Crash, KitVoice::Rim])).unwrap();
+        let own = folder(&[KitVoice::Crash, KitVoice::Rim]);
+        let bank = crate::kit::with_fallback(&own, &reference_bank("room").unwrap());
+        let t = compile_with_kit(&cfg, bank.clone()).unwrap();
+        let samples = |slot: Option<JamSlot>| match slot?.sound {
+            SoundId::Band { voice, layer, robin } => Some(bank.sample(voice, layer, robin)),
+            _ => None,
+        };
         assert_eq!(
-            t.crash_on_one().map(|s| s.sound),
-            Some(SoundId::Custom(KitVoice::Crash))
+            samples(t.crash_on_one()),
+            Some(own.sample(KitVoice::Crash as u8, 0, 0))
         );
         assert_eq!(
-            t.count_in_slot().map(|s| s.sound),
-            Some(SoundId::Custom(KitVoice::Rim))
+            samples(t.count_in_slot()),
+            Some(own.sample(KitVoice::Rim as u8, 0, 0)),
+            "the count-in is the kit's cross-stick"
         );
 
         // And without them in the folder, both are the built-in kit's.
-        let bare = compile_with_kit(&cfg, folder(&[KitVoice::Kick])).unwrap();
+        let behind = reference_bank("room").unwrap();
+        let bare = crate::kit::with_fallback(&folder(&[KitVoice::Kick]), &behind);
+        let t = compile_with_kit(&cfg, bare.clone()).unwrap();
+        let samples = |slot: Option<JamSlot>| match slot?.sound {
+            SoundId::Band { voice, layer, robin } => Some(bare.sample(voice, layer, robin)),
+            _ => None,
+        };
         assert_eq!(
-            bare.crash_on_one().map(|s| s.sound),
-            Some(SoundId::Kit(JamKit::Room, KitVoice::Crash))
+            samples(t.crash_on_one()),
+            Some(behind.sample(KitVoice::Crash as u8, 0, 0))
         );
         assert_eq!(
-            bare.count_in_slot().map(|s| s.sound),
-            Some(SoundId::Kit(JamKit::Room, KitVoice::Rim))
+            samples(t.count_in_slot()),
+            Some(behind.sample(KitVoice::Rim as u8, 0, 0))
         );
+    }
+
+    /// A COUNT-IN IS STICKS, WHATEVER THE GROOVE SAYS ITS GHOSTS ARE.
+    ///
+    /// The cross-stick became reachable from the snare lane this pass
+    /// (`snareGhostIsRim`), and the count-in reaches for the same drum by a
+    /// different road: directly, at the beat gain, outside the intensity,
+    /// the mix and the clamp. A count-in nobody can hear because the drums
+    /// were mixed down is a bug, not a balance.
+    #[test]
+    fn the_sticks_are_not_moved_by_the_mix_or_the_groove() {
+        let mut cfg = rock_8ths();
+        cfg.count_in_sound = Some(JamCountInSound::Sticks);
+        cfg.mix = Some(JamMix {
+            drums: 0.2,
+            bass: 1.0,
+            keys: 1.0,
+        });
+        cfg.intensity = 0.6;
+        let t = compile(&cfg).unwrap();
+        let slot = t.count_in_slot().expect("a sticks count-in");
+        assert!(is(slot.sound, KitVoice::Rim), "the count-in is the cross-stick");
+        assert!(
+            (slot.gain - crate::engine::BEAT_GAIN).abs() < 1e-5,
+            "the count-in came out at {} and the beat gain is {}",
+            slot.gain,
+            crate::engine::BEAT_GAIN
+        );
+        assert!(!slot.accent);
     }
 
     /// CHANGING THE KIT IS A DIAL, SO IT PLAYS NOW.
@@ -3665,9 +3942,9 @@ mod tests {
 
         // The SAME decode twice over is the same drummer, which is what the
         // cache turns a chorus of bar-ahead sends into.
-        let bank = folder(&[KitVoice::Kick]);
-        let c = compile_with_kit(&cfg, bank.clone()).unwrap();
-        let d = compile_with_kit(&cfg, bank).unwrap();
+        let one = folder(&[KitVoice::Kick]);
+        let c = compile_with_kit(&cfg, one.clone()).unwrap();
+        let d = compile_with_kit(&cfg, one).unwrap();
         assert_eq!(c.drums_signature, d.drums_signature);
     }
 
@@ -3680,7 +3957,7 @@ mod tests {
     #[test]
     fn a_custom_kit_is_held_under_the_ceiling_like_every_other() {
         let mut cfg = rock_8ths();
-        cfg.intensity = 1.25;
+        cfg.intensity = 1.6;
         cfg.crash_on_one = true;
         // Every lane on every tick: the loudest thing the table can hold.
         cfg.bar.kick = vec![2; 8];
@@ -3690,16 +3967,15 @@ mod tests {
             &cfg,
             folder(&[
                 KitVoice::Kick,
-                KitVoice::SnareHi,
-                KitVoice::SnareLo,
+                KitVoice::Snare,
                 KitVoice::Hat,
                 KitVoice::Crash,
             ]),
         )
         .unwrap();
         assert!(
-            t.peak_after <= JAM_TICK_CEILING + 1e-4,
-            "a custom kit renders {} after normalisation, over the ceiling",
+            t.peak_after <= JAM_SAFETY_CLAMP * cfg.intensity + 1e-2,
+            "a custom kit renders {} after the clamp, over it",
             t.peak_after
         );
         assert!(t.peak_after > 0.0, "and it is not silent");
@@ -3713,7 +3989,7 @@ mod tests {
     /// 700 ms crash) — and the kick, the snare and the crash are not capped
     /// at all, so at the fastest tick the engine can produce each of them
     /// keeps forty copies of a two-second sample alive out of one lane. That
-    /// is the case `JAM_TICK_CEILING` and `INTERFERENCE_ALLOWANCE` were
+    /// is the case `JAM_SAFETY_CLAMP` was
     /// never measured against, and it is the one a musician with a sample
     /// pack of real cymbals actually loads.
     ///
@@ -3723,7 +3999,7 @@ mod tests {
     fn a_folder_of_two_second_drums_is_held_under_the_ceiling() {
         let mut cfg = rock_8ths();
         cfg.ticks_per_beat = 4;
-        cfg.intensity = 1.25;
+        cfg.intensity = 1.6;
         cfg.crash_on_one = true;
         cfg.bar.kick = vec![2; 16];
         cfg.bar.snare = vec![2; 16];
@@ -3734,8 +4010,8 @@ mod tests {
         let bank = long_folder(&KitVoice::ALL, JAM_REFERENCE_SR);
         let t = compile_with_kit(&cfg, bank).unwrap();
         assert!(
-            t.peak_after <= JAM_TICK_CEILING + 1e-4,
-            "eight two-second drums render {} after normalisation, over the ceiling",
+            t.peak_after <= JAM_SAFETY_CLAMP * cfg.intensity + 1e-2,
+            "eleven three-second drums render {} after the clamp, over it",
             t.peak_after
         );
         assert!(t.peak_after > 0.0, "and it is not silent");
@@ -3743,9 +4019,9 @@ mod tests {
         // that came out unscaled would mean the render never saw the tails,
         // which is the bug this test exists for.
         assert!(
-            t.base_peak > JAM_TICK_CEILING,
-            "eight two-second drums on every tick rendered {} before normalisation, \
-             which is quieter than the ceiling — the ring-out is not being measured",
+            t.base_peak > JAM_SAFETY_CLAMP,
+            "eleven three-second drums on every tick rendered {} before the clamp, \
+             which is under it — the ring-out is not being measured",
             t.base_peak
         );
     }
@@ -3778,8 +4054,7 @@ mod tests {
 
         let voices = [
             KitVoice::Kick,
-            KitVoice::SnareHi,
-            KitVoice::SnareLo,
+            KitVoice::Snare,
             KitVoice::Hat,
             KitVoice::HatOpen,
         ];
@@ -3813,18 +4088,12 @@ mod tests {
         cfg.bar.hat_open = vec![0, 1, 0, 0, 0, 0, 0, 2];
         let t = compile(&cfg).unwrap();
 
-        assert_eq!(
-            lane_sound(&t, 1, JamLane::HatOpen),
-            Some(room(KitVoice::HatOpen))
-        );
-        assert_eq!(
-            lane_sound(&t, 7, JamLane::HatOpen),
-            Some(room(KitVoice::HatOpen))
-        );
+        assert_eq!(lane_voice(&t, 1, JamLane::HatOpen), Some(KitVoice::HatOpen));
+        assert_eq!(lane_voice(&t, 7, JamLane::HatOpen), Some(KitVoice::HatOpen));
         // The closed hat is untouched on those ticks: two rows, two drums,
         // and a groove can play both at once.
-        assert_eq!(lane_sound(&t, 1, JamLane::Hat), Some(room(KitVoice::Hat)));
-        assert!(lane_sound(&t, 0, JamLane::HatOpen).is_none());
+        assert_eq!(lane_voice(&t, 1, JamLane::Hat), Some(KitVoice::Hat));
+        assert!(lane_voice(&t, 0, JamLane::HatOpen).is_none());
 
         // It rings like a ride and not like a closed hat — a wash that
         // carries into the next tick is the whole reason the row exists.
@@ -3851,7 +4120,7 @@ mod tests {
         let t = compile(&cfg).unwrap();
         for tick in 0..8 {
             assert!(
-                lane_sound(&t, tick, JamLane::HatOpen).is_none(),
+                lane_voice(&t, tick, JamLane::HatOpen).is_none(),
                 "tick {tick} grew an open hat out of an absent row"
             );
         }
@@ -3903,16 +4172,20 @@ mod tests {
         cfg.kit = "tight".into();
         cfg.bar.hat_open = vec![0, 1, 0, 0, 0, 1, 0, 0];
 
-        let mine = compile_with_kit(&cfg, folder(&[KitVoice::HatOpen])).unwrap();
+        let own = folder(&[KitVoice::HatOpen]);
+        let behind = reference_bank("tight").unwrap();
+        let mine = crate::kit::with_fallback(&own, &behind);
+        let t = compile_with_kit(&cfg, mine.clone()).unwrap();
         assert_eq!(
-            lane_sound(&mine, 1, JamLane::HatOpen),
-            Some(SoundId::Custom(KitVoice::HatOpen))
+            lane_samples(&t, &mine, 1, JamLane::HatOpen),
+            Some(own.sample(KitVoice::HatOpen as u8, 0, 0))
         );
 
-        let without = compile_with_kit(&cfg, folder(&[KitVoice::Kick])).unwrap();
+        let bare = crate::kit::with_fallback(&folder(&[KitVoice::Kick]), &behind);
+        let t = compile_with_kit(&cfg, bare.clone()).unwrap();
         assert_eq!(
-            lane_sound(&without, 1, JamLane::HatOpen),
-            Some(SoundId::Kit(JamKit::Tight, KitVoice::HatOpen))
+            lane_samples(&t, &bare, 1, JamLane::HatOpen),
+            Some(behind.sample(KitVoice::HatOpen as u8, 0, 0))
         );
     }
 
@@ -3929,7 +4202,8 @@ mod tests {
         let tb = compile(&b).unwrap();
         assert_ne!(ta.drums_signature, tb.drums_signature);
         assert!(!swap_defers(Some(&ta), Some(&tb), true, false));
-        assert_ne!(render_signature(&a, None), render_signature(&b, None));
+        let bank = reference_bank("room").unwrap();
+        assert_ne!(render_signature(&a, &bank), render_signature(&b, &bank));
     }
 
     /// The voices are chosen when the table is compiled, and the config's
@@ -3979,7 +4253,7 @@ mod tests {
         // And the memo must not hand one voice's measurement to the other:
         // an upright is trimmed UP and a slap down, so sharing a peak would
         // put one of them through the ceiling.
-        assert_ne!(render_signature(&a, None), render_signature(&b, None));
+        assert_ne!(render_signature(&a, &reference_bank("room").unwrap()), render_signature(&b, &reference_bank("room").unwrap()));
     }
 }
 
@@ -4003,6 +4277,7 @@ mod form_tests {
                 hat: vec![1, 3, 1, 3, 1, 3, 1, 3],
                 ride: z.clone(),
                 crash: z.clone(),
+                ..Default::default()
             },
             // A fill nobody could mistake for the groove: no kick at all.
             fill: Some(JamPattern {
@@ -4012,6 +4287,7 @@ mod form_tests {
                 hat: z.clone(),
                 ride: z.clone(),
                 crash: z,
+                ..Default::default()
             }),
             form_bars: 12,
             crash_on_one: false,
@@ -4026,6 +4302,7 @@ mod form_tests {
             bass_voice: None,
             keys_voice: None,
             custom_kit: None,
+            ..Default::default()
         }
     }
 
@@ -4242,7 +4519,7 @@ mod form_tests {
         ];
         let first: Vec<f32> = chords
             .iter()
-            .map(|p| compile_with(&walking(p.clone()), &cache, None).unwrap().base_peak)
+            .map(|p| compile_with(&walking(p.clone()), &cache, reference_bank("room").unwrap()).unwrap().base_peak)
             .collect();
         // Every one of them is the number a cold compile would produce.
         for (p, want) in chords.iter().zip(&first) {
@@ -4250,9 +4527,9 @@ mod form_tests {
         }
         // Second chorus: the same four bars, and the memo has all of them.
         for (p, want) in chords.iter().zip(&first) {
-            let again = compile_with(&walking(p.clone()), &cache, None).unwrap();
+            let again = compile_with(&walking(p.clone()), &cache, reference_bank("room").unwrap()).unwrap();
             assert_eq!(again.base_peak, *want);
-            assert!(cache.get(render_signature(&walking(p.clone()), None)).is_some());
+            assert!(cache.get(render_signature(&walking(p.clone()), &reference_bank("room").unwrap())).is_some());
         }
     }
 
@@ -4279,18 +4556,18 @@ mod form_tests {
             c
         };
         assert_ne!(
-            render_signature(&quiet, None),
-            render_signature(&loud, None),
+            render_signature(&quiet, &reference_bank("room").unwrap()),
+            render_signature(&loud, &reference_bank("room").unwrap()),
             "the bass has to be in the key, or the loud table borrows the \
              quiet one's headroom"
         );
         // The drums, though, are the same drummer — which is a different
         // question, and the one the bar-line deferral asks.
-        assert_eq!(drums_signature(&quiet, None), drums_signature(&loud, None));
+        assert_eq!(drums_signature(&quiet, &reference_bank("room").unwrap()), drums_signature(&loud, &reference_bank("room").unwrap()));
 
         let cache = JamGainCache::new();
-        let measured = compile_with(&quiet, &cache, None).unwrap();
-        let after = compile_with(&loud, &cache, None).unwrap();
+        let measured = compile_with(&quiet, &cache, reference_bank("room").unwrap()).unwrap();
+        let after = compile_with(&loud, &cache, reference_bank("room").unwrap()).unwrap();
         assert!(
             after.base_peak > measured.base_peak,
             "a bass three times as loud is louder, and a memo that said \
@@ -4302,17 +4579,17 @@ mod form_tests {
     #[test]
     fn a_change_the_drummer_hears_misses_the_memo() {
         let cache = JamGainCache::new();
-        let plain = compile_with(&twelve_bar(), &cache, None).unwrap();
+        let plain = compile_with(&twelve_bar(), &cache, reference_bank("room").unwrap()).unwrap();
         let mut louder = twelve_bar();
         louder.bar.crash = vec![2, 0, 0, 0, 0, 0, 0, 0];
-        let crashing = compile_with(&louder, &cache, None).unwrap();
+        let crashing = compile_with(&louder, &cache, reference_bank("room").unwrap()).unwrap();
         assert!(
             crashing.base_peak > plain.base_peak,
             "a crash on the one is louder than no crash"
         );
         // Both are remembered, so going back is a hit rather than a render.
         assert_eq!(
-            compile_with(&twelve_bar(), &cache, None).unwrap().base_peak,
+            compile_with(&twelve_bar(), &cache, reference_bank("room").unwrap()).unwrap().base_peak,
             plain.base_peak
         );
     }
@@ -4320,7 +4597,7 @@ mod form_tests {
     #[test]
     fn a_memo_that_has_never_seen_this_table_measures_it() {
         let cache = JamGainCache::new();
-        let with_memo = compile_with(&twelve_bar(), &cache, None).unwrap();
+        let with_memo = compile_with(&twelve_bar(), &cache, reference_bank("room").unwrap()).unwrap();
         let without = compile(&twelve_bar()).unwrap();
         assert_eq!(with_memo.peak_after, without.peak_after);
         assert_eq!(with_memo.base_peak, without.base_peak);
@@ -4336,7 +4613,7 @@ mod form_tests {
         for intensity in [0.7f32, 1.0, 1.25] {
             let mut cfg = twelve_bar();
             cfg.intensity = intensity;
-            let t = compile_with(&cfg, &cache, None).unwrap();
+            let t = compile_with(&cfg, &cache, reference_bank("room").unwrap()).unwrap();
             seen.push(t.base_peak);
             // The level the musician hears does move with the dial.
             assert!(t.peak_after > 0.0);
@@ -4369,7 +4646,7 @@ mod form_tests {
         let total = JAM_GAIN_MEMO + 8;
         for n in 0..total {
             let cfg = line(n);
-            let t = compile_with(&cfg, &cache, None).unwrap();
+            let t = compile_with(&cfg, &cache, reference_bank("room").unwrap()).unwrap();
             assert_eq!(
                 t.base_peak,
                 compile(&cfg).unwrap().base_peak,
@@ -4377,8 +4654,8 @@ mod form_tests {
             );
         }
         // The most recent are still remembered; the first ones are gone.
-        assert!(cache.get(render_signature(&line(total - 1), None)).is_some());
-        assert!(cache.get(render_signature(&line(0), None)).is_none());
+        assert!(cache.get(render_signature(&line(total - 1), &reference_bank("room").unwrap())).is_some());
+        assert!(cache.get(render_signature(&line(0), &reference_bank("room").unwrap())).is_none());
     }
 }
 
@@ -4406,6 +4683,7 @@ mod band_tests {
                 hat: vec![1, 1, 1, 1],
                 ride: vec![0; 4],
                 crash: vec![0; 4],
+                ..Default::default()
             },
             fill: None,
             form_bars: 4,
@@ -4427,6 +4705,7 @@ mod band_tests {
             bass_voice: None,
             keys_voice: None,
             custom_kit: None,
+            ..Default::default()
         }
     }
 
@@ -4738,7 +5017,7 @@ mod band_tests {
 
     #[test]
     fn sticks_are_the_loaded_kits_rim_at_the_beat_gain() {
-        for kit in JamKit::ALL {
+        for kit in JamKit::all() {
             let mut cfg = one_of_everything();
             cfg.kit = kit.name().to_string();
             cfg.count_in_sound = Some(JamCountInSound::Sticks);
@@ -4746,8 +5025,12 @@ mod band_tests {
                 .unwrap()
                 .count_in_slot()
                 .unwrap_or_else(|| panic!("{} should count in with sticks", kit.name()));
-            assert_eq!(slot.sound, SoundId::Kit(kit, KitVoice::Rim));
-            assert_eq!(slot.gain, BEAT_GAIN);
+            assert!(
+                matches!(slot.sound, SoundId::Band { voice, .. } if voice == KitVoice::Rim as u8),
+                "{} counts in on a stick",
+                kit.name()
+            );
+            assert!((slot.gain - BEAT_GAIN).abs() < 1e-5);
             assert_eq!(slot.cap_ticks, 0.0, "a stick click rings out");
             assert!(!slot.accent, "a count-in beat is not a backbeat");
         }

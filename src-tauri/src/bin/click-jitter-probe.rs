@@ -538,6 +538,7 @@ fn busiest_jam() -> JamConfig {
             // solid in the fill below, which is where a drummer puts them.
             tom_hi: vec![0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0],
             tom_lo: vec![0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+            ..Default::default()
         },
         // Every lane on every tick: the worst bar the table can describe.
         // Every lane on every tick, at the LOUDEST LEVEL THERE IS: level 4
@@ -553,6 +554,7 @@ fn busiest_jam() -> JamConfig {
             crash: vec![0; 16],
             tom_hi: vec![4; 16],
             tom_lo: vec![4; 16],
+            ..Default::default()
         }),
         form_bars: 4,
         crash_on_one: true,
@@ -607,6 +609,7 @@ fn busiest_jam() -> JamConfig {
         // every ghost in the groove above resolves through `rim`, which on
         // a kit without one is the softest snare there is.
         snare_ghost_is_rim: Some(true),
+        ..Default::default()
     }
 }
 

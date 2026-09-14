@@ -202,25 +202,45 @@ const CAP_FADE_SECS: f64 = 0.005;
 /// twelve files per voice where there was one.
 pub const MAX_FOLDER_BYTES: u64 = 96 * 1024 * 1024;
 
-/// The peak a decoded voice is held to.
+/// The peak a folder of somebody's own samples is put on.
 ///
-/// **Held to, and only normalised UP for a folder of the musician's own
-/// samples.** That difference is the whole difference between a kit
-/// somebody measured and a kit somebody found:
+/// **A target for a folder, and nothing at all for a kit the app ships**,
+/// and that difference is the whole difference between a kit somebody
+/// measured and a kit somebody found:
 ///
 /// * A shipped kit's levels ARE the recording. A soft layer is quieter than
 ///   a hard one because that is what a soft stroke is, and `trim_db` in the
 ///   manifest is the balance the render tool measured between the voices.
-///   Normalising here would throw both away and put the ghost note back at
-///   the backbeat's level, which is the thing this pass exists to fix. So
-///   all a shipped voice gets is a CLAMP: if the resampler's ringing pushed
-///   it past 0.900 — and it does, by up to 7% on a bright transient — the
-///   whole voice comes down by that much, which keeps a kit the same height
-///   on every device without touching the balance inside it.
+///   Touching either here would throw the pass's whole point away and put
+///   the ghost note back at the backbeat's level. So a shipped voice is
+///   decoded, resampled and trimmed, and its level is left exactly where
+///   the render tool put it.
 /// * A folder of somebody's own samples has no measured balance, and it may
 ///   be a quiet render or a hot one. So its voices are scaled so the LOUDEST
-///   LAYER of each sits on 0.900 — per voice and not per file, so the
+///   LAYER of each sits on this — per voice and not per file, so the
 ///   dynamics between the layers survive.
+///
+/// **THE PEAK THE SOURCE CARRIED IS THE PEAK THE BANK CARRIES**, whichever
+/// branch decided it, and that is a level decision made on the way OUT of
+/// the resampler rather than on the way in.
+///
+/// The resampler is not level-preserving on a bright transient. A windowed
+/// sinc rings around one, and a kit is nothing but bright transients:
+/// `tight`'s closed hat peaks at 0.900 in its own 44.1 kHz file and 1.12
+/// resampled to 48 kHz; `raw`'s, which is brighter still, reaches half as
+/// much again. Left alone, the same kit would be a different height on
+/// every device, and the one drum that overshot would be the one drum in
+/// the band that clipped before anything else was added to it.
+///
+/// So the ringing is divided back out — the same thing the shipped bank did
+/// before these kits became folders, for the same reason. It is not free:
+/// the overshoot is a sample or two of Gibbs and the division takes it off
+/// the whole voice, so a rate whose ripple was large loses that much ENERGY
+/// too. `raw`'s hat is the extreme at 3.6 dB between 44.1 and 48 kHz, and it
+/// is extreme because that hat's content sits at the source's own Nyquist,
+/// which is where a reconstruction filter has the least to work with. The
+/// trade is deliberate: a predictable height on every device, against a
+/// brightness that moves on the two brightest voices in the set.
 pub const VOICE_PEAK: f32 = 0.9;
 
 /// The bus drive a kit asks for when its manifest does not say.
@@ -1060,12 +1080,18 @@ fn build_bank(
         })
         .collect();
 
+    // The peak each voice carried BEFORE anything was resampled, which is
+    // the peak its files carry and the one the bank is put back on. See
+    // [`VOICE_PEAK`].
+    let mut source_peak = [0.0f32; KIT_VOICES];
     for entry in entries.iter() {
         let stem = entry.name.rsplit_once('.').map_or(&entry.name[..], |(s, _)| s);
         let Some((voice, layer, robin)) = parse_file_name(stem, has_soft) else {
             continue;
         };
         let (mut buf, src_rate) = decode_stereo(&entry.name, &entry.source)?;
+        let before = buf.iter().fold(0.0f32, |m, s| m.max(s.abs()));
+        source_peak[voice as usize] = source_peak[voice as usize].max(before);
         if src_rate != rate {
             buf = resample_stereo(&buf, src_rate, rate);
         }
@@ -1120,20 +1146,34 @@ fn build_bank(
             }
         }
 
-        // The peak, over the WHOLE VOICE. Per voice and not per file, so the
-        // dynamics between the layers survive whichever branch runs.
-        let peak = buffers
+        // A drum that decoded to nothing is a message, not a lane that
+        // silently stops playing.
+        if source_peak[v as usize] <= 0.0 {
+            return Err(format!("{} is silent", v.file_name()));
+        }
+        // A KIT IS THE SAME KIT ON EVERY DEVICE, and what "the same" means
+        // is ENERGY. See [`VOICE_PEAK`]: the level is decided on the peak
+        // the SOURCE files carried, before the resampler had a chance to
+        // ring around a transient, so nothing here depends on the rate the
+        // device happened to open at.
+        // Where this voice ends up, and it is the same height at every
+        // rate. See [`VOICE_PEAK`].
+        let target = if normalise {
+            // A folder has no measured balance, so its loudest layer goes on
+            // the target whatever its render level was.
+            VOICE_PEAK
+        } else {
+            // ...and a shipped kit keeps exactly the height the render tool
+            // measured, which is what its own files carry.
+            source_peak[v as usize]
+        };
+        // The peak AFTER the resampler, because that is the buffer the audio
+        // thread will read and the ringing is what has to come back out.
+        let after = buffers
             .iter()
             .flat_map(|b| b.iter())
             .fold(0.0f32, |m, s| m.max(s.abs()));
-        if peak <= 0.0 {
-            return Err(format!("{} is silent", v.file_name()));
-        }
-        let level = if normalise || peak > VOICE_PEAK {
-            VOICE_PEAK / peak
-        } else {
-            1.0
-        };
+        let level = if after > 0.0 { target / after } else { 1.0 };
         // And the balance the render tool measured, on top. `trim_db` is the
         // kit's own business; the LANE trims (a ride sits under a hat) live
         // in `jam.rs`, because they are true of every kit.
