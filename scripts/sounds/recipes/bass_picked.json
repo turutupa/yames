@@ -1,0 +1,72 @@
+{
+  "id": "bass_picked",
+  "name": "Picked bass",
+  "credit": "Black And Blue Basses — Karoryfer Samples",
+  "licence": "CC0-1.0",
+
+  "_what": [
+    "The blue solidbody, played with a pick. The same library and the same",
+    "octave correction as the fingered bass — see bass_fingered.json — and",
+    "the `reg` maps rather than the `fake_det` and `fake_ntp` ones, which",
+    "are a detuned and a no-tone-pot variant of the same performances and",
+    "are a colour rather than a dynamic.",
+    "",
+    "TWO DYNAMICS, AND WHY THE BANK SAYS TWO. Karoryfer recorded this bass",
+    "at f and ff only, where the black one has p, mp, mf and f. The bank",
+    "therefore declares two layers, and the engine's `voice_layer` does the",
+    "filling: it asks for layer 1, 2 or 3 by the line's gain and clamps to",
+    "the layers the bank has, so a soft line plays f and anything from",
+    "normal upwards plays ff. That is 'the nearest layer present', which is",
+    "what a third layer would have been — without shipping a copy of a file",
+    "and a third more memory to hold it.",
+    "",
+    "Eight round robins in the source, which is four more than the black",
+    "bass and six more than a bank can carry."
+  ],
+
+  "source": {
+    "format": "sfz",
+    "root": "${YAMES_SAMPLES}/karoryfer",
+    "sample_base": "Programs",
+    "key_offset": -12,
+    "dynamic_from": "map",
+    "rr_from": "seq_position",
+    "maps": [
+      { "dynamic": "f",  "path": "Programs/maps/babyblue_reg_f_map.sfz" },
+      { "dynamic": "ff", "path": "Programs/maps/babyblue_reg_ff_map.sfz" }
+    ]
+  },
+
+  "range": [28, 55],
+
+  "_notes": [
+    "The fingered bass's grid, for the reasons in that recipe: a fifth",
+    "apart, nothing further than two semitones from a sample, E2 among them.",
+    "Two layers rather than three leaves room for two more notes inside the",
+    "same 4-8 MB, so this bank samples eight and its worst stretch is one",
+    "semitone — the densest of the three basses, because it is the one whose",
+    "source gave the fewest dynamics."
+  ],
+  "notes": [28, 32, 36, 40, 44, 48, 52, 55],
+
+  "layers": 3,
+  "rr": 2,
+  "layer_step_db": 5.5,
+
+  "rate": 48000,
+  "cap_s": 2.0,
+
+  "_release": [
+    "`ampeg_release=0.25` in Programs/controls/common.sfz, the same control",
+    "file both basses in this library share."
+  ],
+  "release_ms": 250,
+
+  "level_ref": "picked",
+
+  "dc_block_hz": 20.0,
+  "fade_in_ms": 1.0,
+  "fade_out_ms": 30.0,
+  "floor_db": -60.0,
+  "seed": 3204
+}

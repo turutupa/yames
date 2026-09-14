@@ -1,0 +1,80 @@
+{
+  "id": "bass_fingered",
+  "name": "Fingered bass",
+  "credit": "Black And Blue Basses — Karoryfer Samples",
+  "licence": "CC0-1.0",
+
+  "_what": [
+    "The black hollowbody, played with the fingers. Karoryfer sample it at",
+    "every semitone with four round robins and four dynamics, which is more",
+    "of everything than a bank can hold; what this recipe does is choose.",
+    "",
+    "THE OCTAVE. The library is mapped and named an octave above what it",
+    "sounds: `darkblack_e2` is written at key 40 and its fundamental is",
+    "41.3 Hz, which is E1 and MIDI 28. `key_offset` is that correction and",
+    "the tool measures the fundamental of every note it writes, because a",
+    "bank an octave out is in tune with itself and wrong with the band."
+  ],
+
+  "source": {
+    "format": "sfz",
+    "root": "${YAMES_SAMPLES}/karoryfer",
+    "sample_base": "Programs",
+    "key_offset": -12,
+    "dynamic_from": "map",
+    "rr_from": "seq_position",
+    "maps": [
+      { "dynamic": "p",  "path": "Programs/maps/darkblack_reg_p_map.sfz" },
+      { "dynamic": "mp", "path": "Programs/maps/darkblack_reg_mp_map.sfz" },
+      { "dynamic": "mf", "path": "Programs/maps/darkblack_reg_mf_map.sfz" },
+      { "dynamic": "f",  "path": "Programs/maps/darkblack_reg_f_map.sfz" }
+    ]
+  },
+
+  "range": [28, 55],
+
+  "_notes": [
+    "Six notes a fifth apart, which covers E1 to G3 with nothing further",
+    "than two semitones from a sample — well inside the three the engine",
+    "allows, and E2 is one of them because that is the note the engine's own",
+    "level test measures on.",
+    "",
+    "Why not denser. Every one of these files runs to the 2.0 s cap: a bass",
+    "note does not get 60 dB down inside two seconds, so the tail search",
+    "never fires and 188 KB is what a note costs whatever pitch it is. Six",
+    "notes at three layers and two round robins is 36 files and 6.6 MB;",
+    "sampling every third semitone, which is what the loader's own comment",
+    "sizes a bank at, would be sixty files and 11.3 MB — past the 4-8 MB",
+    "this voice is allowed and 23 MB resident once the engine builds the",
+    "twenty-eight notes between them."
+  ],
+  "notes": [30, 35, 40, 45, 50, 55],
+
+  "layers": 3,
+  "rr": 2,
+
+  "_layers": [
+    "The library has four dynamics and the bank keeps three of them, chosen",
+    "by measured loudness rather than by name — see render_voice's point 3.",
+    "5.5 dB is the middle of the 5-6 dB the brief asks for."
+  ],
+  "layer_step_db": 5.5,
+
+  "rate": 48000,
+  "cap_s": 2.0,
+
+  "_release": [
+    "The library's own: `ampeg_release=0.25` in Programs/controls/common.sfz,",
+    "which is also the longest the loader accepts. A wound string under a",
+    "finger does not stop when the finger does."
+  ],
+  "release_ms": 250,
+
+  "level_ref": "fingered",
+
+  "dc_block_hz": 20.0,
+  "fade_in_ms": 1.0,
+  "fade_out_ms": 30.0,
+  "floor_db": -60.0,
+  "seed": 2811
+}

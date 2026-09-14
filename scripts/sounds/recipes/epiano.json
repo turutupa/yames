@@ -1,0 +1,89 @@
+{
+  "id": "epiano",
+  "name": "Electric piano",
+  "credit": "jRhodes3 — a 1977 Rhodes Mark I Stage 73 sampled by Jeff Learman",
+  "licence": "CC0-1.0",
+
+  "_what": [
+    "The mono set, not the stereo one: a melodic bank is mono by contract,",
+    "and jRhodes3c's stereo files are the mono ones with a mid-side",
+    "pitch-shift doubling on them that cancels when they are summed. Folding",
+    "those would spend the decode on an effect that then deletes itself.",
+    "",
+    "Sampled every fourth white key, which is a five- or six-semitone grid,",
+    "so this recipe keeps every note the source has across the keys range",
+    "rather than choosing — see `notes`."
+  ],
+
+  "source": {
+    "format": "sfz",
+    "root": "${YAMES_SAMPLES}/jrhodes3c/jRhodes3c-looped-flac-sfz",
+    "sample_base": "",
+    "key_offset": 0,
+    "dynamic_from": "velocity",
+    "rr_from": "none",
+    "maps": [
+      { "dynamic": "rhodes", "path": "_jRhodes-mono-looped.sfz" }
+    ]
+  },
+
+  "range": [48, 84],
+
+  "_notes": [
+    "Every pitch the library samples from A2 up to D6: the grid is the",
+    "player's, not ours. A2 and D6 are outside the 48-84 the keys line uses",
+    "and are in the bank anyway, because without them C3 and C6 would be",
+    "built from a sample three semitones away when one two semitones away",
+    "exists. Worst stretch across the range: three semitones, at the one",
+    "six-semitone gap the source leaves between F4 and B4."
+  ],
+  "notes": [45, 50, 55, 59, 62, 65, 71, 76, 81, 86],
+
+  "_layers": [
+    "The source has five velocity layers and the bank keeps three. Not a",
+    "size decision — five would be 11.7 MB and the ceiling is 12: it is that",
+    "`voices::MAX_LAYERS` is four and `jam::voice_layer` only ever asks for",
+    "one, two or three. Layers four and five would be files the engine",
+    "cannot index. The three kept are the softest, the middle and the",
+    "hardest of the five velocity bands.",
+    "",
+    "`layer_by` is `dynamic` here and `loudness` on the basses, and the",
+    "reason is in pick_layers_by_dynamic: this set's five layers are",
+    "recorded at one peak within 1.9 dB, with the softest measuring LOUDER",
+    "than the hardest, because an SFZ player supplies the level from",
+    "velocity. Measured for loudness the ladder comes out as three",
+    "neighbours in the wrong order; ordered by velocity band it is the soft,",
+    "middle and barking Rhodes the player recorded."
+  ],
+  "layers": 3,
+  "rr": 1,
+  "layer_by": "dynamic",
+
+  "rate": 48000,
+
+  "_cap": [
+    "2.5 s, and this is the voice the cap costs most. jRhodes3c is a LOOPED",
+    "set — the samples are a few seconds long and sustain on a loop point",
+    "rather than decaying — so every note here runs to the cap and lands on",
+    "the 30 ms fade instead of ringing out the way a Rhodes does under a",
+    "held chord. A comping voice plays chords shorter than that, so it is",
+    "the right trade, but it is a trade."
+  ],
+  "cap_s": 2.5,
+
+  "_release": [
+    "The source's own `ampeg_release=0.300`, clamped to the 250 ms",
+    "`voices::MAX_RELEASE_MS` allows. A tine under a damper is the longest",
+    "release of any voice here and it still wants more than the format gives",
+    "it."
+  ],
+  "release_ms": 250,
+
+  "level_ref": "epiano",
+
+  "dc_block_hz": 20.0,
+  "fade_in_ms": 1.0,
+  "fade_out_ms": 30.0,
+  "floor_db": -60.0,
+  "seed": 1977
+}
