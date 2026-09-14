@@ -785,21 +785,22 @@ button.context-chip:hover,
 /* "Edited", not a bullet. The dot is the glance; the word is what makes the
    glance mean something the first time you see it. `--feedback-ok` is the
    token contract's warm attention colour — the only amber the themes agree
-   on — and it is never used for anything else inside the bar. */
+   on — and it is never used for anything else inside the bar.
+
+   A dot and a word, no pill: it used to be the brightest thing in the row,
+   brighter than the Save button it was pointing at, and the owner read that
+   as a mistake. It was. The state is a footnote; the button is the action. */
 .preset-edited {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
   height: 22px;
-  padding: 0 9px 0 8px;
-  border-radius: 11px;
-  border: 1px solid color-mix(in srgb, var(--feedback-ok) 35%, transparent);
-  background: color-mix(in srgb, var(--feedback-ok) 10%, transparent);
-  color: var(--feedback-ok);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  padding: 0 2px;
+  color: var(--text-tertiary);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   white-space: nowrap;
 }
 
@@ -810,48 +811,163 @@ button.context-chip:hover,
   background: var(--feedback-ok);
 }
 
-/* Save and Revert are text, not buttons with walls: the chips on the other
-   side of the bar are the only bordered things in the row, so the eye finds
-   the output cluster without being told. */
+/* Save and Revert.
+
+   Save, when there is something to save, is the one filled button in the bar
+   — the owner's words for the text-only version were "barely visible, it
+   doesn't even have a background". Revert stands beside it with a hairline
+   wall, so the pair reads as one decision with a quiet way out. When there
+   is nothing to save the button stays (its absence would be a third state
+   to read) but goes back to faint text. */
 .preset-text-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
-  padding: 4px 6px;
-  border: none;
-  border-radius: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
   background: none;
   font-size: 12.5px;
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
   cursor: pointer;
   transition:
     color 0.15s,
-    background 0.15s;
+    background 0.15s,
+    border-color 0.15s,
+    filter 0.15s;
 }
 
-.preset-text-btn--save {
-  color: var(--accent);
+.preset-text-btn--save:not(:disabled):not(.preset-text-btn--feedback) {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text, #fff);
+}
+
+.preset-text-btn--save:not(:disabled):not(.preset-text-btn--feedback):hover {
+  filter: brightness(1.08);
 }
 
 .preset-text-btn--revert {
-  color: var(--text-tertiary);
-}
-
-.preset-text-btn:hover:not(:disabled) {
-  background: color-mix(in srgb, currentColor 12%, transparent);
+  border-color: var(--border);
+  color: var(--text-secondary);
 }
 
 .preset-text-btn--revert:hover:not(:disabled) {
-  color: var(--text-secondary);
+  background: var(--surface-hover, color-mix(in srgb, currentColor 8%, transparent));
+  color: var(--text-primary);
 }
 
 /* Nothing to save reads as nothing to save. The button stays — its absence
    would be a third state to interpret — but it stops offering itself. */
 .preset-text-btn:disabled {
+  padding: 0 4px;
   color: var(--text-faint);
   cursor: default;
+}
+
+/* ─── The jam's context bar ─────────────────────────────────────────────
+ *
+ * What this is (name, badge, the vibe it started from), then the two doors,
+ * then the save cluster. The doors are drawn as buttons with a glyph each,
+ * because the text-only version was the thing the owner did not find.
+ * `.jam-sheet-btn` stays on them for the screenshot harness and the tests;
+ * `.jam-door` is the look. */
+.jam-save-area {
+  gap: 8px;
+}
+
+.jam-save-area .preset-active-name {
+  margin-right: 2px;
+}
+
+/* In the jam bar the save cluster is a second state, not a permanent
+   fixture: clean, the bar is the name, the vibe and the two doors; edited, a
+   divider, "Edited", Save and Revert appear after them. "No changes" as a
+   standing caption was one more word in a row the owner already found
+   crowded, so here the disabled button is not drawn at all. */
+.jam-save-area .preset-text-btn:disabled {
+  display: none;
+}
+
+.jam-bar-divider {
+  width: 1px;
+  height: 18px;
+  margin: 0 4px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.jam-vibe-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  height: 24px;
+  padding: 0 9px 0 8px;
+  border: none;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+
+button.jam-vibe-chip {
+  cursor: pointer;
+}
+
+button.jam-vibe-chip:hover {
+  color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.jam-vibe-chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.jam-save-area .jam-sheet-btn.jam-door {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  margin: 0;
+  padding: 0 13px 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+  color: var(--text-primary);
+  font-size: 12.5px;
+  font-weight: 700;
+  transition:
+    color 0.15s,
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.jam-save-area .jam-sheet-btn.jam-door:hover {
+  background: color-mix(in srgb, var(--text-primary) 9%, transparent);
+}
+
+.jam-save-area .jam-sheet-btn.jam-door.active {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.jam-door-glyph {
+  flex-shrink: 0;
+  opacity: 0.85;
 }
 
 .preset-text-btn--feedback,

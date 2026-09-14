@@ -73,4 +73,30 @@ describe("the jam's context bar", () => {
     expect(screen.getByText("Edited")).toBeInTheDocument();
     expect(screen.getByText("Revert")).toBeInTheDocument();
   });
+
+  it("names the vibe the jam started from, and that name opens Set up", () => {
+    // The owner could not tell how to make the band sound like a style: the
+    // word "Rock" lived only behind a button they had not found. Now the bar
+    // says it, and pressing it is the way in.
+    const { props } = draw({ jam: { ...STARTER_JAMS[0], vibe: "rock", variation: "hard" } });
+    const chip = screen.getByRole("button", { name: "Rock · Hard" });
+    fireEvent.click(chip);
+    expect(props.onSetup).toHaveBeenCalled();
+  });
+
+  it("says only the vibe when the jam has no variation, and nothing without a vibe", () => {
+    draw({ jam: { ...STARTER_JAMS[0], vibe: "jazz", variation: undefined } });
+    expect(screen.getByRole("button", { name: "Jazz" })).toBeInTheDocument();
+    cleanup();
+    draw({ jam: { ...STARTER_JAMS[0], vibe: undefined, variation: undefined } });
+    expect(document.querySelector(".jam-vibe-chip")).toBeNull();
+  });
+
+  it("keeps the vibe as a word, not a door, where there is no sheet to open", () => {
+    // The setlist player draws this bar without the sheets; the vibe is still
+    // worth reading there, it just cannot open anything.
+    draw({ jam: { ...STARTER_JAMS[0], vibe: "rock" }, onSetup: undefined, onChords: undefined });
+    expect(screen.queryByRole("button", { name: "Rock" })).toBeNull();
+    expect(screen.getByText("Rock")).toBeInTheDocument();
+  });
 });
