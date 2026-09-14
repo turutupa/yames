@@ -17,6 +17,7 @@ const ROOTS: PitchClass[] = Array.from({ length: 12 }, (_unused, i) => i);
 const QUALITIES: ChordQuality[] = [
   "maj",
   "min",
+  "5",
   "dim",
   "aug",
   "7",

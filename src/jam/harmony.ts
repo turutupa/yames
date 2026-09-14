@@ -224,10 +224,17 @@ export function parseKey(text: string): Key | null {
 /**
  * Enough qualities for the forms Jam ships, and no more. Triads are `maj` and
  * `min`; everything else is named the way it is written on a chart.
+ *
+ * `"5"` is the power chord, and it is a chord type here rather than a way of
+ * drawing one (JAM_UX_DECISIONS A10). It has no third at all — root and fifth
+ * and nothing else — which is why it is the first chord a rock player learns
+ * and why every table below has to give it an answer of its own instead of
+ * pretending it is a major triad with a note missing.
  */
 export type ChordQuality =
   | "maj"
   | "min"
+  | "5"
   | "dim"
   | "aug"
   | "7"
@@ -247,9 +254,9 @@ export type Chord = { root: PitchClass; quality: ChordQuality };
 /**
  * What each quality is written as after the root.
  *
- * The five qualities the forms never produce — `dim`, `aug`, `sus2`, `sus4`,
- * `add9` — are here because the chord-shape library knows how to play them
- * and the key strip offers them (`src/jam/diatonic.ts` names the vii° of
+ * The six qualities the forms never produce — `5`, `dim`, `aug`, `sus2`,
+ * `sus4`, `add9` — are here because the chord-shape library knows how to play
+ * them and the key strip offers them (`src/jam/diatonic.ts` names the vii° of
  * every major key `dim`). One union, one spelling: a chord named in the
  * strip and the same chord named on the timeline have to come out the same
  * word, so both go through this table.
@@ -257,6 +264,7 @@ export type Chord = { root: PitchClass; quality: ChordQuality };
 const QUALITY_SUFFIX: Record<ChordQuality, string> = {
   maj: "",
   min: "m",
+  "5": "5",
   dim: "dim",
   aug: "aug",
   "7": "7",
@@ -276,6 +284,10 @@ const QUALITY_SUFFIX: Record<ChordQuality, string> = {
 const QUALITY_INTERVALS: Record<ChordQuality, readonly number[]> = {
   maj: [0, 4, 7],
   min: [0, 3, 7],
+  // Two notes. The power chord is the one entry here that is shorter than a
+  // triad, and everything downstream that reaches for "the third" has to cope
+  // with its absence rather than invent one.
+  "5": [0, 7],
   dim: [0, 3, 6],
   aug: [0, 4, 8],
   "7": [0, 4, 7, 10],
@@ -324,6 +336,7 @@ const QUALITY_SPELLINGS: ReadonlyArray<readonly [string, ChordQuality]> = [
   ["m", "min"],
   ["min", "min"],
   ["-", "min"],
+  ["5", "5"],
   ["dim", "dim"],
   ["°", "dim"],
   ["o", "dim"],
@@ -371,7 +384,7 @@ const QUALITY_SPELLINGS_BY_LENGTH = [...QUALITY_SPELLINGS].sort(
  *
  * The inverse of `chordName` in the only sense that matters — every chord
  * `chordName` can write comes back as the chord it was written from
- * (`harmony.test.ts` round-trips all twelve roots against all fifteen
+ * (`harmony.test.ts` round-trips all twelve roots against all sixteen
  * qualities) — and rather more besides, because the text this reads is
  * typed by a person off a chart rather than produced by us. See
  * `QUALITY_SPELLINGS` for what it agrees to read.

@@ -1,44 +1,51 @@
-// W25 stub — W24 replaces this file wholesale.
 /**
- * What the cheat sheet asks the theory for (JAM_UX_DECISIONS A10).
+ * The cheat sheet's data.
  *
- * The signatures are the contract in plans/tasks/jam-v2/W24-CHEATSHEET-DATA.md
- * §3 and they are fixed; the bodies here are the simplest true answer to each,
- * written so the screen could be built against them while W24 built the real
- * thing beside it. Two of them are deliberately short of the real answer, and
- * both places say so:
+ * The owner's complaint about the first chord sheet was that it was honest
+ * but small: "only major and 7ths chords? … the user should be able to see
+ * ALL chords for all keys, or filter by the chords the user can play in the
+ * key of the current jam." JAM_UX_DECISIONS A10 is the answer, and this file
+ * is the theory half of it. The screen half is elsewhere; nothing here knows
+ * about React, i18n or the store, and every name it produces is a chord name
+ * rather than a sentence.
  *
- * - **Power chords are not a chord type yet.** `"5"` joins `ChordQuality` in
- *   W24's work, not here, so `"power"` below returns the key's degrees as
- *   plain triads with the degree relabelled ("I5"). The card shows the right
- *   name and the wrong grip until W24 lands, which is the honest failure: the
- *   screen that draws it is finished, the library it draws from is not.
- * - **`qualitiesInFamily("basic")` is four qualities, not five**, for the
- *   same reason.
+ * Two pages, two shapes of question:
  *
- * Everything else — what fits a key, the colours, the roots as the key spells
- * them — is the real rule, because the real rule was no harder to write than
- * a placeholder would have been.
+ * - **In key** asks "what can I play over this jam?", at one of four
+ *   flavours — triads, sevenths, colours, power. `chordsAtFlavour` answers,
+ *   in degree order, and `defaultFlavour` picks the one a jam opens on.
+ * - **All chords** asks "how do I play a Bbm7b5?" — every root, every chord
+ *   type, grouped into three families a player recognises. `rootNames` and
+ *   `qualitiesInFamily` lay that grid out, and `fitsKey` puts the small mark
+ *   on the ones that belong to the jam you are in.
  *
- * Pure, no React, no i18n: what comes out are chord names, never sentences.
+ * ## One rule for "fits the key", and no second scale table
+ *
+ * A chord fits when every one of its notes is in the key's note set, and that
+ * set is derived from the chords the app ALREADY lists for the key
+ * (`chordsInKey`). No scale table is written down twice, so the sheet cannot
+ * come to disagree with itself: if the key strip says a chord is in the key,
+ * the key contains its notes, by construction.
  */
 
-import {
-  type Chord,
-  type ChordQuality,
-  type Key,
-  type KeyMode,
-  type PitchClass,
-  chordNotes,
-  parseKey,
-} from "./harmony";
-import { chordsInKey, chordPitchClasses, noteName, seventhsInKey } from "./diatonic";
+import { chordTones, chordsInKey, noteName, seventhsInKey } from "./diatonic";
 import type { DiatonicChord } from "./diatonic";
+import { chordNotes, chordSuffix, parseKey, pitchClass } from "./harmony";
+import type { Chord, ChordQuality, Key, KeyMode, PitchClass } from "./harmony";
+import { VIBE_IDS } from "./vibesContract";
 import type { Jam } from "./types";
 
-/** The four ways to read the chords of a key. */
+// ---------------------------------------------------------------------------
+// The in-key page: four flavours of the same seven chords
+// ---------------------------------------------------------------------------
+
+/**
+ * How the chords of the key are shown. Four ways of playing the same
+ * harmony, not four different harmonies: I is still I at every flavour.
+ */
 export type ChordFlavour = "triads" | "sevenths" | "colours" | "power";
 
+/** In the order the flavour switch draws them, plainest first. */
 export const CHORD_FLAVOURS: readonly ChordFlavour[] = [
   "triads",
   "sevenths",
@@ -47,163 +54,220 @@ export const CHORD_FLAVOURS: readonly ChordFlavour[] = [
 ];
 
 /**
- * The colour chords, in the order a player reaches for them.
+ * The accidental and the roman numeral of a degree, with everything the
+ * quality wrote after it taken off: "vii°" → "vii", "iiø7" → "ii",
+ * "IIImaj7" → "III", "bVII" → "bVII".
  *
- * Suspensions first because they are what a guitarist actually plays over a
- * held chord, then the added ninth, then the sixth, then the ninth — which is
- * the most flavoured and the least often in the key.
+ * The CASE is kept, because a player reads case as major or minor and a
+ * colour chord on the ii of a major key should still look like a ii.
  */
-const COLOUR_ORDER: readonly { quality: ChordQuality; minorOnly?: boolean; majorOnly?: boolean }[] = [
-  { quality: "sus4" },
-  { quality: "sus2" },
-  { quality: "add9" },
-  { quality: "6", majorOnly: true },
-  { quality: "m6", minorOnly: true },
-  { quality: "9" },
-];
-
-/** Whether a degree's own quality has a minor third in it. */
-function isMinorDegree(quality: ChordQuality): boolean {
-  return quality === "min" || quality === "m7" || quality === "m6" || quality === "m7b5" ||
-    quality === "dim" || quality === "dim7";
+function degreeStem(degree: string): string {
+  const match = /^([b#]?)([ivIV]+)/.exec(degree);
+  return match ? match[1] + match[2] : degree;
 }
 
 /**
- * The roman degree with its accidentals but without its own quality mark —
- * "vii°" becomes "vii", "V7" becomes "V", "Imaj7" becomes "I".
+ * A degree as a power chord: "vii°" → "VII5", "bVII" → "bVII5", "V7" → "V5".
  *
- * The colour and power labels are built from the degree rather than from the
- * chord, so a Csus4 in C major reads "Isus4" and not "Imajsus4".
+ * Always upper case, because a power chord has no third and so is neither
+ * major nor minor — writing "ii5" would be promising a minor third that the
+ * two notes do not contain.
  */
-function bareDegree(degree: string): string {
-  const match = /^([b#]*[IViv]+)/.exec(degree);
-  return match ? match[1] : degree;
+function powerDegree(degree: string): string {
+  const match = /^([b#]?)([ivIV]+)/.exec(degree);
+  return match ? `${match[1]}${match[2].toUpperCase()}5` : `${degree}5`;
+}
+
+/** Every degree of the key as a two-note power chord, in degree order. */
+function powerChordsInKey(root: PitchClass, mode: KeyMode): DiatonicChord[] {
+  const out: DiatonicChord[] = [];
+  const seen = new Set<string>();
+  for (const chord of chordsInKey(root, mode)) {
+    const degree = powerDegree(chord.degree);
+    // A minor key lists both the natural v and the V7 every player borrows.
+    // Stripped to their fifths they are the same two notes, and printing the
+    // card twice would read as a bug rather than as theory.
+    const key = `${degree}:${String(chord.root)}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ degree, root: chord.root, quality: "5", role: chord.role });
+  }
+  return out;
+}
+
+/**
+ * The colour chords, in the order a player reaches for them.
+ *
+ * Suspensions first — they are the ones every style uses — then the added
+ * ninth, then the sixth, then the dominant ninth, which is the one that fits
+ * the fewest keys. Each is kept only if `fitsKey` says so, so a degree may
+ * yield five colours, one, or none at all.
+ */
+const COLOUR_QUALITIES: readonly ChordQuality[] = ["sus4", "sus2", "add9", "6", "9"];
+
+/** True when this degree's own chord has a minor third in it. */
+function isMinorDegree(quality: ChordQuality): boolean {
+  return chordTones(quality).includes(3);
+}
+
+/**
+ * The colours of one degree, in priority order.
+ *
+ * The sixth follows the degree: a major degree takes the major sixth, a minor
+ * one the minor sixth, because a chord written "iim6" over a minor ii is what
+ * a player would actually finger. Everything else is the same chord over
+ * either.
+ */
+function coloursOfDegree(degree: DiatonicChord, root: PitchClass, mode: KeyMode): DiatonicChord[] {
+  const stem = degreeStem(degree.degree);
+  const out: DiatonicChord[] = [];
+  for (const wanted of COLOUR_QUALITIES) {
+    const quality: ChordQuality =
+      wanted === "6" && isMinorDegree(degree.quality) ? "m6" : wanted;
+    const chord: Chord = { root: degree.root, quality };
+    if (!fitsKey(chord, root, mode)) continue;
+    out.push({
+      degree: stem + chordSuffix(quality),
+      root: degree.root,
+      quality,
+      role: degree.role,
+    });
+  }
+  return out;
 }
 
 /**
  * The chords of the key at one flavour, in degree order.
  *
- * `"triads"` and `"sevenths"` are the two lists the key strip has always
- * shown. `"colours"` and `"power"` are A10's additions.
+ * Colours come back as a flat list that keeps the degree order, several
+ * entries to a degree; the screen groups them on the degree's root. A flat
+ * list rather than a nested one because every other flavour is a flat list
+ * and the caller should not have to branch on which one it asked for.
  */
 export function chordsAtFlavour(
   root: PitchClass,
   mode: KeyMode,
   flavour: ChordFlavour,
 ): DiatonicChord[] {
-  if (flavour === "sevenths") return seventhsInKey(root, mode);
-  if (flavour === "triads") return chordsInKey(root, mode);
-
-  if (flavour === "power") {
-    // Every degree as a two-note chord, upper case with a 5 after it: a power
-    // chord has no third, so it is neither major nor minor and a lower-case
-    // roman would be claiming something the chord does not say. A diminished
-    // degree loses its ° for the same reason.
-    return chordsInKey(root, mode).map((chord) => ({
-      degree: `${bareDegree(chord.degree).toUpperCase()}5`,
-      root: chord.root,
-      // W24: this becomes `"5"`. Until then the shape drawn is a triad's, and
-      // the name under it is the only true thing on the card.
-      quality: "maj" as ChordQuality,
-      role: chord.role,
-    }));
+  switch (flavour) {
+    case "sevenths":
+      return seventhsInKey(root, mode);
+    case "power":
+      return powerChordsInKey(root, mode);
+    case "colours":
+      return chordsInKey(root, mode).flatMap((degree) => coloursOfDegree(degree, root, mode));
+    case "triads":
+      return chordsInKey(root, mode);
   }
-
-  // Colours: for each degree, the flavoured chords on that root whose every
-  // note is already in the key. Nothing borrowed, nothing to explain — if it
-  // is on the page you can play it over the whole tune.
-  const notes = keyNoteSet(root, mode);
-  const out: DiatonicChord[] = [];
-  for (const chord of chordsInKey(root, mode)) {
-    const minor = isMinorDegree(chord.quality);
-    for (const colour of COLOUR_ORDER) {
-      if (colour.minorOnly && !minor) continue;
-      if (colour.majorOnly && minor) continue;
-      if (!fitsNotes({ root: chord.root, quality: colour.quality }, notes)) continue;
-      out.push({
-        degree: `${bareDegree(chord.degree)}${suffixOf(colour.quality)}`,
-        root: chord.root,
-        quality: colour.quality,
-        role: chord.role,
-      });
-    }
-  }
-  return out;
 }
 
-/** The colour's mark on a degree label. `m6` on a minor degree reads "6". */
-function suffixOf(quality: ChordQuality): string {
-  return quality === "m6" ? "6" : quality;
-}
+/** The three vibes that open on power chords, and the two that open on sevenths. */
+const POWER_VIBES: readonly string[] = ["rock", "hardRock", "metal"];
+const SEVENTH_VIBES: readonly string[] = ["jazz", "blues"];
 
 /**
  * The flavour a jam's sheet opens on.
  *
- * A rock player's first chord is a power chord and a jazz player's is a
- * seventh, so the sheet should already be on the page they were going to
- * choose. The vibe answers first because it is the more specific statement;
- * the key's mode answers when there is no vibe.
+ * The vibe knows best, because it is the one thing on the screen that says
+ * what kind of music this is: a metal jam should not open on a page of major
+ * triads. A jam with no vibe — an old record, or one built by hand — falls
+ * back to its key, where only a blues has an opinion. Nothing else, and a jam
+ * with neither, opens on triads.
  */
 export function defaultFlavour(jam: Pick<Jam, "vibe" | "key">): ChordFlavour {
-  if (jam.vibe === "rock" || jam.vibe === "hardRock" || jam.vibe === "metal") return "power";
-  if (jam.vibe === "jazz" || jam.vibe === "blues") return "sevenths";
-  if (jam.vibe) return "triads";
+  const vibe = jam.vibe;
+  if (vibe !== undefined && (VIBE_IDS as readonly string[]).includes(vibe)) {
+    if (POWER_VIBES.includes(vibe)) return "power";
+    if (SEVENTH_VIBES.includes(vibe)) return "sevenths";
+    return "triads";
+  }
   const key = jam.key ? parseKey(jam.key) : null;
   return key?.mode === "blues" ? "sevenths" : "triads";
 }
 
+// ---------------------------------------------------------------------------
+// What fits the key
+// ---------------------------------------------------------------------------
+
 /**
- * The notes the key contains, derived from the chords already listed for it.
+ * The notes of a key, from the chords the app lists for it.
  *
- * One rule and no second scale table (A10). For a major key this comes out as
- * exactly the seven scale notes; for a minor key it adds the raised seventh
- * that the borrowed V7 carries, which is the note every player actually uses;
- * for a blues it is the union of the five blues chords, which is not a scale
- * at all and should not be made to look like one.
+ * Not a scale table — A10 is explicit that there must not be a second one.
+ * For a major key this comes out as exactly the seven scale notes; for a
+ * minor key it is those seven plus the raised seventh the borrowed V7
+ * carries; for a blues it is the union of the five blues chords, which is
+ * nine notes and contains none of the three the blues does not use.
+ *
+ * The sevenths are not folded in, and that is the interesting decision. In a
+ * major or a minor key they would add nothing — every degree's seventh is
+ * already in the key. In a BLUES they would add the flat seven of bIII7 and
+ * of bVII7, two notes an A blues player would not call part of A. So the set
+ * is the chords themselves, exactly as A10 words it.
  */
 export function keyNoteSet(root: PitchClass, mode: KeyMode): ReadonlySet<PitchClass> {
   const notes = new Set<PitchClass>();
-  for (const chord of [...chordsInKey(root, mode), ...seventhsInKey(root, mode)]) {
-    for (const pc of chordPitchClasses({ root: chord.root, quality: chord.quality })) {
-      notes.add(pc);
-    }
+  for (const chord of chordsInKey(root, mode)) {
+    for (const pc of chordNotes({ root: chord.root, quality: chord.quality })) notes.add(pc);
   }
   return notes;
 }
 
-/** Every note of the chord is in the key's note set. */
+/**
+ * True when every note of the chord is in the key's note set.
+ *
+ * The whole of "fits the key" — the mark on a card in the browser, the switch
+ * that hides the rest, and the filter that decides which colours a degree
+ * offers. One rule, used everywhere, so the three can never disagree.
+ */
 export function fitsKey(chord: Chord, root: PitchClass, mode: KeyMode): boolean {
-  return fitsNotes(chord, keyNoteSet(root, mode));
+  const inKey = keyNoteSet(root, mode);
+  return chordNotes(chord).every((pc) => inKey.has(pc));
 }
 
-/** The same rule, against a note set already worked out. */
-function fitsNotes(chord: Chord, notes: ReadonlySet<PitchClass>): boolean {
-  return chordNotes(chord).every((pc) => notes.has(pc));
-}
+// ---------------------------------------------------------------------------
+// The browser: every chord type there is
+// ---------------------------------------------------------------------------
 
-/** The three drawers of the browser page. */
+/**
+ * How the browser groups the sixteen chord types.
+ *
+ * Not by theory but by when a player meets them: the ones you learn first,
+ * the ones a jazz chart is made of, and the ones you add when the plain
+ * chord has stopped being interesting.
+ */
 export type ChordFamily = "basic" | "sevenths" | "colours";
 
 export const CHORD_FAMILIES: readonly ChordFamily[] = ["basic", "sevenths", "colours"];
 
-const FAMILIES: Record<ChordFamily, readonly ChordQuality[]> = {
-  // W24 adds `"5"` here, between `min` and `dim`.
-  basic: ["maj", "min", "dim", "aug"],
+const FAMILY_QUALITIES: Record<ChordFamily, readonly ChordQuality[]> = {
+  basic: ["maj", "min", "5", "dim", "aug"],
   sevenths: ["7", "maj7", "m7", "m7b5", "dim7"],
   colours: ["sus2", "sus4", "add9", "6", "m6", "9"],
 };
 
+/**
+ * The chord types in a family, in the order the browser draws them.
+ *
+ * Between them the three families hold every quality the library knows and
+ * hold none of them twice — the test beside this file checks that against
+ * `CHORD_QUALITIES`, so a sixteenth chord type added to the union and
+ * forgotten here fails the build rather than quietly vanishing off the page.
+ */
 export function qualitiesInFamily(family: ChordFamily): readonly ChordQuality[] {
-  return FAMILIES[family];
+  return FAMILY_QUALITIES[family];
 }
 
 /**
- * The twelve roots as this key spells them — flats in a flat key — from C up.
+ * The twelve roots, spelled the way this key spells them.
  *
- * From C rather than from the key's own root because the row is a keyboard,
- * and a keyboard that started on a different note for every jam would be a
- * row you had to read rather than one you could point at.
+ * Pitch class 0..11 in order from C, so the row is the chromatic scale and
+ * not a circle of fifths: this is the row you scan to find a chord, and C D E
+ * is where a reader's eye expects to start. The names follow the key
+ * signature, so in F the sixth button reads Gb and in D it reads F#.
  */
 export function rootNames(key: Key): { pc: PitchClass; name: string }[] {
-  return Array.from({ length: 12 }, (_unused, pc) => ({ pc, name: noteName(pc, key) }));
+  return Array.from({ length: 12 }, (_unused, i) => {
+    const pc = pitchClass(i);
+    return { pc, name: noteName(pc, key) };
+  });
 }

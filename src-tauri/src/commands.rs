@@ -240,7 +240,17 @@ pub fn set_playing(
             }
         } else if !playing && engine.is_running() {
             engine.stop();
-            state.lock().unwrap().is_playing = false;
+            {
+                let mut s = state.lock().unwrap();
+                s.is_playing = false;
+                // A stop spends the count-in, whichever door it came through.
+                // `toggle_playback` and `stop_speed_ramp` already did this;
+                // this path (a tab change, a sound preview, the setlist
+                // runner) did not, so a jam stopped during its count-in kept
+                // the unspent beats armed, and the next Play counted them out
+                // even after the player had set the count-in to none.
+                s.count_in = crate::state::CountIn::default();
+            }
             tempo_ctx.set_playing(false);
         } else {
             // No transition to make. `is_playing` was left untouched here,
@@ -248,7 +258,13 @@ pub fn set_playing(
             // the flag stuck true and the next press of Play was spent
             // toggling it back off. Write the engine's real state instead.
             let running = engine.is_running();
-            state.lock().unwrap().is_playing = running;
+            let mut s = state.lock().unwrap();
+            s.is_playing = running;
+            // Same rule: a stop that finds nothing running still disarms.
+            if !playing {
+                s.count_in = crate::state::CountIn::default();
+            }
+            drop(s);
             tempo_ctx.set_playing(running);
         }
     }

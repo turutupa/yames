@@ -96,7 +96,9 @@ describe("chordTones", () => {
   it("has an entry for every quality, all of them distinct and in the octave", () => {
     for (const quality of CHORD_QUALITIES) {
       const tones = chordTones(quality);
-      expect(tones.length).toBeGreaterThanOrEqual(3);
+      // Three notes make a chord, except the power chord, whose two are the
+      // whole of it.
+      expect(tones.length).toBeGreaterThanOrEqual(quality === "5" ? 2 : 3);
       expect(new Set(tones).size).toBe(tones.length);
       expect(tones[0]).toBe(0);
       for (const t of tones) expect(t).toBeLessThan(12);

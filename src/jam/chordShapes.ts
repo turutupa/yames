@@ -165,8 +165,18 @@ function positionOf(frets: (number | null)[]): number {
  * bassists drop it and never drop the third or the seventh. The library
  * builder refuses any shape that loses anything else, so a grip labelled
  * m7b5 always has its flat five in it.
+ *
+ * The power chord is the exception, and the rule below says why rather than
+ * naming it: the fifth is droppable while some OTHER note is still there to
+ * say what the chord is. A power chord is a root and a fifth and nothing
+ * else, so dropping its fifth leaves one note, and one note is not a chord.
  */
 const OMITTABLE_INTERVAL = 7;
+
+/** True when this quality can be played without its fifth and still be itself. */
+function fifthIsOptional(quality: ChordQuality): boolean {
+  return chordTones(quality).length > 2;
+}
 
 export function spellsChord(
   quality: ChordQuality,
@@ -177,7 +187,7 @@ export function spellsChord(
   const got = new Set(pitches.filter((p): p is PitchClass => p !== null));
   for (const p of got) if (!want.has(p)) return false;
   for (const t of chordTones(quality)) {
-    if (t === OMITTABLE_INTERVAL) continue;
+    if (t === OMITTABLE_INTERVAL && fifthIsOptional(quality)) continue;
     if (!got.has(mod12(root + t))) return false;
   }
   return true;
@@ -319,6 +329,81 @@ const MOVABLE_GUITAR: Seed[] = [
     barre: { fret: 1, from: 3, to: 1 },
     movable: true,
     size: "barre",
+  },
+
+  // --- power chords ---------------------------------------------------------
+  //
+  // Root and fifth, and the octave when there is a finger free for it. Six
+  // grips rather than three because the octave version is a different sound
+  // and a different hand — the two-string one is what a punk player uses at
+  // speed, the three-string one is what a riff sits on. They are named the
+  // way a player names them, by the string the root is on: an "E-string
+  // power chord" is the shape, whatever fret it has been slid to.
+  //
+  // Written at fret 1 like every movable grip here, so the E-string form
+  // reads as an F5 and the A-string form as a Bb5.
+  {
+    id: "power-e-string",
+    name: "E-string power chord",
+    quality: "5",
+    root: 5,
+    frets: [1, 3, null, null, null, null],
+    fingers: [1, 3, null, null, null, null],
+    movable: true,
+    size: "triad",
+  },
+  {
+    id: "power-e-string-octave",
+    name: "E-string power chord, with the octave",
+    quality: "5",
+    root: 5,
+    frets: [1, 3, 3, null, null, null],
+    fingers: [1, 3, 4, null, null, null],
+    movable: true,
+    size: "triad",
+  },
+  {
+    id: "power-a-string",
+    name: "A-string power chord",
+    quality: "5",
+    root: 10,
+    frets: [null, 1, 3, null, null, null],
+    fingers: [null, 1, 3, null, null, null],
+    movable: true,
+    size: "triad",
+  },
+  {
+    id: "power-a-string-octave",
+    name: "A-string power chord, with the octave",
+    quality: "5",
+    root: 10,
+    frets: [null, 1, 3, 3, null, null],
+    fingers: [null, 1, 3, 4, null, null],
+    movable: true,
+    size: "triad",
+  },
+  {
+    id: "power-d-string",
+    name: "D-string power chord",
+    quality: "5",
+    root: 3,
+    frets: [null, null, 1, 3, null, null],
+    fingers: [null, null, 1, 3, null, null],
+    movable: true,
+    size: "triad",
+  },
+  {
+    // The B string is tuned a third above the G rather than a fourth, so the
+    // octave sits a fret further over than it does on the two grips above.
+    // Every guitarist has felt this one and few could say why.
+    id: "power-d-string-octave",
+    name: "D-string power chord, with the octave",
+    quality: "5",
+    root: 3,
+    frets: [null, null, 1, 3, 4, null],
+    fingers: [null, null, 1, 3, 4, null],
+    movable: true,
+    size: "triad",
   },
 
   // --- diminished and augmented triads --------------------------------------
@@ -715,6 +800,14 @@ const OPEN_GUITAR: Seed[] = [
   { id: "open-aadd9", name: "open Aadd9", quality: "add9", root: 9, frets: [null, 0, 2, 4, 2, 0], fingers: [null, null, 1, 3, 2, null], movable: false, size: "open" },
 
   { id: "open-e9", name: "open E9", quality: "9", root: 4, frets: [0, 2, 0, 1, 0, 2], fingers: [null, 3, null, 1, null, 4], movable: false, size: "open" },
+
+  // The three power chords that fall at the nut. A movable grip is written at
+  // fret 1 and only ever slides UP, so E5, A5 and D5 would otherwise appear
+  // eleven frets from where a player actually plays them — exactly the reason
+  // open E, A and D are seeds up above rather than the barre forms slid down.
+  { id: "open-e5", name: "open E5", quality: "5", root: 4, frets: [0, 2, 2, null, null, null], fingers: [null, 1, 2, null, null, null], movable: false, size: "open" },
+  { id: "open-a5", name: "open A5", quality: "5", root: 9, frets: [null, 0, 2, 2, null, null], fingers: [null, null, 1, 2, null, null], movable: false, size: "open" },
+  { id: "open-d5", name: "open D5", quality: "5", root: 2, frets: [null, null, 0, 2, 3, null], fingers: [null, null, null, 1, 3, null], movable: false, size: "open" },
 ];
 
 // ---------------------------------------------------------------------------
@@ -830,6 +923,11 @@ function buildTriadSeeds(): Seed[] {
 const BASS_PATTERNS: { id: string; name: string; quality: ChordQuality; offsets: (number | null)[] }[] = [
   { id: "bass-maj-triad", name: "major triad", quality: "maj", offsets: [0, -1, -3] },
   { id: "bass-maj-octave", name: "one-octave arpeggio", quality: "maj", offsets: [0, -1, -3, -3] },
+  // Root and fifth, and the same with the octave on top: what a bassist plays
+  // under a guitarist's power chord. Two notes is a whole shape here and
+  // nowhere else in this table, which is what the note count below allows for.
+  { id: "bass-power", name: "power chord", quality: "5", offsets: [0, 2] },
+  { id: "bass-power-octave", name: "power chord with the octave", quality: "5", offsets: [0, 2, 2] },
   { id: "bass-min-triad", name: "minor triad", quality: "min", offsets: [0, -2, -3] },
   { id: "bass-min-octave", name: "one-octave arpeggio", quality: "min", offsets: [0, -2, -3, -3] },
   { id: "bass-dim-triad", name: "diminished triad", quality: "dim", offsets: [0, -2, -4] },
@@ -858,7 +956,12 @@ function buildBassSeeds(): Seed[] {
     for (const rootString of [4, 3] as const) {
       const startIndex = indexOfString("bass", rootString);
       const usable = pattern.offsets.slice(0, BASS_TUNING.length - startIndex);
-      if (usable.filter((o) => o !== null).length < 3) continue;
+      // A pattern that ran off the end of the fingerboard is no longer the
+      // shape it was named after, so it is thrown away. Three notes is the
+      // floor for anything that HAS three notes; a power chord has two, and
+      // both of them are still here.
+      const floor = Math.min(3, chordTones(pattern.quality).length);
+      if (usable.filter((o) => o !== null).length < floor) continue;
       const frets: (number | null)[] = [null, null, null, null];
       usable.forEach((offset, k) => {
         if (offset !== null) frets[startIndex + k] = referenceFret + offset;

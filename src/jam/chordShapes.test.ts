@@ -6,6 +6,7 @@ import {
   MAX_FRET,
   SHAPES,
   baseFretFor,
+  shapeCount,
   shapesFor,
   spellsChord,
   type Instrument,
@@ -242,7 +243,9 @@ describe("shapesFor", () => {
 });
 
 describe("three-string triads", () => {
-  const triads = SHAPES.filter((s) => s.size === "triad" && s.instrument === "guitar");
+  // The generated ones, by id. `size: "triad"` means "the small grips" and the
+  // power chords wear it too, so the size alone no longer names this family.
+  const triads = SHAPES.filter((s) => s.instrument === "guitar" && s.id.startsWith("triad-"));
 
   it("covers three string sets and three inversions for four qualities", () => {
     expect(triads.length).toBe(36);
@@ -261,5 +264,94 @@ describe("three-string triads", () => {
       const bass = mod12(GUITAR_TUNING[lowest] + (shape.frets[lowest] as number));
       expect(bass).toBe(mod12(shape.root + chordTones(shape.quality)[inversion]));
     }
+  });
+});
+
+/**
+ * Power chords.
+ *
+ * The first chord a rock player learns and, until now, the one the library
+ * could not draw. Two notes: the root and the fifth. A power chord with a
+ * third in it is a major or a minor chord and no longer the thing the
+ * guitarist asked for, and a power chord with the FIFTH missing is one note,
+ * so the checks below run in both directions.
+ */
+describe("power chords", () => {
+  const ROOT_AND_FIFTH = (root: number) => new Set([mod12(root), mod12(root + 7)]);
+
+  it("sounds the root and the fifth and nothing else, at every root, on both instruments", () => {
+    for (const instrument of INSTRUMENTS) {
+      for (const root of ROOTS) {
+        for (const shape of shapesFor(root, "5", { instrument })) {
+          const want = ROOT_AND_FIFTH(root);
+          const got = new Set(shape.pitches.filter((p): p is number => p !== null));
+          expect([...got].sort(), shape.id).toEqual([...want].sort());
+        }
+      }
+    }
+  });
+
+  it("keeps the fifth, because on this chord it is not the note you drop", () => {
+    // The rule lives in `spellsChord`, not in the shape builder: the fifth is
+    // droppable while some other note still says what the chord is, and a
+    // power chord has no other note.
+    expect(spellsChord("5", 0, [0, 7, null, null, null, null])).toBe(true);
+    expect(spellsChord("5", 0, [0, null, null, null, null, null])).toBe(false);
+    // The same lone root IS an acceptable major triad shell nowhere either,
+    // but a major chord may lose its fifth and keep its third.
+    expect(spellsChord("maj", 0, [0, 4, null, null, null, null])).toBe(true);
+  });
+
+  it("gives every root three guitar grips and two bass shapes at the very least", () => {
+    expect(shapeCount("5", "guitar")).toBeGreaterThanOrEqual(3);
+    expect(shapeCount("5", "bass")).toBeGreaterThanOrEqual(2);
+    for (const root of ROOTS) {
+      expect(shapesFor(root, "5").length, `guitar ${root}`).toBeGreaterThanOrEqual(3);
+      expect(
+        shapesFor(root, "5", { instrument: "bass" }).length,
+        `bass ${root}`,
+      ).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it("offers the two-string grip and the one with the octave, on each of three strings", () => {
+    const ids = new Set(SHAPES.filter((s) => s.quality === "5").map((s) => s.id));
+    for (const id of [
+      "power-e-string",
+      "power-e-string-octave",
+      "power-a-string",
+      "power-a-string-octave",
+      "power-d-string",
+      "power-d-string-octave",
+      "bass-power-root4",
+      "bass-power-root3",
+      "bass-power-octave-root4",
+      "bass-power-octave-root3",
+    ]) {
+      expect(ids.has(id), id).toBe(true);
+    }
+  });
+
+  it("has E5, A5 and D5 at the nut, where a player actually plays them", () => {
+    // A movable grip is written at fret 1 and only slides up, so without these
+    // the first three power chords anybody learns would be drawn at fret 12.
+    const nut: [number, string, (number | null)[]][] = [
+      [4, "open E5", [0, 2, 2, null, null, null]],
+      [9, "open A5", [null, 0, 2, 2, null, null]],
+      [2, "open D5", [null, null, 0, 2, 3, null]],
+    ];
+    for (const [root, name, frets] of nut) {
+      const open = shapesFor(root, "5").find((s) => s.name === name);
+      expect(open?.frets, name).toEqual(frets);
+      expect(open?.position, name).toBe(0);
+    }
+  });
+
+  it("names them the way a player names them, by the string the root is on", () => {
+    const names = SHAPES.filter((s) => s.quality === "5" && s.instrument === "guitar").map(
+      (s) => s.name,
+    );
+    expect(names).toContain("E-string power chord");
+    expect(names).toContain("A-string power chord, with the octave");
   });
 });
