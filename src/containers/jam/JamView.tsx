@@ -43,6 +43,7 @@ import { ChordSheet, chordSheetTitle, pinnedShapeOf } from "./ChordSheet";
 import type { ChordPage } from "./ChordSheet";
 import type { ChordFlavour } from "../../jam/cheatSheet";
 import { JamSetupSheet, setupSheetSubtitle } from "./JamSetupSheet";
+import type { VibePreviewMark } from "./VibePicker";
 import { JamSheet } from "./JamSheet";
 import { GrooveEditorDrawer } from "./GrooveEditorDrawer";
 import { MotionProvider, Presence, useLastPresent } from "../../components/Presence";
@@ -145,6 +146,10 @@ interface JamViewProps {
   /** Two bars of the current groove on a kit, through the engine (B7). */
   onPreviewKit?: (kit: string) => void;
   previewingKit?: string | null;
+  /** Two bars of a whole vibe, through the same door (JAM_KILLER A4). */
+  onPreviewVibe?: ((vibeId: string, variationId?: string) => void) | null;
+  onStopPreview?: (() => void) | null;
+  previewingVibe?: VibePreviewMark | null;
   /** True while the engine is refusing a folder of your own samples (B3). */
   customKitRefused?: boolean;
   screen: JamScreenState;
@@ -211,6 +216,9 @@ export function JamView({
   onToggleTakes,
   onPreviewKit,
   previewingKit = null,
+  onPreviewVibe = null,
+  onStopPreview = null,
+  previewingVibe = null,
   customKitRefused = false,
   screen,
   position,
@@ -692,6 +700,9 @@ export function JamView({
                   lineup={lineup}
                   onPreviewKit={(kit) => onPreviewKit?.(kit)}
                   previewingKit={previewingKit}
+                  onPreviewVibe={onPreviewVibe}
+                  onStopPreview={onStopPreview}
+                  previewingVibe={previewingVibe}
                   customKitRefused={customKitRefused}
                   onOpenEditor={() => screen.setEditorOpen(true)}
                   editingChords={screen.editingChords}

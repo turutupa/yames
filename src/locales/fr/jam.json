@@ -2,6 +2,9 @@
   "jam": {
     "badge": "JAM",
     "newJam": "Nouveau jam",
+    "jamNow": "Jammer maintenant",
+    "jamNowLead": "Choisit un groupe pour ton instrument et lui donne le décompte.",
+    "jamNowName": "Jam {{vibe}}",
     "untitled": "Nouveau jam",
     "deleteJam": "Supprimer le jam",
     "duplicateJam": "Dupliquer le jam",

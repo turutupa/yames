@@ -36,6 +36,15 @@ interface RailProps {
   onRenameJam: (id: string, name: string) => void;
   onDuplicateJam: (id: string) => void;
   onReorderJams: (from: number, to: number) => void;
+  /**
+   * One tap to a band playing (JAM_KILLER A4), when no jam is open.
+   *
+   * On the rail rather than only on the empty screen because the rail is
+   * where somebody who has not opened Jam yet is looking: a play glyph beside
+   * the mode is the shortest distance there is between "I wonder what that
+   * is" and a band.
+   */
+  onJamNow?: () => void;
   /** A jam, into a setlist, from the library's own context menu (JAM_MODE 8.5). */
   onAddJamToSetlist?: (jamId: string, setlistId: string) => void;
   coachOpen: boolean;
@@ -151,6 +160,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
     onDuplicateJam,
     onReorderJams,
     onAddJamToSetlist,
+    onJamNow,
     coachOpen,
     coachActive,
     coachListening,
@@ -183,33 +193,56 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
       aria-label={t("rail.label")}
     >
       <div className="rail-modes">
-        {MODES.map((mode) => (
-          <button
-            key={mode.id}
-            className={`rail-mode ${view === mode.id ? "active" : ""}`}
-            // Below 620px the rail is icons only and the label is display:
-            // none, which leaves the button with no accessible name at all.
-            // The label is named here so it survives being hidden.
-            aria-label={t(mode.labelKey)}
-            data-tour={mode.id === "drill" ? "drill-tab" : undefined}
-            onClick={() => setView(mode.id)}
-            aria-current={view === mode.id ? "page" : undefined}
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+        {MODES.map((mode) => {
+          /* Jam, with nothing open, offers to just play (JAM_KILLER A4). A
+             sibling button rather than something inside the mode row, because
+             a button inside a button is not a thing a browser will draw. */
+          const jamNow = mode.id === "jam" && !!onJamNow && !activeJamId;
+          const entry = (
+            <button
+              key={mode.id}
+              className={`rail-mode ${view === mode.id ? "active" : ""}`}
+              // Below 620px the rail is icons only and the label is display:
+              // none, which leaves the button with no accessible name at all.
+              // The label is named here so it survives being hidden.
+              aria-label={t(mode.labelKey)}
+              data-tour={mode.id === "drill" ? "drill-tab" : undefined}
+              onClick={() => setView(mode.id)}
+              aria-current={view === mode.id ? "page" : undefined}
             >
-              {mode.icon}
-            </svg>
-            <span className="rail-mode-label">{t(mode.labelKey)}</span>
-          </button>
-        ))}
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                {mode.icon}
+              </svg>
+              <span className="rail-mode-label">{t(mode.labelKey)}</span>
+            </button>
+          );
+          if (!jamNow) return entry;
+          return (
+            <div className="rail-mode-row" key={mode.id}>
+              {entry}
+              <button
+                type="button"
+                className="rail-mode-now"
+                aria-label={t("jam.jamNow")}
+                title={t("jam.jamNowLead")}
+                onClick={() => onJamNow?.()}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M7 4.5v15l13-7.5z" />
+                </svg>
+              </button>
+            </div>
+          );
+        })}
       </div>
 
       <div className="rail-library" data-open={libraryOpen ? "" : undefined}>

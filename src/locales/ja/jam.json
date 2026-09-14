@@ -2,6 +2,9 @@
   "jam": {
     "badge": "ジャム",
     "newJam": "新しいジャム",
+    "jamNow": "今すぐジャム",
+    "jamNowLead": "あなたの楽器に合うバンドを選び、カウントを出します。",
+    "jamNowName": "{{vibe}}のジャム",
     "untitled": "新しいジャム",
     "deleteJam": "ジャムを削除",
     "duplicateJam": "ジャムを複製",

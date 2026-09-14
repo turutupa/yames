@@ -11,6 +11,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { useJamSession } from "./useJamSession";
 import { STARTER_JAMS } from "../../../jam/jams";
 import { compileJam } from "../../../jam/compile";
+import { applyVibe } from "../../../jam/vibes";
 import { grooveById } from "../../../jam/grooves";
 import type { Jam, JamEngineConfig, JamPositionCommand } from "../../../jam/types";
 import type { BeatEvent } from "../../../types";
@@ -68,6 +69,11 @@ vi.mock("../../../ipc", () => ({
   // The kit preview presses play on its own when the band is stopped (B7).
   togglePlayback: () => {
     calls.push(["togglePlayback", null]);
+    return Promise.resolve();
+  },
+  // Jam now starts the band with the jam's own count-in (JAM_KILLER A4).
+  armCountIn: (beats: number) => {
+    calls.push(["armCountIn", beats]);
     return Promise.resolve();
   },
   ttsSpeak: () => Promise.resolve(),
@@ -1081,5 +1087,275 @@ describe("the kit preview", () => {
     act(() => result.current.screen.setSetupOpen(true));
     rerender({ v: "jam", playing: true });
     await waitFor(() => expect(result.current.screen.setupOpen).toBe(false));
+  });
+});
+
+/**
+ * The vibe audition (JAM_KILLER §2 A4).
+ *
+ * The same two bars the kit audition plays, of a whole band rather than a
+ * drum kit — and the same rule underneath it, which is the part worth
+ * pinning: the engine is handed the vibe, the RECORD is not touched, and what
+ * was playing before comes back. A preview that edited the jam would be a
+ * hover that made the jam dirty, and a library you could not trust.
+ */
+describe("the vibe preview", () => {
+  /** What the engine was last told to play — the drums' own identity. */
+  function playing(): { grooveId: unknown; kit: unknown } {
+    const config = names("setJam")
+      .filter((c) => c !== null)
+      .pop() as JamEngineConfig & { grooveId?: unknown };
+    return { grooveId: config.name ?? null, kit: config.kit };
+  }
+
+  it("hands the engine the vibe, leaves the record alone, and puts it all back", async () => {
+    const { result, rerender } = await loaded();
+    const before = result.current.jam!;
+    const beforeKit = before.kit;
+
+    act(() => result.current.previewVibe("funk"));
+    // Stopped, so the audition presses play for itself — no count-in, because
+    // a count before a two-bar audition is more count than audition.
+    expect(names("togglePlayback")).toHaveLength(1);
+    expect(names("armCountIn")).toHaveLength(0);
+    expect(result.current.previewingVibe).toEqual({
+      vibeId: "funk",
+      variationId: undefined,
+      sounding: true,
+    });
+
+    rerender({ v: "jam", playing: true, beat: beatAt(0) });
+    const funk = applyVibe(before, "funk");
+    // The meter goes out before the table, so the table is a few microtasks
+    // behind the press that started the audition.
+    await waitFor(() => expect(names("setJam").filter((c) => c !== null)).not.toHaveLength(0));
+    const sent = names("setJam")
+      .filter((c) => c !== null)
+      .pop() as JamEngineConfig;
+    // The vibe's own drummer and the vibe's own kit, compiled the ordinary
+    // way — this is the real engine, not a sample player beside it.
+    expect(sent.kit).toBe(funk.kit);
+    /*
+     * And exactly HOW the vibe plays, over WHAT the jam plays.
+     *
+     * The audition takes the groove, the kit, the feel, the loudness, the two
+     * voices, the band and the meter; it leaves the tempo, the key, the form
+     * and the changes alone. That is what makes hovering Rock and then Funk a
+     * comparison of two bands rather than of two clips — so both halves are
+     * pinned here: the config IS the first compile, and is NOT the second.
+     */
+    const howItPlays = {
+      ...before,
+      grooveId: funk.grooveId,
+      customGroove: funk.customGroove,
+      kit: funk.kit,
+      customKit: funk.customKit,
+      feel: funk.feel,
+      intensity: funk.intensity,
+      bassVoice: funk.bassVoice,
+      keysVoice: funk.keysVoice,
+      band: funk.band,
+      fills: funk.fills,
+      fillEvery: funk.fillEvery,
+      meter: funk.meter,
+    };
+    const at = { formBar: 0, lineup: LINEUP, previousVoicing: null };
+    expect(sent).toEqual(compileJam(howItPlays, at));
+    expect(sent).not.toEqual(compileJam(funk, at));
+
+    // The record is exactly what it was. Not a field of it has moved, and the
+    // tempo and the key it was auditioned OVER are the jam's own.
+    expect(result.current.jam).toBe(before);
+    expect(result.current.jam!.kit).toBe(beforeKit);
+    expect(names("setBpm")).toHaveLength(0);
+
+    // Two bar lines, and the jam's own band is back with the transport.
+    rerender({ v: "jam", playing: true, beat: beatAt(1) });
+    rerender({ v: "jam", playing: true, beat: beatAt(2) });
+    await waitFor(() => expect(result.current.previewingVibe).toBeNull());
+    expect(names("togglePlayback")).toHaveLength(2);
+    const back = names("setJam")
+      .filter((c) => c !== null)
+      .pop() as JamEngineConfig;
+    expect(back.kit).toBe(beforeKit);
+  });
+
+  it("waits for the bar line when the band is already playing", async () => {
+    // Hovering a tile mid-take must not change the drummer under the player's
+    // hands halfway through a bar. It arms, the bar turns, and it comes in.
+    const { result, rerender } = await loaded((jams) => jams[0], {
+      playing: true,
+      beat: beatAt(0),
+    });
+    const before = result.current.jam!;
+    calls.length = 0;
+
+    act(() => result.current.previewVibe("jazz"));
+    expect(result.current.previewingVibe).toEqual({
+      vibeId: "jazz",
+      variationId: undefined,
+      sounding: false,
+    });
+    // Nothing has been sent, and nothing has been pressed: the bar that is
+    // playing is still the jam's own.
+    expect(names("setJam")).toHaveLength(0);
+    expect(names("togglePlayback")).toHaveLength(0);
+
+    rerender({ v: "jam", playing: true, beat: beatAt(1) });
+    expect(result.current.previewingVibe?.sounding).toBe(true);
+    const jazz = applyVibe(before, "jazz");
+    const sent = names("setJam")
+      .filter((c) => c !== null)
+      .pop() as JamEngineConfig;
+    expect(sent.kit).toBe(jazz.kit);
+
+    // Two bars of it, then the jam's own table — and the transport it did not
+    // start is the transport it does not stop.
+    rerender({ v: "jam", playing: true, beat: beatAt(2) });
+    rerender({ v: "jam", playing: true, beat: beatAt(3) });
+    await waitFor(() => expect(result.current.previewingVibe).toBeNull());
+    expect(names("togglePlayback")).toHaveLength(0);
+    expect(result.current.jam).toBe(before);
+    const back = names("setJam")
+      .filter((c) => c !== null)
+      .pop() as JamEngineConfig;
+    expect(back.kit).toBe(before.kit);
+  });
+
+  it("plays the variation when it is asked for one", async () => {
+    const { result, rerender } = await loaded();
+    const before = result.current.jam!;
+    act(() => result.current.previewVibe("rock", "punk"));
+    rerender({ v: "jam", playing: true, beat: beatAt(0) });
+    expect(result.current.previewingVibe).toMatchObject({
+      vibeId: "rock",
+      variationId: "punk",
+    });
+    const punk = applyVibe(before, "rock", "punk");
+    await waitFor(() => expect(names("setJam").filter((c) => c !== null)).not.toHaveLength(0));
+    const sent = names("setJam")
+      .filter((c) => c !== null)
+      .pop() as JamEngineConfig;
+    expect(sent.kit).toBe(punk.kit);
+    expect(result.current.jam).toBe(before);
+  });
+
+  it("asking for the tile that is sounding is Stop", async () => {
+    const { result, rerender } = await loaded();
+    act(() => result.current.previewVibe("funk"));
+    rerender({ v: "jam", playing: true, beat: beatAt(0) });
+    expect(result.current.previewingVibe?.sounding).toBe(true);
+
+    act(() => result.current.previewVibe("funk"));
+    await waitFor(() => expect(result.current.previewingVibe).toBeNull());
+    // And the transport it started goes back where it found it.
+    expect(names("togglePlayback")).toHaveLength(2);
+  });
+
+  it("moving off stops it, and one audition at a time", async () => {
+    const { result, rerender } = await loaded();
+    act(() => result.current.startKitPreview("brushes"));
+    rerender({ v: "jam", playing: true, beat: beatAt(0) });
+    expect(result.current.previewKit).toBe("brushes");
+
+    // A vibe over a kit: one overlay, so the kit audition is over.
+    act(() => result.current.previewVibe("blues"));
+    expect(result.current.previewKit).toBeNull();
+    expect(result.current.previewingVibe?.vibeId).toBe("blues");
+
+    act(() => result.current.stopPreview());
+    expect(result.current.previewingVibe).toBeNull();
+    expect(result.current.previewKit).toBeNull();
+  });
+
+  it("says nothing to the engine about a vibe it has never heard of", async () => {
+    const { result } = await loaded();
+    const before = result.current.jam!;
+    calls.length = 0;
+    act(() => result.current.previewVibe("skiffle"));
+    expect(result.current.previewingVibe).toBeNull();
+    expect(names("setJam")).toHaveLength(0);
+    expect(names("togglePlayback")).toHaveLength(0);
+    expect(result.current.jam).toBe(before);
+  });
+});
+
+/**
+ * Jam now (JAM_KILLER §2 A4) — one tap, and a band is playing.
+ *
+ * What has to be true: the vibe follows the instrument, the jam is named for
+ * it and saved, the setup sheet stays shut, the band is counted in with the
+ * jam's own count-in, and pressing it twice gives you the same jam rather
+ * than a library full of "Rock jam".
+ */
+describe("Jam now", () => {
+  it("makes the jam its instrument asks for and counts the band in", async () => {
+    const { result } = mount("jam", { instrument: "bass" });
+    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    calls.length = 0;
+
+    act(() => {
+      result.current.jamNow();
+    });
+
+    // A bass player gets funk (the plan's table), named for the vibe, saved.
+    expect(result.current.jam?.vibe).toBe("funk");
+    expect(result.current.jams).toHaveLength(7);
+    expect(result.current.jams[6].id).toBe(result.current.jam?.id);
+    expect(names("saveJams")).toHaveLength(1);
+    // The point is to be playing, not to be setting up.
+    expect(result.current.screen.setupOpen).toBe(false);
+
+    await waitFor(() => expect(names("togglePlayback")).toHaveLength(1));
+    // The band and the player start together, as the transport button does
+    // it — and the count is a whole bar, which is the room the table has to
+    // reach the engine before bar one. A jam made this way is never counted
+    // in for nothing: `createJam` gives it the groove's own bar of count.
+    expect(names("armCountIn")).toEqual([result.current.jam!.countIn]);
+    expect(result.current.jam!.countIn).toBeGreaterThan(0);
+    // And the table did reach the engine, for this jam.
+    await waitFor(() => expect(names("setJam").filter((c) => c !== null)).not.toHaveLength(0));
+  });
+
+  it("starts the one it already made instead of making another", async () => {
+    const { result, rerender } = mount("jam", { instrument: "electric-guitar" });
+    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+
+    act(() => {
+      result.current.jamNow();
+    });
+    const first = result.current.jam!.id;
+    await waitFor(() => expect(names("togglePlayback")).toHaveLength(1));
+    expect(result.current.jams).toHaveLength(7);
+
+    // Pressed again, with the band already playing it.
+    rerender({ v: "jam", playing: true, beat: beatAt(0), instrument: "electric-guitar" });
+    act(() => {
+      result.current.jamNow();
+    });
+    expect(result.current.jams).toHaveLength(7);
+    expect(result.current.jam!.id).toBe(first);
+    // Already playing: a second press must not stop it.
+    expect(names("togglePlayback")).toHaveLength(1);
+  });
+
+  it("gives a guitarist rock", async () => {
+    const { result } = mount("jam", { instrument: "acoustic-guitar" });
+    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    act(() => {
+      result.current.jamNow();
+    });
+    expect(result.current.jam?.vibe).toBe("rock");
+  });
+
+  it("gives a piano player jazz", async () => {
+    // Its own test rather than a second mount: the store is module state, so
+    // a second harness in one test reads the library the first one wrote.
+    const { result } = mount("jam", { instrument: "piano" });
+    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    act(() => {
+      result.current.jamNow();
+    });
+    expect(result.current.jam?.vibe).toBe("jazz");
   });
 });

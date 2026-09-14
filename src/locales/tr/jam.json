@@ -2,6 +2,9 @@
   "jam": {
     "badge": "JAM",
     "newJam": "Yeni jam",
+    "jamNow": "Hemen jam",
+    "jamNowLead": "Çaldığın enstrümana göre bir grup seçer ve sayarak başlatır.",
+    "jamNowName": "{{vibe}} jam",
     "untitled": "Yeni jam",
     "deleteJam": "Jam'i sil",
     "duplicateJam": "Jam'i çoğalt",

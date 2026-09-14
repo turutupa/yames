@@ -494,6 +494,19 @@ export function MainWindow() {
   }, [jamSession.newJam]);
 
   /**
+   * Jam now (JAM_KILLER A4) — the tab, then the band.
+   *
+   * The tab first because the hook only puts a jam on the engine while Jam is
+   * the open tab, and this is pressed from the rail with the metronome up as
+   * often as it is pressed from the empty screen. Nothing else: no library, no
+   * name field, no sheet. `jamNow` does the rest and the band counts itself in.
+   */
+  const handleJamNow = useCallback(() => {
+    setView("jam");
+    jamSession.jamNow();
+  }, [setView, jamSession.jamNow]);
+
+  /**
    * Play, on the jam tab.
    *
    * A jam with a count-in arms it before the transport starts, exactly the way
@@ -1365,6 +1378,7 @@ export function MainWindow() {
           onRenameJam={jamSession.renameJam}
           onDuplicateJam={jamSession.duplicateJam}
           onReorderJams={jamSession.reorderJams}
+          onJamNow={handleJamNow}
           onAddJamToSetlist={(jamId, setlistId) => {
             const jam = jamSession.jams.find((j) => j.id === jamId);
             if (jam) void setlistSession.addJamToSetlist(setlistId, jam);
@@ -1607,6 +1621,9 @@ export function MainWindow() {
               onToggleTakes={jamTakes.requestTakes}
               onPreviewKit={jamSession.startKitPreview}
               previewingKit={jamSession.previewKit}
+              onPreviewVibe={jamSession.previewVibe}
+              onStopPreview={jamSession.stopPreview}
+              previewingVibe={jamSession.previewingVibe}
               customKitRefused={jamSession.customKitRefused}
               screen={jamSession.screen}
               position={jamSession.position}
@@ -1628,7 +1645,7 @@ export function MainWindow() {
             />
           ) : (
             /* A mode can be clicked cold. */
-            <JamEmpty onNew={handleNewJam} />
+            <JamEmpty onNew={handleNewJam} onJamNow={handleJamNow} />
           )
         ) : view === "drill" ? (
           <DrillView
