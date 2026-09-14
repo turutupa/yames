@@ -26,6 +26,7 @@ import type {
 } from "../../jam/types";
 import { JAM_MAX_FORM_BARS } from "../../jam/types";
 import type { JamTakesState } from "../main-window/hooks/useJamTakes";
+import type { MotionProps } from "../../components/Presence";
 import { GrooveGlyph } from "./GrooveGlyph";
 import { JamSheet, JamSheetGroup } from "./JamSheet";
 import { JamSelect } from "./JamSelect";
@@ -110,6 +111,8 @@ interface JamSetupSheetProps {
   onEditingChords: (on: boolean) => void;
   takes: JamTakesState;
   onToggleTakes: (next: boolean) => void;
+  /** The slide in and out, from the `Presence` that owns the mount (A11). */
+  motion?: MotionProps;
 }
 
 /**
@@ -143,6 +146,7 @@ export function JamSetupSheet({
   onEditingChords,
   takes,
   onToggleTakes,
+  motion,
 }: JamSetupSheetProps) {
   const { t } = useTranslation();
   const [moreOpen, setMoreOpen] = useState(false);
@@ -212,6 +216,8 @@ export function JamSetupSheet({
       title={jam.name}
       subtitle={startedFrom}
       onClose={onClose}
+      motion={motion}
+      closeOnOutside
     >
       <JamSheetGroup label={t("jam.vibe.label")} lead={t("jam.vibe.lead")}>
         <VibePicker jam={jam} jams={jams} onApply={applyPatch} onLoadOwn={onLoadJam} />

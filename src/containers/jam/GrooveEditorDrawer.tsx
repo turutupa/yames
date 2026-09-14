@@ -1,5 +1,6 @@
 import { useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { Presence, useLastPresent } from "../../components/Presence";
 import { GrooveEditor, fromGroove } from "./editor";
 import type { GrooveEditorPage } from "./editor";
 import { grooveById } from "../../jam/grooves";
@@ -78,7 +79,15 @@ export function GrooveEditorDrawer({
     onClose();
   }, [onEdit, onClose]);
 
-  if (!open || !jam.customGroove) return null;
+  /**
+   * The groove the drawer is drawing.
+   *
+   * Reset clears the custom groove AND shuts the drawer in one move, so for
+   * the 160 ms the drawer spends sinking there is no groove on the record to
+   * draw. It sinks showing the last one it had, which is the true picture of
+   * what just left.
+   */
+  const shown = useLastPresent(jam.customGroove);
 
   /**
    * Which column is lit.
@@ -88,24 +97,35 @@ export function GrooveEditorDrawer({
    * multiplied. Null while stopped — an editor with a column lit and nothing
    * playing reads as a cursor.
    */
-  const ticksPerBeat = jam.customGroove.ticksPerBeat;
+  const ticksPerBeat = shown?.ticksPerBeat ?? 1;
   const playingTick =
-    isPlaying && currentBeat
+    shown && isPlaying && currentBeat
       ? (currentBeat.measureBeat * ticksPerBeat + currentBeat.subdivision) %
-        (jam.customGroove.beatsPerBar * ticksPerBeat)
+        (shown.beatsPerBar * ticksPerBeat)
       : null;
 
   return (
-    <div className="jam-editor-drawer" role="group" aria-label={t("jam.editor.label")}>
-      <GrooveEditor
-        value={jam.customGroove}
-        onChange={change}
-        playingTick={playingTick}
-        page={page}
-        onPageChange={onPageChange}
-        onDone={onClose}
-        onReset={reset}
-      />
-    </div>
+    <Presence open={open && !!jam.customGroove}>
+      {(_state, motion) =>
+        shown && (
+          <div
+            className="jam-editor-drawer motion-drawer"
+            role="group"
+            aria-label={t("jam.editor.label")}
+            {...motion}
+          >
+            <GrooveEditor
+              value={shown}
+              onChange={change}
+              playingTick={playingTick}
+              page={page}
+              onPageChange={onPageChange}
+              onDone={onClose}
+              onReset={reset}
+            />
+          </div>
+        )
+      }
+    </Presence>
   );
 }

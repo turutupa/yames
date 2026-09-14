@@ -144,6 +144,15 @@
   animation: unfold-out var(--motion-exit) var(--motion-ease) both;
 }
 
+/* A surface on its way out is a picture of itself, not a control. Without
+   this, the 160 ms of a sheet sliding away is 160 ms in which its Done button
+   can still be pressed and the groove editor can still be typed into — and
+   the editor's Reset closes the drawer by clearing the groove it is showing,
+   so a click landing there would be a click on stale music. */
+[data-state="exiting"] {
+  pointer-events: none;
+}
+
 /* A section that only ever arrives — the Colours degree groups, which come
    and go with the flavour rather than with a switch of their own. They have
    no exit to wait for, so they need no `Presence` behind them: the keyframe

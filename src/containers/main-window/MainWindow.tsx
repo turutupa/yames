@@ -1610,6 +1610,9 @@ export function MainWindow() {
               customKitRefused={jamSession.customKitRefused}
               screen={jamSession.screen}
               position={jamSession.position}
+              themeId={state.theme}
+              viewTransitions={viewTransitions}
+              animationStyle={animationStyle}
               tapActive={tapActive}
               tapCount={tapCount}
               tapPulse={tapPulse}

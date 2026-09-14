@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { Presence, useLastPresent } from "../../components/Presence";
 import { VIBES, applyVibe } from "../../jam/vibesContract";
 import type { Vibe, VibePatch } from "../../jam/vibesContract";
 import type { Jam } from "../../jam/types";
@@ -34,9 +35,18 @@ export function VibePicker({ jam, jams, onApply, onLoadOwn }: VibePickerProps) {
 
   const picked: Vibe | null = VIBES.find((v) => v.id === jam.vibe) ?? null;
 
+  /**
+   * The vibe the variation row is about while it folds away.
+   *
+   * The row belongs to the tile above it, so tapping a vibe with no
+   * variations takes it with them — and it should leave holding the chips it
+   * had rather than emptying first (A11).
+   */
+  const shownVibe = useLastPresent(picked && picked.variations.length > 0 ? picked : null);
+
   /** Your saved jams of the picked vibe, newest first. Excludes this one. */
-  const yours = picked
-    ? jams.filter((j) => j.vibe === picked.id && j.id !== jam.id).slice().reverse()
+  const yours = shownVibe
+    ? jams.filter((j) => j.vibe === shownVibe.id && j.id !== jam.id).slice().reverse()
     : [];
 
   /** "8ths · Tight · 120" — what the tile promises, in three words. */
@@ -79,18 +89,20 @@ export function VibePicker({ jam, jams, onApply, onLoadOwn }: VibePickerProps) {
         </div>
       )}
 
-      {picked && picked.variations.length > 0 && (
-        <div className="jam-variations-block">
+      <Presence open={!!picked && picked.variations.length > 0}>
+        {(_state, motion) =>
+          shownVibe && (
+        <div className="jam-variations-block motion-unfold" {...motion}>
           <div className="jam-sheet-group-head">
             <span className="stage-label">
               {t("jam.variation.label", {
-                vibe: t(`jam.vibe.${picked.id}`, { defaultValue: picked.id }),
+                vibe: t(`jam.vibe.${shownVibe.id}`, { defaultValue: shownVibe.id }),
               })}
             </span>
             <span className="jam-sheet-lead">{t("jam.variation.lead")}</span>
           </div>
           <div className="jam-variations" role="group" aria-label={t("jam.variation.aria")}>
-            {picked.variations.map((variation) => {
+            {shownVibe.variations.map((variation) => {
               const on = jam.variation === variation.id;
               return (
                 <button
@@ -98,7 +110,7 @@ export function VibePicker({ jam, jams, onApply, onLoadOwn }: VibePickerProps) {
                   type="button"
                   className={`jam-chip${on ? " active" : ""}`}
                   aria-pressed={on}
-                  onClick={() => onApply(applyVibe(jam, picked, variation.id))}
+                  onClick={() => onApply(applyVibe(jam, shownVibe, variation.id))}
                 >
                   {t(`jam.variation.${variation.id}`, { defaultValue: variation.id })}
                 </button>
@@ -128,7 +140,9 @@ export function VibePicker({ jam, jams, onApply, onLoadOwn }: VibePickerProps) {
             </span>
           </div>
         </div>
-      )}
+          )
+        }
+      </Presence>
     </>
   );
 }

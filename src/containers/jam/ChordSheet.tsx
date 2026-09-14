@@ -2,14 +2,32 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { ChordDiagram } from "../../components/chords";
 import { Fretboard, BASS_STANDARD_TUNING, GUITAR_STANDARD_TUNING } from "../../components/fretboard";
-import { chordsInKey, seventhsInKey } from "../../jam/diatonic";
+import { Presence, useLastPresent } from "../../components/Presence";
+import type { MotionProps } from "../../components/Presence";
+import { chordsInKey } from "../../jam/diatonic";
+import type { DiatonicChord } from "../../jam/diatonic";
+import {
+  CHORD_FAMILIES,
+  CHORD_FLAVOURS,
+  chordsAtFlavour,
+  fitsKey,
+  qualitiesInFamily,
+  rootNames,
+} from "../../jam/cheatSheet";
+import type { ChordFamily, ChordFlavour } from "../../jam/cheatSheet";
 import { shapesFor } from "../../jam/chordShapes";
 import { chordName, keyRootName } from "../../jam/harmony";
 import type { PlacedShape, Instrument } from "../../jam/chordShapes";
-import type { Chord, Key } from "../../jam/harmony";
+import type { Chord, Key, PitchClass } from "../../jam/harmony";
 import type { ScaleSuggestion } from "../../jam/scales";
 import type { Jam } from "../../jam/types";
 import { JamSheet } from "./JamSheet";
+import { Segmented } from "./Segmented";
+
+/** Which of the two pages the sheet is on (JAM_UX_DECISIONS A10). */
+export type ChordPage = "key" | "all";
+
+const CHORD_PAGES: readonly ChordPage[] = ["key", "all"];
 
 /**
  * The one shape a page like this should draw for a chord.
@@ -62,27 +80,52 @@ interface ChordSheetProps {
   /** Which of the expanded chord's shapes is selected; `jam-next-shape` steps it. */
   shapeIndex: number;
   onShapeIndex: (index: number) => void;
-  sevenths: boolean;
-  onSevenths: (next: boolean) => void;
+  /** In key, or the whole library. Screen state. */
+  page: ChordPage;
+  onPage: (page: ChordPage) => void;
+  /** Triads, 7ths, colours or power — the In key page's four readings. */
+  flavour: ChordFlavour;
+  onFlavour: (flavour: ChordFlavour) => void;
+  /** Which root the browser is showing, or null for the key's own. */
+  root: PitchClass | null;
+  onRoot: (root: PitchClass) => void;
+  /** Hide the chords that do not fit the key. Off by default. */
+  onlyInKey: boolean;
+  onOnlyInKey: (on: boolean) => void;
   fretboardOpen: boolean;
   onFretboard: (open: boolean) => void;
+  /** The slide in and out, from the `Presence` that owns the mount (A11). */
+  motion?: MotionProps;
 }
 
 /**
- * The chords of the key, as a page you can glance at (JAM_UX_DECISIONS A8).
+ * The chords, as a cheat sheet a player would actually reach for
+ * (JAM_UX_DECISIONS A8, then A10).
  *
- * The owner's words were: "the fretboard and the chords are amazing, but they
- * shouldn't keep changing." So shapes left the playing screen entirely. On the
- * playing screen only two things move on their own now — the timeline and the
- * chord you are on. Everything harmonic lives here, and here nothing moves
- * unless you ask it to.
+ * A8 got the shapes off the playing screen and onto a page that holds still:
+ * "the fretboard and the chords are amazing, but they shouldn't keep
+ * changing." A10 is the owner's next session with it — "only major and 7ths
+ * chords? … the user should be able to see ALL chords for all keys, or filter
+ * by the chords the user can play in the key of the current jam. Feels
+ * incomplete." It was. The sheet showed seven chords and hid the other
+ * fourteen chord types the library knows, and the first chord a rock player
+ * reaches for did not exist at all.
  *
- * One basic shape per chord, seven of them, in a grid. Tap one and every way
- * to play it opens underneath. Pin one and it goes to the corner of the
- * playing screen and stays there until you unpin it. "Follow the jam" is a
- * switch, off by default, for the player who did want the old behaviour — and
- * the fretboard is the same bargain: opt in, and when open it shows ONE box
- * for the key rather than a scale that swaps on every chord.
+ * So it is two pages now, and one rule holds both together: **a chord fits the
+ * key when every one of its notes is in the key's note set.** In key is the
+ * key's own chords at four readings — triads, sevenths, the colours that fit,
+ * and every degree as a power chord. All chords is the library: twelve roots,
+ * every quality under each, and a switch to hide the ones that do not fit
+ * rather than a page that pretends they are not there.
+ *
+ * Both pages tap through to the same "every way to play it" and the same Pin,
+ * so a grip you found by browsing can go to the corner of the playing screen
+ * exactly like one you found in the key.
+ *
+ * Nothing here moves on its own, and changing page or flavour does NOT animate
+ * the cards: a cheat sheet that reshuffles under your eyes is the thing A8
+ * removed, and putting it back with a nicer curve would still be putting it
+ * back.
  */
 export function ChordSheet({
   jam,
@@ -96,10 +139,17 @@ export function ChordSheet({
   onExpand,
   shapeIndex,
   onShapeIndex,
-  sevenths,
-  onSevenths,
+  page,
+  onPage,
+  flavour,
+  onFlavour,
+  root,
+  onRoot,
+  onlyInKey,
+  onOnlyInKey,
   fretboardOpen,
   onFretboard,
+  motion,
 }: ChordSheetProps) {
   const { t } = useTranslation();
 
@@ -111,20 +161,89 @@ export function ChordSheet({
    * The one you tapped; or, with "Follow the jam" on, the one the band is
    * playing. Following is a mode you chose, so it wins over a tap the moment
    * it is on — which is exactly what "follow" means.
+   *
+   * On the browser page it never wins: you went there to look something up,
+   * and a section that jumped back to the jam's chord every bar would make
+   * looking anything up impossible. The switch is not even shown there.
    */
-  const subject = follows ? (current ?? expanded) : expanded;
+  const subject = page === "key" && follows ? (current ?? expanded) : expanded;
 
-  const chords = useMemo(
-    () =>
-      sevenths
-        ? seventhsInKey(playedKey.root, playedKey.mode)
-        : chordsInKey(playedKey.root, playedKey.mode),
-    [sevenths, playedKey.root, playedKey.mode],
+  /** The root the browser is on: the one you picked, else the key's own. */
+  const browseRoot = root ?? playedKey.root;
+
+  /** The key's own chords at the chosen reading. */
+  const inKey = useMemo(
+    () => chordsAtFlavour(playedKey.root, playedKey.mode, flavour),
+    [playedKey.root, playedKey.mode, flavour],
   );
 
+  /**
+   * The degree each of the key's roots belongs to — "V" over the group that
+   * holds Gsus4, Gsus2 and G9.
+   *
+   * Taken from the key's own chord list rather than parsed back out of the
+   * colours' labels: the degree of a root is a fact about the key, and the
+   * label on a colour chord is a rendering of it.
+   */
+  const degrees = useMemo(() => {
+    const byRoot = new Map<PitchClass, string>();
+    for (const chord of chordsInKey(playedKey.root, playedKey.mode)) {
+      if (!byRoot.has(chord.root)) byRoot.set(chord.root, chord.degree);
+    }
+    return byRoot;
+  }, [playedKey.root, playedKey.mode]);
+
+  /** The colours, gathered under the degree they belong to, in degree order. */
+  const colourGroups = useMemo(() => {
+    if (flavour !== "colours") return [];
+    const groups: { root: PitchClass; degree: string; chords: DiatonicChord[] }[] = [];
+    for (const chord of inKey) {
+      const last = groups[groups.length - 1];
+      if (last && last.root === chord.root) last.chords.push(chord);
+      else {
+        groups.push({
+          root: chord.root,
+          degree: degrees.get(chord.root) ?? chord.degree,
+          chords: [chord],
+        });
+      }
+    }
+    return groups;
+  }, [flavour, inKey, degrees]);
+
+  /** The twelve roots as this key spells them, and which of them it owns. */
+  const roots = useMemo(() => rootNames(playedKey), [playedKey]);
+  const keyRoots = useMemo(
+    () => new Set(chordsInKey(playedKey.root, playedKey.mode).map((c) => c.root)),
+    [playedKey.root, playedKey.mode],
+  );
+
+  /** The browser's three drawers for the chosen root, hidden ones dropped. */
+  const families = useMemo(() => {
+    const out: { family: ChordFamily; chords: { chord: Chord; fits: boolean }[] }[] = [];
+    for (const family of CHORD_FAMILIES) {
+      const chords = qualitiesInFamily(family)
+        .map((quality) => {
+          const chord: Chord = { root: browseRoot, quality };
+          return { chord, fits: fitsKey(chord, playedKey.root, playedKey.mode) };
+        })
+        // A group whose every card is hidden loses its heading too: a label
+        // over nothing is a promise the page does not keep.
+        .filter((entry) => !onlyInKey || entry.fits);
+      if (chords.length) out.push({ family, chords });
+    }
+    return out;
+  }, [browseRoot, playedKey.root, playedKey.mode, onlyInKey]);
+
+  /** What the shapes section is about while it folds away (A11). */
+  const shownSubject = useLastPresent(subject);
+
   const shapes = useMemo(
-    () => (instrument && subject ? shapesFor(subject.root, subject.quality, { instrument }) : []),
-    [instrument, subject],
+    () =>
+      instrument && shownSubject
+        ? shapesFor(shownSubject.root, shownSubject.quality, { instrument })
+        : [],
+    [instrument, shownSubject],
   );
 
   const picked = shapes.length
@@ -155,140 +274,247 @@ export function ChordSheet({
     ? { startFret: boxStart(scale), highlight: { pitchClasses: scale.pitchClasses, rootPitchClass: scale.root } }
     : null;
 
+  /** One card. The same card on both pages, which is why Pin works on both. */
+  const card = (
+    chord: Chord,
+    key: string,
+    options: { degree?: string; inKeyMark?: boolean } = {},
+  ) => {
+    const shape = instrument ? basicShape(shapesFor(chord.root, chord.quality, { instrument })) : null;
+    const name = chordName(chord, playedKey);
+    const on = !!subject && subject.root === chord.root && subject.quality === chord.quality;
+    return (
+      <button
+        key={key}
+        type="button"
+        className={`jam-chord-card${on ? " active" : ""}`}
+        aria-pressed={on}
+        aria-label={name}
+        onClick={() => {
+          onExpand(on ? null : chord);
+          onShapeIndex(0);
+        }}
+      >
+        {options.inKeyMark && (
+          <span
+            className="jam-chord-mark"
+            role="img"
+            aria-label={t("jam.chords.inKeyMark")}
+          />
+        )}
+        {shape ? (
+          <ChordDiagram shape={shape} size="sm" selected={on} label={name} />
+        ) : (
+          <span className="jam-chord-card-name">{name}</span>
+        )}
+        {options.degree && <span className="jam-chord-card-degree">{options.degree}</span>}
+      </button>
+    );
+  };
+
   return (
     <JamSheet
       kind="chords"
       title={t("jam.chords.inKey", { key: keyLabel(playedKey, t) })}
-      subtitle={t("jam.chords.sheetLead")}
+      subtitle={page === "all" ? t("jam.chords.allLead") : t("jam.chords.sheetLead")}
       onClose={onClose}
+      motion={motion}
     >
-      <div className="jam-chord-grid" role="group" aria-label={t("jam.chords.label")}>
-        {chords.map((chord) => {
-          const shape = instrument
-            ? basicShape(shapesFor(chord.root, chord.quality, { instrument }))
-            : null;
-          const name = chordName({ root: chord.root, quality: chord.quality }, playedKey);
-          const on =
-            !!subject && subject.root === chord.root && subject.quality === chord.quality;
-          return (
-            <button
-              key={`${chord.degree}-${chord.root}`}
-              type="button"
-              className={`jam-chord-card${on ? " active" : ""}`}
-              aria-pressed={on}
-              aria-label={name}
-              onClick={() => {
-                onExpand(on ? null : { root: chord.root, quality: chord.quality });
-                onShapeIndex(0);
-              }}
-            >
-              {shape ? (
-                <ChordDiagram shape={shape} size="sm" selected={on} label={name} />
-              ) : (
-                <span className="jam-chord-card-name">{name}</span>
+      {/* Two pages, one sheet. The control sits under the header rather than
+          in the header because the title says which KEY you are in, and that
+          is true of both pages. */}
+      <Segmented
+        label={t("jam.chords.pageLabel")}
+        labelHidden
+        value={page}
+        options={CHORD_PAGES.map((id) => ({ id, label: t(`jam.chords.page${cap(id)}`) }))}
+        onChange={onPage}
+      />
+
+      {page === "key" ? (
+        <>
+          <Segmented
+            label={t("jam.chords.flavourLabel")}
+            labelHidden
+            value={flavour}
+            options={CHORD_FLAVOURS.map((id) => ({ id, label: t(`jam.chords.${id}`) }))}
+            onChange={onFlavour}
+          />
+
+          {flavour === "colours" ? (
+            <div className="jam-chord-degrees">
+              {colourGroups.map((group) => (
+                <section
+                  key={group.root}
+                  className="jam-chord-degree motion-arrives"
+                  aria-label={group.degree}
+                >
+                  <span className="jam-chord-degree-label">{group.degree}</span>
+                  <div className="jam-chord-grid">
+                    {group.chords.map((chord) =>
+                      card(
+                        { root: chord.root, quality: chord.quality },
+                        `${chord.degree}-${chord.root}`,
+                      ),
+                    )}
+                  </div>
+                </section>
+              ))}
+            </div>
+          ) : (
+            <div className="jam-chord-grid" role="group" aria-label={t("jam.chords.label")}>
+              {inKey.map((chord) =>
+                card({ root: chord.root, quality: chord.quality }, `${chord.degree}-${chord.root}`, {
+                  degree: chord.degree,
+                }),
               )}
-              <span className="jam-chord-card-degree">{chord.degree}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="jam-chord-switches">
-        <div
-          className="accent-control jam-segmented"
-          role="group"
-          aria-label={t("jam.chords.sizeLabel")}
-        >
-          <div className="accent-options">
-            <button
-              type="button"
-              className={`accent-option${sevenths ? "" : " active"}`}
-              aria-pressed={!sevenths}
-              onClick={() => onSevenths(false)}
-            >
-              {t("jam.chords.triads")}
-            </button>
-            <button
-              type="button"
-              className={`accent-option${sevenths ? " active" : ""}`}
-              aria-pressed={sevenths}
-              onClick={() => onSevenths(true)}
-            >
-              {t("jam.chords.sevenths")}
-            </button>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          role="switch"
-          aria-checked={follows}
-          className={`transport-switch jam-switch ${follows ? "on" : ""}`}
-          title={t("jam.chords.followHint")}
-          onClick={() => onEdit({ shapesFollow: !follows })}
-        >
-          <span className="transport-switch-track" aria-hidden="true" />
-          {t("jam.chords.follow")}
-        </button>
-      </div>
-
-      {subject && instrument && shapes.length > 0 && (
-        <section className="jam-chord-ways" aria-label={t("jam.chords.everyWay", {
-          chord: chordName(subject, playedKey),
-        })}>
-          <div className="jam-sheet-group-head">
-            <span className="stage-label">
-              {t("jam.chords.everyWay", { chord: chordName(subject, playedKey) })}
-            </span>
-            <span className="jam-sheet-lead">{t("jam.chords.lowToHigh")}</span>
-            <button
-              type="button"
-              className={`jam-link${isPinned ? " active" : ""}`}
-              aria-pressed={isPinned}
-              onClick={() =>
-                onEdit({
-                  pinnedShape: isPinned
-                    ? null
-                    : picked
-                      ? { root: picked.root, quality: picked.quality, index: shapes.indexOf(picked) }
-                      : null,
-                })
-              }
-            >
-              {isPinned ? t("jam.chords.unpin") : t("jam.chords.pin")}
-            </button>
-          </div>
-          <div className="jam-chord-shapes">
-            {shapes.map((shape, index) => (
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          {/* Twelve roots, spelled the way this key spells them, from C up.
+              A keyboard you can point at rather than a row you have to read. */}
+          <div className="jam-chord-roots" role="group" aria-label={t("jam.chords.rootLabel")}>
+            {roots.map(({ pc, name }) => (
               <button
-                key={shape.id}
+                key={pc}
                 type="button"
-                className={`jam-chord-shape${index === shapeIndex ? " active" : ""}`}
-                aria-pressed={index === shapeIndex}
-                onClick={() => onShapeIndex(index)}
+                className={`jam-key${pc === browseRoot ? " active" : ""}`}
+                aria-pressed={pc === browseRoot}
+                onClick={() => onRoot(pc)}
               >
-                <ChordDiagram
-                  shape={shape}
-                  size="sm"
-                  selected={index === shapeIndex}
-                  showName={false}
-                />
-                <span className="jam-chord-shape-label">
-                  {t(`jam.chords.size${sizeKey(shape.size)}`)}
-                </span>
-                {/* Where it sits, for the shapes that have somewhere to sit.
-                    An open shape is at the nut by definition, and a label
-                    reading "open · open" says nothing twice. */}
-                {shape.position > 0 && (
-                  <span className="jam-chord-shape-fret">
-                    {t("jam.chords.fret", { fret: shape.position })}
-                  </span>
+                {name}
+                {keyRoots.has(pc) && (
+                  <span
+                    className="jam-chord-mark"
+                    role="img"
+                    aria-label={t("jam.chords.inKeyMark")}
+                  />
                 )}
               </button>
             ))}
           </div>
-        </section>
+
+          {families.length === 0 ? (
+            /* A root outside the key with the filter on. One quiet line, and
+               not an empty page pretending the chords are gone. */
+            <p className="jam-sheet-note">
+              {t("jam.chords.nothingFits", {
+                root: roots[browseRoot]?.name ?? "",
+                key: keyLabel(playedKey, t),
+              })}
+            </p>
+          ) : (
+            families.map(({ family, chords }) => (
+              <section key={family} className="jam-chord-family">
+                <span className="stage-label">{t(`jam.chords.family${cap(family)}`)}</span>
+                <div className="jam-chord-grid">
+                  {chords.map(({ chord, fits }) =>
+                    card(chord, `${family}-${chord.quality}`, { inKeyMark: fits }),
+                  )}
+                </div>
+              </section>
+            ))
+          )}
+        </>
       )}
+
+      <div className="jam-chord-switches">
+        {page === "key" ? (
+          <button
+            type="button"
+            role="switch"
+            aria-checked={follows}
+            className={`transport-switch jam-switch ${follows ? "on" : ""}`}
+            title={t("jam.chords.followHint")}
+            onClick={() => onEdit({ shapesFollow: !follows })}
+          >
+            <span className="transport-switch-track" aria-hidden="true" />
+            {t("jam.chords.follow")}
+          </button>
+        ) : (
+          <button
+            type="button"
+            role="switch"
+            aria-checked={onlyInKey}
+            className={`transport-switch jam-switch ${onlyInKey ? "on" : ""}`}
+            onClick={() => onOnlyInKey(!onlyInKey)}
+          >
+            <span className="transport-switch-track" aria-hidden="true" />
+            {t("jam.chords.onlyInKey")}
+          </button>
+        )}
+      </div>
+
+      {/* Every way to play it — the same section for both pages, so a grip
+          found in the browser pins to the playing screen exactly like one
+          found in the key. It unfolds in place rather than appearing (A11). */}
+      <Presence open={!!subject && !!instrument && shapes.length > 0}>
+        {(_state, ways) =>
+          shownSubject && (
+            <section
+              className="jam-chord-ways motion-unfold"
+              aria-label={t("jam.chords.everyWay", {
+                chord: chordName(shownSubject, playedKey),
+              })}
+              {...ways}
+            >
+              <div className="jam-sheet-group-head">
+                <span className="stage-label">
+                  {t("jam.chords.everyWay", { chord: chordName(shownSubject, playedKey) })}
+                </span>
+                <span className="jam-sheet-lead">{t("jam.chords.lowToHigh")}</span>
+                <button
+                  type="button"
+                  className={`jam-link${isPinned ? " active" : ""}`}
+                  aria-pressed={isPinned}
+                  onClick={() =>
+                    onEdit({
+                      pinnedShape: isPinned
+                        ? null
+                        : picked
+                          ? { root: picked.root, quality: picked.quality, index: shapes.indexOf(picked) }
+                          : null,
+                    })
+                  }
+                >
+                  {isPinned ? t("jam.chords.unpin") : t("jam.chords.pin")}
+                </button>
+              </div>
+              <div className="jam-chord-shapes">
+                {shapes.map((shape, index) => (
+                  <button
+                    key={shape.id}
+                    type="button"
+                    className={`jam-chord-shape${index === shapeIndex ? " active" : ""}`}
+                    aria-pressed={index === shapeIndex}
+                    onClick={() => onShapeIndex(index)}
+                  >
+                    <ChordDiagram
+                      shape={shape}
+                      size="sm"
+                      selected={index === shapeIndex}
+                      showName={false}
+                    />
+                    <span className="jam-chord-shape-label">
+                      {t(`jam.chords.size${sizeKey(shape.size)}`)}
+                    </span>
+                    {/* Where it sits, for the shapes that have somewhere to sit.
+                        An open shape is at the nut by definition, and a label
+                        reading "open · open" says nothing twice. */}
+                    {shape.position > 0 && (
+                      <span className="jam-chord-shape-fret">
+                        {t("jam.chords.fret", { fret: shape.position })}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </section>
+          )
+        }
+      </Presence>
 
       {instrument && (
         <section className="jam-chord-neck">
@@ -342,6 +568,11 @@ function boxStart(scale: ScaleSuggestion): number {
 /** `ShapeSize` to the suffix of its locale key. */
 function sizeKey(size: PlacedShape["size"]): string {
   return size.charAt(0).toUpperCase() + size.slice(1);
+}
+
+/** An id to the tail of its locale key: `all` → `All`, `basic` → `Basic`. */
+function cap(id: string): string {
+  return id.charAt(0).toUpperCase() + id.slice(1);
 }
 
 /** "A blues", "D minor", "G major" — the key, in the reader's language. */

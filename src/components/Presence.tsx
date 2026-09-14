@@ -46,6 +46,8 @@ export interface MotionInputs {
   themeId?: string;
   disabled?: boolean;
   level?: string;
+  /** The chosen animation style, which some themes' keyframes key off. */
+  animStyle?: string;
 }
 
 const MotionContext = createContext<MotionInputs>({});
@@ -86,7 +88,24 @@ export interface MotionProps {
   "data-state": PresenceState;
   "data-theme-transition"?: string;
   "data-animation-level"?: string;
+  "data-animation-style"?: string;
   onAnimationEnd: AnimationEventHandler<HTMLElement>;
+}
+
+/**
+ * The last value that was really there.
+ *
+ * A surface that is leaving still has to draw something, and what it draws is
+ * whatever it was showing when it was told to go. Without this, closing the
+ * groove editor with Reset — which clears the groove and shuts the drawer in
+ * one move — would leave the drawer sinking with nothing inside it.
+ */
+export function useLastPresent<T>(value: T | null | undefined): T | null {
+  const last = useRef<T | null>(value ?? null);
+  useEffect(() => {
+    if (value !== null && value !== undefined) last.current = value;
+  }, [value]);
+  return value ?? last.current;
 }
 
 interface PresenceProps extends MotionInputs {
@@ -134,6 +153,7 @@ export function Presence({
   themeId,
   disabled,
   level,
+  animStyle,
   onExited,
   enterMs = MOTION_ENTER_MS,
   exitMs = MOTION_EXIT_MS,
@@ -143,6 +163,7 @@ export function Presence({
   const theme = themeId ?? inherited.themeId;
   const off = disabled ?? inherited.disabled;
   const animationLevel = level ?? inherited.level;
+  const style = animStyle ?? inherited.animStyle;
 
   // One definition of "may I animate?", live, so flipping the OS setting takes
   // effect without a reload. `off` is folded in as the "off" level the hook
@@ -225,6 +246,7 @@ export function Presence({
     ...(!off && animationLevel && animationLevel !== "off"
       ? { "data-animation-level": animationLevel }
       : {}),
+    ...(!off && style ? { "data-animation-style": style } : {}),
     onAnimationEnd: handleAnimationEnd,
   };
 

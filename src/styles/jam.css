@@ -1433,6 +1433,28 @@
    the transport" is a fact about the WINDOW, and the stage it would otherwise
    live in is a scrolling column capped at 1176px. The header is 56px and the
    transport 76px, both declared in shell.css and both `flex-shrink: 0`. */
+
+:root {
+  --jam-sheet-width: 640px;
+}
+
+/* ── Beside the stage, on a wide window (A12) ──────────────────────────────
+   The owner: "maybe if the window is wide enough the drawer should push the
+   stage content to the left instead of rendering on top, that way it'd be
+   easier to do everything at the same time." Above 1400px of content region
+   the sheet stops being something in front of the jam and becomes a second
+   column of it: the timeline keeps moving, the band row is still yours to
+   press, and nothing is dimmed because nothing is behind anything.
+
+   `JamSheet` writes both classes while it is on the screen; the stage is the
+   view wrapper, and only the wrapper moves — the context bar above the sheet
+   and the transport below it span the region as they always did.
+
+   The stage's width is NOT animated. The sheet slides; a layout that reflowed
+   over a quarter of a second beside it would read as the app struggling. */
+.main-content.has-jam-sheet.jam-sheet-wide > .view-transition-wrapper {
+  padding-right: var(--jam-sheet-width);
+}
 .jam-sheet {
   position: absolute;
   top: 56px;
@@ -1441,7 +1463,7 @@
   z-index: 30;
   display: flex;
   flex-direction: column;
-  width: 640px;
+  width: var(--jam-sheet-width);
   max-width: 100%;
   border-left: 1px solid var(--border);
   background: var(--bg-secondary);
@@ -1933,6 +1955,66 @@
 
 .jam-chord-card-degree {
   font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+}
+
+/* ── The cheat sheet's two pages (A10) ─────────────────────────────────────
+   The owner: "the user should be able to see ALL chords for all keys, or
+   filter by the chords the user can play in the key of the current jam."
+   Below is the second page and the mark that answers the filter. */
+
+/* Twelve roots, spelled the way the key spells them. The same pill as the
+   chord picker's root row, because it is the same gesture — point at a
+   letter — and a second pill an eyelash different would read as a second
+   idea. `relative` so the in-key dot has a corner to sit in. */
+.jam-chord-roots {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.jam-chord-roots .jam-key {
+  position: relative;
+}
+
+/* "In key". A dot rather than a word, because it is on twelve pills and
+   fifteen cards at once and a word on each would be the loudest thing on the
+   page. Its meaning is in its `aria-label`, so it is a dot to the eye and a
+   sentence to a screen reader. */
+.jam-chord-mark {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.jam-chord-card {
+  position: relative;
+}
+
+/* A drawer of the browser — Basic, Sevenths, Colours. */
+.jam-chord-family,
+.jam-chord-degree {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.jam-chord-degrees {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* The degree over its colours: "V" above Gsus4, Gsus2 and G9. Slim, because
+   it is a heading for three cards and not a section of the sheet. */
+.jam-chord-degree-label {
+  font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   color: var(--text-faint);
