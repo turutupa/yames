@@ -1,6 +1,6 @@
 /**
- * The four hints whose trigger lives in the app shell — `drill-first-open`,
- * `preset-suggest`, `widget-discover` and `midi-plugged`.
+ * The seven hints whose trigger lives in the app shell — `drill-first-open`,
+ * `preset-suggest`, `widget-discover`, `midi-plugged` and the three Jam ones.
  *
  * MainWindow already holds every input they need (the active tab, the
  * metronome state, the MIDI hook), so gathering them here keeps MainWindow's
@@ -21,6 +21,7 @@ import {
   recordSetup,
   setupKey,
   shouldHintDrillFirstOpen,
+  shouldHintJamArrangement,
   shouldHintMidiPlugged,
   shouldHintWidgetDiscover,
   shouldSuggestPreset,
@@ -58,17 +59,20 @@ export type UseAppHintsArgs = {
   /** Opens Settings → Hotkeys (`midi-plugged`). */
   onOpenHotkeys: () => void;
   /**
-   * The three Jam captions, as the moments they apply (A7).
+   * The three Jam hints, as the moments they apply (JAM_KILLER A4).
    *
-   * `jamLoaded` is a band on the screen — which is when "everything is
-   * synthesised" is news. `jamSetupOpen` is the setup sheet, whose band block
-   * is the one place the lineup rule can be read. `jamTakesOn` is recording
-   * being switched on, which is the only moment the promise about the disk
-   * matters.
+   * `jamLoaded` is a band on the screen, which is when the two doors in the
+   * context bar are worth naming. A sheet open while the band PLAYS is when
+   * "everything here changes at the next bar" is news — open while stopped it
+   * is a sentence about nothing. And `jamChorus` is the band getting on with
+   * the tune, which is when it is worth saying that it is doing that on
+   * purpose and where the switch is.
    */
   jamLoaded?: boolean;
   jamSetupOpen?: boolean;
-  jamTakesOn?: boolean;
+  jamChordsOpen?: boolean;
+  /** The chorus the form is on, or null while the band is not playing. */
+  jamChorus?: number | null;
 };
 
 export function useAppHints(args: UseAppHintsArgs): ActiveAppHint | null {
@@ -97,13 +101,20 @@ export function useAppHints(args: UseAppHintsArgs): ActiveAppHint | null {
       shouldHintMidiPlugged({ devices: midiDevices, bindings: midiBindings }),
   );
 
-  // The three that used to be captions. Each fires on the Jam tab at the
-  // moment its sentence is true and not before — the takes one in particular
-  // must not appear to somebody who has never turned recording on.
+  // The three Jam hints. Each fires on the Jam tab at the moment its sentence
+  // is true and not before — and the last two need the band to be PLAYING,
+  // because both of them are about what happens while it is.
   const onJam = view === "jam" && !!args.jamLoaded;
-  const jamSynth = useFirstTimeHint("jam-synth", onJam);
-  const jamBand = useFirstTimeHint("jam-band", onJam && !!args.jamSetupOpen);
-  const jamTakes = useFirstTimeHint("jam-takes", onJam && !!args.jamTakesOn);
+  const jamPlaying = onJam && isPlaying;
+  const jamSheets = useFirstTimeHint("jam-sheets", onJam);
+  const jamLive = useFirstTimeHint(
+    "jam-live",
+    jamPlaying && (!!args.jamSetupOpen || !!args.jamChordsOpen),
+  );
+  const jamArrangement = useFirstTimeHint(
+    "jam-arrangement",
+    jamPlaying && shouldHintJamArrangement({ chorus: args.jamChorus ?? null }),
+  );
 
   if (drill.shouldShow) {
     return { id: "drill-first-open", markShown: drill.markShown };
@@ -129,12 +140,14 @@ export function useAppHints(args: UseAppHintsArgs): ActiveAppHint | null {
       markShown: midi.markShown,
     };
   }
-  // Last of the nine, and in this order: the takes promise is the one with a
-  // consequence, so it wins the session's one slot over the two that are
-  // only good to know.
-  if (jamTakes.shouldShow) return { id: "jam-takes", markShown: jamTakes.markShown };
-  if (jamBand.shouldShow) return { id: "jam-band", markShown: jamBand.markShown };
-  if (jamSynth.shouldShow) return { id: "jam-synth", markShown: jamSynth.markShown };
+  // Last of the nine, and in this order: whichever of them is about something
+  // happening RIGHT NOW wins the session's one slot, because the other two
+  // will be just as true the next time the band plays.
+  if (jamArrangement.shouldShow) {
+    return { id: "jam-arrangement", markShown: jamArrangement.markShown };
+  }
+  if (jamLive.shouldShow) return { id: "jam-live", markShown: jamLive.markShown };
+  if (jamSheets.shouldShow) return { id: "jam-sheets", markShown: jamSheets.markShown };
   return null;
 }
 

@@ -2,6 +2,9 @@
   "jam": {
     "badge": "即兴伴奏",
     "newJam": "新建即兴伴奏",
+    "jamNow": "立即即兴",
+    "jamNowLead": "按你演奏的乐器挑一支乐队，数拍带入。",
+    "jamNowName": "{{vibe}}即兴",
     "untitled": "新建即兴伴奏",
     "deleteJam": "删除即兴伴奏",
     "duplicateJam": "复制即兴伴奏",

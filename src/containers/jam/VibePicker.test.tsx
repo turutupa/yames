@@ -8,13 +8,14 @@
  * the bundle, the picked tile shows its variations, a variation applies over
  * the vibe, and "one of yours" loads a jam rather than patching this one.
  */
-import { describe, expect, it, vi, afterEach } from "vitest";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi, afterEach } from "vitest";
+import { act, render, screen, fireEvent, cleanup } from "@testing-library/react";
 import type { Vibe } from "../../jam/vibesContract";
 import { applyVibe } from "../../jam/vibesContract";
 import { STARTER_JAMS } from "../../jam/jams";
 import type { Jam } from "../../jam/types";
 import { VibePicker } from "./VibePicker";
+import type { VibePreviewMark } from "./VibePicker";
 
 // The picker reads `VIBES` from the contract module; the stub is empty until
 // the data lands, so the two below are handed in through the same door the
@@ -68,14 +69,28 @@ stub.vibes = [ROCK, BLUES];
 
 const jamOf = (overrides: Partial<Jam> = {}): Jam => ({ ...STARTER_JAMS[0], ...overrides });
 
-function draw(overrides: { jam?: Jam; jams?: Jam[] } = {}) {
+function draw(
+  overrides: { jam?: Jam; jams?: Jam[]; previewing?: VibePreviewMark | null } = {},
+) {
   const props = {
     jam: overrides.jam ?? jamOf(),
     jams: overrides.jams ?? [],
     onApply: vi.fn(),
     onLoadOwn: vi.fn(),
+    onPreview: vi.fn(),
+    onStopPreview: vi.fn(),
+    previewing: overrides.previewing ?? null,
   };
   return { ...render(<VibePicker {...props} />), props };
+}
+
+/** A mouse crossing a tile, as the DOM reports it. */
+function hover(el: HTMLElement) {
+  fireEvent.pointerEnter(el, { pointerType: "mouse" });
+}
+
+function unhover(el: HTMLElement) {
+  fireEvent.pointerLeave(el, { pointerType: "mouse" });
 }
 
 afterEach(() => {
@@ -173,5 +188,127 @@ describe("one of yours", () => {
   it("says so when you have not saved one yet", () => {
     draw({ jam: jamOf({ vibe: "rock" }) });
     expect(screen.getByText("none saved yet")).toBeInTheDocument();
+  });
+});
+
+/**
+ * Every tile plays (JAM_KILLER §2 A4).
+ *
+ * What the picker has to get right is the GESTURE, not the sound: the band is
+ * the hook's business and is tested there. Here — a rest rather than a
+ * crossing, Space that auditions instead of choosing, a tile that says it is
+ * sounding, and a variation chip that asks for itself rather than for its
+ * vibe.
+ */
+describe("the tiles that play", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const rock = () => screen.getByRole("button", { name: /Rock/ });
+
+  it("waits for the mouse to rest before it starts a band", () => {
+    const { props } = draw();
+    hover(rock());
+    // A hand crossing the grid to reach Jazz passes over three tiles it does
+    // not mean. Nothing has been asked for yet.
+    expect(props.onPreview).not.toHaveBeenCalled();
+    act(() => void vi.advanceTimersByTime(400));
+    expect(props.onPreview).toHaveBeenCalledWith("rock", undefined);
+  });
+
+  it("asks for nothing at all when the mouse moves straight on", () => {
+    const { props } = draw();
+    const tile = rock();
+    hover(tile);
+    act(() => void vi.advanceTimersByTime(120));
+    unhover(tile);
+    act(() => void vi.advanceTimersByTime(1000));
+    expect(props.onPreview).not.toHaveBeenCalled();
+    // Moving off is still a stop: a band left playing because the pointer
+    // left before the timer did would be the worst of both.
+    expect(props.onStopPreview).toHaveBeenCalled();
+  });
+
+  it("stops when the mouse leaves", () => {
+    const { props } = draw();
+    const tile = rock();
+    hover(tile);
+    act(() => void vi.advanceTimersByTime(400));
+    unhover(tile);
+    expect(props.onStopPreview).toHaveBeenCalled();
+  });
+
+  it("holds, rather than hovers, on a screen with no hover", () => {
+    const { props } = draw();
+    const tile = rock();
+    fireEvent.pointerDown(tile, { pointerType: "touch" });
+    act(() => void vi.advanceTimersByTime(300));
+    // A tap is not a hold: at 300ms this is still somebody choosing the tile.
+    expect(props.onPreview).not.toHaveBeenCalled();
+    act(() => void vi.advanceTimersByTime(300));
+    expect(props.onPreview).toHaveBeenCalledWith("rock", undefined);
+    fireEvent.pointerUp(tile, { pointerType: "touch" });
+    expect(props.onStopPreview).toHaveBeenCalled();
+  });
+
+  it("auditions on Space and chooses on click, never the other way round", () => {
+    const { props } = draw();
+    const tile = rock();
+    fireEvent.keyDown(tile, { key: " " });
+    expect(props.onPreview).toHaveBeenCalledWith("rock", undefined);
+    // Space must not also be the keystroke that picks the vibe.
+    expect(props.onApply).not.toHaveBeenCalled();
+
+    fireEvent.click(tile);
+    expect(props.onApply).toHaveBeenCalled();
+  });
+
+  it("marks the tile the band is on, and only that one", () => {
+    const { container } = draw({ previewing: { vibeId: "rock", sounding: true } });
+    const marks = container.querySelectorAll(".jam-vibe-playing");
+    expect(marks).toHaveLength(1);
+    expect(rock()).toHaveClass("jam-vibe-previewing");
+    // Sounding, so the mark is moving rather than waiting.
+    expect(marks[0].hasAttribute("data-armed")).toBe(false);
+  });
+
+  it("says 'coming' rather than 'playing' while it waits for the bar line", () => {
+    const { container } = draw({ previewing: { vibeId: "rock", sounding: false } });
+    expect(container.querySelector(".jam-vibe-playing")).toHaveAttribute("data-armed");
+  });
+
+  it("asks for the variation, not for its vibe, and marks the chip", () => {
+    const { container, props } = draw({
+      jam: jamOf({ vibe: "rock" }),
+      previewing: { vibeId: "rock", variationId: "punk", sounding: true },
+    });
+    // The tile above is NOT the thing playing: the chip is.
+    expect(rock()).not.toHaveClass("jam-vibe-previewing");
+    expect(screen.getByRole("button", { name: /Punk/ })).toHaveClass("jam-vibe-previewing");
+    expect(container.querySelectorAll(".jam-vibe-playing")).toHaveLength(1);
+
+    fireEvent.keyDown(screen.getByRole("button", { name: /Punk/ }), { key: " " });
+    expect(props.onPreview).toHaveBeenCalledWith("rock", "punk");
+  });
+
+  it("is tiles and nothing else on a build that cannot play them", () => {
+    const props = {
+      jam: jamOf(),
+      jams: [],
+      onApply: vi.fn(),
+      onLoadOwn: vi.fn(),
+    };
+    const { container } = render(<VibePicker {...props} />);
+    hover(screen.getByRole("button", { name: /Rock/ }));
+    act(() => void vi.advanceTimersByTime(1000));
+    expect(container.querySelector(".jam-vibe-playing")).toBeNull();
+    // And choosing one still works, which is the thing that must never break.
+    fireEvent.click(screen.getByRole("button", { name: /Rock/ }));
+    expect(props.onApply).toHaveBeenCalled();
   });
 });

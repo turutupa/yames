@@ -154,14 +154,14 @@
         "body": "Un appareil MIDI est connecté mais rien n'est assigné. Assigner une pédale à Lecture/Arrêt ?",
         "action": "Ouvrir les raccourcis"
       },
-      "jamSynth": {
-        "body": "Tout le groupe est synthétisé : rien à télécharger, rien à installer."
+      "jamSheets": {
+        "body": "Réglages change le groupe ; Accords est ton aide-mémoire."
       },
-      "jamBand": {
-        "body": "Le groupe ne joue jamais ton instrument. La basse et les claviers sont à un appui."
+      "jamLive": {
+        "body": "Tout ici prend effet à la mesure suivante."
       },
-      "jamTakes": {
-        "body": "Les prises restent sur cette machine. Rien n'est envoyé."
+      "jamArrangement": {
+        "body": "Le groupe monte et redescend tout seul — Boucle, dans Réglages, désactive ça."
       }
     },
     "tour": {

@@ -33,6 +33,7 @@ import { KitPicker } from "./KitPicker";
 import { Segmented } from "./Segmented";
 import { TakesSection } from "./TakesSection";
 import { VibePicker } from "./VibePicker";
+import type { VibePreviewMark } from "./VibePicker";
 
 const FEELS: JamFeel[] = ["straight", "shuffle", "swing"];
 const INTENSITIES: JamIntensity[] = ["soft", "normal", "loud"];
@@ -100,6 +101,10 @@ interface JamSetupSheetProps {
   /** Two bars of the current groove on a kit, through the engine (B7). */
   onPreviewKit: (kit: string) => void;
   previewingKit: string | null;
+  /** Two bars of a whole vibe, through the same door (JAM_KILLER A4). */
+  onPreviewVibe?: ((vibeId: string, variationId?: string) => void) | null;
+  onStopPreview?: (() => void) | null;
+  previewingVibe?: VibePreviewMark | null;
   /** True while the engine is refusing a folder of your own samples (B3). */
   customKitRefused?: boolean;
   /** The groove editor's door, which lives on this sheet now. */
@@ -152,6 +157,9 @@ export function JamSetupSheet({
   lineup,
   onPreviewKit,
   previewingKit,
+  onPreviewVibe = null,
+  onStopPreview = null,
+  previewingVibe = null,
   customKitRefused = false,
   onOpenEditor,
   editingChords,
@@ -216,7 +224,15 @@ export function JamSetupSheet({
   return (
     <>
       <JamSheetGroup label={t("jam.vibe.label")} lead={t("jam.vibe.lead")}>
-        <VibePicker jam={jam} jams={jams} onApply={applyPatch} onLoadOwn={onLoadJam} />
+        <VibePicker
+          jam={jam}
+          jams={jams}
+          onApply={applyPatch}
+          onLoadOwn={onLoadJam}
+          onPreview={onPreviewVibe}
+          onStopPreview={onStopPreview}
+          previewing={previewingVibe}
+        />
       </JamSheetGroup>
 
       <JamSheetGroup

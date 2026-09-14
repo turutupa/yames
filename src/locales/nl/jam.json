@@ -2,6 +2,9 @@
   "jam": {
     "badge": "JAM",
     "newJam": "Nieuwe jam",
+    "jamNow": "Nu jammen",
+    "jamNowLead": "Kiest een band bij jouw instrument en telt hem in.",
+    "jamNowName": "{{vibe}}-jam",
     "untitled": "Nieuwe jam",
     "deleteJam": "Jam verwijderen",
     "duplicateJam": "Jam dupliceren",

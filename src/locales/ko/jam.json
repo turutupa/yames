@@ -2,6 +2,9 @@
   "jam": {
     "badge": "잼",
     "newJam": "새 잼",
+    "jamNow": "지금 잼",
+    "jamNowLead": "당신의 악기에 맞는 밴드를 골라 카운트를 세어 줍니다.",
+    "jamNowName": "{{vibe}} 잼",
     "untitled": "새 잼",
     "deleteJam": "잼 삭제",
     "duplicateJam": "잼 복제",

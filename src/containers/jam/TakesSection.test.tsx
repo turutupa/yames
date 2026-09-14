@@ -70,9 +70,9 @@ describe("the list", () => {
   });
 
   it("does not print the local-only promise under every take", () => {
-    // It is said once, as a first-run hint at the moment recording is
-    // switched on (JAM_UX_DECISIONS A7). The same words, at the one moment
-    // they are news rather than furniture — see `onboarding.hints.jamTakes`.
+    // It is said once, by the dialog that catches you the first time
+    // recording is switched on (`jam.takes.introPrivate`). The same words, at
+    // the one moment they are news rather than furniture.
     draw();
     expect(screen.queryByText(/Nothing is uploaded/i)).toBeNull();
   });

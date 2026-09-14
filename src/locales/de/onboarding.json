@@ -154,14 +154,14 @@
         "body": "Ein MIDI-Gerät ist verbunden, aber nichts ist zugewiesen. Pedal auf Start/Stopp legen?",
         "action": "Tastenkürzel öffnen"
       },
-      "jamSynth": {
-        "body": "Die ganze Band ist synthetisiert — nichts herunterzuladen, nichts zu installieren."
+      "jamSheets": {
+        "body": "Einrichten ändert die Band; Akkorde ist dein Spickzettel."
       },
-      "jamBand": {
-        "body": "Die Band spielt nie dein Instrument. Bass und Keys sind je ein Tipp entfernt."
+      "jamLive": {
+        "body": "Alles hier greift ab dem nächsten Takt."
       },
-      "jamTakes": {
-        "body": "Aufnahmen bleiben auf diesem Rechner. Nichts wird hochgeladen."
+      "jamArrangement": {
+        "body": "Die Band steigert sich und nimmt sich zurück, ganz von selbst — Schleife unter Einrichten schaltet das ab."
       }
     },
     "tour": {

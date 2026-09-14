@@ -154,14 +154,14 @@
         "body": "C'è un dispositivo MIDI collegato ma nulla è assegnato. Assegni un pedale a Play/Stop?",
         "action": "Apri scorciatoie"
       },
-      "jamSynth": {
-        "body": "Tutta la band è sintetizzata: niente da scaricare, niente da installare."
+      "jamSheets": {
+        "body": "Impostazioni cambia la band; Accordi è il tuo bigliettino."
       },
-      "jamBand": {
-        "body": "La band non suona mai il tuo strumento. Basso e tastiere sono a un tocco."
+      "jamLive": {
+        "body": "Tutto qui cambia alla battuta successiva."
       },
-      "jamTakes": {
-        "body": "Le registrazioni restano su questo computer. Non viene caricato niente."
+      "jamArrangement": {
+        "body": "La band cresce e si ferma da sola — Loop, in Impostazioni, lo disattiva."
       }
     },
     "tour": {

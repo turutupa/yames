@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  armCountIn,
   listJams,
   saveJams,
   setBpm,
@@ -11,6 +12,7 @@ import {
 import {
   GROOVES,
   STARTER_JAMS,
+  applyVibe,
   carryCountIn,
   compileJam,
   countInCue,
@@ -35,6 +37,7 @@ import {
   tempoAfterChorus,
   tradeCue,
   upsertJam,
+  vibeForInstrument,
 } from "../../../jam";
 import type { BarRange } from "../../../jam";
 import type { Chord, PitchClass } from "../../../jam/harmony";
@@ -358,6 +361,40 @@ export function useJamSession({
    * the fifth avoids that.
    */
   const [previewKit, setPreviewKit] = useState<string | null>(null);
+
+  // -------------------------------------------------------------------------
+  // W32 — the vibe preview (JAM_KILLER §2 A4).
+  //
+  // The same audition, one step up: a tile you hover plays two bars of THAT
+  // band, on the real engine, and hands the jam straight back. It rides the
+  // kit preview's mechanism rather than standing beside it — one overlay over
+  // the record, one bar counter, one transport rule — because a second answer
+  // to "what does this sound like" would be the one that was wrong.
+  // -------------------------------------------------------------------------
+
+  /** A vibe being auditioned: which tile, and what it lays over the record. */
+  type VibePreview = {
+    vibeId: string;
+    variationId?: string;
+    patch: Partial<Omit<Jam, "id" | "createdAt">>;
+  };
+
+  /** The vibe sounding right now, or null. */
+  const [previewVibeState, setPreviewVibeState] = useState<VibePreview | null>(null);
+  /**
+   * A vibe waiting for the bar line, because the band is already playing.
+   *
+   * Hovering a tile mid-take must not change the drummer under the player's
+   * hands halfway through a bar. So the tile arms, the bar turns, and the
+   * preview starts where every other change to a playing jam starts.
+   */
+  const [armedVibe, setArmedVibe] = useState<VibePreview | null>(null);
+  /** The bar the arming happened in, so the bar it happened in is not it. */
+  const armedAtRef = useRef<string | null>(null);
+  /** `chorus:bar` as of this render, for the arming to compare against. */
+  const barKeyRef = useRef<string | null>(null);
+  barKeyRef.current = currentBeat ? `${currentBeat.chorus}:${currentBeat.formBar}` : null;
+
   /**
    * The engine's standing refusal, if it has one.
    *
@@ -475,9 +512,25 @@ export function useJamSession({
    * with it — auditioning the built-in Raw while a folder of your own samples
    * is selected has to actually play Raw.
    */
+  /**
+   * What the audition lays over the record: a kit, or a whole vibe (W32).
+   *
+   * One overlay rather than two, so there is exactly one answer to "is
+   * something being previewed" and the two can never both be half on.
+   */
+  const previewOverlay = useMemo<Partial<Jam> | null>(
+    () =>
+      previewVibeState
+        ? previewVibeState.patch
+        : previewKit
+          ? { kit: previewKit, customKit: null }
+          : null,
+    [previewVibeState, previewKit],
+  );
+
   const engineJam = useMemo(
-    () => (jam && previewKit ? { ...jam, kit: previewKit, customKit: null } : jam),
-    [jam, previewKit],
+    () => (jam && previewOverlay ? { ...jam, ...previewOverlay } : jam),
+    [jam, previewOverlay],
   );
   const engineJamRef = useRef<Jam | null>(engineJam);
   engineJamRef.current = engineJam;
@@ -514,6 +567,11 @@ export function useJamSession({
         jam.keysVoice,
         jam.customKit,
         previewKit,
+        // The fourth pass (W32). A vibe being auditioned is a groove, a kit,
+        // a feel, a loudness and two voices at once — none of which would
+        // re-send on its own, because none of them is on the record.
+        previewVibeState?.vibeId ?? null,
+        previewVibeState?.variationId ?? null,
       ])
     : null;
 
@@ -1065,6 +1123,84 @@ export function useJamSession({
     return created;
   }, [t, jam, jams, commit, loadJam, instrument]);
 
+  // -------------------------------------------------------------------------
+  // W32 — Jam now (JAM_KILLER §2 A4).
+  // -------------------------------------------------------------------------
+
+  /**
+   * The jam whose transport is waiting to be started, once it is on the
+   * engine.
+   *
+   * A jam has to reach the engine before the band can play it, and the push
+   * that gets it there happens in an effect. Pressing play inside `jamNow`
+   * itself would send the transport out ahead of the table and start the
+   * plain click over a jam that arrives a moment later. So `jamNow` names the
+   * jam here and the effect below presses play — it is declared after the
+   * push effect, so it runs after it on the same commit.
+   */
+  const startWhenLoadedRef = useRef<string | null>(null);
+
+  /**
+   * One tap, and a band is playing (A4).
+   *
+   * "Thirty seconds to playing" was the mode's principle and it still meant
+   * a sheet, a vibe, a form and a press of play. This is the whole of it: the
+   * vibe your instrument wants, a jam named for it, loaded, counted in.
+   *
+   * The setup sheet stays shut, deliberately — `newJam` opens it because a
+   * new jam is a form nobody has chosen yet, and the point of this button is
+   * that nobody has to choose anything. What is playing is said in the
+   * context bar's vibe chip, which is where the way back in already lives.
+   *
+   * Press it twice and you get the same jam twice. A button that made a
+   * fourth "Rock jam" every time somebody pressed it would fill the library
+   * with the same jam, and the library is the one thing in this mode a player
+   * actually owns — so a jam already made this way is loaded rather than
+   * copied. "Made this way" is its vibe and its name together, which is what
+   * this button writes and what nothing else writes by accident.
+   */
+  const jamNow = useCallback(() => {
+    const vibeId = vibeForInstrument(instrument);
+    const name = t("jam.jamNowName", {
+      vibe: t(`jam.vibe.${vibeId}`, { defaultValue: vibeId }),
+    });
+    // Newest first: if there are somehow two, the one you last played.
+    const existing = [...jams].reverse().find((j) => j.vibe === vibeId && j.name === name);
+    const target =
+      existing ??
+      applyVibe(createJam(name, { band: startingBand(instrument) }), vibeId);
+    if (!existing) commit([...jams, target]);
+    loadJam(target);
+    // The point is to be playing, not to be setting up.
+    setSetupOpen(false);
+    startWhenLoadedRef.current = target.id;
+    return target;
+  }, [instrument, t, jams, commit, loadJam]);
+
+  /**
+   * The band comes in, once the jam it is playing is on its way to the engine.
+   *
+   * With the jam's own count-in, exactly as the transport button does it: the
+   * engine counts the beats out and then begins, so the band and the player
+   * start together rather than the band starting and the player catching up.
+   *
+   * The count is also what gives the table room to land. `pushJam` sends the
+   * meter and then the table, each awaited, so the table is a handful of
+   * microtasks behind this press — and a jam made by `jamNow` always carries
+   * a bar of count (`createJam` gives it the groove's own), which is several
+   * orders of magnitude more room than it needs.
+   */
+  useEffect(() => {
+    const waiting = startWhenLoadedRef.current;
+    if (!waiting || view !== "jam" || !jam || jam.id !== waiting) return;
+    startWhenLoadedRef.current = null;
+    // Pressed while something was already running: it is already playing the
+    // jam that was just loaded, and a second press would stop it.
+    if (isPlaying) return;
+    if (jam.countIn > 0) void armCountIn(jam.countIn).catch(() => {});
+    void togglePlayback().catch(() => {});
+  }, [view, jam, isPlaying]);
+
   const saveActiveJam = useCallback(() => {
     if (!jam) return;
     commit(upsertJam(jams, jam));
@@ -1202,8 +1338,12 @@ export function useJamSession({
    * transport alone; you are auditioning INTO the take, which is the better
    * way to choose a kit anyway.
    */
-  const stopKitPreview = useCallback(() => {
+  const stopPreview = useCallback(() => {
     setPreviewKit(null);
+    // W32: whatever kind of audition it was. One stop, so a vibe hovered over
+    // a kit preview cannot leave half an overlay on the record.
+    setPreviewVibeState(null);
+    setArmedVibe(null);
     previewBarsRef.current = 0;
     previewLiveRef.current = false;
     if (!previewStartedRef.current) return;
@@ -1215,6 +1355,9 @@ export function useJamSession({
     (kit: string) => {
       previewBarsRef.current = 0;
       previewLiveRef.current = false;
+      // A kit and a vibe are one overlay (W32): starting one ends the other.
+      setPreviewVibeState(null);
+      setArmedVibe(null);
       setPreviewKit((current) => {
         if (current === kit) {
           // The same button again is Stop. The transport is put back by the
@@ -1238,6 +1381,152 @@ export function useJamSession({
     [isPlaying, previewKit],
   );
 
+  // -------------------------------------------------------------------------
+  // W32 — `previewVibe` / `stopPreview`, on the mechanism above.
+  // -------------------------------------------------------------------------
+
+  /**
+   * What a vibe audition lays over the record — and, just as importantly,
+   * what it does not.
+   *
+   * A vibe bundle is HOW the band plays and WHAT it plays at once: a groove,
+   * a kit, a feel, a loudness and two voices, but also a tempo, a key and a
+   * form. The audition takes the first half and leaves the second alone, and
+   * the reason is what a two-bar audition is for. You are comparing Rock with
+   * Funk, and two clips at two different tempos in two different keys are not
+   * a comparison — they are two clips. Holding the tempo and the key still is
+   * what makes the difference you hear be the difference between the bands.
+   *
+   * The tile prints the tempo in words for the same reason: it is a promise
+   * about what picking the vibe will DO, not a description of the audition.
+   *
+   * The meter goes with the groove, because a waltz in four is not a waltz.
+   * `customGroove` and `customKit` go because both win over the bundle's own
+   * groove and kit — left on, the audition would sound like whatever was
+   * already there and look like the tile you are holding.
+   */
+  const previewPatchOf = useCallback(
+    (over: Jam, vibeId: string, variationId?: string) => {
+      const full = applyVibe(over, vibeId, variationId);
+      // An id the data does not know: `applyVibe` hands the jam straight
+      // back, and the honest audition for that is none at all.
+      if (full === over) return null;
+      return {
+        grooveId: full.grooveId,
+        customGroove: full.customGroove,
+        kit: full.kit,
+        customKit: full.customKit,
+        feel: full.feel,
+        intensity: full.intensity,
+        bassVoice: full.bassVoice,
+        keysVoice: full.keysVoice,
+        band: full.band ? { ...full.band } : undefined,
+        fills: full.fills,
+        fillEvery: full.fillEvery,
+        meter: full.meter,
+      } satisfies Partial<Omit<Jam, "id" | "createdAt">>;
+    },
+    [],
+  );
+
+  /**
+   * Two bars of a vibe, on the real engine, with the jam untouched (A4).
+   *
+   * The whole of the first minute is this: nine tiles that are nine words
+   * until you hover one, and a band the moment you do. It goes out through
+   * `engineJam` exactly as the kit audition does, so what you hear is the
+   * band the tile would give you.
+   *
+   * Stopped, it presses play with no count-in and presses stop at the end.
+   * Playing, it **arms**: the drummer under a player's hands does not change
+   * halfway through a bar, so the tile waits for the bar line, plays its two
+   * bars, and the jam's own table goes back at the bar line after. Calling it
+   * again for the tile already sounding is Stop, which is what makes the same
+   * function serve a hover, a hold and a press of Space.
+   */
+  const previewVibe = useCallback(
+    (vibeId: string, variationId?: string) => {
+      if (!jam) return;
+      const isSame = (p: VibePreview | null) =>
+        !!p && p.vibeId === vibeId && (p.variationId ?? null) === (variationId ?? null);
+      if (isSame(previewVibeState) || isSame(armedVibe)) {
+        stopPreview();
+        return;
+      }
+      const patch = previewPatchOf(jam, vibeId, variationId);
+      if (!patch) return;
+      const next: VibePreview = { vibeId, variationId, patch };
+      previewBarsRef.current = 0;
+      setPreviewKit(null);
+
+      /*
+       * Whose transport is this?
+       *
+       * `previewStartedRef` is the answer, and it has to be read rather than
+       * `isPlaying`: the press a previous audition sent is still in flight on
+       * the render after it, so a second tile hovered in that window sees a
+       * stopped transport that is about to start. Ours, either way — swap the
+       * overlay at once and press nothing.
+       */
+      const owns = previewStartedRef.current;
+      if (isPlaying && !owns) {
+        previewLiveRef.current = false;
+        setPreviewVibeState(null);
+        armedAtRef.current = barKeyRef.current;
+        setArmedVibe(next);
+        return;
+      }
+      previewLiveRef.current = false;
+      setArmedVibe(null);
+      setPreviewVibeState(next);
+      if (!owns) {
+        previewStartedRef.current = true;
+        void togglePlayback().catch(() => {});
+      }
+    },
+    [jam, isPlaying, previewVibeState, armedVibe, previewPatchOf, stopPreview],
+  );
+
+  /**
+   * The armed tile, coming in on the bar line.
+   *
+   * It cannot fire in the bar it was armed in — that bar is the one already
+   * playing, and coming in on it is the thing the arming exists to avoid — so
+   * the bar it was armed in is remembered and skipped. Everything after that
+   * is the ordinary live-edit path: the overlay changes, the push effect
+   * compiles the next bar and sends it, and the bar turns.
+   */
+  useEffect(() => {
+    if (!armedVibe) return;
+    if (!isPlaying) {
+      // Stopped before the bar came round. Nothing left to wait for, and
+      // starting the transport now would be a tile the player moved off.
+      setArmedVibe(null);
+      return;
+    }
+    if (barKeyRef.current !== null && barKeyRef.current === armedAtRef.current) return;
+    armedAtRef.current = null;
+    previewBarsRef.current = 0;
+    // The transport was already being heard before this armed, so the clock
+    // below has nothing to wait for.
+    previewLiveRef.current = true;
+    setArmedVibe(null);
+    setPreviewVibeState(armedVibe);
+  }, [armedVibe, isPlaying, currentBeat?.chorus, currentBeat?.formBar]);
+
+  /**
+   * Which audition is running, as one value the clock can watch.
+   *
+   * A string rather than a boolean: hovering from one tile to the next has to
+   * restart the two bars, and a boolean that was already true would have the
+   * second tile finish on the first one's count.
+   */
+  const previewKey = previewVibeState
+    ? `vibe:${previewVibeState.vibeId}:${previewVibeState.variationId ?? ""}`
+    : previewKit
+      ? `kit:${previewKit}`
+      : null;
+
   /**
    * The preview's own clock: two bar lines, then back to the jam's kit.
    *
@@ -1246,7 +1535,7 @@ export function useJamSession({
    * else this mode does.
    */
   useEffect(() => {
-    if (!previewKit) return;
+    if (!previewKey) return;
     if (!isPlaying) {
       // Stopped — but which kind of stopped?
       //
@@ -1268,13 +1557,14 @@ export function useJamSession({
       previewStartedRef.current = false;
       previewLiveRef.current = false;
       setPreviewKit(null);
+      setPreviewVibeState(null);
       previewBarsRef.current = 0;
       return;
     }
     previewLiveRef.current = true;
     previewBarsRef.current += 1;
-    if (previewBarsRef.current > 2) stopKitPreview();
-  }, [previewKit, isPlaying, currentBeat?.chorus, currentBeat?.formBar, stopKitPreview]);
+    if (previewBarsRef.current > 2) stopPreview();
+  }, [previewKey, isPlaying, currentBeat?.chorus, currentBeat?.formBar, stopPreview]);
 
   /**
    * The next shape of the chord on screen.
@@ -1387,6 +1677,24 @@ export function useJamSession({
     previewKit,
     startKitPreview,
     /**
+     * W32 — the vibe tiles that play (A4).
+     *
+     * `previewingVibe` is what the tile marks: `sounding` while the band is
+     * actually on it, false while it is armed and waiting for the bar line,
+     * so a tile hovered mid-take says "coming" rather than lying about now.
+     */
+    previewVibe,
+    stopPreview,
+    previewingVibe: previewVibeState
+      ? {
+          vibeId: previewVibeState.vibeId,
+          variationId: previewVibeState.variationId,
+          sounding: true,
+        }
+      : armedVibe
+        ? { vibeId: armedVibe.vibeId, variationId: armedVibe.variationId, sounding: false }
+        : null,
+    /**
      * True while the engine is refusing a configuration that names a folder
      * of your own samples — so the kit picker can say so instead of leaving
      * the built-in kit playing under a folder that looks chosen.
@@ -1398,6 +1706,8 @@ export function useJamSession({
     closeJam,
     editJam,
     newJam,
+    /** W32 — one tap to a band playing (A4). */
+    jamNow,
     saveActiveJam,
     revertJam,
     deleteJam,

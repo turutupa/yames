@@ -2,6 +2,9 @@
   "jam": {
     "badge": "JAM",
     "newJam": "Jam mới",
+    "jamNow": "Jam ngay",
+    "jamNowLead": "Chọn ban nhạc hợp với nhạc cụ của bạn và đếm nhịp vào.",
+    "jamNowName": "Jam {{vibe}}",
     "untitled": "Jam mới",
     "deleteJam": "Xóa jam",
     "duplicateJam": "Nhân bản jam",

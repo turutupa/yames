@@ -154,14 +154,14 @@
         "body": "Hay un dispositivo MIDI conectado pero nada asignado. ¿Asignas un pedal a Reproducir/Parar?",
         "action": "Abrir atajos"
       },
-      "jamSynth": {
-        "body": "Toda la banda está sintetizada: nada que descargar, nada que instalar."
+      "jamSheets": {
+        "body": "Ajustes cambia la banda; Acordes es tu chuleta."
       },
-      "jamBand": {
-        "body": "La banda nunca toca tu instrumento. El bajo y el teclado están a un toque."
+      "jamLive": {
+        "body": "Todo lo de aquí cambia en el compás siguiente."
       },
-      "jamTakes": {
-        "body": "Las tomas se quedan en este equipo. No se sube nada."
+      "jamArrangement": {
+        "body": "La banda sube y baja por su cuenta: Bucle, en Ajustes, lo desactiva."
       }
     },
     "tour": {

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { bandDescription, lineupFor, startingBand } from "./lineup";
+import { bandDescription, lineupFor, startingBand, vibeForInstrument } from "./lineup";
+import { VIBE_IDS } from "./vibesContract";
 import type { InstrumentId } from "../types";
 
 const EVERY_INSTRUMENT: InstrumentId[] = [
@@ -135,5 +136,36 @@ describe("startingBand", () => {
 
   it("gives an instrument it has never heard of the drummer", () => {
     expect(startingBand("theremin")).toEqual({ drums: true, bass: false, keys: false });
+  });
+});
+
+/**
+ * Jam now's one decision (JAM_KILLER A4). The table is short and the fallback
+ * is rock, so what is worth pinning is that every chair gets an answer, that
+ * the answer is a vibe the data actually has, and that nothing here can throw
+ * on an instrument this build has never heard of.
+ */
+describe("vibeForInstrument", () => {
+  it("hands each chair the vibe the plan names", () => {
+    expect(vibeForInstrument("electric-guitar")).toBe("rock");
+    expect(vibeForInstrument("acoustic-guitar")).toBe("rock");
+    expect(vibeForInstrument("bass")).toBe("funk");
+    expect(vibeForInstrument("piano")).toBe("jazz");
+    expect(vibeForInstrument("drums")).toBe("rock");
+    expect(vibeForInstrument("other")).toBe("rock");
+  });
+
+  it("names a vibe the data has, for every instrument there is", () => {
+    for (const instrument of EVERY_INSTRUMENT) {
+      expect(VIBE_IDS).toContain(vibeForInstrument(instrument));
+    }
+  });
+
+  it("has an answer for a singer, and for an instrument it has never heard of", () => {
+    // The instrument list has no seat for a voice yet; the store is where an
+    // id from another build arrives, so this is the door that one comes in by.
+    expect(vibeForInstrument("voice")).toBe("pop");
+    expect(vibeForInstrument("Vocals")).toBe("pop");
+    expect(vibeForInstrument("theremin")).toBe("rock");
   });
 });

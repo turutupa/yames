@@ -154,14 +154,14 @@
         "body": "Có thiết bị MIDI đang kết nối nhưng chưa gán gì. Gán bàn đạp cho Phát/Dừng nhé?",
         "action": "Mở phím tắt"
       },
-      "jamSynth": {
-        "body": "Cả ban nhạc đều là âm tổng hợp — không phải tải, không phải cài."
+      "jamSheets": {
+        "body": "Thiết lập đổi ban nhạc; Hợp âm là tờ phao của bạn."
       },
-      "jamBand": {
-        "body": "Ban nhạc không bao giờ chơi nhạc cụ của bạn. Bass và keys chỉ cách một chạm."
+      "jamLive": {
+        "body": "Mọi thứ ở đây đổi từ ô nhịp kế tiếp."
       },
-      "jamTakes": {
-        "body": "Bản ghi nằm lại trên máy này. Không có gì được tải lên."
+      "jamArrangement": {
+        "body": "Ban nhạc tự dâng lên rồi tự lắng xuống — chọn Vòng trong Thiết lập để tắt."
       }
     },
     "tour": {
