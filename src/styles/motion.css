@@ -153,6 +153,23 @@
   pointer-events: none;
 }
 
+@keyframes swap-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Switching Set up for Chords swaps what is INSIDE the docked frame; the
+   frame itself does not move (A11). A short fade on the new content, an exit
+   long rather than an enter long, because nothing is arriving from anywhere —
+   it is already in front of you and only the words have changed. */
+.motion-swap {
+  animation: swap-in var(--motion-exit) var(--motion-ease) both;
+}
+
 /* A section that only ever arrives — the Colours degree groups, which come
    and go with the flavour rather than with a switch of their own. They have
    no exit to wait for, so they need no `Presence` behind them: the keyframe
@@ -171,7 +188,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   [data-state],
-  .motion-arrives {
+  .motion-arrives,
+  .motion-swap {
     animation: none !important;
   }
 }
@@ -179,6 +197,7 @@
 [data-theme-transition="mono"] [data-state],
 [data-theme-transition="mono"][data-state],
 [data-theme-transition="mono"] .motion-arrives,
-[data-theme-transition="mono"].motion-arrives {
+[data-theme-transition="mono"].motion-arrives,
+[data-theme-transition="mono"] .motion-swap {
   animation: none !important;
 }

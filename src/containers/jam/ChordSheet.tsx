@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { ChordDiagram } from "../../components/chords";
 import { Fretboard, BASS_STANDARD_TUNING, GUITAR_STANDARD_TUNING } from "../../components/fretboard";
 import { Presence, useLastPresent } from "../../components/Presence";
-import type { MotionProps } from "../../components/Presence";
 import { chordsInKey } from "../../jam/diatonic";
 import type { DiatonicChord } from "../../jam/diatonic";
 import {
@@ -16,12 +15,11 @@ import {
 } from "../../jam/cheatSheet";
 import type { ChordFamily, ChordFlavour } from "../../jam/cheatSheet";
 import { shapesFor } from "../../jam/chordShapes";
-import { chordName, keyRootName } from "../../jam/harmony";
+import { chordName, chordSuffix, keyRootName } from "../../jam/harmony";
 import type { PlacedShape, Instrument } from "../../jam/chordShapes";
 import type { Chord, Key, PitchClass } from "../../jam/harmony";
 import type { ScaleSuggestion } from "../../jam/scales";
 import type { Jam } from "../../jam/types";
-import { JamSheet } from "./JamSheet";
 import { Segmented } from "./Segmented";
 
 /** Which of the two pages the sheet is on (JAM_UX_DECISIONS A10). */
@@ -65,7 +63,6 @@ export function pinnedShapeOf(
 interface ChordSheetProps {
   jam: Jam;
   onEdit: (patch: Partial<Omit<Jam, "id" | "createdAt">>) => void;
-  onClose: () => void;
   /** The key as the player READS it — already transposed. */
   playedKey: Key;
   /** The chord the jam is on, or null when chords are off. */
@@ -94,8 +91,24 @@ interface ChordSheetProps {
   onOnlyInKey: (on: boolean) => void;
   fretboardOpen: boolean;
   onFretboard: (open: boolean) => void;
-  /** The slide in and out, from the `Presence` that owns the mount (A11). */
-  motion?: MotionProps;
+}
+
+/**
+ * What the docked frame's header says while the chord sheet is in it.
+ *
+ * The header belongs to the frame, and the frame is shared with the setup
+ * sheet (A11) — one `<aside>` whose title changes when you switch between the
+ * two, rather than one sliding out and another sliding in behind it.
+ */
+export function chordSheetTitle(
+  playedKey: Key,
+  page: ChordPage,
+  t: (k: string, o?: Record<string, unknown>) => string,
+): { title: string; subtitle: string } {
+  return {
+    title: t("jam.chords.inKey", { key: keyLabel(playedKey, t) }),
+    subtitle: page === "all" ? t("jam.chords.allLead") : t("jam.chords.sheetLead"),
+  };
 }
 
 /**
@@ -130,7 +143,6 @@ interface ChordSheetProps {
 export function ChordSheet({
   jam,
   onEdit,
-  onClose,
   playedKey,
   current,
   scale,
@@ -149,7 +161,6 @@ export function ChordSheet({
   onOnlyInKey,
   fretboardOpen,
   onFretboard,
-  motion,
 }: ChordSheetProps) {
   const { t } = useTranslation();
 
@@ -178,38 +189,31 @@ export function ChordSheet({
   );
 
   /**
-   * The degree each of the key's roots belongs to — "V" over the group that
-   * holds Gsus4, Gsus2 and G9.
+   * The colours, gathered under the degree they belong to, in degree order.
    *
-   * Taken from the key's own chord list rather than parsed back out of the
-   * colours' labels: the degree of a root is a fact about the key, and the
-   * label on a colour chord is a rendering of it.
+   * Two things the flat list hands over that a page must not draw as it
+   * stands. A minor key lists both the natural v and the borrowed V7, and a
+   * suspension has no third — so Gsus4 arrives twice in A minor, once under
+   * each. The chord is shown once, under the first degree that offered it.
+   *
+   * And the heading is the degree without the colour's own mark: "V" over
+   * Gsus4, Gsus2 and G9, not "Vsus4" over three chords only one of which is
+   * a sus4.
    */
-  const degrees = useMemo(() => {
-    const byRoot = new Map<PitchClass, string>();
-    for (const chord of chordsInKey(playedKey.root, playedKey.mode)) {
-      if (!byRoot.has(chord.root)) byRoot.set(chord.root, chord.degree);
-    }
-    return byRoot;
-  }, [playedKey.root, playedKey.mode]);
-
-  /** The colours, gathered under the degree they belong to, in degree order. */
   const colourGroups = useMemo(() => {
     if (flavour !== "colours") return [];
     const groups: { root: PitchClass; degree: string; chords: DiatonicChord[] }[] = [];
+    const seen = new Set<string>();
     for (const chord of inKey) {
+      const id = `${chord.root}:${chord.quality}`;
+      if (seen.has(id)) continue;
+      seen.add(id);
       const last = groups[groups.length - 1];
       if (last && last.root === chord.root) last.chords.push(chord);
-      else {
-        groups.push({
-          root: chord.root,
-          degree: degrees.get(chord.root) ?? chord.degree,
-          chords: [chord],
-        });
-      }
+      else groups.push({ root: chord.root, degree: stemOf(chord), chords: [chord] });
     }
-    return groups;
-  }, [flavour, inKey, degrees]);
+    return groups.filter((group) => group.chords.length > 0);
+  }, [flavour, inKey]);
 
   /** The twelve roots as this key spells them, and which of them it owns. */
   const roots = useMemo(() => rootNames(playedKey), [playedKey]);
@@ -313,13 +317,7 @@ export function ChordSheet({
   };
 
   return (
-    <JamSheet
-      kind="chords"
-      title={t("jam.chords.inKey", { key: keyLabel(playedKey, t) })}
-      subtitle={page === "all" ? t("jam.chords.allLead") : t("jam.chords.sheetLead")}
-      onClose={onClose}
-      motion={motion}
-    >
+    <>
       {/* Two pages, one sheet. The control sits under the header rather than
           in the header because the title says which KEY you are in, and that
           is true of both pages. */}
@@ -550,7 +548,7 @@ export function ChordSheet({
           )}
         </section>
       )}
-    </JamSheet>
+    </>
   );
 }
 
@@ -568,6 +566,20 @@ function boxStart(scale: ScaleSuggestion): number {
 /** `ShapeSize` to the suffix of its locale key. */
 function sizeKey(size: PlacedShape["size"]): string {
   return size.charAt(0).toUpperCase() + size.slice(1);
+}
+
+/**
+ * A colour chord's degree with the colour's own mark taken off: "Vsus4" → "V".
+ *
+ * `cheatSheet` builds those labels as the degree's stem plus the quality's
+ * suffix, so taking the suffix back off returns the stem exactly — no second
+ * table of roman numerals, and no guessing.
+ */
+function stemOf(chord: DiatonicChord): string {
+  const suffix = chordSuffix(chord.quality);
+  return suffix && chord.degree.endsWith(suffix)
+    ? chord.degree.slice(0, -suffix.length)
+    : chord.degree;
 }
 
 /** An id to the tail of its locale key: `all` → `All`, `basic` → `Basic`. */

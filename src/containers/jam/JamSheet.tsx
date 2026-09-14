@@ -198,19 +198,24 @@ export function JamSheet({
   }, [closeOnOutside, host, push, onClose]);
 
   /**
-   * Focus lands inside the sheet when it opens.
+   * Focus lands inside the sheet when it opens, and again when its contents
+   * are swapped for the other sheet's.
    *
    * Not a focus trap: the sheet is docked, the screen behind it is live, and
    * tabbing out of it into the transport is a reasonable thing to want. What
    * it must not do is leave focus on the button in the header that opened it,
-   * where the next Space press would close the sheet again.
+   * where the next Space press would close the sheet again — or, after a
+   * switch from Set up to Chords, on a control that is no longer on the page.
+   *
+   * On `kind`, not on mount: the frame stays put through the switch (A11), so
+   * mounting is no longer the only moment new content appears in it.
    */
   useEffect(() => {
     const first = bodyRef.current?.querySelector<HTMLElement>(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     );
     first?.focus({ preventScroll: true });
-  }, []);
+  }, [kind]);
 
   /**
    * The scrim moves with the sheet but does not report back.
@@ -247,7 +252,12 @@ export function JamSheet({
             {t("jam.sheet.done")}
           </button>
         </header>
-        <div className="jam-sheet-body" ref={bodyRef}>
+        {/* Keyed on `kind` so switching sheets replaces the body outright —
+            a scroll position and a half-open MORE belong to the sheet that
+            had them — and so the fade below plays for the new content. The
+            FRAME does not move: that is the whole of A11's rule for the
+            switch. */}
+        <div key={kind} className="jam-sheet-body motion-swap" ref={bodyRef}>
           {children}
         </div>
       </aside>
