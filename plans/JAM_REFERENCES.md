@@ -49,7 +49,7 @@ stop rather than ring on.
 **The keys.** Where they appear at all, a drawbar organ sitting behind the
 guitars — sustained, slightly overdriven, never on top.
 
-**Set by the tile:** groove `rock8`, kit Raw, bass picked, keys organ, 120 in
+**Set by the tile:** groove `rock8`, kit Studio, bass picked, keys organ, 120 in
 A over an eight-bar loop.
 
 ---
@@ -77,7 +77,7 @@ with a hard attack.
 **The keys.** Off, on these records. The organ is what would play if you
 turned it on.
 
-**Set by the tile:** groove `hardRock`, kit Raw, bass picked, keys organ,
+**Set by the tile:** groove `hardRock`, kit Studio, bass picked, keys organ,
 loud, 132 in E over an eight-bar loop.
 
 ---
@@ -104,7 +104,7 @@ third, fifth, sixth and back down through the flat seventh.
 **The keys.** A drawbar organ with a slow rotary, comping in the holes the
 guitar leaves.
 
-**Set by the tile:** groove `shuffle` with the shuffle feel, kit Room, bass
+**Set by the tile:** groove `shuffle` with the shuffle feel, kit Studio, bass
 fingered, keys organ, 92 in A blues over the twelve bars.
 
 ---
@@ -131,7 +131,7 @@ high ones, and short notes with silence between them.
 **The keys.** A clavinet through a wah: percussive, dry, and playing rhythm
 rather than harmony.
 
-**Set by the tile:** groove `funk`, kit Tight, bass slap, keys clav, 100 in E
+**Set by the tile:** groove `funk`, kit Club, bass slap, keys clav, 100 in E
 minor over an eight-bar loop. The New Orleans variation moves to the
 `secondLine` groove, the Room kit and a fingered bass.
 
@@ -159,7 +159,7 @@ noise on the front, walking in quarters that ring into each other.
 **The keys.** An electric piano — bell-like, soft attack, comping in
 rootless voicings behind the horn.
 
-**Set by the tile:** groove `swingRide` with the swing feel, kit Brushes,
+**Set by the tile:** groove `swingRide` with the swing feel, kit Club,
 bass upright, keys electric piano, soft, 140 in F over AABA 32.
 
 ---
@@ -187,7 +187,7 @@ styles share.
 **The keys.** A soft, nylon-edged pad or a clean electric piano, comping the
 chord and getting out of the way.
 
-**Set by the tile:** groove `bossa`, kit Room, bass fingered, keys pad, 132 in
+**Set by the tile:** groove `bossa`, kit Club, bass fingered, keys pad, 132 in
 A minor over sixteen bars. Samba takes the `samba` groove, loud, at 100;
 cha-cha takes the `chaCha` groove at 120 with an electric piano.
 
@@ -215,7 +215,7 @@ attack, sustaining through the bar rather than articulating every note.
 **The keys.** A pad: slow attack, wide, filling the space behind everything
 without a rhythm of its own.
 
-**Set by the tile:** groove `rock8`, kit Electronic, bass synth, keys pad, 112
+**Set by the tile:** groove `rock8`, kit Studio, bass synth, keys pad, 112
 in C over an eight-bar loop.
 
 ---
@@ -242,7 +242,7 @@ double-kick roll it is one held, driven root, which is what the hold rule in
 
 **The keys.** Absent. The pad is only what would play if you asked for it.
 
-**Set by the tile:** groove `doubleKick`, kit Raw, bass picked, keys pad,
+**Set by the tile:** groove `doubleKick`, kit Studio, bass picked, keys pad,
 loud, 160 in E minor over an eight-bar loop.
 
 ---
@@ -268,7 +268,7 @@ long notes, no fills.
 **The keys.** A clean electric piano or an acoustic-sounding one, comping in
 simple triads.
 
-**Set by the tile:** groove `train`, kit Brushes, bass upright, keys electric
+**Set by the tile:** groove `train`, kit Studio, bass upright, keys electric
 piano, 120 in G over an eight-bar loop. Two-step takes the `twoStep` groove at
 168; the waltz takes `waltz` at 108, in three.
 
