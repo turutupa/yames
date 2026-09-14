@@ -95,7 +95,14 @@ describe("the jam's context bar", () => {
   it("keeps the vibe as a word, not a door, where there is no sheet to open", () => {
     // The setlist player draws this bar without the sheets; the vibe is still
     // worth reading there, it just cannot open anything.
-    draw({ jam: { ...STARTER_JAMS[0], vibe: "rock" }, onSetup: undefined, onChords: undefined });
+    // The variation is cleared along with the vibe: every starter names one
+    // now, and "Rock · Shuffle" is a different string from the word this test
+    // is about.
+    draw({
+      jam: { ...STARTER_JAMS[0], vibe: "rock", variation: undefined },
+      onSetup: undefined,
+      onChords: undefined,
+    });
     expect(screen.queryByRole("button", { name: "Rock" })).toBeNull();
     expect(screen.getByText("Rock")).toBeInTheDocument();
   });

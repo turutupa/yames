@@ -557,6 +557,10 @@
       "metal": "金属与朋克",
       "country": "乡村与民谣",
       "world": "世界音乐"
+    },
+    "filter": {
+      "style": "风格",
+      "all": "全部风格"
     }
   },
   "scale": {

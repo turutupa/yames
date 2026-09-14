@@ -557,6 +557,10 @@
       "metal": "Metal và punk",
       "country": "Country và folk",
       "world": "Thế giới"
+    },
+    "filter": {
+      "style": "Phong cách",
+      "all": "Mọi phong cách"
     }
   },
   "scale": {

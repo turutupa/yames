@@ -557,6 +557,10 @@
       "metal": "金屬與龐克",
       "country": "鄉村與民謠",
       "world": "世界音樂"
+    },
+    "filter": {
+      "style": "風格",
+      "all": "全部風格"
     }
   },
   "scale": {

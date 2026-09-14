@@ -557,6 +557,10 @@
       "metal": "Metal ve punk",
       "country": "Country ve folk",
       "world": "Dünya"
+    },
+    "filter": {
+      "style": "Tarz",
+      "all": "Tüm tarzlar"
     }
   },
   "scale": {

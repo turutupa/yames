@@ -1,6 +1,8 @@
-// The library's data operations, and the six jams that ship. The starter set
-// is what the first press of Jam plays, so "it is six, they are distinct, and
-// every one of them names a groove that exists" is worth a test on its own.
+// The library's data operations, and the fifty jams that ship. The starter set
+// is what the first press of Jam plays, so "they are distinct, every one names
+// a groove and a vibe that exist, and every progression is exactly as long as
+// its form" is worth a test on its own — fifty hand-written progressions is
+// fifty chances to be one bar out.
 import { describe, expect, it } from "vitest";
 import {
   STARTER_JAMS,
@@ -16,6 +18,9 @@ import {
   upsertJam,
 } from "./jams";
 import { GROOVES, grooveById } from "./grooves";
+import { VIBES, variationOf, vibeById } from "./vibes";
+import { formBars } from "./forms";
+import { parseChordName, parseKey } from "./harmony";
 import { JAM_MAX_COUNT_IN } from "./types";
 import type { Jam } from "./types";
 
@@ -160,8 +165,8 @@ describe("reorderJams", () => {
 });
 
 describe("the starter jams", () => {
-  it("ships the six the plan names, in order", () => {
-    expect(names([...STARTER_JAMS])).toEqual([
+  it("opens on the six the first plan named, in order", () => {
+    expect(names([...STARTER_JAMS]).slice(0, 6)).toEqual([
       "Slow blues in A",
       "Funk in E",
       "Bossa in D minor",
@@ -169,6 +174,69 @@ describe("the starter jams", () => {
       "Rock in G",
       "Waltz in C",
     ]);
+  });
+
+  it("ships fifty, five or six for each of the nine vibes", () => {
+    // Six is enough to prove the mode works and not enough to open the app
+    // twice (plans/JAM_KILLER.md §2 A3).
+    expect(STARTER_JAMS).toHaveLength(50);
+    const perVibe = new Map<string, number>();
+    for (const jam of STARTER_JAMS) {
+      expect(jam.vibe, jam.name).toBeTruthy();
+      perVibe.set(jam.vibe!, (perVibe.get(jam.vibe!) ?? 0) + 1);
+    }
+    expect([...perVibe.keys()].sort()).toEqual(VIBES.map((v) => v.id).slice().sort());
+    for (const [vibe, count] of perVibe) {
+      expect(count, vibe).toBeGreaterThanOrEqual(5);
+      expect(count, vibe).toBeLessThanOrEqual(6);
+    }
+  });
+
+  it("names a vibe and a variation that both exist", () => {
+    // A jam pointing at a variation that has since been renamed still opens on
+    // its vibe, so this is not a crash — it is a starter that quietly stopped
+    // being what its name says.
+    for (const jam of STARTER_JAMS) {
+      const vibe = vibeById(jam.vibe);
+      expect(vibe, jam.name).not.toBeNull();
+      expect(variationOf(vibe!, jam.variation), `${jam.name} · ${jam.variation}`).not.toBeNull();
+    }
+  });
+
+  it("gives every jam changes that are exactly as long as its form", () => {
+    // The one thing the record must never hold is a progression that does not
+    // fit its form (see progression.ts). Fifty hand-written ones is fifty
+    // chances to be one bar out.
+    for (const jam of STARTER_JAMS) {
+      if (!jam.progression) continue;
+      expect(jam.progression.length, jam.name).toBe(formBars(jam.form));
+    }
+  });
+
+  it("writes every chord in a spelling the parser reads back", () => {
+    // A progression is stored as text and read through `parseChordName`; a
+    // chord it cannot read plays as the form's own, silently.
+    for (const jam of STARTER_JAMS) {
+      for (const name of jam.progression ?? []) {
+        expect(parseChordName(name), `${jam.name}: ${name}`).not.toBeNull();
+      }
+    }
+  });
+
+  it("writes every key in a spelling `parseKey` reads back", () => {
+    for (const jam of STARTER_JAMS) {
+      expect(parseKey(jam.key ?? ""), `${jam.name}: ${jam.key}`).not.toBeNull();
+    }
+  });
+
+  it("gives each jam a name a musician would say out loud", () => {
+    // "Slow blues in G", not "Blues 3". Every starter says its style and its
+    // key, which is the whole of what a player needs to decide to press it.
+    for (const jam of STARTER_JAMS) {
+      expect(jam.name, jam.name).toMatch(/ in [A-G]/);
+    }
+    // And no two of them are the same tune under two names.
+    expect(new Set(names([...STARTER_JAMS])).size).toBe(STARTER_JAMS.length);
   });
 
   it("gives each one a stable id, so a re-seed cannot double the library", () => {

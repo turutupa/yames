@@ -437,6 +437,38 @@ button.context-chip:hover,
   color: var(--text-secondary);
 }
 
+/* The jam library's style filter. A wrapping row of chips above the list,
+   scrolled with the panel's own padding so the chips line up with the rows
+   they narrow. */
+.preset-sidebar-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 0 10px 8px;
+}
+
+.preset-sidebar-chip {
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
+  background: color-mix(in srgb, var(--text-primary) 3%, transparent);
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.preset-sidebar-chip:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.preset-sidebar-chip.active {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+
 .preset-sidebar-list {
   flex: 1;
   overflow-y: auto;

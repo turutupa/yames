@@ -557,6 +557,10 @@
       "metal": "Metal e punk",
       "country": "Country e folk",
       "world": "Do mundo"
+    },
+    "filter": {
+      "style": "Estilo",
+      "all": "Todos os estilos"
     }
   },
   "scale": {
