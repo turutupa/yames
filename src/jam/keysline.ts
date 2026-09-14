@@ -22,7 +22,8 @@
  * Close voicings inside MIDI 55–79 (G3 to G5): the range a keys player's
  * right hand comps in, low enough to sound like harmony and high enough to
  * stay out of the bass's way. At most four notes, so a ninth chord loses its
- * fifth rather than turning into a cluster.
+ * fifth rather than turning into a cluster — and at least three, so a power
+ * chord comes out root, fifth and octave rather than as a bare interval.
  *
  * Between bars the voicing takes the **nearest inversion to the one before**.
  * That is not a refinement, it is the difference between comping and a chord
@@ -114,7 +115,7 @@ function distanceToSet(from: readonly number[], note: number): number {
  * which no hand plays and which no amount of voice leading can then bring
  * within a fourth of the triad before it.
  */
-function closeVoicings(pcs: number[]): number[][] {
+function closeVoicings(pcs: number[], doubleTheOctave = false): number[][] {
   const unique = [...new Set(pcs.map((pc) => ((pc % 12) + 12) % 12))];
   const out: number[][] = [];
   for (const pc of unique) {
@@ -122,6 +123,11 @@ function closeVoicings(pcs: number[]): number[][] {
       .filter((other) => other !== pc)
       .map((other) => ((other - pc) % 12 + 12) % 12)
       .sort((a, b) => a - b);
+    // The power chord's octave. Two notes alone under a band is a bare
+    // interval rather than a chord, so the bottom note is doubled an octave
+    // up and the grip comes out root, fifth, octave — what everybody means by
+    // a power chord on a keyboard.
+    if (doubleTheOctave) intervals.push(12);
     for (const bottom of placements(pc)) {
       const voicing = [bottom, ...intervals.map((step) => bottom + step)];
       if (voicing[voicing.length - 1] > KEYS_HIGH) continue;
@@ -149,19 +155,31 @@ function centreCost(voicing: number[]): number {
  * narrow and a chord with no common ground at all — does the whole field come
  * back, so the band never falls silent over a technicality.
  *
+ * A power chord has one extra pass in the middle. Root-fifth-octave spans a
+ * full octave, and in a range two octaves wide there are only a couple of
+ * places to put it, so sometimes none of them is within a fourth of where the
+ * hand already is. A keys player in that spot does not jump — they leave the
+ * octave off and play the bare fifth, and so does this.
+ *
  * Among what is left, the least total movement wins, and a first voicing with
  * nothing to move from takes the one nearest the middle of the range.
  */
 export function chooseVoicing(chord: Chord, previous?: readonly number[] | null): number[] {
-  const candidates = closeVoicings(voicingTones(chord));
+  const tones = voicingTones(chord);
+  /** True only for the power chord: the one quality with two notes in it. */
+  const isPowerChord = new Set(tones.map((pc) => ((pc % 12) + 12) % 12)).size === 2;
+  const candidates = closeVoicings(tones, isPowerChord);
   if (candidates.length === 0) return [];
   if (!previous || previous.length === 0) {
     return [...candidates].sort((a, b) => centreCost(a) - centreCost(b))[0];
   }
-  const near = candidates.filter((voicing) =>
-    voicing.every((note) => distanceToSet(previous, note) <= KEYS_MAX_LEAP),
-  );
-  const pool = near.length > 0 ? near : candidates;
+  const leadsWell = (voicings: number[][]) =>
+    voicings.filter((voicing) =>
+      voicing.every((note) => distanceToSet(previous, note) <= KEYS_MAX_LEAP),
+    );
+  let pool = leadsWell(candidates);
+  if (pool.length === 0 && isPowerChord) pool = leadsWell(closeVoicings(tones));
+  if (pool.length === 0) pool = candidates;
   let best = pool[0];
   let bestCost = Infinity;
   for (const voicing of pool) {

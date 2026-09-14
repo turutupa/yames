@@ -331,5 +331,21 @@ export function scalesForChord(chord: Chord, key: Key): ScaleSuggestion[] {
         [chord.quality === "sus2" ? "majorPentatonic" : "minorPentatonic", root],
       ]);
     }
+
+    /**
+     * A power chord has no third either, but where a sus chord is waiting to
+     * resolve, a power chord is the finished article — and whoever is holding
+     * one is playing rock. The minor pentatonic on its own root is what goes
+     * over it, the blues scale is the same thing with the extra note, and the
+     * key's own scale is there for anyone who wants the third the chord is
+     * deliberately not playing.
+     */
+    case "5": {
+      return build([
+        ["minorPentatonic", root],
+        ["blues", root],
+        [key.mode === "minor" ? "naturalMinor" : "major", key.root],
+      ]);
+    }
   }
 }

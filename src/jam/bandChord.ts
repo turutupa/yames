@@ -2,11 +2,12 @@
  * The one translation between the chord on the screen and the chord the bass
  * player reads.
  *
- * `harmony.ts` names fifteen qualities because the chord-shape library can
- * draw all fifteen. `bassline.ts` knows ten, because those are the ten a form
- * can put under a bass line. The five that are left over — dim, aug, sus2,
- * sus4, add9 — reach the bass only if a future form starts using them, and
- * this file is where they are given an answer rather than a crash.
+ * `harmony.ts` names sixteen qualities because the chord-shape library can
+ * draw all sixteen. `bassline.ts` knows eleven: the ten a form can put under a
+ * bass line, plus the power chord, which a rock jam really does play. The five
+ * that are left over — dim, aug, sus2, sus4, add9 — reach the bass only if a
+ * future form starts using them, and this file is where they are given an
+ * answer rather than a crash.
  *
  * The rule for the mapping is the bass player's, not the theorist's: a bass
  * line uses the root, the third and the fifth and almost nothing else, so
@@ -28,6 +29,11 @@ const BASS_OCTAVE_BASE = 36;
 const BASS_QUALITY: Record<ChordQuality, BassChordQuality> = {
   maj: "maj",
   min: "min",
+  // The one quality that is NOT translated. A power chord has no third on
+  // purpose, and a bass that supplied one would be telling the room the
+  // guitarist is playing a major chord when they are not, which is the whole
+  // reason `bassline.ts` grew a two-note chord of its own.
+  "5": "5",
   // Root, minor third, flat fifth: the half-diminished chord is the one in
   // the bass's own table that has all three.
   dim: "m7b5",

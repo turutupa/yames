@@ -31,6 +31,7 @@ const FORM_KINDS: JamFormKind[] = ["blues12", "loop8", "bars16", "aaba32", "one"
 const QUALITIES: ChordQuality[] = [
   "maj",
   "min",
+  "5",
   "dim",
   "aug",
   "7",

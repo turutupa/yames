@@ -18,7 +18,8 @@
  * chord-shape library and the components that use it keep importing from
  * one place. The five qualities a shape library needs and a twelve-bar form
  * never plays — `dim`, `aug`, `sus2`, `sus4`, `add9` — are part of harmony's
- * union too, which is what made the merge a re-export rather than a cast.
+ * union too, and so is the power chord `5`, which is what made the merge a
+ * re-export rather than a cast.
  *
  * Naming goes the same way: `chordName` with a key spells through harmony,
  * so the chord in the key strip and the chord on the form timeline come out
@@ -44,6 +45,7 @@ export type { Chord, ChordQuality, Key, KeyMode, PitchClass };
 export const CHORD_QUALITIES: readonly ChordQuality[] = [
   "maj",
   "min",
+  "5",
   "dim",
   "aug",
   "7",
@@ -89,6 +91,10 @@ export type DiatonicChord = {
 const CHORD_TONES: Record<ChordQuality, readonly number[]> = {
   maj: [0, 4, 7],
   min: [0, 3, 7],
+  // The power chord, and the one entry with no third in it. Two notes is the
+  // whole chord, so the fifth here is not the omittable one it is everywhere
+  // else — see `spellsChord` in `chordShapes.ts`.
+  "5": [0, 7],
   dim: [0, 3, 6],
   aug: [0, 4, 8],
   "7": [0, 4, 7, 10],
