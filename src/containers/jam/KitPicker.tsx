@@ -3,11 +3,23 @@ import { useTranslation } from "react-i18next";
 import { inspectKitFolder, pickKitFolder } from "../../ipc";
 
 /**
- * The kits that ship. `raw` is the rock one the second pass added (B2) and it
- * is first, because it is what a vibe reaches for and what "a drum kit" means
- * to most people who open this app.
+ * The kits that ship, in the order the menu draws them.
+ *
+ * The two RECORDED kits come first — a drummer, in a room, with a different
+ * sample for every weight of stroke — because after the third pass they are
+ * what a vibe reaches for and what "a drum kit" means to anyone who opens this
+ * app (plans/JAM_SOUND.md §5). The five synthesised ones stay behind them,
+ * unchanged, until the owner has heard both and said which of them can go.
  */
-export const JAM_KITS = ["raw", "tight", "room", "brushes", "electronic"] as const;
+export const JAM_KITS = [
+  "club",
+  "studio",
+  "raw",
+  "tight",
+  "room",
+  "brushes",
+  "electronic",
+] as const;
 
 /** What a folder of your own samples turned out to hold. */
 export type KitFolder = { dir: string; name: string };

@@ -41,7 +41,12 @@
       "twoStep": "Two-step",
       "samba": "Samba",
       "chaCha": "Cha-cha",
-      "secondLine": "Second line"
+      "secondLine": "Second line",
+      "ballad": "Balada",
+      "slowBlues": "Blues lento",
+      "jazzWaltz": "Valsa jazz",
+      "motown": "Motown",
+      "mambo": "Mambo"
     },
     "changes": {
       "edit": "Editar a harmonia",
@@ -215,6 +220,10 @@
     },
     "kit": {
       "label": "Kit",
+      "club": "Club",
+      "clubHint": "uma bateria de jazz, gravada ao vivo num clube de Boston",
+      "studio": "Estúdio",
+      "studioHint": "uma bateria de estúdio, do jazz ao rock",
       "room": "Sala",
       "roomHint": "aberto, com a sala em volta",
       "tight": "Seco",
@@ -245,7 +254,11 @@
         "hat_open": "chimbal aberto",
         "ride": "ride",
         "rim": "aro",
-        "crash": "crash"
+        "crash": "crash",
+        "tom_hi": "tom agudo",
+        "tom_lo": "tom grave",
+        "hat_pedal": "pedal do chimbal",
+        "ride_bell": "campana do ride"
       }
     },
     "transposition": {
@@ -314,11 +327,14 @@
       "gridBar": "O groove, um compasso",
       "gridFill": "A virada, um compasso",
       "hint": "Clique numa célula para alternar",
+      "addToms": "+ toms",
       "meter": "{{beats}} tempos em {{subdivision}} · as colunas seguem o compasso",
       "cell": "{{lane}}, tempo {{beat}}, tique {{tick}}: {{level}}",
       "lanes": {
         "hat": "Chimbau",
         "snare": "Caixa",
+        "tomHi": "Tom agudo",
+        "tomLo": "Tom grave",
         "kick": "Bumbo",
         "ride": "Ride"
       },
@@ -326,7 +342,8 @@
         "0": "nada",
         "1": "toque",
         "2": "acento",
-        "3": "fantasma"
+        "3": "fantasma",
+        "4": "ápice"
       },
       "subdivision": {
         "1": "semínimas",

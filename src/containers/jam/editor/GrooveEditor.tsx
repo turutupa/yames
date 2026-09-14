@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type React from "react";
 import { useTranslation } from "react-i18next";
-import type { JamCustomGroove } from "../../../jam/types";
+import type { JamCustomGroove, JamPattern } from "../../../jam/types";
 import {
-  EDITABLE_LANES,
   cycleLevel,
   emptyPattern,
+  hasToms,
   isShuffleTick,
+  lanesFor,
   normalizePattern,
   setCell,
   tickLabel,
+  withToms,
 } from "./editorModel";
 import "../../../styles/jam-editor.css";
 
@@ -27,7 +29,14 @@ export interface GrooveEditorProps {
   onReset: () => void;
 }
 
-const LEVEL_CLASS = ["off", "hit", "accent", "ghost"] as const;
+const LEVEL_CLASS = ["off", "hit", "accent", "ghost", "peak"] as const;
+
+/**
+ * The legend, and the order one click walks: off, hit, accent, peak, ghost.
+ * Loudest to quietest with silence at the end, which is the order a drummer
+ * would say them in and not the order the numbers happen to be in.
+ */
+const LEVEL_ORDER = [0, 1, 2, 4, 3] as const;
 
 /**
  * The groove editor (plan §4.1) — the drawer where a jam's drummer stops
@@ -84,6 +93,15 @@ export function GrooveEditor({
     return normalizePattern(source, beats, ticksPerBeat);
   }, [page, value.fill, value.bar, beats, ticksPerBeat]);
 
+  /**
+   * The rows on this page. The toms are drawn for a pattern that has them and
+   * left off one that does not, per PAGE rather than per groove: a fill can go
+   * to the toms while the bar it interrupts never does, which is what every
+   * preset in `grooves.ts` looks like.
+   */
+  const lanes = useMemo(() => lanesFor(pattern), [pattern]);
+  const toms = hasToms(pattern);
+
   // Roving tabindex: one cell in the grid is tabbable, the arrows move which.
   const [focus, setFocus] = useState({ lane: 0, tick: 0 });
   const gridRef = useRef<HTMLDivElement>(null);
@@ -94,11 +112,11 @@ export function GrooveEditor({
   // end of the row; pull it back in rather than leaving nothing tabbable.
   useEffect(() => {
     setFocus((at) => {
-      const lane = Math.min(at.lane, EDITABLE_LANES.length - 1);
+      const lane = Math.min(at.lane, lanes.length - 1);
       const tick = Math.min(at.tick, columns - 1);
       return lane === at.lane && tick === at.tick ? at : { lane, tick };
     });
-  }, [columns]);
+  }, [columns, lanes.length]);
 
   useEffect(() => {
     if (!takeFocus.current) return;
@@ -110,21 +128,36 @@ export function GrooveEditor({
       ?.focus();
   }, [focus]);
 
+  /** The edited pattern back onto the groove, on whichever page is open. */
+  const commit = useCallback(
+    (next: JamPattern) => {
+      onChange(page === "fill" ? { ...value, fill: next } : { ...value, bar: next });
+    },
+    [page, value, onChange],
+  );
+
   const cycle = useCallback(
     (laneIndex: number, tick: number, backwards: boolean) => {
-      const lane = EDITABLE_LANES[laneIndex];
+      const lane = lanes[laneIndex];
       if (!lane) return;
       const next = setCell(
         pattern,
         lane,
         tick,
-        cycleLevel(pattern[lane][tick] ?? 0, backwards),
+        cycleLevel(pattern[lane]?.[tick] ?? 0, backwards),
       );
       if (next === pattern) return;
-      onChange(page === "fill" ? { ...value, fill: next } : { ...value, bar: next });
+      commit(next);
     },
-    [pattern, page, value, onChange],
+    [pattern, lanes, commit],
   );
+
+  /** "+ toms": two empty rows, and they stay until the groove is reset. */
+  const addToms = useCallback(() => {
+    const next = withToms(pattern);
+    if (next === pattern) return;
+    commit(next);
+  }, [pattern, commit]);
 
   const onGridKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -140,7 +173,7 @@ export function GrooveEditor({
           lane = Math.max(0, lane - 1);
           break;
         case "ArrowDown":
-          lane = Math.min(EDITABLE_LANES.length - 1, lane + 1);
+          lane = Math.min(lanes.length - 1, lane + 1);
           break;
         case "Home":
           tick = 0;
@@ -161,7 +194,7 @@ export function GrooveEditor({
       takeFocus.current = true;
       setFocus({ lane, tick });
     },
-    [focus, columns, cycle],
+    [focus, columns, cycle, lanes.length],
   );
 
   // ---- the name, edited in place ------------------------------------------
@@ -285,14 +318,14 @@ export function GrooveEditor({
           ))}
         </div>
 
-        {EDITABLE_LANES.map((lane, laneIndex) => (
+        {lanes.map((lane, laneIndex) => (
           <div className="jam-editor__row" key={lane}>
             <span className="jam-editor__lane-name">{t(`jam.editor.lanes.${lane}`)}</span>
             {Array.from({ length: beats }, (_, beat) => (
               <div className="jam-editor__group" key={beat}>
                 {Array.from({ length: ticksPerBeat }, (_, sub) => {
                   const tick = beat * ticksPerBeat + sub;
-                  const level = pattern[lane][tick] ?? 0;
+                  const level = pattern[lane]?.[tick] ?? 0;
                   const classes = [
                     "jam-editor__cell",
                     `jam-editor__cell--${LEVEL_CLASS[level]}`,
@@ -336,7 +369,7 @@ export function GrooveEditor({
       </div>
 
       <div className="jam-editor__legend">
-        {([0, 1, 2, 3] as const).map((level) => (
+        {LEVEL_ORDER.map((level) => (
           <span className="jam-editor__legend-item" key={level}>
             <span
               className={`jam-editor__cell jam-editor__cell--${LEVEL_CLASS[level]} jam-editor__swatch`}
@@ -349,6 +382,14 @@ export function GrooveEditor({
             </span>
           </span>
         ))}
+        {/* The toms are two rows you ask for. Offered rather than always
+            drawn, because most grooves never leave the snare and two empty
+            rows on every grid are two drums to read past. */}
+        {!toms && (
+          <button type="button" className="jam-editor__text-btn" onClick={addToms}>
+            {t("jam.editor.addToms")}
+          </button>
+        )}
         <span className="jam-editor__spacer" />
         <span className="jam-editor__legend-hint">{t("jam.editor.hint")}</span>
       </div>

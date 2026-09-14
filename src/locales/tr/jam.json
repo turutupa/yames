@@ -41,7 +41,12 @@
       "twoStep": "Two-step",
       "samba": "Samba",
       "chaCha": "Ça ça",
-      "secondLine": "Second line"
+      "secondLine": "Second line",
+      "ballad": "Balad",
+      "slowBlues": "Yavaş blues",
+      "jazzWaltz": "Caz vals",
+      "motown": "Motown",
+      "mambo": "Mambo"
     },
     "changes": {
       "edit": "Akorları düzenle",
@@ -215,6 +220,10 @@
     },
     "kit": {
       "label": "Set",
+      "club": "Kulüp",
+      "clubHint": "Boston'da bir kulüpte canlı kaydedilmiş caz takımı",
+      "studio": "Stüdyo",
+      "studioHint": "cazdan rock'a bir stüdyo takımı",
       "room": "Oda",
       "roomHint": "açık, odanın havasıyla",
       "tight": "Sıkı",
@@ -245,7 +254,11 @@
         "hat_open": "açık hi-hat",
         "ride": "ride",
         "rim": "rim",
-        "crash": "crash"
+        "crash": "crash",
+        "tom_hi": "tiz tom",
+        "tom_lo": "pes tom",
+        "hat_pedal": "hi-hat pedalı",
+        "ride_bell": "ride kampanası"
       }
     },
     "transposition": {
@@ -314,11 +327,14 @@
       "gridBar": "Groove, tek ölçü",
       "gridFill": "Fill, tek ölçü",
       "hint": "Değiştirmek için bir kutuya tıkla",
+      "addToms": "+ tom",
       "meter": "{{subdivision}} olarak {{beats}} vuruş · sütunlar ölçüyü izler",
       "cell": "{{lane}}, {{beat}}. vuruş, {{tick}}. tık: {{level}}",
       "lanes": {
         "hat": "Hi-hat",
         "snare": "Trampet",
+        "tomHi": "Tiz tom",
+        "tomLo": "Pes tom",
         "kick": "Kick",
         "ride": "Ride"
       },
@@ -326,7 +342,8 @@
         "0": "yok",
         "1": "vuruş",
         "2": "aksan",
-        "3": "hayalet"
+        "3": "hayalet",
+        "4": "zirve"
       },
       "subdivision": {
         "1": "dörtlükler",

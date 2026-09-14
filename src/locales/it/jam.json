@@ -41,7 +41,12 @@
       "twoStep": "Two-step",
       "samba": "Samba",
       "chaCha": "Cha cha",
-      "secondLine": "Second line"
+      "secondLine": "Second line",
+      "ballad": "Ballad",
+      "slowBlues": "Blues lento",
+      "jazzWaltz": "Valzer jazz",
+      "motown": "Motown",
+      "mambo": "Mambo"
     },
     "changes": {
       "edit": "Modifica la griglia",
@@ -215,6 +220,10 @@
     },
     "kit": {
       "label": "Kit",
+      "club": "Club",
+      "clubHint": "una batteria jazz, registrata dal vivo in un club di Boston",
+      "studio": "Studio",
+      "studioHint": "una batteria da studio, dal jazz al rock",
       "room": "Sala",
       "roomHint": "aperto, con la stanza intorno",
       "tight": "Asciutto",
@@ -245,7 +254,11 @@
         "hat_open": "charleston aperto",
         "ride": "ride",
         "rim": "rim",
-        "crash": "crash"
+        "crash": "crash",
+        "tom_hi": "tom alto",
+        "tom_lo": "tom basso",
+        "hat_pedal": "pedale del charleston",
+        "ride_bell": "campana del ride"
       }
     },
     "transposition": {
@@ -314,11 +327,14 @@
       "gridBar": "Il groove, una battuta",
       "gridFill": "Il fill, una battuta",
       "hint": "Clicca una cella per cambiarla",
+      "addToms": "+ tom",
       "meter": "{{beats}} movimenti in {{subdivision}} · le colonne seguono il metro",
       "cell": "{{lane}}, movimento {{beat}}, tick {{tick}}: {{level}}",
       "lanes": {
         "hat": "Charleston",
         "snare": "Rullante",
+        "tomHi": "Tom alto",
+        "tomLo": "Tom basso",
         "kick": "Cassa",
         "ride": "Ride"
       },
@@ -326,7 +342,8 @@
         "0": "spento",
         "1": "colpo",
         "2": "accento",
-        "3": "fantasma"
+        "3": "fantasma",
+        "4": "culmine"
       },
       "subdivision": {
         "1": "semiminime",

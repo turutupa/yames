@@ -1972,6 +1972,21 @@
   margin-bottom: 28px;
 }
 
+/* Where the drums came from — the credit the recorded kits' licences ask for. */
+.about-sounds {
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  text-align: center;
+  max-width: 46ch;
+  margin: 0 auto;
+}
+
+.about-sounds-title {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
 .about-footer {
   font-size: 0.85rem;
   color: var(--text-muted);

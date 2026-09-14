@@ -41,7 +41,12 @@
       "twoStep": "两步舞",
       "samba": "桑巴",
       "chaCha": "恰恰",
-      "secondLine": "新奥尔良游行"
+      "secondLine": "新奥尔良游行",
+      "ballad": "抒情慢歌",
+      "slowBlues": "慢布鲁斯",
+      "jazzWaltz": "爵士华尔兹",
+      "motown": "摩城",
+      "mambo": "曼波"
     },
     "changes": {
       "edit": "编辑和弦",
@@ -215,6 +220,10 @@
     },
     "kit": {
       "label": "鼓组",
+      "club": "俱乐部",
+      "clubHint": "在波士顿一家俱乐部实录的爵士鼓组",
+      "studio": "录音棚",
+      "studioHint": "录音棚鼓组，爵士到摇滚都合用",
       "room": "房间",
       "roomHint": "开阔，带着房间的空气感",
       "tight": "紧实",
@@ -245,7 +254,11 @@
         "hat_open": "开镲",
         "ride": "叮叮镲",
         "rim": "边击",
-        "crash": "吊镲"
+        "crash": "吊镲",
+        "tom_hi": "高音嗵鼓",
+        "tom_lo": "低音嗵鼓",
+        "hat_pedal": "踩镲踏板",
+        "ride_bell": "叮叮镲杯"
       }
     },
     "transposition": {
@@ -314,11 +327,14 @@
       "gridBar": "律动，一小节",
       "gridFill": "过门，一小节",
       "hint": "点击格子切换",
+      "addToms": "+ 嗵鼓",
       "meter": "{{beats}} 拍，{{subdivision}} · 列跟随拍号",
       "cell": "{{lane}}，第 {{beat}} 拍，第 {{tick}} 格：{{level}}",
       "lanes": {
         "hat": "踩镲",
         "snare": "军鼓",
+        "tomHi": "高音嗵鼓",
+        "tomLo": "低音嗵鼓",
         "kick": "底鼓",
         "ride": "叮叮镲"
       },
@@ -326,7 +342,8 @@
         "0": "无",
         "1": "击打",
         "2": "重音",
-        "3": "弱音"
+        "3": "弱音",
+        "4": "最强"
       },
       "subdivision": {
         "1": "四分音符",

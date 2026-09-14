@@ -218,6 +218,23 @@ export const BASS_STYLE_FOR_GROOVE: Record<string, BassStyle> = {
   samba: "bossa",
   chaCha: "bossa",
   secondLine: "funk",
+  /**
+   * The five the third pass added.
+   *
+   * A ballad and a Motown bar are both `rock` — roots on the kick — and under
+   * two grooves whose kick is one and three that is exactly the part: long
+   * notes, no fills, which is what a ballad bass and a Motown bass have in
+   * common however different they sound. The slow blues takes the shuffle
+   * line, because it IS the shuffle line with more room in it. The jazz waltz
+   * takes the waltz's three, and the mambo takes the bossa's root-and-fifth
+   * with the fifth pushed onto the "and" — the one figure bossa, samba,
+   * cha-cha and mambo all share.
+   */
+  ballad: "rock",
+  slowBlues: "shuffle",
+  jazzWaltz: "waltz",
+  motown: "rock",
+  mambo: "bossa",
 };
 
 function normaliseGrooveId(id: string): string {

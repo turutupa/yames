@@ -293,6 +293,8 @@
       "updating": "Actualizando…",
       "upToDate": "Estás al día ✓",
       "checkUpdates": "Buscar actualizaciones",
+      "sounds": "Sonidos",
+      "soundsCredit": "La batería Club es Virtuosity Drums, de Versilian Studios y Karoryfer Samples, tocada por Austin McMahon (dominio público). La batería Estudio es DRSKit, del proyecto DrumGizmo (CC BY 4.0).",
       "madeWith": "Hecho con {{heart}} para músicos de todo el mundo"
     }
   },

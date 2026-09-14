@@ -41,7 +41,12 @@
       "twoStep": "투스텝",
       "samba": "삼바",
       "chaCha": "차차",
-      "secondLine": "세컨드 라인"
+      "secondLine": "세컨드 라인",
+      "ballad": "발라드",
+      "slowBlues": "슬로우 블루스",
+      "jazzWaltz": "재즈 왈츠",
+      "motown": "모타운",
+      "mambo": "맘보"
     },
     "changes": {
       "edit": "코드 편집",
@@ -215,6 +220,10 @@
     },
     "kit": {
       "label": "킷",
+      "club": "클럽",
+      "clubHint": "보스턴의 한 클럽에서 실황 녹음한 재즈 드럼",
+      "studio": "스튜디오",
+      "studioHint": "재즈부터 록까지 아우르는 스튜디오 드럼",
       "room": "룸",
       "roomHint": "공간감이 살아 있는 열린 소리",
       "tight": "타이트",
@@ -245,7 +254,11 @@
         "hat_open": "오픈 하이햇",
         "ride": "라이드",
         "rim": "림",
-        "crash": "크래시"
+        "crash": "크래시",
+        "tom_hi": "하이 탐",
+        "tom_lo": "로우 탐",
+        "hat_pedal": "하이햇 페달",
+        "ride_bell": "라이드 벨"
       }
     },
     "transposition": {
@@ -314,11 +327,14 @@
       "gridBar": "그루브, 한 마디",
       "gridFill": "필, 한 마디",
       "hint": "칸을 눌러 바꿉니다",
+      "addToms": "+ 탐",
       "meter": "{{subdivision}}로 {{beats}}박 · 열은 박자를 따릅니다",
       "cell": "{{lane}}, {{beat}}박, {{tick}}번째: {{level}}",
       "lanes": {
         "hat": "하이햇",
         "snare": "스네어",
+        "tomHi": "하이 탐",
+        "tomLo": "로우 탐",
         "kick": "킥",
         "ride": "라이드"
       },
@@ -326,7 +342,8 @@
         "0": "없음",
         "1": "타격",
         "2": "악센트",
-        "3": "고스트"
+        "3": "고스트",
+        "4": "최강타"
       },
       "subdivision": {
         "1": "4분음표",

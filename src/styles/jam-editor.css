@@ -264,6 +264,24 @@
   box-shadow: 0 0 10px var(--accent-glow-strong);
 }
 
+/*
+ * The peak: the accent, with a ring round it. Deliberately the accent's own
+ * colours and not a colour of its own — a peak IS an accent taken as far as
+ * the arm goes, and a grid where it read as a different kind of stroke would
+ * be a grid you have to learn twice.
+ */
+.jam-editor__cell--peak {
+  background: var(--accent-subtle-hover);
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent-glow-strong);
+}
+
+.jam-editor__cell--peak .jam-editor__dot {
+  width: 13px;
+  height: 13px;
+  box-shadow: 0 0 0 3px var(--accent-glow), 0 0 12px var(--accent-glow-strong);
+}
+
 .jam-editor__cell--ghost {
   background: transparent;
   border-color: var(--accent-glow);
