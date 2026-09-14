@@ -279,9 +279,13 @@ pub struct KitManifest {
     pub credit: String,
     #[serde(default)]
     pub licence: String,
-    /// What the files are, for the report. The loader reads each file's own
-    /// header rather than trusting these — a manifest is a description, and
-    /// the samples are the fact.
+    /// What the render tool says the files are.
+    ///
+    /// **A description, not the fact.** The loader reads each file's own
+    /// header and resamples to whatever the device asked for, so a manifest
+    /// that disagrees with its folder changes nothing about what plays — but
+    /// it is a render tool that went wrong, and [`check_declaration`] says so
+    /// once rather than letting a kit ship half converted.
     #[serde(default)]
     pub rate: u32,
     #[serde(default)]
@@ -410,6 +414,10 @@ pub struct KitBank {
     pub id_name: String,
     pub name: String,
     pub credit: String,
+    /// What the kit is licensed under. A CC BY kit is paid for in the About
+    /// screen, so the licence travels with the drums rather than being
+    /// something somebody has to remember.
+    pub licence: String,
     /// How hard this kit is driven into the bus. See [`KitManifest::drive`].
     pub drive: f32,
     /// Which voices were found, with what they were found at. The report
@@ -558,6 +566,7 @@ impl KitBank {
             id_name: "fixture".to_string(),
             name: "Fixture".to_string(),
             credit: String::new(),
+            licence: String::new(),
             drive: DEFAULT_DRIVE,
             found,
             bytes,
@@ -623,6 +632,12 @@ fn manifests() -> &'static [(usize, KitManifest)] {
 
 /// Every shipped kit's id, in the order `build.rs` found them (sorted, so
 /// it is the same list on every machine).
+///
+/// The list a kit picker asks for. Nothing in the engine needs it — a config
+/// names a kit and [`shipped_index`] finds it — so today it is the tests
+/// that walk every kit the app ships, which is what they should be doing
+/// now that the list is a directory rather than a table.
+#[allow(dead_code)]
 pub fn shipped_ids() -> Vec<String> {
     manifests().iter().map(|(_, m)| m.id.clone()).collect()
 }
@@ -641,6 +656,28 @@ pub fn shipped_index(name: &str) -> Option<usize> {
 /// The manifest of a shipped kit, by index.
 pub fn shipped_manifest(index: usize) -> Option<&'static KitManifest> {
     manifests().get(index).map(|(_, m)| m)
+}
+
+/// Does a kit's manifest describe the files beside it?
+///
+/// Not fatal, and it cannot be: the loader reads every file's own header, so
+/// a manifest that lies changes nothing about what plays. What it means is
+/// that the render tool wrote one thing and produced another, and a kit
+/// arriving half converted is worth a line on the console rather than a
+/// silence. Called once per kit, when it is first decoded.
+fn check_declaration(manifest: &KitManifest, rate: u32, channels: u16) {
+    if manifest.rate != 0 && manifest.rate != rate {
+        eprintln!(
+            "[kit] {} says its files are {} Hz and they are {rate} Hz",
+            manifest.id, manifest.rate
+        );
+    }
+    if manifest.channels != 0 && manifest.channels != channels {
+        eprintln!(
+            "[kit] {} says its files are {}-channel and they are {channels}-channel",
+            manifest.id, manifest.channels
+        );
+    }
 }
 
 /// Parse a `kit.json`. Every failure is a sentence, never a panic.
@@ -1215,12 +1252,25 @@ fn build_bank(
     // the peak its files carry and the one the bank is put back on. See
     // [`VOICE_PEAK`].
     let mut source_peak = [0.0f32; KIT_VOICES];
+    // What the files actually turned out to be, so a manifest that describes
+    // something else can be reported. See [`check_declaration`].
+    let mut declared_once = false;
     for entry in entries.iter() {
         let stem = entry.name.rsplit_once('.').map_or(&entry.name[..], |(s, _)| s);
         let Some((voice, layer, robin)) = parse_file_name(stem, has_soft) else {
             continue;
         };
         let (mut buf, src_rate) = decode_stereo(&entry.name, &entry.source)?;
+        if !declared_once {
+            declared_once = true;
+            if let Some(ref m) = manifest {
+                // Two, because `decode_stereo` has already folded whatever
+                // the file was into a pair — the manifest is being checked
+                // against the format the loader guarantees, which is the
+                // only thing a kit can be described as.
+                check_declaration(m, src_rate, 2);
+            }
+        }
         let before = buf.iter().fold(0.0f32, |m, s| m.max(s.abs()));
         source_peak[voice as usize] = source_peak[voice as usize].max(before);
         if src_rate != rate {
@@ -1357,11 +1407,20 @@ fn build_bank(
     // is ordered against it: all that is asked of it is that no two banks
     // ever get the same number.
     static NEXT_ID: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
-    let (id_name, name, credit, drive) = match manifest {
-        Some(ref m) => (m.id.clone(), m.name.clone(), m.credit.clone(), m.drive),
+    let (id_name, name, credit, licence, drive) = match manifest {
+        Some(ref m) => (
+            m.id.clone(),
+            m.name.clone(),
+            m.credit.clone(),
+            m.licence.clone(),
+            m.drive,
+        ),
         None => (
             "custom".to_string(),
             "Your kit".to_string(),
+            String::new(),
+            // A folder on the musician's own machine is theirs, and the app
+            // has nothing to say about its licence.
             String::new(),
             DEFAULT_DRIVE,
         ),
@@ -1373,6 +1432,7 @@ fn build_bank(
         id_name,
         name,
         credit,
+        licence,
         drive,
         found,
         bytes,
@@ -1425,6 +1485,7 @@ pub fn with_fallback(own: &Arc<KitBank>, behind: &Arc<KitBank>) -> Arc<KitBank> 
         id_name: own.id_name.clone(),
         name: own.name.clone(),
         credit: own.credit.clone(),
+        licence: own.licence.clone(),
         // The musician's own drive, not the kit they borrowed from: the
         // folder is the kit, and `raw` lending it a ride should not also
         // lend it a fuzz box.

@@ -4135,13 +4135,6 @@ mod tests {
         Arc::new(KitBank::for_tests(voices, JAM_REFERENCE_SR, 0.05))
     }
 
-    /// The same folder, with the kit named in `kit` behind it — which is
-    /// what `set_jam` builds, and what makes a folder with two drums in it a
-    /// real kit rather than a band with two drums.
-    fn folder_over(voices: &[KitVoice], kit: &str) -> Arc<KitBank> {
-        crate::kit::with_fallback(&folder(voices), &reference_bank(kit).unwrap())
-    }
-
     /// The same, with every voice at the cap — the longest drum a folder is
     /// allowed to hold, which is what the clamp has to survive.
     fn long_folder(voices: &[KitVoice], rate: u32) -> Arc<KitBank> {
