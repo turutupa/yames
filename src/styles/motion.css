@@ -149,7 +149,10 @@
    can still be pressed and the groove editor can still be typed into — and
    the editor's Reset closes the drawer by clearing the groove it is showing,
    so a click landing there would be a click on stale music. */
-[data-state="exiting"] {
+.motion-sheet[data-state="exiting"],
+.motion-scrim[data-state="exiting"],
+.motion-drawer[data-state="exiting"],
+.motion-unfold[data-state="exiting"] {
   pointer-events: none;
 }
 
@@ -184,20 +187,35 @@
    in one frame with no `entering` or `exiting` to see — so these rules are the
    second lock on the same door: a surface that somehow reaches the browser
    with a state on it still appears and vanishes in one frame, as it did
-   before A11. */
+   before A11.
+
+   By class rather than by `[data-state]`, which two older things in the app
+   already use for something else entirely — the trade cue and the setlist
+   player's segments. Only what wears one of the classes above is this file's
+   to switch off. */
 
 @media (prefers-reduced-motion: reduce) {
-  [data-state],
+  .motion-sheet,
+  .motion-scrim,
+  .motion-drawer,
+  .motion-unfold,
   .motion-arrives,
   .motion-swap {
     animation: none !important;
   }
 }
 
-[data-theme-transition="mono"] [data-state],
-[data-theme-transition="mono"][data-state],
+/* Both shapes, because `Presence` writes the theme onto the animating element
+   itself while `ViewTransition` writes it onto an ancestor. */
+[data-theme-transition="mono"] .motion-sheet,
+[data-theme-transition="mono"] .motion-scrim,
+[data-theme-transition="mono"] .motion-drawer,
+[data-theme-transition="mono"] .motion-unfold,
 [data-theme-transition="mono"] .motion-arrives,
-[data-theme-transition="mono"].motion-arrives,
-[data-theme-transition="mono"] .motion-swap {
+[data-theme-transition="mono"] .motion-swap,
+[data-theme-transition="mono"].motion-sheet,
+[data-theme-transition="mono"].motion-scrim,
+[data-theme-transition="mono"].motion-drawer,
+[data-theme-transition="mono"].motion-unfold {
   animation: none !important;
 }
