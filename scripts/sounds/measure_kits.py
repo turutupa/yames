@@ -222,6 +222,121 @@ def db(a, b):
     return 10.0 * math.log10(max(a, 1e-30) / max(b, 1e-30))
 
 
+# ---------------------------------------------------------------------------
+# Pitch
+# ---------------------------------------------------------------------------
+#
+# Used by the render tool to retune a sampled note and by `measure_voice` to
+# gate one, and it is ONE implementation on purpose: a bank tuned by one
+# measurement and checked by another is a bank that passes its own gate and
+# nobody else's. `voices/tests.rs` holds the third copy, in Rust, and its
+# `frequency_by_autocorrelation` is this function's shape line for line —
+# same quarter-tone search, same parabola.
+
+# Concert pitch. The engine's `TUNING_HZ`.
+A4_HZ = 440.0
+
+
+NOTE_NAMES = ("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
+
+
+def midi_hz(midi):
+    return A4_HZ * 2.0 ** ((float(midi) - 69.0) / 12.0)
+
+
+def midi_name(midi):
+    """`40` -> `E2`, the convention the engine's own comments use (C4 = 60)."""
+    return "%s%d" % (NOTE_NAMES[int(midi) % 12], int(midi) // 12 - 1)
+
+
+def cents(got, want):
+    return 1200.0 * math.log2(max(got, 1e-9) / max(want, 1e-9))
+
+
+def onset_index(mono, floor_db=-60.0):
+    """The first sample of the note, relative to its own peak."""
+    if not len(mono):
+        return 0
+    pk = float(np.max(np.abs(mono)))
+    if pk <= 0:
+        return 0
+    above = np.nonzero(np.abs(mono) > pk * (10.0 ** (floor_db / 20.0)))[0]
+    return int(above[0]) if len(above) else 0
+
+
+def sustain_of(mono, sr, start_s=0.25, end_s=0.75):
+    """The half second of a note an ear tunes to.
+
+    NOT THE ATTACK, and that is the whole reason this window exists. A
+    plucked string is not at its pitch while it is still settling: measured
+    over its first half second the upright bass in this repository reads
+    **twenty to thirty cents flat** and over its second half second it reads
+    in tune, because a thick string under a finger starts slack and tightens
+    as the initial displacement dies away. Tuning a bank on its attack would
+    sharpen every note of it by a quarter of a semitone to fix a transient
+    nobody hears as pitch.
+
+    A short file — the softest Rhodes layers are half a second altogether —
+    falls back to whatever it has past the first fiftieth of a second.
+    """
+    o = onset_index(mono)
+    a, b = o + int(start_s * sr), min(o + int(end_s * sr), len(mono))
+    if b - a < int(0.1 * sr):
+        a, b = min(o + int(0.05 * sr), max(len(mono) - 1, 0)), len(mono)
+    return mono[a:b]
+
+
+def sustain_hz(mono, sr, expect, span=1.03):
+    """The fundamental near `expect` Hz, measured on the sustain.
+
+    Autocorrelation and not zero crossings: a recorded bass carries
+    harmonics that add crossings, and a crossing count reads a fingered F2 a
+    major third sharp. The lag is searched only within a QUARTER TONE of the
+    period the note claims — `span` — so the estimator cannot wander an
+    octave or a fifth off and report a confident wrong answer, which is what
+    every broad pitch search on a bright low string eventually does.
+
+    The correlation is computed through the FFT because this runs over every
+    file of every bank: the direct form is a lag times a window, and half a
+    second at 48 kHz across a hundred and thirty files is an afternoon.
+
+    `None` when there is nothing to measure. The parabola through the peak's
+    two neighbours is what takes this from a whole sample of resolution —
+    about four cents at a bass's pitch — to a hundredth of one.
+    """
+    x = np.asarray(sustain_of(mono, sr), dtype=np.float64)
+    n = len(x)
+    if n < 64:
+        return None
+    energy = float(np.dot(x, x))
+    if energy <= 0:
+        return None
+    # ac[lag] = sum over i of x[i] * x[i - lag], the linear autocorrelation,
+    # which is what zero-padding to 2n and multiplying by the conjugate gives.
+    nfft = 1 << int(2 * n - 1).bit_length()
+    spec = np.fft.rfft(x, nfft)
+    ac = np.fft.irfft(spec * np.conj(spec), nfft)[:n]
+    period = sr / float(expect)
+    lo = max(int(math.floor(period / span)), 1)
+    hi = min(int(math.ceil(period * span)), n - 2)
+    if hi <= lo:
+        return None
+    best = lo + int(np.argmax(ac[lo:hi + 1]))
+    if best < 1 or best + 1 >= n:
+        return None
+    left, mid, right = float(ac[best - 1]), float(ac[best]), float(ac[best + 1])
+    denom = left - 2.0 * mid + right
+    refine = 0.5 * (left - right) / denom if abs(denom) > 1e-12 else 0.0
+    return sr / (best + refine)
+
+
+def note_cents(mono, sr, midi):
+    """How far a note sounds from where its name says it should, in cents."""
+    want = midi_hz(midi)
+    got = sustain_hz(mono, sr, want)
+    return None if got is None else cents(got, want)
+
+
 def stats(path, x, sr, ch):
     mono = x.mean(axis=1) if x.ndim > 1 else x
     peak_i16 = int(np.max(np.abs(x))) if len(x) else 0
@@ -478,6 +593,25 @@ VOICE_MAX_BANK_BYTES = 96 * 1024 * 1024
 # nothing will ever index — legal, and worth a word.
 VOICE_USEFUL_LAYERS = 3
 
+# How far out of tune a sampled note may be, in cents, measured on its
+# sustain.
+#
+# FIVE, which is the number `voices/tests.rs` gates a shipped bank at and is
+# about the finest a good ear picks out on a sustained bass note played
+# against another instrument. The render tool corrects anything past THREE,
+# so a bank that arrives here is expected to be well inside this and the two
+# cents between the two numbers are the resampler's own rounding and the
+# difference between a note as rendered and a note as the engine rebuilt it.
+#
+# It is a real gate and not a formality: every one of the four libraries here
+# arrived out of tune in a different way. The Rhodes was recorded at A≈442
+# and sat four to eight cents sharp across the whole set; the fingered bass
+# went ten cents flat as it went up the neck; the picked bass wandered
+# sixteen cents from note to note; and the upright's attack reads twenty to
+# thirty cents flat while the string settles, which is why this is measured
+# where it is. See `sustain_of`.
+VOICE_TUNING_CENTS = 5.0
+
 
 def find_voices():
     if not os.path.isdir(VOICES_DIR):
@@ -633,6 +767,17 @@ def measure_voice(voice, problems):
                                     % (voice, name, m["head_db"]))
                 if abs(m["dc"]) > 2e-4:
                     problems.append("%s/%s: DC offset %.4f" % (voice, name, m["dc"]))
+
+                # In tune, on the sustain. See VOICE_TUNING_CENTS.
+                mono = x.mean(axis=1) if x.ndim > 1 else x
+                m["cents"] = note_cents(mono / 32768.0, sr, midi)
+                if m["cents"] is None:
+                    problems.append("%s/%s: no pitch could be measured" % (voice, name))
+                elif abs(m["cents"]) > VOICE_TUNING_CENTS:
+                    problems.append(
+                        "%s/%s: sounds %+.1f cents from %s, past the %.0f cents a "
+                        "bank may be out"
+                        % (voice, name, m["cents"], midi_name(midi), VOICE_TUNING_CENTS))
 
     for name in sorted(os.listdir(vdir)):
         if not name.endswith(".wav"):
@@ -865,6 +1010,24 @@ def main():
                      bank["stretch_at"],
                      max(m["tail_db"] for m in files.values()),
                      max((m["dc"] for m in files.values()), key=abs)))
+            # Tuning, per sampled note, on the sustain: the worst of that
+            # note's layers and round robins, because a bank is as in tune as
+            # its least in-tune recording.
+            print("  tuning on the sustain (0.25-0.75 s), worst layer and rr "
+                  "of each note, in cents:")
+            line = []
+            for midi in man["notes"]:
+                got = [m["cents"] for m in files.values()
+                       if m["midi"] == midi and m.get("cents") is not None]
+                line.append("%s %s" % (midi_name(midi),
+                                       "?" if not got
+                                       else "%+.1f" % max(got, key=abs)))
+            for i in range(0, len(line), 6):
+                print("    " + "   ".join(line[i:i + 6]))
+            allc = [m["cents"] for m in files.values() if m.get("cents") is not None]
+            if allc:
+                print("    worst %+.1f cents against a %.0f cent gate"
+                      % (max(allc, key=abs), VOICE_TUNING_CENTS))
             for note in voice_notes(man, bank):
                 print("  note: %s" % note)
             print()
@@ -904,7 +1067,9 @@ def main():
                   "inside" % len(voices))
             print("its cap and landing on zero, every manifest describing the folder "
                   "beside it,")
-            print("and no note further than %d semitones from a sample." % MAX_STRETCH)
+            print("no note further than %d semitones from a sample, and every note "
+                  "within" % MAX_STRETCH)
+            print("%.0f cents of concert pitch on its sustain." % VOICE_TUNING_CENTS)
 
 
 if __name__ == "__main__":
