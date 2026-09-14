@@ -20,11 +20,29 @@
  * | | Loud | Soft |
  * |---|---|---|
  * | ghosts | become hits (3 → 1) | — |
- * | snare | — | hits and accents become ghosts |
+ * | snare | the backbeat peaks every fourth bar | hits and accents become ghosts |
  * | hat, off-beats | move to the `hatOpen` row | — |
  * | hat | — | accents close to hits |
  * | hatOpen | — | closes back onto the hat, and the row empties |
  * | crash | one on tick 0 | the lane is cleared |
+ * | peaks | — | come back to accents |
+ *
+ * ## The fourth bar (third pass)
+ *
+ * A drummer playing loud does not hit every backbeat the same. Every fourth
+ * bar — the bar that ends a four-bar phrase — the backbeat gets the whole arm,
+ * and that is a PEAK: the hardest stroke on the kit, and on a recorded kit a
+ * different sample rather than the same one louder.
+ *
+ * Which is why this takes a bar number. `compileJam` re-sends the config on
+ * every bar line already (the bass has to), so the drummer's phrasing can ride
+ * along on a counter the caller is keeping anyway; nothing new is asked of the
+ * audio thread. Bar 0 of the chorus is the first bar of the phrase, so the
+ * peak lands on bars 3, 7, 11 … counted from zero.
+ *
+ * A ghost on the snare is left alone by that rule and raised to a hit by the
+ * one above it, which is also how a loud cross-stick groove stops being a
+ * cross-stick groove: a bossa played loud is played on the head.
  *
  * The open hat is a ROW now (`JamPattern.hatOpen`, second pass), not a level.
  * It used to be an accent on the closed-hat lane, by a convention written
@@ -45,8 +63,11 @@
  * closed-hat lane, and where nothing opens it is not written at all.
  */
 import type { GrooveTicks } from "./grooves";
-import { JAM_LANES } from "./types";
+import { JAM_LANES, JAM_OPTIONAL_LANES } from "./types";
 import type { JamIntensity, JamLevel, JamPattern } from "./types";
+
+/** How often a loud drummer leans the whole arm into the backbeat. */
+const PHRASE_BARS = 4;
 
 /**
  * The meter the pattern is written in. Needed because "the off-beats" is not
@@ -64,15 +85,28 @@ export function isOffBeat(tick: number, ticksPerBeat: number): boolean {
 /**
  * A copy with every lane its own array, so nothing below edits the caller's.
  *
- * `hatOpen` is copied only where it exists: a pattern with no open hats has
- * no row, and inventing an empty one would put a lane in every table the
- * engine has to read past.
+ * The optional rows — the open hat and the two toms — are copied only where
+ * they exist: a pattern with no open hats has no row, and inventing an empty
+ * one would put a lane in every table the engine has to read past.
  */
 function copy(pattern: JamPattern): JamPattern {
   const out = {} as JamPattern;
   for (const lane of JAM_LANES) out[lane] = [...(pattern[lane] ?? [])];
-  if (pattern.hatOpen) out.hatOpen = [...pattern.hatOpen];
+  for (const lane of JAM_OPTIONAL_LANES) {
+    const row = pattern[lane];
+    if (row) out[lane] = [...row];
+  }
   return out;
+}
+
+/** Every row the pattern actually carries, required and optional. */
+function rowsOf(pattern: JamPattern): JamLevel[][] {
+  const rows: JamLevel[][] = JAM_LANES.map((lane) => pattern[lane]);
+  for (const lane of JAM_OPTIONAL_LANES) {
+    const row = pattern[lane];
+    if (row) rows.push(row);
+  }
+  return rows;
 }
 
 /**
@@ -85,9 +119,17 @@ export function applyIntensity(
   pattern: JamPattern,
   intensity: JamIntensity,
   meter: IntensityMeter,
+  formBar = 0,
 ): JamPattern {
   if (intensity === "normal") return pattern;
-  return intensity === "loud" ? loud(pattern, meter) : soft(pattern);
+  return intensity === "loud" ? loud(pattern, meter, formBar) : soft(pattern);
+}
+
+/** Is this the bar a loud drummer leans on — the last of a four-bar phrase? */
+export function isPhraseEnd(formBar: number): boolean {
+  const bar = Math.trunc(formBar);
+  if (!Number.isFinite(bar)) return false;
+  return ((bar % PHRASE_BARS) + PHRASE_BARS) % PHRASE_BARS === PHRASE_BARS - 1;
 }
 
 /**
@@ -106,13 +148,22 @@ export function applyIntensity(
  *
  * And a crash on tick 0, at accent, because that is where a drummer starting
  * loud puts one.
+ *
+ * On the last bar of every four-bar phrase the snare's accents — which is
+ * where the backbeat is written — go to PEAK. That is the arm going in at the
+ * end of the phrase, and it is what stops a loud drummer sounding like a
+ * normal drummer turned up.
  */
-function loud(pattern: JamPattern, meter: IntensityMeter): JamPattern {
+function loud(pattern: JamPattern, meter: IntensityMeter, formBar: number): JamPattern {
   const out = copy(pattern);
-  for (const lane of JAM_LANES) {
-    const row = out[lane];
+  for (const row of rowsOf(out)) {
     for (let t = 0; t < row.length; t += 1) {
       if (row[t] === 3) row[t] = 1;
+    }
+  }
+  if (isPhraseEnd(formBar)) {
+    for (let t = 0; t < out.snare.length; t += 1) {
+      if (out.snare[t] === 2) out.snare[t] = 4;
     }
   }
   const already = out.hatOpen;
@@ -150,6 +201,12 @@ function loud(pattern: JamPattern, meter: IntensityMeter): JamPattern {
  * and a jam with no findable pulse is not a quiet jam, it is a broken one —
  * the same reason `applyFeel`'s swing softens only the hat and the ride.
  *
+ * And every PEAK comes back to an accent. A quiet drummer still marks the top
+ * of the fill and still lands the one — they just do not take the arm back to
+ * do it. The snare goes through this rule second, so a peak on the snare
+ * lands on an accent and stops there rather than falling all the way to a
+ * ghost: the top of a fill you cannot hear is not a soft fill, it is no fill.
+ *
  * No meter needed: none of these rules asks where the beats are.
  */
 function soft(pattern: JamPattern): JamPattern {
@@ -157,6 +214,11 @@ function soft(pattern: JamPattern): JamPattern {
   for (let t = 0; t < out.snare.length; t += 1) {
     const level = out.snare[t];
     if (level === 1 || level === 2) out.snare[t] = 3;
+  }
+  for (const row of rowsOf(out)) {
+    for (let t = 0; t < row.length; t += 1) {
+      if (row[t] === 4) row[t] = 2;
+    }
   }
   for (let t = 0; t < out.hat.length; t += 1) {
     if (out.hat[t] === 2) out.hat[t] = 1;
@@ -189,16 +251,24 @@ export type Intensifiable = {
  * The fill goes through the same rules as the bar, which is what makes a loud
  * fill land: its snare figure keeps its accents, and the crash the engine
  * puts on the next one is answered by the one this adds on tick 0.
+ *
+ * The fill does NOT get the fourth-bar peak, and that is the one asymmetry
+ * here. `formBar` is the bar the caller is about to play; the fill is played
+ * on the bar that ends the chorus, which is a different bar, so phrasing the
+ * fill by this number would be phrasing it by somebody else's count. It has
+ * no need of the rule anyway — a fill written to this pass's shape already
+ * ends on a peak of its own.
  */
 export function applyIntensityToGroove<G extends Intensifiable>(
   groove: G,
   intensity: JamIntensity,
+  formBar = 0,
 ): G {
   if (intensity === "normal") return groove;
   const meter = { beatsPerBar: groove.beatsPerBar, ticksPerBeat: groove.ticksPerBeat };
   return {
     ...groove,
-    bar: applyIntensity(groove.bar, intensity, meter),
+    bar: applyIntensity(groove.bar, intensity, meter, formBar),
     fill: groove.fill ? applyIntensity(groove.fill, intensity, meter) : null,
   };
 }

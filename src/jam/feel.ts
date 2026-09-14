@@ -14,7 +14,7 @@
  */
 import type { GrooveTicks } from "./grooves";
 import type { JamFeel, JamLevel, JamPattern, JamLane } from "./types";
-import { JAM_LANES } from "./types";
+import { JAM_LANES, JAM_OPTIONAL_LANES } from "./types";
 
 /** Straight eighths → triplets, off-beat on the third tick. */
 function toTriplets(source: JamLevel[], beatsPerBar: number): JamLevel[] {
@@ -29,10 +29,14 @@ function toTriplets(source: JamLevel[], beatsPerBar: number): JamLevel[] {
 function patternToTriplets(pattern: JamPattern, beatsPerBar: number): JamPattern {
   const out = {} as JamPattern;
   for (const lane of JAM_LANES) out[lane] = toTriplets(pattern[lane], beatsPerBar);
-  // The open-hat row rides along. It is not one of `JAM_LANES` — it is an
-  // optional sixth row (`JamPattern.hatOpen`) — and a conversion that dropped
-  // it would silently close every open hat in a groove the moment it swung.
-  if (pattern.hatOpen) out.hatOpen = toTriplets(pattern.hatOpen, beatsPerBar);
+  // The optional rows ride along — the open hat and the two toms. They are not
+  // in `JAM_LANES`, and a conversion that dropped them would silently close
+  // every open hat the moment a groove swung, and leave every fill stranded on
+  // the snare with its toms gone.
+  for (const lane of JAM_OPTIONAL_LANES) {
+    const row = pattern[lane];
+    if (row) out[lane] = toTriplets(row, beatsPerBar);
+  }
   return out;
 }
 
@@ -49,8 +53,13 @@ function softenOffBeats(pattern: JamPattern, beatsPerBar: number): JamPattern {
   const out = {} as JamPattern;
   // Carried, not softened. A ghosted open hat is not a thing anybody plays:
   // the stroke is open BECAUSE it is the one being leaned on, so swing brushes
-  // the closed hat beside it and leaves this row as written.
-  if (pattern.hatOpen) out.hatOpen = [...pattern.hatOpen];
+  // the closed hat beside it and leaves this row as written. The toms are
+  // carried for the same reason turned the other way: a tom in a fill is
+  // always a deliberate stroke, never a texture to brush.
+  for (const lane of JAM_OPTIONAL_LANES) {
+    const row = pattern[lane];
+    if (row) out[lane] = [...row];
+  }
   for (const lane of JAM_LANES) {
     const row = [...pattern[lane]];
     if (SOFTENED.includes(lane)) {

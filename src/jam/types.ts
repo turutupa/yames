@@ -13,12 +13,34 @@
  * anyway. See plans/JAM_MODE.md §6.
  */
 
-/** How loud a cell is. 0 off, 1 hit, 2 accent, 3 ghost. */
-export type JamLevel = 0 | 1 | 2 | 3;
+/**
+ * How loud a cell is. 0 off, 1 hit, 2 accent, 3 ghost, **4 peak**.
+ *
+ * Peak is the top of a fill and the crash on the one — the hardest stroke on
+ * the kit, and the reason it is a level rather than a louder accent: a
+ * recorded kit has a different SAMPLE for it, and picking that sample is
+ * something the engine can only do if the table says which stroke this is.
+ * Written last rather than between accent and ghost so that every level a
+ * pattern was ever saved with still means what it meant (third pass,
+ * plans/tasks/jam-v3/BRIEF.md).
+ */
+export type JamLevel = 0 | 1 | 2 | 3 | 4;
 
 export type JamLane = "kick" | "snare" | "hat" | "ride" | "crash";
 
 export const JAM_LANES: readonly JamLane[] = ["kick", "snare", "hat", "ride", "crash"];
+
+/**
+ * The rows a pattern may carry but need not: they are absent, not empty,
+ * where a groove does not play them.
+ *
+ * Absent rather than zeroed on purpose — a row of zeros is a lane the engine
+ * reads past on every tick of every bar to learn nothing, and a lane the
+ * editor would draw as an instrument nobody is playing.
+ */
+export type JamOptionalLane = "hatOpen" | "tomHi" | "tomLo";
+
+export const JAM_OPTIONAL_LANES: readonly JamOptionalLane[] = ["hatOpen", "tomHi", "tomLo"];
 
 /**
  * One bar, one row per drum. Every array has exactly
@@ -27,9 +49,23 @@ export const JAM_LANES: readonly JamLane[] = ["kick", "snare", "hat", "ride", "c
  * `hatOpen` is the open hi-hat as its own row (second pass, B5): a level in
  * it plays the kit's open hat instead of the closed one on that tick.
  * Optional, so every pattern ever saved still reads; absent means closed
- * hats only. The editor may show it as a fifth lane.
+ * hats only.
+ *
+ * `tomHi` and `tomLo` are the two toms (third pass), and they exist for one
+ * reason: a fill that stays on the snare is a drum roll, not a fill. They are
+ * optional for the same reason `hatOpen` is — most grooves never leave the
+ * snare, and a groove that does not use its toms should not carry two silent
+ * rows around.
+ *
+ * The engine's serde mirror names these rows `hat_open`, `tom_hi` and
+ * `tom_lo` and reads them from `hatOpen`, `tomHi` and `tomLo` on the wire,
+ * because `JamPattern` there is `#[serde(rename_all = "camelCase")]`.
  */
-export type JamPattern = Record<JamLane, JamLevel[]> & { hatOpen?: JamLevel[] };
+export type JamPattern = Record<JamLane, JamLevel[]> & {
+  hatOpen?: JamLevel[];
+  tomHi?: JamLevel[];
+  tomLo?: JamLevel[];
+};
 
 /**
  * What the engine receives. The UI is responsible for having ALREADY set the
@@ -51,6 +87,20 @@ export type JamEngineConfig = {
   crashOnOne: boolean;
   /** Gain multiplier on every hit, 0.5..1.5. Soft 0.7, normal 1.0, loud 1.25. */
   intensity: number;
+  /**
+   * The quiet snare in this groove is a CROSS-STICK, not a ghost note.
+   *
+   * A bossa, a ballad and a cha-cha are played with the stick laid across the
+   * head and the tip on the rim — a different sound entirely from a ghost,
+   * which is the same head hit softly. The grooves that want it say so
+   * (`Groove.snareGhostIsRim`), and the engine plays its `rim` voice for
+   * every level-3 stroke on the snare lane instead of the soft snare.
+   *
+   * Absent or false: a ghost is a ghost. The engine's field is
+   * `snare_ghost_is_rim`; the name on the wire is this one, because its
+   * struct is `#[serde(rename_all = "camelCase")]`.
+   */
+  snareGhostIsRim?: boolean;
   /** Which kit plays the lanes: "room" | "tight" | "brushes" | "electronic". */
   kit: string;
   /**

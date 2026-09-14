@@ -32,6 +32,7 @@ import { chordsForJam } from "./progression";
 import { keysLineFor } from "./keysline";
 import { practiceConfigFrom } from "./practice";
 import { applyIntensity } from "./vibesContract";
+import type { ShapedGroove } from "./vibesContract";
 import { JAM_INTENSITY_GAIN, JAM_LANES } from "./types";
 import type { Key } from "./harmony";
 import type {
@@ -102,12 +103,10 @@ export function jamKey(jam: Jam): Key {
  * control has to be able to say what the groove was written for in order to
  * offer "the groove's own".
  */
-export function jamWrittenGroove(jam: Jam): {
-  beatsPerBar: number;
-  ticksPerBeat: 1 | 2 | 3 | 4 | 6;
-  bar: JamPattern;
-  fill: JamPattern | null;
-} {
+export function jamWrittenGroove(jam: Jam): ShapedGroove {
+  // A groove you drew is a groove nobody has heard: its quiet snare is a
+  // ghost, because the editor has no way to say "cross-stick" and guessing
+  // would put a rim click in a bar the player thinks they drew.
   if (jam.customGroove) return applyFeel(jam.customGroove, jam.feel);
   const preset = applyFeel(grooveById(jam.grooveId), jam.feel);
   return {
@@ -115,6 +114,7 @@ export function jamWrittenGroove(jam: Jam): {
     ticksPerBeat: preset.ticksPerBeat,
     bar: preset.bar,
     fill: preset.fill,
+    snareGhostIsRim: preset.snareGhostIsRim,
   };
 }
 
@@ -149,12 +149,7 @@ export function jamGrooveFitsMeter(jam: Jam): boolean {
  * a drummer"). Not a refusal and not a silent re-bar: the bar the engine gets
  * is the meter you asked for, and the drummer plays something honest in it.
  */
-export function jamGroove(jam: Jam): {
-  beatsPerBar: number;
-  ticksPerBeat: 1 | 2 | 3 | 4 | 6;
-  bar: JamPattern;
-  fill: JamPattern | null;
-} {
+export function jamGroove(jam: Jam): ShapedGroove {
   if (jamGrooveFitsMeter(jam)) return jamWrittenGroove(jam);
   const rule = ruleGroove(jamBeatGroups(jam), jam.meter!.ticksPerBeat);
   return {
@@ -168,11 +163,12 @@ export function jamGroove(jam: Jam): {
 /**
  * Every lane at zero, the same width as `pattern`.
  *
- * The optional `hatOpen` row is dropped rather than zeroed, which is the one
- * place in the compiler where the row does not travel: a silent drummer has
- * nothing to open, and a row of zeros would be state the engine reads past on
- * every bar to learn nothing. Everywhere else the bar and the fill go to the
- * engine exactly as the groove wrote them — untouched, this row included.
+ * The optional rows — the open hat and the two toms — are dropped rather than
+ * zeroed, which is the one place in the compiler where they do not travel: a
+ * silent drummer has nothing to open and no tom to hit, and a row of zeros
+ * would be state the engine reads past on every bar to learn nothing.
+ * Everywhere else the bar and the fill go to the engine exactly as the groove
+ * wrote them — those rows included.
  */
 function silenced(pattern: JamPattern): JamPattern {
   const out = {} as JamPattern;
@@ -286,8 +282,12 @@ export function compileJam(jam: Jam, options: JamCompileOptions = {}): JamEngine
    * Applied here and not in `jamGroove`, deliberately: the bass line and the
    * meter are worked out from the groove as WRITTEN, and a hat that opened
    * must not move a bass note or re-bar the tune.
+   *
+   * It takes the bar, because Loud's last rule is a phrase rule: the backbeat
+   * peaks at the end of every four bars. That costs nothing — this function is
+   * already called once per bar line, because the bass has to be.
    */
-  const groove = applyIntensity(jamGroove(jam), jam.intensity);
+  const groove = applyIntensity(jamGroove(jam), jam.intensity, options.formBar ?? 0);
   // Muting the drummer is not the same as removing them: the table still has
   // to be the right width, because the engine checks it against the bar it
   // already runs. A silent drummer is every cell at zero.
@@ -306,6 +306,13 @@ export function compileJam(jam: Jam, options: JamCompileOptions = {}): JamEngine
     formBars: formBars(jam.form),
     crashOnOne: jam.fills && !drumsOff,
     intensity: JAM_INTENSITY_GAIN[jam.intensity] ?? 1,
+    // The bossa, the ballad and the cha-cha are played with the stick across
+    // the head. Sent as a flag rather than written into the table, because it
+    // is true of the whole groove and not of one tick: every quiet snare in it
+    // is the rim, in the bar and in the fill alike. Absent where it is false,
+    // the way the voices below are absent — a switch that is only ever off
+    // reads better missing than present and empty.
+    ...(groove.snareGhostIsRim ? { snareGhostIsRim: true } : {}),
     kit: jam.kit || "room",
     bass: jamBassLine(jam, options.formBar ?? 0, options.lineup),
     practice: jam.practice ? practiceConfigFrom(jam.practice) : null,

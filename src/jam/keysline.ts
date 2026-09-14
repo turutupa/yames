@@ -202,8 +202,9 @@ function snareTicks(groove: JamPattern, length: number): number[] {
   const lane: JamLevel[] = groove?.snare ?? [];
   for (let tick = 0; tick < length; tick++) {
     // A ghost is not a backbeat, and comping on one would put the chord in a
-    // place the drummer is deliberately being quiet.
-    if (lane[tick] === 1 || lane[tick] === 2) out.push(tick);
+    // place the drummer is deliberately being quiet. A peak is the loudest
+    // backbeat there is, so it counts twice over.
+    if (lane[tick] === 1 || lane[tick] === 2 || lane[tick] === 4) out.push(tick);
   }
   return out;
 }
