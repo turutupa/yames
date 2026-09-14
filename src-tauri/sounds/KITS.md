@@ -558,18 +558,19 @@ and a Rhodes comp over them, switchable voice by voice.
 
 ## What ships, measured
 
-| voice | notes sampled | worst stretch | layers | rr | longest | on disk | decoded | `trim_db` | `release_ms` |
-|---|---|---|---|---|---|---|---|---|---|
-| `bass_fingered` | 6 | 2 st | 3 | 2 | 2.00 s | 6.59 MB | 62.1 MB | +0.00 dB | 250 ms |
-| `bass_picked` | 8 | 2 st | 2 | 2 | 2.00 s | 5.86 MB | 40.1 MB | −2.83 dB | 250 ms |
-| `bass_upright` | 6 | 3 st | 3 | 2 | 2.00 s | 6.52 MB | 60.3 MB | +0.00 dB | 60 ms |
-| `epiano` | 10 | 3 st | 3 | 1 | 2.50 s | 5.71 MB | 43.1 MB | −2.54 dB | 250 ms |
+| voice | notes sampled | worst stretch | worst tuning | layers | rr | longest | on disk | decoded | `trim_db` | `release_ms` |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `bass_fingered` | 6 | 2 st | +2.7 ¢ | 3 | 2 | 2.00 s | 6.59 MB | 62.1 MB | +0.00 dB | 250 ms |
+| `bass_picked` | 8 | 2 st | −2.4 ¢ | 2 | 2 | 2.00 s | 5.86 MB | 40.1 MB | −2.82 dB | 250 ms |
+| `bass_upright` | 6 | 3 st | −2.9 ¢ | 3 | 2 | 2.00 s | 6.52 MB | 60.3 MB | +0.00 dB | 60 ms |
+| `epiano` | 10 | 3 st | +2.8 ¢ | 3 | 1 | 2.50 s | 5.72 MB | 43.1 MB | −2.53 dB | 250 ms |
 
 Every file is mono, 48 kHz, 16-bit, peak 0.900, both ends on zero — the kit
 rules, unchanged. The bass banks are built for MIDI 28–55 (E1–G3) and the keys
 for 48–84 (C3–C6); **"worst stretch" is the furthest any note in that range
 sits from a sample it can be built out of**, and `voices::MAX_STRETCH_SEMITONES`
-is three.
+is three. **"Worst tuning" is the furthest any file is from concert pitch on
+its own sustain**, gated at ±5 cents here and again in `voices/tests.rs`.
 
 `bass_slap` is **not** recorded — see below — and plays the synthesised recipe,
 as do `organ`, `clav`, `pad` and `synth`, which were never in scope.
@@ -592,7 +593,7 @@ Meatbass — Karoryfer Samples
 jRhodes3 — a 1977 Rhodes Mark I Stage 73 sampled by Jeff Learman
 ```
 
-## The three decisions that shaped these banks
+## The four decisions that shaped these banks
 
 ### 1. A bank is a handful of notes, because a bass note does not stop
 
@@ -656,7 +657,75 @@ The window is the synthesised note's own length — 0.45 s for the fingered bass
 0.70 s for the Rhodes — because the recording runs to a 2.0 s cap and the
 recipe does not. Summed whole, the comparison would be measuring a duration.
 
-### 3. Three layers, and never more
+### 3. Every bank arrived out of tune, and was retuned
+
+All three libraries are good recordings of real instruments, and not one of
+them was at concert pitch. Measured through the loader on each note's sustain,
+before anything was done about it:
+
+| voice | worst note, before | after | files retuned | the shape of it |
+|---|---|---|---|---|
+| `bass_fingered` | **+15.0 cents** | +2.7 | 15 of 36 | goes flat up the neck |
+| `bass_picked` | **−16.3 cents** | −2.4 | 24 of 32 | wanders note to note |
+| `bass_upright` | **−13.3 cents** | −2.9 | 20 of 36 | in tune; the attack is not |
+| `epiano` | **+8.1 cents** | +2.8 | 23 of 30 | the whole set at about A=442 |
+
+Per sampled note, worst layer and round robin, before → after in cents:
+
+```
+bass_fingered  F#1 +12.5→−0.5   B1 +15.0→+1.7   E2  +3.0→+2.7
+               A2  −1.9→−1.9    D3 −6.3→−1.8    G3  −9.3→−0.4
+bass_picked    E1 +10.3→−0.2    G#1 +7.4→+0.0   C2  −3.4→−2.2   E2 −5.2→−0.8
+               G#2 −2.4→−2.4    C3 −3.6→+0.3    E3 −16.3→−0.5   G3 −3.6→−0.5
+bass_upright   F#1 +6.6→+1.8    A1 −13.0→−2.9   C2 −13.3→−1.8
+               F#2 +5.6→−2.9    C3  +4.7→+1.9   F#3 −9.6→−2.0
+epiano         A2 +4.8→+0.4     D3 +8.1→+2.8    G3 +4.5→−0.5   B3 +3.1→+2.4
+               D4 +5.5→+0.1     F4 +0.4→−0.3    B4 +4.0→−0.2   E5 +4.8→−0.2
+               A5 +4.6→−0.2     D6 +4.0→−0.0
+```
+
+Sixteen cents is a sixth of a semitone. Against a guitar the owner has just
+tuned, that is a slow beat on every held note — and it was invisible, because
+the only pitch check that existed was an octave guard, which is the right tool
+for a `key_offset` that is wrong and no use at all for this.
+
+**Measured on the sustain, and that is the whole trick.** A plucked string is
+not at its pitch while it is still settling: over its first half second the
+upright reads **twenty to thirty cents flat**, and over its second half second
+it reads in tune, because a thick string starts slack and tightens as the
+initial displacement dies away. Tuning a bank on its attack would sharpen every
+note of it by a quarter of a semitone to fix a transient nobody hears as pitch.
+So the window is 0.25–0.75 s from the onset; the lag is searched only within a
+quarter tone of the period the note claims, because a broad search on a bright
+low string eventually finds a harmonic and reports a confident wrong answer;
+and a parabola through the peak's neighbours takes the resolution from a whole
+sample — about four cents at a bass's pitch — to a hundredth of one.
+
+**Corrected by resampling.** A bass sampled a few cents flat was *played* a few
+cents flat, so stretching the waveform by that ratio is restoring the take
+rather than processing it. Six cents is three parts in a thousand — a two
+second note becomes 1.9994 s — which is why nothing downstream has to know.
+The ratio is folded into the 44.1 → 48 kHz conversion the note needed anyway,
+so a retuned note is filtered once and an already-in-tune note takes the old
+road bit for bit; that is why re-rendering moved 82 files of 134 and left the
+rest byte-identical.
+
+Anything past **three** cents is corrected and the gate is at **five**. The two
+between them are the resampler's rounding, the dither, and the difference
+between a note as rendered and the same note as the engine rebuilds it at
+another pitch — correcting at the gate would ship a bank that passes on this
+machine and fails on a device that opened at 44.1 kHz.
+
+The measurement lives once, in `measure_kits.py`, and the render tool imports
+it: a bank tuned by one measurement and checked by another passes its own gate
+and nobody else's. `voices/tests.rs` holds the third copy, in Rust, and gates
+every shipped bank the same way at ±5 cents.
+
+What is *not* fixed: a note that drifts within itself. The fingered G3 is 9.6
+cents flat over its first half second and 10.3 over its second, and one ratio
+cannot flatten a curve. That drift is the instrument.
+
+### 4. Three layers, and never more
 
 `voices::MAX_LAYERS` is four, and `jam::voice_layer` maps a line's gain to
 **one, two or three** and clamps to what the bank has. A fourth layer is a file
@@ -774,7 +843,9 @@ and if a slap library ever turns up, it is a recipe and a re-run.
 | the bank is too big | `notes` first, then `cap_s` | down; round robins last |
 | repeated notes sound machine-gunned | `rr` | up to 3, if the source has them |
 | the Rhodes stops too soon under a held chord | `cap_s` | up, 2.5 → 3.5; costs 40 % of the folder |
-| it is an octave out | `source.key_offset` | ±12 — and the render tool will tell you |
+| it is an octave out | `source.key_offset` | ±12 — and the render tool will refuse it |
+| it beats against my guitar | nothing here — tuning is measured and corrected per note. Re-render and read the before/after table | |
+| the attack sounds flat on the upright | nothing here either — that is the string settling, and the sustain it resolves to is what was tuned | |
 
 ## The rules these were built to
 
