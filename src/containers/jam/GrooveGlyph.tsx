@@ -19,8 +19,12 @@ const ROWS: readonly { lane: JamLane; alt?: JamLane }[] = [
   { lane: "kick" },
 ];
 
-/** Dot radius by level: an accent is the big one, a ghost barely there. */
-const RADIUS: Record<Exclude<JamLevel, 0>, number> = { 1: 1.5, 2: 2.2, 3: 0.9 };
+/**
+ * Dot radius by level: a peak is the biggest, an accent the one under it, a
+ * ghost barely there. A peak only ever appears in a fill, so on a card it is
+ * the stroke that says "and here the drummer let go".
+ */
+const RADIUS: Record<Exclude<JamLevel, 0>, number> = { 1: 1.5, 2: 2.2, 3: 0.9, 4: 2.8 };
 
 const COLUMN = 5;
 const ROW = 6;

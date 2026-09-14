@@ -118,8 +118,9 @@ describe("compileJam", () => {
     }
   });
 
-  it("keeps the kit on the record even though the engine ignores it", () => {
-    expect(compileJam(createJam("x")).kit).toBe("room");
+  it("keeps the kit on the record, and a new jam's is a recorded one", () => {
+    expect(compileJam(createJam("x")).kit).toBe("studio");
+    expect(compileJam(createJam("x", { kit: "brushes" })).kit).toBe("brushes");
   });
 
   it("falls back to a groove that exists when the record names one that does not", () => {
@@ -129,6 +130,99 @@ describe("compileJam", () => {
   it("is pure — compiling twice gives the same table", () => {
     const jam = STARTER_JAMS[0];
     expect(compileJam(jam)).toEqual(compileJam(jam));
+  });
+});
+
+/**
+ * What the third pass added to the wire: a fifth level, two tom rows, and a
+ * flag that says the quiet snare is a cross-stick.
+ *
+ * Each of these fails silently in its own way if it is dropped here — a fill
+ * that never leaves the snare, a peak heard as an accent, a bossa played on
+ * the head — so each is checked at the boundary rather than only in the data.
+ */
+describe("the fifth level and the toms reach the engine", () => {
+  it("sends the fill's tom rows, full width, with the peak on the last tick", () => {
+    const jam = createJam("x", { grooveId: "rock8", fills: true });
+    const config = compileJam(jam);
+    const ticks = config.beatsPerBar * config.ticksPerBeat;
+    expect(config.fill?.tomHi).toHaveLength(ticks);
+    expect(config.fill?.tomLo).toHaveLength(ticks);
+    expect(config.fill?.tomLo?.[ticks - 1]).toBe(4);
+    expect(config.fill?.tomHi?.[ticks - 2]).toBe(2);
+  });
+
+  it("sends no tom rows on the bar, because the bar does not play them", () => {
+    const config = compileJam(createJam("x", { grooveId: "rock8" }));
+    expect(config.bar.tomHi).toBeUndefined();
+    expect(config.bar.tomLo).toBeUndefined();
+  });
+
+  it("carries the toms through a feel and an intensity", () => {
+    for (const feel of FEELS) {
+      for (const intensity of ["soft", "normal", "loud"] as JamIntensity[]) {
+        const config = compileJam(
+          createJam("x", { grooveId: "rock8", feel, intensity, fills: true }),
+        );
+        const ticks = config.beatsPerBar * config.ticksPerBeat;
+        expect(config.fill?.tomLo, `${feel} ${intensity}`).toHaveLength(ticks);
+        // Soft brings the peak back to an accent; the other two keep it.
+        expect(
+          config.fill?.tomLo?.[ticks - 1],
+          `${feel} ${intensity}`,
+        ).toBe(intensity === "soft" ? 2 : 4);
+      }
+    }
+  });
+
+  it("tells the engine when the quiet snare is a cross-stick", () => {
+    for (const id of ["bossa", "ballad", "chaCha", "oneDrop"]) {
+      expect(compileJam(createJam("x", { grooveId: id })).snareGhostIsRim, id).toBe(true);
+    }
+    // And says nothing at all for the grooves whose ghosts are ghosts, rather
+    // than sending a switch that is only ever off.
+    expect(compileJam(createJam("x", { grooveId: "funk" })).snareGhostIsRim).toBeUndefined();
+  });
+
+  it("does not claim a cross-stick for a groove you drew", () => {
+    // A groove nobody has heard yet: the editor has no way to say
+    // "cross-stick", and guessing would put a rim click in a bar the player
+    // thinks they drew.
+    const drawn = createJam("x", { grooveId: "bossa" });
+    drawn.customGroove = {
+      name: "mine",
+      beatsPerBar: 4,
+      ticksPerBeat: 2,
+      bar: {
+        kick: [1, 0, 0, 0, 0, 0, 0, 0],
+        snare: [0, 0, 3, 0, 0, 0, 3, 0],
+        hat: [0, 0, 0, 0, 0, 0, 0, 0],
+        ride: [0, 0, 0, 0, 0, 0, 0, 0],
+        crash: [0, 0, 0, 0, 0, 0, 0, 0],
+      },
+      fill: null,
+    };
+    expect(compileJam(drawn).snareGhostIsRim).toBeUndefined();
+  });
+
+  it("peaks the backbeat on the fourth bar of a loud jam, and not before it", () => {
+    const jam = createJam("x", { grooveId: "rock8", intensity: "loud" });
+    expect(compileJam(jam, { formBar: 0 }).bar.snare).not.toContain(4);
+    expect(compileJam(jam, { formBar: 3 }).bar.snare).toContain(4);
+    // And a jam at normal is the groove as written, on every bar.
+    const plain = createJam("x", { grooveId: "rock8" });
+    expect(compileJam(plain, { formBar: 3 }).bar.snare).not.toContain(4);
+  });
+
+  it("drops the tom rows with everything else when the drummer is off", () => {
+    const jam = createJam("x", {
+      grooveId: "rock8",
+      fills: true,
+      band: { drums: false, bass: false, keys: false },
+    });
+    const config = compileJam(jam);
+    expect(config.fill?.tomLo).toBeUndefined();
+    expect(config.fill?.snare.every((l) => l === 0)).toBe(true);
   });
 });
 

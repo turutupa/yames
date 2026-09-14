@@ -146,12 +146,20 @@ export type Vibe = {
 /** What picking a vibe (or one of its variations) writes onto the record. */
 export type VibePatch = Partial<Omit<Jam, "id" | "createdAt">>;
 
-/** A groove as the compiler holds it — one bar, its fill, and the meter. */
+/**
+ * A groove as the compiler holds it — one bar, its fill, and the meter.
+ *
+ * `snareGhostIsRim` rides along because it is part of what the groove IS: the
+ * quiet snare in a bossa is a cross-stick, and a shaping pass that dropped
+ * the flag would hand the engine a bossa played with the tip of the stick on
+ * the head.
+ */
 export type ShapedGroove = {
   beatsPerBar: number;
   ticksPerBeat: 1 | 2 | 3 | 4 | 6;
   bar: JamPattern;
   fill: JamPattern | null;
+  snareGhostIsRim?: boolean;
 };
 
 // ---------------------------------------------------------------------------
@@ -244,7 +252,17 @@ export function applyVibe(jam: Jam, vibe: Vibe, variationId?: string): VibePatch
   };
 }
 
-/** Intensity as a PATTERN, not only a level (B5); see `intensity.ts`. */
-export function applyIntensity(groove: ShapedGroove, intensity: JamIntensity): ShapedGroove {
-  return applyIntensityToGroove(groove, intensity);
+/**
+ * Intensity as a PATTERN, not only a level (B5); see `intensity.ts`.
+ *
+ * `formBar` is the bar of the chorus about to be played, and it is here for
+ * one rule: a loud drummer peaks the backbeat at the end of every four-bar
+ * phrase. Default 0, which is a jam that has not started yet.
+ */
+export function applyIntensity(
+  groove: ShapedGroove,
+  intensity: JamIntensity,
+  formBar = 0,
+): ShapedGroove {
+  return applyIntensityToGroove(groove, intensity, formBar);
 }

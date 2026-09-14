@@ -106,7 +106,7 @@ describe("the columns follow the meter", () => {
 });
 
 describe("clicking a cell", () => {
-  it("cycles off → hit → accent → ghost → off", () => {
+  it("cycles off → hit → accent → peak → ghost → off", () => {
     const levels: number[] = [];
     let value = groove();
     const onChange = vi.fn((next: JamCustomGroove) => {
@@ -124,7 +124,7 @@ describe("clicking a cell", () => {
         onReset={vi.fn()}
       />,
     );
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 5; i++) {
       fireEvent.click(cell(0, 0));
       rerender(
         <GrooveEditor
@@ -138,7 +138,7 @@ describe("clicking a cell", () => {
         />,
       );
     }
-    expect(levels).toEqual([1, 2, 3, 0]);
+    expect(levels).toEqual([1, 2, 4, 3, 0]);
   });
 
   it("goes backwards on shift-click", () => {
@@ -335,14 +335,54 @@ describe("the header", () => {
     expect(props.onDone).toHaveBeenCalledTimes(1);
   });
 
-  it("lists the four states in the legend", () => {
+  it("lists the five states in the legend, in the order a click walks them", () => {
     const { container } = setup();
     const legend = container.querySelector(".jam-editor__legend")!;
     expect(
       [...legend.querySelectorAll(".jam-editor__legend-text")].map(
         (el) => el.textContent,
       ),
-    ).toEqual(["off", "hit", "accent", "ghost"]);
+    ).toEqual(["off", "hit", "accent", "peak", "ghost"]);
     expect(within(legend as HTMLElement).getByText("Click a cell to cycle")).toBeInTheDocument();
+  });
+});
+
+describe("the toms", () => {
+  it("draws four rows and offers the toms, until they are asked for", () => {
+    const { container, props } = setup();
+    const names = [...container.querySelectorAll(".jam-editor__lane-name")]
+      .map((el) => el.textContent)
+      .filter(Boolean);
+    expect(names).toEqual(["Hat", "Snare", "Kick", "Ride"]);
+
+    const add = screen.getByRole("button", { name: "+ toms" });
+    fireEvent.click(add);
+    const next = props.onChange.mock.calls.at(-1)![0] as JamCustomGroove;
+    expect(next.bar.tomHi).toHaveLength(12);
+    expect(next.bar.tomLo).toHaveLength(12);
+  });
+
+  it("draws the two tom rows, and stops offering them, once they are there", () => {
+    const base = groove();
+    const withRows: JamCustomGroove = {
+      ...base,
+      bar: { ...base.bar, tomHi: new Array(12).fill(0), tomLo: new Array(12).fill(0) },
+    };
+    const { container } = render(
+      <GrooveEditor
+        value={withRows}
+        onChange={vi.fn()}
+        playingTick={null}
+        page="bar"
+        onPageChange={vi.fn()}
+        onDone={vi.fn()}
+        onReset={vi.fn()}
+      />,
+    );
+    const names = [...container.querySelectorAll(".jam-editor__lane-name")]
+      .map((el) => el.textContent)
+      .filter(Boolean);
+    expect(names).toEqual(["Hat", "Snare", "High tom", "Low tom", "Kick", "Ride"]);
+    expect(screen.queryByRole("button", { name: "+ toms" })).toBeNull();
   });
 });

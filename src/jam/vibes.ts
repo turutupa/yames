@@ -61,13 +61,26 @@ import type {
 /**
  * The kits a vibe may name.
  *
- * `raw` is the fifth (B2), built for rock and the reason the Rock, Hard rock
- * and Metal tiles stop sounding like a lounge. The list lives here rather
- * than on the setup screen because this is the module whose tests can check
- * that no bundle names a kit that does not exist, and a list that is only in
- * a `.tsx` file cannot be checked from a data test.
+ * `club` and `studio` are the two RECORDED kits the third pass brought
+ * (plans/JAM_SOUND.md §5): a drummer in a room, with velocity layers and round
+ * robins and cymbals that ring for as long as cymbals ring. They come first
+ * because they are what "a drum kit" now means here, and the five synthesised
+ * ones stay behind them until the owner has heard the difference and said
+ * which of them can go.
+ *
+ * The list lives here rather than on the setup screen because this is the
+ * module whose tests can check that no bundle names a kit that does not exist,
+ * and a list that is only in a `.tsx` file cannot be checked from a data test.
  */
-export const JAM_KIT_IDS = ["raw", "room", "tight", "brushes", "electronic"] as const;
+export const JAM_KIT_IDS = [
+  "club",
+  "studio",
+  "raw",
+  "room",
+  "tight",
+  "brushes",
+  "electronic",
+] as const;
 export type JamKitId = (typeof JAM_KIT_IDS)[number];
 
 export type JamVibeId =
@@ -157,8 +170,8 @@ function vibe(
  * alternatives to it".
  */
 export const VIBES: readonly JamVibe[] = [
-  /* Rock. Eighths with their ghosts, the raw kit, a picked bass and an organ
-     waiting behind the band row. 120 in A, over an eight-bar loop — the
+  /* Rock. Eighths with their ghosts, the studio kit, a picked bass and an
+     organ waiting behind the band row. 120 in A, over an eight-bar loop — the
      plainest thing that unmistakably rocks. */
   vibe(
     "rock",
@@ -166,7 +179,7 @@ export const VIBES: readonly JamVibe[] = [
       grooveId: "rock8",
       feel: "straight",
       intensity: "normal",
-      kit: "raw",
+      kit: "studio",
       bassVoice: "picked",
       keysVoice: "organ",
       bpm: 120,
@@ -179,13 +192,14 @@ export const VIBES: readonly JamVibe[] = [
       // Punk is the hard-rock bar taken to a tempo where nothing else fits,
       // and a fill every eight bars because a punk drummer marks the phrase.
       variation("punk", { grooveId: "hardRock", intensity: "loud", bpm: 176, fillEvery: 8 }),
-      // Alt: the sixteenths, in the room kit, a little under tempo — the
-      // ghosts are the point here, so the intensity stays normal.
-      variation("alt", { grooveId: "rock16", kit: "room", bpm: 112 }),
+      // Alt: the sixteenths, a little under tempo — the ghosts are the point
+      // here, so the intensity stays normal.
+      variation("alt", { grooveId: "rock16", bpm: 112 }),
+      // Ballad: a real ballad groove now, with the stick across the head,
+      // rather than a half-time rock beat played quietly under the word.
       variation("ballad", {
-        grooveId: "halfTime",
+        grooveId: "ballad",
         intensity: "soft",
-        kit: "room",
         bpm: 72,
         form: "bars16",
       }),
@@ -199,7 +213,7 @@ export const VIBES: readonly JamVibe[] = [
       grooveId: "hardRock",
       feel: "straight",
       intensity: "loud",
-      kit: "raw",
+      kit: "studio",
       bassVoice: "picked",
       keysVoice: "organ",
       bpm: 132,
@@ -215,7 +229,7 @@ export const VIBES: readonly JamVibe[] = [
       variation("driving16ths", { grooveId: "rock16", bpm: 144 }),
     ],
   ),
-  /* Blues. The shuffle, the room kit, a fingered bass and an organ, 92 in A
+  /* Blues. The shuffle, the studio kit, a fingered bass and an organ, 92 in A
      over the twelve bars. The first pass's starter jam, now behind a tile
      that says what it is instead of being what you got by default. */
   vibe(
@@ -224,7 +238,7 @@ export const VIBES: readonly JamVibe[] = [
       grooveId: "shuffle",
       feel: "shuffle",
       intensity: "normal",
-      kit: "room",
+      kit: "studio",
       bassVoice: "fingered",
       keysVoice: "organ",
       bpm: 92,
@@ -233,7 +247,9 @@ export const VIBES: readonly JamVibe[] = [
     },
     [
       variation("shuffle", {}),
-      variation("slow", { bpm: 62, intensity: "soft" }),
+      // Slow: twelve-eight, not the fast shuffle taken down to sixty-two. A
+      // slow blues has all three triplets in it, and that is a different bar.
+      variation("slow", { grooveId: "slowBlues", bpm: 62, intensity: "soft" }),
       // Texas: the straight rock bar put through the shuffle feel, loud and
       // up at 116 — a different animal from the triplet shuffle, and the one
       // a Texas player means.
@@ -241,7 +257,7 @@ export const VIBES: readonly JamVibe[] = [
       variation("boogie", { bpm: 150 }),
     ],
   ),
-  /* Funk. The sixteenths with their ghosts, the tight kit, slap and clav.
+  /* Funk. The sixteenths with their ghosts, the club kit, slap and clav.
      100 in E minor — funk lives in one chord, so the eight-bar loop. */
   vibe(
     "funk",
@@ -249,7 +265,7 @@ export const VIBES: readonly JamVibe[] = [
       grooveId: "funk",
       feel: "straight",
       intensity: "normal",
-      kit: "tight",
+      kit: "club",
       bassVoice: "slap",
       keysVoice: "clav",
       bpm: 100,
@@ -259,17 +275,17 @@ export const VIBES: readonly JamVibe[] = [
     [
       variation("sixteenths", {}),
       variation("halfTime", { grooveId: "halfTime", bpm: 88 }),
-      // New Orleans: the second line, in the room kit, with a fingered bass
-      // — the street beat is not a slap style.
+      // New Orleans: the second line, with a fingered bass — the street beat
+      // is not a slap style.
       variation("newOrleans", {
         grooveId: "secondLine",
-        kit: "room",
         bassVoice: "fingered",
         bpm: 96,
       }),
     ],
   ),
-  /* Jazz. The ride, brushes, an upright and an electric piano, soft, over the
+  /* Jazz. The ride, the club kit — recorded live in a Boston club, which is
+     where this music is — an upright and an electric piano, soft, over the
      thirty-two bars. 140 in F, which is a medium swing and where a standard
      is usually called. */
   vibe(
@@ -278,7 +294,7 @@ export const VIBES: readonly JamVibe[] = [
       grooveId: "swingRide",
       feel: "swing",
       intensity: "soft",
-      kit: "brushes",
+      kit: "club",
       bassVoice: "upright",
       keysVoice: "epiano",
       bpm: 140,
@@ -287,28 +303,30 @@ export const VIBES: readonly JamVibe[] = [
     },
     [
       variation("swing", {}),
-      variation("ballad", { bpm: 64, form: "bars16" }),
-      // Bossa-jazz: the bossa pattern straight, in the room kit, over sixteen
-      // bars — the standard a jazz player reaches for when the swing stops.
+      // Ballad: the cross-stick groove, swung — which is what a jazz ballad
+      // is played with, and what "ballad" failed to mean when it was the swing
+      // ride at sixty-four.
+      variation("ballad", { grooveId: "ballad", bpm: 64, form: "bars16" }),
+      // Bossa-jazz: the bossa pattern straight, over sixteen bars — the
+      // standard a jazz player reaches for when the swing stops.
       variation("bossaJazz", {
         grooveId: "bossa",
         feel: "straight",
-        kit: "room",
         bpm: 132,
         form: "bars16",
       }),
       variation("upTempo", { intensity: "normal", bpm: 210 }),
     ],
   ),
-  /* Latin. The bossa, the room kit for its rim, a fingered bass and a pad.
-     132 in A minor over sixteen bars. */
+  /* Latin. The bossa, the club kit for its cross-stick, a fingered bass and a
+     pad. 132 in A minor over sixteen bars. */
   vibe(
     "latin",
     {
       grooveId: "bossa",
       feel: "straight",
       intensity: "normal",
-      kit: "room",
+      kit: "club",
       bassVoice: "fingered",
       keysVoice: "pad",
       bpm: 132,
@@ -324,14 +342,20 @@ export const VIBES: readonly JamVibe[] = [
     ],
   ),
   /* Pop. The rock eighths with their ghosts — B4 keeps those for exactly this
-     — the electronic kit, a synth bass and a pad. 112 in C over eight bars. */
+     — the studio kit, a synth bass and a pad. 112 in C over eight bars.
+
+     The studio kit rather than the electronic one, because a recorded kit is
+     what a pop record is made of even when it has been processed to within an
+     inch of its life, and a synthesised kit under a synth bass was two
+     synthesisers talking to each other. The electronic kit is still what the
+     dance variation plays, which is where it belongs. */
   vibe(
     "pop",
     {
       grooveId: "rock8",
       feel: "straight",
       intensity: "normal",
-      kit: "electronic",
+      kit: "studio",
       bassVoice: "synth",
       keysVoice: "pad",
       bpm: 112,
@@ -340,25 +364,28 @@ export const VIBES: readonly JamVibe[] = [
     },
     [
       variation("straight", {}),
-      variation("fourOnFloor", { grooveId: "fourOnFloor", bpm: 124 }),
+      // Four on the floor is the programmed one: Dancing Queen, Uptown Funk,
+      // a kick you could set a watch by. The electronic kit is the right kit
+      // for it and the only tile that chooses it.
+      variation("fourOnFloor", { grooveId: "fourOnFloor", kit: "electronic", bpm: 124 }),
       variation("ballad", {
-        grooveId: "halfTime",
+        grooveId: "ballad",
         intensity: "soft",
         bpm: 76,
         form: "bars16",
       }),
     ],
   ),
-  /* Metal. The double kick, raw, loud, a picked bass driving it and no keys
-     in earshot — the pad is only what would play if you asked. 160 in E
-     minor. */
+  /* Metal. The double kick, the studio kit, loud, a picked bass driving it and
+     no keys in earshot — the pad is only what would play if you asked. 160 in
+     E minor. */
   vibe(
     "metal",
     {
       grooveId: "doubleKick",
       feel: "straight",
       intensity: "loud",
-      kit: "raw",
+      kit: "studio",
       bassVoice: "picked",
       keysVoice: "pad",
       bpm: 160,
@@ -373,15 +400,15 @@ export const VIBES: readonly JamVibe[] = [
       variation("thrash", { grooveId: "hardRock", bpm: 190 }),
     ],
   ),
-  /* Country. The train beat, brushes, an upright and an electric piano. 120
-     in G over eight bars. */
+  /* Country. The train beat, the studio kit, an upright and an electric
+     piano. 120 in G over eight bars. */
   vibe(
     "country",
     {
       grooveId: "train",
       feel: "straight",
       intensity: "normal",
-      kit: "brushes",
+      kit: "studio",
       bassVoice: "upright",
       keysVoice: "epiano",
       bpm: 120,

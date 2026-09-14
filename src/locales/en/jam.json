@@ -41,7 +41,12 @@
       "twoStep": "Two-step",
       "samba": "Samba",
       "chaCha": "Cha-cha",
-      "secondLine": "Second line"
+      "secondLine": "Second line",
+      "ballad": "Ballad",
+      "slowBlues": "Slow blues",
+      "jazzWaltz": "Jazz waltz",
+      "motown": "Motown",
+      "mambo": "Mambo"
     },
     "changes": {
       "edit": "Edit changes",
@@ -215,6 +220,10 @@
     },
     "kit": {
       "label": "Kit",
+      "club": "Club",
+      "clubHint": "a jazz house kit, recorded live in a Boston club",
+      "studio": "Studio",
+      "studioHint": "a studio kit, from jazz to rock",
       "room": "Room",
       "roomHint": "open, with the room around it",
       "tight": "Tight",
@@ -245,7 +254,11 @@
         "hat_open": "open hat",
         "ride": "ride",
         "rim": "rim",
-        "crash": "crash"
+        "crash": "crash",
+        "tom_hi": "high tom",
+        "tom_lo": "low tom",
+        "hat_pedal": "hat pedal",
+        "ride_bell": "ride bell"
       }
     },
     "transposition": {
@@ -314,11 +327,14 @@
       "gridBar": "The groove, one bar",
       "gridFill": "The fill, one bar",
       "hint": "Click a cell to cycle",
+      "addToms": "+ toms",
       "meter": "{{beats}} beats in {{subdivision}} · the columns follow the meter",
       "cell": "{{lane}}, beat {{beat}}, tick {{tick}}: {{level}}",
       "lanes": {
         "hat": "Hat",
         "snare": "Snare",
+        "tomHi": "High tom",
+        "tomLo": "Low tom",
         "kick": "Kick",
         "ride": "Ride"
       },
@@ -326,7 +342,8 @@
         "0": "off",
         "1": "hit",
         "2": "accent",
-        "3": "ghost"
+        "3": "ghost",
+        "4": "peak"
       },
       "subdivision": {
         "1": "quarters",

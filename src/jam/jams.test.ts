@@ -29,7 +29,10 @@ describe("createJam", () => {
     expect(grooveById(jam.grooveId).id).toBe(jam.grooveId);
     expect(jam.form.kind).toBe("loop8");
     expect(jam.fills).toBe(true);
-    expect(jam.kit).toBe("room");
+    // A recorded kit, like every vibe tile. A new jam that opened on a
+    // synthesised one would be the first thing a player hears being the
+    // sound the third pass was written to replace.
+    expect(jam.kit).toBe("studio");
   });
 
   it("counts in one bar of whatever meter the groove is written in", () => {

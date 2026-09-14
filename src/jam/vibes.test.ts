@@ -276,7 +276,18 @@ describe("applying a vibe", () => {
     const mine = createJam("mine", { customKit: { dir: "C:/samples/mine", name: "mine" } });
     const jam = applyVibe(mine, "jazz");
     expect(jam.customKit).toBeUndefined();
-    expect(jam.kit).toBe("brushes");
+    expect(jam.kit).toBe("club");
+  });
+
+  it("opens every tile on a recorded kit", () => {
+    // The third pass's whole point: a vibe that still reached for a
+    // synthesised kit would be a tile that sounds like the thing the owner
+    // called underwhelming. The Electronic kit is the one exception, and it
+    // is a variation's choice rather than a vibe's — a programmed pop record
+    // wants a programmed kit.
+    for (const v of VIBES) {
+      expect(["club", "studio"], v.id).toContain(v.bundle.kit);
+    }
   });
 
   it("throws away a meter override, so the waltz is allowed to be in three", () => {

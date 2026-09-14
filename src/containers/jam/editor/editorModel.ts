@@ -19,9 +19,10 @@ import type {
   JamCustomGroove,
   JamLane,
   JamLevel,
+  JamOptionalLane,
   JamPattern,
 } from "../../../jam/types";
-import { JAM_LANES } from "../../../jam/types";
+import { JAM_LANES, JAM_OPTIONAL_LANES } from "../../../jam/types";
 
 /**
  * The subdivisions the engine understands, taken from the contract rather
@@ -36,9 +37,10 @@ export type JamTicksPerBeat = JamCustomGroove["ticksPerBeat"];
  * file builds, all zeros, because the engine's type says it must.
  *
  * The order is the order they are drawn, top to bottom — high and busy at the
- * top, low and sparse below, which is how a drum chart is written.
+ * top, low and sparse below, which is how a drum chart is written. The toms
+ * sit between the snare and the kick, where they sit on the kit.
  */
-export type JamEditableLane = Exclude<JamLane, "crash">;
+export type JamEditableLane = Exclude<JamLane, "crash"> | "tomHi" | "tomLo";
 
 export const EDITABLE_LANES: readonly JamEditableLane[] = [
   "hat",
@@ -47,9 +49,22 @@ export const EDITABLE_LANES: readonly JamEditableLane[] = [
   "ride",
 ];
 
+/**
+ * The two tom rows, drawn only for a pattern that has them.
+ *
+ * They are not in `EDITABLE_LANES` because most grooves never leave the snare,
+ * and two empty rows on every grid would be two drums the player has to read
+ * past to find the one they came for. A groove with a tom in it — which after
+ * the third pass is every preset's FILL — gets them; anything else gets a
+ * "+ toms" button instead, and clicking it is what creates the rows.
+ */
+export const TOM_LANES = ["tomHi", "tomLo"] as const;
+
 export const LANE_LABELS: Record<JamEditableLane, string> = {
   hat: "Hat",
   snare: "Snare",
+  tomHi: "High tom",
+  tomLo: "Low tom",
   kick: "Kick",
   ride: "Ride",
 };
@@ -60,7 +75,40 @@ export const LEVEL_LABELS: Record<JamLevel, string> = {
   1: "hit",
   2: "accent",
   3: "ghost",
+  4: "peak",
 };
+
+/**
+ * Does this pattern carry the toms?
+ *
+ * A row that exists, even empty, counts: the player asked for the toms with
+ * the "+ toms" button and the rows should stay in front of them while they
+ * fill them in.
+ */
+export function hasToms(pattern: JamPattern | null | undefined): boolean {
+  return Boolean(pattern?.tomHi || pattern?.tomLo);
+}
+
+/** The rows to draw for this pattern, in order, top to bottom. */
+export function lanesFor(pattern: JamPattern | null | undefined): readonly JamEditableLane[] {
+  if (!hasToms(pattern)) return EDITABLE_LANES;
+  // Snare, then the toms, then the kick: the kit, top to bottom.
+  return ["hat", "snare", "tomHi", "tomLo", "kick", "ride"];
+}
+
+/**
+ * The pattern with two empty tom rows added, or the same pattern when it
+ * already has them. What the "+ toms" button does.
+ */
+export function withToms(pattern: JamPattern): JamPattern {
+  if (hasToms(pattern)) return pattern;
+  const columns = columnsOf(pattern);
+  return {
+    ...pattern,
+    tomHi: new Array<JamLevel>(columns).fill(0),
+    tomLo: new Array<JamLevel>(columns).fill(0),
+  };
+}
 
 /** What a musician calls each subdivision, for the caption over the grid. */
 export const SUBDIVISION_NAMES: Record<JamTicksPerBeat, string> = {
@@ -87,9 +135,12 @@ const TICK_LABELS: Record<JamTicksPerBeat, readonly string[]> = {
 // Reading a pattern
 // ---------------------------------------------------------------------------
 
+/** Every row a pattern may carry — the five required and the three optional. */
+export type JamPatternLane = JamLane | JamOptionalLane;
+
 /** How many columns a pattern actually has — its longest lane. */
 export function columnsOf(pattern: JamPattern): number {
-  return JAM_LANES.reduce(
+  return [...JAM_LANES, ...JAM_OPTIONAL_LANES].reduce(
     (widest, lane) => Math.max(widest, pattern[lane]?.length ?? 0),
     0,
   );
@@ -98,7 +149,7 @@ export function columnsOf(pattern: JamPattern): number {
 /** The level in one cell, 0 for anything the pattern does not have. */
 export function cellAt(
   pattern: JamPattern,
-  lane: JamLane,
+  lane: JamPatternLane,
   tick: number,
 ): JamLevel {
   return pattern[lane]?.[tick] ?? 0;
@@ -153,12 +204,23 @@ export function meterCaption(
 // ---------------------------------------------------------------------------
 
 /**
- * One click on a cell: off → hit → accent → ghost → off. Shift-click walks
- * the same ring the other way, so a mis-click costs one keystroke instead of
- * three.
+ * One click on a cell: off → hit → accent → peak → ghost → off. Shift-click
+ * walks the same ring the other way, so a mis-click costs one keystroke
+ * instead of four.
+ *
+ * The peak sits after the accent and the ghost stays last, which is loudest to
+ * quietest with silence at the end — the order a drummer would say them in.
+ * It is NOT the numeric order (peak is 4, ghost is 3), because the numbers are
+ * a wire format and the ring is a hand on a grid; a ring in numeric order
+ * would put the hardest stroke on the kit between the quietest and nothing.
  */
+const LEVEL_RING: readonly JamLevel[] = [0, 1, 2, 4, 3];
+
 export function cycleLevel(level: JamLevel, backwards = false): JamLevel {
-  return ((level + (backwards ? 3 : 1)) % 4) as JamLevel;
+  const at = LEVEL_RING.indexOf(level);
+  const from = at < 0 ? 0 : at;
+  const step = backwards ? LEVEL_RING.length - 1 : 1;
+  return LEVEL_RING[(from + step) % LEVEL_RING.length];
 }
 
 /**
@@ -168,7 +230,7 @@ export function cycleLevel(level: JamLevel, backwards = false): JamLevel {
  */
 export function setCell(
   pattern: JamPattern,
-  lane: JamLane,
+  lane: JamPatternLane,
   tick: number,
   level: JamLevel,
 ): JamPattern {
@@ -199,12 +261,19 @@ export function emptyPattern(
  * Force a pattern to the width the meter says it should be, filling in
  * missing lanes and cells and dropping anything past the end.
  *
- * The five lanes and no more: the optional `hatOpen` row is dropped here, and
- * by `resizePattern` below, on purpose and consistently. The editor has no
- * lane to draw it in, and a row that survived a pass through the grid would
- * be state the player can neither see nor remove — playing under a bar they
- * think they have in front of them. A groove drawn by hand is what the grid
- * shows; the row belongs to the shaping (`applyIntensity`), which runs after.
+ * The five lanes, the two toms, and no more: the optional `hatOpen` row is
+ * dropped here, and by `resizePattern` below, on purpose and consistently. The
+ * editor has no lane to draw it in, and a row that survived a pass through the
+ * grid would be state the player can neither see nor remove — playing under a
+ * bar they think they have in front of them. A groove drawn by hand is what
+ * the grid shows; the row belongs to the shaping (`applyIntensity`), which
+ * runs after.
+ *
+ * The toms are kept for exactly the reason the open hat is dropped: the grid
+ * DOES draw them, whenever the pattern has them, so they are the player's to
+ * see and to change. They are kept as rows only where they were rows; a
+ * pattern with no toms comes back with none, rather than gaining two silent
+ * drums on its way through.
  *
  * This exists because a `JamCustomGroove` can arrive from the store, written
  * by an older build with a different meter. The editor would otherwise draw a
@@ -225,6 +294,14 @@ export function normalizePattern(
     if (!row) continue;
     const shared = Math.min(row.length, columns);
     for (let i = 0; i < shared; i++) next[lane][i] = row[i] ?? 0;
+  }
+  for (const lane of TOM_LANES) {
+    const row = pattern[lane];
+    if (!row) continue;
+    const kept = new Array<JamLevel>(columns).fill(0);
+    const shared = Math.min(row.length, columns);
+    for (let i = 0; i < shared; i++) kept[i] = row[i] ?? 0;
+    next[lane] = kept;
   }
   return next;
 }
@@ -255,16 +332,22 @@ export function resizePattern(
   const beats = Math.max(1, Math.round(columnsOf(pattern) / from));
   const next = emptyPattern(beats, to);
   const columns = next.kick.length;
-  for (const lane of JAM_LANES) {
+  // The toms come along when they were there, and the rows stay absent when
+  // they were not — a change of subdivision is not somewhere to acquire drums.
+  for (const lane of TOM_LANES) {
+    if (pattern[lane]) next[lane] = new Array<JamLevel>(columns).fill(0);
+  }
+  for (const lane of [...JAM_LANES, ...TOM_LANES]) {
     const row = pattern[lane];
-    if (!row) continue;
+    const target = next[lane];
+    if (!row || !target) continue;
     for (let i = 0; i < row.length; i++) {
       const level = row[i];
       if (!level) continue;
       const moved = ((i % from) * to) / from;
       if (!Number.isInteger(moved)) continue;
-      const target = Math.floor(i / from) * to + moved;
-      if (target < columns) next[lane][target] = level;
+      const at = Math.floor(i / from) * to + moved;
+      if (at < columns) target[at] = level;
     }
   }
   return next;

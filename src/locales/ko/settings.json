@@ -293,6 +293,8 @@
       "updating": "업데이트 중…",
       "upToDate": "최신 버전입니다 ✓",
       "checkUpdates": "업데이트 확인",
+      "sounds": "사운드",
+      "soundsCredit": "클럽 드럼은 Versilian Studios와 Karoryfer Samples의 Virtuosity Drums이며 Austin McMahon이 연주했습니다(퍼블릭 도메인). 스튜디오 드럼은 DrumGizmo 프로젝트의 DRSKit입니다(CC BY 4.0).",
       "madeWith": "전 세계 음악가들을 위해 {{heart}}로 만들었습니다"
     }
   },

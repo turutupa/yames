@@ -17,14 +17,18 @@ import {
   cycleLevel,
   emptyPattern,
   fromGroove,
+  hasToms,
   isShuffleTick,
+  lanesFor,
   meterCaption,
   normalizePattern,
   resizeGroove,
   resizePattern,
   setCell,
   tickLabel,
+  withToms,
 } from "./editorModel";
+import { grooveById } from "../../../jam/grooves";
 
 /** A pattern with one lane spelled out and the rest silent. */
 function kickRow(levels: number[]): JamPattern {
@@ -34,24 +38,80 @@ function kickRow(levels: number[]): JamPattern {
 }
 
 describe("cycleLevel", () => {
-  it("walks off → hit → accent → ghost → off", () => {
+  it("walks off → hit → accent → peak → ghost → off", () => {
+    // Loudest to quietest with silence at the end — the order a drummer would
+    // say them in, and deliberately NOT the order the numbers are in (a peak
+    // is 4 and a ghost is 3), because the numbers are a wire format.
     const seen: JamLevel[] = [];
     let level: JamLevel = 0;
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 6; i++) {
       seen.push(level);
       level = cycleLevel(level);
     }
-    expect(seen).toEqual([0, 1, 2, 3, 0]);
+    expect(seen).toEqual([0, 1, 2, 4, 3, 0]);
   });
 
   it("walks the same ring backwards, so a mis-click costs one keystroke", () => {
     const seen: JamLevel[] = [];
     let level: JamLevel = 0;
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 6; i++) {
       seen.push(level);
       level = cycleLevel(level, true);
     }
-    expect(seen).toEqual([0, 3, 2, 1, 0]);
+    expect(seen).toEqual([0, 3, 4, 2, 1, 0]);
+  });
+});
+
+describe("the tom rows", () => {
+  it("draws four lanes for a pattern with no toms, six for one with them", () => {
+    const plain = emptyPattern(4, 2);
+    expect(hasToms(plain)).toBe(false);
+    expect(lanesFor(plain)).toEqual(["hat", "snare", "kick", "ride"]);
+
+    const withRows = withToms(plain);
+    expect(hasToms(withRows)).toBe(true);
+    // Snare, toms, kick: the kit, top to bottom, the way a chart is written.
+    expect(lanesFor(withRows)).toEqual([
+      "hat",
+      "snare",
+      "tomHi",
+      "tomLo",
+      "kick",
+      "ride",
+    ]);
+  });
+
+  it("adds the rows at the bar's own width, and adds them only once", () => {
+    const before = emptyPattern(4, 4);
+    const after = withToms(before);
+    expect(after.tomHi).toHaveLength(16);
+    expect(after.tomLo).toHaveLength(16);
+    expect(after.tomHi?.every((l) => l === 0)).toBe(true);
+    // Already there: the same object back, so a re-render is free and a row
+    // that has something in it cannot be wiped by a second click.
+    expect(withToms(after)).toBe(after);
+  });
+
+  it("keeps a fill's toms through a normalise, and does not invent any", () => {
+    // Every preset's FILL goes to the toms and its bar does not, so a pass
+    // through the grid has to carry one and leave the other alone.
+    const fill = normalizePattern(grooveById("rock8").fill, 4, 2);
+    expect(fill.tomLo).toHaveLength(8);
+    expect(fill.tomLo?.[7]).toBe(4);
+    const bar = normalizePattern(grooveById("rock8").bar, 4, 2);
+    expect(bar.tomHi).toBeUndefined();
+    expect(bar.tomLo).toBeUndefined();
+  });
+
+  it("carries the toms through a change of subdivision", () => {
+    const eighths = withToms(emptyPattern(4, 2));
+    eighths.tomLo![7] = 4;
+    const sixteenths = resizePattern(eighths, 2, 4);
+    expect(sixteenths.tomLo).toHaveLength(16);
+    // Tick 7 is the "and" of four: beat 3, sub 1 of 2 → beat 3, sub 2 of 4.
+    expect(sixteenths.tomLo?.[14]).toBe(4);
+    // And a pattern with no toms does not acquire them on the way through.
+    expect(resizePattern(emptyPattern(4, 2), 2, 4).tomLo).toBeUndefined();
   });
 });
 

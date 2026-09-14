@@ -31,13 +31,15 @@ describe("the shape survives", () => {
     }
   });
 
-  it("writes only the four levels a drummer plays", () => {
+  it("writes only the five levels a drummer plays", () => {
     for (const g of GROOVES) {
       for (const intensity of EVERY) {
-        const out = applyIntensity(g.bar, intensity, meterOf(g));
-        for (const lane of JAM_LANES) {
-          for (const level of out[lane]) {
-            expect([0, 1, 2, 3], `${g.id} ${intensity} ${lane}`).toContain(level);
+        for (const bar of [0, 3]) {
+          const out = applyIntensity(g.bar, intensity, meterOf(g), bar);
+          for (const lane of JAM_LANES) {
+            for (const level of out[lane]) {
+              expect([0, 1, 2, 3, 4], `${g.id} ${intensity} ${lane}`).toContain(level);
+            }
           }
         }
       }
@@ -62,10 +64,15 @@ describe("the shape survives", () => {
   });
 
   it("never wakes a tick that was silent at all, when soft", () => {
+    // One exception, and it is a stroke moving rather than appearing: a groove
+    // that writes an OPEN hat (hard rock, boom bap) has it closed by Soft, and
+    // a closed hat lands on the tick the open one had. The player is still
+    // playing exactly the strokes they were playing.
     for (const g of GROOVES) {
       const out = applyIntensity(g.bar, "soft", meterOf(g));
       for (const lane of JAM_LANES) {
         for (let t = 0; t < out[lane].length; t += 1) {
+          if (lane === "hat" && (g.bar.hatOpen?.[t] ?? 0) !== 0) continue;
           if (g.bar[lane][t] === 0) {
             expect(out[lane][t], `${g.id} soft ${lane} @${t}`).toBe(0);
           }
@@ -101,7 +108,13 @@ describe("loud", () => {
       for (const lane of JAM_LANES) {
         expect(out[lane], `${g.id} ${lane}`).not.toContain(3);
         for (let t = 0; t < out[lane].length; t += 1) {
-          if (g.bar[lane][t] === 3) expect(out[lane][t]).toBe(1);
+          if (g.bar[lane][t] !== 3) continue;
+          // On the hat the stroke may also have MOVED — a ghosted sixteenth
+          // on an off-beat is opened by the same pass — so the hit is on
+          // whichever of the two hat rows it ended up on.
+          const landed =
+            lane === "hat" ? Math.max(out.hat[t], out.hatOpen?.[t] ?? 0) : out[lane][t];
+          expect(landed, `${g.id} ${lane} @${t}`).toBe(1);
         }
       }
     }
@@ -114,7 +127,7 @@ describe("loud", () => {
     // before, asked the CLOSED hat to be louder and called it open.
     const g = grooveById("rock8");
     const out = applyIntensity(g.bar, "loud", meterOf(g));
-    expect(out.hat).toEqual([2, 0, 1, 0, 1, 0, 1, 0]);
+    expect(out.hat).toEqual([2, 0, 2, 0, 2, 0, 2, 0]);
     expect(out.hatOpen).toEqual([0, 1, 0, 1, 0, 1, 0, 1]);
   });
 
@@ -146,9 +159,9 @@ describe("loud", () => {
     expect([2, 5, 8, 11].every((t) => out.hatOpen![t] === 1)).toBe(true);
     expect([2, 5, 8, 11].every((t) => out.hat[t] === 0)).toBe(true);
     // The downbeats keep the level the groove wrote — the shuffle accents
-    // only the one — because loud opens hats, it does not accent everything.
-    expect(out.hat[0]).toBe(2);
-    expect([3, 6, 9].every((t) => out.hat[t] === 1)).toBe(true);
+    // every beat and hits the skip note — because loud opens hats, it does not
+    // re-level the ones it leaves alone.
+    expect([0, 3, 6, 9].every((t) => out.hat[t] === 2)).toBe(true);
   });
 
   it("has no off-beats to open where a beat is one tick", () => {
@@ -197,6 +210,79 @@ describe("soft", () => {
     const out = applyIntensity(hard.bar, "soft", meterOf(hard));
     expect(out.crash.every((l) => l === 0)).toBe(true);
     expect(out.crash).toHaveLength(hard.bar.crash.length);
+  });
+
+  it("brings every peak back to an accent, on every row a fill uses", () => {
+    for (const g of GROOVES) {
+      const out = applyIntensity(g.fill, "soft", meterOf(g));
+      expect(out.tomLo, g.id).not.toContain(4);
+      expect(out.tomHi, g.id).not.toContain(4);
+      expect(out.snare, g.id).not.toContain(4);
+      // The low tom's peak is the top of the fill: an accent, and still there.
+      const top = g.fill.tomLo!.lastIndexOf(4);
+      expect(out.tomLo![top], g.id).toBe(2);
+    }
+  });
+
+  it("stops the snare's peak at an accent rather than ghosting it", () => {
+    // The snare rule ghosts hits and accents; a peak that went through it
+    // twice would land on a ghost, and the top of a fill you cannot hear is
+    // not a soft fill, it is no fill.
+    const bar: JamPattern = {
+      kick: [0, 0, 0, 0],
+      snare: [1, 0, 4, 0],
+      hat: [0, 0, 0, 0],
+      ride: [0, 0, 0, 0],
+      crash: [0, 0, 0, 0],
+    };
+    const out = applyIntensity(bar, "soft", { beatsPerBar: 2, ticksPerBeat: 2 });
+    expect(out.snare).toEqual([3, 0, 2, 0]);
+  });
+});
+
+/**
+ * Loud's phrase rule: at the end of every four bars the backbeat gets the
+ * whole arm. The bar number comes in from the caller, which already re-sends
+ * the config on every bar line because the bass has to.
+ */
+describe("the fourth bar", () => {
+  it("peaks the backbeat on the last bar of a phrase, and only there", () => {
+    const g = grooveById("rock8");
+    for (const bar of [0, 1, 2]) {
+      expect(applyIntensity(g.bar, "loud", meterOf(g), bar).snare, `bar ${bar}`).not.toContain(4);
+    }
+    const fourth = applyIntensity(g.bar, "loud", meterOf(g), 3);
+    expect(fourth.snare).toEqual([0, 0, 4, 0, 0, 0, 4, 0]);
+    // Bar 8 of a chorus is the end of the second phrase, and bar 7 is it too.
+    expect(applyIntensity(g.bar, "loud", meterOf(g), 7).snare).toEqual(fourth.snare);
+  });
+
+  it("leaves the ghosts where they are — a ghost is not a backbeat", () => {
+    // Funk's snare is mostly ghosts. Loud turns those into hits, and the
+    // phrase rule must not then promote a hit to the top of the kit.
+    const g = grooveById("funk");
+    const out = applyIntensity(g.bar, "loud", meterOf(g), 3);
+    for (let t = 0; t < out.snare.length; t += 1) {
+      if (g.bar.snare[t] === 3) expect(out.snare[t], `@${t}`).toBe(1);
+      if (g.bar.snare[t] === 2) expect(out.snare[t], `@${t}`).toBe(4);
+    }
+  });
+
+  it("does nothing at all when the drummer is not playing loud", () => {
+    const g = grooveById("rock8");
+    expect(applyIntensity(g.bar, "normal", meterOf(g), 3)).toBe(g.bar);
+    expect(applyIntensity(g.bar, "soft", meterOf(g), 3).snare).not.toContain(4);
+  });
+
+  it("phrases the bar and leaves the fill to its own peak", () => {
+    // `formBar` is the bar about to be played; the fill is played on the bar
+    // that ends the chorus, which is a different bar. Phrasing the fill by
+    // this number would be phrasing it by somebody else's count — and the
+    // fill already ends on a peak of its own.
+    const g = grooveById("rock8");
+    const out = applyIntensityToGroove(g, "loud", 3);
+    expect(out.bar.snare).toContain(4);
+    expect(out.fill).toEqual(applyIntensity(g.fill, "loud", meterOf(g)));
   });
 });
 

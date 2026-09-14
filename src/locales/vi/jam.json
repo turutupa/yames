@@ -41,7 +41,12 @@
       "twoStep": "Two-step",
       "samba": "Samba",
       "chaCha": "Cha-cha",
-      "secondLine": "Second line"
+      "secondLine": "Second line",
+      "ballad": "Ballad",
+      "slowBlues": "Blues chậm",
+      "jazzWaltz": "Valse jazz",
+      "motown": "Motown",
+      "mambo": "Mambo"
     },
     "changes": {
       "edit": "Sửa vòng hợp âm",
@@ -215,6 +220,10 @@
     },
     "kit": {
       "label": "Bộ trống",
+      "club": "Club",
+      "clubHint": "bộ trống jazz, thu trực tiếp tại một club ở Boston",
+      "studio": "Studio",
+      "studioHint": "bộ trống phòng thu, từ jazz đến rock",
       "room": "Phòng",
       "roomHint": "mở, có không gian phòng",
       "tight": "Gọn",
@@ -245,7 +254,11 @@
         "hat_open": "hi-hat mở",
         "ride": "ride",
         "rim": "rim",
-        "crash": "crash"
+        "crash": "crash",
+        "tom_hi": "tom cao",
+        "tom_lo": "tom trầm",
+        "hat_pedal": "bàn đạp hi-hat",
+        "ride_bell": "chuông ride"
       }
     },
     "transposition": {
@@ -314,11 +327,14 @@
       "gridBar": "Groove, một ô nhịp",
       "gridFill": "Fill, một ô nhịp",
       "hint": "Bấm vào ô để đổi",
+      "addToms": "+ tom",
       "meter": "{{beats}} phách theo {{subdivision}} · các cột đi theo nhịp",
       "cell": "{{lane}}, phách {{beat}}, nhịp nhỏ {{tick}}: {{level}}",
       "lanes": {
         "hat": "Hi-hat",
         "snare": "Trống nhỏ",
+        "tomHi": "Tom cao",
+        "tomLo": "Tom trầm",
         "kick": "Trống cái",
         "ride": "Ride"
       },
@@ -326,7 +342,8 @@
         "0": "không",
         "1": "gõ",
         "2": "nhấn",
-        "3": "mờ"
+        "3": "mờ",
+        "4": "đỉnh"
       },
       "subdivision": {
         "1": "nốt đen",

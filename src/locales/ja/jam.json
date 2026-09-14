@@ -41,7 +41,12 @@
       "twoStep": "ツーステップ",
       "samba": "サンバ",
       "chaCha": "チャチャ",
-      "secondLine": "セカンドライン"
+      "secondLine": "セカンドライン",
+      "ballad": "バラード",
+      "slowBlues": "スローブルース",
+      "jazzWaltz": "ジャズワルツ",
+      "motown": "モータウン",
+      "mambo": "マンボ"
     },
     "changes": {
       "edit": "コードを編集",
@@ -215,6 +220,10 @@
     },
     "kit": {
       "label": "キット",
+      "club": "クラブ",
+      "clubHint": "ボストンのクラブで生録音したジャズ向けのキット",
+      "studio": "スタジオ",
+      "studioHint": "ジャズからロックまでこなすスタジオキット",
       "room": "ルーム",
       "roomHint": "部屋の響きを含んだ開いた音",
       "tight": "タイト",
@@ -245,7 +254,11 @@
         "hat_open": "オープンハイハット",
         "ride": "ライド",
         "rim": "リム",
-        "crash": "クラッシュ"
+        "crash": "クラッシュ",
+        "tom_hi": "ハイタム",
+        "tom_lo": "ロータム",
+        "hat_pedal": "ハイハットペダル",
+        "ride_bell": "ライドのカップ"
       }
     },
     "transposition": {
@@ -314,11 +327,14 @@
       "gridBar": "グルーヴ、1小節",
       "gridFill": "フィル、1小節",
       "hint": "セルをクリックで切り替え",
+      "addToms": "+ タム",
       "meter": "{{subdivision}}で{{beats}}拍 · 列は拍子に従います",
       "cell": "{{lane}}、{{beat}} 拍目、{{tick}} 番目：{{level}}",
       "lanes": {
         "hat": "ハイハット",
         "snare": "スネア",
+        "tomHi": "ハイタム",
+        "tomLo": "ロータム",
         "kick": "キック",
         "ride": "ライド"
       },
@@ -326,7 +342,8 @@
         "0": "なし",
         "1": "打つ",
         "2": "アクセント",
-        "3": "ゴースト"
+        "3": "ゴースト",
+        "4": "最強打"
       },
       "subdivision": {
         "1": "4分音符",

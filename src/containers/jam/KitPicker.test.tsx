@@ -44,11 +44,15 @@ afterEach(() => {
 });
 
 describe("the built-in kits", () => {
-  it("lists all five with a line each, and marks the one that is loaded", () => {
+  it("lists all seven with a line each, recorded first, and marks the loaded one", () => {
     draw({ kit: "room" });
     open();
     const options = screen.getAllByRole("option");
+    // Club and Studio lead: they are the two kits with a drummer in them, and
+    // the five synthesised ones stay behind them rather than in front.
     expect(options.map((o) => o.querySelector(".jam-dropdown-item-name")?.textContent)).toEqual([
+      "Club",
+      "Studio",
       "Raw",
       "Tight",
       "Room",
@@ -57,6 +61,10 @@ describe("the built-in kits", () => {
     ]);
     expect(options.filter((o) => o.getAttribute("aria-selected") === "true")).toHaveLength(1);
     expect(screen.getByText("open, with the room around it")).toBeInTheDocument();
+    expect(
+      screen.getByText("a jazz house kit, recorded live in a Boston club"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("a studio kit, from jazz to rock")).toBeInTheDocument();
   });
 
   it("plays two bars of a kit without choosing it", () => {
@@ -64,7 +72,7 @@ describe("the built-in kits", () => {
     const { props } = draw();
     open();
     fireEvent.click(screen.getAllByRole("button", { name: /Preview/ })[1]);
-    expect(props.onPreview).toHaveBeenCalledWith("tight");
+    expect(props.onPreview).toHaveBeenCalledWith("studio");
     expect(props.onKit).not.toHaveBeenCalled();
   });
 
@@ -75,11 +83,11 @@ describe("the built-in kits", () => {
   });
 
   it("forgets a folder of your own when a built-in kit is chosen", () => {
-    // Otherwise "Raw" would be selected and your samples would still play.
+    // Otherwise "Club" would be selected and your samples would still play.
     const { props } = draw({ customKit: { dir: "C:/s/mine", name: "mine" } });
     open();
     fireEvent.click(screen.getAllByRole("option")[0]);
-    expect(props.onKit).toHaveBeenCalledWith("raw");
+    expect(props.onKit).toHaveBeenCalledWith("club");
     expect(props.onCustomKit).toHaveBeenCalledWith(null);
   });
 });
