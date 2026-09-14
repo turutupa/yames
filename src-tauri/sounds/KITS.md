@@ -32,6 +32,12 @@ python -m http.server 8123      # from the repository root
 # then open http://localhost:8123/scripts/sounds/ab.html
 ```
 
+**The bass and the keys are here too**, further down under *The melodic
+voices*: four recorded banks in the same folder-and-manifest shape a kit has,
+rendered by `scripts/sounds/render_voice.py`. They are a different instrument
+and mostly the same rules, and the places where the rules differ are the places
+a bank has pitch.
+
 > **Do not run `python generate_sounds.py` with no arguments** unless you mean
 > to. Its legacy section rewrites `click_*`, `wood_*`, `beep_*`, `drum_*` and
 > `chime_*` with files that are *not* the ones the app ships — those are
@@ -526,6 +532,249 @@ size. On the first four kits the tail is too far down to matter; Raw's kick is
 compressed with a 110 ms release and arrives at 150 ms near −38 dBFS, which
 took the DC to 1.7e−04 against a 2e−04 limit. `_rfinish` releases *after* the
 saturation for that reason, and the DC is 2.6e−05.
+
+# The melodic voices
+
+The drums became a band in the third pass and the bass and the keys did not:
+they were the sines the drums used to be. Four of the five melodic voices are
+now **recordings**, in the same shape a kit is — a folder, a manifest, and one
+file per sampled note — rendered by `scripts/sounds/render_voice.py` from CC0
+libraries that are not in this repository.
+
+```
+src-tauri/sounds/voices/<voice>/voice.json
+src-tauri/sounds/voices/<voice>/<midi>.<layer>.<rr>.wav
+```
+
+```sh
+set YAMES_SAMPLES=C:\path\to\_samples
+python scripts/sounds/render_voice.py scripts/sounds/recipes/bass_fingered.json \
+       src-tauri/sounds/voices/bass_fingered
+python scripts/sounds/measure_kits.py          # checks the voices too
+```
+
+`scripts/sounds/ab.html` plays them: the same two bars of rock with a bass line
+and a Rhodes comp over them, switchable voice by voice.
+
+## What ships, measured
+
+| voice | notes sampled | worst stretch | layers | rr | longest | on disk | decoded | `trim_db` | `release_ms` |
+|---|---|---|---|---|---|---|---|---|---|
+| `bass_fingered` | 6 | 2 st | 3 | 2 | 2.00 s | 6.59 MB | 62.1 MB | +0.00 dB | 250 ms |
+| `bass_picked` | 8 | 2 st | 2 | 2 | 2.00 s | 5.86 MB | 40.1 MB | −2.83 dB | 250 ms |
+| `bass_upright` | 6 | 3 st | 3 | 2 | 2.00 s | 6.52 MB | 60.3 MB | +0.00 dB | 60 ms |
+| `epiano` | 10 | 3 st | 3 | 1 | 2.50 s | 5.71 MB | 43.1 MB | −2.54 dB | 250 ms |
+
+Every file is mono, 48 kHz, 16-bit, peak 0.900, both ends on zero — the kit
+rules, unchanged. The bass banks are built for MIDI 28–55 (E1–G3) and the keys
+for 48–84 (C3–C6); **"worst stretch" is the furthest any note in that range
+sits from a sample it can be built out of**, and `voices::MAX_STRETCH_SEMITONES`
+is three.
+
+`bass_slap` is **not** recorded — see below — and plays the synthesised recipe,
+as do `organ`, `clav`, `pad` and `synth`, which were never in scope.
+
+### The libraries, and the credit lines as they must appear
+
+All three are CC0, which requires nothing and is therefore thanked rather than
+complied with. Both lines are in the manifests and belong on the About screen:
+a musician who likes a bass should be able to find out whose it is.
+
+| voice | library | get it from |
+|---|---|---|
+| `bass_fingered`, `bass_picked` | Black And Blue Basses 1.0.0.2 | `karoryfer.com` (1.0 GB zip) |
+| `bass_upright` | Karoryfer Meatbass 1.0.0.1 | `karoryfer.com` (255 MB zip) |
+| `epiano` | jRhodes3c | `github.com/sfzinstruments/jlearman.jRhodes3c` (git clone) |
+
+```
+Black And Blue Basses — Karoryfer Samples
+Meatbass — Karoryfer Samples
+jRhodes3 — a 1977 Rhodes Mark I Stage 73 sampled by Jeff Learman
+```
+
+## The three decisions that shaped these banks
+
+### 1. A bank is a handful of notes, because a bass note does not stop
+
+A kit file is a transient and a decay. A bass note is as long as the player
+held it, and all three of these libraries record five seconds of it. Every
+single file in all three bass banks runs to its **2.0 s cap**: the tail search
+never fires, because a wound string is nowhere near 60 dB down two seconds
+after it is plucked. So a note costs 188 KB whatever pitch it is, and the only
+lever on the size of a bank is how many notes are in it.
+
+That matters more than disk, because **a bank lives decoded**. The engine
+builds every note of the range from the nearest sample at load, so the four
+banks above sit at 40–62 MB resident against the 96 MB `voices::MAX_BANK_BYTES`
+allows. Sampling every third semitone — the density `voices.rs`'s own comment
+sizes a bank at — would be sixty files, 11.3 MB on disk and past 100 MB
+decoded.
+
+So the electric basses take six notes a fourth apart, or eight a major third
+apart, which leaves nothing further than two semitones from a sample — and E2
+is one of them, because that is the note the engine measures a bass's level on.
+
+**The trade, stated plainly:** these instruments ring longer than the bank lets
+them. The Rhodes pays most — jRhodes3c is the *looped* set, so its samples
+sustain on a loop point rather than decaying, and every note runs to the 2.5 s
+cap and lands on a 30 ms fade instead of ringing out under a held chord.
+
+### 2. The level is K-weighted, for the second time in this document
+
+The brief said to set `trim_db` through the small-speaker band-pass so each
+recorded voice sits where the synthesised one sat. Measured that way, a
+recorded fingered bass reads **+14 dB over the recipe it replaces** and wants a
+**−15 dB** trim.
+
+That is the band-pass working exactly as designed, and the same trap the
+recorded kits fell into one section above: it starts at 200 Hz, an E1 is
+41 Hz, and the synthesised bass is very nearly a sine. Through that filter the
+recipe is almost silent and anything with real harmonics on it reads enormous.
+A bass trimmed 15 dB to match a filter that cannot hear either instrument is a
+bass the owner cannot hear.
+
+The proof that it is the filter and not the bank is in the Rhodes. Where an
+instrument has energy where a laptop radiates, the two meters agree:
+
+| voice | K-weighted, recorded vs recipe | band-pass, same files | trim taken |
+|---|---|---|---|
+| `bass_fingered` | −1.9 … +3.2 dB | +7.2 … +17.8 dB | +0.00 dB |
+| `bass_picked` | +0.4 … +5.3 dB | +7.6 … +15.7 dB | −2.83 dB |
+| `bass_upright` | −4.0 … +2.6 dB | +1.6 … +21.6 dB | +0.00 dB |
+| `epiano` | +1.4 … +4.8 dB | +1.7 … +18.7 dB | −2.54 dB |
+
+On the Rhodes' top four notes the two columns agree to a quarter of a decibel
+— at E5 to two hundredths. On the upright's bottom note they are 20 dB apart.
+So the trim is
+**K-weighted over the synthesised note's own length**, and the band-pass figure
+is measured and printed for every note beside it so the departure is visible
+rather than quietly decided. Both trims that came out positive are clamped to
+zero, because every file was written at peak 0.900 and a positive trim asks the
+engine to push past the ceiling the whole app is normalised to.
+
+The window is the synthesised note's own length — 0.45 s for the fingered bass,
+0.70 s for the Rhodes — because the recording runs to a 2.0 s cap and the
+recipe does not. Summed whole, the comparison would be measuring a duration.
+
+### 3. Three layers, and never more
+
+`voices::MAX_LAYERS` is four, and `jam::voice_layer` maps a line's gain to
+**one, two or three** and clamps to what the bank has. A fourth layer is a file
+the engine cannot index, at a third again of the folder and of the memory it
+decodes into. So the brief's "five for the Rhodes if the source has them" is
+not a size question at all: the source has five, the format takes four, and the
+selector asks for three.
+
+And the two libraries disagree about what a layer *is*, which is why the render
+tool has two ways to build one:
+
+* **Karoryfer recorded their dynamics at the level they were played**, so
+  measuring the files finds the ladder. Their four are closer together than
+  the 5–6 dB the brief assumed — p to f is 8.6 dB on the fingered bass — so
+  the widest even ladder available is 4.4 and 4.3 dB, on p, mp and f.
+* **jRhodes3 did not.** Its five layers sit inside 1.9 dB with the *softest*
+  measuring louder than the hardest, because an SFZ player is expected to
+  supply the level from velocity (`amp_veltrack` defaults to 100 and the map
+  sets no `volume`). Measured for loudness that ladder comes out as three
+  neighbours in the wrong order and the soft Rhodes is lost entirely. So that
+  bank is ordered by **velocity band**, which is what its layers actually
+  carry: how much bark is on the tine.
+
+Both end in the same place, because that is how the engine works too —
+`voice_layer` picks the layer and the line's `gain` carries the level.
+
+## Voice by voice
+
+### bass_fingered — a black hollowbody, under the fingers
+
+Karoryfer's Black And Blue Basses, `darkblack`, `reg` articulation. Sampled at
+F♯1, B1, E2, A2, D3 and G3; three layers from the library's p, mp and f; two
+round robins of the four it holds. The `ghost`, `stac` and `btb`
+(behind-the-bridge) articulations are a different voice and are left out.
+
+### bass_picked — a blue solidbody, under a pick
+
+The same library, `babyblue`, `reg` — not the `fake_det` and `fake_ntp` maps,
+which are a detuned and a no-tone-pot variant of the same performances and are
+a colour rather than a dynamic.
+
+**It declares two layers, and that is the honest number.** Karoryfer recorded
+this bass at f and ff only, and those two are **1.6 dB apart** — what separates
+them is the pick, not the level. `voice_layer` clamps to the layers a bank has,
+so a soft line plays f and anything from normal up plays ff: "the nearest layer
+present", done by the engine instead of by a duplicated file. The third of the
+folder that saves went into two more sampled notes, which is why this is the
+densest of the three basses at a worst stretch of two semitones from eight
+sampled pitches.
+
+### bass_upright — a double bass, pizzicato
+
+Meatbass, `pizz`. The `arco` articulations are a bowed instrument and a
+different voice; `perc` is the body being hit and is not a note.
+
+**This is the one bank whose note grid is the library's and not the tool's.**
+Meatbass samples every third semitone, so the five-semitone spacing the
+electric basses use is not on offer: the choice is every 3 (ten notes in range,
+11.3 MB, past what a voice is allowed) or every 6. It takes F♯1, A1 and C2 —
+the library's own spacing, three semitones — and then every six up to F♯3,
+which keeps the whole bottom octave, where a line actually walks, within a
+semitone of a sample, and spends **the worst
+stretch of three semitones on E♭2, A2 and E♭3**. Three is the engine's limit
+rather than a comfortable number, and this voice sits on it.
+
+Its release is **60 ms and not the source's own**. Meatbass declares
+`ampeg_release=0.001` with `ampeg_sustain=0`, which is a library saying "the
+sample *is* the decay, there is no release stage" — the decay lives on CC102
+and the player lets the note ring. One millisecond in our mixer is a step to
+zero, and a step is a click on every note.
+
+### epiano — a 1977 Rhodes Mark I Stage 73
+
+jRhodes3c, the **mono** set: a melodic bank is mono by contract, and this
+library's stereo files are the mono ones with a mid-side pitch-shift doubling
+that cancels when they are summed, so folding them would spend the decode on an
+effect that deletes itself.
+
+Ten notes, which for once the tool did not choose: jRhodes3 samples every
+fourth white key, so the grid is the player's and this bank keeps every pitch
+it has from A2 to D6. A2 and D6 are outside the 48–84 the keys line asks for
+and are in the bank anyway, because without them C3 and C6 would be built from
+a sample three semitones off when one two semitones off exists. The single
+six-semitone gap the set leaves between F4 and B4 is where the worst stretch of
+three lands.
+
+Its release is the source's own `0.300`, clamped to the 250 ms
+`voices::MAX_RELEASE_MS` allows — the longest release of any voice here, and
+still asking for more than the format gives it.
+
+### bass_slap — not recorded, and why
+
+**There is no free slap source.** The brief allowed for one if a CC0 Karoryfer
+bass had a slap articulation; none of the ones downloaded does. Black And Blue
+offers ghost, staccato and behind-the-bridge on the hollowbody and detuned and
+no-tone-pot variants on the solidbody; Meatbass offers arco, pizzicato and body
+percussion. None of those is a thumb and a pop, and rendering one of them into
+a folder called `bass_slap` would be labelling a sound with an instrument it is
+not.
+
+So `slap` keeps the synthesised recipe, which `BASS_VOICE_TRIM` already holds
+at the same level as the other four. A player switching to it hears a change of
+instrument and not a change of volume, which is the property that matters —
+and if a slap library ever turns up, it is a recipe and a re-run.
+
+## What to change first if the owner says…
+
+| if the owner says… | the field in `scripts/sounds/recipes/<voice>.json` | which way |
+|---|---|---|
+| the bass is too loud / too quiet | nothing here — `trim_db` is measured. Move `BASS_VOICE_TRIM` in `jam.rs` | |
+| the bass notes run into each other | `release_ms` | down, 250 → 120 |
+| the notes cut off too abruptly | `release_ms` | up, to 250 at most |
+| it sounds out of tune in places | `notes` | more of them; watch the size |
+| the soft lines sound like the loud ones | `layer_step_db` | up, 5.5 → 8, if the library has the range |
+| the bank is too big | `notes` first, then `cap_s` | down; round robins last |
+| repeated notes sound machine-gunned | `rr` | up to 3, if the source has them |
+| the Rhodes stops too soon under a held chord | `cap_s` | up, 2.5 → 3.5; costs 40 % of the folder |
+| it is an octave out | `source.key_offset` | ±12 — and the render tool will tell you |
 
 ## The rules these were built to
 

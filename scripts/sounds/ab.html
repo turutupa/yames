@@ -113,6 +113,30 @@
   <p class="credit" id="credit"></p>
 </div>
 
+<h2>The band</h2>
+<div class="card">
+  <div class="row">
+    <label><input type="checkbox" id="bassOn" checked> Bass</label>
+    <div class="row" id="bassPick" style="margin-left:6px"></div>
+  </div>
+  <div class="row" style="margin-top:10px">
+    <label><input type="checkbox" id="keysOn" checked> Keys</label>
+    <div class="row" id="keysPick" style="margin-left:6px"></div>
+  </div>
+  <p class="hint">
+    The same two bars, with a bass line and a Rhodes comp over them — Am to G.
+    A recorded voice is a folder of sampled notes and the ones between them are
+    built here the way the engine builds them, by playing the nearest sample
+    back at <code>2<sup>n/12</sup></code>; a note is cut at the next one and
+    faded over the bank's own <code>release_ms</code>, because a bass note that
+    ran its full two seconds would be four notes deep by the end of the bar.
+    Levels are the engine's: each voice's <code>trim_db</code>, then
+    <code>BASS_VOICE_TRIM</code> and the keys' 0.07, which is what holds a
+    four-note chord under a drummer.
+  </p>
+  <p class="hint" id="bandNote"></p>
+</div>
+
 <h2>One voice at a time</h2>
 <div class="card">
   <div class="row" id="voices"></div>
@@ -160,6 +184,7 @@
 
 const DIR = "../../src-tauri/sounds/";
 const KITS_DIR = DIR + "kits/";
+const VOICES_DIR = DIR + "voices/";
 
 // There is no directory listing over HTTP, so the candidates are named and the
 // ones that are not there are skipped. A kit that exists as a folder is read
@@ -194,12 +219,58 @@ const FILL = {
   tom_lo:  [[31,4]],
 };
 
+// --- the band --------------------------------------------------------------
+//
+// A melodic bank is a folder of `<midi>.<layer>.<rr>.wav` with a voice.json
+// beside it, and the notes it does not hold are built from the nearest one it
+// does. That is a `playbackRate` here and a tabulated windowed sinc in the
+// engine; the arithmetic — nearest sample, 2^(n/12) — is the same one, which
+// is the point of this page playing it rather than describing it.
+//
+// The candidates are named because there is no directory listing over HTTP.
+// `bass_slap` has no free CC0 source and is not rendered; it is listed anyway
+// so that the day it is, this page finds it.
+const BASS_VOICES = ["bass_fingered", "bass_picked", "bass_upright", "bass_slap"];
+const KEYS_VOICES = ["epiano"];
+
+// `jam::BASS_VOICE_TRIM` and `jam::KEYS_TRIM`. The banks carry timbre and the
+// engine carries balance: a bank's own `trim_db` lands it where the recipe it
+// replaces landed, and these hold the voices against each other and the
+// section under the drummer.
+const BASS_VOICE_TRIM = {
+  bass_fingered: 1.0000, bass_picked: 0.8699,
+  bass_upright: 1.1981, bass_slap: 0.5661,
+};
+const KEYS_TRIM = 0.07;
+
+// Two bars of Am to G on the drums' own 16th grid, as [step, midi, gain].
+// The gain is the line's, which is what picks the layer — under 0.6 the
+// softest, under 0.9 the one above it, otherwise the hardest — exactly as
+// `jam::voice_layer` does, so the layers can be heard doing their job.
+const BASS = [
+  [0, 33, 1.0], [4, 33, 0.75], [6, 40, 0.75],
+  [8, 33, 1.0], [12, 36, 0.75], [14, 38, 0.75],
+  [16, 31, 1.0], [20, 31, 0.75], [22, 38, 0.75],
+  [24, 31, 1.0], [28, 35, 0.75], [30, 28, 0.55],
+];
+// Four-note voicings, which is what the keys line plays and where a level
+// goes wrong: the 0.07 is applied per note, so a bank that is off is off
+// four times over.
+const KEYS = [
+  [0, [57, 60, 64, 69], 1.0], [6, [57, 60, 64, 69], 0.75], [10, [57, 60, 64, 69], 0.55],
+  [16, [55, 59, 62, 67], 1.0], [22, [55, 59, 62, 67], 0.75], [26, [55, 59, 62, 67], 0.55],
+];
+
 let ctx = null;
 const kits = {};            // id -> {man, buffers, loaded, loading}
 let order = [];             // ids that actually exist, in CANDIDATES order
 let current = null;
 let looping = false, roundRobin = false, blindOrder = null;
 let bpm = 104, onRide = false, withFill = true, humanise = true;
+
+const banks = {};           // voice id -> {man, buffers, loaded, loading}
+let bassVoice = null, keysVoice = null;
+let bassOn = true, keysOn = true;
 
 // --- loading ---------------------------------------------------------------
 
@@ -270,6 +341,106 @@ function ensureKit(id) {
   }
   k.loading = Promise.all(jobs).then(() => { k.loaded = true; return k; });
   return k.loading;
+}
+
+async function discoverVoices() {
+  for (const id of BASS_VOICES.concat(KEYS_VOICES)) {
+    try {
+      const r = await fetch(VOICES_DIR + id + "/voice.json");
+      if (!r.ok) continue;
+      banks[id] = { man: await r.json(), buffers: {} };
+    } catch (e) { /* a voice that is not rendered yet is simply absent */ }
+  }
+  bassVoice = BASS_VOICES.find((id) => banks[id]) || null;
+  keysVoice = KEYS_VOICES.find((id) => banks[id]) || null;
+}
+
+function ensureBank(id) {
+  const b = banks[id];
+  if (!b) return Promise.resolve(null);
+  if (b.loading) return b.loading;
+  const jobs = [];
+  for (const midi of b.man.notes) {
+    for (let li = 1; li <= b.man.layers; li++) {
+      for (let ri = 1; ri <= (b.man.rr || 1); ri++) {
+        const key = midi + "." + li + "." + ri;
+        jobs.push(
+          fetch(VOICES_DIR + id + "/" + key + ".wav")
+            .then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+            .then((x) => audio().decodeAudioData(x))
+            .then((buf) => { b.buffers[key] = buf; })
+            .catch(() => { /* filled from a neighbour below */ })
+        );
+      }
+    }
+  }
+  b.loading = Promise.all(jobs).then(() => { b.loaded = true; return b; });
+  return b.loading;
+}
+
+function ensureBand() {
+  const want = [];
+  if (bassOn && bassVoice) want.push(bassVoice);
+  if (keysOn && keysVoice) want.push(keysVoice);
+  return Promise.all(want.map(ensureBank));
+}
+
+/** The sampled note this pitch is built from: the nearest, ties going down. */
+function nearestNote(notes, midi) {
+  let best = notes[0];
+  for (const n of notes) {
+    if (Math.abs(n - midi) < Math.abs(best - midi)) best = n;
+  }
+  return best;
+}
+
+/**
+ * One note of a melodic bank, ended the way the engine ends one.
+ *
+ * `dur` is how long the line holds it — until the next note — and the fade
+ * over the bank's `release_ms` is what stops that cut being a step to zero,
+ * which on a recording is a click on every note of every walking line. The
+ * curve is a raised cosine because that is the one the mixer uses.
+ */
+function bankHit(id, midi, gain, when, dur, bar, step) {
+  const b = banks[id];
+  if (!b || !b.loaded) return;
+  const layer = Math.min(gain < 0.6 ? 1 : gain < 0.9 ? 2 : 3, b.man.layers);
+  const rr = rrIndex(bar, step, 3, b.man.rr || 1);
+  const near = nearestNote(b.man.notes, midi);
+  let buf = b.buffers[near + "." + layer + "." + rr];
+  for (let l = layer; !buf && l >= 1; l--) buf = b.buffers[near + "." + l + ".1"];
+  for (let l = layer; !buf && l <= b.man.layers; l++) buf = b.buffers[near + "." + l + ".1"];
+  if (!buf) return;
+
+  const rate = Math.pow(2, (midi - near) / 12);
+  const trim = Math.pow(10, (b.man.trim_db || 0) / 20);
+  const voiceTrim = id === keysVoice ? KEYS_TRIM : (BASS_VOICE_TRIM[id] || 1);
+  let level = gain * trim * voiceTrim;
+  let at = when;
+  if (humanise) {
+    const h = hash(bar, step, 40);
+    level *= 1 + (h - 0.5) * 0.04;
+    at += h * 0.003;
+  }
+
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  src.playbackRate.value = rate;
+  const g = ctx.createGain();
+  // A note built up plays back faster and is therefore shorter than the
+  // sample it came from; whichever of the two ends first is the note.
+  const held = Math.min(dur, buf.duration / rate);
+  const rel = Math.min((b.man.release_ms || 60) / 1000, held * 0.9);
+  const curve = new Float32Array(33);
+  for (let i = 0; i < curve.length; i++) {
+    curve[i] = level * (0.5 + 0.5 * Math.cos(Math.PI * (i / (curve.length - 1))));
+  }
+  g.gain.setValueAtTime(level, at);
+  g.gain.setValueCurveAtTime(curve, at + held - rel, rel);
+  src.connect(g).connect(ctx.destination);
+  src.start(at);
+  src.stop(at + held + 0.01);
 }
 
 function say(msg) { document.getElementById("status").textContent = msg; }
@@ -368,6 +539,24 @@ function scheduleBars(k, at, bar) {
   for (const [voice, hits] of Object.entries(table)) {
     for (const [step, level] of hits) hit(k, voice, level, at + step * s, bar, step);
   }
+  // The band, over the same two bars. A note runs until the next one in its
+  // own line and the last one runs to the end of the second bar, which is
+  // what `compile_jam` does with a line's cap.
+  const span = (hits, i) => ((i + 1 < hits.length ? hits[i + 1][0] : STEPS) - hits[i][0]) * s;
+  if (bassOn && bassVoice) {
+    for (let i = 0; i < BASS.length; i++) {
+      const [step, midi, gain] = BASS[i];
+      bankHit(bassVoice, midi, gain, at + step * s, span(BASS, i), bar, step);
+    }
+  }
+  if (keysOn && keysVoice) {
+    for (let i = 0; i < KEYS.length; i++) {
+      const [step, notes, gain] = KEYS[i];
+      for (const midi of notes) {
+        bankHit(keysVoice, midi, gain, at + step * s, span(KEYS, i), bar, step);
+      }
+    }
+  }
   return at + STEPS * s;
 }
 
@@ -394,7 +583,7 @@ function start(mode) {
   const id = blindOrder || current;
   const need = mode === "round" ? order : [id];
   say("loading…");
-  Promise.all(need.map(ensureKit)).then(() => {
+  Promise.all(need.map(ensureKit).concat([ensureBand()])).then(() => {
     say("");
     if (ctx.state === "suspended") ctx.resume();
     stop();
@@ -497,6 +686,49 @@ function buildVoiceButtons() {
   }
 }
 
+function buildBandButtons() {
+  for (const [slot, ids, holder] of [["bass", BASS_VOICES, "bassPick"],
+                                     ["keys", KEYS_VOICES, "keysPick"]]) {
+    const el = document.getElementById(holder);
+    el.innerHTML = "";
+    for (const id of ids) {
+      const have = !!banks[id];
+      const b = document.createElement("button");
+      b.className = "voice" + (have ? "" : " missing");
+      b.dataset.band = slot;
+      b.dataset.voice = id;
+      b.textContent = id.replace(/^bass_/, "");
+      if (!have) b.title = "not rendered — the engine plays the synthesised recipe";
+      b.disabled = !have;
+      b.onclick = () => {
+        if (slot === "bass") bassVoice = id; else keysVoice = id;
+        setBandButtons();
+        ensureBand();
+      };
+      el.appendChild(b);
+    }
+  }
+  setBandButtons();
+}
+
+function setBandButtons() {
+  document.querySelectorAll("button[data-band]").forEach((b) => {
+    const on = b.dataset.voice === (b.dataset.band === "bass" ? bassVoice : keysVoice);
+    b.classList.toggle("on", on);
+    b.classList.toggle("kit", on);
+  });
+  const bits = [];
+  for (const id of [bassVoice, keysVoice]) {
+    const b = id && banks[id];
+    if (!b) continue;
+    bits.push(b.man.name + " — " + b.man.notes.length + " notes, " + b.man.layers +
+      " layer" + (b.man.layers > 1 ? "s" : "") + (b.man.rr > 1 ? " · " + b.man.rr + " rr" : "") +
+      ", trim " + (b.man.trim_db || 0).toFixed(2) + " dB, release " + b.man.release_ms +
+      " ms · " + b.man.credit);
+  }
+  document.getElementById("bandNote").innerHTML = bits.join("<br>");
+}
+
 const beatsEl = document.getElementById("beats");
 for (let i = 0; i < 8; i++) {
   const d = document.createElement("div");
@@ -506,7 +738,7 @@ for (let i = 0; i < 8; i++) {
 
 document.getElementById("play").onclick = () => (looping ? stop() : start("loop"));
 document.getElementById("once").onclick = () => {
-  ensureKit(blindOrder || current).then((k) => {
+  Promise.all([ensureKit(blindOrder || current), ensureBand()]).then(([k]) => {
     if (ctx.state === "suspended") ctx.resume();
     stop();
     scheduleBars(k, ctx.currentTime + 0.08, 0);
@@ -543,6 +775,10 @@ const fillEl = document.getElementById("fill");
 fillEl.onchange = () => { withFill = fillEl.checked; drawChart(); };
 const humanEl = document.getElementById("human");
 humanEl.onchange = () => { humanise = humanEl.checked; };
+const bassEl = document.getElementById("bassOn");
+bassEl.onchange = () => { bassOn = bassEl.checked; drawChart(); if (bassOn) ensureBand(); };
+const keysEl = document.getElementById("keysOn");
+keysEl.onchange = () => { keysOn = keysEl.checked; drawChart(); if (keysOn) ensureBand(); };
 
 const bpmEl = document.getElementById("bpm");
 bpmEl.oninput = () => {
@@ -581,17 +817,43 @@ function drawChart() {
       '<td class="num">' + (spec ? (spec.trim_db || 0).toFixed(1) : "—") + "</td>";
     chart.appendChild(tr);
   }
+  // The band's two lines, written as pitches rather than as levels: what a
+  // melodic line carries is notes, and the level is the one number beside it.
+  const NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+  const name = (m) => NAMES[m % 12] + (Math.floor(m / 12) - 1);
+  const bandRow = (label, hits, pitch, bank) => {
+    const at = new Map(hits.map((h) => [h[0], h]));
+    const cell = (bar) => {
+      const out = [];
+      for (let i = 0; i < 16; i++) {
+        const h = at.get(bar * 16 + i);
+        out.push(h ? '<span class="lvl2">' + pitch(h) + "</span>" : "·");
+        if (i % 4 === 3) out.push(" ");
+      }
+      return out.join(" ");
+    };
+    const tr = document.createElement("tr");
+    tr.innerHTML =
+      "<td>" + label + (bank ? "" : ' <span class="lvl3">(synthesised)</span>') + "</td>" +
+      "<td><code>" + cell(0) + "</code></td>" +
+      "<td><code>" + cell(1) + "</code></td>" +
+      '<td class="num">' + (bank ? (bank.man.trim_db || 0).toFixed(1) : "—") + "</td>";
+    chart.appendChild(tr);
+  };
+  if (bassOn) bandRow("bass", BASS, (h) => name(h[1]), banks[bassVoice]);
+  if (keysOn) bandRow("keys", KEYS, (h) => name(h[1][0]), banks[keysVoice]);
 }
 
 if (location.protocol === "file:") {
   document.getElementById("fileWarn").hidden = false;
 }
 
-discover().then(() => {
+discover().then(discoverVoices).then(() => {
   current = order[0];
   buildKitButtons();
   setKitButtons(current);
   buildVoiceButtons();
+  buildBandButtons();
   drawChart();
 }).catch(() => {
   document.getElementById("fileWarn").hidden = false;
