@@ -39,11 +39,12 @@
     "choice is every 3 (ten notes in range, 11.3 MB, past what this voice is",
     "allowed) or every 6.",
     "",
-    "Every 6 from 30 up, with 33 added underneath. That keeps the whole",
-    "bottom octave, where a bass line actually walks, within one or two",
-    "semitones of a sample, and spends the worst stretch of three on Eb2,",
-    "A2 and Eb3 higher up. Three semitones is the engine's limit rather",
-    "than a comfortable number, and this is the voice that sits on it."
+    "F#1, A1 and C2 at the library's own three-semitone spacing, then every",
+    "six up to F#3. That keeps the whole bottom octave, where a bass line",
+    "actually walks, within a semitone of a sample, and spends the worst",
+    "stretch of three on Eb2, A2 and Eb3 higher up. Three semitones is the",
+    "engine's limit rather than a comfortable number, and this is the voice",
+    "that sits on it."
   ],
   "notes": [30, 33, 36, 42, 48, 54],
 
