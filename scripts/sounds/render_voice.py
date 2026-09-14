@@ -75,6 +75,7 @@ strategy to `_dynamic_of`.
 """
 import argparse
 import collections
+import fractions
 import json
 import math
 import os
@@ -100,7 +101,9 @@ from render_kit import (  # noqa: E402
     PEAK, RATE, dc_block, peak_of, read_stereo, resample_to, resolve_root,
     rms_db, trim_and_fade, write_wav,
 )
-from measure_kits import band_energy, k_energy  # noqa: E402
+from measure_kits import (  # noqa: E402
+    band_energy, k_energy, midi_hz, note_cents, sustain_of,
+)
 from voice_levels import recipe_note  # noqa: E402
 
 # ---------------------------------------------------------------------------
@@ -138,6 +141,31 @@ MAX_RELEASE_MS = 250.0
 # The hard ceiling on one note, from `voices::MAX_NOTE_SECS`. The per-voice
 # caps in the recipes are well under it.
 MAX_NOTE_SECS = 4.0
+
+# How far out of tune a note has to be before it is retuned, in cents.
+#
+# THREE, which is two under the five `measure_kits.VOICE_TUNING_CENTS` and
+# `voices/tests.rs` gate a bank at, and the gap is deliberate: the two cents
+# between them are the resampler's rounding, the dither, and the difference
+# between a note as rendered and the same note as the engine rebuilds it at
+# another pitch. Correcting at the gate rather than under it would leave a
+# bank that passes today and fails on a device that opened at 44.1 kHz.
+#
+# And it is a floor rather than zero because these are RECORDINGS. A real
+# string is never exactly at a frequency — it is sharp while it is loud and
+# settles as it decays — so "in tune" for a bank is a couple of cents wide,
+# and resampling a note that is already inside that would be spending
+# quality on a number rather than on a pitch.
+TUNE_CENTS = 3.0
+
+# The denominator the retuning ratio is rounded to.
+#
+# A tuning correction is a ratio near 1, and `resample_poly` wants it as a
+# fraction. Two thousand puts the rounding error under a thousandth of a cent
+# while keeping the polyphase filter to a few tens of thousands of taps; the
+# rate conversion the note needs anyway is folded into the same fraction, so
+# a retuned note is resampled ONCE rather than twice.
+TUNE_MAX_DEN = 2000
 
 A4 = 440.0
 NOTE_NAMES = ("c", "c#", "d", "d#", "e", "f", "f#", "g", "g#", "a", "a#", "b")
@@ -478,6 +506,39 @@ def pick_layers(loud, layers, step_db):
     return chosen
 
 
+def retune_and_resample(x, sr_in, rate, shift):
+    """Convert to `rate` and multiply the pitch by `shift`, in one pass.
+
+    Resampling is the only way to retune a recording without a phase vocoder,
+    and it is the RIGHT way here: a bass sampled a few cents flat was played a
+    few cents flat, so stretching the whole waveform by that ratio is
+    restoring the take rather than processing it. Six cents is a length
+    change of three parts in a thousand — a two second note becomes 1.9994 s
+    — which is why nothing downstream has to know.
+
+    ONE PASS, not two. The note has to be converted from the library's
+    44.1 kHz to the bank's 48 kHz anyway, so the tuning ratio is folded into
+    that fraction instead of filtering the buffer a second time. The
+    arithmetic: resample to `rate / shift` and then call the result `rate`,
+    which multiplies every frequency in it by `shift`. With `shift` of 1 the
+    fraction reduces to the plain rate conversion `render_kit` does, bit for
+    bit.
+    """
+    ratio = float(rate) / (float(shift) * float(sr_in))
+    if abs(ratio - 1.0) < 1e-12:
+        return x
+    from scipy.signal import resample_poly
+    if shift == 1.0:
+        # The exact conversion, by the greatest common divisor, so an
+        # untouched note takes the same road it always did.
+        g = math.gcd(int(sr_in), int(rate))
+        up, down = int(rate) // g, int(sr_in) // g
+    else:
+        f = fractions.Fraction(ratio).limit_denominator(TUNE_MAX_DEN)
+        up, down = f.numerator, f.denominator
+    return resample_poly(x, up, down, axis=0)
+
+
 def choose_layers(recipe, loud, layers):
     """The recipe's ladder, by whichever of the two rules it asks for."""
     how = recipe.get("layer_by", "loudness")
@@ -536,6 +597,7 @@ def render(recipe, outdir, root):
 
     notes_out = []
     rows = []
+    tuning = []
     longest = 0.0
     total = 0
     for midi in keep:
@@ -550,11 +612,20 @@ def render(recipe, outdir, root):
                 # third slot playing the first again is what a sampler does.
                 rr, wav = note.files[(ri - 1) % len(note.files)]
                 x, sr = read_stereo(wav)
-                x = resample_to(x, sr, rate)
-                # Mono BEFORE the trim, so the tail search and the fade see
-                # the buffer the bank will actually hold.
+                # Mono BEFORE everything else, so the pitch measurement, the
+                # tail search and the fade all see the buffer the bank will
+                # actually hold.
                 if x.shape[1] > 1:
                     x = x.mean(axis=1)[:, None]
+                # In tune, before it is trimmed or normalised. Measured on
+                # the note's own sustain — see `measure_kits.sustain_of` for
+                # why not the attack — and corrected by resampling, which
+                # also does the rate conversion.
+                was = note_cents(x[:, 0], sr, midi)
+                shift = 1.0
+                if was is not None and abs(was) > TUNE_CENTS:
+                    shift = 2.0 ** (-was / 1200.0)
+                x = retune_and_resample(x, sr, rate, shift)
                 x = dc_block(x, rate, float(recipe.get("dc_block_hz", 0.0)))
                 y = trim_and_fade(
                     x, rate, cap,
@@ -567,6 +638,12 @@ def render(recipe, outdir, root):
                 path = os.path.join(outdir, "%d.%d.%d.wav" % (midi, li, ri))
                 total += write_wav(path, y, rate, rng)
                 longest = max(longest, len(y) / float(rate))
+                # Measured back off the file that ships, dither and all,
+                # rather than off the buffer that went into it.
+                done, _ = sf.read(path, always_2d=True, dtype="float64")
+                now = note_cents(done.mean(axis=1), rate, midi)
+                tuning.append({"midi": midi, "layer": li, "rr": ri,
+                               "was": was, "now": now, "moved": shift != 1.0})
         notes_out.append(midi)
         rows.append({"midi": midi, "name": midi_name(midi)})
 
@@ -577,6 +654,7 @@ def render(recipe, outdir, root):
         "dynamics": chosen,
         "loud": loud,
         "notes": notes_out,
+        "tuning": tuning,
         "longest": longest,
         "bytes": total,
         "files": len(keep) * len(chosen) * want_rr,
@@ -700,11 +778,11 @@ def check_pitch(recipe, outdir, built):
     for midi in built["notes"]:
         path = os.path.join(outdir, "%d.%d.1.wav" % (midi, layer))
         x, sr = sf.read(path, always_2d=True, dtype="float64")
-        m = x.mean(axis=1)
-        pk = int(np.argmax(np.abs(m)))
-        seg = m[pk + int(0.05 * sr):pk + int(0.55 * sr)]
+        # The same sustain the tuning was set on, so the two numbers in the
+        # report are the same measurement at two search widths.
+        seg = np.asarray(sustain_of(x.mean(axis=1), sr), dtype=np.float64)
         if len(seg) < 2048:
-            seg = m[:min(len(m), int(0.5 * sr))]
+            continue
         seg = seg - seg.mean()
         ac = np.correlate(seg, seg, "full")[len(seg) - 1:]
         want = A4 * 2.0 ** ((midi - 69) / 12.0)
@@ -798,12 +876,39 @@ def main():
         _log("  K-weighted spread %.2f dB, band-pass spread %.2f dB" % (spread, bspread))
         _log("  trim_db %+.2f (the band-pass would have asked for %+.2f)"
              % (trim, max(-24.0, min(0.0, -sorted(r["band_delta"] for r in level)[len(level) // 2]))))
-    tune = check_pitch(recipe, outdir, built)
+    tune = built["tuning"]
     if tune:
-        worst = max(tune, key=lambda t: abs(t[1]))
         _log()
-        _log("tuning: worst %+.1f cents at MIDI %d (%s); a bank mapped an octave "
-             "out would read %+d" % (worst[1], worst[0], midi_name(worst[0]), 1200))
+        _log("tuning on the sustain, worst layer and round robin of each note, "
+             "in cents:")
+        _log("  | note | before | after | retuned |")
+        for midi in built["notes"]:
+            got = [t for t in tune if t["midi"] == midi]
+            was = [t["was"] for t in got if t["was"] is not None]
+            now = [t["now"] for t in got if t["now"] is not None]
+            _log("  | %3d %-3s | %+6.1f | %+5.1f | %d of %d |"
+                 % (midi, midi_name(midi),
+                    max(was, key=abs) if was else float("nan"),
+                    max(now, key=abs) if now else float("nan"),
+                    sum(1 for t in got if t["moved"]), len(got)))
+        was = [t["was"] for t in tune if t["was"] is not None]
+        now = [t["now"] for t in tune if t["now"] is not None]
+        _log("  worst %+.1f cents before, %+.1f after; %d of %d files retuned"
+             % (max(was, key=abs) if was else float("nan"),
+                max(now, key=abs) if now else float("nan"),
+                sum(1 for t in tune if t["moved"]), len(tune)))
+        octave = check_pitch(recipe, outdir, built)
+        if octave:
+            worst = max(octave, key=lambda t: abs(t[1]))
+            _log("  octave guard (searched five semitones either way rather than a "
+                 "quarter tone): worst %+.0f cents at %s, and a bank mapped an "
+                 "octave out reads %+d"
+                 % (worst[1], midi_name(worst[0]), 1200))
+            if abs(worst[1]) > 100.0:
+                raise SystemExit(
+                    "%s at %s is %+.0f cents out, which is not a tuning error but "
+                    "a mapping one — check `key_offset`"
+                    % (recipe["id"], midi_name(worst[0]), worst[1]))
 
 
 if __name__ == "__main__":
