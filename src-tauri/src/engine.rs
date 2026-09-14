@@ -2393,9 +2393,13 @@ fn jam_play(
 /// beat before that: the last one the count-in actually plays, whether the
 /// count is two bars, one bar, or shorter than a bar.
 ///
-/// `warmup_count` is beats DONE, so it does not move inside a beat: every
-/// tick of the pickup beat answers the same thing, which is what a fill cut
-/// into sixteenths needs.
+/// ASKED ON A DOWNBEAT AND ONLY ON A DOWNBEAT. `warmup_count` is beats DONE,
+/// and the event thread counts a beat done as soon as its downbeat is
+/// reported — several buffers before the beat is over — so on the later ticks
+/// of the pickup beat this would answer "no". A fill cut into sixteenths is a
+/// whole beat of ticks, so the tick loop asks here once and latches the
+/// answer for the beat (`jam_in_pickup`). `is_last_warmup` never needed that
+/// because it is a question about a downbeat.
 #[inline]
 fn is_pickup_beat(warming_up: bool, warmup_count: u8, warmup_beats: u8) -> bool {
     warming_up
@@ -3948,6 +3952,18 @@ impl MetronomeEngine {
             // later — see the tick loop for why it is not spent where it is
             // raised.
             let mut jam_ending_armed = false;
+            // Is the beat under way the PICKUP — the count-in beat the
+            // drummer plays instead of counting?
+            //
+            // Decided once, at that beat's downbeat, and held for the rest of
+            // it, because the number it is decided from moves underneath a
+            // beat. `warmup_count` is beats DONE, and the event thread counts
+            // this beat as done the moment its downbeat is reported — several
+            // buffers before the beat is over. `is_last_warmup` never noticed
+            // because it only ever asks on a downbeat; a pickup is a whole
+            // beat of a fill, sixteenths and all, so it has to ask on every
+            // tick and get the same answer. One bool, beside the two above.
+            let mut jam_in_pickup = false;
             let mut jam_retire = JamRetirement::new();
             let mut take_retire = crate::take::TakeParking::new();
             // One report per loaded table, not one per tick.
@@ -4303,6 +4319,12 @@ impl MetronomeEngine {
                         // on its first tick.
                         jam_ending_armed = false;
                         jam_ending_cancelled = false;
+                        // And a pickup held over from the last one. The first
+                        // tick of a press of Play is a downbeat, so this
+                        // would be decided again a moment later anyway — but
+                        // a latch nobody clears is a latch somebody has to
+                        // reason about.
+                        jam_in_pickup = false;
                         voices.clear();
                     }
 
@@ -4469,12 +4491,16 @@ impl MetronomeEngine {
                             // question, and whether the table asked for one
                             // was settled when it was compiled. Here it is
                             // three integer comparisons on numbers the
-                            // callback is already holding.
-                            let is_pickup = is_pickup_beat(
-                                cached.ramp_warming_up,
-                                cached.warmup_count,
-                                cached.warmup_beats,
-                            );
+                            // callback is already holding, ON THE DOWNBEAT
+                            // and held from there: see `jam_in_pickup`.
+                            if is_downbeat {
+                                jam_in_pickup = is_pickup_beat(
+                                    cached.ramp_warming_up,
+                                    cached.warmup_count,
+                                    cached.warmup_beats,
+                                );
+                            }
+                            let is_pickup = jam_in_pickup && cached.ramp_warming_up;
                             // Where in the bar this tick is. The round robin
                             // and the drift are both functions of it, and it
                             // is the same arithmetic `jam_play` indexes the
@@ -8071,6 +8097,14 @@ mod tests {
         assert!(!is_pickup_beat(true, 0, 1));
         assert!(!is_pickup_beat(true, 0, 0));
         assert!(!is_pickup_beat(false, 2, 4), "no count-in, no pickup");
+
+        // AND WHY THE TICK LOOP LATCHES IT. The beat is counted DONE as soon
+        // as its downbeat is reported, so a beat that was the pickup on its
+        // first tick is not the pickup any more a few buffers later. On a
+        // groove in sixteenths that would be one cell of the fill and three
+        // beeps, which is why `jam_in_pickup` holds the downbeat's answer.
+        assert!(is_pickup_beat(true, 2, 4), "asked on the downbeat");
+        assert!(!is_pickup_beat(true, 3, 4), "and asked again once it is counted");
 
         // THE TAKE BOUNDARY, as a property rather than an example: over every
         // count-in the engine can be armed with, the pickup is never the beat
