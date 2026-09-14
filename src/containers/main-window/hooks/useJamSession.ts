@@ -37,7 +37,10 @@ import {
   upsertJam,
 } from "../../../jam";
 import type { BarRange } from "../../../jam";
-import type { Chord } from "../../../jam/harmony";
+import type { Chord, PitchClass } from "../../../jam/harmony";
+import { defaultFlavour } from "../../../jam/cheatSheet";
+import type { ChordFlavour } from "../../../jam/cheatSheet";
+import type { ChordPage } from "../../jam/ChordSheet";
 import type { Jam, JamBandState, JamPositionCommand } from "../../../jam";
 import { NO_PRACTICE } from "../../jam/PracticeRow";
 import type { GrooveEditorPage } from "../../jam/editor";
@@ -278,7 +281,20 @@ export function useJamSession({
    * reach it, so it lives here rather than inside `JamView`.
    */
   const [fretboardOpen, setFretboardOpen] = useState(false);
-  const [sevenths, setSevenths] = useState(false);
+  /**
+   * How the chord sheet is being read (JAM_UX_DECISIONS A10).
+   *
+   * Which of the two pages is up, which of the four readings the In key page
+   * is showing, which root the browser is parked on, and whether it is hiding
+   * the chords that do not fit. `chordFlavour` replaced a plain `sevenths`
+   * boolean: Triads and 7ths became two of four when Colours and Power joined
+   * them. None of it belongs on the record — a jam is music, not a view — but
+   * all of it has to survive a trip to the metronome tab and back.
+   */
+  const [chordPage, setChordPage] = useState<ChordPage>("key");
+  const [chordFlavour, setChordFlavour] = useState<ChordFlavour>("triads");
+  const [chordRoot, setChordRoot] = useState<PitchClass | null>(null);
+  const [onlyInKey, setOnlyInKey] = useState(false);
   const [shapeIndex, setShapeIndex] = useState(0);
   const [pinnedChord, setPinnedChord] = useState<Chord | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
@@ -305,6 +321,30 @@ export function useJamSession({
    */
   const [setupOpen, setSetupOpen] = useState(false);
   const [chordsOpen, setChordsOpen] = useState(false);
+
+  /**
+   * Which jam the sheet's reading was chosen for (A10).
+   *
+   * The flavour follows the vibe when the sheet opens — a rock jam opens on
+   * Power, a jazz one on 7ths, everything else on Triads — and after that it
+   * is yours: switching to Triads and closing the sheet must not be undone
+   * the next time you open it. So the default is applied once per JAM, not
+   * once per opening.
+   */
+  const flavourForRef = useRef<string | null>(null);
+
+  const openChords = useCallback(
+    (open: boolean) => {
+      setChordsOpen(open);
+      if (!open || !jam || flavourForRef.current === jam.id) return;
+      flavourForRef.current = jam.id;
+      setChordFlavour(defaultFlavour(jam));
+      // A new jam is a new key, so the browser page goes back to that key's
+      // own root rather than staying on whatever you last looked up.
+      setChordRoot(null);
+    },
+    [jam],
+  );
 
   /**
    * The kit a Preview button is sounding, or null (JAM_UX_DECISIONS B7).
@@ -1285,8 +1325,14 @@ export function useJamSession({
     () => ({
       fretboardOpen,
       toggleFretboard: () => setFretboardOpen((open) => !open),
-      sevenths,
-      setSevenths,
+      chordPage,
+      setChordPage,
+      chordFlavour,
+      setChordFlavour,
+      chordRoot,
+      setChordRoot,
+      onlyInKey,
+      setOnlyInKey,
       shapeIndex,
       setShapeIndex,
       pinnedChord,
@@ -1302,11 +1348,14 @@ export function useJamSession({
       setupOpen,
       setSetupOpen,
       chordsOpen,
-      setChordsOpen,
+      setChordsOpen: openChords,
     }),
     [
       fretboardOpen,
-      sevenths,
+      chordPage,
+      chordFlavour,
+      chordRoot,
+      onlyInKey,
       shapeIndex,
       pinnedChord,
       editorOpen,
@@ -1315,6 +1364,7 @@ export function useJamSession({
       editingBar,
       setupOpen,
       chordsOpen,
+      openChords,
     ],
   );
 

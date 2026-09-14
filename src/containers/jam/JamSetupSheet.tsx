@@ -27,7 +27,7 @@ import type {
 import { JAM_MAX_FORM_BARS } from "../../jam/types";
 import type { JamTakesState } from "../main-window/hooks/useJamTakes";
 import { GrooveGlyph } from "./GrooveGlyph";
-import { JamSheet, JamSheetGroup } from "./JamSheet";
+import { JamSheetGroup } from "./JamSheet";
 import { JamSelect } from "./JamSelect";
 import { KitPicker } from "./KitPicker";
 import { Segmented } from "./Segmented";
@@ -93,7 +93,6 @@ interface JamSetupSheetProps {
   jams: readonly Jam[];
   onEdit: (patch: Partial<Omit<Jam, "id" | "createdAt">>) => void;
   onLoadJam: (jam: Jam) => void;
-  onClose: () => void;
   /** What you play — the transposition row shows only where it applies. */
   instrument: string;
   /** The band when the record has not been asked. */
@@ -110,6 +109,23 @@ interface JamSetupSheetProps {
   onEditingChords: (on: boolean) => void;
   takes: JamTakesState;
   onToggleTakes: (next: boolean) => void;
+}
+
+/**
+ * "started from the Hard rock vibe", or nothing when no vibe was picked.
+ *
+ * Out here because the header belongs to the docked frame now, and the frame
+ * is shared with the chord sheet (A11): one `<aside>`, whose title changes
+ * when you switch between the two rather than sliding away and back.
+ */
+export function setupSheetSubtitle(
+  jam: Pick<Jam, "vibe">,
+  t: (k: string, o?: Record<string, unknown>) => string,
+): string | undefined {
+  if (!jam.vibe) return undefined;
+  return t("jam.vibe.startedFrom", {
+    vibe: t(`jam.vibe.${jam.vibe}`, { defaultValue: jam.vibe }),
+  });
 }
 
 /**
@@ -132,7 +148,6 @@ export function JamSetupSheet({
   jams,
   onEdit,
   onLoadJam,
-  onClose,
   instrument,
   lineup,
   onPreviewKit,
@@ -158,13 +173,6 @@ export function JamSetupSheet({
   const grooveName = jam.customGroove
     ? jam.customGroove.name
     : t(`jam.groove.${jam.grooveId}`, { defaultValue: jam.grooveId });
-
-  /** "started from the Hard rock vibe", or nothing when no vibe was picked. */
-  const startedFrom = jam.vibe
-    ? t("jam.vibe.startedFrom", {
-        vibe: t(`jam.vibe.${jam.vibe}`, { defaultValue: jam.vibe }),
-      })
-    : undefined;
 
   const countIn = { beats: jam.countIn, sound: jam.countInSound ?? "beep" };
   const countInOptions = useMemo(
@@ -206,13 +214,7 @@ export function JamSetupSheet({
   const applyPatch = (patch: VibePatch) => onEdit(patch);
 
   return (
-    <JamSheet
-      kind="setup"
-      dim
-      title={jam.name}
-      subtitle={startedFrom}
-      onClose={onClose}
-    >
+    <>
       <JamSheetGroup label={t("jam.vibe.label")} lead={t("jam.vibe.lead")}>
         <VibePicker jam={jam} jams={jams} onApply={applyPatch} onLoadOwn={onLoadJam} />
       </JamSheetGroup>
@@ -645,6 +647,6 @@ export function JamSetupSheet({
           </div>
         )}
       </section>
-    </JamSheet>
+    </>
   );
 }

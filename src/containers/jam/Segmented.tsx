@@ -15,6 +15,7 @@ export function Segmented<T extends string>({
   value,
   onChange,
   hint,
+  labelHidden = false,
 }: {
   label: string;
   options: { id: T; label: string; disabled?: boolean }[];
@@ -22,10 +23,18 @@ export function Segmented<T extends string>({
   onChange: (id: T) => void;
   /** A sentence on hover, for a control whose four words are not the whole story. */
   hint?: string;
+  /**
+   * Leave the heading off, keeping it for screen readers only.
+   *
+   * For a control whose own segments already say what it is: "In key · All
+   * chords" needs no word above it explaining that it chooses a page, and the
+   * chord sheet is short of room as it is.
+   */
+  labelHidden?: boolean;
 }) {
   return (
     <div className="accent-control jam-segmented" role="group" aria-label={label} title={hint}>
-      <span className="stage-label accent-label">{label}</span>
+      {!labelHidden && <span className="stage-label accent-label">{label}</span>}
       <div className="accent-options">
         {options.map((option) => (
           <button

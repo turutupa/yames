@@ -157,6 +157,44 @@ time, Zen over a jam, the jam step in a setlist, the takes, the engine.
   which case surfaces appear and vanish in one frame as they do today.
   Nothing inside a sheet animates on its own: the sheet moves, its content
   does not.
+  **The two sheets are one docked frame**, added 2026-09-13 from the owner's
+  testing ("switching between Set up and Chords makes the right drawer do
+  weird flickering"): Set up and Chords are two contents of a single panel,
+  not two panels in the same place. The frame slides in when the first of
+  them opens and out when the last of them closes; switching between them
+  moves nothing — the heading and the body change under a short cross-fade,
+  focus goes to the first control of the new content, and the scrim comes or
+  goes with whether Set up is the one showing.
+- **A12 — The Set up drawer closes when you look away, and stands beside the
+  stage when there is room.** *decided 2026-09-13 by the owner ("clicking
+  outside of the Setup drawer should close it, and maybe if the window is
+  wide enough the drawer should push the stage content to the left instead of
+  rendering on top, that way it'd be easier to do everything at the same
+  time").* Two behaviours, both about the same feeling: the drawer should not
+  be in the way.
+  - **A press outside puts Set up away**, anywhere in the content region that
+    is not the sheet, through the same door Done uses so it slides out rather
+    than vanishing. Not the chord sheet: that is a page you keep open while
+    you play, and a tap on the timeline must not put it away. Not the context
+    bar's own two buttons either — they toggle the sheet from whatever state
+    it is in, so closing on their press would have the click that follows
+    open it straight back up.
+  - **At 1400px of content region or wider the drawer pushes rather than
+    covers.** The sheet takes a column of its own, the stage shrinks beside
+    it and keeps its own centring and scroll, and there is no scrim because
+    there is nothing behind anything: the timeline keeps moving and the band
+    row is still yours to press. Below 1400 it is the docked overlay it has
+    always been, scrim and all. Measured on the content region rather than on
+    the window, because the rail collapses. The chord sheet follows the same
+    rule and carries no scrim in either layout.
+  - The two do not both apply at once: **the outside press closes the drawer
+    only when it is covering the stage.** In push mode the stage is a live
+    column beside the sheet, and a drawer that shut every time you touched
+    the timeline would take back the whole reason for the wide layout.
+  - The push and the overlay slide in the same way, and the stage's width
+    change is not animated: a layout reflowing over a quarter of a second
+    beside a sliding sheet reads as the app struggling rather than as motion.
+  - Escape and Play still close Set up as they did.
 
 ---
 

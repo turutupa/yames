@@ -3,7 +3,7 @@
 // screen driven by the engine rather than by the record, and "which bar of
 // the twelve am I on" is the question the mode exists to answer.
 import { GROOVES } from "../../jam/grooves";
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { render, screen, fireEvent, cleanup, within } from "@testing-library/react";
 import { createRef } from "react";
 import { JamView } from "./JamView";
@@ -46,8 +46,14 @@ function screenState(
   return {
     fretboardOpen: false,
     toggleFretboard: vi.fn(),
-    sevenths: false,
-    setSevenths: vi.fn(),
+    chordPage: "key" as const,
+    setChordPage: vi.fn(),
+    chordFlavour: "triads" as const,
+    setChordFlavour: vi.fn(),
+    chordRoot: null,
+    setChordRoot: vi.fn(),
+    onlyInKey: false,
+    setOnlyInKey: vi.fn(),
     shapeIndex: 0,
     setShapeIndex: vi.fn(),
     pinnedChord: null,
@@ -104,7 +110,10 @@ function positionState(
   };
 }
 
-function setup(overrides: Partial<React.ComponentProps<typeof JamView>> = {}) {
+function setup(
+  overrides: Partial<React.ComponentProps<typeof JamView>> = {},
+  container?: HTMLElement,
+) {
   const props = {
     jam: jamOf(),
     jams: [] as Jam[],
@@ -136,7 +145,10 @@ function setup(overrides: Partial<React.ComponentProps<typeof JamView>> = {}) {
     onCommitBpmEdit: vi.fn(),
     ...overrides,
   };
-  const utils = render(<JamView {...props} />);
+  // A container, for the tests that need a real `.main-content` around the
+  // stage: the docked sheet portals into it, measures it and listens on it
+  // (A12), none of which it can do against a container it invented.
+  const utils = render(<JamView {...props} />, container ? { container } : undefined);
   return { ...utils, props };
 }
 
@@ -1077,5 +1089,296 @@ describe("JamView — the fourth pass's controls", () => {
     cleanup();
     sheetWithMore({ instrument: "other" });
     expect(screen.getByRole("group", { name: "You read" })).toBeInTheDocument();
+  });
+});
+
+/**
+ * The cheat sheet's two pages (JAM_UX_DECISIONS A10).
+ *
+ * The owner's complaint was that the sheet was incomplete: "the user should
+ * be able to see ALL chords for all keys, or filter by the chords the user
+ * can play in the key of the current jam." So what is worth pinning here is
+ * the ARITHMETIC of the two pages — how many cards, which ones carry the
+ * mark, what disappears when the filter goes on — because those are the
+ * answers a player is reading off the screen, and a page that quietly showed
+ * the wrong ones would still look right.
+ *
+ * The starter jam is an A blues. Its note set is the nine notes of its five
+ * chords, which leaves F, Eb and Bb outside — F is the root the last test
+ * uses, and no chord rooted there can fit.
+ */
+describe("JamView — the cheat sheet", () => {
+  const cards = (container: HTMLElement) => container.querySelectorAll(".jam-chord-card");
+
+  it("opens on the key's chords, with four ways to read them", () => {
+    const { container } = chordSheet();
+    for (const name of ["Triads", "7ths", "Colours", "Power"]) {
+      expect(screen.getByRole("button", { name })).toBeInTheDocument();
+    }
+    // The blues's five chords, one card each.
+    expect(cards(container)).toHaveLength(5);
+  });
+
+  it("writes every degree with a 5 at the Power flavour", () => {
+    const { container } = chordSheet({}, { chordFlavour: "power" });
+    const degrees = [...container.querySelectorAll(".jam-chord-card-degree")].map(
+      (el) => el.textContent,
+    );
+    expect(degrees).toEqual(["I5", "IV5", "V5", "bIII5", "bVII5"]);
+  });
+
+  it("gathers the colours under the degree they belong to", () => {
+    const { container } = chordSheet({}, { chordFlavour: "colours" });
+    const groups = container.querySelectorAll(".jam-chord-degree");
+    expect(groups.length).toBeGreaterThan(0);
+    for (const group of groups) {
+      // A heading, and cards under it. A degree with no colours has no group
+      // at all rather than an empty heading.
+      expect(group.querySelector(".jam-chord-degree-label")?.textContent).toBeTruthy();
+      expect(group.querySelectorAll(".jam-chord-card").length).toBeGreaterThan(0);
+    }
+    // The heading is the degree, not the degree plus one of its colours: "I"
+    // over Isus4 and Iadd9, and never "Isus4" over both.
+    const labels = [...container.querySelectorAll(".jam-chord-degree-label")].map(
+      (el) => el.textContent,
+    );
+    expect(labels).toEqual(labels.map((l) => (l ?? "").replace(/(sus[24]|add9|6|9)$/, "")));
+    // And no chord is drawn twice, which a minor key's v and borrowed V7 would
+    // otherwise do to every suspension they share.
+    const names = [...cards(container)].map((c) => c.getAttribute("aria-label"));
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it("shows Follow the jam on the key's page and Only in key on the browser's", () => {
+    chordSheet();
+    expect(screen.getByRole("switch", { name: /Follow the jam/ })).toBeInTheDocument();
+    expect(screen.queryByRole("switch", { name: "Only in key" })).toBeNull();
+
+    cleanup();
+    chordSheet({}, { chordPage: "all" });
+    expect(screen.getByRole("switch", { name: "Only in key" })).toBeInTheDocument();
+    expect(screen.queryByRole("switch", { name: /Follow the jam/ })).toBeNull();
+  });
+
+  it("lays out twelve roots and starts on the key's own", () => {
+    const { container } = chordSheet({}, { chordPage: "all" });
+    const roots = container.querySelectorAll(".jam-chord-roots .jam-key");
+    expect(roots).toHaveLength(12);
+    // A, the jam's key, is the one already chosen.
+    const chosen = [...roots].filter((r) => r.getAttribute("aria-pressed") === "true");
+    expect(chosen).toHaveLength(1);
+    expect(chosen[0].textContent).toContain("A");
+    // The roots the key's own chords are built on carry the mark.
+    expect(container.querySelectorAll(".jam-chord-roots .jam-chord-mark").length).toBe(5);
+  });
+
+  it("marks the chords that fit the key and hides the rest on request", () => {
+    const { container } = chordSheet({}, { chordPage: "all" });
+    const all = cards(container).length;
+    const marked = container.querySelectorAll(".jam-chord-card .jam-chord-mark").length;
+    // Some fit and some do not — a page where everything is marked would be
+    // telling the player nothing.
+    expect(marked).toBeGreaterThan(0);
+    expect(marked).toBeLessThan(all);
+
+    cleanup();
+    const filtered = chordSheet({}, { chordPage: "all", onlyInKey: true });
+    expect(cards(filtered.container)).toHaveLength(marked);
+    // Every card left is a marked one.
+    expect(filtered.container.querySelectorAll(".jam-chord-card .jam-chord-mark")).toHaveLength(
+      marked,
+    );
+  });
+
+  it("says so quietly when nothing from a root fits", () => {
+    // F is one of the three notes an A blues does not contain, so no chord
+    // rooted on it can fit — and the page says that rather than going blank.
+    const { container } = chordSheet({}, { chordPage: "all", chordRoot: 5, onlyInKey: true });
+    expect(cards(container)).toHaveLength(0);
+    expect(screen.getByText(/Nothing from F fits/)).toBeInTheDocument();
+  });
+
+  it("expands a browsed chord into the same shapes section", () => {
+    const setPinnedChord = vi.fn();
+    const { container } = chordSheet({}, { chordPage: "all", setPinnedChord });
+    fireEvent.click(cards(container)[0] as HTMLElement);
+    // The browser's cards feed the shared section, which is what lets a grip
+    // found by looking something up be pinned to the playing screen.
+    expect(setPinnedChord).toHaveBeenCalledWith(expect.objectContaining({ root: 9 }));
+  });
+});
+
+/**
+ * Everything that appears, arrives (JAM_UX_DECISIONS A11).
+ *
+ * The owner: "clicking on chords just shows the sidebar but it should
+ * smoothly do the entry animation." The tests below are about the STATE
+ * machine rather than the pixels — happy-dom runs no animations — because the
+ * state machine is where the bugs are: a surface that unmounts before its
+ * exit, one that never unmounts at all, and one that leaves a ghost behind
+ * when you close and reopen it in the same second.
+ */
+describe("JamView — the sheet arrives and leaves", () => {
+  /** The docked panel, wherever it currently is. */
+  const aside = () => document.querySelector(".jam-sheet");
+
+  /** The panel's own animation, ending. */
+  const settle = () => {
+    const el = aside();
+    if (el) fireEvent.animationEnd(el);
+  };
+
+  function open(screenOverrides: Partial<React.ComponentProps<typeof JamView>["screen"]> = {}) {
+    const rendered = setup({ screen: screenState(screenOverrides) });
+    const show = (
+      next: Partial<React.ComponentProps<typeof JamView>["screen"]>,
+      props: Partial<React.ComponentProps<typeof JamView>> = {},
+    ) =>
+      rendered.rerender(
+        <JamView {...rendered.props} {...props} screen={screenState({ ...screenOverrides, ...next })} />,
+      );
+    return { ...rendered, show };
+  }
+
+  it("slides the chord sheet in, then settles", () => {
+    const { show } = open();
+    expect(aside()).toBeNull();
+
+    show({ chordsOpen: true });
+    expect(aside()).toHaveAttribute("data-state", "entering");
+    settle();
+    expect(aside()).toHaveAttribute("data-state", "open");
+  });
+
+  it("keeps the sheet on the screen until its exit has finished", () => {
+    const { show } = open({ chordsOpen: true });
+    settle();
+
+    show({ chordsOpen: false });
+    // Still there. Before A11 it was already gone by now.
+    expect(aside()).toHaveAttribute("data-state", "exiting");
+    settle();
+    expect(aside()).toBeNull();
+  });
+
+  it("is simply there and simply gone with view transitions off", () => {
+    const { show } = open();
+    show({ chordsOpen: true }, { viewTransitions: "off" });
+    expect(aside()).toHaveAttribute("data-state", "open");
+    show({ chordsOpen: false }, { viewTransitions: "off" });
+    expect(aside()).toBeNull();
+  });
+
+  it("switches Set up for Chords without moving the drawer", () => {
+    // The owner: "switching between Set up and Chords makes the right drawer
+    // do weird flickering." One frame, so the element that was on the screen
+    // is the element that stays on it.
+    const { show } = open({ setupOpen: true });
+    settle();
+    const before = aside();
+    expect(before).toHaveAttribute("data-sheet", "setup");
+
+    show({ setupOpen: false, chordsOpen: true });
+    expect(aside()).toBe(before);
+    expect(aside()).toHaveAttribute("data-sheet", "chords");
+    // Never in the middle of leaving: the drawer did not go anywhere.
+    expect(aside()).toHaveAttribute("data-state", "open");
+  });
+});
+
+/**
+ * The docked drawer's two layouts, and the press that puts it away
+ * (JAM_UX_DECISIONS A12).
+ *
+ * Both need a real `.main-content` to live in — the sheet portals into it,
+ * measures it, and listens on it — so these tests build one rather than
+ * letting the sheet fall back to rendering in place.
+ */
+describe("JamView — the drawer beside the stage", () => {
+  let host: HTMLElement;
+
+  beforeEach(() => {
+    host = document.createElement("div");
+    host.className = "main-content";
+    document.body.appendChild(host);
+  });
+
+  afterEach(() => {
+    host.remove();
+  });
+
+  /** The content region is this many CSS pixels across. */
+  const widen = (px: number) =>
+    Object.defineProperty(host, "clientWidth", { value: px, configurable: true });
+
+  function inHost(screenOverrides: Partial<React.ComponentProps<typeof JamView>["screen"]> = {}) {
+    return setup({ screen: screenState(screenOverrides) }, host);
+  }
+
+  it("puts the setup sheet away when the stage is pressed", () => {
+    const setSetupOpen = vi.fn();
+    inHost({ setupOpen: true, setSetupOpen });
+    fireEvent.pointerDown(document.querySelector(".jam-view") as HTMLElement);
+    expect(setSetupOpen).toHaveBeenCalledWith(false);
+  });
+
+  it("leaves the chord sheet alone when the stage is pressed", () => {
+    // It is a page you keep open WHILE you play. Putting it away because you
+    // touched the timeline would be the opposite of what it is for.
+    const setChordsOpen = vi.fn();
+    inHost({ chordsOpen: true, setChordsOpen });
+    fireEvent.pointerDown(document.querySelector(".jam-view") as HTMLElement);
+    expect(setChordsOpen).not.toHaveBeenCalled();
+  });
+
+  it("ignores a press on the button that opened it", () => {
+    // The context bar's buttons toggle from whatever state the sheet is in,
+    // so closing on their pointerdown would have their click reopen it.
+    const setSetupOpen = vi.fn();
+    inHost({ setupOpen: true, setSetupOpen });
+    const button = document.createElement("button");
+    button.className = "jam-sheet-btn";
+    host.appendChild(button);
+    fireEvent.pointerDown(button);
+    expect(setSetupOpen).not.toHaveBeenCalled();
+  });
+
+  it("pushes the stage aside at 1400", () => {
+    widen(1400);
+    inHost({ setupOpen: true });
+    expect(host.classList.contains("jam-sheet-wide")).toBe(true);
+    expect(document.querySelector(".jam-sheet")).toHaveAttribute("data-layout", "push");
+    // Nothing behind the sheet to dim, because the stage is beside it.
+    expect(document.querySelector(".jam-sheet-scrim")).toBeNull();
+  });
+
+  it("covers the stage at 1399", () => {
+    // One pixel under, and 640 for the sheet would leave the timeline too
+    // narrow to read as a timeline. So it goes back to being an overlay.
+    widen(1399);
+    inHost({ setupOpen: true });
+    expect(host.classList.contains("jam-sheet-wide")).toBe(false);
+    expect(document.querySelector(".jam-sheet")).toHaveAttribute("data-layout", "overlay");
+    expect(document.querySelector(".jam-sheet-scrim")).not.toBeNull();
+  });
+
+  it("keeps the layout while one of the two sheets is still down", () => {
+    widen(1400);
+    inHost({ setupOpen: true, chordsOpen: false });
+    expect(host.classList.contains("has-jam-sheet")).toBe(true);
+    cleanup();
+    // Both gone: the stage gets its full width back.
+    expect(host.classList.contains("has-jam-sheet")).toBe(false);
+    expect(host.classList.contains("jam-sheet-wide")).toBe(false);
+  });
+
+  it("does not close on an outside press while it is beside the stage", () => {
+    // The whole point of the wide layout is doing both at once, so a drawer
+    // that shut every time you touched the timeline would take that back.
+    widen(1400);
+    const setSetupOpen = vi.fn();
+    inHost({ setupOpen: true, setSetupOpen });
+    fireEvent.pointerDown(document.querySelector(".jam-view") as HTMLElement);
+    expect(setSetupOpen).not.toHaveBeenCalled();
   });
 });

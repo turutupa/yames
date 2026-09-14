@@ -14,6 +14,10 @@ import { AS_THE_FORM } from "../../jam/progression";
 export const PICKER_QUALITIES: readonly ChordQuality[] = [
   "maj",
   "min",
+  // The power chord, in the first row where a rock player will look for it.
+  // It needs no word of its own: `chordSuffix("5")` is "5", which is what a
+  // player writes on a chart and what every language calls it (A10).
+  "5",
   "7",
   "maj7",
   "m7",

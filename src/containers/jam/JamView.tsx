@@ -28,7 +28,7 @@ import {
 import { SCALE_NAMES_EN, scalesForChord, scalesForKey } from "../../jam/scales";
 import { bassStyleForGroove } from "../../jam/bassline";
 import type { Jam, JamFeel, JamIntensity, JamPracticeSettings } from "../../jam/types";
-import type { Chord } from "../../jam/harmony";
+import type { Chord, PitchClass } from "../../jam/harmony";
 import type { JamTakesState } from "../main-window/hooks/useJamTakes";
 import type { Instrument } from "../../jam/chordShapes";
 import type { BeatEvent } from "../../types";
@@ -39,9 +39,13 @@ import { PracticeRow, NO_PRACTICE } from "./PracticeRow";
 import { TradeCue } from "./TradeCue";
 import { Segmented } from "./Segmented";
 import { PinnedShape } from "./PinnedShape";
-import { ChordSheet, pinnedShapeOf } from "./ChordSheet";
-import { JamSetupSheet } from "./JamSetupSheet";
+import { ChordSheet, chordSheetTitle, pinnedShapeOf } from "./ChordSheet";
+import type { ChordPage } from "./ChordSheet";
+import type { ChordFlavour } from "../../jam/cheatSheet";
+import { JamSetupSheet, setupSheetSubtitle } from "./JamSetupSheet";
+import { JamSheet } from "./JamSheet";
 import { GrooveEditorDrawer } from "./GrooveEditorDrawer";
+import { MotionProvider, Presence, useLastPresent } from "../../components/Presence";
 import "../../styles/jam.css";
 
 const FEELS: JamFeel[] = ["straight", "shuffle", "swing"];
@@ -58,8 +62,25 @@ function neckFor(instrument: string): Instrument | null {
 export interface JamScreenState {
   fretboardOpen: boolean;
   toggleFretboard: () => void;
-  sevenths: boolean;
-  setSevenths: (next: boolean) => void;
+  /**
+   * The chord sheet's two pages and the four readings of the first of them
+   * (JAM_UX_DECISIONS A10).
+   *
+   * `chordFlavour` replaced a plain `sevenths` boolean: Triads and 7ths were
+   * two of four once Colours and Power joined them. It opens on whatever the
+   * jam's vibe suggests and then stays where you put it for the rest of the
+   * screen session — a rock player who went to Triads meant it.
+   */
+  chordPage: ChordPage;
+  setChordPage: (page: ChordPage) => void;
+  chordFlavour: ChordFlavour;
+  setChordFlavour: (flavour: ChordFlavour) => void;
+  /** Which root the browser page is on, or null for the key's own. */
+  chordRoot: PitchClass | null;
+  setChordRoot: (root: PitchClass) => void;
+  /** Hide the chords that do not fit the key. Off by default. */
+  onlyInKey: boolean;
+  setOnlyInKey: (on: boolean) => void;
   shapeIndex: number;
   setShapeIndex: (index: number) => void;
   /** The chord the chord sheet has expanded, or null. */
@@ -132,6 +153,18 @@ interface JamViewProps {
    * and the two ways to change them.
    */
   position: JamPositionState;
+  /**
+   * Whether the app may animate, and how (JAM_UX_DECISIONS A11).
+   *
+   * The same three answers `ViewTransition` is given, threaded down from the
+   * window for the same reason: the sheets, the drawer and the shapes section
+   * all arrive, and a jam whose sheets slid while the rest of the app popped
+   * would read as a different app. `viewTransitions` is the preference from
+   * Settings → Appearance, whose literal "off" turns motion off here too.
+   */
+  themeId?: string;
+  viewTransitions?: string;
+  animationStyle?: string;
   /** The metronome's tempo controls, shared rather than built again. */
   tapActive: boolean;
   tapCount: number;
@@ -181,6 +214,9 @@ export function JamView({
   customKitRefused = false,
   screen,
   position,
+  themeId,
+  viewTransitions,
+  animationStyle,
   tapActive,
   tapCount,
   tapPulse,
@@ -342,6 +378,30 @@ export function JamView({
 
   /** The grip pinned to the corner, matched back to a real shape. */
   const pinned = useMemo(() => pinnedShapeOf(jam, neck), [jam, neck]);
+  /** What the corner draws while a just-unpinned grip folds away (A11). */
+  const shownPin = useLastPresent(pinned);
+
+  /**
+   * Which of the two the docked frame is showing, and what it is called.
+   *
+   * Setup wins when both flags are somehow up — the same order Escape uses —
+   * and `useLastPresent` keeps the answer through the slide out, so the frame
+   * leaves showing what it was showing rather than emptying first.
+   */
+  const sheetKind = screen.setupOpen ? "setup" : screen.chordsOpen ? "chords" : null;
+  const shownSheet = useLastPresent(sheetKind);
+  const chordTitle = chordSheetTitle(harmony.key, screen.chordPage, t);
+
+  /** Whether the app may animate, once, for every surface below (A11). */
+  const motionInputs = useMemo(
+    () => ({
+      themeId,
+      disabled: viewTransitions === "off",
+      level: viewTransitions,
+      animStyle: animationStyle,
+    }),
+    [themeId, viewTransitions, animationStyle],
+  );
 
   /** What the drums row says it is playing — the kit, or your own folder. */
   const kitName = jam.customKit
@@ -349,6 +409,7 @@ export function JamView({
     : t(`jam.kit.${jam.kit}`, { defaultValue: jam.kit });
 
   return (
+    <MotionProvider value={motionInputs}>
     <div className="jam-view" data-sheet={screen.setupOpen ? "setup" : undefined}>
       <TradeCue bandState={bandState} isPlaying={isPlaying} />
 
@@ -462,14 +523,21 @@ export function JamView({
         </div>
 
         {/* The pinned grip. Top-right of the playing screen, and it stays
-            there until it is unpinned — which is the whole point (A8). */}
-        {pinned && (
-          <PinnedShape
-            shape={pinned.shape}
-            name={chordName(pinned.chord, harmony.key)}
-            onUnpin={() => onEdit({ pinnedShape: null })}
-          />
-        )}
+            there until it is unpinned — which is the whole point (A8). It
+            unfolds when it is pinned and folds away when it is not: the one
+            thing on this screen that appears, so the one thing that arrives. */}
+        <Presence open={!!pinned}>
+          {(_state, motion) =>
+            shownPin && (
+              <PinnedShape
+                shape={shownPin.shape}
+                name={chordName(shownPin.chord, harmony.key)}
+                onUnpin={() => onEdit({ pinnedShape: null })}
+                motion={motion}
+              />
+            )
+          }
+        </Presence>
       </section>
 
       {/* ── 2. The timeline ─────────────────────────────────────────────── */}
@@ -584,51 +652,87 @@ export function JamView({
         onTakes={takes.available === false ? undefined : onToggleTakes}
       />
 
-      {/* ── The two sheets ──────────────────────────────────────────────── */}
-      {screen.setupOpen && (
-        <JamSetupSheet
-          jam={jam}
-          jams={jams}
-          onEdit={onEdit}
-          onLoadJam={(next) => onLoadJam?.(next)}
-          onClose={() => screen.setSetupOpen(false)}
-          instrument={instrument}
-          lineup={lineup}
-          onPreviewKit={(kit) => onPreviewKit?.(kit)}
-          previewingKit={previewingKit}
-          customKitRefused={customKitRefused}
-          onOpenEditor={() => screen.setEditorOpen(true)}
-          editingChords={screen.editingChords}
-          onEditingChords={(on) => {
-            screen.setEditingChords(on);
-            // Leaving the mode closes the picker: a panel left open over a
-            // timeline that has gone back to jumping points at the wrong thing.
-            if (!on) screen.setEditingBar(null);
-          }}
-          takes={takes}
-          onToggleTakes={onToggleTakes}
-        />
-      )}
+      {/* ── The docked sheet ──────────────────────────────────────────────
+          ONE frame, two contents (JAM_UX_DECISIONS A11). The owner:
+          "switching between Set up and Chords makes the right drawer do weird
+          flickering." It did, because they were two sheets in the same place:
+          pressing Chords unmounted one aside and mounted another, and with a
+          slide on each that would have been an exit followed by an entry.
 
-      {screen.chordsOpen && (
-        <ChordSheet
-          jam={jam}
-          onEdit={onEdit}
-          onClose={() => screen.setChordsOpen(false)}
-          playedKey={harmony.key}
-          current={chord}
-          scale={keyScale}
-          instrument={neck}
-          expanded={screen.pinnedChord}
-          onExpand={screen.setPinnedChord}
-          shapeIndex={screen.shapeIndex}
-          onShapeIndex={screen.setShapeIndex}
-          sevenths={screen.sevenths}
-          onSevenths={screen.setSevenths}
-          fretboardOpen={screen.fretboardOpen}
-          onFretboard={() => screen.toggleFretboard()}
-        />
-      )}
+          Now the frame slides in once when the first of them opens, stays
+          exactly where it is while you switch between them — only the header
+          and the body change — and slides out once when you close. */}
+      <Presence open={screen.setupOpen || screen.chordsOpen}>
+        {(_state, motion) =>
+          shownSheet && (
+            <JamSheet
+              kind={shownSheet}
+              dim={shownSheet === "setup"}
+              closeOnOutside={shownSheet === "setup"}
+              title={shownSheet === "setup" ? jam.name : chordTitle.title}
+              subtitle={
+                shownSheet === "setup"
+                  ? setupSheetSubtitle(jam, t)
+                  : chordTitle.subtitle
+              }
+              onClose={() =>
+                shownSheet === "setup"
+                  ? screen.setSetupOpen(false)
+                  : screen.setChordsOpen(false)
+              }
+              motion={motion}
+            >
+              {shownSheet === "setup" ? (
+                <JamSetupSheet
+                  jam={jam}
+                  jams={jams}
+                  onEdit={onEdit}
+                  onLoadJam={(next) => onLoadJam?.(next)}
+                  instrument={instrument}
+                  lineup={lineup}
+                  onPreviewKit={(kit) => onPreviewKit?.(kit)}
+                  previewingKit={previewingKit}
+                  customKitRefused={customKitRefused}
+                  onOpenEditor={() => screen.setEditorOpen(true)}
+                  editingChords={screen.editingChords}
+                  onEditingChords={(on) => {
+                    screen.setEditingChords(on);
+                    // Leaving the mode closes the picker: a panel left open
+                    // over a timeline that has gone back to jumping points at
+                    // the wrong thing.
+                    if (!on) screen.setEditingBar(null);
+                  }}
+                  takes={takes}
+                  onToggleTakes={onToggleTakes}
+                />
+              ) : (
+                <ChordSheet
+                  jam={jam}
+                  onEdit={onEdit}
+                  playedKey={harmony.key}
+                  current={chord}
+                  scale={keyScale}
+                  instrument={neck}
+                  expanded={screen.pinnedChord}
+                  onExpand={screen.setPinnedChord}
+                  shapeIndex={screen.shapeIndex}
+                  onShapeIndex={screen.setShapeIndex}
+                  page={screen.chordPage}
+                  onPage={screen.setChordPage}
+                  flavour={screen.chordFlavour}
+                  onFlavour={screen.setChordFlavour}
+                  root={screen.chordRoot}
+                  onRoot={screen.setChordRoot}
+                  onlyInKey={screen.onlyInKey}
+                  onOnlyInKey={screen.setOnlyInKey}
+                  fretboardOpen={screen.fretboardOpen}
+                  onFretboard={() => screen.toggleFretboard()}
+                />
+              )}
+            </JamSheet>
+          )
+        }
+      </Presence>
 
       <GrooveEditorDrawer
         jam={jam}
@@ -641,5 +745,6 @@ export function JamView({
         isPlaying={isPlaying}
       />
     </div>
+    </MotionProvider>
   );
 }
