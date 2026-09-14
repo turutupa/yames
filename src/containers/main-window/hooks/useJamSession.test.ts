@@ -1306,7 +1306,7 @@ describe("the vibe preview", () => {
 describe("Jam now", () => {
   it("makes the jam its instrument asks for and counts the band in", async () => {
     const { result } = mount("jam", { instrument: "bass" });
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     calls.length = 0;
 
     act(() => {
@@ -1315,8 +1315,10 @@ describe("Jam now", () => {
 
     // A bass player gets funk (the plan's table), named for the vibe, saved.
     expect(result.current.jam?.vibe).toBe("funk");
-    expect(result.current.jams).toHaveLength(7);
-    expect(result.current.jams[6].id).toBe(result.current.jam?.id);
+    expect(result.current.jams).toHaveLength(STARTER_JAMS.length + 1);
+    // Appended, so it is the last row of the library rather than one of the
+    // fifty that ship.
+    expect(result.current.jams[STARTER_JAMS.length].id).toBe(result.current.jam?.id);
     expect(names("saveJams")).toHaveLength(1);
     // The point is to be playing, not to be setting up.
     expect(result.current.screen.setupOpen).toBe(false);
@@ -1334,21 +1336,21 @@ describe("Jam now", () => {
 
   it("starts the one it already made instead of making another", async () => {
     const { result, rerender } = mount("jam", { instrument: "electric-guitar" });
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
 
     act(() => {
       result.current.jamNow();
     });
     const first = result.current.jam!.id;
     await waitFor(() => expect(names("togglePlayback")).toHaveLength(1));
-    expect(result.current.jams).toHaveLength(7);
+    expect(result.current.jams).toHaveLength(STARTER_JAMS.length + 1);
 
     // Pressed again, with the band already playing it.
     rerender({ v: "jam", playing: true, beat: beatAt(0), instrument: "electric-guitar" });
     act(() => {
       result.current.jamNow();
     });
-    expect(result.current.jams).toHaveLength(7);
+    expect(result.current.jams).toHaveLength(STARTER_JAMS.length + 1);
     expect(result.current.jam!.id).toBe(first);
     // Already playing: a second press must not stop it.
     expect(names("togglePlayback")).toHaveLength(1);
@@ -1356,7 +1358,7 @@ describe("Jam now", () => {
 
   it("gives a guitarist rock", async () => {
     const { result } = mount("jam", { instrument: "acoustic-guitar" });
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     act(() => {
       result.current.jamNow();
     });
@@ -1367,7 +1369,7 @@ describe("Jam now", () => {
     // Its own test rather than a second mount: the store is module state, so
     // a second harness in one test reads the library the first one wrote.
     const { result } = mount("jam", { instrument: "piano" });
-    await waitFor(() => expect(result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     act(() => {
       result.current.jamNow();
     });
@@ -1382,7 +1384,7 @@ describe("Jam now", () => {
 describe("the arrangement, one bar ahead", () => {
   async function arranged(arrangement: Jam["arrangement"], patch: Partial<Jam> = {}) {
     const harness = mount("jam", { playing: true, beat: beatAt(0) });
-    await waitFor(() => expect(harness.result.current.jams).toHaveLength(6));
+    await waitFor(() => expect(harness.result.current.jams).toHaveLength(STARTER_JAMS.length));
     const blues = harness.result.current.jams.find((j) => j.form.kind === "blues12")!;
     act(() => harness.result.current.loadJam(blues));
     await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
