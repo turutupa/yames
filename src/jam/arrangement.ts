@@ -147,22 +147,26 @@ export function jamArrangement(jam: Pick<Jam, "arrangement">): ResolvedArrangeme
 }
 
 /*
- * A note on `intro`, so nobody goes looking for the half of it that is not
- * here.
+ * A note on `intro`, which is ONE gesture in two halves, decided in two
+ * places, because the two halves happen either side of bar one.
  *
- * The brief asks for a pickup fill on the count-in's LAST BAR. That bar is not
- * the arrangement's to write: `bandMoment` is asked about a bar of the form,
- * the count-in happens before bar one exists, and the engine plays it from its
- * own counter and its own sound (`countInSound`) rather than from the table.
- * There is no field on `JamEngineConfig` that reaches it, and the contract for
- * this pass is fixed.
+ * The half that is here is the CRASH on bar one of chorus one: the band
+ * arriving, the answer to a pickup. `bandMoment` can write it because it is a
+ * bar of the form and a bar of the form is what this file is asked about.
+ * Every chorus after the first is marked either way — coming round to the top
+ * is a different event from starting.
  *
- * So what `intro` decides here is the other half of the same gesture, and the
- * half a player actually hears as the band arriving: the CRASH on bar one of
- * chorus one. "Fill" means the band comes in on it — the answer to a pickup,
- * whether or not anything counted them in — and "none" means they just start.
- * Every chorus after the first is marked either way, because coming round to
- * the top of the form is a different event from starting.
+ * The half that is NOT here is the pickup itself, on the count-in's last beat.
+ * That beat is before bar one exists, so `bandMoment` is never asked about it
+ * and could not answer if it were: the count-in is played by the engine from
+ * its own counter, and every one of those ticks used to go back to the click
+ * whatever the table said. It reaches the engine as `pickup` on the config
+ * instead — `compileJam` sets it from the `intro` this function resolves, and
+ * the drummer plays the fill's last beat there (`src-tauri/src/jam.rs`,
+ * `pickup_beat`).
+ *
+ * So: this file decides WHETHER there is an intro, and where the two halves
+ * land is a fact about the engine rather than about the music.
  */
 
 // ---------------------------------------------------------------------------
