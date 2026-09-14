@@ -1,4 +1,6 @@
-use crate::jam::{JamBandState, JamLane, JamPosition, JamTable, JamTick};
+use crate::jam::{
+    JamBandState, JamLane, JamPosition, JamSlot, JamTable, JamTick, DRIFT_MAX_SECS,
+};
 use crate::onset::SharedTempoContext;
 use crate::state::SharedState;
 use crate::take::SharedTake;
@@ -264,80 +266,6 @@ const SNARE_LOW: &[u8] = include_bytes!("../sounds/snare_low.wav");
 const CHIME_UP: &[u8] = include_bytes!("../sounds/chime_up.wav");
 const CHIME_DOWN: &[u8] = include_bytes!("../sounds/chime_down.wav");
 
-/// The four jam kits, eight voices each — `src-tauri/sounds/KITS.md` has the
-/// file list, the measurements and the reasoning behind each kit's character.
-///
-/// A table rather than thirty-two named constants, and a table rather than
-/// thirty-two `SoundId` variants: the row is [`JamKit`] and the column is
-/// [`KitVoice`], so the bank decodes them in one loop and [`SoundBank::get`]
-/// indexes instead of matching. The order of the columns is the order of
-/// `KitVoice`, and `the_kit_table_is_laid_out_the_way_the_voices_are_named`
-/// is what stops the two drifting.
-///
-/// Every file is mono, 16-bit, 44.1 kHz, peak 0.900. The peak is uniform on
-/// purpose: the files carry timbre and duration, and the engine carries
-/// balance (`LEVEL_GAIN` in `jam.rs`). A voice that should be quieter is
-/// turned down here, never shipped quieter.
-const KIT_WAVS: [[&[u8]; KIT_VOICES]; KIT_COUNT] = [
-    // room — the app's drum kit, in a room. The safe default.
-    [
-        include_bytes!("../sounds/kit_room_kick.wav"),
-        include_bytes!("../sounds/kit_room_snare_hi.wav"),
-        include_bytes!("../sounds/kit_room_snare_lo.wav"),
-        include_bytes!("../sounds/kit_room_hat.wav"),
-        include_bytes!("../sounds/kit_room_hat_open.wav"),
-        include_bytes!("../sounds/kit_room_ride.wav"),
-        include_bytes!("../sounds/kit_room_rim.wav"),
-        include_bytes!("../sounds/kit_room_crash.wav"),
-    ],
-    // tight — dry and punchy, for funk and sixteenths.
-    [
-        include_bytes!("../sounds/kit_tight_kick.wav"),
-        include_bytes!("../sounds/kit_tight_snare_hi.wav"),
-        include_bytes!("../sounds/kit_tight_snare_lo.wav"),
-        include_bytes!("../sounds/kit_tight_hat.wav"),
-        include_bytes!("../sounds/kit_tight_hat_open.wav"),
-        include_bytes!("../sounds/kit_tight_ride.wav"),
-        include_bytes!("../sounds/kit_tight_rim.wav"),
-        include_bytes!("../sounds/kit_tight_crash.wav"),
-    ],
-    // brushes — for swing and bossa; the ride carries the time.
-    [
-        include_bytes!("../sounds/kit_brushes_kick.wav"),
-        include_bytes!("../sounds/kit_brushes_snare_hi.wav"),
-        include_bytes!("../sounds/kit_brushes_snare_lo.wav"),
-        include_bytes!("../sounds/kit_brushes_hat.wav"),
-        include_bytes!("../sounds/kit_brushes_hat_open.wav"),
-        include_bytes!("../sounds/kit_brushes_ride.wav"),
-        include_bytes!("../sounds/kit_brushes_rim.wav"),
-        include_bytes!("../sounds/kit_brushes_crash.wav"),
-    ],
-    // electronic — 808-shaped, hand clap for the snare.
-    [
-        include_bytes!("../sounds/kit_electronic_kick.wav"),
-        include_bytes!("../sounds/kit_electronic_snare_hi.wav"),
-        include_bytes!("../sounds/kit_electronic_snare_lo.wav"),
-        include_bytes!("../sounds/kit_electronic_hat.wav"),
-        include_bytes!("../sounds/kit_electronic_hat_open.wav"),
-        include_bytes!("../sounds/kit_electronic_ride.wav"),
-        include_bytes!("../sounds/kit_electronic_rim.wav"),
-        include_bytes!("../sounds/kit_electronic_crash.wav"),
-    ],
-    // raw — a rock drummer close-miked in a dry room: a click on the kick,
-    // wire over the snare body, compressed envelopes, no room tail. The kit
-    // the owner asked for after the first four came out smooth.
-    [
-        include_bytes!("../sounds/kit_raw_kick.wav"),
-        include_bytes!("../sounds/kit_raw_snare_hi.wav"),
-        include_bytes!("../sounds/kit_raw_snare_lo.wav"),
-        include_bytes!("../sounds/kit_raw_hat.wav"),
-        include_bytes!("../sounds/kit_raw_hat_open.wav"),
-        include_bytes!("../sounds/kit_raw_ride.wav"),
-        include_bytes!("../sounds/kit_raw_rim.wav"),
-        include_bytes!("../sounds/kit_raw_crash.wav"),
-    ],
-];
-
 // ---------------------------------------------------------------------------
 // Sound decoding
 // ---------------------------------------------------------------------------
@@ -452,103 +380,53 @@ fn decode_wav(wav_bytes: &'static [u8], target_sr: u32) -> Vec<f32> {
 // Sound bank — all sounds pre-decoded at the output sample rate
 // ---------------------------------------------------------------------------
 
-/// How many kits [`KIT_WAVS`] holds, and how many voices each one has.
-pub const KIT_COUNT: usize = 5;
-pub const KIT_VOICES: usize = 8;
+/// The drums, their names and the banks behind them live in
+/// [`crate::kit`] now: a kit is a folder with a manifest, `build.rs` walks
+/// the shipped ones, and adding a kit is adding a folder rather than a
+/// column in a table here. Re-exported so the rest of the engine, the
+/// probe and the tests keep naming them where they always did.
+pub use crate::kit::KitVoice;
 
-/// The peak every kit file carries, and the peak every decoded kit buffer is
-/// put back on. `src-tauri/sounds/KITS.md` measures all thirty-two at 0.900;
-/// see [`SoundBank::new`] for why the resampler makes this a thing the bank
-/// has to restore rather than a thing it can assume.
-const KIT_FILE_PEAK: f32 = 0.9;
-
-/// Which drum kit a jam plays. `kit` on the config names one of these; an
-/// unknown name is [`JamKit::Room`], which is the kit that sounds like the
-/// app already sounds.
+/// Which drum kit a jam plays.
+///
+/// **An index and no longer an enum.** Five kits were five variants and a
+/// `match`; the recorded kits arrive as folders somebody drops into
+/// `sounds/kits` (`plans/JAM_SOUND.md` §5), and an enum would mean a Rust
+/// change for each one — which is exactly the friction this pass removes.
+/// The index is into the list `build.rs` generated, sorted, so it is the
+/// same list on every machine.
+///
+/// It survives only to name a kit between the config and the loader. The
+/// audio thread never sees one: by the time a table reaches the callback it
+/// carries the decoded [`crate::kit::KitBank`] itself.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum JamKit {
-    Room,
-    Tight,
-    Brushes,
-    Electronic,
-    Raw,
-}
+pub struct JamKit(pub usize);
 
 impl JamKit {
-    /// Every kit, in the order [`KIT_WAVS`] lists them.
-    pub const ALL: [JamKit; KIT_COUNT] =
-        [Self::Room, Self::Tight, Self::Brushes, Self::Electronic, Self::Raw];
+    /// Every kit the app ships, in the order the picker shows them.
+    pub fn all() -> Vec<JamKit> {
+        (0..crate::kit::shipped_count()).map(JamKit).collect()
+    }
 
-    /// The name the contract uses (`Jam.kit` in `src/jam/types.ts`).
+    /// The kit that sounds like the app already sounds, and the answer to
+    /// every name nobody recognises.
+    pub fn fallback() -> Self {
+        Self(crate::kit::shipped_index("room").unwrap_or(0))
+    }
+
+    /// The name the contract uses (`Jam.kit` in `src/jam/types.ts`), which
+    /// is the folder's own name.
     pub fn name(self) -> &'static str {
-        match self {
-            Self::Room => "room",
-            Self::Tight => "tight",
-            Self::Brushes => "brushes",
-            Self::Electronic => "electronic",
-            Self::Raw => "raw",
-        }
+        crate::kit::shipped_manifest(self.0).map_or("room", |m| m.id.as_str())
     }
 
-    /// Read a kit out of a config. **Unknown names are `room`**, not an
-    /// error: a jam saved by a later build that knows more kits must still
-    /// play, and the safe default is the one the metronome already sounds
-    /// like. Case is ignored, because a hand-edited store is a real thing.
+    /// Read a kit out of a config. **Unknown names are the fallback**, not
+    /// an error: a jam saved by a later build that knows more kits must
+    /// still play, and the safe default is the one the metronome already
+    /// sounds like. Case is ignored, because a hand-edited store is a real
+    /// thing.
     pub fn from_name(name: &str) -> Self {
-        match name.trim().to_ascii_lowercase().as_str() {
-            "tight" => Self::Tight,
-            "brushes" => Self::Brushes,
-            "electronic" => Self::Electronic,
-            "raw" => Self::Raw,
-            _ => Self::Room,
-        }
-    }
-}
-
-/// One drum of a kit. The order is the column order of [`KIT_WAVS`].
-///
-/// `HatOpen` is a row of `JamPattern` (`hatOpen`, optional, second pass B5)
-/// and `Rim` is the sticks count-in; every one of the eight is reachable
-/// from a table. That is what the first pass decoded them for: they were
-/// addressable before anything played them, so growing a lane cost a row in
-/// the pattern and nothing in the bank.
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum KitVoice {
-    Kick,
-    SnareHi,
-    SnareLo,
-    Hat,
-    HatOpen,
-    Ride,
-    Rim,
-    Crash,
-}
-
-impl KitVoice {
-    /// Every voice, in the order [`KIT_WAVS`] lists them.
-    pub const ALL: [KitVoice; KIT_VOICES] = [
-        Self::Kick,
-        Self::SnareHi,
-        Self::SnareLo,
-        Self::Hat,
-        Self::HatOpen,
-        Self::Ride,
-        Self::Rim,
-        Self::Crash,
-    ];
-
-    /// The `<voice>` half of `kit_<kit>_<voice>.wav`.
-    pub fn file_name(self) -> &'static str {
-        match self {
-            Self::Kick => "kick",
-            Self::SnareHi => "snare_hi",
-            Self::SnareLo => "snare_lo",
-            Self::Hat => "hat",
-            Self::HatOpen => "hat_open",
-            Self::Ride => "ride",
-            Self::Rim => "rim",
-            Self::Crash => "crash",
-        }
+        crate::kit::shipped_index(name).map_or_else(Self::fallback, Self)
     }
 }
 
@@ -1201,10 +1079,6 @@ pub enum SoundId {
     /// predates Jam and does not move when a kit is retuned.
     DrumMetal,
     DrumCrash,
-    /// Jam: one voice of one kit (`src-tauri/sounds/KITS.md`). Resolved when
-    /// the table is compiled, in the `set_jam` command — never on the audio
-    /// thread.
-    Kit(JamKit, KitVoice),
     /// Jam: one note of one bass voice, indexed `midi − BASS_MIN_MIDI`. Out
     /// of range reads as silence rather than a panic; `jam.rs` has already
     /// rejected any pitch that could get here.
@@ -1213,18 +1087,25 @@ pub enum SoundId {
     /// voicing spawns one of these per note. Out of range reads as silence,
     /// for the same reason the bass does.
     Keys(KeysVoice, u8),
-    /// Jam: one drum of the musician's OWN kit — a folder of WAVs on this
-    /// machine (`plans/JAM_UX_DECISIONS.md` B3).
+    /// Jam: one drum of the LOADED KIT, at one velocity layer and one round
+    /// robin — `voice` indexes [`KitVoice`], the other two index that
+    /// voice's bank.
     ///
-    /// The only `SoundId` the [`SoundBank`] cannot answer, because the bank
-    /// is built when a device opens and this folder is chosen long
-    /// afterwards. It is resolved against the [`crate::kit::CustomBank`] the
-    /// loaded table carries — see [`jam_sample`], which is what the audio
-    /// thread actually calls. A table that names a custom voice always
-    /// carries the bank that holds it: they are the same `Arc<JamTable>`,
-    /// so they arrive together and retire together and there is no window
-    /// in which one is present without the other.
-    Custom(KitVoice),
+    /// **The only `SoundId` the [`SoundBank`] cannot answer**, and after
+    /// this pass that is true of every drum rather than only of a folder the
+    /// musician chose. The bank is built when a device opens; a kit is
+    /// decoded when a jam names it, which is long afterwards and at a depth
+    /// (eleven voices, four layers, three round robins, stereo) nobody would
+    /// pay for on a device change. So the drums travel INSIDE the
+    /// `Arc<JamTable>` that names them — see [`jam_sample`], which is what
+    /// the audio thread actually calls. They arrive together and retire
+    /// together, and there is no window in which one is present without the
+    /// other.
+    ///
+    /// `robin` is decided on the tick, not here: the table stores the voice,
+    /// the layer and how many round robins there are, and the callback works
+    /// out which one this bar and this tick get. See `jam.rs`.
+    Band { voice: u8, layer: u8, robin: u8 },
 }
 
 struct SoundBank {
@@ -1244,8 +1125,6 @@ struct SoundBank {
     /// decoded regardless; keeping them addressable costs nothing.
     drum_metal: Vec<f32>,
     drum_crash: Vec<f32>,
-    /// The jam kits, `[kit][voice]`, laid out like [`KIT_WAVS`].
-    kits: [[Vec<f32>; KIT_VOICES]; KIT_COUNT],
     /// The bass, `[voice][semitone from BASS_MIN_MIDI]`, laid out in the
     /// order [`BassVoice::ALL`] lists them.
     bass: [Vec<Vec<f32>>; BASS_VOICE_COUNT],
@@ -1331,53 +1210,6 @@ impl SoundBank {
             }
         }
 
-        // The band's own drums. Thirty-two files, decoded at the output
-        // rate exactly like everything above; the balance between them is
-        // the table's job, not the bank's (`LEVEL_GAIN` in `jam.rs`).
-        //
-        // This is where the jam's kick used to be synthesised as
-        // `drum_high + drum_body`. Four real kicks make that stand-in
-        // redundant, and its lesson survives where it belongs: every kit in
-        // `KITS.md` carries a mid-band body layer, because a kick with
-        // 99.7% of its energy under 120 Hz is inaudible on a laptop however
-        // loud the meter says it is. `the_jam_kits_read_on_a_small_speaker`
-        // is what holds each of them to it.
-        // ...and put each one back on the peak its file carries.
-        //
-        // THE RESAMPLER IS NOT LEVEL-PRESERVING, AND ON THESE FILES IT IS
-        // NOT CLOSE. A windowed sinc rings around a bright transient, and a
-        // kit is nothing but bright transients: `tight`'s closed hat lives
-        // at 7-15 kHz and peaks at 0.900 in its own 44.1 kHz file, 1.12
-        // resampled to 48 kHz. `electronic`'s crash reaches 1.09 at
-        // 88.2 kHz. Two things follow, and both are bugs:
-        //
-        // 1. The same kit is up to 2 dB louder on one device than another,
-        //    for no reason the musician can hear or control.
-        // 2. `jam.rs` measures a table's worst tick against one reference
-        //    bank at `JAM_REFERENCE_SR`, because the output rate is not
-        //    knowable in the `set_jam` command. That shortcut is only as
-        //    good as the agreement between the rates.
-        //
-        // Dividing the ringing back out fixes both at once and costs
-        // essentially nothing: the overshoot is a sample or two of Gibbs
-        // ripple, not loudness, so the energy — which is what KITS.md rule 2
-        // says to balance by — barely moves. What it buys is a bank that is
-        // the same at every rate, which makes the reference measurement
-        // exact rather than approximate.
-        let kits: [[Vec<f32>; KIT_VOICES]; KIT_COUNT] = std::array::from_fn(|k| {
-            std::array::from_fn(|v| {
-                let mut buf = decode_wav(KIT_WAVS[k][v], sr);
-                let peak = buf.iter().fold(0.0f32, |m, s| m.max(s.abs()));
-                if peak > 0.0 {
-                    let g = KIT_FILE_PEAK / peak;
-                    for s in buf.iter_mut() {
-                        *s *= g;
-                    }
-                }
-                buf
-            })
-        });
-
         // And the bass player — five of them, because a fingered bass under
         // a blues and a slap under a funk groove are different instruments
         // and not the same instrument at different volumes
@@ -1457,7 +1289,6 @@ impl SoundBank {
         );
 
         Self {
-            kits,
             bass,
             keys,
             drum_metal,
@@ -1499,7 +1330,6 @@ impl SoundBank {
             SoundId::ChimeDown => &self.chime_down,
             SoundId::DrumMetal => &self.drum_metal,
             SoundId::DrumCrash => &self.drum_crash,
-            SoundId::Kit(kit, voice) => &self.kits[kit as usize][voice as usize],
             // A bounds check, not a decision: an out-of-range note is
             // silence on the audio thread rather than a panic in it.
             SoundId::Bass(voice, i) => self.bass[voice as usize]
@@ -1512,7 +1342,7 @@ impl SoundBank {
             // goes through `jam_sample`, which has the loaded table's own
             // kit; anything else asking is asking the wrong object, and
             // silence is the answer that cannot make a noise nobody meant.
-            SoundId::Custom(_) => &[],
+            SoundId::Band { .. } => &[],
         }
     }
 }
@@ -1533,29 +1363,35 @@ pub(crate) fn jam_reference_sample(id: SoundId) -> &'static [f32] {
     BANK.get_or_init(|| SoundBank::new(JAM_REFERENCE_SR)).get(id)
 }
 
-/// The samples behind a slot the band is playing: the bank for everything
-/// shipped, the loaded table's own folder for a custom drum.
+/// The samples behind a slot the band is playing: the click's own bank for
+/// everything the metronome makes, the loaded table's own kit for a drum.
 ///
-/// The one place `SoundId::Custom` is answered, and the reason it can be
-/// answered on the audio thread without a lock or an allocation: the bank
+/// The one place `SoundId::Band` is answered, and the reason it can be
+/// answered on the audio thread without a lock or an allocation: the kit
 /// travels INSIDE the `Arc<JamTable>` that names it. Whatever table the
-/// callback is reading, the drums it names and the folder they came from
+/// callback is reading, the drums it names and the samples they came from
 /// are the same object, so there is no ordering to get wrong and nothing to
 /// look up.
 ///
-/// A custom voice with no table behind it renders silence rather than a
-/// wrong drum. That happens for exactly one thing: a kick still ringing
-/// when the musician unloads the jam, which now stops where it used to ring
-/// out. A quarter-second of decay against never resolving a dangling sound
-/// on the audio thread is the trade, and it is the right way round.
+/// A drum with no table behind it renders silence rather than a wrong one.
+/// That happens for exactly one thing: a cymbal still ringing when the
+/// musician unloads the jam, which now stops where it used to ring out. A
+/// quarter-second of decay against never resolving a dangling sound on the
+/// audio thread is the trade, and it is the right way round.
+///
+/// **The slice it returns for a drum is INTERLEAVED STEREO** and every other
+/// slice is mono. The caller knows which it asked for — `Voice::band` says
+/// so — and that is why the mixer, and not this function, does the indexing.
 #[inline]
 fn jam_sample<'a>(
     bank: &'a SoundBank,
-    custom: Option<&'a crate::kit::CustomBank>,
+    kit: Option<&'a crate::kit::KitBank>,
     id: SoundId,
 ) -> &'a [f32] {
     match id {
-        SoundId::Custom(voice) => custom.map_or(&[][..], |c| c.voice(voice)),
+        SoundId::Band { voice, layer, robin } => {
+            kit.map_or(&[][..], |c| c.sample(voice, layer, robin))
+        }
         other => bank.get(other),
     }
 }
@@ -1648,9 +1484,311 @@ impl SoundKit {
 
 struct Voice {
     sound_id: SoundId,
+    /// How far into the sample this voice is, in FRAMES. A click's buffer is
+    /// mono, so a frame is a sample; a drum's is interleaved stereo, so a
+    /// frame is two. The mixer knows which from [`Voice::band`].
     position: usize,
-    amplitude: f32,
-    max_samples: usize, // 0 = no cap (play full buffer)
+    /// Frames still to wait before this voice starts at all.
+    ///
+    /// The push and pull a drummer plays with (`plans/JAM_SOUND.md` §2.6):
+    /// nought to three milliseconds, hashed from the bar, the tick and the
+    /// drum, so it is the same every time round and different on every hit.
+    /// The click never has one.
+    delay: u32,
+    /// The gain into the left and the right of the bus. Two rather than one
+    /// because a kit in a room is stereo and a drum has a place in it; the
+    /// pan was resolved into this pair when the table was compiled.
+    amp_l: f32,
+    amp_r: f32,
+    max_samples: usize, // 0 = no cap (play full buffer), in frames
+    /// Which drum this is, as a [`KitVoice`] index, or [`NOT_A_DRUM`].
+    /// Read only to answer the choke.
+    voice: u8,
+    /// The choke, once it has started: frames left of the fade and how long
+    /// the fade is. `fade_len` of nought means nothing is fading.
+    fade_left: u32,
+    fade_len: u32,
+    /// Does this voice go through the drum bus?
+    ///
+    /// **The click does not, and that is the rule this field exists for.**
+    /// Its timing and its path are unchanged by everything in this pass: it
+    /// is summed, mono, exactly where it always was, and the band is
+    /// saturated, compressed and panned around it.
+    band: bool,
+}
+
+/// [`Voice::voice`] for everything that is not a drum — the click, the
+/// count-in, the bass, the keys. Outside the range of any [`KitVoice`], so
+/// no choke mask can name it.
+use crate::jam::NOT_A_DRUM;
+
+impl Voice {
+    /// A voice of the CLICK: mono, centred, no drift, no choke, and it does
+    /// not go through the drum bus.
+    ///
+    /// The metronome's own path, written once so the six places that spawn
+    /// one cannot drift apart — and so that "the click is unchanged" is a
+    /// property of this function rather than of six struct literals.
+    #[inline]
+    fn click(sound_id: SoundId, amplitude: f32, max_samples: usize) -> Self {
+        Self {
+            sound_id,
+            position: 0,
+            delay: 0,
+            amp_l: amplitude,
+            amp_r: amplitude,
+            max_samples,
+            voice: NOT_A_DRUM,
+            fade_left: 0,
+            fade_len: 0,
+            band: false,
+        }
+    }
+}
+
+impl Voice {
+    /// The choke's gain: 1.0 until something silenced this drum, then a
+    /// linear ramp to nothing over [`CHOKE_FADE_SECS`].
+    #[inline]
+    fn choke_gain(&self) -> f32 {
+        if self.fade_len == 0 {
+            1.0
+        } else {
+            self.fade_left as f32 / self.fade_len as f32
+        }
+    }
+
+    /// Has this voice finished — run off the end of its sample, or been
+    /// choked all the way down?
+    #[inline]
+    fn done(&self, frames: usize) -> bool {
+        if self.fade_len > 0 && self.fade_left == 0 {
+            return true;
+        }
+        let limit = if self.max_samples > 0 {
+            self.max_samples.min(frames)
+        } else {
+            frames
+        };
+        self.position >= limit
+    }
+}
+
+/// One slot of the table, spawned: the round robin chosen, the drift
+/// applied, the pan resolved and whatever it chokes already fading.
+///
+/// **Everything here is arithmetic on integers and floats the caller is
+/// already holding.** No allocation, no lock, no branch on anything behind a
+/// pointer. The round robin is a modulo and the drift is a SplitMix hash
+/// (`jam.rs`), both of them functions of the bar, the tick and the drum — so
+/// the same bar of the same jam plays the same drums every time round, and a
+/// take is reproducible.
+///
+/// The choke walks the ringing voices once, at the tick, and sets a counter
+/// on anything this drum silences. That is bounded by `MAX_VOICES` and
+/// happens once per hit rather than once per sample.
+#[allow(clippy::too_many_arguments)]
+#[inline]
+fn spawn_band_voice(
+    voices: &mut Vec<Voice>,
+    slot: &crate::jam::JamSlot,
+    volume: f32,
+    bar: u32,
+    tick: u32,
+    ticks_per_bar: u32,
+    tick_samples: u64,
+    drift_frames: u32,
+    choke_frames: u32,
+) {
+    if voices.len() >= MAX_VOICES {
+        return;
+    }
+    let sound_id = match slot.sound {
+        SoundId::Band { voice, layer, .. } => SoundId::Band {
+            voice,
+            layer,
+            robin: crate::jam::round_robin(bar, ticks_per_bar, tick, slot.voice, slot.rr),
+        },
+        other => other,
+    };
+    // The drift. The bass and the keys get none: a walking line that pushed
+    // and pulled against the drummer would be two people disagreeing rather
+    // than one person playing.
+    let (wobble, late) = if slot.voice == NOT_A_DRUM {
+        (1.0, 0.0)
+    } else {
+        crate::jam::drift(bar, tick, slot.voice)
+    };
+    // AND THE KICK ON THE ONE IS NEVER LATE. The downbeat is where the band
+    // agrees it is; a drummer who pushed that would be a drummer nobody
+    // could play with.
+    let on_the_one = tick == 0 && slot.voice == KitVoice::Kick as u8;
+    let delay = if on_the_one {
+        0
+    } else {
+        (late * drift_frames as f32) as u32
+    };
+    let gain = slot.gain * wobble * volume;
+
+    // What this hit silences. The manifest said which drums close which
+    // (`choked_by`); `jam.rs` inverted it into `chokes` when the table was
+    // compiled, so this is a mask test per ringing voice and no more.
+    if slot.chokes != 0 {
+        for v in voices.iter_mut() {
+            if v.band && v.voice != NOT_A_DRUM && (slot.chokes & (1u16 << v.voice)) != 0 {
+                // Already fading: leave the shorter fade alone rather than
+                // restarting it, so two closed hats in a row do not make the
+                // open one last longer than one would.
+                if v.fade_len == 0 {
+                    v.fade_len = choke_frames.max(1);
+                    v.fade_left = v.fade_len;
+                }
+            }
+        }
+    }
+
+    voices.push(Voice {
+        sound_id,
+        position: 0,
+        delay,
+        amp_l: gain * slot.pan_l,
+        amp_r: gain * slot.pan_r,
+        max_samples: if slot.cap_ticks > 0.0 {
+            (tick_samples as f32 * slot.cap_ticks) as usize
+        } else {
+            0
+        },
+        voice: slot.voice,
+        fade_left: 0,
+        fade_len: 0,
+        band: true,
+    });
+}
+
+/// How long a choke takes.
+///
+/// A drummer's open hat is closed by the next stick or the next foot, and
+/// twenty milliseconds is what that sounds like: fast enough to be the
+/// closing rather than a fade, slow enough not to be a click of its own.
+/// `plans/JAM_SOUND.md` §2.4 — before this, an open hat rang across every
+/// off-beat into the next beat, which is worst at Loud, where the grooves
+/// use open hats most.
+const CHOKE_FADE_SECS: f32 = 0.020;
+
+// ---------------------------------------------------------------------------
+// The drum bus
+// ---------------------------------------------------------------------------
+
+/// What makes the band sound like one kit rather than like a sum of drums.
+///
+/// `plans/JAM_SOUND.md` §2.7: dry hits summed are thin, and the reason the
+/// jam played 9–13 dB below the metronome's own drum accent was that the
+/// table was scaled so its busiest possible tick could never reach the
+/// ceiling — every groove in the library paying for the loudest one nobody
+/// writes. The scaling goes (`jam.rs` keeps it only as a safety clamp) and
+/// this takes over: a tanh stage for the edge a recording has, then a peak
+/// compressor for the glue, then the sum into the output.
+///
+/// **Fixed cost, and it never sees the click.** Every coefficient is worked
+/// out when the stream opens or when a table arrives, so the per-sample work
+/// is two `tanh`s, a comparison, a one-pole and — only while the band is
+/// over the threshold — one `powf`. No branches on the table, no lookups, no
+/// allocation. The click is summed after it, untouched, exactly where it was
+/// before any of this existed.
+struct DrumBus {
+    /// How hard the band is pushed into the tanh. The kit's own number:
+    /// 1.0 for a recording, more for a kit that is meant to sound driven.
+    drive: f32,
+    /// `1 / tanh(drive)`, so the curve passes through 1.0 at 1.0 — a
+    /// full-scale sum comes out at full scale and not above it.
+    shape: f32,
+    /// One-pole coefficients for the envelope, from the device's rate.
+    attack: f32,
+    release: f32,
+    /// Where the compressor starts working, −6 dBFS.
+    threshold: f32,
+    /// `1 − 1/ratio`, the exponent that turns "how far over" into "how much
+    /// to take off" in one `powf` rather than two logarithms.
+    slope: f32,
+    /// The detector, between samples. The only state there is.
+    env: f32,
+}
+
+/// The compressor's numbers, from the contract.
+const BUS_ATTACK_SECS: f32 = 0.005;
+const BUS_RELEASE_SECS: f32 = 0.080;
+/// −6 dBFS.
+const BUS_THRESHOLD: f32 = 0.5;
+const BUS_RATIO: f32 = 3.0;
+
+impl DrumBus {
+    fn new(sr: u32) -> Self {
+        let coefficient = |secs: f32| {
+            // The usual one-pole: the fraction of the way to the target one
+            // sample covers, so the envelope reaches 63% of a step in `secs`.
+            let n = (secs * sr as f32).max(1.0);
+            1.0 - (-1.0 / n).exp()
+        };
+        Self {
+            drive: 1.0,
+            shape: 1.0 / 1.0f32.tanh(),
+            attack: coefficient(BUS_ATTACK_SECS),
+            release: coefficient(BUS_RELEASE_SECS),
+            threshold: BUS_THRESHOLD,
+            slope: 1.0 - 1.0 / BUS_RATIO,
+            env: 0.0,
+        }
+    }
+
+    /// The kit decides the drive, so this moves when a table does — once, on
+    /// the buffer where the table changed, and never per sample.
+    #[inline]
+    fn set_drive(&mut self, drive: f32, shape: f32) {
+        self.drive = drive;
+        self.shape = shape;
+    }
+
+    /// One stereo frame of the band, saturated and compressed.
+    #[inline]
+    fn process(&mut self, l: f32, r: f32) -> (f32, f32) {
+        let l = (l * self.drive).tanh() * self.shape;
+        let r = (r * self.drive).tanh() * self.shape;
+        // Peak rather than RMS, and one detector for both sides: a
+        // compressor that moved the channels independently would wander the
+        // stereo image every time the snare landed.
+        let peak = l.abs().max(r.abs());
+        let c = if peak > self.env {
+            self.attack
+        } else {
+            self.release
+        };
+        self.env += (peak - self.env) * c;
+        // A COMPRESSOR THAT LAGS LETS THROUGH THE SAMPLE IT EXISTS FOR.
+        //
+        // Five milliseconds of attack is what makes this glue rather than a
+        // limiter: a snare keeps its crack because the detector is still
+        // catching up when the transient lands. But the tanh above only
+        // asymptotes at `1 / tanh(drive)` — 1.31 at drive 1.0 — so a band
+        // arriving at the safety clamp puts 1.31 into the output for those
+        // five milliseconds, and what happens next is the mixer's hard
+        // clamp, which is a square wave and the sound of failure.
+        //
+        // So the detector never lags behind a sample that is ALREADY over
+        // full scale. Below full scale the attack is the attack and the
+        // transients are intact; at or above it the envelope jumps, which is
+        // what every limiter does and is inaudible next to clipping. The
+        // release is unchanged, so the recovery is still 80 ms of the
+        // compressor breathing rather than a gate.
+        if peak > 1.0 && peak > self.env {
+            self.env = peak;
+        }
+        if self.env > self.threshold {
+            let g = (self.threshold / self.env).powf(self.slope);
+            (l * g, r * g)
+        } else {
+            (l, r)
+        }
+    }
 }
 
 /// Ceiling on simultaneously ringing voices.
@@ -1835,27 +1973,27 @@ impl JamHandoff {
     ///
     /// A table survives a device change on purpose — switch headphones
     /// mid-jam and the band is still there (see
-    /// [`MetronomeEngine::set_jam_table`]) — and that is right for every
-    /// table but one. The shipped kits are decoded by the audio thread's own
-    /// `SoundBank`, which is rebuilt at the new rate when the stream
-    /// reopens. A folder of the musician's drums is not: it was decoded and
-    /// resampled once, on the command thread, at the rate the OLD device
-    /// opened at, and it is baked into the table. Play it on a 44.1 kHz
-    /// device after a 48 kHz one and every drum is a semitone and a half
-    /// flat, for as long as the jam is loaded, with nothing to tell the
-    /// musician why.
+    /// [`MetronomeEngine::set_jam_table`]) — and that used to be right for
+    /// every table but one. It is now right for none of them, and the reason
+    /// is that this pass moved the shipped kits out of the `SoundBank`.
     ///
-    /// `kit::KitCache` already keys on the rate, so the fix is only to make
-    /// the app ASK again. Taking the table away does that: the plain click
-    /// plays, and the next bar-ahead `set_jam` — at most a bar later, and
-    /// the UI sends four to six a chorus — decodes the folder at the rate
-    /// the new device actually opened at and hands the band back in tune. A
-    /// bar of click is a smaller lie than a chorus of flat drums.
-    pub(crate) fn drop_custom_kit(&self) -> bool {
+    /// Every kit is decoded and resampled once, on the command thread, at
+    /// the rate the device that was open at the time reported, and it is
+    /// baked into the table. Play that on a 44.1 kHz device after a 48 kHz
+    /// one and every drum is a semitone and a half flat, for as long as the
+    /// jam is loaded, with nothing to tell the musician why.
+    ///
+    /// `kit::KitCache` keys on the rate, so the fix is only to make the app
+    /// ASK again. Taking the table away does that: the plain click plays,
+    /// and the next bar-ahead `set_jam` — at most a bar later, and the UI
+    /// sends four to six a chorus — decodes the kit at the rate the new
+    /// device actually opened at and hands the band back in tune. A bar of
+    /// click is a smaller lie than a chorus of flat drums.
+    pub(crate) fn drop_kit(&self) -> bool {
         let holds = self
             .table
             .lock()
-            .map(|t| t.as_deref().is_some_and(|t| t.custom_kit().is_some()))
+            .map(|t| t.as_deref().is_some())
             .unwrap_or(false);
         if holds {
             self.set(None);
@@ -1934,34 +2072,33 @@ impl JamRetirement {
     }
 }
 
-/// WHICH DECODE a table's drums came from, or `None` for a table whose
-/// drums are all the app's own.
+/// WHICH DECODE a table's drums came from, or `None` when it has no band.
 ///
-/// `CustomBank::id` and not the folder path: a musician who replaces
-/// `snare.wav` while the app is open has the same path and a different
-/// drum, and the whole reason that id exists is that the path cannot tell
-/// the two apart (see `kit.rs`).
+/// `KitBank::id` and not the kit's name or the folder's path: a musician who
+/// replaces `snare.wav` while the app is open has the same path and a
+/// different drum, and the whole reason that id exists is that the path
+/// cannot tell the two apart (see `kit.rs`).
 ///
 /// Used on the audio thread, on the one buffer where a table changes, to
 /// answer "are the drums still ringing the same drums?".
 #[inline]
-fn custom_bank_id(table: Option<&JamTable>) -> Option<u64> {
-    table.and_then(|t| t.custom_kit()).map(|c| c.id)
+fn bank_id(table: Option<&JamTable>) -> Option<u64> {
+    table.map(|t| t.kit_bank().id)
 }
 
-/// A DRUM STILL RINGING OUT OF THE OLD FOLDER IS A CLICK IN THE NEW ONE.
+/// A DRUM STILL RINGING OUT OF THE OLD KIT IS A CLICK IN THE NEW ONE.
 ///
-/// A [`Voice`] is a [`SoundId`] and an offset, and `SoundId::Custom` names a
-/// DRUM rather than a decode: the samples behind it are whichever folder the
+/// A [`Voice`] is a [`SoundId`] and an offset, and `SoundId::Band` names a
+/// DRUM rather than a decode: the samples behind it are whichever kit the
 /// table the callback is holding carries. So a crash 200 ms into its wash
-/// when the musician points the app at a different folder — or replaces
-/// `crash.wav` on disk, which is the same thing to the cache — does not
-/// stop. It carries on at sample 9 600 of somebody else's cymbal, which is a
-/// step from one waveform straight to another in the middle of a note. That
-/// is a click, and on a crash it is a loud one.
+/// when the musician changes kit — or replaces `crash.wav` on disk, which is
+/// the same thing to the cache — does not stop. It carries on at frame 9 600
+/// of somebody else's cymbal, which is a step from one waveform straight to
+/// another in the middle of a note. That is a click, and on a crash it is a
+/// loud one.
 ///
 /// Stopping those voices is the honest answer: the drum they were playing no
-/// longer exists. Everything from the bank — the click, the shipped kits,
+/// longer exists. Everything from the `SoundBank` — the click, the count-in,
 /// the bass, the keys — rings on untouched, because their buffers did not
 /// move.
 ///
@@ -1972,7 +2109,7 @@ fn stop_voices_on_kit_change(voices: &mut Vec<Voice>, before: Option<u64>, after
     if before == after {
         return;
     }
-    voices.retain(|v| !matches!(v.sound_id, SoundId::Custom(_)));
+    voices.retain(|v| !v.band || !matches!(v.sound_id, SoundId::Band { .. }));
 }
 
 /// What the band does on `bar`, or `Full` with no band.
@@ -3307,7 +3444,7 @@ impl MetronomeEngine {
         // `JamHandoff::drop_custom_kit`, which is where the reasoning lives.
         // Every other table survives the change, which is the promise
         // `set_jam_table` makes.
-        if self.jam.drop_custom_kit() {
+        if self.jam.drop_kit() {
             eprintln!(
                 "[yames] the jam's drums came from a folder and were decoded for the \
                  old device; the band returns on the next bar"
@@ -3506,6 +3643,16 @@ impl MetronomeEngine {
 
             // ---- Callback-local mutable state ----
             let mut voices: Vec<Voice> = Vec::with_capacity(MAX_VOICES);
+            // The band's own bus: built here, at the device's rate, so every
+            // coefficient in it is fixed before the first buffer. See
+            // `DrumBus`. It processes the band and never the click.
+            let mut bus = DrumBus::new(sr);
+            // A choke, in frames at this device's rate. Worked out once here
+            // rather than per hit.
+            let choke_frames = (CHOKE_FADE_SECS * sr as f32) as u32;
+            // Three milliseconds of push and pull, as frames. See
+            // `Voice::delay`.
+            let drift_frames = (DRIFT_MAX_SECS * sr as f32) as u32;
             let mut sample_counter: u64 = 0;
             let mut next_beat_sample: u64 = 0;
             let mut beat_count: u32 = 0;
@@ -3683,13 +3830,22 @@ impl MetronomeEngine {
                                 // out of, before and after. A different one
                                 // stops them; see
                                 // `stop_voices_on_kit_change`.
-                                let before = custom_bank_id(cached.jam.as_deref());
-                                let after = custom_bank_id(incoming.as_deref());
+                                let before = bank_id(cached.jam.as_deref());
+                                let after = bank_id(incoming.as_deref());
                                 if let Some(old) = cached.jam.take() {
                                     jam_retire.retire(&jam_shared, old);
                                 }
                                 cached.jam = incoming;
                                 stop_voices_on_kit_change(&mut voices, before, after);
+                                // The kit decides how hard the bus is
+                                // driven. Two floats, copied on the one
+                                // buffer where the table changed — the
+                                // `tanh` behind `bus_shape` was computed
+                                // when the table was compiled.
+                                match cached.jam.as_deref() {
+                                    Some(t) => bus.set_drive(t.bus_drive, t.bus_shape),
+                                    None => bus.set_drive(1.0, 1.0 / 1.0f32.tanh()),
+                                }
                                 cached.jam_changed = true;
                                 cached.count_in_slot =
                                     count_in_slot_of(cached.jam.as_deref());
@@ -3904,12 +4060,7 @@ impl MetronomeEngine {
                         // fit is a chime nobody hears, which is better than
                         // a reallocation under the mixer. See `MAX_VOICES`.
                         if let Some(chime_id) = chime.take().filter(|_| voices.len() < MAX_VOICES) {
-                            voices.push(Voice {
-                                sound_id: chime_id,
-                                position: 0,
-                                amplitude: 0.4 * cached.volume,
-                                max_samples: 0,
-                            });
+                            voices.push(Voice::click(chime_id, 0.4 * cached.volume, 0));
                         }
                     }
 
@@ -4008,6 +4159,11 @@ impl MetronomeEngine {
                             // that changes is which drums sound on it. The
                             // rules live in `jam_play`, which is pure.
                             let counting_in = cached.ramp_warming_up && !is_last_warmup;
+                            // Where in the bar this tick is. The round robin
+                            // and the drift are both functions of it, and it
+                            // is the same arithmetic `jam_play` indexes the
+                            // table with.
+                            let jam_tick_index = measure_beat * subdivision + sub_count;
                             let mut jam_mismatch = false;
                             // Whether anything the band ACTUALLY played on
                             // this tick was an accent. Not the table's own
@@ -4081,16 +4237,17 @@ impl MetronomeEngine {
                                             break;
                                         }
                                         accent_heard |= slot.accent;
-                                        voices.push(Voice {
-                                            sound_id: slot.sound,
-                                            position: 0,
-                                            amplitude: slot.gain * cached.volume,
-                                            max_samples: if slot.cap_ticks > 0.0 {
-                                                (tick_samples as f32 * slot.cap_ticks) as usize
-                                            } else {
-                                                0
-                                            },
-                                        });
+                                        spawn_band_voice(
+                                            &mut voices,
+                                            slot,
+                                            cached.volume,
+                                            jam_bar,
+                                            jam_tick_index,
+                                            beats_per_measure * subdivision,
+                                            tick_samples,
+                                            drift_frames,
+                                            choke_frames,
+                                        );
                                     }
                                 }
                                 // The crash that says "top of the form". Bar
@@ -4110,12 +4267,24 @@ impl MetronomeEngine {
                                         .filter(|_| voices.len() < MAX_VOICES)
                                     {
                                         accent_heard = true;
-                                        voices.push(Voice {
-                                            sound_id: slot.sound,
-                                            position: 0,
-                                            amplitude: slot.gain * cached.volume,
-                                            max_samples: 0,
-                                        });
+                                        // The crash on the one rings out
+                                        // whatever its lane says, which is
+                                        // why it is spawned with no cap and
+                                        // on tick 0 of the bar it opens.
+                                        spawn_band_voice(
+                                            &mut voices,
+                                            &JamSlot {
+                                                cap_ticks: 0.0,
+                                                ..slot
+                                            },
+                                            cached.volume,
+                                            jam_bar,
+                                            0,
+                                            beats_per_measure * subdivision,
+                                            tick_samples,
+                                            drift_frames,
+                                            choke_frames,
+                                        );
                                     }
                                 }
                                 jam_accent = accent_heard;
@@ -4127,12 +4296,11 @@ impl MetronomeEngine {
                                 // about this line rather than about a sum
                                 // computed somewhere else.
                                 if voices.len() < MAX_VOICES {
-                                    voices.push(Voice {
-                                        sound_id: cached.kit.high_id(),
-                                        position: 0,
-                                        amplitude: cached.volume,
-                                        max_samples: 0,
-                                    });
+                                    voices.push(Voice::click(
+                                        cached.kit.high_id(),
+                                        cached.volume,
+                                        0,
+                                    ));
                                 }
                             } else if cached.ramp_warming_up && !is_last_warmup {
                                 // The count-in. Which sound it makes was
@@ -4149,12 +4317,25 @@ impl MetronomeEngine {
                                 // sticks must sound exactly as it did.
                                 match cached.count_in_slot {
                                     Some(slot) if is_downbeat => {
+                                        // A band voice, because the sticks
+                                        // are the kit's own cross-stick and
+                                        // its samples live in the table. No
+                                        // drift and no round robin: a
+                                        // count-in is four identical clicks
+                                        // of wood, which is what counting
+                                        // sounds like.
                                         if voices.len() < MAX_VOICES {
                                             voices.push(Voice {
                                                 sound_id: slot.sound,
                                                 position: 0,
-                                                amplitude: slot.gain * cached.volume,
+                                                delay: 0,
+                                                amp_l: slot.gain * slot.pan_l * cached.volume,
+                                                amp_r: slot.gain * slot.pan_r * cached.volume,
                                                 max_samples: 0,
+                                                voice: slot.voice,
+                                                fade_left: 0,
+                                                fade_len: 0,
+                                                band: true,
                                             });
                                         }
                                     }
@@ -4163,12 +4344,11 @@ impl MetronomeEngine {
                                     Some(_) => {}
                                     None => {
                                         if voices.len() < MAX_VOICES {
-                                            voices.push(Voice {
-                                                sound_id: SoundId::BeepHigh,
-                                                position: 0,
-                                                amplitude: 0.6 * cached.volume,
-                                                max_samples: cap_samples,
-                                            });
+                                            voices.push(Voice::click(
+                                                SoundId::BeepHigh,
+                                                0.6 * cached.volume,
+                                                cap_samples,
+                                            ));
                                         }
                                     }
                                 }
@@ -4180,12 +4360,11 @@ impl MetronomeEngine {
                                     (cached.kit.low_id(), SUB_GAIN)
                                 };
                                 if voices.len() < MAX_VOICES {
-                                    voices.push(Voice {
-                                        sound_id: sid,
-                                        position: 0,
-                                        amplitude: amp * cached.volume,
-                                        max_samples: cap_samples,
-                                    });
+                                    voices.push(Voice::click(
+                                        sid,
+                                        amp * cached.volume,
+                                        cap_samples,
+                                    ));
                                 }
                             }
 
@@ -4314,33 +4493,86 @@ impl MetronomeEngine {
                             next_beat_sample = sample_counter + tick_samples;
                         }
 
-                        // Mix all active voices.
+                        // ---- Mix all active voices ----
                         //
-                        // `custom_kit` is the musician's own folder, when
-                        // the loaded table has one. Read off `cached.jam`
-                        // rather than looked up: it is a field of the table
-                        // the callback is already holding, so it costs one
-                        // `Option` map per frame and cannot be out of step
-                        // with the drums that name it.
-                        let custom_kit = cached.jam.as_deref().and_then(|t| t.custom_kit());
-                        let mut mix = 0.0f32;
+                        // TWO SUMS, AND THE CLICK IS THE ONE THAT DOES NOT
+                        // MOVE. The band goes into a stereo pair and through
+                        // the drum bus; the click is summed mono, exactly
+                        // where it always was, and added afterwards. Its
+                        // path, its timing and its level are the same lines
+                        // they were before Jam existed, which is the rule
+                        // this whole pass was built under.
+                        //
+                        // `kit` is the drums the loaded table carries. Read
+                        // off `cached.jam` rather than looked up: it is a
+                        // field of the table the callback is already
+                        // holding, so it costs one `Option` map per frame
+                        // and cannot be out of step with the drums that name
+                        // it.
+                        let kit = cached.jam.as_deref().map(|t| t.kit_bank());
+                        let mut click = 0.0f32;
+                        let mut band_l = 0.0f32;
+                        let mut band_r = 0.0f32;
                         for voice in voices.iter_mut() {
-                            let buf = jam_sample(&sounds, custom_kit, voice.sound_id);
-                            let limit = if voice.max_samples > 0 {
-                                voice.max_samples.min(buf.len())
+                            // The drift's push and pull: a few milliseconds
+                            // of nothing before the drum speaks.
+                            if voice.delay > 0 {
+                                voice.delay -= 1;
+                                continue;
+                            }
+                            let buf = jam_sample(&sounds, kit, voice.sound_id);
+                            if voice.band {
+                                // Interleaved stereo, so a frame is two
+                                // samples and the length is half the slice.
+                                let frames = buf.len() / 2;
+                                let limit = if voice.max_samples > 0 {
+                                    voice.max_samples.min(frames)
+                                } else {
+                                    frames
+                                };
+                                if voice.position < limit {
+                                    let choke = voice.choke_gain();
+                                    band_l += buf[2 * voice.position] * voice.amp_l * choke;
+                                    band_r += buf[2 * voice.position + 1] * voice.amp_r * choke;
+                                }
+                                if voice.fade_left > 0 {
+                                    voice.fade_left -= 1;
+                                }
                             } else {
-                                buf.len()
-                            };
-                            if voice.position < limit {
-                                mix += buf[voice.position] * voice.amplitude;
+                                let limit = if voice.max_samples > 0 {
+                                    voice.max_samples.min(buf.len())
+                                } else {
+                                    buf.len()
+                                };
+                                if voice.position < limit {
+                                    click += buf[voice.position] * voice.amp_l;
+                                }
                             }
                             voice.position += 1;
                         }
 
-                        // Write to all output channels (mono -> duplicated)
-                        let clamped = mix.clamp(-1.0, 1.0);
-                        for ch in 0..channels {
-                            data[frame_idx * channels + ch] = clamped;
+                        // The bus, and ONLY when there is a band. With no
+                        // table loaded the metronome pays for none of this:
+                        // not the tanh, not the detector, not the branch on
+                        // a threshold. See `DrumBus`.
+                        let (bus_l, bus_r) = if kit.is_some() {
+                            bus.process(band_l, band_r)
+                        } else {
+                            (0.0, 0.0)
+                        };
+
+                        // Write out. A stereo device gets the band where the
+                        // kit was placed; a mono one gets both sides folded,
+                        // which is the same band without the room.
+                        let base = frame_idx * channels;
+                        if channels == 1 {
+                            data[base] = (click + (bus_l + bus_r) * 0.5).clamp(-1.0, 1.0);
+                        } else {
+                            let l = (click + bus_l).clamp(-1.0, 1.0);
+                            let r = (click + bus_r).clamp(-1.0, 1.0);
+                            for ch in 0..channels {
+                                data[base + ch] = if ch % 2 == 0 { l } else { r };
+                            }
                         }
 
                         sample_counter += 1;
@@ -4357,16 +4589,13 @@ impl MetronomeEngine {
                         ring.push_strided(data, channels);
                     }
 
-                    // Remove finished voices (once per buffer)
-                    let custom_kit = cached.jam.as_deref().and_then(|t| t.custom_kit());
+                    // Remove finished voices (once per buffer) — run off
+                    // the end of the sample, or choked all the way down.
+                    let kit = cached.jam.as_deref().map(|t| t.kit_bank());
                     voices.retain(|v| {
-                        let buf = jam_sample(&sounds, custom_kit, v.sound_id);
-                        let limit = if v.max_samples > 0 {
-                            v.max_samples.min(buf.len())
-                        } else {
-                            buf.len()
-                        };
-                        v.position < limit
+                        let buf = jam_sample(&sounds, kit, v.sound_id);
+                        let frames = if v.band { buf.len() / 2 } else { buf.len() };
+                        !v.done(frames)
                     });
                 },
                 |err| {
@@ -5097,28 +5326,35 @@ mod tests {
 
         // ...and every jam kit, by the same measurement and the same floor.
         //
-        // A jam's backbeat is `snare_hi` at `LEVEL_GAIN[2]` and its plain
-        // hit is `snare_lo` at `LEVEL_GAIN[1]`, so the gains go in the same
-        // way `BEAT_GAIN` does above. `KITS.md` measures the files
-        // themselves at +3.13 to +4.84 dB, and the 0.8 hit gain widens each
-        // of those by about 1.9 — but the number that matters is the one
-        // the musician hears, which is this one.
+        // A jam's backbeat is the snare's HARD LAYER at `LEVEL_GAIN[2]` and
+        // its ghost the SOFT LAYER at `LEVEL_GAIN[3]`, which since this pass
+        // are two different recordings rather than one file at two volumes.
+        // The five synthesised kits carry both (`snare_lo` became layer 1
+        // and `snare_hi` layer 2), so the claim is the same claim it always
+        // was and the arithmetic reaches it through the bank rather than
+        // through two `SoundId`s.
         //
-        // `snare_lo` is deliberately NOT a quieter file: it is the same drum
+        // Layer 1 is deliberately NOT a quieter file: it is the same drum
         // struck softly, at the same 0.900 peak, and the level gain does the
         // rest (rule 4 of KITS.md). A kit that passed this by shipping a
         // quiet file would be the snare kit's mistake all over again.
-        for kit in JamKit::ALL {
-            let accent = laptop_band_energy(bank.get(SoundId::Kit(kit, KitVoice::SnareHi)), sr)
-                * (crate::jam::LEVEL_GAIN[2] * crate::jam::LEVEL_GAIN[2]) as f64;
-            let beat = laptop_band_energy(bank.get(SoundId::Kit(kit, KitVoice::SnareLo)), sr)
-                * (crate::jam::LEVEL_GAIN[1] * crate::jam::LEVEL_GAIN[1]) as f64;
-            let db = 10.0 * (accent / beat.max(1e-30)).log10();
+        for id in crate::kit::shipped_ids() {
+            let kit = crate::kit::load_shipped(crate::kit::shipped_index(&id).unwrap(), sr)
+                .expect("a shipped kit decodes");
+            let layer = |l: u8| {
+                let buf = kit.sample(KitVoice::Snare as u8, l, 0);
+                let mono: Vec<f32> = (0..buf.len() / 2)
+                    .map(|i| (buf[2 * i] + buf[2 * i + 1]) * 0.5)
+                    .collect();
+                laptop_band_energy(&mono, sr)
+            };
+            let accent = layer(1) * (crate::jam::LEVEL_GAIN[2] * crate::jam::LEVEL_GAIN[2]) as f64;
+            let ghost = layer(0) * (crate::jam::LEVEL_GAIN[3] * crate::jam::LEVEL_GAIN[3]) as f64;
+            let db = 10.0 * (accent / ghost.max(1e-30)).log10();
             assert!(
                 db > 2.0,
-                "{}: the backbeat is only {db:.2} dB over a plain hit through a \
-                 200 Hz-4 kHz band-pass, which does not read as an accent on a laptop",
-                kit.name()
+                "{id}: the backbeat is only {db:.2} dB over a ghost through a \
+                 200 Hz-4 kHz band-pass, which does not read as an accent on a laptop"
             );
         }
     }
@@ -5961,6 +6197,7 @@ mod tests {
                 hat: vec![1, 0, 3, 0, 1, 0, 3, 0, 1, 0, 3, 0, 1, 0, 3, 0],
                 ride: vec![0; 16],
                 crash: vec![0; 16],
+                ..Default::default()
             },
             fill: None,
             form_bars: 4,
@@ -5976,11 +6213,16 @@ mod tests {
             bass_voice: None,
             keys_voice: None,
             custom_kit: None,
+            ..Default::default()
         }
     }
 
     struct JamRender {
         samples: Vec<f32>,
+        /// The right side. The band is stereo now, so a kit whose hats are
+        /// placed renders two different things.
+        #[allow(dead_code)]
+        right: Vec<f32>,
         /// The peak BEFORE the mixer's clamp, which is the only way to see
         /// whether a table would have clipped.
         peak: f32,
@@ -5988,12 +6230,17 @@ mod tests {
     }
 
     /// A miniature of the callback's mixer: spawn a table's voices tick by
-    /// tick, let them ring across ticks, sum them.
+    /// tick, let them ring across ticks, sum them, and put the band through
+    /// its own bus.
     ///
     /// Deliberately a copy of the callback's arithmetic rather than a shared
     /// helper. A change in the callback that this does not follow shows up
     /// as a failing assertion instead of as a test that quietly moved with
     /// the bug.
+    ///
+    /// `samples` is the LEFT side, and `peak` is the worst of both — the
+    /// band is stereo now, and a test that measured one channel of a kit
+    /// whose hats are panned would be measuring the wrong height.
     fn render_jam(
         table: &JamTable,
         bank: &SoundBank,
@@ -6001,76 +6248,126 @@ mod tests {
         tick_samples: usize,
         volume: f32,
     ) -> JamRender {
+        render_jam_at(table, bank, bars, tick_samples, volume, 48_000, true)
+    }
+
+    /// [`render_jam`] with the device rate the drift and the choke are
+    /// measured in, and a switch for the bus.
+    ///
+    /// The bus off is how a test asks what the BAND rendered — which is the
+    /// number `jam.rs`'s safety clamp is about, and the one a level claim
+    /// has to be made on before a compressor has had its say.
+    #[allow(clippy::too_many_arguments)]
+    fn render_jam_at(
+        table: &JamTable,
+        bank: &SoundBank,
+        bars: u32,
+        tick_samples: usize,
+        volume: f32,
+        sr: u32,
+        with_bus: bool,
+    ) -> JamRender {
         let total = bars as usize * table.ticks_per_bar() as usize * tick_samples;
-        let mut out = vec![0.0f32; total];
+        let mut left = vec![0.0f32; total];
+        let mut right = vec![0.0f32; total];
         let mut voices: Vec<Voice> = Vec::new();
         let mut max_voices = 0usize;
         let mut jam_bar = 0u32;
         let mut pos = 0usize;
+        let mut bus = DrumBus::new(sr);
+        bus.set_drive(table.bus_drive, table.bus_shape);
+        let choke_frames = (CHOKE_FADE_SECS * sr as f32) as u32;
+        let drift_frames = (DRIFT_MAX_SECS * sr as f32) as u32;
+        let kit = table.kit_bank();
         for _ in 0..bars {
             for t in 0..table.ticks_per_bar() {
                 if let Some(tick) = table.tick(t, jam_bar) {
                     for slot in tick.slots() {
-                        voices.push(Voice {
-                            sound_id: slot.sound,
-                            position: 0,
-                            amplitude: slot.gain * volume,
-                            max_samples: if slot.cap_ticks > 0.0 {
-                                (tick_samples as f32 * slot.cap_ticks) as usize
-                            } else {
-                                0
-                            },
-                        });
+                        spawn_band_voice(
+                            &mut voices,
+                            slot,
+                            volume,
+                            jam_bar,
+                            t,
+                            table.ticks_per_bar(),
+                            tick_samples as u64,
+                            drift_frames,
+                            choke_frames,
+                        );
                     }
                     if t == 0 && jam_bar == 0 {
                         if let Some(slot) = table.crash_on_one() {
-                            voices.push(Voice {
-                                sound_id: slot.sound,
-                                position: 0,
-                                amplitude: slot.gain * volume,
-                                max_samples: 0,
-                            });
+                            spawn_band_voice(
+                                &mut voices,
+                                &JamSlot {
+                                    cap_ticks: 0.0,
+                                    ..slot
+                                },
+                                volume,
+                                jam_bar,
+                                0,
+                                table.ticks_per_bar(),
+                                tick_samples as u64,
+                                drift_frames,
+                                choke_frames,
+                            );
                         }
                     }
                 }
                 max_voices = max_voices.max(voices.len());
-                // `jam_sample` and not `bank.get`, so this harness resolves
-                // a drum exactly the way the callback does — including a
-                // table whose kit is a folder on the musician's machine.
-                let kit = table.custom_kit();
                 for _ in 0..tick_samples {
-                    let mut mix = 0.0f32;
+                    let mut l = 0.0f32;
+                    let mut r = 0.0f32;
                     for v in voices.iter_mut() {
-                        let buf = jam_sample(bank, kit, v.sound_id);
+                        if v.delay > 0 {
+                            v.delay -= 1;
+                            continue;
+                        }
+                        // `jam_sample` and not `bank.get`, so this harness
+                        // resolves a drum exactly the way the callback does.
+                        let buf = jam_sample(bank, Some(kit), v.sound_id);
+                        let frames = if v.band { buf.len() / 2 } else { buf.len() };
                         let limit = if v.max_samples > 0 {
-                            v.max_samples.min(buf.len())
+                            v.max_samples.min(frames)
                         } else {
-                            buf.len()
+                            frames
                         };
                         if v.position < limit {
-                            mix += buf[v.position] * v.amplitude;
+                            let g = v.choke_gain();
+                            if v.band {
+                                l += buf[2 * v.position] * v.amp_l * g;
+                                r += buf[2 * v.position + 1] * v.amp_r * g;
+                            } else {
+                                l += buf[v.position] * v.amp_l;
+                                r += buf[v.position] * v.amp_r;
+                            }
+                        }
+                        if v.band && v.fade_left > 0 {
+                            v.fade_left -= 1;
                         }
                         v.position += 1;
                     }
-                    out[pos] = mix;
+                    let (l, r) = if with_bus { bus.process(l, r) } else { (l, r) };
+                    left[pos] = l;
+                    right[pos] = r;
                     pos += 1;
                 }
                 voices.retain(|v| {
-                    let buf = jam_sample(bank, kit, v.sound_id);
-                    let limit = if v.max_samples > 0 {
-                        v.max_samples.min(buf.len())
-                    } else {
-                        buf.len()
-                    };
-                    v.position < limit
+                    let buf = jam_sample(bank, Some(kit), v.sound_id);
+                    let frames = if v.band { buf.len() / 2 } else { buf.len() };
+                    !v.done(frames)
                 });
             }
             let (b, _) = advance_form(jam_bar, 1, table.form_bars());
             jam_bar = b;
         }
-        let peak = out.iter().fold(0.0f32, |m, s| m.max(s.abs()));
+        let peak = left
+            .iter()
+            .chain(right.iter())
+            .fold(0.0f32, |m, s| m.max(s.abs()));
         JamRender {
-            samples: out,
+            samples: left,
+            right,
             peak,
             max_voices,
         }
@@ -6153,9 +6450,15 @@ mod tests {
         // themselves, not on the rendered windows: the kick rings out — it
         // is supposed to — so by tick 4 its tail is still in the buffer and
         // a window comparison would be measuring the kick twice.
-        let kick_low = low_band_share(bank.get(SoundId::Kit(JamKit::Room, KitVoice::Kick)), sr);
-        let snare_low =
-            low_band_share(bank.get(SoundId::Kit(JamKit::Room, KitVoice::SnareHi)), sr);
+        let room = crate::jam::reference_bank("room").unwrap();
+        let mono = |v: KitVoice, l: u8| {
+            let buf = room.sample(v as u8, l, 0);
+            (0..buf.len() / 2)
+                .map(|i| (buf[2 * i] + buf[2 * i + 1]) * 0.5)
+                .collect::<Vec<f32>>()
+        };
+        let kick_low = low_band_share(&mono(KitVoice::Kick, 0), sr);
+        let snare_low = low_band_share(&mono(KitVoice::Snare, 1), sr);
         assert!(
             kick_low > snare_low + 0.3,
             "the kick has {kick_low:.2} of its energy under 150 Hz and the snare \
@@ -6751,6 +7054,7 @@ mod tests {
                     hat_open: vec![2; 16],
                     ride: vec![2; 16],
                     crash: vec![2; 16],
+                    ..Default::default()
                 }
             } else {
                 // Busy, and something a person might actually play: the
@@ -6763,6 +7067,7 @@ mod tests {
                     hat_open: vec![0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
                     ride: vec![1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
                     crash: vec![0; 16],
+                    ..Default::default()
                 }
             },
             fill: None,
@@ -6802,6 +7107,7 @@ mod tests {
             bass_voice: None,
             keys_voice: None,
             custom_kit: None,
+            ..Default::default()
         }
     }
 
@@ -6832,12 +7138,12 @@ mod tests {
         // tempos, rather than both at once: the two effects are independent
         // and the product is thousands of four-bar renders.
         let reference = SoundBank::new(JAM_REFERENCE_SR);
-        for kit in JamKit::ALL {
+        for kit in JamKit::all() {
             for (lawnmower, volume) in [(false, 1.0f32), (true, SHIPPED_VOLUME)] {
                 let table = compile_jam(&busy_band(kit, lawnmower)).unwrap();
                 let check = |bank: &SoundBank, bpm: u32, sr: u32| {
                     let tick_samples = (sr as f64 * 60.0 / bpm as f64 / 4.0) as usize;
-                    let r = render_jam(&table, bank, 2, tick_samples, volume);
+                    let r = render_jam_at(&table, bank, 2, tick_samples, volume, sr, true);
                     assert!(
                         r.peak <= 1.0,
                         "{} at {bpm} BPM / {sr} Hz rendered a peak of {:.3} at volume \
@@ -6903,22 +7209,22 @@ mod tests {
             // Every voice at the cap, decoded at the reference rate — the
             // rate `worst_bar_peak` measures at, so what this renders is
             // exactly what the normalisation thought it was scaling.
-            let folder = std::sync::Arc::new(crate::kit::CustomBank::for_tests(
+            let folder = std::sync::Arc::new(crate::kit::KitBank::for_tests(
                 &KitVoice::ALL,
                 JAM_REFERENCE_SR,
                 crate::kit::MAX_VOICE_SECS,
             ));
-            let cfg = busy_band(JamKit::Room, lawnmower);
-            let table = crate::jam::compile_with_kit(&cfg, Some(folder)).unwrap();
-            assert!(table.custom_kit().is_some());
+            let cfg = busy_band(JamKit::fallback(), lawnmower);
+            let table = crate::jam::compile_with_kit(&cfg, folder.clone()).unwrap();
+            assert_eq!(table.kit_bank().id, folder.id);
 
             let mut worst_voices = 0usize;
             let mut check = |bpm: u32, sr: u32, bank: &SoundBank| {
                 let tick_samples = (sr as f64 * 60.0 / bpm as f64 / 4.0) as usize;
-                let r = render_jam(&table, bank, 2, tick_samples, volume);
+                let r = render_jam_at(&table, bank, 2, tick_samples, volume, sr, true);
                 assert!(
                     r.peak <= 1.0,
-                    "two-second custom drums at {bpm} BPM / {sr} Hz rendered {:.3} at \
+                    "three-second custom drums at {bpm} BPM / {sr} Hz rendered {:.3} at \
                      volume {volume}, so the mixer clamped and the user heard a \
                      square wave",
                     r.peak
@@ -6963,6 +7269,7 @@ mod tests {
                 hat: vec![1; 16],
                 ride: vec![1; 16],
                 crash: vec![0; 16],
+                ..Default::default()
             },
             fill: None,
             form_bars: 4,
@@ -6978,6 +7285,7 @@ mod tests {
             bass_voice: None,
             keys_voice: None,
             custom_kit: None,
+            ..Default::default()
         };
         let table = compile_jam(&cfg).unwrap();
         for bpm in [40.0f64, 120.0, 300.0] {
@@ -6999,7 +7307,8 @@ mod tests {
     /// beat through the band a laptop radiates, because essentially all of
     /// it was sub-120 Hz kick. Every kick in `KITS.md` carries a mid-band
     /// body layer for that reason, and this is what says it is still there
-    /// — in every kit the app ships, and in whatever the next one arrives with.
+    /// — in every kit the app ships, and in whatever the next one arrives
+    /// with, because the list is now whatever folders are in `sounds/kits`.
     ///
     /// The floor is −12 dB against the kit's own hat, not 0: a kick is
     /// allowed to be felt more than heard, but not to vanish. `brushes` is
@@ -7009,116 +7318,699 @@ mod tests {
     #[test]
     fn the_jam_kits_read_on_a_small_speaker() {
         let sr = 48000;
-        let bank = SoundBank::new(sr);
-        for kit in JamKit::ALL {
+        for id in crate::kit::shipped_ids() {
+            let kit = crate::kit::load_shipped(crate::kit::shipped_index(&id).unwrap(), sr)
+                .unwrap_or_else(|e| panic!("{id} did not decode: {e}"));
+            let mono = |v: KitVoice| {
+                let buf = kit.sample(v as u8, 0, 0);
+                (0..buf.len() / 2)
+                    .map(|i| (buf[2 * i] + buf[2 * i + 1]) * 0.5)
+                    .collect::<Vec<f32>>()
+            };
             for voice in KitVoice::ALL {
-                let buf = bank.get(SoundId::Kit(kit, voice));
-                assert!(
-                    !buf.is_empty(),
-                    "{}'s {} decoded to nothing",
-                    kit.name(),
-                    voice.file_name()
-                );
-                let peak = buf.iter().fold(0.0f32, |m, s| m.max(s.abs()));
-                assert!(
-                    (peak - KIT_FILE_PEAK).abs() < 1e-4,
-                    "{}'s {} peaks at {peak}; KITS.md says every file is 0.900 and \
-                     the bank puts every one of them back on it",
-                    kit.name(),
-                    voice.file_name()
-                );
+                let Some(bank) = kit.voice(voice) else {
+                    // The five synthesised kits have no toms, pedal or bell;
+                    // `jam.rs` covers those with the fallbacks.
+                    continue;
+                };
+                for l in 0..bank.layers() {
+                    let buf = kit.sample(voice as u8, l, 0);
+                    assert!(
+                        !buf.is_empty(),
+                        "{id}'s {} layer {l} decoded to nothing",
+                        voice.file_name()
+                    );
+                }
             }
 
             // The kick against this kit's own hat, through a laptop.
-            let k = laptop_band_energy(bank.get(SoundId::Kit(kit, KitVoice::Kick)), sr);
-            let hat = laptop_band_energy(bank.get(SoundId::Kit(kit, KitVoice::Hat)), sr);
+            let k = laptop_band_energy(&mono(KitVoice::Kick), sr);
+            let hat = laptop_band_energy(&mono(KitVoice::Hat), sr);
             let db = 10.0 * (k / hat.max(1e-30)).log10();
             assert!(
                 db > -12.0,
-                "{}'s kick is {db:.2} dB against its own hat through a 200 Hz-4 kHz \
-                 band-pass, which is a thump nobody will feel",
-                kit.name()
+                "{id}'s kick is {db:.2} dB against its own hat through a 200 Hz-4 kHz \
+                 band-pass, which is a thump nobody will feel"
             );
         }
     }
 
-    /// The column order of `KIT_WAVS` and the order of `KitVoice` are the
-    /// same list written twice, and the bank indexes one with the other. A
-    /// swap would be silent — a kick where a crash should be, every table,
-    /// every kit — so the file names are read back off disk and checked.
+    /// THE FOLDER IS THE TABLE NOW, AND THE FILES ARE READ BACK OFF DISK.
+    ///
+    /// `KIT_WAVS` used to be thirty-two `include_bytes!` lines whose column
+    /// order had to match `KitVoice`, and a swap would have been silent — a
+    /// kick where a crash should be, every table, every kit. `build.rs`
+    /// writes that table now, from the folder names, so what has to be
+    /// checked is that the folder on disk and the bank in the binary hold
+    /// the same drums.
     #[test]
-    fn the_kit_table_is_laid_out_the_way_the_voices_are_named() {
-        for (k, kit) in JamKit::ALL.iter().enumerate() {
-            for (v, voice) in KitVoice::ALL.iter().enumerate() {
-                let path = format!("sounds/kit_{}_{}.wav", kit.name(), voice.file_name());
-                let bytes = std::fs::read(&path).unwrap_or_else(|e| panic!("read {path}: {e}"));
+    fn every_kit_folder_on_disk_reaches_the_binary() {
+        for (i, id) in crate::kit::shipped_ids().iter().enumerate() {
+            let dir = std::path::Path::new("sounds/kits").join(id);
+            let seen = crate::kit::inspect(&dir)
+                .unwrap_or_else(|e| panic!("sounds/kits/{id} is not readable: {e}"));
+            let embedded = crate::kit::load_shipped(i, JAM_REFERENCE_SR)
+                .unwrap_or_else(|e| panic!("{id} did not decode: {e}"));
+            let mut from_disk: Vec<String> =
+                embedded.found.iter().map(|v| v.voice.clone()).collect();
+            from_disk.sort();
+            let mut on_disk = seen.voices.clone();
+            on_disk.sort();
+            assert_eq!(
+                from_disk, on_disk,
+                "sounds/kits/{id} holds {on_disk:?} and the binary carries {from_disk:?}"
+            );
+            for v in embedded.found.iter() {
+                let there = seen
+                    .found
+                    .iter()
+                    .find(|f| f.voice == v.voice)
+                    .unwrap_or_else(|| panic!("{id}: {} vanished", v.voice));
                 assert_eq!(
-                    bytes.len(),
-                    KIT_WAVS[k][v].len(),
-                    "KIT_WAVS[{k}][{v}] is not {path}"
+                    (v.layers, v.rr),
+                    (there.layers, there.rr),
+                    "{id}'s {} is {}x{} on disk and {}x{} in the binary",
+                    v.voice,
+                    there.layers,
+                    there.rr,
+                    v.layers,
+                    v.rr
                 );
-                assert!(bytes == KIT_WAVS[k][v], "KIT_WAVS[{k}][{v}] is not {path}");
             }
         }
     }
 
-    /// THE NUMBER `JAM_TICK_CEILING` IS BUILT ON.
+    /// A FILL OF TOMS AT THE TOP LEVEL REACHES THE MIXER.
     ///
-    /// `jam.rs` measures a table against a 48 kHz reference bank, because
-    /// the output device's rate is not knowable when a jam is compiled in
-    /// the `set_jam` command. The device can run at any rate, and the
-    /// resampler's sinc overshoots a bright transient: the closed hat peaks
-    /// at 0.554 in its own 44.1 kHz file, 0.690 resampled to 48 kHz and
-    /// 0.736 resampled to 88.2 kHz.
-    ///
-    /// So a table normalised against the reference can be up to that much
-    /// louder on the user's device, and `JAM_TICK_CEILING` is 0.90 rather
-    /// than 0.97 to swallow it. This test is what says 7% is still the
-    /// figure — if a resampler change makes it 20%, the ceiling has to move
-    /// and the failure says so.
+    /// Two new lanes and a new level, walked the whole way: `jam_play` picks
+    /// the tick out of the table the fill bar names, the callback's own
+    /// spawn turns each slot into a ringing voice, and the mixer renders it.
+    /// Every step between the groove and the speaker is a place a lane the
+    /// engine did not know about would go quietly missing.
     #[test]
-    fn the_jam_reference_bank_matches_the_real_one() {
-        /// The margin `JAM_TICK_CEILING` reserves. 0.90 × 1.077 = 0.97.
-        const ALLOWED_OVERSHOOT: f32 = 1.077;
-        // Every sound a jam table can name: every kit, every voice, and
-        // every note of the bass. The bass is synthesised per rate rather
-        // than resampled, so it has no imaging to overshoot — which is
-        // exactly why it is in the list: if that ever stops being true the
-        // ceiling has to know.
-        let mut ids: Vec<(String, SoundId)> = Vec::new();
-        for kit in JamKit::ALL {
-            for voice in KitVoice::ALL {
-                ids.push((
-                    format!("{} {}", kit.name(), voice.file_name()),
-                    SoundId::Kit(kit, voice),
-                ));
+    fn a_fill_of_toms_at_the_top_level_is_heard_through_jam_play() {
+        let sr = 48_000u32;
+        let bank = SoundBank::new(sr);
+        let mut cfg = rock_16ths();
+        cfg.form_bars = 2;
+        // A fill that is nothing but toms, ramping to the peak — which is
+        // what `plans/JAM_SOUND.md` §2.9 asks a fill to be.
+        cfg.fill = Some(crate::jam::JamPattern {
+            kick: vec![0; 16],
+            snare: vec![0; 16],
+            hat: vec![0; 16],
+            ride: vec![0; 16],
+            crash: vec![0; 16],
+            tom_hi: vec![1, 0, 2, 0, 3, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            tom_lo: vec![0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 0, 3, 0, 4, 0],
+            ..Default::default()
+        });
+        // A kit with real toms, so the lanes are not resolving through the
+        // fallback chain — that is a different test.
+        let kit = std::sync::Arc::new(crate::kit::KitBank::layered_for_tests(
+            &[
+                KitVoice::Kick,
+                KitVoice::Snare,
+                KitVoice::Hat,
+                KitVoice::TomHi,
+                KitVoice::TomLo,
+                KitVoice::Crash,
+            ],
+            sr,
+            0.08,
+            4,
+            1,
+        ));
+        let table = crate::jam::compile_with_kit(&cfg, kit).unwrap();
+
+        // `jam_play` hands back the FILL's tick on bar 1 of a two-bar form,
+        // and the groove's on bar 0 — which is the only way a tom lane
+        // written into a fill ever reaches the callback.
+        let tick_of = |bar: u32, tick: u32| match jam_play(Some(&table), false, false, 4, 4, tick / 4, tick % 4, bar) {
+            JamPlay::Band(t) => t,
+            other => panic!("bar {bar} tick {tick} came back as {other:?}"),
+        };
+        let toms = |bar: u32, tick: u32| {
+            tick_of(bar, tick)
+                .slots()
+                .iter()
+                .filter(|s| matches!(s.lane, JamLane::TomHi | JamLane::TomLo))
+                .count()
+        };
+        assert_eq!(toms(0, 6), 0, "the groove has no toms");
+        assert_eq!(toms(1, 6), 1, "the fill's high tom did not reach jam_play");
+        assert_eq!(toms(1, 14), 1, "nor its floor tom");
+
+        // The ramp is four different strokes, not one at four volumes: the
+        // LAYER climbs with the level, which is the whole point of the fifth
+        // one.
+        let layers: Vec<u8> = [0u32, 2, 4, 6]
+            .iter()
+            .map(|t| {
+                let slot = tick_of(1, *t).slots()[0];
+                match slot.sound {
+                    SoundId::Band { layer, .. } => layer,
+                    other => panic!("a tom came out as {other:?}"),
+                }
+            })
+            .collect();
+        assert_eq!(layers, vec![1, 2, 0, 3], "the ramp is {layers:?}");
+
+        // And it renders. Both halves of the fill bar make a sound, and the
+        // groove bar does not put toms into them.
+        let tick_samples = 3000;
+        let r = render_jam(&table, &bank, 2, tick_samples, 1.0);
+        let energy = |t: usize| -> f64 {
+            r.samples[t * tick_samples..(t + 1) * tick_samples]
+                .iter()
+                .map(|s| (s * s) as f64)
+                .sum()
+        };
+        // Bar 1 starts at tick 16.
+        assert!(energy(16 + 6) > 1.0, "the high tom rendered nothing");
+        assert!(energy(16 + 14) > 1.0, "the floor tom rendered nothing");
+    }
+
+    // -----------------------------------------------------------------
+    // The drum bus
+    // -----------------------------------------------------------------
+
+    /// THE NUMBER THIS WHOLE PASS EXISTS FOR.
+    ///
+    /// `plans/JAM_SOUND.md` §1: "the jam's drums play 9–13 dB quieter than
+    /// the metronome's own Drum accent, because the band is peak-scaled so
+    /// the busiest possible sample never reaches the ceiling". Every groove
+    /// in the library paid, on every hit, for the one pattern nobody writes.
+    ///
+    /// So the comparison is the one the owner made: a rock groove at normal
+    /// intensity, through the band's own path, against ONE hit of the
+    /// metronome's Drum accent through the click's path, both at the same
+    /// volume and both through the 200 Hz-4 kHz band a laptop radiates —
+    /// which is the speaker this gets practised on.
+    ///
+    /// Measured per second over the same window, so a band that is playing
+    /// eight hits a bar is not rewarded for having more of them: what is
+    /// compared is how loud the two things are, which is what an ear
+    /// compares.
+    #[test]
+    fn the_band_is_not_quieter_than_the_metronome_it_replaces() {
+        let sr = 48_000u32;
+        let bank = SoundBank::new(sr);
+        // 120 BPM sixteenths: a bar is two seconds.
+        let tick_samples = (sr as f64 * 60.0 / 120.0 / 4.0) as usize;
+        let table = compile_jam(&rock_16ths()).unwrap();
+        let r = render_jam_at(&table, &bank, 2, tick_samples, 1.0, sr, true);
+        let window = r.samples.len();
+        let band = laptop_band_energy(&r.samples, sr) / window as f64;
+
+        // The metronome's own accent, on the beat, over the same window:
+        // one downbeat every four ticks, which is what the click plays.
+        let accent = bank.get(SoundId::DrumAccent);
+        let mut click = vec![0.0f32; window];
+        let mut at = 0usize;
+        while at < window {
+            for (i, v) in accent.iter().enumerate() {
+                if at + i < window {
+                    click[at + i] += v;
+                }
+            }
+            at += tick_samples * 4;
+        }
+        let metronome = laptop_band_energy(&click, sr) / window as f64;
+
+        let db = 10.0 * (band / metronome.max(1e-30)).log10();
+        eprintln!(
+            "[jam] a rock groove against the metronome's Drum accent: {db:+.1} dB \
+             (was -9 to -13 before this pass)"
+        );
+        assert!(
+            db > -6.0,
+            "the band is {db:.1} dB under the metronome's own accent, and the \
+             whole point of this pass was that it was 9 to 13"
+        );
+        // ...and not the other way round either: a band that shouted over
+        // the click it replaces would be a different complaint.
+        assert!(db < 12.0, "the band is {db:.1} dB OVER the metronome's accent");
+    }
+
+
+    /// A FULL-SCALE SUM COMES OUT AT FULL SCALE AND NEVER ABOVE IT.
+    ///
+    /// The tanh stage is a soft clipper normalised to pass through 1.0:
+    /// `tanh(x·d)/tanh(d)`. Under full scale it is nearly a straight line —
+    /// which is what makes it glue rather than an effect — at full scale it
+    /// is exactly unity, and above it the curve bends rather than breaking.
+    #[test]
+    fn the_bus_passes_full_scale_at_full_scale_and_bends_above_it() {
+        for drive in [1.0f32, 1.6] {
+            let shape = 1.0 / drive.tanh();
+            let curve = |x: f32| (x * drive).tanh() * shape;
+            assert!((curve(1.0) - 1.0).abs() < 1e-5, "drive {drive} is not unity at 1.0");
+            assert!(curve(0.0).abs() < 1e-9);
+            // Monotone, and never over 1.0 anywhere below it.
+            let mut last = 0.0f32;
+            for i in 0..=1000 {
+                let x = i as f32 / 1000.0;
+                let y = curve(x);
+                assert!(y >= last, "the curve turned back at {x}");
+                assert!(y <= 1.0 + 1e-5, "drive {drive} reaches {y} at {x}");
+                last = y;
+            }
+            // ...and it bends: a drive that did nothing would be a straight
+            // line, and 0.5 in would come out at 0.5.
+            assert!(
+                curve(0.5) > 0.5,
+                "drive {drive} is a wire, not a saturator: 0.5 -> {}",
+                curve(0.5)
+            );
+        }
+        // A HARDER DRIVE BENDS HARDER, which is what `raw` asks for.
+        let soft = (0.5f32 * 1.0).tanh() / 1.0f32.tanh();
+        let hard = (0.5f32 * 1.6).tanh() / 1.6f32.tanh();
+        assert!(hard > soft, "raw's drive is doing nothing: {hard} against {soft}");
+    }
+
+    /// THE BAND ARRIVING AT THE SAFETY CLAMP COMES OUT UNDER FULL SCALE.
+    ///
+    /// `jam.rs` lets a table render up to 2.5 before the bus, because the bus
+    /// is what holds it down — that is the whole trade this pass makes. So
+    /// the bus has to actually hold it: fed a steady 2.5 it must settle well
+    /// inside full scale, and it must get there in the five milliseconds its
+    /// attack promises rather than clipping on the way.
+    #[test]
+    fn the_bus_holds_the_safety_clamp_under_full_scale() {
+        let sr = 48_000u32;
+        for drive in [1.0f32, 1.6] {
+            let mut bus = DrumBus::new(sr);
+            bus.set_drive(drive, 1.0 / drive.tanh());
+            let mut worst = 0.0f32;
+            let mut settled = 0.0f32;
+            // A quarter of a second of a full-scale-and-a-half band, which
+            // is the busiest thing the clamp allows.
+            for i in 0..sr / 4 {
+                let (l, r) = bus.process(2.5, -2.5);
+                worst = worst.max(l.abs()).max(r.abs());
+                if i > sr / 8 {
+                    settled = l.abs();
+                }
+            }
+            eprintln!(
+                "[bus] drive {drive}: 2.5 in, worst {worst:.3}, settled {settled:.3}"
+            );
+            assert!(
+                worst <= 1.0,
+                "drive {drive} let {worst:.3} through, so the mixer clamped"
+            );
+            assert!(
+                settled < 0.8,
+                "drive {drive} settles at {settled:.3}, which is not a compressor"
+            );
+            // And it is not a gate: the band is still most of full scale.
+            assert!(settled > 0.4, "drive {drive} settles at {settled:.3}, a whisper");
+        }
+    }
+
+    /// A QUIET BAND GOES THROUGH UNTOUCHED.
+    ///
+    /// Below −6 dBFS the compressor is not working, so a ballad at soft
+    /// intensity is the groove as it was written plus a little saturation —
+    /// which is the point of a threshold.
+    #[test]
+    fn the_bus_leaves_a_quiet_band_alone() {
+        let mut bus = DrumBus::new(48_000);
+        let mut worst = 0.0f32;
+        for _ in 0..4_800 {
+            let (l, _) = bus.process(0.3, 0.3);
+            // The tanh lifts it a little — that is the saturation — and the
+            // compressor does nothing at all.
+            worst = worst.max((l - 0.3f32.tanh() / 1.0f32.tanh()).abs());
+        }
+        assert!(worst < 1e-5, "the compressor moved a band under the threshold by {worst}");
+    }
+
+    /// THE CLICK DOES NOT GO THROUGH ANY OF THIS.
+    ///
+    /// Its timing and its path are unchanged by every line of this pass: it
+    /// is summed mono, where it always was, and added after the bus. A
+    /// `Voice::click` is what carries that, and this is what says it does.
+    #[test]
+    fn the_click_is_not_a_band_voice() {
+        let v = Voice::click(SoundId::ClickHigh, 0.8, 0);
+        assert!(!v.band, "the click went through the drum bus");
+        assert_eq!(v.amp_l, v.amp_r, "the click was panned");
+        assert_eq!(v.delay, 0, "the click drifted");
+        assert_eq!(v.fade_len, 0, "the click can be choked");
+        assert_eq!(v.voice, NOT_A_DRUM, "the click is a drum");
+    }
+
+    // -----------------------------------------------------------------
+    // The choke
+    // -----------------------------------------------------------------
+
+    /// A CLOSED HAT FADES THE OPEN ONE OUT OVER TWENTY MILLISECONDS.
+    ///
+    /// `plans/JAM_SOUND.md` §2.4: before this, an open hat rang across every
+    /// off-beat into the next beat, which is worst at Loud where the grooves
+    /// use open hats most. On the audio thread the choke is a flag and a
+    /// counter on the ringing voice and nothing else — no allocation, no
+    /// second pass, no lookup.
+    #[test]
+    fn a_closed_hat_fades_the_open_one_out_over_twenty_milliseconds() {
+        let sr = 48_000u32;
+        let choke = (CHOKE_FADE_SECS * sr as f32) as u32;
+        let mut cfg = rock_16ths();
+        cfg.bar.hat = vec![0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        cfg.bar.hat_open = vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        cfg.bar.kick = vec![0; 16];
+        cfg.bar.snare = vec![0; 16];
+        cfg.bar.ride = vec![0; 16];
+        let table = compile_jam(&cfg).unwrap();
+
+        let open = table
+            .tick(0, 0)
+            .unwrap()
+            .slots()
+            .iter()
+            .find(|s| s.lane == JamLane::HatOpen)
+            .copied()
+            .expect("an open hat on tick 0");
+        let hat = table
+            .tick(4, 0)
+            .unwrap()
+            .slots()
+            .iter()
+            .find(|s| s.lane == JamLane::Hat)
+            .copied()
+            .expect("a closed hat on tick 4");
+
+        let mut voices = Vec::new();
+        spawn_band_voice(&mut voices, &open, 1.0, 0, 0, 16, 3000, 0, choke);
+        assert_eq!(voices.len(), 1);
+        assert_eq!(voices[0].fade_len, 0, "nothing has closed it yet");
+        assert_eq!(voices[0].choke_gain(), 1.0);
+
+        // The stick lands. The wash starts fading and the hat does not.
+        spawn_band_voice(&mut voices, &hat, 1.0, 0, 4, 16, 3000, 0, choke);
+        assert_eq!(voices.len(), 2);
+        assert_eq!(voices[0].fade_len, choke, "the closed hat did not close the wash");
+        assert_eq!(voices[0].fade_left, choke);
+        assert_eq!(voices[1].fade_len, 0, "the hat choked itself");
+
+        // A LINEAR RAMP TO NOTHING, and then the voice is finished — which
+        // is what `retain` reads, so a choked drum stops costing the mixer
+        // anything at all.
+        let mut seen = Vec::new();
+        for _ in 0..choke {
+            seen.push(voices[0].choke_gain());
+            voices[0].fade_left -= 1;
+        }
+        assert!((seen[0] - 1.0).abs() < 1e-6);
+        assert!(seen.windows(2).all(|w| w[1] < w[0]), "the fade is not monotone");
+        // One step short of nothing, because the ramp is `left / len` and
+        // the voice is retired on the sample after the last one it played.
+        assert!(
+            *seen.last().unwrap() <= 1.5 / choke as f32,
+            "the fade ends at {}",
+            seen.last().unwrap()
+        );
+        assert!(voices[0].done(1_000_000), "a choked voice never finishes");
+
+        // A SECOND STICK DOES NOT RESTART THE FADE. Two closed hats in a row
+        // must not make the open one last longer than one would.
+        let mut voices = Vec::new();
+        spawn_band_voice(&mut voices, &open, 1.0, 0, 0, 16, 3000, 0, choke);
+        spawn_band_voice(&mut voices, &hat, 1.0, 0, 4, 16, 3000, 0, choke);
+        voices[0].fade_left = choke / 2;
+        spawn_band_voice(&mut voices, &hat, 1.0, 0, 8, 16, 3000, 0, choke);
+        assert_eq!(voices[0].fade_left, choke / 2, "the second stick restarted the fade");
+    }
+
+    /// NOTHING ELSE IS CHOKED.
+    ///
+    /// A crash is its decay, and a kick that stopped when the next hat
+    /// landed would be a band with no bottom. The mask is what makes that a
+    /// fact about the data rather than about the loop.
+    #[test]
+    fn a_hat_does_not_silence_the_rest_of_the_kit() {
+        let sr = 48_000u32;
+        let choke = (CHOKE_FADE_SECS * sr as f32) as u32;
+        let mut cfg = rock_16ths();
+        cfg.crash_on_one = true;
+        let table = compile_jam(&cfg).unwrap();
+        let hat = table
+            .tick(0, 0)
+            .unwrap()
+            .slots()
+            .iter()
+            .find(|s| s.lane == JamLane::Hat)
+            .copied()
+            .expect("a hat on tick 0");
+
+        let mut voices = Vec::new();
+        for tick in 0..16u32 {
+            if let Some(t) = table.tick(tick, 0) {
+                for slot in t.slots() {
+                    spawn_band_voice(&mut voices, slot, 1.0, 0, tick, 16, 3000, 0, choke);
+                }
             }
         }
-        for voice in BassVoice::ALL {
-            for i in 0..BASS_NOTES {
-                ids.push((
-                    format!("{} bass MIDI {}", voice.name(), BASS_MIN_MIDI as usize + i),
-                    SoundId::Bass(voice, i as u8),
-                ));
+        if let Some(crash) = table.crash_on_one() {
+            spawn_band_voice(&mut voices, &crash, 1.0, 0, 0, 16, 3000, 0, choke);
+        }
+        spawn_band_voice(&mut voices, &hat, 1.0, 0, 15, 16, 3000, 0, choke);
+
+        for v in voices.iter() {
+            if v.voice == KitVoice::HatOpen as u8 {
+                continue;
+            }
+            assert_eq!(
+                v.fade_len, 0,
+                "voice {} was choked and nothing in a kit chokes it",
+                v.voice
+            );
+        }
+    }
+
+    /// THE DRIFT REACHES THE VOICE, AND THE KICK ON THE ONE NEVER MOVES.
+    ///
+    /// The downbeat is where the band agrees it is. A drummer who pushed
+    /// that would be a drummer nobody could play with — so every other hit
+    /// gets nought to three milliseconds and the kick on tick 0 gets none.
+    #[test]
+    fn the_drift_pushes_every_hit_but_the_kick_on_the_one() {
+        let sr = 48_000u32;
+        let drift_frames = (crate::jam::DRIFT_MAX_SECS * sr as f32) as u32;
+        let mut cfg = rock_16ths();
+        cfg.bar.kick = vec![2; 16];
+        let table = compile_jam(&cfg).unwrap();
+
+        let mut late = Vec::new();
+        for bar in 0..4u32 {
+            for tick in 0..16u32 {
+                let mut voices = Vec::new();
+                for slot in table.tick(tick, bar).unwrap().slots() {
+                    spawn_band_voice(&mut voices, slot, 1.0, bar, tick, 16, 3000, drift_frames, 960);
+                }
+                for v in voices.iter() {
+                    assert!(
+                        v.delay <= drift_frames,
+                        "bar {bar} tick {tick} pushed {} frames, past the 3 ms bound",
+                        v.delay
+                    );
+                    if v.voice == KitVoice::Kick as u8 && tick == 0 {
+                        assert_eq!(v.delay, 0, "the kick on the one moved, on bar {bar}");
+                    }
+                    late.push(v.delay);
+                }
+            }
+        }
+        // And it is not all zero, which would be the drift missing.
+        assert!(late.iter().any(|d| *d > 0), "nothing drifted at all");
+        // The gain wanders too, and by no more than the contract's 2%.
+        let mut voices = Vec::new();
+        let slot = table.tick(1, 0).unwrap().slots()[0];
+        spawn_band_voice(&mut voices, &slot, 1.0, 0, 1, 16, 3000, drift_frames, 960);
+        let ratio = voices[0].amp_l / (slot.gain * slot.pan_l);
+        assert!(
+            (1.0 - crate::jam::DRIFT_GAIN..=1.0 + crate::jam::DRIFT_GAIN).contains(&ratio),
+            "one hit came out {ratio} of its slot's gain"
+        );
+    }
+
+    /// A ROUND ROBIN IS CHOSEN ON THE TICK, AND THE TABLE NEVER STORES ONE.
+    #[test]
+    fn the_round_robin_is_decided_when_the_tick_is_scheduled() {
+        let kit = std::sync::Arc::new(crate::kit::KitBank::layered_for_tests(
+            &[KitVoice::Kick, KitVoice::Snare, KitVoice::Hat],
+            48_000,
+            0.05,
+            2,
+            3,
+        ));
+        let mut cfg = rock_16ths();
+        cfg.bar.hat = vec![1; 16];
+        let table = crate::jam::compile_with_kit(&cfg, kit).unwrap();
+
+        // The TABLE says round robin 0 on every tick — the choice is not
+        // there to be got wrong.
+        for tick in 0..16u32 {
+            for slot in table.tick(tick, 0).unwrap().slots() {
+                if let SoundId::Band { robin, .. } = slot.sound {
+                    assert_eq!(robin, 0, "the table stored a round robin");
+                }
             }
         }
 
-        for sr in [22050u32, 44100, 48000, 88200, 96000] {
+        // The SPAWN chooses, and a hat on every sixteenth is never the same
+        // recording twice in a row.
+        let mut last: Option<u8> = None;
+        for tick in 0..16u32 {
+            let mut voices = Vec::new();
+            let slot = table
+                .tick(tick, 0)
+                .unwrap()
+                .slots()
+                .iter()
+                .find(|s| s.lane == JamLane::Hat)
+                .copied()
+                .expect("a hat");
+            spawn_band_voice(&mut voices, &slot, 1.0, 0, tick, 16, 3000, 0, 960);
+            let SoundId::Band { robin, .. } = voices[0].sound_id else {
+                panic!("a hat is not a drum");
+            };
+            assert!(robin < 3);
+            if let Some(previous) = last {
+                assert_ne!(robin, previous, "tick {tick} repeated round robin {robin}");
+            }
+            last = Some(robin);
+        }
+    }
+
+    /// A KIT IS THE SAME KIT ON EVERY DEVICE.
+    ///
+    /// `jam.rs` renders a table to find out whether it is absurd, and the
+    /// bus holds the band down at the other end — both of them against a
+    /// kit decoded at whatever rate the device opened at. So a kit that came
+    /// out a different height on a 44.1 kHz interface than on a 96 kHz one
+    /// would be a band whose level moved when the musician changed
+    /// headphones, for no reason they could hear or control.
+    ///
+    /// **The peak is exact and the energy is close, and that is the trade
+    /// `kit::VOICE_PEAK` documents.** A windowed sinc rings around a bright
+    /// transient and lifts its peak; the loader divides that back out, which
+    /// makes every rate the same height and costs the voice whatever the
+    /// ripple was. On most drums that is a fraction of a per cent. On the
+    /// two brightest hats in the set — whose content sits at the source
+    /// files' own Nyquist, where a reconstruction filter has least to work
+    /// with — it reaches 2.9 dB of energy between 44.1 and 48 kHz.
+    ///
+    /// This is what the shipped bank always did; before these kits became
+    /// folders the same division lived in `SoundBank::new`, and the same
+    /// hats paid the same price. What is new is that the number is written
+    /// down.
+    #[test]
+    fn a_kit_measures_the_same_at_every_rate_a_device_hands_out() {
+        /// Energy per second, so a rate with more samples in it does not
+        /// score higher for having them.
+        fn energy(buf: &[f32], sr: u32) -> f64 {
+            buf.iter().map(|s| (s * s) as f64).sum::<f64>() / sr as f64
+        }
+        /// How far apart the same drum's ENERGY may measure across rates.
+        /// See above: this is the ripple the peak division took off, not a
+        /// resampler error. The worst is printed.
+        const ALLOWED: f64 = 3.0;
+        /// ...but only at rates a hi-hat FITS IN.
+        ///
+        /// At 22.05 kHz the Nyquist is 11 kHz and `brushes`' closed hat
+        /// lives at 7-15 kHz, so most of it is above the new Nyquist and the
+        /// anti-aliasing filter removes it — which is the filter doing
+        /// exactly its job.
+        const FULL_BAND_ABOVE: u32 = 40_000;
+
+        let mut worst = (0.0f64, String::new());
+        for id in crate::kit::shipped_ids() {
+            let index = crate::kit::shipped_index(&id).unwrap();
+            let reference = crate::kit::load_shipped(index, JAM_REFERENCE_SR).unwrap();
+            for sr in [22050u32, 44100, 88200, 96000] {
+                let here = crate::kit::load_shipped(index, sr).unwrap();
+                for v in KitVoice::ALL {
+                    let Some(bank) = reference.voice(v) else {
+                        continue;
+                    };
+                    // THE HEIGHT IS THE SAME AT EVERY RATE. Exactly, and it
+                    // is the one thing the loader promises about a level it
+                    // did not measure itself.
+                    //
+                    // Per VOICE and not per layer, because that is how the
+                    // loader scales: one gain for the whole drum, so the
+                    // dynamics BETWEEN its layers survive. A layer that is
+                    // not the loudest is free to land wherever the ripple
+                    // put it relative to the one that is.
+                    let voice_peak = |k: &crate::kit::KitBank| {
+                        (0..bank.layers())
+                            .flat_map(|l| (0..bank.rr()).map(move |r| (l, r)))
+                            .flat_map(|(l, r)| k.sample(v as u8, l, r).iter())
+                            .fold(0.0f32, |m, s| m.max(s.abs()))
+                    };
+                    let (va, vb) = (voice_peak(&here), voice_peak(&reference));
+                    assert!(vb > 0.0, "{id} {} is silent", v.file_name());
+                    assert!(
+                        (va - vb).abs() < 1e-3,
+                        "{id} {} peaks at {va:.4} at {sr} Hz against {vb:.4} at \
+                         {JAM_REFERENCE_SR}",
+                        v.file_name()
+                    );
+                    assert!(
+                        va <= crate::kit::VOICE_PEAK + 1e-3,
+                        "{id} {} peaks at {va:.4}, over the ceiling the files \
+                         themselves carry",
+                        v.file_name()
+                    );
+                    for l in 0..bank.layers() {
+                        let a = here.sample(v as u8, l, 0);
+                        let b = reference.sample(v as u8, l, 0);
+                        if sr < FULL_BAND_ABOVE {
+                            continue;
+                        }
+                        let (ea, eb) = (energy(a, sr), energy(b, JAM_REFERENCE_SR));
+                        let apart = 20.0 * (ea / eb).sqrt().log10();
+                        if apart.abs() > worst.0 {
+                            worst = (apart.abs(), format!("{id} {} at {sr} Hz", v.file_name()));
+                        }
+                        assert!(
+                            apart.abs() < ALLOWED,
+                            "{id} {} layer {l} carries {apart:+.2} dB of energy at \
+                             {sr} Hz against {JAM_REFERENCE_SR}",
+                            v.file_name()
+                        );
+                    }
+                }
+            }
+        }
+        eprintln!(
+            "[kit] the widest a shipped drum's energy moves across rates: {:.2} dB ({})",
+            worst.0, worst.1
+        );
+        // And the synthesised bass, which is built per rate rather than
+        // resampled and so has no imaging to overshoot — in the list because
+        // if that ever stops being true the safety clamp has to know.
+        for sr in [22050u32, 44100, 88200, 96000] {
             let bank = SoundBank::new(sr);
-            for (name, id) in &ids {
-                let here = bank.get(*id).iter().fold(0.0f32, |m, s| m.max(s.abs()));
-                let reference = jam_reference_sample(*id)
-                    .iter()
-                    .fold(0.0f32, |m, s| m.max(s.abs()));
-                assert!(reference > 0.0, "{name} is silent in the reference bank");
-                assert!(
-                    here <= reference * ALLOWED_OVERSHOOT,
-                    "{name} peaks at {here:.4} at {sr} Hz against {reference:.4} in \
-                     the 48 kHz reference — {:.1}% over, and JAM_TICK_CEILING only \
-                     leaves {:.1}%",
-                    (here / reference - 1.0) * 100.0,
-                    (ALLOWED_OVERSHOOT - 1.0) * 100.0
-                );
+            for voice in BassVoice::ALL {
+                for i in 0..BASS_NOTES {
+                    let id = SoundId::Bass(voice, i as u8);
+                    let here = bank.get(id).iter().fold(0.0f32, |m, s| m.max(s.abs()));
+                    let reference = jam_reference_sample(id)
+                        .iter()
+                        .fold(0.0f32, |m, s| m.max(s.abs()));
+                    assert!(reference > 0.0);
+                    assert!(
+                        here <= reference * 1.02,
+                        "{} MIDI {} peaks at {here:.4} at {sr} Hz against {reference:.4}",
+                        voice.name(),
+                        BASS_MIN_MIDI as usize + i
+                    );
+                }
             }
         }
     }
@@ -7504,8 +8396,12 @@ mod tests {
             bank.get(SoundId::Bass(BassVoice::Fingered, 40 - BASS_MIN_MIDI)),
             sr,
         );
-        let snare_low =
-            low_band_share(bank.get(SoundId::Kit(JamKit::Room, KitVoice::SnareHi)), sr);
+        let room = crate::jam::reference_bank("room").unwrap();
+        let snare = room.sample(KitVoice::Snare as u8, 1, 0);
+        let snare_mono: Vec<f32> = (0..snare.len() / 2)
+            .map(|i| (snare[2 * i] + snare[2 * i + 1]) * 0.5)
+            .collect();
+        let snare_low = low_band_share(&snare_mono, sr);
         assert!(
             bass_low > snare_low * 2.0,
             "the bass has {bass_low:.2} of its energy under 150 Hz and the snare \
@@ -7536,6 +8432,7 @@ mod tests {
                 hat: vec![0; 16],
                 ride: vec![0; 16],
                 crash: vec![0; 16],
+                ..Default::default()
             },
             fill: None,
             form_bars: 4,
@@ -7551,6 +8448,7 @@ mod tests {
             bass_voice: None,
             keys_voice: None,
             custom_kit: None,
+            ..Default::default()
         }
     }
 
@@ -7652,95 +8550,98 @@ mod tests {
         );
     }
 
-    /// A CUSTOM DRUM REACHES THE MIXER, AND A MISSING ONE DOES NOT REACH
-    /// THE WRONG BANK.
+    /// A DRUM REACHES THE MIXER OUT OF THE TABLE'S OWN KIT, AND A MISSING
+    /// ONE DOES NOT REACH THE WRONG BANK.
     ///
-    /// `jam_sample` is the one function that answers `SoundId::Custom`, and
-    /// it is a two-line match in the hottest loop in the program, so it is
-    /// worth saying out loud what it has to get right: a custom voice comes
-    /// from the table's own folder, a built-in one comes from the bank, and
-    /// a custom voice with no folder behind it is SILENT rather than an
-    /// index into something else.
+    /// `jam_sample` is the one function that answers `SoundId::Band`, and it
+    /// is a two-line match in the hottest loop in the program, so it is
+    /// worth saying out loud what it has to get right: a drum comes from the
+    /// table's own kit, everything the metronome makes comes from the
+    /// `SoundBank`, and a drum with no kit behind it is SILENT rather than
+    /// an index into something else.
     #[test]
-    fn a_custom_drum_is_read_from_the_table_and_never_from_the_bank() {
+    fn a_drum_is_read_from_the_table_and_never_from_the_click_bank() {
         let sr = 48000u32;
         let bank = SoundBank::new(sr);
-        let folder = crate::kit::CustomBank::for_tests(&[KitVoice::Kick], sr, 0.05);
+        let kit = crate::kit::KitBank::for_tests(&[KitVoice::Kick], sr, 0.05);
+        let kick = SoundId::Band {
+            voice: KitVoice::Kick as u8,
+            layer: 0,
+            robin: 0,
+        };
 
-        // The folder's kick, through the folder.
-        let custom = jam_sample(&bank, Some(&folder), SoundId::Custom(KitVoice::Kick));
-        assert!(!custom.is_empty(), "the folder has a kick and it did not come out");
-        assert_ne!(
-            custom,
-            bank.get(SoundId::Kit(JamKit::Room, KitVoice::Kick)),
-            "that is the built-in kick, not the folder's"
-        );
+        let got = jam_sample(&bank, Some(&kit), kick);
+        assert!(!got.is_empty(), "the kit has a kick and it did not come out");
+        assert_eq!(got, kit.sample(KitVoice::Kick as u8, 0, 0));
 
-        // A voice the folder does not hold reads as silence here. `jam.rs`
-        // is what makes sure no table ever names one — this is the audio
-        // thread refusing to make a noise nobody asked for if it ever does.
-        assert!(jam_sample(&bank, Some(&folder), SoundId::Custom(KitVoice::Ride)).is_empty());
-        // And so does a custom voice with no folder at all, which is the
-        // one drum still ringing when the musician unloads the jam.
-        assert!(jam_sample(&bank, None, SoundId::Custom(KitVoice::Kick)).is_empty());
+        // A voice the kit does not hold reads as silence here. `jam.rs` is
+        // what makes sure no table ever names one — this is the audio thread
+        // refusing to make a noise nobody asked for if it ever does. Same
+        // for a layer and a round robin past the end.
+        for id in [
+            SoundId::Band {
+                voice: KitVoice::Ride as u8,
+                layer: 0,
+                robin: 0,
+            },
+            SoundId::Band {
+                voice: KitVoice::Kick as u8,
+                layer: 3,
+                robin: 0,
+            },
+            SoundId::Band {
+                voice: KitVoice::Kick as u8,
+                layer: 0,
+                robin: 2,
+            },
+            SoundId::Band {
+                voice: 200,
+                layer: 0,
+                robin: 0,
+            },
+        ] {
+            assert!(jam_sample(&bank, Some(&kit), id).is_empty(), "{id:?}");
+        }
+        // And so does a drum with no kit at all, which is the one still
+        // ringing when the musician unloads the jam.
+        assert!(jam_sample(&bank, None, kick).is_empty());
 
-        // Everything else is the bank, unchanged, folder or no folder.
+        // Everything else is the bank, unchanged, kit or no kit.
         for id in [
             SoundId::ClickHigh,
-            SoundId::Kit(JamKit::Brushes, KitVoice::Crash),
+            SoundId::DrumAccent,
             SoundId::Bass(BassVoice::Slap, 4),
             SoundId::Keys(KeysVoice::Organ, 4),
         ] {
-            assert_eq!(jam_sample(&bank, Some(&folder), id), bank.get(id));
+            assert_eq!(jam_sample(&bank, Some(&kit), id), bank.get(id));
             assert_eq!(jam_sample(&bank, None, id), bank.get(id));
         }
     }
 
     /// A DEVICE CHANGE TAKES A FOLDER'S DRUMS AWAY, AND ONLY A FOLDER'S.
     ///
-    /// The samples in a `CustomBank` were resampled once, on the command
+    /// The samples in a `KitBank` were resampled once, on the command
     /// thread, at the rate the device that was open then handed out. Switch
     /// from a 48 kHz interface to a 44.1 kHz one and every one of those
     /// drums is a semitone and a half flat for as long as the jam stays
-    /// loaded, because nothing would otherwise make the app decode the
-    /// folder again — `KitCache` keys on the rate, but only a `set_jam` asks
-    /// it anything, and a table already playing does not ask.
+    /// loaded, because nothing would otherwise make the app decode the kit
+    /// again — `KitCache` keys on the rate, but only a `set_jam` asks it
+    /// anything, and a table already playing does not ask.
     ///
-    /// So the table goes, the plain click plays, and the next bar-ahead send
-    /// brings the band back in tune. A table with no folder in it survives
-    /// the change untouched, which is the promise `set_jam_table` makes:
-    /// switch headphones mid-jam and the band is still there.
+    /// **This used to be true of a folder and is now true of every kit**,
+    /// because the shipped kits left the audio thread's `SoundBank` this
+    /// pass. So the table goes, the plain click plays, and the next
+    /// bar-ahead send — at most a bar away — brings the band back in tune.
     #[test]
-    fn a_device_change_takes_a_folder_of_drums_away_and_leaves_every_other_band() {
+    fn a_device_change_takes_the_drums_away_so_the_next_send_retunes_them() {
         let cfg = rock_16ths();
-
-        // No folder: a device change must not touch it.
-        let plain = std::sync::Arc::new(crate::jam::compile(&cfg).unwrap());
         let handoff = JamHandoff::new();
+
+        // A band: it has to go, and the audio thread has to be told.
+        let plain = std::sync::Arc::new(crate::jam::compile(&cfg).unwrap());
         handoff.set(Some(plain));
         let before = handoff.generation.load(Ordering::Acquire);
-        assert!(!handoff.drop_custom_kit(), "a shipped kit was thrown away");
-        assert!(
-            handoff.table.lock().unwrap().is_some(),
-            "switching headphones mid-jam took the band away"
-        );
-        assert_eq!(
-            handoff.generation.load(Ordering::Acquire),
-            before,
-            "nothing changed, so the callback should not have been woken"
-        );
-
-        // A folder: it has to go, and the audio thread has to be told.
-        let folder = std::sync::Arc::new(crate::kit::CustomBank::for_tests(
-            &[KitVoice::Kick, KitVoice::SnareHi],
-            48_000,
-            0.05,
-        ));
-        let mine =
-            std::sync::Arc::new(crate::jam::compile_with_kit(&cfg, Some(folder)).unwrap());
-        handoff.set(Some(mine));
-        let before = handoff.generation.load(Ordering::Acquire);
-        assert!(handoff.drop_custom_kit(), "the folder's drums were kept");
+        assert!(handoff.drop_kit(), "a kit decoded for the old device was kept");
         assert!(
             handoff.table.lock().unwrap().is_none(),
             "a kit decoded for the old device is still loaded, and it is out of tune"
@@ -7750,25 +8651,41 @@ mod tests {
             "the table went and the callback was never told"
         );
 
+        // The musician's own folder is no different, which is the point of
+        // there being one path.
+        let folder = std::sync::Arc::new(crate::kit::KitBank::for_tests(
+            &[KitVoice::Kick, KitVoice::Snare],
+            48_000,
+            0.05,
+        ));
+        let mine = std::sync::Arc::new(crate::jam::compile_with_kit(&cfg, folder).unwrap());
+        handoff.set(Some(mine));
+        assert!(handoff.drop_kit());
+        assert!(handoff.table.lock().unwrap().is_none());
+
         // And with nothing loaded at all it is a no-op rather than a panic:
         // a device change with no jam is the common case.
-        assert!(!handoff.drop_custom_kit());
+        assert!(!handoff.drop_kit());
+        assert_eq!(
+            handoff.generation.load(Ordering::Acquire),
+            handoff.generation.load(Ordering::Acquire)
+        );
     }
 
     /// A MID-RING KIT CHANGE STOPS THE DRUMS THAT CAME OUT OF THE OLD ONE.
     ///
-    /// `SoundId::Custom` names a drum and not a decode, so a crash 200 ms
-    /// into its wash goes on reading at sample 9 600 — of whatever folder
-    /// the NEW table carries. Two waveforms spliced mid-note is a click.
+    /// `SoundId::Band` names a drum and not a decode, so a crash 200 ms into
+    /// its wash goes on reading at frame 9 600 — of whatever kit the NEW
+    /// table carries. Two waveforms spliced mid-note is a click.
     /// See `stop_voices_on_kit_change`.
     #[test]
-    fn changing_the_folder_mid_wash_stops_the_old_folders_drums() {
-        let a = std::sync::Arc::new(crate::kit::CustomBank::for_tests(
+    fn changing_the_kit_mid_wash_stops_the_old_kits_drums() {
+        let a = std::sync::Arc::new(crate::kit::KitBank::for_tests(
             &[KitVoice::Crash],
             48_000,
             0.05,
         ));
-        let b = std::sync::Arc::new(crate::kit::CustomBank::for_tests(
+        let b = std::sync::Arc::new(crate::kit::KitBank::for_tests(
             &[KitVoice::Crash],
             48_000,
             0.05,
@@ -7776,60 +8693,53 @@ mod tests {
         assert_ne!(a.id, b.id, "two decodes are two banks, whatever the path was");
 
         let cfg = rock_16ths();
-        let ta = crate::jam::compile_with_kit(&cfg, Some(a.clone())).unwrap();
-        let tb = crate::jam::compile_with_kit(&cfg, Some(b)).unwrap();
-        let same = crate::jam::compile_with_kit(&cfg, Some(a)).unwrap();
-        let shipped = crate::jam::compile(&cfg).unwrap();
+        let ta = crate::jam::compile_with_kit(&cfg, a.clone()).unwrap();
+        let tb = crate::jam::compile_with_kit(&cfg, b).unwrap();
+        let same = crate::jam::compile_with_kit(&cfg, a).unwrap();
 
-        // Mid-wash: a custom crash, a shipped crash and a bass note.
+        // Mid-wash: a drum, and a bass note that is not one.
         let ringing = || -> Vec<Voice> {
-            [
-                SoundId::Custom(KitVoice::Crash),
-                SoundId::Kit(JamKit::Room, KitVoice::Crash),
-                SoundId::Bass(BassVoice::Fingered, 4),
+            vec![
+                Voice {
+                    sound_id: SoundId::Band {
+                        voice: KitVoice::Crash as u8,
+                        layer: 0,
+                        robin: 0,
+                    },
+                    position: 9_600,
+                    delay: 0,
+                    amp_l: 1.0,
+                    amp_r: 1.0,
+                    max_samples: 0,
+                    voice: KitVoice::Crash as u8,
+                    fade_left: 0,
+                    fade_len: 0,
+                    band: true,
+                },
+                Voice::click(SoundId::Bass(BassVoice::Fingered, 4), 1.0, 0),
             ]
-            .into_iter()
-            .map(|sound_id| Voice {
-                sound_id,
-                position: 9_600,
-                amplitude: 1.0,
-                max_samples: 0,
-            })
-            .collect()
         };
 
-        // A different folder: the folder's drums stop, everything else
-        // rings on.
+        // A different kit: its drums stop, everything else rings on.
         let mut voices = ringing();
-        stop_voices_on_kit_change(
-            &mut voices,
-            custom_bank_id(Some(&ta)),
-            custom_bank_id(Some(&tb)),
-        );
+        stop_voices_on_kit_change(&mut voices, bank_id(Some(&ta)), bank_id(Some(&tb)));
         assert_eq!(
             voices.len(),
-            2,
-            "a drum from the old folder is still reading, out of the new folder's buffer"
+            1,
+            "a drum from the old kit is still reading, out of the new kit's buffer"
         );
-        assert!(!voices.iter().any(|v| matches!(v.sound_id, SoundId::Custom(_))));
+        assert!(!voices.iter().any(|v| v.band));
 
-        // The SAME folder — which is every bar-ahead send of a jam whose kit
+        // The SAME kit — which is every bar-ahead send of a jam whose kit
         // has not changed — must not cut the cymbal short.
         let mut voices = ringing();
-        stop_voices_on_kit_change(
-            &mut voices,
-            custom_bank_id(Some(&ta)),
-            custom_bank_id(Some(&same)),
-        );
-        assert_eq!(voices.len(), 3, "a bar-ahead send silenced a ringing cymbal");
+        stop_voices_on_kit_change(&mut voices, bank_id(Some(&ta)), bank_id(Some(&same)));
+        assert_eq!(voices.len(), 2, "a bar-ahead send silenced a ringing cymbal");
 
-        // Unloading the jam, and loading one whose drums are the app's own,
-        // both leave a custom voice with no buffer behind it.
-        for after in [None, Some(&shipped)] {
-            let mut voices = ringing();
-            stop_voices_on_kit_change(&mut voices, custom_bank_id(Some(&ta)), custom_bank_id(after));
-            assert_eq!(voices.len(), 2);
-        }
+        // And unloading the jam leaves a drum with no buffer behind it.
+        let mut voices = ringing();
+        stop_voices_on_kit_change(&mut voices, bank_id(Some(&ta)), bank_id(None));
+        assert_eq!(voices.len(), 1);
     }
 
     /// A band on somebody else's drums renders, tick for tick, where the
@@ -7843,7 +8753,7 @@ mod tests {
     fn a_jam_on_a_custom_kit_renders_on_the_ticks_it_names() {
         let sr = 48000u32;
         let bank = SoundBank::new(sr);
-        let folder = std::sync::Arc::new(crate::kit::CustomBank::for_tests(
+        let folder = std::sync::Arc::new(crate::kit::KitBank::for_tests(
             &[KitVoice::Kick, KitVoice::Hat],
             sr,
             0.05,
@@ -7853,8 +8763,8 @@ mod tests {
         cfg.bar.kick = vec![2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0];
         cfg.bar.snare = vec![0; 16];
         cfg.bar.hat = vec![0; 16];
-        let table = crate::jam::compile_with_kit(&cfg, Some(folder)).unwrap();
-        assert!(table.custom_kit().is_some());
+        let table = crate::jam::compile_with_kit(&cfg, folder.clone()).unwrap();
+        assert_eq!(table.kit_bank().id, folder.id);
 
         let tick_samples = sr as usize * 60 / 120 / 4;
         let r = render_jam(&table, &bank, 1, tick_samples, 1.0);
@@ -7962,16 +8872,28 @@ mod tests {
 
         // One sound, or a chord of them, rendered on its own into a window
         // of one beat, with the callback's own cap arithmetic.
+        let kit = table.kit_bank();
         let render = |slots: &[crate::jam::JamSlot]| -> Vec<f32> {
             let mut out = vec![0.0f32; window];
             for slot in slots {
-                let buf = bank.get(slot.sound);
-                let limit = if slot.cap_ticks > 0.0 {
-                    ((tick_samples as f32 * slot.cap_ticks) as usize).min(buf.len())
+                let buf = jam_sample(&bank, Some(kit), slot.sound);
+                // A drum is interleaved stereo and a keys note is mono, so
+                // the drum is folded down the middle to be measured beside
+                // one. Panning can only take level away, so this is the
+                // honest height rather than a flattering one.
+                let mono: Vec<f32> = if matches!(slot.sound, SoundId::Band { .. }) {
+                    (0..buf.len() / 2)
+                        .map(|i| (buf[2 * i] * slot.pan_l + buf[2 * i + 1] * slot.pan_r) * 0.5)
+                        .collect()
                 } else {
-                    buf.len()
+                    buf.to_vec()
                 };
-                for (o, v) in out.iter_mut().zip(buf.iter().take(limit)) {
+                let limit = if slot.cap_ticks > 0.0 {
+                    ((tick_samples as f32 * slot.cap_ticks) as usize).min(mono.len())
+                } else {
+                    mono.len()
+                };
+                for (o, v) in out.iter_mut().zip(mono.iter().take(limit)) {
                     *o += v * slot.gain;
                 }
             }
@@ -8055,6 +8977,7 @@ mod tests {
             hat: vec![0; 16],
             ride: vec![0; 16],
             crash: vec![0; 16],
+            ..Default::default()
         });
         let table = compile_jam(&cfg).unwrap();
         // Bar 3 of a four-bar form is the fill bar.
@@ -8241,40 +9164,59 @@ mod tests {
                         if state == JamBandState::HatsOnly && slot.lane != JamLane::Hat {
                             continue;
                         }
-                        voices.push(Voice {
-                            sound_id: slot.sound,
-                            position: 0,
-                            amplitude: slot.gain,
-                            max_samples: if slot.cap_ticks > 0.0 {
-                                (tick_samples as f32 * slot.cap_ticks) as usize
-                            } else {
-                                0
-                            },
-                        });
+                        spawn_band_voice(
+                            &mut voices,
+                            slot,
+                            1.0,
+                            jam_bar,
+                            t as u32,
+                            table.ticks_per_bar(),
+                            tick_samples as u64,
+                            0,
+                            (CHOKE_FADE_SECS * 48_000.0) as u32,
+                        );
                     }
                     if t == 0 && jam_bar == 0 && state == JamBandState::Full {
                         if let Some(slot) = table.crash_on_one() {
-                            voices.push(Voice {
-                                sound_id: slot.sound,
-                                position: 0,
-                                amplitude: slot.gain,
-                                max_samples: 0,
-                            });
+                            spawn_band_voice(
+                                &mut voices,
+                                &JamSlot {
+                                    cap_ticks: 0.0,
+                                    ..slot
+                                },
+                                1.0,
+                                jam_bar,
+                                0,
+                                table.ticks_per_bar(),
+                                tick_samples as u64,
+                                0,
+                                (CHOKE_FADE_SECS * 48_000.0) as u32,
+                            );
                         }
                     }
                 }
             }
+            let kit = table.kit_bank();
             for _ in 0..tick_samples {
                 let mut mix = 0.0f32;
                 for v in voices.iter_mut() {
-                    let buf = bank.get(v.sound_id);
+                    let buf = jam_sample(bank, Some(kit), v.sound_id);
+                    let frames = if v.band { buf.len() / 2 } else { buf.len() };
                     let limit = if v.max_samples > 0 {
-                        v.max_samples.min(buf.len())
+                        v.max_samples.min(frames)
                     } else {
-                        buf.len()
+                        frames
                     };
                     if v.position < limit {
-                        mix += buf[v.position] * v.amplitude;
+                        // Down the middle: what this harness measures is
+                        // WHICH LANES sounded, and a stereo fold would make
+                        // a placed drum look quieter than it is.
+                        mix += if v.band {
+                            (buf[2 * v.position] * v.amp_l + buf[2 * v.position + 1] * v.amp_r)
+                                * 0.5
+                        } else {
+                            buf[v.position] * v.amp_l
+                        };
                     }
                     v.position += 1;
                 }
@@ -8282,13 +9224,9 @@ mod tests {
                 pos += 1;
             }
             voices.retain(|v| {
-                let buf = bank.get(v.sound_id);
-                let limit = if v.max_samples > 0 {
-                    v.max_samples.min(buf.len())
-                } else {
-                    buf.len()
-                };
-                v.position < limit
+                let buf = jam_sample(bank, Some(kit), v.sound_id);
+                let frames = if v.band { buf.len() / 2 } else { buf.len() };
+                !v.done(frames)
             });
         }
         out
@@ -8458,7 +9396,7 @@ mod tests {
             .map(|sr| (sr, SoundBank::new(sr)))
             .collect();
 
-        for kit in JamKit::ALL {
+        for kit in JamKit::all() {
             let cache = JamGainCache::new();
             for round in 0..2 {
                 for (gain, pitches) in &lines {
@@ -8467,7 +9405,8 @@ mod tests {
                         pitches: pitches.clone(),
                         gain: *gain,
                     });
-                    let table = compile_with(&cfg, &cache, None).unwrap();
+                    let bank = crate::jam::reference_bank(kit.name()).unwrap();
+                    let table = compile_with(&cfg, &cache, bank).unwrap();
                     assert_eq!(
                         table.base_peak,
                         compile_jam(&cfg).unwrap().base_peak,

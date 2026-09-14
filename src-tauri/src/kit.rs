@@ -1,123 +1,401 @@
-//! Your own drums — a kit that is a folder on this machine.
+//! The drums — a kit is a folder, whether the app ships it or you point at it.
 //!
-//! `plans/JAM_UX_DECISIONS.md` B3: "a kit can be a folder of WAVs you point
-//! the app at… Loaded from disk, never shipped, so the license rule holds
-//! and a player with a good sample pack gets a real drummer."
+//! `plans/JAM_SOUND.md` is why this module changed shape. The first pass
+//! shipped a kit as eight mono files with one sample per drum, and the
+//! owner's verdict on it was "very underwhelming": one sample scaled
+//! quieter is not a ghost note, identical hits in a row are a machine gun,
+//! and an open hat that nothing closes smears across the bar. All three are
+//! properties of the BANK, not of the mixer, so they are fixed here.
 //!
-//! Three things follow from "never shipped", and they shape this whole
-//! module:
+//! A kit is now a folder with a `kit.json` in it:
 //!
-//! * **The files are the user's, so nothing here may panic.** A folder can
-//!   hold a truncated download, a 32-bit-float render, an eight-channel stem
-//!   or a WAV that is really an AIFF. Every one of those comes back as a
-//!   `Result` with a sentence the UI can put on screen. That is why the
-//!   decoding here is `hound` rather than the `rodio` the embedded sounds
-//!   use: rodio's WAV path narrows everything to `i16` and *panics* on a
-//!   spec it does not implement, which for a file the user chose is a crash
-//!   rather than a message.
-//! * **They are decoded once, off the audio thread, and handed over like a
-//!   table.** [`CustomBank`] is built in the `set_jam` command and carried
-//!   inside the `Arc<JamTable>` that names it, so the drums and the bank
-//!   holding them arrive together, are swapped together at the bar line and
-//!   are retired together on a thread that may call `free()`.
-//! * **They are cached by folder and mtime.** The UI re-sends the whole
-//!   config four to six times a chorus to keep the bass a bar ahead
-//!   (`useJamSession.ts`); decoding eight WAVs on each of those would be a
-//!   folder read per bar. [`KitCache`] makes all but the first a stat of
-//!   eight files and an `Arc` clone.
+//! ```text
+//! src-tauri/sounds/kits/<kit>/kit.json
+//! src-tauri/sounds/kits/<kit>/<voice>.<layer>.<rr>.wav
+//! ```
+//!
+//! `layer` 1 is the softest stroke and 4 the hardest; `rr` is the round
+//! robin, so the same stroke twice in a row is two different recordings.
+//! Eleven voices, stereo, at the device's rate, with a per-voice trim the
+//! render tool measured and a choke set that says which drum silences which.
+//!
+//! **One loader for both.** `build.rs` walks the shipped folders and writes
+//! `include_bytes!` for every file in them; a folder the musician points at
+//! is read off disk. Both arrive here as a list of (file name, bytes) and
+//! leave as the same [`KitBank`], so a shipped kit and somebody's own sample
+//! pack cannot drift apart in what they support. That is also why adding a
+//! kit to the app is adding a folder and touching no Rust at all.
+//!
+//! Three rules survive from the first pass and still shape everything:
+//!
+//! * **Nothing here may panic.** A folder can hold a truncated download, a
+//!   32-bit-float render, an eight-channel stem or a WAV that is really an
+//!   AIFF. Every one of those comes back as a `Result` with a sentence the
+//!   UI can put on screen. That is why the decoding is `hound` rather than
+//!   the `rodio` the click uses: rodio's WAV path narrows everything to
+//!   `i16` and *panics* on a spec it does not implement.
+//! * **Decoded once, off the audio thread, handed over like a table.** The
+//!   bank is built in the `set_jam` command and carried inside the
+//!   `Arc<JamTable>` that names it, so the drums and the samples behind them
+//!   arrive together, swap together at the bar line and are retired together
+//!   on a thread that may call `free()`.
+//! * **Cached by folder and mtime.** The UI re-sends the whole config four
+//!   to six times a chorus to keep the bass a bar ahead
+//!   (`useJamSession.ts`); decoding a hundred and thirty-two WAVs on each of
+//!   those would be a folder read per bar. [`KitCache`] makes all but the
+//!   first a stat and an `Arc` clone.
 
+use std::io::Cursor;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 
-use crate::engine::{resample, KitVoice, KIT_VOICES};
+use serde::Deserialize;
 
-/// The eight file names a kit folder may hold, and the voice each one
-/// replaces. Mirrors the list in `JamEngineConfig.customKit`
-/// (`src/jam/types.ts`) — and note `snare` / `snare_soft` rather than the
-/// engine's `snare_hi` / `snare_lo`: a musician's sample pack is named the
-/// way a drummer talks, and the accent is the same drum hit harder (rule 4
-/// of `src-tauri/sounds/KITS.md`).
-pub const KIT_FILES: [(&str, KitVoice); KIT_VOICES] = [
-    ("kick", KitVoice::Kick),
-    ("snare", KitVoice::SnareHi),
-    ("snare_soft", KitVoice::SnareLo),
-    ("hat", KitVoice::Hat),
-    ("hat_open", KitVoice::HatOpen),
-    ("ride", KitVoice::Ride),
-    ("rim", KitVoice::Rim),
-    ("crash", KitVoice::Crash),
-];
+use crate::engine::resample;
+
+// ---------------------------------------------------------------------------
+// The voices
+// ---------------------------------------------------------------------------
+
+/// How many drums a kit can have.
+pub const KIT_VOICES: usize = 11;
+
+/// One drum of a kit, in the order `plans/tasks/jam-v3/BRIEF.md` fixes.
+///
+/// Eleven and not eight: `hat_pedal` is the foot that closes the hat,
+/// `ride_bell` is the top of a fill on the ride, and the two toms are what a
+/// fill is made of. The order is the contract's and is the order a manifest
+/// is read in; nothing else depends on it, because a bank is indexed by this
+/// enum rather than by a table whose columns have to be kept in step.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum KitVoice {
+    Kick,
+    Snare,
+    Rim,
+    Hat,
+    HatOpen,
+    HatPedal,
+    Ride,
+    RideBell,
+    Crash,
+    TomHi,
+    TomLo,
+}
+
+impl KitVoice {
+    /// Every voice, in the contract's order.
+    pub const ALL: [KitVoice; KIT_VOICES] = [
+        Self::Kick,
+        Self::Snare,
+        Self::Rim,
+        Self::Hat,
+        Self::HatOpen,
+        Self::HatPedal,
+        Self::Ride,
+        Self::RideBell,
+        Self::Crash,
+        Self::TomHi,
+        Self::TomLo,
+    ];
+
+    /// The `<voice>` half of `<voice>.<layer>.<rr>.wav`, and the key a
+    /// manifest names this drum by.
+    pub fn file_name(self) -> &'static str {
+        match self {
+            Self::Kick => "kick",
+            Self::Snare => "snare",
+            Self::Rim => "rim",
+            Self::Hat => "hat",
+            Self::HatOpen => "hat_open",
+            Self::HatPedal => "hat_pedal",
+            Self::Ride => "ride",
+            Self::RideBell => "ride_bell",
+            Self::Crash => "crash",
+            Self::TomHi => "tom_hi",
+            Self::TomLo => "tom_lo",
+        }
+    }
+
+    /// A name from a manifest or a file, or `None`. Case-insensitive,
+    /// because a sample pack names its files the way its author felt like
+    /// that day and renaming a hundred of them should not be the price of
+    /// using one.
+    pub fn from_name(name: &str) -> Option<Self> {
+        let lower = name.trim().to_ascii_lowercase();
+        Self::ALL.into_iter().find(|v| v.file_name() == lower)
+    }
+
+    /// This voice as a bit, for the choke masks.
+    #[inline]
+    pub fn bit(self) -> u16 {
+        1 << (self as u16)
+    }
+}
+
+/// Where a voice this kit does not have comes from instead.
+///
+/// The contract's list, and it is a list of MUSICAL substitutions rather
+/// than of silences: a kit without a cross-stick still has to play a bossa,
+/// and the nearest thing to a cross-stick is the softest snare in the
+/// drawer. The gain beside each is what makes the substitution sound like
+/// the voice it stands in for rather than like the drum it borrowed.
+///
+/// `hat_open` is the exception with a shape of its own: it falls back to the
+/// closed hat and the LANE caps it at four ticks (`HAT_OPEN_CAP_TICKS` in
+/// `jam.rs`), which is what the first pass already did.
+///
+/// `None` ends a chain: a kit with no kick has no kick, and inventing one
+/// out of a tom would be the app playing something nobody recorded.
+pub fn fallback_for(voice: KitVoice) -> Option<(KitVoice, u8, f32)> {
+    match voice {
+        // (voice, layer, gain)
+        KitVoice::Rim => Some((KitVoice::Snare, 1, 1.0)),
+        KitVoice::HatPedal => Some((KitVoice::Hat, 1, 0.5)),
+        KitVoice::RideBell => Some((KitVoice::Ride, 0, 1.0)),
+        KitVoice::TomLo => Some((KitVoice::TomHi, 0, 1.0)),
+        KitVoice::TomHi => Some((KitVoice::Snare, 2, 0.8)),
+        KitVoice::HatOpen => Some((KitVoice::Hat, 0, 1.0)),
+        _ => None,
+    }
+}
+
+// ---------------------------------------------------------------------------
+// The numbers
+// ---------------------------------------------------------------------------
 
 /// The longest one drum may be.
 ///
-/// Two seconds is longer than the longest shipped voice (`brushes`' crash
-/// runs 700 ms) and long enough for any real cymbal sample to say what it
-/// has to say. It is a cap and not a rejection because a sample pack's
-/// crash is very often a ten-second wash with eight of them below −40 dB,
-/// and refusing that folder would be refusing a good kit over a tail nobody
-/// hears under a band.
+/// Three seconds, up from the first pass's two, and the reason is the whole
+/// point of this pass: **a crash is its decay** (`plans/JAM_SOUND.md` §2.5).
+/// A cymbal cut at two seconds is the loudest tell in a synthesised kit, and
+/// a recorded one whose wash is chopped sounds no better than the sine that
+/// preceded it. Three seconds carries any crash in a licensed library down
+/// to where a band covers it.
 ///
-/// It is also the bound on everything `set_jam` pays for a folder. See
-/// [`MAX_FOLDER_BYTES`].
-pub const MAX_VOICE_SECS: f64 = 2.0;
+/// It is a cap and not a rejection because a sample pack's crash is very
+/// often a ten-second wash with eight of them below −40 dB, and refusing
+/// that folder would be refusing a good kit over a tail nobody hears.
+pub const MAX_VOICE_SECS: f64 = 3.0;
 
 /// How long the cut at [`MAX_VOICE_SECS`] takes to reach silence.
 ///
 /// A cap that stopped mid-waveform would leave a step from whatever the
-/// sample happened to be doing at two seconds down to nothing, and a step is
-/// a click — audible on every hit of that drum, and worse on a cymbal, which
-/// is exactly the voice long enough to be cut. Five milliseconds is shorter
+/// sample happened to be doing down to nothing, and a step is a click —
+/// audible on every hit of that drum, and worst on a cymbal, which is
+/// exactly the voice long enough to be cut. Five milliseconds is shorter
 /// than any transient anybody would notice losing and long enough that the
 /// edge is inaudible.
 const CAP_FADE_SECS: f64 = 0.005;
 
-/// The most audio one folder may declare, in decoded bytes.
+/// The most audio one kit may declare, in decoded bytes.
 ///
-/// **This is a sanity check on the folder, not a budget for the decode.**
-/// The decode is already bounded by [`MAX_VOICE_SECS`]: `decode_mono` stops
-/// reading at two seconds *at the source rate*, before a sample past it is
-/// touched, so eight ten-minute stems cost the same as eight one-second hits
-/// and no folder can make `set_jam` take longer than eight voices' worth of
-/// two seconds. What this cap is for is INTENT — sixty-four megabytes is
-/// about two and a half minutes of 44.1 kHz mono per voice across all eight,
-/// which is far more than a drum and is the signature of a folder somebody
-/// pointed at their sample library by mistake. Saying so is kinder than
-/// silently playing the first two seconds of eight songs.
+/// **A sanity check on the folder, not a budget for the decode.** The decode
+/// is already bounded by [`MAX_VOICE_SECS`] per file. Ninety-six megabytes
+/// is what a four-layer, three-round-robin, eleven-voice stereo kit costs
+/// with room to spare — the arithmetic is 132 files, and at half a second
+/// each that is 25 MB — and anything far past it is the signature of a
+/// folder somebody pointed at their sample library by mistake. Saying so is
+/// kinder than silently playing the first three seconds of a hundred songs.
 ///
-/// Measured on the files' own headers, so the answer arrives before any
-/// decoding rather than after it.
-pub const MAX_FOLDER_BYTES: u64 = 64 * 1024 * 1024;
+/// Up from 64 MB because a kit is stereo now and carries layers: the same
+/// drums cost eight bytes a frame where they cost four, and there are up to
+/// twelve files per voice where there was one.
+pub const MAX_FOLDER_BYTES: u64 = 96 * 1024 * 1024;
 
-/// The peak every decoded voice is put on.
+/// The peak a folder of somebody's own samples is put on.
 ///
-/// The same 0.900 the shipped kit files carry, and for the same reason
-/// (`src-tauri/sounds/KITS.md`): the files carry timbre, the engine carries
-/// balance. Without it a quiet sample pack would be a band you cannot hear
-/// and a hot one would drive the table's normalisation into the floor —
-/// and, worse, the two would need different `LEVEL_GAIN`s to sound the same.
+/// **A target for a folder, and nothing at all for a kit the app ships**,
+/// and that difference is the whole difference between a kit somebody
+/// measured and a kit somebody found:
 ///
-/// It is also what lets `jam.rs` measure a table that uses these voices
-/// against the reference bank at [`crate::engine::JAM_REFERENCE_SR`]: a
-/// buffer normalised after resampling is the same height at every rate, so
-/// a peak measured at 48 kHz is the peak the device will render.
+/// * A shipped kit's levels ARE the recording. A soft layer is quieter than
+///   a hard one because that is what a soft stroke is, and `trim_db` in the
+///   manifest is the balance the render tool measured between the voices.
+///   Touching either here would throw the pass's whole point away and put
+///   the ghost note back at the backbeat's level. So a shipped voice is
+///   decoded, resampled and trimmed, and its level is left exactly where
+///   the render tool put it.
+/// * A folder of somebody's own samples has no measured balance, and it may
+///   be a quiet render or a hot one. So its voices are scaled so the LOUDEST
+///   LAYER of each sits on this — per voice and not per file, so the
+///   dynamics between the layers survive.
+///
+/// **THE PEAK THE SOURCE CARRIED IS THE PEAK THE BANK CARRIES**, whichever
+/// branch decided it, and that is a level decision made on the way OUT of
+/// the resampler rather than on the way in.
+///
+/// The resampler is not level-preserving on a bright transient. A windowed
+/// sinc rings around one, and a kit is nothing but bright transients:
+/// `tight`'s closed hat peaks at 0.900 in its own 44.1 kHz file and 1.12
+/// resampled to 48 kHz; `raw`'s, which is brighter still, reaches half as
+/// much again. Left alone, the same kit would be a different height on
+/// every device, and the one drum that overshot would be the one drum in
+/// the band that clipped before anything else was added to it.
+///
+/// So the ringing is divided back out — the same thing the shipped bank did
+/// before these kits became folders, for the same reason. It is not free:
+/// the overshoot is a sample or two of Gibbs and the division takes it off
+/// the whole voice, so a rate whose ripple was large loses that much ENERGY
+/// too. `raw`'s hat is the extreme at 3.6 dB between 44.1 and 48 kHz, and it
+/// is extreme because that hat's content sits at the source's own Nyquist,
+/// which is where a reconstruction filter has the least to work with. The
+/// trade is deliberate: a predictable height on every device, against a
+/// brightness that moves on the two brightest voices in the set.
 pub const VOICE_PEAK: f32 = 0.9;
+
+/// The bus drive a kit asks for when its manifest does not say.
+///
+/// See `jam.rs` for what drive does. 1.0 is the recorded kits' number: the
+/// saturation is glue, not an effect. `raw` asks for more in its own
+/// manifest, because "raw" is what that kit is for.
+const DEFAULT_DRIVE: f32 = 1.0;
+
+/// The voices a folder with no manifest chokes, by default.
+///
+/// A musician's folder carries no `kit.json`, so the one choke relationship
+/// every drum kit in the world has is assumed rather than declared: the
+/// closed hat and the foot close the open hat. Nothing else is guessed — a
+/// choke nobody asked for is a drum going missing.
+fn default_choked_by(voice: KitVoice) -> u16 {
+    match voice {
+        KitVoice::HatOpen => KitVoice::Hat.bit() | KitVoice::HatPedal.bit(),
+        _ => 0,
+    }
+}
+
+// ---------------------------------------------------------------------------
+// The manifest
+// ---------------------------------------------------------------------------
+
+/// `kit.json`, as the contract spells it.
+#[derive(Debug, Clone, Deserialize)]
+pub struct KitManifest {
+    pub id: String,
+    #[serde(default)]
+    pub name: String,
+    /// Who played it and who recorded it. Shown in Settings › About, which
+    /// is what a CC BY licence is paid in.
+    #[serde(default)]
+    pub credit: String,
+    #[serde(default)]
+    pub licence: String,
+    /// What the render tool says the files are.
+    ///
+    /// **A description, not the fact.** The loader reads each file's own
+    /// header and resamples to whatever the device asked for, so a manifest
+    /// that disagrees with its folder changes nothing about what plays — but
+    /// it is a render tool that went wrong, and [`check_declaration`] says so
+    /// once rather than letting a kit ship half converted.
+    #[serde(default)]
+    pub rate: u32,
+    #[serde(default)]
+    pub channels: u16,
+    /// How hard this kit is driven into the bus's tanh stage.
+    ///
+    /// Not in the contract's example manifest, and added rather than
+    /// hard-coded: the contract asks for "1.0 for recorded kits and 1.6 for
+    /// `raw`", and a number that belongs to one kit belongs in that kit's
+    /// own file rather than in a match arm the engine has to grow every time
+    /// a kit arrives.
+    #[serde(default = "default_drive")]
+    pub drive: f32,
+    #[serde(default)]
+    pub voices: std::collections::HashMap<String, VoiceManifest>,
+}
+
+fn default_drive() -> f32 {
+    DEFAULT_DRIVE
+}
+
+fn default_rr() -> u8 {
+    1
+}
+
+/// One voice's entry in `kit.json`.
+#[derive(Debug, Clone, Deserialize)]
+pub struct VoiceManifest {
+    /// How many velocity layers, 1..4. Layer 1 is the softest.
+    pub layers: u8,
+    /// How many round robins per layer, 1..3.
+    #[serde(default = "default_rr")]
+    pub rr: u8,
+    /// The balance the render tool measured, in decibels. Applied once here,
+    /// when the bank is built, never per hit.
+    #[serde(default)]
+    pub trim_db: f32,
+    /// Where this drum sits across the stereo picture, −1 hard left to 1
+    /// hard right. Absent is centre, which is what a mono file has always
+    /// been.
+    #[serde(default)]
+    pub pan: f32,
+    /// The voices whose hit fades this one out over 20 ms.
+    #[serde(default)]
+    pub choked_by: Vec<String>,
+}
+
+/// The largest layer and round-robin numbers the format allows.
+///
+/// Four layers is what a velocity-switched library ships and more than an
+/// ear can tell apart on a drum; three round robins is enough to stop the
+/// brain flagging a repetition (`plans/JAM_SOUND.md` §2.3). They are bounds
+/// and not preferences: a manifest asking for forty layers would be a
+/// hundred megabytes of decode per voice.
+pub const MAX_LAYERS: u8 = 4;
+pub const MAX_RR: u8 = 3;
 
 // ---------------------------------------------------------------------------
 // The bank
 // ---------------------------------------------------------------------------
 
-/// A folder of drums, decoded, resampled and ready for the audio thread.
+/// One drum, at every layer and every round robin, ready for the audio
+/// thread.
 ///
-/// Voices the folder did not hold are `None`, and `jam.rs` resolves those
-/// back to the built-in kit named in `kit` when the table is compiled — so
-/// a folder with nothing but a kick and a snare in it is a real kit with a
-/// borrowed hat, not a band with two drums.
-pub struct CustomBank {
+/// The buffers are stereo INTERLEAVED, at the device's rate: the mixer
+/// reads `buf[2 * i]` and `buf[2 * i + 1]` off one cache line rather than
+/// chasing two planes, and a mono source was duplicated when the bank was
+/// built so the callback never has to ask which it is holding.
+#[derive(Clone)]
+pub struct VoiceBank {
+    /// `layers × rr` buffers, indexed `layer * rr + robin`.
+    buffers: Vec<Vec<f32>>,
+    layers: u8,
+    rr: u8,
+    /// The pan, resolved into a pair of gains when the bank was built.
+    /// Balance rather than a panning law: centre is (1, 1), so panning a
+    /// drum can only take level away from one side and never add it to the
+    /// other, and no kit can be made louder by being placed.
+    pan_l: f32,
+    pan_r: f32,
+    /// Which voices' hits fade this one out. A bitmask of [`KitVoice::bit`],
+    /// so the audio thread's question is an `&`.
+    choked_by: u16,
+}
+
+impl VoiceBank {
+    /// How many velocity layers this drum has, 1..=[`MAX_LAYERS`].
+    #[inline]
+    pub fn layers(&self) -> u8 {
+        self.layers
+    }
+
+    /// How many round robins per layer, 1..=[`MAX_RR`].
+    #[inline]
+    pub fn rr(&self) -> u8 {
+        self.rr
+    }
+}
+
+/// A whole kit, decoded, resampled, trimmed and ready for the audio thread.
+///
+/// Voices the kit does not hold are `None`, and `jam.rs` resolves those
+/// through [`fallback_for`] when the table is compiled — so a kit with no
+/// cross-stick still plays a bossa, out of its own softest snare.
+pub struct KitBank {
     /// Which decode this is. Unique for the life of the process, and never
     /// reused.
     ///
-    /// It exists because `jam.rs` memoises the four-bar render that
-    /// normalises a table, and a folder path is not a key for that: replace
+    /// It exists because `jam.rs` memoises the four-bar render that measures
+    /// a table, and a folder path is not a key for that: replace
     /// `snare.wav` while the app is open and the path is the same, the
     /// samples are not, and the memo would hand back the old snare's peak
     /// forever. Hashing the decode rather than the path means a replaced
@@ -127,137 +405,182 @@ pub struct CustomBank {
     /// freed when the cache replaces it, and the allocator is entitled to
     /// hand the same address straight back.
     pub id: u64,
-    voices: [Option<Vec<f32>>; KIT_VOICES],
+    voices: [Option<VoiceBank>; KIT_VOICES],
     /// The rate every buffer above was resampled to. Diagnostics, the cache
     /// key, and the reason a device change re-decodes rather than detuning.
-    ///
-    /// The re-decode is FORCED, not hoped for: [`KitCache`] keys on this
-    /// rate, but nothing would make the app ask again while a table that
-    /// already holds a bank keeps playing, and that table's drums would be
-    /// a semitone and a half out on the new device. So
-    /// `MetronomeEngine::set_device` takes a table with a bank in it away
-    /// (`JamHandoff::drop_custom_kit`); the click plays until the next
-    /// bar-ahead `set_jam`, which is at most a bar, and that send decodes
-    /// the folder again at the rate the new device actually opened at.
     pub rate: u32,
-    /// Which of [`KIT_FILES`] were found, in that order.
-    pub found: Vec<&'static str>,
-    /// How much audio this bank actually holds, in bytes. Reported so a
-    /// folder that is quietly enormous is visible rather than mysterious.
+    /// The kit's own id, name and credit, for the report and the About
+    /// screen.
+    pub id_name: String,
+    pub name: String,
+    pub credit: String,
+    /// What the kit is licensed under. A CC BY kit is paid for in the About
+    /// screen, so the licence travels with the drums rather than being
+    /// something somebody has to remember.
+    pub licence: String,
+    /// How hard this kit is driven into the bus. See [`KitManifest::drive`].
+    pub drive: f32,
+    /// Which voices were found, with what they were found at. The report
+    /// `inspect_kit_folder` puts on screen.
+    pub found: Vec<FoundVoice>,
+    /// How much audio this bank holds, in bytes. Reported so a kit that is
+    /// quietly enormous is visible rather than mysterious.
     pub bytes: usize,
 }
 
-impl CustomBank {
-    /// The samples for one drum, or an empty slice when the folder did not
-    /// hold it.
+/// One line of a kit's report: this drum, at this many layers and round
+/// robins.
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct FoundVoice {
+    pub voice: String,
+    pub layers: u8,
+    pub rr: u8,
+}
+
+impl KitBank {
+    /// The samples for one drum at one layer and one round robin, stereo
+    /// interleaved — or an empty slice when the kit does not hold it.
     ///
     /// A bounds-free read on the audio thread: an empty slice is a voice
-    /// that renders nothing, which is what a missing sound should do.
+    /// that renders nothing, which is what a missing sound should do. The
+    /// indices come off a [`crate::jam::JamSlot`] that was resolved when the
+    /// table was compiled, so in practice they are always in range; the
+    /// `get`s are what make that a property of this line rather than of
+    /// arithmetic somewhere else.
     #[inline]
-    pub fn voice(&self, v: KitVoice) -> &[f32] {
-        self.voices[v as usize].as_deref().unwrap_or(&[])
+    pub fn sample(&self, voice: u8, layer: u8, robin: u8) -> &[f32] {
+        match self.voices.get(voice as usize).and_then(|v| v.as_ref()) {
+            Some(v) => v
+                .buffers
+                .get(layer as usize * v.rr as usize + robin as usize)
+                .map_or(&[][..], |b| &b[..]),
+            None => &[],
+        }
     }
 
-    /// Did the folder hold this drum? Asked once per lane when the table is
+    /// This drum's bank, if the kit has it. Asked when the table is
     /// compiled, never on the audio thread.
+    #[inline]
+    pub fn voice(&self, v: KitVoice) -> Option<&VoiceBank> {
+        self.voices[v as usize].as_ref()
+    }
+
+    /// Does this kit hold this drum?
     #[inline]
     pub fn has(&self, v: KitVoice) -> bool {
         self.voices[v as usize].is_some()
     }
-}
 
-/// A folder with one half of the snare pair in it has both.
-///
-/// THIS IS THE DIFFERENCE BETWEEN A KIT AND A KIT WITH NO BACKBEAT.
-/// [`KIT_FILES`] maps `snare.wav` to `snare_hi` and `snare_soft.wav` to
-/// `snare_lo`, and `jam::slot_for` reaches for `snare_hi` only on an ACCENT
-/// (level 2). Most of the library writes its backbeat at level 1, which is
-/// `snare_lo` — so a folder holding nothing but `kick.wav` and `snare.wav`,
-/// which is the folder a musician is most likely to try first, played its
-/// kick from the folder and its snare from the built-in kit on nearly every
-/// groove in the app. Two drums that do not match, and no way to tell why.
-///
-/// The fix is rule 4 of `src-tauri/sounds/KITS.md` applied to somebody
-/// else's samples: the accent is the same drum hit harder, so half a pair is
-/// a whole pair. A folder with only the loud one uses it for the ghosts too
-/// (the level gain is what makes a ghost a ghost); a folder with only the
-/// soft one uses it for the backbeat. A folder with both keeps both, and
-/// [`CustomBank::found`] keeps reporting the FILES, so `inspect` and the
-/// screen still say honestly which of the eight are on disk.
-fn alias_snare_pair(voices: &mut [Option<Vec<f32>>; KIT_VOICES]) {
-    for (from, to) in [
-        (KitVoice::SnareHi, KitVoice::SnareLo),
-        (KitVoice::SnareLo, KitVoice::SnareHi),
-    ] {
-        if voices[to as usize].is_none() {
-            if let Some(buf) = voices[from as usize].clone() {
-                voices[to as usize] = Some(buf);
-            }
-        }
+    /// The pan gains for a voice, or centre.
+    pub fn pan(&self, v: KitVoice) -> (f32, f32) {
+        self.voice(v).map_or((1.0, 1.0), |b| (b.pan_l, b.pan_r))
+    }
+
+    /// Which voices' hits choke this one.
+    pub fn choked_by(&self, v: KitVoice) -> u16 {
+        self.voice(v).map_or(0, |b| b.choked_by)
     }
 }
 
 #[cfg(test)]
-impl CustomBank {
-    /// A bank with the named voices in it, without a folder.
+impl KitBank {
+    /// A kit with the named voices in it, without a folder.
     ///
-    /// For `jam.rs`, whose tests are about which SOUND a lane resolves to
-    /// and not about decoding: writing eight WAVs to disk to find out that
-    /// a missing ride falls back to the built-in one would be testing this
-    /// module twice and that one not at all.
+    /// For `jam.rs` and `engine.rs`, whose tests are about which SOUND a
+    /// lane resolves to and how loud the band comes out, not about decoding:
+    /// writing a hundred WAVs to disk to find out that a missing ride falls
+    /// back to the ride's own substitute would be testing this module twice
+    /// and that one not at all.
     ///
     /// `secs` is the length of every voice, and it is a parameter because
-    /// the ceiling tests need it to be. [`MAX_VOICE_SECS`] is nearly three
-    /// times the longest drum this app ships (`brushes`' 700 ms crash), and
-    /// a headroom figure measured on 50 ms bursts says nothing at all about
-    /// a folder of two-second cymbals — the ring-out is the whole reason
-    /// voices stack. Pass [`MAX_VOICE_SECS`] to ask the hard question and a
-    /// short burst when the test is about which sound came out.
+    /// the ceiling tests need it to be. [`MAX_VOICE_SECS`] is far longer
+    /// than the longest drum this app ships, and a headroom figure measured
+    /// on 50 ms bursts says nothing at all about a folder of three-second
+    /// cymbals — the ring-out is the whole reason voices stack.
     ///
-    /// The shape is a decaying sine, and the frequency differs per voice.
-    /// Both matter for the tests that measure a peak: eight copies of one
+    /// The shape is a decaying sine and the frequency differs per voice.
+    /// Both matter for the tests that measure a peak: eleven copies of one
     /// steady tone are phase-locked and add coherently, which is a signal no
     /// drum kit is and a fixture no allowance could ever cover.
+    ///
+    /// One layer and one round robin: a fixture with layers in it would be
+    /// this module's job to build and is what `layers_and_round_robins`
+    /// covers.
     pub fn for_tests(voices: &[KitVoice], rate: u32, secs: f64) -> Self {
-        let mut slots: [Option<Vec<f32>>; KIT_VOICES] = Default::default();
+        Self::layered_for_tests(voices, rate, secs, 1, 1)
+    }
+
+    /// [`KitBank::for_tests`] with layers and round robins, each one a
+    /// different tone so a test can say WHICH buffer played.
+    pub fn layered_for_tests(
+        voices: &[KitVoice],
+        rate: u32,
+        secs: f64,
+        layers: u8,
+        rr: u8,
+    ) -> Self {
+        let mut slots: [Option<VoiceBank>; KIT_VOICES] = Default::default();
+        let mut found = Vec::new();
+        let mut bytes = 0;
         for v in voices {
-            // Peaked on the bank's own peak, so a table compiled against it
-            // normalises the way a real folder would; decaying to a tenth of
-            // that by the end, which is roughly what a cymbal does over its
-            // audible tail.
             let n = (secs * rate as f64) as usize;
-            let freq = 60.0 * 1.7f64.powi(*v as i32);
-            slots[*v as usize] = Some(
-                (0..n)
-                    .map(|i| {
+            let mut buffers = Vec::new();
+            for l in 0..layers {
+                for r in 0..rr {
+                    // A layer is a LEVEL as well as a colour: layer 1 is the
+                    // softest stroke, so the fixture is quieter there, the
+                    // way a recording is.
+                    let level = VOICE_PEAK as f64 * (0.4 + 0.6 * (l as f64 / layers.max(1) as f64));
+                    let freq = 60.0 * 1.7f64.powi(*v as i32) * (1.0 + 0.01 * r as f64);
+                    let mut buf = vec![0.0f32; n * 2];
+                    for i in 0..n {
                         let t = i as f64 / rate as f64;
                         let env = (-t * (10.0f64).ln() / secs.max(1e-6)).exp();
-                        (VOICE_PEAK as f64
-                            * env
-                            * (2.0 * std::f64::consts::PI * freq * t).sin())
-                            as f32
-                    })
-                    .collect(),
-            );
+                        let s = (level * env * (2.0 * std::f64::consts::PI * freq * t).sin()) as f32;
+                        buf[2 * i] = s;
+                        buf[2 * i + 1] = s;
+                    }
+                    bytes += buf.len() * 4;
+                    buffers.push(buf);
+                }
+            }
+            found.push(FoundVoice {
+                voice: v.file_name().to_string(),
+                layers,
+                rr,
+            });
+            slots[*v as usize] = Some(VoiceBank {
+                buffers,
+                layers,
+                rr,
+                pan_l: 1.0,
+                pan_r: 1.0,
+                choked_by: default_choked_by(*v),
+            });
         }
-        alias_snare_pair(&mut slots);
         static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1 << 32);
         Self {
             id: NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
-            bytes: slots.iter().flatten().map(|v| v.len() * 4).sum(),
             voices: slots,
             rate,
-            found: Vec::new(),
+            id_name: "fixture".to_string(),
+            name: "Fixture".to_string(),
+            credit: String::new(),
+            licence: String::new(),
+            drive: DEFAULT_DRIVE,
+            found,
+            bytes,
         }
     }
 }
 
-impl std::fmt::Debug for CustomBank {
+impl std::fmt::Debug for KitBank {
     /// Without this the `Debug` on `JamTable` would print several megabytes
     /// of samples the first time anyone `dbg!`ed a table.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CustomBank")
+        f.debug_struct("KitBank")
             .field("id", &self.id)
+            .field("kit", &self.id_name)
             .field("rate", &self.rate)
             .field("found", &self.found)
             .field("bytes", &self.bytes)
@@ -266,28 +589,186 @@ impl std::fmt::Debug for CustomBank {
 }
 
 // ---------------------------------------------------------------------------
+// The kits the app ships
+// ---------------------------------------------------------------------------
+
+/// One shipped kit, as `build.rs` wrote it: the manifest's text and every
+/// WAV beside it, keyed by lower-cased file name.
+pub struct ShippedKit {
+    pub manifest: &'static str,
+    pub files: &'static [(&'static str, &'static [u8])],
+}
+
+include!(concat!(env!("OUT_DIR"), "/kits_generated.rs"));
+
+/// Every shipped manifest, parsed once.
+///
+/// `set_jam` arrives four to six times a chorus and every one of them asks
+/// which kit a name means; parsing five JSON files each time would be a
+/// hundred microseconds of nothing, several times a bar, forever.
+///
+/// A manifest that does not parse is DROPPED rather than fatal, and the app
+/// is left with the kits that do. A build whose `sounds/kits` is half
+/// written should start and say which kits it has, not refuse to run.
+/// Each entry is (which `SHIPPED_KITS` row, its parsed manifest), so a kit
+/// that did not parse leaves no gap in the numbering the rest of the app
+/// uses.
+fn manifests() -> &'static [(usize, KitManifest)] {
+    static PARSED: std::sync::OnceLock<Vec<(usize, KitManifest)>> = std::sync::OnceLock::new();
+    PARSED.get_or_init(|| {
+        SHIPPED_KITS
+            .iter()
+            .enumerate()
+            .filter_map(|(i, k)| match parse_manifest(k.manifest) {
+                Ok(m) => Some((i, m)),
+                Err(e) => {
+                    eprintln!("[kit] a shipped kit.json did not parse and was skipped: {e}");
+                    None
+                }
+            })
+            .collect()
+    })
+}
+
+/// Every shipped kit's id, in the order `build.rs` found them (sorted, so
+/// it is the same list on every machine).
+///
+/// The list a kit picker asks for. Nothing in the engine needs it — a config
+/// names a kit and [`shipped_index`] finds it — so today it is the tests
+/// that walk every kit the app ships, which is what they should be doing
+/// now that the list is a directory rather than a table.
+#[allow(dead_code)]
+pub fn shipped_ids() -> Vec<String> {
+    manifests().iter().map(|(_, m)| m.id.clone()).collect()
+}
+
+/// How many kits the app ships.
+pub fn shipped_count() -> usize {
+    manifests().len()
+}
+
+/// Which shipped kit a config's `kit` field names, or `None`.
+pub fn shipped_index(name: &str) -> Option<usize> {
+    let want = name.trim().to_ascii_lowercase();
+    manifests().iter().position(|(_, m)| m.id == want)
+}
+
+/// The manifest of a shipped kit, by index.
+pub fn shipped_manifest(index: usize) -> Option<&'static KitManifest> {
+    manifests().get(index).map(|(_, m)| m)
+}
+
+/// Does a kit's manifest describe the files beside it?
+///
+/// Not fatal, and it cannot be: the loader reads every file's own header, so
+/// a manifest that lies changes nothing about what plays. What it means is
+/// that the render tool wrote one thing and produced another, and a kit
+/// arriving half converted is worth a line on the console rather than a
+/// silence. Called once per kit, when it is first decoded.
+fn check_declaration(manifest: &KitManifest, rate: u32, channels: u16) {
+    if manifest.rate != 0 && manifest.rate != rate {
+        eprintln!(
+            "[kit] {} says its files are {} Hz and they are {rate} Hz",
+            manifest.id, manifest.rate
+        );
+    }
+    if manifest.channels != 0 && manifest.channels != channels {
+        eprintln!(
+            "[kit] {} says its files are {}-channel and they are {channels}-channel",
+            manifest.id, manifest.channels
+        );
+    }
+}
+
+/// Parse a `kit.json`. Every failure is a sentence, never a panic.
+pub fn parse_manifest(text: &str) -> Result<KitManifest, String> {
+    let mut m: KitManifest =
+        serde_json::from_str(text).map_err(|e| format!("kit.json did not parse: {e}"))?;
+    if m.id.trim().is_empty() {
+        return Err("kit.json has no id, and a kit is named by its id".to_string());
+    }
+    m.id = m.id.trim().to_ascii_lowercase();
+    if m.name.trim().is_empty() {
+        m.name = m.id.clone();
+    }
+    if !m.drive.is_finite() || m.drive <= 0.0 {
+        m.drive = DEFAULT_DRIVE;
+    }
+    for (name, v) in m.voices.iter_mut() {
+        if KitVoice::from_name(name).is_none() {
+            return Err(format!(
+                "kit.json names a voice called {name:?}, and a kit has {}",
+                KitVoice::ALL
+                    .iter()
+                    .map(|v| v.file_name())
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ));
+        }
+        v.layers = v.layers.clamp(1, MAX_LAYERS);
+        v.rr = v.rr.clamp(1, MAX_RR);
+        if !v.trim_db.is_finite() {
+            v.trim_db = 0.0;
+        }
+        v.pan = if v.pan.is_finite() {
+            v.pan.clamp(-1.0, 1.0)
+        } else {
+            0.0
+        };
+    }
+    Ok(m)
+}
+
+/// Decode a shipped kit at `rate`.
+///
+/// The bytes are in the binary, so there is no disk to read and no error a
+/// user can cause — but the same code path runs, because a shipped kit that
+/// took a different road to the audio thread than a custom one is a shipped
+/// kit whose bugs nobody's folder ever finds.
+pub fn load_shipped(index: usize, rate: u32) -> Result<KitBank, String> {
+    let (row, manifest) = manifests()
+        .get(index)
+        .ok_or_else(|| format!("there is no shipped kit number {index}"))?;
+    let kit = &SHIPPED_KITS[*row];
+    let manifest = manifest.clone();
+    let entries: Vec<Entry> = kit
+        .files
+        .iter()
+        .map(|(name, bytes)| Entry {
+            name: (*name).to_string(),
+            source: Source::Bytes(bytes),
+        })
+        .collect();
+    build_bank(entries, rate, Some(manifest), false)
+}
+
+// ---------------------------------------------------------------------------
 // Looking at a folder without decoding it
 // ---------------------------------------------------------------------------
 
 /// What a kit folder holds. The Rust half of `inspectKitFolder` in
 /// `src/ipc.ts`.
+///
+/// `voices` and `missing` keep the shape the second pass shipped, so the
+/// screen that reads them does not have to change to keep working; `found`
+/// is what this pass adds — the same voices, with the layers and round
+/// robins the folder actually has, which is the difference between "there
+/// is a snare in here" and "there are four snares in here".
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct KitFolder {
-    /// Which of [`KIT_FILES`] were found, in that order.
+    /// Which voices were found, in [`KitVoice::ALL`] order.
     pub voices: Vec<String>,
-    /// And which were not — the ones that will come from the built-in kit.
+    /// And which were not — the ones the fallbacks will cover.
     pub missing: Vec<String>,
+    /// Each found voice with its layers and round robins.
+    pub found: Vec<FoundVoice>,
 }
 
-/// Every `*.wav` in `dir`, as a map from lower-cased stem to full path.
-///
-/// Read once and matched case-insensitively, because a sample pack ships
-/// `Kick.wav` as often as `kick.wav` and a musician should not have to
-/// rename eight files to find out whether their kit works.
-fn wavs_in(dir: &Path) -> Result<std::collections::HashMap<String, PathBuf>, String> {
-    let entries = std::fs::read_dir(dir)
-        .map_err(|e| format!("could not read {}: {e}", dir.display()))?;
-    let mut out = std::collections::HashMap::new();
+/// Every `*.wav` in `dir`, as (lower-cased stem, path).
+fn wavs_in(dir: &Path) -> Result<Vec<(String, PathBuf)>, String> {
+    let entries =
+        std::fs::read_dir(dir).map_err(|e| format!("could not read {}: {e}", dir.display()))?;
+    let mut out = Vec::new();
     for entry in entries.flatten() {
         let path = entry.path();
         if !path.is_file() {
@@ -301,56 +782,151 @@ fn wavs_in(dir: &Path) -> Result<std::collections::HashMap<String, PathBuf>, Str
             continue;
         }
         if let Some(stem) = path.file_stem() {
-            out.insert(stem.to_string_lossy().to_ascii_lowercase(), path);
+            out.push((stem.to_string_lossy().to_ascii_lowercase(), path));
         }
     }
+    // Sorted, so a folder is read in the same order twice and the "which
+    // file won" question below has one answer rather than the filesystem's.
+    out.sort();
     Ok(out)
 }
 
-/// Which of the eight voices this folder holds, without decoding a sample.
+/// Which drum a file name in a folder means, as (voice, layer, round robin).
 ///
-/// The UI calls this while the musician is still choosing, so it must be a
-/// directory listing and nothing more: opening eight WAVs to answer "is
+/// The contract's naming, and today's names still work:
+///
+/// ```text
+/// snare.wav        snare, layer 1, round robin 1   (the plain form)
+/// snare.3.wav      snare, layer 3, round robin 1
+/// snare.3.2.wav    snare, layer 3, round robin 2
+/// snare_soft.wav   snare, layer 1                  (folders from before this pass)
+/// ```
+///
+/// **`snare_soft.wav` is why the plain form is not always layer 1.** Before
+/// this pass a folder said `snare.wav` for the backbeat and
+/// `snare_soft.wav` for the ghosts, and both are layer names now. Read
+/// literally, the two would land on the same layer and one would win. So
+/// when a folder holds `snare_soft.wav`, a plain `snare.wav` is the HARDER
+/// stroke and goes to layer 2, which is exactly the pair that folder always
+/// meant. A folder without `snare_soft.wav` reads `snare.wav` as layer 1 and
+/// the layer filling covers the rest.
+fn parse_file_name(stem: &str, has_snare_soft: bool) -> Option<(KitVoice, u8, u8)> {
+    let mut parts = stem.split('.');
+    let head = parts.next()?;
+    // `snare_soft` is the one alias, and it is the one folders in the wild
+    // already use.
+    let (voice, base_layer) = if head == "snare_soft" {
+        (KitVoice::Snare, 1)
+    } else {
+        let v = KitVoice::from_name(head)?;
+        let base = if v == KitVoice::Snare && has_snare_soft {
+            2
+        } else {
+            1
+        };
+        (v, base)
+    };
+    let layer = match parts.next() {
+        Some(s) => s.parse::<u8>().ok()?,
+        None => base_layer,
+    };
+    let robin = match parts.next() {
+        Some(s) => s.parse::<u8>().ok()?,
+        None => 1,
+    };
+    if parts.next().is_some() {
+        return None;
+    }
+    if !(1..=MAX_LAYERS).contains(&layer) || !(1..=MAX_RR).contains(&robin) {
+        return None;
+    }
+    Some((voice, layer, robin))
+}
+
+/// Which voices this folder holds, and at what depth, without decoding a
+/// sample.
+///
+/// The UI calls this while the musician is still choosing, so it is a
+/// directory listing and nothing more: opening a hundred WAVs to answer "is
 /// there a ride in here" would put a disk read in front of a hover.
 pub fn inspect(dir: &Path) -> Result<KitFolder, String> {
-    let found = wavs_in(dir)?;
-    let mut voices = Vec::new();
-    let mut missing = Vec::new();
-    for (name, _) in KIT_FILES {
-        if found.contains_key(name) {
-            voices.push(name.to_string());
-        } else {
-            missing.push(name.to_string());
+    let files = wavs_in(dir)?;
+    let has_soft = files.iter().any(|(s, _)| s == "snare_soft");
+    let mut depth: [Option<(u8, u8)>; KIT_VOICES] = [None; KIT_VOICES];
+    for (stem, _) in files.iter() {
+        if let Some((voice, layer, robin)) = parse_file_name(stem, has_soft) {
+            let slot = &mut depth[voice as usize];
+            let (l, r) = slot.unwrap_or((0, 0));
+            *slot = Some((l.max(layer), r.max(robin)));
         }
     }
-    Ok(KitFolder { voices, missing })
+    let mut voices = Vec::new();
+    let mut missing = Vec::new();
+    let mut found = Vec::new();
+    for v in KitVoice::ALL {
+        match depth[v as usize] {
+            Some((layers, rr)) => {
+                voices.push(v.file_name().to_string());
+                found.push(FoundVoice {
+                    voice: v.file_name().to_string(),
+                    layers,
+                    rr,
+                });
+            }
+            None => missing.push(v.file_name().to_string()),
+        }
+    }
+    Ok(KitFolder {
+        voices,
+        missing,
+        found,
+    })
 }
 
 // ---------------------------------------------------------------------------
 // Decoding
 // ---------------------------------------------------------------------------
 
-/// One WAV, folded to mono, at its own rate.
+/// Where one file's bytes come from: the binary, or the musician's disk.
+enum Source {
+    Bytes(&'static [u8]),
+    File(PathBuf),
+}
+
+/// One file on its way into a bank.
+struct Entry {
+    name: String,
+    source: Source,
+}
+
+/// One WAV as interleaved stereo, at its own rate.
 ///
 /// Handles what a musician's folder actually contains: 8-, 16-, 24- and
 /// 32-bit PCM and 32-bit float, any channel count, any rate. Anything else
 /// comes back as a message rather than a panic.
 ///
+/// **Stereo, because a kit in a room is stereo** (`plans/JAM_SOUND.md`
+/// §2.8). A mono file is duplicated to both sides here, once, so the mixer
+/// never asks how many channels a buffer has. More than two channels are
+/// folded to two by averaging the odd and even ones — an eight-channel
+/// DrumGizmo stem is not a thing this app plays, but it is a thing somebody
+/// will drop in a folder, and half a kit is better than a refusal.
+///
 /// [`MAX_VOICE_SECS`] is applied HERE, at the source rate and before a
-/// sample past it is read, so a ten-second crash costs two seconds of
-/// decoding and two seconds of sinc rather than ten of each — and no folder,
-/// whatever is in it, can make `set_jam` do more work than eight voices'
-/// worth of two seconds.
+/// sample past it is read, so a ten-second crash costs three seconds of
+/// decoding and three of sinc rather than ten of each.
 ///
 /// A sample that WAS cut is faded out over [`CAP_FADE_SECS`] on the way, so
-/// the cap is a decision about length and not a click. See [`MAX_VOICE_SECS`].
-fn decode_mono(path: &Path) -> Result<(Vec<f32>, u32), String> {
-    let name = path
-        .file_name()
-        .map(|n| n.to_string_lossy().into_owned())
-        .unwrap_or_else(|| path.display().to_string());
-    let mut reader = hound::WavReader::open(path)
-        .map_err(|e| format!("{name} could not be opened as a WAV: {e}"))?;
+/// the cap is a decision about length and not a click.
+fn decode_stereo(name: &str, source: &Source) -> Result<(Vec<f32>, u32), String> {
+    let mut reader = match source {
+        Source::Bytes(b) => hound::WavReader::new(Cursor::new(*b))
+            .map(ReaderKind::Mem)
+            .map_err(|e| format!("{name} could not be opened as a WAV: {e}"))?,
+        Source::File(p) => hound::WavReader::open(p)
+            .map(ReaderKind::Disk)
+            .map_err(|e| format!("{name} could not be opened as a WAV: {e}"))?,
+    };
     let spec = reader.spec();
     let channels = spec.channels.max(1) as usize;
     if spec.sample_rate == 0 {
@@ -362,117 +938,603 @@ fn decode_mono(path: &Path) -> Result<(Vec<f32>, u32), String> {
     // is how the fade below knows whether the cap actually cut anything.
     let file_frames = reader.duration() as usize;
     let want = max_frames.max(1).saturating_mul(channels);
-    // The interleaved samples, as f32 in −1..1. `samples::<i32>()` reads any
-    // integer width hound supports, so one arm covers 8, 16, 24 and 32-bit.
-    let raw: Vec<f32> = match spec.sample_format {
-        hound::SampleFormat::Float => {
-            if spec.bits_per_sample != 32 {
-                return Err(format!(
-                    "{name} is {}-bit float, and only 32-bit float is a thing WAV \
-                     files really are",
-                    spec.bits_per_sample
-                ));
-            }
-            reader
-                .samples::<f32>()
-                .take(want)
-                .collect::<Result<Vec<f32>, _>>()
-                .map_err(|e| format!("{name} stopped decoding partway through: {e}"))?
-        }
-        hound::SampleFormat::Int => {
-            let bits = spec.bits_per_sample;
-            if !(1..=32).contains(&bits) {
-                return Err(format!("{name} is {bits}-bit, which is not a WAV depth"));
-            }
-            // 2^(bits−1) — the magnitude of the most negative sample, which
-            // is the divisor that puts full scale exactly on 1.0.
-            let full = (1i64 << (bits - 1)) as f32;
-            reader
-                .samples::<i32>()
-                .take(want)
-                .map(|s| s.map(|v| v as f32 / full))
-                .collect::<Result<Vec<f32>, _>>()
-                .map_err(|e| format!("{name} stopped decoding partway through: {e}"))?
-        }
-    };
+    let raw = reader.samples(want, name)?;
     if raw.is_empty() {
         return Err(format!("{name} holds no audio at all"));
     }
 
-    // Fold to mono. An average rather than a sum: summing a stereo file
-    // makes it 6 dB louder than a mono one, and the normalisation below
-    // would then quietly undo the difference on the peak while leaving it
-    // in the energy.
-    let mut mono: Vec<f32> = if channels >= 2 {
-        raw.chunks(channels)
-            .map(|frame| frame.iter().sum::<f32>() / channels as f32)
-            .collect()
-    } else {
-        raw
-    };
-
-    // THE CAP IS A DECISION ABOUT LENGTH, NOT A CLICK.
-    //
-    // Two seconds into a ten-second cymbal wash the waveform is still going,
-    // often near the top of a cycle, and stopping there leaves a step
-    // straight down to nothing. A step is broadband: it is a tick on every
-    // hit of that drum, it survives the resampler and the normalisation, and
-    // it is loudest on exactly the voice that gets cut. Five milliseconds of
-    // linear ramp costs nothing anybody can hear and removes it.
-    //
-    // Only when the file WAS cut. A sample that simply ends where it ends is
-    // the musician's own decision and is left alone.
-    if file_frames > max_frames {
-        let fade = ((CAP_FADE_SECS * spec.sample_rate as f64) as usize).min(mono.len());
-        if fade > 1 {
-            let start = mono.len() - fade;
-            for (i, s) in mono[start..].iter_mut().enumerate() {
-                *s *= 1.0 - (i as f32 / (fade - 1) as f32);
+    // Interleave to exactly two channels. A mono file goes to both sides; a
+    // stereo one passes through; anything wider is folded by averaging the
+    // even channels into the left and the odd into the right, which for a
+    // multi-mic stem is the nearest thing to an overhead pair this module
+    // can honestly claim.
+    let frames = raw.len() / channels;
+    let mut out = vec![0.0f32; frames * 2];
+    match channels {
+        1 => {
+            for (i, s) in raw.iter().take(frames).enumerate() {
+                out[2 * i] = *s;
+                out[2 * i + 1] = *s;
+            }
+        }
+        2 => out[..frames * 2].copy_from_slice(&raw[..frames * 2]),
+        n => {
+            for i in 0..frames {
+                let frame = &raw[i * n..i * n + n];
+                let (mut l, mut r, mut nl, mut nr) = (0.0f32, 0.0f32, 0, 0);
+                for (c, s) in frame.iter().enumerate() {
+                    if c % 2 == 0 {
+                        l += *s;
+                        nl += 1;
+                    } else {
+                        r += *s;
+                        nr += 1;
+                    }
+                }
+                out[2 * i] = l / nl.max(1) as f32;
+                out[2 * i + 1] = r / nr.max(1) as f32;
             }
         }
     }
-    Ok((mono, spec.sample_rate))
+
+    // THE CAP IS A DECISION ABOUT LENGTH, NOT A CLICK. Three seconds into a
+    // ten-second cymbal wash the waveform is still going, and stopping there
+    // leaves a step straight down to nothing — broadband, on every hit of
+    // the one voice long enough to be cut. Only when the file WAS cut: a
+    // sample that simply ends where it ends is the musician's own decision.
+    if file_frames > max_frames {
+        let fade = ((CAP_FADE_SECS * spec.sample_rate as f64) as usize).min(frames);
+        if fade > 1 {
+            let start = frames - fade;
+            for i in 0..fade {
+                let g = 1.0 - (i as f32 / (fade - 1) as f32);
+                out[2 * (start + i)] *= g;
+                out[2 * (start + i) + 1] *= g;
+            }
+        }
+    }
+    Ok((out, spec.sample_rate))
 }
 
-/// Decode a folder into a bank at `rate`.
+/// A `hound` reader over bytes or over a file — the same three arms of
+/// sample format either way, written once.
+enum ReaderKind {
+    Mem(hound::WavReader<Cursor<&'static [u8]>>),
+    Disk(hound::WavReader<std::io::BufReader<std::fs::File>>),
+}
+
+impl ReaderKind {
+    fn spec(&self) -> hound::WavSpec {
+        match self {
+            Self::Mem(r) => r.spec(),
+            Self::Disk(r) => r.spec(),
+        }
+    }
+
+    fn duration(&self) -> u32 {
+        match self {
+            Self::Mem(r) => r.duration(),
+            Self::Disk(r) => r.duration(),
+        }
+    }
+
+    /// The first `want` interleaved samples, as f32 in −1..1.
+    fn samples(&mut self, want: usize, name: &str) -> Result<Vec<f32>, String> {
+        let spec = self.spec();
+        macro_rules! read {
+            ($r:expr) => {
+                match spec.sample_format {
+                    hound::SampleFormat::Float => {
+                        if spec.bits_per_sample != 32 {
+                            return Err(format!(
+                                "{name} is {}-bit float, and only 32-bit float is a thing \
+                                 WAV files really are",
+                                spec.bits_per_sample
+                            ));
+                        }
+                        $r.samples::<f32>()
+                            .take(want)
+                            .collect::<Result<Vec<f32>, _>>()
+                            .map_err(|e| format!("{name} stopped decoding partway through: {e}"))?
+                    }
+                    hound::SampleFormat::Int => {
+                        let bits = spec.bits_per_sample;
+                        if !(1..=32).contains(&bits) {
+                            return Err(format!("{name} is {bits}-bit, which is not a WAV depth"));
+                        }
+                        // 2^(bits−1) — the magnitude of the most negative
+                        // sample, which is the divisor that puts full scale
+                        // exactly on 1.0.
+                        let full = (1i64 << (bits - 1)) as f32;
+                        $r.samples::<i32>()
+                            .take(want)
+                            .map(|s| s.map(|v| v as f32 / full))
+                            .collect::<Result<Vec<f32>, _>>()
+                            .map_err(|e| format!("{name} stopped decoding partway through: {e}"))?
+                    }
+                }
+            };
+        }
+        Ok(match self {
+            Self::Mem(r) => read!(r),
+            Self::Disk(r) => read!(r),
+        })
+    }
+}
+
+/// A windowed sinc whose kernel is worked out once instead of per sample.
+///
+/// **THE SAME FILTER `engine::resample` IS, AND IT HAD TO STOP BEING THE
+/// SAME CODE.** That one computes thirty-two taps — a `sin`, two `cos` and a
+/// division each — for every output sample it produces. That is the right
+/// shape for what it is for: a couple of thousand samples of click, once,
+/// when a device opens. A recorded kit is a hundred and thirty-two stereo
+/// files, and the same arithmetic measured **2.2 seconds** on one — on the
+/// main thread, in `set_jam`, with the window not repainting.
+///
+/// The taps do not actually vary per sample. Between two rates there are
+/// only as many distinct sub-sample positions as the denominator of the
+/// ratio in lowest terms: 44.1 kHz to 48 is 147/160, so there are a hundred
+/// and sixty phases and every output sample is one of them. Computing them
+/// once and indexing takes the same decode from 2.2 seconds to **112 ms**,
+/// and the filter is tap for tap the one it replaces — the resampling error
+/// it leaves against an analytic sine is the same −122.5 dB RMS it was
+/// before, which `the_decoder_resamples_44_kilohertz_to_48_within_a_measurable_error`
+/// holds it to.
+struct Resampler {
+    /// `phases × TAPS` taps, already normalised by the sum of their own
+    /// phase — which is what keeps the level steady at the edges, where
+    /// half the kernel hangs off the end of the sample.
+    taps: Vec<f32>,
+    /// The ratio in lowest terms: output position `i` sits at `i × num / den`
+    /// source samples in.
+    num: u64,
+    den: u64,
+}
+
+/// Half-width in source samples, and the same 16 `engine::resample` uses.
+/// Well past the point where the stop-band of a Blackman-windowed sinc stops
+/// being the limiting factor.
+const HALF: i64 = 16;
+const TAPS: usize = (HALF * 2) as usize;
+
+/// Above this many phases the kernel is bigger than the audio. No rate any
+/// device hands out comes near it — 44.1 to 96 kHz is 320 — and a device
+/// that asked for 48001 Hz gets the straightforward path instead of a
+/// twelve-megabyte table.
+const MAX_PHASES: u64 = 4096;
+
+impl Resampler {
+    fn new(from: u32, to: u32) -> Option<Self> {
+        fn gcd(a: u64, b: u64) -> u64 {
+            if b == 0 {
+                a
+            } else {
+                gcd(b, a % b)
+            }
+        }
+        let g = gcd(from as u64, to as u64).max(1);
+        let (num, den) = (from as u64 / g, to as u64 / g);
+        if den > MAX_PHASES {
+            return None;
+        }
+        // Downsampling has to band-limit to the NEW Nyquist, or it aliases.
+        let ratio = to as f64 / from as f64;
+        let cutoff = if ratio < 1.0 { ratio } else { 1.0 };
+        let mut taps = vec![0.0f32; den as usize * TAPS];
+        for phase in 0..den as usize {
+            let frac = phase as f64 / den as f64;
+            let mut row = [0.0f64; TAPS];
+            let mut norm = 0.0f64;
+            for (j, tap) in row.iter_mut().enumerate() {
+                // The distance from this tap to the point being sampled.
+                let x = frac + (HALF - 1) as f64 - j as f64;
+                let sinc = if x.abs() < 1e-9 {
+                    cutoff
+                } else {
+                    (std::f64::consts::PI * cutoff * x).sin() / (std::f64::consts::PI * x)
+                };
+                // Blackman, over the whole kernel.
+                let t = (x + HALF as f64) / (2.0 * HALF as f64);
+                let w = if !(0.0..=1.0).contains(&t) {
+                    0.0
+                } else {
+                    0.42 - 0.5 * (2.0 * std::f64::consts::PI * t).cos()
+                        + 0.08 * (4.0 * std::f64::consts::PI * t).cos()
+                };
+                *tap = sinc * w;
+                norm += *tap;
+            }
+            if norm.abs() > 1e-9 {
+                for (j, tap) in row.iter().enumerate() {
+                    taps[phase * TAPS + j] = (*tap / norm) as f32;
+                }
+            }
+        }
+        Some(Self { taps, num, den })
+    }
+
+    /// How many output frames `frames` source frames become.
+    fn out_len(&self, frames: usize) -> usize {
+        (frames as f64 * self.den as f64 / self.num as f64).ceil() as usize
+    }
+
+    /// One interleaved stereo buffer, resampled.
+    ///
+    /// Both channels through the same walk, because the phase and the window
+    /// are the same for both and walking twice would read the kernel twice.
+    fn stereo(&self, interleaved: &[f32]) -> Vec<f32> {
+        let frames = interleaved.len() / 2;
+        let n = self.out_len(frames);
+        let mut out = vec![0.0f32; n * 2];
+        for i in 0..n {
+            let at = i as u64 * self.num;
+            let centre = (at / self.den) as i64;
+            let row = (at % self.den) as usize * TAPS;
+            let first = centre - HALF + 1;
+            let (mut l, mut r) = (0.0f32, 0.0f32);
+            for j in 0..TAPS {
+                let k = first + j as i64;
+                if k < 0 || k as usize >= frames {
+                    continue;
+                }
+                let tap = self.taps[row + j];
+                l += interleaved[2 * k as usize] * tap;
+                r += interleaved[2 * k as usize + 1] * tap;
+            }
+            out[2 * i] = l;
+            out[2 * i + 1] = r;
+        }
+        out
+    }
+}
+
+/// Resample an interleaved stereo buffer.
+///
+/// Channel by channel when the rates are awkward enough that the kernel
+/// cannot be tabulated, because [`crate::engine::resample`] is a windowed
+/// sinc over one stream and interleaving two through it would be a comb
+/// filter rather than a conversion.
+fn resample_stereo(interleaved: &[f32], from: u32, to: u32) -> Vec<f32> {
+    if from == to {
+        return interleaved.to_vec();
+    }
+    if let Some(r) = Resampler::new(from, to) {
+        return r.stereo(interleaved);
+    }
+    let frames = interleaved.len() / 2;
+    let left: Vec<f32> = (0..frames).map(|i| interleaved[2 * i]).collect();
+    let right: Vec<f32> = (0..frames).map(|i| interleaved[2 * i + 1]).collect();
+    let l = resample(&left, from, to);
+    let r = resample(&right, from, to);
+    let n = l.len().min(r.len());
+    let mut out = vec![0.0f32; n * 2];
+    for i in 0..n {
+        out[2 * i] = l[i];
+        out[2 * i + 1] = r[i];
+    }
+    out
+}
+
+// ---------------------------------------------------------------------------
+// Building a bank
+// ---------------------------------------------------------------------------
+
+/// Decode a list of files into a bank at `rate`.
+///
+/// `manifest` is the shipped kit's `kit.json`, or `None` for a folder of the
+/// musician's own samples — which has no manifest, so its layers, round
+/// robins, trims and chokes come from the file names and the defaults.
+///
+/// `normalise` is the difference between a kit somebody measured and a kit
+/// somebody found. See [`VOICE_PEAK`].
 ///
 /// Runs on the command thread, in `set_jam`, and never on the audio thread.
+fn build_bank(
+    entries: Vec<Entry>,
+    rate: u32,
+    manifest: Option<KitManifest>,
+    normalise: bool,
+) -> Result<KitBank, String> {
+    // ---- Which file is which drum ----
+    let has_soft = entries.iter().any(|e| e.name.starts_with("snare_soft."));
+    // `[voice][layer][rr]` while the files are being placed. `MAX_LAYERS`
+    // and `MAX_RR` wide so a manifest cannot make this allocate per file.
+    let mut grid: Vec<Vec<Vec<Option<Vec<f32>>>>> = (0..KIT_VOICES)
+        .map(|_| {
+            (0..MAX_LAYERS as usize)
+                .map(|_| (0..MAX_RR as usize).map(|_| None).collect())
+                .collect()
+        })
+        .collect();
+
+    // The peak each voice carried BEFORE anything was resampled, which is
+    // the peak its files carry and the one the bank is put back on. See
+    // [`VOICE_PEAK`].
+    let mut source_peak = [0.0f32; KIT_VOICES];
+    // What the files actually turned out to be, so a manifest that describes
+    // something else can be reported. See [`check_declaration`].
+    let mut declared_once = false;
+    for entry in entries.iter() {
+        let stem = entry.name.rsplit_once('.').map_or(&entry.name[..], |(s, _)| s);
+        let Some((voice, layer, robin)) = parse_file_name(stem, has_soft) else {
+            continue;
+        };
+        let (mut buf, src_rate) = decode_stereo(&entry.name, &entry.source)?;
+        if !declared_once {
+            declared_once = true;
+            if let Some(ref m) = manifest {
+                // Two, because `decode_stereo` has already folded whatever
+                // the file was into a pair — the manifest is being checked
+                // against the format the loader guarantees, which is the
+                // only thing a kit can be described as.
+                check_declaration(m, src_rate, 2);
+            }
+        }
+        let before = buf.iter().fold(0.0f32, |m, s| m.max(s.abs()));
+        source_peak[voice as usize] = source_peak[voice as usize].max(before);
+        if src_rate != rate {
+            buf = resample_stereo(&buf, src_rate, rate);
+        }
+        grid[voice as usize][layer as usize - 1][robin as usize - 1] = Some(buf);
+    }
+
+    // ---- Fill the gaps, trim, and place ----
+    let mut voices: [Option<VoiceBank>; KIT_VOICES] = Default::default();
+    let mut found = Vec::new();
+    let mut bytes = 0usize;
+    for v in KitVoice::ALL {
+        let declared = manifest
+            .as_ref()
+            .and_then(|m| m.voices.get(v.file_name()).cloned());
+        // What the files actually carry, which is what the bank is built
+        // from: a manifest saying four layers over a folder holding two is a
+        // description that went stale, and the samples are the fact.
+        let present: Vec<(usize, usize)> = (0..MAX_LAYERS as usize)
+            .flat_map(|l| (0..MAX_RR as usize).map(move |r| (l, r)))
+            .filter(|(l, r)| grid[v as usize][*l][*r].is_some())
+            .collect();
+        if present.is_empty() {
+            continue;
+        }
+        let layers = present.iter().map(|(l, _)| l + 1).max().unwrap_or(1);
+        let rr = present.iter().map(|(_, r)| r + 1).max().unwrap_or(1);
+
+        // MISSING LAYERS ARE FILLED FROM THE NEAREST PRESENT ONE, and
+        // missing round robins from round robin 1 of their own layer. Both
+        // are the contract's rule and both are what a half-filled folder
+        // needs: a pack with a soft and a hard snare and nothing between
+        // should play four levels, not two and two silences.
+        let mut buffers: Vec<Vec<f32>> = Vec::with_capacity(layers * rr);
+        for l in 0..layers {
+            // The nearest layer that has anything at all, preferring a
+            // softer one on a tie — a stroke you do not have is better
+            // played quieter than louder.
+            let source_layer = (0..layers)
+                .filter(|c| (0..rr).any(|r| grid[v as usize][*c][r].is_some()))
+                .min_by_key(|c| (c.abs_diff(l), *c))
+                .unwrap_or(0);
+            for r in 0..rr {
+                let take = grid[v as usize][source_layer][r]
+                    .clone()
+                    .or_else(|| grid[v as usize][source_layer][0].clone())
+                    .or_else(|| {
+                        (0..rr)
+                            .find_map(|k| grid[v as usize][source_layer][k].clone())
+                    })
+                    .unwrap_or_default();
+                buffers.push(take);
+            }
+        }
+
+        // A drum that decoded to nothing is a message, not a lane that
+        // silently stops playing.
+        if source_peak[v as usize] <= 0.0 {
+            return Err(format!("{} is silent", v.file_name()));
+        }
+        // A KIT IS THE SAME KIT ON EVERY DEVICE, and what "the same" means
+        // is ENERGY. See [`VOICE_PEAK`]: the level is decided on the peak
+        // the SOURCE files carried, before the resampler had a chance to
+        // ring around a transient, so nothing here depends on the rate the
+        // device happened to open at.
+        // Where this voice ends up, and it is the same height at every
+        // rate. See [`VOICE_PEAK`].
+        let target = if normalise {
+            // A folder has no measured balance, so its loudest layer goes on
+            // the target whatever its render level was.
+            VOICE_PEAK
+        } else {
+            // ...and a shipped kit keeps exactly the height the render tool
+            // measured, which is what its own files carry.
+            source_peak[v as usize]
+        };
+        // The peak AFTER the resampler, because that is the buffer the audio
+        // thread will read and the ringing is what has to come back out.
+        let after = buffers
+            .iter()
+            .flat_map(|b| b.iter())
+            .fold(0.0f32, |m, s| m.max(s.abs()));
+        let level = if after > 0.0 { target / after } else { 1.0 };
+        // And the balance the render tool measured, on top. `trim_db` is the
+        // kit's own business; the LANE trims (a ride sits under a hat) live
+        // in `jam.rs`, because they are true of every kit.
+        let trim = declared
+            .as_ref()
+            .map_or(1.0, |d| 10f32.powf(d.trim_db / 20.0));
+        let g = level * trim;
+        if (g - 1.0).abs() > 1e-6 {
+            for b in buffers.iter_mut() {
+                for s in b.iter_mut() {
+                    *s *= g;
+                }
+            }
+        }
+
+        let pan = declared.as_ref().map_or(0.0, |d| d.pan);
+        let choked_by = match declared.as_ref() {
+            Some(d) if !d.choked_by.is_empty() => d
+                .choked_by
+                .iter()
+                .filter_map(|n| KitVoice::from_name(n))
+                .fold(0u16, |m, c| m | c.bit()),
+            // A manifest that says nothing chokes nothing; a folder with no
+            // manifest at all gets the one relationship every kit has.
+            Some(_) => 0,
+            None => default_choked_by(v),
+        };
+
+        bytes += buffers.iter().map(|b| b.len() * 4).sum::<usize>();
+        found.push(FoundVoice {
+            voice: v.file_name().to_string(),
+            layers: layers as u8,
+            rr: rr as u8,
+        });
+        voices[v as usize] = Some(VoiceBank {
+            buffers,
+            layers: layers as u8,
+            rr: rr as u8,
+            pan_l: 1.0 - pan.max(0.0),
+            pan_r: 1.0 + pan.min(0.0),
+            choked_by,
+        });
+    }
+
+    if found.is_empty() {
+        return Err("that kit holds no drums at all".to_string());
+    }
+
+    // One per decode, for the life of the process. Relaxed because nothing
+    // is ordered against it: all that is asked of it is that no two banks
+    // ever get the same number.
+    static NEXT_ID: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+    let (id_name, name, credit, licence, drive) = match manifest {
+        Some(ref m) => (
+            m.id.clone(),
+            m.name.clone(),
+            m.credit.clone(),
+            m.licence.clone(),
+            m.drive,
+        ),
+        None => (
+            "custom".to_string(),
+            "Your kit".to_string(),
+            String::new(),
+            // A folder on the musician's own machine is theirs, and the app
+            // has nothing to say about its licence.
+            String::new(),
+            DEFAULT_DRIVE,
+        ),
+    };
+    Ok(KitBank {
+        id: NEXT_ID.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
+        voices,
+        rate,
+        id_name,
+        name,
+        credit,
+        licence,
+        drive,
+        found,
+        bytes,
+    })
+}
+
+/// `own` with everything it is missing borrowed from `behind`.
+///
+/// A FOLDER IS A KIT WITH A KIT BEHIND IT (`plans/JAM_UX_DECISIONS.md` B3):
+/// a musician who drops a kick and a snare they like into a folder has a
+/// real kit whose hats come from the app, not a band with two drums. The
+/// borrowing happens here, once, on the command thread, and what comes out
+/// is ONE bank — so the audio thread reads one kit and never asks which half
+/// a drum came from, and the fallback chain in `jam.rs` only has to deal
+/// with voices neither kit has.
+///
+/// Returns `own` untouched when it holds everything, which is the common
+/// case and costs an `Arc` clone.
+pub fn with_fallback(own: &Arc<KitBank>, behind: &Arc<KitBank>) -> Arc<KitBank> {
+    if KitVoice::ALL.into_iter().all(|v| own.has(v)) {
+        return own.clone();
+    }
+    let mut voices: [Option<VoiceBank>; KIT_VOICES] = Default::default();
+    let mut found = Vec::new();
+    let mut bytes = 0usize;
+    for v in KitVoice::ALL {
+        // The musician's own, or the kit behind it. Never a blend: a snare
+        // whose soft layer came from somebody else's drum would be two
+        // instruments pretending to be one.
+        let take = own.voice(v).or_else(|| behind.voice(v));
+        if let Some(b) = take {
+            bytes += b.buffers.iter().map(|x| x.len() * 4).sum::<usize>();
+            found.push(FoundVoice {
+                voice: v.file_name().to_string(),
+                layers: b.layers,
+                rr: b.rr,
+            });
+            voices[v as usize] = Some(b.clone());
+        }
+    }
+    static NEXT_ID: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1 << 48);
+    Arc::new(KitBank {
+        // A DIFFERENT DECODE, and it has to be: the memo in `jam.rs` keys a
+        // four-bar measurement on this number, and a folder played over
+        // `room` and the same folder played over `brushes` are two different
+        // bands that would otherwise share one id.
+        id: NEXT_ID.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
+        voices,
+        rate: own.rate,
+        id_name: own.id_name.clone(),
+        name: own.name.clone(),
+        credit: own.credit.clone(),
+        licence: own.licence.clone(),
+        // The musician's own drive, not the kit they borrowed from: the
+        // folder is the kit, and `raw` lending it a ride should not also
+        // lend it a fuzz box.
+        drive: own.drive,
+        found,
+        bytes,
+    })
+}
+
+/// Decode a folder of the musician's own samples into a bank at `rate`.
+///
 /// Every error is a sentence the UI can show; a folder with none of the
-/// eight names in it is one of them, because silently falling back to the
-/// built-in kit would look exactly like the feature not working.
-pub fn load(dir: &Path, rate: u32) -> Result<CustomBank, String> {
+/// voice names in it is one of them, because silently falling back to a
+/// shipped kit would look exactly like the feature not working.
+pub fn load(dir: &Path, rate: u32) -> Result<KitBank, String> {
     load_capped(dir, rate, MAX_FOLDER_BYTES)
 }
 
 /// [`load`] with the size cap as an argument.
 ///
 /// Split out for one reason: the test that proves the cap refuses a folder
-/// would otherwise have to WRITE sixty-four megabytes of WAV to disk to
-/// reach it, which is a slow test of an arithmetic comparison. With the cap
-/// as a parameter the same code path is exercised against a few kilobytes,
-/// and `the_cap_the_app_actually_uses_is_the_published_one` keeps the
-/// number honest.
-fn load_capped(dir: &Path, rate: u32, max_bytes: u64) -> Result<CustomBank, String> {
+/// would otherwise have to WRITE ninety-six megabytes of WAV to disk to
+/// reach it, which is a slow test of an arithmetic comparison.
+fn load_capped(dir: &Path, rate: u32, max_bytes: u64) -> Result<KitBank, String> {
     let files = wavs_in(dir)?;
-    let present: Vec<(&'static str, KitVoice, PathBuf)> = KIT_FILES
-        .iter()
-        .filter_map(|(name, voice)| files.get(*name).map(|p| (*name, *voice, p.clone())))
+    let has_soft = files.iter().any(|(s, _)| s == "snare_soft");
+    let present: Vec<(String, PathBuf)> = files
+        .into_iter()
+        .filter(|(stem, _)| parse_file_name(stem, has_soft).is_some())
         .collect();
     if present.is_empty() {
         return Err(format!(
-            "{} holds none of kick, snare, snare_soft, hat, hat_open, ride, rim \
-             or crash as a .wav",
-            dir.display()
+            "{} holds none of {} as a .wav",
+            dir.display(),
+            KitVoice::ALL
+                .iter()
+                .map(|v| v.file_name())
+                .collect::<Vec<_>>()
+                .join(", ")
         ));
     }
 
     // ---- The size cap, from the headers, before a single sample is read ----
     let mut declared: u64 = 0;
-    for (name, _, path) in present.iter() {
+    for (stem, path) in present.iter() {
         let reader = hound::WavReader::open(path)
-            .map_err(|e| format!("{name}.wav could not be opened as a WAV: {e}"))?;
-        // Frames × four bytes: what this file will cost as mono `f32`.
-        declared = declared.saturating_add(reader.duration() as u64 * 4);
+            .map_err(|e| format!("{stem}.wav could not be opened as a WAV: {e}"))?;
+        // Frames × eight bytes: what this file will cost as stereo `f32`.
+        declared = declared.saturating_add(reader.duration() as u64 * 8);
     }
     if declared > max_bytes {
         return Err(format!(
@@ -485,74 +1547,37 @@ fn load_capped(dir: &Path, rate: u32, max_bytes: u64) -> Result<CustomBank, Stri
         ));
     }
 
-    let mut voices: [Option<Vec<f32>>; KIT_VOICES] = Default::default();
-    let mut found = Vec::new();
-    for (name, voice, path) in present {
-        let (mono, src_rate) = decode_mono(&path)?;
-        let mut buf = if src_rate == rate {
-            mono
-        } else {
-            resample(&mono, src_rate, rate)
-        };
-
-        // Peak-normalise. AFTER the resampler, because the resampler is not
-        // level-preserving on a bright transient — the same Gibbs ripple
-        // that makes `SoundBank::new` put the shipped kits back on 0.900,
-        // and the reason a table's peak measured at one rate is the peak
-        // rendered at another.
-        let peak = buf.iter().fold(0.0f32, |m, s| m.max(s.abs()));
-        if peak <= 0.0 {
-            return Err(format!("{name}.wav is silent"));
-        }
-        let g = VOICE_PEAK / peak;
-        for s in buf.iter_mut() {
-            *s *= g;
-        }
-
-        voices[voice as usize] = Some(buf);
-        found.push(name);
-    }
-
-    // Half a snare pair is a whole snare pair. `found` is untouched, so the
-    // screen still reports the files that are really there — see
-    // `alias_snare_pair`, which is where the reasoning lives.
-    alias_snare_pair(&mut voices);
-    // Counted after the aliasing, so `bytes` is what this bank really holds
-    // — a folder with one snare in it carries that snare twice.
-    let bytes: usize = voices
-        .iter()
-        .flatten()
-        .map(|v| v.len() * std::mem::size_of::<f32>())
-        .sum();
-
-    // One per decode, for the life of the process. Relaxed because nothing
-    // is ordered against it: all that is asked of it is that no two banks
-    // ever get the same number.
-    static NEXT_ID: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
-    Ok(CustomBank {
-        id: NEXT_ID.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
-        voices,
-        rate,
-        found,
-        bytes,
-    })
+    let entries: Vec<Entry> = present
+        .into_iter()
+        .map(|(stem, path)| Entry {
+            name: format!("{stem}.wav"),
+            source: Source::File(path),
+        })
+        .collect();
+    build_bank(entries, rate, None, true)
 }
 
 // ---------------------------------------------------------------------------
 // The cache
 // ---------------------------------------------------------------------------
 
-/// What a cached bank was built from: the folder, the rate it was decoded
-/// at, and every file's size and modification time.
-///
-/// The mtimes are the point. A cache keyed on the path alone would keep
-/// playing yesterday's snare after the musician replaced the file, and the
-/// only way to find out would be to restart the app.
+/// What a cached bank was built from.
 #[derive(PartialEq, Eq)]
-struct Key {
-    dir: PathBuf,
-    rate: u32,
-    stamps: Vec<(String, u64, u128)>,
+enum Key {
+    /// A shipped kit, by index and rate. Nothing about it can change while
+    /// the app runs — the bytes are in the binary.
+    Shipped(usize, u32),
+    /// A folder, the rate it was decoded at, and every file's size and
+    /// modification time.
+    ///
+    /// The mtimes are the point. A cache keyed on the path alone would keep
+    /// playing yesterday's snare after the musician replaced the file, and
+    /// the only way to find out would be to restart the app.
+    Folder {
+        dir: PathBuf,
+        rate: u32,
+        stamps: Vec<(String, u64, u128)>,
+    },
 }
 
 /// A modification time as a number, to the NANOSECOND.
@@ -562,11 +1587,8 @@ struct Key {
 /// is working: render a snare out of a DAW, drop it in the folder, hear it.
 /// Two writes inside the same second — which is most of them — carry the
 /// same whole-second stamp, and if the file also happens to come out the
-/// same length (the same bounce of the same bar, re-EQ'd) the key does not
-/// move and the app keeps playing the old snare until it restarts.
-///
-/// `None` — a filesystem that does not report a modification time — is 0,
-/// which makes the key fall back to the path, the rate and the file size.
+/// same length the key does not move and the app keeps playing the old
+/// snare until it restarts.
 fn stamp(modified: Option<std::time::SystemTime>) -> u128 {
     modified
         .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
@@ -574,68 +1596,96 @@ fn stamp(modified: Option<std::time::SystemTime>) -> u128 {
         .unwrap_or(0)
 }
 
-/// Stat the eight names and build the key. Cheap enough to run on every
-/// `set_jam`; a folder read and eight `metadata` calls is microseconds, and
-/// it is what makes the bar-ahead sends free.
+/// Stat the folder and build the key. Cheap enough to run on every
+/// `set_jam`; a folder read and a `metadata` call per file is microseconds,
+/// and it is what makes the bar-ahead sends free.
 fn key_for(dir: &Path, rate: u32) -> Result<Key, String> {
     let files = wavs_in(dir)?;
+    let has_soft = files.iter().any(|(s, _)| s == "snare_soft");
     let mut stamps = Vec::new();
-    for (name, _) in KIT_FILES {
-        let Some(path) = files.get(name) else {
+    for (stem, path) in files.iter() {
+        if parse_file_name(stem, has_soft).is_none() {
             continue;
-        };
+        }
         let meta = std::fs::metadata(path)
             .map_err(|e| format!("could not read {}: {e}", path.display()))?;
-        stamps.push((name.to_string(), meta.len(), stamp(meta.modified().ok())));
+        stamps.push((stem.clone(), meta.len(), stamp(meta.modified().ok())));
     }
-    Ok(Key {
+    Ok(Key::Folder {
         dir: dir.to_path_buf(),
         rate,
         stamps,
     })
 }
 
-/// The kit folder the app has already decoded.
+/// How many decodes the cache keeps.
 ///
-/// One entry, deliberately. The traffic this exists for is the SAME folder
-/// arriving four to six times a chorus behind the bar-ahead bass, not a
-/// musician alternating between two sample packs; a second entry would
-/// double the memory to make an action nobody takes twice a second faster.
+/// Three, and each of them earns its place: the kit the jam is playing, the
+/// kit it was playing a moment ago (a musician auditioning kits goes back
+/// and forth), and one more so a folder does not evict the shipped kit it is
+/// being compared against. A fourth would be memory spent on a move nobody
+/// makes.
+const CACHE_ENTRIES: usize = 3;
+
+/// The kits the app has already decoded.
 #[derive(Default)]
 pub struct KitCache {
     // A `Mutex` and not a lock-free anything: this is the command thread's
     // and only the command thread's. The audio thread never sees it — it
-    // sees the `Arc<CustomBank>` inside the table it was handed.
-    entry: Mutex<Option<(Key, Arc<CustomBank>)>>,
+    // sees the `Arc<KitBank>` inside the table it was handed.
+    entries: Mutex<Vec<(Key, Arc<KitBank>)>>,
 }
 
 impl KitCache {
-    /// The bank for this folder at this rate, decoding it only if the
-    /// folder, one of its files or the output rate has changed since last
-    /// time.
-    pub fn get_or_load(&self, dir: &Path, rate: u32) -> Result<Arc<CustomBank>, String> {
-        let key = key_for(dir, rate)?;
-        if let Ok(slot) = self.entry.lock() {
-            if let Some((cached, bank)) = slot.as_ref() {
-                if *cached == key {
-                    return Ok(bank.clone());
-                }
-            }
+    fn cached(&self, key: &Key) -> Option<Arc<KitBank>> {
+        let mut slot = self.entries.lock().ok()?;
+        let at = slot.iter().position(|(k, _)| k == key)?;
+        // Most recently used to the front, so the kit being played survives
+        // an audition of two others.
+        let entry = slot.remove(at);
+        let bank = entry.1.clone();
+        slot.insert(0, entry);
+        Some(bank)
+    }
+
+    fn store(&self, key: Key, bank: Arc<KitBank>) {
+        if let Ok(mut slot) = self.entries.lock() {
+            slot.insert(0, (key, bank));
+            slot.truncate(CACHE_ENTRIES);
         }
-        let bank = Arc::new(load(dir, rate)?);
-        if let Ok(mut slot) = self.entry.lock() {
-            *slot = Some((key, bank.clone()));
+    }
+
+    /// One of the kits the app ships, at this rate.
+    pub fn shipped(&self, index: usize, rate: u32) -> Result<Arc<KitBank>, String> {
+        let key = Key::Shipped(index, rate);
+        if let Some(bank) = self.cached(&key) {
+            return Ok(bank);
         }
+        let bank = Arc::new(load_shipped(index, rate)?);
+        self.store(key, bank.clone());
         Ok(bank)
     }
 
-    /// How many times a folder has actually been decoded. Tests only — it is
-    /// the only way to say "the bar-ahead send did not re-decode" as a
-    /// number rather than as a hope.
+    /// The bank for this folder at this rate, decoding it only if the
+    /// folder, one of its files or the output rate has changed since last
+    /// time.
+    pub fn get_or_load(&self, dir: &Path, rate: u32) -> Result<Arc<KitBank>, String> {
+        let key = key_for(dir, rate)?;
+        if let Some(bank) = self.cached(&key) {
+            return Ok(bank);
+        }
+        let bank = Arc::new(load(dir, rate)?);
+        self.store(key, bank.clone());
+        Ok(bank)
+    }
+
+    /// Is this folder's decode the one the cache is holding? Tests only — it
+    /// is the only way to say "the bar-ahead send did not re-decode" as a
+    /// fact rather than as a hope.
     #[cfg(test)]
     pub fn is_holding(&self, dir: &Path, rate: u32) -> bool {
-        match (self.entry.lock(), key_for(dir, rate)) {
-            (Ok(slot), Ok(key)) => slot.as_ref().is_some_and(|(k, _)| *k == key),
+        match (self.entries.lock(), key_for(dir, rate)) {
+            (Ok(slot), Ok(key)) => slot.iter().any(|(k, _)| *k == key),
             _ => false,
         }
     }
@@ -646,651 +1696,4 @@ impl KitCache {
 // ---------------------------------------------------------------------------
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    use hound::{SampleFormat, WavSpec, WavWriter};
-
-    /// A directory of its own, removed when the test drops it.
-    ///
-    /// Every test here writes real WAVs to a real disk, on purpose: this
-    /// module exists to read files it did not write, and a fake filesystem
-    /// would test the fake.
-    struct Scratch(PathBuf);
-
-    impl Scratch {
-        fn new(what: &str) -> Self {
-            // The thread id keeps two tests running at once out of each
-            // other's folder; `cargo test` is threaded by default.
-            let dir = std::env::temp_dir().join(format!(
-                "yames-kit-{what}-{}-{:?}",
-                std::process::id(),
-                std::thread::current().id()
-            ));
-            let _ = std::fs::remove_dir_all(&dir);
-            std::fs::create_dir_all(&dir).expect("a scratch directory");
-            Self(dir)
-        }
-
-        fn path(&self) -> &Path {
-            &self.0
-        }
-    }
-
-    impl Drop for Scratch {
-        fn drop(&mut self) {
-            let _ = std::fs::remove_dir_all(&self.0);
-        }
-    }
-
-    /// `freq` Hz for `secs` seconds, at `sr`, in whatever the spec asks for.
-    ///
-    /// A sine rather than a drum because the point of these tests is the
-    /// DECODER, and a sine is the one signal whose resampling error can be
-    /// stated as a number.
-    fn write_sine(
-        path: &Path,
-        sr: u32,
-        channels: u16,
-        bits: u16,
-        float: bool,
-        freq: f64,
-        secs: f64,
-        amp: f64,
-    ) {
-        let spec = WavSpec {
-            channels,
-            sample_rate: sr,
-            bits_per_sample: bits,
-            sample_format: if float {
-                SampleFormat::Float
-            } else {
-                SampleFormat::Int
-            },
-        };
-        let mut w = WavWriter::create(path, spec).expect("a writable WAV");
-        let frames = (secs * sr as f64) as usize;
-        let full = (1i64 << (bits - 1)) as f64;
-        for i in 0..frames {
-            let v = amp * (2.0 * std::f64::consts::PI * freq * i as f64 / sr as f64).sin();
-            for _ in 0..channels {
-                if float {
-                    w.write_sample(v as f32).unwrap();
-                } else {
-                    // −(2^(b−1)) .. 2^(b−1)−1, clamped so full scale cannot
-                    // wrap round to the other end.
-                    let q = (v * full).round().clamp(-full, full - 1.0) as i32;
-                    w.write_sample(q).unwrap();
-                }
-            }
-        }
-        w.finalize().expect("a finalised WAV");
-    }
-
-    /// The frequency of a buffer, from its upward zero crossings — the same
-    /// measurement `engine.rs` uses on the pitched banks, and honest here
-    /// for the same reason: a resampled sine is still a sine.
-    fn frequency_of(buf: &[f32], sr: u32) -> f64 {
-        // Skip the first and last few milliseconds: the resampler's kernel
-        // hangs off both ends of the source and rings there.
-        let from = (0.010 * sr as f64) as usize;
-        let to = buf.len().saturating_sub((0.010 * sr as f64) as usize);
-        let (mut first, mut last, mut count) = (f64::NAN, f64::NAN, 0usize);
-        for i in from + 1..to {
-            let (a, b) = (buf[i - 1] as f64, buf[i] as f64);
-            if a <= 0.0 && b > 0.0 {
-                let t = (i - 1) as f64 + (-a) / (b - a);
-                if count == 0 {
-                    first = t;
-                }
-                last = t;
-                count += 1;
-            }
-        }
-        assert!(count >= 3, "only {count} zero crossings to measure");
-        sr as f64 / ((last - first) / (count - 1) as f64)
-    }
-
-    /// THE FORMAT A SAMPLE PACK ACTUALLY SHIPS IN.
-    ///
-    /// 24-bit stereo at 44.1 kHz is what a drum library is, and every step
-    /// between that and what the audio thread reads is a place to be wrong:
-    /// the bit depth (24-bit read as 16 is a quarter of the level), the
-    /// channel fold (a sum rather than an average is 6 dB), the rate (a
-    /// missing resample is a semitone and a half sharp), and the peak.
-    ///
-    /// So all four are checked on one file, and the tone is measured rather
-    /// than assumed.
-    #[test]
-    fn a_stereo_24_bit_44_kilohertz_file_becomes_mono_at_the_output_rate() {
-        let scratch = Scratch::new("format");
-        write_sine(
-            &scratch.path().join("kick.wav"),
-            44_100,
-            2,
-            24,
-            false,
-            220.0,
-            0.5,
-            0.4,
-        );
-        let bank = load(scratch.path(), 48_000).expect("the folder loads");
-
-        assert_eq!(bank.rate, 48_000);
-        assert_eq!(bank.found, vec!["kick"]);
-        let buf = bank.voice(KitVoice::Kick);
-
-        // Half a second at the OUTPUT rate, within a sample or two of the
-        // resampler's rounding.
-        let want_len = 24_000;
-        assert!(
-            (buf.len() as i64 - want_len).abs() <= 2,
-            "half a second at 48 kHz is {want_len} samples, not {}",
-            buf.len()
-        );
-        // Still 220 Hz. A file played at its own rate on a 48 kHz device
-        // would be 239.5 Hz — a semitone and a half sharp, and unmistakable.
-        let got = frequency_of(buf, 48_000);
-        let cents = 1200.0 * (got / 220.0f64).log2();
-        assert!(
-            cents.abs() < 1.0,
-            "the resampled tone is {got:.3} Hz against 220 — {cents:.3} cents off"
-        );
-        // And on the peak the engine balances against, whatever the file's
-        // own level was.
-        let peak = buf.iter().fold(0.0f32, |m, s| m.max(s.abs()));
-        assert!(
-            (peak - VOICE_PEAK).abs() < 1e-4,
-            "the decoded kick peaks at {peak} and the bank normalises to {VOICE_PEAK}"
-        );
-    }
-
-    /// WHAT THE RESAMPLER COSTS, AS A NUMBER.
-    ///
-    /// 44.1 kHz to 48 is the conversion nearly every user's kit will go
-    /// through, and "it sounds fine" is not a measurement. A 220 Hz sine is
-    /// resampled and compared sample for sample against the same sine
-    /// generated at 48 kHz; what is asserted is the error floor, which is
-    /// what says the windowed sinc in `engine.rs` is doing its job rather
-    /// than dropping samples.
-    ///
-    /// Measured: **−122.5 dB RMS** against the signal, over the steady part
-    /// of the tone — which is the thirty-two-tap Blackman-windowed sinc in
-    /// `engine::resample` doing exactly what it is for, and effectively the
-    /// f32 floor. The gate is −45 dB, two orders of magnitude looser, so it
-    /// catches a resampler that was replaced or removed rather than one
-    /// that was tuned.
-    #[test]
-    fn the_decoder_resamples_44_kilohertz_to_48_within_a_measurable_error() {
-        let scratch = Scratch::new("resample");
-        write_sine(
-            &scratch.path().join("snare.wav"),
-            44_100,
-            1,
-            24,
-            false,
-            220.0,
-            0.5,
-            0.8,
-        );
-        let bank = load(scratch.path(), 48_000).expect("the folder loads");
-        let got = bank.voice(KitVoice::SnareHi);
-
-        // The reference: the same tone at the output rate, on the same peak
-        // the bank normalises to.
-        let want: Vec<f32> = (0..got.len())
-            .map(|i| {
-                (VOICE_PEAK as f64
-                    * (2.0 * std::f64::consts::PI * 220.0 * i as f64 / 48_000.0).sin())
-                    as f32
-            })
-            .collect();
-
-        // The steady part only. The kernel hangs off both ends of the
-        // source, which is a real artefact of a finite file and not a
-        // resampling error.
-        let skip = 480;
-        let (mut err, mut sig) = (0.0f64, 0.0f64);
-        for i in skip..got.len() - skip {
-            let d = (got[i] - want[i]) as f64;
-            err += d * d;
-            sig += (want[i] as f64) * (want[i] as f64);
-        }
-        let db = 10.0 * (err / sig.max(1e-30)).log10();
-        eprintln!("[kit] 44.1 kHz -> 48 kHz resampling error: {db:.1} dB RMS");
-        assert!(
-            db < -45.0,
-            "the resampler leaves {db:.1} dB of error against the signal"
-        );
-    }
-
-    /// Sixteen-bit, thirty-two-bit float and eight-bit all arrive as the
-    /// same drum. The depth is the file's business and none of the band's.
-    #[test]
-    fn every_depth_a_wav_can_be_decodes_to_the_same_sound() {
-        let mut decoded = Vec::new();
-        for (name, bits, float) in [("d16", 16u16, false), ("d32f", 32, true), ("d8", 8, false)] {
-            let scratch = Scratch::new(name);
-            write_sine(
-                &scratch.path().join("hat.wav"),
-                48_000,
-                1,
-                bits,
-                float,
-                220.0,
-                0.2,
-                0.5,
-            );
-            let bank = load(scratch.path(), 48_000).expect("the folder loads");
-            decoded.push((name, bank.voice(KitVoice::Hat).to_vec()));
-        }
-        let (_, reference) = &decoded[0];
-        for (name, buf) in decoded.iter().skip(1) {
-            assert_eq!(buf.len(), reference.len(), "{name} came out a different length");
-            // Eight-bit is coarse — a 255-step quantiser is 48 dB of
-            // signal-to-noise and no more — so the tolerance is the format's
-            // own and not the decoder's.
-            let worst = buf
-                .iter()
-                .zip(reference.iter())
-                .fold(0.0f32, |m, (a, b)| m.max((a - b).abs()));
-            assert!(worst < 0.01, "{name} differs from 16-bit by {worst}");
-        }
-    }
-
-    /// A long sample is CUT, not refused — and the cut FADES.
-    ///
-    /// See [`MAX_VOICE_SECS`] and [`CAP_FADE_SECS`]. The fixture is a
-    /// six-second sine at full level, so two seconds in the waveform is
-    /// still going at full amplitude; without the ramp the buffer ends on a
-    /// step of whatever the sine happened to be doing, which is a click on
-    /// every hit of that cymbal.
-    #[test]
-    fn a_long_sample_is_capped_rather_than_rejected() {
-        let scratch = Scratch::new("long");
-        write_sine(
-            &scratch.path().join("crash.wav"),
-            48_000,
-            1,
-            16,
-            false,
-            440.0,
-            6.0,
-            0.5,
-        );
-        let bank = load(scratch.path(), 48_000).expect("a long crash is still a crash");
-        let buf = bank.voice(KitVoice::Crash);
-        let len = buf.len();
-        assert!(
-            (len as i64 - 96_000).abs() <= 2,
-            "six seconds of crash came out as {len} samples and the cap is two seconds"
-        );
-        // The cut is silent. A 440 Hz sine at 48 kHz crosses zero every 55
-        // samples, so a buffer that simply STOPPED would end somewhere on
-        // the cycle — 0.9 at worst and a couple of tenths on average.
-        let last = buf[len - 1].abs();
-        assert!(
-            last < 0.01,
-            "the capped crash ends at {last}, which is a step and therefore a click"
-        );
-        // And the ramp is only the ramp: the cycle before it starts is still
-        // the drum at full height, so the fade took five milliseconds and
-        // not fifty.
-        let fade = (CAP_FADE_SECS * 48_000.0) as usize;
-        let before = buf[len - fade - 120..len - fade]
-            .iter()
-            .fold(0.0f32, |m, s| m.max(s.abs()));
-        assert!(
-            before > 0.5,
-            "the cycle before the fade peaks at {before}, so the fade is eating the cymbal"
-        );
-    }
-
-    /// A sample that ENDS on its own is not faded.
-    ///
-    /// The ramp is what the cap owes the musician for cutting their file. A
-    /// file the cap never touched is their own decision about where the drum
-    /// stops, and rewriting its last five milliseconds would be the app
-    /// editing samples it was only asked to play.
-    #[test]
-    fn a_short_sample_keeps_the_ending_the_musician_gave_it() {
-        let scratch = Scratch::new("short");
-        // A quarter of a second, ending mid-cycle at full amplitude on
-        // purpose: 440 Hz at 48 kHz is 109.09 samples a cycle, so 12 000
-        // samples is not a whole number of them.
-        write_sine(
-            &scratch.path().join("rim.wav"),
-            48_000,
-            1,
-            16,
-            false,
-            440.0,
-            0.25,
-            0.5,
-        );
-        let bank = load(scratch.path(), 48_000).expect("the folder loads");
-        let buf = bank.voice(KitVoice::Rim);
-        let tail = buf[buf.len() - 60..].iter().fold(0.0f32, |m, s| m.max(s.abs()));
-        assert!(
-            tail > 0.5,
-            "an uncapped file came back faded; its last cycle peaks at {tail}"
-        );
-    }
-
-    /// HALF A SNARE PAIR IS A WHOLE SNARE PAIR.
-    ///
-    /// The folder a musician is most likely to try first is a kick and a
-    /// snare. `snare.wav` is `snare_hi`, and `jam::slot_for` reaches for
-    /// `snare_hi` only on an ACCENT — so before this, that folder played its
-    /// kick and the built-in kit's snare on every groove in the library that
-    /// writes its backbeat at level 1, which is most of them.
-    ///
-    /// See [`alias_snare_pair`]. `found` still reports the files on disk,
-    /// which is what `inspect` and the screen tell the musician.
-    #[test]
-    fn a_folder_with_one_snare_plays_it_for_both_the_backbeat_and_the_ghosts() {
-        let scratch = Scratch::new("snare-hi");
-        write_sine(
-            &scratch.path().join("snare.wav"),
-            48_000,
-            1,
-            16,
-            false,
-            250.0,
-            0.15,
-            0.5,
-        );
-        let bank = load(scratch.path(), 48_000).expect("the folder loads");
-        assert!(bank.has(KitVoice::SnareHi));
-        assert!(
-            bank.has(KitVoice::SnareLo),
-            "a folder with snare.wav in it has no backbeat on a level-1 groove"
-        );
-        assert_eq!(
-            bank.voice(KitVoice::SnareHi),
-            bank.voice(KitVoice::SnareLo),
-            "the accent is the same drum hit harder (rule 4 of KITS.md)"
-        );
-        // The FILES are still reported honestly: the folder holds one snare
-        // and the screen must not claim two.
-        assert_eq!(bank.found, vec!["snare"]);
-        let seen = inspect(scratch.path()).expect("the folder is readable");
-        assert_eq!(seen.voices, vec!["snare"]);
-        assert!(seen.missing.contains(&"snare_soft".to_string()));
-
-        // And the mirror: a folder with only the soft one plays it on the
-        // backbeat rather than borrowing a snare that does not match.
-        let other = Scratch::new("snare-lo");
-        write_sine(
-            &other.path().join("snare_soft.wav"),
-            48_000,
-            1,
-            16,
-            false,
-            250.0,
-            0.15,
-            0.5,
-        );
-        let soft = load(other.path(), 48_000).expect("the folder loads");
-        assert!(soft.has(KitVoice::SnareHi) && soft.has(KitVoice::SnareLo));
-        assert_eq!(soft.found, vec!["snare_soft"]);
-
-        // A folder with BOTH keeps both, which is the whole point of there
-        // being two names.
-        let pair = Scratch::new("snare-pair");
-        write_sine(&pair.path().join("snare.wav"), 48_000, 1, 16, false, 250.0, 0.15, 0.5);
-        write_sine(&pair.path().join("snare_soft.wav"), 48_000, 1, 16, false, 180.0, 0.15, 0.5);
-        let both = load(pair.path(), 48_000).expect("the folder loads");
-        assert_ne!(
-            both.voice(KitVoice::SnareHi),
-            both.voice(KitVoice::SnareLo),
-            "two files in the folder and the app played one of them twice"
-        );
-    }
-
-    /// WHAT A FOLDER CAN COST `set_jam`, AS A NUMBER.
-    ///
-    /// [`MAX_FOLDER_BYTES`] is a sanity check on intent and NOT the bound on
-    /// the work, and the docs on both constants now say so — this is what
-    /// keeps that claim true. `decode_mono` stops at [`MAX_VOICE_SECS`] at
-    /// the source rate, so eight enormous files decode to exactly the same
-    /// eight two-second buffers eight small ones would, and `set_jam` cannot
-    /// be made slower by pointing it at a bigger folder.
-    ///
-    /// It matters because `set_jam` is a synchronous command: the decode
-    /// runs where the caller runs, so "how much work can a folder ask for"
-    /// is the same question as "how long can the window be busy".
-    #[test]
-    fn no_folder_can_cost_more_than_the_cap_however_long_its_files_are() {
-        let scratch = Scratch::new("bounded");
-        for (name, _) in KIT_FILES {
-            // Three times the cap each, at a rate above the output's.
-            write_sine(
-                &scratch.path().join(format!("{name}.wav")),
-                96_000,
-                1,
-                16,
-                false,
-                300.0,
-                MAX_VOICE_SECS * 3.0,
-                0.5,
-            );
-        }
-        let bank = load(scratch.path(), 48_000).expect("eight long drums are still a kit");
-        let ceiling = (MAX_VOICE_SECS * 48_000.0) as usize + 2;
-        for v in KitVoice::ALL {
-            let len = bank.voice(v).len();
-            assert!(
-                len <= ceiling,
-                "{} decoded to {len} samples against a cap of {ceiling}",
-                v.file_name()
-            );
-        }
-        assert!(
-            bank.bytes <= KIT_VOICES * ceiling * 4,
-            "the folder decoded to {} bytes, over eight voices' worth of the cap",
-            bank.bytes
-        );
-    }
-
-    /// THE CACHE KEY KEEPS THE NANOSECONDS.
-    ///
-    /// See [`stamp`]. Truncated to whole seconds, the two times below are
-    /// the same number — and a snare re-bounced and dropped in the folder
-    /// within a second of the last one, at the same length, would keep
-    /// playing the old sound until the app restarted.
-    #[test]
-    fn a_file_replaced_within_the_same_second_is_a_different_key() {
-        let base = std::time::UNIX_EPOCH + std::time::Duration::from_secs(1_757_000_000);
-        assert_ne!(
-            stamp(Some(base)),
-            stamp(Some(base + std::time::Duration::from_millis(1))),
-            "a millisecond apart is a different file, and whole seconds cannot see it"
-        );
-        assert_ne!(
-            stamp(Some(base)),
-            stamp(Some(base + std::time::Duration::from_nanos(100))),
-            "NTFS timestamps tick every 100 ns, so that is the resolution to keep"
-        );
-        // A filesystem that reports no time at all falls back on the path,
-        // the rate and the size rather than panicking.
-        assert_eq!(stamp(None), 0);
-    }
-
-    /// A folder of far too much audio is refused with a sentence, before a
-    /// single sample is read.
-    #[test]
-    fn a_folder_of_too_much_audio_is_refused_with_a_message() {
-        let scratch = Scratch::new("huge");
-        // One second at 48 kHz is 192 kB decoded, so a cap of 64 kB is over
-        // it three times. Same code path, three orders of magnitude less
-        // disk — see `load_capped`.
-        write_sine(
-            &scratch.path().join("kick.wav"),
-            48_000,
-            1,
-            16,
-            false,
-            80.0,
-            1.0,
-            0.5,
-        );
-        let err = load_capped(scratch.path(), 48_000, 64 * 1024)
-            .expect_err("a folder over the cap must be refused");
-        assert!(
-            err.contains("capped at"),
-            "the refusal has to say what the cap is; it said {err:?}"
-        );
-        // And under the cap the same folder loads, so the message is about
-        // the size and not about the folder.
-        assert!(load_capped(scratch.path(), 48_000, 64 * 1024 * 1024).is_ok());
-    }
-
-    /// The published cap is the one the app uses. `load_capped` exists for
-    /// the test above; this is what stops it drifting away from `load`.
-    #[test]
-    fn the_cap_the_app_actually_uses_is_the_published_one() {
-        assert_eq!(MAX_FOLDER_BYTES, 64 * 1024 * 1024);
-        assert_eq!(MAX_VOICE_SECS, 2.0);
-    }
-
-    /// A folder with none of the eight names says so, rather than quietly
-    /// handing back a bank with nothing in it — which would look exactly
-    /// like the feature not working.
-    #[test]
-    fn a_folder_with_no_drums_in_it_says_so() {
-        let scratch = Scratch::new("empty");
-        write_sine(
-            &scratch.path().join("guitar-loop.wav"),
-            48_000,
-            1,
-            16,
-            false,
-            440.0,
-            0.2,
-            0.5,
-        );
-        let err = load(scratch.path(), 48_000).expect_err("nothing here is a drum");
-        assert!(err.contains("kick"), "the message has to name the files it wanted: {err:?}");
-    }
-
-    /// A file that is not a WAV is a message, not a panic. This is the whole
-    /// reason the decoding here is `hound` and not `rodio`.
-    #[test]
-    fn a_file_that_is_not_really_a_wav_is_refused_rather_than_crashing() {
-        let scratch = Scratch::new("junk");
-        std::fs::write(scratch.path().join("kick.wav"), b"ID3\x04\x00not a wav at all").unwrap();
-        let err = load(scratch.path(), 48_000).expect_err("that is not a WAV");
-        assert!(err.contains("kick.wav"), "the message has to name the file: {err:?}");
-    }
-
-    /// `Kick.wav` is a kick. A sample pack names its files the way its
-    /// author felt like that day, and renaming eight files should not be
-    /// the price of using one.
-    #[test]
-    fn the_names_are_matched_whatever_case_they_are_in() {
-        let scratch = Scratch::new("case");
-        for name in ["Kick.WAV", "SNARE.wav", "Hat_Open.Wav"] {
-            write_sine(&scratch.path().join(name), 48_000, 1, 16, false, 300.0, 0.1, 0.5);
-        }
-        let seen = inspect(scratch.path()).expect("the folder is readable");
-        assert_eq!(seen.voices, vec!["kick", "snare", "hat_open"]);
-        assert!(seen.missing.contains(&"ride".to_string()));
-        assert_eq!(seen.voices.len() + seen.missing.len(), KIT_VOICES);
-
-        let bank = load(scratch.path(), 48_000).expect("the folder loads");
-        assert!(bank.has(KitVoice::Kick) && bank.has(KitVoice::SnareHi));
-        assert!(bank.has(KitVoice::HatOpen));
-        // And the ones that are not there are not there — `jam.rs` is what
-        // turns those back into the built-in kit.
-        assert!(!bank.has(KitVoice::Ride));
-        assert!(bank.voice(KitVoice::Ride).is_empty());
-    }
-
-    /// THE BAR-AHEAD SEND MUST NOT RE-DECODE THE FOLDER.
-    ///
-    /// The UI re-sends the whole config four to six times a chorus to keep
-    /// the bass a bar ahead. Without the cache each of those would read and
-    /// resample eight WAVs, which is a folder read per bar for the whole
-    /// time a jam is playing.
-    ///
-    /// Measured on the bank's own identity rather than on a timer: the same
-    /// folder must hand back the SAME decode, and a changed file must not.
-    #[test]
-    fn the_cache_hands_back_the_same_decode_until_a_file_changes() {
-        let scratch = Scratch::new("cache");
-        let kick = scratch.path().join("kick.wav");
-        write_sine(&kick, 48_000, 1, 16, false, 80.0, 0.2, 0.5);
-
-        let cache = KitCache::default();
-        let first = cache.get_or_load(scratch.path(), 48_000).unwrap();
-        for _ in 0..6 {
-            let again = cache.get_or_load(scratch.path(), 48_000).unwrap();
-            assert_eq!(first.id, again.id, "a repeated send re-decoded the folder");
-            assert!(Arc::ptr_eq(&first, &again), "and handed back a different bank");
-        }
-        assert!(cache.is_holding(scratch.path(), 48_000));
-
-        // A DIFFERENT OUTPUT RATE IS A DIFFERENT BANK. The samples are
-        // resampled to the device's rate, so a device change has to
-        // re-decode or the drums come out at the wrong pitch.
-        let other = cache.get_or_load(scratch.path(), 44_100).unwrap();
-        assert_ne!(first.id, other.id, "44.1 kHz reused the 48 kHz decode");
-        assert_eq!(other.rate, 44_100);
-
-        // AND A REPLACED FILE IS A DIFFERENT BANK. Keyed on the path alone,
-        // the app would keep playing yesterday's kick until it restarted.
-        //
-        // The size changes as well as the mtime, deliberately: a filesystem
-        // whose timestamps are whole seconds would otherwise make this test
-        // depend on how fast the machine is.
-        write_sine(&kick, 48_000, 1, 16, false, 90.0, 0.35, 0.5);
-        let after = cache.get_or_load(scratch.path(), 48_000).unwrap();
-        assert_ne!(
-            first.id, after.id,
-            "the kick was replaced on disk and the cache kept the old one"
-        );
-    }
-
-    /// Stereo folds to mono by AVERAGE, not by sum.
-    ///
-    /// A sum would make every stereo file 6 dB hotter than the mono one
-    /// beside it — and the peak normalisation would hide it on the meter
-    /// while leaving it in the energy, which is the worst of both.
-    #[test]
-    fn two_channels_fold_to_their_average() {
-        let scratch = Scratch::new("fold");
-        let path = scratch.path().join("rim.wav");
-        // Left is the tone, right is silence: an average puts the result at
-        // half the amplitude, a sum leaves it at full.
-        let spec = WavSpec {
-            channels: 2,
-            sample_rate: 48_000,
-            bits_per_sample: 16,
-            sample_format: SampleFormat::Int,
-        };
-        let mut w = WavWriter::create(&path, spec).unwrap();
-        for i in 0..4_800 {
-            let v = 0.5 * (2.0 * std::f64::consts::PI * 300.0 * i as f64 / 48_000.0).sin();
-            w.write_sample((v * 32_768.0) as i16).unwrap();
-            w.write_sample(0i16).unwrap();
-        }
-        w.finalize().unwrap();
-
-        // The bank normalises, so the level itself is gone by the time
-        // anyone can look at it; what survives is the SHAPE, and a summed
-        // fold would have left the right channel's silence in it as a
-        // half-wave. Compare against the same tone folded by hand.
-        let bank = load(scratch.path(), 48_000).unwrap();
-        let buf = bank.voice(KitVoice::Rim);
-        let worst = buf
-            .iter()
-            .enumerate()
-            .map(|(i, &s)| {
-                let want = VOICE_PEAK
-                    * (2.0 * std::f64::consts::PI * 300.0 * i as f64 / 48_000.0).sin() as f32;
-                (s - want).abs()
-            })
-            .fold(0.0f32, f32::max);
-        assert!(worst < 0.01, "the folded channel is off by {worst}");
-    }
-}
+mod tests;
