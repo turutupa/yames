@@ -1382,3 +1382,135 @@ describe("JamView — the drawer beside the stage", () => {
     expect(setSetupOpen).not.toHaveBeenCalled();
   });
 });
+
+// ---------------------------------------------------------------------------
+// The arrangement (plans/tasks/jam-v4/BRIEF.md A1)
+// ---------------------------------------------------------------------------
+
+describe("the arrangement control", () => {
+  /** The segmented Loop · Build · Song, which lives in the FORM group. */
+  function modes(): HTMLElement {
+    return screen.getByRole("group", { name: "Arrangement" });
+  }
+
+  it("offers the three modes, and shows a saved jam as the loop it is", () => {
+    // A record with no arrangement plays what it always played, and the
+    // control has to say so rather than showing a mode the jam is not in.
+    sheet({ jam: jamOf({ arrangement: undefined }) });
+    const group = modes();
+    for (const label of ["Loop", "Build", "Song"]) {
+      expect(within(group).getByRole("button", { name: label })).toBeTruthy();
+    }
+    expect(within(group).getByRole("button", { name: "Loop" }).getAttribute("aria-pressed")).toBe(
+      "true",
+    );
+  });
+
+  it("writes a whole arrangement when you touch one field of it", () => {
+    // Half an arrangement on the record reads its missing half as today's
+    // default on every load, which is fine right up until the default moves.
+    const { props } = sheet({ jam: jamOf({ arrangement: undefined }) });
+    fireEvent.click(within(modes()).getByRole("button", { name: "Song" }));
+    expect(props.onEdit).toHaveBeenCalledWith({
+      arrangement: { mode: "song", choruses: 4, intro: "fill", breakdownEvery: 4 },
+    });
+  });
+
+  it("offers the chorus count beside Song and nowhere else", () => {
+    sheet({ jam: jamOf({ arrangement: { mode: "build" } }) });
+    expect(screen.queryByRole("group", { name: "Choruses" })).toBeNull();
+    cleanup();
+    sheet({ jam: jamOf({ arrangement: { mode: "song", choruses: 6 } }) });
+    const stepper = screen.getByRole("group", { name: "Choruses" });
+    expect(within(stepper).getByText("6")).toBeTruthy();
+    expect(within(stepper).getByRole("button", { name: "More choruses" })).toBeTruthy();
+  });
+
+  it("keeps the chorus count inside what a song can be", () => {
+    const { props } = sheet({ jam: jamOf({ arrangement: { mode: "song", choruses: 2 } }) });
+    const stepper = screen.getByRole("group", { name: "Choruses" });
+    expect(
+      within(stepper).getByRole("button", { name: "Fewer choruses" }).hasAttribute("disabled"),
+    ).toBe(true);
+    fireEvent.click(within(stepper).getByRole("button", { name: "More choruses" }));
+    expect(props.onEdit).toHaveBeenCalledWith({
+      arrangement: { mode: "song", choruses: 3, intro: "fill", breakdownEvery: 4 },
+    });
+  });
+
+  it("keeps the breakdown behind a disclosure, and out of Loop entirely", () => {
+    sheet({ jam: jamOf({ arrangement: { mode: "loop" } }) });
+    expect(screen.queryByRole("button", { name: /Breakdown/ })).toBeNull();
+    cleanup();
+
+    sheet({ jam: jamOf({ arrangement: { mode: "build" } }) });
+    // Closed: the summary says what it is set to, and the control is not
+    // drawn. One decision in twenty does not get a row of its own.
+    expect(screen.queryByRole("group", { name: "Breakdown" })).toBeNull();
+    const toggle = screen.getByRole("button", { name: /Breakdown/ });
+    expect(toggle.textContent).toContain("every 4 choruses");
+    fireEvent.click(toggle);
+    const group = screen.getByRole("group", { name: "Breakdown" });
+    for (const label of ["Off", "2", "4", "8"]) {
+      expect(within(group).getByRole("button", { name: label })).toBeTruthy();
+    }
+  });
+
+  it("says what the mode does, in a sentence", () => {
+    sheet({ jam: jamOf({ arrangement: { mode: "song", choruses: 5 } }) });
+    // The count is in the sentence, because "Song" on its own does not say
+    // how long the song is.
+    expect(screen.getByText(/Builds for 5 choruses/)).toBeTruthy();
+  });
+});
+
+describe("the timeline's dynamics marks", () => {
+  function marks(container: HTMLElement): HTMLElement[] {
+    return [...container.querySelectorAll(".jam-timeline-dynamics")] as HTMLElement[];
+  }
+
+  it("draws nothing at all for a jam that loops", () => {
+    // Twelve identical marks under twelve bars would be twelve marks saying
+    // nothing. A loop has no build to see coming.
+    const { container } = setup({ jam: jamOf({ arrangement: { mode: "loop" } }) });
+    expect(marks(container)).toHaveLength(0);
+  });
+
+  it("draws one mark per bar of the chorus on screen, and none of them moves", () => {
+    const jam = jamOf({ form: { kind: "blues12", bars: 12 }, arrangement: { mode: "build" } });
+    const { container } = setup({ jam, currentBeat: beat(3, 1), isPlaying: true });
+    const row = marks(container);
+    expect(row).toHaveLength(12);
+    // Chorus one is the held-back one, all the way through.
+    expect(row.every((mark) => mark.dataset.level === "soft")).toBe(true);
+    // The crash at the top of the chorus, and no other on this time round.
+    expect(row.flatMap((mark, bar) => (mark.hasAttribute("data-crash") ? [bar] : []))).toEqual([0]);
+  });
+
+  it("hatches the half of a breakdown chorus the band is out of", () => {
+    const jam = jamOf({ form: { kind: "blues12", bars: 12 }, arrangement: { mode: "build" } });
+    const { container } = setup({ jam, currentBeat: beat(0, 4), isPlaying: true });
+    const row = marks(container);
+    expect(row.flatMap((mark, bar) => (mark.hasAttribute("data-quiet") ? [bar] : []))).toEqual([
+      0, 1, 2, 3, 4, 5,
+    ]);
+    // And the band comes back on bar seven with a crash on it.
+    expect(row[6].hasAttribute("data-quiet")).toBe(false);
+    expect(row[6].hasAttribute("data-crash")).toBe(true);
+  });
+
+  it("marks the last bar of a song as one hit and nothing after", () => {
+    const jam = jamOf({
+      form: { kind: "blues12", bars: 12 },
+      arrangement: { mode: "song", choruses: 2 },
+    });
+    const { container } = setup({ jam, currentBeat: beat(0, 2), isPlaying: true });
+    expect(marks(container)[11].hasAttribute("data-hit")).toBe(true);
+  });
+
+  it("says the same thing to a screen reader that it draws for an eye", () => {
+    const jam = jamOf({ form: { kind: "blues12", bars: 12 }, arrangement: { mode: "build" } });
+    setup({ jam, currentBeat: beat(0, 4), isPlaying: true });
+    expect(screen.getByRole("button", { name: /Go to bar 1 —.*breakdown.*crash/ })).toBeTruthy();
+  });
+});

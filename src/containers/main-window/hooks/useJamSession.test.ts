@@ -8,7 +8,7 @@
 // this file pins.
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { useJamSession } from "./useJamSession";
+import { nextChorus, useJamSession } from "./useJamSession";
 import { STARTER_JAMS } from "../../../jam/jams";
 import { compileJam } from "../../../jam/compile";
 import { applyVibe } from "../../../jam/vibes";
@@ -76,8 +76,23 @@ vi.mock("../../../ipc", () => ({
     calls.push(["armCountIn", beats]);
     return Promise.resolve();
   },
+  // A Song's last bar takes the transport to stopped, not to quiet (A1). The
+  // listener is handed back so a test can be the engine and end the tune.
+  setPlaying: (playing: boolean) => {
+    calls.push(["setPlaying", playing]);
+    return Promise.resolve();
+  },
+  onJamEnded: (callback: () => void) => {
+    jamEnded.add(callback);
+    return Promise.resolve(() => {
+      jamEnded.delete(callback);
+    });
+  },
   ttsSpeak: () => Promise.resolve(),
 }));
+
+/** Everyone listening for the end of a tune, so a test can be the engine. */
+const jamEnded = new Set<() => void>();
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -1357,5 +1372,126 @@ describe("Jam now", () => {
       result.current.jamNow();
     });
     expect(result.current.jam?.vibe).toBe("jazz");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The arrangement, one bar ahead (plans/tasks/jam-v4/BRIEF.md A1)
+// ---------------------------------------------------------------------------
+
+describe("the arrangement, one bar ahead", () => {
+  async function arranged(arrangement: Jam["arrangement"], patch: Partial<Jam> = {}) {
+    const harness = mount("jam", { playing: true, beat: beatAt(0) });
+    await waitFor(() => expect(harness.result.current.jams).toHaveLength(6));
+    const blues = harness.result.current.jams.find((j) => j.form.kind === "blues12")!;
+    act(() => harness.result.current.loadJam(blues));
+    await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
+    act(() => harness.result.current.editJam({ arrangement, ...patch }));
+    await waitFor(() => expect(harness.result.current.jam?.arrangement).toEqual(arrangement));
+    return harness;
+  }
+
+  function lastConfig(): JamEngineConfig {
+    const sent = names("setJam").filter((c) => c !== null);
+    return sent[sent.length - 1] as JamEngineConfig;
+  }
+
+  it("counts the next chorus the way the engine does", () => {
+    // Rolling over the last bar of the form starts a new one.
+    expect(nextChorus(11, 3, 12, null, null)).toBe(4);
+    expect(nextChorus(10, 3, 12, null, null)).toBe(3);
+    // A loop does not, and neither does a bar you asked to jump to: both are
+    // moving inside the tune, not playing it again from the top.
+    expect(nextChorus(11, 3, 12, { start: 0, end: 11 }, null)).toBe(3);
+    expect(nextChorus(11, 3, 12, null, 0)).toBe(3);
+  });
+
+  it("sends the NEXT chorus's plan on the last bar line of a chorus", async () => {
+    const { rerender } = await arranged({ mode: "build" });
+    calls.length = 0;
+    // The last bar of chorus one. What goes out is chorus TWO's bar one: the
+    // whole band in after a chorus of holding back, and a crash on the one.
+    rerender({ v: "jam", playing: true, beat: beatAt(11, 1) });
+    await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
+    const config = lastConfig();
+    expect(config.bar.crash[0]).toBe(4);
+    expect(config.applyAt).toBe("barLine");
+    // Chorus one holds the bass to two notes a bar; chorus two does not.
+    expect(new Set(config.bass!.pitches.filter((p) => p !== 0)).size).toBeGreaterThan(1);
+  });
+
+  it("speaks on a bar line where only the arrangement has changed", async () => {
+    // A one-chord jam under a rock beat plays the same bass for ever, so the
+    // old signature — the two lines and nothing else — was identical on the
+    // bar that starts a new chorus, and the send that carries the plan would
+    // have been dropped as a duplicate.
+    const { rerender, result } = await arranged(
+      { mode: "build" },
+      { grooveId: "rock8", feel: "straight", form: { kind: "one", bars: 4 } },
+    );
+    await waitFor(() => expect(result.current.jam?.form.kind).toBe("one"));
+    rerender({ v: "jam", playing: true, beat: beatAt(0, 1) });
+    await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
+
+    // Two bars into the chorus nothing has changed, and nothing is said.
+    calls.length = 0;
+    rerender({ v: "jam", playing: true, beat: beatAt(1, 1) });
+    await new Promise((r) => setTimeout(r, 10));
+    expect(names("setJam")).toHaveLength(0);
+
+    // The last bar of the chorus is another matter: the next bar is the top of
+    // chorus two, and the band is about to play it differently.
+    calls.length = 0;
+    rerender({ v: "jam", playing: true, beat: beatAt(3, 1) });
+    await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
+    expect(lastConfig().applyAt).toBe("barLine");
+  });
+
+  it("marks the last bar of a song, and no other", async () => {
+    const { rerender } = await arranged({ mode: "song", choruses: 2 });
+    calls.length = 0;
+    // The bar line before the last bar of chorus two: what goes out is the
+    // ending itself.
+    rerender({ v: "jam", playing: true, beat: beatAt(10, 2) });
+    await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
+    expect(lastConfig().endsForm).toBe(true);
+
+    calls.length = 0;
+    rerender({ v: "jam", playing: true, beat: beatAt(10, 1) });
+    await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
+    expect(lastConfig().endsForm).toBeUndefined();
+  });
+
+  it("stops the transport when the engine says the tune ended", async () => {
+    await arranged({ mode: "song", choruses: 2 });
+    calls.length = 0;
+    expect(jamEnded.size).toBeGreaterThan(0);
+    act(() => {
+      for (const listener of [...jamEnded]) listener();
+    });
+    await waitFor(() => expect(names("setPlaying")).toEqual([false]));
+    // Stopped, not toggled: a toggle arriving after the engine has already
+    // stopped itself would start the band again, which is the worst possible
+    // answer to a feature whose whole point is an ending. And stopped is what
+    // finishes the take — `useJamTakes` ends one when `isPlaying` goes false.
+    expect(names("togglePlayback")).toHaveLength(0);
+  });
+
+  it("leaves a looping jam saying nothing new at all", async () => {
+    const { rerender } = await arranged({ mode: "loop" });
+    for (const bar of [4, 8, 11]) {
+      rerender({ v: "jam", playing: true, beat: beatAt(bar, 3) });
+      await new Promise((r) => setTimeout(r, 10));
+    }
+    // Every table the engine was handed, on the load and on every bar line:
+    // the engine's own fills and crash, and not one word of arrangement.
+    for (const sent of names("setJam").filter((c) => c !== null)) {
+      const config = sent as JamEngineConfig;
+      expect(config.applyAt).toBeUndefined();
+      expect(config.endsForm).toBeUndefined();
+      expect(config.crashOnOne).toBe(true);
+      expect(config.fill).not.toBeNull();
+    }
+    expect(names("setJam").filter((c) => c !== null).length).toBeGreaterThan(1);
   });
 });

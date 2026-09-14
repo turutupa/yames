@@ -16,6 +16,7 @@ import { jamHarmony, nextChange } from "../../jam/display";
 import { JAM_KEYS_STYLES } from "../../jam/keysline";
 import { ChordPicker } from "./ChordPicker";
 import { bandStatesForChorus, practiceConfigFrom } from "../../jam/practice";
+import { momentsForChorus } from "../../jam/arrangement";
 import {
   chordName,
   displayTransposition,
@@ -330,6 +331,22 @@ export function JamView({
     [jam.practice, chorus, bars],
   );
 
+  /**
+   * What the ARRANGEMENT will do with each bar of this chorus (A1).
+   *
+   * Null while the jam loops: there is no build to see coming, and a row of
+   * identical marks under twelve bars would be twelve marks saying nothing.
+   * The same `bandMoment` the compiler calls, so the picture and the sound
+   * cannot disagree.
+   */
+  const moments = useMemo(
+    () =>
+      jam.arrangement && jam.arrangement.mode !== "loop"
+        ? momentsForChorus(jam, chorus)
+        : null,
+    [jam, chorus],
+  );
+
   /** The bass's notes for the bar being played, for the band lane. */
   const bassNotes = useMemo(() => {
     if (!band.bass) return [];
@@ -560,6 +577,7 @@ export function JamView({
         isPlaying={isPlaying}
         chords={timelineChords}
         bandStates={bandStates}
+        moments={moments}
         loop={position.loop}
         pendingJump={position.pendingJump}
         startBar={position.currentBar}

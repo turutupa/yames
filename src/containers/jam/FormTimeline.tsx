@@ -8,6 +8,7 @@ import {
   sectionRanges,
 } from "../../jam/forms";
 import type { BarRange } from "../../jam/forms";
+import type { BandMoment } from "../../jam/arrangement";
 import type { JamBandState, JamForm } from "../../jam/types";
 
 interface FormTimelineProps {
@@ -40,6 +41,18 @@ interface FormTimelineProps {
    * carries whatever the practice tools say bar 6 carries.
    */
   bandStates?: JamBandState[] | null;
+  /**
+   * What the ARRANGEMENT will do with each bar of this chorus — one moment per
+   * bar, from `momentsForChorus` (plans/tasks/jam-v4/BRIEF.md A1). Null when
+   * the jam loops, which is when there is nothing to draw.
+   *
+   * Drawn before it happens, like the practice marks above and for the same
+   * reason: a player who can see the third chorus opening up two bars before
+   * it arrives plays into it, and one who cannot is caught by it. Nothing here
+   * moves — the mark for bar nine is the same mark all the way through the
+   * chorus, and the only thing on this row that animates is the current bar.
+   */
+  moments?: BandMoment[] | null;
   /** The bars the form is looping, inclusive, or null. */
   loop?: BarRange | null;
   /** A bar asked for that the form has not reached yet, or null. */
@@ -76,6 +89,25 @@ interface FormTimelineProps {
 
 /** How long a press has to be to count as "I meant the chord, not the bar". */
 const LONG_PRESS_MS = 450;
+
+/**
+ * One bar's dynamics, as the thing the mark has to say out loud.
+ *
+ * A screen reader gets a sentence and a mouse gets a tooltip; the bar of
+ * colour itself is for the eye. Three things, in the order they matter: how
+ * hard, whether the band is out of the way, and whether a cymbal lands.
+ */
+function momentTitle(
+  moment: BandMoment,
+  t: (key: string, options?: Record<string, unknown>) => string,
+): string {
+  const parts = [t(`jam.dynamics.${moment.intensity}`)];
+  if (moment.drums === "hatsAndKick") parts.push(t("jam.dynamics.breakdown"));
+  if (moment.drums === "stopTime") parts.push(t("jam.dynamics.stopTime"));
+  if (moment.ending) parts.push(t(`jam.dynamics.ending${moment.ending === "hold" ? "Hold" : "Stop"}`));
+  if (moment.crash) parts.push(t("jam.dynamics.crash"));
+  return parts.join(" · ");
+}
 
 /** Two ranges are the same loop when both ends agree. */
 function sameRange(a: BarRange | null | undefined, b: BarRange): boolean {
@@ -119,6 +151,7 @@ export function FormTimeline({
   isPlaying,
   chords = null,
   bandStates = null,
+  moments = null,
   loop = null,
   pendingJump = null,
   startBar = 0,
@@ -286,6 +319,7 @@ export function FormTimeline({
                   // In edit mode the cell is a chord button; out of it, the
                   // bar it goes to. One label, so what a screen reader is told
                   // is what a tap will do.
+                  const moment = moments?.[index] ?? null;
                   const label = editable
                     ? t("jam.changes.pickFor", { bar: index + 1 })
                     : t("jam.form.jumpTo", { bar: index + 1 });
@@ -303,8 +337,8 @@ export function FormTimeline({
                       data-editing={isEditing ? "" : undefined}
                       data-own-chord={own ? "" : undefined}
                       disabled={!onJumpTo && !editable}
-                      aria-label={label}
-                      title={label}
+                      aria-label={moment ? `${label} — ${momentTitle(moment, t)}` : label}
+                      title={moment ? `${label} — ${momentTitle(moment, t)}` : label}
                       onPointerDown={canEdit ? () => startPress(index) : undefined}
                       onPointerUp={canEdit ? cancelPress : undefined}
                       onPointerLeave={canEdit ? cancelPress : undefined}
@@ -331,6 +365,29 @@ export function FormTimeline({
                       )}
                       {isFill && (
                         <span className="jam-timeline-fill">{t("jam.form.fillMark")}</span>
+                      )}
+                      {/* The dynamics: a thin bar along the foot of the cell,
+                          three heights for the three loudnesses, hatched
+                          where the band is out of the way and dotted where a
+                          cymbal lands. It is a picture of the plan, and the
+                          sentence it stands for is on the button's own label
+                          above — so a screen reader gets the whole of it and
+                          this stays out of the tree. */}
+                      {moment && (
+                        <span
+                          className="jam-timeline-dynamics"
+                          data-level={moment.intensity}
+                          data-quiet={
+                            moment.drums === "hatsAndKick" || moment.drums === "off"
+                              ? ""
+                              : undefined
+                          }
+                          data-hit={
+                            moment.drums === "stopTime" || moment.ending ? "" : undefined
+                          }
+                          data-crash={moment.crash ? "" : undefined}
+                          aria-hidden="true"
+                        />
                       )}
                       {/* The bar the form is on its way to. A mark rather than
                           a light: the cell is not playing yet, and lighting it

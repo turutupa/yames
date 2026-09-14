@@ -9,10 +9,31 @@ import { GROOVES, ruleGroove } from "./grooves";
 import { lastVoicing } from "./keysline";
 import { withChordAt } from "./progression";
 import { STARTER_JAMS, createJam } from "./jams";
+import type { NewJamFields } from "./jams";
 import { JAM_INTENSITY_GAIN, JAM_LANES } from "./types";
 import type { Jam, JamFeel, JamIntensity, JamPattern } from "./types";
 
 const FEELS: JamFeel[] = ["straight", "shuffle", "swing"];
+
+/**
+ * A jam that LOOPS — which is what `createJam` made before the fourth pass.
+ *
+ * A new jam is a Build now (plans/tasks/jam-v4/BRIEF.md A1), and Build is a
+ * plan across choruses: the first chorus holds back, the fills are decided per
+ * bar by `src/jam/arrangement.ts` instead of by the engine's own `fillEvery`,
+ * and the crash on the one is the arrangement's. So every test in this file is
+ * written against a looping jam, because every test in this file is about the
+ * TABLE — a fill that reaches the engine, a tom row that keeps its width, a
+ * gain rather than a word. The arrangement's own behaviour is tested where it
+ * is decided, in `arrangement.test.ts`.
+ *
+ * `STARTER_JAMS` need no such help: those records carry no arrangement at all,
+ * and an absent arrangement reads as Loop, which is the promise that nothing
+ * anybody saved changes.
+ */
+function loopJam(name: string, fields: NewJamFields = {}): Jam {
+  return createJam(name, { ...fields, arrangement: { mode: "loop" } });
+}
 
 function expectWellFormed(jam: Jam, label: string) {
   const config = compileJam(jam);
@@ -35,7 +56,7 @@ describe("compileJam", () => {
     for (const groove of GROOVES) {
       for (const feel of FEELS) {
         expectWellFormed(
-          createJam("test", { grooveId: groove.id, feel, form: { kind: "blues12", bars: 12 } }),
+          loopJam("test", { grooveId: groove.id, feel, form: { kind: "blues12", bars: 12 } }),
           `${groove.id} ${feel}`,
         );
       }
@@ -61,17 +82,17 @@ describe("compileJam", () => {
   });
 
   it("takes the chorus length from the form", () => {
-    expect(compileJam(createJam("x", { form: { kind: "blues12", bars: 0 } })).formBars).toBe(12);
-    expect(compileJam(createJam("x", { form: { kind: "custom", bars: 24 } })).formBars).toBe(24);
+    expect(compileJam(loopJam("x", { form: { kind: "blues12", bars: 0 } })).formBars).toBe(12);
+    expect(compileJam(loopJam("x", { form: { kind: "custom", bars: 24 } })).formBars).toBe(24);
   });
 
   it("turns the fill and the crash on together, and off together", () => {
     // They are one gesture. A crash with no fill in front of it is a mistake.
-    const on = compileJam(createJam("x", { fills: true }));
+    const on = compileJam(loopJam("x", { fills: true }));
     expect(on.fill).not.toBeNull();
     expect(on.crashOnOne).toBe(true);
 
-    const off = compileJam(createJam("x", { fills: false }));
+    const off = compileJam(loopJam("x", { fills: false }));
     expect(off.fill).toBeNull();
     expect(off.crashOnOne).toBe(false);
   });
@@ -80,16 +101,16 @@ describe("compileJam", () => {
     // The contract: absent or 0 is the chorus end only, 4 and 8 add the bars
     // in between. Both fields go out together so the engine never has to hold
     // "no fills, every four bars" and decide which half to believe.
-    expect(compileJam(createJam("x", { fills: true })).fillEvery).toBe(0);
-    expect(compileJam(createJam("x", { fills: true, fillEvery: 4 })).fillEvery).toBe(4);
-    expect(compileJam(createJam("x", { fills: true, fillEvery: 8 })).fillEvery).toBe(8);
-    expect(compileJam(createJam("x", { fills: false, fillEvery: 4 })).fillEvery).toBe(0);
+    expect(compileJam(loopJam("x", { fills: true })).fillEvery).toBe(0);
+    expect(compileJam(loopJam("x", { fills: true, fillEvery: 4 })).fillEvery).toBe(4);
+    expect(compileJam(loopJam("x", { fills: true, fillEvery: 8 })).fillEvery).toBe(8);
+    expect(compileJam(loopJam("x", { fills: false, fillEvery: 4 })).fillEvery).toBe(0);
   });
 
   it("zeroes the count for a custom groove that has no fill drawn yet", () => {
     // Nothing to play every four bars either. `fill` is null here, and a
     // `fillEvery` beside a null fill is a number the engine cannot act on.
-    const jam = createJam("x", { fills: true, fillEvery: 4 });
+    const jam = loopJam("x", { fills: true, fillEvery: 4 });
     const mine = compileJam({
       ...jam,
       customGroove: {
@@ -112,19 +133,19 @@ describe("compileJam", () => {
 
   it("hands the engine a gain rather than the word", () => {
     for (const intensity of ["soft", "normal", "loud"] as JamIntensity[]) {
-      expect(compileJam(createJam("x", { intensity })).intensity).toBe(
+      expect(compileJam(loopJam("x", { intensity })).intensity).toBe(
         JAM_INTENSITY_GAIN[intensity],
       );
     }
   });
 
   it("keeps the kit on the record, and a new jam's is a recorded one", () => {
-    expect(compileJam(createJam("x")).kit).toBe("studio");
-    expect(compileJam(createJam("x", { kit: "brushes" })).kit).toBe("brushes");
+    expect(compileJam(loopJam("x")).kit).toBe("studio");
+    expect(compileJam(loopJam("x", { kit: "brushes" })).kit).toBe("brushes");
   });
 
   it("falls back to a groove that exists when the record names one that does not", () => {
-    expectWellFormed(createJam("x", { grooveId: "moon-drums" }), "missing groove");
+    expectWellFormed(loopJam("x", { grooveId: "moon-drums" }), "missing groove");
   });
 
   it("is pure — compiling twice gives the same table", () => {
@@ -143,7 +164,7 @@ describe("compileJam", () => {
  */
 describe("the fifth level and the toms reach the engine", () => {
   it("sends the fill's tom rows, full width, with the peak on the last tick", () => {
-    const jam = createJam("x", { grooveId: "rock8", fills: true });
+    const jam = loopJam("x", { grooveId: "rock8", fills: true });
     const config = compileJam(jam);
     const ticks = config.beatsPerBar * config.ticksPerBeat;
     expect(config.fill?.tomHi).toHaveLength(ticks);
@@ -153,7 +174,7 @@ describe("the fifth level and the toms reach the engine", () => {
   });
 
   it("sends no tom rows on the bar, because the bar does not play them", () => {
-    const config = compileJam(createJam("x", { grooveId: "rock8" }));
+    const config = compileJam(loopJam("x", { grooveId: "rock8" }));
     expect(config.bar.tomHi).toBeUndefined();
     expect(config.bar.tomLo).toBeUndefined();
   });
@@ -162,7 +183,7 @@ describe("the fifth level and the toms reach the engine", () => {
     for (const feel of FEELS) {
       for (const intensity of ["soft", "normal", "loud"] as JamIntensity[]) {
         const config = compileJam(
-          createJam("x", { grooveId: "rock8", feel, intensity, fills: true }),
+          loopJam("x", { grooveId: "rock8", feel, intensity, fills: true }),
         );
         const ticks = config.beatsPerBar * config.ticksPerBeat;
         expect(config.fill?.tomLo, `${feel} ${intensity}`).toHaveLength(ticks);
@@ -177,18 +198,18 @@ describe("the fifth level and the toms reach the engine", () => {
 
   it("tells the engine when the quiet snare is a cross-stick", () => {
     for (const id of ["bossa", "ballad", "chaCha", "oneDrop"]) {
-      expect(compileJam(createJam("x", { grooveId: id })).snareGhostIsRim, id).toBe(true);
+      expect(compileJam(loopJam("x", { grooveId: id })).snareGhostIsRim, id).toBe(true);
     }
     // And says nothing at all for the grooves whose ghosts are ghosts, rather
     // than sending a switch that is only ever off.
-    expect(compileJam(createJam("x", { grooveId: "funk" })).snareGhostIsRim).toBeUndefined();
+    expect(compileJam(loopJam("x", { grooveId: "funk" })).snareGhostIsRim).toBeUndefined();
   });
 
   it("does not claim a cross-stick for a groove you drew", () => {
     // A groove nobody has heard yet: the editor has no way to say
     // "cross-stick", and guessing would put a rim click in a bar the player
     // thinks they drew.
-    const drawn = createJam("x", { grooveId: "bossa" });
+    const drawn = loopJam("x", { grooveId: "bossa" });
     drawn.customGroove = {
       name: "mine",
       beatsPerBar: 4,
@@ -206,16 +227,16 @@ describe("the fifth level and the toms reach the engine", () => {
   });
 
   it("peaks the backbeat on the fourth bar of a loud jam, and not before it", () => {
-    const jam = createJam("x", { grooveId: "rock8", intensity: "loud" });
+    const jam = loopJam("x", { grooveId: "rock8", intensity: "loud" });
     expect(compileJam(jam, { formBar: 0 }).bar.snare).not.toContain(4);
     expect(compileJam(jam, { formBar: 3 }).bar.snare).toContain(4);
     // And a jam at normal is the groove as written, on every bar.
-    const plain = createJam("x", { grooveId: "rock8" });
+    const plain = loopJam("x", { grooveId: "rock8" });
     expect(compileJam(plain, { formBar: 3 }).bar.snare).not.toContain(4);
   });
 
   it("drops the tom rows with everything else when the drummer is off", () => {
-    const jam = createJam("x", {
+    const jam = loopJam("x", {
       grooveId: "rock8",
       fills: true,
       band: { drums: false, bass: false, keys: false },
@@ -260,13 +281,13 @@ describe("compileJam, the band", () => {
   });
 
   it("takes the band from the lineup when the record has not been asked", () => {
-    const jam = createJam("x", { key: "A" });
+    const jam = loopJam("x", { key: "A" });
     expect(compileJam(jam, { lineup: { drums: true, bass: false } }).bass).toBeNull();
     expect(compileJam(jam, { lineup: { drums: true, bass: true } }).bass).not.toBeNull();
   });
 
   it("lets the record overrule the lineup once a toggle has been touched", () => {
-    const jam = createJam("x", { key: "A", band: { drums: true, bass: false } });
+    const jam = loopJam("x", { key: "A", band: { drums: true, bass: false } });
     expect(compileJam(jam, { lineup: { drums: true, bass: true } }).bass).toBeNull();
   });
 
@@ -274,7 +295,7 @@ describe("compileJam, the band", () => {
     // The row is optional and is not one of `JAM_LANES`, so every helper on
     // the way to the engine has to be asked about it by name. Loud is what
     // writes it (B5); the compiler's job is to not lose it.
-    const jam = createJam("x", { grooveId: "rock8", feel: "straight", intensity: "loud" });
+    const jam = loopJam("x", { grooveId: "rock8", feel: "straight", intensity: "loud" });
     const config = compileJam(jam);
     const ticks = config.beatsPerBar * config.ticksPerBeat;
     expect(config.bar.hatOpen).toHaveLength(ticks);
@@ -284,11 +305,11 @@ describe("compileJam, the band", () => {
       if (config.bar.hatOpen![t] !== 0) expect(config.bar.hat[t], `@${t}`).toBe(0);
     }
     // Normal writes no row at all, and the compiler does not invent one.
-    expect(compileJam(createJam("x", { grooveId: "rock8" })).bar.hatOpen).toBeUndefined();
+    expect(compileJam(loopJam("x", { grooveId: "rock8" })).bar.hatOpen).toBeUndefined();
   });
 
   it("silences the drummer without changing the width of the table", () => {
-    const jam = createJam("x", { key: "A", band: { drums: false, bass: true }, fills: true });
+    const jam = loopJam("x", { key: "A", band: { drums: false, bass: true }, fills: true });
     const config = compileJam(jam);
     const ticks = config.beatsPerBar * config.ticksPerBeat;
     for (const lane of JAM_LANES) {
@@ -301,8 +322,8 @@ describe("compileJam, the band", () => {
   });
 
   it("compiles the practice windows, and sends null when every tool is off", () => {
-    expect(compileJam(createJam("x")).practice).toBeNull();
-    const practising = createJam("x", {
+    expect(compileJam(loopJam("x")).practice).toBeNull();
+    const practising = loopJam("x", {
       practice: {
         dropOutEvery: 8,
         dropOutBars: 2,
@@ -318,9 +339,9 @@ describe("compileJam, the band", () => {
   });
 
   it("plays the groove you drew instead of the one you started from", () => {
-    const preset = compileJam(createJam("x", { grooveId: "rock8" }));
+    const preset = compileJam(loopJam("x", { grooveId: "rock8" }));
     const mine = compileJam(
-      createJam("x", {
+      loopJam("x", {
         grooveId: "rock8",
         customGroove: {
           name: "Mine",
@@ -340,7 +361,7 @@ describe("compileJam, the band", () => {
 
   it("swings a groove you drew, the same way it swings a preset", () => {
     const mine = compileJam(
-      createJam("x", {
+      loopJam("x", {
         feel: "shuffle",
         customGroove: {
           name: "Mine",
@@ -358,11 +379,11 @@ describe("compileJam, the band", () => {
   });
 
   it("reads a key with no mode in it as major, and an unreadable one as C", () => {
-    expect(jamKey(createJam("x", { key: "A" }))).toEqual({ root: 9, mode: "major" });
-    expect(jamKey(createJam("x", { key: "Dm" }))).toEqual({ root: 2, mode: "minor" });
-    expect(jamKey(createJam("x", { key: "A blues" }))).toEqual({ root: 9, mode: "blues" });
-    expect(jamKey(createJam("x"))).toEqual({ root: 0, mode: "major" });
-    expect(jamKey(createJam("x", { key: "wombat" }))).toEqual({ root: 0, mode: "major" });
+    expect(jamKey(loopJam("x", { key: "A" }))).toEqual({ root: 9, mode: "major" });
+    expect(jamKey(loopJam("x", { key: "Dm" }))).toEqual({ root: 2, mode: "minor" });
+    expect(jamKey(loopJam("x", { key: "A blues" }))).toEqual({ root: 9, mode: "blues" });
+    expect(jamKey(loopJam("x"))).toEqual({ root: 0, mode: "major" });
+    expect(jamKey(loopJam("x", { key: "wombat" }))).toEqual({ root: 0, mode: "major" });
   });
 });
 
@@ -371,16 +392,16 @@ describe("a meter the groove was not written for", () => {
   const sevenEight = { beatGroups: [2, 2, 3], ticksPerBeat: 2 as const };
 
   it("plays the groove as written when the meter matches it", () => {
-    const jam = createJam("x", {
+    const jam = loopJam("x", {
       grooveId: "rock8",
       meter: { beatGroups: [4], ticksPerBeat: 2 },
     });
     expect(jamGrooveFitsMeter(jam)).toBe(true);
-    expect(compileJam(jam).bar).toEqual(compileJam(createJam("x", { grooveId: "rock8" })).bar);
+    expect(compileJam(jam).bar).toEqual(compileJam(loopJam("x", { grooveId: "rock8" })).bar);
   });
 
   it("plays the rule instead when it does not, rather than refusing the meter", () => {
-    const jam = createJam("x", { grooveId: "shuffle", meter: sevenEight });
+    const jam = loopJam("x", { grooveId: "shuffle", meter: sevenEight });
     expect(jamGrooveFitsMeter(jam)).toBe(false);
     const config = compileJam(jam);
     expect(config.beatsPerBar).toBe(7);
@@ -389,8 +410,8 @@ describe("a meter the groove was not written for", () => {
   });
 
   it("sends the engine the GROUPS, because 3+2+2 and 2+2+3 are different bars", () => {
-    const front = createJam("x", { meter: { beatGroups: [3, 2, 2], ticksPerBeat: 2 } });
-    const back = createJam("x", { meter: sevenEight });
+    const front = loopJam("x", { meter: { beatGroups: [3, 2, 2], ticksPerBeat: 2 } });
+    const back = loopJam("x", { meter: sevenEight });
     expect(jamMeter(front).beatGroups).toEqual([3, 2, 2]);
     expect(jamMeter(back).beatGroups).toEqual([2, 2, 3]);
     // Same seven beats either way — that is what makes the grouping the only
@@ -402,7 +423,7 @@ describe("a meter the groove was not written for", () => {
   it("keeps every lane the width the engine will check it against", () => {
     for (const groups of [[3, 2], [2, 2, 3], [3, 3, 3]]) {
       for (const ticksPerBeat of [2, 4] as const) {
-        const jam = createJam("x", { grooveId: "bossa", meter: { beatGroups: groups, ticksPerBeat } });
+        const jam = loopJam("x", { grooveId: "bossa", meter: { beatGroups: groups, ticksPerBeat } });
         expectWellFormed(jam, `${groups} / ${ticksPerBeat}`);
         const config = compileJam(jam);
         expect(config.beatsPerBar).toBe(groups.reduce((sum, n) => sum + n, 0));
@@ -412,7 +433,7 @@ describe("a meter the groove was not written for", () => {
   });
 
   it("gives the bass and the keys the new tick count too", () => {
-    const jam = createJam("x", {
+    const jam = loopJam("x", {
       grooveId: "shuffle",
       meter: sevenEight,
       band: { drums: true, bass: true, keys: true },
@@ -426,15 +447,15 @@ describe("a meter the groove was not written for", () => {
 
 describe("the keys, the mix and the sticks", () => {
   it("sends no keys when nobody is on them", () => {
-    expect(compileJam(createJam("x", { band: { drums: true, bass: true } })).keys).toBeNull();
+    expect(compileJam(loopJam("x", { band: { drums: true, bass: true } })).keys).toBeNull();
     expect(
-      compileJam(createJam("x", { band: { drums: true, bass: true, keys: false } })).keys,
+      compileJam(loopJam("x", { band: { drums: true, bass: true, keys: false } })).keys,
     ).toBeNull();
   });
 
   it("sends a voicing per tick when somebody is", () => {
     const config = compileJam(
-      createJam("x", { band: { drums: true, bass: false, keys: true }, key: "C" }),
+      loopJam("x", { band: { drums: true, bass: false, keys: true }, key: "C" }),
     );
     expect(config.keys?.voicings).toHaveLength(config.beatsPerBar * config.ticksPerBeat);
     const struck = config.keys!.voicings.filter((v) => v.length > 0);
@@ -444,15 +465,15 @@ describe("the keys, the mix and the sticks", () => {
 
   it("comps the way the record says, pads unless told otherwise", () => {
     const band = { drums: true, bass: false, keys: true };
-    const pads = compileJam(createJam("x", { band, key: "C" }));
-    const stabs = compileJam(createJam("x", { band, key: "C", keysStyle: "stabs" }));
+    const pads = compileJam(loopJam("x", { band, key: "C" }));
+    const stabs = compileJam(loopJam("x", { band, key: "C", keysStyle: "stabs" }));
     // A pad is beat one and nothing else; stabs are off the beat.
     expect(pads.keys!.voicings.flatMap((v, i) => (v.length ? [i] : []))).toEqual([0]);
     expect(stabs.keys!.voicings.flatMap((v, i) => (v.length ? [i] : []))).toEqual([3, 7]);
   });
 
   it("leads the keys away from the voicing the last bar ended on", () => {
-    const jam = createJam("x", {
+    const jam = loopJam("x", {
       band: { drums: true, bass: false, keys: true },
       key: "A blues",
       form: { kind: "blues12", bars: 12 },
@@ -467,16 +488,16 @@ describe("the keys, the mix and the sticks", () => {
   });
 
   it("sends a mix of ones when the record has none", () => {
-    expect(compileJam(createJam("x")).mix).toEqual({ drums: 1, bass: 1, keys: 1 });
+    expect(compileJam(loopJam("x")).mix).toEqual({ drums: 1, bass: 1, keys: 1 });
   });
 
   it("sends the mix the record carries, clamped", () => {
-    expect(compileJam(createJam("x", { mix: { drums: 0.4, bass: 1.2, keys: 0 } })).mix).toEqual({
+    expect(compileJam(loopJam("x", { mix: { drums: 0.4, bass: 1.2, keys: 0 } })).mix).toEqual({
       drums: 0.4,
       bass: 1.2,
       keys: 0,
     });
-    expect(compileJam(createJam("x", { mix: { drums: -1, bass: 9, keys: 1 } })).mix).toEqual({
+    expect(compileJam(loopJam("x", { mix: { drums: -1, bass: 9, keys: 1 } })).mix).toEqual({
       drums: 0,
       bass: 1.5,
       keys: 1,
@@ -484,15 +505,15 @@ describe("the keys, the mix and the sticks", () => {
   });
 
   it("counts in with the beep unless the sticks were asked for", () => {
-    expect(compileJam(createJam("x")).countInSound).toBe("beep");
-    expect(compileJam(createJam("x", { countInSound: "sticks" })).countInSound).toBe("sticks");
-    expect(compileJam(createJam("x", { countInSound: "beep" })).countInSound).toBe("beep");
+    expect(compileJam(loopJam("x")).countInSound).toBe("beep");
+    expect(compileJam(loopJam("x", { countInSound: "sticks" })).countInSound).toBe("sticks");
+    expect(compileJam(loopJam("x", { countInSound: "beep" })).countInSound).toBe("beep");
   });
 });
 
 describe("the changes the band plays", () => {
   it("are the progression's where there is one", () => {
-    const jam = createJam("x", {
+    const jam = loopJam("x", {
       key: "A blues",
       form: { kind: "blues12", bars: 12 },
       band: { drums: true, bass: true },

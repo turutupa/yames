@@ -136,6 +136,32 @@
       "loopOff": "Döngüyü kapat",
       "shape": "Yapı"
     },
+    "arrangement": {
+      "label": "Düzenleme",
+      "loop": "Döngü",
+      "build": "Yükselme",
+      "song": "Parça",
+      "loopLead": "Tek bir groove, sen durdurana kadar döne döne.",
+      "buildLead": "Grup ilk chorus'ta kendini tutar, parça başa döndükçe açılır, yolda bir yerde kick ve hi-hat'e iner.",
+      "songLead": "{{choruses}} chorus boyunca yükselir, sonra grup parçayı birlikte bitirir.",
+      "choruses": "Chorus",
+      "fewerChoruses": "Daha az chorus",
+      "moreChoruses": "Daha çok chorus",
+      "breakdown": "Breakdown",
+      "breakdownOff": "Hiç",
+      "breakdownEvery": "her {{choruses}} chorus'ta",
+      "breakdownHint": "Grubun yarım chorus boyunca yalnızca kick ve hi-hat çalma sıklığı."
+    },
+    "dynamics": {
+      "soft": "kısık",
+      "normal": "tam kadro",
+      "loud": "yüksek",
+      "breakdown": "breakdown",
+      "stopTime": "stop-time",
+      "endingHold": "son akor, çınlayarak",
+      "endingStop": "son vuruş, tam sessizlik",
+      "crash": "crash"
+    },
     "short": {
       "blues12": "12 ölçü",
       "loop8": "8 ölçü",

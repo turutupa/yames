@@ -136,6 +136,32 @@
       "loopOff": "Smetti di ripetere",
       "shape": "Struttura"
     },
+    "arrangement": {
+      "label": "Arrangiamento",
+      "loop": "Loop",
+      "build": "Crescita",
+      "song": "Brano",
+      "loopLead": "Un groove, ancora e ancora, finché non ti fermi.",
+      "buildLead": "La band si trattiene al primo giro, si apre quando il brano riparte e lungo la strada resta su cassa e charleston.",
+      "songLead": "Cresce per {{choruses}} giri, poi la band chiude il brano insieme.",
+      "choruses": "Giri",
+      "fewerChoruses": "Meno giri",
+      "moreChoruses": "Più giri",
+      "breakdown": "Breakdown",
+      "breakdownOff": "Mai",
+      "breakdownEvery": "ogni {{choruses}} giri",
+      "breakdownHint": "Ogni quanto la band resta su cassa e charleston per mezzo giro."
+    },
+    "dynamics": {
+      "soft": "piano",
+      "normal": "tutta la band",
+      "loud": "forte",
+      "breakdown": "breakdown",
+      "stopTime": "stop-time",
+      "endingHold": "ultimo accordo, che risuona",
+      "endingStop": "ultimo colpo, secco",
+      "crash": "crash"
+    },
     "short": {
       "blues12": "12 battute",
       "loop8": "8 battute",
