@@ -561,6 +561,21 @@
     "filter": {
       "style": "Estilo",
       "all": "Todos os estilos"
+    },
+    "chart": {
+      "paste": "Colar acordes",
+      "label": "Cole uma cifra",
+      "placeholder": "| Am | F | C | G |\nAm7 D7 | Gmaj7 |\nC            G\na letra embaixo",
+      "use": "Usar estes acordes",
+      "cancel": "Cancelar",
+      "empty": "Com barras de compasso, uma linha do iReal ou uma letra com cifras em cima.",
+      "none": "Ainda não há acordes aí.",
+      "summary": "{{count}} compassos · tom de {{key}}",
+      "summary_one": "{{count}} compasso · tom de {{key}}",
+      "summary_other": "{{count}} compassos · tom de {{key}}",
+      "check": "{{count}} para conferir: {{list}}",
+      "check_one": "{{count}} para conferir: {{list}}",
+      "check_other": "{{count}} para conferir: {{list}}"
     }
   },
   "scale": {

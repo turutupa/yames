@@ -561,6 +561,21 @@
     "filter": {
       "style": "风格",
       "all": "全部风格"
+    },
+    "chart": {
+      "paste": "粘贴和弦",
+      "label": "粘贴和弦谱",
+      "placeholder": "| Am | F | C | G |\nAm7 D7 | Gmaj7 |\nC            G\n下面是歌词",
+      "use": "使用这些和弦",
+      "cancel": "取消",
+      "empty": "小节线、iReal 格式的一行，或歌词上方写着和弦的谱子。",
+      "none": "里面还没有和弦。",
+      "summary": "{{count}} 小节 · {{key}} 调",
+      "summary_one": "{{count}} 小节 · {{key}} 调",
+      "summary_other": "{{count}} 小节 · {{key}} 调",
+      "check": "有 {{count}} 处可以核对：{{list}}",
+      "check_one": "有 {{count}} 处可以核对：{{list}}",
+      "check_other": "有 {{count}} 处可以核对：{{list}}"
     }
   },
   "scale": {

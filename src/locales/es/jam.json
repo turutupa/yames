@@ -561,6 +561,21 @@
     "filter": {
       "style": "Estilo",
       "all": "Todos los estilos"
+    },
+    "chart": {
+      "paste": "Pegar acordes",
+      "label": "Pega una hoja de acordes",
+      "placeholder": "| Am | F | C | G |\nAm7 D7 | Gmaj7 |\nC            G\nla letra debajo",
+      "use": "Usar estos acordes",
+      "cancel": "Cancelar",
+      "empty": "Con barras de compás, una línea de iReal o una letra con acordes encima.",
+      "none": "Ahí no hay acordes todavía.",
+      "summary": "{{count}} compases · tonalidad de {{key}}",
+      "summary_one": "{{count}} compás · tonalidad de {{key}}",
+      "summary_other": "{{count}} compases · tonalidad de {{key}}",
+      "check": "{{count}} para revisar: {{list}}",
+      "check_one": "{{count}} para revisar: {{list}}",
+      "check_other": "{{count}} para revisar: {{list}}"
     }
   },
   "scale": {

@@ -561,6 +561,21 @@
     "filter": {
       "style": "Stile",
       "all": "Tutti gli stili"
+    },
+    "chart": {
+      "paste": "Incolla accordi",
+      "label": "Incolla una griglia di accordi",
+      "placeholder": "| Am | F | C | G |\nAm7 D7 | Gmaj7 |\nC            G\nil testo sotto",
+      "use": "Usa questi accordi",
+      "cancel": "Annulla",
+      "empty": "Stanghette, una riga iReal o un testo con gli accordi sopra.",
+      "none": "Lì dentro non ci sono ancora accordi.",
+      "summary": "{{count}} battute · tonalità di {{key}}",
+      "summary_one": "{{count}} battuta · tonalità di {{key}}",
+      "summary_other": "{{count}} battute · tonalità di {{key}}",
+      "check": "{{count}} da controllare: {{list}}",
+      "check_one": "{{count}} da controllare: {{list}}",
+      "check_other": "{{count}} da controllare: {{list}}"
     }
   },
   "scale": {

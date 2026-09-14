@@ -957,6 +957,45 @@ describe("JamView — editing the changes", () => {
     expect(screen.queryByRole("button", { name: "Edit changes" })).toBeNull();
   });
 
+  it("offers Paste chords whether or not the timeline is showing any", () => {
+    // Pasting a chart is how a jam GETS chords, so hiding the door behind the
+    // switch it is meant to turn on would be a door into a locked room.
+    sheet({ jam: jamOf({ chords: false }) });
+    expect(screen.getByRole("button", { name: "Paste chords" })).toBeInTheDocument();
+  });
+
+  it("says what it has understood while you type, and then applies it", () => {
+    const { props } = sheet({ jam: withChords() });
+    fireEvent.click(screen.getByRole("button", { name: "Paste chords" }));
+    const box = screen.getByLabelText("Paste a chord chart");
+    fireEvent.change(box, { target: { value: "| Am | F | C | G | D/F# | ?? |" } });
+    // Six bars, the key the four diatonic ones are in, and the two symbols it
+    // did something lossy with — the slash chord's bass and the unreadable one.
+    expect(screen.getByText(/6 bars/)).toBeInTheDocument();
+    expect(screen.getByText(/key of Am/)).toBeInTheDocument();
+    expect(screen.getByText(/D\/F#, \?\?/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Use these chords" }));
+    expect(props.onEdit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        form: { kind: "custom", bars: 6 },
+        key: "Am",
+        progression: ["Am", "F", "C", "G", "D", ""],
+        chords: true,
+      }),
+    );
+  });
+
+  it("will not apply a chart it found no chords in", () => {
+    const { props } = sheet({ jam: withChords() });
+    fireEvent.click(screen.getByRole("button", { name: "Paste chords" }));
+    fireEvent.change(screen.getByLabelText("Paste a chord chart"), {
+      target: { value: "the quick brown fox" },
+    });
+    expect(screen.getByRole("button", { name: "Use these chords" })).toBeDisabled();
+    expect(props.onEdit).not.toHaveBeenCalled();
+  });
+
   it("turns the cells into chord buttons in edit mode", () => {
     const { container } = setup({
       jam: withChords(),

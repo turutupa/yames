@@ -11,6 +11,7 @@ import {
 } from "../../jam/jams";
 import { jamBand, jamGroove, jamGrooveFitsMeter, jamKey, jamMix, jamWrittenGroove } from "../../jam/compile";
 import { SHARP_NAMES, TRANSPOSITION_OPTIONS, keyName, noteName } from "../../jam/harmony";
+import { chartEdit, parseChordChart } from "../../jam/chart";
 import { progressionEdit } from "../../jam/progression";
 import { METER_PRESETS } from "../../constants/metronome";
 import { meterKey } from "../../utils/meter";
@@ -187,6 +188,32 @@ export function JamSetupSheet({
   const [pickedFamily, setPickedFamily] = useState<GrooveFamily | "all" | null>(null);
   const grooveFamily: GrooveFamily | "all" =
     pickedFamily ?? (jam.customGroove ? "all" : grooveById(jam.grooveId).family);
+
+  /**
+   * The paste-a-chart box, and what it has understood so far.
+   *
+   * The preview is recomputed on every keystroke and says three things: how
+   * many bars, what key, and how many symbols it did something lossy with.
+   * That last number is the one that matters — a paste box whose mistakes you
+   * only find out about after it has replaced your changes is a paste box
+   * nobody uses twice.
+   */
+  const [pasteOpen, setPasteOpen] = useState(false);
+  const [chartText, setChartText] = useState("");
+  const chart = useMemo(() => parseChordChart(chartText), [chartText]);
+  const chartPreview = useMemo(() => {
+    if (!chartText.trim()) return t("jam.chart.empty");
+    if (chart.bars.length === 0) return t("jam.chart.none");
+    const summary = t("jam.chart.summary", {
+      count: chart.bars.length,
+      key: keyName(chart.key ?? key),
+    });
+    if (chart.warnings.length === 0) return summary;
+    return `${summary} · ${t("jam.chart.check", {
+      count: chart.warnings.length,
+      list: chart.warnings.slice(0, 4).join(", "),
+    })}`;
+  }, [chartText, chart, key, t]);
 
   /** One groove card. The same button whichever shelf it is drawn under. */
   const grooveCard = (groove: Groove) => {
@@ -388,19 +415,78 @@ export function JamSetupSheet({
       <JamSheetGroup
         label={t("jam.form.label")}
         action={
-          jam.chords ? (
+          <span className="jam-sheet-links">
+            {jam.chords && (
+              <button
+                type="button"
+                className={`jam-link${editingChords ? " active" : ""}`}
+                aria-pressed={editingChords}
+                title={t("jam.changes.hint")}
+                onClick={() => onEditingChords(!editingChords)}
+              >
+                {editingChords ? t("jam.changes.done") : t("jam.changes.edit")}
+              </button>
+            )}
+            {/* The fastest way to jam over a tune is to paste the chart you
+                already have (A3). Beside "Edit changes" rather than inside it:
+                typing chords in one at a time and pasting a page of them are
+                two different gestures, and the second one is the one people
+                arrive with. */}
             <button
               type="button"
-              className={`jam-link${editingChords ? " active" : ""}`}
-              aria-pressed={editingChords}
-              title={t("jam.changes.hint")}
-              onClick={() => onEditingChords(!editingChords)}
+              className={`jam-link${pasteOpen ? " active" : ""}`}
+              aria-pressed={pasteOpen}
+              onClick={() => setPasteOpen((open) => !open)}
             >
-              {editingChords ? t("jam.changes.done") : t("jam.changes.edit")}
+              {t("jam.chart.paste")}
             </button>
-          ) : undefined
+          </span>
         }
       >
+        {pasteOpen && (
+          <div className="jam-chart-paste">
+            <label className="stage-label" htmlFor="jam-chart-text">
+              {t("jam.chart.label")}
+            </label>
+            <textarea
+              id="jam-chart-text"
+              className="jam-chart-text"
+              rows={6}
+              spellCheck={false}
+              value={chartText}
+              placeholder={t("jam.chart.placeholder")}
+              onChange={(e) => setChartText(e.target.value)}
+            />
+            {/* The preview is live, because the whole risk of a paste box is
+                that you cannot tell what it understood until after it has
+                replaced your changes. */}
+            <p className="jam-chart-preview">{chartPreview}</p>
+            <div className="jam-chart-actions">
+              <button
+                type="button"
+                className="preset-text-btn"
+                disabled={chart.bars.length === 0}
+                onClick={() => {
+                  onEdit(chartEdit(chartText, jam));
+                  setPasteOpen(false);
+                  setChartText("");
+                }}
+              >
+                {t("jam.chart.use")}
+              </button>
+              <button
+                type="button"
+                className="jam-link"
+                onClick={() => {
+                  setPasteOpen(false);
+                  setChartText("");
+                }}
+              >
+                {t("jam.chart.cancel")}
+              </button>
+            </div>
+          </div>
+        )}
         <div className="jam-sheet-row">
           <JamSelect
             label={t("jam.form.shape")}

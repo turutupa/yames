@@ -561,6 +561,21 @@
     "filter": {
       "style": "Tarz",
       "all": "Tüm tarzlar"
+    },
+    "chart": {
+      "paste": "Akorları yapıştır",
+      "label": "Akor şeması yapıştır",
+      "placeholder": "| Am | F | C | G |\nAm7 D7 | Gmaj7 |\nC            G\naltında sözler",
+      "use": "Bu akorları kullan",
+      "cancel": "Vazgeç",
+      "empty": "Ölçü çizgileri, bir iReal satırı ya da akorları üstte yazılı bir söz sayfası.",
+      "none": "Orada henüz akor yok.",
+      "summary": "{{count}} ölçü · {{key}} tonunda",
+      "summary_one": "{{count}} ölçü · {{key}} tonunda",
+      "summary_other": "{{count}} ölçü · {{key}} tonunda",
+      "check": "{{count}} gözden geçirilecek: {{list}}",
+      "check_one": "{{count}} gözden geçirilecek: {{list}}",
+      "check_other": "{{count}} gözden geçirilecek: {{list}}"
     }
   },
   "scale": {

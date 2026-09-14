@@ -561,6 +561,21 @@
     "filter": {
       "style": "Phong cách",
       "all": "Mọi phong cách"
+    },
+    "chart": {
+      "paste": "Dán hợp âm",
+      "label": "Dán bảng hợp âm",
+      "placeholder": "| Am | F | C | G |\nAm7 D7 | Gmaj7 |\nC            G\nlời hát bên dưới",
+      "use": "Dùng các hợp âm này",
+      "cancel": "Hủy",
+      "empty": "Vạch nhịp, một dòng iReal, hoặc lời hát có hợp âm bên trên.",
+      "none": "Chưa có hợp âm nào trong đó.",
+      "summary": "{{count}} ô nhịp · giọng {{key}}",
+      "summary_one": "{{count}} ô nhịp · giọng {{key}}",
+      "summary_other": "{{count}} ô nhịp · giọng {{key}}",
+      "check": "{{count}} nên xem lại: {{list}}",
+      "check_one": "{{count}} nên xem lại: {{list}}",
+      "check_other": "{{count}} nên xem lại: {{list}}"
     }
   },
   "scale": {

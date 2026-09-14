@@ -561,6 +561,21 @@
     "filter": {
       "style": "Stijl",
       "all": "Alle stijlen"
+    },
+    "chart": {
+      "paste": "Akkoorden plakken",
+      "label": "Plak een akkoordenschema",
+      "placeholder": "| Am | F | C | G |\nAm7 D7 | Gmaj7 |\nC            G\nde tekst eronder",
+      "use": "Deze akkoorden gebruiken",
+      "cancel": "Annuleren",
+      "empty": "Maatstrepen, een iReal-regel of een tekstblad met akkoorden erboven.",
+      "none": "Daar staan nog geen akkoorden in.",
+      "summary": "{{count}} maten · toonsoort {{key}}",
+      "summary_one": "{{count}} maat · toonsoort {{key}}",
+      "summary_other": "{{count}} maten · toonsoort {{key}}",
+      "check": "{{count}} om na te kijken: {{list}}",
+      "check_one": "{{count}} om na te kijken: {{list}}",
+      "check_other": "{{count}} om na te kijken: {{list}}"
     }
   },
   "scale": {

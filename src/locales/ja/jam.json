@@ -561,6 +561,21 @@
     "filter": {
       "style": "スタイル",
       "all": "すべてのスタイル"
+    },
+    "chart": {
+      "paste": "コードを貼り付け",
+      "label": "コード譜を貼り付け",
+      "placeholder": "| Am | F | C | G |\nAm7 D7 | Gmaj7 |\nC            G\n下に歌詞",
+      "use": "このコードを使う",
+      "cancel": "キャンセル",
+      "empty": "小節線、iReal 形式の行、または歌詞の上にコードを書いた譜面。",
+      "none": "まだコードが見つかりません。",
+      "summary": "{{count}} 小節 · {{key}} のキー",
+      "summary_one": "{{count}} 小節 · {{key}} のキー",
+      "summary_other": "{{count}} 小節 · {{key}} のキー",
+      "check": "確認したいもの {{count}} 件: {{list}}",
+      "check_one": "確認したいもの {{count}} 件: {{list}}",
+      "check_other": "確認したいもの {{count}} 件: {{list}}"
     }
   },
   "scale": {

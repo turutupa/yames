@@ -561,6 +561,21 @@
     "filter": {
       "style": "Style",
       "all": "Tous les styles"
+    },
+    "chart": {
+      "paste": "Coller des accords",
+      "label": "Collez une grille d'accords",
+      "placeholder": "| Am | F | C | G |\nAm7 D7 | Gmaj7 |\nC            G\nles paroles en dessous",
+      "use": "Utiliser ces accords",
+      "cancel": "Annuler",
+      "empty": "Des barres de mesure, une ligne iReal ou des paroles avec les accords au-dessus.",
+      "none": "Aucun accord là-dedans pour l'instant.",
+      "summary": "{{count}} mesures · tonalité de {{key}}",
+      "summary_one": "{{count}} mesure · tonalité de {{key}}",
+      "summary_other": "{{count}} mesures · tonalité de {{key}}",
+      "check": "{{count}} à vérifier : {{list}}",
+      "check_one": "{{count}} à vérifier : {{list}}",
+      "check_other": "{{count}} à vérifier : {{list}}"
     }
   },
   "scale": {

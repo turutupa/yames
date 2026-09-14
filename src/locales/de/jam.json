@@ -561,6 +561,21 @@
     "filter": {
       "style": "Stil",
       "all": "Alle Stile"
+    },
+    "chart": {
+      "paste": "Akkorde einfügen",
+      "label": "Akkordblatt einfügen",
+      "placeholder": "| Am | F | C | G |\nAm7 D7 | Gmaj7 |\nC            G\nder Text darunter",
+      "use": "Diese Akkorde übernehmen",
+      "cancel": "Abbrechen",
+      "empty": "Taktstriche, eine iReal-Zeile oder ein Textblatt mit Akkorden darüber.",
+      "none": "Darin stehen noch keine Akkorde.",
+      "summary": "{{count}} Takte · Tonart {{key}}",
+      "summary_one": "{{count}} Takt · Tonart {{key}}",
+      "summary_other": "{{count}} Takte · Tonart {{key}}",
+      "check": "{{count}} zum Prüfen: {{list}}",
+      "check_one": "{{count}} zum Prüfen: {{list}}",
+      "check_other": "{{count}} zum Prüfen: {{list}}"
     }
   },
   "scale": {

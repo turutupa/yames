@@ -561,6 +561,21 @@
     "filter": {
       "style": "스타일",
       "all": "모든 스타일"
+    },
+    "chart": {
+      "paste": "코드 붙여넣기",
+      "label": "코드 차트 붙여넣기",
+      "placeholder": "| Am | F | C | G |\nAm7 D7 | Gmaj7 |\nC            G\n아래에 가사",
+      "use": "이 코드 사용",
+      "cancel": "취소",
+      "empty": "마디선, iReal 형식의 줄, 또는 가사 위에 코드를 적은 악보.",
+      "none": "아직 코드가 없습니다.",
+      "summary": "{{count}}마디 · {{key}} 조",
+      "summary_one": "{{count}}마디 · {{key}} 조",
+      "summary_other": "{{count}}마디 · {{key}} 조",
+      "check": "확인할 것 {{count}}개: {{list}}",
+      "check_one": "확인할 것 {{count}}개: {{list}}",
+      "check_other": "확인할 것 {{count}}개: {{list}}"
     }
   },
   "scale": {

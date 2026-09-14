@@ -561,6 +561,21 @@
     "filter": {
       "style": "風格",
       "all": "全部風格"
+    },
+    "chart": {
+      "paste": "貼上和弦",
+      "label": "貼上和弦譜",
+      "placeholder": "| Am | F | C | G |\nAm7 D7 | Gmaj7 |\nC            G\n下面是歌詞",
+      "use": "使用這些和弦",
+      "cancel": "取消",
+      "empty": "小節線、iReal 格式的一行，或歌詞上方寫著和弦的譜。",
+      "none": "裡面還沒有和弦。",
+      "summary": "{{count}} 小節 · {{key}} 調",
+      "summary_one": "{{count}} 小節 · {{key}} 調",
+      "summary_other": "{{count}} 小節 · {{key}} 調",
+      "check": "有 {{count}} 處可以核對：{{list}}",
+      "check_one": "有 {{count}} 處可以核對：{{list}}",
+      "check_other": "有 {{count}} 處可以核對：{{list}}"
     }
   },
   "scale": {

@@ -1600,8 +1600,65 @@
 /* A link on a group head sits against the right edge, whether or not the
    group has a lead sentence to take the slack for it. */
 .jam-sheet-group-head .jam-link,
+.jam-sheet-group-head .jam-sheet-links,
 .jam-sheet-group-head .transport-switch {
   margin-left: auto;
+}
+
+/* Two links on one head — "Edit changes" and "Paste chords". Grouped so the
+   pair takes the slack once between them rather than each pushing the other. */
+.jam-sheet-links {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.jam-sheet-links .jam-link {
+  margin-left: 0;
+}
+
+/* ── Paste a chord chart (fourth pass, A3) ─────────────────────────────── */
+.jam-chart-paste {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Monospaced, because a chart is a grid: `| Am | F |` has to line up under
+   itself or you cannot see the bar you mistyped. */
+.jam-chart-text {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  padding: 9px 11px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--text-primary) 3%, transparent);
+  color: var(--text-primary);
+  font-family: var(--font-mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);
+  font-size: 0.76rem;
+  line-height: 1.5;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.jam-chart-text:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.jam-chart-preview {
+  margin: 0;
+  min-height: 1.2em;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-faint);
+}
+
+.jam-chart-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .jam-sheet-note {

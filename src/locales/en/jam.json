@@ -561,6 +561,21 @@
     "filter": {
       "style": "Style",
       "all": "All styles"
+    },
+    "chart": {
+      "paste": "Paste chords",
+      "label": "Paste a chord chart",
+      "placeholder": "| Am | F | C | G |\nAm7 D7 | Gmaj7 |\nC            G\nthe words underneath",
+      "use": "Use these chords",
+      "cancel": "Cancel",
+      "empty": "Bar lines, an iReal line, or a lyric sheet with chords over the words.",
+      "none": "No chords in that yet.",
+      "summary": "{{count}} bars · key of {{key}}",
+      "summary_one": "{{count}} bar · key of {{key}}",
+      "summary_other": "{{count}} bars · key of {{key}}",
+      "check": "{{count}} you may want to check: {{list}}",
+      "check_one": "{{count}} you may want to check: {{list}}",
+      "check_other": "{{count}} you may want to check: {{list}}"
     }
   },
   "scale": {
