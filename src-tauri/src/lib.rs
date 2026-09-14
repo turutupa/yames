@@ -23,6 +23,7 @@ mod state;
 mod take;
 pub mod timing;
 mod tts;
+mod voices;
 
 /// Everything `src/bin/click-jitter-probe.rs` needs, and nothing more.
 ///
@@ -39,9 +40,16 @@ pub mod probe {
     /// through.
     pub use crate::jam::{
         band_state_for_bar, compile as compile_jam, compile_with_kit as compile_jam_with_kit,
-        reference_bank, JamBandState, JamBassLine, JamConfig, JamDropOut, JamKeysLine, JamMix,
-        JamPattern, JamPosition, JamPracticeConfig, JamTable, JamTrade,
+        compile_with_voices as compile_jam_with_voices, reference_bank, JamBandState, JamBassLine,
+        JamConfig, JamDropOut, JamKeysLine, JamMix, JamPattern, JamPosition, JamPracticeConfig,
+        JamTable, JamTrade, JamVoices,
     };
+    /// The recorded bass and keys. `--jam-voice <dir>` plays a folder of
+    /// notes, so the gate covers the path a melodic bank takes to the mixer:
+    /// a MONO buffer through the drum bus, a round robin decided on the
+    /// tick, and a raised-cosine release on every note the line's cap ends —
+    /// which is the one per-sample `cos` anywhere near the callback.
+    pub use crate::voices::{load as load_voice_bank, MelodicBank};
     /// The drums. Every kit is decoded on the command thread and travels
     /// inside the table, so the gate covers the sound source the audio
     /// thread actually reads — including `--jam-kit <dir>`, a folder of the
@@ -87,7 +95,7 @@ use commands::{
     arm_count_in, inspect_kit_folder, pick_kit_folder, set_accent_mode, set_jam, set_jam_position, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
     tts_stop, tts_voice_diagnostics, unload_coach_model, write_model_chunk, DownloadState,
     delete_take, list_takes, play_take, start_take, stop_take, stop_take_playback, takes_dir_size,
-    EngineState, JamGainState, JamKitState, TakeState,
+    EngineState, JamGainState, JamKitState, JamVoiceState, TakeState,
 };
 use engine::MetronomeEngine;
 use midi::create_shared_midi;
@@ -306,6 +314,9 @@ pub fn run() {
             // The decoded kit folder, so the bar-ahead sends do not each
             // re-read eight WAVs. See `KitCache` in `kit.rs`.
             app.manage(JamKitState::default());
+            // ...and the decoded melodic banks, for the same reason and at a
+            // higher price per miss. See `VoiceCache` in `voices.rs`.
+            app.manage(JamVoiceState::default());
             // The take being recorded, if one is. See `TakeState`.
             app.manage(TakeState::default());
 

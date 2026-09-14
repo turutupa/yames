@@ -592,8 +592,12 @@ impl std::fmt::Debug for KitBank {
 // The kits the app ships
 // ---------------------------------------------------------------------------
 
-/// One shipped kit, as `build.rs` wrote it: the manifest's text and every
+/// One shipped folder, as `build.rs` wrote it: the manifest's text and every
 /// WAV beside it, keyed by lower-cased file name.
+///
+/// Named for the kits, and used for the melodic voices too — `SHIPPED_KITS`
+/// and `SHIPPED_VOICES` are the same walk of two directories, so a second
+/// struct saying the same thing would be a second thing to keep in step.
 pub struct ShippedKit {
     pub manifest: &'static str,
     pub files: &'static [(&'static str, &'static [u8])],
@@ -888,15 +892,15 @@ pub fn inspect(dir: &Path) -> Result<KitFolder, String> {
 // ---------------------------------------------------------------------------
 
 /// Where one file's bytes come from: the binary, or the musician's disk.
-enum Source {
+pub(crate) enum Source {
     Bytes(&'static [u8]),
     File(PathBuf),
 }
 
 /// One file on its way into a bank.
-struct Entry {
-    name: String,
-    source: Source,
+pub(crate) struct Entry {
+    pub(crate) name: String,
+    pub(crate) source: Source,
 }
 
 /// One WAV as interleaved stereo, at its own rate.
@@ -919,6 +923,27 @@ struct Entry {
 /// A sample that WAS cut is faded out over [`CAP_FADE_SECS`] on the way, so
 /// the cap is a decision about length and not a click.
 fn decode_stereo(name: &str, source: &Source) -> Result<(Vec<f32>, u32), String> {
+    decode_capped(name, source, MAX_VOICE_SECS).map(|(buf, rate, _)| (buf, rate))
+}
+
+/// [`decode_stereo`] with the length cap as an argument, and the channel
+/// count the FILE carried alongside the pair it was folded into.
+///
+/// A drum is capped at [`MAX_VOICE_SECS`]; a melodic note is longer, because
+/// a bass note held under a ballad is a note and not a wash. One decoder
+/// either way — every bit depth, every channel count, every rate a folder
+/// can hold, and one place for all of it to be wrong.
+///
+/// The channel count is the source's own, and it is returned rather than
+/// assumed because the two formats describe themselves differently: a kit
+/// says it is stereo and is checked against the pair this guarantees, and a
+/// melodic bank says it is mono and would be wrong about it on every correct
+/// file if it were checked against the same thing.
+pub(crate) fn decode_capped(
+    name: &str,
+    source: &Source,
+    max_secs: f64,
+) -> Result<(Vec<f32>, u32, u16), String> {
     let mut reader = match source {
         Source::Bytes(b) => hound::WavReader::new(Cursor::new(*b))
             .map(ReaderKind::Mem)
@@ -933,7 +958,7 @@ fn decode_stereo(name: &str, source: &Source) -> Result<(Vec<f32>, u32), String>
         return Err(format!("{name} claims a sample rate of zero"));
     }
 
-    let max_frames = (MAX_VOICE_SECS * spec.sample_rate as f64) as usize;
+    let max_frames = (max_secs * spec.sample_rate as f64) as usize;
     // `duration()` is frames, from the header, before anything is read: it
     // is how the fade below knows whether the cap actually cut anything.
     let file_frames = reader.duration() as usize;
@@ -993,7 +1018,7 @@ fn decode_stereo(name: &str, source: &Source) -> Result<(Vec<f32>, u32), String>
             }
         }
     }
-    Ok((out, spec.sample_rate))
+    Ok((out, spec.sample_rate, spec.channels.max(1)))
 }
 
 /// A `hound` reader over bytes or over a file — the same three arms of
@@ -1081,7 +1106,7 @@ impl ReaderKind {
 /// it leaves against an analytic sine is the same −122.5 dB RMS it was
 /// before, which `the_decoder_resamples_44_kilohertz_to_48_within_a_measurable_error`
 /// holds it to.
-struct Resampler {
+pub(crate) struct Resampler {
     /// `phases × TAPS` taps, already normalised by the sum of their own
     /// phase — which is what keeps the level steady at the edges, where
     /// half the kernel hangs off the end of the sample.
@@ -1104,7 +1129,76 @@ const TAPS: usize = (HALF * 2) as usize;
 /// twelve-megabyte table.
 const MAX_PHASES: u64 = 4096;
 
+/// The best rational approximation to `x` with a denominator no larger than
+/// `max_den`.
+///
+/// A PITCH IS NOT A RATIO OF RATES. Two sample rates are whole numbers, so
+/// the phases between them are a finite set and [`Resampler::new`] can name
+/// it exactly: 44.1 to 48 kHz is 147/160 and there are a hundred and sixty
+/// phases. A semitone is `2^(1/12)`, which is irrational, so there is no
+/// exact table — and computing the taps per output sample instead is the
+/// 2.2-second decode this whole struct exists to avoid.
+///
+/// So the ratio is approximated, and the error it leaves is a TUNING error.
+/// The continued fraction gives the best approximation there is at a given
+/// denominator, which at 1024 is a few parts in ten million — a thousandth
+/// of a cent, against the four or five cents a guitarist's own tuner
+/// tolerates. `the_pitches_between_the_samples_are_in_tune` in `voices.rs`
+/// measures it on a real bank rather than trusting this paragraph.
+pub(crate) fn best_rational(x: f64, max_den: u64) -> (u64, u64) {
+    if !x.is_finite() || x <= 0.0 {
+        return (1, 1);
+    }
+    // The convergents, two at a time: p/q is the current one and the
+    // previous is what the recurrence needs.
+    let (mut prev_p, mut prev_q) = (1u64, 0u64);
+    let (mut p, mut q) = (x.floor() as u64, 1u64);
+    let mut rest = x - x.floor();
+    while rest > 1e-12 {
+        let next = 1.0 / rest;
+        let a = next.floor() as u64;
+        let (np, nq) = (
+            a.saturating_mul(p).saturating_add(prev_p),
+            a.saturating_mul(q).saturating_add(prev_q),
+        );
+        if nq > max_den || nq == 0 {
+            // THE LAST CONVERGENT IS NOT ALWAYS THE BEST FRACTION THAT
+            // FITS. Between two convergents there is a run of
+            // semiconvergents — the same recurrence with a smaller
+            // coefficient — and one of them can be both closer and small
+            // enough. For `2^(1/12)` at a thousand and twenty-four, the last
+            // convergent is 196/185 and 873/824 is eleven times nearer.
+            //
+            // So the largest coefficient that still fits is tried, and kept
+            // only when it actually is nearer: below half of `a` a
+            // semiconvergent is worse than the convergent it came from, and
+            // comparing is cheaper than knowing which half we are in.
+            let room = (max_den.saturating_sub(prev_q)) / q.max(1);
+            if room > 0 {
+                let (sp, sq) = (
+                    room.saturating_mul(p).saturating_add(prev_p),
+                    room.saturating_mul(q).saturating_add(prev_q),
+                );
+                if sq > 0
+                    && sq <= max_den
+                    && (x - sp as f64 / sq as f64).abs() < (x - p as f64 / q as f64).abs()
+                {
+                    return (sp.max(1), sq);
+                }
+            }
+            break;
+        }
+        prev_p = p;
+        prev_q = q;
+        p = np;
+        q = nq;
+        rest = next - next.floor();
+    }
+    (p.max(1), q.max(1))
+}
+
 impl Resampler {
+    /// A converter between two sample rates, exactly.
     fn new(from: u32, to: u32) -> Option<Self> {
         fn gcd(a: u64, b: u64) -> u64 {
             if b == 0 {
@@ -1114,12 +1208,26 @@ impl Resampler {
             }
         }
         let g = gcd(from as u64, to as u64).max(1);
-        let (num, den) = (from as u64 / g, to as u64 / g);
-        if den > MAX_PHASES {
+        Self::from_terms(from as u64 / g, to as u64 / g)
+    }
+
+    /// A converter at an arbitrary ratio: output sample `i` reads source
+    /// position `i × ratio`.
+    ///
+    /// Above 1 the source is being read faster than it is written, which is
+    /// a note going UP and a decimation — so the kernel band-limits, exactly
+    /// as it does when a device asks for a lower rate.
+    pub(crate) fn for_ratio(ratio: f64) -> Option<Self> {
+        let (num, den) = best_rational(ratio, MAX_PHASES);
+        Self::from_terms(num, den)
+    }
+
+    fn from_terms(num: u64, den: u64) -> Option<Self> {
+        if den > MAX_PHASES || den == 0 || num == 0 {
             return None;
         }
         // Downsampling has to band-limit to the NEW Nyquist, or it aliases.
-        let ratio = to as f64 / from as f64;
+        let ratio = den as f64 / num as f64;
         let cutoff = if ratio < 1.0 { ratio } else { 1.0 };
         let mut taps = vec![0.0f32; den as usize * TAPS];
         for phase in 0..den as usize {
@@ -1157,6 +1265,29 @@ impl Resampler {
     /// How many output frames `frames` source frames become.
     fn out_len(&self, frames: usize) -> usize {
         (frames as f64 * self.den as f64 / self.num as f64).ceil() as usize
+    }
+
+    /// One mono buffer, resampled. The melodic banks' walk — a note is one
+    /// channel, where a drum is two.
+    pub(crate) fn mono(&self, buf: &[f32]) -> Vec<f32> {
+        let n = self.out_len(buf.len());
+        let mut out = vec![0.0f32; n];
+        for (i, o) in out.iter_mut().enumerate() {
+            let at = i as u64 * self.num;
+            let centre = (at / self.den) as i64;
+            let row = (at % self.den) as usize * TAPS;
+            let first = centre - HALF + 1;
+            let mut v = 0.0f32;
+            for j in 0..TAPS {
+                let k = first + j as i64;
+                if k < 0 || k as usize >= buf.len() {
+                    continue;
+                }
+                v += buf[k as usize] * self.taps[row + j];
+            }
+            *o = v;
+        }
+        out
     }
 
     /// One interleaved stereo buffer, resampled.
