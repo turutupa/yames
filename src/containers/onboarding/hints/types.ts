@@ -1,7 +1,7 @@
 /**
  * Progressive first-time hints (ONBOARDING_PLAN §5, brief O7).
  *
- * Six contextual cards, each shown exactly once, at most one per app session.
+ * Nine contextual cards, each shown exactly once, at most one per app session.
  *
  * Store keys (onboarding README + this task):
  *   hints.<id>              boolean  the hint has been shown
@@ -25,16 +25,22 @@ export type HintId =
   | "widget-discover"
   | "midi-plugged"
   /**
-   * The three Jam captions (plans/JAM_UX_DECISIONS.md A7).
+   * The three Jam hints (plans/JAM_KILLER.md §2 A4).
    *
-   * "Everything synthesised", "the band never plays your instrument" and
-   * "takes stay on this machine" were all true, all worth saying once, and
-   * all printed on the screen forever. They are hints now — said at the
-   * moment each applies, and then never again.
+   * They were the three captions of JAM_UX_DECISIONS A7 — everything is
+   * synthesised, the band never plays your instrument, takes stay on this
+   * machine — and all three were answers to questions a player was not
+   * asking. Half the band is recorded now, the band row says who is in it,
+   * and nobody has ever been surprised that a recording they made is on their
+   * own disk.
+   *
+   * These three are what a player actually has to be told, in the order they
+   * first need it: where the two doors go, that a sheet is live while the
+   * band plays, and that the band is arranging itself.
    */
-  | "jam-synth"
-  | "jam-band"
-  | "jam-takes";
+  | "jam-sheets"
+  | "jam-live"
+  | "jam-arrangement";
 
 /** Every hint id, in the order §5 lists them. */
 export const HINT_IDS: readonly HintId[] = [
@@ -44,9 +50,9 @@ export const HINT_IDS: readonly HintId[] = [
   "zen-first",
   "widget-discover",
   "midi-plugged",
-  "jam-synth",
-  "jam-band",
-  "jam-takes",
+  "jam-sheets",
+  "jam-live",
+  "jam-arrangement",
 ] as const;
 
 /** `hints.<id>` — the "already shown" flag for one hint. */
@@ -82,7 +88,7 @@ export const HINT_I18N_KEY: Record<HintId, string> = {
   "zen-first": "zenFirst",
   "widget-discover": "widgetDiscover",
   "midi-plugged": "midiPlugged",
-  "jam-synth": "jamSynth",
-  "jam-band": "jamBand",
-  "jam-takes": "jamTakes",
+  "jam-sheets": "jamSheets",
+  "jam-live": "jamLive",
+  "jam-arrangement": "jamArrangement",
 };

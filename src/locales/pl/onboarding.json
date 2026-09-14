@@ -154,14 +154,14 @@
         "body": "Urządzenie MIDI jest podłączone, ale nic nie jest przypisane. Przypisać pedał do Start/Stop?",
         "action": "Otwórz skróty"
       },
-      "jamSynth": {
-        "body": "Cały zespół jest syntezowany — nic do pobrania, nic do instalowania."
+      "jamSheets": {
+        "body": "Ustawienia zmieniają zespół; Akordy to twoja ściąga."
       },
-      "jamBand": {
-        "body": "Zespół nigdy nie gra na twoim instrumencie. Bas i klawisze to jedno dotknięcie."
+      "jamLive": {
+        "body": "Wszystko tutaj zmienia się od następnego taktu."
       },
-      "jamTakes": {
-        "body": "Nagrania zostają na tym komputerze. Nic nie jest wysyłane."
+      "jamArrangement": {
+        "body": "Zespół sam się rozkręca i sam wycisza — Pętla w Ustawieniach to wyłącza."
       }
     },
     "tour": {

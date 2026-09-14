@@ -154,14 +154,14 @@
         "body": "Há um dispositivo MIDI conectado, mas nada mapeado. Mapear um pedal para Tocar/Parar?",
         "action": "Abrir atalhos"
       },
-      "jamSynth": {
-        "body": "A banda inteira é sintetizada: nada para baixar, nada para instalar."
+      "jamSheets": {
+        "body": "Ajustes muda a banda; Acordes é a sua cola."
       },
-      "jamBand": {
-        "body": "A banda nunca toca o seu instrumento. Baixo e teclado ficam a um toque."
+      "jamLive": {
+        "body": "Tudo aqui muda no compasso seguinte."
       },
-      "jamTakes": {
-        "body": "As gravações ficam nesta máquina. Nada é enviado."
+      "jamArrangement": {
+        "body": "A banda cresce e desmonta sozinha — Loop, em Ajustes, desliga isso."
       }
     },
     "tour": {

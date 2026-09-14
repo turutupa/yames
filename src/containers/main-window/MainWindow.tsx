@@ -1211,10 +1211,12 @@ export function MainWindow() {
     isPlaying: state.isPlaying,
     midiDevices: midi.devices,
     midiBindings: midi.bindings,
-    // The three Jam captions, as first-run hints (JAM_UX_DECISIONS A7).
+    // The three Jam hints (JAM_KILLER A4): the two doors, the sheet that is
+    // live while the band plays, and the band arranging itself.
     jamLoaded: !!jamSession.jam,
     jamSetupOpen: jamSession.screen.setupOpen,
-    jamTakesOn: !!jamSession.jam?.takes,
+    jamChordsOpen: jamSession.screen.chordsOpen,
+    jamChorus: currentBeat?.chorus ?? null,
     onSavePreset: handlePresetSave,
     onOpenWidget: () => {
       void markWidgetOpened();
