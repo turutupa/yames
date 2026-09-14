@@ -80,7 +80,7 @@ use std::time::Duration;
 
 use yames_lib::probe::{
     compile_jam, compile_jam_with_kit, create_beat_log, create_shared_state, load_kit,
-    CallbackProbe, CallbackSample, CustomBank, JamBassLine,
+    reference_bank, CallbackProbe, CallbackSample, JamBassLine, KitBank,
     JamConfig, JamKeysLine, JamMix, JamPattern, JamPosition, MetronomeEngine, TakeRing, TakeSession,
     TakeStart,
 };
@@ -533,19 +533,30 @@ fn busiest_jam() -> JamConfig {
             hat_open: vec![0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
             ride: vec![1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
             crash: vec![0; 16],
+            // The toms are their own lanes now, and a groove that uses them
+            // is one more voice ringing uncapped per tick. Sparse here and
+            // solid in the fill below, which is where a drummer puts them.
+            tom_hi: vec![0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+            tom_lo: vec![0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
         },
         // Every lane on every tick: the worst bar the table can describe.
+        // Every lane on every tick, at the LOUDEST LEVEL THERE IS: level 4
+        // reaches the hardest layer the kit has and the ride's own bell, so
+        // this is the worst bar the table can describe on a kit with four
+        // layers as well as on one with a single sample.
         fill: Some(JamPattern {
-            kick: vec![1; 16],
-            snare: vec![2; 16],
+            kick: vec![4; 16],
+            snare: vec![4; 16],
             hat: vec![1; 16],
             hat_open: vec![1; 16],
-            ride: vec![1; 16],
+            ride: vec![4; 16],
             crash: vec![0; 16],
+            tom_hi: vec![4; 16],
+            tom_lo: vec![4; 16],
         }),
         form_bars: 4,
         crash_on_one: true,
-        intensity: 1.25,
+        intensity: 1.6,
         // The longest kit in the set: a 700 ms crash, a 400 ms ride and a
         // 330 ms open hat (`src-tauri/sounds/KITS.md`). Voices that ring
         // longer overlap more, and overlapping voices are what the mixer
@@ -592,6 +603,10 @@ fn busiest_jam() -> JamConfig {
         bass_voice: None,
         keys_voice: None,
         custom_kit: None,
+        // The cross-stick, so the probe covers the fallback chain as well:
+        // every ghost in the groove above resolves through `rim`, which on
+        // a kit without one is the softest snare there is.
+        snare_ghost_is_rim: Some(true),
     }
 }
 
@@ -688,7 +703,7 @@ fn main() -> ExitCode {
     // stream, which is more of a test than a table set before the first
     // buffer, not less. It lands inside the warm-up window the measurement
     // already excludes.
-    let custom_kit: Option<Arc<CustomBank>> = match args.jam_kit {
+    let custom_kit: Option<Arc<KitBank>> = match args.jam_kit {
         Some(ref dir) => {
             let rate = engine.output_sample_rate().unwrap_or(48_000);
             let bank = match load_kit(std::path::Path::new(dir), rate) {
@@ -699,12 +714,16 @@ fn main() -> ExitCode {
                 }
             };
             eprintln!(
-                "[probe] custom kit from {dir}: {} at {} Hz, {:.1} MB decoded",
-                bank.found.join(", "),
+                "[probe] kit from {dir}: {} at {} Hz, {:.1} MB decoded",
+                bank.found
+                    .iter()
+                    .map(|v| format!("{} {}x{}", v.voice, v.layers, v.rr))
+                    .collect::<Vec<_>>()
+                    .join(", "),
                 bank.rate,
                 bank.bytes as f64 / (1024.0 * 1024.0),
             );
-            match compile_jam_with_kit(&busiest_jam(), Some(bank.clone())) {
+            match compile_jam_with_kit(&busiest_jam(), bank.clone()) {
                 Ok(table) => {
                     eprintln!(
                         "[probe] jam recompiled on the custom kit; loudest sample \
@@ -743,19 +762,21 @@ fn main() -> ExitCode {
         let stop_swaps = Arc::new(std::sync::atomic::AtomicBool::new(false));
         let flag = stop_swaps.clone();
         // Both tables carry the same kit, so a swap is the bar-ahead bass
-        // handshake and not a kit change — and the `Arc<CustomBank>` inside
+        // handshake and not a kit change — and the `Arc<KitBank>` inside
         // them is the SAME one, which is what the cache achieves in the app
         // and what makes a swap a refcount bump rather than a decode.
-        let table_a = Arc::new(
-            compile_jam_with_kit(&busiest_jam(), custom_kit.clone()).expect("compiled above"),
-        );
+        let bank = match custom_kit.clone() {
+            Some(b) => b,
+            None => reference_bank(&busiest_jam().kit).expect("the probe's kit decodes"),
+        };
+        let table_a =
+            Arc::new(compile_jam_with_kit(&busiest_jam(), bank.clone()).expect("compiled above"));
         let mut cfg_b = busiest_jam();
         if let Some(ref mut b) = cfg_b.bass {
             b.gain = 0.9;
         }
         let table_b = Arc::new(
-            compile_jam_with_kit(&cfg_b, custom_kit.clone())
-                .expect("the probe's swap table did not compile"),
+            compile_jam_with_kit(&cfg_b, bank).expect("the probe's swap table did not compile"),
         );
         let swaps = Arc::new(std::sync::atomic::AtomicU64::new(0));
         let count = swaps.clone();

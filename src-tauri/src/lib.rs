@@ -39,13 +39,15 @@ pub mod probe {
     /// through.
     pub use crate::jam::{
         band_state_for_bar, compile as compile_jam, compile_with_kit as compile_jam_with_kit,
-        JamBandState, JamBassLine, JamConfig, JamDropOut, JamKeysLine, JamMix, JamPattern,
-        JamPosition, JamPracticeConfig, JamTable, JamTrade,
+        reference_bank, JamBandState, JamBassLine, JamConfig, JamDropOut, JamKeysLine, JamMix,
+        JamPattern, JamPosition, JamPracticeConfig, JamTable, JamTrade,
     };
-    /// The musician's own drums. `--jam-kit <dir>` decodes a folder and
-    /// plays the band out of it, so the gate covers the one sound source
-    /// the audio thread reads that was not compiled into the binary.
-    pub use crate::kit::{load as load_kit, CustomBank};
+    /// The drums. Every kit is decoded on the command thread and travels
+    /// inside the table, so the gate covers the sound source the audio
+    /// thread actually reads — including `--jam-kit <dir>`, a folder of the
+    /// musician's own samples, which is the one that was never in the
+    /// binary at all.
+    pub use crate::kit::{load as load_kit, KitBank, KitVoice};
     /// The take recorder. `--jam-take` runs one during the measurement, so
     /// the gate covers the ring the output callback writes into and the
     /// writer thread draining it to disk underneath the stream.

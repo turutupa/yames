@@ -2509,26 +2509,49 @@ pub fn set_jam(
 ) -> Result<(), String> {
     let table = match config {
         Some(ref cfg) => {
-            let custom = match cfg.custom_kit {
-                Some(ref k) => {
-                    // The rate the device is actually running at, so the
-                    // folder is decoded once at the rate it will be played
-                    // at. Before a device opens there is nothing to ask, and
-                    // the reference rate is the honest guess — the next
-                    // `set_jam` after the stream starts re-decodes, and with
-                    // the bar-ahead handshake that is at most a bar away.
-                    let rate = engine_state
-                        .0
-                        .lock()
-                        .unwrap()
-                        .output_sample_rate()
-                        .unwrap_or(crate::engine::JAM_REFERENCE_SR);
-                    Some(jam_kit.0.get_or_load(std::path::Path::new(&k.dir), rate)?)
+            // WHICH DRUMS, DECODED AT THE RATE THE DEVICE IS RUNNING AT.
+            //
+            // Every kit goes through this now, not only a folder the
+            // musician chose: the shipped kits moved out of the audio
+            // thread's `SoundBank` and into `sounds/kits/<kit>/`, because a
+            // recorded kit is a hundred and thirty-two files and decoding
+            // every kit the app ships on every device change would be most
+            // of a second of start-up for drums nobody asked for. The cache
+            // makes all but the first send of a jam a stat and an `Arc`
+            // clone — see `KitCache` in `kit.rs`.
+            let bank = {
+                // The rate the device is actually running at, so the kit is
+                // decoded once at the rate it will be played at. Before a
+                // device opens there is nothing to ask, and the reference
+                // rate is the honest guess — the next `set_jam` after the
+                // stream starts re-decodes, and with the bar-ahead
+                // handshake that is at most a bar away.
+                let rate = engine_state
+                    .0
+                    .lock()
+                    .unwrap()
+                    .output_sample_rate()
+                    .unwrap_or(crate::engine::JAM_REFERENCE_SR);
+                let shipped = crate::engine::JamKit::from_name(&cfg.kit).0;
+                match cfg.custom_kit {
+                    // A FOLDER IS A KIT WITH A KIT BEHIND IT. A voice the
+                    // musician's folder does not hold comes from the built-in
+                    // kit the jam names, so a folder with nothing but a kick
+                    // and a snare in it is a real kit with a borrowed hat
+                    // rather than a band with two drums
+                    // (`plans/JAM_UX_DECISIONS.md` B3). Merged here, on the
+                    // command thread, into ONE bank — the audio thread reads
+                    // one kit and never asks which half a drum came from.
+                    Some(ref k) => {
+                        let own = jam_kit.0.get_or_load(std::path::Path::new(&k.dir), rate)?;
+                        let behind = jam_kit.0.shipped(shipped, rate)?;
+                        crate::kit::with_fallback(&own, &behind)
+                    }
+                    None => jam_kit.0.shipped(shipped, rate)?,
                 }
-                None => None,
             };
             Some(std::sync::Arc::new(crate::jam::compile_with(
-                cfg, &jam_gain.0, custom,
+                cfg, &jam_gain.0, bank,
             )?))
         }
         None => None,
