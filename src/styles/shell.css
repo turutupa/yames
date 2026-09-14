@@ -1148,6 +1148,49 @@ button.jam-vibe-chip:hover {
   text-overflow: ellipsis;
 }
 
+/* ── Jam now, on the rail (JAM_KILLER A4) ──────────────────────────────────
+ *
+ * A play glyph beside the Jam entry while no jam is open. It sits in a row
+ * with the mode rather than inside it — a button inside a button is not a
+ * thing a browser will draw — and the mode keeps all the room it had, because
+ * the glyph is the last 24px and the label ellipsises before it. */
+.rail-mode-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.rail-mode-row .rail-mode {
+  flex: 1;
+  min-width: 0;
+}
+
+.rail-mode-now {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  margin-right: 2px;
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.rail-mode-now:hover {
+  background: var(--accent-subtle);
+  border-color: var(--accent);
+}
+
+.rail-mode-now:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .rail-library {
   flex: 1;
   min-height: 0;
@@ -1650,6 +1693,13 @@ button.jam-vibe-chip:hover {
     display: none;
   }
 
+  /* At 68px there is no room beside an icon, and a 26px glyph crowding a
+     42px row would read as a second mode rather than an action on this one.
+     The empty Jam screen still has the button, in words. */
+  .rail-mode-now {
+    display: none;
+  }
+
   /* Opening the library gives the rail its width back, over the stage. */
   .rail[data-library-open] {
     position: absolute;
@@ -1677,6 +1727,11 @@ button.jam-vibe-chip:hover {
   .rail[data-library-open] .rail-library,
   .rail[data-library-open] .rail-action-dot {
     display: revert;
+  }
+
+  /* The rail has its width back, so the glyph has its place back. */
+  .rail[data-library-open] .rail-mode-now {
+    display: flex;
   }
 
   .rail[data-library-open] .rail-library {

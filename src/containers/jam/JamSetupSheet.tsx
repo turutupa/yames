@@ -4,6 +4,13 @@ import { GROOVE_FAMILIES, grooveById, groovesInFamily } from "../../jam/grooves"
 import type { Groove, GrooveFamily } from "../../jam/grooves";
 import { JAM_FORM_KINDS, clampFormBars, formBars } from "../../jam/forms";
 import {
+  JAM_ARRANGEMENT_MODES,
+  JAM_BREAKDOWN_CHOICES,
+  JAM_MAX_CHORUSES,
+  JAM_MIN_CHORUSES,
+  jamArrangement,
+} from "../../jam/arrangement";
+import {
   carryCountIn,
   countInChoiceId,
   countInChoices,
@@ -19,6 +26,7 @@ import type { VibePatch } from "../../jam/vibesContract";
 import type { KeyMode, TranspositionOption } from "../../jam/harmony";
 import type {
   Jam,
+  JamArrangement,
   JamBassVoice,
   JamCountInSound,
   JamFeel,
@@ -35,6 +43,7 @@ import { KitPicker } from "./KitPicker";
 import { Segmented } from "./Segmented";
 import { TakesSection } from "./TakesSection";
 import { VibePicker } from "./VibePicker";
+import type { VibePreviewMark } from "./VibePicker";
 
 const FEELS: JamFeel[] = ["straight", "shuffle", "swing"];
 const INTENSITIES: JamIntensity[] = ["soft", "normal", "loud"];
@@ -102,6 +111,10 @@ interface JamSetupSheetProps {
   /** Two bars of the current groove on a kit, through the engine (B7). */
   onPreviewKit: (kit: string) => void;
   previewingKit: string | null;
+  /** Two bars of a whole vibe, through the same door (JAM_KILLER A4). */
+  onPreviewVibe?: ((vibeId: string, variationId?: string) => void) | null;
+  onStopPreview?: (() => void) | null;
+  previewingVibe?: VibePreviewMark | null;
   /** True while the engine is refusing a folder of your own samples (B3). */
   customKitRefused?: boolean;
   /** The groove editor's door, which lives on this sheet now. */
@@ -154,6 +167,9 @@ export function JamSetupSheet({
   lineup,
   onPreviewKit,
   previewingKit,
+  onPreviewVibe = null,
+  onStopPreview = null,
+  previewingVibe = null,
   customKitRefused = false,
   onOpenEditor,
   editingChords,
@@ -163,6 +179,10 @@ export function JamSetupSheet({
 }: JamSetupSheetProps) {
   const { t } = useTranslation();
   const [moreOpen, setMoreOpen] = useState(false);
+  /** The breakdown disclosure inside the FORM group, closed until asked for. */
+  const [breakdownOpen, setBreakdownOpen] = useState(false);
+  /** The arrangement with its blanks filled in — what the controls below show. */
+  const arrangement = jamArrangement(jam);
 
   const meter = useMemo(() => jamGroove(jam), [jam]);
   const written = jamWrittenGroove(jam);
@@ -269,6 +289,18 @@ export function JamSetupSheet({
     onEdit({ form: next, progression: progressionEdit(jam.progression, formBars(next)) });
   };
 
+  /**
+   * A change to the arrangement, written WHOLE.
+   *
+   * `jamArrangement` fills the blanks in for reading, and this writes them
+   * back out: touch the mode of a jam that has no arrangement and what lands
+   * on the record is a complete one, chorus count and breakdown included. A
+   * record carrying half an arrangement would read its missing half as the
+   * default on every load, which is fine until the default changes.
+   */
+  const editArrangement = (patch: Partial<JamArrangement>) =>
+    onEdit({ arrangement: { ...arrangement, ...patch } });
+
   const activeGroups = jam.meter ? meterKey(jam.meter.beatGroups) : null;
   const ticks = jam.meter?.ticksPerBeat ?? (written.ticksPerBeat as 1 | 2 | 3 | 4 | 6);
 
@@ -285,7 +317,15 @@ export function JamSetupSheet({
   return (
     <>
       <JamSheetGroup label={t("jam.vibe.label")} lead={t("jam.vibe.lead")}>
-        <VibePicker jam={jam} jams={jams} onApply={applyPatch} onLoadOwn={onLoadJam} />
+        <VibePicker
+          jam={jam}
+          jams={jams}
+          onApply={applyPatch}
+          onLoadOwn={onLoadJam}
+          onPreview={onPreviewVibe}
+          onStopPreview={onStopPreview}
+          previewing={previewingVibe}
+        />
       </JamSheetGroup>
 
       <JamSheetGroup
@@ -516,6 +556,114 @@ export function JamSetupSheet({
             }}
           />
         </div>
+
+        {/* THE ARRANGEMENT (plans/tasks/jam-v4/BRIEF.md A1).
+
+            In the FORM group and nowhere else, because it IS the form: the
+            shape above says how long one time round is, and this says what
+            the band does with it the second, third and fourth time round.
+
+            One sentence under it saying what the mode does, because these are
+            three words a musician knows and three behaviours they cannot
+            guess. Breakdown is behind a disclosure: it is a real decision, but
+            it is one decision in twenty, and the sheet's whole job is to stop
+            being a wall. */}
+        <div className="jam-sheet-row">
+          <Segmented
+            label={t("jam.arrangement.label")}
+            value={arrangement.mode}
+            options={JAM_ARRANGEMENT_MODES.map((id) => ({
+              id,
+              label: t(`jam.arrangement.${id}`),
+            }))}
+            onChange={(mode) => editArrangement({ mode })}
+          />
+          {arrangement.mode === "song" && (
+            <div className="jam-bars">
+              <span className="stage-label">{t("jam.arrangement.choruses")}</span>
+              <div
+                className="beat-stepper"
+                role="group"
+                aria-label={t("jam.arrangement.choruses")}
+              >
+                <button
+                  className="beat-stepper-btn"
+                  aria-label={t("jam.arrangement.fewerChoruses")}
+                  disabled={arrangement.choruses <= JAM_MIN_CHORUSES}
+                  onClick={() => editArrangement({ choruses: arrangement.choruses - 1 })}
+                >
+                  −
+                </button>
+                <span className="beat-stepper-value">{arrangement.choruses}</span>
+                <button
+                  className="beat-stepper-btn"
+                  aria-label={t("jam.arrangement.moreChoruses")}
+                  disabled={arrangement.choruses >= JAM_MAX_CHORUSES}
+                  onClick={() => editArrangement({ choruses: arrangement.choruses + 1 })}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <p className="jam-sheet-lead">
+          {t(`jam.arrangement.${arrangement.mode}Lead`, { choruses: arrangement.choruses })}
+        </p>
+
+        {arrangement.mode !== "loop" && (
+          <>
+            <button
+              type="button"
+              className="jam-more-toggle"
+              aria-expanded={breakdownOpen}
+              onClick={() => setBreakdownOpen((open) => !open)}
+            >
+              <span className="stage-label">{t("jam.arrangement.breakdown")}</span>
+              <span className="jam-sheet-lead">
+                {arrangement.breakdownEvery > 0
+                  ? t("jam.arrangement.breakdownEvery", {
+                      choruses: arrangement.breakdownEvery,
+                    })
+                  : t("jam.arrangement.breakdownOff")}
+              </span>
+              <svg
+                width="11"
+                height="11"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                data-open={breakdownOpen ? "" : undefined}
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+            {breakdownOpen && (
+              <div className="jam-more-body">
+                <Segmented
+                  label={t("jam.arrangement.breakdown")}
+                  labelHidden
+                  value={String(arrangement.breakdownEvery)}
+                  // Off, and then the numbers themselves: "2" is "2" in every
+                  // one of the fifteen languages, and a key whose whole value
+                  // is a placeholder is a string asked of fifteen translators
+                  // that none of them can improve.
+                  options={JAM_BREAKDOWN_CHOICES.map((every) => ({
+                    id: String(every),
+                    label: every === 0 ? t("jam.arrangement.breakdownOff") : String(every),
+                  }))}
+                  onChange={(id) => editArrangement({ breakdownEvery: Number(id) })}
+                  hint={t("jam.arrangement.breakdownHint")}
+                />
+              </div>
+            )}
+          </>
+        )}
 
         {jam.form.kind === "custom" && (
           <div className="jam-bars">

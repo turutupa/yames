@@ -2,6 +2,9 @@
   "jam": {
     "badge": "JAM",
     "newJam": "Nuevo jam",
+    "jamNow": "Tocar ya",
+    "jamNowLead": "Elige una banda para tu instrumento y la cuenta para entrar.",
+    "jamNowName": "Jam de {{vibe}}",
     "untitled": "Nuevo jam",
     "deleteJam": "Eliminar jam",
     "duplicateJam": "Duplicar jam",
@@ -222,6 +225,32 @@
       "loopSection": "Repetir los compases {{start}}–{{end}}",
       "loopOff": "Dejar de repetir",
       "shape": "Estructura"
+    },
+    "arrangement": {
+      "label": "Arreglo",
+      "loop": "Bucle",
+      "build": "Crecer",
+      "song": "Tema",
+      "loopLead": "Un groove, una y otra vez, hasta que pares.",
+      "buildLead": "La banda se guarda en la primera vuelta, se abre cuando el tema vuelve a empezar y por el camino se queda en bombo y charles.",
+      "songLead": "Crece durante {{choruses}} vueltas y luego la banda termina el tema junta.",
+      "choruses": "Vueltas",
+      "fewerChoruses": "Menos vueltas",
+      "moreChoruses": "Más vueltas",
+      "breakdown": "Breakdown",
+      "breakdownOff": "Ninguno",
+      "breakdownEvery": "cada {{choruses}} vueltas",
+      "breakdownHint": "Cada cuánto la banda se queda en bombo y charles media vuelta."
+    },
+    "dynamics": {
+      "soft": "suave",
+      "normal": "banda entera",
+      "loud": "fuerte",
+      "breakdown": "breakdown",
+      "stopTime": "stop-time",
+      "endingHold": "último acorde, sonando",
+      "endingStop": "último golpe, seco",
+      "crash": "crash"
     },
     "short": {
       "blues12": "12 compases",

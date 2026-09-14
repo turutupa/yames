@@ -178,6 +178,14 @@ export function createJam(name: string, fields: NewJamFields = {}): Jam {
     ...(fields.bassVoice ? { bassVoice: fields.bassVoice } : {}),
     ...(fields.keysVoice ? { keysVoice: fields.keysVoice } : {}),
     ...(fields.customKit ? { customKit: { ...fields.customKit } } : {}),
+    // The fourth pass's arrangement (plans/tasks/jam-v4/BRIEF.md A1). The only
+    // optional field written when nothing was handed over, and the reason is
+    // the whole compatibility story: an ABSENT arrangement reads as `loop`, so
+    // every jam anybody has saved plays what it always played, and a jam made
+    // from today on gets a band that plays a tune. The default has to live on
+    // the new record rather than in the reader, or writing it would change
+    // what every old record means.
+    ...(fields.arrangement ? { arrangement: { ...fields.arrangement } } : { arrangement: { mode: "build" as const } }),
   };
 }
 

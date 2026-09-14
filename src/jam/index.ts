@@ -13,6 +13,7 @@ export * from "./intensity";
 export * from "./vibes";
 export * from "./forms";
 export * from "./compile";
+export * from "./arrangement";
 export * from "./progression";
 export * from "./display";
 export * from "./keysline";

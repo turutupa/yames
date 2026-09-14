@@ -145,6 +145,31 @@ export type JamEngineConfig = {
    * the audio thread when the table is compiled. Absent or null: built-in.
    */
   customKit?: { dir: string } | null;
+  // -------------------------------------------------------------------------
+  // The arrangement (fourth pass, plans/tasks/jam-v4/BRIEF.md A1). Both are
+  // decided in `src/jam/arrangement.ts` and applied by `compileJam`; the Rust
+  // side reads them as `apply_at` and `ends_form` under the same camelCase
+  // rename as everything above.
+  // -------------------------------------------------------------------------
+  /**
+   * When this table takes effect. `"barLine"` holds the WHOLE table — the
+   * drums included — until the next downbeat.
+   *
+   * The drums used to apply at once and the lines at the bar line, which is
+   * right for an edit (you moved a slider, you want to hear it) and wrong for
+   * an arrangement: a drummer sent a bar ahead would arrive a bar early, so
+   * the breakdown would start halfway through the bar before it. Absent or
+   * `"now"` is what an edit sends and what every caller sent before this.
+   */
+  applyAt?: "now" | "barLine";
+  /**
+   * The tune finishes at the end of this bar. The engine plays the bar out,
+   * stops, and emits `jam-ended` with no payload.
+   *
+   * Set by `song` on the last bar of its last chorus and by nothing else.
+   * Absent or false: the form goes round again, as it always has.
+   */
+  endsForm?: boolean;
 };
 
 export type JamKeysLine = {
@@ -312,6 +337,44 @@ export type Jam = {
   pinnedShape?: { root: number; quality: string; index: number } | null;
   /** The chord sheet follows the jam (off by default). */
   shapesFollow?: boolean;
+  /**
+   * Fourth pass: whether the band LOOPS, BUILDS or plays a SONG.
+   *
+   * Absent means loop — what the band did before there was an arrangement —
+   * so every jam anybody has saved plays exactly what it played. New jams are
+   * created with `{ mode: "build" }`, so the default is a band that plays a
+   * tune rather than a bar on repeat. The rules live in
+   * `src/jam/arrangement.ts`; nothing here but the record.
+   */
+  arrangement?: JamArrangement;
+};
+
+// ---------------------------------------------------------------------------
+// The arrangement (fourth pass, plans/tasks/jam-v4/BRIEF.md A1)
+// ---------------------------------------------------------------------------
+
+export type JamArrangementMode = "loop" | "build" | "song";
+
+/**
+ * How the band plays a tune, as four fields on the record.
+ *
+ * `loop` is a bar that repeats — the whole of what the band could do until
+ * this pass. `build` holds back at the top, opens up as the form comes round,
+ * drops to a breakdown and never ends. `song` is `build` with a last chorus
+ * and an ending.
+ *
+ * Everything optional has a default in `jamArrangement` (`./arrangement`), and
+ * those defaults are read rather than written into the record, so a jam saved
+ * before a field existed still means what its author meant.
+ */
+export type JamArrangement = {
+  mode: JamArrangementMode;
+  /** Song only: how many times round, 2..32. Absent: 4. */
+  choruses?: number;
+  /** Whether the band comes in on a pickup. Absent: "fill". */
+  intro?: "none" | "fill";
+  /** Build and Song: a breakdown chorus every N. Absent: 4. 0: never. */
+  breakdownEvery?: number;
 };
 
 export type JamBassVoice = "fingered" | "picked" | "upright" | "slap" | "synth";

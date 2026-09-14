@@ -2,6 +2,9 @@
   "jam": {
     "badge": "JAM",
     "newJam": "Nouveau jam",
+    "jamNow": "Jammer maintenant",
+    "jamNowLead": "Choisit un groupe pour ton instrument et lui donne le décompte.",
+    "jamNowName": "Jam {{vibe}}",
     "untitled": "Nouveau jam",
     "deleteJam": "Supprimer le jam",
     "duplicateJam": "Dupliquer le jam",
@@ -222,6 +225,32 @@
       "loopSection": "Boucler les mesures {{start}}–{{end}}",
       "loopOff": "Arrêter la boucle",
       "shape": "Structure"
+    },
+    "arrangement": {
+      "label": "Arrangement",
+      "loop": "Boucle",
+      "build": "Montée",
+      "song": "Morceau",
+      "loopLead": "Un groove, encore et encore, jusqu'à ce que tu arrêtes.",
+      "buildLead": "Le groupe se retient au premier chorus, s'ouvre quand la grille revient, et passe par un breakdown en chemin.",
+      "songLead": "Monte pendant {{choruses}} chorus, puis le groupe termine le morceau ensemble.",
+      "choruses": "Chorus",
+      "fewerChoruses": "Moins de chorus",
+      "moreChoruses": "Plus de chorus",
+      "breakdown": "Breakdown",
+      "breakdownOff": "Aucun",
+      "breakdownEvery": "tous les {{choruses}} chorus",
+      "breakdownHint": "À quelle fréquence le groupe ne garde que la grosse caisse et le charleston pendant un demi-chorus."
+    },
+    "dynamics": {
+      "soft": "doux",
+      "normal": "groupe au complet",
+      "loud": "fort",
+      "breakdown": "breakdown",
+      "stopTime": "stop-time",
+      "endingHold": "dernier accord, qui sonne",
+      "endingStop": "dernier coup, net",
+      "crash": "crash"
     },
     "short": {
       "blues12": "12 mesures",

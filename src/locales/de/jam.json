@@ -2,6 +2,9 @@
   "jam": {
     "badge": "JAM",
     "newJam": "Neuer Jam",
+    "jamNow": "Jetzt jammen",
+    "jamNowLead": "Sucht eine Band zu deinem Instrument und zählt sie ein.",
+    "jamNowName": "{{vibe}}-Jam",
     "untitled": "Neuer Jam",
     "deleteJam": "Jam löschen",
     "duplicateJam": "Jam duplizieren",
@@ -222,6 +225,32 @@
       "loopSection": "Takt {{start}}–{{end}} in Schleife",
       "loopOff": "Schleife beenden",
       "shape": "Ablauf"
+    },
+    "arrangement": {
+      "label": "Arrangement",
+      "loop": "Schleife",
+      "build": "Aufbau",
+      "song": "Stück",
+      "loopLead": "Ein Groove, immer im Kreis, bis du aufhörst.",
+      "buildLead": "Die Band hält sich im ersten Chorus zurück, geht mit jedem Durchgang mehr auf und legt zwischendurch einen Breakdown ein.",
+      "songLead": "Baut über {{choruses}} Chorusse auf, dann beendet die Band das Stück gemeinsam.",
+      "choruses": "Chorusse",
+      "fewerChoruses": "Weniger Chorusse",
+      "moreChoruses": "Mehr Chorusse",
+      "breakdown": "Breakdown",
+      "breakdownOff": "Aus",
+      "breakdownEvery": "alle {{choruses}} Chorusse",
+      "breakdownHint": "Wie oft die Band einen halben Chorus lang nur Bassdrum und Hi-Hat spielt."
+    },
+    "dynamics": {
+      "soft": "leise",
+      "normal": "ganze Band",
+      "loud": "laut",
+      "breakdown": "Breakdown",
+      "stopTime": "Stop-Time",
+      "endingHold": "letzter Akkord, klingt aus",
+      "endingStop": "letzter Schlag, Schluss",
+      "crash": "Crash"
     },
     "short": {
       "blues12": "12 Takte",

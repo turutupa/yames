@@ -2,6 +2,9 @@
   "jam": {
     "badge": "JAM",
     "newJam": "Jam mới",
+    "jamNow": "Jam ngay",
+    "jamNowLead": "Chọn ban nhạc hợp với nhạc cụ của bạn và đếm nhịp vào.",
+    "jamNowName": "Jam {{vibe}}",
     "untitled": "Jam mới",
     "deleteJam": "Xóa jam",
     "duplicateJam": "Nhân bản jam",
@@ -222,6 +225,32 @@
       "loopSection": "Lặp ô nhịp {{start}}–{{end}}",
       "loopOff": "Ngừng lặp",
       "shape": "Cấu trúc"
+    },
+    "arrangement": {
+      "label": "Phối",
+      "loop": "Vòng lặp",
+      "build": "Dâng dần",
+      "song": "Bài",
+      "loopLead": "Một groove, lặp mãi, cho tới khi bạn dừng.",
+      "buildLead": "Ban nhạc giữ nhẹ ở vòng đầu, mở dần khi bài quay lại, và giữa chừng rút xuống còn trống cái với hi-hat.",
+      "songLead": "Dâng dần qua {{choruses}} vòng, rồi cả ban nhạc cùng kết bài.",
+      "choruses": "Số vòng",
+      "fewerChoruses": "Bớt vòng",
+      "moreChoruses": "Thêm vòng",
+      "breakdown": "Breakdown",
+      "breakdownOff": "Không bao giờ",
+      "breakdownEvery": "mỗi {{choruses}} vòng",
+      "breakdownHint": "Bao lâu một lần ban nhạc rút xuống còn trống cái với hi-hat trong nửa vòng."
+    },
+    "dynamics": {
+      "soft": "nhẹ",
+      "normal": "đủ ban nhạc",
+      "loud": "mạnh",
+      "breakdown": "breakdown",
+      "stopTime": "stop-time",
+      "endingHold": "hợp âm cuối, ngân ra",
+      "endingStop": "cú cuối, dứt hẳn",
+      "crash": "crash"
     },
     "short": {
       "blues12": "12 ô nhịp",

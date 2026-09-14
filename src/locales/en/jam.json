@@ -2,6 +2,9 @@
   "jam": {
     "badge": "JAM",
     "newJam": "New jam",
+    "jamNow": "Jam now",
+    "jamNowLead": "Picks a band for what you play, and counts it in.",
+    "jamNowName": "{{vibe}} jam",
     "untitled": "New jam",
     "deleteJam": "Delete jam",
     "duplicateJam": "Duplicate jam",
@@ -222,6 +225,32 @@
       "loopSection": "Loop bars {{start}}–{{end}}",
       "loopOff": "Stop looping",
       "shape": "Shape"
+    },
+    "arrangement": {
+      "label": "Arrangement",
+      "loop": "Loop",
+      "build": "Build",
+      "song": "Song",
+      "loopLead": "One groove, round and round, until you stop it.",
+      "buildLead": "The band holds back on the first chorus, opens up as the tune comes round, and drops to a breakdown along the way.",
+      "songLead": "Builds for {{choruses}} choruses, then the band ends the tune together.",
+      "choruses": "Choruses",
+      "fewerChoruses": "Fewer choruses",
+      "moreChoruses": "More choruses",
+      "breakdown": "Breakdown",
+      "breakdownOff": "Off",
+      "breakdownEvery": "every {{choruses}} choruses",
+      "breakdownHint": "How often the band drops to the kick and the hats for half a chorus."
+    },
+    "dynamics": {
+      "soft": "quiet",
+      "normal": "full band",
+      "loud": "loud",
+      "breakdown": "breakdown",
+      "stopTime": "stop-time",
+      "endingHold": "last chord, ringing",
+      "endingStop": "last hit, dead stop",
+      "crash": "crash"
     },
     "short": {
       "blues12": "12-bar",

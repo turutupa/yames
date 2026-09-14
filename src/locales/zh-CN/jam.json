@@ -2,6 +2,9 @@
   "jam": {
     "badge": "即兴伴奏",
     "newJam": "新建即兴伴奏",
+    "jamNow": "立即即兴",
+    "jamNowLead": "按你演奏的乐器挑一支乐队，数拍带入。",
+    "jamNowName": "{{vibe}}即兴",
     "untitled": "新建即兴伴奏",
     "deleteJam": "删除即兴伴奏",
     "duplicateJam": "复制即兴伴奏",
@@ -222,6 +225,32 @@
       "loopSection": "循环第 {{start}}–{{end}} 小节",
       "loopOff": "取消循环",
       "shape": "曲式"
+    },
+    "arrangement": {
+      "label": "编排",
+      "loop": "循环",
+      "build": "渐强",
+      "song": "整首",
+      "loopLead": "一个律动，一圈接一圈，直到你喊停。",
+      "buildLead": "第一遍收着弹，越转越放开，中途还会只剩底鼓和踩镲。",
+      "songLead": "走 {{choruses}} 遍越弹越开，最后全乐队一起收尾。",
+      "choruses": "遍数",
+      "fewerChoruses": "减少遍数",
+      "moreChoruses": "增加遍数",
+      "breakdown": "中段落差",
+      "breakdownOff": "关",
+      "breakdownEvery": "每 {{choruses}} 遍",
+      "breakdownHint": "乐队每隔多久只留底鼓和踩镲，持续半遍。"
+    },
+    "dynamics": {
+      "soft": "轻",
+      "normal": "全员",
+      "loud": "重",
+      "breakdown": "落差段",
+      "stopTime": "停顿节奏",
+      "endingHold": "最后一下，余音不断",
+      "endingStop": "最后一下，戛然而止",
+      "crash": "吊镲"
     },
     "short": {
       "blues12": "12 小节",

@@ -52,6 +52,42 @@
   width: 100%;
 }
 
+/* ── Jam now (JAM_KILLER A4) ───────────────────────────────────────────────
+ *
+ * The one button on this screen that costs nothing to press, so it is the one
+ * that looks like it. A shade wider and heavier than the button beneath it,
+ * and the sentence under it is the whole of its manual.
+ *
+ * "New jam" is not demoted so far that it looks disabled — it is still the
+ * right door for a player who came here to build something — but it stops
+ * being the button your eye lands on, because for everybody else it is the
+ * long way round to the same band. */
+.jam-blank-now {
+  padding: 11px 28px;
+  font-size: 14px;
+}
+
+.jam-blank-now-lead {
+  margin: -6px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-faint);
+  max-width: 40ch;
+}
+
+.jam-blank-now-lead + .setlist-blank-new {
+  border-color: var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.jam-blank-now-lead + .setlist-blank-new:hover {
+  filter: none;
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
 /* ── Tempo, with feel and intensity beside it ───────────────────────────────
    The setup board stacks these; at 1440 they fit on one row, and putting them
    there keeps the groove cards — the part you actually browse — above the
@@ -388,6 +424,73 @@
   .jam-timeline-fill {
     display: none;
   }
+}
+
+/* ── The dynamics (plans/tasks/jam-v4/BRIEF.md A1) ────────────────────────
+   What the arrangement will do with this bar, drawn along the foot of the
+   cell: three heights for soft, normal and loud, hatched where the band is
+   out of the way, and a dot where a cymbal lands.
+
+   Nothing here animates. The timeline has exactly one moving part — the
+   current bar filling as it goes by — and a row of marks that pulsed would
+   compete with it for the only thing on the screen a player glances at while
+   both hands are busy. The mark for bar nine is the same mark from the top of
+   the chorus to the bottom of it, which is what makes it readable AHEAD. */
+.jam-timeline-dynamics {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  bottom: 2px;
+  z-index: 1;
+  border-radius: 1px;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--text-primary) 26%, transparent);
+}
+
+.jam-timeline-dynamics[data-level="soft"] {
+  height: 2px;
+  background: color-mix(in srgb, var(--text-primary) 16%, transparent);
+}
+
+.jam-timeline-dynamics[data-level="normal"] {
+  height: 4px;
+}
+
+.jam-timeline-dynamics[data-level="loud"] {
+  height: 7px;
+  background: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+/* The breakdown: the same bar, hatched, because the band is still playing —
+   it is out of the way, not absent. A silence is `data-band`'s job above. */
+.jam-timeline-dynamics[data-quiet] {
+  background: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--text-primary) 30%, transparent) 0 2px,
+    transparent 2px 4px
+  );
+}
+
+/* Stop-time and an ending are one hit and then nothing, so the mark is one
+   stroke at the left edge rather than a bar across the cell. */
+.jam-timeline-dynamics[data-hit] {
+  left: 3px;
+  right: auto;
+  width: 5px;
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+/* The crash, as a dot over the left edge of the mark. */
+.jam-timeline-dynamics[data-crash]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 2px);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
 }
 
 /* The honest line used to be printed under the stage forever. It is the
@@ -1716,6 +1819,71 @@
   gap: 4px;
   min-height: 58px;
   padding: 10px 12px;
+}
+
+/* ── A tile that is playing (JAM_KILLER A4) ────────────────────────────────
+ *
+ * Four bars of a level meter, which is the rail's own jam glyph and the one
+ * mark in this app that has always meant "this is sounding". Three rather
+ * than four here because it sits inside a line of text at 10px and the fourth
+ * reads as a smudge.
+ *
+ * The ARMED state — a tile hovered while the band is already playing, waiting
+ * for the bar line — holds the bars still and halves them. It has to look
+ * like "about to", not like "playing quietly": a mark that moved before the
+ * sound arrived would be the screen lying about the engine by a bar.
+ */
+.jam-vibe-previewing {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.jam-vibe-playing {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 10px;
+  margin-left: 6px;
+  vertical-align: -1px;
+}
+
+.jam-vibe-playing i {
+  display: block;
+  width: 2px;
+  height: 10px;
+  border-radius: 1px;
+  background: var(--accent);
+  transform-origin: bottom;
+  animation: jam-vibe-bar 620ms ease-in-out infinite alternate;
+}
+
+.jam-vibe-playing i:nth-child(2) {
+  animation-duration: 430ms;
+}
+
+.jam-vibe-playing i:nth-child(3) {
+  animation-duration: 780ms;
+}
+
+.jam-vibe-playing[data-armed] i {
+  animation: none;
+  transform: scaleY(0.45);
+  opacity: 0.55;
+}
+
+@keyframes jam-vibe-bar {
+  from {
+    transform: scaleY(0.3);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jam-vibe-playing i {
+    animation: none;
+    transform: scaleY(0.7);
+  }
 }
 
 /* ── The variations of the picked vibe (A9) ────────────────────────────── */

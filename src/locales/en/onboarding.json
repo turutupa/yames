@@ -154,14 +154,14 @@
         "body": "A MIDI device is connected but nothing is mapped. Map a pedal to Play/Stop?",
         "action": "Open Hotkeys"
       },
-      "jamSynth": {
-        "body": "The whole band is synthesised — nothing to download, nothing to install."
+      "jamSheets": {
+        "body": "Set up changes the band; Chords is your cheat sheet."
       },
-      "jamBand": {
-        "body": "The band never plays your instrument. Bass and keys are one tap each."
+      "jamLive": {
+        "body": "Everything here changes at the next bar."
       },
-      "jamTakes": {
-        "body": "Takes stay on this machine. Nothing is uploaded."
+      "jamArrangement": {
+        "body": "The band builds and breaks down on its own — Loop in Set up turns that off."
       }
     },
     "tour": {

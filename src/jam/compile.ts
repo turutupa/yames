@@ -23,6 +23,8 @@
  * itself: it is the audio thread that knows what bar it is on, not us.
  */
 import { applyFeel } from "./feel";
+import { bandMoment, previousBar, sameMoment } from "./arrangement";
+import type { BandMoment } from "./arrangement";
 import { formBars } from "./forms";
 import { grooveById, ruleGroove } from "./grooves";
 import { bassLineFor, bassStyleForGroove } from "./bassline";
@@ -33,7 +35,7 @@ import { keysLineFor } from "./keysline";
 import { practiceConfigFrom } from "./practice";
 import { applyIntensity } from "./vibesContract";
 import type { ShapedGroove } from "./vibesContract";
-import { JAM_INTENSITY_GAIN, JAM_LANES } from "./types";
+import { JAM_INTENSITY_GAIN, JAM_LANES, JAM_OPTIONAL_LANES } from "./types";
 import type { Key } from "./harmony";
 import type {
   Jam,
@@ -78,6 +80,17 @@ export type JamCompileOptions = {
    * not, which is the point.
    */
   lineup?: JamBand;
+  /**
+   * Which time round the form this bar is, 1-based, straight off
+   * `BeatEvent.chorus`.
+   *
+   * The arrangement is a plan across choruses — held back on the first, open
+   * on the third, a breakdown on the fourth — so the compiler cannot decide
+   * what the band plays without it. Default 1, which is what a jam that has
+   * not started yet is about to play, and what a `loop` jam means on every bar
+   * for ever.
+   */
+  chorus?: number;
 };
 
 /** Who is playing on this jam: the record's own answer, or the lineup's. */
@@ -176,6 +189,245 @@ function silenced(pattern: JamPattern): JamPattern {
     out[lane] = new Array<JamLevel>(pattern[lane]?.length ?? 0).fill(0);
   }
   return out;
+}
+
+// ---------------------------------------------------------------------------
+// The arrangement, applied (fourth pass, plans/tasks/jam-v4/BRIEF.md A1)
+// ---------------------------------------------------------------------------
+//
+// `src/jam/arrangement.ts` decides WHAT the band does on this bar; everything
+// under this heading is HOW that decision reaches the table, the bass line and
+// the keys line. The split is deliberate: the decision is music and wants to
+// be read by a musician, and this is bookkeeping over arrays.
+//
+// One rule governs the order, and it is the only subtle thing here. The bar is
+// shaped first, the intensity runs over the result — because the moment's
+// intensity is what this bar is played at — and the crash is forced back on
+// LAST. Soft clears the crash lane, which is what Soft means, so a crash put
+// on before it would be silently swallowed on exactly the bar a band most
+// wants one: the top of the first, held-back chorus.
+
+/** A row of the same length, or all zeros where the pattern has no such row. */
+function rowOr(pattern: JamPattern, lane: keyof JamPattern, length: number): JamLevel[] {
+  const row = pattern[lane] as JamLevel[] | undefined;
+  const out = new Array<JamLevel>(length).fill(0);
+  if (!row) return out;
+  for (let t = 0; t < row.length && t < length; t += 1) out[t] = row[t];
+  return out;
+}
+
+/**
+ * `bar` up to `from`, `fill` from there on — how a drummer plays a fill that
+ * is shorter than a bar.
+ *
+ * Row by row across both patterns, because the bar and the fill do not carry
+ * the same optional rows: a groove with no toms and a fill full of them meet
+ * here, and a lane that exists on one side and not the other has to read as
+ * silence on the other rather than as a shorter array. A row that ends up
+ * silent on both halves is dropped, so a table that never touches a tom still
+ * carries no tom row (`silenced` above says why that matters).
+ */
+function spliceFill(bar: JamPattern, fill: JamPattern, from: number): JamPattern {
+  const length = bar.kick.length;
+  const out = {} as JamPattern;
+  for (const lane of JAM_LANES) {
+    const row = rowOr(bar, lane, length);
+    const after = rowOr(fill, lane, length);
+    for (let t = from; t < length; t += 1) row[t] = after[t];
+    out[lane] = row;
+  }
+  for (const lane of JAM_OPTIONAL_LANES) {
+    if (!bar[lane] && !fill[lane]) continue;
+    const row = rowOr(bar, lane, length);
+    const after = rowOr(fill, lane, length);
+    for (let t = from; t < length; t += 1) row[t] = after[t];
+    if (row.some((level) => level !== 0)) out[lane] = row;
+  }
+  return out;
+}
+
+/** Every stroke on the pattern's last tick taken to peak — the top of a fill. */
+function toppedOff(pattern: JamPattern): JamPattern {
+  const out = {} as JamPattern;
+  const last = pattern.kick.length - 1;
+  for (const lane of JAM_LANES) {
+    const row = [...pattern[lane]];
+    if (last >= 0 && row[last] !== 0) row[last] = 4;
+    out[lane] = row;
+  }
+  for (const lane of JAM_OPTIONAL_LANES) {
+    const row = pattern[lane];
+    if (!row) continue;
+    const copy = [...row];
+    if (last >= 0 && copy[last] !== 0) copy[last] = 4;
+    out[lane] = copy;
+  }
+  return out;
+}
+
+/**
+ * The bar this moment actually plays: the groove, a beat of fill on the end of
+ * it, or the whole fill.
+ *
+ * `small` is the fill's LAST BEAT only, spliced over the groove — which is
+ * what a drummer does at a section seam: they play the bar and turn the last
+ * beat into a pickup. `big` is the whole fill with its last tick taken to
+ * peak, the gesture that answers a crash on the next downbeat.
+ *
+ * A groove with no fill written for it — one you drew, before you drew one —
+ * plays the bar. Nothing invents a fill here.
+ */
+function barForMoment(groove: ShapedGroove, moment: BandMoment): JamPattern {
+  if (moment.fill === "none" || !groove.fill) return groove.bar;
+  if (moment.fill === "big") return toppedOff(groove.fill);
+  const from = Math.max(0, (groove.beatsPerBar - 1) * groove.ticksPerBeat);
+  return spliceFill(groove.bar, groove.fill, from);
+}
+
+/**
+ * Tick 0 at accent on the lanes a band hits with, and silence after.
+ *
+ * The crash is deliberately NOT one of them. A crash is decided in exactly one
+ * place — the moment's `crash` — and a second rule putting one on every
+ * stop-time bar would be two answers to the same question, audible as a cymbal
+ * over a gesture whose whole point is the silence after the hit.
+ *
+ * The toms and the open hat go with the rest: nobody lands a stop-time figure
+ * on a rack tom.
+ */
+function stopTimeBar(pattern: JamPattern): JamPattern {
+  const length = pattern.kick.length;
+  const out = {} as JamPattern;
+  for (const lane of JAM_LANES) {
+    const row = new Array<JamLevel>(length).fill(0);
+    if (length > 0 && lane !== "crash") row[0] = 2;
+    out[lane] = row;
+  }
+  return out;
+}
+
+/** The kick and the hats, and nobody else — the breakdown's first half. */
+function hatsAndKickBar(pattern: JamPattern): JamPattern {
+  const length = pattern.kick.length;
+  const out = {} as JamPattern;
+  out.kick = [...pattern.kick];
+  out.hat = [...pattern.hat];
+  out.snare = new Array<JamLevel>(length).fill(0);
+  out.ride = new Array<JamLevel>(length).fill(0);
+  out.crash = new Array<JamLevel>(length).fill(0);
+  // The open hat is a hat and stays; the toms are not and go. A breakdown that
+  // kept its tom fills would not be a breakdown.
+  if (pattern.hatOpen) out.hatOpen = [...pattern.hatOpen];
+  return out;
+}
+
+/** The drums as this moment has them, before the crash is put back. */
+function drumsForMoment(pattern: JamPattern, moment: BandMoment): JamPattern {
+  switch (moment.drums) {
+    case "full":
+      return pattern;
+    case "hatsAndKick":
+      return hatsAndKickBar(pattern);
+    case "stopTime":
+      return stopTimeBar(pattern);
+    case "off":
+      return silenced(pattern);
+  }
+}
+
+/**
+ * The strong beats of a bar, as tick numbers.
+ *
+ * One and three in four-time and anything longer; one alone in three-time,
+ * because a waltz has no three to land on. These are where a bass player puts
+ * a half note when they are staying out of the way.
+ */
+function strongBeatTicks(beatsPerBar: number, ticksPerBeat: number): number[] {
+  if (beatsPerBar < 4) return [0];
+  return [0, Math.floor(beatsPerBar / 2) * ticksPerBeat];
+}
+
+/** The first note the bar sounds, for a downbeat that happens to be a rest. */
+function firstPitch(pitches: number[]): number {
+  for (const pitch of pitches) if (pitch !== 0) return pitch;
+  return 0;
+}
+
+/**
+ * The bass line as this moment plays it.
+ *
+ * `sparse` is the one that needed a decision. "Roots and fifths on the strong
+ * beats and drop the rest", read literally, is one TICK of bass per half bar —
+ * and a one-tick note is a blip, not a bass player: `bassline.ts` writes a
+ * note's LENGTH as the same pitch repeated across consecutive ticks, so
+ * dropping the repeats shortens every note to nothing. So the note found at
+ * each strong beat is HELD to the next one, which is the half-note feel the
+ * rule is describing, and what a bass player actually does on the first chorus
+ * while everybody works out what the tune is.
+ *
+ * A stop-time bar and an ending are the same shape for the bass as for the
+ * drums: the downbeat, and silence.
+ */
+function bassForMoment(
+  line: JamBassLine | null,
+  moment: BandMoment,
+  meter: { beatsPerBar: number; ticksPerBeat: number },
+): JamBassLine | null {
+  if (!line) return null;
+  const length = line.pitches.length;
+  if (moment.bass === "off") {
+    return { ...line, pitches: new Array<number>(length).fill(0) };
+  }
+  if (moment.drums === "stopTime") {
+    const pitches = new Array<number>(length).fill(0);
+    if (length > 0) pitches[0] = line.pitches[0] || firstPitch(line.pitches);
+    return { ...line, pitches };
+  }
+  if (moment.bass === "full") return line;
+  const strong = strongBeatTicks(meter.beatsPerBar, meter.ticksPerBeat);
+  const pitches = new Array<number>(length).fill(0);
+  for (let i = 0; i < strong.length; i += 1) {
+    const from = strong[i];
+    if (from >= length) continue;
+    const until = i + 1 < strong.length ? Math.min(strong[i + 1], length) : length;
+    const pitch = line.pitches[from] || 0;
+    if (pitch === 0) continue;
+    for (let t = from; t < until; t += 1) pitches[t] = pitch;
+  }
+  return { ...line, pitches };
+}
+
+/**
+ * The keys as this moment comps them.
+ *
+ * `sparse` is one voicing per bar — the first the bar strikes, left where it
+ * was struck. Keeping the first rather than forcing one onto tick 0 is the
+ * difference between a quiet keys player and a wrong one: a stabs line answers
+ * the snare, and moving its one chord to the downbeat would be comping a
+ * rhythm nobody is playing.
+ */
+function keysForMoment(line: JamKeysLine | null, moment: BandMoment): JamKeysLine | null {
+  if (!line) return null;
+  const empty = () => line.voicings.map(() => [] as number[]);
+  if (moment.keys === "off") return { ...line, voicings: empty() };
+  const first = line.voicings.findIndex((v) => v.length > 0);
+  if (moment.drums === "stopTime") {
+    const voicings = empty();
+    if (first >= 0 && voicings.length > 0) voicings[0] = [...line.voicings[first]];
+    return { ...line, voicings };
+  }
+  if (moment.keys === "full") return line;
+  const voicings = empty();
+  if (first >= 0) voicings[first] = [...line.voicings[first]];
+  return { ...line, voicings };
+}
+
+/** The crash, forced onto the downbeat at peak — the last word on the table. */
+function withCrash(pattern: JamPattern): JamPattern {
+  if (pattern.crash.length === 0) return pattern;
+  const crash = [...pattern.crash];
+  crash[0] = 4;
+  return { ...pattern, crash };
 }
 
 /**
@@ -287,13 +539,63 @@ export function compileJam(jam: Jam, options: JamCompileOptions = {}): JamEngine
    * peaks at the end of every four bars. That costs nothing — this function is
    * already called once per bar line, because the bass has to be.
    */
-  const groove = applyIntensity(jamGroove(jam), jam.intensity, options.formBar ?? 0);
+  const formBar = options.formBar ?? 0;
+  /**
+   * What the band is doing on this bar, and what it was doing on the last one.
+   *
+   * In `loop` the moment is the same on every bar and says nothing the compiler
+   * did not already do, so everything below reads exactly as it read before —
+   * which is the compatibility promise of this whole pass, made good by one
+   * branch rather than by hoping.
+   */
+  const chorus = Math.max(1, Math.trunc(options.chorus ?? 1));
+  const moment = bandMoment(jam, chorus, formBar);
+  const arranged = jam.arrangement?.mode === "build" || jam.arrangement?.mode === "song";
+  const written = jamGroove(jam);
+  const groove = applyIntensity(
+    arranged ? { ...written, bar: barForMoment(written, moment) } : written,
+    // The arrangement's dynamics in Build and Song; the record's in Loop. They
+    // are the same value in Loop, so this line changes nothing there.
+    moment.intensity,
+    formBar,
+  );
   // Muting the drummer is not the same as removing them: the table still has
   // to be the right width, because the engine checks it against the bar it
   // already runs. A silent drummer is every cell at zero.
   const drumsOff = !jamBand(jam, options.lineup).drums;
-  const bar = drumsOff ? silenced(groove.bar) : groove.bar;
-  const fill = jam.fills && groove.fill ? (drumsOff ? silenced(groove.fill) : groove.fill) : null;
+  const arrangedBar = arranged ? drumsForMoment(groove.bar, moment) : groove.bar;
+  const played = drumsOff ? silenced(arrangedBar) : arrangedBar;
+  const bar = arranged && moment.crash && !drumsOff ? withCrash(played) : played;
+  /**
+   * The engine's own fill machinery, off under an arrangement.
+   *
+   * In `loop` the engine plays `fill` on the chorus's last bar and every
+   * `fillEvery` bars and crashes on the one, and that is exactly what it has
+   * always done. Under an arrangement the fills are decided per bar and are
+   * already IN the table above, so leaving the engine's rules switched on
+   * would play two fills over each other and crash on downbeats the plan said
+   * nothing about. One place decides; here it is said once.
+   */
+  const fill =
+    !arranged && jam.fills && groove.fill
+      ? drumsOff
+        ? silenced(groove.fill)
+        : groove.fill
+      : null;
+  const meter = { beatsPerBar: groove.beatsPerBar, ticksPerBeat: groove.ticksPerBeat };
+  const bassLine = jamBassLine(jam, formBar, options.lineup);
+  const keysLine = jamKeysLine(jam, formBar, options.lineup, options.previousVoicing);
+  /**
+   * Does this bar ask the band for something the last bar was not doing?
+   *
+   * Only then does the table have to wait for the downbeat. `previousBar`
+   * returns null at the very top of a take — the first bar of a tune is a
+   * start, not a change — so a load is sent the way a load has always been
+   * sent, at once.
+   */
+  const before = arranged ? previousBar(jam, chorus, formBar) : null;
+  const changed =
+    !!before && !sameMoment(moment, bandMoment(jam, before.chorus, before.formBar));
 
   return {
     ticksPerBeat: groove.ticksPerBeat,
@@ -304,8 +606,8 @@ export function compileJam(jam: Jam, options: JamCompileOptions = {}): JamEngine
     // crash with no fill in front of it sounds like a mistake.
     fill,
     formBars: formBars(jam.form),
-    crashOnOne: jam.fills && !drumsOff,
-    intensity: JAM_INTENSITY_GAIN[jam.intensity] ?? 1,
+    crashOnOne: !arranged && jam.fills && !drumsOff,
+    intensity: JAM_INTENSITY_GAIN[moment.intensity] ?? 1,
     // The bossa, the ballad and the cha-cha are played with the stick across
     // the head. Sent as a flag rather than written into the table, because it
     // is true of the whole groove and not of one tick: every quiet snare in it
@@ -314,14 +616,14 @@ export function compileJam(jam: Jam, options: JamCompileOptions = {}): JamEngine
     // reads better missing than present and empty.
     ...(groove.snareGhostIsRim ? { snareGhostIsRim: true } : {}),
     kit: jam.kit || "studio",
-    bass: jamBassLine(jam, options.formBar ?? 0, options.lineup),
+    bass: arranged ? bassForMoment(bassLine, moment, meter) : bassLine,
     practice: jam.practice ? practiceConfigFrom(jam.practice) : null,
     // A fill every four or eight bars as well as at the chorus end. Zero when
     // fills are off at all, rather than a number the engine would have to
     // remember not to act on: `fill` is already null there, and two switches
     // that have to agree is one too many.
     fillEvery: fill ? Math.max(0, Math.trunc(jam.fillEvery ?? 0)) : 0,
-    keys: jamKeysLine(jam, options.formBar ?? 0, options.lineup, options.previousVoicing),
+    keys: arranged ? keysForMoment(keysLine, moment) : keysLine,
     mix: jamMix(jam),
     // The sticks are the drummer counting the band in on the rim, which is
     // what a drummer does; the beep is the drill's, and it is what you want
@@ -337,6 +639,14 @@ export function compileJam(jam: Jam, options: JamCompileOptions = {}): JamEngine
     // engine falls back to the built-in kit named above for any voice the
     // folder does not hold.
     ...(jam.customKit?.dir ? { customKit: { dir: jam.customKit.dir } } : {}),
+    // The arrangement's two words to the engine (A1). Both absent under
+    // `loop`, and absent rather than false or "now" under the other two,
+    // because a switch that is only ever off reads better missing than
+    // present and empty — the same courtesy `snareGhostIsRim` gets above.
+    ...(changed ? { applyAt: "barLine" as const } : {}),
+    // `ending` is set on exactly one bar of a Song and on nothing else, so it
+    // is the whole of the question. No second rule to keep in step with it.
+    ...(moment.ending ? { endsForm: true } : {}),
   };
 }
 

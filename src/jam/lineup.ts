@@ -95,3 +95,37 @@ export function bandDescription(lineup: JamLineup): string[] {
   if (lineup.keys) keys.push("jam.band.keys");
   return keys;
 }
+
+/**
+ * The vibe **Jam now** hands a player of `instrument` (JAM_KILLER §2 A4).
+ *
+ * One tap has to pick a style, and the honest way to pick one is to ask what
+ * the player is holding. The table is the plan's, and it is deliberately
+ * short: this is the answer for somebody who has not chosen yet, and every
+ * one of them is one tile away from being changed.
+ *
+ * The chair rather than the instrument, so the two guitars answer the same
+ * way and so a chair added to `JamLineup` fails the compile here instead of
+ * quietly falling through to rock.
+ */
+const VIBE_FOR_CHAIR: Record<JamLineup["you"], string> = {
+  guitar: "rock",
+  bass: "funk",
+  keys: "jazz",
+  // The one player the band's drummer sits out for, so this is the vibe of
+  // the bass and keys they are given — rock, the plainest thing to play over.
+  drums: "rock",
+  other: "rock",
+};
+
+/**
+ * A plain string, for the same reason `lineupFor` takes one: the instrument
+ * comes out of the store, where a build other than this one may have written
+ * a chair this build has never heard of. A singer is exactly that — the
+ * instrument list has no seat for a voice yet, and on the day it does this
+ * hands them pop rather than the fallback.
+ */
+export function vibeForInstrument(instrument: InstrumentId | string): string {
+  if (/^(?:voice|vocal|vocals|sing|singer|singing)$/i.test(String(instrument))) return "pop";
+  return VIBE_FOR_CHAIR[lineupFor(instrument).you];
+}

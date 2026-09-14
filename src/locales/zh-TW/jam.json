@@ -2,6 +2,9 @@
   "jam": {
     "badge": "即興伴奏",
     "newJam": "新增即興伴奏",
+    "jamNow": "立即即興",
+    "jamNowLead": "依你演奏的樂器挑一支樂隊，數拍帶入。",
+    "jamNowName": "{{vibe}}即興",
     "untitled": "新增即興伴奏",
     "deleteJam": "刪除即興伴奏",
     "duplicateJam": "複製即興伴奏",
@@ -222,6 +225,32 @@
       "loopSection": "循環第 {{start}}–{{end}} 小節",
       "loopOff": "取消循環",
       "shape": "曲式"
+    },
+    "arrangement": {
+      "label": "編排",
+      "loop": "循環",
+      "build": "漸強",
+      "song": "整首",
+      "loopLead": "一個律動，一圈接一圈，直到你喊停。",
+      "buildLead": "第一遍收著彈，越轉越放開，中途還會只剩大鼓和腳踏鈸。",
+      "songLead": "走 {{choruses}} 遍越彈越開，最後全樂團一起收尾。",
+      "choruses": "遍數",
+      "fewerChoruses": "減少遍數",
+      "moreChoruses": "增加遍數",
+      "breakdown": "中段落差",
+      "breakdownOff": "關",
+      "breakdownEvery": "每 {{choruses}} 遍",
+      "breakdownHint": "樂團每隔多久只留大鼓和腳踏鈸，持續半遍。"
+    },
+    "dynamics": {
+      "soft": "輕",
+      "normal": "全員",
+      "loud": "重",
+      "breakdown": "落差段",
+      "stopTime": "停頓節奏",
+      "endingHold": "最後一下，餘音不斷",
+      "endingStop": "最後一下，戛然而止",
+      "crash": "碎音鈸"
     },
     "short": {
       "blues12": "12 小節",

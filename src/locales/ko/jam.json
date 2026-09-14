@@ -2,6 +2,9 @@
   "jam": {
     "badge": "잼",
     "newJam": "새 잼",
+    "jamNow": "지금 잼",
+    "jamNowLead": "당신의 악기에 맞는 밴드를 골라 카운트를 세어 줍니다.",
+    "jamNowName": "{{vibe}} 잼",
     "untitled": "새 잼",
     "deleteJam": "잼 삭제",
     "duplicateJam": "잼 복제",
@@ -222,6 +225,32 @@
       "loopSection": "{{start}}–{{end}}마디 반복",
       "loopOff": "반복 끄기",
       "shape": "형태"
+    },
+    "arrangement": {
+      "label": "편곡",
+      "loop": "루프",
+      "build": "빌드",
+      "song": "곡",
+      "loopLead": "그루브 하나를, 멈출 때까지 계속.",
+      "buildLead": "첫 코러스는 눌러서, 돌아올수록 열어서, 중간에는 킥과 하이햇만 남깁니다.",
+      "songLead": "{{choruses}} 코러스 동안 쌓고, 마지막엔 밴드가 다 같이 끝냅니다.",
+      "choruses": "코러스 수",
+      "fewerChoruses": "코러스 줄이기",
+      "moreChoruses": "코러스 늘리기",
+      "breakdown": "브레이크다운",
+      "breakdownOff": "없음",
+      "breakdownEvery": "{{choruses}} 코러스마다",
+      "breakdownHint": "반 코러스 동안 킥과 하이햇만 남는 주기."
+    },
+    "dynamics": {
+      "soft": "여리게",
+      "normal": "밴드 전원",
+      "loud": "세게",
+      "breakdown": "브레이크다운",
+      "stopTime": "스톱타임",
+      "endingHold": "마지막 화음, 울리며",
+      "endingStop": "마지막 한 방, 딱 멈춤",
+      "crash": "크래시"
     },
     "short": {
       "blues12": "12마디",

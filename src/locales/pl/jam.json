@@ -2,6 +2,9 @@
   "jam": {
     "badge": "JAM",
     "newJam": "Nowy jam",
+    "jamNow": "Zagraj teraz",
+    "jamNowLead": "Dobiera zespół do twojego instrumentu i odlicza wejście.",
+    "jamNowName": "Jam {{vibe}}",
     "untitled": "Nowy jam",
     "deleteJam": "Usuń jam",
     "duplicateJam": "Powiel jam",
@@ -222,6 +225,32 @@
       "loopSection": "Zapętl takty {{start}}–{{end}}",
       "loopOff": "Wyłącz pętlę",
       "shape": "Kształt"
+    },
+    "arrangement": {
+      "label": "Aranżacja",
+      "loop": "Pętla",
+      "build": "Narastanie",
+      "song": "Utwór",
+      "loopLead": "Jeden groove, w kółko, dopóki nie przerwiesz.",
+      "buildLead": "Zespół trzyma się przy pierwszym chorusie, otwiera się, gdy temat wraca, a po drodze schodzi do stopy i hi-hatu.",
+      "songLead": "Narasta przez {{choruses}} chorusów, potem zespół razem kończy utwór.",
+      "choruses": "Chorusy",
+      "fewerChoruses": "Mniej chorusów",
+      "moreChoruses": "Więcej chorusów",
+      "breakdown": "Breakdown",
+      "breakdownOff": "Nigdy",
+      "breakdownEvery": "co {{choruses}} chorusy",
+      "breakdownHint": "Jak często zespół przez pół chorusa gra tylko stopę i hi-hat."
+    },
+    "dynamics": {
+      "soft": "cicho",
+      "normal": "cały zespół",
+      "loud": "głośno",
+      "breakdown": "breakdown",
+      "stopTime": "stop-time",
+      "endingHold": "ostatni akord, wybrzmiewa",
+      "endingStop": "ostatnie uderzenie, cisza",
+      "crash": "crash"
     },
     "short": {
       "blues12": "12 taktów",

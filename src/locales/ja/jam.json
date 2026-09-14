@@ -2,6 +2,9 @@
   "jam": {
     "badge": "ジャム",
     "newJam": "新しいジャム",
+    "jamNow": "今すぐジャム",
+    "jamNowLead": "あなたの楽器に合うバンドを選び、カウントを出します。",
+    "jamNowName": "{{vibe}}のジャム",
     "untitled": "新しいジャム",
     "deleteJam": "ジャムを削除",
     "duplicateJam": "ジャムを複製",
@@ -222,6 +225,32 @@
       "loopSection": "{{start}}–{{end}} 小節をループ",
       "loopOff": "ループを解除",
       "shape": "型"
+    },
+    "arrangement": {
+      "label": "アレンジ",
+      "loop": "ループ",
+      "build": "ビルド",
+      "song": "曲",
+      "loopLead": "ひとつのグルーヴを、止めるまでぐるぐる。",
+      "buildLead": "最初のコーラスは抑えめ、まわるほど開いていき、途中でキックとハイハットだけに落とします。",
+      "songLead": "{{choruses}}コーラスかけて盛り上げ、最後はバンド全員で締めます。",
+      "choruses": "コーラス数",
+      "fewerChoruses": "コーラスを減らす",
+      "moreChoruses": "コーラスを増やす",
+      "breakdown": "ブレイクダウン",
+      "breakdownOff": "なし",
+      "breakdownEvery": "{{choruses}}コーラスごと",
+      "breakdownHint": "半コーラスのあいだキックとハイハットだけになる頻度。"
+    },
+    "dynamics": {
+      "soft": "抑えめ",
+      "normal": "バンド全員",
+      "loud": "強め",
+      "breakdown": "ブレイクダウン",
+      "stopTime": "ストップタイム",
+      "endingHold": "最後の一発、鳴らしたまま",
+      "endingStop": "最後の一発、そこで止まる",
+      "crash": "クラッシュ"
     },
     "short": {
       "blues12": "12小節",
