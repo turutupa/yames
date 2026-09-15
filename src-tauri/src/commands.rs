@@ -2576,9 +2576,29 @@ pub fn set_jam(
             // the recipe it always has. Resolved here, on the command
             // thread, so the audio thread receives notes rather than a
             // decision.
+            // AND THE PERCUSSIONIST, at the same rate and out of the same
+            // cache. One set, played under every drum kit — a percussionist
+            // is not a drum kit, and choosing Brushes does not choose a
+            // different cowbell. `None` when the app ships no set, which is
+            // a checkout without `sounds/perc` and is every percussion lane
+            // silent rather than a jam that will not load.
+            let perc = match crate::kit::perc_count() {
+                0 => None,
+                _ => match jam_kit.0.perc(0, rate) {
+                    Ok(set) => Some(set),
+                    // A sentence on the console and a band with no shaker.
+                    // The percussionist is a layer over a band that works
+                    // without one, so a set that will not decode must not
+                    // take the drummer down with it.
+                    Err(e) => {
+                        eprintln!("[perc] the shipped percussion set did not decode: {e}");
+                        None
+                    }
+                },
+            };
             let voices = crate::jam::resolve_voices(cfg, &jam_voices.0, rate)?;
             Some(std::sync::Arc::new(crate::jam::compile_with(
-                cfg, &jam_gain.0, bank, voices,
+                cfg, &jam_gain.0, bank, perc, voices,
             )?))
         }
         None => None,

@@ -1487,8 +1487,19 @@ pub(crate) fn jam_reference_sample(id: SoundId) -> &'static [f32] {
 #[inline]
 fn jam_sample<'a>(bank: &'a SoundBank, band: BandBanks<'a>, id: SoundId) -> &'a [f32] {
     match id {
+        // THE VOICE INDEX SAYS WHICH BANK, and that is the whole of the
+        // percussionist on the audio thread. The contract numbers the ten
+        // percussion voices after the eleven drums, so a slot already
+        // carries the answer and no second field, no second variant and no
+        // lookup is needed: one comparison on a byte, and the shaker comes
+        // out of the set while the snare comes out of the kit.
         SoundId::Band { voice, layer, robin } => {
-            band.kit.map_or(&[][..], |c| c.sample(voice, layer, robin))
+            let from = if (voice as usize) >= crate::kit::DRUM_VOICES {
+                band.perc
+            } else {
+                band.kit
+            };
+            from.map_or(&[][..], |c| c.sample(voice, layer, robin))
         }
         SoundId::Voice {
             line,
@@ -1512,6 +1523,11 @@ fn jam_sample<'a>(bank: &'a SoundBank, band: BandBanks<'a>, id: SoundId) -> &'a 
 #[derive(Clone, Copy, Default)]
 struct BandBanks<'a> {
     kit: Option<&'a crate::kit::KitBank>,
+    /// The percussionist's set. `None` is a band without one, and every
+    /// percussion voice then renders silence — which cannot happen in
+    /// practice, because a table with no set compiles no percussion slots,
+    /// and is the right answer if it ever does.
+    perc: Option<&'a crate::kit::KitBank>,
     bass: Option<&'a crate::voices::MelodicBank>,
     keys: Option<&'a crate::voices::MelodicBank>,
 }
@@ -1523,6 +1539,7 @@ impl<'a> BandBanks<'a> {
         match table {
             Some(t) => Self {
                 kit: Some(t.kit_bank()),
+                perc: t.perc_bank(),
                 bass: t.voice_bank(VoiceLine::Bass),
                 keys: t.voice_bank(VoiceLine::Keys),
             },
@@ -1911,7 +1928,7 @@ fn spawn_band_voice(
     // compiled, so this is a mask test per ringing voice and no more.
     if slot.chokes != 0 {
         for v in voices.iter_mut() {
-            if v.band && v.voice != NOT_A_DRUM && (slot.chokes & (1u16 << v.voice)) != 0 {
+            if v.band && v.voice != NOT_A_DRUM && (slot.chokes & (1u32 << v.voice)) != 0 {
                 // Already fading: leave the shorter fade alone rather than
                 // restarting it, so two closed hats in a row do not make the
                 // open one last longer than one would.
@@ -4687,8 +4704,23 @@ impl MetronomeEngine {
                                         // Your bars in a trade: the hat lane
                                         // keeps the time and nothing else
                                         // plays, bass included.
+                                        //
+                                        // AND THE PERCUSSIONIST, who keeps
+                                        // going when the hats do
+                                        // (`plans/tasks/jam-v5/BRIEF.md`).
+                                        // In a breakdown the kit drops to
+                                        // kick and hats while the shaker and
+                                        // the congas hold the time, which is
+                                        // what somebody standing next to the
+                                        // drummer actually does — and it is
+                                        // the difference between a bar that
+                                        // opens up and a bar that falls
+                                        // over. Asked off the lane, which
+                                        // the slot already carries for
+                                        // exactly this question.
                                         if band_state == JamBandState::HatsOnly
                                             && slot.lane != trade_keeps
+                                            && !slot.lane.is_perc()
                                         {
                                             continue;
                                         }
@@ -8386,6 +8418,7 @@ mod tests {
                 drums: 1.5,
                 bass: 1.5,
                 keys: 1.5,
+                perc: 1.0,
             }),
             count_in_sound: None,
             bass_voice: None,
@@ -8393,6 +8426,118 @@ mod tests {
             custom_kit: None,
             ..Default::default()
         }
+    }
+
+
+    /// A PERCUSSIONIST ON EVERY TICK STILL DOES NOT REACH THE CLAMP.
+    ///
+    /// The ceiling test the percussionist has to pass, and it is a harder
+    /// question than the drums': a kit has three lanes a groove can write on
+    /// every tick and leave ringing, and this adds ten more rows on top of
+    /// the lawnmower — every percussion voice, on every sixteenth, under a
+    /// band that was already the worst bar the table can describe.
+    ///
+    /// Both claims, the same two the drums answer:
+    ///
+    /// * the band does not reach the mixer's clamp, so nobody hears a square
+    ///   wave;
+    /// * the voice count stays inside the preallocated [`MAX_VOICES`], so
+    ///   the callback never reallocates. This is the one the caps in
+    ///   `jam.rs` exist for — ten uncapped percussion rows at 300 BPM
+    ///   sixteenths would be four hundred voices out of a mixer that holds
+    ///   two hundred and fifty-six.
+    ///
+    /// Its own set and its own kit rather than the shipped ones, both at the
+    /// loader's length cap: `sounds/perc` is a folder a checkout may not
+    /// have, and a ceiling test that silently measured a band with no
+    /// percussion in it would be worse than no test.
+    #[test]
+    fn a_percussionist_on_every_tick_stays_under_the_ceiling() {
+        const SHIPPED_VOLUME: f32 = 0.8;
+        let reference = SoundBank::new(JAM_REFERENCE_SR);
+        let others: Vec<(u32, SoundBank)> = [44100u32, 96000]
+            .into_iter()
+            .map(|sr| (sr, SoundBank::new(sr)))
+            .collect();
+        // Every voice at the cap — the longest a folder is allowed to hold,
+        // which is what stacks.
+        let kit = std::sync::Arc::new(crate::kit::KitBank::for_tests(
+            &KitVoice::DRUMS,
+            JAM_REFERENCE_SR,
+            crate::kit::MAX_VOICE_SECS,
+        ));
+        let set = std::sync::Arc::new(crate::kit::KitBank::for_tests(
+            &KitVoice::PERC,
+            JAM_REFERENCE_SR,
+            crate::kit::MAX_VOICE_SECS,
+        ));
+
+        let mut cfg = busy_band(JamKit::fallback(), true);
+        let all = vec![2u8; 16];
+        cfg.bar = crate::jam::JamPattern {
+            shaker: all.clone(),
+            tambourine: all.clone(),
+            cowbell: all.clone(),
+            cabasa: all.clone(),
+            claves: all.clone(),
+            guiro: all.clone(),
+            conga_hi: all.clone(),
+            conga_lo: all.clone(),
+            bongo_hi: all.clone(),
+            bongo_lo: all.clone(),
+            ..cfg.bar.clone()
+        };
+        cfg.mix = Some(crate::jam::JamMix {
+            drums: 1.5,
+            bass: 1.5,
+            keys: 1.5,
+            // The percussionist as loud as the contract lets anybody be.
+            perc: 1.5,
+        });
+        let table = crate::jam::compile_with_perc(&cfg, kit, Some(set)).unwrap();
+        assert!(
+            table.perc_bank().is_some(),
+            "the table did not carry the set this test is about"
+        );
+        // Ten rows on every tick, and they are really in the table.
+        assert_eq!(
+            table
+                .tick(0, 0)
+                .expect("tick 0")
+                .slots()
+                .iter()
+                .filter(|s| s.lane.is_perc())
+                .count(),
+            10,
+            "the percussion rows did not reach the table"
+        );
+
+        let mut worst_voices = 0usize;
+        let mut check = |bpm: u32, sr: u32, bank: &SoundBank| {
+            let tick_samples = (sr as f64 * 60.0 / bpm as f64 / 4.0) as usize;
+            let r = render_jam_at(&table, bank, 2, tick_samples, SHIPPED_VOLUME, sr, true);
+            assert!(
+                r.peak <= 1.0,
+                "a percussionist on every tick at {bpm} BPM / {sr} Hz rendered \
+                 {:.3}, so the mixer clamped and the user heard a square wave",
+                r.peak
+            );
+            worst_voices = worst_voices.max(r.max_voices);
+            assert!(
+                r.max_voices < MAX_VOICES,
+                "{} voices alive at {bpm} BPM / {sr} Hz, against {MAX_VOICES} \
+                 preallocated — the callback would have reallocated on the \
+                 audio thread",
+                r.max_voices
+            );
+        };
+        for bpm in [20u32, 60, 120, 200, 300] {
+            check(bpm, JAM_REFERENCE_SR, &reference);
+        }
+        for (sr, bank) in others.iter() {
+            check(300, *sr, bank);
+        }
+        eprintln!("[perc] worst voice count with ten rows on every tick: {worst_voices}");
     }
 
     /// THE BAND THAT WOULD HAVE CLIPPED, RENDERED.
@@ -8493,8 +8638,12 @@ mod tests {
             // Every voice at the cap, decoded at the reference rate — the
             // rate `worst_bar_peak` measures at, so what this renders is
             // exactly what the normalisation thought it was scaling.
+            // THE DRUMS: this is the test named for a folder somebody
+            // points Yames at, and such a folder is a drum kit. The
+            // percussionist's ceiling is its own test, above, because it is
+            // a harder question and a different set.
             let folder = std::sync::Arc::new(crate::kit::KitBank::for_tests(
-                &KitVoice::ALL,
+                &KitVoice::DRUMS,
                 JAM_REFERENCE_SR,
                 crate::kit::MAX_VOICE_SECS,
             ));
@@ -10906,6 +11055,104 @@ mod tests {
         );
     }
 
+
+    /// THE PERCUSSIONIST KEEPS GOING WHEN THE HATS DO.
+    ///
+    /// The contract's band rule, rendered rather than asserted about a
+    /// table: in a breakdown or on your bars in a trade the kit drops to the
+    /// hats and the shaker and the congas keep the time. It is the whole
+    /// reason the layer earns its place — a bar that drops to a closed hat
+    /// alone falls over, and one with a percussionist still in it opens up.
+    ///
+    /// Three claims, because "kept" and "dropped" are different questions:
+    /// the trading bar is quieter than the band, the percussion is still in
+    /// it, and the kick and the bass are not.
+    #[test]
+    fn a_trading_bar_keeps_the_percussionist_and_drops_everything_else() {
+        let sr = 48000;
+        let bank = SoundBank::new(sr);
+        let tick_samples = sr as usize * 60 / 120 / 4;
+        let kit = std::sync::Arc::new(crate::kit::KitBank::for_tests(
+            &KitVoice::DRUMS,
+            JAM_REFERENCE_SR,
+            0.2,
+        ));
+        let set = std::sync::Arc::new(crate::kit::KitBank::for_tests(
+            &KitVoice::PERC,
+            JAM_REFERENCE_SR,
+            0.2,
+        ));
+
+        let mut cfg = practising_band();
+        cfg.form_bars = 8;
+        cfg.practice = Some(JamPracticeConfig {
+            drop_out: None,
+            trade: Some(JamTrade {
+                band_bars: 4,
+                you_bars: 4,
+            }),
+        });
+        let sixteen = |v: [u8; 4]| -> Vec<u8> { (0..16).map(|t| v[t % 4]).collect() };
+        cfg.bar.shaker = sixteen([2, 1, 1, 1]);
+        cfg.bar.conga_hi = sixteen([0, 0, 3, 0]);
+        cfg.bar.conga_lo = sixteen([2, 0, 0, 1]);
+        let table = crate::jam::compile_with_perc(&cfg, kit, Some(set)).unwrap();
+        assert_eq!(table.band_state(0), JamBandState::Full);
+        assert_eq!(table.band_state(4), JamBandState::HatsOnly);
+
+        let energy = |b: &[f32]| -> f64 { b.iter().map(|s| (s * s) as f64).sum() };
+        let full = render_band_bar(&table, &bank, 0, tick_samples);
+        let yours = render_band_bar(&table, &bank, 4, tick_samples);
+
+        assert!(
+            energy(&yours) > 0.0 && energy(&yours) < energy(&full),
+            "your bars rendered {:.0} against the band's {:.0}",
+            energy(&yours),
+            energy(&full)
+        );
+
+        // The percussion is still there. Measured against the same bar with
+        // the percussionist switched off, which is the only honest
+        // comparison: a hats-only bar's level says nothing on its own.
+        let mut no_perc = cfg.clone();
+        no_perc.perc = Some(false);
+        let bare = crate::jam::compile_with_perc(
+            &no_perc,
+            std::sync::Arc::new(crate::kit::KitBank::for_tests(
+                &KitVoice::DRUMS,
+                JAM_REFERENCE_SR,
+                0.2,
+            )),
+            Some(std::sync::Arc::new(crate::kit::KitBank::for_tests(
+                &KitVoice::PERC,
+                JAM_REFERENCE_SR,
+                0.2,
+            ))),
+        )
+        .unwrap();
+        let hats_alone = render_band_bar(&bare, &bank, 4, tick_samples);
+        assert!(
+            energy(&yours) > energy(&hats_alone) * 1.5,
+            "a trading bar with a shaker and two congas in it rendered {:.0} \
+             against {:.0} with the percussionist switched off — the \
+             percussion is being dropped with the rest of the band",
+            energy(&yours),
+            energy(&hats_alone)
+        );
+
+        // And the kick and the bass are gone. The low band is what they
+        // carry and a closed hat has none of it, so this is the claim about
+        // what is MISSING rather than about how loud what is left is.
+        let low = |b: &[f32]| low_band_share(b, sr) * energy(b);
+        assert!(
+            low(&yours) < low(&full) * 0.01,
+            "your four carry {:.1} of energy under 150 Hz against the band's \
+             {:.1}; the kick or the bass is still playing",
+            low(&yours),
+            low(&full)
+        );
+    }
+
     /// One bar of a table, spawned and mixed the way the callback does it,
     /// with the practice window applied. A sibling of [`render_jam`] and
     /// deliberately another copy of the callback's arithmetic rather than a
@@ -10926,7 +11173,15 @@ mod tests {
             if state != JamBandState::Silent {
                 if let Some(tick) = table.tick(t as u32, jam_bar) {
                     for slot in tick.slots() {
-                        if state == JamBandState::HatsOnly && slot.lane != JamLane::Hat {
+                        // The callback's filter, and the percussionist is
+                        // in it: they keep going when the hats do
+                        // (`plans/tasks/jam-v5/BRIEF.md`). A copy of the
+                        // callback's line rather than a shared helper, for
+                        // the reason this whole function is one.
+                        if state == JamBandState::HatsOnly
+                            && slot.lane != JamLane::Hat
+                            && !slot.lane.is_perc()
+                        {
                             continue;
                         }
                         spawn_band_voice(
@@ -11172,7 +11427,7 @@ mod tests {
                     });
                     let bank = crate::jam::reference_bank(kit.name()).unwrap();
                     let table =
-                        compile_with(&cfg, &cache, bank, crate::jam::JamVoices::default())
+                        compile_with(&cfg, &cache, bank, None, crate::jam::JamVoices::default())
                             .unwrap();
                     assert_eq!(
                         table.base_peak,

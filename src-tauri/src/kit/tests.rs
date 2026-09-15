@@ -715,7 +715,12 @@ fn a_short_sample_keeps_the_ending_the_musician_gave_it() {
 #[test]
 fn no_folder_can_cost_more_than_the_cap_however_long_its_files_are() {
     let scratch = Scratch::new("bounded");
-    for v in KitVoice::ALL {
+    // THE DRUMS, because a folder somebody points Yames at is a drum kit
+    // and `load` reads nothing else out of one. Twenty-one voices of
+    // three-second files is 138 MB, which is over the folder cap — and
+    // measuring the cap against audio no folder can hold would be measuring
+    // the wrong folder.
+    for v in KitVoice::DRUMS {
         // Three times the cap each, at a rate above the output's.
         write_sine(
             &scratch.path().join(format!("{}.wav", v.file_name())),
@@ -730,7 +735,7 @@ fn no_folder_can_cost_more_than_the_cap_however_long_its_files_are() {
     }
     let bank = load(scratch.path(), 48_000).expect("eleven long drums are still a kit");
     let ceiling = (MAX_VOICE_SECS * 48_000.0) as usize + 2;
-    for v in KitVoice::ALL {
+    for v in KitVoice::DRUMS {
         let frames = bank.sample(v as u8, 0, 0).len() / 2;
         assert!(
             frames <= ceiling,
@@ -739,7 +744,7 @@ fn no_folder_can_cost_more_than_the_cap_however_long_its_files_are() {
         );
     }
     assert!(
-        bank.bytes <= KIT_VOICES * ceiling * 8,
+        bank.bytes <= DRUM_VOICES * ceiling * 8,
         "the folder decoded to {} bytes, over eleven voices' worth of the cap",
         bank.bytes
     );
@@ -802,7 +807,14 @@ fn the_names_are_matched_whatever_case_they_are_in() {
     let seen = inspect(scratch.path()).expect("the folder is readable");
     assert_eq!(seen.voices, vec!["kick", "hat_open", "ride_bell", "tom_hi"]);
     assert!(seen.missing.contains(&"ride".to_string()));
-    assert_eq!(seen.voices.len() + seen.missing.len(), KIT_VOICES);
+    // The eleven drums and no more: the report a musician's own folder gets
+    // is about a drum kit, and the percussionist's ten are never read out of
+    // a folder anybody points at.
+    assert_eq!(seen.voices.len() + seen.missing.len(), DRUM_VOICES);
+    assert!(
+        !seen.missing.iter().any(|v| v == "shaker"),
+        "a folder of drums was told it is missing a shaker"
+    );
 
     let bank = load(scratch.path(), 48_000).expect("the folder loads");
     assert!(bank.has(KitVoice::Kick) && bank.has(KitVoice::TomHi));
@@ -1024,4 +1036,59 @@ fn the_decode_is_quick_enough_to_run_on_the_command_thread() {
         "resampling cost {resampled:.0} ms against {millis:.0} ms without it, \
          which is the per-sample kernel back again"
     );
+}
+
+/// THE PERCUSSION SET THE APP SHIPS DECODES FROM ITS OWN FOLDER.
+///
+/// The kits have this test and so do the melodic banks; this is the same one
+/// for `sounds/perc/*`. Every set loads at 48 kHz, holds the contract's ten
+/// voices and nothing that belongs to a drum kit, and every layer of every
+/// voice decoded to audio rather than to an empty buffer.
+///
+/// **It says so when there is nothing to check.** The set is rendered by a
+/// tool and a checkout may not have it — which is a state the whole feature
+/// is built to survive, so a missing folder is a line on the console and a
+/// pass, not a failure. What would be worse than either is a test that
+/// silently checked nothing, so it prints which it did.
+#[test]
+fn every_shipped_percussion_set_decodes_from_its_own_folder() {
+    let ids = perc_ids();
+    if ids.is_empty() {
+        eprintln!(
+            "[perc] no percussion set is shipped, so the lanes are silent — \
+             this checkout has no sounds/perc"
+        );
+        return;
+    }
+    for (index, id) in ids.iter().enumerate() {
+        let bank = load_perc(index, 48_000)
+            .unwrap_or_else(|e| panic!("the {id} percussion set did not load: {e}"));
+        for v in KitVoice::PERC {
+            assert!(
+                bank.has(v),
+                "the {id} set has no {} — a set is the contract's ten",
+                v.file_name()
+            );
+            let voice = bank.voice(v).expect("just checked");
+            for l in 0..voice.layers() {
+                for r in 0..voice.rr() {
+                    assert!(
+                        !bank.sample(v as u8, l, r).is_empty(),
+                        "{id}'s {} layer {l} round robin {r} decoded to nothing",
+                        v.file_name()
+                    );
+                }
+            }
+        }
+        // AND NOTHING THAT BELONGS TO THE DRUMMER. A set with a snare in it
+        // would play that snare under every kit in the app, on top of the
+        // kit's own — the percussionist is a tray, not a second drum kit.
+        for v in KitVoice::DRUMS {
+            assert!(
+                !bank.has(v),
+                "the {id} set holds a {}, which is the drummer's",
+                v.file_name()
+            );
+        }
+    }
 }
