@@ -216,6 +216,29 @@ export function duplicateSetlist(setlist: Setlist, name = setlist.name): Setlist
   };
 }
 
+/**
+ * Move a setlist within the library. Out-of-range indices leave the list
+ * alone, so a drag that ends outside the panel is a no-op rather than a
+ * reshuffle.
+ *
+ * `reorderJams`, read for setlists, and deliberately the same function twice
+ * rather than one generic: the two libraries are drops in the same sidebar
+ * and a drummer who has dragged a jam expects a setlist to move the same way,
+ * which is a promise about behaviour and not about types.
+ *
+ * The library's order is the user's — the routine you warm up on first, the
+ * one you finish with — which is why it is moved by hand here and why
+ * `reorderSetlists` in `src/ipc.ts` writes it down.
+ */
+export function reorderSetlists(list: Setlist[], from: number, to: number): Setlist[] {
+  if (from === to) return list;
+  if (from < 0 || from >= list.length || to < 0 || to >= list.length) return list;
+  const out = [...list];
+  const [moved] = out.splice(from, 1);
+  out.splice(to, 0, moved);
+  return out;
+}
+
 // ---------------------------------------------------------------------------
 // Steps
 // ---------------------------------------------------------------------------

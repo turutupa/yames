@@ -16,6 +16,7 @@ export {
   renameSetlist,
   stepRange,
   upsertSetlist,
+  reorderSetlists,
   reorderSteps,
   setSetlistCountIn,
   setSetlistRepeat,

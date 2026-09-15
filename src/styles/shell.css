@@ -499,6 +499,38 @@ button.context-chip:hover,
   background: rgba(255, 255, 255, 0.06);
 }
 
+/* A row you can pick up says so before you pick it up.
+ *
+ * Written for whatever library row is DRAGGABLE rather than for either kind,
+ * because both libraries in the sidebar are ordered by hand — jams on their
+ * tab, setlists on theirs — and one grab has to feel like the other. It also
+ * tracks the guard the rows already carry: a row being renamed is a text
+ * field, its `draggable` goes false, and the hand goes with it.
+ *
+ * The attribute buys the specificity this needs, which is the other half of
+ * the story: `.preset-sidebar-item.setlist-item` is two simple selectors and
+ * setlist.css is imported after this file, so anything written as one class
+ * here loses the cursor to it.
+ */
+.preset-sidebar-item[draggable="true"] {
+  cursor: grab;
+}
+
+/* Picked up, and the row it is over. A line between rows rather than a filled
+   one: "after this one" and "instead of this one" are different answers and a
+   wash only gives the second. */
+.preset-sidebar-item[data-dragging] {
+  opacity: 0.45;
+}
+
+.preset-sidebar-item[draggable="true"][data-dragging] {
+  cursor: grabbing;
+}
+
+.preset-sidebar-item[data-drag-over] {
+  box-shadow: inset 0 2px 0 0 var(--accent);
+}
+
 .preset-sidebar-item.active {
   background: color-mix(in srgb, var(--accent) 15%, transparent);
   border-color: color-mix(in srgb, var(--accent) 30%, transparent);

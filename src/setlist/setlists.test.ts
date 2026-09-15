@@ -13,6 +13,7 @@ import {
   removeStep,
   removeSteps,
   renameSetlist,
+  reorderSetlists,
   reorderSteps,
   stepRange,
   setSetlistCountIn,
@@ -176,6 +177,39 @@ describe("setlists", () => {
     expect(duplicateSetlist(c, "Evening copy").countIn).toBe(4);
     // And none is still none, rather than a zero that reads as a setting.
     expect(duplicateSetlist(createSetlist("Cold"), "Cold copy").countIn).toBeUndefined();
+  });
+
+  it("moves one setlist within the library, the way a jam moves", () => {
+    // The library's order is the user's: the routine you warm up on first,
+    // the one you finish with.
+    const library = [createSetlist("Warm-up"), createSetlist("Evening"), createSetlist("Gig")];
+    const names = (list: Setlist[]) => list.map((c) => c.name);
+    expect(names(reorderSetlists(library, 0, 2))).toEqual(["Evening", "Gig", "Warm-up"]);
+    expect(names(reorderSetlists(library, 2, 0))).toEqual(["Gig", "Warm-up", "Evening"]);
+    // The same list back when nothing moves, so React can skip the render and
+    // the store is not written for a drag that went home.
+    expect(reorderSetlists(library, 1, 1)).toBe(library);
+    expect(names(library)).toEqual(["Warm-up", "Evening", "Gig"]);
+  });
+
+  it("leaves the library alone when a drag ends outside it", () => {
+    const library = [createSetlist("Warm-up"), createSetlist("Evening")];
+    expect(reorderSetlists(library, 0, 9)).toBe(library);
+    expect(reorderSetlists(library, -1, 1)).toBe(library);
+    expect(reorderSetlists([], 0, 1)).toEqual([]);
+  });
+
+  it("keeps every setlist through any sequence of moves", () => {
+    // A reorder is a permutation, never a loss.
+    let library = Array.from({ length: 6 }, (_, i) => createSetlist(`c${i}`));
+    const names = new Set(library.map((c) => c.name));
+    for (let from = 0; from < 6; from++) {
+      for (let to = 0; to < 6; to++) {
+        library = reorderSetlists(library, from, to);
+        expect(library).toHaveLength(6);
+        expect(new Set(library.map((c) => c.name))).toEqual(names);
+      }
+    }
   });
 });
 

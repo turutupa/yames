@@ -28,6 +28,8 @@ interface RailProps {
   onDeleteSetlist: (id: string) => void;
   onRenameSetlist: (id: string, name: string) => void;
   onDuplicateSetlist: (id: string) => void;
+  /** A setlist dragged to a new place in the library, as a jam can be. */
+  onReorderSetlists: (from: number, to: number) => void;
   /** The jam library, on the jam tab — the same deal setlists get (U9.4). */
   jams: Jam[];
   activeJamId: string | null;
@@ -153,6 +155,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
     onDeleteSetlist,
     onRenameSetlist,
     onDuplicateSetlist,
+    onReorderSetlists,
     jams,
     activeJamId,
     onLoadJam,
@@ -264,6 +267,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
             onDeleteSetlist={onDeleteSetlist}
             onRenameSetlist={onRenameSetlist}
             onDuplicateSetlist={onDuplicateSetlist}
+            onReorderSetlists={onReorderSetlists}
             jams={jams}
             activeJamId={activeJamId}
             onLoadJam={onLoadJam}
