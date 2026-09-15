@@ -244,13 +244,16 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   /**
    * A jam row marks itself as a drop target only for a JAM.
    *
-   * `onDragEnter` fires for whatever is being dragged, so a setlist in flight
-   * would light up a jam row that could never accept it — an invitation to a
-   * drop that does nothing. Guarded here rather than in the row so the jam
-   * rows keep one reading of "the row I am over".
+   * `onDragEnter` fires for whatever is being dragged — a setlist from the
+   * other tab, a file off the desktop, a selection — and any of them would
+   * light up a row that cannot accept them: an invitation to a drop that does
+   * nothing. So the line is drawn only while a jam is actually in the hand,
+   * which is the rule the setlist rows below already follow. Guarded here
+   * rather than in the row so the jam rows keep one reading of "the row I am
+   * over".
    */
   const setDragOverJamId = (id: string | null) => {
-    if (dragSetlistId && id !== null) return;
+    if (id !== null && !dragJamId) return;
     setDragOverJamIdState(id);
   };
   /**
@@ -298,6 +301,23 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
       setSearchOpen(false);
     }
   }, [isOpen]);
+
+  /*
+   * Changing tabs ends whatever was in the hand.
+   *
+   * `dragend` fires on the row the drag started from, and that row is gone the
+   * moment the library lists something else — so an id left behind would
+   * outlive the gesture for the rest of the session: the row comes back faded,
+   * and the guard that keeps the two kinds apart reads a drag that is not
+   * happening and refuses the drop line to every later one. Ending the drag
+   * with the tab is also what it looks like from the outside.
+   */
+  useEffect(() => {
+    setDragSetlistId(null);
+    setDragOverSetlistId(null);
+    setDragJamId(null);
+    setDragOverJamIdState(null);
+  }, [view]);
 
   // Close context menu on outside click
   useEffect(() => {
@@ -842,6 +862,10 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               }}
               onDragEnter={() => setDragOverJamId(j.id)}
               onDragOver={(e) => {
+                // Only a jam can land here. Without this the row accepts the
+                // drop — the "move" cursor and all — for anything at all, and
+                // then does nothing with it.
+                if (!dragJamId) return;
                 e.preventDefault();
                 e.dataTransfer.dropEffect = "move";
               }}

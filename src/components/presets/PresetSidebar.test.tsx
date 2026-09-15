@@ -11,10 +11,11 @@
  * - Search filters visible presets
  */
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
+import { createEvent, render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { createRef } from "react";
 import { PresetSidebar, type PresetSidebarHandle } from "./PresetSidebar";
 import { setInvokeResponse, DEFAULT_TEST_STATE } from "../../test/mocks";
+import { readStylesheet } from "../../test/readStyles";
 import { STARTER_JAMS } from "../../jam/jams";
 import type { Setlist, Preset } from "../../types";
 
@@ -426,13 +427,93 @@ describe("PresetSidebar — dragging a setlist in the library", () => {
     for (const row of await rows()) expect(row.getAttribute("draggable")).toBe("false");
   });
 
+  it("offers the drop only to the kind that is in the hand", async () => {
+    // `dragover` is what says "this row will take it": the browser shows the
+    // move cursor for it and sends no `drop` without it. A row that accepts
+    // everything and then does nothing with most of it is a row that lies.
+    setInvokeResponse("list_presets", () => []);
+    render(
+      <PresetSidebar
+        {...setlistProps}
+        setlists={LIBRARY}
+        onLoadSetlist={vi.fn()}
+        onReorderSetlists={vi.fn()}
+      />,
+    );
+    const r = await rows();
+
+    // Nothing of ours in flight — a file from the desktop, a selection, a jam
+    // that came from the other tab. The row is not a target.
+    const foreign = createEvent.dragOver(r[1], { dataTransfer: transfer() });
+    fireEvent(r[1], foreign);
+    expect(foreign.defaultPrevented).toBe(false);
+
+    // A setlist in flight, and it is.
+    fireEvent.dragStart(r[0], { dataTransfer: transfer() });
+    const own = createEvent.dragOver(r[1], { dataTransfer: transfer() });
+    fireEvent(r[1], own);
+    expect(own.defaultPrevented).toBe(true);
+  });
+
+  it("offers a jam row the same answer, for the same reason", async () => {
+    setInvokeResponse("list_presets", () => []);
+    render(
+      <PresetSidebar
+        {...baseProps}
+        view="jam"
+        jams={[...STARTER_JAMS]}
+        onLoadJam={vi.fn()}
+        onReorderJams={vi.fn()}
+      />,
+    );
+    const j = await waitFor(() => {
+      const r = [...document.querySelectorAll(".jam-item")] as HTMLElement[];
+      expect(r.length).toBeGreaterThan(2);
+      return r;
+    });
+    const foreign = createEvent.dragOver(j[1], { dataTransfer: transfer() });
+    fireEvent(j[1], foreign);
+    expect(foreign.defaultPrevented).toBe(false);
+
+    fireEvent.dragStart(j[0], { dataTransfer: transfer() });
+    const own = createEvent.dragOver(j[1], { dataTransfer: transfer() });
+    fireEvent(j[1], own);
+    expect(own.defaultPrevented).toBe(true);
+  });
+
+  it("gives a draggable row the grab hand, and keeps it while it is held", async () => {
+    /*
+     * Only CSS can get this wrong and no render test can see it. The setlist
+     * row carried `cursor: pointer` at two simple selectors from a file
+     * imported after shell.css, so a rule written there as one class lost —
+     * the jam rows showed a hand and the setlist rows a finger, for the same
+     * gesture.
+     */
+    const css = readStylesheet();
+    const grab = css.indexOf('.preset-sidebar-item[draggable="true"] {');
+    const grabbing = css.indexOf('.preset-sidebar-item[draggable="true"][data-dragging] {');
+    expect(grab).toBeGreaterThan(-1);
+    expect(grabbing).toBeGreaterThan(-1);
+    expect(css.slice(grab, css.indexOf("}", grab))).toContain("cursor: grab");
+    expect(css.slice(grabbing, css.indexOf("}", grabbing))).toContain("cursor: grabbing");
+
+    // Nothing later may take the cursor back off a library row. The setlist
+    // row's own rule is the one that did.
+    const setlistRow = css.indexOf(".preset-sidebar-item.setlist-item {");
+    expect(css.slice(setlistRow, css.indexOf("}", setlistRow))).not.toContain("cursor");
+    // And the jam row no longer keeps a hand of its own, which it held even
+    // while it was being renamed and could not be picked up.
+    expect(readStylesheet("jam.css")).not.toContain(".jam-item {");
+  });
+
   /*
    * A setlist and a jam are never dropped on each other.
    *
    * The two libraries live on separate tabs, so the only way to hold a drag
-   * open across both is to move the tab out from under it — which is what
-   * these two do. Contrived as a gesture, and exactly the point: the guard is
-   * in the handlers, not in the accident that the rows never meet.
+   * open across both is to move the tab out from under it — and moving the tab
+   * is what ENDS a drag, because the row it started from is gone and its
+   * `dragend` will never fire. So what these check is that nothing is left in
+   * the hand, and that the row the drag would have landed on refuses it.
    */
   const bothLibraries = (over: ReturnType<typeof vi.fn>) => ({
     setlists: LIBRARY,
@@ -451,7 +532,7 @@ describe("PresetSidebar — dragging a setlist in the library", () => {
     });
   }
 
-  it("shows a jam no drop target in the setlist library, and moves nothing", async () => {
+  it("leaves a jam behind on the tab it was picked up on", async () => {
     setInvokeResponse("list_presets", () => []);
     const never = vi.fn();
     const props = bothLibraries(never);
@@ -461,13 +542,16 @@ describe("PresetSidebar — dragging a setlist in the library", () => {
 
     rerender(<PresetSidebar {...baseProps} view="setlist" {...props} />);
     const r = await rows();
+    // Nothing is in the hand any more, so no setlist row is a target and none
+    // of them can be dropped on.
+    expect(document.querySelector("[data-dragging]")).toBeNull();
     fireEvent.dragEnter(r[2]);
     expect(r[2].getAttribute("data-drag-over")).toBeNull();
     fireEvent.drop(r[2], { dataTransfer: data });
     expect(never).not.toHaveBeenCalled();
   });
 
-  it("shows a setlist no drop target in the jam library, and moves nothing", async () => {
+  it("leaves a setlist behind the same way", async () => {
     setInvokeResponse("list_presets", () => []);
     const never = vi.fn();
     const props = bothLibraries(never);
@@ -477,10 +561,42 @@ describe("PresetSidebar — dragging a setlist in the library", () => {
 
     rerender(<PresetSidebar {...baseProps} view="jam" {...props} />);
     const j = await jamRows();
+    expect(document.querySelector("[data-dragging]")).toBeNull();
     fireEvent.dragEnter(j[2]);
     expect(j[2].getAttribute("data-drag-over")).toBeNull();
     fireEvent.drop(j[2], { dataTransfer: data });
     expect(never).not.toHaveBeenCalled();
+  });
+
+  it("does not let an abandoned drag haunt the next one", async () => {
+    /*
+     * `dragend` fires on the row the drag started from, and changing tabs
+     * takes that row away — so an id left behind outlived the gesture: the row
+     * came back faded when you returned to it, and every later drag in the
+     * OTHER library was refused its drop line by a guard reading a drag that
+     * was not happening.
+     */
+    setInvokeResponse("list_presets", () => []);
+    const onReorderJams = vi.fn();
+    const props = { ...bothLibraries(vi.fn()), onReorderJams };
+    const { rerender } = render(<PresetSidebar {...baseProps} view="setlist" {...props} />);
+    const abandoned = await rows();
+    fireEvent.dragStart(abandoned[0], { dataTransfer: transfer() });
+
+    // Away and back: the row that was in the hand is not still marked.
+    rerender(<PresetSidebar {...baseProps} view="jam" {...props} />);
+    rerender(<PresetSidebar {...baseProps} view="setlist" {...props} />);
+    expect(document.querySelector("[data-dragging]")).toBeNull();
+
+    // And the other library still takes a drag of its own, drop line and all.
+    rerender(<PresetSidebar {...baseProps} view="jam" {...props} />);
+    const j = await jamRows();
+    const data = transfer();
+    fireEvent.dragStart(j[0], { dataTransfer: data });
+    fireEvent.dragEnter(j[2]);
+    await waitFor(() => expect(j[2].getAttribute("data-drag-over")).toBe(""));
+    fireEvent.drop(j[2], { dataTransfer: data });
+    expect(onReorderJams).toHaveBeenCalledWith(0, 2);
   });
 });
 
