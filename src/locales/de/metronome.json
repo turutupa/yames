@@ -14,6 +14,8 @@
     "clicksPerBar": "{{count}} Klicks/Takt",
     "addBeat": "Beat hinzufügen",
     "removeBeat": "Beat entfernen",
+    "prevMeter": "Vorherige Taktart",
+    "nextMeter": "Nächste Taktart",
     "grouping": "Gruppierung",
     "tempo": "Tempo",
     "tempoUp": "Tempo erhöhen",

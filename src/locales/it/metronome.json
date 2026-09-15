@@ -14,6 +14,8 @@
     "clicksPerBar": "{{count}} clic/battuta",
     "addBeat": "Aggiungi colpo",
     "removeBeat": "Rimuovi colpo",
+    "prevMeter": "Metro precedente",
+    "nextMeter": "Metro successivo",
     "grouping": "raggruppamento",
     "tempo": "Tempo",
     "tempoUp": "Aumenta il tempo",

@@ -1047,7 +1047,14 @@
 /* Outlined, not filled. Eight filled discs all say "something is happening
    here"; eight rings with one of them lit says which beat is sounding, which
    is the only question the dots are asked. The accent ring marks where a
-   group opens, and fill is reserved for the beat you are hearing right now. */
+   group opens, and fill is reserved for the beat you are hearing right now.
+
+   THREE RINGS, NOT TWO, since a bar of 6/8 got a middle (issue 52). The dot
+   that opens the bar keeps the ring AND the halo it has always had; a group
+   start inside the bar keeps the ring and loses the halo; a plain beat has
+   neither. The halo is the only thing that moves, which is what makes the
+   three read as one scale rather than as three unrelated marks — and it is
+   also the loudness order, so the row says what the click does. */
 .group-dot {
   /* The thing you look at while playing, so it gets the size to match — the
      rest of the row is labels and small print. */
@@ -1066,6 +1073,15 @@
   box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 7%, transparent);
 }
 
+/* A middle: the bar's other group starts. The same ring in the same colour —
+   it is the same kind of event — with the halo taken away, because there is
+   only one beat one. `box-shadow: none` is said rather than left out so the
+   rule wins wherever it lands after a `.playing`. */
+.group-dot.accent-medium {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: none;
+}
+
 .group-dot.playing {
   transform: scale(1.35);
   background: var(--text-primary);
@@ -1079,6 +1095,18 @@
   box-shadow:
     0 0 0 8px color-mix(in srgb, var(--accent) 14%, transparent),
     0 0 18px color-mix(in srgb, var(--accent) 50%, transparent);
+  transform: scale(1.35);
+}
+
+/* A middle, sounding. It fills with the accent colour like beat one — you are
+   hearing the accent click, so the dot must say so — and keeps the close halo
+   without the 18px bloom, which is the part the eye reads as "this is the
+   one". Beside each other at 120 BPM the difference is unmistakable and
+   neither is mistakable for a plain beat. */
+.group-dot.accent-medium.playing {
+  background: color-mix(in srgb, var(--accent) 74%, transparent);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 10%, transparent);
   transform: scale(1.35);
 }
 
@@ -1313,6 +1341,16 @@ span.meter-grouping-chip {
 .free-dots .group-dot.free-active.accent {
   border-color: color-mix(in srgb, var(--accent) 45%, transparent);
   box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
+/* And the middle tier, for the same specificity reason. A FREE bar is one
+   group of N, so nothing in it is a middle today and this draws nothing — it
+   is here because the day FREE learns to group, a missing rule here would
+   show up as a grey ring rather than as an error, which is exactly how the
+   line above came to be needed. */
+.free-dots .group-dot.free-active.accent-medium {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: none;
 }
 
 /* =================== Metronome, Phase C1 =================== */

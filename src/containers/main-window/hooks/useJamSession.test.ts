@@ -140,6 +140,7 @@ function beatAt(formBar: number, chorus = 1, measureBeat = 0): BeatEvent {
     measureBeat,
     subdivision: 0,
     isDownbeat: measureBeat === 0,
+    accentLevel: measureBeat === 0 ? 2 : 0,
     isAccent: measureBeat === 0,
     formBar,
     chorus,

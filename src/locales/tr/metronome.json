@@ -14,6 +14,8 @@
     "clicksPerBar": "{{count}} tık/ölçü",
     "addBeat": "Vuruş ekle",
     "removeBeat": "Vuruş çıkar",
+    "prevMeter": "Önceki zaman imzası",
+    "nextMeter": "Sonraki zaman imzası",
     "grouping": "gruplama",
     "tempo": "Tempo",
     "tempoUp": "Tempoyu artır",

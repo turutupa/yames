@@ -439,6 +439,10 @@ the stage instead of stopping at 720px. The ruler measures — numbers above,
 eras below, one caret — instead of filling like a progress bar. Dots are rings
 that fill only on the sounding beat. The beat-count stepper now works in
 grouped meters by resizing the last group, which it never did before.
+(Reverted 2026-09-15, issue 52: the owner reported resizing the last group
+as "a really bad experience" — 3+3 becoming 3+4 — and the stepper walks the
+meter list again, as every other next-meter control in the app does. The
+sentence stands as the record of a change that was wrong.)
 
 **Drill.** The leftover tempo readout and beat circles are gone from the
 at-rest screen; the plan sentence heads it at display size with the mode

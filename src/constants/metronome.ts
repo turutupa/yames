@@ -91,8 +91,23 @@ export const INSTRUMENTS: Array<{ id: string; soon?: boolean }> = [
   { id: "other", soon: true },
 ];
 
+/**
+ * The ways a meter can be grouped, first entry canonical. The meter row draws
+ * these as chips beside the meter chip, so a player moves between them
+ * without opening anything.
+ *
+ * Keep this list and `ALL_METERS` in `src-tauri/src/engine.rs` in step: the
+ * Rust accent tests walk one and `meter.accentPositions.test.ts` walks the
+ * other, and they exist to prove the same rule twice.
+ *
+ * 6/8 has two. 3+3 is the compound feel and the default — one, two, three,
+ * FOUR, five, six. 2+2+2 is the duple one, and it is here because issue 52's
+ * reporter asked for "6/8 accents like 3/4" and may well have meant that:
+ * three group starts to a bar rather than two.
+ */
 export const METER_VARIANTS: Record<string, number[][]> = {
   "5/4":  [[3, 2], [2, 3]],
+  "6/8":  [[3, 3], [2, 2, 2]],
   "7/8":  [[3, 2, 2], [2, 2, 3], [2, 3, 2]],
   "8/8":  [[3, 2, 3], [3, 3, 2], [2, 3, 3]],
 };
@@ -246,44 +261,4 @@ export function nextFreeBeatCount(total: number): number {
 /** Previous beat count for a "−1" stepper, wrapping MIN → MAX. */
 export function prevFreeBeatCount(total: number): number {
   return total <= MIN_FREE_BEATS ? MAX_FREE_BEATS : total - 1;
-}
-
-/**
- * The same stepper, in a GROUPED meter.
- *
- * FREE mode is a flat run of N beats, so its stepper just moves N — and wraps,
- * which is why its buttons never disable. A grouped bar has no single N to
- * move without deciding what becomes of the grouping, so the stepper resizes
- * the LAST group and leaves the rest alone: 3+3 grows to 3+4 and shrinks to
- * 3+2. The shape you set up survives a nudge to the bar's length.
- *
- * These clamp rather than wrap. Wrapping a 16-beat bar round to one beat would
- * throw away a grouping the player built, without saying so; the caller
- * disables the button at the bound instead. The bounds mirror
- * `validate_beat_groups` in `src-tauri/src/commands.rs` — 1–16 beats to a bar,
- * at least one beat to a group — so a bar Rust would reject never leaves here.
- */
-export function addBeatToLastGroup(groups: number[]): number[] {
-  const total = groups.reduce((a, b) => a + b, 0);
-  if (groups.length === 0 || total >= MAX_FREE_BEATS) return groups;
-  const next = [...groups];
-  next[next.length - 1] += 1;
-  return next;
-}
-
-export function removeBeatFromLastGroup(groups: number[]): number[] {
-  if (groups.length === 0) return groups;
-  const next = [...groups];
-  const last = next.length - 1;
-  if (next[last] > 1) {
-    next[last] -= 1;
-    return next;
-  }
-  // A group of one cannot shrink, so it goes — unless it is the last one
-  // standing, because a bar of no beats is not a meter.
-  if (next.length > 1) {
-    next.pop();
-    return next;
-  }
-  return groups;
 }
