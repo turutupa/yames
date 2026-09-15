@@ -21,8 +21,9 @@ import type {
   JamLevel,
   JamOptionalLane,
   JamPattern,
+  JamPercLane,
 } from "../../../jam/types";
-import { JAM_LANES, JAM_OPTIONAL_LANES } from "../../../jam/types";
+import { JAM_LANES, JAM_OPTIONAL_LANES, JAM_PERC_LANES } from "../../../jam/types";
 
 /**
  * The subdivisions the engine understands, taken from the contract rather
@@ -40,7 +41,11 @@ export type JamTicksPerBeat = JamCustomGroove["ticksPerBeat"];
  * top, low and sparse below, which is how a drum chart is written. The toms
  * sit between the snare and the kick, where they sit on the kit.
  */
-export type JamEditableLane = Exclude<JamLane, "crash"> | "tomHi" | "tomLo";
+export type JamEditableLane =
+  | Exclude<JamLane, "crash">
+  | "tomHi"
+  | "tomLo"
+  | JamPercLane;
 
 export const EDITABLE_LANES: readonly JamEditableLane[] = [
   "hat",
@@ -60,6 +65,20 @@ export const EDITABLE_LANES: readonly JamEditableLane[] = [
  */
 export const TOM_LANES = ["tomHi", "tomLo"] as const;
 
+/**
+ * The percussionist's ten, offered under the kit.
+ *
+ * They behave like the toms in one way and unlike them in another, and both
+ * are deliberate. Like the toms: a row that exists is drawn, and there is a
+ * "+ percussion" affordance for a groove that has none. Unlike the toms: an
+ * emptied percussion row is REMOVED rather than kept in front of you (see
+ * `setPercCell`). The toms are two rows a drummer either uses or does not; the
+ * percussion is ten, and ten empty rows left behind by somebody trying things
+ * out is a grid nobody can read — and, on the record, ten lanes the engine
+ * reads past on every tick of every bar to learn nothing.
+ */
+export const PERC_LANES = JAM_PERC_LANES;
+
 export const LANE_LABELS: Record<JamEditableLane, string> = {
   hat: "Hat",
   snare: "Snare",
@@ -67,7 +86,26 @@ export const LANE_LABELS: Record<JamEditableLane, string> = {
   tomLo: "Low tom",
   kick: "Kick",
   ride: "Ride",
+  // The percussionist. The two congas and the two bongos are named high and
+  // low rather than by their proper names — a tumbadora and a quinto are what
+  // a percussionist calls them, and "High conga" is what everybody else can
+  // find on a grid.
+  shaker: "Shaker",
+  tambourine: "Tambourine",
+  cowbell: "Cowbell",
+  cabasa: "Cabasa",
+  claves: "Claves",
+  guiro: "Güiro",
+  congaHi: "High conga",
+  congaLo: "Low conga",
+  bongoHi: "High bongo",
+  bongoLo: "Low bongo",
 };
+
+/** Is this row the percussionist's rather than the drummer's? */
+export function isPercLane(lane: string): lane is JamPercLane {
+  return (JAM_PERC_LANES as readonly string[]).includes(lane);
+}
 
 /** How each level is said out loud — in the cell's `aria-label`, and in the legend. */
 export const LEVEL_LABELS: Record<JamLevel, string> = {
@@ -89,11 +127,35 @@ export function hasToms(pattern: JamPattern | null | undefined): boolean {
   return Boolean(pattern?.tomHi || pattern?.tomLo);
 }
 
+/**
+ * Which percussion rows this pattern carries, in the contract's order.
+ *
+ * A row that exists counts even while it is empty — you have just added it and
+ * have not played anything on it yet. It stops counting the moment you take
+ * the last stroke back OUT of it, which is `setPercCell`'s job and not this
+ * one.
+ */
+export function percLanesOf(
+  pattern: JamPattern | null | undefined,
+): readonly JamPercLane[] {
+  if (!pattern) return [];
+  return PERC_LANES.filter((lane) => pattern[lane] !== undefined);
+}
+
+/** Are any of the percussionist's rows on this pattern? */
+export function hasPerc(pattern: JamPattern | null | undefined): boolean {
+  return percLanesOf(pattern).length > 0;
+}
+
 /** The rows to draw for this pattern, in order, top to bottom. */
 export function lanesFor(pattern: JamPattern | null | undefined): readonly JamEditableLane[] {
-  if (!hasToms(pattern)) return EDITABLE_LANES;
-  // Snare, then the toms, then the kick: the kit, top to bottom.
-  return ["hat", "snare", "tomHi", "tomLo", "kick", "ride"];
+  // Snare, then the toms, then the kick: the kit, top to bottom. The
+  // percussionist goes UNDER all of it, because they are a second player and
+  // not a drum — the grid reads as one kit and then somebody else's hands.
+  const kit: JamEditableLane[] = hasToms(pattern)
+    ? ["hat", "snare", "tomHi", "tomLo", "kick", "ride"]
+    : [...EDITABLE_LANES];
+  return [...kit, ...percLanesOf(pattern)];
 }
 
 /**
@@ -108,6 +170,45 @@ export function withToms(pattern: JamPattern): JamPattern {
     tomHi: new Array<JamLevel>(columns).fill(0),
     tomLo: new Array<JamLevel>(columns).fill(0),
   };
+}
+
+/**
+ * The pattern with one empty percussion row added — what the picker does.
+ *
+ * One at a time, unlike "+ toms", because the toms are a pair a drummer
+ * reaches for together and these ten are ten different instruments. Adding all
+ * ten would be the wall the toms' own comment is about, ten times over.
+ */
+export function withPercLane(pattern: JamPattern, lane: JamPercLane): JamPattern {
+  if (pattern[lane]) return pattern;
+  return { ...pattern, [lane]: new Array<JamLevel>(columnsOf(pattern)).fill(0) };
+}
+
+/**
+ * Write one cell on a PERCUSSION row, and drop the row when that empties it.
+ *
+ * The rule the toms do not have, and the reason is the record rather than the
+ * grid: a percussion row of zeros is a lane the engine reads past on every
+ * tick of every bar to learn nothing, and `JamPattern` says those rows are
+ * "absent, not empty". A player taking their last conga stroke back has
+ * decided there is no conga in this groove, and the row going with it is that
+ * decision being honoured rather than a row left behind to be tidied later.
+ *
+ * Adding a row back is one click on the picker, which is what makes this
+ * affordable.
+ */
+export function setPercCell(
+  pattern: JamPattern,
+  lane: JamPercLane,
+  tick: number,
+  level: JamLevel,
+): JamPattern {
+  const next = setCell(pattern, lane, tick, level);
+  if (next === pattern) return pattern;
+  if (next[lane]?.some((value) => value !== 0)) return next;
+  const out = { ...next };
+  delete out[lane];
+  return out;
 }
 
 /** What a musician calls each subdivision, for the caption over the grid. */
@@ -135,12 +236,12 @@ const TICK_LABELS: Record<JamTicksPerBeat, readonly string[]> = {
 // Reading a pattern
 // ---------------------------------------------------------------------------
 
-/** Every row a pattern may carry — the five required and the three optional. */
-export type JamPatternLane = JamLane | JamOptionalLane;
+/** Every row a pattern may carry — five required, three optional, ten perc. */
+export type JamPatternLane = JamLane | JamOptionalLane | JamPercLane;
 
 /** How many columns a pattern actually has — its longest lane. */
 export function columnsOf(pattern: JamPattern): number {
-  return [...JAM_LANES, ...JAM_OPTIONAL_LANES].reduce(
+  return [...JAM_LANES, ...JAM_OPTIONAL_LANES, ...JAM_PERC_LANES].reduce(
     (widest, lane) => Math.max(widest, pattern[lane]?.length ?? 0),
     0,
   );
@@ -275,6 +376,11 @@ export function emptyPattern(
  * pattern with no toms comes back with none, rather than gaining two silent
  * drums on its way through.
  *
+ * The percussion rows are kept on the same terms and for the same reason: the
+ * grid draws them, so they are the player's. A groove drawn from a bossa keeps
+ * its shaker through a pass over the grid, and a groove that never had one
+ * does not acquire ten silent instruments here.
+ *
  * This exists because a `JamCustomGroove` can arrive from the store, written
  * by an older build with a different meter. The editor would otherwise draw a
  * ragged grid, or crash reading a lane that is not there; the engine would
@@ -295,7 +401,7 @@ export function normalizePattern(
     const shared = Math.min(row.length, columns);
     for (let i = 0; i < shared; i++) next[lane][i] = row[i] ?? 0;
   }
-  for (const lane of TOM_LANES) {
+  for (const lane of [...TOM_LANES, ...PERC_LANES]) {
     const row = pattern[lane];
     if (!row) continue;
     const kept = new Array<JamLevel>(columns).fill(0);
@@ -332,12 +438,13 @@ export function resizePattern(
   const beats = Math.max(1, Math.round(columnsOf(pattern) / from));
   const next = emptyPattern(beats, to);
   const columns = next.kick.length;
-  // The toms come along when they were there, and the rows stay absent when
-  // they were not — a change of subdivision is not somewhere to acquire drums.
-  for (const lane of TOM_LANES) {
+  // The toms and the percussion come along when they were there, and stay
+  // absent when they were not — a change of subdivision is not somewhere to
+  // acquire drums, or a conga player.
+  for (const lane of [...TOM_LANES, ...PERC_LANES]) {
     if (pattern[lane]) next[lane] = new Array<JamLevel>(columns).fill(0);
   }
-  for (const lane of [...JAM_LANES, ...TOM_LANES]) {
+  for (const lane of [...JAM_LANES, ...TOM_LANES, ...PERC_LANES]) {
     const row = pattern[lane];
     const target = next[lane];
     if (!row || !target) continue;

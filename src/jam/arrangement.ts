@@ -77,6 +77,19 @@ export type BandMoment = {
    * `off` a drummer with their hands down.
    */
   drums: "full" | "hatsAndKick" | "stopTime" | "off";
+  /**
+   * The percussionist: playing their rows, or hands down. Two states and not
+   * four, because a percussionist has no equivalent of the breakdown — the
+   * shaker and the congas ARE what a breakdown keeps.
+   *
+   * That is why this is its own field rather than something read off `drums`.
+   * The kit comes down to the kick and the hats and the percussion goes on
+   * exactly as written, which is what a band does when the guitar takes a
+   * chorus: somebody has to still be keeping time, and it is not the drummer.
+   * Stop-time and a drummer with their hands down are the two bars where
+   * nobody is, and those are the two this turns off.
+   */
+  perc: "full" | "off";
   /** `sparse` is roots and fifths on the strong beats, held. */
   bass: "full" | "sparse" | "off";
   /** `sparse` is one voicing at the top of the bar and nothing else. */
@@ -478,6 +491,10 @@ export function bandMoment(
     return {
       intensity: jam.intensity,
       drums: "full",
+      // Loop says nothing the compiler did not already do, percussion
+      // included: the rows the groove carries are the rows it plays, on every
+      // bar, for ever.
+      perc: "full",
       bass: "full",
       keys: "full",
       fill: "none",
@@ -505,6 +522,9 @@ export function bandMoment(
     return {
       intensity,
       drums: "stopTime",
+      // One downbeat and silence after it. A shaker running on under the
+      // last chord is the band not knowing the tune finished.
+      perc: "off",
       bass: "full",
       keys: "full",
       fill: "none",
@@ -536,6 +556,11 @@ export function bandMoment(
         // out of the way, and a loud breakdown is a contradiction.
         intensity: shiftIntensity(intensity, -1),
         drums: "hatsAndKick",
+        // The percussionist is what a breakdown is FOR. The kit comes down to
+        // the kick and the hats and the shaker and the congas keep the time
+        // going, which is the difference between a band getting out of the
+        // way and a band stopping.
+        perc: "full",
         bass: "full",
         keys: "off",
         fill: filling(bar === half - 1 ? "big" : isSeam(jam, bar, bars) ? "small" : "none"),
@@ -545,6 +570,7 @@ export function bandMoment(
     return {
       intensity,
       drums: "full",
+      perc: "full",
       bass: "full",
       keys: "full",
       fill: filling(
@@ -568,6 +594,9 @@ export function bandMoment(
     return {
       intensity,
       drums: "stopTime",
+      // The whole point of stop-time is the silence between the hits, and a
+      // percussionist filling it in is the one player who could ruin it.
+      perc: "off",
       bass: "full",
       keys: "full",
       fill: "none",
@@ -579,6 +608,7 @@ export function bandMoment(
   return {
     intensity,
     drums: "full",
+    perc: "full",
     bass: holdingBack ? "sparse" : "full",
     keys: holdingBack ? "sparse" : "full",
     fill: filling(
@@ -619,6 +649,7 @@ export function momentKey(moment: BandMoment): string {
   return [
     moment.intensity,
     moment.drums,
+    moment.perc,
     moment.bass,
     moment.keys,
     moment.fill,

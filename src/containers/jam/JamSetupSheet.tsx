@@ -748,8 +748,13 @@ export function JamSetupSheet({
       </JamSheetGroup>
 
       <JamSheetGroup label={t("jam.band.label")} lead={t("jam.band.lead")}>
-        {(["drums", "bass", "keys"] as const).map((id) => {
-          const on = id === "keys" ? !!band.keys : band[id];
+        {/* Percussion after Keys, and always here even where the groove has
+            none written for it. The playing screen's row comes and goes with
+            the groove, because that row says what the band IS doing; this is
+            where you decide who is in the band, and a switch that disappeared
+            when you changed groove would be a decision taken away from you. */}
+        {(["drums", "bass", "keys", "perc"] as const).map((id) => {
+          const on = !!band[id];
           return (
             <div className="jam-player" key={id} data-off={on ? undefined : ""}>
               <button
@@ -763,6 +768,7 @@ export function JamSetupSheet({
                       drums: band.drums,
                       bass: band.bass,
                       keys: !!band.keys,
+                      perc: !!band.perc,
                       [id]: !on,
                     },
                   })

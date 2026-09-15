@@ -393,6 +393,7 @@
       "drums": "Drums",
       "bass": "Bass",
       "keys": "Keys",
+      "perc": "Percussion",
       "you": "You",
       "youPlay": "{{instrument}}",
       "out": "out",
@@ -470,7 +471,9 @@
         "3": "triplets",
         "4": "sixteenths",
         "6": "sextuplets"
-      }
+      },
+      "addPerc": "+ percussion",
+      "percPicker": "Add a percussion instrument"
     },
     "takes": {
       "label": "Takes",
@@ -605,6 +608,21 @@
       "check": "{{count}} you may want to check: {{list}}",
       "check_one": "{{count}} you may want to check: {{list}}",
       "check_other": "{{count}} you may want to check: {{list}}"
+    },
+    "perc": {
+      "shaker": "shaker",
+      "tambourine": "tambourine",
+      "cowbell": "cowbell",
+      "cabasa": "cabasa",
+      "claves": "claves",
+      "guiro": "güiro",
+      "congaHi": "high conga",
+      "congaLo": "low conga",
+      "bongoHi": "high bongo",
+      "bongoLo": "low bongo",
+      "congas": "congas",
+      "bongos": "bongos",
+      "silent": "nothing in this groove"
     }
   },
   "scale": {

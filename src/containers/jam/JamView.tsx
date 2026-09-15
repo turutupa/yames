@@ -10,6 +10,7 @@ import {
   jamBassLine,
   jamKeysStyle,
   jamMix,
+  percussionVoices,
 } from "../../jam/compile";
 import { progressionEdit, withChordAt } from "../../jam/progression";
 import { jamHarmony, nextChange } from "../../jam/display";
@@ -202,6 +203,30 @@ interface JamViewProps {
  * change on their own.** A shape you pinned stays pinned; the neck is on the
  * chord sheet; nothing else moves while you play.
  */
+/**
+ * "shaker and congas" — a list joined the way this language joins lists.
+ *
+ * `Intl.ListFormat` is in every browser this app ships to, and it is not in
+ * the ES2020 lib the project compiles against, so it is reached through a
+ * narrow declaration here rather than by widening `lib` for the whole repo for
+ * the sake of one line of one row. A runtime without it gets commas, which is
+ * wrong in a few of the fifteen and readable in all of them.
+ */
+type ListFormatCtor = new (
+  locale?: string,
+  options?: { type?: "conjunction" | "disjunction" },
+) => { format(list: string[]): string };
+
+function joinNames(names: string[], language: string): string {
+  const ListFormat = (Intl as unknown as { ListFormat?: ListFormatCtor }).ListFormat;
+  if (!ListFormat) return names.join(", ");
+  try {
+    return new ListFormat(language, { type: "conjunction" }).format(names);
+  } catch {
+    return names.join(", ");
+  }
+}
+
 export function JamView({
   jam,
   jams = [],
@@ -239,7 +264,9 @@ export function JamView({
   onStartBpmEdit,
   onCommitBpmEdit,
 }: JamViewProps) {
-  const { t } = useTranslation();
+  // `i18n` for the band row's list formatter: "shaker and congas" is a
+  // sentence, and which language it is in decides where the "and" goes.
+  const { t, i18n } = useTranslation();
   const shownBpm = trainedBpm ?? jam.bpm;
   const marking = getTempoMarking(shownBpm);
 
@@ -400,6 +427,28 @@ export function JamView({
   const mix = jamMix(jam);
   const grooveFits = jamGrooveFitsMeter(jam);
   const keysStyle = jamKeysStyle(jam);
+
+  /**
+   * What the percussionist is playing, and whether there is a row for them.
+   *
+   * The row appears when the GROOVE has percussion written for it or when the
+   * jam has turned one on. Two conditions rather than one, and each answers a
+   * different complaint: a Percussion row over a thrash bar is a player with
+   * nothing to play, and a row that vanished the moment you switched to that
+   * bar would take a switch you had set away with it.
+   */
+  const percVoices = useMemo(() => percussionVoices(meter.bar), [meter]);
+  const showPerc = percVoices.length > 0 || !!band.perc;
+  /**
+   * "shaker and congas". `Intl.ListFormat` rather than a joined string,
+   * because "and" is a word and the fifteen do not agree on where it goes;
+   * the comma is the fallback where a runtime has no list formatter.
+   */
+  const percDetail = useMemo(() => {
+    const names = percVoices.map((voice) => t(`jam.perc.${voice}`));
+    if (names.length === 0) return t("jam.perc.silent");
+    return joinNames(names, i18n.language);
+  }, [percVoices, t, i18n.language]);
 
   /** The grip pinned to the corner, matched back to a real shape. */
   const pinned = useMemo(() => pinnedShapeOf(jam, neck), [jam, neck]);
@@ -648,6 +697,18 @@ export function JamView({
               </span>
             ),
           },
+          // The percussionist, after Keys. Withheld entirely where there is
+          // nobody to be: see `showPerc` above for the two ways there is.
+          ...(showPerc
+            ? [
+                {
+                  id: "perc" as const,
+                  on: !!band.perc,
+                  detail: percDetail,
+                  volume: mix.perc,
+                },
+              ]
+            : []),
         ]}
         onToggle={(id) =>
           onEdit({
@@ -655,7 +716,10 @@ export function JamView({
               drums: band.drums,
               bass: band.bass,
               keys: !!band.keys,
-              [id]: id === "keys" ? !band.keys : !band[id],
+              perc: !!band.perc,
+              // The two optional flags are read through `!`, so an absent one
+              // toggles to true rather than to `!undefined` twice over.
+              [id]: !band[id],
             },
           })
         }

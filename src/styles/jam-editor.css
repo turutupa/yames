@@ -354,3 +354,44 @@
   font-weight: 600;
   color: var(--text-faint);
 }
+
+/* ---- the percussionist --------------------------------------------------
+
+   The rows under the kit belong to a SECOND PLAYER, and the grid says so the
+   only way a grid can: a hairline above the first of them, and their names in
+   the lighter of the two label colours. Not a palette of their own — the cells
+   still mean the same five levels, and a percussion grid in different colours
+   would read as a different kind of thing rather than as somebody else's hands
+   on the same bar. */
+
+.jam-editor__row:not([data-perc]) + .jam-editor__row[data-perc] {
+  border-top: 1px solid var(--border);
+  padding-top: 6px;
+  margin-top: 2px;
+}
+
+.jam-editor__row[data-perc] .jam-editor__lane-name {
+  font-weight: 600;
+  color: var(--text-tertiary);
+}
+
+/* The voice names are stored lower case, because the band row on the playing
+   screen joins them into a sentence ("shaker and congas"). Here they are
+   labels, so the first letter is raised — the first LETTER and not every word,
+   so "high conga" becomes "High conga" rather than "High Conga", and so that
+   the rule is simply a no-op in Japanese and Chinese. The legend above does
+   the same thing to "off" and "hit". */
+.jam-editor__row[data-perc] .jam-editor__lane-name::first-letter,
+.jam-editor__perc-picker .jam-editor__text-btn::first-letter {
+  text-transform: uppercase;
+}
+
+/* The picker: one wrapping row of names under the legend that opened it. A
+   list and not a dropdown, because ten short words fit and a select would hide
+   the answer to "what can I add" behind a second click. */
+.jam-editor__perc-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  padding: 8px 4px 2px;
+}

@@ -142,10 +142,42 @@ describe("every bundle names something real", () => {
 
   it("starts the band on drums alone, every time", () => {
     // B1. What the vibe contributes is WHICH bass and WHICH keys wait behind
-    // the band row's taps, not that they are already playing.
+    // the band row's taps, not that they are already playing. The
+    // percussionist is the one exception and is checked on its own below.
     for (const { label, bundle } of everyBundle()) {
-      expect(bundle.band, label).toEqual({ drums: true, bass: false, keys: false });
+      expect({ ...bundle.band, perc: false }, label).toEqual({
+        drums: true,
+        bass: false,
+        keys: false,
+        perc: false,
+      });
     }
+  });
+
+  it("hires a percussionist for Latin, Funk and Pop and for nobody else", () => {
+    // The fifth pass's default, and the reason it is a default rather than a
+    // tap: a bossa without a shaker is a drum machine playing a bossa. Every
+    // VARIATION of those three inherits it, because no variation sets `band`.
+    const hired = new Set(["latin", "funk", "pop"]);
+    for (const vibe of VIBES) {
+      expect(vibe.bundle.band.perc, vibe.id).toBe(hired.has(vibe.id));
+      for (const variation of vibe.variations) {
+        expect(vibeBundle(vibe, variation.id).band.perc, `${vibe.id}/${variation.id}`).toBe(
+          hired.has(vibe.id),
+        );
+      }
+    }
+  });
+
+  it("carries the percussionist onto the record when a vibe is applied", () => {
+    // `applyVibe` copies the bundle's band onto the jam, which is where the
+    // default actually takes effect — the flag lives on the record, not on
+    // the tile, so editing the jam afterwards keeps your answer.
+    const jam = createJam("check");
+    expect(applyVibe(jam, "latin").band?.perc).toBe(true);
+    expect(applyVibe(jam, "latin", "chaCha").band?.perc).toBe(true);
+    expect(applyVibe(jam, "rock").band?.perc).toBe(false);
+    expect(applyVibe(jam, "jazz", "bossaJazz").band?.perc).toBe(false);
   });
 });
 

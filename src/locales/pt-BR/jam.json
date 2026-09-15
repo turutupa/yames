@@ -393,6 +393,7 @@
       "drums": "Bateria",
       "bass": "Baixo",
       "keys": "Teclado",
+      "perc": "Percussão",
       "you": "Você",
       "youPlay": "{{instrument}}",
       "out": "fora",
@@ -470,7 +471,9 @@
         "3": "tercinas",
         "4": "semicolcheias",
         "6": "sextinas"
-      }
+      },
+      "addPerc": "+ percussão",
+      "percPicker": "Adicionar um instrumento de percussão"
     },
     "takes": {
       "label": "Gravações",
@@ -605,6 +608,21 @@
       "check": "{{count}} para conferir: {{list}}",
       "check_one": "{{count}} para conferir: {{list}}",
       "check_other": "{{count}} para conferir: {{list}}"
+    },
+    "perc": {
+      "shaker": "ganzá",
+      "tambourine": "pandeiro",
+      "cowbell": "cowbell",
+      "cabasa": "afoxé",
+      "claves": "claves",
+      "guiro": "reco-reco",
+      "congaHi": "conga aguda",
+      "congaLo": "conga grave",
+      "bongoHi": "bongô agudo",
+      "bongoLo": "bongô grave",
+      "congas": "congas",
+      "bongos": "bongôs",
+      "silent": "nada nesta levada"
     }
   },
   "scale": {

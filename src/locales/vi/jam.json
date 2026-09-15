@@ -393,6 +393,7 @@
       "drums": "Trống",
       "bass": "Bass",
       "keys": "Phím",
+      "perc": "Bộ gõ",
       "you": "Bạn",
       "youPlay": "{{instrument}}",
       "out": "nghỉ",
@@ -470,7 +471,9 @@
         "3": "chùm ba",
         "4": "nốt móc kép",
         "6": "chùm sáu"
-      }
+      },
+      "addPerc": "+ bộ gõ",
+      "percPicker": "Thêm một nhạc cụ gõ"
     },
     "takes": {
       "label": "Bản thu",
@@ -605,6 +608,21 @@
       "check": "{{count}} nên xem lại: {{list}}",
       "check_one": "{{count}} nên xem lại: {{list}}",
       "check_other": "{{count}} nên xem lại: {{list}}"
+    },
+    "perc": {
+      "shaker": "shaker",
+      "tambourine": "trống lục lạc",
+      "cowbell": "chuông bò",
+      "cabasa": "cabasa",
+      "claves": "claves",
+      "guiro": "güiro",
+      "congaHi": "conga cao",
+      "congaLo": "conga trầm",
+      "bongoHi": "bongo cao",
+      "bongoLo": "bongo trầm",
+      "congas": "conga",
+      "bongos": "bongo",
+      "silent": "không có trong groove này"
     }
   },
   "scale": {

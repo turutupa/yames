@@ -393,6 +393,7 @@
       "drums": "Davul",
       "bass": "Bas",
       "keys": "Klavye",
+      "perc": "Perküsyon",
       "you": "Sen",
       "youPlay": "{{instrument}}",
       "out": "susuyor",
@@ -470,7 +471,9 @@
         "3": "triole",
         "4": "onaltılıklar",
         "6": "sextole"
-      }
+      },
+      "addPerc": "+ perküsyon",
+      "percPicker": "Perküsyon çalgısı ekle"
     },
     "takes": {
       "label": "Kayıtlar",
@@ -605,6 +608,21 @@
       "check": "{{count}} gözden geçirilecek: {{list}}",
       "check_one": "{{count}} gözden geçirilecek: {{list}}",
       "check_other": "{{count}} gözden geçirilecek: {{list}}"
+    },
+    "perc": {
+      "shaker": "shaker",
+      "tambourine": "tef",
+      "cowbell": "inek çanı",
+      "cabasa": "cabasa",
+      "claves": "claves",
+      "guiro": "güiro",
+      "congaHi": "tiz konga",
+      "congaLo": "pes konga",
+      "bongoHi": "tiz bongo",
+      "bongoLo": "pes bongo",
+      "congas": "kongalar",
+      "bongos": "bongolar",
+      "silent": "bu groove'da yok"
     }
   },
   "scale": {

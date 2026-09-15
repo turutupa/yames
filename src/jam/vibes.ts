@@ -32,13 +32,26 @@
  * wrong drums. What each vibe is tuned against, track by track, is written
  * down in `plans/JAM_REFERENCES.md` (B10).
  *
- * ## The lineup is drums (B1)
+ * ## The lineup is drums (B1), plus the percussionist where the music has one
  *
  * Every vibe's `band` is drums alone, and that is not an oversight: a new
  * jam's lineup is drums alone for every instrument, and the bass and the keys
  * are one tap each in the band row. What the vibe contributes is WHICH bass
  * and WHICH keys are waiting behind that tap, so the tap gives you the right
  * sound instead of the same soft sine under everything.
+ *
+ * The percussionist is the exception, and that exception is the point of the
+ * fifth pass. Latin, funk and pop come up with `perc` on; everything else
+ * comes up with it off. It is not one more tap because a bossa without a
+ * shaker is not a quieter bossa — it is a drum machine playing a bossa. In
+ * those styles the layer is not an addition, it is what the music is made of,
+ * and tapping Latin has to give you a room rather than a kit in the shape of
+ * one.
+ *
+ * (The BRIEF also names world. There is no world VIBE — world is a groove
+ * FAMILY, and its thirteen grooves carry their percussion rows whichever tile
+ * reaches them. Nothing to set here; written down so the next pass does not go
+ * looking for a tile that was never drawn.)
  *
  * Pure and deterministic. Nothing here reads the store, the engine or React;
  * `applyVibe` takes a jam and gives back a jam.
@@ -111,7 +124,11 @@ export type JamVibeBundle = {
   fills: boolean;
   /** A fill every N bars as well as at the chorus end. 0: the end only. */
   fillEvery: number;
-  band: { drums: boolean; bass: boolean; keys: boolean };
+  /**
+   * Who the tile hires. Drums for every vibe (B1), and `perc` as well for the
+   * three the fifth pass gave a percussionist to.
+   */
+  band: { drums: boolean; bass: boolean; keys: boolean; perc: boolean };
   bassVoice: JamBassVoice;
   keysVoice: JamKeysVoice;
   bpm: number;
@@ -136,7 +153,28 @@ export type JamVibe = {
 };
 
 /** Drums alone, for every vibe. See B1, and the header. */
-const DRUMS_ONLY = { drums: true, bass: false, keys: false } as const;
+const DRUMS_ONLY = { drums: true, bass: false, keys: false, perc: false } as const;
+
+/**
+ * Drums and the percussionist — Latin, Funk and Pop.
+ *
+ * The flag hires the player; the GROOVE decides what they play. So a variation
+ * that points at a bar with no percussion rows simply has them sitting out,
+ * and pop's four-on-the-floor — the programmed tile, on the electronic kit —
+ * keeps the flag and gets a shaker and nothing else, which is exactly the
+ * percussion a dance record has.
+ */
+const WITH_PERCUSSION = { drums: true, bass: false, keys: false, perc: true } as const;
+
+/**
+ * The three tiles that come up with a percussionist already hired.
+ *
+ * One list rather than a field on each `vibe()` call, because it is one
+ * decision about three tiles and not three decisions — and because anybody
+ * asking which vibes have percussion should find the answer in one place
+ * rather than by reading nine bundles.
+ */
+const VIBES_WITH_PERCUSSION: readonly JamVibeId[] = ["latin", "funk", "pop"];
 
 function variation(id: string, bundle: Partial<JamVibeBundle>): JamVariation {
   return { id, nameKey: `jam.variation.${id}`, bundle };
@@ -155,7 +193,10 @@ function vibe(
       fills: true,
       fillEvery: 0,
       ...bundle,
-      band: { ...DRUMS_ONLY },
+      // The variations inherit it: `vibeBundle` spreads the vibe's bundle and
+      // then the variation's, and no variation sets `band`, so every variation
+      // of Latin has the percussionist Latin hired.
+      band: { ...(VIBES_WITH_PERCUSSION.includes(id) ? WITH_PERCUSSION : DRUMS_ONLY) },
     },
     variations,
   };

@@ -393,6 +393,7 @@
       "drums": "Schlagzeug",
       "bass": "Bass",
       "keys": "Keys",
+      "perc": "Perkussion",
       "you": "Du",
       "youPlay": "{{instrument}}",
       "out": "raus",
@@ -470,7 +471,9 @@
         "3": "Triolen",
         "4": "Sechzehnteln",
         "6": "Sextolen"
-      }
+      },
+      "addPerc": "+ Perkussion",
+      "percPicker": "Ein Perkussionsinstrument hinzufügen"
     },
     "takes": {
       "label": "Takes",
@@ -605,6 +608,21 @@
       "check": "{{count}} zum Prüfen: {{list}}",
       "check_one": "{{count}} zum Prüfen: {{list}}",
       "check_other": "{{count}} zum Prüfen: {{list}}"
+    },
+    "perc": {
+      "shaker": "Shaker",
+      "tambourine": "Tamburin",
+      "cowbell": "Kuhglocke",
+      "cabasa": "Cabasa",
+      "claves": "Claves",
+      "guiro": "Güiro",
+      "congaHi": "hohe Conga",
+      "congaLo": "tiefe Conga",
+      "bongoHi": "hohes Bongo",
+      "bongoLo": "tiefes Bongo",
+      "congas": "Congas",
+      "bongos": "Bongos",
+      "silent": "in diesem Groove nichts"
     }
   },
   "scale": {
