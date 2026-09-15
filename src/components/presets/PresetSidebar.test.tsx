@@ -315,6 +315,175 @@ describe("PresetSidebar", () => {
   });
 });
 
+describe("PresetSidebar — dragging a setlist in the library", () => {
+  /** Five routines, in the order the library holds them. */
+  const LIBRARY = [
+    makeSetlist({ id: "c0", name: "Warm-up" }),
+    makeSetlist({ id: "c1", name: "Evening set" }),
+    makeSetlist({ id: "c2", name: "Gig night" }),
+    makeSetlist({ id: "c3", name: "Sunday set" }),
+    makeSetlist({ id: "c4", name: "Monday drills" }),
+  ];
+
+  const setlistProps = { ...baseProps, view: "setlist" as const };
+  const transfer = () => ({ effectAllowed: "", dropEffect: "", setData: vi.fn() });
+
+  async function rows(): Promise<HTMLElement[]> {
+    return await waitFor(() => {
+      const r = [...document.querySelectorAll(".setlist-item")] as HTMLElement[];
+      expect(r.length).toBeGreaterThan(2);
+      return r;
+    });
+  }
+
+  it("moves a setlist to the row it was dropped on", async () => {
+    // The order is the user's: the routine you warm up on first, the one you
+    // finish with. The jam library has said so since JAM_MODE; this is the
+    // same gesture, and the owner noticed it was missing here (issue 52).
+    setInvokeResponse("list_presets", () => []);
+    const onReorderSetlists = vi.fn();
+    render(
+      <PresetSidebar
+        {...setlistProps}
+        setlists={LIBRARY}
+        onLoadSetlist={vi.fn()}
+        onReorderSetlists={onReorderSetlists}
+      />,
+    );
+    const r = await rows();
+    const data = transfer();
+    fireEvent.dragStart(r[1], { dataTransfer: data });
+    // Picked up, and the row it is over — what the styling hangs off.
+    expect(r[1].getAttribute("data-dragging")).toBe("");
+    fireEvent.dragEnter(r[3]);
+    await waitFor(() => expect(r[3].getAttribute("data-drag-over")).toBe(""));
+    fireEvent.drop(r[3], { dataTransfer: data });
+    expect(onReorderSetlists).toHaveBeenCalledWith(1, 3);
+
+    // And the drag is over: nothing is left marked.
+    await waitFor(() => {
+      expect(document.querySelector(".setlist-item[data-dragging]")).toBeNull();
+      expect(document.querySelector(".setlist-item[data-drag-over]")).toBeNull();
+    });
+  });
+
+  it("says 'Drag to reorder' on the row, in the user's own words", async () => {
+    setInvokeResponse("list_presets", () => []);
+    render(<PresetSidebar {...setlistProps} setlists={LIBRARY} onLoadSetlist={vi.fn()} />);
+    const r = await rows();
+    expect(r[0].getAttribute("title")).toBe("Drag to reorder");
+    expect(r[0].getAttribute("draggable")).toBe("true");
+  });
+
+  it("reports the library's indices, not the filtered view's", async () => {
+    // Dropping the first row of a search result onto the third must move the
+    // setlist to the third MATCH's place in the library — the filtered view
+    // will not exist a keystroke later.
+    setInvokeResponse("list_presets", () => []);
+    const onReorderSetlists = vi.fn();
+    render(
+      <PresetSidebar
+        {...setlistProps}
+        setlists={LIBRARY}
+        onLoadSetlist={vi.fn()}
+        onReorderSetlists={onReorderSetlists}
+      />,
+    );
+    const search = await openSearch();
+    // "Evening set" (1), "Sunday set" (3) and "Monday drills" (4) match; the
+    // first and third rows of the result are library 1 and library 4.
+    fireEvent.change(search, { target: { value: "s" } });
+    const r = await waitFor(() => {
+      const found = [...document.querySelectorAll(".setlist-item")] as HTMLElement[];
+      expect(found).toHaveLength(3);
+      return found;
+    });
+    const data = transfer();
+    fireEvent.dragStart(r[0], { dataTransfer: data });
+    fireEvent.drop(r[2], { dataTransfer: data });
+    expect(onReorderSetlists).toHaveBeenCalledWith(1, 4);
+  });
+
+  it("will not drag a row that is being renamed", async () => {
+    // The row is a text field at that moment, and a drag would take the caret
+    // with it. The jam rows guard the same way.
+    setInvokeResponse("list_presets", () => []);
+    const ref = createRef<PresetSidebarHandle>();
+    render(
+      <PresetSidebar
+        {...setlistProps}
+        ref={ref}
+        setlists={LIBRARY}
+        onLoadSetlist={vi.fn()}
+        onReorderSetlists={vi.fn()}
+      />,
+    );
+    await waitFor(() => expect(ref.current).not.toBeNull());
+    ref.current?.triggerRenameSetlist("c1");
+    await waitFor(() =>
+      expect(document.querySelector(".preset-sidebar-name-input")).not.toBeNull(),
+    );
+    for (const row of await rows()) expect(row.getAttribute("draggable")).toBe("false");
+  });
+
+  /*
+   * A setlist and a jam are never dropped on each other.
+   *
+   * The two libraries live on separate tabs, so the only way to hold a drag
+   * open across both is to move the tab out from under it — which is what
+   * these two do. Contrived as a gesture, and exactly the point: the guard is
+   * in the handlers, not in the accident that the rows never meet.
+   */
+  const bothLibraries = (over: ReturnType<typeof vi.fn>) => ({
+    setlists: LIBRARY,
+    jams: [...STARTER_JAMS],
+    onLoadSetlist: vi.fn(),
+    onLoadJam: vi.fn(),
+    onReorderSetlists: over,
+    onReorderJams: over,
+  });
+
+  async function jamRows(): Promise<HTMLElement[]> {
+    return await waitFor(() => {
+      const r = [...document.querySelectorAll(".jam-item")] as HTMLElement[];
+      expect(r.length).toBeGreaterThan(2);
+      return r;
+    });
+  }
+
+  it("shows a jam no drop target in the setlist library, and moves nothing", async () => {
+    setInvokeResponse("list_presets", () => []);
+    const never = vi.fn();
+    const props = bothLibraries(never);
+    const { rerender } = render(<PresetSidebar {...baseProps} view="jam" {...props} />);
+    const data = transfer();
+    fireEvent.dragStart((await jamRows())[1], { dataTransfer: data });
+
+    rerender(<PresetSidebar {...baseProps} view="setlist" {...props} />);
+    const r = await rows();
+    fireEvent.dragEnter(r[2]);
+    expect(r[2].getAttribute("data-drag-over")).toBeNull();
+    fireEvent.drop(r[2], { dataTransfer: data });
+    expect(never).not.toHaveBeenCalled();
+  });
+
+  it("shows a setlist no drop target in the jam library, and moves nothing", async () => {
+    setInvokeResponse("list_presets", () => []);
+    const never = vi.fn();
+    const props = bothLibraries(never);
+    const { rerender } = render(<PresetSidebar {...baseProps} view="setlist" {...props} />);
+    const data = transfer();
+    fireEvent.dragStart((await rows())[0], { dataTransfer: data });
+
+    rerender(<PresetSidebar {...baseProps} view="jam" {...props} />);
+    const j = await jamRows();
+    fireEvent.dragEnter(j[2]);
+    expect(j[2].getAttribute("data-drag-over")).toBeNull();
+    fireEvent.drop(j[2], { dataTransfer: data });
+    expect(never).not.toHaveBeenCalled();
+  });
+});
+
 describe("PresetSidebar — the jam library", () => {
   const jamProps = { ...baseProps, view: "jam" as const };
 
