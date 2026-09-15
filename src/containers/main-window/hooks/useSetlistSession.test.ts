@@ -684,6 +684,34 @@ describe("dragging a setlist to a new place in the library", () => {
     expect(result.current.dirty).toBe(false);
   });
 
+  it("moves the list as it is now, not as the drag found it", async () => {
+    /*
+     * `duplicateSetlist` awaits the store before it adds the copy, and a drop
+     * landing inside that window used to write back a list from before the
+     * copy existed — the copy gone from the library, and the drag blamed for
+     * it. Held here by keeping the callback from before the copy and calling
+     * it after, which is exactly what a closure over the old list is.
+     */
+    const reorder = vi.spyOn(ipc, "reorderSetlists");
+    const { result } = await library();
+    const mid = result.current.reorderSetlists;
+    await act(async () => {
+      await result.current.duplicateSetlist("c1");
+    });
+    expect(result.current.setlists).toHaveLength(4);
+
+    await act(async () => {
+      await mid(0, 2);
+    });
+    expect(result.current.setlists).toHaveLength(4);
+    expect(result.current.setlists.map((c) => c.name)).toContain("Warm-up copy");
+    // And what was written down is what is on screen, not one of the two.
+    expect(reorder.mock.calls[reorder.mock.calls.length - 1][0]).toEqual(
+      result.current.setlists.map((c) => c.id),
+    );
+    reorder.mockRestore();
+  });
+
   it("writes nothing for a drag that moved nothing", async () => {
     const reorder = vi.spyOn(ipc, "reorderSetlists");
     const { result } = await library();

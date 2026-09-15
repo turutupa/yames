@@ -151,6 +151,17 @@ export function useSetlistSession({
 }: UseSetlistSessionArgs) {
   const { t } = useTranslation();
   const [setlists, setSetlists] = useState<Setlist[]>([]);
+  /**
+   * The library as it stands, for a writer that has to know the order it is
+   * about to persist rather than merely hand React a new one.
+   *
+   * Assigned every render — the pattern `useJamSession` uses for a value an
+   * effect must read without depending on — so it is never behind what is on
+   * screen, which is exactly what a callback that closed over an older list
+   * is.
+   */
+  const setlistsRef = useRef<Setlist[]>(setlists);
+  setlistsRef.current = setlists;
   /** The working copy — edited freely, written to the store only on Save. */
   const [setlist, setSetlist] = useState<Setlist | null>(null);
   /** What the store holds, for the dirty flag and for Revert. */
@@ -525,15 +536,33 @@ export function useSetlistSession({
    * dirty because another one moved past it would be asking to save an edit
    * nobody made.
    */
-  const reorderSetlists = useCallback(
-    async (from: number, to: number) => {
-      const next = reorderSetlistsData(setlists, from, to);
-      if (next === setlists) return;
-      setSetlists(next);
-      await reorderSetlistsIpc(next.map((c) => c.id)).catch(() => {});
-    },
-    [setlists],
-  );
+  const reorderSetlists = useCallback(async (from: number, to: number) => {
+    /*
+     * Against the list as it stands, never against one this callback closed
+     * over: `duplicateSetlist` below awaits the store before it adds the copy,
+     * and a drop landing inside that window used to write back a library from
+     * before the copy existed — the copy gone, and the drag blamed for it.
+     * The same window `newSetlist` and `upsertSetlist` learned about, arrived
+     * at from the other side.
+     */
+    const current = setlistsRef.current;
+    const next = reorderSetlistsData(current, from, to);
+    // A drag that went home moves nothing and is not written down.
+    if (next === current) return;
+    setlistsRef.current = next;
+    /*
+     * The updater form, and the ref: one for each half of the problem.
+     *
+     * React does not run an updater until it re-renders, so an order computed
+     * inside one is not available to the store call that has to follow it —
+     * the write was simply skipped. The ref gives the order synchronously;
+     * the updater makes sure that if something else landed between reading
+     * the ref and this write, the move is re-applied to THAT list instead of
+     * replacing it.
+     */
+    setSetlists((prev) => (prev === current ? next : reorderSetlistsData(prev, from, to)));
+    await reorderSetlistsIpc(next.map((c) => c.id)).catch(() => {});
+  }, []);
 
   const renameSetlist = useCallback(
     async (id: string, name: string) => {
