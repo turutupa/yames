@@ -20,6 +20,12 @@ files — so a rebuild produces the same bytes. Verified across two runs: all 40
 files byte-identical. The recorded ones are deterministic given the same
 library and recipe, apart from the dither, which is seeded from the recipe.
 
+**There is also a percussionist**, further down under *The percussion set*: ten
+voices in the same folder-and-manifest shape, rendered from the same download
+as Club, played by the engine *under* whichever kit is loaded rather than
+instead of one. It is not an eighth kit and it is not eleven voices with ten
+of them missing.
+
 **To hear them rather than read them:** `scripts/sounds/ab.html` plays the same
 two bars of rock on every kit it can find and swaps kits at a bar line, so the
 comparison is like for like. It plays each kit the way the engine will — the
@@ -343,7 +349,8 @@ library's own description a contemporary jazz kit recorded in the style of a
 live club date. Four of the six mics are used: `kickmic` and `snaremic` close,
 `oh` overhead, `mid` as a closer pair for the cymbals and toms, `room` behind.
 `lofi` is the vintage mic and is a colour rather than a kit; `perc` is VSCO
-percussion and is not a drum voice. Weights are the brief's live-recording
+percussion and is not a drum voice — it is the percussion set instead, below.
+Weights are the brief's live-recording
 default — close 1.0, overheads 0.7, room 0.35 — and the cymbals and toms,
 which have no close mic in this library, use the overheads as their close mic
 at 1.0 with `mid` at 0.4–0.6 for proximity.
@@ -532,6 +539,242 @@ size. On the first four kits the tail is too far down to matter; Raw's kick is
 compressed with a 110 ms release and arrives at 150 ms near −38 dBFS, which
 took the DC to 1.7e−04 against a 2e−04 limit. `_rfinish` releases *after* the
 saturation for that reason, and the DC is 2.6e−05.
+
+# The percussion set
+
+The fifth pass added a percussionist, and a percussionist is not a drum kit.
+The engine plays **one set under whichever kit is loaded**, so switching from
+Club to Studio does not switch the congas — which is what happens in a room,
+where the drummer and the percussionist are two people.
+
+```
+src-tauri/sounds/perc/club/kit.json
+src-tauri/sounds/perc/club/<voice>.<layer>.<rr>.wav
+```
+
+That is the kit format, unchanged, and it is not a coincidence: the same
+loader reads it, the same `render_kit.py` writes it and the same
+`measure_kits.py` checks it. Ten voices instead of eleven, a 2.0 s ceiling
+instead of 3.0, and one field a kit does not have — `pan`.
+
+```sh
+set YAMES_SAMPLES=C:\path\to\_samples
+python scripts/sounds/render_kit.py scripts/sounds/recipes/perc-club.json \
+       src-tauri/sounds/perc/club
+python scripts/sounds/measure_kits.py
+```
+
+## Where it comes from
+
+The same download as Club. Virtuosity Drums ships twenty-nine auxiliary
+percussion maps alongside Austin McMahon's kit, which came into that library
+from **VSCO 2 Pro** and were recorded and mapped separately — four mic
+positions with the same names, a different room, different hands.
+
+```
+Virtuosity Drums — Versilian Studios and Karoryfer Samples (auxiliary percussion from VSCO 2 Pro)
+```
+
+CC0, so the credit is a courtesy rather than a condition, and it is in the
+manifest and belongs on the About screen for the same reason the kits' are: a
+musician who likes the congas should be able to find out whose they are.
+
+**The nineteen maps left behind** are agogo, belltree, cuica, jinglebell,
+sleighbells, timbales, triangle, vibraslap, whistle, woodblock and the fast
+guiro. They are not worse recordings. They are not the ten instruments a
+percussionist reaches for in latin, funk, pop and world grooves, which is what
+this layer is for, and a triangle nobody wrote a part for is 300 KB of
+installer.
+
+## The table
+
+| voice | source | layers | rr | peak | longest | trim dB | pan | size |
+|---|---|---|---|---|---|---|---|---|
+| `shaker` | `shaker_up` + `shaker_down` | 1 | 2 | 0.900 | 632 ms | −17.6 | +0.35 | 210 KB |
+| `tambourine` | `tambourine` | 2 | 3 | 0.900 | 993 ms | −10.8 | −0.30 | 661 KB |
+| `cowbell` | `cowbell` | 3 | 3 | 0.900 | 569 ms | −6.8 | +0.20 | 807 KB |
+| `cabasa` | `cabasa` | 2 | 3 | 0.900 | 593 ms | −14.1 | +0.30 | 428 KB |
+| `claves` | `claves` | 3 | 3 | 0.900 | 534 ms | +0.0 | −0.20 | 609 KB |
+| `guiro` | `guiro_slow` | 1 | 3 | 0.900 | 968 ms | −6.9 | −0.35 | 506 KB |
+| `conga_hi` | `conga_muted` + `conga_open` | 3 | 3 | 0.900 | 881 ms | −5.3 | −0.15 | 1234 KB |
+| `conga_lo` | `tumba` | 3 | 3 | 0.900 | 840 ms | −10.8 | −0.15 | 1223 KB |
+| `bongo_hi` | `bongo_high` | 3 | 3 | 0.900 | 669 ms | −6.5 | +0.25 | 945 KB |
+| `bongo_lo` | `bongo_low` | 3 | 3 | 0.900 | 649 ms | −6.9 | +0.25 | 1038 KB |
+
+**71 files, 7.48 MB**, 48 kHz 16-bit stereo, every file landing on zero at
+both ends. The whole percussionist costs less than half of either drum kit.
+
+## What the source could not do, and what was done instead
+
+Three of the ten did not fit the shape the brief assumed, and in each case the
+library's answer was taken rather than a layer invented. `render_kit.py` will
+say so when it runs; the measurements are here so the decisions can be argued
+with rather than rediscovered.
+
+**The shaker has one layer, not two.** `shaker_up` and `shaker_down` are two
+maps because an up-stroke and a down-stroke are two sounds, and the contract
+makes them the two round robins of one voice — a shaker alternates by nature,
+so on sixteenths the set really does play up-down-up-down. But each map is
+sampled at a single dynamic, and the seven shakes inside it span **4.6 dB**
+(up) and **1.6 dB** (down). A second layer out of 1.6 dB is two files of the
+same sound. A shaker's accent is in the hand, and the hand is `LEVEL_GAIN`.
+
+In the source the up-stroke is 8 to 11 dB quieter than the down-stroke, which
+is the instrument and not the session. Peak normalisation lands both at 0.900,
+so what alternates in the set is the *timbre* of the two strokes, which is
+what a listener hears anyway.
+
+**The guiro has one layer** for the same reason: one dynamic, eight scrapes,
+**3.7 dB** between the softest and the hardest — under the 4.5 dB step a
+second layer would have to be worth. `guiro_fast` is skipped because the
+contract skips it, and the contract is right: a fast scrape is a different
+stroke, not a louder one, and a groove that wants one should say so in the
+part.
+
+**The tambourine has two layers out of its round robins.** This is the drums'
+problem exactly inverted. Virtuosity's *drums* have 16 to 36 velocities and no
+round robins, so `pick_rr` borrows a neighbouring velocity when it needs a
+second performance. Its tambourine has one velocity band and *ten shakes in
+it*, because a tambourine is not a drum you strike at a chosen force — you
+shake it, and ten shakes by a human being are not the same loudness. Measured,
+they span **8.2 dB**, which is wider than several instruments here that *were*
+sampled in bands. So `rank_rr_as_dynamics` ranks them by loudness and gives
+each its own dynamic index, and every function downstream then works
+unchanged and works correctly.
+
+**`conga_muted` is layer 1 of `conga_hi`.** No velocity of an open stroke is a
+palm laid on the head, however softly it is struck — so this is an
+articulation standing in for a velocity band, which is what `combine: layers`
+in the recipe is for. The engine plays layer 1 on a ghost, so the muted stroke
+lands exactly where a tumbao wants it.
+
+**The tumba's softest band was left alone.** It has four dynamics and three
+are taken; one of the eight strokes in the bottom band is 30 dB under its
+siblings, and a band that inconsistent is not a performance anyone would play.
+The three that ship sit at −46.9, −41.3 and −34.4 dB in the source, about
+5.5 dB apart, which is a better ladder than the four would have been.
+
+**Three round robins wherever the source has three**, which is everywhere but
+the shaker. This is not padding for the size target: a clave pattern and a
+conga tumbao repeat all night, and two round robins on a tumbao is a machine
+gun. The source has seven or eight strokes per dynamic for every instrument
+here, so none of these is borrowed from a neighbour.
+
+**The guiro is capped at 1.0 s and not the 0.6 s the brief guessed at.** A
+scrape is not a decay. Capping a cymbal lands its tail; capping a scrape lifts
+the stick halfway through the stroke, and 0.6 s did exactly that on every
+file. Measured, the slow scrape runs 0.97 s — which is also about how long a
+cha-cha wants it, beats one and two at 120.
+
+## The balance, and why it is measured outside the folder
+
+A kit is levelled against its own snare. **A percussion set has no snare**, and
+levelling it against its own loudest voice would make it internally tidy and,
+next to a drummer, either inaudible or all you can hear. So `balance_ref` in
+the recipe points at the club kit's snare accent — the same file every kit
+voice is already measured against, so a number in `balance` means the same
+thing in both recipes.
+
+The contract sets the targets and nine of the ten land on them within 0.05 dB.
+
+| | K-weighted vs the snare | step | small speaker |
+|---|---|---|---|
+| `conga_lo` | −3.98 dB | — | −13.20 dB |
+| `conga_hi` | −4.02 dB | 0.04 | −7.58 dB |
+| `cowbell` | −5.95 dB | 1.94 | −1.24 dB |
+| `bongo_hi` | −6.00 dB | 0.05 | −2.49 dB |
+| `bongo_lo` | −6.04 dB | 0.04 | −4.87 dB |
+| `tambourine` | −7.98 dB | 1.94 | −11.85 dB |
+| `claves` | −8.10 dB | 0.13 | −8.41 dB |
+| `guiro` | −8.95 dB | 0.85 | −4.57 dB |
+| `cabasa` | −11.98 dB | 3.03 | −18.24 dB |
+| `shaker` | −12.04 dB | 0.06 | −13.66 dB |
+
+Ten voices inside 8.06 dB, the widest step 3.03 dB.
+
+**The claves are the tenth and they land 2.1 dB under their −6.** At peak
+0.900 that is as loud as a clave *gets* over a 400 ms window — it is a 3 ms
+click on a stick, and there is very little of it to weight. The honest answer
+is the one the tool gives: `trim_db` is clamped at 0, because a positive trim
+asks the engine to play a file louder than the ceiling every other file was
+normalised to. The claves are as loud as they get.
+
+**The two columns disagree and the disagreement is the point.** The cowbell
+lands 5.95 dB under the snare K-weighted and **1.24 dB** under it through the
+small-speaker band-pass, because a cowbell lives at 800 Hz, in the middle of
+the window a laptop speaker radiates. The cabasa lands 11.98 dB under
+K-weighted and **18.24 dB** under on a laptop, because it lives above 6 kHz
+and the 4 kHz low-pass takes nearly all of it. Neither is a bug and it is the
+same effect this document already documents for the kick and the hi-hat: on
+headphones the balance is right, and on a laptop a cowbell is a cowbell.
+
+## `pan`, and why it is in the manifest
+
+Ten instruments in the hands of one player are not all in the same place, and
+the set is the first folder in the tree to say where its voices sit. `pan` is
+**not baked into the files**: where a voice is placed is one number to argue
+with, and a file that arrived panned could never be moved back to the middle.
+A mono mic is written centred and a stereo pair keeps the image the room gave
+it; the manifest's pan places whatever that adds up to.
+
+`swap_stereo` is **off** here and **on** for Club, and that is not an
+inconsistency. The kit is swapped because its overheads were imaged from in
+front of the kit and the brief wants the drummer's seat. The percussion is a
+different recording of a different room, and there is no drummer's seat to put
+anyone in. Measured on the source it is nearly centred anyway: the widest
+instrument sits 4.6 dB right and the narrowest 0.2 dB left, so the files carry
+a little real width and nothing that could be called a placement. Seven of the
+ten pans agree with the direction the room already leaned; the tambourine and
+the guiro are asked to cross about 1 dB of it, which a 0.3 pan swamps.
+
+## The mics
+
+Every one of the ten has all four positions, which the cymbals and toms in
+Club do not. **The overheads lead and the close mic follows**, which is the
+opposite of the kick and the snare and is right for the reason those are not:
+a percussionist is heard in the room, and a close mic on a shaker is a
+recording of a hand.
+
+| | `oh` | `close` | `mid` | `room` |
+|---|---|---|---|---|
+| shaker, tambourine, cowbell, cabasa, claves, guiro | 1.0 | 0.45 | 0.35 | 0.3 |
+| congas, bongos | 1.0 | 0.7 | 0.4 | 0.3 |
+
+The struck and shaken metal and wood cut through anything and want air more
+than proximity. The congas and the bongos are drums with heads and the body of
+a head is in the close mic — still under the overheads, because a conga mixed
+like a kick arrives in front of the drummer instead of beside them.
+
+**The mic names are written twice in this library and differently each time.**
+The drums put the mic in the directory *and* at the front of the file name
+(`Samples/oh/snare/oh_snare_buzz_vl7.flac`). The percussion puts it in the
+directory as `oh` but at the END of the file name as a word
+(`Samples/perc/oh/conga/Conga_22_HitN_1_50_rr1_Overhead.wav`, whose close mic
+is `..._rr1_Close.wav`). `mic_tag` in the recipe is that translation, and
+without it the close mic is never found for any stroke, the mix silently drops
+the channel it was weighted for, and the only symptom is a set with no
+proximity in it.
+
+## What to change first if the owner says…
+
+| if the owner says… | the field in `recipes/perc-club.json` | which way |
+|---|---|---|
+| the shaker is a hiss | `balance.shaker` | down, −12 → −15 |
+| I cannot hear the congas | `balance.conga_hi` / `.conga_lo` | up, −4 → −2 |
+| the cowbell is too much on my laptop | `balance.cowbell` | down; it sits in the laptop's band |
+| the percussion is all on one side | `voices.<v>.pan` | toward 0 |
+| it sounds like one instrument | `voices.<v>.pan` | wider, ±0.2 → ±0.4 |
+| machine-gun on the tumbao | `voices.conga_hi.rr` | already 3, the source's limit |
+| the tambourine rings too long | `voices.tambourine.cap_s` | down, 1.0 → 0.7 |
+| more room on the percussion | `voices.<v>.mix.room` | up, 0.3 → 0.45 |
+| the congas are in front of the drummer | `voices.conga_*.mix.close` | down, 0.7 → 0.5 |
+| the ghost strokes are too loud | nothing here — that is `LEVEL_GAIN[3]` | |
+| the set is too big | `voices.<v>.rr` on the congas and bongos | down to 2, 2.4 MB back |
+
+**To hear it:** `scripts/sounds/ab.html` has a *Percussion* switch that plays
+the set under whichever kit is selected — a shaker on every sixteenth, a conga
+tumbao, and a tambourine on 2 and 4. It applies each voice's `pan` with a real
+panner, so the widths can be judged rather than read.
 
 # The melodic voices
 
