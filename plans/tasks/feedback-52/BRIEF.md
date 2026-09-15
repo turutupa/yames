@@ -17,7 +17,9 @@ W38 on `jam-v5` is rewriting the click sound banks and the gains it
 would touch.
 
 ## The branch
-**`feedback-52`**, from `jam-v5` at `5d5eec0`. Your worktree is already
+**`feedback-52`**, from `jam-v5` at `5d5eec0`; W1 and W2 landed on `jam-v5`
+at 2d5d8b1, which is where the owner then started **`jam-v6`** — W3 and W4
+base on `jam-v6` and the PR goes to `jam-v6`. Your worktree is already
 created and named in your file; verify with `git log --oneline -1` and
 `git branch --show-current` before doing anything. `git merge feedback-52`
 first so you have these briefs. The orchestrator merges into
@@ -33,7 +35,8 @@ main checkout. Never start `tauri dev`, never touch
 |---|---|---|
 | W1 setlist editor | `src/setlist/**`, `src/components/setlist/**`, `src/components/presets/PresetSidebar.tsx` (the setlist menu only), `src/containers/main-window/hooks/useSetlistSession.ts`, `Rail.tsx`/`MainWindow.tsx` prop threading, `src/styles/setlist.css`, `src/locales/*/setlist.json` | `src-tauri/`, settings, the jam rows in `PresetSidebar.tsx` |
 | W2 output pair | `src-tauri/src/engine.rs` (device list, stream config, the mix write, take read-back), `tts.rs`, `commands.rs`, `lib.rs`, `src/ipc.ts`, `src/types.ts`, `src/test/mocks.ts`, `src/components/ChannelDropdown.tsx` or a sibling, `DevicesSettingsSection.tsx`, `useAudioOutputDevices.ts`, `SettingsView.tsx`/`MainWindow.tsx` threading, `src/locales/*/settings.json` | `SoundKit`/`SoundBank`/`BEAT_GAIN`/`SUB_GAIN`/`accent_for` (W38 and W3 own those), setlist code |
-| W3 accents (parked) | see `W3-ACCENT-TIERS.md` | — |
+| W3 accents + stepper | `src-tauri/src/engine.rs` (`accent_for`, `accent_mask`, the sound pick, `BeatNotification`), `src/utils/meter.ts`, `src/constants/metronome.ts`, `src/containers/metronome/**`, `src/styles/metronome.css`, `src/types.ts` (`BeatEvent`), consumers of `isAccent`, `src/locales/*/metronome.json` | setlist code, `PresetSidebar.tsx`, the output-pair code |
+| W4 library drag | `src/components/presets/PresetSidebar.tsx` (setlist rows only), its test, `src/containers/main-window/hooks/useSetlistSession.ts` (a reorder callback), `Rail.tsx`/`MainWindow.tsx` threading, `src/styles/*.css` for the rows | `src-tauri/`, the jam rows, the metronome |
 
 ## Language
 Everything a user reads is for musicians: outputs, steps, accents. No
