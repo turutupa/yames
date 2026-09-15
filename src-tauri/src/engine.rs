@@ -1420,8 +1420,19 @@ pub(crate) fn jam_reference_sample(id: SoundId) -> &'static [f32] {
 #[inline]
 fn jam_sample<'a>(bank: &'a SoundBank, band: BandBanks<'a>, id: SoundId) -> &'a [f32] {
     match id {
+        // THE VOICE INDEX SAYS WHICH BANK, and that is the whole of the
+        // percussionist on the audio thread. The contract numbers the ten
+        // percussion voices after the eleven drums, so a slot already
+        // carries the answer and no second field, no second variant and no
+        // lookup is needed: one comparison on a byte, and the shaker comes
+        // out of the set while the snare comes out of the kit.
         SoundId::Band { voice, layer, robin } => {
-            band.kit.map_or(&[][..], |c| c.sample(voice, layer, robin))
+            let from = if (voice as usize) >= crate::kit::DRUM_VOICES {
+                band.perc
+            } else {
+                band.kit
+            };
+            from.map_or(&[][..], |c| c.sample(voice, layer, robin))
         }
         SoundId::Voice {
             line,
@@ -1445,6 +1456,11 @@ fn jam_sample<'a>(bank: &'a SoundBank, band: BandBanks<'a>, id: SoundId) -> &'a 
 #[derive(Clone, Copy, Default)]
 struct BandBanks<'a> {
     kit: Option<&'a crate::kit::KitBank>,
+    /// The percussionist's set. `None` is a band without one, and every
+    /// percussion voice then renders silence — which cannot happen in
+    /// practice, because a table with no set compiles no percussion slots,
+    /// and is the right answer if it ever does.
+    perc: Option<&'a crate::kit::KitBank>,
     bass: Option<&'a crate::voices::MelodicBank>,
     keys: Option<&'a crate::voices::MelodicBank>,
 }
@@ -1456,6 +1472,7 @@ impl<'a> BandBanks<'a> {
         match table {
             Some(t) => Self {
                 kit: Some(t.kit_bank()),
+                perc: t.perc_bank(),
                 bass: t.voice_bank(VoiceLine::Bass),
                 keys: t.voice_bank(VoiceLine::Keys),
             },
@@ -1806,7 +1823,7 @@ fn spawn_band_voice(
     // compiled, so this is a mask test per ringing voice and no more.
     if slot.chokes != 0 {
         for v in voices.iter_mut() {
-            if v.band && v.voice != NOT_A_DRUM && (slot.chokes & (1u16 << v.voice)) != 0 {
+            if v.band && v.voice != NOT_A_DRUM && (slot.chokes & (1u32 << v.voice)) != 0 {
                 // Already fading: leave the shorter fade alone rather than
                 // restarting it, so two closed hats in a row do not make the
                 // open one last longer than one would.
@@ -4582,8 +4599,23 @@ impl MetronomeEngine {
                                         // Your bars in a trade: the hat lane
                                         // keeps the time and nothing else
                                         // plays, bass included.
+                                        //
+                                        // AND THE PERCUSSIONIST, who keeps
+                                        // going when the hats do
+                                        // (`plans/tasks/jam-v5/BRIEF.md`).
+                                        // In a breakdown the kit drops to
+                                        // kick and hats while the shaker and
+                                        // the congas hold the time, which is
+                                        // what somebody standing next to the
+                                        // drummer actually does — and it is
+                                        // the difference between a bar that
+                                        // opens up and a bar that falls
+                                        // over. Asked off the lane, which
+                                        // the slot already carries for
+                                        // exactly this question.
                                         if band_state == JamBandState::HatsOnly
                                             && slot.lane != trade_keeps
+                                            && !slot.lane.is_perc()
                                         {
                                             continue;
                                         }
@@ -8219,6 +8251,7 @@ mod tests {
                 drums: 1.5,
                 bass: 1.5,
                 keys: 1.5,
+                perc: 1.0,
             }),
             count_in_sound: None,
             bass_voice: None,
@@ -11005,7 +11038,7 @@ mod tests {
                     });
                     let bank = crate::jam::reference_bank(kit.name()).unwrap();
                     let table =
-                        compile_with(&cfg, &cache, bank, crate::jam::JamVoices::default())
+                        compile_with(&cfg, &cache, bank, None, crate::jam::JamVoices::default())
                             .unwrap();
                     assert_eq!(
                         table.base_peak,

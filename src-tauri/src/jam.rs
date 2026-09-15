@@ -38,23 +38,37 @@ use crate::voices::MelodicBank;
 // Limits — mirrored from src/jam/types.ts
 // ---------------------------------------------------------------------------
 
-/// The lanes a `JamPattern` carries: kick, snare, hat, hat_open, ride,
-/// crash, tom_hi, tom_lo.
+/// How many rows of the pattern are the drummer's: kick, snare, hat,
+/// hat_open, ride, crash, tom_hi, tom_lo.
 ///
-/// Eight, because a fill is toms (`plans/tasks/jam-v3/BRIEF.md`). The two
-/// new rows are optional in exactly the way `hatOpen` already was: absent
-/// is silent, and every pattern the app has ever saved still loads.
-pub const JAM_PATTERN_LANES: usize = 8;
+/// Eight, because a fill is toms (`plans/tasks/jam-v3/BRIEF.md`).
+pub const JAM_DRUM_LANES: usize = 8;
+
+/// And how many are the percussionist's — the contract's ten
+/// (`plans/tasks/jam-v5/BRIEF.md`), in its order.
+pub const JAM_PERC_LANES: usize = 10;
+
+/// The lanes a `JamPattern` carries.
+///
+/// Eighteen: the drummer's eight and the percussionist's ten. Every row
+/// past the first six is optional in exactly the way `hatOpen` was when it
+/// arrived — absent is silent, and every pattern the app has ever saved
+/// still loads and still plays what it always played.
+pub const JAM_PATTERN_LANES: usize = JAM_DRUM_LANES + JAM_PERC_LANES;
 
 /// The most notes one keys voicing may hold. Four is a seventh chord, which
 /// is as much harmony as a comping voice should put under a soloist; five
 /// would be a pianist showing off.
 pub const JAM_MAX_VOICING: usize = 4;
 
-/// Eight drums, the hi-hat pedal the engine adds after an open hat, the
-/// bass, and up to four notes of one keys voicing. The array on every tick
-/// is this wide, so a tick is a fixed-size value the audio thread can read
-/// without a bounds surprise or a heap touch.
+/// Eight drums and ten percussion voices, the hi-hat pedal the engine adds
+/// after an open hat, the bass, and up to four notes of one keys voicing.
+/// The array on every tick is this wide, so a tick is a fixed-size value the
+/// audio thread can read without a bounds surprise or a heap touch.
+///
+/// It is what a table can DESCRIBE and not what anybody writes: no groove in
+/// the library puts eighteen rows on one tick. The probe's `busiest_jam`
+/// does, which is the point of it.
 pub const JAM_MAX_SLOTS: usize = JAM_PATTERN_LANES + 1 + 1 + JAM_MAX_VOICING;
 
 /// `JAM_MAX_FORM_BARS` in `src/jam/types.ts`.
@@ -147,6 +161,40 @@ const HAT_OPEN_CAP_TICKS: f32 = 4.0;
 /// The ride rings three ticks — long enough to read as a wash under the
 /// groove, short enough that a 16th-note ride pattern does not stack up.
 const RIDE_CAP_TICKS: f32 = 3.0;
+
+/// How long a struck percussion voice rings: four ticks, the open hat's
+/// bound.
+///
+/// **Every percussion lane is capped, and the reason is arithmetic before it
+/// is music.** A drum kit has three lanes a groove can write on every tick
+/// and leave ringing (kick, snare, crash); a percussion tray has ten. At 300
+/// BPM sixteenths a tick is 50 ms and a set's voices may be two seconds
+/// long, so ten uncapped rows written on every tick would be four hundred
+/// voices alive at once out of a mixer that preallocates two hundred and
+/// fifty-six. Uncapped percussion is not a balance decision that went wrong;
+/// it is a table the callback cannot play.
+///
+/// Four ticks is the number for the ringing half of the tray — cowbell,
+/// claves, tambourine, congas, bongos — and it is the open hat's number for
+/// the open hat's reason: a beat at sixteenths, half a bar at eighths, and
+/// the lane bounded at four. At every tempo a musician actually plays, a
+/// conga tone and a tambourine are over before it, so the cap is a bound the
+/// band never touches; above about 250 BPM in sixteenths it starts to cut,
+/// and it cuts the way the hat, the open hat and the ride are already cut.
+const PERC_CAP_TICKS: f32 = 4.0;
+
+/// And the shaken and scraped voices ring two, which is the closed hat's
+/// rule rather than the open one's.
+///
+/// A shaker, a cabasa and a guiro are the pulse: they are written on every
+/// subdivision and the next stroke is what ends the last one. One that rang
+/// two subdivisions into the next would be a hiss rather than a time
+/// keeper, which is exactly why the closed hat is capped at 0.9 of a tick.
+/// Two and not 0.9 because these are longer gestures than a stick on a
+/// closed cymbal — a cabasa stroke is the beads going round — and cutting
+/// one inside its own tick would take the gesture away rather than the
+/// smear.
+const PERC_SHAKEN_CAP_TICKS: f32 = 2.0;
 
 /// WHAT THE TABLE'S NORMALISATION IS FOR, AFTER THIS PASS.
 ///
@@ -481,6 +529,43 @@ pub struct JamPattern {
     /// faster.
     #[serde(default, deserialize_with = "lane_or_none")]
     pub tom_lo: Vec<u8>,
+    // ---- The percussionist's ten (`plans/tasks/jam-v5/BRIEF.md`) ----
+    //
+    // Optional every one of them, and for the reason `hat_open` and the toms
+    // are: a groove written before the percussionist existed does not carry
+    // these rows, and has to load and play exactly as it did. A groove that
+    // carries none of them has no percussionist, which is most of the
+    // library — a country train and a bluegrass groove have nobody on a
+    // shaker, and saying so is a row that is not there rather than a row of
+    // zeros the engine reads past on every bar to learn nothing.
+    //
+    // They are ROWS OF THE SAME BAR and not a second pattern: a
+    // percussionist plays the same tick grid as the drummer, so the cells
+    // are the same levels, the same length, and land in the same `JamTick`
+    // the drums do. The audio thread walks one list.
+    #[serde(default, deserialize_with = "lane_or_none")]
+    pub shaker: Vec<u8>,
+    #[serde(default, deserialize_with = "lane_or_none")]
+    pub tambourine: Vec<u8>,
+    #[serde(default, deserialize_with = "lane_or_none")]
+    pub cowbell: Vec<u8>,
+    #[serde(default, deserialize_with = "lane_or_none")]
+    pub cabasa: Vec<u8>,
+    #[serde(default, deserialize_with = "lane_or_none")]
+    pub claves: Vec<u8>,
+    #[serde(default, deserialize_with = "lane_or_none")]
+    pub guiro: Vec<u8>,
+    /// The open conga and the tumba. `conga_muted` is layer 1 of the high
+    /// one — the ghost stroke — so a muted conga is a level on this row
+    /// rather than a row of its own, exactly as a ghost snare is.
+    #[serde(default, deserialize_with = "lane_or_none")]
+    pub conga_hi: Vec<u8>,
+    #[serde(default, deserialize_with = "lane_or_none")]
+    pub conga_lo: Vec<u8>,
+    #[serde(default, deserialize_with = "lane_or_none")]
+    pub bongo_hi: Vec<u8>,
+    #[serde(default, deserialize_with = "lane_or_none")]
+    pub bongo_lo: Vec<u8>,
 }
 
 /// An optional lane: the cells, or nothing at all, whichever arrived.
@@ -505,6 +590,16 @@ impl JamPattern {
             (JamLane::Crash, &self.crash),
             (JamLane::TomHi, &self.tom_hi),
             (JamLane::TomLo, &self.tom_lo),
+            (JamLane::Shaker, &self.shaker),
+            (JamLane::Tambourine, &self.tambourine),
+            (JamLane::Cowbell, &self.cowbell),
+            (JamLane::Cabasa, &self.cabasa),
+            (JamLane::Claves, &self.claves),
+            (JamLane::Guiro, &self.guiro),
+            (JamLane::CongaHi, &self.conga_hi),
+            (JamLane::CongaLo, &self.conga_lo),
+            (JamLane::BongoHi, &self.bongo_hi),
+            (JamLane::BongoLo, &self.bongo_lo),
         ]
     }
 }
@@ -515,7 +610,23 @@ impl JamPattern {
 /// existed has to load and play exactly as it did. A row that IS sent is
 /// held to the same length as the rest — half a lane is a caller's bug, not
 /// a groove.
-const OPTIONAL_LANES: [JamLane; 3] = [JamLane::HatOpen, JamLane::TomHi, JamLane::TomLo];
+const OPTIONAL_LANES: [JamLane; 3 + JAM_PERC_LANES] = [
+    JamLane::HatOpen,
+    JamLane::TomHi,
+    JamLane::TomLo,
+    // And every percussion row: a groove with no percussionist writes none
+    // of them, which is most of the library.
+    JamLane::Shaker,
+    JamLane::Tambourine,
+    JamLane::Cowbell,
+    JamLane::Cabasa,
+    JamLane::Claves,
+    JamLane::Guiro,
+    JamLane::CongaHi,
+    JamLane::CongaLo,
+    JamLane::BongoHi,
+    JamLane::BongoLo,
+];
 
 /// Which row of the table a slot came from.
 ///
@@ -538,6 +649,24 @@ pub enum JamLane {
     /// in `plans/JAM_SOUND.md` §2.9 are written around.
     TomHi,
     TomLo,
+    /// The percussionist's ten, in the contract's order and immediately
+    /// after the drummer's — which is what [`JamLane::is_perc`] reads.
+    ///
+    /// They are lanes rather than one "percussion" lane because the band
+    /// state asks about them one at a time no more than it asks about the
+    /// hats one at a time: the lane travels to the audio thread so a
+    /// trading bar can say what keeps playing, and "the percussion keeps
+    /// going" is a question about the FAMILY, which the order answers.
+    Shaker,
+    Tambourine,
+    Cowbell,
+    Cabasa,
+    Claves,
+    Guiro,
+    CongaHi,
+    CongaLo,
+    BongoHi,
+    BongoLo,
     /// Not a row of `JamPattern` either — the foot that closes the hi-hat.
     /// The engine adds it after every open hat, at the next hat hit, because
     /// it is a consequence of the groove rather than something a groove
@@ -564,10 +693,77 @@ impl JamLane {
             Self::Crash => "crash",
             Self::TomHi => "tomHi",
             Self::TomLo => "tomLo",
+            Self::Shaker => "shaker",
+            Self::Tambourine => "tambourine",
+            Self::Cowbell => "cowbell",
+            Self::Cabasa => "cabasa",
+            Self::Claves => "claves",
+            Self::Guiro => "guiro",
+            Self::CongaHi => "congaHi",
+            Self::CongaLo => "congaLo",
+            Self::BongoHi => "bongoHi",
+            Self::BongoLo => "bongoLo",
             Self::HatPedal => "hatPedal",
             Self::Bass => "bass",
             Self::Keys => "keys",
         }
+    }
+
+    /// Is this row the percussionist's?
+    ///
+    /// Read on the AUDIO THREAD, once per slot on a trading bar, which is
+    /// why it is a range on the discriminant rather than a lookup: the ten
+    /// are numbered together and immediately after the drummer's eight, so
+    /// the whole question is two comparisons on a byte the slot already
+    /// carries.
+    ///
+    /// What it decides is the contract's band rule: **the percussion keeps
+    /// going when the hats do.** In a breakdown the kit drops to kick and
+    /// hats and the shaker and the congas keep the time, which is what a
+    /// percussionist in a room does and the reason the layer is worth
+    /// having at all.
+    #[inline]
+    pub fn is_perc(self) -> bool {
+        matches!(
+            self,
+            Self::Shaker
+                | Self::Tambourine
+                | Self::Cowbell
+                | Self::Cabasa
+                | Self::Claves
+                | Self::Guiro
+                | Self::CongaHi
+                | Self::CongaLo
+                | Self::BongoHi
+                | Self::BongoLo
+        )
+    }
+
+    /// The kit voice this percussion row plays, or `None` for a row that is
+    /// not the percussionist's.
+    ///
+    /// The lane and the voice are one to one here — a percussionist's row IS
+    /// an instrument, where the drummer's `ride` row reaches for the bell on
+    /// a level 4 and the `snare` row for the cross-stick on a ghost. There
+    /// is no such second stroke on a tray: a cowbell is a cowbell. The one
+    /// place a level changes which RECORDING plays is the conga, whose
+    /// muted ghost is layer 1 of the open one, and that is a layer rather
+    /// than a voice.
+    #[inline]
+    fn perc_voice(self) -> Option<KitVoice> {
+        Some(match self {
+            Self::Shaker => KitVoice::Shaker,
+            Self::Tambourine => KitVoice::Tambourine,
+            Self::Cowbell => KitVoice::Cowbell,
+            Self::Cabasa => KitVoice::Cabasa,
+            Self::Claves => KitVoice::Claves,
+            Self::Guiro => KitVoice::Guiro,
+            Self::CongaHi => KitVoice::CongaHi,
+            Self::CongaLo => KitVoice::CongaLo,
+            Self::BongoHi => KitVoice::BongoHi,
+            Self::BongoLo => KitVoice::BongoLo,
+            _ => return None,
+        })
     }
 }
 
@@ -683,6 +879,28 @@ pub struct JamConfig {
     /// guess about tempo or feel. Absent or false: a ghost is a ghost.
     #[serde(default)]
     pub snare_ghost_is_rim: Option<bool>,
+    /// Is there a percussionist in this band?
+    ///
+    /// The band flag, mirroring `Jam.band.perc` on the contract's side. It
+    /// is a THIRD state and not a boolean, and the three are different:
+    ///
+    /// * `Some(true)` — the jam has a percussionist, and every percussion
+    ///   row the groove wrote plays.
+    /// * `None` — nobody has said. The rows play if the groove has any,
+    ///   which is what every jam saved before this pass means and what a
+    ///   sender that has not learned the field yet means. A jam is never
+    ///   silently given a percussionist it did not ask for: a groove with no
+    ///   percussion rows has no percussion either way.
+    /// * `Some(false)` — the musician switched the percussionist off. The
+    ///   rows are dropped and NOTHING ELSE CHANGES: same drums, same bass,
+    ///   same keys, same normalisation, same everything. Muting a player is
+    ///   not remixing the band.
+    ///
+    /// It is a flag here rather than zeroed rows in the sender because it is
+    /// a member of the band rather than a bar of music — the same reason
+    /// `mix.perc` is a dial rather than a gain written into every cell.
+    #[serde(default)]
+    pub perc: Option<bool>,
 }
 
 /// When a table takes over. The mirror of `JamEngineConfig.applyAt` in
@@ -734,6 +952,21 @@ pub struct JamMix {
     pub drums: f32,
     pub bass: f32,
     pub keys: f32,
+    /// The percussionist's own level, 0..1.5 like the rest.
+    ///
+    /// **Defaulted and not required**, unlike the three above it. Those have
+    /// been on the wire since the mix existed, so a config without them is a
+    /// caller that is wrong; this one arrives on a wire full of jams saved
+    /// before the percussionist did, and a stored mix of three numbers has
+    /// to keep loading. Absent is 1.0, which is the percussionist at the
+    /// level the grooves were written at.
+    #[serde(default = "default_mix_level")]
+    pub perc: f32,
+}
+
+/// A mix lane nobody set: the band as the grooves were written.
+fn default_mix_level() -> f32 {
+    1.0
 }
 
 impl Default for JamMix {
@@ -742,6 +975,7 @@ impl Default for JamMix {
             drums: 1.0,
             bass: 1.0,
             keys: 1.0,
+            perc: 1.0,
         }
     }
 }
@@ -761,6 +995,7 @@ impl JamMix {
             drums: one(self.drums),
             bass: one(self.bass),
             keys: one(self.keys),
+            perc: one(self.perc),
         }
     }
 }
@@ -1027,8 +1262,8 @@ pub struct JamSlot {
     /// Which voices' hits fade this one out, and which voices THIS one fades
     /// out. Both as masks of `KitVoice::bit`, so the audio thread's question
     /// is an `&` over the voices already ringing.
-    pub choked_by: u16,
-    pub chokes: u16,
+    pub choked_by: u32,
+    pub chokes: u32,
     /// How many frames of fade-out this note ends its cap with, at the rate
     /// its bank was built at.
     ///
@@ -1169,6 +1404,24 @@ pub struct JamTable {
     /// bank for the same kit — so a chorus of them costs a refcount bump
     /// each and no decoding at all.
     bank: Arc<KitBank>,
+    /// The percussionist's set, when one ships and this jam has one.
+    ///
+    /// **Beside the drums and inside the table, for every reason the drums
+    /// are.** The audio thread has to be able to answer
+    /// `SoundId::Band { voice: shaker, .. }` while it is mixing and may not
+    /// lock or allocate to do it; the set is decoded at whatever rate the
+    /// device opened at, long after the `SoundBank` was built. So it rides
+    /// in the `Arc<JamTable>` that names it, arrives with it, swaps with it
+    /// at the bar line and retires with it on a thread that may `free()`.
+    /// There is no window in which the drums have swapped and the
+    /// percussion has not.
+    ///
+    /// `None` is every percussion lane silent: no set shipped, or no
+    /// percussionist in this band. A table with no percussion slots in it
+    /// still carries the set — resolving it costs an `Arc` clone off the
+    /// cache — because whether a row is silent is the compiler's answer and
+    /// not the callback's.
+    perc: Option<Arc<KitBank>>,
     /// The recorded bass and keys, when the voices this jam names ship one.
     ///
     /// Inside the table for every reason the drums are, and the reason is
@@ -1225,6 +1478,14 @@ impl JamTable {
     #[inline]
     pub fn kit_bank(&self) -> &KitBank {
         &self.bank
+    }
+
+    /// The percussion this table plays, or `None` for a band with no
+    /// percussionist. Read once per buffer by the audio thread, off an
+    /// object it is already holding, which is why it may.
+    #[inline]
+    pub fn perc_bank(&self) -> Option<&KitBank> {
+        self.perc.as_deref()
     }
 
     /// The recorded bank one of the melodic lines plays out of, or `None`
@@ -1469,7 +1730,7 @@ impl JamGainCache {
 /// the device is running at.
 pub fn compile(cfg: &JamConfig) -> Result<JamTable, String> {
     let voices = reference_voices(cfg)?;
-    compile_measured(cfg, None, reference_bank(&cfg.kit)?, voices)
+    compile_measured(cfg, None, reference_bank(&cfg.kit)?, reference_perc(), voices)
 }
 
 /// [`compile`] with the bass and keys on their synthesised recipes,
@@ -1491,6 +1752,7 @@ pub(crate) fn compile_synth(cfg: &JamConfig) -> Result<JamTable, String> {
         cfg,
         None,
         reference_bank(&cfg.kit)?,
+        reference_perc(),
         JamVoices { bass: None, keys: None },
     )
 }
@@ -1533,6 +1795,45 @@ pub fn reference_bank(kit: &str) -> Result<Arc<KitBank>, String> {
     Ok(bank)
 }
 
+/// THE PERCUSSION SET, decoded once per process at [`JAM_REFERENCE_SR`].
+///
+/// [`reference_bank`] for the other folder, and a constant rather than a
+/// cache for the same reason: a decode's identity is part of a table's
+/// signature, so two decodes of one set would be two percussionists as far
+/// as the bar-line handshake is concerned.
+///
+/// **`None` when the app ships no set**, which is a checkout without
+/// `sounds/perc` and is a state the whole feature is built to survive: the
+/// table carries no set, every percussion lane compiles to no slot, and the
+/// band plays exactly what it played before the percussionist existed.
+///
+/// **Set zero, and not a set the config names.** One set for now
+/// (`plans/tasks/jam-v5/BRIEF.md`): the percussionist plays it under every
+/// drum kit, because a percussionist is not a drum kit and the person who
+/// picked Brushes did not thereby pick a different cowbell. A later set is
+/// another folder and a choice, and this is the line that grows when there
+/// is one to make.
+pub fn reference_perc() -> Option<Arc<KitBank>> {
+    static SET: std::sync::OnceLock<Option<Arc<KitBank>>> = std::sync::OnceLock::new();
+    SET.get_or_init(|| {
+        if crate::kit::perc_count() == 0 {
+            return None;
+        }
+        match crate::kit::load_perc(0, JAM_REFERENCE_SR) {
+            Ok(bank) => Some(Arc::new(bank)),
+            Err(e) => {
+                // A SENTENCE AND A SILENT ROW, not a jam that will not load.
+                // The percussionist is a layer on top of a band that works
+                // without one, so a set that does not decode takes the
+                // shaker away and leaves the drummer playing.
+                eprintln!("[perc] the shipped percussion set did not decode: {e}");
+                None
+            }
+        }
+    })
+    .clone()
+}
+
 /// [`compile`], with the drums already decoded.
 ///
 /// The decoding is the caller's because only the caller knows the output
@@ -1541,7 +1842,7 @@ pub fn reference_bank(kit: &str) -> Result<Arc<KitBank>, String> {
 /// by lane, in [`slot_for`].
 pub fn compile_with_kit(cfg: &JamConfig, bank: Arc<KitBank>) -> Result<JamTable, String> {
     let voices = reference_voices(cfg)?;
-    compile_measured(cfg, None, bank, voices)
+    compile_measured(cfg, None, bank, reference_perc(), voices)
 }
 
 /// [`compile`], with the melodic banks handed in rather than resolved.
@@ -1555,7 +1856,26 @@ pub fn compile_with_voices(
     bank: Arc<KitBank>,
     voices: JamVoices,
 ) -> Result<JamTable, String> {
-    compile_measured(cfg, None, bank, voices)
+    compile_measured(cfg, None, bank, reference_perc(), voices)
+}
+
+/// [`compile_with_kit`], with the PERCUSSION handed in rather than resolved.
+///
+/// What the tests use, and the reason they can say anything at all about the
+/// percussionist: the shipped set is a folder that may not be in a
+/// checkout, so a test that needed it would be a test that passes on one
+/// machine. Every percussion test builds its own set with
+/// `KitBank::for_tests(&KitVoice::PERC, ..)` and hands it in here, and the
+/// one test that IS about the shipped folder says so and skips when there
+/// is none.
+#[cfg(test)]
+pub(crate) fn compile_with_perc(
+    cfg: &JamConfig,
+    bank: Arc<KitBank>,
+    perc: Option<Arc<KitBank>>,
+) -> Result<JamTable, String> {
+    let voices = reference_voices(cfg)?;
+    compile_measured(cfg, None, bank, perc, voices)
 }
 
 /// The recorded banks a config's voices resolve to, at [`JAM_REFERENCE_SR`].
@@ -1616,11 +1936,12 @@ pub fn compile_with(
     cfg: &JamConfig,
     cache: &JamGainCache,
     bank: Arc<KitBank>,
+    perc: Option<Arc<KitBank>>,
     voices: JamVoices,
 ) -> Result<JamTable, String> {
-    let signature = render_signature(cfg, &bank, &voices);
+    let signature = render_signature(cfg, &bank, perc.as_deref(), &voices);
     let remembered = cache.get(signature);
-    let table = compile_measured(cfg, remembered, bank, voices)?;
+    let table = compile_measured(cfg, remembered, bank, perc, voices)?;
     if remembered.is_none() {
         cache.put(signature, table.base_peak);
     }
@@ -1633,6 +1954,7 @@ fn compile_measured(
     cfg: &JamConfig,
     base_peak: Option<f32>,
     bank: Arc<KitBank>,
+    perc: Option<Arc<KitBank>>,
     voices: JamVoices,
 ) -> Result<JamTable, String> {
     if !TICKS_PER_BEAT.contains(&cfg.ticks_per_beat) {
@@ -1698,11 +2020,27 @@ fn compile_measured(
     // Compiled at intensity 1.0 and scaled once at the end, so the
     // normalisation below can see the groove's own shape rather than the
     // shape times whatever the musician set the dial to.
+    // IS THERE A PERCUSSIONIST? Asked once, here, and the answer is a bank
+    // or nothing — so every percussion lane below either resolves against a
+    // set or makes no slot at all, and the audio thread never learns that a
+    // band could have had one.
+    //
+    // `perc: Some(false)` is the musician switching the player off and is
+    // the only thing it does: the rows make no slots, and the drums, the
+    // bass, the keys, the fill, the crash, the count-in and the
+    // normalisation are all exactly what they would have been. A band
+    // member leaving is not a remix.
+    let perc = match cfg.perc {
+        Some(false) => None,
+        _ => perc,
+    };
     let voicing = Voicing {
         bank: &bank,
+        perc: perc.as_deref(),
         chokes,
         ghost_is_rim,
         mix: mix.drums,
+        mix_perc: mix.perc,
     };
     let mut bar = compile_pattern(&cfg.bar, ticks, &voicing, "bar")?;
     let mut fill = match cfg.fill {
@@ -1781,6 +2119,7 @@ fn compile_measured(
             cfg.form_bars,
             cfg.ticks_per_beat,
             &bank,
+            perc.as_deref(),
             &voices,
         )
     });
@@ -1878,7 +2217,7 @@ fn compile_measured(
         .any(|t| t.slots().iter().any(|s| s.lane == JamLane::Hat));
     // Taken here rather than in the struct literal below, which moves
     // `custom` and would end the borrow `custom_ref` is holding.
-    let drums_signature = drums_signature(cfg, &bank, &voices);
+    let drums_signature = drums_signature(cfg, &bank, perc.as_deref(), &voices);
     let bus_drive = bank.drive;
     Ok(JamTable {
         ticks_per_bar: ticks,
@@ -1894,6 +2233,7 @@ fn compile_measured(
         bus_drive,
         bus_shape: 1.0 / bus_drive.tanh(),
         bank,
+        perc,
         voices,
         has_hat,
         drums_signature,
@@ -1915,11 +2255,16 @@ fn compile_measured(
 /// changes anything else — the groove, the kit, the intensity, the form, the
 /// practice windows, the mix — is the musician turning a dial, and that
 /// applies at once.
-fn drums_signature(cfg: &JamConfig, bank: &KitBank, voices: &JamVoices) -> u64 {
+fn drums_signature(
+    cfg: &JamConfig,
+    bank: &KitBank,
+    perc: Option<&KitBank>,
+    voices: &JamVoices,
+) -> u64 {
     use std::collections::hash_map::DefaultHasher;
     use std::hash::Hasher;
     let mut h = DefaultHasher::new();
-    hash_drums(cfg, bank, voices, &mut h);
+    hash_drums(cfg, bank, perc, voices, &mut h);
     h.finish()
 }
 
@@ -1932,11 +2277,16 @@ fn drums_signature(cfg: &JamConfig, bank: &KitBank, voices: &JamVoices) -> u64 {
 /// this the same sound, so the measurement still holds?". The bass and the
 /// keys answer the second and not the first, which is the whole point of
 /// having two.
-fn render_signature(cfg: &JamConfig, bank: &KitBank, voices: &JamVoices) -> u64 {
+fn render_signature(
+    cfg: &JamConfig,
+    bank: &KitBank,
+    perc: Option<&KitBank>,
+    voices: &JamVoices,
+) -> u64 {
     use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
     let mut h = DefaultHasher::new();
-    hash_drums(cfg, bank, voices, &mut h);
+    hash_drums(cfg, bank, perc, voices, &mut h);
     match cfg.bass {
         Some(ref b) => {
             true.hash(&mut h);
@@ -1980,6 +2330,7 @@ fn render_signature(cfg: &JamConfig, bank: &KitBank, voices: &JamVoices) -> u64 
 fn hash_drums(
     cfg: &JamConfig,
     bank: &KitBank,
+    perc: Option<&KitBank>,
     voices: &JamVoices,
     h: &mut impl std::hash::Hasher,
 ) {
@@ -1995,6 +2346,21 @@ fn hash_drums(
         p.crash.hash(h);
         p.tom_hi.hash(h);
         p.tom_lo.hash(h);
+        // And the percussionist's ten. They are rows of the same bar, so
+        // they belong in the same walk for both of the reasons the toms do:
+        // a groove that changed its shaker is a different drummer as far as
+        // the bar-line handshake is concerned, and it renders a different
+        // four bars as far as the memo is.
+        p.shaker.hash(h);
+        p.tambourine.hash(h);
+        p.cowbell.hash(h);
+        p.cabasa.hash(h);
+        p.claves.hash(h);
+        p.guiro.hash(h);
+        p.conga_hi.hash(h);
+        p.conga_lo.hash(h);
+        p.bongo_hi.hash(h);
+        p.bongo_lo.hash(h);
     }
     cfg.fill.is_some().hash(h);
     // Which bars the fill lands on is the drummer's business, not the bass
@@ -2027,6 +2393,14 @@ fn hash_drums(
     (cfg.bass_voice.as_deref().map(BassVoice::from_name).map(|v| v.name())).hash(h);
     (cfg.keys_voice.as_deref().map(KeysVoice::from_name).map(|v| v.name())).hash(h);
     bank.id.hash(h);
+    // AND WHICH PERCUSSION, by its decode and by whether there is one at
+    // all — the two things that can differ. Both of the kit's reasons apply
+    // unchanged: switching the percussionist off is the musician turning a
+    // dial and has to be heard on the next tick rather than at the next bar
+    // line, and it changes what four bars of this band render, so the memo
+    // must not hand back a measurement taken with a shaker in it.
+    perc.map(|b| b.id).hash(h);
+    cfg.perc.hash(h);
     // And WHICH RECORDED BANKS, by their decode, for both of the reasons
     // the kit is hashed by its. A bank arriving where there was a recipe
     // changes what the band sounds like, so the memo must not share a
@@ -2042,6 +2416,7 @@ fn hash_drums(
         mix.drums.to_bits(),
         mix.bass.to_bits(),
         mix.keys.to_bits(),
+        mix.perc.to_bits(),
     )
         .hash(h);
     // Which sound the count-in makes is not part of the band, but it IS part
@@ -2303,13 +2678,46 @@ fn compile_keys(
 /// groove and the fill end up resolved against different kits.
 struct Voicing<'a> {
     bank: &'a KitBank,
+    /// The percussion set, when one ships and the band has not switched it
+    /// off.
+    ///
+    /// `None` is every percussion lane silent, and it is `None` for three
+    /// different reasons that all mean the same thing on the audio thread: a
+    /// checkout with no `sounds/perc` folder, a jam whose band flag says no
+    /// percussionist, and a groove that writes none of the rows (which never
+    /// gets this far — it has no slots to make). One `Option`, checked on
+    /// the command thread, and no percussion branch anywhere the callback
+    /// can see.
+    perc: Option<&'a KitBank>,
     /// Which voices each voice's hit chokes. Indexed by [`KitVoice`].
-    chokes: [u16; KIT_VOICES],
+    chokes: [u32; KIT_VOICES],
     /// Does this groove's snare ghost mean the cross-stick?
     ghost_is_rim: bool,
     /// The drums' share of the mix, folded into every slot here so the audio
     /// thread never sees one.
     mix: f32,
+    /// And the percussion's, folded into the percussion slots the same way.
+    /// Its own dial because it is its own row in the band — the musician
+    /// pulling the shaker down is not pulling the drummer down.
+    mix_perc: f32,
+}
+
+impl<'a> Voicing<'a> {
+    /// Which bank a voice's samples come out of, and the mix its row
+    /// carries.
+    ///
+    /// THE ONE PLACE THE TWO FAMILIES PART, and it happens here on the
+    /// command thread rather than on the audio thread: what a slot ends up
+    /// holding is a voice index, and `jam_sample` picks the bank off the
+    /// index alone.
+    #[inline]
+    fn family(&self, voice: KitVoice) -> Option<(&'a KitBank, f32)> {
+        if voice.is_perc() {
+            Some((self.perc?, self.mix_perc))
+        } else {
+            Some((self.bank, self.mix))
+        }
+    }
 }
 
 /// Invert the manifest's `choked_by` into "what does this hit silence?".
@@ -2319,8 +2727,8 @@ struct Voicing<'a> {
 /// audio thread asks the other question, on the tick, about the drum it is
 /// about to spawn — so the inversion happens here, once, on the command
 /// thread.
-fn choke_map(bank: &KitBank) -> [u16; KIT_VOICES] {
-    let mut out = [0u16; KIT_VOICES];
+fn choke_map(bank: &KitBank) -> [u32; KIT_VOICES] {
+    let mut out = [0u32; KIT_VOICES];
     for victim in KitVoice::ALL {
         let by = bank.choked_by(victim);
         for killer in KitVoice::ALL {
@@ -2380,16 +2788,22 @@ fn voice_slot(
     cap_ticks: f32,
     accent: bool,
 ) -> Option<JamSlot> {
-    let (voice, index, cost) = resolve_voice(v.bank, voice, layer)?;
-    let bank = v.bank.voice(voice)?;
-    let (pan_l, pan_r) = v.bank.pan(voice);
+    // WHICH BANK, and which of the band's dials this row is under. A
+    // percussion voice comes out of the set and carries `mix.perc`; a drum
+    // comes out of the kit and carries `mix.drums`. `None` is no set at all
+    // — no folder shipped, or the band switched the percussionist off — and
+    // a lane with no bank behind it makes no slot, which is silence.
+    let (from, mix) = v.family(voice)?;
+    let (voice, index, cost) = resolve_voice(from, voice, layer)?;
+    let bank = from.voice(voice)?;
+    let (pan_l, pan_r) = from.pan(voice);
     Some(JamSlot {
         sound: SoundId::Band {
             voice: voice as u8,
             layer: index,
             robin: 0,
         },
-        gain: gain * cost * v.mix,
+        gain: gain * cost * mix,
         cap_ticks,
         lane,
         accent,
@@ -2397,7 +2811,7 @@ fn voice_slot(
         pan_r,
         rr: bank.rr(),
         voice: voice as u8,
-        choked_by: v.bank.choked_by(voice),
+        choked_by: from.choked_by(voice),
         chokes: v.chokes[voice as usize],
         // A drum ends where its sample ends or where its cap lands, and
         // both of those are already decisions somebody made about a
@@ -2560,6 +2974,32 @@ fn slot_for(lane: JamLane, level: u8, v: &Voicing) -> Option<JamSlot> {
         JamLane::TomHi => (KitVoice::TomHi, g, 0.0),
         JamLane::TomLo => (KitVoice::TomLo, g, 0.0),
         JamLane::HatPedal => (KitVoice::HatPedal, HAT_PEDAL_GAIN, HAT_CAP_TICKS),
+        // ---- The percussionist ----
+        //
+        // A row IS an instrument here: there is no second stroke to reach
+        // for on a level 4 the way the ride lane reaches for its bell and
+        // the snare lane for the cross-stick, because a cowbell is a
+        // cowbell. What a level does is what it does everywhere else —
+        // `LEVEL_LAYER` picks the stroke's velocity layer, so a ghost is the
+        // softest recording the set has (on the conga that is the muted
+        // stroke, which is the whole reason `conga_muted` is a layer and not
+        // a row) and a peak is the hardest.
+        //
+        // No engine trim, either, and that is deliberate: the balance
+        // between the ten is `trim_db` in the set's own manifest, measured
+        // by the render tool against the kits' snare
+        // (`plans/tasks/jam-v5/BRIEF.md`). `RIDE_TRIM` exists because a ride
+        // is true of every kit; a shaker's level is true of one recording.
+        JamLane::Shaker | JamLane::Cabasa | JamLane::Guiro => {
+            (lane.perc_voice()?, g, PERC_SHAKEN_CAP_TICKS)
+        }
+        JamLane::Tambourine
+        | JamLane::Cowbell
+        | JamLane::Claves
+        | JamLane::CongaHi
+        | JamLane::CongaLo
+        | JamLane::BongoHi
+        | JamLane::BongoLo => (lane.perc_voice()?, g, PERC_CAP_TICKS),
         // The bass and the keys have their own arrays in the config and
         // their own compilers.
         JamLane::Bass | JamLane::Keys => return None,
@@ -2666,6 +3106,7 @@ fn worst_bar_peak(
     form_bars: u32,
     ticks_per_beat: u32,
     bank: &KitBank,
+    perc: Option<&KitBank>,
     voices: &JamVoices,
 ) -> f32 {
     let ticks = bar.len();
@@ -2718,14 +3159,33 @@ fn worst_bar_peak(
                 // below the signal (`kit.rs`), so interpolating here would
                 // cost time to move a number nothing reads.
                 let (buf, stride) = match slot.sound {
+                    // WHICH BANK IS THE VOICE INDEX'S OWN ANSWER, here as on
+                    // the audio thread: the percussion is numbered after the
+                    // drums, so a slot says which of the two it came out of
+                    // without carrying a second field to say so. A table
+                    // whose percussion has been switched off has no such
+                    // slots to measure.
                     SoundId::Band {
                         voice,
                         layer,
                         robin,
-                    } => (
-                        bank.sample(voice, layer, robin),
-                        bank.rate as f64 / JAM_REFERENCE_SR as f64,
-                    ),
+                    } => {
+                        let from = if crate::kit::KitVoice::ALL
+                            .get(voice as usize)
+                            .is_some_and(|v| v.is_perc())
+                        {
+                            perc
+                        } else {
+                            Some(bank)
+                        };
+                        match from {
+                            Some(b) => (
+                                b.sample(voice, layer, robin),
+                                b.rate as f64 / JAM_REFERENCE_SR as f64,
+                            ),
+                            None => (&[][..], 1.0f64),
+                        }
+                    }
                     // A RECORDED melodic note, out of the bank this table
                     // carries — and at that bank's own rate's stride, for
                     // the reason a drum is: a bank decoded at whatever rate
@@ -2916,6 +3376,7 @@ mod tests {
                 render_signature(
                     &cfg(Some(vec![33, 0, 0, 0, 40, 0, 0, 0]), "room"),
                     &bank,
+                    None,
                     &JamVoices::default()
                 ),
                 render_signature(
@@ -2925,6 +3386,7 @@ mod tests {
                         c
                     },
                     &bank,
+                    None,
                     &JamVoices::default()
                 )
             );
@@ -3593,6 +4055,7 @@ mod tests {
             t.form_bars(),
             cfg.ticks_per_beat,
             t.kit_bank(),
+            t.perc_bank(),
             &JamVoices::default(),
         );
         assert!(
@@ -5089,8 +5552,7 @@ mod tests {
         cfg.count_in_sound = Some(JamCountInSound::Sticks);
         cfg.mix = Some(JamMix {
             drums: 0.2,
-            bass: 1.0,
-            keys: 1.0,
+            ..JamMix::default()
         });
         cfg.intensity = 0.6;
         let t = compile(&cfg).unwrap();
@@ -5391,8 +5853,8 @@ mod tests {
         let bank = reference_bank("room").unwrap();
         let none = JamVoices::default();
         assert_ne!(
-            render_signature(&a, &bank, &none),
-            render_signature(&b, &bank, &none)
+            render_signature(&a, &bank, None, &none),
+            render_signature(&b, &bank, None, &none)
         );
     }
 
@@ -5443,7 +5905,7 @@ mod tests {
         // And the memo must not hand one voice's measurement to the other:
         // an upright is trimmed UP and a slap down, so sharing a peak would
         // put one of them through the ceiling.
-        assert_ne!(render_signature(&a, &reference_bank("room").unwrap(), &JamVoices::default()), render_signature(&b, &reference_bank("room").unwrap(), &JamVoices::default()));
+        assert_ne!(render_signature(&a, &reference_bank("room").unwrap(), None, &JamVoices::default()), render_signature(&b, &reference_bank("room").unwrap(), None, &JamVoices::default()));
     }
 }
 
@@ -5714,7 +6176,7 @@ mod form_tests {
         ];
         let first: Vec<f32> = chords
             .iter()
-            .map(|p| compile_with(&walking(p.clone()), &cache, reference_bank("room").unwrap(), JamVoices::default()).unwrap().base_peak)
+            .map(|p| compile_with(&walking(p.clone()), &cache, reference_bank("room").unwrap(), None, JamVoices::default()).unwrap().base_peak)
             .collect();
         // Every one of them is the number a cold compile would produce.
         for (p, want) in chords.iter().zip(&first) {
@@ -5722,9 +6184,9 @@ mod form_tests {
         }
         // Second chorus: the same four bars, and the memo has all of them.
         for (p, want) in chords.iter().zip(&first) {
-            let again = compile_with(&walking(p.clone()), &cache, reference_bank("room").unwrap(), JamVoices::default()).unwrap();
+            let again = compile_with(&walking(p.clone()), &cache, reference_bank("room").unwrap(), None, JamVoices::default()).unwrap();
             assert_eq!(again.base_peak, *want);
-            assert!(cache.get(render_signature(&walking(p.clone()), &reference_bank("room").unwrap(), &JamVoices::default())).is_some());
+            assert!(cache.get(render_signature(&walking(p.clone()), &reference_bank("room").unwrap(), None, &JamVoices::default())).is_some());
         }
     }
 
@@ -5751,18 +6213,18 @@ mod form_tests {
             c
         };
         assert_ne!(
-            render_signature(&quiet, &reference_bank("room").unwrap(), &JamVoices::default()),
-            render_signature(&loud, &reference_bank("room").unwrap(), &JamVoices::default()),
+            render_signature(&quiet, &reference_bank("room").unwrap(), None, &JamVoices::default()),
+            render_signature(&loud, &reference_bank("room").unwrap(), None, &JamVoices::default()),
             "the bass has to be in the key, or the loud table borrows the \
              quiet one's headroom"
         );
         // The drums, though, are the same drummer — which is a different
         // question, and the one the bar-line deferral asks.
-        assert_eq!(drums_signature(&quiet, &reference_bank("room").unwrap(), &JamVoices::default()), drums_signature(&loud, &reference_bank("room").unwrap(), &JamVoices::default()));
+        assert_eq!(drums_signature(&quiet, &reference_bank("room").unwrap(), None, &JamVoices::default()), drums_signature(&loud, &reference_bank("room").unwrap(), None, &JamVoices::default()));
 
         let cache = JamGainCache::new();
-        let measured = compile_with(&quiet, &cache, reference_bank("room").unwrap(), JamVoices::default()).unwrap();
-        let after = compile_with(&loud, &cache, reference_bank("room").unwrap(), JamVoices::default()).unwrap();
+        let measured = compile_with(&quiet, &cache, reference_bank("room").unwrap(), None, JamVoices::default()).unwrap();
+        let after = compile_with(&loud, &cache, reference_bank("room").unwrap(), None, JamVoices::default()).unwrap();
         assert!(
             after.base_peak > measured.base_peak,
             "a bass three times as loud is louder, and a memo that said \
@@ -5774,17 +6236,17 @@ mod form_tests {
     #[test]
     fn a_change_the_drummer_hears_misses_the_memo() {
         let cache = JamGainCache::new();
-        let plain = compile_with(&twelve_bar(), &cache, reference_bank("room").unwrap(), JamVoices::default()).unwrap();
+        let plain = compile_with(&twelve_bar(), &cache, reference_bank("room").unwrap(), None, JamVoices::default()).unwrap();
         let mut louder = twelve_bar();
         louder.bar.crash = vec![2, 0, 0, 0, 0, 0, 0, 0];
-        let crashing = compile_with(&louder, &cache, reference_bank("room").unwrap(), JamVoices::default()).unwrap();
+        let crashing = compile_with(&louder, &cache, reference_bank("room").unwrap(), None, JamVoices::default()).unwrap();
         assert!(
             crashing.base_peak > plain.base_peak,
             "a crash on the one is louder than no crash"
         );
         // Both are remembered, so going back is a hit rather than a render.
         assert_eq!(
-            compile_with(&twelve_bar(), &cache, reference_bank("room").unwrap(), JamVoices::default()).unwrap().base_peak,
+            compile_with(&twelve_bar(), &cache, reference_bank("room").unwrap(), None, JamVoices::default()).unwrap().base_peak,
             plain.base_peak
         );
     }
@@ -5792,7 +6254,7 @@ mod form_tests {
     #[test]
     fn a_memo_that_has_never_seen_this_table_measures_it() {
         let cache = JamGainCache::new();
-        let with_memo = compile_with(&twelve_bar(), &cache, reference_bank("room").unwrap(), JamVoices::default()).unwrap();
+        let with_memo = compile_with(&twelve_bar(), &cache, reference_bank("room").unwrap(), None, JamVoices::default()).unwrap();
         let without = compile(&twelve_bar()).unwrap();
         assert_eq!(with_memo.peak_after, without.peak_after);
         assert_eq!(with_memo.base_peak, without.base_peak);
@@ -5808,7 +6270,7 @@ mod form_tests {
         for intensity in [0.7f32, 1.0, 1.25] {
             let mut cfg = twelve_bar();
             cfg.intensity = intensity;
-            let t = compile_with(&cfg, &cache, reference_bank("room").unwrap(), JamVoices::default()).unwrap();
+            let t = compile_with(&cfg, &cache, reference_bank("room").unwrap(), None, JamVoices::default()).unwrap();
             seen.push(t.base_peak);
             // The level the musician hears does move with the dial.
             assert!(t.peak_after > 0.0);
@@ -5841,7 +6303,7 @@ mod form_tests {
         let total = JAM_GAIN_MEMO + 8;
         for n in 0..total {
             let cfg = line(n);
-            let t = compile_with(&cfg, &cache, reference_bank("room").unwrap(), JamVoices::default()).unwrap();
+            let t = compile_with(&cfg, &cache, reference_bank("room").unwrap(), None, JamVoices::default()).unwrap();
             assert_eq!(
                 t.base_peak,
                 compile(&cfg).unwrap().base_peak,
@@ -5849,8 +6311,8 @@ mod form_tests {
             );
         }
         // The most recent are still remembered; the first ones are gone.
-        assert!(cache.get(render_signature(&line(total - 1), &reference_bank("room").unwrap(), &JamVoices::default())).is_some());
-        assert!(cache.get(render_signature(&line(0), &reference_bank("room").unwrap(), &JamVoices::default())).is_none());
+        assert!(cache.get(render_signature(&line(total - 1), &reference_bank("room").unwrap(), None, &JamVoices::default())).is_some());
+        assert!(cache.get(render_signature(&line(0), &reference_bank("room").unwrap(), None, &JamVoices::default())).is_none());
     }
 }
 
@@ -6059,6 +6521,7 @@ mod band_tests {
             drums: 0.5,
             bass: 1.0,
             keys: 1.0,
+            perc: 1.0,
         });
         let quieter = compile(&cfg).unwrap();
         // The comparison has to be against the UNNORMALISED level: a table
@@ -6084,6 +6547,7 @@ mod band_tests {
             drums: 1.0,
             bass: 1.0,
             keys: 0.25,
+            perc: 1.0,
         });
         let t = compile(&cfg).unwrap();
         let ratio = lane_gain(&t, 0, JamLane::Keys) / lane_gain(&t, 0, JamLane::Kick);
@@ -6100,6 +6564,7 @@ mod band_tests {
             drums: 1.0,
             bass: 0.0,
             keys: 1.0,
+            perc: 1.0,
         });
         let t = compile(&cfg).unwrap();
         assert_eq!(
@@ -6119,6 +6584,7 @@ mod band_tests {
                 drums: MIX_MAX,
                 bass: 1.0,
                 keys: 1.0,
+                perc: 1.0,
             });
             compile(&cfg).unwrap()
         };
@@ -6128,6 +6594,7 @@ mod band_tests {
                 drums: 12.0,
                 bass: 1.0,
                 keys: 1.0,
+                perc: 1.0,
             });
             compile(&cfg).unwrap()
         };
@@ -6137,6 +6604,7 @@ mod band_tests {
                 drums: -3.0,
                 bass: 1.0,
                 keys: 1.0,
+                perc: 1.0,
             });
             compile(&cfg).unwrap()
         };
@@ -6146,6 +6614,7 @@ mod band_tests {
                 drums: f32::INFINITY,
                 bass: 1.0,
                 keys: 1.0,
+                perc: 1.0,
             });
             compile(&cfg).unwrap()
         };
@@ -6178,6 +6647,7 @@ mod band_tests {
             drums: 0.4,
             bass: 1.0,
             keys: 1.0,
+            perc: 1.0,
         });
         let b = std::sync::Arc::new(compile(&cfg).unwrap());
         assert!(
@@ -6249,6 +6719,7 @@ mod band_tests {
             drums: 0.0,
             bass: 1.0,
             keys: 1.0,
+            perc: 1.0,
         });
         // ...and a groove busy enough to be normalised down.
         loud.bar.kick = vec![2; 4];

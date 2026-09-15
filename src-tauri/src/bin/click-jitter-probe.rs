@@ -632,6 +632,7 @@ fn busiest_jam() -> JamConfig {
             drums: 1.5,
             bass: 1.5,
             keys: 1.5,
+            perc: 1.0,
         }),
         count_in_sound: None,
         bass_voice: None,

@@ -57,16 +57,48 @@ use crate::engine::resample;
 // The voices
 // ---------------------------------------------------------------------------
 
-/// How many drums a kit can have.
-pub const KIT_VOICES: usize = 11;
+/// How many drums one drum kit can have.
+pub const DRUM_VOICES: usize = 11;
 
-/// One drum of a kit, in the order `plans/tasks/jam-v3/BRIEF.md` fixes.
+/// How many voices one percussion set can have.
 ///
-/// Eleven and not eight: `hat_pedal` is the foot that closes the hat,
-/// `ride_bell` is the top of a fill on the ride, and the two toms are what a
-/// fill is made of. The order is the contract's and is the order a manifest
-/// is read in; nothing else depends on it, because a bank is indexed by this
-/// enum rather than by a table whose columns have to be kept in step.
+/// Ten, and they are the contract's ten
+/// (`plans/tasks/jam-v5/BRIEF.md`): a percussionist's tray, not a second
+/// drum kit.
+pub const PERC_VOICES: usize = 10;
+
+/// How many voices a bank can have at all — the drums and the percussion in
+/// one index space.
+///
+/// **ONE ENUM AND ONE ARRAY, NOT TWO.** A percussion set is a kit-format
+/// folder loaded by the kit loader, so making it a second voice enum with a
+/// second bank type, a second resampler walk and a second set of fallbacks
+/// would be this module written twice — and the audio thread would then have
+/// to carry a second discriminator on every slot to say which of the two a
+/// `voice` index meant. Numbering the percussion AFTER the drums means the
+/// index itself says which family a voice belongs to
+/// ([`KitVoice::is_perc`]), which is the branch `jam_sample` in `engine.rs`
+/// makes and the only one the callback gained this pass.
+///
+/// A bank holds one family or the other, never both: the drums are decoded
+/// out of `sounds/kits/<kit>` and leave the percussion slots `None`, and a
+/// set out of `sounds/perc/<set>` leaves the drum slots `None`.
+pub const KIT_VOICES: usize = DRUM_VOICES + PERC_VOICES;
+
+/// One voice of a kit or of a percussion set, in the order the contracts
+/// fix.
+///
+/// The drums are `plans/tasks/jam-v3/BRIEF.md`'s eleven: `hat_pedal` is the
+/// foot that closes the hat, `ride_bell` is the top of a fill on the ride,
+/// and the two toms are what a fill is made of. The percussion is
+/// `plans/tasks/jam-v5/BRIEF.md`'s ten, **after** them and in its order.
+///
+/// The order is the contract's and is the order a manifest is read in;
+/// nothing else depends on it, because a bank is indexed by this enum rather
+/// than by a table whose columns have to be kept in step. What DOES depend
+/// on it is the split: everything from [`KitVoice::Shaker`] on is the
+/// percussionist's, which is what [`KitVoice::is_perc`] reads off the
+/// discriminant.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum KitVoice {
     Kick,
@@ -80,10 +112,21 @@ pub enum KitVoice {
     Crash,
     TomHi,
     TomLo,
+    // ---- The percussionist, from here down. Order fixed by the contract. ----
+    Shaker,
+    Tambourine,
+    Cowbell,
+    Cabasa,
+    Claves,
+    Guiro,
+    CongaHi,
+    CongaLo,
+    BongoHi,
+    BongoLo,
 }
 
 impl KitVoice {
-    /// Every voice, in the contract's order.
+    /// Every voice of both families, in the contract's order.
     pub const ALL: [KitVoice; KIT_VOICES] = [
         Self::Kick,
         Self::Snare,
@@ -96,7 +139,64 @@ impl KitVoice {
         Self::Crash,
         Self::TomHi,
         Self::TomLo,
+        Self::Shaker,
+        Self::Tambourine,
+        Self::Cowbell,
+        Self::Cabasa,
+        Self::Claves,
+        Self::Guiro,
+        Self::CongaHi,
+        Self::CongaLo,
+        Self::BongoHi,
+        Self::BongoLo,
     ];
+
+    /// The drums, and only the drums.
+    ///
+    /// What "a kit" means wherever the answer is about a DRUM KIT rather
+    /// than about a bank: the report a folder the musician points at gets,
+    /// the sentence that lists what a folder may hold, the fallback walk.
+    /// A musician who drops a kick and a snare in a folder is not missing a
+    /// cabasa — nobody put one there and nothing is going to play one.
+    pub const DRUMS: [KitVoice; DRUM_VOICES] = [
+        Self::Kick,
+        Self::Snare,
+        Self::Rim,
+        Self::Hat,
+        Self::HatOpen,
+        Self::HatPedal,
+        Self::Ride,
+        Self::RideBell,
+        Self::Crash,
+        Self::TomHi,
+        Self::TomLo,
+    ];
+
+    /// The percussionist's ten, in the contract's order.
+    pub const PERC: [KitVoice; PERC_VOICES] = [
+        Self::Shaker,
+        Self::Tambourine,
+        Self::Cowbell,
+        Self::Cabasa,
+        Self::Claves,
+        Self::Guiro,
+        Self::CongaHi,
+        Self::CongaLo,
+        Self::BongoHi,
+        Self::BongoLo,
+    ];
+
+    /// Is this one of the percussionist's, rather than one of the drummer's?
+    ///
+    /// The discriminant answers it, because the contract numbers the ten
+    /// after the eleven. This is the question `jam_sample` asks on the audio
+    /// thread to know WHICH BANK a slot's samples come out of — a comparison
+    /// on a `u8` the slot already carries, and the only branch the callback
+    /// gained for the percussionist.
+    #[inline]
+    pub fn is_perc(self) -> bool {
+        (self as usize) >= DRUM_VOICES
+    }
 
     /// The `<voice>` half of `<voice>.<layer>.<rr>.wav`, and the key a
     /// manifest names this drum by.
@@ -113,6 +213,16 @@ impl KitVoice {
             Self::Crash => "crash",
             Self::TomHi => "tom_hi",
             Self::TomLo => "tom_lo",
+            Self::Shaker => "shaker",
+            Self::Tambourine => "tambourine",
+            Self::Cowbell => "cowbell",
+            Self::Cabasa => "cabasa",
+            Self::Claves => "claves",
+            Self::Guiro => "guiro",
+            Self::CongaHi => "conga_hi",
+            Self::CongaLo => "conga_lo",
+            Self::BongoHi => "bongo_hi",
+            Self::BongoLo => "bongo_lo",
         }
     }
 
@@ -126,9 +236,13 @@ impl KitVoice {
     }
 
     /// This voice as a bit, for the choke masks.
+    ///
+    /// A `u32` since the percussionist arrived: twenty-one voices do not fit
+    /// in sixteen bits, and a mask that silently dropped the last five would
+    /// be a choke that works on some voices and not others.
     #[inline]
-    pub fn bit(self) -> u16 {
-        1 << (self as u16)
+    pub fn bit(self) -> u32 {
+        1 << (self as u32)
     }
 }
 
@@ -146,6 +260,16 @@ impl KitVoice {
 ///
 /// `None` ends a chain: a kit with no kick has no kick, and inventing one
 /// out of a tom would be the app playing something nobody recorded.
+///
+/// **Every percussion voice ends its chain immediately**, and that is the
+/// same rule rather than an exception to it. The substitutions above are
+/// musical because the voices they run between are one instrument played
+/// differently — a cross-stick is a snare, a bell is a ride. A percussion
+/// tray is ten separate instruments: a cabasa standing in for a cowbell is
+/// not a quieter cowbell, it is the wrong instrument. So a set without a
+/// guiro has no guiro, the lane is silent, and a build with no
+/// `sounds/perc` at all is every percussion lane silent — which is exactly
+/// what the contract asks a checkout without the folder to do.
 pub fn fallback_for(voice: KitVoice) -> Option<(KitVoice, u8, f32)> {
     match voice {
         // (voice, layer, gain)
@@ -256,7 +380,7 @@ const DEFAULT_DRIVE: f32 = 1.0;
 /// every drum kit in the world has is assumed rather than declared: the
 /// closed hat and the foot close the open hat. Nothing else is guessed — a
 /// choke nobody asked for is a drum going missing.
-fn default_choked_by(voice: KitVoice) -> u16 {
+fn default_choked_by(voice: KitVoice) -> u32 {
     match voice {
         KitVoice::HatOpen => KitVoice::Hat.bit() | KitVoice::HatPedal.bit(),
         _ => 0,
@@ -368,7 +492,7 @@ pub struct VoiceBank {
     pan_r: f32,
     /// Which voices' hits fade this one out. A bitmask of [`KitVoice::bit`],
     /// so the audio thread's question is an `&`.
-    choked_by: u16,
+    choked_by: u32,
 }
 
 impl VoiceBank {
@@ -477,7 +601,7 @@ impl KitBank {
     }
 
     /// Which voices' hits choke this one.
-    pub fn choked_by(&self, v: KitVoice) -> u16 {
+    pub fn choked_by(&self, v: KitVoice) -> u32 {
         self.voice(v).map_or(0, |b| b.choked_by)
     }
 }
@@ -747,6 +871,76 @@ pub fn load_shipped(index: usize, rate: u32) -> Result<KitBank, String> {
 }
 
 // ---------------------------------------------------------------------------
+// The percussion the app ships
+// ---------------------------------------------------------------------------
+
+/// Every shipped percussion manifest, parsed once.
+///
+/// [`manifests`] for `sounds/perc/*`, and deliberately the same shape: a set
+/// is a kit-format folder, so it is the same `kit.json`, the same parser and
+/// the same "a manifest that does not parse is dropped rather than fatal".
+///
+/// **Empty is a legal answer and the one a fresh checkout gives.** The set is
+/// rendered by a tool (`scripts/sounds/render_kit.py`) and a checkout that
+/// has not got `sounds/perc` yet has to build and run — with the percussion
+/// lanes silent, which is what an empty list produces all the way down:
+/// [`perc_count`] is 0, `jam.rs` resolves no bank, and every percussion lane
+/// compiles to no slot at all. That is the same promise `sounds/voices`
+/// already makes for the recorded bass and keys.
+fn perc_manifests() -> &'static [(usize, KitManifest)] {
+    static PARSED: std::sync::OnceLock<Vec<(usize, KitManifest)>> = std::sync::OnceLock::new();
+    PARSED.get_or_init(|| {
+        SHIPPED_PERC
+            .iter()
+            .enumerate()
+            .filter_map(|(i, k)| match parse_manifest(k.manifest) {
+                Ok(m) => Some((i, m)),
+                Err(e) => {
+                    eprintln!("[perc] a shipped perc kit.json did not parse and was skipped: {e}");
+                    None
+                }
+            })
+            .collect()
+    })
+}
+
+/// How many percussion sets the app ships. Zero until one is rendered.
+pub fn perc_count() -> usize {
+    perc_manifests().len()
+}
+
+/// Every shipped set's id, in the order `build.rs` found them.
+#[allow(dead_code)]
+pub fn perc_ids() -> Vec<String> {
+    perc_manifests().iter().map(|(_, m)| m.id.clone()).collect()
+}
+
+/// Decode a shipped percussion set at `rate`.
+///
+/// [`load_shipped`] pointed at the other directory, through the same
+/// [`build_bank`]: same format, same rules, same resampler, same levels.
+/// What comes back is a [`KitBank`] whose eleven drum slots are all `None`
+/// and whose ten percussion slots are the set — which is why one bank type
+/// serves both and the audio thread's only question is which of the two a
+/// voice index belongs to.
+pub fn load_perc(index: usize, rate: u32) -> Result<KitBank, String> {
+    let (row, manifest) = perc_manifests()
+        .get(index)
+        .ok_or_else(|| format!("there is no shipped percussion set number {index}"))?;
+    let set = &SHIPPED_PERC[*row];
+    let manifest = manifest.clone();
+    let entries: Vec<Entry> = set
+        .files
+        .iter()
+        .map(|(name, bytes)| Entry {
+            name: (*name).to_string(),
+            source: Source::Bytes(bytes),
+        })
+        .collect();
+    build_bank(entries, rate, Some(manifest), false)
+}
+
+// ---------------------------------------------------------------------------
 // Looking at a folder without decoding it
 // ---------------------------------------------------------------------------
 
@@ -867,7 +1061,14 @@ pub fn inspect(dir: &Path) -> Result<KitFolder, String> {
     let mut voices = Vec::new();
     let mut missing = Vec::new();
     let mut found = Vec::new();
-    for v in KitVoice::ALL {
+    // THE DRUMS, AND NOT THE PERCUSSION. This is the report the screen puts
+    // in front of a musician who pointed Yames at a folder of their own
+    // samples, and that folder is a DRUM KIT: telling somebody their kick
+    // and snare are "missing a cabasa" would be the app inventing a
+    // shortcoming out of a feature they never asked for. The percussionist
+    // plays one set, it ships with the app, and no folder of anybody's is
+    // ever asked to hold it.
+    for v in KitVoice::DRUMS {
         match depth[v as usize] {
             Some((layers, rr)) => {
                 voices.push(v.file_name().to_string());
@@ -1512,7 +1713,7 @@ fn build_bank(
                 .choked_by
                 .iter()
                 .filter_map(|n| KitVoice::from_name(n))
-                .fold(0u16, |m, c| m | c.bit()),
+                .fold(0u32, |m, c| m | c.bit()),
             // A manifest that says nothing chokes nothing; a folder with no
             // manifest at all gets the one relationship every kit has.
             Some(_) => 0,
@@ -1588,13 +1789,18 @@ fn build_bank(
 /// Returns `own` untouched when it holds everything, which is the common
 /// case and costs an `Arc` clone.
 pub fn with_fallback(own: &Arc<KitBank>, behind: &Arc<KitBank>) -> Arc<KitBank> {
-    if KitVoice::ALL.into_iter().all(|v| own.has(v)) {
+    // THE DRUMS, because both of these are drum kits: a folder somebody
+    // pointed at and the shipped kit standing behind it. Neither holds a
+    // percussion voice, so walking all twenty-one would make the early
+    // return below — the common case, and the one that costs nothing —
+    // unreachable for every kit in the app.
+    if KitVoice::DRUMS.into_iter().all(|v| own.has(v)) {
         return own.clone();
     }
     let mut voices: [Option<VoiceBank>; KIT_VOICES] = Default::default();
     let mut found = Vec::new();
     let mut bytes = 0usize;
-    for v in KitVoice::ALL {
+    for v in KitVoice::DRUMS {
         // The musician's own, or the kit behind it. Never a blend: a snare
         // whose soft layer came from somebody else's drum would be two
         // instruments pretending to be one.
@@ -1656,7 +1862,11 @@ fn load_capped(dir: &Path, rate: u32, max_bytes: u64) -> Result<KitBank, String>
         return Err(format!(
             "{} holds none of {} as a .wav",
             dir.display(),
-            KitVoice::ALL
+            // The drums: a folder of the musician's own samples is a drum
+            // kit, and listing the percussionist's ten in the sentence that
+            // says what is missing would be asking them for a tray of
+            // instruments the app never reads out of a folder.
+            KitVoice::DRUMS
                 .iter()
                 .map(|v| v.file_name())
                 .collect::<Vec<_>>()
@@ -1703,6 +1913,11 @@ enum Key {
     /// A shipped kit, by index and rate. Nothing about it can change while
     /// the app runs — the bytes are in the binary.
     Shipped(usize, u32),
+    /// A shipped percussion set, the same way. Its own variant and not a
+    /// flag on the one above: set 0 and kit 0 are different folders, and a
+    /// key that could not tell them apart would hand the drums back as the
+    /// percussion the first time a jam asked for both.
+    ShippedPerc(usize, u32),
     /// A folder, the rate it was decoded at, and every file's size and
     /// modification time.
     ///
@@ -1756,12 +1971,19 @@ fn key_for(dir: &Path, rate: u32) -> Result<Key, String> {
 
 /// How many decodes the cache keeps.
 ///
-/// Three, and each of them earns its place: the kit the jam is playing, the
+/// Four, and each of them earns its place: the kit the jam is playing, the
 /// kit it was playing a moment ago (a musician auditioning kits goes back
-/// and forth), and one more so a folder does not evict the shipped kit it is
-/// being compared against. A fourth would be memory spent on a move nobody
-/// makes.
-const CACHE_ENTRIES: usize = 3;
+/// and forth), one more so a folder does not evict the shipped kit it is
+/// being compared against — and the percussion set, which every one of
+/// those jams is also holding.
+///
+/// It was three until the percussionist arrived, and three is exactly one
+/// too few now: a jam with percussion asks for a kit and a set on every
+/// bar-ahead send, so a musician auditioning kits over a latin groove would
+/// have the set evicted by the third kit and re-decoded on the next bar —
+/// a folder read, on the command thread, several times a chorus, which is
+/// the cost this cache exists to remove.
+const CACHE_ENTRIES: usize = 4;
 
 /// The kits the app has already decoded.
 #[derive(Default)]
@@ -1798,6 +2020,21 @@ impl KitCache {
             return Ok(bank);
         }
         let bank = Arc::new(load_shipped(index, rate)?);
+        self.store(key, bank.clone());
+        Ok(bank)
+    }
+
+    /// One of the percussion sets the app ships, at this rate.
+    ///
+    /// The same cache and the same reason: `set_jam` arrives four to six
+    /// times a chorus and every one of those sends asks for the set as well
+    /// as for the kit. All but the first is an `Arc` clone.
+    pub fn perc(&self, index: usize, rate: u32) -> Result<Arc<KitBank>, String> {
+        let key = Key::ShippedPerc(index, rate);
+        if let Some(bank) = self.cached(&key) {
+            return Ok(bank);
+        }
+        let bank = Arc::new(load_perc(index, rate)?);
         self.store(key, bank.clone());
         Ok(bank)
     }
