@@ -2,12 +2,24 @@
 
     python scripts/sounds/render_kit.py scripts/sounds/recipes/club.json \
         src-tauri/sounds/kits/club
+    python scripts/sounds/render_kit.py scripts/sounds/recipes/perc-club.json \
+        src-tauri/sounds/perc/club
 
-A recipe names the source library, the mic mix, and for each of the eleven
-contract voices which articulation to draw from and how many velocity layers
-and round robins to keep. The library itself never enters the repository —
-only the rendered files do, the way `generate_sounds.py --kits` is the source
-of the synthesised kits and no WAV is hand-edited.
+A recipe names the source library, the mic mix, and for each of the contract's
+voices which articulation to draw from and how many velocity layers and round
+robins to keep. The library itself never enters the repository — only the
+rendered files do, the way `generate_sounds.py --kits` is the source of the
+synthesised kits and no WAV is hand-edited.
+
+TWO CONTRACT VOICE LISTS, one tool. `"set": "kit"` is the eleven drum voices
+and `"set": "perc"` is the percussionist's ten, and a percussion set is a
+kit-format folder in every other respect — same rate, same peak, same
+`trim_db`, same `<voice>.<layer>.<rr>.wav`. The three things a percussionist
+needed that a drum kit did not are each a recipe field and each documented
+where it is implemented: `mic_tag` (`SfzSource`), `layers_from_rr`
+(`rank_rr_as_dynamics`), and a voice drawn from more than one articulation
+(`voice_parts`). `balance_ref` is the fourth: a set with no snare in it is
+levelled against the snare of the kit it plays under.
 
 WHY A TOOL AND NOT A ONE-OFF SCRIPT. The kits are going to be re-rendered.
 The first listen will say "more room" or "less hat", and the answer to that
@@ -59,6 +71,7 @@ import collections
 import json
 import math
 import os
+import re
 import sys
 import xml.etree.ElementTree as ET
 
@@ -91,6 +104,26 @@ VOICES = (
     "kick", "snare", "rim", "hat", "hat_open", "hat_pedal",
     "ride", "ride_bell", "crash", "tom_hi", "tom_lo",
 )
+
+# The percussion set — `plans/tasks/jam-v5/BRIEF.md`. A percussionist is not a
+# drum kit, and the engine plays this folder *under* whichever kit is loaded,
+# so it is a second contract voice list and not eleven voices with ten of them
+# missing. It is a kit-format folder in every other respect, which is why the
+# whole of this file works on it unchanged apart from the list and the cap.
+PERC_VOICES = (
+    "shaker", "tambourine", "cowbell", "cabasa", "claves", "guiro",
+    "conga_hi", "conga_lo", "bongo_hi", "bongo_lo",
+)
+
+# A recipe says which set it renders with `"set"`. The ceiling differs because
+# the longest thing in a drum kit is a crash and the longest thing a
+# percussionist owns is a tambourine, which has stopped ringing inside two
+# seconds; a percussion file over that is a mistake and not a cymbal.
+SETS = {
+    "kit": {"voices": VOICES, "max_seconds": 3.0},
+    "perc": {"voices": PERC_VOICES, "max_seconds": 2.0},
+}
+
 RATE = 48000
 CHANNELS = 2
 PEAK = 0.90
@@ -127,6 +160,19 @@ class Take(object):
         return "Take(vel=%s, rr=%s)" % (self.vel, self.rr)
 
 
+class TakeList(list):
+    """The strokes of one articulation, and what the search did not find.
+
+    A plain list everywhere it is used; `missing` rides along so a mic that
+    the library turns out not to have for this instrument is reported once
+    rather than inferred from a mix that sounds thin.
+    """
+
+    def __init__(self, takes, missing=None):
+        list.__init__(self, takes)
+        self.missing = missing or collections.Counter()
+
+
 class SfzSource(object):
     """Virtuosity Drums and anything else shipped as per-mic SFZ maps.
 
@@ -137,6 +183,24 @@ class SfzSource(object):
     in the file name (`..._vl3_rr2.flac`) and the file name is the more
     reliable of the two: a handful of maps in this library give every region
     the same `seq_length` without a `seq_position` on the first one.
+
+    TWO NAMING DIALECTS IN ONE LIBRARY, and the second one is why `mic_tag`
+    exists. Virtuosity's drums put the mic in front of the file name and in
+    the directory — `Samples/oh/snare/oh_snare_buzz_vl7.flac` — so finding the
+    same stroke on another mic is one substitution done twice. Its auxiliary
+    percussion, which came from VSCO 2 and was mapped separately, puts the mic
+    in the directory as `oh` but at the END of the file name as a word:
+    `Samples/perc/oh/conga/Conga_22_HitN_1_50_rr1_Overhead.wav`, and the close
+    mic of that stroke is `..._rr1_Close.wav` under `perc/close/`. A recipe
+    whose library does that names the translation:
+
+        "mic_tag": {"oh": "Overhead", "close": "Close", "room": "Far"}
+
+    Without it the close mic is simply never found, the mix quietly loses the
+    channel it was weighted for, and the only symptom is a percussion set with
+    no proximity in it — which is a bug you hear months later and cannot
+    explain. With it, the miss is still not fatal (a library may genuinely not
+    have miked one instrument close) but it is counted and reported.
     """
 
     format = "sfz"
@@ -144,12 +208,39 @@ class SfzSource(object):
     def __init__(self, root, cfg):
         self.root = root
         self.programs = os.path.join(root, cfg.get("programs", "Programs"))
-        self.mappings = os.path.join(self.programs, "mappings")
+        # `mappings` because one library can hold more than one instrument
+        # family: Virtuosity's drums are mapped at `mappings/<mic>/` and its
+        # auxiliary percussion one level further down at `mappings/perc/<mic>/`.
+        self.mappings = os.path.join(self.programs,
+                                     *cfg.get("mappings", "mappings").split("/"))
+        self.mic_tag = cfg.get("mic_tag", {})
         if not os.path.isdir(self.mappings):
             raise SystemExit("no SFZ mappings under %s" % self.mappings)
 
     def _map_path(self, mic, articulation):
         return os.path.join(self.mappings, mic, "%s_map.sfz" % articulation)
+
+    def _candidates(self, abspath, primary, mic):
+        """Where the same stroke might live for `mic`, best guess first."""
+        base = os.path.basename(abspath)
+        out = []
+        # The drums: the mic is the directory and the file name's prefix.
+        out.append(abspath.replace(os.sep + primary + os.sep, os.sep + mic + os.sep)
+                          .replace(primary + "_", mic + "_", 1))
+        # The percussion: the mic is the directory and the file name's suffix,
+        # spelled as a word that the recipe translates.
+        tag_from, tag_to = self.mic_tag.get(primary), self.mic_tag.get(mic)
+        if tag_from and tag_to:
+            out.append(os.path.join(
+                os.path.dirname(abspath).replace(
+                    os.sep + primary + os.sep, os.sep + mic + os.sep),
+                base.replace("_" + tag_from + ".", "_" + tag_to + ".")))
+        # The blunt one, for a library that only moves the directory.
+        out.append(os.path.join(
+            os.path.dirname(os.path.dirname(abspath)).replace(
+                os.sep + primary, os.sep + mic),
+            os.path.basename(os.path.dirname(abspath)), base))
+        return out
 
     def _regions(self, path):
         """Every `sample=` in an SFZ, with the opcodes of its region."""
@@ -184,7 +275,12 @@ class SfzSource(object):
 
         The primary mic's map defines which strokes exist; the others are
         matched by file name, because every mic in this library recorded every
-        stroke and the names differ only in the mic prefix.
+        stroke and the names differ only in where the mic is written. See
+        `_candidates` for the two places that is.
+
+        `missing` on the returned list counts strokes that lost a non-primary
+        mic, per mic, so the caller can say so rather than silently render a
+        thinner mix than the recipe asked for.
         """
         primary = mics[0]
         path = self._map_path(primary, articulation)
@@ -193,6 +289,8 @@ class SfzSource(object):
                 "no map for %s on mic %s (looked for %s)" % (articulation, primary, path)
             )
         grouped = collections.OrderedDict()
+        missing = collections.Counter()
+        seq = collections.Counter()
         for region in self._regions(path):
             rel = region["sample"].replace("\\", "/")
             abspath = os.path.normpath(os.path.join(self.programs, rel))
@@ -201,38 +299,37 @@ class SfzSource(object):
             base = os.path.basename(abspath)
             vel, rr = _parse_vl_rr(base)
             if vel is None:
-                # No _vl tag: a single-sample articulation. Order by hivel so
-                # the softest still sorts first.
+                # No dynamic in the name. The map's own velocity band is what
+                # orders these — the percussion writes its range into the file
+                # name as words (`..._51_100_...`) rather than as an index, and
+                # a single-dynamic articulation has no band at all.
                 vel = int(region.get("hivel", region.get("lovel", 127)))
+            if rr is None:
+                # No round robin in the name either. Number them in map order
+                # within the dynamic, because collapsing eight real round
+                # robins onto rr 1 would throw seven of them away.
+                seq[vel] += 1
+                rr = seq[vel]
             files = {}
             ok = True
             for mic in mics:
-                cand = os.path.join(
-                    os.path.dirname(os.path.dirname(abspath)).replace(
-                        os.sep + primary, os.sep + mic
-                    ),
-                    os.path.basename(os.path.dirname(abspath)),
-                    base.replace(primary + "_", mic + "_", 1),
-                )
-                # The path juggling above is fragile across libraries; do it
-                # the blunt way as well and prefer whichever exists.
-                simple = abspath.replace(
-                    os.sep + primary + os.sep, os.sep + mic + os.sep
-                ).replace(primary + "_", mic + "_", 1)
-                if os.path.isfile(simple):
-                    files[mic] = simple
-                elif os.path.isfile(cand):
-                    files[mic] = cand
-                elif mic == primary:
-                    ok = False
-                # A missing non-primary mic is not fatal: the mix just loses
-                # that channel's contribution for this stroke. Reported later.
+                for cand in self._candidates(abspath, primary, mic):
+                    if os.path.isfile(cand):
+                        files[mic] = cand
+                        break
+                else:
+                    if mic == primary:
+                        ok = False
+                    else:
+                        # Not fatal: the mix loses that channel for this
+                        # stroke. Counted, and reported by the caller.
+                        missing[mic] += 1
             if not ok:
                 continue
             grouped.setdefault((vel, rr), Take(vel, rr, files))
         takes = list(grouped.values())
         takes.sort(key=lambda t: (t.vel, t.rr))
-        return takes
+        return TakeList(takes, missing)
 
 
 class DrumGizmoSource(object):
@@ -343,7 +440,7 @@ class DrumGizmoSource(object):
             if files:
                 takes.append(Take(power, 0, files))
         takes.sort(key=lambda t: t.vel)
-        return takes
+        return TakeList(takes)
 
 
 def _tag(el):
@@ -361,13 +458,37 @@ def _find_dir_with(root, filename):
     return None
 
 
+_VL_RE = re.compile(r"_vl(\d+)(?=[_.])")
+_V_RE = re.compile(r"_v(\d+)(?=[_.])")
+_RR_RE = re.compile(r"_rr(\d+)(?=[_.])")
+
+
 def _parse_vl_rr(name):
-    """`oh_ride_ride_vl2_rr3.flac` -> (2, 3); `..._vl7.flac` -> (7, 1)."""
-    import re
-    m = re.search(r"_vl(\d+)(?:_rr(\d+))?\.[A-Za-z0-9]+$", name)
-    if not m:
-        return None, 1
-    return int(m.group(1)), int(m.group(2) or 1)
+    """The dynamic and the round robin a file name carries, or (None, None).
+
+    Three dialects, all of them in this one library, because its drums and its
+    auxiliary percussion were mapped by different hands:
+
+        oh_ride_ride_vl2_rr3.flac          -> (2, 3)    the drums
+        oh_snare_buzz_vl7.flac             -> (7, None) the drums, no rr
+        BongoH_Hit1_v3_rr2_Overhead.wav    -> (3, 2)    percussion, `_v`
+        Conga_22_HitN_51_100_rr4_Over.wav  -> (None, 4) percussion, range in
+                                                        the name, not an index
+        Tamb1_Shake_rr7_Overhead.wav       -> (None, 7) percussion, one dynamic
+
+    The tokens are found anywhere in the name and not anchored to the
+    extension, because percussion puts the mic after them (`..._rr1_Overhead`)
+    where the drums put it in front (`oh_...`).
+
+    `None` for the round robin means the name does not say, which is not the
+    same as round robin 1: the caller groups strokes by `(vel, rr)`, and eight
+    real round robins that all parsed as 1 would collapse into one stroke. The
+    caller numbers them in file order instead.
+    """
+    m = _VL_RE.search(name) or _V_RE.search(name)
+    vel = int(m.group(1)) if m else None
+    r = _RR_RE.search(name)
+    return vel, (int(r.group(1)) if r else None)
 
 
 SOURCES = {"sfz": SfzSource, "drumgizmo": DrumGizmoSource}
@@ -633,6 +754,105 @@ def _take_key(t):
     return entry
 
 
+def rank_rr_as_dynamics(takes):
+    """Let a one-dynamic articulation's round robins stand in for its layers.
+
+    THE DRUMS' PROBLEM, EXACTLY INVERTED. Virtuosity's drums have 16 to 36
+    velocities and no round robins, so `pick_rr` borrows a neighbouring
+    velocity when it needs a second performance. Its tambourine has the
+    opposite shape: one velocity band and ten shakes inside it, sampled as
+    round robins because a tambourine is not a drum you strike at a chosen
+    force — you shake it, and ten shakes by a human being are not the same
+    loudness. Measured on this library the ten span 8.2 dB, which is a real
+    dynamic range and a wider one than several instruments that *were*
+    sampled in bands.
+
+    So rank the strokes by loudness and give each one its own dynamic index.
+    Everything downstream then works unchanged and works correctly:
+    `pick_layers` walks down the ranking in dB steps as it does for a snare,
+    and `pick_rr` finds one stroke per dynamic and borrows its neighbours —
+    which are the adjacent shakes, the nearest thing to the same stroke played
+    again that the library holds.
+
+    Returns False and changes nothing when the articulation already has more
+    than one dynamic, so a recipe can ask for this without first knowing which
+    shape the source turned out to have.
+    """
+    if len(set(t.vel for t in takes)) > 1:
+        return False
+    for i, t in enumerate(sorted(takes, key=lambda t: t.rms)):
+        t.vel = i
+    takes.sort(key=lambda t: (t.vel, t.rr))
+    return True
+
+
+def voice_parts(cfg, voice):
+    """The articulations one voice draws on: (combine, [(name, layers, rr)]).
+
+    Most voices are one articulation and this is a formality. Two in the
+    percussion set are not, and they are not for opposite reasons:
+
+    `"combine": "rr"` — the shaker. `shaker_up` and `shaker_down` are two maps
+    because an up-stroke and a down-stroke are two different sounds, and a
+    shaker alternates between them by nature. So they are not two dynamics and
+    not two instruments: they are the two round robins of one voice, and the
+    contract says so. Each articulation supplies its share of the round
+    robins at every layer.
+
+    `"combine": "layers"` — the high conga. `conga_muted` is the ghost stroke,
+    a palm on the head, and no velocity of `conga_open` is that sound however
+    softly it is struck. It is layer 1 and the open strokes are the layers
+    above it, which is a source articulation standing in for a velocity band.
+    Each articulation names how many layers it supplies and they stack in the
+    order written, softest first.
+    """
+    art = cfg["articulation"]
+    want_layers = min(int(cfg.get("layers", 1)), MAX_LAYERS)
+    want_rr = min(int(cfg.get("rr", 1)), MAX_RR)
+    if isinstance(art, str):
+        return "layers", [(art, want_layers, want_rr)]
+    if not art:
+        raise SystemExit("%s: `articulation` is an empty list" % voice)
+
+    combine = cfg.get("combine")
+    if combine not in ("layers", "rr"):
+        raise SystemExit(
+            "%s draws on %d articulations, so it needs \"combine\": \"layers\" "
+            "(each one is a layer of its own) or \"rr\" (each one is a round "
+            "robin); the recipe says %r" % (voice, len(art), combine))
+
+    if combine == "rr":
+        names = []
+        for a in art:
+            if not isinstance(a, str):
+                raise SystemExit(
+                    "%s: with \"combine\": \"rr\" every articulation is named as "
+                    "a string — the round robins are shared out, not declared"
+                    % voice)
+            names.append(a)
+        n = len(names)
+        if want_rr < n:
+            raise SystemExit(
+                "%s: %d articulations to share %d round robin(s) between; ask "
+                "for at least %d" % (voice, n, want_rr, n))
+        shares = [want_rr // n + (1 if i < want_rr % n else 0) for i in range(n)]
+        return "rr", [(nm, want_layers, s) for nm, s in zip(names, shares)]
+
+    out = []
+    for a in art:
+        if isinstance(a, str) or "layers" not in a:
+            raise SystemExit(
+                "%s: with \"combine\": \"layers\" each articulation says how many "
+                "layers it supplies, as {\"name\": ..., \"layers\": n}" % voice)
+        out.append((a["name"], int(a["layers"]), want_rr))
+    got = sum(n for _, n, _ in out)
+    if got != want_layers:
+        raise SystemExit(
+            "%s: the articulations supply %d layers and the voice asks for %d"
+            % (voice, got, want_layers))
+    return "layers", out
+
+
 # ---------------------------------------------------------------------------
 # Rendering one stroke
 # ---------------------------------------------------------------------------
@@ -880,6 +1100,13 @@ def render(recipe, outdir):
     root = resolve_root(src_cfg["root"], recipe.get("_root_override"))
     source = cls(root, src_cfg)
 
+    which = recipe.get("set", "kit")
+    if which not in SETS:
+        raise SystemExit("unknown set %r — the contract has %s"
+                         % (which, " and ".join(sorted(SETS))))
+    set_voices = SETS[which]["voices"]
+    max_seconds = SETS[which]["max_seconds"]
+
     rate = recipe.get("rate", RATE)
     swap = bool(recipe.get("swap_stereo", False))
     step_db = float(recipe.get("layer_step_db", 4.5))
@@ -891,46 +1118,84 @@ def render(recipe, outdir):
     rendered = {}
     manifest_voices = collections.OrderedDict()
 
-    for voice in VOICES:
+    for name in recipe["voices"]:
+        if name not in set_voices:
+            raise SystemExit(
+                "%r is not one of the %s set's voices: %s"
+                % (name, which, ", ".join(set_voices)))
+
+    for voice in set_voices:
         cfg = recipe["voices"].get(voice)
         if cfg is None:
             notes.append("%s: not in the recipe, so not in the kit" % voice)
             continue
-        art = cfg["articulation"]
         mics = [m for m, w in cfg["mix"].items() if w]
         if not mics:
             raise SystemExit("%s: every mic weight is zero" % voice)
         mics.sort(key=lambda m: -abs(cfg["mix"][m]))
 
-        takes = source.takes(art, mics)
-        if not takes:
-            raise SystemExit("%s: no samples for articulation %r" % (voice, art))
-        measure_takes(source, takes, mics[0], rate)
+        combine, parts = voice_parts(cfg, voice)
+        art = " + ".join(nm for nm, _, _ in parts)
+        rr_source = "source"
+        per_part = []
+        for name, nlayers, nrr in parts:
+            takes = source.takes(name, mics)
+            if not takes:
+                raise SystemExit("%s: no samples for articulation %r" % (voice, name))
+            for mic, n in sorted(takes.missing.items()):
+                notes.append("%s: %s has no %s mic for %d of its strokes"
+                             % (voice, name, mic, n))
+            measure_takes(source, takes, mics[0], rate)
+            label = name if len(parts) > 1 else voice
+            if cfg.get("layers_from_rr") and rank_rr_as_dynamics(takes):
+                notes.append("%s: %s is sampled at one dynamic, so its %d round "
+                             "robins are ranked by loudness and stand in for its "
+                             "layers" % (voice, name, len(takes)))
+            groups, all_keys, by_key, loud, note = pick_layers(
+                takes, nlayers, float(cfg.get("layer_step_db", step_db)), label
+            )
+            if note:
+                notes.append("%s: %s" % (label, note))
+            anchors = set(g[0].vel for g in groups)
+            used_files = set()
+            picked = []
+            for group in groups:
+                got, how = pick_rr(group, nrr, all_keys, by_key, anchors, used_files)
+                if how == "neighbours":
+                    rr_source = "neighbours"
+                picked.append(got)
+            per_part.append(picked)
 
-        want_layers = min(int(cfg.get("layers", 1)), MAX_LAYERS)
-        want_rr = min(int(cfg.get("rr", 1)), MAX_RR)
-        groups, all_keys, by_key, loud, note = pick_layers(
-            takes, want_layers, float(cfg.get("layer_step_db", step_db)), voice
-        )
-        if note:
-            notes.append("%s: %s" % (voice, note))
-        anchors = set(g[0].vel for g in groups)
+        if combine == "layers":
+            layers = [p for part in per_part for p in part]
+        else:
+            # Every articulation is a round robin of the same layer, so the
+            # layer count is what the thinnest of them could supply.
+            depth = min(len(p) for p in per_part)
+            if any(len(p) != depth for p in per_part):
+                notes.append("%s: its articulations reached %s layers, so the "
+                             "voice has %d" % (voice,
+                                               "/".join(str(len(p)) for p in per_part),
+                                               depth))
+            layers = [[t for part in per_part for t in part[li]]
+                      for li in range(depth)]
 
-        used_files = set()
         written = []
         cap = float(cfg.get("cap_s", 1.0))
+        # `pan` is a manifest field and is NOT baked into the files. Where a
+        # voice is placed is the engine's business and the owner's — it is one
+        # number to argue with in `kit.json`, not a re-render — and a file that
+        # arrived panned could never be moved back to the middle. A mono mic is
+        # therefore written centred, and a stereo pair keeps the image the room
+        # gave it; the manifest's pan places whatever that adds up to.
         pan = float(cfg.get("pan", 0.0))
         longest = 0.0
         total = 0
-        rr_source = "source"
         lag_seen = {}
         flips = set()
-        for li, group in enumerate(groups, start=1):
-            picks, how = pick_rr(group, want_rr, all_keys, by_key, anchors, used_files)
-            if how == "neighbours":
-                rr_source = "neighbours"
+        for li, picks in enumerate(layers, start=1):
             for ri, take in enumerate(picks, start=1):
-                got = render_take(take, cfg["mix"], pan, swap, rate,
+                got = render_take(take, cfg["mix"], 0.0, swap, rate,
                                   cfg.get("align_to"),
                                   tuple(cfg.get("flip_if_opposed",
                                                 recipe.get("flip_if_opposed", ()))))
@@ -952,36 +1217,38 @@ def render(recipe, outdir):
                 if not len(y):
                     raise SystemExit("%s layer %d rr %d came out empty" % (voice, li, ri))
                 secs = len(y) / float(rate)
-                if secs > MAX_SECONDS + 1e-9:
+                if secs > max_seconds + 1e-9:
                     raise SystemExit(
-                        "%s.%d.%d is %.3f s, over the %.1f s the contract allows"
-                        % (voice, li, ri, secs, MAX_SECONDS)
+                        "%s.%d.%d is %.3f s, over the %.1f s the %s contract allows"
+                        % (voice, li, ri, secs, max_seconds, which)
                     )
                 longest = max(longest, secs)
                 path = os.path.join(outdir, "%s.%d.%d.wav" % (voice, li, ri))
                 total += write_wav(path, y, rate, rng)
                 written.append((li, ri))
 
-        n_layers = len(groups)
+        n_layers = len(layers)
         n_rr = max(r for _, r in written)
         rendered[voice] = n_layers
         rows.append({
             "voice": voice, "articulation": art,
             "layers": n_layers, "rr": n_rr,
             "longest": longest, "bytes": total,
-            "rr_source": rr_source,
-            "spread": [loud[g[0].vel] for g in groups],
+            "rr_source": rr_source, "pan": pan,
+            "spread": [picks[0].rms for picks in layers],
             "lag_ms": {m: 1000.0 * l / rate for m, l in sorted(lag_seen.items())},
         })
         manifest_voices[voice] = collections.OrderedDict(
             (("layers", n_layers), ("rr", n_rr), ("trim_db", 0.0))
         )
+        if pan:
+            manifest_voices[voice]["pan"] = round(pan, 2)
         if cfg.get("choked_by"):
             manifest_voices[voice]["choked_by"] = list(cfg["choked_by"])
         if flips:
             notes.append("%s: %s came in with opposite polarity and was inverted"
                          % (voice, ", ".join(sorted(flips))))
-        _log("  %-10s %s  layers %d  rr %d (%s)  longest %.2f s  %6.1f KB"
+        _log("  %-10s %-24s layers %d  rr %d (%s)  longest %.2f s  %6.1f KB"
              % (voice, art, n_layers, n_rr, rr_source, longest, total / 1024.0))
 
     trims = compute_trims(recipe, outdir, rendered)
@@ -1026,19 +1293,43 @@ def compute_trims(recipe, outdir, layer_counts):
     a request to exceed the ceiling the whole kit was normalised to. When a
     voice measures quieter than its target, the honest answer is that it is as
     loud as it gets, not that the engine should push it into the saturator.
+
+    A KIT IS MEASURED AGAINST ITS OWN SNARE; A PERCUSSION SET HAS NONE. It is
+    played under whichever drum kit is loaded, so the thing it has to sit
+    against is not in the folder — and a set balanced against its own loudest
+    voice would be internally tidy and, next to a drummer, either inaudible or
+    all you can hear. `balance_ref` names the file outside the folder that the
+    balance is measured from:
+
+        "balance_ref": {"folder": "kits/club", "voice": "snare", "layer": 3}
+
+    which is the same snare accent every kit voice is already measured against,
+    so the numbers in `balance` mean the same thing in both places.
     """
     balance = recipe.get("balance", {})
     window = float(recipe.get("balance_window_s", 0.4))
-    rate = recipe.get("rate", RATE)
     loud = {}
     for voice, layers in layer_counts.items():
         li = min(3, layers)
         path = os.path.join(outdir, "%s.%d.1.wav" % (voice, li))
         x, sr = sf.read(path, always_2d=True, dtype="float64")
         loud[voice] = k_energy(x.mean(axis=1), sr, window)
-    if "snare" not in loud:
-        return {v: 0.0 for v in loud}
-    ref = loud["snare"]
+
+    ref = loud.get("snare")
+    if ref is None:
+        spec = recipe.get("balance_ref")
+        if not spec:
+            return {v: 0.0 for v in loud}
+        path = os.path.join(ROOT, "src-tauri", "sounds", spec["folder"],
+                            "%s.%d.1.wav" % (spec["voice"], int(spec.get("layer", 3))))
+        if not os.path.isfile(path):
+            raise SystemExit(
+                "the balance is measured against %s and it is not there.\n"
+                "Render that kit first — the percussion set is levelled against\n"
+                "the drums it plays under, not against itself." % path)
+        x, sr = sf.read(path, always_2d=True, dtype="float64")
+        ref = k_energy(x.mean(axis=1), sr, window)
+
     out = {}
     for voice, l in loud.items():
         want = float(balance.get(voice, 0.0))
@@ -1119,12 +1410,13 @@ def main():
 
     total = sum(r["bytes"] for r in rows)
     _log()
-    _log("| voice | articulation | layers | rr | rr from | longest | trim_db | size |")
-    _log("|---|---|---|---|---|---|---|---|")
+    _log("| voice | articulation | layers | rr | rr from | longest | trim_db | pan | size |")
+    _log("|---|---|---|---|---|---|---|---|---|")
     for r in rows:
-        _log("| `%s` | `%s` | %d | %d | %s | %.2f s | %+.1f dB | %.0f KB |"
+        _log("| `%s` | `%s` | %d | %d | %s | %.2f s | %+.1f dB | %s | %.0f KB |"
              % (r["voice"], r["articulation"], r["layers"], r["rr"], r["rr_source"],
-                r["longest"], trims.get(r["voice"], 0.0), r["bytes"] / 1024.0))
+                r["longest"], trims.get(r["voice"], 0.0),
+                "%+.2f" % r["pan"] if r["pan"] else "0", r["bytes"] / 1024.0))
     nfiles = sum(r["layers"] * r["rr"] for r in rows)
     _log()
     _log("%d files, %.2f MB" % (nfiles, total / 1048576.0))
