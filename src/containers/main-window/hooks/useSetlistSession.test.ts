@@ -639,6 +639,65 @@ describe("duplicating a setlist", () => {
   });
 });
 
+describe("dragging a setlist to a new place in the library", () => {
+  /** Three setlists in the library, the first one loaded and saved. */
+  async function library() {
+    const view = mount();
+    const { result } = view;
+    for (const [id, name] of [["c1", "Warm-up"], ["c2", "Evening"], ["c3", "Gig"]]) {
+      await act(async () => {
+        result.current.loadSetlist({ ...CHAIN, id, name });
+      });
+      await act(async () => {
+        await result.current.saveActiveSetlist();
+      });
+    }
+    await act(async () => {
+      result.current.loadSetlist({ ...CHAIN, id: "c1", name: "Warm-up" });
+    });
+    expect(result.current.setlists.map((c) => c.id)).toEqual(["c1", "c2", "c3"]);
+    return view;
+  }
+
+  it("moves the row and writes the new order down together", async () => {
+    // What the library shows and what the store keeps have to agree, or the
+    // drag comes undone at the next restart — the one place the order means
+    // anything.
+    const reorder = vi.spyOn(ipc, "reorderSetlists");
+    const { result } = await library();
+    await act(async () => {
+      await result.current.reorderSetlists(0, 2);
+    });
+    expect(result.current.setlists.map((c) => c.id)).toEqual(["c2", "c3", "c1"]);
+    expect(reorder.mock.calls[reorder.mock.calls.length - 1][0]).toEqual(["c2", "c3", "c1"]);
+    reorder.mockRestore();
+  });
+
+  it("leaves the open setlist open and the save bar clean", async () => {
+    // Moving a row in the library says nothing about what is in the routine.
+    const { result } = await library();
+    await act(async () => {
+      await result.current.reorderSetlists(2, 0);
+    });
+    expect(result.current.setlist?.id).toBe("c1");
+    expect(result.current.selectedStepId).toBe("s1");
+    expect(result.current.dirty).toBe(false);
+  });
+
+  it("writes nothing for a drag that moved nothing", async () => {
+    const reorder = vi.spyOn(ipc, "reorderSetlists");
+    const { result } = await library();
+    const before = result.current.setlists;
+    await act(async () => {
+      await result.current.reorderSetlists(1, 1);
+      await result.current.reorderSetlists(0, 9);
+    });
+    expect(result.current.setlists).toBe(before);
+    expect(reorder).not.toHaveBeenCalled();
+    reorder.mockRestore();
+  });
+});
+
 describe("a block of steps, beside the selection", () => {
   /** A setlist with four steps, loaded, step one selected. */
   function loaded() {

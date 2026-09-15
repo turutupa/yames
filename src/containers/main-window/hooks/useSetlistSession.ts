@@ -7,6 +7,7 @@ import {
   jamToSetlistStep,
   presetToSetlistStep,
   renameSetlist as renameSetlistData,
+  reorderSetlists as reorderSetlistsData,
   stepRange,
   updateStep,
   upsertSetlist,
@@ -511,6 +512,29 @@ export function useSetlistSession({
     [setlists, t],
   );
 
+  /**
+   * A setlist dragged to a new place in the library.
+   *
+   * The order is the user's — the routine you warm up on first, the one you
+   * finish with — so it is written down rather than kept on screen: the same
+   * argument, and the same `reorder_setlists` call, that `duplicateSetlist`
+   * above makes for the copy's place.
+   *
+   * What is open stays open and the save bar stays clean. Moving a row in the
+   * library says nothing about the setlist's contents, and a routine that went
+   * dirty because another one moved past it would be asking to save an edit
+   * nobody made.
+   */
+  const reorderSetlists = useCallback(
+    async (from: number, to: number) => {
+      const next = reorderSetlistsData(setlists, from, to);
+      if (next === setlists) return;
+      setSetlists(next);
+      await reorderSetlistsIpc(next.map((c) => c.id)).catch(() => {});
+    },
+    [setlists],
+  );
+
   const renameSetlist = useCallback(
     async (id: string, name: string) => {
       const target = setlists.find((c) => c.id === id);
@@ -628,6 +652,8 @@ export function useSetlistSession({
     deleteSetlist,
     renameSetlist,
     duplicateSetlist,
+    /** The library's order, moved by hand and written to the store. */
+    reorderSetlists,
     addStepFromNow,
     /** A jam as a step, in the open setlist or in a named one. */
     addJamStep,
