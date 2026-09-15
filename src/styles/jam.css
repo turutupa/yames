@@ -498,10 +498,11 @@
 
    ── The library row ──────────────────────────────────────────────────────
    The jam rows borrow the setlist row wholesale; what they add is the drag,
-   which presets do not have because presets sort themselves by name. */
-.jam-item {
-  cursor: grab;
-}
+   which presets do not have because presets sort themselves by name — and the
+   setlist rows now add too. The grab hand and the fade are therefore written
+   once, for any draggable library row, in shell.css beside the row's other
+   states. A `.jam-item { cursor: grab }` here would have kept the hand on a
+   jam row being renamed, where there is nothing to pick up. */
 
 /* "120 · 16-bar" is longer than the "4 steps" this row was cut for, and it
    wrapped onto a second line in the rail's 252px — which made every jam row a
