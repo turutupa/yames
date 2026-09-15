@@ -80,10 +80,23 @@ export type BeatEvent = {
   subdivision: number;
   isDownbeat: boolean;
   /**
-   * Whether the engine accented this tick — it opens a beat group, or
-   * is beat 0 of the speed ramp's bar. Read this for the LIVE accent
-   * state instead of re-deriving group starts from `beatGroups`; the
-   * engine is the only thing that knows which rule applied.
+   * How hard the engine accented this tick: 0 not at all, 1 a group start
+   * inside the bar — the middle of a 6/8 — and 2 the bar's own opening,
+   * which is also what a ramp's bar line and "every beat" report.
+   *
+   * Read this for the LIVE accent state instead of re-deriving group starts
+   * from `beatGroups`; the engine is the only thing that knows which rule
+   * applied. `accentPositions` in `utils/meter.ts` mirrors the same rule for
+   * the markers drawn while stopped.
+   */
+  accentLevel: 0 | 1 | 2;
+  /**
+   * `accentLevel > 0` — whether this tick was accented at all, which is what
+   * an accent was before it had tiers.
+   *
+   * @deprecated Kept for one release so nothing reading the old field
+   * silently loses its accents. Use `accentLevel`; the engine derives this
+   * from it, so they cannot disagree.
    */
   isAccent: boolean;
   /**

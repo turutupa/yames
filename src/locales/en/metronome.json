@@ -14,6 +14,8 @@
     "clicksPerBar": "{{count}} clicks/bar",
     "addBeat": "Add beat",
     "removeBeat": "Remove beat",
+    "prevMeter": "Previous meter",
+    "nextMeter": "Next meter",
     "grouping": "grouping",
     "tempo": "Tempo",
     "tempoUp": "Tempo up",

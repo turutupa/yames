@@ -16,12 +16,17 @@
    wanted, so it moved onto `.preset-sidebar-head-btn` where all three get it,
    and the rest of the override went with it. */
 
+/* No `cursor` here. It said `pointer`, which is what `.preset-sidebar-item`
+   already says — but at two simple selectors, from a file imported after
+   shell.css, so it silently beat the grab hand a draggable row is supposed to
+   show. A row that can be picked up now takes its cursor from
+   `.preset-sidebar-item[draggable="true"]` and every other row keeps the
+   pointer it always had. */
 .preset-sidebar-item.setlist-item {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 3px;
-  cursor: pointer;
   text-align: left;
 }
 

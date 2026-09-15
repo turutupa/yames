@@ -40,6 +40,7 @@ function beatEvent(n: number): BeatEvent {
     measureBeat: n % 4,
     subdivision: 0,
     isDownbeat: n % 4 === 0,
+    accentLevel: n % 4 === 0 ? 2 : 0,
     isAccent: n % 4 === 0,
     formBar: 0,
     chorus: 1,

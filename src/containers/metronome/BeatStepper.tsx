@@ -1,12 +1,5 @@
 import { useTranslation } from "react-i18next";
-import {
-  addBeatToLastGroup,
-  MAX_FREE_BEATS,
-  MIN_FREE_BEATS,
-  nextFreeBeatCount,
-  prevFreeBeatCount,
-  removeBeatFromLastGroup,
-} from "../../constants/metronome";
+import { stepMeter } from "../../utils/meter";
 
 /** Clicks per beat, by subdivision. */
 const SUBDIVISION_MULTIPLIER: Record<number, number> = {
@@ -34,8 +27,25 @@ interface BeatStepperProps {
  * their boxes are wide enough for the largest value they can hold. 9 → 10
  * beats must not nudge the `+` a pixel.
  *
- * FREE mode wraps at both ends and so never disables; a grouped meter clamps,
- * because wrapping would discard the grouping. See `addBeatToLastGroup`.
+ * IT WALKS THE METERS, and always did until it stopped. In a grouped meter
+ * `+` is the next time signature and `−` the previous one — 6/8 → 7/8 → 8/8
+ * → 9/8 → 12/8 → 2/4 — wrapping at both ends, so neither button is ever
+ * disabled. For a while it resized the LAST GROUP instead, turning 3+3 into
+ * 3+4, which the owner reported as "a really bad experience": it is not what
+ * v1.1.0 did, it is not what the floating widget's meter button, the Zen
+ * one or the `sig-next` / `sig-prev` hotkeys do, and a 7-beat bar grouped
+ * 3+4 is not a meter anybody asked for.
+ *
+ * FREE mode is the exception and is unchanged: a flat run of N beats has no
+ * grouping to walk, so `+` adds a beat and `−` removes one, wrapping 16 → 1.
+ *
+ * Both branches are `stepMeter`, which is the same function all six of those
+ * call sites go through — the agreement is structural rather than remembered.
+ *
+ * The buttons' names follow the branch, because a screen reader is the only
+ * thing that reads them and "Add beat" is a lie in a grouped meter: 12/8's
+ * `+` wraps to 2/4 and 9/8's adds three beats at once. The visible control is
+ * `− 6 +` either way.
  */
 export function BeatStepper({
   beatGroups,
@@ -46,6 +56,8 @@ export function BeatStepper({
   const { t } = useTranslation();
   const total = beatGroups.reduce((sum, n) => sum + n, 0);
   const clicksPerBar = total * (SUBDIVISION_MULTIPLIER[subdivision] ?? 1);
+  const upLabel = t(freeMode ? "metronome.addBeat" : "metronome.nextMeter");
+  const downLabel = t(freeMode ? "metronome.removeBeat" : "metronome.prevMeter");
 
   return (
     <div className="beat-stepper-row">
@@ -56,26 +68,16 @@ export function BeatStepper({
       >
         <button
           className="beat-stepper-btn"
-          onClick={() =>
-            onBeatGroupsChange?.(
-              freeMode ? [prevFreeBeatCount(total)] : removeBeatFromLastGroup(beatGroups),
-            )
-          }
-          disabled={!freeMode && total <= MIN_FREE_BEATS}
-          aria-label={t("metronome.removeBeat")}
+          onClick={() => onBeatGroupsChange?.(stepMeter(beatGroups, freeMode, -1))}
+          aria-label={downLabel}
         >
           −
         </button>
         <span className="beat-stepper-value">{total}</span>
         <button
           className="beat-stepper-btn"
-          onClick={() =>
-            onBeatGroupsChange?.(
-              freeMode ? [nextFreeBeatCount(total)] : addBeatToLastGroup(beatGroups),
-            )
-          }
-          disabled={!freeMode && total >= MAX_FREE_BEATS}
-          aria-label={t("metronome.addBeat")}
+          onClick={() => onBeatGroupsChange?.(stepMeter(beatGroups, freeMode, 1))}
+          aria-label={upLabel}
         >
           +
         </button>

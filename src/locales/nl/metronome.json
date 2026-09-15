@@ -14,6 +14,8 @@
     "clicksPerBar": "{{count}} kliks/maat",
     "addBeat": "Beat toevoegen",
     "removeBeat": "Beat verwijderen",
+    "prevMeter": "Vorige maatsoort",
+    "nextMeter": "Volgende maatsoort",
     "grouping": "groepering",
     "tempo": "Tempo",
     "tempoUp": "Tempo omhoog",

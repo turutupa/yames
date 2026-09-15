@@ -14,6 +14,8 @@
     "clicksPerBar": "{{count}} щелчков/такт",
     "addBeat": "Добавить долю",
     "removeBeat": "Убрать долю",
+    "prevMeter": "Предыдущий размер",
+    "nextMeter": "Следующий размер",
     "grouping": "группировка",
     "tempo": "Темп",
     "tempoUp": "Быстрее",

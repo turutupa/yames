@@ -14,6 +14,8 @@
     "clicksPerBar": "{{count}} clics/compás",
     "addBeat": "Añadir pulso",
     "removeBeat": "Quitar pulso",
+    "prevMeter": "Compás anterior",
+    "nextMeter": "Compás siguiente",
     "grouping": "agrupación",
     "tempo": "Tempo",
     "tempoUp": "Subir el tempo",

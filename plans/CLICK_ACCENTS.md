@@ -42,6 +42,23 @@ accents fall; not for *how strong* they are.
   reporter may have meant the duple feel.
 - **Nothing new is stored.** Presets and setlist steps are unchanged.
 
+**Built** on `feedback-52-w3-accent-tiers`, 2026-09-15, exactly as decided
+above. `MEDIUM_GAIN` is 0.80 — the number this document proposed, kept after
+measuring rather than moved. Through the 200 Hz-4 kHz band a laptop
+radiates, a middle accent sits 1.94 dB under the downbeat for every kit and
+between +1.73 dB (drum) and +2.64 dB (beep) over the plain beat; the two
+gaps are different sizes on purpose, because strong against medium is one
+file at two volumes and has only level to go on, while medium against the
+beat is two different files and has timbre as well. `every_medium_accent_
+sits_between_its_strong_and_its_beat` in `engine.rs` prints the per-kit
+table.
+
+**Still to confirm by ear.** The number is measured, not heard: the tier was
+built headless, against the loudness filter, on a machine where nothing may
+play the click. 0.80 is where the design and the measurements agree, and it
+is the owner's to move if a bar of 6/8 does not sit right at practice
+volume — one constant, one line.
+
 **Why it waited:** W38 (`plans/tasks/jam-v5/W38-CLICK-PRESETS.md`) was
 replacing the click sound files, the kit enum and the loudness floor
 between accent and beat. The tier lives in exactly that code and its

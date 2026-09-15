@@ -77,6 +77,7 @@ describe("FullscreenView", () => {
       measureBeat,
       subdivision: 0,
       isDownbeat: true,
+      accentLevel: (measureBeat === 0 ? 2 : 0) as 0 | 1 | 2,
       isAccent: measureBeat === 0,
       formBar: 0,
       chorus: 1,

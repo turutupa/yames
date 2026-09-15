@@ -312,6 +312,34 @@ const CHIME_DOWN: &[u8] = include_bytes!("../sounds/chime_down.wav");
 /// reads without shouting.
 pub(crate) const BEAT_GAIN: f32 = 0.65;
 
+/// How loud a MIDDLE accent is — the second and later group starts of a bar,
+/// the accent sound at less than full volume so that 6/8 has a beat one and a
+/// beat four that are not the same event (`plans/CLICK_ACCENTS.md`).
+///
+/// The accent click, quieter, not the beat click louder: on the bright kits
+/// the beat sound at full volume blurs into the beats either side of it, and
+/// a middle accent has to be recognisably the same gesture as the downbeat.
+///
+/// 0.80 is the number the design proposed and the number the measurements
+/// kept. It has to buy two distinctions out of one span, and they are not the
+/// same size of problem:
+///
+///   - Strong against Medium is 1.94 dB, and it is the harder of the two,
+///     because the two are the SAME FILE and level is the only cue there is.
+///   - Medium against the beat is that kit's accent margin less 1.94 dB, and
+///     it is the easier one, because the two are DIFFERENT FILES: you hear
+///     the accent sound arrive, softly, not a loud beat.
+///
+/// So the bigger share of the span goes to Strong-against-Medium, which is
+/// what a gain below 1 does. Raising it to 0.85 would leave 1.4 dB between
+/// the two accents — under the JND on a transient heard once a bar — and
+/// lowering it to 0.70 pushes the drum kit's middle accent to within 0.6 dB
+/// of its own beat. The per-kit numbers live on
+/// `every_medium_accent_sits_between_its_strong_and_its_beat`, and what that
+/// test's older sibling says holds here too: a margin is a floor, not a
+/// target.
+const MEDIUM_GAIN: f32 = 0.80;
+
 /// Subdivisions, quieter again. Kept at the same ratio to `BEAT_GAIN` it had
 /// at 0.75/0.35, so lifting the accent does not also raise the ticks between
 /// beats relative to the beats themselves.
@@ -1602,6 +1630,53 @@ impl AccentMode {
     }
 }
 
+/// How hard this tick is accented.
+///
+/// An accent used to be one bit, and a bar of 6/8 was therefore two bars of
+/// 3/4: beats one and four opened a group, both got the same click at the
+/// same volume, and nothing in the sound said which of them started the bar.
+/// That is issue 52's complaint, and it holds for 9/8, 12/8, 7/8, 5/4 and
+/// 8/8 as well. `plans/CLICK_ACCENTS.md` has the decision.
+///
+/// **The numbers are the loudness order**, low to high, and the frontend's
+/// `BeatEvent.accentLevel` is this cast to `u8` — so `level > 0` is "is this
+/// accented at all", which is what the old `is_accent` bool meant and what
+/// every consumer of it still reads. Nothing sorts on these, but a player
+/// reading `2 = quiet` would be the kind of surprise that outlives whoever
+/// wrote it.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[repr(u8)]
+enum AccentLevel {
+    /// A plain beat, or a subdivision tick. The beat click.
+    None = 0,
+    /// A group start that is not the bar's: the accent click at
+    /// [`MEDIUM_GAIN`]. A bar's middle.
+    Medium = 1,
+    /// Beat one, "every beat", the ramp's bar line: the accent click at full
+    /// volume, exactly as loud as every accent was before there were tiers.
+    Strong = 2,
+}
+
+impl AccentLevel {
+    /// Whether anything accented happened here — the old one-bit question.
+    #[inline]
+    fn is_accent(self) -> bool {
+        self != Self::None
+    }
+
+    /// The gain the accent click plays at. `None` never reaches the voice
+    /// spawn, and answers 0.0 rather than panicking so that a future caller
+    /// cannot make a silent bug out of an exhaustive match.
+    #[inline]
+    fn gain(self) -> f32 {
+        match self {
+            Self::None => 0.0,
+            Self::Medium => MEDIUM_GAIN,
+            Self::Strong => 1.0,
+        }
+    }
+}
+
 #[derive(Clone, Copy, PartialEq)]
 enum SoundKit {
     Click,
@@ -2784,9 +2859,19 @@ fn should_report_take_end(ran_out: bool, already: &mut bool) -> bool {
     true
 }
 
-/// Should this tick be played as an accent (the "high" sound)?
+/// How hard should this tick be accented — [`AccentLevel`]?
 ///
 /// Pure so it can be unit-tested without an audio device.
+///
+/// **Which beats are strong and which are middling**: under `Groups`, the
+/// first set bit of `accent_mask` — beat one, the bar's own opening — is
+/// Strong, and every other group start is Medium. `All` is every beat Strong,
+/// unchanged in sound from before the tier existed, because a player who
+/// asked for flat pulses asked for flat pulses. `None` is none. A ramp
+/// accents its own bar line Strong, and has no middle to mark. FREE mode is
+/// one group of N, so its beat 0 is Strong and nothing else accents at all.
+/// **A subdivision tick is never an accent of any kind**, which is the
+/// `is_downbeat` in every branch below.
 ///
 /// FREE mode is checked **first**: it means "N equal beats, no accent
 /// structure", and that has to hold everywhere — including while the drill's
@@ -2798,6 +2883,12 @@ fn should_report_take_end(ran_out: bool, already: &mut bool) -> bool {
 /// rebuilding a `HashSet` there allocated on every single click. The mask
 /// is rebuilt only when the grouping actually changes — see
 /// [`accent_mask`] and `CachedParams::accent_mask`.
+///
+/// THE TIER COSTS NOTHING the bit test did not. It is the same mask and one
+/// more instruction on it — `trailing_zeros`, which is where the first group
+/// start is — so nothing was added to `CachedParams` and nothing on the audio
+/// thread got bigger. A second mask or a level array would have been the
+/// obvious shape and would have had to be kept in step with this one.
 fn accent_for(
     mode: AccentMode,
     ramp_active: bool,
@@ -2806,13 +2897,19 @@ fn accent_for(
     is_downbeat: bool,
     beat_count: u32,
     measure_beat: u32,
-) -> bool {
+) -> AccentLevel {
     // The mode comes first, because it is the user saying what they want to
     // hear and everything below is a rule about where accents fall by default.
     match mode {
-        AccentMode::None => return false,
+        AccentMode::None => return AccentLevel::None,
         // Every beat, whatever the meter, the grouping, or a running ramp.
-        AccentMode::All => return is_downbeat,
+        AccentMode::All => {
+            return if is_downbeat {
+                AccentLevel::Strong
+            } else {
+                AccentLevel::None
+            }
+        }
         AccentMode::Groups => {}
     }
     // FREE mode used to short-circuit to `false` here, because before the
@@ -2832,9 +2929,25 @@ fn accent_for(
         } else {
             4
         };
-        return is_downbeat && (beat_count % bpb) == 0;
+        // A ramp's bar is a count, not a grouping: it has a first beat and no
+        // middle, so the one accent it has is the strong one.
+        return if is_downbeat && (beat_count % bpb) == 0 {
+            AccentLevel::Strong
+        } else {
+            AccentLevel::None
+        };
     }
-    is_downbeat && mask_has_accent(accent_mask, measure_beat)
+    if !is_downbeat || !mask_has_accent(accent_mask, measure_beat) {
+        return AccentLevel::None;
+    }
+    // The bar's own opening against a group's. `trailing_zeros` is the lowest
+    // set bit and so the first group start; on an empty mask it answers 32,
+    // which `mask_has_accent` has already refused above.
+    if accent_mask.trailing_zeros() == measure_beat {
+        AccentLevel::Strong
+    } else {
+        AccentLevel::Medium
+    }
 }
 
 /// Upper bound on the number of groups (`validate_beat_groups`).
@@ -2881,10 +2994,11 @@ struct BeatNotification {
     /// each tick to its phase within the beat.
     subdivision_total: u8,
     is_downbeat: bool,
-    /// Whether this tick is accented (opens a group, or is the first
-    /// beat of the ramp's bar). Mirrored to `BeatEvent` so the UI never
-    /// has to re-derive accent positions from `beat_groups`.
-    is_accent: bool,
+    /// How hard this tick is accented — [`AccentLevel`] as a `u8`, so
+    /// 0 none, 1 a group start inside the bar, 2 the bar's own opening.
+    /// Mirrored to `BeatEvent` so the UI never has to re-derive accent
+    /// positions from `beat_groups`.
+    accent: u8,
     /// Beats per bar the engine used to wrap `measure_beat` for this
     /// tick — ramp `beats_per_bar` while the ramp is active, else the
     /// meter total.
@@ -3100,8 +3214,17 @@ pub struct BeatEvent {
     pub subdivision: u32,
     #[serde(rename = "isDownbeat")]
     pub is_downbeat: bool,
-    /// True when the engine accented this tick. The UI reads this
-    /// instead of re-deriving group starts from `beatGroups`.
+    /// How hard the engine accented this tick: 0 not at all, 1 a group start
+    /// inside the bar (the middle of a 6/8), 2 the bar's own opening. The UI
+    /// reads this instead of re-deriving group starts from `beatGroups`.
+    #[serde(rename = "accentLevel")]
+    pub accent: u8,
+    /// `accentLevel > 0`, on the wire because it used to be the only thing
+    /// on the wire. Kept for one release so that nothing reading the old
+    /// field — a hot-reloaded frontend against a newer binary, a consumer
+    /// nobody has grepped — silently loses its accents; `src/types.ts`
+    /// deprecates it in the same words. The engine is the only writer, so
+    /// the two can never disagree.
     #[serde(rename = "isAccent")]
     pub is_accent: bool,
     /// Where this tick sits in a jam's form (`plans/JAM_MODE.md`).
@@ -5175,8 +5298,10 @@ impl MetronomeEngine {
 
                             // Determine accent. A handful of integer ops
                             // — no allocation, no set build, per the
-                            // "click is sacred" rule.
-                            let use_accent = accent_for(
+                            // "click is sacred" rule. The tier added one
+                            // `trailing_zeros` to that handful and nothing
+                            // else; see `accent_for`.
+                            let accent_level = accent_for(
                                 cached.accent_mode,
                                 cached.ramp_active,
                                 cached.ramp_beats_per_bar,
@@ -5372,17 +5497,27 @@ impl MetronomeEngine {
                                     }
                                 }
                                 jam_accent = accent_heard;
-                            } else if use_accent && !cached.ramp_warming_up {
+                            } else if accent_level.is_accent() && !cached.ramp_warming_up {
                                 // Accent: full ring-out, no duration cap.
                                 // Guarded like every other push — see
                                 // `MAX_VOICES`; the click cannot reach it,
                                 // and the guard is what makes that a fact
                                 // about this line rather than about a sum
                                 // computed somewhere else.
+                                //
+                                // ONE SOUND, TWO VOLUMES. A middle accent is
+                                // the same file as the downbeat at
+                                // `MEDIUM_GAIN`, which is why every kit —
+                                // including a custom one — has a middle
+                                // without shipping a third sample. It rings
+                                // out uncapped like the strong one: it is the
+                                // same gesture, and capping it would make it
+                                // a different kind of click rather than a
+                                // quieter one.
                                 if voices.len() < MAX_VOICES {
                                     voices.push(Voice::click(
                                         cached.kit.high_id(),
-                                        cached.volume,
+                                        accent_level.gain() * cached.volume,
                                         0,
                                     ));
                                 }
@@ -5472,9 +5607,21 @@ impl MetronomeEngine {
                             // any drum on it is — so the UI's dots flash on
                             // the kick and the backbeat rather than on the
                             // meter's group starts, which nothing is playing.
-                            let notif_accent = match jam_tick {
-                                Some(_) => jam_accent,
-                                None => use_accent,
+                            //
+                            // A band's accent has no middle tier: the table
+                            // says a drum is an accent or it does not, so it
+                            // reports Strong or nothing and the dots flash
+                            // exactly as they did before the tier existed.
+                            // The meter's tiers are the click's.
+                            let notif_accent: u8 = match jam_tick {
+                                Some(_) => {
+                                    if jam_accent {
+                                        AccentLevel::Strong as u8
+                                    } else {
+                                        AccentLevel::None as u8
+                                    }
+                                }
+                                None => accent_level as u8,
                             };
                             // "full" whenever the band is not the thing
                             // playing — no jam, the count-in, a drill ramp,
@@ -5611,7 +5758,7 @@ impl MetronomeEngine {
                                 subdivision: notif_sub,
                                 subdivision_total: subdivision.clamp(1, 255) as u8,
                                 is_downbeat,
-                                is_accent: notif_accent,
+                                accent: notif_accent,
                                 beats_per_bar: beats_per_measure.clamp(1, 255) as u8,
                                 ts_ns,
                                 expected_interval_ms: beat_duration_secs * 1000.0,
@@ -5988,7 +6135,11 @@ impl MetronomeEngine {
                         measure_beat: notif.measure_beat,
                         subdivision: notif.subdivision,
                         is_downbeat: notif.is_downbeat,
-                        is_accent: notif.is_accent,
+                        accent: notif.accent,
+                        // Derived here and nowhere else, so the two fields on
+                        // the wire cannot drift: `isAccent` has always meant
+                        // "was this tick accented at all".
+                        is_accent: notif.accent > 0,
                         form_bar: notif.jam_bar,
                         chorus: notif.jam_chorus,
                         band_state: notif.jam_band_state,
@@ -6300,8 +6451,8 @@ mod tests {
     fn accent_none_means_none() {
         for ramp in [false, true] {
             for beat in 0..8u32 {
-                assert!(
-                    !accent_for(
+                assert_eq!(
+                    accent_for(
                         AccentMode::None,
                         ramp,
                         4,
@@ -6310,45 +6461,245 @@ mod tests {
                         beat,
                         beat
                     ),
+                    AccentLevel::None,
                     "ramp={ramp} beat={beat}"
                 );
             }
         }
     }
 
-    /// "all" accents every beat of the bar, whatever the grouping says.
+    /// "all" accents every beat of the bar, whatever the grouping says —
+    /// and every one of them STRONG. This is the mode for players who want a
+    /// flat pulse and to feel the bar themselves, so the tier must not reach
+    /// it: "every beat" that quietly made five of seven beats a middle accent
+    /// would be a shape, which is the thing this mode exists to remove.
     #[test]
-    fn accent_all_means_every_beat() {
+    fn accent_all_means_every_beat_and_all_of_them_strong() {
         let mask = accent_mask(&[3, 2, 2]);
         for beat in 0..7u32 {
-            assert!(
+            assert_eq!(
                 accent_for(AccentMode::All, false, 4, mask, true, beat, beat),
+                AccentLevel::Strong,
                 "beat {beat}"
             );
         }
         // Still only on the beat itself — a subdivision tick is not a beat.
-        assert!(!accent_for(AccentMode::All, false, 4, mask, false, 0, 0));
+        assert_eq!(
+            accent_for(AccentMode::All, false, 4, mask, false, 0, 0),
+            AccentLevel::None
+        );
     }
 
     /// "all" reaches the case that overrides the grouping, because a player
     /// who asked for every beat means every beat.
     #[test]
     fn accent_all_overrides_the_ramp() {
-        assert!(accent_for(AccentMode::All, true, 4, 0, true, 3, 3), "mid-ramp");
+        assert_eq!(
+            accent_for(AccentMode::All, true, 4, 0, true, 3, 3),
+            AccentLevel::Strong,
+            "mid-ramp"
+        );
     }
 
-    /// The default is unchanged: group openings only.
+    /// The default accents the same beats it always did — and now says how
+    /// hard. 3+2+2 opens three groups; the first of them is the bar's.
     #[test]
-    fn accent_groups_is_what_it_always_was() {
+    fn accent_groups_marks_the_bar_strong_and_its_middles_medium() {
         let mask = accent_mask(&[3, 2, 2]);
         for beat in 0..7u32 {
-            let expected = matches!(beat, 0 | 3 | 5);
+            let expected = match beat {
+                0 => AccentLevel::Strong,
+                3 | 5 => AccentLevel::Medium,
+                _ => AccentLevel::None,
+            };
             assert_eq!(
                 accent_for(AccentMode::Groups, false, 4, mask, true, beat, beat),
                 expected,
                 "beat {beat} of 3+2+2"
             );
         }
+    }
+
+    /// The meters issue 52 is actually about, one assertion each.
+    ///
+    /// 6/8 as 3+3 is the reporter's bar: two accents, and until this tier
+    /// they were the same accent, which is why a bar of it was two bars of
+    /// 3/4. 6/8 as 2+2+2 is the duple feel the reporter may have meant —
+    /// three group starts, one bar. 3/4 has no middle to mark and must not
+    /// grow one; 12/8 has three of them.
+    #[test]
+    fn a_bar_of_six_eight_finally_has_a_middle() {
+        let level = |groups: &[u8], beat: u32| {
+            accent_for(
+                AccentMode::Groups,
+                false,
+                4,
+                accent_mask(groups),
+                true,
+                beat,
+                beat,
+            )
+        };
+        use AccentLevel::{Medium, None as Flat, Strong};
+
+        // 3/4 — one group, one accent, no change of any kind.
+        assert_eq!(
+            (0..3).map(|b| level(&[3], b)).collect::<Vec<_>>(),
+            vec![Strong, Flat, Flat]
+        );
+        // 6/8 as 3+3 — THE BUG REPORT. Beat four is now a middle, not a
+        // second downbeat.
+        assert_eq!(
+            (0..6).map(|b| level(&[3, 3], b)).collect::<Vec<_>>(),
+            vec![Strong, Flat, Flat, Medium, Flat, Flat]
+        );
+        // 6/8 as 2+2+2 — the duple feel, reachable from the meter row.
+        assert_eq!(
+            (0..6).map(|b| level(&[2, 2, 2], b)).collect::<Vec<_>>(),
+            vec![Strong, Flat, Medium, Flat, Medium, Flat]
+        );
+        // 7/8 as 3+2+2.
+        assert_eq!(
+            (0..7).map(|b| level(&[3, 2, 2], b)).collect::<Vec<_>>(),
+            vec![Strong, Flat, Flat, Medium, Flat, Medium, Flat]
+        );
+        // 12/8 — four groups, three middles.
+        assert_eq!(
+            (0..12).map(|b| level(&[3, 3, 3, 3], b)).collect::<Vec<_>>(),
+            vec![
+                Strong, Flat, Flat, Medium, Flat, Flat, Medium, Flat, Flat, Medium, Flat, Flat
+            ]
+        );
+    }
+
+    /// Exactly one beat in a bar may be Strong, in every meter the app can
+    /// reach and under every mode but "every beat". A bar with two strong
+    /// beats is the bug this whole tier exists to fix, so it is asserted
+    /// over the fixture list rather than over the two meters that inspired
+    /// it.
+    #[test]
+    fn a_bar_has_exactly_one_strong_beat() {
+        for groups in ALL_METERS {
+            let mask = accent_mask(groups);
+            let total: u32 = groups.iter().map(|&g| g as u32).sum();
+            let strong = (0..total)
+                .filter(|&b| {
+                    accent_for(AccentMode::Groups, false, 4, mask, true, b, b)
+                        == AccentLevel::Strong
+                })
+                .collect::<Vec<_>>();
+            assert_eq!(strong, vec![0], "groups {groups:?}");
+        }
+    }
+
+    /// The level and the old bit agree about WHERE, so nothing that only
+    /// asks "was this accented" changed behaviour when the tier arrived.
+    /// `BeatEvent.isAccent` is that question, still on the wire.
+    #[test]
+    fn a_middle_accent_is_still_an_accent() {
+        for groups in ALL_METERS {
+            let mask = accent_mask(groups);
+            let total: u32 = groups.iter().map(|&g| g as u32).sum();
+            for beat in 0..total {
+                let level = accent_for(AccentMode::Groups, false, 4, mask, true, beat, beat);
+                assert_eq!(
+                    level.is_accent(),
+                    mask_has_accent(mask, beat),
+                    "groups {groups:?}, beat {beat}"
+                );
+            }
+        }
+    }
+
+    /// ONE REPORT PER TICK, IN ORDER, AND THE TIER CHANGES NEITHER.
+    ///
+    /// `BeatNotification` is what feeds `beat_log`, and `beat_log` is the
+    /// TimingAnalyzer's only source of beat positions — a notification
+    /// dropped or reordered is a session that scores against the wrong grid.
+    /// The callback sends one unconditionally at the end of every tick and
+    /// this pass did not touch that line, so what is asserted here is the
+    /// thing that DID change: the accent the tick reports.
+    ///
+    /// A bar of 6/8 in triplets, tick by tick as the callback walks it.
+    /// Eighteen ticks, six of them beats, two of those accented — and the
+    /// twelve ticks between the beats report nothing, which is the rule a
+    /// third tier could most easily have broken.
+    #[test]
+    fn a_bar_reports_one_accent_level_per_tick_and_in_order() {
+        let groups = [3u8, 3];
+        let mask = accent_mask(&groups);
+        let subdivision = 3u32;
+        let beats = 6u32;
+
+        let mut reported = Vec::new();
+        for beat in 0..beats {
+            for sub in 0..subdivision {
+                // The callback's own two lines: `is_downbeat` is "this tick
+                // is on the beat", and the level is asked once per tick.
+                let is_downbeat = sub == 0;
+                reported.push(
+                    accent_for(AccentMode::Groups, false, 4, mask, is_downbeat, beat, beat) as u8,
+                );
+            }
+        }
+
+        assert_eq!(
+            reported.len() as u32,
+            beats * subdivision,
+            "one report per tick, no more and no fewer"
+        );
+        assert_eq!(
+            reported,
+            vec![
+                2, 0, 0, // one
+                0, 0, 0, // two
+                0, 0, 0, // three
+                1, 0, 0, // FOUR — the middle of the bar
+                0, 0, 0, // five
+                0, 0, 0, // six
+            ]
+        );
+    }
+
+    /// The wire, as the frontend reads it. `accentLevel` is the number and
+    /// `isAccent` is the old question about it, and `src/types.ts` says the
+    /// same thing in TypeScript.
+    #[test]
+    fn a_beat_event_carries_the_level_and_the_old_bit() {
+        let event = |accent: u8| {
+            let e = BeatEvent {
+                beat: 0,
+                measure_beat: 0,
+                subdivision: 0,
+                is_downbeat: true,
+                accent,
+                is_accent: accent > 0,
+                form_bar: 0,
+                chorus: 1,
+                band_state: JamBandState::Full,
+            };
+            serde_json::to_value(&e).expect("a beat event serialises")
+        };
+        for (accent, expected_bit) in [(0u8, false), (1, true), (2, true)] {
+            let v = event(accent);
+            assert_eq!(v["accentLevel"], serde_json::json!(accent));
+            assert_eq!(v["isAccent"], serde_json::json!(expected_bit));
+        }
+    }
+
+    /// The gains, in the order the ear has to hear them. `Strong` is 1.0
+    /// because an accent always played at 1.0 and this tier did not make the
+    /// downbeat quieter — it made a second, softer one.
+    #[test]
+    fn the_three_tiers_come_in_loudness_order() {
+        assert_eq!(AccentLevel::Strong.gain(), 1.0);
+        assert!(AccentLevel::Medium.gain() < AccentLevel::Strong.gain());
+        assert!(AccentLevel::Medium.gain() > BEAT_GAIN);
+        assert_eq!(AccentLevel::None.gain(), 0.0);
+        // And the numbers the frontend reads, which sort the same way.
+        assert_eq!(AccentLevel::None as u8, 0);
+        assert_eq!(AccentLevel::Medium as u8, 1);
+        assert_eq!(AccentLevel::Strong as u8, 2);
     }
 
     #[test]
@@ -6963,6 +7314,91 @@ mod tests {
         }
     }
 
+    /// THE MIDDLE OF THE BAR MUST SIT BETWEEN ITS ENDS, ON THE SAME SPEAKER.
+    ///
+    /// The sibling above says an accent beats its own beat. This says the
+    /// tier in between is genuinely in between: a 6/8's beat four louder than
+    /// its beat two and quieter than its beat one, through the band a laptop
+    /// actually radiates. Measured the same way and for the same reason —
+    /// broadband arithmetic said the drum kit's accent was fine when it was
+    /// half a dB quieter than the beat it marked.
+    ///
+    /// Measured at `MEDIUM_GAIN` = 0.80, against the RECORDED presets (W38
+    /// replaced Wood, Snare, Sticks, Cowbell and Kit with recordings; these
+    /// are their numbers, not the synthesised ones'):
+    ///
+    ///     kit      strong   medium   beat      medium-beat   strong-medium
+    ///     click    +4.24    +2.30    0.00      +2.30         1.94
+    ///     sticks   +4.18    +2.24    0.00      +2.24         1.94
+    ///     wood     +4.19    +2.26    0.00      +2.26         1.94
+    ///     beep     +4.58    +2.64    0.00      +2.64         1.94
+    ///     drum     +3.67    +1.73    0.00      +1.73         1.94
+    ///     kit      +4.36    +2.42    0.00      +2.42         1.94
+    ///     snare    +4.01    +2.07    0.00      +2.07         1.94
+    ///     cowbell  +4.50    +2.56    0.00      +2.56         1.94
+    ///
+    /// (dB through the 200 Hz-4 kHz band-pass, each kit relative to its own
+    /// beat, which is why the beat column is zero by construction.)
+    ///
+    /// THE TWO FLOORS ARE DIFFERENT NUMBERS ON PURPOSE. Strong against
+    /// Medium is one file at two gains — level is the only cue, so it gets
+    /// the larger share of the span and a 1.5 dB floor. Medium against the
+    /// beat is two different files — the accent sound arriving softly, which
+    /// the ear separates by timbre before it separates by level — so 1.0 dB
+    /// is a real floor there and the drum kit's +1.73 clears it with room.
+    ///
+    /// The drum kit is the binding case at both ends, as it is above: its
+    /// accent has the narrowest margin of the eight (+3.67 dB), and one span
+    /// has to buy two distinctions. A floor pair that the drum kit could not
+    /// meet would be a floor pair fitted to the other seven.
+    #[test]
+    fn every_medium_accent_sits_between_its_strong_and_its_beat() {
+        let sr = 48000;
+        let bank = SoundBank::new(sr);
+        for (name, kit) in SoundKit::ALL {
+            let high = laptop_band_energy(bank.get(kit.high_id()), sr);
+            let low = laptop_band_energy(bank.get(kit.low_id()), sr);
+            // The three things a bar of 6/8 makes, as the callback spawns
+            // them: the accent file at 1.0, the same file at MEDIUM_GAIN,
+            // and the beat file at BEAT_GAIN. Energy, so the gains square.
+            let strong = high;
+            let medium = high * (MEDIUM_GAIN * MEDIUM_GAIN) as f64;
+            let beat = low * (BEAT_GAIN * BEAT_GAIN) as f64;
+
+            let strong_over_beat = 10.0 * (strong / beat.max(1e-30)).log10();
+            let medium_over_beat = 10.0 * (medium / beat.max(1e-30)).log10();
+            let strong_over_medium = 10.0 * (strong / medium.max(1e-30)).log10();
+            // Printed, not just asserted: the table in the doc comment above
+            // is this line, and a kit re-recorded a year from now should be
+            // able to reproduce it with `--nocapture` rather than by reading
+            // the source of the assertion.
+            println!(
+                "{name:>8}  strong {strong_over_beat:+.2}  medium {medium_over_beat:+.2}  \
+                 beat +0.00  (strong-medium {strong_over_medium:.2})"
+            );
+
+            assert!(
+                medium_over_beat > 1.0,
+                "{name}: a middle accent is only {medium_over_beat:.2} dB over the plain \
+                 beat through a 200 Hz-4 kHz band-pass. Below about 1 dB the bar's middle \
+                 stops being a middle and becomes a beat, which is the bug this tier fixes."
+            );
+            assert!(
+                strong_over_medium > 1.5,
+                "{name}: the bar's opening is only {strong_over_medium:.2} dB over its \
+                 middles. They are the same file, so level is the only thing telling them \
+                 apart, and under about 1.5 dB a bar of 6/8 is two bars of 3/4 again."
+            );
+            // And the ordering itself, said plainly rather than left to be
+            // inferred from two margins.
+            assert!(
+                strong > medium && medium > beat,
+                "{name}: the three tiers are out of order — strong {strong:.4e}, \
+                 medium {medium:.4e}, beat {beat:.4e}"
+            );
+        }
+    }
+
     /// K-weighted energy: the loudness filter from ITU-R BS.1770, which is
     /// what a LUFS meter measures through and what `laptop_band_energy` is
     /// not.
@@ -7246,6 +7682,7 @@ mod tests {
         &[3, 3, 3, 3],
         // METER_VARIANTS
         &[2, 3],
+        &[2, 2, 2],
         &[2, 2, 3],
         &[2, 3, 2],
         &[3, 3, 2],
@@ -7573,11 +8010,19 @@ mod tests {
         // FREE mode is one group of N — `collapse_to_free` guarantees it — so
         // the group opens once, at beat 0. Walk the whole 16-beat maximum on
         // and off the quarter-note grid; exactly one position may accent.
+        //
+        // And the one accent it has is STRONG. A FREE bar has no middle to
+        // mark — that is what choosing FREE says — so the tier must not
+        // invent one.
         for n in [1u8, 4, 7, 16] {
             let mask = accent_mask(&[n]);
             for beat in 0..u32::from(n) {
                 for is_downbeat in [true, false] {
-                    let expected = is_downbeat && beat == 0;
+                    let expected = if is_downbeat && beat == 0 {
+                        AccentLevel::Strong
+                    } else {
+                        AccentLevel::None
+                    };
                     assert_eq!(
                         accent_for(AccentMode::Groups, false, 4, mask, is_downbeat, beat, beat),
                         expected,
@@ -7593,8 +8038,15 @@ mod tests {
         // N1 used to say FREE mode outranked the ramp's own bar accent. With
         // the free-mode branch gone there is nothing left to outrank it: a
         // drill accents beat 0 of every ramp bar whatever the meter is.
+        //
+        // A ramp's bar is a count of beats with a line drawn every `bpb`, not
+        // a grouping — so what it accents is Strong and it has no middle.
         for beat in 0..16u32 {
-            let expected = beat % 4 == 0;
+            let expected = if beat % 4 == 0 {
+                AccentLevel::Strong
+            } else {
+                AccentLevel::None
+            };
             assert_eq!(
                 accent_for(AccentMode::Groups, true, 4, accent_mask(&[16]), true, beat, beat),
                 expected,
@@ -7609,7 +8061,11 @@ mod tests {
         // 0, 3 and 5.
         let groups = [3u8, 2, 2];
         for pos in 0..7u32 {
-            let expected = matches!(pos, 0 | 3 | 5);
+            let expected = match pos {
+                0 => AccentLevel::Strong,
+                3 | 5 => AccentLevel::Medium,
+                _ => AccentLevel::None,
+            };
             assert_eq!(
                 accent_for(AccentMode::Groups, false, 4, accent_mask(&groups), true, pos, pos),
                 expected,
@@ -7620,9 +8076,24 @@ mod tests {
 
     #[test]
     fn accent_never_fires_off_the_quarter_note_grid() {
-        // `is_downbeat == false` means a subdivision tick — never an accent.
-        assert!(!accent_for(AccentMode::Groups, false, 4, accent_mask(&[4]), false, 0, 0));
-        assert!(!accent_for(AccentMode::Groups, true, 4, accent_mask(&[4]), false, 0, 0));
+        // `is_downbeat == false` means a subdivision tick — never an accent
+        // of ANY tier. A middle accent on the "and" of three would be a
+        // second grid the player never asked for.
+        for mode in [AccentMode::Groups, AccentMode::All, AccentMode::None] {
+            for ramp in [false, true] {
+                for groups in ALL_METERS {
+                    let mask = accent_mask(groups);
+                    let total: u32 = groups.iter().map(|&g| g as u32).sum();
+                    for beat in 0..total {
+                        assert_eq!(
+                            accent_for(mode, ramp, 4, mask, false, beat, beat),
+                            AccentLevel::None,
+                            "a sub-tick accented: groups {groups:?}, beat {beat}, ramp={ramp}"
+                        );
+                    }
+                }
+            }
+        }
     }
 
     // -----------------------------------------------------------------

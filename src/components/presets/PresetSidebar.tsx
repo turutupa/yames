@@ -39,6 +39,15 @@ interface PresetSidebarProps {
   onRenameSetlist?: (id: string, name: string) => void;
   onDuplicateSetlist?: (id: string) => void;
   /**
+   * A setlist dragged to a new place in the library — the jam rows' reorder,
+   * read for setlists.
+   *
+   * Setlists are ordered by hand for the same reason jams are: a library of
+   * routines is an ORDER, the one you warm up on first and the one you finish
+   * with, and the only way to say that is to move the rows.
+   */
+  onReorderSetlists?: (from: number, to: number) => void;
+  /**
    * Jams, on the jam tab. Same deal as setlists: the stage edits the loaded
    * one continuously, so the list is the parent's state and this component
    * only draws it. Ordering is the library's, which is why there is a
@@ -177,6 +186,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   onDeleteSetlist,
   onRenameSetlist,
   onDuplicateSetlist,
+  onReorderSetlists,
   jams,
   activeJamId,
   onLoadJam,
@@ -222,7 +232,30 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
    * list can be filtered by the search field while a drag is in flight.
    */
   const [dragJamId, setDragJamId] = useState<string | null>(null);
-  const [dragOverJamId, setDragOverJamId] = useState<string | null>(null);
+  const [dragOverJamId, setDragOverJamIdState] = useState<string | null>(null);
+  /**
+   * The setlist being dragged, and the row it is over. Same two pieces of
+   * state the jam library keeps, and kept apart from them on purpose: a
+   * setlist and a jam are different things and neither can land in the
+   * other's list.
+   */
+  const [dragSetlistId, setDragSetlistId] = useState<string | null>(null);
+  const [dragOverSetlistId, setDragOverSetlistId] = useState<string | null>(null);
+  /**
+   * A jam row marks itself as a drop target only for a JAM.
+   *
+   * `onDragEnter` fires for whatever is being dragged — a setlist from the
+   * other tab, a file off the desktop, a selection — and any of them would
+   * light up a row that cannot accept them: an invitation to a drop that does
+   * nothing. So the line is drawn only while a jam is actually in the hand,
+   * which is the rule the setlist rows below already follow. Guarded here
+   * rather than in the row so the jam rows keep one reading of "the row I am
+   * over".
+   */
+  const setDragOverJamId = (id: string | null) => {
+    if (id !== null && !dragJamId) return;
+    setDragOverJamIdState(id);
+  };
   /**
    * Which style the jam library is showing, or null for all of them.
    *
@@ -268,6 +301,23 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
       setSearchOpen(false);
     }
   }, [isOpen]);
+
+  /*
+   * Changing tabs ends whatever was in the hand.
+   *
+   * `dragend` fires on the row the drag started from, and that row is gone the
+   * moment the library lists something else — so an id left behind would
+   * outlive the gesture for the rest of the session: the row comes back faded,
+   * and the guard that keeps the two kinds apart reads a drag that is not
+   * happening and refuses the drop line to every later one. Ending the drag
+   * with the tab is also what it looks like from the outside.
+   */
+  useEffect(() => {
+    setDragSetlistId(null);
+    setDragOverSetlistId(null);
+    setDragJamId(null);
+    setDragOverJamIdState(null);
+  }, [view]);
 
   // Close context menu on outside click
   useEffect(() => {
@@ -512,6 +562,26 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
     onReorderJams?.(from, to);
   };
 
+  /**
+   * The same finish for a setlist row, against the same full list.
+   *
+   * A search that hides rows must still report where the setlist landed in the
+   * LIBRARY: dropping the second row of a result onto the fourth moves it to
+   * the fourth setlist's place, not to the fourth row of a view that will not
+   * exist a keystroke later.
+   *
+   * A jam in flight leaves `dragSetlistId` null, so `from` is -1 and the drop
+   * does nothing — a jam cannot land in the setlist library.
+   */
+  const dropSetlist = (targetId: string) => {
+    const from = setlists?.findIndex((c) => c.id === dragSetlistId) ?? -1;
+    const to = setlists?.findIndex((c) => c.id === targetId) ?? -1;
+    setDragSetlistId(null);
+    setDragOverSetlistId(null);
+    if (from === -1 || to === -1 || from === to) return;
+    onReorderSetlists?.(from, to);
+  };
+
   return (
     <>
       {/* Sidebar panel */}
@@ -683,12 +753,48 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               className={`preset-sidebar-item setlist-item ${activeSetlistId === c.id ? "active" : ""}`}
               role="button"
               tabIndex={0}
+              /* A row being renamed is a text field, and a drag would take the
+                 caret with it — the jam rows' guard, for the same reason. */
+              draggable={!renamingSetlist}
+              data-dragging={dragSetlistId === c.id ? "" : undefined}
+              data-drag-over={
+                dragOverSetlistId === c.id && dragSetlistId && dragSetlistId !== c.id
+                  ? ""
+                  : undefined
+              }
+              title={t("setlist.reorderHint")}
               onClick={() => onLoadSetlist?.(c)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
                   onLoadSetlist?.(c);
                 }
+              }}
+              onDragStart={(e) => {
+                setDragSetlistId(c.id);
+                e.dataTransfer.effectAllowed = "move";
+                // Firefox refuses to start a drag without data on it.
+                e.dataTransfer.setData("text/plain", c.id);
+              }}
+              /* Only for a setlist. A jam being dragged is not a thing this
+                 list can accept, so it gets no drop target and no "move"
+                 cursor — the drop it would invite does nothing. */
+              onDragEnter={() => {
+                if (dragSetlistId) setDragOverSetlistId(c.id);
+              }}
+              onDragOver={(e) => {
+                if (!dragSetlistId) return;
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+              }}
+              onDrop={(e) => {
+                if (!dragSetlistId) return;
+                e.preventDefault();
+                dropSetlist(c.id);
+              }}
+              onDragEnd={() => {
+                setDragSetlistId(null);
+                setDragOverSetlistId(null);
               }}
               onContextMenu={(e) => {
                 e.preventDefault();
@@ -756,6 +862,10 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
               }}
               onDragEnter={() => setDragOverJamId(j.id)}
               onDragOver={(e) => {
+                // Only a jam can land here. Without this the row accepts the
+                // drop — the "move" cursor and all — for anything at all, and
+                // then does nothing with it.
+                if (!dragJamId) return;
                 e.preventDefault();
                 e.dataTransfer.dropEffect = "move";
               }}

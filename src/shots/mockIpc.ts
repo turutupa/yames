@@ -244,10 +244,12 @@ export function installShotMock(shot: Shot, theme: string): void {
     const groups = STATE.beatGroups as number[];
     const total = groups.reduce((a, b) => a + b, 0) || 4;
     const measureBeat = beatCount % total;
-    const opens = new Set<number>();
+    // The engine's accent rule, drawn again for the screenshot harness: the
+    // beat that opens the bar is strong, every other group start is a middle.
+    const opens = new Map<number, 1 | 2>();
     let cursor = 0;
     for (const g of groups) {
-      opens.add(cursor);
+      opens.set(cursor, cursor === 0 ? 2 : 1);
       cursor += g;
     }
     // Bar zero of chorus one is what the engine reports with no jam loaded.
@@ -286,6 +288,7 @@ export function installShotMock(shot: Shot, theme: string): void {
       measureBeat,
       subdivision: 0,
       isDownbeat: true,
+      accentLevel: opens.get(measureBeat) ?? 0,
       isAccent: opens.has(measureBeat),
       formBar,
       chorus,
