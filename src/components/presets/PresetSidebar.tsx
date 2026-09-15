@@ -37,6 +37,7 @@ interface PresetSidebarProps {
   onNewSetlist?: () => void;
   onDeleteSetlist?: (id: string) => void;
   onRenameSetlist?: (id: string, name: string) => void;
+  onDuplicateSetlist?: (id: string) => void;
   /**
    * Jams, on the jam tab. Same deal as setlists: the stage edits the loaded
    * one continuously, so the list is the parent's state and this component
@@ -175,6 +176,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
   onNewSetlist,
   onDeleteSetlist,
   onRenameSetlist,
+  onDuplicateSetlist,
   jams,
   activeJamId,
   onLoadJam,
@@ -1016,6 +1018,14 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
             }}
           >
             {t("presets.rename")}
+          </button>
+          <button
+            onClick={() => {
+              onDuplicateSetlist?.(setlistMenu.id);
+              setSetlistMenu(null);
+            }}
+          >
+            {t("setlist.duplicateSetlist")}
           </button>
           <button
             className="preset-context-delete"
