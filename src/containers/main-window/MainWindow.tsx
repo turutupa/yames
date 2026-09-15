@@ -1364,6 +1364,7 @@ export function MainWindow() {
           onNewSetlist={handleNewSetlist}
           onDeleteSetlist={setlistSession.deleteSetlist}
           onRenameSetlist={setlistSession.renameSetlist}
+          onDuplicateSetlist={setlistSession.duplicateSetlist}
           jams={jamSession.jams}
           activeJamId={jamSession.jam?.id ?? null}
           // Clicking the jam you are already in is the way out of it, the same

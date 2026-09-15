@@ -20,6 +20,7 @@ function setup(overrides: Partial<React.ComponentProps<typeof Rail>> = {}) {
     onNewSetlist: vi.fn(),
     onDeleteSetlist: vi.fn(),
     onRenameSetlist: vi.fn(),
+    onDuplicateSetlist: vi.fn(),
     jams: [],
     activeJamId: null,
     onLoadJam: vi.fn(),

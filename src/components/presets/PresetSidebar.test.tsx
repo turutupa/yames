@@ -280,6 +280,39 @@ describe("PresetSidebar", () => {
     fireEvent.click(add);
     await waitFor(() => expect(document.querySelector(".preset-sidebar-name-input")).not.toBeNull());
   });
+
+  it("offers rename, duplicate and delete on a right-click", async () => {
+    // The same three items in the same order as a jam's menu. A drummer who
+    // has duplicated a jam should not have to find out whether a setlist can
+    // be duplicated by trying it.
+    setInvokeResponse("list_presets", () => []);
+    const onDuplicateSetlist = vi.fn();
+    const onDeleteSetlist = vi.fn();
+    render(
+      <PresetSidebar
+        {...baseProps}
+        view="setlist"
+        setlists={[makeSetlist()]}
+        onLoadSetlist={vi.fn()}
+        onDuplicateSetlist={onDuplicateSetlist}
+        onDeleteSetlist={onDeleteSetlist}
+      />,
+    );
+    fireEvent.contextMenu(await screen.findByText("Warm-up routine"));
+    const menu = await waitFor(() => {
+      const m = document.querySelector(".preset-context-menu");
+      expect(m).not.toBeNull();
+      return m as HTMLElement;
+    });
+    expect([...menu.querySelectorAll("button")].map((b) => b.textContent)).toEqual([
+      "Rename",
+      "Duplicate setlist",
+      "Delete setlist",
+    ]);
+    fireEvent.click(within(menu).getByText("Duplicate setlist"));
+    expect(onDuplicateSetlist).toHaveBeenCalledWith("ch1");
+    expect(onDeleteSetlist).not.toHaveBeenCalled();
+  });
 });
 
 describe("PresetSidebar — the jam library", () => {

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import {
   addStep,
   createSetlist,
+  duplicateSetlist as duplicateSetlistData,
   jamToSetlistStep,
   presetToSetlistStep,
   renameSetlist as renameSetlistData,
@@ -346,6 +347,38 @@ export function useSetlistSession({
     [setlist?.id, closeSetlist],
   );
 
+  /**
+   * A copy of a setlist, beside the one it came from.
+   *
+   * The jam library's Duplicate, read for setlists (`duplicateJam`): the copy
+   * is a variation on that setlist and belongs next to it, not at the bottom
+   * of the library. What is open stays open — you duplicate a routine to
+   * change the copy later, and being thrown out of the one you were editing
+   * would be a second thing happening that you did not ask for.
+   */
+  const duplicateSetlist = useCallback(
+    async (id: string) => {
+      const target = setlists.find((c) => c.id === id);
+      if (!target) return;
+      const copy = duplicateSetlistData(target, t("setlist.copyName", { name: target.name }));
+      await saveSetlistIpc(copy).catch(() => {});
+      setSetlists((prev) => {
+        // Against the list as it is NOW, not the one this closure captured:
+        // the await above is the same window `newSetlist` learned about.
+        const next = upsertSetlist(prev, copy);
+        const at = next.findIndex((c) => c.id === id);
+        const landed = next.findIndex((c) => c.id === copy.id);
+        if (at < 0 || landed === at + 1) return next;
+        const moved = [...next];
+        moved.splice(landed, 1);
+        moved.splice(landed < at ? at : at + 1, 0, copy);
+        return moved;
+      });
+      return copy;
+    },
+    [setlists, t],
+  );
+
   const renameSetlist = useCallback(
     async (id: string, name: string) => {
       const target = setlists.find((c) => c.id === id);
@@ -457,6 +490,7 @@ export function useSetlistSession({
     revertSetlist,
     deleteSetlist,
     renameSetlist,
+    duplicateSetlist,
     addStepFromNow,
     /** A jam as a step, in the open setlist or in a named one. */
     addJamStep,

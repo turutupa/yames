@@ -4,6 +4,8 @@
     "untitled": "Yeni set listesi",
     "newSetlist": "Yeni set listesi",
     "deleteSetlist": "Set listesini sil",
+    "duplicateSetlist": "Set listesini çoğalt",
+    "copyName": "{{name}} kopya",
     "librarySteps": "{{count}} adım",
     "librarySteps_one": "{{count}} adım",
     "librarySteps_other": "{{count}} adım",

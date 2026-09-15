@@ -4,6 +4,8 @@
     "untitled": "Nowa setlista",
     "newSetlist": "Nowa setlista",
     "deleteSetlist": "Usuń setlistę",
+    "duplicateSetlist": "Powiel setlistę",
+    "copyName": "{{name}} kopia",
     "librarySteps": "{{count}} kroków",
     "librarySteps_one": "{{count}} krok",
     "librarySteps_other": "{{count}} kroków",

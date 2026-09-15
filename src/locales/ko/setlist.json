@@ -4,6 +4,8 @@
     "untitled": "새 셋리스트",
     "newSetlist": "새 셋리스트",
     "deleteSetlist": "셋리스트 삭제",
+    "duplicateSetlist": "셋리스트 복제",
+    "copyName": "{{name}} 복사본",
     "librarySteps": "{{count}}단계",
     "librarySteps_one": "{{count}}단계",
     "librarySteps_other": "{{count}}단계",

@@ -550,3 +550,71 @@ describe("the mirror and a jam step", () => {
     expect(after.beatGroups).toEqual(before.beatGroups);
   });
 });
+
+describe("duplicating a setlist", () => {
+  /** Two setlists in the library, the second one loaded. */
+  async function library() {
+    const view = mount();
+    const { result } = view;
+    await act(async () => {
+      result.current.loadSetlist({ ...CHAIN, countIn: 4 });
+    });
+    await act(async () => {
+      await result.current.saveActiveSetlist();
+    });
+    await act(async () => {
+      result.current.loadSetlist({ ...CHAIN, id: "c2", name: "Evening" });
+    });
+    await act(async () => {
+      await result.current.saveActiveSetlist();
+    });
+    expect(result.current.setlists.map((c) => c.id)).toEqual(["c1", "c2"]);
+    return view;
+  }
+
+  it("puts the copy directly after the one it came from", async () => {
+    // Beside it, not at the bottom of the library: a copy is a variation on
+    // that setlist. The jam library's Duplicate already reads this way.
+    const { result } = await library();
+    await act(async () => {
+      await result.current.duplicateSetlist("c1");
+    });
+    expect(result.current.setlists.map((c) => c.name)).toEqual([
+      "Warm-up",
+      "Warm-up copy",
+      "Evening",
+    ]);
+  });
+
+  it("carries the count-in and gives every step a new id", async () => {
+    const { result } = await library();
+    await act(async () => {
+      await result.current.duplicateSetlist("c1");
+    });
+    const [source, copy] = result.current.setlists;
+    expect(copy.countIn).toBe(4);
+    expect(copy.id).not.toBe(source.id);
+    expect(copy.steps.map((s) => s.name)).toEqual(["Loosen up", "Alt picking"]);
+    for (const step of copy.steps) {
+      expect(source.steps.some((s) => s.id === step.id)).toBe(false);
+    }
+  });
+
+  it("leaves the setlist you were editing open", async () => {
+    // Duplicating one routine is not a request to stop working on another.
+    const { result } = await library();
+    await act(async () => {
+      await result.current.duplicateSetlist("c1");
+    });
+    expect(result.current.setlist?.id).toBe("c2");
+    expect(result.current.dirty).toBe(false);
+  });
+
+  it("does nothing for a setlist that is not in the library", async () => {
+    const { result } = await library();
+    await act(async () => {
+      await result.current.duplicateSetlist("nope");
+    });
+    expect(result.current.setlists).toHaveLength(2);
+  });
+});

@@ -4,6 +4,8 @@
     "untitled": "Nuova scaletta",
     "newSetlist": "Nuova scaletta",
     "deleteSetlist": "Elimina scaletta",
+    "duplicateSetlist": "Duplica scaletta",
+    "copyName": "{{name}} copia",
     "librarySteps": "{{count}} passi",
     "librarySteps_one": "{{count}} passo",
     "librarySteps_other": "{{count}} passi",

@@ -4,6 +4,8 @@
     "untitled": "Новый сет-лист",
     "newSetlist": "Новый сет-лист",
     "deleteSetlist": "Удалить сет-лист",
+    "duplicateSetlist": "Дублировать сет-лист",
+    "copyName": "{{name}} копия",
     "librarySteps": "{{count}} шагов",
     "librarySteps_one": "{{count}} шаг",
     "librarySteps_other": "{{count}} шагов",

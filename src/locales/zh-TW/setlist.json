@@ -4,6 +4,8 @@
     "untitled": "新增曲目單",
     "newSetlist": "新增曲目單",
     "deleteSetlist": "刪除曲目單",
+    "duplicateSetlist": "複製曲目單",
+    "copyName": "{{name}} 複本",
     "librarySteps": "{{count}} 步",
     "librarySteps_one": "{{count}} 步",
     "librarySteps_other": "{{count}} 步",

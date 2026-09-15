@@ -4,6 +4,8 @@
     "untitled": "Setlist mới",
     "newSetlist": "Setlist mới",
     "deleteSetlist": "Xóa setlist",
+    "duplicateSetlist": "Nhân bản setlist",
+    "copyName": "{{name}} bản sao",
     "librarySteps": "{{count}} bước",
     "librarySteps_one": "{{count}} bước",
     "librarySteps_other": "{{count}} bước",
