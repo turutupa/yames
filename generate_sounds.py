@@ -13,6 +13,13 @@ beat) and added the beater to `drum_high`. `gen_wood` is also unseeded, so
 its module docstring is the history. This script is kept for the jam kits
 below and for the record of how the originals were first made.
 
+It never owned the MIDDLE strokes. Since 2026-09-15 every click preset ships
+three files rather than two (`plans/CLICK_ACCENTS.md`); `click_mid` and
+`beep_mid` are `gen_click` and `gen_beep` at a third pitch and a faster decay,
+and they live in `rebuild.py` beside the DC removal and the tail fade they
+need, rather than here beside the generators they borrow. The other five
+middles are recordings and belong to `scripts/sounds/render_click.py`.
+
     python generate_sounds.py --kits    # jam kits only: safe, deterministic
     python generate_sounds.py           # ALSO rewrites the legacy files above
 """
