@@ -1918,6 +1918,25 @@ pub fn list_audio_output_devices() -> Vec<AudioOutputDevice> {
     crate::engine::list_output_devices()
 }
 
+/// The key the per-device pair choices live under: a map from device name
+/// to the 0-based pair, so switching back to the interface brings its own
+/// outputs back rather than the laptop's.
+pub const OUTPUT_PAIRS_KEY: &str = "audioOutputPairs";
+
+/// The pair stored against `device_name`, or 0 — which is "Outputs 1-2",
+/// and the right answer for a device nobody has ever chosen a pair for.
+///
+/// `None` (the system default device) has its own entry under the empty
+/// name, so a musician who uses the default device and an interface keeps
+/// a pair for each.
+pub fn stored_output_pair(store: &serde_json::Value, device_name: Option<&str>) -> u16 {
+    store
+        .get(device_name.unwrap_or(""))
+        .and_then(|v| v.as_u64())
+        .unwrap_or(0)
+        .min(u16::MAX as u64) as u16
+}
+
 #[tauri::command]
 pub fn set_audio_output_device(
     device_name: Option<String>,
@@ -1927,14 +1946,25 @@ pub fn set_audio_output_device(
 ) {
     // Persist the choice
     use tauri_plugin_store::StoreExt;
-    if let Ok(store) = app_handle.store("settings.json") {
+    let stored_pair = if let Ok(store) = app_handle.store("settings.json") {
         match &device_name {
             Some(name) => store.set("audioOutputDevice", serde_json::json!(name)),
             None => store.set("audioOutputDevice", serde_json::Value::Null),
         }
-    }
+        let pairs = store
+            .get(OUTPUT_PAIRS_KEY)
+            .unwrap_or(serde_json::Value::Null);
+        stored_output_pair(&pairs, device_name.as_deref())
+    } else {
+        0
+    };
 
     let mut engine = engine_state.0.lock().unwrap();
+    // The pair this device was last used on, in place BEFORE the restart
+    // below — the new stream reads it to decide how many outputs to ask
+    // the device for. Plug the interface back in and the click is on 3-4
+    // again without anybody touching the dropdown.
+    engine.set_output_pair_name_only(stored_pair);
     if let Err(e) = engine.set_device(device_name, state.inner().clone(), app_handle) {
         // Non-fatal, and not the failure report. `set_device` does not wait
         // for the new device — a device that will not open is announced by
@@ -1943,6 +1973,43 @@ pub fn set_audio_output_device(
         // engine startable so the next press of Play re-tries.
         eprintln!("[yames] switching audio output device failed: {e}");
     }
+}
+
+/// Move everything the app plays to another pair of the device's outputs.
+/// Returns the pair actually in effect, 0-based.
+///
+/// Remembered against the device it was chosen for, so a musician who takes
+/// the laptop to church and plugs the interface in finds the click back on
+/// outputs 3-4 without touching anything.
+#[tauri::command]
+pub fn set_audio_output_pair(
+    pair: u16,
+    state: State<SharedState>,
+    engine_state: State<EngineState>,
+    app_handle: AppHandle,
+) -> u16 {
+    use tauri_plugin_store::StoreExt;
+    let device_name = {
+        let engine = engine_state.0.lock().unwrap();
+        engine.device_name().map(|s| s.to_string())
+    };
+
+    if let Ok(store) = app_handle.store("settings.json") {
+        let mut pairs = match store.get(OUTPUT_PAIRS_KEY) {
+            Some(serde_json::Value::Object(m)) => m,
+            // Anything else under the key (a stale scalar from a hand-edited
+            // settings file) is replaced rather than argued with.
+            _ => serde_json::Map::new(),
+        };
+        pairs.insert(
+            device_name.clone().unwrap_or_default(),
+            serde_json::json!(pair),
+        );
+        store.set(OUTPUT_PAIRS_KEY, serde_json::Value::Object(pairs));
+    }
+
+    let mut engine = engine_state.0.lock().unwrap();
+    engine.set_output_pair(pair, state.inner().clone(), app_handle)
 }
 
 // ---------------------------------------------------------------------------
@@ -2276,16 +2343,23 @@ pub async fn tts_speak(
     }
     .ok_or_else(|| "Models directory not set".to_string())?;
 
-    // Speech now plays in-process (was macOS `afplay`, which always used
-    // the OS default output). Route it to the SAME device the metronome
-    // engine is on, exactly like `start_playback` does for the input
-    // tester — otherwise a user on a USB interface hears the click in
-    // their monitors and the coach in their laptop speakers. The engine
-    // lock is taken and released immediately; the heavy work below runs
-    // without holding it.
-    snapshot.output_device = {
-        let engine = engine_state.0.lock().unwrap();
-        engine.device_name().map(|s| s.to_string())
+    // Speech plays through the metronome engine's OWN stream — same
+    // device, same pair of outputs, same mixer as the click. Otherwise a
+    // user on a USB interface hears the click in their monitors and the
+    // coach in their laptop speakers, and a drummer who has put the click
+    // on outputs 3-4 hears the coach in the v-drums. See `speech_out`.
+    //
+    // Opening the device here is deliberate: the coach greets a musician
+    // who has not pressed Play yet, and there would be no stream for the
+    // line to come out of. `ensure_audio_thread` is a no-op when one is
+    // already running, which is the usual case. The engine lock is taken
+    // and released immediately; the heavy work below runs without it.
+    snapshot.speech = {
+        let mut engine = engine_state.0.lock().unwrap();
+        if let Err(e) = engine.ensure_audio_thread(state.inner().clone(), app_handle.clone()) {
+            eprintln!("[yames] the coach has nowhere to speak from: {e}");
+        }
+        engine.speech_out()
     };
 
     let tts_active_arc: SharedTtsActive = tts_active.inner().clone();

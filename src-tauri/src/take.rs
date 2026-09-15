@@ -155,12 +155,28 @@ impl TakeRing {
     /// its length; the samples themselves are relaxed. Nothing here
     /// allocates, locks or branches on anything but the ring's own fill.
     pub fn push_strided(&self, data: &[f32], stride: usize) {
+        self.push_strided_at(data, stride, 0)
+    }
+
+    /// The same, starting from `offset` within each frame.
+    ///
+    /// Which channel a take reads back stopped being a given the moment the
+    /// musician could choose a pair of outputs: with the click on outputs
+    /// 3-4, channel 0 carries the silence the callback wrote there, and a
+    /// take of it is a take of nothing. `engine::take_offset` decides the
+    /// number; this walks it. An offset past the end of the buffer reads
+    /// nothing rather than panicking.
+    pub fn push_strided_at(&self, data: &[f32], stride: usize, offset: usize) {
         let stride = stride.max(1);
         let cap = self.buf.len() as u64;
         let mut w = self.write.load(Ordering::Relaxed);
         let r = self.read.load(Ordering::Acquire);
         let mut free = cap.saturating_sub(w.wrapping_sub(r));
         let mut lost = 0usize;
+        let data = match data.get(offset..) {
+            Some(d) => d,
+            None => &[],
+        };
         for s in data.iter().step_by(stride) {
             if free == 0 {
                 lost += 1;
