@@ -389,6 +389,18 @@
   border-radius: 10px;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
+  /* Shift-click marks a block of steps, and a shift-click is also how every
+     browser extends a text selection — so marking four steps used to leave
+     four rows of highlighted prose behind it. The step's own labels are not
+     text anybody copies; the fields inside the expanded step are, and they
+     say so below. */
+  user-select: none;
+}
+
+.setlist-step input,
+.setlist-step textarea,
+.setlist-step [contenteditable] {
+  user-select: text;
 }
 
 .setlist-step:hover {
@@ -497,9 +509,16 @@
 /* While the setlist plays. The runner addresses steps by index, so a row
    moving under it changes what plays next — the handle says so by its title
    and refuses to be grabbed. The up and down buttons still work: they are
-   the one-position move the runner already survives. */
-.setlist-step-grip.is-locked,
-.setlist-step-grip.is-locked:hover {
+   the one-position move the runner already survives.
+
+   `.setlist-step` in front, and AFTER the reveal rules above, on purpose.
+   Written as `.setlist-step-grip.is-locked` it is one class short of
+   `.setlist-step:hover .setlist-step-grip`, so the grip went back to full
+   opacity the moment the pointer touched the row — which is the only moment
+   anybody would have looked at it, and the only moment the greying had
+   anything to say. */
+.setlist-step .setlist-step-grip.is-locked,
+.setlist-step .setlist-step-grip.is-locked:hover {
   cursor: default;
   color: var(--text-muted);
   opacity: 0.3;

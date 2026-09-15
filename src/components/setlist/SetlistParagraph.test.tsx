@@ -352,6 +352,54 @@ describe("dragging a step by its handle", () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
+  it("puts the drag down if the setlist starts in the middle of it", () => {
+    /*
+     * `draggable={!locked}` only stops a drag from STARTING. The setlist can
+     * begin to play while one is in the air — a hotkey, a MIDI note, the
+     * footswitch under the drummer's foot — and the drop would then move rows
+     * under a runner that addresses them by index. `dragend` does not fire
+     * until the pointer comes up, which may be several bars later, so both
+     * ends of the drag ask rather than trusting the handle.
+     */
+    const onChange = vi.fn();
+    const props = {
+      setlist: SETLIST,
+      selectedStepId: "s1",
+      onSelectStep: vi.fn(),
+      onChange,
+      onPatchStep: vi.fn(),
+      onAddStep: vi.fn(),
+    };
+    const { container, rerender } = render(<SetlistParagraph {...props} runningIndex={-1} />);
+    const rows = blocks(container);
+    const data = transfer();
+    boxed(rows[2]);
+    fireEvent.dragStart(grips(container)[0], { dataTransfer: data });
+    dragEvent("dragover", rows[2], 135, data);
+    expect(rows[2].getAttribute("data-drop")).toBe("after");
+
+    rerender(<SetlistParagraph {...props} runningIndex={0} />);
+    // The line is gone, because it was promising something no longer on offer.
+    expect(rows[2].getAttribute("data-drop")).toBeNull();
+    dragEvent("dragover", rows[2], 135, data);
+    dragEvent("drop", rows[2], 135, data);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("does not re-apply a step to the engine for grabbing the one it is on", () => {
+    // Selecting pushes the step onto the engine and reopens the mirror's
+    // wait. Doing that for the step the engine is already on is an IPC write
+    // and a dropped guard in exchange for nothing.
+    const onSelectStep = vi.fn();
+    const { container } = draw({ selectedStepId: "s1", onSelectStep });
+    fireEvent.dragStart(grips(container)[0], { dataTransfer: transfer() });
+    expect(onSelectStep).not.toHaveBeenCalled();
+
+    // A row that is not the one being edited still becomes it.
+    fireEvent.dragStart(grips(container)[2], { dataTransfer: transfer() });
+    expect(onSelectStep).toHaveBeenCalledWith("s3");
+  });
+
   it("refuses the handle while the setlist is playing, and says why", () => {
     // The runner tracks steps by index, so a row moving under it changes what
     // plays next. The up and down buttons keep working - they are the
@@ -422,28 +470,57 @@ describe("a block of steps", () => {
     expect(document.activeElement).toBe(rows[1]);
   });
 
-  it("does not let the arrows reach the tempo hotkeys", () => {
-    // The arrows are the global BPM keys, dispatched from a listener on
-    // `document`. React's own listener sits on the root inside it, so the row
-    // has to stop the event or marking a block would retune the metronome.
-    const seen: string[] = [];
-    const spy = (e: KeyboardEvent) => seen.push(e.key);
-    document.addEventListener("keydown", spy);
+  it("keeps every modified arrow off the tempo — including the ones that do nothing", () => {
+    /*
+     * The arrows are the global BPM keys, dispatched from a listener on
+     * `document`. React's own listener sits on the root inside it, so the row
+     * has to stop the event or marking a block would retune the metronome.
+     *
+     * The refused presses are the ones that mattered. Shift+↑ on the top row
+     * and Shift+↓ on the bottom row have nowhere to go, and Alt+arrows are
+     * refused outright while the setlist plays — and each of those used to
+     * `return` before claiming the key, so the press that was supposed to do
+     * NOTHING changed the tempo instead. A gesture that is refused has to be
+     * refused silently.
+     */
+    const listen = (run: () => void): string[] => {
+      const seen: string[] = [];
+      const spy = (e: KeyboardEvent) => seen.push(e.key);
+      document.addEventListener("keydown", spy);
+      run();
+      document.removeEventListener("keydown", spy);
+      return seen;
+    };
+
     const { container } = draw({ onExtendSelection: vi.fn(), onChange: vi.fn() });
     const rows = blocks(container);
     rows[0].focus();
-    fireEvent.keyDown(rows[0], { key: "ArrowDown", shiftKey: true });
+    expect(
+      listen(() => {
+        fireEvent.keyDown(rows[0], { key: "ArrowDown", shiftKey: true });
+        fireEvent.keyDown(rows[0], { key: "ArrowDown", altKey: true });
+        // Nowhere to go: the top row has no row above it, the last none below.
+        fireEvent.keyDown(rows[0], { key: "ArrowUp", shiftKey: true });
+        fireEvent.keyDown(rows[2], { key: "ArrowDown", shiftKey: true });
+      }),
+    ).toEqual([]);
+
+    // A bare arrow is still the tempo, which is what it has always been.
+    expect(listen(() => fireEvent.keyDown(rows[0], { key: "ArrowUp" }))).toEqual(["ArrowUp"]);
+  });
+
+  it("keeps Alt off the tempo while the setlist plays, and moves nothing", () => {
+    const onChange = vi.fn();
+    const { container } = draw({ onChange, runningIndex: 0, selectedStepIds: ids(["s1", "s2"]) });
+    const rows = blocks(container);
+    rows[0].focus();
+    const seen: string[] = [];
+    const spy = (e: KeyboardEvent) => seen.push(e.key);
+    document.addEventListener("keydown", spy);
     fireEvent.keyDown(rows[0], { key: "ArrowDown", altKey: true });
     document.removeEventListener("keydown", spy);
     expect(seen).toEqual([]);
-
-    // A bare arrow is still the tempo, which is what it has always been.
-    const plain: string[] = [];
-    const spy2 = (e: KeyboardEvent) => plain.push(e.key);
-    document.addEventListener("keydown", spy2);
-    fireEvent.keyDown(rows[0], { key: "ArrowUp" });
-    document.removeEventListener("keydown", spy2);
-    expect(plain).toEqual(["ArrowUp"]);
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it("Alt and down moves the whole block one position", () => {

@@ -194,8 +194,11 @@ export function SetlistParagraph({
   const startDrag = (e: React.DragEvent, step: SetlistStep) => {
     const block = blockFor(step.id);
     // A row outside the block is a block of one, and grabbing it makes it the
-    // step you are working with — the same thing clicking it does.
-    if (!block) onSelectStep(step.id);
+    // step you are working with — the same thing clicking it does. Not when
+    // it already IS: selecting pushes the step onto the engine and reopens
+    // the mirror's wait, and doing that for a step the engine is already on
+    // is an IPC write and a dropped guard in exchange for nothing.
+    if (!block && step.id !== selectedStepId) onSelectStep(step.id);
     const ids = block ?? [step.id];
     setDragIds(ids);
     e.dataTransfer.effectAllowed = "move";
@@ -209,7 +212,11 @@ export function SetlistParagraph({
   };
 
   const dragOverRow = (e: React.DragEvent, step: SetlistStep) => {
-    if (!dragIds) return;
+    // `draggable={!locked}` only stops a drag from STARTING. The setlist can
+    // begin to play in the middle of one — a hotkey, a MIDI note, the
+    // footswitch under the drummer's foot — and the drop would then move rows
+    // under a runner that addresses them by index. Both ends of the drag ask.
+    if (!dragIds || locked) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
     if (dragIds.includes(step.id)) {
@@ -225,7 +232,7 @@ export function SetlistParagraph({
   };
 
   const dropOnRow = (e: React.DragEvent, step: SetlistStep) => {
-    if (!dragIds) return;
+    if (!dragIds || locked) return;
     e.preventDefault();
     const edge = dropAt?.id === step.id ? dropAt.edge : "after";
     const to = landingIndex(dragIds, step.id, edge);
@@ -277,6 +284,20 @@ export function SetlistParagraph({
       document.removeEventListener("keydown", onKey);
     };
   }, [pickingJam]);
+
+  /*
+   * A run starting puts down whatever was being dragged.
+   *
+   * The drop is refused while the setlist plays, so a line still drawn
+   * between two rows would be promising something that is no longer on
+   * offer — and `dragend` does not fire until the pointer is released, which
+   * may be several bars later.
+   */
+  useEffect(() => {
+    if (!locked) return;
+    setDragIds(null);
+    setDropAt(null);
+  }, [locked]);
 
   /**
    * Escape gives the block back before it gives the setlist back.
@@ -456,22 +477,32 @@ export function SetlistParagraph({
                    * root inside it, so stopping propagation here is what
                    * keeps a step row from nudging the BPM while you are
                    * marking one.
+                   *
+                   * Claimed on the MODIFIER, before asking whether the row
+                   * has anywhere to go. It used to be claimed further down,
+                   * after the bounds test and after the locked test, so
+                   * Shift+↑ on the top row and Alt+↓ on a playing setlist —
+                   * the two presses where nothing is supposed to happen —
+                   * fell through and changed the tempo instead. A gesture
+                   * that is refused has to be refused silently; the one
+                   * thing it must not do is something else.
                    */
+                  if (e.shiftKey || e.altKey) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  } else {
+                    // A bare arrow is the tempo, which is what it has always
+                    // been from anywhere in the window.
+                    return;
+                  }
                   if (e.shiftKey) {
                     const next = index + (down ? 1 : -1);
                     if (next < 0 || next >= setlist.steps.length) return;
-                    e.preventDefault();
-                    e.stopPropagation();
                     onExtendSelection?.(setlist.steps[next].id);
                     focusRow(next);
                     return;
                   }
-                  if (e.altKey && !locked) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    nudgeBlock(block ?? [step.id], down ? 1 : -1);
-                    return;
-                  }
+                  if (!locked) nudgeBlock(block ?? [step.id], down ? 1 : -1);
                   return;
                 }
                 if (e.key !== "Enter" && e.key !== " ") return;

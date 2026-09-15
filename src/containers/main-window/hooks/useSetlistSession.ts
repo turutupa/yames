@@ -14,6 +14,7 @@ import {
 import {
   deleteSetlist as deleteSetlistIpc,
   listSetlists,
+  reorderSetlists as reorderSetlistsIpc,
   saveSetlist as saveSetlistIpc,
 } from "../../../ipc";
 import { meterKey } from "../../../utils/meter";
@@ -104,6 +105,23 @@ function stateAsPreset(state: AppState, name: string): Preset {
   };
 }
 
+/**
+ * `list` with `item` sitting directly after the entry with id `afterId`.
+ *
+ * Returns the list unchanged when it is already there or when `afterId` names
+ * nothing. Pure, and used twice on purpose: once for what is on screen and
+ * once for the ids the store is told to keep.
+ */
+function insertAfter<T extends { id: string }>(list: T[], afterId: string, item: T): T[] {
+  const at = list.findIndex((c) => c.id === afterId);
+  const landed = list.findIndex((c) => c.id === item.id);
+  if (at < 0 || landed < 0 || landed === at + 1) return list;
+  const next = [...list];
+  next.splice(landed, 1);
+  next.splice(landed < at ? at : at + 1, 0, item);
+  return next;
+}
+
 interface UseSetlistSessionArgs {
   state: AppState;
   isPlaying: boolean;
@@ -186,22 +204,44 @@ export function useSetlistSession({
   }, [isPlaying]);
 
   /*
-   * Starting the setlist gives the block back.
+   * A run, either end of it, gives the block back.
    *
-   * The runner walks the primary selection down the list from here, so a set
-   * marked against where the selection used to be would stop describing
-   * anything a moment later — and the drag it was marked for is refused
-   * while the setlist plays anyway.
+   * Starting, because the runner is about to walk the primary selection down
+   * the list and a set marked against where it used to be stops describing
+   * anything a moment later. STOPPING, because by then it has: the anchor
+   * would still be sitting wherever the block was marked from before the
+   * run, so stopping on step six and shift-clicking step eight selected one
+   * through eight — a sweep of the whole routine from a gesture that asked
+   * for three steps.
    */
   useEffect(() => {
-    if (!isPlaying) return;
-    setSelectedStepIds((prev) =>
-      prev.size > 1 ? new Set(selectedStepId ? [selectedStepId] : []) : prev,
-    );
+    setSelectedStepIds(selectedStepId ? new Set([selectedStepId]) : new Set());
     setAnchorStepId(selectedStepId);
-    // Only when the run starts. Adding the selection here would collapse the
-    // block on every click that moves it, which is the opposite of the point.
+    // Only when the run starts or ends. Adding the selection here would
+    // collapse the block on every click that moves it, which is the opposite
+    // of the point.
   }, [isPlaying]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /*
+   * Ids the setlist no longer has.
+   *
+   * Revert, or an undo of any kind, can take a step away while it is marked
+   * — and a ghost id leaves one row wearing the block's wash while its
+   * buttons say "1 step", which is the set and the screen disagreeing about
+   * what a press would do. Cheap: the common case finds nothing to prune and
+   * returns the same Set, so it costs no render.
+   */
+  useEffect(() => {
+    if (!setlist) return;
+    const live = new Set(setlist.steps.map((s) => s.id));
+    setSelectedStepIds((prev) => {
+      let stale = false;
+      for (const id of prev) if (!live.has(id)) stale = true;
+      if (!stale) return prev;
+      return new Set([...prev].filter((id) => live.has(id)));
+    });
+    setAnchorStepId((prev) => (prev && live.has(prev) ? prev : null));
+  }, [setlist]);
 
   useEffect(() => {
     listSetlists().then(setSetlists).catch(() => {});
@@ -269,16 +309,32 @@ export function useSetlistSession({
     [setlist, anchorStepId, selectedStepId],
   );
 
-  /** Ctrl-click (⌘ on a Mac): this one step in or out, nothing else moves. */
-  const toggleStepSelection = useCallback((stepId: string) => {
-    setSelectedStepIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(stepId)) next.delete(stepId);
-      else next.add(stepId);
-      return next;
-    });
-    setAnchorStepId(stepId);
-  }, []);
+  /**
+   * Ctrl-click (⌘ on a Mac): this one step in or out, nothing else moves.
+   *
+   * Never out of existence, though. The set is "the steps an operation would
+   * take", and it has to hold at least the step the controls are on — a
+   * ctrl-click that emptied it left the row still drawn as selected with its
+   * buttons pointing at nothing. So the primary cannot be clicked out, and a
+   * toggle that would leave the set empty collapses to the primary instead.
+   */
+  const toggleStepSelection = useCallback(
+    (stepId: string) => {
+      setSelectedStepIds((prev) => {
+        const next = new Set(prev);
+        if (!next.has(stepId)) {
+          next.add(stepId);
+          return next;
+        }
+        if (stepId === selectedStepId) return prev;
+        next.delete(stepId);
+        if (next.size === 0 && selectedStepId) next.add(selectedStepId);
+        return next;
+      });
+      setAnchorStepId(stepId);
+    },
+    [selectedStepId],
+  );
 
   /** Back to the one step the controls are on. */
   const collapseSelection = useCallback(() => {
@@ -437,18 +493,19 @@ export function useSetlistSession({
       if (!target) return;
       const copy = duplicateSetlistData(target, t("setlist.copyName", { name: target.name }));
       await saveSetlistIpc(copy).catch(() => {});
-      setSetlists((prev) => {
-        // Against the list as it is NOW, not the one this closure captured:
-        // the await above is the same window `newSetlist` learned about.
-        const next = upsertSetlist(prev, copy);
-        const at = next.findIndex((c) => c.id === id);
-        const landed = next.findIndex((c) => c.id === copy.id);
-        if (at < 0 || landed === at + 1) return next;
-        const moved = [...next];
-        moved.splice(landed, 1);
-        moved.splice(landed < at ? at : at + 1, 0, copy);
-        return moved;
-      });
+      // Against the list as it is NOW, not the one this closure captured: the
+      // await above is the same window `newSetlist` learned about.
+      setSetlists((prev) => insertAfter(upsertSetlist(prev, copy), id, copy));
+      /*
+       * And in the store, which has its own order.
+       *
+       * `save_setlist` appends, so the copy sat beside its source on screen
+       * and at the bottom of the library after a restart — the one place the
+       * position was supposed to mean something. The library's order is the
+       * user's, so it is written down.
+       */
+      const ordered = insertAfter(upsertSetlist(setlists, copy), id, copy);
+      await reorderSetlistsIpc(ordered.map((c) => c.id)).catch(() => {});
       return copy;
     },
     [setlists, t],

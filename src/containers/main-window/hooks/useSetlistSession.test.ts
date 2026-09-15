@@ -12,6 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 import { useSetlistSession } from "./useSetlistSession";
 import { DEFAULT_TEST_STATE, mockInvoke } from "../../../test/mocks";
+import * as ipc from "../../../ipc";
 import { STARTER_JAMS } from "../../../jam/jams";
 import { jamToSetlistStep } from "../../../setlist";
 import type { Jam } from "../../../jam/types";
@@ -572,6 +573,25 @@ describe("duplicating a setlist", () => {
     return view;
   }
 
+  it("writes the copy's place down, so it is still there after a restart", async () => {
+    /*
+     * `save_setlist` appends. The copy therefore sat beside its source on
+     * screen and at the bottom of the library the next time the app opened —
+     * the one place where being beside it was the whole point. The order is
+     * the user's, so it goes to the store as an order.
+     */
+    const reorder = vi.spyOn(ipc, "reorderSetlists");
+    const { result } = await library();
+    let copyId = "";
+    await act(async () => {
+      copyId = (await result.current.duplicateSetlist("c1"))?.id ?? "";
+    });
+    const ids = reorder.mock.calls[reorder.mock.calls.length - 1][0];
+    expect(ids.indexOf(copyId)).toBe(ids.indexOf("c1") + 1);
+    expect(ids).toEqual(["c1", copyId, "c2"]);
+    reorder.mockRestore();
+  });
+
   it("puts the copy directly after the one it came from", async () => {
     // Beside it, not at the bottom of the library: a copy is a variation on
     // that setlist. The jam library's Duplicate already reads this way.
@@ -657,9 +677,75 @@ describe("a block of steps, beside the selection", () => {
     act(() => result.current.extendSelection("s2"));
     act(() => result.current.toggleStepSelection("s4"));
     expect([...result.current.selectedStepIds].sort()).toEqual(["s1", "s2", "s4"]);
-    act(() => result.current.toggleStepSelection("s1"));
-    expect([...result.current.selectedStepIds].sort()).toEqual(["s2", "s4"]);
+    act(() => result.current.toggleStepSelection("s2"));
+    expect([...result.current.selectedStepIds].sort()).toEqual(["s1", "s4"]);
     expect(result.current.selectedStepId).toBe("s1");
+  });
+
+  it("never lets a ctrl-click empty the set", () => {
+    // The set is "the steps an operation would take", and the step the
+    // controls are on is always one of them — a set clicked down to nothing
+    // left the row still drawn as selected with its buttons pointing at
+    // no step at all.
+    const { result } = loaded();
+    act(() => result.current.extendSelection("s2"));
+    // The primary cannot be clicked out of its own set.
+    act(() => result.current.toggleStepSelection("s1"));
+    expect([...result.current.selectedStepIds].sort()).toEqual(["s1", "s2"]);
+
+    // And a toggle that would empty a set the primary is not in falls back
+    // to the primary rather than to nothing.
+    act(() => result.current.selectStep("s1"));
+    act(() => result.current.toggleStepSelection("s3"));
+    act(() => result.current.toggleStepSelection("s1"));
+    act(() => result.current.toggleStepSelection("s3"));
+    expect([...result.current.selectedStepIds]).toEqual(["s1"]);
+  });
+
+  it("drops ids the setlist no longer has, and the anchor with them", () => {
+    // Revert can take a step away while it is marked. A ghost id leaves one
+    // row wearing the block's wash while its buttons say "1 step".
+    const { result } = loaded();
+    act(() => result.current.extendSelection("s4"));
+    expect(result.current.selectedStepIds.size).toBe(4);
+    act(() =>
+      result.current.setSetlist((c) =>
+        c ? { ...c, steps: c.steps.filter((s) => s.id !== "s3" && s.id !== "s4") } : c,
+      ),
+    );
+    expect([...result.current.selectedStepIds].sort()).toEqual(["s1", "s2"]);
+  });
+
+  it("forgets where a shift-click measures from once a run has moved the selection", () => {
+    // The runner drags the primary down the list; the anchor stayed where the
+    // block was marked from before the run, so stopping on a later step and
+    // shift-clicking one after it swept the whole routine.
+    const setView = vi.fn();
+    const { result, rerender } = renderHook(
+      ({ state, isPlaying }: { state: AppState; isPlaying: boolean }) =>
+        useSetlistSession({
+          state,
+          isPlaying,
+          currentBeat: null,
+          setView,
+          onSetlistLoaded: vi.fn(),
+        }),
+      { initialProps: { state: DEFAULT_TEST_STATE as AppState, isPlaying: false } },
+    );
+    const steps = [
+      ...CHAIN.steps,
+      { ...CHAIN.steps[0], id: "s3", name: "Push" },
+      { ...CHAIN.steps[1], id: "s4", name: "Cool down" },
+    ];
+    act(() => result.current.loadSetlist({ ...CHAIN, steps }));
+    // A block marked from the top, then a run, then a stop on step three.
+    act(() => result.current.extendSelection("s2"));
+    act(() => rerender({ state: DEFAULT_TEST_STATE as AppState, isPlaying: true }));
+    act(() => result.current.selectStep("s3"));
+    act(() => rerender({ state: DEFAULT_TEST_STATE as AppState, isPlaying: false }));
+
+    act(() => result.current.extendSelection("s4"));
+    expect([...result.current.selectedStepIds]).toEqual(["s3", "s4"]);
   });
 
   it("a plain click ends the block", () => {
