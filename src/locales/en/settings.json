@@ -138,6 +138,9 @@
     "devices": {
       "title": "Devices",
       "audioOutput": "Audio Output",
+      "outputPair": "Outputs",
+      "outputsPair": "Outputs {{a}}-{{b}}",
+      "outputPairFallback": "This device only delivered two outputs, so the click plays on outputs 1-2.",
       "refreshAudio": "Refresh audio devices",
       "btLatencyWarning": "Bluetooth audio adds significant latency. Visual cues and sound may not sync perfectly.",
       "audioInput": "Audio Input",

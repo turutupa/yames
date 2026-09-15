@@ -138,6 +138,9 @@
     "devices": {
       "title": "Cihazlar",
       "audioOutput": "Ses Çıkışı",
+      "outputPair": "Çıkışlar",
+      "outputsPair": "Çıkışlar {{a}}-{{b}}",
+      "outputPairFallback": "Bu cihaz yalnızca iki çıkış verdi, bu yüzden klik 1-2 numaralı çıkışlardan çalıyor.",
       "refreshAudio": "Ses cihazlarını yenile",
       "btLatencyWarning": "Bluetooth ses belirgin gecikme ekler. Görsel ipuçları ve ses tam olarak senkronize olmayabilir.",
       "audioInput": "Ses Girişi",

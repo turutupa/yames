@@ -69,7 +69,10 @@ interface SettingsViewProps {
   audioOutputDevices: AudioOutputDevice[];
   setAudioOutputDevices: Dispatch<SetStateAction<AudioOutputDevice[]>>;
   selectedOutputDevice: string;
-  setSelectedOutputDevice: Dispatch<SetStateAction<string>>;
+  outputPair: number;
+  selectOutputPair: (pair: number) => void;
+  selectOutputDevice: (deviceName: string) => void;
+  outputPairFellBack: boolean;
   evaluation: Evaluation;
   midi: UseMidiReturn;
   onOpenInputTest: () => void;
@@ -161,7 +164,10 @@ export function SettingsView({
   audioOutputDevices,
   setAudioOutputDevices,
   selectedOutputDevice,
-  setSelectedOutputDevice,
+  outputPair,
+  selectOutputPair,
+  selectOutputDevice,
+  outputPairFellBack,
   evaluation,
   midi,
   onOpenInputTest,
@@ -257,7 +263,10 @@ export function SettingsView({
         audioOutputDevices={audioOutputDevices}
         setAudioOutputDevices={setAudioOutputDevices}
         selectedOutputDevice={selectedOutputDevice}
-        setSelectedOutputDevice={setSelectedOutputDevice}
+        outputPair={outputPair}
+        selectOutputPair={selectOutputPair}
+        selectOutputDevice={selectOutputDevice}
+        outputPairFellBack={outputPairFellBack}
         evaluation={evaluation}
         midi={midi}
         onOpenInputTest={onOpenInputTest}

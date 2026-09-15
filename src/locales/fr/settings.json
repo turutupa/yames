@@ -138,6 +138,9 @@
     "devices": {
       "title": "Périphériques",
       "audioOutput": "Sortie audio",
+      "outputPair": "Sorties",
+      "outputsPair": "Sorties {{a}}-{{b}}",
+      "outputPairFallback": "Cet appareil ne fournit que deux sorties, donc le clic passe par les sorties 1-2.",
       "refreshAudio": "Rafraîchir les périphériques audio",
       "btLatencyWarning": "L'audio Bluetooth ajoute une latence importante. Les repères visuels et le son peuvent ne pas être parfaitement synchronisés.",
       "audioInput": "Entrée audio",
