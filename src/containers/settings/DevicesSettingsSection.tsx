@@ -73,12 +73,20 @@ export function DevicesSettingsSection({
   );
   const deviceChannelCount = selectedInputDevice?.channels ?? 0;
   // How many outputs the chosen device has, and how many whole pairs that
-  // makes. "System default" is the empty name and has no entry in the
-  // list, so it reports nothing and the picker stays away — the default
-  // device is whatever the OS says it is, and its outputs are not ours to
-  // count from here.
-  const selectedOutputChannelCount =
-    audioOutputDevices.find((d) => d.name === selectedOutputDevice)?.channels ?? 0;
+  // makes.
+  //
+  // "System default" is the empty name and has no entry of its own in the
+  // list, so it resolves to whichever device is flagged `isDefault` — and
+  // on the machine issue 52 came from, the interface IS the default. A
+  // lookup by name alone hid the picker from exactly the person who asked
+  // for it. The backend keys the stored pair under the empty name either
+  // way, so the two agree on what "system default" means.
+  const selectedOutputDeviceEntry =
+    audioOutputDevices.find((d) => d.name === selectedOutputDevice) ??
+    (selectedOutputDevice === ""
+      ? audioOutputDevices.find((d) => d.isDefault)
+      : undefined);
+  const selectedOutputChannelCount = selectedOutputDeviceEntry?.channels ?? 0;
   const selectedOutputPairsAvailable = Math.floor(selectedOutputChannelCount / 2);
   // Per-instrument calibration cache lookup. We re-fetch whenever the
   // active `(instrument, audio input)` pair changes so the displayed

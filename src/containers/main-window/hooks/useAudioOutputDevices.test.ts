@@ -89,8 +89,15 @@ describe("storedPairFor", () => {
   });
 
   it("refuses nonsense from a hand-edited settings file", () => {
+    // `settings.json` is a file a user can open, and half a pair is not a
+    // pair. NaN and Infinity matter too: both slip past a bare `>= 0` and
+    // then index the options list with nothing.
     expect(storedPairFor({ x: -1 } as never, "x")).toBe(0);
     expect(storedPairFor({ x: "3-4" } as never, "x")).toBe(0);
+    expect(storedPairFor({ x: 1.5 } as never, "x")).toBe(0);
+    expect(storedPairFor({ x: NaN } as never, "x")).toBe(0);
+    expect(storedPairFor({ x: Infinity } as never, "x")).toBe(0);
+    expect(storedPairFor({ x: 2 } as never, "x")).toBe(2);
   });
 });
 

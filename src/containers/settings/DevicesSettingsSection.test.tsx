@@ -85,7 +85,27 @@ describe("the Outputs picker", () => {
     expect(outputPicker()).toBe(false);
   });
 
-  it("stays away for the system default, which names no device", () => {
+  it("appears for the system default when the default IS the interface", () => {
+    // The reporter's own setup: the interface is the OS default, so the
+    // picker is at "System default" and never at a name. Looking the
+    // device up by name alone hid the picker from exactly the person who
+    // asked for it.
+    renderSection({
+      audioOutputDevices: [{ ...INTERFACE, isDefault: true }, LAPTOP],
+      selectedOutputDevice: "",
+    });
+    expect(screen.getByText("Outputs 1-2")).toBeTruthy();
+  });
+
+  it("stays away when the system default is a two-output device", () => {
+    renderSection({
+      audioOutputDevices: [INTERFACE, { ...LAPTOP, isDefault: true }],
+      selectedOutputDevice: "",
+    });
+    expect(outputPicker()).toBe(false);
+  });
+
+  it("stays away when nothing is flagged as the default", () => {
     renderSection({ selectedOutputDevice: "" });
     expect(outputPicker()).toBe(false);
   });

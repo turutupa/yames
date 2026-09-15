@@ -52,6 +52,11 @@ pub struct SpeechHandoff {
     /// because the callback must not allocate, and the waiter is already
     /// awake every 20 ms.
     done: AtomicBool,
+    /// Raised when the stream the line was going out of is being torn down —
+    /// a device change, or a pair the open stream is too narrow for. The
+    /// speaking thread turns it into `Interrupted` rather than waiting out a
+    /// completion that is never coming.
+    cut: AtomicBool,
     retired: Mutex<Vec<Retired>>,
 }
 
@@ -90,6 +95,7 @@ impl SpeechHandoff {
             clip: Mutex::new(None),
             generation: AtomicU64::new(0),
             done: AtomicBool::new(false),
+            cut: AtomicBool::new(false),
             retired: Mutex::new(Vec::with_capacity(SPEECH_RETIRED_CAP)),
         }
     }
@@ -98,6 +104,12 @@ impl SpeechHandoff {
     /// one off. Clears any stale "it finished" flag, so a line started
     /// straight after an interrupted one cannot collect the old one's
     /// ending.
+    /// Deliberately does NOT clear `cut`. A device change can land while
+    /// the WAV is still being decoded — before the clip ever reaches this
+    /// slot — and clearing here would swallow it, leaving a line resampled
+    /// for the old device's rate to play out in full on the new one.
+    /// Clearing a stale cut is the speaking thread's job, once, before it
+    /// starts; see `tts::play_wav_path`.
     pub fn set_clip(&self, clip: Option<SpeechClip>) {
         self.drain_retired();
         self.done.store(false, Ordering::Release);
@@ -122,6 +134,29 @@ impl SpeechHandoff {
         self.done.store(true, Ordering::Release);
     }
 
+    /// Command thread: the stream this line was going out of is going away.
+    ///
+    /// Take the line back and say why. A line already resampled for the old
+    /// device's rate would play flat or sharp on the new one, and half of it
+    /// at the wrong speed is worse than none of it — the same reasoning
+    /// `MetronomeEngine::set_device` gives for dropping a kit decoded at the
+    /// old rate. The speaking thread reports `Interrupted`, which is not an
+    /// error: the musician asked for the device change.
+    pub fn cut(&self) {
+        if let Ok(mut slot) = self.clip.lock() {
+            *slot = None;
+            drop(slot);
+            self.generation.fetch_add(1, Ordering::Release);
+        }
+        self.cut.store(true, Ordering::Release);
+    }
+
+    /// Speaking thread: was the line taken away by a restart? Consumes the
+    /// flag, so one restart cuts one line.
+    pub fn was_cut(&self) -> bool {
+        self.cut.swap(false, Ordering::AcqRel)
+    }
+
     /// Audio thread: read the slot if its generation moved. `Some(new
     /// value)` when it did; `None` when nothing changed or the lock was
     /// busy — in which case the caller leaves its cached generation alone
@@ -136,15 +171,20 @@ impl SpeechHandoff {
         Some(slot.clone())
     }
 
-    /// Audio thread: give a finished clip back rather than dropping it.
-    /// Dropping the last `Arc` of a minute of speech would free it here.
-    /// A full retirement list is not an error — it means the speaking
-    /// thread has not come back yet, and the clip waits one more buffer.
-    pub(crate) fn retire(&self, pcm: Arc<Vec<f32>>) {
-        if let Ok(mut r) = self.retired.try_lock() {
-            if r.len() < SPEECH_RETIRED_CAP {
+    /// Audio thread: try to give a finished clip back rather than dropping
+    /// it — dropping the last `Arc` of a minute of speech would `free()`
+    /// under the mixer.
+    ///
+    /// `Err(item)` when the list is busy or full, and the caller MUST keep
+    /// what comes back: letting it fall out of scope here is the free this
+    /// exists to prevent. [`SpeechParking`] is where it waits.
+    fn try_retire(&self, pcm: Arc<Vec<f32>>) -> Result<(), Arc<Vec<f32>>> {
+        match self.retired.try_lock() {
+            Ok(mut r) if r.len() < SPEECH_RETIRED_CAP => {
                 r.push(Retired::Pcm(pcm));
+                Ok(())
             }
+            _ => Err(pcm),
         }
     }
 
@@ -152,6 +192,47 @@ impl SpeechHandoff {
     pub fn drain_retired(&self) {
         if let Ok(mut r) = self.retired.lock() {
             r.clear();
+        }
+    }
+}
+
+/// The audio thread's parking spaces for lines it finished with while the
+/// retirement list was busy, flushed once per buffer.
+///
+/// [`crate::take::TakeParking`] applied to speech, and for the same reason:
+/// `try_retire` can refuse, and a refused `Arc` that falls out of scope on
+/// the audio thread is exactly the `free()` under the mixer the engine is
+/// built to avoid. Two spaces rather than four — lines of coaching do not
+/// overlap, so one being cut off while another is handed over is already
+/// more traffic than this ever sees. If even these fill, the buffer is
+/// LEAKED rather than freed here: a few hundred kilobytes lost is a price,
+/// a `free()` in the callback is not.
+pub(crate) struct SpeechParking {
+    parked: [Option<Arc<Vec<f32>>>; 2],
+}
+
+impl SpeechParking {
+    pub(crate) fn new() -> Self {
+        Self { parked: [None, None] }
+    }
+
+    pub(crate) fn retire(&mut self, handoff: &SpeechHandoff, pcm: Arc<Vec<f32>>) {
+        if let Err(pcm) = handoff.try_retire(pcm) {
+            match self.parked.iter_mut().find(|s| s.is_none()) {
+                Some(slot) => *slot = Some(pcm),
+                None => std::mem::forget(pcm),
+            }
+        }
+    }
+
+    pub(crate) fn flush(&mut self, handoff: &SpeechHandoff) {
+        for slot in self.parked.iter_mut() {
+            if let Some(pcm) = slot.take() {
+                if let Err(back) = handoff.try_retire(pcm) {
+                    *slot = Some(back);
+                    return;
+                }
+            }
         }
     }
 }
@@ -285,6 +366,96 @@ mod tests {
         let mut pos = 0usize;
         mix_speech(&mut data, 1, 0, 3, &pcm, &mut pos);
         assert_eq!(data, vec![0.5, 0.5, 0.5]);
+    }
+
+    #[test]
+    fn a_line_taken_back_by_a_restart_says_so_once() {
+        let h = SpeechHandoff::new();
+        h.set_clip(Some(clip(64)));
+        assert!(!h.was_cut());
+        h.cut();
+        assert!(h.was_cut(), "a restart has to be reportable");
+        assert!(!h.was_cut(), "one restart cuts one line");
+        let mut seen = 0u64;
+        assert!(
+            matches!(h.poll(&mut seen), Some(None)),
+            "and the callback is told to go quiet on its next buffer"
+        );
+    }
+
+    #[test]
+    fn a_cut_survives_the_clip_that_arrives_after_it() {
+        // The ordering bug this pins down: a device change lands while the
+        // WAV is still being decoded, so it is raised BEFORE the clip
+        // reaches the slot. `set_clip` used to clear the flag, and a line
+        // resampled for the old device's rate then played out in full on
+        // the new one. Only the speaking thread clears it, once, before it
+        // starts — which is `was_cut`'s consuming swap.
+        let h = SpeechHandoff::new();
+        h.cut();
+        h.set_clip(Some(clip(8)));
+        assert!(
+            h.was_cut(),
+            "a device change during the decode was swallowed"
+        );
+        assert!(
+            !h.was_cut(),
+            "and having been collected, it does not cut the next line too"
+        );
+    }
+
+    #[test]
+    fn a_clip_the_retirement_list_refuses_is_parked_not_freed() {
+        // The bug: `retire` dropped the `Arc` when `try_retire` said no,
+        // which is a `free()` on the audio thread — the one thing the
+        // handoff exists to prevent.
+        let h = SpeechHandoff::new();
+        // Fill the list, so the next hand-back is refused.
+        for _ in 0..SPEECH_RETIRED_CAP {
+            assert!(h.try_retire(Arc::new(vec![0.0; 4])).is_ok());
+        }
+        let pcm = Arc::new(vec![0.25f32; 512]);
+        let watch = Arc::downgrade(&pcm);
+        let mut parking = SpeechParking::new();
+        parking.retire(&h, pcm);
+        assert!(
+            watch.upgrade().is_some(),
+            "the buffer was freed on the audio thread"
+        );
+
+        // The speaking thread comes back; the parked clip goes where it
+        // was always headed.
+        h.drain_retired();
+        parking.flush(&h);
+        assert!(watch.upgrade().is_some(), "still owned, now by the list");
+        h.drain_retired();
+        assert!(
+            watch.upgrade().is_none(),
+            "and freed on the thread that is allowed to free it"
+        );
+    }
+
+    #[test]
+    fn parking_that_overflows_leaks_rather_than_frees() {
+        // Needs the speaking thread to be gone for six hand-backs running,
+        // which no real sequence produces. A few hundred kilobytes lost is
+        // a price; a `free()` under the mixer is not.
+        let h = SpeechHandoff::new();
+        for _ in 0..SPEECH_RETIRED_CAP {
+            assert!(h.try_retire(Arc::new(vec![0.0; 4])).is_ok());
+        }
+        let mut parking = SpeechParking::new();
+        let watched: Vec<_> = (0..3)
+            .map(|_| {
+                let pcm = Arc::new(vec![0.1f32; 16]);
+                let w = Arc::downgrade(&pcm);
+                parking.retire(&h, pcm);
+                w
+            })
+            .collect();
+        for w in &watched {
+            assert!(w.upgrade().is_some(), "something was freed on the callback");
+        }
     }
 
     #[test]

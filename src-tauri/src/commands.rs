@@ -1929,13 +1929,25 @@ pub const OUTPUT_PAIRS_KEY: &str = "audioOutputPairs";
 /// `None` (the system default device) has its own entry under the empty
 /// name, so a musician who uses the default device and an interface keeps
 /// a pair for each.
+///
+/// Anything that is not a whole number of pairs the engine could act on is
+/// outputs 1-2: `settings.json` is a file a user can open, and half a pair
+/// or a pair past `MAX_OUTPUT_PAIR` is not a routing the app can honour.
+/// Clamping a silly number would be worse than ignoring it — it would send
+/// the click to an output nobody named.
 pub fn stored_output_pair(store: &serde_json::Value, device_name: Option<&str>) -> u16 {
     store
         .get(device_name.unwrap_or(""))
         .and_then(|v| v.as_u64())
-        .unwrap_or(0)
-        .min(u16::MAX as u64) as u16
+        .filter(|&n| n <= MAX_OUTPUT_PAIR as u64)
+        .unwrap_or(0) as u16
 }
+
+/// The widest interface worth offering a pair on: 128 outputs. Well past
+/// anything a musician plugs into a laptop, and a ceiling means a number
+/// typed into `settings.json` by hand cannot ask the engine to open a
+/// stream nothing could deliver.
+pub const MAX_OUTPUT_PAIR: u16 = 63;
 
 #[tauri::command]
 pub fn set_audio_output_device(
@@ -1989,6 +2001,10 @@ pub fn set_audio_output_pair(
     app_handle: AppHandle,
 ) -> u16 {
     use tauri_plugin_store::StoreExt;
+    // The same ceiling `stored_output_pair` reads back through, so a pair
+    // that would be ignored on the next launch is refused now rather than
+    // persisted and quietly forgotten.
+    let pair = pair.min(MAX_OUTPUT_PAIR);
     let device_name = {
         let engine = engine_state.0.lock().unwrap();
         engine.device_name().map(|s| s.to_string())
@@ -2337,7 +2353,7 @@ pub async fn tts_speak(
     // it. The active-state cancellation above gives us the interrupt
     // semantic; releasing the lock here lets the new call actually
     // proceed concurrently to do the cancelling.
-    let mut snapshot = {
+    let snapshot = {
         let engine = tts.lock().map_err(|e| format!("Lock failed: {e}"))?;
         engine.snapshot()
     }
@@ -2349,17 +2365,25 @@ pub async fn tts_speak(
     // coach in their laptop speakers, and a drummer who has put the click
     // on outputs 3-4 hears the coach in the v-drums. See `speech_out`.
     //
-    // Opening the device here is deliberate: the coach greets a musician
-    // who has not pressed Play yet, and there would be no stream for the
-    // line to come out of. `ensure_audio_thread` is a no-op when one is
-    // already running, which is the usual case. The engine lock is taken
-    // and released immediately; the heavy work below runs without it.
-    snapshot.speech = {
+    // Getting the device opening here is deliberate: the coach greets a
+    // musician who has not pressed Play yet, and there would be no stream
+    // for the line to come out of. `start_audio_thread` is a no-op when
+    // one is already running, which is the usual case.
+    //
+    // The lock is held for the SPAWN and nothing else. Waiting for the
+    // device under it would queue every synchronous Tauri command — Play,
+    // the tempo, the output pair — behind up to two seconds of device
+    // open, on the main thread, which is a frozen window and exactly what
+    // `MetronomeEngine::start` refuses to do. The wait happens on the
+    // blocking thread below, on a handle that needs no lock at all.
+    let speech_slots = {
         let mut engine = engine_state.0.lock().unwrap();
-        if let Err(e) = engine.ensure_audio_thread(state.inner().clone(), app_handle.clone()) {
+        if let Err(e) = engine.start_audio_thread(state.inner().clone(), app_handle.clone()) {
             eprintln!("[yames] the coach has nowhere to speak from: {e}");
         }
-        engine.speech_out()
+        // AFTER the spawn: `start_audio_thread` installs a fresh `alive`,
+        // and a handle taken before it would be watching a dead thread.
+        engine.speech_slots()
     };
 
     let tts_active_arc: SharedTtsActive = tts_active.inner().clone();
@@ -2368,6 +2392,19 @@ pub async fn tts_speak(
     // Push subprocess I/O onto tokio's blocking pool so async workers
     // stay free for boundary IPC, evaluation toggles, settings, etc.
     let join_result = tokio::task::spawn_blocking(move || {
+        let mut snapshot = snapshot;
+        snapshot.speech = speech_slots.wait_for_stream();
+        if snapshot.speech.is_none() {
+            // No stream, so no speech — and this returns rather than
+            // running Piper for a line nobody can hear. An `Err` here
+            // still reaches the tail below, which emits
+            // `tts-speech-ended` and unwinds the dim: the metronome must
+            // not be left quiet because the device would not open. The
+            // audio thread has already said what went wrong through
+            // `audio-error`.
+            return Err("the audio output device is not available, so there is                         nowhere for the coach to speak"
+                .to_string());
+        }
         crate::tts::speak_standalone(&snapshot, &text_owned, &tts_active_arc, || {
             let _ = app_handle_for_emit.emit("tts-speech-started", ());
         })
@@ -3286,5 +3323,55 @@ mod tests {
         // into `main` and stealing focus from a returning widget user.
         assert_eq!(resolve_startup_window(Some("widget")), "widget");
         assert_ne!(resolve_startup_window(Some("")), "main");
+    }
+
+    /// A drummer with a laptop and an interface keeps a pair of outputs for
+    /// each: the click on 3-4 at church and on 1-2 at the kitchen table,
+    /// without touching the picker either way.
+    #[test]
+    fn the_stored_pair_is_remembered_per_device() {
+        let pairs = serde_json::json!({ "": 0, "UMC204HD 192k": 1, "Scarlett 18i20": 2 });
+        assert_eq!(stored_output_pair(&pairs, Some("UMC204HD 192k")), 1);
+        assert_eq!(stored_output_pair(&pairs, Some("Scarlett 18i20")), 2);
+        assert_eq!(
+            stored_output_pair(&pairs, None),
+            0,
+            "the system default device has its own entry, under the empty name"
+        );
+        assert_eq!(
+            stored_output_pair(&pairs, Some("a headset nobody has chosen")),
+            0,
+            "a device with no stored pair plays on outputs 1-2"
+        );
+        assert_eq!(
+            stored_output_pair(&serde_json::Value::Null, Some("anything")),
+            0,
+            "and so does every device before anyone has chosen at all"
+        );
+    }
+
+    /// The store is a JSON file a user can open. Half a pair is not a pair,
+    /// and a pair that does not fit a  is not one either.
+    #[test]
+    fn a_hand_edited_pair_that_makes_no_sense_is_outputs_one_and_two() {
+        let pairs = serde_json::json!({
+            "a": -1,
+            "b": "3-4",
+            "c": 1.5,
+            "d": 99_999_999_999_i64,
+        });
+        for name in ["a", "b", "c"] {
+            assert_eq!(stored_output_pair(&pairs, Some(name)), 0, "{name}");
+        }
+        assert_eq!(
+            stored_output_pair(&pairs, Some("d")),
+            0,
+            "a pair past the ceiling is ignored, not clamped onto some other output"
+        );
+        assert_eq!(
+            stored_output_pair(&serde_json::json!({ "e": MAX_OUTPUT_PAIR }), Some("e")),
+            MAX_OUTPUT_PAIR,
+            "and the ceiling itself is still a pair"
+        );
     }
 }

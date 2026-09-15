@@ -39,20 +39,26 @@ type StoredPairs = Record<string, number>;
 
 /** The pair stored for a device, or 0. The system default device is the
  *  empty name, so a musician with a laptop and an interface keeps one
- *  pair for each. Mirrors `commands::stored_output_pair`. */
+ *  pair for each. Mirrors `commands::stored_output_pair`.
+ *
+ *  A whole non-negative number or nothing: the store is a JSON file a user
+ *  can open, and half a pair is not a pair. `Number.isInteger` also
+ *  rejects NaN and Infinity, which a bare `>= 0` would let through as an
+ *  index into the options list. */
 export function storedPairFor(
   pairs: StoredPairs | null | undefined,
   deviceName: string,
 ): number {
   const stored = pairs?.[deviceName];
-  return typeof stored === "number" && stored >= 0 ? stored : 0;
+  return typeof stored === "number" && Number.isInteger(stored) && stored >= 0
+    ? stored
+    : 0;
 }
 
 export interface AudioOutputDevicesState {
   audioOutputDevices: AudioOutputDevice[];
   setAudioOutputDevices: Dispatch<SetStateAction<AudioOutputDevice[]>>;
   selectedOutputDevice: string;
-  setSelectedOutputDevice: Dispatch<SetStateAction<string>>;
   /** 0-based: 0 is "Outputs 1-2", 1 is "Outputs 3-4". */
   outputPair: number;
   /** Move the click, the band, takes and the coach to another pair. */
@@ -158,7 +164,6 @@ export function useAudioOutputDevices(): AudioOutputDevicesState {
     audioOutputDevices,
     setAudioOutputDevices,
     selectedOutputDevice,
-    setSelectedOutputDevice,
     outputPair,
     selectOutputPair,
     selectOutputDevice,

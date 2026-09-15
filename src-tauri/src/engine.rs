@@ -3149,6 +3149,118 @@ pub(crate) fn write_pair(
     frame[2 * pair + 1] = r;
 }
 
+/// How long anything waits for the output device to open. Enumerating
+/// devices, decoding the sound bank and opening the stream is the slow part
+/// of the first Play, and it is the same slow part on the first coach line.
+const SPEECH_STREAM_WAIT: Duration = AUDIO_SETUP_TIMEOUT;
+
+/// Everything the coach's voice needs from the engine, in a handle that can
+/// be polled with the engine mutex released. See
+/// [`MetronomeEngine::speech_slots`].
+#[derive(Clone)]
+pub struct SpeechSlots {
+    alive: Arc<AtomicBool>,
+    sample_rate: Arc<AtomicU32>,
+    stream_channels: Arc<AtomicU32>,
+    handoff: SharedSpeech,
+}
+
+impl SpeechSlots {
+    /// The open stream, or `None`.
+    ///
+    /// Three conditions, and all three earn their place. `alive` is per
+    /// spawn, so a thread that failed or exited answers `None` even though
+    /// the rate it published is still sitting there — the bug this rule
+    /// exists for is a device that opened once and then went away
+    /// (unplugged, or held exclusively by another app on WASAPI), where a
+    /// rate-only check handed the coach a slot nothing was reading and the
+    /// blocking thread waited for a completion that could never arrive,
+    /// with the metronome left dimmed behind it. `stream_channels` is
+    /// published only after the stream is up and cleared before every
+    /// spawn, so a thread that is still opening answers `None` rather than
+    /// the LAST stream's rate. And the rate itself is what the line is
+    /// resampled to.
+    pub fn out(&self) -> Option<SpeechOut> {
+        if !self.alive.load(Ordering::SeqCst) {
+            return None;
+        }
+        if self.stream_channels.load(Ordering::Acquire) == 0 {
+            return None;
+        }
+        match self.sample_rate.load(Ordering::Acquire) {
+            0 => None,
+            sr => Some(SpeechOut {
+                handoff: self.handoff.clone(),
+                sample_rate: sr,
+            }),
+        }
+    }
+
+    /// Wait for the stream to come up, up to [`SPEECH_STREAM_WAIT`].
+    ///
+    /// `None` means the device would not open — the audio thread has
+    /// already said so through `audio-error`, and the caller's job is to
+    /// let the speech fail cleanly rather than wait on it forever. Call
+    /// this with the engine mutex RELEASED; polling every 10 ms rather than
+    /// rendezvousing on the setup channel because that channel answers the
+    /// spawn, and this may be looking at a thread somebody else started.
+    pub fn wait_for_stream(&self) -> Option<SpeechOut> {
+        let deadline = std::time::Instant::now() + SPEECH_STREAM_WAIT;
+        loop {
+            if let Some(out) = self.out() {
+                return Some(out);
+            }
+            // A thread that is not even alive is not on its way up: either
+            // it never spawned or it has already failed. Nothing to wait for.
+            if !self.alive.load(Ordering::SeqCst) {
+                return None;
+            }
+            if std::time::Instant::now() >= deadline {
+                return None;
+            }
+            thread::sleep(Duration::from_millis(10));
+        }
+    }
+}
+
+/// What `set_output_pair` has to do to give the musician the pair they
+/// asked for.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum PairAction {
+    /// Store the pair and get on with it. Either nothing is running (the
+    /// next stream to open will read it), or the open stream is already
+    /// wide enough — which is the case that matters, because it means the
+    /// click moves without stopping.
+    StoreOnly,
+    /// Reopen the device. The channel count is fixed when a stream is
+    /// built, so a stream too narrow for the pair cannot be widened.
+    Restart,
+}
+
+/// The decision, from the two things the engine knows about its audio
+/// thread: whether one is running, and how wide the stream it opened is
+/// (0 until the stream is actually up).
+///
+/// The middle case is the one that bit: a thread that is ALIVE but has not
+/// published a width yet is still opening, and it read the pair on its way
+/// up — before the musician changed it. Storing the new pair and returning
+/// would leave the picker saying 3-4 over a stream that opened at its
+/// default width with nothing to correct it, because no fallback fires when
+/// nothing was asked for. Press Play and pick Outputs 3-4 half a second
+/// later and that is exactly the race. It restarts instead.
+pub(crate) fn pair_action(alive: bool, stream_channels: usize, pair: u16) -> PairAction {
+    if !alive {
+        return PairAction::StoreOnly;
+    }
+    if stream_channels == 0 {
+        return PairAction::Restart;
+    }
+    if pair_fits(pair, stream_channels) {
+        return PairAction::StoreOnly;
+    }
+    PairAction::Restart
+}
+
 /// Which channel of an interleaved buffer a take reads back.
 ///
 /// The pair's LEFT, because that is where the click and the band were just
@@ -3947,33 +4059,28 @@ impl MetronomeEngine {
         state: SharedState,
         app_handle: AppHandle,
     ) -> u16 {
-        // `alive` as well as the count: the count is what the LAST stream
-        // opened at, and a thread that has since exited left it behind.
-        let open = if self.alive.load(Ordering::SeqCst) {
-            self.stream_channels.load(Ordering::Acquire) as usize
-        } else {
-            0
-        };
-        // No stream open: nothing to restart, and the next one to open
-        // reads this and searches for a config that carries it.
-        if open == 0 {
-            self.output_pair.store(pair as u32, Ordering::Release);
+        let alive = self.alive.load(Ordering::SeqCst);
+        let open = self.stream_channels.load(Ordering::Acquire) as usize;
+        // Stored first, whatever happens next: a restart reads it on the way
+        // up, and a stream that already fits reads it on the next buffer.
+        self.output_pair.store(pair as u32, Ordering::Release);
+        if pair_action(alive, open, pair) == PairAction::StoreOnly {
+            if alive {
+                eprintln!(
+                    "[yames] the click moved to outputs {}-{}",
+                    2 * pair + 1,
+                    2 * pair + 2
+                );
+            }
             return pair;
         }
-        if pair_fits(pair, open) {
-            self.output_pair.store(pair as u32, Ordering::Release);
-            eprintln!("[yames] the click moved to outputs {}-{}", 2 * pair + 1, 2 * pair + 2);
-            return pair;
-        }
-        // Too wide for the stream that is open. The channel count is fixed
-        // when a stream is built, so this one has to go.
         eprintln!(
-            "[yames] outputs {}-{} need a wider stream than the {} open; reopening the device",
+            "[yames] outputs {}-{} need a stream this one is not ({} outputs open); \
+             reopening the device",
             2 * pair + 1,
             2 * pair + 2,
             open
         );
-        self.output_pair.store(pair as u32, Ordering::Release);
         let was_playing = self.playing.load(Ordering::SeqCst);
         self.shutdown();
         // Fresh atomics, for the reason `set_device` gives.
@@ -3986,35 +4093,50 @@ impl MetronomeEngine {
         pair
     }
 
+    /// The slots the coach's voice needs, pollable **without the engine
+    /// mutex**. Take it under the lock, use it outside.
+    ///
+    /// The lock matters because the wait for a device to open is up to
+    /// `AUDIO_SETUP_TIMEOUT`, and every synchronous Tauri command — Play,
+    /// the tempo, the output pair — runs on the main thread and would queue
+    /// behind it. A click on Play during the first coach line would freeze
+    /// the window, which is the very thing `start`'s doc comment forbids.
+    ///
+    /// Taken AFTER the spawn rather than before: `ensure_thread` installs a
+    /// fresh `alive` per spawn, so a snapshot taken earlier would be
+    /// watching the flag of a thread that is already gone.
+    pub fn speech_slots(&self) -> SpeechSlots {
+        SpeechSlots {
+            alive: self.alive.clone(),
+            sample_rate: self.sample_rate.clone(),
+            stream_channels: self.stream_channels.clone(),
+            handoff: self.speech.clone(),
+        }
+    }
+
     /// Where the coach's voice is left for the callback, and the rate to
-    /// resample it to — or `None` when no stream is open, which is the one
-    /// honest answer: there is nowhere for speech to come out of.
+    /// resample it to — or `None` when there is nowhere for speech to come
+    /// out of, which is the one honest answer and the one the caller knows
+    /// how to report.
     ///
     /// See `speech_out` for why the coach goes through the metronome's own
     /// stream rather than a second one of its own.
     pub fn speech_out(&self) -> Option<SpeechOut> {
-        match self.sample_rate.load(Ordering::Acquire) {
-            0 => None,
-            sr => Some(SpeechOut {
-                handoff: self.speech.clone(),
-                sample_rate: sr,
-            }),
-        }
+        self.speech_slots().out()
     }
 
-    /// Open the output device if it is not open already, so the coach has
-    /// somewhere to speak from before the musician has pressed Play once.
+    /// Get the output device opening if it is not open already, so the coach
+    /// has somewhere to speak from before the musician has pressed Play once.
     ///
-    /// This one DOES wait for the verdict, unlike `start`: it runs on a
-    /// blocking pool thread with no window to freeze, and handing a line of
-    /// speech to a stream that never opened would leave the caller polling
-    /// for a completion that can never arrive.
-    pub fn ensure_audio_thread(
+    /// Returns as soon as the thread is on its way — it does NOT wait for
+    /// the device, because this runs with the engine mutex held. The wait
+    /// belongs outside the lock, on `SpeechSlots::wait_for_stream`.
+    pub fn start_audio_thread(
         &mut self,
         state: SharedState,
         app_handle: AppHandle,
     ) -> Result<(), String> {
-        self.ensure_thread(state, Some(app_handle), SetupWait::UpTo(AUDIO_SETUP_TIMEOUT))
+        self.ensure_thread(state, Some(app_handle), SetupWait::No)
     }
 
     /// Get a clone of the adaptive score Arc for external updates.
@@ -4052,6 +4174,18 @@ impl MetronomeEngine {
         // silence, with `start` having reported success. Same idiom as
         // `set_device`.
         self.alive = Arc::new(AtomicBool::new(true));
+        // No stream yet, whatever the last one was. Written HERE, on the
+        // command thread and before the spawn, rather than by the outgoing
+        // thread: a thread that is unwinding must never write a slot the
+        // thread replacing it has already filled, which is the reason
+        // `alive` is a fresh `Arc` per spawn. The new thread republishes
+        // this once its stream is actually up.
+        //
+        // Two readers depend on the zero. `set_output_pair` reads it as
+        // "still opening, so the pair it read on the way up is stale —
+        // reopen"; `SpeechSlots::out` reads it as "no stream, so there is
+        // nowhere for the coach to speak".
+        self.stream_channels.store(0, Ordering::Release);
         let alive = self.alive.clone();
         let playing = self.playing.clone();
         let beat_log = self.beat_log.clone();
@@ -4219,7 +4353,19 @@ impl MetronomeEngine {
                     None,
                 );
                 match preflight {
-                    Ok(s) => drop(s),
+                    Ok(s) => {
+                        drop(s);
+                        // The same hundred milliseconds `set_device` waits
+                        // after tearing a stream down, and for the same
+                        // reason: CoreAudio does not release a device the
+                        // instant the last reference goes, and the real
+                        // stream is about to ask the same device for more
+                        // channels. Paid only when a widened config was
+                        // worth trying at all — a laptop never reaches
+                        // this branch, and an interface pays it once, when
+                        // the stream opens.
+                        thread::sleep(Duration::from_millis(100));
+                    }
                     Err(e) => {
                         eprintln!(
                             "[yames] this device would not open {} outputs ({e}); \
@@ -4340,6 +4486,7 @@ impl MetronomeEngine {
             let mut jam_in_pickup = false;
             let mut jam_retire = JamRetirement::new();
             let mut take_retire = crate::take::TakeParking::new();
+            let mut speech_retire = crate::speech_out::SpeechParking::new();
             // One report per loaded table, not one per tick.
             let mut jam_mismatch_reported = false;
             let mut was_playing = false;
@@ -4583,6 +4730,7 @@ impl MetronomeEngine {
                         cached.take_play_ended = false;
                     }
                     take_retire.flush(&take_shared);
+                    speech_retire.flush(&speech_cb);
 
                     // ---- What the coach is saying ----
                     //
@@ -4594,7 +4742,7 @@ impl MetronomeEngine {
                     // stopped metronome far more often than a running one.
                     if let Some(incoming) = speech_cb.poll(&mut cached.speech_generation) {
                         if let Some(old) = cached.speech.take() {
-                            speech_cb.retire(old.pcm);
+                            speech_retire.retire(&speech_cb, old.pcm);
                         }
                         cached.speech = incoming;
                         cached.speech_pos = 0;
@@ -4633,7 +4781,7 @@ impl MetronomeEngine {
                                 // and cannot report the ending twice.
                                 speech_cb.note_done();
                                 if let Some(old) = cached.speech.take() {
-                                    speech_cb.retire(old.pcm);
+                                    speech_retire.retire(&speech_cb, old.pcm);
                                 }
                             }
                         };
@@ -6008,9 +6156,14 @@ impl MetronomeEngine {
     pub fn shutdown(&mut self) {
         self.playing.store(false, Ordering::SeqCst);
         self.alive.store(false, Ordering::SeqCst);
-        // No stream, so no width and no rate. Cleared here rather than left
-        // behind, so nothing decides a pair fits a stream that is gone.
+        // No stream, so no width. Cleared here rather than left behind, so
+        // nothing decides a pair fits a stream that is gone.
         self.stream_channels.store(0, Ordering::Release);
+        // A line of coaching in flight was decoded for THIS device's rate
+        // and is half-spoken. Take it back rather than let the next stream
+        // replay it from the top at the wrong speed; the speaking thread
+        // reports `Interrupted`, which is what a device change is.
+        self.speech.cut();
         if let Some(handle) = self.thread_handle.take() {
             let _ = handle.join();
         }
@@ -6262,12 +6415,42 @@ mod tests {
     }
 
     #[test]
-    fn frames_are_still_counted_by_the_streams_width() {
+    fn a_widened_buffer_holds_as_many_frames_as_the_callback_writes() {
         // The trap `audio_input.rs` documents: divide a buffer by the wrong
-        // channel count and the cursor advances at the wrong speed. Six
-        // outputs, 128 frames.
-        let data = vec![0.0f32; 6 * 128];
-        assert_eq!(data.len() / 6, 128);
+        // channel count and the cursor advances at the wrong speed. This
+        // runs the real mix write over a whole six-output buffer with a
+        // signal that says which frame it came from, then counts the frames
+        // back out of what was written — so a write that strode wrong, or a
+        // frame count that disagreed with the stream's width, shows up as a
+        // missing or misplaced sample rather than as arithmetic agreeing
+        // with itself.
+        const CHANNELS: usize = 6;
+        const FRAMES: usize = 128;
+        let mut data = vec![-1.0f32; CHANNELS * FRAMES];
+        let frames = data.len() / CHANNELS;
+        assert_eq!(frames, FRAMES);
+        for f in 0..frames {
+            // A ramp, so every frame is distinguishable from its neighbours.
+            let v = f as f32 / FRAMES as f32;
+            write_pair(&mut data, f * CHANNELS, CHANNELS, 2, v, -v);
+        }
+        // Read it back the way the take recorder does, off the pair's left.
+        let recovered: Vec<f32> = data
+            .iter()
+            .skip(take_offset(CHANNELS, 2))
+            .step_by(CHANNELS)
+            .copied()
+            .collect();
+        assert_eq!(recovered.len(), FRAMES, "a frame went missing");
+        for (f, &v) in recovered.iter().enumerate() {
+            assert_eq!(v, f as f32 / FRAMES as f32, "frame {f} is not its own");
+        }
+        // ...and nothing was left over from the fill on outputs 1-4.
+        for f in 0..frames {
+            for ch in 0..4 {
+                assert_eq!(data[f * CHANNELS + ch], 0.0, "output {} spoke", ch + 1);
+            }
+        }
     }
 
     #[test]
@@ -6351,44 +6534,126 @@ mod tests {
     }
 
     #[test]
-    fn the_pair_a_callback_reads_is_one_relaxed_load() {
-        // The shape the callback uses, spelled out: whatever is in the
-        // atomic, clamped to what the stream can hold. Changing the atomic
-        // from another thread is all it takes to move the click — no
-        // restart, no lock, nothing to allocate.
-        let slot = Arc::new(AtomicU32::new(0));
-        let read = |channels: usize| effective_pair(slot.load(Ordering::Relaxed) as u16, channels);
-        assert_eq!(read(4), 0);
-        slot.store(1, Ordering::Release);
-        assert_eq!(read(4), 1, "the next buffer plays on outputs 3-4");
-        assert_eq!(read(2), 0, "and on a stereo stream it stays on 1-2");
+    fn a_pair_the_open_stream_already_holds_stops_nothing() {
+        // The case that matters: four outputs open, asked for 3-4. The
+        // callback picks the new pair up on its next buffer, so the click
+        // does not miss a beat and the band keeps its bar.
+        assert_eq!(pair_action(true, 4, 1), PairAction::StoreOnly);
+        assert_eq!(pair_action(true, 8, 3), PairAction::StoreOnly);
+        assert_eq!(pair_action(true, 2, 0), PairAction::StoreOnly);
     }
 
     #[test]
-    fn the_stored_pair_is_remembered_per_device() {
-        let pairs = serde_json::json!({ "": 0, "UMC204HD 192k": 1, "Scarlett 18i20": 2 });
+    fn a_pair_wider_than_the_open_stream_reopens_the_device() {
+        // The channel count is fixed when a stream is built, so this one
+        // has to go.
+        assert_eq!(pair_action(true, 2, 1), PairAction::Restart);
+        assert_eq!(pair_action(true, 4, 2), PairAction::Restart);
+    }
+
+    #[test]
+    fn a_pair_chosen_while_the_device_is_still_opening_reopens_it() {
+        // The regression: `alive` goes up at the spawn, but the width is
+        // published only once the stream is actually running, and the
+        // thread read the pair on its way past. Press Play and pick
+        // Outputs 3-4 half a second later and the store-only branch would
+        // leave the picker saying 3-4 over a stream that opened at its
+        // default width — with no fallback to correct it, because nothing
+        // was asked for at open time.
+        assert_eq!(pair_action(true, 0, 1), PairAction::Restart);
         assert_eq!(
-            crate::commands::stored_output_pair(&pairs, Some("UMC204HD 192k")),
-            1
+            pair_action(true, 0, 0),
+            PairAction::Restart,
+            "even outputs 1-2: the thread may have read a WIDER pair on its way up"
         );
+    }
+
+    #[test]
+    fn a_pair_chosen_with_nothing_running_is_just_remembered() {
+        // Nothing to restart, and the next stream to open reads it and
+        // goes looking for a config that carries it.
+        assert_eq!(pair_action(false, 0, 1), PairAction::StoreOnly);
         assert_eq!(
-            crate::commands::stored_output_pair(&pairs, Some("Scarlett 18i20")),
-            2
+            pair_action(false, 4, 1),
+            PairAction::StoreOnly,
+            "a width left behind by a thread that has exited is not a stream"
         );
-        assert_eq!(
-            crate::commands::stored_output_pair(&pairs, None),
-            0,
-            "the system default device has its own entry"
+    }
+
+    #[test]
+    fn the_coach_has_nowhere_to_speak_until_a_stream_is_up() {
+        // The bug: a rate is published once per stream and never cleared,
+        // so an engine whose device opened once and then went away still
+        // answered with a slot nothing was reading — and `play_wav_path`
+        // waited on it for a completion that could not arrive, with the
+        // metronome dimmed behind it.
+        let mut engine = MetronomeEngine::new(crate::timing::create_beat_log());
+        assert!(
+            engine.speech_out().is_none(),
+            "nothing has opened a device yet"
         );
-        assert_eq!(
-            crate::commands::stored_output_pair(&pairs, Some("a headset nobody has chosen")),
-            0,
-            "a device with no stored pair plays on outputs 1-2"
+
+        // Pretend a stream ran: a rate and a width, both published.
+        engine.sample_rate.store(48_000, Ordering::Release);
+        engine.stream_channels.store(4, Ordering::Release);
+        engine.alive.store(true, Ordering::SeqCst);
+        assert!(engine.speech_out().is_some(), "a live stream is speakable");
+
+        // ...and then the device went away.
+        engine.shutdown();
+        assert!(
+            engine.speech_out().is_none(),
+            "the rate is still there, but there is no stream behind it"
         );
-        assert_eq!(
-            crate::commands::stored_output_pair(&serde_json::Value::Null, Some("anything")),
-            0,
-            "and so does every device before anyone has chosen at all"
+    }
+
+    #[test]
+    fn a_stream_that_is_still_opening_is_not_a_place_to_speak() {
+        let mut engine = MetronomeEngine::new(crate::timing::create_beat_log());
+        // What `ensure_thread` leaves behind between the spawn and `ready`:
+        // alive up, a rate from the LAST stream, no width yet.
+        engine.sample_rate.store(44_100, Ordering::Release);
+        engine.stream_channels.store(0, Ordering::Release);
+        engine.alive.store(true, Ordering::SeqCst);
+        assert!(
+            engine.speech_out().is_none(),
+            "resampling to the old device's rate is worse than saying no"
+        );
+    }
+
+    #[test]
+    fn waiting_for_a_stream_gives_up_when_nothing_is_coming() {
+        // No thread was ever spawned, so there is nothing to wait for and
+        // the answer must be immediate rather than the full timeout.
+        let engine = MetronomeEngine::new(crate::timing::create_beat_log());
+        let slots = engine.speech_slots();
+        let started = std::time::Instant::now();
+        assert!(slots.wait_for_stream().is_none());
+        assert!(
+            started.elapsed() < SPEECH_STREAM_WAIT,
+            "a dead engine made the coach wait out the whole device timeout"
+        );
+    }
+
+    #[test]
+    fn a_device_change_takes_the_line_in_flight_back() {
+        // A line decoded at the old device's rate would play flat or sharp
+        // on the new one, and the callback's position resets with the
+        // thread — so half of it would be replayed at the wrong speed.
+        // `shutdown` cuts it instead, and the speaking thread reports
+        // `Interrupted`, which is what a device change is.
+        let mut engine = MetronomeEngine::new(crate::timing::create_beat_log());
+        let speech = engine.speech.clone();
+        speech.set_clip(Some(crate::speech_out::SpeechClip {
+            pcm: Arc::new(vec![0.5; 128]),
+        }));
+        assert!(!speech.was_cut());
+        engine.shutdown();
+        assert!(speech.was_cut(), "the line was left to replay on the new stream");
+        let mut seen = 0u64;
+        assert!(
+            matches!(speech.poll(&mut seen), Some(None)),
+            "and the callback is told to go quiet"
         );
     }
 

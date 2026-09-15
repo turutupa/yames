@@ -688,10 +688,33 @@ pub fn play_wav_path(
     let out = out.ok_or_else(|| {
         "no audio output device available for speech playback".to_string()
     })?;
+    // Throw away a cut left over from an earlier line's device change. From
+    // here on a cut belongs to THIS line — including one that lands while
+    // the file below is still being decoded, which matters because the rate
+    // it is being resampled to was read before the restart and is now the
+    // wrong one. This is the only place the flag is cleared; `set_clip`
+    // deliberately leaves it alone.
+    let _ = out.handoff.was_cut();
     let pcm = decode_speech_wav(path, out.sample_rate, volume)?;
     if pcm.is_empty() {
         return Ok(PlaybackEnd::Finished);
     }
+    let frames = pcm.len();
+    // How long this line can possibly take, plus a second of slack for the
+    // buffer the callback is already inside and the 20 ms poll below.
+    //
+    // A deadline and not a bare loop because the thing on the other end is
+    // a sound card. A device that was open and then went away — unplugged,
+    // or taken exclusively by another app, which is WASAPI's
+    // `AUDCLNT_E_DEVICE_IN_USE` — leaves a slot nothing is reading, and a
+    // loop with no way out would hold this blocking thread until the next
+    // line of coaching, never emit `tts-speech-ended`, and never unwind the
+    // dim: the metronome would come back quiet and stay quiet. An error is
+    // what the caller already knows how to report.
+    let budget = Duration::from_secs_f64(frames as f64 / out.sample_rate.max(1) as f64)
+        + Duration::from_secs(1);
+    let deadline = std::time::Instant::now() + budget;
+
     out.handoff.set_clip(Some(SpeechClip { pcm: Arc::new(pcm) }));
 
     loop {
@@ -701,12 +724,29 @@ pub fn play_wav_path(
             out.handoff.set_clip(None);
             return Ok(PlaybackEnd::Interrupted);
         }
+        if out.handoff.was_cut() {
+            // The stream this was going out of is being torn down — a
+            // device change, or a pair too wide for it. Not an error: the
+            // musician asked for it. See `SpeechHandoff::cut`.
+            //
+            // Cleared as well as reported: a cut that landed during the
+            // decode above left the slot empty, and the `set_clip` after
+            // it put this line INTO the new stream. Take it back.
+            out.handoff.set_clip(None);
+            return Ok(PlaybackEnd::Interrupted);
+        }
         if out.handoff.finished() {
             // The callback has already handed the buffer back; clearing the
             // slot releases the last reference to it, on this thread, where
             // freeing memory is allowed.
             out.handoff.set_clip(None);
             return Ok(PlaybackEnd::Finished);
+        }
+        if std::time::Instant::now() >= deadline {
+            out.handoff.set_clip(None);
+            return Err(
+                "the audio output stream stopped reading the coach's voice".to_string()
+            );
         }
         std::thread::sleep(Duration::from_millis(20));
     }
@@ -1586,6 +1626,107 @@ mod tts_playback_tests {
         let result = play_wav_path(&path, 1.0, None, &|| true);
         let _ = std::fs::remove_file(&path);
         assert!(result.is_err(), "speech with no stream must say so");
+    }
+
+    /// A slot nothing is reading must not hold the speaking thread for
+    /// ever.
+    ///
+    /// The scenario: the device opened once, the musician unplugged the
+    /// interface (or another app took it exclusively, which is WASAPI's
+    /// `AUDCLNT_E_DEVICE_IN_USE`), and the coach spoke. Before the
+    /// deadline this loop had no way out — the blocking thread spun until
+    /// the next line of coaching, `tts-speech-ended` never fired, the dim
+    /// never unwound, and the metronome came back quiet and stayed quiet.
+    /// An `Err` is what the caller already knows how to report.
+    #[test]
+    fn a_stream_that_stopped_reading_does_not_hold_the_speaking_thread() {
+        let path =
+            std::env::temp_dir().join(format!("yames_tts_test_stall_{}.wav", std::process::id()));
+        // 200 ms of audio, so the budget is about 1.2 s.
+        write_sine_wav(&path, 200, 440.0, 22050);
+
+        // A slot with no callback behind it at all.
+        let (out, _handoff) = a_slot();
+        let started = std::time::Instant::now();
+        let result = play_wav_path(&path, 0.5, Some(&out), &|| true);
+        let elapsed = started.elapsed();
+        let _ = std::fs::remove_file(&path);
+
+        assert!(
+            result.is_err(),
+            "a line nobody played must not report Finished: {result:?}"
+        );
+        assert!(
+            elapsed >= Duration::from_millis(1_100),
+            "it gave up before the line could possibly have played: {elapsed:?}"
+        );
+        assert!(
+            elapsed < Duration::from_secs(8),
+            "it waited far past the line's own length plus slack: {elapsed:?}"
+        );
+    }
+
+    /// A device change mid-line is not an error — the musician asked for
+    /// it — and it must not wait out the deadline either.
+    ///
+    /// The cut here lands roughly where the ten-second file is still being
+    /// decoded and resampled, so this also covers the ordering that got
+    /// away the first time: a cut raised BEFORE the clip reaches the slot
+    /// used to be cleared by `set_clip`, and the line — resampled for a
+    /// device that is no longer there — played out in full on the new one.
+    #[test]
+    fn a_line_cut_by_a_device_change_comes_back_interrupted() {
+        let path =
+            std::env::temp_dir().join(format!("yames_tts_test_cut_{}.wav", std::process::id()));
+        // Long enough that the deadline cannot be what ends this.
+        write_sine_wav(&path, 10_000, 440.0, 22050);
+
+        let (out, handoff) = a_slot();
+        let cutter = handoff.clone();
+        std::thread::spawn(move || {
+            std::thread::sleep(Duration::from_millis(60));
+            cutter.cut();
+        });
+
+        let started = std::time::Instant::now();
+        let result = play_wav_path(&path, 0.5, Some(&out), &|| true);
+        let elapsed = started.elapsed();
+        let _ = std::fs::remove_file(&path);
+
+        assert_eq!(result, Ok(PlaybackEnd::Interrupted));
+        assert!(
+            elapsed < Duration::from_secs(5),
+            "a cut line waited on something: {elapsed:?}"
+        );
+    }
+
+    /// The device change BEFORE this line is not this line's business.
+    ///
+    /// The flag is consumed once, on the way in, precisely so the last
+    /// restart cannot interrupt the next thing the coach says. Without
+    /// that, one unplugged interface would silence every line after it
+    /// until something else happened to clear the flag.
+    #[test]
+    fn a_device_change_that_happened_earlier_does_not_cut_this_line() {
+        let path = std::env::temp_dir()
+            .join(format!("yames_tts_test_stale_cut_{}.wav", std::process::id()));
+        write_sine_wav(&path, 100, 440.0, 22050);
+
+        let (out, handoff) = a_slot();
+        handoff.cut();
+        let stop = Arc::new(AtomicBool::new(false));
+        let callback = spawn_a_callback(handoff, stop.clone());
+
+        let result = play_wav_path(&path, 0.5, Some(&out), &|| true);
+        stop.store(true, Ordering::Relaxed);
+        let _ = callback.join();
+        let _ = std::fs::remove_file(&path);
+
+        assert_eq!(
+            result,
+            Ok(PlaybackEnd::Finished),
+            "a stale cut silenced a line that had a stream to play on"
+        );
     }
 
     /// Piper writes 22050 Hz; the device is running at 48 kHz. Every line
