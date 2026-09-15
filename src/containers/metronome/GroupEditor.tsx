@@ -26,11 +26,11 @@ interface GroupEditorProps {
    */
   feedback?: Map<number, BeatFeedback>;
   /**
-   * Called by the stepper with the whole new grouping. Kept as a prop so this
-   * component stays presentational — the owner (`MetronomeView`) does the IPC.
-   * It takes an array rather than a count because the grouped stepper resizes
-   * the last group: `[3, 3]` → `[3, 4]` is not expressible as a number.
-   * No-op default lets either branch render without wiring.
+   * Called with the whole new grouping. Kept as a prop so this component
+   * stays presentational — the owner (`MetronomeView`) does the IPC. It takes
+   * an array rather than a count because a meter is a grouping and not a
+   * length: `[3, 2, 2]` and `[2, 2, 3]` are both 7. No-op default lets either
+   * branch render without wiring.
    */
   onBeatGroupsChange?: (next: number[]) => void;
 }

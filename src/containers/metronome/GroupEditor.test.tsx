@@ -7,10 +7,11 @@
  *   `onBeatGroupsChange` prop and never touches IPC itself.
  * - In FREE mode the stepper wraps at both ends (MAX → MIN and MIN → MAX)
  *   rather than clamping, which is why its buttons never disable.
- * - In a grouped meter it resizes the LAST group and clamps, so a grouping
- *   the player built is never silently thrown away.
  * - Beat counts render through i18n with real plural forms, so 1 reads
  *   "1 beat" and not "1 beats".
+ *
+ * The stepper's GROUPED behaviour — walking the meter list — lives in
+ * `BeatStepper.test.tsx`, which is the component's own file.
  */
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
@@ -223,45 +224,6 @@ describe("GroupEditor — grouped mode", () => {
     );
   });
 
-  it("resizes the last group rather than flattening the bar", () => {
-    const onBeatGroupsChange = vi.fn();
-    render(
-      <BeatStepper
-        beatGroups={[3, 3]}
-        subdivision={1}
-        onBeatGroupsChange={onBeatGroupsChange}
-      />,
-    );
-    fireEvent.click(stepper("Add beat"));
-    expect(onBeatGroupsChange).toHaveBeenCalledWith([3, 4]);
-    fireEvent.click(stepper("Remove beat"));
-    expect(onBeatGroupsChange).toHaveBeenCalledWith([3, 2]);
-  });
-
-  it("drops a group of one rather than leaving a bar with a zero in it", () => {
-    const onBeatGroupsChange = vi.fn();
-    render(
-      <BeatStepper
-        beatGroups={[3, 1]}
-        subdivision={1}
-        onBeatGroupsChange={onBeatGroupsChange}
-      />,
-    );
-    fireEvent.click(stepper("Remove beat"));
-    expect(onBeatGroupsChange).toHaveBeenCalledWith([3]);
-  });
-
-  it("clamps instead of wrapping, and says so by disabling the button", () => {
-    // Wrapping a full bar round to one beat would discard the grouping
-    // without telling anyone. FREE mode has nothing to discard, so it wraps.
-    const full = render(<BeatStepper beatGroups={[4, 4, 4, 4]} subdivision={1} />);
-    expect((full.getByLabelText("Add beat") as HTMLButtonElement).disabled).toBe(true);
-    expect((full.getByLabelText("Remove beat") as HTMLButtonElement).disabled).toBe(false);
-    full.unmount();
-
-    const single = render(<BeatStepper beatGroups={[1]} subdivision={1} />);
-    expect((single.getByLabelText("Remove beat") as HTMLButtonElement).disabled).toBe(true);
-  });
 });
 
 /**
