@@ -12,8 +12,12 @@ interface GroupEditorProps {
   freeMode?: boolean;
   /** Which beats carry the accent — mirrors the engine (U2.3). */
   accentMode?: "groups" | "all" | "none";
-  /** `BeatEvent.isAccent` for the beat currently lit. */
-  isAccentBeat?: boolean;
+  /**
+   * `BeatEvent.accentLevel` for the beat currently lit — 0 none, 1 a group
+   * start inside the bar, 2 the bar's own opening. The engine decides it;
+   * this component only draws it.
+   */
+  accentBeat?: 0 | 1 | 2;
   /**
    * Per-beat evaluation feedback, keyed by bar position. Renders the
    * `feedback-<classification>` tint the pre-grouping beat dots had —
@@ -40,14 +44,19 @@ export function GroupEditor({
   isDownbeat = false,
   freeMode = false,
   accentMode = "groups",
-  isAccentBeat = false,
+  accentBeat = 0,
   feedback,
 }: GroupEditorProps) {
   const { t } = useTranslation();
   const total = meterTotal(beatGroups);
   // Static markers only — the LIVE accent comes from the engine via
-  // `isAccentBeat`, so the two can never disagree.
+  // `accentBeat`, so the two can never disagree.
   const accents = accentPositions(beatGroups, accentMode);
+  // Strong keeps the ring and the glow it always had; medium keeps the ring
+  // and drops the glow, so a bar reads as one opening and a middle rather
+  // than as two openings. Weak is a plain ring.
+  const accentClass = (level: number) =>
+    level === 2 ? "accent" : level === 1 ? "accent-medium" : "";
 
   if (freeMode) {
     return (
@@ -63,11 +72,11 @@ export function GroupEditor({
             // accent control's "every beat" applies here too, in the engine
             // and so on the dots. Playing, the engine is the authority; at
             // rest `accents` is, exactly as in the grouped branch below.
-            const isAccent = isActive ? isAccentBeat : accents.has(i);
+            const level = isActive ? accentBeat : (accents.get(i) ?? 0);
             return (
               <div key={i} className="group-dot-wrap">
                 <div
-                  className={`group-dot ${isAccent ? "accent" : ""} ${isActive ? "playing" : "free-active"} ${feedbackClass}`}
+                  className={`group-dot ${accentClass(level)} ${isActive ? "playing" : "free-active"} ${feedbackClass}`}
                 />
                 {subdivision > 1 && (
                   <div className="group-sub-dots">
@@ -106,12 +115,12 @@ export function GroupEditor({
                   const isActive = isPlaying && isDownbeat && activeBeat === pos;
                   const isSubBeat = isPlaying && !isDownbeat && activeBeat === pos;
                   // Playing: trust the engine. Stopped: draw the marker.
-                  const isAccent = isActive ? isAccentBeat : accents.has(pos);
+                  const level = isActive ? accentBeat : (accents.get(pos) ?? 0);
                   const fb = feedback?.get(pos);
                   const feedbackClass = fb && isActive ? `feedback-${fb.classification}` : "";
                   return (
                     <div key={d} className="group-dot-wrap">
-                      <div className={`group-dot ${isAccent ? "accent" : ""} ${isActive ? "playing" : ""} ${feedbackClass}`} />
+                      <div className={`group-dot ${accentClass(level)} ${isActive ? "playing" : ""} ${feedbackClass}`} />
                       {subdivision > 1 && (
                         <div className="group-sub-dots">
                           {Array.from({ length: subdivision - 1 }, (_, s) => (

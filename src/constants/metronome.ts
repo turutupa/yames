@@ -91,8 +91,23 @@ export const INSTRUMENTS: Array<{ id: string; soon?: boolean }> = [
   { id: "other", soon: true },
 ];
 
+/**
+ * The ways a meter can be grouped, first entry canonical. The meter row draws
+ * these as chips beside the meter chip, so a player moves between them
+ * without opening anything.
+ *
+ * Keep this list and `ALL_METERS` in `src-tauri/src/engine.rs` in step: the
+ * Rust accent tests walk one and `meter.accentPositions.test.ts` walks the
+ * other, and they exist to prove the same rule twice.
+ *
+ * 6/8 has two. 3+3 is the compound feel and the default — one, two, three,
+ * FOUR, five, six. 2+2+2 is the duple one, and it is here because issue 52's
+ * reporter asked for "6/8 accents like 3/4" and may well have meant that:
+ * three group starts to a bar rather than two.
+ */
 export const METER_VARIANTS: Record<string, number[][]> = {
   "5/4":  [[3, 2], [2, 3]],
+  "6/8":  [[3, 3], [2, 2, 2]],
   "7/8":  [[3, 2, 2], [2, 2, 3], [2, 3, 2]],
   "8/8":  [[3, 2, 3], [3, 3, 2], [2, 3, 3]],
 };

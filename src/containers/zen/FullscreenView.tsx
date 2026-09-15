@@ -117,9 +117,12 @@ export function FullscreenView({
   const activeBeat = currentBeat ? currentBeat.measureBeat : -1;
   const activeSub = currentBeat ? currentBeat.subdivision : -1;
   const isDownbeat = currentBeat?.isDownbeat ?? false;
-  // Accent comes from the engine event — false in FREE mode, and aware
-  // of the speed ramp's own bar.
-  const isAccent = currentBeat?.isAccent ?? false;
+  // Accent comes from the engine event — nothing in FREE mode past beat
+  // one, and aware of the speed ramp's own bar. Zen draws the lit beat as
+  // accented or not, without the metronome screen's middle tier: the bar's
+  // shape is already in the `accent-marker` rings, and this row is read from
+  // across a room.
+  const isAccent = (currentBeat?.accentLevel ?? 0) > 0;
 
   const exitFullscreen = () => onExit();
   const isWarmingUp = activeTab === "drill" && ramp.active && ramp.warmupCount < ramp.warmupBeats;

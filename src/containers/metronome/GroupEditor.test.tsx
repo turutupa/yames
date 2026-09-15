@@ -264,25 +264,48 @@ describe("GroupEditor — grouped mode", () => {
   });
 });
 
+/**
+ * The dot tier at a glance: 2 for `.accent`, 1 for `.accent-medium`, 0 for a
+ * plain ring. Read off `classList` rather than off the class string, because
+ * "accent-medium" contains "accent" and a substring test cannot tell a bar's
+ * opening from its middle — which is the whole distinction being drawn.
+ */
+function tiers(container: HTMLElement): number[] {
+  return dots(container).map((d) =>
+    d.classList.contains("accent") ? 2 : d.classList.contains("accent-medium") ? 1 : 0,
+  );
+}
+
 describe("GroupEditor — accents", () => {
-  it("marks group starts as accents while stopped", () => {
+  it("draws three kinds of dot: the bar's opening, its middles, and the rest", () => {
     const { container } = render(
       <GroupEditor beatGroups={[3, 2, 2]} subdivision={1} />,
     );
-    const accented = dots(container)
-      .map((d, i) => (d.className.includes("accent") ? i : -1))
-      .filter((i) => i >= 0);
-    expect(accented).toEqual([0, 3, 5]);
+    expect(tiers(container)).toEqual([2, 0, 0, 1, 0, 1, 0]);
   });
 
-  it("draws exactly one accent marker in FREE mode — the first beat", () => {
+  it("gives a bar of 6/8 a middle, in either grouping", () => {
+    // Issue 52 on the screen: beat four of 3+3 is not a second beat one.
+    const compound = render(<GroupEditor beatGroups={[3, 3]} subdivision={1} />);
+    expect(tiers(compound.container)).toEqual([2, 0, 0, 1, 0, 0]);
+    compound.unmount();
+
+    const duple = render(<GroupEditor beatGroups={[2, 2, 2]} subdivision={1} />);
+    expect(tiers(duple.container)).toEqual([2, 0, 1, 0, 1, 0]);
+  });
+
+  it("keeps every beat strong under `all` — a flat pulse has no middle", () => {
+    const { container } = render(
+      <GroupEditor beatGroups={[3, 2, 2]} subdivision={1} accentMode="all" />,
+    );
+    expect(tiers(container)).toEqual([2, 2, 2, 2, 2, 2, 2]);
+  });
+
+  it("draws exactly one accent marker in FREE mode — the first beat, strong", () => {
     const { container } = render(
       <GroupEditor beatGroups={[7]} subdivision={1} freeMode />,
     );
-    const marked = dots(container)
-      .map((d, i) => (d.className.includes("accent") ? i : -1))
-      .filter((i) => i >= 0);
-    expect(marked).toEqual([0]);
+    expect(tiers(container)).toEqual([2, 0, 0, 0, 0, 0, 0]);
   });
 
   it("takes the LIVE accent from the engine, not the local markers", () => {
@@ -295,10 +318,10 @@ describe("GroupEditor — accents", () => {
         isPlaying
         isDownbeat
         activeBeat={1}
-        isAccentBeat
+        accentBeat={2}
       />,
     );
-    expect(dots(container)[1].className).toContain("accent");
+    expect(dots(container)[1].classList.contains("accent")).toBe(true);
 
     // ...and the converse: a group start the engine did NOT accent (a
     // speed ramp running with a different bar length, or FREE mode)
@@ -310,10 +333,47 @@ describe("GroupEditor — accents", () => {
         isPlaying
         isDownbeat
         activeBeat={3}
-        isAccentBeat={false}
+        accentBeat={0}
       />,
     );
-    expect(dots(c2)[3].className).not.toContain("accent");
+    expect(tiers(c2)[3]).toBe(0);
+  });
+
+  it("draws the LIVE middle accent as a middle, not as a downbeat", () => {
+    // A ramp can accent a beat the grouping does not, and the grouping can
+    // mark a beat the engine is playing at another tier. The lit dot is the
+    // engine's to describe, at whichever tier it reports.
+    const { container } = render(
+      <GroupEditor
+        beatGroups={[3, 3]}
+        subdivision={1}
+        isPlaying
+        isDownbeat
+        activeBeat={3}
+        accentBeat={1}
+      />,
+    );
+    const lit = dots(container)[3];
+    expect(lit.classList.contains("accent-medium")).toBe(true);
+    expect(lit.classList.contains("accent")).toBe(false);
+    expect(lit.classList.contains("playing")).toBe(true);
+  });
+
+  it("draws FREE mode's lit dot at the tier the engine reports", () => {
+    const { container } = render(
+      <GroupEditor
+        beatGroups={[4]}
+        subdivision={1}
+        freeMode
+        isPlaying
+        isDownbeat
+        activeBeat={0}
+        accentBeat={2}
+      />,
+    );
+    const lit = dots(container)[0];
+    expect(lit.classList.contains("accent")).toBe(true);
+    expect(lit.classList.contains("playing")).toBe(true);
   });
 });
 

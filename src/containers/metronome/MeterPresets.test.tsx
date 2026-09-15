@@ -99,6 +99,36 @@ describe("MeterPresets — FREE chip", () => {
     expect(container.querySelector(".meter-picker")).toBeNull();
   });
 
+  it("offers 6/8 both of its groupings on the row", () => {
+    // Issue 52's reporter asked for "6/8 accents like 3/4". 3+3 is the
+    // compound feel and stays the default; 2+2+2 is the duple one they may
+    // have meant, and it is now one click away rather than unreachable.
+    const { container } = render(<MeterPresets beatGroups={[3, 3]} freeMode={false} />);
+    expect(container.querySelector(".meter-chip")?.textContent).toContain("6/8");
+    const chips = [...container.querySelectorAll(".meter-grouping-chip")] as HTMLButtonElement[];
+    expect(chips.map((c) => c.textContent)).toEqual(["3 + 3", "2 + 2 + 2"]);
+    expect(chips.every((c) => c.tagName === "BUTTON")).toBe(true);
+    expect(chips.filter((c) => c.className.includes("active")).map((c) => c.textContent)).toEqual([
+      "3 + 3",
+    ]);
+
+    fireEvent.click(chips[1]);
+    expect(mockInvoke).toHaveBeenCalledWith("set_beat_groups", { groups: [2, 2, 2] });
+    expect(container.querySelector(".meter-picker")).toBeNull();
+  });
+
+  it("still calls 2+2+2 a 6/8, so the chip and the row agree", () => {
+    // A variant must not read as an unknown grouping — that is what
+    // `findMeterPreset` being variant-aware is for, and 6/8's second
+    // grouping is the newest thing relying on it.
+    const { container } = render(<MeterPresets beatGroups={[2, 2, 2]} freeMode={false} />);
+    expect(container.querySelector(".meter-chip")?.textContent).toContain("6/8");
+    const chips = [...container.querySelectorAll(".meter-grouping-chip")];
+    expect(chips.filter((c) => c.className.includes("active")).map((c) => c.textContent)).toEqual([
+      "2 + 2 + 2",
+    ]);
+  });
+
   it("shows a lone grouping as the active badge, not as a button", () => {
     // 9/8 is only ever 3+3+3. It reads as the same kind of thing as a meter
     // that has alternatives — one active badge — but there is nothing to

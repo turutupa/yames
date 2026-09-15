@@ -296,7 +296,7 @@ export function MetronomeView({
           isDownbeat={isDownbeat}
           freeMode={state.freeMode}
           accentMode={state.accentMode ?? "groups"}
-          isAccentBeat={currentBeat?.isAccent ?? false}
+          accentBeat={currentBeat?.accentLevel ?? 0}
           feedback={dotFeedback}
           onBeatGroupsChange={(next) => {
             // No notifySettingsChange() — useSession watches the meter

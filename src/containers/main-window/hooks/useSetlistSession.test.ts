@@ -419,6 +419,7 @@ describe("a run that ends on a plain step", () => {
       measureBeat: 0,
       subdivision: 0,
       isDownbeat: true,
+      accentLevel: 2,
       isAccent: true,
       formBar: 0,
       chorus: 1,
