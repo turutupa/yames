@@ -1,10 +1,13 @@
 """Render the metronome's RECORDED click presets from the sample libraries.
 
 The generator of record for `wood_*`, `snare_*`, `sticks_*`, `cowbell_*` and
-`kit_*` under `src-tauri/sounds/`. `rebuild.py` still owns the synthesised
-five — click, beep, drum and the chimes — and says so in its own header.
+`kit_*` under `src-tauri/sounds/` — THREE strokes each since 2026-09-15, not
+two. `rebuild.py` still owns the synthesised five — click, beep, drum and the
+chimes — and says so in its own header, including the two middle strokes
+(`click_mid`, `beep_mid`) that belong to it for the same reason its siblings
+do.
 
-    python scripts/sounds/render_click.py            # all ten
+    python scripts/sounds/render_click.py            # all fifteen
     python scripts/sounds/render_click.py wood_high  # one
     python scripts/sounds/render_click.py --measure  # numbers, write nothing
 
@@ -61,6 +64,45 @@ file is what you hear, its peak is guaranteed here like every other click
 file's, and `SoundBank::new` gains no second premix to go wrong.
 
 ---------------------------------------------------------------------------
+THE MIDDLE STROKE, AND WHY IT IS NOT A QUIETER DOWNBEAT
+---------------------------------------------------------------------------
+A bar of 6/8 has a beat one and a beat four, and until 2026-09-15 the engine
+marked the second of them with the accent file at 80 % (`MEDIUM_GAIN`). The
+owner listened and heard nothing, and was right: the same transient 2 dB down
+is under the ear's threshold when it passes once a bar. A real metronome uses
+three SOUNDS, because pitch and timbre are what the ear separates.
+
+So every preset ships a third file, `<kit>_mid.wav`, at `MID_PEAK` — a
+stroke of the same instrument, between the other two in weight and different
+from both in colour. `MEDIUM_GAIN` is 1.0 now: the level lives in the file.
+
+AND THAT IS HARDER THAN IT SOUNDS, for exactly the reason the section above
+gives. At a fixed peak a SOFTER stroke is LOUDER — its peak is not spent on a
+stick transient — so a softer layer normalised to 0.930 lands within half a
+decibel of a harder one at 0.970, and sometimes over it. Cowbell is the
+extreme: 26 dB of library dynamic between v1 and v3 collapses to +1.3 dB in
+favour of the SOFT stroke once both are peak-normalised. Nothing about the
+peak convention produces a ladder; the ladder has to be built here, per file,
+out of the four knobs this table already has:
+
+    layer    which dynamic of the instrument
+    drive    the tanh stage — the loudness-at-fixed-peak knob, and the only
+             one that pushes UP. Its floor is 0.0, so it cannot pull down.
+    mix      a darker, more distant blend radiates less through 200 Hz-4 kHz
+             (cowbell's middle is the only place this is used as a level)
+    floor    where the trim cuts — a shorter stroke carries less energy
+             (wood's middle is the only place this is used as a level, and
+             it is the one-mic instrument, so it has no `mix` to spend)
+
+Each middle is placed at the GEOMETRIC CENTRE of its own kit's span — equal
+margins in dB to the downbeat above and to the plain beat below — because
+with three genuinely different sounds there is no longer a reason to bias one
+gap over the other. W3's reason for biasing (strong against medium was one
+file at two volumes and had only level to go on) stopped being true when the
+third file arrived. `every_medium_accent_sits_between_its_strong_and_its_beat`
+in `engine.rs` prints the result and holds it to a floor.
+
+---------------------------------------------------------------------------
 WHAT THE LIBRARIES DID NOT HAVE
 ---------------------------------------------------------------------------
 1. Virtuosity's woodblock is ONE MIC. `Samples/perc/oh/woodblock/` exists and
@@ -112,7 +154,13 @@ user's volume does."""
 BEAT_PEAK = 0.90
 """And the plain beat, which is the kits' own ceiling."""
 
-PEAK_I16 = {ACCENT_PEAK: 31784, BEAT_PEAK: 29490}
+MID_PEAK = 0.93
+"""And the middle stroke, between the two. A peak in the file and not a gain
+in the engine: `MEDIUM_GAIN` is 1.0, so what a bar's middle sounds like is
+decided here, where it can be measured against the same filters the Rust
+tests use, and not by a constant that has no idea which kit is loaded."""
+
+PEAK_I16 = {ACCENT_PEAK: 31784, BEAT_PEAK: 29490, MID_PEAK: 30473}
 
 OUT_DIR = os.path.join("src-tauri", "sounds")
 
@@ -129,6 +177,12 @@ DRUM_SRC = {"programs": "Programs", "mappings": "mappings"}
 PERC_MIX = {"oh": 1.0, "close": 0.45, "mid": 0.35, "room": 0.3}
 WOOD_MIX = {"oh": 1.0}          # and there is no other mic — see the header
 SNARE_MIX = {"snaremic": 1.0, "oh": 0.6, "room": 0.3}
+
+# And one blend that is not a balance but a LEVEL. The cowbell's middle stroke
+# is the same hard stroke as its downbeat heard from across the room: the close
+# and mid mics dropped and the room brought up to meet the overhead, from the
+# 0.3 that balances a percussionist to 1.0. See `cowbell_mid`.
+COWBELL_MID_MIX = {"oh": 1.0, "room": 1.0}
 
 STUDIO = os.path.join("src-tauri", "sounds", "kits", "studio")
 
@@ -247,6 +301,106 @@ RECIPE = [
     dict(name="kit_low", src=("studio", ["hat.1.1.wav"]),
          peak=BEAT_PEAK, drive=0.0, cap_s=0.30, floor=None, fade=30.0,
          why="Studio closed hat, softest layer"),
+
+    # -- THE MIDDLE STROKES, and they are APPENDED RATHER THAN INTERLEAVED.
+    # `_write` draws its dither from ONE generator in table order, so a row
+    # inserted beside its siblings would re-dither every file below it and
+    # change the bytes of ten files the app has shipped since 2026-09-14 —
+    # which `the_shipped_click_files_are_the_ones_that_were_heard` in
+    # `engine.rs` pins by hash, and which the jam's count-in depends on. Kept
+    # at the end, a whole run reproduces those ten byte for byte.
+    #
+    # Read the header's "THE MIDDLE STROKE" section before changing a number
+    # here: each of these is placed at the geometric centre of its own kit's
+    # span, and the knob that placed it is different in each case because the
+    # instruments are.
+
+    # Wood: the SAME small block, struck at vl3 instead of vl6.
+    #
+    # THE TRIM IS THE LEVEL HERE. The woodblock is Virtuosity's one-mic
+    # instrument, so there is no darker blend to spend and no drive below 0.0,
+    # and vl3 normalised to 0.930 measures only 0.93 dB under vl6 at 0.970.
+    # What is left is where the trim cuts: -22 dB rather than the accent's -40
+    # ships the 64 ms the softer block is properly audible for and leaves the
+    # hall behind, which is 1.99 dB and lands it in the middle. It is also the
+    # truth about a lighter stroke — it excites the room less — so the middle
+    # is drier than the downbeat as well as quieter, and drier is the second
+    # cue the ear gets.
+    dict(name="wood_mid", src=("perc", "woodblock_high", 3, WOOD_MIX, ["oh"]),
+         peak=MID_PEAK, drive=0.0, cap_s=0.25, floor=-22.0, fade=12.0,
+         why="Virtuosity woodblock_high vl3, trimmed dry"),
+
+    # Snare: the same drum at layer 3, with its own drive.
+    #
+    # Layer 3 and not layer 2, and the header says why the question is not
+    # silly: the layers are not ordered by loudness. Both land in range; 3 is
+    # the mezzo-forte stroke between a ghost and a rimshot by the library's
+    # own dynamic and by ear-shaped sense, and 1.1 of drive puts it 1.91 dB
+    # under the accent and 2.07 dB over the beat. The accent's drive is 1.5
+    # and the beat's 0.8, so this sits between those too, which is what a
+    # stroke between two strokes should need.
+    # Capped at 0.43 and not the pair's 0.6, which is the only number here
+    # that is about tidiness: layer 3's file runs 510 ms and layer 4's 429, so
+    # left alone the middle of the bar would ring 80 ms longer than the
+    # downbeat. The 80 ms it gives up is the bottom of the wire tail and
+    # measures 0.00 dB, so nothing is paid for it.
+    dict(name="snare_mid", src=("studio", ["snare.3.1.wav"]),
+         peak=MID_PEAK, drive=1.1, cap_s=0.43, floor=None, fade=30.0,
+         why="Studio snare layer 3, mono fold"),
+
+    # Sticks: the same stick-shot, played at vl3.
+    #
+    # vl3 rather than the vl4 the brief also allowed: vl4 normalised measures
+    # LOUDER than the accent (+0.55 dB at the same drive), which is the
+    # hard-stroke-is-quieter trap in one line. vl3 at drive 1.1 lands
+    # -2.02/+2.16. The other two files of this preset are both driven at 1.0
+    # and this one is at 1.1 for the same reason theirs are equal: the number
+    # that mattered was where it put the stroke, not that the three match.
+    dict(name="sticks_mid", src=("drums", "snare_stickshot1", 3, SNARE_MIX,
+                                 ["snaremic", "oh", "room"]),
+         peak=MID_PEAK, drive=1.1, cap_s=0.30, floor=-45.0, fade=25.0,
+         why="Virtuosity snare_stickshot1 vl3"),
+
+    # Cowbell: the same hard stroke, heard from the back of the room.
+    #
+    # THE ONE PRESET WHERE THE DECIDED PLAN DID NOT MEASURE. It was to be v2
+    # for the middle and v1 — the fingertip tap — re-cut as the beat. v1 is
+    # 26 dB under v3 in the library and is the softest thing in it, and at the
+    # beat's 0.900 peak it measures 1.26 dB LOUDER than the accent through the
+    # laptop band, because all of its peak is ring and none of it is stick.
+    # The three would then have stood at +0.47 dB and +2.30 dB: the downbeat
+    # and the middle half a decibel apart, which is the failure this whole
+    # pass exists to fix.
+    #
+    # So the brief's own fallback, with the mic blend as the level: v3, the
+    # accent's stroke, with the close and mid mics dropped and the room lifted
+    # up to meet the overhead (`COWBELL_MID_MIX`). That is 2.49 dB under the
+    # accent and 2.01 over the beat, and it is a real gesture rather than a
+    # fader — the same bell, further away, which is what a player's second
+    # accent sounds like across a room. At 0.8 of room it measured 2.02/2.47,
+    # just as well balanced, and was passed over because at 1.0 the colour
+    # moves as far as the level does: the distance the ear has to notice is
+    # what this file is FOR, and a blend is the only thing spending it here.
+    # `cowbell_low` is NOT re-cut: it stays the v2 the owner has been
+    # listening to since 2026-09-14.
+    dict(name="cowbell_mid", src=("perc", "cowbell", 3, COWBELL_MID_MIX,
+                                  ["oh", "room"]),
+         peak=MID_PEAK, drive=0.0, cap_s=0.45, floor=-45.0, fade=30.0,
+         why="Virtuosity cowbell, hard layer, distant blend"),
+
+    # Kit: the backbeat. Snare layer 3 and NO KICK.
+    #
+    # 6/8 on a kit is kick on one, snare on four, hats between, so the middle
+    # of the bar is the thing that is missing the kick — and that is a huge
+    # difference to hear and a small one to measure, because a band-pass that
+    # starts at 200 Hz cannot see a kick at all. Band-limited this stands only
+    # 0.83 dB under its downbeat; K-weighted, which does hear the kick, it
+    # stands 1.73 dB under. Both orderings are right and the gap between them
+    # IS the middle stroke. No drive: at 0.0 it is already as far under the
+    # accent as this pair of filters will allow.
+    dict(name="kit_mid", src=("studio", ["snare.3.1.wav"]),
+         peak=MID_PEAK, drive=0.0, cap_s=0.45, floor=None, fade=30.0,
+         why="Studio snare layer 3 alone, no kick"),
 ]
 
 
@@ -459,7 +613,7 @@ def _write(path, x, rate, peak, rng):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("names", nargs="*", help="which files (default: all ten)")
+    ap.add_argument("names", nargs="*", help="which files (default: all fifteen)")
     ap.add_argument("--source-root", help="the Virtuosity Drums folder")
     ap.add_argument("--out", default=OUT_DIR)
     ap.add_argument("--measure", action="store_true",
@@ -490,20 +644,34 @@ def main():
     print("%-13s %36s %7d B" % ("", "total", total))
 
     print()
-    print("Through a 200 Hz-4 kHz band-pass, the accent against its beat at "
-          "BEAT_GAIN, and the beat's own energy at SUB_GAIN:")
+    print("Through a 200 Hz-4 kHz band-pass, each of the three strokes against "
+          "the plain beat as the engine plays them (1.0 / MEDIUM_GAIN=1.0 / "
+          "BEAT_GAIN), and the beat again at SUB_GAIN:")
     for kit in ("wood", "snare", "sticks", "cowbell", "kit"):
         hi, lo = rendered.get(kit + "_high"), rendered.get(kit + "_low")
         if hi is None or lo is None:
             continue
+        mid = rendered.get(kit + "_mid")
         a = laptop_band_energy(hi, RATE)
         b = laptop_band_energy(lo, RATE) * BEAT_GAIN * BEAT_GAIN
         s = laptop_band_energy(lo, RATE) * SUB_GAIN * SUB_GAIN
         bar = (k_weighted_energy(hi, RATE)
                + 3.0 * k_weighted_energy(lo, RATE) * BEAT_GAIN * BEAT_GAIN)
-        print("  %-8s accent %+5.2f dB over its beat   accent %8.2f   "
+        # The middle column is blank when only some of the table was asked
+        # for, rather than absent: a partial run is a legitimate thing to do
+        # and a missing column should not read as a missing file.
+        if mid is None:
+            mid_txt = "  middle     --  "
+        else:
+            m = laptop_band_energy(mid, RATE)
+            mid_txt = ("  middle %+5.2f / %+5.2f"
+                       % (10.0 * np.log10(m / max(a, 1e-30)),
+                          10.0 * np.log10(m / max(b, 1e-30))))
+        print("  %-8s accent %+5.2f dB over its beat%s   accent %8.2f   "
               "beat %8.2f   subdivision %7.2f   bar %8.1f"
-              % (kit, 10.0 * np.log10(a / max(b, 1e-30)), a, b, s, bar))
+              % (kit, 10.0 * np.log10(a / max(b, 1e-30)), mid_txt, a, b, s, bar))
+    print("  (the middle column is dB against the downbeat / dB against the "
+          "plain beat)")
 
 
 if __name__ == "__main__":
