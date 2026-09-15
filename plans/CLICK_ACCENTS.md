@@ -3,7 +3,7 @@
 Written 2026-09-14 from GitHub issue 52 (a drummer: "6/8 accents like
 3/4") and issue 2 (a classical player: "a custom subdivision editor
 where users can define their own beat sequences and accents"). Two
-pieces of work. The first is small and parked behind W38; the second
+pieces of work. The first is small and waited for W38; the second
 is a feature of its own and is planned here so it is not lost again.
 
 ## What the click does today
@@ -22,7 +22,7 @@ None — and deliberately no per-beat editor: "the grouping already
 expresses it for every meter the app ships". True for *where* the
 accents fall; not for *how strong* they are.
 
-## Part 1 — two tiers (W3, parked until W38 lands)
+## Part 1 — two tiers (W3)
 **Decided:**
 - **The first group start is strong, the others are medium.** Beat 1
   keeps the accent click at full volume; every later group start plays
@@ -42,11 +42,12 @@ accents fall; not for *how strong* they are.
   reporter may have meant the duple feel.
 - **Nothing new is stored.** Presets and setlist steps are unchanged.
 
-**Why parked:** W38 (`plans/tasks/jam-v5/W38-CLICK-PRESETS.md`) is
+**Why it waited:** W38 (`plans/tasks/jam-v5/W38-CLICK-PRESETS.md`) was
 replacing the click sound files, the kit enum and the loudness floor
 between accent and beat. The tier lives in exactly that code and its
-tuning depends on the new files. Doing it in parallel would be a merge
-of two rewrites of one function.
+tuning depends on the new files. Doing it in parallel would have been a
+merge of two rewrites of one function. W38 landed on 2026-09-14; W3 is
+unblocked and waits only for the owner's go.
 
 **Question for the reporter** (owner to ask on the issue): do they hear
 beat 4 of 6/8 accented today at all? If they truly hear 1, 3 and 5,

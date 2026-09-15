@@ -1,11 +1,13 @@
-# W3 — a bar of 6/8 has a middle (PARKED until W38 lands on jam-v5)
+# W3 — a bar of 6/8 has a middle
 
-Do not start this until `plans/tasks/jam-v5/W38-CLICK-PRESETS.md` has
-merged into `jam-v5` and `feedback-52` has merged `jam-v5` again. W38
-is rewriting `SoundKit`, `SoundBank`, the accent-versus-beat loudness
-floor and the files behind `high_id()` / `low_id()`; this brief changes
-what the engine does with exactly those. Design and decisions in
-`plans/CLICK_ACCENTS.md`.
+This was parked behind `plans/tasks/jam-v5/W38-CLICK-PRESETS.md`, which
+rewrote `SoundKit`, `SoundBank`, the accent-versus-beat loudness floor
+and the files behind `high_id()` / `low_id()` — exactly what this brief
+changes. W38 landed on `jam-v5` at d18e6ba (2026-09-14) and `feedback-52`
+has merged it (9739f97), so this can start on the owner's word. Design
+and decisions in `plans/CLICK_ACCENTS.md`. Tune `MEDIUM_GAIN` against
+the recorded presets W38 shipped (Wood, Snare, Sticks, Cowbell, Kit), not
+the old synthesised ones.
 
 Branch `feedback-52-w3-accent-tiers` from `feedback-52`. Read
 `plans/CLICK_ACCENTS.md`, then `src-tauri/src/engine.rs`: `AccentMode`,
