@@ -41,10 +41,13 @@
   },
   "sound": {
     "click": "Clic",
+    "sticks": "Baguettes",
     "wood": "Bois",
     "beep": "Bip",
     "drum": "Caisse",
-    "snare": "Caisse claire"
+    "kit": "Batterie",
+    "snare": "Caisse claire",
+    "cowbell": "Cloche"
   },
   "driftMeter": {
     "early": "En avance",

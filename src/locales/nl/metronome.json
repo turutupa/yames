@@ -41,10 +41,13 @@
   },
   "sound": {
     "click": "Klik",
+    "sticks": "Stokken",
     "wood": "Hout",
     "beep": "Piep",
     "drum": "Drum",
-    "snare": "Snare"
+    "kit": "Drumstel",
+    "snare": "Snare",
+    "cowbell": "Koebel"
   },
   "driftMeter": {
     "early": "Te vroeg",

@@ -41,10 +41,13 @@
   },
   "sound": {
     "click": "Clic",
+    "sticks": "Bacchette",
     "wood": "Legno",
     "beep": "Bip",
     "drum": "Tamburo",
-    "snare": "Rullante"
+    "kit": "Batteria",
+    "snare": "Rullante",
+    "cowbell": "Campanaccio"
   },
   "driftMeter": {
     "early": "In anticipo",

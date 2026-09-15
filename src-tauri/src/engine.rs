@@ -229,9 +229,13 @@ fn query_coreaudio_output_latency_frames(_device_name: Option<&str>) -> Option<u
     None
 }
 
-// Embedded click sounds -- 4 kits
+// Embedded click sounds -- 8 kits
 const CLICK_HIGH: &[u8] = include_bytes!("../sounds/click_high.wav");
 const CLICK_LOW: &[u8] = include_bytes!("../sounds/click_low.wav");
+/// RECORDED since 2026-09-14, where it used to be a pair of synthesised
+/// blocks: Virtuosity's small woodblock over its big one, cut by
+/// `scripts/sounds/render_click.py`, which is the generator of record for
+/// this pair and for the four below. `rebuild.py` no longer claims them.
 const WOOD_HIGH: &[u8] = include_bytes!("../sounds/wood_high.wav");
 const WOOD_LOW: &[u8] = include_bytes!("../sounds/wood_low.wav");
 const BEEP_HIGH: &[u8] = include_bytes!("../sounds/beep_high.wav");
@@ -261,8 +265,34 @@ const DRUM_BODY: &[u8] = include_bytes!("../sounds/drum_body.wav");
 /// beat is now the same snare struck softly, which is what a metronome accent
 /// has always been: the same drum hit harder. See `_snare` and `snare_low` in
 /// `scripts/sounds/rebuild.py` for the measurements and what it cost.
+///
+/// AND IT IS A RECORDING NOW — the Studio kit's own snare, hardest layer over
+/// softest, folded to mono by `scripts/sounds/render_click.py`. Everything
+/// above still holds and is why the recording is the same drum twice rather
+/// than two drums; the synthesis those three rejections produced is kept in
+/// `rebuild.py`, unreachable, as the record of what it cost to learn.
 const SNARE_HIGH: &[u8] = include_bytes!("../sounds/snare_high.wav");
 const SNARE_LOW: &[u8] = include_bytes!("../sounds/snare_low.wav");
+/// A drummer's count-off: a stick-shot off the rim for the accent and a
+/// cross-stick for the beat, both out of Virtuosity's snare. The jam's
+/// count-in plays these same two files, so being counted in and practising to
+/// Sticks are the same sound (`JamCountInSound::Sticks`).
+const STICKS_HIGH: &[u8] = include_bytes!("../sounds/sticks_high.wav");
+const STICKS_LOW: &[u8] = include_bytes!("../sounds/sticks_low.wav");
+/// One cowbell at two dynamics — the hard layer and the middle one. The
+/// library's softest is 26 dB down and is a fingertip on the lip of the bell,
+/// which at the beat's peak is a tick with a room behind it.
+const COWBELL_HIGH: &[u8] = include_bytes!("../sounds/cowbell_high.wav");
+const COWBELL_LOW: &[u8] = include_bytes!("../sounds/cowbell_low.wav");
+/// The RECORDED answer to [`SoundKit::Drum`], and built the way that one is so
+/// the owner can put the two side by side: a kick under a struck head for the
+/// accent, a closed hat for the beat. The difference is where the summing and
+/// the saturation happen — `drum_accent` is mixed in [`SoundBank::new`] from
+/// three shipped files, and this arrives already summed and already through
+/// the same tanh curve, because there is nothing about it left for the engine
+/// to retune. See `render_click.py`.
+const KIT_HIGH: &[u8] = include_bytes!("../sounds/kit_high.wav");
+const KIT_LOW: &[u8] = include_bytes!("../sounds/kit_low.wav");
 const CHIME_UP: &[u8] = include_bytes!("../sounds/chime_up.wav");
 const CHIME_DOWN: &[u8] = include_bytes!("../sounds/chime_down.wav");
 
@@ -1083,6 +1113,18 @@ pub enum SoundId {
     DrumAccent,
     SnareLow,
     SnareHigh,
+    /// The three presets added 2026-09-14, all of them recordings. They are
+    /// plain buffers in the [`SoundBank`] exactly as the five before them are
+    /// — a click is a click, whatever it was cut from.
+    ///
+    /// `SticksLow` is also the jam's count-in, which is the one of these the
+    /// audio thread reaches by a second road; see `jam.rs`.
+    SticksHigh,
+    SticksLow,
+    CowbellHigh,
+    CowbellLow,
+    KitHigh,
+    KitLow,
     ChimeUp,
     ChimeDown,
     /// The metronome drum kit's closed hat and crash, un-mixed. They are
@@ -1153,6 +1195,12 @@ struct SoundBank {
     drum_accent: Vec<f32>, // pre-mixed kick + metal hat + crash + body
     snare_low: Vec<f32>,
     snare_high: Vec<f32>,
+    sticks_high: Vec<f32>,
+    sticks_low: Vec<f32>,
+    cowbell_high: Vec<f32>,
+    cowbell_low: Vec<f32>,
+    kit_high: Vec<f32>,
+    kit_low: Vec<f32>,
     chime_up: Vec<f32>,
     chime_down: Vec<f32>,
     /// The metronome kit's hat and crash, un-mixed. The premix needs them
@@ -1343,6 +1391,19 @@ impl SoundBank {
             // wire tail was cut off at -36 dBFS, not in the mixing.
             snare_low: decode_wav(SNARE_LOW, sr),
             snare_high: decode_wav(SNARE_HIGH, sr),
+            // And no premix for any of these three either, for a reason the
+            // snare kit's comment above only half covers: they are
+            // recordings, so their balance is not merely fixed in the file,
+            // it is the only thing in the file. `kit_high` is two strokes
+            // summed and saturated, and both of those happened in
+            // `render_click.py` where the peak they land on can be measured
+            // against the same filters this file's tests use.
+            sticks_high: decode_wav(STICKS_HIGH, sr),
+            sticks_low: decode_wav(STICKS_LOW, sr),
+            cowbell_high: decode_wav(COWBELL_HIGH, sr),
+            cowbell_low: decode_wav(COWBELL_LOW, sr),
+            kit_high: decode_wav(KIT_HIGH, sr),
+            kit_low: decode_wav(KIT_LOW, sr),
             chime_up: decode_wav(CHIME_UP, sr),
             chime_down: decode_wav(CHIME_DOWN, sr),
         }
@@ -1360,6 +1421,12 @@ impl SoundBank {
             SoundId::DrumAccent => &self.drum_accent,
             SoundId::SnareLow => &self.snare_low,
             SoundId::SnareHigh => &self.snare_high,
+            SoundId::SticksHigh => &self.sticks_high,
+            SoundId::SticksLow => &self.sticks_low,
+            SoundId::CowbellHigh => &self.cowbell_high,
+            SoundId::CowbellLow => &self.cowbell_low,
+            SoundId::KitHigh => &self.kit_high,
+            SoundId::KitLow => &self.kit_low,
             SoundId::ChimeUp => &self.chime_up,
             SoundId::ChimeDown => &self.chime_down,
             SoundId::DrumMetal => &self.drum_metal,
@@ -1535,6 +1602,19 @@ enum SoundKit {
     /// below are shaped by: two dynamics of one drum cannot pull as far apart
     /// as two different instruments can, and should not need to.
     Snare,
+    /// A drummer counting a band off: a stick-shot for the accent, a
+    /// cross-stick for the beat. The quietest preset here on purpose — it is
+    /// two sticks and a rim — and the only one that is also something else,
+    /// because `JamCountInSound::Sticks` plays the same two files.
+    Sticks,
+    /// One cowbell, hard and soft. Nothing else in the list cuts through a
+    /// loud room the way a bell does, which is the whole reason it is here.
+    Cowbell,
+    /// The recorded twin of [`Self::Drum`] — kick and snare under the accent,
+    /// closed hat on the beat — added so the owner can hold a recording
+    /// against the synthesis by ear rather than by argument. Both stay: this
+    /// is not a replacement, and the numbers do not say which one is better.
+    Kit,
 }
 
 impl SoundKit {
@@ -1548,6 +1628,9 @@ impl SoundKit {
             "beep" => Self::Beep,
             "drum" => Self::Drum,
             "snare" => Self::Snare,
+            "sticks" => Self::Sticks,
+            "cowbell" => Self::Cowbell,
+            "kit" => Self::Kit,
             _ => Self::Click,
         }
     }
@@ -1558,6 +1641,9 @@ impl SoundKit {
             Self::Beep => SoundId::BeepHigh,
             Self::Drum => SoundId::DrumAccent,
             Self::Snare => SoundId::SnareHigh,
+            Self::Sticks => SoundId::SticksHigh,
+            Self::Cowbell => SoundId::CowbellHigh,
+            Self::Kit => SoundId::KitHigh,
         }
     }
     fn low_id(self) -> SoundId {
@@ -1567,8 +1653,27 @@ impl SoundKit {
             Self::Beep => SoundId::BeepLow,
             Self::Drum => SoundId::DrumLow,
             Self::Snare => SoundId::SnareLow,
+            Self::Sticks => SoundId::SticksLow,
+            Self::Cowbell => SoundId::CowbellLow,
+            Self::Kit => SoundId::KitLow,
         }
     }
+
+    /// Every kit the menu offers, in the order it offers them. The tests walk
+    /// this rather than a list of their own, so a kit added to the enum and
+    /// forgotten in a test is a compile error in one place instead of a green
+    /// run that measured four of five.
+    #[cfg(test)]
+    const ALL: [(&'static str, Self); 8] = [
+        ("click", Self::Click),
+        ("sticks", Self::Sticks),
+        ("wood", Self::Wood),
+        ("beep", Self::Beep),
+        ("drum", Self::Drum),
+        ("kit", Self::Kit),
+        ("snare", Self::Snare),
+        ("cowbell", Self::Cowbell),
+    ];
 }
 
 // ---------------------------------------------------------------------------
@@ -5777,9 +5882,15 @@ mod tests {
     ///
     /// Measured through `laptop_band_energy`: the old drum premix scores
     /// -0.46 dB and fails. Today every kit sits between +3.67 and +4.58 —
-    /// drum +3.67, wood +3.74, click +4.24, snare +4.24, beep +4.58 — so a
-    /// 2 dB floor has real room on both sides rather than being fitted to
-    /// today's mix.
+    ///
+    ///     drum   +3.67      sticks +4.18      kit     +4.36
+    ///     snare  +4.01      wood   +4.19      cowbell +4.50
+    ///     click  +4.24      beep   +4.58
+    ///
+    /// — so a 2 dB floor has real room on both sides rather than being fitted
+    /// to today's mix. The three recordings added 2026-09-14 were tuned INTO
+    /// that spread rather than to the widest margin their sources allowed,
+    /// for the reason the next paragraph spends four rejections making.
     ///
     /// NOTE that passing this is not the same as sounding good, and the
     /// snare kit is the proof THREE TIMES OVER. Its first version passed at
@@ -5806,13 +5917,7 @@ mod tests {
         let sr = 48000;
         let bank = SoundBank::new(sr);
         // Every kit the UI offers, named so a failure says which one broke.
-        for (name, kit) in [
-            ("click", SoundKit::Click),
-            ("wood", SoundKit::Wood),
-            ("beep", SoundKit::Beep),
-            ("drum", SoundKit::Drum),
-            ("snare", SoundKit::Snare),
-        ] {
+        for (name, kit) in SoundKit::ALL {
             let accent = laptop_band_energy(bank.get(kit.high_id()), sr);
             let beat =
                 laptop_band_energy(bank.get(kit.low_id()), sr) * (BEAT_GAIN * BEAT_GAIN) as f64;
@@ -6009,9 +6114,61 @@ mod tests {
             assert!(!bank.get(kit.high_id()).is_empty());
             assert!(!bank.get(kit.low_id()).is_empty());
         }
-        // And the kits that do exist must keep resolving to themselves.
-        assert!(SoundKit::from_str("drum") == SoundKit::Drum);
-        assert!(SoundKit::from_str("snare") == SoundKit::Snare);
+        // And the kits that do exist must keep resolving to themselves — all
+        // eight of them, by the same names the menu and `SOUND_TYPES` use.
+        for (name, kit) in SoundKit::ALL {
+            assert!(
+                SoundKit::from_str(name) == kit,
+                "{name:?} does not resolve to its own kit"
+            );
+        }
+    }
+
+    /// Every kit answers with a buffer, and the recorded ones peak where
+    /// `render_click.py` says it left them.
+    ///
+    /// `drum_accent_leaves_headroom` makes this claim for the two accents it
+    /// knows about; this makes it for all eight pairs and from the other
+    /// side as well, because a kit whose BEAT arrived at full scale would
+    /// clip on three events in four and no assertion here used to see it.
+    ///
+    /// THE CEILING IS 0.98 AND NOT THE 0.970 THE FILES CARRY, because this
+    /// measures the buffer AFTER the resampler and a windowed sinc overshoots.
+    /// The files ship at 44 100 and most devices run at 48 000, so nearly
+    /// every buffer here has been through `resample`: a 0.970 file arrives at
+    /// up to 0.9731, which is the interpolator ringing around a transient and
+    /// not a level anybody chose. 0.98 is past every one of them and still
+    /// leaves the two per cent of headroom that is the point of 0.970.
+    ///
+    /// AND BEEP IS ALREADY OVER FULL SCALE, which this test found and did not
+    /// cause. `beep_high` is a synthesised tone sitting at 0.9872 in the file
+    /// — the only one of the sixteen normalised that high — and at 48 000 it
+    /// arrives at 1.0019. It is 0.17 dB and it has been true since the beep
+    /// was synthesised, so it is recorded here rather than fixed: this pass
+    /// was asked to leave Click, Beep and Drum alone, and the fix is a
+    /// re-render of one file, not a change to anything here. The exception is
+    /// named rather than the ceiling loosened, so the other seven keep a
+    /// bound that would catch a real regression.
+    ///
+    /// The floor has teeth too: 0.5 catches a file that was normalised to the
+    /// wrong target or truncated to a tail, which is exactly what a bad
+    /// re-render of `render_click.py` would produce.
+    #[test]
+    fn every_kit_has_two_buffers_and_neither_one_clips() {
+        let bank = SoundBank::new(48000);
+        for (name, kit) in SoundKit::ALL {
+            let ceiling = if name == "beep" { 1.002 } else { 0.98 };
+            for (which, id) in [("accent", kit.high_id()), ("beat", kit.low_id())] {
+                let buf = bank.get(id);
+                assert!(!buf.is_empty(), "{name}'s {which} decoded to nothing");
+                let peak = buf.iter().fold(0.0f32, |m, s| m.max(s.abs()));
+                assert!(
+                    peak <= ceiling,
+                    "{name}'s {which} peaks at {peak}, over the {ceiling} this kit is allowed"
+                );
+                assert!(peak > 0.5, "{name}'s {which} is suspiciously quiet at {peak}");
+            }
+        }
     }
 
     /// An accent plays at 1.0. These are what it is measured against, and the
@@ -6034,7 +6191,7 @@ mod tests {
     #[test]
     fn no_sample_ends_mid_decay() {
         let bank = SoundBank::new(44100);
-        let named: [(&str, &Vec<f32>); 9] = [
+        let named: [(&str, &Vec<f32>); 15] = [
             ("click_high", &bank.click_high),
             ("click_low", &bank.click_low),
             ("wood_high", &bank.wood_high),
@@ -6044,6 +6201,16 @@ mod tests {
             ("drum_low", &bank.drum_low),
             ("snare_low", &bank.snare_low),
             ("snare_high", &bank.snare_high),
+            // The recorded six. A recording is the case this test was written
+            // for — the five originals were truncated mid-decay when they
+            // arrived, and `render_click.py` lands every tail it cuts, which
+            // is a claim and not a guarantee until something checks it.
+            ("sticks_high", &bank.sticks_high),
+            ("sticks_low", &bank.sticks_low),
+            ("cowbell_high", &bank.cowbell_high),
+            ("cowbell_low", &bank.cowbell_low),
+            ("kit_high", &bank.kit_high),
+            ("kit_low", &bank.kit_low),
         ];
         for (name, buf) in named {
             let tail = buf.last().copied().unwrap_or(0.0).abs();

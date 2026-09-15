@@ -41,10 +41,13 @@
   },
   "sound": {
     "click": "滴答",
+    "sticks": "鼓棒",
     "wood": "木声",
     "beep": "哔声",
     "drum": "鼓声",
-    "snare": "军鼓"
+    "kit": "鼓组",
+    "snare": "军鼓",
+    "cowbell": "牛铃"
   },
   "driftMeter": {
     "early": "偏快",

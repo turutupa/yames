@@ -41,10 +41,13 @@
   },
   "sound": {
     "click": "Tích tắc",
+    "sticks": "Dùi trống",
     "wood": "Gỗ",
     "beep": "Bíp",
     "drum": "Trống",
-    "snare": "Trống snare"
+    "kit": "Bộ trống",
+    "snare": "Trống snare",
+    "cowbell": "Chuông bò"
   },
   "driftMeter": {
     "early": "Sớm",
