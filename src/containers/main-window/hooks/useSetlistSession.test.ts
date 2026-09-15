@@ -618,3 +618,95 @@ describe("duplicating a setlist", () => {
     expect(result.current.setlists).toHaveLength(2);
   });
 });
+
+describe("a block of steps, beside the selection", () => {
+  /** A setlist with four steps, loaded, step one selected. */
+  function loaded() {
+    const view = mount();
+    const steps = [...CHAIN.steps, { ...CHAIN.steps[0], id: "s3", name: "Push" },
+      { ...CHAIN.steps[1], id: "s4", name: "Cool down" }];
+    act(() => view.result.current.loadSetlist({ ...CHAIN, steps }));
+    return view;
+  }
+
+  it("starts as the one step the controls are on", () => {
+    const { result } = loaded();
+    expect(result.current.selectedStepId).toBe("s1");
+    expect([...result.current.selectedStepIds]).toEqual(["s1"]);
+  });
+
+  it("extends from the anchor without moving the primary selection", () => {
+    // Marking four steps to drag them is not a request to start listening to
+    // the fourth: the metronome below the track stays on the step it was on.
+    const { result } = loaded();
+    act(() => result.current.extendSelection("s3"));
+    expect([...result.current.selectedStepIds]).toEqual(["s1", "s2", "s3"]);
+    expect(result.current.selectedStepId).toBe("s1");
+  });
+
+  it("reads a shift-click above the anchor the same way", () => {
+    const { result } = loaded();
+    act(() => result.current.selectStep("s3"));
+    act(() => result.current.extendSelection("s1"));
+    expect([...result.current.selectedStepIds]).toEqual(["s1", "s2", "s3"]);
+    expect(result.current.selectedStepId).toBe("s3");
+  });
+
+  it("toggles one step in and out, leaving the rest of the block alone", () => {
+    const { result } = loaded();
+    act(() => result.current.extendSelection("s2"));
+    act(() => result.current.toggleStepSelection("s4"));
+    expect([...result.current.selectedStepIds].sort()).toEqual(["s1", "s2", "s4"]);
+    act(() => result.current.toggleStepSelection("s1"));
+    expect([...result.current.selectedStepIds].sort()).toEqual(["s2", "s4"]);
+    expect(result.current.selectedStepId).toBe("s1");
+  });
+
+  it("a plain click ends the block", () => {
+    const { result } = loaded();
+    act(() => result.current.extendSelection("s4"));
+    expect(result.current.selectedStepIds.size).toBe(4);
+    act(() => result.current.selectStep("s2"));
+    expect([...result.current.selectedStepIds]).toEqual(["s2"]);
+  });
+
+  it("collapses back to the step the controls are on", () => {
+    const { result } = loaded();
+    act(() => result.current.extendSelection("s4"));
+    act(() => result.current.collapseSelection());
+    expect([...result.current.selectedStepIds]).toEqual(["s1"]);
+  });
+
+  it("gives the block back when the setlist starts", () => {
+    // The runner walks the primary selection down the list from here, so a
+    // block marked against where it used to be stops describing anything.
+    const { result, rerender } = (() => {
+      const setView = vi.fn();
+      const view = renderHook(
+        ({ state, isPlaying }: { state: AppState; isPlaying: boolean }) =>
+          useSetlistSession({
+            state,
+            isPlaying,
+            currentBeat: null,
+            setView,
+            onSetlistLoaded: vi.fn(),
+          }),
+        { initialProps: { state: DEFAULT_TEST_STATE as AppState, isPlaying: false } },
+      );
+      return view;
+    })();
+    act(() => result.current.loadSetlist(CHAIN));
+    act(() => result.current.extendSelection("s2"));
+    expect(result.current.selectedStepIds.size).toBe(2);
+
+    act(() => rerender({ state: DEFAULT_TEST_STATE as AppState, isPlaying: true }));
+    expect([...result.current.selectedStepIds]).toEqual(["s1"]);
+  });
+
+  it("clears with the setlist it belonged to", () => {
+    const { result } = loaded();
+    act(() => result.current.extendSelection("s4"));
+    act(() => result.current.closeSetlist());
+    expect(result.current.selectedStepIds.size).toBe(0);
+  });
+});

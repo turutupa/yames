@@ -7,6 +7,7 @@ import {
   jamToSetlistStep,
   presetToSetlistStep,
   renameSetlist as renameSetlistData,
+  stepRange,
   updateStep,
   upsertSetlist,
 } from "../../../setlist";
@@ -136,6 +137,18 @@ export function useSetlistSession({
   /** What the store holds, for the dirty flag and for Revert. */
   const [saved, setSaved] = useState<Setlist | null>(null);
   const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
+  /**
+   * The block, BESIDE the selection and never instead of it.
+   *
+   * `selectedStepId` is load-bearing in three places — the engine mirror
+   * below, the index a run starts on, and the step the runner drags the
+   * selection to — and folding it into a set would have meant teaching all
+   * three which member of the set was the real one. So the set is for bulk
+   * operations only, it holds the primary as its single member in the
+   * ordinary case, and the anchor is where a shift-click measures from.
+   */
+  const [selectedStepIds, setSelectedStepIds] = useState<Set<string>>(new Set());
+  const [anchorStepId, setAnchorStepId] = useState<string | null>(null);
   const [saveFeedback, setSaveFeedback] = useState(false);
   /**
    * The player is showing but you asked for the paragraph back.
@@ -172,6 +185,24 @@ export function useSetlistSession({
     if (!isPlaying) setEditingWhileRunning(false);
   }, [isPlaying]);
 
+  /*
+   * Starting the setlist gives the block back.
+   *
+   * The runner walks the primary selection down the list from here, so a set
+   * marked against where the selection used to be would stop describing
+   * anything a moment later — and the drag it was marked for is refused
+   * while the setlist plays anyway.
+   */
+  useEffect(() => {
+    if (!isPlaying) return;
+    setSelectedStepIds((prev) =>
+      prev.size > 1 ? new Set(selectedStepId ? [selectedStepId] : []) : prev,
+    );
+    setAnchorStepId(selectedStepId);
+    // Only when the run starts. Adding the selection here would collapse the
+    // block on every click that moves it, which is the opposite of the point.
+  }, [isPlaying]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     listSetlists().then(setSetlists).catch(() => {});
     return () => {
@@ -207,6 +238,10 @@ export function useSetlistSession({
   const selectStep = useCallback(
     (stepId: string) => {
       setSelectedStepId(stepId);
+      // A plain click is the end of whatever block was marked: one step, and
+      // the next shift-click measures from here.
+      setSelectedStepIds(new Set([stepId]));
+      setAnchorStepId(stepId);
       // Pointing the metronome at the step is what makes it the step's own
       // controls rather than a second set of numbers beside them.
       const step = setlist?.steps.find((s) => s.id === stepId);
@@ -214,6 +249,42 @@ export function useSetlistSession({
     },
     [setlist, isPlaying, applyAndAwait],
   );
+
+  /**
+   * Shift-click, and Shift+↑/↓: everything from the anchor to here.
+   *
+   * The primary selection does NOT move — the metronome below the track goes
+   * on editing the step it was editing, because marking five steps to move
+   * them is not a request to start listening to the fifth.
+   */
+  const extendSelection = useCallback(
+    (stepId: string) => {
+      if (!setlist) return;
+      const anchor = anchorStepId ?? selectedStepId;
+      const range = stepRange(setlist, anchor, stepId);
+      if (range.length === 0) return;
+      setSelectedStepIds(new Set(range));
+      if (!anchor) setAnchorStepId(stepId);
+    },
+    [setlist, anchorStepId, selectedStepId],
+  );
+
+  /** Ctrl-click (⌘ on a Mac): this one step in or out, nothing else moves. */
+  const toggleStepSelection = useCallback((stepId: string) => {
+    setSelectedStepIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(stepId)) next.delete(stepId);
+      else next.add(stepId);
+      return next;
+    });
+    setAnchorStepId(stepId);
+  }, []);
+
+  /** Back to the one step the controls are on. */
+  const collapseSelection = useCallback(() => {
+    setSelectedStepIds(selectedStepId ? new Set([selectedStepId]) : new Set());
+    setAnchorStepId(selectedStepId);
+  }, [selectedStepId]);
 
   // While the setlist runs, the selection follows it: the controls below the
   // track always describe what you are hearing.
@@ -267,6 +338,8 @@ export function useSetlistSession({
       setSaved(next);
       const first = next.steps[0] ?? null;
       setSelectedStepId(first?.id ?? null);
+      setSelectedStepIds(first ? new Set([first.id]) : new Set());
+      setAnchorStepId(first?.id ?? null);
       if (first && !isPlaying) applyAndAwait(first);
     },
     [setView, onSetlistLoaded, isPlaying, applyAndAwait],
@@ -305,6 +378,8 @@ export function useSetlistSession({
     setSetlist(null);
     setSaved(null);
     setSelectedStepId(null);
+    setSelectedStepIds(new Set());
+    setAnchorStepId(null);
   }, []);
 
   const newSetlist = useCallback(async () => {
@@ -475,6 +550,11 @@ export function useSetlistSession({
     dirty,
     saveFeedback,
     selectedStepId,
+    /** The steps a bulk operation would take — never fewer than the one. */
+    selectedStepIds,
+    extendSelection,
+    toggleStepSelection,
+    collapseSelection,
     /** The step the controls below the track are editing. */
     selectedStep: setlist?.steps.find((s) => s.id === selectedStepId) ?? null,
     runner,

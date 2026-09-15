@@ -1571,6 +1571,10 @@ export function MainWindow() {
               setlist={setlistSession.setlist}
               selectedStepId={setlistSession.selectedStepId}
               onSelectStep={setlistSession.selectStep}
+              selectedStepIds={setlistSession.selectedStepIds}
+              onExtendSelection={setlistSession.extendSelection}
+              onToggleSelection={setlistSession.toggleStepSelection}
+              onCollapseSelection={setlistSession.collapseSelection}
               runningIndex={setlistSession.runningIndex}
               onChange={setlistSession.setSetlist}
               onPatchStep={setlistSession.patchStep}

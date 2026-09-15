@@ -417,9 +417,11 @@
    line between look like a table; the fill is the seam. */
 .setlist-step.selected + .setlist-step,
 .setlist-step.running + .setlist-step,
+.setlist-step.multi + .setlist-step,
 .setlist-step:hover + .setlist-step,
 .setlist-step.selected,
 .setlist-step.running,
+.setlist-step.multi,
 .setlist-step:hover {
   border-top-color: transparent;
 }
@@ -437,6 +439,86 @@
 .setlist-step.running {
   border-left-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+/* Marked, as part of a block.
+
+   THREE row states now, and they are three different sentences: `selected` is
+   "this is the step the controls are on", `running` is "this is what you are
+   hearing", and this is "this step moves with the others when you drag one".
+   They can all be true of one row at once, so this one claims no border —
+   only a wash — and every pairing below states its own fill rather than
+   letting one of the three swallow the others. Without the pairings a
+   selected step in a block looked exactly like a selected step on its own,
+   which is the one thing the wash exists to say. */
+.setlist-step.multi {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.setlist-step.selected.multi {
+  background: color-mix(in srgb, var(--accent) 17%, transparent);
+}
+
+.setlist-step.running.multi {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+/* The six dots you grab a step by.
+
+   Same hover-reveal family as the tools on the right, and drawn on every row
+   at `opacity: 0` for the same reason: a row that gains a handle on hover is
+   a row that changes width, and the sentence beside it reflows.
+
+   The HANDLE is draggable, never the row. A selected row opens into a
+   sentence of inputs, and a drag that began on a tempo field would carry the
+   step off while you were trying to select text in it. */
+.setlist-step-grip {
+  flex: none;
+  display: flex;
+  align-items: center;
+  width: 12px;
+  padding-top: 8px;
+  color: var(--text-tertiary);
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.setlist-step:hover .setlist-step-grip,
+.setlist-step.selected .setlist-step-grip,
+.setlist-step:focus-within .setlist-step-grip {
+  opacity: 1;
+}
+
+.setlist-step-grip:hover {
+  color: var(--text-primary);
+}
+
+/* While the setlist plays. The runner addresses steps by index, so a row
+   moving under it changes what plays next — the handle says so by its title
+   and refuses to be grabbed. The up and down buttons still work: they are
+   the one-position move the runner already survives. */
+.setlist-step-grip.is-locked,
+.setlist-step-grip.is-locked:hover {
+  cursor: default;
+  color: var(--text-muted);
+  opacity: 0.3;
+}
+
+.setlist-step[data-dragging] {
+  opacity: 0.45;
+}
+
+/* A LINE between rows, not a filled row. "After this one" and "instead of
+   this one" are different answers and a highlighted row only gives the
+   second. Inset, so the line costs no height and the list does not jump as
+   the pointer crosses a boundary. */
+.setlist-step[data-drop="before"] {
+  box-shadow: inset 0 2px 0 0 var(--accent);
+}
+
+.setlist-step[data-drop="after"] {
+  box-shadow: inset 0 -2px 0 0 var(--accent);
 }
 
 .setlist-step-no {
