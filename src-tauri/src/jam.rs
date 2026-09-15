@@ -7009,6 +7009,76 @@ mod perc_tests {
         }
     }
 
+    /// THE SEAM THE UI ACTUALLY SENDS: NO FLAG AT ALL.
+    ///
+    /// `src/jam/compile.ts` decides whether there is a percussionist in
+    /// TypeScript and says so by SENDING THE ROWS OR LEAVING THEM OUT — band
+    /// flag off, drums off, stop-time, an ending, all of them arrive here as
+    /// an absent row. It never puts a `perc` boolean on the config.
+    ///
+    /// So `None` has to mean "the rows play if they are there", and nothing
+    /// on this side may read a missing flag as a missing player. `Some(false)`
+    /// stays in the contract as the engine's own answer for a sender that
+    /// wants one; the app is not that sender.
+    #[test]
+    fn a_config_with_no_perc_flag_plays_the_rows_it_was_sent() {
+        let json = serde_json::json!({
+            "ticksPerBeat": 1,
+            "beatsPerBar": 4,
+            "bar": {
+                "kick": [1, 0, 0, 0],
+                "snare": [0, 0, 2, 0],
+                "hat": [1, 1, 1, 1],
+                "ride": [0, 0, 0, 0],
+                "crash": [0, 0, 0, 0],
+                "shaker": [2, 1, 2, 1],
+                "congaHi": [0, 3, 0, 2],
+            },
+            "formBars": 4,
+            "crashOnOne": false,
+            "intensity": 1.0,
+            "kit": "room",
+        });
+        let cfg: JamConfig = serde_json::from_value(json).expect("the UI's own config");
+        assert_eq!(cfg.perc, None, "the UI sends no flag, so this must stay None");
+        let table = compile_with_perc(&cfg, kit(), Some(set())).expect("compiles");
+        assert!(
+            slot(&table, 0, JamLane::Shaker).is_some(),
+            "a config with no perc flag lost its shaker"
+        );
+        assert!(
+            slot(&table, 1, JamLane::CongaHi).is_some(),
+            "a config with no perc flag lost its conga"
+        );
+    }
+
+    /// AND A MIX WITH NO `perc` IN IT IS THE PERCUSSIONIST AT FULL LEVEL.
+    ///
+    /// Three numbers is what every jam saved before this pass carries, and
+    /// what a store, a JSON round trip or an older build will keep sending.
+    /// Absent is 1.0 — the level the grooves were written at — and not zero,
+    /// which would be a percussionist who plays every row and is inaudible.
+    #[test]
+    fn a_mix_without_perc_is_the_percussionist_at_full_level() {
+        let three: JamMix = serde_json::from_value(serde_json::json!({
+            "drums": 1.0, "bass": 1.0, "keys": 1.0,
+        }))
+        .expect("a mix saved before the percussionist");
+        assert_eq!(three.perc, 1.0);
+
+        // And through the compiler: the same band with the row's level
+        // spelled out comes out at the same gain.
+        let mut old = with_perc();
+        old.mix = Some(three);
+        let old = compile_with_perc(&old, kit(), Some(set())).expect("compiles");
+        let full = compile_with_perc(&with_perc(), kit(), Some(set())).expect("compiles");
+        assert_eq!(
+            slot(&old, 0, JamLane::Shaker).map(|s| s.gain),
+            slot(&full, 0, JamLane::Shaker).map(|s| s.gain),
+            "a mix with no perc row in it changed the percussionist's level"
+        );
+    }
+
     /// A MISSING SET IS A SILENT ROW, AND NOTHING ELSE.
     ///
     /// The promise a checkout without `sounds/perc` lives on: the build
