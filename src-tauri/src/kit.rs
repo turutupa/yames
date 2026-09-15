@@ -1788,6 +1788,33 @@ fn build_bank(
 ///
 /// Returns `own` untouched when it holds everything, which is the common
 /// case and costs an `Arc` clone.
+impl KitBank {
+    /// The same bank under a different identity.
+    ///
+    /// A decode's `id` is what `jam.rs` hashes into a table's signature and
+    /// what the four-bar memo is keyed on, so two decodes of the same thing
+    /// must not carry two numbers. The counter in `build_bank` cannot
+    /// promise that on its own: the cache below hands out the KEY's hash
+    /// instead, and a bank that fell out of the cache and was decoded again
+    /// comes back as the bank it was.
+    pub(crate) fn with_id(mut self, id: u64) -> Self {
+        self.id = id;
+        self
+    }
+}
+
+/// A number for a cache key: the same key, the same number, for the life of
+/// the process and across processes on the same build. `salt` keeps the
+/// families apart (a shipped kit and a shipped percussion set share an
+/// index and a rate).
+fn stable_id(key: &Key, salt: u64) -> u64 {
+    use std::hash::{Hash, Hasher};
+    let mut h = std::collections::hash_map::DefaultHasher::new();
+    salt.hash(&mut h);
+    key.hash(&mut h);
+    h.finish()
+}
+
 pub fn with_fallback(own: &Arc<KitBank>, behind: &Arc<KitBank>) -> Arc<KitBank> {
     // THE DRUMS, because both of these are drum kits: a folder somebody
     // pointed at and the shipped kit standing behind it. Neither holds a
@@ -1815,13 +1842,24 @@ pub fn with_fallback(own: &Arc<KitBank>, behind: &Arc<KitBank>) -> Arc<KitBank> 
             voices[v as usize] = Some(b.clone());
         }
     }
-    static NEXT_ID: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1 << 48);
+    // A DIFFERENT DECODE, and it has to be: the memo in `jam.rs` keys a
+    // four-bar measurement on this number, and a folder played over `room`
+    // and the same folder played over `brushes` are two different bands
+    // that would otherwise share one id. But the SAME folder over the SAME
+    // kit is one band, and `set_jam` builds this merge on every bar-ahead
+    // send — a fresh counter here made every send a new drummer, so the
+    // bar-line handshake swapped at once and the memo never hit. The id is
+    // the two parents', combined.
+    let merged_id = {
+        use std::hash::{Hash, Hasher};
+        let mut h = std::collections::hash_map::DefaultHasher::new();
+        0x6d65_7267_6564u64.hash(&mut h); // "merged"
+        own.id.hash(&mut h);
+        behind.id.hash(&mut h);
+        h.finish()
+    };
     Arc::new(KitBank {
-        // A DIFFERENT DECODE, and it has to be: the memo in `jam.rs` keys a
-        // four-bar measurement on this number, and a folder played over
-        // `room` and the same folder played over `brushes` are two different
-        // bands that would otherwise share one id.
-        id: NEXT_ID.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
+        id: merged_id,
         voices,
         rate: own.rate,
         id_name: own.id_name.clone(),
@@ -1908,7 +1946,7 @@ fn load_capped(dir: &Path, rate: u32, max_bytes: u64) -> Result<KitBank, String>
 // ---------------------------------------------------------------------------
 
 /// What a cached bank was built from.
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Hash)]
 enum Key {
     /// A shipped kit, by index and rate. Nothing about it can change while
     /// the app runs — the bytes are in the binary.
@@ -1995,33 +2033,49 @@ pub struct KitCache {
 }
 
 impl KitCache {
-    fn cached(&self, key: &Key) -> Option<Arc<KitBank>> {
-        let mut slot = self.entries.lock().ok()?;
-        let at = slot.iter().position(|(k, _)| k == key)?;
-        // Most recently used to the front, so the kit being played survives
-        // an audition of two others.
-        let entry = slot.remove(at);
-        let bank = entry.1.clone();
-        slot.insert(0, entry);
-        Some(bank)
-    }
-
-    fn store(&self, key: Key, bank: Arc<KitBank>) {
-        if let Ok(mut slot) = self.entries.lock() {
-            slot.insert(0, (key, bank));
-            slot.truncate(CACHE_ENTRIES);
+    /// The bank for `key`, decoding it with `load` only when the cache does
+    /// not hold it.
+    ///
+    /// THE LOCK IS HELD THROUGH THE DECODE. Looking up, dropping the lock,
+    /// decoding and inserting is the obvious shape and it was the shape
+    /// here, and under two callers it decodes twice: both miss, both build,
+    /// both insert, and the same kit is in the cache twice under two ids —
+    /// the second of which evicts something live. The command thread is
+    /// this cache's only client in the app, so holding the lock for a
+    /// decode costs nothing there; in the tests, which run on many threads
+    /// against one process-wide reference cache, it is the difference
+    /// between a signature that holds and one that flickers.
+    ///
+    /// And the id is the key's, not a counter's: a bank that fell out of
+    /// the four entries and was decoded again is the same bank, and the
+    /// bar-line handshake and the four-bar memo both need it to say so.
+    fn fetch(
+        &self,
+        key: Key,
+        salt: u64,
+        load: impl FnOnce() -> Result<KitBank, String>,
+    ) -> Result<Arc<KitBank>, String> {
+        let mut slot = self
+            .entries
+            .lock()
+            .map_err(|_| "the kit cache could not be read".to_string())?;
+        if let Some(at) = slot.iter().position(|(k, _)| *k == key) {
+            // Most recently used to the front, so the kit being played
+            // survives an audition of two others.
+            let entry = slot.remove(at);
+            let bank = entry.1.clone();
+            slot.insert(0, entry);
+            return Ok(bank);
         }
+        let bank = Arc::new(load()?.with_id(stable_id(&key, salt)));
+        slot.insert(0, (key, bank.clone()));
+        slot.truncate(CACHE_ENTRIES);
+        Ok(bank)
     }
 
     /// One of the kits the app ships, at this rate.
     pub fn shipped(&self, index: usize, rate: u32) -> Result<Arc<KitBank>, String> {
-        let key = Key::Shipped(index, rate);
-        if let Some(bank) = self.cached(&key) {
-            return Ok(bank);
-        }
-        let bank = Arc::new(load_shipped(index, rate)?);
-        self.store(key, bank.clone());
-        Ok(bank)
+        self.fetch(Key::Shipped(index, rate), 0x6b69_74, || load_shipped(index, rate))
     }
 
     /// One of the percussion sets the app ships, at this rate.
@@ -2030,13 +2084,7 @@ impl KitCache {
     /// times a chorus and every one of those sends asks for the set as well
     /// as for the kit. All but the first is an `Arc` clone.
     pub fn perc(&self, index: usize, rate: u32) -> Result<Arc<KitBank>, String> {
-        let key = Key::ShippedPerc(index, rate);
-        if let Some(bank) = self.cached(&key) {
-            return Ok(bank);
-        }
-        let bank = Arc::new(load_perc(index, rate)?);
-        self.store(key, bank.clone());
-        Ok(bank)
+        self.fetch(Key::ShippedPerc(index, rate), 0x7065_7263, || load_perc(index, rate))
     }
 
     /// The bank for this folder at this rate, decoding it only if the
@@ -2044,12 +2092,7 @@ impl KitCache {
     /// time.
     pub fn get_or_load(&self, dir: &Path, rate: u32) -> Result<Arc<KitBank>, String> {
         let key = key_for(dir, rate)?;
-        if let Some(bank) = self.cached(&key) {
-            return Ok(bank);
-        }
-        let bank = Arc::new(load(dir, rate)?);
-        self.store(key, bank.clone());
-        Ok(bank)
+        self.fetch(key, 0x666f_6c64_6572, || load(dir, rate))
     }
 
     /// Is this folder's decode the one the cache is holding? Tests only — it

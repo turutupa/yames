@@ -1092,3 +1092,52 @@ fn every_shipped_percussion_set_decodes_from_its_own_folder() {
         }
     }
 }
+
+/// ONE KEY, ONE DECODE, ONE ID — however many threads ask at once.
+///
+/// The cache used to look up, drop its lock, decode, and insert. Two
+/// callers that both missed both decoded, and the same kit sat in the cache
+/// twice under two ids; the second insert evicted something live. In the
+/// app the command thread is the only caller, but the tests share one
+/// process-wide reference cache across threads, and a table's signature
+/// hashes the bank's id — so two compiles of one config disagreed about
+/// which drummer they had, one run in twenty.
+#[test]
+fn one_key_decodes_once_however_many_threads_ask() {
+    let cache = std::sync::Arc::new(KitCache::default());
+    let threads: Vec<_> = (0..8)
+        .map(|_| {
+            let cache = cache.clone();
+            std::thread::spawn(move || cache.shipped(0, 48_000).unwrap().id)
+        })
+        .collect();
+    let ids: Vec<u64> = threads.into_iter().map(|t| t.join().unwrap()).collect();
+    assert!(ids.windows(2).all(|w| w[0] == w[1]), "one kit, ids {ids:?}");
+    assert_eq!(
+        cache.entries.lock().unwrap().len(),
+        1,
+        "one kit is one entry, not one per thread that missed"
+    );
+}
+
+/// A BANK THAT FELL OUT OF THE CACHE COMES BACK AS ITSELF.
+///
+/// Four entries, and a jam holds a kit and a percussion set while an
+/// audition loads two more; the fifth load evicts the first. When that
+/// first is asked for again it is decoded again — and it must carry the
+/// id it had, or the bar-line handshake sees a new drummer and the
+/// four-bar memo measures a band it already knows.
+#[test]
+fn an_evicted_bank_comes_back_with_the_same_id() {
+    let cache = KitCache::default();
+    let first = cache.shipped(0, 48_000).unwrap().id;
+    for rate in [44_100u32, 88_200, 96_000, 22_050] {
+        cache.shipped(0, rate).unwrap();
+    }
+    assert!(
+        !cache.entries.lock().unwrap().iter().any(|(k, _)| *k == Key::Shipped(0, 48_000)),
+        "four loads later the first is gone"
+    );
+    let again = cache.shipped(0, 48_000).unwrap().id;
+    assert_eq!(first, again, "the same kit at the same rate is the same bank");
+}
