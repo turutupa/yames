@@ -230,16 +230,42 @@ fn query_coreaudio_output_latency_frames(_device_name: Option<&str>) -> Option<u
     None
 }
 
-// Embedded click sounds -- 8 kits
+// Embedded click sounds -- 8 kits, THREE STROKES EACH.
+//
+// A bar of 6/8 has a beat one, a beat four and four plain beats, and until
+// 2026-09-15 the first two were one file at two volumes. The owner listened
+// to that and heard nothing: the same transient 2 dB down, passing once a
+// bar, is under the ear's threshold. A real metronome marks three levels with
+// three SOUNDS, because pitch and timbre are what the ear separates. So every
+// preset now ships a middle stroke of its own instrument —
+// `plans/CLICK_ACCENTS.md` Part 1 has the decision and the per-kit table,
+// `scripts/sounds/render_click.py` the five recorded ones,
+// `scripts/sounds/rebuild.py` point 7 the two synthesised ones, and
+// `SoundKit::mid_id` the wiring. `DrumMid` is the exception and is mixed
+// below, exactly as `DrumAccent` is.
 const CLICK_HIGH: &[u8] = include_bytes!("../sounds/click_high.wav");
+/// Click's middle: the same sine tick at 980 Hz, the geometric mean of the
+/// 1200 above and the 800 below, damped at 140/s rather than 80 so that it
+/// carries less weight at a peak the convention fixes. `rebuild.py`.
+const CLICK_MID: &[u8] = include_bytes!("../sounds/click_mid.wav");
 const CLICK_LOW: &[u8] = include_bytes!("../sounds/click_low.wav");
 /// RECORDED since 2026-09-14, where it used to be a pair of synthesised
 /// blocks: Virtuosity's small woodblock over its big one, cut by
 /// `scripts/sounds/render_click.py`, which is the generator of record for
 /// this pair and for the four below. `rebuild.py` no longer claims them.
 const WOOD_HIGH: &[u8] = include_bytes!("../sounds/wood_high.wav");
+/// Wood's middle: the SAME small block as the downbeat, struck at vl3 and cut
+/// exactly as the downbeat is — same trim floor, same fade, same 250 ms. The
+/// level is the file's peak, 0.814. It was the trim for a day, at -22 dB, and
+/// that gated the stroke: the fade began while the block was still at 8-10%
+/// of full scale and took it to nothing in 12 ms, where the downbeat rings on
+/// for another 180. Virtuosity Drums, CC0.
+const WOOD_MID: &[u8] = include_bytes!("../sounds/wood_mid.wav");
 const WOOD_LOW: &[u8] = include_bytes!("../sounds/wood_low.wav");
 const BEEP_HIGH: &[u8] = include_bytes!("../sounds/beep_high.wav");
+/// Beep's middle: 760 Hz between 880 and 660, damped at 53/s rather than 30
+/// for the reason `CLICK_MID` is damped at 140. `rebuild.py`.
+const BEEP_MID: &[u8] = include_bytes!("../sounds/beep_mid.wav");
 const BEEP_LOW: &[u8] = include_bytes!("../sounds/beep_low.wav");
 const DRUM_HIGH: &[u8] = include_bytes!("../sounds/drum_high.wav");
 const DRUM_LOW: &[u8] = include_bytes!("../sounds/drum_low.wav");
@@ -273,17 +299,48 @@ const DRUM_BODY: &[u8] = include_bytes!("../sounds/drum_body.wav");
 /// than two drums; the synthesis those three rejections produced is kept in
 /// `rebuild.py`, unreachable, as the record of what it cost to learn.
 const SNARE_HIGH: &[u8] = include_bytes!("../sounds/snare_high.wav");
+/// And the middle of its bar is the same drum a third time: Studio's layer 3,
+/// driven at 1.1 where the accent is driven at 1.5 and the beat at 0.8, and
+/// peaking at 0.921 rather than a convention. Layer 2 is the more distinct
+/// sound of the two candidates and is the LOUDEST of this drum's four layers,
+/// so at any peak that puts it under the downbeat on a laptop it sits OVER
+/// the downbeat K-weighted. `render_click.py`'s `snare_mid` has the numbers.
+/// DRSKit via the Studio kit, CC BY 4.0.
+const SNARE_MID: &[u8] = include_bytes!("../sounds/snare_mid.wav");
 const SNARE_LOW: &[u8] = include_bytes!("../sounds/snare_low.wav");
 /// A drummer's count-off: a stick-shot off the rim for the accent and a
 /// cross-stick for the beat, both out of Virtuosity's snare. The jam's
 /// count-in plays these same two files, so being counted in and practising to
 /// Sticks are the same sound (`JamCountInSound::Sticks`).
 const STICKS_HIGH: &[u8] = include_bytes!("../sounds/sticks_high.wav");
+/// The middle is the same stick-shot played at vl3 — a drummer's secondary
+/// accent is the same stroke with less arm behind it. vl4 was the other
+/// candidate and measured LOUDER than the downbeat once normalised, which is
+/// `render_click.py`'s "a hard stroke is quieter" arriving where it was least
+/// wanted. Virtuosity Drums, CC0.
+const STICKS_MID: &[u8] = include_bytes!("../sounds/sticks_mid.wav");
 const STICKS_LOW: &[u8] = include_bytes!("../sounds/sticks_low.wav");
 /// One cowbell at two dynamics — the hard layer and the middle one. The
 /// library's softest is 26 dB down and is a fingertip on the lip of the bell,
 /// which at the beat's peak is a tick with a room behind it.
 const COWBELL_HIGH: &[u8] = include_bytes!("../sounds/cowbell_high.wav");
+/// The library's three dynamics, one per tier — and the preset where the
+/// peak had to stop being a convention. Its strokes are 26 dB apart in the
+/// library and under 1.5 dB apart once each is normalised, because a bell's
+/// peak is one clang and its loudness is the ring after it: the SOFTEST
+/// stroke at the beat's usual 0.900 came back 1.26 dB LOUDER than the hardest
+/// at 0.970. So the peaks are solved for from the ladder backwards — 0.970,
+/// 0.771 and 0.763, 2.1 dB a step through the band a laptop radiates.
+///
+/// `COWBELL_LOW` is therefore the one pre-existing click file this pass
+/// re-cut: it was the middle dynamic and is the fingertip tap now. A middle
+/// built out of the DOWNBEAT'S stroke at a distant mic blend was tried first
+/// and measured better on every number that has a number — 2.49 dB under,
+/// spectral distance 0.43 where three dynamics of one bell manage 0.11 — and
+/// was the wrong sound: 13.3% of its energy over 5.6 kHz against the
+/// downbeat's 4.2%, and 42 ms longer than it. `render_click.py`'s
+/// `cowbell_mid` has the whole table. Virtuosity Drums, CC0.
+const COWBELL_MID: &[u8] = include_bytes!("../sounds/cowbell_mid.wav");
 const COWBELL_LOW: &[u8] = include_bytes!("../sounds/cowbell_low.wav");
 /// The RECORDED answer to [`SoundKit::Drum`], and built the way that one is so
 /// the owner can put the two side by side: a kick under a struck head for the
@@ -293,6 +350,15 @@ const COWBELL_LOW: &[u8] = include_bytes!("../sounds/cowbell_low.wav");
 /// the same tanh curve, because there is nothing about it left for the engine
 /// to retune. See `render_click.py`.
 const KIT_HIGH: &[u8] = include_bytes!("../sounds/kit_high.wav");
+/// And its middle is the backbeat with no kick under it: Studio's snare at
+/// layer 3, alone. 6/8 on a kit is kick on one, snare on four, hats between,
+/// so what the middle of the bar is missing is the kick — a huge thing to
+/// hear and almost nothing to measure, because a 200 Hz-4 kHz band-pass
+/// cannot see a kick at all. At the middles' usual peak that left it 0.83 dB
+/// under its own downbeat, which is the half-decibel the owner already
+/// listened to and could not hear, so the file's peak carries it the rest of
+/// the way: 0.807, and 2.06 dB under. DRSKit via the Studio kit, CC BY 4.0.
+const KIT_MID: &[u8] = include_bytes!("../sounds/kit_mid.wav");
 const KIT_LOW: &[u8] = include_bytes!("../sounds/kit_low.wav");
 const CHIME_UP: &[u8] = include_bytes!("../sounds/chime_up.wav");
 const CHIME_DOWN: &[u8] = include_bytes!("../sounds/chime_down.wav");
@@ -313,32 +379,27 @@ const CHIME_DOWN: &[u8] = include_bytes!("../sounds/chime_down.wav");
 pub(crate) const BEAT_GAIN: f32 = 0.65;
 
 /// How loud a MIDDLE accent is — the second and later group starts of a bar,
-/// the accent sound at less than full volume so that 6/8 has a beat one and a
-/// beat four that are not the same event (`plans/CLICK_ACCENTS.md`).
+/// the stroke that gives 6/8 a beat one and a beat four that are not the same
+/// event (`plans/CLICK_ACCENTS.md`).
 ///
-/// The accent click, quieter, not the beat click louder: on the bright kits
-/// the beat sound at full volume blurs into the beats either side of it, and
-/// a middle accent has to be recognisably the same gesture as the downbeat.
+/// **1.0, and that is not a bug.** This was 0.80: the accent file, quieter.
+/// The owner listened to it and heard nothing, and was right — 1.94 dB off a
+/// transient that passes once a bar is under what an ear reports. A real
+/// metronome marks three levels with three SOUNDS, so every preset ships a
+/// middle stroke of its own instrument now, and the level lives in that
+/// file's peak (0.930, between the accent's 0.970 and the beat's 0.900) and
+/// in how the stroke was cut. `SoundKit::mid_id` names the files;
+/// `scripts/sounds/render_click.py`'s header explains why the peak alone
+/// builds no ladder and what does.
 ///
-/// 0.80 is the number the design proposed and the number the measurements
-/// kept. It has to buy two distinctions out of one span, and they are not the
-/// same size of problem:
-///
-///   - Strong against Medium is 1.94 dB, and it is the harder of the two,
-///     because the two are the SAME FILE and level is the only cue there is.
-///   - Medium against the beat is that kit's accent margin less 1.94 dB, and
-///     it is the easier one, because the two are DIFFERENT FILES: you hear
-///     the accent sound arrive, softly, not a loud beat.
-///
-/// So the bigger share of the span goes to Strong-against-Medium, which is
-/// what a gain below 1 does. Raising it to 0.85 would leave 1.4 dB between
-/// the two accents — under the JND on a transient heard once a bar — and
-/// lowering it to 0.70 pushes the drum kit's middle accent to within 0.6 dB
-/// of its own beat. The per-kit numbers live on
-/// `every_medium_accent_sits_between_its_strong_and_its_beat`, and what that
-/// test's older sibling says holds here too: a margin is a floor, not a
-/// target.
-const MEDIUM_GAIN: f32 = 0.80;
+/// THE CONSTANT STAYS, at 1.0, because a tuning should be one line. If the
+/// middles come back too loud or too soft ACROSS EVERY KIT AT ONCE, this is
+/// the number to move; if one kit is wrong, the recipe row for that kit's
+/// `_mid` file is the place, because that is where a per-kit answer can
+/// actually be given. Moving this trades against the whole table on
+/// `every_medium_accent_sits_between_its_strong_and_its_beat`, which is
+/// printed for exactly that conversation.
+const MEDIUM_GAIN: f32 = 1.0;
 
 /// Subdivisions, quieter again. Kept at the same ratio to `BEAT_GAIN` it had
 /// at 0.75/0.35, so lifting the accent does not also raise the ticks between
@@ -1142,6 +1203,24 @@ pub enum SoundId {
     DrumAccent,
     SnareLow,
     SnareHigh,
+    /// The middle strokes, one per kit, added 2026-09-15. A bar's beat four
+    /// plays these where it used to play the downbeat's file at 80 % — see
+    /// [`MEDIUM_GAIN`] for why that was not enough and [`SoundKit::mid_id`]
+    /// for the table.
+    ///
+    /// `DrumMid` is the only one with no file behind it: it is mixed in
+    /// [`SoundBank::new`] from the kick and the body, which is `DrumAccent`
+    /// with the cymbals taken out, for the same reason `DrumAccent` is mixed
+    /// there — the balance of layers that all ship separately is the engine's
+    /// to decide and can be retuned without a re-render.
+    ClickMid,
+    WoodMid,
+    BeepMid,
+    DrumMid,
+    SnareMid,
+    SticksMid,
+    CowbellMid,
+    KitMid,
     /// The three presets added 2026-09-14, all of them recordings. They are
     /// plain buffers in the [`SoundBank`] exactly as the five before them are
     /// — a click is a click, whatever it was cut from.
@@ -1215,20 +1294,28 @@ pub enum SoundId {
 
 struct SoundBank {
     click_high: Vec<f32>,
+    click_mid: Vec<f32>,
     click_low: Vec<f32>,
     wood_high: Vec<f32>,
+    wood_mid: Vec<f32>,
     wood_low: Vec<f32>,
     beep_high: Vec<f32>,
+    beep_mid: Vec<f32>,
     beep_low: Vec<f32>,
     drum_low: Vec<f32>,
     drum_accent: Vec<f32>, // pre-mixed kick + metal hat + crash + body
+    drum_mid: Vec<f32>,    // and the same premix with the cymbals taken out
     snare_low: Vec<f32>,
+    snare_mid: Vec<f32>,
     snare_high: Vec<f32>,
     sticks_high: Vec<f32>,
+    sticks_mid: Vec<f32>,
     sticks_low: Vec<f32>,
     cowbell_high: Vec<f32>,
+    cowbell_mid: Vec<f32>,
     cowbell_low: Vec<f32>,
     kit_high: Vec<f32>,
+    kit_mid: Vec<f32>,
     kit_low: Vec<f32>,
     chime_up: Vec<f32>,
     chime_down: Vec<f32>,
@@ -1321,6 +1408,49 @@ impl SoundBank {
             }
         }
 
+        // And the middle of the bar, mixed here for the same reasons and out
+        // of two of the same four layers: THE KICK AND THE BODY, NO METAL AND
+        // NO CRASH.
+        //
+        // 6/8 on a kit is a kick on one, a snare on four and hats between,
+        // and what says "one" on this kit is the cymbal — so what says "four"
+        // is the kick with the cymbal taken off it. That is a bigger
+        // difference to hear than any gain, which is the whole argument of
+        // this pass, and it is nearly invisible to the band-pass the tests
+        // measure through: the kick carries 99.7% of its energy under 120 Hz.
+        // Band-limited this lands 1.83 dB under the accent at 44 100 and
+        // 1.62 at 48 000 — the resampler, and the reason every margin in this
+        // file says which rate it was taken at. What a listener actually
+        // loses is the crash.
+        //
+        // Peak 0.930 EXACTLY, not "0.930 if it is over": the five recorded
+        // middles land on that number and this one is the sixth. Unlike the
+        // accent above, where a premix that came in under the ceiling was
+        // left alone, there is nothing here that a lower peak would protect —
+        // two layers summed peak well over full scale and the tanh has
+        // already held them.
+        //
+        // Runs once when the bank is built, on the setup path, never on the
+        // audio thread.
+        let mid_len = drum_high.len().max(drum_body.len());
+        let mut drum_mid = vec![0.0f32; mid_len];
+        for (i, s) in drum_high.iter().enumerate() {
+            drum_mid[i] += s * 0.70;
+        }
+        for (i, s) in drum_body.iter().enumerate() {
+            drum_mid[i] += s;
+        }
+        for s in drum_mid.iter_mut() {
+            *s = (*s * DRIVE).tanh() / shape;
+        }
+        let mid_peak = drum_mid.iter().fold(0.0f32, |m, s| m.max(s.abs()));
+        if mid_peak > 0.0 {
+            let g = 0.93 / mid_peak;
+            for s in drum_mid.iter_mut() {
+                *s *= g;
+            }
+        }
+
         // And the bass player — five of them, because a fingered bass under
         // a blues and a slap under a funk groove are different instruments
         // and not the same instrument at different volumes
@@ -1405,13 +1535,17 @@ impl SoundBank {
             drum_metal,
             drum_crash,
             click_high: decode_wav(CLICK_HIGH, sr),
+            click_mid: decode_wav(CLICK_MID, sr),
             click_low: decode_wav(CLICK_LOW, sr),
             wood_high: decode_wav(WOOD_HIGH, sr),
+            wood_mid: decode_wav(WOOD_MID, sr),
             wood_low: decode_wav(WOOD_LOW, sr),
             beep_high: decode_wav(BEEP_HIGH, sr),
+            beep_mid: decode_wav(BEEP_MID, sr),
             beep_low: decode_wav(BEEP_LOW, sr),
             drum_low: decode_wav(DRUM_LOW, sr),
             drum_accent,
+            drum_mid,
             // No premix for this kit: it is synthesised whole, so its accent
             // is already balanced against its beat in the file and there is
             // no summed peak to limit away. That decision was right and was
@@ -1419,6 +1553,7 @@ impl SoundBank {
             // lost inside the files, in a 60 ms plain beat and a snare whose
             // wire tail was cut off at -36 dBFS, not in the mixing.
             snare_low: decode_wav(SNARE_LOW, sr),
+            snare_mid: decode_wav(SNARE_MID, sr),
             snare_high: decode_wav(SNARE_HIGH, sr),
             // And no premix for any of these three either, for a reason the
             // snare kit's comment above only half covers: they are
@@ -1428,10 +1563,13 @@ impl SoundBank {
             // `render_click.py` where the peak they land on can be measured
             // against the same filters this file's tests use.
             sticks_high: decode_wav(STICKS_HIGH, sr),
+            sticks_mid: decode_wav(STICKS_MID, sr),
             sticks_low: decode_wav(STICKS_LOW, sr),
             cowbell_high: decode_wav(COWBELL_HIGH, sr),
+            cowbell_mid: decode_wav(COWBELL_MID, sr),
             cowbell_low: decode_wav(COWBELL_LOW, sr),
             kit_high: decode_wav(KIT_HIGH, sr),
+            kit_mid: decode_wav(KIT_MID, sr),
             kit_low: decode_wav(KIT_LOW, sr),
             chime_up: decode_wav(CHIME_UP, sr),
             chime_down: decode_wav(CHIME_DOWN, sr),
@@ -1450,6 +1588,14 @@ impl SoundBank {
             SoundId::DrumAccent => &self.drum_accent,
             SoundId::SnareLow => &self.snare_low,
             SoundId::SnareHigh => &self.snare_high,
+            SoundId::ClickMid => &self.click_mid,
+            SoundId::WoodMid => &self.wood_mid,
+            SoundId::BeepMid => &self.beep_mid,
+            SoundId::DrumMid => &self.drum_mid,
+            SoundId::SnareMid => &self.snare_mid,
+            SoundId::SticksMid => &self.sticks_mid,
+            SoundId::CowbellMid => &self.cowbell_mid,
+            SoundId::KitMid => &self.kit_mid,
             SoundId::SticksHigh => &self.sticks_high,
             SoundId::SticksLow => &self.sticks_low,
             SoundId::CowbellHigh => &self.cowbell_high,
@@ -1649,8 +1795,8 @@ impl AccentMode {
 enum AccentLevel {
     /// A plain beat, or a subdivision tick. The beat click.
     None = 0,
-    /// A group start that is not the bar's: the accent click at
-    /// [`MEDIUM_GAIN`]. A bar's middle.
+    /// A group start that is not the bar's: the kit's MIDDLE STROKE, its own
+    /// file, at [`MEDIUM_GAIN`]. A bar's middle.
     Medium = 1,
     /// Beat one, "every beat", the ramp's bar line: the accent click at full
     /// volume, exactly as loud as every accent was before there were tiers.
@@ -1664,9 +1810,15 @@ impl AccentLevel {
         self != Self::None
     }
 
-    /// The gain the accent click plays at. `None` never reaches the voice
-    /// spawn, and answers 0.0 rather than panicking so that a future caller
-    /// cannot make a silent bug out of an exhaustive match.
+    /// The gain this tier plays at. `None` never reaches the voice spawn, and
+    /// answers 0.0 rather than panicking so that a future caller cannot make a
+    /// silent bug out of an exhaustive match.
+    ///
+    /// Strong and Medium both answer 1.0 since the middle became a file of its
+    /// own — which is NOT the same as saying they are equally loud. They are
+    /// different recordings, cut to different peaks and different weights;
+    /// [`MEDIUM_GAIN`] says why the level moved out of this function and into
+    /// the file, and `SoundKit::mid_id` is where the difference actually is.
     #[inline]
     fn gain(self) -> f32 {
         match self {
@@ -1737,6 +1889,31 @@ impl SoundKit {
             Self::Sticks => SoundId::SticksHigh,
             Self::Cowbell => SoundId::CowbellHigh,
             Self::Kit => SoundId::KitHigh,
+        }
+    }
+    /// The MIDDLE stroke — what a bar's second and later group starts play.
+    ///
+    /// A third file per kit rather than the downbeat's at a lower gain, for
+    /// the reason [`MEDIUM_GAIN`] gives at length: the owner heard the gain
+    /// version and heard nothing. Every one of these is the same instrument
+    /// as the downbeat played differently — a softer velocity of the same
+    /// stroke (sticks, wood, snare, cowbell), the same premix with the
+    /// cymbals taken out (drum), the backbeat without its kick (kit), a third
+    /// pitch of the same tone (click, beep).
+    ///
+    /// The fallback kit is Click, as it is for `high_id` and `low_id`, so a
+    /// store naming a kit this build has never heard of still gets a bar with
+    /// a middle rather than a silent beat four.
+    fn mid_id(self) -> SoundId {
+        match self {
+            Self::Click => SoundId::ClickMid,
+            Self::Wood => SoundId::WoodMid,
+            Self::Beep => SoundId::BeepMid,
+            Self::Drum => SoundId::DrumMid,
+            Self::Snare => SoundId::SnareMid,
+            Self::Sticks => SoundId::SticksMid,
+            Self::Cowbell => SoundId::CowbellMid,
+            Self::Kit => SoundId::KitMid,
         }
     }
     fn low_id(self) -> SoundId {
@@ -5505,18 +5682,35 @@ impl MetronomeEngine {
                                 // about this line rather than about a sum
                                 // computed somewhere else.
                                 //
-                                // ONE SOUND, TWO VOLUMES. A middle accent is
-                                // the same file as the downbeat at
-                                // `MEDIUM_GAIN`, which is why every kit —
-                                // including a custom one — has a middle
-                                // without shipping a third sample. It rings
-                                // out uncapped like the strong one: it is the
-                                // same gesture, and capping it would make it
-                                // a different kind of click rather than a
-                                // quieter one.
+                                // TWO SOUNDS, NOT ONE SOUND AT TWO VOLUMES.
+                                // This used to spawn `high_id()` at
+                                // `MEDIUM_GAIN` for a bar's middle, and the
+                                // owner listened to that and heard nothing:
+                                // the same transient a couple of decibels
+                                // down, passing once a bar, is under what an
+                                // ear reports. Every kit ships a middle
+                                // stroke of its own now — see `mid_id` — and
+                                // the level lives in that file.
+                                //
+                                // One more id lookup than before and nothing
+                                // else: a `match` over a `Copy` enum, the
+                                // same shape the beat and the sub-tick have
+                                // always had. No allocation, no lock, no
+                                // branch that depends on anything but this
+                                // tick's level.
+                                //
+                                // It rings out uncapped like the strong one:
+                                // it is the same gesture, and capping it
+                                // would make it a different kind of click
+                                // rather than a lighter one.
                                 if voices.len() < MAX_VOICES {
+                                    let sound = if accent_level == AccentLevel::Strong {
+                                        cached.kit.high_id()
+                                    } else {
+                                        cached.kit.mid_id()
+                                    };
                                     voices.push(Voice::click(
-                                        cached.kit.high_id(),
+                                        sound,
                                         accent_level.gain() * cached.volume,
                                         0,
                                     ));
@@ -6689,17 +6883,53 @@ mod tests {
 
     /// The gains, in the order the ear has to hear them. `Strong` is 1.0
     /// because an accent always played at 1.0 and this tier did not make the
-    /// downbeat quieter — it made a second, softer one.
+    /// downbeat quieter — it made a second, lighter one.
+    ///
+    /// AND MEDIUM IS 1.0 TOO, WHICH IS THE POINT AND NOT A HOLE IN THIS TEST.
+    /// A middle accent was the downbeat's own file at 0.80 and the owner
+    /// heard nothing; it is a different file now and the level lives in that
+    /// file's peak and in how the stroke was cut. So the loudness order this
+    /// test is named for cannot be checked here any more — it is checked
+    /// where it now lives, on
+    /// `every_medium_accent_sits_between_its_strong_and_its_beat`, against
+    /// the actual buffers and through the band a laptop radiates. What is
+    /// still true here is that neither accent is attenuated and that both
+    /// stand over the plain beat, which is what these three constants say.
     #[test]
     fn the_three_tiers_come_in_loudness_order() {
         assert_eq!(AccentLevel::Strong.gain(), 1.0);
-        assert!(AccentLevel::Medium.gain() < AccentLevel::Strong.gain());
+        assert_eq!(AccentLevel::Medium.gain(), MEDIUM_GAIN);
         assert!(AccentLevel::Medium.gain() > BEAT_GAIN);
+        assert!(AccentLevel::Medium.gain() <= AccentLevel::Strong.gain());
         assert_eq!(AccentLevel::None.gain(), 0.0);
         // And the numbers the frontend reads, which sort the same way.
         assert_eq!(AccentLevel::None as u8, 0);
         assert_eq!(AccentLevel::Medium as u8, 1);
         assert_eq!(AccentLevel::Strong as u8, 2);
+    }
+
+    /// Every kit answers a middle stroke, and it is nobody else's file.
+    ///
+    /// The cheapest possible guard against the mistake this whole pass was
+    /// written to undo: a `mid_id` arm copied from `high_id` and not edited
+    /// would rebuild the bug — a bar whose middle is its downbeat — and
+    /// nothing else here would notice, because the buffers would measure
+    /// perfectly in order with each other.
+    #[test]
+    fn every_kit_has_a_middle_of_its_own() {
+        for (name, kit) in SoundKit::ALL {
+            assert!(
+                kit.mid_id() != kit.high_id(),
+                "{name}'s middle is its downbeat's file again"
+            );
+            assert!(
+                kit.mid_id() != kit.low_id(),
+                "{name}'s middle is its plain beat's file"
+            );
+        }
+        // And the kit a store cannot name — `from_str` falls through to Click
+        // so that a bar out of a newer build still has three levels.
+        assert!(SoundKit::from_str("no such kit").mid_id() == SoundId::ClickMid);
     }
 
     #[test]
@@ -7180,6 +7410,19 @@ mod tests {
             assert!(peak <= 0.971, "{name} peaks at {peak}, which clips");
             assert!(peak > 0.5, "{name} is suspiciously quiet at {peak}");
         }
+        // And the middle of the drum kit's bar, which is the other premix
+        // built in `SoundBank::new`.
+        //
+        // EXACTLY 0.930 AT ANY RATE, where the seven middles that are files
+        // are allowed a little over. Those are decoded and then resampled, and
+        // a windowed sinc overshoots around a transient; this one is mixed
+        // from buffers that have ALREADY been resampled and is normalised
+        // afterwards, so the number below is the number, not a window.
+        let mid_peak = bank.drum_mid.iter().fold(0.0f32, |m, s| m.max(s.abs()));
+        assert!(
+            (mid_peak - 0.93).abs() < 1e-4,
+            "the drum kit's middle peaks at {mid_peak}, not the 0.930 it is set to"
+        );
     }
 
     /// Energy through a 200 Hz–4 kHz band-pass: roughly the band a laptop
@@ -7321,73 +7564,156 @@ mod tests {
     /// its beat two and quieter than its beat one, through the band a laptop
     /// actually radiates. Measured the same way and for the same reason —
     /// broadband arithmetic said the drum kit's accent was fine when it was
-    /// half a dB quieter than the beat it marked.
+    /// half a decibel quieter than the beat it marked.
     ///
-    /// Measured at `MEDIUM_GAIN` = 0.80, against the RECORDED presets (W38
-    /// replaced Wood, Snare, Sticks, Cowbell and Kit with recordings; these
-    /// are their numbers, not the synthesised ones'):
+    /// THESE ARE THREE FILES NOW AND WERE ONE FILE AT TWO VOLUMES. The first
+    /// version of this tier played the downbeat's own sample at
+    /// `MEDIUM_GAIN` = 0.80 and measured a tidy 1.94 dB under it for every
+    /// kit; the owner listened and heard nothing, which is the honest answer
+    /// about a transient that passes once a bar. `MEDIUM_GAIN` is 1.0 and the
+    /// level lives in `<kit>_mid.wav`, so the numbers below are eight
+    /// separate cuts rather than one arithmetic identity — which is exactly
+    /// why they have to be printed.
     ///
-    ///     kit      strong   medium   beat      medium-beat   strong-medium
-    ///     click    +4.24    +2.30    0.00      +2.30         1.94
-    ///     sticks   +4.18    +2.24    0.00      +2.24         1.94
-    ///     wood     +4.19    +2.26    0.00      +2.26         1.94
-    ///     beep     +4.58    +2.64    0.00      +2.64         1.94
-    ///     drum     +3.67    +1.73    0.00      +1.73         1.94
-    ///     kit      +4.36    +2.42    0.00      +2.42         1.94
-    ///     snare    +4.01    +2.07    0.00      +2.07         1.94
-    ///     cowbell  +4.50    +2.56    0.00      +2.56         1.94
+    /// Measured at 48 kHz, each kit against its own beat at `BEAT_GAIN`:
     ///
-    /// (dB through the 200 Hz-4 kHz band-pass, each kit relative to its own
-    /// beat, which is why the beat column is zero by construction.)
+    ///     kit      strong   middle   beat   strong-mid  mid-beat   K-weighted
+    ///     click    +4.24    +2.08    0.00      2.16       2.08     2.34 / 2.15
+    ///     sticks   +4.18    +2.16    0.00      2.01       2.16     1.98 / 3.56
+    ///     wood     +4.19    +2.10    0.00      2.09       2.10     2.05 / 1.98
+    ///     beep     +4.58    +2.30    0.00      2.28       2.30     2.16 / 2.07
+    ///     drum     +3.67    +2.06    0.00      1.62       2.06     1.52 / 2.29
+    ///     kit      +4.36    +2.30    0.00      2.07       2.30     2.96 / 1.70
+    ///     snare    +4.01    +2.01    0.00      1.99       2.01     1.34 / 2.94
+    ///     cowbell  +4.20    +2.10    0.00      2.10       2.10     1.88 / 2.56
     ///
-    /// THE TWO FLOORS ARE DIFFERENT NUMBERS ON PURPOSE. Strong against
-    /// Medium is one file at two gains — level is the only cue, so it gets
-    /// the larger share of the span and a 1.5 dB floor. Medium against the
-    /// beat is two different files — the accent sound arriving softly, which
-    /// the ear separates by timbre before it separates by level — so 1.0 dB
-    /// is a real floor there and the drum kit's +1.73 clears it with room.
+    /// The first four columns are dB through the 200 Hz-4 kHz band-pass, each
+    /// kit against its own beat, which is why the beat column is zero by
+    /// construction. The last is strong-over-middle and middle-over-beat
+    /// K-WEIGHTED — a different question, asserted separately below, and the
+    /// one that decided which layer of the Studio snare two of these are.
     ///
-    /// The drum kit is the binding case at both ends, as it is above: its
-    /// accent has the narrowest margin of the eight (+3.67 dB), and one span
-    /// has to buy two distinctions. A floor pair that the drum kit could not
-    /// meet would be a floor pair fitted to the other seven.
+    /// EACH MIDDLE IS AIMED AT THE GEOMETRIC CENTRE OF ITS OWN SPAN, which is
+    /// a change of policy from the 0.80 version and is what the third file
+    /// buys.
+    /// That version gave the bigger share to strong-against-medium, because
+    /// the two were the same file and level was the only cue; now they are
+    /// different strokes and the ear gets timbre as well on both sides, so
+    /// there is no reason left to favour either gap. Equal margins also
+    /// maximise the smaller of the two, which is the one that fails first.
+    /// Seven of the eight land within 0.1 dB of that centre at the rate the
+    /// files ship at. Drum is the exception and misses low: it is the one
+    /// preset whose middle and downbeat are both PREMIXES, built here rather
+    /// than cut, so the peak that places the others is set in
+    /// `SoundBank::new` against a downbeat that has two more layers in it.
+    ///
+    /// EVERY NUMBER IN THE TABLE ABOVE IS AT 48 kHz, which is what this test
+    /// builds and what most devices run. The recipe in `render_click.py`
+    /// quotes the same margins at 44 100, the rate the files ship at, and the
+    /// two differ by up to 0.2 dB — drum reads 1.62 dB here and 1.83 there.
+    /// That is the resampler, it has always been there (`rebuild.py` point 6
+    /// says the same about its own numbers), and it is why a margin quoted
+    /// anywhere in this repository says which rate it was taken at.
+    ///
+    /// SO WHY IS THE FLOOR 1.5 AND NOT 2.0. Because the span is what it is:
+    /// no kit here stands more than 4.58 dB over its own beat, and the drum
+    /// kit stands 3.67, so a middle placed perfectly can be at most 1.83 dB
+    /// from each end of that one. A 2.0 dB floor is not a strict test, it is
+    /// an arithmetic impossibility for two of the eight kits, and raising the
+    /// accent margins to make room would be the snare kit's third rejection
+    /// all over again ("disproportionally loud"). 1.5 clears every kit with
+    /// room, and it is a real raise on the 1.0 the gain version was held to.
+    ///
+    /// AND THERE IS NO PER-KIT EXCEPTION, which there was for a day and
+    /// should not have been. `kit`'s middle is its backbeat with the KICK
+    /// TAKEN OUT — the largest musical difference in this table and, at the
+    /// peak every middle used to be given, very nearly the smallest measured
+    /// one, because this filter starts at 200 Hz and a kick carries 99.7% of
+    /// its energy below 120. It measured 0.83 dB under its downbeat and was
+    /// allowed through on the K-weighted number, which does hear a kick and
+    /// read 1.73 dB.
+    ///
+    /// That was the wrong call and the band-pass was right. On a laptop the
+    /// kick is not merely invisible to the filter, it is GONE, so what the
+    /// owner would have heard on beat four of a 6/8 is a snare 0.83 dB under
+    /// the snare on beat one — which is the experiment that has already been
+    /// run, and which he could not hear. The file carries it now: `kit_mid`
+    /// peaks at 0.807 rather than 0.930, and clears the same 1.5 dB every
+    /// other preset does.
+    ///
+    /// The margins are floors, not targets. Everything
+    /// `every_accent_is_louder_than_its_beat_on_a_small_speaker` says about
+    /// that holds here, and it cost three rejections to learn once already.
     #[test]
     fn every_medium_accent_sits_between_its_strong_and_its_beat() {
         let sr = 48000;
         let bank = SoundBank::new(sr);
         for (name, kit) in SoundKit::ALL {
             let high = laptop_band_energy(bank.get(kit.high_id()), sr);
+            let mid = laptop_band_energy(bank.get(kit.mid_id()), sr);
             let low = laptop_band_energy(bank.get(kit.low_id()), sr);
             // The three things a bar of 6/8 makes, as the callback spawns
-            // them: the accent file at 1.0, the same file at MEDIUM_GAIN,
+            // them: the accent file at 1.0, the middle file at MEDIUM_GAIN,
             // and the beat file at BEAT_GAIN. Energy, so the gains square.
             let strong = high;
-            let medium = high * (MEDIUM_GAIN * MEDIUM_GAIN) as f64;
+            let medium = mid * (MEDIUM_GAIN * MEDIUM_GAIN) as f64;
             let beat = low * (BEAT_GAIN * BEAT_GAIN) as f64;
+
+            // AND THE SAME THREE THROUGH THE LOUDNESS FILTER. The band-pass
+            // above answers "will a laptop reproduce this"; K-weighting
+            // answers "is it loud", and a musician on headphones is a
+            // musician. The two disagree, and they disagreed in the worst
+            // direction: the snare kit's middle was Studio's layer 2 for an
+            // afternoon — the more distinct sound of the two candidates, and
+            // the LOUDEST of that drum's four layers — and at the peak that
+            // put it 1.99 dB under its downbeat on a laptop it sat 0.86 dB
+            // OVER it here. No peak fixes that; the level that satisfies this
+            // filter leaves 0.13 dB over the plain beat on the other one.
+            // Both presets built from the Studio snare are layer 3 because of
+            // this assertion.
+            let k_strong = k_weighted_energy(bank.get(kit.high_id()), sr);
+            let k_medium =
+                k_weighted_energy(bank.get(kit.mid_id()), sr) * (MEDIUM_GAIN * MEDIUM_GAIN) as f64;
+            let k_beat =
+                k_weighted_energy(bank.get(kit.low_id()), sr) * (BEAT_GAIN * BEAT_GAIN) as f64;
+            let k_strong_over_medium = 10.0 * (k_strong / k_medium.max(1e-30)).log10();
+            let k_medium_over_beat = 10.0 * (k_medium / k_beat.max(1e-30)).log10();
 
             let strong_over_beat = 10.0 * (strong / beat.max(1e-30)).log10();
             let medium_over_beat = 10.0 * (medium / beat.max(1e-30)).log10();
             let strong_over_medium = 10.0 * (strong / medium.max(1e-30)).log10();
             // Printed, not just asserted: the table in the doc comment above
-            // is this line, and a kit re-recorded a year from now should be
-            // able to reproduce it with `--nocapture` rather than by reading
-            // the source of the assertion.
+            // is this line, and a kit re-cut a year from now should be able
+            // to reproduce it with `--nocapture` rather than by reading the
+            // source of the assertion.
             println!(
-                "{name:>8}  strong {strong_over_beat:+.2}  medium {medium_over_beat:+.2}  \
-                 beat +0.00  (strong-medium {strong_over_medium:.2})"
+                "{name:>8}  strong {strong_over_beat:+.2}  middle {medium_over_beat:+.2}  \
+                 beat +0.00  (strong-middle {strong_over_medium:.2})  \
+                 K-weighted {k_strong_over_medium:.2} / {k_medium_over_beat:.2}"
             );
 
             assert!(
-                medium_over_beat > 1.0,
-                "{name}: a middle accent is only {medium_over_beat:.2} dB over the plain \
-                 beat through a 200 Hz-4 kHz band-pass. Below about 1 dB the bar's middle \
-                 stops being a middle and becomes a beat, which is the bug this tier fixes."
+                medium_over_beat > 1.5,
+                "{name}: a middle stroke is only {medium_over_beat:.2} dB over the plain \
+                 beat through a 200 Hz-4 kHz band-pass. Below about 1.5 dB the bar's \
+                 middle stops being a middle and becomes a beat, which is the bug this \
+                 tier fixes."
             );
             assert!(
                 strong_over_medium > 1.5,
                 "{name}: the bar's opening is only {strong_over_medium:.2} dB over its \
-                 middles. They are the same file, so level is the only thing telling them \
-                 apart, and under about 1.5 dB a bar of 6/8 is two bars of 3/4 again."
+                 middles. They are different files, so timbre helps — but a bar of 6/8 \
+                 whose one and whose four weigh the same is two bars of 3/4 again, \
+                 which is the bar the owner listened to and could not hear."
+            );
+            assert!(
+                k_strong_over_medium > 1.0 && k_medium_over_beat > 1.0,
+                "{name}: K-weighted, the middle stands {k_strong_over_medium:.2} dB under \
+                 its downbeat and {k_medium_over_beat:.2} dB over its plain beat. A middle \
+                 that is in order on a laptop and out of order on headphones is not in \
+                 order. The floor is lower than the band-pass's 1.5 because this filter \
+                 hears the sub-bass a laptop cannot, and a kick under a downbeat is \
+                 loudness the middle is deliberately without."
             );
             // And the ordering itself, said plainly rather than left to be
             // inferred from two margins.
@@ -7558,13 +7884,36 @@ mod tests {
         }
     }
 
-    /// Every kit answers with a buffer, and the recorded ones peak where
+    /// Every kit answers with THREE buffers, and the recorded ones peak where
     /// `render_click.py` says it left them.
     ///
     /// `drum_accent_leaves_headroom` makes this claim for the two accents it
-    /// knows about; this makes it for all eight pairs and from the other
+    /// knows about; this makes it for all eight kits and from the other
     /// side as well, because a kit whose BEAT arrived at full scale would
     /// clip on three events in four and no assertion here used to see it.
+    ///
+    /// AND THE MIDDLES ARE HELD TO THE PEAK THEIR OWN RECIPE ROW STATES,
+    /// which is not one number any more. `render_click.py` solves each middle's
+    /// peak for the level it has to sit at rather than assuming a convention,
+    /// so they ship at 0.930 (click, beep, sticks), 0.921 (snare), 0.814
+    /// (wood), 0.807 (kit) and 0.771 (cowbell), and drum's is mixed to 0.930
+    /// in `SoundBank::new`. The window is 2.5% either side, and it is that wide
+    /// because THE RESAMPLER MOVES A PEAK BOTH WAYS. Read at 48 kHz, click's
+    /// middle comes back 1.7% HIGH — a windowed sinc rings around a transient
+    /// — and cowbell's comes back 1.5% LOW, because a bell's peak is one
+    /// sample and at 48/44.1 no output sample lands on it. Those two are the
+    /// extremes of the eight; the rest are inside half a per cent.
+    ///
+    /// It is still a useful bound: what this catches is a file normalised to
+    /// the WRONG target, which means 0.930 where 0.771 was meant, and that is
+    /// 21%. A file swapped for another kit's is the hash test's job, not
+    /// this one's.
+    ///
+    /// COWBELL'S PLAIN BEAT IS AT 0.763 AND THE FLOOR STAYS AT 0.5. It is the
+    /// one beat in the app that is deliberately far under 0.900, because that
+    /// preset's three strokes are three dynamics of one bell and the softest
+    /// of them, normalised, is the LOUDEST of the three. Raising the floor to
+    /// fence the others in would fence this one out for being correct.
     ///
     /// THE CEILING IS 0.98 AND NOT THE 0.970 THE FILES CARRY, because this
     /// measures the buffer AFTER the resampler and a windowed sinc overshoots.
@@ -7588,11 +7937,34 @@ mod tests {
     /// wrong target or truncated to a tail, which is exactly what a bad
     /// re-render of `render_click.py` would produce.
     #[test]
-    fn every_kit_has_two_buffers_and_neither_one_clips() {
+    fn every_kit_has_three_buffers_and_none_of_them_clips() {
         let bank = SoundBank::new(48000);
+        // What `render_click.py`'s recipe says each middle is normalised to,
+        // in `SoundKit::ALL` order. Kept here rather than derived so that a
+        // recipe row edited without a re-render, or re-rendered without the
+        // row being read, fails loudly in one place.
+        let mid_peaks = [
+            ("click", 0.930f32),
+            ("sticks", 0.930),
+            ("wood", 0.814),
+            ("beep", 0.930),
+            ("drum", 0.930),
+            ("kit", 0.807),
+            ("snare", 0.921),
+            ("cowbell", 0.771),
+        ];
         for (name, kit) in SoundKit::ALL {
             let ceiling = if name == "beep" { 1.002 } else { 0.98 };
-            for (which, id) in [("accent", kit.high_id()), ("beat", kit.low_id())] {
+            let want_mid = mid_peaks
+                .iter()
+                .find(|(n, _)| *n == name)
+                .expect("every kit states its middle's peak")
+                .1;
+            for (which, id) in [
+                ("accent", kit.high_id()),
+                ("middle", kit.mid_id()),
+                ("beat", kit.low_id()),
+            ] {
                 let buf = bank.get(id);
                 assert!(!buf.is_empty(), "{name}'s {which} decoded to nothing");
                 let peak = buf.iter().fold(0.0f32, |m, s| m.max(s.abs()));
@@ -7601,7 +7973,367 @@ mod tests {
                     "{name}'s {which} peaks at {peak}, over the {ceiling} this kit is allowed"
                 );
                 assert!(peak > 0.5, "{name}'s {which} is suspiciously quiet at {peak}");
+                if which == "middle" {
+                    assert!(
+                        (peak - want_mid).abs() < want_mid * 0.025,
+                        "{name}'s middle peaks at {peak}, not the {want_mid} its recipe \
+                         row states"
+                    );
+                }
             }
+        }
+    }
+
+    /// EVERY CLICK FILE IS PINNED, AND THE ONES THE OWNER HAS HEARD DO NOT
+    /// CHANGE.
+    ///
+    /// Adding a middle stroke to every kit touched two generators and a
+    /// recipe table, and the way that goes wrong is silent: `render_click.py`
+    /// draws its dither from ONE generator in table order, so a row inserted
+    /// beside its siblings rather than appended re-dithers every file below
+    /// it — new bytes, the same measurements, nothing to see. So the bytes
+    /// are pinned here, on the `include_bytes!` constants themselves, which
+    /// is what actually ships rather than what happens to be in the working
+    /// tree.
+    ///
+    /// `sticks_low` is the one with a second job: `JamCountInSound::Sticks`
+    /// plays it for the jam's count-in (`jam.rs`), so a change there would
+    /// alter how a band is counted in as well as how the Sticks preset
+    /// sounds, and the owner has been listening to both since 2026-09-14.
+    ///
+    /// The eight added on 2026-09-15 are pinned too, for the second half of
+    /// the same reason: the dither coupling cuts both ways, and a middle
+    /// re-rendered on its own from the command line comes out audibly
+    /// identical and byte-for-byte different from the one in the tree. The
+    /// generator says so in its usage block; this is what notices.
+    ///
+    /// `cowbell_low` is the ONE pre-existing file this pass deliberately
+    /// re-cut — the preset went from two dynamics of the bell to three, so
+    /// what was its plain beat is its middle now and the fingertip tap became
+    /// the beat. Its number below is new on purpose.
+    ///
+    /// FNV-1a rather than a real digest, because the crate has no hash
+    /// dependency and does not need one: this is a regression guard against
+    /// a re-render, not a defence against anybody. A one-bit change moves it.
+    ///
+    /// When a file here is DELIBERATELY re-cut, print the new number from
+    /// this test's failure and say in the commit message what the owner
+    /// heard that asked for it.
+    #[test]
+    fn the_shipped_click_files_are_the_ones_that_were_heard() {
+        fn fnv1a(bytes: &[u8]) -> u64 {
+            let mut h: u64 = 0xcbf2_9ce4_8422_2325;
+            for &b in bytes {
+                h ^= b as u64;
+                h = h.wrapping_mul(0x0000_0100_0000_01b3);
+            }
+            h
+        }
+        for (name, bytes, want) in [
+            ("click_high", CLICK_HIGH, 0xf025_7547_868f_d3a8u64),
+            ("click_low", CLICK_LOW, 0x0b46_5c3a_0355_8e8c),
+            ("wood_high", WOOD_HIGH, 0x8549_cc66_51d4_bd19),
+            ("wood_low", WOOD_LOW, 0x5deb_cc73_b132_dee6),
+            ("beep_high", BEEP_HIGH, 0x69b9_b936_3ce6_5fc8),
+            ("beep_low", BEEP_LOW, 0x0234_e771_caed_febf),
+            ("drum_high", DRUM_HIGH, 0xb3c0_e25f_7ab0_fb01),
+            ("drum_low", DRUM_LOW, 0xb089_227f_6d5e_59a2),
+            ("drum_metal", DRUM_METAL, 0x4b88_8e13_8797_eabb),
+            ("drum_crash", DRUM_CRASH, 0x9fbc_05a8_8bfb_37f5),
+            ("drum_body", DRUM_BODY, 0x368f_dc63_f27c_6d88),
+            ("snare_high", SNARE_HIGH, 0x0840_3a28_7462_14a5),
+            ("snare_low", SNARE_LOW, 0x8864_635d_aeb6_d4d4),
+            ("sticks_high", STICKS_HIGH, 0x29c7_ea73_e73e_56db),
+            ("sticks_low", STICKS_LOW, 0xc356_a3dc_09a7_3768),
+            ("cowbell_high", COWBELL_HIGH, 0xacba_363a_662e_fb74),
+            // RE-CUT 2026-09-15, and the only one. See the doc comment.
+            ("cowbell_low", COWBELL_LOW, 0x9611_0d67_b5a5_2b43),
+            ("kit_high", KIT_HIGH, 0xebde_82ae_e54c_6edb),
+            ("kit_low", KIT_LOW, 0xebdf_4250_ca3b_c9f8),
+            // And the eight cut on 2026-09-15.
+            ("click_mid", CLICK_MID, 0x1e40_7e31_d6e8_19b1),
+            ("beep_mid", BEEP_MID, 0x2fa8_cc0b_9d29_0c05),
+            ("wood_mid", WOOD_MID, 0xc656_9ba4_f959_dc94),
+            ("snare_mid", SNARE_MID, 0x587f_ef28_7f9f_7bd4),
+            ("sticks_mid", STICKS_MID, 0xb623_109d_4d6d_d6ce),
+            ("cowbell_mid", COWBELL_MID, 0x6ab9_1578_146b_48e8),
+            ("kit_mid", KIT_MID, 0x07da_8c40_a306_6e65),
+        ] {
+            let got = fnv1a(bytes);
+            assert_eq!(
+                got, want,
+                "{name} is not the file that shipped: 0x{got:016x}, pinned 0x{want:016x}"
+            );
+        }
+    }
+
+    /// A radix-2 FFT, iterative, in place. Test-only, so the allocation and
+    /// the `f64` are free; `semitone_bands` is the only caller and it pads to
+    /// a power of two first.
+    fn fft(re: &mut [f64], im: &mut [f64]) {
+        let n = re.len();
+        debug_assert!(n.is_power_of_two() && im.len() == n);
+        let mut j = 0usize;
+        for i in 1..n {
+            let mut bit = n >> 1;
+            while j & bit != 0 {
+                j ^= bit;
+                bit >>= 1;
+            }
+            j |= bit;
+            if i < j {
+                re.swap(i, j);
+                im.swap(i, j);
+            }
+        }
+        let mut len = 2usize;
+        while len <= n {
+            let ang = -2.0 * std::f64::consts::PI / len as f64;
+            let (wr, wi) = (ang.cos(), ang.sin());
+            let mut i = 0usize;
+            while i < n {
+                let (mut cr, mut ci) = (1.0f64, 0.0f64);
+                for k in 0..len / 2 {
+                    let (ur, ui) = (re[i + k], im[i + k]);
+                    let (xr, xi) = (re[i + k + len / 2], im[i + k + len / 2]);
+                    let (vr, vi) = (xr * cr - xi * ci, xr * ci + xi * cr);
+                    re[i + k] = ur + vr;
+                    im[i + k] = ui + vi;
+                    re[i + k + len / 2] = ur - vr;
+                    im[i + k + len / 2] = ui - vi;
+                    let nr = cr * wr - ci * wi;
+                    ci = cr * wi + ci * wr;
+                    cr = nr;
+                }
+                i += len;
+            }
+            len <<= 1;
+        }
+    }
+
+    /// The buffer's energy split into SEMITONE-WIDE bands from 80 Hz up, each
+    /// as a fraction of the whole — so the vector says what the sound is made
+    /// of and nothing at all about how loud it is.
+    ///
+    /// A semitone and not an octave, because two of the eight presets are
+    /// distinguished by PITCH and nothing else: click's three strokes are
+    /// 1200, 980 and 800 Hz and beep's are 880, 760 and 660, and an
+    /// octave-band vector puts all three beeps in one bucket and reports them
+    /// as the same sound. At a twelfth of an octave a minor third is four
+    /// bands and the measure sees what a musician hears.
+    ///
+    /// 88 bands, so the top edge is 80 Hz x 2^(88/12) = 12.9 kHz. Above that
+    /// is cymbal air that no click decision has ever turned on, and every
+    /// buffer here has been through a resampler whose own behaviour up there
+    /// is not what this is trying to measure.
+    fn semitone_bands(buf: &[f32], sr: u32) -> Vec<f64> {
+        const BANDS: usize = 88;
+        let n = buf.len().next_power_of_two().max(2);
+        let mut re: Vec<f64> = buf.iter().map(|&s| s as f64).collect();
+        re.resize(n, 0.0);
+        let mut im = vec![0.0f64; n];
+        fft(&mut re, &mut im);
+        let mut out = vec![0.0f64; BANDS];
+        let bin_hz = sr as f64 / n as f64;
+        for k in 0..n / 2 {
+            let f = k as f64 * bin_hz;
+            if f < 80.0 {
+                continue;
+            }
+            let b = ((f / 80.0).log2() * 12.0).floor() as isize;
+            if b < 0 || b as usize >= BANDS {
+                continue;
+            }
+            out[b as usize] += re[k] * re[k] + im[k] * im[k];
+        }
+        let total: f64 = out.iter().sum();
+        if total > 0.0 {
+            for v in out.iter_mut() {
+                *v /= total;
+            }
+        }
+        out
+    }
+
+    /// How far apart two sounds are in colour, level divided out: the L1
+    /// distance between their `semitone_bands` vectors. Zero means one is a
+    /// scaled copy of the other; two is the most two sounds can differ.
+    fn spectral_distance(a: &[f32], b: &[f32], sr: u32) -> f64 {
+        let (x, y) = (semitone_bands(a, sr), semitone_bands(b, sr));
+        x.iter().zip(y.iter()).map(|(p, q)| (p - q).abs()).sum()
+    }
+
+    /// A MIDDLE STROKE IS NEVER A SCALED COPY OF A SIBLING.
+    ///
+    /// The point of the whole pass. "The same click 2 dB quieter is below
+    /// what a musician notices on a transient" — so the file that marks a
+    /// bar's middle has to be a different SOUND, and this is the assertion
+    /// that it is, with the level taken out of the measurement so that the
+    /// only thing left to measure is what it is made of.
+    ///
+    /// Measured at 48 kHz, L1 distance between semitone-band energy
+    /// fractions:
+    ///
+    ///     kit      middle-strong   middle-beat   (strong-beat, for scale)
+    ///     click        1.81            1.76            1.93
+    ///     sticks       0.42            1.14            1.12
+    ///     wood         0.61            0.86            0.56
+    ///     beep         1.87            1.82            1.95
+    ///     drum         0.52            1.50            1.05
+    ///     kit          0.75            1.44            1.52
+    ///     snare        0.56            0.54            0.53
+    ///     cowbell      0.11            0.27            0.31
+    ///
+    /// THE FLOOR IS 0.25 AND IT IS A FLOOR. A scaled copy measures exactly
+    /// 0.0, which is what the 0.80-gain version of this tier would have
+    /// scored for all eight kits, so any real number here passes the literal
+    /// claim and the floor exists to stop a lazy re-cut. Seven of the eight
+    /// clear it by 0.17 or better, and the brief expected the trouble to be
+    /// snare and sticks, where the middle is the same drum played softer. It
+    /// is not: a softer stroke on a real drum is not the same spectrum
+    /// quieter — fewer wires are thrown, less crack comes off the head — and
+    /// at a twelfth of an octave this sees that.
+    ///
+    /// Both of those kits could have scored higher still — Studio's layer 2
+    /// stands 0.70 and 0.94 from their downbeats where the layer 3 that ships
+    /// stands 0.56 and 0.75 — and could not be given a level that survived the
+    /// loudness filter. See
+    /// `every_medium_accent_sits_between_its_strong_and_its_beat`: a more
+    /// distinct sound at the wrong weight is not a middle stroke.
+    ///
+    /// COWBELL IS NAMED AT 0.10, AND IT IS A BELL. Its three strokes are
+    /// three dynamics of one instrument, and a bell's partials are its
+    /// geometry: they do not move with how hard it is struck. So the
+    /// normalised spectra of v3, v2 and v1 sit 0.11 and 0.27 apart and there
+    /// is nothing a harder stroke could have done about it. What DOES
+    /// separate them is where the energy sits in TIME, which this measure
+    /// throws away along with the level — 51.5%, 47.4% and 33.0% of each
+    /// stroke's energy lands in its first 15 ms, so a harder stroke is more
+    /// clang and less ring. That plus 2.1 dB a step is what a cowbell has.
+    ///
+    /// The alternative was built and rejected, and it is worth knowing why a
+    /// better number lost. For a day this middle was the DOWNBEAT'S stroke
+    /// through a distant mic blend, which scored 0.43 here — four times the
+    /// margin — and was the wrong sound: 13.3% of its energy over 5.6 kHz
+    /// against the downbeat's 4.2%, a centroid of 1788 Hz against 1042, and
+    /// 42 ms longer. It did not read as the same bell struck differently. A
+    /// measure is not a target, and this one least of all: it says a middle
+    /// is not a scaled copy, and it cannot say the difference is the right
+    /// one.
+    ///
+    /// What this does NOT say is that the difference is the RIGHT one. A
+    /// middle that measured 1.9 from both siblings and sounded like a
+    /// different instrument would pass this and fail a musician. That is the
+    /// owner's ear on `scripts/sounds/ab_click.html`, as it was for the
+    /// snare kit three times.
+    #[test]
+    fn a_middle_stroke_is_a_different_sound_from_both_its_siblings() {
+        let sr = 48000;
+        let bank = SoundBank::new(sr);
+        for (name, kit) in SoundKit::ALL {
+            let (high, mid, low) = (
+                bank.get(kit.high_id()),
+                bank.get(kit.mid_id()),
+                bank.get(kit.low_id()),
+            );
+            let from_strong = spectral_distance(mid, high, sr);
+            let from_beat = spectral_distance(mid, low, sr);
+            println!(
+                "{name:>8}  middle-strong {from_strong:.2}  middle-beat {from_beat:.2}  \
+                 (strong-beat {:.2})",
+                spectral_distance(high, low, sr)
+            );
+            // Cowbell is named, with its numbers and its reason, in the doc
+            // comment above. Nothing else may claim the exception.
+            let floor = if name == "cowbell" { 0.10 } else { 0.25 };
+            for (which, d) in [("downbeat", from_strong), ("plain beat", from_beat)] {
+                assert!(
+                    d > floor,
+                    "{name}: the middle stroke is {d:.2} away from the {which} in \
+                     semitone-band energy fractions, which is close enough to be the \
+                     same file at another volume — and the same file at another volume \
+                     is the thing the owner listened to and could not hear."
+                );
+            }
+        }
+    }
+
+    /// Where a stroke starts, in milliseconds: the first sample within 30 dB
+    /// of the file's own peak. Level-independent by construction, which is
+    /// what lets three files at three peaks be compared.
+    fn onset_ms(buf: &[f32], sr: u32) -> f64 {
+        let peak = buf.iter().fold(0.0f32, |m, s| m.max(s.abs()));
+        let thresh = peak * 10f32.powf(-30.0 / 20.0);
+        let i = buf.iter().position(|s| s.abs() >= thresh).unwrap_or(0);
+        1000.0 * i as f64 / sr as f64
+    }
+
+    /// THE MIDDLE MUST NOT FLAM AGAINST THE DOWNBEAT.
+    ///
+    /// A metronome's three levels have to land in the same place. If a kit's
+    /// middle stroke reaches full level later than its downbeat does, the bar
+    /// has two different ideas of where a beat is, and at 200 bpm a
+    /// millisecond of that is audible as a limp.
+    ///
+    /// Measured at 44 100 — the rate the files ship at, so the resampler's
+    /// pre-ringing is not smearing the thing being measured:
+    ///
+    ///     kit      downbeat   middle   beat    middle vs downbeat   spread
+    ///     click      0.02      0.02    0.02          0.00            0.00
+    ///     sticks     2.13      2.24    2.86          0.11            0.73
+    ///     wood       2.02      2.02    2.00          0.00            0.02
+    ///     beep       0.11      0.14    0.14          0.02            0.02
+    ///     drum       0.00      0.00    0.00          0.00            0.00
+    ///     kit        0.25      0.39    0.45          0.14            0.20
+    ///     snare      0.25      0.36    0.54          0.11            0.29
+    ///     cowbell    0.75      0.70    0.75          0.05            0.05
+    ///
+    /// TWO CLAIMS, AND THE FIRST IS THE ONE THAT MATTERS. Every middle lands
+    /// within 0.5 ms of its own downbeat, and that is entirely a fact about
+    /// the files this pass cut: the worst is 0.14 ms, under a third of the
+    /// window.
+    ///
+    /// The second is the spread across all three, held at 1.0 ms rather than
+    /// the 0.5 the first claim gets, BECAUSE THE PAIRS ALREADY SHIPPED WIDER
+    /// THAN THAT. Sticks is a stick-shot against a CROSS-STICK — two
+    /// different articulations off two different parts of the drum — and its
+    /// beat comes in 0.73 ms after its accent. That file is frozen
+    /// (`the_shipped_click_files_are_the_ones_that_were_heard`: the jam's
+    /// count-in plays it), and nothing here would be improved by pretending
+    /// otherwise. 1.0 ms is past today's worst pair with room and still tight
+    /// enough that a middle cut from the wrong end of a sample would fail.
+    ///
+    /// AND NOT "WITHIN 1 ms OF SAMPLE 0", which is what the plan asked for
+    /// and which is not true of the files the app ships: wood comes in at
+    /// 2.0 ms and sticks at 2.1, because `render_click.py` trims those two at
+    /// a -40 and a -45 dB floor and this measures at -30, so what sits in
+    /// front is the bottom of the instrument's own attack. It is the same
+    /// 2 ms on all three strokes of those kits, so nothing flams; an absolute
+    /// assertion would only have frozen a rendering detail.
+    #[test]
+    fn a_kits_three_strokes_start_together() {
+        let sr = 44100;
+        let bank = SoundBank::new(sr);
+        for (name, kit) in SoundKit::ALL {
+            let high = onset_ms(bank.get(kit.high_id()), sr);
+            let mid = onset_ms(bank.get(kit.mid_id()), sr);
+            let low = onset_ms(bank.get(kit.low_id()), sr);
+            let spread = high.max(mid).max(low) - high.min(mid).min(low);
+            let flam = (mid - high).abs();
+            println!(
+                "{name:>8}  downbeat {high:.2} ms  middle {mid:.2}  beat {low:.2}  \
+                 (middle vs downbeat {flam:.2}, spread {spread:.2})"
+            );
+            assert!(
+                flam < 0.5,
+                "{name}: the middle stroke starts {flam:.2} ms from the downbeat. A bar \
+                 whose one and whose four do not land in the same place is a bar with a \
+                 limp in it."
+            );
+            assert!(
+                spread < 1.0,
+                "{name}: the three strokes start {spread:.2} ms apart"
+            );
         }
     }
 
@@ -7625,7 +8357,7 @@ mod tests {
     #[test]
     fn no_sample_ends_mid_decay() {
         let bank = SoundBank::new(44100);
-        let named: [(&str, &Vec<f32>); 15] = [
+        let named: [(&str, &Vec<f32>); 24] = [
             ("click_high", &bank.click_high),
             ("click_low", &bank.click_low),
             ("wood_high", &bank.wood_high),
@@ -7645,6 +8377,26 @@ mod tests {
             ("cowbell_low", &bank.cowbell_low),
             ("kit_high", &bank.kit_high),
             ("kit_low", &bank.kit_low),
+            // And the seven middle strokes. Five are cut by the same
+            // `render_click.py` as the recordings above; `click_mid` and
+            // `beep_mid` come out of `rebuild.py`'s synthesis stage and get
+            // the same 4 ms tail fade their own siblings got, which is a
+            // claim and not a guarantee until something checks it.
+            ("click_mid", &bank.click_mid),
+            ("wood_mid", &bank.wood_mid),
+            ("beep_mid", &bank.beep_mid),
+            ("snare_mid", &bank.snare_mid),
+            ("sticks_mid", &bank.sticks_mid),
+            ("cowbell_mid", &bank.cowbell_mid),
+            ("kit_mid", &bank.kit_mid),
+            // And the two PREMIXES, which are the only buffers here that no
+            // file is responsible for. `drum_accent` has been missing from
+            // this list since the list was written: it is four samples summed
+            // and then saturated, and the sum is as long as its longest layer,
+            // so a layer that grew would leave the others' silence at the end
+            // — or, saturated, would not. Nothing checked.
+            ("drum_accent", &bank.drum_accent),
+            ("drum_mid", &bank.drum_mid),
         ];
         for (name, buf) in named {
             let tail = buf.last().copied().unwrap_or(0.0).abs();
