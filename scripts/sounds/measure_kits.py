@@ -15,6 +15,11 @@ synthesised kits are also still checked in their older flat form
 exist, so this passes on a branch where they have not been moved yet and on
 one where they have.
 
+A percussion set is a folder too — `src-tauri/sounds/perc/<id>/` — and it is
+measured by the same code, because it obeys the same format down to the last
+rule. What differs is three constants (ten voices, their caps, a 2.0 s
+ceiling) and what a margin can possibly mean, on which see `perc_ladder`.
+
 THE ACCENT MARGIN IS THE ONE THAT MATTERS, and it is measured the way the
 engine measures it, not broadband. `laptop_band_energy` below is a line-for-
 line port of the function of the same name in `src-tauri/src/engine.rs`: four
@@ -66,6 +71,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 SND = os.path.join(ROOT, "src-tauri", "sounds")
 KITS_DIR = os.path.join(SND, "kits")
+PERC_DIR = os.path.join(SND, "perc")
 VOICES_DIR = os.path.join(SND, "voices")
 
 # The five synthesised kits in their pre-folder form. Checked only while the
@@ -92,6 +98,51 @@ VOICE_CAP_S = {
     "kick": 0.8, "snare": 1.0, "rim": 0.5, "hat": 0.4, "hat_open": 1.5,
     "hat_pedal": 0.4, "ride": 2.5, "ride_bell": 2.0, "crash": 3.0,
     "tom_hi": 1.5, "tom_lo": 1.5,
+}
+
+# ---------------------------------------------------------------------------
+# The percussion sets, `src-tauri/sounds/perc/<id>/`. A percussionist is not a
+# drum kit — the engine plays one of these UNDER whichever kit is loaded — but
+# a set is a kit-format folder down to the last rule, so it is measured by the
+# same code and not by a second copy of it. Two copies of these checks is how
+# one of them quietly stops matching the engine.
+#
+# The ceiling is 2.0 s and not 3.0 because the longest thing in a drum kit is
+# a crash and the longest thing a percussionist owns is a tambourine, which
+# has stopped ringing inside two seconds.
+# ---------------------------------------------------------------------------
+
+PERC_VOICES = (
+    "shaker", "tambourine", "cowbell", "cabasa", "claves", "guiro",
+    "conga_hi", "conga_lo", "bongo_hi", "bongo_lo",
+)
+PERC_MAX_SECONDS = 2.0
+PERC_CAP_S = {
+    "shaker": 1.0, "tambourine": 1.0, "cowbell": 1.0, "cabasa": 0.8,
+    "claves": 0.6, "guiro": 1.0, "conga_hi": 1.0, "conga_lo": 1.0,
+    "bongo_hi": 0.8, "bongo_lo": 0.8,
+}
+
+# A percussion set is levelled against the kit it plays under, so the
+# reference for its ladder is outside its own folder — the same snare accent
+# `render_kit.py` balanced it against.
+PERC_REF = ("club", "snare", 3)
+
+# A percussionist is not louder than the drummer. Every balance target in the
+# contract is negative, so a voice that lands above the snare accent it was
+# measured against is a mistake and not a choice.
+PERC_CEILING_DB = 0.0
+
+# What a folder of folders is measured as.
+FAMILIES = {
+    "kit": {
+        "dir": KITS_DIR, "voices": VOICES, "caps": VOICE_CAP_S,
+        "max_s": MAX_SECONDS, "prefix": "", "what": "eleven kit voices",
+    },
+    "perc": {
+        "dir": PERC_DIR, "voices": PERC_VOICES, "caps": PERC_CAP_S,
+        "max_s": PERC_MAX_SECONDS, "prefix": "perc/", "what": "ten percussion voices",
+    },
 }
 
 # What the duration table in W3-SOUNDS.md allows for the flat synth files, ms.
@@ -368,6 +419,10 @@ def stats(path, x, sr, ch):
         # A non-zero mean thumps through a speaker and wastes headroom.
         "dc": float(np.mean(flat)) / 32768.0 if len(flat) else 0.0,
         "band": band_energy(mono / 32768.0, sr),
+        # The other way this file measures loudness: BS.1770 over a fixed
+        # 400 ms window, which is how every balance in the tree was set. Kept
+        # beside `band` so a ladder can print both without re-reading the file.
+        "k": k_energy(mono / 32768.0, sr, 0.4),
         "bytes": os.path.getsize(path),
     }
 
@@ -376,40 +431,55 @@ def stats(path, x, sr, ch):
 # Folder kits
 # ---------------------------------------------------------------------------
 
-def find_kits():
-    if not os.path.isdir(KITS_DIR):
+def find_kits(family="kit"):
+    base = FAMILIES[family]["dir"]
+    if not os.path.isdir(base):
         return []
     out = []
-    for name in sorted(os.listdir(KITS_DIR)):
-        if os.path.isfile(os.path.join(KITS_DIR, name, "kit.json")):
+    for name in sorted(os.listdir(base)):
+        if os.path.isfile(os.path.join(base, name, "kit.json")):
             out.append(name)
     return out
 
 
-def measure_kit(kit, problems):
-    kdir = os.path.join(KITS_DIR, kit)
+def measure_kit(kit, problems, family="kit"):
+    fam = FAMILIES[family]
+    kdir = os.path.join(fam["dir"], kit)
+    # What this folder is called in a complaint. Both families can hold a
+    # `club`, and "club: ..." would then name two different folders.
+    tag = fam["prefix"] + kit
     with open(os.path.join(kdir, "kit.json")) as fh:
         man = json.load(fh)
 
     for field in ("id", "name", "credit", "licence", "rate", "channels", "voices"):
         if field not in man:
-            problems.append("%s/kit.json: no %r" % (kit, field))
+            problems.append("%s/kit.json: no %r" % (tag, field))
     if man.get("id") != kit:
-        problems.append("%s/kit.json: id is %r but the folder is %r" % (kit, man.get("id"), kit))
+        problems.append("%s/kit.json: id is %r but the folder is %r" % (tag, man.get("id"), kit))
 
     files = {}
     for voice, spec in man.get("voices", {}).items():
-        if voice not in VOICES:
-            problems.append("%s: %r is not one of the eleven voices" % (kit, voice))
+        if voice not in fam["voices"]:
+            problems.append("%s: %r is not one of the %s" % (tag, voice, fam["what"]))
             continue
         layers = int(spec.get("layers", 1))
         rr = int(spec.get("rr", 1))
+        # A positive trim asks the engine to play a file louder than the 0.900
+        # every file in the folder was normalised to, which is a request to
+        # clip. When a voice is quieter than its target the honest answer is
+        # that it is as loud as it gets.
+        if float(spec.get("trim_db", 0.0)) > 0.0:
+            problems.append("%s: %s has trim_db %+.1f — over the ceiling the files "
+                            "were normalised to" % (tag, voice, float(spec["trim_db"])))
+        if "pan" in spec and not -1.0 <= float(spec["pan"]) <= 1.0:
+            problems.append("%s: %s has pan %.2f, outside -1 to +1"
+                            % (tag, voice, float(spec["pan"])))
         for li in range(1, layers + 1):
             for ri in range(1, rr + 1):
                 name = "%s.%d.%d.wav" % (voice, li, ri)
                 path = os.path.join(kdir, name)
                 if not os.path.isfile(path):
-                    problems.append("%s: the manifest promises %s and it is not there" % (kit, name))
+                    problems.append("%s: the manifest promises %s and it is not there" % (tag, name))
                     continue
                 x, sr, ch = read(path)
                 m = stats(path, x, sr, ch)
@@ -418,25 +488,25 @@ def measure_kit(kit, problems):
 
                 if m["sr"] != man.get("rate"):
                     problems.append("%s/%s: %d Hz, the manifest says %s"
-                                    % (kit, name, m["sr"], man.get("rate")))
+                                    % (tag, name, m["sr"], man.get("rate")))
                 if m["ch"] != man.get("channels"):
                     problems.append("%s/%s: %d channels, the manifest says %s"
-                                    % (kit, name, m["ch"], man.get("channels")))
+                                    % (tag, name, m["ch"], man.get("channels")))
                 if m["clipped"]:
-                    problems.append("%s/%s: %d samples at full scale" % (kit, name, m["clipped"]))
+                    problems.append("%s/%s: %d samples at full scale" % (tag, name, m["clipped"]))
                 if m["peak"] > 0.902:
-                    problems.append("%s/%s: peak %.4f, over the 0.900 ceiling" % (kit, name, m["peak"]))
-                if m["ms"] > MAX_SECONDS * 1000.0 + 0.5:
+                    problems.append("%s/%s: peak %.4f, over the 0.900 ceiling" % (tag, name, m["peak"]))
+                if m["ms"] > fam["max_s"] * 1000.0 + 0.5:
                     problems.append("%s/%s: %.0f ms, over the %.1f s ceiling"
-                                    % (kit, name, m["ms"], MAX_SECONDS))
-                cap = VOICE_CAP_S.get(voice)
+                                    % (tag, name, m["ms"], fam["max_s"]))
+                cap = fam["caps"].get(voice)
                 if cap and m["ms"] > cap * 1000.0 + 0.5:
                     problems.append("%s/%s: %.0f ms, over the %.2f s cap for %s"
-                                    % (kit, name, m["ms"], cap, voice))
+                                    % (tag, name, m["ms"], cap, voice))
                 if m["tail_db"] > -60.0:
                     problems.append(
                         "%s/%s: ends at %.1f dBFS — truncated mid-decay, so the step is a click"
-                        % (kit, name, m["tail_db"]))
+                        % (tag, name, m["tail_db"]))
                 # A recorded file starts on zero because the render tool
                 # puts 2 ms of silence and a 1 ms fade in front of the
                 # transient. The synthesised files start ON their transient
@@ -446,17 +516,17 @@ def measure_kit(kit, problems):
                 synthesised = str(man.get("credit", "")).startswith("Synthesised")
                 if m["head_db"] > -60.0 and not synthesised:
                     problems.append("%s/%s: starts at %.1f dBFS, not on zero"
-                                    % (kit, name, m["head_db"]))
+                                    % (tag, name, m["head_db"]))
                 # 2e-4 rather than a round 1e-3: the loosest synthesised voice
                 # measures 7.4e-5, so this is a guard with real headroom and
                 # not a line drawn round today's numbers.
                 if abs(m["dc"]) > 2e-4:
-                    problems.append("%s/%s: DC offset %.4f" % (kit, name, m["dc"]))
+                    problems.append("%s/%s: DC offset %.4f" % (tag, name, m["dc"]))
 
         for ch in spec.get("choked_by", []):
             if ch not in man.get("voices", {}) and ch != "hat_pedal":
                 problems.append("%s: %s is choked_by %r, which the kit does not have"
-                                % (kit, voice, ch))
+                                % (tag, voice, ch))
 
     # Anything on disk the manifest does not mention is a file the engine will
     # never load: either a leftover from a re-render with fewer layers, or a
@@ -472,7 +542,7 @@ def measure_kit(kit, problems):
             except ValueError:
                 key = None
         if key is None or key not in files:
-            problems.append("%s: %s is on disk but not in the manifest" % (kit, name))
+            problems.append("%s: %s is on disk but not in the manifest" % (tag, name))
 
     return man, files
 
@@ -527,6 +597,61 @@ def kit_margins(man, files):
     if k is not None and h is not None:
         kh = db(k["band"], h["band"]) + trims.get("kick", 0.0) - trims.get("hat", 0.0)
     return sn, kh, sn_raw
+
+
+def perc_reference():
+    """The kit snare accent a percussion set is levelled against.
+
+    Returns (label, K-weighted energy, band energy), or None when that kit is
+    not in the tree — which is not a failure here. The set was balanced against
+    it once, at render time, and the numbers are frozen into `trim_db`; this is
+    the check that they still say what they said, and a missing reference means
+    the check cannot run, not that the set is wrong.
+    """
+    kit, voice, layer = PERC_REF
+    path = os.path.join(KITS_DIR, kit, "%s.%d.1.wav" % (voice, layer))
+    if not os.path.isfile(path):
+        return None
+    x, sr, _ = read(path)
+    mono = (x.mean(axis=1) if x.ndim > 1 else x) / 32768.0
+    return ("%s %s layer %d" % (kit, voice, layer),
+            k_energy(mono, sr, 0.4), band_energy(mono, sr))
+
+
+def perc_ladder(man, files):
+    """Every voice as the engine plays it, loudest first, with the steps.
+
+    WHAT A MARGIN MEANS FOR A SET WITH NO SNARE IN IT. A drum kit is gated on
+    two pairs — the snare over its own ghost, the kick over the hat — because
+    those are the two the engine asserts and the two a metronome lives or dies
+    by. A percussion set has neither. What it has instead is ten voices that
+    all play at once under a drummer, so the number that matters is where each
+    one sits against the others and against the kit it plays under.
+
+    So: the accent layer of each voice, carrying its `trim_db`, measured both
+    ways the rest of this file measures anything — K-weighted, which is how
+    the balance was set and is what the owner hears on headphones, and through
+    the engine's small-speaker band-pass, which is what survives a laptop. The
+    two disagree loudly and that is the point of printing both. A cowbell
+    lives at 800 Hz and comes through a laptop almost as loud as the snare; a
+    cabasa lives above 6 kHz and the 4 kHz low-pass takes nearly all of it.
+    Neither is a bug, and neither is visible from one column.
+    """
+    trims = {v: float(s.get("trim_db", 0.0)) for v, s in man.get("voices", {}).items()}
+    rows = []
+    for voice in PERC_VOICES:
+        a = accent(files, voice)
+        if a is None:
+            continue
+        rows.append({
+            "voice": voice,
+            "k": 10.0 * math.log10(max(a["k"], 1e-30)) + trims[voice],
+            "band": 10.0 * math.log10(max(a["band"], 1e-30)) + trims[voice],
+            "trim": trims[voice],
+            "pan": float(man["voices"][voice].get("pan", 0.0)),
+        })
+    rows.sort(key=lambda r: -r["k"])
+    return rows
 
 
 # ---------------------------------------------------------------------------
@@ -897,6 +1022,11 @@ def main():
     for kit in kits:
         measured[kit] = measure_kit(kit, problems)
 
+    percs = [] if only_voice else [p for p in find_kits("perc") if only in (None, p)]
+    perced = {}
+    for perc in percs:
+        perced[perc] = measure_kit(perc, problems, "perc")
+
     voices = [] if only else [v for v in find_voices() if only_voice in (None, v)]
     voiced = {}
     for voice in voices:
@@ -933,6 +1063,36 @@ def main():
                      "%+.2f dB" % sn if sn is not None else "-",
                      "%+.2f dB" % kh if kh is not None else "-",
                      sum(m["bytes"] for m in files.values()) / 1048576.0))
+        for perc in percs:
+            man, files = perced[perc]
+            print()
+            print("| perc set | voice | layers | rr | peak | longest | trim_db "
+                  "| pan | K vs snare | small speaker | size |")
+            print("|---|---|---|---|---|---|---|---|---|---|---|")
+            ref = perc_reference()
+            ladder = {r["voice"]: r for r in perc_ladder(man, files)}
+            for voice in PERC_VOICES:
+                got = [m for k, m in files.items() if k[0] == voice]
+                if not got:
+                    continue
+                spec = man["voices"][voice]
+                r = ladder[voice]
+                print("| %s | `%s` | %d | %d | %.3f | %.0f ms | %+.1f | %s | %s | %s "
+                      "| %.0f KB |"
+                      % (perc, voice, spec["layers"], spec["rr"],
+                         max(m["peak"] for m in got), max(m["ms"] for m in got),
+                         float(spec.get("trim_db", 0.0)),
+                         "%+.2f" % r["pan"] if r["pan"] else "0",
+                         "-" if ref is None
+                         else "%+.2f dB" % (r["k"] - 10.0 * math.log10(ref[1])),
+                         "-" if ref is None
+                         else "%+.2f dB" % (r["band"] - 10.0 * math.log10(ref[2])),
+                         sum(m["bytes"] for m in got) / 1024.0))
+            print()
+            print("%s: %d files, %.2f MB%s"
+                  % (perc, len(files),
+                     sum(m["bytes"] for m in files.values()) / 1048576.0,
+                     "" if ref is None else ", against the %s" % ref[0]))
         if voices:
             print()
             print("| voice | notes | range | worst stretch | layers | rr | files "
@@ -983,6 +1143,55 @@ def main():
                 print("    kick vs hat (trimmed)    %+6.2f dB   %s"
                       % (kh, "ok" if kh > MARGIN_FLOOR_DB
                          else "UNDER THE %.1f dB FLOOR" % MARGIN_FLOOR_DB))
+            print()
+
+        ref = perc_reference()
+        for perc in percs:
+            man, files = perced[perc]
+            total = sum(m["bytes"] for m in files.values())
+            print("=== perc/%s (%s) ===  %d files, %.2f MB, %d Hz, %d ch"
+                  % (perc, man.get("name", "?"), len(files), total / 1048576.0,
+                     man.get("rate", 0), man.get("channels", 0)))
+            for voice in PERC_VOICES:
+                got = sorted([(k, m) for k, m in files.items() if k[0] == voice])
+                if not got:
+                    print("  %-10s not in this set" % voice)
+                    continue
+                spec = man["voices"][voice]
+                print("  %-10s %d x %d  peak %.3f  longest %6.1f ms  %7.1f KB  "
+                      "trim %+5.1f dB  pan %+.2f  tail %6.1f dBFS  dc %+.1e"
+                      % (voice, spec["layers"], spec["rr"],
+                         max(m["peak"] for _, m in got),
+                         max(m["ms"] for _, m in got),
+                         sum(m["bytes"] for _, m in got) / 1024.0,
+                         float(spec.get("trim_db", 0.0)),
+                         float(spec.get("pan", 0.0)),
+                         max(m["tail_db"] for _, m in got),
+                         max((m["dc"] for _, m in got), key=abs)))
+
+            rows = perc_ladder(man, files)
+            if ref is None:
+                print("  the %s kit is not in this tree, so the ladder it is levelled"
+                      % PERC_REF[0])
+                print("  against cannot be printed. The trims still say what they said.")
+                print()
+                continue
+            kref, bref = 10.0 * math.log10(ref[1]), 10.0 * math.log10(ref[2])
+            print("  the percussionist under the drummer, against the %s," % ref[0])
+            print("  loudest first, each carrying its own trim_db:")
+            print("    %-11s %10s %7s   %14s" %
+                  ("", "K-weighted", "step", "small speaker"))
+            prev = None
+            for r in rows:
+                print("    %-11s %+9.2f dB %7s   %+9.2f dB"
+                      % (r["voice"], r["k"] - kref,
+                         "-" if prev is None else "%.2f" % (prev - r["k"]),
+                         r["band"] - bref))
+                prev = r["k"]
+            print("    %d voices inside %.2f dB, the widest step %.2f dB"
+                  % (len(rows), rows[0]["k"] - rows[-1]["k"],
+                     max((rows[i]["k"] - rows[i + 1]["k"])
+                         for i in range(len(rows) - 1)) if len(rows) > 1 else 0.0))
             print()
 
         for voice in voices:
@@ -1051,6 +1260,28 @@ def main():
         if kh is not None and kh <= MARGIN_FLOOR_DB:
             problems.append("%s: the kick is only %+.2f dB over the hat" % (kit, kh))
 
+    # The one gate a percussion set has that a kit does not, and the only one
+    # the contract actually asserts: a percussionist is not louder than the
+    # drummer. Every balance target in `plans/tasks/jam-v5/BRIEF.md` is
+    # negative, so a voice that lands above the snare accent it was measured
+    # against has escaped its trim.
+    ref = perc_reference()
+    for perc in percs:
+        man, files = perced[perc]
+        missing = [v for v in PERC_VOICES if v not in man.get("voices", {})]
+        if missing:
+            problems.append("perc/%s: the contract names ten voices and this set "
+                            "has no %s" % (perc, ", ".join(missing)))
+        if ref is None:
+            continue
+        kref = 10.0 * math.log10(ref[1])
+        for r in perc_ladder(man, files):
+            if r["k"] - kref > PERC_CEILING_DB:
+                problems.append(
+                    "perc/%s: %s lands %+.2f dB against the %s — a percussionist "
+                    "does not play over the drummer"
+                    % (perc, r["voice"], r["k"] - kref, ref[0]))
+
     if problems:
         print("\nPROBLEMS:")
         for p in problems:
@@ -1062,6 +1293,12 @@ def main():
             print("%d kits within spec: peak at or under 0.900, no clipping, every file" % n)
             print("inside its cap and landing on zero, every margin over the engine's")
             print("%.1f dB floor." % MARGIN_FLOOR_DB)
+        if percs:
+            print("%d percussion set%s within spec: all ten voices, the same peak, the "
+                  "same" % (len(percs), "" if len(percs) == 1 else "s"))
+            print("landing on zero, every file inside a %.1f s ceiling, and not one "
+                  "voice" % PERC_MAX_SECONDS)
+            print("playing over the drummer it sits under.")
         if voices:
             print("%d voices within spec: mono, peak at or under 0.900, every note "
                   "inside" % len(voices))

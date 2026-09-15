@@ -1,0 +1,225 @@
+{
+  "id": "club",
+  "name": "Club percussion",
+  "set": "perc",
+  "credit": "Virtuosity Drums — Versilian Studios and Karoryfer Samples (auxiliary percussion from VSCO 2 Pro)",
+  "licence": "CC0-1.0",
+
+  "_what": [
+    "The percussionist. Ten voices out of the twenty-nine auxiliary percussion",
+    "maps Virtuosity ships, which came into that library from VSCO 2 Pro and",
+    "were recorded and mapped separately from Austin McMahon's kit — four mic",
+    "positions, the same names, a different room.",
+    "",
+    "This is not a drum kit and is not loaded as one. The engine plays this",
+    "folder UNDER whichever kit the jam has chosen, so the set has to sit",
+    "against a drummer it cannot see: the balance is measured against the club",
+    "kit's snare accent (`balance_ref`), which is the same reference every kit",
+    "voice is already levelled against, so a number here means what the same",
+    "number means in `club.json`.",
+    "",
+    "The nineteen maps left behind are agogo, belltree, cuica, jinglebell,",
+    "sleighbells, timbales, triangle, vibraslap, whistle, woodblock and the",
+    "fast guiro. They are not worse recordings; they are not the ten",
+    "instruments a percussionist reaches for in latin, funk, pop and world",
+    "grooves, which is what this layer is for. The contract names the ten."
+  ],
+
+  "source": {
+    "format": "sfz",
+    "root": "${YAMES_SAMPLES}/virtuosity_drums",
+    "programs": "Programs",
+    "mappings": "mappings/perc",
+
+    "_mic_tag": [
+      "The percussion writes the mic at the END of the file name as a word",
+      "(`..._rr1_Overhead.wav`) where the drums write it at the front as the",
+      "directory's own name (`oh_snare_buzz_vl7.flac`). Without this table the",
+      "close mic is never found for any stroke, the mix silently drops the",
+      "channel it was weighted for, and the set is thin for no visible reason."
+    ],
+    "mic_tag": {
+      "oh": "Overhead",
+      "close": "Close",
+      "mid": "Mid",
+      "room": "Far"
+    }
+  },
+
+  "rate": 48000,
+  "layer_step_db": 4.5,
+  "balance_window_s": 0.4,
+  "dc_block_hz": 22.0,
+  "fade_in_ms": 1.0,
+  "fade_out_ms": 30.0,
+  "floor_db": -60.0,
+  "seed": 1743,
+
+  "_stereo": [
+    "swap_stereo is OFF here and it is ON for the drums, and that is not an",
+    "inconsistency. The kit is swapped because its overheads were imaged from",
+    "in front of the kit and the brief wants the drummer's seat — one honest",
+    "channel swap turns the whole kit round at once. The percussion is a",
+    "different recording of a different room by different hands, and there is",
+    "no drummer's seat to put anyone in.",
+    "",
+    "Measured on the source, the percussion overheads are nearly centred: the",
+    "widest instrument sits 4.6 dB right and the narrowest 0.2 dB left. So the",
+    "files carry a little real width and nothing that could be called a",
+    "placement, and the placement is `pan` in the manifest — where the owner",
+    "can argue with it without a re-render. Seven of the ten pans agree with",
+    "the direction the room already leaned; the tambourine and the guiro are",
+    "asked to cross about 1 dB of it, which a 0.3 pan swamps."
+  ],
+  "swap_stereo": false,
+
+  "_mix": [
+    "The overheads lead and the close mic follows, which is the opposite of",
+    "the kick and the snare and is right for the reason those are not: a",
+    "percussionist is heard in the room, and a close mic on a shaker is a",
+    "recording of a hand. Every instrument here has all four mics, which the",
+    "cymbals and toms in `club.json` do not.",
+    "",
+    "Two mixes. The struck and shaken metal and wood — shaker, tambourine,",
+    "cowbell, cabasa, claves, guiro — cut through anything and want air more",
+    "than proximity, so the close mic is at 0.45. The congas and the bongos",
+    "are drums with heads, and the body of a head is in the close mic, so they",
+    "get 0.7 — still under the overheads, because a conga mixed like a kick",
+    "arrives in front of the drummer instead of beside them."
+  ],
+
+  "_balance": [
+    "dB against the club kit's snare accent, K-weighted over 400 ms, exactly",
+    "as the kits are balanced. The contract sets these and they are the",
+    "numbers to argue with when the owner says 'less shaker': the tool",
+    "measures what it got and writes the difference into trim_db, so the files",
+    "never change when the balance does.",
+    "",
+    "A percussionist is quieter than a drummer and these say so. The shaker",
+    "and the cabasa sit 12 dB under the snare because they play every",
+    "sixteenth and anything louder is a hiss over the whole groove; the congas",
+    "are only 4 dB down because a conga tumbao is a melody and not a texture."
+  ],
+  "balance": {
+    "shaker": -12.0,
+    "tambourine": -8.0,
+    "cowbell": -6.0,
+    "cabasa": -12.0,
+    "claves": -6.0,
+    "guiro": -9.0,
+    "conga_hi": -4.0,
+    "conga_lo": -4.0,
+    "bongo_hi": -6.0,
+    "bongo_lo": -6.0
+  },
+  "balance_ref": { "folder": "kits/club", "voice": "snare", "layer": 3 },
+
+  "voices": {
+    "shaker": {
+      "_": [
+        "shaker_up and shaker_down are the two round robins of one voice,",
+        "because a shaker alternates by nature and the up-stroke and the",
+        "down-stroke are the two halves of one motion. In the source the",
+        "up-stroke is 8 to 11 dB quieter, which is the instrument and not the",
+        "session; peak normalisation lands both at 0.900, so what alternates",
+        "in the kit is the timbre of the two strokes, which is what you hear.",
+        "",
+        "One layer. Each articulation is sampled at a single dynamic and its",
+        "seven shakes span 4.6 dB (up) and 1.6 dB (down) — the down-stroke has",
+        "no second layer in it, and a layer the library does not have cannot",
+        "be invented. A shaker's accent is in the hand, which is the gain."
+      ],
+      "articulation": ["shaker_up", "shaker_down"],
+      "combine": "rr",
+      "mix": { "oh": 1.0, "close": 0.45, "mid": 0.35, "room": 0.3 },
+      "layers": 1, "rr": 2, "cap_s": 1.0, "pan": 0.35
+    },
+    "tambourine": {
+      "_": [
+        "One velocity band and ten shakes in it, spanning 8.2 dB — a wider",
+        "range than several instruments here that were sampled in bands. So",
+        "the round robins are ranked by loudness and stand in for the layers;",
+        "see `rank_rr_as_dynamics`."
+      ],
+      "articulation": "tambourine",
+      "layers_from_rr": true,
+      "mix": { "oh": 1.0, "close": 0.45, "mid": 0.35, "room": 0.3 },
+      "layers": 2, "rr": 3, "cap_s": 1.0, "pan": -0.3
+    },
+    "cowbell": {
+      "articulation": "cowbell",
+      "mix": { "oh": 1.0, "close": 0.45, "mid": 0.35, "room": 0.3 },
+      "layers": 3, "rr": 3, "cap_s": 1.0, "pan": 0.2
+    },
+    "cabasa": {
+      "_": "Two dynamics, 12.1 dB apart. Two layers, and both of them real.",
+      "articulation": "cabasa",
+      "mix": { "oh": 1.0, "close": 0.45, "mid": 0.35, "room": 0.3 },
+      "layers": 2, "rr": 3, "cap_s": 0.8, "pan": 0.3
+    },
+    "claves": {
+      "articulation": "claves",
+      "mix": { "oh": 1.0, "close": 0.45, "mid": 0.35, "room": 0.3 },
+      "layers": 3, "rr": 3, "cap_s": 0.6, "pan": -0.2
+    },
+    "guiro": {
+      "_": [
+        "`guiro_slow` only. The contract skips `guiro_fast` because it is a",
+        "different stroke and not a louder one — a fast scrape is a shorter",
+        "instrument, and a groove that wants one wants it written into the",
+        "part, not reached by hitting the guiro harder.",
+        "",
+        "One layer, for the same reason as the shaker: one dynamic, and its",
+        "eight scrapes span 3.7 dB, under the 4.5 dB step a second layer would",
+        "have to be worth.",
+        "",
+        "1.0 s and not the 0.6 s the brief guessed at. A scrape is not a decay:",
+        "cutting it is not landing a tail, it is lifting the stick halfway",
+        "through the stroke, and 0.6 s did exactly that on every file. Measured,",
+        "the slow scrape runs 0.97 s, which is also about how long a cha-cha",
+        "wants it — beats one and two at 120."
+      ],
+      "articulation": "guiro_slow",
+      "mix": { "oh": 1.0, "close": 0.45, "mid": 0.35, "room": 0.3 },
+      "layers": 1, "rr": 3, "cap_s": 1.0, "pan": -0.35
+    },
+    "conga_hi": {
+      "_": [
+        "`conga_muted` is layer 1 — the ghost stroke, a palm laid on the head",
+        "— and `conga_open` supplies the two above it. No velocity of an open",
+        "stroke is that sound however softly it is struck, so this is an",
+        "articulation standing in for a velocity band, which is what",
+        "`combine: layers` is for. The engine plays layer 1 on a ghost, so the",
+        "muted stroke lands exactly where the contract puts it."
+      ],
+      "articulation": [
+        { "name": "conga_muted", "layers": 1 },
+        { "name": "conga_open", "layers": 2 }
+      ],
+      "combine": "layers",
+      "mix": { "oh": 1.0, "close": 0.7, "mid": 0.4, "room": 0.3 },
+      "layers": 3, "rr": 3, "cap_s": 1.0, "pan": -0.15
+    },
+    "conga_lo": {
+      "_": [
+        "The tumba, the big drum of the set. Four dynamics in the source and",
+        "three taken; the softest band is left alone because one of its eight",
+        "strokes is 30 dB under its siblings and the band is not a performance",
+        "anyone would play."
+      ],
+      "articulation": "tumba",
+      "mix": { "oh": 1.0, "close": 0.7, "mid": 0.4, "room": 0.3 },
+      "layers": 3, "rr": 3, "cap_s": 1.0, "pan": -0.15
+    },
+    "bongo_hi": {
+      "articulation": "bongo_high",
+      "mix": { "oh": 1.0, "close": 0.7, "mid": 0.4, "room": 0.3 },
+      "layers": 3, "rr": 3, "cap_s": 0.8, "pan": 0.25
+    },
+    "bongo_lo": {
+      "articulation": "bongo_low",
+      "mix": { "oh": 1.0, "close": 0.7, "mid": 0.4, "room": 0.3 },
+      "layers": 3, "rr": 3, "cap_s": 0.8, "pan": 0.25
+    }
+  }
+}

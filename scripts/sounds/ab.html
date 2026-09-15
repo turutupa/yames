@@ -137,6 +137,28 @@
   <p class="hint" id="bandNote"></p>
 </div>
 
+<h2>The percussionist</h2>
+<div class="card">
+  <div class="row">
+    <label><input type="checkbox" id="percOn"> Percussion</label>
+    <div class="row" id="percPick" style="margin-left:6px"></div>
+  </div>
+  <p class="hint">
+    One set, played <em>under</em> whichever kit is above — a percussionist is
+    not a drum kit, so switching kits does not switch this. A shaker on every
+    sixteenth, a conga tumbao and a tambourine on 2 and 4: the shaker is the
+    voice most likely to turn into a hiss, the tumbao is where a machine-gun
+    round robin shows up, and the tambourine has to survive the snare it lands
+    on. The shaker's two round robins are the up-stroke and the down-stroke,
+    so the sixteenths really do alternate.
+    Levels and <code>trim_db</code> are the engine's, and each voice is placed
+    by the <code>pan</code> in its own manifest, which is a number to argue
+    with rather than something baked into the files.
+  </p>
+  <div class="row" id="percVoices" style="margin-top:10px"></div>
+  <p class="hint" id="percNote"></p>
+</div>
+
 <h2>One voice at a time</h2>
 <div class="card">
   <div class="row" id="voices"></div>
@@ -184,6 +206,7 @@
 
 const DIR = "../../src-tauri/sounds/";
 const KITS_DIR = DIR + "kits/";
+const PERC_DIR = DIR + "perc/";
 const VOICES_DIR = DIR + "voices/";
 
 // There is no directory listing over HTTP, so the candidates are named and the
@@ -217,6 +240,42 @@ const FILL = {
   snare:   [[28,2]],
   tom_hi:  [[29,1],[30,2]],
   tom_lo:  [[31,4]],
+};
+
+// --- the percussionist -----------------------------------------------------
+//
+// A percussion set is a kit-format folder that plays UNDER a kit rather than
+// instead of one, so it is loaded like a kit and scheduled beside one, and
+// the switch here is the switch the band row will be: on or off over whatever
+// is playing. It carries one thing a kit does not — `pan` in its manifest,
+// because ten instruments in the hands of one player are not all in the same
+// place — and this page honours it with a StereoPannerNode so the widths can
+// be judged rather than read.
+const PERC_CANDIDATES = ["club"];
+const PERC_VOICES = ["shaker", "tambourine", "cowbell", "cabasa", "claves",
+                     "guiro", "conga_hi", "conga_lo", "bongo_hi", "bongo_lo"];
+
+// Two bars of the three things the brief asks to hear: a shaker on every
+// sixteenth, a conga tumbao, and a tambourine on 2 and 4. Together they are
+// the test that matters — the shaker is the voice most likely to turn into a
+// hiss, the tumbao is the one that exposes a machine-gun round robin, and the
+// tambourine lands on the backbeat where it has to survive the snare.
+//
+// The shaker alternates 2 and 1 because a shaker alternates, and its two
+// round robins are the up-stroke and the down-stroke, so the sixteenths
+// really are up-down-up-down. The tumbao is the standard marcha: ghosts under
+// the hand, a slap on 2, and the two open tones at the end of the bar, with
+// the tumba answering on 1 and 3. Bar 2 moves one open tone onto the tumba,
+// which is the variation a player makes without being asked.
+const PERC = {
+  shaker:     [[0,2],[1,1],[2,2],[3,1],[4,2],[5,1],[6,2],[7,1],
+               [8,2],[9,1],[10,2],[11,1],[12,2],[13,1],[14,2],[15,1],
+               [16,2],[17,1],[18,2],[19,1],[20,2],[21,1],[22,2],[23,1],
+               [24,2],[25,1],[26,2],[27,1],[28,2],[29,1],[30,2],[31,1]],
+  tambourine: [[4,2],[12,2],[20,2],[28,2]],
+  conga_hi:   [[2,3],[4,4],[6,3],[10,3],[12,2],[14,2],
+               [18,3],[20,4],[22,3],[26,3],[28,2]],
+  conga_lo:   [[0,3],[8,1],[16,3],[24,1],[30,2]],
 };
 
 // --- the band --------------------------------------------------------------
@@ -271,6 +330,9 @@ let bpm = 104, onRide = false, withFill = true, humanise = true;
 const banks = {};           // voice id -> {man, buffers, loaded, loading}
 let bassVoice = null, keysVoice = null;
 let bassOn = true, keysOn = true;
+
+const percSets = {};        // set id -> {man, buffers, loaded, loading}
+let percSet = null, percOn = false;
 
 // --- loading ---------------------------------------------------------------
 
@@ -382,7 +444,47 @@ function ensureBand() {
   const want = [];
   if (bassOn && bassVoice) want.push(bassVoice);
   if (keysOn && keysVoice) want.push(keysVoice);
-  return Promise.all(want.map(ensureBank));
+  return Promise.all(want.map(ensureBank)).then(() =>
+    percOn && percSet ? ensurePerc(percSet) : null);
+}
+
+async function discoverPerc() {
+  for (const id of PERC_CANDIDATES) {
+    try {
+      const r = await fetch(PERC_DIR + id + "/kit.json");
+      if (!r.ok) continue;
+      percSets[id] = { man: await r.json(), buffers: {} };
+    } catch (e) { /* a set that is not rendered yet is simply absent */ }
+  }
+  percSet = PERC_CANDIDATES.find((id) => percSets[id]) || null;
+}
+
+// The same loader as a kit's, because it is the same folder shape. Kept
+// separate rather than parameterised: a kit and a percussion set are two
+// different things that happen to be spelled the same way, and the day one of
+// them gains a field the other does not, one `if` in a shared loader is how
+// that gets missed.
+function ensurePerc(id) {
+  const p = percSets[id];
+  if (!p) return Promise.resolve(null);
+  if (p.loading) return p.loading;
+  const jobs = [];
+  for (const [voice, spec] of Object.entries(p.man.voices)) {
+    for (let li = 1; li <= spec.layers; li++) {
+      for (let ri = 1; ri <= (spec.rr || 1); ri++) {
+        const key = voice + "." + li + "." + ri;
+        jobs.push(
+          fetch(PERC_DIR + id + "/" + key + ".wav")
+            .then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+            .then((b) => audio().decodeAudioData(b))
+            .then((buf) => { p.buffers[key] = buf; })
+            .catch(() => { /* a missing round robin falls back below */ })
+        );
+      }
+    }
+  }
+  p.loading = Promise.all(jobs).then(() => { p.loaded = true; return p; });
+  return p.loading;
 }
 
 /** The sampled note this pitch is built from: the nearest, ties going down. */
@@ -514,6 +616,56 @@ function hit(k, voice, level, when, bar, step) {
   src.start(at);
 }
 
+/**
+ * One percussion stroke, placed where its manifest says.
+ *
+ * The level picks the layer and the round robin cycles exactly as they do for
+ * a kit, because a set is a kit-format folder — but `pan` is a field a kit
+ * does not have, and it is applied here rather than baked into the file. That
+ * is the whole reason it is a manifest field: the owner can argue with a
+ * shaker that sits too far right by changing one number, and this page plays
+ * the change without a re-render.
+ *
+ * The voice index is offset past the eleven kit voices so a percussion voice
+ * and a drum voice do not walk their round robins in lockstep — a shaker and
+ * a hi-hat landing on the same repeat every bar is audible as a pulse that
+ * neither of them is playing.
+ */
+function percHit(voice, level, when, bar, step) {
+  const p = percSets[percSet];
+  if (!p || !p.loaded) return;
+  const spec = p.man.voices[voice];
+  if (!spec) return;
+  const layer = Math.min(LEVEL_LAYER[level] || 1, spec.layers);
+  const vi = VOICES.length + Math.max(PERC_VOICES.indexOf(voice), 0);
+  const rr = rrIndex(bar, step, vi, spec.rr || 1);
+  let buf = p.buffers[voice + "." + layer + "." + rr];
+  for (let l = layer; !buf && l >= 1; l--) buf = p.buffers[voice + "." + l + ".1"];
+  for (let l = layer; !buf && l <= spec.layers; l++) buf = p.buffers[voice + "." + l + ".1"];
+  if (!buf) return;
+
+  const trim = Math.pow(10, (spec.trim_db || 0) / 20);
+  let gain = LEVEL_GAIN[level] * trim, at = when;
+  if (humanise) {
+    const h = hash(bar, step, vi);
+    gain *= 1 + (h - 0.5) * 0.04;
+    at += h * 0.003;
+  }
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  const g = ctx.createGain();
+  g.gain.value = Math.max(gain, 0);
+  const pan = +(spec.pan || 0);
+  if (pan && ctx.createStereoPanner) {
+    const pn = ctx.createStereoPanner();
+    pn.pan.value = Math.max(-1, Math.min(1, pan));
+    src.connect(g).connect(pn).connect(ctx.destination);
+  } else {
+    src.connect(g).connect(ctx.destination);
+  }
+  src.start(at);
+}
+
 function stepSeconds() { return 60 / bpm / 4; }
 
 function rows() {
@@ -538,6 +690,13 @@ function scheduleBars(k, at, bar) {
   const table = rows();
   for (const [voice, hits] of Object.entries(table)) {
     for (const [step, level] of hits) hit(k, voice, level, at + step * s, bar, step);
+  }
+  // The percussionist plays under whatever kit is loaded, which is the point
+  // of the set being one folder rather than one per kit.
+  if (percOn && percSet) {
+    for (const [voice, hits] of Object.entries(PERC)) {
+      for (const [step, level] of hits) percHit(voice, level, at + step * s, bar, step);
+    }
   }
   // The band, over the same two bars. A note runs until the next one in its
   // own line and the last one runs to the end of the second bar, which is
@@ -711,6 +870,58 @@ function buildBandButtons() {
   setBandButtons();
 }
 
+function buildPercButtons() {
+  const pick = document.getElementById("percPick");
+  pick.innerHTML = "";
+  for (const id of PERC_CANDIDATES) {
+    const have = !!percSets[id];
+    const b = document.createElement("button");
+    b.className = "voice" + (have ? "" : " missing");
+    b.dataset.perc = id;
+    b.textContent = id;
+    if (!have) b.title = "not rendered — see scripts/sounds/recipes/perc-club.json";
+    b.disabled = !have;
+    b.onclick = () => { percSet = id; setPercButtons(); if (percOn) ensurePerc(id); };
+    pick.appendChild(b);
+  }
+
+  // Every voice the set has, not only the four the groove uses: the cowbell,
+  // the claves, the guiro, the bongos and the cabasa are in the folder and
+  // have to be judged too, and a set is ten instruments before it is a part.
+  const el = document.getElementById("percVoices");
+  el.innerHTML = "";
+  const p = percSets[percSet];
+  for (const v of PERC_VOICES) {
+    const has = !!(p && p.man.voices[v]);
+    const b = document.createElement("button");
+    b.className = "voice" + (has ? "" : " missing");
+    b.textContent = v;
+    b.onclick = () => ensurePerc(percSet).then(() => {
+      if (ctx.state === "suspended") ctx.resume();
+      const t = ctx.currentTime + 0.05, s = stepSeconds();
+      percHit(v, 2, t, 0, 0);
+      percHit(v, 2, t + s * 2, 0, 1);
+      percHit(v, 3, t + s * 4, 0, 2);
+    });
+    el.appendChild(b);
+  }
+  setPercButtons();
+}
+
+function setPercButtons() {
+  document.querySelectorAll("button[data-perc]").forEach((b) => {
+    const on = b.dataset.perc === percSet;
+    b.classList.toggle("on", on);
+    b.classList.toggle("kit", on);
+  });
+  const p = percSets[percSet];
+  document.getElementById("percNote").textContent = p
+    ? p.man.name + " — " + Object.keys(p.man.voices).length + " voices, trims " +
+      Object.values(p.man.voices).map((s) => (s.trim_db || 0).toFixed(1)).join(" / ") +
+      " dB · " + p.man.credit
+    : "no percussion set rendered";
+}
+
 function setBandButtons() {
   document.querySelectorAll("button[data-band]").forEach((b) => {
     const on = b.dataset.voice === (b.dataset.band === "bass" ? bassVoice : keysVoice);
@@ -779,6 +990,12 @@ const bassEl = document.getElementById("bassOn");
 bassEl.onchange = () => { bassOn = bassEl.checked; drawChart(); if (bassOn) ensureBand(); };
 const keysEl = document.getElementById("keysOn");
 keysEl.onchange = () => { keysOn = keysEl.checked; drawChart(); if (keysOn) ensureBand(); };
+const percEl = document.getElementById("percOn");
+percEl.onchange = () => {
+  percOn = percEl.checked;
+  drawChart();
+  if (percOn && percSet) ensurePerc(percSet);
+};
 
 const bpmEl = document.getElementById("bpm");
 bpmEl.oninput = () => {
@@ -842,18 +1059,37 @@ function drawChart() {
   };
   if (bassOn) bandRow("bass", BASS, (h) => name(h[1]), banks[bassVoice]);
   if (keysOn) bandRow("keys", KEYS, (h) => name(h[1][0]), banks[keysVoice]);
+  // The percussion rows, written out of the same table the scheduler reads.
+  // The trim column is the set's own, because that is what makes a shaker on
+  // every sixteenth a texture instead of a hiss.
+  if (percOn) {
+    const p = percSets[percSet];
+    for (const v of PERC_VOICES) {
+      const hits = PERC[v];
+      if (!hits) continue;
+      const spec = p && p.man.voices[v];
+      const tr = document.createElement("tr");
+      tr.innerHTML =
+        "<td>" + v + (spec ? "" : ' <span class="lvl3">(not rendered)</span>') + "</td>" +
+        "<td><code>" + barText(hits, 0) + "</code></td>" +
+        "<td><code>" + barText(hits, 1) + "</code></td>" +
+        '<td class="num">' + (spec ? (spec.trim_db || 0).toFixed(1) : "—") + "</td>";
+      chart.appendChild(tr);
+    }
+  }
 }
 
 if (location.protocol === "file:") {
   document.getElementById("fileWarn").hidden = false;
 }
 
-discover().then(discoverVoices).then(() => {
+discover().then(discoverVoices).then(discoverPerc).then(() => {
   current = order[0];
   buildKitButtons();
   setKitButtons(current);
   buildVoiceButtons();
   buildBandButtons();
+  buildPercButtons();
   drawChart();
 }).catch(() => {
   document.getElementById("fileWarn").hidden = false;
