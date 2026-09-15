@@ -1117,3 +1117,113 @@ it is worth reading before changing a number.
    and is itself an amplitude step. It showed up as a DC offset an order of
    magnitude above every other voice, and the release took it from 1.0e−03
    to 3.1e−05.
+
+# The click presets
+
+Not a jam kit and not in a folder: the metronome's own eight presets, loose
+WAVs at the top of `src-tauri/sounds/`, 44 100 Hz and 16-bit mono, embedded by
+`include_bytes!` in `engine.rs`. Until 2026-09-14 they were all synthesised;
+five are recordings now. Until 2026-09-15 each was a PAIR — a downbeat and a
+plain beat — and each is a set of THREE, because a bar of 6/8 has a middle and
+the middle has to be a sound rather than a volume (`plans/CLICK_ACCENTS.md`).
+
+```sh
+python scripts/sounds/render_click.py            # the recorded files, all of them
+python scripts/sounds/render_click.py --measure  # the numbers, write nothing
+python scripts/sounds/rebuild.py --synth-only    # the synthesised ones
+python scripts/sounds/bars_6_8.py                # two bars of 6/8 as WAVs
+python -m http.server 8123   # then /scripts/sounds/ab_click.html to hear them
+```
+
+## What the three strokes are
+
+| preset | downbeat | middle | plain beat | source |
+|---|---|---|---|---|
+| preset | downbeat | middle | plain beat | peaks (hi/mid/lo) |
+|---|---|---|---|---|
+| click | 1200 Hz | **980 Hz**, damped at 140/s | 800 Hz | .905 / .930 / .900 |
+| sticks | stick-shot vl6 | **stick-shot vl3** | cross-stick vl14 | .970 / .930 / .900 |
+| wood | high block vl6 | **high block vl3** | low block vl6 | .970 / **.814** / .900 |
+| beep | 880 Hz | **760 Hz**, damped at 53/s | 660 Hz | .987 / .930 / .954 |
+| drum | kick + hat + crash + body | **kick + body**, no cymbal | noise snare | .970 / .930 / .707 |
+| kit | kick 0.70 + snare L4 | **snare L3 alone**, no kick | closed hat L1 | .970 / **.807** / .900 |
+| snare | snare L4, drive 1.5 | **snare L3, drive 1.1** | snare L1, drive 0.8 | .970 / **.921** / .900 |
+| cowbell | bell v3 | **bell v2** | **bell v1**, the fingertip tap | .970 / **.771** / **.763** |
+
+Sources: click, beep and drum are synthesised; sticks, wood and cowbell are
+Virtuosity Drums; kit and snare are the Studio kit (DRSKit).
+
+Twenty-one files plus drum's five layers, of which **`render_click.py` owns
+sixteen** — the five recorded presets, three strokes each, and cowbell's plain
+beat moved as well — and `rebuild.py` owns the rest. The `_high` and `_low`
+files of click, beep and drum were MADE by `generate_sounds.py` in 2023 and
+have only been transformed since (DC removed, tails faded, a body layer added
+to the kick); `rebuild.py` is their generator of record now and can rebuild
+the synthesised ones from arithmetic, but it cannot re-derive those three
+pairs from nothing — the transform stage reads the files it rewrites.
+`generate_sounds.py` with no arguments still rewrites them with output that is
+*not* what ships, and its header says so.
+
+## The rules a click file obeys
+
+1. **The peak is headroom, and since 2026-09-15 it is also the level.** A
+   downbeat gets 0.970 so it cannot clip before the user's volume does; a
+   plain beat gets the kits' own 0.900. A MIDDLE gets whatever puts it at the
+   geometric centre of its preset's span through the band a laptop radiates —
+   0.930 at most, and as little as 0.760 — because `MEDIUM_GAIN` is 1.0 and at
+   a fixed peak a softer stroke is usually louder (rule 4). Cowbell's plain
+   beat is solved the same way and lands at 0.763. `click_*` and `beep_*`
+   predate all of it and sit where they were synthesised.
+2. **Mono, 44 100 Hz, no round robins, no velocity layers, no drift.** A
+   metronome is a machine. Where a library had several takes of a dynamic, the
+   MEDIAN by RMS is used — not the loudest, which is the take that got away
+   from the player, and not the first, which is whichever the library wrote
+   down first.
+3. **DC blocked, trimmed to a stated floor, landed on zero at both ends, TPDF
+   dithered.** A tail cut rather than faded is a second, unintended click on
+   every beat, and five of the original ten did exactly that.
+4. **The peak does not set the loudness and must not be trusted to.** At a
+   fixed peak a softer stroke is usually LOUDER, because its peak is not spent
+   on a stick transient. The level is built per file out of the layer, the
+   tanh drive, the mic blend and where the trim cuts — see `render_click.py`'s
+   header, which is the long version of this sentence.
+5. **A middle stroke is a different sound, never a scaled copy.** Held to it
+   by `a_middle_stroke_is_a_different_sound_from_both_its_siblings` in
+   `engine.rs`, and placed between its siblings — 1.5 dB clear of each through
+   the band a laptop radiates, 1.0 dB clear K-weighted, no exceptions — by
+   `every_medium_accent_sits_between_its_strong_and_its_beat`. Both filters,
+   because a middle in order on a laptop and out of order on headphones is not
+   in order; that is what sent both Studio-based middles from layer 2 back to
+   layer 3.
+   The cowbell is named in the first of those at a lower margin, because three
+   dynamics of one bell share their partials and what separates them is the
+   attack; the same test's comment has the numbers.
+6. **The three strokes of a preset start together** — every middle lands
+   within 0.14 ms of its own downbeat, so a bar never flams
+   (`a_kits_three_strokes_start_together`).
+7. **A file the owner has heard does not change.** All twenty-seven are pinned
+   by hash in `the_shipped_click_files_are_the_ones_that_were_heard`;
+   `sticks_low` matters most, because the jam's count-in plays it. Only
+   `cowbell_low` has ever been deliberately re-cut, when that preset went from
+   two dynamics of the bell to three.
+8. **Render the whole table, not one row.** `render_click.py` draws its dither
+   from one generator in table order, so a file rendered on its own is
+   audibly identical to the committed one and byte-for-byte different. Rule 7
+   is what notices.
+
+## The credit lines, as they must appear
+
+Same two libraries as the recorded jam kits, and the same obligations. Nothing
+from either library is in this repository — only the strokes cut from them.
+
+- **Virtuosity Drums** — Versilian Studios / Karoryfer Samples, **CC0**. The
+  woodblocks, the cowbell, the stick-shot and the cross-stick. No attribution
+  is required; it is given anyway.
+- **DRSKit**, via the already-rendered Studio kit — DrumGizmo,
+  **CC BY 4.0**. The snare and kick and hat behind the `snare` and `kit`
+  presets. Attribution **is** required, and is already carried: these strokes
+  are cut from `src-tauri/sounds/kits/studio/`, so the Studio kit's own credit
+  line covers them — the one in *The credit lines, as they must appear* above
+  and the `soundsCredit` string on the About screen, which names both
+  libraries. No new line is owed; if the Studio kit ever leaves, these six
+  files still owe this one.
