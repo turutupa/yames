@@ -19,11 +19,13 @@
  * `GroupEditor.test.tsx`.
  */
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, renderHook, screen, fireEvent } from "@testing-library/react";
 import { BeatStepper } from "./BeatStepper";
 import { mockInvoke } from "../../test/mocks";
 import { METER_PRESETS, MAX_FREE_BEATS, MIN_FREE_BEATS } from "../../constants/metronome";
 import { stepMeter } from "../../utils/meter";
+import { useActionDispatcher } from "../../hooks/useActionDispatcher";
+import type { AppState } from "../../types";
 
 /**
  * Click one end of the stepper and return the grouping it reported.
@@ -129,13 +131,60 @@ describe("BeatStepper — FREE mode still counts beats", () => {
   });
 });
 
+/**
+ * Press `sig-next` / `sig-prev` through the real dispatcher and return the
+ * grouping it sent to the engine.
+ *
+ * `set_beat_groups` is read off the mocked Tauri `invoke` rather than off a
+ * mocked `ipc` module — this suite mocks the transport and runs the real
+ * `src/ipc.ts`, so what comes back is the command the hotkey would send.
+ */
+function hotkeyStep(groups: number[], dir: 1 | -1, freeMode = false): number[] {
+  mockInvoke.mockClear();
+  const state = { beatGroups: groups, freeMode, subdivision: 1, bpm: 120 } as unknown as AppState;
+  const { result, unmount } = renderHook(() =>
+    useActionDispatcher({
+      view: "beat",
+      setView: vi.fn(),
+      prevTab: { current: "beat" },
+      setlistLoaded: false,
+      jamLoaded: false,
+      jamEditorOpen: false,
+      onToggleJam: vi.fn(),
+      jamActions: {
+        nextGroove: vi.fn(),
+        prevGroove: vi.fn(),
+        toggleTrade: vi.fn(),
+        toggleDropOut: vi.fn(),
+        nextShape: vi.fn(),
+        nextSection: vi.fn(),
+        prevSection: vi.fn(),
+        loopSection: vi.fn(),
+        toggleTakes: vi.fn(),
+      },
+      state,
+      isFullscreen: false,
+      setIsFullscreen: vi.fn(),
+      setIsOsFullscreen: vi.fn(),
+      setSidebarOpen: vi.fn(),
+      toggleCard: vi.fn(),
+      forceWebviewFocus: () => Promise.resolve(),
+    }),
+  );
+  result.current(dir === 1 ? "sig-next" : "sig-prev");
+  unmount();
+  const call = mockInvoke.mock.calls.find(([cmd]) => cmd === "set_beat_groups");
+  expect(call, "sig-next / sig-prev sent no set_beat_groups").toBeDefined();
+  return (call![1] as { groups: number[] }).groups;
+}
+
 describe("BeatStepper — the same step as the hotkeys", () => {
   it("agrees with sig-next and sig-prev from the same state", () => {
-    // `useActionDispatcher` answers `sig-next` with `stepMeter(groups,
-    // freeMode, 1)` and the widget and Zen meter buttons do the same. The
-    // stepper drifting away from them is the bug being fixed here, so the
-    // agreement is asserted rather than assumed — over every meter the app
-    // ships, both directions, and both modes.
+    // THE POINT OF THE FIX. `useActionDispatcher` answers `sig-next` with
+    // `stepMeter`, and so do the floating widget's meter button and the Zen
+    // one; the stepper had drifted away from all three. Pressed from the
+    // same state, the button and the hotkey must land on the same bar —
+    // over every meter the app ships, both directions, and both modes.
     const everyMeter = [
       ...METER_PRESETS.map((p) => p.groups),
       [2, 3],
@@ -147,11 +196,16 @@ describe("BeatStepper — the same step as the hotkeys", () => {
     ];
     for (const groups of everyMeter) {
       for (const dir of [1, -1] as const) {
-        expect(step(groups, dir)).toEqual(stepMeter(groups, false, dir));
+        const fromTheButton = step(groups, dir);
+        expect(fromTheButton, `${groups.join("+")} ${dir}`).toEqual(hotkeyStep(groups, dir));
+        // ...and both of them are the shared helper, which is the other
+        // call sites' story too.
+        expect(fromTheButton).toEqual(stepMeter(groups, false, dir));
       }
     }
     for (const n of [1, 4, 7, MAX_FREE_BEATS]) {
       for (const dir of [1, -1] as const) {
+        expect(step([n], dir, true)).toEqual(hotkeyStep([n], dir, true));
         expect(step([n], dir, true)).toEqual(stepMeter([n], true, dir));
       }
     }
