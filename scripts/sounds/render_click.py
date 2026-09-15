@@ -94,7 +94,7 @@ favour of the SOFT stroke once both are peak-normalised. Nothing about the
 peak convention produces no ladder at all. So THE PEAK IS SOLVED FOR RATHER
 THAN ASSUMED: every middle's `peak` below is whatever puts that stroke at
 the geometric centre of its own preset's span through the 200 Hz-4 kHz band,
-and the five recorded ones land between 0.760 and 0.930. Cowbell's plain beat
+and the five recorded ones land between 0.771 and 0.930. Cowbell's plain beat
 is solved the same way and lands at 0.763, because that preset's three strokes
 are three dynamics of one bell and a bell's loudness is its ring rather than
 its clang.
@@ -185,7 +185,7 @@ every middle to 0.930 therefore produced a ladder that was not a ladder:
 cowbell's middle stood 0.47 dB under its downbeat and the recorded kit's stood
 0.83, which is the same half-decibel the owner already listened to and could
 not hear. So `peak` in the table below is per file, stated per file, and the
-five recorded middles land between 0.760 and 0.930 — whatever puts the stroke
+five recorded middles land between 0.771 and 0.930 — whatever puts the stroke
 at the geometric centre of its own kit's span through the band a laptop
 radiates. Headroom is not what is being spent here: every one of these is
 further from full scale than the 0.970 an accent is allowed."""
@@ -471,7 +471,7 @@ RECIPE = [
          peak=0.763, drive=0.0, cap_s=0.45, floor=-40.0, fade=30.0,
          why="Virtuosity cowbell, fingertip layer"),
 
-    # Kit: the backbeat. Snare layer 2 and NO KICK.
+    # Kit: the backbeat. Snare layer 3 and NO KICK.
     #
     # 6/8 on a kit is kick on one, snare on four, hats between, so the middle
     # of the bar is the thing that is missing the kick. That is a huge

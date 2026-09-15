@@ -1418,8 +1418,10 @@ impl SoundBank {
         // difference to hear than any gain, which is the whole argument of
         // this pass, and it is nearly invisible to the band-pass the tests
         // measure through: the kick carries 99.7% of its energy under 120 Hz.
-        // Band-limited this lands 1.83 dB under the accent; what a listener
-        // actually loses is the crash.
+        // Band-limited this lands 1.83 dB under the accent at 44 100 and
+        // 1.62 at 48 000 — the resampler, and the reason every margin in this
+        // file says which rate it was taken at. What a listener actually
+        // loses is the crash.
         //
         // Peak 0.930 EXACTLY, not "0.930 if it is over": the five recorded
         // middles land on that number and this one is the sixth. Unlike the
@@ -7636,8 +7638,8 @@ mod tests {
     /// owner would have heard on beat four of a 6/8 is a snare 0.83 dB under
     /// the snare on beat one — which is the experiment that has already been
     /// run, and which he could not hear. The file carries it now: `kit_mid`
-    /// is layer 2 rather than layer 3 and peaks at 0.760 rather than 0.930,
-    /// and it clears the same 1.5 dB every other preset does.
+    /// peaks at 0.807 rather than 0.930, and clears the same 1.5 dB every
+    /// other preset does.
     ///
     /// The margins are floors, not targets. Everything
     /// `every_accent_is_louder_than_its_beat_on_a_small_speaker` says about
@@ -7903,8 +7905,8 @@ mod tests {
     /// extremes of the eight; the rest are inside half a per cent.
     ///
     /// It is still a useful bound: what this catches is a file normalised to
-    /// the WRONG target, which means 0.930 where 0.760 was meant, and that is
-    /// 22%. A file swapped for another kit's is the hash test's job, not
+    /// the WRONG target, which means 0.930 where 0.771 was meant, and that is
+    /// 21%. A file swapped for another kit's is the hash test's job, not
     /// this one's.
     ///
     /// COWBELL'S PLAIN BEAT IS AT 0.763 AND THE FLOOR STAYS AT 0.5. It is the
