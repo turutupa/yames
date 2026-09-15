@@ -10,6 +10,14 @@ fn main() {
     // a MIDI number where the drum's name is — so the embedding is the same
     // question asked of a different directory.
     embed_folders("sounds/voices", "voice.json", "SHIPPED_VOICES");
+    // And a percussion set is a kit-format folder that happens to hold the
+    // auxiliary voices instead of the drums — same `kit.json`, same naming,
+    // same loader (`plans/tasks/jam-v5/BRIEF.md`). So it is the same walk of
+    // a third directory, and `sounds/perc` may be missing for the reason
+    // `sounds/voices` may: the set is rendered by a tool, and a checkout
+    // that has not got it yet has to build and run with the percussion
+    // lanes silent.
+    embed_folders("sounds/perc", "kit.json", "SHIPPED_PERC");
 
     // Windows/MSVC: give `cargo test` integration-test binaries the
     // Common-Controls v6 manifest they would otherwise never get. Without
