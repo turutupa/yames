@@ -37,11 +37,24 @@ export const SHARE_OPTIONS = [
   { id: "copy", label: "Copy link", url: "" },
 ] as const;
 
+// THE ORDER HERE IS THE MENU'S ORDER, and it is also the order the Rust
+// whitelist has to be in: `sound_types_match_the_ui` reads the ids out of this
+// block and compares them to `SOUND_TYPES` in `commands.rs` as a SEQUENCE. It
+// runs quietest to fullest rather than alphabetically or oldest-first, so
+// stepping down the menu is a crescendo and not a shuffle.
 export const SOUND_TYPES = [
   { id: "click", icon: "○" },
+  // A drummer's count-off — a stick-shot over a cross-stick, out of
+  // Virtuosity's snare. The same two files the jam counts you in with, so
+  // "four sticks and then the band" and "practise to sticks" are one sound.
+  { id: "sticks", icon: "╱" },
   { id: "wood", icon: "◆" },
   { id: "beep", icon: "◉" },
   { id: "drum", icon: "◎" },
+  // The recorded twin of `drum`: a real kick and snare under the accent and a
+  // real closed hat on the beat. Both stay in the list on purpose — it is
+  // here so the two can be compared by ear, and neither one wins on paper.
+  { id: "kit", icon: "◈" },
   // The same kit idea with the metal taken out, for people who want drums
   // rather than cymbals: ONE snare drum, struck hard on the accent with a
   // kick under it and struck softly on the other beats.
@@ -54,7 +67,14 @@ export const SOUND_TYPES = [
   // snare, tom, tom, tom: "the 'big' accent on snare really sounds out of
   // place compared to the normal snare beats". A metronome accent is the
   // same drum hit harder, so that is what it is now.
+  //
+  // It is a RECORDING now — the Studio kit's own snare, hardest stroke over
+  // softest — and every word above is why the recording had to be one drum
+  // twice rather than two drums once.
   { id: "snare", icon: "◍" },
+  // Last because it is the loudest thing in the list: nothing else here cuts
+  // through a room the way a bell does.
+  { id: "cowbell", icon: "◭" },
 ];
 
 export const INSTRUMENTS: Array<{ id: string; soon?: boolean }> = [

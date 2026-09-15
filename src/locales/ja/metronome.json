@@ -41,10 +41,13 @@
   },
   "sound": {
     "click": "クリック",
+    "sticks": "スティック",
     "wood": "ウッド",
     "beep": "ビープ",
     "drum": "ドラム",
-    "snare": "スネア"
+    "kit": "ドラムキット",
+    "snare": "スネア",
+    "cowbell": "カウベル"
   },
   "driftMeter": {
     "early": "早め",

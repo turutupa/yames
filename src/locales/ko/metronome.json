@@ -41,10 +41,13 @@
   },
   "sound": {
     "click": "클릭",
+    "sticks": "스틱",
     "wood": "우드",
     "beep": "비프",
     "drum": "드럼",
-    "snare": "스네어"
+    "kit": "드럼 키트",
+    "snare": "스네어",
+    "cowbell": "카우벨"
   },
   "driftMeter": {
     "early": "앞당김",
