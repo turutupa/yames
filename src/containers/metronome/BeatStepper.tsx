@@ -8,24 +8,51 @@ const SUBDIVISION_MULTIPLIER: Record<number, number> = {
 
 interface BeatStepperProps {
   beatGroups: number[];
-  subdivision: number;
   freeMode: boolean;
   onBeatGroupsChange?: (groups: number[]) => void;
 }
 
 /**
- * The bar's length — `− 6 +` — and clicks/bar beside it.
+ * Clicks/bar — the bar's length once the subdivision has multiplied it.
+ *
+ * It is a READOUT, not a control, and that is why it is no longer next to the
+ * `− 6 +` it used to trail. It sits on the METER heading line, beside the
+ * word, the way the section headings work everywhere else on this stage: the
+ * title says what the section is, and the things you press are the row under
+ * it. Mixing a number you can only read into the row of things you press was
+ * the inconsistency the owner reported against SUBDIVISION.
+ *
+ * Tabular, so 9 → 10 beats does not reflow the heading line.
+ */
+export function ClicksPerBar({
+  beatGroups,
+  subdivision,
+}: {
+  beatGroups: number[];
+  subdivision: number;
+}) {
+  const { t } = useTranslation();
+  const total = beatGroups.reduce((sum, n) => sum + n, 0);
+  const clicksPerBar = total * (SUBDIVISION_MULTIPLIER[subdivision] ?? 1);
+  return (
+    <span className="beat-clicks">
+      {t("metronome.clicksPerBar", { count: clicksPerBar })}
+    </span>
+  );
+}
+
+/**
+ * The bar's length — `− 6 +`.
  *
  * It lived at the end of the dots row, which meant it slid sideways every time
  * the bar got longer or shorter: the control moved out from under the pointer
  * at the exact moment you were clicking it repeatedly, which is how you end up
- * pressing the wrong thing. It sits on the meter row now, at a fixed offset —
- * see `.meter-row` in metronome.css, where the position is a grid column
- * rather than the end of a flow.
+ * pressing the wrong thing. It sits in the METER section's control row now, at
+ * a fixed offset from the left — see `.meter-controls` in metronome.css.
  *
- * Nothing inside it may resize either, so both numbers are tabular and both
- * their boxes are wide enough for the largest value they can hold. 9 → 10
- * beats must not nudge the `+` a pixel.
+ * Nothing inside it may resize either, so the number is tabular and its box is
+ * wide enough for the largest value it can hold. 9 → 10 beats must not nudge
+ * the `+` a pixel.
  *
  * IT WALKS THE METERS, and always did until it stopped. In a grouped meter
  * `+` is the next time signature and `−` the previous one — 6/8 → 7/8 → 8/8
@@ -49,42 +76,35 @@ interface BeatStepperProps {
  */
 export function BeatStepper({
   beatGroups,
-  subdivision,
   freeMode,
   onBeatGroupsChange,
 }: BeatStepperProps) {
   const { t } = useTranslation();
   const total = beatGroups.reduce((sum, n) => sum + n, 0);
-  const clicksPerBar = total * (SUBDIVISION_MULTIPLIER[subdivision] ?? 1);
   const upLabel = t(freeMode ? "metronome.addBeat" : "metronome.nextMeter");
   const downLabel = t(freeMode ? "metronome.removeBeat" : "metronome.prevMeter");
 
   return (
-    <div className="beat-stepper-row">
-      <div
-        className="beat-stepper"
-        role="group"
-        aria-label={t("metronome.beatCount", { count: total })}
+    <div
+      className="beat-stepper"
+      role="group"
+      aria-label={t("metronome.beatCount", { count: total })}
+    >
+      <button
+        className="beat-stepper-btn"
+        onClick={() => onBeatGroupsChange?.(stepMeter(beatGroups, freeMode, -1))}
+        aria-label={downLabel}
       >
-        <button
-          className="beat-stepper-btn"
-          onClick={() => onBeatGroupsChange?.(stepMeter(beatGroups, freeMode, -1))}
-          aria-label={downLabel}
-        >
-          −
-        </button>
-        <span className="beat-stepper-value">{total}</span>
-        <button
-          className="beat-stepper-btn"
-          onClick={() => onBeatGroupsChange?.(stepMeter(beatGroups, freeMode, 1))}
-          aria-label={upLabel}
-        >
-          +
-        </button>
-      </div>
-      <span className="beat-clicks">
-        {t("metronome.clicksPerBar", { count: clicksPerBar })}
-      </span>
+        −
+      </button>
+      <span className="beat-stepper-value">{total}</span>
+      <button
+        className="beat-stepper-btn"
+        onClick={() => onBeatGroupsChange?.(stepMeter(beatGroups, freeMode, 1))}
+        aria-label={upLabel}
+      >
+        +
+      </button>
     </div>
   );
 }

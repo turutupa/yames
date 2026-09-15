@@ -926,15 +926,10 @@
 }
 
 /* ── Meter presets + contextual variant row ── */
-.meter-presets {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  max-width: 520px;
-  margin: 0 auto;
-}
+/* The block's own shape is declared once, further down with `.meter-head` and
+   `.meter-controls` — the three belong together. What used to be here was a
+   centred 520px column from the old stacked layout; on the stage the block is
+   one of two on the meter row and is sized by its controls. */
 
 .meter-variant-row {
   display: flex;
@@ -1138,26 +1133,16 @@
    the grouping is chosen) and a caption under every group (now the group's
    `title`). Clicks/bar is the one figure none of that expresses, so it stays
    here, beside the number it is derived from. */
-/* The meter row: the chip and its grouping on the left, the bar's length on
-   the right. A grid rather than a flex row, because the point is that the
-   stepper does not move — and in a flow it would, every time the grouping
-   went from "3 + 2" to "3 + 3" or the chip from 5/4 to 12/8.
-
-   The first column is fixed, so the stepper starts at the same x forever. */
+/* METER and ACCENT side by side, each a heading over its own controls. The
+   row aligns them at the TOP, not the middle, so the two headings share a line
+   and the two control rows share the one under it - which is the whole point:
+   read across and the stage has one shape, not three. */
 .meter-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
 }
 
-/* Between the meter chip and the grouping badges — all three are the same
-   subject, and the stepper used to sit at the far end of the row with an empty
-   gap where the connection should have been. */
-.beat-stepper-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
 
 /* Nothing inside may resize either. Both numbers are tabular and both boxes
    are cut for the largest value they can hold, so 9 -> 10 beats does not
@@ -1230,17 +1215,11 @@ span.meter-grouping-chip {
   background: color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
-/* Under about 900px the row stops being two columns — the stepper drops
-   beneath the meter rather than squeezing it — and the fixed left column
-   would be a lie there. */
+/* Under about 900px ACCENT drops beneath METER rather than squeezing it. */
 @media (max-width: 899px) {
   .meter-row {
     flex-wrap: wrap;
-    row-gap: 12px;
-  }
-
-  .beat-clicks {
-    min-width: 0;
+    row-gap: 20px;
   }
 }
 
@@ -1562,8 +1541,7 @@ span.meter-grouping-chip {
   padding-right: 48px;
 }
 
-.main-content[data-view="beat"] .bpm-section,
-.main-content[data-view="beat"] .meter-presets {
+.main-content[data-view="beat"] .bpm-section {
   align-items: flex-start;
 }
 
@@ -1578,8 +1556,11 @@ span.meter-grouping-chip {
    proportion to the tempo they name, so a short ruler crowds Moderato into
    Allegro. They span the stage now, and the stage's own max-width is what
    stops them smearing. */
+/* `.meter-presets` is NOT in this list any more. It is one of two blocks on
+   the meter row now, and a block told to be 100% wide leaves the accent group
+   beside it nothing to be pushed away from - `margin-left: auto` only pushes
+   when there is slack. It sizes to its controls instead. */
 .main-content[data-view="beat"] .sub-row,
-.main-content[data-view="beat"] .meter-presets,
 .main-content[data-view="beat"] .time-sig-row,
 .main-content[data-view="beat"] .bpm-slider-wrap {
   margin-left: 0;
@@ -1921,12 +1902,36 @@ span.meter-grouping-chip {
   position: relative;
 }
 
-/* One gap for the whole row. Every element on it — the label, the chip, the
-   stepper, clicks/bar, the grouping badges — sits the same distance from its
-   neighbour, so the row reads as one series rather than as three clumps. */
+/* The METER block: a heading line, then the controls under it. 12px between
+   the two is the gap `.sub-section` puts under SUBDIVISION, so the headings sit
+   the same distance above the things they name.
+
+   `align-items: flex-start` so the two children are as wide as their own
+   content, not as wide as the block — the heading line must not stretch. */
+.meter-presets {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* The heading line: METER, and clicks/bar beside it. Baseline-aligned, because
+   they are two runs of text at different sizes and centring them would leave
+   the number floating against the cap-height of the label. */
 .meter-head {
   display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+/* One gap for the whole control row. The chip, the stepper and the grouping
+   badges sit the same distance from each other, so the row reads as one series
+   rather than as three clumps. It wraps rather than overflows: a 7/8 bar in
+   German is a long row. */
+.meter-controls {
+  display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 14px;
 }
 
@@ -2195,7 +2200,13 @@ span.meter-grouping-chip {
    moves when the meter changes, because it is measured from the right. */
 .accent-control {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  /* Left, over the first button — the same place METER and SUBDIVISION put
+     their names. The block is pushed to the stage's right edge, but the title
+     still sits at the start of the thing it names, so reading down the stage
+     you meet four headings in the same relation to their controls. Aligned to
+     the right edge instead it read as a caption on "None". */
+  align-items: flex-start;
   gap: 12px;
   margin-left: auto;
 }
@@ -2238,16 +2249,11 @@ span.meter-grouping-chip {
   color: var(--accent);
 }
 
-/* Below about 1100px the row cannot hold the meter, the stepper, clicks/bar,
-   the groupings AND this. The label goes first — the buttons still say what
-   they are — and then the whole control wraps onto its own line rather than
-   squeezing the meter it belongs beside. */
-@media (max-width: 1279px) {
-  .accent-label {
-    display: none;
-  }
-}
-
+/* The label used to be dropped below 1280px to buy width on a crowded single
+   row. On its own line above the buttons it costs no width at all, so it stays
+   - a section with no title is the inconsistency this was rebuilt to fix.
+   Below about 1100px the whole control wraps under the meter instead, and
+   left-aligns with it once it is no longer against the right edge. */
 @media (max-width: 1099px) {
   .accent-control {
     margin-left: 0;

@@ -35,6 +35,10 @@ export function AccentControl({ mode }: { mode: Mode }) {
 
   return (
     <div className="accent-control" role="group" aria-label={t("metronome.accent.label")}>
+      {/* A heading over its controls, like METER beside it and SUBDIVISION
+          below. The label used to sit inline to the left of the buttons and
+          was dropped entirely under 1280px to buy room on a crowded row; on
+          its own line it costs no width, so it is always there. */}
       <span className="stage-label accent-label">{t("metronome.accent.label")}</span>
       <div className="accent-options">
         {MODES.map((m) => (

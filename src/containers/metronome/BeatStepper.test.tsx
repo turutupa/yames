@@ -39,7 +39,6 @@ function step(groups: number[], dir: 1 | -1, freeMode = false): number[] {
   const view = render(
     <BeatStepper
       beatGroups={groups}
-      subdivision={1}
       freeMode={freeMode}
       onBeatGroupsChange={onBeatGroupsChange}
     />,
@@ -74,12 +73,12 @@ describe("BeatStepper — a grouped meter walks the list", () => {
     expect(step([2], -1)).toEqual([3, 3, 3, 3]);
     expect(step([3, 3, 3, 3], 1)).toEqual([2]);
 
-    const view = render(<BeatStepper beatGroups={[3, 3, 3, 3]} subdivision={1} freeMode={false} />);
+    const view = render(<BeatStepper beatGroups={[3, 3, 3, 3]} freeMode={false} />);
     expect((screen.getByLabelText("Next meter") as HTMLButtonElement).disabled).toBe(false);
     expect((screen.getByLabelText("Previous meter") as HTMLButtonElement).disabled).toBe(false);
     view.unmount();
 
-    const one = render(<BeatStepper beatGroups={[2]} subdivision={1} freeMode={false} />);
+    const one = render(<BeatStepper beatGroups={[2]} freeMode={false} />);
     expect((screen.getByLabelText("Previous meter") as HTMLButtonElement).disabled).toBe(false);
     one.unmount();
   });
@@ -104,13 +103,13 @@ describe("BeatStepper — a grouped meter walks the list", () => {
   });
 
   it("does no IPC of its own — the meter change is the owner's to make", () => {
-    render(<BeatStepper beatGroups={[3, 3]} subdivision={1} freeMode={false} />);
+    render(<BeatStepper beatGroups={[3, 3]} freeMode={false} />);
     fireEvent.click(screen.getByLabelText("Next meter"));
     expect(mockInvoke).not.toHaveBeenCalled();
   });
 
   it("does not throw when no onBeatGroupsChange is wired", () => {
-    render(<BeatStepper beatGroups={[3, 3]} subdivision={1} freeMode={false} />);
+    render(<BeatStepper beatGroups={[3, 3]} freeMode={false} />);
     expect(() => fireEvent.click(screen.getByLabelText("Next meter"))).not.toThrow();
   });
 });

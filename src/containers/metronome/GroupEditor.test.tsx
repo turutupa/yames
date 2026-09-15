@@ -16,7 +16,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { GroupEditor } from "./GroupEditor";
-import { BeatStepper } from "./BeatStepper";
+import { BeatStepper, ClicksPerBar } from "./BeatStepper";
 import { mockInvoke } from "../../test/mocks";
 import { MAX_FREE_BEATS, MIN_FREE_BEATS } from "../../constants/metronome";
 import type { BeatFeedback } from "../../types";
@@ -55,7 +55,6 @@ describe("GroupEditor — free mode", () => {
     render(
       <BeatStepper
         beatGroups={[4]}
-        subdivision={1}
         freeMode
         onBeatGroupsChange={onBeatGroupsChange}
       />,
@@ -71,7 +70,6 @@ describe("GroupEditor — free mode", () => {
     render(
       <BeatStepper
         beatGroups={[4]}
-        subdivision={1}
         freeMode
         onBeatGroupsChange={onBeatGroupsChange}
       />,
@@ -85,7 +83,6 @@ describe("GroupEditor — free mode", () => {
     render(
       <BeatStepper
         beatGroups={[MAX_FREE_BEATS]}
-        subdivision={1}
         freeMode
         onBeatGroupsChange={onBeatGroupsChange}
       />,
@@ -99,7 +96,6 @@ describe("GroupEditor — free mode", () => {
     render(
       <BeatStepper
         beatGroups={[MIN_FREE_BEATS]}
-        subdivision={1}
         freeMode
         onBeatGroupsChange={onBeatGroupsChange}
       />,
@@ -110,7 +106,7 @@ describe("GroupEditor — free mode", () => {
 
   it("never disables the chevrons — they wrap instead of clamping", () => {
     render(
-      <BeatStepper beatGroups={[MAX_FREE_BEATS]} subdivision={1} freeMode />,
+      <BeatStepper beatGroups={[MAX_FREE_BEATS]} freeMode />,
     );
     expect(stepper("Add beat").disabled).toBe(false);
     expect(stepper("Remove beat").disabled).toBe(false);
@@ -120,7 +116,6 @@ describe("GroupEditor — free mode", () => {
     render(
       <BeatStepper
         beatGroups={[4]}
-        subdivision={1}
         freeMode
         onBeatGroupsChange={vi.fn()}
       />,
@@ -131,16 +126,18 @@ describe("GroupEditor — free mode", () => {
   });
 
   it("does not throw when no onBeatGroupsChange is wired", () => {
-    render(<BeatStepper beatGroups={[4]} subdivision={1} freeMode />);
+    render(<BeatStepper beatGroups={[4]} freeMode />);
     expect(() => fireEvent.click(stepper("Add beat"))).not.toThrow();
   });
 
-  it("shows the bar's length on the stepper, and clicks/bar beside it", () => {
-    const { container } = render(
-      <BeatStepper beatGroups={[7]} subdivision={2} freeMode />,
-    );
-    expect(container.querySelector(".beat-stepper-value")?.textContent).toBe("7");
-    expect(container.querySelector(".beat-clicks")?.textContent).toBe(
+  it("shows the bar's length on the stepper, and clicks/bar on the heading", () => {
+    // Two components since the METER section became a heading over a row:
+    // the stepper is pressed, clicks/bar is only read, and they no longer
+    // share a box.
+    const step = render(<BeatStepper beatGroups={[7]} freeMode />);
+    expect(step.container.querySelector(".beat-stepper-value")?.textContent).toBe("7");
+    const clicks = render(<ClicksPerBar beatGroups={[7]} subdivision={2} />);
+    expect(clicks.container.querySelector(".beat-clicks")?.textContent).toBe(
       "14 clicks/bar",
     );
   });
@@ -148,7 +145,7 @@ describe("GroupEditor — free mode", () => {
   it("names the stepper for a screen reader, with the plural form", () => {
     // The visible label is a bare digit (the design's `− 6 +`), so the count
     // in words has to reach assistive tech some other way.
-    render(<BeatStepper beatGroups={[1]} subdivision={1} freeMode />);
+    render(<BeatStepper beatGroups={[1]} freeMode />);
     expect(screen.getByLabelText("1 beat")).not.toBeNull();
   });
   it("accents FREE mode's dots when the mode says every beat", () => {
@@ -212,14 +209,13 @@ describe("GroupEditor — grouped mode", () => {
     ).toEqual(["1 beat", "3 beats"]);
   });
 
-  it("shows the total on the stepper and clicks/bar beside it", () => {
+  it("shows the total on the stepper and clicks/bar on the heading", () => {
     // The `3 + 2 + 2` formula is not repeated here: it is stated next to the
     // meter chip, which is where the grouping is chosen (see MeterPresets).
-    const { container } = render(
-      <BeatStepper beatGroups={[3, 2, 2]} subdivision={3} />,
-    );
-    expect(container.querySelector(".beat-stepper-value")?.textContent).toBe("7");
-    expect(container.querySelector(".beat-clicks")?.textContent).toBe(
+    const step = render(<BeatStepper beatGroups={[3, 2, 2]} />);
+    expect(step.container.querySelector(".beat-stepper-value")?.textContent).toBe("7");
+    const clicks = render(<ClicksPerBar beatGroups={[3, 2, 2]} subdivision={3} />);
+    expect(clicks.container.querySelector(".beat-clicks")?.textContent).toBe(
       "21 clicks/bar",
     );
   });
