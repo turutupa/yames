@@ -393,6 +393,7 @@
       "drums": "Batería",
       "bass": "Bajo",
       "keys": "Teclados",
+      "perc": "Percusión",
       "you": "Tú",
       "youPlay": "{{instrument}}",
       "out": "fuera",
@@ -470,7 +471,9 @@
         "3": "tresillos",
         "4": "semicorcheas",
         "6": "seisillos"
-      }
+      },
+      "addPerc": "+ percusión",
+      "percPicker": "Añadir un instrumento de percusión"
     },
     "takes": {
       "label": "Tomas",
@@ -605,6 +608,21 @@
       "check": "{{count}} para revisar: {{list}}",
       "check_one": "{{count}} para revisar: {{list}}",
       "check_other": "{{count}} para revisar: {{list}}"
+    },
+    "perc": {
+      "shaker": "maraca",
+      "tambourine": "pandereta",
+      "cowbell": "cencerro",
+      "cabasa": "cabasa",
+      "claves": "claves",
+      "guiro": "güiro",
+      "congaHi": "conga aguda",
+      "congaLo": "tumbadora",
+      "bongoHi": "bongó macho",
+      "bongoLo": "bongó hembra",
+      "congas": "congas",
+      "bongos": "bongós",
+      "silent": "nada en este groove"
     }
   },
   "scale": {

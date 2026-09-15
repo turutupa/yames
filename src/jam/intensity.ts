@@ -26,7 +26,22 @@
  * | hatOpen | — | closes back onto the hat, and the row empties |
  * | crash | one on tick 0 | the lane is cleared |
  * | peaks | — | come back to accents |
+ * | shaker, cabasa | ghosts become hits | accents close to hits |
+ * | the other eight percussion rows | ghosts become hits | — |
  *
+ * ## The percussionist (fifth pass)
+ *
+ * The ten percussion rows go through the two rules that are about LEVELS and
+ * not about drums — Loud's ghosts, Soft's peaks — because those are true of
+ * anybody's hands. Beyond that only the shaker and the cabasa are touched, and
+ * they are touched exactly as the hat is: they are the one part of the set
+ * that plays a running subdivision rather than a figure, so they are the one
+ * part a rule written for a hi-hat is true of (`JAM_PERC_TIMEKEEPERS`). The
+ * clave, the tambourine, the cowbell, the güiro, the congas and the bongos are
+ * left alone at every intensity, because a figure softened until its accents
+ * are gone is not a quiet figure, it is a different one.
+ *
+
  * ## The fourth bar (third pass)
  *
  * A drummer playing loud does not hit every backbeat the same. Every fourth
@@ -63,7 +78,7 @@
  * closed-hat lane, and where nothing opens it is not written at all.
  */
 import type { GrooveTicks } from "./grooves";
-import { JAM_LANES, JAM_OPTIONAL_LANES } from "./types";
+import { JAM_ALL_OPTIONAL_LANES, JAM_LANES, JAM_PERC_TIMEKEEPERS } from "./types";
 import type { JamIntensity, JamLevel, JamPattern } from "./types";
 
 /** How often a loud drummer leans the whole arm into the backbeat. */
@@ -85,14 +100,15 @@ export function isOffBeat(tick: number, ticksPerBeat: number): boolean {
 /**
  * A copy with every lane its own array, so nothing below edits the caller's.
  *
- * The optional rows — the open hat and the two toms — are copied only where
- * they exist: a pattern with no open hats has no row, and inventing an empty
- * one would put a lane in every table the engine has to read past.
+ * The optional rows — the open hat, the two toms and the percussionist's ten —
+ * are copied only where they exist: a pattern with no open hats has no row,
+ * and inventing an empty one would put a lane in every table the engine has to
+ * read past.
  */
 function copy(pattern: JamPattern): JamPattern {
   const out = {} as JamPattern;
   for (const lane of JAM_LANES) out[lane] = [...(pattern[lane] ?? [])];
-  for (const lane of JAM_OPTIONAL_LANES) {
+  for (const lane of JAM_ALL_OPTIONAL_LANES) {
     const row = pattern[lane];
     if (row) out[lane] = [...row];
   }
@@ -102,7 +118,7 @@ function copy(pattern: JamPattern): JamPattern {
 /** Every row the pattern actually carries, required and optional. */
 function rowsOf(pattern: JamPattern): JamLevel[][] {
   const rows: JamLevel[][] = JAM_LANES.map((lane) => pattern[lane]);
-  for (const lane of JAM_OPTIONAL_LANES) {
+  for (const lane of JAM_ALL_OPTIONAL_LANES) {
     const row = pattern[lane];
     if (row) rows.push(row);
   }
@@ -222,6 +238,26 @@ function soft(pattern: JamPattern): JamPattern {
   }
   for (let t = 0; t < out.hat.length; t += 1) {
     if (out.hat[t] === 2) out.hat[t] = 1;
+  }
+  /**
+   * The shaker and the cabasa close the same way the hat does, and the other
+   * eight percussion rows are left exactly as written.
+   *
+   * Those two are the percussionist's hi-hat — a stroke on every subdivision,
+   * accent on the beat and a lighter one off it — so the rule that softens a
+   * hat is the rule that softens them: the hand keeps moving, it just stops
+   * digging in. Every other row in the set is a FIGURE, and a figure quietened
+   * into flatness stops being the figure. A clave played soft is still a
+   * clave: two strokes and three, at the weights the pattern says. A tumbao
+   * whose open tones came back to the level of its slaps is not a quiet
+   * tumbao, it is a conga player nobody told what a tumbao is.
+   */
+  for (const lane of JAM_PERC_TIMEKEEPERS) {
+    const row = out[lane];
+    if (!row) continue;
+    for (let t = 0; t < row.length; t += 1) {
+      if (row[t] === 2) row[t] = 1;
+    }
   }
   if (out.hatOpen) {
     for (let t = 0; t < out.hatOpen.length; t += 1) {

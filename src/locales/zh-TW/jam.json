@@ -393,6 +393,7 @@
       "drums": "鼓",
       "bass": "貝斯",
       "keys": "鍵盤",
+      "perc": "打擊樂",
       "you": "你",
       "youPlay": "{{instrument}}",
       "out": "休止",
@@ -470,7 +471,9 @@
         "3": "三連音",
         "4": "十六分音符",
         "6": "六連音"
-      }
+      },
+      "addPerc": "+ 打擊樂",
+      "percPicker": "加入打擊樂器"
     },
     "takes": {
       "label": "錄音",
@@ -605,6 +608,21 @@
       "check": "有 {{count}} 處可以核對：{{list}}",
       "check_one": "有 {{count}} 處可以核對：{{list}}",
       "check_other": "有 {{count}} 處可以核對：{{list}}"
+    },
+    "perc": {
+      "shaker": "沙鈴",
+      "tambourine": "鈴鼓",
+      "cowbell": "牛鈴",
+      "cabasa": "卡巴薩",
+      "claves": "響棒",
+      "guiro": "刮胡",
+      "congaHi": "高音康加鼓",
+      "congaLo": "低音康加鼓",
+      "bongoHi": "高音邦哥鼓",
+      "bongoLo": "低音邦哥鼓",
+      "congas": "康加鼓",
+      "bongos": "邦哥鼓",
+      "silent": "這個律動裡沒有"
     }
   },
   "scale": {

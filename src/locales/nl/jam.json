@@ -393,6 +393,7 @@
       "drums": "Drums",
       "bass": "Bas",
       "keys": "Toetsen",
+      "perc": "Percussie",
       "you": "Jij",
       "youPlay": "{{instrument}}",
       "out": "eruit",
@@ -470,7 +471,9 @@
         "3": "triolen",
         "4": "zestienden",
         "6": "sextolen"
-      }
+      },
+      "addPerc": "+ percussie",
+      "percPicker": "Een percussie-instrument toevoegen"
     },
     "takes": {
       "label": "Opnames",
@@ -605,6 +608,21 @@
       "check": "{{count}} om na te kijken: {{list}}",
       "check_one": "{{count}} om na te kijken: {{list}}",
       "check_other": "{{count}} om na te kijken: {{list}}"
+    },
+    "perc": {
+      "shaker": "shaker",
+      "tambourine": "tamboerijn",
+      "cowbell": "koebel",
+      "cabasa": "cabasa",
+      "claves": "claves",
+      "guiro": "güiro",
+      "congaHi": "hoge conga",
+      "congaLo": "lage conga",
+      "bongoHi": "hoge bongo",
+      "bongoLo": "lage bongo",
+      "congas": "conga's",
+      "bongos": "bongo's",
+      "silent": "niets in deze groove"
     }
   },
   "scale": {

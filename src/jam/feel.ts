@@ -14,7 +14,7 @@
  */
 import type { GrooveTicks } from "./grooves";
 import type { JamFeel, JamLevel, JamPattern, JamLane } from "./types";
-import { JAM_LANES, JAM_OPTIONAL_LANES } from "./types";
+import { JAM_ALL_OPTIONAL_LANES, JAM_LANES } from "./types";
 
 /** Straight eighths → triplets, off-beat on the third tick. */
 function toTriplets(source: JamLevel[], beatsPerBar: number): JamLevel[] {
@@ -29,11 +29,13 @@ function toTriplets(source: JamLevel[], beatsPerBar: number): JamLevel[] {
 function patternToTriplets(pattern: JamPattern, beatsPerBar: number): JamPattern {
   const out = {} as JamPattern;
   for (const lane of JAM_LANES) out[lane] = toTriplets(pattern[lane], beatsPerBar);
-  // The optional rows ride along — the open hat and the two toms. They are not
-  // in `JAM_LANES`, and a conversion that dropped them would silently close
-  // every open hat the moment a groove swung, and leave every fill stranded on
-  // the snare with its toms gone.
-  for (const lane of JAM_OPTIONAL_LANES) {
+  // The optional rows ride along — the open hat, the two toms, and the
+  // percussionist's ten. They are not in `JAM_LANES`, and a conversion that
+  // dropped them would silently close every open hat the moment a groove
+  // swung, leave every fill stranded on the snare with its toms gone, and
+  // send the percussionist home: a cha-cha set to Shuffle would lose its
+  // güiro and its congas without one line on the screen saying so.
+  for (const lane of JAM_ALL_OPTIONAL_LANES) {
     const row = pattern[lane];
     if (row) out[lane] = toTriplets(row, beatsPerBar);
   }
@@ -56,7 +58,12 @@ function softenOffBeats(pattern: JamPattern, beatsPerBar: number): JamPattern {
   // the closed hat beside it and leaves this row as written. The toms are
   // carried for the same reason turned the other way: a tom in a fill is
   // always a deliberate stroke, never a texture to brush.
-  for (const lane of JAM_OPTIONAL_LANES) {
+  //
+  // The percussion is carried because it is not the drummer's to brush at all.
+  // Swing is what a pair of hands does to the off-beat on a cymbal; the
+  // percussionist's own dynamics are written into their rows, and `intensity`
+  // is the one place anything is allowed to move them.
+  for (const lane of JAM_ALL_OPTIONAL_LANES) {
     const row = pattern[lane];
     if (row) out[lane] = [...row];
   }

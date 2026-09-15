@@ -1,16 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type React from "react";
 import { useTranslation } from "react-i18next";
-import type { JamCustomGroove, JamPattern } from "../../../jam/types";
+import type { JamCustomGroove, JamPattern, JamPercLane } from "../../../jam/types";
 import {
+  PERC_LANES,
   cycleLevel,
   emptyPattern,
   hasToms,
+  isPercLane,
   isShuffleTick,
   lanesFor,
   normalizePattern,
+  percLanesOf,
   setCell,
+  setPercCell,
   tickLabel,
+  withPercLane,
   withToms,
 } from "./editorModel";
 import "../../../styles/jam-editor.css";
@@ -78,6 +83,16 @@ export function GrooveEditor({
   onReset,
 }: GrooveEditorProps) {
   const { t } = useTranslation();
+  /**
+   * What a row is called. The percussionist's ten are named under `jam.perc`
+   * rather than under `jam.editor.lanes`, because the band row on the playing
+   * screen calls them the same things and a translator should be asked for a
+   * güiro once.
+   */
+  const laneName = useCallback(
+    (lane: string) => (isPercLane(lane) ? t(`jam.perc.${lane}`) : t(`jam.editor.lanes.${lane}`)),
+    [t],
+  );
   const { beatsPerBar, ticksPerBeat } = value;
   const beats = Math.max(1, Math.round(beatsPerBar));
   const columns = beats * ticksPerBeat;
@@ -101,6 +116,24 @@ export function GrooveEditor({
    */
   const lanes = useMemo(() => lanesFor(pattern), [pattern]);
   const toms = hasToms(pattern);
+  /**
+   * The percussionist's rows are drawn whenever the pattern has them — a
+   * groove started from a bossa opens with its shaker already on the grid,
+   * which is "reveals the rows the groove uses" in one line and no state.
+   *
+   * What needs state is the PICKER: ten instruments is too many for a row of
+   * buttons somebody did not ask for, so "+ percussion" opens it and it closes
+   * again as soon as one is chosen.
+   */
+  const percLanes = useMemo(() => percLanesOf(pattern), [pattern]);
+  const [picking, setPicking] = useState(false);
+  const canAdd = useMemo(
+    () => PERC_LANES.filter((lane) => !percLanes.includes(lane)),
+    [percLanes],
+  );
+  // The picker closes with the page: the fill's rows are not the bar's, and a
+  // list left open over a grid that changed under it is a list about nothing.
+  useEffect(() => setPicking(false), [page]);
 
   // Roving tabindex: one cell in the grid is tabbable, the arrows move which.
   const [focus, setFocus] = useState({ lane: 0, tick: 0 });
@@ -140,12 +173,13 @@ export function GrooveEditor({
     (laneIndex: number, tick: number, backwards: boolean) => {
       const lane = lanes[laneIndex];
       if (!lane) return;
-      const next = setCell(
-        pattern,
-        lane,
-        tick,
-        cycleLevel(pattern[lane]?.[tick] ?? 0, backwards),
-      );
+      const level = cycleLevel(pattern[lane]?.[tick] ?? 0, backwards);
+      // A percussion row that has just lost its last stroke goes with it; a
+      // drum row never does. `setPercCell` is where that difference lives and
+      // why it is there.
+      const next = isPercLane(lane)
+        ? setPercCell(pattern, lane, tick, level)
+        : setCell(pattern, lane, tick, level);
       if (next === pattern) return;
       commit(next);
     },
@@ -158,6 +192,17 @@ export function GrooveEditor({
     if (next === pattern) return;
     commit(next);
   }, [pattern, commit]);
+
+  /** One instrument off the picker: an empty row, ready to be played on. */
+  const addPerc = useCallback(
+    (lane: JamPercLane) => {
+      setPicking(false);
+      const next = withPercLane(pattern, lane);
+      if (next === pattern) return;
+      commit(next);
+    },
+    [pattern, commit],
+  );
 
   const onGridKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -319,8 +364,8 @@ export function GrooveEditor({
         </div>
 
         {lanes.map((lane, laneIndex) => (
-          <div className="jam-editor__row" key={lane}>
-            <span className="jam-editor__lane-name">{t(`jam.editor.lanes.${lane}`)}</span>
+          <div className="jam-editor__row" key={lane} data-perc={isPercLane(lane) ? "" : undefined}>
+            <span className="jam-editor__lane-name">{laneName(lane)}</span>
             {Array.from({ length: beats }, (_, beat) => (
               <div className="jam-editor__group" key={beat}>
                 {Array.from({ length: ticksPerBeat }, (_, sub) => {
@@ -348,7 +393,7 @@ export function GrooveEditor({
                         focus.lane === laneIndex && focus.tick === tick ? 0 : -1
                       }
                       aria-label={t("jam.editor.cell", {
-                        lane: t(`jam.editor.lanes.${lane}`),
+                        lane: laneName(lane),
                         beat: Math.floor(tick / ticksPerBeat) + 1,
                         tick: (tick % ticksPerBeat) + 1,
                         level: t(`jam.editor.levels.${level}`),
@@ -390,9 +435,42 @@ export function GrooveEditor({
             {t("jam.editor.addToms")}
           </button>
         )}
+        {/* The percussionist. Ten instruments is too many to offer as a row of
+            buttons nobody asked for, so this opens a list and the list closes
+            as soon as one is chosen. The rows themselves need no affordance:
+            a groove that has them draws them. */}
+        {canAdd.length > 0 && (
+          <button
+            type="button"
+            className="jam-editor__text-btn"
+            aria-expanded={picking}
+            onClick={() => setPicking((open) => !open)}
+          >
+            {t("jam.editor.addPerc")}
+          </button>
+        )}
         <span className="jam-editor__spacer" />
         <span className="jam-editor__legend-hint">{t("jam.editor.hint")}</span>
       </div>
+
+      {picking && canAdd.length > 0 && (
+        <div
+          className="jam-editor__perc-picker"
+          role="group"
+          aria-label={t("jam.editor.percPicker")}
+        >
+          {canAdd.map((lane) => (
+            <button
+              key={lane}
+              type="button"
+              className="jam-editor__text-btn"
+              onClick={() => addPerc(lane)}
+            >
+              {laneName(lane)}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

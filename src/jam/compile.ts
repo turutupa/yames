@@ -35,7 +35,7 @@ import { keysLineFor } from "./keysline";
 import { practiceConfigFrom } from "./practice";
 import { applyIntensity } from "./vibesContract";
 import type { ShapedGroove } from "./vibesContract";
-import { JAM_INTENSITY_GAIN, JAM_LANES, JAM_OPTIONAL_LANES } from "./types";
+import { JAM_INTENSITY_GAIN, JAM_LANES, JAM_OPTIONAL_LANES, JAM_PERC_LANES } from "./types";
 import type { Key } from "./harmony";
 import type {
   Jam,
@@ -45,16 +45,17 @@ import type {
   JamLevel,
   JamMix,
   JamPattern,
+  JamPercLane,
   JamBassLine,
 } from "./types";
 
 /** A jam with no readable key is read as C major rather than as no key. */
 const DEFAULT_KEY: Key = { root: 0, mode: "major" };
 
-export type JamBand = { drums: boolean; bass: boolean; keys?: boolean };
+export type JamBand = { drums: boolean; bass: boolean; keys?: boolean; perc?: boolean };
 
 /** Drums and nobody else, for a caller that has no lineup to hand. */
-const DRUMS_ONLY: JamBand = { drums: true, bass: false, keys: false };
+const DRUMS_ONLY: JamBand = { drums: true, bass: false, keys: false, perc: false };
 
 export type JamCompileOptions = {
   /**
@@ -242,6 +243,83 @@ function spliceFill(bar: JamPattern, fill: JamPattern, from: number): JamPattern
     const after = rowOr(fill, lane, length);
     for (let t = from; t < length; t += 1) row[t] = after[t];
     if (row.some((level) => level !== 0)) out[lane] = row;
+  }
+  // The percussion crosses the seam UNSPLICED, and that is the one asymmetry
+  // in this function. A drum fill is the drummer leaving the groove; the
+  // percussionist is a second player and they do not leave with them — a
+  // shaker that stopped for two beats every time round the form is the exact
+  // hole this pass exists to fill. So the bar's rows come through whole, and
+  // the fill's (there are none: `fillOver` writes toms, not congas) are
+  // ignored.
+  for (const lane of JAM_PERC_LANES) {
+    const row = bar[lane];
+    if (row && row.some((level) => level !== 0)) out[lane] = [...row];
+  }
+  return out;
+}
+
+/**
+ * The percussionist's rows off a pattern, or null when they are not playing on
+ * it.
+ *
+ * Only the rows with a stroke in them: an empty row is a lane the engine reads
+ * past on every tick of every bar to learn nothing, which is the same reason
+ * `silenced` drops the kit's optional rows rather than zeroing them.
+ */
+function percRowsOf(pattern: JamPattern): Partial<Record<JamPercLane, JamLevel[]>> | null {
+  let out: Partial<Record<JamPercLane, JamLevel[]>> | null = null;
+  for (const lane of JAM_PERC_LANES) {
+    const row = pattern[lane];
+    if (!row || !row.some((level) => level !== 0)) continue;
+    (out ??= {})[lane] = [...row];
+  }
+  return out;
+}
+
+/**
+ * The same pattern with the percussion rows taken off, or the same object when
+ * it had none.
+ *
+ * Needed because the groove's bar arrives here WITH its rows on it — that is
+ * where they are written — and the question of whether they sound is decided
+ * one layer up, by the record and the arrangement. So the compiler takes them
+ * off unconditionally and puts back the ones that are playing, rather than
+ * leaving a path (a loop, where nothing reshapes the drums) on which they
+ * reach the engine because nobody removed them.
+ *
+ * The same object where nothing changes, so a re-render that recompiles does
+ * not hand the engine a new table that is the same table.
+ */
+function withoutPerc(pattern: JamPattern): JamPattern {
+  if (!JAM_PERC_LANES.some((lane) => pattern[lane] !== undefined)) return pattern;
+  const out = { ...pattern };
+  for (const lane of JAM_PERC_LANES) delete out[lane];
+  return out;
+}
+
+/**
+ * What the percussionist is playing on this bar, as names for the band row —
+ * `["shaker", "congas"]`, `["tambourine"]`.
+ *
+ * The two congas are one instrument to a listener and so are the two bongos,
+ * so they collapse to one name each. The row is a line of prose ("shaker and
+ * congas"), not an inventory, and "high conga, low conga" is the second thing
+ * and not the first.
+ *
+ * Returns ids, not text: the caller translates them, because a güiro is a
+ * güiro in Spanish and a shaker has its own word in half of the fifteen.
+ */
+export function percussionVoices(pattern: JamPattern | null | undefined): string[] {
+  if (!pattern) return [];
+  const out: string[] = [];
+  for (const lane of JAM_PERC_LANES) {
+    if (!pattern[lane]?.some((level) => level !== 0)) continue;
+    const name = lane.startsWith("conga")
+      ? "congas"
+      : lane.startsWith("bongo")
+        ? "bongos"
+        : lane;
+    if (!out.includes(name)) out.push(name);
   }
   return out;
 }
@@ -517,6 +595,10 @@ export function jamMix(jam: Jam): JamMix {
     drums: clamp(jam.mix?.drums),
     bass: clamp(jam.mix?.bass),
     keys: clamp(jam.mix?.keys),
+    // The percussionist's fader. A record saved before there was one has no
+    // number here and reads as 1.0, which is the same courtesy every lane
+    // above gets and the reason `clamp` takes `undefined` at all.
+    perc: clamp(jam.mix?.perc),
   };
 }
 
@@ -565,7 +647,35 @@ export function compileJam(jam: Jam, options: JamCompileOptions = {}): JamEngine
   const drumsOff = !jamBand(jam, options.lineup).drums;
   const arrangedBar = arranged ? drumsForMoment(groove.bar, moment) : groove.bar;
   const played = drumsOff ? silenced(arrangedBar) : arrangedBar;
-  const bar = arranged && moment.crash && !drumsOff ? withCrash(played) : played;
+  const crashed = arranged && moment.crash && !drumsOff ? withCrash(played) : played;
+  /**
+   * The percussionist, put back on top of whatever the drummer is doing.
+   *
+   * Everything above this line reshapes the KIT — `drumsForMoment` rebuilds the
+   * table from the five lanes and the kit's three optional rows, so by here the
+   * percussion is gone from it — and that is deliberate rather than a leak to
+   * patch. A breakdown takes the snare, the ride and the toms off the drummer;
+   * it does not take the congas off the percussionist, and the only way for one
+   * function to express both is for the percussion to be a layer laid back on
+   * after the kit has been shaped (BRIEF: "a percussionist is not a drum kit").
+   *
+   * The rows come from `groove.bar` — the groove as the intensity plays it,
+   * before the arrangement touched the kit — because the percussionist plays
+   * their bar whatever the drummer is doing on top of it.
+   *
+   * Three things have to be true for them to sound, and each is somebody
+   * different's answer: the record has hired one (`band.perc`), the drummer is
+   * playing at all (a percussion-only band is not a thing this mode offers),
+   * and this bar is not one of the two the arrangement silences them on.
+   */
+  const percHired = jamBand(jam, options.lineup).perc === true;
+  const percOn = percHired && !drumsOff && (!arranged || moment.perc === "full");
+  const percussion = percOn ? percRowsOf(groove.bar) : null;
+  // Off first, then back on. Under `loop` nothing above this line reshapes the
+  // drums at all, so the groove's own rows would otherwise arrive at the
+  // engine having been decided by nobody.
+  const kit = withoutPerc(crashed);
+  const bar = percussion ? { ...kit, ...percussion } : kit;
   /**
    * The engine's own fill machinery, off under an arrangement.
    *
@@ -576,12 +686,27 @@ export function compileJam(jam: Jam, options: JamCompileOptions = {}): JamEngine
    * would play two fills over each other and crash on downbeats the plan said
    * nothing about. One place decides; here it is said once.
    */
-  const barLineFill =
+  const writtenFill =
     !arranged && jam.fills && groove.fill
       ? drumsOff
         ? silenced(groove.fill)
         : groove.fill
       : null;
+  /**
+   * The fill the engine lands on the chorus's last bar — with the percussion
+   * still under it.
+   *
+   * A fill is a bar like any other as far as the percussionist is concerned:
+   * the drummer goes round the toms and the shaker keeps going, because the
+   * shaker is what the fill is played against. Without this the percussion
+   * would drop out for one whole bar every time round the form, which is the
+   * single most audible thing a layer like this can get wrong.
+   *
+   * `spliceFill` does the same job for the arranged modes, where a fill is
+   * written into the bar rather than sent on its own row.
+   */
+  const barLineFill =
+    writtenFill && percussion ? { ...writtenFill, ...percussion } : writtenFill;
   /**
    * Does the drummer play this jam IN?
    *

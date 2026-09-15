@@ -4,7 +4,7 @@
 import { describe, expect, it } from "vitest";
 import { applyFeel } from "./feel";
 import { GROOVES, grooveById, grooveTickCount } from "./grooves";
-import { JAM_LANES } from "./types";
+import { JAM_LANES, JAM_PERC_LANES } from "./types";
 import type { JamFeel } from "./types";
 
 const FEELS: JamFeel[] = ["straight", "shuffle", "swing"];
@@ -109,5 +109,48 @@ describe("applyFeel", () => {
     expect(swung.fill.tomLo).toHaveLength(ticks);
     expect(swung.fill.tomHi?.slice(9)).toEqual([2, 0, 0]);
     expect(swung.fill.tomLo?.slice(9)).toEqual([0, 0, 4]);
+  });
+
+  it("takes the percussionist along when a groove swings", () => {
+    // The same bug as the toms, one player further out. A cha-cha set to
+    // Shuffle that arrived with no güiro and no congas would have lost them
+    // here, silently, with nothing on the screen saying so.
+    const straight = grooveById("chaCha");
+    const swung = applyFeel(straight, "shuffle");
+    const ticks = grooveTickCount(swung);
+    for (const lane of ["guiro", "congaHi", "congaLo"] as const) {
+      expect(swung.bar[lane], lane).toHaveLength(ticks);
+      expect(swung.bar[lane]!.some((level) => level !== 0), lane).toBe(true);
+    }
+    // The tumbao's two open tones were on four and the "and" of four — the
+    // last two eighths — and land on the last beat's first and third triplet.
+    expect(swung.bar.congaHi?.slice(9)).toEqual([2, 0, 2]);
+  });
+
+  it("does not brush the percussion the way swing brushes a hat", () => {
+    // Swing is what a pair of hands does to a cymbal's off-beat. A conga's
+    // dynamics are written into its row, and `intensity` is the one thing
+    // allowed to move them.
+    // Motown: the hat and the tambourine play the same eighths, which is the
+    // cleanest possible statement of the rule — one row is brushed and the
+    // other, note for note identical, is not.
+    const straight = grooveById("motown");
+    const shuffled = applyFeel(straight, "shuffle");
+    const swung = applyFeel(straight, "swing");
+    expect(shuffled.bar.tambourine).toEqual(shuffled.bar.hat);
+    expect(swung.bar.tambourine).toEqual(shuffled.bar.tambourine);
+    expect(swung.bar.hat).not.toEqual(shuffled.bar.hat);
+  });
+
+  it("never invents a percussion row for a groove that has none", () => {
+    for (const g of GROOVES) {
+      for (const feel of FEELS) {
+        const out = applyFeel(g, feel);
+        for (const lane of JAM_PERC_LANES) {
+          if (g.bar[lane]) continue;
+          expect(out.bar[lane], `${g.id} ${feel} ${lane}`).toBeUndefined();
+        }
+      }
+    }
   });
 });

@@ -11,6 +11,14 @@ import type { JamLane, JamLevel, JamPattern } from "../../jam/types";
  *
  * The rows are in drum-notation order, high to low, which is the order anyone
  * who has seen a drum chart already reads.
+ *
+ * **Three rows, and the percussion is not one of them.** Fifty-eight grooves
+ * carry a percussionist (fifth pass) and none of it is drawn here, on purpose:
+ * a card is a picture of the DRUMS, three dots high, read at a glance in a
+ * wall of a hundred and fifteen. A shaker's sixteen sixteenths across a fourth
+ * row would be the loudest thing on every Latin card and would say the least —
+ * every one of them has one. What the percussion is doing is on the band row,
+ * where there is a line of prose to say it in.
  */
 const ROWS: readonly { lane: JamLane; alt?: JamLane }[] = [
   // The cymbal line: hats, unless the groove is a ride groove.

@@ -393,6 +393,7 @@
       "drums": "Batterie",
       "bass": "Basse",
       "keys": "Clavier",
+      "perc": "Percussions",
       "you": "Toi",
       "youPlay": "{{instrument}}",
       "out": "sortie",
@@ -470,7 +471,9 @@
         "3": "triolets",
         "4": "doubles-croches",
         "6": "sextolets"
-      }
+      },
+      "addPerc": "+ percussions",
+      "percPicker": "Ajouter un instrument de percussion"
     },
     "takes": {
       "label": "Prises",
@@ -605,6 +608,21 @@
       "check": "{{count}} à vérifier : {{list}}",
       "check_one": "{{count}} à vérifier : {{list}}",
       "check_other": "{{count}} à vérifier : {{list}}"
+    },
+    "perc": {
+      "shaker": "shaker",
+      "tambourine": "tambourin",
+      "cowbell": "cloche",
+      "cabasa": "cabasa",
+      "claves": "claves",
+      "guiro": "güiro",
+      "congaHi": "conga aiguë",
+      "congaLo": "conga grave",
+      "bongoHi": "bongo aigu",
+      "bongoLo": "bongo grave",
+      "congas": "congas",
+      "bongos": "bongos",
+      "silent": "rien dans ce groove"
     }
   },
   "scale": {

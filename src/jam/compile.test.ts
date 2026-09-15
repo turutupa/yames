@@ -4,8 +4,15 @@
 // like a metronome — so the length check runs over every starter jam and
 // every combination of groove and feel.
 import { describe, expect, it } from "vitest";
-import { compileJam, jamGrooveFitsMeter, jamKey, jamMeter, type JamBand } from "./compile";
-import { GROOVES, ruleGroove } from "./grooves";
+import {
+  compileJam,
+  jamGrooveFitsMeter,
+  jamKey,
+  jamMeter,
+  percussionVoices,
+  type JamBand,
+} from "./compile";
+import { GROOVES, grooveById, ruleGroove } from "./grooves";
 import { lastVoicing } from "./keysline";
 import { withChordAt } from "./progression";
 import { STARTER_JAMS, createJam } from "./jams";
@@ -488,20 +495,35 @@ describe("the keys, the mix and the sticks", () => {
   });
 
   it("sends a mix of ones when the record has none", () => {
-    expect(compileJam(loopJam("x")).mix).toEqual({ drums: 1, bass: 1, keys: 1 });
+    expect(compileJam(loopJam("x")).mix).toEqual({ drums: 1, bass: 1, keys: 1, perc: 1 });
   });
 
   it("sends the mix the record carries, clamped", () => {
-    expect(compileJam(loopJam("x", { mix: { drums: 0.4, bass: 1.2, keys: 0 } })).mix).toEqual({
+    expect(
+      compileJam(loopJam("x", { mix: { drums: 0.4, bass: 1.2, keys: 0, perc: 0.6 } })).mix,
+    ).toEqual({
       drums: 0.4,
       bass: 1.2,
       keys: 0,
+      perc: 0.6,
     });
-    expect(compileJam(loopJam("x", { mix: { drums: -1, bass: 9, keys: 1 } })).mix).toEqual({
+    expect(
+      compileJam(loopJam("x", { mix: { drums: -1, bass: 9, keys: 1, perc: 4 } })).mix,
+    ).toEqual({
       drums: 0,
       bass: 1.5,
       keys: 1,
+      perc: 1.5,
     });
+  });
+
+  it("reads a record written before the percussionist as a percussion fader of one", () => {
+    // The lane the record has never heard of is 1.0, not 0 — the same courtesy
+    // every other lane gets from an absent `mix`.
+    const mix = compileJam(
+      loopJam("x", { mix: { drums: 0.5, bass: 0.5, keys: 0.5 } as never }),
+    ).mix;
+    expect(mix?.perc).toBe(1);
   });
 
   it("counts in with the beep unless the sticks were asked for", () => {
@@ -533,3 +555,119 @@ function emptyLanes(length: number): JamPattern {
   for (const lane of JAM_LANES) out[lane] = new Array(length).fill(0);
   return out;
 }
+
+// ---------------------------------------------------------------------------
+// The percussionist (fifth pass)
+// ---------------------------------------------------------------------------
+
+/** A looping bossa — the shortest way to a groove with percussion rows on it. */
+function percJam(fields: NewJamFields = {}): Jam {
+  return loopJam("perc", {
+    grooveId: "bossa",
+    band: { drums: true, bass: false, keys: false, perc: true },
+    ...fields,
+  });
+}
+
+describe("the percussionist reaches the engine", () => {
+  it("sends the groove's percussion rows when the band has one", () => {
+    const config = compileJam(percJam());
+    expect(config.bar.shaker).toHaveLength(16);
+    expect(config.bar.shaker!.some((level) => level !== 0)).toBe(true);
+  });
+
+  it("sends no percussion rows at all when nobody was hired", () => {
+    // Absent, not zeroed. A row of zeros is a lane the engine reads past on
+    // every tick of every bar to learn nothing.
+    const config = compileJam(percJam({ band: { drums: true, bass: false, keys: false } }));
+    expect(config.bar.shaker).toBeUndefined();
+    expect(config.bar.claves).toBeUndefined();
+  });
+
+  it("reads a record saved before the percussionist as no percussionist", () => {
+    // The compatibility promise: a bossa that played as a kit alone goes on
+    // playing as a kit alone until somebody turns the row on.
+    const config = compileJam(loopJam("old", { grooveId: "bossa" }));
+    expect(config.bar.shaker).toBeUndefined();
+  });
+
+  it("sends nothing for a groove that has no percussion written for it", () => {
+    // The flag hires the player; the groove is what they play. Over a thrash
+    // bar there is nothing to play, and a silent row is not the answer.
+    const config = compileJam(percJam({ grooveId: "metalThrash" }));
+    expect(config.bar.shaker).toBeUndefined();
+  });
+
+  it("silences the percussion with the drummer", () => {
+    // "The percussion plays when the drums play." Muting the drums is not a
+    // mix decision, it is the band having no drummer, and a percussionist
+    // alone is not a thing this mode offers.
+    const config = compileJam(
+      percJam({ band: { drums: false, bass: true, keys: false, perc: true } }),
+    );
+    expect(config.bar.shaker).toBeUndefined();
+  });
+
+  it("keeps the percussion under the bar-line fill", () => {
+    // The one artefact this layer must not have: a shaker that stops for a
+    // whole bar every time round the form.
+    const config = compileJam(percJam({ fills: true }));
+    expect(config.fill).not.toBeNull();
+    expect(config.fill!.shaker).toEqual(config.bar.shaker);
+  });
+
+  it("keeps the percussion through a breakdown, where the kit drops out", () => {
+    // The contract, in one assertion. `breakdownEvery: 2` and chorus two puts
+    // the first half of the form in a breakdown: the snare goes, the shaker
+    // does not.
+    const jam = createJam("build", {
+      grooveId: "bossa",
+      band: { drums: true, bass: false, keys: false, perc: true },
+      arrangement: { mode: "build", breakdownEvery: 2 },
+    });
+    const config = compileJam(jam, { chorus: 2, formBar: 0 });
+    expect(config.bar.snare.every((level) => level === 0)).toBe(true);
+    expect(config.bar.shaker!.some((level) => level !== 0)).toBe(true);
+  });
+
+  it("stops the percussion on a stop-time bar", () => {
+    // Stop-time is the silence between the hits, and a shaker running through
+    // it is the one player who could ruin the gesture.
+    const jam = createJam("build", {
+      grooveId: "rock8",
+      band: { drums: true, bass: false, keys: false, perc: true },
+      form: { kind: "blues12", bars: 12 },
+      arrangement: { mode: "build", breakdownEvery: 0 },
+    });
+    // Rock stop-times on the last bar of every second chorus (see
+    // `arrangement.ts`); the groove below it is one that HAS percussion.
+    const stopping = compileJam({ ...jam, grooveId: "bluesRhumba" }, { chorus: 2, formBar: 11 });
+    expect(stopping.bar.tambourine).toBeUndefined();
+    const playing = compileJam({ ...jam, grooveId: "bluesRhumba" }, { chorus: 2, formBar: 10 });
+    expect(playing.bar.tambourine!.some((level) => level !== 0)).toBe(true);
+  });
+
+  it("names what the percussionist is playing, congas as one instrument", () => {
+    // What the band row reads out. The two congas and the two bongos collapse
+    // to one name each, because they are one instrument to a listener and the
+    // row is a line of prose rather than an inventory.
+    expect(percussionVoices(grooveById("bossa").bar)).toEqual(["shaker"]);
+    expect(percussionVoices(grooveById("chaCha").bar)).toEqual(["guiro", "congas"]);
+    expect(percussionVoices(grooveById("latinSon").bar)).toEqual([
+      "claves",
+      "guiro",
+      "bongos",
+    ]);
+    expect(percussionVoices(grooveById("metalThrash").bar)).toEqual([]);
+    expect(percussionVoices(null)).toEqual([]);
+  });
+
+  it("softens the shaker and leaves the clave's accents alone", () => {
+    // `intensity.ts`'s rule, seen from the compiler: the timekeeping rows
+    // close like a hat, the figures keep their shape.
+    const soft = compileJam(percJam({ grooveId: "latinBossa23", intensity: "soft" }));
+    const normal = compileJam(percJam({ grooveId: "latinBossa23" }));
+    expect(soft.bar.shaker).not.toEqual(normal.bar.shaker);
+    expect(soft.bar.claves).toEqual(normal.bar.claves);
+  });
+});
