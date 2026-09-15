@@ -2420,8 +2420,9 @@ pub fn tts_set_voice(tts: State<'_, SharedTts>, voice: String) {
 }
 
 /// Set the coach voice playback volume (0.0..=1.0). Stored on the TtsEngine
-/// and applied to the next utterance via the rodio `Sink`'s gain (it was
-/// `afplay -v` before speech playback moved in-process).
+/// and scaled into the next utterance as it is decoded, before the buffer
+/// ever reaches the audio callback — so the click pays nothing for it. It
+/// was `afplay -v`, then rodio's `Sink` gain; see `speech_out`.
 #[tauri::command]
 pub fn tts_set_volume(tts: State<'_, SharedTts>, volume: f32) {
     if let Ok(mut engine) = tts.lock() {
