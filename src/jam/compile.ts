@@ -298,19 +298,6 @@ function withoutPerc(pattern: JamPattern): JamPattern {
 }
 
 /**
- * Does this pattern have a percussionist written into it?
- *
- * The band row on the playing screen and the switch in the sheet both ask it:
- * a Percussion row over a thrash groove would be a player with nothing to
- * play, and a jam that has turned percussion ON is a different question,
- * answered by the record (`jam.band.perc`) and not by this.
- */
-export function hasPercussion(pattern: JamPattern | null | undefined): boolean {
-  if (!pattern) return false;
-  return JAM_PERC_LANES.some((lane) => pattern[lane]?.some((level) => level !== 0));
-}
-
-/**
  * What the percussionist is playing on this bar, as names for the band row —
  * `["shaker", "congas"]`, `["tambourine"]`.
  *

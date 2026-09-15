@@ -4,8 +4,15 @@
 // like a metronome — so the length check runs over every starter jam and
 // every combination of groove and feel.
 import { describe, expect, it } from "vitest";
-import { compileJam, jamGrooveFitsMeter, jamKey, jamMeter, type JamBand } from "./compile";
-import { GROOVES, ruleGroove } from "./grooves";
+import {
+  compileJam,
+  jamGrooveFitsMeter,
+  jamKey,
+  jamMeter,
+  percussionVoices,
+  type JamBand,
+} from "./compile";
+import { GROOVES, grooveById, ruleGroove } from "./grooves";
 import { lastVoicing } from "./keysline";
 import { withChordAt } from "./progression";
 import { STARTER_JAMS, createJam } from "./jams";
@@ -638,6 +645,21 @@ describe("the percussionist reaches the engine", () => {
     expect(stopping.bar.tambourine).toBeUndefined();
     const playing = compileJam({ ...jam, grooveId: "bluesRhumba" }, { chorus: 2, formBar: 10 });
     expect(playing.bar.tambourine!.some((level) => level !== 0)).toBe(true);
+  });
+
+  it("names what the percussionist is playing, congas as one instrument", () => {
+    // What the band row reads out. The two congas and the two bongos collapse
+    // to one name each, because they are one instrument to a listener and the
+    // row is a line of prose rather than an inventory.
+    expect(percussionVoices(grooveById("bossa").bar)).toEqual(["shaker"]);
+    expect(percussionVoices(grooveById("chaCha").bar)).toEqual(["guiro", "congas"]);
+    expect(percussionVoices(grooveById("latinSon").bar)).toEqual([
+      "claves",
+      "guiro",
+      "bongos",
+    ]);
+    expect(percussionVoices(grooveById("metalThrash").bar)).toEqual([]);
+    expect(percussionVoices(null)).toEqual([]);
   });
 
   it("softens the shaker and leaves the clave's accents alone", () => {
