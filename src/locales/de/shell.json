@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "Metronom",
     "setlist": "Setlist",
-    "drill": "Tempo-Training"
+    "drill": "Tempo-Training",
+    "jam": "Jam"
   },
   "tooltip": {
     "zen": "Zen",
@@ -24,6 +25,7 @@
     "title": "Presets",
     "titleDrill": "Trainings",
     "titleSetlist": "Setlists",
+    "titleJam": "Jams",
     "saveCurrent": "Aktuelle Einstellungen speichern",
     "search": "Bibliothek durchsuchen",
     "searchPlaceholder": "Suchen…",

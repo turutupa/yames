@@ -1,0 +1,270 @@
+/*
+ * Chord diagrams, the key's chords, and one chord's shapes.
+ *
+ * Everything here is drawn out of the app's own custom properties, so the
+ * boxes follow whatever theme is on: --accent for the chord you are on,
+ * --text-primary for the dots, --text-secondary and --border for the neck
+ * itself, --bg-card behind it all. No colour is written out longhand except
+ * where it is a transparency over one of those.
+ */
+
+/* --- the box ------------------------------------------------------------ */
+
+.chord-diagram {
+  display: inline-flex;
+  line-height: 0;
+}
+
+.chord-diagram svg {
+  max-width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.chord-diagram-fret,
+.chord-diagram-string {
+  stroke: var(--border);
+  stroke-width: 0.8;
+}
+
+.chord-diagram-string {
+  stroke: var(--text-faint, var(--border));
+}
+
+.chord-diagram-nut {
+  stroke: var(--text-secondary);
+  stroke-width: 3;
+  stroke-linecap: square;
+}
+
+.chord-diagram-dot,
+.chord-diagram-barre {
+  fill: var(--text-primary);
+}
+
+.chord-diagram-open {
+  fill: none;
+  stroke: var(--text-secondary);
+  stroke-width: 1;
+}
+
+.chord-diagram-mute {
+  fill: var(--text-muted);
+  font-size: 8px;
+  font-weight: 600;
+}
+
+.chord-diagram-finger {
+  fill: var(--bg-card);
+  font-size: 6px;
+  font-weight: 700;
+}
+
+.chord-diagram-name {
+  fill: var(--text-primary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.chord-diagram-basefret {
+  fill: var(--text-secondary);
+  font-size: 8px;
+}
+
+/* The chord the jam is on, or the shape the player picked. */
+.chord-diagram.is-selected .chord-diagram-dot,
+.chord-diagram.is-selected .chord-diagram-barre {
+  fill: var(--accent);
+}
+
+.chord-diagram.is-selected .chord-diagram-name {
+  fill: var(--accent);
+}
+
+.chord-diagram.is-selected .chord-diagram-finger {
+  fill: var(--accent-text, var(--bg-card));
+}
+
+/* --- the chords of the key ---------------------------------------------- */
+
+.key-chords {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.key-chords-row {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.key-chord {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 2px 3px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm, 8px);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.key-chord:hover {
+  background: var(--bg-raised);
+}
+
+/* The roles, tinted rather than spelled out: where the music rests, the
+ * step away from it, the pull back, and everything borrowed. */
+.key-chord-home {
+  border-bottom-color: var(--accent-subtle);
+}
+
+.key-chord-subdominant {
+  border-bottom-color: var(--accent-2-subtle);
+}
+
+.key-chord-dominant {
+  border-bottom-color: var(--accent-glow);
+}
+
+.key-chord-passing {
+  border-bottom-color: var(--border);
+}
+
+.key-chord.is-current {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.key-chord-degree {
+  font-size: 10px;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+}
+
+.key-chord.is-current .key-chord-degree {
+  color: var(--accent);
+}
+
+.key-chord-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.key-chords-sevenths {
+  flex: 0 0 auto;
+  align-self: center;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 8px);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.key-chords-sevenths.is-on {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+/* --- one chord's shapes -------------------------------------------------- */
+
+.chord-shapes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.chord-shapes-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.chord-shapes-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.chord-shapes-next {
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 8px);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.chord-shapes-next:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.chord-shapes-next:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Scrolls sideways on purpose: shapes run up the neck, and a grid of them
+ * is the wall of diagrams this feature exists to avoid. */
+.chord-shapes-scroll {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 2px 0 4px;
+  scroll-snap-type: x proximity;
+}
+
+.chord-shape {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 5px 4px 4px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm, 8px);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  scroll-snap-align: center;
+}
+
+.chord-shape:hover {
+  background: var(--bg-raised);
+}
+
+.chord-shape.is-selected {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.chord-shape-size {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.chord-shape-where {
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.chord-shape.is-selected .chord-shape-size {
+  color: var(--accent);
+}

@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "メトロノーム",
     "setlist": "セットリスト",
-    "drill": "テンポ練習"
+    "drill": "テンポ練習",
+    "jam": "ジャム"
   },
   "tooltip": {
     "zen": "禅",
@@ -24,6 +25,7 @@
     "title": "プリセット",
     "titleDrill": "テンポ練習",
     "titleSetlist": "セットリスト",
+    "titleJam": "ジャム",
     "saveCurrent": "現在の設定を保存",
     "search": "ライブラリを検索",
     "searchPlaceholder": "検索…",

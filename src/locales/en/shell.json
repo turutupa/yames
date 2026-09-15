@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "Metronome",
     "setlist": "Setlist",
-    "drill": "Drill"
+    "drill": "Drill",
+    "jam": "Jam"
   },
   "tooltip": {
     "zen": "Zen",
@@ -24,6 +25,7 @@
     "title": "Presets",
     "titleDrill": "Drills",
     "titleSetlist": "Setlists",
+    "titleJam": "Jams",
     "saveCurrent": "Save current settings",
     "search": "Search the library",
     "searchPlaceholder": "Search...",

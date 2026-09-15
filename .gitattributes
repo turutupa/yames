@@ -1,0 +1,23 @@
+# `core.autocrlf` is true on the machine these kits are rendered on, and git
+# decides text-or-binary by sniffing the first few KB. A WAV whose header and
+# leading samples happen to carry no NUL byte can be sniffed as text, and then
+# every 0x0A in the audio becomes 0x0D 0x0A on checkout: the file grows, the
+# chunk length in the header stops matching the data, and the kit either fails
+# to load or plays as noise. Say it outright instead of trusting the sniff.
+*.wav binary
+*.flac binary
+*.ogg binary
+*.mp3 binary
+
+# Same reasoning for the images and fonts the app ships.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.icns binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.pdf binary

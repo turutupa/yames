@@ -69,7 +69,10 @@ interface SettingsViewProps {
   audioOutputDevices: AudioOutputDevice[];
   setAudioOutputDevices: Dispatch<SetStateAction<AudioOutputDevice[]>>;
   selectedOutputDevice: string;
-  setSelectedOutputDevice: Dispatch<SetStateAction<string>>;
+  outputPair: number;
+  selectOutputPair: (pair: number) => void;
+  selectOutputDevice: (deviceName: string) => void;
+  outputPairFellBack: boolean;
   evaluation: Evaluation;
   midi: UseMidiReturn;
   onOpenInputTest: () => void;
@@ -97,6 +100,9 @@ interface SettingsViewProps {
   voiceDiagnostics: VoiceDiagnostic[];
   instrument: string;
   setInstrument: Dispatch<SetStateAction<string>>;
+  /** Spoken cues on the Jam tab — a preference now (JAM_UX_DECISIONS A4). */
+  jamCues: boolean;
+  setJamCues: Dispatch<SetStateAction<boolean>>;
   onStartDownload: (tier: ModelTier) => void;
   onRequestDownload: (tier: ModelTier) => void;
 
@@ -158,7 +164,10 @@ export function SettingsView({
   audioOutputDevices,
   setAudioOutputDevices,
   selectedOutputDevice,
-  setSelectedOutputDevice,
+  outputPair,
+  selectOutputPair,
+  selectOutputDevice,
+  outputPairFellBack,
   evaluation,
   midi,
   onOpenInputTest,
@@ -182,6 +191,8 @@ export function SettingsView({
   voiceDiagnostics,
   instrument,
   setInstrument,
+  jamCues,
+  setJamCues,
   onStartDownload,
   onRequestDownload,
   widgetMode,
@@ -252,7 +263,10 @@ export function SettingsView({
         audioOutputDevices={audioOutputDevices}
         setAudioOutputDevices={setAudioOutputDevices}
         selectedOutputDevice={selectedOutputDevice}
-        setSelectedOutputDevice={setSelectedOutputDevice}
+        outputPair={outputPair}
+        selectOutputPair={selectOutputPair}
+        selectOutputDevice={selectOutputDevice}
+        outputPairFellBack={outputPairFellBack}
         evaluation={evaluation}
         midi={midi}
         onOpenInputTest={onOpenInputTest}
@@ -280,6 +294,8 @@ export function SettingsView({
         voiceDiagnostics={voiceDiagnostics}
         instrument={instrument}
         setInstrument={setInstrument}
+        jamCues={jamCues}
+        setJamCues={setJamCues}
         onStartDownload={onStartDownload}
         onRequestDownload={onRequestDownload}
       />

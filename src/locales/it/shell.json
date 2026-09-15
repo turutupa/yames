@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "Metronomo",
     "setlist": "Scaletta",
-    "drill": "Rampa"
+    "drill": "Rampa",
+    "jam": "Jam"
   },
   "tooltip": {
     "zen": "Zen",
@@ -24,6 +25,7 @@
     "title": "Preset",
     "titleDrill": "Rampe",
     "titleSetlist": "Scalette",
+    "titleJam": "Jam",
     "saveCurrent": "Salva impostazioni attuali",
     "search": "Cerca nella libreria",
     "searchPlaceholder": "Cerca…",

@@ -1,0 +1,69 @@
+{
+  "id": "studio",
+  "name": "Studio",
+  "credit": "DRSKit by the DrumGizmo project, CC BY 4.0",
+  "licence": "CC-BY-4.0",
+  "rate": 48000,
+  "channels": 2,
+  "voices": {
+    "kick": {
+      "layers": 4,
+      "rr": 3,
+      "trim_db": -3.6
+    },
+    "snare": {
+      "layers": 4,
+      "rr": 3,
+      "trim_db": 0.0
+    },
+    "rim": {
+      "layers": 2,
+      "rr": 2,
+      "trim_db": -4.6
+    },
+    "hat": {
+      "layers": 4,
+      "rr": 3,
+      "trim_db": -11.1
+    },
+    "hat_open": {
+      "layers": 3,
+      "rr": 2,
+      "trim_db": -13.4,
+      "choked_by": [
+        "hat",
+        "hat_pedal"
+      ]
+    },
+    "hat_pedal": {
+      "layers": 2,
+      "rr": 2,
+      "trim_db": -14.5
+    },
+    "ride": {
+      "layers": 4,
+      "rr": 3,
+      "trim_db": -10.1
+    },
+    "ride_bell": {
+      "layers": 2,
+      "rr": 2,
+      "trim_db": -7.8
+    },
+    "crash": {
+      "layers": 3,
+      "rr": 2,
+      "trim_db": -4.6
+    },
+    "tom_hi": {
+      "layers": 3,
+      "rr": 2,
+      "trim_db": -0.1
+    },
+    "tom_lo": {
+      "layers": 3,
+      "rr": 2,
+      "trim_db": -3.0
+    }
+  }
+}

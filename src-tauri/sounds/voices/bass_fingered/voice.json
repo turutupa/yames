@@ -1,0 +1,20 @@
+{
+  "id": "bass_fingered",
+  "name": "Fingered bass",
+  "credit": "Black And Blue Basses \u2014 Karoryfer Samples",
+  "licence": "CC0-1.0",
+  "rate": 48000,
+  "channels": 1,
+  "layers": 3,
+  "rr": 2,
+  "trim_db": 0.0,
+  "release_ms": 250,
+  "notes": [
+    30,
+    35,
+    40,
+    45,
+    50,
+    55
+  ]
+}

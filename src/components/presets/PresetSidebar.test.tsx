@@ -15,6 +15,7 @@ import { render, screen, fireEvent, waitFor, within } from "@testing-library/rea
 import { createRef } from "react";
 import { PresetSidebar, type PresetSidebarHandle } from "./PresetSidebar";
 import { setInvokeResponse, DEFAULT_TEST_STATE } from "../../test/mocks";
+import { STARTER_JAMS } from "../../jam/jams";
 import type { Setlist, Preset } from "../../types";
 
 const makePreset = (overrides: Partial<Preset> = {}): Preset => ({
@@ -278,5 +279,207 @@ describe("PresetSidebar", () => {
     expect(screen.queryByLabelText("New setlist")).toBeNull();
     fireEvent.click(add);
     await waitFor(() => expect(document.querySelector(".preset-sidebar-name-input")).not.toBeNull());
+  });
+
+  it("offers rename, duplicate and delete on a right-click", async () => {
+    // The same three items in the same order as a jam's menu. A drummer who
+    // has duplicated a jam should not have to find out whether a setlist can
+    // be duplicated by trying it.
+    setInvokeResponse("list_presets", () => []);
+    const onDuplicateSetlist = vi.fn();
+    const onDeleteSetlist = vi.fn();
+    render(
+      <PresetSidebar
+        {...baseProps}
+        view="setlist"
+        setlists={[makeSetlist()]}
+        onLoadSetlist={vi.fn()}
+        onDuplicateSetlist={onDuplicateSetlist}
+        onDeleteSetlist={onDeleteSetlist}
+      />,
+    );
+    fireEvent.contextMenu(await screen.findByText("Warm-up routine"));
+    const menu = await waitFor(() => {
+      const m = document.querySelector(".preset-context-menu");
+      expect(m).not.toBeNull();
+      return m as HTMLElement;
+    });
+    expect([...menu.querySelectorAll("button")].map((b) => b.textContent)).toEqual([
+      "Rename",
+      "Duplicate setlist",
+      "Delete setlist",
+    ]);
+    fireEvent.click(within(menu).getByText("Duplicate setlist"));
+    expect(onDuplicateSetlist).toHaveBeenCalledWith("ch1");
+    expect(onDeleteSetlist).not.toHaveBeenCalled();
+  });
+});
+
+describe("PresetSidebar — the jam library", () => {
+  const jamProps = { ...baseProps, view: "jam" as const };
+
+  it("lists jams with their tempo and their shape", async () => {
+    // "92 · 12-bar" is what tells two blues jams apart in a list of six.
+    setInvokeResponse("list_presets", () => []);
+    render(<PresetSidebar {...jamProps} jams={[...STARTER_JAMS]} onLoadJam={vi.fn()} />);
+    expect(await screen.findByText("Slow blues in A")).toBeInTheDocument();
+    expect(screen.getByText("92 · 12-bar")).toBeInTheDocument();
+    expect(screen.getByText("Swing in F")).toBeInTheDocument();
+    expect(screen.getByText("160 · AABA")).toBeInTheDocument();
+  });
+
+  it("titles the panel for the thing it holds", async () => {
+    setInvokeResponse("list_presets", () => []);
+    const { container } = render(<PresetSidebar {...jamProps} jams={[]} />);
+    await waitFor(() =>
+      expect(container.querySelector(".preset-sidebar-title")?.textContent).toBe("Jams"),
+    );
+  });
+
+  it("keeps jams off every other tab's library, and presets off its own", async () => {
+    setInvokeResponse("list_presets", () => [makePreset({ name: "Funk Groove" })]);
+    for (const view of ["beat", "drill", "setlist"] as const) {
+      const { container, unmount } = render(
+        <PresetSidebar {...baseProps} view={view} jams={[...STARTER_JAMS]} onLoadJam={vi.fn()} />,
+      );
+      await waitFor(() => expect(container.querySelector(".preset-sidebar-title")).not.toBeNull());
+      expect(container.querySelector(".jam-item")).toBeNull();
+      unmount();
+    }
+
+    const { container } = render(
+      <PresetSidebar {...jamProps} jams={[...STARTER_JAMS]} onLoadJam={vi.fn()} />,
+    );
+    await waitFor(() => expect(container.querySelector(".jam-item")).not.toBeNull());
+    expect(screen.queryByText("Funk Groove")).toBeNull();
+  });
+
+  it("gives the jam tab its own opener", async () => {
+    setInvokeResponse("list_presets", () => []);
+    const onNewJam = vi.fn();
+    render(<PresetSidebar {...jamProps} jams={[]} onNewJam={onNewJam} />);
+    fireEvent.click(await screen.findByLabelText("New jam"));
+    expect(onNewJam).toHaveBeenCalled();
+    expect(document.querySelector(".preset-sidebar-add")).toBeNull();
+  });
+
+  it("loads the jam whose row was clicked", async () => {
+    setInvokeResponse("list_presets", () => []);
+    const onLoadJam = vi.fn();
+    render(<PresetSidebar {...jamProps} jams={[...STARTER_JAMS]} onLoadJam={onLoadJam} />);
+    fireEvent.click(await screen.findByText("Bossa in D minor"));
+    expect(onLoadJam).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "Bossa in D minor" }),
+    );
+  });
+
+  it("offers rename, duplicate and delete on a right-click", async () => {
+    setInvokeResponse("list_presets", () => []);
+    const onDuplicateJam = vi.fn();
+    const onDeleteJam = vi.fn();
+    render(
+      <PresetSidebar
+        {...jamProps}
+        jams={[...STARTER_JAMS]}
+        onLoadJam={vi.fn()}
+        onDuplicateJam={onDuplicateJam}
+        onDeleteJam={onDeleteJam}
+      />,
+    );
+    fireEvent.contextMenu(await screen.findByText("Rock in G"));
+    const menu = await waitFor(() => {
+      const m = document.querySelector(".preset-context-menu");
+      expect(m).not.toBeNull();
+      return m as HTMLElement;
+    });
+    expect([...menu.querySelectorAll("button")].map((b) => b.textContent)).toEqual([
+      "Rename",
+      "Duplicate jam",
+      "Delete jam",
+    ]);
+    fireEvent.click(within(menu).getByText("Duplicate jam"));
+    expect(onDuplicateJam).toHaveBeenCalled();
+  });
+
+  it("reorders by the library's own order, not by the filtered rows", async () => {
+    // Dropping row two of a search result onto row four must move the jam to
+    // the fourth jam's place in the LIBRARY — the filtered view will not exist
+    // a keystroke later.
+    setInvokeResponse("list_presets", () => []);
+    const onReorderJams = vi.fn();
+    render(
+      <PresetSidebar
+        {...jamProps}
+        jams={[...STARTER_JAMS]}
+        onLoadJam={vi.fn()}
+        onReorderJams={onReorderJams}
+      />,
+    );
+    const search = await openSearch();
+    fireEvent.change(search, { target: { value: "in " } });
+
+    const rows = await waitFor(() => {
+      const r = [...document.querySelectorAll(".jam-item")];
+      expect(r.length).toBeGreaterThan(2);
+      return r;
+    });
+    const data = { effectAllowed: "", dropEffect: "", setData: vi.fn() };
+    // "Funk in E" is library index 1; "Swing in F" is library index 3.
+    fireEvent.dragStart(rows[1], { dataTransfer: data });
+    fireEvent.drop(rows[3], { dataTransfer: data });
+    expect(onReorderJams).toHaveBeenCalledWith(1, 3);
+  });
+
+  it("says so when a search matches no jam", async () => {
+    setInvokeResponse("list_presets", () => []);
+    render(<PresetSidebar {...jamProps} jams={[...STARTER_JAMS]} onLoadJam={vi.fn()} />);
+    const search = await openSearch();
+    fireEvent.change(search, { target: { value: "polka" } });
+    expect(await screen.findByText("No results")).toBeInTheDocument();
+  });
+
+  it("narrows the library to one style, and back", async () => {
+    // Fifty starters is a library, and "the blues ones" is how a player asks
+    // for a third of it (JAM_KILLER §2 A3).
+    setInvokeResponse("list_presets", () => []);
+    const { container } = render(
+      <PresetSidebar {...jamProps} jams={[...STARTER_JAMS]} onLoadJam={vi.fn()} />,
+    );
+    await screen.findByText("Slow blues in A");
+    const filter = container.querySelector(".preset-sidebar-filter") as HTMLElement;
+    fireEvent.click(within(filter).getByText("Blues"));
+    const shown = [...container.querySelectorAll(".jam-item .preset-item-name")].map(
+      (n) => n.textContent,
+    );
+    expect(shown).toContain("Slow blues in A");
+    expect(shown).not.toContain("Swing in F");
+    expect(shown).toHaveLength(STARTER_JAMS.filter((j) => j.vibe === "blues").length);
+
+    // Tapping the chip again is the way back, and so is "All styles".
+    fireEvent.click(within(filter).getByText("Blues"));
+    expect(container.querySelectorAll(".jam-item")).toHaveLength(STARTER_JAMS.length);
+  });
+
+  it("offers a chip only for a style the library actually holds", async () => {
+    // A chip that empties the list is a filter people stop trusting.
+    setInvokeResponse("list_presets", () => []);
+    const onlyBlues = STARTER_JAMS.filter((j) => j.vibe === "blues");
+    const { container } = render(
+      <PresetSidebar {...jamProps} jams={[...onlyBlues, STARTER_JAMS[3]]} onLoadJam={vi.fn()} />,
+    );
+    await screen.findByText("Slow blues in A");
+    const chips = [...container.querySelectorAll(".preset-sidebar-chip")].map(
+      (c) => c.textContent,
+    );
+    expect(chips).toEqual(["All styles", "Blues", "Jazz"]);
+  });
+
+  it("keeps the style filter off every other tab", async () => {
+    setInvokeResponse("list_presets", () => []);
+    const { container } = render(
+      <PresetSidebar {...baseProps} view="beat" jams={[...STARTER_JAMS]} onLoadJam={vi.fn()} />,
+    );
+    await waitFor(() => expect(container.querySelector(".preset-sidebar-list")).not.toBeNull());
+    expect(container.querySelector(".preset-sidebar-filter")).toBeNull();
   });
 });

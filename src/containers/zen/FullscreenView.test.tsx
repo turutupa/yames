@@ -78,6 +78,8 @@ describe("FullscreenView", () => {
       subdivision: 0,
       isDownbeat: true,
       isAccent: measureBeat === 0,
+      formBar: 0,
+      chorus: 1,
     });
 
     it("uses the meter total when the ramp is NOT active", () => {
@@ -150,5 +152,111 @@ describe("FullscreenView", () => {
         }
       }
     });
+  });
+});
+
+/**
+ * Zen over a jam (JAM_MODE §4.7): the chord and the beat, nothing else.
+ *
+ * What is worth pinning is the "nothing else": the value of this screen is
+ * what it leaves out, and a control that creeps back in — a tempo nudge, a
+ * meter button — is the whole feature quietly undone.
+ */
+describe("FullscreenView — a jam", () => {
+  const jam = {
+    chord: "A7",
+    next: { name: "D7", inBars: 4 },
+    bar: 2,
+    bars: 12,
+    chorus: 3,
+  };
+
+  const renderJam = (overrides: Partial<typeof jam> | null = {}) =>
+    render(
+      <FullscreenView
+        state={DEFAULT_TEST_STATE}
+        currentBeat={null}
+        activeTab="jam"
+        jam={overrides === null ? null : { ...jam, ...overrides }}
+        onExit={vi.fn()}
+      />,
+    );
+
+  it("makes the chord the largest thing on the screen", () => {
+    const { container } = renderJam();
+    expect(container.querySelector(".fs-jam-chord")?.textContent).toBe("A7");
+  });
+
+  it("says what is coming and when", () => {
+    const { container } = renderJam();
+    expect(container.querySelector(".fs-jam-next")?.textContent).toContain("D7");
+    expect(container.querySelector(".fs-jam-next")?.textContent).toContain("4");
+  });
+
+  it("says the bar and the chorus", () => {
+    const { container } = renderJam();
+    const where = container.querySelector(".fs-jam-where")?.textContent ?? "";
+    expect(where).toContain("3");
+    expect(where).toContain("12");
+  });
+
+  it("keeps the beat", () => {
+    const { container } = renderJam();
+    expect(container.querySelectorAll(".fs-beat").length).toBeGreaterThan(0);
+  });
+
+  it("shows nothing else — no tempo, no meter button, no ramp", () => {
+    const { container } = renderJam();
+    expect(container.querySelector(".fs-bpm")).toBeNull();
+    expect(container.querySelector(".fs-ramp-progress")).toBeNull();
+    // The metronome's own nudges and its meter button are the controls that
+    // would put the band out of step with the bar the engine checks.
+    expect(container.querySelectorAll(".fs-ctrl-btn").length).toBe(0);
+    // Play is still there: Zen is somewhere you start and stop from.
+    expect(container.querySelector(".fs-play-btn")).not.toBeNull();
+  });
+
+  it("is Zen as it always was when no jam is loaded", () => {
+    const { container } = renderJam(null);
+    expect(container.querySelector(".fs-jam-chord")).toBeNull();
+    expect(container.querySelector(".fs-bpm")?.textContent).toContain("120");
+  });
+
+  it("draws a blank rather than repeating itself over a one-chord jam", () => {
+    const { container } = renderJam({ next: null });
+    expect(container.querySelector(".fs-jam-next")?.textContent?.trim()).toBe("");
+  });
+
+  it("puts the meter buttons away for a jam STEP of a setlist too", () => {
+    // A setlist step can be a jam, and a setlist reads as "beat" here — so
+    // the two controls that break a band were live in Zen with the band
+    // playing behind them. Pressing one sets a meter the loaded table was not
+    // written for, the engine refuses the table, and the drummer disappears
+    // with nothing on screen to say why.
+    const { container } = render(
+      <FullscreenView
+        state={DEFAULT_TEST_STATE}
+        currentBeat={null}
+        activeTab="beat"
+        jamOnEngine
+        onExit={vi.fn()}
+      />,
+    );
+    expect(container.querySelectorAll(".fs-ctrl-btn").length).toBe(0);
+    // Everything else the metronome tab has in Zen is untouched.
+    expect(container.querySelector(".fs-bpm")?.textContent).toContain("120");
+    expect(container.querySelector(".fs-play-btn")).not.toBeNull();
+  });
+
+  it("leaves them alone on the metronome tab with no band anywhere", () => {
+    const { container } = render(
+      <FullscreenView
+        state={DEFAULT_TEST_STATE}
+        currentBeat={null}
+        activeTab="beat"
+        onExit={vi.fn()}
+      />,
+    );
+    expect(container.querySelectorAll(".fs-ctrl-btn").length).toBeGreaterThan(0);
   });
 });

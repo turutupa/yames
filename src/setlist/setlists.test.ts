@@ -5,15 +5,23 @@ import {
   createSetlist,
   duplicateSetlist,
   duplicateStep,
+  duplicateSteps,
+  jamStepBars,
+  jamToSetlistStep,
+  moveSteps,
   presetToSetlistStep,
   removeStep,
+  removeSteps,
   renameSetlist,
   reorderSteps,
+  stepRange,
   setSetlistCountIn,
   setSetlistRepeat,
   upsertSetlist,
   updateStep,
 } from "./setlists";
+import { STARTER_JAMS } from "../jam/jams";
+import type { Jam } from "../jam/types";
 import type { Setlist, SetlistStep, Preset } from "../types";
 
 function preset(over: Partial<Preset> = {}): Preset {
@@ -160,6 +168,15 @@ describe("setlists", () => {
     }
     expect(new Set(copy.steps.map((s) => s.id)).size).toBe(2);
   });
+
+  it("carries the count-in, because that is how the routine starts", () => {
+    // It was dropped, so a duplicated setlist started cold while the one it
+    // was copied from counted you in. Nothing on screen said why.
+    const c = setSetlistCountIn(createSetlist("Evening", [stepOf("a")]), 4);
+    expect(duplicateSetlist(c, "Evening copy").countIn).toBe(4);
+    // And none is still none, rather than a zero that reads as a setting.
+    expect(duplicateSetlist(createSetlist("Cold"), "Cold copy").countIn).toBeUndefined();
+  });
 });
 
 describe("steps", () => {
@@ -215,6 +232,140 @@ describe("steps", () => {
         expect(new Set(setlist.steps.map((s) => s.id))).toEqual(ids);
       }
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// A block of steps (issue 52)
+// ---------------------------------------------------------------------------
+
+describe("moveSteps", () => {
+  const base = createSetlist("Evening", [
+    stepOf("a"),
+    stepOf("b"),
+    stepOf("c"),
+    stepOf("d"),
+    stepOf("e"),
+  ]);
+  const names = (s: Setlist) => s.steps.map((x) => x.name);
+
+  it("lands a block where the drop line was, in one piece", () => {
+    // `to` counts the list with the block already lifted out, which is the
+    // only reading that makes a gap between two rows mean one thing whether
+    // the block came from above it or below.
+    expect(names(moveSteps(base, ["id-a", "id-b"], 3))).toEqual(["c", "d", "e", "a", "b"]);
+    expect(names(moveSteps(base, ["id-d", "id-e"], 0))).toEqual(["d", "e", "a", "b", "c"]);
+  });
+
+  it("keeps the block's own order, whatever order the ids arrive in", () => {
+    // The set is built by clicking, and the last click is not the last row.
+    expect(names(moveSteps(base, ["id-d", "id-b"], 0))).toEqual(["b", "d", "a", "c", "e"]);
+  });
+
+  it("closes the gaps a scattered block leaves behind", () => {
+    expect(names(moveSteps(base, ["id-a", "id-c", "id-e"], 1))).toEqual(["b", "a", "c", "e", "d"]);
+  });
+
+  it("clamps a drop past either end rather than losing the steps", () => {
+    expect(names(moveSteps(base, ["id-a"], 99))).toEqual(["b", "c", "d", "e", "a"]);
+    expect(names(moveSteps(base, ["id-e"], -7))).toEqual(["e", "a", "b", "c", "d"]);
+    expect(names(moveSteps(base, ["id-b"], Number.NaN))).toEqual(["b", "a", "c", "d", "e"]);
+  });
+
+  it("returns the same setlist when the block goes back where it was", () => {
+    // A drag that changes nothing must not mark the setlist edited.
+    expect(moveSteps(base, ["id-b", "id-c"], 1)).toBe(base);
+    expect(moveSteps(base, [], 2)).toBe(base);
+    expect(moveSteps(base, ["nope"], 0)).toBe(base);
+    expect(moveSteps(createSetlist("empty"), ["id-a"], 0).steps).toEqual([]);
+  });
+
+  it("ignores ids that name no step, and moves the ones that do", () => {
+    expect(names(moveSteps(base, ["id-a", "ghost"], 2))).toEqual(["b", "c", "a", "d", "e"]);
+  });
+
+  it("is a permutation for every subset and every landing place", () => {
+    /*
+     * The property the whole feature rests on. A block drag must never lose a
+     * step, never gain one, never scramble the steps it moved and never
+     * scramble the steps it did not touch — and the failure mode of an
+     * index-arithmetic bug here is exactly one of those four, silently, on a
+     * routine somebody built.
+     *
+     * Six steps is 63 non-empty subsets and seven landing places apiece.
+     */
+    const list = createSetlist("long", ["a", "b", "c", "d", "e", "f"].map(stepOf));
+    const all = list.steps.map((s) => s.id);
+    for (let mask = 1; mask < 1 << all.length; mask++) {
+      const ids = all.filter((_, i) => mask & (1 << i));
+      const stayed = all.filter((id) => !ids.includes(id));
+      for (let to = 0; to <= stayed.length; to++) {
+        const out = moveSteps(list, ids, to).steps.map((s) => s.id);
+        expect(out).toHaveLength(all.length);
+        expect(new Set(out)).toEqual(new Set(all));
+        // The moved steps keep their order relative to each other...
+        expect(out.filter((id) => ids.includes(id))).toEqual(ids);
+        // ...and so do the ones that stood still.
+        expect(out.filter((id) => !ids.includes(id))).toEqual(stayed);
+        // The block is contiguous, and it starts where it was told to.
+        expect(out.indexOf(ids[ids.length - 1]) - out.indexOf(ids[0])).toBe(ids.length - 1);
+        expect(out.indexOf(ids[0])).toBe(to);
+      }
+    }
+  });
+});
+
+describe("removeSteps and duplicateSteps", () => {
+  const base = createSetlist("Evening", [stepOf("a"), stepOf("b"), stepOf("c"), stepOf("d")]);
+  const names = (s: Setlist) => s.steps.map((x) => x.name);
+
+  it("takes off every named step at once", () => {
+    expect(names(removeSteps(base, ["id-b", "id-d"]))).toEqual(["a", "c"]);
+    expect(names(removeSteps(base, ["id-a", "ghost"]))).toEqual(["b", "c", "d"]);
+  });
+
+  it("returns the same setlist when it removed nothing", () => {
+    expect(removeSteps(base, [])).toBe(base);
+    expect(removeSteps(base, ["ghost"])).toBe(base);
+  });
+
+  it("copies a block after the last step of it, with fresh ids", () => {
+    const out = duplicateSteps(base, ["id-a", "id-c"]);
+    expect(names(out)).toEqual(["a", "b", "c", "a", "c", "d"]);
+    expect(new Set(out.steps.map((s) => s.id)).size).toBe(6);
+    // A shared meter array would make one edit change two steps.
+    expect(out.steps[3].beatGroups).not.toBe(base.steps[0].beatGroups);
+    expect(out.steps[3].beatGroups).toEqual(base.steps[0].beatGroups);
+  });
+
+  it("reads one step the way the single duplicate button always has", () => {
+    expect(names(duplicateSteps(base, ["id-b"]))).toEqual(["a", "b", "b", "c", "d"]);
+    expect(duplicateSteps(base, [])).toBe(base);
+    expect(duplicateSteps(base, ["ghost"])).toBe(base);
+  });
+});
+
+describe("stepRange", () => {
+  const base = createSetlist("Evening", [stepOf("a"), stepOf("b"), stepOf("c"), stepOf("d")]);
+
+  it("is everything between the anchor and the row you shift-clicked", () => {
+    expect(stepRange(base, "id-b", "id-d")).toEqual(["id-b", "id-c", "id-d"]);
+    expect(stepRange(base, "id-b", "id-b")).toEqual(["id-b"]);
+  });
+
+  it("reads the same upwards", () => {
+    expect(stepRange(base, "id-d", "id-a")).toEqual(["id-a", "id-b", "id-c", "id-d"]);
+  });
+
+  it("falls back to the row you clicked when there is no anchor yet", () => {
+    expect(stepRange(base, null, "id-c")).toEqual(["id-c"]);
+    expect(stepRange(base, "ghost", "id-c")).toEqual(["id-c"]);
+  });
+
+  it("falls back to the anchor when the target is gone, and to nothing when both are", () => {
+    expect(stepRange(base, "id-b", "ghost")).toEqual(["id-b"]);
+    expect(stepRange(base, "ghost", "ghost")).toEqual([]);
+    expect(stepRange(createSetlist("empty"), null, "id-a")).toEqual([]);
   });
 });
 
@@ -300,5 +451,85 @@ describe("the count-in at the top of a setlist", () => {
 
   it("a new setlist has none, like every setlist saved before it existed", () => {
     expect(createSetlist("Warm-up").countIn).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// A jam as a step (JAM_MODE §8.5)
+// ---------------------------------------------------------------------------
+
+function jam(over: Partial<Jam> = {}): Jam {
+  return { ...STARTER_JAMS[0], ...over };
+}
+
+describe("jamToSetlistStep", () => {
+  it("copies the jam rather than pointing at it, and keeps the id as well", () => {
+    // U9.1 both ways: the step is a COPY, so it still plays if the jam is
+    // deleted — and it carries `jamId`, so while the jam exists it is the
+    // band that plays rather than the copy.
+    const source = jam({ name: "Slow blues in A", bpm: 92 });
+    const step = jamToSetlistStep(source);
+    expect(step.jamId).toBe(source.id);
+    expect(step.name).toBe("Slow blues in A");
+    expect(step.bpm).toBe(92);
+    expect(step.id).not.toBe(source.id);
+  });
+
+  it("takes the jam's meter, groups and all", () => {
+    // The engine checks `ticksPerBeat × beatsPerBar` against its own bar, so a
+    // step whose meter disagrees with the groove's is a step that plays the
+    // plain click. Groups, not the sum: 3+2+2 and 2+2+3 are different music.
+    const step = jamToSetlistStep(jam({ meter: { beatGroups: [3, 2, 2], ticksPerBeat: 2 } }));
+    expect(step.beatGroups.reduce((a, b) => a + b, 0)).toBe(7);
+    expect(step.beatGroups).toEqual([3, 2, 2]);
+    expect(step.subdivision).toBe(2);
+    expect(step.freeMode).toBe(false);
+  });
+
+  it("falls back to the jam's count-in sound, not to whatever is loaded", () => {
+    // The sound only ever sounds on the day the jam has been deleted, and it
+    // has to be the same sound every time — a step that borrowed the app's
+    // current click would play something different on each occasion.
+    expect(jamToSetlistStep(jam({ countInSound: "beep" })).soundType).toBe("beep");
+    expect(jamToSetlistStep(jam({ countInSound: "sticks" })).soundType).toBe("wood");
+    expect(jamToSetlistStep(jam({ countInSound: undefined })).soundType).toBe("beep");
+  });
+
+  it("starts with a gap that cannot run away, and takes one when given", () => {
+    expect(jamToSetlistStep(jam()).trigger).toEqual({ kind: "manual" });
+    const step = jamToSetlistStep(jam(), { trigger: { kind: "bars", bars: 48 } });
+    expect(step.trigger).toEqual({ kind: "bars", bars: 48 });
+  });
+
+  it("gives every step its own id, so two of the same jam are two rows", () => {
+    const source = jam();
+    expect(jamToSetlistStep(source).id).not.toBe(jamToSetlistStep(source).id);
+  });
+
+  it("survives being duplicated as the same jam", () => {
+    // A duplicated jam step is still that jam: copying the row must not
+    // quietly turn the band into a click.
+    const setlist = addStep(createSetlist("Routine"), jamToSetlistStep(jam()));
+    const copied = duplicateStep(setlist, setlist.steps[0].id);
+    expect(copied.steps).toHaveLength(2);
+    expect(copied.steps[1].jamId).toBe(setlist.steps[0].jamId);
+    expect(copied.steps[1].id).not.toBe(setlist.steps[0].id);
+  });
+
+  it("drops the jam when the step is saved as a preset — a preset is a click", () => {
+    const preset = setlistStepToPreset(jamToSetlistStep(jam()));
+    expect(preset).not.toHaveProperty("jamId");
+  });
+});
+
+describe("jamStepBars", () => {
+  it("is the length of one chorus", () => {
+    expect(jamStepBars(jam({ form: { kind: "blues12", bars: 12 } }))).toBe(12);
+    expect(jamStepBars(jam({ form: { kind: "aaba32", bars: 32 } }))).toBe(32);
+  });
+
+  it("is zero for a jam that is no longer there", () => {
+    expect(jamStepBars(null)).toBe(0);
+    expect(jamStepBars(undefined)).toBe(0);
   });
 });

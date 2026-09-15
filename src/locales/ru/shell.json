@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "Метроном",
     "setlist": "Сет-лист",
-    "drill": "Темповая тренировка"
+    "drill": "Темповая тренировка",
+    "jam": "Джем"
   },
   "tooltip": {
     "zen": "Дзен",
@@ -24,6 +25,7 @@
     "title": "Пресеты",
     "titleDrill": "Тренировки",
     "titleSetlist": "Сет-листы",
+    "titleJam": "Джемы",
     "saveCurrent": "Сохранить текущие настройки",
     "search": "Поиск в библиотеке",
     "searchPlaceholder": "Поиск…",

@@ -153,6 +153,15 @@
       "midiPlugged": {
         "body": "Ein MIDI-Gerät ist verbunden, aber nichts ist zugewiesen. Pedal auf Start/Stopp legen?",
         "action": "Tastenkürzel öffnen"
+      },
+      "jamSheets": {
+        "body": "Einrichten ändert die Band; Akkorde ist dein Spickzettel."
+      },
+      "jamLive": {
+        "body": "Alles hier greift ab dem nächsten Takt."
+      },
+      "jamArrangement": {
+        "body": "Die Band steigert sich und nimmt sich zurück, ganz von selbst — Schleife unter Einrichten schaltet das ab."
       }
     },
     "tour": {

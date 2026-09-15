@@ -41,10 +41,13 @@
   },
   "sound": {
     "click": "Klick",
+    "sticks": "Sticks",
     "wood": "Holz",
     "beep": "Piep",
     "drum": "Trommel",
-    "snare": "Snare"
+    "kit": "Schlagzeug",
+    "snare": "Snare",
+    "cowbell": "Kuhglocke"
   },
   "driftMeter": {
     "early": "zu früh",

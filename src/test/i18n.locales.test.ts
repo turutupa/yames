@@ -22,6 +22,7 @@ const NAMESPACES = [
   "coach",
   "common",
   "drill",
+  "jam",
   "metronome",
   "onboarding",
   "setlist",

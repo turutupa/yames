@@ -389,6 +389,18 @@
   border-radius: 10px;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
+  /* Shift-click marks a block of steps, and a shift-click is also how every
+     browser extends a text selection — so marking four steps used to leave
+     four rows of highlighted prose behind it. The step's own labels are not
+     text anybody copies; the fields inside the expanded step are, and they
+     say so below. */
+  user-select: none;
+}
+
+.setlist-step input,
+.setlist-step textarea,
+.setlist-step [contenteditable] {
+  user-select: text;
 }
 
 .setlist-step:hover {
@@ -417,9 +429,11 @@
    line between look like a table; the fill is the seam. */
 .setlist-step.selected + .setlist-step,
 .setlist-step.running + .setlist-step,
+.setlist-step.multi + .setlist-step,
 .setlist-step:hover + .setlist-step,
 .setlist-step.selected,
 .setlist-step.running,
+.setlist-step.multi,
 .setlist-step:hover {
   border-top-color: transparent;
 }
@@ -437,6 +451,93 @@
 .setlist-step.running {
   border-left-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+/* Marked, as part of a block.
+
+   THREE row states now, and they are three different sentences: `selected` is
+   "this is the step the controls are on", `running` is "this is what you are
+   hearing", and this is "this step moves with the others when you drag one".
+   They can all be true of one row at once, so this one claims no border —
+   only a wash — and every pairing below states its own fill rather than
+   letting one of the three swallow the others. Without the pairings a
+   selected step in a block looked exactly like a selected step on its own,
+   which is the one thing the wash exists to say. */
+.setlist-step.multi {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.setlist-step.selected.multi {
+  background: color-mix(in srgb, var(--accent) 17%, transparent);
+}
+
+.setlist-step.running.multi {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+/* The six dots you grab a step by.
+
+   Same hover-reveal family as the tools on the right, and drawn on every row
+   at `opacity: 0` for the same reason: a row that gains a handle on hover is
+   a row that changes width, and the sentence beside it reflows.
+
+   The HANDLE is draggable, never the row. A selected row opens into a
+   sentence of inputs, and a drag that began on a tempo field would carry the
+   step off while you were trying to select text in it. */
+.setlist-step-grip {
+  flex: none;
+  display: flex;
+  align-items: center;
+  width: 12px;
+  padding-top: 8px;
+  color: var(--text-tertiary);
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.setlist-step:hover .setlist-step-grip,
+.setlist-step.selected .setlist-step-grip,
+.setlist-step:focus-within .setlist-step-grip {
+  opacity: 1;
+}
+
+.setlist-step-grip:hover {
+  color: var(--text-primary);
+}
+
+/* While the setlist plays. The runner addresses steps by index, so a row
+   moving under it changes what plays next — the handle says so by its title
+   and refuses to be grabbed. The up and down buttons still work: they are
+   the one-position move the runner already survives.
+
+   `.setlist-step` in front, and AFTER the reveal rules above, on purpose.
+   Written as `.setlist-step-grip.is-locked` it is one class short of
+   `.setlist-step:hover .setlist-step-grip`, so the grip went back to full
+   opacity the moment the pointer touched the row — which is the only moment
+   anybody would have looked at it, and the only moment the greying had
+   anything to say. */
+.setlist-step .setlist-step-grip.is-locked,
+.setlist-step .setlist-step-grip.is-locked:hover {
+  cursor: default;
+  color: var(--text-muted);
+  opacity: 0.3;
+}
+
+.setlist-step[data-dragging] {
+  opacity: 0.45;
+}
+
+/* A LINE between rows, not a filled row. "After this one" and "instead of
+   this one" are different answers and a highlighted row only gives the
+   second. Inset, so the line costs no height and the list does not jump as
+   the pointer crosses a boundary. */
+.setlist-step[data-drop="before"] {
+  box-shadow: inset 0 2px 0 0 var(--accent);
+}
+
+.setlist-step[data-drop="after"] {
+  box-shadow: inset 0 -2px 0 0 var(--accent);
 }
 
 .setlist-step-no {
@@ -862,4 +963,110 @@
 
 .setlist-blank-new:hover {
   filter: brightness(1.08);
+}
+
+/* â”€â”€ A jam as a step (JAM_MODE Â§8.5) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   A jam step is a step: the same row, the same sentence, the same tools. What
+   marks it is the glyph and the accent on it, because "this one is a band"
+   has to be readable while scanning the routine top to bottom â€” which is what
+   the paragraph is for. Anything louder would make the jam steps the subject
+   of a screen whose subject is the order. */
+.setlist-jam-mark {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  margin-right: 2px;
+  color: var(--accent);
+}
+
+/* The jam is gone. Grey, because the mark is now describing something that
+   is not there â€” an accent-coloured badge for a missing band would be the
+   screen looking pleased with itself. */
+.setlist-jam-mark[data-gone] {
+  color: var(--text-faint);
+}
+
+/* "12 bars" stands where the meter token would be, and it is not a control:
+   the meter belongs to the groove. Same size and weight as the value it
+   replaces, so the line does not change shape between step kinds. */
+.setlist-jam-bars {
+  color: var(--text-secondary);
+}
+
+.setlist-jam-said {
+  color: var(--text-faint);
+}
+
+.setlist-jam-gone {
+  margin: 4px 0 0;
+  font-size: 0.7rem;
+  color: var(--text-faint);
+}
+
+/* The two ways to add something, side by side at the foot of the list. */
+.setlist-add-jam-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.setlist-add-jam {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.setlist-add-jam.open {
+  color: var(--accent);
+}
+
+.setlist-jam-menu {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 4px;
+  border-radius: var(--radius-md, 9px);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
+  background: var(--bg-elevated, var(--bg-secondary));
+  box-shadow: 0 8px 24px rgb(0 0 0 / 28%);
+}
+
+/* Above the button rather than below it: the row is the last thing in the
+   list, so a menu opening downwards would open off the bottom of the stage. */
+.setlist-jam-menu .sub-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+}
+
+/* â”€â”€ The jam's place in the form, in the player â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   Under the step's own countdown, because the two answer different questions
+   and a player two metres back needs both: the form says what to play next,
+   the countdown says how long there is left to play it. */
+.setlist-player-jam {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.setlist-player-jam-chord {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.setlist-player-jam-next {
+  font-size: 0.8rem;
+  color: var(--text-faint);
 }

@@ -41,10 +41,13 @@
   },
   "sound": {
     "click": "Tık",
+    "sticks": "Baget",
     "wood": "Tahta",
     "beep": "Bip",
     "drum": "Davul",
-    "snare": "Trampet"
+    "kit": "Bateri",
+    "snare": "Trampet",
+    "cowbell": "İnek çanı"
   },
   "driftMeter": {
     "early": "Erken",

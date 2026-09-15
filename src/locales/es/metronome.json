@@ -41,10 +41,13 @@
   },
   "sound": {
     "click": "Clic",
+    "sticks": "Baquetas",
     "wood": "Madera",
     "beep": "Pitido",
     "drum": "Tambor",
-    "snare": "Caja"
+    "kit": "Batería",
+    "snare": "Caja",
+    "cowbell": "Cencerro"
   },
   "driftMeter": {
     "early": "Adelantado",

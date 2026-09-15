@@ -1,0 +1,1099 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jam kits — A/B</title>
+<style>
+  :root {
+    --bg: #14161a; --panel: #1c1f25; --line: #2a2f38; --ink: #e8eaee;
+    --dim: #9aa2ae; --hot: #ff7043; --ok: #6fcf97; --accent: #7aa2f7;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 28px 24px 60px; background: var(--bg); color: var(--ink);
+    font: 15px/1.55 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.09em;
+       color: var(--dim); margin: 30px 0 10px; font-weight: 600; }
+  p.sub { color: var(--dim); margin: 0 0 22px; max-width: 68ch; }
+  .card { background: var(--panel); border: 1px solid var(--line);
+          border-radius: 10px; padding: 16px 18px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  button {
+    font: inherit; font-weight: 600; color: var(--ink); background: #262b33;
+    border: 1px solid var(--line); border-radius: 7px; padding: 9px 15px;
+    cursor: pointer; transition: background .12s, border-color .12s;
+  }
+  button:hover:not(:disabled) { background: #2f3540; border-color: #3d4450; }
+  button:disabled { opacity: .4; cursor: default; }
+  button.kit.on { background: var(--hot); border-color: var(--hot); color: #16181c; }
+  button.kit .tag { font-weight: 500; opacity: .75; font-size: 12px; margin-left: 6px; }
+  button.big { padding: 11px 20px; }
+  button.voice { font-weight: 500; padding: 7px 12px; font-size: 14px; }
+  button.voice.missing { opacity: .45; }
+  .kits { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+  label { color: var(--dim); font-size: 14px; display: inline-flex;
+          align-items: center; gap: 8px; }
+  input[type=range] { accent-color: var(--hot); width: 170px; vertical-align: middle; }
+  .bpm { font-variant-numeric: tabular-nums; color: var(--ink); min-width: 4ch;
+         display: inline-block; font-weight: 600; }
+  .beats { display: flex; gap: 4px; margin: 14px 0 2px; }
+  .beat { flex: 1; height: 6px; border-radius: 3px; background: #262b33; }
+  .beat.lit { background: var(--hot); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; margin-top: 6px; }
+  th, td { text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--line); }
+  th { color: var(--dim); font-weight: 600; font-size: 12px;
+       text-transform: uppercase; letter-spacing: 0.06em; }
+  td.num { font-variant-numeric: tabular-nums; text-align: right; padding-right: 18px; }
+  code { background: #262b33; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+  .warn { background: #3a2118; border: 1px solid #7a3b22; color: #ffc9a8;
+          border-radius: 8px; padding: 14px 16px; margin-bottom: 20px; }
+  .hint { color: var(--dim); font-size: 13.5px; margin: 8px 0 0; }
+  .blind { color: var(--accent); font-weight: 600; }
+  .status { color: var(--dim); font-size: 13.5px; min-height: 1.4em; }
+  .credit { color: var(--dim); font-size: 13px; margin-top: 10px; }
+  .lvl1 { color: var(--dim); } .lvl2 { color: var(--ink); }
+  .lvl3 { color: #6b7280; } .lvl4 { color: var(--hot); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Jam kits — A/B</h1>
+<p class="sub">
+  The same two bars of rock, played by each kit in turn, so they can be
+  compared by ear rather than by table. Every file is peak 0.900; the balance
+  between voices comes from each kit's own <code>trim_db</code> and the
+  dynamics from the engine's level gains, so what you hear is the difference
+  between the kits and nothing else.
+</p>
+
+<div id="fileWarn" class="warn" hidden>
+  <strong>This page needs a local server.</strong> Opened straight off disk, the
+  browser refuses to read the WAVs. From the repository root run
+  <code>python -m http.server 8123</code> and then open
+  <code>http://localhost:8123/scripts/sounds/ab.html</code>.
+</div>
+
+<div class="card">
+  <div class="kits" id="kits"></div>
+  <p class="hint">
+    Click a kit while it is looping and it swaps at the top of the next bar —
+    that is the comparison that matters. A recorded kit is about 18 MB and is
+    fetched the first time you ask for it.
+  </p>
+
+  <div class="beats" id="beats"></div>
+
+  <div class="row" style="margin-top:14px">
+    <button class="big" id="play">Play the loop</button>
+    <button class="big" id="once">Two bars, once</button>
+    <button class="big" id="round">Round robin — every kit</button>
+    <label style="margin-left:6px">
+      Tempo <input type="range" id="bpm" min="60" max="180" value="104" step="1">
+      <span class="bpm" id="bpmOut">104</span>
+    </label>
+  </div>
+
+  <div class="row" style="margin-top:12px">
+    <label><input type="checkbox" id="ride"> Ride, not hats</label>
+    <label style="margin-left:10px"><input type="checkbox" id="fill" checked> Tom fill into the crash</label>
+    <label style="margin-left:10px"><input type="checkbox" id="human" checked> Humanise</label>
+  </div>
+
+  <div class="row" style="margin-top:12px">
+    <button id="blind">Blind test</button>
+    <button id="reveal" disabled>Reveal</button>
+    <span class="status" id="status"></span>
+  </div>
+  <p class="hint">Blind test picks a kit at random and hides which. Judge it, then reveal.</p>
+  <p class="credit" id="credit"></p>
+</div>
+
+<h2>The band</h2>
+<div class="card">
+  <div class="row">
+    <label><input type="checkbox" id="bassOn" checked> Bass</label>
+    <div class="row" id="bassPick" style="margin-left:6px"></div>
+  </div>
+  <div class="row" style="margin-top:10px">
+    <label><input type="checkbox" id="keysOn" checked> Keys</label>
+    <div class="row" id="keysPick" style="margin-left:6px"></div>
+  </div>
+  <p class="hint">
+    The same two bars, with a bass line and a Rhodes comp over them — Am to G.
+    A recorded voice is a folder of sampled notes and the ones between them are
+    built here the way the engine builds them, by playing the nearest sample
+    back at <code>2<sup>n/12</sup></code>; a note is cut at the next one and
+    faded over the bank's own <code>release_ms</code>, because a bass note that
+    ran its full two seconds would be four notes deep by the end of the bar.
+    Levels are the engine's: each voice's <code>trim_db</code>, then
+    <code>BASS_VOICE_TRIM</code> and the keys' 0.07, which is what holds a
+    four-note chord under a drummer.
+  </p>
+  <p class="hint" id="bandNote"></p>
+</div>
+
+<h2>The percussionist</h2>
+<div class="card">
+  <div class="row">
+    <label><input type="checkbox" id="percOn"> Percussion</label>
+    <div class="row" id="percPick" style="margin-left:6px"></div>
+  </div>
+  <p class="hint">
+    One set, played <em>under</em> whichever kit is above — a percussionist is
+    not a drum kit, so switching kits does not switch this. A shaker on every
+    sixteenth, a conga tumbao and a tambourine on 2 and 4: the shaker is the
+    voice most likely to turn into a hiss, the tumbao is where a machine-gun
+    round robin shows up, and the tambourine has to survive the snare it lands
+    on. The shaker's two round robins are the up-stroke and the down-stroke,
+    so the sixteenths really do alternate.
+    Levels and <code>trim_db</code> are the engine's, and each voice is placed
+    by the <code>pan</code> in its own manifest, which is a number to argue
+    with rather than something baked into the files.
+  </p>
+  <div class="row" id="percVoices" style="margin-top:10px"></div>
+  <p class="hint" id="percNote"></p>
+</div>
+
+<h2>One voice at a time</h2>
+<div class="card">
+  <div class="row" id="voices"></div>
+  <p class="hint">
+    Plays the accent layer, then round robin 2, then the ghost layer, so the
+    layers can be heard against each other. Faded voices are ones this kit does
+    not have; the engine falls back for those and so does this page.
+  </p>
+</div>
+
+<h2>The groove</h2>
+<div class="card">
+  <table>
+    <thead><tr><th>voice</th><th>bar 1</th><th>bar 2</th><th class="num">trim dB</th></tr></thead>
+    <tbody id="chart"></tbody>
+  </table>
+  <p class="hint">
+    Positions are 16ths; <code>1 e &amp; a</code>. <span class="lvl4">A</span> is a
+    peak, <span class="lvl2">x</span> an accent, <span class="lvl1">+</span> a
+    plain hit and <span class="lvl3">o</span> a ghost — the engine's five levels.
+    Hats alternate strong and weak across the eighths, there are ghost notes
+    under the backbeat, and the fill ramps into the crash on the one.
+  </p>
+</div>
+
+</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// No library, on purpose: this page has to keep working with nothing installed
+// and no build step, for as long as the kits exist.
+//
+// Web Audio rather than <audio> elements because the thing being judged IS the
+// transient. An <audio> tag fires when it feels like it, tens of milliseconds
+// late and differently each time, and a kick that arrives late does not sound
+// punchy — it sounds like a different kick. Every hit here is scheduled against
+// the audio clock ahead of time.
+//
+// The page reads each kit's own kit.json and plays it the way the engine will:
+// the level picks the layer, the round robin cycles by the contract's formula,
+// and trim_db carries the balance. That is the point — an A/B that applied one
+// mix to everything would be comparing files, and what the owner is judging is
+// kits.
+// ---------------------------------------------------------------------------
+
+const DIR = "../../src-tauri/sounds/";
+const KITS_DIR = DIR + "kits/";
+const PERC_DIR = DIR + "perc/";
+const VOICES_DIR = DIR + "voices/";
+
+// There is no directory listing over HTTP, so the candidates are named and the
+// ones that are not there are skipped. A kit that exists as a folder is read
+// from its manifest; one that is still in the old flat form is wrapped in a
+// manifest built here, so this page works before and after the five
+// synthesised kits move into folders.
+const CANDIDATES = ["club", "studio", "room", "tight", "brushes", "electronic", "raw"];
+const LEGACY_VOICES = ["kick", "snare_hi", "snare_lo", "hat", "hat_open", "ride", "rim", "crash"];
+
+const VOICES = ["kick", "snare", "rim", "hat", "hat_open", "hat_pedal",
+                "ride", "ride_bell", "crash", "tom_hi", "tom_lo"];
+
+// The contract's levels: 0 off, 1 hit, 2 accent, 3 ghost, 4 peak.
+const LEVEL_GAIN = [0.0, 0.8, 1.0, 0.45, 1.0];
+const LEVEL_LAYER = [0, 2, 3, 1, 4];
+const STEPS = 32;
+
+// Two bars on a 16th grid, as [step, level] pairs.
+const GROOVE = {
+  kick:    [[0,2],[10,1],[16,2],[22,1],[26,1]],
+  snare:   [[4,2],[7,3],[12,2],[20,2],[23,3],[28,2],[31,3]],
+  hat:     [[0,2],[2,1],[4,2],[6,1],[8,2],[10,1],[12,2],
+            [16,2],[18,1],[20,2],[22,1],[24,2],[26,1],[28,2]],
+  hat_open:[[14,2],[30,2]],
+  crash:   [[0,4]],
+};
+// The last beat of bar 2, when the fill is on: the snare and hats get out of
+// the way and the toms ramp into the crash on the one.
+const FILL = {
+  snare:   [[28,2]],
+  tom_hi:  [[29,1],[30,2]],
+  tom_lo:  [[31,4]],
+};
+
+// --- the percussionist -----------------------------------------------------
+//
+// A percussion set is a kit-format folder that plays UNDER a kit rather than
+// instead of one, so it is loaded like a kit and scheduled beside one, and
+// the switch here is the switch the band row will be: on or off over whatever
+// is playing. It carries one thing a kit does not — `pan` in its manifest,
+// because ten instruments in the hands of one player are not all in the same
+// place — and this page honours it with a StereoPannerNode so the widths can
+// be judged rather than read.
+const PERC_CANDIDATES = ["club"];
+const PERC_VOICES = ["shaker", "tambourine", "cowbell", "cabasa", "claves",
+                     "guiro", "conga_hi", "conga_lo", "bongo_hi", "bongo_lo"];
+
+// Two bars of the three things the brief asks to hear: a shaker on every
+// sixteenth, a conga tumbao, and a tambourine on 2 and 4. Together they are
+// the test that matters — the shaker is the voice most likely to turn into a
+// hiss, the tumbao is the one that exposes a machine-gun round robin, and the
+// tambourine lands on the backbeat where it has to survive the snare.
+//
+// The shaker alternates 2 and 1 because a shaker alternates, and its two
+// round robins are the up-stroke and the down-stroke, so the sixteenths
+// really are up-down-up-down. The tumbao is the standard marcha: ghosts under
+// the hand, a slap on 2, and the two open tones at the end of the bar, with
+// the tumba answering on 1 and 3. Bar 2 moves one open tone onto the tumba,
+// which is the variation a player makes without being asked.
+const PERC = {
+  shaker:     [[0,2],[1,1],[2,2],[3,1],[4,2],[5,1],[6,2],[7,1],
+               [8,2],[9,1],[10,2],[11,1],[12,2],[13,1],[14,2],[15,1],
+               [16,2],[17,1],[18,2],[19,1],[20,2],[21,1],[22,2],[23,1],
+               [24,2],[25,1],[26,2],[27,1],[28,2],[29,1],[30,2],[31,1]],
+  tambourine: [[4,2],[12,2],[20,2],[28,2]],
+  conga_hi:   [[2,3],[4,4],[6,3],[10,3],[12,2],[14,2],
+               [18,3],[20,4],[22,3],[26,3],[28,2]],
+  conga_lo:   [[0,3],[8,1],[16,3],[24,1],[30,2]],
+};
+
+// --- the band --------------------------------------------------------------
+//
+// A melodic bank is a folder of `<midi>.<layer>.<rr>.wav` with a voice.json
+// beside it, and the notes it does not hold are built from the nearest one it
+// does. That is a `playbackRate` here and a tabulated windowed sinc in the
+// engine; the arithmetic — nearest sample, 2^(n/12) — is the same one, which
+// is the point of this page playing it rather than describing it.
+//
+// The candidates are named because there is no directory listing over HTTP.
+// `bass_slap` has no free CC0 source and is not rendered; it is listed anyway
+// so that the day it is, this page finds it.
+const BASS_VOICES = ["bass_fingered", "bass_picked", "bass_upright", "bass_slap"];
+const KEYS_VOICES = ["epiano"];
+
+// `jam::BASS_VOICE_TRIM` and `jam::KEYS_TRIM`. The banks carry timbre and the
+// engine carries balance: a bank's own `trim_db` lands it where the recipe it
+// replaces landed, and these hold the voices against each other and the
+// section under the drummer.
+const BASS_VOICE_TRIM = {
+  bass_fingered: 1.0000, bass_picked: 0.8699,
+  bass_upright: 1.1981, bass_slap: 0.5661,
+};
+const KEYS_TRIM = 0.07;
+
+// Two bars of Am to G on the drums' own 16th grid, as [step, midi, gain].
+// The gain is the line's, which is what picks the layer — under 0.6 the
+// softest, under 0.9 the one above it, otherwise the hardest — exactly as
+// `jam::voice_layer` does, so the layers can be heard doing their job.
+const BASS = [
+  [0, 33, 1.0], [4, 33, 0.75], [6, 40, 0.75],
+  [8, 33, 1.0], [12, 36, 0.75], [14, 38, 0.75],
+  [16, 31, 1.0], [20, 31, 0.75], [22, 38, 0.75],
+  [24, 31, 1.0], [28, 35, 0.75], [30, 28, 0.55],
+];
+// Four-note voicings, which is what the keys line plays and where a level
+// goes wrong: the 0.07 is applied per note, so a bank that is off is off
+// four times over.
+const KEYS = [
+  [0, [57, 60, 64, 69], 1.0], [6, [57, 60, 64, 69], 0.75], [10, [57, 60, 64, 69], 0.55],
+  [16, [55, 59, 62, 67], 1.0], [22, [55, 59, 62, 67], 0.75], [26, [55, 59, 62, 67], 0.55],
+];
+
+let ctx = null;
+const kits = {};            // id -> {man, buffers, loaded, loading}
+let order = [];             // ids that actually exist, in CANDIDATES order
+let current = null;
+let looping = false, roundRobin = false, blindOrder = null;
+let bpm = 104, onRide = false, withFill = true, humanise = true;
+
+const banks = {};           // voice id -> {man, buffers, loaded, loading}
+let bassVoice = null, keysVoice = null;
+let bassOn = true, keysOn = true;
+
+const percSets = {};        // set id -> {man, buffers, loaded, loading}
+let percSet = null, percOn = false;
+
+// --- loading ---------------------------------------------------------------
+
+function audio() {
+  ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+  return ctx;
+}
+
+async function discover() {
+  for (const id of CANDIDATES) {
+    try {
+      const r = await fetch(KITS_DIR + id + "/kit.json");
+      if (r.ok) { kits[id] = { man: await r.json(), buffers: {}, legacy: false }; order.push(id); continue; }
+    } catch (e) { /* fall through to the flat form */ }
+    // Flat form: probe one file, and if it is there synthesise a manifest.
+    try {
+      const r = await fetch(DIR + "kit_" + id + "_kick.wav", { method: "HEAD" });
+      if (!r.ok) continue;
+    } catch (e) { continue; }
+    kits[id] = { man: legacyManifest(id), buffers: {}, legacy: true };
+    order.push(id);
+  }
+  if (!order.length) throw new Error("no kits found");
+}
+
+// `snare_lo` is the same drum struck softly, so it is layer 1 and `snare_hi`
+// is layer 2 — which is exactly the move W26 makes when these become folders.
+function legacyManifest(id) {
+  return {
+    id, name: id, credit: "", licence: "", rate: 44100, channels: 1,
+    voices: {
+      kick: { layers: 1, rr: 1, trim_db: 0 },
+      snare: { layers: 2, rr: 1, trim_db: 0 },
+      rim: { layers: 1, rr: 1, trim_db: -6 },
+      hat: { layers: 1, rr: 1, trim_db: -8 },
+      hat_open: { layers: 1, rr: 1, trim_db: -7.5 },
+      ride: { layers: 1, rr: 1, trim_db: -7 },
+      crash: { layers: 1, rr: 1, trim_db: -5 },
+    },
+  };
+}
+
+function legacyFile(id, voice, layer) {
+  if (voice === "snare") return "kit_" + id + "_" + (layer >= 2 ? "snare_hi" : "snare_lo") + ".wav";
+  return "kit_" + id + "_" + voice + ".wav";
+}
+
+function ensureKit(id) {
+  const k = kits[id];
+  if (k.loading) return k.loading;
+  const jobs = [];
+  for (const [voice, spec] of Object.entries(k.man.voices)) {
+    for (let li = 1; li <= spec.layers; li++) {
+      for (let ri = 1; ri <= (spec.rr || 1); ri++) {
+        const url = k.legacy
+          ? DIR + legacyFile(id, voice, li)
+          : KITS_DIR + id + "/" + voice + "." + li + "." + ri + ".wav";
+        const key = voice + "." + li + "." + ri;
+        jobs.push(
+          fetch(url)
+            .then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+            .then((b) => audio().decodeAudioData(b))
+            .then((buf) => { k.buffers[key] = buf; })
+            .catch(() => { /* a missing round robin falls back below */ })
+        );
+      }
+    }
+  }
+  k.loading = Promise.all(jobs).then(() => { k.loaded = true; return k; });
+  return k.loading;
+}
+
+async function discoverVoices() {
+  for (const id of BASS_VOICES.concat(KEYS_VOICES)) {
+    try {
+      const r = await fetch(VOICES_DIR + id + "/voice.json");
+      if (!r.ok) continue;
+      banks[id] = { man: await r.json(), buffers: {} };
+    } catch (e) { /* a voice that is not rendered yet is simply absent */ }
+  }
+  bassVoice = BASS_VOICES.find((id) => banks[id]) || null;
+  keysVoice = KEYS_VOICES.find((id) => banks[id]) || null;
+}
+
+function ensureBank(id) {
+  const b = banks[id];
+  if (!b) return Promise.resolve(null);
+  if (b.loading) return b.loading;
+  const jobs = [];
+  for (const midi of b.man.notes) {
+    for (let li = 1; li <= b.man.layers; li++) {
+      for (let ri = 1; ri <= (b.man.rr || 1); ri++) {
+        const key = midi + "." + li + "." + ri;
+        jobs.push(
+          fetch(VOICES_DIR + id + "/" + key + ".wav")
+            .then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+            .then((x) => audio().decodeAudioData(x))
+            .then((buf) => { b.buffers[key] = buf; })
+            .catch(() => { /* filled from a neighbour below */ })
+        );
+      }
+    }
+  }
+  b.loading = Promise.all(jobs).then(() => { b.loaded = true; return b; });
+  return b.loading;
+}
+
+function ensureBand() {
+  const want = [];
+  if (bassOn && bassVoice) want.push(bassVoice);
+  if (keysOn && keysVoice) want.push(keysVoice);
+  return Promise.all(want.map(ensureBank)).then(() =>
+    percOn && percSet ? ensurePerc(percSet) : null);
+}
+
+async function discoverPerc() {
+  for (const id of PERC_CANDIDATES) {
+    try {
+      const r = await fetch(PERC_DIR + id + "/kit.json");
+      if (!r.ok) continue;
+      percSets[id] = { man: await r.json(), buffers: {} };
+    } catch (e) { /* a set that is not rendered yet is simply absent */ }
+  }
+  percSet = PERC_CANDIDATES.find((id) => percSets[id]) || null;
+}
+
+// The same loader as a kit's, because it is the same folder shape. Kept
+// separate rather than parameterised: a kit and a percussion set are two
+// different things that happen to be spelled the same way, and the day one of
+// them gains a field the other does not, one `if` in a shared loader is how
+// that gets missed.
+function ensurePerc(id) {
+  const p = percSets[id];
+  if (!p) return Promise.resolve(null);
+  if (p.loading) return p.loading;
+  const jobs = [];
+  for (const [voice, spec] of Object.entries(p.man.voices)) {
+    for (let li = 1; li <= spec.layers; li++) {
+      for (let ri = 1; ri <= (spec.rr || 1); ri++) {
+        const key = voice + "." + li + "." + ri;
+        jobs.push(
+          fetch(PERC_DIR + id + "/" + key + ".wav")
+            .then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+            .then((b) => audio().decodeAudioData(b))
+            .then((buf) => { p.buffers[key] = buf; })
+            .catch(() => { /* a missing round robin falls back below */ })
+        );
+      }
+    }
+  }
+  p.loading = Promise.all(jobs).then(() => { p.loaded = true; return p; });
+  return p.loading;
+}
+
+/** The sampled note this pitch is built from: the nearest, ties going down. */
+function nearestNote(notes, midi) {
+  let best = notes[0];
+  for (const n of notes) {
+    if (Math.abs(n - midi) < Math.abs(best - midi)) best = n;
+  }
+  return best;
+}
+
+/**
+ * One note of a melodic bank, ended the way the engine ends one.
+ *
+ * `dur` is how long the line holds it — until the next note — and the fade
+ * over the bank's `release_ms` is what stops that cut being a step to zero,
+ * which on a recording is a click on every note of every walking line. The
+ * curve is a raised cosine because that is the one the mixer uses.
+ */
+function bankHit(id, midi, gain, when, dur, bar, step) {
+  const b = banks[id];
+  if (!b || !b.loaded) return;
+  const layer = Math.min(gain < 0.6 ? 1 : gain < 0.9 ? 2 : 3, b.man.layers);
+  const rr = rrIndex(bar, step, 3, b.man.rr || 1);
+  const near = nearestNote(b.man.notes, midi);
+  let buf = b.buffers[near + "." + layer + "." + rr];
+  for (let l = layer; !buf && l >= 1; l--) buf = b.buffers[near + "." + l + ".1"];
+  for (let l = layer; !buf && l <= b.man.layers; l++) buf = b.buffers[near + "." + l + ".1"];
+  if (!buf) return;
+
+  const rate = Math.pow(2, (midi - near) / 12);
+  const trim = Math.pow(10, (b.man.trim_db || 0) / 20);
+  const voiceTrim = id === keysVoice ? KEYS_TRIM : (BASS_VOICE_TRIM[id] || 1);
+  let level = gain * trim * voiceTrim;
+  let at = when;
+  if (humanise) {
+    const h = hash(bar, step, 40);
+    level *= 1 + (h - 0.5) * 0.04;
+    at += h * 0.003;
+  }
+
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  src.playbackRate.value = rate;
+  const g = ctx.createGain();
+  // A note built up plays back faster and is therefore shorter than the
+  // sample it came from; whichever of the two ends first is the note.
+  const held = Math.min(dur, buf.duration / rate);
+  const rel = Math.min((b.man.release_ms || 60) / 1000, held * 0.9);
+  const curve = new Float32Array(33);
+  for (let i = 0; i < curve.length; i++) {
+    curve[i] = level * (0.5 + 0.5 * Math.cos(Math.PI * (i / (curve.length - 1))));
+  }
+  g.gain.setValueAtTime(level, at);
+  g.gain.setValueCurveAtTime(curve, at + held - rel, rel);
+  src.connect(g).connect(ctx.destination);
+  src.start(at);
+  src.stop(at + held + 0.01);
+}
+
+function say(msg) { document.getElementById("status").textContent = msg; }
+
+// --- choosing a buffer -----------------------------------------------------
+
+/** The contract's round robin: deterministic, no state. */
+function rrIndex(bar, step, voiceIndex, rr) {
+  if (rr <= 1) return 1;
+  return ((bar * STEPS + step + voiceIndex * 7) % rr) + 1;
+}
+
+/** A voice this kit has, or what the contract says to play instead. */
+function resolve(k, voice, level) {
+  const v = k.man.voices;
+  if (v[voice]) return { voice, level, extra: 1 };
+  switch (voice) {
+    case "rim":       return v.snare ? { voice: "snare", level: 3, extra: 1 } : null;
+    case "hat_pedal": return v.hat ? { voice: "hat", level: 3, extra: 0.5 } : null;
+    case "ride_bell": return v.ride ? { voice: "ride", level, extra: 1 } : null;
+    case "hat_open":  return v.hat ? { voice: "hat", level, extra: 1 } : null;
+    case "tom_lo":    return v.tom_hi ? { voice: "tom_hi", level, extra: 1 }
+                                      : (v.snare ? { voice: "snare", level: 1, extra: 0.8 } : null);
+    case "tom_hi":    return v.snare ? { voice: "snare", level: 1, extra: 0.8 } : null;
+    default:          return null;
+  }
+}
+
+function pick(k, voice, level, bar, step) {
+  const r = resolve(k, voice, level);
+  if (!r) return null;
+  const spec = k.man.voices[r.voice];
+  const layer = Math.min(LEVEL_LAYER[r.level] || 1, spec.layers);
+  const vi = Math.max(VOICES.indexOf(r.voice), 0);
+  const rr = rrIndex(bar, step, vi, spec.rr || 1);
+  let buf = k.buffers[r.voice + "." + layer + "." + rr];
+  // Fill a missing layer or round robin from the nearest one present, the way
+  // the loader does for a custom folder.
+  for (let l = layer; !buf && l >= 1; l--) buf = k.buffers[r.voice + "." + l + ".1"];
+  for (let l = layer; !buf && l <= spec.layers; l++) buf = k.buffers[r.voice + "." + l + ".1"];
+  if (!buf) return null;
+  const trim = Math.pow(10, (spec.trim_db || 0) / 20);
+  return { buf, gain: LEVEL_GAIN[r.level] * trim * r.extra };
+}
+
+// A seeded wobble, so repeats are not bit-identical but a take is reproducible.
+function hash(bar, step, vi) {
+  let h = (bar * 73856093) ^ (step * 19349663) ^ (vi * 83492791);
+  h = Math.imul(h ^ (h >>> 15), 2246822507);
+  h = Math.imul(h ^ (h >>> 13), 3266489909);
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+
+// --- scheduling ------------------------------------------------------------
+
+function hit(k, voice, level, when, bar, step) {
+  const got = pick(k, voice, level, bar, step);
+  if (!got) return;
+  const vi = Math.max(VOICES.indexOf(voice), 0);
+  let gain = got.gain, at = when;
+  if (humanise) {
+    const h = hash(bar, step, vi);
+    gain *= 1 + (h - 0.5) * 0.04;                      // +/- 2 %
+    if (!(voice === "kick" && step === 0)) at += h * 0.003;  // 0-3 ms
+  }
+  const src = ctx.createBufferSource();
+  src.buffer = got.buf;
+  const g = ctx.createGain();
+  g.gain.value = Math.max(gain, 0);
+  src.connect(g).connect(ctx.destination);
+  src.start(at);
+}
+
+/**
+ * One percussion stroke, placed where its manifest says.
+ *
+ * The level picks the layer and the round robin cycles exactly as they do for
+ * a kit, because a set is a kit-format folder — but `pan` is a field a kit
+ * does not have, and it is applied here rather than baked into the file. That
+ * is the whole reason it is a manifest field: the owner can argue with a
+ * shaker that sits too far right by changing one number, and this page plays
+ * the change without a re-render.
+ *
+ * The voice index is offset past the eleven kit voices so a percussion voice
+ * and a drum voice do not walk their round robins in lockstep — a shaker and
+ * a hi-hat landing on the same repeat every bar is audible as a pulse that
+ * neither of them is playing.
+ */
+function percHit(voice, level, when, bar, step) {
+  const p = percSets[percSet];
+  if (!p || !p.loaded) return;
+  const spec = p.man.voices[voice];
+  if (!spec) return;
+  const layer = Math.min(LEVEL_LAYER[level] || 1, spec.layers);
+  const vi = VOICES.length + Math.max(PERC_VOICES.indexOf(voice), 0);
+  const rr = rrIndex(bar, step, vi, spec.rr || 1);
+  let buf = p.buffers[voice + "." + layer + "." + rr];
+  for (let l = layer; !buf && l >= 1; l--) buf = p.buffers[voice + "." + l + ".1"];
+  for (let l = layer; !buf && l <= spec.layers; l++) buf = p.buffers[voice + "." + l + ".1"];
+  if (!buf) return;
+
+  const trim = Math.pow(10, (spec.trim_db || 0) / 20);
+  let gain = LEVEL_GAIN[level] * trim, at = when;
+  if (humanise) {
+    const h = hash(bar, step, vi);
+    gain *= 1 + (h - 0.5) * 0.04;
+    at += h * 0.003;
+  }
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  const g = ctx.createGain();
+  g.gain.value = Math.max(gain, 0);
+  const pan = +(spec.pan || 0);
+  if (pan && ctx.createStereoPanner) {
+    const pn = ctx.createStereoPanner();
+    pn.pan.value = Math.max(-1, Math.min(1, pan));
+    src.connect(g).connect(pn).connect(ctx.destination);
+  } else {
+    src.connect(g).connect(ctx.destination);
+  }
+  src.start(at);
+}
+
+function stepSeconds() { return 60 / bpm / 4; }
+
+function rows() {
+  const out = {};
+  for (const [v, hits] of Object.entries(GROOVE)) out[v] = hits.slice();
+  if (withFill) {
+    // Clear the last beat of bar 2 and put the fill there.
+    for (const v of Object.keys(out)) out[v] = out[v].filter(([s]) => s < 28);
+    for (const [v, hits] of Object.entries(FILL)) out[v] = (out[v] || []).concat(hits);
+  }
+  if (onRide) {
+    out.ride = (out.hat || []).slice();
+    delete out.hat;
+    delete out.hat_open;
+  }
+  return out;
+}
+
+/** Schedule the two bars for one kit starting at `at`. Returns its end time. */
+function scheduleBars(k, at, bar) {
+  const s = stepSeconds();
+  const table = rows();
+  for (const [voice, hits] of Object.entries(table)) {
+    for (const [step, level] of hits) hit(k, voice, level, at + step * s, bar, step);
+  }
+  // The percussionist plays under whatever kit is loaded, which is the point
+  // of the set being one folder rather than one per kit.
+  if (percOn && percSet) {
+    for (const [voice, hits] of Object.entries(PERC)) {
+      for (const [step, level] of hits) percHit(voice, level, at + step * s, bar, step);
+    }
+  }
+  // The band, over the same two bars. A note runs until the next one in its
+  // own line and the last one runs to the end of the second bar, which is
+  // what `compile_jam` does with a line's cap.
+  const span = (hits, i) => ((i + 1 < hits.length ? hits[i + 1][0] : STEPS) - hits[i][0]) * s;
+  if (bassOn && bassVoice) {
+    for (let i = 0; i < BASS.length; i++) {
+      const [step, midi, gain] = BASS[i];
+      bankHit(bassVoice, midi, gain, at + step * s, span(BASS, i), bar, step);
+    }
+  }
+  if (keysOn && keysVoice) {
+    for (let i = 0; i < KEYS.length; i++) {
+      const [step, notes, gain] = KEYS[i];
+      for (const midi of notes) {
+        bankHit(keysVoice, midi, gain, at + step * s, span(KEYS, i), bar, step);
+      }
+    }
+  }
+  return at + STEPS * s;
+}
+
+let nextTime = 0, timer = null, barIndex = 0, litFrom = 0;
+
+function pump() {
+  // Schedule anything that starts inside the next 250 ms. The kit is read
+  // fresh on every pass, so clicking a different kit takes effect at the next
+  // bar line and never at a beat — swapping mid-bar would move the groove and
+  // the groove is the one thing this page must hold constant.
+  const horizon = ctx.currentTime + 0.25;
+  while (nextTime < horizon) {
+    const id = blindOrder || (roundRobin ? order[barIndex % order.length] : current);
+    const k = kits[id];
+    if (!k || !k.loaded) { ensureKit(id); return; }
+    litFrom = nextTime;
+    nextTime = scheduleBars(k, nextTime, barIndex);
+    barIndex++;
+    if (roundRobin) setKitButtons(id);
+  }
+}
+
+function start(mode) {
+  const id = blindOrder || current;
+  const need = mode === "round" ? order : [id];
+  say("loading…");
+  Promise.all(need.map(ensureKit).concat([ensureBand()])).then(() => {
+    say("");
+    if (ctx.state === "suspended") ctx.resume();
+    stop();
+    looping = true;
+    barIndex = 0;
+    nextTime = ctx.currentTime + 0.08;
+    roundRobin = mode === "round";
+    pump();
+    timer = setInterval(pump, 60);
+    tick();
+    document.getElementById("play").textContent = "Stop";
+  }).catch((e) => {
+    document.getElementById("fileWarn").hidden = false;
+    say("could not load: " + e.message);
+  });
+}
+
+function stop() {
+  looping = false;
+  roundRobin = false;
+  if (timer) clearInterval(timer);
+  timer = null;
+  document.getElementById("play").textContent = "Play the loop";
+  paintBeats(-1);
+}
+
+// --- the beat lamps --------------------------------------------------------
+
+function paintBeats(active) {
+  document.querySelectorAll(".beat").forEach((el, i) => el.classList.toggle("lit", i === active));
+}
+
+function tick() {
+  if (!looping) return;
+  const into = ctx.currentTime - litFrom;
+  const step = Math.floor(into / stepSeconds());
+  paintBeats(step >= 0 && step < STEPS ? Math.floor(step / 4) : -1);
+  requestAnimationFrame(tick);
+}
+
+// --- UI --------------------------------------------------------------------
+
+function setKitButtons(id) {
+  document.querySelectorAll("button.kit").forEach((b) => {
+    b.classList.toggle("on", !blindOrder && b.dataset.kit === id);
+  });
+  const k = kits[id];
+  document.getElementById("credit").textContent =
+    k && k.man.credit ? k.man.credit + "  ·  " + k.man.licence : "";
+}
+
+function buildKitButtons() {
+  const el = document.getElementById("kits");
+  el.innerHTML = "";
+  for (const id of order) {
+    const k = kits[id];
+    const b = document.createElement("button");
+    b.className = "kit" + (id === current ? " on" : "");
+    b.dataset.kit = id;
+    const specs = Object.values(k.man.voices);
+    const nv = specs.length;
+    const ml = Math.max.apply(null, specs.map((s) => s.layers || 1));
+    const mr = Math.max.apply(null, specs.map((s) => s.rr || 1));
+    b.innerHTML = id + '<span class="tag">' + nv + " voices · " + ml +
+      " layer" + (ml > 1 ? "s" : "") + (mr > 1 ? " · " + mr + " rr" : "") + "</span>";
+    b.onclick = () => {
+      current = id;
+      roundRobin = false;
+      blindOrder = null;
+      document.getElementById("reveal").disabled = true;
+      say("");
+      setKitButtons(id);
+      buildVoiceButtons();
+      drawChart();
+      if (!looping) start("loop");
+    };
+    el.appendChild(b);
+  }
+}
+
+function buildVoiceButtons() {
+  const el = document.getElementById("voices");
+  el.innerHTML = "";
+  const k = kits[current];
+  for (const v of VOICES) {
+    const has = !!(k && k.man.voices[v]);
+    const b = document.createElement("button");
+    b.className = "voice" + (has ? "" : " missing");
+    b.textContent = v;
+    b.onclick = () => ensureKit(current).then(() => {
+      if (ctx.state === "suspended") ctx.resume();
+      const t = ctx.currentTime + 0.05, s = stepSeconds();
+      // Accent, then the next round robin, then the ghost: the three things a
+      // layered kit has that a single file does not.
+      hit(k, v, 2, t, 0, 0);
+      hit(k, v, 2, t + s * 2, 0, 1);
+      hit(k, v, 3, t + s * 4, 0, 2);
+    });
+    el.appendChild(b);
+  }
+}
+
+function buildBandButtons() {
+  for (const [slot, ids, holder] of [["bass", BASS_VOICES, "bassPick"],
+                                     ["keys", KEYS_VOICES, "keysPick"]]) {
+    const el = document.getElementById(holder);
+    el.innerHTML = "";
+    for (const id of ids) {
+      const have = !!banks[id];
+      const b = document.createElement("button");
+      b.className = "voice" + (have ? "" : " missing");
+      b.dataset.band = slot;
+      b.dataset.voice = id;
+      b.textContent = id.replace(/^bass_/, "");
+      if (!have) b.title = "not rendered — the engine plays the synthesised recipe";
+      b.disabled = !have;
+      b.onclick = () => {
+        if (slot === "bass") bassVoice = id; else keysVoice = id;
+        setBandButtons();
+        ensureBand();
+      };
+      el.appendChild(b);
+    }
+  }
+  setBandButtons();
+}
+
+function buildPercButtons() {
+  const pick = document.getElementById("percPick");
+  pick.innerHTML = "";
+  for (const id of PERC_CANDIDATES) {
+    const have = !!percSets[id];
+    const b = document.createElement("button");
+    b.className = "voice" + (have ? "" : " missing");
+    b.dataset.perc = id;
+    b.textContent = id;
+    if (!have) b.title = "not rendered — see scripts/sounds/recipes/perc-club.json";
+    b.disabled = !have;
+    b.onclick = () => { percSet = id; setPercButtons(); if (percOn) ensurePerc(id); };
+    pick.appendChild(b);
+  }
+
+  // Every voice the set has, not only the four the groove uses: the cowbell,
+  // the claves, the guiro, the bongos and the cabasa are in the folder and
+  // have to be judged too, and a set is ten instruments before it is a part.
+  const el = document.getElementById("percVoices");
+  el.innerHTML = "";
+  const p = percSets[percSet];
+  for (const v of PERC_VOICES) {
+    const has = !!(p && p.man.voices[v]);
+    const b = document.createElement("button");
+    b.className = "voice" + (has ? "" : " missing");
+    b.textContent = v;
+    b.onclick = () => ensurePerc(percSet).then(() => {
+      if (ctx.state === "suspended") ctx.resume();
+      const t = ctx.currentTime + 0.05, s = stepSeconds();
+      percHit(v, 2, t, 0, 0);
+      percHit(v, 2, t + s * 2, 0, 1);
+      percHit(v, 3, t + s * 4, 0, 2);
+    });
+    el.appendChild(b);
+  }
+  setPercButtons();
+}
+
+function setPercButtons() {
+  document.querySelectorAll("button[data-perc]").forEach((b) => {
+    const on = b.dataset.perc === percSet;
+    b.classList.toggle("on", on);
+    b.classList.toggle("kit", on);
+  });
+  const p = percSets[percSet];
+  document.getElementById("percNote").textContent = p
+    ? p.man.name + " — " + Object.keys(p.man.voices).length + " voices, trims " +
+      Object.values(p.man.voices).map((s) => (s.trim_db || 0).toFixed(1)).join(" / ") +
+      " dB · " + p.man.credit
+    : "no percussion set rendered";
+}
+
+function setBandButtons() {
+  document.querySelectorAll("button[data-band]").forEach((b) => {
+    const on = b.dataset.voice === (b.dataset.band === "bass" ? bassVoice : keysVoice);
+    b.classList.toggle("on", on);
+    b.classList.toggle("kit", on);
+  });
+  const bits = [];
+  for (const id of [bassVoice, keysVoice]) {
+    const b = id && banks[id];
+    if (!b) continue;
+    bits.push(b.man.name + " — " + b.man.notes.length + " notes, " + b.man.layers +
+      " layer" + (b.man.layers > 1 ? "s" : "") + (b.man.rr > 1 ? " · " + b.man.rr + " rr" : "") +
+      ", trim " + (b.man.trim_db || 0).toFixed(2) + " dB, release " + b.man.release_ms +
+      " ms · " + b.man.credit);
+  }
+  document.getElementById("bandNote").innerHTML = bits.join("<br>");
+}
+
+const beatsEl = document.getElementById("beats");
+for (let i = 0; i < 8; i++) {
+  const d = document.createElement("div");
+  d.className = "beat";
+  beatsEl.appendChild(d);
+}
+
+document.getElementById("play").onclick = () => (looping ? stop() : start("loop"));
+document.getElementById("once").onclick = () => {
+  Promise.all([ensureKit(blindOrder || current), ensureBand()]).then(([k]) => {
+    if (ctx.state === "suspended") ctx.resume();
+    stop();
+    scheduleBars(k, ctx.currentTime + 0.08, 0);
+  });
+};
+document.getElementById("round").onclick = () => {
+  blindOrder = null;
+  document.getElementById("reveal").disabled = true;
+  start("round");
+};
+document.getElementById("blind").onclick = () => {
+  blindOrder = order[Math.floor(Math.random() * order.length)];
+  document.getElementById("reveal").disabled = false;
+  document.getElementById("status").innerHTML =
+    '<span class="blind">Playing one of the ' + order.length + '. Which one is it?</span>';
+  document.querySelectorAll("button.kit").forEach((b) => b.classList.remove("on"));
+  document.getElementById("credit").textContent = "";
+  start("loop");
+};
+document.getElementById("reveal").onclick = () => {
+  const was = blindOrder;
+  blindOrder = null;
+  current = was;
+  document.getElementById("status").innerHTML =
+    'It was <span class="blind">' + was + "</span>.";
+  setKitButtons(was);
+  buildVoiceButtons();
+  document.getElementById("reveal").disabled = true;
+};
+
+const rideEl = document.getElementById("ride");
+rideEl.onchange = () => { onRide = rideEl.checked; drawChart(); };
+const fillEl = document.getElementById("fill");
+fillEl.onchange = () => { withFill = fillEl.checked; drawChart(); };
+const humanEl = document.getElementById("human");
+humanEl.onchange = () => { humanise = humanEl.checked; };
+const bassEl = document.getElementById("bassOn");
+bassEl.onchange = () => { bassOn = bassEl.checked; drawChart(); if (bassOn) ensureBand(); };
+const keysEl = document.getElementById("keysOn");
+keysEl.onchange = () => { keysOn = keysEl.checked; drawChart(); if (keysOn) ensureBand(); };
+const percEl = document.getElementById("percOn");
+percEl.onchange = () => {
+  percOn = percEl.checked;
+  drawChart();
+  if (percOn && percSet) ensurePerc(percSet);
+};
+
+const bpmEl = document.getElementById("bpm");
+bpmEl.oninput = () => {
+  bpm = +bpmEl.value;
+  document.getElementById("bpmOut").textContent = bpm;
+};
+
+// The groove chart, written out of the same table the scheduler reads so the
+// two can never disagree.
+const MARK = { 1: '<span class="lvl1">+</span>', 2: '<span class="lvl2">x</span>',
+               3: '<span class="lvl3">o</span>', 4: '<span class="lvl4">A</span>' };
+function barText(hits, bar) {
+  const at = new Map(hits.map(([s, l]) => [s, l]));
+  const cells = [];
+  for (let i = 0; i < 16; i++) {
+    const l = at.get(bar * 16 + i);
+    cells.push(l ? MARK[l] : "·");
+    if (i % 4 === 3) cells.push(" ");
+  }
+  return cells.join("");
+}
+function drawChart() {
+  const chart = document.getElementById("chart");
+  chart.innerHTML = "";
+  const k = kits[current];
+  const table = rows();
+  for (const v of VOICES) {
+    const hits = table[v];
+    if (!hits || !hits.length) continue;
+    const spec = k && k.man.voices[v];
+    const tr = document.createElement("tr");
+    tr.innerHTML =
+      "<td>" + v + (spec ? "" : ' <span class="lvl3">(fallback)</span>') + "</td>" +
+      "<td><code>" + barText(hits, 0) + "</code></td>" +
+      "<td><code>" + barText(hits, 1) + "</code></td>" +
+      '<td class="num">' + (spec ? (spec.trim_db || 0).toFixed(1) : "—") + "</td>";
+    chart.appendChild(tr);
+  }
+  // The band's two lines, written as pitches rather than as levels: what a
+  // melodic line carries is notes, and the level is the one number beside it.
+  const NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+  const name = (m) => NAMES[m % 12] + (Math.floor(m / 12) - 1);
+  const bandRow = (label, hits, pitch, bank) => {
+    const at = new Map(hits.map((h) => [h[0], h]));
+    const cell = (bar) => {
+      const out = [];
+      for (let i = 0; i < 16; i++) {
+        const h = at.get(bar * 16 + i);
+        out.push(h ? '<span class="lvl2">' + pitch(h) + "</span>" : "·");
+        if (i % 4 === 3) out.push(" ");
+      }
+      return out.join(" ");
+    };
+    const tr = document.createElement("tr");
+    tr.innerHTML =
+      "<td>" + label + (bank ? "" : ' <span class="lvl3">(synthesised)</span>') + "</td>" +
+      "<td><code>" + cell(0) + "</code></td>" +
+      "<td><code>" + cell(1) + "</code></td>" +
+      '<td class="num">' + (bank ? (bank.man.trim_db || 0).toFixed(1) : "—") + "</td>";
+    chart.appendChild(tr);
+  };
+  if (bassOn) bandRow("bass", BASS, (h) => name(h[1]), banks[bassVoice]);
+  if (keysOn) bandRow("keys", KEYS, (h) => name(h[1][0]), banks[keysVoice]);
+  // The percussion rows, written out of the same table the scheduler reads.
+  // The trim column is the set's own, because that is what makes a shaker on
+  // every sixteenth a texture instead of a hiss.
+  if (percOn) {
+    const p = percSets[percSet];
+    for (const v of PERC_VOICES) {
+      const hits = PERC[v];
+      if (!hits) continue;
+      const spec = p && p.man.voices[v];
+      const tr = document.createElement("tr");
+      tr.innerHTML =
+        "<td>" + v + (spec ? "" : ' <span class="lvl3">(not rendered)</span>') + "</td>" +
+        "<td><code>" + barText(hits, 0) + "</code></td>" +
+        "<td><code>" + barText(hits, 1) + "</code></td>" +
+        '<td class="num">' + (spec ? (spec.trim_db || 0).toFixed(1) : "—") + "</td>";
+      chart.appendChild(tr);
+    }
+  }
+}
+
+if (location.protocol === "file:") {
+  document.getElementById("fileWarn").hidden = false;
+}
+
+discover().then(discoverVoices).then(discoverPerc).then(() => {
+  current = order[0];
+  buildKitButtons();
+  setKitButtons(current);
+  buildVoiceButtons();
+  buildBandButtons();
+  buildPercButtons();
+  drawChart();
+}).catch(() => {
+  document.getElementById("fileWarn").hidden = false;
+});
+</script>
+</body>
+</html>

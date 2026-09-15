@@ -1,0 +1,69 @@
+{
+  "id": "club",
+  "name": "Club",
+  "credit": "Virtuosity Drums \u2014 Versilian Studios and Karoryfer Samples, performed by Austin McMahon",
+  "licence": "CC0-1.0",
+  "rate": 48000,
+  "channels": 2,
+  "voices": {
+    "kick": {
+      "layers": 4,
+      "rr": 3,
+      "trim_db": -4.5
+    },
+    "snare": {
+      "layers": 4,
+      "rr": 3,
+      "trim_db": 0.0
+    },
+    "rim": {
+      "layers": 2,
+      "rr": 2,
+      "trim_db": -2.0
+    },
+    "hat": {
+      "layers": 4,
+      "rr": 3,
+      "trim_db": -3.8
+    },
+    "hat_open": {
+      "layers": 3,
+      "rr": 2,
+      "trim_db": -3.0,
+      "choked_by": [
+        "hat",
+        "hat_pedal"
+      ]
+    },
+    "hat_pedal": {
+      "layers": 2,
+      "rr": 2,
+      "trim_db": -12.3
+    },
+    "ride": {
+      "layers": 3,
+      "rr": 3,
+      "trim_db": 0.0
+    },
+    "ride_bell": {
+      "layers": 2,
+      "rr": 2,
+      "trim_db": -7.0
+    },
+    "crash": {
+      "layers": 3,
+      "rr": 2,
+      "trim_db": -13.7
+    },
+    "tom_hi": {
+      "layers": 3,
+      "rr": 2,
+      "trim_db": -4.9
+    },
+    "tom_lo": {
+      "layers": 3,
+      "rr": 2,
+      "trim_db": -3.6
+    }
+  }
+}

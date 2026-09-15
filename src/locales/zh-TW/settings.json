@@ -138,6 +138,9 @@
     "devices": {
       "title": "裝置",
       "audioOutput": "音訊輸出",
+      "outputPair": "輸出",
+      "outputsPair": "輸出 {{a}}-{{b}}",
+      "outputPairFallback": "此裝置只提供兩個輸出，所以節拍聲從輸出 1-2 播放。",
       "refreshAudio": "重新整理音訊裝置",
       "btLatencyWarning": "藍牙音訊延遲明顯。視覺提示與聲音可能無法完美同步。",
       "audioInput": "音訊輸入",
@@ -173,7 +176,8 @@
       "groups": {
         "metronome": "節拍器",
         "view": "檢視",
-        "navigation": "導航"
+        "navigation": "導航",
+        "jam": "即興"
       },
       "actions": {
         "play": "播放／停止",
@@ -195,9 +199,19 @@
         "tab-1": "節拍器分頁",
         "tab-2": "曲目單分頁",
         "tab-3": "變速練習分頁",
+        "tab-4": "即興伴奏分頁",
         "settings": "設定",
         "toggle-sidebar": "切換側邊欄",
-        "toggle-coach": "切換教練"
+        "toggle-coach": "切換教練",
+        "jam-next-groove": "下一個律動",
+        "jam-prev-groove": "上一個律動",
+        "jam-trade": "輪奏",
+        "jam-dropout": "留白小節",
+        "jam-next-shape": "下一個和弦指型",
+        "jam-next-section": "下一段",
+        "jam-prev-section": "上一段",
+        "jam-loop-section": "循環這一段",
+        "jam-take": "錄下這一遍"
       },
       "descs": {
         "play": "開始或停止節拍器",
@@ -219,9 +233,19 @@
         "tab-1": "切換到節拍器分頁",
         "tab-2": "切換到曲目單分頁",
         "tab-3": "切換到變速練習分頁",
+        "tab-4": "切換到即興伴奏分頁",
         "settings": "開啟或關閉設定",
         "toggle-sidebar": "摺疊或展開左側邊欄",
-        "toggle-coach": "開啟或關閉練習教練面板"
+        "toggle-coach": "開啟或關閉練習教練面板",
+        "jam-next-groove": "手不離開樂器就切到下一個律動",
+        "jam-prev-groove": "退回上一個律動",
+        "jam-trade": "開啟或關閉輪奏——樂團四小節，你四小節",
+        "jam-dropout": "開啟或關閉留白小節",
+        "jam-next-shape": "逐一翻看目前和弦的按法",
+        "jam-next-section": "在小節線上跳到下一段的開頭",
+        "jam-prev-section": "在小節線上退回上一段的開頭",
+        "jam-loop-section": "把正在演奏的這一段循環起來，或取消循環",
+        "jam-take": "下次按播放時錄音，或停止錄音"
       }
     },
     "inputTest": {
@@ -272,6 +296,8 @@
       "updating": "更新中…",
       "upToDate": "已是最新 ✓",
       "checkUpdates": "檢查更新",
+      "sounds": "音色",
+      "soundsCredit": "俱樂部鼓組是 Versilian Studios 與 Karoryfer Samples 的 Virtuosity Drums，由 Austin McMahon 演奏（公有領域）。錄音室鼓組是 DrumGizmo 專案的 DRSKit（CC BY 4.0）。",
       "madeWith": "用 {{heart}} 為全世界的音樂人打造"
     }
   },

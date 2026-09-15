@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "Métronome",
     "setlist": "Setlist",
-    "drill": "Rampe"
+    "drill": "Rampe",
+    "jam": "Jam"
   },
   "tooltip": {
     "zen": "Zen",
@@ -24,6 +25,7 @@
     "title": "Préréglages",
     "titleDrill": "Rampes",
     "titleSetlist": "Setlists",
+    "titleJam": "Jams",
     "saveCurrent": "Enregistrer les réglages actuels",
     "search": "Rechercher dans la bibliothèque",
     "searchPlaceholder": "Rechercher…",

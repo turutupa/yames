@@ -153,6 +153,15 @@
       "midiPlugged": {
         "body": "Er is een MIDI-apparaat verbonden maar niets toegewezen. Pedaal aan Afspelen/Stoppen koppelen?",
         "action": "Sneltoetsen openen"
+      },
+      "jamSheets": {
+        "body": "Instellen verandert de band; Akkoorden is je spiekbriefje."
+      },
+      "jamLive": {
+        "body": "Alles hier gaat in bij de volgende maat."
+      },
+      "jamArrangement": {
+        "body": "De band bouwt op en breekt af, helemaal zelf — Lus onder Instellen zet dat uit."
       }
     },
     "tour": {

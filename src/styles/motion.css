@@ -1,0 +1,221 @@
+/* motion.css — one vocabulary for everything that appears.
+
+   plans/JAM_UX_DECISIONS.md A11, in the owner's words: "clicking on chords
+   just shows the sidebar but it should smoothly do the entry animation."
+   Before this file every surface either popped into existence or invented its
+   own timing, and the app read as several apps.
+
+   Two durations and one curve, declared once. An enter is longer than an exit
+   because arriving is the part you are meant to notice and leaving is the part
+   you are meant to forget. The curve is `ViewTransition`'s "subtle" easing —
+   reused rather than invented, so a sheet sliding in and a view changing under
+   it move to the same rhythm.
+
+   The keyframes come in pairs and nothing else in the app should write its
+   own. A surface picks a pair by class and `Presence` drives the state:
+
+     .motion-sheet   a sheet docked to the right — slides in, slides out
+     .motion-scrim   the dim behind a sheet — fades
+     .motion-drawer  a drawer at the bottom — rises, sinks
+     .motion-unfold  a section that opens in place — fades and lifts 6px
+
+   Nothing INSIDE a surface animates on its own: the sheet moves, its content
+   does not. A cheat sheet whose cards shuffle is the thing A8 removed. */
+
+:root {
+  --motion-enter: 240ms;
+  --motion-exit: 160ms;
+  /* `--view-enter-easing` at the "subtle" level in transitions.css. Written
+     out rather than referenced because that variable is redefined per theme
+     and per animation level, and a sheet should not slide differently in
+     Aurora than it does in Ash. */
+  --motion-ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* ── The pairs ──────────────────────────────────────────────────────────── */
+
+@keyframes sheet-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes sheet-out {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scrim-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes drawer-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes drawer-out {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes unfold-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes unfold-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* ── What wears them ────────────────────────────────────────────────────── */
+
+.motion-sheet[data-state="entering"] {
+  animation: sheet-in var(--motion-enter) var(--motion-ease) both;
+}
+
+.motion-sheet[data-state="exiting"] {
+  animation: sheet-out var(--motion-exit) var(--motion-ease) both;
+}
+
+.motion-scrim[data-state="entering"] {
+  animation: scrim-in var(--motion-enter) var(--motion-ease) both;
+}
+
+.motion-scrim[data-state="exiting"] {
+  animation: scrim-out var(--motion-exit) var(--motion-ease) both;
+}
+
+.motion-drawer[data-state="entering"] {
+  animation: drawer-in var(--motion-enter) var(--motion-ease) both;
+}
+
+.motion-drawer[data-state="exiting"] {
+  animation: drawer-out var(--motion-exit) var(--motion-ease) both;
+}
+
+.motion-unfold[data-state="entering"] {
+  animation: unfold-in var(--motion-enter) var(--motion-ease) both;
+}
+
+.motion-unfold[data-state="exiting"] {
+  animation: unfold-out var(--motion-exit) var(--motion-ease) both;
+}
+
+/* A surface on its way out is a picture of itself, not a control. Without
+   this, the 160 ms of a sheet sliding away is 160 ms in which its Done button
+   can still be pressed and the groove editor can still be typed into — and
+   the editor's Reset closes the drawer by clearing the groove it is showing,
+   so a click landing there would be a click on stale music. */
+.motion-sheet[data-state="exiting"],
+.motion-scrim[data-state="exiting"],
+.motion-drawer[data-state="exiting"],
+.motion-unfold[data-state="exiting"] {
+  pointer-events: none;
+}
+
+@keyframes swap-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Switching Set up for Chords swaps what is INSIDE the docked frame; the
+   frame itself does not move (A11). A short fade on the new content, an exit
+   long rather than an enter long, because nothing is arriving from anywhere —
+   it is already in front of you and only the words have changed. */
+.motion-swap {
+  animation: swap-in var(--motion-exit) var(--motion-ease) both;
+}
+
+/* A section that only ever arrives — the Colours degree groups, which come
+   and go with the flavour rather than with a switch of their own. They have
+   no exit to wait for, so they need no `Presence` behind them: the keyframe
+   runs once, at mount, and that is the whole of it. */
+.motion-arrives {
+  animation: unfold-in var(--motion-enter) var(--motion-ease) both;
+}
+
+/* ── The three ways to say no ───────────────────────────────────────────────
+   The OS setting, the app's own View transitions "off", and the Mono theme.
+   `Presence` already answers all three in JavaScript — it mounts and unmounts
+   in one frame with no `entering` or `exiting` to see — so these rules are the
+   second lock on the same door: a surface that somehow reaches the browser
+   with a state on it still appears and vanishes in one frame, as it did
+   before A11.
+
+   By class rather than by `[data-state]`, which two older things in the app
+   already use for something else entirely — the trade cue and the setlist
+   player's segments. Only what wears one of the classes above is this file's
+   to switch off. */
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-sheet,
+  .motion-scrim,
+  .motion-drawer,
+  .motion-unfold,
+  .motion-arrives,
+  .motion-swap {
+    animation: none !important;
+  }
+}
+
+/* Both shapes, because `Presence` writes the theme onto the animating element
+   itself while `ViewTransition` writes it onto an ancestor. */
+[data-theme-transition="mono"] .motion-sheet,
+[data-theme-transition="mono"] .motion-scrim,
+[data-theme-transition="mono"] .motion-drawer,
+[data-theme-transition="mono"] .motion-unfold,
+[data-theme-transition="mono"] .motion-arrives,
+[data-theme-transition="mono"] .motion-swap,
+[data-theme-transition="mono"].motion-sheet,
+[data-theme-transition="mono"].motion-scrim,
+[data-theme-transition="mono"].motion-drawer,
+[data-theme-transition="mono"].motion-unfold {
+  animation: none !important;
+}

@@ -4,6 +4,8 @@
     "untitled": "Nuova scaletta",
     "newSetlist": "Nuova scaletta",
     "deleteSetlist": "Elimina scaletta",
+    "duplicateSetlist": "Duplica scaletta",
+    "copyName": "{{name}} copia",
     "librarySteps": "{{count}} passi",
     "librarySteps_one": "{{count}} passo",
     "librarySteps_other": "{{count}} passi",
@@ -22,6 +24,14 @@
     "moveLater": "Sposta questo passo dopo",
     "duplicateStep": "Duplica questo passo",
     "removeStep": "Rimuovi questo passo",
+    "reorderHint": "Trascina per riordinare",
+    "stopToReorder": "Ferma la scaletta per riordinare",
+    "duplicateSteps": "Duplica {{count}} passi",
+    "duplicateSteps_one": "Duplica {{count}} passo",
+    "duplicateSteps_other": "Duplica {{count}} passi",
+    "removeSteps": "Rimuovi {{count}} passi",
+    "removeSteps_one": "Rimuovi {{count}} passo",
+    "removeSteps_other": "Rimuovi {{count}} passi",
     "barOf": "battuta {{current}} di {{total}}",
     "timeLeft": "{{duration}} rimasti",
     "waitingForYou": "in attesa di te",
@@ -128,6 +138,17 @@
       "beats_other": "{{count}} movimenti",
       "fewer": "Meno movimenti di intro",
       "more": "Più movimenti di intro"
+    },
+    "jam": {
+      "mark": "Questo passo è un jam",
+      "addStep": "Aggiungi un jam",
+      "addTo": "Aggiungi alla scaletta…",
+      "barsOfForm": "{{count}} battute",
+      "barsOfForm_one": "{{count}} battuta",
+      "barsOfForm_other": "{{count}} battute",
+      "said": "la band",
+      "goneShort": "Il jam non c'è più",
+      "gone": "Quel jam non è più nella libreria, quindi questo passo suona il clic che descrive."
     }
   }
 }

@@ -1,6 +1,23 @@
 """Rebuild the metronome samples from their originals, and synthesise the ones
 that have no original.
 
+THIS SCRIPT NO LONGER OWNS WOOD OR SNARE. Since 2026-09-14 both are
+RECORDINGS, cut from Virtuosity Drums and from the Studio kit by
+`scripts/sounds/render_click.py`, which is their generator of record along
+with the new `sticks_*`, `cowbell_*` and `kit_*`. They are gone from `TARGETS`
+and from `SYNTH` so that re-running this script cannot quietly overwrite a
+recording with the synthesis it replaced — which is the only way this file
+could still do damage.
+
+What is left here is click, beep, drum, the drum body and the two chimes.
+
+Points 4, 5 and 6 below, and `_snare` / `snare_high` / `snare_low` further
+down, are KEPT AND ARE NOT RUN. They are the record of a kit that was
+rejected three times and of what each rejection cost, they are what
+`engine.rs` points at when it explains why this kit's two sounds have to be
+the same drum, and `render_click.py` had to learn every one of those lessons
+again from a recording. Deleting them would delete the reasons.
+
 WHAT THIS FIXES, and how it was found: every number below came from measuring
 the shipped files, not from listening. See the commit that introduced this
 script for the full table.
@@ -193,9 +210,10 @@ SND = os.path.join("src-tauri", "sounds")
 SR = 44100
 FADE_MS = 4.0
 
+# No `wood_*`: the wood block is a recording now and `render_click.py` lands
+# its tails itself. Left here it would be faded a second time on every run.
 TARGETS = [
     "click_low.wav", "click_high.wav",
-    "wood_low.wav", "wood_high.wav",
     "beep_low.wav", "beep_high.wav",
     "drum_low.wav", "drum_high.wav",
     "drum_metal.wav", "drum_crash.wav",
@@ -265,7 +283,11 @@ def rebuild(name):
 # is what makes this stage safe to re-run, unlike the transform stage above.
 # ---------------------------------------------------------------------------
 
-SYNTH = ["drum_body.wav", "snare_low.wav", "snare_high.wav"]
+# `snare_low` and `snare_high` are NOT in here any more — see the top of the
+# file. Their recipes are still below, and `synthesise` still answers for
+# them, so anyone comparing the recording against what it replaced can render
+# the old pair by name; nothing reaches them from `main`.
+SYNTH = ["drum_body.wav"]
 
 
 def _noise(n, seed):

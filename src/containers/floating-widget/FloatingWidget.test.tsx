@@ -33,6 +33,8 @@ async function emitBeat(beat: Partial<BeatEvent>) {
         subdivision: 0,
         isDownbeat: true,
         isAccent: false,
+        formBar: 0,
+        chorus: 1,
         ...beat,
       },
     });

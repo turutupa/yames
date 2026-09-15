@@ -2,7 +2,8 @@
   "nav": {
     "metronome": "Máy đếm nhịp",
     "setlist": "Setlist",
-    "drill": "Luyện tempo"
+    "drill": "Luyện tempo",
+    "jam": "Jam"
   },
   "tooltip": {
     "zen": "Thiền",
@@ -24,6 +25,7 @@
     "title": "Cài đặt sẵn",
     "titleDrill": "Bài luyện tempo",
     "titleSetlist": "Setlist",
+    "titleJam": "Jam",
     "saveCurrent": "Lưu cài đặt hiện tại",
     "search": "Tìm trong thư viện",
     "searchPlaceholder": "Tìm kiếm...",

@@ -41,6 +41,8 @@ function beatEvent(n: number): BeatEvent {
     subdivision: 0,
     isDownbeat: n % 4 === 0,
     isAccent: n % 4 === 0,
+    formBar: 0,
+    chorus: 1,
   };
 }
 

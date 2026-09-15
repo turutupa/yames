@@ -73,6 +73,19 @@ export function AboutSection({
         </div>
       </div>
       <div className="about-footer-divider"></div>
+      {/*
+        Where the drums came from. The two recorded kits are other people's
+        work under licences that ask to be named, and one of those licences
+        (CC BY 4.0, for the Studio kit) makes naming them a condition rather
+        than a courtesy — so the line is here, in the About screen, where the
+        rest of what this app is made of is written down. The kit names, the
+        people and the licence ids are not translated: they are what they are
+        called.
+      */}
+      <p className="about-sounds">
+        <span className="about-sounds-title">{t("settings.about.sounds")}</span>{" "}
+        {t("settings.about.soundsCredit")}
+      </p>
       <p className="about-footer">
         {t("settings.about.madeWith", { heart: "♥" })}
       </p>

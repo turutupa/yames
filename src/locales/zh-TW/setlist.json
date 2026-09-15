@@ -4,6 +4,8 @@
     "untitled": "新增曲目單",
     "newSetlist": "新增曲目單",
     "deleteSetlist": "刪除曲目單",
+    "duplicateSetlist": "複製曲目單",
+    "copyName": "{{name}} 複本",
     "librarySteps": "{{count}} 步",
     "librarySteps_one": "{{count}} 步",
     "librarySteps_other": "{{count}} 步",
@@ -22,6 +24,14 @@
     "moveLater": "把這一步往後移",
     "duplicateStep": "複製這一步",
     "removeStep": "刪除這一步",
+    "reorderHint": "拖曳以重新排序",
+    "stopToReorder": "停止曲目單後才能重新排序",
+    "duplicateSteps": "複製 {{count}} 步",
+    "duplicateSteps_one": "複製 {{count}} 步",
+    "duplicateSteps_other": "複製 {{count}} 步",
+    "removeSteps": "刪除 {{count}} 步",
+    "removeSteps_one": "刪除 {{count}} 步",
+    "removeSteps_other": "刪除 {{count}} 步",
     "barOf": "第 {{current}} / {{total}} 小節",
     "timeLeft": "還剩 {{duration}}",
     "waitingForYou": "等你示意",
@@ -128,6 +138,17 @@
       "beats_other": "{{count}} 拍",
       "fewer": "減少預備拍",
       "more": "增加預備拍"
+    },
+    "jam": {
+      "mark": "這一步是即興伴奏",
+      "addStep": "新增即興伴奏",
+      "addTo": "加入曲目單…",
+      "barsOfForm": "{{count}} 小節",
+      "barsOfForm_one": "{{count}} 小節",
+      "barsOfForm_other": "{{count}} 小節",
+      "said": "樂團",
+      "goneShort": "即興伴奏已不在",
+      "gone": "那個即興伴奏已不在書庫裡，所以這一步只會按它寫的節拍器聲音來響。"
     }
   }
 }
