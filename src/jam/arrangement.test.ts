@@ -740,3 +740,62 @@ describe("compileJam applies the moment", () => {
     }
   });
 });
+
+describe("the percussionist's two states", () => {
+  const latin = (arrangement: JamArrangement) =>
+    createJam("latin", {
+      grooveId: "bossa",
+      form: { kind: "blues12", bars: 12 },
+      key: "Am",
+      band: { drums: true, bass: false, keys: false, perc: true },
+      fills: true,
+      arrangement,
+    });
+
+  it("plays on every bar of a loop", () => {
+    for (let bar = 0; bar < 12; bar += 1) {
+      expect(bandMoment(latin({ mode: "loop" }), 3, bar).perc, `bar ${bar}`).toBe("full");
+    }
+  });
+
+  it("keeps playing through a breakdown, where the kit does not", () => {
+    // The whole reason this is its own field. The drummer comes down to the
+    // kick and the hats; the shaker and the congas are what is still keeping
+    // time, and a band with nobody keeping time is not a breakdown, it is a
+    // stop.
+    const moment = bandMoment(latin({ mode: "build", breakdownEvery: 2 }), 2, 0);
+    expect(moment.drums).toBe("hatsAndKick");
+    expect(moment.perc).toBe("full");
+  });
+
+  it("stops on a stop-time bar and on the ending", () => {
+    const blues = createJam("blues", {
+      grooveId: "bluesRhumba",
+      form: { kind: "blues12", bars: 12 },
+      band: { drums: true, bass: false, keys: false, perc: true },
+      arrangement: { mode: "song", choruses: 2, breakdownEvery: 0 },
+    });
+    // The last bar of the last chorus is the ending.
+    const ending = bandMoment(blues, 2, 11);
+    expect(ending.ending).toBeDefined();
+    expect(ending.perc).toBe("off");
+    // And every bar that is not one of those two keeps the player in.
+    expect(bandMoment(blues, 2, 4).perc).toBe("full");
+  });
+
+  it("counts as a change the engine has to be told about", () => {
+    // `momentKey` is what decides whether a new table waits for the bar line.
+    // A percussionist dropping out mid-bar would be exactly the artefact
+    // `applyAt` exists to prevent.
+    const playing: BandMoment = {
+      intensity: "normal",
+      drums: "full",
+      perc: "full",
+      bass: "full",
+      keys: "full",
+      fill: "none",
+      crash: false,
+    };
+    expect(sameMoment(playing, { ...playing, perc: "off" })).toBe(false);
+  });
+});

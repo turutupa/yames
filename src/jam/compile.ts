@@ -277,6 +277,27 @@ function percRowsOf(pattern: JamPattern): Partial<Record<JamPercLane, JamLevel[]
 }
 
 /**
+ * The same pattern with the percussion rows taken off, or the same object when
+ * it had none.
+ *
+ * Needed because the groove's bar arrives here WITH its rows on it — that is
+ * where they are written — and the question of whether they sound is decided
+ * one layer up, by the record and the arrangement. So the compiler takes them
+ * off unconditionally and puts back the ones that are playing, rather than
+ * leaving a path (a loop, where nothing reshapes the drums) on which they
+ * reach the engine because nobody removed them.
+ *
+ * The same object where nothing changes, so a re-render that recompiles does
+ * not hand the engine a new table that is the same table.
+ */
+function withoutPerc(pattern: JamPattern): JamPattern {
+  if (!JAM_PERC_LANES.some((lane) => pattern[lane] !== undefined)) return pattern;
+  const out = { ...pattern };
+  for (const lane of JAM_PERC_LANES) delete out[lane];
+  return out;
+}
+
+/**
  * Does this pattern have a percussionist written into it?
  *
  * The band row on the playing screen and the switch in the sheet both ask it:
@@ -636,7 +657,11 @@ export function compileJam(jam: Jam, options: JamCompileOptions = {}): JamEngine
   const percHired = jamBand(jam, options.lineup).perc === true;
   const percOn = percHired && !drumsOff && (!arranged || moment.perc === "full");
   const percussion = percOn ? percRowsOf(groove.bar) : null;
-  const bar = percussion ? { ...crashed, ...percussion } : crashed;
+  // Off first, then back on. Under `loop` nothing above this line reshapes the
+  // drums at all, so the groove's own rows would otherwise arrive at the
+  // engine having been decided by nobody.
+  const kit = withoutPerc(crashed);
+  const bar = percussion ? { ...kit, ...percussion } : kit;
   /**
    * The engine's own fill machinery, off under an arrangement.
    *

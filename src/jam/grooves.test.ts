@@ -1047,7 +1047,9 @@ describe("the percussionist's parts", () => {
     const file = path.resolve(process.cwd(), "src/jam/grooves.ts");
     const source = readFileSync(file, "utf8");
     const silent = GROOVES.length - GROOVES.filter((g) => percLanesOf(g.bar).length).length;
-    expect(source.match(/Percussion:/g) ?? []).toHaveLength(GROOVES.length);
-    expect(source.match(/Percussion: none/g) ?? []).toHaveLength(silent);
+    // Anchored to the comment blocks' own indentation, so the file header's
+    // mention of the convention is not counted as one of the lines.
+    expect(source.match(/^ {5}Percussion: /gm) ?? []).toHaveLength(GROOVES.length);
+    expect(source.match(/^ {5}Percussion: none/gm) ?? []).toHaveLength(silent);
   });
 });

@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 import { applyFeel } from "./feel";
 import { GROOVES, grooveById, grooveTickCount, ruleGroove } from "./grooves";
 import { applyIntensity, applyIntensityToGroove, isOffBeat } from "./intensity";
-import { JAM_LANES } from "./types";
+import { JAM_LANES, JAM_PERC_LANES } from "./types";
 import type { JamIntensity, JamPattern } from "./types";
 
 const EVERY: readonly JamIntensity[] = ["soft", "normal", "loud"];
@@ -405,5 +405,60 @@ describe("an empty table", () => {
     expect(up.kick).toEqual([0, 0, 0, 0]);
     const down = applyIntensity(empty, "soft", meter);
     for (const lane of JAM_LANES) expect(down[lane], lane).toEqual([0, 0, 0, 0]);
+  });
+});
+
+describe("the percussionist", () => {
+  it("keeps every percussion row exactly as long as it was", () => {
+    // The same rule as the drums, and the same consequence for breaking it.
+    for (const g of GROOVES) {
+      const ticks = grooveTickCount(g);
+      for (const intensity of EVERY) {
+        const out = applyIntensity(g.bar, intensity, meterOf(g));
+        for (const lane of JAM_PERC_LANES) {
+          if (!g.bar[lane]) {
+            expect(out[lane], `${g.id} ${lane} invented`).toBeUndefined();
+            continue;
+          }
+          expect(out[lane], `${g.id} ${intensity} ${lane}`).toHaveLength(ticks);
+        }
+      }
+    }
+  });
+
+  it("closes the shaker and the cabasa the way it closes the hat", () => {
+    // Soft turns an accent into a hit on the two rows that play a running
+    // subdivision — the percussionist's hi-hat.
+    for (const id of ["bossa", "worldRockers"]) {
+      const g = grooveById(id);
+      const lane = g.bar.shaker ? "shaker" : "cabasa";
+      const soft = applyIntensity(g.bar, "soft", meterOf(g));
+      expect((g.bar[lane] as number[]).includes(2), `${id} starts with accents`).toBe(true);
+      expect((soft[lane] as number[]).includes(2), `${id} soft keeps an accent`).toBe(false);
+    }
+  });
+
+  it("leaves a clave, a tumbao and a tambourine exactly as written", () => {
+    // A figure softened until its accents are gone is not a quiet figure, it
+    // is a different one. Only the timekeeping rows follow the hat.
+    const clave = grooveById("latinBossa23");
+    expect(applyIntensity(clave.bar, "soft", meterOf(clave)).claves).toEqual(clave.bar.claves);
+    const tumbao = grooveById("mambo");
+    expect(applyIntensity(tumbao.bar, "soft", meterOf(tumbao)).congaHi).toEqual(
+      tumbao.bar.congaHi,
+    );
+    const tamb = grooveById("popBallad");
+    expect(applyIntensity(tamb.bar, "soft", meterOf(tamb)).tambourine).toEqual(
+      tamb.bar.tambourine,
+    );
+  });
+
+  it("raises the percussion's ghosts to hits when the band plays loud", () => {
+    // The one rule that is about hands rather than about drums, so it reaches
+    // every row including the figures.
+    const g = grooveById("bossa");
+    const loud = applyIntensity(g.bar, "loud", meterOf(g));
+    expect((g.bar.shaker as number[]).includes(3)).toBe(true);
+    expect((loud.shaker as number[]).includes(3)).toBe(false);
   });
 });
