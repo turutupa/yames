@@ -668,3 +668,30 @@ fn frequency_by_autocorrelation(buf: &[f32], sr: u32, expect: f64) -> f64 {
     sr as f64 / (best.1 as f64 + refine)
 }
 
+
+/// See `kit::tests::one_key_decodes_once_however_many_threads_ask`: the
+/// same rule for the melodic banks, whose ids the bass signature hashes.
+#[test]
+fn one_voice_key_builds_once_however_many_threads_ask() {
+    if super::shipped_ids().is_empty() {
+        eprintln!("[voices] no shipped banks, nothing to check");
+        return;
+    }
+    let cache = std::sync::Arc::new(super::VoiceCache::default());
+    let threads: Vec<_> = (0..6)
+        .map(|_| {
+            let cache = cache.clone();
+            std::thread::spawn(move || cache.shipped(0, 48_000, 28, 55).unwrap().id)
+        })
+        .collect();
+    let ids: Vec<u64> = threads.into_iter().map(|t| t.join().unwrap()).collect();
+    assert!(ids.windows(2).all(|w| w[0] == w[1]), "one bank, ids {ids:?}");
+    let first = ids[0];
+    // Four other keys push the first out of the four entries. One-note
+    // ranges, so the filler builds cost a fraction of a second each.
+    for note in [40u8, 41, 42, 43] {
+        cache.shipped(0, 48_000, note, note).unwrap();
+    }
+    let again = cache.shipped(0, 48_000, 28, 55).unwrap().id;
+    assert_eq!(first, again, "evicted and rebuilt, it is the same bank");
+}

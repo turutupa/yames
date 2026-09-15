@@ -727,7 +727,7 @@ fn build_bank(
 // ---------------------------------------------------------------------------
 
 /// What a cached bank was built from.
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Hash)]
 enum Key {
     /// A shipped voice, by index, rate and the range it was built for.
     /// Nothing about it can change while the app runs.
@@ -762,21 +762,50 @@ pub struct VoiceCache {
     entries: Mutex<Vec<(Key, Arc<MelodicBank>)>>,
 }
 
-impl VoiceCache {
-    fn cached(&self, key: &Key) -> Option<Arc<MelodicBank>> {
-        let mut slot = self.entries.lock().ok()?;
-        let at = slot.iter().position(|(k, _)| k == key)?;
-        let entry = slot.remove(at);
-        let bank = entry.1.clone();
-        slot.insert(0, entry);
-        Some(bank)
+impl MelodicBank {
+    /// The same bank under a different identity — the cache's key, so a
+    /// bank built twice is one bank. See `kit::KitBank::with_id`.
+    pub(crate) fn with_id(mut self, id: u64) -> Self {
+        self.id = id;
+        self
     }
+}
 
-    fn store(&self, key: Key, bank: Arc<MelodicBank>) {
-        if let Ok(mut slot) = self.entries.lock() {
-            slot.insert(0, (key, bank));
-            slot.truncate(CACHE_ENTRIES);
+/// See `kit::stable_id`: the same key, the same number.
+fn stable_id(key: &Key, salt: u64) -> u64 {
+    use std::hash::{Hash, Hasher};
+    let mut h = std::collections::hash_map::DefaultHasher::new();
+    salt.hash(&mut h);
+    key.hash(&mut h);
+    h.finish()
+}
+
+impl VoiceCache {
+    /// The bank for `key`, built with `load` only when the cache does not
+    /// hold it. The lock is held through the build and the id is the key's:
+    /// see `kit::KitCache::fetch` for why both, and for what the tests saw
+    /// when neither was true — the same bass under two ids, and a bar-line
+    /// handshake that called it a different player.
+    fn fetch(
+        &self,
+        key: Key,
+        salt: u64,
+        load: impl FnOnce() -> Result<MelodicBank, String>,
+    ) -> Result<Arc<MelodicBank>, String> {
+        let mut slot = self
+            .entries
+            .lock()
+            .map_err(|_| "the voice cache could not be read".to_string())?;
+        if let Some(at) = slot.iter().position(|(k, _)| *k == key) {
+            let entry = slot.remove(at);
+            let bank = entry.1.clone();
+            slot.insert(0, entry);
+            return Ok(bank);
         }
+        let bank = Arc::new(load()?.with_id(stable_id(&key, salt)));
+        slot.insert(0, (key, bank.clone()));
+        slot.truncate(CACHE_ENTRIES);
+        Ok(bank)
     }
 
     /// One of the voices the app ships, at this rate and over this range.
@@ -787,13 +816,9 @@ impl VoiceCache {
         low: u8,
         high: u8,
     ) -> Result<Arc<MelodicBank>, String> {
-        let key = Key::Shipped(index, rate, low, high);
-        if let Some(bank) = self.cached(&key) {
-            return Ok(bank);
-        }
-        let bank = Arc::new(load_shipped(index, rate, low, high)?);
-        self.store(key, bank.clone());
-        Ok(bank)
+        self.fetch(Key::Shipped(index, rate, low, high), 0x766f_6963_65, || {
+            load_shipped(index, rate, low, high)
+        })
     }
 
     /// The bank for this folder, built only if the folder, one of its files,
@@ -807,12 +832,7 @@ impl VoiceCache {
         high: u8,
     ) -> Result<Arc<MelodicBank>, String> {
         let key = key_for(dir, rate, low, high)?;
-        if let Some(bank) = self.cached(&key) {
-            return Ok(bank);
-        }
-        let bank = Arc::new(load(dir, rate, low, high)?);
-        self.store(key, bank.clone());
-        Ok(bank)
+        self.fetch(key, 0x7666_6f6c_6465_72, || load(dir, rate, low, high))
     }
 }
 

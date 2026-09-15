@@ -417,7 +417,15 @@ pub fn save_window_position(label: String, x: i32, y: i32, app_handle: AppHandle
 /// Snare stored "click" and the metronome carried on playing the old kit,
 /// with nothing anywhere reporting a problem. `sound_types_match_the_ui` in
 /// the test module holds the two lists together now.
-pub const SOUND_TYPES: [&str; 5] = ["click", "wood", "beep", "drum", "snare"];
+///
+/// THE ORDER IS THE MENU'S ORDER and `sound_types_match_the_ui` compares the
+/// two as sequences, not as sets — so this is not alphabetical and not the
+/// order the kits were added. It is the order the owner asked the menu to
+/// read in: the two ticks, then the two tones, then the three kits, with
+/// the bell last.
+pub const SOUND_TYPES: [&str; 8] = [
+    "click", "sticks", "wood", "beep", "drum", "kit", "snare", "cowbell",
+];
 
 #[tauri::command]
 pub fn set_sound_type(sound_type: String, state: State<SharedState>, app_handle: AppHandle) {
