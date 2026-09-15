@@ -18,6 +18,8 @@
 // twenty-five — the ones a reader can hold in their head — and everything
 // after them is held by rules that apply to all of it.
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import {
   GROOVES,
   GROOVE_FAMILIES,
@@ -30,7 +32,7 @@ import {
   DEFAULT_GROOVE_ID,
 } from "./grooves";
 import type { Groove } from "./grooves";
-import { JAM_LANES, JAM_OPTIONAL_LANES } from "./types";
+import { JAM_LANES, JAM_OPTIONAL_LANES, JAM_PERC_LANES } from "./types";
 import type { JamLevel } from "./types";
 
 /** The twenty-five the third pass left, which several checks still name. */
@@ -859,5 +861,193 @@ describe("looking a groove up", () => {
 
   it("finds every groove it ships", () => {
     for (const g of GROOVES) expect(grooveById(g.id)).toBe(g);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The percussionist (fifth pass, plans/tasks/jam-v5/BRIEF.md)
+// ---------------------------------------------------------------------------
+//
+// The contract names, family by family, where a percussionist belongs, and the
+// counts below are that contract written as numbers. Exact rather than "at
+// least", deliberately: the failure worth catching is not a groove with too
+// few percussion rows, it is a shaker arriving on a thrash bar because
+// whatever wrote it found that easy.
+
+/** Which percussion rows a groove's bar carries, in the contract's order. */
+function percLanesOf(pattern: Groove["bar"]): string[] {
+  return JAM_PERC_LANES.filter((lane) => pattern[lane] !== undefined);
+}
+
+function withPercussion(family: string): Groove[] {
+  return GROOVES.filter((g) => g.family === family && percLanesOf(g.bar).length > 0);
+}
+
+/**
+ * The son clave, both ways round, on a bar of sixteenths.
+ *
+ * The only two patterns a `claves` row may play on a sixteenth groove. Which
+ * TICKS speak is what is compared and not the levels: a clave player leans on
+ * different strokes in different musics, but move one stroke and it is the
+ * other clave, which is a different dance.
+ */
+const SON_CLAVE_3_2 = [0, 3, 6, 10, 12];
+const SON_CLAVE_2_3 = [2, 4, 8, 11, 14];
+
+describe("the percussionist's parts", () => {
+  it("gives every percussion row exactly the bar's width", () => {
+    // The same reason as the drums: a row of the wrong length is a table the
+    // engine refuses, and it refuses it by playing the plain click.
+    for (const g of GROOVES) {
+      const width = grooveTickCount(g);
+      for (const lane of percLanesOf(g.bar)) {
+        expect(g.bar[lane as "shaker"], `${g.id} bar.${lane}`).toHaveLength(width);
+      }
+    }
+  });
+
+  it("never writes a percussion row of one level", () => {
+    // The W28 rule, applied to the second player. A shaker of identical
+    // accents is the same tell as a hat row of them: nobody played it.
+    for (const g of GROOVES) {
+      for (const lane of percLanesOf(g.bar)) {
+        const row = g.bar[lane as "shaker"] as JamLevel[];
+        const struck = new Set(row.filter((level) => level !== 0));
+        expect(struck.size, `${g.id} ${lane} levels`).toBeGreaterThan(1);
+      }
+    }
+  });
+
+  it("writes only the five levels on the percussion rows too", () => {
+    for (const g of GROOVES) {
+      for (const lane of percLanesOf(g.bar)) {
+        for (const level of g.bar[lane as "shaker"] as JamLevel[]) {
+          expect([0, 1, 2, 3, 4], `${g.id} ${lane}`).toContain(level);
+        }
+      }
+    }
+  });
+
+  it("plays one of the two son claves wherever claves are written in sixteenths", () => {
+    // Scoped to sixteenths because that is the only grid a son clave fits on:
+    // its second stroke is the "a" of one, and a bar of eighths has nowhere to
+    // put it. The one eighth-note claves row in the file — the tango's
+    // three-three-two — is a different figure, and its comment says so.
+    for (const g of GROOVES) {
+      const row = g.bar.claves;
+      if (!row || g.ticksPerBeat !== 4) continue;
+      const struck = row.flatMap((level, tick) => (level !== 0 ? [tick] : []));
+      const matches = [SON_CLAVE_3_2, SON_CLAVE_2_3].some(
+        (clave) => clave.length === struck.length && clave.every((t, i) => t === struck[i]),
+      );
+      expect(matches, `${g.id} claves at ${struck.join(",")}`).toBe(true);
+    }
+  });
+
+  it("gives the tumbao its open tones on four and the 'and' of four", () => {
+    // The one figure the contract spells out stroke by stroke. Every groove
+    // whose comment says "tumbao" puts the two open tones — the loudest
+    // strokes on the high conga — in the last beat of the bar, and the bar is
+    // not a tumbao without them.
+    for (const id of ["chaCha", "mambo", "latinCascara", "latinSongo", "funkBoogaloo"]) {
+      const g = grooveById(id);
+      const row = g.bar.congaHi!;
+      const four = grooveTickCount(g) - g.ticksPerBeat;
+      const andOfFour = four + Math.floor(g.ticksPerBeat / 2);
+      expect(row[four], `${id} open tone on four`).toBe(2);
+      expect(row[andOfFour], `${id} open tone on the "and" of four`).toBe(2);
+    }
+  });
+
+  it("gives the martillo eight strokes with the accent on the open low bongo", () => {
+    for (const id of ["latinSon", "latinBolero"]) {
+      const g = grooveById(id);
+      const hi = g.bar.bongoHi!;
+      expect(hi.filter((level) => level !== 0), `${id} martillo strokes`).toHaveLength(8);
+      // The macho never takes the accent; the accent is what the low drum is
+      // for, and that is the whole shape of a martillo.
+      expect(hi.includes(2), `${id} macho stays under the accent`).toBe(false);
+      expect(g.bar.bongoLo![0], `${id} open low on the one`).toBe(2);
+    }
+  });
+
+  it("puts the tambourine's accent on a backbeat with a lighter stroke in front", () => {
+    // The contract's rule for the pop end of the library: two and four are the
+    // accents, and the stroke before each is the shake that says a hand is
+    // moving rather than landing.
+    for (const id of ["popBallad", "popIndie", "bluesRhumba", "rockMotorik", "funkSoul"]) {
+      const g = grooveById(id);
+      const row = g.bar.tambourine!;
+      const accents = row.flatMap((level, tick) => (level === 2 ? [tick] : []));
+      expect(accents.length, `${id} tambourine accents`).toBe(2);
+      for (const at of accents) {
+        expect(at % g.ticksPerBeat, `${id} accent lands on a beat`).toBe(0);
+        expect(row[at - 1], `${id} shake before the accent`).not.toBe(0);
+        expect(row[at - 1], `${id} shake lighter than the accent`).not.toBe(2);
+      }
+    }
+  });
+
+  it("gives each family exactly the count the contract names", () => {
+    const counts: Record<string, number> = {
+      latin: 14,
+      world: 13,
+      funk: 14,
+      pop: 14,
+      blues: 1,
+      rock: 1,
+      jazz: 1,
+      country: 0,
+      metal: 0,
+    };
+    for (const family of GROOVE_FAMILIES) {
+      expect(withPercussion(family).length, family).toBe(counts[family]);
+    }
+  });
+
+  it("names the three grooves outside latin, world, funk and pop that get one", () => {
+    // Small enough to write down, and worth writing down: an exception nobody
+    // enumerated is a rule nobody has.
+    expect(withPercussion("rock").map((g) => g.id)).toEqual(["rockMotorik"]);
+    expect(withPercussion("blues").map((g) => g.id)).toEqual(["bluesRhumba"]);
+    expect(withPercussion("jazz").map((g) => g.id)).toEqual(["jazzSoulJazz"]);
+  });
+
+  it("leaves the train beat and the bluegrass bar alone, as the contract asks", () => {
+    for (const id of ["train", "countryBluegrass"]) {
+      expect(percLanesOf(grooveById(id).bar), id).toEqual([]);
+    }
+  });
+
+  it("uses all ten voices somewhere in the library", () => {
+    // A voice nobody plays is a sample in the installer for nothing.
+    for (const lane of JAM_PERC_LANES) {
+      expect(
+        GROOVES.some((g) => g.bar[lane] !== undefined),
+        `${lane} is played by nobody`,
+      ).toBe(true);
+    }
+  });
+
+  it("keeps the percussion out of the fills", () => {
+    // A fill is the DRUMMER leaving the groove; the percussionist stays in it.
+    // `compileJam` carries the bar's rows across the fill, so a fill with rows
+    // of its own would be two shakers for one bar every time round the form.
+    for (const g of GROOVES) {
+      expect(percLanesOf(g.fill), `${g.id} fill`).toEqual([]);
+    }
+  });
+
+  it("says what the percussionist is doing over every single groove", () => {
+    // The parts that have one say what it is; the ones that do not say why
+    // not. The SOURCE is read rather than the export, because the comment is
+    // the thing being checked, and a comment is the one part of this file a
+    // type cannot hold in place.
+    // Vitest runs from the project root, as `i18n.locales.test.ts` relies on.
+    const file = path.resolve(process.cwd(), "src/jam/grooves.ts");
+    const source = readFileSync(file, "utf8");
+    const silent = GROOVES.length - GROOVES.filter((g) => percLanesOf(g.bar).length).length;
+    expect(source.match(/Percussion:/g) ?? []).toHaveLength(GROOVES.length);
+    expect(source.match(/Percussion: none/g) ?? []).toHaveLength(silent);
   });
 });
