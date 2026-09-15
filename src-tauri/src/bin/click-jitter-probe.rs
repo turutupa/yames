@@ -88,7 +88,7 @@ use std::time::Duration;
 
 use yames_lib::probe::{
     compile_jam, compile_jam_with_voices, create_beat_log,
-    create_shared_state, load_kit, load_voice_bank, reference_bank, CallbackProbe, CallbackSample,
+    create_shared_state, load_kit, load_voice_bank, perc_ids, reference_bank, CallbackProbe, CallbackSample,
     JamBassLine, JamConfig, JamKeysLine, JamMix, JamPattern, JamPosition, JamVoices, KitBank,
     MelodicBank, MetronomeEngine, TakeRing, TakeSession, TakeStart,
 };
@@ -570,6 +570,23 @@ fn busiest_jam() -> JamConfig {
             // solid in the fill below, which is where a drummer puts them.
             tom_hi: vec![0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0],
             tom_lo: vec![0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+            // THE PERCUSSIONIST, all ten rows of them. Nobody writes a
+            // groove with a shaker, a cabasa, a guiro, two congas, two
+            // bongos, a cowbell, a tambourine AND claves in it — this is
+            // the worst bar the table can describe, which is the only bar
+            // the gate is about. Levels vary per row so each one reaches a
+            // different layer of the set, and the two-round-robin voices
+            // step through both.
+            shaker: vec![2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1],
+            tambourine: vec![0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0],
+            cowbell: vec![2, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 2, 0, 0, 0],
+            cabasa: vec![1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2],
+            claves: vec![2, 0, 0, 1, 0, 0, 1, 0, 0, 0, 2, 0, 0, 2, 0, 0],
+            guiro: vec![0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 2, 0],
+            conga_hi: vec![0, 3, 0, 2, 0, 3, 0, 4, 0, 3, 0, 2, 0, 3, 0, 4],
+            conga_lo: vec![1, 0, 2, 0, 1, 0, 2, 0, 1, 0, 2, 0, 1, 0, 2, 0],
+            bongo_hi: vec![0, 0, 3, 0, 0, 2, 0, 0, 3, 0, 0, 2, 0, 0, 3, 0],
+            bongo_lo: vec![0, 2, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 2, 0, 0],
             ..Default::default()
         },
         // Every lane on every tick: the worst bar the table can describe.
@@ -586,6 +603,21 @@ fn busiest_jam() -> JamConfig {
             crash: vec![0; 16],
             tom_hi: vec![4; 16],
             tom_lo: vec![4; 16],
+            // And the percussionist on every tick of it, at the top level:
+            // ten more voices spawning on every sixteenth, on top of a bar
+            // that was already the worst one the table can hold. This is
+            // what the caps in `jam.rs` are for and the number the gate
+            // reports.
+            shaker: vec![4; 16],
+            tambourine: vec![4; 16],
+            cowbell: vec![4; 16],
+            cabasa: vec![4; 16],
+            claves: vec![4; 16],
+            guiro: vec![4; 16],
+            conga_hi: vec![4; 16],
+            conga_lo: vec![4; 16],
+            bongo_hi: vec![4; 16],
+            bongo_lo: vec![4; 16],
             ..Default::default()
         }),
         form_bars: 4,
@@ -632,7 +664,7 @@ fn busiest_jam() -> JamConfig {
             drums: 1.5,
             bass: 1.5,
             keys: 1.5,
-            perc: 1.0,
+            perc: 1.5,
         }),
         count_in_sound: None,
         bass_voice: None,
@@ -763,6 +795,17 @@ fn main() -> ExitCode {
         }
         None => None,
     };
+
+    // WHICH PERCUSSION SET the band is playing, said out loud. The ten
+    // rows in `busiest_jam` are silent on a checkout with no `sounds/perc`
+    // in it, and a gate that measured a band with no percussionist without
+    // saying so would be a gate reporting the wrong band.
+    match perc_ids().first() {
+        Some(id) => eprintln!("[probe] percussion set: {id}, under every kit"),
+        None => eprintln!(
+            "[probe] no percussion set is shipped: the ten percussion rows are SILENT"
+        ),
+    }
 
     // `--jam-voice`: recorded bass and keys, built HERE for the reason the
     // kit is decoded here — a bank's notes are built at the OUTPUT rate, and

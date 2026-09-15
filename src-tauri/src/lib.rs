@@ -55,7 +55,7 @@ pub mod probe {
     /// thread actually reads — including `--jam-kit <dir>`, a folder of the
     /// musician's own samples, which is the one that was never in the
     /// binary at all.
-    pub use crate::kit::{load as load_kit, KitBank, KitVoice};
+    pub use crate::kit::{load as load_kit, perc_ids, KitBank, KitVoice};
     /// The take recorder. `--jam-take` runs one during the measurement, so
     /// the gate covers the ring the output callback writes into and the
     /// writer thread draining it to disk underneath the stream.

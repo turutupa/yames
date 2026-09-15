@@ -6854,3 +6854,543 @@ mod band_tests {
         assert!(table.pickup_tick(1).is_none());
     }
 }
+
+// ---------------------------------------------------------------------------
+// The percussionist
+// ---------------------------------------------------------------------------
+
+/// `plans/tasks/jam-v5/BRIEF.md` — the ten rows, the set behind them, the
+/// band flag and the mix.
+///
+/// **Every test here builds its own set.** The shipped one is a folder
+/// (`sounds/perc/*`) rendered by a tool, and a checkout may not have it —
+/// so a test that reached for the real set would be a test that passes on
+/// one machine and quietly checks nothing on another. What these are about
+/// is the ENGINE: which bank a lane resolves against, what the flag does,
+/// what the mix does, what a bar that writes nothing does. The shipped
+/// folder has one test of its own, in `kit/tests.rs`, and it says so when it
+/// has nothing to check.
+#[cfg(test)]
+mod perc_tests {
+    use super::*;
+    use crate::engine::KitVoice;
+
+    /// A percussion set: the ten voices, one layer, one round robin.
+    fn set() -> Arc<KitBank> {
+        Arc::new(KitBank::for_tests(&KitVoice::PERC, JAM_REFERENCE_SR, 0.05))
+    }
+
+    /// And a drum kit to play it under.
+    fn kit() -> Arc<KitBank> {
+        Arc::new(KitBank::for_tests(&KitVoice::DRUMS, JAM_REFERENCE_SR, 0.05))
+    }
+
+    /// A latin-ish bar at eighths: a drummer, a clave and a tumbao.
+    fn with_perc() -> JamConfig {
+        JamConfig {
+            ticks_per_beat: 2,
+            beats_per_bar: 4,
+            bar: JamPattern {
+                kick: vec![1, 0, 0, 0, 1, 0, 0, 0],
+                snare: vec![0; 8],
+                hat: vec![1, 3, 1, 3, 1, 3, 1, 3],
+                ride: vec![0; 8],
+                crash: vec![0; 8],
+                // Strong and weak, never a row of one level — the W28 rule.
+                shaker: vec![2, 1, 2, 1, 2, 1, 2, 1],
+                claves: vec![2, 0, 0, 1, 0, 1, 0, 0],
+                conga_hi: vec![0, 3, 0, 2, 0, 3, 0, 2],
+                conga_lo: vec![1, 0, 2, 0, 1, 0, 2, 0],
+                ..Default::default()
+            },
+            fill: None,
+            form_bars: 4,
+            crash_on_one: false,
+            intensity: 1.0,
+            kit: "room".to_string(),
+            ..Default::default()
+        }
+    }
+
+    /// Which voice a lane resolved to on tick `t`, or `None` for a lane that
+    /// made no slot at all.
+    fn lane_voice(table: &JamTable, t: u32, lane: JamLane) -> Option<KitVoice> {
+        table
+            .tick(t, 0)
+            .expect("in the bar")
+            .slots()
+            .iter()
+            .find(|s| s.lane == lane)
+            .and_then(|s| match s.sound {
+                SoundId::Band { voice, .. } => KitVoice::ALL.get(voice as usize).copied(),
+                _ => None,
+            })
+    }
+
+    fn slot(table: &JamTable, t: u32, lane: JamLane) -> Option<JamSlot> {
+        table
+            .tick(t, 0)
+            .expect("in the bar")
+            .slots()
+            .iter()
+            .find(|s| s.lane == lane)
+            .copied()
+    }
+
+    /// Every percussion lane, for the tests that ask "did any of them play".
+    fn perc_lanes() -> impl Iterator<Item = JamLane> {
+        OPTIONAL_LANES.into_iter().filter(|l| l.is_perc())
+    }
+
+    /// THE CONTRACT'S TEN NAMES, OFF THE WIRE.
+    ///
+    /// camelCase for the two-word ones, because that is what `rename_all`
+    /// makes of `conga_hi` and what `src/jam/types.ts` spells. This is the
+    /// one test that would catch a row renamed on one side of the wire and
+    /// not the other, which arrives as a silent lane rather than as an
+    /// error.
+    #[test]
+    fn the_ten_rows_arrive_under_the_contracts_own_names() {
+        let json = serde_json::json!({
+            "ticksPerBeat": 1,
+            "beatsPerBar": 4,
+            "bar": {
+                "kick": [1, 0, 0, 0],
+                "snare": [0, 0, 2, 0],
+                "hat": [1, 1, 1, 1],
+                "ride": [0, 0, 0, 0],
+                "crash": [0, 0, 0, 0],
+                "shaker": [1, 2, 1, 2],
+                "tambourine": [0, 2, 0, 2],
+                "cowbell": [2, 0, 1, 0],
+                "cabasa": [1, 1, 2, 1],
+                "claves": [2, 0, 0, 1],
+                "guiro": [0, 1, 0, 2],
+                "congaHi": [0, 3, 0, 2],
+                "congaLo": [1, 0, 2, 0],
+                "bongoHi": [0, 1, 0, 2],
+                "bongoLo": [2, 0, 1, 0],
+            },
+            "formBars": 4,
+            "crashOnOne": false,
+            "intensity": 1.0,
+            "kit": "room",
+            "perc": true,
+            "mix": { "drums": 1.0, "bass": 1.0, "keys": 1.0, "perc": 0.8 },
+        });
+        let cfg: JamConfig = serde_json::from_value(json).expect("the contract's own spelling");
+        assert_eq!(cfg.perc, Some(true));
+        assert_eq!(cfg.mix.expect("a mix").perc, 0.8);
+        assert_eq!(cfg.bar.conga_hi, vec![0, 3, 0, 2]);
+        assert_eq!(cfg.bar.bongo_lo, vec![2, 0, 1, 0]);
+
+        // And every one of them reaches its own voice.
+        let table = compile_with_perc(&cfg, kit(), Some(set())).expect("compiles");
+        let want = [
+            (JamLane::Shaker, KitVoice::Shaker, 0),
+            (JamLane::Tambourine, KitVoice::Tambourine, 1),
+            (JamLane::Cowbell, KitVoice::Cowbell, 0),
+            (JamLane::Cabasa, KitVoice::Cabasa, 0),
+            (JamLane::Claves, KitVoice::Claves, 0),
+            (JamLane::Guiro, KitVoice::Guiro, 1),
+            (JamLane::CongaHi, KitVoice::CongaHi, 1),
+            (JamLane::CongaLo, KitVoice::CongaLo, 0),
+            (JamLane::BongoHi, KitVoice::BongoHi, 1),
+            (JamLane::BongoLo, KitVoice::BongoLo, 0),
+        ];
+        for (lane, voice, tick) in want {
+            assert_eq!(
+                lane_voice(&table, tick, lane),
+                Some(voice),
+                "{} did not reach {}",
+                lane.name(),
+                voice.file_name()
+            );
+        }
+    }
+
+    /// A MISSING SET IS A SILENT ROW, AND NOTHING ELSE.
+    ///
+    /// The promise a checkout without `sounds/perc` lives on: the build
+    /// works, the jam loads, the percussion lanes play nothing, and the
+    /// drummer plays exactly what a groove with no percussion rows in it
+    /// would have played. Compared table against table, tick by tick, so
+    /// "untouched" is a fact rather than a hope.
+    #[test]
+    fn with_no_set_the_lanes_are_silent_and_the_drums_are_untouched() {
+        let cfg = with_perc();
+        let without = compile_with_perc(&cfg, kit(), None).expect("compiles with no set");
+        for lane in perc_lanes() {
+            for t in 0..8 {
+                assert!(
+                    slot(&without, t, lane).is_none(),
+                    "{} played with no set behind it",
+                    lane.name()
+                );
+            }
+        }
+
+        // The same config with the percussion rows deleted, which is the
+        // band this has to be identical to.
+        let mut bare = cfg.clone();
+        bare.bar = JamPattern {
+            shaker: Vec::new(),
+            claves: Vec::new(),
+            conga_hi: Vec::new(),
+            conga_lo: Vec::new(),
+            ..cfg.bar.clone()
+        };
+        let plain = compile_with_perc(&bare, kit(), None).expect("compiles");
+        for t in 0..8 {
+            assert_eq!(
+                without.tick(t, 0).unwrap().slots(),
+                plain.tick(t, 0).unwrap().slots(),
+                "tick {t} of the drums moved when the percussion went missing"
+            );
+        }
+        assert_eq!(without.base_peak, plain.base_peak);
+    }
+
+    /// THE BAND FLAG SILENCES THE ROWS AND NOTHING ELSE.
+    ///
+    /// Muting a player is not remixing the band: the drums, the levels and
+    /// the normalisation all have to come out what they were with the
+    /// percussionist standing there. The comparison is against the same
+    /// config with the rows deleted rather than against itself, so a flag
+    /// that quietly rescaled the drums would fail here.
+    #[test]
+    fn switching_the_percussionist_off_takes_away_the_rows_and_nothing_else() {
+        let mut off = with_perc();
+        off.perc = Some(false);
+        let off = compile_with_perc(&off, kit(), Some(set())).expect("compiles");
+
+        let mut bare = with_perc();
+        bare.bar = JamPattern {
+            shaker: Vec::new(),
+            claves: Vec::new(),
+            conga_hi: Vec::new(),
+            conga_lo: Vec::new(),
+            ..with_perc().bar
+        };
+        let bare = compile_with_perc(&bare, kit(), Some(set())).expect("compiles");
+
+        for t in 0..8 {
+            assert_eq!(
+                off.tick(t, 0).unwrap().slots(),
+                bare.tick(t, 0).unwrap().slots(),
+                "tick {t} is not the same band with the percussionist switched off"
+            );
+        }
+        assert_eq!(off.base_peak, bare.base_peak);
+
+        // And absent is not off: a jam saved before the flag existed still
+        // has its percussionist.
+        let mut unsaid = with_perc();
+        unsaid.perc = None;
+        let unsaid = compile_with_perc(&unsaid, kit(), Some(set())).expect("compiles");
+        assert!(
+            slot(&unsaid, 0, JamLane::Shaker).is_some(),
+            "a jam that says nothing about the percussionist lost one"
+        );
+        assert!(
+            slot(&unsaid, 0, JamLane::Claves).is_some(),
+            "a jam that says nothing about the percussionist lost the clave"
+        );
+    }
+
+    /// THE MIX SCALES THE PERCUSSION AND LEAVES THE DRUMMER WHERE HE IS.
+    ///
+    /// Two dials, two rows in the band. Half on `mix.perc` is half on every
+    /// percussion slot and exactly nothing on the kick beside it.
+    #[test]
+    fn the_perc_mix_scales_the_percussion_and_only_the_percussion() {
+        let full = compile_with_perc(&with_perc(), kit(), Some(set())).expect("compiles");
+        let mut half = with_perc();
+        half.mix = Some(JamMix {
+            perc: 0.5,
+            ..JamMix::default()
+        });
+        let half = compile_with_perc(&half, kit(), Some(set())).expect("compiles");
+
+        for lane in [
+            JamLane::Shaker,
+            JamLane::Claves,
+            JamLane::CongaHi,
+            JamLane::CongaLo,
+        ] {
+            let (a, b) = (0..8)
+                .filter_map(|t| Some((slot(&full, t, lane)?, slot(&half, t, lane)?)))
+                .next()
+                .unwrap_or_else(|| panic!("{} never played", lane.name()));
+            assert!(
+                (b.gain - a.gain * 0.5).abs() < 1e-6,
+                "{} came out at {} against {} at half the mix",
+                lane.name(),
+                b.gain,
+                a.gain * 0.5
+            );
+        }
+        let kick_full = slot(&full, 0, JamLane::Kick).expect("a kick");
+        let kick_half = slot(&half, 0, JamLane::Kick).expect("a kick");
+        assert_eq!(
+            kick_full.gain, kick_half.gain,
+            "the drummer moved when the percussion mix did"
+        );
+    }
+
+    /// A STOP-TIME BAR DROPS THE PERCUSSIONIST TOO.
+    ///
+    /// Stop-time is the downbeat and silence after it, written by the
+    /// arrangement into the rows it sends (`BandMoment.perc` is `off`
+    /// there). What this holds is the engine's half: nothing in here keeps a
+    /// percussion lane alive across a bar that does not write it. Every row
+    /// is read cell by cell, exactly as the drums are, and a row of zeros
+    /// makes no slot.
+    #[test]
+    fn a_stop_time_bar_leaves_the_downbeat_and_nothing_after_it() {
+        let mut cfg = with_perc();
+        let hit = |mut v: Vec<u8>| {
+            for c in v.iter_mut().skip(1) {
+                *c = 0;
+            }
+            v
+        };
+        cfg.bar = JamPattern {
+            kick: hit(cfg.bar.kick.clone()),
+            snare: vec![0; 8],
+            hat: vec![0; 8],
+            ride: vec![0; 8],
+            crash: vec![0; 8],
+            shaker: vec![0; 8],
+            claves: hit(cfg.bar.claves.clone()),
+            conga_hi: vec![0; 8],
+            conga_lo: vec![0; 8],
+            ..Default::default()
+        };
+        let table = compile_with_perc(&cfg, kit(), Some(set())).expect("compiles");
+        assert!(slot(&table, 0, JamLane::Claves).is_some(), "the downbeat");
+        for t in 1..8 {
+            for lane in perc_lanes() {
+                assert!(
+                    slot(&table, t, lane).is_none(),
+                    "{} played on tick {t} of a stop-time bar",
+                    lane.name()
+                );
+            }
+        }
+    }
+
+    /// THE FOUR-BAR RENDER COUNTS THE PERCUSSION.
+    ///
+    /// The measurement behind the safety clamp walks the table's slots and
+    /// reads each one's samples out of the bank the voice belongs to. If it
+    /// read the percussion out of the drum kit — where those slots are
+    /// `None` — ten rows would measure as silence, and a table that really
+    /// is loud would go to the bus unscaled. So a band with a percussionist
+    /// has to render LOUDER than the same band without one.
+    #[test]
+    fn the_worst_tick_is_measured_with_the_percussion_in_it() {
+        let with = compile_with_perc(&with_perc(), kit(), Some(set())).expect("compiles");
+        let mut bare = with_perc();
+        bare.perc = Some(false);
+        let bare = compile_with_perc(&bare, kit(), Some(set())).expect("compiles");
+        assert!(
+            with.base_peak > bare.base_peak,
+            "four bars with a shaker, a clave and two congas in them measured \
+             {} against {} without — the render is not reading the set",
+            with.base_peak,
+            bare.base_peak
+        );
+    }
+
+    /// A PERCUSSION VOICE THE SET HAS NOT GOT IS SILENCE, NOT A SUBSTITUTE.
+    ///
+    /// The drums substitute because their voices are one instrument played
+    /// differently — a cross-stick is a snare. A tray is ten instruments,
+    /// and a cowbell standing in for a guiro is the wrong one. See
+    /// `kit::fallback_for`.
+    #[test]
+    fn a_voice_the_set_has_not_got_plays_nothing() {
+        let partial = Arc::new(KitBank::for_tests(
+            &[KitVoice::Shaker, KitVoice::CongaHi, KitVoice::CongaLo],
+            JAM_REFERENCE_SR,
+            0.05,
+        ));
+        let table = compile_with_perc(&with_perc(), kit(), Some(partial)).expect("compiles");
+        assert!(
+            slot(&table, 0, JamLane::Shaker).is_some(),
+            "the shaker is there"
+        );
+        for t in 0..8 {
+            assert!(
+                slot(&table, t, JamLane::Claves).is_none(),
+                "a set with no claves played one anyway on tick {t}"
+            );
+        }
+    }
+
+    /// THE SET IS ITS OWN BANK, AND THE DRUMS ARE THE KIT'S.
+    ///
+    /// The whole design in one assertion: one voice index space, two banks,
+    /// and the index says which. A percussion slot names a voice at or past
+    /// `DRUM_VOICES` — which is what `jam_sample` reads on the audio thread —
+    /// and a drum's names one below it.
+    #[test]
+    fn a_percussion_slot_names_a_voice_the_drum_kit_does_not_have() {
+        let table = compile_with_perc(&with_perc(), kit(), Some(set())).expect("compiles");
+        let shaker = slot(&table, 0, JamLane::Shaker).expect("a shaker");
+        let kick = slot(&table, 0, JamLane::Kick).expect("a kick");
+        assert!(shaker.voice as usize >= crate::kit::DRUM_VOICES);
+        assert!((kick.voice as usize) < crate::kit::DRUM_VOICES);
+        assert!(
+            table.kit_bank().sample(shaker.voice, 0, 0).is_empty(),
+            "the drum kit answered for a shaker"
+        );
+        assert!(
+            !table
+                .perc_bank()
+                .expect("a set")
+                .sample(shaker.voice, 0, 0)
+                .is_empty(),
+            "the set had nothing for its own shaker"
+        );
+    }
+
+    /// A SHAKER'S TWO FILES ALTERNATE BY THE SAME FORMULA THE DRUMS USE.
+    ///
+    /// The contract asks for it by name ("a shaker's two files alternate by
+    /// it"), and it is the same [`round_robin`] arithmetic with no state on
+    /// the audio thread — so the second of two round robins is reached, and
+    /// the same bar and tick give the same answer every time round the form.
+    #[test]
+    fn a_shakers_round_robins_alternate_and_repeat() {
+        let two = Arc::new(KitBank::layered_for_tests(
+            &KitVoice::PERC,
+            JAM_REFERENCE_SR,
+            0.05,
+            1,
+            2,
+        ));
+        let table = compile_with_perc(&with_perc(), kit(), Some(two)).expect("compiles");
+        let s = slot(&table, 0, JamLane::Shaker).expect("a shaker");
+        assert_eq!(s.rr, 2, "the table did not carry the set's round robins");
+        let seen: std::collections::BTreeSet<u8> =
+            (0..8).map(|t| round_robin(0, 8, t, s.voice, s.rr)).collect();
+        assert_eq!(seen.len(), 2, "one of the shaker's two files never plays");
+        assert_eq!(
+            round_robin(3, 8, 5, s.voice, s.rr),
+            round_robin(3, 8, 5, s.voice, s.rr),
+            "the same bar and tick gave two answers"
+        );
+    }
+
+    /// THE LEVELS ARE THE LEVELS, AND A GHOST IS A DIFFERENT RECORDING.
+    ///
+    /// A muted conga is layer 1 of the open one — the contract's own words —
+    /// so a level 3 on the conga row has to reach the softest layer the set
+    /// has, exactly as a ghost snare reaches the softest snare. That is the
+    /// whole reason `conga_muted` is a layer and not an eleventh row.
+    #[test]
+    fn a_ghost_on_the_conga_reaches_the_muted_stroke() {
+        let layered = Arc::new(KitBank::layered_for_tests(
+            &KitVoice::PERC,
+            JAM_REFERENCE_SR,
+            0.05,
+            3,
+            1,
+        ));
+        let table = compile_with_perc(&with_perc(), kit(), Some(layered)).expect("compiles");
+        // `conga_hi` is a ghost on tick 1 and an accent on tick 3.
+        let ghost = slot(&table, 1, JamLane::CongaHi).expect("a ghost conga");
+        let accent = slot(&table, 3, JamLane::CongaHi).expect("an accent conga");
+        let layer = |s: JamSlot| match s.sound {
+            SoundId::Band { layer, .. } => layer,
+            _ => panic!("a conga is a drum"),
+        };
+        assert_eq!(layer(ghost), 0, "the ghost is not the softest stroke");
+        assert!(
+            layer(accent) > layer(ghost),
+            "an accent and a ghost came out of the same recording"
+        );
+    }
+
+    /// EVERY PERCUSSION LANE IS BOUNDED.
+    ///
+    /// The arithmetic behind [`PERC_CAP_TICKS`]: ten rows a groove may write
+    /// on every tick, against a mixer that preallocates its voices. An
+    /// uncapped percussion lane is not a balance that went wrong, it is a
+    /// table the callback cannot play — so no percussion slot may carry the
+    /// kick's "ring out for ever".
+    #[test]
+    fn no_percussion_lane_rings_out_uncapped() {
+        let mut cfg = with_perc();
+        let all = vec![2u8; 8];
+        cfg.bar = JamPattern {
+            shaker: all.clone(),
+            tambourine: all.clone(),
+            cowbell: all.clone(),
+            cabasa: all.clone(),
+            claves: all.clone(),
+            guiro: all.clone(),
+            conga_hi: all.clone(),
+            conga_lo: all.clone(),
+            bongo_hi: all.clone(),
+            bongo_lo: all.clone(),
+            ..cfg.bar.clone()
+        };
+        let table = compile_with_perc(&cfg, kit(), Some(set())).expect("compiles");
+        for lane in perc_lanes() {
+            let s = slot(&table, 0, lane).unwrap_or_else(|| panic!("{} never played", lane.name()));
+            assert!(
+                s.cap_ticks > 0.0 && s.cap_ticks <= PERC_CAP_TICKS,
+                "{} rings for {} ticks",
+                lane.name(),
+                s.cap_ticks
+            );
+        }
+    }
+
+    /// TURNING THE PERCUSSIONIST OFF IS A CHANGE YOU HEAR NOW.
+    ///
+    /// Both signatures move with the flag and with the mix, for the two
+    /// different reasons the brief names: the swap must not be held back to
+    /// a bar line the way a bass line is, and the four-bar memo must not
+    /// hand back a measurement that was taken with a shaker in it.
+    #[test]
+    fn the_flag_and_the_mix_are_in_both_signatures() {
+        let kit = kit();
+        let set = Some(set());
+        let on = with_perc();
+        let mut off = with_perc();
+        off.perc = Some(false);
+        let mut quiet = with_perc();
+        quiet.mix = Some(JamMix {
+            perc: 0.25,
+            ..JamMix::default()
+        });
+        let voices = JamVoices::default();
+        let sig = |c: &JamConfig| drums_signature(c, &kit, set.as_deref(), &voices);
+        let render = |c: &JamConfig| render_signature(c, &kit, set.as_deref(), &voices);
+        assert_ne!(
+            sig(&on),
+            sig(&off),
+            "switching the player off looks like the same band"
+        );
+        assert_ne!(
+            render(&on),
+            render(&off),
+            "the memo would reuse a measurement with a shaker in it"
+        );
+        assert_ne!(sig(&on), sig(&quiet), "the perc mix is not in the signature");
+        assert_ne!(
+            render(&on),
+            render(&quiet),
+            "the memo would reuse the measurement across a mix change"
+        );
+        // And a set arriving where there was none is a different band too.
+        assert_ne!(
+            drums_signature(&on, &kit, None, &voices),
+            drums_signature(&on, &kit, set.as_deref(), &voices),
+        );
+    }
+}
