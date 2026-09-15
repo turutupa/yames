@@ -393,6 +393,7 @@
       "drums": "Perkusja",
       "bass": "Bas",
       "keys": "Klawisze",
+      "perc": "Perkusjonalia",
       "you": "Ty",
       "youPlay": "{{instrument}}",
       "out": "pauza",
@@ -470,7 +471,9 @@
         "3": "triolach",
         "4": "szesnastkach",
         "6": "sekstolach"
-      }
+      },
+      "addPerc": "+ perkusjonalia",
+      "percPicker": "Dodaj instrument perkusyjny"
     },
     "takes": {
       "label": "Nagrania",
@@ -605,6 +608,21 @@
       "check": "{{count}} do sprawdzenia: {{list}}",
       "check_one": "{{count}} do sprawdzenia: {{list}}",
       "check_other": "{{count}} do sprawdzenia: {{list}}"
+    },
+    "perc": {
+      "shaker": "shaker",
+      "tambourine": "tamburyn",
+      "cowbell": "krowi dzwonek",
+      "cabasa": "cabasa",
+      "claves": "claves",
+      "guiro": "güiro",
+      "congaHi": "conga wysoka",
+      "congaLo": "conga niska",
+      "bongoHi": "bongo wysokie",
+      "bongoLo": "bongo niskie",
+      "congas": "congi",
+      "bongos": "bongosy",
+      "silent": "nic w tym groove"
     }
   },
   "scale": {

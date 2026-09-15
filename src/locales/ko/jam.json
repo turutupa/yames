@@ -393,6 +393,7 @@
       "drums": "드럼",
       "bass": "베이스",
       "keys": "건반",
+      "perc": "퍼커션",
       "you": "당신",
       "youPlay": "{{instrument}}",
       "out": "쉼",
@@ -470,7 +471,9 @@
         "3": "셋잇단음표",
         "4": "16분음표",
         "6": "여섯잇단음표"
-      }
+      },
+      "addPerc": "+ 퍼커션",
+      "percPicker": "퍼커션 추가"
     },
     "takes": {
       "label": "테이크",
@@ -605,6 +608,21 @@
       "check": "확인할 것 {{count}}개: {{list}}",
       "check_one": "확인할 것 {{count}}개: {{list}}",
       "check_other": "확인할 것 {{count}}개: {{list}}"
+    },
+    "perc": {
+      "shaker": "셰이커",
+      "tambourine": "탬버린",
+      "cowbell": "카우벨",
+      "cabasa": "카바사",
+      "claves": "클라베스",
+      "guiro": "귀로",
+      "congaHi": "하이 콩가",
+      "congaLo": "로우 콩가",
+      "bongoHi": "하이 봉고",
+      "bongoLo": "로우 봉고",
+      "congas": "콩가",
+      "bongos": "봉고",
+      "silent": "이 그루브에는 없음"
     }
   },
   "scale": {

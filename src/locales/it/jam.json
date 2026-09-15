@@ -393,6 +393,7 @@
       "drums": "Batteria",
       "bass": "Basso",
       "keys": "Tastiere",
+      "perc": "Percussioni",
       "you": "Tu",
       "youPlay": "{{instrument}}",
       "out": "fuori",
@@ -470,7 +471,9 @@
         "3": "terzine",
         "4": "semicrome",
         "6": "sestine"
-      }
+      },
+      "addPerc": "+ percussioni",
+      "percPicker": "Aggiungi uno strumento a percussione"
     },
     "takes": {
       "label": "Registrazioni",
@@ -605,6 +608,21 @@
       "check": "{{count}} da controllare: {{list}}",
       "check_one": "{{count}} da controllare: {{list}}",
       "check_other": "{{count}} da controllare: {{list}}"
+    },
+    "perc": {
+      "shaker": "shaker",
+      "tambourine": "tamburello",
+      "cowbell": "campanaccio",
+      "cabasa": "cabasa",
+      "claves": "claves",
+      "guiro": "güiro",
+      "congaHi": "conga acuta",
+      "congaLo": "conga grave",
+      "bongoHi": "bongo acuto",
+      "bongoLo": "bongo grave",
+      "congas": "congas",
+      "bongos": "bonghi",
+      "silent": "niente in questo groove"
     }
   },
   "scale": {

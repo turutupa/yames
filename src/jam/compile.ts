@@ -310,6 +310,33 @@ export function hasPercussion(pattern: JamPattern | null | undefined): boolean {
   return JAM_PERC_LANES.some((lane) => pattern[lane]?.some((level) => level !== 0));
 }
 
+/**
+ * What the percussionist is playing on this bar, as names for the band row —
+ * `["shaker", "congas"]`, `["tambourine"]`.
+ *
+ * The two congas are one instrument to a listener and so are the two bongos,
+ * so they collapse to one name each. The row is a line of prose ("shaker and
+ * congas"), not an inventory, and "high conga, low conga" is the second thing
+ * and not the first.
+ *
+ * Returns ids, not text: the caller translates them, because a güiro is a
+ * güiro in Spanish and a shaker has its own word in half of the fifteen.
+ */
+export function percussionVoices(pattern: JamPattern | null | undefined): string[] {
+  if (!pattern) return [];
+  const out: string[] = [];
+  for (const lane of JAM_PERC_LANES) {
+    if (!pattern[lane]?.some((level) => level !== 0)) continue;
+    const name = lane.startsWith("conga")
+      ? "congas"
+      : lane.startsWith("bongo")
+        ? "bongos"
+        : lane;
+    if (!out.includes(name)) out.push(name);
+  }
+  return out;
+}
+
 /** Every stroke on the pattern's last tick taken to peak — the top of a fill. */
 function toppedOff(pattern: JamPattern): JamPattern {
   const out = {} as JamPattern;

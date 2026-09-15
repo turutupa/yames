@@ -83,7 +83,36 @@ function KeysIcon() {
   );
 }
 
-export type BandLaneId = "drums" | "bass" | "keys";
+/**
+ * The percussionist: a shaker, seen side on, with its beads.
+ *
+ * Not a conga and not a tambourine, though the row plays all of those. The
+ * glyph has to read at fourteen pixels beside a drum kit, a bass and a piano,
+ * and a shaker is the only one of the ten whose outline is not something else
+ * on this list at a different angle.
+ */
+function PercIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M9 3.6h6l1.4 5.2c.5 1.8.8 3 .8 4.4 0 3.4-2.2 7.2-5.2 7.2S6.8 16.6 6.8 13.2c0-1.4.3-2.6.8-4.4z" />
+      <line x1="7.6" y1="9.4" x2="16.4" y2="9.4" />
+      <circle cx="10.6" cy="13.4" r="0.9" fill="currentColor" stroke="none" />
+      <circle cx="13.6" cy="15.8" r="0.9" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export type BandLaneId = "drums" | "bass" | "keys" | "perc";
 
 interface Lane {
   id: BandLaneId;
@@ -151,13 +180,17 @@ export function BandLanes({
   function liveState(id: BandLaneId): string | null {
     if (!isPlaying || bandState === "full") return null;
     if (bandState === "silent") return t("jam.band.out");
-    // Only the drummer keeps the hats through a trade; everyone else is out.
+    // The drummer keeps the hats through a trade, and the percussionist keeps
+    // their whole part — the engine treats them as it treats the hats, which
+    // is what makes a trade something to play over rather than a hole.
+    if (id === "perc") return null;
     return id === "drums" ? t("jam.band.hatsOnly") : t("jam.band.out");
   }
 
   function laneIcon(id: BandLaneId) {
     if (id === "drums") return <DrumsIcon />;
     if (id === "bass") return <BassIcon />;
+    if (id === "perc") return <PercIcon />;
     return <KeysIcon />;
   }
 

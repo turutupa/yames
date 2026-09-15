@@ -393,6 +393,7 @@
       "drums": "ドラム",
       "bass": "ベース",
       "keys": "キーボード",
+      "perc": "パーカッション",
       "you": "あなた",
       "youPlay": "{{instrument}}",
       "out": "休み",
@@ -470,7 +471,9 @@
         "3": "3連符",
         "4": "16分音符",
         "6": "6連符"
-      }
+      },
+      "addPerc": "+ パーカッション",
+      "percPicker": "パーカッションを追加"
     },
     "takes": {
       "label": "テイク",
@@ -605,6 +608,21 @@
       "check": "確認したいもの {{count}} 件: {{list}}",
       "check_one": "確認したいもの {{count}} 件: {{list}}",
       "check_other": "確認したいもの {{count}} 件: {{list}}"
+    },
+    "perc": {
+      "shaker": "シェイカー",
+      "tambourine": "タンバリン",
+      "cowbell": "カウベル",
+      "cabasa": "カバサ",
+      "claves": "クラベス",
+      "guiro": "ギロ",
+      "congaHi": "ハイコンガ",
+      "congaLo": "ローコンガ",
+      "bongoHi": "ハイボンゴ",
+      "bongoLo": "ローボンゴ",
+      "congas": "コンガ",
+      "bongos": "ボンゴ",
+      "silent": "このグルーヴにはなし"
     }
   },
   "scale": {

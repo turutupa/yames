@@ -11,21 +11,28 @@ import { describe, it, expect } from "vitest";
 import type { JamLevel, JamPattern } from "../../../jam/types";
 import { JAM_LANES } from "../../../jam/types";
 import {
+  LANE_LABELS,
+  PERC_LANES,
   cellAt,
   cellLabel,
   columnsOf,
   cycleLevel,
   emptyPattern,
   fromGroove,
+  hasPerc,
   hasToms,
+  isPercLane,
   isShuffleTick,
   lanesFor,
   meterCaption,
   normalizePattern,
+  percLanesOf,
   resizeGroove,
   resizePattern,
   setCell,
+  setPercCell,
   tickLabel,
+  withPercLane,
   withToms,
 } from "./editorModel";
 import { grooveById } from "../../../jam/grooves";
@@ -346,5 +353,84 @@ describe("columnsOf", () => {
   it("reports the widest lane", () => {
     expect(columnsOf(emptyPattern(4, 3))).toBe(12);
     expect(columnsOf({ kick: [1, 1, 1] } as unknown as JamPattern)).toBe(3);
+  });
+});
+
+describe("the percussionist's rows", () => {
+  it("draws the rows a groove already has, under the kit", () => {
+    // "Reveals the rows the groove uses": a bossa opened in the editor has
+    // its shaker on the grid without anybody asking for it.
+    const bossa = normalizePattern(grooveById("bossa").bar, 4, 4);
+    expect(hasPerc(bossa)).toBe(true);
+    expect(lanesFor(bossa)).toEqual(["hat", "snare", "kick", "ride", "shaker"]);
+    // And a groove with none has none: the rock bar is four rows, as before.
+    const rock = normalizePattern(grooveById("rock8").bar, 4, 2);
+    expect(hasPerc(rock)).toBe(false);
+    expect(lanesFor(rock)).toEqual(["hat", "snare", "kick", "ride"]);
+  });
+
+  it("keeps the contract's order however the rows were added", () => {
+    // The order on screen is the order in `JAM_PERC_LANES`, not the order
+    // somebody happened to click — a grid whose rows moved as you built it
+    // would be a different instrument every time you looked away.
+    let pattern = emptyPattern(4, 4);
+    for (const lane of ["bongoLo", "shaker", "congaHi"] as const) {
+      pattern = withPercLane(pattern, lane);
+    }
+    expect(percLanesOf(pattern)).toEqual(["shaker", "congaHi", "bongoLo"]);
+  });
+
+  it("adds one row at the bar's width, and adds it only once", () => {
+    const before = emptyPattern(4, 4);
+    const after = withPercLane(before, "claves");
+    expect(after.claves).toHaveLength(16);
+    expect(after.claves?.every((level) => level === 0)).toBe(true);
+    // Already there: the same object back, so a second click cannot wipe a
+    // row somebody has been playing on.
+    expect(withPercLane(after, "claves")).toBe(after);
+  });
+
+  it("drops a percussion row when its last stroke is taken back out", () => {
+    // The rule the toms do not have. A row of zeros on the record is a lane
+    // the engine reads past on every tick of every bar to learn nothing, and
+    // `JamPattern` says these rows are absent rather than empty.
+    let pattern = withPercLane(emptyPattern(4, 4), "cowbell");
+    pattern = setPercCell(pattern, "cowbell", 0, 2);
+    pattern = setPercCell(pattern, "cowbell", 8, 1);
+    expect(pattern.cowbell).toHaveLength(16);
+    pattern = setPercCell(pattern, "cowbell", 0, 0);
+    // One stroke left: still a row.
+    expect(pattern.cowbell).toHaveLength(16);
+    pattern = setPercCell(pattern, "cowbell", 8, 0);
+    expect(pattern.cowbell).toBeUndefined();
+  });
+
+  it("leaves a drum row alone when the same thing happens to it", () => {
+    // The kick is one of the five the engine always reads; emptying it is a
+    // groove with no kick, not a groove with no kick LANE.
+    const pattern = setCell(emptyPattern(4, 2), "kick", 0, 0);
+    expect(pattern.kick).toHaveLength(8);
+  });
+
+  it("carries the percussion through a normalise and a change of subdivision", () => {
+    const bossa = normalizePattern(grooveById("bossa").bar, 4, 4);
+    expect(bossa.shaker).toHaveLength(16);
+    const eighths = resizePattern(bossa, 4, 2);
+    expect(eighths.shaker).toHaveLength(8);
+    // And a pattern with no percussion does not acquire ten silent
+    // instruments on the way through either function.
+    expect(resizePattern(emptyPattern(4, 2), 2, 4).shaker).toBeUndefined();
+    expect(normalizePattern(grooveById("rock8").bar, 4, 2).shaker).toBeUndefined();
+  });
+
+  it("names every one of the ten", () => {
+    // `LANE_LABELS` is what `cellLabel` reads out, so a voice missing from it
+    // is a row a screen reader cannot announce.
+    for (const lane of PERC_LANES) {
+      expect(LANE_LABELS[lane], lane).toBeTruthy();
+      expect(isPercLane(lane), lane).toBe(true);
+    }
+    expect(isPercLane("snare")).toBe(false);
+    expect(cellLabel("congaHi", 4, 4, 2)).toBe("High conga, beat 2, tick 1: accent");
   });
 });

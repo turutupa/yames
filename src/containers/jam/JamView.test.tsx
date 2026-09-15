@@ -1128,6 +1128,95 @@ describe("JamView — the fourth pass's controls", () => {
     expect(props.onEdit).toHaveBeenCalledWith({ keysStyle: "stabs" });
   });
 
+  it("shows a Percussion row for a groove that has one, and names what it plays", () => {
+    // A bossa's percussionist plays a shaker, and the row says so — the same
+    // job the drums row does by naming the groove and the kit.
+    const { container } = setup({ jam: jamOf({ grooveId: "bossa" }) });
+    const names = [...container.querySelectorAll(".jam-band-name")].map((el) => el.textContent);
+    expect(names).toContain("Percussion");
+    const row = [...container.querySelectorAll(".jam-band-lane")].find((lane) =>
+      lane.querySelector(".jam-band-name")?.textContent?.includes("Percussion"),
+    )!;
+    expect(row.querySelector(".jam-band-detail")?.textContent).toBe("shaker");
+  });
+
+  it("joins two voices into a sentence rather than a list", () => {
+    // "guiro and congas", not "guiro, congaHi, congaLo": the two congas are
+    // one instrument to a listener, and the row is prose.
+    const { container } = setup({ jam: jamOf({ grooveId: "chaCha" }) });
+    const row = [...container.querySelectorAll(".jam-band-lane")].find((lane) =>
+      lane.querySelector(".jam-band-name")?.textContent?.includes("Percussion"),
+    )!;
+    expect(row.querySelector(".jam-band-detail")?.textContent).toBe("güiro and congas");
+  });
+
+  it("withholds the Percussion row where there is nobody to be", () => {
+    // A row over a thrash bar would be a player with nothing to play.
+    const { container } = setup({ jam: jamOf({ grooveId: "metalThrash" }) });
+    const names = [...container.querySelectorAll(".jam-band-name")].map((el) => el.textContent);
+    expect(names).not.toContain("Percussion");
+  });
+
+  it("keeps the row where the jam turned percussion on, whatever the groove", () => {
+    // The other half: a row that vanished when you changed groove would take
+    // a switch you had set away with it.
+    const { container } = setup({
+      jam: jamOf({
+        grooveId: "metalThrash",
+        band: { drums: true, bass: false, keys: false, perc: true },
+      }),
+    });
+    const row = [...container.querySelectorAll(".jam-band-lane")].find((lane) =>
+      lane.querySelector(".jam-band-name")?.textContent?.includes("Percussion"),
+    )!;
+    expect(row).toBeTruthy();
+    expect(row.querySelector(".jam-band-detail")?.textContent).toBe("nothing in this groove");
+  });
+
+  it("keeps the sheet's percussion switch whatever the groove", () => {
+    // The sheet is where you decide who is in the band, so the switch is
+    // always there — unlike the playing screen's row, which says what the
+    // band IS doing and comes and goes with the groove.
+    const { container } = sheet({ jam: jamOf({ grooveId: "metalThrash" }) });
+    const players = [...container.querySelectorAll(".jam-player")];
+    expect(players.map((p) => p.querySelector("button")?.textContent)).toEqual([
+      "Drums",
+      "Bass",
+      "Keys",
+      "Percussion",
+    ]);
+  });
+
+  it("gives the percussionist a volume in the sheet once they are hired", () => {
+    const { container, props } = sheet({
+      jam: jamOf({
+        grooveId: "bossa",
+        band: { drums: true, bass: false, keys: false, perc: true },
+      }),
+    });
+    const player = [...container.querySelectorAll(".jam-player")].find((p) =>
+      p.querySelector("button")?.textContent?.includes("Percussion"),
+    )!;
+    const slider = player.querySelector<HTMLInputElement>("input[type=range]")!;
+    fireEvent.change(slider, { target: { value: "0.6" } });
+    expect(props.onEdit).toHaveBeenCalledWith({
+      mix: { drums: 1, bass: 1, keys: 1, perc: 0.6 },
+    });
+  });
+
+  it("hires the percussionist from the row without disturbing the rest of the band", () => {
+    const { container, props } = setup({
+      jam: jamOf({ grooveId: "bossa", band: { drums: true, bass: true, keys: false } }),
+    });
+    const row = [...container.querySelectorAll(".jam-band-lane")].find((lane) =>
+      lane.querySelector(".jam-band-name")?.textContent?.includes("Percussion"),
+    )!;
+    fireEvent.click(row.querySelector("button[role='switch']")!);
+    expect(props.onEdit).toHaveBeenCalledWith({
+      band: { drums: true, bass: true, keys: false, perc: true },
+    });
+  });
+
   it("unpins the shape in the corner when the key moves", () => {
     // A pinned grip belongs to the key it was pinned in. Left alone, a G shape
     // sat in the corner of a jam in B flat, drawn as if it were the chord to

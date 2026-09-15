@@ -386,3 +386,72 @@ describe("the toms", () => {
     expect(screen.queryByRole("button", { name: "+ toms" })).toBeNull();
   });
 });
+
+describe("the percussionist", () => {
+  /** A groove with one percussion row on it, as a bossa arrives with. */
+  function withShaker(): JamCustomGroove {
+    const base = groove();
+    return { ...base, bar: { ...base.bar, shaker: new Array(12).fill(0) } };
+  }
+
+  it("offers percussion behind one button rather than ten rows", () => {
+    // Ten instruments is too many to put in front of somebody who has not
+    // asked, so the legend carries one affordance and it opens a list.
+    setup();
+    expect(screen.queryByRole("button", { name: "shaker" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "+ percussion" }));
+    expect(screen.getByRole("button", { name: "shaker" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "high conga" })).toBeTruthy();
+  });
+
+  it("adds the row you pick, at the bar's width, and closes the list", () => {
+    const { props } = setup();
+    fireEvent.click(screen.getByRole("button", { name: "+ percussion" }));
+    fireEvent.click(screen.getByRole("button", { name: "claves" }));
+    const next = props.onChange.mock.calls.at(-1)![0] as JamCustomGroove;
+    expect(next.bar.claves).toHaveLength(12);
+    expect(next.bar.claves!.every((level) => level === 0)).toBe(true);
+    expect(screen.queryByRole("button", { name: "shaker" })).toBeNull();
+  });
+
+  it("draws the rows the groove already uses, under the kit", () => {
+    const { container } = setup({ value: withShaker() });
+    const names = [...container.querySelectorAll(".jam-editor__lane-name")]
+      .map((el) => el.textContent)
+      .filter(Boolean);
+    expect(names).toEqual(["Hat", "Snare", "Kick", "Ride", "shaker"]);
+    // And the grid marks them, so the CSS can say they are somebody else's.
+    expect(container.querySelectorAll(".jam-editor__row[data-perc]")).toHaveLength(1);
+  });
+
+  it("stops offering an instrument that is already on the grid", () => {
+    setup({ value: withShaker() });
+    fireEvent.click(screen.getByRole("button", { name: "+ percussion" }));
+    // The row's own label is still there; what is gone is the picker's entry,
+    // so exactly one element is named "shaker".
+    expect(screen.queryAllByRole("button", { name: "shaker" })).toHaveLength(0);
+    expect(screen.getByRole("button", { name: "cabasa" })).toBeTruthy();
+  });
+
+  it("takes the row away when its last stroke is taken back out", () => {
+    const base = groove();
+    const value: JamCustomGroove = {
+      // A ghost is the last rung of the ring, so one click on this groove's
+      // only cowbell stroke turns it off — and takes the row with it.
+      ...base,
+      bar: { ...base.bar, cowbell: [3, ...new Array(11).fill(0)] as never },
+    };
+    const { props } = setup({ value });
+    // The cowbell is the fifth row: hat, snare, kick, ride, then percussion.
+    fireEvent.click(cell(4, 0));
+    const next = props.onChange.mock.calls.at(-1)![0] as JamCustomGroove;
+    expect(next.bar.cowbell).toBeUndefined();
+  });
+
+  it("gives every cell of a percussion row a label that names the instrument", () => {
+    setup({ value: withShaker() });
+    expect(
+      screen.getByRole("button", { name: "shaker, beat 2, tick 1: off" }),
+    ).toBeTruthy();
+  });
+});

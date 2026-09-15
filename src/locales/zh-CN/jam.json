@@ -393,6 +393,7 @@
       "drums": "鼓",
       "bass": "贝斯",
       "keys": "键盘",
+      "perc": "打击乐",
       "you": "你",
       "youPlay": "{{instrument}}",
       "out": "休止",
@@ -470,7 +471,9 @@
         "3": "三连音",
         "4": "十六分音符",
         "6": "六连音"
-      }
+      },
+      "addPerc": "+ 打击乐",
+      "percPicker": "添加打击乐器"
     },
     "takes": {
       "label": "录音",
@@ -605,6 +608,21 @@
       "check": "有 {{count}} 处可以核对：{{list}}",
       "check_one": "有 {{count}} 处可以核对：{{list}}",
       "check_other": "有 {{count}} 处可以核对：{{list}}"
+    },
+    "perc": {
+      "shaker": "沙锤",
+      "tambourine": "铃鼓",
+      "cowbell": "牛铃",
+      "cabasa": "卡巴萨",
+      "claves": "响棒",
+      "guiro": "刮胡",
+      "congaHi": "高音康加鼓",
+      "congaLo": "低音康加鼓",
+      "bongoHi": "高音邦戈鼓",
+      "bongoLo": "低音邦戈鼓",
+      "congas": "康加鼓",
+      "bongos": "邦戈鼓",
+      "silent": "这个律动里没有"
     }
   },
   "scale": {
