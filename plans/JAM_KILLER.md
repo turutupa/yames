@@ -84,6 +84,24 @@ engine. A **Jam now** button on the empty Jam screen and in the rail's
 Jam entry that picks a vibe for your instrument and starts the band in
 one tap. The first-run hints for Jam rewritten to three that matter.
 
+### A5 — The percussionist · after Wave A · W35 + W36 + W37
+Decided 2026-09-14 after the owner's first session with Wave A ("it's so
+usable right now… if we add anything let's just do that for now"): one
+more layer, a percussionist, and nothing else before the polish pass and
+the ship. Ten voices from Virtuosity Drums' auxiliary percussion (public
+domain): shaker, tambourine, cowbell, cabasa, claves, guiro, two congas,
+two bongos, as a kit-format set played under every drum kit; a
+Percussion row in the band with its own mute and level; parts authored
+per groove where a percussionist belongs, on by default for latin, funk,
+pop and world. Contract in `plans/tasks/jam-v5/BRIEF.md`. Rhythm guitar
+and horns wait.
+
+### On sharing presets
+The owner, 2026-09-14: preset sharing must be a built-in marketplace of
+sorts, browse and take inside the app; import and export files are too
+much friction to be the main path. Recorded here so no pass proposes
+files as the answer; it is a later stage with its own plan.
+
 ### B1 — The band that listens · Wave B · W34
 Tempo follow (the band nudges toward the player's pulse within a window,
 off by default); dynamics follow (when the player drops to a whisper the
