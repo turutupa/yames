@@ -19,6 +19,7 @@ mod onset;
 pub mod session;
 mod session_audio;
 pub mod session_log;
+mod speech_out;
 mod state;
 mod take;
 pub mod timing;
@@ -87,7 +88,8 @@ use commands::{
     list_calibration_cache, list_midi_devices, list_presets, list_session_logs, load_coach_model,
     close_open_segment, notify_settings_change, open_url, reorder_presets, save_drill_run, save_preset, save_session,
     save_window_position, set_active_tab, set_always_on_top,
-    set_audio_output_device, set_bpm, set_calibration_offset, set_input_gain, set_instrument,
+    set_audio_output_device, set_audio_output_pair, set_bpm, set_calibration_offset, set_input_gain,
+    set_instrument,
     set_beat_groups, set_free_mode, set_midi_binding, set_playing, set_sound_type, set_subdivision, set_theme,
     app_ready, set_volume, set_widget_always_on_top, set_widget_mode, show_floating, show_main,
     start_evaluation, start_model_download, start_playback, start_recording, start_speed_ramp,
@@ -300,10 +302,23 @@ pub fn run() {
             // command that called it to learn that and clear it.
             engine.set_tempo_context(tempo_ctx);
 
-            // Restore saved audio output device
+            // Restore saved audio output device, and the pair of outputs
+            // that device was last used on. Both before the first stream
+            // opens, so it opens wide enough to carry the pair — see
+            // `engine::channels_for_pair`.
             {
                 let store = app.store("settings.json")?;
-                if let Some(device_name) = store.get("audioOutputDevice").and_then(|v| v.as_str().map(String::from)) {
+                let device_name = store
+                    .get("audioOutputDevice")
+                    .and_then(|v| v.as_str().map(String::from));
+                let pairs = store
+                    .get(commands::OUTPUT_PAIRS_KEY)
+                    .unwrap_or(serde_json::Value::Null);
+                engine.set_output_pair_name_only(commands::stored_output_pair(
+                    &pairs,
+                    device_name.as_deref(),
+                ));
+                if let Some(device_name) = device_name {
                     engine.set_device_name(Some(device_name));
                 }
             }
@@ -664,6 +679,7 @@ pub fn run() {
             set_input_gain,
             list_audio_output_devices,
             set_audio_output_device,
+            set_audio_output_pair,
             get_model_status,
             get_system_memory_mb,
             write_model_chunk,

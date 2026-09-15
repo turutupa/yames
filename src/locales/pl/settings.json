@@ -138,6 +138,9 @@
     "devices": {
       "title": "Urządzenia",
       "audioOutput": "Wyjście audio",
+      "outputPair": "Wyjścia",
+      "outputsPair": "Wyjścia {{a}}-{{b}}",
+      "outputPairFallback": "To urządzenie udostępnia tylko dwa wyjścia, więc klik gra na wyjściach 1-2.",
       "refreshAudio": "Odśwież urządzenia audio",
       "btLatencyWarning": "Bluetooth dodaje spore opóźnienie. Wskazania wizualne i dźwięk mogą nie być idealnie zsynchronizowane.",
       "audioInput": "Wejście audio",

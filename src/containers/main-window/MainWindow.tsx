@@ -592,7 +592,10 @@ export function MainWindow() {
     audioOutputDevices,
     setAudioOutputDevices,
     selectedOutputDevice,
-    setSelectedOutputDevice,
+    outputPair,
+    selectOutputPair,
+    selectOutputDevice,
+    outputPairFellBack,
   } = useAudioOutputDevices();
   // Auto-update preference, app version, banner status, and the
   // "Check now" callback — owned by a dedicated hook that hydrates the
@@ -1364,6 +1367,7 @@ export function MainWindow() {
           onNewSetlist={handleNewSetlist}
           onDeleteSetlist={setlistSession.deleteSetlist}
           onRenameSetlist={setlistSession.renameSetlist}
+          onDuplicateSetlist={setlistSession.duplicateSetlist}
           jams={jamSession.jams}
           activeJamId={jamSession.jam?.id ?? null}
           // Clicking the jam you are already in is the way out of it, the same
@@ -1570,6 +1574,10 @@ export function MainWindow() {
               setlist={setlistSession.setlist}
               selectedStepId={setlistSession.selectedStepId}
               onSelectStep={setlistSession.selectStep}
+              selectedStepIds={setlistSession.selectedStepIds}
+              onExtendSelection={setlistSession.extendSelection}
+              onToggleSelection={setlistSession.toggleStepSelection}
+              onCollapseSelection={setlistSession.collapseSelection}
               runningIndex={setlistSession.runningIndex}
               onChange={setlistSession.setSetlist}
               onPatchStep={setlistSession.patchStep}
@@ -1693,7 +1701,10 @@ export function MainWindow() {
             audioOutputDevices={audioOutputDevices}
             setAudioOutputDevices={setAudioOutputDevices}
             selectedOutputDevice={selectedOutputDevice}
-            setSelectedOutputDevice={setSelectedOutputDevice}
+            outputPair={outputPair}
+            selectOutputPair={selectOutputPair}
+            selectOutputDevice={selectOutputDevice}
+            outputPairFellBack={outputPairFellBack}
             evaluation={evaluation}
             midi={midi}
             onOpenInputTest={() => setInputTestOpen(true)}

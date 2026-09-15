@@ -138,6 +138,9 @@
     "devices": {
       "title": "Apparaten",
       "audioOutput": "Audio-uitvoer",
+      "outputPair": "Uitgangen",
+      "outputsPair": "Uitgangen {{a}}-{{b}}",
+      "outputPairFallback": "Dit apparaat levert maar twee uitgangen, dus de klik speelt via uitgang 1-2.",
       "refreshAudio": "Audio-apparaten vernieuwen",
       "btLatencyWarning": "Bluetooth-audio voegt flink wat vertraging toe. Visuele aanwijzingen en geluid lopen mogelijk niet perfect synchroon.",
       "audioInput": "Audio-invoer",
