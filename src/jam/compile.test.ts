@@ -488,20 +488,35 @@ describe("the keys, the mix and the sticks", () => {
   });
 
   it("sends a mix of ones when the record has none", () => {
-    expect(compileJam(loopJam("x")).mix).toEqual({ drums: 1, bass: 1, keys: 1 });
+    expect(compileJam(loopJam("x")).mix).toEqual({ drums: 1, bass: 1, keys: 1, perc: 1 });
   });
 
   it("sends the mix the record carries, clamped", () => {
-    expect(compileJam(loopJam("x", { mix: { drums: 0.4, bass: 1.2, keys: 0 } })).mix).toEqual({
+    expect(
+      compileJam(loopJam("x", { mix: { drums: 0.4, bass: 1.2, keys: 0, perc: 0.6 } })).mix,
+    ).toEqual({
       drums: 0.4,
       bass: 1.2,
       keys: 0,
+      perc: 0.6,
     });
-    expect(compileJam(loopJam("x", { mix: { drums: -1, bass: 9, keys: 1 } })).mix).toEqual({
+    expect(
+      compileJam(loopJam("x", { mix: { drums: -1, bass: 9, keys: 1, perc: 4 } })).mix,
+    ).toEqual({
       drums: 0,
       bass: 1.5,
       keys: 1,
+      perc: 1.5,
     });
+  });
+
+  it("reads a record written before the percussionist as a percussion fader of one", () => {
+    // The lane the record has never heard of is 1.0, not 0 — the same courtesy
+    // every other lane gets from an absent `mix`.
+    const mix = compileJam(
+      loopJam("x", { mix: { drums: 0.5, bass: 0.5, keys: 0.5 } as never }),
+    ).mix;
+    expect(mix?.perc).toBe(1);
   });
 
   it("counts in with the beep unless the sticks were asked for", () => {

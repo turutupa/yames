@@ -43,6 +43,67 @@ export type JamOptionalLane = "hatOpen" | "tomHi" | "tomLo";
 export const JAM_OPTIONAL_LANES: readonly JamOptionalLane[] = ["hatOpen", "tomHi", "tomLo"];
 
 /**
+ * The percussionist's ten, in the order the contract fixes them
+ * (plans/tasks/jam-v5/BRIEF.md).
+ *
+ * A separate list from `JAM_OPTIONAL_LANES` rather than ten more entries in
+ * it, and that is the whole design of this pass in one line: **a percussionist
+ * is not a drum kit.** They are a second player, they play under whichever kit
+ * the drummer is on, and they do not follow the drummer's rules — the kit
+ * drops to the hats in a breakdown and the shaker keeps time straight through
+ * it. Every place in the compiler that reshapes the drums therefore has to say
+ * out loud what happens to the percussion, and with two lists it cannot forget
+ * to: a lane added to the wrong one changes behaviour nobody asked it to.
+ *
+ * The engine's serde mirror names them `conga_hi`, `bongo_lo` and so on and
+ * reads them off the wire as these camelCase names, under the same
+ * `rename_all = "camelCase"` the rest of `JamPattern` travels under.
+ */
+export type JamPercLane =
+  | "shaker"
+  | "tambourine"
+  | "cowbell"
+  | "cabasa"
+  | "claves"
+  | "guiro"
+  | "congaHi"
+  | "congaLo"
+  | "bongoHi"
+  | "bongoLo";
+
+export const JAM_PERC_LANES: readonly JamPercLane[] = [
+  "shaker",
+  "tambourine",
+  "cowbell",
+  "cabasa",
+  "claves",
+  "guiro",
+  "congaHi",
+  "congaLo",
+  "bongoHi",
+  "bongoLo",
+];
+
+/**
+ * The two percussion rows that are a running subdivision rather than a figure.
+ *
+ * A shaker and a cabasa are the percussionist's hi-hat: a stroke on every
+ * sixteenth (or eighth), alternating hard and light, holding the time down
+ * while everything else in the set answers the bar. Every other percussion row
+ * is a FIGURE — a clave, a tumbao, a tambourine on two and four — and a rule
+ * written for a hand that never stops would be a lie about all of them.
+ *
+ * `intensity.ts` is the one place that reads this, and the reason it exists.
+ */
+export const JAM_PERC_TIMEKEEPERS: readonly JamPercLane[] = ["shaker", "cabasa"];
+
+/** Every row a pattern may carry beyond the five: the kit's three and the ten. */
+export const JAM_ALL_OPTIONAL_LANES: readonly (JamOptionalLane | JamPercLane)[] = [
+  ...JAM_OPTIONAL_LANES,
+  ...JAM_PERC_LANES,
+];
+
+/**
  * One bar, one row per drum. Every array has exactly
  * `beatsPerBar × ticksPerBeat` entries, tick 0 first.
  *
@@ -60,12 +121,18 @@ export const JAM_OPTIONAL_LANES: readonly JamOptionalLane[] = ["hatOpen", "tomHi
  * The engine's serde mirror names these rows `hat_open`, `tom_hi` and
  * `tom_lo` and reads them from `hatOpen`, `tomHi` and `tomLo` on the wire,
  * because `JamPattern` there is `#[serde(rename_all = "camelCase")]`.
+ *
+ * The ten after them are the PERCUSSIONIST's (fifth pass,
+ * plans/tasks/jam-v5/BRIEF.md), optional for the same reason and one more: a
+ * percussionist belongs in a latin bar and not in a thrash one, so most of the
+ * hundred and fifteen grooves carry none of these rows at all, and the ones
+ * that do carry two or three rather than ten.
  */
 export type JamPattern = Record<JamLane, JamLevel[]> & {
   hatOpen?: JamLevel[];
   tomHi?: JamLevel[];
   tomLo?: JamLevel[];
-};
+} & Partial<Record<JamPercLane, JamLevel[]>>;
 
 /**
  * What the engine receives. The UI is responsible for having ALREADY set the
@@ -201,7 +268,15 @@ export type JamKeysLine = {
   gain: number;
 };
 
-export type JamMix = { drums: number; bass: number; keys: number };
+/**
+ * Per-lane gain, 0..1.5, 1.0 each by default.
+ *
+ * `perc` is the percussionist's own fader and not part of `drums`, because the
+ * two are separate players through separate faders: a shaker that came up with
+ * the kit could never be turned down under it, which is the one thing anybody
+ * ever wants to do to a shaker.
+ */
+export type JamMix = { drums: number; bass: number; keys: number; perc: number };
 export type JamCountInSound = "beep" | "sticks";
 
 /**
@@ -313,8 +388,14 @@ export type Jam = {
    * band is then the lineup for the instrument you play — the band never
    * plays your instrument (JAM_MODE §3.1). Touch a toggle and the answer
    * becomes the record's, and stays the record's.
+   *
+   * `perc` is optional and absent means NO percussionist, exactly as `keys`
+   * once did: a jam saved before this pass keeps the band it was saved with,
+   * and a bossa that played as a kit alone goes on playing as a kit alone
+   * until somebody turns the row on. The vibes are what turn it on for new
+   * jams (`applyVibe`), which is the whole of the default.
    */
-  band?: { drums: boolean; bass: boolean; keys?: boolean };
+  band?: { drums: boolean; bass: boolean; keys?: boolean; perc?: boolean };
   /** Chords on the timeline and the NOW block. Absent: off. */
   chords?: boolean;
   /** The practice tools. Absent: none. */

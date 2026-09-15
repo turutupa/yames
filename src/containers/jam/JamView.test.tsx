@@ -1117,7 +1117,9 @@ describe("JamView — the fourth pass's controls", () => {
     const { container, props } = setup();
     const slider = container.querySelector<HTMLInputElement>(".jam-band-volume input")!;
     fireEvent.change(slider, { target: { value: "0.5" } });
-    expect(props.onEdit).toHaveBeenCalledWith({ mix: { drums: 0.5, bass: 1, keys: 1 } });
+    expect(props.onEdit).toHaveBeenCalledWith({
+      mix: { drums: 0.5, bass: 1, keys: 1, perc: 1 },
+    });
   });
 
   it("has a keys row with a comping style", () => {
