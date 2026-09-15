@@ -4783,30 +4783,30 @@ impl MetronomeEngine {
                                 // sticks must sound exactly as it did.
                                 match cached.count_in_slot {
                                     Some(slot) if is_downbeat => {
-                                        // A band voice, because the sticks
-                                        // are the kit's own cross-stick and
-                                        // its samples live in the table. No
-                                        // drift and no round robin: a
+                                        // A CLICK, and no longer a band
+                                        // voice. The sticks used to be the
+                                        // loaded kit's cross-stick, which
+                                        // lives in the table and arrives
+                                        // interleaved and panned; they are
+                                        // `sticks_low` out of the
+                                        // `SoundBank` now — the same file
+                                        // the Sticks preset plays — so this
+                                        // goes down the metronome's own path
+                                        // like every other click, mono and
+                                        // centred and outside the drum bus.
+                                        //
+                                        // No drift and no round robin, which
+                                        // used to be a decision and is now
+                                        // simply what the sound is: a
                                         // count-in is four identical clicks
                                         // of wood, which is what counting
                                         // sounds like.
                                         if voices.len() < MAX_VOICES {
-                                            voices.push(Voice {
-                                                sound_id: slot.sound,
-                                                position: 0,
-                                                delay: 0,
-                                                amp_l: slot.gain * slot.pan_l * cached.volume,
-                                                amp_r: slot.gain * slot.pan_r * cached.volume,
-                                                max_samples: 0,
-                                                voice: slot.voice,
-                                                fade_left: 0,
-                                                fade_len: 0,
-                                                band: true,
-                                                // The kit's cross-stick, and
-                                                // a drum is a pair.
-                                                stereo: true,
-                                                release: 0,
-                                            });
+                                            voices.push(Voice::click(
+                                                slot.sound,
+                                                slot.gain * cached.volume,
+                                                0,
+                                            ));
                                         }
                                     }
                                     // A sticks count-in is silent between the

@@ -1848,28 +1848,40 @@ fn compile_measured(
     // not a balance.
     let count_in_slot = match cfg.count_in_sound.unwrap_or_default() {
         JamCountInSound::Beep => None,
-        // The kit's own cross-stick, at the beat gain — whatever the groove
-        // says its ghosts are, a count-in is sticks. Deliberately outside
-        // everything above it: the sticks are not scaled by the intensity
-        // dial, the mix or the safety clamp, because a count-in happens
-        // before the band and alone.
-        JamCountInSound::Sticks => voice_slot(
-            &voicing,
-            KitVoice::Rim,
-            1,
-            JamLane::Snare,
-            crate::engine::BEAT_GAIN,
-            0.0,
-            false,
-        )
-        .map(|mut slot| {
-            // `voice_slot` folds the drums' mix into every slot it makes,
-            // and this one must not carry it: a musician who pulled the
-            // drums to nothing still has to be counted in. Put back what
-            // the mix took, on the one slot in the table that is not part
-            // of the band.
-            slot.gain = crate::engine::BEAT_GAIN;
-            slot
+        // THE METRONOME'S OWN CROSS-STICK, NOT THE LOADED KIT'S.
+        //
+        // It was `voice_slot(KitVoice::Rim, ...)` — whichever rim the jam's
+        // kit happened to ship — and since 2026-09-14 it is `sticks_low`,
+        // the beat half of the Sticks click preset, straight out of the
+        // `SoundBank`. Two things follow and both were the point.
+        //
+        // Being counted in and practising to Sticks are now the SAME SOUND.
+        // A musician who counts off with sticks and then hears the Sticks
+        // preset is hearing one instrument, where before the count-off was
+        // whatever rim the kit had and the preset did not exist.
+        //
+        // And it no longer depends on the kit. A count-in is played before
+        // the band, alone, outside the intensity dial, the mix and the
+        // safety clamp — it was already the one slot in the table that the
+        // band's arithmetic does not touch, and now it does not come from
+        // the band's folder either. So there is nothing for a kit without a
+        // rim to fall back through, and nothing for `voice_slot`'s mix to
+        // be put back after.
+        JamCountInSound::Sticks => Some(JamSlot {
+            sound: SoundId::SticksLow,
+            gain: crate::engine::BEAT_GAIN,
+            cap_ticks: 0.0,
+            lane: JamLane::Snare,
+            accent: false,
+            // Centred, and read by nothing: the audio thread spawns this one
+            // through `Voice::click`, which is mono by construction.
+            pan_l: 1.0,
+            pan_r: 1.0,
+            rr: 1,
+            voice: NOT_A_DRUM,
+            choked_by: 0,
+            chokes: 0,
+            release: 0,
         }),
     };
 
@@ -5032,12 +5044,21 @@ mod tests {
 
     /// The crash on the one and the sticks count-in are drums too.
     ///
-    /// Both are built outside `slot_for` — the crash because it is not a
-    /// lane of the pattern, the count-in because it is deliberately outside
-    /// every gain the band goes through — so both are places the folder
-    /// could have been forgotten, and this is what says it was not.
+    /// The crash is built outside `slot_for` — it is not a lane of the
+    /// pattern — so it is a place the folder could have been forgotten, and
+    /// this is what says it was not.
+    ///
+    /// THE COUNT-IN USED TO BE HERE TOO AND IS DELIBERATELY NOT ANY MORE.
+    /// It was the second half of this test and it asserted the opposite of
+    /// what it now must: since the sticks became `sticks_low` out of the
+    /// `SoundBank` they do not come from the folder, do not fall back
+    /// through `with_fallback`, and do not change when the kit does. That
+    /// claim is `sticks_are_the_click_banks_cross_stick_at_the_beat_gain`,
+    /// which walks every kit to make it. What is asserted here instead is
+    /// the narrow thing this test is the right place for: that swapping the
+    /// folder moves the crash and leaves the count-in alone.
     #[test]
-    fn the_crash_on_the_one_and_the_sticks_come_from_the_folder_too() {
+    fn the_crash_on_the_one_comes_from_the_folder_and_the_sticks_do_not() {
         let mut cfg = rock_8ths();
         cfg.crash_on_one = true;
         cfg.count_in_sound = Some(JamCountInSound::Sticks);
@@ -5053,12 +5074,14 @@ mod tests {
             Some(own.sample(KitVoice::Crash as u8, 0, 0))
         );
         assert_eq!(
-            samples(t.count_in_slot()),
-            Some(own.sample(KitVoice::Rim as u8, 0, 0)),
-            "the count-in is the kit's cross-stick"
+            t.count_in_slot().map(|s| s.sound),
+            Some(SoundId::SticksLow),
+            "the count-in is the metronome's own cross-stick"
         );
 
-        // And without them in the folder, both are the built-in kit's.
+        // And without them in the folder, the crash is the built-in kit's —
+        // while the count-in is the same file it was a moment ago, which is
+        // the whole of what changed.
         let behind = reference_bank("room").unwrap();
         let bare = crate::kit::with_fallback(&folder(&[KitVoice::Kick]), &behind);
         let t = compile_with_kit(&cfg, bare.clone()).unwrap();
@@ -5070,19 +5093,17 @@ mod tests {
             samples(t.crash_on_one()),
             Some(behind.sample(KitVoice::Crash as u8, 0, 0))
         );
-        assert_eq!(
-            samples(t.count_in_slot()),
-            Some(behind.sample(KitVoice::Rim as u8, 0, 0))
-        );
+        assert_eq!(t.count_in_slot().map(|s| s.sound), Some(SoundId::SticksLow));
     }
 
     /// A COUNT-IN IS STICKS, WHATEVER THE GROOVE SAYS ITS GHOSTS ARE.
     ///
-    /// The cross-stick became reachable from the snare lane this pass
-    /// (`snareGhostIsRim`), and the count-in reaches for the same drum by a
-    /// different road: directly, at the beat gain, outside the intensity,
-    /// the mix and the clamp. A count-in nobody can hear because the drums
-    /// were mixed down is a bug, not a balance.
+    /// The cross-stick became reachable from the snare lane (`snareGhostIsRim`),
+    /// and the count-in no longer reaches for that drum at all: it is
+    /// `sticks_low` out of the `SoundBank`, at the beat gain, outside the
+    /// intensity, the mix and the clamp. A count-in nobody can hear because
+    /// the drums were mixed down is a bug, not a balance — and it is now a
+    /// bug that cannot happen, because the mix has nothing to multiply.
     #[test]
     fn the_sticks_are_not_moved_by_the_mix_or_the_groove() {
         let mut cfg = rock_8ths();
@@ -5095,7 +5116,11 @@ mod tests {
         cfg.intensity = 0.6;
         let t = compile(&cfg).unwrap();
         let slot = t.count_in_slot().expect("a sticks count-in");
-        assert!(is(slot.sound, KitVoice::Rim), "the count-in is the cross-stick");
+        assert_eq!(
+            slot.sound,
+            SoundId::SticksLow,
+            "the count-in is the metronome's cross-stick"
+        );
         assert!(
             (slot.gain - crate::engine::BEAT_GAIN).abs() < 1e-5,
             "the count-in came out at {} and the beat gain is {}",
@@ -5866,7 +5891,7 @@ mod band_tests {
     fn compile(cfg: &JamConfig) -> Result<JamTable, String> {
         super::compile_synth(cfg)
     }
-    use crate::engine::{JamKit, KitVoice, SoundId, BEAT_GAIN, KEYS_MAX_MIDI, KEYS_MIN_MIDI};
+    use crate::engine::{JamKit, SoundId, BEAT_GAIN, KEYS_MAX_MIDI, KEYS_MIN_MIDI};
 
     /// A bar with one drum, one bass note and one chord on tick 0, so every
     /// lane is present and each one can be found by name.
@@ -6215,8 +6240,19 @@ mod band_tests {
         assert!(compile(&cfg).unwrap().count_in_slot().is_none());
     }
 
+    /// The count-in is `sticks_low` — the beat half of the Sticks click
+    /// preset — whatever kit the jam loaded, and it used to be that kit's
+    /// own cross-stick.
+    ///
+    /// Walking every kit is still the point of this test and means the
+    /// opposite of what it used to: before, it said each kit reached its own
+    /// rim; now it says none of them reaches anything, because a count-in
+    /// happens before the band and no longer comes out of the band's folder.
+    /// A kit that shipped without a rim used to fall back through
+    /// `with_fallback` to get counted in; there is nothing left to fall
+    /// through.
     #[test]
-    fn sticks_are_the_loaded_kits_rim_at_the_beat_gain() {
+    fn sticks_are_the_click_banks_cross_stick_at_the_beat_gain() {
         for kit in JamKit::all() {
             let mut cfg = one_of_everything();
             cfg.kit = kit.name().to_string();
@@ -6225,14 +6261,16 @@ mod band_tests {
                 .unwrap()
                 .count_in_slot()
                 .unwrap_or_else(|| panic!("{} should count in with sticks", kit.name()));
-            assert!(
-                matches!(slot.sound, SoundId::Band { voice, .. } if voice == KitVoice::Rim as u8),
-                "{} counts in on a stick",
+            assert_eq!(
+                slot.sound,
+                SoundId::SticksLow,
+                "{} counts in on the metronome's own sticks",
                 kit.name()
             );
             assert!((slot.gain - BEAT_GAIN).abs() < 1e-5);
             assert_eq!(slot.cap_ticks, 0.0, "a stick click rings out");
             assert!(!slot.accent, "a count-in beat is not a backbeat");
+            assert_eq!(slot.voice, NOT_A_DRUM, "a count-in is not one of the drums");
         }
     }
 
