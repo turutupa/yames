@@ -1128,7 +1128,7 @@ plain beat — and each is a set of THREE, because a bar of 6/8 has a middle and
 the middle has to be a sound rather than a volume (`plans/CLICK_ACCENTS.md`).
 
 ```sh
-python scripts/sounds/render_click.py            # all fifteen recorded files
+python scripts/sounds/render_click.py            # the recorded files, all of them
 python scripts/sounds/render_click.py --measure  # the numbers, write nothing
 python scripts/sounds/rebuild.py --synth-only    # the synthesised ones
 python scripts/sounds/bars_6_8.py                # two bars of 6/8 as WAVs
@@ -1139,28 +1139,41 @@ python -m http.server 8123   # then /scripts/sounds/ab_click.html to hear them
 
 | preset | downbeat | middle | plain beat | source |
 |---|---|---|---|---|
-| click | 1200 Hz | **980 Hz**, damped at 140/s | 800 Hz | synthesised, `rebuild.py` |
-| sticks | stick-shot vl6 | **stick-shot vl3** | cross-stick vl14 | Virtuosity snare |
-| wood | high block vl6 | **high block vl3**, trimmed dry | low block vl6 | Virtuosity woodblock |
-| beep | 880 Hz | **760 Hz**, damped at 53/s | 660 Hz | synthesised, `rebuild.py` |
-| drum | kick + hat + crash + body | **kick + body**, no cymbal | noise snare | synthesised, premixed in `SoundBank::new` |
-| kit | kick 0.70 + snare L4 | **snare L3 alone**, no kick | closed hat L1 | Studio (DRSKit) |
-| snare | snare L4, drive 1.5 | **snare L3, drive 1.1** | snare L1, drive 0.8 | Studio (DRSKit) |
-| cowbell | v3, four mics | **v3, overhead + room** | v2, four mics | Virtuosity cowbell |
+| preset | downbeat | middle | plain beat | peaks (hi/mid/lo) |
+|---|---|---|---|---|
+| click | 1200 Hz | **980 Hz**, damped at 140/s | 800 Hz | .905 / .930 / .900 |
+| sticks | stick-shot vl6 | **stick-shot vl3** | cross-stick vl14 | .970 / .930 / .900 |
+| wood | high block vl6 | **high block vl3** | low block vl6 | .970 / **.814** / .900 |
+| beep | 880 Hz | **760 Hz**, damped at 53/s | 660 Hz | .987 / .930 / .954 |
+| drum | kick + hat + crash + body | **kick + body**, no cymbal | noise snare | .970 / .930 / .707 |
+| kit | kick 0.70 + snare L4 | **snare L3 alone**, no kick | closed hat L1 | .970 / **.807** / .900 |
+| snare | snare L4, drive 1.5 | **snare L3, drive 1.1** | snare L1, drive 0.8 | .970 / **.921** / .900 |
+| cowbell | bell v3 | **bell v2** | **bell v1**, the fingertip tap | .970 / **.771** / **.763** |
+
+Sources: click, beep and drum are synthesised; sticks, wood and cowbell are
+Virtuosity Drums; kit and snare are the Studio kit (DRSKit).
 
 Twenty-one files plus drum's five layers, of which **`render_click.py` owns
-fifteen** — the recorded presets, three strokes each — and `rebuild.py` owns
-the rest. `generate_sounds.py` owns none of them any more and its header says
-so; running it with no arguments still rewrites the synthesised ones with
-files that are *not* what ships.
+sixteen** — the five recorded presets, three strokes each, and cowbell's plain
+beat moved as well — and `rebuild.py` owns the rest. The `_high` and `_low`
+files of click, beep and drum were MADE by `generate_sounds.py` in 2023 and
+have only been transformed since (DC removed, tails faded, a body layer added
+to the kick); `rebuild.py` is their generator of record now and can rebuild
+the synthesised ones from arithmetic, but it cannot re-derive those three
+pairs from nothing — the transform stage reads the files it rewrites.
+`generate_sounds.py` with no arguments still rewrites them with output that is
+*not* what ships, and its header says so.
 
 ## The rules a click file obeys
 
-1. **Three peaks, and they are the whole level convention**: 0.970 for a
-   downbeat, 0.930 for a middle, 0.900 for a plain beat. A kit voice is always
-   0.900; a click accent is allowed 0.970 so that it cannot clip before the
-   user's volume does. `click_*` and `beep_*` predate the convention and sit
-   where they were synthesised (about 0.90, and 0.987 for `beep_high`).
+1. **The peak is headroom, and since 2026-09-15 it is also the level.** A
+   downbeat gets 0.970 so it cannot clip before the user's volume does; a
+   plain beat gets the kits' own 0.900. A MIDDLE gets whatever puts it at the
+   geometric centre of its preset's span through the band a laptop radiates —
+   0.930 at most, and as little as 0.760 — because `MEDIUM_GAIN` is 1.0 and at
+   a fixed peak a softer stroke is usually louder (rule 4). Cowbell's plain
+   beat is solved the same way and lands at 0.763. `click_*` and `beep_*`
+   predate all of it and sit where they were synthesised.
 2. **Mono, 44 100 Hz, no round robins, no velocity layers, no drift.** A
    metronome is a machine. Where a library had several takes of a dynamic, the
    MEDIAN by RMS is used — not the loudest, which is the take that got away
@@ -1176,14 +1189,27 @@ files that are *not* what ships.
    header, which is the long version of this sentence.
 5. **A middle stroke is a different sound, never a scaled copy.** Held to it
    by `a_middle_stroke_is_a_different_sound_from_both_its_siblings` in
-   `engine.rs`, and placed between its siblings by
-   `every_medium_accent_sits_between_its_strong_and_its_beat`.
+   `engine.rs`, and placed between its siblings — 1.5 dB clear of each through
+   the band a laptop radiates, 1.0 dB clear K-weighted, no exceptions — by
+   `every_medium_accent_sits_between_its_strong_and_its_beat`. Both filters,
+   because a middle in order on a laptop and out of order on headphones is not
+   in order; that is what sent both Studio-based middles from layer 2 back to
+   layer 3.
+   The cowbell is named in the first of those at a lower margin, because three
+   dynamics of one bell share their partials and what separates them is the
+   attack; the same test's comment has the numbers.
 6. **The three strokes of a preset start together** — every middle lands
    within 0.14 ms of its own downbeat, so a bar never flams
    (`a_kits_three_strokes_start_together`).
-7. **A file the owner has heard does not change.** Nineteen of them are pinned
+7. **A file the owner has heard does not change.** All twenty-seven are pinned
    by hash in `the_shipped_click_files_are_the_ones_that_were_heard`;
-   `sticks_low` matters most, because the jam's count-in plays it.
+   `sticks_low` matters most, because the jam's count-in plays it. Only
+   `cowbell_low` has ever been deliberately re-cut, when that preset went from
+   two dynamics of the bell to three.
+8. **Render the whole table, not one row.** `render_click.py` draws its dither
+   from one generator in table order, so a file rendered on its own is
+   audibly identical to the committed one and byte-for-byte different. Rule 7
+   is what notices.
 
 ## The credit lines, as they must appear
 

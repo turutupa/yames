@@ -1,0 +1,6 @@
+# Rejected candidates, rendered so the owner can hear a decision instead of
+# reading it — `bars_6_8.py --alt <name>` picks them up out of `<name>/`. They
+# are not tracked and never ship: what is worth keeping about a candidate is
+# the paragraph in the recipe saying why it lost, not the WAV.
+*
+!.gitignore

@@ -142,12 +142,12 @@ const DIR = "../../src-tauri/sounds/";
 const KITS = [
   ["click",   "980 Hz between 1200 and 800, damped faster"],
   ["sticks",  "the same stick-shot at vl3, less arm behind it"],
-  ["wood",    "the same small block at vl3, trimmed dry"],
+  ["wood",    "the same small block at vl3, at 0.814"],
   ["beep",    "760 Hz between 880 and 660, damped faster"],
   ["drum",    "the kick and the body — the cymbal taken off"],
-  ["kit",     "the backbeat with no kick under it"],
-  ["snare",   "the same drum at layer 3, mezzo-forte"],
-  ["cowbell", "the same hard stroke, heard across the room"],
+  ["kit",     "the backbeat with no kick under it, at 0.760"],
+  ["snare",   "the same drum at layer 2"],
+  ["cowbell", "the bell's middle dynamic, 2.1 dB down"],
 ];
 
 // `[3, 3]` is 6/8, `[4]` is 4/4, `[3, 2, 2]` is 7/8 — the meters exactly as
@@ -218,8 +218,28 @@ const stroke = (k, tier) =>
     ? (tier === "low" ? load("drum_low") : drumPremix(tier === "high" ? "accent" : "mid"))
     : load(k + "_" + tier);
 
-async function fire(k, tier, gain, at) {
-  const buf = await stroke(k, tier);
+/** EVERYTHING IS DECODED BEFORE ANYTHING IS SCHEDULED, and that is not a
+ *  nicety. `fire` used to await the fetch and the decode and only then call
+ *  `start(at)`; a time already in the past starts immediately, so the first
+ *  bar after a cold load came out as a flam — on a page whose whole job is to
+ *  tell you whether a bar flams. Twenty-four buffers, about 400 kB. */
+let ready = null;
+function preload() {
+  if (!ready) {
+    audio();
+    ready = Promise.all(
+      KITS.flatMap(([k]) => ["high", "mid", "low"].map((t) => stroke(k, t)))
+    );
+  }
+  return ready;
+}
+
+/** Schedules only. Everything it can play is already in `buffers`; `preload`
+ *  is awaited by the callers before any time is computed. */
+function fire(k, tier, gain, at) {
+  const buf = buffers[k === "drum" ? (tier === "low" ? "drum_low"
+    : tier === "high" ? "drum_accent" : "drum_mid") : k + "_" + tier];
+  if (!buf) return;
   const src = audio().createBufferSource();
   const amp = audio().createGain();
   src.buffer = buf;
@@ -252,7 +272,7 @@ function drawDots(lit) {
   });
 }
 
-async function playBar(k, startAt) {
+function playBar(k, startAt) {
   const t = tiers(meter);
   const step = 60 / bpm;
   for (let i = 0; i < t.length; i++) {
@@ -265,14 +285,14 @@ async function playBar(k, startAt) {
   return t.length * step;
 }
 
-async function loop() {
+function loop() {
   if (!looping) return;
   if (roundRobin !== null) {
     kit = KITS[roundRobin % KITS.length][0];
     document.getElementById("whichOut").textContent = kit;
     roundRobin++;
   }
-  const len = await playBar(kit, audio().currentTime + 0.08);
+  const len = playBar(kit, audio().currentTime + 0.08);
   timer = setTimeout(loop, len * 1000);
 }
 
@@ -285,23 +305,39 @@ function stop() {
   drawDots(-1);
 }
 
+async function armed(fn) {
+  say("loading the presets…");
+  try {
+    await preload();
+    say("");
+  } catch (e) {
+    say(String(e));
+    return;
+  }
+  fn();
+}
+
 document.getElementById("play").onclick = () => {
   if (looping) return stop();
-  looping = true;
-  document.getElementById("play").textContent = "Stop";
-  loop();
+  armed(() => {
+    looping = true;
+    document.getElementById("play").textContent = "Stop";
+    loop();
+  });
 };
-document.getElementById("once").onclick = async () => {
+document.getElementById("once").onclick = () => {
   stop();
-  await playBar(kit, audio().currentTime + 0.05);
+  armed(() => playBar(kit, audio().currentTime + 0.05));
 };
 document.getElementById("round").onclick = () => {
   stop();
-  looping = true;
-  roundRobin = 0;
-  document.getElementById("play").textContent = "Stop";
-  say("one bar each, in menu order");
-  loop();
+  armed(() => {
+    looping = true;
+    roundRobin = 0;
+    document.getElementById("play").textContent = "Stop";
+    say("one bar each, in menu order");
+    loop();
+  });
 };
 document.getElementById("bpm").oninput = (e) => {
   bpm = +e.target.value;
@@ -342,7 +378,7 @@ KITS.forEach(([k, why]) => {
     const b = document.createElement("button");
     b.className = "stroke " + cls;
     b.textContent = label;
-    b.onclick = () => fire(k, tier, gain).catch((e) => say(String(e)));
+    b.onclick = () => armed(() => fire(k, tier, gain));
     td.appendChild(b);
     tr.appendChild(td);
   });

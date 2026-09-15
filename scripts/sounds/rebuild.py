@@ -222,9 +222,11 @@ script for the full table.
    THESE TWO ARE DITHERED AND THEIR SIBLINGS ARE NOT. `write` below truncates
    to sixteen bits, which is what the originals got in 2023 and is why they
    are what they are; a middle stroke cut today gets the TPDF dither, the
-   exact peak and the zero landing that all ten recorded click files get,
-   because there is no reason to reproduce an accident. Nothing else about
-   them differs: same generator, same DC removal, same 4 ms tail fade.
+   exact peak and the zero landing that all sixteen recorded click files get,
+   because there is no reason to reproduce an accident. The DC removal is not
+   the siblings' either — it is windowed (`land`), because a flat subtraction
+   put a step at sample 1 of `beep_mid`. Everything else is the same: same
+   generator, same 4 ms tail fade.
 
 THE TRANSFORM STAGE IS NOT IDEMPOTENT — running it twice adds a second beater
 to the kick. It refuses to run when every sample already ends in silence,
@@ -317,6 +319,39 @@ def fade_tail(x, sr):
         return x
     y = x.copy()
     y[-n:] *= 0.5 * (1 + np.cos(np.linspace(0, np.pi, n)))
+    return y
+
+
+def land(x, sr, fade_in_ms=1.0):
+    """Take the DC out WITHOUT putting a step at the front, and land both ends.
+
+    A decaying sine that starts at phase zero has a non-zero mean, so it has to
+    come off — and the obvious way, `x - x.mean()` followed by forcing sample 0
+    to zero, is what `beep_mid` shipped with for an afternoon: the correction is
+    a flat offset, sample 0 is pulled back to zero on its own, and sample 1 is
+    left 108 LSB off the axis. That IS a step, at the very front of the file,
+    which is the one place a click cannot afford one.
+
+    So the CORRECTION is windowed and the SIGNAL is not. `render_kit.
+    trim_and_fade` multiplies both, which is right for a recording it is also
+    fading in; here the attack is the sound and must not be touched. The window
+    is zero at both ends, so the correction vanishes exactly where the file has
+    to be zero, and it still sums to the whole offset, so the mean comes out
+    exactly zero.
+    """
+    y = np.asarray(x, dtype=np.float64).copy()
+    win = np.ones(len(y))
+    fi = min(int(sr * fade_in_ms / 1000.0), len(y) // 4)
+    if fi > 1:
+        win[:fi] = 0.5 - 0.5 * np.cos(np.linspace(0.0, np.pi, fi))
+    fo = min(int(sr * FADE_MS / 1000.0), len(y) // 2)
+    if fo > 1:
+        win[-fo:] = 0.5 + 0.5 * np.cos(np.linspace(0.0, np.pi, fo))
+    s = float(np.sum(win))
+    if s > 0:
+        y -= (y.mean() * len(y) / s) * win
+    y[0] = 0.0
+    y[-1] = 0.0
     return y
 
 
@@ -671,14 +706,19 @@ def click_mid(sr):
 
     22 ms rather than the downbeat's 25 and the beat's 20 — between those too,
     though at this decay the last few milliseconds carry almost nothing and
-    the number is for tidiness rather than for level."""
+    the number is for tidiness rather than for level.
+
+    `land` and not `x - x.mean()`: see that function. A sine starting at phase
+    zero already has sample 0 on the axis and sample 1 is the click itself —
+    4200 LSB of it — so nothing here is hidden by the windowed correction, and
+    the file is measured starting at zero with no step either way."""
     n = int(sr * 22.0 / 1000)
     t = np.arange(n) / sr
     env = np.exp(-t * 140.0)
     y = np.sin(2 * np.pi * 980.0 * t) * env
     k = int(sr * 0.002)
     y[:k] += np.sin(2 * np.pi * 980.0 * 3 * t[:k]) * 0.3 * env[:k]
-    return fade_tail(y - np.mean(y), sr)
+    return land(fade_tail(y, sr), sr)
 
 
 def beep_mid(sr):
@@ -694,7 +734,12 @@ def beep_mid(sr):
     has to. At 53 it measures 2.29 dB under the downbeat and 2.29 dB over the
     plain beat — the centre of the widest span of the eight presets, which is
     why this one lands symmetrical to the second decimal and the others do
-    not."""
+    not.
+
+    THIS FILE IS WHY `land` EXISTS. Its envelope ramps from zero over 2 ms, so
+    sample 1 is a thousandth of full scale; subtracting a flat DC offset and
+    then forcing sample 0 back to zero left that sample 108 LSB off the axis,
+    which is a step at the front of a click. The correction is windowed now."""
     n = int(sr * 37.0 / 1000)
     t = np.arange(n) / sr
     attack, release = int(sr * 0.002), int(sr * 0.008)
@@ -702,8 +747,7 @@ def beep_mid(sr):
     env[:attack] = np.arange(attack) / attack
     tail = np.arange(n) > n - release
     env[tail] = (n - np.arange(n)[tail]) / release
-    y = np.sin(2 * np.pi * 760.0 * t) * env
-    return fade_tail(y - np.mean(y), sr)
+    return land(fade_tail(np.sin(2 * np.pi * 760.0 * t) * env, sr), sr)
 
 
 def synthesise(name, sr=SR):

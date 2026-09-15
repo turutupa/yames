@@ -44,8 +44,18 @@ SND = os.path.join("src-tauri", "sounds")
 DEFAULT_OUT = os.path.join(
     os.environ.get("TEMP", "."),
     "claude", "C--Users-alber-Dev-yames",
-    "c91391ca-5187-4311-ba2c-30e326a5256c", "scratchpad", "listen-w5",
+    "c91391ca-5187-4311-ba2c-30e326a5256c", "scratchpad", "listen-w5-round2",
 )
+
+ALT_DIR = os.path.join("scripts", "sounds", "alternates")
+"""Where `--alt <name>` looks for a stroke before it looks in `src-tauri/sounds`.
+
+A middle stroke is a judgement, and twice now the version that measured better
+was the wrong sound. So a rejected candidate can be rendered beside the shipped
+one rather than described: put `<preset>_mid.wav` (or `_low.wav`) here, pass
+`--alt <name>`, and the bar comes out as `6-8_<preset>__<name>.wav`. Nothing in
+this folder is embedded by the app and nothing is tracked; it exists so the
+owner hears the choice instead of reading about it."""
 
 # `SoundKit::ALL`, in the order the menu offers them.
 KITS = ["click", "sticks", "wood", "beep", "drum", "kit", "snare", "cowbell"]
@@ -56,8 +66,15 @@ beat 4 — `accent_for` in `engine.rs`, and the whole of the reporter's
 complaint."""
 
 
-def read(name):
-    with wave.open(os.path.join(SND, name + ".wav"), "rb") as w:
+def read(name, alt=None):
+    """One stroke, from the alternates folder if `alt` names one and it holds
+    a file for this stroke, otherwise from what the app embeds."""
+    path = os.path.join(SND, name + ".wav")
+    if alt:
+        cand = os.path.join(ALT_DIR, alt, name + ".wav")
+        if os.path.isfile(cand):
+            path = cand
+    with wave.open(path, "rb") as w:
         ch, sr, n = w.getnchannels(), w.getframerate(), w.getnframes()
         raw = w.readframes(n)
     x = np.frombuffer(raw, dtype=np.int16).astype(np.float64) / 32768.0
@@ -95,15 +112,16 @@ def drum_premix(mid):
     return y
 
 
-def strokes(kit):
+def strokes(kit, alt=None):
     if kit == "drum":
         return drum_premix(False), drum_premix(True), read("drum_low")
-    return read(kit + "_high"), read(kit + "_mid"), read(kit + "_low")
+    return (read(kit + "_high", alt), read(kit + "_mid", alt),
+            read(kit + "_low", alt))
 
 
-def bar(kit, bpm, bars):
+def bar(kit, bpm, bars, alt=None):
     """Two bars of 6/8, summed into one buffer at the engine's gains."""
-    high, mid, low = strokes(kit)
+    high, mid, low = strokes(kit, alt)
     step = int(round(RATE * 60.0 / bpm))
     beats = sum(GROUPS)
     starts = set()
@@ -144,6 +162,9 @@ def main():
     ap.add_argument("--bpm", type=float, default=120.0,
                     help="the eighth-note pulse; 6/8 is six of them a bar")
     ap.add_argument("--bars", type=int, default=2)
+    ap.add_argument("--alt", action="append", default=[],
+                    help="also render every preset an alternate exists for, "
+                         "from scripts/sounds/alternates/<name>/")
     args = ap.parse_args()
 
     if not os.path.isdir(SND):
@@ -151,6 +172,13 @@ def main():
     os.makedirs(args.out, exist_ok=True)
 
     rendered = {k: bar(k, args.bpm, args.bars) for k in KITS}
+    # Alternates go through the same scale as the shipped set, or the A/B is
+    # between two loudnesses rather than between two sounds.
+    for alt in args.alt:
+        for kit in KITS:
+            if any(os.path.isfile(os.path.join(ALT_DIR, alt, kit + "_" + t + ".wav"))
+                   for t in ("high", "mid", "low")):
+                rendered["%s__%s" % (kit, alt)] = bar(kit, args.bpm, args.bars, alt)
     loudest = max(float(np.max(np.abs(v))) for v in rendered.values())
     # 0.97, the same ceiling an accent file is allowed, so that a bar of the
     # loudest preset ends up exactly where its own downbeat already is.
@@ -159,7 +187,7 @@ def main():
           % (scale, loudest))
 
     rng = np.random.default_rng(4116)
-    for kit in KITS:
+    for kit in sorted(rendered, key=lambda n: (KITS.index(n.split("__")[0]), n)):
         x = rendered[kit]
         path = os.path.join(args.out, "6-8_%s.wav" % kit)
         size = write(path, x, scale, rng)

@@ -77,63 +77,92 @@ kit's recipe row, which is the only place a per-kit answer can be given.
 | click | 1200 Hz | **980 Hz**, damped 140/s | 800 Hz | the geometric mean of the two, rung shorter |
 | beep | 880 Hz | **760 Hz**, damped 53/s | 660 Hz | as above |
 | sticks | stick-shot vl6 | **stick-shot vl3** | cross-stick vl14 | a drummer's second accent is the same stroke, less arm |
-| wood | high block vl6 | **high block vl3**, trimmed at −22 dB | low block vl6 | pitch keeps it off the beat, dryness and weight keep it under the downbeat |
-| snare | layer 4, drive 1.5 | **layer 3, drive 1.1** | layer 1, drive 0.8 | the same drum, mezzo-forte |
+| wood | high block vl6 | **high block vl3** | low block vl6 | pitch keeps it off the beat, weight keeps it under the downbeat |
+| snare | layer 4, drive 1.5 | **layer 3, drive 1.1** | layer 1, drive 0.8 | the same drum, struck between a ghost and a rimshot |
 | kit | kick 0.70 + snare L4 | **snare L3 alone, no kick** | closed hat L1 | 6/8 on a kit is kick on one, snare on four — the middle is the backbeat |
 | drum | kick + hat + crash + body | **kick + body**, premixed in `SoundBank::new` | noise snare | the cymbal is what says "one"; the bare kick says "four" |
-| cowbell | v3, four mics | **v3, overhead + room** | v2, four mics | the same bell heard across the room |
+| cowbell | bell v3 | **bell v2** | **bell v1**, the fingertip tap | three dynamics of one bell, which is what a player has |
 
 **The peak convention builds no ladder, and that was the surprise.** At a fixed
 peak a SOFTER stroke is usually LOUDER — its peak is not spent on a stick
 transient — so a softer layer normalised to 0.930 lands within half a decibel
-of a harder one at 0.970, and sometimes over it. The level had to be built per
-file out of the four knobs the recipe already had: which layer, the tanh drive,
-the mic blend, and where the trim cuts. Each middle is aimed at the geometric
-centre of its own kit's span, because with three genuinely different sounds
-there is no longer a reason to bias one gap over the other.
+of a harder one at 0.970, and sometimes over it. Cowbell is the extreme: 26 dB
+of library dynamic between its softest and hardest strokes collapses to
++1.3 dB in favour of the SOFT one.
+
+**So the peak is solved for rather than assumed.** Each middle's peak is
+whatever puts that stroke at the geometric centre of its own preset's span
+through the band a laptop radiates, and the recorded ones land between 0.760
+and 0.930; cowbell's plain beat is solved the same way and lands at 0.763. The
+trim, the drive and the mic blend went back to describing the stroke. An
+earlier version of this pass spent those three as levels instead and shipped
+two files that measured right and sounded wrong — a woodblock gated at −22 dB
+where its downbeat rang on for another 180 ms, and a cowbell so far back in the
+room that it read as a different, washier bell. Both are recorded in
+`render_click.py` where they happened.
 
 Measured at 48 kHz through the same band-pass, each preset against its own
 plain beat at `BEAT_GAIN`:
 
-    preset   strong   middle   beat    strong-middle   middle-beat
-    click    +4.24    +2.15    0.00        2.09            2.15
-    sticks   +4.18    +2.16    0.00        2.01            2.16
-    wood     +4.19    +2.20    0.00        2.00            2.20
-    beep     +4.58    +2.29    0.00        2.29            2.29
-    drum     +3.67    +2.06    0.00        1.62            2.06
-    kit      +4.36    +3.53    0.00        0.83            3.53
-    snare    +4.01    +2.10    0.00        1.91            2.10
-    cowbell  +4.50    +1.99    0.00        2.51            1.99
+    preset   strong   middle   beat   strong-mid  mid-beat   K-weighted
+    click    +4.24    +2.08    0.00      2.16       2.08     2.34 / 2.15
+    sticks   +4.18    +2.16    0.00      2.01       2.16     1.98 / 3.56
+    wood     +4.19    +2.10    0.00      2.09       2.10     2.05 / 1.98
+    beep     +4.58    +2.30    0.00      2.28       2.30     2.16 / 2.07
+    drum     +3.67    +2.06    0.00      1.62       2.06     1.52 / 2.29
+    kit      +4.36    +2.30    0.00      2.07       2.30     2.96 / 1.70
+    snare    +4.01    +2.01    0.00      1.99       2.01     1.34 / 2.94
+    cowbell  +4.20    +2.10    0.00      2.10       2.10     1.88 / 2.56
+
+**Both filters, and the second one changed a decision.** The band-pass asks
+whether a laptop will reproduce the difference; K-weighting asks whether it is
+loud, which is the question a pair of headphones asks. Studio's layer 2 is the
+more distinct sound for both the `snare` and `kit` middles — 0.70 and 0.94 of
+spectral distance against layer 3's 0.56 and 0.75 — and it is also the LOUDEST
+of that drum's four layers, so at the peak that centres it on a laptop the
+snare's middle sat 0.86 dB OVER its own downbeat K-weighted. No peak fixes it:
+the level that satisfies one filter fails the other. Both middles are layer 3,
+and the gate now asserts the ordering through both filters so the choice cannot
+be made again by accident.
 
 **The floor is 1.5 dB on both sides, not the 2.0 the brief asked for**, and
 that is arithmetic rather than a compromise: no preset stands more than
 4.58 dB over its own beat and the drum kit stands 3.67, so a perfectly placed
 middle can be at most 1.83 dB from each end of that one. Widening the accents
 to make room is the snare kit's third rejection all over again —
-"disproportionally loud". `kit` is named separately at 0.7, because its middle
-is the backbeat with the KICK taken out: the largest musical difference in the
-table and very nearly the smallest measured one, since the band-pass starts at
-200 Hz and a kick carries 99.7% of its energy below 120. K-weighted, which does
-hear a kick, it stands 1.73 dB under its downbeat.
+"disproportionally loud". **No preset is excepted.** `kit` was, for a day, at
+0.7 dB: its middle is the backbeat with the KICK taken out, the largest
+musical difference in the table and — at the peak middles used to be given —
+very nearly the smallest measured one, because the band-pass starts at 200 Hz
+and a kick carries 99.7% of its energy below 120. That was the wrong call and
+the filter was right: on a laptop the kick is not merely invisible, it is gone,
+so what the owner would have heard on beat four is a snare 0.83 dB under the
+snare on beat one — the experiment that has already been run. The file carries
+it now, at 0.760.
 
-**Cowbell's decided plan did not measure.** It was to be v2 for the middle with
-the fingertip v1 re-cut as the plain beat. v1 is 26 dB under v3 in the library,
-and at the beat's 0.900 peak it comes back **1.26 dB louder** than the downbeat
-through the laptop band — all of its peak is ring and none of it is stick. The
-three would have stood at +0.47 and +2.30, which is the failure this whole pass
-exists to undo. So the brief's own fallback, with the mic blend as the level:
-the same hard stroke, close and mid mics dropped, room brought up to meet the
-overhead. `cowbell_low` is not re-cut; nothing the owner has already heard
-moved.
+**Cowbell is three dynamics of one bell**, levelled by band energy rather than
+by peak: v3 at 0.970 (unchanged), v2 at 0.771, v1 at 0.763, 2.1 dB a step. Its
+plain beat is therefore the one pre-existing click file this pass re-cut, which
+the brief allowed. The alternative — the downbeat's own stroke through a
+distant mic blend — measured better on every number that has one and was the
+wrong sound: 13.3% of its energy above 5.6 kHz against the downbeat's 4.2%, a
+centroid of 1788 Hz against 1042, and 42 ms longer than the downbeat. Both are
+rendered as bars for the owner; the three dynamics ship.
 
 **Five gates**, all walking `SoundKit::ALL` in `engine.rs`:
-`every_medium_accent_sits_between_its_strong_and_its_beat` (the table above),
+`every_medium_accent_sits_between_its_strong_and_its_beat` (the table above,
+1.5 dB both sides, no exceptions),
 `a_middle_stroke_is_a_different_sound_from_both_its_siblings` (L1 distance
-between semitone-band energy fractions, floor 0.25, tightest cell 0.42),
-`a_kits_three_strokes_start_together` (every middle within 0.14 ms of its own
-downbeat), `every_kit_has_three_buffers_and_none_of_them_clips`, and
-`the_shipped_click_files_are_the_ones_that_were_heard` (nineteen files pinned
-by hash, `sticks_low` among them because the jam's count-in plays it).
+between semitone-band energy fractions, floor 0.25, with cowbell named at 0.10
+because a bell's partials do not move with how hard it is struck — what
+separates its three strokes is that 51.5%, 47.4% and 33.0% of their energy
+lands in the first 15 ms), `a_kits_three_strokes_start_together` (every middle
+within 0.14 ms of its own downbeat),
+`every_kit_has_three_buffers_and_none_of_them_clips` (each middle held to the
+peak its own recipe row states), and
+`the_shipped_click_files_are_the_ones_that_were_heard` (all twenty-seven click
+files pinned by hash, `sticks_low` among them because the jam's count-in plays
+it).
 
 **Still to confirm by ear**, and this is the half no test reaches. Every number
 above was measured on a machine where nothing may play the click. What
@@ -142,14 +171,20 @@ measurement cannot answer:
 - Whether each middle reads as the same INSTRUMENT as its downbeat rather than
   as a second instrument — the snare kit was rejected three times on exactly
   that, and every time the numbers were fine.
-- Whether `wood`'s middle, trimmed to 64 ms against a 250 ms downbeat, sounds
-  deliberately drier or simply cut off.
-- Whether `cowbell`'s middle reads as the same bell further away or as a
-  different, washier bell.
-- Whether `kit`'s middle is far enough under its downbeat on a laptop, where
-  the kick that separates them is the part a laptop cannot reproduce.
-- Whether the whole tier is now too loud: at `MEDIUM_GAIN` 1.0 the middle is
-  about 2 dB louder in the bar than the 0.80 version was.
+- Whether `cowbell`'s three dynamics are far enough apart to hear. They are
+  2.1 dB a step and they share their partials; a bell is the one instrument
+  here where dynamics do not change the colour much. The alternative that did
+  change the colour is rendered beside it.
+- Whether `snare`'s three strokes read as one drum played three ways. Layers 3
+  and 4 of it are both struck hard, so its downbeat and its middle are the
+  closest pair of sounds in the app after the cowbell's. Layer 2 is the more
+  distinct stroke and cannot be given a level that works; if the middle is
+  inaudible against the downbeat by ear, that is the thing to say, because the
+  answer is a different drum rather than a different number.
+- Whether the middles are now too QUIET rather than too loud. Every one of
+  them was placed at the centre of its span by measurement, which is a
+  different thing from the middle of what an ear wants; `MEDIUM_GAIN` is the
+  one line that moves all eight together.
 
 `scripts/sounds/ab_click.html` plays every preset three ways and loops 6/8,
 4/4 and 7/8 at the engine's own gains; `scripts/sounds/bars_6_8.py` renders the
