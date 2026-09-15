@@ -138,6 +138,9 @@
     "devices": {
       "title": "设备",
       "audioOutput": "音频输出",
+      "outputPair": "输出",
+      "outputsPair": "输出 {{a}}-{{b}}",
+      "outputPairFallback": "此设备只提供两个输出，所以节拍声从输出 1-2 播放。",
       "refreshAudio": "刷新音频设备",
       "btLatencyWarning": "蓝牙音频有明显延迟。视觉提示与声音可能无法完美同步。",
       "audioInput": "音频输入",

@@ -138,6 +138,9 @@
     "devices": {
       "title": "기기",
       "audioOutput": "오디오 출력",
+      "outputPair": "출력",
+      "outputsPair": "출력 {{a}}-{{b}}",
+      "outputPairFallback": "이 장치는 출력이 두 개뿐이라 클릭이 출력 1-2로 나옵니다.",
       "refreshAudio": "오디오 기기 새로고침",
       "btLatencyWarning": "블루투스 오디오는 지연이 큽니다. 시각 신호와 소리가 완벽히 동기화되지 않을 수 있습니다.",
       "audioInput": "오디오 입력",

@@ -138,6 +138,9 @@
     "devices": {
       "title": "デバイス",
       "audioOutput": "オーディオ出力",
+      "outputPair": "出力",
+      "outputsPair": "出力 {{a}}-{{b}}",
+      "outputPairFallback": "このデバイスは出力が2つしかないため、クリックは出力 1-2 から鳴ります。",
       "refreshAudio": "オーディオデバイスを更新",
       "btLatencyWarning": "Bluetooth オーディオは遅延が大きくなります。視覚的な合図と音が完全には同期しないことがあります。",
       "audioInput": "オーディオ入力",

@@ -6,13 +6,13 @@ import {
   clearCalibrationCacheEntry,
   getCalibrationCacheEntry,
   listAudioOutputDevices,
-  setAudioOutputDevice,
 } from "../../ipc";
 import type { CalibrationCacheEntry } from "../../ipc";
 import { AudioOutputDropdown } from "../../components/AudioOutputDropdown";
 import { AudioInputDropdown } from "../../components/AudioInputDropdown";
 import { MidiDeviceDropdown } from "../../components/MidiDeviceDropdown";
 import { ChannelDropdown } from "../../components/ChannelDropdown";
+import { OutputPairDropdown } from "../../components/OutputPairDropdown";
 import type { useEvaluation } from "../../hooks/useEvaluation";
 import type { UseMidiReturn } from "../../hooks/useMidi";
 
@@ -45,7 +45,10 @@ export function DevicesSettingsSection({
   audioOutputDevices,
   setAudioOutputDevices,
   selectedOutputDevice,
-  setSelectedOutputDevice,
+  outputPair,
+  selectOutputPair,
+  selectOutputDevice,
+  outputPairFellBack,
   evaluation,
   midi,
   onOpenInputTest,
@@ -54,7 +57,10 @@ export function DevicesSettingsSection({
   audioOutputDevices: AudioOutputDevice[];
   setAudioOutputDevices: Dispatch<SetStateAction<AudioOutputDevice[]>>;
   selectedOutputDevice: string;
-  setSelectedOutputDevice: Dispatch<SetStateAction<string>>;
+  outputPair: number;
+  selectOutputPair: (pair: number) => void;
+  selectOutputDevice: (deviceName: string) => void;
+  outputPairFellBack: boolean;
   evaluation: EvaluationLike;
   midi: MidiLike;
   onOpenInputTest: () => void;
@@ -66,6 +72,22 @@ export function DevicesSettingsSection({
     (d) => d.name === evaluation.selectedDevice,
   );
   const deviceChannelCount = selectedInputDevice?.channels ?? 0;
+  // How many outputs the chosen device has, and how many whole pairs that
+  // makes.
+  //
+  // "System default" is the empty name and has no entry of its own in the
+  // list, so it resolves to whichever device is flagged `isDefault` — and
+  // on the machine issue 52 came from, the interface IS the default. A
+  // lookup by name alone hid the picker from exactly the person who asked
+  // for it. The backend keys the stored pair under the empty name either
+  // way, so the two agree on what "system default" means.
+  const selectedOutputDeviceEntry =
+    audioOutputDevices.find((d) => d.name === selectedOutputDevice) ??
+    (selectedOutputDevice === ""
+      ? audioOutputDevices.find((d) => d.isDefault)
+      : undefined);
+  const selectedOutputChannelCount = selectedOutputDeviceEntry?.channels ?? 0;
+  const selectedOutputPairsAvailable = Math.floor(selectedOutputChannelCount / 2);
   // Per-instrument calibration cache lookup. We re-fetch whenever the
   // active `(instrument, audio input)` pair changes so the displayed
   // value tracks what start_evaluation would actually use next session.
@@ -101,10 +123,7 @@ export function DevicesSettingsSection({
           <AudioOutputDropdown
             devices={audioOutputDevices}
             value={selectedOutputDevice}
-            onChange={(val) => {
-              setSelectedOutputDevice(val);
-              setAudioOutputDevice(val || null);
-            }}
+            onChange={selectOutputDevice}
           />
           <button
             className="midi-refresh-btn"
@@ -126,6 +145,33 @@ export function DevicesSettingsSection({
             </svg>
             <span>{t("settings.devices.btLatencyWarning")}</span>
           </div>
+        )}
+        {/* Which pair of the device's outputs everything plays on. Only
+            for a device that HAS more than two — on a laptop there is
+            nothing to choose, and a picker with one option in it is a
+            question nobody asked. A drummer on a four-output interface
+            puts the click on 3-4 and keeps 1-2 for the v-drums. */}
+        {selectedOutputPairsAvailable > 1 && (
+          <>
+            <label
+              className="midi-label devices-subsection-label"
+              style={{ marginTop: 12 }}
+            >
+              {t("settings.devices.outputPair")}
+            </label>
+            <div className="midi-device-row">
+              <OutputPairDropdown
+                outputCount={selectedOutputChannelCount}
+                value={outputPair}
+                onChange={selectOutputPair}
+              />
+            </div>
+            {outputPairFellBack && (
+              <span className="channel-picker-hint">
+                {t("settings.devices.outputPairFallback")}
+              </span>
+            )}
+          </>
         )}
       </div>
 

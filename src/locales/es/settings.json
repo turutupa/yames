@@ -138,6 +138,9 @@
     "devices": {
       "title": "Dispositivos",
       "audioOutput": "Salida de audio",
+      "outputPair": "Salidas",
+      "outputsPair": "Salidas {{a}}-{{b}}",
+      "outputPairFallback": "Este dispositivo solo ofrece dos salidas, así que el clic suena por las salidas 1-2.",
       "refreshAudio": "Actualizar dispositivos de audio",
       "btLatencyWarning": "El audio Bluetooth añade mucha latencia. Las señales visuales y el sonido pueden no ir perfectamente sincronizados.",
       "audioInput": "Entrada de audio",

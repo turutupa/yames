@@ -138,6 +138,9 @@
     "devices": {
       "title": "Geräte",
       "audioOutput": "Audio-Ausgabe",
+      "outputPair": "Ausgänge",
+      "outputsPair": "Ausgänge {{a}}-{{b}}",
+      "outputPairFallback": "Dieses Gerät liefert nur zwei Ausgänge, daher läuft der Klick über die Ausgänge 1-2.",
       "refreshAudio": "Audio-Geräte aktualisieren",
       "btLatencyWarning": "Bluetooth-Audio hat eine spürbare Latenz. Visuelle Hinweise und Ton sind eventuell nicht perfekt synchron.",
       "audioInput": "Audio-Eingang",

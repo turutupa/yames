@@ -497,8 +497,31 @@ export async function setAudioOutputDevice(deviceName: string | null): Promise<v
   return invoke("set_audio_output_device", { deviceName });
 }
 
+/**
+ * Move everything the app plays — the click, the band, take playback, the
+ * coach's voice — to another pair of the device's outputs. `pair` is
+ * 0-based: 0 is "Outputs 1-2", 1 is "Outputs 3-4".
+ *
+ * Resolves with the pair actually in effect. Remembered against the device
+ * it was chosen for, so switching back to the interface brings its outputs
+ * back with it.
+ */
+export async function setAudioOutputPair(pair: number): Promise<number> {
+  return invoke<number>("set_audio_output_pair", { pair });
+}
+
 export function onAudioDevicesChanged(callback: (devices: AudioOutputDevice[]) => void) {
   return listen<AudioOutputDevice[]>("audio-devices-changed", (e) => callback(e.payload));
+}
+
+/**
+ * The chosen device turned out to have fewer outputs than it advertised,
+ * so the app is playing on the pair named in the payload (which is 0 —
+ * outputs 1-2 — in every case the backend can produce today). The screen
+ * moves the picker back and says why.
+ */
+export function onAudioOutputPairFallback(callback: (pair: number) => void) {
+  return listen<number>("audio-output-pair-fallback", (e) => callback(e.payload));
 }
 
 /**

@@ -229,6 +229,13 @@ export type AudioOutputDevice = {
   name: string;
   isDefault: boolean;
   isBluetooth: boolean;
+  /**
+   * How many outputs this device has, at its widest. More than two means
+   * the Outputs picker appears under it in Settings › Devices, so a
+   * musician on an interface can send the click somewhere other than the
+   * first pair.
+   */
+  channels: number;
 };
 
 // ---------------------------------------------------------------------------
