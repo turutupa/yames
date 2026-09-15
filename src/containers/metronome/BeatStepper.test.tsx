@@ -22,7 +22,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, renderHook, screen, fireEvent } from "@testing-library/react";
 import { BeatStepper } from "./BeatStepper";
 import { mockInvoke } from "../../test/mocks";
-import { METER_PRESETS, MAX_FREE_BEATS, MIN_FREE_BEATS } from "../../constants/metronome";
+import { METER_PRESETS, METER_VARIANTS, MAX_FREE_BEATS, MIN_FREE_BEATS } from "../../constants/metronome";
 import { stepMeter } from "../../utils/meter";
 import { useActionDispatcher } from "../../hooks/useActionDispatcher";
 import type { AppState } from "../../types";
@@ -187,12 +187,10 @@ describe("BeatStepper — the same step as the hotkeys", () => {
     // over every meter the app ships, both directions, and both modes.
     const everyMeter = [
       ...METER_PRESETS.map((p) => p.groups),
-      [2, 3],
-      [2, 2, 2],
-      [2, 2, 3],
-      [2, 3, 2],
-      [3, 3, 2],
-      [2, 3, 3],
+      // Every grouping variant the app ships, read from the table rather
+      // than copied out of it: a variant added later is then covered here
+      // as well as in the meter mirror test, not silently skipped.
+      ...Object.values(METER_VARIANTS).flat(),
     ];
     for (const groups of everyMeter) {
       for (const dir of [1, -1] as const) {
