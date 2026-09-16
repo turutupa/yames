@@ -1204,16 +1204,86 @@ export async function saveJams(jams: Jam[]): Promise<void> {
  * disagree.
  */
 export async function setJam(config: JamEngineConfig | null): Promise<void> {
-  return invoke("set_jam", { config });
+  return jamQueue.table(config);
 }
 
 /**
  * Move the form: jump to a bar, or loop a range of bars. The engine applies
  * it at the next bar line, so the change lands where a musician expects it.
+ *
+ * Through the same queue as `setJam`, so a jump sent after a new form is
+ * checked against that form and not the one it replaces.
  */
 export async function setJamPosition(command: JamPositionCommand): Promise<void> {
-  return invoke("set_jam_position", { command });
+  return jamQueue.position(command);
 }
+
+/**
+ * ONE LINE FOR EVERY JAM COMMAND, IN THE ORDER THEY WERE SENT.
+ *
+ * `set_jam` runs off the main thread now (it decodes recorded kits and
+ * voices, and on the main thread that was the beachball), so the engine no
+ * longer gets its order for free. This is where the order comes from: each
+ * command waits for the one before it to finish.
+ *
+ * And a run of `setJam`s that are all still waiting collapses to the NEWEST.
+ * Every send is a whole band, so the older ones are already out of date —
+ * the bar-ahead sends pile up exactly this way behind a cold kit decode, and
+ * building each of them in turn would only make the band later. Every caller
+ * still gets its promise settled, with the result of the send that replaced
+ * it. A position command is never collapsed and never jumped over: it lands
+ * after the table sent before it and before the table sent after it.
+ */
+type JamJob =
+  | { kind: "table"; config: JamEngineConfig | null; waiters: Waiter[] }
+  | { kind: "position"; command: JamPositionCommand; waiters: Waiter[] };
+type Waiter = { resolve: () => void; reject: (err: unknown) => void };
+
+export const jamQueue = (() => {
+  const pending: JamJob[] = [];
+  let running = false;
+
+  async function drain(): Promise<void> {
+    if (running) return;
+    running = true;
+    try {
+      while (pending.length > 0) {
+        const job = pending.shift()!;
+        try {
+          if (job.kind === "table") await invoke("set_jam", { config: job.config });
+          else await invoke("set_jam_position", { command: job.command });
+          for (const w of job.waiters) w.resolve();
+        } catch (err) {
+          for (const w of job.waiters) w.reject(err);
+        }
+      }
+    } finally {
+      running = false;
+    }
+  }
+
+  function enqueue(job: JamJob): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      const last = pending[pending.length - 1];
+      if (job.kind === "table" && last && last.kind === "table") {
+        // Superseded before it was sent: the newer band replaces it.
+        last.config = job.config;
+        last.waiters.push({ resolve, reject });
+      } else {
+        job.waiters.push({ resolve, reject });
+        pending.push(job);
+      }
+      void drain();
+    });
+  }
+
+  return {
+    table: (config: JamEngineConfig | null) =>
+      enqueue({ kind: "table", config, waiters: [] }),
+    position: (command: JamPositionCommand) =>
+      enqueue({ kind: "position", command, waiters: [] }),
+  };
+})();
 
 /**
  * The tune finished itself.

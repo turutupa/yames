@@ -2606,38 +2606,47 @@ pub fn app_ready(app_handle: AppHandle) {
 /// samples behind them one thing the audio thread can swap and retire
 /// together; see `JamTable::custom` in `jam.rs`.
 ///
-/// **This command stays synchronous, and that is a decision, not an
-/// oversight.** A synchronous `#[tauri::command]` runs on the main thread,
-/// so the first send of a jam whose kit is a folder holds the window for as
-/// long as the decode takes. Two things make that the right trade:
+/// **`async`, and the work is on a blocking thread — the reverse of what this
+/// said until 2026-09-16.** A synchronous `#[tauri::command]` runs on the main
+/// thread, the one that draws the window, and the argument for keeping it
+/// there was that the work was "tens of milliseconds, once per folder". That
+/// stopped being true when the kits, the percussion and the melodic voices
+/// became recordings: one send now decodes a recorded kit (~19 MB, ~82 files),
+/// the percussion set, pitch-shifts every semitone of a bass and a keys voice,
+/// renders four bars to measure the band, and on the very first send builds the
+/// reference `SoundBank` (530-720 ms in release on its own). The owner saw the
+/// macOS beachball on opening Jam and on every voice or kit change.
 ///
-/// * **The work is bounded, and small.** `kit::MAX_FOLDER_BYTES` is a
-///   sanity check on what the musician pointed at, not a budget for this
-///   thread: `decode_mono` stops reading at `kit::MAX_VOICE_SECS` at the
-///   SOURCE rate, so eight ten-minute stems cost exactly what eight
-///   one-second hits cost — eight voices of two seconds, read, resampled
-///   and normalised. That is tens of milliseconds, once per folder, and
-///   `no_folder_can_cost_more_than_the_cap_however_long_its_files_are` in
-///   `kit.rs` is what holds it there.
-/// * **Order is worth more than those milliseconds.** The UI fires these
-///   without a queue — four to six a chorus, each carrying the NEXT bar's
-///   bass (`useJamSession.ts`) — and the main thread is what puts them in
-///   the order they were sent. Off it, a send that missed the cache and a
-///   send that hit it are two threads racing, and the loser overwrites the
-///   winner: the band plays last bar's bass line over this bar's chord.
-///   The engine has no sequence number to notice that, and adding one to
-///   save a hitch nobody has reported would be the wrong end to start from.
+/// The other half of the old argument — that the main thread is what keeps
+/// the sends in order — is now kept by the UI instead: every jam command
+/// goes through one queue in `ipc.ts` (`jamQueue`), which waits for each to
+/// finish before sending the next and collapses a run of waiting `set_jam`s to
+/// the newest. So no two of these ever build at once, and last bar's bass can
+/// never land on top of this bar's.
 ///
-/// The dialog next door is the opposite call for the opposite reason — it
-/// is unbounded and it deadlocks — which is what makes this one a choice.
+/// The dialog next door is async for a different reason — it deadlocks —
+/// but it is the same shape.
 #[tauri::command]
-pub fn set_jam(
+pub async fn set_jam(
+    app_handle: AppHandle,
     config: Option<crate::jam::JamConfig>,
-    engine_state: State<EngineState>,
-    jam_gain: State<JamGainState>,
-    jam_kit: State<JamKitState>,
-    jam_voices: State<JamVoiceState>,
 ) -> Result<(), String> {
+    tokio::task::spawn_blocking(move || build_and_install_jam(&app_handle, config))
+        .await
+        .map_err(|e| format!("set_jam join failed: {e}"))?
+}
+
+/// `set_jam`'s body, on a blocking thread. Everything that decodes, resamples
+/// or renders happens here, and the engine's lock is only taken for the two
+/// moments that need it: reading the device rate, and swapping the table in.
+fn build_and_install_jam(
+    app_handle: &AppHandle,
+    config: Option<crate::jam::JamConfig>,
+) -> Result<(), String> {
+    let engine_state = app_handle.state::<EngineState>();
+    let jam_gain = app_handle.state::<JamGainState>();
+    let jam_kit = app_handle.state::<JamKitState>();
+    let jam_voices = app_handle.state::<JamVoiceState>();
     let table = match config {
         Some(ref cfg) => {
             // WHICH DRUMS, DECODED AT THE RATE THE DEVICE IS RUNNING AT.
