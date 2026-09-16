@@ -1045,11 +1045,18 @@
    group opens, and fill is reserved for the beat you are hearing right now.
 
    THREE RINGS, NOT TWO, since a bar of 6/8 got a middle (issue 52). The dot
-   that opens the bar keeps the ring AND the halo it has always had; a group
-   start inside the bar keeps the ring and loses the halo; a plain beat has
-   neither. The halo is the only thing that moves, which is what makes the
-   three read as one scale rather than as three unrelated marks — and it is
-   also the loudness order, so the row says what the click does. */
+   that opens the bar is the accent colour with a halo; a group start inside
+   the bar is the theme's SECOND accent colour with no halo; a plain beat is
+   grey.
+
+   Two colours, not one, since 2026-09-16. The first version told the two
+   accents apart by the halo alone, at the same colour and the same 45% ring,
+   and the owner did not see the difference until it was pointed out. A
+   second colour is what a player reads at a glance, and every theme already
+   carries one (`--accent-2`) chosen to stand apart from its accent. The halo
+   stays on beat one as well, so the two still differ for a player who cannot
+   tell the colours apart. The rings are stronger than they were (70%, not
+   45%) for the same reason: at 45% the downbeat itself barely read. */
 .group-dot {
   /* The thing you look at while playing, so it gets the size to match — the
      rest of the row is labels and small print. */
@@ -1064,16 +1071,15 @@
 }
 
 .group-dot.accent {
-  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 70%, transparent);
   box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 7%, transparent);
 }
 
-/* A middle: the bar's other group starts. The same ring in the same colour —
-   it is the same kind of event — with the halo taken away, because there is
-   only one beat one. `box-shadow: none` is said rather than left out so the
-   rule wins wherever it lands after a `.playing`. */
+/* A middle: the bar's other group starts. The second accent colour, and no
+   halo, because there is only one beat one. `box-shadow: none` is said rather
+   than left out so the rule wins wherever it lands after a `.playing`. */
 .group-dot.accent-medium {
-  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  border-color: color-mix(in srgb, var(--accent-2, var(--accent)) 70%, transparent);
   box-shadow: none;
 }
 
@@ -1093,15 +1099,13 @@
   transform: scale(1.35);
 }
 
-/* A middle, sounding. It fills with the accent colour like beat one — you are
-   hearing the accent click, so the dot must say so — and keeps the close halo
-   without the 18px bloom, which is the part the eye reads as "this is the
-   one". Beside each other at 120 BPM the difference is unmistakable and
-   neither is mistakable for a plain beat. */
+/* A middle, sounding. It fills with its own colour — you are hearing an
+   accented click, so the dot must say so — and keeps a close halo without the
+   18px bloom, which is the part the eye reads as "this is the one". */
 .group-dot.accent-medium.playing {
-  background: color-mix(in srgb, var(--accent) 74%, transparent);
-  border-color: var(--accent);
-  box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 10%, transparent);
+  background: var(--accent-2, var(--accent));
+  border-color: var(--accent-2, var(--accent));
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent-2, var(--accent)) 12%, transparent);
   transform: scale(1.35);
 }
 
@@ -1318,7 +1322,7 @@ span.meter-grouping-chip {
    The comment this replaced said FREE had "no accent structure to mark", which
    stopped being true when the accent control was built. */
 .free-dots .group-dot.free-active.accent {
-  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 70%, transparent);
   box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 7%, transparent);
 }
 
@@ -1328,7 +1332,7 @@ span.meter-grouping-chip {
    show up as a grey ring rather than as an error, which is exactly how the
    line above came to be needed. */
 .free-dots .group-dot.free-active.accent-medium {
-  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  border-color: color-mix(in srgb, var(--accent-2, var(--accent)) 70%, transparent);
   box-shadow: none;
 }
 
