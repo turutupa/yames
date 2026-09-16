@@ -1,5 +1,6 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { warmJam } from "../../ipc";
+import { useJamLoading } from "../../hooks/useJamLoading";
 import { useTranslation } from "react-i18next";
 import { GROOVE_FAMILIES, grooveById, groovesInFamily } from "../../jam/grooves";
 import type { Groove, GrooveFamily } from "../../jam/grooves";
@@ -182,6 +183,19 @@ export function JamSetupSheet({
   const [moreOpen, setMoreOpen] = useState(false);
   /** Which roles' voices this sheet has already asked to be built. Once each. */
   const warmedRef = useRef({ bass: false, keys: false });
+  /**
+   * The sound control touched last, so the spinner shows on the one you
+   * changed rather than on all three. Forgotten once the band has loaded —
+   * or a moment later if it never had to (the sound was already decoded).
+   */
+  const [changed, setChanged] = useState<"kit" | "bass" | "keys" | null>(null);
+  const loading = useJamLoading();
+  useEffect(() => {
+    if (!changed || loading) return;
+    const timer = setTimeout(() => setChanged(null), 400);
+    return () => clearTimeout(timer);
+  }, [changed, loading]);
+  const spinning = (which: "kit" | "bass" | "keys") => loading && changed === which;
   const warmVoices = (role: "bass" | "keys") => {
     if (warmedRef.current[role]) return;
     warmedRef.current[role] = true;
@@ -431,12 +445,16 @@ export function JamSetupSheet({
         <div className="jam-sheet-row">
           <KitPicker
             kit={jam.kit}
-            onKit={(kit) => onEdit({ kit })}
+            onKit={(kit) => {
+              setChanged("kit");
+              onEdit({ kit });
+            }}
             customKit={jam.customKit ?? null}
             onCustomKit={(customKit) => onEdit({ customKit })}
             onPreview={onPreviewKit}
             previewing={previewingKit}
             refused={customKitRefused}
+            loading={spinning("kit")}
           />
           <Segmented
             label={t("jam.fills.label")}
@@ -779,7 +797,9 @@ export function JamSetupSheet({
                 role="switch"
                 aria-checked={on}
                 className={`transport-switch jam-switch ${on ? "on" : ""}`}
-                onClick={() =>
+                onClick={() => {
+                  // Hiring a bass or keys player loads their instrument.
+                  if (!on && (id === "bass" || id === "keys")) setChanged(id);
                   onEdit({
                     band: {
                       drums: band.drums,
@@ -788,8 +808,8 @@ export function JamSetupSheet({
                       perc: !!band.perc,
                       [id]: !on,
                     },
-                  })
-                }
+                  });
+                }}
               >
                 <span className="transport-switch-track" aria-hidden="true" />
                 {t(`jam.band.${id}`)}
@@ -807,7 +827,11 @@ export function JamSetupSheet({
                     id: voice,
                     label: t(`jam.bassVoice.${voice}`),
                   }))}
-                  onChange={(bassVoice) => onEdit({ bassVoice })}
+                  onChange={(bassVoice) => {
+                    setChanged("bass");
+                    onEdit({ bassVoice });
+                  }}
+                  loading={spinning("bass")}
                   onWarm={() => warmVoices("bass")}
                 />
               )}
@@ -820,7 +844,11 @@ export function JamSetupSheet({
                     id: voice,
                     label: t(`jam.keysVoice.${voice}`),
                   }))}
-                  onChange={(keysVoice) => onEdit({ keysVoice })}
+                  onChange={(keysVoice) => {
+                    setChanged("keys");
+                    onEdit({ keysVoice });
+                  }}
+                  loading={spinning("keys")}
                   onWarm={() => warmVoices("keys")}
                 />
               )}

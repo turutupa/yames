@@ -1,5 +1,6 @@
 {
   "jam": {
+    "loading": "Wczytywanie dźwięków…",
     "badge": "JAM",
     "newJam": "Nowy jam",
     "jamNow": "Zagraj teraz",

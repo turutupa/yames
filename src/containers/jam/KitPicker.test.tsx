@@ -57,6 +57,22 @@ describe("getting the kits ready", () => {
   });
 });
 
+describe("while the kit loads", () => {
+  it("shows a spinner and keeps the picker usable", () => {
+    draw({ loading: true });
+    const button = screen.getByRole("button", { name: /Kit/ });
+    expect(button.querySelector(".jam-spinner")).not.toBeNull();
+    expect((button as HTMLButtonElement).disabled).toBe(false);
+    open();
+    expect(screen.getAllByRole("option").length).toBeGreaterThan(0);
+  });
+
+  it("shows nothing when there is nothing to wait for", () => {
+    draw();
+    expect(document.querySelector(".jam-spinner")).toBeNull();
+  });
+});
+
 describe("the built-in kits", () => {
   it("lists all seven with a line each, recorded first, and marks the loaded one", () => {
     draw({ kit: "room" });

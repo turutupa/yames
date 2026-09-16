@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export type JamSelectOption<T extends string> = {
   id: T;
@@ -21,6 +22,12 @@ interface JamSelectProps<T extends string> {
    * open, so it must be cheap to call more than once.
    */
   onWarm?: () => void;
+  /**
+   * The choice just made is still loading. A small spinner beside the value,
+   * and nothing else — the control stays live, so a misclick can be fixed
+   * without waiting for the wrong sound to finish.
+   */
+  loading?: boolean;
 }
 
 /**
@@ -45,9 +52,12 @@ export function JamSelect<T extends string>({
   disabled = false,
   compact = false,
   onWarm,
+  loading = false,
 }: JamSelectProps<T>) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
+  const loadingLabel = t("jam.loading");
 
   useEffect(() => {
     if (!open) return;
@@ -90,6 +100,7 @@ export function JamSelect<T extends string>({
       >
         <span className="jam-dropdown-label">{label}</span>
         <span className="jam-dropdown-value">{current?.label ?? value}</span>
+        {loading && <span className="jam-spinner" role="status" aria-label={loadingLabel} />}
         <svg
           width="11"
           height="11"

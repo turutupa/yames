@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { useJamLoading } from "../../hooks/useJamLoading";
 import { spanLabel, type SetlistRemaining } from "../../components/setlist/format";
 
 interface TransportProps {
@@ -161,6 +162,7 @@ export function Transport({
   recordedSeconds = 0,
 }: TransportProps) {
   const { t } = useTranslation();
+  const jamLoading = useJamLoading();
   const running = view === "drill" ? speedRampActive : isPlaying;
   const anyRunning = isPlaying || speedRampActive;
   const setlisted = view === "setlist" && setlistStepCount > 0;
@@ -315,6 +317,17 @@ export function Transport({
           <span className="transport-recording-dot" aria-hidden="true" />
           <span className="transport-recording-label">{t("jam.takes.recording")}</span>
           <span className="transport-recording-clock">{clock(recordedSeconds)}</span>
+        </div>
+      )}
+
+      {/* The band is loading — a kit or a voice nobody had asked for yet.
+          Here, beside the Play button, because that is where you look when
+          you have pressed it and nothing is playing yet. Any tab: a setlist
+          step can be a jam too. */}
+      {jamLoading && (
+        <div className="transport-loading" role="status">
+          <span className="jam-spinner" aria-hidden="true" />
+          <span>{t("jam.loading")}</span>
         </div>
       )}
 

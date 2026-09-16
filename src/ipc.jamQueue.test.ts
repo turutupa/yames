@@ -13,7 +13,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { mockInvoke } from "./test/mocks";
-import { setJam, setJamPosition } from "./ipc";
+import { JAM_LOADING_AFTER_MS, isJamLoading, setJam, setJamPosition } from "./ipc";
 import type { JamEngineConfig, JamPositionCommand } from "./types";
 
 const cfg = (n: number) => ({ n }) as unknown as JamEngineConfig;
@@ -89,5 +89,38 @@ describe("jamQueue", () => {
     expect(calls).toHaveLength(2);
     calls[1].release();
     await expect(b).resolves.toBeUndefined();
+  });
+
+  it("says the band is loading only when a send is slow, and stops when the line is empty", async () => {
+    const calls = gated();
+    const a = setJam(cfg(1));
+    await flush();
+    // A send that finishes inside the grace period never shows anything.
+    expect(isJamLoading()).toBe(false);
+    calls[0].release();
+    await a;
+    await new Promise((r) => setTimeout(r, JAM_LOADING_AFTER_MS + 30));
+    expect(isJamLoading()).toBe(false);
+
+    // A slow one does, and it goes away when the queue is done.
+    const b = setJam(cfg(2));
+    const c = setJam(cfg(3));
+    await new Promise((r) => setTimeout(r, JAM_LOADING_AFTER_MS + 30));
+    expect(isJamLoading()).toBe(true);
+    calls[1].release();
+    await flush();
+    expect(isJamLoading()).toBe(true);
+    calls[2].release();
+    await Promise.all([b, c]);
+    expect(isJamLoading()).toBe(false);
+  });
+
+  it("never shows loading for taking the band away", async () => {
+    const calls = gated();
+    const off = setJam(null);
+    await new Promise((r) => setTimeout(r, JAM_LOADING_AFTER_MS + 30));
+    expect(isJamLoading()).toBe(false);
+    calls[0].release();
+    await off;
   });
 });

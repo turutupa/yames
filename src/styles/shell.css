@@ -2550,3 +2550,55 @@ button.jam-vibe-chip:hover {
 .header-more-menu .sub-dropdown-item.open {
   color: var(--accent);
 }
+
+/* ── The band is loading ──────────────────────────────────────────────────
+   A small ring, shared by the bottom bar and the jam pickers. Only ever shown
+   when a load has taken longer than a blink (`JAM_LOADING_AFTER_MS`), and
+   never with anything disabled beside it. */
+.jam-spinner {
+  flex: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-top-color: var(--accent);
+  animation: jam-spinner-turn 0.8s linear infinite;
+}
+
+@keyframes jam-spinner-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Same footprint as the recording chip beside it, quieter colour: it is
+   news, not an alarm. */
+.transport-loading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px;
+  height: 26px;
+  border-radius: 13px;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* Reduced motion: the ring holds still and pulses its opacity instead, so it
+   still reads as "working" without spinning. */
+@media (prefers-reduced-motion: reduce) {
+  .jam-spinner {
+    animation: jam-spinner-breathe 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes jam-spinner-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}

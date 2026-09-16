@@ -46,6 +46,8 @@ interface KitPickerProps {
    * was a `console.warn` nobody has open.
    */
   refused?: boolean;
+  /** The kit just chosen is still loading: a spinner, nothing disabled. */
+  loading?: boolean;
 }
 
 /** The last path segment, which is what a person calls the folder. */
@@ -108,6 +110,7 @@ export function KitPicker({
   onPreview,
   previewing,
   refused = false,
+  loading = false,
 }: KitPickerProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -234,6 +237,7 @@ export function KitPicker({
       >
         <span className="jam-dropdown-label">{t("jam.kit.label")}</span>
         <span className="jam-dropdown-value">{currentLabel}</span>
+        {loading && <span className="jam-spinner" role="status" aria-label={t("jam.loading")} />}
         <svg
           width="11"
           height="11"

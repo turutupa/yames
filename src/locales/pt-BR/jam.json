@@ -1,5 +1,6 @@
 {
   "jam": {
+    "loading": "Carregando sons…",
     "badge": "JAM",
     "newJam": "Novo jam",
     "jamNow": "Tocar agora",

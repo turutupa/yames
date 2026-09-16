@@ -1264,6 +1264,37 @@ export function warmJam(request: JamWarmRequest): void {
  * it. A position command is never collapsed and never jumped over: it lands
  * after the table sent before it and before the table sent after it.
  */
+/**
+ * IS THE BAND STILL LOADING?
+ *
+ * True while a `setJam` has been on its way for longer than
+ * `JAM_LOADING_AFTER_MS`, false once the queue is empty. The delay is so a
+ * send that finds its sounds already decoded — almost all of them — never
+ * flashes a spinner; only a real load shows one. Read it with
+ * `useJamLoading`. Nothing is disabled while it is true: a player who picked
+ * the wrong kit can pick another straight away, and the queue plays the last.
+ */
+export const JAM_LOADING_AFTER_MS = 150;
+let jamLoading = false;
+const jamLoadingWatchers = new Set<() => void>();
+
+export function subscribeJamLoading(listener: () => void): () => void {
+  jamLoadingWatchers.add(listener);
+  return () => {
+    jamLoadingWatchers.delete(listener);
+  };
+}
+
+export function isJamLoading(): boolean {
+  return jamLoading;
+}
+
+function setJamLoading(next: boolean): void {
+  if (jamLoading === next) return;
+  jamLoading = next;
+  for (const watcher of [...jamLoadingWatchers]) watcher();
+}
+
 type JamJob =
   | { kind: "table"; config: JamEngineConfig | null; waiters: Waiter[] }
   | { kind: "position"; command: JamPositionCommand; waiters: Waiter[] };
@@ -1276,9 +1307,13 @@ export const jamQueue = (() => {
   async function drain(): Promise<void> {
     if (running) return;
     running = true;
+    let slow: ReturnType<typeof setTimeout> | null = null;
     try {
       while (pending.length > 0) {
         const job = pending.shift()!;
+        if (job.kind === "table" && job.config && slow === null) {
+          slow = setTimeout(() => setJamLoading(true), JAM_LOADING_AFTER_MS);
+        }
         try {
           if (job.kind === "table") await invoke("set_jam", { config: job.config });
           else await invoke("set_jam_position", { command: job.command });
@@ -1289,6 +1324,8 @@ export const jamQueue = (() => {
       }
     } finally {
       running = false;
+      if (slow !== null) clearTimeout(slow);
+      setJamLoading(false);
     }
   }
 
