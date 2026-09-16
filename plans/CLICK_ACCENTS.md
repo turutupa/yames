@@ -78,9 +78,9 @@ kit's recipe row, which is the only place a per-kit answer can be given.
 | beep | 880 Hz | **760 Hz**, damped 53/s | 660 Hz | as above |
 | sticks | stick-shot vl6 | **stick-shot vl3** | cross-stick vl14 | a drummer's second accent is the same stroke, less arm |
 | wood | high block vl6 | **high block vl3** | low block vl6 | pitch keeps it off the beat, weight keeps it under the downbeat |
-| snare | layer 4, drive 1.5 | **layer 3, drive 1.1** | layer 1, drive 0.8 | the same drum, struck between a ghost and a rimshot |
+| snare | layer 4, drive 1.5 | **rim + layer 2 head, drive 0.8** | layer 1, drive 0.8 | the same drum, struck a different way (re-cut 2026-09-15) |
 | kit | kick 0.70 + snare L4 | **snare L3 alone, no kick** | closed hat L1 | 6/8 on a kit is kick on one, snare on four — the middle is the backbeat |
-| drum | kick + hat + crash + body | **kick + body**, premixed in `SoundBank::new` | noise snare | the cymbal is what says "one"; the bare kick says "four" |
+| drum | kick + hat + crash + body | **kick + 0.30 hat + body**, premixed in `SoundBank::new` | noise snare | the crash is what says "one" (re-cut 2026-09-15) |
 | cowbell | bell v3 | **bell v2** | **bell v1**, the fingertip tap | three dynamics of one bell, which is what a player has |
 
 **The peak convention builds no ladder, and that was the surprise.** At a fixed
@@ -109,9 +109,9 @@ plain beat at `BEAT_GAIN`:
     sticks   +4.18    +2.16    0.00      2.01       2.16     1.98 / 3.56
     wood     +4.19    +2.10    0.00      2.09       2.10     2.05 / 1.98
     beep     +4.58    +2.30    0.00      2.28       2.30     2.16 / 2.07
-    drum     +3.67    +2.06    0.00      1.62       2.06     1.52 / 2.29
+    drum     +3.67    +2.08    0.00      1.59       2.08     1.56 / 2.25
     kit      +4.36    +2.30    0.00      2.07       2.30     2.96 / 1.70
-    snare    +4.01    +2.01    0.00      1.99       2.01     1.34 / 2.94
+    snare    +4.01    +1.95    0.00      2.05       1.95     2.13 / 2.14
     cowbell  +4.20    +2.10    0.00      2.10       2.10     1.88 / 2.56
 
 **Both filters, and the second one changed a decision.** The band-pass asks
@@ -121,9 +121,11 @@ more distinct sound for both the `snare` and `kit` middles — 0.70 and 0.94 of
 spectral distance against layer 3's 0.56 and 0.75 — and it is also the LOUDEST
 of that drum's four layers, so at the peak that centres it on a laptop the
 snare's middle sat 0.86 dB OVER its own downbeat K-weighted. No peak fixes it:
-the level that satisfies one filter fails the other. Both middles are layer 3,
+the level that satisfies one filter fails the other. Both middles were layer 3,
 and the gate now asserts the ordering through both filters so the choice cannot
-be made again by accident.
+be made again by accident. (`snare`'s is no longer layer 3 at all — see the
+re-cut below — but the trap and the gate are unchanged, and `kit`'s middle is
+still layer 3 because of it.)
 
 **The floor is 1.5 dB on both sides, not the 2.0 the brief asked for**, and
 that is arithmetic rather than a compromise: no preset stands more than
@@ -185,6 +187,53 @@ measurement cannot answer:
   them was placed at the centre of its span by measurement, which is a
   different thing from the middle of what an ear wants; `MEDIUM_GAIN` is the
   one line that moves all eight together.
+
+## The re-cut, 2026-09-15
+
+The owner listened to all eight and kept six. `drum` and `snare` came back, and
+the two open questions above are the two that came back — the section called
+them, and neither was a level.
+
+**`snare`: the middle was the downbeat turned down.** Layer 3 against a layer 4
+downbeat, and those two layers of this drum are both struck hard: normalised
+they measure 0.38 dB of RMS apart, and band by band the middle was a scaled
+copy — 1.11 dB under its downbeat at 120-400 Hz, 2.57 under at 400 Hz-2 kHz,
+3.01 under at 2-6 kHz. Down by roughly a constant in every band IS a gain-only
+accent, which is the one thing this tier was built not to be.
+
+It is the RIM and the head now — `rim.1.1.wav` with `snare.2.1.wav` under it at
+0.65, one stroke the way a rim shot is one stroke. Still the Studio kit's own
+snare, so still the same drum played a different way rather than a second
+instrument. The rim alone cannot do it: 10% of its energy sits under 200 Hz
+against the drum's 33, so K-weighted there is no peak that puts it over this
+preset's wiry plain beat and under its downbeat at once (every drive and peak
+was swept; the best missed by 0.34 dB). The head puts that back. Layer 2 for
+the head is the one place layer 2 belongs — under a rim it is not the stroke,
+it is the drum the stroke lands on, and the row's peak sets the level. Its
+tightest margin goes from 1.34 dB to 2.13.
+
+**`drum`: the middle was the only event in the bar with no top.** The premix
+was kick + body, and the comment said it was "the cymbal taken off" while the
+code took BOTH cymbals. As a share of a mix the kick dominates that reads 0.0%
+either way and hides it; in absolute terms the 6-16 kHz octave sat 16.45 dB
+under the downbeat's and 15.68 dB under the PLAIN BEAT's. A dull thud between
+two bright ticks does not read as a middle.
+
+The hat is back, at 0.30 and not the downbeat's 0.70, and the ceiling is the
+DISTINCTNESS gate rather than the level ones: at 0.70 the premix is the
+downbeat with a crash lifted off it and measures 0.18 from it against a floor
+of 0.25 — the first attempt, caught by
+`a_middle_stroke_is_a_different_sound_from_both_its_siblings`, which is what
+that test is for. More hat is more top and less colour of its own, monotonically;
+0.30 puts the top octave 7.5 dB up (8.21 under the plain beat, from 15.68) with
+0.44 of distance still in hand. Peak follows from 0.930 to 0.920, because the
+hat is audible to the band-pass where the kick is not.
+
+**Six files did not move.** `render_click.py` draws its dither from one
+generator in table order, so the row that was `snare_mid` is reserved where it
+stood and the re-cut is appended at the bottom of the table; every preset the
+owner kept is byte-identical, and `the_shipped_click_files_are_the_ones_that_were_heard`
+says so.
 
 `scripts/sounds/ab_click.html` plays every preset three ways and loops 6/8,
 4/4 and 7/8 at the engine's own gains; `scripts/sounds/bars_6_8.py` renders the

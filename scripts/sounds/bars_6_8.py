@@ -91,12 +91,16 @@ def drum_premix(mid):
     The accent is kick + hat + crash + body with the kick held down to 0.70
     because it carries 99.7% of its energy below 120 Hz and at 1.0 it sets a
     ceiling the audible layers cannot be heard through. The middle is the same
-    thing with the metal and the crash taken off — the cymbal is what says
-    "one". Both through the same tanh at drive 1.0.
+    thing with the crash taken off and the hat held down to 0.30 — the crash
+    is what says "one". Both through the same tanh at drive 1.0.
+
+    The hat used to come off entirely, which left the middle with no top at all
+    and is what the owner reported; `SoundBank::new` carries the numbers, and
+    why 0.30 rather than the downbeat's own 0.70.
     """
     high, metal, crash, body = (read("drum_high"), read("drum_metal"),
                                 read("drum_crash"), read("drum_body"))
-    parts = ([(high, 0.70), (body, 1.0)] if mid else
+    parts = ([(high, 0.70), (metal, 0.30), (body, 1.0)] if mid else
              [(high, 0.70), (metal, 0.70), (crash, 0.45), (body, 1.0)])
     n = max(len(p) for p, _ in parts)
     y = np.zeros(n)
@@ -104,7 +108,7 @@ def drum_premix(mid):
         y[: len(p)] += p * g
     y = np.tanh(y * 1.0) / np.tanh(1.0)
     peak = np.max(np.abs(y))
-    ceil = 0.93 if mid else 0.97
+    ceil = 0.92 if mid else 0.97
     # The accent is scaled only if it is over; the middle lands on its peak
     # exactly, which is what the seven files do and what the engine does.
     if mid or peak > ceil:
@@ -114,7 +118,13 @@ def drum_premix(mid):
 
 def strokes(kit, alt=None):
     if kit == "drum":
-        return drum_premix(False), drum_premix(True), read("drum_low")
+        # `--alt` reached every preset but this one, because drum's middle is
+        # premixed rather than read. An alternate `drum_mid.wav` now wins over
+        # the premix, which is the only way to hear a change to `SoundBank`'s
+        # mix beside the mix it replaces.
+        alt_mid = alt and os.path.join(ALT_DIR, alt, "drum_mid.wav")
+        mid = read("drum_mid", alt) if alt_mid and os.path.isfile(alt_mid)             else drum_premix(True)
+        return drum_premix(False), mid, read("drum_low")
     return (read(kit + "_high", alt), read(kit + "_mid", alt),
             read(kit + "_low", alt))
 

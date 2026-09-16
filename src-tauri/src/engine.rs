@@ -1304,7 +1304,7 @@ struct SoundBank {
     beep_low: Vec<f32>,
     drum_low: Vec<f32>,
     drum_accent: Vec<f32>, // pre-mixed kick + metal hat + crash + body
-    drum_mid: Vec<f32>,    // and the same premix with the cymbals taken out
+    drum_mid: Vec<f32>,    // and the same premix with the CRASH taken out
     snare_low: Vec<f32>,
     snare_mid: Vec<f32>,
     snare_high: Vec<f32>,
@@ -1409,33 +1409,57 @@ impl SoundBank {
         }
 
         // And the middle of the bar, mixed here for the same reasons and out
-        // of two of the same four layers: THE KICK AND THE BODY, NO METAL AND
-        // NO CRASH.
+        // of three of the same four layers: THE KICK, THE HAT AND THE BODY.
+        // The crash is the only thing held back.
         //
-        // 6/8 on a kit is a kick on one, a snare on four and hats between,
-        // and what says "one" on this kit is the cymbal — so what says "four"
-        // is the kick with the cymbal taken off it. That is a bigger
+        // 6/8 on a kit is a kick on one, a snare on four and hats between, and
+        // what says "one" on this kit is the CRASH — so what says "four" is
+        // the same stroke with the crash taken off it. That is a bigger
         // difference to hear than any gain, which is the whole argument of
         // this pass, and it is nearly invisible to the band-pass the tests
         // measure through: the kick carries 99.7% of its energy under 120 Hz.
-        // Band-limited this lands 1.83 dB under the accent at 44 100 and
-        // 1.62 at 48 000 — the resampler, and the reason every margin in this
-        // file says which rate it was taken at. What a listener actually
-        // loses is the crash.
         //
-        // Peak 0.930 EXACTLY, not "0.930 if it is over": the five recorded
-        // middles land on that number and this one is the sixth. Unlike the
-        // accent above, where a premix that came in under the ceiling was
-        // left alone, there is nothing here that a lower peak would protect —
-        // two layers summed peak well over full scale and the tanh has
-        // already held them.
+        // THE HAT USED TO COME OFF TOO, and that was the bug the owner
+        // reported. The comment here said "the cymbal" and the code took both
+        // cymbals, which left the middle as kick-plus-body and nothing else.
+        // Measured in absolute terms rather than as a share of a mix the kick
+        // dominates — which reads 0.0% either way and hides it — the 6-16 kHz
+        // octave of that stroke sat 16.45 dB under the downbeat's and 15.68 dB
+        // under the PLAIN BEAT's. It was the one event in the bar with no top
+        // at all, between two bright ones, and it did not read as a middle: it
+        // read as a downbeat with a blanket over it.
+        //
+        // 0.30 OF THE HAT AND NOT THE DOWNBEAT'S 0.70, and the ceiling is not
+        // the level gates — it is
+        // `a_middle_stroke_is_a_different_sound_from_both_its_siblings`. At
+        // 0.70 this premix is the downbeat with a crash lifted off it, and at
+        // a twelfth of an octave that measures 0.18 from the downbeat against
+        // a floor of 0.25: the same file at another volume, which is the one
+        // thing this whole tier exists not to be. The two ends of the knob
+        // trade against each other monotonically — more hat is more top and
+        // less colour of its own — and 0.30 is where the top octave has come
+        // up 7.5 dB (to 8.21 under the plain beat, from 15.68) while the
+        // distance is still 0.44, inside the 0.42 seven of the eight presets
+        // clear.
+        //
+        // PEAK 0.92 AND NOT 0.930, which is the small part. The hat is audible
+        // to the band-pass where the kick is not, so putting any of it back
+        // raises what the gate can hear and the level comes down to meet it —
+        // the trade `kit_mid` makes at 0.807 for the same reason, and why
+        // `peak` is a per-file number rather than a convention. The four
+        // margins land +1.87 / +1.76 band-limited and +1.69 / +2.14 K-weighted
+        // at 44 100, against the old mix's +1.80 / +1.83 / +1.69 / +2.14. The
+        // stroke changed; the ladder did not.
         //
         // Runs once when the bank is built, on the setup path, never on the
         // audio thread.
-        let mid_len = drum_high.len().max(drum_body.len());
+        let mid_len = drum_high.len().max(drum_metal.len()).max(drum_body.len());
         let mut drum_mid = vec![0.0f32; mid_len];
         for (i, s) in drum_high.iter().enumerate() {
             drum_mid[i] += s * 0.70;
+        }
+        for (i, s) in drum_metal.iter().enumerate() {
+            drum_mid[i] += s * 0.30;
         }
         for (i, s) in drum_body.iter().enumerate() {
             drum_mid[i] += s;
@@ -1445,7 +1469,7 @@ impl SoundBank {
         }
         let mid_peak = drum_mid.iter().fold(0.0f32, |m, s| m.max(s.abs()));
         if mid_peak > 0.0 {
-            let g = 0.93 / mid_peak;
+            let g = 0.92 / mid_peak;
             for s in drum_mid.iter_mut() {
                 *s *= g;
             }
@@ -7413,15 +7437,22 @@ mod tests {
         // And the middle of the drum kit's bar, which is the other premix
         // built in `SoundBank::new`.
         //
-        // EXACTLY 0.930 AT ANY RATE, where the seven middles that are files
-        // are allowed a little over. Those are decoded and then resampled, and
-        // a windowed sinc overshoots around a transient; this one is mixed
-        // from buffers that have ALREADY been resampled and is normalised
+        // EXACTLY 0.92 AT ANY RATE, where the seven middles that are files are
+        // allowed a little over. Those are decoded and then resampled, and a
+        // windowed sinc overshoots around a transient; this one is mixed from
+        // buffers that have ALREADY been resampled and is normalised
         // afterwards, so the number below is the number, not a window.
+        //
+        // It was 0.930 until 2026-09-15, when the hat went back into the mix
+        // and the level had to come down to pay for it. The two move together
+        // and always will: the hat is audible to the band-pass the middle is
+        // measured through and the kick is not, so any change to how much
+        // cymbal this premix carries is a change to what it may peak at.
+        // `SoundBank::new` has the arithmetic.
         let mid_peak = bank.drum_mid.iter().fold(0.0f32, |m, s| m.max(s.abs()));
         assert!(
-            (mid_peak - 0.93).abs() < 1e-4,
-            "the drum kit's middle peaks at {mid_peak}, not the 0.930 it is set to"
+            (mid_peak - 0.92).abs() < 1e-4,
+            "the drum kit's middle peaks at {mid_peak}, not the 0.92 it is set to"
         );
     }
 
@@ -7582,16 +7613,16 @@ mod tests {
     ///     sticks   +4.18    +2.16    0.00      2.01       2.16     1.98 / 3.56
     ///     wood     +4.19    +2.10    0.00      2.09       2.10     2.05 / 1.98
     ///     beep     +4.58    +2.30    0.00      2.28       2.30     2.16 / 2.07
-    ///     drum     +3.67    +2.06    0.00      1.62       2.06     1.52 / 2.29
+    ///     drum     +3.67    +2.08    0.00      1.59       2.08     1.56 / 2.25
     ///     kit      +4.36    +2.30    0.00      2.07       2.30     2.96 / 1.70
-    ///     snare    +4.01    +2.01    0.00      1.99       2.01     1.34 / 2.94
+    ///     snare    +4.01    +1.95    0.00      2.05       1.95     2.13 / 2.14
     ///     cowbell  +4.20    +2.10    0.00      2.10       2.10     1.88 / 2.56
     ///
     /// The first four columns are dB through the 200 Hz-4 kHz band-pass, each
     /// kit against its own beat, which is why the beat column is zero by
     /// construction. The last is strong-over-middle and middle-over-beat
     /// K-WEIGHTED — a different question, asserted separately below, and the
-    /// one that decided which layer of the Studio snare two of these are.
+    /// one that decided which layer of the Studio snare `kit`'s middle is.
     ///
     /// EACH MIDDLE IS AIMED AT THE GEOMETRIC CENTRE OF ITS OWN SPAN, which is
     /// a change of policy from the 0.80 version and is what the third file
@@ -7948,9 +7979,12 @@ mod tests {
             ("sticks", 0.930),
             ("wood", 0.814),
             ("beep", 0.930),
-            ("drum", 0.930),
+            // Both re-cut 2026-09-15 and both for the same complaint. Drum's
+            // is a premix and its number lives in `SoundBank::new`; snare's is
+            // the last row of `render_click.py`.
+            ("drum", 0.920),
             ("kit", 0.807),
-            ("snare", 0.921),
+            ("snare", 0.800),
             ("cowbell", 0.771),
         ];
         for (name, kit) in SoundKit::ALL {
@@ -8054,7 +8088,9 @@ mod tests {
             ("click_mid", CLICK_MID, 0x1e40_7e31_d6e8_19b1),
             ("beep_mid", BEEP_MID, 0x2fa8_cc0b_9d29_0c05),
             ("wood_mid", WOOD_MID, 0xc656_9ba4_f959_dc94),
-            ("snare_mid", SNARE_MID, 0x587f_ef28_7f9f_7bd4),
+            // RE-CUT 2026-09-15: the rim and the head, not layer 3. See
+            // `render_click.py`'s last row.
+            ("snare_mid", SNARE_MID, 0x3a05_e186_5e8b_fd3c),
             ("sticks_mid", STICKS_MID, 0xb623_109d_4d6d_d6ce),
             ("cowbell_mid", COWBELL_MID, 0x6ab9_1578_146b_48e8),
             ("kit_mid", KIT_MID, 0x07da_8c40_a306_6e65),
@@ -8179,9 +8215,9 @@ mod tests {
     ///     sticks       0.42            1.14            1.12
     ///     wood         0.61            0.86            0.56
     ///     beep         1.87            1.82            1.95
-    ///     drum         0.52            1.50            1.05
+    ///     drum         0.44            1.43            1.05
     ///     kit          0.75            1.44            1.52
-    ///     snare        0.56            0.54            0.53
+    ///     snare        0.50            0.46            0.53
     ///     cowbell      0.11            0.27            0.31
     ///
     /// THE FLOOR IS 0.25 AND IT IS A FLOOR. A scaled copy measures exactly
@@ -8194,12 +8230,25 @@ mod tests {
     /// quieter — fewer wires are thrown, less crack comes off the head — and
     /// at a twelfth of an octave this sees that.
     ///
-    /// Both of those kits could have scored higher still — Studio's layer 2
-    /// stands 0.70 and 0.94 from their downbeats where the layer 3 that ships
-    /// stands 0.56 and 0.75 — and could not be given a level that survived the
-    /// loudness filter. See
+    /// `kit` could have scored higher still — Studio's layer 2 stands 0.94
+    /// from its downbeat where the layer 3 that ships stands 0.75 — and could
+    /// not be given a level that survived the loudness filter. See
     /// `every_medium_accent_sits_between_its_strong_and_its_beat`: a more
     /// distinct sound at the wrong weight is not a middle stroke.
+    ///
+    /// SNARE AND DRUM WERE RE-CUT ON 2026-09-15 AND NEITHER MOVED BECAUSE OF
+    /// THIS NUMBER. Snare's middle was layer 3 against a layer 4 downbeat and
+    /// scored a respectable 0.56 while sounding, to the owner, like the
+    /// downbeat turned down — which is what those two layers are: normalised
+    /// they differ by 0.38 dB of RMS. It is the rim and the head now and
+    /// scores 0.50, LOWER, and is not remotely the same stroke. Drum went the
+    /// other way: its middle had the hat put back, which fixed a top octave
+    /// 15.68 dB under the plain beat's and cost 0.08 here. This measure earns
+    /// its keep by catching a lazy re-cut, and it did — the first attempt put
+    /// the hat back at the downbeat's full 0.70 and landed at 0.18, which is
+    /// the same file at another volume and is why the hat ships at 0.30. What
+    /// it cannot do is tell you which of two real differences is the right
+    /// one.
     ///
     /// COWBELL IS NAMED AT 0.10, AND IT IS A BELL. Its three strokes are
     /// three dynamics of one instrument, and a bell's partials are its

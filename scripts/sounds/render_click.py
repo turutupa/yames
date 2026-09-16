@@ -406,9 +406,17 @@ RECIPE = [
     # and layer 4's runs 429 ms, so left alone the middle of the bar would ring
     # longer than the downbeat. What it gives up is the bottom of the wire tail
     # and measures 0.00 dB, so nothing is paid for it.
-    dict(name="snare_mid", src=("studio", ["snare.3.1.wav"]),
+    # RE-CUT 2026-09-15 and moved to the bottom of this table — the row that
+    # ships is the last one in the file. This one stays exactly here, renders
+    # exactly what it always rendered, dithers the same 18 963 samples and
+    # writes nothing, so `sticks_mid`, `cowbell_mid`, `cowbell_low` and
+    # `kit_mid` keep the bytes the owner has been listening to. Same trick as
+    # `cowbell_low@2026-09-14` above, and the same reason: `_write` draws from
+    # one generator in table order.
+    dict(name="snare_mid@2026-09-15", reserve=True,
+         src=("studio", ["snare.3.1.wav"]),
          peak=0.921, drive=1.1, cap_s=0.43, floor=None, fade=30.0,
-         why="Studio snare layer 3, mono fold"),
+         why="RESERVED - holds the dither stream, writes no file"),
 
     # Sticks: the same stick-shot, played at vl3.
     #
@@ -493,6 +501,55 @@ RECIPE = [
     dict(name="kit_mid", src=("studio", ["snare.3.1.wav"]),
          peak=0.807, drive=0.0, cap_s=0.45, floor=None, fade=30.0,
          why="Studio snare layer 3 alone, no kick"),
+
+    # -- Snare's middle, RE-CUT 2026-09-15. Last in the table because it is
+    # the re-cut: appended, so every row above keeps its place in the dither
+    # stream and its bytes. The row it replaces is `snare_mid@2026-09-15`,
+    # reserved where it used to sit.
+    #
+    # WHY IT HAD TO GO. It was layer 3 of this drum against a layer 4 downbeat,
+    # and the header's own note above says those two "are both struck hard
+    # enough to be nearly the same sound". Normalised they measure 0.38 dB
+    # apart in RMS, and band by band the shipped middle was a scaled copy of
+    # its downbeat: 1.11 dB under at 120-400, 2.57 under at 400-2k, 3.01 under
+    # at 2-6k. A stroke that is its downbeat minus a constant IS a gain-only
+    # accent, which is the thing this whole tier was built to stop being, and
+    # the owner heard it as one.
+    #
+    # WHAT IT IS NOW: THE RIM AND THE HEAD, which is one stroke and not two.
+    # The Studio kit ships its own rim, so this is still the same drum played
+    # a different way rather than a second instrument — `SoundKit::Snare`'s
+    # whole rule. The rim ALONE cannot do the job: it carries 10% of its
+    # energy under 200 Hz against the drum's 33, so K-weighted there is no
+    # peak that puts it over this preset's wiry plain beat and under its
+    # downbeat at the same time (every combination of drive and peak was
+    # swept; the best missed by 0.34 dB). The head under it puts that back.
+    #
+    # Layer 2 for the head, and this is the one place layer 2 belongs. It is
+    # the loudest of the drum's four layers and was rejected as a middle in
+    # its own right for exactly that; at 0.65 under a rim it is not the stroke,
+    # it is the drum the stroke lands on, and the level is set by this row's
+    # peak rather than by the layer.
+    #
+    # Where it lands: 61.32 / 52.85 / 48.52 dB in the three bands, against a
+    # downbeat's 64.45 / 56.01 / 45.34 and a plain beat's 58.60 / 51.31 /
+    # 45.92. Between them low down, where loudness is, and BRIGHTER than both
+    # at 2-6 kHz, where the stick is. That is what makes it a different stroke
+    # rather than a quieter one: the ear places it by timbre and the meter
+    # places it by level, and for once they are not being asked to agree.
+    #
+    # The margins are +1.96 / +2.02 band-limited and +2.13 / +2.14 K-weighted
+    # at 44 100 — the most even pair in this table, and wider on the tightest
+    # of the four than the layer-3 version it replaces (+1.99 / +1.99 / +1.34
+    # / +2.94: the 1.34 was the one to worry about).
+    #
+    # Drive 0.8 and not the old 1.1. A rim shot has its own crack and does not
+    # need to be pushed into one; 1.1 measured no better and only cost the
+    # attack.
+    dict(name="snare_mid", src=("studio", [("rim.1.1.wav", 1.0),
+                                           ("snare.2.1.wav", 0.65)]),
+         peak=0.80, drive=0.8, cap_s=0.43, floor=None, fade=30.0,
+         why="Studio snare rim + layer 2 head, mono fold"),
 ]
 
 
