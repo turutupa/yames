@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { inspectKitFolder, pickKitFolder } from "../../ipc";
+import { inspectKitFolder, pickKitFolder, warmJam } from "../../ipc";
 
 /**
  * The kits that ship, in the order the menu draws them.
@@ -124,6 +124,12 @@ export function KitPicker({
   const [empty, setEmpty] = useState(false);
   const [busy, setBusy] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const warmedRef = useRef(false);
+  const warmKits = () => {
+    if (warmedRef.current) return;
+    warmedRef.current = true;
+    warmJam({ kits: true });
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -216,7 +222,15 @@ export function KitPicker({
         className={`jam-dropdown${open ? " open" : ""}`}
         aria-haspopup="listbox"
         aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
+        // Every kit the app ships, decoded while the pointer is still on its
+        // way to one — so the one you click plays at once. Seven kits, about
+        // a tenth of a second on a laptop, and the cache keeps them all.
+        onPointerEnter={warmKits}
+        onFocus={warmKits}
+        onClick={() => {
+          warmKits();
+          setOpen((o) => !o);
+        }}
       >
         <span className="jam-dropdown-label">{t("jam.kit.label")}</span>
         <span className="jam-dropdown-value">{currentLabel}</span>

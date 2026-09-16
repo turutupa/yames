@@ -1218,6 +1218,36 @@ export async function setJamPosition(command: JamPositionCommand): Promise<void>
   return jamQueue.position(command);
 }
 
+/** What to decode ahead of time. See `warmJam`. */
+export type JamWarmRequest = {
+  /** Jams the screen expects to open, compiled. */
+  configs?: JamEngineConfig[];
+  /** Every kit the app ships — the kit picker is open. */
+  kits?: boolean;
+  /** Every recorded bass — the bass dropdown is about to open. */
+  bassVoices?: boolean;
+  /** Every recorded keys voice — the keys dropdown is about to open. */
+  keysVoices?: boolean;
+};
+
+/**
+ * Decode sounds before anybody asks for them, so choosing a jam, a kit or a
+ * voice plays at once instead of after a load.
+ *
+ * Fire and forget. It installs nothing, so it does not wait in `jamQueue`,
+ * and a failure only means the load happens later, when the sound is really
+ * asked for — which is where an error is worth showing. The same request
+ * twice is cheap: everything lands in a cache and the second pass finds it.
+ */
+export function warmJam(request: JamWarmRequest): void {
+  void invoke("warm_jam", {
+    configs: request.configs ?? [],
+    kits: !!request.kits,
+    bassVoices: !!request.bassVoices,
+    keysVoices: !!request.keysVoices,
+  }).catch(() => {});
+}
+
 /**
  * ONE LINE FOR EVERY JAM COMMAND, IN THE ORDER THEY WERE SENT.
  *

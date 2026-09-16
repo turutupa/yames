@@ -2009,7 +2009,15 @@ fn key_for(dir: &Path, rate: u32) -> Result<Key, String> {
 
 /// How many decodes the cache keeps.
 ///
-/// Four, and each of them earns its place: the kit the jam is playing, the
+/// NINE SINCE 2026-09-16: every kit the app ships (seven), the percussion
+/// set, and one folder of the musician's own. Opening the kit picker now
+/// decodes every shipped kit in the background (`warm_jam`) so that choosing
+/// one is instant, and a cache smaller than that list would evict the kit
+/// being played to make room for one being looked at. The five small kits
+/// are under a megabyte each; the whole list is about 97 MB at 48 kHz, of
+/// which Club and Studio are 39 each.
+///
+/// What follows is why it was four, and all of it still holds: the kit the jam is playing, the
 /// kit it was playing a moment ago (a musician auditioning kits goes back
 /// and forth), one more so a folder does not evict the shipped kit it is
 /// being compared against — and the percussion set, which every one of
@@ -2021,7 +2029,7 @@ fn key_for(dir: &Path, rate: u32) -> Result<Key, String> {
 /// have the set evicted by the third kit and re-decoded on the next bar —
 /// a folder read, on the command thread, several times a chorus, which is
 /// the cost this cache exists to remove.
-const CACHE_ENTRIES: usize = 4;
+const CACHE_ENTRIES: usize = 9;
 
 /// The kits the app has already decoded.
 #[derive(Default)]

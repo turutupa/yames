@@ -15,6 +15,12 @@ interface JamSelectProps<T extends string> {
   disabled?: boolean;
   /** A narrower menu for a control that only holds one word per row. */
   compact?: boolean;
+  /**
+   * The pointer is on the way, or the menu is opening: a chance to get the
+   * options ready before one is chosen. Called on hover, on focus and on
+   * open, so it must be cheap to call more than once.
+   */
+  onWarm?: () => void;
 }
 
 /**
@@ -38,6 +44,7 @@ export function JamSelect<T extends string>({
   onChange,
   disabled = false,
   compact = false,
+  onWarm,
 }: JamSelectProps<T>) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -74,7 +81,12 @@ export function JamSelect<T extends string>({
         aria-haspopup="listbox"
         aria-expanded={open}
         disabled={disabled}
-        onClick={() => setOpen((o) => !o)}
+        onPointerEnter={onWarm}
+        onFocus={onWarm}
+        onClick={() => {
+          if (!open) onWarm?.();
+          setOpen((o) => !o);
+        }}
       >
         <span className="jam-dropdown-label">{label}</span>
         <span className="jam-dropdown-value">{current?.label ?? value}</span>

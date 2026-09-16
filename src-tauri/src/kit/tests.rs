@@ -1122,8 +1122,7 @@ fn one_key_decodes_once_however_many_threads_ask() {
 
 /// A BANK THAT FELL OUT OF THE CACHE COMES BACK AS ITSELF.
 ///
-/// Four entries, and a jam holds a kit and a percussion set while an
-/// audition loads two more; the fifth load evicts the first. When that
+/// `CACHE_ENTRIES` entries, and one load past that evicts the first. When that
 /// first is asked for again it is decoded again — and it must carry the
 /// id it had, or the bar-line handshake sees a new drummer and the
 /// four-bar memo measures a band it already knows.
@@ -1131,12 +1130,15 @@ fn one_key_decodes_once_however_many_threads_ask() {
 fn an_evicted_bank_comes_back_with_the_same_id() {
     let cache = KitCache::default();
     let first = cache.shipped(0, 48_000).unwrap().id;
-    for rate in [44_100u32, 88_200, 96_000, 22_050] {
-        cache.shipped(0, rate).unwrap();
+    // As many OTHER keys as the cache holds, so the first is pushed out
+    // whatever the capacity is. Kit 0 at different rates: cheap, and each a
+    // distinct key.
+    for n in 0..CACHE_ENTRIES as u32 {
+        cache.shipped(0, 20_000 + n).unwrap();
     }
     assert!(
         !cache.entries.lock().unwrap().iter().any(|(k, _)| *k == Key::Shipped(0, 48_000)),
-        "four loads later the first is gone"
+        "a full cache's worth of loads later, the first is gone"
     );
     let again = cache.shipped(0, 48_000).unwrap().id;
     assert_eq!(first, again, "the same kit at the same rate is the same bank");

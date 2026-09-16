@@ -2636,96 +2636,214 @@ pub async fn set_jam(
         .map_err(|e| format!("set_jam join failed: {e}"))?
 }
 
+/// The rate a jam should be built at.
+///
+/// The running stream's rate when there is one. Before Play there is none,
+/// and this used to fall back to [`crate::engine::JAM_REFERENCE_SR`] — so on
+/// a 44 100 device every kit and voice was built once at 48 000 on opening
+/// the jam and again at 44 100 on the first Play. Now the device is asked
+/// what it WILL open at (`probe_output_rate`), which is the rate the stream
+/// takes, so the first build is the one that plays. The reference rate is
+/// left for a machine with no output at all.
+///
+/// The device name is copied out and the lock dropped before the device is
+/// asked: a device query can take a while, and the metronome's own commands
+/// take this lock on the main thread.
+fn jam_rate(app_handle: &AppHandle) -> u32 {
+    let (running, device) = {
+        let engine = app_handle.state::<EngineState>();
+        let engine = engine.0.lock().unwrap();
+        (engine.output_sample_rate(), engine.device_name().map(str::to_owned))
+    };
+    running
+        .or_else(|| crate::engine::probe_output_rate(device.as_deref()))
+        .unwrap_or(crate::engine::JAM_REFERENCE_SR)
+}
+
+/// The sounds a jam is made of: its drums, its percussion and its voices.
+type JamSounds = (
+    std::sync::Arc<crate::kit::KitBank>,
+    Option<std::sync::Arc<crate::kit::KitBank>>,
+    crate::jam::JamVoices,
+);
+
+/// Every sound a jam needs, out of the caches, at `rate`: the drums (with
+/// the built-in kit behind a folder), the percussion set, the bass and the
+/// keys. Shared by `set_jam`, which plays them, and `warm_jam`, which only
+/// wants them decoded before anybody asks.
+fn jam_sounds(
+    app_handle: &AppHandle,
+    cfg: &crate::jam::JamConfig,
+    rate: u32,
+) -> Result<JamSounds, String> {
+    let jam_kit = app_handle.state::<JamKitState>();
+    let jam_voices = app_handle.state::<JamVoiceState>();
+    // WHICH DRUMS, DECODED AT THE RATE THE DEVICE IS RUNNING AT.
+    //
+    // Every kit goes through this now, not only a folder the
+    // musician chose: the shipped kits moved out of the audio
+    // thread's `SoundBank` and into `sounds/kits/<kit>/`, because a
+    // recorded kit is a hundred and thirty-two files and decoding
+    // every kit the app ships on every device change would be most
+    // of a second of start-up for drums nobody asked for. The cache
+    // makes all but the first send of a jam a stat and an `Arc`
+    // clone — see `KitCache` in `kit.rs`.
+    let bank = {
+        let shipped = crate::engine::JamKit::from_name(&cfg.kit).0;
+        match cfg.custom_kit {
+            // A FOLDER IS A KIT WITH A KIT BEHIND IT. A voice the
+            // musician's folder does not hold comes from the built-in
+            // kit the jam names, so a folder with nothing but a kick
+            // and a snare in it is a real kit with a borrowed hat
+            // rather than a band with two drums
+            // (`plans/JAM_UX_DECISIONS.md` B3). Merged here, on the
+            // command thread, into ONE bank — the audio thread reads
+            // one kit and never asks which half a drum came from.
+            Some(ref k) => {
+                let own = jam_kit.0.get_or_load(std::path::Path::new(&k.dir), rate)?;
+                let behind = jam_kit.0.shipped(shipped, rate)?;
+                crate::kit::with_fallback(&own, &behind)
+            }
+            None => jam_kit.0.shipped(shipped, rate)?,
+        }
+    };
+    // AND WHICH BASS AND WHICH KEYS, at the same rate and through
+    // the same shape of cache. A voice whose folder ships plays the
+    // recording; one whose folder does not — and `synth`, `organ`,
+    // `clav` and `pad`, which are synthesisers in real life — plays
+    // the recipe it always has. Resolved here, on the command
+    // thread, so the audio thread receives notes rather than a
+    // decision.
+    // AND THE PERCUSSIONIST, at the same rate and out of the same
+    // cache. One set, played under every drum kit — a percussionist
+    // is not a drum kit, and choosing Brushes does not choose a
+    // different cowbell. `None` when the app ships no set, which is
+    // a checkout without `sounds/perc` and is every percussion lane
+    // silent rather than a jam that will not load.
+    let perc = match crate::kit::perc_count() {
+        0 => None,
+        _ => match jam_kit.0.perc(0, rate) {
+            Ok(set) => Some(set),
+            // A sentence on the console and a band with no shaker.
+            // The percussionist is a layer over a band that works
+            // without one, so a set that will not decode must not
+            // take the drummer down with it.
+            Err(e) => {
+                eprintln!("[perc] the shipped percussion set did not decode: {e}");
+                None
+            }
+        },
+    };
+    let voices = crate::jam::resolve_voices(cfg, &jam_voices.0, rate)?;
+    Ok((bank, perc, voices))
+}
+
 /// `set_jam`'s body, on a blocking thread. Everything that decodes, resamples
-/// or renders happens here, and the engine's lock is only taken for the two
-/// moments that need it: reading the device rate, and swapping the table in.
+/// or renders happens here, and the engine's lock is only taken for the
+/// moments that need it: reading the device, and swapping the table in.
 fn build_and_install_jam(
     app_handle: &AppHandle,
     config: Option<crate::jam::JamConfig>,
 ) -> Result<(), String> {
-    let engine_state = app_handle.state::<EngineState>();
-    let jam_gain = app_handle.state::<JamGainState>();
-    let jam_kit = app_handle.state::<JamKitState>();
-    let jam_voices = app_handle.state::<JamVoiceState>();
     let table = match config {
         Some(ref cfg) => {
-            // WHICH DRUMS, DECODED AT THE RATE THE DEVICE IS RUNNING AT.
-            //
-            // Every kit goes through this now, not only a folder the
-            // musician chose: the shipped kits moved out of the audio
-            // thread's `SoundBank` and into `sounds/kits/<kit>/`, because a
-            // recorded kit is a hundred and thirty-two files and decoding
-            // every kit the app ships on every device change would be most
-            // of a second of start-up for drums nobody asked for. The cache
-            // makes all but the first send of a jam a stat and an `Arc`
-            // clone — see `KitCache` in `kit.rs`.
-            // The rate the device is actually running at, so the kit and the
-            // melodic banks are built once at the rate they will be played
-            // at. Before a device opens there is nothing to ask, and the
-            // reference rate is the honest guess — the next `set_jam` after
-            // the stream starts rebuilds, and with the bar-ahead handshake
-            // that is at most a bar away.
-            let rate = engine_state
-                .0
-                .lock()
-                .unwrap()
-                .output_sample_rate()
-                .unwrap_or(crate::engine::JAM_REFERENCE_SR);
-            let bank = {
-                let shipped = crate::engine::JamKit::from_name(&cfg.kit).0;
-                match cfg.custom_kit {
-                    // A FOLDER IS A KIT WITH A KIT BEHIND IT. A voice the
-                    // musician's folder does not hold comes from the built-in
-                    // kit the jam names, so a folder with nothing but a kick
-                    // and a snare in it is a real kit with a borrowed hat
-                    // rather than a band with two drums
-                    // (`plans/JAM_UX_DECISIONS.md` B3). Merged here, on the
-                    // command thread, into ONE bank — the audio thread reads
-                    // one kit and never asks which half a drum came from.
-                    Some(ref k) => {
-                        let own = jam_kit.0.get_or_load(std::path::Path::new(&k.dir), rate)?;
-                        let behind = jam_kit.0.shipped(shipped, rate)?;
-                        crate::kit::with_fallback(&own, &behind)
-                    }
-                    None => jam_kit.0.shipped(shipped, rate)?,
-                }
-            };
-            // AND WHICH BASS AND WHICH KEYS, at the same rate and through
-            // the same shape of cache. A voice whose folder ships plays the
-            // recording; one whose folder does not — and `synth`, `organ`,
-            // `clav` and `pad`, which are synthesisers in real life — plays
-            // the recipe it always has. Resolved here, on the command
-            // thread, so the audio thread receives notes rather than a
-            // decision.
-            // AND THE PERCUSSIONIST, at the same rate and out of the same
-            // cache. One set, played under every drum kit — a percussionist
-            // is not a drum kit, and choosing Brushes does not choose a
-            // different cowbell. `None` when the app ships no set, which is
-            // a checkout without `sounds/perc` and is every percussion lane
-            // silent rather than a jam that will not load.
-            let perc = match crate::kit::perc_count() {
-                0 => None,
-                _ => match jam_kit.0.perc(0, rate) {
-                    Ok(set) => Some(set),
-                    // A sentence on the console and a band with no shaker.
-                    // The percussionist is a layer over a band that works
-                    // without one, so a set that will not decode must not
-                    // take the drummer down with it.
-                    Err(e) => {
-                        eprintln!("[perc] the shipped percussion set did not decode: {e}");
-                        None
-                    }
-                },
-            };
-            let voices = crate::jam::resolve_voices(cfg, &jam_voices.0, rate)?;
+            let rate = jam_rate(app_handle);
+            let (bank, perc, voices) = jam_sounds(app_handle, cfg, rate)?;
+            let jam_gain = app_handle.state::<JamGainState>();
             Some(std::sync::Arc::new(crate::jam::compile_with(
                 cfg, &jam_gain.0, bank, perc, voices,
             )?))
         }
         None => None,
     };
-    engine_state.0.lock().unwrap().set_jam_table(table);
+    app_handle
+        .state::<EngineState>()
+        .0
+        .lock()
+        .unwrap()
+        .set_jam_table(table);
     Ok(())
+}
+
+/// DECODE THE BAND BEFORE ANYBODY ASKS FOR IT.
+///
+/// `set_jam` no longer freezes the window, but a jam whose kit or voice has
+/// not been decoded still takes a moment to come in: a recorded kit is 39 MB
+/// and a recorded bass 42-65 MB once built, and a cold one costs a few
+/// hundred milliseconds. This moves that moment to before the click:
+///
+/// * `configs` — the jams the UI expects to open, compiled. Their kits,
+///   voices and the percussion set are decoded, and so is the reference bank
+///   every table is measured against (the first `set_jam` of a session used
+///   to pay ~350 ms for that alone).
+/// * `kits` — every kit the app ships, for the kit picker being opened.
+/// * `bass_voices` / `keys_voices` — every recorded voice for that role, for
+///   its dropdown being opened.
+///
+/// Best effort, always: a sound that will not decode is logged and skipped,
+/// and the real `set_jam` will say so properly if it is ever asked for. It
+/// installs nothing and changes no state, so it does not go through the UI's
+/// jam queue and cannot put a band out of order. Everything lands in the same
+/// caches `set_jam` reads, at the rate `set_jam` will ask for.
+#[tauri::command]
+pub async fn warm_jam(
+    app_handle: AppHandle,
+    configs: Vec<crate::jam::JamConfig>,
+    kits: bool,
+    bass_voices: bool,
+    keys_voices: bool,
+) -> Result<(), String> {
+    tokio::task::spawn_blocking(move || {
+        use crate::engine::{BassVoice, KeysVoice};
+        let rate = jam_rate(&app_handle);
+        let warn = |what: &str, e: String| eprintln!("[jam] warming {what} failed: {e}");
+        if !configs.is_empty() {
+            let _ = crate::engine::jam_reference_sample(crate::engine::SoundId::ClickHigh);
+        }
+        for cfg in &configs {
+            if let Err(e) = jam_sounds(&app_handle, cfg, rate) {
+                warn("a jam", e);
+            }
+        }
+        let jam_kit = app_handle.state::<JamKitState>();
+        if kits {
+            for i in 0..crate::kit::shipped_count() {
+                if let Err(e) = jam_kit.0.shipped(i, rate) {
+                    warn("a kit", e);
+                }
+            }
+            if crate::kit::perc_count() > 0 {
+                if let Err(e) = jam_kit.0.perc(0, rate) {
+                    warn("the percussion", e);
+                }
+            }
+        }
+        let jam_voices = app_handle.state::<JamVoiceState>();
+        let recorded =
+            |folder: Option<&'static str>| folder.and_then(crate::voices::shipped_index);
+        if bass_voices {
+            for v in BassVoice::ALL {
+                if let Some(i) = recorded(crate::jam::JamVoices::folder_for_bass(v)) {
+                    let (lo, hi) = (crate::engine::BASS_MIN_MIDI, crate::engine::BASS_MAX_MIDI);
+                    if let Err(e) = jam_voices.0.shipped(i, rate, lo, hi) {
+                        warn("a bass", e);
+                    }
+                }
+            }
+        }
+        if keys_voices {
+            for v in KeysVoice::ALL {
+                if let Some(i) = recorded(crate::jam::JamVoices::folder_for_keys(v)) {
+                    let (lo, hi) = (crate::engine::KEYS_MIN_MIDI, crate::engine::KEYS_MAX_MIDI);
+                    if let Err(e) = jam_voices.0.shipped(i, rate, lo, hi) {
+                        warn("a keys voice", e);
+                    }
+                }
+            }
+        }
+    })
+    .await
+    .map_err(|e| format!("warm_jam join failed: {e}"))
 }
 
 /// Ask the musician for a folder of drum samples.

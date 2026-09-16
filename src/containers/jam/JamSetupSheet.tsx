@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { warmJam } from "../../ipc";
 import { useTranslation } from "react-i18next";
 import { GROOVE_FAMILIES, grooveById, groovesInFamily } from "../../jam/grooves";
 import type { Groove, GrooveFamily } from "../../jam/grooves";
@@ -179,6 +180,13 @@ export function JamSetupSheet({
 }: JamSetupSheetProps) {
   const { t } = useTranslation();
   const [moreOpen, setMoreOpen] = useState(false);
+  /** Which roles' voices this sheet has already asked to be built. Once each. */
+  const warmedRef = useRef({ bass: false, keys: false });
+  const warmVoices = (role: "bass" | "keys") => {
+    if (warmedRef.current[role]) return;
+    warmedRef.current[role] = true;
+    warmJam(role === "bass" ? { bassVoices: true } : { keysVoices: true });
+  };
   /** The breakdown disclosure inside the FORM group, closed until asked for. */
   const [breakdownOpen, setBreakdownOpen] = useState(false);
   /** The arrangement with its blanks filled in — what the controls below show. */
@@ -756,7 +764,16 @@ export function JamSetupSheet({
         {(["drums", "bass", "keys", "perc"] as const).map((id) => {
           const on = !!band[id];
           return (
-            <div className="jam-player" key={id} data-off={on ? undefined : ""}>
+            <div
+              className="jam-player"
+              key={id}
+              data-off={on ? undefined : ""}
+              // A bass or a keys player is a recorded instrument that takes a
+              // moment to build. Hovering the row — the switch that hires
+              // them, or the dropdown that picks which — builds every one of
+              // them in the background, so the click that follows is instant.
+              onPointerEnter={id === "bass" || id === "keys" ? () => warmVoices(id) : undefined}
+            >
               <button
                 type="button"
                 role="switch"
@@ -791,6 +808,7 @@ export function JamSetupSheet({
                     label: t(`jam.bassVoice.${voice}`),
                   }))}
                   onChange={(bassVoice) => onEdit({ bassVoice })}
+                  onWarm={() => warmVoices("bass")}
                 />
               )}
               {on && id === "keys" && (
@@ -803,6 +821,7 @@ export function JamSetupSheet({
                     label: t(`jam.keysVoice.${voice}`),
                   }))}
                   onChange={(keysVoice) => onEdit({ keysVoice })}
+                  onWarm={() => warmVoices("keys")}
                 />
               )}
               {on && (

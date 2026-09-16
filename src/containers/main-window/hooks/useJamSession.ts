@@ -10,6 +10,7 @@ import {
   setPlaying,
   togglePlayback,
   ttsSpeak,
+  warmJam,
 } from "../../../ipc";
 import {
   GROOVES,
@@ -514,6 +515,50 @@ export function useJamSession({
       if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
     };
   }, []);
+
+  /**
+   * HAVE THE BAND READY BEFORE IT IS ASKED FOR.
+   *
+   * A few seconds after the library loads, every kit and voice the saved jams
+   * use is decoded in the background — the ones this machine will actually
+   * play, at the rate its output runs at — so opening a jam starts the band at
+   * once instead of after a load. A handful of distinct sounds even across a
+   * long library, because most jams share a kit and a bass; about 165 MB for
+   * the starter set, which is what the first jam opened would hold anyway.
+   *
+   * Once per session, and late enough not to compete with the window
+   * drawing itself. The ref is set inside the timer, not before it, so React
+   * running this effect twice in development does not cancel the only warm.
+   */
+  const warmedLibraryRef = useRef(false);
+  useEffect(() => {
+    if (warmedLibraryRef.current || jams.length === 0) return;
+    const timer = setTimeout(() => {
+      if (warmedLibraryRef.current) return;
+      warmedLibraryRef.current = true;
+      const seen = new Set<string>();
+      const configs = [];
+      for (const saved of jams) {
+        let config;
+        try {
+          config = compileJam(saved, { lineup });
+        } catch {
+          continue;
+        }
+        const sounds = [
+          config.kit,
+          config.customKit?.dir ?? "",
+          config.bass ? (config.bassVoice ?? "") : "-",
+          config.keys ? (config.keysVoice ?? "") : "-",
+        ].join("|");
+        if (seen.has(sounds)) continue;
+        seen.add(sounds);
+        configs.push(config);
+      }
+      if (configs.length > 0) warmJam({ configs });
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [jams, lineup]);
 
   /** The whole list, to the store and to the UI, in one place. */
   const commit = useCallback((next: Jam[]) => {

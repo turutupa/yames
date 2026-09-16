@@ -3705,6 +3705,31 @@ pub(crate) fn take_offset(channels: usize, pair: usize) -> usize {
     }
 }
 
+/// The rate a stream on this device WOULD open at, asked of the device
+/// without opening one — the same lookup and the same `default_output_config`
+/// the audio thread's setup uses, minus the logging.
+///
+/// Why it exists: a jam loaded before Play used to be built at
+/// [`JAM_REFERENCE_SR`] because no stream had told anyone its rate yet, and
+/// then built AGAIN at the real rate on the first Play — every kit and voice
+/// decoded twice, on a machine at 44 100. Asking the device first makes the
+/// first build the one that plays.
+///
+/// A device query, so never under the engine's lock and never on the main
+/// thread. `None` when there is no device or it will not say.
+pub fn probe_output_rate(device_name: Option<&str>) -> Option<u32> {
+    let host = cpal::default_host();
+    let device = match device_name {
+        Some(name) => host
+            .output_devices()
+            .ok()
+            .and_then(|mut devs| devs.find(|d| d.name().ok().as_deref() == Some(name)))
+            .or_else(|| host.default_output_device()),
+        None => host.default_output_device(),
+    }?;
+    device.default_output_config().ok().map(|c| c.sample_rate().0)
+}
+
 /// List all available audio output devices.
 pub fn list_output_devices() -> Vec<AudioOutputDevice> {
     let host = cpal::default_host();

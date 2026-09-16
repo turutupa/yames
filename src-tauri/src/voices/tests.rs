@@ -687,11 +687,21 @@ fn one_voice_key_builds_once_however_many_threads_ask() {
     let ids: Vec<u64> = threads.into_iter().map(|t| t.join().unwrap()).collect();
     assert!(ids.windows(2).all(|w| w[0] == w[1]), "one bank, ids {ids:?}");
     let first = ids[0];
-    // Four other keys push the first out of the four entries. One-note
-    // ranges, so the filler builds cost a fraction of a second each.
-    for note in [40u8, 41, 42, 43] {
+    // As many other keys as the cache holds push the first out, whatever the
+    // capacity is. One-note ranges, so the filler builds cost a fraction of a
+    // second each.
+    for note in 40u8..40 + super::CACHE_ENTRIES as u8 {
         cache.shipped(0, 48_000, note, note).unwrap();
     }
+    assert!(
+        !cache
+            .entries
+            .lock()
+            .unwrap()
+            .iter()
+            .any(|(k, _)| *k == super::Key::Shipped(0, 48_000, 28, 55)),
+        "a full cache's worth of builds later, the first is gone"
+    );
     let again = cache.shipped(0, 48_000, 28, 55).unwrap().id;
     assert_eq!(first, again, "evicted and rebuilt, it is the same bank");
 }

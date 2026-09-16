@@ -13,11 +13,13 @@ import { KitPicker, folderName } from "./KitPicker";
 const ipc = vi.hoisted(() => ({
   pick: vi.fn<[], Promise<string | null>>(),
   inspect: vi.fn<[string], Promise<{ voices: string[]; missing: string[] }>>(),
+  warm: vi.fn(),
 }));
 
 vi.mock("../../ipc", () => ({
   pickKitFolder: () => ipc.pick(),
   inspectKitFolder: (dir: string) => ipc.inspect(dir),
+  warmJam: (request: unknown) => ipc.warm(request),
 }));
 
 function draw(overrides: Partial<React.ComponentProps<typeof KitPicker>> = {}) {
@@ -41,6 +43,18 @@ function open() {
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+});
+
+describe("getting the kits ready", () => {
+  it("decodes every kit when the pointer reaches the picker, and only once", () => {
+    draw();
+    const button = screen.getByRole("button", { name: /Kit/ });
+    fireEvent.pointerEnter(button);
+    expect(ipc.warm).toHaveBeenCalledWith({ kits: true });
+    fireEvent.pointerEnter(button);
+    open();
+    expect(ipc.warm).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("the built-in kits", () => {

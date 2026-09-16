@@ -745,9 +745,14 @@ enum Key {
 
 /// How many decodes the cache keeps.
 ///
-/// Four, and each earns its place: the bass and the keys the jam is playing,
-/// and the pair it was playing a moment ago while somebody auditions voices.
-const CACHE_ENTRIES: usize = 4;
+/// Six since 2026-09-16: every recorded voice the app ships (three basses and
+/// the electric piano), plus two for a folder or a device at another rate.
+/// Opening a voice dropdown now builds every recorded voice for that role in
+/// the background (`warm_jam`), so choosing one is instant — and a cache
+/// smaller than that list would evict the voice being played to make room for
+/// one being looked at. All four together are about 215 MB at 48 kHz, which is
+/// why they are built when the dropdown opens and not at start-up.
+const CACHE_ENTRIES: usize = 6;
 
 /// The melodic banks the app has already built.
 ///

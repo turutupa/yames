@@ -66,6 +66,9 @@ vi.mock("../../../ipc", () => ({
     calls.push(["setJamPosition", command]);
     return Promise.resolve();
   },
+  warmJam: (request: unknown) => {
+    calls.push(["warmJam", request]);
+  },
   // The kit preview presses play on its own when the band is stopped (B7).
   togglePlayback: () => {
     calls.push(["togglePlayback", null]);
@@ -165,6 +168,29 @@ function mount(view = "jam", extra: Omit<Props, "v"> = {}) {
     { initialProps: { v: view, ...extra } },
   );
 }
+
+describe("warming the library", () => {
+  it("decodes each distinct band the saved jams use, once, a moment after they load", async () => {
+    const { result, rerender } = mount();
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
+    // Not straight away: the window is still drawing itself.
+    expect(names("warmJam")).toHaveLength(0);
+    await waitFor(() => expect(names("warmJam")).toHaveLength(1), { timeout: 4000 });
+
+    const request = calls.find(([n]) => n === "warmJam")![1] as { configs: JamEngineConfig[] };
+    const bands = request.configs.map((c) =>
+      [c.kit, c.customKit?.dir ?? "", c.bass ? c.bassVoice ?? "" : "-", c.keys ? c.keysVoice ?? "" : "-"].join("|"),
+    );
+    expect(request.configs.length).toBeGreaterThan(0);
+    expect(new Set(bands).size).toBe(bands.length);
+
+    // Once per session, whatever re-renders.
+    rerender({ v: "metronome" });
+    rerender({ v: "jam" });
+    await new Promise((r) => setTimeout(r, 2700));
+    expect(names("warmJam")).toHaveLength(1);
+  }, 10000);
+});
 
 describe("seeding", () => {
   it("seeds the six starters the first time, and saves them", async () => {
