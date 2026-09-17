@@ -160,13 +160,6 @@
     "mix": {
       "forLane": "Volume de {{lane}}"
     },
-    "keysStyle": {
-      "label": "Acompanhamento",
-      "pads": "sustentado pelo compasso inteiro",
-      "stabs": "no contratempo, com a caixa",
-      "padsShort": "Pads",
-      "stabsShort": "Pancadas"
-    },
     "countInSound": {
       "label": "Contagem",
       "beep": "Bipe",
@@ -189,14 +182,17 @@
       "label": "Levada",
       "straight": "Reto",
       "shuffle": "Shuffle",
-      "swing": "Swing"
+      "swing": "Swing",
+      "bandLabel": "Levada da banda",
+      "scope": "a banda toda toca"
     },
     "intensity": {
       "label": "Intensidade",
       "soft": "Suave",
       "normal": "Normal",
       "loud": "Forte",
-      "hint": "Alto tira as ghost notes e mete um crash; baixo toca o backbeat leve e deixa o crash de fora."
+      "hint": "Alto tira as ghost notes e mete um crash; baixo toca o backbeat leve e deixa o crash de fora.",
+      "drumsLabel": "Intensidade da bateria"
     },
     "form": {
       "label": "Forma",
@@ -400,16 +396,8 @@
       "out": "fora",
       "hatsOnly": "só chimbau",
       "inputOn": "Entrada ligada",
-      "inputOff": "Entrada desligada"
-    },
-    "bassStyle": {
-      "rock": "fundamentais no bumbo",
-      "shuffle": "uma levada de boogie",
-      "swing": "um walking bass",
-      "bossa": "a levada de bossa",
-      "waltz": "fundamental e quinta",
-      "sixeight": "fundamental e quinta",
-      "funk": "fundamentais sincopadas"
+      "inputOff": "Entrada desligada",
+      "playing": "Tocando"
     },
     "practice": {
       "label": "Estudo",
@@ -556,9 +544,6 @@
       "twoStep": "Two-step",
       "waltz": "Valsa"
     },
-    "drummer": {
-      "label": "O baterista"
-    },
     "more": {
       "label": "Mais",
       "lead": "compasso · o que você lê · gravações"
@@ -624,6 +609,85 @@
       "congas": "congas",
       "bongos": "bongôs",
       "silent": "nada nesta levada"
+    },
+    "section": {
+      "song": "A música",
+      "songLead": "todos tocam isto",
+      "drums": "Bateria",
+      "drumsLead": "a levada e o kit",
+      "bass": "Baixo",
+      "bassLead": "a linha embaixo dos acordes",
+      "keys": "Teclado",
+      "keysLead": "os acordes, acompanhando",
+      "perc": "Percussão",
+      "percLead": "shakers, congas, a sala"
+    },
+    "bassFigure": {
+      "label": "Estilo",
+      "autoNamed": "Auto · {{style}}",
+      "kick": "Tônicas no bumbo",
+      "eighths": "Colcheias constantes",
+      "rootFifth": "Tônica e quinta",
+      "octaves": "Oitavas",
+      "boogie": "Boogie",
+      "walking": "Walking",
+      "twoFeel": "Em dois",
+      "pedal": "Nota pedal",
+      "bossa": "Bossa",
+      "tumbao": "Tumbao",
+      "funk": "Funk",
+      "countryAlt": "Country",
+      "gallop": "Galope",
+      "ballad": "Notas longas",
+      "reggae": "Reggae"
+    },
+    "bassBusy": {
+      "label": "Atividade",
+      "sparse": "Pouca",
+      "normal": "Normal",
+      "busy": "Muita"
+    },
+    "keysComp": {
+      "label": "Acompanhamento",
+      "autoNamed": "Auto · {{style}}",
+      "pads": "Pads",
+      "stabs": "Pancadas",
+      "pulse": "Pulso",
+      "arpeggio": "Arpejo",
+      "charleston": "Comping de jazz",
+      "skank": "Skank de reggae",
+      "montuno": "Montuno",
+      "bossaComp": "Bossa",
+      "shuffleComp": "Shuffle"
+    },
+    "progressions": {
+      "label": "Progressão",
+      "autoNamed": "Auto · {{name}}",
+      "pop": "Pop",
+      "rock": "Rock clássico",
+      "country": "Country",
+      "doowop": "Anos cinquenta",
+      "funkVamp": "Vamp de funk",
+      "jazzLoop": "Loop de jazz",
+      "axis": "Loop de quatro acordes",
+      "minorRock": "Rock menor",
+      "aeolian": "Menor natural",
+      "dorianVamp": "Vamp dórico",
+      "minorTwoFive": "Dois-cinco menor",
+      "andalusian": "Menor descendente",
+      "bluesVamp": "Vamp de blues",
+      "boogieVamp": "Vamp de boogie",
+      "quickChange": "Mudança rápida",
+      "jazzBlues": "Blues de jazz",
+      "blues": "Blues clássico",
+      "minorBlues": "Blues menor",
+      "verseChorus": "Verso e refrão",
+      "sixteen": "Turnarounds",
+      "sixteenMinor": "Turnarounds em menor",
+      "minorVerseChorus": "Verso e refrão em menor",
+      "sixteenBlues": "Blues de 16 compassos",
+      "oneChord": "Um acorde",
+      "ownChords": "Seus próprios acordes tocam por cima onde você os escreveu."
     }
   },
   "scale": {

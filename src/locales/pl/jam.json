@@ -160,13 +160,6 @@
     "mix": {
       "forLane": "Głośność: {{lane}}"
     },
-    "keysStyle": {
-      "label": "Akompaniament",
-      "pads": "trzymany przez cały takt",
-      "stabs": "na „i”, razem z werblem",
-      "padsShort": "Pady",
-      "stabsShort": "Akcenty"
-    },
     "countInSound": {
       "label": "Odliczanie",
       "beep": "Sygnał",
@@ -189,14 +182,17 @@
       "label": "Feel",
       "straight": "Prosto",
       "shuffle": "Shuffle",
-      "swing": "Swing"
+      "swing": "Swing",
+      "bandLabel": "Feel zespołu",
+      "scope": "gra to cały zespół"
     },
     "intensity": {
       "label": "Intensywność",
       "soft": "Cicho",
       "normal": "Normalnie",
       "loud": "Głośno",
-      "hint": "Głośno wyrzuca ghost noty i dokłada crash; cicho gra backbeat lekko i pomija crash."
+      "hint": "Głośno wyrzuca ghost noty i dokłada crash; cicho gra backbeat lekko i pomija crash.",
+      "drumsLabel": "Intensywność perkusji"
     },
     "form": {
       "label": "Forma",
@@ -400,16 +396,8 @@
       "out": "pauza",
       "hatsOnly": "tylko hi-hat",
       "inputOn": "Wejście włączone",
-      "inputOff": "Wejście wyłączone"
-    },
-    "bassStyle": {
-      "rock": "prymy na stopie",
-      "shuffle": "figura boogie",
-      "swing": "linia walking",
-      "bossa": "wzór bossy",
-      "waltz": "pryma i kwinta",
-      "sixeight": "pryma i kwinta",
-      "funk": "synkopowane prymy"
+      "inputOff": "Wejście wyłączone",
+      "playing": "Gra"
     },
     "practice": {
       "label": "Ćwiczenie",
@@ -556,9 +544,6 @@
       "twoStep": "Two-step",
       "waltz": "Walc"
     },
-    "drummer": {
-      "label": "Perkusista"
-    },
     "more": {
       "label": "Więcej",
       "lead": "metrum · co czytasz · nagrania"
@@ -624,6 +609,85 @@
       "congas": "congi",
       "bongos": "bongosy",
       "silent": "nic w tym groove"
+    },
+    "section": {
+      "song": "Utwór",
+      "songLead": "grają to wszyscy",
+      "drums": "Perkusja",
+      "drumsLead": "groove i zestaw",
+      "bass": "Bas",
+      "bassLead": "linia pod akordami",
+      "keys": "Klawisze",
+      "keysLead": "akordy w akompaniamencie",
+      "perc": "Perkusjonalia",
+      "percLead": "shakery, kongi, przestrzeń"
+    },
+    "bassFigure": {
+      "label": "Styl",
+      "autoNamed": "Auto · {{style}}",
+      "kick": "Tonika ze stopą",
+      "eighths": "Pędzące ósemki",
+      "rootFifth": "Tonika i kwinta",
+      "octaves": "Oktawy",
+      "boogie": "Boogie",
+      "walking": "Walking",
+      "twoFeel": "Na dwa",
+      "pedal": "Nuta pedałowa",
+      "bossa": "Bossa",
+      "tumbao": "Tumbao",
+      "funk": "Funk",
+      "countryAlt": "Country",
+      "gallop": "Galop",
+      "ballad": "Długie nuty",
+      "reggae": "Reggae"
+    },
+    "bassBusy": {
+      "label": "Aktywność",
+      "sparse": "Mało",
+      "normal": "Normalnie",
+      "busy": "Dużo"
+    },
+    "keysComp": {
+      "label": "Akompaniament",
+      "autoNamed": "Auto · {{style}}",
+      "pads": "Pady",
+      "stabs": "Akcenty",
+      "pulse": "Puls",
+      "arpeggio": "Arpeggio",
+      "charleston": "Comping jazzowy",
+      "skank": "Skank reggae",
+      "montuno": "Montuno",
+      "bossaComp": "Bossa",
+      "shuffleComp": "Shuffle"
+    },
+    "progressions": {
+      "label": "Progresja",
+      "autoNamed": "Auto · {{name}}",
+      "pop": "Pop",
+      "rock": "Klasyczny rock",
+      "country": "Country",
+      "doowop": "Lata pięćdziesiąte",
+      "funkVamp": "Vamp funkowy",
+      "jazzLoop": "Pętla jazzowa",
+      "axis": "Pętla czterech akordów",
+      "minorRock": "Rock molowy",
+      "aeolian": "Moll naturalny",
+      "dorianVamp": "Vamp dorycki",
+      "minorTwoFive": "Molowe II–V",
+      "andalusian": "Opadający moll",
+      "bluesVamp": "Vamp bluesowy",
+      "boogieVamp": "Vamp boogie",
+      "quickChange": "Quick change",
+      "jazzBlues": "Blues jazzowy",
+      "blues": "Klasyczny blues",
+      "minorBlues": "Blues molowy",
+      "verseChorus": "Zwrotka i refren",
+      "sixteen": "Turnaroundy",
+      "sixteenMinor": "Turnaroundy molowe",
+      "minorVerseChorus": "Molowa zwrotka i refren",
+      "sixteenBlues": "Blues 16-taktowy",
+      "oneChord": "Jeden akord",
+      "ownChords": "Twoje własne akordy grają na wierzchu tam, gdzie je wpisałeś."
     }
   },
   "scale": {

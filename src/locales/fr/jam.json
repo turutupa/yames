@@ -160,13 +160,6 @@
     "mix": {
       "forLane": "Volume {{lane}}"
     },
-    "keysStyle": {
-      "label": "Accompagnement",
-      "pads": "tenu sur toute la mesure",
-      "stabs": "à contretemps, avec la caisse claire",
-      "padsShort": "Nappes",
-      "stabsShort": "Accents"
-    },
     "countInSound": {
       "label": "Décompte",
       "beep": "Bip",
@@ -189,14 +182,17 @@
       "label": "Feel",
       "straight": "Binaire",
       "shuffle": "Shuffle",
-      "swing": "Swing"
+      "swing": "Swing",
+      "bandLabel": "Feel du groupe",
+      "scope": "tout le groupe le joue"
     },
     "intensity": {
       "label": "Intensité",
       "soft": "Doux",
       "normal": "Normal",
       "loud": "Fort",
-      "hint": "Fort supprime les ghost notes et pose un crash ; doux joue le backbeat en douceur et laisse le crash de côté."
+      "hint": "Fort supprime les ghost notes et pose un crash ; doux joue le backbeat en douceur et laisse le crash de côté.",
+      "drumsLabel": "Intensité de la batterie"
     },
     "form": {
       "label": "Forme",
@@ -400,16 +396,8 @@
       "out": "sortie",
       "hatsOnly": "charleston seul",
       "inputOn": "Entrée active",
-      "inputOff": "Entrée coupée"
-    },
-    "bassStyle": {
-      "rock": "fondamentales sur la grosse caisse",
-      "shuffle": "une figure boogie",
-      "swing": "une walking bass",
-      "bossa": "le motif bossa",
-      "waltz": "fondamentale et quinte",
-      "sixeight": "fondamentale et quinte",
-      "funk": "fondamentales syncopées"
+      "inputOff": "Entrée coupée",
+      "playing": "Joue"
     },
     "practice": {
       "label": "Travail",
@@ -556,9 +544,6 @@
       "twoStep": "Two-step",
       "waltz": "Valse"
     },
-    "drummer": {
-      "label": "Le batteur"
-    },
     "more": {
       "label": "Plus",
       "lead": "mesure · ce que tu lis · prises"
@@ -624,6 +609,85 @@
       "congas": "congas",
       "bongos": "bongos",
       "silent": "rien dans ce groove"
+    },
+    "section": {
+      "song": "Le morceau",
+      "songLead": "tout le monde le joue",
+      "drums": "Batterie",
+      "drumsLead": "le groove et le kit",
+      "bass": "Basse",
+      "bassLead": "la ligne sous les accords",
+      "keys": "Clavier",
+      "keysLead": "les accords, en accompagnement",
+      "perc": "Percussions",
+      "percLead": "shakers, congas, la salle"
+    },
+    "bassFigure": {
+      "label": "Style",
+      "autoNamed": "Auto · {{style}}",
+      "kick": "Fondamentales sur la grosse caisse",
+      "eighths": "Croches soutenues",
+      "rootFifth": "Fondamentale et quinte",
+      "octaves": "Octaves",
+      "boogie": "Boogie",
+      "walking": "Walking",
+      "twoFeel": "Deux temps",
+      "pedal": "Pédale",
+      "bossa": "Bossa",
+      "tumbao": "Tumbao",
+      "funk": "Funk",
+      "countryAlt": "Country",
+      "gallop": "Galop",
+      "ballad": "Notes longues",
+      "reggae": "Reggae"
+    },
+    "bassBusy": {
+      "label": "Activité",
+      "sparse": "Sobre",
+      "normal": "Normale",
+      "busy": "Chargée"
+    },
+    "keysComp": {
+      "label": "Accompagnement",
+      "autoNamed": "Auto · {{style}}",
+      "pads": "Nappes",
+      "stabs": "Accents",
+      "pulse": "Pulsation",
+      "arpeggio": "Arpège",
+      "charleston": "Comping jazz",
+      "skank": "Skank reggae",
+      "montuno": "Montuno",
+      "bossaComp": "Bossa",
+      "shuffleComp": "Shuffle"
+    },
+    "progressions": {
+      "label": "Grille",
+      "autoNamed": "Auto · {{name}}",
+      "pop": "Pop",
+      "rock": "Rock classique",
+      "country": "Country",
+      "doowop": "Années cinquante",
+      "funkVamp": "Vamp funk",
+      "jazzLoop": "Boucle jazz",
+      "axis": "Boucle à quatre accords",
+      "minorRock": "Rock mineur",
+      "aeolian": "Mineur naturel",
+      "dorianVamp": "Vamp dorien",
+      "minorTwoFive": "II–V mineur",
+      "andalusian": "Mineur descendant",
+      "bluesVamp": "Vamp blues",
+      "boogieVamp": "Vamp boogie",
+      "quickChange": "Quick change",
+      "jazzBlues": "Blues jazz",
+      "blues": "Blues classique",
+      "minorBlues": "Blues mineur",
+      "verseChorus": "Couplet et refrain",
+      "sixteen": "Turnarounds",
+      "sixteenMinor": "Turnarounds en mineur",
+      "minorVerseChorus": "Couplet et refrain en mineur",
+      "sixteenBlues": "Blues de 16 mesures",
+      "oneChord": "Un accord",
+      "ownChords": "Tes propres accords jouent par-dessus là où tu les as écrits."
     }
   },
   "scale": {

@@ -160,13 +160,6 @@
     "mix": {
       "forLane": "Âm lượng {{lane}}"
     },
-    "keysStyle": {
-      "label": "Đệm",
-      "pads": "ngân suốt ô nhịp",
-      "stabs": "lệch phách, cùng với trống snare",
-      "padsShort": "Nền",
-      "stabsShort": "Chấm"
-    },
     "countInSound": {
       "label": "Đếm vào",
       "beep": "Tiếng bíp",
@@ -189,14 +182,17 @@
       "label": "Cảm giác",
       "straight": "Đều",
       "shuffle": "Shuffle",
-      "swing": "Swing"
+      "swing": "Swing",
+      "bandLabel": "Cảm giác của ban",
+      "scope": "cả ban cùng chơi"
     },
     "intensity": {
       "label": "Cường độ",
       "soft": "Nhẹ",
       "normal": "Vừa",
       "loud": "Mạnh",
-      "hint": "Lớn bỏ ghost note và thêm một cú crash; nhỏ đánh backbeat nhẹ và bỏ crash."
+      "hint": "Lớn bỏ ghost note và thêm một cú crash; nhỏ đánh backbeat nhẹ và bỏ crash.",
+      "drumsLabel": "Cường độ trống"
     },
     "form": {
       "label": "Cấu trúc",
@@ -400,16 +396,8 @@
       "out": "nghỉ",
       "hatsOnly": "chỉ hi-hat",
       "inputOn": "Đầu vào bật",
-      "inputOff": "Đầu vào tắt"
-    },
-    "bassStyle": {
-      "rock": "nốt gốc theo trống cái",
-      "shuffle": "mẫu boogie",
-      "swing": "đường walking",
-      "bossa": "mẫu bossa",
-      "waltz": "nốt gốc và bậc năm",
-      "sixeight": "nốt gốc và bậc năm",
-      "funk": "nốt gốc đảo phách"
+      "inputOff": "Đầu vào tắt",
+      "playing": "Đang chơi"
     },
     "practice": {
       "label": "Luyện tập",
@@ -556,9 +544,6 @@
       "twoStep": "Two-step",
       "waltz": "Waltz"
     },
-    "drummer": {
-      "label": "Tay trống"
-    },
     "more": {
       "label": "Thêm",
       "lead": "loại nhịp · thứ bạn đọc · bản ghi"
@@ -624,6 +609,85 @@
       "congas": "conga",
       "bongos": "bongo",
       "silent": "không có trong groove này"
+    },
+    "section": {
+      "song": "Bài nhạc",
+      "songLead": "cả ban cùng chơi",
+      "drums": "Trống",
+      "drumsLead": "groove và bộ trống",
+      "bass": "Bass",
+      "bassLead": "dòng chạy dưới hợp âm",
+      "keys": "Phím",
+      "keysLead": "đệm hợp âm",
+      "perc": "Bộ gõ",
+      "percLead": "shaker, conga, không gian"
+    },
+    "bassFigure": {
+      "label": "Kiểu",
+      "autoNamed": "Tự động · {{style}}",
+      "kick": "Nốt gốc theo kick",
+      "eighths": "Móc đơn dồn dập",
+      "rootFifth": "Nốt gốc và quãng năm",
+      "octaves": "Quãng tám",
+      "boogie": "Boogie",
+      "walking": "Walking",
+      "twoFeel": "Nhịp hai",
+      "pedal": "Nốt pedal",
+      "bossa": "Bossa",
+      "tumbao": "Tumbao",
+      "funk": "Funk",
+      "countryAlt": "Country",
+      "gallop": "Phi nước đại",
+      "ballad": "Nốt dài",
+      "reggae": "Reggae"
+    },
+    "bassBusy": {
+      "label": "Mật độ",
+      "sparse": "Thưa",
+      "normal": "Vừa",
+      "busy": "Dày"
+    },
+    "keysComp": {
+      "label": "Đệm",
+      "autoNamed": "Tự động · {{style}}",
+      "pads": "Nền",
+      "stabs": "Chấm",
+      "pulse": "Nhịp đều",
+      "arpeggio": "Rải hợp âm",
+      "charleston": "Đệm jazz",
+      "skank": "Skank reggae",
+      "montuno": "Montuno",
+      "bossaComp": "Bossa",
+      "shuffleComp": "Shuffle"
+    },
+    "progressions": {
+      "label": "Vòng hợp âm",
+      "autoNamed": "Tự động · {{name}}",
+      "pop": "Pop",
+      "rock": "Rock cổ điển",
+      "country": "Country",
+      "doowop": "Thập niên 50",
+      "funkVamp": "Vamp funk",
+      "jazzLoop": "Vòng jazz",
+      "axis": "Vòng bốn hợp âm",
+      "minorRock": "Rock thứ",
+      "aeolian": "Thứ tự nhiên",
+      "dorianVamp": "Vamp Dorian",
+      "minorTwoFive": "Hai-năm thứ",
+      "andalusian": "Thứ đi xuống",
+      "bluesVamp": "Vamp blues",
+      "boogieVamp": "Vamp boogie",
+      "quickChange": "Đổi nhanh",
+      "jazzBlues": "Blues jazz",
+      "blues": "Blues cổ điển",
+      "minorBlues": "Blues thứ",
+      "verseChorus": "Verse và điệp khúc",
+      "sixteen": "Turnaround",
+      "sixteenMinor": "Turnaround thứ",
+      "minorVerseChorus": "Verse và điệp khúc giọng thứ",
+      "sixteenBlues": "Blues 16 ô nhịp",
+      "oneChord": "Một hợp âm",
+      "ownChords": "Hợp âm bạn tự nhập sẽ vang lên ở những ô nhịp đó."
     }
   },
   "scale": {

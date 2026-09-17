@@ -160,13 +160,6 @@
     "mix": {
       "forLane": "{{lane}} 音量"
     },
-    "keysStyle": {
-      "label": "伴奏",
-      "pads": "整小節延音",
-      "stabs": "在反拍上，跟著小鼓",
-      "padsShort": "鋪底",
-      "stabsShort": "頓奏"
-    },
     "countInSound": {
       "label": "預備拍",
       "beep": "提示音",
@@ -189,14 +182,17 @@
       "label": "律動",
       "straight": "平均",
       "shuffle": "三連音搖擺",
-      "swing": "搖擺"
+      "swing": "搖擺",
+      "bandLabel": "樂團律動",
+      "scope": "整個樂團一起演奏"
     },
     "intensity": {
       "label": "力度",
       "soft": "輕",
       "normal": "適中",
       "loud": "重",
-      "hint": "重會去掉幽靈音、加一記碎音鈸；輕則把重拍打輕、不打碎音鈸。"
+      "hint": "重會去掉幽靈音、加一記碎音鈸；輕則把重拍打輕、不打碎音鈸。",
+      "drumsLabel": "鼓的力度"
     },
     "form": {
       "label": "曲式",
@@ -400,16 +396,8 @@
       "out": "休止",
       "hatsOnly": "只有腳踏鈸",
       "inputOn": "輸入已開",
-      "inputOff": "輸入已關"
-    },
-    "bassStyle": {
-      "rock": "跟著大鼓的根音",
-      "shuffle": "布基樂句",
-      "swing": "行走貝斯",
-      "bossa": "巴薩諾瓦型",
-      "waltz": "根音與五度",
-      "sixeight": "根音與五度",
-      "funk": "切分根音"
+      "inputOff": "輸入已關",
+      "playing": "演奏中"
     },
     "practice": {
       "label": "練習",
@@ -556,9 +544,6 @@
       "twoStep": "兩步舞",
       "waltz": "華爾滋"
     },
-    "drummer": {
-      "label": "鼓手"
-    },
     "more": {
       "label": "更多",
       "lead": "拍號 · 你讀的調 · 錄音"
@@ -624,6 +609,85 @@
       "congas": "康加鼓",
       "bongos": "邦哥鼓",
       "silent": "這個律動裡沒有"
+    },
+    "section": {
+      "song": "歌曲",
+      "songLead": "全員一起演奏",
+      "drums": "鼓",
+      "drumsLead": "律動與鼓組",
+      "bass": "貝斯",
+      "bassLead": "和弦下方的線條",
+      "keys": "鍵盤",
+      "keysLead": "和弦伴奏",
+      "perc": "打擊樂",
+      "percLead": "沙鈴、康加鼓、空間"
+    },
+    "bassFigure": {
+      "label": "風格",
+      "autoNamed": "自動 · {{style}}",
+      "kick": "跟大鼓的根音",
+      "eighths": "推進的八分音符",
+      "rootFifth": "根音與五度",
+      "octaves": "八度",
+      "boogie": "布基",
+      "walking": "行走貝斯",
+      "twoFeel": "二拍感",
+      "pedal": "持續音",
+      "bossa": "巴薩",
+      "tumbao": "通巴奧",
+      "funk": "放克",
+      "countryAlt": "鄉村",
+      "gallop": "馬蹄節奏",
+      "ballad": "長音",
+      "reggae": "雷鬼"
+    },
+    "bassBusy": {
+      "label": "音符密度",
+      "sparse": "稀疏",
+      "normal": "適中",
+      "busy": "密集"
+    },
+    "keysComp": {
+      "label": "伴奏",
+      "autoNamed": "自動 · {{style}}",
+      "pads": "鋪底",
+      "stabs": "頓奏",
+      "pulse": "律動和弦",
+      "arpeggio": "琶音",
+      "charleston": "爵士伴奏",
+      "skank": "雷鬼切分",
+      "montuno": "蒙圖諾",
+      "bossaComp": "巴薩",
+      "shuffleComp": "搖擺"
+    },
+    "progressions": {
+      "label": "和弦進行",
+      "autoNamed": "自動 · {{name}}",
+      "pop": "流行",
+      "rock": "經典搖滾",
+      "country": "鄉村",
+      "doowop": "五零年代",
+      "funkVamp": "放克循環",
+      "jazzLoop": "爵士循環",
+      "axis": "四和弦循環",
+      "minorRock": "小調搖滾",
+      "aeolian": "自然小調",
+      "dorianVamp": "多利亞循環",
+      "minorTwoFive": "小調二五",
+      "andalusian": "下行小調",
+      "bluesVamp": "藍調循環",
+      "boogieVamp": "布基循環",
+      "quickChange": "快速轉換",
+      "jazzBlues": "爵士藍調",
+      "blues": "經典藍調",
+      "minorBlues": "小調藍調",
+      "verseChorus": "主歌與副歌",
+      "sixteen": "回轉進行",
+      "sixteenMinor": "小調回轉進行",
+      "minorVerseChorus": "小調主歌與副歌",
+      "sixteenBlues": "16小節藍調",
+      "oneChord": "單和弦",
+      "ownChords": "你自己輸入的和弦會在對應小節優先演奏。"
     }
   },
   "scale": {

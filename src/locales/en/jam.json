@@ -160,13 +160,6 @@
     "mix": {
       "forLane": "{{lane}} volume"
     },
-    "keysStyle": {
-      "label": "Comping",
-      "pads": "held through the bar",
-      "stabs": "off the beat, with the snare",
-      "padsShort": "Pads",
-      "stabsShort": "Stabs"
-    },
     "countInSound": {
       "label": "Count-in",
       "beep": "Beep",
@@ -189,14 +182,17 @@
       "label": "Feel",
       "straight": "Straight",
       "shuffle": "Shuffle",
-      "swing": "Swing"
+      "swing": "Swing",
+      "bandLabel": "Band feel",
+      "scope": "the whole band plays it"
     },
     "intensity": {
       "label": "Intensity",
       "soft": "Soft",
       "normal": "Normal",
       "loud": "Loud",
-      "hint": "Loud drops the ghost notes and lands a crash; soft plays the backbeat light and leaves the crash out."
+      "hint": "Loud drops the ghost notes and lands a crash; soft plays the backbeat light and leaves the crash out.",
+      "drumsLabel": "Drum intensity"
     },
     "form": {
       "label": "Form",
@@ -400,16 +396,8 @@
       "out": "out",
       "hatsOnly": "hats only",
       "inputOn": "Input on",
-      "inputOff": "Input off"
-    },
-    "bassStyle": {
-      "rock": "roots on the kick",
-      "shuffle": "a boogie figure",
-      "swing": "a walking line",
-      "bossa": "the bossa pattern",
-      "waltz": "root and fifth",
-      "sixeight": "root and fifth",
-      "funk": "syncopated roots"
+      "inputOff": "Input off",
+      "playing": "Playing"
     },
     "practice": {
       "label": "Practice",
@@ -556,9 +544,6 @@
       "twoStep": "Two-step",
       "waltz": "Waltz"
     },
-    "drummer": {
-      "label": "The drummer"
-    },
     "more": {
       "label": "More",
       "lead": "meter · what you read · takes"
@@ -624,6 +609,85 @@
       "congas": "congas",
       "bongos": "bongos",
       "silent": "nothing in this groove"
+    },
+    "section": {
+      "song": "The song",
+      "songLead": "everyone plays this",
+      "drums": "Drums",
+      "drumsLead": "the groove and the kit",
+      "bass": "Bass",
+      "bassLead": "the line under the chords",
+      "keys": "Keys",
+      "keysLead": "the chords, comped",
+      "perc": "Percussion",
+      "percLead": "shakers, congas, the room"
+    },
+    "bassFigure": {
+      "label": "Style",
+      "autoNamed": "Auto · {{style}}",
+      "kick": "Roots on the kick",
+      "eighths": "Driving eighths",
+      "rootFifth": "Root and fifth",
+      "octaves": "Octaves",
+      "boogie": "Boogie",
+      "walking": "Walking",
+      "twoFeel": "Two-feel",
+      "pedal": "Pedal note",
+      "bossa": "Bossa",
+      "tumbao": "Tumbao",
+      "funk": "Funk",
+      "countryAlt": "Country",
+      "gallop": "Gallop",
+      "ballad": "Long notes",
+      "reggae": "Reggae"
+    },
+    "bassBusy": {
+      "label": "Activity",
+      "sparse": "Sparse",
+      "normal": "Normal",
+      "busy": "Busy"
+    },
+    "keysComp": {
+      "label": "Comping",
+      "autoNamed": "Auto · {{style}}",
+      "pads": "Pads",
+      "stabs": "Stabs",
+      "pulse": "Pulse",
+      "arpeggio": "Arpeggio",
+      "charleston": "Jazz comping",
+      "skank": "Reggae skank",
+      "montuno": "Montuno",
+      "bossaComp": "Bossa",
+      "shuffleComp": "Shuffle"
+    },
+    "progressions": {
+      "label": "Progression",
+      "autoNamed": "Auto · {{name}}",
+      "pop": "Pop",
+      "rock": "Classic rock",
+      "country": "Country",
+      "doowop": "Fifties",
+      "funkVamp": "Funk vamp",
+      "jazzLoop": "Jazz loop",
+      "axis": "Four-chord loop",
+      "minorRock": "Minor rock",
+      "aeolian": "Natural minor",
+      "dorianVamp": "Dorian vamp",
+      "minorTwoFive": "Minor two-five",
+      "andalusian": "Descending minor",
+      "bluesVamp": "Blues vamp",
+      "boogieVamp": "Boogie vamp",
+      "quickChange": "Quick change",
+      "jazzBlues": "Jazz blues",
+      "blues": "Classic blues",
+      "minorBlues": "Minor blues",
+      "verseChorus": "Verse and chorus",
+      "sixteen": "Turnarounds",
+      "sixteenMinor": "Minor turnarounds",
+      "minorVerseChorus": "Minor verse and chorus",
+      "sixteenBlues": "Sixteen-bar blues",
+      "oneChord": "One chord",
+      "ownChords": "Your own chords play over it where you typed them."
     }
   },
   "scale": {

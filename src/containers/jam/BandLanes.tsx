@@ -209,7 +209,7 @@ export function BandLanes({
               {laneIcon(lane.id)}
               {t(`jam.band.${lane.id}`)}
             </span>
-            <span className="jam-band-detail">{lane.detail}</span>
+            {lane.detail ? <span className="jam-band-detail">{lane.detail}</span> : null}
             {lane.extra ? <span className="jam-band-extra">{lane.extra}</span> : null}
             <span className="jam-band-live">
               {live ? (

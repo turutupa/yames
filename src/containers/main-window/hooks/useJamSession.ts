@@ -634,6 +634,12 @@ export function useJamSession({
         jam.mix,
         jam.keysStyle,
         jam.countInSound,
+        // The band pass (2026-09-16): how the bass plays, how busy it is, and
+        // which progression the form plays. Each rewrites a line the engine
+        // is holding.
+        jam.bassStyle,
+        jam.bassBusy,
+        jam.changes,
         // The second pass. The voices and a folder of your own samples change
         // what the band SOUNDS like, and the kit being previewed changes it
         // for two bars — all three have to re-send or the audition is silent.

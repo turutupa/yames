@@ -160,13 +160,6 @@
     "mix": {
       "forLane": "Lautstärke {{lane}}"
     },
-    "keysStyle": {
-      "label": "Begleitung",
-      "pads": "über den ganzen Takt gehalten",
-      "stabs": "neben dem Schlag, mit der Snare",
-      "padsShort": "Flächen",
-      "stabsShort": "Stabs"
-    },
     "countInSound": {
       "label": "Einzähler",
       "beep": "Piep",
@@ -189,14 +182,17 @@
       "label": "Feeling",
       "straight": "Gerade",
       "shuffle": "Shuffle",
-      "swing": "Swing"
+      "swing": "Swing",
+      "bandLabel": "Band-Feeling",
+      "scope": "die ganze Band spielt es"
     },
     "intensity": {
       "label": "Intensität",
       "soft": "Leise",
       "normal": "Normal",
       "loud": "Laut",
-      "hint": "Laut lässt die Ghost Notes weg und setzt ein Crash; leise spielt den Backbeat leicht und lässt das Crash weg."
+      "hint": "Laut lässt die Ghost Notes weg und setzt ein Crash; leise spielt den Backbeat leicht und lässt das Crash weg.",
+      "drumsLabel": "Schlagzeug-Intensität"
     },
     "form": {
       "label": "Form",
@@ -400,16 +396,8 @@
       "out": "raus",
       "hatsOnly": "nur Hi-Hat",
       "inputOn": "Eingang an",
-      "inputOff": "Eingang aus"
-    },
-    "bassStyle": {
-      "rock": "Grundtöne auf der Bassdrum",
-      "shuffle": "eine Boogie-Figur",
-      "swing": "eine Walking-Linie",
-      "bossa": "das Bossa-Muster",
-      "waltz": "Grundton und Quinte",
-      "sixeight": "Grundton und Quinte",
-      "funk": "synkopierte Grundtöne"
+      "inputOff": "Eingang aus",
+      "playing": "Spielt"
     },
     "practice": {
       "label": "Üben",
@@ -556,9 +544,6 @@
       "twoStep": "Two-Step",
       "waltz": "Walzer"
     },
-    "drummer": {
-      "label": "Der Drummer"
-    },
     "more": {
       "label": "Mehr",
       "lead": "Taktart · was du liest · Aufnahmen"
@@ -624,6 +609,85 @@
       "congas": "Congas",
       "bongos": "Bongos",
       "silent": "in diesem Groove nichts"
+    },
+    "section": {
+      "song": "Der Song",
+      "songLead": "alle spielen das",
+      "drums": "Schlagzeug",
+      "drumsLead": "Groove und Kit",
+      "bass": "Bass",
+      "bassLead": "die Linie unter den Akkorden",
+      "keys": "Keys",
+      "keysLead": "die Akkorde, begleitet",
+      "perc": "Perkussion",
+      "percLead": "Shaker, Congas, der Raum"
+    },
+    "bassFigure": {
+      "label": "Stil",
+      "autoNamed": "Auto · {{style}}",
+      "kick": "Grundtöne auf der Kick",
+      "eighths": "Treibende Achtel",
+      "rootFifth": "Grundton und Quinte",
+      "octaves": "Oktaven",
+      "boogie": "Boogie",
+      "walking": "Walking",
+      "twoFeel": "Two-Feel",
+      "pedal": "Orgelpunkt",
+      "bossa": "Bossa",
+      "tumbao": "Tumbao",
+      "funk": "Funk",
+      "countryAlt": "Country",
+      "gallop": "Galopp",
+      "ballad": "Lange Töne",
+      "reggae": "Reggae"
+    },
+    "bassBusy": {
+      "label": "Aktivität",
+      "sparse": "Sparsam",
+      "normal": "Normal",
+      "busy": "Viel"
+    },
+    "keysComp": {
+      "label": "Begleitung",
+      "autoNamed": "Auto · {{style}}",
+      "pads": "Flächen",
+      "stabs": "Stabs",
+      "pulse": "Puls",
+      "arpeggio": "Arpeggio",
+      "charleston": "Jazz-Comping",
+      "skank": "Reggae-Skank",
+      "montuno": "Montuno",
+      "bossaComp": "Bossa",
+      "shuffleComp": "Shuffle"
+    },
+    "progressions": {
+      "label": "Akkordfolge",
+      "autoNamed": "Auto · {{name}}",
+      "pop": "Pop",
+      "rock": "Classic Rock",
+      "country": "Country",
+      "doowop": "Fünfziger",
+      "funkVamp": "Funk-Vamp",
+      "jazzLoop": "Jazz-Loop",
+      "axis": "Vier-Akkorde-Loop",
+      "minorRock": "Moll-Rock",
+      "aeolian": "Natürliches Moll",
+      "dorianVamp": "Dorischer Vamp",
+      "minorTwoFive": "Moll II–V",
+      "andalusian": "Absteigendes Moll",
+      "bluesVamp": "Blues-Vamp",
+      "boogieVamp": "Boogie-Vamp",
+      "quickChange": "Quick Change",
+      "jazzBlues": "Jazz-Blues",
+      "blues": "Klassischer Blues",
+      "minorBlues": "Moll-Blues",
+      "verseChorus": "Strophe und Refrain",
+      "sixteen": "Turnarounds",
+      "sixteenMinor": "Moll-Turnarounds",
+      "minorVerseChorus": "Moll-Strophe und Refrain",
+      "sixteenBlues": "16-taktiger Blues",
+      "oneChord": "Ein Akkord",
+      "ownChords": "Deine eigenen Akkorde spielen dort darüber, wo du sie eingetragen hast."
     }
   },
   "scale": {

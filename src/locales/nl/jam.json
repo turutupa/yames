@@ -160,13 +160,6 @@
     "mix": {
       "forLane": "Volume {{lane}}"
     },
-    "keysStyle": {
-      "label": "Begeleiding",
-      "pads": "de hele maat aangehouden",
-      "stabs": "op de tegentel, met de snare",
-      "padsShort": "Pads",
-      "stabsShort": "Stabs"
-    },
     "countInSound": {
       "label": "Aftellen",
       "beep": "Piep",
@@ -189,14 +182,17 @@
       "label": "Feel",
       "straight": "Recht",
       "shuffle": "Shuffle",
-      "swing": "Swing"
+      "swing": "Swing",
+      "bandLabel": "Bandfeel",
+      "scope": "de hele band speelt het"
     },
     "intensity": {
       "label": "Intensiteit",
       "soft": "Zacht",
       "normal": "Normaal",
       "loud": "Luid",
-      "hint": "Luid laat de ghost notes weg en zet een crash; zacht speelt de backbeat licht en laat de crash weg."
+      "hint": "Luid laat de ghost notes weg en zet een crash; zacht speelt de backbeat licht en laat de crash weg.",
+      "drumsLabel": "Drumintensiteit"
     },
     "form": {
       "label": "Vorm",
@@ -400,16 +396,8 @@
       "out": "eruit",
       "hatsOnly": "alleen hi-hat",
       "inputOn": "Ingang aan",
-      "inputOff": "Ingang uit"
-    },
-    "bassStyle": {
-      "rock": "grondtonen op de kick",
-      "shuffle": "een boogiefiguur",
-      "swing": "een walking bass",
-      "bossa": "het bossapatroon",
-      "waltz": "grondtoon en kwint",
-      "sixeight": "grondtoon en kwint",
-      "funk": "gesyncopeerde grondtonen"
+      "inputOff": "Ingang uit",
+      "playing": "Speelt"
     },
     "practice": {
       "label": "Oefenen",
@@ -556,9 +544,6 @@
       "twoStep": "Two-step",
       "waltz": "Wals"
     },
-    "drummer": {
-      "label": "De drummer"
-    },
     "more": {
       "label": "Meer",
       "lead": "maatsoort · wat je leest · opnames"
@@ -624,6 +609,85 @@
       "congas": "conga's",
       "bongos": "bongo's",
       "silent": "niets in deze groove"
+    },
+    "section": {
+      "song": "Het nummer",
+      "songLead": "iedereen speelt dit",
+      "drums": "Drums",
+      "drumsLead": "de groove en de kit",
+      "bass": "Bas",
+      "bassLead": "de lijn onder de akkoorden",
+      "keys": "Toetsen",
+      "keysLead": "de akkoorden, begeleidend",
+      "perc": "Percussie",
+      "percLead": "shakers, conga's, de ruimte"
+    },
+    "bassFigure": {
+      "label": "Stijl",
+      "autoNamed": "Auto · {{style}}",
+      "kick": "Grondtonen op de kick",
+      "eighths": "Stuwende achtsten",
+      "rootFifth": "Grondtoon en kwint",
+      "octaves": "Octaven",
+      "boogie": "Boogie",
+      "walking": "Walking",
+      "twoFeel": "Two-feel",
+      "pedal": "Orgelpunt",
+      "bossa": "Bossa",
+      "tumbao": "Tumbao",
+      "funk": "Funk",
+      "countryAlt": "Country",
+      "gallop": "Galop",
+      "ballad": "Lange noten",
+      "reggae": "Reggae"
+    },
+    "bassBusy": {
+      "label": "Activiteit",
+      "sparse": "Weinig",
+      "normal": "Normaal",
+      "busy": "Veel"
+    },
+    "keysComp": {
+      "label": "Begeleiding",
+      "autoNamed": "Auto · {{style}}",
+      "pads": "Pads",
+      "stabs": "Stabs",
+      "pulse": "Puls",
+      "arpeggio": "Arpeggio",
+      "charleston": "Jazzcomping",
+      "skank": "Reggae-skank",
+      "montuno": "Montuno",
+      "bossaComp": "Bossa",
+      "shuffleComp": "Shuffle"
+    },
+    "progressions": {
+      "label": "Akkoordenschema",
+      "autoNamed": "Auto · {{name}}",
+      "pop": "Pop",
+      "rock": "Classic rock",
+      "country": "Country",
+      "doowop": "Jaren vijftig",
+      "funkVamp": "Funkvamp",
+      "jazzLoop": "Jazzloop",
+      "axis": "Vierakkoordenloop",
+      "minorRock": "Mineurrock",
+      "aeolian": "Natuurlijk mineur",
+      "dorianVamp": "Dorische vamp",
+      "minorTwoFive": "Mineur twee-vijf",
+      "andalusian": "Dalend mineur",
+      "bluesVamp": "Bluesvamp",
+      "boogieVamp": "Boogievamp",
+      "quickChange": "Quick change",
+      "jazzBlues": "Jazzblues",
+      "blues": "Klassieke blues",
+      "minorBlues": "Mineurblues",
+      "verseChorus": "Couplet en refrein",
+      "sixteen": "Turnarounds",
+      "sixteenMinor": "Mineur-turnarounds",
+      "minorVerseChorus": "Couplet en refrein in mineur",
+      "sixteenBlues": "Blues van 16 maten",
+      "oneChord": "Eén akkoord",
+      "ownChords": "Je eigen akkoorden klinken eroverheen waar je ze hebt ingevuld."
     }
   },
   "scale": {

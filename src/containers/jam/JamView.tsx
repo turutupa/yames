@@ -7,6 +7,7 @@ import {
   jamBand,
   jamGroove,
   jamGrooveFitsMeter,
+  jamBassFigure,
   jamBassLine,
   jamKeysStyle,
   jamMix,
@@ -14,7 +15,9 @@ import {
 } from "../../jam/compile";
 import { progressionEdit, withChordAt } from "../../jam/progression";
 import { jamHarmony, nextChange } from "../../jam/display";
-import { JAM_KEYS_STYLES } from "../../jam/keysline";
+import { JAM_KEYS_STYLES_ALL } from "../../jam/keysFigures";
+import { JAM_BASS_STYLES } from "../../jam/bassFigures";
+import { JamSelect } from "./JamSelect";
 import { ChordPicker } from "./ChordPicker";
 import { bandStatesForChorus, practiceConfigFrom } from "../../jam/practice";
 import { momentsForChorus } from "../../jam/arrangement";
@@ -28,7 +31,6 @@ import {
   transposeChord,
 } from "../../jam/harmony";
 import { SCALE_NAMES_EN, scalesForChord, scalesForKey } from "../../jam/scales";
-import { bassStyleForGroove } from "../../jam/bassline";
 import type { Jam, JamFeel, JamIntensity, JamPracticeSettings } from "../../jam/types";
 import type { Chord, PitchClass } from "../../jam/harmony";
 import type { JamTakesState } from "../main-window/hooks/useJamTakes";
@@ -426,7 +428,6 @@ export function JamView({
   /** The mix as the sliders show it, defaults filled in. */
   const mix = jamMix(jam);
   const grooveFits = jamGrooveFitsMeter(jam);
-  const keysStyle = jamKeysStyle(jam);
 
   /**
    * What the percussionist is playing, and whether there is a row for them.
@@ -506,13 +507,13 @@ export function JamView({
 
         <div className="jam-head-controls">
           <Segmented
-            label={t("jam.feel.label")}
+            label={t("jam.feel.bandLabel")}
             value={jam.feel}
             options={FEELS.map((id) => ({ id, label: t(`jam.feel.${id}`) }))}
             onChange={(feel) => onEdit({ feel })}
           />
           <Segmented
-            label={t("jam.intensity.label")}
+            label={t("jam.intensity.drumsLabel")}
             value={jam.intensity}
             options={INTENSITIES.map((id) => ({ id, label: t(`jam.intensity.${id}`) }))}
             onChange={(intensity) => onEdit({ intensity })}
@@ -668,33 +669,55 @@ export function JamView({
           {
             id: "bass",
             on: band.bass,
-            detail: t(`jam.bassStyle.${bassStyleForGroove(jam.customGroove ? "" : jam.grooveId)}`),
+            detail: "",
             notes: bassNotes,
             volume: mix.bass,
+            // The bass's style belongs to the bass, so it is picked on the
+            // bass's row, while you listen to it — the keys row's rule.
+            extra: (
+              <JamSelect
+                label={t("jam.bassFigure.label")}
+                value={jam.bassStyle ?? "auto"}
+                compact
+                disabled={!band.bass}
+                options={[
+                  {
+                    id: "auto" as const,
+                    label: t("jam.bassFigure.autoNamed", {
+                      style: t(`jam.bassFigure.${jamBassFigure({ ...jam, bassStyle: undefined })}`),
+                    }),
+                  },
+                  ...JAM_BASS_STYLES.map((id) => ({ id, label: t(`jam.bassFigure.${id}`) })),
+                ]}
+                onChange={(id) => onEdit({ bassStyle: id === "auto" ? undefined : id })}
+              />
+            ),
           },
           {
             id: "keys",
             on: !!band.keys,
-            detail: t(`jam.keysStyle.${keysStyle}`),
+            detail: "",
             volume: mix.keys,
             // The comping style belongs to this player and to nobody else, so
-            // it lives on their row — you change it while listening to it,
-            // which is the only way to choose between a pad and a stab.
+            // it lives on their row — you change it while listening to it.
+            // Nine styles now, so a dropdown rather than a button each.
             extra: (
-              <span className="jam-keys-style" role="group" aria-label={t("jam.keysStyle.label")}>
-                {JAM_KEYS_STYLES.map((style) => (
-                  <button
-                    key={style}
-                    type="button"
-                    className={`jam-keys-style-btn${keysStyle === style ? " active" : ""}`}
-                    aria-pressed={keysStyle === style}
-                    disabled={!band.keys}
-                    onClick={() => onEdit({ keysStyle: style })}
-                  >
-                    {t(`jam.keysStyle.${style}Short`)}
-                  </button>
-                ))}
-              </span>
+              <JamSelect
+                label={t("jam.keysComp.label")}
+                value={jam.keysStyle ?? "auto"}
+                compact
+                disabled={!band.keys}
+                options={[
+                  {
+                    id: "auto" as const,
+                    label: t("jam.keysComp.autoNamed", {
+                      style: t(`jam.keysComp.${jamKeysStyle({ ...jam, keysStyle: undefined })}`),
+                    }),
+                  },
+                  ...JAM_KEYS_STYLES_ALL.map((id) => ({ id, label: t(`jam.keysComp.${id}`) })),
+                ]}
+                onChange={(id) => onEdit({ keysStyle: id === "auto" ? undefined : id })}
+              />
             ),
           },
           // The percussionist, after Keys. Withheld entirely where there is

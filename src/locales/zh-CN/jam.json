@@ -160,13 +160,6 @@
     "mix": {
       "forLane": "{{lane}} 音量"
     },
-    "keysStyle": {
-      "label": "伴奏",
-      "pads": "整小节延音",
-      "stabs": "在反拍上，跟着军鼓",
-      "padsShort": "铺底",
-      "stabsShort": "顿奏"
-    },
     "countInSound": {
       "label": "预备拍",
       "beep": "提示音",
@@ -189,14 +182,17 @@
       "label": "律动",
       "straight": "平均",
       "shuffle": "三连音摇摆",
-      "swing": "摇摆"
+      "swing": "摇摆",
+      "bandLabel": "乐队律动",
+      "scope": "整个乐队一起演奏"
     },
     "intensity": {
       "label": "力度",
       "soft": "轻",
       "normal": "适中",
       "loud": "重",
-      "hint": "重会去掉幽灵音、加一记吊镲；轻则把重拍打轻、不打吊镲。"
+      "hint": "重会去掉幽灵音、加一记吊镲；轻则把重拍打轻、不打吊镲。",
+      "drumsLabel": "鼓的力度"
     },
     "form": {
       "label": "曲式",
@@ -400,16 +396,8 @@
       "out": "休止",
       "hatsOnly": "只有踩镲",
       "inputOn": "输入已开",
-      "inputOff": "输入已关"
-    },
-    "bassStyle": {
-      "rock": "跟着底鼓的根音",
-      "shuffle": "布基乐句",
-      "swing": "行走贝斯",
-      "bossa": "波萨型",
-      "waltz": "根音与五度",
-      "sixeight": "根音与五度",
-      "funk": "切分根音"
+      "inputOff": "输入已关",
+      "playing": "演奏中"
     },
     "practice": {
       "label": "练习",
@@ -556,9 +544,6 @@
       "twoStep": "两步舞",
       "waltz": "华尔兹"
     },
-    "drummer": {
-      "label": "鼓手"
-    },
     "more": {
       "label": "更多",
       "lead": "拍号 · 你读的调 · 录音"
@@ -624,6 +609,85 @@
       "congas": "康加鼓",
       "bongos": "邦戈鼓",
       "silent": "这个律动里没有"
+    },
+    "section": {
+      "song": "歌曲",
+      "songLead": "全员一起演奏",
+      "drums": "鼓",
+      "drumsLead": "律动与鼓组",
+      "bass": "贝斯",
+      "bassLead": "和弦下方的线条",
+      "keys": "键盘",
+      "keysLead": "和弦伴奏",
+      "perc": "打击乐",
+      "percLead": "沙锤、康加鼓、空间"
+    },
+    "bassFigure": {
+      "label": "风格",
+      "autoNamed": "自动 · {{style}}",
+      "kick": "跟底鼓的根音",
+      "eighths": "推进的八分音符",
+      "rootFifth": "根音与五度",
+      "octaves": "八度",
+      "boogie": "布吉",
+      "walking": "行走贝斯",
+      "twoFeel": "二拍感",
+      "pedal": "持续音",
+      "bossa": "波萨",
+      "tumbao": "通巴奥",
+      "funk": "放克",
+      "countryAlt": "乡村",
+      "gallop": "马蹄节奏",
+      "ballad": "长音",
+      "reggae": "雷鬼"
+    },
+    "bassBusy": {
+      "label": "音符密度",
+      "sparse": "稀疏",
+      "normal": "适中",
+      "busy": "密集"
+    },
+    "keysComp": {
+      "label": "伴奏",
+      "autoNamed": "自动 · {{style}}",
+      "pads": "铺底",
+      "stabs": "顿奏",
+      "pulse": "律动和弦",
+      "arpeggio": "琶音",
+      "charleston": "爵士伴奏",
+      "skank": "雷鬼切分",
+      "montuno": "蒙图诺",
+      "bossaComp": "波萨",
+      "shuffleComp": "摇摆"
+    },
+    "progressions": {
+      "label": "和弦进行",
+      "autoNamed": "自动 · {{name}}",
+      "pop": "流行",
+      "rock": "经典摇滚",
+      "country": "乡村",
+      "doowop": "五十年代",
+      "funkVamp": "放克循环",
+      "jazzLoop": "爵士循环",
+      "axis": "四和弦循环",
+      "minorRock": "小调摇滚",
+      "aeolian": "自然小调",
+      "dorianVamp": "多利亚循环",
+      "minorTwoFive": "小调二五",
+      "andalusian": "下行小调",
+      "bluesVamp": "布鲁斯循环",
+      "boogieVamp": "布吉循环",
+      "quickChange": "快速变换",
+      "jazzBlues": "爵士布鲁斯",
+      "blues": "经典布鲁斯",
+      "minorBlues": "小调布鲁斯",
+      "verseChorus": "主歌与副歌",
+      "sixteen": "回转进行",
+      "sixteenMinor": "小调回转进行",
+      "minorVerseChorus": "小调主歌与副歌",
+      "sixteenBlues": "16小节布鲁斯",
+      "oneChord": "单和弦",
+      "ownChords": "你自己输入的和弦会在对应小节优先演奏。"
     }
   },
   "scale": {

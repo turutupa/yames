@@ -160,13 +160,6 @@
     "mix": {
       "forLane": "{{lane}} の音量"
     },
-    "keysStyle": {
-      "label": "バッキング",
-      "pads": "小節いっぱい伸ばす",
-      "stabs": "裏拍で、スネアと一緒に",
-      "padsShort": "パッド",
-      "stabsShort": "スタブ"
-    },
     "countInSound": {
       "label": "カウントイン",
       "beep": "ビープ",
@@ -189,14 +182,17 @@
       "label": "フィール",
       "straight": "ストレート",
       "shuffle": "シャッフル",
-      "swing": "スウィング"
+      "swing": "スウィング",
+      "bandLabel": "バンドのフィール",
+      "scope": "バンド全体で演奏"
     },
     "intensity": {
       "label": "強さ",
       "soft": "弱め",
       "normal": "ふつう",
       "loud": "強め",
-      "hint": "強くするとゴーストノートが消えてクラッシュが入り、弱くするとバックビートを軽く叩いてクラッシュはなしになります。"
+      "hint": "強くするとゴーストノートが消えてクラッシュが入り、弱くするとバックビートを軽く叩いてクラッシュはなしになります。",
+      "drumsLabel": "ドラムの強さ"
     },
     "form": {
       "label": "フォーム",
@@ -400,16 +396,8 @@
       "out": "休み",
       "hatsOnly": "ハイハットのみ",
       "inputOn": "入力オン",
-      "inputOff": "入力オフ"
-    },
-    "bassStyle": {
-      "rock": "キックに合わせたルート",
-      "shuffle": "ブギのフレーズ",
-      "swing": "ウォーキングライン",
-      "bossa": "ボサのパターン",
-      "waltz": "ルートと5度",
-      "sixeight": "ルートと5度",
-      "funk": "シンコペーションしたルート"
+      "inputOff": "入力オフ",
+      "playing": "演奏中"
     },
     "practice": {
       "label": "練習",
@@ -556,9 +544,6 @@
       "twoStep": "ツーステップ",
       "waltz": "ワルツ"
     },
-    "drummer": {
-      "label": "ドラマー"
-    },
     "more": {
       "label": "その他",
       "lead": "拍子 · 読む譜 · 録音"
@@ -624,6 +609,85 @@
       "congas": "コンガ",
       "bongos": "ボンゴ",
       "silent": "このグルーヴにはなし"
+    },
+    "section": {
+      "song": "曲",
+      "songLead": "全員が演奏",
+      "drums": "ドラム",
+      "drumsLead": "グルーヴとキット",
+      "bass": "ベース",
+      "bassLead": "コードの下のライン",
+      "keys": "キーボード",
+      "keysLead": "コードのバッキング",
+      "perc": "パーカッション",
+      "percLead": "シェイカー、コンガ、空間"
+    },
+    "bassFigure": {
+      "label": "スタイル",
+      "autoNamed": "自動 · {{style}}",
+      "kick": "キックに合わせてルート",
+      "eighths": "ドライブする8分",
+      "rootFifth": "ルートと5度",
+      "octaves": "オクターブ",
+      "boogie": "ブギー",
+      "walking": "ウォーキング",
+      "twoFeel": "ツーフィール",
+      "pedal": "ペダル音",
+      "bossa": "ボサ",
+      "tumbao": "トゥンバオ",
+      "funk": "ファンク",
+      "countryAlt": "カントリー",
+      "gallop": "ギャロップ",
+      "ballad": "ロングトーン",
+      "reggae": "レゲエ"
+    },
+    "bassBusy": {
+      "label": "音数",
+      "sparse": "少なめ",
+      "normal": "普通",
+      "busy": "多め"
+    },
+    "keysComp": {
+      "label": "バッキング",
+      "autoNamed": "自動 · {{style}}",
+      "pads": "パッド",
+      "stabs": "スタブ",
+      "pulse": "パルス",
+      "arpeggio": "アルペジオ",
+      "charleston": "ジャズ・コンピング",
+      "skank": "レゲエ・スカンク",
+      "montuno": "モントゥーノ",
+      "bossaComp": "ボサ",
+      "shuffleComp": "シャッフル"
+    },
+    "progressions": {
+      "label": "コード進行",
+      "autoNamed": "自動 · {{name}}",
+      "pop": "ポップ",
+      "rock": "クラシック・ロック",
+      "country": "カントリー",
+      "doowop": "50年代",
+      "funkVamp": "ファンク・ヴァンプ",
+      "jazzLoop": "ジャズ・ループ",
+      "axis": "4コード・ループ",
+      "minorRock": "マイナー・ロック",
+      "aeolian": "ナチュラル・マイナー",
+      "dorianVamp": "ドリアン・ヴァンプ",
+      "minorTwoFive": "マイナーのツーファイブ",
+      "andalusian": "下降マイナー",
+      "bluesVamp": "ブルース・ヴァンプ",
+      "boogieVamp": "ブギー・ヴァンプ",
+      "quickChange": "クイック・チェンジ",
+      "jazzBlues": "ジャズ・ブルース",
+      "blues": "クラシック・ブルース",
+      "minorBlues": "マイナー・ブルース",
+      "verseChorus": "ヴァースとコーラス",
+      "sixteen": "ターンアラウンド",
+      "sixteenMinor": "マイナーのターンアラウンド",
+      "minorVerseChorus": "マイナーのヴァースとコーラス",
+      "sixteenBlues": "16小節ブルース",
+      "oneChord": "ワンコード",
+      "ownChords": "自分で入力したコードは、その小節で優先されます。"
     }
   },
   "scale": {

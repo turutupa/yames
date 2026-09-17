@@ -277,6 +277,8 @@ export function JamSheetGroup({
   label,
   lead,
   action,
+  player,
+  control,
   children,
 }: {
   label: string;
@@ -284,16 +286,76 @@ export function JamSheetGroup({
   lead?: string;
   /** A link on the heading's right — "Edit changes", "Edit the groove". */
   action?: React.ReactNode;
-  children: React.ReactNode;
+  /**
+   * Whose settings these are (2026-09-16). A player's group wears that
+   * player's mark and colour, and the song's wears the band's, so a control
+   * never has to be read to know who it belongs to — the owner's ask: "the
+   * UI clearly shows what setting you are modifying".
+   */
+  player?: "song" | "drums" | "bass" | "keys" | "perc";
+  /** The player's on/off switch, on the heading's right. */
+  control?: React.ReactNode;
+  children?: React.ReactNode;
 }) {
   return (
-    <section className="jam-sheet-group" aria-label={label}>
+    <section className="jam-sheet-group" aria-label={label} data-player={player}>
       <div className="jam-sheet-group-head">
+        {player && <PlayerMark player={player} />}
         <span className="stage-label">{label}</span>
         {lead && <span className="jam-sheet-lead">{lead}</span>}
         {action}
+        {control && <span className="jam-sheet-group-control">{control}</span>}
       </div>
       {children}
     </section>
+  );
+}
+
+/** A small glyph per player, drawn in the player's colour. */
+function PlayerMark({ player }: { player: NonNullable<Parameters<typeof JamSheetGroup>[0]["player"]> }) {
+  const paths: Record<typeof player, React.ReactNode> = {
+    // A staff line and a note: what everybody reads.
+    song: (
+      <>
+        <path d="M9 18V6l10-2v12" />
+        <circle cx="6.5" cy="18" r="2.5" />
+        <circle cx="16.5" cy="16" r="2.5" />
+      </>
+    ),
+    // A drum.
+    drums: (
+      <>
+        <ellipse cx="12" cy="8" rx="8" ry="3" />
+        <path d="M4 8v8c0 1.7 3.6 3 8 3s8-1.3 8-3V8" />
+      </>
+    ),
+    // Four strings.
+    bass: (
+      <>
+        <path d="M5 4v16M10 4v16M14 4v16M19 4v16" />
+      </>
+    ),
+    // Keys.
+    keys: (
+      <>
+        <rect x="3" y="5" width="18" height="14" rx="1.5" />
+        <path d="M8 5v8M12 5v8M16 5v8" />
+      </>
+    ),
+    // A shaker.
+    perc: (
+      <>
+        <ellipse cx="12" cy="9" rx="5" ry="6" />
+        <path d="M12 15v6" />
+      </>
+    ),
+  };
+  return (
+    <span className="jam-player-mark" data-player={player} aria-hidden="true">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        {paths[player]}
+      </svg>
+    </span>
   );
 }

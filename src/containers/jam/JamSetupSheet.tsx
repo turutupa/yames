@@ -18,7 +18,19 @@ import {
   countInChoices,
   parseCountInChoice,
 } from "../../jam/jams";
-import { jamBand, jamGroove, jamGrooveFitsMeter, jamKey, jamMix, jamWrittenGroove } from "../../jam/compile";
+import {
+  jamBand,
+  jamFamily,
+  jamGroove,
+  jamGrooveFitsMeter,
+  jamKey,
+  jamMix,
+  jamWrittenGroove,
+} from "../../jam/compile";
+import { JAM_BASS_BUSY, JAM_BASS_STYLES, autoBassFigure } from "../../jam/bassFigures";
+import { JAM_KEYS_STYLES_ALL, autoKeysStyle } from "../../jam/keysFigures";
+import { changesFor, defaultChangesFor } from "../../jam/changes";
+import type { ChangesBar } from "../../jam/changes";
 import { SHARP_NAMES, TRANSPOSITION_OPTIONS, keyName, noteName } from "../../jam/harmony";
 import { chartEdit, parseChordChart } from "../../jam/chart";
 import { progressionEdit } from "../../jam/progression";
@@ -87,6 +99,26 @@ export function fillsEditFor(choice: FillChoice): { fills: boolean; fillEvery: n
     case "chorus":
       return { fills: true, fillEvery: 0 };
   }
+}
+
+/**
+ * A progression's numerals, the way a player reads them off a chart: the
+ * chords in order with repeats folded, "I · V · vi · IV". A bar that moves in
+ * its middle is written "ii–V".
+ */
+export function numeralsOf(bars: readonly ChangesBar[]): string {
+  const words: string[] = [];
+  for (const bar of bars) {
+    const word = typeof bar === "string" ? bar : `${bar[0]}–${bar[1]}`;
+    const shown = word.replace("@tonic", "I");
+    if (words[words.length - 1] !== shown) words.push(shown);
+  }
+  // A loop that comes round twice says so once.
+  const half = words.length / 2;
+  if (Number.isInteger(half) && words.slice(0, half).join() === words.slice(half).join()) {
+    words.length = half;
+  }
+  return words.length > 8 ? `${words.slice(0, 8).join(" · ")} …` : words.join(" · ");
 }
 
 /**
@@ -213,6 +245,97 @@ export function JamSetupSheet({
   const band = jamBand(jam, lineup);
   const mix = jamMix(jam);
   const key = jamKey(jam);
+
+  /** The on/off switch a player's section wears on its heading. */
+  const playerSwitch = (id: "drums" | "bass" | "keys" | "perc") => {
+    const on = !!band[id];
+    return (
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        aria-label={t(`jam.band.${id}`)}
+        className={`transport-switch jam-switch ${on ? "on" : ""}`}
+        onPointerEnter={id === "bass" || id === "keys" ? () => warmVoices(id) : undefined}
+        onClick={() => {
+          // Hiring a bass or keys player loads their instrument.
+          if (!on && (id === "bass" || id === "keys")) setChanged(id);
+          onEdit({
+            band: {
+              drums: band.drums,
+              bass: band.bass,
+              keys: !!band.keys,
+              perc: !!band.perc,
+              [id]: !on,
+            },
+          });
+        }}
+      >
+        <span className="transport-switch-track" aria-hidden="true" />
+        {on ? t("jam.band.playing") : t("jam.band.out")}
+      </button>
+    );
+  };
+
+  /** A player's volume, under their controls. */
+  const playerVolume = (id: "drums" | "bass" | "keys" | "perc") => (
+    <div className="jam-player-volume">
+      <input
+        type="range"
+        min={0}
+        max={1.5}
+        step={0.05}
+        value={mix[id]}
+        aria-label={t("jam.mix.forLane", { lane: t(`jam.band.${id}`) })}
+        onChange={(e) => onEdit({ mix: { ...mix, [id]: Number(e.target.value) } })}
+      />
+      <span className="jam-band-volume-value">{Math.round(mix[id] * 100)}</span>
+    </div>
+  );
+
+  // What each player's "Auto" would play, named, so Auto is never a mystery.
+  const grooveIdForAuto = jam.customGroove ? null : jam.grooveId;
+  const bassFigureOptions = [
+    {
+      id: "auto" as const,
+      label: t("jam.bassFigure.autoNamed", {
+        style: t(`jam.bassFigure.${autoBassFigure(grooveIdForAuto)}`),
+      }),
+    },
+    ...JAM_BASS_STYLES.map((id) => ({ id, label: t(`jam.bassFigure.${id}`) })),
+  ];
+  const keysStyleOptions = [
+    {
+      id: "auto" as const,
+      label: t("jam.keysComp.autoNamed", {
+        style: t(`jam.keysComp.${autoKeysStyle(grooveIdForAuto, jamFamily(jam))}`),
+      }),
+    },
+    ...JAM_KEYS_STYLES_ALL.map((id) => ({ id, label: t(`jam.keysComp.${id}`) })),
+  ];
+
+  // The progressions this form and key can play, with their numerals.
+  const autoChanges = defaultChangesFor(jam.form.kind, key.mode, jamFamily(jam));
+  const progressionEntries = changesFor(jam.form.kind, key.mode);
+  const progressionOptions = progressionEntries.length === 0
+    ? []
+    : [
+        {
+          id: "auto",
+          label: t("jam.progressions.autoNamed", {
+            name: autoChanges ? t(`jam.progressions.${autoChanges.id}`) : "",
+          }),
+          hint: autoChanges ? numeralsOf(autoChanges.bars) : undefined,
+        },
+        ...progressionEntries.map((entry) => ({
+          id: entry.id,
+          label: t(`jam.progressions.${entry.id}`),
+          hint: numeralsOf(entry.bars),
+        })),
+      ];
+  const progressionValue =
+    jam.changes && progressionEntries.some((entry) => entry.id === jam.changes) ? jam.changes : "auto";
+  const hasOwnChords = !!jam.progression?.some((name) => name.trim());
 
   const grooveName = jam.customGroove
     ? jam.customGroove.name
@@ -351,135 +474,9 @@ export function JamSetupSheet({
       </JamSheetGroup>
 
       <JamSheetGroup
-        label={t("jam.drummer.label")}
-        action={
-          jam.customGroove ? (
-            <button type="button" className="jam-link" onClick={onOpenEditor}>
-              {t("jam.editor.edit")}
-            </button>
-          ) : undefined
-        }
-      >
-        {/* A hundred and fifteen cards in one grid is a wall, not a picker
-            (A3). So: a chip row of the nine shelves, and the cards of one
-            shelf at a time — with "All" still there for the person who wants
-            to scroll the whole book. The row follows the jam by default, so
-            tapping the Latin vibe leaves the Latin shelf open rather than
-            leaving the selected card somewhere off screen. */}
-        <div className="jam-groove-shelves">
-          <div
-            className="jam-variations jam-family-chips"
-            role="group"
-            aria-label={t("jam.family.label")}
-          >
-            <button
-              type="button"
-              className={`jam-chip${grooveFamily === "all" ? " active" : ""}`}
-              aria-pressed={grooveFamily === "all"}
-              onClick={() => setPickedFamily("all")}
-            >
-              {t("jam.family.all")}
-            </button>
-            {GROOVE_FAMILIES.map((id) => (
-              <button
-                key={id}
-                type="button"
-                className={`jam-chip${grooveFamily === id ? " active" : ""}`}
-                aria-pressed={grooveFamily === id}
-                onClick={() => setPickedFamily(id)}
-              >
-                {t(`jam.family.${id}`)}
-              </button>
-            ))}
-          </div>
-
-          {grooveFamily === "all" ? (
-            GROOVE_FAMILIES.map((id) => (
-              <div key={id} className="jam-family-block">
-                <span className="stage-label">{t(`jam.family.${id}`)}</span>
-                <div className="jam-cards jam-cards-groove">
-                  {groovesInFamily(id).map(grooveCard)}
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="jam-cards jam-cards-groove">
-              {groovesInFamily(grooveFamily).map(grooveCard)}
-            </div>
-          )}
-
-          {/* The last card, under whichever shelf is open. A groove of your
-              own is one of the choices, not a mode you have to find — and it
-              is on no shelf, because nobody else has heard it. */}
-          <div className="jam-cards jam-cards-groove">
-            <button
-              type="button"
-              className={`sub-row-btn jam-card jam-card-mine${jam.customGroove ? " active" : ""}`}
-              aria-pressed={!!jam.customGroove}
-              onClick={onOpenEditor}
-            >
-              <GrooveGlyph groove={meter} />
-              <span className="sub-row-label">
-                {jam.customGroove ? jam.customGroove.name : t("jam.editor.makeYourOwn")}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        <div className="jam-sheet-row">
-          <Segmented
-            label={t("jam.feel.label")}
-            value={jam.feel}
-            options={FEELS.map((id) => ({ id, label: t(`jam.feel.${id}`) }))}
-            onChange={(feel) => onEdit({ feel })}
-          />
-          <Segmented
-            label={t("jam.intensity.label")}
-            value={jam.intensity}
-            options={INTENSITIES.map((id) => ({ id, label: t(`jam.intensity.${id}`) }))}
-            onChange={(intensity) => onEdit({ intensity })}
-            hint={t("jam.intensity.hint")}
-          />
-        </div>
-
-        <div className="jam-sheet-row">
-          <KitPicker
-            kit={jam.kit}
-            onKit={(kit) => {
-              setChanged("kit");
-              onEdit({ kit });
-            }}
-            customKit={jam.customKit ?? null}
-            onCustomKit={(customKit) => onEdit({ customKit })}
-            onPreview={onPreviewKit}
-            previewing={previewingKit}
-            refused={customKitRefused}
-            loading={spinning("kit")}
-          />
-          <Segmented
-            label={t("jam.fills.label")}
-            value={fillsChoiceOf(jam)}
-            options={FILL_CHOICES.map((id) => ({ id, label: t(`jam.fills.${id}`) }))}
-            onChange={(choice) => onEdit(fillsEditFor(choice))}
-            hint={t("jam.fills.hint")}
-          />
-        </div>
-
-        {/* Said plainly rather than left to be noticed by ear. The groove card
-            above still looks selected — and it is, it is just not what is
-            playing — so this is the only place that can say why. */}
-        {!grooveFits && (
-          <p className="jam-meter-note">
-            {t("jam.meter.doesNotFit", {
-              groove: grooveName,
-              meter: jam.meter ? jam.meter.beatGroups.join("+") : "",
-            })}
-          </p>
-        )}
-      </JamSheetGroup>
-
-      <JamSheetGroup
-        label={t("jam.form.label")}
+        label={t("jam.section.song")}
+        lead={t("jam.section.songLead")}
+        player="song"
         action={
           <span className="jam-sheet-links">
             {jam.chords && (
@@ -760,6 +757,35 @@ export function JamSetupSheet({
           </div>
         </div>
 
+        {/* Which progression the form plays, named the way players name
+            them, with the numerals underneath (2026-09-16). Offered only
+            where the form has alternatives — rhythm changes is the form. */}
+        {progressionOptions.length > 1 && (
+          <div className="jam-sheet-row">
+            <JamSelect
+              label={t("jam.progressions.label")}
+              value={progressionValue}
+              options={progressionOptions}
+              onChange={(id) => onEdit({ changes: id === "auto" ? undefined : id })}
+            />
+          </div>
+        )}
+        {progressionOptions.length > 1 && hasOwnChords && (
+          <p className="jam-meter-note">{t("jam.progressions.ownChords")}</p>
+        )}
+
+        {/* The feel is the band's, not the drummer's: the bass swings with
+            it too. So it sits with the song. */}
+        <div className="jam-sheet-row">
+          <Segmented
+            label={t("jam.feel.label")}
+            value={jam.feel}
+            options={FEELS.map((id) => ({ id, label: t(`jam.feel.${id}`) }))}
+            onChange={(feel) => onEdit({ feel })}
+            hint={t("jam.feel.scope")}
+          />
+        </div>
+
         <button
           type="button"
           role="switch"
@@ -773,102 +799,230 @@ export function JamSetupSheet({
         </button>
       </JamSheetGroup>
 
-      <JamSheetGroup label={t("jam.band.label")} lead={t("jam.band.lead")}>
-        {/* Percussion after Keys, and always here even where the groove has
-            none written for it. The playing screen's row comes and goes with
-            the groove, because that row says what the band IS doing; this is
-            where you decide who is in the band, and a switch that disappeared
-            when you changed groove would be a decision taken away from you. */}
-        {(["drums", "bass", "keys", "perc"] as const).map((id) => {
-          const on = !!band[id];
-          return (
-            <div
-              className="jam-player"
-              key={id}
-              data-off={on ? undefined : ""}
-              // A bass or a keys player is a recorded instrument that takes a
-              // moment to build. Hovering the row — the switch that hires
-              // them, or the dropdown that picks which — builds every one of
-              // them in the background, so the click that follows is instant.
-              onPointerEnter={id === "bass" || id === "keys" ? () => warmVoices(id) : undefined}
+      <JamSheetGroup
+        label={t("jam.section.drums")}
+        lead={t("jam.section.drumsLead")}
+        player="drums"
+        control={playerSwitch("drums")}
+        action={
+          jam.customGroove ? (
+            <button type="button" className="jam-link" onClick={onOpenEditor}>
+              {t("jam.editor.edit")}
+            </button>
+          ) : undefined
+        }
+      >
+        {/* A hundred and fifteen cards in one grid is a wall, not a picker
+            (A3). So: a chip row of the nine shelves, and the cards of one
+            shelf at a time — with "All" still there for the person who wants
+            to scroll the whole book. The row follows the jam by default, so
+            tapping the Latin vibe leaves the Latin shelf open rather than
+            leaving the selected card somewhere off screen. */}
+        <div className="jam-groove-shelves">
+          <div
+            className="jam-variations jam-family-chips"
+            role="group"
+            aria-label={t("jam.family.label")}
+          >
+            <button
+              type="button"
+              className={`jam-chip${grooveFamily === "all" ? " active" : ""}`}
+              aria-pressed={grooveFamily === "all"}
+              onClick={() => setPickedFamily("all")}
             >
+              {t("jam.family.all")}
+            </button>
+            {GROOVE_FAMILIES.map((id) => (
               <button
+                key={id}
                 type="button"
-                role="switch"
-                aria-checked={on}
-                className={`transport-switch jam-switch ${on ? "on" : ""}`}
-                onClick={() => {
-                  // Hiring a bass or keys player loads their instrument.
-                  if (!on && (id === "bass" || id === "keys")) setChanged(id);
-                  onEdit({
-                    band: {
-                      drums: band.drums,
-                      bass: band.bass,
-                      keys: !!band.keys,
-                      perc: !!band.perc,
-                      [id]: !on,
-                    },
-                  });
-                }}
+                className={`jam-chip${grooveFamily === id ? " active" : ""}`}
+                aria-pressed={grooveFamily === id}
+                onClick={() => setPickedFamily(id)}
               >
-                <span className="transport-switch-track" aria-hidden="true" />
-                {t(`jam.band.${id}`)}
+                {t(`jam.family.${id}`)}
               </button>
+            ))}
+          </div>
 
-              {/* The voice and the volume appear WITH the player. A dropdown
-                  for a bass nobody has hired is a control that does nothing,
-                  and the sheet is long enough already (B9). */}
-              {on && id === "bass" && (
-                <JamSelect
-                  label={t("jam.bassVoice.label")}
-                  value={jam.bassVoice ?? "fingered"}
-                  compact
-                  options={BASS_VOICES.map((voice) => ({
-                    id: voice,
-                    label: t(`jam.bassVoice.${voice}`),
-                  }))}
-                  onChange={(bassVoice) => {
-                    setChanged("bass");
-                    onEdit({ bassVoice });
-                  }}
-                  loading={spinning("bass")}
-                  onWarm={() => warmVoices("bass")}
-                />
-              )}
-              {on && id === "keys" && (
-                <JamSelect
-                  label={t("jam.keysVoice.label")}
-                  value={jam.keysVoice ?? "epiano"}
-                  compact
-                  options={KEYS_VOICES.map((voice) => ({
-                    id: voice,
-                    label: t(`jam.keysVoice.${voice}`),
-                  }))}
-                  onChange={(keysVoice) => {
-                    setChanged("keys");
-                    onEdit({ keysVoice });
-                  }}
-                  loading={spinning("keys")}
-                  onWarm={() => warmVoices("keys")}
-                />
-              )}
-              {on && (
-                <div className="jam-player-volume">
-                  <input
-                    type="range"
-                    min={0}
-                    max={1.5}
-                    step={0.05}
-                    value={mix[id]}
-                    aria-label={t("jam.mix.forLane", { lane: t(`jam.band.${id}`) })}
-                    onChange={(e) => onEdit({ mix: { ...mix, [id]: Number(e.target.value) } })}
-                  />
-                  <span className="jam-band-volume-value">{Math.round(mix[id] * 100)}</span>
+          {grooveFamily === "all" ? (
+            GROOVE_FAMILIES.map((id) => (
+              <div key={id} className="jam-family-block">
+                <span className="stage-label">{t(`jam.family.${id}`)}</span>
+                <div className="jam-cards jam-cards-groove">
+                  {groovesInFamily(id).map(grooveCard)}
                 </div>
-              )}
+              </div>
+            ))
+          ) : (
+            <div className="jam-cards jam-cards-groove">
+              {groovesInFamily(grooveFamily).map(grooveCard)}
             </div>
-          );
-        })}
+          )}
+
+          {/* The last card, under whichever shelf is open. A groove of your
+              own is one of the choices, not a mode you have to find — and it
+              is on no shelf, because nobody else has heard it. */}
+          <div className="jam-cards jam-cards-groove">
+            <button
+              type="button"
+              className={`sub-row-btn jam-card jam-card-mine${jam.customGroove ? " active" : ""}`}
+              aria-pressed={!!jam.customGroove}
+              onClick={onOpenEditor}
+            >
+              <GrooveGlyph groove={meter} />
+              <span className="sub-row-label">
+                {jam.customGroove ? jam.customGroove.name : t("jam.editor.makeYourOwn")}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <div className="jam-sheet-row">
+          <Segmented
+            label={t("jam.intensity.label")}
+            value={jam.intensity}
+            options={INTENSITIES.map((id) => ({ id, label: t(`jam.intensity.${id}`) }))}
+            onChange={(intensity) => onEdit({ intensity })}
+            hint={t("jam.intensity.hint")}
+          />
+        </div>
+
+        <div className="jam-sheet-row">
+          <KitPicker
+            kit={jam.kit}
+            onKit={(kit) => {
+              setChanged("kit");
+              onEdit({ kit });
+            }}
+            customKit={jam.customKit ?? null}
+            onCustomKit={(customKit) => onEdit({ customKit })}
+            onPreview={onPreviewKit}
+            previewing={previewingKit}
+            refused={customKitRefused}
+            loading={spinning("kit")}
+          />
+          <Segmented
+            label={t("jam.fills.label")}
+            value={fillsChoiceOf(jam)}
+            options={FILL_CHOICES.map((id) => ({ id, label: t(`jam.fills.${id}`) }))}
+            onChange={(choice) => onEdit(fillsEditFor(choice))}
+            hint={t("jam.fills.hint")}
+          />
+        </div>
+
+        {/* Said plainly rather than left to be noticed by ear. The groove card
+            above still looks selected — and it is, it is just not what is
+            playing — so this is the only place that can say why. */}
+        {!grooveFits && (
+          <p className="jam-meter-note">
+            {t("jam.meter.doesNotFit", {
+              groove: grooveName,
+              meter: jam.meter ? jam.meter.beatGroups.join("+") : "",
+            })}
+          </p>
+        )}
+        {band.drums && playerVolume("drums")}
+      </JamSheetGroup>
+
+      {/* THE BASS. The on/off switch is on the heading; the rest appears
+          with the player, because a dropdown for a bass nobody has hired is a
+          control that does nothing (B9). Hovering the section builds every
+          recorded bass in the background, so the pick that follows is
+          instant. */}
+      <JamSheetGroup
+        label={t("jam.section.bass")}
+        lead={t("jam.section.bassLead")}
+        player="bass"
+        control={playerSwitch("bass")}
+      >
+        {band.bass && (
+          <div className="jam-player" onPointerEnter={() => warmVoices("bass")}>
+            <div className="jam-sheet-row">
+              <JamSelect
+                label={t("jam.bassVoice.label")}
+                value={jam.bassVoice ?? "fingered"}
+                compact
+                options={BASS_VOICES.map((voice) => ({
+                  id: voice,
+                  label: t(`jam.bassVoice.${voice}`),
+                }))}
+                onChange={(bassVoice) => {
+                  setChanged("bass");
+                  onEdit({ bassVoice });
+                }}
+                loading={spinning("bass")}
+                onWarm={() => warmVoices("bass")}
+              />
+              <JamSelect
+                label={t("jam.bassFigure.label")}
+                value={jam.bassStyle ?? "auto"}
+                options={bassFigureOptions}
+                onChange={(id) => onEdit({ bassStyle: id === "auto" ? undefined : id })}
+              />
+            </div>
+            <div className="jam-sheet-row">
+              <Segmented
+                label={t("jam.bassBusy.label")}
+                value={jam.bassBusy ?? "normal"}
+                options={JAM_BASS_BUSY.map((id) => ({ id, label: t(`jam.bassBusy.${id}`) }))}
+                onChange={(bassBusy) => onEdit({ bassBusy: bassBusy === "normal" ? undefined : bassBusy })}
+              />
+            </div>
+            {playerVolume("bass")}
+          </div>
+        )}
+      </JamSheetGroup>
+
+      {/* THE KEYS. The comping style lives here and on the keys row of the
+          playing screen — the same choice, in the two places you make it. */}
+      <JamSheetGroup
+        label={t("jam.section.keys")}
+        lead={t("jam.section.keysLead")}
+        player="keys"
+        control={playerSwitch("keys")}
+      >
+        {band.keys && (
+          <div className="jam-player" onPointerEnter={() => warmVoices("keys")}>
+            <div className="jam-sheet-row">
+              <JamSelect
+                label={t("jam.keysVoice.label")}
+                value={jam.keysVoice ?? "epiano"}
+                compact
+                options={KEYS_VOICES.map((voice) => ({
+                  id: voice,
+                  label: t(`jam.keysVoice.${voice}`),
+                }))}
+                onChange={(keysVoice) => {
+                  setChanged("keys");
+                  onEdit({ keysVoice });
+                }}
+                loading={spinning("keys")}
+                onWarm={() => warmVoices("keys")}
+              />
+              <JamSelect
+                label={t("jam.keysComp.label")}
+                value={jam.keysStyle ?? "auto"}
+                options={keysStyleOptions}
+                onChange={(id) => onEdit({ keysStyle: id === "auto" ? undefined : id })}
+              />
+            </div>
+            {playerVolume("keys")}
+          </div>
+        )}
+      </JamSheetGroup>
+
+      {/* THE PERCUSSIONIST. Always here even where the groove has none
+          written for it: this is where you decide who is in the band, and a
+          switch that disappeared when you changed groove would be a decision
+          taken away from you. */}
+      <JamSheetGroup
+        label={t("jam.section.perc")}
+        lead={t("jam.section.percLead")}
+        player="perc"
+        control={playerSwitch("perc")}
+      >
+        {band.perc && playerVolume("perc")}
       </JamSheetGroup>
 
       {/* MORE. Collapsed, because these are true of maybe one jam in twenty

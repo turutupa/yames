@@ -9341,6 +9341,168 @@ mod tests {
         }
     }
 
+    /// AN AUDITION, NOT A CHECK (2026-09-16).
+    ///
+    /// The bass and keys players are judged by ear. `YAMES_BAND_DEMO` names a
+    /// folder of `<name>.json` files written by `scripts/sounds/band_demo.ts`
+    /// — one compiled config per bar, as the app sends them — and each becomes
+    /// `<name>.wav` beside it: the shipped kits and recorded voices, through
+    /// this module's copy of the callback's mixer, with the notes left ringing
+    /// across the bar lines the way the engine leaves them. Skipped without
+    /// the variable, and `#[ignore]` so it never runs in the suite.
+    #[test]
+    #[ignore]
+    fn render_band_demos() {
+        #[derive(serde::Deserialize)]
+        struct Demo {
+            bpm: f32,
+            bars: Vec<crate::jam::JamConfig>,
+        }
+        let Ok(dir) = std::env::var("YAMES_BAND_DEMO") else {
+            eprintln!("YAMES_BAND_DEMO is not set; nothing to render");
+            return;
+        };
+        let sr = 44_100u32;
+        let bank = SoundBank::new(sr);
+        let kits = crate::kit::KitCache::default();
+        let voices = crate::voices::VoiceCache::default();
+        let mut entries: Vec<_> = std::fs::read_dir(&dir)
+            .expect("the demo folder")
+            .filter_map(|e| e.ok().map(|e| e.path()))
+            .filter(|p| p.extension().and_then(|e| e.to_str()) == Some("json"))
+            .collect();
+        entries.sort();
+        for path in entries {
+            let demo: Demo =
+                serde_json::from_str(&std::fs::read_to_string(&path).unwrap()).unwrap();
+            let tables: Vec<JamTable> = demo
+                .bars
+                .iter()
+                .map(|cfg| {
+                    let kit = kits.shipped(JamKit::from_name(&cfg.kit).0, sr).unwrap();
+                    let v = crate::jam::resolve_voices(cfg, &voices, sr).unwrap();
+                    crate::jam::compile_with_voices(cfg, kit, v).unwrap()
+                })
+                .collect();
+            let tpb = demo.bars[0].ticks_per_beat.max(1) as f32;
+            let tick_samples = (60.0 / demo.bpm / tpb * sr as f32).round() as usize;
+            let (left, right) = render_sequence(&tables, &bank, tick_samples, 0.8, sr);
+            let wav = path.with_extension("wav");
+            let spec = hound::WavSpec {
+                channels: 2,
+                sample_rate: sr,
+                bits_per_sample: 16,
+                sample_format: hound::SampleFormat::Int,
+            };
+            let mut w = hound::WavWriter::create(&wav, spec).unwrap();
+            for (l, r) in left.iter().zip(right.iter()) {
+                w.write_sample((l.clamp(-1.0, 1.0) * 32767.0) as i16).unwrap();
+                w.write_sample((r.clamp(-1.0, 1.0) * 32767.0) as i16).unwrap();
+            }
+            w.finalize().unwrap();
+            let peak = left.iter().chain(right.iter()).fold(0.0f32, |m, s| m.max(s.abs()));
+            println!("{} -> {} bars, peak {peak:.3}", wav.display(), tables.len());
+        }
+    }
+
+    /// [`render_jam_at`] over a SEQUENCE of tables, one per bar, with the
+    /// voices carried across the bar lines — what the engine does when the
+    /// bar-ahead handshake swaps a table in at the downbeat.
+    fn render_sequence(
+        tables: &[JamTable],
+        bank: &SoundBank,
+        tick_samples: usize,
+        volume: f32,
+        sr: u32,
+    ) -> (Vec<f32>, Vec<f32>) {
+        let mut left = Vec::new();
+        let mut right = Vec::new();
+        let mut voices: Vec<Voice> = Vec::new();
+        let mut jam_bar = 0u32;
+        let mut bus = DrumBus::new(sr);
+        let choke_frames = (CHOKE_FADE_SECS * sr as f32) as u32;
+        let drift_frames = (DRIFT_MAX_SECS * sr as f32) as u32;
+        for (index, table) in tables.iter().enumerate() {
+            bus.set_drive(table.bus_drive, table.bus_shape);
+            let kit = BandBanks::of(Some(table));
+            for t in 0..table.ticks_per_bar() {
+                if let Some(tick) = table.tick(t, jam_bar) {
+                    for slot in tick.slots() {
+                        spawn_band_voice(
+                            &mut voices,
+                            slot,
+                            volume,
+                            jam_bar,
+                            t,
+                            table.ticks_per_bar(),
+                            tick_samples as u64,
+                            drift_frames,
+                            choke_frames,
+                        );
+                    }
+                    if t == 0 && index == 0 {
+                        if let Some(slot) = table.crash_on_one() {
+                            spawn_band_voice(
+                                &mut voices,
+                                &JamSlot { cap_ticks: 0.0, ..slot },
+                                volume,
+                                jam_bar,
+                                0,
+                                table.ticks_per_bar(),
+                                tick_samples as u64,
+                                drift_frames,
+                                choke_frames,
+                            );
+                        }
+                    }
+                }
+                for _ in 0..tick_samples {
+                    let mut l = 0.0f32;
+                    let mut r = 0.0f32;
+                    for v in voices.iter_mut() {
+                        if v.delay > 0 {
+                            v.delay -= 1;
+                            continue;
+                        }
+                        let buf = jam_sample(bank, kit, v.sound_id);
+                        let frames = if v.stereo { buf.len() / 2 } else { buf.len() };
+                        let limit = if v.max_samples > 0 { v.max_samples.min(frames) } else { frames };
+                        if v.position < limit {
+                            let g = v.choke_gain();
+                            let (sl, sr) = if v.stereo {
+                                (buf[2 * v.position], buf[2 * v.position + 1])
+                            } else {
+                                (buf[v.position], buf[v.position])
+                            };
+                            if v.band {
+                                l += sl * v.amp_l * g;
+                                r += sr * v.amp_r * g;
+                            } else {
+                                l += sl * v.amp_l;
+                                r += sr * v.amp_r;
+                            }
+                        }
+                        if v.band && v.fade_left > 0 {
+                            v.fade_left -= 1;
+                        }
+                        v.position += 1;
+                    }
+                    let (l, r) = bus.process(l, r);
+                    left.push(l);
+                    right.push(r);
+                }
+                voices.retain(|v| {
+                    let buf = jam_sample(bank, kit, v.sound_id);
+                    let frames = if v.stereo { buf.len() / 2 } else { buf.len() };
+                    !v.done(frames)
+                });
+            }
+            let (b, _) = advance_form(jam_bar, 1, table.form_bars());
+            jam_bar = b;
+        }
+        (left, right)
+    }
+
     /// How much of a sound's energy sits under 150 Hz.
     ///
     /// Four cascaded one-pole sections, each with its own state, for the

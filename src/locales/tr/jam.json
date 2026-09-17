@@ -160,13 +160,6 @@
     "mix": {
       "forLane": "{{lane}} sesi"
     },
-    "keysStyle": {
-      "label": "Eşlik",
-      "pads": "ölçü boyunca tutulur",
-      "stabs": "vuruş dışında, trampetle birlikte",
-      "padsShort": "Pad",
-      "stabsShort": "Vurgu"
-    },
     "countInSound": {
       "label": "Giriş sayımı",
       "beep": "Bip",
@@ -189,14 +182,17 @@
       "label": "Feel",
       "straight": "Düz",
       "shuffle": "Shuffle",
-      "swing": "Swing"
+      "swing": "Swing",
+      "bandLabel": "Grup hissi",
+      "scope": "bütün grup çalar"
     },
     "intensity": {
       "label": "Yoğunluk",
       "soft": "Yumuşak",
       "normal": "Normal",
       "loud": "Yüksek",
-      "hint": "Yüksek, ghost note'ları atar ve bir crash koyar; alçak, backbeat'i hafif çalar ve crash'i çalmaz."
+      "hint": "Yüksek, ghost note'ları atar ve bir crash koyar; alçak, backbeat'i hafif çalar ve crash'i çalmaz.",
+      "drumsLabel": "Davul yoğunluğu"
     },
     "form": {
       "label": "Form",
@@ -400,16 +396,8 @@
       "out": "susuyor",
       "hatsOnly": "sadece hi-hat",
       "inputOn": "Giriş açık",
-      "inputOff": "Giriş kapalı"
-    },
-    "bassStyle": {
-      "rock": "kick üstünde kök sesler",
-      "shuffle": "boogie kalıbı",
-      "swing": "yürüyen bas",
-      "bossa": "bossa kalıbı",
-      "waltz": "kök ses ve beşli",
-      "sixeight": "kök ses ve beşli",
-      "funk": "senkoplu kök sesler"
+      "inputOff": "Giriş kapalı",
+      "playing": "Çalıyor"
     },
     "practice": {
       "label": "Çalışma",
@@ -556,9 +544,6 @@
       "twoStep": "Two-step",
       "waltz": "Vals"
     },
-    "drummer": {
-      "label": "Davulcu"
-    },
     "more": {
       "label": "Daha fazla",
       "lead": "ölçü · ne okuduğun · kayıtlar"
@@ -624,6 +609,85 @@
       "congas": "kongalar",
       "bongos": "bongolar",
       "silent": "bu groove'da yok"
+    },
+    "section": {
+      "song": "Şarkı",
+      "songLead": "herkes bunu çalar",
+      "drums": "Davul",
+      "drumsLead": "groove ve set",
+      "bass": "Bas",
+      "bassLead": "akorların altındaki çizgi",
+      "keys": "Klavye",
+      "keysLead": "akorlar, eşlikli",
+      "perc": "Perküsyon",
+      "percLead": "shaker, konga, oda"
+    },
+    "bassFigure": {
+      "label": "Tarz",
+      "autoNamed": "Otomatik · {{style}}",
+      "kick": "Kick ile kök sesler",
+      "eighths": "Akıcı sekizlikler",
+      "rootFifth": "Kök ve beşli",
+      "octaves": "Oktavlar",
+      "boogie": "Boogie",
+      "walking": "Walking",
+      "twoFeel": "İkili his",
+      "pedal": "Pedal nota",
+      "bossa": "Bossa",
+      "tumbao": "Tumbao",
+      "funk": "Funk",
+      "countryAlt": "Country",
+      "gallop": "Dörtnala",
+      "ballad": "Uzun notalar",
+      "reggae": "Reggae"
+    },
+    "bassBusy": {
+      "label": "Yoğunluk",
+      "sparse": "Seyrek",
+      "normal": "Normal",
+      "busy": "Yoğun"
+    },
+    "keysComp": {
+      "label": "Eşlik",
+      "autoNamed": "Otomatik · {{style}}",
+      "pads": "Pad",
+      "stabs": "Vurgu",
+      "pulse": "Nabız",
+      "arpeggio": "Arpej",
+      "charleston": "Caz comping",
+      "skank": "Reggae skank",
+      "montuno": "Montuno",
+      "bossaComp": "Bossa",
+      "shuffleComp": "Shuffle"
+    },
+    "progressions": {
+      "label": "Akor yürüyüşü",
+      "autoNamed": "Otomatik · {{name}}",
+      "pop": "Pop",
+      "rock": "Klasik rock",
+      "country": "Country",
+      "doowop": "Elliler",
+      "funkVamp": "Funk vamp",
+      "jazzLoop": "Caz döngüsü",
+      "axis": "Dört akorlu döngü",
+      "minorRock": "Minör rock",
+      "aeolian": "Doğal minör",
+      "dorianVamp": "Dorian vamp",
+      "minorTwoFive": "Minör iki-beş",
+      "andalusian": "İnen minör",
+      "bluesVamp": "Blues vamp",
+      "boogieVamp": "Boogie vamp",
+      "quickChange": "Hızlı değişim",
+      "jazzBlues": "Caz blues",
+      "blues": "Klasik blues",
+      "minorBlues": "Minör blues",
+      "verseChorus": "Kıta ve nakarat",
+      "sixteen": "Turnaround'lar",
+      "sixteenMinor": "Minör turnaround'lar",
+      "minorVerseChorus": "Minör kıta ve nakarat",
+      "sixteenBlues": "16 ölçülük blues",
+      "oneChord": "Tek akor",
+      "ownChords": "Kendi yazdığın akorlar, yazdığın yerlerde üstte çalar."
     }
   },
   "scale": {

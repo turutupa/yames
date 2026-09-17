@@ -1675,6 +1675,43 @@
   flex-wrap: wrap;
 }
 
+/* ── Whose settings these are (2026-09-16) ─────────────────────────────────
+   Each player's group wears a colour: a thin rule down its left edge and a
+   small mark before its name. Built from the theme's own two accents, so it
+   works in every theme without a palette of its own — the drums take the
+   accent, the bass the second accent, the keys the mix of the two, the
+   percussion the second accent softened, and the song the plain text colour
+   (it belongs to everybody). */
+.jam-sheet-group[data-player] {
+  --player: var(--text-secondary);
+  padding-left: 12px;
+  border-left: 2px solid color-mix(in srgb, var(--player) 55%, transparent);
+}
+.jam-sheet-group[data-player="drums"] { --player: var(--accent); }
+.jam-sheet-group[data-player="bass"] { --player: var(--accent-2, var(--accent)); }
+.jam-sheet-group[data-player="keys"] {
+  --player: color-mix(in srgb, var(--accent) 50%, var(--accent-2, var(--accent)));
+}
+.jam-sheet-group[data-player="perc"] {
+  --player: color-mix(in srgb, var(--accent-2, var(--accent)) 60%, var(--text-primary));
+}
+
+.jam-player-mark {
+  display: inline-flex;
+  align-self: center;
+  color: var(--player);
+}
+
+.jam-sheet-group[data-player] > .jam-sheet-group-head > .stage-label {
+  color: var(--player);
+}
+
+/* The player's on/off switch, against the heading's right edge. */
+.jam-sheet-group-control {
+  margin-left: auto;
+  align-self: center;
+}
+
 /* The one line under a heading that says what the group is for. It takes the
    slack so a link on the right sits against the edge. */
 .jam-sheet-lead {

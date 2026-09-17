@@ -1123,10 +1123,31 @@ describe("JamView — the fourth pass's controls", () => {
     });
   });
 
-  it("has a keys row with a comping style", () => {
-    const { props } = setup({ jam: jamOf({ band: { drums: true, bass: true, keys: true } }) });
-    fireEvent.click(screen.getByRole("button", { name: "Stabs" }));
+  it("has a keys row with a comping style, and a bass row with a figure", () => {
+    const { container, props } = setup({ jam: jamOf({ band: { drums: true, bass: true, keys: true } }) });
+    const lane = (name: string) =>
+      [...container.querySelectorAll(".jam-band-lane")].find(
+        (l) => l.querySelector(".jam-band-name")?.textContent?.includes(name),
+      )!;
+    fireEvent.click(lane("Keys").querySelector(".jam-dropdown")!);
+    fireEvent.click(screen.getByRole("option", { name: /^Stabs/ }));
     expect(props.onEdit).toHaveBeenCalledWith({ keysStyle: "stabs" });
+
+    fireEvent.click(lane("Bass").querySelector(".jam-dropdown")!);
+    fireEvent.click(screen.getByRole("option", { name: /^Walking/ }));
+    expect(props.onEdit).toHaveBeenCalledWith({ bassStyle: "walking" });
+  });
+
+  it("names what Auto plays, and Auto clears the choice", () => {
+    const { container, props } = setup({
+      jam: jamOf({ band: { drums: true, bass: true, keys: true }, keysStyle: "pads" }),
+    });
+    const keys = [...container.querySelectorAll(".jam-band-lane")].find(
+      (l) => l.querySelector(".jam-band-name")?.textContent?.includes("Keys"),
+    )!;
+    fireEvent.click(keys.querySelector(".jam-dropdown")!);
+    fireEvent.click(screen.getByRole("option", { name: /^Auto · / }));
+    expect(props.onEdit).toHaveBeenCalledWith({ keysStyle: undefined });
   });
 
   it("shows a Percussion row for a groove that has one, and names what it plays", () => {
@@ -1179,8 +1200,10 @@ describe("JamView — the fourth pass's controls", () => {
     // always there — unlike the playing screen's row, which says what the
     // band IS doing and comes and goes with the groove.
     const { container } = sheet({ jam: jamOf({ grooveId: "metalThrash" }) });
-    const players = [...container.querySelectorAll(".jam-player")];
-    expect(players.map((p) => p.querySelector("button")?.textContent)).toEqual([
+    // One section per player (2026-09-16), each with its switch on the
+    // heading, named for the player it hires.
+    const switches = [...container.querySelectorAll("section[data-player] .jam-sheet-group-control [role=switch]")];
+    expect(switches.map((s) => s.getAttribute("aria-label"))).toEqual([
       "Drums",
       "Bass",
       "Keys",
@@ -1195,9 +1218,7 @@ describe("JamView — the fourth pass's controls", () => {
         band: { drums: true, bass: false, keys: false, perc: true },
       }),
     });
-    const player = [...container.querySelectorAll(".jam-player")].find((p) =>
-      p.querySelector("button")?.textContent?.includes("Percussion"),
-    )!;
+    const player = container.querySelector("section[data-player=perc]")!;
     const slider = player.querySelector<HTMLInputElement>("input[type=range]")!;
     fireEvent.change(slider, { target: { value: "0.6" } });
     expect(props.onEdit).toHaveBeenCalledWith({

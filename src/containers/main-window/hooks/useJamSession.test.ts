@@ -427,6 +427,26 @@ describe("the bass, one bar ahead", () => {
     expect(names("setJam")).toHaveLength(0);
   });
 
+  it.each([
+    [{ bassStyle: "walking" as const }, (c: JamEngineConfig) => c.bass],
+    [{ bassBusy: "busy" as const }, (c: JamEngineConfig) => c.bass],
+    [{ changes: "quickChange" }, (c: JamEngineConfig) => c.bass],
+    [{ keysStyle: "arpeggio" as const, band: { drums: true, bass: true, keys: true } }, (c: JamEngineConfig) => c.keys],
+  ])("re-sends the band when %o is edited", async (edit, lineOf) => {
+    // The band pass's controls rewrite a line the engine is holding. A
+    // control whose change never reached the engine would be a dead switch.
+    const { result } = await loadedBlues();
+    if ("band" in edit) {
+      act(() => result.current.editJam({ band: edit.band }));
+      await waitFor(() => expect(result.current.jam?.band?.keys).toBe(true));
+    }
+    const before = lineOf(lastConfig());
+    calls.length = 0;
+    act(() => result.current.editJam(edit));
+    await waitFor(() => expect(names("setJam").length).toBeGreaterThan(0));
+    expect(lineOf(lastConfig())).not.toEqual(before);
+  });
+
   it("never re-sends the meter on a bar line", async () => {
     // The meter restacks the bar. Doing that on every downbeat would rebuild
     // the music under the player four times a chorus.
