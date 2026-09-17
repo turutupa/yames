@@ -133,8 +133,10 @@ describe("Rail", () => {
     const { props, rerender } = setup({ view: "drill", prevTab, setView });
 
     fireEvent.click(screen.getByText("Settings"));
-    expect(prevTab.current).toBe("drill");
     expect(setView).toHaveBeenCalledWith("settings");
+    // `useTabRouting.setView` records the mode Settings covers (tested there);
+    // the rail only has to send you back to it.
+    prevTab.current = "drill";
 
     rerender(<Rail {...props} view="settings" />);
     fireEvent.click(screen.getByText("Settings"));
@@ -151,11 +153,21 @@ describe("Rail", () => {
     const { props, rerender } = setup({ view: "jam", prevTab, setView });
 
     fireEvent.click(screen.getByText("Settings"));
-    expect(prevTab.current).toBe("jam");
+    expect(setView).toHaveBeenCalledWith("settings");
+    prevTab.current = "jam";
 
-    rerender(<Rail {...props} view="settings" />);
+    rerender(<Rail {...props} view="settings" mode="jam" />);
     fireEvent.click(screen.getByText("Settings"));
     expect(setView).toHaveBeenLastCalledWith("jam");
+  });
+
+  it("keeps the covered mode's library under Settings", () => {
+    // It fell back to the metronome's presets whatever mode Settings was
+    // opened from, which read as "Settings switched me to the metronome".
+    const prevTab = { current: "jam" as "beat" | "drill" | "setlist" | "jam" };
+    const { container } = setup({ view: "settings", mode: "jam", prevTab, libraryOpen: true });
+    const sidebar = container.querySelector(".rail-library");
+    expect(sidebar?.textContent ?? "").not.toMatch(/Presets/i);
   });
 
   it("names every button, so the icon-only rail is still usable blind", () => {

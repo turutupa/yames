@@ -68,6 +68,7 @@ import {
   subscribeJamSend,
 } from "./jamEngine";
 import type { MeterSnapshot } from "./jamEngine";
+import { sameRecord } from "../../../utils/sameRecord";
 
 /**
  * The jam the window has open: which one, what the store holds, and the whole
@@ -1408,7 +1409,8 @@ export function useJamSession({
   );
 
   const dirty = useMemo(
-    () => (jam && saved ? JSON.stringify(jam) !== JSON.stringify(saved) : false),
+    // Compared by what the records SAY, not by their text: see `sameRecord`.
+    () => (jam && saved ? !sameRecord(jam, saved) : false),
     [jam, saved],
   );
 

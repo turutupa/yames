@@ -14,6 +14,8 @@ interface RailProps {
   view: MainView;
   setView: (v: MainView) => void;
   prevTab: { current: PlayTab };
+  /** The mode the app is in — under Settings, the one Settings covers. */
+  mode?: PlayTab;
   /** The library section — the rail itself is always visible. */
   libraryOpen: boolean;
   onToggleLibrary: () => void;
@@ -143,6 +145,7 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
     view,
     setView,
     prevTab,
+    mode,
     libraryOpen,
     onToggleLibrary,
     onLoadPreset,
@@ -175,9 +178,10 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
   sidebarRef,
 ) {
   const { t } = useTranslation();
-  // Settings is an overlay, not a library: it keeps whatever list was
-  // behind it, and "beat" is the one to fall back to.
-  const playView: PlayTab = view === "settings" ? "beat" : view;
+  // Settings is an overlay, not a library: it keeps whatever list was behind
+  // it. This said "beat" under Settings whatever the comment claimed, so
+  // opening Settings from the jam swapped the jam list for the presets.
+  const playView: PlayTab = view === "settings" ? (mode ?? prevTab.current) : view;
 
   // The mockup writes "Ready" at the right of the coach's row. Three words
   // rather than one, because the row already knows more than that: a session
@@ -379,15 +383,8 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
           aria-label={t("tooltip.settings")}
           data-hint="midi-plugged"
           onClick={() => {
-            if (view === "settings") {
-              setView(prevTab.current);
-            } else {
-              // Every play tab, not two of them: this said `drill : beat`,
-              // which quietly sent anyone who opened Settings from the setlist
-              // or the jam back to the metronome.
-              prevTab.current = view;
-              setView("settings");
-            }
+            // `setView` remembers the mode Settings covers; nothing here does.
+            setView(view === "settings" ? prevTab.current : "settings");
           }}
         >
           <span className="rail-action-icon">

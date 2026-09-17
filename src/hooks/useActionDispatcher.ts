@@ -130,11 +130,8 @@ export function useActionDispatcher({
             setView("jam");
             break;
           case "settings":
-            if (view === "settings") setView(prevTab.current);
-            else {
-              prevTab.current = view as "beat" | "drill" | "setlist" | "jam";
-              setView("settings");
-            }
+            // `setView` remembers the mode Settings covers.
+            setView(view === "settings" ? prevTab.current : "settings");
             break;
           case "toggle-widget":
             // Same bookkeeping as the header button — the `widget-discover`

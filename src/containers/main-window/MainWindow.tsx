@@ -99,6 +99,7 @@ import { useJamTakes } from "./hooks/useJamTakes";
 import { TakesIntroDialog } from "../jam/TakesIntroDialog";
 import type { Jam, JamBand } from "../../jam";
 import { UnsavedChangesDialog } from "../../components/UnsavedChangesDialog";
+import type { UnsavedKind } from "../../components/UnsavedChangesDialog";
 import { SetlistEmpty } from "../../components/setlist/SetlistEmpty";
 import { SetlistParagraph } from "../../components/setlist/SetlistParagraph";
 import { SetlistPlayer } from "../../components/setlist/SetlistPlayer";
@@ -145,7 +146,7 @@ export function MainWindow() {
   // restore on mount, scroll-to-top for track/settings) — owned by a
   // dedicated hook. `contentRef` is also returned so the scrollable
   // content container can be wired directly to it.
-  const { view, setView, prevTab, contentRef } = useTabRouting({
+  const { view, mode, setView, prevTab, contentRef } = useTabRouting({
     isPlaying: state.isPlaying,
     speedRampActive: !!state.speedRamp?.active,
   });
@@ -374,7 +375,10 @@ export function MainWindow() {
   // The jam the window has open (JAM_MODE). With none loaded every one of
   // these is inert and the metronome behaves exactly as it did.
   const jamSession = useJamSession({
-    view,
+    // The MODE, not the screen: Settings is a layer over the jam, and a jam
+    // that took its band off the engine whenever Settings opened fell back to
+    // the bare click under it (2026-09-16).
+    view: mode,
     isPlaying: state.isPlaying,
     instrument,
     currentBeat,
@@ -428,7 +432,7 @@ export function MainWindow() {
    */
   const jamTakes = useJamTakes({
     jam: jamSession.jam,
-    view,
+    view: mode,
     isPlaying: state.isPlaying,
     countingIn: (state.countIn?.beats ?? 0) > 0,
     onSetTakes: setJamTakes,
@@ -444,8 +448,8 @@ export function MainWindow() {
   jamLineupRef.current = jamSession.lineup;
 
   useEffect(() => {
-    setJamModeActive(view === "jam" && !!jamSession.jam);
-  }, [view, jamSession.jam]);
+    setJamModeActive(mode === "jam" && !!jamSession.jam);
+  }, [mode, jamSession.jam]);
 
   /**
    * What Zen shows over a jam: the chord, the next one, the place in the form.
@@ -841,6 +845,7 @@ export function MainWindow() {
    * object over, and `handlePresetUpdate` is its save.
    */
   const [pending, setPending] = useState<{
+    kind: UnsavedKind;
     name: string;
     save: () => void | Promise<unknown>;
     run: () => void;
@@ -858,6 +863,7 @@ export function MainWindow() {
     (action: () => void) => {
       if (setlistSession.setlist && setlistSession.dirty) {
         setPending({
+          kind: "setlist",
           name: setlistSession.setlist.name,
           save: setlistSession.saveActiveSetlist,
           run: action,
@@ -866,6 +872,7 @@ export function MainWindow() {
       }
       if (jamSession.jam && jamSession.dirty) {
         setPending({
+          kind: "jam",
           name: jamSession.jam.name,
           save: jamSession.saveActiveJam,
           run: action,
@@ -873,13 +880,26 @@ export function MainWindow() {
         return;
       }
       if (activePreset && presetDirty) {
-        setPending({ name: activePreset.name, save: handlePresetUpdate, run: action });
+        setPending({ kind: "preset", name: activePreset.name, save: handlePresetUpdate, run: action });
         return;
       }
       action();
     },
     [setlistSession, jamSession, activePreset, presetDirty, handlePresetUpdate],
   );
+  /*
+   * Everything that OPENS something closes whatever was open — one thing is
+   * loaded at a time — so every one of them goes through the gate. "New
+   * setlist", "New jam" and "Jam now" did not, and threw an edited jam or
+   * setlist away without a word (2026-09-16).
+   */
+  const newSetlistGuarded = useCallback(
+    () => guarded(() => void handleNewSetlist()),
+    [guarded, handleNewSetlist],
+  );
+  const newJamGuarded = useCallback(() => guarded(handleNewJam), [guarded, handleNewJam]);
+  const jamNowGuarded = useCallback(() => guarded(handleJamNow), [guarded, handleJamNow]);
+
   const askToLeave = useCallback(() => {
     if (!setlistSession.setlist) return;
     guarded(closeAndRelease);
@@ -889,8 +909,12 @@ export function MainWindow() {
   // while a popover owns the key — those close themselves first, and a
   // window-level handler that fired anyway would close the setlist out from
   // under a field you were editing.
+  //
+  // And only on the Setlist tab. A setlist stays open while you visit the
+  // metronome, and Escape there used to close it — or ask about it — from a
+  // screen that was not showing it (2026-09-16).
   useEffect(() => {
-    if (!setlistSession.setlist) return;
+    if (!setlistSession.setlist || view !== "setlist") return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape" || e.defaultPrevented) return;
       const el = document.activeElement as HTMLElement | null;
@@ -900,7 +924,7 @@ export function MainWindow() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [setlistSession.setlist, askToLeave]);
+  }, [setlistSession.setlist, askToLeave, view]);
 
   /**
    * The row in the library keeps the focus a click gave it. Space would then
@@ -976,7 +1000,7 @@ export function MainWindow() {
   const handleBpmChange = (value: number) => {
     const clamped = Math.max(20, Math.min(300, value));
     setBpm(clamped);
-    if (view === "jam") jamSession.editJam({ bpm: clamped });
+    if (mode === "jam") jamSession.editJam({ bpm: clamped });
   };
 
   // A narrow window cannot hold the library and a usable stage at once.
@@ -1228,7 +1252,6 @@ export function MainWindow() {
     onOpenHotkeys: () => {
       // O3's MIDI capture flow is not merged yet — until it is, the hint
       // lands the user on the section that owns the mapping UI.
-      prevTab.current = view === "settings" ? prevTab.current : view;
       setView("settings");
       setTimeout(() => {
         document
@@ -1261,11 +1284,11 @@ export function MainWindow() {
       <FullscreenView
         state={state}
         currentBeat={currentBeat}
-        activeTab={view === "drill" ? "drill" : view === "jam" && jamSession.jam ? "jam" : "beat"}
+        activeTab={mode === "drill" ? "drill" : mode === "jam" && jamSession.jam ? "jam" : "beat"}
         jam={zenJam}
         // Whichever tab put it there: the jam tab's own, or a setlist step
         // that is a jam, which reads as "beat" above and is still a band.
-        jamOnEngine={(view === "jam" && !!jamSession.jam) || !!setlistSession.runner.jam}
+        jamOnEngine={(mode === "jam" && !!jamSession.jam) || !!setlistSession.runner.jam}
         onExit={zenExitHandler}
       />
     </ZenTransition>
@@ -1344,6 +1367,7 @@ export function MainWindow() {
           ref={sidebarRef}
           state={state}
           view={view}
+          mode={mode}
           setView={setView}
           prevTab={prevTab}
           libraryOpen={sidebarOpen}
@@ -1364,7 +1388,7 @@ export function MainWindow() {
               ? askToLeave()
               : guarded(() => setlistSession.loadSetlist(next))
           }
-          onNewSetlist={handleNewSetlist}
+          onNewSetlist={newSetlistGuarded}
           onDeleteSetlist={setlistSession.deleteSetlist}
           onRenameSetlist={setlistSession.renameSetlist}
           onDuplicateSetlist={setlistSession.duplicateSetlist}
@@ -1380,12 +1404,12 @@ export function MainWindow() {
               releaseSidebarFocus();
             })
           }
-          onNewJam={handleNewJam}
+          onNewJam={newJamGuarded}
           onDeleteJam={jamSession.deleteJam}
           onRenameJam={jamSession.renameJam}
           onDuplicateJam={jamSession.duplicateJam}
           onReorderJams={jamSession.reorderJams}
-          onJamNow={handleJamNow}
+          onJamNow={jamNowGuarded}
           onAddJamToSetlist={(jamId, setlistId) => {
             const jam = jamSession.jams.find((j) => j.id === jamId);
             if (jam) void setlistSession.addJamToSetlist(setlistId, jam);
@@ -1529,6 +1553,7 @@ export function MainWindow() {
 
         {pending && (
           <UnsavedChangesDialog
+            kind={pending.kind}
             name={pending.name}
             onSave={() => {
               const { save, run } = pending;
@@ -1591,7 +1616,7 @@ export function MainWindow() {
             /* The tab standing up cold. A mode can be clicked with nothing
                loaded — the one state this screen never had while it was a
                corner of the metronome. */
-            <SetlistEmpty onNew={() => void handleNewSetlist()} />
+            <SetlistEmpty onNew={newSetlistGuarded} />
           )
         ) : view === "beat" ? (
           <MetronomeView
@@ -1621,7 +1646,7 @@ export function MainWindow() {
               jam={jamSession.jam}
               jams={jamSession.jams}
               onEdit={jamSession.editJam}
-              onLoadJam={jamSession.loadJam}
+              onLoadJam={(next) => guarded(() => jamSession.loadJam(next))}
               currentBeat={currentBeat}
               isPlaying={state.isPlaying}
               instrument={instrument}
@@ -1656,7 +1681,7 @@ export function MainWindow() {
             />
           ) : (
             /* A mode can be clicked cold. */
-            <JamEmpty onNew={handleNewJam} onJamNow={handleJamNow} />
+            <JamEmpty onNew={newJamGuarded} onJamNow={jamNowGuarded} />
           )
         ) : view === "drill" ? (
           <DrillView

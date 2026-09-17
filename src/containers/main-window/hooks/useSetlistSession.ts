@@ -24,6 +24,7 @@ import type { AppState, BeatEvent, Setlist, SetlistStep, Preset } from "../../..
 import { applySetlistStep } from "./applySetlistStep";
 import { useSetlistRunner } from "./useSetlistRunner";
 import type { SetlistJamContext } from "./useSetlistRunner";
+import { sameRecord } from "../../../utils/sameRecord";
 
 /**
  * The setlist the window has open: which one, which step you are editing, and
@@ -650,7 +651,8 @@ export function useSetlistSession({
   );
 
   const dirty = useMemo(
-    () => (setlist && saved ? JSON.stringify(setlist) !== JSON.stringify(saved) : false),
+    // Compared by what the records SAY, not by their text: see `sameRecord`.
+    () => (setlist && saved ? !sameRecord(setlist, saved) : false),
     [setlist, saved],
   );
 
