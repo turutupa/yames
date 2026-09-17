@@ -759,9 +759,9 @@ describe("the library", () => {
     expect(result.current.jam!.band).toEqual({ drums: false, bass: true, keys: false });
   });
 
-  it("opens the setup sheet on a new jam, and Play closes it", async () => {
-    // A1. A new jam has nothing set, so the sheet is where you are; the
-    // moment the band comes in, the thing you need is the timeline behind it.
+  it("opens the setup sheet on a new jam, and Play leaves it open", async () => {
+    // A1. A new jam has nothing set, so the sheet is where you are. Play used
+    // to close it; the owner shapes the band while it plays, so it stays.
     const { result, rerender } = mount("jam");
     await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     expect(result.current.screen.setupOpen).toBe(false);
@@ -772,7 +772,8 @@ describe("the library", () => {
     await waitFor(() => expect(result.current.screen.setupOpen).toBe(true));
 
     rerender({ v: "jam", playing: true });
-    await waitFor(() => expect(result.current.screen.setupOpen).toBe(false));
+    await new Promise((r) => setTimeout(r, 50));
+    expect(result.current.screen.setupOpen).toBe(true);
   });
 
   it("takes both sheets away with the jam", async () => {
@@ -1123,12 +1124,14 @@ describe("the kit preview", () => {
     expect(names("togglePlayback")).toHaveLength(0);
   });
 
-  it("closes the setup sheet on a play that is not a preview", async () => {
-    // The rule the fix must not have broken (A1).
+  it("leaves the setup sheet open on a play that is not a preview", async () => {
+    // A1 used to close it here. The owner shapes the band while it plays, and
+    // Play closing the sheet took away the thing being changed (2026-09-16).
     const { result, rerender } = await loaded();
     act(() => result.current.screen.setSetupOpen(true));
     rerender({ v: "jam", playing: true });
-    await waitFor(() => expect(result.current.screen.setupOpen).toBe(false));
+    await new Promise((r) => setTimeout(r, 50));
+    expect(result.current.screen.setupOpen).toBe(true);
   });
 });
 

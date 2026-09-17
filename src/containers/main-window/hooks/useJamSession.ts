@@ -1218,22 +1218,15 @@ export function useJamSession({
     setChordsOpen(false);
   }, []);
 
-  /**
-   * Play puts the setup sheet away (A1).
+  /*
+   * Play does NOT put the setup sheet away (2026-09-16).
    *
-   * The sheet is where you decide; the playing screen is where you read. The
-   * moment the band comes in, the thing you need is the timeline it is dimming
-   * — so pressing play is also the third way to close it, beside Done and
-   * Escape. The chord sheet stays: it is a cheat sheet, and reading it while
-   * you play is what it is for.
+   * It used to (A1): the sheet was "where you decide", the playing screen
+   * "where you read". The owner found the opposite in use — the sheet is
+   * where you shape the band WHILE it plays, and pressing Play to hear a
+   * change closed the thing you were changing. Done, Escape and the Set up
+   * button close it; the transport does not.
    */
-  useEffect(() => {
-    // Unless a kit preview is what pressed play. The Preview buttons are ON
-    // the sheet (B7), so closing it on the transport the preview started
-    // would take the kit list away from the hand that was auditioning it —
-    // and the audition it interrupted was two bars long.
-    if (isPlaying && !previewStartedRef.current) setSetupOpen(false);
-  }, [isPlaying]);
 
   /**
    * An edit from the stage. It lands in the working copy, which re-sends the
