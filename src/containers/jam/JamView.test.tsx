@@ -1507,6 +1507,21 @@ describe("JamView — the drawer beside the stage", () => {
     expect(setSetupOpen).not.toHaveBeenCalled();
   });
 
+  it.each([".transport", ".main-header"])(
+    "leaves the setup sheet open when %s is pressed — Play is not the stage",
+    (cls) => {
+      const setSetupOpen = vi.fn();
+      inHost({ setupOpen: true, setSetupOpen });
+      const bar = document.createElement("div");
+      bar.className = cls.slice(1);
+      const play = document.createElement("button");
+      bar.appendChild(play);
+      host.appendChild(bar);
+      fireEvent.pointerDown(play);
+      expect(setSetupOpen).not.toHaveBeenCalled();
+    },
+  );
+
   it("pushes the stage aside at 1400", () => {
     widen(1400);
     inHost({ setupOpen: true });

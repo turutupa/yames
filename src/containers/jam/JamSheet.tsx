@@ -183,6 +183,11 @@ export function JamSheet({
    * The context bar's own buttons are excepted: they toggle the sheet from
    * whatever state it is in, so letting this close it first would have the
    * click that followed open it straight back up.
+   *
+   * And the transport and the header are not the stage (2026-09-16). Both
+   * live inside the content region, so pressing Play — or nudging the volume
+   * — counted as "outside" and put the sheet away, which is exactly when the
+   * owner was using it: shaping the band and pressing Play to hear it.
    */
   useEffect(() => {
     if (!closeOnOutside || !host || push) return;
@@ -190,7 +195,7 @@ export function JamSheet({
       const target = event.target as Element | null;
       if (!target) return;
       if (sheetRef.current?.contains(target)) return;
-      if (target.closest?.(".jam-sheet-btn")) return;
+      if (target.closest?.(".jam-sheet-btn, .transport, .main-header")) return;
       onClose();
     };
     host.addEventListener("pointerdown", onDown);
