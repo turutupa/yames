@@ -10657,6 +10657,7 @@ mod tests {
             bass: Some(JamBassLine {
                 pitches: vec![40, 45, 47, 52, 40, 45, 47, 52, 38, 43, 45, 50, 38, 43, 45, 50],
                 gain: 1.5,
+                ..Default::default()
             }),
             practice: None,
             fill_every: None,
@@ -10676,6 +10677,7 @@ mod tests {
                     })
                     .collect(),
                 gain: 1.5,
+                ..Default::default()
             }),
             mix: Some(crate::jam::JamMix {
                 drums: 1.5,
@@ -11999,7 +12001,7 @@ mod tests {
             cfg.bass_voice = Some(voice.name().to_string());
             let mut pitches = vec![0u8; 16];
             pitches[0] = 40; // E2, the middle of a bass line.
-            cfg.bass = Some(JamBassLine { pitches, gain: 1.0 });
+            cfg.bass = Some(JamBassLine { pitches, gain: 1.0, ..Default::default() });
             let t = compile_jam(&cfg).unwrap();
             let slot = t
                 .tick(0, 0)
@@ -12062,6 +12064,7 @@ mod tests {
         cfg.bass = Some(JamBassLine {
             pitches: vec![40, 0, 0, 0, 45, 0, 0, 0, 47, 0, 0, 0, 52, 0, 0, 0],
             gain: 1.0,
+            ..Default::default()
         });
         let table = compile_jam(&cfg).unwrap();
 
@@ -12134,7 +12137,7 @@ mod tests {
         cfg.bar.hat = vec![0; 16];
         let mut pitches = vec![0u8; 16];
         pitches[0] = 40; // E2 — 440 × 2^((40 − 69) / 12) = 82.41 Hz.
-        cfg.bass = Some(JamBassLine { pitches, gain: 1.0 });
+        cfg.bass = Some(JamBassLine { pitches, gain: 1.0, ..Default::default() });
         let table = compile_jam(&cfg).unwrap();
         // 120 BPM sixteenths, one bar, no bus: the tanh would not move a
         // zero crossing, but a measurement of a pitch should not have a
@@ -12327,7 +12330,7 @@ mod tests {
             cfg.bar.hat = vec![0; 16];
             let mut pitches = vec![0u8; 16];
             pitches[0] = midi;
-            cfg.bass = Some(JamBassLine { pitches, gain: 1.0 });
+            cfg.bass = Some(JamBassLine { pitches, gain: 1.0, ..Default::default() });
             cfg
         };
         let kit = crate::jam::reference_bank("room").unwrap();
@@ -12488,7 +12491,7 @@ mod tests {
         let mut cfg = rock_16ths();
         let mut pitches = vec![0u8; 16];
         pitches[0] = 40;
-        cfg.bass = Some(JamBassLine { pitches, gain: 1.0 });
+        cfg.bass = Some(JamBassLine { pitches, gain: 1.0, ..Default::default() });
         for name in ["fingered", "picked", "upright", "slap", "synth"] {
             cfg.bass_voice = Some(name.to_string());
             let table = compile_jam(&cfg).unwrap();
@@ -12551,7 +12554,7 @@ mod tests {
             let mut cfg = rock_16ths();
             let mut pitches = vec![0u8; 16];
             pitches[0] = 40;
-            cfg.bass = Some(JamBassLine { pitches, gain });
+            cfg.bass = Some(JamBassLine { pitches, gain, ..Default::default() });
             let table = crate::jam::compile_with_voices(
                 &cfg,
                 kit.clone(),
@@ -12617,7 +12620,7 @@ mod tests {
             bass: None,
             practice: None,
             fill_every: None,
-            keys: Some(crate::jam::JamKeysLine { voicings: v, gain }),
+            keys: Some(crate::jam::JamKeysLine { voicings: v, gain, ..Default::default() }),
             mix: None,
             count_in_sound: None,
             bass_voice: None,
@@ -13223,6 +13226,7 @@ mod tests {
         cfg.bass = Some(JamBassLine {
             pitches: vec![40, 0, 0, 0, 45, 0, 0, 0, 47, 0, 0, 0, 52, 0, 0, 0],
             gain: 1.0,
+            ..Default::default()
         });
         cfg
     }
@@ -13687,6 +13691,7 @@ mod tests {
                     cfg.bass = Some(JamBassLine {
                         pitches: pitches.clone(),
                         gain: *gain,
+                        ..Default::default()
                     });
                     let bank = crate::jam::reference_bank(kit.name()).unwrap();
                     let table =

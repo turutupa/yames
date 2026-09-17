@@ -636,6 +636,7 @@ fn busiest_jam() -> JamConfig {
         bass: Some(JamBassLine {
             pitches: vec![40, 45, 47, 52, 40, 45, 47, 52, 38, 43, 45, 50, 38, 43, 45, 50],
             gain: 1.0,
+            ..Default::default()
         }),
         // The practice windows only ever take work away, so the probe runs
         // without them: the busiest case is the band playing every bar.
@@ -658,6 +659,7 @@ fn busiest_jam() -> JamConfig {
                 })
                 .collect(),
             gain: 1.5,
+            ..Default::default()
         }),
         // Every lane as loud as the contract lets it be.
         mix: Some(JamMix {

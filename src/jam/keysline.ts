@@ -83,7 +83,7 @@ function placements(pc: number): number[] {
  * MIDDLE of the stack rather than the top. Dropping the top would throw away
  * the ninth, which is the whole reason the chord is a ninth.
  */
-function voicingTones(chord: Chord): number[] {
+export function voicingTones(chord: Chord): number[] {
   const notes = chordNotes(chord);
   if (notes.length <= KEYS_MAX_NOTES) return notes;
   const kept = [...notes];
@@ -93,7 +93,7 @@ function voicingTones(chord: Chord): number[] {
 }
 
 /** How far `note` is from the closest note of `from`; Infinity when `from` is empty. */
-function distanceToSet(from: readonly number[], note: number): number {
+export function distanceToSet(from: readonly number[], note: number): number {
   let best = Infinity;
   for (const other of from) best = Math.min(best, Math.abs(other - note));
   return best;
@@ -115,7 +115,7 @@ function distanceToSet(from: readonly number[], note: number): number {
  * which no hand plays and which no amount of voice leading can then bring
  * within a fourth of the triad before it.
  */
-function closeVoicings(pcs: number[], doubleTheOctave = false): number[][] {
+export function closeVoicings(pcs: number[], doubleTheOctave = false): number[][] {
   const unique = [...new Set(pcs.map((pc) => ((pc % 12) + 12) % 12))];
   const out: number[][] = [];
   for (const pc of unique) {
@@ -138,7 +138,7 @@ function closeVoicings(pcs: number[], doubleTheOctave = false): number[][] {
 }
 
 /** How far the middle of a voicing sits from the middle of the range. */
-function centreCost(voicing: number[]): number {
+export function centreCost(voicing: number[]): number {
   const centre = (KEYS_LOW + KEYS_HIGH) / 2;
   const mean = voicing.reduce((sum, n) => sum + n, 0) / voicing.length;
   return Math.abs(mean - centre);
@@ -197,7 +197,7 @@ export function chooseVoicing(chord: Chord, previous?: readonly number[] | null)
 }
 
 /** The ticks a bar's snare lands on — where the stabs go in an odd meter. */
-function snareTicks(groove: JamPattern, length: number): number[] {
+export function snareTicks(groove: JamPattern, length: number): number[] {
   const out: number[] = [];
   const lane: JamLevel[] = groove?.snare ?? [];
   for (let tick = 0; tick < length; tick++) {
@@ -265,6 +265,12 @@ export function keysLineFor(args: KeysLineArgs): JamKeysLine {
 /** The voicing a keys line struck, for the next bar to lead away from. */
 export function lastVoicing(line: JamKeysLine | null | undefined): number[] | null {
   if (!line) return null;
+  // A whole chord if the bar struck one: an arpeggio's last tick is a single
+  // note, and leading the next bar away from one note is leading it away
+  // from nothing in particular.
+  for (let i = line.voicings.length - 1; i >= 0; i--) {
+    if (line.voicings[i].length >= 3) return line.voicings[i];
+  }
   for (let i = line.voicings.length - 1; i >= 0; i--) {
     if (line.voicings[i].length > 0) return line.voicings[i];
   }

@@ -470,13 +470,19 @@ describe("the keys, the mix and the sticks", () => {
     for (const voicing of struck) expect(voicing.length).toBeLessThanOrEqual(4);
   });
 
-  it("comps the way the record says, pads unless told otherwise", () => {
+  it("comps the way the record says, and the groove's way when it says nothing", () => {
     const band = { drums: true, bass: false, keys: true };
-    const pads = compileJam(loopJam("x", { band, key: "C" }));
+    const struck = (config: ReturnType<typeof compileJam>) =>
+      config.keys!.voicings.flatMap((v, i) => (v.length ? [i] : []));
+    const pads = compileJam(loopJam("x", { band, key: "C", keysStyle: "pads" }));
     const stabs = compileJam(loopJam("x", { band, key: "C", keysStyle: "stabs" }));
+    const auto = compileJam(loopJam("x", { band, key: "C" }));
     // A pad is beat one and nothing else; stabs are off the beat.
-    expect(pads.keys!.voicings.flatMap((v, i) => (v.length ? [i] : []))).toEqual([0]);
-    expect(stabs.keys!.voicings.flatMap((v, i) => (v.length ? [i] : []))).toEqual([3, 7]);
+    expect(struck(pads)).toEqual([0]);
+    expect(struck(stabs)).toEqual([3, 7]);
+    // Absent is `auto`: under a rock eighths groove that is the pulse, a
+    // chord on every beat (2026-09-16 — it was pads before there was a choice).
+    expect(struck(auto)).toEqual([0, 2, 4, 6]);
   });
 
   it("leads the keys away from the voicing the last bar ended on", () => {
@@ -488,9 +494,13 @@ describe("the keys, the mix and the sticks", () => {
     const first = compileJam(jam, { formBar: 0 });
     const previous = lastVoicing(first.keys!);
     const next = compileJam(jam, { formBar: 4, previousVoicing: previous });
-    const struck = lastVoicing(next.keys!)!;
+    // The right hand. A rock grip has a left-hand root under it (C3 to B3),
+    // and a root moves like a bass note, not like a voice in a chord.
+    const hand = (v: number[]) => v.filter((n) => n >= 60);
+    const struck = hand(lastVoicing(next.keys!)!);
+    expect(struck.length).toBeGreaterThan(0);
     for (const note of struck) {
-      expect(Math.min(...previous!.map((p) => Math.abs(p - note)))).toBeLessThanOrEqual(5);
+      expect(Math.min(...hand(previous!).map((p) => Math.abs(p - note)))).toBeLessThanOrEqual(5);
     }
   });
 

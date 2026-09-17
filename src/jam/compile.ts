@@ -27,11 +27,13 @@ import { bandMoment, previousBar, sameMoment } from "./arrangement";
 import type { BandMoment } from "./arrangement";
 import { formBars } from "./forms";
 import { grooveById, ruleGroove } from "./grooves";
-import { bassLineFor, bassStyleForGroove } from "./bassline";
+import { bassPartFor, resolveBassFigure } from "./bassFigures";
 import { bassChordFrom } from "./bandChord";
 import { parseKey } from "./harmony";
-import { chordsForJam } from "./progression";
-import { keysLineFor } from "./keysline";
+import { formBarsForJam, jamChangesBars } from "./progression";
+import { keysPartFor, resolveKeysStyle } from "./keysFigures";
+import type { GrooveFamily } from "./grooves";
+import type { JamBassStyle } from "./types";
 import { practiceConfigFrom } from "./practice";
 import { applyIntensity } from "./vibesContract";
 import type { ShapedGroove } from "./vibesContract";
@@ -453,26 +455,40 @@ function bassForMoment(
 ): JamBassLine | null {
   if (!line) return null;
   const length = line.pitches.length;
+  // The engine strikes every non-zero tick, so a held note is ONE pitch and a
+  // length (`JamBassLine.lengths`), never the same pitch repeated — which the
+  // engine would play as a machine-gun of re-attacks.
+  const blank = () => ({
+    pitches: new Array<number>(length).fill(0),
+    velocities: new Array<number>(length).fill(1),
+    lengths: new Array<number>(length).fill(0),
+  });
   if (moment.bass === "off") {
-    return { ...line, pitches: new Array<number>(length).fill(0) };
+    return { ...line, ...blank() };
   }
   if (moment.drums === "stopTime") {
-    const pitches = new Array<number>(length).fill(0);
-    if (length > 0) pitches[0] = line.pitches[0] || firstPitch(line.pitches);
-    return { ...line, pitches };
+    const out = blank();
+    if (length > 0) {
+      out.pitches[0] = line.pitches[0] || firstPitch(line.pitches);
+      out.velocities[0] = 1.1;
+      out.lengths[0] = meter.ticksPerBeat;
+    }
+    return { ...line, ...out };
   }
   if (moment.bass === "full") return line;
   const strong = strongBeatTicks(meter.beatsPerBar, meter.ticksPerBeat);
-  const pitches = new Array<number>(length).fill(0);
+  const out = blank();
   for (let i = 0; i < strong.length; i += 1) {
     const from = strong[i];
     if (from >= length) continue;
     const until = i + 1 < strong.length ? Math.min(strong[i + 1], length) : length;
     const pitch = line.pitches[from] || 0;
     if (pitch === 0) continue;
-    for (let t = from; t < until; t += 1) pitches[t] = pitch;
+    out.pitches[from] = pitch;
+    out.velocities[from] = line.velocities?.[from] ?? 1;
+    out.lengths[from] = until - from;
   }
-  return { ...line, pitches };
+  return { ...line, ...out };
 }
 
 /**
@@ -488,16 +504,22 @@ function keysForMoment(line: JamKeysLine | null, moment: BandMoment): JamKeysLin
   if (!line) return null;
   const empty = () => line.voicings.map(() => [] as number[]);
   if (moment.keys === "off") return { ...line, voicings: empty() };
-  const first = line.voicings.findIndex((v) => v.length > 0);
+  // A whole chord, not an arpeggio's single note, where the bar has one.
+  const whole = line.voicings.findIndex((v) => v.length >= 3);
+  const first = whole >= 0 ? whole : line.voicings.findIndex((v) => v.length > 0);
+  // The one chord left rings to the end of the bar (length 0), whatever the
+  // style had it do: a quiet keys player holds, it does not stab once.
+  const lengths = line.voicings.map(() => 0);
+  const velocities = line.voicings.map((_, i) => line.velocities?.[i] ?? 1);
   if (moment.drums === "stopTime") {
     const voicings = empty();
     if (first >= 0 && voicings.length > 0) voicings[0] = [...line.voicings[first]];
-    return { ...line, voicings };
+    return { ...line, voicings, lengths, velocities };
   }
   if (moment.keys === "full") return line;
   const voicings = empty();
   if (first >= 0) voicings[first] = [...line.voicings[first]];
-  return { ...line, voicings };
+  return { ...line, voicings, lengths, velocities };
 }
 
 /** The crash, forced onto the downbeat at peak — the last word on the table. */
@@ -524,33 +546,56 @@ export function jamBassLine(jam: Jam, formBar: number, lineup?: JamBand): JamBas
   if (bars <= 0) return null;
 
   const key = jamKey(jam);
-  // The changes the jam is actually on: yours where you typed one, the form's
-  // everywhere else. The bass follows the progression for the same reason the
-  // timeline does — there is one set of changes, and a bass playing the
-  // form's while the screen shows yours is the worst bug this mode could have.
-  const chords = chordsForJam(jam.form, key, jam.progression);
+  // The changes the jam is actually on: yours where you typed one, the named
+  // progression everywhere else. The bass follows them for the same reason
+  // the timeline does — there is one set of changes, and a bass playing
+  // other ones than the screen shows is the worst bug this mode could have.
+  // Bar by bar WITH the half-bar chord, so a bar that moves in its middle
+  // takes the bass with it.
+  const chorus = formBarsForJam(jam.form, key, jam.progression, jamChangesBars(jam, key));
   const index = ((Math.trunc(formBar) % bars) + bars) % bars;
+  const here = chorus[index].chords;
+  const next = chorus[(index + 1) % bars].chords[0];
 
-  return bassLineFor({
+  return bassPartFor({
     groove: groove.bar,
     feel: jam.feel,
     chords: {
-      bar: bassChordFrom(chords[index]),
-      next: bassChordFrom(chords[(index + 1) % bars]),
+      bar: bassChordFrom(here[0]),
+      half: here[1] ? bassChordFrom(here[1]) : null,
+      next: bassChordFrom(next),
     },
     beatsPerBar: groove.beatsPerBar,
     ticksPerBeat: groove.ticksPerBeat,
-    // A custom groove has no id to look a style up by, so it falls back to
-    // roots on the kick — which is exactly right for a pattern nobody has
-    // heard yet.
-    style: bassStyleForGroove(jam.customGroove ? "" : jam.grooveId),
+    // A custom groove has no id to look a figure up by, so `auto` falls back
+    // to roots on the kick — exactly right for a pattern nobody has heard yet.
+    figure: resolveBassFigure(jam.bassStyle, jam.customGroove ? null : jam.grooveId),
+    busy: jam.bassBusy ?? "normal",
     barIndex: index,
+    formBars: bars,
+    keyRoot: key.root,
+    voice: jam.bassVoice,
   });
 }
 
-/** How the keys comp on this jam. Absent: pads, the quieter of the two. */
+/**
+ * How the keys comp on this jam: its own choice, or what the groove's style
+ * calls for (`autoKeysStyle`). Absent is `auto` — it was "pads" when pads and
+ * stabs were the only two.
+ */
 export function jamKeysStyle(jam: Jam): JamKeysStyle {
-  return jam.keysStyle === "stabs" ? "stabs" : "pads";
+  const grooveId = jam.customGroove ? null : jam.grooveId;
+  return resolveKeysStyle(jam.keysStyle, grooveId, jamFamily(jam));
+}
+
+/** The style shelf the jam's groove came off, or null for a groove of your own. */
+export function jamFamily(jam: Jam): GrooveFamily | null {
+  return jam.customGroove ? null : (grooveById(jam.grooveId)?.family ?? null);
+}
+
+/** The bass figure this jam plays: its own choice, or the groove's. */
+export function jamBassFigure(jam: Jam): JamBassStyle {
+  return resolveBassFigure(jam.bassStyle, jam.customGroove ? null : jam.grooveId);
 }
 
 /**
@@ -571,16 +616,23 @@ export function jamKeysLine(
   const bars = formBars(jam.form);
   if (bars <= 0) return null;
   const groove = jamGroove(jam);
-  const chords = chordsForJam(jam.form, jamKey(jam), jam.progression);
+  const key = jamKey(jam);
+  const chorus = formBarsForJam(jam.form, key, jam.progression, jamChangesBars(jam, key));
   const index = ((Math.trunc(formBar) % bars) + bars) % bars;
-  const chord = chords[index];
-  if (!chord) return null;
-  return keysLineFor({
-    chord,
+  const here = chorus[index]?.chords;
+  if (!here || here.length === 0) return null;
+  return keysPartFor({
+    chords: { bar: here[0], half: here[1] ?? null, next: chorus[(index + 1) % bars].chords[0] },
     groove: groove.bar,
+    grooveId: jam.customGroove ? null : jam.grooveId,
+    family: jamFamily(jam),
     style: jamKeysStyle(jam),
+    feel: jam.feel,
     meter: { beatsPerBar: groove.beatsPerBar, ticksPerBeat: groove.ticksPerBeat },
     previous,
+    barIndex: index,
+    formBars: bars,
+    bass: jamBand(jam, lineup).bass,
     // The lane's volume travels once, in `mix.keys`; the engine multiplies
     // `gain` and `mix.keys`, so sending it here too applied it squared.
     gain: 1,

@@ -99,7 +99,7 @@ describe("the power chord reaches the bass as two notes", () => {
 });
 
 describe("the power chord reaches the keys as root, fifth and octave", () => {
-  it("comps three notes from two pitch classes, at every root", () => {
+  it("comps root, fifth and octave over a left-hand root, and never a third", () => {
     for (const root of ROOTS) {
       const name = SHARP[root] + "5";
       const line = jamKeysLine(powerJam(name), 0);
@@ -110,8 +110,12 @@ describe("the power chord reaches the keys as root, fifth and octave", () => {
         const classes = voicing.map((n) => pitchClass(n));
         for (const third of thirdsOf(root)) expect(classes, name).not.toContain(third);
         expect(new Set(classes), name).toEqual(new Set([pitchClass(root), pitchClass(root + 7)]));
-        expect(voicing.length, name).toBe(3);
-        expect(voicing[voicing.length - 1] - voicing[0], name).toBe(12);
+        // A rock grip (2026-09-16): the root in the left hand, C3 to B3, and
+        // root-fifth-octave above it in the right.
+        expect(voicing.length, name).toBe(4);
+        expect(voicing[0], name).toBeLessThanOrEqual(59);
+        const right = voicing.slice(1);
+        expect(right[right.length - 1] - right[0], name).toBe(12);
       }
     }
   });

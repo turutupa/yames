@@ -33,10 +33,12 @@
  * player's Bb part is a display of the same concert changes, never a second
  * set of them.
  */
-import { chordsForForm, parseChordName } from "./harmony";
-import type { Chord, Key } from "./harmony";
+import { barsForForm, chordsForForm, parseChordName } from "./harmony";
+import type { Chord, FormBar, Key, RomanBar } from "./harmony";
 import type { Jam, JamForm } from "./types";
 import { formBars } from "./forms";
+import { resolveChanges } from "./changes";
+import { grooveById } from "./grooves";
 
 /** What a cell holds when it means "whatever the form plays here". */
 export const AS_THE_FORM = "";
@@ -103,14 +105,45 @@ export function chordsForJam(
   form: JamForm,
   key: Key,
   progression?: readonly string[] | null,
+  changes?: readonly RomanBar[] | null,
 ): Chord[] {
   const bars = formBars(form);
-  const base = chordsForForm(form.kind, bars, key);
+  const base = chordsForForm(form.kind, bars, key, changes);
   if (!progression || progression.length === 0) return base;
   return base.map((chord, index) => parseChordName(progression[index] ?? "") ?? chord);
 }
 
+/**
+ * The chorus bar by bar, each bar with the one or two chords it plays.
+ *
+ * What the bass and the keys read, because a bar of rhythm changes or of the
+ * jazz blues moves in its middle and a player follows it. A typed chord
+ * replaces the WHOLE bar — you wrote one chord for it.
+ */
+export function formBarsForJam(
+  form: JamForm,
+  key: Key,
+  progression?: readonly string[] | null,
+  changes?: readonly RomanBar[] | null,
+): FormBar[] {
+  const base = barsForForm(form.kind, formBars(form), key, changes);
+  if (!progression || progression.length === 0) return base;
+  return base.map((bar, index) => {
+    const typed = parseChordName(progression[index] ?? "");
+    return typed ? { chords: [typed] } : bar;
+  });
+}
+
 /** The same, straight off a record. */
 export function jamChords(jam: Jam, key: Key): Chord[] {
-  return chordsForJam(jam.form, key, jam.progression);
+  return chordsForJam(jam.form, key, jam.progression, jamChangesBars(jam, key));
+}
+
+/**
+ * The named progression a jam plays in this key, as roman bars — its own
+ * choice where it fits, the style's otherwise (`resolveChanges`).
+ */
+export function jamChangesBars(jam: Jam, key: Key): readonly RomanBar[] | null {
+  const family = jam.customGroove ? null : (grooveById(jam.grooveId)?.family ?? null);
+  return resolveChanges(jam.changes, jam.form.kind, key.mode, family)?.bars ?? null;
 }

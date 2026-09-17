@@ -14,7 +14,7 @@
  */
 import { chordName, displayTransposition, sameChord, transposeChord, transposeKey } from "./harmony";
 import type { Chord, Key } from "./harmony";
-import { chordsForJam } from "./progression";
+import { chordsForJam, jamChangesBars } from "./progression";
 import { jamKey } from "./compile";
 import { formBars } from "./forms";
 import type { Jam } from "./types";
@@ -33,7 +33,12 @@ export function jamHarmony(jam: Jam): JamHarmony {
   const concert = jamKey(jam);
   const semitones = displayTransposition(jam.transposition ?? "concert");
   const key = transposeKey(concert, semitones);
-  const chords = chordsForJam(jam.form, concert, jam.progression).map((chord) =>
+  const chords = chordsForJam(
+    jam.form,
+    concert,
+    jam.progression,
+    jamChangesBars(jam, concert),
+  ).map((chord) =>
     transposeChord(chord, semitones),
   );
   return { key, concert, chords };

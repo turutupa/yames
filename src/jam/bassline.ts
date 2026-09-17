@@ -404,12 +404,12 @@ export function andTick(ticksPerBeat: number): number | null {
  * note of its own there. A kick that lands there is a different matter: the
  * engine plays that tick, so the bass plays it too.
  */
-function swallowed(feel: JamFeel, ticksPerBeat: number, tick: number): boolean {
+export function swallowed(feel: JamFeel, ticksPerBeat: number, tick: number): boolean {
   return (feel === "shuffle" || feel === "swing") && ticksPerBeat === 3 && tick % 3 === 1;
 }
 
 /** The first tick at or after `tick` that shuffle and swing do not swallow. */
-function firstPlayable(feel: JamFeel, ticksPerBeat: number, tick: number, length: number): number {
+export function firstPlayable(feel: JamFeel, ticksPerBeat: number, tick: number, length: number): number {
   let t = tick;
   while (t < length && swallowed(feel, ticksPerBeat, t)) t += 1;
   return t < length ? t : tick;

@@ -266,6 +266,10 @@ export type JamKeysLine = {
   voicings: number[][];
   /** Gain multiplier on the keys voice, 0.5..1.5. */
   gain: number;
+  /** How hard each voicing is played, per tick. See `JamBassLine.velocities`. */
+  velocities?: number[];
+  /** How long each voicing rings, in ticks. See `JamBassLine.lengths`. */
+  lengths?: number[];
 };
 
 /**
@@ -287,7 +291,40 @@ export type JamCountInSound = "beep" | "sticks";
  * carries it and `keysline.ts` already imports this file — the same reason
  * `JamTransposition` lives here and `harmony.ts` re-exports it.
  */
-export type JamKeysStyle = "pads" | "stabs";
+export type JamKeysStyle =
+  | "pads"
+  | "stabs"
+  | "pulse"
+  | "arpeggio"
+  | "charleston"
+  | "skank"
+  | "montuno"
+  | "bossaComp"
+  | "shuffleComp";
+
+/**
+ * How the bass plays (2026-09-16). `auto` — and absent — follows the drummer,
+ * which is what every jam did before there was a choice.
+ */
+export type JamBassStyle =
+  | "kick"
+  | "eighths"
+  | "rootFifth"
+  | "octaves"
+  | "boogie"
+  | "walking"
+  | "twoFeel"
+  | "pedal"
+  | "bossa"
+  | "tumbao"
+  | "funk"
+  | "countryAlt"
+  | "gallop"
+  | "ballad"
+  | "reggae";
+
+/** How much the bass plays around its figure. Absent: normal. */
+export type JamBassBusy = "sparse" | "normal" | "busy";
 
 /**
  * Where the form goes next. The engine applies both at the next bar line,
@@ -305,6 +342,17 @@ export type JamBassLine = {
   pitches: number[];
   /** Gain multiplier on the bass voice, 0.5..1.5. */
   gain: number;
+  /**
+   * How hard each note is played, per tick, 1.0 as written; a rest's entry is
+   * ignored. Absent, or exactly one entry per tick. The engine clamps to
+   * 0.3..1.4 and picks the recorded layer from it.
+   */
+  velocities?: number[];
+  /**
+   * How long each note rings, in ticks. `0` (or absent) is "until the next
+   * note or the bar line"; a shorter length is a detached note.
+   */
+  lengths?: number[];
 };
 
 /**
@@ -416,8 +464,21 @@ export type Jam = {
    * subdivision). Absent: the groove's meter.
    */
   meter?: { beatGroups: number[]; ticksPerBeat: 1 | 2 | 3 | 4 | 6 };
-  /** How the keys comp, when there are keys. Absent: "pads". */
-  keysStyle?: JamKeysStyle;
+  /**
+   * How the keys comp, when there are keys. Absent or `auto`: whatever the
+   * groove's style calls for (it was "pads" before there were more than two).
+   */
+  keysStyle?: JamKeysStyle | "auto";
+  /** How the bass plays. Absent or `auto`: follows the drummer. */
+  bassStyle?: JamBassStyle | "auto";
+  /** How busy the bass is around its figure. Absent: normal. */
+  bassBusy?: JamBassBusy;
+  /**
+   * Which named progression the form plays (`src/jam/changes.ts`). Absent or
+   * `auto`: the one the groove's style calls for. Typed-in chords
+   * (`progression`) still win bar by bar.
+   */
+  changes?: string;
   /** Per-lane volume. Absent: 1.0 each. */
   mix?: JamMix;
   /** Absent: "beep". */

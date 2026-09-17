@@ -655,12 +655,15 @@ describe("compileJam applies the moment", () => {
 
   it("holds the bass on the strong beats through a held-back chorus", () => {
     const config = compileJam(rock({ mode: "build" }), { formBar: 0, chorus: 1 });
-    const pitches = config.bass!.pitches;
+    const { pitches, lengths } = config.bass!;
     // Eight ticks, two strong beats: one and three. Each note is HELD to the
-    // next, because a one-tick bass note is a blip rather than a bass player.
-    expect(pitches.slice(0, 4).every((p) => p === pitches[0])).toBe(true);
-    expect(pitches.slice(4).every((p) => p === pitches[4])).toBe(true);
+    // next — by its length, not by repeating the pitch, which the engine
+    // would strike again on every tick.
     expect(pitches[0]).toBeGreaterThan(0);
+    expect(pitches[4]).toBeGreaterThan(0);
+    expect(pitches.filter((p, t) => p !== 0 && t !== 0 && t !== 4)).toEqual([]);
+    expect(lengths![0]).toBe(4);
+    expect(lengths![4]).toBe(4);
   });
 
   it("leaves a waltz's held-back bass on the one alone, because a waltz has no three", () => {

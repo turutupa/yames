@@ -482,7 +482,15 @@ function qualityForRoman(suffix: string, upperCase: boolean): ChordQuality {
     case "6":
       return upperCase ? "6" : "m6";
     case "9":
-      return "9";
+      return upperCase ? "9" : "m7";
+    case "add9":
+      return upperCase ? "add9" : "min";
+    case "sus4":
+      return "sus4";
+    case "sus2":
+      return "sus2";
+    case "5":
+      return "5";
     default:
       throw new Error(`jam/harmony: unknown chord suffix "${suffix}"`);
   }
@@ -497,6 +505,9 @@ function qualityForRoman(suffix: string, upperCase: boolean): ChordQuality {
  * silently render the wrong chord on stage.
  */
 export function romanToChord(symbol: string, key: Key): Chord {
+  // The key's own home chord, whatever the mode: I, i or I7. For a
+  // progression written once for all three modes.
+  if (symbol.trim() === "@tonic") return tonicChord(key);
   const match = /^([b#]?)([ivIV]+)(.*)$/.exec(symbol.trim());
   if (!match) throw new Error(`jam/harmony: not a roman numeral: "${symbol}"`);
   const [, accidental, numeral, suffix] = match;
@@ -525,7 +536,7 @@ export function romanToChord(symbol: string, key: Key): Chord {
 export type FormBar = { chords: Chord[] };
 
 /** A bar in a table: one roman numeral, or a pair played half a bar each. */
-type RomanBar = string | [string, string];
+export type RomanBar = string | readonly [string, string];
 
 const RHYTHM_A_MAJOR: RomanBar[] = [
   ["I", "vi"],
@@ -696,14 +707,22 @@ function romanBarToFormBar(bar: RomanBar, key: Key): FormBar {
  * `custom` is the tonic in every bar — the bar count is the user's, the
  * chords are not editable yet.
  */
-export function barsForForm(kind: JamFormKind, bars: number, key: Key): FormBar[] {
+export function barsForForm(
+  kind: JamFormKind,
+  bars: number,
+  key: Key,
+  changes?: readonly RomanBar[] | null,
+): FormBar[] {
   const count = Number.isFinite(bars) ? Math.max(0, Math.floor(bars)) : 0;
   if (count === 0) return [];
   if (kind === "custom") {
     const tonic = tonicChord(key);
     return Array.from({ length: count }, () => ({ chords: [tonic] }));
   }
-  const pattern = FORM_PROGRESSIONS[kind][key.mode];
+  // A named progression from `./changes` when the jam plays one; the form's
+  // own table otherwise, which is what every form played before there was a
+  // choice.
+  const pattern = changes && changes.length > 0 ? changes : FORM_PROGRESSIONS[kind][key.mode];
   return Array.from({ length: count }, (_unused, index) =>
     romanBarToFormBar(pattern[index % pattern.length], key),
   );
@@ -713,8 +732,13 @@ export function barsForForm(kind: JamFormKind, bars: number, key: Key): FormBar[
  * The chord of each bar — the downbeat chord where a bar holds two. Exactly
  * `bars` entries. This is what the form timeline and the NOW block read.
  */
-export function chordsForForm(kind: JamFormKind, bars: number, key: Key): Chord[] {
-  return barsForForm(kind, bars, key).map((bar) => bar.chords[0]);
+export function chordsForForm(
+  kind: JamFormKind,
+  bars: number,
+  key: Key,
+  changes?: readonly RomanBar[] | null,
+): Chord[] {
+  return barsForForm(kind, bars, key, changes).map((bar) => bar.chords[0]);
 }
 
 // ---------------------------------------------------------------------------

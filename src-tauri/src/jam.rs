@@ -933,12 +933,18 @@ pub struct JamCustomKit {
 
 /// One voicing per tick, up to four MIDI notes each, an empty array for a
 /// rest. The mirror of `JamKeysLine` in `src/jam/types.ts`.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Default, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct JamKeysLine {
     pub voicings: Vec<Vec<u8>>,
     /// Gain multiplier on the keys voice, 0.5..1.5.
     pub gain: f32,
+    /// How hard each voicing is played. See [`JamBassLine::velocities`].
+    #[serde(default)]
+    pub velocities: Vec<f32>,
+    /// How long each voicing rings, in ticks. See [`JamBassLine::lengths`].
+    #[serde(default)]
+    pub lengths: Vec<f32>,
 }
 
 /// Per-lane balance. The mirror of `JamMix` in `src/jam/types.ts`.
@@ -1019,12 +1025,68 @@ impl Default for JamCountInSound {
 
 /// One MIDI note per tick, `0` for a rest, the same length as the drum
 /// lanes. The mirror of `JamBassLine` in `src/jam/types.ts`.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Default, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct JamBassLine {
     pub pitches: Vec<u8>,
     /// Gain multiplier on the bass voice, 0.5..1.5.
     pub gain: f32,
+    /// How hard each note is played, per tick, 1.0 as written.
+    ///
+    /// Empty (the default, and every config sent before 2026-09-16) is 1.0
+    /// everywhere. Otherwise exactly as long as `pitches`; a rest's entry is
+    /// ignored. Clamped to [`NOTE_VELOCITY_MIN`]..[`NOTE_VELOCITY_MAX`] and
+    /// multiplied into the note's gain, and it picks the note's recorded
+    /// layer — so an accented note is a harder stroke, not only a louder one.
+    /// Without it every note of a line was the same stroke, which is the
+    /// sound of a sequencer rather than a player.
+    #[serde(default)]
+    pub velocities: Vec<f32>,
+    /// How long each note rings, in ticks, per tick.
+    ///
+    /// Empty, or `0` for a note, is "until the next note or the bar line",
+    /// which is all a line could say before. A positive length shorter than
+    /// that ends the note early — the detached note a funk or a reggae bass
+    /// plays, which the old rule could not write at all: a rest after a note
+    /// used to extend it. A length longer than the gap is cut to the gap.
+    #[serde(default)]
+    pub lengths: Vec<f32>,
+}
+
+/// The softest and hardest a note may be asked to be. Wide enough for a
+/// ghost note and an accent, narrow enough that a stray value cannot silence
+/// a line or blow the bus.
+pub const NOTE_VELOCITY_MIN: f32 = 0.3;
+pub const NOTE_VELOCITY_MAX: f32 = 1.4;
+
+/// One note's velocity, from a line's optional array.
+fn note_velocity(velocities: &[f32], i: usize) -> f32 {
+    match velocities.get(i) {
+        Some(v) if v.is_finite() => v.clamp(NOTE_VELOCITY_MIN, NOTE_VELOCITY_MAX),
+        _ => 1.0,
+    }
+}
+
+/// How many ticks a note rings: its own length if it asked for one shorter
+/// than the gap to the next note, the gap otherwise.
+fn note_cap(lengths: &[f32], i: usize, gap: usize) -> f32 {
+    match lengths.get(i) {
+        Some(l) if l.is_finite() && *l > 0.0 => l.min(gap as f32),
+        _ => gap as f32,
+    }
+}
+
+/// The optional per-note arrays must be empty or exactly one entry per tick.
+fn check_articulation(what: &str, velocities: &[f32], lengths: &[f32], ticks: u32) -> Result<(), String> {
+    for (name, v) in [("velocities", velocities), ("lengths", lengths)] {
+        if !v.is_empty() && v.len() != ticks as usize {
+            return Err(format!(
+                "{what}.{name} has {} entries; it is either empty or one per tick ({ticks})",
+                v.len()
+            ));
+        }
+    }
+    Ok(())
 }
 
 /// The mirror of `JamPracticeConfig` in `src/jam/types.ts`.
@@ -2303,6 +2365,9 @@ fn render_signature(
         Some(ref b) => {
             true.hash(&mut h);
             b.pitches.hash(&mut h);
+            for v in b.velocities.iter().chain(b.lengths.iter()) {
+                v.to_bits().hash(&mut h);
+            }
             // The clamped value, because that is the one the render uses:
             // two stores holding 2.0 and 3.0 are the same bass at 1.5.
             let gain = if b.gain.is_finite() {
@@ -2318,6 +2383,9 @@ fn render_signature(
         Some(ref k) => {
             true.hash(&mut h);
             k.voicings.hash(&mut h);
+            for v in k.velocities.iter().chain(k.lengths.iter()) {
+                v.to_bits().hash(&mut h);
+            }
             let gain = if k.gain.is_finite() {
                 k.gain.clamp(KEYS_GAIN_MIN, KEYS_GAIN_MAX)
             } else {
@@ -2510,6 +2578,7 @@ fn compile_bass(
             line.pitches.len()
         ));
     }
+    check_articulation("bass", &line.velocities, &line.lengths, ticks)?;
     for (i, &p) in line.pitches.iter().enumerate() {
         if p != 0 && !(BASS_MIN_MIDI..=BASS_MAX_MIDI).contains(&p) {
             return Err(format!(
@@ -2532,9 +2601,6 @@ fn compile_bass(
         // top of a recording so that a bank measured against the fingered
         // recipe lands where the fingered recipe landed.
         * BASS_VOICE_TRIM[voice as usize];
-    // How hard the line is played, as a layer. See `voice_layer`.
-    let layer = bank.map_or(0, |b| voice_layer(level, b.layers()));
-
     let n = ticks as usize;
     let mut out: Vec<Option<JamSlot>> = vec![None; n];
     for i in 0..n {
@@ -2542,6 +2608,10 @@ fn compile_bass(
             continue;
         }
         let next = (i + 1..n).find(|&j| line.pitches[j] != 0).unwrap_or(n);
+        // How hard THIS note is played: its level, and the recorded layer
+        // that level reaches. See `voice_layer`.
+        let velocity = note_velocity(&line.velocities, i);
+        let layer = bank.map_or(0, |b| voice_layer(level * velocity, b.layers()));
         // A recorded bank if one ships for this voice, and the recipe if
         // not. The note is an index into whichever answered, worked out
         // here so the audio thread never subtracts a MIDI number.
@@ -2564,8 +2634,8 @@ fn compile_bass(
         };
         out[i] = Some(JamSlot {
             sound,
-            gain,
-            cap_ticks: (next - i) as f32,
+            gain: gain * velocity,
+            cap_ticks: note_cap(&line.lengths, i, next - i),
             lane: JamLane::Bass,
             // A bass note is never an accent: the dots mark the drummer's
             // backbeat, and a walking line would have every one of them lit.
@@ -2633,7 +2703,7 @@ fn compile_keys(
         1.0
     };
     let gain = level * mix * KEYS_TRIM * KEYS_VOICE_TRIM[voice as usize];
-    let layer = bank.map_or(0, |b| voice_layer(level, b.layers()));
+    check_articulation("keys", &line.velocities, &line.lengths, ticks)?;
 
     let n = ticks as usize;
     let mut out: Vec<Vec<JamSlot>> = vec![Vec::new(); n];
@@ -2644,6 +2714,9 @@ fn compile_keys(
         let next = (i + 1..n)
             .find(|&j| !line.voicings[j].is_empty())
             .unwrap_or(n);
+        let velocity = note_velocity(&line.velocities, i);
+        let layer = bank.map_or(0, |b| voice_layer(level * velocity, b.layers()));
+        let cap = note_cap(&line.lengths, i, next - i);
         out[i] = line.voicings[i]
             .iter()
             .map(|&note| {
@@ -2662,8 +2735,8 @@ fn compile_keys(
                 };
                 JamSlot {
                     sound,
-                    gain,
-                    cap_ticks: (next - i) as f32,
+                    gain: gain * velocity,
+                    cap_ticks: cap,
                     lane: JamLane::Keys,
                     // A chord is never an accent. The dots mark the
                     // drummer's backbeat, and comping on every tick would
@@ -3307,7 +3380,7 @@ mod tests {
                 crash_on_one: true,
                 intensity: 1.0,
                 kit: kit.to_string(),
-                bass: bass.map(|pitches| JamBassLine { pitches, gain: 1.0 }),
+                bass: bass.map(|pitches| JamBassLine { pitches, gain: 1.0, ..Default::default() }),
                 practice: None,
                 fill_every: None,
                 keys: None,
@@ -4844,7 +4917,7 @@ mod tests {
             crash_on_one: false,
             intensity: 1.0,
             kit: "room".into(),
-            bass: Some(JamBassLine { pitches, gain: 1.0 }),
+            bass: Some(JamBassLine { pitches, gain: 1.0, ..Default::default() }),
             practice: None,
             fill_every: None,
             keys: None,
@@ -4885,6 +4958,74 @@ mod tests {
         for tick in [1u32, 2, 3, 5, 15] {
             assert!(bass_at(&t, tick).is_none(), "tick {tick} is a rest");
         }
+    }
+
+    /// A NOTE MAY BE SHORTER THAN THE GAP (2026-09-16). A detached funk or
+    /// reggae note is a note followed by silence, and the old rule — ring
+    /// until the next note — could not write it.
+    #[test]
+    fn a_bass_note_can_stop_before_the_next_one() {
+        let mut cfg = with_bass(vec![40, 0, 0, 0, 45, 0, 0, 0, 47, 0, 0, 0, 52, 0, 0, 0]);
+        let b = cfg.bass.as_mut().unwrap();
+        b.lengths = vec![1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 9.0, 0.0, 0.0, 0.0, 2.5, 0.0, 0.0, 0.0];
+        let t = compile(&cfg).unwrap();
+        assert_eq!(bass_at(&t, 0).unwrap().cap_ticks, 1.0, "asked for one tick");
+        assert_eq!(bass_at(&t, 4).unwrap().cap_ticks, 4.0, "0 is until the next note");
+        assert_eq!(bass_at(&t, 8).unwrap().cap_ticks, 4.0, "longer than the gap is cut to it");
+        assert_eq!(bass_at(&t, 12).unwrap().cap_ticks, 2.5, "fractions are allowed");
+    }
+
+    /// A NOTE MAY BE PLAYED SOFTER OR HARDER THAN THE LINE (2026-09-16).
+    #[test]
+    fn a_bass_note_carries_its_own_velocity() {
+        let pitches = vec![40, 0, 0, 0, 45, 0, 0, 0, 47, 0, 0, 0, 52, 0, 0, 0];
+        let plain = compile(&with_bass(pitches.clone())).unwrap();
+        let mut cfg = with_bass(pitches);
+        let b = cfg.bass.as_mut().unwrap();
+        b.velocities = vec![1.2, 1.0, 1.0, 1.0, 0.5, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, f32::NAN, 1.0, 1.0, 1.0];
+        let t = compile(&cfg).unwrap();
+        let g = |table: &JamTable, tick| bass_at(table, tick).unwrap().gain;
+        assert!((g(&t, 0) - g(&plain, 0) * 1.2).abs() < 1e-5, "accented");
+        assert!((g(&t, 4) - g(&plain, 4) * 0.5).abs() < 1e-5, "ghosted");
+        assert!(
+            (g(&t, 8) - g(&plain, 8) * NOTE_VELOCITY_MIN).abs() < 1e-5,
+            "0 is clamped up, not a silent note"
+        );
+        assert!((g(&t, 12) - g(&plain, 12)).abs() < 1e-5, "NaN is ignored");
+    }
+
+    /// The per-note arrays are empty or one per tick — a line of the wrong
+    /// length is refused whole, like a pitch array of the wrong length.
+    #[test]
+    fn articulation_of_the_wrong_length_is_refused() {
+        let mut cfg = with_bass(vec![40; 16]);
+        cfg.bass.as_mut().unwrap().lengths = vec![1.0; 3];
+        let err = compile(&cfg).unwrap_err();
+        assert!(err.contains("bass.lengths"), "{err}");
+        let mut cfg = with_bass(vec![40; 16]);
+        cfg.bass.as_mut().unwrap().velocities = vec![1.0; 17];
+        let err = compile(&cfg).unwrap_err();
+        assert!(err.contains("bass.velocities"), "{err}");
+    }
+
+    /// A change of articulation is a change of sound, so the loudness memo
+    /// must not hand back the measurement of the line without it.
+    #[test]
+    fn articulation_is_part_of_what_renders() {
+        let bank = reference_bank("room").unwrap();
+        let voices = JamVoices::default();
+        let a = with_bass(vec![40; 16]);
+        let mut b = a.clone();
+        b.bass.as_mut().unwrap().lengths = vec![1.0; 16];
+        let mut c = a.clone();
+        c.bass.as_mut().unwrap().velocities = vec![0.5; 16];
+        let sig = |cfg: &JamConfig| render_signature(cfg, &bank, None, &voices);
+        assert_ne!(sig(&a), sig(&b));
+        assert_ne!(sig(&a), sig(&c));
+        // ...and it is still not part of what the drummer is: a new bass
+        // articulation waits for the bar line like a new bass line.
+        let dsig = |cfg: &JamConfig| drums_signature(cfg, &bank, None, &voices);
+        assert_eq!(dsig(&a), dsig(&b));
     }
 
     /// ...OR THE END OF THE BAR, WHICHEVER COMES FIRST. A note with nothing
@@ -4971,6 +5112,7 @@ mod tests {
         cfg.bass = Some(JamBassLine {
             pitches: vec![40; 8],
             gain: 1.0,
+            ..Default::default()
         });
         let err = compile(&cfg).expect_err("half a bar of bass must be rejected");
         assert!(err.contains("bass.pitches"), "{err}");
@@ -4995,7 +5137,7 @@ mod tests {
             let mut pitches = vec![0u8; 16];
             pitches[0] = 40;
             let mut cfg = with_bass(pitches.clone());
-            cfg.bass = Some(JamBassLine { pitches, gain });
+            cfg.bass = Some(JamBassLine { pitches, gain, ..Default::default() });
             bass_at(&compile(&cfg).unwrap(), 0).unwrap().gain
         };
         assert_eq!(gain_of(0.01), gain_of(0.5), "clamped up to 0.5");
@@ -6179,6 +6321,7 @@ mod form_tests {
         cfg.bass = Some(JamBassLine {
             pitches,
             gain: 1.0,
+            ..Default::default()
         });
         cfg
     }
@@ -6380,12 +6523,14 @@ mod band_tests {
             bass: Some(JamBassLine {
                 pitches: vec![40, 0, 0, 0],
                 gain: 1.0,
+                ..Default::default()
             }),
             practice: None,
             fill_every: None,
             keys: Some(JamKeysLine {
                 voicings,
                 gain: 1.0,
+                ..Default::default()
             }),
             mix: None,
             count_in_sound: None,
@@ -6449,6 +6594,7 @@ mod band_tests {
         cfg.keys = Some(JamKeysLine {
             voicings: vec![Vec::new(); 3],
             gain: 1.0,
+            ..Default::default()
         });
         let err = compile(&cfg).expect_err("three voicings is not a four-tick bar");
         assert!(err.contains("keys.voicings has 3"), "{err}");
@@ -6460,6 +6606,7 @@ mod band_tests {
         cfg.keys = Some(JamKeysLine {
             voicings: vec![vec![60, 62, 64, 65, 67], Vec::new(), Vec::new(), Vec::new()],
             gain: 1.0,
+            ..Default::default()
         });
         let err = compile(&cfg).expect_err("five notes is not a voicing");
         assert!(err.contains("at most 4"), "{err}");
@@ -6474,6 +6621,7 @@ mod band_tests {
             cfg.keys = Some(JamKeysLine {
                 voicings: vec![vec![bad], Vec::new(), Vec::new(), Vec::new()],
                 gain: 1.0,
+                ..Default::default()
             });
             let err = compile(&cfg)
                 .err()

@@ -171,9 +171,13 @@ export function pushJam(jam: Jam, config: JamEngineConfig, sendMeter = true): vo
  * under a changed chord.
  */
 export function lineSignature(config: JamEngineConfig): string {
+  // How the notes are played is part of the line too: two bars with the same
+  // pitches and a different fill or accent are two different bars.
+  const art = (line: { velocities?: number[]; lengths?: number[] } | null | undefined) =>
+    line ? `${line.velocities?.join(",") ?? ""}/${line.lengths?.join(",") ?? ""}` : "";
   const bass = config.bass ? config.bass.pitches.join(",") : "";
   const keys = config.keys ? config.keys.voicings.map((v) => v.join(".")).join(",") : "";
-  return `${bass}|${keys}`;
+  return `${bass}~${art(config.bass)}|${keys}~${art(config.keys)}`;
 }
 
 /**
