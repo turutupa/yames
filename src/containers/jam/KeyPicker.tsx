@@ -33,22 +33,36 @@ export function KeyPicker({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   /**
-   * Which edge the menu hangs from. The chip sits at the right-hand end of
-   * the header, so a menu anchored to its left ran off the window; anchored
-   * to its right it would run off the other side in a narrow one. Measured
-   * when it opens, which is the only moment either is knowable.
+   * How far the menu has to move to be on screen, in pixels.
+   *
+   * It hangs from the chip's left edge, and the chip sits at the right-hand
+   * end of the header, so the menu ran off the window. Flipping it to hang
+   * from the chip's RIGHT edge instead was the first fix and it was not
+   * enough: in a narrow window neither edge fits, and the layout suite caught
+   * exactly that — at 520px the menu ended three pixels past the frame. So it
+   * is not a choice between two edges but a measurement: hang it from the
+   * left, see where it lands, and slide it back inside. Zero is the common
+   * case and costs nothing.
    */
-  const [align, setAlign] = useState<"left" | "right">("left");
+  const [shift, setShift] = useState(0);
   const wrapRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!open) return;
-    const chip = wrapRef.current?.getBoundingClientRect();
+    if (!open) {
+      setShift(0);
+      return;
+    }
     const menu = menuRef.current?.getBoundingClientRect();
-    if (!chip || !menu) return;
-    const room = window.innerWidth - chip.left - 12;
-    setAlign(menu.width > room && chip.right - menu.width >= 12 ? "right" : "left");
+    if (!menu) return;
+    // A margin, so the menu never sits flush against the frame.
+    const edge = 12;
+    let moved = Math.min(0, window.innerWidth - edge - menu.right);
+    // And if moving it left has pushed its start off the other side — a menu
+    // wider than the window — put that edge back instead. It cannot be both,
+    // and the left edge is the one with the first key on it.
+    if (menu.left + moved < edge) moved = edge - menu.left;
+    setShift(moved);
   }, [open]);
 
   useEffect(() => {
@@ -93,7 +107,7 @@ export function KeyPicker({
       {open && (
         <div
           className="jam-key-menu"
-          data-align={align}
+          style={shift ? { transform: `translateX(${shift}px)` } : undefined}
           ref={menuRef}
           role="dialog"
           aria-label={t("jam.key.label")}

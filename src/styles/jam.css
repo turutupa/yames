@@ -873,10 +873,9 @@
   box-shadow: var(--shadow);
 }
 
-.jam-key-menu[data-align="right"] {
-  left: auto;
-  right: 0;
-}
+/* It hangs from the chip and is then slid back inside the window by the
+   picker, which is the only place the two rectangles are both known. The
+   width is capped here so that slide is a few pixels rather than a journey. */
 
 .jam-keys {
   display: grid;
