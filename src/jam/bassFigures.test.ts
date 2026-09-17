@@ -54,37 +54,59 @@ function part(figure: JamBassStyle, opts: Partial<Parameters<typeof bassPartFor>
 const struck = (line: { pitches: number[] }) => line.pitches.flatMap((p, t) => (p ? [t] : []));
 
 describe("every figure keeps the engine's contract", () => {
+  /**
+   * The sweep is about eighteen thousand bars, and the assertion is plain
+   * JavaScript rather than an `expect` per note deliberately: the same sweep
+   * written as a quarter of a million `expect` calls took fifteen seconds —
+   * inside a twenty-second limit on an idle machine and over it whenever the
+   * box was busy, which is the worst kind of failing test. The coverage is
+   * identical; only the reporting is deferred to the one bar that breaks.
+   */
+  function faultIn(
+    line: ReturnType<typeof part>,
+    n: number,
+  ): string | null {
+    if (line.pitches.length !== n) return `pitches has ${line.pitches.length}, not ${n}`;
+    if (line.velocities?.length !== n) return `velocities has ${line.velocities?.length}, not ${n}`;
+    if (line.lengths?.length !== n) return `lengths has ${line.lengths?.length}, not ${n}`;
+    if (struck(line).length === 0) return "a bar with no bass";
+    for (let t = 0; t < n; t++) {
+      const p = line.pitches[t];
+      if (!p) continue;
+      if (!Number.isInteger(p)) return `tick ${t}: pitch ${p} is not a whole note`;
+      if (p < 28 || p > 55) return `tick ${t}: pitch ${p} is off the bass`;
+      const v = line.velocities![t];
+      if (!(v >= 0.3 && v <= 1.4)) return `tick ${t}: velocity ${v} is outside 0.3..1.4`;
+      const len = line.lengths![t];
+      if (!Number.isFinite(len) || len < 0) return `tick ${t}: length ${len}`;
+    }
+    return null;
+  }
+
   it("in every meter, busyness, feel and place in the form", () => {
+    const faults: string[] = [];
+    let bars = 0;
     for (const figure of JAM_BASS_STYLES) {
       for (const [beats, tpb] of METERS) {
         for (const busy of JAM_BASS_BUSY) {
           for (const feel of ["straight", "shuffle", "swing"] as const) {
             for (const barIndex of [0, 1, 3, 11]) {
               for (const chords of [{ bar: A7, next: D7 }, { bar: A7, half: D7, next: A7 }, { bar: C5, next: C5 }]) {
-                const where = `${figure} ${beats}/${tpb} ${busy} ${feel} bar ${barIndex}`;
                 const line = part(figure, { beatsPerBar: beats, ticksPerBeat: tpb, busy, feel, barIndex, chords });
-                const n = beats * tpb;
-                expect(line.pitches, where).toHaveLength(n);
-                expect(line.velocities, where).toHaveLength(n);
-                expect(line.lengths, where).toHaveLength(n);
-                expect(struck(line).length, `${where}: a bar with no bass`).toBeGreaterThan(0);
-                line.pitches.forEach((p, t) => {
-                  if (p === 0) return;
-                  expect(p, where).toBeGreaterThanOrEqual(28);
-                  expect(p, where).toBeLessThanOrEqual(55);
-                  expect(Number.isInteger(p), where).toBe(true);
-                  const v = line.velocities![t];
-                  expect(v, where).toBeGreaterThanOrEqual(0.3);
-                  expect(v, where).toBeLessThanOrEqual(1.4);
-                  expect(Number.isFinite(line.lengths![t]), where).toBe(true);
-                  expect(line.lengths![t], where).toBeGreaterThanOrEqual(0);
-                });
+                const fault = faultIn(line, beats * tpb);
+                bars++;
+                if (fault) faults.push(`${figure} ${beats}/${tpb} ${busy} ${feel} bar ${barIndex}: ${fault}`);
               }
             }
           }
         }
       }
     }
+    expect(faults).toEqual([]);
+    // A sweep that checks nothing passes quietly; this says it swept.
+    expect(bars).toBe(
+      JAM_BASS_STYLES.length * METERS.length * JAM_BASS_BUSY.length * 3 * 4 * 3,
+    );
   });
 
   it("is the same line every time for the same bar", () => {

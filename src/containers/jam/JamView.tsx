@@ -18,6 +18,7 @@ import { jamHarmony, nextChange } from "../../jam/display";
 import { JAM_KEYS_STYLES_ALL } from "../../jam/keysFigures";
 import { JAM_BASS_STYLES } from "../../jam/bassFigures";
 import { JamSelect } from "./JamSelect";
+import { KeyPicker } from "./KeyPicker";
 import { ChordPicker } from "./ChordPicker";
 import { bandStatesForChorus, practiceConfigFrom } from "../../jam/practice";
 import { momentsForChorus } from "../../jam/arrangement";
@@ -506,6 +507,16 @@ export function JamView({
         )}
 
         <div className="jam-head-controls">
+          {/* The key, here as well as in the sheet (2026-09-17). Changing key
+              is something you do while playing — "I change keys often for
+              improv purposes" — and three gestures behind a drawer is not
+              where that lives. `harmony.concert` and not `harmony.key`: the
+              record holds the key the BAND plays, and a transposing player
+              reads their own. */}
+          <KeyPicker
+            value={harmony.concert}
+            onPick={(key) => onEdit({ key, pinnedShape: null })}
+          />
           <Segmented
             label={t("jam.feel.bandLabel")}
             value={jam.feel}

@@ -684,10 +684,20 @@
   color: var(--text-faint);
 }
 
+/* A GRID, NOT A FLEX ROW (2026-09-17). Every lane is the same five columns,
+   so the volume and the switch sit at the same x in every row and cannot be
+   pushed off the end by what is to their left. They were: the bass and keys
+   rows grew a style dropdown, nothing in the row was allowed to shrink, and
+   the switch walked out past the row's own edge on a narrow window — the
+   owner saw it as "the on/off switch shows up out of the table".
+
+   Column three is the live readout (the bass's notes, the drummer's state);
+   it is the one that gives way, down to nothing, before anything else does. */
 .jam-band-lane {
-  display: flex;
+  display: grid;
+  grid-template-columns: 104px minmax(0, auto) minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 16px;
+  column-gap: 16px;
   min-height: 42px;
   padding: 0 14px;
   border-radius: var(--radius-md, 10px);
@@ -706,8 +716,7 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  width: 104px;
-  flex-shrink: 0;
+  min-width: 0;
   font-size: 0.8rem;
   font-weight: 700;
   color: var(--text-secondary);
@@ -715,7 +724,7 @@
 
 .jam-band-detail {
   width: 150px;
-  flex-shrink: 0;
+  max-width: 100%;
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--text-faint);
@@ -830,6 +839,35 @@
 
 /* Twelve roots in one row. A shape a player recognises — the chromatic scale
    — where a dropdown of thirty-six would be a list to read. */
+/* The key chip on the playing screen, and the grid it opens (2026-09-17).
+   The menu is the sheet's own key block in a popover, so the two places a
+   key can be changed look and work the same. */
+.jam-key-picker {
+  position: relative;
+}
+
+.jam-key-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  max-width: calc(100vw - 24px);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(420px, 78vw);
+  padding: 10px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
+  box-shadow: var(--shadow);
+}
+
+.jam-key-menu[data-align="right"] {
+  left: auto;
+  right: 0;
+}
+
 .jam-keys {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -1197,7 +1235,31 @@
   align-items: center;
   gap: 7px;
   width: 118px;
-  flex-shrink: 0;
+  justify-self: end;
+}
+
+/* "You" has no volume, so its input chip takes the last two columns. */
+.jam-band-input {
+  grid-column: 4 / -1;
+  justify-self: end;
+}
+
+/* Under about 1024px the row cannot hold the live readout AND a readable
+   dropdown, so the readout goes: the bass's notes for this bar are a lovely
+   thing to watch and the control is the thing you came to use. The columns
+   close up behind it, so the player's own control gets the room. */
+@media (max-width: 1023px) {
+  .jam-band-lane {
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto auto;
+  }
+
+  .jam-band-live {
+    display: none;
+  }
+
+  .jam-band-input {
+    grid-column: 3 / -1;
+  }
 }
 
 .jam-band-volume input[type="range"] {
@@ -1222,8 +1284,15 @@
   color: var(--text-faint);
 }
 
+/* The player's own control — the style or comping dropdown. It may shrink;
+   the dropdown's value ellipses rather than pushing the row wider. */
 .jam-band-extra {
-  flex-shrink: 0;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.jam-band-extra .jam-dropdown {
+  max-width: 100%;
 }
 
 .jam-keys-style {
