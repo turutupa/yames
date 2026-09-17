@@ -693,9 +693,17 @@
 
    Column three is the live readout (the bass's notes, the drummer's state);
    it is the one that gives way, down to nothing, before anything else does. */
+/* Six columns, and every part says which one it is in.
+   Sizing them alone is not enough: the rows do not all carry the same parts —
+   the drums row has a kit name AND a groove picker, the bass row has a picker
+   and no name, the "you" row has neither — so a row placing its parts in
+   order put its switch in the volume's column, or ran off the end of the grid
+   onto a second line. Named columns mean a part a row does not have leaves
+   its track empty, which is also what keeps the three pickers under each
+   other down the screen. */
 .jam-band-lane {
   display: grid;
-  grid-template-columns: 104px minmax(0, auto) minmax(0, 1fr) auto auto;
+  grid-template-columns: 104px 150px minmax(0, auto) minmax(0, 1fr) auto auto;
   align-items: center;
   column-gap: 16px;
   min-height: 42px;
@@ -713,6 +721,7 @@
 }
 
 .jam-band-name {
+  grid-column: 1;
   display: flex;
   align-items: center;
   gap: 9px;
@@ -723,7 +732,7 @@
 }
 
 .jam-band-detail {
-  width: 150px;
+  grid-column: 2;
   max-width: 100%;
   font-size: 0.72rem;
   font-weight: 600;
@@ -734,6 +743,7 @@
 }
 
 .jam-band-live {
+  grid-column: 4;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -1231,6 +1241,7 @@
 /* ── The mix, and the keys player ──────────────────────────────────────── */
 
 .jam-band-volume {
+  grid-column: 5;
   display: flex;
   align-items: center;
   gap: 7px;
@@ -1238,9 +1249,18 @@
   justify-self: end;
 }
 
-/* "You" has no volume, so its input chip takes the last two columns. */
+.jam-band-lane > .jam-switch {
+  grid-column: 6;
+}
+
+/* "You" has no volume and no switch, so its input chip takes the last two
+   columns — and row one explicitly: the readout's track is still there (empty)
+   on that row, and two things told to start in the same column are put on
+   separate lines by the grid, which is how the chip ended up under its own
+   row. */
 .jam-band-input {
-  grid-column: 4 / -1;
+  grid-column: 5 / -1;
+  grid-row: 1;
   justify-self: end;
 }
 
@@ -1249,16 +1269,15 @@
    thing to watch and the control is the thing you came to use. The columns
    close up behind it, so the player's own control gets the room. */
 @media (max-width: 1023px) {
+  /* The same six columns, so the parts stay where they are told; the
+     readout's track goes to nothing and the picker's takes the room. */
   .jam-band-lane {
-    grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto auto;
+    grid-template-columns: 96px minmax(0, 104px) minmax(0, 1fr) 0 auto auto;
+    column-gap: 10px;
   }
 
   .jam-band-live {
     display: none;
-  }
-
-  .jam-band-input {
-    grid-column: 3 / -1;
   }
 }
 
@@ -1287,6 +1306,7 @@
 /* The player's own control — the style or comping dropdown. It may shrink;
    the dropdown's value ellipses rather than pushing the row wider. */
 .jam-band-extra {
+  grid-column: 3;
   min-width: 0;
   max-width: 100%;
 }

@@ -266,6 +266,40 @@ interface UseJamSessionArgs {
   meter?: MeterSnapshot;
 }
 
+/**
+ * The fields of a jam that are NOT the band.
+ *
+ * Everything else re-sends to the engine the moment it changes, which is what
+ * makes a setting audible on the next bar rather than on the next press of
+ * Play. This used to be the other way round — a hand-kept list of the fields
+ * that DO re-send — and the list went stale exactly as you would expect: the
+ * arrangement (loop, build or song, and how many choruses) and the count-in
+ * were read by the compiler and missing from it, so switching a playing jam
+ * from Loop to Song did nothing until something else moved. A list of the
+ * exceptions cannot go stale that way: a field added to the record and
+ * forgotten here re-sends, which is at worst one extra table.
+ *
+ * The identity of the record; the tempo, which has an effect of its own so
+ * changing it does not disturb the bar; and the things only the SCREEN reads
+ * — what the chord sheet shows, whether a voice speaks the cues, whether
+ * takes are being kept, and the vibe's name, which is a label over fields
+ * that are themselves on the record.
+ */
+const NOT_THE_BAND = new Set<string>([
+  "id",
+  "name",
+  "createdAt",
+  "bpm",
+  "transposition",
+  "chords",
+  "cues",
+  "takes",
+  "pinnedShape",
+  "shapesFollow",
+  "vibe",
+  "variation",
+]);
+
 export function useJamSession({
   view,
   isPlaying,
@@ -611,45 +645,19 @@ export function useJamSession({
 
   const engineKey = jam
     ? JSON.stringify([
-        jam.grooveId,
-        jam.customGroove,
-        jam.feel,
-        jam.intensity,
-        jam.form,
-        jam.fills,
-        // Both halves of the fill switch. "Every 4 bars" is a field of its
-        // own on the config, so a key that only watched `fills` sat on the
-        // change until something else moved and then sent it as a surprise.
-        jam.fillEvery,
-        jam.kit,
-        jam.key,
+        // Every field of the record that is not on the list above, in a fixed
+        // order, so a field nobody thought about here still re-sends.
+        ...Object.keys(jam)
+          .filter((field) => !NOT_THE_BAND.has(field))
+          .sort()
+          .map((field) => [field, jam[field as keyof Jam]]),
+        // Absent `band` is not "no band": it is the lineup for the instrument
+        // you play, which is not on the record and can change under it.
         jam.band ?? lineup,
-        jam.practice,
-        // The fourth pass. Every one of these changes the table, the meter or
-        // a line in it, so every one of them has to re-send: a chord typed
-        // into bar five that the engine never hears is the bug this list
-        // exists to prevent.
-        jam.progression,
-        jam.meter,
-        jam.mix,
-        jam.keysStyle,
-        jam.countInSound,
-        // The band pass (2026-09-16): how the bass plays, how busy it is, and
-        // which progression the form plays. Each rewrites a line the engine
-        // is holding.
-        jam.bassStyle,
-        jam.bassBusy,
-        jam.changes,
-        // The second pass. The voices and a folder of your own samples change
-        // what the band SOUNDS like, and the kit being previewed changes it
-        // for two bars — all three have to re-send or the audition is silent.
-        jam.bassVoice,
-        jam.keysVoice,
-        jam.customKit,
+        // None of these is on the record at all. A kit being auditioned plays
+        // for two bars, and a vibe being auditioned is a groove, a kit, a
+        // feel, a loudness and two voices at once.
         previewKit,
-        // The fourth pass (W32). A vibe being auditioned is a groove, a kit,
-        // a feel, a loudness and two voices at once — none of which would
-        // re-send on its own, because none of them is on the record.
         previewVibeState?.vibeId ?? null,
         previewVibeState?.variationId ?? null,
       ])

@@ -13,6 +13,8 @@ import {
   jamMix,
   percussionVoices,
 } from "../../jam/compile";
+import { grooveById, groovesInFamily } from "../../jam/grooves";
+import { carryCountIn } from "../../jam/jams";
 import { progressionEdit, withChordAt } from "../../jam/progression";
 import { jamHarmony, nextChange } from "../../jam/display";
 import { JAM_KEYS_STYLES_ALL } from "../../jam/keysFigures";
@@ -431,6 +433,29 @@ export function JamView({
   const grooveFits = jamGrooveFitsMeter(jam);
 
   /**
+   * The grooves the drums row offers (2026-09-17).
+   *
+   * The bass row picks its figure and the keys row its comping, both while
+   * you listen to them; the drummer — the player with a hundred and fifteen
+   * of these — was the one row you could only read. So the drums row picks
+   * too, from the shelf its current groove is on: swapping a shuffle for a
+   * boogie mid-chorus is the same size of gesture as swapping a bass figure,
+   * and the other hundred are still a tap away in Set up, where choosing
+   * between shelves is what the card wall is for.
+   *
+   * A groove of your own is drawn as its own option when there is one, so
+   * the control reads what is actually playing rather than the preset
+   * underneath it.
+   */
+  /* The id the drums row's dropdown gives a groove of your own. No preset
+     answers to it, so a pick of it is a no-op rather than a lookup miss. */
+  const CUSTOM_GROOVE = "__mine__";
+  const shelf = useMemo(() => {
+    const current = grooveById(jam.grooveId);
+    return groovesInFamily(current.family);
+  }, [jam.grooveId]);
+
+  /**
    * What the percussionist is playing, and whether there is a row for them.
    *
    * The row appears when the GROOVE has percussion written for it or when the
@@ -670,12 +695,44 @@ export function JamView({
           {
             id: "drums",
             on: band.drums,
-            detail: grooveFits
-              ? `${grooveName} · ${kitName}`
-              : // The card in the sheet still says Shuffle, and it is still
-                // selected; this row says what is actually being played.
-                `${t("jam.groove.rule")} · ${kitName}`,
+            // The kit alone now: the groove is a control on this row, and a
+            // name printed beside the control that sets it is the same word
+            // twice.
+            detail: grooveFits ? kitName : `${t("jam.groove.rule")} · ${kitName}`,
             volume: mix.drums,
+            extra: (
+              <JamSelect
+                label={t("jam.groove.label")}
+                value={jam.customGroove ? CUSTOM_GROOVE : jam.grooveId}
+                compact
+                disabled={!band.drums}
+                options={[
+                  ...(jam.customGroove
+                    ? [{ id: CUSTOM_GROOVE, label: jam.customGroove.name }]
+                    : []),
+                  ...shelf.map((groove) => ({
+                    id: groove.id,
+                    label: t(`jam.groove.${groove.id}`),
+                  })),
+                ]}
+                onChange={(id) => {
+                  if (id === CUSTOM_GROOVE) return;
+                  onEdit({
+                    grooveId: id,
+                    // A groove carries its own meter, so the count-in follows
+                    // it: one bar of a waltz is three beats, not four.
+                    countIn: carryCountIn(
+                      jam.countIn,
+                      meter.beatsPerBar,
+                      grooveById(id).beatsPerBar,
+                    ),
+                    // Picking a preset is picking a preset. The groove you
+                    // drew is still on the record until you pick one.
+                    customGroove: undefined,
+                  });
+                }}
+              />
+            ),
           },
           {
             id: "bass",

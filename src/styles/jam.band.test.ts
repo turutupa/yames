@@ -50,6 +50,31 @@ describe("a band row on the playing screen", () => {
     }
   });
 
+  it("tells every part which column it is in", () => {
+    // Sizing the columns is not enough: the rows carry different parts — the
+    // drums row a kit name AND a groove picker, the bass row a picker and no
+    // name, "you" neither — so a part placed by document order lands in the
+    // wrong track on some row, or falls off the end onto a second line, which
+    // is exactly how the on/off switch ended up under the row.
+    const columns = /grid-template-columns:([^;]+);/.exec(rule(".jam-band-lane"))?.[1].trim();
+    const count = (columns as string).split(/\s+(?![^(]*\))/).length;
+    for (const part of [
+      ".jam-band-name",
+      ".jam-band-detail",
+      ".jam-band-extra",
+      ".jam-band-live",
+      ".jam-band-volume",
+      ".jam-band-lane > .jam-switch",
+    ]) {
+      const placed = /grid-column:\s*([^;]+);/.exec(rule(part))?.[1].trim();
+      expect(placed, `${part} does not say which column it is in`).toBeTruthy();
+      const track = Number(placed);
+      expect(track, `${part} is in column ${placed}, outside the ${count}`).toBeLessThanOrEqual(
+        count,
+      );
+    }
+  });
+
   it("caps the dropdown at the width of its column", () => {
     expect(rule(".jam-band-extra")).toMatch(/max-width:\s*100%/);
     expect(rule(".jam-band-extra .jam-dropdown")).toMatch(/max-width:\s*100%/);

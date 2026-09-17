@@ -13,6 +13,7 @@ import { STARTER_JAMS } from "../../../jam/jams";
 import { compileJam } from "../../../jam/compile";
 import { applyVibe } from "../../../jam/vibes";
 import { grooveById } from "../../../jam/grooves";
+import { NO_PRACTICE } from "../../../containers/jam/PracticeRow";
 import type { Jam, JamEngineConfig, JamPositionCommand } from "../../../jam/types";
 import type { BeatEvent } from "../../../types";
 
@@ -315,6 +316,79 @@ describe("what reaches the engine", () => {
     act(() => result.current.editJam({ fillEvery: 4 }));
     await waitFor(() => expect(names("setJam")).toHaveLength(1));
     expect((names("setJam")[0] as JamEngineConfig).fillEvery).toBe(4);
+  });
+
+  /**
+   * Every setting the compiler reads reaches the engine while the band plays.
+   *
+   * The owner's report was "when user clicks on one setting or another every
+   * setting is loaded in realtime instead of having to pause play again", and
+   * the cause was a hand-kept list of the fields that re-send: the
+   * arrangement and the count-in were read by `compileJam` and missing from
+   * it, so switching a playing jam from Loop to Song did nothing until some
+   * unrelated edit pushed the table. The list is the other way round now —
+   * the fields that are NOT the band — and this is the test that says so: it
+   * reads what the compiler actually touches rather than trusting a list.
+   */
+  it("sends every setting the band is made of, the moment it changes", async () => {
+    // One edit per field the compiler reads, each a real change from the
+    // starter's value.
+    const edits: Array<[keyof Jam, Partial<Jam>]> = [
+      ["arrangement", { arrangement: { mode: "song", choruses: 3 } }],
+      ["band", { band: { drums: true, bass: false, keys: true } }],
+      ["bassBusy", { bassBusy: "busy" }],
+      ["bassStyle", { bassStyle: "walking" }],
+      ["bassVoice", { bassVoice: "upright" }],
+      ["countIn", { countIn: 8 }],
+      ["countInSound", { countInSound: "sticks" }],
+      ["feel", { feel: "swing" }],
+      ["fillEvery", { fillEvery: 4 }],
+      ["fills", { fills: false }],
+      ["form", { form: { kind: "loop8", bars: 8 } }],
+      ["grooveId", { grooveId: "funk" }],
+      ["intensity", { intensity: "loud" }],
+      ["key", { key: "Eb" }],
+      ["keysStyle", { keysStyle: "arpeggio" }],
+      ["keysVoice", { keysVoice: "organ" }],
+      ["kit", { kit: "club" }],
+      ["mix", { mix: { drums: 0.7, bass: 1, keys: 1, perc: 1 } }],
+      ["practice", { practice: { ...NO_PRACTICE, dropOutEvery: 8, dropOutBars: 2 } }],
+      ["progression", { progression: ["A7", "D7", "A7", "E7", "A7", "D7", "A7", "E7"] }],
+      ["changes", { changes: "quickChange" }],
+    ];
+
+    const { result } = mount();
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
+    act(() => result.current.loadJam(result.current.jams[0]));
+    await waitFor(() => expect(names("setJam")).toHaveLength(1));
+
+    const silent: string[] = [];
+    for (const [field, edit] of edits) {
+      calls.length = 0;
+      act(() => result.current.editJam(edit));
+      await waitFor(() => expect(result.current.jam?.[field]).toBeDefined());
+      if (names("setJam").length === 0) silent.push(String(field));
+    }
+    expect(silent, "these settings wait for the next press of Play").toEqual([]);
+  });
+
+  it("does not disturb the band over something only the screen reads", async () => {
+    const { result } = mount();
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
+    act(() => result.current.loadJam(result.current.jams[0]));
+    await waitFor(() => expect(names("setJam")).toHaveLength(1));
+
+    for (const edit of [
+      { name: "Another name" },
+      { pinnedShape: { root: 9, quality: "7", index: 0 } },
+      { shapesFollow: true },
+      { chords: true },
+    ] as Partial<Jam>[]) {
+      calls.length = 0;
+      act(() => result.current.editJam(edit));
+      await waitFor(() => expect(result.current.jam).toBeTruthy());
+      expect(names("setJam"), JSON.stringify(edit)).toHaveLength(0);
+    }
   });
 
   it("takes the band away when you leave the tab, and brings it back", async () => {

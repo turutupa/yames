@@ -165,6 +165,41 @@ time, Zen over a jam, the jam step in a setlist, the takes, the engine.
   moves nothing — the heading and the body change under a short cross-fade,
   focus goes to the first control of the new content, and the scrim comes or
   goes with whether Set up is the one showing.
+- **A13 — What is on the stage and what is in the drawer.** *decided
+  2026-09-17 by the owner ("the key of the song it's maybe too hidden inside
+  the setup drawer? I think we have to take another look at what's inside the
+  setup drawer and what's outside... It's fine to duplicate stuff but for
+  example I change keys often for improv purposes and the key change is too
+  hidden imo").*
+
+  The rule, and everything below follows from it: **the playing screen holds
+  what each player is DOING; the drawer holds who the players are and what
+  the song is.** A thing you reach for with an instrument in your hands is on
+  the stage; a thing you set once before you count in is in the drawer.
+
+  - On the stage: the key, the tempo, the band feel, the drum intensity, each
+    player's own style — the drummer's groove, the bass's figure, the keys'
+    comping — each player's volume, and who is in or out.
+  - In the drawer: the vibe, the form and its bars, the arrangement, the
+    count-in, the changes, the kits and the voices, the percussion set, the
+    meter and the transposition.
+  - **Duplication is fine and sometimes right.** The key, the feel and the
+    intensity are in both places. The drawer is where a jam is set up, and a
+    control that MOVED out of it would be missing from the place people
+    learned it was; the stage copy is the same control, not a shortcut to the
+    drawer.
+  - The drummer's row picks from the shelf its groove is on, not from all
+    hundred and fifteen. The card wall exists so you can cross between
+    shelves, which is a setting-up gesture; swapping a shuffle for a boogie
+    mid-chorus is not.
+  - Two settings stay in the drawer that the rule would put on the stage —
+    how busy the bass is, and how often the drummer fills. Both are
+    second-order next to the style itself, and a row with four controls on it
+    stops being readable at a glance, which is the stage's whole job.
+  - **Everything on the stage takes effect while the band plays.** A setting
+    that waits for the next press of Play is a setting in the wrong place
+    even when it is drawn in the right one.
+
 - **A12 — The Set up drawer closes when you look away, and stands beside the
   stage when there is room.** *decided 2026-09-13 by the owner ("clicking
   outside of the Setup drawer should close it, and maybe if the window is

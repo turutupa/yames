@@ -1138,6 +1138,53 @@ describe("JamView — the fourth pass's controls", () => {
     expect(props.onEdit).toHaveBeenCalledWith({ bassStyle: "walking" });
   });
 
+  it("has a drums row that picks a groove off the shelf it is on", () => {
+    // The drummer was the one player whose row you could only read: the bass
+    // picks a figure and the keys a comping style while you listen to them,
+    // and the drums row named its groove in text. It picks too now, from the
+    // shelf its groove is on — the other hundred are a tap away in Set up,
+    // which is what the card wall is for.
+    const { container, props } = setup({ jam: jamOf({ grooveId: "shuffle" }) });
+    const drums = [...container.querySelectorAll(".jam-band-lane")].find(
+      (l) => l.querySelector(".jam-band-name")?.textContent?.includes("Drums"),
+    )!;
+    fireEvent.click(drums.querySelector(".jam-dropdown")!);
+    // Every option is a blues groove, because the shuffle is a blues groove.
+    const blues = groovesInFamily("blues");
+    expect(screen.getAllByRole("option")).toHaveLength(blues.length);
+
+    // The one after the shuffle, whichever the shelf writes next.
+    const next = blues[blues.findIndex((g) => g.id === "shuffle") + 1];
+    fireEvent.click(screen.getAllByRole("option")[blues.indexOf(next)]);
+    expect(props.onEdit).toHaveBeenCalledWith(
+      expect.objectContaining({ grooveId: next.id, customGroove: undefined }),
+    );
+  });
+
+  it("carries the count-in onto a groove in another meter", () => {
+    // One bar of a waltz is three beats, not four: the setting is BARS and
+    // the engine takes beats, so a picker that only wrote the groove would
+    // leave a two-bar count-in a bar and a third long.
+    const family = GROOVE_FAMILIES.find((f) =>
+      groovesInFamily(f).some((g) => g.beatsPerBar !== groovesInFamily(f)[0].beatsPerBar),
+    )!;
+    const shelf = groovesInFamily(family);
+    const from = shelf[0];
+    const to = shelf.find((g) => g.beatsPerBar !== from.beatsPerBar)!;
+
+    const { container, props } = setup({
+      jam: jamOf({ grooveId: from.id, countIn: from.beatsPerBar * 2 }),
+    });
+    const drums = [...container.querySelectorAll(".jam-band-lane")].find(
+      (l) => l.querySelector(".jam-band-name")?.textContent?.includes("Drums"),
+    )!;
+    fireEvent.click(drums.querySelector(".jam-dropdown")!);
+    fireEvent.click(screen.getAllByRole("option")[shelf.indexOf(to)]);
+    expect(props.onEdit).toHaveBeenCalledWith(
+      expect.objectContaining({ grooveId: to.id, countIn: to.beatsPerBar * 2 }),
+    );
+  });
+
   it("names what Auto plays, and Auto clears the choice", () => {
     const { container, props } = setup({
       jam: jamOf({ band: { drums: true, bass: true, keys: true }, keysStyle: "pads" }),
