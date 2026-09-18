@@ -723,6 +723,9 @@
     "majorPentatonic": "ngũ cung trưởng",
     "blues": "blues",
     "harmonicMinor": "thứ hòa thanh",
+    "lydian": "lydian",
+    "phrygian": "phrygian",
+    "majorBlues": "blues trưởng",
     "altered": "altered"
   }
 }

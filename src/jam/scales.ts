@@ -28,6 +28,9 @@ export type ScaleId =
   | "majorPentatonic"
   | "blues"
   | "harmonicMinor"
+  | "lydian"
+  | "phrygian"
+  | "majorBlues"
   | "altered";
 
 export type ScaleDefinition = {
@@ -66,6 +69,34 @@ export const SCALES: Record<ScaleId, ScaleDefinition> = {
     labelKey: "scale.harmonicMinor",
   },
   // Every note that is not the root, third or seventh of the dominant is
+  /* The three added 2026-09-18, when the owner asked what else is commonly
+     used. Each earns its place by being a scale a player in one of the vibes
+     this app ships actually reaches for.
+
+     Lydian is the major mode with the raised fourth — the one a guitarist
+     goes to over a major chord that is not the tonic, and the only major-key
+     colour the list was missing.
+
+     Phrygian is the minor mode with the flat second: flamenco, and every
+     metal riff that leans on the semitone above the root. The app ships a
+     metal vibe and had nothing to offer it.
+
+     Major blues is the major pentatonic with the flat third wedged in, as
+     the blues scale is the minor pentatonic with the flat fifth wedged in.
+     It is the country and the major-key blues sound, and its absence left
+     "blues" meaning only one of the two things players mean by it.
+
+     Deliberately NOT here: locrian, melodic minor, whole tone and the
+     diminished scales. They are real scales that a cheat sheet for a jam is
+     the wrong place for — `altered` already answers the one dominant-chord
+     case that comes up, and every extra chip is one more to read past. */
+  lydian: { id: "lydian", intervals: [0, 2, 4, 6, 7, 9, 11], labelKey: "scale.lydian" },
+  phrygian: { id: "phrygian", intervals: [0, 1, 3, 5, 7, 8, 10], labelKey: "scale.phrygian" },
+  majorBlues: {
+    id: "majorBlues",
+    intervals: [0, 2, 3, 4, 7, 9],
+    labelKey: "scale.majorBlues",
+  },
   // altered. Its fifth mode of melodic minor identity is not needed here.
   altered: { id: "altered", intervals: [0, 1, 3, 4, 6, 8, 10], labelKey: "scale.altered" },
 };
@@ -85,6 +116,9 @@ export const SCALE_NAMES_EN: Record<ScaleId, string> = {
   majorPentatonic: "Major pentatonic",
   blues: "Blues",
   harmonicMinor: "Harmonic minor",
+  lydian: "Lydian",
+  phrygian: "Phrygian",
+  majorBlues: "Major blues",
   altered: "Altered",
 };
 
@@ -116,8 +150,14 @@ function suggest(scale: ScaleId, root: PitchClass): ScaleSuggestion {
   };
 }
 
-function build(entries: Array<[ScaleId, PitchClass]>): ScaleSuggestion[] {
-  return entries.slice(0, 3).map(([scale, root]) => suggest(scale, root));
+/**
+ * `limit` is three because the NOW block draws a chord's scales as one line
+ * of text under the chord name, and a fourth name wraps it. A KEY's scales
+ * are a row of chips you pick from rather than a line to read, so they pass
+ * their own number — which is why this is a parameter and not a constant.
+ */
+function build(entries: Array<[ScaleId, PitchClass]>, limit = 3): ScaleSuggestion[] {
+  return entries.slice(0, limit).map(([scale, root]) => suggest(scale, root));
 }
 
 /**
@@ -173,25 +213,46 @@ function build(entries: Array<[ScaleId, PitchClass]>): ScaleSuggestion[] {
  * minor pentatonic for a blues, natural minor for a minor key, the major
  * scale for a major one. Best first, and the list is short on purpose.
  */
+/**
+ * The scales a key offers, best first.
+ *
+ * Longer lists since 2026-09-18. The chord sheet drew only the first of
+ * these, so the length did not matter; now they are a row of chips you pick
+ * from, and two options for a major key was a row that barely existed. The
+ * owner: "what scales did we add? Common scales I think should be there?"
+ *
+ * The first is always the one to reach for without thinking, and the rest
+ * are ordered by how often a player would actually want them — not by
+ * theory. Two additions are worth naming: harmonic minor was in this file
+ * all along and no KEY ever offered it, and the major pentatonic over a
+ * blues is not an oversight but the point — mixing it with the minor
+ * pentatonic is the blues guitar sound.
+ */
 export function scalesForKey(key: Key): ScaleSuggestion[] {
   if (key.mode === "blues") {
     return build([
       ["minorPentatonic", key.root],
       ["blues", key.root],
+      ["majorPentatonic", key.root],
       ["mixolydian", key.root],
-    ]);
+      ["dorian", key.root],
+    ], 5);
   }
   if (key.mode === "minor") {
     return build([
       ["minorPentatonic", key.root],
       ["naturalMinor", key.root],
       ["dorian", key.root],
-    ]);
+      ["harmonicMinor", key.root],
+      ["phrygian", key.root],
+    ], 5);
   }
   return build([
     ["majorPentatonic", key.root],
     ["major", key.root],
-  ]);
+    ["lydian", key.root],
+    ["mixolydian", key.root],
+  ], 4);
 }
 
 export function scalesForChord(chord: Chord, key: Key): ScaleSuggestion[] {

@@ -1850,12 +1850,33 @@
 
 /* The band rows need no rule here any more: the section is its own container
    and its columns answer to its own width, drawer or no drawer. */
-/* Maximized: the cheat sheet fills the region instead of its own column.
-   A page of chord shapes and seventeen frets of neck in 640px is a page you
-   squint at. Not a separate dialog — the same sheet, wider — so the scroll
-   position, the page you were on and the Done button all survive it. */
+/* Maximized: the cheat sheet takes the window, not just the stage.
+ *
+ * A page of chord shapes and seventeen frets of neck in a 640px column is a
+ * page you squint at, and the first version of this only reclaimed the stage
+ * — the owner: "the maximize cheat sheet could actually use the whole app
+ * space to maximize how much they can see in there". So it covers the rail
+ * and the header too: both are navigation, and you are not navigating, you
+ * are reading chords.
+ *
+ * It stops above the TRANSPORT, and that is not a matter of taste. The
+ * transport's own rule, written where it sheds controls on a narrow window:
+ * "Play and Stop never go — finding how to stop is the one thing that must
+ * always work." A cheat sheet drawn over Stop while the band plays is the one
+ * arrangement this app must not make.
+ *
+ * Not a separate dialog — the same sheet, moved — so the scroll position, the
+ * page you were on and the Done button all survive being maximized. */
 .jam-sheet[data-maximized] {
-  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 76px;
+  width: auto;
+  z-index: 80;
+  border-left: none;
+  border-bottom: 1px solid var(--border);
 }
 
 .jam-sheet-grow {
@@ -2730,6 +2751,33 @@
 
   .jam-chord-shapes {
     grid-template-columns: repeat(auto-fill, minmax(0, 132px));
+  }
+}
+
+/* Maximized on a real screen, where the point is to SEE the thing. More
+   columns alone would only have spread the same small diagrams over more
+   room; every box here is an SVG with a viewBox, so it enlarges cleanly and
+   the grid is sized to the bigger box. The neck takes the width outright —
+   seventeen frets across 1600px is a neck you can read from a music stand,
+   which is where a cheat sheet is read from. */
+@container sheet (min-width: 1100px) {
+  .jam-chord-grid {
+    grid-template-columns: repeat(auto-fill, minmax(0, 238px));
+  }
+
+  .jam-chord-shapes {
+    grid-template-columns: repeat(auto-fill, minmax(0, 172px));
+  }
+
+  .jam-chord-card .chord-diagram svg,
+  .jam-chord-shape .chord-diagram svg {
+    width: 136px;
+    height: auto;
+  }
+
+  .jam-fretboard {
+    width: 100%;
+    height: auto;
   }
 }
 

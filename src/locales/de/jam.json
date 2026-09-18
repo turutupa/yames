@@ -723,6 +723,9 @@
     "majorPentatonic": "Dur-Pentatonik",
     "blues": "Blues",
     "harmonicMinor": "harmonisches Moll",
+    "lydian": "lydisch",
+    "phrygian": "phrygisch",
+    "majorBlues": "Dur-Blues",
     "altered": "Alteriert"
   }
 }

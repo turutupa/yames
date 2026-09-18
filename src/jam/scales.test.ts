@@ -5,6 +5,7 @@ import {
   SCALE_NAMES_EN,
   scaleNotes,
   scalesForChord,
+  scalesForKey,
   type ScaleId,
 } from "./scales";
 import {
@@ -210,6 +211,61 @@ describe("which scale over which chord", () => {
           }
         }
       }
+    }
+  });
+});
+
+/**
+ * The scales a KEY offers, which is what the cheat sheet's chip row draws.
+ *
+ * Worth its own tests because the list is a judgement about what players
+ * reach for rather than a fact about intervals, and because it was silently
+ * capped at three for a while — `build` takes a limit meant for the NOW
+ * block's single line of text, and a key's chips are not a line of text.
+ */
+describe("the scales a key offers", () => {
+  const key = (root: number, mode: KeyMode): Key => ({ root: root as PitchClass, mode });
+
+  it("offers more than the three a chord's caption has room for", () => {
+    // The bug: every key came back with exactly three because `build`'s
+    // default limit belongs to a different caller.
+    expect(scalesForKey(key(9, "blues")).length).toBeGreaterThan(3);
+    expect(scalesForKey(key(9, "minor")).length).toBeGreaterThan(3);
+  });
+
+  it("leads with the one a player reaches for without thinking", () => {
+    expect(scalesForKey(key(9, "blues"))[0].scale).toBe("minorPentatonic");
+    expect(scalesForKey(key(9, "minor"))[0].scale).toBe("minorPentatonic");
+    expect(scalesForKey(key(0, "major"))[0].scale).toBe("majorPentatonic");
+  });
+
+  it("puts the major pentatonic on a blues key", () => {
+    // Mixing it with the minor pentatonic IS the blues guitar sound, and for
+    // a long time a blues key offered no way to see it.
+    expect(scalesForKey(key(9, "blues")).map((s) => s.scale)).toContain("majorPentatonic");
+  });
+
+  it("puts harmonic minor on a minor key", () => {
+    // It was in this file from the start and no key ever offered it.
+    expect(scalesForKey(key(9, "minor")).map((s) => s.scale)).toContain("harmonicMinor");
+  });
+
+  it("names every scale it offers, and plays them all from the key's root", () => {
+    for (const mode of ["major", "minor", "blues"] as KeyMode[]) {
+      for (let root = 0; root < 12; root++) {
+        for (const suggestion of scalesForKey(key(root, mode))) {
+          expect(SCALE_NAMES_EN[suggestion.scale], suggestion.scale).toBeTruthy();
+          expect(suggestion.root, `${mode} ${root} ${suggestion.scale}`).toBe(root);
+          expect(suggestion.pitchClasses.length).toBeGreaterThan(4);
+        }
+      }
+    }
+  });
+
+  it("offers each scale once", () => {
+    for (const mode of ["major", "minor", "blues"] as KeyMode[]) {
+      const ids = scalesForKey(key(9, mode)).map((s) => s.scale);
+      expect(new Set(ids).size, `${mode}: ${ids.join(", ")}`).toBe(ids.length);
     }
   });
 });

@@ -723,6 +723,9 @@
     "majorPentatonic": "메이저 펜타토닉",
     "blues": "블루스",
     "harmonicMinor": "화성 단음계",
+    "lydian": "리디안",
+    "phrygian": "프리지안",
+    "majorBlues": "메이저 블루스",
     "altered": "얼터드"
   }
 }

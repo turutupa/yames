@@ -723,6 +723,9 @@
     "majorPentatonic": "メジャーペンタトニック",
     "blues": "ブルース",
     "harmonicMinor": "ハーモニックマイナー",
+    "lydian": "リディアン",
+    "phrygian": "フリジアン",
+    "majorBlues": "メジャーブルース",
     "altered": "オルタード"
   }
 }

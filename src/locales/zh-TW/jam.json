@@ -723,6 +723,9 @@
     "majorPentatonic": "大調五聲",
     "blues": "藍調",
     "harmonicMinor": "和聲小調",
+    "lydian": "利底亞",
+    "phrygian": "弗里幾亞",
+    "majorBlues": "大調布魯斯",
     "altered": "變化音階"
   }
 }

@@ -723,6 +723,9 @@
     "majorPentatonic": "pentatonique majeure",
     "blues": "blues",
     "harmonicMinor": "mineure harmonique",
+    "lydian": "lydien",
+    "phrygian": "phrygien",
+    "majorBlues": "blues majeur",
     "altered": "altérée"
   }
 }

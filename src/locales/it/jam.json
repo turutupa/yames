@@ -723,6 +723,9 @@
     "majorPentatonic": "pentatonica maggiore",
     "blues": "blues",
     "harmonicMinor": "minore armonica",
+    "lydian": "lidio",
+    "phrygian": "frigio",
+    "majorBlues": "blues maggiore",
     "altered": "alterata"
   }
 }

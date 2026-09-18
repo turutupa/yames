@@ -185,6 +185,35 @@ test.describe("a dropdown menu", () => {
   });
 });
 
+test.describe("the cheat sheet, maximized", () => {
+  test("takes the window but never covers Stop", async ({ page }) => {
+    // The owner asked for it to "use the whole app space", and it does — the
+    // rail and the header are navigation and you are not navigating. The
+    // transport is the exception, and not as a matter of taste: its own
+    // stylesheet says "Play and Stop never go — finding how to stop is the
+    // one thing that must always work".
+    await openShot(page, "jam-chords", { width: 1600, height: 1000 });
+    await page.click(".jam-sheet-grow");
+    await page.evaluate(
+      () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
+    );
+
+    const sheet = (await (await page.waitForSelector(".jam-sheet")).boundingBox())!;
+    const transport = await page.$(".transport");
+    expect(transport, "no transport on the jam screen").toBeTruthy();
+    const stop = (await transport!.boundingBox())!;
+
+    expect(Math.round(sheet.x), "the sheet leaves a gap at the left").toBe(0);
+    expect(Math.round(sheet.width), "the sheet is not the full width").toBe(
+      page.viewportSize()!.width,
+    );
+    expect(
+      Math.round(sheet.y + sheet.height),
+      "the sheet is drawn over the transport",
+    ).toBeLessThanOrEqual(Math.round(stop.y) + 1);
+  });
+});
+
 test.describe("the key, on the playing screen", () => {
   test("opens its menu inside the window", async ({ page }) => {
     // The chip sits at the right-hand end of the header, so a menu hung from

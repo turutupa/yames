@@ -723,6 +723,9 @@
     "majorPentatonic": "pentatónica mayor",
     "blues": "de blues",
     "harmonicMinor": "menor armónica",
+    "lydian": "lidia",
+    "phrygian": "frigia",
+    "majorBlues": "blues mayor",
     "altered": "alterada"
   }
 }
