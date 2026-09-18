@@ -158,7 +158,6 @@
       "doesNotFit": "{{groove}} no entra en {{meter}}; el batería toca la regla."
     },
     "mix": {
-      "label": "Volumen",
       "forLane": "Volumen de {{lane}}"
     },
     "countInSound": {

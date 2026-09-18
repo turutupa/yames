@@ -158,7 +158,6 @@
       "doesNotFit": "{{groove}} passt nicht zu {{meter}}; der Schlagzeuger spielt die Regel."
     },
     "mix": {
-      "label": "Lautstärke",
       "forLane": "Lautstärke {{lane}}"
     },
     "countInSound": {

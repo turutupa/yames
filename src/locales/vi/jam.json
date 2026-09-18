@@ -158,7 +158,6 @@
       "doesNotFit": "{{groove}} không vừa với {{meter}}; tay trống chơi theo quy tắc."
     },
     "mix": {
-      "label": "Âm lượng",
       "forLane": "Âm lượng {{lane}}"
     },
     "countInSound": {

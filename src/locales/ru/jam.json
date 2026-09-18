@@ -158,7 +158,6 @@
       "doesNotFit": "{{groove}} не укладывается в {{meter}}; барабанщик играет по правилу."
     },
     "mix": {
-      "label": "Громкость",
       "forLane": "Громкость: {{lane}}"
     },
     "countInSound": {

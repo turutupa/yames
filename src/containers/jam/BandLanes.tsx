@@ -222,9 +222,13 @@ export function BandLanes({
                 ))
               ) : null}
             </span>
-            {/* The mix. Disabled with the player, because turning up somebody
-                who is not in the band is a control that does nothing, and a
-                slider that does nothing is worse than no slider. */}
+            {/* The mix. Live even for a player who is out (2026-09-17): the
+                old rule was that turning up somebody not in the band is a
+                control that does nothing, and that is wrong twice over.
+                Setting a level before you bring a player in is an ordinary
+                thing to do — so the keys do not arrive at full tilt when you
+                switch them on — and a slider that decides what happens next
+                is not a slider doing nothing. */}
             {/* A div, not a label: the input carries its own `aria-label`, and
                 a label element wrapping it as well would announce the lane
                 twice. */}
@@ -235,7 +239,6 @@ export function BandLanes({
                 max={MAX_GAIN}
                 step={0.05}
                 value={lane.volume}
-                disabled={!lane.on}
                 aria-label={t("jam.mix.forLane", { lane: t(`jam.band.${lane.id}`) })}
                 onChange={(e) => onVolume(lane.id, Number(e.target.value))}
               />

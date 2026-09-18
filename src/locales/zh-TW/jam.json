@@ -158,7 +158,6 @@
       "doesNotFit": "{{groove}} 不適合 {{meter}}，鼓手按通用規則演奏。"
     },
     "mix": {
-      "label": "音量",
       "forLane": "{{lane}} 音量"
     },
     "countInSound": {

@@ -158,7 +158,6 @@
       "doesNotFit": "{{groove}}, {{meter}} ölçüsüne sığmıyor; davulcu kuralı çalıyor."
     },
     "mix": {
-      "label": "Ses",
       "forLane": "{{lane}} sesi"
     },
     "countInSound": {

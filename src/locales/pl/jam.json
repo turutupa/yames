@@ -158,7 +158,6 @@
       "doesNotFit": "{{groove}} nie mieści się w {{meter}}; perkusista gra regułę."
     },
     "mix": {
-      "label": "Głośność",
       "forLane": "Głośność: {{lane}}"
     },
     "countInSound": {

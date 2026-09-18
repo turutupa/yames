@@ -158,7 +158,6 @@
       "doesNotFit": "{{groove}} não cabe em {{meter}}; o baterista toca a regra."
     },
     "mix": {
-      "label": "Volume",
       "forLane": "Volume de {{lane}}"
     },
     "countInSound": {

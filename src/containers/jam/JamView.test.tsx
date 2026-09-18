@@ -1110,12 +1110,17 @@ describe("JamView — the fourth pass's controls", () => {
     );
   });
 
-  it("gives every player a volume, and disables it for one who is out", () => {
+  it("gives every player a volume, and leaves it live for one who is out", () => {
+    // It used to be disabled with the player, on the reasoning that turning
+    // up somebody not in the band is a control that does nothing. That is
+    // wrong twice over: setting a level before you bring a player in is an
+    // ordinary thing to do — so the keys do not arrive at full tilt when the
+    // switch goes on — and a slider that decides what happens next is not a
+    // slider doing nothing.
     const { container } = setup({ jam: jamOf({ band: { drums: true, bass: false, keys: false } }) });
     const sliders = container.querySelectorAll<HTMLInputElement>(".jam-band-volume input");
     expect(sliders).toHaveLength(3);
-    expect(sliders[0].disabled).toBe(false);
-    expect(sliders[1].disabled).toBe(true);
+    expect([...sliders].map((s) => s.disabled)).toEqual([false, false, false]);
   });
 
   it("writes a volume to the mix without disturbing the others", () => {

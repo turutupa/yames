@@ -247,6 +247,14 @@ export function JamSetupSheet({
   const key = jamKey(jam);
 
   /** The on/off switch a player's section wears on its heading. */
+  /** The pair every player's heading carries: how loud, and whether at all. */
+  const playerMix = (id: "drums" | "bass" | "keys" | "perc") => (
+    <>
+      {playerVolume(id)}
+      {playerSwitch(id)}
+    </>
+  );
+
   const playerSwitch = (id: "drums" | "bass" | "keys" | "perc") => {
     const on = !!band[id];
     return (
@@ -277,21 +285,32 @@ export function JamSetupSheet({
     );
   };
 
-  /** A player's volume, under their controls. */
   /**
-   * How loud this player is, as the last line of their section.
+   * How loud this player is — on their heading, beside their on/off switch.
    *
-   * It used to be dropped wherever the section happened to end — inside the
-   * bass's last row, on the keys' voice row, alone under Percussion — and
-   * being right-aligned it then landed at a different height and a different
-   * distance in each one. The owner: "the switches and volumes look all over
-   * the place for these instruments." Every player's section ends with this
-   * same line now, named, so the eye can run down the sheet and find the
-   * same control in the same place four times.
+   * A player's section holds two kinds of control: what they PLAY (the voice,
+   * the style, how busy) and whether they are here and how loud. The second
+   * pair belongs together, and the playing screen has said so all along — its
+   * band rows put the slider and the switch side by side at the right of
+   * every row. Saying it the same way here means the same two controls in the
+   * same relationship in both places, and it takes a whole line out of every
+   * section of a sheet whose besetting sin is length.
+   *
+   * It was the last LINE of the section before that, and before that it was
+   * dropped wherever the section happened to end — the owner: "the switches
+   * and volumes look all over the place for these instruments", and then,
+   * looking at the fix: "should we have a volume bar next to the on off
+   * switch for that instrument?"
+   *
+   * Live even when the player is out. The playing screen used to disable it,
+   * reasoning that turning up somebody who is not in the band is a control
+   * that does nothing — which is wrong twice over: setting a level before you
+   * bring a player in is an ordinary thing to do, so the keys do not arrive
+   * at full tilt when you switch them on, and a slider that sets what happens
+   * next is not a slider doing nothing.
    */
   const playerVolume = (id: "drums" | "bass" | "keys" | "perc") => (
     <div className="jam-player-volume">
-      <span className="stage-label">{t("jam.mix.label")}</span>
       <input
         type="range"
         min={0}
@@ -848,7 +867,7 @@ export function JamSetupSheet({
         label={t("jam.section.drums")}
         lead={t("jam.section.drumsLead")}
         player="drums"
-        control={playerSwitch("drums")}
+        control={playerMix("drums")}
         action={
           jam.customGroove ? (
             <button type="button" className="jam-link" onClick={onOpenEditor}>
@@ -986,7 +1005,6 @@ export function JamSetupSheet({
             })}
           </p>
         )}
-        {band.drums && playerVolume("drums")}
       </JamSheetGroup>
 
       {/* THE BASS. The on/off switch is on the heading; the rest appears
@@ -998,7 +1016,7 @@ export function JamSetupSheet({
         label={t("jam.section.bass")}
         lead={t("jam.section.bassLead")}
         player="bass"
-        control={playerSwitch("bass")}
+        control={playerMix("bass")}
       >
         {band.bass && (
           <div className="jam-player" onPointerEnter={() => warmVoices("bass")}>
@@ -1035,7 +1053,6 @@ export function JamSetupSheet({
             </div>
           </div>
         )}
-        {band.bass && playerVolume("bass")}
       </JamSheetGroup>
 
       {/* THE KEYS. The comping style lives here and on the keys row of the
@@ -1044,7 +1061,7 @@ export function JamSetupSheet({
         label={t("jam.section.keys")}
         lead={t("jam.section.keysLead")}
         player="keys"
-        control={playerSwitch("keys")}
+        control={playerMix("keys")}
       >
         {band.keys && (
           <div className="jam-player" onPointerEnter={() => warmVoices("keys")}>
@@ -1073,7 +1090,6 @@ export function JamSetupSheet({
             </div>
           </div>
         )}
-        {band.keys && playerVolume("keys")}
       </JamSheetGroup>
 
       {/* THE PERCUSSIONIST. Always here even where the groove has none
@@ -1084,9 +1100,8 @@ export function JamSetupSheet({
         label={t("jam.section.perc")}
         lead={t("jam.section.percLead")}
         player="perc"
-        control={playerSwitch("perc")}
+        control={playerMix("perc")}
       >
-        {band.perc && playerVolume("perc")}
       </JamSheetGroup>
 
       {/* MORE. Collapsed, because these are true of maybe one jam in twenty

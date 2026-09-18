@@ -158,7 +158,6 @@
       "doesNotFit": "{{groove}} は {{meter}} に合いません。ドラムはルールで演奏します。"
     },
     "mix": {
-      "label": "音量",
       "forLane": "{{lane}} の音量"
     },
     "countInSound": {

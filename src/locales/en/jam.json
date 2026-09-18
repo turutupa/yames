@@ -158,7 +158,6 @@
       "doesNotFit": "{{groove}} does not fit {{meter}}; the drummer plays the rule."
     },
     "mix": {
-      "label": "Volume",
       "forLane": "{{lane}} volume"
     },
     "countInSound": {

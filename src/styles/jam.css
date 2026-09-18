@@ -1424,8 +1424,8 @@
   cursor: pointer;
 }
 
-/* A slider for somebody who is not in the band would be a control that does
-   nothing, which is worse than no control. */
+/* Nothing is disabled here any more — see BandLanes — but the rule stays for
+   any build that still hands one a `disabled`. */
 .jam-band-volume input[type="range"]:disabled {
   cursor: default;
   opacity: 0.4;
@@ -1906,7 +1906,12 @@
   color: var(--accent);
 }
 
+/* The sheet asks about its own width, not the window's: it is a fixed column
+   beside a stage that changes size, so a media query would be answering about
+   something else entirely. */
 .jam-sheet-body {
+  container-type: inline-size;
+  container-name: sheet;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
@@ -2055,10 +2060,23 @@
   margin-left: 0;
 }
 
-/* The player's on/off switch, against the heading's right edge. */
+/* The player's volume and on/off switch, against the heading's right edge. */
 .jam-sheet-group-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-left: auto;
   align-self: center;
+}
+
+/* The heading is a mark, a name, a sentence and now two controls. The
+   sentence is the part a player can do without, so on a narrow drawer it is
+   the part that goes — a wrapped heading would push the controls onto a line
+   of their own, which is the bug this whole pass has been about. */
+@container sheet (max-width: 520px) {
+  .jam-sheet-group-head > .jam-sheet-lead {
+    display: none;
+  }
 }
 
 /* The one line under a heading that says what the group is for. It takes the
@@ -2576,23 +2594,17 @@
   min-width: 92px;
 }
 
-/* The same last line in every player's section: the word, the slider, the
-   number. Full width and left-aligned, so four sections put it in four
-   identical places rather than four different ones. */
+/* On the heading, beside the switch — the same pair, in the same order, that
+   every band row on the playing screen carries. */
 .jam-player-volume {
   display: flex;
   align-items: center;
-  gap: 10px;
-  width: 100%;
-}
-
-.jam-player-volume .stage-label {
+  gap: 8px;
   flex-shrink: 0;
 }
 
 .jam-player-volume input[type="range"] {
-  flex: 1;
-  max-width: 260px;
+  width: 92px;
   /* The stage's slider, not the browser's: a range left unstyled comes out in
      the OS accent colour, which is the one colour on this screen that is not
      the theme's. */

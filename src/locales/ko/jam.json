@@ -158,7 +158,6 @@
       "doesNotFit": "{{groove}}은(는) {{meter}}에 맞지 않아 드러머가 규칙대로 연주합니다."
     },
     "mix": {
-      "label": "볼륨",
       "forLane": "{{lane}} 음량"
     },
     "countInSound": {
