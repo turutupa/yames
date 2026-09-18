@@ -717,8 +717,68 @@ export function JamSetupSheet({
           </div>
         )}
 
+        {/* How long a BAR is, under how many bars there are.
+
+            It was in a collapsed "More" at the foot of the sheet, where the
+            owner found it and asked the right question: "doesn't the meter
+            belong to the vibe or the form or something?" The form. A form
+            says how long one time round is and a meter says how long a bar
+            is — the same question at two sizes. Its default answer, the
+            groove's own, is what makes this a rare edit rather than one that
+            had to be hidden.
+
+            It must stay INSIDE this group. Moving it out of "More" put it
+            after the closing tag rather than before it, so it drew as a
+            sibling of the sections — no rail, no heading, belonging to
+            nothing — and the owner asked the same question a second time:
+            "why doesn't the meter belong to any section?" */}
+        <div className="jam-setup-block">
+          <span className="stage-label">
+            {t("jam.meter.label")}
+            <span className="jam-setup-value">
+              {jam.meter ? jam.meter.beatGroups.join(" + ") : t("jam.meter.grooves")}
+            </span>
+          </span>
+          <div className="jam-meters" role="group" aria-label={t("jam.meter.label")}>
+            <button
+              type="button"
+              className={`jam-meter${jam.meter ? "" : " active"}`}
+              aria-pressed={!jam.meter}
+              onClick={() => onEdit({ meter: undefined })}
+            >
+              {t("jam.meter.grooves")}
+            </button>
+            {METER_PRESETS.map((preset) => {
+              const on = activeGroups === meterKey(preset.groups);
+              return (
+                <button
+                  key={preset.label}
+                  type="button"
+                  className={`jam-meter${on ? " active" : ""}`}
+                  aria-pressed={on}
+                  onClick={() =>
+                    onEdit({
+                      meter: { beatGroups: [...preset.groups], ticksPerBeat: ticks },
+                      // The count-in is a number of BARS wearing a number
+                      // of beats, so a new meter has to carry it.
+                      countIn: carryCountIn(
+                        jam.countIn,
+                        meter.beatsPerBar,
+                        preset.groups.reduce((sum, n) => sum + n, 0),
+                      ),
+                    })
+                  }
+                >
+                  {preset.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* The feel is the band's, not the drummer's: the bass swings with
-            it too. So it sits with the song. */}
+            it too. So it sits with the song. Last, because it is the one
+            question here that is not about length. */}
         <div className="jam-sheet-row">
           <Segmented
             label={t("jam.feel.label")}
@@ -729,63 +789,6 @@ export function JamSetupSheet({
           />
         </div>
       </JamSheetGroup>
-
-        {/* How long a BAR is, under how many bars there are.
-
-            It was in a collapsed "More" at the foot of the sheet, where the
-            owner found it and asked the right question: "doesn't the meter
-            belong to the vibe or the form or something?" The form. A form
-            says how long one time round is and a meter says how long a bar
-            is — the same question at two sizes. Its default answer, the
-            groove's own, is what makes this a rare edit rather than one that
-            had to be hidden. */}
-          <div className="jam-setup-block">
-            <span className="stage-label">
-              {t("jam.meter.label")}
-              <span className="jam-setup-value">
-                {jam.meter ? jam.meter.beatGroups.join(" + ") : t("jam.meter.grooves")}
-              </span>
-            </span>
-            <div className="jam-meters" role="group" aria-label={t("jam.meter.label")}>
-              <button
-                type="button"
-                className={`jam-meter${jam.meter ? "" : " active"}`}
-                aria-pressed={!jam.meter}
-                onClick={() => onEdit({ meter: undefined })}
-              >
-                {t("jam.meter.grooves")}
-              </button>
-              {METER_PRESETS.map((preset) => {
-                const on = activeGroups === meterKey(preset.groups);
-                return (
-                  <button
-                    key={preset.label}
-                    type="button"
-                    className={`jam-meter${on ? " active" : ""}`}
-                    aria-pressed={on}
-                    onClick={() =>
-                      onEdit({
-                        meter: { beatGroups: [...preset.groups], ticksPerBeat: ticks },
-                        // The count-in is a number of BARS wearing a number
-                        // of beats, so a new meter has to carry it.
-                        countIn: carryCountIn(
-                          jam.countIn,
-                          meter.beatsPerBar,
-                          preset.groups.reduce((sum, n) => sum + n, 0),
-                        ),
-                      })
-                    }
-                  >
-                    {preset.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Transposing unpins too, and for the harder version of the same
-              reason: the chord names all move, so the grip in the corner
-              keeps its diagram and loses its name. */}
 
       {/* THE CHANGES — what everybody plays over (2026-09-17).
 

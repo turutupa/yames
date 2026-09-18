@@ -314,3 +314,40 @@ test.describe("the key, on the playing screen", () => {
     await noSidewaysScroll(page, "the jam screen with the key menu open");
   });
 });
+
+test.describe("a variation chip", () => {
+  test("costs nothing in width when its bars come up", async ({ page }) => {
+    /*
+     * Resting on a chip previews the vibe, and three little bars rise and
+     * fall on the chip to say the band is sounding. They used to be part of
+     * the chip's content, so the chip grew by their width for as long as the
+     * mouse was on it and every chip to its right slid along — the owner
+     * liked the animation and was ready to lose it over this: "maybe we
+     * should get rid of that cool animation unfortunately". It keeps its
+     * animation; the bars are drawn out of the flow, into padding the chips
+     * carry whether or not anything is sounding.
+     *
+     * The mark is put there directly rather than by hovering, because what
+     * broke was the geometry — a mark costs width — and not the hover that
+     * reveals it.
+     */
+    await openShot(page, "jam-setup", { width: 1500, height: 1000 });
+    const chips = ".jam-variations .jam-chip";
+    await page.waitForSelector(chips);
+
+    const widths = () =>
+      page.$$eval(chips, (nodes) => nodes.map((n) => Math.round(n.getBoundingClientRect().width)));
+
+    const before = await widths();
+    expect(before.length, "no variation chips to measure").toBeGreaterThan(1);
+
+    await page.$eval(chips, (chip) => {
+      const mark = document.createElement("span");
+      mark.className = "jam-vibe-playing";
+      mark.innerHTML = "<i></i><i></i><i></i>";
+      chip.appendChild(mark);
+    });
+
+    expect(await widths(), "a sounding chip pushes the row along").toEqual(before);
+  });
+});

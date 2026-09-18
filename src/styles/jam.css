@@ -981,10 +981,28 @@
 }
 
 /* ── Key, meter and the part you read — the setup sheet's blocks ───────── */
+/* A sentence explaining the control directly above it is part of that block,
+   not the next one — so it closes up too, rather than sitting in the middle
+   of the step the eye takes between blocks. */
+.jam-sheet-group > .jam-sheet-row + .jam-sheet-lead {
+  margin-top: -18px;
+}
+
+/* A label and the control it names. Tight, so the pair reads as one thing:
+   the sheet's air belongs between blocks, not inside them. */
 .jam-setup-block {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+}
+
+/* A segmented control carries its own label, and it is the same pair. On the
+   metronome's stage it sits 12px clear of its buttons, which is right there —
+   the stage puts four of these side by side with nothing else between them.
+   In the sheet it is one block among many stacked down a column, so it
+   closes up to match everything around it. */
+.jam-sheet-body .accent-control {
+  gap: 6px;
 }
 
 .jam-setup-row {
@@ -2033,12 +2051,22 @@
      here" — everything arrived as one long column of chips, which is what
      the owner saw: "does it look very cramped to you?".
 
-     Three steps, each about twice the last: 34 between sections, 16 inside
-     one, 8 between a label and the control it names. The last stays tight
-     on purpose — a label belongs to its control, and air there would only
-     cut it loose. Space does this work rather than dividing rules: every
-     section already wears a coloured rail down its left edge, and lines
-     between things that are already marked is clutter. */
+     Three steps, each about twice the last: 34 between sections, 24 between
+     one labelled block and the next inside a section, 6 between a label and
+     the control it names. Space does this work rather than dividing rules:
+     every section already wears a coloured rail down its left edge, and
+     lines between things that are already marked is clutter.
+
+     The third step is the one that makes the other two legible, and it is
+     the one that was wrong. A label used to sit a comfortable 8 or 12
+     pixels above its buttons while the next block began 16 away — near
+     enough the same, so ARRANGEMENT read as belonging to the row above it
+     as readily as the row below, and a section came out as an undivided
+     ladder of labels and chips. The owner: "the title ARRANGEMENT and the
+     row below should have normal margin or can be kept closer, but the next
+     row METER should be a bit further away so the eyes can more easily
+     navigate rows". So the label closes right up on the thing it names, and
+     the air goes where the eye needs to step down. */
   gap: 34px;
   padding: 20px 22px 40px;
 }
@@ -2046,7 +2074,7 @@
 .jam-sheet-group {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
 }
 
 .jam-sheet-group-head {
@@ -2394,6 +2422,34 @@
   height: 10px;
   margin-left: 6px;
   vertical-align: -1px;
+}
+
+/* On a variation chip the bars get a lane of their own.
+ *
+ * A tile is a grid cell with its title against the left edge, so bars
+ * appearing after the title move nothing. A chip is a pill in a wrapping row
+ * with its label centred, so the same bars made the pill sixteen pixels wider
+ * for as long as the mouse rested on it and shoved every chip to its right
+ * along — the owner: "i like the hover animation with the bar sounds moving
+ * up and down on hover... but its making the pill to increment its width
+ * pushing all the content to its right further out".
+ *
+ * Six pixels of extra right padding, on every chip in the row and always, and
+ * the bars are drawn into it out of the flow. The chips are a little wider
+ * than they were and they never change size again; nothing has to move for a
+ * mark that lasts as long as a hover. Keeping the animation, which was the
+ * point — the alternative on the table was deleting it. */
+.jam-variations .jam-chip {
+  position: relative;
+  padding-right: 19px;
+}
+
+.jam-variations .jam-vibe-playing {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  margin-left: 0;
+  transform: translateY(-50%);
 }
 
 .jam-vibe-playing i {

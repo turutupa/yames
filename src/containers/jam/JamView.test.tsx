@@ -721,6 +721,29 @@ describe("JamView — the changes", () => {
  * (plans/JAM_UX_DECISIONS.md A1, A8).
  */
 describe("JamView — the sheets", () => {
+  it("puts every control in the setup sheet inside a section", () => {
+    /*
+     * A section is what tells you whose setting you are looking at: a
+     * heading, a coloured rail down the left, and a name. A control that is
+     * a direct child of the sheet gets none of that — it floats between two
+     * sections looking like it belongs to neither, which is what happened
+     * to the meter when it came out of "More" and landed one line past the
+     * form's closing tag. The owner spotted it twice, the second time
+     * asking the question this test now answers: "why doesn't the meter
+     * belong to any section?"
+     *
+     * happy-dom draws nothing, but it nests perfectly well, and being in
+     * the wrong parent is a nesting fault rather than a drawing one.
+     */
+    const { container } = sheet();
+    const body = container.querySelector(".jam-sheet-body")!;
+    expect(body, "no setup sheet").toBeTruthy();
+    const loose = [...body.children]
+      .filter((child) => !child.classList.contains("jam-sheet-group"))
+      .map((child) => child.className || child.tagName);
+    expect(loose, "these sit between the sections, belonging to none").toEqual([]);
+  });
+
   it("draws neither until it is asked", () => {
     const { container } = setup();
     expect(container.querySelector(".jam-sheet")).toBeNull();
