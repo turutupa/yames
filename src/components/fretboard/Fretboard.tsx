@@ -12,6 +12,7 @@
  * hands the notes over.
  */
 
+import { useState } from "react";
 import { pitchClass, type PitchClass } from "../../jam/harmony";
 import "../../styles/fretboard.css";
 
@@ -53,6 +54,16 @@ export type FretboardProps = {
    */
   startFret?: number;
   highlight: FretboardHighlight;
+  /**
+   * What a note IS, for the label that appears when you rest on it.
+   *
+   * The board draws where the notes are and says nothing about what they are,
+   * which leaves "which one is the flat third" — the question a player is
+   * actually asking of it — unanswered. It still knows nothing about keys or
+   * scales: the caller names the note, this only puts the words on screen.
+   * Absent: no labels, and the board is the picture it always was.
+   */
+  describeNote?: (pitchClass: PitchClass) => string;
   size?: FretboardSize;
   /**
    * Read out to a screen reader. The caller supplies it already translated —
@@ -99,12 +110,17 @@ export default function Fretboard({
   tuning = GUITAR_STANDARD_TUNING,
   frets = 12,
   startFret = 0,
+  describeNote,
   highlight,
   size = "large",
   ariaLabel,
   className,
 }: FretboardProps) {
   const metrics = METRICS[size];
+  /** The note the pointer is on, or null. Only ever one. */
+  const [hovered, setHovered] = useState<{ string: number; fret: number; pc: PitchClass } | null>(
+    null,
+  );
   const fretCount = Math.max(1, Math.floor(frets));
   const nutStart = Math.max(0, Math.floor(startFret)) === 0;
   // The lowest fret with a wire under it. When the board starts at the nut
@@ -263,6 +279,8 @@ export default function Fretboard({
           data-string={dot.string}
           data-pitch-class={dot.pc}
           data-root={dot.root ? "true" : undefined}
+          onPointerEnter={describeNote ? () => setHovered(dot) : undefined}
+          onPointerLeave={describeNote ? () => setHovered(null) : undefined}
         />
       ))}
 
@@ -279,6 +297,39 @@ export default function Fretboard({
           {fret}
         </text>
       ))}
+
+      {/* What the note under the pointer is. Drawn in the board's own
+          coordinates rather than as an HTML layer over it: the board is one
+          SVG and this way it cannot be clipped by anything the board happens
+          to be sitting inside, which on this screen is a drawer that scrolls.
+          Clamped to the board, so a note at either end is still readable. */}
+      {hovered &&
+        describeNote &&
+        (() => {
+          const text = describeNote(hovered.pc);
+          const padX = metrics.fontSize * 0.55;
+          const boxW = text.length * metrics.fontSize * 0.62 + padX * 2;
+          const boxH = metrics.fontSize * 1.9;
+          const cx = fretX(hovered.fret);
+          const left = Math.min(Math.max(cx - boxW / 2, 2), width - boxW - 2);
+          // Above the note, unless the note is on the top string.
+          const above = stringY(hovered.string) - metrics.dotRadius - 5 - boxH;
+          const top = above < 2 ? stringY(hovered.string) + metrics.dotRadius + 5 : above;
+          return (
+            <g className="fretboard-note-label" pointerEvents="none">
+              <rect x={left} y={top} width={boxW} height={boxH} rx={4} />
+              <text
+                x={left + boxW / 2}
+                y={top + boxH / 2}
+                fontSize={metrics.fontSize}
+                textAnchor="middle"
+                dominantBaseline="central"
+              >
+                {text}
+              </text>
+            </g>
+          );
+        })()}
     </svg>
   );
 }

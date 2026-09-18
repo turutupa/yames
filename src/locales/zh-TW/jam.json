@@ -288,7 +288,8 @@
     "fretboard": {
       "label": "指板",
       "aria": "琴頸上的 {{chord}}",
-      "wholeNeck": "{{scale}}，整塊指板 · 演奏時保持不變"
+      "wholeNeck": "整塊指板 · 演奏時保持不變",
+      "scales": "哪個音階"
     },
     "chords": {
       "label": "和弦",
@@ -493,7 +494,9 @@
     },
     "sheet": {
       "setUp": "設定",
-      "done": "完成"
+      "done": "完成",
+      "grow": "鋪滿視窗",
+      "shrink": "回到側欄寬度"
     },
     "vibe": {
       "label": "風格",
@@ -695,6 +698,20 @@
       "sixteenBlues": "16小節藍調",
       "oneChord": "單和弦",
       "ownChords": "你自己輸入的和弦會在對應小節優先演奏。"
+    },
+    "degree": {
+      "root": "1",
+      "flat2": "♭2",
+      "second": "2",
+      "flat3": "♭3",
+      "third": "3",
+      "fourth": "4",
+      "flat5": "♭5",
+      "fifth": "5",
+      "flat6": "♭6",
+      "sixth": "6",
+      "flat7": "♭7",
+      "seventh": "7"
     }
   },
   "scale": {

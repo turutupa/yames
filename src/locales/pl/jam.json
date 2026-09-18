@@ -288,7 +288,8 @@
     "fretboard": {
       "label": "Gryf",
       "aria": "{{chord}} na gryfie",
-      "wholeNeck": "{{scale}}, cały gryf · nie zmienia się, gdy grasz"
+      "wholeNeck": "cały gryf · nie zmienia się, gdy grasz",
+      "scales": "Która skala"
     },
     "chords": {
       "label": "Akordy",
@@ -493,7 +494,9 @@
     },
     "sheet": {
       "setUp": "Ustawienia",
-      "done": "Gotowe"
+      "done": "Gotowe",
+      "grow": "Wypełnij okno",
+      "shrink": "Wróć do kolumny"
     },
     "vibe": {
       "label": "Vibe",
@@ -695,6 +698,20 @@
       "sixteenBlues": "Blues 16-taktowy",
       "oneChord": "Jeden akord",
       "ownChords": "Twoje własne akordy grają na wierzchu tam, gdzie je wpisałeś."
+    },
+    "degree": {
+      "root": "1",
+      "flat2": "♭2",
+      "second": "2",
+      "flat3": "♭3",
+      "third": "3",
+      "fourth": "4",
+      "flat5": "♭5",
+      "fifth": "5",
+      "flat6": "♭6",
+      "sixth": "6",
+      "flat7": "♭7",
+      "seventh": "7"
     }
   },
   "scale": {

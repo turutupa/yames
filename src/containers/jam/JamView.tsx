@@ -337,12 +337,18 @@ export function JamView({
   );
 
   /**
-   * The scale the chord SHEET draws on the neck: the key's, not the chord's.
+   * The scales the chord SHEET can draw on the neck: the key's, not the
+   * chord's.
    *
-   * One box, chosen once from the key, so the fretboard stops swapping under
-   * your hands every four bars (A8).
+   * Chosen from the key and not from the bar, so the fretboard stops swapping
+   * under your hands every four bars (A8). All of them rather than the first
+   * (2026-09-17): a blues key suggests the minor pentatonic, the blues scale
+   * and mixolydian, and the owner asked to "show the other 'main' scales too
+   * and show them like cheatsheet style" — which is the same argument the
+   * chord cheat sheet already won. Which one is drawn is a choice the sheet
+   * owns; this hands over the list.
    */
-  const keyScale = useMemo(() => scalesForKey(harmony.key)[0] ?? null, [harmony.key]);
+  const keyScales = useMemo(() => scalesForKey(harmony.key), [harmony.key]);
 
   /** The chord names the timeline draws, or null when chords are off. */
   const timelineChords = useMemo(
@@ -857,6 +863,10 @@ export function JamView({
           shownSheet && (
             <JamSheet
               kind={shownSheet}
+              // The cheat sheet can fill the region; the setup sheet cannot.
+              // Setup is a column of controls beside the thing they change,
+              // and widening it would cover the band it is being used on.
+              canMaximize={shownSheet === "chords"}
               dim={shownSheet === "setup"}
               closeOnOutside={shownSheet === "setup"}
               title={shownSheet === "setup" ? jam.name : chordTitle.title}
@@ -904,7 +914,7 @@ export function JamView({
                   onEdit={onEdit}
                   playedKey={harmony.key}
                   current={chord}
-                  scale={keyScale}
+                  scales={keyScales}
                   instrument={neck}
                   expanded={screen.pinnedChord}
                   onExpand={screen.setPinnedChord}

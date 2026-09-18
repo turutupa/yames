@@ -688,6 +688,17 @@
    chord sheet's now, at the foot of this file. */
 .jam-fretboard {
   align-self: flex-start;
+  /* The neck is seventeen frets wide now; on a narrow sheet it scrolls
+     rather than squeezing the frets to nothing. */
+  max-width: 100%;
+}
+
+/* Which of the key's scales the neck is drawing. The same chip row the vibe's
+   variations use, because it is the same gesture: one of a short list. */
+.jam-scale-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 /* ── The timeline's chord names and band states ────────────────────────── */
@@ -1839,6 +1850,34 @@
 
 /* The band rows need no rule here any more: the section is its own container
    and its columns answer to its own width, drawer or no drawer. */
+/* Maximized: the cheat sheet fills the region instead of its own column.
+   A page of chord shapes and seventeen frets of neck in 640px is a page you
+   squint at. Not a separate dialog — the same sheet, wider — so the scroll
+   position, the page you were on and the Done button all survive it. */
+.jam-sheet[data-maximized] {
+  width: 100%;
+}
+
+.jam-sheet-grow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid transparent;
+  background: none;
+  color: var(--text-faint);
+  cursor: pointer;
+}
+
+.jam-sheet-grow:hover,
+.jam-sheet-grow[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  color: var(--accent);
+}
+
 .jam-sheet {
   position: absolute;
   top: 56px;
@@ -2595,12 +2634,37 @@
 }
 
 /* On the heading, beside the switch — the same pair, in the same order, that
-   every band row on the playing screen carries. */
+   every band row on the playing screen carries, and wearing the context
+   bar's speaker and "Vol" so a volume looks like a volume everywhere. */
 .jam-player-volume {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   flex-shrink: 0;
+  color: var(--text-faint);
+}
+
+.jam-player-volume-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Both words in the box, the longer one setting its width, one of them
+   visible — so flipping the switch cannot move anything beside it. */
+.jam-switch-state {
+  display: grid;
+  justify-items: start;
+}
+
+.jam-switch-state > * {
+  grid-area: 1 / 1;
+}
+
+.jam-switch-ghost {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .jam-player-volume input[type="range"] {
@@ -2650,10 +2714,23 @@
 /* ── The chord sheet (A8) ──────────────────────────────────────────────────
    A page you glance at. Nothing on it moves unless you ask it to, which is the
    entire reason it is not on the playing screen. */
+/* Four across in the sheet's own column. Maximized there is room for more,
+   and four cards stretched over 1300px is four diagrams adrift in four
+   fields — so the columns are counted from the width instead. */
 .jam-chord-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
+}
+
+@container sheet (min-width: 760px) {
+  .jam-chord-grid {
+    grid-template-columns: repeat(auto-fill, minmax(0, 180px));
+  }
+
+  .jam-chord-shapes {
+    grid-template-columns: repeat(auto-fill, minmax(0, 132px));
+  }
 }
 
 .jam-chord-card {

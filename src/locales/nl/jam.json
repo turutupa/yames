@@ -288,7 +288,8 @@
     "fretboard": {
       "label": "Toets",
       "aria": "{{chord}} op de hals",
-      "wholeNeck": "{{scale}}, de hele hals · blijft staan terwijl je speelt"
+      "wholeNeck": "de hele hals · blijft staan terwijl je speelt",
+      "scales": "Welke toonladder"
     },
     "chords": {
       "label": "Akkoorden",
@@ -493,7 +494,9 @@
     },
     "sheet": {
       "setUp": "Instellen",
-      "done": "Klaar"
+      "done": "Klaar",
+      "grow": "Venster vullen",
+      "shrink": "Terug naar de kolom"
     },
     "vibe": {
       "label": "Vibe",
@@ -695,6 +698,20 @@
       "sixteenBlues": "Blues van 16 maten",
       "oneChord": "Eén akkoord",
       "ownChords": "Je eigen akkoorden klinken eroverheen waar je ze hebt ingevuld."
+    },
+    "degree": {
+      "root": "1",
+      "flat2": "♭2",
+      "second": "2",
+      "flat3": "♭3",
+      "third": "3",
+      "fourth": "4",
+      "flat5": "♭5",
+      "fifth": "5",
+      "flat6": "♭6",
+      "sixth": "6",
+      "flat7": "♭7",
+      "seventh": "7"
     }
   },
   "scale": {

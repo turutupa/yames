@@ -67,3 +67,21 @@
   opacity: 0.7;
   font-variant-numeric: tabular-nums;
 }
+
+/* What the note under the pointer is: its name and what it is doing in the
+   scale. Drawn inside the SVG so nothing the board sits in can clip it. */
+.fretboard-note-label rect {
+  fill: var(--bg-secondary);
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.fretboard-note-label text {
+  fill: var(--text-primary);
+  font-weight: 700;
+}
+
+/* The dot the pointer is on is a target, so it says so. */
+.fretboard-dot {
+  cursor: default;
+}

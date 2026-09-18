@@ -288,7 +288,8 @@
     "fretboard": {
       "label": "Diapasón",
       "aria": "{{chord}} en el mástil",
-      "wholeNeck": "{{scale}}, todo el mástil · no cambia mientras tocas"
+      "wholeNeck": "todo el mástil · no cambia mientras tocas",
+      "scales": "Qué escala"
     },
     "chords": {
       "label": "Acordes",
@@ -493,7 +494,9 @@
     },
     "sheet": {
       "setUp": "Ajustes",
-      "done": "Listo"
+      "done": "Listo",
+      "grow": "Ocupar la ventana",
+      "shrink": "Volver a la columna"
     },
     "vibe": {
       "label": "Vibe",
@@ -695,6 +698,20 @@
       "sixteenBlues": "Blues de 16 compases",
       "oneChord": "Un acorde",
       "ownChords": "Tus propios acordes suenan encima donde los escribiste."
+    },
+    "degree": {
+      "root": "1",
+      "flat2": "♭2",
+      "second": "2",
+      "flat3": "♭3",
+      "third": "3",
+      "fourth": "4",
+      "flat5": "♭5",
+      "fifth": "5",
+      "flat6": "♭6",
+      "sixth": "6",
+      "flat7": "♭7",
+      "seventh": "7"
     }
   },
   "scale": {

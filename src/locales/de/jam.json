@@ -288,7 +288,8 @@
     "fretboard": {
       "label": "Griffbrett",
       "aria": "{{chord}} auf dem Hals",
-      "wholeNeck": "{{scale}}, der ganze Hals · bleibt beim Spielen stehen"
+      "wholeNeck": "der ganze Hals · bleibt beim Spielen stehen",
+      "scales": "Welche Tonleiter"
     },
     "chords": {
       "label": "Akkorde",
@@ -493,7 +494,9 @@
     },
     "sheet": {
       "setUp": "Einrichten",
-      "done": "Fertig"
+      "done": "Fertig",
+      "grow": "Fenster füllen",
+      "shrink": "Zurück zur Spalte"
     },
     "vibe": {
       "label": "Vibe",
@@ -695,6 +698,20 @@
       "sixteenBlues": "16-taktiger Blues",
       "oneChord": "Ein Akkord",
       "ownChords": "Deine eigenen Akkorde spielen dort darüber, wo du sie eingetragen hast."
+    },
+    "degree": {
+      "root": "1",
+      "flat2": "♭2",
+      "second": "2",
+      "flat3": "♭3",
+      "third": "3",
+      "fourth": "4",
+      "flat5": "♭5",
+      "fifth": "5",
+      "flat6": "♭6",
+      "sixth": "6",
+      "flat7": "♭7",
+      "seventh": "7"
     }
   },
   "scale": {

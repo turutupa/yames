@@ -71,6 +71,18 @@ interface JamSheetProps {
   /** For the stylesheet and for tests: `setup` or `chords`. */
   kind: "setup" | "chords";
   /**
+   * Offer to fill the content region rather than the sheet's own column.
+   *
+   * For the chord sheet, which is a cheat sheet: a page of chord shapes and
+   * seventeen frets of neck in a 640px column is a page you squint at, and
+   * the owner asked for "an optional maximize button that opens a dialog so
+   * that users can easily see the cheatsheet". Not a dialog in the end — the
+   * sheet it already is, widened, which keeps the scroll position, the
+   * choices and the Done button rather than building a second copy of the
+   * page that has to be kept in step with the first.
+   */
+  canMaximize?: boolean;
+  /**
    * Close when a press lands on the stage outside the sheet
    * (JAM_UX_DECISIONS A12).
    *
@@ -115,9 +127,11 @@ export function JamSheet({
   kind,
   motion,
   closeOnOutside = false,
+  canMaximize = false,
   children,
 }: JamSheetProps) {
   const { t } = useTranslation();
+  const [maximized, setMaximized] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
 
@@ -244,6 +258,7 @@ export function JamSheet({
         className="jam-sheet motion-sheet"
         data-sheet={kind}
         data-layout={push ? "push" : "overlay"}
+        data-maximized={canMaximize && maximized ? "" : undefined}
         role="region"
         aria-label={title}
         {...motion}
@@ -253,6 +268,25 @@ export function JamSheet({
             <span className="jam-sheet-title">{title}</span>
             {subtitle && <span className="jam-sheet-sub">{subtitle}</span>}
           </div>
+          {canMaximize && (
+            <button
+              type="button"
+              className="jam-sheet-grow"
+              aria-pressed={maximized}
+              aria-label={t(maximized ? "jam.sheet.shrink" : "jam.sheet.grow")}
+              data-explain={t(maximized ? "jam.sheet.shrink" : "jam.sheet.grow")}
+              onClick={() => setMaximized((m) => !m)}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                {maximized ? (
+                  <path d="M9 4v5H4M15 20v-5h5M20 9h-5V4M4 15h5v5" />
+                ) : (
+                  <path d="M4 9V4h5M20 15v5h-5M15 4h5v5M9 20H4v-5" />
+                )}
+              </svg>
+            </button>
+          )}
           <button type="button" className="jam-sheet-done" onClick={onClose}>
             {t("jam.sheet.done")}
           </button>

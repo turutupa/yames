@@ -288,7 +288,8 @@
     "fretboard": {
       "label": "指板",
       "aria": "ネック上の {{chord}}",
-      "wholeNeck": "{{scale}}、ネック全体 · 演奏中も変わりません"
+      "wholeNeck": "ネック全体 · 演奏中も変わりません",
+      "scales": "どのスケール"
     },
     "chords": {
       "label": "コード",
@@ -493,7 +494,9 @@
     },
     "sheet": {
       "setUp": "セットアップ",
-      "done": "完了"
+      "done": "完了",
+      "grow": "ウィンドウいっぱいに",
+      "shrink": "元の幅に戻す"
     },
     "vibe": {
       "label": "バイブ",
@@ -695,6 +698,20 @@
       "sixteenBlues": "16小節ブルース",
       "oneChord": "ワンコード",
       "ownChords": "自分で入力したコードは、その小節で優先されます。"
+    },
+    "degree": {
+      "root": "1",
+      "flat2": "♭2",
+      "second": "2",
+      "flat3": "♭3",
+      "third": "3",
+      "fourth": "4",
+      "flat5": "♭5",
+      "fifth": "5",
+      "flat6": "♭6",
+      "sixth": "6",
+      "flat7": "♭7",
+      "seventh": "7"
     }
   },
   "scale": {

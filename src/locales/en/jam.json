@@ -288,7 +288,8 @@
     "fretboard": {
       "label": "Fretboard",
       "aria": "{{chord}} on the neck",
-      "wholeNeck": "{{scale}}, the whole neck · stays put while you play"
+      "wholeNeck": "the whole neck · stays put while you play",
+      "scales": "Which scale"
     },
     "chords": {
       "label": "Chords",
@@ -493,7 +494,9 @@
     },
     "sheet": {
       "setUp": "Set up",
-      "done": "Done"
+      "done": "Done",
+      "grow": "Fill the window",
+      "shrink": "Back to the column"
     },
     "vibe": {
       "label": "Vibe",
@@ -695,6 +698,20 @@
       "sixteenBlues": "Sixteen-bar blues",
       "oneChord": "One chord",
       "ownChords": "Your own chords play over it where you typed them."
+    },
+    "degree": {
+      "root": "1",
+      "flat2": "♭2",
+      "second": "2",
+      "flat3": "♭3",
+      "third": "3",
+      "fourth": "4",
+      "flat5": "♭5",
+      "fifth": "5",
+      "flat6": "♭6",
+      "sixth": "6",
+      "flat7": "♭7",
+      "seventh": "7"
     }
   },
   "scale": {

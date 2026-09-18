@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChordDiagram } from "../../components/chords";
 import { Fretboard, BASS_STANDARD_TUNING, GUITAR_STANDARD_TUNING } from "../../components/fretboard";
@@ -15,10 +15,32 @@ import {
 } from "../../jam/cheatSheet";
 import type { ChordFamily, ChordFlavour } from "../../jam/cheatSheet";
 import { shapesFor } from "../../jam/chordShapes";
-import { chordName, chordSuffix, keyRootName } from "../../jam/harmony";
+import { chordName, chordSuffix, keyRootName, noteName, spellingForKey } from "../../jam/harmony";
 import type { PlacedShape, Instrument } from "../../jam/chordShapes";
 import type { Chord, Key, PitchClass } from "../../jam/harmony";
 import type { ScaleSuggestion } from "../../jam/scales";
+
+/**
+ * A semitone above the scale's root, named the way a player names it.
+ *
+ * Twelve of them, because a note can be any distance from the root — even the
+ * ones no scale here contains, since the neck shows only the scale's own
+ * notes and this is what names them.
+ */
+const DEGREES = [
+  "root",
+  "flat2",
+  "second",
+  "flat3",
+  "third",
+  "fourth",
+  "flat5",
+  "fifth",
+  "flat6",
+  "sixth",
+  "flat7",
+  "seventh",
+] as const;
 import type { Jam } from "../../jam/types";
 import { Segmented } from "./Segmented";
 
@@ -67,8 +89,11 @@ interface ChordSheetProps {
   playedKey: Key;
   /** The chord the jam is on, or null when chords are off. */
   current: Chord | null;
-  /** The scale to draw on the neck for this key. */
-  scale: ScaleSuggestion | null;
+  /**
+   * The scales this key suggests, best first. The neck draws one of them and
+   * the row above it offers the rest.
+   */
+  scales: readonly ScaleSuggestion[];
   /** Which neck to draw, or null for a player who has none. */
   instrument: Instrument | null;
   /** The chord whose shapes are expanded, or null. Screen state. */
@@ -145,7 +170,7 @@ export function ChordSheet({
   onEdit,
   playedKey,
   current,
-  scale,
+  scales,
   instrument,
   expanded,
   onExpand,
@@ -282,9 +307,34 @@ export function ChordSheet({
    * are not. Open strings are in the key too, and they were off the left-hand
    * edge of it.
    */
+  /**
+   * Which of the key's scales the neck is drawing.
+   *
+   * The first by default — the one a player reaches for — and then whichever
+   * you pick, for the rest of the screen session. Kept here rather than on
+   * the record: it is a way of looking at the key, not a fact about the jam.
+   */
+  const [scaleIndex, setScaleIndex] = useState(0);
+  const scale = scales[Math.min(scaleIndex, scales.length - 1)] ?? null;
   const board = scale
     ? { highlight: { pitchClasses: scale.pitchClasses, rootPitchClass: scale.root } }
     : null;
+
+  /**
+   * What a note on the neck is: its name, and what it is doing in the scale.
+   *
+   * The owner: "can we also add on hover the notes on the fretboard it should
+   * show some info? something like what note that is and also some info of
+   * that note in regards to the scale?" A dot on a fretboard is the one thing
+   * on this screen that says WHERE without saying WHAT, and "which one is the
+   * flat third" is the question a player is actually asking of it.
+   */
+  const describeNote = scale
+    ? (pc: number) => {
+        const name = noteName(pc as PitchClass, spellingForKey(playedKey));
+        return `${name} · ${t(`jam.degree.${DEGREES[(pc - scale.root + 12) % 12]}`)}`;
+      }
+    : undefined;
 
   /** One card. The same card on both pages, which is why Pin works on both. */
   const card = (
@@ -536,19 +586,38 @@ export function ChordSheet({
               {t("jam.fretboard.label")}
             </button>
             {fretboardOpen && scale && (
-              <span className="jam-sheet-lead">
-                {t("jam.fretboard.wholeNeck", {
-                  scale: t(scale.labelKey, { defaultValue: scale.scale }),
-                })}
-              </span>
+              <span className="jam-sheet-lead">{t("jam.fretboard.wholeNeck")}</span>
             )}
           </div>
+          {/* The key's other scales, as a row you tap — the same cheat-sheet
+              gesture the chords above use. A blues key suggests the minor
+              pentatonic, the blues scale and mixolydian, and only the first
+              was ever drawn: the other two existed and nothing offered them. */}
+          {fretboardOpen && scales.length > 1 && (
+            <div className="jam-scale-chips" role="group" aria-label={t("jam.fretboard.scales")}>
+              {scales.map((option, index) => {
+                const on = index === Math.min(scaleIndex, scales.length - 1);
+                return (
+                  <button
+                    key={`${option.scale}-${option.root}`}
+                    type="button"
+                    className={`jam-chip${on ? " active" : ""}`}
+                    aria-pressed={on}
+                    onClick={() => setScaleIndex(index)}
+                  >
+                    {t(option.labelKey, { defaultValue: option.scale })}
+                  </button>
+                );
+              })}
+            </div>
+          )}
           {fretboardOpen && board && (
             <Fretboard
               tuning={instrument === "bass" ? BASS_STANDARD_TUNING : GUITAR_STANDARD_TUNING}
               startFret={0}
               frets={17}
               highlight={board.highlight}
+              describeNote={describeNote}
               size="large"
               className="jam-fretboard"
               ariaLabel={t("jam.fretboard.aria", { chord: keyRootName(playedKey) })}

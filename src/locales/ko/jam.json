@@ -288,7 +288,8 @@
     "fretboard": {
       "label": "지판",
       "aria": "넥 위의 {{chord}}",
-      "wholeNeck": "{{scale}}, 넥 전체 · 연주하는 동안 그대로"
+      "wholeNeck": "넥 전체 · 연주하는 동안 그대로",
+      "scales": "어떤 스케일"
     },
     "chords": {
       "label": "코드",
@@ -493,7 +494,9 @@
     },
     "sheet": {
       "setUp": "설정",
-      "done": "완료"
+      "done": "완료",
+      "grow": "창 가득 채우기",
+      "shrink": "원래 폭으로"
     },
     "vibe": {
       "label": "바이브",
@@ -695,6 +698,20 @@
       "sixteenBlues": "16마디 블루스",
       "oneChord": "원 코드",
       "ownChords": "직접 입력한 코드는 그 마디에서 우선합니다."
+    },
+    "degree": {
+      "root": "1",
+      "flat2": "♭2",
+      "second": "2",
+      "flat3": "♭3",
+      "third": "3",
+      "fourth": "4",
+      "flat5": "♭5",
+      "fifth": "5",
+      "flat6": "♭6",
+      "sixth": "6",
+      "flat7": "♭7",
+      "seventh": "7"
     }
   },
   "scale": {

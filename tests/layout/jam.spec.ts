@@ -118,6 +118,39 @@ test.describe("the band rows with the setup drawer open", () => {
   });
 });
 
+test.describe("a player's heading in the setup drawer", () => {
+  test("puts every player's controls in the same place", async ({ page }) => {
+    // Four sections, four headings, and the volume and switch on each of them
+    // have to line up down the sheet — otherwise the eye has to find them
+    // again in every section.
+    await openShot(page, "jam-setup", { width: 1500, height: 1000 });
+    const lefts = await page.$$eval(".jam-sheet-group-control", (nodes) =>
+      nodes.map((n) => Math.round(n.getBoundingClientRect().left)),
+    );
+    expect(lefts.length, "no player headings on screen").toBeGreaterThan(1);
+    expect(new Set(lefts).size, `the controls start at ${lefts.join(", ")}`).toBe(1);
+  });
+
+  test("does not move when a player is switched on or off", async ({ page }) => {
+    // The switch says "Playing" or "out", which are different lengths, and it
+    // sits at the end of a heading pushed to the right — so every flip used
+    // to drag the slider and the switch sideways. The owner: "each element
+    // must have the same width so it doesn't move left or right".
+    await openShot(page, "jam-setup", { width: 1500, height: 1000 });
+    const control = (await page.$$(".jam-sheet-group-control"))[0];
+    const before = (await control.boundingBox())!;
+
+    await (await control.$('[role="switch"]'))!.click();
+    await page.evaluate(
+      () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
+    );
+    const after = (await control.boundingBox())!;
+
+    expect(Math.round(after.x), "the controls moved sideways").toBe(Math.round(before.x));
+    expect(Math.round(after.width), "the controls changed width").toBe(Math.round(before.width));
+  });
+});
+
 test.describe("a dropdown menu", () => {
   /*
    * Menus hung from their chip's bottom-left corner and were as tall as they

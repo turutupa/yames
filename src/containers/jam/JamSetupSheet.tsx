@@ -192,6 +192,26 @@ export function setupSheetSubtitle(
  * then the form and the band; then, collapsed, the three things that are true
  * of maybe one jam in twenty.
  */
+/** The context bar's speaker, at the size this heading reads at. */
+function SpeakerGlyph() {
+  return (
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M4 9v6h4l5 4V5L8 9H4z" />
+      <path d="M17 9.5a3.5 3.5 0 0 1 0 5" />
+    </svg>
+  );
+}
+
 export function JamSetupSheet({
   jam,
   jams,
@@ -280,7 +300,25 @@ export function JamSetupSheet({
         }}
       >
         <span className="transport-switch-track" aria-hidden="true" />
-        {on ? t("jam.band.playing") : t("jam.band.out")}
+        {/* "Playing" and "out" are different lengths, and the switch sits at
+            the end of a heading that is pushed right — so every flip dragged
+            the volume slider and the switch sideways. The owner: "each
+            element must have the same width so it doesn't move left or
+            right". Both words are in the box and the box is as wide as the
+            longer of them; only one is ever visible. Stacked rather than
+            measured, because which word is longer is a fact about the
+            language being read, not about English. */}
+        <span className="jam-switch-state">
+          <span className="jam-switch-ghost" aria-hidden="true">
+            {t("jam.band.playing")}
+          </span>
+          <span className="jam-switch-ghost" aria-hidden="true">
+            {t("jam.band.out")}
+          </span>
+          <span className="jam-switch-now">
+            {on ? t("jam.band.playing") : t("jam.band.out")}
+          </span>
+        </span>
       </button>
     );
   };
@@ -311,6 +349,14 @@ export function JamSetupSheet({
    */
   const playerVolume = (id: "drums" | "bass" | "keys" | "perc") => (
     <div className="jam-player-volume">
+      {/* The speaker and the word, exactly as the context bar's volume chip
+          wears them. The owner: "could we have a Vol next to it? Or similar?
+          So it looks like the volume bar in the main metronome page (In the
+          top rail) for consistency" — and a bare slider between a sentence
+          and a switch really is the one control on the heading that does not
+          say what it is. */}
+      <SpeakerGlyph />
+      <span className="jam-player-volume-label">{t("volume.short")}</span>
       <input
         type="range"
         min={0}

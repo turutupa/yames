@@ -288,7 +288,8 @@
     "fretboard": {
       "label": "Tastiera",
       "aria": "{{chord}} sul manico",
-      "wholeNeck": "{{scale}}, tutto il manico · resta fermo mentre suoni"
+      "wholeNeck": "tutto il manico · resta fermo mentre suoni",
+      "scales": "Quale scala"
     },
     "chords": {
       "label": "Accordi",
@@ -493,7 +494,9 @@
     },
     "sheet": {
       "setUp": "Impostazioni",
-      "done": "Fatto"
+      "done": "Fatto",
+      "grow": "Riempi la finestra",
+      "shrink": "Torna alla colonna"
     },
     "vibe": {
       "label": "Vibe",
@@ -695,6 +698,20 @@
       "sixteenBlues": "Blues di 16 battute",
       "oneChord": "Un accordo",
       "ownChords": "I tuoi accordi suonano sopra dove li hai scritti."
+    },
+    "degree": {
+      "root": "1",
+      "flat2": "♭2",
+      "second": "2",
+      "flat3": "♭3",
+      "third": "3",
+      "fourth": "4",
+      "flat5": "♭5",
+      "fifth": "5",
+      "flat6": "♭6",
+      "sixth": "6",
+      "flat7": "♭7",
+      "seventh": "7"
     }
   },
   "scale": {

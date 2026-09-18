@@ -288,7 +288,8 @@
     "fretboard": {
       "label": "Manche",
       "aria": "{{chord}} sur le manche",
-      "wholeNeck": "{{scale}}, tout le manche · ne bouge pas pendant que tu joues"
+      "wholeNeck": "tout le manche · ne bouge pas pendant que tu joues",
+      "scales": "Quelle gamme"
     },
     "chords": {
       "label": "Accords",
@@ -493,7 +494,9 @@
     },
     "sheet": {
       "setUp": "Réglages",
-      "done": "Terminé"
+      "done": "Terminé",
+      "grow": "Occuper la fenêtre",
+      "shrink": "Revenir à la colonne"
     },
     "vibe": {
       "label": "Vibe",
@@ -695,6 +698,20 @@
       "sixteenBlues": "Blues de 16 mesures",
       "oneChord": "Un accord",
       "ownChords": "Tes propres accords jouent par-dessus là où tu les as écrits."
+    },
+    "degree": {
+      "root": "1",
+      "flat2": "♭2",
+      "second": "2",
+      "flat3": "♭3",
+      "third": "3",
+      "fourth": "4",
+      "flat5": "♭5",
+      "fifth": "5",
+      "flat6": "♭6",
+      "sixth": "6",
+      "flat7": "♭7",
+      "seventh": "7"
     }
   },
   "scale": {
