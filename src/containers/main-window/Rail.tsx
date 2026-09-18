@@ -41,15 +41,6 @@ interface RailProps {
   onRenameJam: (id: string, name: string) => void;
   onDuplicateJam: (id: string) => void;
   onReorderJams: (from: number, to: number) => void;
-  /**
-   * One tap to a band playing (JAM_KILLER A4), when no jam is open.
-   *
-   * On the rail rather than only on the empty screen because the rail is
-   * where somebody who has not opened Jam yet is looking: a play glyph beside
-   * the mode is the shortest distance there is between "I wonder what that
-   * is" and a band.
-   */
-  onJamNow?: () => void;
   /** A jam, into a setlist, from the library's own context menu (JAM_MODE 8.5). */
   onAddJamToSetlist?: (jamId: string, setlistId: string) => void;
   coachOpen: boolean;
@@ -168,7 +159,6 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
     onDuplicateJam,
     onReorderJams,
     onAddJamToSetlist,
-    onJamNow,
     coachOpen,
     coachActive,
     coachListening,
@@ -202,14 +192,19 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
       aria-label={t("rail.label")}
     >
       <div className="rail-modes">
-        {MODES.map((mode) => {
-          /* Jam, with nothing open, offers to just play (JAM_KILLER A4). A
-             sibling button rather than something inside the mode row, because
-             a button inside a button is not a thing a browser will draw. */
-          const jamNow = mode.id === "jam" && !!onJamNow && !activeJamId;
-          const entry = (
+        {MODES.map((mode) => (
+          /* The row is the entry, highlight and all, so `data-active` puts the
+             fill on the row rather than on the button inside it. It held a
+             second control once — a play glyph beside Jam — which is why it
+             is a row at all; the fill stopping at the button's edge and
+             leaving that glyph on the rail's own background is what made one
+             mode read as two. */
+          <div
+            className="rail-mode-row"
+            key={mode.id}
+            data-active={view === mode.id ? "" : undefined}
+          >
             <button
-              key={mode.id}
               className={`rail-mode ${view === mode.id ? "active" : ""}`}
               // Below 620px the rail is icons only and the label is display:
               // none, which leaves the button with no accessible name at all.
@@ -232,36 +227,17 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
                 {mode.icon}
               </svg>
               <span className="rail-mode-label">{t(mode.labelKey)}</span>
+              {/* Jam is the newest mode and the one still changing under the
+                  people using it. The badge is not an apology — it is what
+                  tells a player that what they are looking at is new, so a
+                  thing that is wrong with it reads as worth reporting rather
+                  than as how the app is. It goes when the mode settles. */}
+              {mode.id === "jam" && (
+                <span className="rail-mode-badge">{t("rail.beta")}</span>
+              )}
             </button>
-          );
-          if (!jamNow) return entry;
-          return (
-            /* The row is the entry, highlight and all: the glyph is part of
-               this mode, not something parked beside it, so `data-active`
-               puts the fill on the row and the button inside it goes
-               transparent. It used to stop at the button's edge and leave the
-               play button sitting on the rail's own background, which read as
-               two controls. */
-            <div
-              className="rail-mode-row"
-              key={mode.id}
-              data-active={view === mode.id ? "" : undefined}
-            >
-              {entry}
-              <button
-                type="button"
-                className="rail-mode-now"
-                aria-label={t("jam.jamNow")}
-                title={t("jam.jamNowLead")}
-                onClick={() => onJamNow?.()}
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M7 4.5v15l13-7.5z" />
-                </svg>
-              </button>
-            </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
 
       <div className="rail-library" data-open={libraryOpen ? "" : undefined}>

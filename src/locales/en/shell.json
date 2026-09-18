@@ -80,6 +80,7 @@
     "collapse": "Collapse sidebar",
     "expand": "Expand sidebar",
     "collapseWithShortcut": "Collapse sidebar ({{shortcut}})",
-    "expandWithShortcut": "Expand sidebar ({{shortcut}})"
+    "expandWithShortcut": "Expand sidebar ({{shortcut}})",
+    "beta": "Beta"
   }
 }

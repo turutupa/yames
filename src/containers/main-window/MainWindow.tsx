@@ -500,18 +500,6 @@ export function MainWindow() {
     setTimeout(() => sidebarRef.current?.triggerRenameJam(created.id), 150);
   }, [jamSession.newJam]);
 
-  /**
-   * Jam now (JAM_KILLER A4) — the tab, then the band.
-   *
-   * The tab first because the hook only puts a jam on the engine while Jam is
-   * the open tab, and this is pressed from the rail with the metronome up as
-   * often as it is pressed from the empty screen. Nothing else: no library, no
-   * name field, no sheet. `jamNow` does the rest and the band counts itself in.
-   */
-  const handleJamNow = useCallback(() => {
-    setView("jam");
-    jamSession.jamNow();
-  }, [setView, jamSession.jamNow]);
 
   /**
    * Play, on the jam tab.
@@ -896,7 +884,6 @@ export function MainWindow() {
     [guarded, handleNewSetlist],
   );
   const newJamGuarded = useCallback(() => guarded(handleNewJam), [guarded, handleNewJam]);
-  const jamNowGuarded = useCallback(() => guarded(handleJamNow), [guarded, handleJamNow]);
 
   /**
    * The row in the library keeps the focus a click gave it. Space would then
@@ -1384,7 +1371,6 @@ export function MainWindow() {
           onRenameJam={jamSession.renameJam}
           onDuplicateJam={jamSession.duplicateJam}
           onReorderJams={jamSession.reorderJams}
-          onJamNow={jamNowGuarded}
           onAddJamToSetlist={(jamId, setlistId) => {
             const jam = jamSession.jams.find((j) => j.id === jamId);
             if (jam) void setlistSession.addJamToSetlist(setlistId, jam);

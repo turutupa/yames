@@ -80,6 +80,7 @@
     "collapse": "사이드바 접기",
     "expand": "사이드바 펼치기",
     "collapseWithShortcut": "사이드바 접기 ({{shortcut}})",
-    "expandWithShortcut": "사이드바 펼치기 ({{shortcut}})"
+    "expandWithShortcut": "사이드바 펼치기 ({{shortcut}})",
+    "beta": "베타"
   }
 }

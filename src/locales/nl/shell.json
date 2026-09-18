@@ -80,6 +80,7 @@
     "collapse": "Zijbalk inklappen",
     "expand": "Zijbalk uitklappen",
     "collapseWithShortcut": "Zijbalk inklappen ({{shortcut}})",
-    "expandWithShortcut": "Zijbalk uitklappen ({{shortcut}})"
+    "expandWithShortcut": "Zijbalk uitklappen ({{shortcut}})",
+    "beta": "Bèta"
   }
 }

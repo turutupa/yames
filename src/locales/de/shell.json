@@ -80,6 +80,7 @@
     "collapse": "Seitenleiste einklappen",
     "expand": "Seitenleiste ausklappen",
     "collapseWithShortcut": "Seitenleiste einklappen ({{shortcut}})",
-    "expandWithShortcut": "Seitenleiste ausklappen ({{shortcut}})"
+    "expandWithShortcut": "Seitenleiste ausklappen ({{shortcut}})",
+    "beta": "Beta"
   }
 }

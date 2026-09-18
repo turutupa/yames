@@ -139,7 +139,21 @@ export function createJam(name: string, fields: NewJamFields = {}): Jam {
     // the band, the key and the practice tools across with everything else.
     ...(fields.key ? { key: fields.key } : {}),
     ...(fields.band ? { band: { ...fields.band } } : {}),
-    ...(fields.chords === undefined ? {} : { chords: fields.chords }),
+    /*
+     * Chords on, unless you are copying a jam that had them off.
+     *
+     * A jam made from nothing used to have them off, and every jam that ships
+     * has them on — so "New jam" was the one place in the app where the NOW
+     * block said "Rock 8ths" instead of the chord you are on, its scales and
+     * the way to the fretboard. The owner hit exactly that and read it as a
+     * difference between their two machines: "on my mac on the left side it
+     * says what key is playing on and other stuff, but on this laptop there's
+     * a space on that top left area".
+     *
+     * It is the headline of the mode. Starting a jam from nothing should not
+     * be the one route that hides it.
+     */
+    chords: fields.chords ?? true,
     // How often the fills land, when it is not just the chorus end. Carried
     // like the rest of the optional half: "another one like this one" means
     // the drummer still plays every four bars.

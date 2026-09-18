@@ -30,7 +30,12 @@
   overflow-x: hidden;
 }
 
+/* The stage asks about its own width. It is a column whose size is decided by
+   the window AND by whether the setup drawer is pushing it, so a media query
+   would be answering about neither. */
 .jam-view {
+  container-type: inline-size;
+  container-name: stage;
   display: flex;
   flex-direction: column;
   gap: 22px;
@@ -900,24 +905,42 @@
  * Capped, because four chips stretched across a 1600px stage is four labels
  * adrift in their own boxes.
  */
+/*
+ * The practice switches: four across, or two and two, and never three and a
+ * stray.
+ *
+ * As a wrapping flex row the fourth one dropped alone onto a second line —
+ * the owner, twice: "it wraps which looks meh", and then "i still don't love
+ * how this wraps... i feel like it should wrap into 2 columns instead of just
+ * one item wrapping". Flex cannot say that: it fits what it can and breaks
+ * wherever it runs out. A grid can, because the number of columns is a
+ * decision rather than a consequence — four while there is room for four, two
+ * the moment there is not.
+ */
 .jam-practice {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto repeat(4, minmax(0, 240px));
   align-items: center;
-  flex-wrap: wrap;
   gap: 10px;
   width: 100%;
 }
 
 .jam-practice .jam-practice-chip {
-  flex: 1 1 0;
-  min-width: 150px;
-  max-width: 240px;
+  /* Stretched, the switch belongs at the far end rather than trailing the
+     word with a pool of empty box after it. */
+  justify-content: space-between;
 }
 
-/* Stretched, the switch belongs at the far end rather than trailing the word
-   with a pool of empty box after it. */
-.jam-practice .jam-practice-chip {
-  justify-content: space-between;
+@container stage (max-width: 880px) {
+  .jam-practice {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* On its own line, because a label in the first column would put two chips
+     on the first row and three on the next. */
+  .jam-practice > .stage-label {
+    grid-column: 1 / -1;
+  }
 }
 
 .jam-practice-chip {
@@ -2999,9 +3022,16 @@
 /* With chords off there is no NOW chord to draw, and the row would collapse
    onto the tempo. The groove's name stands in — it is what the band is
    playing, which is what NOW means on a jam with no changes. */
+/* `.jam-now` is a ROW that aligns its children to the end, which means their
+   BOTTOMS. Turn the same box into a column and "the end" becomes the right —
+   so the quiet readout has been right-aligned all along. It went unnoticed
+   while the box was only as wide as its words; the moment the stage let it
+   take the room it had, "NOW · Rock 8ths" was over by the tempo with the
+   whole left of the screen empty beside it. */
 .jam-now-quiet {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 4px;
 }
 

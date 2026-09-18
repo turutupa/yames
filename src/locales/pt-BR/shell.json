@@ -80,6 +80,7 @@
     "collapse": "Recolher barra lateral",
     "expand": "Expandir barra lateral",
     "collapseWithShortcut": "Recolher barra lateral ({{shortcut}})",
-    "expandWithShortcut": "Expandir barra lateral ({{shortcut}})"
+    "expandWithShortcut": "Expandir barra lateral ({{shortcut}})",
+    "beta": "Beta"
   }
 }

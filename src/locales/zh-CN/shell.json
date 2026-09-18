@@ -80,6 +80,7 @@
     "collapse": "折叠侧边栏",
     "expand": "展开侧边栏",
     "collapseWithShortcut": "折叠侧边栏 ({{shortcut}})",
-    "expandWithShortcut": "展开侧边栏 ({{shortcut}})"
+    "expandWithShortcut": "展开侧边栏 ({{shortcut}})",
+    "beta": "测试版"
   }
 }

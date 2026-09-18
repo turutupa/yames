@@ -80,6 +80,7 @@
     "collapse": "Свернуть боковую панель",
     "expand": "Развернуть боковую панель",
     "collapseWithShortcut": "Свернуть боковую панель ({{shortcut}})",
-    "expandWithShortcut": "Развернуть боковую панель ({{shortcut}})"
+    "expandWithShortcut": "Развернуть боковую панель ({{shortcut}})",
+    "beta": "Бета"
   }
 }

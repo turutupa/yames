@@ -80,6 +80,7 @@
     "collapse": "Réduire la barre latérale",
     "expand": "Développer la barre latérale",
     "collapseWithShortcut": "Réduire la barre latérale ({{shortcut}})",
-    "expandWithShortcut": "Développer la barre latérale ({{shortcut}})"
+    "expandWithShortcut": "Développer la barre latérale ({{shortcut}})",
+    "beta": "Bêta"
   }
 }

@@ -363,3 +363,18 @@ describe("createJam and the vibe", () => {
     expect("shapesFollow" in copy).toBe(false);
   });
 });
+
+describe("what a jam made from nothing starts with", () => {
+  it("shows the chords, like every jam that ships does", () => {
+    // It used to be the one route in the app that hid them, so the NOW block
+    // said "Rock 8ths" where every starter says the chord you are on, its
+    // scales and the way to the fretboard. The owner read the difference as
+    // one between their two machines rather than between two jams.
+    expect(createJam("New jam").chords).toBe(true);
+  });
+
+  it("keeps them off when copying a jam that had them off", () => {
+    // "Another one like this one" means like THIS one.
+    expect(createJam("Copy", { chords: false }).chords).toBe(false);
+  });
+});

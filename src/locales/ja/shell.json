@@ -80,6 +80,7 @@
     "collapse": "サイドバーを折りたたむ",
     "expand": "サイドバーを展開",
     "collapseWithShortcut": "サイドバーを折りたたむ ({{shortcut}})",
-    "expandWithShortcut": "サイドバーを展開 ({{shortcut}})"
+    "expandWithShortcut": "サイドバーを展開 ({{shortcut}})",
+    "beta": "ベータ"
   }
 }

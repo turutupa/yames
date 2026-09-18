@@ -1184,6 +1184,24 @@ button.jam-vibe-chip:hover {
   color: var(--accent);
 }
 
+/* "Beta", after the mode's name. Not an apology — it is what tells a player
+   that what they are looking at is new, so a thing that is wrong with it
+   reads as worth reporting rather than as how the app is. Quiet: it is a
+   note about the mode, not a second name for it. */
+.rail-mode-badge {
+  flex-shrink: 0;
+  padding: 1px 5px;
+  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: color-mix(in srgb, var(--accent) 85%, var(--text-primary));
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 .rail-mode-label {
   white-space: nowrap;
   overflow: hidden;
@@ -1758,6 +1776,7 @@ button.jam-vibe-chip:hover {
   }
 
   .rail-mode-label,
+  .rail-mode-badge,
   .rail-action-label,
   .rail-action-status,
   .rail-library,
@@ -1794,6 +1813,7 @@ button.jam-vibe-chip:hover {
   }
 
   .rail[data-library-open] .rail-mode-label,
+  .rail[data-library-open] .rail-mode-badge,
   .rail[data-library-open] .rail-action-label,
   .rail[data-library-open] .rail-action-status,
   .rail[data-library-open] .rail-library,
@@ -2243,6 +2263,7 @@ button.jam-vibe-chip:hover {
 }
 
 .rail[data-collapsed] .rail-mode-label,
+.rail[data-collapsed] .rail-mode-badge,
 .rail[data-collapsed] .rail-action-label,
 .rail[data-collapsed] .rail-action-status,
 .rail[data-collapsed] .rail-library {

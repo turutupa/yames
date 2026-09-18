@@ -80,6 +80,7 @@
     "collapse": "Zwiń panel boczny",
     "expand": "Rozwiń panel boczny",
     "collapseWithShortcut": "Zwiń panel boczny ({{shortcut}})",
-    "expandWithShortcut": "Rozwiń panel boczny ({{shortcut}})"
+    "expandWithShortcut": "Rozwiń panel boczny ({{shortcut}})",
+    "beta": "Beta"
   }
 }

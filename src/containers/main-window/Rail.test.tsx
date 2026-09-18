@@ -204,24 +204,37 @@ describe("Rail", () => {
     );
   });
 
-  it("draws the play glyph inside the entry's highlight, not beside it", () => {
-    // The owner: "can we have the background effect to include the play
-    // button please?" The fill was painted on the mode BUTTON, which stops at
-    // the label, so the glyph sat on the rail's own background and one mode
-    // read as two controls.
-    const { container } = setup({ view: "jam", onJamNow: vi.fn(), activeJamId: null });
+  it("marks the active mode on its row, not on the button inside it", () => {
+    // The fill is the ROW's, with the button inside it cleared, or the two
+    // backgrounds would draw a seam down the middle of one shape. The row
+    // held a second control once — a play glyph beside Jam — which is why
+    // this is a row at all.
+    const { container } = setup({ view: "jam" });
     const row = container.querySelector(".rail-mode-row[data-active]");
     expect(row, "the active mode's row is not marked active").toBeTruthy();
-    expect(row!.querySelector(".rail-mode-now"), "the glyph is outside the entry").toBeTruthy();
+    expect(row!.querySelector(".rail-mode.active"), "no active button in it").toBeTruthy();
 
-    // And the fill is the ROW's, with the button inside it cleared, or the
-    // two backgrounds would draw a seam down the middle of one shape.
     const css = readStylesheet();
     const fill = css.slice(css.indexOf(".rail-mode-row[data-active] {"));
     expect(fill.slice(0, fill.indexOf("}"))).toContain("background: var(--accent-subtle)");
     const cleared = css.indexOf(".rail-mode-row[data-active] .rail-mode.active");
     expect(cleared, "the button inside an active row is not cleared").toBeGreaterThan(-1);
     expect(css.slice(cleared, css.indexOf("}", cleared))).toContain("background: transparent");
+  });
+
+  it("says Jam is new, and says it only where the rail has words", () => {
+    // The owner: "should we also add a BETA badge next to jam too?" — on the
+    // newest mode and on no other. It hides with the labels when the rail is
+    // icons only: a badge beside an icon, with no name to qualify, is a word
+    // floating on its own.
+    const { container } = setup();
+    const badges = [...container.querySelectorAll(".rail-mode-badge")];
+    expect(badges).toHaveLength(1);
+    expect(badges[0].closest(".rail-mode")?.textContent).toContain("Jam");
+
+    const css = readStylesheet();
+    const strip = css.slice(css.indexOf("@media (max-width: 619px) {"));
+    expect(strip.slice(0, strip.indexOf("display: none;"))).toContain(".rail-mode-badge");
   });
 
   it("keeps Zen and the widget adjacent — the tour spotlights them together", () => {

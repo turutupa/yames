@@ -151,6 +151,35 @@ test.describe("a player's heading in the setup drawer", () => {
   });
 });
 
+test.describe("the practice switches", () => {
+  /*
+   * Reported twice: "it wraps which looks meh", and then "i still don't love
+   * how this wraps... i feel like it should wrap into 2 columns instead of
+   * just one item wrapping". Four across or two and two — never three and a
+   * stray, which is what a flex row does when it runs out of space.
+   */
+  for (const size of [
+    { name: "wide", width: 1500, height: 1000, rows: 1 },
+    { name: "narrow", width: 900, height: 1000, rows: 2 },
+  ]) {
+    test(`sit in ${size.rows} row(s) at ${size.name} (${size.width}px)`, async ({ page }) => {
+      await openShot(page, "jam", size);
+      const tops = await page.$$eval(".jam-practice .jam-practice-chip", (nodes) =>
+        nodes.map((n) => Math.round(n.getBoundingClientRect().top)),
+      );
+      expect(tops.length, "no practice switches on screen").toBeGreaterThan(2);
+
+      const rows = [...new Set(tops)].sort((a, b) => a - b);
+      expect(rows.length, `the switches are on ${rows.length} lines`).toBe(size.rows);
+      // Two lines means two and two, not three and one.
+      if (rows.length === 2) {
+        const counts = rows.map((top) => tops.filter((t) => t === top).length);
+        expect(counts[0], `${counts.join(" then ")}`).toBe(counts[1]);
+      }
+    });
+  }
+});
+
 test.describe("a dropdown menu", () => {
   /*
    * Menus hung from their chip's bottom-left corner and were as tall as they

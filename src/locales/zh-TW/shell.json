@@ -80,6 +80,7 @@
     "collapse": "摺疊側邊欄",
     "expand": "展開側邊欄",
     "collapseWithShortcut": "摺疊側邊欄 ({{shortcut}})",
-    "expandWithShortcut": "展開側邊欄 ({{shortcut}})"
+    "expandWithShortcut": "展開側邊欄 ({{shortcut}})",
+    "beta": "測試版"
   }
 }
