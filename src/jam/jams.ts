@@ -351,6 +351,26 @@ function starter(id: string, name: string, fields: StarterFields): Jam {
  * where a jam came from. The six the first pass wrote are first and unchanged
  * but for that pair of fields.
  */
+/**
+ * A jam read back from the store, with a default filled in that the record
+ * predates (2026-09-18).
+ *
+ * Only `chords`, and only when it is ABSENT. Every jam the app ships has the
+ * chord names on and every jam made from now on does too — but a jam saved
+ * before that default changed carries no `chords` field at all, and absent
+ * read as off. So the owner's own jams would open with the timeline bare and
+ * no reason on screen for it, which is the exact confusion the default was
+ * changed to end.
+ *
+ * Absent and `false` are different answers and this only touches the first.
+ * The switch writes `false` when you turn it off, so a jam you deliberately
+ * quietened stays quiet; a jam that never had the question put to it gets the
+ * answer everything else gets.
+ */
+export function carriedForward(jam: Jam): Jam {
+  return jam.chords === undefined ? { ...jam, chords: true } : jam;
+}
+
 export const STARTER_JAMS: readonly Jam[] = [
   {
     id: "jam-slow-blues-a",

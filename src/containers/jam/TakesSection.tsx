@@ -84,16 +84,19 @@ export function TakesSection({
 
   return (
     <section className="jam-takes" aria-label={t("jam.takes.label")}>
-      <div className="jam-section-head">
-        <span className="stage-label">{t("jam.takes.label")}</span>
-        {/* Only once the folder is worth mentioning. Below the threshold a
-            number here would be clutter on a screen read at arm's length. */}
-        {available && heavy && (
+      {/* No heading of its own since the takes became a section of the sheet
+          rather than the tail of "More": the section says TAKES above this,
+          and saying it twice in six lines is the drawer talking to itself.
+          The size still belongs here — it is about the folder, not about the
+          feature — and only once the folder is worth mentioning, since below
+          the threshold a number is clutter on a screen read at arm's length. */}
+      {available && heavy && (
+        <div className="jam-section-head">
           <span className="jam-takes-size">
             {t("jam.takes.size", { megabytes: megabytes(dirBytes) })}
           </span>
-        )}
-      </div>
+        </div>
+      )}
 
       {available === false ? (
         <p className="jam-takes-empty">{t("jam.takes.unavailable")}</p>

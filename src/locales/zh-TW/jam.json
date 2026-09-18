@@ -477,6 +477,7 @@
     },
     "takes": {
       "label": "錄音",
+      "lead": "你彈過的，留著回聽",
       "record": "錄下這一遍",
       "recording": "錄音中",
       "recordingNow": "正在錄音。停下時會出現在這裡。",
@@ -556,10 +557,6 @@
       "train": "火車節奏",
       "twoStep": "兩步舞",
       "waltz": "華爾滋"
-    },
-    "more": {
-      "label": "更多",
-      "lead": "拍號 · 你讀的調 · 錄音"
     },
     "bassVoice": {
       "label": "音色",

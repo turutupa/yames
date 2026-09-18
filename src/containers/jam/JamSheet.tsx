@@ -326,7 +326,7 @@ export function JamSheetGroup({
    * never has to be read to know who it belongs to — the owner's ask: "the
    * UI clearly shows what setting you are modifying".
    */
-  player?: "vibe" | "form" | "changes" | "drums" | "bass" | "keys" | "perc";
+  player?: "vibe" | "form" | "changes" | "takes" | "drums" | "bass" | "keys" | "perc";
   /** The player's on/off switch, on the heading's right. */
   control?: React.ReactNode;
   children?: React.ReactNode;
@@ -377,6 +377,13 @@ function PlayerMark({ player }: { player: NonNullable<Parameters<typeof JamSheet
         <path d="M9 18V6l10-2v12" />
         <circle cx="6.5" cy="18" r="2.5" />
         <circle cx="16.5" cy="16" r="2.5" />
+      </>
+    ),
+    /* Takes: a circle, the way a record button has always been drawn. */
+    takes: (
+      <>
+        <circle cx="12" cy="12" r="7" />
+        <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
       </>
     ),
     // A drum.

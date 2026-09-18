@@ -17,6 +17,7 @@ import {
 import {
   GROOVES,
   STARTER_JAMS,
+  carriedForward,
   applyVibe,
   bandMoment,
   carryCountIn,
@@ -584,7 +585,7 @@ export function useJamSession({
           await saveJams(seeded).catch(() => {});
           return;
         }
-        setJams(stored);
+        setJams(stored.map(carriedForward));
       })
       .catch(() => {})
       // Whatever it said, and even if it said nothing: the restore below is

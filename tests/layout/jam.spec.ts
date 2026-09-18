@@ -124,7 +124,13 @@ test.describe("a player's heading in the setup drawer", () => {
     // have to line up down the sheet — otherwise the eye has to find them
     // again in every section.
     await openShot(page, "jam-setup", { width: 1500, height: 1000 });
-    const lefts = await page.$$eval(".jam-sheet-group-control", (nodes) =>
+    // The PLAYERS. Takes wears a switch on its heading too, but it carries no
+    // volume beside it and is not somebody you hire, so it has no business
+    // lining up with them.
+    const players = ["drums", "bass", "keys", "perc"]
+      .map((p) => `.jam-sheet-group[data-player="${p}"] .jam-sheet-group-control`)
+      .join(", ");
+    const lefts = await page.$$eval(players, (nodes) =>
       nodes.map((n) => Math.round(n.getBoundingClientRect().left)),
     );
     expect(lefts.length, "no player headings on screen").toBeGreaterThan(1);
@@ -137,7 +143,9 @@ test.describe("a player's heading in the setup drawer", () => {
     // to drag the slider and the switch sideways. The owner: "each element
     // must have the same width so it doesn't move left or right".
     await openShot(page, "jam-setup", { width: 1500, height: 1000 });
-    const control = (await page.$$(".jam-sheet-group-control"))[0];
+    const control = (await page.$(
+      '.jam-sheet-group[data-player="drums"] .jam-sheet-group-control',
+    ))!;
     const before = (await control.boundingBox())!;
 
     await (await control.$('[role="switch"]'))!.click();

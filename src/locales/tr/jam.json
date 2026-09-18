@@ -477,6 +477,7 @@
     },
     "takes": {
       "label": "Kayıtlar",
+      "lead": "çaldıkların, sonra dinlemek için",
       "record": "Kaydı al",
       "recording": "Kaydediliyor",
       "recordingNow": "Kaydediliyor. Durdurduğunda buraya düşer.",
@@ -556,10 +557,6 @@
       "train": "Train",
       "twoStep": "Two-step",
       "waltz": "Vals"
-    },
-    "more": {
-      "label": "Daha fazla",
-      "lead": "ölçü · ne okuduğun · kayıtlar"
     },
     "bassVoice": {
       "label": "Tını",

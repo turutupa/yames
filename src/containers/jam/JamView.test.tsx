@@ -196,16 +196,16 @@ function chordSheet(
 }
 
 /**
- * The setup sheet with MORE expanded — the meter, what you read, and takes.
+ * The setup sheet, with the settings that used to be folded into "More".
  *
- * Collapsed by default (A3) and opened by a click, because that is the only
- * way a person gets there and the collapse is itself the decision under test
- * everywhere else on this sheet.
+ * They are not folded any more: the meter went to the form, what you read
+ * went to the changes, and the takes got a section of their own. The helper
+ * survives its own disclosure because every caller of it is a test about one
+ * of those three, and what they assert did not change — only where you find
+ * the control did.
  */
 function sheetWithMore(overrides: Partial<React.ComponentProps<typeof JamView>> = {}) {
-  const rendered = sheet(overrides);
-  fireEvent.click(rendered.container.querySelector(".jam-more-toggle") as HTMLElement);
-  return rendered;
+  return sheet(overrides);
 }
 
 afterEach(() => {
@@ -1258,13 +1258,15 @@ describe("JamView — the fourth pass's controls", () => {
     const { container } = sheet({ jam: jamOf({ grooveId: "metalThrash" }) });
     // One section per player (2026-09-16), each with its switch on the
     // heading, named for the player it hires.
+    // The four PLAYERS, in order. Takes wears a switch on its heading too —
+    // recording is something you turn on and forget, so it sits where the eye
+    // already looks for a switch — but it is not somebody you hire, so it is
+    // named rather than counted here.
     const switches = [...container.querySelectorAll("section[data-player] .jam-sheet-group-control [role=switch]")];
-    expect(switches.map((s) => s.getAttribute("aria-label"))).toEqual([
-      "Drums",
-      "Bass",
-      "Keys",
-      "Percussion",
-    ]);
+    const hired = switches
+      .map((s) => s.getAttribute("aria-label"))
+      .filter((name) => name !== null && !/take/i.test(name));
+    expect(hired).toEqual(["Drums", "Bass", "Keys", "Percussion"]);
   });
 
   it("gives the percussionist a volume in the sheet once they are hired", () => {

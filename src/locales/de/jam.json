@@ -476,7 +476,8 @@
       "percPicker": "Ein Perkussionsinstrument hinzufügen"
     },
     "takes": {
-      "label": "Takes",
+      "label": "Aufnahmen",
+      "lead": "was du gespielt hast, zum Nachhören",
       "record": "Take aufnehmen",
       "recording": "Nimmt auf",
       "recordingNow": "Nimmt auf. Der Take erscheint hier, sobald du stoppst.",
@@ -556,10 +557,6 @@
       "train": "Train",
       "twoStep": "Two-Step",
       "waltz": "Walzer"
-    },
-    "more": {
-      "label": "Mehr",
-      "lead": "Taktart · was du liest · Aufnahmen"
     },
     "bassVoice": {
       "label": "Klang",

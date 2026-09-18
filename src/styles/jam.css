@@ -806,7 +806,14 @@
    other down the screen. */
 .jam-band-lane {
   display: grid;
-  grid-template-columns: 104px 150px minmax(0, auto) minmax(0, 1fr) auto auto;
+  /* The picker's track is a FIXED width, not `auto`. Every lane is its own
+     grid, so an `auto` track sized to that row's own text and the three
+     pickers came out three different widths down the screen — the owner:
+     "should these dropdowns in the main jam page have same width for
+     consistency?" They should: they are the same control asked three times,
+     and the answer being longer on one row is not a reason for the box to be.
+     A long value ellipsises, and the menu shows it in full. */
+  grid-template-columns: 104px 150px minmax(0, 280px) minmax(0, 1fr) auto auto;
   align-items: center;
   column-gap: 16px;
   min-height: 42px;
@@ -2054,7 +2061,8 @@
    as loudly as the drummer would say they are people too. */
 .jam-sheet-group[data-player="vibe"],
 .jam-sheet-group[data-player="form"],
-.jam-sheet-group[data-player="changes"] {
+.jam-sheet-group[data-player="changes"],
+.jam-sheet-group[data-player="takes"] {
   --player: var(--text-secondary);
 }
 

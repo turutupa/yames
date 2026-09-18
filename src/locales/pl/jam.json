@@ -477,6 +477,7 @@
     },
     "takes": {
       "label": "Nagrania",
+      "lead": "to, co zagrałeś, do odsłuchania",
       "record": "Nagraj takę",
       "recording": "Nagrywanie",
       "recordingNow": "Nagrywanie. Take pojawi się tutaj, gdy przerwiesz.",
@@ -556,10 +557,6 @@
       "train": "Train",
       "twoStep": "Two-step",
       "waltz": "Walc"
-    },
-    "more": {
-      "label": "Więcej",
-      "lead": "metrum · co czytasz · nagrania"
     },
     "bassVoice": {
       "label": "Brzmienie",

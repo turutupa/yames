@@ -477,6 +477,7 @@
     },
     "takes": {
       "label": "Prises",
+      "lead": "ce que tu as joué, gardé pour le réécouter",
       "record": "Enregistrer la prise",
       "recording": "Enregistrement",
       "recordingNow": "Enregistrement en cours. La prise apparaît ici quand tu arrêtes.",
@@ -556,10 +557,6 @@
       "train": "Train",
       "twoStep": "Two-step",
       "waltz": "Valse"
-    },
-    "more": {
-      "label": "Plus",
-      "lead": "mesure · ce que tu lis · prises"
     },
     "bassVoice": {
       "label": "Son",

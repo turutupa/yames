@@ -476,7 +476,8 @@
       "percPicker": "パーカッションを追加"
     },
     "takes": {
-      "label": "テイク",
+      "label": "録音",
+      "lead": "弾いたものを、聴き返すために",
       "record": "テイクを録音",
       "recording": "録音中",
       "recordingNow": "録音中です。停止するとここに並びます。",
@@ -556,10 +557,6 @@
       "train": "トレイン",
       "twoStep": "ツーステップ",
       "waltz": "ワルツ"
-    },
-    "more": {
-      "label": "その他",
-      "lead": "拍子 · 読む譜 · 録音"
     },
     "bassVoice": {
       "label": "音色",

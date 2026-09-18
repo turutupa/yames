@@ -476,7 +476,8 @@
       "percPicker": "Thêm một nhạc cụ gõ"
     },
     "takes": {
-      "label": "Bản thu",
+      "label": "Bản ghi",
+      "lead": "những gì bạn đã chơi, để nghe lại",
       "record": "Thu bản này",
       "recording": "Đang thu",
       "recordingNow": "Đang thu. Bản thu sẽ hiện ở đây khi bạn dừng.",
@@ -556,10 +557,6 @@
       "train": "Train",
       "twoStep": "Two-step",
       "waltz": "Waltz"
-    },
-    "more": {
-      "label": "Thêm",
-      "lead": "loại nhịp · thứ bạn đọc · bản ghi"
     },
     "bassVoice": {
       "label": "Âm sắc",

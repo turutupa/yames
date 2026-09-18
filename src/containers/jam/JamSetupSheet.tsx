@@ -232,7 +232,6 @@ export function JamSetupSheet({
   onToggleTakes,
 }: JamSetupSheetProps) {
   const { t } = useTranslation();
-  const [moreOpen, setMoreOpen] = useState(false);
   /** Which roles' voices this sheet has already asked to be built. Once each. */
   const warmedRef = useRef({ bass: false, keys: false });
   /**
@@ -731,6 +730,63 @@ export function JamSetupSheet({
         </div>
       </JamSheetGroup>
 
+        {/* How long a BAR is, under how many bars there are.
+
+            It was in a collapsed "More" at the foot of the sheet, where the
+            owner found it and asked the right question: "doesn't the meter
+            belong to the vibe or the form or something?" The form. A form
+            says how long one time round is and a meter says how long a bar
+            is — the same question at two sizes. Its default answer, the
+            groove's own, is what makes this a rare edit rather than one that
+            had to be hidden. */}
+          <div className="jam-setup-block">
+            <span className="stage-label">
+              {t("jam.meter.label")}
+              <span className="jam-setup-value">
+                {jam.meter ? jam.meter.beatGroups.join(" + ") : t("jam.meter.grooves")}
+              </span>
+            </span>
+            <div className="jam-meters" role="group" aria-label={t("jam.meter.label")}>
+              <button
+                type="button"
+                className={`jam-meter${jam.meter ? "" : " active"}`}
+                aria-pressed={!jam.meter}
+                onClick={() => onEdit({ meter: undefined })}
+              >
+                {t("jam.meter.grooves")}
+              </button>
+              {METER_PRESETS.map((preset) => {
+                const on = activeGroups === meterKey(preset.groups);
+                return (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    className={`jam-meter${on ? " active" : ""}`}
+                    aria-pressed={on}
+                    onClick={() =>
+                      onEdit({
+                        meter: { beatGroups: [...preset.groups], ticksPerBeat: ticks },
+                        // The count-in is a number of BARS wearing a number
+                        // of beats, so a new meter has to carry it.
+                        countIn: carryCountIn(
+                          jam.countIn,
+                          meter.beatsPerBar,
+                          preset.groups.reduce((sum, n) => sum + n, 0),
+                        ),
+                      })
+                    }
+                  >
+                    {preset.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Transposing unpins too, and for the harder version of the same
+              reason: the chord names all move, so the grip in the corner
+              keeps its diagram and loses its name. */}
+
       {/* THE CHANGES — what everybody plays over (2026-09-17).
 
           One section until the owner said "the song section is super messy...
@@ -907,6 +963,35 @@ export function JamSetupSheet({
           </button>
           <span className="jam-sheet-lead">{t("jam.chords.hint")}</span>
         </div>
+
+        {/* What you READ, which is not always what the band plays: a B flat
+            instrument reads a tone up. It belongs with the changes because
+            that is the whole of what it changes — the names on the chords,
+            here and on the neck. */}
+          {transpositionApplies(instrument) && (
+            <div
+              className="accent-control jam-segmented"
+              role="group"
+              aria-label={t("jam.transposition.label")}
+            >
+              <span className="stage-label accent-label">{t("jam.transposition.label")}</span>
+              <div className="accent-options">
+                {TRANSPOSITION_OPTIONS.map((option: TranspositionOption) => (
+                  <button
+                    key={option}
+                    type="button"
+                    className={`accent-option${
+                      (jam.transposition ?? "concert") === option ? " active" : ""
+                    }`}
+                    aria-pressed={(jam.transposition ?? "concert") === option}
+                    onClick={() => onEdit({ transposition: option, pinnedShape: null })}
+                  >
+                    {t(`jam.transposition.${option}`)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
       </JamSheetGroup>
 
       <JamSheetGroup
@@ -1152,119 +1237,40 @@ export function JamSetupSheet({
 
       {/* MORE. Collapsed, because these are true of maybe one jam in twenty
           and the sheet's whole job is to stop being a wall (A3). */}
-      <section className="jam-sheet-group jam-sheet-more">
-        <button
-          type="button"
-          className="jam-more-toggle"
-          aria-expanded={moreOpen}
-          onClick={() => setMoreOpen((open) => !open)}
-        >
-          <span className="stage-label">{t("jam.more.label")}</span>
-          <span className="jam-sheet-lead">{t("jam.more.lead")}</span>
-          <svg
-            width="11"
-            height="11"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-            data-open={moreOpen ? "" : undefined}
+
+      {/* TAKES — a section of its own, and not folded away (2026-09-18).
+
+          It was the last third of a collapsed "More", which is where the
+          owner went looking and concluded the feature did not exist: "we
+          don't even have an option on the ui yet to show the recordings". It
+          did, three clicks down. A heading and one line of empty state is a
+          cheap price for a thing being findable, and recording is the one
+          part of the sheet that makes something you would come back for.
+
+          The switch sits directly above the list it fills, which is also why
+          it left the practice row on the playing screen — it was in both
+          places, and this is the one with the recordings in it. */}
+      <JamSheetGroup
+        label={t("jam.takes.label")}
+        lead={t("jam.takes.lead")}
+        player="takes"
+        /* On the heading, where every player's switch is. Recording is the
+           one thing in this drawer you turn on and then forget about, so it
+           belongs where the eye already looks for a switch. */
+        control={
+          <button
+            type="button"
+            role="switch"
+            aria-checked={!!jam.takes}
+            className={`transport-switch jam-switch ${jam.takes ? "on" : ""}`}
+            disabled={takes.available === false}
+            onClick={() => onToggleTakes(!jam.takes)}
           >
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-        </button>
-
-        {moreOpen && (
-          <div className="jam-more-body">
-            {/* The meter, given to the jam rather than borrowed from the
-                groove. Ticks per beat is gone from here (A4): the groove
-                decides it, and a meter override implies it. */}
-            <div className="jam-setup-block">
-              <span className="stage-label">
-                {t("jam.meter.label")}
-                <span className="jam-setup-value">
-                  {jam.meter ? jam.meter.beatGroups.join(" + ") : t("jam.meter.grooves")}
-                </span>
-              </span>
-              <div className="jam-meters" role="group" aria-label={t("jam.meter.label")}>
-                <button
-                  type="button"
-                  className={`jam-meter${jam.meter ? "" : " active"}`}
-                  aria-pressed={!jam.meter}
-                  onClick={() => onEdit({ meter: undefined })}
-                >
-                  {t("jam.meter.grooves")}
-                </button>
-                {METER_PRESETS.map((preset) => {
-                  const on = activeGroups === meterKey(preset.groups);
-                  return (
-                    <button
-                      key={preset.label}
-                      type="button"
-                      className={`jam-meter${on ? " active" : ""}`}
-                      aria-pressed={on}
-                      onClick={() =>
-                        onEdit({
-                          meter: { beatGroups: [...preset.groups], ticksPerBeat: ticks },
-                          // The count-in is a number of BARS wearing a number
-                          // of beats, so a new meter has to carry it.
-                          countIn: carryCountIn(
-                            jam.countIn,
-                            meter.beatsPerBar,
-                            preset.groups.reduce((sum, n) => sum + n, 0),
-                          ),
-                        })
-                      }
-                    >
-                      {preset.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Transposing unpins too, and for the harder version of the same
-                reason: the chord names all move, so the grip in the corner
-                keeps its diagram and loses its name. */}
-            {transpositionApplies(instrument) && (
-              <div
-                className="accent-control jam-segmented"
-                role="group"
-                aria-label={t("jam.transposition.label")}
-              >
-                <span className="stage-label accent-label">{t("jam.transposition.label")}</span>
-                <div className="accent-options">
-                  {TRANSPOSITION_OPTIONS.map((option: TranspositionOption) => (
-                    <button
-                      key={option}
-                      type="button"
-                      className={`accent-option${
-                        (jam.transposition ?? "concert") === option ? " active" : ""
-                      }`}
-                      aria-pressed={(jam.transposition ?? "concert") === option}
-                      onClick={() => onEdit({ transposition: option, pinnedShape: null })}
-                    >
-                      {t(`jam.transposition.${option}`)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <button
-              type="button"
-              role="switch"
-              aria-checked={!!jam.takes}
-              className={`transport-switch jam-switch ${jam.takes ? "on" : ""}`}
-              disabled={takes.available === false}
-              onClick={() => onToggleTakes(!jam.takes)}
-            >
-              <span className="transport-switch-track" aria-hidden="true" />
-              {t("jam.takes.record")}
-            </button>
+            <span className="transport-switch-track" aria-hidden="true" />
+            {t("jam.takes.record")}
+          </button>
+        }
+      >
 
             <TakesSection
               available={takes.available}
@@ -1276,9 +1282,8 @@ export function JamSetupSheet({
               onStop={takes.stopPlayback}
               onDelete={takes.remove}
             />
-          </div>
-        )}
-      </section>
+      </JamSheetGroup>
+
     </>
   );
 }

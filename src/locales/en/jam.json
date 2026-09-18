@@ -477,6 +477,7 @@
     },
     "takes": {
       "label": "Takes",
+      "lead": "what you played, kept to listen back to",
       "record": "Record the take",
       "recording": "Recording",
       "recordingNow": "Recording. It lands here when you stop.",
@@ -556,10 +557,6 @@
       "train": "Train",
       "twoStep": "Two-step",
       "waltz": "Waltz"
-    },
-    "more": {
-      "label": "More",
-      "lead": "meter · what you read · takes"
     },
     "bassVoice": {
       "label": "Voice",

@@ -477,6 +477,7 @@
     },
     "takes": {
       "label": "Opnames",
+      "lead": "wat je speelde, bewaard om terug te luisteren",
       "record": "Neem de take op",
       "recording": "Opnemen",
       "recordingNow": "Aan het opnemen. De take komt hier zodra je stopt.",
@@ -556,10 +557,6 @@
       "train": "Train",
       "twoStep": "Two-step",
       "waltz": "Wals"
-    },
-    "more": {
-      "label": "Meer",
-      "lead": "maatsoort · wat je leest · opnames"
     },
     "bassVoice": {
       "label": "Klank",

@@ -477,6 +477,7 @@
     },
     "takes": {
       "label": "录音",
+      "lead": "你弹过的，留着回听",
       "record": "录下这一遍",
       "recording": "录音中",
       "recordingNow": "正在录音。停下时会出现在这里。",
@@ -556,10 +557,6 @@
       "train": "火车节奏",
       "twoStep": "两步舞",
       "waltz": "华尔兹"
-    },
-    "more": {
-      "label": "更多",
-      "lead": "拍号 · 你读的调 · 录音"
     },
     "bassVoice": {
       "label": "音色",

@@ -476,7 +476,8 @@
       "percPicker": "Añadir un instrumento de percusión"
     },
     "takes": {
-      "label": "Tomas",
+      "label": "Grabaciones",
+      "lead": "lo que tocaste, guardado para escucharlo",
       "record": "Grabar la toma",
       "recording": "Grabando",
       "recordingNow": "Grabando. La toma aparece aquí cuando pares.",
@@ -556,10 +557,6 @@
       "train": "Train",
       "twoStep": "Two-step",
       "waltz": "Vals"
-    },
-    "more": {
-      "label": "Más",
-      "lead": "compás · lo que lees · tomas"
     },
     "bassVoice": {
       "label": "Sonido",

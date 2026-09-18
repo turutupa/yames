@@ -477,6 +477,7 @@
     },
     "takes": {
       "label": "Registrazioni",
+      "lead": "quello che hai suonato, da riascoltare",
       "record": "Registra la take",
       "recording": "Registrazione",
       "recordingNow": "Sta registrando. La take compare qui quando ti fermi.",
@@ -556,10 +557,6 @@
       "train": "Train",
       "twoStep": "Two-step",
       "waltz": "Valzer"
-    },
-    "more": {
-      "label": "Altro",
-      "lead": "metro · cosa leggi · registrazioni"
     },
     "bassVoice": {
       "label": "Suono",

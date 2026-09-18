@@ -476,7 +476,8 @@
       "percPicker": "퍼커션 추가"
     },
     "takes": {
-      "label": "테이크",
+      "label": "녹음",
+      "lead": "연주한 것을 다시 들어 보려고 보관",
       "record": "테이크 녹음",
       "recording": "녹음 중",
       "recordingNow": "녹음 중입니다. 멈추면 여기에 들어옵니다.",
@@ -556,10 +557,6 @@
       "train": "트레인",
       "twoStep": "투스텝",
       "waltz": "왈츠"
-    },
-    "more": {
-      "label": "더 보기",
-      "lead": "박자 · 읽는 조 · 녹음"
     },
     "bassVoice": {
       "label": "음색",
