@@ -204,6 +204,26 @@ describe("Rail", () => {
     );
   });
 
+  it("draws the play glyph inside the entry's highlight, not beside it", () => {
+    // The owner: "can we have the background effect to include the play
+    // button please?" The fill was painted on the mode BUTTON, which stops at
+    // the label, so the glyph sat on the rail's own background and one mode
+    // read as two controls.
+    const { container } = setup({ view: "jam", onJamNow: vi.fn(), activeJamId: null });
+    const row = container.querySelector(".rail-mode-row[data-active]");
+    expect(row, "the active mode's row is not marked active").toBeTruthy();
+    expect(row!.querySelector(".rail-mode-now"), "the glyph is outside the entry").toBeTruthy();
+
+    // And the fill is the ROW's, with the button inside it cleared, or the
+    // two backgrounds would draw a seam down the middle of one shape.
+    const css = readStylesheet();
+    const fill = css.slice(css.indexOf(".rail-mode-row[data-active] {"));
+    expect(fill.slice(0, fill.indexOf("}"))).toContain("background: var(--accent-subtle)");
+    const cleared = css.indexOf(".rail-mode-row[data-active] .rail-mode.active");
+    expect(cleared, "the button inside an active row is not cleared").toBeGreaterThan(-1);
+    expect(css.slice(cleared, css.indexOf("}", cleared))).toContain("background: transparent");
+  });
+
   it("keeps Zen and the widget adjacent — the tour spotlights them together", () => {
     // Tour stop "zen-widget" unions every element carrying the id. They used
     // to sit next to each other in the header; separating them would stretch

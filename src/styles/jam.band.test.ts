@@ -80,14 +80,27 @@ describe("a band row on the playing screen", () => {
     expect(rule(".jam-band-extra .jam-dropdown")).toMatch(/max-width:\s*100%/);
   });
 
-  it("drops the live notes before it squeezes the pickers, on a narrow window", () => {
+  it("measures its own width, not the window's", () => {
+    // The rows used to reflow on a media query, and a media query asks the
+    // WINDOW. Open the setup drawer on a 1900px screen and the stage behind
+    // it is about 900px — a narrow row inside a wide window — so the narrow
+    // rules never fired: the switch was pushed off the end of its row and the
+    // volume slider was drawn on top of the groove dropdown. The section is a
+    // container now and the rows answer to it.
+    expect(rule(".jam-band")).toMatch(/container-type:\s*inline-size/);
+    expect(rule(".jam-band")).toMatch(/container-name:\s*band/);
+    expect(css, "the rows still reflow on the window's width").not.toContain(
+      "@media (max-width: 1023px)",
+    );
+  });
+
+  it("drops the live notes before it squeezes the pickers, on a narrow stage", () => {
     // The readout is the part a player can do without; the picker is a
-    // control. Below the breakpoint the notes go and the picker keeps its
+    // control. Below the threshold the notes go and the picker keeps its
     // room, rather than both being shaved.
-    const narrow = css.indexOf("@media (max-width: 1023px)");
-    expect(narrow).toBeGreaterThan(-1);
+    const narrow = css.indexOf("@container band (max-width: 880px)");
+    expect(narrow, "no container query for a narrow stage").toBeGreaterThan(-1);
     expect(rule(".jam-band-live", narrow)).toMatch(/display:\s*none/);
-    const columns = rule(".jam-band-lane", narrow);
-    expect(columns).toMatch(/grid-template-columns:/);
+    expect(rule(".jam-band-lane", narrow)).toMatch(/grid-template-columns:/);
   });
 });

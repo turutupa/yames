@@ -106,6 +106,19 @@
   width: 100%;
 }
 
+/*
+ * The key, the feel and the drum intensity: one row, at every width.
+ *
+ * They used to stack in a right-aligned column, and because each control is
+ * a different width that read as a staircase pinned to the far right of the
+ * stage — the owner's "everything's way too shifted to the right". Worse, the
+ * stack became a wrapped ROW below 1100px, so opening the setup drawer
+ * (which narrows the stage past that) rearranged the whole cluster: the same
+ * three controls in two different shapes depending on a drawer.
+ *
+ * One row, always, and it wraps as a row when there is no space. The
+ * controls are a fixed width below, so the row is a tidy one.
+ */
 .jam-head-controls {
   display: flex;
   flex-direction: column;
@@ -114,8 +127,58 @@
   padding-bottom: 6px;
 }
 
-.jam-segmented {
-  margin-left: auto;
+/* The cluster keeps the width its controls need, and the NOW block — which is
+   prose and can reflow — gives it up. The other way round, the three controls
+   were squeezed until one of them wrapped, which is the staircase again with
+   an extra step. */
+.jam-top > .jam-head-controls {
+  flex: 0 0 auto;
+}
+
+.jam-top > .jam-now {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* The key, the feel and the intensity. The tempo block is the cluster's other
+   child and keeps its own line: four of these across never fit, so a single
+   wrapping row put the break in a different place at every width. */
+.jam-head-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+
+/* One width for both pills, so "Straight · Shuffle · Swing" and "Soft ·
+   Normal · Loud" are the same object twice rather than two sizes of nearly
+   the same thing. */
+.jam-head-row .jam-segmented {
+  width: 214px;
+  margin-left: 0;
+}
+
+.jam-head-row .jam-segmented .accent-options {
+  width: 100%;
+}
+
+/* And inside a pill, three equal segments: a trough whose middle button is
+   twice the width of the one beside it reads as a mistake, and which word is
+   longest is an accident of the language it is being read in. Only the jam's
+   own pills — the metronome's accent control has labels of very different
+   lengths and equal columns would waste half its row. */
+.jam-segmented .accent-options {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+}
+
+.jam-segmented .accent-option {
+  padding-inline: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* The tempo is the largest thing on the metronome stage because that screen is
@@ -665,7 +728,19 @@
 }
 
 /* ── The band, one row per player ──────────────────────────────────────── */
+/*
+ * The band's own width is what its rows have to fit into — not the window's.
+ *
+ * Every responsive rule here used to be a media query, and a media query asks
+ * the WINDOW. Open the setup drawer on a 1900px screen and the stage behind
+ * it is about 900px: a narrow row inside a wide window, so the narrow rules
+ * never fired and the switch was pushed off the end of its row while the
+ * volume slider sat on top of the groove dropdown. A container query asks the
+ * thing that actually got narrower.
+ */
 .jam-band {
+  container-type: inline-size;
+  container-name: band;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -789,12 +864,37 @@
 }
 
 /* ── The practice tools ────────────────────────────────────────────────── */
+/*
+ * The practice switches, all one width.
+ *
+ * Each chip used to be as wide as its own label, so when the setup drawer
+ * narrowed the stage "Record the take" — the longest of the four — dropped
+ * alone onto a second line and the row read as broken rather than wrapped.
+ * Equal widths fix both halves of that: four narrower chips fit on one line
+ * at the widths where three and a stray used to, and when they genuinely do
+ * not fit they wrap two and two, which reads as a decision.
+ *
+ * Capped, because four chips stretched across a 1600px stage is four labels
+ * adrift in their own boxes.
+ */
 .jam-practice {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
   width: 100%;
+}
+
+.jam-practice .jam-practice-chip {
+  flex: 1 1 0;
+  min-width: 150px;
+  max-width: 240px;
+}
+
+/* Stretched, the switch belongs at the far end rather than trailing the word
+   with a pool of empty box after it. */
+.jam-practice .jam-practice-chip {
+  justify-content: space-between;
 }
 
 .jam-practice-chip {
@@ -865,7 +965,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  width: min(420px, 78vw);
+  width: min(268px, calc(100vw - 24px));
   padding: 10px;
   border-radius: var(--radius-sm, 6px);
   border: 1px solid var(--border);
@@ -875,7 +975,25 @@
 
 /* It hangs from the chip and is then slid back inside the window by the
    picker, which is the only place the two rectangles are both known. The
-   width is capped here so that slide is a few pixels rather than a journey. */
+   width is capped here so that slide is a few pixels rather than a journey.
+
+   Six and six rather than the sheet's twelve in a row. Twelve wants 420px of
+   menu hanging off a chip at the right-hand end of the header — which is how
+   it came to spill off the window in the first place — and squeezed into
+   less, each root is a sliver too narrow to hit. Two rows of six is a shape
+   a player still reads as the chromatic scale, at a size a finger can find,
+   in a panel half the width. */
+.jam-key-menu .jam-keys {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+/* The three modes across the foot of it. Right-aligned — which is what the
+   control does on a stage, where it is pushed to the edge — it read as a
+   stray pill tucked under one corner of the grid. */
+.jam-key-menu .jam-segmented {
+  width: 100%;
+  margin-left: 0;
+}
 
 .jam-keys {
   display: grid;
@@ -1267,9 +1385,11 @@
    dropdown, so the readout goes: the bass's notes for this bar are a lovely
    thing to watch and the control is the thing you came to use. The columns
    close up behind it, so the player's own control gets the room. */
-@media (max-width: 1023px) {
-  /* The same six columns, so the parts stay where they are told; the
-     readout's track goes to nothing and the picker's takes the room. */
+/* The same six columns, so the parts stay where they are told; the readout's
+   track goes to nothing and the picker's takes the room. The threshold is the
+   width the wide row actually needs: a name, a detail, a readable picker, the
+   volume, the switch and five gaps. */
+@container band (max-width: 880px) {
   .jam-band-lane {
     grid-template-columns: 96px minmax(0, 104px) minmax(0, 1fr) 0 auto auto;
     column-gap: 10px;
@@ -1277,6 +1397,24 @@
 
   .jam-band-live {
     display: none;
+  }
+}
+
+/* Narrower still — the drawer open on a small laptop — and the detail goes
+   too. The picker says what the player is doing; the kit name is a label. */
+@container band (max-width: 620px) {
+  .jam-band-lane {
+    grid-template-columns: 88px 0 minmax(0, 1fr) 0 auto auto;
+    column-gap: 8px;
+    padding: 0 10px;
+  }
+
+  .jam-band-detail {
+    display: none;
+  }
+
+  .jam-band-volume {
+    width: 96px;
   }
 }
 
@@ -1310,8 +1448,24 @@
   max-width: 100%;
 }
 
+/* On a band row the chip fills its column, so the three players' pickers are
+   one shape down the screen rather than three boxes of the same width with
+   their chevrons in three different places. The value takes the slack and
+   ellipsises; the arrow sits at the end, where an arrow on a full-width
+   control belongs. */
 .jam-band-extra .jam-dropdown {
+  width: 100%;
   max-width: 100%;
+}
+
+.jam-band-extra .jam-dropdown-value {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.jam-band-extra .jam-dropdown > svg {
+  flex-shrink: 0;
 }
 
 .jam-keys-style {
@@ -1360,16 +1514,16 @@
     gap: 16px;
   }
 
+  /* The cluster is a row at every width now, so all this one has to do is
+     let it start at the stage's left edge once it is no longer beside the
+     tempo. Its shape does not change, which is the point. */
   .jam-head-controls {
-    flex-direction: row;
-    align-items: center;
     align-self: stretch;
-    flex-wrap: wrap;
-    gap: 16px;
+    align-items: flex-start;
   }
 
-  .jam-head-controls .jam-segmented {
-    margin-left: 0;
+  .jam-head-row {
+    justify-content: flex-start;
   }
 
   .jam-cards-form {
@@ -1639,8 +1793,25 @@
 
    The stage's width is NOT animated. The sheet slides; a layout that reflowed
    over a quarter of a second beside it would read as the app struggling. */
+/*
+ * In push mode the sheet's column is padding on the stage — so the stage's
+ * own width cap and its centring have to stop counting it.
+ *
+ * They did not, and the sums were brutal: a 1900px window gave the wrapper a
+ * 1176px cap, centred with 211px of margin on the left, and then 640px of
+ * that 1176 went to the sheet. The stage was left with 488px — narrower than
+ * the same screen with the drawer SHUT — which is why the band rows had a
+ * slider sitting on a dropdown and why the owner saw "empty space to the left
+ * of the stage" beside a squeezed one.
+ *
+ * The cap grows by the sheet's width, so 1176 is what the stage still gets;
+ * the centring offset is measured against that same wider band, so it goes to
+ * zero as soon as the sheet is taking the room instead.
+ */
 .main-content.has-jam-sheet.jam-sheet-wide > .view-transition-wrapper {
-  padding-right: var(--jam-sheet-width);
+  --stage-band: calc(1176px + var(--jam-sheet-width));
+  max-width: calc(1176px + var(--jam-sheet-width));
+  padding-right: calc(var(--jam-sheet-width) + 48px);
 }
 
 /* A stage in push mode is narrow whatever the window is doing.
@@ -1658,20 +1829,16 @@
 }
 
 .main-content.has-jam-sheet.jam-sheet-wide .jam-head-controls {
-  flex-direction: row;
-  align-items: center;
   align-self: stretch;
-  flex-wrap: wrap;
-  gap: 16px;
+  align-items: flex-start;
 }
 
-.main-content.has-jam-sheet.jam-sheet-wide .jam-head-controls .jam-segmented {
-  margin-left: 0;
+.main-content.has-jam-sheet.jam-sheet-wide .jam-head-row {
+  justify-content: flex-start;
 }
 
-.main-content.has-jam-sheet.jam-sheet-wide .jam-band-detail {
-  width: 118px;
-}
+/* The band rows need no rule here any more: the section is its own container
+   and its columns answer to its own width, drawer or no drawer. */
 .jam-sheet {
   position: absolute;
   top: 56px;

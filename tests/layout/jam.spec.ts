@@ -65,6 +65,59 @@ test.describe("the band rows", () => {
   });
 });
 
+test.describe("the band rows with the setup drawer open", () => {
+  /*
+   * The case the first pass missed.
+   *
+   * The drawer takes half the window, so the stage behind it is narrow while
+   * the WINDOW is wide — and every responsive rule here is written against
+   * the window. On the owner's 2000px screen with Set up open, the stage was
+   * about 900px and the volume slider was drawn straight over the groove
+   * dropdown. A test at four window widths with the drawer shut could not
+   * see it; this one opens the drawer, which is the narrow stage.
+   */
+  for (const size of [
+    { name: "wide", width: 1900, height: 1000 },
+    { name: "medium", width: 1500, height: 1000 },
+  ]) {
+    test(`hold their controls at ${size.name} (${size.width}px)`, async ({ page }) => {
+      await openShot(page, "jam-setup", size);
+      await fitsOnOneLine(page, ".jam-band-lane", `band rows behind the drawer at ${size.width}px`);
+    });
+  }
+
+  test("never draws one control over another", async ({ page }) => {
+    // Overlap is its own failure: a grid item wider than its track spills
+    // across the one beside it, and the row still "fits" because the row is
+    // as wide as it ever was. Only the rectangles say the slider is sitting
+    // on top of the dropdown.
+    await openShot(page, "jam-setup", { width: 1900, height: 1000 });
+    const rows = await page.$$(".jam-band-lane");
+    expect(rows.length).toBeGreaterThan(0);
+
+    for (const row of rows) {
+      const parts = await row.evaluate((node) =>
+        [...node.children]
+          .map((child) => {
+            const r = child.getBoundingClientRect();
+            return {
+              left: r.left,
+              right: r.right,
+              what: (child.className || child.tagName).toString().slice(0, 40),
+            };
+          })
+          .filter((p) => p.right > p.left),
+      );
+      for (let i = 1; i < parts.length; i++) {
+        expect(
+          Math.round(parts[i].left),
+          `"${parts[i - 1].what}" ends at ${Math.round(parts[i - 1].right)} and "${parts[i].what}" starts at ${Math.round(parts[i].left)} — they overlap`,
+        ).toBeGreaterThanOrEqual(Math.round(parts[i - 1].right) - 1);
+      }
+    }
+  });
+});
+
 test.describe("the key, on the playing screen", () => {
   test("opens its menu inside the window", async ({ page }) => {
     // The chip sits at the right-hand end of the header, so a menu hung from

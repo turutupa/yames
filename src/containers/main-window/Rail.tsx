@@ -236,7 +236,17 @@ export const Rail = forwardRef<PresetSidebarHandle, RailProps>(function Rail(
           );
           if (!jamNow) return entry;
           return (
-            <div className="rail-mode-row" key={mode.id}>
+            /* The row is the entry, highlight and all: the glyph is part of
+               this mode, not something parked beside it, so `data-active`
+               puts the fill on the row and the button inside it goes
+               transparent. It used to stop at the button's edge and leave the
+               play button sitting on the rail's own background, which read as
+               two controls. */
+            <div
+              className="rail-mode-row"
+              key={mode.id}
+              data-active={view === mode.id ? "" : undefined}
+            >
               {entry}
               <button
                 type="button"

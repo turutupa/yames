@@ -532,6 +532,13 @@ export function JamView({
         )}
 
         <div className="jam-head-controls">
+          {/* The three you reach for while playing, side by side. They used
+              to stack down the right-hand edge, and because each is a
+              different width that read as a staircase; they are their own
+              row now so the tempo block below keeps a line to itself — four
+              things across never fit, which is what made the cluster
+              rearrange itself every time the setup drawer opened. */}
+          <div className="jam-head-row">
           {/* The key, here as well as in the sheet (2026-09-17). Changing key
               is something you do while playing — "I change keys often for
               improv purposes" — and three gestures behind a drawer is not
@@ -555,6 +562,8 @@ export function JamView({
             onChange={(intensity) => onEdit({ intensity })}
             hint={t("jam.intensity.hint")}
           />
+          </div>
+
           <div className="tempo-block">
             <span className="stage-label">{t("metronome.tempo")}</span>
             <div className="bpm-display">

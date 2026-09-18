@@ -185,9 +185,16 @@ describe("one of yours", () => {
     expect(props.onApply).not.toHaveBeenCalled();
   });
 
-  it("says so when you have not saved one yet", () => {
+  it("says nothing at all when you have not saved one yet", () => {
+    // It used to say "one of yours — none saved yet": a label and a denial
+    // taking a row to describe something that is not there. The owner, who
+    // had to ask what it meant: "what the heck is one of your non saved yet?
+    // can we remove that?" — and it is long enough to wrap onto the
+    // variations' line or off it depending on the vibe, which moved the whole
+    // sheet below it up and down.
     draw({ jam: jamOf({ vibe: "rock" }) });
-    expect(screen.getByText("none saved yet")).toBeInTheDocument();
+    expect(screen.queryByText("none saved yet")).toBeNull();
+    expect(screen.queryByText("One of yours")).toBeNull();
   });
 });
 

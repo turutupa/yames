@@ -1197,6 +1197,36 @@ button.jam-vibe-chip:hover {
   min-width: 0;
 }
 
+/* The highlight belongs to the ENTRY, and the glyph is part of the entry.
+   It used to be painted on the button, which stopped at the label and left
+   the play button sitting on the rail's own background — one mode drawn as
+   two controls. The row carries the fill now and the button inside it goes
+   transparent, so there is one shape and no seam down the middle of it. The
+   accent bar stays on the button: it is the button's left edge and the row's
+   left edge, and leaving it there keeps the narrow and collapsed rails —
+   where the glyph is hidden and the row IS the button — exactly as they
+   were. */
+.rail-mode-row:hover {
+  border-radius: var(--radius-sm);
+  background: var(--surface-hover);
+}
+
+.rail-mode-row[data-active] {
+  border-radius: var(--radius-sm);
+  background: var(--accent-subtle);
+}
+
+.rail-mode-row:hover .rail-mode,
+.rail-mode-row[data-active] .rail-mode.active {
+  background: transparent;
+}
+
+/* Over the row's own fill, the glyph's hover needs to be the stronger of the
+   two or it reads as nothing happening. */
+.rail-mode-row[data-active] .rail-mode-now:hover {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
 .rail-mode-now {
   display: flex;
   align-items: center;

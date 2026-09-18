@@ -280,13 +280,19 @@ export function VibePicker({
             {/* "One of yours". A jam you tuned and saved is a way of playing
                 this vibe, so it belongs in this row and nowhere else — but it
                 LOADS a jam rather than patching this one, because that is what
-                it is: your jam, not a variation of the one on the stage. */}
-            <span className="jam-chip-group">
-              <span className="jam-chip-group-label">{t("jam.variation.yours")}</span>
-              {yours.length === 0 ? (
-                <span className="jam-chip-empty">{t("jam.variation.yoursEmpty")}</span>
-              ) : (
-                yours.map((own) => (
+                it is: your jam, not a variation of the one on the stage.
+
+                Nothing at all when you have none. It used to say "one of
+                yours — none saved yet", which is a label and a denial taking
+                up a row to describe something that is not there; worse, it is
+                long enough to wrap onto the variations' line or off it
+                depending on the vibe's name, and the whole sheet below it
+                moved up or down as it did. You find out you can save a jam by
+                saving one. */}
+            {yours.length > 0 && (
+              <span className="jam-chip-group">
+                <span className="jam-chip-group-label">{t("jam.variation.yours")}</span>
+                {yours.map((own) => (
                   <button
                     key={own.id}
                     type="button"
@@ -295,9 +301,9 @@ export function VibePicker({
                   >
                     {own.name}
                   </button>
-                ))
-              )}
-            </span>
+                ))}
+              </span>
+            )}
           </div>
         </div>
           )
