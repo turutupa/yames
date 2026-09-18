@@ -289,7 +289,8 @@
       "label": "Diapasón",
       "aria": "{{chord}} en el mástil",
       "wholeNeck": "todo el mástil · no cambia mientras tocas",
-      "scales": "Qué escala"
+      "scales": "Qué escala",
+      "noteNames": "Nombres de notas"
     },
     "chords": {
       "label": "Acordes",
@@ -723,6 +724,7 @@
     "majorPentatonic": "pentatónica mayor",
     "blues": "de blues",
     "harmonicMinor": "menor armónica",
+    "melodicMinor": "menor melódica",
     "lydian": "lidia",
     "phrygian": "frigia",
     "majorBlues": "blues mayor",

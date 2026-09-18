@@ -289,7 +289,8 @@
       "label": "Klavye",
       "aria": "Sapta {{chord}}",
       "wholeNeck": "tüm klavye · çalarken yerinde kalır",
-      "scales": "Hangi dizi"
+      "scales": "Hangi dizi",
+      "noteNames": "Nota adları"
     },
     "chords": {
       "label": "Akorlar",
@@ -723,6 +724,7 @@
     "majorPentatonic": "majör pentatonik",
     "blues": "blues",
     "harmonicMinor": "armonik minör",
+    "melodicMinor": "melodik minör",
     "lydian": "lidyen",
     "phrygian": "frigyen",
     "majorBlues": "majör blues",

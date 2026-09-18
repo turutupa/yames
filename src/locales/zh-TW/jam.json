@@ -289,7 +289,8 @@
       "label": "指板",
       "aria": "琴頸上的 {{chord}}",
       "wholeNeck": "整塊指板 · 演奏時保持不變",
-      "scales": "哪個音階"
+      "scales": "哪個音階",
+      "noteNames": "音名"
     },
     "chords": {
       "label": "和弦",
@@ -723,6 +724,7 @@
     "majorPentatonic": "大調五聲",
     "blues": "藍調",
     "harmonicMinor": "和聲小調",
+    "melodicMinor": "旋律小調",
     "lydian": "利底亞",
     "phrygian": "弗里幾亞",
     "majorBlues": "大調布魯斯",

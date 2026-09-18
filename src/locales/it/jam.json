@@ -289,7 +289,8 @@
       "label": "Tastiera",
       "aria": "{{chord}} sul manico",
       "wholeNeck": "tutto il manico · resta fermo mentre suoni",
-      "scales": "Quale scala"
+      "scales": "Quale scala",
+      "noteNames": "Nomi delle note"
     },
     "chords": {
       "label": "Accordi",
@@ -723,6 +724,7 @@
     "majorPentatonic": "pentatonica maggiore",
     "blues": "blues",
     "harmonicMinor": "minore armonica",
+    "melodicMinor": "minore melodica",
     "lydian": "lidio",
     "phrygian": "frigio",
     "majorBlues": "blues maggiore",

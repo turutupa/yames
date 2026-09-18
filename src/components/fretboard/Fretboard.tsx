@@ -64,6 +64,15 @@ export type FretboardProps = {
    * Absent: no labels, and the board is the picture it always was.
    */
   describeNote?: (pitchClass: PitchClass) => string;
+  /**
+   * Write each note's name inside its dot.
+   *
+   * The printed cheat sheets a player already owns name every note on the
+   * neck, and "which note is this" is the question a diagram of dots cannot
+   * answer by itself — hovering answers it one note at a time, which is no
+   * use to somebody learning where the C's are. Absent: dots, as before.
+   */
+  nameNote?: (pitchClass: PitchClass) => string;
   size?: FretboardSize;
   /**
    * Read out to a screen reader. The caller supplies it already translated —
@@ -111,6 +120,7 @@ export default function Fretboard({
   frets = 12,
   startFret = 0,
   describeNote,
+  nameNote,
   highlight,
   size = "large",
   ariaLabel,
@@ -283,6 +293,25 @@ export default function Fretboard({
           onPointerLeave={describeNote ? () => setHovered(null) : undefined}
         />
       ))}
+
+      {/* The names, over the dots that are already there. A separate pass so
+          every name sits above every dot: drawn with its own circle, a name
+          on one string would be half-covered by the dot on the next. */}
+      {nameNote &&
+        dots.map((dot) => (
+          <text
+            key={`name-${dot.string}-${dot.fret}`}
+            className={`fretboard-dot-name${dot.root ? " fretboard-dot-name-root" : ""}`}
+            x={fretX(dot.fret)}
+            y={stringY(dot.string)}
+            fontSize={metrics.dotRadius * 1.05}
+            textAnchor="middle"
+            dominantBaseline="central"
+            pointerEvents="none"
+          >
+            {nameNote(dot.pc)}
+          </text>
+        ))}
 
       {/* Fret numbers, so a board that starts up the neck says where it is. */}
       {numberedFrets.map((fret) => (

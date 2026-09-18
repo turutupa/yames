@@ -85,3 +85,15 @@
 .fretboard-dot {
   cursor: default;
 }
+
+/* A note's name, inside its dot. The hollow dots take the board's text
+   colour; the filled root dot takes the background it is filled with, which
+   is the only way a name on it is legible. */
+.fretboard-dot-name {
+  fill: var(--text-primary);
+  font-weight: 800;
+}
+
+.fretboard-dot-name-root {
+  fill: var(--bg-primary);
+}

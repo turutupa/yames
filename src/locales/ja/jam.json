@@ -289,7 +289,8 @@
       "label": "指板",
       "aria": "ネック上の {{chord}}",
       "wholeNeck": "ネック全体 · 演奏中も変わりません",
-      "scales": "どのスケール"
+      "scales": "どのスケール",
+      "noteNames": "音名"
     },
     "chords": {
       "label": "コード",
@@ -723,6 +724,7 @@
     "majorPentatonic": "メジャーペンタトニック",
     "blues": "ブルース",
     "harmonicMinor": "ハーモニックマイナー",
+    "melodicMinor": "メロディックマイナー",
     "lydian": "リディアン",
     "phrygian": "フリジアン",
     "majorBlues": "メジャーブルース",

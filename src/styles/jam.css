@@ -697,8 +697,16 @@
    variations use, because it is the same gesture: one of a short list. */
 .jam-scale-chips {
   display: flex;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 6px 10px;
+}
+
+/* The names switch shares the row with the scale chips but is not one of
+   them: it says how the neck is drawn, not which notes are on it. Pushed to
+   the end so the chips stay a row of like things. */
+.jam-scale-names {
+  margin-left: auto;
 }
 
 /* ── The timeline's chord names and band states ────────────────────────── */

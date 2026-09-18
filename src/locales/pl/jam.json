@@ -289,7 +289,8 @@
       "label": "Gryf",
       "aria": "{{chord}} na gryfie",
       "wholeNeck": "cały gryf · nie zmienia się, gdy grasz",
-      "scales": "Która skala"
+      "scales": "Która skala",
+      "noteNames": "Nazwy dźwięków"
     },
     "chords": {
       "label": "Akordy",
@@ -723,6 +724,7 @@
     "majorPentatonic": "pentatonika durowa",
     "blues": "bluesowa",
     "harmonicMinor": "molowa harmoniczna",
+    "melodicMinor": "molowa melodyczna",
     "lydian": "lidyjska",
     "phrygian": "frygijska",
     "majorBlues": "blues durowy",

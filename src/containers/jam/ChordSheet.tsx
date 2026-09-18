@@ -315,6 +315,15 @@ export function ChordSheet({
    * the record: it is a way of looking at the key, not a fact about the jam.
    */
   const [scaleIndex, setScaleIndex] = useState(0);
+  /**
+   * Whether the neck names its notes.
+   *
+   * Off by default — the shape of a scale is what you look at first, and
+   * twelve letters on it is a busier picture. On, it is the fretboard chart
+   * every player already owns a printed copy of: "which note is this" asked
+   * of the whole neck at once rather than one hover at a time.
+   */
+  const [noteNames, setNoteNames] = useState(false);
   const scale = scales[Math.min(scaleIndex, scales.length - 1)] ?? null;
   const board = scale
     ? { highlight: { pitchClasses: scale.pitchClasses, rootPitchClass: scale.root } }
@@ -329,10 +338,10 @@ export function ChordSheet({
    * on this screen that says WHERE without saying WHAT, and "which one is the
    * flat third" is the question a player is actually asking of it.
    */
+  const nameOf = (pc: number) => noteName(pc as PitchClass, spellingForKey(playedKey));
   const describeNote = scale
     ? (pc: number) => {
-        const name = noteName(pc as PitchClass, spellingForKey(playedKey));
-        return `${name} · ${t(`jam.degree.${DEGREES[(pc - scale.root + 12) % 12]}`)}`;
+        return `${nameOf(pc)} · ${t(`jam.degree.${DEGREES[(pc - scale.root + 12) % 12]}`)}`;
       }
     : undefined;
 
@@ -595,6 +604,16 @@ export function ChordSheet({
               was ever drawn: the other two existed and nothing offered them. */}
           {fretboardOpen && scales.length > 1 && (
             <div className="jam-scale-chips" role="group" aria-label={t("jam.fretboard.scales")}>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={noteNames}
+                className={`transport-switch jam-switch jam-scale-names ${noteNames ? "on" : ""}`}
+                onClick={() => setNoteNames((on) => !on)}
+              >
+                <span className="transport-switch-track" aria-hidden="true" />
+                {t("jam.fretboard.noteNames")}
+              </button>
               {scales.map((option, index) => {
                 const on = index === Math.min(scaleIndex, scales.length - 1);
                 return (
@@ -618,6 +637,7 @@ export function ChordSheet({
               frets={17}
               highlight={board.highlight}
               describeNote={describeNote}
+              nameNote={noteNames ? nameOf : undefined}
               size="large"
               className="jam-fretboard"
               ariaLabel={t("jam.fretboard.aria", { chord: keyRootName(playedKey) })}

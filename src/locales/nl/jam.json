@@ -289,7 +289,8 @@
       "label": "Toets",
       "aria": "{{chord}} op de hals",
       "wholeNeck": "de hele hals · blijft staan terwijl je speelt",
-      "scales": "Welke toonladder"
+      "scales": "Welke toonladder",
+      "noteNames": "Notennamen"
     },
     "chords": {
       "label": "Akkoorden",
@@ -723,6 +724,7 @@
     "majorPentatonic": "majeur pentatonisch",
     "blues": "blues",
     "harmonicMinor": "harmonisch mineur",
+    "melodicMinor": "melodisch mineur",
     "lydian": "lydisch",
     "phrygian": "frygisch",
     "majorBlues": "majeur blues",

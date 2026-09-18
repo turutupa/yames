@@ -289,7 +289,8 @@
       "label": "Cần đàn",
       "aria": "{{chord}} trên cần đàn",
       "wholeNeck": "cả cần đàn · giữ nguyên khi bạn chơi",
-      "scales": "Thang âm nào"
+      "scales": "Thang âm nào",
+      "noteNames": "Tên nốt"
     },
     "chords": {
       "label": "Hợp âm",
@@ -723,6 +724,7 @@
     "majorPentatonic": "ngũ cung trưởng",
     "blues": "blues",
     "harmonicMinor": "thứ hòa thanh",
+    "melodicMinor": "thứ giai điệu",
     "lydian": "lydian",
     "phrygian": "phrygian",
     "majorBlues": "blues trưởng",

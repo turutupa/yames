@@ -31,6 +31,7 @@ export type ScaleId =
   | "lydian"
   | "phrygian"
   | "majorBlues"
+  | "melodicMinor"
   | "altered";
 
 export type ScaleDefinition = {
@@ -97,6 +98,15 @@ export const SCALES: Record<ScaleId, ScaleDefinition> = {
     intervals: [0, 2, 3, 4, 7, 9],
     labelKey: "scale.majorBlues",
   },
+  /* The minor scale with the sixth and seventh raised — the one a player
+     goes to when harmonic minor's gap between the flat sixth and the natural
+     seventh is too far to sing. It sits beside harmonic minor on every
+     printed cheat sheet, which is where the owner's came from. */
+  melodicMinor: {
+    id: "melodicMinor",
+    intervals: [0, 2, 3, 5, 7, 9, 11],
+    labelKey: "scale.melodicMinor",
+  },
   // altered. Its fifth mode of melodic minor identity is not needed here.
   altered: { id: "altered", intervals: [0, 1, 3, 4, 6, 8, 10], labelKey: "scale.altered" },
 };
@@ -116,6 +126,7 @@ export const SCALE_NAMES_EN: Record<ScaleId, string> = {
   majorPentatonic: "Major pentatonic",
   blues: "Blues",
   harmonicMinor: "Harmonic minor",
+  melodicMinor: "Melodic minor",
   lydian: "Lydian",
   phrygian: "Phrygian",
   majorBlues: "Major blues",
@@ -234,8 +245,8 @@ export function scalesForKey(key: Key): ScaleSuggestion[] {
       ["minorPentatonic", key.root],
       ["blues", key.root],
       ["majorPentatonic", key.root],
+      ["majorBlues", key.root],
       ["mixolydian", key.root],
-      ["dorian", key.root],
     ], 5);
   }
   if (key.mode === "minor") {
@@ -244,15 +255,17 @@ export function scalesForKey(key: Key): ScaleSuggestion[] {
       ["naturalMinor", key.root],
       ["dorian", key.root],
       ["harmonicMinor", key.root],
+      ["melodicMinor", key.root],
       ["phrygian", key.root],
-    ], 5);
+    ], 6);
   }
   return build([
     ["majorPentatonic", key.root],
     ["major", key.root],
+    ["majorBlues", key.root],
     ["lydian", key.root],
     ["mixolydian", key.root],
-  ], 4);
+  ], 5);
 }
 
 export function scalesForChord(chord: Chord, key: Key): ScaleSuggestion[] {

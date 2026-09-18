@@ -289,7 +289,8 @@
       "label": "Griffbrett",
       "aria": "{{chord}} auf dem Hals",
       "wholeNeck": "der ganze Hals · bleibt beim Spielen stehen",
-      "scales": "Welche Tonleiter"
+      "scales": "Welche Tonleiter",
+      "noteNames": "Notennamen"
     },
     "chords": {
       "label": "Akkorde",
@@ -723,6 +724,7 @@
     "majorPentatonic": "Dur-Pentatonik",
     "blues": "Blues",
     "harmonicMinor": "harmonisches Moll",
+    "melodicMinor": "melodisch Moll",
     "lydian": "lydisch",
     "phrygian": "phrygisch",
     "majorBlues": "Dur-Blues",

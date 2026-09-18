@@ -289,7 +289,8 @@
       "label": "Manche",
       "aria": "{{chord}} sur le manche",
       "wholeNeck": "tout le manche · ne bouge pas pendant que tu joues",
-      "scales": "Quelle gamme"
+      "scales": "Quelle gamme",
+      "noteNames": "Noms des notes"
     },
     "chords": {
       "label": "Accords",
@@ -723,6 +724,7 @@
     "majorPentatonic": "pentatonique majeure",
     "blues": "blues",
     "harmonicMinor": "mineure harmonique",
+    "melodicMinor": "mineure mélodique",
     "lydian": "lydien",
     "phrygian": "phrygien",
     "majorBlues": "blues majeur",

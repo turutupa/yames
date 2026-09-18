@@ -289,7 +289,8 @@
       "label": "Fretboard",
       "aria": "{{chord}} on the neck",
       "wholeNeck": "the whole neck · stays put while you play",
-      "scales": "Which scale"
+      "scales": "Which scale",
+      "noteNames": "Note names"
     },
     "chords": {
       "label": "Chords",
@@ -723,6 +724,7 @@
     "majorPentatonic": "major pentatonic",
     "blues": "blues",
     "harmonicMinor": "harmonic minor",
+    "melodicMinor": "melodic minor",
     "lydian": "lydian",
     "phrygian": "phrygian",
     "majorBlues": "major blues",
