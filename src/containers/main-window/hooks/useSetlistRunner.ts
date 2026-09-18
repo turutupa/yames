@@ -68,6 +68,23 @@ export function useSetlistRunner(
   /** Index to begin on — the step the editor has open. */
   startFrom = 0,
   jamContext?: SetlistJamContext,
+  /**
+   * Whether a press of Play means "run this setlist".
+   *
+   * It means that on the setlist tab and nowhere else. Pressing Play on the
+   * METRONOME must be a metronome, and this used to be true only by accident:
+   * a setlist was null unless you had deliberately opened one, so the run
+   * could not start from another tab because there was nothing to run. Then
+   * every mode started restoring what you last had open, a setlist began
+   * outliving the tab it belongs to, and pressing Play on the metronome
+   * started walking somebody's set — changing the subdivision and the beat
+   * groups under them once per step, with nothing on screen to say why.
+   *
+   * Only the START is gated. A run already going keeps going wherever you
+   * wander, which is the point of a set: press play, then go and look at
+   * something.
+   */
+  canStart = true,
 ): SetlistRunner {
   const [state, setState] = useState<SetlistRunState>(IDLE_SETLIST_RUN);
   const stateRef = useRef(state);
@@ -81,6 +98,10 @@ export function useSetlistRunner(
    */
   const startFromRef = useRef(startFrom);
   startFromRef.current = startFrom;
+
+  /** Read through a ref: switching tabs mid-run must not restart anything. */
+  const canStartRef = useRef(canStart);
+  canStartRef.current = canStart;
 
   const startedAt = useRef<number | null>(null);
   const lastBeat = useRef<number | null>(null);
@@ -256,6 +277,9 @@ export function useSetlistRunner(
       lastBeat.current = null;
       return;
     }
+    // Playing, but not from the setlist tab: this press of Play belongs to
+    // whatever the user is actually looking at.
+    if (!canStartRef.current && stateRef.current.phase === "idle") return;
     startedAt.current = Date.now();
     lastBeat.current = null;
     dispatch({ kind: "start", seconds: 0, from: startFromRef.current });

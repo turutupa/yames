@@ -235,7 +235,16 @@ export function useSetlistSession({
     0,
     setlist?.steps.findIndex((s) => s.id === selectedStepId) ?? 0,
   );
-  const runner = useSetlistRunner(setlist, isPlaying, currentBeat, selectedIndex, jamContext);
+  const runner = useSetlistRunner(
+    setlist,
+    isPlaying,
+    currentBeat,
+    selectedIndex,
+    jamContext,
+    // A set runs when you press Play ON the setlist tab. Everywhere else the
+    // transport belongs to the screen you are looking at.
+    view === "setlist",
+  );
 
   useEffect(() => {
     if (!isPlaying) setEditingWhileRunning(false);

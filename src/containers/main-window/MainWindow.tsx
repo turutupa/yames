@@ -1802,11 +1802,28 @@ export function MainWindow() {
             onStartSpeedRamp={() => startSpeedRamp()}
             onStopSpeedRamp={() => stopSpeedRamp()}
             setlistStepNumber={setlistSession.runner.stepNumber}
-            setlistStepCount={setlistSession.setlist?.steps.length ?? 0}
+            /* The transport says what the SCREEN is doing, or what is actually
+               running. This and `jamFormBars` used to be handed over whenever
+               a setlist or a jam was loaded at all — harmless while that meant
+               "you opened one", and not harmless once every mode began
+               restoring what you last had open: the metronome's transport grew
+               a "step 1 of 4" and a Skip for a set nobody had started. A run
+               that IS going keeps its readout wherever you wander, which is
+               the point of pressing play on a set and going to look at
+               something else. */
+            setlistStepCount={
+              mode === "setlist" || setlistSession.runner.step
+                ? (setlistSession.setlist?.steps.length ?? 0)
+                : 0
+            }
             setlistRemaining={setlistSession.runner.remaining}
             setlistStartAt={setlistSession.startAt}
             onSetlistSkip={setlistSession.runner.skip}
-            jamFormBars={jamSession.jam ? formBars(jamSession.jam.form) : 0}
+            jamFormBars={
+              (mode === "jam" || setlistSession.runner.jam) && jamSession.jam
+                ? formBars(jamSession.jam.form)
+                : 0
+            }
             jamFormBar={currentBeat?.formBar ?? 0}
             jamChorus={currentBeat?.chorus ?? 1}
             recording={jamTakes.recording}

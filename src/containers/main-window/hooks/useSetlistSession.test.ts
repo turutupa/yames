@@ -491,6 +491,10 @@ describe("a run that ends on a plain step", () => {
           state,
           isPlaying,
           currentBeat: beat,
+          // On the setlist tab: this test is about a RUN, and a run is
+          // something that starts from the setlist tab. Play pressed anywhere
+          // else belongs to the screen the user is looking at.
+          view: "setlist",
           setView,
           onSetlistLoaded: vi.fn(),
           jamContext: {

@@ -49,11 +49,17 @@ function callsTo(command: string) {
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
 
-function mount(setlist: Setlist | null = CHAIN) {
+function mount(setlist: Setlist | null = CHAIN, canStart = true) {
   return renderHook(
-    ({ b, playing }: { b: BeatEvent | null; playing: boolean }) =>
-      useSetlistRunner(setlist, playing, b),
-    { initialProps: { b: null as BeatEvent | null, playing: false } },
+    ({ b, playing, from }: { b: BeatEvent | null; playing: boolean; from?: boolean }) =>
+      useSetlistRunner(setlist, playing, b, 0, undefined, from ?? canStart),
+    {
+      initialProps: {
+        b: null as BeatEvent | null,
+        playing: false,
+        from: canStart as boolean | undefined,
+      },
+    },
   );
 }
 
@@ -73,6 +79,52 @@ describe("useSetlistRunner", () => {
   it("does nothing at all without a setlist", () => {
     const { rerender } = mount(null);
     act(() => rerender({ b: null, playing: true }));
+    expect(callsTo("set_bpm")).toEqual([]);
+  });
+
+  it("stays out of the way when Play was pressed on another tab", async () => {
+    // The owner, on the metronome: "i hit play on metronome, and its changing
+    // the subdivisions and groupings by itself without me touching anything
+    // while its playing". A setlist runs on the setlist tab; everywhere else
+    // the transport belongs to the screen you are looking at.
+    //
+    // This was safe only by accident until every mode started restoring what
+    // you last had open: a setlist used to be null unless you deliberately
+    // opened one, so there was nothing to run from another tab. Now one
+    // outlives its tab, and a press of Play on the metronome was walking
+    // somebody's set — a step's meter at a time, with nothing on screen
+    // saying why.
+    const { rerender } = mount(CHAIN, false);
+    act(() => rerender({ b: null, playing: true, from: false }));
+    await settle();
+    expect(callsTo("set_bpm")).toEqual([]);
+    expect(callsTo("set_beat_groups")).toEqual([]);
+  });
+
+  it("keeps running once started, wherever you wander", async () => {
+    // Only the START belongs to the setlist tab. Pressing play on your set
+    // and then going to look at something else is the point of a set.
+    const { result, rerender } = mount(CHAIN, true);
+    act(() => rerender({ b: null, playing: true, from: true }));
+    await settle();
+    expect(callsTo("set_bpm")).toContainEqual({ bpm: 80 });
+
+    act(() => rerender({ b: null, playing: true, from: false }));
+    act(() => rerender({ b: beat(0, true), playing: true, from: false }));
+    expect(result.current.step?.name).toBe("a");
+    expect(result.current.stepNumber).toBe(1);
+  });
+
+  it("is not a run at all when the setlist has no steps", () => {
+    // The Setlist tab always has a setlist on it now, and when the library is
+    // empty that is a brand new one with nothing in it. Pressing Play on it
+    // must play the metronome, not start and instantly finish a run of
+    // nothing — which reads as the transport bouncing off the button.
+    const empty: Setlist = { ...CHAIN, id: "empty", steps: [] };
+    const { result, rerender } = mount(empty, true);
+    act(() => rerender({ b: null, playing: true, from: true }));
+    expect(result.current.step).toBeNull();
+    expect(callsTo("stop")).toEqual([]);
     expect(callsTo("set_bpm")).toEqual([]);
   });
 
