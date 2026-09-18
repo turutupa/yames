@@ -522,7 +522,18 @@ export function JamView({
 
       {/* ── 1 and 3. The chord, and the tempo beside it ─────────────────── */}
       <section className="jam-top">
-        {jam.chords && chord ? (
+        {/* The chord you are on, whenever there is one to name — and not
+            behind the timeline's switch (2026-09-18).
+
+            It used to be `jam.chords && chord`, so the control labelled "show
+            the chords on the timeline" also governed the headline readout of
+            the whole mode: the chord, the scales that fit it and the way to
+            the fretboard. The owner found that out the hard way, looking at
+            two machines and seeing a gap on one of them — "i think this
+            switch shouldn't affect that area, only the timeline". A control
+            has to do what it says it does, and thirty-two chord names down a
+            timeline is a matter of taste in a way that one chord is not. */}
+        {chord ? (
           <NowBlock
             chord={chordName(chord, harmony.key)}
             next={next}

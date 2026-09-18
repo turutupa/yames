@@ -444,7 +444,15 @@ export type Jam = {
    * jams (`applyVibe`), which is the whole of the default.
    */
   band?: { drums: boolean; bass: boolean; keys?: boolean; perc?: boolean };
-  /** Chords on the timeline and the NOW block. Absent: off. */
+  /**
+   * The chord names down the timeline. Absent: off.
+   *
+   * The TIMELINE only, since 2026-09-18. It governed the NOW block as well,
+   * which made a switch named after one part of the screen quietly turn off
+   * the most useful part of another — the chord you are on, its scales and
+   * the way to the fretboard. Thirty-two names down a timeline is a matter of
+   * taste; one chord at the top of the screen is what the mode is for.
+   */
   chords?: boolean;
   /** The practice tools. Absent: none. */
   practice?: JamPracticeSettings;
