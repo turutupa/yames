@@ -297,8 +297,6 @@
     },
     "chords": {
       "label": "Akkoorden",
-      "onTimeline": "Akkoorden op de maatbalk tonen",
-      "hint": "De wisselingen op de maatbalk, en daarboven het akkoord waar je op zit.",
       "inKey": "Akkoorden in {{key}}",
       "follow": "Volg de jam",
       "followHint": "Laat de grepen met de wisselingen meelopen, of zet ze vast op één akkoord.",

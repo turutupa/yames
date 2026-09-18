@@ -297,8 +297,6 @@
     },
     "chords": {
       "label": "Acordes",
-      "onTimeline": "Mostrar os acordes na linha de compassos",
-      "hint": "A harmonia na linha de compassos, e acima dela o acorde em que você está.",
       "inKey": "Acordes em {{key}}",
       "follow": "Seguir o jam",
       "followHint": "Deixe as formas andarem com a harmonia, ou fixe-as em um acorde.",

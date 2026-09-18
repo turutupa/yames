@@ -297,8 +297,6 @@
     },
     "chords": {
       "label": "Akorlar",
-      "onTimeline": "Akorları ölçü şeridinde göster",
-      "hint": "Akor geçişlerini ölçü şeridine, üstüne de çaldığın akoru koyar.",
       "inKey": "{{key}} akorları",
       "follow": "Jam'i takip et",
       "followHint": "Basışlar akorlarla birlikte ilerlesin ya da tek bir akora sabitlensin.",

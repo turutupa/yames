@@ -297,8 +297,6 @@
     },
     "chords": {
       "label": "Hợp âm",
-      "onTimeline": "Hiện hợp âm trên dải ô nhịp",
-      "hint": "Vòng hợp âm trên dải ô nhịp, và hợp âm bạn đang chơi ở trên.",
       "inKey": "Hợp âm trong {{key}}",
       "follow": "Bám theo bài",
       "followHint": "Thế bấm chạy theo vòng hợp âm, hoặc ghim vào một hợp âm.",

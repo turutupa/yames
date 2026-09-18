@@ -297,8 +297,6 @@
     },
     "chords": {
       "label": "Akordy",
-      "onTimeline": "Pokaż akordy na pasku taktów",
-      "hint": "Przebieg akordów na pasku taktów, a nad nim akord, na którym jesteś.",
       "inKey": "Akordy w {{key}}",
       "follow": "Idź za jamem",
       "followHint": "Chwyty przesuwają się razem z akordami albo zostają przypięte do jednego.",

@@ -297,8 +297,6 @@
     },
     "chords": {
       "label": "Accordi",
-      "onTimeline": "Mostra gli accordi sulla linea",
-      "hint": "I cambi sulla linea delle battute, e sopra l'accordo su cui sei.",
       "inKey": "Accordi in {{key}}",
       "follow": "Segui il jam",
       "followHint": "Le posizioni seguono i cambi, oppure le fissi su un accordo.",

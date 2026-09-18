@@ -159,21 +159,23 @@ test.describe("a player's heading in the setup drawer", () => {
   });
 });
 
-test.describe('"show the chords on the timeline"', () => {
+test.describe('"chord names"', () => {
   test("takes the names off the timeline and leaves the NOW block alone", async ({ page }) => {
     // It used to govern both, so a switch named after one part of the screen
     // quietly turned off the most useful part of another — the chord you are
     // on, its scales and the way to the fretboard. The owner found it by
     // comparing two machines and seeing a gap on one: "i think this switch
     // shouldn't affect that area, only the timeline".
-    await openShot(page, "jam-setup", { width: 1500, height: 1000 });
+    await openShot(page, "jam", { width: 1500, height: 1000 });
 
     expect(await page.$(".jam-now-chord"), "no NOW block to begin with").toBeTruthy();
     const before = (await page.$$(".jam-timeline-cell .jam-timeline-chord")).length;
     expect(before, "no chord names on the timeline to begin with").toBeGreaterThan(0);
 
-    const sw = await page.$(".jam-sheet-switch-row [role='switch']");
-    expect(sw, "no chords switch in the drawer").toBeTruthy();
+    // In the practice row now, not the drawer: the drawer's copy of it went,
+    // because a control in two places is a control you have to check twice.
+    const sw = await page.$('.jam-practice-chip:has-text("Chord names") [role=\'switch\']');
+    expect(sw, "no chord names switch in the practice row").toBeTruthy();
     await sw!.scrollIntoViewIfNeeded();
     await sw!.click();
     await page.evaluate(

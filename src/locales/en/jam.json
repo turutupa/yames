@@ -297,8 +297,6 @@
     },
     "chords": {
       "label": "Chords",
-      "onTimeline": "Show the chords on the timeline",
-      "hint": "Put the changes on the timeline, and the chord you are on above it.",
       "inKey": "Chords in {{key}}",
       "follow": "Follow the jam",
       "followHint": "Let the shapes move with the changes, or pin them to one chord.",

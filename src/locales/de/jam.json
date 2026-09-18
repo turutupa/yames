@@ -297,8 +297,6 @@
     },
     "chords": {
       "label": "Akkorde",
-      "onTimeline": "Akkorde auf der Leiste zeigen",
-      "hint": "Die Wechsel auf die Leiste, und den Akkord, auf dem du bist, darüber.",
       "inKey": "Akkorde in {{key}}",
       "follow": "Dem Jam folgen",
       "followHint": "Die Griffe wandern mit den Wechseln, oder du heftest sie an einen Akkord.",

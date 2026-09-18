@@ -944,25 +944,11 @@ export function JamSetupSheet({
         )}
 
 
-        {/* And whether the result is drawn on the timeline while you play.
-            It used to be a lone switch at the foot of a long section, next to
-            nothing, saying one word — the owner: "chords switch at the end
-            without context on what it does". It is the last line of the
-            changes now, which is the only place where "chords" names
-            something you can see. */}
-        <div className="jam-sheet-switch-row">
-          <button
-            type="button"
-            role="switch"
-            aria-checked={!!jam.chords}
-            className={`transport-switch jam-switch ${jam.chords ? "on" : ""}`}
-            onClick={() => onEdit({ chords: !jam.chords })}
-          >
-            <span className="transport-switch-track" aria-hidden="true" />
-            {t("jam.chords.onTimeline")}
-          </button>
-          <span className="jam-sheet-lead">{t("jam.chords.hint")}</span>
-        </div>
+        {/* The switch that draws the names on the timeline used to end this
+            section. It is on the playing screen now, in the practice row,
+            where you can reach it without opening anything — and a control
+            in two places is a control you have to check twice, so this copy
+            goes rather than sitting here shadowing the other one. */}
 
         {/* What you READ, which is not always what the band plays: a B flat
             instrument reads a tone up. It belongs with the changes because

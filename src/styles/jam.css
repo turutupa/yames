@@ -2027,14 +2027,26 @@
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  gap: 22px;
-  padding: 18px 20px 28px;
+  /* ── How much air, and where (2026-09-18) ───────────────────────────────
+     The drawer used to run 22px between sections and 12px inside one, and
+     ten pixels is not a difference the eye reads as "a new section starts
+     here" — everything arrived as one long column of chips, which is what
+     the owner saw: "does it look very cramped to you?".
+
+     Three steps, each about twice the last: 34 between sections, 16 inside
+     one, 8 between a label and the control it names. The last stays tight
+     on purpose — a label belongs to its control, and air there would only
+     cut it loose. Space does this work rather than dividing rules: every
+     section already wears a coloured rail down its left edge, and lines
+     between things that are already marked is clutter. */
+  gap: 34px;
+  padding: 20px 22px 40px;
 }
 
 .jam-sheet-group {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .jam-sheet-group-head {
@@ -2145,21 +2157,6 @@
 [data-explain][data-explain-from="right"]::after {
   left: auto;
   right: 0;
-}
-
-/* A switch and the sentence that says what it does, on one line at the foot
-   of a section. The switch used to sit alone against the right-hand edge with
-   a single word on it, as far from its explanation as the section is tall. */
-.jam-sheet-switch-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px 12px;
-}
-
-.jam-sheet-switch-row .jam-sheet-lead {
-  flex: 1;
-  min-width: 0;
 }
 
 /* The key's three modes belong under the twelve roots they qualify, not
