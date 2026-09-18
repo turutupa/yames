@@ -290,7 +290,10 @@
       "aria": "넥 위의 {{chord}}",
       "wholeNeck": "넥 전체 · 연주하는 동안 그대로",
       "scales": "어떤 스케일",
-      "noteNames": "음 이름"
+      "onTheDots": "점 위에",
+      "dotsNone": "없음",
+      "dotsNotes": "음 이름",
+      "dotsDegrees": "음정"
     },
     "chords": {
       "label": "코드",

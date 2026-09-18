@@ -290,7 +290,10 @@
       "aria": "{{chord}} on the neck",
       "wholeNeck": "the whole neck · stays put while you play",
       "scales": "Which scale",
-      "noteNames": "Note names"
+      "onTheDots": "On the dots",
+      "dotsNone": "Nothing",
+      "dotsNotes": "Notes",
+      "dotsDegrees": "Degrees"
     },
     "chords": {
       "label": "Chords",

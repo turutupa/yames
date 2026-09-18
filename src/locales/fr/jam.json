@@ -290,7 +290,10 @@
       "aria": "{{chord}} sur le manche",
       "wholeNeck": "tout le manche · ne bouge pas pendant que tu joues",
       "scales": "Quelle gamme",
-      "noteNames": "Noms des notes"
+      "onTheDots": "Sur les points",
+      "dotsNone": "Rien",
+      "dotsNotes": "Notes",
+      "dotsDegrees": "Degrés"
     },
     "chords": {
       "label": "Accords",

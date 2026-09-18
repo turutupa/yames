@@ -290,7 +290,10 @@
       "aria": "{{chord}} trên cần đàn",
       "wholeNeck": "cả cần đàn · giữ nguyên khi bạn chơi",
       "scales": "Thang âm nào",
-      "noteNames": "Tên nốt"
+      "onTheDots": "Trên các chấm",
+      "dotsNone": "Không",
+      "dotsNotes": "Tên nốt",
+      "dotsDegrees": "Bậc"
     },
     "chords": {
       "label": "Hợp âm",

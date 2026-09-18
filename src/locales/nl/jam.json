@@ -290,7 +290,10 @@
       "aria": "{{chord}} op de hals",
       "wholeNeck": "de hele hals · blijft staan terwijl je speelt",
       "scales": "Welke toonladder",
-      "noteNames": "Notennamen"
+      "onTheDots": "Op de stippen",
+      "dotsNone": "Niets",
+      "dotsNotes": "Noten",
+      "dotsDegrees": "Trappen"
     },
     "chords": {
       "label": "Akkoorden",

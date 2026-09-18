@@ -290,7 +290,10 @@
       "aria": "{{chord}} no braço",
       "wholeNeck": "o braço inteiro · fica parado enquanto você toca",
       "scales": "Qual escala",
-      "noteNames": "Nomes das notas"
+      "onTheDots": "Nos pontos",
+      "dotsNone": "Nada",
+      "dotsNotes": "Notas",
+      "dotsDegrees": "Graus"
     },
     "chords": {
       "label": "Acordes",

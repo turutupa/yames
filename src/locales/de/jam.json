@@ -290,7 +290,10 @@
       "aria": "{{chord}} auf dem Hals",
       "wholeNeck": "der ganze Hals · bleibt beim Spielen stehen",
       "scales": "Welche Tonleiter",
-      "noteNames": "Notennamen"
+      "onTheDots": "Auf den Punkten",
+      "dotsNone": "Nichts",
+      "dotsNotes": "Noten",
+      "dotsDegrees": "Stufen"
     },
     "chords": {
       "label": "Akkorde",

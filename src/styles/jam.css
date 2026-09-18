@@ -702,11 +702,15 @@
   gap: 6px 10px;
 }
 
-/* The names switch shares the row with the scale chips but is not one of
-   them: it says how the neck is drawn, not which notes are on it. Pushed to
-   the end so the chips stay a row of like things. */
+/* The dot labels share the row with the scale chips but are not one of them:
+   they say how the neck is DRAWN, not which notes are on it. Pushed to the
+   end so the chips stay a row of like things. */
 .jam-scale-names {
   margin-left: auto;
+}
+
+.jam-scale-names .jam-segmented {
+  margin-left: 0;
 }
 
 /* ── The timeline's chord names and band states ────────────────────────── */
@@ -1983,6 +1987,13 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  /* The gutter is always there, whether or not there is anything to scroll.
+     Without it, switching a player off takes their controls away, the sheet
+     becomes short enough not to need a scrollbar, the scrollbar goes, and
+     every heading in the drawer jumps sideways by its width — which is the
+     same "nothing may move when you press a switch" the switch's own labels
+     were stacked for. */
+  scrollbar-gutter: stable;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;

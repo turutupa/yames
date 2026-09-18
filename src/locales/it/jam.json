@@ -290,7 +290,10 @@
       "aria": "{{chord}} sul manico",
       "wholeNeck": "tutto il manico · resta fermo mentre suoni",
       "scales": "Quale scala",
-      "noteNames": "Nomi delle note"
+      "onTheDots": "Sui pallini",
+      "dotsNone": "Niente",
+      "dotsNotes": "Note",
+      "dotsDegrees": "Gradi"
     },
     "chords": {
       "label": "Accordi",

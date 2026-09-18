@@ -290,7 +290,10 @@
       "aria": "{{chord}} на грифе",
       "wholeNeck": "весь гриф · не меняется, пока вы играете",
       "scales": "Какая гамма",
-      "noteNames": "Названия нот"
+      "onTheDots": "На точках",
+      "dotsNone": "Ничего",
+      "dotsNotes": "Ноты",
+      "dotsDegrees": "Ступени"
     },
     "chords": {
       "label": "Аккорды",

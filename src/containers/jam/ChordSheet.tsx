@@ -27,6 +27,10 @@ import type { ScaleSuggestion } from "../../jam/scales";
  * ones no scale here contains, since the neck shows only the scale's own
  * notes and this is what names them.
  */
+/** What the fretboard writes inside its dots. */
+type DotLabel = "none" | "notes" | "degrees";
+const DOT_LABELS: readonly DotLabel[] = ["none", "notes", "degrees"];
+
 const DEGREES = [
   "root",
   "flat2",
@@ -316,14 +320,18 @@ export function ChordSheet({
    */
   const [scaleIndex, setScaleIndex] = useState(0);
   /**
-   * Whether the neck names its notes.
+   * What is written inside the dots: nothing, the note, or the degree.
    *
-   * Off by default — the shape of a scale is what you look at first, and
-   * twelve letters on it is a busier picture. On, it is the fretboard chart
-   * every player already owns a printed copy of: "which note is this" asked
-   * of the whole neck at once rather than one hover at a time.
+   * A switch could only ever answer one of the two questions a player asks of
+   * a fretboard, and they are different questions. "Which note is this" is
+   * how you learn the neck, and it is the printed chart every guitarist owns.
+   * "Which degree is this" is how you MOVE a shape: the same pattern of 1, ♭3
+   * and 5 is the same lick in every key, and letters hide that.
+   *
+   * Nothing by default. The shape of a scale is what you look at first, and
+   * sixty labels on it is a busier picture than sixty dots.
    */
-  const [noteNames, setNoteNames] = useState(false);
+  const [dots, setDots] = useState<DotLabel>("none");
   const scale = scales[Math.min(scaleIndex, scales.length - 1)] ?? null;
   const board = scale
     ? { highlight: { pitchClasses: scale.pitchClasses, rootPitchClass: scale.root } }
@@ -339,6 +347,11 @@ export function ChordSheet({
    * flat third" is the question a player is actually asking of it.
    */
   const nameOf = (pc: number) => noteName(pc as PitchClass, spellingForKey(playedKey));
+  /** What this note is against the scale's root: "1", "♭3", "5". */
+  const degreeOf = scale
+    ? (pc: number) => t(`jam.degree.${DEGREES[(pc - scale.root + 12) % 12]}`)
+    : undefined;
+  const labelDot = dots === "notes" ? nameOf : dots === "degrees" ? degreeOf : undefined;
   const describeNote = scale
     ? (pc: number) => {
         return `${nameOf(pc)} · ${t(`jam.degree.${DEGREES[(pc - scale.root + 12) % 12]}`)}`;
@@ -604,16 +617,6 @@ export function ChordSheet({
               was ever drawn: the other two existed and nothing offered them. */}
           {fretboardOpen && scales.length > 1 && (
             <div className="jam-scale-chips" role="group" aria-label={t("jam.fretboard.scales")}>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={noteNames}
-                className={`transport-switch jam-switch jam-scale-names ${noteNames ? "on" : ""}`}
-                onClick={() => setNoteNames((on) => !on)}
-              >
-                <span className="transport-switch-track" aria-hidden="true" />
-                {t("jam.fretboard.noteNames")}
-              </button>
               {scales.map((option, index) => {
                 const on = index === Math.min(scaleIndex, scales.length - 1);
                 return (
@@ -628,6 +631,20 @@ export function ChordSheet({
                   </button>
                 );
               })}
+              {/* Last, and pushed to the far end: the scales are a row of like
+                  things and this is not one of them — it says how they are
+                  drawn, not which one is drawn. */}
+              <span className="jam-scale-names">
+                <Segmented
+                  label={t("jam.fretboard.onTheDots")}
+                  value={dots}
+                  options={DOT_LABELS.map((id) => ({
+                    id,
+                    label: t(`jam.fretboard.dots${id[0].toUpperCase()}${id.slice(1)}`),
+                  }))}
+                  onChange={setDots}
+                />
+              </span>
             </div>
           )}
           {fretboardOpen && board && (
@@ -637,7 +654,7 @@ export function ChordSheet({
               frets={17}
               highlight={board.highlight}
               describeNote={describeNote}
-              nameNote={noteNames ? nameOf : undefined}
+              nameNote={labelDot}
               size="large"
               className="jam-fretboard"
               ariaLabel={t("jam.fretboard.aria", { chord: keyRootName(playedKey) })}

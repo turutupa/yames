@@ -290,7 +290,10 @@
       "aria": "Sapta {{chord}}",
       "wholeNeck": "tüm klavye · çalarken yerinde kalır",
       "scales": "Hangi dizi",
-      "noteNames": "Nota adları"
+      "onTheDots": "Noktaların üstünde",
+      "dotsNone": "Hiçbiri",
+      "dotsNotes": "Notalar",
+      "dotsDegrees": "Dereceler"
     },
     "chords": {
       "label": "Akorlar",

@@ -290,7 +290,10 @@
       "aria": "琴颈上的 {{chord}}",
       "wholeNeck": "整块指板 · 演奏时保持不变",
       "scales": "哪个音阶",
-      "noteNames": "音名"
+      "onTheDots": "圆点上显示",
+      "dotsNone": "不显示",
+      "dotsNotes": "音名",
+      "dotsDegrees": "级数"
     },
     "chords": {
       "label": "和弦",

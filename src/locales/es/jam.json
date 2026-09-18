@@ -290,7 +290,10 @@
       "aria": "{{chord}} en el mástil",
       "wholeNeck": "todo el mástil · no cambia mientras tocas",
       "scales": "Qué escala",
-      "noteNames": "Nombres de notas"
+      "onTheDots": "En los puntos",
+      "dotsNone": "Nada",
+      "dotsNotes": "Notas",
+      "dotsDegrees": "Grados"
     },
     "chords": {
       "label": "Acordes",

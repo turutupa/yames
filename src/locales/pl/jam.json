@@ -290,7 +290,10 @@
       "aria": "{{chord}} na gryfie",
       "wholeNeck": "cały gryf · nie zmienia się, gdy grasz",
       "scales": "Która skala",
-      "noteNames": "Nazwy dźwięków"
+      "onTheDots": "Na kropkach",
+      "dotsNone": "Nic",
+      "dotsNotes": "Dźwięki",
+      "dotsDegrees": "Stopnie"
     },
     "chords": {
       "label": "Akordy",
