@@ -22,6 +22,8 @@
     "short": "音量"
   },
   "presets": {
+    "unsavedMetronome": "未保存的节拍器",
+    "unsavedDrill": "未保存的变速练习",
     "title": "预设",
     "titleDrill": "变速练习",
     "titleSetlist": "曲目单",

@@ -22,6 +22,8 @@
     "short": "Vol."
   },
   "presets": {
+    "unsavedMetronome": "Metrônomo não salvo",
+    "unsavedDrill": "Treino não salvo",
     "title": "Predefinições",
     "titleDrill": "Treinos",
     "titleSetlist": "Setlists",

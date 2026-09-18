@@ -67,7 +67,14 @@ export function PracticeRow({ value, onChange, takes, onTakes }: PracticeRowProp
     <section className="jam-practice" aria-label={t("jam.practice.label")}>
       <span className="stage-label">{t("jam.practice.label")}</span>
 
-      <div className="jam-practice-chip" data-on={dropOutOn ? "" : undefined}>
+      {/* Each of the four says what it does when you rest on it. Four verbs
+          with no explanation is four things to try rather than four things to
+          choose — the owner: "these options are not clear what they do". */}
+      <div
+        className="jam-practice-chip"
+        data-on={dropOutOn ? "" : undefined}
+        data-explain={t("jam.practice.dropOutExplain")}
+      >
         <button
           type="button"
           className="jam-practice-text"
@@ -114,7 +121,11 @@ export function PracticeRow({ value, onChange, takes, onTakes }: PracticeRowProp
         </button>
       </div>
 
-      <div className="jam-practice-chip" data-on={tradeOn ? "" : undefined}>
+      <div
+        className="jam-practice-chip"
+        data-on={tradeOn ? "" : undefined}
+        data-explain={t("jam.practice.tradeExplain")}
+      >
         <button
           type="button"
           className="jam-practice-text"
@@ -134,7 +145,11 @@ export function PracticeRow({ value, onChange, takes, onTakes }: PracticeRowProp
         </button>
       </div>
 
-      <div className="jam-practice-chip" data-on={tempoOn ? "" : undefined}>
+      <div
+        className="jam-practice-chip"
+        data-on={tempoOn ? "" : undefined}
+        data-explain={t("jam.practice.tempoExplain")}
+      >
         <button
           type="button"
           className="jam-practice-text"
@@ -190,7 +205,12 @@ export function PracticeRow({ value, onChange, takes, onTakes }: PracticeRowProp
           four that produces a FILE — everything to its left changes what you
           hear and nothing else. */}
       {onTakes && (
-        <div className="jam-practice-chip jam-practice-takes" data-on={takes ? "" : undefined}>
+        <div
+          className="jam-practice-chip jam-practice-takes"
+          data-on={takes ? "" : undefined}
+          data-explain-from="right"
+          data-explain={t("jam.practice.takesExplain")}
+        >
           <button
             type="button"
             className="jam-practice-text"

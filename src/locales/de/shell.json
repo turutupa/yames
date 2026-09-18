@@ -22,6 +22,8 @@
     "short": "Lautst."
   },
   "presets": {
+    "unsavedMetronome": "Nicht gespeichertes Metronom",
+    "unsavedDrill": "Nicht gespeichertes Tempo-Training",
     "title": "Presets",
     "titleDrill": "Trainings",
     "titleSetlist": "Setlists",

@@ -158,6 +158,7 @@
       "doesNotFit": "{{groove}} não cabe em {{meter}}; o baterista toca a regra."
     },
     "mix": {
+      "label": "Volume",
       "forLane": "Volume de {{lane}}"
     },
     "countInSound": {
@@ -288,10 +289,11 @@
     "fretboard": {
       "label": "Braço",
       "aria": "{{chord}} no braço",
-      "staysPut": "{{scale}}, a posição na casa {{fret}} · fica parada enquanto você toca"
+      "wholeNeck": "{{scale}}, o braço inteiro · fica parado enquanto você toca"
     },
     "chords": {
       "label": "Acordes",
+      "onTimeline": "Mostrar os acordes na linha de compassos",
       "hint": "A harmonia na linha de compassos, e acima dela o acorde em que você está.",
       "inKey": "Acordes em {{key}}",
       "follow": "Seguir o jam",
@@ -415,7 +417,11 @@
       "everyChoruses": "a cada {{count}} voltas",
       "everyChoruses_one": "a cada {{count}} volta",
       "everyChoruses_other": "a cada {{count}} voltas",
-      "climbing": "subindo de {{from}}"
+      "climbing": "subindo de {{from}}",
+      "dropOutExplain": "A banda para por alguns compassos de vez em quando, e você segura o tempo sozinho.",
+      "tradeExplain": "A banda toca alguns compassos, depois você toca a mesma quantidade.",
+      "tempoExplain": "O andamento sobe um pouco a cada volta do tema.",
+      "takesExplain": "Grava o que você toca com a banda junto, e guarda neste computador."
     },
     "cue": {
       "yours": "Seus quatro",
@@ -611,8 +617,10 @@
       "silent": "nada nesta levada"
     },
     "section": {
-      "song": "A música",
-      "songLead": "todos tocam isto",
+      "form": "A forma",
+      "formLead": "quanto dura uma volta",
+      "changes": "Os acordes",
+      "changesLead": "sobre o que todos tocam",
       "drums": "Bateria",
       "drumsLead": "a levada e o kit",
       "bass": "Baixo",

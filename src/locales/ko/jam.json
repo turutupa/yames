@@ -158,6 +158,7 @@
       "doesNotFit": "{{groove}}은(는) {{meter}}에 맞지 않아 드러머가 규칙대로 연주합니다."
     },
     "mix": {
+      "label": "볼륨",
       "forLane": "{{lane}} 음량"
     },
     "countInSound": {
@@ -288,10 +289,11 @@
     "fretboard": {
       "label": "지판",
       "aria": "넥 위의 {{chord}}",
-      "staysPut": "{{scale}}, {{fret}}프렛 포지션 · 연주하는 동안 그대로입니다"
+      "wholeNeck": "{{scale}}, 넥 전체 · 연주하는 동안 그대로"
     },
     "chords": {
       "label": "코드",
+      "onTimeline": "마디 줄에 코드 표시",
       "hint": "마디 줄에 코드 진행을, 그 위에 지금 코드를 보여 줍니다.",
       "inKey": "{{key}}의 코드",
       "follow": "잼 따라가기",
@@ -415,7 +417,11 @@
       "everyChoruses": "{{count}}코러스마다",
       "everyChoruses_one": "{{count}}코러스마다",
       "everyChoruses_other": "{{count}}코러스마다",
-      "climbing": "{{from}}에서 오르는 중"
+      "climbing": "{{from}}에서 오르는 중",
+      "dropOutExplain": "가끔 밴드가 몇 마디 쉬고, 그동안 혼자 박을 지킵니다.",
+      "tradeExplain": "밴드가 몇 마디 연주하면, 같은 마디 수만큼 이어서 연주합니다.",
+      "tempoExplain": "곡이 한 바퀴 돌 때마다 템포가 조금씩 올라갑니다.",
+      "takesExplain": "밴드와 함께 연주한 소리를 녹음해 이 기기에 보관합니다."
     },
     "cue": {
       "yours": "당신 차례, 네 마디",
@@ -611,8 +617,10 @@
       "silent": "이 그루브에는 없음"
     },
     "section": {
-      "song": "곡",
-      "songLead": "모두가 함께 연주",
+      "form": "형식",
+      "formLead": "한 바퀴의 길이",
+      "changes": "코드 진행",
+      "changesLead": "모두가 그 위에서 연주",
       "drums": "드럼",
       "drumsLead": "그루브와 킷",
       "bass": "베이스",

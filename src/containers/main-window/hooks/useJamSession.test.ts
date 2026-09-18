@@ -27,9 +27,15 @@ const calls: Array<[string, unknown]> = [];
  * as a real round trip does — a write that happened in between is not
  * something an in-flight read can know about.
  */
-const stored: { jams: Jam[] | undefined; hold: Promise<void> | null } = {
+const stored: {
+  jams: Jam[] | undefined;
+  hold: Promise<void> | null;
+  /** The preferences store, where the last jam you had open is written down. */
+  keys: Record<string, unknown>;
+} = {
   jams: undefined,
   hold: null,
+  keys: {},
 };
 
 vi.mock("../../../ipc", () => ({
@@ -93,6 +99,12 @@ vi.mock("../../../ipc", () => ({
     });
   },
   ttsSpeak: () => Promise.resolve(),
+  storeLoad: async (key: string) => stored.keys[key],
+  storeSave: (key: string, value: unknown) => {
+    calls.push(["storeSave", [key, value]]);
+    stored.keys[key] = value;
+    return Promise.resolve();
+  },
 }));
 
 /** Everyone listening for the end of a tune, so a test can be the engine. */
@@ -109,7 +121,7 @@ function names(of: string) {
 /** The engine calls, in order, ignoring anything that is not one. */
 function engineOrder() {
   return calls
-    .filter(([name]) => name !== "saveJams")
+    .filter(([name]) => name !== "saveJams" && name !== "storeSave")
     .map(([name]) => name);
 }
 
@@ -117,6 +129,7 @@ beforeEach(() => {
   calls.length = 0;
   stored.jams = undefined;
   stored.hold = null;
+  stored.keys = {};
 });
 
 type Props = {
@@ -411,7 +424,11 @@ describe("what reaches the engine", () => {
     // Not even the clear-down. A setlist step can BE a jam and the runner puts
     // it on the engine while this hook holds nothing; a `setJam(null)` from
     // here would take that band away, from a hook that never loaded anything.
-    const { result } = mount();
+    //
+    // On the Setlist tab, because the Jam tab is never empty any more
+    // (2026-09-17): standing on it IS asking for a jam, and the hook opens
+    // one. Everywhere else it holds nothing and says nothing.
+    const { result } = mount("setlist");
     await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     expect(names("setBeatGroups")).toHaveLength(0);
     expect(names("setJam")).toHaveLength(0);
@@ -903,14 +920,20 @@ describe("the library", () => {
     expect((stored.jams ?? [])[3].id).toBe(first);
   });
 
-  it("closes a jam it deletes, and leaves the others alone", async () => {
+  it("takes a deleted jam off the stage and puts the next one up", async () => {
+    // Deleting the jam you are playing used to leave the tab showing a screen
+    // with a button on it. The stage is never empty now (2026-09-17), so the
+    // jam goes and another one takes its place — and it is one of the ones
+    // that are left, not the one that was just thrown away.
     const { result } = mount();
     await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
     const doomed = result.current.jams[0];
     act(() => result.current.loadJam(doomed));
     act(() => result.current.deleteJam(doomed.id));
     await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length - 1));
-    expect(result.current.jam).toBeNull();
+    await waitFor(() => expect(result.current.jam).not.toBeNull());
+    expect(result.current.jam!.id).not.toBe(doomed.id);
+    expect(result.current.jams.map((j) => j.id)).toContain(result.current.jam!.id);
   });
 
   it("does not go dirty over a rename", async () => {
@@ -1129,12 +1152,16 @@ describe("the metronome's meter", () => {
     expect(names("setSubdivision")[0]).toBe(4);
   });
 
-  it("gives it back when the jam is closed with the tab still open", async () => {
+  it("gives it back the moment the jam leaves the stage, tab or no tab", async () => {
+    // The snapshot is handed over on the way out and not a render later. The
+    // tab then opens another jam on top of it — it is never empty any more
+    // (2026-09-17) — so what this pins is the ORDER: the 7/8 goes back first,
+    // and whatever borrows it next borrows it from there.
     const { result } = await fromSevenEight();
     calls.length = 0;
 
     act(() => result.current.closeJam());
-    await waitFor(() => expect(names("setBeatGroups")).toHaveLength(1));
+    await waitFor(() => expect(names("setBeatGroups").length).toBeGreaterThan(0));
     expect(names("setBeatGroups")[0]).toEqual([7]);
   });
 
@@ -1619,5 +1646,114 @@ describe("the arrangement, one bar ahead", () => {
       expect(config.fill).not.toBeNull();
     }
     expect(names("setJam").filter((c) => c !== null).length).toBeGreaterThan(1);
+  });
+});
+
+/**
+ * The Jam tab is never a screen with a button on it (2026-09-17).
+ *
+ * The owner's report was that the three modes disagreed with each other about
+ * what opening one means: Drill showed a whole drill, Jam and Setlist showed
+ * an invitation, and none of them remembered anything from yesterday. The
+ * rule is that every mode opens with something live in front of you, and the
+ * library holds what you chose to save.
+ */
+describe("the tab always has a jam on it", () => {
+  it("opens on the jam you last had open", async () => {
+    // The whole of "it remembers where I was". Without it, coming back to the
+    // app meant coming back to an invitation, whatever you were playing the
+    // night before.
+    stored.jams = [...STARTER_JAMS];
+    stored.keys.lastJamId = STARTER_JAMS[2].id;
+    const { result } = mount();
+    await waitFor(() => expect(result.current.jam?.id).toBe(STARTER_JAMS[2].id));
+  });
+
+  it("opens on the first in the library when none was ever open", async () => {
+    stored.jams = [...STARTER_JAMS];
+    const { result } = mount();
+    await waitFor(() => expect(result.current.jam?.id).toBe(STARTER_JAMS[0].id));
+  });
+
+  it("opens on the first in the library when the remembered one is gone", async () => {
+    // A lookup, not a load by id: a jam you deleted last week is not an answer
+    // to "what was I playing", and asking the store for it by name would have
+    // put nothing on the stage at all.
+    stored.jams = [...STARTER_JAMS];
+    stored.keys.lastJamId = "jam-that-was-deleted";
+    const { result } = mount();
+    await waitFor(() => expect(result.current.jam?.id).toBe(STARTER_JAMS[0].id));
+  });
+
+  it("opens a jam the library has never heard of when there are none left", async () => {
+    /*
+     * A player who deleted every jam they had. The stage still has a band on
+     * it — that is the rule — but nothing is filed, because a jam made
+     * because somebody clicked a tab is not a jam anybody asked to keep.
+     * An empty list rather than no list: the six starters are seeded once and
+     * stay deleted, which is the app not arguing with the user.
+     */
+    stored.jams = [];
+    const { result } = mount();
+    await waitFor(() => expect(result.current.jam).not.toBeNull());
+    expect(result.current.jams).toHaveLength(0);
+    expect(names("saveJams")).toHaveLength(0);
+    // And Save has something to do, which "no changes" would have denied: a
+    // jam that has never been written down always has something to write.
+    expect(result.current.unsaved).toBe(true);
+    expect(result.current.dirty).toBe(false);
+  });
+
+  it("files that jam the moment you ask it to, and not before", async () => {
+    stored.jams = [];
+    const { result } = mount();
+    await waitFor(() => expect(result.current.jam).not.toBeNull());
+
+    act(() => result.current.saveActiveJam());
+    await waitFor(() => expect(result.current.jams).toHaveLength(1));
+    expect(result.current.unsaved).toBe(false);
+    expect(stored.jams).toHaveLength(1);
+  });
+
+  it("writes down the jam it opened, so tomorrow opens on the same one", async () => {
+    stored.jams = [...STARTER_JAMS];
+    const { result } = mount();
+    await waitFor(() => expect(result.current.jam).not.toBeNull());
+    const target = result.current.jams[3];
+    act(() => result.current.loadJam(target));
+    await waitFor(() => expect(stored.keys.lastJamId).toBe(target.id));
+  });
+
+  it("leaves every other tab alone", async () => {
+    // Standing on the Metronome tab is not a request for a band. This used to
+    // be the only behaviour there was, and it is still the right one
+    // everywhere except the tab whose job is jams.
+    stored.jams = [...STARTER_JAMS];
+    const { result } = mount("beat");
+    await waitFor(() => expect(result.current.jams).toHaveLength(STARTER_JAMS.length));
+    await new Promise((r) => setTimeout(r, 20));
+    expect(result.current.jam).toBeNull();
+  });
+});
+
+describe("a jam the tab made, once you start working on it", () => {
+  it("goes dirty like any other, so nothing can throw it away in silence", async () => {
+    /*
+     * The gate that asks "you have unsaved work, save it?" reads `dirty`, and
+     * the first version of this could never be dirty: there was nothing
+     * stored to compare against. So an afternoon spent setting a jam up on a
+     * library somebody had emptied disappeared without a word the moment
+     * anything else was loaded. The baseline is the jam AS CREATED now.
+     */
+    stored.jams = [];
+    const { result } = mount();
+    await waitFor(() => expect(result.current.jam).not.toBeNull());
+    expect(result.current.dirty).toBe(false);
+
+    act(() => result.current.editJam({ bpm: 133 }));
+    await waitFor(() => expect(result.current.dirty).toBe(true));
+    // And it is still in no library — the two facts are separate, and both
+    // are true at once.
+    expect(result.current.unsaved).toBe(true);
   });
 });

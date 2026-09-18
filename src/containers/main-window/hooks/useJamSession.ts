@@ -8,6 +8,8 @@ import {
   setBpm,
   setJamPosition,
   setPlaying,
+  storeLoad,
+  storeSave,
   togglePlayback,
   ttsSpeak,
   warmJam,
@@ -300,6 +302,18 @@ const NOT_THE_BAND = new Set<string>([
   "variation",
 ]);
 
+/**
+ * Where the jam you last had open is written down.
+ *
+ * In the same store, through the same two calls, as the appearance
+ * preferences (`useUiPreferences`) — one key, written when a jam is put on
+ * the stage and read when the tab is opened with nothing on it. It is the
+ * whole of "it remembers where I was": without it, coming back to the app
+ * meant coming back to a screen with a button on it, whatever you had been
+ * playing the night before.
+ */
+const LAST_JAM_KEY = "lastJamId";
+
 export function useJamSession({
   view,
   isPlaying,
@@ -314,10 +328,38 @@ export function useJamSession({
 }: UseJamSessionArgs) {
   const { t } = useTranslation();
   const [jams, setJams] = useState<Jam[]>([]);
+  /**
+   * The library as it stands, for the restore below — which reads it inside
+   * an async function and must not see the list as it was when the effect
+   * started. Assigned every render, the pattern `useSetlistSession` uses.
+   */
+  const jamsRef = useRef<Jam[]>(jams);
+  jamsRef.current = jams;
+  /**
+   * True once the read from the store has landed, whatever it said.
+   *
+   * The restore has to wait for it. Picking "the first jam in the library"
+   * from a library that has not arrived yet would make a brand new jam on
+   * every cold start, and file it beside the six the seeding was about to
+   * put there.
+   */
+  const [libraryReady, setLibraryReady] = useState(false);
   /** The working copy — edited freely, written to the store only on Save. */
   const [jam, setActiveJam] = useState<Jam | null>(null);
   /** What the store holds, for the dirty flag and for Revert. */
   const [saved, setSaved] = useState<Jam | null>(null);
+  /**
+   * True while the jam on the stage is in no library.
+   *
+   * Its own flag rather than "`saved` is null", which was the first attempt
+   * and was quietly wrong: with nothing to compare against, a jam the tab had
+   * made could never go dirty — so an afternoon of setting one up was thrown
+   * away without a word the moment anything else was loaded, because the gate
+   * that asks about unsaved work reads `dirty`. `saved` is the jam AS CREATED
+   * here, so editing it reads as editing, and this says the separate thing:
+   * that even untouched, it has never been written down.
+   */
+  const [stageUnsaved, setStageUnsaved] = useState(false);
   const [saveFeedback, setSaveFeedback] = useState(false);
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -544,7 +586,12 @@ export function useJamSession({
         }
         setJams(stored);
       })
-      .catch(() => {});
+      .catch(() => {})
+      // Whatever it said, and even if it said nothing: the restore below is
+      // waiting on this, and a store that cannot be read is still an answer.
+      .finally(() => {
+        if (alive) setLibraryReady(true);
+      });
     return () => {
       alive = false;
       if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
@@ -1218,14 +1265,86 @@ export function useJamSession({
       onJamLoaded();
       setActiveJam(next);
       setSaved(next);
+      setStageUnsaved(false);
+      // So the tab opens on this one tomorrow. Silent on failure, like every
+      // other write to this store: a jam that is not remembered is a tab that
+      // opens on the top of the library, which is a smaller loss than a
+      // dialog about it would be.
+      void storeSave(LAST_JAM_KEY, next.id).catch(() => {});
     },
     [onJamLoaded],
   );
+
+  /**
+   * A jam on the stage that the library has never heard of.
+   *
+   * For the one case that has no jam to open: a player who has deleted every
+   * jam they had. The rule is that a mode always has something live in front
+   * of you, and the library holds what you CHOSE to save — so this is put on
+   * the stage and nowhere else, and pressing Save is what files it. Writing
+   * it to the library here would mean an app that quietly makes records
+   * nobody asked for, which is how a library stops being worth opening.
+   *
+   * `saved` is the jam as it was created, so Revert and the dirty flag work
+   * on it exactly as they do on a stored one — an edit to it is an edit, and
+   * the gate that asks about unsaved work can see it. `stageUnsaved` carries
+   * the other half: Save is live from the first moment, because a jam that
+   * has never been written down always has something to write down.
+   */
+  const openUnsavedJam = useCallback(() => {
+    const created = createJam(t("jam.untitled"), { band: startingBand(instrument) });
+    onJamLoaded();
+    setActiveJam(created);
+    setSaved(created);
+    setStageUnsaved(true);
+    return created;
+  }, [t, instrument, onJamLoaded]);
+
+  /**
+   * The Jam tab always has a jam on it (2026-09-17).
+   *
+   * The one you last had open, else the first in the library, else a new one
+   * that is not in the library at all. The owner's report was that the three
+   * modes disagreed with each other about this — Drill showed a whole drill,
+   * Jam and Setlist showed a button — and that none of them remembered
+   * anything between sittings.
+   *
+   * It runs whenever the tab is showing with nothing on the stage, not only
+   * when the tab is entered, because the stage can be emptied while you are
+   * standing on it: deleting the open jam is the ordinary way. That is also
+   * why the close doors on this tab went away — there is nowhere to close to
+   * any more.
+   *
+   * `pickingRef` is the guard the effect needs and the state cannot give it:
+   * reading the last id is a round trip, and without it every render inside
+   * that window would start another one and the last to land would win.
+   */
+  const pickingRef = useRef(false);
+  useEffect(() => {
+    if (view !== "jam" || jam || !libraryReady || pickingRef.current) return;
+    pickingRef.current = true;
+    (async () => {
+      let lastId: string | undefined;
+      try {
+        lastId = await storeLoad<string>(LAST_JAM_KEY);
+      } catch {
+        /* Never opened one, or a store that cannot be read. The library wins. */
+      }
+      const library = jamsRef.current;
+      // A jam that was deleted since is not an answer, which is why this is a
+      // lookup rather than a load by id.
+      const target = library.find((j) => j.id === lastId) ?? library[0] ?? null;
+      if (target) loadJam(target);
+      else openUnsavedJam();
+      pickingRef.current = false;
+    })();
+  }, [view, jam, libraryReady, loadJam, openUnsavedJam]);
 
   /** Put the jam away — loading a preset is loading a preset. */
   const closeJam = useCallback(() => {
     setActiveJam(null);
     setSaved(null);
+    setStageUnsaved(false);
     // The sheets belong to the jam that was open. Left down, they would be
     // the first thing the NEXT jam showed, describing the one before it.
     setSetupOpen(false);
@@ -1359,6 +1478,10 @@ export function useJamSession({
     if (!jam) return;
     commit(upsertJam(jams, jam));
     setSaved(jam);
+    setStageUnsaved(false);
+    // A jam that was only ever on the stage is in the library from here, so
+    // this is the first moment there is an id worth coming back to.
+    void storeSave(LAST_JAM_KEY, jam.id).catch(() => {});
     if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
     setSaveFeedback(true);
     feedbackTimer.current = setTimeout(() => setSaveFeedback(false), 1800);
@@ -1420,6 +1543,16 @@ export function useJamSession({
     () => (jam && saved ? !sameRecord(jam, saved) : false),
     [jam, saved],
   );
+
+  /**
+   * A jam on the stage that the library has never held.
+   *
+   * Beside dirty rather than folded into it. They answer two questions — "has
+   * this moved since it was written down" and "has it ever been written down"
+   * — and a jam the tab made is the case where the answers differ. What they
+   * share is that Save has something to do.
+   */
+  const unsaved = !!jam && stageUnsaved;
 
   // -------------------------------------------------------------------------
   // Hands-free (JAM_MODE §4.7). A footswitch sends the same action a key does.
@@ -1817,6 +1950,8 @@ export function useJamSession({
     jams,
     jam,
     dirty,
+    /** True while the jam on the stage has never been written to the library. */
+    unsaved,
     saveFeedback,
     /** The band when the record has not been asked — what the toggles show. */
     lineup,

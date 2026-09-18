@@ -23,6 +23,12 @@ describe("the band's choices are named everywhere", () => {
     for (const { id } of CHANGES) expect(jam.progressions?.[id], `progressions.${id}`).toBeTruthy();
     for (const key of ["bassFigure", "keysComp"]) expect(jam[key].autoNamed).toContain("{{style}}");
     expect(jam.progressions.autoNamed).toContain("{{name}}");
-    for (const s of ["song", "drums", "bass", "keys", "perc"]) expect(jam.section?.[s], `section.${s}`).toBeTruthy();
+    // One heading per section of the sheet. "The song" was two sections in
+    // one — the shape of the tune and the harmony of it — and split into
+    // "the form" and "the changes" when the owner said it read as a pile.
+    for (const s of ["form", "changes", "drums", "bass", "keys", "perc"]) {
+      expect(jam.section?.[s], `section.${s}`).toBeTruthy();
+      expect(jam.section?.[`${s}Lead`], `section.${s}Lead`).toBeTruthy();
+    }
   });
 });

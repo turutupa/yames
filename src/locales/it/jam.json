@@ -158,6 +158,7 @@
       "doesNotFit": "{{groove}} non entra in {{meter}}; il batterista suona la regola."
     },
     "mix": {
+      "label": "Volume",
       "forLane": "Volume {{lane}}"
     },
     "countInSound": {
@@ -288,10 +289,11 @@
     "fretboard": {
       "label": "Tastiera",
       "aria": "{{chord}} sul manico",
-      "staysPut": "{{scale}}, la posizione al tasto {{fret}} · resta ferma mentre suoni"
+      "wholeNeck": "{{scale}}, tutto il manico · resta fermo mentre suoni"
     },
     "chords": {
       "label": "Accordi",
+      "onTimeline": "Mostra gli accordi sulla linea",
       "hint": "I cambi sulla linea delle battute, e sopra l'accordo su cui sei.",
       "inKey": "Accordi in {{key}}",
       "follow": "Segui il jam",
@@ -415,7 +417,11 @@
       "everyChoruses": "ogni {{count}} giri",
       "everyChoruses_one": "ogni {{count}} giro",
       "everyChoruses_other": "ogni {{count}} giri",
-      "climbing": "partendo da {{from}}"
+      "climbing": "partendo da {{from}}",
+      "dropOutExplain": "Ogni tanto la band si ferma per qualche battuta e tieni il tempo da solo.",
+      "tradeExplain": "La band suona qualche battuta, poi ne suoni altrettante tu.",
+      "tempoExplain": "Il tempo sale un po' a ogni giro del brano.",
+      "takesExplain": "Registra quello che suoni con la band, e lo tiene su questo computer."
     },
     "cue": {
       "yours": "Tocca a te, quattro",
@@ -611,8 +617,10 @@
       "silent": "niente in questo groove"
     },
     "section": {
-      "song": "Il brano",
-      "songLead": "lo suonano tutti",
+      "form": "La forma",
+      "formLead": "quanto dura un giro",
+      "changes": "Gli accordi",
+      "changesLead": "su cosa suonano tutti",
       "drums": "Batteria",
       "drumsLead": "il groove e il kit",
       "bass": "Basso",

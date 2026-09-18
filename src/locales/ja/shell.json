@@ -22,6 +22,8 @@
     "short": "音量"
   },
   "presets": {
+    "unsavedMetronome": "未保存のメトノーム",
+    "unsavedDrill": "未保存のテンポ練習",
     "title": "プリセット",
     "titleDrill": "テンポ練習",
     "titleSetlist": "セットリスト",

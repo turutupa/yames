@@ -158,6 +158,7 @@
       "doesNotFit": "{{groove}} 不适合 {{meter}}，鼓手按通用规则演奏。"
     },
     "mix": {
+      "label": "音量",
       "forLane": "{{lane}} 音量"
     },
     "countInSound": {
@@ -288,10 +289,11 @@
     "fretboard": {
       "label": "指板",
       "aria": "琴颈上的 {{chord}}",
-      "staysPut": "{{scale}}，第 {{fret}} 品的把位 · 弹的时候不会动"
+      "wholeNeck": "{{scale}}，整块指板 · 演奏时保持不变"
     },
     "chords": {
       "label": "和弦",
+      "onTimeline": "在小节条上显示和弦",
       "hint": "把和弦走向放进小节条，当前和弦放在上面。",
       "inKey": "{{key}} 的和弦",
       "follow": "跟着即兴走",
@@ -415,7 +417,11 @@
       "everyChoruses": "每 {{count}} 轮",
       "everyChoruses_one": "每 {{count}} 轮",
       "everyChoruses_other": "每 {{count}} 轮",
-      "climbing": "从 {{from}} 往上"
+      "climbing": "从 {{from}} 往上",
+      "dropOutExplain": "乐队每隔一阵停几小节，由你自己保持节奏。",
+      "tradeExplain": "乐队先弹几小节，然后你弹同样的小节数。",
+      "tempoExplain": "每走完一轮，速度就往上提一点。",
+      "takesExplain": "把你和乐队一起演奏的声音录下来，存在这台电脑上。"
     },
     "cue": {
       "yours": "你的四小节",
@@ -611,8 +617,10 @@
       "silent": "这个律动里没有"
     },
     "section": {
-      "song": "歌曲",
-      "songLead": "全员一起演奏",
+      "form": "曲式",
+      "formLead": "一轮有多长",
+      "changes": "和弦走向",
+      "changesLead": "大家都在这上面演奏",
       "drums": "鼓",
       "drumsLead": "律动与鼓组",
       "bass": "贝斯",

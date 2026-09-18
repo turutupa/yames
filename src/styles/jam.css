@@ -1942,6 +1942,15 @@
   padding-left: 12px;
   border-left: 2px solid color-mix(in srgb, var(--player) 55%, transparent);
 }
+/* The three that are not a player. They wear the text colour rather than an
+   accent — a rail says "this is a section", and colouring the song's halves
+   as loudly as the drummer would say they are people too. */
+.jam-sheet-group[data-player="vibe"],
+.jam-sheet-group[data-player="form"],
+.jam-sheet-group[data-player="changes"] {
+  --player: var(--text-secondary);
+}
+
 .jam-sheet-group[data-player="drums"] { --player: var(--accent); }
 .jam-sheet-group[data-player="bass"] { --player: var(--accent-2, var(--accent)); }
 .jam-sheet-group[data-player="keys"] {
@@ -1959,6 +1968,91 @@
 
 .jam-sheet-group[data-player] > .jam-sheet-group-head > .stage-label {
   color: var(--player);
+}
+
+/* ── What a control does, on hover ────────────────────────────────────────
+ *
+ * The owner: "these options are not clear what they do... i feel like in
+ * general if we want to avoid adding too much information on the screen,
+ * these options and a bunch of other should have a on hover pop over that
+ * explains what it does."
+ *
+ * Which is exactly the trade: a jam screen with a sentence under every
+ * control is a manual, and a jam screen with none is a row of words you have
+ * to try to find out. The sentence exists either way — it only appears when
+ * somebody asks for it by resting on the thing.
+ *
+ * It wraps, unlike the header's chip tooltips, because these are sentences
+ * rather than names. Half a second of delay so it never fires at a pointer
+ * on its way somewhere else, and `pointer-events: none` so it can never be
+ * the thing you click.
+ */
+[data-explain] {
+  position: relative;
+}
+
+[data-explain]::after {
+  content: attr(data-explain);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  z-index: 55;
+  width: max-content;
+  max-width: 240px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  box-shadow: var(--shadow);
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: 0;
+  white-space: normal;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity 0.14s ease, transform 0.14s ease;
+}
+
+[data-explain]:hover::after,
+[data-explain]:focus-visible::after {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.45s;
+}
+
+/* Against the right-hand edge it would hang off the window, so the last
+   control in a row drops its sentence from the other corner. */
+[data-explain][data-explain-from="right"]::after {
+  left: auto;
+  right: 0;
+}
+
+/* A switch and the sentence that says what it does, on one line at the foot
+   of a section. The switch used to sit alone against the right-hand edge with
+   a single word on it, as far from its explanation as the section is tall. */
+.jam-sheet-switch-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+
+.jam-sheet-switch-row .jam-sheet-lead {
+  flex: 1;
+  min-width: 0;
+}
+
+/* The key's three modes belong under the twelve roots they qualify, not
+   pushed to the far side of the sheet. `.accent-control` sends itself right
+   because on a stage it is the last thing in a row; in a block of its own it
+   is the second line of a two-line control. */
+.jam-setup-block .jam-segmented {
+  margin-left: 0;
 }
 
 /* The player's on/off switch, against the heading's right edge. */
@@ -1981,6 +2075,49 @@
   align-items: flex-end;
   flex-wrap: wrap;
   gap: 16px;
+}
+
+/* A dropdown and a segmented control side by side are the same control in two
+   shapes — one puts its name inside the chip, the other above the trough — so
+   without this the trough came out a couple of pixels shorter and the pair
+   read as misaligned however carefully the row was aligned. The owner: "the
+   kit dropdown and the 4 way switch next to it doesn't have the same height,
+   it feels very inconsistent". Same height, and the row bottom-aligns them. */
+.jam-sheet-row .accent-options,
+.jam-sheet-group .accent-options {
+  min-height: 36px;
+}
+
+/* Make your own. It sat in the card wall wearing a groove's clothes — the
+   owner: "should not look like another preset i feel like... to make it more
+   obvious". It is not one of the hundred and fifteen; it is the door out of
+   them, so it is drawn as a door: outlined rather than filled, with a plus
+   where the others have their pattern. Once you HAVE drawn one it becomes a
+   real card, because then it is a groove like any other. */
+.jam-card-mine:not(.active) {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--text-primary) 22%, transparent);
+  background: none;
+  color: var(--text-secondary);
+}
+
+/* Where the others draw their bar, this draws the gesture. Sized to the
+   glyph it replaces so the card is the same height as its neighbours. */
+.jam-card-plus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  color: var(--text-faint);
+}
+
+.jam-card-mine:not(.active):hover .jam-card-plus {
+  color: var(--accent);
+}
+
+.jam-card-mine:not(.active):hover {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  color: var(--text-primary);
 }
 
 .jam-sheet-row .jam-segmented,
@@ -2286,11 +2423,12 @@
   white-space: nowrap;
 }
 
+/* Drawn on the body and placed in window coordinates, so nothing that
+   scrolls can clip it. `fixed`, not `absolute`: the setup drawer scrolls and
+   an absolutely placed menu inside it was cut off at the drawer's edge. */
 .jam-dropdown-menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  z-index: 40;
+  position: fixed;
+  z-index: 60;
   display: flex;
   flex-direction: column;
   min-width: 260px;
@@ -2307,6 +2445,8 @@
 .jam-select[data-compact] .jam-dropdown-menu {
   min-width: 190px;
 }
+
+/* Upwards is now a `top` the picker works out, not a rule. */
 
 .jam-dropdown-item {
   display: flex;
@@ -2436,15 +2576,23 @@
   min-width: 92px;
 }
 
+/* The same last line in every player's section: the word, the slider, the
+   number. Full width and left-aligned, so four sections put it in four
+   identical places rather than four different ones. */
 .jam-player-volume {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-left: auto;
+  gap: 10px;
+  width: 100%;
+}
+
+.jam-player-volume .stage-label {
+  flex-shrink: 0;
 }
 
 .jam-player-volume input[type="range"] {
-  width: 96px;
+  flex: 1;
+  max-width: 260px;
   /* The stage's slider, not the browser's: a range left unstyled comes out in
      the OS accent colour, which is the one colour on this screen that is not
      the theme's. */
@@ -2619,15 +2767,22 @@
 /* Low to high on the neck, scrolling sideways: five ways to play a minor
    seventh is five boxes, and stacking them would push the fretboard off the
    sheet. */
+/* Every way to play it, wrapped.
+ *
+ * It was one row that scrolled sideways, and a sideways scrollbar is the one
+ * gesture nobody makes: three shapes were visible and the other seven were
+ * somewhere to the right. The owner: "instead of horizontally scrolling,
+ * let's make it take all the space below it, so vertically scrolling
+ * instead". A grid that fills the width and goes down the page is a cheat
+ * sheet; a strip you have to drag is a filing cabinet. */
 .jam-chord-shapes {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
   gap: 10px;
-  overflow-x: auto;
   padding-bottom: 4px;
 }
 
 .jam-chord-shape {
-  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -278,8 +278,20 @@ export function JamSetupSheet({
   };
 
   /** A player's volume, under their controls. */
+  /**
+   * How loud this player is, as the last line of their section.
+   *
+   * It used to be dropped wherever the section happened to end — inside the
+   * bass's last row, on the keys' voice row, alone under Percussion — and
+   * being right-aligned it then landed at a different height and a different
+   * distance in each one. The owner: "the switches and volumes look all over
+   * the place for these instruments." Every player's section ends with this
+   * same line now, named, so the eye can run down the sheet and find the
+   * same control in the same place four times.
+   */
   const playerVolume = (id: "drums" | "bass" | "keys" | "perc") => (
     <div className="jam-player-volume">
+      <span className="stage-label">{t("jam.mix.label")}</span>
       <input
         type="range"
         min={0}
@@ -461,7 +473,7 @@ export function JamSetupSheet({
 
   return (
     <>
-      <JamSheetGroup label={t("jam.vibe.label")} lead={t("jam.vibe.lead")}>
+      <JamSheetGroup label={t("jam.vibe.label")} lead={t("jam.vibe.lead")} player="vibe">
         <VibePicker
           jam={jam}
           jams={jams}
@@ -474,82 +486,10 @@ export function JamSetupSheet({
       </JamSheetGroup>
 
       <JamSheetGroup
-        label={t("jam.section.song")}
-        lead={t("jam.section.songLead")}
-        player="song"
-        action={
-          <span className="jam-sheet-links">
-            {jam.chords && (
-              <button
-                type="button"
-                className={`jam-link${editingChords ? " active" : ""}`}
-                aria-pressed={editingChords}
-                title={t("jam.changes.hint")}
-                onClick={() => onEditingChords(!editingChords)}
-              >
-                {editingChords ? t("jam.changes.done") : t("jam.changes.edit")}
-              </button>
-            )}
-            {/* The fastest way to jam over a tune is to paste the chart you
-                already have (A3). Beside "Edit changes" rather than inside it:
-                typing chords in one at a time and pasting a page of them are
-                two different gestures, and the second one is the one people
-                arrive with. */}
-            <button
-              type="button"
-              className={`jam-link${pasteOpen ? " active" : ""}`}
-              aria-pressed={pasteOpen}
-              onClick={() => setPasteOpen((open) => !open)}
-            >
-              {t("jam.chart.paste")}
-            </button>
-          </span>
-        }
+        label={t("jam.section.form")}
+        lead={t("jam.section.formLead")}
+        player="form"
       >
-        {pasteOpen && (
-          <div className="jam-chart-paste">
-            <label className="stage-label" htmlFor="jam-chart-text">
-              {t("jam.chart.label")}
-            </label>
-            <textarea
-              id="jam-chart-text"
-              className="jam-chart-text"
-              rows={6}
-              spellCheck={false}
-              value={chartText}
-              placeholder={t("jam.chart.placeholder")}
-              onChange={(e) => setChartText(e.target.value)}
-            />
-            {/* The preview is live, because the whole risk of a paste box is
-                that you cannot tell what it understood until after it has
-                replaced your changes. */}
-            <p className="jam-chart-preview">{chartPreview}</p>
-            <div className="jam-chart-actions">
-              <button
-                type="button"
-                className="preset-text-btn"
-                disabled={chart.bars.length === 0}
-                onClick={() => {
-                  onEdit(chartEdit(chartText, jam));
-                  setPasteOpen(false);
-                  setChartText("");
-                }}
-              >
-                {t("jam.chart.use")}
-              </button>
-              <button
-                type="button"
-                className="jam-link"
-                onClick={() => {
-                  setPasteOpen(false);
-                  setChartText("");
-                }}
-              >
-                {t("jam.chart.cancel")}
-              </button>
-            </div>
-          </div>
-        )}
         <div className="jam-sheet-row">
           <JamSelect
             label={t("jam.form.shape")}
@@ -713,6 +653,39 @@ export function JamSetupSheet({
           </div>
         )}
 
+        {/* The feel is the band's, not the drummer's: the bass swings with
+            it too. So it sits with the song. */}
+        <div className="jam-sheet-row">
+          <Segmented
+            label={t("jam.feel.label")}
+            value={jam.feel}
+            options={FEELS.map((id) => ({ id, label: t(`jam.feel.${id}`) }))}
+            onChange={(feel) => onEdit({ feel })}
+            hint={t("jam.feel.scope")}
+          />
+        </div>
+      </JamSheetGroup>
+
+      {/* THE CHANGES — what everybody plays over (2026-09-17).
+
+          One section until the owner said "the song section is super messy...
+          its just a bunch of optinos one stacking on top of another...
+          progression dropdown down there in the middle of nowhere ... chords
+          switch at the end without context on what it does". It was: the
+          shape of the tune and the harmony of it are two different questions
+          and they were in one column, so nothing sat next to the thing it
+          belonged with.
+
+          Time above, harmony here — which is how a musician holds them apart
+          anyway. The progression, the two ways to overrule it, and the switch
+          that puts the result on the timeline are now one block, and that
+          switch finally has something beside it to explain what "chords"
+          means. */}
+      <JamSheetGroup
+        label={t("jam.section.changes")}
+        lead={t("jam.section.changesLead")}
+        player="changes"
+      >
         {/* The key, as two rows rather than a dropdown of thirty-six: twelve
             roots and three modes is a shape a player recognises. The roots are
             written sharp here and only here — a key picker has no key to spell
@@ -774,29 +747,101 @@ export function JamSetupSheet({
           <p className="jam-meter-note">{t("jam.progressions.ownChords")}</p>
         )}
 
-        {/* The feel is the band's, not the drummer's: the bass swings with
-            it too. So it sits with the song. */}
-        <div className="jam-sheet-row">
-          <Segmented
-            label={t("jam.feel.label")}
-            value={jam.feel}
-            options={FEELS.map((id) => ({ id, label: t(`jam.feel.${id}`) }))}
-            onChange={(feel) => onEdit({ feel })}
-            hint={t("jam.feel.scope")}
-          />
-        </div>
+        {/* The two ways to overrule it, beside the thing they overrule.
+            They used to be links up in the section's heading, which put the
+            fastest way into the app — pasting the chart you already have —
+            above a form control it has nothing to do with. */}
+          <span className="jam-sheet-links">
+            {jam.chords && (
+              <button
+                type="button"
+                className={`jam-link${editingChords ? " active" : ""}`}
+                aria-pressed={editingChords}
+                title={t("jam.changes.hint")}
+                onClick={() => onEditingChords(!editingChords)}
+              >
+                {editingChords ? t("jam.changes.done") : t("jam.changes.edit")}
+              </button>
+            )}
+            {/* The fastest way to jam over a tune is to paste the chart you
+                already have (A3). Beside "Edit changes" rather than inside it:
+                typing chords in one at a time and pasting a page of them are
+                two different gestures, and the second one is the one people
+                arrive with. */}
+            <button
+              type="button"
+              className={`jam-link${pasteOpen ? " active" : ""}`}
+              aria-pressed={pasteOpen}
+              onClick={() => setPasteOpen((open) => !open)}
+            >
+              {t("jam.chart.paste")}
+            </button>
+          </span>
+        {pasteOpen && (
+          <div className="jam-chart-paste">
+            <label className="stage-label" htmlFor="jam-chart-text">
+              {t("jam.chart.label")}
+            </label>
+            <textarea
+              id="jam-chart-text"
+              className="jam-chart-text"
+              rows={6}
+              spellCheck={false}
+              value={chartText}
+              placeholder={t("jam.chart.placeholder")}
+              onChange={(e) => setChartText(e.target.value)}
+            />
+            {/* The preview is live, because the whole risk of a paste box is
+                that you cannot tell what it understood until after it has
+                replaced your changes. */}
+            <p className="jam-chart-preview">{chartPreview}</p>
+            <div className="jam-chart-actions">
+              <button
+                type="button"
+                className="preset-text-btn"
+                disabled={chart.bars.length === 0}
+                onClick={() => {
+                  onEdit(chartEdit(chartText, jam));
+                  setPasteOpen(false);
+                  setChartText("");
+                }}
+              >
+                {t("jam.chart.use")}
+              </button>
+              <button
+                type="button"
+                className="jam-link"
+                onClick={() => {
+                  setPasteOpen(false);
+                  setChartText("");
+                }}
+              >
+                {t("jam.chart.cancel")}
+              </button>
+            </div>
+          </div>
+        )}
 
-        <button
-          type="button"
-          role="switch"
-          aria-checked={!!jam.chords}
-          className={`transport-switch jam-switch ${jam.chords ? "on" : ""}`}
-          title={t("jam.chords.hint")}
-          onClick={() => onEdit({ chords: !jam.chords })}
-        >
-          <span className="transport-switch-track" aria-hidden="true" />
-          {t("jam.chords.label")}
-        </button>
+
+        {/* And whether the result is drawn on the timeline while you play.
+            It used to be a lone switch at the foot of a long section, next to
+            nothing, saying one word — the owner: "chords switch at the end
+            without context on what it does". It is the last line of the
+            changes now, which is the only place where "chords" names
+            something you can see. */}
+        <div className="jam-sheet-switch-row">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={!!jam.chords}
+            className={`transport-switch jam-switch ${jam.chords ? "on" : ""}`}
+            onClick={() => onEdit({ chords: !jam.chords })}
+          >
+            <span className="transport-switch-track" aria-hidden="true" />
+            {t("jam.chords.onTimeline")}
+          </button>
+          <span className="jam-sheet-lead">{t("jam.chords.hint")}</span>
+        </div>
       </JamSheetGroup>
 
       <JamSheetGroup
@@ -818,6 +863,43 @@ export function JamSetupSheet({
             to scroll the whole book. The row follows the jam by default, so
             tapping the Latin vibe leaves the Latin shelf open rather than
             leaving the selected card somewhere off screen. */}
+        {/* The kit, the loudness and the fills, ABOVE the grooves.
+            They were under them, which meant scrolling past a hundred and
+            fifteen cards to reach three controls — the owner: "not sure if
+            those options should go at the top of drums section?" They should:
+            the heading says who this is, these three say what they sound
+            like, and then the wall of grooves is the last and largest thing,
+            which is the order every other section already reads in. */}
+        <div className="jam-sheet-row">
+          <KitPicker
+            kit={jam.kit}
+            onKit={(kit) => {
+              setChanged("kit");
+              onEdit({ kit });
+            }}
+            customKit={jam.customKit ?? null}
+            onCustomKit={(customKit) => onEdit({ customKit })}
+            onPreview={onPreviewKit}
+            previewing={previewingKit}
+            refused={customKitRefused}
+            loading={spinning("kit")}
+          />
+          <Segmented
+            label={t("jam.intensity.label")}
+            value={jam.intensity}
+            options={INTENSITIES.map((id) => ({ id, label: t(`jam.intensity.${id}`) }))}
+            onChange={(intensity) => onEdit({ intensity })}
+            hint={t("jam.intensity.hint")}
+          />
+          <Segmented
+            label={t("jam.fills.label")}
+            value={fillsChoiceOf(jam)}
+            options={FILL_CHOICES.map((id) => ({ id, label: t(`jam.fills.${id}`) }))}
+            onChange={(choice) => onEdit(fillsEditFor(choice))}
+            hint={t("jam.fills.hint")}
+          />
+        </div>
+
         <div className="jam-groove-shelves">
           <div
             className="jam-variations jam-family-chips"
@@ -870,7 +952,20 @@ export function JamSetupSheet({
               aria-pressed={!!jam.customGroove}
               onClick={onOpenEditor}
             >
-              <GrooveGlyph groove={meter} />
+              {/* A groove you drew gets its own pattern drawn, like every
+                  other card. Until then there is no pattern to draw, and a
+                  borrowed one was the whole reason this read as a preset:
+                  it was wearing somebody else's bar. */}
+              {jam.customGroove ? (
+                <GrooveGlyph groove={meter} />
+              ) : (
+                <span className="jam-card-plus" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       strokeWidth="2" strokeLinecap="round">
+                    <path d="M12 6v12M6 12h12" />
+                  </svg>
+                </span>
+              )}
               <span className="sub-row-label">
                 {jam.customGroove ? jam.customGroove.name : t("jam.editor.makeYourOwn")}
               </span>
@@ -878,38 +973,7 @@ export function JamSetupSheet({
           </div>
         </div>
 
-        <div className="jam-sheet-row">
-          <Segmented
-            label={t("jam.intensity.label")}
-            value={jam.intensity}
-            options={INTENSITIES.map((id) => ({ id, label: t(`jam.intensity.${id}`) }))}
-            onChange={(intensity) => onEdit({ intensity })}
-            hint={t("jam.intensity.hint")}
-          />
-        </div>
 
-        <div className="jam-sheet-row">
-          <KitPicker
-            kit={jam.kit}
-            onKit={(kit) => {
-              setChanged("kit");
-              onEdit({ kit });
-            }}
-            customKit={jam.customKit ?? null}
-            onCustomKit={(customKit) => onEdit({ customKit })}
-            onPreview={onPreviewKit}
-            previewing={previewingKit}
-            refused={customKitRefused}
-            loading={spinning("kit")}
-          />
-          <Segmented
-            label={t("jam.fills.label")}
-            value={fillsChoiceOf(jam)}
-            options={FILL_CHOICES.map((id) => ({ id, label: t(`jam.fills.${id}`) }))}
-            onChange={(choice) => onEdit(fillsEditFor(choice))}
-            hint={t("jam.fills.hint")}
-          />
-        </div>
 
         {/* Said plainly rather than left to be noticed by ear. The groove card
             above still looks selected — and it is, it is just not what is
@@ -969,9 +1033,9 @@ export function JamSetupSheet({
                 onChange={(bassBusy) => onEdit({ bassBusy: bassBusy === "normal" ? undefined : bassBusy })}
               />
             </div>
-            {playerVolume("bass")}
           </div>
         )}
+        {band.bass && playerVolume("bass")}
       </JamSheetGroup>
 
       {/* THE KEYS. The comping style lives here and on the keys row of the
@@ -1007,9 +1071,9 @@ export function JamSetupSheet({
                 onChange={(id) => onEdit({ keysStyle: id === "auto" ? undefined : id })}
               />
             </div>
-            {playerVolume("keys")}
           </div>
         )}
+        {band.keys && playerVolume("keys")}
       </JamSheetGroup>
 
       {/* THE PERCUSSIONIST. Always here even where the groove has none

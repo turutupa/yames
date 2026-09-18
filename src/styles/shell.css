@@ -846,6 +846,16 @@ button.context-chip:hover,
   color: var(--accent);
 }
 
+/* The same line, when nothing has been saved yet — "Unsaved metronome". It is
+   a label rather than a door, so it neither invites a click nor lights up
+   under the pointer, and it sits a shade back from a name you chose because
+   the app picked those words, not you. */
+.preset-active-name--unsaved,
+.preset-active-name--unsaved:hover {
+  color: var(--text-muted);
+  cursor: default;
+}
+
 /* "Edited", not a bullet. The dot is the glance; the word is what makes the
    glance mean something the first time you see it. `--feedback-ok` is the
    token contract's warm attention colour — the only amber the themes agree

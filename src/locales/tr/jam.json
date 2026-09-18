@@ -158,6 +158,7 @@
       "doesNotFit": "{{groove}}, {{meter}} ölçüsüne sığmıyor; davulcu kuralı çalıyor."
     },
     "mix": {
+      "label": "Ses",
       "forLane": "{{lane}} sesi"
     },
     "countInSound": {
@@ -288,10 +289,11 @@
     "fretboard": {
       "label": "Klavye",
       "aria": "Sapta {{chord}}",
-      "staysPut": "{{scale}}, {{fret}}. perdedeki kalıp · çalarken yerinde durur"
+      "wholeNeck": "{{scale}}, tüm klavye · çalarken yerinde kalır"
     },
     "chords": {
       "label": "Akorlar",
+      "onTimeline": "Akorları ölçü şeridinde göster",
       "hint": "Akor geçişlerini ölçü şeridine, üstüne de çaldığın akoru koyar.",
       "inKey": "{{key}} akorları",
       "follow": "Jam'i takip et",
@@ -415,7 +417,11 @@
       "everyChoruses": "her {{count}} turda",
       "everyChoruses_one": "her {{count}} turda",
       "everyChoruses_other": "her {{count}} turda",
-      "climbing": "{{from}} değerinden yükseliyor"
+      "climbing": "{{from}} değerinden yükseliyor",
+      "dropOutExplain": "Grup arada bir birkaç ölçü susar, zamanı sen tutarsın.",
+      "tradeExplain": "Grup birkaç ölçü çalar, sonra aynı kadarını sen çalarsın.",
+      "tempoExplain": "Parça her döndüğünde tempo biraz yükselir.",
+      "takesExplain": "Grupla birlikte çaldığını kaydeder ve bu bilgisayarda tutar."
     },
     "cue": {
       "yours": "Senin dört ölçün",
@@ -611,8 +617,10 @@
       "silent": "bu groove'da yok"
     },
     "section": {
-      "song": "Şarkı",
-      "songLead": "herkes bunu çalar",
+      "form": "Biçim",
+      "formLead": "bir tur ne kadar sürüyor",
+      "changes": "Akorlar",
+      "changesLead": "herkesin üzerinde çaldığı",
       "drums": "Davul",
       "drumsLead": "groove ve set",
       "bass": "Bas",

@@ -107,3 +107,28 @@ describe("the jam's context bar", () => {
     expect(screen.getByText("Rock")).toBeInTheDocument();
   });
 });
+
+/**
+ * A jam the library has never held (2026-09-17).
+ *
+ * The Jam tab always has something on it now, and for a player who deleted
+ * every jam they had that something is a jam nothing has filed. The bar has
+ * to offer to file it — "No changes" on a jam that was never written down is
+ * the bar refusing to do the one thing that would help.
+ */
+describe("a jam that has never been saved", () => {
+  it("offers Save, with nothing said about edits", () => {
+    draw({ unsaved: true });
+    const save = screen.getByRole("button", { name: "Save" });
+    expect(save).toBeEnabled();
+    // "Edited" is a claim about a stored jam that has moved away from what was
+    // stored, and there is nothing stored here to have moved away from.
+    expect(screen.queryByText("Edited")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Revert" })).not.toBeInTheDocument();
+  });
+
+  it("goes quiet once it has been filed", () => {
+    draw({ unsaved: false });
+    expect(screen.getByRole("button", { name: "No changes" })).toBeDisabled();
+  });
+});

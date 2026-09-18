@@ -292,7 +292,7 @@ export function JamSheetGroup({
    * never has to be read to know who it belongs to — the owner's ask: "the
    * UI clearly shows what setting you are modifying".
    */
-  player?: "song" | "drums" | "bass" | "keys" | "perc";
+  player?: "vibe" | "form" | "changes" | "drums" | "bass" | "keys" | "perc";
   /** The player's on/off switch, on the heading's right. */
   control?: React.ReactNode;
   children?: React.ReactNode;
@@ -314,8 +314,31 @@ export function JamSheetGroup({
 /** A small glyph per player, drawn in the player's colour. */
 function PlayerMark({ player }: { player: NonNullable<Parameters<typeof JamSheetGroup>[0]["player"]> }) {
   const paths: Record<typeof player, React.ReactNode> = {
-    // A staff line and a note: what everybody reads.
-    song: (
+    /* The vibe: a dial, because that is what the row of tiles is — one
+       control with nine positions, not nine controls. It has a rail like
+       everybody else now: without one the tiles and their variation row read
+       as something parked above the sheet rather than the first section of
+       it. */
+    vibe: (
+      <>
+        <circle cx="12" cy="12" r="8" />
+        <path d="M12 7v5" />
+      </>
+    ),
+    /* The form: a repeat sign. How long one time round is and what the band
+       does the second time round. */
+    form: (
+      <>
+        <path d="M5 4v16M9 4v16" />
+        <circle cx="14" cy="9.5" r="1.4" fill="currentColor" stroke="none" />
+        <circle cx="14" cy="14.5" r="1.4" fill="currentColor" stroke="none" />
+        <path d="M19 4v16" />
+      </>
+    ),
+    /* The changes: the staff and the notes on it — what everybody plays
+       over. This was the "song" mark, and it keeps the job it was drawn
+       for; the form took the half of that section that is about time. */
+    changes: (
       <>
         <path d="M9 18V6l10-2v12" />
         <circle cx="6.5" cy="18" r="2.5" />

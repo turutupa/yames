@@ -9,7 +9,7 @@
  * between selecting a step and its configuration reaching the engine.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { useSetlistSession } from "./useSetlistSession";
 import { DEFAULT_TEST_STATE, mockInvoke } from "../../../test/mocks";
 import * as ipc from "../../../ipc";
@@ -51,16 +51,33 @@ const CHAIN: Setlist = {
   ],
 };
 
-function mount(initial: Partial<AppState> = {}) {
+/**
+ * The hook, on a tab that is NOT the setlist unless a test says so.
+ *
+ * Standing on the Setlist tab is itself a request for a setlist now
+ * (2026-09-17), so the tab has to be somewhere else for the tests below to be
+ * about the thing they load by hand rather than about the one the tab opened.
+ */
+function mount(initial: Partial<AppState> = {}, tab = "beat") {
   const setView = vi.fn();
   const onSetlistLoaded = vi.fn();
   const view = renderHook(
-    ({ state, isPlaying }: { state: AppState; isPlaying: boolean }) =>
-      useSetlistSession({ state, isPlaying, currentBeat: null, setView, onSetlistLoaded }),
+    // `tab` is optional so the rerenders below can go on passing the two
+    // props they care about; left out, the hook is not on the setlist tab.
+    ({ state, isPlaying, tab }: { state: AppState; isPlaying: boolean; tab?: string }) =>
+      useSetlistSession({
+        state,
+        isPlaying,
+        currentBeat: null,
+        view: tab ?? "beat",
+        setView,
+        onSetlistLoaded,
+      }),
     {
       initialProps: {
         state: { ...DEFAULT_TEST_STATE, ...initial },
         isPlaying: false,
+        tab,
       },
     },
   );
@@ -882,5 +899,143 @@ describe("a block of steps, beside the selection", () => {
     act(() => result.current.extendSelection("s4"));
     act(() => result.current.closeSetlist());
     expect(result.current.selectedStepIds.size).toBe(0);
+  });
+});
+
+/**
+ * The Setlist tab is never a screen with a button on it (2026-09-17).
+ *
+ * The owner's report was that the three modes disagreed with each other about
+ * what opening one means: Drill showed a whole drill, Setlist and Jam showed
+ * an invitation, and none of them remembered anything from yesterday. The
+ * rule is that every mode opens with something live in front of you, and the
+ * library holds what you chose to save.
+ */
+describe("the tab always has a setlist on it", () => {
+  /** Two saved routines, and whatever the store remembers about them. */
+  function shelf(setlists: Setlist[], lastId?: string) {
+    const list = vi.spyOn(ipc, "listSetlists").mockResolvedValue(setlists);
+    const load = vi.spyOn(ipc, "storeLoad").mockImplementation(async (key: string) =>
+      key === "lastSetlistId" ? (lastId as never) : (undefined as never),
+    );
+    return () => {
+      list.mockRestore();
+      load.mockRestore();
+    };
+  }
+
+  const SECOND: Setlist = { ...CHAIN, id: "c2", name: "Cool down" };
+
+  it("opens on the setlist you last had open", async () => {
+    // The whole of "it remembers where I was". Without it, coming back to the
+    // app meant coming back to an invitation, whatever you were working on
+    // the night before.
+    const restore = shelf([CHAIN, SECOND], "c2");
+    const { result } = mount({}, "setlist");
+    await waitFor(() => expect(result.current.setlist?.id).toBe("c2"));
+    restore();
+  });
+
+  it("opens on the first in the library when none was ever open", async () => {
+    const restore = shelf([CHAIN, SECOND]);
+    const { result } = mount({}, "setlist");
+    await waitFor(() => expect(result.current.setlist?.id).toBe("c1"));
+    restore();
+  });
+
+  it("opens on the first in the library when the remembered one is gone", async () => {
+    // A lookup, not a load by id: a setlist you deleted last week is not an
+    // answer to "what was I working on", and asking the store for it by name
+    // would have put nothing on the stage at all.
+    const restore = shelf([CHAIN, SECOND], "c-deleted");
+    const { result } = mount({}, "setlist");
+    await waitFor(() => expect(result.current.setlist?.id).toBe("c1"));
+    restore();
+  });
+
+  it("opens a new setlist that the library has never heard of", async () => {
+    /*
+     * The one rule that matters more than the others here: a setlist made
+     * because somebody clicked a tab must NOT be filed. A mode that saved one
+     * every time it was opened would leave a shelf of empty routines nobody
+     * made, and the library is the one thing in this app a player owns.
+     */
+    const save = vi.spyOn(ipc, "saveSetlist");
+    const restore = shelf([]);
+    const { result } = mount({}, "setlist");
+    await waitFor(() => expect(result.current.setlist).not.toBeNull());
+    expect(result.current.setlists).toHaveLength(0);
+    expect(save).not.toHaveBeenCalled();
+    // And Save has something to do, which "no changes" would have denied: a
+    // setlist that has never been written down always has something to write.
+    expect(result.current.unsaved).toBe(true);
+    expect(result.current.dirty).toBe(false);
+    restore();
+    save.mockRestore();
+  });
+
+  it("files that setlist the moment you ask it to, and not before", async () => {
+    const save = vi.spyOn(ipc, "saveSetlist").mockResolvedValue(undefined);
+    const restore = shelf([]);
+    const { result } = mount({}, "setlist");
+    await waitFor(() => expect(result.current.setlist).not.toBeNull());
+
+    await act(async () => {
+      await result.current.saveActiveSetlist();
+    });
+    expect(save).toHaveBeenCalledTimes(1);
+    expect(result.current.setlists).toHaveLength(1);
+    expect(result.current.unsaved).toBe(false);
+    restore();
+    save.mockRestore();
+  });
+
+  it("writes down the setlist it opened, so tomorrow opens on the same one", async () => {
+    const write = vi.spyOn(ipc, "storeSave").mockResolvedValue(undefined);
+    const { result } = mount();
+    await act(async () => {
+      result.current.loadSetlist(CHAIN);
+    });
+    expect(write).toHaveBeenCalledWith("lastSetlistId", "c1");
+    write.mockRestore();
+  });
+
+  it("leaves every other tab alone", async () => {
+    // Standing on the Metronome tab is not a request for a setlist. This used
+    // to be the only behaviour there was, and it is still the right one
+    // everywhere except the tab whose job is setlists.
+    const restore = shelf([CHAIN]);
+    const { result } = mount();
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 20));
+    });
+    expect(result.current.setlist).toBeNull();
+    restore();
+  });
+});
+
+describe("a setlist the tab made, once you start working on it", () => {
+  it("goes dirty like any other, so nothing can throw it away in silence", async () => {
+    /*
+     * The gate that asks "you have unsaved work, save it?" reads `dirty`, and
+     * the first version of this could never be dirty: there was nothing
+     * stored to compare against. So an afternoon spent building a routine on
+     * a fresh install disappeared without a word the moment anything else was
+     * loaded. The baseline is the setlist AS CREATED now, which makes adding
+     * a step to it exactly as visible as adding one to a stored setlist.
+     */
+    const list = vi.spyOn(ipc, "listSetlists").mockResolvedValue([]);
+    const { result } = mount({}, "setlist");
+    await waitFor(() => expect(result.current.setlist).not.toBeNull());
+    expect(result.current.dirty).toBe(false);
+
+    await act(async () => {
+      result.current.addStepFromNow();
+    });
+    expect(result.current.dirty).toBe(true);
+    // And it is still in no library — the two facts are separate, and both
+    // are true at once.
+    expect(result.current.unsaved).toBe(true);
+    list.mockRestore();
   });
 });

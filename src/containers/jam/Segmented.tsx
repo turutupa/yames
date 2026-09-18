@@ -21,7 +21,12 @@ export function Segmented<T extends string>({
   options: { id: T; label: string; disabled?: boolean }[];
   value: T;
   onChange: (id: T) => void;
-  /** A sentence on hover, for a control whose four words are not the whole story. */
+  /**
+   * A sentence on hover, for a control whose four words are not the whole
+   * story. It used to be the `title` attribute, which is the operating
+   * system's tooltip: a second and a half late, in the system's font, and
+   * unstyleable. This is the app's own.
+   */
   hint?: string;
   /**
    * Leave the heading off, keeping it for screen readers only.
@@ -33,7 +38,7 @@ export function Segmented<T extends string>({
   labelHidden?: boolean;
 }) {
   return (
-    <div className="accent-control jam-segmented" role="group" aria-label={label} title={hint}>
+    <div className="accent-control jam-segmented" role="group" aria-label={label} data-explain={hint}>
       {!labelHidden && <span className="stage-label accent-label">{label}</span>}
       <div className="accent-options">
         {options.map((option) => (

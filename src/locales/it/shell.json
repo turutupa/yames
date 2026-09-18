@@ -22,6 +22,8 @@
     "short": "Vol."
   },
   "presets": {
+    "unsavedMetronome": "Metronomo non salvato",
+    "unsavedDrill": "Rampa non salvata",
     "title": "Preset",
     "titleDrill": "Rampe",
     "titleSetlist": "Scalette",

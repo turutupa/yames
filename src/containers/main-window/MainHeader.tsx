@@ -225,6 +225,8 @@ interface MainHeaderProps {
   /** A loaded setlist takes the context bar's left half (U9.4). */
   activeSetlist: Setlist | null;
   setlistDirty: boolean;
+  /** True while the setlist on the stage has never reached the library. */
+  setlistUnsaved?: boolean;
   setlistSaveFeedback: boolean;
   onSaveSetlist: () => void;
   onRevertSetlist: () => void;
@@ -232,6 +234,8 @@ interface MainHeaderProps {
   /** A loaded jam takes the same half of the bar, on its own tab. */
   activeJam?: Jam | null;
   jamDirty?: boolean;
+  /** True while the jam on the stage has never reached the library. */
+  jamUnsaved?: boolean;
   jamSaveFeedback?: boolean;
   onSaveJam?: () => void;
   onRevertJam?: () => void;
@@ -310,12 +314,14 @@ export function MainHeader({
   onRevertPreset,
   activeSetlist,
   setlistDirty,
+  setlistUnsaved = false,
   setlistSaveFeedback,
   onSaveSetlist,
   onRevertSetlist,
   onRenameSetlist,
   activeJam = null,
   jamDirty = false,
+  jamUnsaved = false,
   jamSaveFeedback = false,
   onSaveJam,
   onRevertJam,
@@ -396,6 +402,7 @@ export function MainHeader({
           <JamSaveBar
             jam={activeJam}
             dirty={jamDirty}
+            unsaved={jamUnsaved}
             saveFeedback={jamSaveFeedback}
             onRename={() => onRenameJam?.()}
             onSave={() => onSaveJam?.()}
@@ -409,6 +416,7 @@ export function MainHeader({
           <SetlistSaveBar
             setlist={activeSetlist}
             dirty={setlistDirty}
+            unsaved={setlistUnsaved}
             saveFeedback={setlistSaveFeedback}
             onRename={onRenameSetlist}
             onSave={onSaveSetlist}
@@ -418,6 +426,7 @@ export function MainHeader({
           (view === "beat" || view === "drill") && (
             <PresetSaveBar
               activePreset={activePreset}
+              view={view}
               presetDirty={presetDirty}
               updateFeedback={updateFeedback}
               onRename={onRenamePreset}

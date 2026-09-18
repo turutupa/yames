@@ -158,6 +158,7 @@
       "doesNotFit": "{{groove}} nie mieści się w {{meter}}; perkusista gra regułę."
     },
     "mix": {
+      "label": "Głośność",
       "forLane": "Głośność: {{lane}}"
     },
     "countInSound": {
@@ -288,10 +289,11 @@
     "fretboard": {
       "label": "Gryf",
       "aria": "{{chord}} na gryfie",
-      "staysPut": "{{scale}}, pozycja na progu {{fret}} · stoi w miejscu, kiedy grasz"
+      "wholeNeck": "{{scale}}, cały gryf · nie zmienia się, gdy grasz"
     },
     "chords": {
       "label": "Akordy",
+      "onTimeline": "Pokaż akordy na pasku taktów",
       "hint": "Przebieg akordów na pasku taktów, a nad nim akord, na którym jesteś.",
       "inKey": "Akordy w {{key}}",
       "follow": "Idź za jamem",
@@ -415,7 +417,11 @@
       "everyChoruses": "co {{count}} przebiegów",
       "everyChoruses_one": "co {{count}} przebieg",
       "everyChoruses_other": "co {{count}} przebiegów",
-      "climbing": "od {{from}} w górę"
+      "climbing": "od {{from}} w górę",
+      "dropOutExplain": "Zespół co jakiś czas milknie na kilka taktów, a ty trzymasz czas sam.",
+      "tradeExplain": "Zespół gra kilka taktów, potem ty grasz tyle samo.",
+      "tempoExplain": "Tempo rośnie odrobinę z każdym obiegiem tematu.",
+      "takesExplain": "Nagrywa to, co grasz razem z zespołem, i trzyma na tym komputerze."
     },
     "cue": {
       "yours": "Twoje cztery",
@@ -611,8 +617,10 @@
       "silent": "nic w tym groove"
     },
     "section": {
-      "song": "Utwór",
-      "songLead": "grają to wszyscy",
+      "form": "Forma",
+      "formLead": "jak długo trwa jedno kółko",
+      "changes": "Akordy",
+      "changesLead": "nad czym wszyscy grają",
       "drums": "Perkusja",
       "drumsLead": "groove i zestaw",
       "bass": "Bas",

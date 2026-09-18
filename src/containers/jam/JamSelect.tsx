@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { useMenuPlacement } from "./useMenuPlacement";
 import { useTranslation } from "react-i18next";
 
 export type JamSelectOption<T extends string> = {
@@ -55,14 +57,17 @@ export function JamSelect<T extends string>({
   loading = false,
 }: JamSelectProps<T>) {
   const [open, setOpen] = useState(false);
-  const wrapRef = useRef<HTMLDivElement>(null);
+  const { wrapRef, menuRef, style } = useMenuPlacement(open);
   const { t } = useTranslation();
   const loadingLabel = t("jam.loading");
 
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
+      // Both, now that the menu is drawn on the body: a click inside it is
+      // not inside the chip, and closing on it would eat the choice.
       if (wrapRef.current?.contains(e.target as Node)) return;
+      if (menuRef.current?.contains(e.target as Node)) return;
       setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
@@ -116,8 +121,15 @@ export function JamSelect<T extends string>({
         </svg>
       </button>
 
-      {open && (
-        <div className="jam-dropdown-menu" role="listbox" aria-label={label}>
+      {open &&
+        createPortal(
+          <div
+            className="jam-dropdown-menu"
+            ref={menuRef}
+            style={style}
+            role="listbox"
+            aria-label={label}
+          >
           {options.map((option) => (
             <button
               key={option.id}
@@ -138,8 +150,9 @@ export function JamSelect<T extends string>({
               </span>
             </button>
           ))}
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

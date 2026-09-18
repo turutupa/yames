@@ -158,6 +158,7 @@
       "doesNotFit": "{{groove}} không vừa với {{meter}}; tay trống chơi theo quy tắc."
     },
     "mix": {
+      "label": "Âm lượng",
       "forLane": "Âm lượng {{lane}}"
     },
     "countInSound": {
@@ -288,10 +289,11 @@
     "fretboard": {
       "label": "Cần đàn",
       "aria": "{{chord}} trên cần đàn",
-      "staysPut": "{{scale}}, thế bấm ở phím {{fret}} · đứng yên trong lúc bạn chơi"
+      "wholeNeck": "{{scale}}, cả cần đàn · giữ nguyên khi bạn chơi"
     },
     "chords": {
       "label": "Hợp âm",
+      "onTimeline": "Hiện hợp âm trên dải ô nhịp",
       "hint": "Vòng hợp âm trên dải ô nhịp, và hợp âm bạn đang chơi ở trên.",
       "inKey": "Hợp âm trong {{key}}",
       "follow": "Bám theo bài",
@@ -415,7 +417,11 @@
       "everyChoruses": "mỗi {{count}} vòng",
       "everyChoruses_one": "mỗi {{count}} vòng",
       "everyChoruses_other": "mỗi {{count}} vòng",
-      "climbing": "đang lên từ {{from}}"
+      "climbing": "đang lên từ {{from}}",
+      "dropOutExplain": "Thỉnh thoảng cả ban dừng vài ô nhịp, bạn tự giữ nhịp.",
+      "tradeExplain": "Ban nhạc chơi vài ô nhịp, rồi bạn chơi lại đúng bấy nhiêu.",
+      "tempoExplain": "Tốc độ nhích lên một chút mỗi vòng của bài.",
+      "takesExplain": "Ghi lại phần bạn chơi cùng ban nhạc, và giữ trên máy này."
     },
     "cue": {
       "yours": "Bốn ô của bạn",
@@ -611,8 +617,10 @@
       "silent": "không có trong groove này"
     },
     "section": {
-      "song": "Bài nhạc",
-      "songLead": "cả ban cùng chơi",
+      "form": "Cấu trúc",
+      "formLead": "một vòng dài bao nhiêu",
+      "changes": "Vòng hợp âm",
+      "changesLead": "cả ban chơi trên nền này",
       "drums": "Trống",
       "drumsLead": "groove và bộ trống",
       "bass": "Bass",

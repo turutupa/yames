@@ -158,6 +158,7 @@
       "doesNotFit": "{{groove}} no entra en {{meter}}; el batería toca la regla."
     },
     "mix": {
+      "label": "Volumen",
       "forLane": "Volumen de {{lane}}"
     },
     "countInSound": {
@@ -288,10 +289,11 @@
     "fretboard": {
       "label": "Diapasón",
       "aria": "{{chord}} en el mástil",
-      "staysPut": "{{scale}}, la posición en el traste {{fret}} · se queda quieta mientras tocas"
+      "wholeNeck": "{{scale}}, todo el mástil · no cambia mientras tocas"
     },
     "chords": {
       "label": "Acordes",
+      "onTimeline": "Mostrar los acordes en la línea",
       "hint": "Pon los cambios en la línea de compases, y encima el acorde en el que estás.",
       "inKey": "Acordes en {{key}}",
       "follow": "Seguir el jam",
@@ -415,7 +417,11 @@
       "everyChoruses": "cada {{count}} vueltas",
       "everyChoruses_one": "cada {{count}} vuelta",
       "everyChoruses_other": "cada {{count}} vueltas",
-      "climbing": "subiendo desde {{from}}"
+      "climbing": "subiendo desde {{from}}",
+      "dropOutExplain": "La banda para unos compases de vez en cuando y tú llevas el tiempo solo.",
+      "tradeExplain": "La banda toca unos compases y luego tú tocas los mismos.",
+      "tempoExplain": "El tempo sube un poco cada vuelta del tema.",
+      "takesExplain": "Graba lo que tocas con la banda mezclada, y lo guarda en este equipo."
     },
     "cue": {
       "yours": "Tus cuatro",
@@ -611,8 +617,10 @@
       "silent": "nada en este groove"
     },
     "section": {
-      "song": "La canción",
-      "songLead": "todos tocan esto",
+      "form": "La forma",
+      "formLead": "cuánto dura una vuelta",
+      "changes": "Los acordes",
+      "changesLead": "sobre lo que todos tocan",
       "drums": "Batería",
       "drumsLead": "el groove y el kit",
       "bass": "Bajo",

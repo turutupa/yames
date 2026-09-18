@@ -158,6 +158,7 @@
       "doesNotFit": "{{groove}} past niet in {{meter}}; de drummer speelt de regel."
     },
     "mix": {
+      "label": "Volume",
       "forLane": "Volume {{lane}}"
     },
     "countInSound": {
@@ -288,10 +289,11 @@
     "fretboard": {
       "label": "Toets",
       "aria": "{{chord}} op de hals",
-      "staysPut": "{{scale}}, de positie op fret {{fret}} · blijft staan terwijl je speelt"
+      "wholeNeck": "{{scale}}, de hele hals · blijft staan terwijl je speelt"
     },
     "chords": {
       "label": "Akkoorden",
+      "onTimeline": "Akkoorden op de maatbalk tonen",
       "hint": "De wisselingen op de maatbalk, en daarboven het akkoord waar je op zit.",
       "inKey": "Akkoorden in {{key}}",
       "follow": "Volg de jam",
@@ -415,7 +417,11 @@
       "everyChoruses": "elke {{count}} rondes",
       "everyChoruses_one": "elke {{count}} ronde",
       "everyChoruses_other": "elke {{count}} rondes",
-      "climbing": "klimmend vanaf {{from}}"
+      "climbing": "klimmend vanaf {{from}}",
+      "dropOutExplain": "De band stopt af en toe een paar maten, en jij houdt zelf de tijd.",
+      "tradeExplain": "De band speelt een paar maten, daarna speel jij er evenveel terug.",
+      "tempoExplain": "Het tempo loopt elke ronde een stukje op.",
+      "takesExplain": "Neemt op wat je speelt met de band erbij, en bewaart het op deze computer."
     },
     "cue": {
       "yours": "Jouw vier",
@@ -611,8 +617,10 @@
       "silent": "niets in deze groove"
     },
     "section": {
-      "song": "Het nummer",
-      "songLead": "iedereen speelt dit",
+      "form": "De vorm",
+      "formLead": "hoe lang één ronde duurt",
+      "changes": "De akkoorden",
+      "changesLead": "waarover iedereen speelt",
       "drums": "Drums",
       "drumsLead": "de groove en de kit",
       "bass": "Bas",

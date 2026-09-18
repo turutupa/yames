@@ -158,6 +158,7 @@
       "doesNotFit": "{{groove}} does not fit {{meter}}; the drummer plays the rule."
     },
     "mix": {
+      "label": "Volume",
       "forLane": "{{lane}} volume"
     },
     "countInSound": {
@@ -288,10 +289,11 @@
     "fretboard": {
       "label": "Fretboard",
       "aria": "{{chord}} on the neck",
-      "staysPut": "{{scale}}, the box at fret {{fret}} · stays put while you play"
+      "wholeNeck": "{{scale}}, the whole neck · stays put while you play"
     },
     "chords": {
       "label": "Chords",
+      "onTimeline": "Show the chords on the timeline",
       "hint": "Put the changes on the timeline, and the chord you are on above it.",
       "inKey": "Chords in {{key}}",
       "follow": "Follow the jam",
@@ -415,7 +417,11 @@
       "everyChoruses": "every {{count}} choruses",
       "everyChoruses_one": "every {{count}} chorus",
       "everyChoruses_other": "every {{count}} choruses",
-      "climbing": "climbing from {{from}}"
+      "climbing": "climbing from {{from}}",
+      "dropOutExplain": "The band stops for a few bars every so often, and you keep the time on your own.",
+      "tradeExplain": "The band plays a few bars, then you play the same number back.",
+      "tempoExplain": "The tempo climbs a little every time the tune comes round.",
+      "takesExplain": "Records what you play with the band mixed in, and keeps it on this machine."
     },
     "cue": {
       "yours": "Your four",
@@ -611,8 +617,10 @@
       "silent": "nothing in this groove"
     },
     "section": {
-      "song": "The song",
-      "songLead": "everyone plays this",
+      "form": "The form",
+      "formLead": "how long it goes round",
+      "changes": "The changes",
+      "changesLead": "what everyone plays over",
       "drums": "Drums",
       "drumsLead": "the groove and the kit",
       "bass": "Bass",

@@ -118,6 +118,40 @@ test.describe("the band rows with the setup drawer open", () => {
   });
 });
 
+test.describe("a dropdown menu", () => {
+  /*
+   * Menus hung from their chip's bottom-left corner and were as tall as they
+   * liked. A chip near the right-hand edge sent the menu off the window; a
+   * chip low in the setup drawer sent it off the bottom. Neither is visible
+   * to a test that cannot measure, which is every other test in this repo.
+   */
+  test("opens inside the window, wherever its chip is", async ({ page }) => {
+    await openShot(page, "jam-setup", { width: 1500, height: 900 });
+
+    const chips = await page.$$(".jam-sheet .jam-dropdown");
+    expect(chips.length, "no dropdowns in the setup drawer").toBeGreaterThan(0);
+
+    for (const chip of chips) {
+      if (!(await chip.isVisible())) continue;
+      await chip.scrollIntoViewIfNeeded();
+      await chip.click();
+      const menu = await page.waitForSelector(".jam-dropdown-menu", { timeout: 5000 });
+      const box = (await menu.boundingBox())!;
+      const label = (await chip.textContent())?.trim().slice(0, 30);
+      const { width, height } = page.viewportSize()!;
+
+      expect(Math.round(box.x), `${label}: the menu starts off the left`).toBeGreaterThanOrEqual(0);
+      expect(Math.round(box.x + box.width), `${label}: the menu runs off the right`)
+        .toBeLessThanOrEqual(width);
+      expect(Math.round(box.y), `${label}: the menu starts above the window`).toBeGreaterThanOrEqual(0);
+      expect(Math.round(box.y + box.height), `${label}: the menu runs off the bottom`)
+        .toBeLessThanOrEqual(height);
+
+      await page.keyboard.press("Escape");
+    }
+  });
+});
+
 test.describe("the key, on the playing screen", () => {
   test("opens its menu inside the window", async ({ page }) => {
     // The chip sits at the right-hand end of the header, so a menu hung from

@@ -22,6 +22,8 @@
     "short": "Vol."
   },
   "presets": {
+    "unsavedMetronome": "Métronome non enregistré",
+    "unsavedDrill": "Rampe non enregistrée",
     "title": "Préréglages",
     "titleDrill": "Rampes",
     "titleSetlist": "Setlists",

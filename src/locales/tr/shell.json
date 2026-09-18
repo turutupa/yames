@@ -22,6 +22,8 @@
     "short": "Ses"
   },
   "presets": {
+    "unsavedMetronome": "Kaydedilmemiş metronom",
+    "unsavedDrill": "Kaydedilmemiş tempo antrenmanı",
     "title": "Ön Ayarlar",
     "titleDrill": "Antrenmanlar",
     "titleSetlist": "Set listeleri",

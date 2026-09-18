@@ -22,6 +22,8 @@
     "short": "Âm"
   },
   "presets": {
+    "unsavedMetronome": "Máy đếm nhịp chưa lưu",
+    "unsavedDrill": "Bài luyện tempo chưa lưu",
     "title": "Cài đặt sẵn",
     "titleDrill": "Bài luyện tempo",
     "titleSetlist": "Setlist",

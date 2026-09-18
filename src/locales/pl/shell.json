@@ -22,6 +22,8 @@
     "short": "Głoś."
   },
   "presets": {
+    "unsavedMetronome": "Niezapisany metronom",
+    "unsavedDrill": "Niezapisany rozbieg",
     "title": "Presety",
     "titleDrill": "Rozbiegi",
     "titleSetlist": "Setlisty",

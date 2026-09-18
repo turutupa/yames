@@ -480,9 +480,13 @@ describe("JamView — the controls", () => {
     // up advertising the old one.
     const { container } = sheet();
     const glyphs = allGrooves(container).querySelectorAll(".jam-cards-groove .jam-glyph");
-    // Every preset, plus the "make your own" card, which draws the groove
-    // that is loaded so it is never a blank square.
-    expect(glyphs).toHaveLength(GROOVES.length + 1);
+    // One per preset and not one more. "Make your own" used to draw the
+    // loaded groove's pattern so as not to be a blank square, which is
+    // exactly why it read as a hundred-and-sixteenth preset — the owner:
+    // "the make your own preset button should be different and should not
+    // look like another preset". It draws a plus now, and there is a glyph
+    // on screen for every groove that exists and for nothing that does not.
+    expect(glyphs).toHaveLength(GROOVES.length);
     // Rock eighths is 4 × 2 ticks over three lanes; the bossa is 4 × 4. Found
     // by shelf rather than by index into GROOVES: with "All" open the cards
     // are drawn family block after family block, not in file order.

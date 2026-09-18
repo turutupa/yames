@@ -22,6 +22,8 @@
     "short": "Громк."
   },
   "presets": {
+    "unsavedMetronome": "Несохранённый метроном",
+    "unsavedDrill": "Несохранённая темповая тренировка",
     "title": "Пресеты",
     "titleDrill": "Тренировки",
     "titleSetlist": "Сет-листы",

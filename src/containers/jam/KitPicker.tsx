@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
+import { useMenuPlacement } from "./useMenuPlacement";
 import { inspectKitFolder, pickKitFolder, warmJam } from "../../ipc";
 
 /**
@@ -126,7 +128,7 @@ export function KitPicker({
   /** A folder with no drums in it — chosen, inspected, and turned down. */
   const [empty, setEmpty] = useState(false);
   const [busy, setBusy] = useState(false);
-  const wrapRef = useRef<HTMLDivElement>(null);
+  const { wrapRef, menuRef, style } = useMenuPlacement(open);
   const warmedRef = useRef(false);
   const warmKits = () => {
     if (warmedRef.current) return;
@@ -137,7 +139,10 @@ export function KitPicker({
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
+      // Both, since the menu is drawn on the body rather than inside the
+      // chip: a click in the menu is not a click outside the picker.
       if (wrapRef.current?.contains(e.target as Node)) return;
+      if (menuRef.current?.contains(e.target as Node)) return;
       setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
@@ -253,8 +258,15 @@ export function KitPicker({
         </svg>
       </button>
 
-      {open && (
-        <div className="jam-dropdown-menu" role="listbox" aria-label={t("jam.kit.label")}>
+      {open &&
+        createPortal(
+          <div
+            className="jam-dropdown-menu"
+            ref={menuRef}
+            style={style}
+            role="listbox"
+            aria-label={t("jam.kit.label")}
+          >
           <div className="jam-dropdown-section">{t("jam.kit.builtIn")}</div>
           {JAM_KITS.map((id) => {
             const on = !customKit && kit === id;
@@ -337,8 +349,9 @@ export function KitPicker({
               </span>
             </span>
           </button>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
 
       {/* What the folder turned out to hold. Said once, under the control,
           because "seven of the eight, the ride comes from Raw" is the whole

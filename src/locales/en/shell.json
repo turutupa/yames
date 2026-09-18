@@ -22,6 +22,8 @@
     "short": "Vol"
   },
   "presets": {
+    "unsavedMetronome": "Unsaved metronome",
+    "unsavedDrill": "Unsaved drill",
     "title": "Presets",
     "titleDrill": "Drills",
     "titleSetlist": "Setlists",

@@ -17,6 +17,8 @@ import {
   listSetlists,
   reorderSetlists as reorderSetlistsIpc,
   saveSetlist as saveSetlistIpc,
+  storeLoad,
+  storeSave,
 } from "../../../ipc";
 import { meterKey } from "../../../utils/meter";
 import type { Jam } from "../../../jam";
@@ -124,10 +126,22 @@ function insertAfter<T extends { id: string }>(list: T[], afterId: string, item:
   return next;
 }
 
+/**
+ * Where the setlist you last had open is written down — the setlist's half of
+ * `LAST_JAM_KEY`, in the same store and through the same two calls as the
+ * appearance preferences (`useUiPreferences`).
+ */
+const LAST_SETLIST_KEY = "lastSetlistId";
+
 interface UseSetlistSessionArgs {
   state: AppState;
   isPlaying: boolean;
   currentBeat: BeatEvent | null;
+  /**
+   * Which tab is showing. Read for one thing only: the setlist tab always has
+   * a setlist on it, and this is how the hook knows it is being looked at.
+   */
+  view: string;
   setView: (view: "setlist") => void;
   /** Loading a setlist takes the preset's place in the context bar. */
   onSetlistLoaded: () => void;
@@ -146,6 +160,7 @@ export function useSetlistSession({
   state,
   isPlaying,
   currentBeat,
+  view,
   setView,
   onSetlistLoaded,
   jamContext,
@@ -167,6 +182,16 @@ export function useSetlistSession({
   const [setlist, setSetlist] = useState<Setlist | null>(null);
   /** What the store holds, for the dirty flag and for Revert. */
   const [saved, setSaved] = useState<Setlist | null>(null);
+  /**
+   * True while the setlist on the stage is in no library.
+   *
+   * Its own flag rather than "`saved` is null", which was the first attempt
+   * and was quietly wrong: with nothing to compare against, a setlist the tab
+   * had made could never go dirty — so a routine somebody spent an afternoon
+   * building was thrown away without a word the moment anything else was
+   * loaded, because the gate that asks about unsaved work reads `dirty`.
+   */
+  const [stageUnsaved, setStageUnsaved] = useState(false);
   const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
   /**
    * The block, BESIDE the selection and never instead of it.
@@ -256,8 +281,20 @@ export function useSetlistSession({
     setAnchorStepId((prev) => (prev && live.has(prev) ? prev : null));
   }, [setlist]);
 
+  /**
+   * True once the read from the store has landed, whatever it said.
+   *
+   * The restore below waits for it: choosing "the first setlist in the
+   * library" out of a library that has not arrived yet would put a new
+   * unsaved setlist on the stage in front of a shelf full of saved ones.
+   */
+  const [libraryReady, setLibraryReady] = useState(false);
+
   useEffect(() => {
-    listSetlists().then(setSetlists).catch(() => {});
+    listSetlists()
+      .then(setSetlists)
+      .catch(() => {})
+      .finally(() => setLibraryReady(true));
     return () => {
       if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
     };
@@ -405,14 +442,86 @@ export function useSetlistSession({
       onSetlistLoaded();
       setSetlist(next);
       setSaved(next);
+      setStageUnsaved(false);
       const first = next.steps[0] ?? null;
       setSelectedStepId(first?.id ?? null);
       setSelectedStepIds(first ? new Set([first.id]) : new Set());
       setAnchorStepId(first?.id ?? null);
       if (first && !isPlaying) applyAndAwait(first);
+      // So the tab opens on this one tomorrow. Silent on failure, like every
+      // other write to this store.
+      void storeSave(LAST_SETLIST_KEY, next.id).catch(() => {});
     },
     [setView, onSetlistLoaded, isPlaying, applyAndAwait],
   );
+
+  /**
+   * A setlist on the stage that the library has never heard of.
+   *
+   * For the player who has no setlists at all — a first run, or one who
+   * deleted the lot. The rule is that a mode always has something live in
+   * front of you, and the library holds what you CHOSE to save, so this goes
+   * on the stage and nowhere near `save_setlist`. A mode that filed a "New
+   * setlist" every time somebody clicked the tab would leave a shelf of empty
+   * routines nobody made, and the library is the one thing here a player owns.
+   *
+   * `saved` is the setlist as it was created, so Revert and the dirty flag
+   * work on it exactly as they do on a stored one — a step added to it reads
+   * as an edit, and the gate that asks about unsaved work can see it.
+   * `stageUnsaved` carries the other half: Save is live from the first
+   * moment, because a setlist that has never been written down always has
+   * something to write down.
+   */
+  const openUnsavedSetlist = useCallback(() => {
+    const created = createSetlist(t("setlist.untitled"));
+    setView("setlist");
+    onSetlistLoaded();
+    setSetlist(created);
+    setSaved(created);
+    setStageUnsaved(true);
+    setSelectedStepId(null);
+    setSelectedStepIds(new Set());
+    setAnchorStepId(null);
+    return created;
+  }, [t, setView, onSetlistLoaded]);
+
+  /**
+   * The Setlist tab always has a setlist on it (2026-09-17).
+   *
+   * The one you last had open, else the first in the library, else a new one
+   * that is not in the library at all — the same three answers, in the same
+   * order, that the Jam tab gives. The owner's report was that the modes
+   * disagreed with each other about this and that none of them remembered
+   * anything between sittings.
+   *
+   * Whenever the tab is showing with nothing on the stage, not only when it
+   * is entered: deleting the open setlist empties the stage while you are
+   * standing on it, and the answer to that is the next setlist, not a button.
+   *
+   * `pickingRef` is the guard the effect needs and the state cannot give it:
+   * reading the last id is a round trip, and without it every render inside
+   * that window would start another one.
+   */
+  const pickingRef = useRef(false);
+  useEffect(() => {
+    if (view !== "setlist" || setlist || !libraryReady || pickingRef.current) return;
+    pickingRef.current = true;
+    (async () => {
+      let lastId: string | undefined;
+      try {
+        lastId = await storeLoad<string>(LAST_SETLIST_KEY);
+      } catch {
+        /* Never opened one, or a store that cannot be read. The library wins. */
+      }
+      const library = setlistsRef.current;
+      // A lookup rather than a load by id: a setlist deleted since is not an
+      // answer to "what was I working on".
+      const target = library.find((c) => c.id === lastId) ?? library[0] ?? null;
+      if (target) loadSetlist(target);
+      else openUnsavedSetlist();
+      pickingRef.current = false;
+    })();
+  }, [view, setlist, libraryReady, loadSetlist, openUnsavedSetlist]);
 
   /**
    * A step edited from its own sentence.
@@ -446,6 +555,7 @@ export function useSetlistSession({
   const closeSetlist = useCallback(() => {
     setSetlist(null);
     setSaved(null);
+    setStageUnsaved(false);
     setSelectedStepId(null);
     setSelectedStepIds(new Set());
     setAnchorStepId(null);
@@ -467,6 +577,10 @@ export function useSetlistSession({
     await saveSetlistIpc(setlist).catch(() => {});
     setSetlists((prev) => upsertSetlist(prev, setlist));
     setSaved(setlist);
+    setStageUnsaved(false);
+    // A setlist that was only ever on the stage is in the library from here,
+    // so this is the first moment there is an id worth coming back to.
+    void storeSave(LAST_SETLIST_KEY, setlist.id).catch(() => {});
     if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
     setSaveFeedback(true);
     feedbackTimer.current = setTimeout(() => setSaveFeedback(false), 1800);
@@ -656,10 +770,22 @@ export function useSetlistSession({
     [setlist, saved],
   );
 
+  /**
+   * A setlist on the stage that the library has never held.
+   *
+   * Beside dirty rather than folded into it. They answer two questions — "has
+   * this moved since it was written down" and "has it ever been written down"
+   * — and a setlist the tab made is the case where the answers differ. What
+   * they share is that Save has something to do.
+   */
+  const unsaved = !!setlist && stageUnsaved;
+
   return {
     setlists,
     setlist,
     dirty,
+    /** True while the setlist on the stage has never reached the library. */
+    unsaved,
     saveFeedback,
     selectedStepId,
     /** The steps a bulk operation would take — never fewer than the one. */

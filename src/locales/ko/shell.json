@@ -22,6 +22,8 @@
     "short": "볼륨"
   },
   "presets": {
+    "unsavedMetronome": "저장하지 않은 메트로놌",
+    "unsavedDrill": "저장하지 않은 템포 연습",
     "title": "프리셋",
     "titleDrill": "템포 연습",
     "titleSetlist": "셋리스트",

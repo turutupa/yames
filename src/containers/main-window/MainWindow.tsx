@@ -58,7 +58,6 @@ import { useWhatsNew } from "../onboarding/whats-new/useWhatsNew";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { DrillView } from "../drill/DrillView";
 import { JamView } from "../jam/JamView";
-import { JamEmpty } from "../jam/JamEmpty";
 import { FullscreenView } from "../zen/FullscreenView";
 import type { PresetSidebarHandle } from "../../components/presets/PresetSidebar";
 import { ThemeEffects } from "./ThemeEffects";
@@ -100,7 +99,6 @@ import { TakesIntroDialog } from "../jam/TakesIntroDialog";
 import type { Jam, JamBand } from "../../jam";
 import { UnsavedChangesDialog } from "../../components/UnsavedChangesDialog";
 import type { UnsavedKind } from "../../components/UnsavedChangesDialog";
-import { SetlistEmpty } from "../../components/setlist/SetlistEmpty";
 import { SetlistParagraph } from "../../components/setlist/SetlistParagraph";
 import { SetlistPlayer } from "../../components/setlist/SetlistPlayer";
 import { useAudioError } from "./hooks/useAudioError";
@@ -321,6 +319,11 @@ export function MainWindow() {
     state,
     isPlaying: state.isPlaying,
     currentBeat,
+    // The MODE, not the screen, for the reason the jam hook is given the same
+    // one: Settings is a layer over the setlist, and a setlist tab that
+    // counted as "not showing" while Settings was open would try to open a
+    // second setlist the moment Settings closed.
+    view: mode,
     setView,
     onSetlistLoaded: () => {
       // The library marks what is loaded, and only one thing can be.
@@ -808,28 +811,23 @@ export function MainWindow() {
 
   // Use measureBeat from the engine — it resets correctly when groups change mid-play,
   // unlike beat % beatsPerMeasure which produces misaligned values after a meter switch.
-  /**
-   * Leaving the setlist, from either door: Escape, or clicking the one you
-   * are already in.
+  /*
+   * There is no door out of a setlist any more (2026-09-17).
    *
-   * A clean setlist closes without a word. A dirty one asks — losing an
-   * afternoon of edits to a single keypress is the failure worth a dialog,
-   * and a dialog that appears every time is one nobody reads.
-   */
-  /**
-   * Close the setlist, and let go of the row in the library.
+   * Escape closed it, and so did clicking the row of the one you were already
+   * in — both of which left the tab showing a screen with a button on it.
+   * Every mode has a live working object now: the Setlist tab always has a
+   * setlist on it, the way the Metronome tab always has a tempo on it, and
+   * the library holds the ones you chose to save. So closing without opening
+   * something else is not a thing you can ask for, and both gestures were
+   * taken out rather than left to close a setlist that reopened a frame later
+   * — which on a dirty one meant a dialog about losing edits, answered, and
+   * then the same setlist back on the stage.
    *
-   * You open a setlist by clicking its row, which focuses it. Escape then
-   * closes the setlist and the row keeps the focus — and because Escape is a
-   * keyboard action the browser draws `:focus-visible` on it, so a ring sits
-   * in the sidebar around a setlist that is no longer open. The row has done
-   * its job; releasing it is what a mouse click would have implied anyway.
+   * `useSetlistSession` still has `closeSetlist`, and it still matters: it is
+   * what makes room when a JAM or a preset is loaded, and the tab changes
+   * with it.
    */
-  const closeAndRelease = useCallback(() => {
-    setlistSession.closeSetlist();
-    const active = document.activeElement as HTMLElement | null;
-    if (active && active.closest(".preset-sidebar")) active.blur();
-  }, [setlistSession]);
 
   /**
    * The action waiting on an answer about unsaved work, or null.
@@ -900,32 +898,6 @@ export function MainWindow() {
   const newJamGuarded = useCallback(() => guarded(handleNewJam), [guarded, handleNewJam]);
   const jamNowGuarded = useCallback(() => guarded(handleJamNow), [guarded, handleJamNow]);
 
-  const askToLeave = useCallback(() => {
-    if (!setlistSession.setlist) return;
-    guarded(closeAndRelease);
-  }, [setlistSession.setlist, guarded, closeAndRelease]);
-
-  // Escape is the other door. Not while something is typed into, and not
-  // while a popover owns the key — those close themselves first, and a
-  // window-level handler that fired anyway would close the setlist out from
-  // under a field you were editing.
-  //
-  // And only on the Setlist tab. A setlist stays open while you visit the
-  // metronome, and Escape there used to close it — or ask about it — from a
-  // screen that was not showing it (2026-09-16).
-  useEffect(() => {
-    if (!setlistSession.setlist || view !== "setlist") return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape" || e.defaultPrevented) return;
-      const el = document.activeElement as HTMLElement | null;
-      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
-      if (document.querySelector('[role="dialog"], [role="alertdialog"]')) return;
-      askToLeave();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [setlistSession.setlist, askToLeave, view]);
-
   /**
    * The row in the library keeps the focus a click gave it. Space would then
    * press the row again — and pressing the open jam's row is the gesture
@@ -938,7 +910,13 @@ export function MainWindow() {
   }, []);
 
   /*
-   * Escape is the jam's other door too, with the same guards as the setlist's.
+   * Escape puts away whatever is open OVER the jam — and stops there.
+   *
+   * It used to close the jam itself as its last resort, which left the tab
+   * showing a screen with a button on it. Every mode has a live working
+   * object now (2026-09-17), so there is nothing behind the jam to close to,
+   * and a press that closed it would only be undone by the tab opening
+   * another one a frame later.
    *
    * The dependency list is picked apart rather than `jamSession`, which is a
    * fresh object literal on every render: with the whole session in it this
@@ -946,7 +924,6 @@ export function MainWindow() {
    * times a bar.
    */
   const jamScreen = jamSession.screen;
-  const closeJam = jamSession.closeJam;
   const jamLoaded = !!jamSession.jam;
   useEffect(() => {
     if (view !== "jam" || !jamLoaded) return;
@@ -976,14 +953,14 @@ export function MainWindow() {
         jamScreen?.setChordsOpen(false);
         return;
       }
-      guarded(() => {
-        closeJam();
-        releaseSidebarFocus();
-      });
+      // `jamEscapeTarget` still answers "jam" once the sheets are away, and
+      // that answer is now nothing to do. The function is left as it is
+      // because it is the written-down ORDER of what closes first, and the
+      // order has not changed — only what happens when the list runs out.
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [view, jamLoaded, jamScreen, closeJam, guarded, releaseSidebarFocus]);
+  }, [view, jamLoaded, jamScreen]);
 
   const activeBeat = currentBeat ? currentBeat.measureBeat : -1;
   const activeSub = currentBeat ? currentBeat.subdivision : -1;
@@ -1379,15 +1356,14 @@ export function MainWindow() {
           presetShortcut={platformKey(keyBindings["toggle-sidebar"] || "")}
           setlists={setlistSession.setlists}
           activeSetlistId={setlistSession.setlist?.id ?? null}
-          onLoadSetlist={(next) =>
-            // Clicking the setlist you are already in is the way out of it,
-            // the same way clicking the open tab closes it in most things
-            // with tabs. Any other setlist replaces this one — which is the
-            // commonest way to lose edits, so it goes through the gate.
-            next.id === setlistSession.setlist?.id
-              ? askToLeave()
-              : guarded(() => setlistSession.loadSetlist(next))
-          }
+          onLoadSetlist={(next) => {
+            // Clicking the setlist you are already in used to be the way out
+            // of it; there is no out any more, so it is the row saying what
+            // is already true. Any OTHER setlist replaces this one — which is
+            // the commonest way to lose edits, so it goes through the gate.
+            if (next.id === setlistSession.setlist?.id) return;
+            guarded(() => setlistSession.loadSetlist(next));
+          }}
           onNewSetlist={newSetlistGuarded}
           onDeleteSetlist={setlistSession.deleteSetlist}
           onRenameSetlist={setlistSession.renameSetlist}
@@ -1395,15 +1371,14 @@ export function MainWindow() {
           onReorderSetlists={setlistSession.reorderSetlists}
           jams={jamSession.jams}
           activeJamId={jamSession.jam?.id ?? null}
-          // Clicking the jam you are already in is the way out of it, the same
-          // gesture that closes an open setlist.
-          onLoadJam={(next) =>
+          // And the same for a jam: the row you are on is where you are.
+          onLoadJam={(next) => {
+            if (next.id === jamSession.jam?.id) return;
             guarded(() => {
-              if (next.id === jamSession.jam?.id) jamSession.closeJam();
-              else jamSession.loadJam(next);
+              jamSession.loadJam(next);
               releaseSidebarFocus();
-            })
-          }
+            });
+          }}
           onNewJam={newJamGuarded}
           onDeleteJam={jamSession.deleteJam}
           onRenameJam={jamSession.renameJam}
@@ -1458,6 +1433,7 @@ export function MainWindow() {
           }
           activeSetlist={setlistSession.setlist}
           setlistDirty={setlistSession.dirty}
+          setlistUnsaved={setlistSession.unsaved}
           setlistSaveFeedback={setlistSession.saveFeedback}
           onSaveSetlist={() => void setlistSession.saveActiveSetlist()}
           onRevertSetlist={setlistSession.revertSetlist}
@@ -1469,6 +1445,7 @@ export function MainWindow() {
           }}
           activeJam={jamSession.jam}
           jamDirty={jamSession.dirty}
+          jamUnsaved={jamSession.unsaved}
           jamSaveFeedback={jamSession.saveFeedback}
           onSaveJam={jamSession.saveActiveJam}
           onRevertJam={jamSession.revertJam}
@@ -1613,10 +1590,13 @@ export function MainWindow() {
               onBackToPlaying={setlistSession.backToPlaying}
             />
           ) : (
-            /* The tab standing up cold. A mode can be clicked with nothing
-               loaded — the one state this screen never had while it was a
-               corner of the metronome. */
-            <SetlistEmpty onNew={newSetlistGuarded} />
+            /* Nothing, and only for as long as it takes the tab to pick one.
+               The Setlist tab opens on the setlist you last had, on the first
+               in the library, or on a new one — so "no setlist" is a moment
+               between two renders now, not a screen anybody sits on. A full
+               empty state drawn for that moment would be a flash of an
+               invitation nobody needed. */
+            null
           )
         ) : view === "beat" ? (
           <MetronomeView
@@ -1680,8 +1660,11 @@ export function MainWindow() {
               onCommitBpmEdit={commitBpmEdit}
             />
           ) : (
-            /* A mode can be clicked cold. */
-            <JamEmpty onNew={newJamGuarded} onJamNow={jamNowGuarded} />
+            /* Nothing, and only for as long as it takes the tab to pick one.
+               The Jam tab opens on the jam you last had, on the first in the
+               library, or on a new one — so "no jam" is a moment between two
+               renders now, not a screen anybody sits on. */
+            null
           )
         ) : view === "drill" ? (
           <DrillView

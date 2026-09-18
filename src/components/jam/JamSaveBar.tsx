@@ -4,6 +4,12 @@ import type { Jam } from "../../jam/types";
 interface JamSaveBarProps {
   jam: Jam;
   dirty: boolean;
+  /**
+   * True while this jam has never reached the library — the tab put it on the
+   * stage and nothing has filed it yet. Save is live; "Edited" is not,
+   * because there is no stored version for it to differ from.
+   */
+  unsaved?: boolean;
   saveFeedback: boolean;
   onRename: () => void;
   onSave: () => void;
@@ -43,6 +49,7 @@ interface JamSaveBarProps {
 export function JamSaveBar({
   jam,
   dirty,
+  unsaved = false,
   saveFeedback,
   onRename,
   onSave,
@@ -118,7 +125,7 @@ export function JamSaveBar({
         </button>
       )}
 
-      {(dirty || saveFeedback) && (
+      {(dirty || unsaved || saveFeedback) && (
         <span className="jam-bar-divider" aria-hidden="true" />
       )}
 
@@ -134,11 +141,11 @@ export function JamSaveBar({
           saveFeedback ? "preset-text-btn--feedback" : ""
         }`}
         onClick={onSave}
-        disabled={!dirty && !saveFeedback}
-        title={dirty ? t("jam.saveTooltip") : t("jam.noChanges")}
+        disabled={!dirty && !unsaved && !saveFeedback}
+        title={dirty || unsaved ? t("jam.saveTooltip") : t("jam.noChanges")}
       >
         <span className="preset-save-btn-label">
-          {saveFeedback ? t("jam.saved") : dirty ? t("jam.save") : t("jam.noChanges")}
+          {saveFeedback ? t("jam.saved") : dirty || unsaved ? t("jam.save") : t("jam.noChanges")}
         </span>
       </button>
 

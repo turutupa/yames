@@ -22,6 +22,8 @@
     "short": "Vol."
   },
   "presets": {
+    "unsavedMetronome": "Niet-opgeslagen metronoom",
+    "unsavedDrill": "Niet-opgeslagen tempotraining",
     "title": "Presets",
     "titleDrill": "Trainingen",
     "titleSetlist": "Setlists",

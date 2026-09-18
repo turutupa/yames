@@ -22,6 +22,8 @@
     "short": "Vol."
   },
   "presets": {
+    "unsavedMetronome": "Metrónomo sin guardar",
+    "unsavedDrill": "Rampa de tempo sin guardar",
     "title": "Preajustes",
     "titleDrill": "Rampas",
     "titleSetlist": "Setlists",

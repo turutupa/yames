@@ -158,6 +158,7 @@
       "doesNotFit": "{{groove}} は {{meter}} に合いません。ドラムはルールで演奏します。"
     },
     "mix": {
+      "label": "音量",
       "forLane": "{{lane}} の音量"
     },
     "countInSound": {
@@ -288,10 +289,11 @@
     "fretboard": {
       "label": "指板",
       "aria": "ネック上の {{chord}}",
-      "staysPut": "{{scale}}、{{fret}} フレットのポジション · 弾いている間も動きません"
+      "wholeNeck": "{{scale}}、ネック全体 · 演奏中も変わりません"
     },
     "chords": {
       "label": "コード",
+      "onTimeline": "小節の並びにコードを表示",
       "hint": "小節の並びにコード進行を、その上に今のコードを表示します。",
       "inKey": "{{key}} のコード",
       "follow": "ジャムに追従",
@@ -415,7 +417,11 @@
       "everyChoruses": "{{count}} コーラスごと",
       "everyChoruses_one": "{{count}} コーラスごと",
       "everyChoruses_other": "{{count}} コーラスごと",
-      "climbing": "{{from}} から上昇中"
+      "climbing": "{{from}} から上昇中",
+      "dropOutExplain": "ときどきバンドが数小節止まり、あなたひとりでテンポを保ちます。",
+      "tradeExplain": "バンドが数小節弾き、そのあと同じ小節数をあなたが弾きます。",
+      "tempoExplain": "曲がひと回りするたびにテンポが少しずつ上がります。",
+      "takesExplain": "バンドと一緒に弾いた演奏を録音し、この端末に保存します。"
     },
     "cue": {
       "yours": "あなたの4小節",
@@ -611,8 +617,10 @@
       "silent": "このグルーヴにはなし"
     },
     "section": {
-      "song": "曲",
-      "songLead": "全員が演奏",
+      "form": "構成",
+      "formLead": "ひと回りの長さ",
+      "changes": "コード進行",
+      "changesLead": "全員がこの上で演奏",
       "drums": "ドラム",
       "drumsLead": "グルーヴとキット",
       "bass": "ベース",

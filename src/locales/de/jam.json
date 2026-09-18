@@ -158,6 +158,7 @@
       "doesNotFit": "{{groove}} passt nicht zu {{meter}}; der Schlagzeuger spielt die Regel."
     },
     "mix": {
+      "label": "Lautstärke",
       "forLane": "Lautstärke {{lane}}"
     },
     "countInSound": {
@@ -288,10 +289,11 @@
     "fretboard": {
       "label": "Griffbrett",
       "aria": "{{chord}} auf dem Hals",
-      "staysPut": "{{scale}}, die Box im {{fret}}. Bund · bleibt beim Spielen stehen"
+      "wholeNeck": "{{scale}}, der ganze Hals · bleibt beim Spielen stehen"
     },
     "chords": {
       "label": "Akkorde",
+      "onTimeline": "Akkorde auf der Leiste zeigen",
       "hint": "Die Wechsel auf die Leiste, und den Akkord, auf dem du bist, darüber.",
       "inKey": "Akkorde in {{key}}",
       "follow": "Dem Jam folgen",
@@ -415,7 +417,11 @@
       "everyChoruses": "alle {{count}} Durchgänge",
       "everyChoruses_one": "jeden {{count}}. Durchgang",
       "everyChoruses_other": "alle {{count}} Durchgänge",
-      "climbing": "von {{from}} aufwärts"
+      "climbing": "von {{from}} aufwärts",
+      "dropOutExplain": "Die Band setzt ab und zu ein paar Takte aus, und du hältst die Zeit allein.",
+      "tradeExplain": "Die Band spielt ein paar Takte, dann spielst du genauso viele zurück.",
+      "tempoExplain": "Das Tempo steigt bei jeder Runde ein Stück.",
+      "takesExplain": "Nimmt dein Spiel mit der Band auf und behält es auf diesem Rechner."
     },
     "cue": {
       "yours": "Deine vier",
@@ -611,8 +617,10 @@
       "silent": "in diesem Groove nichts"
     },
     "section": {
-      "song": "Der Song",
-      "songLead": "alle spielen das",
+      "form": "Die Form",
+      "formLead": "wie lang eine Runde ist",
+      "changes": "Die Akkorde",
+      "changesLead": "worüber alle spielen",
       "drums": "Schlagzeug",
       "drumsLead": "Groove und Kit",
       "bass": "Bass",

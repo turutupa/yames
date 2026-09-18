@@ -271,11 +271,19 @@ export function ChordSheet({
    * The neck, static.
    *
    * The key's scale and nothing else: not the current chord's, which is what
-   * made it "keep changing". One box, the one you would use, and it is the
-   * same box in bar 1 and bar 9.
+   * made it "keep changing". The same neck in bar 1 and bar 9.
+   *
+   * The WHOLE neck, from the nut (2026-09-17). It used to open on the box —
+   * the five frets where the minor pentatonic sits — and the owner: "when
+   * showing the fretboard we should always show from first fret too, not only
+   * where the minor pentatonic 'starts' and ideally up to fret 17". Which is
+   * right, and for a reason the box hid: the notes of a key are everywhere on
+   * the neck, and a picture that starts at the fifth fret quietly says they
+   * are not. Open strings are in the key too, and they were off the left-hand
+   * edge of it.
    */
   const board = scale
-    ? { startFret: boxStart(scale), highlight: { pitchClasses: scale.pitchClasses, rootPitchClass: scale.root } }
+    ? { highlight: { pitchClasses: scale.pitchClasses, rootPitchClass: scale.root } }
     : null;
 
   /** One card. The same card on both pages, which is why Pin works on both. */
@@ -529,9 +537,8 @@ export function ChordSheet({
             </button>
             {fretboardOpen && scale && (
               <span className="jam-sheet-lead">
-                {t("jam.fretboard.staysPut", {
+                {t("jam.fretboard.wholeNeck", {
                   scale: t(scale.labelKey, { defaultValue: scale.scale }),
-                  fret: boxStart(scale),
                 })}
               </span>
             )}
@@ -539,7 +546,8 @@ export function ChordSheet({
           {fretboardOpen && board && (
             <Fretboard
               tuning={instrument === "bass" ? BASS_STANDARD_TUNING : GUITAR_STANDARD_TUNING}
-              startFret={board.startFret}
+              startFret={0}
+              frets={17}
               highlight={board.highlight}
               size="large"
               className="jam-fretboard"
@@ -550,17 +558,6 @@ export function ChordSheet({
       )}
     </>
   );
-}
-
-/**
- * Which fret the box starts at: the scale's root on the low E string.
- *
- * That is where a guitarist actually finds a box — E minor pentatonic is "at
- * the nut" or "at the twelfth", and both are the sixth string. 0 for E, 8 for
- * C. Static, so the neck stops moving (A8).
- */
-function boxStart(scale: ScaleSuggestion): number {
-  return (scale.root - 4 + 12) % 12;
 }
 
 /** `ShapeSize` to the suffix of its locale key. */
