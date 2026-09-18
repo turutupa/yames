@@ -21,19 +21,20 @@ interface PracticeRowProps {
   value: JamPracticeSettings;
   onChange: (next: JamPracticeSettings) => void;
   /**
-   * Recording is on for this jam (`Jam.takes`), and the switch that changes it.
+   * The chord names down the timeline, and the switch that draws them.
    *
-   * It sits in this row and not with the band's lanes because it is a
-   * practice tool in exactly the sense the other three are: it is something
-   * the app does to your session rather than a member of the band. Listening
-   * back is how improvisers improve (JAM_MODE §4.4), and it belongs beside
-   * the drop-outs that make there be something worth listening back to.
+   * It sits in this row because it is a practice tool in exactly the sense
+   * the other three are: drop-out bars, trading and the tempo trainer all
+   * take support away on purpose, and so does playing a blues with the
+   * changes hidden to find out whether you know where the four lands.
    *
-   * Absent on a build whose engine has no take commands, so the row does not
-   * offer a switch that cannot do anything.
+   * Recording had this place and gave it up: it was here AND in the setup
+   * drawer, and the drawer's copy sits directly above the list of what it has
+   * recorded, which is the right side of the app for the one switch in this
+   * row that makes a file.
    */
-  takes?: boolean;
-  onTakes?: (next: boolean) => void;
+  chords?: boolean;
+  onChords?: (next: boolean) => void;
 }
 
 /**
@@ -50,7 +51,7 @@ interface PracticeRowProps {
  * Off is `0` on both halves of a pair, so a switch turned off keeps the number
  * it had and turning it back on does not ask again.
  */
-export function PracticeRow({ value, onChange, takes, onTakes }: PracticeRowProps) {
+export function PracticeRow({ value, onChange, chords, onChords }: PracticeRowProps) {
   const { t } = useTranslation();
 
   const dropOutOn = value.dropOutEvery > 0 && value.dropOutBars > 0;
@@ -201,30 +202,40 @@ export function PracticeRow({ value, onChange, takes, onTakes }: PracticeRowProp
         </button>
       </div>
 
-      {/* Record the take. Last in the row, because it is the only one of the
-          four that produces a FILE — everything to its left changes what you
-          hear and nothing else. */}
-      {onTakes && (
+      {/* The chord names, last in the row.
+          
+          Recording used to be here, and it was in the setup drawer as well —
+          directly above the list of what it had recorded, which is where it
+          belongs: it is the one switch in this row that makes a FILE, and the
+          file is in the drawer. The owner: "should we put it in the main
+          screen instead of Record the take? ... maybe we can swap them".
+
+          The chord names earn the place recording gave up, because they are
+          the same KIND of thing as the three beside them. Drop-out bars,
+          Trade and the tempo trainer all take support away on purpose; so
+          does playing a blues with the changes hidden, to find out whether
+          you know where the four lands. */}
+      {onChords && (
         <div
-          className="jam-practice-chip jam-practice-takes"
-          data-on={takes ? "" : undefined}
+          className="jam-practice-chip"
+          data-on={chords ? "" : undefined}
           data-explain-from="right"
-          data-explain={t("jam.practice.takesExplain")}
+          data-explain={t("jam.practice.chordsExplain")}
         >
           <button
             type="button"
             className="jam-practice-text"
-            onClick={() => onTakes(!takes)}
+            onClick={() => onChords(!chords)}
           >
-            {t("jam.takes.record")}
+            {t("jam.chords.names")}
           </button>
           <button
             type="button"
             role="switch"
-            aria-checked={!!takes}
-            aria-label={t("jam.takes.record")}
-            className={`transport-switch jam-switch ${takes ? "on" : ""}`}
-            onClick={() => onTakes(!takes)}
+            aria-checked={!!chords}
+            aria-label={t("jam.chords.names")}
+            className={`transport-switch jam-switch ${chords ? "on" : ""}`}
+            onClick={() => onChords(!chords)}
           >
             <span className="transport-switch-track" aria-hidden="true" />
           </button>

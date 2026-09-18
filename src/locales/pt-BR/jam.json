@@ -328,7 +328,8 @@
       "nothingFits": "De {{root}} não cabe nada em {{key}}",
       "familyBasic": "Básicos",
       "familySevenths": "Sétimas",
-      "familyColours": "Cores"
+      "familyColours": "Cores",
+      "names": "Nomes dos acordes"
     },
     "key": {
       "label": "Tom",
@@ -425,7 +426,7 @@
       "dropOutExplain": "A banda para por alguns compassos de vez em quando, e você segura o tempo sozinho.",
       "tradeExplain": "A banda toca alguns compassos, depois você toca a mesma quantidade.",
       "tempoExplain": "O andamento sobe um pouco a cada volta do tema.",
-      "takesExplain": "Grava o que você toca com a banda junto, e guarda neste computador."
+      "chordsExplain": "A harmonia escrita na linha de compassos. Desligado é o teste de se você sabe."
     },
     "cue": {
       "yours": "Seus quatro",

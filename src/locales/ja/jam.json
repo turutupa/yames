@@ -328,7 +328,8 @@
       "nothingFits": "{{root}} から {{key}} に入るコードはありません",
       "familyBasic": "基本",
       "familySevenths": "7th",
-      "familyColours": "カラー"
+      "familyColours": "カラー",
+      "names": "コード名"
     },
     "key": {
       "label": "キー",
@@ -425,7 +426,7 @@
       "dropOutExplain": "ときどきバンドが数小節止まり、あなたひとりでテンポを保ちます。",
       "tradeExplain": "バンドが数小節弾き、そのあと同じ小節数をあなたが弾きます。",
       "tempoExplain": "曲がひと回りするたびにテンポが少しずつ上がります。",
-      "takesExplain": "バンドと一緒に弾いた演奏を録音し、この端末に保存します。"
+      "chordsExplain": "小節の並びに書かれた進行。オフにすると、覚えているかの確認になります。"
     },
     "cue": {
       "yours": "あなたの4小節",

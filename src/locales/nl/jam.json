@@ -328,7 +328,8 @@
       "nothingFits": "Vanaf {{root}} past er niets in {{key}}",
       "familyBasic": "Basis",
       "familySevenths": "Septiemen",
-      "familyColours": "Kleuren"
+      "familyColours": "Kleuren",
+      "names": "Akkoordnamen"
     },
     "key": {
       "label": "Toonsoort",
@@ -425,7 +426,7 @@
       "dropOutExplain": "De band stopt af en toe een paar maten, en jij houdt zelf de tijd.",
       "tradeExplain": "De band speelt een paar maten, daarna speel jij er evenveel terug.",
       "tempoExplain": "Het tempo loopt elke ronde een stukje op.",
-      "takesExplain": "Neemt op wat je speelt met de band erbij, en bewaart het op deze computer."
+      "chordsExplain": "De wisselingen op de maatbalk. Uit is de test of je ze kent."
     },
     "cue": {
       "yours": "Jouw vier",

@@ -328,7 +328,8 @@
       "nothingFits": "Rien depuis {{root}} ne va dans {{key}}",
       "familyBasic": "De base",
       "familySevenths": "Septièmes",
-      "familyColours": "Couleurs"
+      "familyColours": "Couleurs",
+      "names": "Noms des accords"
     },
     "key": {
       "label": "Tonalité",
@@ -425,7 +426,7 @@
       "dropOutExplain": "Le groupe s'arrête quelques mesures de temps en temps, et tu tiens le tempo seul.",
       "tradeExplain": "Le groupe joue quelques mesures, puis tu en joues autant.",
       "tempoExplain": "Le tempo monte un peu à chaque tour du morceau.",
-      "takesExplain": "Enregistre ton jeu avec le groupe, et le garde sur cette machine."
+      "chordsExplain": "Les changements écrits sur la frise. Éteint, c'est le test : les connais-tu ?"
     },
     "cue": {
       "yours": "À toi, quatre",

@@ -7,6 +7,54 @@
  * edited, and the parts are contiguous runs of the original file imported in
  * the original order, so the cascade is unchanged. */
 
+/* ── Scrollbars, everywhere ───────────────────────────────────────────────
+ *
+ * The app draws its own menus, its own sliders and its own switches, and then
+ * handed the operating system every scrollbar in it — so a dropdown opened on
+ * Windows came with a wide grey Windows scrollbar down its side, in the one
+ * palette on the screen that belongs to nobody. The owner: "can we also have
+ * a custom scrollbar? something that matches the theme better?"
+ *
+ * Thin, rounded, the ink colour at low alpha, brighter under the pointer, and
+ * the track left transparent so it disappears where nothing overflows. Both
+ * webviews this app ships in are WebKit-derived — WebView2 is Chromium, macOS
+ * is WKWebView — so the `::-webkit-` rules are the ones that paint;
+ * `scrollbar-color` is the standard property for everything else.
+ *
+ * Global rather than per-component: three screens had already styled their
+ * own, which is how a fourth came to be missed. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text-primary) 22%, transparent) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  /* Painted into the padding box so the border above reads as a margin, and
+     the thumb sits in its lane rather than filling it. */
+  background-clip: padding-box;
+  background-color: color-mix(in srgb, var(--text-primary) 22%, transparent);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in srgb, var(--text-primary) 38%, transparent);
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+
 /* =================== Layout: fixed header + scrolling content =================== */
 .main-window {
   height: 100%;

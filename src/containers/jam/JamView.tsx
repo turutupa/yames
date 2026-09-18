@@ -853,10 +853,8 @@ export function JamView({
       <PracticeRow
         value={practice}
         onChange={(nextPractice: JamPracticeSettings) => onEdit({ practice: nextPractice })}
-        takes={!!jam.takes}
-        // Withheld on a build whose engine has no take commands, so the row
-        // does not offer a switch with nothing behind it.
-        onTakes={takes.available === false ? undefined : onToggleTakes}
+        chords={!!jam.chords}
+        onChords={(next: boolean) => onEdit({ chords: next })}
       />
 
       {/* ── The docked sheet ──────────────────────────────────────────────

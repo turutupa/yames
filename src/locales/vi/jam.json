@@ -328,7 +328,8 @@
       "nothingFits": "Từ {{root}} không có gì vào được {{key}}",
       "familyBasic": "Cơ bản",
       "familySevenths": "Hợp âm 7",
-      "familyColours": "Màu sắc"
+      "familyColours": "Màu sắc",
+      "names": "Tên hợp âm"
     },
     "key": {
       "label": "Giọng",
@@ -425,7 +426,7 @@
       "dropOutExplain": "Thỉnh thoảng cả ban dừng vài ô nhịp, bạn tự giữ nhịp.",
       "tradeExplain": "Ban nhạc chơi vài ô nhịp, rồi bạn chơi lại đúng bấy nhiêu.",
       "tempoExplain": "Tốc độ nhích lên một chút mỗi vòng của bài.",
-      "takesExplain": "Ghi lại phần bạn chơi cùng ban nhạc, và giữ trên máy này."
+      "chordsExplain": "Vòng hợp âm ghi trên dải ô nhịp. Tắt đi là để thử xem bạn có thuộc không."
     },
     "cue": {
       "yours": "Bốn ô của bạn",

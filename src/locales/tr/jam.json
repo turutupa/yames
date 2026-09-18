@@ -328,7 +328,8 @@
       "nothingFits": "{{root}} üzerinden {{key}} tonuna uyan bir şey yok",
       "familyBasic": "Temel",
       "familySevenths": "Yedililer",
-      "familyColours": "Renkler"
+      "familyColours": "Renkler",
+      "names": "Akor adları"
     },
     "key": {
       "label": "Ton",
@@ -425,7 +426,7 @@
       "dropOutExplain": "Grup arada bir birkaç ölçü susar, zamanı sen tutarsın.",
       "tradeExplain": "Grup birkaç ölçü çalar, sonra aynı kadarını sen çalarsın.",
       "tempoExplain": "Parça her döndüğünde tempo biraz yükselir.",
-      "takesExplain": "Grupla birlikte çaldığını kaydeder ve bu bilgisayarda tutar."
+      "chordsExplain": "Akor geçişleri ölçü şeridinde yazılı. Kapalıyken biliyor musun, orada anlaşılır."
     },
     "cue": {
       "yours": "Senin dört ölçün",

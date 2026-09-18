@@ -328,7 +328,8 @@
       "nothingFits": "Nada desde {{root}} encaja en {{key}}",
       "familyBasic": "Básicos",
       "familySevenths": "Séptimas",
-      "familyColours": "Colores"
+      "familyColours": "Colores",
+      "names": "Nombres de acordes"
     },
     "key": {
       "label": "Tonalidad",
@@ -425,7 +426,7 @@
       "dropOutExplain": "La banda para unos compases de vez en cuando y tú llevas el tiempo solo.",
       "tradeExplain": "La banda toca unos compases y luego tú tocas los mismos.",
       "tempoExplain": "El tempo sube un poco cada vuelta del tema.",
-      "takesExplain": "Graba lo que tocas con la banda mezclada, y lo guarda en este equipo."
+      "chordsExplain": "Los cambios escritos en la línea de compases. Apagado es la prueba de si te los sabes."
     },
     "cue": {
       "yours": "Tus cuatro",

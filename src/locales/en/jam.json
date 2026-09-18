@@ -328,7 +328,8 @@
       "nothingFits": "Nothing from {{root}} fits {{key}}",
       "familyBasic": "Basic",
       "familySevenths": "Sevenths",
-      "familyColours": "Colours"
+      "familyColours": "Colours",
+      "names": "Chord names"
     },
     "key": {
       "label": "Key",
@@ -425,7 +426,7 @@
       "dropOutExplain": "The band stops for a few bars every so often, and you keep the time on your own.",
       "tradeExplain": "The band plays a few bars, then you play the same number back.",
       "tempoExplain": "The tempo climbs a little every time the tune comes round.",
-      "takesExplain": "Records what you play with the band mixed in, and keeps it on this machine."
+      "chordsExplain": "The changes written down the timeline. Off is a test of whether you know them."
     },
     "cue": {
       "yours": "Your four",

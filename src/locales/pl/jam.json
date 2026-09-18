@@ -328,7 +328,8 @@
       "nothingFits": "Od {{root}} nic nie pasuje do {{key}}",
       "familyBasic": "Podstawowe",
       "familySevenths": "Septymowe",
-      "familyColours": "Barwy"
+      "familyColours": "Barwy",
+      "names": "Nazwy akordów"
     },
     "key": {
       "label": "Tonacja",
@@ -425,7 +426,7 @@
       "dropOutExplain": "Zespół co jakiś czas milknie na kilka taktów, a ty trzymasz czas sam.",
       "tradeExplain": "Zespół gra kilka taktów, potem ty grasz tyle samo.",
       "tempoExplain": "Tempo rośnie odrobinę z każdym obiegiem tematu.",
-      "takesExplain": "Nagrywa to, co grasz razem z zespołem, i trzyma na tym komputerze."
+      "chordsExplain": "Przebieg zapisany na pasku taktów. Wyłączone to sprawdzian, czy go znasz."
     },
     "cue": {
       "yours": "Twoje cztery",

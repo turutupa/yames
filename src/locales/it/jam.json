@@ -328,7 +328,8 @@
       "nothingFits": "Da {{root}} non ci sta niente in {{key}}",
       "familyBasic": "Di base",
       "familySevenths": "Settime",
-      "familyColours": "Colori"
+      "familyColours": "Colori",
+      "names": "Nomi degli accordi"
     },
     "key": {
       "label": "Tonalità",
@@ -425,7 +426,7 @@
       "dropOutExplain": "Ogni tanto la band si ferma per qualche battuta e tieni il tempo da solo.",
       "tradeExplain": "La band suona qualche battuta, poi ne suoni altrettante tu.",
       "tempoExplain": "Il tempo sale un po' a ogni giro del brano.",
-      "takesExplain": "Registra quello che suoni con la band, e lo tiene su questo computer."
+      "chordsExplain": "I cambi scritti sulla linea delle battute. Spento è la prova che li sai."
     },
     "cue": {
       "yours": "Tocca a te, quattro",

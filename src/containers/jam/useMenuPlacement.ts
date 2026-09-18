@@ -50,7 +50,17 @@ export function useMenuPlacement(open: boolean) {
       const gap = 4;
       // Its natural height, asked for before anything has been imposed on it.
       const natural = menu.scrollHeight;
-      const width = Math.max(menu.offsetWidth, chip.width);
+      /*
+       * As wide as it needs, and no wider than a menu should be.
+       *
+       * It used to ask for the chip's width so a wide chip never got a narrow
+       * menu — which on "STYLE  Auto · Roots on the kick" meant a menu three
+       * hundred and fifty pixels across with fifteen short words rattling
+       * around in it. The chip is a floor worth having and a ceiling worth
+       * capping; the stylesheet's own `max-width` cannot do it, because a
+       * `min-width` set here would beat it.
+       */
+      const width = Math.min(Math.max(menu.offsetWidth, chip.width), 320);
 
       const below = window.innerHeight - chip.bottom - gap - edge;
       const above = chip.top - gap - edge;

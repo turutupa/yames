@@ -328,7 +328,8 @@
       "nothingFits": "从 {{root}} 起没有和弦能进 {{key}}",
       "familyBasic": "基础",
       "familySevenths": "七和弦",
-      "familyColours": "色彩"
+      "familyColours": "色彩",
+      "names": "和弦名"
     },
     "key": {
       "label": "调",
@@ -425,7 +426,7 @@
       "dropOutExplain": "乐队每隔一阵停几小节，由你自己保持节奏。",
       "tradeExplain": "乐队先弹几小节，然后你弹同样的小节数。",
       "tempoExplain": "每走完一轮，速度就往上提一点。",
-      "takesExplain": "把你和乐队一起演奏的声音录下来，存在这台电脑上。"
+      "chordsExplain": "写在小节条上的和弦走向。关掉，就是考考你记不记得。"
     },
     "cue": {
       "yours": "你的四小节",

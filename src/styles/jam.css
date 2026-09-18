@@ -2551,8 +2551,14 @@
   z-index: 60;
   display: flex;
   flex-direction: column;
-  min-width: 260px;
-  max-width: 420px;
+  /* A menu is a column of short labels, not a paragraph. Left to match the
+     chip it hangs from, the bass style's menu came out as wide as "Auto ·
+     Roots on the kick" and every other row in it floated in empty space —
+     the owner: "can we have a max width for the dropdown items? i think its
+     currently too long". The picker caps the width it asks for; this caps
+     what any content can ask for. */
+  min-width: 220px;
+  max-width: 320px;
   max-height: 320px;
   overflow-y: auto;
   padding: 4px;
@@ -2563,7 +2569,7 @@
 }
 
 .jam-select[data-compact] .jam-dropdown-menu {
-  min-width: 190px;
+  min-width: 180px;
 }
 
 /* Upwards is now a `top` the picker works out, not a rule. */
@@ -2608,6 +2614,9 @@
 .jam-dropdown-item-name {
   font-size: 0.8rem;
   font-weight: 700;
+  /* Wrapping rather than ellipsis: a menu row that hides half its own name is
+     a row you cannot choose between. */
+  overflow-wrap: anywhere;
 }
 
 .jam-dropdown-item-hint {

@@ -328,7 +328,8 @@
       "nothingFits": "Von {{root}} passt nichts in {{key}}",
       "familyBasic": "Grundakkorde",
       "familySevenths": "Septimen",
-      "familyColours": "Farben"
+      "familyColours": "Farben",
+      "names": "Akkordnamen"
     },
     "key": {
       "label": "Tonart",
@@ -425,7 +426,7 @@
       "dropOutExplain": "Die Band setzt ab und zu ein paar Takte aus, und du hältst die Zeit allein.",
       "tradeExplain": "Die Band spielt ein paar Takte, dann spielst du genauso viele zurück.",
       "tempoExplain": "Das Tempo steigt bei jeder Runde ein Stück.",
-      "takesExplain": "Nimmt dein Spiel mit der Band auf und behält es auf diesem Rechner."
+      "chordsExplain": "Die Wechsel auf der Leiste. Aus ist die Probe, ob du sie kennst."
     },
     "cue": {
       "yours": "Deine vier",

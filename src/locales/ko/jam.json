@@ -328,7 +328,8 @@
       "nothingFits": "{{root}}에서 {{key}}에 맞는 코드가 없습니다",
       "familyBasic": "기본",
       "familySevenths": "7th",
-      "familyColours": "컬러"
+      "familyColours": "컬러",
+      "names": "코드 이름"
     },
     "key": {
       "label": "키",
@@ -425,7 +426,7 @@
       "dropOutExplain": "가끔 밴드가 몇 마디 쉬고, 그동안 혼자 박을 지킵니다.",
       "tradeExplain": "밴드가 몇 마디 연주하면, 같은 마디 수만큼 이어서 연주합니다.",
       "tempoExplain": "곡이 한 바퀴 돌 때마다 템포가 조금씩 올라갑니다.",
-      "takesExplain": "밴드와 함께 연주한 소리를 녹음해 이 기기에 보관합니다."
+      "chordsExplain": "마디 줄에 적힌 코드 진행. 끄면 외웠는지 확인이 됩니다."
     },
     "cue": {
       "yours": "당신 차례, 네 마디",
