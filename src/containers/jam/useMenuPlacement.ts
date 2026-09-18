@@ -48,6 +48,19 @@ export function useMenuPlacement(open: boolean) {
       const edge = 12;
       /** The gap between the chip and its menu. */
       const gap = 4;
+      /*
+       * As tall as a menu is allowed to get — about eight rows, then it
+       * scrolls.
+       *
+       * The stylesheet has said `max-height: 320px` all along and it never
+       * once took effect: the frame below sets `maxHeight` inline, and an
+       * inline style beats a stylesheet. So on a tall window the bass style
+       * menu opened to its full fifteen rows — the owner: "i thought i asked
+       * you to set a max height to the dropdowns list... this is freakin
+       * massive". The cap belongs here, where the measuring happens; the
+       * stylesheet keeps its own for the frame before anything is measured.
+       */
+      const tallest = 320;
       // Its natural height, asked for before anything has been imposed on it.
       const natural = menu.scrollHeight;
       /*
@@ -67,7 +80,7 @@ export function useMenuPlacement(open: boolean) {
       // Upwards only when it genuinely helps: flipping into a space just as
       // short as the one it left is movement for nothing.
       const up = natural > below && above > below;
-      const room = Math.max(0, up ? above : below);
+      const room = Math.min(Math.max(0, up ? above : below), tallest);
       const height = Math.min(natural, room);
 
       let left = chip.left;

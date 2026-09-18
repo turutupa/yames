@@ -243,6 +243,15 @@ test.describe("a dropdown menu", () => {
       expect(Math.round(box.y), `${label}: the menu starts above the window`).toBeGreaterThanOrEqual(0);
       expect(Math.round(box.y + box.height), `${label}: the menu runs off the bottom`)
         .toBeLessThanOrEqual(height);
+      /*
+       * And it scrolls rather than growing. "Inside the window" was not
+       * enough on its own: the bass style menu has fifteen rows and on a
+       * tall window it drew every one of them, six hundred-odd pixels of
+       * menu over the screen it belongs to, passing this test the whole
+       * time. The stylesheet's cap was being overridden inline.
+       */
+      expect(Math.round(box.height), `${label}: the menu is ${Math.round(box.height)}px tall`)
+        .toBeLessThanOrEqual(320);
 
       await page.keyboard.press("Escape");
     }
