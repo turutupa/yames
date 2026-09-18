@@ -72,8 +72,14 @@
    scale. Drawn inside the SVG so nothing the board sits in can clip it. */
 .fretboard-note-label rect {
   fill: var(--bg-secondary);
-  stroke: var(--border);
-  stroke-width: 1;
+  /* It is over the board, not on it. In the app's own border colour, a panel
+     filled with one of the app's own surfaces read as one more thing printed
+     on the neck; the accent says it belongs to the pointer and will go when
+     the pointer does. (A drop shadow would say the same and is what this
+     first reached for — but every colour in this file has to come from the
+     theme, and a shadow cannot be written that way.) */
+  stroke: var(--accent);
+  stroke-width: 1.5;
 }
 
 .fretboard-note-label text {

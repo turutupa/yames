@@ -631,20 +631,29 @@ export function ChordSheet({
                   </button>
                 );
               })}
-              {/* Last, and pushed to the far end: the scales are a row of like
-                  things and this is not one of them — it says how they are
-                  drawn, not which one is drawn. */}
-              <span className="jam-scale-names">
-                <Segmented
-                  label={t("jam.fretboard.onTheDots")}
-                  value={dots}
-                  options={DOT_LABELS.map((id) => ({
-                    id,
-                    label: t(`jam.fretboard.dots${id[0].toUpperCase()}${id.slice(1)}`),
-                  }))}
-                  onChange={setDots}
-                />
-              </span>
+            </div>
+          )}
+          {/* How the dots are drawn, which is a different question from which
+              scale is drawn — so it is not one of the chips.
+
+              It used to say so by sitting at the far end of the chips' row,
+              and on a wide sheet that stranded it against the right-hand
+              edge, a heading and three buttons alone out there with the whole
+              neck starting back at the left — the owner: "the on the dots
+              buttons looks very off on the right side... can we have it left
+              aligned?" A line of its own says the same thing and says it
+              where everything else on this sheet begins. */}
+          {fretboardOpen && board && (
+            <div className="jam-scale-names">
+              <Segmented
+                label={t("jam.fretboard.onTheDots")}
+                value={dots}
+                options={DOT_LABELS.map((id) => ({
+                  id,
+                  label: t(`jam.fretboard.dots${id[0].toUpperCase()}${id.slice(1)}`),
+                }))}
+                onChange={setDots}
+              />
             </div>
           )}
           {fretboardOpen && board && (

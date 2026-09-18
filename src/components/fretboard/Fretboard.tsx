@@ -336,21 +336,41 @@ export default function Fretboard({
         describeNote &&
         (() => {
           const text = describeNote(hovered.pc);
-          const padX = metrics.fontSize * 0.55;
-          const boxW = text.length * metrics.fontSize * 0.62 + padX * 2;
-          const boxH = metrics.fontSize * 1.9;
+          /*
+           * Half again the board's own type.
+           *
+           * It used to be drawn at exactly the size of the names inside the
+           * dots, so the answer to "what is this note" was no more prominent
+           * than the question — the owner: "the popovers in the fretboard
+           * work but look too small". A label is read once and dismissed; it
+           * should win the moment it is up.
+           */
+          const fontSize = metrics.fontSize * 1.5;
+          const padX = fontSize * 0.6;
+          const boxW = text.length * fontSize * 0.62 + padX * 2;
+          const boxH = fontSize * 1.8;
           const cx = fretX(hovered.fret);
           const left = Math.min(Math.max(cx - boxW / 2, 2), width - boxW - 2);
-          // Above the note, unless the note is on the top string.
-          const above = stringY(hovered.string) - metrics.dotRadius - 5 - boxH;
-          const top = above < 2 ? stringY(hovered.string) + metrics.dotRadius + 5 : above;
+          /*
+           * Clear of the dot by a whole dot's width, and above it.
+           *
+           * The pointer sits on the note and its arrow hangs down and to the
+           * right of that, so a label a few units above used to end up under
+           * the cursor: "render behind the cursor so some are not legible".
+           * Below is the last resort rather than a preference — it is the
+           * side the cursor is on — so it is taken only when the note is so
+           * near the top of the board that there is genuinely no room.
+           */
+          const gap = metrics.dotRadius * 2;
+          const above = stringY(hovered.string) - metrics.dotRadius - gap - boxH;
+          const top = above < 2 ? stringY(hovered.string) + metrics.dotRadius + gap : above;
           return (
             <g className="fretboard-note-label" pointerEvents="none">
-              <rect x={left} y={top} width={boxW} height={boxH} rx={4} />
+              <rect x={left} y={top} width={boxW} height={boxH} rx={boxH / 4} />
               <text
                 x={left + boxW / 2}
                 y={top + boxH / 2}
-                fontSize={metrics.fontSize}
+                fontSize={fontSize}
                 textAnchor="middle"
                 dominantBaseline="central"
               >

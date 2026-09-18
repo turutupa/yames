@@ -710,10 +710,10 @@
 /* The dot labels share the row with the scale chips but are not one of them:
    they say how the neck is DRAWN, not which notes are on it. Pushed to the
    end so the chips stay a row of like things. */
-.jam-scale-names {
-  margin-left: auto;
-}
-
+/* "On the dots" gets a line of its own under the scale chips, starting at
+   the left margin like everything else on the sheet. It used to be pushed to
+   the far end of the chips' row, which on a wide sheet stranded it against
+   the right-hand edge. */
 .jam-scale-names .jam-segmented {
   margin-left: 0;
 }
@@ -1995,11 +1995,24 @@
   border-bottom: 1px solid var(--border);
 }
 
+/* The title takes the slack, so the two buttons end up together against the
+   right-hand edge.
+
+   The header spaces its children out, and with a title, a maximize button
+   and Done that put the maximize button at the exact centre of the sheet,
+   touching nothing and belonging to neither side — the owner: "the maximize
+   button is sitting in the middle of nowhere". It is a control of the same
+   kind as Done and it now sits beside it. */
 .jam-sheet-titles {
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
+  flex: 1;
+}
+
+.jam-sheet-head > .jam-sheet-grow {
+  margin-left: auto;
 }
 
 .jam-sheet-title {
