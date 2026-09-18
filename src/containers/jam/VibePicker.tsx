@@ -2,7 +2,12 @@ import { useCallback, useEffect, useRef } from "react";
 import type { KeyboardEvent, PointerEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Presence, useLastPresent } from "../../components/Presence";
-import { VIBES, applyVibe } from "../../jam/vibesContract";
+import {
+  VIBES,
+  applyVibe,
+  variationShowingFor,
+  vibeShowingFor,
+} from "../../jam/vibesContract";
 import type { Vibe, VibePatch } from "../../jam/vibesContract";
 import type { Jam } from "../../jam/types";
 
@@ -183,7 +188,19 @@ export function VibePicker({
       ? previewing
       : null;
 
-  const picked: Vibe | null = VIBES.find((v) => v.id === jam.vibe) ?? null;
+  /*
+   * The vibe showing, which is not quite the same as the vibe on the record.
+   *
+   * A jam made from nothing carries no `vibe`, so all nine tiles opened dark
+   * and the variation row with them — and a player who tapped one to find out
+   * what it did then had no way back, because there had been nothing selected
+   * to go back to. A vibe cannot be un-picked (there is no band that plays no
+   * style), so one of them is always the answer and `vibeShowingFor` works
+   * out which from the groove. It writes nothing: the drawer says what this
+   * jam sounds like, the record still says where it came from.
+   */
+  const picked: Vibe | null = vibeShowingFor(jam, VIBES);
+  const showingVariation = variationShowingFor(jam, VIBES);
 
   /**
    * The vibe the variation row is about while it folds away.
@@ -216,7 +233,7 @@ export function VibePicker({
       ) : (
         <div className="jam-vibes" role="group" aria-label={t("jam.vibe.label")}>
           {VIBES.map((vibe) => {
-            const on = jam.vibe === vibe.id;
+            const on = picked?.id === vibe.id;
             const mark = markFor(vibe.id);
             return (
               <button
@@ -258,7 +275,7 @@ export function VibePicker({
           </div>
           <div className="jam-variations" role="group" aria-label={t("jam.variation.aria")}>
             {shownVibe.variations.map((variation) => {
-              const on = jam.variation === variation.id;
+              const on = showingVariation === variation.id;
               const mark = markFor(shownVibe.id, variation.id);
               return (
                 <button

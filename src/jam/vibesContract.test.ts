@@ -12,8 +12,16 @@
 import { describe, expect, it } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
-import { VARIATION_IDS, VIBES, VIBE_IDS, applyIntensity, applyVibe } from "./vibesContract";
-import { GROOVES } from "./grooves";
+import {
+  VARIATION_IDS,
+  VIBES,
+  VIBE_IDS,
+  applyIntensity,
+  applyVibe,
+  variationShowingFor,
+  vibeShowingFor,
+} from "./vibesContract";
+import { GROOVES, RULE_GROOVE_ID } from "./grooves";
 import type { ShapedGroove, Vibe } from "./vibesContract";
 import { createJam } from "./jams";
 import type { Jam } from "./types";
@@ -275,5 +283,70 @@ describe("the ids the locale files carry", () => {
       expect(VIBE_IDS).toContain(v.id);
       for (const x of v.variations) expect(VARIATION_IDS).toContain(x.id);
     }
+  });
+});
+
+/**
+ * Which vibe the drawer shows as picked.
+ *
+ * A vibe cannot be un-picked — there is no band that plays no style — so one
+ * of the nine is always the right answer, including for a jam whose record
+ * never named one. Before this, a jam made from nothing opened the drawer
+ * with all nine tiles dark and no variation row, and tapping a tile to find
+ * out what it did left the player stuck: "when i hit Rock there is no way of
+ * un-selecting it."
+ */
+describe("the vibe a jam is showing", () => {
+  const jamOf = (fields: Partial<Jam>): Jam => ({ ...createJam("t"), ...fields });
+
+  it("is the one on the record when there is one", () => {
+    expect(vibeShowingFor(jamOf({ vibe: "jazz", grooveId: "rock8" }))?.id).toBe("jazz");
+  });
+
+  it("is never nothing for a jam made from the defaults", () => {
+    // The case the owner hit: "+ New jam" writes no vibe at all.
+    expect(vibeShowingFor(createJam("New jam"))).not.toBeNull();
+  });
+
+  it("names a vibe for every groove on a shelf a vibe is named after", () => {
+    // Eight of the nine shelves share their name with a vibe. "World" does
+    // not — it is the shelf for everything whose bar is not a Western
+    // backbeat, which is not one style and has no one tile — so a jam on a
+    // reggae or an Afrobeat groove lights nothing, and that is the honest
+    // answer rather than a tile claiming it is Latin.
+    const orphans = GROOVES.filter(
+      (g) =>
+        g.id !== RULE_GROOVE_ID &&
+        g.family !== "world" &&
+        !vibeShowingFor(jamOf({ grooveId: g.id })),
+    ).map((g) => g.id);
+    expect(orphans, "these grooves light no tile").toEqual([]);
+  });
+
+  it("reads a vibe's own groove as that vibe", () => {
+    for (const v of VIBES) {
+      expect(vibeShowingFor(jamOf({ grooveId: v.grooveId }))?.id, v.id).toBeTruthy();
+    }
+  });
+
+  it("opens the second row on a variation that plays this groove", () => {
+    const rock = VIBES.find((v) => v.id === "rock")!;
+    const other = rock.variations.find((x) => x.grooveId !== rock.grooveId)!;
+    const showing = variationShowingFor(jamOf({ grooveId: other.grooveId }));
+    // By groove rather than by id: more than one variation can play the same
+    // groove — hard and punk are both the hard-rock bar at different tempos —
+    // so the claim is that the lit chip plays what you are hearing.
+    const lit = VIBES.flatMap((v) => v.variations).find((x) => x.id === showing);
+    expect(lit?.grooveId, `${showing} does not play ${other.grooveId}`).toBe(other.grooveId);
+  });
+
+  it("lights nothing for a groove you drew yourself", () => {
+    // It is nobody's vibe, and a lit tile would be a claim about a bar the
+    // user wrote.
+    const mine = jamOf({
+      grooveId: "rock8",
+      customGroove: { name: "Mine", bar: {}, fill: {} } as Jam["customGroove"],
+    });
+    expect(vibeShowingFor(mine)).toBeNull();
   });
 });

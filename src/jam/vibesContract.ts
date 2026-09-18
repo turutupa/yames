@@ -28,6 +28,7 @@ import type {
 } from "./types";
 import { VIBES as VIBE_DATA, applyVibe as applyVibeToJam, vibeBundle } from "./vibes";
 import { applyIntensityToGroove } from "./intensity";
+import { GROOVES } from "./grooves";
 
 /**
  * The eight tiles, in the order the board draws them.
@@ -194,6 +195,68 @@ export const VIBES: readonly Vibe[] = VIBE_DATA.map((v) => ({
     };
   }),
 }));
+
+/**
+ * Which vibe a jam is showing, when the record does not name one.
+ *
+ * A jam made from nothing has no `vibe` on it — `createJam` writes the field
+ * only when a tile put it there — and neither does any jam saved before the
+ * field existed. So the setup drawer opened with all nine tiles dark, and the
+ * variation row ("Rock, which one") hidden with them. The owner tapped Rock
+ * to see what it did and then could not un-tap it: "when i hit Rock there is
+ * no way of un-selecting it, but when i select it the different subgenres
+ * show up." Nothing had been selected in the first place, which is what made
+ * the tile look like a toggle rather than a choice among nine.
+ *
+ * A vibe is not un-pickable — there is no "no vibe" for a band to play — so
+ * the answer is that one of them is always right, and this works out which.
+ * The groove is the signal: it is the one field every vibe and every
+ * variation names, and it is the loudest thing about how a jam sounds. Its
+ * own groove first, then any variation's, and failing both the vibe whose
+ * name matches the groove's shelf — "funk" and the funk shelf are the same
+ * word on purpose.
+ *
+ * Read only. Nothing is written to the record: the jam has not been started
+ * from this vibe, it merely sounds like it, and saying so in the drawer is
+ * not the same as claiming it in the file.
+ */
+export function vibeShowingFor(
+  jam: Pick<Jam, "vibe" | "grooveId" | "customGroove">,
+  /* The list to look in. A parameter because the picker's own import is what
+     a test may have replaced, and a helper reading a different list from the
+     screen calling it is a helper that answers about a different app. */
+  vibes: readonly Vibe[] = VIBES,
+): Vibe | null {
+  if (jam.vibe) return vibes.find((v) => v.id === jam.vibe) ?? null;
+  // A groove you drew yourself is nobody's vibe, and pretending otherwise
+  // would light a tile that does not describe what is playing.
+  if (jam.customGroove) return null;
+
+  const exact = vibes.find((v) => v.grooveId === jam.grooveId);
+  if (exact) return exact;
+
+  const byVariation = vibes.find((v) => v.variations.some((x) => x.grooveId === jam.grooveId));
+  if (byVariation) return byVariation;
+
+  const family = GROOVES.find((g) => g.id === jam.grooveId)?.family;
+  return (family && vibes.find((v) => v.id === family)) ?? null;
+}
+
+/**
+ * And which of that vibe's variations, by the same rule.
+ *
+ * So the second row opens on the one that is playing rather than on none of
+ * them, which would be the same puzzle one row down.
+ */
+export function variationShowingFor(
+  jam: Pick<Jam, "vibe" | "variation" | "grooveId" | "customGroove">,
+  vibes: readonly Vibe[] = VIBES,
+): VariationId | null {
+  if (jam.variation) return jam.variation as VariationId;
+  const showing = vibeShowingFor(jam, vibes);
+  if (!showing || jam.vibe) return null;
+  return showing.variations.find((x) => x.grooveId === jam.grooveId)?.id ?? null;
+}
 
 /**
  * The patch a tile writes, for the jam it is being tapped over.
