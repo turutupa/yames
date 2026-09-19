@@ -387,13 +387,20 @@ test.describe("the chord poster", () => {
     const narrowest = Math.min(...widths);
     expect(narrowest, `the narrowest box is ${narrowest}px`).toBeGreaterThanOrEqual(90);
 
-    // Every row the same length, so a column heading means the same thing all
-    // the way down — including with the filter on, where the misfits leave
-    // gaps rather than shortening the row.
-    const lengths = await page.$$eval(".jam-chord-table tbody tr", (rows) => [
-      ...new Set(rows.map((r) => r.querySelectorAll(".jam-chord-cell").length)),
-    ]);
-    expect(lengths, "the rows are different lengths").toHaveLength(1);
+    // Every row the same length AND solid all the way across, so a column
+    // heading means the same thing every line down. "none of the cheat
+    // sheets online have gaps like yours" — they do not, and nor does this.
+    const rows = await page.$$eval(".jam-chord-table tbody tr", (nodes) =>
+      nodes.map((r) => ({
+        cells: r.querySelectorAll(".jam-chord-cell").length,
+        filled: r.querySelectorAll(".jam-chord-card").length,
+        root: r.querySelector("th")?.textContent ?? "?",
+      })),
+    );
+    expect(new Set(rows.map((r) => r.cells)).size, "the rows are different lengths").toBe(1);
+    for (const row of rows) {
+      expect(row.filled, `the ${row.root} row has a hole in it`).toBe(row.cells);
+    }
 
     // And it scrolls rather than overflowing the sheet.
     const box = (await table.boundingBox())!;

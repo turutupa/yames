@@ -2950,10 +2950,21 @@
    chord picker's root row, because it is the same gesture — point at a
    letter — and a second pill an eyelash different would read as a second
    idea. `relative` so the in-key dot has a corner to sit in. */
-/* "In key". A dot rather than a word, because it is on twelve pills and
-   fifteen cards at once and a word on each would be the loudest thing on the
-   page. Its meaning is in its `aria-label`, so it is a dot to the eye and a
-   sentence to a screen reader. */
+/* "In key" on a chord card: the box is outlined in the accent.
+
+   It was only ever the dot below, which is five pixels across and was fine
+   when it sat on fifteen cards and is not when it sits on a hundred and
+   ninety-two — the owner: "maybe just add some border to the ones in key?"
+   The border carries it now and the dot stays for its `aria-label`, which is
+   the half a screen reader needs. */
+.jam-chord-card.in-key {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
+/* "In key". A dot rather than a word, because a word on each would be the
+   loudest thing on the page. Its meaning is in its `aria-label`, so it is a
+   dot to the eye and a sentence to a screen reader. */
 .jam-chord-mark {
   position: absolute;
   top: 4px;
@@ -3153,12 +3164,6 @@
 
 .jam-chord-cell .chord-diagram svg {
   max-width: none;
-}
-
-/* A chord that is not in the key, with the filter on. The row keeps its
-   length; what is left is the shape of the key. */
-.jam-chord-cell-out {
-  min-width: 104px;
 }
 
 /* A drawer of the browser — Basic, Sevenths, Colours. */

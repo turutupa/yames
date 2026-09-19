@@ -1468,7 +1468,7 @@ describe("JamView — the cheat sheet", () => {
     expect(container.querySelectorAll(".jam-chord-table-root .jam-chord-mark").length).toBe(5);
   });
 
-  it("marks the chords that fit the key, and In key leaves only those", () => {
+  it("marks the chords that fit the key without hiding the rest of the row", () => {
     const { container } = chordSheet({}, { chordPage: "all" });
     const all = cards(container).length;
     const marked = container.querySelectorAll(".jam-chord-card .jam-chord-mark").length;
@@ -1476,27 +1476,30 @@ describe("JamView — the cheat sheet", () => {
     // telling the player nothing.
     expect(marked).toBeGreaterThan(0);
     expect(marked).toBeLessThan(all);
-
-    cleanup();
-    const filtered = chordSheet({}, { chordPage: "key" });
-    expect(cards(filtered.container)).toHaveLength(marked);
-    // Every card left is a marked one.
-    expect(filtered.container.querySelectorAll(".jam-chord-card .jam-chord-mark")).toHaveLength(
-      marked,
-    );
   });
 
-  it("leaves a gap for a chord outside the key rather than shortening the row", () => {
-    // With the filter on, the holes are the point: what is left is the shape
-    // of the key. A row that simply lost its misfits would put a different
-    // chord type under each column heading on every line.
+  it("never leaves a hole: In key drops whole rows, never cells", () => {
+    // The owner, holding a printed chart: "none of the cheat sheets online
+    // have gaps like yours". The filter used to hide the individual chords
+    // that do not belong to the key, which left a row of Swiss cheese under
+    // headings that then meant nothing. It thins the chart to the roots the
+    // key is built on instead, and every one of those rows is solid.
     const { container } = chordSheet({}, { chordPage: "key" });
-    const rows = container.querySelectorAll(".jam-chord-table tbody tr");
-    const widths = new Set([...rows].map((r) => r.querySelectorAll(".jam-chord-cell").length));
-    expect(widths.size, "the filter made the rows different lengths").toBe(1);
-    expect([...widths][0]).toBe(CHORD_QUALITIES.length);
-    // And there really are gaps, or the filter is doing nothing.
-    expect(container.querySelectorAll(".jam-chord-cell-out").length).toBeGreaterThan(0);
+    const rows = [...container.querySelectorAll(".jam-chord-table tbody tr")];
+
+    // Fewer rows than the full twelve, or the filter is doing nothing.
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows.length).toBeLessThan(12);
+
+    for (const row of rows) {
+      const cells = row.querySelectorAll(".jam-chord-cell");
+      expect(cells).toHaveLength(CHORD_QUALITIES.length);
+      // Every cell of every row carries a chord. No blanks anywhere.
+      expect(
+        row.querySelectorAll(".jam-chord-card"),
+        `${row.querySelector("th")?.textContent} has a hole in it`,
+      ).toHaveLength(CHORD_QUALITIES.length);
+    }
   });
 
   it("expands a browsed chord into the same shapes section", () => {

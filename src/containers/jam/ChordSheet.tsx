@@ -249,11 +249,21 @@ export function ChordSheet({
     [],
   );
 
-  /** The chart itself: a row per root, a column per chord type. */
-  const rows = useMemo(
-    () => sheetGrid(playedKey, qualities, shapeCache),
-    [playedKey, qualities, shapeCache],
-  );
+  /**
+   * The chart itself: a row per root, a column per chord type.
+   *
+   * "In key" drops ROWS, never cells. It used to hide the individual chords
+   * that do not belong to the key, and the owner put the result next to a
+   * printed one: "none of the cheat sheets online have gaps like yours".
+   * Quite right — a reference with holes in it is a reference you have to
+   * interpret, and every row of a real chart is solid. So the key thins the
+   * chart to the roots it is built on, each of them complete; the dot on a
+   * cell still says which of those chords is strictly in the key.
+   */
+  const rows = useMemo(() => {
+    const all = sheetGrid(playedKey, qualities, shapeCache);
+    return inKeyOnly ? all.filter((row) => keyRoots.has(row.root)) : all;
+  }, [playedKey, qualities, shapeCache, inKeyOnly, keyRoots]);
 
   /** What the shapes section is about while it folds away (A11). */
   const shownSubject = useLastPresent(subject);
@@ -366,7 +376,9 @@ export function ChordSheet({
       <button
         key={key}
         type="button"
-        className={`jam-chord-card${on ? " active" : ""}`}
+        className={`jam-chord-card${on ? " active" : ""}${
+          options.inKeyMark ? " in-key" : ""
+        }`}
         aria-pressed={on}
         aria-label={name}
         onClick={() => {
@@ -471,27 +483,15 @@ export function ChordSheet({
                         />
                       )}
                     </th>
-                    {row.cells.map((cell) =>
-                      /* In key, a chord that does not belong leaves a gap
-                         rather than vanishing: the holes ARE the answer —
-                         what is left is the shape of the key — and a table
-                         whose rows are different lengths is not a table. */
-                      inKeyOnly && !cell.fits ? (
-                        <td
-                          key={cell.chord.quality}
-                          className="jam-chord-cell jam-chord-cell-out"
-                          aria-hidden="true"
-                        />
-                      ) : (
-                        <td key={cell.chord.quality} className="jam-chord-cell">
-                          {cell.shape
-                            ? card(cell.chord, `${row.root}-${cell.chord.quality}`, {
-                                inKeyMark: cell.fits,
-                              })
-                            : null}
-                        </td>
-                      ),
-                    )}
+                    {row.cells.map((cell) => (
+                      <td key={cell.chord.quality} className="jam-chord-cell">
+                        {cell.shape
+                          ? card(cell.chord, `${row.root}-${cell.chord.quality}`, {
+                              inKeyMark: cell.fits,
+                            })
+                          : null}
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
