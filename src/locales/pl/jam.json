@@ -288,16 +288,23 @@
     "fretboard": {
       "label": "Gryf",
       "aria": "{{chord}} na gryfie",
-      "wholeNeck": "cały gryf · nie zmienia się, gdy grasz",
       "scales": "Która skala",
       "onTheDots": "Na kropkach",
       "dotsNone": "Nic",
       "dotsNotes": "Dźwięki",
       "dotsDegrees": "Stopnie"
     },
+    "cheat": {
+      "label": "Ściąga",
+      "title": "Ściąga w {{key}}",
+      "tabs": "Na co patrzysz",
+      "chords": "Akordy",
+      "scales": "Skale",
+      "scalesLead": "cały gryf i to, co na nim pasuje",
+      "noScales": "Do tej tonacji nie ma jeszcze skali do narysowania."
+    },
     "chords": {
       "label": "Akordy",
-      "inKey": "Akordy w {{key}}",
       "follow": "Idź za jamem",
       "followHint": "Chwyty przesuwają się razem z akordami albo zostają przypięte do jednego.",
       "sevenths": "Septymowe",
@@ -320,10 +327,8 @@
       "flavourLabel": "Trójdźwięki, septymowe, barwy albo akordy power",
       "colours": "Barwy",
       "power": "Power",
-      "rootLabel": "Pryma",
       "inKeyMark": "w tonacji",
       "onlyInKey": "Tylko z tonacji",
-      "nothingFits": "Od {{root}} nic nie pasuje do {{key}}",
       "familyBasic": "Podstawowe",
       "familySevenths": "Septymowe",
       "familyColours": "Barwy",

@@ -8,6 +8,7 @@ import { render, screen, fireEvent, cleanup, within } from "@testing-library/rea
 import { createRef } from "react";
 import { JamView } from "./JamView";
 import { STARTER_JAMS } from "../../jam/jams";
+import { CHORD_QUALITIES } from "../../jam/diatonic";
 import type { Jam } from "../../jam/types";
 import type { BeatEvent } from "../../types";
 
@@ -64,14 +65,12 @@ function screenState(
   overrides: Partial<React.ComponentProps<typeof JamView>["screen"]> = {},
 ): React.ComponentProps<typeof JamView>["screen"] {
   return {
-    fretboardOpen: false,
-    toggleFretboard: vi.fn(),
+    cheatTab: "chords" as const,
+    setCheatTab: vi.fn(),
     chordPage: "key" as const,
     setChordPage: vi.fn(),
     chordFlavour: "triads" as const,
     setChordFlavour: vi.fn(),
-    chordRoot: null,
-    setChordRoot: vi.fn(),
     onlyInKey: false,
     setOnlyInKey: vi.fn(),
     shapeIndex: 0,
@@ -847,11 +846,13 @@ describe("JamView — the sheets", () => {
     expect(container.querySelector(".jam-pinned")).toBeNull();
   });
 
-  it("shows the fretboard as one static box for the key", () => {
-    const { container } = chordSheet({}, { fretboardOpen: true });
+  it("shows the fretboard as one static box for the key, on its own tab", () => {
+    // It used to be at the foot of the chords page behind a switch called
+    // "Fretboard", which is where the scales lived and where nobody looked.
+    // The tab IS the switch now, which is why there is no switch left.
+    const { container } = chordSheet({}, { cheatTab: "scales" });
     expect(container.querySelector(".jam-fretboard")).not.toBeNull();
-    // The sentence that says it will not move — which is the whole promise.
-    expect(screen.getByText(/stays put while you play/)).toBeInTheDocument();
+    expect(screen.queryByRole("switch", { name: /Fretboard/ })).toBeNull();
   });
 });
 
@@ -1426,16 +1427,30 @@ describe("JamView — the cheat sheet", () => {
     expect(screen.queryByRole("switch", { name: /Follow the jam/ })).toBeNull();
   });
 
-  it("lays out twelve roots and starts on the key's own", () => {
+  it("lays the whole library out as a table, every root by every chord type", () => {
+    // The printed card a guitarist owns: roots down the side, chord types
+    // across the top. It was one root at a time with the other eleven on a
+    // row of buttons, which is a list you page through rather than a card
+    // you scan.
     const { container } = chordSheet({}, { chordPage: "all" });
-    const roots = container.querySelectorAll(".jam-chord-roots .jam-key");
-    expect(roots).toHaveLength(12);
-    // A, the jam's key, is the one already chosen.
-    const chosen = [...roots].filter((r) => r.getAttribute("aria-pressed") === "true");
-    expect(chosen).toHaveLength(1);
-    expect(chosen[0].textContent).toContain("A");
+    const rows = container.querySelectorAll(".jam-chord-table tbody tr");
+    expect(rows).toHaveLength(12);
+
+    // Every row is the same length, because a table whose rows differ is not
+    // a table — and every cell of every row is filled.
+    const widths = new Set([...rows].map((r) => r.querySelectorAll(".jam-chord-cell").length));
+    expect(widths.size, "the rows are different lengths").toBe(1);
+    expect([...widths][0]).toBe(CHORD_QUALITIES.length);
+
+    // The columns are headed by the chord symbol, the plain major included.
+    const heads = [...container.querySelectorAll(".jam-chord-table thead tr:last-child th")].map(
+      (th) => th.textContent,
+    );
+    expect(heads).toContain("maj");
+    expect(heads).toContain("m7b5");
+
     // The roots the key's own chords are built on carry the mark.
-    expect(container.querySelectorAll(".jam-chord-roots .jam-chord-mark").length).toBe(5);
+    expect(container.querySelectorAll(".jam-chord-table-root .jam-chord-mark").length).toBe(5);
   });
 
   it("marks the chords that fit the key and hides the rest on request", () => {
@@ -1456,21 +1471,29 @@ describe("JamView — the cheat sheet", () => {
     );
   });
 
-  it("says so quietly when nothing from a root fits", () => {
-    // F is one of the three notes an A blues does not contain, so no chord
-    // rooted on it can fit — and the page says that rather than going blank.
-    const { container } = chordSheet({}, { chordPage: "all", chordRoot: 5, onlyInKey: true });
-    expect(cards(container)).toHaveLength(0);
-    expect(screen.getByText(/Nothing from F fits/)).toBeInTheDocument();
+  it("leaves a gap for a chord outside the key rather than shortening the row", () => {
+    // With the filter on, the holes are the point: what is left is the shape
+    // of the key. A row that simply lost its misfits would put a different
+    // chord type under each column heading on every line.
+    const { container } = chordSheet({}, { chordPage: "all", onlyInKey: true });
+    const rows = container.querySelectorAll(".jam-chord-table tbody tr");
+    const widths = new Set([...rows].map((r) => r.querySelectorAll(".jam-chord-cell").length));
+    expect(widths.size, "the filter made the rows different lengths").toBe(1);
+    expect([...widths][0]).toBe(CHORD_QUALITIES.length);
+    // And there really are gaps, or the filter is doing nothing.
+    expect(container.querySelectorAll(".jam-chord-cell-out").length).toBeGreaterThan(0);
   });
 
   it("expands a browsed chord into the same shapes section", () => {
     const setPinnedChord = vi.fn();
     const { container } = chordSheet({}, { chordPage: "all", setPinnedChord });
+    // The table starts at C, so its first cell is C major.
     fireEvent.click(cards(container)[0] as HTMLElement);
-    // The browser's cards feed the shared section, which is what lets a grip
+    // The table's cells feed the shared section, which is what lets a grip
     // found by looking something up be pinned to the playing screen.
-    expect(setPinnedChord).toHaveBeenCalledWith(expect.objectContaining({ root: 9 }));
+    expect(setPinnedChord).toHaveBeenCalledWith(
+      expect.objectContaining({ root: 0, quality: "maj" }),
+    );
   });
 });
 

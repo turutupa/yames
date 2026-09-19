@@ -288,16 +288,23 @@
     "fretboard": {
       "label": "Manche",
       "aria": "{{chord}} sur le manche",
-      "wholeNeck": "tout le manche · ne bouge pas pendant que tu joues",
       "scales": "Quelle gamme",
       "onTheDots": "Sur les points",
       "dotsNone": "Rien",
       "dotsNotes": "Notes",
       "dotsDegrees": "Degrés"
     },
+    "cheat": {
+      "label": "Antisèche",
+      "title": "Antisèche en {{key}}",
+      "tabs": "Ce que tu regardes",
+      "chords": "Accords",
+      "scales": "Gammes",
+      "scalesLead": "tout le manche, et ce qui passe dessus",
+      "noScales": "Pas encore de gamme à tracer pour cette tonalité."
+    },
     "chords": {
       "label": "Accords",
-      "inKey": "Accords en {{key}}",
       "follow": "Suivre le jam",
       "followHint": "Les positions suivent les changements, ou tu les fixes sur un accord.",
       "sevenths": "Septièmes",
@@ -320,10 +327,8 @@
       "flavourLabel": "Triades, septièmes, couleurs ou accords de puissance",
       "colours": "Couleurs",
       "power": "Puissance",
-      "rootLabel": "Fondamentale",
       "inKeyMark": "dans la tonalité",
       "onlyInKey": "Seulement dans la tonalité",
-      "nothingFits": "Rien depuis {{root}} ne va dans {{key}}",
       "familyBasic": "De base",
       "familySevenths": "Septièmes",
       "familyColours": "Couleurs",

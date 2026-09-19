@@ -60,6 +60,22 @@
   font-weight: 700;
 }
 
+/* A note's name or its degree, written in the dot in the finger number's
+   place. Slightly smaller than a finger number: a finger is one digit and
+   these run to two characters, and the circle did not grow. */
+.chord-diagram-note {
+  fill: var(--bg-card);
+  font-size: 5px;
+  font-weight: 700;
+}
+
+/* The same, for a string played open — above the nut, where its o was. */
+.chord-diagram-open-name {
+  fill: var(--text-secondary);
+  font-size: 6px;
+  font-weight: 700;
+}
+
 .chord-diagram-name {
   fill: var(--text-primary);
   font-size: 11px;
@@ -81,6 +97,7 @@
   fill: var(--accent);
 }
 
+.chord-diagram.is-selected .chord-diagram-note,
 .chord-diagram.is-selected .chord-diagram-finger {
   fill: var(--accent-text, var(--bg-card));
 }

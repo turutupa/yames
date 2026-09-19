@@ -288,16 +288,23 @@
     "fretboard": {
       "label": "Fretboard",
       "aria": "{{chord}} on the neck",
-      "wholeNeck": "the whole neck · stays put while you play",
       "scales": "Which scale",
       "onTheDots": "On the dots",
       "dotsNone": "Nothing",
       "dotsNotes": "Notes",
       "dotsDegrees": "Degrees"
     },
+    "cheat": {
+      "label": "Cheat sheet",
+      "title": "Cheat sheet in {{key}}",
+      "tabs": "What you are looking at",
+      "chords": "Chords",
+      "scales": "Scales",
+      "scalesLead": "the whole neck, and what fits over it",
+      "noScales": "No scale to draw for this key yet."
+    },
     "chords": {
       "label": "Chords",
-      "inKey": "Chords in {{key}}",
       "follow": "Follow the jam",
       "followHint": "Let the shapes move with the changes, or pin them to one chord.",
       "sevenths": "7ths",
@@ -320,10 +327,8 @@
       "flavourLabel": "Triads, 7ths, colours or power chords",
       "colours": "Colours",
       "power": "Power",
-      "rootLabel": "Root",
       "inKeyMark": "in key",
       "onlyInKey": "Only in key",
-      "nothingFits": "Nothing from {{root}} fits {{key}}",
       "familyBasic": "Basic",
       "familySevenths": "Sevenths",
       "familyColours": "Colours",

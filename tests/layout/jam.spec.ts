@@ -351,3 +351,39 @@ test.describe("a variation chip", () => {
     expect(await widths(), "a sounding chip pushes the row along").toEqual(before);
   });
 });
+
+test.describe("the chord poster", () => {
+  test("keeps its diagrams readable rather than squeezing them to fit", async ({ page }) => {
+    /*
+     * Twelve roots by sixteen chord types is wider than any drawer, and a
+     * table's first instinct is to shrink its columns until it fits. Between
+     * that and the `max-width: 100%` every chord box carries, a 96px diagram
+     * came out thirty-one pixels across with six strings drawn inside it —
+     * technically present, and no use to anybody. The box scrolls sideways
+     * instead. No unit test can see this: happy-dom gives every one of those
+     * diagrams the same zero width.
+     */
+    await openShot(page, "jam-chords-all", { width: 1500, height: 1000 });
+    const table = await page.waitForSelector(".jam-chord-table");
+
+    const widths = await page.$$eval(".jam-chord-cell .chord-diagram svg", (nodes) =>
+      nodes.map((n) => Math.round(n.getBoundingClientRect().width)),
+    );
+    expect(widths.length, "no chord boxes in the table").toBeGreaterThan(20);
+    const narrowest = Math.min(...widths);
+    expect(narrowest, `the narrowest box is ${narrowest}px`).toBeGreaterThanOrEqual(90);
+
+    // Every row the same length, so a column heading means the same thing all
+    // the way down — including with the filter on, where the misfits leave
+    // gaps rather than shortening the row.
+    const lengths = await page.$$eval(".jam-chord-table tbody tr", (rows) => [
+      ...new Set(rows.map((r) => r.querySelectorAll(".jam-chord-cell").length)),
+    ]);
+    expect(lengths, "the rows are different lengths").toHaveLength(1);
+
+    // And it scrolls rather than overflowing the sheet.
+    const box = (await table.boundingBox())!;
+    expect(Math.round(box.x), "the table starts off the left").toBeGreaterThanOrEqual(0);
+    await noSidewaysScroll(page, "the cheat sheet with the poster open");
+  });
+});

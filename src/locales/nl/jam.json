@@ -288,16 +288,23 @@
     "fretboard": {
       "label": "Toets",
       "aria": "{{chord}} op de hals",
-      "wholeNeck": "de hele hals · blijft staan terwijl je speelt",
       "scales": "Welke toonladder",
       "onTheDots": "Op de stippen",
       "dotsNone": "Niets",
       "dotsNotes": "Noten",
       "dotsDegrees": "Trappen"
     },
+    "cheat": {
+      "label": "Spiekbriefje",
+      "title": "Spiekbriefje in {{key}}",
+      "tabs": "Waar je naar kijkt",
+      "chords": "Akkoorden",
+      "scales": "Toonladders",
+      "scalesLead": "de hele toets, en wat erover past",
+      "noScales": "Nog geen toonladder om te tekenen voor deze toonsoort."
+    },
     "chords": {
       "label": "Akkoorden",
-      "inKey": "Akkoorden in {{key}}",
       "follow": "Volg de jam",
       "followHint": "Laat de grepen met de wisselingen meelopen, of zet ze vast op één akkoord.",
       "sevenths": "Septiemen",
@@ -320,10 +327,8 @@
       "flavourLabel": "Drieklanken, septiemen, kleuren of powerchords",
       "colours": "Kleuren",
       "power": "Powerchords",
-      "rootLabel": "Grondtoon",
       "inKeyMark": "in de toonaard",
       "onlyInKey": "Alleen uit de toonaard",
-      "nothingFits": "Vanaf {{root}} past er niets in {{key}}",
       "familyBasic": "Basis",
       "familySevenths": "Septiemen",
       "familyColours": "Kleuren",

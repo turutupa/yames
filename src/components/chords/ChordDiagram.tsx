@@ -1,5 +1,6 @@
 import { chordName } from "../../jam/diatonic";
 import type { PlacedShape } from "../../jam/chordShapes";
+import type { PitchClass } from "../../jam/harmony";
 import "../../styles/chords.css";
 
 /**
@@ -29,6 +30,22 @@ export type ChordDiagramProps = {
   label?: string;
   /** Pass false for a bare box, e.g. when the name is already above the row. */
   showName?: boolean;
+  /**
+   * What to write on each sounding note: its name, or what it is doing in
+   * the chord. Left out, the dots carry the finger numbers as before.
+   *
+   * The same question the neck answers with ON THE DOTS, asked of a grip
+   * instead of a scale — and the answer was already in the data. Every
+   * `PlacedShape` carries the pitch class each string sounds; nothing had
+   * ever drawn it. A box that says which dot is the third is the difference
+   * between copying a shape and knowing one.
+   *
+   * It replaces the finger numbers rather than joining them: there is one
+   * circle and it holds one character. Fingering is how to grab the chord
+   * and this is what the chord IS, and a player wanting the first is not
+   * asking the second at the same moment.
+   */
+  nameNote?: (pc: PitchClass) => string;
 };
 
 const STRING_GAP = 10;
@@ -53,6 +70,7 @@ export function ChordDiagram({
   selected = false,
   label,
   showName = true,
+  nameNote,
 }: ChordDiagramProps) {
   const strings = shape.frets.length;
   const TOP = showName ? TOP_WITH_NAME : TOP_BARE;
@@ -61,7 +79,11 @@ export function ChordDiagram({
   const viewHeight = TOP + ROWS * FRET_GAP + BOTTOM;
   const scale = RENDERED_WIDTH[size] / REFERENCE_WIDTH;
   const name = label ?? chordName(shape.root, shape.quality);
-  const showFingers = size !== "xs";
+  /* At `xs` the finger numbers come off — see the note above. A note name is
+     one or two characters in the same circle, so it comes off for the same
+     reason and at the same size. */
+  const showDotText = size !== "xs";
+  const showFingers = showDotText && !nameNote;
 
   const x = (index: number) => PAD_LEFT + index * STRING_GAP;
   const rowCentre = (fret: number) => TOP + (fret - shape.baseFret) * FRET_GAP + FRET_GAP / 2;
@@ -173,6 +195,30 @@ export function ChordDiagram({
             );
           }
           if (fret === 0) {
+            const pc = shape.pitches[i];
+            const open =
+              nameNote && showDotText && pc !== null && pc !== undefined ? nameNote(pc) : null;
+            /* An open string sounds as much as a fretted one, so when the box
+               is naming its notes it has to name this one too — an open D
+               chord is three dots and two open strings, and labelling only
+               the dots would say a five-note chord has three notes in it.
+               The name takes the o's place rather than sitting beside it:
+               above the nut is what says "open", and there is no room for
+               both. */
+            if (open !== null) {
+              return (
+                <text
+                  key={"mark" + String(i)}
+                  className="chord-diagram-open-name"
+                  data-testid="chord-open-name"
+                  x={x(i)}
+                  y={TOP - 4}
+                  textAnchor="middle"
+                >
+                  {open}
+                </text>
+              );
+            }
             return (
               <circle
                 key={"mark" + String(i)}
@@ -190,6 +236,9 @@ export function ChordDiagram({
         {shape.frets.map((fret, i) => {
           if (fret === null || fret === 0 || !inBox(fret)) return null;
           const finger = shape.fingers[i];
+          const pc = shape.pitches[i];
+          const note =
+            nameNote && showDotText && pc !== null && pc !== undefined ? nameNote(pc) : null;
           return (
             <g key={"dot" + String(i)}>
               <circle
@@ -199,6 +248,17 @@ export function ChordDiagram({
                 cy={rowCentre(fret)}
                 r={4.2}
               />
+              {note !== null && (
+                <text
+                  className="chord-diagram-note"
+                  data-testid="chord-note"
+                  x={x(i)}
+                  y={rowCentre(fret) + 2.5}
+                  textAnchor="middle"
+                >
+                  {note}
+                </text>
+              )}
               {showFingers && finger !== null && finger !== undefined && (
                 <text
                   className="chord-diagram-finger"

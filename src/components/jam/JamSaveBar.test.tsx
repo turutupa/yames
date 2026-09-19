@@ -37,14 +37,14 @@ describe("the jam's context bar", () => {
     draw();
     expect(screen.getByText("Slow blues in A")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Set up" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Chords" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cheat sheet" })).toBeInTheDocument();
   });
 
   it("asks for each sheet when its button is pressed", () => {
     const { props } = draw();
     fireEvent.click(screen.getByRole("button", { name: "Set up" }));
     expect(props.onSetup).toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Chords" }));
+    fireEvent.click(screen.getByRole("button", { name: "Cheat sheet" }));
     expect(props.onChords).toHaveBeenCalled();
   });
 
@@ -54,7 +54,7 @@ describe("the jam's context bar", () => {
       "aria-pressed",
       "true",
     );
-    expect(screen.getByRole("button", { name: "Chords" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Cheat sheet" })).toHaveAttribute(
       "aria-pressed",
       "false",
     );
@@ -65,7 +65,7 @@ describe("the jam's context bar", () => {
     // open a sheet over a screen that is not the jam stage.
     draw({ onSetup: undefined, onChords: undefined });
     expect(screen.queryByRole("button", { name: "Set up" })).toBeNull();
-    expect(screen.queryByRole("button", { name: "Chords" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Cheat sheet" })).toBeNull();
   });
 
   it("still says whether the jam has unsaved changes", () => {

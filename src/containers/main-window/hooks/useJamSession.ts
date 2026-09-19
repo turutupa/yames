@@ -48,10 +48,10 @@ import {
   vibeForInstrument,
 } from "../../../jam";
 import type { BarRange } from "../../../jam";
-import type { Chord, PitchClass } from "../../../jam/harmony";
+import type { Chord } from "../../../jam/harmony";
 import { defaultFlavour } from "../../../jam/cheatSheet";
 import type { ChordFlavour } from "../../../jam/cheatSheet";
-import type { ChordPage } from "../../jam/ChordSheet";
+import type { CheatTab, ChordPage } from "../../jam/ChordSheet";
 import type { Jam, JamBandState, JamPositionCommand } from "../../../jam";
 import { NO_PRACTICE } from "../../jam/PracticeRow";
 import type { GrooveEditorPage } from "../../jam/editor";
@@ -384,13 +384,14 @@ export function useJamSession({
   /**
    * What the screen is showing that the jam does not remember.
    *
-   * The neck being open, which chord the shapes row is pinned to, which shape
-   * of it you are looking at, the groove editor being down. None of this
+   * Which half of the cheat sheet is up, which chord the shapes row is
+   * pinned to, which shape of it you are looking at, the groove editor being
+   * down. None of this
    * belongs on the record — a jam is music, not a view — but all of it has to
    * outlive a trip to the metronome tab and back, and the hotkeys have to
    * reach it, so it lives here rather than inside `JamView`.
    */
-  const [fretboardOpen, setFretboardOpen] = useState(false);
+  const [cheatTab, setCheatTab] = useState<CheatTab>("chords");
   /**
    * How the chord sheet is being read (JAM_UX_DECISIONS A10).
    *
@@ -403,7 +404,6 @@ export function useJamSession({
    */
   const [chordPage, setChordPage] = useState<ChordPage>("key");
   const [chordFlavour, setChordFlavour] = useState<ChordFlavour>("triads");
-  const [chordRoot, setChordRoot] = useState<PitchClass | null>(null);
   const [onlyInKey, setOnlyInKey] = useState(false);
   const [shapeIndex, setShapeIndex] = useState(0);
   const [pinnedChord, setPinnedChord] = useState<Chord | null>(null);
@@ -449,9 +449,6 @@ export function useJamSession({
       if (!open || !jam || flavourForRef.current === jam.id) return;
       flavourForRef.current = jam.id;
       setChordFlavour(defaultFlavour(jam));
-      // A new jam is a new key, so the browser page goes back to that key's
-      // own root rather than staying on whatever you last looked up.
-      setChordRoot(null);
     },
     [jam],
   );
@@ -1902,14 +1899,12 @@ export function useJamSession({
 
   const screen = useMemo(
     () => ({
-      fretboardOpen,
-      toggleFretboard: () => setFretboardOpen((open) => !open),
+      cheatTab,
+      setCheatTab,
       chordPage,
       setChordPage,
       chordFlavour,
       setChordFlavour,
-      chordRoot,
-      setChordRoot,
       onlyInKey,
       setOnlyInKey,
       shapeIndex,
@@ -1930,10 +1925,9 @@ export function useJamSession({
       setChordsOpen: openChords,
     }),
     [
-      fretboardOpen,
+      cheatTab,
       chordPage,
       chordFlavour,
-      chordRoot,
       onlyInKey,
       shapeIndex,
       pinnedChord,

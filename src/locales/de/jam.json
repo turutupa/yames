@@ -288,16 +288,23 @@
     "fretboard": {
       "label": "Griffbrett",
       "aria": "{{chord}} auf dem Hals",
-      "wholeNeck": "der ganze Hals · bleibt beim Spielen stehen",
       "scales": "Welche Tonleiter",
       "onTheDots": "Auf den Punkten",
       "dotsNone": "Nichts",
       "dotsNotes": "Noten",
       "dotsDegrees": "Stufen"
     },
+    "cheat": {
+      "label": "Spickzettel",
+      "title": "Spickzettel in {{key}}",
+      "tabs": "Was du gerade ansiehst",
+      "chords": "Akkorde",
+      "scales": "Tonleitern",
+      "scalesLead": "das ganze Griffbrett, und was darüber passt",
+      "noScales": "Für diese Tonart gibt es noch keine Tonleiter."
+    },
     "chords": {
       "label": "Akkorde",
-      "inKey": "Akkorde in {{key}}",
       "follow": "Dem Jam folgen",
       "followHint": "Die Griffe wandern mit den Wechseln, oder du heftest sie an einen Akkord.",
       "sevenths": "Septimen",
@@ -320,10 +327,8 @@
       "flavourLabel": "Dreiklänge, Septimen, Farben oder Powerchords",
       "colours": "Farben",
       "power": "Powerchords",
-      "rootLabel": "Grundton",
       "inKeyMark": "in der Tonart",
       "onlyInKey": "Nur aus der Tonart",
-      "nothingFits": "Von {{root}} passt nichts in {{key}}",
       "familyBasic": "Grundakkorde",
       "familySevenths": "Septimen",
       "familyColours": "Farben",

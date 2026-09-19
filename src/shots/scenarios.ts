@@ -334,10 +334,10 @@ export const SHOTS: Shot[] = [
     suffix: "jam-chords-all",
     window: "main",
     tab: "jam",
-    // The browser: twelve roots spelled the way this key spells them, every
-    // chord type under the chosen one, grouped Basic / Sevenths / Colours,
-    // with the filter on so only what fits the key is left. The owner's
-    // "filter by what I can play" (A10).
+    // The poster: twelve roots down the side, all sixteen chord types
+    // across the top in their three bands, with the filter on so the gaps
+    // draw the shape of the key. The printed card the owner had in front of
+    // them — "that's what i want to build".
     jam: { row: 0, bar: 5, sheet: "chords", chordPage: "All chords", onlyInKey: true },
     width: 1400,
     height: 900,

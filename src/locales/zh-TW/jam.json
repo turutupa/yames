@@ -288,16 +288,23 @@
     "fretboard": {
       "label": "指板",
       "aria": "琴頸上的 {{chord}}",
-      "wholeNeck": "整塊指板 · 演奏時保持不變",
       "scales": "哪個音階",
       "onTheDots": "圓點上顯示",
       "dotsNone": "不顯示",
       "dotsNotes": "音名",
       "dotsDegrees": "級數"
     },
+    "cheat": {
+      "label": "速查表",
+      "title": "{{key}} 的速查表",
+      "tabs": "你正在看的內容",
+      "chords": "和弦",
+      "scales": "音階",
+      "scalesLead": "整塊指板，以及能套上去的音",
+      "noScales": "這個調還沒有可畫的音階。"
+    },
     "chords": {
       "label": "和弦",
-      "inKey": "{{key}} 的和弦",
       "follow": "跟著即興走",
       "followHint": "讓指型跟著和弦走，或釘在某一個和弦上。",
       "sevenths": "七和弦",
@@ -320,10 +327,8 @@
       "flavourLabel": "三和弦、七和弦、色彩和弦或強力和弦",
       "colours": "色彩",
       "power": "強力和弦",
-      "rootLabel": "根音",
       "inKeyMark": "調內",
       "onlyInKey": "只看調內的",
-      "nothingFits": "從 {{root}} 起沒有和弦能進 {{key}}",
       "familyBasic": "基礎",
       "familySevenths": "七和弦",
       "familyColours": "色彩",

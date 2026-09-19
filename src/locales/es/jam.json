@@ -288,16 +288,23 @@
     "fretboard": {
       "label": "Diapasón",
       "aria": "{{chord}} en el mástil",
-      "wholeNeck": "todo el mástil · no cambia mientras tocas",
       "scales": "Qué escala",
       "onTheDots": "En los puntos",
       "dotsNone": "Nada",
       "dotsNotes": "Notas",
       "dotsDegrees": "Grados"
     },
+    "cheat": {
+      "label": "Chuleta",
+      "title": "Chuleta en {{key}}",
+      "tabs": "Qué estás mirando",
+      "chords": "Acordes",
+      "scales": "Escalas",
+      "scalesLead": "el mástil entero, y lo que encaja encima",
+      "noScales": "Todavía no hay escala que dibujar para esta tonalidad."
+    },
     "chords": {
       "label": "Acordes",
-      "inKey": "Acordes en {{key}}",
       "follow": "Seguir el jam",
       "followHint": "Que las posiciones se muevan con los cambios, o fíjalas a un acorde.",
       "sevenths": "Séptimas",
@@ -320,10 +327,8 @@
       "flavourLabel": "Tríadas, séptimas, colores o quintas",
       "colours": "Colores",
       "power": "Quintas",
-      "rootLabel": "Fundamental",
       "inKeyMark": "en la tonalidad",
       "onlyInKey": "Solo los de la tonalidad",
-      "nothingFits": "Nada desde {{root}} encaja en {{key}}",
       "familyBasic": "Básicos",
       "familySevenths": "Séptimas",
       "familyColours": "Colores",

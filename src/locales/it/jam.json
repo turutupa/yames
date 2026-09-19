@@ -288,16 +288,23 @@
     "fretboard": {
       "label": "Tastiera",
       "aria": "{{chord}} sul manico",
-      "wholeNeck": "tutto il manico · resta fermo mentre suoni",
       "scales": "Quale scala",
       "onTheDots": "Sui pallini",
       "dotsNone": "Niente",
       "dotsNotes": "Note",
       "dotsDegrees": "Gradi"
     },
+    "cheat": {
+      "label": "Bigliettino",
+      "title": "Bigliettino in {{key}}",
+      "tabs": "Cosa stai guardando",
+      "chords": "Accordi",
+      "scales": "Scale",
+      "scalesLead": "tutta la tastiera, e quello che ci sta sopra",
+      "noScales": "Nessuna scala da disegnare per questa tonalità."
+    },
     "chords": {
       "label": "Accordi",
-      "inKey": "Accordi in {{key}}",
       "follow": "Segui il jam",
       "followHint": "Le posizioni seguono i cambi, oppure le fissi su un accordo.",
       "sevenths": "Settime",
@@ -320,10 +327,8 @@
       "flavourLabel": "Triadi, settime, colori o quinte",
       "colours": "Colori",
       "power": "Quinte",
-      "rootLabel": "Fondamentale",
       "inKeyMark": "in tonalità",
       "onlyInKey": "Solo quelli in tonalità",
-      "nothingFits": "Da {{root}} non ci sta niente in {{key}}",
       "familyBasic": "Di base",
       "familySevenths": "Settime",
       "familyColours": "Colori",

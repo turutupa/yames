@@ -288,16 +288,23 @@
     "fretboard": {
       "label": "Klavye",
       "aria": "Sapta {{chord}}",
-      "wholeNeck": "tüm klavye · çalarken yerinde kalır",
       "scales": "Hangi dizi",
       "onTheDots": "Noktaların üstünde",
       "dotsNone": "Hiçbiri",
       "dotsNotes": "Notalar",
       "dotsDegrees": "Dereceler"
     },
+    "cheat": {
+      "label": "Kopya kâğıdı",
+      "title": "{{key}} kopya kâğıdı",
+      "tabs": "Neye bakıyorsun",
+      "chords": "Akorlar",
+      "scales": "Diziler",
+      "scalesLead": "klavyenin tamamı ve üstüne oturan sesler",
+      "noScales": "Bu tonalite için çizilecek dizi henüz yok."
+    },
     "chords": {
       "label": "Akorlar",
-      "inKey": "{{key}} akorları",
       "follow": "Jam'i takip et",
       "followHint": "Basışlar akorlarla birlikte ilerlesin ya da tek bir akora sabitlensin.",
       "sevenths": "Yedililer",
@@ -320,10 +327,8 @@
       "flavourLabel": "Üçlüler, yedililer, renkler ya da beşli akorlar",
       "colours": "Renkler",
       "power": "Beşliler",
-      "rootLabel": "Kök ses",
       "inKeyMark": "tonda",
       "onlyInKey": "Yalnızca tondakiler",
-      "nothingFits": "{{root}} üzerinden {{key}} tonuna uyan bir şey yok",
       "familyBasic": "Temel",
       "familySevenths": "Yedililer",
       "familyColours": "Renkler",

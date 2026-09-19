@@ -288,16 +288,23 @@
     "fretboard": {
       "label": "지판",
       "aria": "넥 위의 {{chord}}",
-      "wholeNeck": "넥 전체 · 연주하는 동안 그대로",
       "scales": "어떤 스케일",
       "onTheDots": "점 위에",
       "dotsNone": "없음",
       "dotsNotes": "음 이름",
       "dotsDegrees": "음정"
     },
+    "cheat": {
+      "label": "치트시트",
+      "title": "{{key}} 치트시트",
+      "tabs": "지금 보고 있는 것",
+      "chords": "코드",
+      "scales": "스케일",
+      "scalesLead": "지판 전체와 그 위에 얹히는 음",
+      "noScales": "이 조성에 그릴 스케일이 아직 없습니다."
+    },
     "chords": {
       "label": "코드",
-      "inKey": "{{key}}의 코드",
       "follow": "잼 따라가기",
       "followHint": "폼이 코드 진행을 따라가게 하거나, 한 코드에 고정합니다.",
       "sevenths": "7th",
@@ -320,10 +327,8 @@
       "flavourLabel": "3화음, 7th, 컬러, 파워 코드",
       "colours": "컬러",
       "power": "파워 코드",
-      "rootLabel": "루트",
       "inKeyMark": "키 안",
       "onlyInKey": "키 안의 코드만",
-      "nothingFits": "{{root}}에서 {{key}}에 맞는 코드가 없습니다",
       "familyBasic": "기본",
       "familySevenths": "7th",
       "familyColours": "컬러",

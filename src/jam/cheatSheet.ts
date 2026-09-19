@@ -32,6 +32,7 @@ import { chordTones, chordsInKey, noteName, seventhsInKey } from "./diatonic";
 import type { DiatonicChord } from "./diatonic";
 import { chordNotes, chordSuffix, parseKey, pitchClass } from "./harmony";
 import type { Chord, ChordQuality, Key, KeyMode, PitchClass } from "./harmony";
+import type { PlacedShape } from "./chordShapes";
 import { VIBE_IDS } from "./vibesContract";
 import type { Jam } from "./types";
 
@@ -270,4 +271,87 @@ export function rootNames(key: Key): { pc: PitchClass; name: string }[] {
     const pc = pitchClass(i);
     return { pc, name: noteName(pc, key) };
   });
+}
+
+// ---------------------------------------------------------------------------
+// The poster: every root, every chord type, in one table
+// ---------------------------------------------------------------------------
+
+/**
+ * One cell of the poster: a chord, one grip for it, and whether it fits.
+ *
+ * `shape` is null only for a chord the library has no grip for. There are
+ * none today — every quality has at least one shape at every root, which
+ * `chordShapes.test.ts` asserts — but a seventeenth quality added to the
+ * union without seeds would land here, and a cell that says so is better
+ * than a blank the reader has to interpret.
+ */
+export type SheetCell = {
+  chord: Chord;
+  shape: PlacedShape | null;
+  /** Every note of it is in the key. */
+  fits: boolean;
+};
+
+export type SheetRow = {
+  root: PitchClass;
+  /** The root spelled the way this key spells it. */
+  name: string;
+  cells: SheetCell[];
+};
+
+/**
+ * The one grip a page like this should draw for a chord.
+ *
+ * "The open one or the first barre" (JAM_UX_DECISIONS A8). Not simply the
+ * first shape the library returns: the lowest thing on the neck for a minor
+ * seventh is often a three-string triad, which is a fine grip and a terrible
+ * introduction. A page you glance at should show the chord the way you would
+ * teach it.
+ *
+ * It lived in the container until the poster needed it too, which is the
+ * moment a rule about what to draw stopped being one screen's business.
+ */
+export function basicShape(shapes: readonly PlacedShape[]): PlacedShape | null {
+  return (
+    shapes.find((s) => s.size === "open") ??
+    shapes.find((s) => s.size === "barre") ??
+    shapes[0] ??
+    null
+  );
+}
+
+/**
+ * The whole library as a table: twelve roots down, every chord type across.
+ *
+ * This is the printed card a guitarist already owns, and the owner asked for
+ * it in those words — "should the cheatsheet organize the chords by
+ * triads/7ths/minor/minor6/min7/... take a look at the kind of cheatsheets i
+ * attached, that's what i want to build". The pieces all existed: the roots,
+ * the qualities, the grips and the in-key rule. Nothing crossed them, so the
+ * browser could only ever show you one root at a time and the page read as a
+ * list rather than a reference.
+ *
+ * Both axes are fixed and complete: every row has a cell for every quality
+ * in `columns`, in the same order, whether or not it fits the key. A table
+ * whose rows have different lengths is not a table, and the mark on a cell
+ * is what says "this one belongs to your jam" — not its absence.
+ */
+export function sheetGrid(
+  key: Key,
+  columns: readonly ChordQuality[],
+  shapesFor: (root: PitchClass, quality: ChordQuality) => readonly PlacedShape[],
+): SheetRow[] {
+  return rootNames(key).map(({ pc, name }) => ({
+    root: pc,
+    name,
+    cells: columns.map((quality) => {
+      const chord: Chord = { root: pc, quality };
+      return {
+        chord,
+        shape: basicShape(shapesFor(pc, quality)),
+        fits: fitsKey(chord, key.root, key.mode),
+      };
+    }),
+  }));
 }

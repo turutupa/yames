@@ -139,7 +139,7 @@ async function drive() {
      * the jam shots below start here.
      */
     if (shot!.jam.sheet) {
-      const wantedLabel = shot!.jam.sheet === "setup" ? "set up" : "chords";
+      const wantedLabel = shot!.jam.sheet === "setup" ? "set up" : "cheat sheet";
       await until("the context bar", () => !!document.querySelector(".jam-sheet-btn"));
       const button = [...document.querySelectorAll<HTMLElement>(".jam-sheet-btn")].find(
         (b) => (b.textContent ?? "").trim().toLowerCase() === wantedLabel,

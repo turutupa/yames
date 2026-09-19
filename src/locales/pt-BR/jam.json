@@ -288,16 +288,23 @@
     "fretboard": {
       "label": "Braço",
       "aria": "{{chord}} no braço",
-      "wholeNeck": "o braço inteiro · fica parado enquanto você toca",
       "scales": "Qual escala",
       "onTheDots": "Nos pontos",
       "dotsNone": "Nada",
       "dotsNotes": "Notas",
       "dotsDegrees": "Graus"
     },
+    "cheat": {
+      "label": "Cola",
+      "title": "Cola em {{key}}",
+      "tabs": "O que você está olhando",
+      "chords": "Acordes",
+      "scales": "Escalas",
+      "scalesLead": "o braço inteiro, e o que cabe em cima",
+      "noScales": "Ainda não há escala para desenhar nesta tonalidade."
+    },
     "chords": {
       "label": "Acordes",
-      "inKey": "Acordes em {{key}}",
       "follow": "Seguir o jam",
       "followHint": "Deixe as formas andarem com a harmonia, ou fixe-as em um acorde.",
       "sevenths": "Sétimas",
@@ -320,10 +327,8 @@
       "flavourLabel": "Tríades, sétimas, cores ou power chords",
       "colours": "Cores",
       "power": "Power chords",
-      "rootLabel": "Fundamental",
       "inKeyMark": "no tom",
       "onlyInKey": "Só os do tom",
-      "nothingFits": "De {{root}} não cabe nada em {{key}}",
       "familyBasic": "Básicos",
       "familySevenths": "Sétimas",
       "familyColours": "Cores",

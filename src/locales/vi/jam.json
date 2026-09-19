@@ -288,16 +288,23 @@
     "fretboard": {
       "label": "Cần đàn",
       "aria": "{{chord}} trên cần đàn",
-      "wholeNeck": "cả cần đàn · giữ nguyên khi bạn chơi",
       "scales": "Thang âm nào",
       "onTheDots": "Trên các chấm",
       "dotsNone": "Không",
       "dotsNotes": "Tên nốt",
       "dotsDegrees": "Bậc"
     },
+    "cheat": {
+      "label": "Bảng tra nhanh",
+      "title": "Bảng tra nhanh trong {{key}}",
+      "tabs": "Bạn đang xem gì",
+      "chords": "Hợp âm",
+      "scales": "Thang âm",
+      "scalesLead": "cả cần đàn, và những nốt hợp với nó",
+      "noScales": "Chưa có thang âm nào để vẽ cho giọng này."
+    },
     "chords": {
       "label": "Hợp âm",
-      "inKey": "Hợp âm trong {{key}}",
       "follow": "Bám theo bài",
       "followHint": "Thế bấm chạy theo vòng hợp âm, hoặc ghim vào một hợp âm.",
       "sevenths": "Hợp âm 7",
@@ -320,10 +327,8 @@
       "flavourLabel": "Hợp âm ba, hợp âm 7, màu sắc hay hợp âm quãng năm",
       "colours": "Màu sắc",
       "power": "Quãng năm",
-      "rootLabel": "Nốt gốc",
       "inKeyMark": "trong giọng",
       "onlyInKey": "Chỉ hợp âm trong giọng",
-      "nothingFits": "Từ {{root}} không có gì vào được {{key}}",
       "familyBasic": "Cơ bản",
       "familySevenths": "Hợp âm 7",
       "familyColours": "Màu sắc",

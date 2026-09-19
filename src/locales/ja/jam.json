@@ -288,16 +288,23 @@
     "fretboard": {
       "label": "指板",
       "aria": "ネック上の {{chord}}",
-      "wholeNeck": "ネック全体 · 演奏中も変わりません",
       "scales": "どのスケール",
       "onTheDots": "点の表示",
       "dotsNone": "なし",
       "dotsNotes": "音名",
       "dotsDegrees": "度数"
     },
+    "cheat": {
+      "label": "チートシート",
+      "title": "{{key}} のチートシート",
+      "tabs": "いま見ているもの",
+      "chords": "コード",
+      "scales": "スケール",
+      "scalesLead": "指板ぜんぶと、その上に乗る音",
+      "noScales": "このキーに描けるスケールはまだありません。"
+    },
     "chords": {
       "label": "コード",
-      "inKey": "{{key}} のコード",
       "follow": "ジャムに追従",
       "followHint": "フォームをコード進行に合わせて動かすか、ひとつのコードに固定します。",
       "sevenths": "7th",
@@ -320,10 +327,8 @@
       "flavourLabel": "三和音、7th、カラー、パワーコード",
       "colours": "カラー",
       "power": "パワーコード",
-      "rootLabel": "ルート",
       "inKeyMark": "キー内",
       "onlyInKey": "キー内だけ",
-      "nothingFits": "{{root}} から {{key}} に入るコードはありません",
       "familyBasic": "基本",
       "familySevenths": "7th",
       "familyColours": "カラー",

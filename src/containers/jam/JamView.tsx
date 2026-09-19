@@ -35,7 +35,7 @@ import {
 } from "../../jam/harmony";
 import { SCALE_NAMES_EN, scalesForChord, scalesForKey } from "../../jam/scales";
 import type { Jam, JamFeel, JamIntensity, JamPracticeSettings } from "../../jam/types";
-import type { Chord, PitchClass } from "../../jam/harmony";
+import type { Chord } from "../../jam/harmony";
 import type { JamTakesState } from "../main-window/hooks/useJamTakes";
 import type { Instrument } from "../../jam/chordShapes";
 import type { BeatEvent } from "../../types";
@@ -46,8 +46,8 @@ import { PracticeRow, NO_PRACTICE } from "./PracticeRow";
 import { TradeCue } from "./TradeCue";
 import { Segmented } from "./Segmented";
 import { PinnedShape } from "./PinnedShape";
-import { ChordSheet, chordSheetTitle, pinnedShapeOf } from "./ChordSheet";
-import type { ChordPage } from "./ChordSheet";
+import { ChordSheet, cheatSheetTitle, pinnedShapeOf } from "./ChordSheet";
+import type { CheatTab, ChordPage } from "./ChordSheet";
 import type { ChordFlavour } from "../../jam/cheatSheet";
 import { JamSetupSheet, setupSheetSubtitle } from "./JamSetupSheet";
 import type { VibePreviewMark } from "./VibePicker";
@@ -68,8 +68,15 @@ function neckFor(instrument: string): Instrument | null {
 
 /** Everything the jam screen keeps that the record does not. */
 export interface JamScreenState {
-  fretboardOpen: boolean;
-  toggleFretboard: () => void;
+  /**
+   * Which half of the cheat sheet is up: its chords or its scales.
+   *
+   * It was a `fretboardOpen` boolean, because the neck was a thing you
+   * switched on at the foot of the chords page rather than a half of the
+   * sheet in its own right.
+   */
+  cheatTab: CheatTab;
+  setCheatTab: (tab: CheatTab) => void;
   /**
    * The chord sheet's two pages and the four readings of the first of them
    * (JAM_UX_DECISIONS A10).
@@ -83,9 +90,6 @@ export interface JamScreenState {
   setChordPage: (page: ChordPage) => void;
   chordFlavour: ChordFlavour;
   setChordFlavour: (flavour: ChordFlavour) => void;
-  /** Which root the browser page is on, or null for the key's own. */
-  chordRoot: PitchClass | null;
-  setChordRoot: (root: PitchClass) => void;
   /** Hide the chords that do not fit the key. Off by default. */
   onlyInKey: boolean;
   setOnlyInKey: (on: boolean) => void;
@@ -497,7 +501,7 @@ export function JamView({
    */
   const sheetKind = screen.setupOpen ? "setup" : screen.chordsOpen ? "chords" : null;
   const shownSheet = useLastPresent(sheetKind);
-  const chordTitle = chordSheetTitle(harmony.key, screen.chordPage, t);
+  const chordTitle = cheatSheetTitle(harmony.key, screen.cheatTab, screen.chordPage, t);
 
   /** Whether the app may animate, once, for every surface below (A11). */
   const motionInputs = useMemo(
@@ -933,12 +937,10 @@ export function JamView({
                   onPage={screen.setChordPage}
                   flavour={screen.chordFlavour}
                   onFlavour={screen.setChordFlavour}
-                  root={screen.chordRoot}
-                  onRoot={screen.setChordRoot}
                   onlyInKey={screen.onlyInKey}
                   onOnlyInKey={screen.setOnlyInKey}
-                  fretboardOpen={screen.fretboardOpen}
-                  onFretboard={() => screen.toggleFretboard()}
+                  tab={screen.cheatTab}
+                  onTab={screen.setCheatTab}
                 />
               )}
             </JamSheet>

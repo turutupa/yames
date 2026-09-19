@@ -121,7 +121,10 @@ export function JamSaveBar({
           onClick={onChords}
         >
           <ChordGlyph />
-          {t("jam.chords.label")}
+          {/* "Cheat sheet", not "Chords": the page behind this button is a
+              tab of chords and a tab of scales, and the neck was invisible
+              for as long as the door only promised the chords. */}
+          {t("jam.cheat.label")}
         </button>
       )}
 
