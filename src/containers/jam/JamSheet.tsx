@@ -82,6 +82,8 @@ interface JamSheetProps {
    * page that has to be kept in step with the first.
    */
   canMaximize?: boolean;
+  /** Start wide. The cheat sheet does; the setup drawer does not. */
+  openMaximized?: boolean;
   /**
    * Close when a press lands on the stage outside the sheet
    * (JAM_UX_DECISIONS A12).
@@ -128,10 +130,22 @@ export function JamSheet({
   motion,
   closeOnOutside = false,
   canMaximize = false,
+  openMaximized = false,
   children,
 }: JamSheetProps) {
   const { t } = useTranslation();
-  const [maximized, setMaximized] = useState(false);
+  /**
+   * The cheat sheet opens wide, and the setup sheet does not.
+   *
+   * A chord chart is twelve roots by sixteen types — the printed thing is a
+   * page you pin to a wall, and in a 600px drawer it is four columns and a
+   * sideways scroll, which is not a cheat sheet. The setup sheet is a column
+   * of controls over a stage you are watching, and belongs in the drawer.
+   *
+   * It is a starting point rather than a lock: the button in the header
+   * shrinks it, and does so for the rest of the session.
+   */
+  const [maximized, setMaximized] = useState(openMaximized);
   const bodyRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
 

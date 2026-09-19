@@ -880,6 +880,7 @@ export function JamView({
               // Setup is a column of controls beside the thing they change,
               // and widening it would cover the band it is being used on.
               canMaximize={shownSheet === "chords"}
+              openMaximized={shownSheet === "chords"}
               dim={shownSheet === "setup"}
               closeOnOutside={shownSheet === "setup"}
               title={shownSheet === "setup" ? jam.name : chordTitle.title}
@@ -935,10 +936,6 @@ export function JamView({
                   onShapeIndex={screen.setShapeIndex}
                   page={screen.chordPage}
                   onPage={screen.setChordPage}
-                  flavour={screen.chordFlavour}
-                  onFlavour={screen.setChordFlavour}
-                  onlyInKey={screen.onlyInKey}
-                  onOnlyInKey={screen.setOnlyInKey}
                   tab={screen.cheatTab}
                   onTab={screen.setCheatTab}
                 />

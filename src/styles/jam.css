@@ -2968,6 +2968,103 @@
   position: relative;
 }
 
+/* ── The cheat sheet's chrome (2026-09-19) ────────────────────────────────
+   Two switches and the dot labels, on one row at the left margin. There
+   were three of them stacked down the RIGHT-hand edge, each on its own
+   line, pushed there by `.accent-control`'s `margin-left: auto` — which is
+   right on the metronome's stage, where a segmented control is the last
+   thing in a row, and wrong here, where it is the first thing on a page.
+   The owner: "all the options that a user should see at the top is the
+   switch between chords and scales and in key or all keys (and ideally
+   both switches on the same row)". */
+.jam-cheat-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.jam-cheat-controls .jam-segmented,
+.jam-cheat-controls .accent-control {
+  margin-left: 0;
+  gap: 6px;
+}
+
+/* ── The scales, all of them, stacked (2026-09-19) ────────────────────────
+   One neck per scale, down the page, each under its own title bar: the
+   printed card's shape, because the printed card is right. It was a single
+   neck with a row of chips above it, so five of the six scales a key
+   suggests were invisible until you pressed something — a cheat sheet you
+   have to operate is not a cheat sheet. */
+.jam-scale-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.jam-scale-board {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* The title bar. Solid, the way the card prints it, so the eye can find the
+   next scale down the page without reading. */
+.jam-scale-board-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm, 6px);
+  background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+}
+
+.jam-scale-board-name {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.jam-scale-board-count {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+/* The formula — 1 ♭3 4 5 ♭7 — pushed to the right-hand end of the bar, as
+   the card prints it. It is what makes two scales comparable at a glance:
+   the blues scale is the minor pentatonic with a ♭5 in it, and the picture
+   alone never says so. */
+.jam-scale-board-formula {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.jam-scale-degree {
+  min-width: 17px;
+  padding: 1px 4px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* The root's own degree is the one you hunt for on the neck. */
+.jam-scale-degree:first-child {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-text, var(--bg-primary));
+}
+
 /* ── The poster (2026-09-18) ───────────────────────────────────────────────
    Twelve roots down the side, every chord type across the top, in the three
    bands the browser already grouped them into. This is the printed card a
@@ -2979,8 +3076,14 @@
    put while it scrolls — the one thing you must never lose is which row you
    are on. */
 .jam-chord-table-wrap {
+  /* `overflow-y` stays visible. Setting it to `hidden` alongside an
+     `overflow-x: auto` does not clip one axis and free the other — CSS
+     promotes the box to a scroll container on both, and the chart came out
+     a hundred pixels tall with one row of C in it. `flex: none` for the
+     same family of reason: the sheet is a flex column and would otherwise
+     squeeze this to fit rather than let the page scroll. */
+  flex: none;
   overflow-x: auto;
-  overflow-y: hidden;
   margin-inline: -4px;
   padding-inline: 4px;
 }
@@ -3034,9 +3137,18 @@
    in it. Sixteen columns are wider than any drawer; the answer is the
    sideways scroll this box already has, not smaller diagrams. */
 .jam-chord-cell {
-  min-width: 104px;
-  padding: 2px;
+  min-width: 100px;
+  padding: 1px;
   vertical-align: top;
+}
+
+/* Tight in the chart, roomy on its own. A card standing alone wants air
+   around it; a hundred and ninety-two of them in a grid want as little as
+   will still tell one box from the next, or half the chart is padding and
+   you scroll past the answer. */
+.jam-chord-cell .jam-chord-card {
+  gap: 2px;
+  padding: 4px 2px 3px;
 }
 
 .jam-chord-cell .chord-diagram svg {

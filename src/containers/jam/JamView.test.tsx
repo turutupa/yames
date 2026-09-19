@@ -776,10 +776,14 @@ describe("JamView — the sheets", () => {
     expect(container.querySelector(".jam-sheet-scrim")).toBeNull();
   });
 
-  it("draws the key's chords once each, as one basic shape", () => {
+  it("opens on the chart, thinned to what fits the key", () => {
     const { container } = chordSheet();
-    // A blues key has five chords, one card each — a page, not a wall.
-    expect(container.querySelectorAll(".jam-chord-card")).toHaveLength(5);
+    // A chart, not a page of seven cards: every root down the side, every
+    // chord type across. "In key" leaves the ones that fit.
+    expect(container.querySelector(".jam-chord-table")).not.toBeNull();
+    const cards = container.querySelectorAll(".jam-chord-card");
+    expect(cards.length).toBeGreaterThan(20);
+    expect(cards.length).toBeLessThan(192);
     // And no shapes row until you tap one: nothing here moves unless asked.
     expect(container.querySelector(".jam-chord-shapes")).toBeNull();
   });
@@ -788,7 +792,9 @@ describe("JamView — the sheets", () => {
     const setPinnedChord = vi.fn();
     const { container } = chordSheet({}, { setPinnedChord });
     fireEvent.click(container.querySelectorAll(".jam-chord-card")[0] as HTMLElement);
-    expect(setPinnedChord).toHaveBeenCalledWith(expect.objectContaining({ root: 9 }));
+    expect(setPinnedChord).toHaveBeenCalledWith(
+      expect.objectContaining({ quality: expect.any(String) }),
+    );
   });
 
   it("keeps Follow the jam off until it is switched on", () => {
@@ -1377,54 +1383,63 @@ describe("JamView — the fourth pass's controls", () => {
 describe("JamView — the cheat sheet", () => {
   const cards = (container: HTMLElement) => container.querySelectorAll(".jam-chord-card");
 
-  it("opens on the key's chords, with four ways to read them", () => {
-    const { container } = chordSheet();
-    for (const name of ["Triads", "7ths", "Colours", "Power"]) {
-      expect(screen.getByRole("button", { name })).toBeInTheDocument();
+  it("shows two switches and no more", () => {
+    // The whole of the chrome: Chords / Scales and In key / All keys, plus
+    // the dot labels. There used to be a third — Triads / 7ths / Colours /
+    // Power — which hid nine of the sixteen chord types behind a word. The
+    // owner: "having a switch for switching between 7ths, triads etc is a
+    // fucking pain in the ass".
+    chordSheet();
+    for (const gone of ["Triads", "7ths", "Colours", "Power"]) {
+      expect(screen.queryByRole("button", { name: gone }), gone).toBeNull();
     }
-    // The blues's five chords, one card each.
-    expect(cards(container)).toHaveLength(5);
+    for (const kept of ["Chords", "Scales", "In key", "All keys"]) {
+      expect(screen.getByRole("button", { name: kept }), kept).toBeInTheDocument();
+    }
   });
 
-  it("writes every degree with a 5 at the Power flavour", () => {
-    const { container } = chordSheet({}, { chordFlavour: "power" });
-    const degrees = [...container.querySelectorAll(".jam-chord-card-degree")].map(
-      (el) => el.textContent,
-    );
-    expect(degrees).toEqual(["I5", "IV5", "V5", "bIII5", "bVII5"]);
+  it("draws every chord type at once, sevenths and colours included", () => {
+    // The flavour switch is gone, so the chart has to be showing what it
+    // used to hide: a plain major, a seventh and a suspension in one view.
+    const { container } = chordSheet({}, { chordPage: "all" });
+    const names = [...cards(container)].map((c) => c.getAttribute("aria-label"));
+    for (const chord of ["A", "Am", "A7", "Amaj7", "Am7", "Asus4", "A6", "Adim"]) {
+      expect(names, chord).toContain(chord);
+    }
   });
 
-  it("gathers the colours under the degree they belong to", () => {
-    const { container } = chordSheet({}, { chordFlavour: "colours" });
-    const groups = container.querySelectorAll(".jam-chord-degree");
-    expect(groups.length).toBeGreaterThan(0);
-    for (const group of groups) {
-      // A heading, and cards under it. A degree with no colours has no group
-      // at all rather than an empty heading.
-      expect(group.querySelector(".jam-chord-degree-label")?.textContent).toBeTruthy();
-      expect(group.querySelectorAll(".jam-chord-card").length).toBeGreaterThan(0);
-    }
-    // The heading is the degree, not the degree plus one of its colours: "I"
-    // over Isus4 and Iadd9, and never "Isus4" over both.
-    const labels = [...container.querySelectorAll(".jam-chord-degree-label")].map(
-      (el) => el.textContent,
-    );
-    expect(labels).toEqual(labels.map((l) => (l ?? "").replace(/(sus[24]|add9|6|9)$/, "")));
-    // And no chord is drawn twice, which a minor key's v and borrowed V7 would
-    // otherwise do to every suspension they share.
+  it("never draws a chord twice", () => {
+    // One cell per root and quality. The old colours page could list a minor
+    // key's v and its borrowed V7, and draw every suspension they share once
+    // under each.
+    const { container } = chordSheet({}, { chordPage: "all" });
     const names = [...cards(container)].map((c) => c.getAttribute("aria-label"));
     expect(new Set(names).size).toBe(names.length);
   });
 
-  it("shows Follow the jam on the key's page and Only in key on the browser's", () => {
-    chordSheet();
-    expect(screen.getByRole("switch", { name: /Follow the jam/ })).toBeInTheDocument();
-    expect(screen.queryByRole("switch", { name: "Only in key" })).toBeNull();
+  it("stacks every scale of the key on the Scales tab, each with its formula", () => {
+    // It was one neck with a row of chips above it, so five of the six a key
+    // suggests were invisible until you pressed something. A cheat sheet you
+    // have to operate is not a cheat sheet.
+    const { container } = chordSheet({}, { cheatTab: "scales" });
+    const boards = container.querySelectorAll(".jam-scale-board");
+    expect(boards.length).toBeGreaterThan(1);
+    for (const board of boards) {
+      expect(board.querySelector(".jam-scale-board-name")?.textContent).toBeTruthy();
+      expect(board.querySelector("[data-testid='fretboard']")).not.toBeNull();
+      // The formula, in degrees, starting on the root.
+      const degrees = [...board.querySelectorAll(".jam-scale-degree")].map((d) => d.textContent);
+      expect(degrees.length).toBeGreaterThan(4);
+      expect(degrees[0]).toBe("1");
+    }
+  });
 
+  it("shows every scale it knows on All keys, not just the ones that fit", () => {
+    const { container: inKey } = chordSheet({}, { cheatTab: "scales" });
+    const fitting = inKey.querySelectorAll(".jam-scale-board").length;
     cleanup();
-    chordSheet({}, { chordPage: "all" });
-    expect(screen.getByRole("switch", { name: "Only in key" })).toBeInTheDocument();
-    expect(screen.queryByRole("switch", { name: /Follow the jam/ })).toBeNull();
+    const { container: all } = chordSheet({}, { cheatTab: "scales", chordPage: "all" });
+    expect(all.querySelectorAll(".jam-scale-board").length).toBeGreaterThan(fitting);
   });
 
   it("lays the whole library out as a table, every root by every chord type", () => {
@@ -1453,17 +1468,17 @@ describe("JamView — the cheat sheet", () => {
     expect(container.querySelectorAll(".jam-chord-table-root .jam-chord-mark").length).toBe(5);
   });
 
-  it("marks the chords that fit the key and hides the rest on request", () => {
+  it("marks the chords that fit the key, and In key leaves only those", () => {
     const { container } = chordSheet({}, { chordPage: "all" });
     const all = cards(container).length;
     const marked = container.querySelectorAll(".jam-chord-card .jam-chord-mark").length;
-    // Some fit and some do not — a page where everything is marked would be
+    // Some fit and some do not — a chart where everything is marked would be
     // telling the player nothing.
     expect(marked).toBeGreaterThan(0);
     expect(marked).toBeLessThan(all);
 
     cleanup();
-    const filtered = chordSheet({}, { chordPage: "all", onlyInKey: true });
+    const filtered = chordSheet({}, { chordPage: "key" });
     expect(cards(filtered.container)).toHaveLength(marked);
     // Every card left is a marked one.
     expect(filtered.container.querySelectorAll(".jam-chord-card .jam-chord-mark")).toHaveLength(
@@ -1475,7 +1490,7 @@ describe("JamView — the cheat sheet", () => {
     // With the filter on, the holes are the point: what is left is the shape
     // of the key. A row that simply lost its misfits would put a different
     // chord type under each column heading on every line.
-    const { container } = chordSheet({}, { chordPage: "all", onlyInKey: true });
+    const { container } = chordSheet({}, { chordPage: "key" });
     const rows = container.querySelectorAll(".jam-chord-table tbody tr");
     const widths = new Set([...rows].map((r) => r.querySelectorAll(".jam-chord-cell").length));
     expect(widths.size, "the filter made the rows different lengths").toBe(1);

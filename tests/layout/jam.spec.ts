@@ -267,11 +267,11 @@ test.describe("the cheat sheet, maximized", () => {
     // transport is the exception, and not as a matter of taste: its own
     // stylesheet says "Play and Stop never go — finding how to stop is the
     // one thing that must always work".
+    // It OPENS wide now rather than being made wide: the chord chart is
+    // twelve roots by sixteen types, and in a 600px drawer that is four
+    // columns and a sideways scroll, which is not a cheat sheet. So there is
+    // nothing to press here — the button in the header shrinks it instead.
     await openShot(page, "jam-chords", { width: 1600, height: 1000 });
-    await page.click(".jam-sheet-grow");
-    await page.evaluate(
-      () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
-    );
 
     const sheet = (await (await page.waitForSelector(".jam-sheet")).boundingBox())!;
     const transport = await page.$(".transport");
@@ -286,6 +286,20 @@ test.describe("the cheat sheet, maximized", () => {
       Math.round(sheet.y + sheet.height),
       "the sheet is drawn over the transport",
     ).toBeLessThanOrEqual(Math.round(stop.y) + 1);
+  });
+
+  test("shrinks back into the drawer when asked, and stays there", async ({ page }) => {
+    await openShot(page, "jam-chords", { width: 1600, height: 1000 });
+    const wide = (await (await page.waitForSelector(".jam-sheet")).boundingBox())!;
+
+    await page.click(".jam-sheet-grow");
+    await page.evaluate(
+      () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
+    );
+    const narrow = (await (await page.waitForSelector(".jam-sheet")).boundingBox())!;
+    expect(Math.round(narrow.width), "the button did not shrink it").toBeLessThan(
+      Math.round(wide.width),
+    );
   });
 });
 

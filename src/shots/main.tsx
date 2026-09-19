@@ -178,15 +178,11 @@ async function drive() {
       button.click();
     };
 
+    if (shot!.jam.cheatTab) await pressInSheet(shot!.jam.cheatTab);
     if (shot!.jam.chordPage) await pressInSheet(shot!.jam.chordPage);
-    if (shot!.jam.chordFlavour) await pressInSheet(shot!.jam.chordFlavour);
-    if (shot!.jam.onlyInKey) {
-      await pressInSheet("Only in key");
-      await until("the filtered grid", () => !!document.querySelector(".jam-chord-card"));
-    }
 
     if (shot!.jam.chordCard !== undefined) {
-      await until("the chord grid", () => !!document.querySelector(".jam-chord-card"));
+      await until("the chord chart", () => !!document.querySelector(".jam-chord-card"));
       const cards = document.querySelectorAll<HTMLElement>(".jam-chord-card");
       cards[shot!.jam.chordCard].click();
       await until("the shapes row", () => !!document.querySelector(".jam-chord-shapes"));

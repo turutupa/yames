@@ -4,20 +4,17 @@ import { ChordDiagram } from "../../components/chords";
 import { Fretboard, BASS_STANDARD_TUNING, GUITAR_STANDARD_TUNING } from "../../components/fretboard";
 import { Presence, useLastPresent } from "../../components/Presence";
 import { chordsInKey } from "../../jam/diatonic";
-import type { DiatonicChord } from "../../jam/diatonic";
 import {
   CHORD_FAMILIES,
-  CHORD_FLAVOURS,
   basicShape,
-  chordsAtFlavour,
   qualitiesInFamily,
   sheetGrid,
 } from "../../jam/cheatSheet";
-import type { ChordFlavour } from "../../jam/cheatSheet";
 import { shapesFor } from "../../jam/chordShapes";
 import { chordName, chordSuffix, keyRootName, noteName, spellingForKey } from "../../jam/harmony";
 import type { PlacedShape, Instrument } from "../../jam/chordShapes";
 import type { Chord, ChordQuality, Key, PitchClass } from "../../jam/harmony";
+import { SCALES, SCALE_IDS, scaleNotes } from "../../jam/scales";
 import type { ScaleSuggestion } from "../../jam/scales";
 
 /**
@@ -121,12 +118,6 @@ interface ChordSheetProps {
   /** In key, or the whole library. Screen state. */
   page: ChordPage;
   onPage: (page: ChordPage) => void;
-  /** Triads, 7ths, colours or power — the In key page's four readings. */
-  flavour: ChordFlavour;
-  onFlavour: (flavour: ChordFlavour) => void;
-  /** Hide the chords that do not fit the key. Off by default. */
-  onlyInKey: boolean;
-  onOnlyInKey: (on: boolean) => void;
   /** Chords or scales. Screen state, like everything else about the view. */
   tab: CheatTab;
   onTab: (tab: CheatTab) => void;
@@ -198,10 +189,6 @@ export function ChordSheet({
   onShapeIndex,
   page,
   onPage,
-  flavour,
-  onFlavour,
-  onlyInKey,
-  onOnlyInKey,
   tab,
   onTab,
 }: ChordSheetProps) {
@@ -210,64 +197,30 @@ export function ChordSheet({
   const follows = !!jam.shapesFollow;
 
   /**
-   * Which chord the expanded row is about.
+   * Which chord the drill-down is about.
    *
    * The one you tapped; or, with "Follow the jam" on, the one the band is
    * playing. Following is a mode you chose, so it wins over a tap the moment
    * it is on — which is exactly what "follow" means.
-   *
-   * On the browser page it never wins: you went there to look something up,
-   * and a section that jumped back to the jam's chord every bar would make
-   * looking anything up impossible. The switch is not even shown there.
    */
-  const subject = page === "key" && follows ? (current ?? expanded) : expanded;
+  const subject = follows ? (current ?? expanded) : expanded;
 
-  /** The key's own chords at the chosen reading. */
-  const inKey = useMemo(
-    () => chordsAtFlavour(playedKey.root, playedKey.mode, flavour),
-    [playedKey.root, playedKey.mode, flavour],
-  );
+  /** "In key" thins the sheet to what works here; "All keys" is the lot. */
+  const inKeyOnly = page === "key";
 
-  /**
-   * The colours, gathered under the degree they belong to, in degree order.
-   *
-   * Two things the flat list hands over that a page must not draw as it
-   * stands. A minor key lists both the natural v and the borrowed V7, and a
-   * suspension has no third — so Gsus4 arrives twice in A minor, once under
-   * each. The chord is shown once, under the first degree that offered it.
-   *
-   * And the heading is the degree without the colour's own mark: "V" over
-   * Gsus4, Gsus2 and G9, not "Vsus4" over three chords only one of which is
-   * a sus4.
-   */
-  const colourGroups = useMemo(() => {
-    if (flavour !== "colours") return [];
-    const groups: { root: PitchClass; degree: string; chords: DiatonicChord[] }[] = [];
-    const seen = new Set<string>();
-    for (const chord of inKey) {
-      const id = `${chord.root}:${chord.quality}`;
-      if (seen.has(id)) continue;
-      seen.add(id);
-      const last = groups[groups.length - 1];
-      if (last && last.root === chord.root) last.chords.push(chord);
-      else groups.push({ root: chord.root, degree: stemOf(chord), chords: [chord] });
-    }
-    return groups.filter((group) => group.chords.length > 0);
-  }, [flavour, inKey]);
-
-  /** Which roots the key owns, for the mark down the table's left edge. */
+  /** Which roots the key owns, for the mark down the chart's left edge. */
   const keyRoots = useMemo(
     () => new Set(chordsInKey(playedKey.root, playedKey.mode).map((c) => c.root)),
     [playedKey.root, playedKey.mode],
   );
 
   /**
-   * Every grip the table needs, worked out once.
+   * Every grip the chart needs, worked out once.
    *
-   * The poster is twelve roots by sixteen chord types, and `shapesFor`
-   * filters and places the whole library on every call — a hundred and
-   * ninety-two of those on each render would be felt. The cache lives as
-   * long as the instrument does, which is as long as the answers do.
+   * Twelve roots by sixteen chord types, and `shapesFor` filters and places
+   * the whole library on every call — a hundred and ninety-two of those on
+   * each render would be felt. The cache lives as long as the instrument
+   * does, which is as long as the answers do.
    */
   const shapeCache = useMemo(() => {
     const seen = new Map<string, readonly PlacedShape[]>();
@@ -284,24 +237,20 @@ export function ChordSheet({
   }, [instrument]);
 
   /**
-   * The table's columns, taken from the families rather than listed again.
+   * The chart's columns: every chord type the library knows, in the order
+   * the families put them — plain ones, then sevenths, then colours.
    *
-   * The bands across the top and the cells under them are then the same
-   * list read twice, and cannot come to disagree about either the order or
-   * the count — which is the only way a header band ever lies.
+   * All sixteen, always. They used to be four-at-a-time behind a Triads /
+   * 7ths / Colours / Power switch, which meant a page called "the chords in
+   * D" showed seven boxes and hid the rest behind a word.
    */
-  const columns = useMemo(
-    () =>
-      CHORD_FAMILIES.map((family) => ({ family, qualities: qualitiesInFamily(family) })),
+  const qualities = useMemo(
+    () => CHORD_FAMILIES.flatMap((family) => [...qualitiesInFamily(family)]),
     [],
   );
-  const qualities = useMemo(
-    () => columns.flatMap((band) => band.qualities),
-    [columns],
-  );
 
-  /** The poster itself: a row per root, a column per chord type. */
-  const grid = useMemo(
+  /** The chart itself: a row per root, a column per chord type. */
+  const rows = useMemo(
     () => sheetGrid(playedKey, qualities, shapeCache),
     [playedKey, qualities, shapeCache],
   );
@@ -335,69 +284,65 @@ export function ChordSheet({
     pin.index === shapes.indexOf(picked);
 
   /**
-   * The neck, static.
-   *
-   * The key's scale and nothing else: not the current chord's, which is what
-   * made it "keep changing". The same neck in bar 1 and bar 9.
-   *
-   * The WHOLE neck, from the nut (2026-09-17). It used to open on the box —
-   * the five frets where the minor pentatonic sits — and the owner: "when
-   * showing the fretboard we should always show from first fret too, not only
-   * where the minor pentatonic 'starts' and ideally up to fret 17". Which is
-   * right, and for a reason the box hid: the notes of a key are everywhere on
-   * the neck, and a picture that starts at the fifth fret quietly says they
-   * are not. Open strings are in the key too, and they were off the left-hand
-   * edge of it.
-   */
-  /**
-   * Which of the key's scales the neck is drawing.
-   *
-   * The first by default — the one a player reaches for — and then whichever
-   * you pick, for the rest of the screen session. Kept here rather than on
-   * the record: it is a way of looking at the key, not a fact about the jam.
-   */
-  const [scaleIndex, setScaleIndex] = useState(0);
-  /**
    * What is written inside the dots: nothing, the note, or the degree.
    *
-   * A switch could only ever answer one of the two questions a player asks of
-   * a fretboard, and they are different questions. "Which note is this" is
-   * how you learn the neck, and it is the printed chart every guitarist owns.
-   * "Which degree is this" is how you MOVE a shape: the same pattern of 1, ♭3
-   * and 5 is the same lick in every key, and letters hide that.
+   * A switch could only ever answer one of the two questions a player asks
+   * of a fretboard, and they are different questions. "Which note is this"
+   * is how you learn the neck. "Which degree is this" is how you MOVE a
+   * shape: the same pattern of 1, ♭3 and 5 is the same lick in every key,
+   * and letters hide that.
    *
    * Nothing by default. The shape of a scale is what you look at first, and
    * sixty labels on it is a busier picture than sixty dots.
    */
   const [dots, setDots] = useState<DotLabel>("none");
-  const scale = scales[Math.min(scaleIndex, scales.length - 1)] ?? null;
-  const board = scale
-    ? { highlight: { pitchClasses: scale.pitchClasses, rootPitchClass: scale.root } }
-    : null;
+
+  /**
+   * Every scale, drawn, one under the next.
+   *
+   * "In key" is the handful this key suggests, best first. "All keys" is
+   * every scale the app knows, from this key's root — which is the printed
+   * card exactly: major pentatonic, minor pentatonic, blues, the major
+   * scale, then the modes, each with its own neck.
+   *
+   * It used to be ONE neck with a row of chips above it, so five of the six
+   * a key offers were invisible until you pressed something.
+   */
+  const boards = useMemo(
+    () =>
+      inKeyOnly
+        ? scales
+        : SCALE_IDS.map((id) => ({
+            scale: id,
+            root: playedKey.root,
+            labelKey: SCALES[id].labelKey,
+            pitchClasses: scaleNotes(playedKey.root, id),
+          })),
+    [inKeyOnly, scales, playedKey.root],
+  );
+
+  const nameOf = (pc: number) => noteName(pc as PitchClass, spellingForKey(playedKey));
+
+  /** What a note is against a given root: "1", "♭3", "5". */
+  const degreeFrom = (root: PitchClass) => (pc: number) =>
+    t(`jam.degree.${DEGREES[(pc - root + 12) % 12]}`);
+
+  /** What the neck writes in its dots, for the scale being drawn. */
+  const labelOnNeck = (root: PitchClass) =>
+    dots === "notes" ? nameOf : dots === "degrees" ? degreeFrom(root) : undefined;
 
   /**
    * What a note on the neck is: its name, and what it is doing in the scale.
    *
-   * The owner: "can we also add on hover the notes on the fretboard it should
-   * show some info? something like what note that is and also some info of
-   * that note in regards to the scale?" A dot on a fretboard is the one thing
-   * on this screen that says WHERE without saying WHAT, and "which one is the
-   * flat third" is the question a player is actually asking of it.
+   * A dot on a fretboard is the one thing on this screen that says WHERE
+   * without saying WHAT, and "which one is the flat third" is the question a
+   * player is actually asking of it.
    */
-  const nameOf = (pc: number) => noteName(pc as PitchClass, spellingForKey(playedKey));
-  /** What this note is against the scale's root: "1", "♭3", "5". */
-  const degreeOf = scale
-    ? (pc: number) => t(`jam.degree.${DEGREES[(pc - scale.root + 12) % 12]}`)
-    : undefined;
-  const labelDot = dots === "notes" ? nameOf : dots === "degrees" ? degreeOf : undefined;
-  const describeNote = scale
-    ? (pc: number) => {
-        return `${nameOf(pc)} · ${t(`jam.degree.${DEGREES[(pc - scale.root + 12) % 12]}`)}`;
-      }
-    : undefined;
+  const describeFor = (root: PitchClass) => (pc: number) =>
+    `${nameOf(pc)} · ${degreeFrom(root)(pc)}`;
 
   /**
-   * What a box writes on its dots.
+   * What a chord box writes on its dots.
    *
    * The note's name is the same question the neck answers. The DEGREE is
    * not: on the neck it is measured from the scale's root, and in a chord
@@ -406,13 +351,9 @@ export function ChordSheet({
    * player looks at it. So this is built per chord rather than once.
    */
   const labelInBox = (chordRoot: PitchClass) =>
-    dots === "notes"
-      ? nameOf
-      : dots === "degrees"
-        ? (pc: number) => t(`jam.degree.${DEGREES[(pc - chordRoot + 12) % 12]}`)
-        : undefined;
+    dots === "notes" ? nameOf : dots === "degrees" ? degreeFrom(chordRoot) : undefined;
 
-  /** One card. The same card on both pages, which is why Pin works on both. */
+  /** One cell of the chart: a chord, its grip, and whether it fits the key. */
   const card = (
     chord: Chord,
     key: string,
@@ -434,11 +375,7 @@ export function ChordSheet({
         }}
       >
         {options.inKeyMark && (
-          <span
-            className="jam-chord-mark"
-            role="img"
-            aria-label={t("jam.chords.inKeyMark")}
-          />
+          <span className="jam-chord-mark" role="img" aria-label={t("jam.chords.inKeyMark")} />
         )}
         {shape ? (
           <ChordDiagram
@@ -458,203 +395,125 @@ export function ChordSheet({
 
   /** What the dots say, on whichever picture the tab is showing. */
   const onTheDots = instrument ? (
-    <div className="jam-scale-names">
-      <Segmented
-        label={t("jam.fretboard.onTheDots")}
-        value={dots}
-        options={DOT_LABELS.map((id) => ({
-          id,
-          label: t(`jam.fretboard.dots${id[0].toUpperCase()}${id.slice(1)}`),
-        }))}
-        onChange={setDots}
-      />
-    </div>
+    <Segmented
+      label={t("jam.fretboard.onTheDots")}
+      value={dots}
+      options={DOT_LABELS.map((id) => ({
+        id,
+        label: t(`jam.fretboard.dots${id[0].toUpperCase()}${id.slice(1)}`),
+      }))}
+      onChange={setDots}
+    />
   ) : null;
-
   return (
     <>
-      {/* Chords or scales. The tab sits under the header because the title
-          says which KEY you are in, and that is true of both halves. */}
-      <Segmented
-        label={t("jam.cheat.tabs")}
-        labelHidden
-        value={tab}
-        options={CHEAT_TABS.map((id) => ({ id, label: t(`jam.cheat.${id}`) }))}
-        onChange={onTab}
-      />
+      {/* Two switches, one row, and that is the whole of the chrome.
+
+          There used to be three stacked down the right-hand edge — Chords /
+          Scales, then In key / All chords, then Triads / 7ths / Colours /
+          Power — and under them seven cards. The owner, holding a printed
+          chart: "all the options that a user should see at the top is the
+          switch between chords and scales and in key or all keys (and
+          ideally both switches on the same row)... having a switch for
+          switching between 7ths, triads etc is a fucking pain in the ass".
+
+          Quite right. A cheat sheet is a thing you look AT. Every control on
+          it is one more thing between the player and the answer, and the
+          flavour switch was hiding nine of the sixteen chord types behind a
+          word most people would not press. It is gone; everything shows. */}
+      <div className="jam-cheat-controls">
+        <Segmented
+          label={t("jam.cheat.tabs")}
+          labelHidden
+          value={tab}
+          options={CHEAT_TABS.map((id) => ({ id, label: t(`jam.cheat.${id}`) }))}
+          onChange={onTab}
+        />
+        <Segmented
+          label={t("jam.cheat.scope")}
+          labelHidden
+          value={page}
+          options={CHORD_PAGES.map((id) => ({ id, label: t(`jam.cheat.scope${cap(id)}`) }))}
+          onChange={onPage}
+        />
+        {onTheDots}
+      </div>
 
       {tab === "chords" ? (
         <>
-          {/* Two pages of chords: the key's own, or the whole library. */}
-          <Segmented
-            label={t("jam.chords.pageLabel")}
-            labelHidden
-            value={page}
-            options={CHORD_PAGES.map((id) => ({ id, label: t(`jam.chords.page${cap(id)}`) }))}
-            onChange={onPage}
-          />
+          {/* The chart: every root down the side, every chord type across.
 
-          {page === "key" ? (
-            <>
-              <Segmented
-                label={t("jam.chords.flavourLabel")}
-                labelHidden
-                value={flavour}
-                options={CHORD_FLAVOURS.map((id) => ({ id, label: t(`jam.chords.${id}`) }))}
-                onChange={onFlavour}
-              />
-
-              {onTheDots}
-
-              {flavour === "colours" ? (
-                <div className="jam-chord-degrees">
-                  {colourGroups.map((group) => (
-                    <section
-                      key={group.root}
-                      className="jam-chord-degree motion-arrives"
-                      aria-label={group.degree}
-                    >
-                      <span className="jam-chord-degree-label">{group.degree}</span>
-                      <div className="jam-chord-grid">
-                        {group.chords.map((chord) =>
-                          card(
-                            { root: chord.root, quality: chord.quality },
-                            `${chord.degree}-${chord.root}`,
-                          ),
-                        )}
-                      </div>
-                    </section>
+              This is the poster a guitarist tapes to the wall, and it is one
+              picture rather than a page you drive. "In key" thins it to what
+              works over this jam; "All keys" is the lot. */}
+          <div className="jam-chord-table-wrap">
+            <table className="jam-chord-table">
+              <thead>
+                <tr>
+                  <td />
+                  {qualities.map((quality) => (
+                    <th key={quality} scope="col">
+                      {chordSuffix(quality) || MAJOR_COLUMN}
+                    </th>
                   ))}
-                </div>
-              ) : (
-                <div className="jam-chord-grid" role="group" aria-label={t("jam.chords.label")}>
-                  {inKey.map((chord) =>
-                    card(
-                      { root: chord.root, quality: chord.quality },
-                      `${chord.degree}-${chord.root}`,
-                      { degree: chord.degree },
-                    ),
-                  )}
-                </div>
-              )}
-            </>
-          ) : (
-            <>
-              {onTheDots}
-
-              {/* The poster: twelve roots down, every chord type across, in
-                  three bands a player recognises.
-
-                  It used to be one root at a time with the other eleven on a
-                  row of buttons above it, which is a list you page through
-                  rather than a card you scan — and the owner, who had the
-                  printed thing in front of them, said so: "should the
-                  cheatsheet organize the chords by triads/7ths/minor/minor6/
-                  min7/... that's what i want to build". Everything needed was
-                  already here; nothing had ever crossed the two axes.
-
-                  A real table, headers and all, rather than a grid of divs: a
-                  reader scanning down the m7 column to the D row is doing
-                  exactly what a table is for, and a screen reader announcing
-                  "D, m7" gets it for nothing. */}
-              <div className="jam-chord-table-wrap">
-                <table className="jam-chord-table">
-                  <thead>
-                    <tr className="jam-chord-table-bands">
-                      <td />
-                      {columns.map((band) => (
-                        <th key={band.family} scope="colgroup" colSpan={band.qualities.length}>
-                          <span className="stage-label">
-                            {t(`jam.chords.family${cap(band.family)}`)}
-                          </span>
-                        </th>
-                      ))}
-                    </tr>
-                    <tr>
-                      <td />
-                      {qualities.map((quality) => (
-                        <th key={quality} scope="col">
-                          {chordSuffix(quality) || MAJOR_COLUMN}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {grid.map((row) => (
-                      <tr key={row.root}>
-                        <th scope="row" className="jam-chord-table-root">
-                          {row.name}
-                          {keyRoots.has(row.root) && (
-                            <span
-                              className="jam-chord-mark"
-                              role="img"
-                              aria-label={t("jam.chords.inKeyMark")}
-                            />
-                          )}
-                        </th>
-                        {row.cells.map((cell) =>
-                          /* With the filter on, a chord that is not in the key
-                             leaves a gap rather than vanishing from the row.
-                             The holes are the point — what is left is the
-                             shape of the key — and a table whose rows are
-                             different lengths is not a table. */
-                          onlyInKey && !cell.fits ? (
-                            <td
-                              key={cell.chord.quality}
-                              className="jam-chord-cell jam-chord-cell-out"
-                              aria-hidden="true"
-                            />
-                          ) : (
-                            <td key={cell.chord.quality} className="jam-chord-cell">
-                              {cell.shape
-                                ? card(cell.chord, `${row.root}-${cell.chord.quality}`, {
-                                    inKeyMark: cell.fits,
-                                  })
-                                : null}
-                            </td>
-                          ),
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </>
-          )}
-
-          <div className="jam-chord-switches">
-            {page === "key" ? (
-              <button
-                type="button"
-                role="switch"
-                aria-checked={follows}
-                className={`transport-switch jam-switch ${follows ? "on" : ""}`}
-                title={t("jam.chords.followHint")}
-                onClick={() => onEdit({ shapesFollow: !follows })}
-              >
-                <span className="transport-switch-track" aria-hidden="true" />
-                {t("jam.chords.follow")}
-              </button>
-            ) : (
-              <button
-                type="button"
-                role="switch"
-                aria-checked={onlyInKey}
-                className={`transport-switch jam-switch ${onlyInKey ? "on" : ""}`}
-                onClick={() => onOnlyInKey(!onlyInKey)}
-              >
-                <span className="transport-switch-track" aria-hidden="true" />
-                {t("jam.chords.onlyInKey")}
-              </button>
-            )}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row) => (
+                  <tr key={row.root}>
+                    <th scope="row" className="jam-chord-table-root">
+                      {row.name}
+                      {keyRoots.has(row.root) && (
+                        <span
+                          className="jam-chord-mark"
+                          role="img"
+                          aria-label={t("jam.chords.inKeyMark")}
+                        />
+                      )}
+                    </th>
+                    {row.cells.map((cell) =>
+                      /* In key, a chord that does not belong leaves a gap
+                         rather than vanishing: the holes ARE the answer —
+                         what is left is the shape of the key — and a table
+                         whose rows are different lengths is not a table. */
+                      inKeyOnly && !cell.fits ? (
+                        <td
+                          key={cell.chord.quality}
+                          className="jam-chord-cell jam-chord-cell-out"
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        <td key={cell.chord.quality} className="jam-chord-cell">
+                          {cell.shape
+                            ? card(cell.chord, `${row.root}-${cell.chord.quality}`, {
+                                inKeyMark: cell.fits,
+                              })
+                            : null}
+                        </td>
+                      ),
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
-          {/* Every way to play the one you tapped. It reads as the drill-down
-              it is now that the neck has its own tab: sixteen near-identical
-              boxes used to run the width of a page that was supposed to be
-              about which chords exist, and the owner read them as the answer
-              — "most are triad or barre". They are not the answer. They are
-              where else you can put your hand. */}
+          <div className="jam-chord-switches">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={follows}
+              className={`transport-switch jam-switch ${follows ? "on" : ""}`}
+              data-explain={t("jam.chords.followHint")}
+              onClick={() => onEdit({ shapesFollow: !follows })}
+            >
+              <span className="transport-switch-track" aria-hidden="true" />
+              {t("jam.chords.follow")}
+            </button>
+          </div>
+
+          {/* Every way to play the one you tapped — a drill-down, opened by
+              a cell of the chart above and closed by tapping it again. */}
           <Presence open={!!subject && !!instrument && shapes.length > 0}>
             {(_state, ways) =>
               shownSubject && (
@@ -710,10 +569,6 @@ export function ChordSheet({
                         <span className="jam-chord-shape-label">
                           {t(`jam.chords.size${sizeKey(shape.size)}`)}
                         </span>
-                        {/* Where it sits, for the shapes that have somewhere
-                            to sit. An open shape is at the nut by definition,
-                            and a label reading "open · open" says nothing
-                            twice. */}
                         {shape.position > 0 && (
                           <span className="jam-chord-shape-fret">
                             {t("jam.chords.fret", { fret: shape.position })}
@@ -728,45 +583,50 @@ export function ChordSheet({
           </Presence>
         </>
       ) : (
-        /* The scales half. Nothing to find it behind any more: the tab is the
-           switch the neck used to hide under, and the neck is simply what
-           this tab is. */
-        <section className="jam-chord-neck">
-          {scales.length > 1 && (
-            <div className="jam-scale-chips" role="group" aria-label={t("jam.fretboard.scales")}>
-              {scales.map((option, index) => {
-                const on = index === Math.min(scaleIndex, scales.length - 1);
-                return (
-                  <button
-                    key={`${option.scale}-${option.root}`}
-                    type="button"
-                    className={`jam-chip${on ? " active" : ""}`}
-                    aria-pressed={on}
-                    onClick={() => setScaleIndex(index)}
-                  >
-                    {t(option.labelKey, { defaultValue: option.scale })}
-                  </button>
-                );
-              })}
-            </div>
-          )}
+        /* The scales, every one of them drawn.
 
-          {onTheDots}
-
-          {board ? (
-            <Fretboard
-              tuning={instrument === "bass" ? BASS_STANDARD_TUNING : GUITAR_STANDARD_TUNING}
-              startFret={0}
-              frets={17}
-              highlight={board.highlight}
-              describeNote={describeNote}
-              nameNote={labelDot}
-              size="large"
-              className="jam-fretboard"
-              ariaLabel={t("jam.fretboard.aria", { chord: keyRootName(playedKey) })}
-            />
-          ) : (
+           This was one neck with a row of chips above it, so five of the six
+           scales a key offers were a click away and invisible until you
+           clicked. The printed card stacks them — a title bar, the formula,
+           and the whole neck — and you read down it. So does this. */
+        <section className="jam-scale-sheet">
+          {boards.length === 0 ? (
             <p className="jam-sheet-note">{t("jam.cheat.noScales")}</p>
+          ) : (
+            boards.map((board) => (
+              <section key={`${board.scale}-${board.root}`} className="jam-scale-board">
+                <header className="jam-scale-board-head">
+                  <h3 className="jam-scale-board-name">
+                    {t(board.labelKey, { defaultValue: board.scale })}
+                  </h3>
+                  <span className="jam-scale-board-count">
+                    {t("jam.cheat.noteCount", { count: board.pitchClasses.length })}
+                  </span>
+                  {/* The formula, in the degrees the card prints: 1 ♭3 4 5 ♭7.
+                      It is what makes two scales comparable at a glance — the
+                      blues scale is the minor pentatonic with a ♭5 in it, and
+                      the picture alone never says so. */}
+                  <span className="jam-scale-board-formula">
+                    {board.pitchClasses.map((pc) => (
+                      <span key={pc} className="jam-scale-degree">
+                        {t(`jam.degree.${DEGREES[(pc - board.root + 12) % 12]}`)}
+                      </span>
+                    ))}
+                  </span>
+                </header>
+                <Fretboard
+                  tuning={instrument === "bass" ? BASS_STANDARD_TUNING : GUITAR_STANDARD_TUNING}
+                  startFret={0}
+                  frets={17}
+                  highlight={{ pitchClasses: board.pitchClasses, rootPitchClass: board.root }}
+                  describeNote={describeFor(board.root)}
+                  nameNote={labelOnNeck(board.root)}
+                  size="large"
+                  className="jam-fretboard"
+                  ariaLabel={t("jam.fretboard.aria", { chord: keyRootName(playedKey) })}
+                />
+              </section>
+            ))
           )}
         </section>
       )}
@@ -777,20 +637,6 @@ export function ChordSheet({
 /** `ShapeSize` to the suffix of its locale key. */
 function sizeKey(size: PlacedShape["size"]): string {
   return size.charAt(0).toUpperCase() + size.slice(1);
-}
-
-/**
- * A colour chord's degree with the colour's own mark taken off: "Vsus4" → "V".
- *
- * `cheatSheet` builds those labels as the degree's stem plus the quality's
- * suffix, so taking the suffix back off returns the stem exactly — no second
- * table of roman numerals, and no guessing.
- */
-function stemOf(chord: DiatonicChord): string {
-  const suffix = chordSuffix(chord.quality);
-  return suffix && chord.degree.endsWith(suffix)
-    ? chord.degree.slice(0, -suffix.length)
-    : chord.degree;
 }
 
 /** An id to the tail of its locale key: `all` → `All`, `basic` → `Basic`. */

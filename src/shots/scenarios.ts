@@ -89,16 +89,14 @@ export interface Shot {
     /** Tap this chord on the chord sheet (0-based) to expand its shapes. */
     chordCard?: number;
     /**
-     * The chord sheet's page and reading (JAM_UX_DECISIONS A10).
-     *
-     * `chordPage` presses In key or All chords; `chordFlavour` presses one of
-     * the four segments on the In key page; `onlyInKey` flips the browser's
-     * filter. Pressed rather than poked, like everything else here: the
-     * controls are on the sheet and a person has no other way to reach them.
+     * The cheat sheet's two switches, and nothing else — there is nothing
+     * else. `cheatTab` picks chords or scales; `chordPage` thins the chart
+     * to the key or opens it to all twelve. Pressed rather than poked, like
+     * everything else here: the controls are on the sheet and a person has
+     * no other way to reach them.
      */
-    chordPage?: "In key" | "All chords";
-    chordFlavour?: "Triads" | "7ths" | "Colours" | "Power";
-    onlyInKey?: boolean;
+    cheatTab?: "Chords" | "Scales";
+    chordPage?: "In key" | "All keys";
   };
   /**
    * The Setlist tab, with a setlist actually on it.
@@ -312,7 +310,7 @@ export const SHOTS: Shot[] = [
     // The In key page at Colours: the sus, add9, 6 and 9 chords of the key,
     // gathered under the degree each belongs to. The page that says the sheet
     // knows more than seven chords (A10).
-    jam: { row: 0, bar: 5, sheet: "chords", chordFlavour: "Colours" },
+    jam: { row: 0, bar: 5, sheet: "chords", cheatTab: "Scales" },
     width: 1400,
     height: 900,
     settleMs: 400,
@@ -324,7 +322,7 @@ export const SHOTS: Shot[] = [
     tab: "jam",
     // Every degree as a power chord — I5, IV5, V5 — with the real two-note
     // grips under them. A rock jam opens here without being asked.
-    jam: { row: 0, bar: 5, sheet: "chords", chordFlavour: "Power" },
+    jam: { row: 0, bar: 5, sheet: "chords", cheatTab: "Scales", chordPage: "All keys" },
     width: 1400,
     height: 900,
     settleMs: 400,
@@ -338,7 +336,7 @@ export const SHOTS: Shot[] = [
     // across the top in their three bands, with the filter on so the gaps
     // draw the shape of the key. The printed card the owner had in front of
     // them — "that's what i want to build".
-    jam: { row: 0, bar: 5, sheet: "chords", chordPage: "All chords", onlyInKey: true },
+    jam: { row: 0, bar: 5, sheet: "chords", chordPage: "All keys" },
     width: 1400,
     height: 900,
     settleMs: 400,
