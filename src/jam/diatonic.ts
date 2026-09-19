@@ -70,6 +70,11 @@ export const CHORD_QUALITIES: readonly ChordQuality[] = [
   "7sharp5",
   "69",
   "madd9",
+  "7b9",
+  "7sharp9",
+  "maj13",
+  "9sus4",
+  "mMaj7",
 ];
 
 /**
@@ -130,6 +135,11 @@ const CHORD_TONES: Record<ChordQuality, readonly number[]> = {
   "7sharp5": [0, 4, 8, 10],
   "69": [0, 2, 4, 7, 9],
   madd9: [0, 2, 3, 7],
+  "7b9": [0, 1, 4, 7, 10],
+  "7sharp9": [0, 3, 4, 7, 10],
+  maj13: [0, 2, 4, 7, 9, 11],
+  "9sus4": [0, 2, 5, 7, 10],
+  mMaj7: [0, 3, 7, 11],
 };
 
 /** The intervals of a quality, in semitones from the root, ascending. */

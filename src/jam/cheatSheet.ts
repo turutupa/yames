@@ -254,9 +254,9 @@ export const CHORD_FAMILIES: readonly ChordFamily[] = ["major", "minor", "domina
  * and forgotten here fails the build rather than vanishing off the chart.
  */
 const FAMILY_QUALITIES: Record<ChordFamily, readonly ChordQuality[]> = {
-  major: ["maj", "6", "maj7", "maj9", "69", "add9", "sus2", "sus4"],
-  minor: ["min", "m6", "m7", "m9", "m11", "m13", "madd9"],
-  dominant: ["7", "9", "11", "13", "7sus2", "7sus4", "7sharp5"],
+  major: ["maj", "6", "maj7", "maj9", "maj13", "69", "add9", "sus2", "sus4"],
+  minor: ["min", "m6", "m7", "mMaj7", "m9", "m11", "m13", "madd9"],
+  dominant: ["7", "9", "11", "13", "7b9", "7sharp9", "7sus2", "7sus4", "9sus4", "7sharp5"],
   // The ones that are none of the three: no third at all, or a fifth that
   // has been moved.
   other: ["5", "dim", "dim7", "m7b5", "aug"],

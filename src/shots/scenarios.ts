@@ -381,16 +381,6 @@ export const SHOTS: Shot[] = [
     settleMs: 400,
   },
   {
-    id: "jam-empty",
-    suffix: "jam-empty",
-    window: "main",
-    tab: "jam",
-    // The tab opened cold, which is the first thing anybody sees.
-    width: 1400,
-    height: 900,
-    settleMs: 400,
-  },
-  {
     id: "widget",
     suffix: "widget",
     window: "floating",

@@ -73,6 +73,16 @@ const BASS_QUALITY: Record<ChordQuality, BassChordQuality> = {
   "7sharp5": "7",
   "69": "6",
   madd9: "min",
+  // Altering the ninth changes the colour on top and not the skeleton under
+  // it; both are a dominant seventh down there.
+  "7b9": "7",
+  "7sharp9": "7",
+  maj13: "maj7",
+  "9sus4": "7",
+  // Minor triad, MAJOR seventh. Mapping it to m7 would put a flat seventh
+  // under a chord whose whole character is the natural one, so the bass
+  // keeps to the triad and lets the chord say the rest.
+  mMaj7: "min",
 };
 
 /** A chord from the form, as the bass line generator wants it. */

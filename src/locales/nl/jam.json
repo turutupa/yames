@@ -3,8 +3,6 @@
     "loading": "Geluiden laden…",
     "badge": "JAM",
     "newJam": "Nieuwe jam",
-    "jamNow": "Nu jammen",
-    "jamNowLead": "Kiest een band bij jouw instrument en telt hem in.",
     "jamNowName": "{{vibe}}-jam",
     "untitled": "Nieuwe jam",
     "deleteJam": "Jam verwijderen",
@@ -19,8 +17,6 @@
     "noChanges": "Geen wijzigingen",
     "revert": "Herstellen",
     "revertTooltip": "Terug naar de opgeslagen jam",
-    "noneOpenTitle": "Geen jam geopend",
-    "noneOpenLead": "Een jam is een band om overheen te spelen: een groove, een tempo en een vorm die voor jou de tel bijhoudt. Laad er een uit de bibliotheek, of begin een nieuwe.",
     "headphones": "Met een koptelefoon blijft de score eerlijk.",
     "summary": "{{bpm}} · {{form}}",
     "groove": {

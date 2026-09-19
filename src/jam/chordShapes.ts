@@ -63,6 +63,11 @@ export type ShapeSize = "triad" | "open" | "barre" | "seventh";
  * correctly, there is simply no four-string grip to draw on a cheat sheet.
  */
 export const GUITAR_ONLY_QUALITIES: readonly ChordQuality[] = [
+  "7b9",
+  "7sharp9",
+  "maj13",
+  "9sus4",
+  "mMaj7",
   "maj9",
   "m9",
   "11",
@@ -219,6 +224,7 @@ const ALSO_OMITTABLE: Partial<Record<ChordQuality, readonly number[]>> = {
   "13": [2],
   m11: [2],
   m13: [2],
+  maj13: [2],
 };
 
 /** True when this quality can be played without its fifth and still be itself. */
@@ -1010,6 +1016,15 @@ const EXTENDED_VOICING: Partial<Record<ChordQuality, readonly number[]>> = {
   "7sharp5": [0, 4, 8, 10],
   "69": [0, 4, 9, 14],
   madd9: [0, 3, 7, 14],
+  // The altered dominants: root, third, seventh and the altered ninth that
+  // names the chord. The fifth is what makes room for it.
+  "7b9": [0, 4, 10, 13],
+  "7sharp9": [0, 4, 10, 15],
+  maj13: [0, 4, 11, 21],
+  "9sus4": [0, 5, 10, 14],
+  // All four notes of it, and none to spare: the minor third and the major
+  // seventh together ARE the chord.
+  mMaj7: [0, 3, 7, 11],
 };
 
 /**

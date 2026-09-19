@@ -3,8 +3,6 @@
     "loading": "사운드 불러오는 중…",
     "badge": "잼",
     "newJam": "새 잼",
-    "jamNow": "지금 잼",
-    "jamNowLead": "당신의 악기에 맞는 밴드를 골라 카운트를 세어 줍니다.",
     "jamNowName": "{{vibe}} 잼",
     "untitled": "새 잼",
     "deleteJam": "잼 삭제",
@@ -19,8 +17,6 @@
     "noChanges": "변경 사항 없음",
     "revert": "되돌리기",
     "revertTooltip": "저장된 잼으로 되돌리기",
-    "noneOpenTitle": "열린 잼이 없습니다",
-    "noneOpenLead": "잼은 그 위에서 연주할 밴드입니다. 그루브와 템포, 그리고 지금 어디인지 대신 세어 주는 형식. 라이브러리에서 불러오거나 새로 만들어 보세요.",
     "headphones": "헤드폰을 쓰면 점수가 정직해집니다.",
     "summary": "{{bpm}} · {{form}}",
     "groove": {

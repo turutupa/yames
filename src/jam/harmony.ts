@@ -262,7 +262,13 @@ export type ChordQuality =
   | "7sus2"
   | "7sharp5"
   | "69"
-  | "madd9";
+  | "madd9"
+  // The last five a complete chart prints (2026-09-19).
+  | "7b9"
+  | "7sharp9"
+  | "maj13"
+  | "9sus4"
+  | "mMaj7";
 
 export type Chord = { root: PitchClass; quality: ChordQuality };
 
@@ -304,6 +310,11 @@ const QUALITY_SUFFIX: Record<ChordQuality, string> = {
   "7sharp5": "7#5",
   "69": "6/9",
   madd9: "m(add9)",
+  "7b9": "7b9",
+  "7sharp9": "7#9",
+  maj13: "maj13",
+  "9sus4": "9sus4",
+  mMaj7: "m(maj7)",
 };
 
 /** Semitones above the root, root first, in the order the chord is stacked. */
@@ -344,6 +355,15 @@ const QUALITY_INTERVALS: Record<ChordQuality, readonly number[]> = {
   "7sharp5": [0, 4, 8, 10],
   "69": [0, 4, 7, 9, 14],
   madd9: [0, 3, 7, 14],
+  // The altered dominants. Both are a plain seventh with one note moved,
+  // and that note is the whole chord.
+  "7b9": [0, 4, 7, 10, 13],
+  "7sharp9": [0, 4, 7, 10, 15],
+  maj13: [0, 4, 7, 11, 14, 21],
+  "9sus4": [0, 5, 7, 10, 14],
+  // Minor triad, major seventh. The one that sounds like a film score, and
+  // the reason the melodic minor scale exists.
+  mMaj7: [0, 3, 7, 11],
 };
 
 /** The suffix a quality is written with — "", "m", "m7b5". */
@@ -439,6 +459,19 @@ const QUALITY_SPELLINGS: ReadonlyArray<readonly [string, ChordQuality]> = [
   ["madd9", "madd9"],
   ["m(add9)", "madd9"],
   ["minadd9", "madd9"],
+  ["7b9", "7b9"],
+  ["7-9", "7b9"],
+  ["7#9", "7sharp9"],
+  ["7+9", "7sharp9"],
+  ["maj13", "maj13"],
+  ["M13", "maj13"],
+  ["9sus4", "9sus4"],
+  ["9sus", "9sus4"],
+  ["mmaj7", "mMaj7"],
+  ["mMaj7", "mMaj7"],
+  ["m(maj7)", "mMaj7"],
+  ["minmaj7", "mMaj7"],
+  ["mM7", "mMaj7"],
 ];
 
 /** The same list, longest spelling first, so the walk below is greedy. */

@@ -3,8 +3,6 @@
     "loading": "Sesler yükleniyor…",
     "badge": "JAM",
     "newJam": "Yeni jam",
-    "jamNow": "Hemen jam",
-    "jamNowLead": "Çaldığın enstrümana göre bir grup seçer ve sayarak başlatır.",
     "jamNowName": "{{vibe}} jam",
     "untitled": "Yeni jam",
     "deleteJam": "Jam'i sil",
@@ -19,8 +17,6 @@
     "noChanges": "Değişiklik yok",
     "revert": "Geri al",
     "revertTooltip": "Kayıtlı jam'e dön",
-    "noneOpenTitle": "Açık jam yok",
-    "noneOpenLead": "Jam, üzerine çalacağın bir grup: bir groove, bir tempo ve nerede olduğunu senin yerine sayan bir form. Kitaplıktan birini yükle ya da yenisini başlat.",
     "headphones": "Kulaklıkla puan dürüst kalır.",
     "summary": "{{bpm}} · {{form}}",
     "groove": {

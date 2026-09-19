@@ -361,6 +361,7 @@ export function scalesForChord(chord: Chord, key: Key): ScaleSuggestion[] {
     // which scale fits: it is already the second degree of both answers.
     case "add9":
     case "maj9":
+    case "maj13":
     case "69": {
       return build([
         ["major", key.mode === "minor" ? root : key.root],
@@ -402,10 +403,26 @@ export function scalesForChord(chord: Chord, key: Key): ScaleSuggestion[] {
     // The augmented seventh is the altered dominant the altered scale was
     // named for, and it is the one place that scale is the FIRST answer
     // rather than a colour.
-    case "7sharp5": {
+    case "7sharp5":
+    // A flattened or sharpened ninth is the other way a dominant is
+    // altered, and the altered scale is named for exactly these.
+    case "7b9":
+    case "7sharp9": {
       return build([
         ["altered", root],
         ["harmonicMinor", key.root],
+      ]);
+    }
+
+    /**
+     * A minor triad with a major seventh. The melodic minor is the scale
+     * that has both of those in it — this chord is the reason it exists —
+     * and the harmonic minor is the near neighbour that also does.
+     */
+    case "mMaj7": {
+      return build([
+        ["melodicMinor", root],
+        ["harmonicMinor", root],
       ]);
     }
 
@@ -420,7 +437,8 @@ export function scalesForChord(chord: Chord, key: Key): ScaleSuggestion[] {
     // A seventh on a suspension changes what the chord is going to DO and
     // not what fits over it: still no third, still the key's own scale.
     case "7sus2":
-    case "7sus4": {
+    case "7sus4":
+    case "9sus4": {
       return build([
         [key.mode === "minor" ? "naturalMinor" : "major", key.root],
         [chord.quality === "sus2" || chord.quality === "7sus2"

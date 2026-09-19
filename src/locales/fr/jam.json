@@ -3,8 +3,6 @@
     "loading": "Chargement des sons…",
     "badge": "JAM",
     "newJam": "Nouveau jam",
-    "jamNow": "Jammer maintenant",
-    "jamNowLead": "Choisit un groupe pour ton instrument et lui donne le décompte.",
     "jamNowName": "Jam {{vibe}}",
     "untitled": "Nouveau jam",
     "deleteJam": "Supprimer le jam",
@@ -19,8 +17,6 @@
     "noChanges": "Aucun changement",
     "revert": "Rétablir",
     "revertTooltip": "Revenir au jam enregistré",
-    "noneOpenTitle": "Aucun jam ouvert",
-    "noneOpenLead": "Un jam, c'est un groupe sur lequel jouer : un groove, un tempo et une forme qui compte les mesures à ta place. Charges-en un depuis la bibliothèque, ou commences-en un nouveau.",
     "headphones": "Au casque, la note reste honnête.",
     "summary": "{{bpm}} · {{form}}",
     "groove": {

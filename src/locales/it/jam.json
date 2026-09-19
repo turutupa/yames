@@ -3,8 +3,6 @@
     "loading": "Caricamento dei suoni…",
     "badge": "JAM",
     "newJam": "Nuovo jam",
-    "jamNow": "Suona subito",
-    "jamNowLead": "Sceglie una band per il tuo strumento e la conta in battere.",
     "jamNowName": "Jam {{vibe}}",
     "untitled": "Nuovo jam",
     "deleteJam": "Elimina jam",
@@ -19,8 +17,6 @@
     "noChanges": "Nessuna modifica",
     "revert": "Ripristina",
     "revertTooltip": "Torna al jam salvato",
-    "noneOpenTitle": "Nessun jam aperto",
-    "noneOpenLead": "Un jam è una band su cui suonare: un groove, un tempo e una forma che tiene il segno al posto tuo. Caricane uno dalla libreria, o creane uno nuovo.",
     "headphones": "Con le cuffie il punteggio resta onesto.",
     "summary": "{{bpm}} · {{form}}",
     "groove": {

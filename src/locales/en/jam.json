@@ -3,8 +3,6 @@
     "loading": "Loading sounds…",
     "badge": "JAM",
     "newJam": "New jam",
-    "jamNow": "Jam now",
-    "jamNowLead": "Picks a band for what you play, and counts it in.",
     "jamNowName": "{{vibe}} jam",
     "untitled": "New jam",
     "deleteJam": "Delete jam",
@@ -19,8 +17,6 @@
     "noChanges": "No changes",
     "revert": "Revert",
     "revertTooltip": "Go back to the saved jam",
-    "noneOpenTitle": "No jam open",
-    "noneOpenLead": "A jam is a band to play over: a groove, a tempo and a form that keeps your place for you. Load one from the library, or start a new one.",
     "headphones": "Headphones keep the score honest.",
     "summary": "{{bpm}} · {{form}}",
     "groove": {

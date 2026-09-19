@@ -3,8 +3,6 @@
     "loading": "Đang tải âm thanh…",
     "badge": "JAM",
     "newJam": "Jam mới",
-    "jamNow": "Jam ngay",
-    "jamNowLead": "Chọn ban nhạc hợp với nhạc cụ của bạn và đếm nhịp vào.",
     "jamNowName": "Jam {{vibe}}",
     "untitled": "Jam mới",
     "deleteJam": "Xóa jam",
@@ -19,8 +17,6 @@
     "noChanges": "Không có thay đổi",
     "revert": "Hoàn tác",
     "revertTooltip": "Quay lại jam đã lưu",
-    "noneOpenTitle": "Chưa mở jam nào",
-    "noneOpenLead": "Một jam là ban nhạc để bạn chơi cùng: một groove, một tempo và một cấu trúc tự đếm ô nhịp thay bạn. Hãy tải một jam từ thư viện, hoặc tạo jam mới.",
     "headphones": "Dùng tai nghe thì điểm số mới trung thực.",
     "summary": "{{bpm}} · {{form}}",
     "groove": {

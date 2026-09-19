@@ -3,8 +3,6 @@
     "loading": "Carregando sons…",
     "badge": "JAM",
     "newJam": "Novo jam",
-    "jamNow": "Tocar agora",
-    "jamNowLead": "Escolhe uma banda para o seu instrumento e dá a contagem.",
     "jamNowName": "Jam de {{vibe}}",
     "untitled": "Novo jam",
     "deleteJam": "Excluir jam",
@@ -19,8 +17,6 @@
     "noChanges": "Sem alterações",
     "revert": "Reverter",
     "revertTooltip": "Voltar ao jam salvo",
-    "noneOpenTitle": "Nenhum jam aberto",
-    "noneOpenLead": "Um jam é uma banda para tocar por cima: um groove, um andamento e uma forma que conta os compassos por você. Carregue um da biblioteca ou comece um novo.",
     "headphones": "Com fones, a nota continua honesta.",
     "summary": "{{bpm}} · {{form}}",
     "groove": {

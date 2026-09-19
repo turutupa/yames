@@ -3,8 +3,6 @@
     "loading": "Wczytywanie dźwięków…",
     "badge": "JAM",
     "newJam": "Nowy jam",
-    "jamNow": "Zagraj teraz",
-    "jamNowLead": "Dobiera zespół do twojego instrumentu i odlicza wejście.",
     "jamNowName": "Jam {{vibe}}",
     "untitled": "Nowy jam",
     "deleteJam": "Usuń jam",
@@ -19,8 +17,6 @@
     "noChanges": "Brak zmian",
     "revert": "Przywróć",
     "revertTooltip": "Wróć do zapisanego jamu",
-    "noneOpenTitle": "Nie otwarto żadnego jamu",
-    "noneOpenLead": "Jam to zespół, nad którym grasz: groove, tempo i forma, która liczy takty za ciebie. Wczytaj jeden z biblioteki albo zacznij nowy.",
     "headphones": "W słuchawkach ocena pozostaje uczciwa.",
     "summary": "{{bpm}} · {{form}}",
     "groove": {

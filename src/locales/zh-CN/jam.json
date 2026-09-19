@@ -3,8 +3,6 @@
     "loading": "正在加载声音…",
     "badge": "即兴伴奏",
     "newJam": "新建即兴伴奏",
-    "jamNow": "立即即兴",
-    "jamNowLead": "按你演奏的乐器挑一支乐队，数拍带入。",
     "jamNowName": "{{vibe}}即兴",
     "untitled": "新建即兴伴奏",
     "deleteJam": "删除即兴伴奏",
@@ -19,8 +17,6 @@
     "noChanges": "无更改",
     "revert": "还原",
     "revertTooltip": "回到已保存的即兴伴奏",
-    "noneOpenTitle": "尚未打开即兴伴奏",
-    "noneOpenLead": "即兴伴奏就是一支给你伴奏的乐队：一段鼓点、一个速度，还有一套替你数小节的曲式。从资料库里载入一个，或者新建一个。",
     "headphones": "戴上耳机，评分才不会骗你。",
     "summary": "{{bpm}} · {{form}}",
     "groove": {
