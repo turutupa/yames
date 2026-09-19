@@ -56,6 +56,25 @@
   stroke-width: 1.5;
 }
 
+/* On the scales sheet, filled and quiet.
+   A whole neck of ringed dots is a mesh of accent with the root somewhere
+   inside it — the printed card draws its scale notes solid and dark and
+   keeps the colour for the root alone, which is the only way the root is
+   findable at a glance. */
+.fretboard-sheet .fretboard-dot {
+  fill: var(--text-secondary);
+  /* The ring is removed by width rather than by painting it away. Every
+     colour in this file has to come from a theme variable and the test
+     beside the component enforces it — including, it turns out, inside a
+     comment. A zero width is the same picture and argues with nothing. */
+  stroke-width: 0;
+}
+
+.fretboard-sheet .fretboard-dot-root {
+  fill: var(--accent);
+  stroke-width: 0;
+}
+
 /* The root: filled, and the only solid accent on the board. */
 .fretboard-dot-root {
   fill: var(--accent);

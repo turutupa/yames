@@ -437,3 +437,35 @@ test.describe('"take me to"', () => {
     expect(await cells(), "the jump removed chords from the chart").toBe(before);
   });
 });
+
+test.describe("the scales sheet", () => {
+  test("fits several scales on the page, the way the printed card does", async ({ page }) => {
+    /*
+     * It used to draw one neck stretched to the width of the sheet — about
+     * two and a half times the size it was designed at, so a single scale
+     * took a third of the screen and every dot was eighteen pixels across.
+     * The card the owner sent fits six scales on a page, and the reason it
+     * is readable at that size is that a scale is a SHAPE: you read it off
+     * the spacing between the dots, which a dot nearly as wide as its fret
+     * leaves none of.
+     */
+    await openShot(page, "jam-chords", { width: 1600, height: 1100 });
+    await page.click('.jam-cheat-controls .accent-control:nth-of-type(1) button:nth-of-type(2)');
+    const boards = await page.$$eval(".jam-scale-board", (nodes) =>
+      nodes.map((n) => Math.round(n.getBoundingClientRect().height)),
+    );
+    expect(boards.length, "no scales drawn").toBeGreaterThan(1);
+
+    // A scale and its title bar in under a fifth of the window, so several
+    // are readable at once rather than one at a time.
+    const tallest = Math.max(...boards);
+    expect(tallest, `a scale block is ${tallest}px tall`).toBeLessThan(1100 / 5);
+
+    // And the dots stay small enough to read the shape between them.
+    const dot = await page.$eval(
+      ".jam-scale-board .fretboard-dot",
+      (n) => n.getBoundingClientRect().width,
+    );
+    expect(Math.round(dot), `the dots are ${Math.round(dot)}px across`).toBeLessThan(16);
+  });
+});

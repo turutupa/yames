@@ -2900,6 +2900,8 @@
     height: auto;
   }
 
+  /* The ONE neck on a chord's page still fills the room it is given. The
+     scales sheet's do not — see `.jam-scale-board .fretboard` below. */
   .jam-fretboard {
     width: 100%;
     height: auto;
@@ -3028,7 +3030,21 @@
   gap: 22px;
 }
 
+/* A scale's neck takes the width it is given, up to a point.
+
+   Left to fill a maximized sheet it came out two and a half times its
+   natural size — eighteen-pixel dots, one scale eating a third of the
+   screen, where the printed card fits six on a page. Pinned to its natural
+   size instead, it left half the window empty. The cap is the middle: the
+   board grows into the room and stops while a scale is still a shape you
+   read in one look. The title bar shares the cap so the two line up. */
+.jam-scale-board .fretboard {
+  width: 100%;
+  height: auto;
+}
+
 .jam-scale-board {
+  max-width: 1150px;
   display: flex;
   flex-direction: column;
   gap: 8px;

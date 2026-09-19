@@ -704,7 +704,7 @@ export function ChordSheet({
                   highlight={{ pitchClasses: board.pitchClasses, rootPitchClass: board.root }}
                   describeNote={describeFor(board.root)}
                   nameNote={labelOnNeck(board.root)}
-                  size="large"
+                  size="sheet"
                   className="jam-fretboard"
                   ariaLabel={t("jam.fretboard.aria", { chord: keyRootName(playedKey) })}
                 />

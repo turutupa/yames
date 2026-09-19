@@ -33,7 +33,7 @@ export const BASS_STANDARD_TUNING: Tuning = [28, 33, 38, 43];
 const SINGLE_MARKERS = new Set([3, 5, 7, 9, 15, 17, 19, 21]);
 const DOUBLE_MARKERS = new Set([12, 24]);
 
-export type FretboardSize = "small" | "large";
+export type FretboardSize = "small" | "large" | "sheet";
 
 export type FretboardHighlight = {
   /** Every pitch class to light up, in any order. */
@@ -112,6 +112,30 @@ const METRICS: Record<FretboardSize, Metrics> = {
     numberRow: 18,
     openColumn: 26,
     fontSize: 11,
+  },
+  /*
+   * The scales cheat sheet: a whole neck per scale, a dozen scales down the
+   * page, the way the printed card prints them.
+   *
+   * `large` is drawn for ONE neck with room around it, and the sheet used to
+   * use it — stretched to the width of a maximized window, which is about
+   * two and a half times its natural size. Every dot came out eighteen
+   * pixels across and a single scale took a third of the screen, so you read
+   * two of them and scrolled. The card fits six.
+   *
+   * So: wide enough not to want stretching, and the strings close enough
+   * together that a neck is a band rather than a wall. The dots go with
+   * them — a scale is a SHAPE, and the eye reads the shape off the spacing
+   * between dots, which a dot nearly as wide as its fret leaves none of.
+   */
+  sheet: {
+    fretWidth: 46,
+    stringGap: 13,
+    dotRadius: 4.6,
+    pad: 8,
+    numberRow: 13,
+    openColumn: 22,
+    fontSize: 8,
   },
 };
 
