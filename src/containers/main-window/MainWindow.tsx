@@ -97,6 +97,8 @@ import { useJamSession } from "./hooks/useJamSession";
 import { useJamTakes } from "./hooks/useJamTakes";
 import { TakesIntroDialog } from "../jam/TakesIntroDialog";
 import type { Jam, JamBand } from "../../jam";
+import { setSetlistCountIn } from "../../setlist/setlists";
+import { countInIsOn, countInToggle } from "./countIn";
 import { UnsavedChangesDialog } from "../../components/UnsavedChangesDialog";
 import type { UnsavedKind } from "../../components/UnsavedChangesDialog";
 import { SetlistParagraph } from "../../components/setlist/SetlistParagraph";
@@ -517,6 +519,53 @@ export function MainWindow() {
     }
     void togglePlayback();
   }, [jamSession.jam, state.isPlaying]);
+
+  /* ── One count-in, four modes (2026-09-19) ───────────────────────────────
+   * The rules live in `./countIn`, which is a module because they are real
+   * logic — a meter to read, a ceiling to respect, four stores to tell apart
+   * — and this file is the one no test can render. Here is only the wiring.
+   */
+  const countInSubject = useMemo(
+    () => ({
+      view,
+      jam: jamSession.jam ?? null,
+      setlist: setlistSession.setlist ?? null,
+      state,
+    }),
+    [view, jamSession.jam, setlistSession.setlist, state],
+  );
+
+  const countInOn = countInIsOn(countInSubject);
+
+  const toggleCountIn = useCallback(() => {
+    const { store, beats } = countInToggle(countInSubject);
+    if (store === "jam") {
+      jamSession.editJam({ countIn: beats });
+      return;
+    }
+    if (store === "setlist") {
+      const setlist = setlistSession.setlist;
+      if (setlist) setlistSession.setSetlist(setSetlistCountIn(setlist, beats));
+      return;
+    }
+    void reconfigureRamp({ warmupBeats: beats });
+  }, [countInSubject, setlistSession.setlist]);
+
+  /**
+   * Play, on the metronome.
+   *
+   * The engine has always been able to count a plain click in — the audio
+   * thread gates on `count_in`, not on the drill — and nothing had ever
+   * armed it, so the metronome was the one mode with no count-in at all.
+   * The drill's Start seeds it in Rust and the setlist's runner arms its
+   * own, so this is only ever the metronome's Play.
+   */
+  const togglePlaybackCountedIn = useCallback(() => {
+    if (view === "beat" && !state.isPlaying && state.speedRamp.warmupBeats > 0) {
+      void armCountIn(state.speedRamp.warmupBeats).catch(() => {});
+    }
+    void togglePlayback();
+  }, [view, state.isPlaying, state.speedRamp.warmupBeats]);
 
   const handleNewSetlist = useCallback(async () => {
     setSidebarOpen(true);
@@ -1776,14 +1825,12 @@ export function MainWindow() {
             hasSignal={evaluation.hasSignal}
             playShortcut={platformKey(keyBindings["play"] || "")}
             startBpm={state.speedRamp.startBpm}
-            countIn={state.speedRamp.warmupBeats > 0}
+            countIn={countInOn}
             loop={state.speedRamp.cyclic}
-            onToggleCountIn={() =>
-              reconfigureRamp({ warmupBeats: state.speedRamp.warmupBeats > 0 ? 0 : 4 })
-            }
+            onToggleCountIn={toggleCountIn}
             onToggleLoop={() => reconfigureRamp({ cyclic: !state.speedRamp.cyclic })}
             onTogglePlayback={() =>
-              view === "jam" ? toggleJamPlayback() : togglePlayback()
+              view === "jam" ? toggleJamPlayback() : togglePlaybackCountedIn()
             }
             onStartSpeedRamp={() => startSpeedRamp()}
             onStopSpeedRamp={() => stopSpeedRamp()}

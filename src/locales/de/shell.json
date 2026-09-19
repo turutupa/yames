@@ -71,7 +71,8 @@
     "listening": "Hört zu",
     "inputOff": "Eingang aus",
     "coachOnPlay": "Der Coach hört zu, sobald du startest",
-    "coachQuiet": "Der Coach schweigt während eines Schritts"
+    "coachQuiet": "Der Coach schweigt während eines Schritts",
+    "countIn": "Einzähler"
   },
   "rail": {
     "label": "Modi und Bibliothek",

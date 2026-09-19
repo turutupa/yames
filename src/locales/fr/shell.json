@@ -71,7 +71,8 @@
     "listening": "À l'écoute",
     "inputOff": "Entrée coupée",
     "coachOnPlay": "Le coach écoute dès que vous lancez la lecture",
-    "coachQuiet": "Le coach se tait pendant une étape"
+    "coachQuiet": "Le coach se tait pendant une étape",
+    "countIn": "Décompte"
   },
   "rail": {
     "label": "Modes et bibliothèque",

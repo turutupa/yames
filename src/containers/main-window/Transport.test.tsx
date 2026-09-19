@@ -113,9 +113,36 @@ describe("Transport", () => {
     expect(onToggleCountIn).not.toHaveBeenCalled();
     unmount();
 
+    // The metronome keeps the count-in — every mode has one now, in this
+    // same place — and loses the ramp's Loop and its starting tempo, which
+    // are the drill's alone.
     render(<Transport {...base} view="beat" />);
-    expect(screen.queryAllByRole("switch")).toHaveLength(0);
+    const switches = screen.getAllByRole("switch");
+    expect(switches).toHaveLength(1);
+    expect(switches[0].textContent).toContain("Count-in");
     expect(screen.queryByText("Starts at")).toBeNull();
+  });
+
+  it("puts the count-in beside Play in every mode", () => {
+    // It was the drill's, in the drill's own block. The metronome had none
+    // at all, the setlist kept a beat stepper in the panel above its steps,
+    // and the jam's was a dropdown behind the setup drawer — the owner:
+    // "I think we should always have this option in the bottom bar, stays
+    // consistent across menus and user knows where to find it".
+    for (const view of ["beat", "drill", "setlist", "jam"] as const) {
+      const onToggleCountIn = vi.fn();
+      const { unmount } = render(
+        <Transport {...base} view={view} countIn onToggleCountIn={onToggleCountIn} />,
+      );
+      const countIn = screen
+        .getAllByRole("switch")
+        .find((s) => (s.textContent ?? "").includes("Count-in"));
+      expect(countIn, `no count-in switch on ${view}`).toBeTruthy();
+      expect(countIn!.getAttribute("aria-checked")).toBe("true");
+      fireEvent.click(countIn!);
+      expect(onToggleCountIn, `the ${view} switch did nothing`).toHaveBeenCalledTimes(1);
+      unmount();
+    }
   });
 
   it("explains the coach until there is something live to report instead", () => {

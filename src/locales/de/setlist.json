@@ -130,14 +130,7 @@
       "backToPlaying": "Zurück zum Spielen"
     },
     "countIn": {
-      "label": "Einzähler",
-      "off": "Kein Einzähler",
-      "startingIn": "Start in",
-      "beats": "{{count}} Schläge",
-      "beats_one": "{{count}} Schlag",
-      "beats_other": "{{count}} Schläge",
-      "fewer": "Weniger Einzählschläge",
-      "more": "Mehr Einzählschläge"
+      "startingIn": "Start in"
     },
     "jam": {
       "mark": "Dieser Schritt ist ein Jam",

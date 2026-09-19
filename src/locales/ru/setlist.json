@@ -130,14 +130,7 @@
       "backToPlaying": "Вернуться к игре"
     },
     "countIn": {
-      "label": "Отсчёт",
-      "off": "Без отсчёта",
-      "startingIn": "старт через",
-      "beats": "{{count}} долей",
-      "beats_one": "{{count}} доля",
-      "beats_other": "{{count}} долей",
-      "fewer": "Меньше долей отсчёта",
-      "more": "Больше долей отсчёта"
+      "startingIn": "старт через"
     },
     "jam": {
       "mark": "Этот шаг — джем",

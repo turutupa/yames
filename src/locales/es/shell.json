@@ -71,7 +71,8 @@
     "listening": "Escuchando",
     "inputOff": "Entrada apagada",
     "coachOnPlay": "El entrenador escucha al pulsar reproducir",
-    "coachQuiet": "El entrenador calla durante cada paso"
+    "coachQuiet": "El entrenador calla durante cada paso",
+    "countIn": "Cuenta de entrada"
   },
   "rail": {
     "label": "Modos y biblioteca",

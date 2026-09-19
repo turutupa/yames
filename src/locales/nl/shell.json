@@ -71,7 +71,8 @@
     "listening": "Luistert",
     "inputOff": "Ingang uit",
     "coachOnPlay": "De coach luistert zodra je afspeelt",
-    "coachQuiet": "De coach zwijgt tijdens een stap"
+    "coachQuiet": "De coach zwijgt tijdens een stap",
+    "countIn": "Aftellen"
   },
   "rail": {
     "label": "Modi en bibliotheek",

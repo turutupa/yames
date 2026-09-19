@@ -7,7 +7,6 @@ import {
   removeStep,
   removeSteps,
   reorderSteps,
-  setSetlistCountIn,
   setSetlistRepeat,
 } from "../../setlist";
 import { setlistSeconds, durationLabel, repeatLabel } from "./format";
@@ -350,33 +349,13 @@ export function SetlistParagraph({
             {t("setlist.player.backToPlaying")}
           </button>
         )}
-        {/* Beats counted out before step one, at step one's tempo. A count
-            of beats and not a switch, for the reason the repeat below is: the
-            useful question is how many, and "off" is simply none of them. */}
-        <span className="setlist-repeat-label">{t("setlist.countIn.label")}</span>
-        <div className="setlist-stepper-field">
-          <button
-            type="button"
-            aria-label={t("setlist.countIn.fewer")}
-            title={t("setlist.countIn.fewer")}
-            onClick={() => onChange(setSetlistCountIn(setlist, (setlist.countIn ?? 0) - 1))}
-          >
-            −
-          </button>
-          <span className="setlist-stepper-value is-countin">
-            {setlist.countIn
-              ? t("setlist.countIn.beats", { count: setlist.countIn })
-              : t("setlist.countIn.off")}
-          </span>
-          <button
-            type="button"
-            aria-label={t("setlist.countIn.more")}
-            title={t("setlist.countIn.more")}
-            onClick={() => onChange(setSetlistCountIn(setlist, (setlist.countIn ?? 0) + 1))}
-          >
-            +
-          </button>
-        </div>
+        {/* The count-in used to be a beat stepper here. It is a switch in
+            the transport now, with the metronome's, the drill's and the
+            jam's — the same control in the same place whatever you are
+            playing, which is what the owner asked for and what makes it
+            findable. The per-step count-ins in the step editor are a
+            different thing and stay where they are: those are the shape of
+            the set, not how you start it. */}
 
         {/* Repeat is a count, never a switch (U9.6): "three times through" and
             "until I stop" are one control at different numbers. */}

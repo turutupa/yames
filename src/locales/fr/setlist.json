@@ -130,14 +130,7 @@
       "backToPlaying": "Revenir au jeu"
     },
     "countIn": {
-      "label": "Décompte",
-      "off": "Sans décompte",
-      "startingIn": "départ dans",
-      "beats": "{{count}} temps",
-      "beats_one": "{{count}} temps",
-      "beats_other": "{{count}} temps",
-      "fewer": "Moins de temps de décompte",
-      "more": "Plus de temps de décompte"
+      "startingIn": "départ dans"
     },
     "jam": {
       "mark": "Cette étape est un jam",

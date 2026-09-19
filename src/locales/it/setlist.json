@@ -130,14 +130,7 @@
       "backToPlaying": "Torna a suonare"
     },
     "countIn": {
-      "label": "Intro",
-      "off": "Senza intro",
-      "startingIn": "si parte tra",
-      "beats": "{{count}} movimenti",
-      "beats_one": "{{count}} movimento",
-      "beats_other": "{{count}} movimenti",
-      "fewer": "Meno movimenti di intro",
-      "more": "Più movimenti di intro"
+      "startingIn": "si parte tra"
     },
     "jam": {
       "mark": "Questo passo è un jam",

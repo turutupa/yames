@@ -130,14 +130,7 @@
       "backToPlaying": "回到播放"
     },
     "countIn": {
-      "label": "预备拍",
-      "off": "无预备拍",
-      "startingIn": "还有",
-      "beats": "{{count}} 拍",
-      "beats_one": "{{count}} 拍",
-      "beats_other": "{{count}} 拍",
-      "fewer": "减少预备拍",
-      "more": "增加预备拍"
+      "startingIn": "还有"
     },
     "jam": {
       "mark": "这一步是即兴伴奏",

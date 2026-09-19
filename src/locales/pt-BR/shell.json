@@ -71,7 +71,8 @@
     "listening": "Ouvindo",
     "inputOff": "Entrada desligada",
     "coachOnPlay": "O coach escuta quando você toca",
-    "coachQuiet": "O coach fica quieto durante o passo"
+    "coachQuiet": "O coach fica quieto durante o passo",
+    "countIn": "Contagem inicial"
   },
   "rail": {
     "label": "Modos e biblioteca",

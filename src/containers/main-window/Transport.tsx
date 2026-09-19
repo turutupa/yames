@@ -14,11 +14,26 @@ interface TransportProps {
   listening: boolean;
   hasSignal: boolean;
   playShortcut?: string;
-  /** Drill only — the tempo the ramp begins at, and its two run switches. */
-  startBpm: number;
+  /**
+   * Count the first bar in before anything starts. EVERY mode (2026-09-19).
+   *
+   * It used to be the drill's, sitting in the drill's own block beside the
+   * ramp's Loop — and so the metronome had none at all, the setlist kept
+   * one in the panel above its steps, and the jam's was a dropdown you had
+   * to open the setup drawer to find. The owner: "I think we should always
+   * have this option in the bottom bar, stays consistent across menus and
+   * user knows where to find it, plus its not JAM or song specific, its
+   * something you may expect from every mode."
+   *
+   * One meaning wherever it is: a bar counted at that mode's own meter,
+   * once, before the first beat. Nothing between setlist steps or jam
+   * choruses — "count in at the very beginning and that's it".
+   */
   countIn: boolean;
-  loop: boolean;
   onToggleCountIn: () => void;
+  /** Drill only — the tempo the ramp begins at, and the ramp's Loop. */
+  startBpm: number;
+  loop: boolean;
   onToggleLoop: () => void;
   onTogglePlayback: () => void;
   onStartSpeedRamp: () => void;
@@ -225,6 +240,22 @@ export function Transport({
 
       {playShortcut && <kbd className="transport-key">{playShortcut}</kbd>}
 
+      {/* Count-in, in every mode and always here. It sits with Play rather
+          than with the mode's own settings because it is not a fact about
+          the music — the tempo, the key and the form are that, and they live
+          on the record. This is how you start playing THIS time, which is
+          the same category of thing as the button beside it. */}
+      <button
+        type="button"
+        role="switch"
+        aria-checked={countIn}
+        className={`transport-switch ${countIn ? "on" : ""}`}
+        onClick={onToggleCountIn}
+      >
+        <span className="transport-switch-track" aria-hidden="true" />
+        {t("transport.countIn")}
+      </button>
+
       {/* Nothing has been counted yet, so there is nothing to say — a bar
           count of 1 and 0:00 elapsed is furniture pretending to be a
           reading. It stays MOUNTED and goes transparent rather than
@@ -337,19 +368,6 @@ export function Transport({
             <span className="transport-value">{startBpm}</span>
             <span className="transport-label">{t("transport.startsAt")}</span>
           </div>
-          {/* Both switches write the drill's `speedRamp`, which is also where
-              the settings form reads them from — one setting, two places to
-              reach it, no second copy of the state. */}
-          <button
-            type="button"
-            role="switch"
-            aria-checked={countIn}
-            className={`transport-switch ${countIn ? "on" : ""}`}
-            onClick={onToggleCountIn}
-          >
-            <span className="transport-switch-track" aria-hidden="true" />
-            {t("drill.countdown")}
-          </button>
           <button
             type="button"
             role="switch"
