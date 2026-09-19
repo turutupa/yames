@@ -1193,7 +1193,7 @@ describe("the kit preview", () => {
 
     act(() => result.current.startKitPreview("brushes"));
     // Play has been pressed and the engine has not answered yet.
-    expect(names("togglePlayback")).toHaveLength(1);
+    expect(names("setPlaying")).toEqual([true]);
     expect(result.current.previewKit).toBe("brushes");
     // The sheet the Preview button sits on is still there, and the audition
     // is still on. This is the render that used to end both.
@@ -1211,7 +1211,7 @@ describe("the kit preview", () => {
     rerender({ v: "jam", playing: true, beat: beatAt(1) });
     rerender({ v: "jam", playing: true, beat: beatAt(2) });
     await waitFor(() => expect(result.current.previewKit).toBeNull());
-    expect(names("togglePlayback")).toHaveLength(2);
+    expect(names("setPlaying")).toEqual([true, false]);
   });
 
   it("ends when the player stops the transport under it, and stops there", async () => {
@@ -1225,7 +1225,33 @@ describe("the kit preview", () => {
 
     rerender({ v: "jam", playing: false, beat: beatAt(0) });
     await waitFor(() => expect(result.current.previewKit).toBeNull());
-    expect(names("togglePlayback")).toHaveLength(1);
+    expect(names("setPlaying")).toEqual([true]);
+  });
+
+  it("does not start the band when an audition is ended before it is heard", async () => {
+    /*
+     * The bug behind "I played a jam for 2 or 3 seconds and hit pause... all
+     * of a sudden it started playing by itself again."
+     *
+     * An audition ended by TOGGLING the transport, and a toggle is a wish
+     * about what the transport is currently doing rather than an
+     * instruction. Tap Preview and tap it again before the engine has
+     * answered the first press — the press is still in flight, `isPlaying`
+     * is still false — and "end the audition" arrived at a stopped transport
+     * and started the band. Nothing was then left to end it.
+     */
+    const { result } = await loaded();
+    act(() => result.current.startKitPreview("brushes"));
+    expect(names("setPlaying")).toEqual([true]);
+
+    // Tapped again, still inside the window where the engine has not
+    // answered. This is Stop.
+    act(() => result.current.startKitPreview("brushes"));
+
+    expect(
+      names("setPlaying"),
+      "ending the audition asked the band to play",
+    ).toEqual([true, false]);
   });
 
   it("leaves the transport alone when the band was already playing", async () => {
@@ -1236,13 +1262,13 @@ describe("the kit preview", () => {
       beat: beatAt(0),
     });
     act(() => result.current.startKitPreview("electronic"));
-    expect(names("togglePlayback")).toHaveLength(0);
+    expect(names("setPlaying")).toHaveLength(0);
 
     rerender({ v: "jam", playing: true, beat: beatAt(1) });
     rerender({ v: "jam", playing: true, beat: beatAt(2) });
     rerender({ v: "jam", playing: true, beat: beatAt(3) });
     await waitFor(() => expect(result.current.previewKit).toBeNull());
-    expect(names("togglePlayback")).toHaveLength(0);
+    expect(names("setPlaying")).toHaveLength(0);
   });
 
   it("leaves the setup sheet open on a play that is not a preview", async () => {
@@ -1282,7 +1308,7 @@ describe("the vibe preview", () => {
     act(() => result.current.previewVibe("funk"));
     // Stopped, so the audition presses play for itself — no count-in, because
     // a count before a two-bar audition is more count than audition.
-    expect(names("togglePlayback")).toHaveLength(1);
+    expect(names("setPlaying")).toHaveLength(1);
     expect(names("armCountIn")).toHaveLength(0);
     expect(result.current.previewingVibe).toEqual({
       vibeId: "funk",
@@ -1339,7 +1365,7 @@ describe("the vibe preview", () => {
     rerender({ v: "jam", playing: true, beat: beatAt(1) });
     rerender({ v: "jam", playing: true, beat: beatAt(2) });
     await waitFor(() => expect(result.current.previewingVibe).toBeNull());
-    expect(names("togglePlayback")).toHaveLength(2);
+    expect(names("setPlaying")).toHaveLength(2);
     const back = names("setJam")
       .filter((c) => c !== null)
       .pop() as JamEngineConfig;
@@ -1365,7 +1391,7 @@ describe("the vibe preview", () => {
     // Nothing has been sent, and nothing has been pressed: the bar that is
     // playing is still the jam's own.
     expect(names("setJam")).toHaveLength(0);
-    expect(names("togglePlayback")).toHaveLength(0);
+    expect(names("setPlaying")).toHaveLength(0);
 
     rerender({ v: "jam", playing: true, beat: beatAt(1) });
     expect(result.current.previewingVibe?.sounding).toBe(true);
@@ -1380,7 +1406,7 @@ describe("the vibe preview", () => {
     rerender({ v: "jam", playing: true, beat: beatAt(2) });
     rerender({ v: "jam", playing: true, beat: beatAt(3) });
     await waitFor(() => expect(result.current.previewingVibe).toBeNull());
-    expect(names("togglePlayback")).toHaveLength(0);
+    expect(names("setPlaying")).toHaveLength(0);
     expect(result.current.jam).toBe(before);
     const back = names("setJam")
       .filter((c) => c !== null)
@@ -1415,7 +1441,7 @@ describe("the vibe preview", () => {
     act(() => result.current.previewVibe("funk"));
     await waitFor(() => expect(result.current.previewingVibe).toBeNull());
     // And the transport it started goes back where it found it.
-    expect(names("togglePlayback")).toHaveLength(2);
+    expect(names("setPlaying")).toHaveLength(2);
   });
 
   it("moving off stops it, and one audition at a time", async () => {
@@ -1441,7 +1467,7 @@ describe("the vibe preview", () => {
     act(() => result.current.previewVibe("skiffle"));
     expect(result.current.previewingVibe).toBeNull();
     expect(names("setJam")).toHaveLength(0);
-    expect(names("togglePlayback")).toHaveLength(0);
+    expect(names("setPlaying")).toHaveLength(0);
     expect(result.current.jam).toBe(before);
   });
 });
@@ -1474,7 +1500,7 @@ describe("Jam now", () => {
     // The point is to be playing, not to be setting up.
     expect(result.current.screen.setupOpen).toBe(false);
 
-    await waitFor(() => expect(names("togglePlayback")).toHaveLength(1));
+    await waitFor(() => expect(names("setPlaying")).toHaveLength(1));
     // The band and the player start together, as the transport button does
     // it — and the count is a whole bar, which is the room the table has to
     // reach the engine before bar one. A jam made this way is never counted
@@ -1493,7 +1519,7 @@ describe("Jam now", () => {
       result.current.jamNow();
     });
     const first = result.current.jam!.id;
-    await waitFor(() => expect(names("togglePlayback")).toHaveLength(1));
+    await waitFor(() => expect(names("setPlaying")).toHaveLength(1));
     expect(result.current.jams).toHaveLength(STARTER_JAMS.length + 1);
 
     // Pressed again, with the band already playing it.
@@ -1504,7 +1530,7 @@ describe("Jam now", () => {
     expect(result.current.jams).toHaveLength(STARTER_JAMS.length + 1);
     expect(result.current.jam!.id).toBe(first);
     // Already playing: a second press must not stop it.
-    expect(names("togglePlayback")).toHaveLength(1);
+    expect(names("setPlaying")).toHaveLength(1);
   });
 
   it("gives a guitarist rock", async () => {
@@ -1622,12 +1648,15 @@ describe("the arrangement, one bar ahead", () => {
     act(() => {
       for (const listener of [...jamEnded]) listener();
     });
-    await waitFor(() => expect(names("setPlaying")).toEqual([false]));
     // Stopped, not toggled: a toggle arriving after the engine has already
     // stopped itself would start the band again, which is the worst possible
     // answer to a feature whose whole point is an ending. And stopped is what
     // finishes the take — `useJamTakes` ends one when `isPlaying` goes false.
-    expect(names("togglePlayback")).toHaveLength(0);
+    //
+    // Every transport call this hook makes says what it wants now, so the
+    // assertion is that the only one here is a stop — never a `true` that
+    // could land on a band the player had already silenced.
+    await waitFor(() => expect(names("setPlaying")).toEqual([false]));
   });
 
   it("leaves a looping jam saying nothing new at all", async () => {

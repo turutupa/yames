@@ -10,7 +10,6 @@ import {
   setPlaying,
   storeLoad,
   storeSave,
-  togglePlayback,
   ttsSpeak,
   warmJam,
 } from "../../../ipc";
@@ -1469,7 +1468,9 @@ export function useJamSession({
     // jam that was just loaded, and a second press would stop it.
     if (isPlaying) return;
     if (jam.countIn > 0) void armCountIn(jam.countIn).catch(() => {});
-    void togglePlayback().catch(() => {});
+    // START, not flip. The guard above reads a rendered `isPlaying`, and the
+    // one thing this must never do is stop a band somebody is listening to.
+    void setPlaying(true).catch(() => {});
   }, [view, jam, isPlaying]);
 
   const saveActiveJam = useCallback(() => {
@@ -1634,7 +1635,23 @@ export function useJamSession({
     previewLiveRef.current = false;
     if (!previewStartedRef.current) return;
     previewStartedRef.current = false;
-    void togglePlayback().catch(() => {});
+    /*
+     * STOP, not "press the button".
+     *
+     * A toggle is a wish about what the transport is currently doing, and an
+     * audition has several ways to end at a moment when it is not doing what
+     * the code assumed. Tap Preview and tap it again before the engine has
+     * answered the first press and this ran against a transport that was
+     * still stopped — so "end the audition" started the band, and nothing
+     * was left to end it.
+     *
+     * The same hazard is written down a few hundred lines above, against the
+     * song that ends itself: "a toggle that arrives after the engine has
+     * already stopped itself would start the band again". It was the right
+     * note and it had only ever been applied to one of the places that
+     * needed it. `setPlaying` is idempotent, so arriving late costs nothing.
+     */
+    void setPlaying(false).catch(() => {});
   }, []);
 
   const startKitPreview = useCallback(
@@ -1655,13 +1672,13 @@ export function useJamSession({
       if (previewKit === kit) {
         if (previewStartedRef.current) {
           previewStartedRef.current = false;
-          void togglePlayback().catch(() => {});
+          void setPlaying(false).catch(() => {});
         }
         return;
       }
       if (!isPlaying && !previewStartedRef.current) {
         previewStartedRef.current = true;
-        void togglePlayback().catch(() => {});
+        void setPlaying(true).catch(() => {});
       }
     },
     [isPlaying, previewKit],
@@ -1767,7 +1784,7 @@ export function useJamSession({
       setPreviewVibeState(next);
       if (!owns) {
         previewStartedRef.current = true;
-        void togglePlayback().catch(() => {});
+        void setPlaying(true).catch(() => {});
       }
     },
     [jam, isPlaying, previewVibeState, armedVibe, previewPatchOf, stopPreview],
