@@ -3001,6 +3001,21 @@
   gap: 6px;
 }
 
+/* "Take me to" — the jump bar. Not a filter: it scrolls the chart sideways
+   to a family of chords or the scales page down to one scale, and hides
+   nothing. The owner: "filtering is annoying because it changes the whole
+   page... just an easy way for going to the desired chords". */
+.jam-chord-jump {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+
+.jam-chord-jump .stage-label {
+  margin-right: 2px;
+}
+
 /* ── The scales, all of them, stacked (2026-09-19) ────────────────────────
    One neck per scale, down the page, each under its own title bar: the
    printed card's shape, because the printed card is right. It was a single
@@ -3017,6 +3032,9 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  /* A jump lands the title bar just below the top of the sheet rather than
+     flush against it, where it reads as having overshot. */
+  scroll-margin-top: 12px;
 }
 
 /* The title bar. Solid, the way the card prints it, so the eye can find the
@@ -3095,8 +3113,6 @@
      squeeze this to fit rather than let the page scroll. */
   flex: none;
   overflow-x: auto;
-  margin-inline: -4px;
-  padding-inline: 4px;
 }
 
 .jam-chord-table {

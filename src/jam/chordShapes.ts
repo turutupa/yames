@@ -53,6 +53,29 @@ export type GuitarString = 1 | 2 | 3 | 4 | 5 | 6;
  */
 export type ShapeSize = "triad" | "open" | "barre" | "seventh";
 
+/**
+ * The chord types the guitar has grips for and the bass does not.
+ *
+ * A bassist does not play a thirteenth chord; they play the root, or the
+ * shell of the seventh underneath it, and the extension is whoever is
+ * holding the chord's business. `bandChord.ts` maps each of these to that
+ * parent seventh for exactly that reason — so the band still plays an m13
+ * correctly, there is simply no four-string grip to draw on a cheat sheet.
+ */
+export const GUITAR_ONLY_QUALITIES: readonly ChordQuality[] = [
+  "maj9",
+  "m9",
+  "11",
+  "13",
+  "m11",
+  "m13",
+  "7sus4",
+  "7sus2",
+  "7sharp5",
+  "69",
+  "madd9",
+];
+
 export type Barre = {
   fret: number;
   /** The lower-sounding end, e.g. 6. */
@@ -173,9 +196,41 @@ function positionOf(frets: (number | null)[]): number {
  */
 const OMITTABLE_INTERVAL = 7;
 
+/**
+ * What the EXTENDED chords are allowed to drop, beyond the fifth.
+ *
+ * Six notes on six strings with four fingers is not a chord a person plays,
+ * and guitarists have never tried: every chord dictionary ever printed
+ * voices an eleventh or a thirteenth with four notes and leaves the rest
+ * implied. Which notes go is not taste, it is the settled practice —
+ *
+ * - the NINTH goes from an 11 or a 13, because the note that names the chord
+ *   is the one at the top and the ninth is neither that nor a guide tone;
+ * - the THIRD goes from a dominant 11, because a natural eleventh sits a
+ *   semitone above the major third and that is the one interval the chord
+ *   cannot hold. (It is why a "G11" on a chart is so often written G7sus4.)
+ *
+ * Anything not listed here keeps every note it is written with, and the
+ * builder throws out any grip that loses one — so an m7b5 still has its flat
+ * five and a 7#5 still has its sharp five, which is the note that makes it.
+ */
+const ALSO_OMITTABLE: Partial<Record<ChordQuality, readonly number[]>> = {
+  "11": [2, 4],
+  "13": [2],
+  m11: [2],
+  m13: [2],
+};
+
 /** True when this quality can be played without its fifth and still be itself. */
 function fifthIsOptional(quality: ChordQuality): boolean {
   return chordTones(quality).length > 2;
+}
+
+/** The intervals a grip of this quality may leave out. */
+function omittable(quality: ChordQuality): ReadonlySet<number> {
+  const out = new Set<number>(ALSO_OMITTABLE[quality] ?? []);
+  if (fifthIsOptional(quality)) out.add(OMITTABLE_INTERVAL);
+  return out;
 }
 
 export function spellsChord(
@@ -186,8 +241,9 @@ export function spellsChord(
   const want = new Set(chordTones(quality).map((t) => mod12(root + t)));
   const got = new Set(pitches.filter((p): p is PitchClass => p !== null));
   for (const p of got) if (!want.has(p)) return false;
+  const spare = omittable(quality);
   for (const t of chordTones(quality)) {
-    if (t === OMITTABLE_INTERVAL && fifthIsOptional(quality)) continue;
+    if (spare.has(t)) continue;
     if (!got.has(mod12(root + t))) return false;
   }
   return true;
@@ -905,6 +961,158 @@ function buildTriadSeeds(): Seed[] {
 // ---------------------------------------------------------------------------
 // Bass
 // ---------------------------------------------------------------------------
+// The extended chords, generated (2026-09-19)
+// ---------------------------------------------------------------------------
+
+/**
+ * Four adjacent strings, low and high.
+ *
+ * Extended chords are four-note grips: the root, the two guide tones and the
+ * note the chord is named after. Six-string voicings of them exist and are
+ * mostly pianists' chords written on a guitar; these two sets are where a
+ * guitarist actually plays a maj9 or a 13.
+ */
+const EXTENDED_SETS: { label: string; strings: [number, number, number, number] }[] = [
+  { label: "5-4-3-2", strings: [5, 4, 3, 2] },
+  { label: "4-3-2-1", strings: [4, 3, 2, 1] },
+];
+
+/**
+ * Which four notes a grip of each extended quality is built from.
+ *
+ * Not a choice — this is the voicing every chord dictionary prints, and the
+ * reasoning is the same each time: keep the root so the shape is findable,
+ * keep the third and the seventh because they are what make the chord major
+ * or minor and dominant or not, and keep the extension the chord is NAMED
+ * after. Whatever is left is the fifth, and the fifth is the note a guitar
+ * has always dropped.
+ *
+ * `spellsChord` independently checks the result against the quality's own
+ * omission rules, so a formula that dropped something it should not keep
+ * would fail the build rather than ship a chord that lies about its name.
+ */
+const EXTENDED_VOICING: Partial<Record<ChordQuality, readonly number[]>> = {
+  //                 root  3rd   7th   extension
+  maj9: [0, 4, 11, 14],
+  m9: [0, 3, 10, 14],
+  "9": [0, 4, 10, 14],
+  // No third: a natural eleventh will not sit beside one. This is the grip a
+  // chart means by "G11" and why it so often writes G7sus4 instead.
+  "11": [0, 10, 14, 17],
+  "13": [0, 4, 10, 21],
+  m11: [0, 3, 10, 17],
+  m13: [0, 3, 10, 21],
+  // Four notes and nothing spare: a suspended seventh has no third to drop
+  // and its fourth or second is the whole point of it.
+  "7sus4": [0, 5, 7, 10],
+  "7sus2": [0, 2, 7, 10],
+  // The sharpened fifth is the note that names it, so it stays.
+  "7sharp5": [0, 4, 8, 10],
+  "69": [0, 4, 9, 14],
+  madd9: [0, 3, 7, 14],
+};
+
+/**
+ * The lowest close voicing of four pitch classes on four given strings,
+ * within a four-fret reach and sounding in ascending order.
+ *
+ * The same search `findVoicing` does for triads, one string wider. Kept
+ * separate rather than made generic over arity: the triad version is read
+ * often and a loop-over-N version of it is harder to follow than two
+ * readable ones.
+ */
+function findFourVoicing(indices: number[], wantPcs: number[]): number[] | null {
+  const candidates = indices.map((idx, k) => {
+    const out: number[] = [];
+    for (let f = 0; f <= MAX_FRET; f++) {
+      if (mod12(GUITAR_TUNING[idx] + f) === mod12(wantPcs[k])) out.push(f);
+    }
+    return out;
+  });
+  let best: number[] | null = null;
+  let bestScore = Number.POSITIVE_INFINITY;
+  for (const a of candidates[0]) {
+    for (const b of candidates[1]) {
+      for (const c of candidates[2]) {
+        for (const d of candidates[3]) {
+          const notes = [
+            GUITAR_TUNING[indices[0]] + a,
+            GUITAR_TUNING[indices[1]] + b,
+            GUITAR_TUNING[indices[2]] + c,
+            GUITAR_TUNING[indices[3]] + d,
+          ];
+          // Ascending, so the shape sounds like the chord rather than a
+          // cluster with the notes in some other order.
+          if (!notes.every((n, i) => i === 0 || notes[i - 1] < n)) continue;
+          const frets = [a, b, c, d];
+          const top = Math.max(...frets);
+          const span = top - Math.min(...frets);
+          // Four frets is a hand. Anything wider is a chord you can write
+          // down and not one you can hold.
+          if (span > 4) continue;
+          const score = top * 100 + span;
+          if (score < bestScore) {
+            bestScore = score;
+            best = frets;
+          }
+        }
+      }
+    }
+  }
+  return best;
+}
+
+/**
+ * Every extended chord, on both four-string sets, in every rotation that the
+ * neck will hold.
+ *
+ * Generated for the reason the triads are: a hundred-odd voicings typed out
+ * by hand would contain mistakes, and the tuning already knows the answer.
+ * The owner asked for the chart to be complete — "just making up cards for
+ * all chords and shapes, just make them so they look consistent and
+ * complete" — and completeness is exactly the thing a generator gives you
+ * and a table does not.
+ */
+function buildExtendedSeeds(): Seed[] {
+  const seeds: Seed[] = [];
+  for (const [quality, tones] of Object.entries(EXTENDED_VOICING) as [
+    ChordQuality,
+    readonly number[],
+  ][]) {
+    for (const set of EXTENDED_SETS) {
+      const indices = set.strings.map((n) => indexOfString("guitar", n));
+      for (let inv = 0; inv < tones.length; inv++) {
+        const order = tones.map((_unused, k) => tones[(inv + k) % tones.length]);
+        const found = findFourVoicing(indices, order);
+        if (!found) continue;
+        const shift = 1 - Math.min(...found);
+        const placed = found.map((f) => f + shift);
+        const frets: (number | null)[] = [null, null, null, null, null, null];
+        const fingers: (number | null)[] = [null, null, null, null, null, null];
+        const lowest = Math.min(...placed);
+        indices.forEach((idx, k) => {
+          frets[idx] = placed[k];
+          fingers[idx] = Math.min(4, placed[k] - lowest + 1);
+        });
+        seeds.push({
+          id: "ext-" + quality + "-" + set.label + "-" + String(inv),
+          name: "on " + set.label,
+          quality,
+          // The voicing is written as the chord on C and then slid down to
+          // fret 1, exactly as the triads are, so the shift IS the root.
+          root: mod12(shift),
+          frets,
+          fingers,
+          movable: true,
+          size: "seventh",
+        });
+      }
+    }
+  }
+  return seeds;
+}
+
+// ---------------------------------------------------------------------------
 
 /**
  * Bass shapes as offsets from the root's fret, one note per string, starting
@@ -945,6 +1153,7 @@ const BASS_PATTERNS: { id: string; name: string; quality: ChordQuality; offsets:
   { id: "bass-add9", name: "added ninth", quality: "add9", offsets: [0, -1, -3, -1] },
   { id: "bass-dom9", name: "ninth", quality: "9", offsets: [0, -1, 0, -1] },
 ];
+
 
 function buildBassSeeds(): Seed[] {
   const seeds: Seed[] = [];
@@ -1022,6 +1231,7 @@ export const SHAPES: readonly Shape[] = [
   ...MOVABLE_GUITAR,
   ...OPEN_GUITAR,
   ...buildTriadSeeds(),
+  ...buildExtendedSeeds(),
   ...buildBassSeeds(),
 ].map(toShape);
 

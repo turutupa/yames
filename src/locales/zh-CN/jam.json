@@ -306,7 +306,13 @@
       "scopeAll": "所有调",
       "noteCount_one": "{{count}} 音音阶",
       "noteCount_other": "{{count}} 音音阶",
-      "noteCount": "{{count}} 音音阶"
+      "noteCount": "{{count}} 音音阶",
+      "jump": "跳转到",
+      "jumpLabel": "跳转到某类和弦",
+      "familyMajor": "大三类",
+      "familyMinor": "小三类",
+      "familyDominant": "属和弦",
+      "familyOther": "减与增"
     },
     "chords": {
       "follow": "跟着即兴走",

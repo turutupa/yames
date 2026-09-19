@@ -306,7 +306,13 @@
       "scopeAll": "Toutes les tonalités",
       "noteCount_one": "gamme à {{count}} note",
       "noteCount_other": "gamme à {{count}} notes",
-      "noteCount": "gamme à {{count}} notes"
+      "noteCount": "gamme à {{count}} notes",
+      "jump": "Aller à",
+      "jumpLabel": "Aller à une famille d’accords",
+      "familyMajor": "Majeurs",
+      "familyMinor": "Mineurs",
+      "familyDominant": "Dominantes",
+      "familyOther": "Dim. et aug."
     },
     "chords": {
       "follow": "Suivre le jam",

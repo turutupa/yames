@@ -408,3 +408,32 @@ test.describe("the chord poster", () => {
     await noSidewaysScroll(page, "the cheat sheet with the poster open");
   });
 });
+
+test.describe('"take me to"', () => {
+  test("scrolls the chart to a family without hiding anything", async ({ page }) => {
+    /*
+     * Not a filter, and the difference is the whole point: "clicking on
+     * minor it focuses the minor chords but doesn't fucking filter...
+     * filtering is annoying because it changes the whole page". So the
+     * chart moves sideways and every cell that was on it is still on it.
+     */
+    await openShot(page, "jam-chords-all", { width: 1500, height: 1000 });
+    const cells = () => page.$$eval(".jam-chord-card", (n) => n.length);
+    const before = await cells();
+    expect(before, "no chart to jump around").toBeGreaterThan(100);
+
+    const wrap = ".jam-chord-table-wrap";
+    expect(await page.$eval(wrap, (n) => n.scrollLeft)).toBe(0);
+
+    await page.click('.jam-chord-jump button:nth-of-type(2)');
+    await page.waitForFunction(
+      (sel) => (document.querySelector(sel) as HTMLElement).scrollLeft > 0,
+      wrap,
+      { timeout: 4000 },
+    );
+
+    // It moved, and it hid nothing on the way.
+    expect(await page.$eval(wrap, (n) => n.scrollLeft)).toBeGreaterThan(0);
+    expect(await cells(), "the jump removed chords from the chart").toBe(before);
+  });
+});

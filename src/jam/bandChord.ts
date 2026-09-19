@@ -55,6 +55,24 @@ const BASS_QUALITY: Record<ChordQuality, BassChordQuality> = {
   m6: "m6",
   add9: "maj",
   "9": "9",
+  // The extended chords (2026-09-19). The bass plays the chord's SKELETON,
+  // and a ninth, an eleventh or a thirteenth is not part of one: the note
+  // that matters down there is the third and the seventh, and the upper
+  // extension is the guitarist's or the keys player's business. So each maps
+  // to the seventh chord it is built on.
+  maj9: "maj7",
+  m9: "m7",
+  "11": "7",
+  "13": "7",
+  m11: "m7",
+  m13: "m7",
+  // Suspended sevenths have no third, exactly like sus2 and sus4 above.
+  "7sus4": "7",
+  "7sus2": "7",
+  // Nothing in the bass table raises a fifth — the same gap `aug` hits.
+  "7sharp5": "7",
+  "69": "6",
+  madd9: "min",
 };
 
 /** A chord from the form, as the bass line generator wants it. */

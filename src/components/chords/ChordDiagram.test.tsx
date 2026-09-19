@@ -79,8 +79,11 @@ describe("ChordDiagram", () => {
   it("draws a bass shape on four strings", () => {
     const [placed] = shapesFor(9, "maj", { instrument: "bass" });
     render(<ChordDiagram shape={placed} />);
-    const strings = screen.getByRole("img").querySelectorAll(".chord-diagram-string");
-    expect(strings).toHaveLength(4);
+    // The strings are one path rather than one element each — three hundred
+    // of these boxes on the cheat sheet's chart made twelve ruled lines
+    // apiece too many nodes — so the count is on the path that draws them.
+    const strings = screen.getByRole("img").querySelector(".chord-diagram-string");
+    expect(strings?.getAttribute("data-strings")).toBe("4");
   });
 
   it("tells a screen reader what it is", () => {

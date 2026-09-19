@@ -276,7 +276,13 @@ export function scalesForChord(chord: Chord, key: Key): ScaleSuggestion[] {
 
   switch (chord.quality) {
     case "7":
-    case "9": {
+    case "9":
+    // The extended dominants (2026-09-19). A ninth, an eleventh or a
+    // thirteenth on top of a dominant seventh does not change which scale
+    // fits it — mixolydian already contains all three — so they answer with
+    // the seventh's own answer rather than an entry each.
+    case "11":
+    case "13": {
       if (key.mode === "blues") {
         return build([
           ["mixolydian", root],
@@ -300,7 +306,12 @@ export function scalesForChord(chord: Chord, key: Key): ScaleSuggestion[] {
 
     case "m7":
     case "min":
-    case "m6": {
+    case "m6":
+    // The same, on the minor side: dorian holds the 9, the 11 and the 13.
+    case "m9":
+    case "m11":
+    case "m13":
+    case "madd9": {
       if (chord.quality === "m6") {
         // A minor sixth chord has the natural sixth in it, so dorian, not
         // natural minor.
@@ -348,7 +359,9 @@ export function scalesForChord(chord: Chord, key: Key): ScaleSuggestion[] {
     case "6":
     // A major triad with a ninth on top. Nothing about the ninth changes
     // which scale fits: it is already the second degree of both answers.
-    case "add9": {
+    case "add9":
+    case "maj9":
+    case "69": {
       return build([
         ["major", key.mode === "minor" ? root : key.root],
         ["majorPentatonic", root],
@@ -385,7 +398,11 @@ export function scalesForChord(chord: Chord, key: Key): ScaleSuggestion[] {
      * key. Altered from the chord root spells it; the key's harmonic minor is
      * where the chord occurs naturally (on its third degree).
      */
-    case "aug": {
+    case "aug":
+    // The augmented seventh is the altered dominant the altered scale was
+    // named for, and it is the one place that scale is the FIRST answer
+    // rather than a colour.
+    case "7sharp5": {
       return build([
         ["altered", root],
         ["harmonicMinor", key.root],
@@ -399,10 +416,16 @@ export function scalesForChord(chord: Chord, key: Key): ScaleSuggestion[] {
      * itself — the ninth for sus2, the fourth for sus4.
      */
     case "sus2":
-    case "sus4": {
+    case "sus4":
+    // A seventh on a suspension changes what the chord is going to DO and
+    // not what fits over it: still no third, still the key's own scale.
+    case "7sus2":
+    case "7sus4": {
       return build([
         [key.mode === "minor" ? "naturalMinor" : "major", key.root],
-        [chord.quality === "sus2" ? "majorPentatonic" : "minorPentatonic", root],
+        [chord.quality === "sus2" || chord.quality === "7sus2"
+          ? "majorPentatonic"
+          : "minorPentatonic", root],
       ]);
     }
 

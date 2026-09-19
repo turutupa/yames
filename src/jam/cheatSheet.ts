@@ -236,14 +236,30 @@ export function fitsKey(chord: Chord, root: PitchClass, mode: KeyMode): boolean 
  * the ones a jazz chart is made of, and the ones you add when the plain
  * chord has stopped being interesting.
  */
-export type ChordFamily = "basic" | "sevenths" | "colours";
+export type ChordFamily = "major" | "minor" | "dominant" | "other";
 
-export const CHORD_FAMILIES: readonly ChordFamily[] = ["basic", "sevenths", "colours"];
+export const CHORD_FAMILIES: readonly ChordFamily[] = ["major", "minor", "dominant", "other"];
 
+/**
+ * The four families, and the order the chart's columns come in.
+ *
+ * They used to be "basic / sevenths / colours" — grouped by when a player
+ * MEETS a chord, which is a fine way to teach and a useless way to find
+ * something. A guitarist looking at a chart is asking "where are the minor
+ * ones", and the owner asked for exactly that: "clicking on minor it focuses
+ * the minor chords". So the grouping is by what the chord IS.
+ *
+ * Every quality appears once, and the test beside this file checks that
+ * against `CHORD_QUALITIES` — a twenty-eighth chord type added to the union
+ * and forgotten here fails the build rather than vanishing off the chart.
+ */
 const FAMILY_QUALITIES: Record<ChordFamily, readonly ChordQuality[]> = {
-  basic: ["maj", "min", "5", "dim", "aug"],
-  sevenths: ["7", "maj7", "m7", "m7b5", "dim7"],
-  colours: ["sus2", "sus4", "add9", "6", "m6", "9"],
+  major: ["maj", "6", "maj7", "maj9", "69", "add9", "sus2", "sus4"],
+  minor: ["min", "m6", "m7", "m9", "m11", "m13", "madd9"],
+  dominant: ["7", "9", "11", "13", "7sus2", "7sus4", "7sharp5"],
+  // The ones that are none of the three: no third at all, or a fifth that
+  // has been moved.
+  other: ["5", "dim", "dim7", "m7b5", "aug"],
 };
 
 /**

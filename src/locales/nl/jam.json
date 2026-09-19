@@ -306,7 +306,13 @@
       "scopeAll": "Alle toonsoorten",
       "noteCount_one": "toonladder van {{count}} noot",
       "noteCount_other": "toonladder van {{count}} noten",
-      "noteCount": "toonladder van {{count}} noten"
+      "noteCount": "toonladder van {{count}} noten",
+      "jump": "Ga naar",
+      "jumpLabel": "Naar een akkoordfamilie springen",
+      "familyMajor": "Majeur",
+      "familyMinor": "Mineur",
+      "familyDominant": "Dominant",
+      "familyOther": "Dim & aug"
     },
     "chords": {
       "follow": "Volg de jam",

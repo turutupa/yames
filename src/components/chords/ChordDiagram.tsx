@@ -120,29 +120,26 @@ export function ChordDiagram({
           </text>
         )}
 
-        {/* The frets. */}
-        {Array.from({ length: ROWS + 1 }, (_, row) => (
-          <line
-            key={"fret" + String(row)}
-            className="chord-diagram-fret"
-            x1={gridLeft}
-            y1={TOP + row * FRET_GAP}
-            x2={gridRight}
-            y2={TOP + row * FRET_GAP}
-          />
-        ))}
-
-        {/* The strings. */}
-        {Array.from({ length: strings }, (_, i) => (
-          <line
-            key={"string" + String(i)}
-            className="chord-diagram-string"
-            x1={x(i)}
-            y1={TOP}
-            x2={x(i)}
-            y2={TOP + ROWS * FRET_GAP}
-          />
-        ))}
+        {/* The grid: one path for the frets, one for the strings.
+            Twelve `<line>` elements would read more plainly, and did — but
+            the cheat sheet's chart draws three hundred of these boxes at
+            once, and twelve nodes each is nearly four thousand nodes of
+            ruled lines. Two paths carry the same picture. */}
+        <path
+          className="chord-diagram-fret"
+          d={Array.from(
+            { length: ROWS + 1 },
+            (_, row) => `M${gridLeft} ${TOP + row * FRET_GAP}H${gridRight}`,
+          ).join("")}
+        />
+        <path
+          className="chord-diagram-string"
+          data-strings={strings}
+          d={Array.from(
+            { length: strings },
+            (_, i) => `M${x(i)} ${TOP}V${TOP + ROWS * FRET_GAP}`,
+          ).join("")}
+        />
 
         {atNut && (
           <line

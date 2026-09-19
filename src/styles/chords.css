@@ -23,6 +23,7 @@
 
 .chord-diagram-fret,
 .chord-diagram-string {
+  fill: none;
   stroke: var(--border);
   stroke-width: 0.8;
 }

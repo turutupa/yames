@@ -306,7 +306,13 @@
       "scopeAll": "All keys",
       "noteCount_one": "{{count}} note scale",
       "noteCount_other": "{{count}} note scale",
-      "noteCount": "{{count}} note scale"
+      "noteCount": "{{count}} note scale",
+      "jump": "Take me to",
+      "jumpLabel": "Jump to a family of chords",
+      "familyMajor": "Major",
+      "familyMinor": "Minor",
+      "familyDominant": "Dominant",
+      "familyOther": "Dim & aug"
     },
     "chords": {
       "follow": "Follow the jam",

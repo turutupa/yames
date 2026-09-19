@@ -325,23 +325,27 @@ describe("the chord families", () => {
     expect([...listed].sort()).toEqual([...CHORD_QUALITIES].sort());
   });
 
-  it("puts the chords a beginner learns first in the first family", () => {
-    expect(qualitiesInFamily("basic")).toEqual<ChordQuality[]>(["maj", "min", "5", "dim", "aug"]);
-    expect(qualitiesInFamily("sevenths")).toEqual<ChordQuality[]>([
-      "7",
-      "maj7",
-      "m7",
-      "m7b5",
-      "dim7",
-    ]);
-    expect(qualitiesInFamily("colours")).toEqual<ChordQuality[]>([
-      "sus2",
-      "sus4",
-      "add9",
-      "6",
-      "m6",
-      "9",
-    ]);
+  it("groups the chords by what they ARE, so a reader can find them", () => {
+    // They were grouped by when a player MEETS them — basic, sevenths,
+    // colours — which teaches well and finds nothing. A guitarist at a chart
+    // is asking "where are the minor ones".
+    expect(qualitiesInFamily("major")[0]).toBe("maj");
+    expect(qualitiesInFamily("minor")[0]).toBe("min");
+    expect(qualitiesInFamily("dominant")[0]).toBe("7");
+
+    // Every minor chord is in the minor family and nowhere else. The chart's
+    // columns come out in this order, so a stray m9 among the dominants
+    // would put it under the wrong heading on every row.
+    for (const quality of ["min", "m6", "m7", "m9", "m11", "m13", "madd9"] as ChordQuality[]) {
+      expect(qualitiesInFamily("minor"), quality).toContain(quality);
+    }
+    for (const quality of ["7", "9", "11", "13"] as ChordQuality[]) {
+      expect(qualitiesInFamily("dominant"), quality).toContain(quality);
+    }
+    // A half-diminished is not a minor chord however it is spelled, and a
+    // power chord is not a major one.
+    expect(qualitiesInFamily("other")).toContain("m7b5");
+    expect(qualitiesInFamily("other")).toContain("5");
   });
 });
 

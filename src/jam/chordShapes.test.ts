@@ -11,6 +11,7 @@ import {
   spellsChord,
   type Instrument,
   type PlacedShape,
+  GUITAR_ONLY_QUALITIES,
 } from "./chordShapes";
 
 const INSTRUMENTS: Instrument[] = ["guitar", "bass"];
@@ -164,14 +165,33 @@ describe("the shapes a player already knows", () => {
 });
 
 describe("shapesFor", () => {
-  it("finds at least one guitar and one bass shape for every quality at every root", () => {
+  it("finds at least one shape for every quality at every root", () => {
+    // Both instruments, except for the extended chords: a bassist does not
+    // play a thirteenth, they play the shell of the seventh under it, and
+    // `bandChord.ts` maps each of them to that seventh for the same reason.
+    // There is nothing to draw, rather than something missing.
     const empty: string[] = [];
     for (const instrument of INSTRUMENTS) {
       for (const quality of CHORD_QUALITIES) {
+        if (instrument === "bass" && GUITAR_ONLY_QUALITIES.includes(quality)) continue;
         for (const root of ROOTS) {
           if (shapesFor(root, quality, { instrument }).length === 0) {
             empty.push(instrument + " " + quality + " " + String(root));
           }
+        }
+      }
+    }
+    expect(empty).toEqual([]);
+  });
+
+  it("gives the guitar a grip for every chord type the chart prints", () => {
+    // The chart is the whole point, and a blank cell in it is the thing the
+    // owner objected to. Every quality, every root, a shape.
+    const empty: string[] = [];
+    for (const quality of CHORD_QUALITIES) {
+      for (const root of ROOTS) {
+        if (shapesFor(root, quality, { instrument: "guitar" }).length === 0) {
+          empty.push(quality + " at " + String(root));
         }
       }
     }

@@ -247,7 +247,22 @@ export type ChordQuality =
   | "6"
   | "m6"
   | "add9"
-  | "9";
+  | "9"
+  // The extended chords (2026-09-19). Added so the cheat sheet is the whole
+  // chart a guitarist owns rather than most of one — the owner, with two
+  // printed charts open: "it's just making up cards for all chords and
+  // shapes, just make them so they look consistent and complete".
+  | "maj9"
+  | "m9"
+  | "11"
+  | "13"
+  | "m11"
+  | "m13"
+  | "7sus4"
+  | "7sus2"
+  | "7sharp5"
+  | "69"
+  | "madd9";
 
 export type Chord = { root: PitchClass; quality: ChordQuality };
 
@@ -278,6 +293,17 @@ const QUALITY_SUFFIX: Record<ChordQuality, string> = {
   m6: "m6",
   add9: "add9",
   "9": "9",
+  maj9: "maj9",
+  m9: "m9",
+  "11": "11",
+  "13": "13",
+  m11: "m11",
+  m13: "m13",
+  "7sus4": "7sus4",
+  "7sus2": "7sus2",
+  "7sharp5": "7#5",
+  "69": "6/9",
+  madd9: "m(add9)",
 };
 
 /** Semitones above the root, root first, in the order the chord is stacked. */
@@ -301,6 +327,23 @@ const QUALITY_INTERVALS: Record<ChordQuality, readonly number[]> = {
   m6: [0, 3, 7, 9],
   add9: [0, 2, 4, 7],
   "9": [0, 4, 7, 10, 14],
+  maj9: [0, 4, 7, 11, 14],
+  m9: [0, 3, 7, 10, 14],
+  // A dominant 11 is written with its third and almost never played with it:
+  // a natural 11 a semitone above the major third is the one interval the
+  // chord cannot hold. `spellsChord` lets the grip drop it.
+  "11": [0, 4, 7, 10, 14, 17],
+  // And a 13 is written without its 11 for the same reason.
+  "13": [0, 4, 7, 10, 14, 21],
+  m11: [0, 3, 7, 10, 14, 17],
+  m13: [0, 3, 7, 10, 14, 21],
+  "7sus4": [0, 5, 7, 10],
+  "7sus2": [0, 2, 7, 10],
+  // The augmented seventh. Its fifth is the sharpened one, so unlike every
+  // other quality here it is the one note that cannot be left out.
+  "7sharp5": [0, 4, 8, 10],
+  "69": [0, 4, 7, 9, 14],
+  madd9: [0, 3, 7, 14],
 };
 
 /** The suffix a quality is written with — "", "m", "m7b5". */
@@ -372,6 +415,30 @@ const QUALITY_SPELLINGS: ReadonlyArray<readonly [string, ChordQuality]> = [
   ["add9", "add9"],
   ["9", "9"],
   ["dom9", "9"],
+  ["maj9", "maj9"],
+  ["M9", "maj9"],
+  ["Δ9", "maj9"],
+  ["m9", "m9"],
+  ["min9", "m9"],
+  ["-9", "m9"],
+  ["11", "11"],
+  ["13", "13"],
+  ["m11", "m11"],
+  ["min11", "m11"],
+  ["m13", "m13"],
+  ["min13", "m13"],
+  ["7sus4", "7sus4"],
+  ["7sus", "7sus4"],
+  ["7sus2", "7sus2"],
+  ["7#5", "7sharp5"],
+  ["7+5", "7sharp5"],
+  ["aug7", "7sharp5"],
+  ["+7", "7sharp5"],
+  ["6/9", "69"],
+  ["69", "69"],
+  ["madd9", "madd9"],
+  ["m(add9)", "madd9"],
+  ["minadd9", "madd9"],
 ];
 
 /** The same list, longest spelling first, so the walk below is greedy. */

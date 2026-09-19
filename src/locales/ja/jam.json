@@ -306,7 +306,13 @@
       "scopeAll": "すべてのキー",
       "noteCount_one": "{{count}}音スケール",
       "noteCount_other": "{{count}}音スケール",
-      "noteCount": "{{count}}音スケール"
+      "noteCount": "{{count}}音スケール",
+      "jump": "ジャンプ",
+      "jumpLabel": "コードの系統へジャンプ",
+      "familyMajor": "メジャー",
+      "familyMinor": "マイナー",
+      "familyDominant": "ドミナント",
+      "familyOther": "dim・aug"
     },
     "chords": {
       "follow": "ジャムに追従",

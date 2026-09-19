@@ -306,7 +306,13 @@
       "scopeAll": "모든 조성",
       "noteCount_one": "{{count}}음 스케일",
       "noteCount_other": "{{count}}음 스케일",
-      "noteCount": "{{count}}음 스케일"
+      "noteCount": "{{count}}음 스케일",
+      "jump": "바로 가기",
+      "jumpLabel": "코드 계열로 이동",
+      "familyMajor": "메이저",
+      "familyMinor": "마이너",
+      "familyDominant": "도미넌트",
+      "familyOther": "dim·aug"
     },
     "chords": {
       "follow": "잼 따라가기",

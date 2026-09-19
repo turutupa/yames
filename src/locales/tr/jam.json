@@ -306,7 +306,13 @@
       "scopeAll": "Tüm tonaliteler",
       "noteCount_one": "{{count}} sesli dizi",
       "noteCount_other": "{{count}} sesli dizi",
-      "noteCount": "{{count}} sesli dizi"
+      "noteCount": "{{count}} sesli dizi",
+      "jump": "Şuraya git",
+      "jumpLabel": "Bir akor ailesine git",
+      "familyMajor": "Majör",
+      "familyMinor": "Minör",
+      "familyDominant": "Dominant",
+      "familyOther": "Eks. ve art."
     },
     "chords": {
       "follow": "Jam'i takip et",

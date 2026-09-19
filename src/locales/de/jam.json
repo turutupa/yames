@@ -306,7 +306,13 @@
       "scopeAll": "Alle Tonarten",
       "noteCount_one": "{{count}}-Ton-Skala",
       "noteCount_other": "{{count}}-Ton-Skala",
-      "noteCount": "{{count}}-Ton-Skala"
+      "noteCount": "{{count}}-Ton-Skala",
+      "jump": "Springe zu",
+      "jumpLabel": "Zu einer Akkordfamilie springen",
+      "familyMajor": "Dur",
+      "familyMinor": "Moll",
+      "familyDominant": "Dominant",
+      "familyOther": "Verm. & üb."
     },
     "chords": {
       "follow": "Dem Jam folgen",

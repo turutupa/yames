@@ -306,7 +306,13 @@
       "scopeAll": "Wszystkie tonacje",
       "noteCount_one": "skala {{count}}-dźwiękowa",
       "noteCount_other": "skala {{count}}-dźwiękowa",
-      "noteCount": "skala {{count}}-dźwiękowa"
+      "noteCount": "skala {{count}}-dźwiękowa",
+      "jump": "Przejdź do",
+      "jumpLabel": "Przejdź do rodziny akordów",
+      "familyMajor": "Durowe",
+      "familyMinor": "Molowe",
+      "familyDominant": "Dominantowe",
+      "familyOther": "Zmn. i zw."
     },
     "chords": {
       "follow": "Idź za jamem",

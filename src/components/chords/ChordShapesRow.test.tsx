@@ -69,8 +69,8 @@ describe("ChordShapesRow", () => {
     expect(screen.getAllByTestId("chord-shape")).toHaveLength(
       shapesFor(9, "maj", { instrument: "bass" }).length,
     );
-    const strings = screen.getAllByRole("img")[0].querySelectorAll(".chord-diagram-string");
-    expect(strings).toHaveLength(4);
+    const strings = screen.getAllByRole("img")[0].querySelector(".chord-diagram-string");
+    expect(strings?.getAttribute("data-strings")).toBe("4");
   });
 
   it("takes its words from outside, so the app can translate them", () => {

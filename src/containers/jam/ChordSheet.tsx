@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChordDiagram } from "../../components/chords";
 import { Fretboard, BASS_STANDARD_TUNING, GUITAR_STANDARD_TUNING } from "../../components/fretboard";
@@ -79,6 +79,14 @@ const CHEAT_TABS: readonly CheatTab[] = ["chords", "scales"];
  * the same in every language a musician reads.
  */
 const MAJOR_COLUMN = "maj";
+
+/**
+ * How much of the chart the sticky root column covers.
+ *
+ * A jump lands the column it was asked for just clear of it, rather than
+ * underneath it — which looks exactly like the jump not having worked.
+ */
+const ROOT_COLUMN_WIDTH = 52;
 
 /** The pinned shape as the record stores it, matched back to a real grip. */
 export function pinnedShapeOf(
@@ -248,6 +256,49 @@ export function ChordSheet({
     () => CHORD_FAMILIES.flatMap((family) => [...qualitiesInFamily(family)]),
     [],
   );
+
+  /** The first column of each family, so a jump knows where to land. */
+  const familyStarts = useMemo(
+    () =>
+      CHORD_FAMILIES.map((family) => ({
+        family,
+        quality: qualitiesInFamily(family)[0],
+      })),
+    [],
+  );
+
+  /**
+   * Take me to the minor chords.
+   *
+   * Not a filter. The owner was explicit about why: "clicking on minor it
+   * focuses the minor chords but doesn't fucking filter... filtering is
+   * annoying because it changes the whole page". So this scrolls the chart
+   * sideways to that family's first column and leaves everything where it
+   * is — the thing you were looking at is still on screen, just not in the
+   * middle any more.
+   */
+  const tableRef = useRef<HTMLDivElement>(null);
+  const scalesRef = useRef<HTMLElement>(null);
+
+  /** Take me to the blues scale. Scrolls the sheet, hides nothing. */
+  const jumpToScale = (scale: string) => {
+    scalesRef.current
+      ?.querySelector(`[data-scale="${scale}"]`)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const jumpTo = (quality: ChordQuality) => {
+    const wrap = tableRef.current;
+    const column = wrap?.querySelector<HTMLElement>(`[data-quality="${quality}"]`);
+    if (!wrap || !column) return;
+    // Measured rather than `scrollIntoView`, which on a box inside a
+    // scrolling sheet scrolls the sheet vertically as well and throws the
+    // reader somewhere they did not ask to go.
+    wrap.scrollTo({
+      left: Math.max(0, column.offsetLeft - wrap.offsetLeft - ROOT_COLUMN_WIDTH),
+      behavior: "smooth",
+    });
+  };
 
   /**
    * The chart itself: a row per root, a column per chord type.
@@ -451,6 +502,34 @@ export function ChordSheet({
         {onTheDots}
       </div>
 
+      {/* Jump, don't filter. A word, and the sheet moves to it — the chart
+          sideways to that family of chords, the scales page down to that
+          scale. Nothing is hidden and nothing else moves. */}
+      <nav className="jam-chord-jump" aria-label={t("jam.cheat.jumpLabel")}>
+        <span className="stage-label">{t("jam.cheat.jump")}</span>
+        {tab === "chords"
+          ? familyStarts.map(({ family, quality }) => (
+              <button
+                key={family}
+                type="button"
+                className="jam-chip"
+                onClick={() => jumpTo(quality)}
+              >
+                {t(`jam.cheat.family${cap(family)}`)}
+              </button>
+            ))
+          : boards.map((board) => (
+              <button
+                key={`${board.scale}-${board.root}`}
+                type="button"
+                className="jam-chip"
+                onClick={() => jumpToScale(board.scale)}
+              >
+                {t(board.labelKey, { defaultValue: board.scale })}
+              </button>
+            ))}
+      </nav>
+
       {tab === "chords" ? (
         <>
           {/* The chart: every root down the side, every chord type across.
@@ -458,13 +537,13 @@ export function ChordSheet({
               This is the poster a guitarist tapes to the wall, and it is one
               picture rather than a page you drive. "In key" thins it to what
               works over this jam; "All keys" is the lot. */}
-          <div className="jam-chord-table-wrap">
+          <div className="jam-chord-table-wrap" ref={tableRef}>
             <table className="jam-chord-table">
               <thead>
                 <tr>
                   <td />
                   {qualities.map((quality) => (
-                    <th key={quality} scope="col">
+                    <th key={quality} scope="col" data-quality={quality}>
                       {chordSuffix(quality) || MAJOR_COLUMN}
                     </th>
                   ))}
@@ -589,12 +668,16 @@ export function ChordSheet({
            scales a key offers were a click away and invisible until you
            clicked. The printed card stacks them — a title bar, the formula,
            and the whole neck — and you read down it. So does this. */
-        <section className="jam-scale-sheet">
+        <section className="jam-scale-sheet" ref={scalesRef}>
           {boards.length === 0 ? (
             <p className="jam-sheet-note">{t("jam.cheat.noScales")}</p>
           ) : (
             boards.map((board) => (
-              <section key={`${board.scale}-${board.root}`} className="jam-scale-board">
+              <section
+                key={`${board.scale}-${board.root}`}
+                className="jam-scale-board"
+                data-scale={board.scale}
+              >
                 <header className="jam-scale-board-head">
                   <h3 className="jam-scale-board-name">
                     {t(board.labelKey, { defaultValue: board.scale })}

@@ -306,7 +306,13 @@
       "scopeAll": "Mọi giọng",
       "noteCount_one": "thang {{count}} nốt",
       "noteCount_other": "thang {{count}} nốt",
-      "noteCount": "thang {{count}} nốt"
+      "noteCount": "thang {{count}} nốt",
+      "jump": "Đưa tôi tới",
+      "jumpLabel": "Nhảy tới một nhóm hợp âm",
+      "familyMajor": "Trưởng",
+      "familyMinor": "Thứ",
+      "familyDominant": "Át",
+      "familyOther": "Dim & aug"
     },
     "chords": {
       "follow": "Bám theo bài",

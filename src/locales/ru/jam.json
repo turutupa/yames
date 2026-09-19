@@ -306,7 +306,13 @@
       "scopeAll": "Все тональности",
       "noteCount_one": "{{count}}-ступенная гамма",
       "noteCount_other": "{{count}}-ступенная гамма",
-      "noteCount": "{{count}}-ступенная гамма"
+      "noteCount": "{{count}}-ступенная гамма",
+      "jump": "Перейти к",
+      "jumpLabel": "Перейти к семейству аккордов",
+      "familyMajor": "Мажорные",
+      "familyMinor": "Минорные",
+      "familyDominant": "Доминанты",
+      "familyOther": "Ум. и ув."
     },
     "chords": {
       "follow": "Следовать за джемом",
