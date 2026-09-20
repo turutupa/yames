@@ -1,4 +1,12 @@
-# W23 — The next yames.app: practice that listens (a draft on a branch, never published by you)
+# W23 — The next yames.app (a draft on a branch, never published by you)
+
+> **Overridden 2026-09-20, by the owner:** "it listens" is rejected as headline, thread or slogan
+> (`plans/WEBSITE_DECISIONS.md`, "Say what the app does"). Wherever this brief says "it listens" or
+> "the coach is the thread", read instead: every heading says plainly what the app is and what you do
+> with it. Headlines: "Practise your songs with a band behind you — and see exactly what to fix." ·
+> "The free practice app for guitar and bass." · "Your tabs, a backing band and a metronome. One free
+> app." Sections are named for what you do (Learn a song · Play with a band · Keep time), songs and
+> the band first. The worker was told by message.
 
 Branch `site-next`, from the local branch `site-backing-tracks` (it holds
 the `/backing-tracks/` page and a fix to `coachFigure.recolour()` that this

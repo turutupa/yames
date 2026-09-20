@@ -50,7 +50,23 @@ Three reasons:
 3. The coach still does its job as the section that makes someone pick *this* metronome over the
    free one they already have — it just isn't the headline.
 
-### Open · 2026-09-20 · From "a metronome" to "practice that listens" — evaluation and recommendation
+### Decided — 2026-09-20 · "It listens" is rejected. Say what the app does.
+
+The orchestrator proposed "it listens" / "the practice room that listens back" as the thread of the
+new site (the entry below). The owner: *"Nobody coming to the website for the first time would ever
+understand what it means and what the app does by saying listens."* He is right; it only makes sense
+to someone who already knows the product.
+
+**The rule:** every headline, kicker and section title must tell a stranger, in three seconds, what
+the app IS and what they would DO with it, in the words a guitarist would use to a friend. No
+metaphor, no concept, no slogan. Hearing the player is explained concretely where it applies ("marks
+every note on time, early, late or missed"), never made into a theme. Headline candidates for the
+draft: "Practise your songs with a band behind you — and see exactly what to fix." · "The free
+practice app for guitar and bass." · "Your tabs, a backing band and a metronome. One free app."
+Everything else in the entry below — the numbers, the timing, the landing pages, not "toolkit" —
+still stands; its headline candidates and "the thread" do not.
+
+### Superseded in part · 2026-09-20 · From "a metronome" to "practice that listens" — evaluation and recommendation
 
 The owner's question: the homepage sells a metronome, and the app is fast becoming a toolkit and a
 companion. Should the marketing shift? Recommendation below; nothing here is decided until the owner
