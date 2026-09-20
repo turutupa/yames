@@ -284,6 +284,12 @@ pub struct Evidence {
     /// (the tempo it holds, the tempo it collapses at), in BPM.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bpm_band: Option<(u16, u16)>,
+    /// Notes played that are not written, inside this finding's bars. The
+    /// one number an `extras` sentence is actually about: `onsets` and
+    /// `hits` count what the score asked for, and these are the ones it
+    /// did not.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub extras: Option<u32>,
     /// Against earlier attempts: how much the hit rate moved…
     #[serde(skip_serializing_if = "Option::is_none")]
     pub hit_rate_delta: Option<f32>,
@@ -1260,9 +1266,7 @@ fn rule_extras(ctx: &Context, agg: &Aggregate, attempt: &Attempt) -> Option<Find
         evidence: Evidence {
             printed_bars: ctx.printed_of(first_bar, last_bar),
             reference_bpm: Some(ctx.score_bpm_at(first_bar)),
-            // `onsets` counts what was expected; the extras are the gap
-            // between that and what arrived, and live in `hits` vs `onsets`
-            // nowhere — so they are stated here, in the passes they hit.
+            extras: Some(cluster),
             passes_affected: agg.passes.min(cluster),
             ..evidence_of(&tally, agg.passes)
         },
@@ -2538,6 +2542,7 @@ mod tests {
         let head = headline(&found).expect("four notes nobody wrote is a finding");
         assert_eq!(head.kind, FindingKind::Extras);
         assert_eq!(head.bars, Some((5, 5)));
+        assert_eq!(head.evidence.extras, Some(4), "the number the sentence is about");
         assert!(matches!(head.fix, Some(Fix::LoopBars { start: 5, end: 5, .. })));
     }
 
@@ -3044,6 +3049,138 @@ mod tests {
         assert_eq!(slower(70), 50);
         assert_eq!(slower(55), 50);
         assert_eq!(slower(50), 50);
+    }
+
+    // -----------------------------------------------------------------
+    // The wire — W4 mirrors all of this in `src/songs/types.ts`
+    // -----------------------------------------------------------------
+
+    #[test]
+    fn a_finding_goes_over_the_wire_in_camel_case() {
+        let finding = Finding {
+            kind: FindingKind::ConsistentMiss,
+            bars: Some((3, 4)),
+            note_ids: vec![12, 13],
+            severity: 0.8,
+            evidence: Evidence {
+                onsets: 6,
+                passes: 3,
+                passes_affected: 3,
+                printed_bars: Some((4, 5)),
+                ..Evidence::default()
+            },
+            fix: Some(Fix::LoopBars {
+                start: 3,
+                end: 4,
+                tempo_percent: 80,
+            }),
+        };
+        let json = serde_json::to_value(&finding).expect("a finding serialises");
+
+        assert_eq!(json["kind"], "consistentMiss");
+        assert_eq!(json["noteIds"], serde_json::json!([12, 13]));
+        assert_eq!(json["bars"], serde_json::json!([3, 4]));
+        assert_eq!(json["evidence"]["hitRate"], 0.0);
+        assert_eq!(json["evidence"]["meanDeviationMs"], 0.0);
+        assert_eq!(json["evidence"]["passesAffected"], 3);
+        assert_eq!(json["evidence"]["printedBars"], serde_json::json!([4, 5]));
+        // Absent, not null: a narrator must never quote a number nobody
+        // measured, and `undefined` is how TypeScript says so.
+        assert!(json["evidence"].get("bpmBand").is_none());
+        assert!(json["evidence"].get("subdivision").is_none());
+        assert_eq!(json["fix"]["type"], "loopBars");
+        assert_eq!(json["fix"]["tempoPercent"], 80);
+
+        let back: Finding = serde_json::from_value(json).expect("and comes back");
+        assert_eq!(back, finding);
+    }
+
+    #[test]
+    fn every_fix_is_a_tagged_object() {
+        let table: &[(Fix, &str)] = &[
+            (
+                Fix::LoopBars {
+                    start: 1,
+                    end: 2,
+                    tempo_percent: 80,
+                },
+                "loopBars",
+            ),
+            (
+                Fix::Ramp {
+                    start: None,
+                    end: None,
+                    from_percent: 80,
+                    to_percent: 100,
+                },
+                "ramp",
+            ),
+            (
+                Fix::ClickSubdivision {
+                    start: Some(1),
+                    end: Some(2),
+                    subdivision: 4,
+                },
+                "clickSubdivision",
+            ),
+            (Fix::ComeBack { days: 2 }, "comeBack"),
+        ];
+        for &(fix, tag) in table {
+            let json = serde_json::to_value(fix).expect("a fix serialises");
+            assert_eq!(json["type"], tag, "wrong tag for {fix:?}");
+            let back: Fix = serde_json::from_value(json).expect("and comes back");
+            assert_eq!(back, fix);
+        }
+        assert_eq!(
+            serde_json::to_value(Fix::Ramp {
+                start: None,
+                end: None,
+                from_percent: 80,
+                to_percent: 100
+            })
+            .unwrap()["fromPercent"],
+            80
+        );
+    }
+
+    #[test]
+    fn the_contract_types_round_trip() {
+        // The three shapes scoring hands back, in the contract's own words.
+        let result = OnsetResult {
+            id: 7,
+            state: OnsetState::SoftAbsent,
+            deviation_ms: None,
+            pass: 2,
+        };
+        let json = serde_json::to_value(result).unwrap();
+        assert_eq!(json["state"], "softAbsent");
+        assert_eq!(json["deviationMs"], serde_json::Value::Null);
+        assert_eq!(
+            serde_json::from_value::<OnsetResult>(json).unwrap(),
+            result
+        );
+
+        let expected = ExpectedOnset {
+            id: 7,
+            beat: 3.5,
+            note_ids: vec![9, 10],
+            soft: true,
+            accent: false,
+        };
+        let json = serde_json::to_value(&expected).unwrap();
+        assert_eq!(json["noteIds"], serde_json::json!([9, 10]));
+        assert_eq!(
+            serde_json::from_value::<ExpectedOnset>(json).unwrap(),
+            expected
+        );
+
+        let score = score_of(2, 4, one_finger);
+        let json = serde_json::to_value(&score).unwrap();
+        assert_eq!(json["ticksPerQuarter"], 960);
+        assert_eq!(json["source"]["format"], "gp");
+        assert_eq!(json["bars"][0]["printedBar"], 1);
+        assert_eq!(json["notes"][0]["tieFromPrevious"], false);
+        assert_eq!(serde_json::from_value::<SongScore>(json).unwrap(), score);
     }
 
     #[test]
