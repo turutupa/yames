@@ -77,6 +77,17 @@ Status key: **decided** · **open** · **deferred**
   partnership conversation for when there is traction. Brief:
   `plans/tasks/songs/W19-FRICTION.md`.
 
+- **S0.10 No hook into other platforms' paid content.** (Owner, 2026-09-20,
+  after asking whether a player's Songsterr or Guitar Pro subscription could
+  be connected.) A subscription is a licence to use that service on its
+  terms, not ownership of the tabs, and those terms forbid automated access;
+  an app that logs in and pulls them is the thing breaking the terms, with
+  customers' passwords in its hands. What is clean and already works: a file
+  the service lets its user export, imported like any other. What is clean
+  and later: an official partnership ("open in Yames"), a conversation for
+  when there is traction. Nothing in between — no reading a tab off a page.
+  The owner's call: "let's stick to our roadmap."
+
 ### State of the engine this stands on (checked 2026-09-18)
 
 Roadmap Phase 0 is done. Phase 1 is untouched: no SQLite store (1.1), no
