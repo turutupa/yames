@@ -417,14 +417,14 @@ export function MainWindow() {
   });
 
   /**
-   * The Songs library and the loaded song.
+   * The Songs library, the loaded song, and the song the engine is playing.
    *
-   * Takes nothing from the engine and gives it nothing but a schedule: the
-   * cursor is driven from `currentBeat` inside `SongsView`, and the click is
-   * the ordinary metronome running at the tempo the range asks for. Inert
-   * with no song open, like the jam above it.
+   * It is given the tab for one reason: Songs is its own engine mode beside
+   * the jam, so walking away from it has to take the song off the engine —
+   * otherwise the Metronome tab would go on clicking through a score nobody
+   * is looking at. Inert with no song open, like the jam above it.
    */
-  const songsSession = useSongsSession();
+  const songsSession = useSongsSession(undefined, { view });
 
   /*
    * Wrapped, because it is the root of a chain of fresh objects.

@@ -10,14 +10,15 @@
  * The tab is never hidden behind a toggle (U1.1's sibling rule): it is the
  * main content, and everything else makes room for it.
  *
- * What this wave does NOT do, so nobody looks for it: the engine clicks at
- * one tempo for the whole pass. The tempo map and the file's other tracks
- * played through the band are the next wave's (`SONGS.md` §C, T-E), and the
- * review with its verdict comes after W1 and W2.
+ * Play now means the song: the engine follows the score's own tempo map and
+ * plays the file's other tracks through the band, so the band's faders, the
+ * mutes and the count-in are on the stage beside the range (A13 again). The
+ * review with its verdict is the one piece still to come.
  */
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TrackPicker, tuningLabel } from "./TrackPicker";
+import { SongBand, SongCountIn } from "./SongBand";
 import { SONG_FILE_EXTENSIONS } from "../../songs/types";
 import { meterAt, rangeTicks, sectionRange, wholeSong } from "../../songs/schedule";
 import type { SongsSession } from "../main-window/hooks/useSongsSession";
@@ -61,23 +62,39 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
   /**
    * Where the cursor stands, in ticks.
    *
-   * The ONLY input is the engine's beat count. No timer, no animation frame,
-   * no interpolation: a beat arrives, the cursor moves. `beat` counts from
-   * the moment the engine started, so a loop wraps with a modulo rather than
-   * by anyone keeping a position.
+   * The ONLY input is `songTick` — where the engine says the song is, in the
+   * score's own ticks. No timer, no animation frame, no interpolation: a beat
+   * arrives, the cursor moves.
+   *
+   * **Never `BeatEvent.beat`.** That is what this used to read, and it was
+   * wrong in two ways that both look like the cursor drifting. `beat` counts
+   * the CLICK's beats, so in 7/8 it counts eighths and the cursor advances at
+   * twice the rate the music does; and it counts them at one length, so after
+   * a tempo step at bar nine the cursor and the page are further apart with
+   * every bar. `songTick` is the engine's own position in the piece and
+   * carries both, along with the loop seam, for nothing.
    */
   const tick = useMemo(() => {
     if (!score) return 0;
-    const { start, end } = rangeTicks(score, range);
+    const { start } = rangeTicks(score, range);
+    // No song on the engine, stopped, or counting in: the cursor sits on the
+    // first bar of the range and waits. A cursor walking through a count-in
+    // would be a cursor on notes nobody has been asked to play yet.
     if (currentBeat === null || !isPlaying) return start;
-    const beatTicks = score.ticksPerQuarter;
-    const spanBeats = (end - start) / beatTicks;
-    // `beat` counts quarter notes since the engine started. A loop wraps with
-    // a modulo rather than by anybody keeping a position of their own.
-    const elapsed = currentBeat.beat;
-    const played = loop && spanBeats > 0 ? elapsed % spanBeats : Math.min(elapsed, spanBeats);
-    return start + played * beatTicks;
-  }, [score, range, currentBeat, isPlaying, loop]);
+    if (currentBeat.songCountIn || currentBeat.songBar === null) return start;
+    return currentBeat.songTick;
+  }, [score, range, currentBeat, isPlaying]);
+
+  /**
+   * The count, while one is being counted in.
+   *
+   * `measureBeat` is 0-based and a count is not, and the engine sends the
+   * count-in's ticks in the range's own meter — so this is the number a
+   * person would say out loud. Subdivision ticks carry the same
+   * `measureBeat`, so the number holds between beats instead of blinking.
+   */
+  const countIn =
+    isPlaying && currentBeat?.songCountIn ? currentBeat.measureBeat + 1 : null;
 
   // The engine gets the schedule when what it describes changes — not on every
   // render, and never while a pass is running underneath it.
@@ -163,6 +180,26 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
         </div>
       )}
 
+      {/* The engine's own trouble, which is not an import failure and must
+          not look like one: the song is in the library and readable, and
+          what went wrong is the sound. `detail` is the engine's line, in
+          English, under the sentence rather than instead of it. */}
+      {session.engineError && (
+        <div className="songs-alert" role="alert">
+          <span>
+            {session.engineError.kind === "busy"
+              ? t("songs.engine.busy")
+              : t("songs.engine.cannotPlay")}
+            {session.engineError.kind === "load" && session.engineError.detail ? (
+              <span className="songs-alert-detail">{session.engineError.detail}</span>
+            ) : null}
+          </span>
+          <button type="button" className="songs-btn" onClick={session.dismissEngineError}>
+            {t("songs.dismiss")}
+          </button>
+        </div>
+      )}
+
       {!score || !source ? (
         <div className="songs-empty">
           <h2 className="songs-empty-title">{t("songs.empty.title")}</h2>
@@ -223,15 +260,48 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
             </ul>
           )}
 
-          <Suspense
-            fallback={
-              <div className="songs-tab-viewport">
-                <p className="songs-tab-status">{t("songs.tab.drawing")}</p>
+          {/* What the engine could not bring, said once and quietly. Neither
+              of these is a failure: a file written for a band this one does
+              not have still plays, and a player who imported an orchestral
+              arrangement deserves to know where the strings went rather than
+              to wonder whether the import worked. */}
+          {(session.leftOut.length > 0 || (session.loaded?.droppedNotes ?? 0) > 0) && (
+            <ul className="songs-warnings songs-warnings-quiet">
+              {session.leftOut.length > 0 && (
+                <li>
+                  {t("songs.band.leftOut", {
+                    count: session.leftOut.length,
+                    tracks: session.leftOut.join(", "),
+                  })}
+                </li>
+              )}
+              {(session.loaded?.droppedNotes ?? 0) > 0 && (
+                <li>{t("songs.band.droppedNotes", { count: session.loaded!.droppedNotes })}</li>
+              )}
+            </ul>
+          )}
+
+          <div className="songs-tab-frame">
+            <Suspense
+              fallback={
+                <div className="songs-tab-viewport">
+                  <p className="songs-tab-status">{t("songs.tab.drawing")}</p>
+                </div>
+              }
+            >
+              <TabStage score={score} source={source} tick={tick} themeId={themeId} />
+            </Suspense>
+
+            {/* The count, over the page, while somebody counts you in. The
+                cursor is not drawn at all until the piece starts — see
+                `tick` above — so this is what is on screen instead. */}
+            {countIn !== null && (
+              <div className="songs-countin-overlay" role="status" aria-live="polite">
+                <span className="songs-countin-count">{countIn}</span>
+                <span className="songs-countin-caption">{t("songs.countIn.counting")}</span>
               </div>
-            }
-          >
-            <TabStage score={score} source={source} tick={tick} themeId={themeId} />
-          </Suspense>
+            )}
+          </div>
 
           {/* The stage controls: what you reach for with the guitar on. */}
           <div className="songs-stage-controls">
@@ -272,6 +342,11 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
               </div>
               <p className="songs-control-note">{t("songs.barsCount", { count: barsInRange })}</p>
             </div>
+
+            <SongCountIn
+              bars={session.mixSetting.countInBars}
+              onChange={session.setCountInBars}
+            />
 
             {score.sections.length > 0 && (
               <div className="songs-control songs-control-sections">
@@ -329,6 +404,13 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
               </button>
               <p className="songs-control-note">{t("songs.loopNote")}</p>
             </div>
+
+            <SongBand
+              setting={session.mixSetting}
+              lanes={session.lanes}
+              onGain={session.setGain}
+              onMute={session.setMute}
+            />
           </div>
         </>
       )}

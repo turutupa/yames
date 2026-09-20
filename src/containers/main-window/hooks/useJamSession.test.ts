@@ -162,6 +162,10 @@ function beatAt(formBar: number, chorus = 1, measureBeat = 0): BeatEvent {
     formBar,
     chorus,
     bandState: "full",
+    songBar: null,
+    songTick: 0,
+    songPass: 0,
+    songCountIn: false,
   };
 }
 

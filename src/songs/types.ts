@@ -137,6 +137,101 @@ export type ScoreSchedule = {
   loops: boolean;
 };
 
+// ---------------------------------------------------------------------------
+// What the ENGINE is told — the mirror of `src-tauri/src/song.rs`
+//
+// A `SongScore` is what is written; a `SongTransport` is what is PLAYED, and
+// they are different shapes for a reason. The score carries the page (string,
+// fret, technique, the bar it was printed on); the transport carries only what
+// the click needs to walk the piece in time — the tempo map, the meter of
+// every played bar, the range, the speed, and a count-in. The engine never
+// sees a fret.
+//
+// Fixed by `plans/tasks/songs/W9-ENGINE-SONG.md` and pinned on the Rust side
+// by the `Deserialize` impls in `song.rs`, `camelCase` on the wire. A change
+// here is a change there.
+// ---------------------------------------------------------------------------
+
+/** One played bar, as the engine counts it. `bars` is already unrolled. */
+export type SongTransportBar = {
+  startTick: number;
+  lengthTicks: number;
+  numerator: number;
+  denominator: number;
+};
+
+export type SongTransport = {
+  ticksPerQuarter: typeof TICKS_PER_QUARTER;
+  /** Step changes, on bar lines, the first at or before the first bar. */
+  tempoMap: SongTempo[];
+  bars: SongTransportBar[];
+  /** Inclusive, in played-bar indices. */
+  range: { startBar: number; endBar: number };
+  loops: boolean;
+  tempoPercent: number;
+  /** 0, 1 or 2 bars, at the range's first tempo and meter. */
+  countInBars: number;
+};
+
+/** Which of the band's three rows a backing track is played on. */
+export type SongRole = "drums" | "bass" | "keys";
+
+/**
+ * One note of the file's own rhythm section.
+ *
+ * `midi` is a General MIDI PERCUSSION number on a `drums` track — what Guitar
+ * Pro writes, and what the engine maps onto the kit's voices — and the
+ * sounding pitch on a `bass` or `keys` one. `velocity` is 0..1.
+ */
+export type SongBackingNote = {
+  tick: number;
+  durTicks: number;
+  midi: number;
+  velocity: number;
+};
+
+export type SongBackingTrack = {
+  role: SongRole;
+  name: string;
+  notes: SongBackingNote[];
+};
+
+/** The file's own rhythm section. `null` is a song the engine only clicks to. */
+export type SongBacking = { tracks: SongBackingTrack[] };
+
+/** How loud the click and each of the band's three rows are. */
+export type SongMix = {
+  click: number;
+  drums: number;
+  bass: number;
+  keys: number;
+};
+
+/**
+ * The click at 0.45, and that is the engine's number, not a guess.
+ *
+ * `song.rs`'s `DEFAULT_CLICK_MIX`: a metronome at full scale is the loudest
+ * thing the engine makes, and over a piece you are reading it does not want to
+ * be — the band is the reference and the click is the ruler beside it.
+ */
+export const DEFAULT_SONG_MIX: SongMix = {
+  click: 0.45,
+  drums: 1,
+  bass: 1,
+  keys: 1,
+};
+
+/** The loudest a lane goes, and the quietest. `song.rs`'s `MIX_MIN`/`MIX_MAX`. */
+export const SONG_MIX_MAX = 1.5;
+export const SONG_MIX_MIN = 0;
+
+/** The most bars of count-in the engine will play. `song.rs`'s own ceiling. */
+export const MAX_COUNT_IN_BARS = 2;
+
+/** The speeds the engine accepts, as a percentage of what is written. */
+export const MIN_TEMPO_PERCENT = 25;
+export const MAX_TEMPO_PERCENT = 100;
+
 /** What scoring says back, per expected onset. `pass` counts loops, from 0. */
 export type OnsetResult = {
   id: number;

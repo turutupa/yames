@@ -8,13 +8,17 @@ import { describe, expect, it } from "vitest";
 import {
   SONG_FILE_EXTENSIONS,
   SongImportError,
+  buildBacking,
+  buildTransport,
   importSong,
   parseSongFile,
   playableTracks,
   songId,
 } from "./import";
 import { TICKS_PER_QUARTER } from "./types";
+import { wholeSong } from "./schedule";
 import {
+  BAND_WITH_SEVEN_EIGHT,
   CAPO_TWO,
   CHORD_THEN_SINGLES,
   DROP_D,
@@ -368,5 +372,151 @@ describe("the formats people actually import", () => {
     expect(score.capo).toBe(2);
     expect(score.notes).toHaveLength(2);
     expect(score.notes.map((n) => n.fret)).toEqual([0, 2]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// What the engine is handed
+//
+// The transport is what the click walks and the backing is what the band
+// plays, and both fail in the same silent way: the piece still sounds, in the
+// wrong meter or with the kick where the snare should be. So these pin the
+// numbers rather than the shapes.
+// ---------------------------------------------------------------------------
+
+describe("the transport", () => {
+  it("carries every played bar with its own meter", () => {
+    const { score } = load(TEMPO_AND_SEVEN_EIGHT);
+    const transport = buildTransport(score, wholeSong(score));
+
+    expect(transport.ticksPerQuarter).toBe(TICKS_PER_QUARTER);
+    expect(transport.bars).toHaveLength(3);
+    expect(transport.bars.map((b) => `${b.numerator}/${b.denominator}`)).toEqual([
+      "4/4",
+      "4/4",
+      "7/8",
+    ]);
+    // A 7/8 bar is seven eighths, and an eighth is 480 ticks.
+    expect(transport.bars[2].lengthTicks).toBe(7 * 480);
+    expect(transport.bars.map((b) => b.startTick)).toEqual([0, 3840, 7680]);
+  });
+
+  it("hands over the tempo steps, in order and inside what the click plays", () => {
+    const { score } = load(TEMPO_AND_SEVEN_EIGHT);
+    const transport = buildTransport(score, wholeSong(score));
+    expect(transport.tempoMap.map((t) => t.bpm)).toEqual([100, 140]);
+    expect(transport.tempoMap[0].tick).toBe(0);
+    expect(transport.tempoMap[1].tick).toBe(3840);
+  });
+
+  it("opens the tempo map at or before the first bar, whatever the file did", () => {
+    const { score } = load(TEMPO_AND_SEVEN_EIGHT);
+    const moved = { ...score, tempoMap: [{ tick: 999, bpm: 100 }] };
+    expect(buildTransport(moved, wholeSong(score)).tempoMap[0].tick).toBe(0);
+  });
+
+  it("holds a tempo the engine cannot click inside the range it can", () => {
+    const { score } = load(TEMPO_AND_SEVEN_EIGHT);
+    const silly = { ...score, tempoMap: [{ tick: 0, bpm: 900 }] };
+    expect(buildTransport(silly, wholeSong(score)).tempoMap[0].bpm).toBe(300);
+  });
+
+  it("clamps the range, the speed and the count-in rather than let the load fail", () => {
+    const { score } = load(TEMPO_AND_SEVEN_EIGHT);
+    const transport = buildTransport(
+      score,
+      { startBar: 7, endBar: 2 },
+      { loops: true, tempoPercent: 300, countInBars: 9 },
+    );
+    expect(transport.range).toEqual({ startBar: 2, endBar: 2 });
+    expect(transport.loops).toBe(true);
+    expect(transport.tempoPercent).toBe(100);
+    expect(transport.countInBars).toBe(2);
+  });
+
+  it("defaults to the whole piece once through, at the written tempo, with no count-in", () => {
+    const { score } = load(SECTIONS);
+    const transport = buildTransport(score, wholeSong(score));
+    expect(transport.loops).toBe(false);
+    expect(transport.tempoPercent).toBe(100);
+    expect(transport.countInBars).toBe(0);
+  });
+});
+
+describe("the band from the file", () => {
+  const parsed = () => parseSongFile(texBytes(BAND_WITH_SEVEN_EIGHT), "band.alphatex");
+
+  it("gives every other track a role, and never the one you are playing", () => {
+    const { backing } = buildBacking(parsed(), 0);
+    expect(backing.tracks.map((t) => [t.name, t.role])).toEqual([
+      ["Drums", "drums"],
+      ["Bass", "bass"],
+      ["Piano", "keys"],
+    ]);
+    expect(backing.tracks.map((t) => t.name)).not.toContain("Guitar");
+  });
+
+  it("names what it left out rather than letting it vanish", () => {
+    const { leftOut } = buildBacking(parsed(), 0);
+    expect(leftOut).toEqual(["Horn"]);
+  });
+
+  it("leaves the player's own part out whichever part that is", () => {
+    // The bass player's band has no bass in it, and the guitar it does have
+    // is a track this band cannot play — so it is named, not silently gone.
+    const { backing, leftOut } = buildBacking(parsed(), 2);
+    expect(backing.tracks.map((t) => t.role)).toEqual(["drums", "keys"]);
+    expect(leftOut).toEqual(["Guitar", "Horn"]);
+  });
+
+  it("reads drums as General MIDI percussion numbers, not as articulations", () => {
+    const { backing } = buildBacking(parsed(), 0);
+    const drums = backing.tracks.find((t) => t.role === "drums")!;
+    // Bar one: kick and hat together, hat, snare and hat together, hat.
+    expect(drums.notes.slice(0, 6).map((n) => [n.tick, n.midi])).toEqual([
+      [0, 35],
+      [0, 42],
+      [960, 42],
+      [1920, 38],
+      [1920, 42],
+      [2880, 42],
+    ]);
+  });
+
+  it("reads the bass and the keys as sounding pitches", () => {
+    const { backing } = buildBacking(parsed(), 0);
+    const bass = backing.tracks.find((t) => t.role === "bass")!;
+    const keys = backing.tracks.find((t) => t.role === "keys")!;
+    // Fret 3 of the low E of a four-string bass is G1.
+    expect(bass.notes[0].midi).toBe(31);
+    expect(keys.notes.slice(0, 4).map((n) => n.midi)).toEqual([60, 64, 67, 72]);
+  });
+
+  it("puts the 7/8 bar's notes where the 7/8 bar is", () => {
+    const { backing } = buildBacking(parsed(), 0);
+    const keys = backing.tracks.find((t) => t.role === "keys")!;
+    // Two 4/4 bars, then seven eighths starting at 7680, 480 apart.
+    const seven = keys.notes.filter((n) => n.tick >= 7680);
+    expect(seven.map((n) => n.tick)).toEqual([7680, 8160, 8640, 9120, 9600, 10080, 10560]);
+    expect(seven.every((n) => n.durTicks === 480)).toBe(true);
+  });
+
+  it("carries a velocity the engine can read, between nothing and everything", () => {
+    const { backing } = buildBacking(parsed(), 0);
+    for (const track of backing.tracks) {
+      for (const note of track.notes) {
+        expect(note.velocity).toBeGreaterThan(0);
+        expect(note.velocity).toBeLessThanOrEqual(1);
+      }
+    }
+  });
+
+  it("is an empty band, not a crash, when the file has only your part in it", () => {
+    const { backing, leftOut } = buildBacking(
+      parseSongFile(texBytes(REPEAT_WITH_ENDINGS), "repeat.alphatex"),
+      0,
+    );
+    expect(backing.tracks).toEqual([]);
+    expect(leftOut).toEqual([]);
   });
 });

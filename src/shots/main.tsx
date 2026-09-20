@@ -249,6 +249,20 @@ async function drive() {
     (document.querySelectorAll(rows)[shot!.songs!.row] as HTMLElement).click();
     await until("the songs stage", () => !!document.querySelector(".songs-view"));
     await until("the drawn tab", () => !!document.querySelector(".songs-tab-host[data-ready]"));
+    /*
+     * And the band, which arrives after the tab does.
+     *
+     * The file's other tracks are read in a second pass and the engine send
+     * is debounced, so the faders appear a moment after the score is drawn.
+     * Without this wait the layout suite measures a stage that has a click
+     * row and nothing else — which is the real narrow-window failure it is
+     * here to catch, so it must not be the state it photographs.
+     * Three rows: the click, the drums and the bass of `SHOT_SONG_TEX`.
+     */
+    await until(
+      "the band's faders",
+      () => document.querySelectorAll(".songs-band-lane").length >= 3,
+    );
 
     if (shot!.songs.section) {
       const chips = [...document.querySelectorAll<HTMLElement>(".songs-section-chips .songs-chip")];
