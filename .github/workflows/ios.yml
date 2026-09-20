@@ -94,6 +94,19 @@ jobs:
       - name: Install frontend dependencies
         run: npm install
 
+      # cargo-mobile2 — the thing underneath `tauri ios init` — wants
+      # `xcodegen` to write the Xcode project and `pod` for dependency
+      # resolution, and it installs them through Homebrew if they are
+      # missing. Doing it here instead means the install is visible in the log
+      # and does not happen inside a command that would otherwise have failed
+      # with something obscure. The runner image already carries CocoaPods.
+      - name: Install the Xcode project generator
+        run: |
+          command -v xcodegen >/dev/null 2>&1 || brew install xcodegen
+          command -v pod >/dev/null 2>&1 || brew install cocoapods
+          xcodegen --version
+          pod --version
+
       - name: Show the toolchain
         run: |
           xcodebuild -version

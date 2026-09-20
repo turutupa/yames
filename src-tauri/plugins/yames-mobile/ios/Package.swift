@@ -1,4 +1,7 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.5
+// 5.5 rather than the 5.3 Tauri's own plugins use: `.iOS(.v15)` — the floor
+// the mobile plan sets for Yames — did not exist in PackageDescription until
+// 5.5, and declaring it under 5.3 fails to compile the manifest at all.
 // The iPhone half of the `yames-mobile` plugin.
 //
 // Built and linked by `swift_rs::SwiftLinker` from the crate's build script
