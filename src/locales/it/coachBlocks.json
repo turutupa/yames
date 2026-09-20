@@ -2,7 +2,7 @@
   "coachBlocks": {
     "action": {
       "loopBars": "Ripeti le battute {{from}}–{{to}}",
-      "loopBarsAt": "Ripeti le battute {{from}}–{{to}} a {{bpm}}",
+      "loopBarsAt": "Ripeti le battute {{from}}–{{to}} a {{bpm}} BPM",
       "ramp": "Portalo da {{from}} a {{to}}",
       "click": {
         "1": "Clic sulle semiminime",

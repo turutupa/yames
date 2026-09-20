@@ -120,8 +120,37 @@ const SongReview = lazy(() =>
 /** The tempo percentages worth a button. 50–100, the brief's range. */
 const TEMPO_STEPS = [50, 60, 70, 80, 90, 100];
 
+/** The four English ordinals have their own keys; everything else is `other`. */
+const ORDINAL_KEYS = ["one", "two", "few"];
+
+/**
+ * "3rd time round" — which key says it in this language.
+ *
+ * English is the only one of the fifteen whose ordinal changes with the
+ * number, and it changes on the last digit: 1st, 2nd, 3rd, 4th, and 21st
+ * again. `Intl.PluralRules` knows that rule for every language and is the
+ * only thing that does, so it picks the key.
+ *
+ * They are nested keys rather than i18next plural suffixes on purpose. A
+ * suffix is an underscore, and i18next resolves those against a language's
+ * CARDINAL categories — so `timeRound_two` in English would be a form
+ * nothing ever asks for, which is precisely what the plural gate fails a
+ * file for. A language whose ordinal rules name a category English has no
+ * key for falls to `other`, which is what that language wants anyway: its
+ * ordinal is written the same way whatever the number.
+ */
+function timeRoundKey(language: string, n: number): string {
+  let rule = "other";
+  try {
+    rule = new Intl.PluralRules(language, { type: "ordinal" }).select(n);
+  } catch {
+    // An unknown tag is not worth a blank label.
+  }
+  return `songs.stage.timeRound.${ORDINAL_KEYS.includes(rule) ? rule : "other"}`;
+}
+
 export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsViewProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { score, source, song, range, loop, tempoPercent, tempo } = session;
   const fileRef = useRef<HTMLInputElement>(null);
   /** The stage itself, so the band can fold when this column gets narrow. */
@@ -497,7 +526,9 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                 it would be furniture. */}
             {isPlaying && loop && (position?.pass ?? 0) > 0 && (
               <p className="songs-stage-pass" role="status" aria-live="polite">
-                {t("songs.stage.timeRound", { n: (position?.pass ?? 0) + 1 })}
+                {t(timeRoundKey(i18n.language, (position?.pass ?? 0) + 1), {
+                  n: (position?.pass ?? 0) + 1,
+                })}
               </p>
             )}
 
@@ -611,7 +642,12 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                 title={t("songs.loopNote")}
                 onClick={() => session.setLoop(!loop)}
               >
-                {loop ? t("songs.loopOn") : t("songs.loopOff")}
+                {/* One word, and the pressed state says which it is. It used
+                    to read "Round and round" or "Once through" depending, so
+                    the label changed under the finger that pressed it and
+                    neither half said what the button DOES. The sentence
+                    beside it is still where the state is spelled out. */}
+                {t("songs.loop")}
               </button>
 
               {/* Clears the portion rather than selecting every bar: they play

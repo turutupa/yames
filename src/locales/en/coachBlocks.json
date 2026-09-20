@@ -2,7 +2,7 @@
   "coachBlocks": {
     "action": {
       "loopBars": "Loop bars {{from}}–{{to}}",
-      "loopBarsAt": "Loop bars {{from}}–{{to}} at {{bpm}}",
+      "loopBarsAt": "Loop bars {{from}}–{{to}} at {{bpm}} BPM",
       "ramp": "Work it from {{from}} to {{to}}",
       "click": {
         "1": "Put the click on quarters",

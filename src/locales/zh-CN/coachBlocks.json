@@ -2,7 +2,7 @@
   "coachBlocks": {
     "action": {
       "loopBars": "循环第 {{from}}–{{to}} 小节",
-      "loopBarsAt": "以 {{bpm}} 循环第 {{from}}–{{to}} 小节",
+      "loopBarsAt": "以 {{bpm}} BPM 循环第 {{from}}–{{to}} 小节",
       "ramp": "从 {{from}} 练到 {{to}}",
       "click": {
         "1": "滴答走四分音符",

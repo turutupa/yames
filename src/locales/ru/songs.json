@@ -21,8 +21,6 @@
     "percent": "{{percent}}%",
     "speedNote": "Клик идёт на {{bpm}} BPM",
     "loop": "Повторять",
-    "loopOn": "По кругу",
-    "loopOff": "Один раз",
     "loopNote": "Играет такты выше снова и снова",
     "dropHere": "Отпусти файл, чтобы открыть его",
     "band": {
@@ -219,16 +217,24 @@
       "backToTab": "Back to the tab",
       "selectedBars": "Bars {{bars}} chosen",
       "wholeSong": "The whole song",
-      "portionSays": "{{count}} bar · {{state}}",
-      "portionSays_other": "{{count}} bars · {{state}}",
+      "portionSays": "{{count}} такт · {{state}}",
+      "portionSays_few": "{{count}} такта · {{state}}",
+      "portionSays_many": "{{count}} тактов · {{state}}",
+      "portionSays_other": "{{count}} такта · {{state}}",
       "looping": "on repeat",
       "once": "once through",
-      "timeRound": "Go {{n}}",
-      "keepPortion": "Keep it",
+      "timeRound": {
+        "one": "{{n}}-й раз",
+        "two": "{{n}}-й раз",
+        "few": "{{n}}-й раз",
+        "other": "{{n}}-й раз"
+      },
+      "keepPortion": "Сохранить этот фрагмент",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",
-      "portionTitle": "{{name}} — at {{percent}}%"
+      "portionTitle": "{{name}} — at {{percent}}%",
+      "keepPortionNote": "Сначала выберите такты в табулатуре, потом дайте им имя"
     }
   }
 }

@@ -2,7 +2,7 @@
   "coachBlocks": {
     "action": {
       "loopBars": "Boucler les mesures {{from}}–{{to}}",
-      "loopBarsAt": "Boucler les mesures {{from}}–{{to}} à {{bpm}}",
+      "loopBarsAt": "Boucler les mesures {{from}}–{{to}} à {{bpm}} BPM",
       "ramp": "Monte-la de {{from}} à {{to}}",
       "click": {
         "1": "Clic sur les noires",

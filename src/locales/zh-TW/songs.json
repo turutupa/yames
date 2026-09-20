@@ -19,8 +19,6 @@
     "percent": "{{percent}}%",
     "speedNote": "滴答走 {{bpm}} BPM",
     "loop": "重複",
-    "loopOn": "一遍又一遍",
-    "loopOff": "只走一遍",
     "loopNote": "把上面這幾小節一遍又一遍地彈",
     "dropHere": "把檔案放在這裡就會開啟",
     "band": {
@@ -201,16 +199,22 @@
       "backToTab": "Back to the tab",
       "selectedBars": "Bars {{bars}} chosen",
       "wholeSong": "The whole song",
-      "portionSays": "{{count}} bar · {{state}}",
-      "portionSays_other": "{{count}} bars · {{state}}",
+      "portionSays": "{{count}} 小節 · {{state}}",
+      "portionSays_other": "{{count}} 小節 · {{state}}",
       "looping": "on repeat",
       "once": "once through",
-      "timeRound": "Go {{n}}",
-      "keepPortion": "Keep it",
+      "timeRound": {
+        "one": "第 {{n}} 遍",
+        "two": "第 {{n}} 遍",
+        "few": "第 {{n}} 遍",
+        "other": "第 {{n}} 遍"
+      },
+      "keepPortion": "儲存這一段",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",
-      "portionTitle": "{{name}} — at {{percent}}%"
+      "portionTitle": "{{name}} — at {{percent}}%",
+      "keepPortionNote": "先在六線譜上選好小節，再給它取個名字"
     }
   }
 }

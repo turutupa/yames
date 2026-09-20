@@ -19,8 +19,6 @@
     "percent": "%{{percent}}",
     "speedNote": "Tık {{bpm}} BPM ile gidiyor",
     "loop": "Tekrarla",
-    "loopOn": "Baştan başa",
-    "loopOff": "Bir kez",
     "loopNote": "Yukarıdaki ölçüleri tekrar tekrar çalar",
     "dropHere": "Açmak için dosyayı buraya bırak",
     "band": {
@@ -201,16 +199,22 @@
       "backToTab": "Back to the tab",
       "selectedBars": "Bars {{bars}} chosen",
       "wholeSong": "The whole song",
-      "portionSays": "{{count}} bar · {{state}}",
-      "portionSays_other": "{{count}} bars · {{state}}",
+      "portionSays": "{{count}} ölçü · {{state}}",
+      "portionSays_other": "{{count}} ölçü · {{state}}",
       "looping": "on repeat",
       "once": "once through",
-      "timeRound": "Go {{n}}",
-      "keepPortion": "Keep it",
+      "timeRound": {
+        "one": "{{n}}. geçiş",
+        "two": "{{n}}. geçiş",
+        "few": "{{n}}. geçiş",
+        "other": "{{n}}. geçiş"
+      },
+      "keepPortion": "Bu bölümü kaydet",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",
-      "portionTitle": "{{name}} — at {{percent}}%"
+      "portionTitle": "{{name}} — at {{percent}}%",
+      "keepPortionNote": "Önce tabda ölçüleri seç, sonra onlara bir ad ver"
     }
   }
 }

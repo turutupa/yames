@@ -19,8 +19,6 @@
     "percent": "{{percent}}%",
     "speedNote": "Tiếng gõ chạy ở {{bpm}} BPM",
     "loop": "Lặp lại",
-    "loopOn": "Lặp mãi",
-    "loopOff": "Một lần thôi",
     "loopNote": "Chơi đi chơi lại những ô nhịp ở trên",
     "dropHere": "Thả tệp vào đây để mở",
     "band": {
@@ -201,16 +199,22 @@
       "backToTab": "Back to the tab",
       "selectedBars": "Bars {{bars}} chosen",
       "wholeSong": "The whole song",
-      "portionSays": "{{count}} bar · {{state}}",
-      "portionSays_other": "{{count}} bars · {{state}}",
+      "portionSays": "{{count}} ô nhịp · {{state}}",
+      "portionSays_other": "{{count}} ô nhịp · {{state}}",
       "looping": "on repeat",
       "once": "once through",
-      "timeRound": "Go {{n}}",
-      "keepPortion": "Keep it",
+      "timeRound": {
+        "one": "Lượt {{n}}",
+        "two": "Lượt {{n}}",
+        "few": "Lượt {{n}}",
+        "other": "Lượt {{n}}"
+      },
+      "keepPortion": "Lưu đoạn này",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",
-      "portionTitle": "{{name}} — at {{percent}}%"
+      "portionTitle": "{{name}} — at {{percent}}%",
+      "keepPortionNote": "Chọn ô nhịp trên tab trước, rồi đặt tên cho chúng"
     }
   }
 }

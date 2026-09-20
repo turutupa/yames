@@ -132,8 +132,9 @@ const ADDED_BY_THE_SONGS_WAVE = [
   "songs.library.summary",
   "songs.loop",
   "songs.loopNote",
-  "songs.loopOff",
-  "songs.loopOn",
+  // `songs.loopOff` and `songs.loopOn` were the two halves of a label that
+  // changed under the finger pressing it. One chip, one word, and the
+  // pressed state says whether the repeat is on (W22 item 3).
   "songs.meter",
   "songs.percent",
   "songs.picker.cancel",

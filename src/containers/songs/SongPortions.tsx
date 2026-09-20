@@ -17,7 +17,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { SavedPortion } from "../../songs/selection";
 
-/** "Keep it", and the name field it opens. */
+/** "Save this part", and the name field it opens. */
 export function SongPortionSave({
   canSave,
   onSave,
@@ -40,13 +40,24 @@ export function SongPortionSave({
     if (!canSave) setNaming(false);
   }, [canSave]);
 
-  if (!canSave) return null;
-
   if (!naming) {
     return (
+      /*
+       * Always on the row, greyed until there is something to save.
+       *
+       * It used to be absent until a portion was chosen, so pressing a
+       * section chip made a button appear and shoved the speed chips onto
+       * the next line — the controls moving under the hand that pressed
+       * them, which is the complaint the owner made about Jam's switches
+       * and which `songs.spec.ts` measures on this very row. A disabled
+       * chip also tells a player the naming exists before they have found
+       * out by accident; nothing did before.
+       */
       <button
         type="button"
         className="songs-chip songs-portion-save"
+        disabled={!canSave}
+        title={t("songs.stage.keepPortionNote")}
         onClick={() => {
           setName("");
           setNaming(true);

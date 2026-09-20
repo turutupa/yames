@@ -2,7 +2,7 @@
   "coachBlocks": {
     "action": {
       "loopBars": "Repetir los compases {{from}}–{{to}}",
-      "loopBarsAt": "Repetir los compases {{from}}–{{to}} a {{bpm}}",
+      "loopBarsAt": "Repetir los compases {{from}}–{{to}} a {{bpm}} BPM",
       "ramp": "Súbelo de {{from}} a {{to}}",
       "click": {
         "1": "Clic en negras",

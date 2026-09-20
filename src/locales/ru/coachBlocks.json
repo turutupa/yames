@@ -2,7 +2,7 @@
   "coachBlocks": {
     "action": {
       "loopBars": "Зациклить такты {{from}}–{{to}}",
-      "loopBarsAt": "Зациклить такты {{from}}–{{to}} на {{bpm}}",
+      "loopBarsAt": "Зациклить такты {{from}}–{{to}} на {{bpm}} BPM",
       "ramp": "Подними с {{from}} до {{to}}",
       "click": {
         "1": "Клик по четвертям",
