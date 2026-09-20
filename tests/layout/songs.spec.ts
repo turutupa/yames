@@ -229,3 +229,48 @@ test.describe("the track picker", () => {
     expect(overflow, "the picker list scrolls sideways").toBeLessThanOrEqual(1);
   });
 });
+
+/**
+ * Every theme draws the tab, and draws it in that theme's ink.
+ *
+ * This is here rather than in vitest because happy-dom runs no renderer:
+ * alphaTab's engraving only exists in a real browser. It caught a real one —
+ * under Manuscript the tab was BLANK, because that theme's font stack opens
+ * with `Source Serif 4` and alphaTab hands the family to
+ * `document.fonts.check()` without quoting it, which throws and kills the
+ * font loader before anything is drawn. One theme in thirteen, no error on
+ * screen. `themeFontFamilies` in `TabStage.tsx` is the fix.
+ *
+ * Four themes rather than thirteen: one light, one dark, the serif one that
+ * broke, and the one with a quoted multi-word family. Thirteen would triple
+ * the suite's runtime to re-prove the same two things.
+ */
+test.describe("the tab under a theme", () => {
+  for (const theme of ["manuscript", "ivory", "obsidian", "neon"]) {
+    test(`draws, and takes the ink, under ${theme}`, async ({ page }) => {
+      await openShot(page, "songs", { width: 1400, height: 900 }, theme);
+
+      const drawn = await page.locator(".at-surface-svg").count();
+      expect(drawn, `${theme} drew no score at all`).toBeGreaterThan(0);
+
+      const tookTheInk = await page.evaluate(() => {
+        const ink = getComputedStyle(document.documentElement)
+          .getPropertyValue("--text-primary")
+          .trim()
+          .toLowerCase();
+        const fills = new Set<string>();
+        document.querySelectorAll(".at-surface-svg *").forEach((el) => {
+          const styled = (el.getAttribute("style") ?? "").match(/fill:\s*([^;]+)/);
+          if (styled) fills.add(styled[1].trim().toLowerCase());
+          const attr = el.getAttribute("fill");
+          if (attr && attr !== "none") fills.add(attr.trim().toLowerCase());
+        });
+        return { ink, has: fills.has(ink) };
+      });
+      expect(
+        tookTheInk.has,
+        `${theme} drew the score in something other than its own ${tookTheInk.ink}`,
+      ).toBe(true);
+    });
+  }
+});

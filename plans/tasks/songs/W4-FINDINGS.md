@@ -165,11 +165,45 @@ to avoid: two clocks. The rule for stage C is that Songs sets
 `--text-primary: #e8e8ea` fed in, **every `fill` in the rendered SVG was
 `#E8E8EA`** — alphaTab painted nothing in its own black.
 
-One real gap: the *fonts* in `RenderingResources` are not covered by the
-colour settings, and the default came out as `32px Georgia, serif` for
-the title block. Under thirteen themes that is thirteen wrong typefaces.
-Stage C sets the resource fonts from `--font-family` alongside the
-colours, in the same place, driven by the same theme effect.
+All thirteen were then checked one at a time in stage C, driving the
+real screen: **13/13 draw the tab, and 13/13 draw it in that theme's own
+`--text-primary`.** Two things came out of doing that rather than
+assuming it, and the second was a bug nobody would have reported as a
+theming problem.
+
+**The fonts are separate from the colours, and one of them is a crash.**
+`RenderingResources` carries fonts as well as colours, and left alone
+alphaTab draws in Georgia and Arial under every theme. Setting them from
+`--font-family` is easy; the trap is that alphaTab hands the family name
+to `document.fonts.check()`, **which throws on a family that is not a
+valid CSS identifier**. The Manuscript theme's stack opens with
+`Source Serif 4`. Unquoted, the check raises `Could not resolve '1em
+Source Serif 4' as a font`, the exception escapes alphaTab's font loader
+before anything is drawn, and **Manuscript's tab is blank** — one theme
+in thirteen, with no error on screen and nothing in the console a user
+would see.
+
+alphaTab is inconsistent here: it quotes a family with a space when it
+writes the SVG's `font:` shorthand, and does not when it builds the
+string for `fonts.check`. So the quotes have to come from our side, and
+the cost is that families which needed them arrive double-quoted in the
+drawn CSS and match nothing — the stack then falls to the next family,
+so Manuscript draws in Georgia rather than Source Serif 4 and Ember in
+Outfit rather than Segoe UI. That trade is taken deliberately: every
+theme draws its tab, in a face from its own stack. Worth raising
+upstream; if alphaTab quotes both paths, one `.map` in `TabStage.tsx`
+goes away.
+
+`tests/layout/songs.spec.ts` pins it under four themes — Manuscript, one
+light, one dark, and one with a quoted multi-word family.
+
+**Still not right, and small:** five or six runs of text per score — the
+title, the subtitle, the effect marks, the bar numbers — are still drawn
+in Georgia and Arial. They are not among the font fields
+`RenderingResources` exposes as own properties, so the loop that themes
+the rest does not reach them, and naming them explicitly did not take
+either. Cosmetic, identical under all thirteen themes, and not worth
+more of this wave.
 
 Because the resources are plain settings rather than CSS, a theme change
 means re-applying them and re-rendering. That is a re-render, not a
@@ -262,11 +296,34 @@ Two hundred bars of eighth notes, written by the spike, one track drawn.
 | added to the installer | ≈ 0.6 MB (font + gzipped JS) |
 
 The last line is the one to weigh against v1.2.1, which was a release
-specifically about making the download *smaller* (`05284291`). Songs is
-a mode you opt into; the JS is a lazy chunk the moment `SongsView` is
-imported the way `JamView` is, so a player who never opens Songs pays
-parse time of nothing. The font is unconditional unless it is fetched on
-first use, which is a later decision, not this wave's.
+specifically about making the download *smaller* (`05284291`).
+
+**Corrected after stage C measured it.** This section first said the JS
+would be "a lazy chunk the moment `SongsView` is imported the way
+`JamView` is". That was wrong on the facts: `JamView` is a plain static
+import, `MainWindow` lazy-loads nothing, and importing Songs the same
+way put all of alphaTab in the main bundle — 3,181 kB raw / 917 kB
+gzipped, against 628 kB gzipped before. So stage C split it on purpose,
+and Songs is the app's only lazy chunk:
+
+```
+dist/assets/index-*.js      1,969.01 kB │ gzip: 628.02 kB   the app
+dist/assets/import-*.js     1,207.47 kB │ gzip: 288.72 kB   alphaTab, on demand
+dist/assets/TabStage-*.js       2.67 kB │ gzip:   1.27 kB   the renderer
+dist/assets/Bravura-*.woff2   313.35 kB                     the music font
+```
+
+The main bundle is back to exactly where it was. A player who never
+opens Songs downloads the font and nothing else, and the font is the one
+remaining unconditional cost — fetching it on first use is a later
+decision, not this wave's. Only `.woff2` ships: the `.woff` beside it is
+550 kB of fallback for browsers no Tauri webview uses.
+
+Two things had to move to make the split real, because both dragged
+alphaTab back in: `SONG_FILE_EXTENSIONS` now lives in `types.ts` (the
+file input needs it on a screen that has not loaded the renderer), and
+`useSongsSession` imports the importer with a dynamic `import()` inside
+the two functions that need it.
 
 A caveat on the render figure, stated plainly: it was measured in
 headless Chromium, not in WebView2, and not inside the real app with the
@@ -308,6 +365,26 @@ Guitar Pro 3–6 (`.gp3`/`.gp4`/`.gp5`) go through a different importer
 (`Gp3To5Importer`) and are **untested here** — I have no such file and
 will not download one. The risk is low (it is the same library's
 best-travelled path) and it is named here rather than hidden.
+
+## 8b. The layout suite's port is shared, and it lies when it collides
+
+Not alphaTab, and it cost an hour, so it is written down where the next
+worker will find it.
+
+`npm run test:layout` starts vite on port 5390 with
+`reuseExistingServer: !process.env.CI`. **A dev server left running by
+another worktree answers on that port, and Playwright happily uses it** —
+so the suite runs the real tests against a *different worker's source*.
+What it looked like from here: twenty-four tests passing and every
+`songs` scene reporting "the scene did not build", with the harness
+listing shot ids that do not exist on this branch. `fits.ts` already
+guards the case where the port belongs to a different app entirely; it
+cannot tell one Yames worktree from another.
+
+If a layout run reports scenes that should exist as missing, kill every
+`vite` process on the machine — not just this worktree's — and run
+again. While several workers share one laptop, layout runs are not safe
+to run in parallel.
 
 ## 9. Two things that are not alphaTab's fault, and block stage C's shape
 

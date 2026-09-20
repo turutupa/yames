@@ -54,19 +54,53 @@ function token(name: string, fallback: string): string {
 }
 
 /**
+ * The theme's font stack, as family names alphaTab can hand to the browser.
+ *
+ * This is not tidying. alphaTab builds a CSS font shorthand out of the family
+ * and gives it to `document.fonts.check()`, which THROWS on a family name
+ * that is not a valid CSS identifier — and the Manuscript theme's stack opens
+ * with `Source Serif 4`. Unquoted, that is three tokens and a number, the
+ * check raises `Could not resolve '1em Source Serif 4' as a font`, the
+ * exception escapes alphaTab's font loader, and the tab never draws at all.
+ * One theme in thirteen, silently blank.
+ *
+ * alphaTab is inconsistent about this, which is what makes it awkward: it
+ * quotes a family with a space when it writes the SVG's `font:` shorthand,
+ * and does not when it builds the string for `fonts.check`. So the quotes
+ * have to come from here, and the cost is that the families which needed them
+ * arrive double-quoted in the drawn CSS and match nothing.
+ *
+ * That is the trade accepted, deliberately: a stack is a list, so the next
+ * family down is used instead — Manuscript draws in Georgia rather than
+ * Source Serif 4, Ember in Outfit rather than Segoe UI. Every theme's tab is
+ * drawn, in a face from that theme's own stack. Not quoting instead leaves
+ * Manuscript's tab blank, which is not a typography question.
+ *
+ * Worth reporting upstream; if alphaTab quotes both paths, the `.map` below
+ * is the only line that has to go.
+ */
+function themeFontFamilies(): string[] {
+  const stack = token("--font-family", "system-ui, sans-serif");
+  return stack
+    .split(",")
+    .map((part) => part.trim().replace(/^["']|["']$/g, ""))
+    .filter(Boolean)
+    .map((family) => (/^[A-Za-z][A-Za-z0-9-]*$/.test(family) ? family : `"${family}"`));
+}
+
+/**
  * Paint alphaTab in the app's colours.
  *
  * `RenderingResources` is plain settings rather than CSS, so a theme change
  * cannot cascade into the drawn score — it has to be applied and the score
  * re-rendered. The fonts matter as much as the colours: left alone, alphaTab
- * draws its titles in Georgia, which is wrong in all thirteen themes.
+ * draws in Georgia and Arial, which is wrong in all thirteen themes.
  */
 function applyTheme(settings: Settings): void {
   const ink = token("--text-primary", "#e8e8ea");
   const quiet = token("--text-tertiary", "#9a9aa4");
   const faint = token("--text-faint", "#6a6a74");
   const accent = token("--accent", "#e5732a");
-  const family = token("--font-family", "system-ui, sans-serif");
 
   const res = settings.display.resources;
   const colour = (value: string, fallback: string) =>
@@ -78,13 +112,25 @@ function applyTheme(settings: Settings): void {
   res.staffLineColor = colour(faint, "#6a6a74");
   res.barSeparatorColor = colour(faint, "#6a6a74");
   res.barNumberColor = colour(accent, "#e5732a");
-  res.tablatureFont = new model.Font(family, 13, model.FontStyle.Plain);
-  res.effectFont = new model.Font(family, 12, model.FontStyle.Italic);
-  res.copyrightFont = new model.Font(family, 12, model.FontStyle.Plain);
-  res.titleFont = new model.Font(family, 24, model.FontStyle.Plain);
-  res.subTitleFont = new model.Font(family, 16, model.FontStyle.Plain);
-  res.wordsFont = new model.Font(family, 13, model.FontStyle.Plain);
-  res.barNumberFont = new model.Font(family, 11, model.FontStyle.Plain);
+
+  /*
+   * Every font on the resources, by walking them rather than by naming them.
+   *
+   * Naming them missed one: the subtitle line kept coming out in 20px Georgia
+   * under all thirteen themes because it is not one of the fields this file
+   * knew about. The set alphaTab exposes also differs between versions, so a
+   * list written here goes stale silently — a font nobody assigned is not an
+   * error, it is just Georgia.
+   *
+   * Only the families change. The sizes and styles alphaTab chose are part of
+   * the engraving, and a music renderer has better reasons for them than we
+   * do.
+   */
+  const families = themeFontFamilies();
+  for (const key of Object.keys(res)) {
+    const value = (res as unknown as Record<string, unknown>)[key];
+    if (value instanceof model.Font) value.families = families;
+  }
 }
 
 function buildSettings(): Settings {
