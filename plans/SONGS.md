@@ -35,6 +35,27 @@ Status key: **decided** · **open** · **deferred**
   everything. Which note was played is checked on single-note lines
   only, and the review says so where it cannot tell.
 
+- **S0.6 The coach is the point, and Songs ships with its verdict.**
+  (Owner, 2026-09-20.) The smart coach is the main roadmap; every mode is
+  an instrument it plays. So the review after a pass does not stop at
+  colours: it says where it went wrong and what to do about it ("bars
+  17–20, you rush the sixteenths — loop them at 80 % and climb"), and one
+  tap sets that loop up. Computed by rule, no model. The talking,
+  model-written coach still comes last. The rule from here on: nothing
+  ships without saying what it hands the coach.
+- **S0.7 Heavier local models, and an optional paid tier.** (Owner,
+  2026-09-20.) The light models are not strong enough for where the coach
+  is going. Lean towards heavier local models; for players whose machine
+  cannot run one, an optional paid tier that only covers the cost of
+  running it for them. Same coach for everyone (`ECHORA.md` E0.5). Not
+  scheduled; ROADMAP §3 (tiers) and principles 5–6 are rewritten when it
+  is.
+- **S0.8 Two halves of coach work.** (Owner, 2026-09-20.) The technical
+  half — hearing, scoring, remembering — is this plan and runs first. The
+  other half is how the coach behaves with a person; that is
+  `plans/COACH_UX.md`, drafted by the orchestrator for the owner to react
+  to rather than designed by committee.
+
 ### State of the engine this stands on (checked 2026-09-18)
 
 Roadmap Phase 0 is done. Phase 1 is untouched: no SQLite store (1.1), no
@@ -51,7 +72,9 @@ refractory, so a riff in 16ths is swallowed before scoring sees it.
 
 ## A. Questions that block the briefs
 
-- **A1 — What the player plays over.** *open.* alphaTab (MPL-2.0, reads
+- **A1 — What the player plays over.** *open, not critical (owner,
+  2026-09-20): aim for the engine if it is better, a MIDI-style player
+  like Songsterr's is acceptable, settle it when the spike reports.* alphaTab (MPL-2.0, reads
   Guitar Pro 3–7, MusicXML, alphaTex; renders a scrolling tab) can also
   play the file's other tracks, but from the webview, on a clock the
   scoring engine does not share.
@@ -72,13 +95,15 @@ refractory, so a riff in 16ths is swallowed before scoring sees it.
   not a tempo map. Proposed default: v1 supports a tempo map in the
   engine (step changes on bar lines); gradual changes are flattened to
   steps; files that need more are flagged at import.
-- **A5 — Where Songs lives.** *open.* A rail mode of its own beside
+- **A5 — Where Songs lives.** *decided 2026-09-20: its own rail mode,
+  beside Jam and the others.* A rail mode of its own beside
   Metronome, Drill, Setlists and Jam, or inside one of them.
   Proposed default: its own mode. A song library is a place.
 - **A6 — Practice tools on a song.** *open.* Proposed default for v1:
   pick a section or a bar range, loop it, play it at a percentage of
   tempo, and let the existing speed ramp climb as passes are clean.
-- **A7 — Live feedback vs the review.** *open.* Proposed default: while
+- **A7 — Live feedback vs the review.** *decided 2026-09-20, as
+  proposed.* Proposed default: while
   playing, notes light as they are hit, on timing alone (the next note
   is known, so an onset is enough). Note identity, bends and the rest
   appear in the review after the pass. Nothing new runs on the audio
@@ -135,6 +160,14 @@ refractory, so a riff in 16ths is swallowed before scoring sees it.
 | T-E Engine | Tempo map (A4), note-event playback of imported tracks through Jam's voices (A1), T06b done alone and first | 0.5c | `engine.rs`, `jam.rs`. Serial with nothing else in these files |
 | T-G Camera | After K3: camera picker and preview, record with the pass, offset sidecar, list/play/delete beside takes | — | new `src/containers/song/camera/`, a thin addition to the take list. Never touches the audio threads |
 | T-F Paths | Owner and Claude work LP groups A–F on paper | — | the log only |
+
+**First wave launched 2026-09-20** on `songs-v1` (briefs in
+`plans/tasks/songs/`): W1 scoring (1.3, then matching against a known
+score), W2 store, W3 the allocation-free beat queue, W4 the importer and
+the Songs mode, W5 pitch and the dry stem. The camera spike (K3) waits for
+the owner: it needs a camera and a person in front of it. The second wave
+is the engine's tempo map and imported-track playback (after W3), and the
+review with its verdict (after W1, W2, W4).
 
 Then, in order: the review screen (take, colored notes, playback, and
 the picture when there is one) → section loop and tempo tools (A6) → release Songs →
