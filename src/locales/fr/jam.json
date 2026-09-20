@@ -253,6 +253,7 @@
       "one": "1 accord",
       "custom": "{{count}} mesures",
       "custom_one": "{{count}} mesure",
+      "custom_many": "{{count}} mesures",
       "custom_other": "{{count}} mesures"
     },
     "countIn": {
@@ -260,6 +261,7 @@
       "none": "Aucun",
       "barsAnd": "{{count}} mesures · {{sound}}",
       "barsAnd_one": "{{count}} mesure · {{sound}}",
+      "barsAnd_many": "{{count}} mesures · {{sound}}",
       "barsAnd_other": "{{count}} mesures · {{sound}}"
     },
     "fills": {
@@ -278,6 +280,7 @@
       "aria": "{{chord}} en cours",
       "next": "{{chord}} dans {{count}} mesures",
       "next_one": "{{chord}} dans {{count}} mesure",
+      "next_many": "{{chord}} dans {{count}} mesures",
       "next_other": "{{chord}} dans {{count}} mesures",
       "nextNow": "{{chord}} juste après"
     },
@@ -302,6 +305,7 @@
       "scopeKey": "Dans la tonalité",
       "scopeAll": "Toutes les tonalités",
       "noteCount_one": "gamme à {{count}} note",
+      "noteCount_many": "gamme à {{count}} notes",
       "noteCount_other": "gamme à {{count}} notes",
       "noteCount": "gamme à {{count}} notes",
       "jump": "Aller à",
@@ -410,6 +414,7 @@
       "dropOutBarsLabel": "Combien de temps le groupe se tait",
       "forBars": "pendant {{count}} mesures",
       "forBars_one": "pendant {{count}} mesure",
+      "forBars_many": "pendant {{count}} mesures",
       "forBars_other": "pendant {{count}} mesures",
       "trade": "Échanges",
       "tradeN": "Par {{count}}",
@@ -418,6 +423,7 @@
       "tempoEveryLabel": "À quelle fréquence le tempo monte",
       "everyChoruses": "tous les {{count}} tours",
       "everyChoruses_one": "tous les {{count}} tour",
+      "everyChoruses_many": "tous les {{count}} tours",
       "everyChoruses_other": "tous les {{count}} tours",
       "climbing": "en partant de {{from}}",
       "dropOutExplain": "Le groupe s'arrête quelques mesures de temps en temps, et tu tiens le tempo seul.",
@@ -522,6 +528,7 @@
       "aria": "Façons de jouer ce vibe",
       "count": "{{count}} façons de le jouer",
       "count_one": "{{count}} façon de le jouer",
+      "count_many": "{{count}} façons de le jouer",
       "count_other": "{{count}} façons de le jouer",
       "yours": "Un des tiens",
       "yoursEmpty": "aucun enregistré",
@@ -597,9 +604,11 @@
       "none": "Aucun accord là-dedans pour l'instant.",
       "summary": "{{count}} mesures · tonalité de {{key}}",
       "summary_one": "{{count}} mesure · tonalité de {{key}}",
+      "summary_many": "{{count}} mesures · tonalité de {{key}}",
       "summary_other": "{{count}} mesures · tonalité de {{key}}",
       "check": "{{count}} à vérifier : {{list}}",
       "check_one": "{{count}} à vérifier : {{list}}",
+      "check_many": "{{count}} à vérifier : {{list}}",
       "check_other": "{{count}} à vérifier : {{list}}"
     },
     "perc": {

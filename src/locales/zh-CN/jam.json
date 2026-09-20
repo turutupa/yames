@@ -252,14 +252,12 @@
       "aaba32": "AABA",
       "one": "单和弦",
       "custom": "{{count}} 小节",
-      "custom_one": "{{count}} 小节",
       "custom_other": "{{count}} 小节"
     },
     "countIn": {
       "label": "预备拍",
       "none": "无",
       "barsAnd": "{{count}} 小节 · {{sound}}",
-      "barsAnd_one": "{{count}} 小节 · {{sound}}",
       "barsAnd_other": "{{count}} 小节 · {{sound}}"
     },
     "fills": {
@@ -277,7 +275,6 @@
       "label": "当前",
       "aria": "正在演奏 {{chord}}",
       "next": "{{count}} 小节后 {{chord}}",
-      "next_one": "{{count}} 小节后 {{chord}}",
       "next_other": "{{count}} 小节后 {{chord}}",
       "nextNow": "下一个是 {{chord}}"
     },
@@ -301,7 +298,6 @@
       "scope": "显示范围",
       "scopeKey": "本调内",
       "scopeAll": "所有调",
-      "noteCount_one": "{{count}} 音音阶",
       "noteCount_other": "{{count}} 音音阶",
       "noteCount": "{{count}} 音音阶",
       "jump": "跳转到",
@@ -409,7 +405,6 @@
       "dropOutEvery": "每 {{count}} 小节留白",
       "dropOutBarsLabel": "乐队停多久",
       "forBars": "持续 {{count}} 小节",
-      "forBars_one": "持续 {{count}} 小节",
       "forBars_other": "持续 {{count}} 小节",
       "trade": "轮奏",
       "tradeN": "每 {{count}} 小节一轮",
@@ -417,7 +412,6 @@
       "tempoUp": "速度 +{{step}}",
       "tempoEveryLabel": "多久提一次速",
       "everyChoruses": "每 {{count}} 轮",
-      "everyChoruses_one": "每 {{count}} 轮",
       "everyChoruses_other": "每 {{count}} 轮",
       "climbing": "从 {{from}} 往上",
       "dropOutExplain": "乐队每隔一阵停几小节，由你自己保持节奏。",
@@ -521,7 +515,6 @@
       "lead": "每一种都同时定好节奏型、鼓组、律动和力度",
       "aria": "这个风格的几种打法",
       "count": "{{count}} 种打法",
-      "count_one": "{{count}} 种打法",
       "count_other": "{{count}} 种打法",
       "yours": "你自己的",
       "yoursEmpty": "还没有保存",
@@ -596,10 +589,8 @@
       "empty": "小节线、iReal 格式的一行，或歌词上方写着和弦的谱子。",
       "none": "里面还没有和弦。",
       "summary": "{{count}} 小节 · {{key}} 调",
-      "summary_one": "{{count}} 小节 · {{key}} 调",
       "summary_other": "{{count}} 小节 · {{key}} 调",
       "check": "有 {{count}} 处可以核对：{{list}}",
-      "check_one": "有 {{count}} 处可以核对：{{list}}",
       "check_other": "有 {{count}} 处可以核对：{{list}}"
     },
     "perc": {

@@ -7,7 +7,6 @@
     "duplicateSetlist": "セットリストを複製",
     "copyName": "{{name}} のコピー",
     "librarySteps": "{{count}} ステップ",
-    "librarySteps_one": "{{count}} ステップ",
     "librarySteps_other": "{{count}} ステップ",
     "renameTooltip": "このセットリストの名前を変更",
     "edited": "編集済み",
@@ -27,10 +26,8 @@
     "reorderHint": "ドラッグして並べ替え",
     "stopToReorder": "並べ替えるにはセットリストを停止",
     "duplicateSteps": "{{count}} ステップを複製",
-    "duplicateSteps_one": "{{count}} ステップを複製",
     "duplicateSteps_other": "{{count}} ステップを複製",
     "removeSteps": "{{count}} ステップを削除",
-    "removeSteps_one": "{{count}} ステップを削除",
     "removeSteps_other": "{{count}} ステップを削除",
     "barOf": "{{total}} 小節中 {{current}} 小節目",
     "timeLeft": "残り {{duration}}",
@@ -38,7 +35,6 @@
     "switching": "切り替え中",
     "summary": {
       "steps": "{{count}} ステップ",
-      "steps_one": "{{count}} ステップ",
       "steps_other": "{{count}} ステップ",
       "about": "約 {{duration}}",
       "ends": "自動で終わります",
@@ -48,7 +44,6 @@
       "label": "繰り返し",
       "once": "1 周だけ",
       "times": "{{count}} 周",
-      "times_one": "{{count}} 周",
       "times_other": "{{count}} 周",
       "forever": "止めるまで",
       "fewer": "繰り返しを減らす",
@@ -57,13 +52,10 @@
     "trigger": {
       "manualShort": "合図したら",
       "barsShort": "{{count}} 小節",
-      "barsShort_one": "{{count}} 小節",
       "barsShort_other": "{{count}} 小節",
       "secondsShort": "{{count}} 秒",
-      "secondsShort_one": "{{count}} 秒",
       "secondsShort_other": "{{count}} 秒",
       "minutesShort": "{{count}} 分",
-      "minutesShort_one": "{{count}} 分",
       "minutesShort_other": "{{count}} 分",
       "minutesSeconds": "{{minutes}}:{{seconds}}"
     },
@@ -104,10 +96,8 @@
     "transition": {
       "cutShort": "そのまま切り替え",
       "countInShort": "{{count}} 小節のカウント",
-      "countInShort_one": "{{count}} 小節のカウント",
       "countInShort_other": "{{count}} 小節のカウント",
       "restShort": "{{count}} 小節の休み",
-      "restShort_one": "{{count}} 小節の休み",
       "restShort_other": "{{count}} 小節の休み"
     },
     "said": {
@@ -137,7 +127,6 @@
       "addStep": "ジャムを追加",
       "addTo": "セットリストに追加…",
       "barsOfForm": "{{count}} 小節",
-      "barsOfForm_one": "{{count}} 小節",
       "barsOfForm_other": "{{count}} 小節",
       "said": "バンド",
       "goneShort": "ジャムがありません",
