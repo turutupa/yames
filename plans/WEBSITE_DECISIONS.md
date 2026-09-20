@@ -170,6 +170,13 @@ caption says "played by the band in the app", not "straight out of the app". Pic
 has harmonics (picked, fingered) in a key that keeps its root up (D, not E), and a keys style
 that moves (arpeggio, montuno, shuffleComp) rather than one that holds.
 
+It builds (owner, 2026-09-19: "so the users that hit play actually get kinda hyped"). The jam is
+in Song mode, the app's own arrangement: a four-bar form four times round — held back and sparse,
+then the full band, then loud twice — with the big fills and crashes at the turnarounds and the
+ending where the band stops together. A four-bar form because the pay-off has to arrive inside
+fifteen seconds. The master is one static gain and a limiter, never a loudness normaliser, which
+would lift the quiet first chorus up to meet the last and flatten the very thing being shown.
+
 ---
 
 ## Copy
