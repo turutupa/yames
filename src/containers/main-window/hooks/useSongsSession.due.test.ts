@@ -46,7 +46,12 @@ vi.mock("./useSongEngine", () => ({
   }),
 }));
 
-vi.mock("../../../ipc", () => ({ loadScoreSchedule: () => Promise.resolve() }));
+vi.mock("../../../ipc", () => ({
+  loadScoreSchedule: () => Promise.resolve(),
+  // Opening a song also tells the library it was opened (W19's
+  // "recently played"); the session does not wait on the answer.
+  markScoreOpened: () => Promise.resolve(),
+}));
 
 /** Eight bars of 4/4, which is enough to promise four of them. */
 const SCORE: SongScore = {
