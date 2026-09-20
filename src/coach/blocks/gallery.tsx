@@ -134,7 +134,7 @@ export const GALLERY_SCENES: Scene[] = [
         { type: "action", action: { kind: "clickSubdivision", subdivision: 2 } },
         { type: "action", action: { kind: "loadPreset", preset: "warmup" } },
         { type: "action", action: { kind: "loadJam", jam: "slow-blues-a" } },
-        { type: "action", action: { kind: "comeBack", when: "tomorrow" } },
+        { type: "action", action: { kind: "comeBack", days: 1 } },
       ],
     },
   },

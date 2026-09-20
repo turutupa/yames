@@ -37,6 +37,25 @@ describe("every block in the catalogue", () => {
     );
     expect([...drawn].sort()).toEqual([...BLOCK_TYPES].sort());
   });
+
+  /**
+   * A gallery scene is written as `unknown`, so the compiler cannot tell it
+   * when the catalogue changes underneath it. This can. W14 changed
+   * `comeBack` from three named occasions to a number of days and the "All
+   * six actions" scene went on saying `when: "tomorrow"` — it silently drew
+   * five blocks instead of six, and the only thing that noticed was a
+   * Playwright test counting boxes.
+   */
+  it("keeps every scene but the one about dropping, whole", () => {
+    for (const scene of GALLERY_SCENES) {
+      const { dropped } = resolveCoachAnswer(scene.answer, GALLERY_CONTEXT);
+      if (scene.name === "What gets dropped") {
+        expect(dropped.length, scene.name).toBeGreaterThan(0);
+        continue;
+      }
+      expect(dropped.map((d) => `${String(d.type)}: ${d.detail}`), scene.name).toEqual([]);
+    }
+  });
 });
 
 describe("what the blocks are drawn with", () => {
