@@ -31,6 +31,9 @@ import {
   useSongTakePitch,
 } from "./review";
 import { SongBand, SongCountIn } from "./SongBand";
+import { SongRecordControl, SongTakes } from "./SongTakes";
+import { useSongTakes } from "./useSongTakes";
+import { TakesIntroDialog } from "../jam/TakesIntroDialog";
 import { SONG_FILE_EXTENSIONS } from "../../songs/types";
 import { buildSchedule, meterAt, sectionRange, wholeSong } from "../../songs/schedule";
 import { songPosition } from "../../songs/position";
@@ -149,14 +152,30 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
   });
 
   /**
+   * Recording the pass, and the shelf it lands on.
+   *
+   * Jam's take control over a song, keyed by the song's id — `take.rs` takes
+   * that id as an opaque string and needed no change to accept one
+   * (`useSongTakes.ts` says why). Opt-in per song, the same first-run dialog,
+   * the same list, play and delete.
+   */
+  const takes = useSongTakes({
+    songId: song?.id ?? null,
+    view: "songs",
+    isPlaying,
+    countingIn: countIn !== null,
+    enabled: session.mixSetting.takes,
+    onSetTakes: session.setTakes,
+  });
+
+  /**
    * What the ear said about the notes, when there is a recording to ask.
    *
-   * `undefined` today: the engine can record a take over a song (W9), but the
-   * Songs stage has no record button on it yet, so nothing supplies one. The
-   * review then says nothing about which notes were played — only about when
-   * they landed — which is exactly what `SONGS.md` S0.5 says it may claim.
+   * `undefined` until a pass has been recorded, which is the honest state and
+   * the one `SONGS.md` S0.5 allows: the review then says nothing about which
+   * notes were played, only about when they landed.
    */
-  const pitch = useSongTakePitch(attempt.review, undefined);
+  const pitch = useSongTakePitch(attempt.review, takes.lastTake);
 
   const actions = useSongActions({
     scoreId: song?.id ?? null,
@@ -482,6 +501,13 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
               <p className="songs-control-note">{t("songs.loopNote")}</p>
             </div>
 
+            <SongRecordControl
+              available={takes.available}
+              enabled={session.mixSetting.takes}
+              recording={takes.recording}
+              onRequestTakes={takes.requestTakes}
+            />
+
             <SongBand
               setting={session.mixSetting}
               lanes={session.lanes}
@@ -489,6 +515,23 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
               onMute={session.setMute}
             />
           </div>
+
+          {/* The shelf, under the song it belongs to. Drawn even when empty:
+              a feature that appears only once you have used it is a feature
+              nobody finds, and what it says when empty is what recording is
+              FOR. */}
+          <SongTakes
+            available={takes.available}
+            takes={takes.takes}
+            recording={takes.recording}
+            dirBytes={takes.dirBytes}
+            playingId={takes.playingId}
+            enabled={session.mixSetting.takes}
+            onRequestTakes={takes.requestTakes}
+            onPlay={takes.play}
+            onStop={takes.stopPlayback}
+            onDelete={takes.remove}
+          />
 
           {/* A3: nothing here while the transport runs. The verdict appears
               when you stop, and goes away again when you start. */}
@@ -513,6 +556,15 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
           onChoose={(index) => void session.chooseTrack(index)}
           onCancel={session.cancelImport}
         />
+      )}
+
+      {/* A microphone that starts writing files is the one thing in this app a
+          person is entitled to be told about first, so the switch does not
+          simply flip. Jam's dialog, not a second one: the promise is one
+          promise, it is made in one set of words, and having read it once is
+          having read it. */}
+      {takes.introOpen && (
+        <TakesIntroDialog onConfirm={takes.confirmIntro} onCancel={takes.cancelIntro} />
       )}
 
       {dragging && <div className="songs-drop-hint">{t("songs.dropHere")}</div>}

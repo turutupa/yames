@@ -1967,6 +1967,38 @@ mod tests {
         assert_eq!(safe_dir_name(" blues ").unwrap(), safe_dir_name("blues").unwrap());
     }
 
+    /// A SONG'S ID IS A TAKE KEY, AND THIS MODULE NEEDED NOTHING FOR IT.
+    ///
+    /// Songs records takes too (`W14-MOUNTING.md` item 2) and files them under
+    /// the song's id rather than a jam's. Nothing here has to change for that,
+    /// and this is the assertion that says so rather than leaving it to be
+    /// rediscovered: the id is an OPAQUE string everywhere in this file, and
+    /// `src/songs/import.ts`'s `songId` is sixteen lowercase hex characters,
+    /// which the character rule passes through untouched.
+    ///
+    /// The half that is worth a test rather than a comment is the last line:
+    /// a song and a jam can never share a folder unless a player has named a
+    /// jam with sixteen hex digits, and even then they would have to be the
+    /// SAME sixteen.
+    #[test]
+    fn a_song_id_is_a_take_key_this_module_already_accepts() {
+        // Two ids of the shape `songId` mints, from the fixtures' own hashes.
+        for id in ["1c0f3a9b7e2d4506", "00000000ffffffff"] {
+            let name = safe_dir_name(id).expect("a song id is a take key");
+            assert_eq!(sanitised(id).unwrap(), id, "{id:?} was rewritten on the way in");
+            assert!(name.starts_with(&format!("{id}-")), "{id:?} became {name:?}");
+            assert!(!name.contains('/') && !name.contains('\\') && !name.contains(".."));
+            // And addressable as a take id too, which is what `delete_take`
+            // and `play_take` take — the stem rule refuses anything it had to
+            // change, and this changed nothing.
+            assert_eq!(safe_stem(id).unwrap(), id);
+        }
+        assert_ne!(
+            safe_dir_name("1c0f3a9b7e2d4506").unwrap(),
+            safe_dir_name("blues").unwrap(),
+        );
+    }
+
     /// End to end: two jams whose ids the character rule confuses keep their
     /// own takes, and neither can see the other's.
     #[test]

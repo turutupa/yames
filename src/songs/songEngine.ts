@@ -31,12 +31,21 @@ export type SongMixSetting = {
   muted: SongLane[];
   /** 0, 1 or 2 bars before the first pass. */
   countInBars: number;
+  /**
+   * Record a take of this song. Off unless the player turned it on, and per
+   * song for the same reason the mix is: `Jam.takes` lives on the jam record,
+   * so a song you record is a song you decided to record and the one next to
+   * it in the library is not. Absent means off, which is what every song
+   * stored before this existed says.
+   */
+  takes: boolean;
 };
 
 export const DEFAULT_MIX_SETTING: SongMixSetting = {
   mix: DEFAULT_SONG_MIX,
   muted: [],
   countInBars: 0,
+  takes: false,
 };
 
 function clampGain(value: number): number {
@@ -114,6 +123,10 @@ export function readMixSetting(stored: unknown): SongMixSetting {
       typeof raw.countInBars === "number" && raw.countInBars >= 0 && raw.countInBars <= 2
         ? Math.round(raw.countInBars)
         : 0,
+    // Only an explicit `true` records. Anything else a hand-edited file or an
+    // older build can hold — missing, `"yes"`, `1` — leaves the microphone
+    // alone, which is the only default a switch like this may have.
+    takes: raw.takes === true,
   };
 }
 
