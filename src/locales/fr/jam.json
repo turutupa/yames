@@ -326,7 +326,6 @@
       "unpin": "Détacher",
       "pinnedAria": "{{chord}}, épinglé à l'écran",
       "allLead": "tous les accords, une position chacun — touche pour voir le reste",
-      "inKeyMark": "dans la tonalité",
       "names": "Noms des accords"
     },
     "key": {

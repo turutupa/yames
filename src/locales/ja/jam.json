@@ -326,7 +326,6 @@
       "unpin": "固定を解除",
       "pinnedAria": "{{chord}}、画面に固定中",
       "allLead": "すべてのコードを一つの押さえ方で。タップで残りも表示",
-      "inKeyMark": "キー内",
       "names": "コード名"
     },
     "key": {

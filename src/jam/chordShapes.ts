@@ -885,6 +885,38 @@ const TRIAD_SETS: { label: string; strings: [number, number, number] }[] = [
 const INVERSIONS = ["root position", "first inversion", "second inversion"];
 
 /**
+ * Which finger goes where, for a generated shape.
+ *
+ * The generators used to work it out from the fret alone —
+ * `min(4, fret - lowest + 1)` — which is the right answer only when the
+ * shape happens to use one note per fret. It is not: a four-fret span holds
+ * FIVE frets, so the top two both came out as finger four, and two notes a
+ * fret apart held by the same finger is not a chord anybody can play. The
+ * owner, looking at the chart: "I saw some chords with seemingly impossible
+ * fingering". Five of them.
+ *
+ * A hand assigns fingers in order up the neck, and where two notes share a
+ * fret they take neighbouring fingers — which is why an open A major is
+ * one, two, three all at the second fret and not one finger three times.
+ * So: sort by fret, then by string, and count off.
+ *
+ * Returns null when the shape needs more than four, which is the honest
+ * answer for a grip nobody has four fingers for; the caller throws it away.
+ */
+function fingersFor(frets: (number | null)[]): (number | null)[] | null {
+  const held = frets
+    .map((fret, at) => ({ fret, at }))
+    .filter((n): n is { fret: number; at: number } => n.fret !== null && n.fret > 0)
+    .sort((a, b) => a.fret - b.fret || a.at - b.at);
+  if (held.length > 4) return null;
+  const fingers: (number | null)[] = frets.map(() => null);
+  held.forEach((note, k) => {
+    fingers[note.at] = k + 1;
+  });
+  return fingers;
+}
+
+/**
  * The lowest close voicing of three given pitch classes on three given
  * strings, within a four-fret reach and sounding in ascending order.
  * Returns null when the tuning simply cannot hold it.
@@ -942,12 +974,11 @@ function buildTriadSeeds(): Seed[] {
         const shift = 1 - Math.min(...found);
         const placed = found.map((f) => f + shift);
         const frets: (number | null)[] = [null, null, null, null, null, null];
-        const fingers: (number | null)[] = [null, null, null, null, null, null];
-        const lowest = Math.min(...placed);
         indices.forEach((idx, k) => {
           frets[idx] = placed[k];
-          fingers[idx] = Math.min(4, placed[k] - lowest + 1);
         });
+        const fingers = fingersFor(frets);
+        if (!fingers) continue;
         seeds.push({
           id: "triad-" + quality + "-" + set.label + "-" + String(inv),
           name: "triad on " + set.label + ", " + INVERSIONS[inv],
@@ -1103,12 +1134,11 @@ function buildExtendedSeeds(): Seed[] {
         const shift = 1 - Math.min(...found);
         const placed = found.map((f) => f + shift);
         const frets: (number | null)[] = [null, null, null, null, null, null];
-        const fingers: (number | null)[] = [null, null, null, null, null, null];
-        const lowest = Math.min(...placed);
         indices.forEach((idx, k) => {
           frets[idx] = placed[k];
-          fingers[idx] = Math.min(4, placed[k] - lowest + 1);
         });
+        const fingers = fingersFor(frets);
+        if (!fingers) continue;
         seeds.push({
           id: "ext-" + quality + "-" + set.label + "-" + String(inv),
           name: "on " + set.label,

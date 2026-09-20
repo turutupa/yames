@@ -1468,20 +1468,21 @@ describe("JamView — the cheat sheet", () => {
     expect(new Set(heads).size).toBe(CHORD_QUALITIES.length);
   });
 
-  it("marks the chords that fit the key on All keys, and only there", () => {
+  it("marks no chord as in-key: the switch says it instead", () => {
+    /*
+     * There was a dot, then an outline, and neither could say what it meant
+     * — "what is the meaning of the highlighted shapes? it doesn't seem
+     * obvious what it is". It was not, and the In key / All keys switch
+     * above the chart answers the same question out loud. A reference that
+     * needs a legend has something wrong with it.
+     *
+     * The accent is left to mean one thing on this page: the chord you
+     * tapped.
+     */
     const { container } = chordSheet({}, { chordPage: "all" });
-    const all = cards(container).length;
-    const marked = container.querySelectorAll(".jam-chord-card.in-key").length;
-    // Some fit and some do not — a chart where everything is marked would be
-    // telling the player nothing.
-    expect(marked).toBeGreaterThan(0);
-    expect(marked).toBeLessThan(all);
-
-    cleanup();
-    // On In key every chord drawn is in the key, so an outline on each of
-    // them would be a page shouting one fact at itself.
-    const filtered = chordSheet({}, { chordPage: "key" });
-    expect(filtered.container.querySelectorAll(".jam-chord-card.in-key")).toHaveLength(0);
+    expect(cards(container).length).toBeGreaterThan(100);
+    expect(container.querySelectorAll(".jam-chord-card.in-key")).toHaveLength(0);
+    expect(container.querySelectorAll(".jam-chord-mark")).toHaveLength(0);
   });
 
   it("In key keeps the key's roots and only their chords, holes and all", () => {

@@ -393,7 +393,7 @@ export function ChordSheet({
   const card = (
     chord: Chord,
     key: string,
-    options: { degree?: string; inKeyMark?: boolean } = {},
+    options: { degree?: string } = {},
   ) => {
     const shape = instrument ? basicShape(shapeCache(chord.root, chord.quality)) : null;
     const name = chordName(chord, playedKey);
@@ -402,9 +402,7 @@ export function ChordSheet({
       <button
         key={key}
         type="button"
-        className={`jam-chord-card${on ? " active" : ""}${
-          options.inKeyMark ? " in-key" : ""
-        }`}
+        className={`jam-chord-card${on ? " active" : ""}`}
         aria-pressed={on}
         aria-label={name}
         onClick={() => {
@@ -412,9 +410,6 @@ export function ChordSheet({
           onShapeIndex(0);
         }}
       >
-        {options.inKeyMark && (
-          <span className="jam-chord-mark" role="img" aria-label={t("jam.chords.inKeyMark")} />
-        )}
         {shape ? (
           <ChordDiagram
             shape={shape}
@@ -564,14 +559,20 @@ export function ChordSheet({
                               key={qualities[at]}
                               className={`jam-chord-cell${cell ? "" : " jam-chord-cell-out"}`}
                             >
+                              {/* No "in key" mark on the chart.
+
+                                  An outline on some cells and not others
+                                  was the only thing on this page that
+                                  needed explaining, and nothing explained
+                                  it — the owner, looking at a screenshot of
+                                  it: "what is the meaning of the
+                                  highlighted shapes? it doesn't seem
+                                  obvious what it is". It is not, and the
+                                  switch two inches above answers the same
+                                  question out loud. A reference that needs
+                                  a legend has something wrong with it. */}
                               {cell?.shape
-                                ? card(cell.chord, `${row.root}-${cell.chord.quality}`, {
-                                    /* The outline says "this one is in your
-                                       key" — which is worth saying on All
-                                       keys and says nothing on In key,
-                                       where every cell drawn is one. */
-                                    inKeyMark: !inKeyOnly && cell.fits,
-                                  })
+                                ? card(cell.chord, `${row.root}-${cell.chord.quality}`)
                                 : null}
                             </td>
                           ))}

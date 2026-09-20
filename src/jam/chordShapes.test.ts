@@ -375,3 +375,80 @@ describe("power chords", () => {
     expect(names).toContain("A-string power chord, with the octave");
   });
 });
+
+/**
+ * A fingering a hand can actually make (2026-09-19).
+ *
+ * The generated shapes worked their fingers out from the fret alone —
+ * `min(4, fret - lowest + 1)` — which is right only when a shape uses one
+ * note per fret. A four-fret span holds FIVE frets, so the top two came out
+ * as finger four apiece, and one finger on two different frets is not a
+ * chord: the owner spotted it on the chart, "I saw some chords with
+ * seemingly impossible fingering". Five of them were.
+ *
+ * These are the rules a hand imposes, checked against every shape in the
+ * library — the hand-written ones included, so a typo in the tables fails
+ * here too.
+ */
+describe("every fingering is one a hand can make", () => {
+  const held = (shape: (typeof SHAPES)[number]) =>
+    shape.frets
+      .map((fret, at) => ({ fret, at, finger: shape.fingers[at] }))
+      .filter(
+        (n): n is { fret: number; at: number; finger: number } =>
+          n.fret !== null && n.fret > 0 && n.finger !== null && n.finger !== undefined,
+      );
+
+  it("never puts one finger on two different frets", () => {
+    const broken: string[] = [];
+    for (const shape of SHAPES) {
+      const frets = new Map<number, Set<number>>();
+      for (const note of held(shape)) {
+        if (!frets.has(note.finger)) frets.set(note.finger, new Set());
+        frets.get(note.finger)!.add(note.fret);
+      }
+      for (const [finger, at] of frets) {
+        // A barre is the one exception, and it is one FRET held by one
+        // finger across several strings — which this still satisfies.
+        if (at.size > 1) broken.push(`${shape.id}: finger ${finger} on frets ${[...at]}`);
+      }
+    }
+    expect(broken).toEqual([]);
+  });
+
+  it("asks for no more than four fingers", () => {
+    const broken = SHAPES.filter((shape) => new Set(held(shape).map((n) => n.finger)).size > 4).map(
+      (shape) => shape.id,
+    );
+    expect(broken).toEqual([]);
+  });
+
+  it("counts them off up the neck, never backwards", () => {
+    // A lower fret never takes a higher finger than one above it: that is a
+    // hand crossed over itself.
+    const broken: string[] = [];
+    for (const shape of SHAPES) {
+      const order = [...held(shape)].sort((a, b) => a.fret - b.fret);
+      for (let k = 1; k < order.length; k++) {
+        if (order[k].fret > order[k - 1].fret && order[k].finger < order[k - 1].finger) {
+          broken.push(shape.id);
+          break;
+        }
+      }
+    }
+    expect(broken).toEqual([]);
+  });
+
+  it("gives every fretted note a finger, and every finger a note", () => {
+    for (const shape of SHAPES) {
+      shape.frets.forEach((fret, at) => {
+        const finger = shape.fingers[at];
+        if (fret !== null && fret > 0) {
+          expect(finger, `${shape.id} string ${at} is fretted with no finger`).toBeTruthy();
+        } else {
+          expect(finger ?? null, `${shape.id} string ${at} has a finger on nothing`).toBeNull();
+        }
+      });
+    }
+  });
+});

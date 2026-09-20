@@ -326,7 +326,6 @@
       "unpin": "Soltar",
       "pinnedAria": "{{chord}}, fijado en la pantalla",
       "allLead": "todos los acordes, una postura cada uno — toca para ver el resto",
-      "inKeyMark": "en la tonalidad",
       "names": "Nombres de acordes"
     },
     "key": {
