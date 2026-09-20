@@ -28,7 +28,7 @@ import {
 } from "./useLiveNoteLights";
 import { useSongActions } from "./useSongActions";
 import { __finishAttemptForTests } from "./useSongAttempt";
-import { takePitchFor } from "./useSongTakePitch";
+import { startOffsetOf, takePitchFor } from "./useSongTakePitch";
 import { scriptFindings, scriptPass } from "./reviewFixtures";
 import { buildSchedule } from "../../../songs/schedule";
 import type { LiveOnset, TimingBands } from "../../../ipc";
@@ -780,5 +780,48 @@ describe("asking the ear which note it was", () => {
     await expect(
       takePitchFor(review, { takeId: "tk1", jamId: "j1", startOffsetMs: 0 }),
     ).resolves.toEqual([]);
+  });
+
+  /**
+   * The engine measured it; the frontend guessed at it. The guess is
+   * optimistic by tens of milliseconds — the IPC crossing on the way in and
+   * the ring handover on the way out — so where both exist the engine wins.
+   */
+  it("prefers the offset the take's own writer measured", () => {
+    const take = { takeId: "tk1", jamId: "j1", startOffsetMs: -12 };
+    expect(startOffsetOf(take)).toBe(-12);
+    expect(
+      startOffsetOf({
+        ...take,
+        position: {
+          mode: "song" as const,
+          bar: 3,
+          tick: 2880,
+          pass: 0,
+          startOffsetMs: -41.7,
+        },
+      }),
+    ).toBe(-41.7);
+    // A jam's position carries no offset — there is no beat 0 of a range to
+    // measure from — so the estimate is still the only answer there.
+    expect(
+      startOffsetOf({
+        ...take,
+        position: { mode: "jam" as const, bar: 5, tick: 0, pass: 1 },
+      }),
+    ).toBe(-12);
+  });
+
+  it("sends the measured offset rather than the estimate", async () => {
+    setInvokeResponse("analyze_take_pitch", []);
+    await takePitchFor(review, {
+      takeId: "tk1",
+      jamId: "j1",
+      startOffsetMs: -12,
+      position: { mode: "song", bar: 0, tick: 0, pass: 0, startOffsetMs: -41.7 },
+    });
+    const call = mockInvoke.mock.calls.find((c) => c[0] === "analyze_take_pitch");
+    const request = (call?.[1] as { request: Record<string, unknown> }).request;
+    expect(request.startOffsetMs).toBe(-41.7);
   });
 });

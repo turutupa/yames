@@ -34,7 +34,7 @@ export type { LiveLights } from "./useLiveNoteLights";
 
 export { useSongProgress } from "./useSongProgress";
 
-export { useSongTakePitch, takePitchFor } from "./useSongTakePitch";
+export { useSongTakePitch, takePitchFor, startOffsetOf } from "./useSongTakePitch";
 export type { SongTake } from "./useSongTakePitch";
 
 export { useSongsDue, announceSongsDue, SONGS_DUE_EVENT } from "./useSongsDue";

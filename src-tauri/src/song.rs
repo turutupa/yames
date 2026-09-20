@@ -589,6 +589,100 @@ impl SongTable {
 }
 
 // ---------------------------------------------------------------------------
+// Where a take began
+// ---------------------------------------------------------------------------
+
+/// Turn the transport stamp the audio callback left on a take's ring into the
+/// position the take's sidecar records
+/// (`plans/tasks/songs/W15-LIVE-AND-EXACT.md`, item 2).
+///
+/// Called on the take's WRITER thread, on its first chunk of band, through
+/// the function `start_take` hands over. It lives here rather than in
+/// `take.rs` because the arithmetic is the compiled table's own — a sample
+/// cursor becomes a bar and a tick only against the bar plan that put every
+/// sample where it is — and because `take.rs` has never had to know a song
+/// exists.
+///
+/// `table` is the song the engine was holding when the take started. `None`
+/// is a jam or free play, and a `Song` stamp with no table to read it against
+/// answers `None` rather than guessing — a position nobody can check is worse
+/// than no position at all.
+pub fn take_position(
+    table: Option<&SongTable>,
+    at: crate::take::TakeTransport,
+) -> Option<crate::take::TakePosition> {
+    use crate::take::{TakeMode, TakePosition, TakeTransport};
+    match at {
+        TakeTransport::Free => None,
+        TakeTransport::Jam { bar, chorus } => Some(TakePosition {
+            mode: TakeMode::Jam,
+            bar,
+            tick: 0,
+            // A chorus is counted from one and a pass from zero; one subtraction
+            // so nothing downstream has to hold two ideas of "which time round".
+            pass: chorus.saturating_sub(1),
+            count_in: false,
+            start_offset_ms: None,
+        }),
+        TakeTransport::SongCountIn { frames } => {
+            let table = table?;
+            let first = table.bars().first()?;
+            let rate = table.rate.max(1) as f64;
+            Some(TakePosition {
+                mode: TakeMode::Song,
+                bar: first.index,
+                tick: first.start_tick,
+                pass: 0,
+                count_in: true,
+                // Beat 0 is still to come: the count-in has
+                // `count_in_samples - frames` left to run, and that much of
+                // the file is in front of it.
+                start_offset_ms: Some(
+                    (table.count_in_samples().saturating_sub(frames)) as f64 / rate * 1000.0,
+                ),
+            })
+        }
+        TakeTransport::Song { frames, pass } => {
+            let table = table?;
+            let rate = table.rate.max(1) as f64;
+            // The bar this sample is in. A walk rather than a search: it runs
+            // once per take, on the writer thread, and a range is at most
+            // `MAX_BARS` — four thousand comparisons in the worst case
+            // anybody can build, against a thread that is asleep the rest of
+            // the time.
+            let mut plan = *table.bars().first()?;
+            for bar in table.bars() {
+                if bar.start_sample <= frames {
+                    plan = *bar;
+                } else {
+                    break;
+                }
+            }
+            // And how far into it, in the song's own ticks. The bar's own
+            // tempo, which is the one in force there — reading the range's
+            // opening tempo would put every bar after a step in the wrong
+            // place, which is the failure `analyze_take_pitch`'s `tempoMap`
+            // exists to stop.
+            let into_secs = frames.saturating_sub(plan.start_sample) as f64 / rate;
+            let quarters = into_secs * plan.bpm / 60.0;
+            let tick = plan.start_tick + (quarters * TICKS_PER_QUARTER as f64).round() as u32;
+            // Beat 0 of the FIRST pass, which is the origin
+            // `analyze_take_pitch` reckons every note from, is this many
+            // samples BEHIND the first sample of the file.
+            let behind = pass as u64 * table.pass_samples() + frames;
+            Some(TakePosition {
+                mode: TakeMode::Song,
+                bar: plan.index,
+                tick,
+                pass,
+                count_in: false,
+                start_offset_ms: Some(-(behind as f64) / rate * 1000.0),
+            })
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
 // General MIDI percussion -> the kit's voices
 // ---------------------------------------------------------------------------
 

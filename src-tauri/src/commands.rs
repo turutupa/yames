@@ -3963,13 +3963,18 @@ pub fn start_take(
     app_handle: AppHandle,
 ) -> Result<(), String> {
     let home = takes_home(&app_handle)?;
-    let (handoff, out_sr, out_sr_watch, output_latency_us) = {
+    let (handoff, out_sr, out_sr_watch, output_latency_us, song) = {
         let engine = engine_state.0.lock().unwrap();
         (
             engine.take_handoff(),
             engine.output_sample_rate(),
             engine.output_sample_rate_handle(),
             engine.output_latency_us(),
+            // The piece as it is compiled RIGHT NOW. A song that is replaced
+            // mid-take — a new range, a new speed — recompiles into a
+            // different table, and the take's opening bar was measured
+            // against this one.
+            engine.song_handoff().table(),
         )
     };
     let out_sr = out_sr
@@ -3999,6 +4004,15 @@ pub fn start_take(
     // the two offsets there.
     let round_trip_us = output_latency_us + input_latency_us;
 
+    // How the writer turns the callback's transport stamp into a bar and a
+    // tick. The closure owns the song rather than the engine lock: it runs on
+    // the take's writer thread, on its first chunk of band, and a writer that
+    // had to take the engine's lock to answer "where did this start?" would
+    // be a writer that can block.
+    let position: crate::take::TakePositionSource = std::sync::Arc::new(move |at| {
+        crate::song::take_position(song.as_deref(), at)
+    });
+
     let started = {
         let mut session = take_state.0.lock().unwrap_or_else(|e| e.into_inner());
         session.start(crate::take::TakeStart {
@@ -4010,6 +4024,7 @@ pub fn start_take(
             round_trip_us,
             out_sr_watch: Some(out_sr_watch),
             owns_input,
+            position: Some(position),
         })
     };
     if started.is_err() {
