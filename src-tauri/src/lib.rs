@@ -27,6 +27,9 @@ mod onset;
 pub mod session;
 mod session_audio;
 pub mod session_log;
+/// The song the engine plays — the tempo map, the range and the band from an
+/// imported file (`plans/SONGS.md` A1/A4/A6).
+mod song;
 mod speech_out;
 mod state;
 mod take;
@@ -53,9 +56,9 @@ pub mod probe {
     /// through.
     pub use crate::jam::{
         band_state_for_bar, compile as compile_jam, compile_with_kit as compile_jam_with_kit,
-        compile_with_voices as compile_jam_with_voices, reference_bank, JamBandState, JamBassLine,
-        JamConfig, JamDropOut, JamKeysLine, JamMix, JamPattern, JamPosition, JamPracticeConfig,
-        JamTable, JamTrade, JamVoices,
+        compile_with_voices as compile_jam_with_voices, reference_bank, reference_perc,
+        JamBandState, JamBassLine, JamConfig, JamDropOut, JamKeysLine, JamMix, JamPattern,
+        JamPosition, JamPracticeConfig, JamTable, JamTrade, JamVoices,
     };
     /// The recorded bass and keys. `--jam-voice <dir>` plays a folder of
     /// notes, so the gate covers the path a melodic bank takes to the mixer:
@@ -73,6 +76,16 @@ pub mod probe {
     /// the gate covers the ring the output callback writes into and the
     /// writer thread draining it to disk underneath the stream.
     pub use crate::take::{SharedTake, TakeHandoff, TakeRing, TakeSession, TakeStart};
+    /// The song. `--song` builds a transport and a backing track directly and
+    /// hands the engine the compiled table, for the reason `--jam` compiles a
+    /// jam here: the probe runs headless and there is no `load_song` command
+    /// to call. The gate then covers the one path where the callback walks a
+    /// table of sample positions rather than counting ticks — the loop seam
+    /// and the tempo step included.
+    pub use crate::song::{
+        compile as compile_song, SongBacking, SongBar, SongMix, SongNote, SongRange, SongRole,
+        SongSounds, SongTable, SongTempo, SongTrack, SongTransport,
+    };
 
     pub use crate::state::{create_shared_state, AppState, SharedState};
     pub use crate::timing::create_beat_log;
@@ -112,7 +125,9 @@ use commands::{
     arm_count_in, inspect_kit_folder, pick_kit_folder, set_accent_mode, set_jam, set_jam_position, warm_jam, stop_speed_ramp, toggle_playback, tts_list_voices, tts_set_voice, tts_set_volume, tts_speak,
     tts_stop, tts_voice_diagnostics, unload_coach_model, write_model_chunk, DownloadState,
     delete_take, list_takes, play_take, start_take, stop_take, stop_take_playback, takes_dir_size,
-    EngineState, JamGainState, JamKitState, JamVoiceState, TakeState,
+    // W9 — the engine plays a song (`plans/SONGS.md` A1/A4/A6).
+    clear_song, load_song, set_song_mix, set_song_range,
+    EngineState, JamGainState, JamKitState, JamVoiceState, SongSourceState, TakeState,
 };
 use engine::MetronomeEngine;
 use midi::create_shared_midi;
@@ -347,6 +362,10 @@ pub fn run() {
             // ...and the decoded melodic banks, for the same reason and at a
             // higher price per miss. See `VoiceCache` in `voices.rs`.
             app.manage(JamVoiceState::default());
+            // The song as it arrived, so `set_song_range` can build it again
+            // without the frontend re-sending a whole score. See
+            // `SongSourceState`.
+            app.manage(SongSourceState::default());
             // The take being recorded, if one is. See `TakeState`.
             app.manage(TakeState::default());
 
@@ -655,6 +674,10 @@ pub fn run() {
             set_jam,
             set_jam_position,
             warm_jam,
+            load_song,
+            clear_song,
+            set_song_range,
+            set_song_mix,
             pick_kit_folder,
             inspect_kit_folder,
             start_take,

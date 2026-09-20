@@ -266,7 +266,7 @@ const MIX_MAX: f32 = 1.5;
 /// range this trim opens is 0.035 to 0.157 — a bit under half to a bit over
 /// double. The test's floor is the brief's 6 dB and not today's 7.7, so the
 /// trim can move by ear without the test having to.
-const KEYS_TRIM: f32 = 0.07;
+pub(crate) const KEYS_TRIM: f32 = 0.07;
 
 /// Each bass voice against the fingered one, through the small-speaker
 /// band-pass.
@@ -317,7 +317,7 @@ const KEYS_TRIM: f32 = 0.07;
 /// The test's gate is the brief's 3 dB and not today's hundredth of one, so
 /// the recipes can be tuned by ear (`plans/JAM_UX_DECISIONS.md` C2 — the
 /// owner listens) without the test having to move every time.
-const BASS_VOICE_TRIM: [f32; BASS_VOICE_COUNT] = [
+pub(crate) const BASS_VOICE_TRIM: [f32; BASS_VOICE_COUNT] = [
     1.0000, // fingered — the reference. Moving this one moves everything.
     0.8699, // picked
     1.1981, // upright
@@ -347,7 +347,7 @@ const BASS_VOICE_TRIM: [f32; BASS_VOICE_COUNT] = [
 /// a quarter. Both trims are therefore doing exactly what they should — and
 /// the clav's, being above 1, means its TRANSIENT is twice the piano's,
 /// which is what a percussive stab is.
-const KEYS_VOICE_TRIM: [f32; KEYS_VOICE_COUNT] = [
+pub(crate) const KEYS_VOICE_TRIM: [f32; KEYS_VOICE_COUNT] = [
     1.0000, // epiano — the reference, so `KEYS_TRIM`'s own measurement holds.
     0.4236, // organ
     2.0160, // clav
@@ -475,7 +475,7 @@ impl JamVoices {
 /// band play harder.
 ///
 /// Returns a 0-based index, which is what the bank is addressed by.
-fn voice_layer(gain: f32, layers: u8) -> u8 {
+pub(crate) fn voice_layer(gain: f32, layers: u8) -> u8 {
     let want = if !gain.is_finite() || gain < 0.6 {
         1
     } else if gain < 0.9 {
@@ -2761,8 +2761,8 @@ fn compile_keys(
 /// A struct rather than six arguments because every one of them is the same
 /// for the whole table, and passing them down one at a time is how the
 /// groove and the fill end up resolved against different kits.
-struct Voicing<'a> {
-    bank: &'a KitBank,
+pub(crate) struct Voicing<'a> {
+    pub(crate) bank: &'a KitBank,
     /// The percussion set, when one ships and the band has not switched it
     /// off.
     ///
@@ -2773,18 +2773,18 @@ struct Voicing<'a> {
     /// gets this far — it has no slots to make). One `Option`, checked on
     /// the command thread, and no percussion branch anywhere the callback
     /// can see.
-    perc: Option<&'a KitBank>,
+    pub(crate) perc: Option<&'a KitBank>,
     /// Which voices each voice's hit chokes. Indexed by [`KitVoice`].
-    chokes: [u32; KIT_VOICES],
+    pub(crate) chokes: [u32; KIT_VOICES],
     /// Does this groove's snare ghost mean the cross-stick?
-    ghost_is_rim: bool,
+    pub(crate) ghost_is_rim: bool,
     /// The drums' share of the mix, folded into every slot here so the audio
     /// thread never sees one.
-    mix: f32,
+    pub(crate) mix: f32,
     /// And the percussion's, folded into the percussion slots the same way.
     /// Its own dial because it is its own row in the band — the musician
     /// pulling the shaker down is not pulling the drummer down.
-    mix_perc: f32,
+    pub(crate) mix_perc: f32,
 }
 
 impl<'a> Voicing<'a> {
@@ -2812,7 +2812,7 @@ impl<'a> Voicing<'a> {
 /// audio thread asks the other question, on the tick, about the drum it is
 /// about to spawn — so the inversion happens here, once, on the command
 /// thread.
-fn choke_map(bank: &KitBank) -> [u32; KIT_VOICES] {
+pub(crate) fn choke_map(bank: &KitBank) -> [u32; KIT_VOICES] {
     let mut out = [0u32; KIT_VOICES];
     for victim in KitVoice::ALL {
         let by = bank.choked_by(victim);
@@ -2864,7 +2864,7 @@ fn resolve_voice(bank: &KitBank, voice: KitVoice, layer: u8) -> Option<(KitVoice
 /// robin count already resolved.
 ///
 /// `layer` is 1-based, or 0 for "the layer this level asks for".
-fn voice_slot(
+pub(crate) fn voice_slot(
     v: &Voicing,
     voice: KitVoice,
     layer: u8,
