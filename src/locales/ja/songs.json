@@ -77,7 +77,9 @@
       "summary": "{{track}} · {{bars}} 小節",
       "remove": "Yames から外す",
       "due": "今日の分",
-      "dueTitle": "この曲に戻ると決めていました"
+      "dueTitle": "この曲に戻ると決めていました",
+      "starter": "付属",
+      "starterTitle": "Yames に最初から入っています。いつでも消せます。"
     },
     "review": {
       "title": "今のはどうだったか",

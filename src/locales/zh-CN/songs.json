@@ -77,7 +77,9 @@
       "summary": "{{track}} · {{bars}} 小节",
       "remove": "从 Yames 移除",
       "due": "今天练",
-      "dueTitle": "你说过要回到这首"
+      "dueTitle": "你说过要回到这首",
+      "starter": "自带",
+      "starterTitle": "随 Yames 一起来的。想删就删。"
     },
     "review": {
       "title": "刚才那遍如何",

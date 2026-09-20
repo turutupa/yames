@@ -147,6 +147,8 @@ const ADDED_BY_THE_SONGS_WAVE = [
   "songs.library.dueTitle",
   "songs.library.empty",
   "songs.library.remove",
+  "songs.library.starter",
+  "songs.library.starterTitle",
   "songs.library.summary",
   "songs.loop",
   "songs.loopNote",

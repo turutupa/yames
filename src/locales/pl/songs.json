@@ -89,7 +89,9 @@
       "summary": "{{track}} · {{bars}} taktów",
       "remove": "Usuń z Yames",
       "due": "Na dziś",
-      "dueTitle": "Prosiłeś, żeby do tego wrócić"
+      "dueTitle": "Prosiłeś, żeby do tego wrócić",
+      "starter": "W zestawie",
+      "starterTitle": "Przyszła razem z Yames. Skasuj ją, kiedy chcesz."
     },
     "review": {
       "title": "Jak poszło",

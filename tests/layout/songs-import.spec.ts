@@ -95,4 +95,101 @@ test.describe("the offer when a download finishes", () => {
     // stop and what a sixty-character tab-site file name would otherwise do.
     expect(Math.round(height), "the offer strip is not a strip any more").toBeLessThanOrEqual(110);
   });
+
+  /**
+   * And the strip it appears above does not move.
+   *
+   * The whole shape of the Songs stage is "one screen, and the controls are
+   * reachable with a guitar on". An offer that pushed the bars, the speed and
+   * the band off the bottom would undo that on exactly the screen a new
+   * player is on. It cannot: `.songs-view` is a fixed-height column whose one
+   * flexible child is the tab frame. This is that, measured.
+   */
+  test("does not push the stage's controls out of the window", async ({ page }) => {
+    for (const size of [SMALLEST, { width: 1100, height: 720 }]) {
+      await openShot(page, "songs-offer", size);
+      await noSidewaysScroll(page, `the offer at ${size.width}px`);
+      // The offer scene opens on the empty state, which has no strip — so
+      // this asks whether there is one before measuring it, rather than
+      // waiting thirty seconds for a control that is not on this screen.
+      const strip = page.locator(".songs-strip");
+      if ((await strip.count()) > 0) {
+        const box = (await strip.boundingBox())!;
+        expect(
+          Math.round(box.y + box.height),
+          `the strip ends at ${Math.round(box.y + box.height)} in a ${size.height}px window`,
+        ).toBeLessThanOrEqual(size.height + 1);
+      }
+      // Nothing outside the tab frame scrolls, offer or no offer.
+      const scrolls = await page.evaluate(() => {
+        const el = document.scrollingElement ?? document.documentElement;
+        return el.scrollHeight - el.clientHeight;
+      });
+      expect(scrolls, `the window scrolls ${scrolls}px with an offer on it`).toBeLessThanOrEqual(1);
+    }
+  });
+});
+
+test.describe("the shelf Yames ships with", () => {
+  /**
+   * The library is never empty, and the seven pieces fit in it.
+   *
+   * The scene lets the real seeding run against an empty store, so these are
+   * the pieces the app actually ships — imported by the real importer, drawn
+   * by the real sidebar. What can go wrong is a title plus an "Included"
+   * marker that does not fit the row, which is invisible to vitest because
+   * happy-dom computes no geometry at all.
+   */
+  for (const size of [
+    { width: 1100, height: 720 },
+    { width: 1400, height: 900 },
+  ]) {
+    test(`puts seven pieces in the library at ${size.width}×${size.height}`, async ({ page }) => {
+      await openShot(page, "songs-starter", size);
+      await noSidewaysScroll(page, `the starter shelf at ${size.width}px`);
+
+      const rows = page.locator(".preset-sidebar-item.song-item");
+      expect(await rows.count(), "the shelf did not arrive").toBe(7);
+
+      // Every row is marked as having come with Yames, and every marker is
+      // inside its own row rather than hanging off the end of it.
+      const marked = await page.$$eval(".preset-sidebar-item.song-item", (nodes) =>
+        nodes.map((node) => {
+          const row = node.getBoundingClientRect();
+          const mark = node.querySelector(".song-item-starter")?.getBoundingClientRect();
+          const name = node.querySelector(".preset-item-name")!.getBoundingClientRect();
+          return {
+            text: node.querySelector(".preset-item-name")?.textContent ?? "",
+            rowRight: row.right,
+            rowLeft: row.left,
+            markRight: mark?.right ?? null,
+            nameWidth: name.width,
+          };
+        }),
+      );
+      for (const row of marked) {
+        expect(row.markRight, `"${row.text}" is not marked as included`).not.toBeNull();
+        expect(
+          Math.round(row.markRight!),
+          `the marker on "${row.text}" ends at ${Math.round(row.markRight!)}, past the row's ${Math.round(row.rowRight)}`,
+        ).toBeLessThanOrEqual(Math.round(row.rowRight) + 1);
+        // And the marker has not squeezed the name to nothing: a row that
+        // says "Included" and shows three letters of the title is worse than
+        // one that says nothing.
+        expect(row.nameWidth, `"${row.text}" has no room left for its name`).toBeGreaterThan(40);
+      }
+    });
+  }
+
+  /** One of them on the stage, at the smallest window the app opens. */
+  test(`plays a shipped piece at ${SMALLEST.width}×${SMALLEST.height}`, async ({ page }) => {
+    await openShot(page, "songs-starter", SMALLEST);
+    await noSidewaysScroll(page, `a shipped piece at ${SMALLEST.width}px`);
+    const strip = await page.locator(".songs-strip").boundingBox();
+    expect(strip, "no controls on the stage").not.toBeNull();
+    expect(
+      Math.round(strip!.y + strip!.height),
+      `the strip ends at ${Math.round(strip!.y + strip!.height)} in a ${SMALLEST.height}px window`,
+    ).toBeLessThanOrEqual(SMALLEST.height + 1);
+  });
 });

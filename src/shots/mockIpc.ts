@@ -226,7 +226,12 @@ function songShotRecord(): SongRecord {
  * All four postdate the last time these screenshots were taken, and all four
  * would have landed on the homepage.
  */
-function baseStore(theme: string, tab: string, zenStyle?: string): Map<string, unknown> {
+function baseStore(
+  theme: string,
+  tab: string,
+  zenStyle?: string,
+  starter?: boolean,
+): Map<string, unknown> {
   const hints = [
     "drill-first-open", "preset-suggest", "coach-ask",
     "zen-first", "widget-discover", "midi-plugged",
@@ -255,6 +260,13 @@ function baseStore(theme: string, tab: string, zenStyle?: string): Map<string, u
   // now, and `SCORES` below is what answers for it. Saying the move has run
   // keeps the harness off a migration path the shots are not about.
   store.set("movedToPracticeStore", true);
+  // W19 — the starter shelf is already seeded, so the seven pieces Yames
+  // ships with do not appear in the library. Every Songs scene but
+  // `songs-starter` wants that: seven extra rows would change which song row
+  // 0 is and quietly re-point every songs shot at a different piece. The one
+  // scene that IS about the shelf leaves this key unset, and the seeding runs
+  // for real — through the real importer, like everything else here.
+  if (!starter) store.set("songsStarterShelf", { seeded: true, ids: [] });
   return store;
 }
 
@@ -265,11 +277,15 @@ export function installShotMock(shot: Shot, theme: string): void {
 
   const STATE = baseState(theme) as Record<string, unknown>;
   if (shot.ramp) Object.assign(STATE.speedRamp as object, shot.ramp);
-  const store = baseStore(theme, shot.tab ?? "beat", shot.zenStyle);
+  const store = baseStore(theme, shot.tab ?? "beat", shot.zenStyle, shot.starterShelf);
 
   /** The song library, the way the practice store holds it. */
   const SCORES = new Map<string, SongRecord>();
-  if (shot.tab === "songs") {
+  // The starter-shelf scene starts with an EMPTY store, so what the pictures
+  // and the layout suite see is the seven pieces the app really ships with,
+  // seeded by the real code through the real importer — not this fixture
+  // beside them.
+  if (shot.tab === "songs" && !shot.starterShelf) {
     const record = songShotRecord();
     SCORES.set(record.id, record);
   }

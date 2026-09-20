@@ -77,7 +77,9 @@
       "summary": "{{track}} · {{bars}} ô nhịp",
       "remove": "Bỏ khỏi Yames",
       "due": "Hôm nay",
-      "dueTitle": "Bạn đã hẹn quay lại bài này"
+      "dueTitle": "Bạn đã hẹn quay lại bài này",
+      "starter": "Có sẵn",
+      "starterTitle": "Có sẵn cùng Yames. Xoá lúc nào cũng được."
     },
     "review": {
       "title": "Vừa rồi thế nào",

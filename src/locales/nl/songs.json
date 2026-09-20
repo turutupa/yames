@@ -77,7 +77,9 @@
       "summary": "{{track}} · {{bars}} maten",
       "remove": "Uit Yames halen",
       "due": "Aan de beurt",
-      "dueTitle": "Je wilde hierop terugkomen"
+      "dueTitle": "Je wilde hierop terugkomen",
+      "starter": "Meegeleverd",
+      "starterTitle": "Kwam met Yames mee. Verwijder hem wanneer je wilt."
     },
     "review": {
       "title": "Hoe dat ging",

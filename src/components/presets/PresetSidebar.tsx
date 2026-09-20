@@ -7,6 +7,9 @@ import { VIBES } from "../../jam/vibes";
 import type { AppState, Setlist, Preset } from "../../types";
 import type { Jam } from "../../jam/types";
 import type { SongRecord } from "../../songs/library";
+// W19 — which library rows came with Yames. Ids from `settings.json`; this
+// module is a few dozen lines and pulls no importer with it.
+import { starterIds } from "../../songs/starter/shelf";
 import { JamGlyph } from "../jam/JamGlyph";
 
 export interface PresetSidebarHandle {
@@ -401,6 +404,25 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [songMenu]);
+
+  /**
+   * W19 — which songs came with Yames rather than from the player.
+   *
+   * Read from the store rather than passed down, the way `dueSongs` is read
+   * by the window above: the list is written once, on the launch that seeded
+   * the shelf, and re-read whenever the library grows so a piece that was
+   * just seeded is marked without a reload. Ids only — no score, no alphaTab.
+   */
+  const [starterSongs, setStarterSongs] = useState<ReadonlySet<string>>(new Set());
+  useEffect(() => {
+    let cancelled = false;
+    void starterIds().then((ids) => {
+      if (!cancelled) setStarterSongs(ids);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [songs?.length]);
 
   useEffect(() => {
     if (!jamMenu) {
@@ -1059,6 +1081,16 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
                     {dueSongs?.has(s.id) && (
                       <span className="song-item-due" title={t("songs.library.dueTitle")}>
                         {t("songs.library.due")}
+                      </span>
+                    )}
+                    {/* W19 — a piece that came with Yames rather than one
+                        the player brought in. A word and not a badge, the
+                        way "due" beside it is: it explains where the song
+                        came from and is not something to clear. Deleting
+                        one works exactly like deleting any other song. */}
+                    {starterSongs.has(s.id) && (
+                      <span className="song-item-starter" title={t("songs.library.starterTitle")}>
+                        {t("songs.library.starter")}
                       </span>
                     )}
                   </span>

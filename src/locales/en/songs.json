@@ -77,7 +77,9 @@
       "summary": "{{track}} · {{bars}} bars",
       "remove": "Remove from Yames",
       "due": "Due",
-      "dueTitle": "You asked to come back to this one"
+      "dueTitle": "You asked to come back to this one",
+      "starter": "Included",
+      "starterTitle": "Came with Yames. Delete it whenever you like."
     },
     "review": {
       "title": "How that went",

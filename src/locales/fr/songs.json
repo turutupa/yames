@@ -83,7 +83,9 @@
       "summary": "{{track}} · {{bars}} mesures",
       "remove": "Retirer de Yames",
       "due": "À revoir",
-      "dueTitle": "Tu as demandé à y revenir"
+      "dueTitle": "Tu as demandé à y revenir",
+      "starter": "Fournie",
+      "starterTitle": "Fournie avec Yames. Supprimez-la quand vous voulez."
     },
     "review": {
       "title": "Ce que ça a donné",

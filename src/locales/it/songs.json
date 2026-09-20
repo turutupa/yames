@@ -83,7 +83,9 @@
       "summary": "{{track}} · {{bars}} battute",
       "remove": "Togli da Yames",
       "due": "Da riprendere",
-      "dueTitle": "Hai chiesto di tornare su questo"
+      "dueTitle": "Hai chiesto di tornare su questo",
+      "starter": "Inclusa",
+      "starterTitle": "Arrivata con Yames. Cancellala quando vuoi."
     },
     "review": {
       "title": "Com'è andata",

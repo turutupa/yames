@@ -83,7 +83,9 @@
       "summary": "{{track}} · {{bars}} compassos",
       "remove": "Tirar do Yames",
       "due": "Para hoje",
-      "dueTitle": "Você pediu para voltar a esta"
+      "dueTitle": "Você pediu para voltar a esta",
+      "starter": "Inclusa",
+      "starterTitle": "Veio com o Yames. Apague quando quiser."
     },
     "review": {
       "title": "Como foi",

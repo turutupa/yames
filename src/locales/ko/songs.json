@@ -77,7 +77,9 @@
       "summary": "{{track}} · {{bars}}마디",
       "remove": "Yames에서 빼기",
       "due": "오늘 할 것",
-      "dueTitle": "이 곡으로 돌아오겠다고 했습니다"
+      "dueTitle": "이 곡으로 돌아오겠다고 했습니다",
+      "starter": "기본 제공",
+      "starterTitle": "Yames에 처음부터 들어 있습니다. 언제든 지워도 됩니다."
     },
     "review": {
       "title": "방금은 어땠는지",

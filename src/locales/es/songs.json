@@ -83,7 +83,9 @@
       "summary": "{{track}} · {{bars}} compases",
       "remove": "Quitar de Yames",
       "due": "Toca hoy",
-      "dueTitle": "Pediste volver a esta"
+      "dueTitle": "Pediste volver a esta",
+      "starter": "Incluida",
+      "starterTitle": "Viene con Yames. Bórrala cuando quieras."
     },
     "review": {
       "title": "Cómo ha ido",

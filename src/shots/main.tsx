@@ -303,7 +303,11 @@ async function drive() {
    */
   if (shot!.songs) {
     const rows = ".preset-sidebar-item.song-item";
-    await until("the song library", () => document.querySelectorAll(rows).length > shot!.songs!.row);
+    // The starter shelf is seeded asynchronously on a fresh store, so this
+    // scene waits for all seven rather than for one — otherwise it could
+    // click a row while six more were still arriving under it.
+    const wanted = shot!.starterShelf ? 7 : shot!.songs.row + 1;
+    await until("the song library", () => document.querySelectorAll(rows).length >= wanted);
     (document.querySelectorAll(rows)[shot!.songs!.row] as HTMLElement).click();
     await until("the songs stage", () => !!document.querySelector(".songs-view"));
     await until("the drawn tab", () => !!document.querySelector(".songs-tab-host[data-ready]"));

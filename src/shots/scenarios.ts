@@ -119,6 +119,15 @@ export interface Shot {
    * on.
    */
   downloadOffer?: boolean;
+  /**
+   * The shelf Yames ships with, seeded into the library (W19, S0.9).
+   *
+   * Every other Songs scene has it turned OFF — `mockIpc` writes the "already
+   * seeded" flag into the store — because seven extra library rows would
+   * change which song row 0 is and quietly re-point every songs shot at a
+   * different piece. This is the one scene that lets the seeding run.
+   */
+  starterShelf?: boolean;
   jam?: {
     row: number;
     bar?: number;
@@ -613,6 +622,21 @@ export const SHOTS: Shot[] = [
     width: 1400,
     height: 900,
     settleMs: 300,
+  },
+  {
+    id: "songs-starter",
+    suffix: "songs-starter",
+    window: "main",
+    tab: "songs",
+    // The library on a fresh install: the seven pieces Yames ships with, each
+    // marked as having come with the app, and the first of them on the stage.
+    // The layout suite is what this is for — it asks whether the marker fits
+    // beside a song's name without pushing anything out of the row.
+    starterShelf: true,
+    songs: { row: 0 },
+    width: 1400,
+    height: 900,
+    settleMs: 900,
   },
   {
     id: "widget",
