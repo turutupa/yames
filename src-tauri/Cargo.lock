@@ -6448,6 +6448,7 @@ version = "1.2.1"
 dependencies = [
  "aubio",
  "audio_thread_priority",
+ "base64 0.22.1",
  "claxon",
  "core-foundation-sys",
  "coreaudio-sys",

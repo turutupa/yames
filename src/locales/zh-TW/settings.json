@@ -309,6 +309,18 @@
       "sounds": "音色",
       "soundsCredit": "俱樂部鼓組是 Versilian Studios 與 Karoryfer Samples 的 Virtuosity Drums，由 Austin McMahon 演奏（公有領域）。錄音室鼓組是 DrumGizmo 專案的 DRSKit（CC BY 4.0）。",
       "madeWith": "用 {{heart}} 為全世界的音樂人打造"
+    },
+    "songs": {
+      "title": "歌曲",
+      "catchDownloads": "提示你下載的歌曲",
+      "catchDownloadsHint": "打開歌曲時，Yames 會留意你的下載資料夾，並且在打開任何東西之前先問你。你的檔案不會被移動、改名或刪除。",
+      "folder": "留意這個資料夾",
+      "folderUnknown": "這台電腦沒有告訴 Yames 下載放在哪裡",
+      "chooseFolder": "選擇...",
+      "useDownloads": "用下載資料夾",
+      "turnedDown": "你拒絕過的歌曲",
+      "turnedDownHint": "有 {{n}} 個檔案 Yames 不會再提示",
+      "forgetTurnedDown": "重新提示"
     }
   },
   "keybindings": {

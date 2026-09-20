@@ -702,6 +702,30 @@ export function installShotMock(shot: Shot, theme: string): void {
       return null;
     }
 
+    /*
+     * A download that has just finished (W19, `SONGS.md` S0.9).
+     *
+     * The app starts the watch on its way into Songs; this answers that a
+     * file arrived, the way the Rust watcher does. Nothing is faked past the
+     * IPC boundary — the banner in the picture is `DownloadOffer.tsx`
+     * drawing what `useDownloadWatch` made of the event.
+     */
+    if (cmd === "start_download_watch") {
+      if (shot.downloadOffer) {
+        setTimeout(
+          () =>
+            emit("songs-download-offer", {
+              path: "C:\\Users\\you\\Downloads\\Blackbird (fingerstyle).gp5",
+              fileName: "Blackbird (fingerstyle).gp5",
+              sizeBytes: 41_233,
+              modifiedMs: Date.now(),
+            }),
+          0,
+        );
+      }
+      return "C:\\Users\\you\\Downloads";
+    }
+
     if (cmd === "set_beat_groups" && Array.isArray(a?.groups)) {
       STATE.beatGroups = a.groups as number[];
       emit("state-changed", STATE);

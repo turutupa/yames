@@ -1168,6 +1168,55 @@ export async function queryAttempts(query: AttemptQuery): Promise<Attempt[]> {
 }
 
 // ---------------------------------------------------------------------------
+// The download is caught (W19, `plans/SONGS.md` S0.9)
+//
+// While Songs is the open mode, Rust lists the Downloads folder and says when
+// a Guitar Pro or MusicXML file has finished arriving. It offers; it never
+// imports, never moves the file and never opens it — `readOfferedFile` is the
+// only call that reads bytes, and it runs after the player has pressed the
+// button. No tab site is touched by any of this, by any route.
+// ---------------------------------------------------------------------------
+
+import type { DownloadOffer } from "./songs/downloadWatch";
+
+/** Where this machine puts downloads, or null if the OS will not say. */
+export async function defaultDownloadsDir(): Promise<string | null> {
+  return invoke<string | null>("default_downloads_dir");
+}
+
+/**
+ * Start watching. `folder` is null for this machine's own Downloads.
+ *
+ * Resolves with the folder actually being watched, so the setting can show it
+ * without having to work out what "the default" means on this OS. Rejects
+ * when the folder is not there, which is the case a player who moved a
+ * removable drive will hit.
+ */
+export async function startDownloadWatch(folder: string | null): Promise<string> {
+  return invoke<string>("start_download_watch", { dir: folder });
+}
+
+/** Stop watching. Idempotent. After this there is no watcher thread at all. */
+export async function stopDownloadWatch(): Promise<void> {
+  return invoke("stop_download_watch");
+}
+
+/** "Not this one", for as long as this watch runs. */
+export async function dismissDownloadOffer(fileName: string): Promise<void> {
+  return invoke("dismiss_download_offer", { fileName });
+}
+
+/** The offered file's bytes, base64 — after the player has said yes. */
+export async function readOfferedFile(path: string): Promise<string> {
+  return invoke<string>("read_offered_file", { path });
+}
+
+/** A file has finished arriving in the watched folder. */
+export function onDownloadOffer(callback: (offer: DownloadOffer) => void) {
+  return listen<DownloadOffer>("songs-download-offer", (e) => callback(e.payload));
+}
+
+// ---------------------------------------------------------------------------
 // "Come back to this" (COACH_UX A5)
 //
 // The promise the coach's fourth button makes. It was four keys in

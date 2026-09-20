@@ -39,6 +39,10 @@ import { useSongAttempt } from "./review/useSongAttempt";
 import { useSongProgress } from "./review/useSongProgress";
 import { useSongTakePitch } from "./review/useSongTakePitch";
 import { SongBand, SongCountIn } from "./SongBand";
+// W19 — getting a song in (`plans/SONGS.md` S0.9). Three small pieces, each
+// in its own file with its own stylesheet, mounted here and nowhere else.
+import { DownloadOffer } from "./DownloadOffer";
+import { useDownloadWatch } from "./useDownloadWatch";
 import { SongRecordControl, SongTakes } from "./SongTakes";
 import { useSongTakes } from "./useSongTakes";
 import { TakesIntroDialog } from "../jam/TakesIntroDialog";
@@ -237,6 +241,16 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
   );
 
   /**
+   * A download that has just finished, offered rather than opened.
+   *
+   * The caught file goes through `offerFile` — the same door the picker and
+   * the drop target use — so the track picker still opens and the player
+   * still chooses their part. Nothing is automatic (`SONGS.md` S0.9).
+   */
+  const onCaughtFile = useCallback((file: File) => void session.offerFile(file), [session]);
+  const downloads = useDownloadWatch({ view: "songs", onFile: onCaughtFile });
+
+  /**
    * The library's "+" opens this screen's file input.
    *
    * One input, on the view, reached by an event rather than copied into the
@@ -293,6 +307,8 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
           e.target.value = "";
         }}
       />
+
+      <DownloadOffer watch={downloads} />
 
       {session.error && (
         <div className="songs-alert" role="alert">

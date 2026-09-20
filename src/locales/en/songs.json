@@ -196,6 +196,15 @@
           "3": "You played {{bars}} right every time. Leave it and come back to it."
         }
       }
+    },
+    "offer": {
+      "justArrived": "just arrived in your downloads",
+      "justArrivedSized": "just arrived in your downloads · {{size}}",
+      "more": "{{n}} more waiting",
+      "open": "Open it",
+      "opening": "Opening...",
+      "notThisOne": "Not this one",
+      "failed": "Yames could not open that file. It may still be downloading."
     }
   }
 }

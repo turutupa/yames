@@ -88,6 +88,15 @@ claxon = "0.4.3"
 # itself is public domain and rusqlite is MIT, so neither touches the
 # GPL-3 promise in ROADMAP §1 principle 5.
 rusqlite = { version = "0.37", features = ["bundled"] }
+# Base64, for the two places bytes cross the IPC boundary: the file a caught
+# download is read from (`downloads.rs`) and the copy of it the store kept,
+# on its way back out to a save dialog (`export_score_source`). Tauri
+# serialises a `Vec<u8>` as a JSON array of decimal numbers, so a megabyte of
+# Guitar Pro would cross as a million integers; base64 is the shape
+# `scores.source_b64` is already in on the other side. Already in the graph
+# under tauri itself, so this adds NO package to Cargo.lock and NOTHING to
+# the installer. MIT OR Apache-2.0.
+base64 = "0.22"
 
 [features]
 default = []

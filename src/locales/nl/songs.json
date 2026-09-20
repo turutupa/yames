@@ -196,6 +196,15 @@
           "3": "Je speelde het {{bars}} elke keer goed. Laat het liggen en kom er later op terug."
         }
       }
+    },
+    "offer": {
+      "justArrived": "staat net in je downloads",
+      "justArrivedSized": "staat net in je downloads · {{size}}",
+      "more": "nog {{n}} in de wacht",
+      "open": "Openen",
+      "opening": "Bezig met openen...",
+      "notThisOne": "Deze niet",
+      "failed": "Yames kon dat bestand niet openen. Misschien wordt het nog gedownload."
     }
   }
 }

@@ -379,6 +379,19 @@ async function drive() {
   }
 
   /**
+   * A download, caught and offered (W19, `SONGS.md` S0.9).
+   *
+   * Nothing is pressed: the whole point of the feature is that it appears
+   * without being asked for. The wait is on the shipping banner, so a scene
+   * that photographed the screen before the event landed would fail here
+   * rather than quietly measure a strip that is not there.
+   */
+  if (shot!.downloadOffer) {
+    await until("the songs stage", () => !!document.querySelector(".songs-view"));
+    await until("the download offer", () => !!document.querySelector(".songs-offer"));
+  }
+
+  /**
    * A setlist, loaded and open in the paragraph.
    *
    * By clicking the library row, like the jam above and for the same reason:

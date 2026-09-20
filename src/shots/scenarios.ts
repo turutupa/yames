@@ -83,6 +83,17 @@ export interface Shot {
     review?: "rushing" | "missed" | "clean";
     openMore?: boolean;
   };
+  /**
+   * A download that has just finished, offered on the Songs screen (S0.9).
+   *
+   * Driven the way the real thing is: the app starts the watch when Songs
+   * opens, the mocked backend answers that a file has arrived, and the
+   * shipping banner draws itself. Its own flag rather than a field of
+   * `songs` because it is not about a song being loaded — the offer appears
+   * over the empty state too, which is the screen most players will meet it
+   * on.
+   */
+  downloadOffer?: boolean;
   jam?: {
     row: number;
     bar?: number;
@@ -521,6 +532,20 @@ export const SHOTS: Shot[] = [
     width: 1400,
     height: 900,
     settleMs: 900,
+  },
+  {
+    id: "songs-offer",
+    suffix: "songs-offer",
+    window: "main",
+    tab: "songs",
+    // A download caught, over the empty state — the screen a player meets
+    // this on the first time. Not a marketing picture: it is here so the
+    // layout suite can ask whether the strip and its two buttons fit at the
+    // smallest window the app opens.
+    downloadOffer: true,
+    width: 1400,
+    height: 900,
+    settleMs: 300,
   },
   {
     id: "widget",

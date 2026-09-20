@@ -196,6 +196,15 @@
           "3": "{{bars}}你每一遍都弹对了。先放着，过阵子再回来。"
         }
       }
+    },
+    "offer": {
+      "justArrived": "刚刚出现在你的下载里",
+      "justArrivedSized": "刚刚出现在你的下载里 · {{size}}",
+      "more": "还有 {{n}} 个在等着",
+      "open": "打开它",
+      "opening": "正在打开...",
+      "notThisOne": "不是这个",
+      "failed": "Yames 打不开这个文件，也许它还在下载。"
     }
   }
 }

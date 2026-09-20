@@ -214,6 +214,15 @@
           "3": "Zagrałeś {{bars}} dobrze za każdym razem. Zostaw to i wróć później."
         }
       }
+    },
+    "offer": {
+      "justArrived": "właśnie trafił do pobranych",
+      "justArrivedSized": "właśnie trafił do pobranych · {{size}}",
+      "more": "czeka jeszcze {{n}}",
+      "open": "Otwórz",
+      "opening": "Otwieranie...",
+      "notThisOne": "Nie ten",
+      "failed": "Yames nie mógł otworzyć tego pliku. Może wciąż się pobiera."
     }
   }
 }

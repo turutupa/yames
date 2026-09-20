@@ -196,6 +196,15 @@
           "3": "{{bars}} her seferinde doğru çaldın. Bırak ve sonra geri dön."
         }
       }
+    },
+    "offer": {
+      "justArrived": "az önce indirilenlere düştü",
+      "justArrivedSized": "az önce indirilenlere düştü · {{size}}",
+      "more": "{{n}} tane daha bekliyor",
+      "open": "Aç",
+      "opening": "Açılıyor...",
+      "notThisOne": "Bu değil",
+      "failed": "Yames bu dosyayı açamadı. Hâlâ iniyor olabilir."
     }
   }
 }

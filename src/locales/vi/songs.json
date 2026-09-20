@@ -196,6 +196,15 @@
           "3": "Bạn chơi đúng {{bars}} mọi lần. Để đó rồi quay lại sau."
         }
       }
+    },
+    "offer": {
+      "justArrived": "vừa về trong thư mục tải xuống của bạn",
+      "justArrivedSized": "vừa về trong thư mục tải xuống của bạn · {{size}}",
+      "more": "còn {{n}} tệp nữa đang chờ",
+      "open": "Mở tệp",
+      "opening": "Đang mở...",
+      "notThisOne": "Không phải tệp này",
+      "failed": "Yames không mở được tệp đó. Có thể tệp vẫn đang tải."
     }
   }
 }

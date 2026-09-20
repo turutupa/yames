@@ -4114,6 +4114,114 @@ pub fn stop_take_playback(engine_state: State<EngineState>) -> Result<(), String
     handoff.drain_retired();
     Ok(())
 }
+
+// ---------------------------------------------------------------------------
+// W19 — the download is caught (`plans/SONGS.md` S0.9)
+//
+// The Downloads folder is listed while Songs is the open mode, and a Guitar
+// Pro or MusicXML file that has finished arriving is OFFERED. Every rule is in
+// `downloads.rs`, which has no Tauri in it and is tested against a temp
+// directory; these four commands are the wiring.
+//
+// Nothing here makes a network request. Nothing here opens a file except
+// `read_offered_file`, which runs after the player has pressed the button.
+// ---------------------------------------------------------------------------
+
+/// Where this machine puts downloads, or `None` if the OS will not say.
+///
+/// Tauri's own path API rather than a guess at `~/Downloads`: it reads the
+/// XDG user-dirs / known-folder setting, so a player whose downloads go
+/// somewhere else is watched where their files actually land.
+#[tauri::command]
+pub fn default_downloads_dir(app_handle: AppHandle) -> Option<String> {
+    app_handle
+        .path()
+        .download_dir()
+        .ok()
+        .map(|p| p.to_string_lossy().into_owned())
+}
+
+/// Start watching a folder. Replaces any watch already running.
+///
+/// `dir` is the folder the player chose, or `None` for this machine's own
+/// Downloads. Turning the offer off does not call this — it calls
+/// `stop_download_watch`, and then there is no thread at all.
+#[tauri::command]
+pub fn start_download_watch(
+    dir: Option<String>,
+    app_handle: AppHandle,
+    watch: State<'_, crate::downloads::WatchState>,
+) -> Result<String, String> {
+    let dir = match dir {
+        Some(d) if !d.trim().is_empty() => std::path::PathBuf::from(d),
+        _ => app_handle
+            .path()
+            .download_dir()
+            .map_err(|e| format!("this computer has no Downloads folder Yames can find: {e}"))?,
+    };
+    if !dir.is_dir() {
+        return Err(format!("{} is not a folder", dir.display()));
+    }
+    let mut held = watch.0.lock().unwrap();
+    if let Some(running) = held.take() {
+        running.stop();
+    }
+    let emitter = app_handle.clone();
+    let started = crate::downloads::spawn_watch(dir.clone(), move |offer| {
+        let _ = emitter.emit("songs-download-offer", &offer);
+    });
+    *held = Some(started);
+    Ok(dir.to_string_lossy().into_owned())
+}
+
+/// Stop watching. Idempotent: leaving Songs twice is not an error.
+#[tauri::command]
+pub fn stop_download_watch(watch: State<'_, crate::downloads::WatchState>) {
+    if let Some(running) = watch.0.lock().unwrap().take() {
+        running.stop();
+    }
+}
+
+/// "Not this one." The watch stops offering it for as long as it runs; the
+/// frontend remembers it across restarts.
+#[tauri::command]
+pub fn dismiss_download_offer(
+    file_name: String,
+    watch: State<'_, crate::downloads::WatchState>,
+) {
+    if let Some(running) = watch.0.lock().unwrap().as_ref() {
+        running.dismiss(&file_name);
+    }
+}
+
+/// The offered file's bytes, base64 — after the player has said yes.
+///
+/// The one place in this feature that opens a file, and it is guarded twice:
+/// the path has to be a direct child of the folder currently being watched
+/// (canonicalised on both sides, so `..` cannot walk out of it) and it has to
+/// be a name the watcher would have offered. Base64 rather than a byte array
+/// because Tauri serialises `Vec<u8>` as a JSON array of numbers, and a
+/// megabyte of Guitar Pro would cross the wire as a million decimal integers.
+#[tauri::command(async)]
+pub fn read_offered_file(
+    path: String,
+    watch: State<'_, crate::downloads::WatchState>,
+) -> Result<String, String> {
+    use base64::Engine as _;
+    let dir = {
+        let held = watch.0.lock().unwrap();
+        held.as_ref()
+            .map(|w| w.dir.clone())
+            // No watch means nothing was offered, so there is nothing to
+            // read. Refusing here is what stops this being a "read any file"
+            // command that happens to be called by the Songs screen.
+            .ok_or_else(|| "Yames is not watching for downloads right now".to_string())?
+    };
+    let bytes = crate::downloads::read_offered(&dir, std::path::Path::new(&path))
+        .map_err(|e| e.to_string())?;
+    Ok(base64::engine::general_purpose::STANDARD.encode(bytes))
+}
+
 // ---------------------------------------------------------------------------
 // Tests — the pure halves of the beat-group / free-mode commands. The
 // `#[tauri::command]` wrappers need a live `State` + `AppHandle`, so the

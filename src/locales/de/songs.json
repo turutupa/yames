@@ -196,6 +196,15 @@
           "3": "Du hast es {{bars}} jedes Mal richtig gespielt. Lass es liegen und komm später wieder."
         }
       }
+    },
+    "offer": {
+      "justArrived": "ist gerade in deinen Downloads gelandet",
+      "justArrivedSized": "ist gerade in deinen Downloads gelandet · {{size}}",
+      "more": "{{n}} weitere warten",
+      "open": "Öffnen",
+      "opening": "Wird geöffnet ...",
+      "notThisOne": "Diese nicht",
+      "failed": "Yames konnte diese Datei nicht öffnen. Vielleicht lädt sie noch."
     }
   }
 }

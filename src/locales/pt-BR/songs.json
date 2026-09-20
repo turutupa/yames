@@ -205,6 +205,15 @@
           "3": "Você tocou certo {{bars}} todas as vezes. Deixe de lado e volte a ela depois."
         }
       }
+    },
+    "offer": {
+      "justArrived": "acabou de chegar nos seus downloads",
+      "justArrivedSized": "acabou de chegar nos seus downloads · {{size}}",
+      "more": "mais {{n}} esperando",
+      "open": "Abrir",
+      "opening": "Abrindo...",
+      "notThisOne": "Esse não",
+      "failed": "O Yames não conseguiu abrir esse arquivo. Talvez ainda esteja baixando."
     }
   }
 }

@@ -11,6 +11,9 @@ mod commands;
 /// and `timing` are: the store's own types are what a future integration
 /// test would import.
 pub mod db;
+/// The Downloads folder, watched while Songs is open (`plans/SONGS.md` S0.9).
+/// `pub` for the reason `db` is: its rules are pure and its tests are its own.
+pub mod downloads;
 mod engine;
 // `findings`, `score` and `srs` are the coach's judgement, the score format
 // it judges against, and the schedule it reviews on. They are `pub` for the
@@ -149,6 +152,9 @@ use commands::{
     delete_take, list_takes, play_take, start_take, stop_take, stop_take_playback, takes_dir_size,
     // W9 — the engine plays a song (`plans/SONGS.md` A1/A4/A6).
     clear_song, load_song, set_song_mix, set_song_range,
+    // W19 — the download is caught, and the file opens with Yames (S0.9).
+    default_downloads_dir, dismiss_download_offer, read_offered_file, start_download_watch,
+    stop_download_watch,
     EngineState, JamGainState, JamKitState, JamVoiceState, SongSourceState, TakeState,
 };
 use engine::MetronomeEngine;
@@ -390,6 +396,10 @@ pub fn run() {
             app.manage(SongSourceState::default());
             // The take being recorded, if one is. See `TakeState`.
             app.manage(TakeState::default());
+            // W19 — the Downloads watch, which exists only while Songs is
+            // open. `None` here is the whole of "off": no thread, no folder
+            // listed, and `read_offered_file` with nothing to read.
+            app.manage(downloads::WatchState::default());
 
             // Start audio output device polling
             engine::start_audio_device_polling(app.handle().clone());
@@ -700,6 +710,12 @@ pub fn run() {
             clear_song,
             set_song_range,
             set_song_mix,
+            // W19 — the download is caught (`plans/SONGS.md` S0.9).
+            default_downloads_dir,
+            start_download_watch,
+            stop_download_watch,
+            dismiss_download_offer,
+            read_offered_file,
             pick_kit_folder,
             inspect_kit_folder,
             start_take,

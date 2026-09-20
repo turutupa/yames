@@ -205,6 +205,15 @@
           "3": "Tu as joué juste {{bars}} à chaque fois. Laisse-la et reviens-y plus tard."
         }
       }
+    },
+    "offer": {
+      "justArrived": "vient d'arriver dans vos téléchargements",
+      "justArrivedSized": "vient d'arriver dans vos téléchargements · {{size}}",
+      "more": "{{n}} autres en attente",
+      "open": "L'ouvrir",
+      "opening": "Ouverture...",
+      "notThisOne": "Pas celui-ci",
+      "failed": "Yames n'a pas pu ouvrir ce fichier. Il est peut-être encore en cours de téléchargement."
     }
   }
 }

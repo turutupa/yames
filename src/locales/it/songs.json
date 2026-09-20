@@ -205,6 +205,15 @@
           "3": "Hai suonato bene {{bars}} tutte le volte. Lasciala lì e tornaci più avanti."
         }
       }
+    },
+    "offer": {
+      "justArrived": "è appena arrivato nei tuoi download",
+      "justArrivedSized": "è appena arrivato nei tuoi download · {{size}}",
+      "more": "altri {{n}} in attesa",
+      "open": "Aprilo",
+      "opening": "Apertura...",
+      "notThisOne": "Non questo",
+      "failed": "Yames non è riuscito ad aprire quel file. Forse è ancora in download."
     }
   }
 }
