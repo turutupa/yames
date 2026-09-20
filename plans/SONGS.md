@@ -135,6 +135,26 @@ refractory, so a riff in 16ths is swallowed before scoring sees it.
   later step (`ECHORA.md` D4), and needs an encoder whose licence has
   to be checked against GPL-3 before it is promised.
 
+- **A11 — The refractory when a free player speeds up.** *open, the
+  owner's call (W11, 2026-09-20).* Roadmap 1.3 unpinned the detector's
+  refractory from the click and pinned it to the rhythm the app has
+  locked onto. A player who then moves to a FINER rhythm than the lock
+  is deafened again: locked on eighths at 120 BPM the refractory is
+  187 ms and an eighth-note triplet arrives 166 ms after its neighbour,
+  so two notes in five never reach the analyzer and the evidence a
+  re-lock needs is what was swallowed. Measured: alternating eighths and
+  triplets by the bar, heard 109/160 locked on eighths and 153/160
+  locked on triplets; both still score 86–87, so roadmap 1.4's gate
+  passes while the inference never moves. Per-beat voting cannot fix
+  notes that were never heard. **Songs is not affected**: a loaded score
+  sets the refractory from its own smallest gap. Free play is. The fix
+  is a smaller refractory factor than the 0.75 chosen on 2026-05-23 to
+  kill the 103–150 ms ghost band, which means re-running that forensic
+  work on real guitar audio — not something to decide unattended.
+  Proposed default: do it with the owner's 180 BPM capture in hand, and
+  raise `minHeardRatio` in the `played/` fixtures when it is settled;
+  that is what "1.4 is done" will look like.
+
 ## B. Spikes (throwaway code, a written answer each)
 
 - **K1 — Backing through the engine.** Parse one Guitar Pro file with
