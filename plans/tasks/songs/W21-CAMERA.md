@@ -71,6 +71,78 @@ registration lines. If a shared file has moved under you when you finish,
    capabilities/CSP as needed. Say in the report what you could verify on
    this Windows machine and what is reasoning about the other two.
 
+## Addendum, 2026-09-20 — the owner: "make it very very cool and very well integrated"
+
+Items 1–5 above are the floor. This is what makes it the feature people
+show a friend. It is the player watching their own hands with a teacher's
+marks on the tape, so every idea below ties the picture to what Yames
+already knows about the pass. In priority order; stop cleanly at a
+boundary and say where.
+
+6. **The tape has the verdict painted on it.** Under the video, a
+   timeline the width of the take: every expected note a tick in its
+   verdict's colour and glyph (the review's own `marks.ts`), extras
+   between them, bar lines and section names above, passes separated.
+   Click or drag to scrub; **"next slip" / "previous slip"** jumps the
+   picture to half a bar before each mistake; hovering a tick shows the
+   note and how early or late. The coloured excerpt beside the video has
+   a moving mark and the note being played lifts as it passes. Picture,
+   excerpt and timeline are one clock.
+7. **The coach points at the tape.** The verdict's button row gains
+   "Watch it" when the attempt has a picture: it plays the finding's
+   bars, looped, at 70 %, with the offending notes marked — a teacher
+   rewinding to the spot. Implement it as the catalogue's `take` block
+   (bars + attempt id) so any future answer can do the same.
+8. **Selecting bars selects the tape.** The portion selected on the
+   excerpt (W18's selection model, the same one the tab uses) is the
+   loop of the video. Half speed and 70 % keep pitch where the platform
+   allows (`preservesPitch`), and say so where it does not.
+9. **While recording it feels like a studio, not a webcam test.** The
+   preview is small, mirrored, draggable to any corner of the stage and
+   remembered; when the transport runs it shrinks to a quiet red ring
+   with the elapsed time so the player looks at the tab, not themselves;
+   the count-in shows on it. A one-time framing guide (a faint neck-shaped
+   outline: "get both hands in") with a left-handed flip. The camera is
+   opened only while armed and released the moment it is not; the app
+   says "camera on" in words wherever the system's own light might not
+   be visible.
+10. **Takes look like takes.** Each take row under the song shows a
+   thumbnail (a frame grabbed at the first downbeat, stored as a small
+   JPEG beside the take), its bars, tempo, passes, the attempt's score
+   and date; a filter for "with picture"; delete removes picture, mix,
+   dry stem, thumbnail and sidecar together.
+11. **Then and now.** Two takes of the same bars side by side, locked to
+   the same bar positions (not the same seconds: the tempos may differ),
+   each with its own timeline — the catalogue's `compare` block gets its
+   real component, and an `improved` finding offers "See the
+   difference". This is the single-player progress reel from
+   `plans/ECHORA.md` A2 and needs no server.
+12. **A take you can send to someone** (`plans/ECHORA.md` D4, and the
+   growth loop: every shared clip shows Yames). "Save as a video":
+   composite, in the webview, the picture + the scrolling coloured
+   excerpt + bar, chord or section and tempo + a small Yames mark onto a
+   canvas while the take plays back; `canvas.captureStream()` for the
+   picture and a `MediaStreamAudioDestinationNode` fed by the take's MIX
+   for the sound; `MediaRecorder` to one ordinary file (mp4/H.264+AAC
+   where the webview can, WebM otherwise, and say which the player got
+   and that some sites only take mp4); saved through a Rust save dialog.
+   No encoder dependency, no licence question, real-time (a 40-second
+   take takes 40 seconds, with a progress ring and cancel). Choose the
+   bars, 16:9 or 9:16, with or without the marks. Nothing is uploaded:
+   the player saves a file and decides where it goes.
+13. **Hands on the instrument.** Actions in `useActionDispatcher` for
+   record/stop the take and camera on/off, bindable to a footswitch;
+   a recording can be started from the count-in without touching the
+   mouse.
+
+Engineering notes that matter here: send chunks to Rust as raw bytes
+(Tauri's binary IPC body), never base64 of a video stream; write through
+a buffered file on a thread that is not the UI's; throttle the preview
+to 15 fps while the transport runs; measure dropped frames and encoder
+time with the fake device and report them; and re-run the layout suite —
+the review with a picture must fit the same frame W18 gives the review,
+at the minimum window size, without a scroll.
+
 ## Testing without a camera or a person
 
 Chromium's fake device (`--use-fake-device-for-media-stream
