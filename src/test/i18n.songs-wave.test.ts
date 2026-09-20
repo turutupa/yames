@@ -7,12 +7,16 @@
 // fallback for a key that does not exist yet; it is not an acceptable
 // translation, and nothing failed when a locale carried 186 of them.
 //
-// So this file checks the values. Its subject is exactly the keys this wave
-// added — `git diff main...songs-v1 -- src/locales/en` at the time W16 ran —
-// rather than every key in the repo, because 359 keys that predate the wave
-// are also still English and untangling those is somebody else's afternoon
-// (see the report on `songs-w16-words`). A later wave adds its own list, or
-// replaces this one with the whole key space once the backlog is cleared.
+// So this file checks the values. Its subject is every key this wave added —
+// `git diff main...songs-v1 -- src/locales/en`, regenerated whole each time
+// somebody runs it — rather than every key in the repo, because 359 keys that
+// predate the wave are also still English and untangling those is somebody
+// else's afternoon (see the report on `songs-w16-words`).
+//
+// REGENERATE THE LIST, DO NOT APPEND TO IT. It was frozen at W16's diff, and
+// the waves after that one added strings this file then knew nothing about:
+// the Songs hotkeys and the stage's saved portions sat in all fourteen
+// locales in English with these checks green over the top of them.
 //
 // The LAST check in this file is the exception: plural forms are checked
 // across every key in every namespace in every locale, this wave's or not.
@@ -38,10 +42,10 @@ const LANGS = [
 ];
 
 /**
- * The keys `src/locales/en` gained between `main` (8cc7ea1f) and the end of
- * the Songs wave: the `songs` namespace, the coach's blocks, the three
- * renamed report stats, the coaching-stance settings and the Songs tab's
- * rail label and hotkey.
+ * Every key `src/locales/en` has gained since `main` (8cc7ea1f): the `songs`
+ * namespace and its stage, the coach's blocks, the three renamed report
+ * stats, the coaching-stance settings, and the Songs tab's rail label and its
+ * whole block of hotkeys.
  */
 const ADDED_BY_THE_SONGS_WAVE = [
   "coachBlocks.action.click.1",
@@ -82,6 +86,10 @@ const ADDED_BY_THE_SONGS_WAVE = [
   "coachReport.effTitle",
   "coachReport.gridLabel",
   "coachReport.gridTitle",
+  "drill.beatsSummary_other",
+  "drill.everyBars_other",
+  "metronome.clicksPerBar_other",
+  "metronome.tapCount_other",
   "nav.songs",
   "presets.titleSongs",
   "settings.coach.stance",
@@ -90,8 +98,21 @@ const ADDED_BY_THE_SONGS_WAVE = [
   "settings.coach.stanceLearningDesc",
   "settings.coach.stanceStrict",
   "settings.coach.stanceStrictDesc",
+  "settings.hotkeys.actions.songs-loop",
+  "settings.hotkeys.actions.songs-loop-clear",
+  "settings.hotkeys.actions.songs-loop-earlier",
+  "settings.hotkeys.actions.songs-loop-end",
+  "settings.hotkeys.actions.songs-loop-later",
+  "settings.hotkeys.actions.songs-loop-start",
   "settings.hotkeys.actions.tab-5",
+  "settings.hotkeys.descs.songs-loop",
+  "settings.hotkeys.descs.songs-loop-clear",
+  "settings.hotkeys.descs.songs-loop-earlier",
+  "settings.hotkeys.descs.songs-loop-end",
+  "settings.hotkeys.descs.songs-loop-later",
+  "settings.hotkeys.descs.songs-loop-start",
   "settings.hotkeys.descs.tab-5",
+  "settings.hotkeys.groups.songs",
   "settings.songs.catchDownloads",
   "settings.songs.catchDownloadsHint",
   "settings.songs.chooseFolder",
@@ -252,6 +273,23 @@ const ADDED_BY_THE_SONGS_WAVE = [
   "songs.sections",
   "songs.speed",
   "songs.speedNote",
+  "songs.stage.backToTab",
+  "songs.stage.deletePortion",
+  "songs.stage.keepPortion",
+  "songs.stage.keepPortionNote",
+  "songs.stage.looping",
+  "songs.stage.once",
+  "songs.stage.portionPlaceholder",
+  "songs.stage.portionSays",
+  "songs.stage.portionSays_other",
+  "songs.stage.portionTitle",
+  "songs.stage.renamePortion",
+  "songs.stage.selectedBars",
+  "songs.stage.timeRound.few",
+  "songs.stage.timeRound.one",
+  "songs.stage.timeRound.other",
+  "songs.stage.timeRound.two",
+  "songs.stage.wholeSong",
   "songs.tab.drawing",
   "songs.tab.failed",
   "songs.tempo",
@@ -358,6 +396,11 @@ const ALLOWED: { key: string; langs: string[]; why: string }[] = [
   { key: "nav.songs", langs: ["de"], why: "German rock musicians say Songs" },
   { key: "presets.titleSongs", langs: ["de"], why: "the rail label again" },
   { key: "settings.songs.title", langs: ["de"], why: "the rail label a third time" },
+  {
+    key: "settings.hotkeys.groups.songs",
+    langs: ["de"],
+    why: "and a fourth — the hotkey list names the tab",
+  },
   { key: "settings.coach.stanceStrict", langs: ["fr"], why: "strict is the French word too" },
   { key: "songs.sections", langs: ["fr"], why: "sections is the French word too" },
   { key: "songs.review.notes", langs: ["fr"], why: "note is the French word too" },

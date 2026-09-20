@@ -184,7 +184,7 @@
         "view": "뷰",
         "navigation": "탐색",
         "jam": "잼",
-        "songs": "Songs"
+        "songs": "곡"
       },
       "actions": {
         "play": "재생 / 정지",
@@ -220,12 +220,12 @@
         "jam-loop-section": "이 섹션 반복",
         "jam-take": "테이크 녹음",
         "tab-5": "곡 탭",
-        "songs-loop-start": "Loop starts here",
-        "songs-loop-end": "Loop ends here",
-        "songs-loop": "Repeat the portion",
-        "songs-loop-clear": "The whole song again",
-        "songs-loop-earlier": "Portion a bar earlier",
-        "songs-loop-later": "Portion a bar later"
+        "songs-loop-start": "여기서 반복 시작",
+        "songs-loop-end": "여기서 반복 끝",
+        "songs-loop": "부분 반복",
+        "songs-loop-clear": "다시 곡 전체",
+        "songs-loop-earlier": "부분을 한 마디 앞으로",
+        "songs-loop-later": "부분을 한 마디 뒤로"
       },
       "descs": {
         "play": "메트로놈을 시작하거나 정지합니다",
@@ -261,12 +261,12 @@
         "jam-loop-section": "지금 있는 섹션을 반복하거나 반복을 끄기",
         "jam-take": "다음에 재생할 때 녹음하거나 녹음을 멈춥니다",
         "tab-5": "곡 탭으로 전환합니다",
-        "songs-loop-start": "Start the portion at the bar you are playing",
-        "songs-loop-end": "End the portion at the bar you are playing",
-        "songs-loop": "Play the chosen bars round and round, or stop",
-        "songs-loop-clear": "Forget the portion and play the piece from the top",
-        "songs-loop-earlier": "Slide the chosen bars one bar towards the start, keeping their length",
-        "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length"
+        "songs-loop-start": "지금 연주하는 마디에서 부분을 시작하기",
+        "songs-loop-end": "지금 연주하는 마디에서 부분을 끝내기",
+        "songs-loop": "고른 마디를 몇 번이고 연주하거나 멈추기",
+        "songs-loop-clear": "부분을 잊고 곡을 처음부터 연주하기",
+        "songs-loop-earlier": "고른 마디를 길이는 그대로 한 마디 앞쪽으로 밀기",
+        "songs-loop-later": "고른 마디를 길이는 그대로 한 마디 뒤쪽으로 밀기"
       }
     },
     "inputTest": {

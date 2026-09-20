@@ -184,7 +184,7 @@
         "view": "Affichage",
         "navigation": "Navigation",
         "jam": "Jam",
-        "songs": "Songs"
+        "songs": "Morceaux"
       },
       "actions": {
         "play": "Lecture / Arrêt",
@@ -220,12 +220,12 @@
         "jam-loop-section": "Boucler cette section",
         "jam-take": "Enregistrer la prise",
         "tab-5": "Onglet Morceaux",
-        "songs-loop-start": "Loop starts here",
-        "songs-loop-end": "Loop ends here",
-        "songs-loop": "Repeat the portion",
-        "songs-loop-clear": "The whole song again",
-        "songs-loop-earlier": "Portion a bar earlier",
-        "songs-loop-later": "Portion a bar later"
+        "songs-loop-start": "La boucle commence ici",
+        "songs-loop-end": "La boucle finit ici",
+        "songs-loop": "Répéter le passage",
+        "songs-loop-clear": "Tout le morceau à nouveau",
+        "songs-loop-earlier": "Le passage une mesure plus tôt",
+        "songs-loop-later": "Le passage une mesure plus tard"
       },
       "descs": {
         "play": "Démarrer ou arrêter le métronome",
@@ -261,12 +261,12 @@
         "jam-loop-section": "Mettre en boucle la section où tu es, ou l'en sortir",
         "jam-take": "Enregistrer au prochain lancement, ou arrêter l'enregistrement",
         "tab-5": "Passer à l'onglet Morceaux",
-        "songs-loop-start": "Start the portion at the bar you are playing",
-        "songs-loop-end": "End the portion at the bar you are playing",
-        "songs-loop": "Play the chosen bars round and round, or stop",
-        "songs-loop-clear": "Forget the portion and play the piece from the top",
-        "songs-loop-earlier": "Slide the chosen bars one bar towards the start, keeping their length",
-        "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length"
+        "songs-loop-start": "Faire commencer le passage à la mesure que vous jouez",
+        "songs-loop-end": "Faire finir le passage à la mesure que vous jouez",
+        "songs-loop": "Rejouer les mesures choisies encore et encore, ou arrêter",
+        "songs-loop-clear": "Oublier le passage et jouer le morceau depuis le début",
+        "songs-loop-earlier": "Décaler les mesures choisies d'une mesure vers le début, sans changer leur longueur",
+        "songs-loop-later": "Décaler les mesures choisies d'une mesure vers la fin, sans changer leur longueur"
       }
     },
     "inputTest": {

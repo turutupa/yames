@@ -184,7 +184,7 @@
         "view": "Vista",
         "navigation": "Navigazione",
         "jam": "Jam",
-        "songs": "Songs"
+        "songs": "Brani"
       },
       "actions": {
         "play": "Avvia / Ferma",
@@ -220,12 +220,12 @@
         "jam-loop-section": "Ripeti questa sezione",
         "jam-take": "Registra la take",
         "tab-5": "Scheda Brani",
-        "songs-loop-start": "Loop starts here",
-        "songs-loop-end": "Loop ends here",
-        "songs-loop": "Repeat the portion",
-        "songs-loop-clear": "The whole song again",
-        "songs-loop-earlier": "Portion a bar earlier",
-        "songs-loop-later": "Portion a bar later"
+        "songs-loop-start": "La ripetizione inizia qui",
+        "songs-loop-end": "La ripetizione finisce qui",
+        "songs-loop": "Ripeti la parte",
+        "songs-loop-clear": "Di nuovo tutto il brano",
+        "songs-loop-earlier": "La parte una battuta prima",
+        "songs-loop-later": "La parte una battuta dopo"
       },
       "descs": {
         "play": "Avvia o ferma il metronomo",
@@ -261,12 +261,12 @@
         "jam-loop-section": "Mettere in loop la sezione in cui sei, o toglierla",
         "jam-take": "Registra alla prossima riproduzione, oppure smetti di registrare",
         "tab-5": "Passa alla scheda Brani",
-        "songs-loop-start": "Start the portion at the bar you are playing",
-        "songs-loop-end": "End the portion at the bar you are playing",
-        "songs-loop": "Play the chosen bars round and round, or stop",
-        "songs-loop-clear": "Forget the portion and play the piece from the top",
-        "songs-loop-earlier": "Slide the chosen bars one bar towards the start, keeping their length",
-        "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length"
+        "songs-loop-start": "Far iniziare la parte alla battuta che stai suonando",
+        "songs-loop-end": "Far finire la parte alla battuta che stai suonando",
+        "songs-loop": "Suonare le battute scelte una volta dopo l'altra, o smettere",
+        "songs-loop-clear": "Dimenticare la parte e suonare il brano dall'inizio",
+        "songs-loop-earlier": "Spostare le battute scelte di una battuta verso l'inizio, mantenendo la stessa lunghezza",
+        "songs-loop-later": "Spostare le battute scelte di una battuta verso la fine, mantenendo la stessa lunghezza"
       }
     },
     "inputTest": {

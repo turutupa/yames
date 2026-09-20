@@ -184,7 +184,7 @@
         "view": "Weergave",
         "navigation": "Navigatie",
         "jam": "Jam",
-        "songs": "Songs"
+        "songs": "Nummers"
       },
       "actions": {
         "play": "Afspelen / Stoppen",
@@ -220,12 +220,12 @@
         "jam-loop-section": "Dit deel herhalen",
         "jam-take": "Neem de take op",
         "tab-5": "Nummers-tabblad",
-        "songs-loop-start": "Loop starts here",
-        "songs-loop-end": "Loop ends here",
-        "songs-loop": "Repeat the portion",
-        "songs-loop-clear": "The whole song again",
-        "songs-loop-earlier": "Portion a bar earlier",
-        "songs-loop-later": "Portion a bar later"
+        "songs-loop-start": "Herhaling begint hier",
+        "songs-loop-end": "Herhaling eindigt hier",
+        "songs-loop": "Het stuk herhalen",
+        "songs-loop-clear": "Weer het hele nummer",
+        "songs-loop-earlier": "Stuk een maat eerder",
+        "songs-loop-later": "Stuk een maat later"
       },
       "descs": {
         "play": "Start of stop de metronoom",
@@ -261,12 +261,12 @@
         "jam-loop-section": "Het deel waar je in zit herhalen, of daarmee stoppen",
         "jam-take": "Opnemen zodra je de volgende keer op afspelen drukt, of stoppen met opnemen",
         "tab-5": "Naar het Nummers-tabblad",
-        "songs-loop-start": "Start the portion at the bar you are playing",
-        "songs-loop-end": "End the portion at the bar you are playing",
-        "songs-loop": "Play the chosen bars round and round, or stop",
-        "songs-loop-clear": "Forget the portion and play the piece from the top",
-        "songs-loop-earlier": "Slide the chosen bars one bar towards the start, keeping their length",
-        "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length"
+        "songs-loop-start": "Het stuk laten beginnen bij de maat die je speelt",
+        "songs-loop-end": "Het stuk laten eindigen bij de maat die je speelt",
+        "songs-loop": "De gekozen maten steeds opnieuw spelen, of stoppen",
+        "songs-loop-clear": "Het stuk vergeten en het nummer vanaf het begin spelen",
+        "songs-loop-earlier": "De gekozen maten een maat richting het begin schuiven, even lang",
+        "songs-loop-later": "De gekozen maten een maat richting het eind schuiven, even lang"
       }
     },
     "inputTest": {

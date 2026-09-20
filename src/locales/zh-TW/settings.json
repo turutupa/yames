@@ -184,7 +184,7 @@
         "view": "檢視",
         "navigation": "導航",
         "jam": "即興",
-        "songs": "Songs"
+        "songs": "曲目"
       },
       "actions": {
         "play": "播放／停止",
@@ -220,12 +220,12 @@
         "jam-loop-section": "循環這一段",
         "jam-take": "錄下這一遍",
         "tab-5": "曲目分頁",
-        "songs-loop-start": "Loop starts here",
-        "songs-loop-end": "Loop ends here",
-        "songs-loop": "Repeat the portion",
-        "songs-loop-clear": "The whole song again",
-        "songs-loop-earlier": "Portion a bar earlier",
-        "songs-loop-later": "Portion a bar later"
+        "songs-loop-start": "重複從這裡開始",
+        "songs-loop-end": "重複到這裡結束",
+        "songs-loop": "重複這一段",
+        "songs-loop-clear": "重新彈整首",
+        "songs-loop-earlier": "這一段提前一小節",
+        "songs-loop-later": "這一段延後一小節"
       },
       "descs": {
         "play": "開始或停止節拍器",
@@ -261,12 +261,12 @@
         "jam-loop-section": "把正在演奏的這一段循環起來，或取消循環",
         "jam-take": "下次按播放時錄音，或停止錄音",
         "tab-5": "切換到曲目分頁",
-        "songs-loop-start": "Start the portion at the bar you are playing",
-        "songs-loop-end": "End the portion at the bar you are playing",
-        "songs-loop": "Play the chosen bars round and round, or stop",
-        "songs-loop-clear": "Forget the portion and play the piece from the top",
-        "songs-loop-earlier": "Slide the chosen bars one bar towards the start, keeping their length",
-        "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length"
+        "songs-loop-start": "把這一段的開頭定在你正在彈的小節",
+        "songs-loop-end": "把這一段的結尾定在你正在彈的小節",
+        "songs-loop": "把選取的小節一遍又一遍地彈，或者停下",
+        "songs-loop-clear": "忘掉這一段，從頭彈整首",
+        "songs-loop-earlier": "把選取的小節整體往前挪一小節，長度不變",
+        "songs-loop-later": "把選取的小節整體往後挪一小節，長度不變"
       }
     },
     "inputTest": {

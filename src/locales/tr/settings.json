@@ -184,7 +184,7 @@
         "view": "Görünüm",
         "navigation": "Gezinme",
         "jam": "Jam",
-        "songs": "Songs"
+        "songs": "Şarkılar"
       },
       "actions": {
         "play": "Çal / Durdur",
@@ -220,12 +220,12 @@
         "jam-loop-section": "Bu bölümü döngüye al",
         "jam-take": "Kaydı al",
         "tab-5": "Şarkılar sekmesi",
-        "songs-loop-start": "Loop starts here",
-        "songs-loop-end": "Loop ends here",
-        "songs-loop": "Repeat the portion",
-        "songs-loop-clear": "The whole song again",
-        "songs-loop-earlier": "Portion a bar earlier",
-        "songs-loop-later": "Portion a bar later"
+        "songs-loop-start": "Tekrar burada başlar",
+        "songs-loop-end": "Tekrar burada biter",
+        "songs-loop": "Bölümü tekrarla",
+        "songs-loop-clear": "Yine şarkının tamamı",
+        "songs-loop-earlier": "Bölüm bir ölçü önce",
+        "songs-loop-later": "Bölüm bir ölçü sonra"
       },
       "descs": {
         "play": "Metronomu başlat veya durdur",
@@ -261,12 +261,12 @@
         "jam-loop-section": "İçinde olduğun bölümü döngüye al ya da döngüden çıkar",
         "jam-take": "Bir sonraki çalışında kaydet veya kaydı durdur",
         "tab-5": "Şarkılar sekmesine geç",
-        "songs-loop-start": "Start the portion at the bar you are playing",
-        "songs-loop-end": "End the portion at the bar you are playing",
-        "songs-loop": "Play the chosen bars round and round, or stop",
-        "songs-loop-clear": "Forget the portion and play the piece from the top",
-        "songs-loop-earlier": "Slide the chosen bars one bar towards the start, keeping their length",
-        "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length"
+        "songs-loop-start": "Bölümü çaldığın ölçüden başlat",
+        "songs-loop-end": "Bölümü çaldığın ölçüde bitir",
+        "songs-loop": "Seçilen ölçüleri tekrar tekrar çal ya da durdur",
+        "songs-loop-clear": "Bölümü unut ve parçayı baştan çal",
+        "songs-loop-earlier": "Seçilen ölçüleri, boyunu bozmadan bir ölçü başa doğru kaydır",
+        "songs-loop-later": "Seçilen ölçüleri, boyunu bozmadan bir ölçü sona doğru kaydır"
       }
     },
     "inputTest": {

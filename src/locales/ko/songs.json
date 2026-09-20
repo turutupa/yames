@@ -193,13 +193,13 @@
       }
     },
     "stage": {
-      "backToTab": "Back to the tab",
-      "selectedBars": "Bars {{bars}} chosen",
-      "wholeSong": "The whole song",
+      "backToTab": "탭으로 돌아가기",
+      "selectedBars": "{{bars}}마디 선택됨",
+      "wholeSong": "곡 전체",
       "portionSays": "{{count}}마디 · {{state}}",
       "portionSays_other": "{{count}}마디 · {{state}}",
-      "looping": "on repeat",
-      "once": "once through",
+      "looping": "반복 중",
+      "once": "한 번만",
       "timeRound": {
         "one": "{{n}}번째",
         "two": "{{n}}번째",
@@ -208,10 +208,10 @@
       },
       "keepPortion": "이 부분 저장",
       "keepPortionNote": "탭에서 마디를 먼저 고른 다음 이름을 붙이세요",
-      "portionPlaceholder": "Name this bit",
-      "renamePortion": "Rename",
-      "deletePortion": "Forget this one",
-      "portionTitle": "{{name}} — at {{percent}}%"
+      "portionPlaceholder": "이 부분에 이름 붙이기",
+      "renamePortion": "이름 바꾸기",
+      "deletePortion": "이건 잊기",
+      "portionTitle": "{{name}} — {{percent}}%"
     },
     "offer": {
       "justArrived": "이(가) 다운로드에 방금 도착했습니다",

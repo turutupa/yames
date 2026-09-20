@@ -184,7 +184,7 @@
         "view": "Вид",
         "navigation": "Навигация",
         "jam": "Джем",
-        "songs": "Songs"
+        "songs": "Песни"
       },
       "actions": {
         "play": "Старт / Стоп",
@@ -220,12 +220,12 @@
         "jam-loop-section": "Зациклить раздел",
         "jam-take": "Записать дубль",
         "tab-5": "Вкладка «Песни»",
-        "songs-loop-start": "Loop starts here",
-        "songs-loop-end": "Loop ends here",
-        "songs-loop": "Repeat the portion",
-        "songs-loop-clear": "The whole song again",
-        "songs-loop-earlier": "Portion a bar earlier",
-        "songs-loop-later": "Portion a bar later"
+        "songs-loop-start": "Повтор начинается здесь",
+        "songs-loop-end": "Повтор заканчивается здесь",
+        "songs-loop": "Повторять фрагмент",
+        "songs-loop-clear": "Снова вся песня",
+        "songs-loop-earlier": "Фрагмент на такт раньше",
+        "songs-loop-later": "Фрагмент на такт позже"
       },
       "descs": {
         "play": "Запустить или остановить метроном",
@@ -261,12 +261,12 @@
         "jam-loop-section": "Зациклить раздел, в котором вы находитесь, или снять петлю",
         "jam-take": "Записать при следующем запуске или остановить запись",
         "tab-5": "Переключиться на вкладку «Песни»",
-        "songs-loop-start": "Start the portion at the bar you are playing",
-        "songs-loop-end": "End the portion at the bar you are playing",
-        "songs-loop": "Play the chosen bars round and round, or stop",
-        "songs-loop-clear": "Forget the portion and play the piece from the top",
-        "songs-loop-earlier": "Slide the chosen bars one bar towards the start, keeping their length",
-        "songs-loop-later": "Slide the chosen bars one bar towards the end, keeping their length"
+        "songs-loop-start": "Начать фрагмент с такта, который вы играете",
+        "songs-loop-end": "Закончить фрагмент на такте, который вы играете",
+        "songs-loop": "Играть выбранные такты снова и снова или остановиться",
+        "songs-loop-clear": "Забыть фрагмент и играть пьесу с начала",
+        "songs-loop-earlier": "Сдвинуть выбранные такты на такт к началу, не меняя их длины",
+        "songs-loop-later": "Сдвинуть выбранные такты на такт к концу, не меняя их длины"
       }
     },
     "inputTest": {

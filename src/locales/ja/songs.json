@@ -193,13 +193,13 @@
       }
     },
     "stage": {
-      "backToTab": "Back to the tab",
-      "selectedBars": "Bars {{bars}} chosen",
-      "wholeSong": "The whole song",
+      "backToTab": "タブに戻る",
+      "selectedBars": "{{bars}}小節を選択",
+      "wholeSong": "曲全体",
       "portionSays": "{{count}}小節 · {{state}}",
       "portionSays_other": "{{count}}小節 · {{state}}",
-      "looping": "on repeat",
-      "once": "once through",
+      "looping": "繰り返し",
+      "once": "一度だけ",
       "timeRound": {
         "one": "{{n}} 回目",
         "two": "{{n}} 回目",
@@ -208,10 +208,10 @@
       },
       "keepPortion": "この部分を保存",
       "keepPortionNote": "タブで小節を選んでから名前を付けます",
-      "portionPlaceholder": "Name this bit",
-      "renamePortion": "Rename",
-      "deletePortion": "Forget this one",
-      "portionTitle": "{{name}} — at {{percent}}%"
+      "portionPlaceholder": "この部分に名前を",
+      "renamePortion": "名前を変更",
+      "deletePortion": "これを忘れる",
+      "portionTitle": "{{name}} — {{percent}}%"
     },
     "offer": {
       "justArrived": "がダウンロードに届きました",
