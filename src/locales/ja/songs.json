@@ -19,8 +19,6 @@
     "percent": "{{percent}}%",
     "speedNote": "クリックは {{bpm}} BPM で動きます",
     "loop": "繰り返し",
-    "loopOn": "何度でも",
-    "loopOff": "一度だけ",
     "loopNote": "上の小節を何度も繰り返し弾きます",
     "dropHere": "ファイルをここに落とすと開きます",
     "band": {
@@ -38,11 +36,6 @@
       "droppedNotes_other": "このファイルの {{count}} 個の音は、バンドにない楽器のものです。"
     },
     "countIn": {
-      "label": "カウントイン",
-      "none": "すぐに開始",
-      "bars": "{{count}} 小節",
-      "bars_other": "{{count}} 小節",
-      "note": "最初の一周の前だけ数えます。繰り返しのたびには数えません",
       "counting": "カウント中"
     },
     "engine": {
@@ -207,8 +200,14 @@
       "portionSays_other": "{{count}}小節 · {{state}}",
       "looping": "on repeat",
       "once": "once through",
-      "timeRound": "Go {{n}}",
-      "keepPortion": "Keep it",
+      "timeRound": {
+        "one": "{{n}} 回目",
+        "two": "{{n}} 回目",
+        "few": "{{n}} 回目",
+        "other": "{{n}} 回目"
+      },
+      "keepPortion": "この部分を保存",
+      "keepPortionNote": "タブで小節を選んでから名前を付けます",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",

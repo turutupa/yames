@@ -19,8 +19,6 @@
     "percent": "{{percent}} %",
     "speedNote": "Der Klick läuft mit {{bpm}} BPM",
     "loop": "Wiederholen",
-    "loopOn": "Immer wieder",
-    "loopOff": "Einmal durch",
     "loopNote": "Spielt die Takte oben immer wieder",
     "dropHere": "Datei hier ablegen, um sie zu öffnen",
     "band": {
@@ -38,11 +36,6 @@
       "droppedNotes_other": "{{count}} Noten in dieser Datei sind für Instrumente, die die Band nicht hat."
     },
     "countIn": {
-      "label": "Einzähler",
-      "none": "Direkt los",
-      "bars": "{{count}} Takt",
-      "bars_other": "{{count}} Takte",
-      "note": "Wird vor dem ersten Durchgang gezählt, nicht vor jeder Wiederholung",
       "counting": "Zählt dich ein"
     },
     "engine": {
@@ -207,8 +200,14 @@
       "portionSays_other": "{{count}} Takte · {{state}}",
       "looping": "on repeat",
       "once": "once through",
-      "timeRound": "Go {{n}}",
-      "keepPortion": "Keep it",
+      "timeRound": {
+        "one": "{{n}}. Durchgang",
+        "two": "{{n}}. Durchgang",
+        "few": "{{n}}. Durchgang",
+        "other": "{{n}}. Durchgang"
+      },
+      "keepPortion": "Diesen Teil speichern",
+      "keepPortionNote": "Erst Takte in der Tabulatur wählen, dann benennen",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",

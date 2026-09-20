@@ -2,7 +2,7 @@
   "coachBlocks": {
     "action": {
       "loopBars": "Maten {{from}}–{{to}} herhalen",
-      "loopBarsAt": "Maten {{from}}–{{to}} herhalen op {{bpm}}",
+      "loopBarsAt": "Maten {{from}}–{{to}} herhalen op {{bpm}} BPM",
       "ramp": "Werk het op van {{from}} naar {{to}}",
       "click": {
         "1": "Klik op kwarten",

@@ -2,7 +2,7 @@
   "coachBlocks": {
     "action": {
       "loopBars": "{{from}}–{{to}}마디 반복",
-      "loopBarsAt": "{{from}}–{{to}}마디를 {{bpm}}로 반복",
+      "loopBarsAt": "{{from}}–{{to}}마디를 {{bpm}} BPM으로 반복",
       "ramp": "{{from}}에서 {{to}}까지 올리기",
       "click": {
         "1": "클릭을 4분음표로",

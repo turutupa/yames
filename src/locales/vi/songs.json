@@ -19,8 +19,6 @@
     "percent": "{{percent}}%",
     "speedNote": "Tiếng gõ chạy ở {{bpm}} BPM",
     "loop": "Lặp lại",
-    "loopOn": "Lặp mãi",
-    "loopOff": "Một lần thôi",
     "loopNote": "Chơi đi chơi lại những ô nhịp ở trên",
     "dropHere": "Thả tệp vào đây để mở",
     "band": {
@@ -38,11 +36,6 @@
       "droppedNotes_other": "{{count}} nốt trong tệp này thuộc về những nhạc cụ mà ban nhạc không có."
     },
     "countIn": {
-      "label": "Đếm vào",
-      "none": "Vào thẳng",
-      "bars": "{{count}} ô nhịp",
-      "bars_other": "{{count}} ô nhịp",
-      "note": "Chỉ đếm trước lượt đầu tiên, không đếm trước mỗi lần lặp",
       "counting": "Đang đếm vào"
     },
     "engine": {
@@ -207,8 +200,14 @@
       "portionSays_other": "{{count}} ô nhịp · {{state}}",
       "looping": "on repeat",
       "once": "once through",
-      "timeRound": "Go {{n}}",
-      "keepPortion": "Keep it",
+      "timeRound": {
+        "one": "Lượt {{n}}",
+        "two": "Lượt {{n}}",
+        "few": "Lượt {{n}}",
+        "other": "Lượt {{n}}"
+      },
+      "keepPortion": "Lưu đoạn này",
+      "keepPortionNote": "Chọn ô nhịp trên tab trước, rồi đặt tên cho chúng",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",

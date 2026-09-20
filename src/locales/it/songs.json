@@ -20,8 +20,6 @@
     "percent": "{{percent}}%",
     "speedNote": "Il clic va a {{bpm}} BPM",
     "loop": "Ripeti",
-    "loopOn": "Di continuo",
-    "loopOff": "Una volta sola",
     "loopNote": "Risuona le battute qui sopra una volta dopo l'altra",
     "dropHere": "Lascia qui il file per aprirlo",
     "band": {
@@ -41,12 +39,6 @@
       "droppedNotes_other": "{{count}} note di questo file sono per strumenti che la band non ha."
     },
     "countIn": {
-      "label": "Conteggio iniziale",
-      "none": "Si parte subito",
-      "bars": "{{count}} battuta",
-      "bars_many": "{{count}} battute",
-      "bars_other": "{{count}} battute",
-      "note": "Contato prima del primo giro, non prima di ogni ripetizione",
       "counting": "Ti conta l'entrata"
     },
     "engine": {
@@ -217,8 +209,14 @@
       "portionSays_other": "{{count}} battute · {{state}}",
       "looping": "on repeat",
       "once": "once through",
-      "timeRound": "Go {{n}}",
-      "keepPortion": "Keep it",
+      "timeRound": {
+        "one": "Giro {{n}}",
+        "two": "Giro {{n}}",
+        "few": "Giro {{n}}",
+        "other": "Giro {{n}}"
+      },
+      "keepPortion": "Salva questa parte",
+      "keepPortionNote": "Scegli le battute sulla tablatura, poi dai loro un nome",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",

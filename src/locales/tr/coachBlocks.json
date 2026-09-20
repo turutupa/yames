@@ -2,7 +2,7 @@
   "coachBlocks": {
     "action": {
       "loopBars": "{{from}}–{{to}}. ölçüyü döngüye al",
-      "loopBarsAt": "{{from}}–{{to}}. ölçüyü {{bpm}} ile döngüye al",
+      "loopBarsAt": "{{from}}–{{to}}. ölçüyü {{bpm}} BPM ile döngüye al",
       "ramp": "{{from}} tempodan {{to}} tempoya çıkar",
       "click": {
         "1": "Tık dörtlüklerde",

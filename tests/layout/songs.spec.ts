@@ -375,6 +375,29 @@ test.describe("the chosen portion, on the tab", () => {
     await expect(page.locator(".songs-loop-chip")).toHaveAttribute("aria-pressed", "false");
   });
 
+  /**
+   * One chip lights for one set of bars (W22 item 4).
+   *
+   * The shot's saved portion is "The chorus" over bars 5–8, which is exactly
+   * what the file calls Chorus — so the stage had two chips lit over the same
+   * four bars, which says the range is two things. The name the player chose
+   * wins; the section stays on the row, unlit, because it is still a way in.
+   */
+  test("lights one chip when a saved portion covers a section's own bars", async ({ page }) => {
+    await openShot(page, "songs-portion", { width: 1400, height: 900 });
+
+    const lit = page.locator(".songs-strip-sections [aria-pressed='true']");
+    await expect(lit, "two chips are lit over the same bars").toHaveCount(1);
+    await expect(lit, "the section lit instead of the name the player gave it").toHaveText(
+      "The chorus",
+    );
+
+    // The section is still there to press, and pressing it still works.
+    const section = page.getByRole("button", { name: "Chorus", exact: true });
+    await expect(section, "the file's own section went off the row").toHaveCount(1);
+    await expect(section).toHaveAttribute("aria-pressed", "false");
+  });
+
   /** A portion kept under a name sits beside the sections and comes back. */
   test("keeps a named portion beside the sections", async ({ page }) => {
     await openShot(page, "songs-portion", { width: 1400, height: 900 });
@@ -389,6 +412,183 @@ test.describe("the chosen portion, on the tab", () => {
     await expect(page.locator(".songs-strip-portion input").first()).toHaveValue("5");
     await expect(page.locator(".songs-strip-portion input").nth(1)).toHaveValue("8");
     await expect(page.locator(".songs-tab-band").first()).toBeVisible();
+  });
+});
+
+/**
+ * The cursor, and the question nobody asked (W22 item 1).
+ *
+ * The capture of `songs-playing` had a transport counting bars over a page
+ * with no cursor anywhere on it, and a hundred-odd layout tests were green,
+ * because every one of them asked where a box WAS and none asked whether it
+ * could be SEEN. Three things were wrong at once and two of them could only
+ * ever be found by asking this:
+ *
+ * 1. alphaTab ships no stylesheet — there is no `.css` file in the package —
+ *    so its two cursor boxes were `background-color: rgba(0, 0, 0, 0)`.
+ *    Present, positioned, moving, invisible, in all thirteen themes.
+ * 2. The harness's mocked beat events carried the jam's fields and none of
+ *    the song's, so `songTick` arrived `undefined` and the cursor never left
+ *    tick zero.
+ * 3. The scroll that keeps it in view read `offsetTop`, which is zero for
+ *    ever because alphaTab moves the cursor with a transform.
+ *
+ * So: it exists, it is painted, it is inside the tab, nothing opaque is over
+ * it, and it is somewhere else a bar later. The same visibility question is
+ * then asked of a lit note, which is the other thing drawn on this page that
+ * a layer over the engraving could have swallowed.
+ */
+test.describe("the playback cursor", () => {
+  /**
+   * Is anything painted OVER this box?
+   *
+   * `elementFromPoint` alone cannot answer it. alphaTab's cursor wrapper is
+   * `pointer-events: none` — it has to be, or a drag across the bar being
+   * played would be caught by the cursor instead of the selection surface —
+   * so the hit test never returns the cursor itself, and the surface that
+   * owns the pointer is always what comes back. Covering is about PAINT, so
+   * the question is asked of the paint: of everything the hit test finds
+   * above the engraving, is any of it opaque?
+   */
+  const coveredBy = (selector: string) =>
+    `(() => {
+      const el = document.querySelector(${JSON.stringify(selector)});
+      const host = document.querySelector(".songs-tab-host");
+      if (!el || !host) return null;
+      const r = el.getBoundingClientRect();
+      if (r.width <= 0 || r.height <= 0) return null;
+      const stack = document.elementsFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+      const above = stack.slice(0, Math.max(0, stack.indexOf(host)));
+      const solid = (node) => {
+        const cs = getComputedStyle(node);
+        if (cs.backgroundImage !== "none") return true;
+        const m = cs.backgroundColor.match(/rgba?\\(([^)]+)\\)/);
+        if (!m) return false;
+        const parts = m[1].split(",").map((n) => parseFloat(n));
+        return parts.length < 4 || parts[3] > 0.5;
+      };
+      return above
+        .filter((node) => node !== host && !host.contains(node) && solid(node))
+        .map((node) => node.tagName + "." + String(node.className).slice(0, 40));
+    })()`;
+
+  test("is drawn, on the page, and moves while the band plays", async ({ page }) => {
+    await openShot(page, "songs-playing", { width: 1400, height: 900 });
+
+    const seen = await page.evaluate(() => {
+      const cursor = document.querySelector(".at-cursor-beat");
+      const bar = document.querySelector(".at-cursor-bar");
+      const viewport = document.querySelector(".songs-tab-viewport");
+      if (!cursor || !bar || !viewport) return null;
+      const alpha = (node: Element) => {
+        const m = getComputedStyle(node).backgroundColor.match(/rgba?\(([^)]+)\)/);
+        if (!m) return 0;
+        const parts = m[1].split(",").map((n) => parseFloat(n));
+        return parts.length < 4 ? 1 : parts[3];
+      };
+      const box = cursor.getBoundingClientRect();
+      const frame = viewport.getBoundingClientRect();
+      return {
+        beatAlpha: alpha(cursor),
+        barAlpha: alpha(bar),
+        box: { x: box.x, y: box.y, w: box.width, h: box.height },
+        frame: { x: frame.x, y: frame.y, w: frame.width, h: frame.height },
+      };
+    });
+    expect(seen, "there is no cursor on the tab at all").not.toBeNull();
+
+    // Painted. This is the one the shipped bug would have failed: alphaTab
+    // gives its cursors no colour of their own and the app has to.
+    expect(seen!.beatAlpha, "the beat cursor has no colour — it is invisible").toBeGreaterThan(0.5);
+    expect(seen!.barAlpha, "the bar cursor has no colour — it is invisible").toBeGreaterThan(0.02);
+
+    // Inside the tab's own frame, on all four sides.
+    const { box, frame } = seen!;
+    expect(box.x, "the cursor is off the left of the tab").toBeGreaterThanOrEqual(frame.x - 1);
+    expect(box.x + box.w, "the cursor is off the right of the tab").toBeLessThanOrEqual(
+      frame.x + frame.w + 1,
+    );
+    expect(box.y, "the cursor is above the tab").toBeGreaterThanOrEqual(frame.y - 1);
+    expect(box.y + box.h, "the cursor is below the tab").toBeLessThanOrEqual(
+      frame.y + frame.h + 1,
+    );
+
+    // Nothing opaque over it — the selection band and the handles share this
+    // stack, and the band used to be the layer on top.
+    const blocked = await page.evaluate(coveredBy(".at-cursor-beat"));
+    expect(blocked, "something opaque is painted over the cursor").toEqual([]);
+
+    // And it is somewhere else a bar later. The shot song is 4/4 at 96, so a
+    // bar is 2.5 seconds; three is comfortably one and not two.
+    const where = () =>
+      page.evaluate(() => {
+        const el = document.querySelector(".at-cursor-beat");
+        return el ? getComputedStyle(el).transform : "";
+      });
+    const before = await where();
+    await page.waitForTimeout(3000);
+    const after = await where();
+    expect(before, "the cursor has no transform to move").not.toBe("");
+    expect(after, "the cursor has not moved in a bar — it is stuck on tick zero").not.toBe(before);
+  });
+
+  test("lights notes as they go by, and nothing covers them", async ({ page }) => {
+    await openShot(page, "songs-playing", { width: 1400, height: 900 });
+
+    const lit = page.locator(".songs-tab-host [data-song-light]").first();
+    await expect(lit, "no note lit while the band plays").toHaveCount(1);
+
+    const inside = await page.evaluate(() => {
+      const el = document.querySelector(".songs-tab-host [data-song-light]");
+      const viewport = document.querySelector(".songs-tab-viewport");
+      if (!el || !viewport) return null;
+      const box = el.getBoundingClientRect();
+      const frame = viewport.getBoundingClientRect();
+      return (
+        box.width > 0 &&
+        box.height > 0 &&
+        box.x >= frame.x - 1 &&
+        box.x + box.width <= frame.x + frame.width + 1 &&
+        box.y >= frame.y - 1 &&
+        box.y + box.height <= frame.y + frame.height + 1
+      );
+    });
+    expect(inside, "the lit note is not inside the tab's frame").toBe(true);
+
+    const blocked = await page.evaluate(coveredBy(".songs-tab-host [data-song-light]"));
+    expect(blocked, "something opaque is painted over the lit note").toEqual([]);
+  });
+
+  /**
+   * The band behind the chosen bars is UNDER the music, and the handles are
+   * over everything — which is what puts the cursor between them.
+   */
+  test("sits above the selection band and below its handles", async ({ page }) => {
+    await openShot(page, "songs-portion", { width: 1400, height: 900 });
+    const order = await page.evaluate(() => {
+      const value = (selector: string) => {
+        const el = document.querySelector(selector);
+        return el ? getComputedStyle(el).zIndex : null;
+      };
+      const host = document.querySelector(".songs-tab-host");
+      const bands = document.querySelector(".songs-tab-bands");
+      const overlay = document.querySelector(".songs-tab-overlay");
+      return {
+        bands: value(".songs-tab-bands"),
+        host: value(".songs-tab-host"),
+        overlay: value(".songs-tab-overlay"),
+        cursorInsideHost: !!host?.querySelector(".at-cursors"),
+        bandInBandLayer: !!bands?.querySelector(".songs-tab-band"),
+        handleInOverlay: !!overlay?.querySelector(".songs-tab-handle"),
+      };
+    });
+    expect(order.cursorInsideHost, "the cursor is not a child of the engraving").toBe(true);
+    expect(order.bandInBandLayer, "the band is not in the layer under the music").toBe(true);
+    expect(order.handleInOverlay, "the handles are not in the layer over the music").toBe(true);
+    expect(Number(order.bands), "the band is not under the music").toBeLessThan(Number(order.host));
+    expect(Number(order.overlay), "the handles are not over the music").toBeGreaterThan(
+      Number(order.host),
+    );
   });
 });
 

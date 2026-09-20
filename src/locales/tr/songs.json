@@ -19,8 +19,6 @@
     "percent": "%{{percent}}",
     "speedNote": "Tık {{bpm}} BPM ile gidiyor",
     "loop": "Tekrarla",
-    "loopOn": "Baştan başa",
-    "loopOff": "Bir kez",
     "loopNote": "Yukarıdaki ölçüleri tekrar tekrar çalar",
     "dropHere": "Açmak için dosyayı buraya bırak",
     "band": {
@@ -38,11 +36,6 @@
       "droppedNotes_other": "Bu dosyadaki {{count}} nota, grupta olmayan çalgılara ait."
     },
     "countIn": {
-      "label": "Giriş sayımı",
-      "none": "Doğrudan",
-      "bars": "{{count}} ölçü",
-      "bars_other": "{{count}} ölçü",
-      "note": "Yalnızca ilk turdan önce sayılır, her tekrardan önce değil",
       "counting": "Girişini sayıyorum"
     },
     "engine": {
@@ -207,8 +200,14 @@
       "portionSays_other": "{{count}} ölçü · {{state}}",
       "looping": "on repeat",
       "once": "once through",
-      "timeRound": "Go {{n}}",
-      "keepPortion": "Keep it",
+      "timeRound": {
+        "one": "{{n}}. geçiş",
+        "two": "{{n}}. geçiş",
+        "few": "{{n}}. geçiş",
+        "other": "{{n}}. geçiş"
+      },
+      "keepPortion": "Bu bölümü kaydet",
+      "keepPortionNote": "Önce tabda ölçüleri seç, sonra onlara bir ad ver",
       "portionPlaceholder": "Name this bit",
       "renamePortion": "Rename",
       "deletePortion": "Forget this one",

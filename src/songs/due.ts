@@ -47,6 +47,21 @@ export const SONG_DUE_KEY = "songs.due";
 /** The marker that says the move off that key has happened. */
 export const SONG_DUE_MOVED_KEY = "songs.dueMovedToStore";
 
+/**
+ * And where a promise's SPEED is kept, which is beside it rather than in it.
+ *
+ * Opening a passage the coach asked you to come back to has to open it at
+ * the speed the promise was made at — coming back to a run at full tempo
+ * when the promise was made at seventy per cent is being handed a different
+ * exercise. `score_due` has no column for it (`db.rs`, migration three), and
+ * adding one is a schema change in a file this task does not own, so the
+ * number lives in `settings.json` under its own key, keyed by the passage.
+ *
+ * A few bytes per promise, written and read only here, and the moment the
+ * table grows the column this key and the four functions that touch it go.
+ */
+export const SONG_DUE_TEMPO_KEY = "songs.dueTempo";
+
 /** One passage of one song, and the day to look at it again. */
 export type SongDue = {
   scoreId: string;
@@ -57,7 +72,56 @@ export type SongDue = {
   dueDay: number;
   /** Why the coach asked, as the finding's own kind. */
   reason?: string;
+  /**
+   * The speed the promise was made at, 50–100, when one was recorded.
+   *
+   * Absent on every promise made before this existed, and on one whose
+   * settings file could not be read. The stage then opens the passage at
+   * whatever speed the song was left at, which is the honest fallback.
+   */
+  tempoPercent?: number;
 };
+
+/** One passage, as the tempo map keys it. */
+function passageKey(scoreId: string, startBar: number, endBar: number): string {
+  return `${scoreId}|${String(startBar)}|${String(endBar)}`;
+}
+
+/** Every promise's speed, mistrusting the file it came out of. */
+async function readTempos(): Promise<Record<string, number>> {
+  const stored = await storeLoad<Record<string, unknown>>(SONG_DUE_TEMPO_KEY).catch(
+    () => undefined,
+  );
+  if (!stored || typeof stored !== "object") return {};
+  const out: Record<string, number> = {};
+  for (const [key, value] of Object.entries(stored)) {
+    if (typeof value !== "number" || !Number.isFinite(value)) continue;
+    out[key] = Math.min(100, Math.max(50, Math.round(value)));
+  }
+  return out;
+}
+
+/** Remember one, or forget it when the promise itself is forgotten. */
+async function writeTempo(key: string, percent: number | null): Promise<void> {
+  const all = await readTempos();
+  if (percent === null) {
+    if (!(key in all)) return;
+    delete all[key];
+  } else {
+    all[key] = Math.min(100, Math.max(50, Math.round(percent)));
+  }
+  await storeSave(SONG_DUE_TEMPO_KEY, all).catch(() => undefined);
+}
+
+/** The speeds put back on the promises they belong to. */
+async function withTempos(items: SongDue[]): Promise<SongDue[]> {
+  if (items.length === 0) return items;
+  const tempos = await readTempos();
+  return items.map((item) => {
+    const percent = tempos[passageKey(item.scoreId, item.startBar, item.endBar)];
+    return percent === undefined ? item : { ...item, tempoPercent: percent };
+  });
+}
 
 /**
  * Today, as a day number.
@@ -170,11 +234,30 @@ async function storeRows(): Promise<ScoreDue[] | null> {
   }
 }
 
-/** Every promise on file, oldest due first. */
+/** Every promise on file, oldest due first, each at the speed it was made at. */
 export async function listSongDue(): Promise<SongDue[]> {
   const rows = await storeRows();
-  if (rows) return rows.map(fromRow).sort((a, b) => a.dueDay - b.dueDay);
-  return legacyList();
+  if (rows) return withTempos(rows.map(fromRow).sort((a, b) => a.dueDay - b.dueDay));
+  return withTempos(await legacyList());
+}
+
+/**
+ * The passage of this song that has fallen due, or null.
+ *
+ * The soonest-due first, so the one a player is handed when they open the
+ * song is the one that has been waiting longest. A promise for tomorrow is
+ * not a promise for today, and opening a song must not quietly start looping
+ * four bars of it because of something the coach said on Thursday.
+ */
+export function songDueNow(
+  items: readonly SongDue[],
+  scoreId: string,
+  today: number = dayOf(),
+): SongDue | null {
+  for (const item of items) {
+    if (item.scoreId === scoreId && item.dueDay <= today) return item;
+  }
+  return null;
 }
 
 /**
@@ -188,6 +271,10 @@ export async function listSongDue(): Promise<SongDue[]> {
  * the store keeps it rather than this file remembering to.
  */
 export async function promiseToComeBack(item: SongDue): Promise<SongDue[]> {
+  // Beside the promise, whichever half of the file it lands in.
+  if (item.tempoPercent !== undefined) {
+    await writeTempo(passageKey(item.scoreId, item.startBar, item.endBar), item.tempoPercent);
+  }
   if ((await storeRows()) !== null) {
     try {
       await saveDue(toRow(item));
@@ -208,6 +295,7 @@ export async function clearSongDue(
   startBar: number,
   endBar: number,
 ): Promise<SongDue[]> {
+  await writeTempo(passageKey(scoreId, startBar, endBar), null);
   if ((await storeRows()) !== null) {
     try {
       await clearDue(scoreId, startBar, endBar);
