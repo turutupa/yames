@@ -10,6 +10,16 @@ of `src/songs/`, `src/coach/blocks/`, `src-tauri/src/score.rs`,
 only where an item says so. Commit per stage. W9 still owns `engine.rs`,
 `song.rs`, `jam.rs` tonight.
 
+**W13 is wiring Songs to the engine at the same time** (`import.ts`
+transport and backing, `ipc.ts` song functions, the cursor, the faders,
+`useSongsSession.ts`, `SongsView.tsx`). Put the review in NEW files —
+`src/containers/songs/review/**`, `src/songs/attempt.ts`,
+`src/songs/verdict.ts`, a `useSongAttempt` hook — and keep your edits to
+`useSongsSession.ts` and `SongsView.tsx` to the few lines that mount them.
+Position in a song is `songBar`/`songTick` on the beat event once W13
+lands; until then use what W4's cursor uses, behind one function, so the
+swap is one line.
+
 ## Stage A — an attempt is a thing
 
 In Songs, pressing play on a range loads the schedule
