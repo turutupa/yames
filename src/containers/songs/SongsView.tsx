@@ -23,14 +23,21 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TrackPicker, tuningLabel } from "./TrackPicker";
-import {
-  SongReview,
-  useLiveNoteLights,
-  useSongActions,
-  useSongAttempt,
-  useSongProgress,
-  useSongTakePitch,
-} from "./review";
+/*
+ * The review's hooks, from their own modules rather than through
+ * `./review`.
+ *
+ * The barrel re-exports `SongReview` and `ReviewTab`, so importing anything
+ * through it pulls the whole review — and with it `CoachBlocks`, the
+ * catalogue, the resolver and the theory tables — into the main bundle. The
+ * hooks are a few hundred lines and run on every pass; the drawing is sixty
+ * kilobytes and is only ever seen after you stop. See `SongReview` below.
+ */
+import { useLiveNoteLights } from "./review/useLiveNoteLights";
+import { useSongActions } from "./review/useSongActions";
+import { useSongAttempt } from "./review/useSongAttempt";
+import { useSongProgress } from "./review/useSongProgress";
+import { useSongTakePitch } from "./review/useSongTakePitch";
 import { SongBand, SongCountIn } from "./SongBand";
 import { SongRecordControl, SongTakes } from "./SongTakes";
 import { useSongTakes } from "./useSongTakes";
@@ -65,6 +72,23 @@ export interface SongsViewProps {
  */
 const TabStage = lazy(() =>
   import("./TabStage").then((m) => ({ default: m.TabStage })),
+);
+
+/**
+ * The verdict, in a chunk of its own — behind the same boundary as the tab.
+ *
+ * It is the coach's whole vocabulary: `CoachBlocks`, the catalogue, the
+ * resolver and its shape checker, the chord and scale tables the fretboard
+ * blocks draw from, the excerpt renderer and a stylesheet. Sixty-odd
+ * kilobytes gzipped, in a bundle every player downloads, for a screen only
+ * Songs players ever see — and only after they have stopped playing, which
+ * is the least hurried moment in the app.
+ *
+ * The hooks above stay eager because they run during a pass. This is the
+ * drawing, and there is a whole pass's worth of time to fetch it in.
+ */
+const SongReview = lazy(() =>
+  import("./review/SongReview").then((m) => ({ default: m.SongReview })),
 );
 
 /** The tempo percentages worth a button. 50–100, the brief's range. */
@@ -548,13 +572,18 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
           {attempt.working && <p className="songs-review-working">{t("songs.review.working")}</p>}
           {attempt.tooShort && <p className="songs-review-working">{t("songs.review.tooShort")}</p>}
           {attempt.review && (
-            <SongReview
-              review={attempt.review}
-              pitch={pitch}
-              onAction={actions.run}
-              onDismiss={attempt.dismiss}
-              progressFor={progressFor}
-            />
+            // The same line the screen shows between the stop and the
+            // verdict, so a chunk that has not arrived yet looks like a coach
+            // still thinking rather than like a panel that failed to open.
+            <Suspense fallback={<p className="songs-review-working">{t("songs.review.working")}</p>}>
+              <SongReview
+                review={attempt.review}
+                pitch={pitch}
+                onAction={actions.run}
+                onDismiss={attempt.dismiss}
+                progressFor={progressFor}
+              />
+            </Suspense>
           )}
         </>
       )}
