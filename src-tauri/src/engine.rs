@@ -3235,6 +3235,263 @@ struct BeatNotification {
 }
 
 // ---------------------------------------------------------------------------
+// The beat queue — callback to event loop, preallocated
+// ---------------------------------------------------------------------------
+
+/// How many [`BeatNotification`]s the output callback may be ahead of the
+/// event loop.
+///
+/// **A dropped notification is not cosmetic.** `beat_log` is the only place
+/// [`crate::timing::TimingAnalyzer`] learns where a beat fell, so a
+/// notification the queue throws away is a beat the matcher never sees and a
+/// score the player did not earn (learned 2026-09-04). The drop path below
+/// exists because a full queue leaves an audio callback no other move — not
+/// because dropping is acceptable. So the queue is sized for the worst case
+/// the app can produce, several times over.
+///
+/// The worst case is bounded and small. `set_bpm` clamps the tempo to
+/// 20..=300 and `set_subdivision` clamps the resolution to 1..=6, so the
+/// fastest tick stream the engine can ever produce is 300 BPM sextuplets:
+/// **30 ticks a second**, one every 33 ms. 512 slots is **seventeen seconds**
+/// of that. The event loop wakes on every push and in any case at least every
+/// 50 ms, and the longest thing it does per notification is one
+/// `thread::sleep(delay_us)` of an output latency — a few milliseconds. For
+/// this to overflow the event thread would have to be off the CPU for
+/// seventeen seconds, which is not a full queue, it is a hung machine.
+///
+/// The cost is the memory: ten parallel arrays, 44 bytes a slot, ~23 KB,
+/// allocated once when the audio thread starts and never grown.
+const BEAT_QUEUE_SLOTS: usize = 512;
+
+/// The preallocated, lock-free hand-off from the cpal output callback to the
+/// engine's event loop.
+///
+/// It replaces a `std::sync::mpsc::channel`, which was the wrong shape twice
+/// over — and both faults were on the audio thread, once per metronome tick:
+///
+/// * **It allocated.** std's unbounded channel stores messages in blocks of
+///   31 and `Box`es a new one when the current block fills
+///   (`sync/mpmc/list.rs::start_send`). At 200 BPM sixteenths that is a
+///   `malloc` under the mixer every 2.3 seconds.
+/// * **It took a lock.** Every send ends in `self.receivers.notify()`, which
+///   locks a `Mutex` whenever a receiver is registered as sleeping
+///   (`sync/mpmc/waker.rs::SyncWaker::notify`) — and the event loop slept in
+///   `recv_timeout` between beats, so it was registered essentially always.
+///   A `Mutex` shared with a lower-priority thread, acquired from a
+///   `THREAD_PRIORITY_TIME_CRITICAL` callback, is a priority inversion: the
+///   click waits on the UI thread. T06 saw exactly the symptom — promoting
+///   the *event loop* improved *callback* jitter, which only makes sense if
+///   the callback depends on the loop.
+///
+/// The shape is [`crate::take::TakeRing`]'s, applied to a struct: one writer
+/// (the audio thread), one reader (the event loop), a power-of-two ring of
+/// preallocated slots, and monotonic `write` / `read` counts. A push is an
+/// acquire load, ten relaxed stores and one release store; there is no
+/// `unsafe` anywhere in it, because each field of a slot is its own atomic
+/// exactly the way [`CallbackProbe`] stores its arena. The nine small fields
+/// travel together in one `u32` — see [`pack_small_fields`].
+pub struct BeatQueue {
+    session: Box<[AtomicU64]>,
+    ts_ns: Box<[AtomicU64]>,
+    delay_us: Box<[AtomicU64]>,
+    /// `expected_interval_ms` as `f64::to_bits`. Stored as bits for the same
+    /// reason `TakeRing` stores samples as bits: an `AtomicF64` does not
+    /// exist, and the alternative is `unsafe`.
+    interval_bits: Box<[AtomicU64]>,
+    beat: Box<[AtomicU32]>,
+    measure_beat: Box<[AtomicU32]>,
+    subdivision: Box<[AtomicU32]>,
+    jam_bar: Box<[AtomicU32]>,
+    jam_chorus: Box<[AtomicU32]>,
+    small: Box<[AtomicU32]>,
+    /// `slots - 1`; the capacity is a power of two so the wrap is a mask.
+    mask: usize,
+    /// Monotonic counts, not indices — a `u64` of 30-a-second ticks outlasts
+    /// the solar system, so the wrapping arithmetic is a formality.
+    write: AtomicU64,
+    read: AtomicU64,
+    /// Beats the callback had to throw away. Shared with the engine so it
+    /// survives the audio thread that recorded it: a device change spawns a
+    /// new thread and a new queue, and a diagnostic that reset itself there
+    /// would be a diagnostic nobody could trust.
+    dropped: Arc<AtomicU64>,
+}
+
+/// The nine small fields of a [`BeatNotification`], in one word.
+///
+/// Three `u8`s, a three-valued enum and six flags: 24 + 2 + 6 = exactly 32
+/// bits, which is why this is one array rather than nine.
+/// `the_small_fields_survive_the_round_trip` is the test that says the layout
+/// and [`unpack_small_fields`] still agree.
+#[inline]
+fn pack_small_fields(n: &BeatNotification) -> u32 {
+    let state: u32 = match n.jam_band_state {
+        JamBandState::Full => 0,
+        JamBandState::HatsOnly => 1,
+        JamBandState::Silent => 2,
+    };
+    n.subdivision_total as u32
+        | (n.accent as u32) << 8
+        | (n.beats_per_bar as u32) << 16
+        | state << 24
+        | (n.is_downbeat as u32) << 26
+        | (n.is_warmup_beat as u32) << 27
+        | (n.is_warmup_transition as u32) << 28
+        | (n.bar_just_completed as u32) << 29
+        | (n.jam_bar_mismatch as u32) << 30
+        | (n.jam_form_ended as u32) << 31
+}
+
+/// The inverse of [`pack_small_fields`], on the event thread.
+#[inline]
+fn unpack_small_fields(w: u32) -> (u8, u8, u8, JamBandState, [bool; 6]) {
+    let state = match (w >> 24) & 0b11 {
+        0 => JamBandState::Full,
+        1 => JamBandState::HatsOnly,
+        // Only 0, 1 and 2 are ever written; a third value would be a bug in
+        // `pack_small_fields`, and silence is the safest thing to guess.
+        _ => JamBandState::Silent,
+    };
+    (
+        (w & 0xFF) as u8,
+        ((w >> 8) & 0xFF) as u8,
+        ((w >> 16) & 0xFF) as u8,
+        state,
+        [
+            w & (1 << 26) != 0,
+            w & (1 << 27) != 0,
+            w & (1 << 28) != 0,
+            w & (1 << 29) != 0,
+            w & (1 << 30) != 0,
+            w & (1 << 31) != 0,
+        ],
+    )
+}
+
+impl BeatQueue {
+    /// Allocate `slots` (rounded up to a power of two) worth of room, and
+    /// share `dropped` with whoever reports it. Call it on the thread that
+    /// sets the audio thread up — never from a callback.
+    fn new(slots: usize, dropped: Arc<AtomicU64>) -> Self {
+        let cap = slots.max(2).next_power_of_two();
+        let u64s = || {
+            (0..cap)
+                .map(|_| AtomicU64::new(0))
+                .collect::<Vec<_>>()
+                .into_boxed_slice()
+        };
+        let u32s = || {
+            (0..cap)
+                .map(|_| AtomicU32::new(0))
+                .collect::<Vec<_>>()
+                .into_boxed_slice()
+        };
+        Self {
+            session: u64s(),
+            ts_ns: u64s(),
+            delay_us: u64s(),
+            interval_bits: u64s(),
+            beat: u32s(),
+            measure_beat: u32s(),
+            subdivision: u32s(),
+            jam_bar: u32s(),
+            jam_chorus: u32s(),
+            small: u32s(),
+            mask: cap - 1,
+            write: AtomicU64::new(0),
+            read: AtomicU64::new(0),
+            dropped,
+        }
+    }
+
+    fn capacity(&self) -> usize {
+        self.session.len()
+    }
+
+    /// PRODUCER (the cpal output callback): queue one tick.
+    ///
+    /// Returns false when the queue is full, having counted the loss — the
+    /// only outcome available to a thread that may not wait. See
+    /// [`BEAT_QUEUE_SLOTS`] for why that cannot happen at any tempo the app
+    /// can be set to.
+    ///
+    /// Allocates nothing, locks nothing and branches on nothing but the
+    /// queue's own fill.
+    #[inline]
+    fn push(&self, n: &BeatNotification) -> bool {
+        let w = self.write.load(Ordering::Relaxed);
+        let r = self.read.load(Ordering::Acquire);
+        if w.wrapping_sub(r) >= self.capacity() as u64 {
+            self.dropped.fetch_add(1, Ordering::Relaxed);
+            return false;
+        }
+        let i = (w as usize) & self.mask;
+        self.session[i].store(n.session, Ordering::Relaxed);
+        self.ts_ns[i].store(n.ts_ns, Ordering::Relaxed);
+        self.delay_us[i].store(n.delay_us, Ordering::Relaxed);
+        self.interval_bits[i].store(n.expected_interval_ms.to_bits(), Ordering::Relaxed);
+        self.beat[i].store(n.beat, Ordering::Relaxed);
+        self.measure_beat[i].store(n.measure_beat, Ordering::Relaxed);
+        self.subdivision[i].store(n.subdivision, Ordering::Relaxed);
+        self.jam_bar[i].store(n.jam_bar, Ordering::Relaxed);
+        self.jam_chorus[i].store(n.jam_chorus, Ordering::Relaxed);
+        self.small[i].store(pack_small_fields(n), Ordering::Relaxed);
+        // The release is what publishes the ten stores above to the reader's
+        // acquire. One per tick, not one per field.
+        self.write.store(w.wrapping_add(1), Ordering::Release);
+        true
+    }
+
+    /// CONSUMER (the engine's event loop): the oldest tick, or `None` when
+    /// the callback has not produced one since the last call.
+    fn pop(&self) -> Option<BeatNotification> {
+        let r = self.read.load(Ordering::Relaxed);
+        let w = self.write.load(Ordering::Acquire);
+        if r == w {
+            return None;
+        }
+        let i = (r as usize) & self.mask;
+        let (subdivision_total, accent, beats_per_bar, jam_band_state, flags) =
+            unpack_small_fields(self.small[i].load(Ordering::Relaxed));
+        let n = BeatNotification {
+            session: self.session[i].load(Ordering::Relaxed),
+            beat: self.beat[i].load(Ordering::Relaxed),
+            measure_beat: self.measure_beat[i].load(Ordering::Relaxed),
+            subdivision: self.subdivision[i].load(Ordering::Relaxed),
+            subdivision_total,
+            is_downbeat: flags[0],
+            accent,
+            beats_per_bar,
+            ts_ns: self.ts_ns[i].load(Ordering::Relaxed),
+            expected_interval_ms: f64::from_bits(self.interval_bits[i].load(Ordering::Relaxed)),
+            is_warmup_beat: flags[1],
+            is_warmup_transition: flags[2],
+            bar_just_completed: flags[3],
+            delay_us: self.delay_us[i].load(Ordering::Relaxed),
+            jam_bar: self.jam_bar[i].load(Ordering::Relaxed),
+            jam_chorus: self.jam_chorus[i].load(Ordering::Relaxed),
+            jam_band_state,
+            jam_bar_mismatch: flags[4],
+            jam_form_ended: flags[5],
+        };
+        // Released only after the slot has been read out, so the producer
+        // cannot overwrite it underneath this.
+        self.read.store(r.wrapping_add(1), Ordering::Release);
+        Some(n)
+    }
+
+    /// CONSUMER: throw away everything waiting.
+    ///
+    /// The event loop does this while the transport is stopped — ticks that
+    /// arrived before a Stop are not news — and it is the one thing the old
+    /// `while rx.try_recv().is_ok() {}` did that has to be kept.
+    fn drain(&self) {
+        let w = self.write.load(Ordering::Acquire);
+        self.read.store(w, Ordering::Release);
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Speed ramp logic
 // ---------------------------------------------------------------------------
 
@@ -4295,6 +4552,17 @@ pub struct MetronomeEngine {
     /// a round trip late, and only the callback knows how long its buffer
     /// is. One relaxed store a buffer, which is one instruction and no lock.
     output_latency_us: Arc<AtomicU64>,
+    /// Beats the output callback could not hand to the event loop because
+    /// [`BeatQueue`] was full.
+    ///
+    /// **This number must be zero.** It is not a dropped frame or a missed
+    /// repaint: `beat_log` is the only source `TimingAnalyzer` has for where
+    /// a beat fell, so every count here is an expected onset the matcher
+    /// never gets to pair and a score the player did not earn. It lives on
+    /// the engine rather than inside the queue so it survives the audio
+    /// thread — a device change builds a new queue, and a counter that reset
+    /// there would be a counter nobody could believe.
+    dropped_notifications: Arc<AtomicU64>,
     /// Test-only: make the audio thread fail its setup without touching a
     /// real device, so the recovery path above can be exercised on a build
     /// machine that has a perfectly good sound card.
@@ -4320,9 +4588,21 @@ impl MetronomeEngine {
             take: Arc::new(crate::take::TakeHandoff::new()),
             sample_rate: Arc::new(AtomicU32::new(0)),
             output_latency_us: Arc::new(AtomicU64::new(0)),
+            dropped_notifications: Arc::new(AtomicU64::new(0)),
             #[cfg(test)]
             force_setup_failure: false,
         }
+    }
+
+    /// Beats the output callback had to throw away because the event loop
+    /// had not drained [`BeatQueue`].
+    ///
+    /// Cumulative for the life of the engine, across device changes. Any
+    /// value but zero is a scoring defect, not a performance note — see the
+    /// field. `click-jitter-probe` fails a run on it, and the event loop
+    /// says so on the console the moment it moves.
+    pub fn dropped_notifications(&self) -> u64 {
+        self.dropped_notifications.load(Ordering::Relaxed)
     }
 
     /// Load a jam, or `None` to take the band away.
@@ -4654,6 +4934,7 @@ impl MetronomeEngine {
         let stream_channels_pub = self.stream_channels.clone();
         let speech_shared = self.speech.clone();
         let out_latency_pub = self.output_latency_us.clone();
+        let dropped_notifications = self.dropped_notifications.clone();
         let app_handle = EventSink(app_handle);
         #[cfg(test)]
         let force_setup_failure = self.force_setup_failure;
@@ -4839,8 +5120,28 @@ impl MetronomeEngine {
             // Pre-decode all sounds at the output sample rate
             let sounds = SoundBank::new(sample_rate);
 
-            // Callback -> event thread channel
-            let (tx, rx) = mpsc::channel::<BeatNotification>();
+            // Callback -> event thread. Preallocated here, on the setup path,
+            // and never grown: see `BeatQueue` for what the channel this
+            // replaced was doing on the audio thread, and `BEAT_QUEUE_SLOTS`
+            // for why a drop cannot happen at any tempo the app allows.
+            let beats = Arc::new(BeatQueue::new(
+                BEAT_QUEUE_SLOTS,
+                dropped_notifications.clone(),
+            ));
+            let beats_cb = beats.clone();
+            // And the thread to wake when something is in it. THIS thread:
+            // the closure below is built here and runs on the device's
+            // thread, so `current()` is the event loop's handle, taken once
+            // rather than looked up per beat.
+            //
+            // `Thread::unpark` is the one hand-off that is safe FROM an audio
+            // callback: on every platform Yames ships to it is a single
+            // atomic swap, and it only reaches the kernel when the loop is
+            // genuinely asleep (std `sys/sync/thread_parking`: futex on
+            // Windows and Linux, a dispatch semaphore on Apple). It also
+            // leaves a token behind when the loop is awake, so a wake can
+            // never be missed and there is no flag to keep in step.
+            let event_thread = thread::current();
 
             // Event thread -> callback: pending chime sound
             let pending_chime: Arc<Mutex<Option<SoundId>>> = Arc::new(Mutex::new(None));
@@ -5010,6 +5311,21 @@ impl MetronomeEngine {
                         Some(_) => crate::clock::now_ns(),
                         None => 0,
                     };
+
+                    // Audio-safety probe, the half the timings cannot see.
+                    // Entry-to-entry gaps do not show an allocation inside a
+                    // buffer unless it is slow enough to push the NEXT
+                    // callback late, and a warm heap is fast — which is
+                    // exactly when "the callback must not allocate" stops
+                    // being tested. This raises a thread-local for the body
+                    // of the callback and lowers it at every exit, including
+                    // the two early returns below; `click-jitter-probe`
+                    // installs a counting allocator that reads it and fails
+                    // the run on a single `malloc` or `free`. `None` in the
+                    // app, where it is the null check already paid above.
+                    let _alloc_span = probe_cb
+                        .as_ref()
+                        .map(|_| crate::alloc_probe::Span::new());
 
                     // Output latency compensation.
                     // CoreAudio device/safety/stream latency + one buffer of
@@ -5994,7 +6310,19 @@ impl MetronomeEngine {
                                 }
                             }
 
-                            let _ = tx.send(BeatNotification {
+                            // INTO THE QUEUE, AND THEN WAKE THE LOOP.
+                            //
+                            // Built on the stack and copied field by field
+                            // into a slot that was allocated when the stream
+                            // opened. A full queue is the one case with no
+                            // good answer — a callback may not wait — so it
+                            // is counted and reported rather than passed off
+                            // as a dropped frame: the analyzer scores the
+                            // player against `beat_log`, and a beat that
+                            // never reaches it is a beat the player is
+                            // marked down for not playing. See
+                            // `BEAT_QUEUE_SLOTS` for why it cannot fill.
+                            let notif = BeatNotification {
                                 session,
                                 beat: notif_beat,
                                 measure_beat: notif_measure_beat,
@@ -6014,7 +6342,10 @@ impl MetronomeEngine {
                                 jam_band_state: notif_band_state,
                                 jam_bar_mismatch: jam_mismatch,
                                 jam_form_ended: form_ends_now,
-                            });
+                            };
+                            if beats_cb.push(&notif) {
+                                event_thread.unpark();
+                            }
 
                             // AND THE TUNE ENDS.
                             //
@@ -6227,25 +6558,82 @@ impl MetronomeEngine {
                 let _ = app_handle.emit("audio-output-pair-fallback", effective_pair_now);
             }
 
-            // ROADMAP §0.5 — promote the event loop (not the cpal callback,
-            // which the backend already runs at TIME_CRITICAL). Failure is
-            // non-fatal: the loop just runs at normal priority.
-            let _rt_handle = match audio_thread_priority::promote_current_thread_to_real_time(
-                0,
-                sample_rate,
-            ) {
-                Ok(h) => Some(h),
-                Err(e) => {
-                    eprintln!("[yames] event loop stayed at normal priority: {e}");
-                    None
-                }
-            };
+            // THE EVENT LOOP RUNS AT NORMAL PRIORITY, and that is a decision
+            // rather than an omission.
+            //
+            // T06 (2026-09-02) promoted it to real time because doing so
+            // improved *callback* jitter under CPU inference — 1.2-2.3 ms
+            // down to 0.49-1.19 ms. That only ever made sense because the
+            // callback DEPENDED on this loop: it pushed every beat into a
+            // `std::sync::mpsc` channel whose send allocated every 31
+            // messages and locked the receiver's waker every time (see
+            // `BeatQueue`). Promoting the consumer shortened the lock the
+            // producer was waiting on. It treated the symptom.
+            //
+            // The queue below shares nothing with the callback but two
+            // atomics, so there is nothing left to invert — and what this
+            // loop does per beat is exactly what a real-time thread must not:
+            // `state.lock().unwrap()`, `app_handle.emit` (which allocates and
+            // serialises), and a `thread::sleep` of the output latency.
+            // Promoting all of that on a two-core machine is a UI thread
+            // holding a lock above the scheduler's other work.
+            //
+            // AND IT WAS MEASURED, not assumed. Ten 60 s runs on
+            // 2026-09-20, alternating promoted and not, eight of them on the
+            // busiest path the engine has — 240 BPM sixteenths, every lane,
+            // a table swapped in from another thread every 350 ms, a form
+            // jump every 2 s and a take being written to disk underneath:
+            //
+            //   p99 jitter, normal:     5.58  10.95  4.56  6.09 ms
+            //   p99 jitter, real-time:  95.10  8.13  3.22  8.15 ms
+            //   click only, normal 2.21 ms / 4 dropouts; real-time 7.11 ms
+            //   / 16 dropouts / 5 missed beats
+            //
+            // The distributions sit on top of each other and the two worst
+            // runs in the whole set are both promoted ones. There is no
+            // number here that buys the promotion its keep. (The box was at
+            // 100% with up to sixteen `rustc` on it the whole time, so none
+            // of these are the absolute figures ROADMAP §4 asks for — but
+            // heavy CPU load is exactly the condition the promotion was
+            // introduced to survive, and it did not help under it.)
+            //
+            // What did not move at all, in any of the ten: zero allocations
+            // and zero frees inside the callback, and zero dropped
+            // notifications.
+            //
+            // The analyzer's own promotion (`onset.rs`) is a different
+            // thread and a different question; this changes nothing there.
 
             // ---- Event loop (also keeps the cpal Stream alive) ----
             let mut pending_ramp_advance = false;
             let mut current_session: u64 = 0;
+            // The last drop count this loop said out loud, so a queue that
+            // overflows is reported when it happens and not once a beat
+            // forever after.
+            let mut dropped_said: u64 = 0;
 
             while alive.load(Ordering::SeqCst) {
+                // A BEAT THE CALLBACK COULD NOT HAND OVER.
+                //
+                // Said here because this is the thread that may print, and
+                // said at all because it is not a cosmetic loss: `beat_log`
+                // below is the only place the matcher learns where a beat
+                // fell, so every one of these is an expected onset the score
+                // is missing. One relaxed load per pass.
+                let dropped_now = dropped_notifications.load(Ordering::Relaxed);
+                if dropped_now != dropped_said {
+                    eprintln!(
+                        "[yames] BEAT QUEUE OVERFLOW: {} notification(s) dropped in total \
+                         ({} since the last report). The timing analyzer scores against \
+                         these, so this session's numbers are low by however many beats \
+                         it never saw. The event thread was off the CPU for more than \
+                         {} ticks.",
+                        dropped_now,
+                        dropped_now - dropped_said,
+                        BEAT_QUEUE_SLOTS,
+                    );
+                    dropped_said = dropped_now;
+                }
                 // A take that ran off its own end. Checked here, at the top
                 // of every pass — including the timeout pass, which is the
                 // only one that runs while a take plays with the band
@@ -6260,16 +6648,30 @@ impl MetronomeEngine {
                 if take_event.take_capped() {
                     let _ = app_handle.emit("take-capped", ());
                 }
-                let notif = match rx.recv_timeout(Duration::from_millis(50)) {
-                    Ok(n) => n,
-                    Err(mpsc::RecvTimeoutError::Timeout) => {
-                        // Drain stale notifications when not playing
+                // The callback unparks this thread on every push, so the
+                // common path is: park, wake, take the beat. The 50 ms is a
+                // backstop and the pace of the two take flags above — it is
+                // the same 50 ms `recv_timeout` used, and nothing about the
+                // engine's timing depends on it, because the tick's play
+                // time was stamped inside the callback (`ts_ns`).
+                //
+                // There is no `Disconnected` arm any more and nothing is
+                // lost with it: the sender lived in the stream, the stream is
+                // dropped after this loop, so the channel could only
+                // disconnect once the loop had already ended. `alive` is what
+                // ends it, as it always really was.
+                let notif = match beats.pop() {
+                    Some(n) => n,
+                    None => {
+                        thread::park_timeout(Duration::from_millis(50));
+                        // Ticks that landed while the transport was stopped
+                        // are stale. Same rule, same place in the pass, as
+                        // the `try_recv` drain this replaces.
                         if !playing.load(Ordering::Relaxed) {
-                            while rx.try_recv().is_ok() {}
+                            beats.drain();
                         }
                         continue;
                     }
-                    Err(mpsc::RecvTimeoutError::Disconnected) => break,
                 };
 
                 if !alive.load(Ordering::SeqCst) {
@@ -6664,6 +7066,10 @@ impl MetronomeEngine {
         // reports `Interrupted`, which is what a device change is.
         self.speech.cut();
         if let Some(handle) = self.thread_handle.take() {
+            // The event loop sleeps in `park_timeout` between beats now, so
+            // it is woken rather than waited out: without this the join
+            // costs up to the 50 ms backstop on every device change.
+            handle.thread().unpark();
             let _ = handle.join();
         }
     }
@@ -6678,6 +7084,9 @@ impl Drop for MetronomeEngine {
         self.playing.store(false, Ordering::SeqCst);
         self.alive.store(false, Ordering::SeqCst);
         if let Some(handle) = self.thread_handle.take() {
+            // See `shutdown`: the loop is asleep in `park_timeout` and is
+            // woken rather than waited out.
+            handle.thread().unpark();
             let _ = handle.join();
         }
     }
@@ -13915,5 +14324,265 @@ mod tests {
                 JamPlay::Click
             );
         }
+    }
+
+    // ─── The beat queue ──────────────────────────────────────────────────
+
+    use super::{BeatNotification, BeatQueue, BEAT_QUEUE_SLOTS};
+
+    /// A notification with every field set to something distinguishable, so
+    /// a field packed into the wrong bits cannot pass by coincidence.
+    fn a_notification(n: u64) -> BeatNotification {
+        BeatNotification {
+            session: 0xDEAD_BEEF_0000_0000 | n,
+            beat: 11 + n as u32,
+            measure_beat: 3,
+            subdivision: 2,
+            subdivision_total: 6,
+            is_downbeat: true,
+            accent: 2,
+            beats_per_bar: 7,
+            ts_ns: 1_234_567_890_123 + n,
+            expected_interval_ms: 200.0 / 3.0,
+            is_warmup_beat: false,
+            is_warmup_transition: true,
+            bar_just_completed: false,
+            delay_us: 12_345 + n,
+            jam_bar: 9,
+            jam_chorus: 4,
+            jam_band_state: JamBandState::HatsOnly,
+            jam_bar_mismatch: true,
+            jam_form_ended: false,
+        }
+    }
+
+    fn assert_same(a: &BeatNotification, b: &BeatNotification) {
+        assert_eq!(a.session, b.session);
+        assert_eq!(a.beat, b.beat);
+        assert_eq!(a.measure_beat, b.measure_beat);
+        assert_eq!(a.subdivision, b.subdivision);
+        assert_eq!(a.subdivision_total, b.subdivision_total);
+        assert_eq!(a.is_downbeat, b.is_downbeat);
+        assert_eq!(a.accent, b.accent);
+        assert_eq!(a.beats_per_bar, b.beats_per_bar);
+        assert_eq!(a.ts_ns, b.ts_ns);
+        assert_eq!(a.expected_interval_ms, b.expected_interval_ms);
+        assert_eq!(a.is_warmup_beat, b.is_warmup_beat);
+        assert_eq!(a.is_warmup_transition, b.is_warmup_transition);
+        assert_eq!(a.bar_just_completed, b.bar_just_completed);
+        assert_eq!(a.delay_us, b.delay_us);
+        assert_eq!(a.jam_bar, b.jam_bar);
+        assert_eq!(a.jam_chorus, b.jam_chorus);
+        assert_eq!(a.jam_band_state, b.jam_band_state);
+        assert_eq!(a.jam_bar_mismatch, b.jam_bar_mismatch);
+        assert_eq!(a.jam_form_ended, b.jam_form_ended);
+    }
+
+    fn queue(slots: usize) -> (BeatQueue, Arc<AtomicU64>) {
+        let dropped = Arc::new(AtomicU64::new(0));
+        (BeatQueue::new(slots, dropped.clone()), dropped)
+    }
+
+    /// Nineteen fields go in, nineteen fields come out. The nine that share
+    /// a word are the reason this test exists.
+    #[test]
+    fn a_notification_survives_the_queue_whole() {
+        let (q, dropped) = queue(4);
+        let sent = a_notification(0);
+        assert!(q.push(&sent));
+        let got = q.pop().expect("one in, one out");
+        assert_same(&sent, &got);
+        assert_eq!(dropped.load(Ordering::Relaxed), 0);
+        assert!(q.pop().is_none(), "and nothing behind it");
+    }
+
+    /// Every combination of the six flags, the three-valued enum and the
+    /// extreme bytes, so a bit shifted into its neighbour is caught.
+    #[test]
+    fn the_small_fields_survive_the_round_trip() {
+        let (q, _) = queue(64);
+        let states = [
+            JamBandState::Full,
+            JamBandState::HatsOnly,
+            JamBandState::Silent,
+        ];
+        for bits in 0u32..64 {
+            for state in states {
+                let mut n = a_notification(0);
+                n.subdivision_total = 255;
+                n.accent = 254;
+                n.beats_per_bar = 253;
+                n.jam_band_state = state;
+                n.is_downbeat = bits & 1 != 0;
+                n.is_warmup_beat = bits & 2 != 0;
+                n.is_warmup_transition = bits & 4 != 0;
+                n.bar_just_completed = bits & 8 != 0;
+                n.jam_bar_mismatch = bits & 16 != 0;
+                n.jam_form_ended = bits & 32 != 0;
+                assert!(q.push(&n));
+                assert_same(&n, &q.pop().unwrap());
+            }
+        }
+    }
+
+    /// Order is order: a queue is not a set, and the matcher reads these in
+    /// the order the beats were played.
+    #[test]
+    fn beats_come_back_in_the_order_they_were_played() {
+        let (q, _) = queue(8);
+        for i in 0..5 {
+            assert!(q.push(&a_notification(i)));
+        }
+        for i in 0..5 {
+            assert_eq!(q.pop().unwrap().session, a_notification(i).session);
+        }
+        assert!(q.pop().is_none());
+    }
+
+    /// The wrap. A ring that was only ever filled once would hide an index
+    /// that does not come back round.
+    #[test]
+    fn the_ring_goes_round_more_than_once() {
+        let (q, dropped) = queue(4);
+        for i in 0..40u64 {
+            assert!(q.push(&a_notification(i)), "room, because it is drained");
+            assert_eq!(q.pop().unwrap().session, a_notification(i).session);
+        }
+        assert_eq!(dropped.load(Ordering::Relaxed), 0);
+    }
+
+    /// A full queue drops and COUNTS, rather than allocating, blocking or
+    /// pretending. The count is what the probe fails on and what the event
+    /// loop prints.
+    #[test]
+    fn a_full_queue_drops_and_says_so() {
+        let (q, dropped) = queue(4);
+        for i in 0..4 {
+            assert!(q.push(&a_notification(i)));
+        }
+        assert!(!q.push(&a_notification(99)), "the fifth has nowhere to go");
+        assert!(!q.push(&a_notification(100)));
+        assert_eq!(dropped.load(Ordering::Relaxed), 2);
+
+        // And the four that DID fit are still the four that fit — a full
+        // queue keeps the oldest rather than overwriting it, because the
+        // matcher needs a run of beats and not the most recent one.
+        for i in 0..4 {
+            assert_eq!(q.pop().unwrap().session, a_notification(i).session);
+        }
+        assert!(q.pop().is_none());
+    }
+
+    /// A stop throws away what the transport left behind.
+    #[test]
+    fn draining_empties_it() {
+        let (q, _) = queue(8);
+        for i in 0..6 {
+            assert!(q.push(&a_notification(i)));
+        }
+        q.drain();
+        assert!(q.pop().is_none());
+        // And the room comes back, rather than the ring being wedged.
+        assert!(q.push(&a_notification(7)));
+        assert_eq!(q.pop().unwrap().session, a_notification(7).session);
+    }
+
+    /// A capacity that is not a power of two is rounded UP, never down: the
+    /// mask arithmetic needs it and the headroom argument must not shrink.
+    #[test]
+    fn capacity_rounds_up_to_a_power_of_two() {
+        let (q, _) = queue(5);
+        assert_eq!(q.capacity(), 8);
+        let (q, _) = queue(BEAT_QUEUE_SLOTS);
+        assert_eq!(q.capacity(), BEAT_QUEUE_SLOTS);
+    }
+
+    /// THE OTHER PRE-SIZED BUFFER IN THE CALLBACK, pinned the same way.
+    ///
+    /// `cached.beat_groups` is refilled in place on every buffer against a
+    /// capacity of `MAX_BEAT_GROUPS`, and the only thing keeping that from
+    /// being a `realloc` under the mixer is that `set_beat_groups` refuses
+    /// more groups than that. There are literally TWO constants called
+    /// `MAX_BEAT_GROUPS`, one here and one in `commands.rs`, both 6, with
+    /// nothing between them. This is the thing between them: loosen the
+    /// validator and this fails rather than the click.
+    #[test]
+    fn the_validator_cannot_hand_the_callback_more_groups_than_it_reserved() {
+        assert_eq!(
+            MAX_BEAT_GROUPS,
+            crate::commands::MAX_BEAT_GROUPS,
+            "the callback reserves one number and the command surface enforces another"
+        );
+        let longest: Vec<u8> = vec![1; MAX_BEAT_GROUPS];
+        assert!(
+            crate::commands::validate_beat_groups(&longest).is_ok(),
+            "the reservation should not be bigger than what is allowed"
+        );
+        let one_too_many: Vec<u8> = vec![1; MAX_BEAT_GROUPS + 1];
+        assert!(
+            crate::commands::validate_beat_groups(&one_too_many).is_err(),
+            "a bar of {} groups would reallocate `cached.beat_groups` on the audio thread",
+            MAX_BEAT_GROUPS + 1
+        );
+    }
+
+    /// THE SIZING ARGUMENT, AS A TEST.
+    ///
+    /// `set_bpm` clamps to 300 and `set_subdivision` to 6, so 30 ticks a
+    /// second is the fastest stream the app can produce. The queue must hold
+    /// seconds of that, because a dropped notification is a beat the score
+    /// is missing — see `BEAT_QUEUE_SLOTS`. Pinned so that anyone shrinking
+    /// it has to argue with this rather than with a comment.
+    #[test]
+    fn the_queue_holds_seconds_of_the_fastest_click_the_app_allows() {
+        const TICKS_PER_SEC: usize = 300 / 60 * 6;
+        assert_eq!(TICKS_PER_SEC, 30);
+        assert!(
+            BEAT_QUEUE_SLOTS >= TICKS_PER_SEC * 10,
+            "ten seconds is the floor; {BEAT_QUEUE_SLOTS} slots is {} s",
+            BEAT_QUEUE_SLOTS / TICKS_PER_SEC
+        );
+    }
+
+    /// One writer, one reader, both running — the shape the callback and the
+    /// event loop actually have. Not a proof of the memory ordering, but it
+    /// catches a lost, duplicated or reordered slot, which is what a wrong
+    /// index looks like in practice.
+    ///
+    /// The producer here goes as fast as it can and so DOES fill a 64-slot
+    /// queue, which the real callback cannot (`BEAT_QUEUE_SLOTS`); it retries
+    /// a refused push rather than losing the beat, so the drop counter climbs
+    /// and is not what this test is about. What it is about is that every
+    /// beat that went in comes out exactly once and in order.
+    #[test]
+    fn a_producer_and_a_consumer_agree_on_every_beat() {
+        const BEATS: u64 = 20_000;
+        let (q, _dropped) = queue(64);
+        let q = Arc::new(q);
+        let producer = {
+            let q = q.clone();
+            thread::spawn(move || {
+                let mut sent = 0u64;
+                while sent < BEATS {
+                    if q.push(&a_notification(sent)) {
+                        sent += 1;
+                    } else {
+                        thread::yield_now();
+                    }
+                }
+            })
+        };
+        let mut want = 0u64;
+        while want < BEATS {
+            match q.pop() {
+                Some(n) => {
+                    assert_eq!(n.session, a_notification(want).session, "in order, no gaps");
+                    want += 1;
+                }
+                None => thread::yield_now(),
+            }
+        }
+        producer.join().unwrap();
+        assert!(q.pop().is_none(), "and nothing left over");
     }
 }
