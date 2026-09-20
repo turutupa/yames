@@ -32,6 +32,7 @@ import {
   resetCooldowns,
   shouldDropForStaleness,
   type GatekeeperEvent,
+  type GatekeeperContext,
   type GatekeeperState,
   type ScenarioTag,
 } from "../coach/gatekeeper";
@@ -397,6 +398,11 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
   // mid-session and the next tip should honour the new setting.
   const stanceRef = useRef<CoachStance>(coachStance);
   useEffect(() => { stanceRef.current = coachStance; }, [coachStance]);
+  // The tempo band this preset has stalled in before, loaded once from
+  // history at session start (ROADMAP 1.7). A fact about the player's
+  // past, so it does not change while they play — but the beat callback
+  // that reads it outlives the load, hence the ref.
+  const presetCeilingRef = useRef<GatekeeperContext["presetCeiling"]>(undefined);
 
   // ── inDrillRamp: stable ref for use in long-lived beat callbacks ──
   const inDrillRampRef = useRef(inDrillRamp);
@@ -608,6 +614,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
         inDrillRamp: inDrillRampRef.current,
         verbosity: coachVerbosity,
         stance: stanceRef.current,
+        presetCeiling: presetCeilingRef.current,
         recentHitCompleteness: computeRecentHitCompleteness(segmentReportsRef.current),
       });
       gatekeeperRef.current = nextState;
@@ -1288,6 +1295,18 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     // Arm stamina, pace-coaching, and grid-lost tips from history.
     // All state lives in useRealtimeTips; resets fired-gates too.
     seedRealtimeTips(presetId, presetName, history);
+
+    // ── Preset-ceiling seed (ROADMAP 1.7) ─────────────────────────
+    // Same source as the pace line, different half of the range: this
+    // is the observation the coach makes up to the third attempt at a
+    // band, where `useRealtimeTips` takes over with a suggestion. The
+    // gatekeeper applies the split (`PRESET_CEILING_MAX_SESSIONS`).
+    presetCeilingRef.current = (() => {
+      if (!presetId || !history) return undefined;
+      const summary = summarizePreset(presetId, presetName, history);
+      const { bpmCeiling } = detectRecurringIssues(summary);
+      return bpmCeiling ?? undefined;
+    })();
 
     const greeting = renderGreeting({
       presetId,

@@ -257,6 +257,24 @@ export const WARMUP_GRACE_TEMPO_MS = 10_000;
  */
 export const REPETITION_HISTORY_MAX = 3;
 
+/**
+ * Where `preset_ceiling_hit` stops and the pace line takes over
+ * (ROADMAP 1.7, P1-COACH-3 and P1-DSP-3).
+ *
+ * `presetAwareness` will name a ceiling band after three sessions have
+ * stalled in it. Three is enough to say "you have been here before".
+ * It is not enough to prescribe: a player who has tried a tempo three
+ * times is still trying it, and a coach that starts planning around a
+ * pattern that young is guessing.
+ *
+ * So the two split at four. Up to and including three attempts the
+ * coach makes the observation and nothing more — this scenario. From
+ * the fourth, `useRealtimeTips` fires `pace_coaching` instead, which
+ * suggests dropping a band and building back. Exactly one of them can
+ * fire for a given band, and the player never hears both.
+ */
+export const PRESET_CEILING_MAX_SESSIONS = 3;
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -278,7 +296,8 @@ export type ScenarioTag =
   | "boundary_signal_a"
   | "boundary_signal_b"
   | "grid_discontinuity"
-  | "ramp_complete";
+  | "ramp_complete"
+  | "preset_ceiling_hit";
 
 export type Tier = "spoken" | "written";
 
@@ -413,6 +432,23 @@ export type GatekeeperContext = {
    * Used by the `low_completeness` scenario detector.
    */
   recentHitCompleteness?: number;
+  /**
+   * The tempo band this preset has historically stalled in, from
+   * `presetAwareness.detectBpmCeiling` via `detectRecurringIssues`, or
+   * absent when the preset has not crossed the three-session gate.
+   *
+   * Supplied by the session layer at session start and left alone
+   * afterwards — it is a fact about the player's history, not about
+   * this session. The gatekeeper only compares it against the tempo
+   * being played. See `PRESET_CEILING_MAX_SESSIONS` for where this
+   * scenario stops and the pace line takes over.
+   */
+  presetCeiling?: {
+    bpmLow: number;
+    bpmHigh: number;
+    sessions: number;
+    medianScore: number;
+  };
   /**
    * How hard the coach is on the player (ROADMAP 1.5). `"learning"`
    * widens every tolerance below by `LEARNING_WINDOW_SCALE` and demotes
@@ -761,6 +797,10 @@ const PER_SCENARIO_COOLDOWN_MS: Partial<Record<ScenarioTag, number>> = {
   // generous enough that the user has time to try adjusting first.
   bias_only: 90_000,
   low_completeness: 300_000,   // 5 min — effectively once per session
+  // The ceiling observation is a fact about the player's history, and
+  // the history does not change while they play. Saying it twice in a
+  // session would be the coach repeating itself, not informing.
+  preset_ceiling_hit: 600_000,
 };
 
 function passesPerScenarioCooldown(
@@ -1078,6 +1118,40 @@ function detectTrend(
     };
   }
   return null;
+}
+
+/**
+ * The player is at the tempo this exercise has stalled in before
+ * (ROADMAP 1.7, P1-COACH-3).
+ *
+ * Wired from `presetAwareness.detectBpmCeiling`, which already applies
+ * the data gates worth having — a band needs three sessions and a
+ * median under 70 before it is called a ceiling at all, and only the
+ * LOWEST such band counts, because once playing falls apart at some
+ * tempo the harder bands say nothing. All this has to do is notice that
+ * the player has walked into it.
+ *
+ * `bpmHigh` is exclusive, matching `BpmCeiling`'s `bpmLow + 10`.
+ *
+ * Silent above `PRESET_CEILING_MAX_SESSIONS` attempts: from there the
+ * player has earned advice rather than an observation, and
+ * `pace_coaching` gives it. Only one of the two ever fires.
+ */
+function detectPresetCeilingHit(ctx: GatekeeperContext): Detection | null {
+  const ceiling = ctx.presetCeiling;
+  if (!ceiling) return null;
+  if (ceiling.sessions > PRESET_CEILING_MAX_SESSIONS) return null;
+  if (ctx.bpm < ceiling.bpmLow || ctx.bpm >= ceiling.bpmHigh) return null;
+  return {
+    scenario: "preset_ceiling_hit",
+    tier: "written",
+    context: {
+      bpmLow: ceiling.bpmLow,
+      bpmHigh: ceiling.bpmHigh - 1,
+      attemptCount: ceiling.sessions,
+      score: Math.round(ceiling.medianScore),
+    },
+  };
 }
 
 /**
@@ -1493,6 +1567,19 @@ export function evaluate(
         applyFirstBeatsRule(toEvent({ ...trend, tier }, ctx.bpm), ctx),
       );
     }
+  }
+
+  // 5.4. Preset ceiling reached (ROADMAP 1.7, P1-COACH-3). The player
+  // is at the tempo this exercise has stalled in before. Written tier:
+  // it is an observation, and one the player can act on or ignore. It
+  // sits below the trends because a live trend is about the bar they
+  // just played and this is about a month of them.
+  const ceiling = detectPresetCeilingHit(ctx);
+  if (
+    ceiling &&
+    passesAllGates(working, ceiling.scenario, ceiling.tier, ctx.now, ctx.inDrillRamp, ctx.verbosity)
+  ) {
+    return commit(working, ctx.now, applyFirstBeatsRule(toEvent(ceiling, ctx.bpm), ctx));
   }
 
   // 5.5. Bias-only: consistent offset with low scatter. Written tier

@@ -458,6 +458,21 @@ const GENERIC: ScenarioCatalog = {
       "Ceiling at {bpm} BPM — {attemptCount} attempts confirms it. Park at {suggestedBpm} and let it settle.",
     ],
   },
+  // ROADMAP 1.7, P1-COACH-3. The observation the coach makes up to the
+  // third attempt at a band, before the pace line above takes over with
+  // a suggestion. Every line stays inside what was measured: the median
+  // score across `{attemptCount}` sessions in one 10-BPM band, and the
+  // fact that it is the lowest such band. Nothing here predicts today.
+  preset_ceiling_hit: {
+    neutral: [
+      "{bpmLow}–{bpmHigh} is where this one stops being clean for you — {attemptCount} sessions in that band, all around {score}.",
+      "You're back at {bpmLow}–{bpmHigh}. Your last {attemptCount} runs here came in around {score}.",
+      "Noting it while you play: {attemptCount} sessions at {bpmLow}–{bpmHigh}, each of them near {score}.",
+      "This is the tempo your scores on this one start dropping off at. {attemptCount} sessions here so far.",
+      "{attemptCount} times at {bpmLow}–{bpmHigh} now, around {score} each time. Let's see how today sits.",
+      "Same band as last time — {bpmLow}–{bpmHigh}, where this exercise has been landing near {score}.",
+    ],
+  },
   grid_lost: {
     neutral: [
       "Grid correlation dropped — are you still playing to the click?",
