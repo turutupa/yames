@@ -504,6 +504,11 @@ pure Rust + React and fully unit-testable.
 - Per AGENTS.md tiers, pitch analysis never runs on the audio thread.
   On segment end (mid-session report tier) or session end, analyse the
   segment's audio.
+- **Superseded 2026-09-20 by `SONGS.md` A8:** pitch reads the dry stem a
+  take already keeps on disk under the take's own opt-in; the in-memory
+  ring below was designed before takes existed and is kept for the
+  record. The privacy rule is unchanged: nothing is recorded that the
+  player did not ask to record, and nothing is analysed unless they ask.
 - Requires an audio buffer for the *last segment* in release builds:
   keep a bounded in-memory PCM ring (≤ 60 s, never written to disk)
   gated behind an explicit "Analyse notes" opt-in in Coach settings.

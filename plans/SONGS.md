@@ -108,7 +108,11 @@ refractory, so a riff in 16ths is swallowed before scoring sees it.
   is known, so an onset is enough). Note identity, bends and the rest
   appear in the review after the pass. Nothing new runs on the audio
   thread.
-- **A8 — The take in the review.** *open.* A take today is you and the
+- **A8 — The take in the review.** *built as proposed 2026-09-20 (W5),
+  for the owner to confirm:* the dry stem is a file, `<id>.dry.wav`, under
+  the take's existing opt-in — no second switch — listed, sized and deleted
+  with its take. This supersedes ROADMAP 2.7's in-memory-only ring, which
+  was written before takes existed. A take today is you and the
   band already mixed (`take.rs`). Pitch needs you alone.
   Proposed default: the writer thread also keeps the dry input as a
   second file beside the mix, same opt-in, same delete.
