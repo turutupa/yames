@@ -791,6 +791,34 @@ pub fn smallest_gap_beats(onsets: &[ExpectedOnset]) -> Option<f64> {
     smallest
 }
 
+/// The most onsets any single quarter note of this schedule holds.
+///
+/// Not the reciprocal of the smallest gap: one pair of 32nds in an
+/// otherwise plain piece would answer 8 to that question, and the
+/// answer wanted here is how dense the music actually gets. A sliding
+/// quarter-wide window over the onsets, which are already in beat
+/// order, gives the honest number in one pass.
+///
+/// `timing.rs` reads it to bound how many notes one quarter may hold
+/// before the extras stop being music: a loaded score knows exactly
+/// how many notes a beat was written to carry, which is a better
+/// answer than any constant.
+pub fn densest_quarter(onsets: &[ExpectedOnset]) -> u32 {
+    let mut densest: u32 = 0;
+    let mut start = 0usize;
+    for end in 0..onsets.len() {
+        // Onsets are sorted by beat; walk the tail forward until the
+        // window is one quarter wide. The epsilon keeps a note exactly
+        // one beat later out of the same window, where floating point
+        // would otherwise decide it by the last bit.
+        while onsets[end].beat - onsets[start].beat >= 1.0 - 1e-9 {
+            start += 1;
+        }
+        densest = densest.max((end - start + 1) as u32);
+    }
+    densest
+}
+
 /// Whether the notes the score marked accented actually came out
 /// louder. `None` when there is nothing to compare — no accents, or not
 /// enough of either group landed.
@@ -1021,6 +1049,13 @@ impl ScheduleRun {
     /// work out from what has already been played.
     pub fn smallest_gap_ms(&self, quarter_ms: f64) -> Option<f64> {
         smallest_gap_beats(&self.schedule.onsets).map(|b| b * quarter_ms)
+    }
+
+    /// The most notes any one quarter of this score asks for. The
+    /// per-quarter onset cap in `timing.rs` follows this rather than a
+    /// constant while a schedule is loaded.
+    pub fn densest_quarter(&self) -> u32 {
+        densest_quarter(&self.schedule.onsets)
     }
 
     /// Match everything so far. `None` until there is a beat map to
