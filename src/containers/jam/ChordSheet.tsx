@@ -80,14 +80,6 @@ const CHEAT_TABS: readonly CheatTab[] = ["chords", "scales"];
  */
 const MAJOR_COLUMN = "maj";
 
-/**
- * How much of the chart the sticky root column covers.
- *
- * A jump lands the column it was asked for just clear of it, rather than
- * underneath it — which looks exactly like the jump not having worked.
- */
-const ROOT_COLUMN_WIDTH = 52;
-
 /** The pinned shape as the record stores it, matched back to a real grip. */
 export function pinnedShapeOf(
   jam: Jam,
@@ -245,76 +237,59 @@ export function ChordSheet({
   }, [instrument]);
 
   /**
-   * The chart's columns: every chord type the library knows, in the order
-   * the families put them — plain ones, then sevenths, then colours.
+   * The chart, as four stacked sections rather than one wide one.
    *
-   * All sixteen, always. They used to be four-at-a-time behind a Triads /
-   * 7ths / Colours / Power switch, which meant a page called "the chords in
-   * D" showed seven boxes and hid the rest behind a word.
+   * It was a single table of every chord type across, and twenty-seven
+   * columns is wider than any window — so it grew a horizontal scrollbar at
+   * the FOOT of a table twelve rows tall, which you had to scroll down past
+   * the whole chart to reach. The owner: "there's a horizontal bar which is
+   * awful, because in order to see the horizontal bar i need to scroll down
+   * first".
+   *
+   * Quite so, and the fix is not a better scrollbar. Four sections — major,
+   * minor, dominant, dim & aug — each narrow enough to sit in the window,
+   * read top to bottom like every other page in this app. "Take me to"
+   * scrolls DOWN to one, which is the direction a page already moves.
    */
-  const qualities = useMemo(
-    () => CHORD_FAMILIES.flatMap((family) => [...qualitiesInFamily(family)]),
-    [],
-  );
-
-  /** The first column of each family, so a jump knows where to land. */
-  const familyStarts = useMemo(
+  const sections = useMemo(
     () =>
-      CHORD_FAMILIES.map((family) => ({
-        family,
-        quality: qualitiesInFamily(family)[0],
-      })),
-    [],
+      CHORD_FAMILIES.map((family) => {
+        const qualities = [...qualitiesInFamily(family)];
+        const all = sheetGrid(playedKey, qualities, shapeCache);
+        return {
+          family,
+          qualities,
+          /*
+           * "In key" leaves the holes.
+           *
+           * Thinning rows alone kept every chord of every root the key is
+           * built on, so a row came out as a few outlined cells among a
+           * dozen that simply do not belong — "this looks bad... we either
+           * remove the rows we don't want or we do the gaps (cheese)
+           * approach where we don't render the cells that don't belong to
+           * the key". Both, in the end: only the key's roots, and only
+           * their chords. What is left IS the key.
+           */
+          rows: inKeyOnly
+            ? all
+                .filter((row) => keyRoots.has(row.root))
+                .map((row) => ({
+                  ...row,
+                  cells: row.cells.map((cell) => (cell.fits ? cell : null)),
+                }))
+            : all.map((row) => ({ ...row, cells: row.cells.map((cell) => cell) })),
+        };
+      }).filter((section) => section.rows.some((row) => row.cells.some(Boolean))),
+    [playedKey, shapeCache, inKeyOnly, keyRoots],
   );
 
-  /**
-   * Take me to the minor chords.
-   *
-   * Not a filter. The owner was explicit about why: "clicking on minor it
-   * focuses the minor chords but doesn't fucking filter... filtering is
-   * annoying because it changes the whole page". So this scrolls the chart
-   * sideways to that family's first column and leaves everything where it
-   * is — the thing you were looking at is still on screen, just not in the
-   * middle any more.
-   */
-  const tableRef = useRef<HTMLDivElement>(null);
-  const scalesRef = useRef<HTMLElement>(null);
-
-  /** Take me to the blues scale. Scrolls the sheet, hides nothing. */
-  const jumpToScale = (scale: string) => {
-    scalesRef.current
-      ?.querySelector(`[data-scale="${scale}"]`)
+  /** Take me to the minor chords — down the page, hiding nothing. */
+  const sheetRef = useRef<HTMLElement>(null);
+  const jumpTo = (id: string) => {
+    sheetRef.current
+      ?.querySelector(`[data-section="${id}"]`)
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
-
-  const jumpTo = (quality: ChordQuality) => {
-    const wrap = tableRef.current;
-    const column = wrap?.querySelector<HTMLElement>(`[data-quality="${quality}"]`);
-    if (!wrap || !column) return;
-    // Measured rather than `scrollIntoView`, which on a box inside a
-    // scrolling sheet scrolls the sheet vertically as well and throws the
-    // reader somewhere they did not ask to go.
-    wrap.scrollTo({
-      left: Math.max(0, column.offsetLeft - wrap.offsetLeft - ROOT_COLUMN_WIDTH),
-      behavior: "smooth",
-    });
-  };
-
-  /**
-   * The chart itself: a row per root, a column per chord type.
-   *
-   * "In key" drops ROWS, never cells. It used to hide the individual chords
-   * that do not belong to the key, and the owner put the result next to a
-   * printed one: "none of the cheat sheets online have gaps like yours".
-   * Quite right — a reference with holes in it is a reference you have to
-   * interpret, and every row of a real chart is solid. So the key thins the
-   * chart to the roots it is built on, each of them complete; the dot on a
-   * cell still says which of those chords is strictly in the key.
-   */
-  const rows = useMemo(() => {
-    const all = sheetGrid(playedKey, qualities, shapeCache);
-    return inKeyOnly ? all.filter((row) => keyRoots.has(row.root)) : all;
-  }, [playedKey, qualities, shapeCache, inKeyOnly, keyRoots]);
 
   /** What the shapes section is about while it folds away (A11). */
   const shownSubject = useLastPresent(subject);
@@ -456,17 +431,36 @@ export function ChordSheet({
     );
   };
 
-  /** What the dots say, on whichever picture the tab is showing. */
+  /**
+   * What the dots say, on whichever picture the tab is showing.
+   *
+   * The label is HIDDEN and spoken instead, because it is the third control
+   * on a row of three and the other two have none: a heading over only this
+   * one stood it a line taller and knocked the row out of alignment.
+   *
+   * And its first option is named for what it actually leaves behind. It
+   * said "Nothing" on both tabs, which is true of a neck and a lie about a
+   * chord box — the owner: "why does it show still numbers when Nothing is
+   * enabled?" Because a box with nothing written on it still has its
+   * fingering, and that is the thing you are turning back to.
+   */
   const onTheDots = instrument ? (
-    <Segmented
-      label={t("jam.fretboard.onTheDots")}
-      value={dots}
-      options={DOT_LABELS.map((id) => ({
-        id,
-        label: t(`jam.fretboard.dots${id[0].toUpperCase()}${id.slice(1)}`),
-      }))}
-      onChange={setDots}
-    />
+    <span className="jam-dots-control">
+      <span className="stage-label">{t("jam.fretboard.onTheDots")}</span>
+      <Segmented
+        label={t("jam.fretboard.onTheDots")}
+        labelHidden
+        value={dots}
+        options={DOT_LABELS.map((id) => ({
+          id,
+          label:
+            id === "none"
+              ? t(tab === "chords" ? "jam.fretboard.dotsFingers" : "jam.fretboard.dotsNone")
+              : t(`jam.fretboard.dots${id[0].toUpperCase()}${id.slice(1)}`),
+        }))}
+        onChange={setDots}
+      />
+    </span>
   ) : null;
   return (
     <>
@@ -508,12 +502,12 @@ export function ChordSheet({
       <nav className="jam-chord-jump" aria-label={t("jam.cheat.jumpLabel")}>
         <span className="stage-label">{t("jam.cheat.jump")}</span>
         {tab === "chords"
-          ? familyStarts.map(({ family, quality }) => (
+          ? sections.map(({ family }) => (
               <button
                 key={family}
                 type="button"
                 className="jam-chip"
-                onClick={() => jumpTo(quality)}
+                onClick={() => jumpTo(family)}
               >
                 {t(`jam.cheat.family${cap(family)}`)}
               </button>
@@ -523,7 +517,7 @@ export function ChordSheet({
                 key={`${board.scale}-${board.root}`}
                 type="button"
                 className="jam-chip"
-                onClick={() => jumpToScale(board.scale)}
+                onClick={() => jumpTo(board.scale)}
               >
                 {t(board.labelKey, { defaultValue: board.scale })}
               </button>
@@ -532,50 +526,63 @@ export function ChordSheet({
 
       {tab === "chords" ? (
         <>
-          {/* The chart: every root down the side, every chord type across.
-
-              This is the poster a guitarist tapes to the wall, and it is one
-              picture rather than a page you drive. "In key" thins it to what
-              works over this jam; "All keys" is the lot. */}
-          <div className="jam-chord-table-wrap" ref={tableRef}>
-            <table className="jam-chord-table">
-              <thead>
-                <tr>
-                  <td />
-                  {qualities.map((quality) => (
-                    <th key={quality} scope="col" data-quality={quality}>
-                      {chordSuffix(quality) || MAJOR_COLUMN}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row) => (
-                  <tr key={row.root}>
-                    <th scope="row" className="jam-chord-table-root">
-                      {row.name}
-                      {keyRoots.has(row.root) && (
-                        <span
-                          className="jam-chord-mark"
-                          role="img"
-                          aria-label={t("jam.chords.inKeyMark")}
-                        />
-                      )}
-                    </th>
-                    {row.cells.map((cell) => (
-                      <td key={cell.chord.quality} className="jam-chord-cell">
-                        {cell.shape
-                          ? card(cell.chord, `${row.root}-${cell.chord.quality}`, {
-                              inKeyMark: cell.fits,
-                            })
-                          : null}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {/* Four sections, each a table narrow enough to read without
+              anything scrolling sideways. */}
+          <section className="jam-chord-chart" ref={sheetRef}>
+            {sections.map(({ family, qualities, rows }) => (
+              <section
+                key={family}
+                className="jam-chord-family"
+                data-section={family}
+                aria-label={t(`jam.cheat.family${cap(family)}`)}
+              >
+                <header className="jam-chord-family-head">
+                  <h3 className="jam-chord-family-name">
+                    {t(`jam.cheat.family${cap(family)}`)}
+                  </h3>
+                </header>
+                <div className="jam-chord-table-wrap">
+                  <table className="jam-chord-table">
+                    <thead>
+                      <tr>
+                        <td />
+                        {qualities.map((quality) => (
+                          <th key={quality} scope="col" data-quality={quality}>
+                            {chordSuffix(quality) || MAJOR_COLUMN}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rows.map((row) => (
+                        <tr key={row.root}>
+                          <th scope="row" className="jam-chord-table-root">
+                            {row.name}
+                          </th>
+                          {row.cells.map((cell, at) => (
+                            <td
+                              key={qualities[at]}
+                              className={`jam-chord-cell${cell ? "" : " jam-chord-cell-out"}`}
+                            >
+                              {cell?.shape
+                                ? card(cell.chord, `${row.root}-${cell.chord.quality}`, {
+                                    /* The outline says "this one is in your
+                                       key" — which is worth saying on All
+                                       keys and says nothing on In key,
+                                       where every cell drawn is one. */
+                                    inKeyMark: !inKeyOnly && cell.fits,
+                                  })
+                                : null}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            ))}
+          </section>
 
           <div className="jam-chord-switches">
             <button
@@ -668,7 +675,7 @@ export function ChordSheet({
            scales a key offers were a click away and invisible until you
            clicked. The printed card stacks them — a title bar, the formula,
            and the whole neck — and you read down it. So does this. */
-        <section className="jam-scale-sheet" ref={scalesRef}>
+        <section className="jam-scale-sheet" ref={sheetRef}>
           {boards.length === 0 ? (
             <p className="jam-sheet-note">{t("jam.cheat.noScales")}</p>
           ) : (
@@ -676,7 +683,7 @@ export function ChordSheet({
               <section
                 key={`${board.scale}-${board.root}`}
                 className="jam-scale-board"
-                data-scale={board.scale}
+                data-section={board.scale}
               >
                 <header className="jam-scale-board-head">
                   <h3 className="jam-scale-board-name">

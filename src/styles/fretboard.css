@@ -75,6 +75,15 @@
   stroke-width: 0;
 }
 
+/* A name written INSIDE a filled dot has to be the colour behind the board,
+   not the colour of text. The sheet's dots became solid and the names stayed
+   `--text-primary`, so every label but the root's was light-on-light and
+   invisible — the owner: "scales are ONLY rendering on the root note, maybe
+   its because the same font color is used on regular dots". Exactly that. */
+.fretboard-sheet .fretboard-dot-name {
+  fill: var(--bg-primary);
+}
+
 /* The root: filled, and the only solid accent on the board. */
 .fretboard-dot-root {
   fill: var(--accent);

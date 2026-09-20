@@ -287,7 +287,8 @@
       "onTheDots": "Sui pallini",
       "dotsNone": "Niente",
       "dotsNotes": "Note",
-      "dotsDegrees": "Gradi"
+      "dotsDegrees": "Gradi",
+      "dotsFingers": "Diteggiatura"
     },
     "cheat": {
       "label": "Bigliettino",
@@ -726,6 +727,14 @@
     "lydian": "lidio",
     "phrygian": "frigio",
     "majorBlues": "blues maggiore",
-    "altered": "alterata"
+    "altered": "alterata",
+    "locrian": "locria",
+    "wholeTone": "esatonale",
+    "diminishedWholeHalf": "diminuita (tono-semitono)",
+    "diminishedHalfWhole": "diminuita (semitono-tono)",
+    "phrygianDominant": "frigia dominante",
+    "lydianDominant": "lidia dominante",
+    "harmonicMajor": "maggiore armonica",
+    "hungarianMinor": "minore ungherese"
   }
 }

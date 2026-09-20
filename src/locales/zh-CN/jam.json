@@ -287,7 +287,8 @@
       "onTheDots": "圆点上显示",
       "dotsNone": "不显示",
       "dotsNotes": "音名",
-      "dotsDegrees": "级数"
+      "dotsDegrees": "级数",
+      "dotsFingers": "指法"
     },
     "cheat": {
       "label": "速查表",
@@ -726,6 +727,14 @@
     "lydian": "利底亚",
     "phrygian": "弗里几亚",
     "majorBlues": "大调布鲁斯",
-    "altered": "变化音阶"
+    "altered": "变化音阶",
+    "locrian": "洛克里安",
+    "wholeTone": "全音阶",
+    "diminishedWholeHalf": "减音阶（全半）",
+    "diminishedHalfWhole": "减音阶（半全）",
+    "phrygianDominant": "弗里几亚属",
+    "lydianDominant": "利底亚属",
+    "harmonicMajor": "和声大调",
+    "hungarianMinor": "匈牙利小调"
   }
 }

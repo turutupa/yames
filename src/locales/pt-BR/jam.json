@@ -287,7 +287,8 @@
       "onTheDots": "Nos pontos",
       "dotsNone": "Nada",
       "dotsNotes": "Notas",
-      "dotsDegrees": "Graus"
+      "dotsDegrees": "Graus",
+      "dotsFingers": "Dedilhado"
     },
     "cheat": {
       "label": "Cola",
@@ -726,6 +727,14 @@
     "lydian": "lídio",
     "phrygian": "frígio",
     "majorBlues": "blues maior",
-    "altered": "alterada"
+    "altered": "alterada",
+    "locrian": "lócria",
+    "wholeTone": "de tons inteiros",
+    "diminishedWholeHalf": "diminuta (tom-semitom)",
+    "diminishedHalfWhole": "diminuta (semitom-tom)",
+    "phrygianDominant": "frígia dominante",
+    "lydianDominant": "lídia dominante",
+    "harmonicMajor": "maior harmônica",
+    "hungarianMinor": "menor húngara"
   }
 }

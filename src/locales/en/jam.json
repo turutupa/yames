@@ -287,7 +287,8 @@
       "onTheDots": "On the dots",
       "dotsNone": "Nothing",
       "dotsNotes": "Notes",
-      "dotsDegrees": "Degrees"
+      "dotsDegrees": "Degrees",
+      "dotsFingers": "Fingering"
     },
     "cheat": {
       "label": "Cheat sheet",
@@ -726,6 +727,14 @@
     "lydian": "lydian",
     "phrygian": "phrygian",
     "majorBlues": "major blues",
-    "altered": "altered"
+    "altered": "altered",
+    "locrian": "locrian",
+    "wholeTone": "whole tone",
+    "diminishedWholeHalf": "diminished (whole-half)",
+    "diminishedHalfWhole": "diminished (half-whole)",
+    "phrygianDominant": "phrygian dominant",
+    "lydianDominant": "lydian dominant",
+    "harmonicMajor": "harmonic major",
+    "hungarianMinor": "hungarian minor"
   }
 }

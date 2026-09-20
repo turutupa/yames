@@ -287,7 +287,8 @@
       "onTheDots": "점 위에",
       "dotsNone": "없음",
       "dotsNotes": "음 이름",
-      "dotsDegrees": "음정"
+      "dotsDegrees": "음정",
+      "dotsFingers": "운지"
     },
     "cheat": {
       "label": "치트시트",
@@ -726,6 +727,14 @@
     "lydian": "리디안",
     "phrygian": "프리지안",
     "majorBlues": "메이저 블루스",
-    "altered": "얼터드"
+    "altered": "얼터드",
+    "locrian": "로크리안",
+    "wholeTone": "온음음계",
+    "diminishedWholeHalf": "디미니시드(온-반)",
+    "diminishedHalfWhole": "디미니시드(반-온)",
+    "phrygianDominant": "프리지안 도미넌트",
+    "lydianDominant": "리디안 도미넌트",
+    "harmonicMajor": "하모닉 메이저",
+    "hungarianMinor": "헝가리안 마이너"
   }
 }

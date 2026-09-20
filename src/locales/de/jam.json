@@ -287,7 +287,8 @@
       "onTheDots": "Auf den Punkten",
       "dotsNone": "Nichts",
       "dotsNotes": "Noten",
-      "dotsDegrees": "Stufen"
+      "dotsDegrees": "Stufen",
+      "dotsFingers": "Fingersatz"
     },
     "cheat": {
       "label": "Spickzettel",
@@ -726,6 +727,14 @@
     "lydian": "lydisch",
     "phrygian": "phrygisch",
     "majorBlues": "Dur-Blues",
-    "altered": "Alteriert"
+    "altered": "Alteriert",
+    "locrian": "lokrisch",
+    "wholeTone": "Ganzton",
+    "diminishedWholeHalf": "vermindert (Ganz-Halb)",
+    "diminishedHalfWhole": "vermindert (Halb-Ganz)",
+    "phrygianDominant": "phrygisch-dominant",
+    "lydianDominant": "lydisch-dominant",
+    "harmonicMajor": "harmonisch Dur",
+    "hungarianMinor": "ungarisch Moll"
   }
 }

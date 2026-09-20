@@ -28,7 +28,6 @@
     "titleDrill": "Rozbiegi",
     "titleSetlist": "Setlisty",
     "titleJam": "Jamy",
-    "saveCurrent": "Zapisz bieżące ustawienia",
     "search": "Szukaj w bibliotece",
     "searchPlaceholder": "Szukaj...",
     "namePlaceholder": "Nazwa...",
@@ -44,7 +43,9 @@
     "revert": "Przywróć",
     "revertTooltip": "Odrzuć zmiany i wczytaj preset ponownie",
     "save": "Zapisz preset",
-    "delete": "Usuń"
+    "delete": "Usuń",
+    "newPreset": "Nowy zestaw",
+    "newDrill": "Nowe ćwiczenie"
   },
   "emptyStates": {
     "presets": {

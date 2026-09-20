@@ -28,7 +28,6 @@
     "titleDrill": "Drills",
     "titleSetlist": "Setlists",
     "titleJam": "Jams",
-    "saveCurrent": "Save current settings",
     "search": "Search the library",
     "searchPlaceholder": "Search...",
     "namePlaceholder": "Name...",
@@ -44,7 +43,9 @@
     "revert": "Revert",
     "revertTooltip": "Discard changes and reload the preset",
     "save": "Save preset",
-    "delete": "Delete"
+    "delete": "Delete",
+    "newPreset": "New preset",
+    "newDrill": "New drill"
   },
   "emptyStates": {
     "presets": {

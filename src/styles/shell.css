@@ -1374,6 +1374,14 @@ button.jam-vibe-chip:hover {
   color: var(--text-primary);
 }
 
+/* A maximized cheat sheet is fixed over the window down to the transport,
+   so the only part of the rail left showing was the strip under it — the
+   middle of a row, cut in half, which reads as a bug because it is one. The
+   sheet covers the rail on purpose; this finishes the job. */
+body[data-sheet-maximized] .rail {
+  display: none;
+}
+
 .rail-footer {
   flex-shrink: 0;
   display: flex;

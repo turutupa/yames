@@ -28,7 +28,6 @@
     "titleDrill": "变速练习",
     "titleSetlist": "曲目单",
     "titleJam": "即兴伴奏",
-    "saveCurrent": "保存当前设置",
     "search": "搜索资料库",
     "searchPlaceholder": "搜索…",
     "namePlaceholder": "名称…",
@@ -44,7 +43,9 @@
     "revert": "还原",
     "revertTooltip": "放弃更改并重新加载预设",
     "save": "保存预设",
-    "delete": "删除"
+    "delete": "删除",
+    "newPreset": "新建预设",
+    "newDrill": "新建练习"
   },
   "emptyStates": {
     "presets": {

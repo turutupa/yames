@@ -28,7 +28,6 @@
     "titleDrill": "Тренировки",
     "titleSetlist": "Сет-листы",
     "titleJam": "Джемы",
-    "saveCurrent": "Сохранить текущие настройки",
     "search": "Поиск в библиотеке",
     "searchPlaceholder": "Поиск…",
     "namePlaceholder": "Название…",
@@ -44,7 +43,9 @@
     "revert": "Вернуть",
     "revertTooltip": "Отменить изменения и загрузить пресет заново",
     "save": "Сохранить пресет",
-    "delete": "Удалить"
+    "delete": "Удалить",
+    "newPreset": "Новый пресет",
+    "newDrill": "Новое упражнение"
   },
   "emptyStates": {
     "presets": {

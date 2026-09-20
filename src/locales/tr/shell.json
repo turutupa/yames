@@ -28,7 +28,6 @@
     "titleDrill": "Antrenmanlar",
     "titleSetlist": "Set listeleri",
     "titleJam": "Jam'ler",
-    "saveCurrent": "Geçerli ayarları kaydet",
     "search": "Kitaplıkta ara",
     "searchPlaceholder": "Ara...",
     "namePlaceholder": "Ad...",
@@ -44,7 +43,9 @@
     "revert": "Geri al",
     "revertTooltip": "Değişiklikleri at ve ön ayarı yeniden yükle",
     "save": "Ön ayarı kaydet",
-    "delete": "Sil"
+    "delete": "Sil",
+    "newPreset": "Yeni ayar",
+    "newDrill": "Yeni çalışma"
   },
   "emptyStates": {
     "presets": {

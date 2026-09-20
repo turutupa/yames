@@ -28,7 +28,6 @@
     "titleDrill": "Trainingen",
     "titleSetlist": "Setlists",
     "titleJam": "Jams",
-    "saveCurrent": "Huidige instellingen opslaan",
     "search": "Zoeken in de bibliotheek",
     "searchPlaceholder": "Zoeken…",
     "namePlaceholder": "Naam…",
@@ -44,7 +43,9 @@
     "revert": "Herstellen",
     "revertTooltip": "Wijzigingen verwerpen en de preset opnieuw laden",
     "save": "Preset opslaan",
-    "delete": "Verwijderen"
+    "delete": "Verwijderen",
+    "newPreset": "Nieuwe preset",
+    "newDrill": "Nieuwe oefening"
   },
   "emptyStates": {
     "presets": {

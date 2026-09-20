@@ -28,7 +28,6 @@
     "titleDrill": "Rampas",
     "titleSetlist": "Setlists",
     "titleJam": "Jams",
-    "saveCurrent": "Guardar ajustes actuales",
     "search": "Buscar en la biblioteca",
     "searchPlaceholder": "Buscar…",
     "namePlaceholder": "Nombre…",
@@ -44,7 +43,9 @@
     "revert": "Descartar",
     "revertTooltip": "Descartar los cambios y volver a cargar el preajuste",
     "save": "Guardar preajuste",
-    "delete": "Eliminar"
+    "delete": "Eliminar",
+    "newPreset": "Nuevo preajuste",
+    "newDrill": "Nuevo ejercicio"
   },
   "emptyStates": {
     "presets": {

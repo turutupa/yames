@@ -287,7 +287,8 @@
       "onTheDots": "点の表示",
       "dotsNone": "なし",
       "dotsNotes": "音名",
-      "dotsDegrees": "度数"
+      "dotsDegrees": "度数",
+      "dotsFingers": "運指"
     },
     "cheat": {
       "label": "チートシート",
@@ -726,6 +727,14 @@
     "lydian": "リディアン",
     "phrygian": "フリジアン",
     "majorBlues": "メジャーブルース",
-    "altered": "オルタード"
+    "altered": "オルタード",
+    "locrian": "ロクリアン",
+    "wholeTone": "ホールトーン",
+    "diminishedWholeHalf": "ディミニッシュ（全半）",
+    "diminishedHalfWhole": "ディミニッシュ（半全）",
+    "phrygianDominant": "フリジアン・ドミナント",
+    "lydianDominant": "リディアン・ドミナント",
+    "harmonicMajor": "ハーモニック・メジャー",
+    "hungarianMinor": "ハンガリアン・マイナー"
   }
 }

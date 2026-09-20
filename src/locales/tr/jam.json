@@ -287,7 +287,8 @@
       "onTheDots": "Noktaların üstünde",
       "dotsNone": "Hiçbiri",
       "dotsNotes": "Notalar",
-      "dotsDegrees": "Dereceler"
+      "dotsDegrees": "Dereceler",
+      "dotsFingers": "Parmak"
     },
     "cheat": {
       "label": "Kopya kâğıdı",
@@ -726,6 +727,14 @@
     "lydian": "lidyen",
     "phrygian": "frigyen",
     "majorBlues": "majör blues",
-    "altered": "altere"
+    "altered": "altere",
+    "locrian": "lokrian",
+    "wholeTone": "tam ton",
+    "diminishedWholeHalf": "eksilmiş (tam-yarım)",
+    "diminishedHalfWhole": "eksilmiş (yarım-tam)",
+    "phrygianDominant": "frigyen dominant",
+    "lydianDominant": "lidyen dominant",
+    "harmonicMajor": "armonik majör",
+    "hungarianMinor": "macar minör"
   }
 }

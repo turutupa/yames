@@ -287,7 +287,8 @@
       "onTheDots": "En los puntos",
       "dotsNone": "Nada",
       "dotsNotes": "Notas",
-      "dotsDegrees": "Grados"
+      "dotsDegrees": "Grados",
+      "dotsFingers": "Digitación"
     },
     "cheat": {
       "label": "Chuleta",
@@ -726,6 +727,14 @@
     "lydian": "lidia",
     "phrygian": "frigia",
     "majorBlues": "blues mayor",
-    "altered": "alterada"
+    "altered": "alterada",
+    "locrian": "locria",
+    "wholeTone": "tonos enteros",
+    "diminishedWholeHalf": "disminuida (tono-semitono)",
+    "diminishedHalfWhole": "disminuida (semitono-tono)",
+    "phrygianDominant": "frigia dominante",
+    "lydianDominant": "lidia dominante",
+    "harmonicMajor": "mayor armónica",
+    "hungarianMinor": "menor húngara"
   }
 }

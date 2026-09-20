@@ -287,7 +287,8 @@
       "onTheDots": "Sur les points",
       "dotsNone": "Rien",
       "dotsNotes": "Notes",
-      "dotsDegrees": "Degrés"
+      "dotsDegrees": "Degrés",
+      "dotsFingers": "Doigté"
     },
     "cheat": {
       "label": "Antisèche",
@@ -726,6 +727,14 @@
     "lydian": "lydien",
     "phrygian": "phrygien",
     "majorBlues": "blues majeur",
-    "altered": "altérée"
+    "altered": "altérée",
+    "locrian": "locrien",
+    "wholeTone": "par tons",
+    "diminishedWholeHalf": "diminuée (ton-demi)",
+    "diminishedHalfWhole": "diminuée (demi-ton)",
+    "phrygianDominant": "phrygien dominant",
+    "lydianDominant": "lydien dominant",
+    "harmonicMajor": "majeure harmonique",
+    "hungarianMinor": "mineure hongroise"
   }
 }

@@ -287,7 +287,8 @@
       "onTheDots": "На точках",
       "dotsNone": "Ничего",
       "dotsNotes": "Ноты",
-      "dotsDegrees": "Ступени"
+      "dotsDegrees": "Ступени",
+      "dotsFingers": "Аппликатура"
     },
     "cheat": {
       "label": "Шпаргалка",
@@ -726,6 +727,14 @@
     "lydian": "лидийский",
     "phrygian": "фригийский",
     "majorBlues": "мажорный блюз",
-    "altered": "альтерированная"
+    "altered": "альтерированная",
+    "locrian": "локрийский",
+    "wholeTone": "целотоновая",
+    "diminishedWholeHalf": "уменьшённая (тон-полутон)",
+    "diminishedHalfWhole": "уменьшённая (полутон-тон)",
+    "phrygianDominant": "фригийский доминантовый",
+    "lydianDominant": "лидийский доминантовый",
+    "harmonicMajor": "гармонический мажор",
+    "hungarianMinor": "венгерский минор"
   }
 }

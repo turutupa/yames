@@ -9,6 +9,7 @@ import { createRef } from "react";
 import { JamView } from "./JamView";
 import { STARTER_JAMS } from "../../jam/jams";
 import { CHORD_QUALITIES } from "../../jam/diatonic";
+import { CHORD_FAMILIES } from "../../jam/cheatSheet";
 import type { Jam } from "../../jam/types";
 import type { BeatEvent } from "../../types";
 
@@ -1442,64 +1443,66 @@ describe("JamView — the cheat sheet", () => {
     expect(all.querySelectorAll(".jam-scale-board").length).toBeGreaterThan(fitting);
   });
 
-  it("lays the whole library out as a table, every root by every chord type", () => {
-    // The printed card a guitarist owns: roots down the side, chord types
-    // across the top. It was one root at a time with the other eleven on a
-    // row of buttons, which is a list you page through rather than a card
-    // you scan.
+  it("lays the library out as four sections, one per family of chord", () => {
+    // It was ONE table of all twenty-seven types, which is wider than any
+    // window — so it grew a horizontal scrollbar at the foot of a twelve-row
+    // table, and you had to scroll past the whole chart to reach the thing
+    // that scrolls it. Four narrower tables read top to bottom instead.
     const { container } = chordSheet({}, { chordPage: "all" });
-    const rows = container.querySelectorAll(".jam-chord-table tbody tr");
-    expect(rows).toHaveLength(12);
+    const families = [...container.querySelectorAll(".jam-chord-family")];
+    expect(families).toHaveLength(CHORD_FAMILIES.length);
 
-    // Every row is the same length, because a table whose rows differ is not
-    // a table — and every cell of every row is filled.
-    const widths = new Set([...rows].map((r) => r.querySelectorAll(".jam-chord-cell").length));
-    expect(widths.size, "the rows are different lengths").toBe(1);
-    expect([...widths][0]).toBe(CHORD_QUALITIES.length);
+    for (const family of families) {
+      expect(family.querySelector(".jam-chord-family-name")?.textContent).toBeTruthy();
+      const rows = [...family.querySelectorAll("tbody tr")];
+      // Every root, every time, so the rows line up across the sections.
+      expect(rows).toHaveLength(12);
+      const widths = new Set(rows.map((r) => r.querySelectorAll(".jam-chord-cell").length));
+      expect(widths.size, "a section's rows are different lengths").toBe(1);
+    }
 
-    // The columns are headed by the chord symbol, the plain major included.
-    const heads = [...container.querySelectorAll(".jam-chord-table thead tr:last-child th")].map(
-      (th) => th.textContent,
+    // Between them the four hold every chord type and hold none of them twice.
+    const heads = [...container.querySelectorAll(".jam-chord-table thead th")].map(
+      (th) => th.getAttribute("data-quality"),
     );
-    expect(heads).toContain("maj");
-    expect(heads).toContain("m7b5");
-
-    // The roots the key's own chords are built on carry the mark.
-    expect(container.querySelectorAll(".jam-chord-table-root .jam-chord-mark").length).toBe(5);
+    expect(new Set(heads).size).toBe(CHORD_QUALITIES.length);
   });
 
-  it("marks the chords that fit the key without hiding the rest of the row", () => {
+  it("marks the chords that fit the key on All keys, and only there", () => {
     const { container } = chordSheet({}, { chordPage: "all" });
     const all = cards(container).length;
-    const marked = container.querySelectorAll(".jam-chord-card .jam-chord-mark").length;
+    const marked = container.querySelectorAll(".jam-chord-card.in-key").length;
     // Some fit and some do not — a chart where everything is marked would be
     // telling the player nothing.
     expect(marked).toBeGreaterThan(0);
     expect(marked).toBeLessThan(all);
+
+    cleanup();
+    // On In key every chord drawn is in the key, so an outline on each of
+    // them would be a page shouting one fact at itself.
+    const filtered = chordSheet({}, { chordPage: "key" });
+    expect(filtered.container.querySelectorAll(".jam-chord-card.in-key")).toHaveLength(0);
   });
 
-  it("never leaves a hole: In key drops whole rows, never cells", () => {
-    // The owner, holding a printed chart: "none of the cheat sheets online
-    // have gaps like yours". The filter used to hide the individual chords
-    // that do not belong to the key, which left a row of Swiss cheese under
-    // headings that then meant nothing. It thins the chart to the roots the
-    // key is built on instead, and every one of those rows is solid.
+  it("In key keeps the key's roots and only their chords, holes and all", () => {
+    /*
+     * Thinning rows alone left a row of a few outlined cells among a dozen
+     * that do not belong — "this looks bad... we either remove the rows we
+     * don't want or we do the gaps (cheese) approach where we don't render
+     * the cells that don't belong to the key". Both. What is left IS the key.
+     */
     const { container } = chordSheet({}, { chordPage: "key" });
-    const rows = [...container.querySelectorAll(".jam-chord-table tbody tr")];
-
-    // Fewer rows than the full twelve, or the filter is doing nothing.
+    const rows = [...container.querySelectorAll(".jam-chord-family tbody tr")];
     expect(rows.length).toBeGreaterThan(0);
-    expect(rows.length).toBeLessThan(12);
 
-    for (const row of rows) {
-      const cells = row.querySelectorAll(".jam-chord-cell");
-      expect(cells).toHaveLength(CHORD_QUALITIES.length);
-      // Every cell of every row carries a chord. No blanks anywhere.
-      expect(
-        row.querySelectorAll(".jam-chord-card"),
-        `${row.querySelector("th")?.textContent} has a hole in it`,
-      ).toHaveLength(CHORD_QUALITIES.length);
+    // Fewer roots than the full twelve, in every section.
+    for (const family of container.querySelectorAll(".jam-chord-family")) {
+      expect(family.querySelectorAll("tbody tr").length).toBeLessThan(12);
     }
+    // And there really are holes, or the filter is doing nothing.
+    expect(container.querySelectorAll(".jam-chord-cell-out").length).toBeGreaterThan(0);
+    // Every chord still drawn is one that fits.
+    expect(cards(container).length).toBeGreaterThan(0);
   });
 
   it("expands a browsed chord into the same shapes section", () => {

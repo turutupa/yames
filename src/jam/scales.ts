@@ -32,7 +32,18 @@ export type ScaleId =
   | "phrygian"
   | "majorBlues"
   | "melodicMinor"
-  | "altered";
+  | "altered"
+  // The rest of what a scales card prints (2026-09-19). The seventh mode,
+  // the two symmetrical scales, the two dominant modes a player actually
+  // reaches for, and the two harmonic-family scales.
+  | "locrian"
+  | "wholeTone"
+  | "diminishedWholeHalf"
+  | "diminishedHalfWhole"
+  | "phrygianDominant"
+  | "lydianDominant"
+  | "harmonicMajor"
+  | "hungarianMinor";
 
 export type ScaleDefinition = {
   id: ScaleId;
@@ -109,6 +120,49 @@ export const SCALES: Record<ScaleId, ScaleDefinition> = {
   },
   // altered. Its fifth mode of melodic minor identity is not needed here.
   altered: { id: "altered", intervals: [0, 1, 3, 4, 6, 8, 10], labelKey: "scale.altered" },
+  // The seventh mode. It completes the set — the other six have been here
+  // since the beginning and a card that prints six of seven modes is a card
+  // with a hole in it.
+  locrian: { id: "locrian", intervals: [0, 1, 3, 5, 6, 8, 10], labelKey: "scale.locrian" },
+  // Six notes, all a tone apart: the scale with no leading note anywhere in
+  // it, which is what makes an augmented chord sound like it is floating.
+  wholeTone: { id: "wholeTone", intervals: [0, 2, 4, 6, 8, 10], labelKey: "scale.wholeTone" },
+  // Eight notes, alternating. The whole-half is the one for a diminished
+  // chord; the half-whole is the one for a dominant with altered notes on it.
+  diminishedWholeHalf: {
+    id: "diminishedWholeHalf",
+    intervals: [0, 2, 3, 5, 6, 8, 9, 11],
+    labelKey: "scale.diminishedWholeHalf",
+  },
+  diminishedHalfWhole: {
+    id: "diminishedHalfWhole",
+    intervals: [0, 1, 3, 4, 6, 7, 9, 10],
+    labelKey: "scale.diminishedHalfWhole",
+  },
+  // The fifth mode of the harmonic minor — the flamenco sound, and the one
+  // that fits a 7b9 without any of the altered scale's other business.
+  phrygianDominant: {
+    id: "phrygianDominant",
+    intervals: [0, 1, 4, 5, 7, 8, 10],
+    labelKey: "scale.phrygianDominant",
+  },
+  // The fourth mode of the melodic minor: a dominant seventh with a sharp
+  // eleventh, which is the sound of nearly every jazz blues turnaround.
+  lydianDominant: {
+    id: "lydianDominant",
+    intervals: [0, 2, 4, 6, 7, 9, 10],
+    labelKey: "scale.lydianDominant",
+  },
+  harmonicMajor: {
+    id: "harmonicMajor",
+    intervals: [0, 2, 4, 5, 7, 8, 11],
+    labelKey: "scale.harmonicMajor",
+  },
+  hungarianMinor: {
+    id: "hungarianMinor",
+    intervals: [0, 2, 3, 6, 7, 8, 11],
+    labelKey: "scale.hungarianMinor",
+  },
 };
 
 export const SCALE_IDS: readonly ScaleId[] = Object.keys(SCALES) as ScaleId[];
@@ -131,6 +185,14 @@ export const SCALE_NAMES_EN: Record<ScaleId, string> = {
   phrygian: "Phrygian",
   majorBlues: "Major blues",
   altered: "Altered",
+  locrian: "Locrian",
+  wholeTone: "Whole tone",
+  diminishedWholeHalf: "Diminished (whole-half)",
+  diminishedHalfWhole: "Diminished (half-whole)",
+  phrygianDominant: "Phrygian dominant",
+  lydianDominant: "Lydian dominant",
+  harmonicMajor: "Harmonic major",
+  hungarianMinor: "Hungarian minor",
 };
 
 /** The pitch classes of a scale, ascending from its root. */

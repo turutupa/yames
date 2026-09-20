@@ -28,7 +28,6 @@
     "titleDrill": "Rampe",
     "titleSetlist": "Scalette",
     "titleJam": "Jam",
-    "saveCurrent": "Salva impostazioni attuali",
     "search": "Cerca nella libreria",
     "searchPlaceholder": "Cerca…",
     "namePlaceholder": "Nome…",
@@ -44,7 +43,9 @@
     "revert": "Ripristina",
     "revertTooltip": "Annulla le modifiche e ricarica il preset",
     "save": "Salva preset",
-    "delete": "Elimina"
+    "delete": "Elimina",
+    "newPreset": "Nuovo preset",
+    "newDrill": "Nuovo esercizio"
   },
   "emptyStates": {
     "presets": {

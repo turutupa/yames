@@ -146,6 +146,28 @@ export function JamSheet({
    * shrinks it, and does so for the rest of the session.
    */
   const [maximized, setMaximized] = useState(openMaximized);
+  /*
+   * While a sheet is maximized the rail is not there.
+   *
+   * A maximized sheet is fixed over the whole window down to the transport,
+   * so the only part of the rail still showing was the seventy-six pixels
+   * under it — which is the middle of a row, and it looked exactly like a
+   * bug: "on the bottom left you can see the Settings label on the left
+   * sidebar is partially visible". It was.
+   *
+   * Hiding it is the honest answer rather than nudging the rail's padding
+   * until nothing straddles the edge: the sheet already covers the rail on
+   * purpose (you are reading, not navigating), and a sliver of a thing you
+   * cannot reach is worse than none of it.
+   */
+  useEffect(() => {
+    if (!canMaximize || !maximized) return;
+    document.body.dataset.sheetMaximized = "";
+    return () => {
+      delete document.body.dataset.sheetMaximized;
+    };
+  }, [canMaximize, maximized]);
+
   const bodyRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
 

@@ -2997,6 +2997,15 @@
   gap: 10px 16px;
 }
 
+/* "On the dots" wears its name beside it rather than above it. Above, it
+   stood a line taller than the two switches next to it and knocked the
+   whole row out of line. */
+.jam-dots-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .jam-cheat-controls .jam-segmented,
 .jam-cheat-controls .accent-control {
   margin-left: 0;
@@ -3027,6 +3036,7 @@
 .jam-scale-sheet {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 22px;
 }
 
@@ -3044,6 +3054,7 @@
 }
 
 .jam-scale-board {
+  width: 100%;
   max-width: 1150px;
   display: flex;
   flex-direction: column;
@@ -3110,30 +3121,58 @@
   color: var(--accent-text, var(--bg-primary));
 }
 
-/* ── The poster (2026-09-18) ───────────────────────────────────────────────
-   Twelve roots down the side, every chord type across the top, in the three
-   bands the browser already grouped them into. This is the printed card a
-   guitarist owns, and it is a real <table> because that is what it is.
+/* ── The chart (2026-09-19) ────────────────────────────────────────────────
+   Four sections down the page, each a table of one family: major, minor,
+   dominant, dim & aug. It was ONE table of all twenty-seven types, which is
+   wider than any window, so it grew a horizontal scrollbar at the foot of a
+   twelve-row table — you had to scroll past the whole chart to reach the
+   thing that scrolls it. Sections read top to bottom like every other page
+   here, and "Take me to" scrolls DOWN, which is the direction a page moves
+   anyway. */
+.jam-chord-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
 
-   It scrolls sideways inside its own box rather than squeezing: sixteen
-   columns of chord boxes are wider than any drawer, and a chord diagram
-   shrunk to fit is a chord diagram you cannot read. The root column stays
-   put while it scrolls — the one thing you must never lose is which row you
-   are on. */
+.jam-chord-family {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* A jump lands the heading clear of the top rather than flush against it,
+     where it reads as having overshot. */
+  scroll-margin-top: 12px;
+}
+
+.jam-chord-family-head {
+  padding: 6px 10px;
+  border-radius: var(--radius-sm, 6px);
+  background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+}
+
+.jam-chord-family-name {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+/* A family is at most ten columns, so it fits — and on a narrow sheet the
+   box still scrolls rather than squeezing the diagrams to nothing. */
 .jam-chord-table-wrap {
-  /* `overflow-y` stays visible. Setting it to `hidden` alongside an
-     `overflow-x: auto` does not clip one axis and free the other — CSS
-     promotes the box to a scroll container on both, and the chart came out
-     a hundred pixels tall with one row of C in it. `flex: none` for the
-     same family of reason: the sheet is a flex column and would otherwise
-     squeeze this to fit rather than let the page scroll. */
   flex: none;
   overflow-x: auto;
 }
 
 .jam-chord-table {
   border-collapse: separate;
-  border-spacing: 0;
+  /* Breathing room between cells, which is the whole of what a chart needs
+     to stop reading as a wall — the owner: "we need some gap between each
+     cell to give it some breathing room". `border-spacing` rather than
+     padding, so the gap is BETWEEN boxes and not inside them. */
+  border-spacing: 6px 8px;
 }
 
 .jam-chord-table th {
@@ -3142,20 +3181,8 @@
   color: var(--text-secondary);
 }
 
-/* The band across a family's columns. */
-.jam-chord-table-bands th {
-  padding: 0 0 6px;
-  border-bottom: 1px solid var(--border);
-}
-
-/* The chord symbol over each column: m, 7, sus4. Sticky, so the column you
-   have scrolled to still says what it is. */
-.jam-chord-table thead tr:last-child th {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  padding: 6px 0;
-  background: var(--bg-primary);
+.jam-chord-table thead th {
+  padding: 2px 0;
   font-size: 0.72rem;
   letter-spacing: 0.02em;
 }
@@ -3163,39 +3190,34 @@
 .jam-chord-table-root {
   position: sticky;
   left: 0;
-  z-index: 3;
-  min-width: 42px;
-  padding-right: 10px;
+  z-index: 2;
+  min-width: 34px;
+  padding-right: 6px;
   background: var(--bg-primary);
   text-align: left;
   font-size: 0.82rem;
   color: var(--text-primary);
 }
 
-/* A cell is as wide as a chord box, and never less.
-
-   A table sizes its columns to fit the space it is given, and the boxes
-   carry `max-width: 100%` so they shrink inside a card — between them they
-   squeezed a 96px diagram to thirty-one pixels across and drew six strings
-   in it. Sixteen columns are wider than any drawer; the answer is the
-   sideways scroll this box already has, not smaller diagrams. */
 .jam-chord-cell {
   min-width: 100px;
-  padding: 1px;
   vertical-align: top;
 }
 
-/* Tight in the chart, roomy on its own. A card standing alone wants air
-   around it; a hundred and ninety-two of them in a grid want as little as
-   will still tell one box from the next, or half the chart is padding and
-   you scroll past the answer. */
+.jam-chord-cell .chord-diagram svg {
+  max-width: none;
+}
+
+/* Tight inside a cell, roomy between them: the air is the table's job now. */
 .jam-chord-cell .jam-chord-card {
   gap: 2px;
   padding: 4px 2px 3px;
 }
 
-.jam-chord-cell .chord-diagram svg {
-  max-width: none;
+/* A chord that is not in the key, with the filter on. Nothing is drawn —
+   what is left is the key, and the holes are how you see its shape. */
+.jam-chord-cell-out {
+  min-width: 100px;
 }
 
 /* A drawer of the browser — Basic, Sevenths, Colours. */

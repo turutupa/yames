@@ -287,7 +287,8 @@
       "onTheDots": "Na kropkach",
       "dotsNone": "Nic",
       "dotsNotes": "Dźwięki",
-      "dotsDegrees": "Stopnie"
+      "dotsDegrees": "Stopnie",
+      "dotsFingers": "Palcowanie"
     },
     "cheat": {
       "label": "Ściąga",
@@ -726,6 +727,14 @@
     "lydian": "lidyjska",
     "phrygian": "frygijska",
     "majorBlues": "blues durowy",
-    "altered": "alterowana"
+    "altered": "alterowana",
+    "locrian": "lokrycka",
+    "wholeTone": "całotonowa",
+    "diminishedWholeHalf": "zmniejszona (cały-pół)",
+    "diminishedHalfWhole": "zmniejszona (pół-cały)",
+    "phrygianDominant": "frygijska dominantowa",
+    "lydianDominant": "lidyjska dominantowa",
+    "harmonicMajor": "durowa harmoniczna",
+    "hungarianMinor": "molowa węgierska"
   }
 }

@@ -366,74 +366,85 @@ test.describe("a variation chip", () => {
   });
 });
 
-test.describe("the chord poster", () => {
+test.describe("the chord chart", () => {
   test("keeps its diagrams readable rather than squeezing them to fit", async ({ page }) => {
     /*
-     * Twelve roots by sixteen chord types is wider than any drawer, and a
-     * table's first instinct is to shrink its columns until it fits. Between
-     * that and the `max-width: 100%` every chord box carries, a 96px diagram
-     * came out thirty-one pixels across with six strings drawn inside it —
-     * technically present, and no use to anybody. The box scrolls sideways
-     * instead. No unit test can see this: happy-dom gives every one of those
+     * A table's first instinct is to shrink its columns until it fits, and
+     * every chord box carries `max-width: 100%` — between them a 96px
+     * diagram came out thirty-one pixels across with six strings drawn in
+     * it. No unit test sees this: happy-dom gives every one of those
      * diagrams the same zero width.
      */
     await openShot(page, "jam-chords-all", { width: 1500, height: 1000 });
-    const table = await page.waitForSelector(".jam-chord-table");
+    await page.waitForSelector(".jam-chord-table");
 
     const widths = await page.$$eval(".jam-chord-cell .chord-diagram svg", (nodes) =>
       nodes.map((n) => Math.round(n.getBoundingClientRect().width)),
     );
-    expect(widths.length, "no chord boxes in the table").toBeGreaterThan(20);
+    expect(widths.length, "no chord boxes in the chart").toBeGreaterThan(20);
     const narrowest = Math.min(...widths);
     expect(narrowest, `the narrowest box is ${narrowest}px`).toBeGreaterThanOrEqual(90);
 
-    // Every row the same length AND solid all the way across, so a column
-    // heading means the same thing every line down. "none of the cheat
-    // sheets online have gaps like yours" — they do not, and nor does this.
-    const rows = await page.$$eval(".jam-chord-table tbody tr", (nodes) =>
-      nodes.map((r) => ({
-        cells: r.querySelectorAll(".jam-chord-cell").length,
-        filled: r.querySelectorAll(".jam-chord-card").length,
-        root: r.querySelector("th")?.textContent ?? "?",
-      })),
+    // Every row of a section is the same length, so a column heading means
+    // the same thing all the way down it.
+    const ragged = await page.$$eval(".jam-chord-family", (families) =>
+      families
+        .map((f) => [
+          ...new Set(
+            [...f.querySelectorAll("tbody tr")].map((r) => r.querySelectorAll("td").length),
+          ),
+        ].length)
+        .filter((n) => n !== 1).length,
     );
-    expect(new Set(rows.map((r) => r.cells)).size, "the rows are different lengths").toBe(1);
-    for (const row of rows) {
-      expect(row.filled, `the ${row.root} row has a hole in it`).toBe(row.cells);
-    }
+    expect(ragged, "a section's rows are different lengths").toBe(0);
 
-    // And it scrolls rather than overflowing the sheet.
-    const box = (await table.boundingBox())!;
-    expect(Math.round(box.x), "the table starts off the left").toBeGreaterThanOrEqual(0);
-    await noSidewaysScroll(page, "the cheat sheet with the poster open");
+    await noSidewaysScroll(page, "the cheat sheet with the chart open");
+  });
+
+  test("splits into sections narrow enough not to scroll sideways", async ({ page }) => {
+    /*
+     * It was ONE table of all thirty-two chord types, which is wider than
+     * any window — so it grew a horizontal scrollbar at the FOOT of a
+     * twelve-row table, and you had to scroll past the whole chart to reach
+     * the thing that scrolls it: "there's a horizontal bar which is awful,
+     * because in order to see the horizontal bar i need to scroll down
+     * first". Four narrower tables, read top to bottom, need no such thing.
+     */
+    await openShot(page, "jam-chords-all", { width: 1700, height: 1100 });
+    const overflow = await page.$$eval(".jam-chord-table-wrap", (wraps) =>
+      wraps.map((w) => w.scrollWidth - w.clientWidth),
+    );
+    expect(overflow.length, "no sections drawn").toBeGreaterThan(1);
+    for (const over of overflow) {
+      expect(over, `a section overflows its box by ${over}px`).toBeLessThanOrEqual(1);
+    }
   });
 });
 
 test.describe('"take me to"', () => {
-  test("scrolls the chart to a family without hiding anything", async ({ page }) => {
+  test("scrolls the sheet to a family without hiding anything", async ({ page }) => {
     /*
-     * Not a filter, and the difference is the whole point: "clicking on
-     * minor it focuses the minor chords but doesn't fucking filter...
-     * filtering is annoying because it changes the whole page". So the
-     * chart moves sideways and every cell that was on it is still on it.
+     * Not a filter, and the difference is the point: "clicking on minor it
+     * focuses the minor chords but doesn't fucking filter... filtering is
+     * annoying because it changes the whole page". It scrolls DOWN to the
+     * section, which is the direction a page moves anyway.
      */
     await openShot(page, "jam-chords-all", { width: 1500, height: 1000 });
     const cells = () => page.$$eval(".jam-chord-card", (n) => n.length);
     const before = await cells();
     expect(before, "no chart to jump around").toBeGreaterThan(100);
 
-    const wrap = ".jam-chord-table-wrap";
-    expect(await page.$eval(wrap, (n) => n.scrollLeft)).toBe(0);
+    const body = ".jam-sheet-body";
+    expect(await page.$eval(body, (n) => n.scrollTop)).toBe(0);
 
-    await page.click('.jam-chord-jump button:nth-of-type(2)');
+    await page.click(".jam-chord-jump button:nth-of-type(2)");
     await page.waitForFunction(
-      (sel) => (document.querySelector(sel) as HTMLElement).scrollLeft > 0,
-      wrap,
+      (sel) => (document.querySelector(sel) as HTMLElement).scrollTop > 0,
+      body,
       { timeout: 4000 },
     );
 
-    // It moved, and it hid nothing on the way.
-    expect(await page.$eval(wrap, (n) => n.scrollLeft)).toBeGreaterThan(0);
+    expect(await page.$eval(body, (n) => n.scrollTop)).toBeGreaterThan(0);
     expect(await cells(), "the jump removed chords from the chart").toBe(before);
   });
 });

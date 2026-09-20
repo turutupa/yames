@@ -287,7 +287,8 @@
       "onTheDots": "Trên các chấm",
       "dotsNone": "Không",
       "dotsNotes": "Tên nốt",
-      "dotsDegrees": "Bậc"
+      "dotsDegrees": "Bậc",
+      "dotsFingers": "Thế bấm"
     },
     "cheat": {
       "label": "Bảng tra nhanh",
@@ -726,6 +727,14 @@
     "lydian": "lydian",
     "phrygian": "phrygian",
     "majorBlues": "blues trưởng",
-    "altered": "altered"
+    "altered": "altered",
+    "locrian": "locrian",
+    "wholeTone": "toàn cung",
+    "diminishedWholeHalf": "giảm (cung-nửa)",
+    "diminishedHalfWhole": "giảm (nửa-cung)",
+    "phrygianDominant": "phrygian át",
+    "lydianDominant": "lydian át",
+    "harmonicMajor": "trưởng hòa thanh",
+    "hungarianMinor": "thứ Hungary"
   }
 }

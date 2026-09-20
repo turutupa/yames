@@ -287,7 +287,8 @@
       "onTheDots": "Op de stippen",
       "dotsNone": "Niets",
       "dotsNotes": "Noten",
-      "dotsDegrees": "Trappen"
+      "dotsDegrees": "Trappen",
+      "dotsFingers": "Vingerzetting"
     },
     "cheat": {
       "label": "Spiekbriefje",
@@ -726,6 +727,14 @@
     "lydian": "lydisch",
     "phrygian": "frygisch",
     "majorBlues": "majeur blues",
-    "altered": "altered"
+    "altered": "altered",
+    "locrian": "locrisch",
+    "wholeTone": "heletoons",
+    "diminishedWholeHalf": "verminderd (heel-half)",
+    "diminishedHalfWhole": "verminderd (half-heel)",
+    "phrygianDominant": "frygisch dominant",
+    "lydianDominant": "lydisch dominant",
+    "harmonicMajor": "harmonisch majeur",
+    "hungarianMinor": "hongaars mineur"
   }
 }

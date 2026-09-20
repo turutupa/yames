@@ -502,6 +502,10 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
 
   // The rail's setlist glyph at row size — lines with a play head, a list that
   // runs in order. Rail.tsx has the note on why it is no longer a chain.
+  // The rail's setlist glyph at row size — lines with a play head, a list that
+  // runs in order. Rail.tsx has the note on why it is no longer a chain. It
+  // marks a ROW in the library, where saying what kind of thing this is is
+  // the whole job; the header's button above says "new" instead.
   const setlistIcon = (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M4 6.5h11" />
@@ -511,14 +515,44 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
     </svg>
   );
 
+  // The band's lanes at row size — the same component the setlist's jam
+  // steps draw.
+  const jamIcon = <JamGlyph />;
+
+  /**
+   * "Make me a new one", on every tab (2026-09-19).
+   *
+   * There used to be three different glyphs here — a floppy on the
+   * metronome and the drill, a setlist's own lines, the band's bars — for
+   * one gesture, because each was drawn to say what KIND of thing it made.
+   * The library below it already says that. The owner: "we should have the
+   * same icon for create new metronome preset/new setlist/new drill and
+   * potentially should be a plus icon which is very generic".
+   *
+   * A plus, then. It is the one glyph nobody has to learn.
+   */
+  const newIcon = (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </svg>
+  );
+
   // The setlist tab's library IS the setlists, and no other tab's carries
   // them. This is what a mode buys that a section heading could not: each
   // list holds one kind of thing, so nothing has to be labelled to be told
   // apart, and the panel's title is true on every tab.
   // The band's lanes at row size — the rail's jam glyph, same four bars, and
   // now the same component the setlist's jam steps draw.
-  const jamIcon = <JamGlyph />;
-
   const showSetlists = view === "setlist" && !!setlists;
   const setlistList = showSetlists
     ? (search.trim()
@@ -641,7 +675,7 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
                 aria-label={t("setlist.newSetlist")}
                 data-tip={t("setlist.newSetlist")}
               >
-                {setlistIcon}
+                {newIcon}
               </button>
             )}
             {/* The jam tab's opener. It copies the loaded jam rather than
@@ -654,34 +688,21 @@ export const PresetSidebar = forwardRef<PresetSidebarHandle, PresetSidebarProps>
                 aria-label={t("jam.newJam")}
                 data-tip={t("jam.newJam")}
               >
-                {jamIcon}
+                {newIcon}
               </button>
             )}
             {!showSetlists && !showJams && viewPresets.length < MAX_PRESETS && (
               <button
                 className="preset-sidebar-head-btn preset-sidebar-add"
                 onClick={() => setAdding(true)}
-                aria-label={t("presets.saveCurrent")}
-                data-tip={t("presets.saveCurrent")}
+                aria-label={t(view === "drill" ? "presets.newDrill" : "presets.newPreset")}
+                data-tip={t(view === "drill" ? "presets.newDrill" : "presets.newPreset")}
               >
-                {/* The same floppy the context bar's "Save preset" carries.
-                    It was a "+", which reads as "add an empty one" — the two
-                    buttons do the same thing and now say so. */}
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                  <polyline points="17 21 17 13 7 13 7 21" />
-                  <polyline points="7 3 7 8 15 8" />
-                </svg>
+                {/* It said "Save current settings", under a floppy, on a
+                    button that files a NEW thing in the library beside it —
+                    and on the drill tab that sentence names neither the
+                    thing nor the act. It makes a new drill. */}
+                {newIcon}
               </button>
             )}
           </div>

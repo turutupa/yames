@@ -28,7 +28,6 @@
     "titleDrill": "Bài luyện tempo",
     "titleSetlist": "Setlist",
     "titleJam": "Jam",
-    "saveCurrent": "Lưu cài đặt hiện tại",
     "search": "Tìm trong thư viện",
     "searchPlaceholder": "Tìm kiếm...",
     "namePlaceholder": "Tên...",
@@ -44,7 +43,9 @@
     "revert": "Hoàn tác",
     "revertTooltip": "Bỏ thay đổi và tải lại cài đặt sẵn",
     "save": "Lưu cài đặt sẵn",
-    "delete": "Xóa"
+    "delete": "Xóa",
+    "newPreset": "Cài đặt mới",
+    "newDrill": "Bài tập mới"
   },
   "emptyStates": {
     "presets": {
