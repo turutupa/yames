@@ -10,6 +10,9 @@ mod kit;
 mod midi;
 mod models;
 mod onset;
+/// Roadmap 2.4 — the score a player is playing against, and what came
+/// back. `pub` for the same reason the three below are.
+pub mod score;
 // `session`, `session_log`, and `timing` are exposed `pub` so the
 // integration tests in `tests/dsp_fixtures.rs` can import
 // `score_feedbacks`, `BeatFeedback`, and `SessionReport` directly.
@@ -86,7 +89,8 @@ use commands::{
     get_system_memory_mb,
     get_waveform, is_coach_loaded, list_audio_input_devices, list_audio_output_devices,
     list_calibration_cache, list_midi_devices, list_presets, list_session_logs, load_coach_model,
-    close_open_segment, notify_settings_change, open_url, reorder_presets, save_drill_run, save_preset, save_session,
+    clear_score_schedule, close_open_segment, load_score_schedule, notify_settings_change,
+    open_url, reorder_presets, save_drill_run, save_preset, save_session,
     save_window_position, set_active_tab, set_always_on_top,
     set_audio_output_device, set_audio_output_pair, set_bpm, set_calibration_offset, set_input_gain,
     set_instrument,
@@ -658,6 +662,9 @@ pub fn run() {
             get_evaluation_state,
             notify_settings_change,
             close_open_segment,
+            // Roadmap 2.4 — the score the player is playing against.
+            load_score_schedule,
+            clear_score_schedule,
             get_session_report,
             get_final_session_report,
             clear_session,

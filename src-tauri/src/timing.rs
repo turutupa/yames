@@ -7,6 +7,7 @@ use std::time::Duration;
 use crate::instrument::{Instrument, InstrumentProfile, ScoreWeights};
 use crate::models::PlayMode;
 use crate::onset::Onset;
+use crate::score::{PlayedOnset, ScheduleRun, ScoreSchedule};
 use crate::session::CoachMode;
 use crate::session_log::{
     ActivityTransition, Classification, ComponentScores, DetectedOnset, ExpectedBeat,
@@ -171,6 +172,34 @@ pub struct PracticeSegmentEnded {
     /// exactly which intervals drove the IC score.
     #[serde(rename = "intervalErrors", default)]
     pub interval_errors: Vec<f64>,
+    /// Roadmap 2.4 — one verdict per expected onset, when a
+    /// `ScoreSchedule` was loaded. This is what the review after a pass
+    /// colours the tab from. Empty in free play, and skipped on the
+    /// wire when empty, so the event a free-play session emits is the
+    /// one it has always emitted.
+    #[serde(
+        rename = "onsetResults",
+        default,
+        skip_serializing_if = "Vec::is_empty"
+    )]
+    pub onset_results: Vec<crate::score::OnsetResult>,
+    /// Roadmap 2.4 — notes the player made that the score did not ask
+    /// for. Same emptiness rule as above.
+    #[serde(
+        rename = "extraOnsets",
+        default,
+        skip_serializing_if = "Vec::is_empty"
+    )]
+    pub extra_onsets: Vec<crate::score::ExtraOnset>,
+    /// Roadmap 2.4 / LP C3 — how far the accents the score marked
+    /// actually came out louder than their neighbours. Reported, not
+    /// scored: C3 has not decided what it should cost.
+    #[serde(
+        rename = "accentAgreement",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub accent_agreement: Option<f32>,
 }
 
 /// Path B — UI event emitted whenever the rhythm-inference's locked
@@ -291,6 +320,14 @@ pub struct TimingAnalyzer {
     /// click. `None` in tests and in any caller that never wired one
     /// up; the loop simply publishes nothing then.
     tempo_ctx: Option<crate::onset::SharedTempoContext>,
+    /// Roadmap 2.4 — the score the player is playing against, when
+    /// there is one. `None` is free play, and free play is untouched
+    /// by everything this field enables.
+    schedule: Arc<Mutex<Option<ScoreSchedule>>>,
+    /// Bumped whenever the slot above changes, so the analysis loop can
+    /// tell "still the same schedule" from "a new one" without locking
+    /// and cloning it every 5 ms.
+    schedule_version: Arc<std::sync::atomic::AtomicU64>,
 }
 
 impl TimingAnalyzer {
@@ -304,7 +341,31 @@ impl TimingAnalyzer {
             close_segment_now: Arc::new(AtomicBool::new(false)),
             telemetry: Arc::new(Mutex::new(SessionTelemetry::default())),
             tempo_ctx: None,
+            schedule: Arc::new(Mutex::new(None)),
+            schedule_version: Arc::new(std::sync::atomic::AtomicU64::new(0)),
         }
+    }
+
+    /// Roadmap 2.4 — hand the analyzer the score the player is about to
+    /// play. From the next downbeat, matching runs against this instead
+    /// of against the grid the inference guessed: a note that is due
+    /// and does not arrive becomes a miss rather than a rest, and a
+    /// note nobody asked for becomes an extra rather than nothing at
+    /// all. Takes effect within one matcher pass; safe to call while a
+    /// session is running.
+    pub fn load_score_schedule(&self, schedule: ScoreSchedule) {
+        *self.schedule.lock().unwrap() = Some(schedule);
+        self.schedule_version
+            .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+    }
+
+    /// Back to free play. Whatever the current attempt had accumulated
+    /// is dropped — the caller has already been given it on the last
+    /// segment-ended event.
+    pub fn clear_score_schedule(&self) {
+        *self.schedule.lock().unwrap() = None;
+        self.schedule_version
+            .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
     }
 
     /// Hand the analyzer the same `TempoContext` the onset detector
@@ -424,6 +485,8 @@ impl TimingAnalyzer {
         let close_segment_now = self.close_segment_now.clone();
         let telemetry = self.telemetry.clone();
         let tempo_ctx = self.tempo_ctx.clone();
+        let schedule = self.schedule.clone();
+        let schedule_version = self.schedule_version.clone();
 
         self.thread_handle = Some(thread::spawn(move || {
             Self::analysis_loop(
@@ -434,6 +497,8 @@ impl TimingAnalyzer {
                 close_segment_now,
                 telemetry,
                 tempo_ctx,
+                schedule,
+                schedule_version,
                 profile,
                 instrument_id,
                 preset_id,
@@ -480,6 +545,8 @@ impl TimingAnalyzer {
         close_segment_now: Arc<AtomicBool>,
         telemetry: Arc<Mutex<SessionTelemetry>>,
         tempo_ctx: Option<crate::onset::SharedTempoContext>,
+        schedule_slot: Arc<Mutex<Option<ScoreSchedule>>>,
+        schedule_version: Arc<std::sync::atomic::AtomicU64>,
         profile: InstrumentProfile,
         instrument_id: String,
         preset_id: Option<String>,
@@ -579,6 +646,13 @@ impl TimingAnalyzer {
         //   * the segment's `inferred_divisor` telemetry,
         //   * the UI "Tracking 16ths" caption (via the divisor-locked
         //     event, emitted when the lock state changes).
+        // Roadmap 2.4 — the score the player is playing against, if
+        // there is one, and everything that has happened since it was
+        // loaded. `None` is free play, which is every path below that
+        // does not mention it.
+        let mut schedule_run: Option<ScheduleRun> = None;
+        let mut seen_schedule_version = u64::MAX;
+
         let mut rhythm_inference = RhythmInference::new();
         // Last divisor we surfaced to the JS layer — used to debounce
         // the divisor-changed callback so we don't fire on every refit.
@@ -698,6 +772,22 @@ impl TimingAnalyzer {
             thread::sleep(Duration::from_millis(5));
             let stopping = !alive.load(Ordering::SeqCst);
 
+            // Roadmap 2.4 — pick up a schedule that was loaded or
+            // cleared since the last pass. The version counter keeps
+            // this to an atomic read on the 5 ms path; the lock is only
+            // taken when something has actually changed.
+            {
+                let version = schedule_version.load(Ordering::SeqCst);
+                if version != seen_schedule_version {
+                    seen_schedule_version = version;
+                    schedule_run = schedule_slot
+                        .lock()
+                        .unwrap()
+                        .clone()
+                        .map(ScheduleRun::new);
+                }
+            }
+
             // D4 — Signal A poll. If the JS layer called
             // `notify_settings_change`, close the open segment with
             // reason `SettingsChange` and clear local accumulators so
@@ -721,6 +811,7 @@ impl TimingAnalyzer {
                             SegmentEndReason::SettingsChange,
                             rhythm_inference.current_divisor(),
                             rhythm_inference.confidence(),
+                            schedule_run.as_ref(),
                         ),
                         false,
                     );
@@ -754,6 +845,7 @@ impl TimingAnalyzer {
                             SegmentEndReason::UserStopped,
                             rhythm_inference.current_divisor(),
                             rhythm_inference.confidence(),
+                            schedule_run.as_ref(),
                         ),
                         true,
                     );
@@ -770,6 +862,17 @@ impl TimingAnalyzer {
                 let base_wall_ms = now_wall_ms();
                 let base_ns = crate::clock::now_ns();
                 for onset in log.drain(..) {
+                    // Roadmap 2.4 — every note the detector emitted
+                    // goes to the schedule run on the same wall clock
+                    // the beat map uses. What counts as a count-in is
+                    // decided at match time, not here.
+                    if let Some(run) = schedule_run.as_mut() {
+                        run.note_onset(PlayedOnset {
+                            time_ms: ts_ns_to_wall_ms(onset.ts_ns, base_wall_ms, base_ns) as f64,
+                            amplitude: onset.amplitude,
+                            confidence: onset.confidence,
+                        });
+                    }
                     // Record for grid correlation
                     grid_onset_times.push_back(onset.ts_ns);
                     while grid_onset_times.len() > 64 {
@@ -893,9 +996,20 @@ impl TimingAnalyzer {
             // what the detector already reads for itself.
             if let Some(ctx) = tempo_ctx.as_ref() {
                 let quarter_ms = rhythm_inference.last_beat_interval_ms();
-                if rhythm_inference.is_locked() && quarter_ms > 0.0 {
-                    let played =
-                        rhythm_inference.effective_interval_ms(quarter_ms);
+                // Roadmap 2.4 — with a score loaded the schedule's own
+                // smallest gap wins outright. The score knows what is
+                // about to be played; the inference can only work out
+                // what already has been, and it needs eight onsets to
+                // do even that. There is no cold start when the
+                // material is known.
+                let from_schedule = schedule_run
+                    .as_ref()
+                    .filter(|_| quarter_ms > 0.0)
+                    .and_then(|run| run.smallest_gap_ms(quarter_ms));
+                if let Some(gap_ms) = from_schedule {
+                    ctx.set_played_interval_ms(Some(gap_ms as f32));
+                } else if rhythm_inference.is_locked() && quarter_ms > 0.0 {
+                    let played = rhythm_inference.effective_interval_ms(quarter_ms);
                     ctx.set_played_interval_ms(Some(played as f32));
                 } else {
                     ctx.set_played_interval_ms(None);
@@ -965,6 +1079,25 @@ impl TimingAnalyzer {
             // sampling pattern as the onset-drain path above.
             let beat_base_wall_ms = now_wall_ms();
             let beat_base_ns = crate::clock::now_ns();
+
+            // Roadmap 2.4 — where the quarter notes actually fell. This
+            // is the beat map the schedule's beat positions are turned
+            // into times through, and it is the only source for that:
+            // a tempo step at a bar line, a speed ramp and the drift of
+            // a real audio clock are all in here and in no BPM. Only
+            // audible quarter anchors count — a position the analyzer
+            // invented is derived from these and would be circular.
+            // Recorded before the activity and grace gates below, which
+            // are about whether a NOTE is scored, not about whether a
+            // beat happened.
+            if let Some(run) = schedule_run.as_mut() {
+                for beat in beats.iter().filter(|b| b.subdivision_index == 0) {
+                    run.note_quarter(
+                        beat.is_downbeat,
+                        ts_ns_to_wall_ms(beat.ts_ns, beat_base_wall_ms, beat_base_ns) as f64,
+                    );
+                }
+            }
 
             // Match each beat to the closest onset within the window
             for (beat, virtual_for) in &scored {
@@ -1645,6 +1778,7 @@ impl TimingAnalyzer {
                                         SegmentEndReason::ActivityGap,
                                         rhythm_inference.current_divisor(),
                                         rhythm_inference.confidence(),
+                                        schedule_run.as_ref(),
                                     ),
                                     true,
                                 );
@@ -1743,6 +1877,7 @@ impl TimingAnalyzer {
                                         SegmentEndReason::GridDiscontinuity,
                                         rhythm_inference.current_divisor(),
                                         rhythm_inference.confidence(),
+                                        schedule_run.as_ref(),
                                     );
                                     // The grid was lost *now*, which may be
                                     // several beats after the last matched
@@ -1839,6 +1974,7 @@ impl TimingAnalyzer {
                         SegmentEndReason::SessionEnd,
                         rhythm_inference.current_divisor(),
                         rhythm_inference.confidence(),
+                        schedule_run.as_ref(),
                     ),
                     true,
                 );
@@ -2402,6 +2538,7 @@ fn build_segment_ended(
     end_reason: SegmentEndReason,
     inferred_divisor: u8,
     inferred_divisor_confidence: f64,
+    schedule_run: Option<&ScheduleRun>,
 ) -> PracticeSegmentEnded {
     let instr_profile = Instrument::from_id(instrument_id).profile();
     let seg_weights = if seg.coach_mode == CoachMode::Default {
@@ -2409,7 +2546,32 @@ fn build_segment_ended(
     } else {
         instr_profile.score_weights
     };
-    let (score, component_scores) = score_segment(seg, &seg_weights);
+    let (mut score, mut component_scores) = score_segment(seg, &seg_weights);
+
+    // Roadmap 2.4 / LP C1 — when the material is known, the schedule is
+    // what was played against, so it is what the number comes from. The
+    // four axes keep their meaning; each is just measured against the
+    // score rather than against a grid the analyzer guessed. The accent
+    // fields stay as the grid pass left them — a bar-position average
+    // is about the click, and the schedule's own accent verdict rides
+    // separately on `accent_agreement`, reported and not scored while
+    // LP C3 is open.
+    //
+    // With no schedule loaded not one line of this runs, and the event
+    // is what it has always been, down to the bytes: the three fields
+    // below are skipped entirely when empty.
+    let schedule_report = schedule_run.and_then(|run| run.report(&seg_weights));
+    let (onset_results, extra_onsets, accent_agreement) = match schedule_report {
+        Some(report) => {
+            score = report.score;
+            component_scores.interval_consistency = report.interval_consistency;
+            component_scores.grid_alignment = report.grid_alignment;
+            component_scores.hit_completeness = report.hit_completeness;
+            component_scores.onset_efficiency = report.onset_efficiency;
+            (report.results, report.extras, report.accent_agreement)
+        }
+        None => (Vec::new(), Vec::new(), None),
+    };
     // D3b — onset_efficiency = matched / total. Floor the denominator
     // at 1 to avoid div-by-zero on truly empty segments.
     let onset_efficiency = if seg.total_onsets > 0 {
@@ -2439,6 +2601,9 @@ fn build_segment_ended(
             PlayMode::Noodling
         },
         interval_errors: seg.interval_errors.clone(),
+        onset_results,
+        extra_onsets,
+        accent_agreement,
     }
 }
 
@@ -2960,6 +3125,124 @@ mod tests {
             subdivision_total: sub_total,
             beats_per_bar: 4,
         }
+    }
+
+    // ── Roadmap 2.4 — the schedule rides out on the existing event ──
+
+    #[test]
+    fn free_play_emits_the_event_it_always_emitted() {
+        // The gate the brief sets for stage B: with no schedule loaded,
+        // the event is what it was, down to the keys on the wire. The
+        // three fields the schedule adds are skipped when empty
+        // precisely so this holds.
+        let seg = make_seg(16, 0, 0, 0, vec![0.0; 16], vec![0.5; 16]);
+        let ended = build_segment_ended(
+            &seg,
+            "electric-guitar",
+            &None,
+            SegmentEndReason::UserStopped,
+            4,
+            0.9,
+            None,
+        );
+        let json = serde_json::to_string(&ended).expect("serialize");
+        assert!(!json.contains("onsetResults"), "{json}");
+        assert!(!json.contains("extraOnsets"), "{json}");
+        assert!(!json.contains("accentAgreement"), "{json}");
+        assert!(ended.onset_results.is_empty());
+        assert!(ended.extra_onsets.is_empty());
+    }
+
+    #[test]
+    fn a_loaded_schedule_replaces_the_number_and_brings_its_verdicts() {
+        // Four quarters, played clean. The segment accumulators are
+        // deliberately a poor run so the two numbers cannot be confused
+        // with each other: what comes out must be the schedule's.
+        let mut run = ScheduleRun::new(ScoreSchedule {
+            onsets: (0..4u32)
+                .map(|i| crate::score::ExpectedOnset {
+                    id: i,
+                    beat: i as f64,
+                    note_ids: vec![i],
+                    soft: false,
+                    accent: false,
+                })
+                .collect(),
+            length_beats: 4.0,
+            loops: false,
+        });
+        for i in 0..5u32 {
+            run.note_quarter(i == 0, 1_000.0 + i as f64 * 500.0);
+        }
+        for i in 0..4u32 {
+            run.note_onset(PlayedOnset {
+                time_ms: 1_000.0 + i as f64 * 500.0,
+                amplitude: 0.5,
+                confidence: 1.0,
+            });
+        }
+
+        let poor = make_seg(0, 0, 4, 12, vec![40.0; 4], vec![0.5; 4]);
+        let free = build_segment_ended(
+            &poor,
+            "electric-guitar",
+            &None,
+            SegmentEndReason::UserStopped,
+            1,
+            0.9,
+            None,
+        );
+        let scored = build_segment_ended(
+            &poor,
+            "electric-guitar",
+            &None,
+            SegmentEndReason::UserStopped,
+            1,
+            0.9,
+            Some(&run),
+        );
+
+        assert_eq!(scored.onset_results.len(), 4);
+        assert!(scored
+            .onset_results
+            .iter()
+            .all(|r| r.state == crate::score::OnsetState::Hit));
+        assert!(scored.extra_onsets.is_empty());
+        assert!(
+            scored.score > free.score,
+            "a clean pass against the score scored {} where the inferred \
+             grid said {} — the schedule did not replace the number",
+            scored.score,
+            free.score,
+        );
+        // Everything that is not the score is still the segment's.
+        assert_eq!(scored.onset_count, free.onset_count);
+        assert_eq!(scored.total_onsets, free.total_onsets);
+    }
+
+    #[test]
+    fn a_schedule_waits_for_a_downbeat_before_it_starts_counting_beats() {
+        // Beat 0 of a schedule is a bar line. Starting mid-bar would
+        // put every bar line of the attempt in the wrong place, and a
+        // loop boundary with it.
+        let mut run = ScheduleRun::new(ScoreSchedule {
+            onsets: vec![crate::score::ExpectedOnset {
+                id: 0,
+                beat: 0.0,
+                note_ids: vec![0],
+                soft: false,
+                accent: false,
+            }],
+            length_beats: 4.0,
+            loops: false,
+        });
+        run.note_quarter(false, 1_000.0);
+        run.note_quarter(false, 1_500.0);
+        assert!(!run.has_started());
+        assert!(run.report(&ScoreWeights::default()).is_none());
+        run.note_quarter(true, 2_000.0);
+        assert!(run.has_started());
+        assert!(run.report(&ScoreWeights::default()).is_some());
     }
 
     #[test]

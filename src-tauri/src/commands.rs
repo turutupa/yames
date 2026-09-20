@@ -1633,6 +1633,43 @@ pub fn close_open_segment(timing_analyzer: State<SharedTimingAnalyzer>) -> Resul
     Ok(())
 }
 
+/// Roadmap 2.4 — tell the analyzer what the player is about to play.
+///
+/// From the next downbeat, matching runs against this score instead of
+/// against the grid the inference guessed: an expected note that does
+/// not arrive is a miss rather than a rest, and a note nobody asked for
+/// is an extra. The per-note verdicts come back on the existing
+/// `practice-segment-ended` event (`onsetResults` / `extraOnsets`) —
+/// there is deliberately no second channel for them, so the review
+/// never has to reconcile two sources for one pass.
+///
+/// Safe to call before or during a session. `schedule.onsets` must be
+/// sorted by `beat`; the importer that builds it
+/// (`src/songs/schedule.ts`) is where that is guaranteed.
+#[tauri::command]
+pub fn load_score_schedule(
+    schedule: crate::score::ScoreSchedule,
+    timing_analyzer: State<SharedTimingAnalyzer>,
+) -> Result<(), String> {
+    let ta = timing_analyzer
+        .lock()
+        .map_err(|e| format!("Lock failed: {e}"))?;
+    ta.load_score_schedule(schedule);
+    Ok(())
+}
+
+/// Roadmap 2.4 — back to free play. Whatever the current attempt had
+/// accumulated is dropped; the caller already has it from the last
+/// `practice-segment-ended`. Safe to call when nothing is loaded.
+#[tauri::command]
+pub fn clear_score_schedule(timing_analyzer: State<SharedTimingAnalyzer>) -> Result<(), String> {
+    let ta = timing_analyzer
+        .lock()
+        .map_err(|e| format!("Lock failed: {e}"))?;
+    ta.clear_score_schedule();
+    Ok(())
+}
+
 #[tauri::command]
 pub async fn get_session_report(
     session_acc: State<'_, SharedSessionAccumulator>,
