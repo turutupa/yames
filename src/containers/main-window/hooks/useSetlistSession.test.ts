@@ -430,10 +430,18 @@ describe("a run that ends on a plain step", () => {
     ],
   };
 
-  function downbeat(n: number): BeatEvent {
+  /**
+   * A tick that opens a bar of 4/4 — beat 0, 4, 8 and so on.
+   *
+   * `measureBeat` comes off the beat index rather than being pinned to 0,
+   * because the engine's `isDownbeat` is only "a whole beat, not a
+   * subdivision" and a fixture that sets `measureBeat: 0` on every tick
+   * cannot tell a runner counting BARS from one counting beats.
+   */
+  function barLine(n: number): BeatEvent {
     return {
       beat: n,
-      measureBeat: 0,
+      measureBeat: n % 4,
       subdivision: 0,
       isDownbeat: true,
       accentLevel: 2,
@@ -521,13 +529,13 @@ describe("a run that ends on a plain step", () => {
     expect(result.current.dirty).toBe(false);
 
     act(() => rerender({ state: asState(jamStep), isPlaying: true, beat: null }));
-    act(() => rerender({ state: asState(jamStep), isPlaying: true, beat: downbeat(0) }));
-    act(() => rerender({ state: asState(jamStep), isPlaying: true, beat: downbeat(4) }));
+    act(() => rerender({ state: asState(jamStep), isPlaying: true, beat: barLine(0) }));
+    act(() => rerender({ state: asState(jamStep), isPlaying: true, beat: barLine(4) }));
     await settle();
     expect(result.current.runningIndex).toBe(1);
 
     // The engine is on the plain step now, and says so.
-    act(() => rerender({ state: asState(plain), isPlaying: true, beat: downbeat(4) }));
+    act(() => rerender({ state: asState(plain), isPlaying: true, beat: barLine(4) }));
     mockInvoke.mockClear();
 
     act(() => rerender({ state: asState(plain), isPlaying: false, beat: null }));

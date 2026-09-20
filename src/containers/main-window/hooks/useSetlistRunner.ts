@@ -21,8 +21,25 @@ import type { BeatEvent, Setlist, SetlistStep } from "../../../types";
  * hook only supplies the two clocks the runtime cannot read for itself and
  * carries out the effects it returns.
  *
+ * WHERE A BAR BEGINS, and the mistake this used to make. `isDownbeat` on a
+ * beat event is `sub == 0` in `engine.rs` — "this tick is a whole beat and
+ * not a subdivision" — so it is true once per BEAT. Handed to the runtime as
+ * if it were a bar line, it made every bar count in a setlist a beat count:
+ * "after 8 bars" moved on after 8 beats, two bars of rest were two beats of
+ * it, and an armed switch landed on the next beat instead of at the top of
+ * the bar, which is the one thing U9.3 exists to guarantee. A bar opens on
+ * `isDownbeat && measureBeat === 0`, the pair the engine itself tests when it
+ * opens one (`measure_beat == 0 && sub_count == 0`), and that is what goes
+ * out as `barStart`. The field keeps its own meaning everywhere else — the
+ * accent dots, the zen visuals, the floating widget all want "a whole beat".
+ *
+ * `measureBeat` is bar-local and captured before the engine's counters
+ * advance, so it is 0 again the moment `beat_groups` changes: a step whose
+ * meter differs from the one before it starts counting from its own bar one,
+ * and a step that only changes tempo cannot move the count at all.
+ *
  * The clocks are deliberately different in kind, for the reason
- * `usePlaybackClock` gives: bars are counted from engine downbeats, because
+ * `usePlaybackClock` gives: bars are counted from engine bar lines, because
  * `BeatEvent` carries no bar length and the beat index does not reset when
  * the meter changes; seconds come from wall time, because a step that
  * changes tempo would otherwise make "two minutes" mean something else.
@@ -36,7 +53,7 @@ export type SetlistRunner = {
   stepCount: number;
   /** What is left of the current gap, live. (U9.7) */
   remaining: ReturnType<typeof stepRemaining>;
-  /** Move on at the next downbeat — the manual trigger, and skip-ahead. */
+  /** Move on at the next bar line — the manual trigger, and skip-ahead. */
   skip: () => void;
   /** The jam the step now playing is, or null. For the player's readout. */
   jam: Jam | null;
@@ -293,7 +310,10 @@ export function useSetlistRunner(
     if (currentBeat.subdivision !== 0) return;
     if (lastBeat.current === currentBeat.beat) return;
     lastBeat.current = currentBeat.beat;
-    dispatch({ kind: "beat", isDownbeat: currentBeat.isDownbeat, seconds: runClock() });
+    // A bar opens where the engine opens one, and nowhere else: a whole beat
+    // that is also bar-local position zero. See the note at the top.
+    const barStart = currentBeat.isDownbeat && currentBeat.measureBeat === 0;
+    dispatch({ kind: "beat", barStart, seconds: runClock() });
   }, [isPlaying, currentBeat, dispatch, runClock]);
 
   /**
