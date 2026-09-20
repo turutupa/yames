@@ -6,10 +6,8 @@
     "meter": "拍號",
     "free": "FREE",
     "freeBeatCount": "{{count}} 拍",
-    "freeBeatCount_one": "{{count}} 拍",
     "freeBeatCount_other": "{{count}} 拍",
     "beatCount": "{{count}} 拍",
-    "beatCount_one": "{{count}} 拍",
     "beatCount_other": "{{count}} 拍",
     "clicksPerBar": "每小節 {{count}} 次",
     "addBeat": "增加一拍",
@@ -22,7 +20,6 @@
     "tempoDown": "降低速度",
     "lastSession": "上次練習",
     "lastSessionMinutes": "{{count}} 分鐘",
-    "lastSessionMinutes_one": "{{count}} 分鐘",
     "lastSessionMinutes_other": "{{count}} 分鐘",
     "lastSessionScore": "得分 {{score}}",
     "accent": {

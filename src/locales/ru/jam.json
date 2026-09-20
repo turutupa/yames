@@ -253,6 +253,8 @@
       "one": "1 аккорд",
       "custom": "{{count}} тактов",
       "custom_one": "{{count}} такт",
+      "custom_few": "{{count}} такта",
+      "custom_many": "{{count}} тактов",
       "custom_other": "{{count}} тактов"
     },
     "countIn": {
@@ -260,6 +262,8 @@
       "none": "Нет",
       "barsAnd": "{{count}} такта · {{sound}}",
       "barsAnd_one": "{{count}} такт · {{sound}}",
+      "barsAnd_few": "{{count}} такта · {{sound}}",
+      "barsAnd_many": "{{count}} тактов · {{sound}}",
       "barsAnd_other": "{{count}} такта · {{sound}}"
     },
     "fills": {
@@ -278,6 +282,8 @@
       "aria": "Звучит {{chord}}",
       "next": "{{chord}} через {{count}} тактов",
       "next_one": "{{chord}} через {{count}} такт",
+      "next_few": "{{chord}} через {{count}} такта",
+      "next_many": "{{chord}} через {{count}} тактов",
       "next_other": "{{chord}} через {{count}} тактов",
       "nextNow": "Дальше {{chord}}"
     },
@@ -302,6 +308,8 @@
       "scopeKey": "В тональности",
       "scopeAll": "Все тональности",
       "noteCount_one": "{{count}}-ступенная гамма",
+      "noteCount_few": "{{count}}-ступенная гамма",
+      "noteCount_many": "{{count}}-ступенная гамма",
       "noteCount_other": "{{count}}-ступенная гамма",
       "noteCount": "{{count}}-ступенная гамма",
       "jump": "Перейти к",
@@ -410,6 +418,8 @@
       "dropOutBarsLabel": "Насколько долго группа молчит",
       "forBars": "на {{count}} тактов",
       "forBars_one": "на {{count}} такт",
+      "forBars_few": "на {{count}} такта",
+      "forBars_many": "на {{count}} тактов",
       "forBars_other": "на {{count}} тактов",
       "trade": "Обмен",
       "tradeN": "По {{count}}",
@@ -418,6 +428,8 @@
       "tempoEveryLabel": "Как часто темп растёт",
       "everyChoruses": "каждые {{count}} кругов",
       "everyChoruses_one": "каждый {{count}} круг",
+      "everyChoruses_few": "каждые {{count}} круга",
+      "everyChoruses_many": "каждые {{count}} кругов",
       "everyChoruses_other": "каждые {{count}} кругов",
       "climbing": "растёт от {{from}}",
       "dropOutExplain": "Время от времени группа умолкает на несколько тактов, и вы держите время сами.",
@@ -522,6 +534,8 @@
       "aria": "Способы сыграть этот вайб",
       "count": "{{count}} способов сыграть",
       "count_one": "{{count}} способ сыграть",
+      "count_few": "{{count}} способа сыграть",
+      "count_many": "{{count}} способов сыграть",
       "count_other": "{{count}} способов сыграть",
       "yours": "Один из твоих",
       "yoursEmpty": "пока ничего не сохранено",
@@ -597,9 +611,13 @@
       "none": "Аккордов там пока нет.",
       "summary": "{{count}} тактов · тональность {{key}}",
       "summary_one": "{{count}} такт · тональность {{key}}",
+      "summary_few": "{{count}} такта · тональность {{key}}",
+      "summary_many": "{{count}} тактов · тональность {{key}}",
       "summary_other": "{{count}} тактов · тональность {{key}}",
       "check": "{{count}} стоит проверить: {{list}}",
       "check_one": "{{count}} стоит проверить: {{list}}",
+      "check_few": "{{count}} стоит проверить: {{list}}",
+      "check_many": "{{count}} стоит проверить: {{list}}",
       "check_other": "{{count}} стоит проверить: {{list}}"
     },
     "perc": {

@@ -6,10 +6,8 @@
     "meter": "박자",
     "free": "FREE",
     "freeBeatCount": "{{count}}박",
-    "freeBeatCount_one": "{{count}}박",
     "freeBeatCount_other": "{{count}}박",
     "beatCount": "{{count}}박",
-    "beatCount_one": "{{count}}박",
     "beatCount_other": "{{count}}박",
     "clicksPerBar": "마디당 {{count}}회",
     "addBeat": "박 추가",
@@ -22,7 +20,6 @@
     "tempoDown": "템포 내리기",
     "lastSession": "지난 세션",
     "lastSessionMinutes": "{{count}}분",
-    "lastSessionMinutes_one": "{{count}}분",
     "lastSessionMinutes_other": "{{count}}분",
     "lastSessionScore": "점수 {{score}}",
     "accent": {

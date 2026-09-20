@@ -6,10 +6,8 @@
     "meter": "Nhịp",
     "free": "FREE",
     "freeBeatCount": "{{count}} phách",
-    "freeBeatCount_one": "{{count}} phách",
     "freeBeatCount_other": "{{count}} phách",
     "beatCount": "{{count}} phách",
-    "beatCount_one": "{{count}} phách",
     "beatCount_other": "{{count}} phách",
     "clicksPerBar": "{{count}} tiếng/ô nhịp",
     "addBeat": "Thêm phách",
@@ -22,7 +20,6 @@
     "tempoDown": "Giảm nhịp độ",
     "lastSession": "Buổi tập trước",
     "lastSessionMinutes": "{{count}} phút",
-    "lastSessionMinutes_one": "{{count}} phút",
     "lastSessionMinutes_other": "{{count}} phút",
     "lastSessionScore": "điểm {{score}}",
     "accent": {
