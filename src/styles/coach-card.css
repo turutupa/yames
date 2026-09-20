@@ -891,7 +891,10 @@
   font-size: 12px;
   line-height: 1.5;
   margin-bottom: 10px;
-  color: var(--text);
+  /* `--text` is not a token anything defines, so this line has always been
+     dropped and the comment has inherited the report's ink. It is named now
+     rather than left to inherit by accident. */
+  color: var(--text-primary);
 }
 
 /* ─── Session Detail ─── */
