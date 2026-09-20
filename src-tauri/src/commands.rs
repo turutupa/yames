@@ -1205,6 +1205,12 @@ pub async fn start_evaluation(
     let app_for_segment = app_handle.clone();
     let session_for_segment = session_acc.inner().clone();
     let mut ta = timing_analyzer.lock().unwrap();
+    // Roadmap 1.3 — the analyzer publishes the divisor it locks into
+    // the same tempo context the onset detector reads, so the
+    // refractory follows the player instead of the click. Without this
+    // handle a quarter click at 100 BPM swallows every played 16th
+    // before the analyzer ever sees one.
+    ta.set_tempo_context(tempo_ctx.inner().clone());
     ta.start(
         ta_profile,
         ta_instrument,

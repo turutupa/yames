@@ -1,0 +1,13 @@
+{
+  "name": "120bpm_click_16ths_play_16ths",
+  "description": "The control. Click and player agree, so 1.3 has nothing to do: no position is invented, the detection interval is the click's either way, and both modes must land in the same place. Its ceiling is deliberately 100 — this fixture is here to prove the change is inert when it should be, and it fails only if the score drops.",
+  "bpm": 120,
+  "clickSubdivision": 4,
+  "playedDivisor": 4,
+  "bars": 16,
+  "jitterMs": 5.0,
+  "seed": 20260925,
+  "minScore": 85,
+  "clickKeyedMaxScore": 100,
+  "expectDivisor": 4
+}

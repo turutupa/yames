@@ -285,6 +285,12 @@ pub struct TimingAnalyzer {
     /// drained by `drain_telemetry()` at session end. See
     /// `SessionTelemetry` for the schema and why it exists.
     telemetry: Arc<Mutex<SessionTelemetry>>,
+    /// Roadmap 1.3 — the same `TempoContext` the onset detector reads.
+    /// The analysis loop publishes the divisor it has locked into it so
+    /// the detector's refractory follows the player instead of the
+    /// click. `None` in tests and in any caller that never wired one
+    /// up; the loop simply publishes nothing then.
+    tempo_ctx: Option<crate::onset::SharedTempoContext>,
 }
 
 impl TimingAnalyzer {
@@ -297,7 +303,17 @@ impl TimingAnalyzer {
             settings_changed: Arc::new(AtomicBool::new(false)),
             close_segment_now: Arc::new(AtomicBool::new(false)),
             telemetry: Arc::new(Mutex::new(SessionTelemetry::default())),
+            tempo_ctx: None,
         }
+    }
+
+    /// Hand the analyzer the same `TempoContext` the onset detector
+    /// reads, so the divisor the inference locks can reach the
+    /// detector's refractory (roadmap 1.3). Call before `start`; the
+    /// loop takes its own handle at spawn. Mirrors
+    /// `MetronomeEngine::set_tempo_context`.
+    pub fn set_tempo_context(&mut self, tempo_ctx: crate::onset::SharedTempoContext) {
+        self.tempo_ctx = Some(tempo_ctx);
     }
 
     /// Drain the per-session telemetry buffer and reset for the next
@@ -407,6 +423,7 @@ impl TimingAnalyzer {
         let settings_changed = self.settings_changed.clone();
         let close_segment_now = self.close_segment_now.clone();
         let telemetry = self.telemetry.clone();
+        let tempo_ctx = self.tempo_ctx.clone();
 
         self.thread_handle = Some(thread::spawn(move || {
             Self::analysis_loop(
@@ -416,6 +433,7 @@ impl TimingAnalyzer {
                 settings_changed,
                 close_segment_now,
                 telemetry,
+                tempo_ctx,
                 profile,
                 instrument_id,
                 preset_id,
@@ -440,6 +458,13 @@ impl TimingAnalyzer {
         // Reset Signal A and close flags so the next session starts clean.
         self.settings_changed.store(false, Ordering::SeqCst);
         self.close_segment_now.store(false, Ordering::SeqCst);
+        // Roadmap 1.3 — hand the detector's refractory back to the
+        // click. Leaving the last session's divisor published would
+        // carry a 16th-note refractory into somebody's next session of
+        // slow quarters, where it has no business being.
+        if let Some(ctx) = self.tempo_ctx.as_ref() {
+            ctx.set_played_interval_ms(None);
+        }
     }
 
     #[allow(dead_code)]
@@ -454,6 +479,7 @@ impl TimingAnalyzer {
         settings_changed: Arc<AtomicBool>,
         close_segment_now: Arc<AtomicBool>,
         telemetry: Arc<Mutex<SessionTelemetry>>,
+        tempo_ctx: Option<crate::onset::SharedTempoContext>,
         profile: InstrumentProfile,
         instrument_id: String,
         preset_id: Option<String>,
@@ -597,6 +623,16 @@ impl TimingAnalyzer {
         // has passed — by which point any onset the user intended for
         // that beat has reached `pending_onsets`.
         let mut held_beats: Vec<BeatTick> = Vec::with_capacity(8);
+        // Roadmap 1.3 — the positions the engine never clicked but the
+        // player is playing to: 16ths over a quarter click, triplets
+        // over 16ths. Synthesised from each quarter anchor as it comes
+        // out of `held_beats`, then held to the same onset-arrival
+        // deadline as a real tick, because an invented tick has exactly
+        // the same race with the onset pipeline that a real one does.
+        // Each entry carries the divisor it was invented for, so a tick
+        // whose grid has since been abandoned can be dropped instead of
+        // scored against a rhythm nobody is playing any more.
+        let mut held_virtual: Vec<(BeatTick, u8)> = Vec::with_capacity(8);
         // Headroom above the per-beat matching window. Covers the
         // worst-case onset-detector pipeline latency: FFT hop = 10ms
         // (50% overlap of 1024-sample FFT at 48kHz) + 1–2 hops of
@@ -806,7 +842,27 @@ impl TimingAnalyzer {
                 }
             });
 
-            if beats.is_empty() {
+            // Roadmap 1.3 — pull the virtual ticks whose own deadline
+            // has passed. Held and released exactly like real ticks;
+            // generated further down, once this pass's audible ticks
+            // have refreshed the inference.
+            let mut virtual_due: Vec<(BeatTick, u8)> = Vec::new();
+            held_virtual.retain(|(b, d)| {
+                let window_ns =
+                    (tempo_aware_window_ms(b.expected_interval_ms) * 1_000_000.0) as u64;
+                let deadline_ns = b
+                    .ts_ns
+                    .saturating_add(window_ns)
+                    .saturating_add(ONSET_PIPELINE_LATENCY_NS);
+                if stopping || now_ns >= deadline_ns {
+                    virtual_due.push((b.clone(), *d));
+                    false
+                } else {
+                    true
+                }
+            });
+
+            if beats.is_empty() && virtual_due.is_empty() {
                 // When stopping with nothing left to flush, exit cleanly.
                 // Without this, stop() called on an empty session hangs:
                 // the outer `loop` never reaches the `if stopping { break; }`
@@ -818,14 +874,71 @@ impl TimingAnalyzer {
             }
 
             // Path B — refresh rhythm-inference state from the latest
-            // beat tick (downbeat anchor + interval + subdivision_total)
-            // and re-run the divisor selection. Must happen BEFORE the
-            // per-beat match loop so `is_active_tick` decisions reflect
-            // the freshest fit.
+            // audible beat tick (downbeat anchor + interval +
+            // subdivision_total) and re-run the divisor selection. Must
+            // happen BEFORE the per-beat match loop so `is_active_tick`
+            // decisions reflect the freshest fit. Virtual ticks are
+            // deliberately not a reference: they are derived from the
+            // click, so feeding them back in would be the inference
+            // reading its own output.
             if let Some(latest_beat) = beats.last() {
                 rhythm_inference.update_reference(latest_beat);
             }
             rhythm_inference.refit();
+
+            // Roadmap 1.3 — tell the onset detector what the player is
+            // playing, so its refractory stops being the click's. Only
+            // once the inference has actually locked: an unlocked
+            // divisor is the user's click setting echoed back, which is
+            // what the detector already reads for itself.
+            if let Some(ctx) = tempo_ctx.as_ref() {
+                let quarter_ms = rhythm_inference.last_beat_interval_ms();
+                if rhythm_inference.is_locked() && quarter_ms > 0.0 {
+                    let played =
+                        rhythm_inference.effective_interval_ms(quarter_ms);
+                    ctx.set_played_interval_ms(Some(played as f32));
+                } else {
+                    ctx.set_played_interval_ms(None);
+                }
+            }
+
+            // Roadmap 1.3 — invent this pass's missing grid positions.
+            // One quarter anchor (`subdivision_index == 0`) fans out to
+            // the positions `virtual_tick_offsets` says the click does
+            // not already cover. Generating from the anchor rather than
+            // from every tick is what keeps this exactly once per
+            // quarter whatever the click is set to.
+            {
+                let divisor = rhythm_inference.current_divisor();
+                for anchor in beats.iter().filter(|b| b.subdivision_index == 0) {
+                    if anchor.expected_interval_ms <= 0.0 {
+                        continue;
+                    }
+                    let offsets = virtual_tick_offsets(anchor.subdivision_total, divisor);
+                    let step_ns =
+                        ((anchor.expected_interval_ms * 1_000_000.0) / divisor as f64) as u64;
+                    for &j in &offsets {
+                        let mut tick = anchor.clone();
+                        tick.ts_ns = anchor.ts_ns.saturating_add(step_ns * j as u64);
+                        // A position nobody clicked is never the top of
+                        // a bar, and never the quarter the grace
+                        // counter counts down.
+                        tick.is_downbeat = false;
+                        tick.subdivision_index = j;
+                        held_virtual.push((tick, divisor));
+                    }
+                }
+            }
+
+            // The scored grid for this pass: audible ticks and the
+            // invented ones, in time order. `None` = a tick the engine
+            // really played; `Some(d)` = one this analyzer invented for
+            // divisor `d`.
+            let mut scored: Vec<(BeatTick, Option<u8>)> =
+                Vec::with_capacity(beats.len() + virtual_due.len());
+            scored.extend(beats.iter().cloned().map(|b| (b, None)));
+            scored.extend(virtual_due.into_iter().map(|(b, d)| (b, Some(d))));
+            scored.sort_by_key(|(b, _)| b.ts_ns);
 
             // Path B — surface lock-state / divisor changes to the JS
             // layer so the coach card can render the "Tracking 16ths"
@@ -854,7 +967,8 @@ impl TimingAnalyzer {
             let beat_base_ns = crate::clock::now_ns();
 
             // Match each beat to the closest onset within the window
-            for beat in &beats {
+            for (beat, virtual_for) in &scored {
+                let beat = &*beat;
                 // Skip if already processed. Keyed on the monotonic
                 // `ts_ns` (NOT `beat_index`) so a metronome pause/resume
                 // inside one evaluation — which resets the engine's
@@ -902,8 +1016,23 @@ impl TimingAnalyzer {
                 // ticks skip telemetry, classification, grace
                 // decrement, and the consecutive-misses counter.
                 // They're effectively invisible to the matcher.
-                if !rhythm_inference.is_active_tick(beat) {
-                    continue;
+                //
+                // Roadmap 1.3 — a virtual tick is on the inferred grid
+                // by construction, so it does not go through the
+                // active-tick test. What it does need is proof that the
+                // grid it was invented for is still the one being
+                // played: the divisor can move in the ~one beat between
+                // a tick being invented and its deadline arriving, and
+                // scoring the leftovers of an abandoned grid would
+                // invent misses out of a rhythm change.
+                match virtual_for {
+                    Some(d) if *d != rhythm_inference.current_divisor() => continue,
+                    Some(_) => {}
+                    None => {
+                        if !rhythm_inference.is_active_tick(beat) {
+                            continue;
+                        }
+                    }
                 }
 
                 // Push expected beat to telemetry. We log every beat
@@ -1310,8 +1439,22 @@ impl TimingAnalyzer {
                         // Accent-bucket population. Gate on non-miss so only
                         // genuine hits contribute to bar-position averages.
                         if classification != "miss" {
+                            // Roadmap 1.3 — a virtual tick has no
+                            // bar position that this bucket scheme can
+                            // express: the key is
+                            // `(beat_index % time_sig) × subdivision +
+                            // subdivision_index`, where `subdivision`
+                            // is the CLICK's. Under a quarter click
+                            // that maps the invented positions of beat
+                            // 1 straight onto beat 2, so the buckets
+                            // would report an accent pattern nobody
+                            // played. The hit still counts everywhere
+                            // else; only the bar-position average
+                            // abstains. Accent analysis over an
+                            // invented grid is the score schedule's
+                            // job (stage B), not this one's.
                             let bar_len = seg.time_sig as u32 * seg.subdivision as u32;
-                            if bar_len > 0 {
+                            if bar_len > 0 && virtual_for.is_none() {
                                 let bar_pos = (beat.beat_index as u32 % seg.time_sig as u32)
                                     * seg.subdivision as u32
                                     + beat.subdivision_index as u32;
@@ -1931,23 +2074,35 @@ impl RhythmInference {
         }
     }
 
-    /// Should this beat tick be scored under the current divisor?
-    /// Returns true for ticks that land on the inferred grid.
+    /// Should this AUDIBLE beat tick be scored under the current
+    /// divisor? Returns true for ticks that land on the inferred grid.
+    ///
+    /// An audible tick sits at `index / total` of the way through the
+    /// quarter; the inferred grid has its points at `j / divisor`. The
+    /// tick is on that grid exactly when `index × divisor` divides
+    /// `total` evenly.
+    ///
+    /// Roadmap 1.3 — the old form computed `step = total / divisor` and
+    /// tested `index % step`, which is the same answer whenever the
+    /// divisor divides the subdivision (all it could ever be before the
+    /// candidate set widened) and fell back to downbeats-only when it
+    /// did not. That fallback is now reachable and wrong: with an 8th
+    /// click under played 16ths it would have thrown away the audible
+    /// off-beat, which is a played 16th like any other.
+    ///
+    /// Virtual ticks do not come through here — they are on the grid by
+    /// construction. See `virtual_tick_offsets`.
     pub fn is_active_tick(&self, beat: &BeatTick) -> bool {
-        let d = self.current_divisor();
-        let total = beat.subdivision_total.max(1);
-        if total % d == 0 {
-            let step = (total / d) as u32;
-            if step == 0 {
-                return beat.subdivision_index == 0;
-            }
-            (beat.subdivision_index as u32) % step == 0
-        } else {
-            // Divisor incompatible with engine's tick resolution
-            // (shouldn't happen — `candidate_divisors` filters these
-            // out). Be defensive and fall back to downbeats only.
-            beat.subdivision_index == 0
-        }
+        let d = self.current_divisor().max(1) as u32;
+        let total = beat.subdivision_total.max(1) as u32;
+        (beat.subdivision_index as u32 * d) % total == 0
+    }
+
+    /// The quarter-note interval (ms) from the most recent beat tick,
+    /// or 0.0 before any tick has been seen. Roadmap 1.3 reads it to
+    /// turn the locked divisor into the interval the detector needs.
+    pub fn last_beat_interval_ms(&self) -> f64 {
+        self.last_beat_interval_ms
     }
 
     /// Effective inter-onset interval the matcher should expect, in ms.
@@ -1971,21 +2126,54 @@ impl Default for RhythmInference {
     }
 }
 
-/// Candidate divisors usable for a given engine subdivision_total.
-/// Restricts to divisors `d` where `subdivision_total % d == 0` so that
-/// the matcher's `is_active_tick` test always identifies real engine
-/// ticks. Sorted ascending so "smallest that fits" wins on iteration.
-fn candidate_divisors(subdivision_total: u8) -> Vec<u8> {
-    let mut out = Vec::with_capacity(5);
-    for d in [1u8, 2, 3, 4, 6] {
-        if subdivision_total >= d && subdivision_total % d == 0 {
-            out.push(d);
-        }
-    }
-    if out.is_empty() {
-        out.push(1);
-    }
-    out
+/// Candidate divisors the inference may lock onto. Sorted ascending so
+/// "smallest that fits" wins on iteration.
+///
+/// Roadmap 1.3 — this used to be filtered to divisors that divide the
+/// engine's `subdivision_total`, because the matcher could only score
+/// ticks the engine actually clicked: with a quarter click the whole
+/// candidate set was `[1]`, so a player laying down clean 16ths could
+/// never be heard as anything but a quarter-note player, and the
+/// refractory keyed off that answer stayed at 450 ms and swallowed the
+/// evidence. The analyzer now synthesises the missing positions itself
+/// (`virtual_tick_offsets`), so every candidate is scorable against any
+/// click and the filter has no reason to exist.
+///
+/// `subdivision_total` is kept in the signature: it still seeds the
+/// cold-start fallback in `current_divisor`, and a caller passing 0
+/// (no beat tick seen yet) gets the same safe `[1, 2, 3, 4, 6]`.
+fn candidate_divisors(_subdivision_total: u8) -> Vec<u8> {
+    vec![1u8, 2, 3, 4, 6]
+}
+
+/// Roadmap 1.3 — which positions inside one quarter note the analyzer
+/// has to invent, given what the engine is clicking (`subdivision_total`)
+/// and what the player is playing (`divisor`).
+///
+/// Positions are numbered `j` in `0..divisor`, at `j × quarter / divisor`
+/// from the quarter's own tick. Position `j` already exists as an
+/// audible tick when `j × subdivision_total` divides `divisor` evenly —
+/// those are left alone, because they are in the beat log already and
+/// scoring them twice would double every hit. Everything else is
+/// virtual: the tick nobody clicked but the player is playing to.
+///
+/// Consequences worth seeing at a glance:
+///   * 16ths over a 16th click (`4`, `4`) → nothing virtual. The
+///     pre-1.3 path, byte for byte.
+///   * 16ths over a quarter click (`1`, `4`) → `[1, 2, 3]`.
+///   * 16ths over an 8th click (`2`, `4`) → `[1, 3]`; the half-beat is
+///     already audible.
+///   * triplets over a 16th click (`4`, `3`) → `[1, 2]`; neither
+///     triplet lands on a 16th.
+///   * quarters over any click (`_`, `1`) → nothing. Playing coarser
+///     than the click needs no new positions, only `is_active_tick`.
+pub fn virtual_tick_offsets(subdivision_total: u8, divisor: u8) -> Vec<u8> {
+    let total = subdivision_total.max(1) as u32;
+    let d = divisor.max(1) as u32;
+    (0..d)
+        .filter(|j| (j * total) % d != 0)
+        .map(|j| j as u8)
+        .collect()
 }
 
 /// Compute the fit of a single divisor candidate: the fraction of
@@ -2043,6 +2231,12 @@ pub struct WindowThresholds {
 /// (e.g. `inspect-session`) can import it without flipping `onset` to
 /// a `pub mod`. Keep in sync with `onset::REFRACTORY_SUBDIVISION_FACTOR`.
 pub use crate::onset::REFRACTORY_SUBDIVISION_FACTOR;
+
+/// Same reason, for the pieces the roadmap-1.3 fixture suite drives:
+/// the refractory rule the detector actually runs, and the tempo view
+/// it reads it through. A fixture that reimplemented either would prove
+/// nothing about what ships.
+pub use crate::onset::{GateDecision, RefractoryGate, TempoContext};
 
 /// D3a — tempo-aware matching window in ms. The "right" window
 /// shrinks as beats get shorter so windows don't overlap at fast
@@ -2752,6 +2946,165 @@ mod tests {
             d.push_back(v);
         }
         d
+    }
+
+    // ── Roadmap 1.3 — the grid the player is on, not the one clicking ──
+
+    fn tick(ts_ns: u64, beat_index: u32, sub_index: u8, sub_total: u8, interval_ms: f64) -> BeatTick {
+        BeatTick {
+            ts_ns,
+            beat_index,
+            is_downbeat: sub_index == 0 && beat_index % 4 == 0,
+            expected_interval_ms: interval_ms,
+            subdivision_index: sub_index,
+            subdivision_total: sub_total,
+            beats_per_bar: 4,
+        }
+    }
+
+    #[test]
+    fn every_grid_is_a_candidate_whatever_the_click_is_set_to() {
+        // Before 1.3 a quarter click left the candidate set as `[1]`,
+        // so a player laying down 16ths could only ever be heard as a
+        // quarter-note player — and the refractory keyed off that
+        // answer then swallowed the evidence that would have corrected
+        // it. Every click must offer every grid.
+        for click in [1u8, 2, 3, 4, 6] {
+            assert_eq!(
+                candidate_divisors(click),
+                vec![1, 2, 3, 4, 6],
+                "click {click} lost a candidate",
+            );
+        }
+    }
+
+    #[test]
+    fn a_click_that_already_covers_the_grid_invents_nothing() {
+        // The pre-1.3 path. These four cases are every combination the
+        // old candidate filter could produce, and each must still be
+        // handled entirely by real engine ticks — no new positions, so
+        // no change in what gets scored.
+        for (click, divisor) in [(4u8, 4u8), (4, 2), (4, 1), (2, 2), (2, 1), (6, 3), (6, 6)] {
+            assert!(
+                virtual_tick_offsets(click, divisor).is_empty(),
+                "click {click} / divisor {divisor} invented a tick it did not need",
+            );
+        }
+    }
+
+    #[test]
+    fn sixteenths_over_a_quarter_click_need_three_invented_positions() {
+        assert_eq!(virtual_tick_offsets(1, 4), vec![1, 2, 3]);
+    }
+
+    #[test]
+    fn sixteenths_over_an_eighth_click_reuse_the_offbeat_that_is_audible() {
+        // The half-beat is already clicking; only the two 16ths in
+        // between have to be invented.
+        assert_eq!(virtual_tick_offsets(2, 4), vec![1, 3]);
+    }
+
+    #[test]
+    fn triplets_over_a_sixteenth_click_share_only_the_quarter() {
+        assert_eq!(virtual_tick_offsets(4, 3), vec![1, 2]);
+        assert_eq!(virtual_tick_offsets(1, 3), vec![1, 2]);
+    }
+
+    #[test]
+    fn playing_coarser_than_the_click_invents_nothing() {
+        for click in [1u8, 2, 3, 4, 6] {
+            assert!(virtual_tick_offsets(click, 1).is_empty());
+        }
+    }
+
+    #[test]
+    fn active_tick_still_answers_what_the_old_step_rule_answered() {
+        // The rewrite has to be a strict generalisation: wherever the
+        // old `step = total / divisor; index % step == 0` form applied
+        // — every case reachable before the candidate set widened — the
+        // answer must be identical, or the 23 d3d scenarios and every
+        // shipped session change meaning underneath us.
+        for total in [1u8, 2, 3, 4, 6] {
+            for divisor in [1u8, 2, 3, 4, 6] {
+                if total % divisor != 0 {
+                    continue;
+                }
+                let mut inference = RhythmInference::new();
+                inference.locked_divisor = Some(divisor);
+                inference.locked_fit = 1.0;
+                for index in 0..total {
+                    let step = total / divisor;
+                    let old = index % step == 0;
+                    let beat = tick(0, 0, index, total, 500.0);
+                    assert_eq!(
+                        inference.is_active_tick(&beat),
+                        old,
+                        "total {total} / divisor {divisor} / index {index}",
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn an_audible_offbeat_is_a_played_sixteenth_like_any_other() {
+        // 8th click, 16ths played. The audible off-beat tick lands on
+        // the 16th grid and must be scored; the old fallback threw it
+        // away and left a phantom miss on every other beat.
+        let mut inference = RhythmInference::new();
+        inference.locked_divisor = Some(4);
+        inference.locked_fit = 1.0;
+        assert!(inference.is_active_tick(&tick(0, 0, 0, 2, 500.0)));
+        assert!(inference.is_active_tick(&tick(0, 0, 1, 2, 500.0)));
+    }
+
+    #[test]
+    fn the_inference_hears_sixteenths_over_a_quarter_click() {
+        // 100 BPM quarters (600 ms), 16ths played (150 ms apart). This
+        // is the case roadmap 1.3 exists for, and before the candidate
+        // set widened it was unreachable: divisor 4 was not on offer.
+        let mut inference = RhythmInference::new();
+        let quarter_ns = 600_000_000_u64;
+        inference.update_reference(&tick(0, 0, 0, 1, 600.0));
+        for i in 0..16u64 {
+            inference.push_onset(i * (quarter_ns / 4));
+        }
+        inference.refit();
+        assert!(inference.is_locked(), "never locked onto anything");
+        assert_eq!(inference.current_divisor(), 4);
+        // And that is what the detector is told to key its refractory
+        // to: 150 ms, not the click's 600 ms.
+        assert!((inference.effective_interval_ms(600.0) - 150.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn the_inference_still_hears_quarters_over_a_quarter_click() {
+        // The widened candidate set must not make a plain quarter-note
+        // player look like something finer. "Smallest that fits" is
+        // what protects this, and it is worth a test because every
+        // onset on a quarter is also on an 8th and a 16th.
+        let mut inference = RhythmInference::new();
+        let quarter_ns = 600_000_000_u64;
+        inference.update_reference(&tick(0, 0, 0, 1, 600.0));
+        for i in 0..12u64 {
+            inference.push_onset(i * quarter_ns);
+        }
+        inference.refit();
+        assert!(inference.is_locked());
+        assert_eq!(inference.current_divisor(), 1);
+    }
+
+    #[test]
+    fn the_inference_hears_triplets_over_a_quarter_click() {
+        let mut inference = RhythmInference::new();
+        let quarter_ns = 600_000_000_u64;
+        inference.update_reference(&tick(0, 0, 0, 1, 600.0));
+        for i in 0..15u64 {
+            inference.push_onset(i * (quarter_ns / 3));
+        }
+        inference.refit();
+        assert!(inference.is_locked());
+        assert_eq!(inference.current_divisor(), 3);
     }
 
     #[test]
