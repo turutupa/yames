@@ -24,7 +24,12 @@ export type { Pass, SongAttemptInput, SongAttemptReview, SongAttemptState } from
 export { useSongActions, RAMP_STEP_PERCENT } from "./useSongActions";
 export type { SongActions, SongActionsInput, SongRamp } from "./useSongActions";
 
-export { useLiveNoteLights, markFromFeedback, onsetsInBeat } from "./useLiveNoteLights";
+export {
+  useLiveNoteLights,
+  markFromFeedback,
+  markFromOnset,
+  onsetsInBeat,
+} from "./useLiveNoteLights";
 export type { LiveLights } from "./useLiveNoteLights";
 
 export { useSongProgress } from "./useSongProgress";

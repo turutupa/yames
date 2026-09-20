@@ -254,6 +254,32 @@ pub struct ExtraOnset {
     pub beat: f64,
     pub pass: u32,
 }
+
+/// One expected onset's verdict, said while the player is still playing
+/// (`plans/SONGS.md` A7).
+///
+/// The same four facts [`OnsetResult`] carries, and deliberately a type of
+/// its own rather than that one: this is PROVISIONAL. It is decided from the
+/// notes that had arrived by the time the onset's matching window closed, and
+/// the banded alignment at the end of the attempt can still revise the last
+/// bar of it — a note the player has not played yet can change which slot an
+/// earlier one belongs in. The end-of-attempt `ScheduleReport` is the
+/// authority and always was; this is what the page can light a note with
+/// before then.
+///
+/// `accent_heard` is not here on purpose. An accent is measured against the
+/// notes on either side of it (see [`report_accents`]), and the note after
+/// has not necessarily been played when this is emitted.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LiveOnset {
+    pub id: u32,
+    /// Times round a loop, from 0 — the same axis [`OnsetResult::pass`] is on.
+    pub pass: u32,
+    pub state: OnsetState,
+    /// Negative is early. `None` when there was nothing to measure.
+    pub deviation_ms: Option<f64>,
+}
 /// A note the player actually made, as this module wants it.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct PlayedOnset {
@@ -290,6 +316,13 @@ impl BeatMap {
     /// it and is not in here.
     pub fn from_quarter_times(times_ms: Vec<f64>) -> Self {
         Self { beats_ms: times_ms }
+    }
+
+    /// One more quarter note fell. The live path grows the map a beat at a
+    /// time rather than rebuilding it, so `report` can be asked the same
+    /// question at the end without anything having been copied.
+    pub fn push_quarter(&mut self, time_ms: f64) {
+        self.beats_ms.push(time_ms);
     }
 
     pub fn len(&self) -> usize {
@@ -751,11 +784,7 @@ pub fn match_attempt(
     played: &[PlayedOnset],
     weights: &ScoreWeights,
 ) -> ScheduleReport {
-    let length = if schedule.length_beats > 0.0 {
-        schedule.length_beats
-    } else {
-        1.0
-    };
+    let length = pass_length(schedule);
 
     // How many times round. Without a loop there is exactly one pass,
     // however long the player carried on for.
@@ -1097,18 +1126,80 @@ fn score_results(
 #[derive(Debug, Clone)]
 pub struct ScheduleRun {
     schedule: ScoreSchedule,
-    quarter_times_ms: Vec<f64>,
+    beats: BeatMap,
     played: Vec<PlayedOnset>,
     started: bool,
+    /// The onsets ONE pass asks for, in beat order — the same filter
+    /// `match_attempt` applies, taken once because it cannot change.
+    pass_onsets: Vec<ExpectedOnset>,
+    /// The schedule's smallest gap in beats, which sets every matching
+    /// window. Taken once for the same reason.
+    smallest_gap: f64,
+    /// How far the live sweep has got: `pass * pass_onsets.len() + index`,
+    /// so a loop keeps counting rather than starting again. Everything below
+    /// it has had a verdict emitted; nothing below it is ever revisited.
+    settled: u64,
+    /// When the last sweep ran, on the beat map's own clock. The rate limit.
+    last_sweep_ms: f64,
 }
+
+/// How long after an expected onset's matching window closes its live verdict
+/// is taken to be decided.
+///
+/// The onset detector is not instantaneous: an FFT hop, a hop or two of
+/// decision smoothing and the driver's own buffering put a note in the
+/// analyzer's hands up to about thirty milliseconds after it was played, which
+/// is the same figure `timing.rs` holds a beat back by for the same reason. A
+/// verdict passed before that would call a note missed that is still in
+/// flight.
+const LIVE_SETTLE_LAG_MS: f64 = 35.0;
+
+/// The shortest gap between two live sweeps.
+///
+/// Twenty-five sweeps a second: faster than a screen refreshes a note and far
+/// slower than the analyzer's own 5 ms loop, so the alignment below runs on
+/// one pass in eight rather than on every one. A verdict is never delayed by
+/// more than this, which at any tempo anybody plays is a fraction of the beat
+/// it has to arrive inside.
+const LIVE_SWEEP_MS: f64 = 40.0;
+
+/// The most verdicts one sweep will emit.
+///
+/// A sweep normally settles nought or one onset. The cap only bites when a
+/// schedule is loaded onto a transport that has already been running, where
+/// the cursor has a backlog to walk; it spreads that over a few sweeps rather
+/// than doing an unbounded amount of alignment in one.
+const LIVE_SWEEP_CAP: usize = 64;
+
+/// How many onsets on either side of the settled run the live alignment is
+/// given to work with.
+///
+/// The alignment is the whole reason a dropped note is reported as one
+/// mistake rather than twenty (`align_pass`), and it can only do that with a
+/// run of notes to align. Handed one onset it degenerates into
+/// nearest-neighbour matching, which is exactly what this module exists to
+/// avoid. Eight is two beats of sixteenths — enough for the path to route
+/// around a drop, and small enough that a sweep is a few dozen cells.
+const LIVE_CONTEXT: usize = 8;
 
 impl ScheduleRun {
     pub fn new(schedule: ScoreSchedule) -> Self {
+        let pass_onsets: Vec<ExpectedOnset> = schedule
+            .onsets
+            .iter()
+            .filter(|o| o.beat >= 0.0 && (!schedule.loops || o.beat < pass_length(&schedule)))
+            .cloned()
+            .collect();
+        let smallest_gap = smallest_gap_beats(&schedule.onsets).unwrap_or(1.0);
         Self {
             schedule,
-            quarter_times_ms: Vec::with_capacity(256),
+            beats: BeatMap::default(),
             played: Vec::with_capacity(512),
             started: false,
+            pass_onsets,
+            smallest_gap,
+            settled: 0,
+            last_sweep_ms: f64::NEG_INFINITY,
         }
     }
 
@@ -1127,7 +1218,7 @@ impl ScheduleRun {
             }
             self.started = true;
         }
-        self.quarter_times_ms.push(wall_ms);
+        self.beats.push_quarter(wall_ms);
     }
 
     /// A note was heard. Everything the detector emitted goes in,
@@ -1161,11 +1252,172 @@ impl ScheduleRun {
     /// match against — without one there is no honest way to turn a
     /// beat into a time.
     pub fn report(&self, weights: &ScoreWeights) -> Option<ScheduleReport> {
-        if self.quarter_times_ms.is_empty() {
+        if self.beats.is_empty() {
             return None;
         }
-        let beats = BeatMap::from_quarter_times(self.quarter_times_ms.clone());
-        Some(match_attempt(&self.schedule, &beats, &self.played, weights))
+        Some(match_attempt(
+            &self.schedule,
+            &self.beats,
+            &self.played,
+            weights,
+        ))
+    }
+
+    /// `plans/SONGS.md` A7 — the verdicts that can be given NOW, appended to
+    /// `out`, each exactly once for the life of this run.
+    ///
+    /// Called on the analyzer's own thread, from the loop that is already
+    /// matching onsets to beats. Nothing here runs on the audio callback and
+    /// nothing here is on the onset detector's path.
+    ///
+    /// **It changes nothing the report reads.** `played`, the beat map and
+    /// the schedule are untouched; the only state this moves is the cursor
+    /// and the sweep clock, neither of which `report` looks at. So an
+    /// attempt scores exactly what it scored before this existed, whether
+    /// this was called a thousand times or never —
+    /// `the_live_sweep_changes_nothing_about_the_report` is the test.
+    ///
+    /// An onset is settled when its matching window has closed and the
+    /// detector has had time to deliver anything still in flight, and only
+    /// while the beat log actually reaches it: a transport that stops takes
+    /// the beat log with it, and extrapolating past the last logged quarter
+    /// would turn "the player stopped" into a bar of misses.
+    pub fn settle(&mut self, now_ms: f64, out: &mut Vec<LiveOnset>) {
+        let n = self.pass_onsets.len();
+        if n == 0 || self.beats.is_empty() {
+            return;
+        }
+        if now_ms - self.last_sweep_ms < LIVE_SWEEP_MS {
+            return;
+        }
+        self.last_sweep_ms = now_ms;
+
+        let length = pass_length(&self.schedule);
+        // The last quarter the engine actually reported. Nothing past it is
+        // judged, however long ago its nominal time was.
+        let last_logged = (self.beats.len() - 1) as f64;
+
+        // ── How far the cursor can go ──────────────────────────────────
+        let start = self.settled;
+        let mut end = start;
+        while (end - start) < LIVE_SWEEP_CAP as u64 {
+            let pass = (end / n as u64) as u32;
+            if pass > 0 && !self.schedule.loops {
+                break;
+            }
+            let i = (end % n as u64) as usize;
+            let abs = pass as f64 * length + self.pass_onsets[i].beat;
+            if abs > last_logged {
+                break;
+            }
+            let Some(t) = self.beats.time_at_beat(abs) else {
+                break;
+            };
+            if t + self.window_ms_at(abs) + LIVE_SETTLE_LAG_MS > now_ms {
+                break;
+            }
+            end += 1;
+        }
+        if end == start {
+            return;
+        }
+
+        // ── Align, one pass of the loop at a time ──────────────────────
+        // A slice that straddles a seam would have to carry two `pass`
+        // numbers through an alignment that takes one, so the seam is where
+        // the work is cut. At most two slices come out of any one sweep.
+        let mut cursor = start;
+        while cursor < end {
+            let pass = (cursor / n as u64) as u32;
+            let first = (cursor % n as u64) as usize;
+            let pass_end = ((pass as u64 + 1) * n as u64).min(end);
+            let last = ((pass_end - 1) % n as u64) as usize;
+            self.emit_slice(pass, first, last, length, out);
+            cursor = pass_end;
+        }
+        self.settled = end;
+    }
+
+    /// Verdicts for `first..=last` of one pass, aligned with context on both
+    /// sides so the path has somewhere to put a dropped or an added note.
+    fn emit_slice(
+        &self,
+        pass: u32,
+        first: usize,
+        last: usize,
+        length: f64,
+        out: &mut Vec<LiveOnset>,
+    ) {
+        let n = self.pass_onsets.len();
+        let lo = first.saturating_sub(LIVE_CONTEXT);
+        let hi = (last + 1 + LIVE_CONTEXT).min(n);
+        let expected = &self.pass_onsets[lo..hi];
+        let origin = pass as f64 * length;
+        let times: Vec<f64> = expected
+            .iter()
+            .filter_map(|o| self.beats.time_at_beat(origin + o.beat))
+            .collect();
+        if times.len() != expected.len() {
+            return;
+        }
+        let windows: Vec<f64> = expected
+            .iter()
+            .map(|o| self.window_ms_at(origin + o.beat))
+            .collect();
+
+        // The notes that could pair with anything in the slice. `played` is
+        // in arrival order, which is time order, so both ends are a binary
+        // search rather than a scan of the whole attempt.
+        let from_ms = times[0] - windows[0];
+        let to_ms = times[times.len() - 1] + windows[windows.len() - 1];
+        let from = self.played.partition_point(|p| p.time_ms < from_ms);
+        let to = self.played.partition_point(|p| p.time_ms <= to_ms);
+
+        // The extras are dropped here and the beat they fell on is never
+        // computed: a note nobody asked for lights nothing on the page, and
+        // the review reports them all at the end.
+        let (results, _extras) = align_pass(
+            expected,
+            &times,
+            &self.played[from..to],
+            &|i| windows[i],
+            pass,
+            &|_| 0.0,
+        );
+        if results.len() != expected.len() {
+            // A malformed band ends the backtrack early and leaves the
+            // results out of step with the onsets they are about. Saying
+            // nothing is the only safe answer; the report will say it
+            // properly at the end of the attempt.
+            return;
+        }
+        for k in (first - lo)..=(last - lo) {
+            out.push(LiveOnset {
+                id: results[k].id,
+                pass: results[k].pass,
+                state: results[k].state,
+                deviation_ms: results[k].deviation_ms,
+            });
+        }
+    }
+
+    /// The matching window around an absolute beat — the same tempo-aware
+    /// rule, off the same beat map, that `match_attempt` will use when the
+    /// attempt ends. Two answers to "was that note in time" that came from
+    /// different windows would be two answers.
+    fn window_ms_at(&self, abs_beat: f64) -> f64 {
+        tempo_aware_window_ms(self.beats.interval_ms_at(abs_beat) * self.smallest_gap)
+    }
+}
+
+/// How long one pass of a schedule is, in quarter notes. A schedule that
+/// declares nothing is one beat long rather than zero, which is what
+/// `match_attempt` has always assumed and what keeps the loop cursor moving.
+fn pass_length(schedule: &ScoreSchedule) -> f64 {
+    if schedule.length_beats > 0.0 {
+        schedule.length_beats
+    } else {
+        1.0
     }
 }
 

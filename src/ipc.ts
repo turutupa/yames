@@ -735,6 +735,34 @@ export type PracticeSegmentEndedPayload = {
   accentAgreement?: number;
 };
 
+/**
+ * One expected note's verdict, while the pass is still running
+ * (`plans/SONGS.md` A7).
+ *
+ * The same four facts an `OnsetResult` carries, and deliberately not that
+ * type: this is **provisional**. It is decided the moment the note's matching
+ * window closes, from what had arrived by then, and the alignment at the end
+ * of the attempt can still revise the last bar of it — a note not yet played
+ * can change which slot an earlier one belongs in. The review's
+ * `onsetResults` are the authority and always were.
+ *
+ * It arrives only while a `ScoreSchedule` is loaded. Free play emits none at
+ * all: the sweep that produces these does not run.
+ */
+export type LiveOnset = {
+  id: number;
+  /** Times round the loop, from 0 — the same axis `OnsetResult.pass` is on. */
+  pass: number;
+  state: OnsetResult["state"];
+  /** Negative is early. `null` when there was nothing to measure. */
+  deviationMs: number | null;
+};
+
+/** Subscribe to the live per-note verdicts. See {@link LiveOnset}. */
+export function onScoreOnset(callback: (onset: LiveOnset) => void) {
+  return listen<LiveOnset>("score-onset", (e) => callback(e.payload));
+}
+
 export function onPracticeSegmentEnded(
   callback: (payload: PracticeSegmentEndedPayload) => void,
 ) {

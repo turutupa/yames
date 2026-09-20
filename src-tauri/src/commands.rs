@@ -1323,6 +1323,19 @@ pub async fn start_evaluation(
                 let _ = app_for_grid.emit("inferred-grid-changed", &grid);
             }
         },
+        {
+            // `plans/SONGS.md` A7 — one provisional verdict per expected
+            // onset, as its matching window closes, so the page can light
+            // the note the player just picked instead of waiting for the
+            // review. The analyzer's thread decides; this forwards.
+            //
+            // Nothing is emitted in free play: with no schedule loaded the
+            // sweep that produces these does not run.
+            let app_for_score = app_handle.clone();
+            move |onset: crate::score::LiveOnset| {
+                let _ = app_for_score.emit("score-onset", &onset);
+            }
+        },
     );
 
     // Start onset detection, forwarding onsets to both Tauri events AND timing analyzer

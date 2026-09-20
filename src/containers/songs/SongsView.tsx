@@ -148,15 +148,18 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
    * alphaTab's engraving, and nothing mapped an onset onto a note element.
    * `TabStage` does that now, so the hook's map goes straight to it.
    *
-   * It is honest about being a stand-in — one verdict per BEAT, spread across
-   * the attacks inside it, because that is the only thing that arrives while a
-   * pass runs. On quarters it is exact; on sixteenths it is a smear, and the
-   * review that appears the moment you stop replaces it per onset.
+   * With a schedule loaded the analyzer says which NOTE was hit, as it
+   * happens (`score-onset`), so a bar of sixteenths lights four notes on four
+   * verdicts. The per-beat smear it used to draw is still there underneath as
+   * the fallback for a pass with no material behind it; the hook says which
+   * wins and why. Either way the review that appears the moment you stop is
+   * the authority.
    */
   const lights = useLiveNoteLights({
     schedule,
     beatInRange: position?.beatInRange ?? 0,
     isPlaying,
+    bpm: tempo,
   });
 
   /**

@@ -7,7 +7,7 @@ use std::time::Duration;
 use crate::instrument::{Instrument, InstrumentProfile, ScoreWeights};
 use crate::models::PlayMode;
 use crate::onset::Onset;
-use crate::score::{PlayedOnset, ScheduleRun, ScoreSchedule};
+use crate::score::{LiveOnset, PlayedOnset, ScheduleRun, ScoreSchedule};
 use crate::session::CoachMode;
 use crate::session_log::{
     ActivityTransition, Classification, ComponentScores, DetectedOnset, ExpectedBeat,
@@ -346,6 +346,15 @@ pub struct TimingAnalyzer {
     schedule_version: Arc<std::sync::atomic::AtomicU64>,
 }
 
+/// How many live verdicts one sweep is expected to hand back.
+///
+/// `ScheduleRun::settle` caps a sweep at sixty-four and normally settles
+/// nought or one, so this is the buffer's capacity and not a limit: it is
+/// sized once and refilled, so the sweep never reallocates on a thread that
+/// runs every five milliseconds. The cap's own worst case is a schedule
+/// loaded onto a transport that has already been running.
+const LIVE_VERDICT_BUFFER: usize = 64;
+
 impl TimingAnalyzer {
     pub fn new(beat_log: BeatLog) -> Self {
         Self {
@@ -466,7 +475,14 @@ impl TimingAnalyzer {
     /// real samples (confidence == 1.0). The callee writes the value
     /// back to the cache. It does not fire when the cached pre-seed is
     /// what filled the buffer — only genuine on-device learning counts.
-    pub fn start<F, G, H, I>(
+    ///
+    /// `on_score_onset` (`plans/SONGS.md` A7) fires once per expected
+    /// onset of a LOADED schedule, as soon as that onset's matching
+    /// window has closed — a provisional verdict the page can light a
+    /// note with while the pass is still running. With no schedule
+    /// loaded it never fires at all, which is what free play has always
+    /// been: not one line of the live sweep runs.
+    pub fn start<F, G, H, I, J>(
         &mut self,
         profile: InstrumentProfile,
         instrument_id: String,
@@ -477,11 +493,13 @@ impl TimingAnalyzer {
         on_segment_end: G,
         on_calibration_converged: H,
         on_inferred_grid: I,
+        on_score_onset: J,
     ) where
         F: Fn(BeatFeedback) + Send + 'static,
         G: Fn(PracticeSegmentEnded, bool) + Send + 'static,
         H: Fn(f64) + Send + 'static,
         I: Fn(InferredGridChanged) + Send + 'static,
+        J: Fn(LiveOnset) + Send + 'static,
     {
         self.stop();
         // Clear any stale Signal A / close flags from a prior session so a
@@ -524,6 +542,7 @@ impl TimingAnalyzer {
                 on_segment_end,
                 on_calibration_converged,
                 on_inferred_grid,
+                on_score_onset,
             );
         }));
     }
@@ -553,7 +572,7 @@ impl TimingAnalyzer {
         self.alive.load(Ordering::SeqCst)
     }
 
-    fn analysis_loop<F, G, H, I>(
+    fn analysis_loop<F, G, H, I, J>(
         alive: Arc<AtomicBool>,
         beat_log: BeatLog,
         onset_log: Arc<Mutex<VecDeque<Onset>>>,
@@ -572,11 +591,13 @@ impl TimingAnalyzer {
         on_segment_end: G,
         on_calibration_converged: H,
         on_inferred_grid: I,
+        on_score_onset: J,
     ) where
         F: Fn(BeatFeedback) + Send + 'static,
         G: Fn(PracticeSegmentEnded, bool) + Send + 'static,
         H: Fn(f64) + Send + 'static,
         I: Fn(InferredGridChanged) + Send + 'static,
+        J: Fn(LiveOnset) + Send + 'static,
     {
         // D4 — profile-driven pause tolerance. Beats are tempo-aware
         // (N silent beats is shorter wall-clock at 200 BPM than at 60),
@@ -668,6 +689,11 @@ impl TimingAnalyzer {
         // does not mention it.
         let mut schedule_run: Option<ScheduleRun> = None;
         let mut seen_schedule_version = u64::MAX;
+        // `plans/SONGS.md` A7 — the verdicts the live sweep hands back, in a
+        // buffer that is filled and drained rather than allocated: the sweep
+        // runs twenty-five times a second for as long as a schedule is
+        // loaded, and normally hands back nought or one.
+        let mut live_verdicts: Vec<LiveOnset> = Vec::with_capacity(LIVE_VERDICT_BUFFER);
 
         let mut rhythm_inference = RhythmInference::new();
         // Last divisor we surfaced to the JS layer — used to debounce
@@ -1126,6 +1152,24 @@ impl TimingAnalyzer {
                         beat.is_downbeat,
                         ts_ns_to_wall_ms(beat.ts_ns, beat_base_wall_ms, beat_base_ns) as f64,
                     );
+                }
+
+                // `plans/SONGS.md` A7 — and say what can be said about the
+                // notes already played. On the analyzer's own thread, from
+                // the loop that is already matching onsets to beats: the
+                // audio callback does not know this exists.
+                //
+                // AFTER the beat map is fed, because an onset on the quarter
+                // that just landed is settled by the same sweep that learns
+                // where that quarter fell. Before it, every verdict would
+                // wait for the following pass of this loop.
+                //
+                // With no schedule loaded this block does not run at all,
+                // which is what makes free play emit nothing.
+                live_verdicts.clear();
+                run.settle(beat_base_wall_ms as f64, &mut live_verdicts);
+                for verdict in live_verdicts.iter().copied() {
+                    on_score_onset(verdict);
                 }
             }
 
@@ -4661,6 +4705,7 @@ mod tests {
             |_seg, _emit_ui| {},
             |_| {},
             |_| {},
+            |_| {},
         );
 
         // We anchor each batch's `ts_ns` at small fixed values
@@ -4777,6 +4822,7 @@ mod tests {
             |_seg, _emit_ui| {},
             |_| {},
             |_| {},
+            |_| {},
         );
 
         // Let the monotonic clock advance well past the tiny ts_ns values
@@ -4875,6 +4921,7 @@ mod tests {
             },
             |_| {},
             |_| {},
+            |_| {},
         );
 
         // Stop immediately — no beats injected, no segment open, play_ms ≈ 0.
@@ -4944,6 +4991,7 @@ mod tests {
             move |pse, emit_ui| {
                 let _ = close_tx.send((pse.end_reason, emit_ui));
             },
+            |_| {},
             |_| {},
             |_| {},
         );
@@ -5125,6 +5173,7 @@ mod tests {
                 let _ = tick_tx.send(fb.beat_index);
             },
             |_seg, _emit_ui| {},
+            |_| {},
             |_| {},
             |_| {},
         );
@@ -5471,5 +5520,187 @@ mod tests {
         );
         let p = Instrument::ElectricGuitar.profile();
         assert_eq!(onsets_per_quarter_cap(p.max_onsets_per_beat, 8), 10);
+    }
+
+    // ── `plans/SONGS.md` A7 — the verdicts that arrive while you play ──
+    //
+    // These two run the SHIPPED analysis loop in real time, the way the
+    // live-path tests above do, and for the same reason: the rule is
+    // unit-tested in `score::tests`, and what cannot be unit-tested is
+    // whether the loop that owns the clock actually calls it, whether the
+    // verdicts come out of the thread that is allowed to emit, and how long
+    // they take on a wall clock.
+    //
+    // They are real time — a quarter here is half a second of somebody's
+    // afternoon — because the whole claim is about latency, and the anchored
+    // `play_live` harness above deliberately puts its events in the past to
+    // make latency unmeasurable.
+
+    /// One live verdict, and when it reached the callback.
+    #[derive(Debug, Clone, Copy)]
+    struct TimedVerdict {
+        onset: crate::score::LiveOnset,
+        /// Milliseconds after the run's first downbeat.
+        at_ms: f64,
+    }
+
+    /// A bar of sixteenths at 120 BPM, played dead on, through the real
+    /// analysis loop. `schedule` is what the analyzer is told, if anything.
+    ///
+    /// The run is six quarters long: four of music, and two more so the beat
+    /// log reaches past the last sixteenth — nothing is judged past the last
+    /// quarter the engine reported, which is the rule
+    /// `nothing_is_judged_past_the_last_beat_the_engine_reported` pins down.
+    fn play_a_bar_of_sixteenths(schedule: Option<ScoreSchedule>) -> Vec<TimedVerdict> {
+        const QUARTERS: u64 = 6;
+        const PLAYED_QUARTERS: u64 = 4;
+        const QUARTER_MS: f64 = 500.0;
+        let quarter_ns = (QUARTER_MS * 1_000_000.0) as u64;
+
+        let beat_log = create_beat_log();
+        let mut analyzer = TimingAnalyzer::new(beat_log.clone());
+        if let Some(s) = schedule {
+            // Before `start`, the way `load_song` reaches an analyzer that
+            // is already running: the loop's version counter starts at
+            // `u64::MAX` so the first pass picks it up either way.
+            analyzer.load_score_schedule(s);
+        }
+
+        let verdicts: Arc<Mutex<Vec<TimedVerdict>>> = Arc::new(Mutex::new(Vec::new()));
+        let collector = verdicts.clone();
+        // The run's own zero, shared with the collector so an arrival is
+        // recorded on the same axis the notes are played on.
+        let origin = std::time::Instant::now();
+        analyzer.start(
+            Instrument::ElectricGuitar.profile(),
+            "test".to_string(),
+            None,
+            None,
+            CoachMode::Default,
+            |_fb| {},
+            |_seg, _emit_ui| {},
+            |_| {},
+            |_| {},
+            move |onset| {
+                collector.lock().unwrap().push(TimedVerdict {
+                    onset,
+                    at_ms: origin.elapsed().as_secs_f64() * 1000.0,
+                });
+            },
+        );
+
+        let base_ns = crate::clock::now_ns();
+        for q in 0..QUARTERS {
+            // Sleep until this quarter is due. `saturating_sub` rather than
+            // a panic: a box under load can already be past it, and being
+            // late makes this test slower, never red.
+            let due = origin + std::time::Duration::from_millis((q as f64 * QUARTER_MS) as u64);
+            let now = std::time::Instant::now();
+            if due > now {
+                std::thread::sleep(due - now);
+            }
+            let anchor = base_ns + q * quarter_ns;
+            if q < PLAYED_QUARTERS {
+                for slot in 0..4u64 {
+                    analyzer.log_onset(Onset {
+                        ts_ns: anchor + (quarter_ns / 4) * slot,
+                        amplitude: 0.6,
+                        centroid: 900.0,
+                        confidence: 1.0,
+                    });
+                }
+            }
+            let mut log = beat_log.lock().unwrap();
+            log.push_back(BeatTick {
+                ts_ns: anchor,
+                beat_index: q as u32,
+                is_downbeat: q == 0,
+                expected_interval_ms: QUARTER_MS,
+                subdivision_index: 0,
+                subdivision_total: 1,
+                beats_per_bar: 4,
+            });
+        }
+        // One more beat for the last quarter to clear its hold, settle and
+        // be swept. `stop` force-flushes the beat log, so this is about the
+        // sweep rather than about the beats.
+        std::thread::sleep(std::time::Duration::from_millis(QUARTER_MS as u64));
+        analyzer.stop();
+        let out = verdicts.lock().unwrap().clone();
+        out
+    }
+
+    fn sixteenths_schedule() -> ScoreSchedule {
+        ScoreSchedule {
+            onsets: (0..16)
+                .map(|i| crate::score::ExpectedOnset {
+                    id: i,
+                    beat: i as f64 * 0.25,
+                    note_ids: vec![i],
+                    soft: false,
+                    accent: false,
+                })
+                .collect(),
+            length_beats: 4.0,
+            loops: false,
+        }
+    }
+
+    #[test]
+    fn sixteenths_light_one_by_one_while_the_pass_is_running() {
+        let verdicts = play_a_bar_of_sixteenths(Some(sixteenths_schedule()));
+
+        let ids: Vec<u32> = verdicts.iter().map(|v| v.onset.id).collect();
+        assert_eq!(
+            ids,
+            (0..16).collect::<Vec<u32>>(),
+            "every sixteenth gets its own verdict, in the order it was \
+             played — one per note, not one per beat smeared over four"
+        );
+        for v in verdicts.iter() {
+            assert_eq!(
+                v.onset.state,
+                crate::score::OnsetState::Hit,
+                "onset {} was played on the click and came back {:?}",
+                v.onset.id,
+                v.onset.state
+            );
+            assert_eq!(v.onset.pass, 0);
+        }
+
+        // THE GATE'S NUMBER. Each note is judged inside the beat it was
+        // played in. The slack is for the box, not for the rule: the design
+        // costs a matching window (50 ms on sixteenths at this tempo), the
+        // detector's own 35 ms, one 40 ms sweep, and — for a note late in a
+        // beat — the wait for the next quarter to be reported, which is
+        // where the 250 ms worst case comes from. A regression that put
+        // these back on the end of the attempt misses by seconds.
+        const SLACK_MS: f64 = 250.0;
+        for v in verdicts.iter() {
+            let played_at = v.onset.id as f64 * 0.25 * 500.0;
+            let lag = v.at_ms - played_at;
+            assert!(
+                lag <= 500.0 + SLACK_MS,
+                "onset {} was played {played_at} ms in and judged at {} ms — \
+                 {lag} ms later, which is past the beat it was played in",
+                v.onset.id,
+                v.at_ms
+            );
+        }
+    }
+
+    #[test]
+    fn free_play_emits_no_live_verdicts_at_all() {
+        // The other half of A7, and the one that keeps the metronome's own
+        // screen exactly as it was: with no schedule loaded the sweep never
+        // runs, so there is nothing to filter out downstream and nothing
+        // crossing the IPC boundary that did not cross it before.
+        let verdicts = play_a_bar_of_sixteenths(None);
+        assert!(
+            verdicts.is_empty(),
+            "free play emitted {} live verdicts: {:?}",
+            verdicts.len(),
+            verdicts
+        );
     }
 }
