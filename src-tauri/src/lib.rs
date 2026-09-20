@@ -10,6 +10,11 @@ mod kit;
 mod midi;
 mod models;
 mod onset;
+// `pitch` is `pub` for the same reason the three below are: the fixture
+// suite in `tests/pitch_fixtures.rs` and the `pitch-inspect` bin are
+// separate crates and can only see `pub` items. Nothing in the Tauri
+// command surface reaches it yet — the review screen is the next wave.
+pub mod pitch;
 // `session`, `session_log`, and `timing` are exposed `pub` so the
 // integration tests in `tests/dsp_fixtures.rs` can import
 // `score_feedbacks`, `BeatFeedback`, and `SessionReport` directly.
