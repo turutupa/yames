@@ -71,6 +71,8 @@ export interface SongEngine {
   setCountInBars: (bars: number) => void;
   /** Turn recording on or off for the loaded song. Remembered per song. */
   setTakes: (takes: boolean) => void;
+  /** W21 — and the camera, the same way. Opens nothing; it is a switch. */
+  setCamera: (camera: boolean) => void;
   /** Write the portion, the repeat, the speed or the saved portions. */
   setStageSetting: (
     patch: Partial<Pick<SongMixSetting, "selection" | "loop" | "tempoPercent" | "portions">>,
@@ -359,6 +361,23 @@ export function useSongEngine({
   );
 
   /**
+   * W21 — record the picture of this song as well.
+   *
+   * `setTakes`'s twin, stored in the same record for the same reasons, and
+   * exactly as inert: no camera is opened by this. It is a switch, and
+   * `useSongCamera` is what acts on it.
+   */
+  const setCamera = useCallback(
+    (camera: boolean) =>
+      setMixSetting((current) => {
+        const next = { ...current, camera };
+        if (songId) void saveMixSetting(songId, next).catch(() => {});
+        return next;
+      }),
+    [songId],
+  );
+
+  /**
    * Write down how the player has this song set up: the portion, the repeat,
    * the speed, and the portions they have named.
    *
@@ -383,6 +402,7 @@ export function useSongEngine({
     setMute,
     setCountInBars,
     setTakes,
+    setCamera,
     setStageSetting,
     lanes,
     leftOut: band?.leftOut ?? [],

@@ -104,6 +104,20 @@ export type SongTakesInput = {
   enabled: boolean;
   /** Write it back. The record owns the switch, this hook only acts on it. */
   onSetTakes: (next: boolean) => void;
+  /**
+   * W21 — the two moments the camera has to rendezvous with.
+   *
+   * `onTakeStarted` fires as the take begins; `onTakeFinished` fires with the
+   * take the engine handed back, or `null` when there was not one. The camera
+   * needs the second because the engine only NAMES a take when it stops, and
+   * the picture has to be filed under that name.
+   *
+   * Optional, and never awaited, and every call is inside a `try`: a camera
+   * that threw here would be a camera that lost somebody's take, which is the
+   * one thing `useSongCamera`'s header says cannot happen.
+   */
+  onTakeStarted?: () => void;
+  onTakeFinished?: (take: JamTake | null) => void;
 };
 
 export function useSongTakes({
@@ -113,6 +127,8 @@ export function useSongTakes({
   countingIn,
   enabled,
   onSetTakes,
+  onTakeStarted,
+  onTakeFinished,
 }: SongTakesInput): SongTakesState {
   const [available, setAvailable] = useState<boolean | null>(null);
   const [takes, setTakes] = useState<JamTake[]>([]);
@@ -139,6 +155,18 @@ export function useSongTakes({
   const startedAt = useRef<number | null>(null);
   const songIdRef = useRef<string | null>(null);
   songIdRef.current = songId;
+  /**
+   * W21's two doors, held in refs.
+   *
+   * The effect below is the take's whole lifecycle and its dependency list is
+   * the edge it fires on. A callback prop in that list would restart a take
+   * every time the camera's hook produced a new function identity, which is
+   * every render.
+   */
+  const startedDoor = useRef<(() => void) | undefined>(undefined);
+  const finishedDoor = useRef<((take: JamTake | null) => void) | undefined>(undefined);
+  startedDoor.current = onTakeStarted;
+  finishedDoor.current = onTakeFinished;
 
   const refreshSize = useCallback(async () => {
     try {
@@ -241,6 +269,11 @@ export function useSongTakes({
       // A new pass, so the take of the last one stops being the take of
       // "this" one before the review has a chance to ask.
       setLastTake(undefined);
+      try {
+        startedDoor.current?.();
+      } catch {
+        // The camera's problem, never the take's.
+      }
       void startTake(id)
         .then(() => {
           offsetRef.current = atFirstBeat - performance.now();
@@ -253,6 +286,12 @@ export function useSongTakes({
           startedAt.current = null;
           setRecording(false);
           setAvailable(false);
+          // No take, so nothing for a picture to be filed under.
+          try {
+            finishedDoor.current?.(null);
+          } catch {
+            /* the camera's problem */
+          }
         });
       return;
     }
@@ -267,6 +306,14 @@ export function useSongTakes({
       setRecordedSeconds(0);
       void stopTake()
         .then((take) => {
+          // The camera first, and with whatever the engine said — `null`
+          // included, because that is what tells it to throw its recording
+          // away rather than leave one nothing lists.
+          try {
+            finishedDoor.current?.(take ?? null);
+          } catch {
+            /* the camera's problem */
+          }
           // `null` is the engine saying nothing was recording, which is not a
           // failure and not a take.
           if (!take) return;

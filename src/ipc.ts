@@ -2137,6 +2137,50 @@ export async function takesDirSize(): Promise<number> {
   return invoke("takes_dir_size");
 }
 
+// ---- W21: the camera's recording, streamed to disk beside the take --------
+//
+// Four calls, in the order a pass uses them (`src-tauri/src/take_video.rs`).
+// The picture is the webview's — `MediaRecorder` hands it over a chunk at a
+// time — and everything about where it goes, what it may be called and who
+// may delete it is Rust's. Nothing here reads a video back: the review plays
+// it through the asset protocol, scoped to the takes directory.
+
+/** Open the file. `startedMs` only names it until the take has an id. */
+export async function takeVideoBegin(
+  jamId: string,
+  container: "mp4" | "webm",
+  startedMs: number,
+): Promise<void> {
+  return invoke("take_video_begin", { jamId, container, startedMs });
+}
+
+/**
+ * Append one chunk. **Raw bytes, never base64.**
+ *
+ * Tauri v2 carries a `Uint8Array` as the request's BODY rather than as JSON,
+ * so a third of a megabyte of video crosses as a third of a megabyte. The
+ * same chunk as a JSON array of numbers is four times the size and has to be
+ * parsed a number at a time, every second, for as long as somebody plays; as
+ * base64 it is a third bigger again and has to be decoded twice. The chunk's
+ * number rides in a header because the body is the video and nothing else.
+ */
+export async function takeVideoAppend(seq: number, bytes: Uint8Array): Promise<number> {
+  return invoke("take_video_append", bytes, { headers: { seq: String(seq) } });
+}
+
+/** Close it, file it under the take, and record how far it sits from the sound. */
+export async function takeVideoFinish(
+  takeId: string,
+  offsetMs: number | null,
+): Promise<{ path: string; bytes: number; offsetMs?: number }> {
+  return invoke("take_video_finish", { takeId, offsetMs });
+}
+
+/** Throw it away: the pass was abandoned, or the take turned out to be nothing. */
+export async function takeVideoDiscard(): Promise<void> {
+  return invoke("take_video_discard");
+}
+
 /**
  * Ask the user for a folder of drum samples (a native folder dialog). Resolves
  * to the folder path, or null when they cancel. The folder is read on this
