@@ -374,3 +374,43 @@ Key rules:
 - Never run destructive git on uncommitted work (`reset --hard`,
   `checkout .`, `restore .`, `clean -fd`). A day of work was lost to
   this on 2026-05-14.
+
+## When a worktree's work is merged, clean up after it
+
+On 2026-09-20 this repo was holding 176 GB it did not need: a 109 GB
+`src-tauri/target/debug` in the main checkout, 120 GB of per-worker build
+caches from one night, and forty worktrees nobody had looked at since
+their branch landed. Whoever merges a branch finishes the job, in the
+same session, before saying the work is done:
+
+1. **Only a worktree that is both merged and clean.** Merged means its
+   HEAD is an ancestor of the branch it was for (`git merge-base
+   --is-ancestor <head> <main|feature-branch>`). Clean means `git status
+   --porcelain` is empty, or shows only the two vitest snapshot files and
+   `git diff --numstat` on them is empty (a test run rewrites their line
+   endings and nothing else). Anything else — uncommitted work, an
+   unmerged branch, a long-lived one such as `mobile` — is left exactly
+   as it is and named in the report. When in doubt it stays.
+2. **Unlink before you remove.** If the worktree's `node_modules` is a
+   junction to another checkout's, remove the link first (`cmd /c rmdir
+   <path>\node_modules`). Deleting a tree through a junction empties the
+   folder it points at.
+3. **`git worktree remove <path>`, then `git worktree prune`.** Never
+   delete the folder by hand and never delete the branch: the branch is
+   the record and costs nothing.
+4. **Delete the build caches the work created**: the worktree's own
+   `src-tauri/target`, and any short `CARGO_TARGET_DIR` a brief handed
+   out (`C:\yt-*`). A worker's cache is 12–15 GB. Check nothing is running
+   out of it first. They rebuild; nothing else in them is worth keeping.
+5. **Leave what is not a cache.** `C:\yt06models` holds the GGUF models
+   the jitter probe and the LLM smoke tests need. Downloads, recordings,
+   fixtures and anything under a data directory are never clean-up.
+6. **Look at the main checkout's `src-tauri/target` while you are there.**
+   Past ~30 GB, delete `target/debug` (keep `release`) when nothing is
+   running from it, and say that the next `tauri dev` is a full rebuild.
+7. **Say what you freed and what you left**, with sizes, and why each
+   thing that was left was left.
+
+An orchestrator running several workers does steps 1–4 for each worker as
+its branch is merged and verified, not at the end of the night: ten idle
+caches are 120 GB.
