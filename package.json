@@ -38,6 +38,7 @@
     "test:dsp": "node scripts/rust-test.mjs --test dsp_fixtures",
     "test:dsp:bake": "UPDATE_FIXTURES=1 node scripts/rust-test.mjs --test dsp_fixtures",
     "test:highbpm": "node scripts/rust-test.mjs --test highbpm_fixtures",
+    "test:pitch": "node scripts/rust-test.mjs --test pitch_fixtures",
     "test:highbpm:bake": "UPDATE_FIXTURES=1 node scripts/rust-test.mjs --test highbpm_fixtures",
     "yames:jitter-probe": "cargo run --release --manifest-path src-tauri/Cargo.toml --bin click-jitter-probe --",
     "yames:debug-bpm": "bash scripts/debug-bpm.sh",
