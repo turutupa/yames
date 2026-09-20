@@ -480,3 +480,86 @@ test.describe("the scales sheet", () => {
     expect(Math.round(dot), `the dots are ${Math.round(dot)}px across`).toBeLessThan(16);
   });
 });
+
+test.describe("a row of controls in the setup drawer", () => {
+  test("lines its dropdowns and its segmented controls up with each other", async ({ page }) => {
+    /*
+     * A dropdown carries its label INSIDE the chip — "VOICE  Fingered" —
+     * and a segmented control used to carry its above the buttons, so on a
+     * row holding both the two shapes could not line up however the row was
+     * aligned: the owner, on the bass lane, "this ACTIVITY label is making
+     * the 3 way switch to be unaligned with the 2 dropdowns to its left".
+     * They are one control in two shapes; on a row together they say so.
+     */
+    await openShot(page, "jam-setup", { width: 1500, height: 1000 });
+
+    /*
+     * A row WRAPS when the sheet is narrow, so two controls on it may
+     * legitimately be on different lines. What has to line up is whatever
+     * ends up side by side — so the controls are grouped into lines first
+     * and each line checked on its own.
+     */
+    const lines = await page.$$eval(".jam-sheet-row", (nodes) => {
+      const out: number[][] = [];
+      for (const row of nodes) {
+        const middles = [...row.querySelectorAll<HTMLElement>(".jam-dropdown, .accent-options")]
+          .map((el) => {
+            const box = el.getBoundingClientRect();
+            return Math.round(box.top + box.height / 2);
+          })
+          .sort((a, b) => a - b);
+        // Anything within half a control's height of its neighbour is on the
+        // same line; a wrap puts the next one a whole row lower.
+        let line: number[] = [];
+        for (const middle of middles) {
+          if (line.length && middle - line[line.length - 1] > 20) {
+            out.push(line);
+            line = [];
+          }
+          line.push(middle);
+        }
+        if (line.length) out.push(line);
+      }
+      return out.filter((l) => l.length > 1);
+    });
+    expect(lines.length, "no line holds two controls to compare").toBeGreaterThan(0);
+
+    for (const middles of lines) {
+      const drift = middles[middles.length - 1] - middles[0];
+      expect(drift, `controls side by side sit ${drift}px apart: ${middles.join(", ")}`)
+        .toBeLessThanOrEqual(2);
+    }
+  });
+});
+
+test.describe("the groove editor", () => {
+  test("gets the whole stage, with none of its grid under the drawer", async ({ page }) => {
+    /*
+     * "Make your own" lives in the setup drawer, and the editor docks to the
+     * foot of the STAGE — so it opened a twelve-column grid into the half a
+     * stage the drawer had left, and the rest ran underneath it. Building a
+     * groove is a different job from choosing one and it needs the room, so
+     * the drawer closes on the way in.
+     */
+    await openShot(page, "jam-editor", { width: 1500, height: 1000 });
+
+    // The drawer is not over it.
+    expect(await page.$(".jam-sheet"), "the setup drawer stayed open").toBeNull();
+
+    const grid = (await (await page.waitForSelector(".jam-editor__grid")).boundingBox())!;
+    const width = page.viewportSize()!.width;
+    expect(Math.round(grid.x), "the grid starts off the left").toBeGreaterThanOrEqual(0);
+    expect(Math.round(grid.x + grid.width), "the grid runs off the right").toBeLessThanOrEqual(
+      width,
+    );
+
+    // Every column of it is on screen, not just the box that holds them.
+    const cells = await page.$$eval(".jam-editor__grid button", (nodes) =>
+      nodes.map((n) => Math.round(n.getBoundingClientRect().right)),
+    );
+    expect(cells.length, "no cells in the grid").toBeGreaterThan(12);
+    expect(Math.max(...cells), "a cell runs off the right").toBeLessThanOrEqual(width);
+
+    await noSidewaysScroll(page, "the jam screen with the groove editor open");
+  });
+});

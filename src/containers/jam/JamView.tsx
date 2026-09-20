@@ -910,7 +910,26 @@ export function JamView({
                   onStopPreview={onStopPreview}
                   previewingVibe={previewingVibe}
                   customKitRefused={customKitRefused}
-                  onOpenEditor={() => screen.setEditorOpen(true)}
+                  onOpenEditor={() => {
+                    /*
+                     * Building a groove is a different job from choosing
+                     * one, and it needs the room.
+                     *
+                     * The editor docks to the foot of the STAGE, and the
+                     * setup drawer takes half of it — so "Make your own"
+                     * opened a sixteen-column grid into a space that could
+                     * hold about six of them, and the rest ran under the
+                     * drawer. The owner: "the create your own drums... we
+                     * should maybe think about how to render this properly".
+                     *
+                     * The drawer closes, exactly as it does for Jam now:
+                     * the point is to be building, not to be browsing. Done
+                     * on the editor brings you back to the stage, and Set
+                     * up is where it always was.
+                     */
+                    screen.setSetupOpen(false);
+                    screen.setEditorOpen(true);
+                  }}
                   editingChords={screen.editingChords}
                   onEditingChords={(on) => {
                     screen.setEditingChords(on);

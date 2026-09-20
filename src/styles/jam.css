@@ -1162,11 +1162,14 @@
   z-index: 20;
   margin: 8px -48px 0;
   padding: 0 48px 12px;
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    var(--bg-base, #0b0a14) 14px
-  );
+  /* The stage's own background, fading in, so the grid sits ON the page
+     rather than in a panel of its own.
+
+     It faded into `var(--bg-base, #0b0a14)`, and `--bg-base` is defined by
+     no theme in this app — so every theme got the hard-coded fallback, a
+     blue-black that matches none of them and read as a hole cut in the
+     stage. `--bg-primary` is what the window is actually painted with. */
+  background: linear-gradient(to bottom, transparent, var(--bg-primary) 14px);
 }
 
 /* ── Narrower windows ─────────────────────────────────────────────────────
@@ -1929,7 +1932,16 @@
  * page you were on and the Done button all survive being maximized. */
 .jam-sheet[data-maximized] {
   position: fixed;
-  top: 0;
+  /* Below the title bar, not over it.
+     It used to start at zero, which on macOS put the sheet's own title
+     under the traffic lights the system draws on top of the window — the
+     owner: "the maximize minimize close buttons are on the top left corner
+     on mac so the cheat sheet in the top left corner its rendering slightly
+     below those 3 buttons". The same thirty-nine pixels keep Done clear of
+     the window buttons on Windows, and leave the wordmark showing so you
+     can still tell which window you are in. A platform-neutral answer to
+     what looked like a platform-specific bug. */
+  top: 39px;
   left: 0;
   right: 0;
   bottom: 76px;
@@ -2198,6 +2210,31 @@
 [data-explain][data-explain-from="right"]::after {
   left: auto;
   right: 0;
+}
+
+/* A segmented control beside a dropdown wears its name the same way.
+
+   A dropdown carries its label INSIDE the chip — "VOICE  Fingered" — and a
+   segmented control carried its above the buttons, so on a row holding both
+   the two shapes did not line up however the row was aligned: the owner,
+   on the bass lane, "this ACTIVITY label is making the 3 way switch to be
+   unaligned with the 2 dropdowns to its left". They are one control in two
+   shapes; on a row together they now read as one.
+
+   Only on a ROW. A segmented control standing alone in a block keeps its
+   name above it, where a heading belongs. */
+.jam-sheet-row .accent-control {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.jam-sheet-row .accent-control > .accent-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
 }
 
 /* The key's three modes belong under the twelve roots they qualify, not
