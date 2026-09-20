@@ -510,14 +510,30 @@ export function parseChordName(text: string): Chord | null {
   if (root === undefined) return null;
   for (const accidental of accidentals) root += accidental === "#" || accidental === "♯" ? 1 : -1;
 
-  // A slash bass ("D/F#") is a voicing instruction, not a different chord, and
-  // nothing in this mode plays an inversion the user asked for by name. The
-  // chord is read and the bass note dropped, which is better than refusing a
-  // name a player would reasonably write.
-  const suffix = rest.split("/")[0].trim();
+  /*
+   * A slash bass ("D/F#") is a voicing instruction, not a different chord,
+   * and nothing in this mode plays an inversion the user asked for by name.
+   * The chord is read and the bass note dropped, which is better than
+   * refusing a name a player would reasonably write.
+   *
+   * But a slash is not always a bass note: the six-nine chord is written
+   * "6/9", and `chordSuffix("69")` writes exactly that. Splitting on the
+   * slash first read C6/9 as a C6 with a 9 in the bass — the right root and
+   * the wrong chord, which is worse than refusing it, and it meant one
+   * quality the app writes could not be read back. So the whole suffix is
+   * tried against the table BEFORE any bass note is taken off, and only a
+   * suffix nothing recognises is cut at its LAST slash and tried again:
+   * "6/9" matches whole, "m7/G" does not and becomes "m7", and the
+   * uncommon-but-writable "6/9/E" loses only the bass.
+   */
+  const whole = rest.trim();
+  const slash = whole.lastIndexOf("/");
+  const candidates = slash >= 0 ? [whole, whole.slice(0, slash).trim()] : [whole];
 
-  for (const [spelling, quality] of QUALITY_SPELLINGS_BY_LENGTH) {
-    if (suffix === spelling) return { root: pitchClass(root), quality };
+  for (const candidate of candidates) {
+    for (const [spelling, quality] of QUALITY_SPELLINGS_BY_LENGTH) {
+      if (candidate === spelling) return { root: pitchClass(root), quality };
+    }
   }
   return null;
 }

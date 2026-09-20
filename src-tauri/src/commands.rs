@@ -1865,16 +1865,29 @@ pub fn clear_all_sessions(
 // ---------------------------------------------------------------------------
 
 /// Import (or re-import) a song. Returns the score's id.
+///
+/// `name` is what the player calls it and `source_base64` the bytes of the
+/// file it was read from (`SONGS.md` A2 — the tab is engraved from the
+/// source). Both are optional, and leaving one out says nothing about it
+/// rather than clearing it: a re-import of a song the player renamed keeps
+/// the name. `imported_at` is not a parameter because the moment a song
+/// entered the library is not the frontend's to assert — except on the
+/// one-time move out of `songs.json`, which passes the date it had there.
 #[tauri::command(async)]
 pub fn save_score(
     score: serde_json::Value,
+    name: Option<String>,
+    source_base64: Option<String>,
+    imported_at: Option<i64>,
     store: State<'_, crate::db::SharedPracticeStore>,
 ) -> Result<String, String> {
-    let now = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map(|d| d.as_millis() as i64)
-        .unwrap_or(0);
-    store.with(|db| db.save_score(&score, now))
+    let now = imported_at.unwrap_or_else(|| {
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_millis() as i64)
+            .unwrap_or(0)
+    });
+    store.with(|db| db.save_score(&score, name.as_deref(), source_base64.as_deref(), now))
 }
 
 #[tauri::command(async)]
@@ -1890,6 +1903,17 @@ pub fn get_score(
     store: State<'_, crate::db::SharedPracticeStore>,
 ) -> Option<serde_json::Value> {
     store.read_or(None, |db| db.get_score(&id))
+}
+
+/// The bytes of the file a song was read from, base64. Its own command
+/// because it is the biggest thing on the row and a library list never wants
+/// it — only the screen that is about to draw a tab does.
+#[tauri::command(async)]
+pub fn get_score_source(
+    id: String,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Option<String> {
+    store.read_or(None, |db| db.get_score_source(&id))
 }
 
 /// Forget a song, and with it every attempt at it.
@@ -1917,6 +1941,306 @@ pub fn query_attempts(
     store: State<'_, crate::db::SharedPracticeStore>,
 ) -> Vec<crate::db::Attempt> {
     store.read_or(Vec::new(), |db| db.query_attempts(&query))
+}
+
+// ---------------------------------------------------------------------------
+// The coach's judgement, and its ears — the door to `findings.rs` and
+// `pitch.rs`
+//
+// Registration and nothing else. Every rule lives in `findings.rs` and every
+// line of DSP in `pitch.rs`; what is here is the plumbing between them, the
+// store and the frontend — loading a score by its id, converting a stored
+// attempt into the shape the judgement takes, finding a take's dry stem, and
+// turning beats into the milliseconds the tracker thinks in.
+//
+// Both are `async` commands, so they run on Tauri's blocking pool and never
+// on the UI thread: a thirty-second take is most of a second of FFTs, and a
+// year of attempts is a SQLite read (AGENTS.md's post-session tier).
+// ---------------------------------------------------------------------------
+
+/// One attempt at a passage, as the frontend has it: every pass, as scoring
+/// reported it.
+#[derive(Debug, Clone, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AttemptPasses {
+    pub results: Vec<crate::score::OnsetResult>,
+    #[serde(default)]
+    pub extras: Vec<crate::score::ExtraOnset>,
+    /// The tempo it was played at, as a share of the score's own tempo.
+    pub tempo_percent: u16,
+}
+
+/// What `analyze_attempt` is told.
+///
+/// The score comes either by `scoreId` (read out of the store) or whole in
+/// `score`; the schedule always comes from the frontend, because
+/// `src/songs/schedule.ts` is what derives it and deriving it twice, in two
+/// languages, is two answers to one question.
+#[derive(Debug, Clone, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AnalyzeAttemptRequest {
+    #[serde(default)]
+    pub score_id: Option<String>,
+    #[serde(default)]
+    pub score: Option<crate::score::SongScore>,
+    pub schedule: crate::score::ScoreSchedule,
+    pub attempt: AttemptPasses,
+    /// Earlier attempts at the same passage, oldest first, given whole.
+    #[serde(default)]
+    pub earlier: Vec<AttemptPasses>,
+    /// …or asked of the store instead: every earlier attempt that overlaps
+    /// these bars. Needs `scoreId`. Both may be given; they are concatenated,
+    /// the store's first, because the store's are the older ones.
+    #[serde(default)]
+    pub earlier_bars: Option<crate::db::BarRange>,
+    /// The attempt being judged, when it has already been saved — so it is
+    /// not compared against itself.
+    #[serde(default)]
+    pub exclude_attempt_id: Option<String>,
+}
+
+/// What the coach found, ranked, headline first (`COACH_UX.md` A4).
+///
+/// Nothing here decides anything: `findings::analyze_attempt` is the whole
+/// of the judgement, and this loads what it needs.
+#[tauri::command(async)]
+pub fn analyze_attempt(
+    request: AnalyzeAttemptRequest,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<Vec<crate::findings::Finding>, String> {
+    let score = resolve_score(request.score, request.score_id.as_deref(), &store)?;
+
+    // Earlier attempts, oldest first: the store's, then any the caller
+    // brought. `query_attempts` already answers oldest first.
+    let mut earlier_owned: Vec<AttemptPasses> = Vec::new();
+    if let (Some(bars), Some(score_id)) = (request.earlier_bars, request.score_id.as_deref()) {
+        let rows = store.read_or(Vec::new(), |db| {
+            db.query_attempts(&crate::db::AttemptQuery {
+                score_id: score_id.to_string(),
+                bar_range: Some(bars),
+                include_onsets: true,
+                limit: None,
+            })
+        });
+        for row in rows {
+            if Some(&row.id) == request.exclude_attempt_id.as_ref() {
+                continue;
+            }
+            earlier_owned.push(stored_attempt_to_passes(&row));
+        }
+    }
+    earlier_owned.extend(request.earlier);
+
+    let earlier: Vec<crate::findings::Attempt> = earlier_owned
+        .iter()
+        .map(|a| crate::findings::Attempt {
+            results: &a.results,
+            extras: &a.extras,
+            tempo_percent: a.tempo_percent,
+        })
+        .collect();
+
+    Ok(crate::findings::analyze_attempt(
+        &score,
+        &request.schedule,
+        &crate::findings::Attempt {
+            results: &request.attempt.results,
+            extras: &request.attempt.extras,
+            tempo_percent: request.attempt.tempo_percent,
+        },
+        &earlier,
+    ))
+}
+
+/// What `analyze_take_pitch` is told.
+///
+/// `startOffsetMs` is the one number that is easy to get wrong and that
+/// everything else rests on: where the FIRST BEAT of the played range sits
+/// inside the dry stem, measured from the instant that file starts. The
+/// contract's `OnsetResult` carries a deviation and not an absolute time
+/// (the matcher works in beats), so the moment a note was played has to be
+/// reconstructed as "where it was due, plus how far off it was" — and "where
+/// it was due" is only meaningful against the buffer's own clock. Get it
+/// wrong and every note moves by the same amount, which looks like a tracker
+/// that cannot segment rather than a clock that is out (`pitch.rs`,
+/// `MatchedOnset::from_result`).
+#[derive(Debug, Clone, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AnalyzeTakePitchRequest {
+    /// The take to listen to, and the jam it was recorded under. Its DRY
+    /// stem is what is read — the mix has the band in it, and a monophonic
+    /// tracker asked about a band answers about the bass (`SONGS.md` A8).
+    pub take_id: String,
+    pub jam_id: String,
+    #[serde(default)]
+    pub score_id: Option<String>,
+    #[serde(default)]
+    pub score: Option<crate::score::SongScore>,
+    pub schedule: crate::score::ScoreSchedule,
+    pub results: Vec<crate::score::OnsetResult>,
+    /// Onsets the player produced that the score did not ask for.
+    ///
+    /// No verdict is given on them — they are not notes of the score — but
+    /// they are where the tracker is CUT. Nothing in a pitch track tells one
+    /// note from the next; an onset does, and an extra note left out of this
+    /// list is one that gets folded into the written note before it and
+    /// drags its median off (`pitch.rs`, `notes_from`).
+    #[serde(default)]
+    pub extras: Vec<crate::score::ExtraOnset>,
+    /// The tempo the range was played at, in BPM — the click's tempo, not
+    /// the score's, when the player slowed it down.
+    pub bpm: f64,
+    #[serde(default)]
+    pub start_offset_ms: f64,
+}
+
+/// Which note was that, for every note of the score in the played range.
+#[tauri::command(async)]
+pub fn analyze_take_pitch(
+    request: AnalyzeTakePitchRequest,
+    app_handle: AppHandle,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<Vec<crate::pitch::NoteVerdict>, String> {
+    if !request.bpm.is_finite() || request.bpm <= 0.0 {
+        return Err("a take cannot be read against a tempo of nothing".into());
+    }
+    let score = resolve_score(request.score, request.score_id.as_deref(), &store)?;
+
+    let dry = crate::take::list_takes(&takes_home(&app_handle)?, &request.jam_id)?
+        .into_iter()
+        .find(|t| t.id == request.take_id)
+        .ok_or_else(|| format!("there is no take {} on this machine", request.take_id))?
+        .dry_path
+        .ok_or_else(|| {
+            "that take was recorded without a microphone, so there is nothing of you in it to \
+             listen to"
+                .to_string()
+        })?;
+
+    // Beats to milliseconds on the buffer's own clock. A pass round a loop is
+    // one whole schedule later; the schedule's `lengthBeats` is what one is.
+    let beat_ms = 60_000.0 / request.bpm;
+    let by_id: std::collections::HashMap<u32, &crate::score::ExpectedOnset> = request
+        .schedule
+        .onsets
+        .iter()
+        .map(|o| (o.id, o))
+        .collect();
+
+    let mut matched: Vec<crate::pitch::MatchedOnset> = Vec::with_capacity(request.results.len());
+    for result in &request.results {
+        let Some(expected) = by_id.get(&result.id) else {
+            // An onset the schedule does not have is not this module's to
+            // guess at; the review draws nothing for it.
+            continue;
+        };
+        let beat = expected.beat + f64::from(result.pass) * request.schedule.length_beats;
+        matched.push(crate::pitch::MatchedOnset::from_result(
+            result.id,
+            expected.note_ids.clone(),
+            match result.state {
+                crate::score::OnsetState::Hit => crate::pitch::OnsetState::Hit,
+                crate::score::OnsetState::Miss => crate::pitch::OnsetState::Miss,
+                crate::score::OnsetState::SoftAbsent => crate::pitch::OnsetState::SoftAbsent,
+            },
+            request.start_offset_ms + beat * beat_ms,
+            result.deviation_ms,
+        ));
+    }
+
+    // Only the notes the schedule asked for, and each of them once.
+    let wanted: std::collections::HashSet<u32> = matched
+        .iter()
+        .flat_map(|m| m.note_ids.iter().copied())
+        .collect();
+    let notes: Vec<crate::pitch::ScoreNote> = score
+        .notes
+        .iter()
+        .filter(|n| wanted.contains(&n.id))
+        .map(|n| crate::pitch::ScoreNote {
+            id: n.id,
+            midi: f64::from(n.midi),
+        })
+        .collect();
+
+    // The range the score's own tuning asks for, and not the default. The
+    // default spans a five-string bass to the top of a 24-fret guitar, and a
+    // window wide enough to hear a 31 Hz B cannot tell two sixteenths at 160
+    // BPM apart — so a guitar part asked for that way is unreadable at speed
+    // (`pitch.rs`, "the range you ask for buys the time resolution you get").
+    let tuning: Vec<i32> = score.tuning.iter().map(|&m| i32::from(m)).collect();
+    let cfg = crate::pitch::PitchConfig::for_tuning(&tuning);
+
+    let (samples, rate) = crate::pitch::decode_mono_file(std::path::Path::new(&dry))?;
+    // Every moment a note started, written or not. `notes_from` sorts them
+    // and drops the ones too close together to be two notes.
+    let mut onsets_ms: Vec<f64> = matched.iter().filter_map(|m| m.heard_at_ms).collect();
+    onsets_ms.extend(request.extras.iter().map(|e| {
+        request.start_offset_ms
+            + (e.beat + f64::from(e.pass) * request.schedule.length_beats) * beat_ms
+    }));
+    let events = crate::pitch::analyse(&samples, rate, &onsets_ms, &cfg);
+    Ok(crate::pitch::match_notes(
+        &events,
+        &notes,
+        &matched,
+        &crate::pitch::MatchConfig::default(),
+    ))
+}
+
+/// The score both commands work against: the one the caller brought, or the
+/// one the store holds under that id.
+fn resolve_score(
+    given: Option<crate::score::SongScore>,
+    id: Option<&str>,
+    store: &State<'_, crate::db::SharedPracticeStore>,
+) -> Result<crate::score::SongScore, String> {
+    if let Some(score) = given {
+        return Ok(score);
+    }
+    let id = id.ok_or_else(|| "no score was named, and none was given".to_string())?;
+    let json = store
+        .read_or(None, |db| db.get_score(id))
+        .ok_or_else(|| format!("there is no song {id} in the library"))?;
+    serde_json::from_value(json).map_err(|e| format!("song {id} is not a score this build reads: {e}"))
+}
+
+/// A stored attempt, as the judgement takes one.
+///
+/// The store keeps an onset's state as text so a state added by a later
+/// scoring pass survives a round trip through an older build; a row whose
+/// state this build does not know is dropped rather than guessed at, because
+/// counting it as a hit or a miss would be inventing evidence.
+fn stored_attempt_to_passes(row: &crate::db::Attempt) -> AttemptPasses {
+    AttemptPasses {
+        results: row
+            .onsets
+            .iter()
+            .filter_map(|o| {
+                let state = match o.state.as_str() {
+                    "hit" => crate::score::OnsetState::Hit,
+                    "miss" => crate::score::OnsetState::Miss,
+                    "softAbsent" => crate::score::OnsetState::SoftAbsent,
+                    _ => return None,
+                };
+                Some(crate::score::OnsetResult {
+                    id: o.id.max(0) as u32,
+                    state,
+                    deviation_ms: o.deviation_ms,
+                    pass: o.pass.max(0) as u32,
+                })
+            })
+            .collect(),
+        extras: row
+            .extra_onsets
+            .iter()
+            .map(|e| crate::score::ExtraOnset {
+                beat: e.beat,
+                pass: e.pass.max(0) as u32,
+            })
+            .collect(),
+        tempo_percent: row.tempo_percent.clamp(0.0, f64::from(u16::MAX)).round() as u16,
+    }
 }
 
 // ---------------------------------------------------------------------------

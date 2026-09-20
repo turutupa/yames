@@ -57,7 +57,7 @@ pub const DB_FILE_NAME: &str = "practice.db";
 /// Schema version this build writes and understands. A database whose
 /// `PRAGMA user_version` is higher was written by a newer Yames: refuse
 /// it (see `DbError::Newer`) rather than guess at columns that moved.
-pub const SCHEMA_VERSION: i64 = 1;
+pub const SCHEMA_VERSION: i64 = 2;
 
 /// How long a command waits for the store to finish opening before it
 /// gives up and answers as though there were no history. Opening is a
@@ -141,7 +141,7 @@ pub struct HistoryFilter {
 }
 
 /// One row of the song library — everything a list needs, and none of the
-/// score itself. `getScore` fetches the notes.
+/// score itself. `getScore` fetches the notes, `getScoreSource` the file.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ScoreSummary {
@@ -153,6 +153,11 @@ pub struct ScoreSummary {
     pub track_index: i64,
     pub track_name: String,
     pub imported_at: i64,
+    /// What the player calls this song, when they have renamed it. `None`
+    /// means "the title it came with" — the library shows `title` then, and
+    /// a rename never rewrites what is printed on the page.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
 }
 
 /// The handful of fields the store lifts out of a `SongScore` so a song
@@ -431,6 +436,27 @@ CREATE TABLE attempt_extras (
 CREATE INDEX attempt_extras_attempt ON attempt_extras(attempt_id, pass);
 "#;
 
+/// v2 — the two things a song carries that are not part of its score.
+///
+/// The library used to live in `songs.json` beside the settings, and it kept
+/// three fields the `SongScore` contract has no room for: the name the player
+/// gave the song, and the bytes of the file it came from. The name is not the
+/// score's `title` — renaming a song in the library must not rewrite the
+/// title printed on the page — and the bytes are how the tab is drawn at all
+/// (`SONGS.md` A2: alphaTab engraves from the source, and a score knows every
+/// note's tick and fret but not how the page was laid out).
+///
+/// Columns and not extra keys inside `json`, because that column is a
+/// `SongScore` and `score.rs` is the contract for what one is. Anything the
+/// store needs to know that the contract does not carry belongs beside it.
+///
+/// A separate migration, and migration one is left exactly as it shipped:
+/// v1 databases exist on this machine already.
+const MIGRATION_V2: &str = r#"
+ALTER TABLE scores ADD COLUMN display_name TEXT;
+ALTER TABLE scores ADD COLUMN source_b64   TEXT;
+"#;
+
 // ---------------------------------------------------------------------------
 // The store
 // ---------------------------------------------------------------------------
@@ -498,6 +524,9 @@ impl Db {
         let tx = self.conn.transaction().map_err(DbError::from)?;
         if from < 1 {
             tx.execute_batch(MIGRATION_V1).map_err(DbError::from)?;
+        }
+        if from < 2 {
+            tx.execute_batch(MIGRATION_V2).map_err(DbError::from)?;
         }
         // `user_version` is a pragma, not a statement, so it is set on the
         // connection rather than inside the batch — but still before the
@@ -792,7 +821,20 @@ impl Db {
     /// the contract makes it a hash of the source bytes and the track)
     /// replaces it and keeps every attempt at it, because it is the same
     /// song: the id is what "same" means.
-    pub fn save_score(&self, score: &serde_json::Value, imported_at: i64) -> DbResult<String> {
+    ///
+    /// `name` is what the player calls it and `source_b64` the bytes of the
+    /// file it was read from, both optional and both `COALESCE`d on a
+    /// re-import: a caller that passes `None` is saying nothing about that
+    /// field, not asking for it to be cleared. Re-importing a file the
+    /// player has renamed therefore keeps the name, which is the behaviour
+    /// the library has always had.
+    pub fn save_score(
+        &self,
+        score: &serde_json::Value,
+        name: Option<&str>,
+        source_b64: Option<&str>,
+        imported_at: i64,
+    ) -> DbResult<String> {
         let meta: ScoreMeta = serde_json::from_value(score.clone())
             .map_err(|e| DbError::Sqlite(format!("score is not a SongScore: {e}")))?;
         if meta.id.trim().is_empty() {
@@ -802,13 +844,16 @@ impl Db {
         self.conn
             .execute(
                 "INSERT INTO scores (id, title, artist, source_file, format,
-                                     track_index, track_name, imported_at, json)
-                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
+                                     track_index, track_name, imported_at, json,
+                                     display_name, source_b64)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)
                  ON CONFLICT(id) DO UPDATE SET
                      title = excluded.title, artist = excluded.artist,
                      source_file = excluded.source_file, format = excluded.format,
                      track_index = excluded.track_index, track_name = excluded.track_name,
-                     imported_at = excluded.imported_at, json = excluded.json",
+                     imported_at = excluded.imported_at, json = excluded.json,
+                     display_name = COALESCE(excluded.display_name, scores.display_name),
+                     source_b64 = COALESCE(excluded.source_b64, scores.source_b64)",
                 rusqlite::params![
                     meta.id,
                     meta.title,
@@ -819,6 +864,8 @@ impl Db {
                     meta.source.track_name,
                     imported_at,
                     json,
+                    name,
+                    source_b64,
                 ],
             )
             .map_err(DbError::from)?;
@@ -830,7 +877,8 @@ impl Db {
         let mut stmt = self
             .conn
             .prepare(
-                "SELECT id, title, artist, source_file, format, track_index, track_name, imported_at
+                "SELECT id, title, artist, source_file, format, track_index, track_name,
+                        imported_at, display_name
                  FROM scores ORDER BY imported_at DESC, title ASC",
             )
             .map_err(DbError::from)?;
@@ -845,6 +893,7 @@ impl Db {
                     track_index: r.get(5)?,
                     track_name: r.get(6)?,
                     imported_at: r.get(7)?,
+                    name: r.get(8)?,
                 })
             })
             .map_err(DbError::from)?;
@@ -863,6 +912,23 @@ impl Db {
             )),
             None => Ok(None),
         }
+    }
+
+    /// The bytes of the file a song was read from, base64.
+    ///
+    /// Its own query and not a field on the summary or the score: it is the
+    /// biggest thing on the row, the list never wants it, and the contract
+    /// type has no room for it. `None` both for a song nobody kept the file
+    /// for and for a song that is not there — the caller's next move is the
+    /// same either way, which is to draw no tab.
+    pub fn get_score_source(&self, id: &str) -> DbResult<Option<String>> {
+        self.conn
+            .query_row("SELECT source_b64 FROM scores WHERE id = ?1", [id], |r| {
+                r.get::<_, Option<String>>(0)
+            })
+            .optional()
+            .map(|found| found.flatten())
+            .map_err(DbError::from)
     }
 
     /// Delete a song, and with it every attempt at it (cascade).
@@ -1561,7 +1627,7 @@ mod tests {
             .unwrap();
         db.save_session(&sample_session("b", 2_000, 100, None), None)
             .unwrap();
-        db.save_score(&sample_score("song1"), 10).unwrap();
+        db.save_score(&sample_score("song1"), None, None, 10).unwrap();
         db.save_attempt(&sample_attempt("at1", "song1", 50, 17, 24))
             .unwrap();
 
@@ -1625,7 +1691,9 @@ mod tests {
     fn a_score_round_trips_whole() {
         let db = Db::open_in_memory().unwrap();
         let score = sample_score("hash-1");
-        let id = db.save_score(&score, 1_700_000_000_000).unwrap();
+        let id = db
+            .save_score(&score, Some("My Blackbird"), Some("QkxL"), 1_700_000_000_000)
+            .unwrap();
         assert_eq!(id, "hash-1");
         assert_eq!(db.get_score("hash-1").unwrap().unwrap(), score);
 
@@ -1634,26 +1702,88 @@ mod tests {
         assert_eq!(list[0].title, "Blackbird");
         assert_eq!(list[0].format, "gp");
         assert_eq!(list[0].track_name, "Acoustic");
+        // The player's name for it is beside the title, not instead of it.
+        assert_eq!(list[0].name.as_deref(), Some("My Blackbird"));
+        assert_eq!(db.get_score_source("hash-1").unwrap().as_deref(), Some("QkxL"));
 
-        // Re-importing the same file replaces it rather than doubling it.
-        db.save_score(&score, 1_700_000_000_001).unwrap();
-        assert_eq!(db.list_scores().unwrap().len(), 1);
+        // Re-importing the same file replaces it rather than doubling it, and
+        // says nothing about the name or the bytes — so both survive.
+        db.save_score(&score, None, None, 1_700_000_000_001).unwrap();
+        let list = db.list_scores().unwrap();
+        assert_eq!(list.len(), 1);
+        assert_eq!(list[0].name.as_deref(), Some("My Blackbird"));
+        assert_eq!(db.get_score_source("hash-1").unwrap().as_deref(), Some("QkxL"));
+
+        // And a rename is a save that says something about it.
+        db.save_score(&score, Some("Verse loop"), None, 1_700_000_000_002)
+            .unwrap();
+        assert_eq!(
+            db.list_scores().unwrap()[0].name.as_deref(),
+            Some("Verse loop")
+        );
 
         assert!(db.get_score("nope").unwrap().is_none());
+        assert!(db.get_score_source("nope").unwrap().is_none());
+    }
+
+    /// A song imported before the library moved out of `songs.json` has no
+    /// name and no bytes, and must still list and still open.
+    #[test]
+    fn a_score_saved_without_a_name_or_its_bytes_is_still_a_song() {
+        let db = Db::open_in_memory().unwrap();
+        db.save_score(&sample_score("bare"), None, None, 5).unwrap();
+        let list = db.list_scores().unwrap();
+        assert_eq!(list.len(), 1);
+        assert_eq!(list[0].name, None);
+        assert_eq!(db.get_score_source("bare").unwrap(), None);
+        assert!(db.get_score("bare").unwrap().is_some());
+    }
+
+    /// The v2 columns arrive on a database that already has songs in it, and
+    /// nothing in it is lost. This is the upgrade every machine that ran the
+    /// first build of this wave will do.
+    #[test]
+    fn a_v1_database_gains_the_two_columns_and_keeps_its_songs() {
+        let conn = Connection::open_in_memory().unwrap();
+        // A store exactly as v1 shipped it, songs and all.
+        conn.execute_batch(MIGRATION_V1).unwrap();
+        conn.pragma_update(None, "user_version", 1).unwrap();
+        conn.execute(
+            "INSERT INTO scores (id, title, artist, source_file, format,
+                                 track_index, track_name, imported_at, json)
+             VALUES ('old', 'Blackbird', 'The Beatles', 'b.gp5', 'gp', 0, 'Acoustic', 7, ?1)",
+            [sample_score("old").to_string()],
+        )
+        .unwrap();
+
+        let db = Db::from_connection(conn, PathBuf::from(":memory:")).unwrap();
+        let v: i64 = db
+            .conn
+            .pragma_query_value(None, "user_version", |r| r.get(0))
+            .unwrap();
+        assert_eq!(v, SCHEMA_VERSION);
+
+        let list = db.list_scores().unwrap();
+        assert_eq!(list.len(), 1);
+        assert_eq!(list[0].title, "Blackbird");
+        // Nothing invented for the columns that did not exist.
+        assert_eq!(list[0].name, None);
+        assert_eq!(db.get_score_source("old").unwrap(), None);
+        assert!(db.get_score("old").unwrap().is_some());
     }
 
     #[test]
     fn a_score_that_is_not_a_song_is_refused() {
         let db = Db::open_in_memory().unwrap();
         assert!(db
-            .save_score(&serde_json::json!({ "title": "no id here" }), 1)
+            .save_score(&serde_json::json!({ "title": "no id here" }), None, None, 1)
             .is_err());
     }
 
     #[test]
     fn attempts_come_back_oldest_first_and_only_for_the_bars_asked_for() {
         let mut db = Db::open_in_memory().unwrap();
-        db.save_score(&sample_score("song1"), 1).unwrap();
+        db.save_score(&sample_score("song1"), None, None, 1).unwrap();
         db.save_attempt(&sample_attempt("late", "song1", 300, 17, 24))
             .unwrap();
         db.save_attempt(&sample_attempt("early", "song1", 100, 17, 24))
@@ -1695,7 +1825,7 @@ mod tests {
     #[test]
     fn per_onset_verdicts_survive_the_round_trip() {
         let mut db = Db::open_in_memory().unwrap();
-        db.save_score(&sample_score("song1"), 1).unwrap();
+        db.save_score(&sample_score("song1"), None, None, 1).unwrap();
         let attempt = sample_attempt("a1", "song1", 100, 17, 24);
         db.save_attempt(&attempt).unwrap();
 
@@ -1733,7 +1863,7 @@ mod tests {
     #[test]
     fn deleting_a_song_takes_its_attempts_with_it() {
         let mut db = Db::open_in_memory().unwrap();
-        db.save_score(&sample_score("song1"), 1).unwrap();
+        db.save_score(&sample_score("song1"), None, None, 1).unwrap();
         db.save_attempt(&sample_attempt("a1", "song1", 100, 1, 8))
             .unwrap();
         db.delete_score("song1").unwrap();
@@ -1750,7 +1880,7 @@ mod tests {
         // join over `attempt_onsets(onset_id, …)`; the test is here so the
         // index that makes it cheap cannot be dropped unnoticed.
         let mut db = Db::open_in_memory().unwrap();
-        db.save_score(&sample_score("song1"), 1).unwrap();
+        db.save_score(&sample_score("song1"), None, None, 1).unwrap();
         db.save_attempt(&sample_attempt("a1", "song1", 100, 17, 24))
             .unwrap();
         db.save_attempt(&sample_attempt("a2", "song1", 200, 17, 24))
@@ -1936,7 +2066,7 @@ mod tests {
         }
 
         // 5 000 attempts at one song, each with sixteen expected onsets.
-        db.save_score(&sample_score("song1"), 1).unwrap();
+        db.save_score(&sample_score("song1"), None, None, 1).unwrap();
         {
             let tx = db.conn.transaction().unwrap();
             {

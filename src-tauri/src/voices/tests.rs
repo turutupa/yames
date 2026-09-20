@@ -533,28 +533,63 @@ fn the_release_arrives_as_frames_at_the_devices_rate() {
 /// them bounds-checked and none of them inlined — and it runs alongside the
 /// rest of a threaded suite. A gate tight enough to mean anything in release
 /// would be a test that fails on a busy laptop and says nothing.
+///
+/// **What it asserts is a SHAPE, not a duration.** A wall-clock ceiling on
+/// its own measures whatever else the machine is doing: this passed alone
+/// and failed under four parallel workers, which is a test that says
+/// "somebody was compiling" and calls it a regression. So the assertion is
+/// a ratio between two builds taken in the same run — six times the
+/// recordings may cost `LINEAR_SLACK` times six and no more — and the clock
+/// stays only as a hang-catcher with an order of magnitude of room in it.
+/// Load moves both measurements together, so the ratio stands on a busy box.
 #[test]
 fn a_melodic_bank_is_quick_enough_to_build_on_the_command_thread() {
-    let scratch = Scratch::new("speed");
+    /// How far off linear the big build may be. Three, because the small
+    /// bank pays the same fixed cost — the manifest, and pitch-shifting the
+    /// same 28 notes into place — over a sixth of the audio, so the honest
+    /// measured ratio is well BELOW six rather than above it.
+    const LINEAR_SLACK: f64 = 3.0;
+
     let notes = [28u8, 31, 33, 36, 40, 43, 45, 48, 52, 55, 57, 60];
+
+    // The reference: the same bank, one layer and one round robin.
+    let small = Scratch::new("speed-1x1");
+    write_bank(small.path(), &notes, 1, 1, 60.0, 0.0);
+    let small_began = std::time::Instant::now();
+    let small_bank = load(small.path(), 48_000, 28, 55).unwrap();
+    let small_ms = small_began.elapsed().as_secs_f64() * 1000.0;
+
+    let scratch = Scratch::new("speed");
     write_bank(scratch.path(), &notes, 3, 2, 60.0, 0.0);
     let began = std::time::Instant::now();
     let bank = load(scratch.path(), 48_000, 28, 55).unwrap();
     let ms = began.elapsed().as_secs_f64() * 1000.0;
     eprintln!(
         "[voices] a {}×{} bank of {} sampled notes built {} notes in {ms:.0} ms \
-         ({:.1} MB)",
+         ({:.1} MB); the 1×1 reference ({:.1} MB): {small_ms:.0} ms",
         bank.layers(),
         bank.rr(),
         notes.len(),
         bank.notes(),
         bank.bytes as f64 / (1024.0 * 1024.0),
+        small_bank.bytes as f64 / (1024.0 * 1024.0),
     );
-    let ceiling = if cfg!(debug_assertions) { 8000.0 } else { 500.0 };
+
+    let recordings_ratio = 6.0;
+    let ratio = ms / small_ms.max(1.0);
+    assert!(
+        ratio < recordings_ratio * LINEAR_SLACK,
+        "a bank {recordings_ratio:.0}x the recordings took {ratio:.1}x as long to \
+         build ({ms:.0} ms against {small_ms:.0} ms) — the build stopped being \
+         linear in the audio it reads"
+    );
+
+    let ceiling = if cfg!(debug_assertions) { 40_000.0 } else { 5_000.0 };
     assert!(
         ms < ceiling,
-        "building a melodic bank took {ms:.0} ms on the command thread, \
-         against a ceiling of {ceiling:.0}"
+        "building a melodic bank took {ms:.0} ms on the command thread, against a \
+         ceiling of {ceiling:.0} — this is the catastrophe gate, not the \
+         responsiveness one"
     );
 }
 

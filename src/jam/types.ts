@@ -561,6 +561,21 @@ export type JamTake = {
   durationSec: number;
   /** Absolute path of the WAV in the app's data directory. */
   path: string;
+  /**
+   * Absolute path of the dry stem — you alone, without the band — when the
+   * take was recorded with a mic and there is one (`SONGS.md` A8).
+   *
+   * Nothing on screen shows it or ever should: it is not a second recording
+   * the player has to think about, it is the same take with the band taken
+   * out, written under the same opt-in and deleted with it (`take.rs`). It
+   * exists because pitch cannot be read off a mix — the review is what will
+   * use it.
+   *
+   * Optional because a take of the band alone has none, and because every
+   * sidecar written before the stem existed has none either; `take.rs`
+   * skips the field rather than writing a null into those files.
+   */
+  dryPath?: string;
 };
 
 export type JamCustomGroove = {

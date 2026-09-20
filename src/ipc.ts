@@ -821,14 +821,14 @@ export async function queryHistory(
 // ---------------------------------------------------------------------------
 // Songs — the library, and what was played against it
 // ---------------------------------------------------------------------------
-
-/**
- * A `SongScore` as the store holds it: whole, exactly as the importer
- * produced it. The structural type lives in `src/songs/types.ts`; this
- * alias exists so `ipc.ts` does not have to depend on it, and callers are
- * expected to narrow to `SongScore` at the edge.
- */
-export type StoredSongScore = Record<string, unknown>;
+import type {
+  ExtraOnset,
+  Finding,
+  NoteVerdict,
+  OnsetResult,
+  ScoreSchedule,
+  SongScore,
+} from "./songs/types";
 
 /** One row of the song library — what a list shows, without the notes. */
 export type ScoreSummary = {
@@ -841,6 +841,12 @@ export type ScoreSummary = {
   trackName: string;
   /** Epoch ms. */
   importedAt: number;
+  /**
+   * What the player calls this song, when they have renamed it. Absent means
+   * "the title it came with" — renaming a song in the library never rewrites
+   * the title printed on the page.
+   */
+  name?: string;
 };
 
 /**
@@ -907,9 +913,30 @@ export type AttemptQuery = {
   limit?: number;
 };
 
+/** What `saveScore` may say about a song besides its score. */
+export type SaveScoreOptions = {
+  /** The player's name for it. Omitted says nothing rather than clearing it. */
+  name?: string;
+  /**
+   * The bytes of the file it was read from, base64. `SONGS.md` A2: the tab is
+   * engraved from the source, so the bytes outlive the import.
+   */
+  sourceBase64?: string;
+  /** Epoch ms. Omitted means now — pass one only to preserve a date. */
+  importedAt?: number;
+};
+
 /** Import (or re-import) a song. Resolves with the score's id. */
-export async function saveScore(score: StoredSongScore): Promise<string> {
-  return invoke<string>("save_score", { score });
+export async function saveScore(
+  score: SongScore,
+  opts: SaveScoreOptions = {},
+): Promise<string> {
+  return invoke<string>("save_score", {
+    score,
+    name: opts.name ?? null,
+    sourceBase64: opts.sourceBase64 ?? null,
+    importedAt: opts.importedAt ?? null,
+  });
 }
 
 /** The library, most recently imported first. */
@@ -917,8 +944,18 @@ export async function listScores(): Promise<ScoreSummary[]> {
   return invoke<ScoreSummary[]>("list_scores");
 }
 
-export async function getScore(id: string): Promise<StoredSongScore | null> {
-  return invoke<StoredSongScore | null>("get_score", { id });
+export async function getScore(id: string): Promise<SongScore | null> {
+  return invoke<SongScore | null>("get_score", { id });
+}
+
+/**
+ * The bytes of the file a song was read from, base64, or `null`.
+ *
+ * Its own call because it is the biggest thing on the row and the library
+ * list never wants it — only the screen about to draw a tab does.
+ */
+export async function getScoreSource(id: string): Promise<string | null> {
+  return invoke<string | null>("get_score_source", { id });
 }
 
 /** Forget a song, and with it every attempt at it. */
@@ -928,6 +965,91 @@ export async function deleteScore(id: string): Promise<void> {
 
 export async function saveAttempt(attempt: Attempt): Promise<void> {
   return invoke("save_attempt", { attempt });
+}
+
+// ---------------------------------------------------------------------------
+// The coach's judgement, and its ears
+//
+// Both run off the UI thread (`#[tauri::command(async)]`) and both belong to
+// the post-session tier (`AGENTS.md`): the pass is over, the player is
+// reading the timing score, and there are seconds to spend.
+// ---------------------------------------------------------------------------
+
+/** One attempt at a passage: every pass, as scoring reported it. */
+export type AttemptPasses = {
+  results: OnsetResult[];
+  extras?: ExtraOnset[];
+  /** The tempo it was played at, as a share of the score's own tempo. */
+  tempoPercent: number;
+};
+
+export type AnalyzeAttemptRequest = {
+  /** The score to judge against, by id in the library… */
+  scoreId?: string;
+  /** …or whole, for a passage that is not in the library yet. */
+  score?: SongScore;
+  /** Always from `src/songs/schedule.ts` — it is what derives one. */
+  schedule: ScoreSchedule;
+  attempt: AttemptPasses;
+  /** Earlier attempts at the same passage, oldest first, given whole. */
+  earlier?: AttemptPasses[];
+  /**
+   * …or asked of the store instead: every earlier attempt overlapping these
+   * bars. Needs `scoreId`. It is what makes "improved" and the tempo ceiling
+   * possible, and nothing else depends on it.
+   */
+  earlierBars?: BarRange;
+  /** The attempt being judged, when it is already saved — so it is not
+   *  compared against itself. */
+  excludeAttemptId?: string;
+};
+
+/** The coach's verdict, ranked, headline first (`COACH_UX.md` A4). */
+export async function analyzeAttempt(
+  request: AnalyzeAttemptRequest,
+): Promise<Finding[]> {
+  return invoke<Finding[]>("analyze_attempt", { request });
+}
+
+export type AnalyzeTakePitchRequest = {
+  /** The take to listen to, and the jam it was recorded under. Its DRY stem
+   *  is what is read — the mix has the band in it. */
+  takeId: string;
+  jamId: string;
+  scoreId?: string;
+  score?: SongScore;
+  schedule: ScoreSchedule;
+  results: OnsetResult[];
+  /**
+   * Onsets the player produced that the score did not ask for.
+   *
+   * No verdict is given on them — they are not notes of the score — but they
+   * are where the tracker is cut. Nothing in a pitch track tells one note
+   * from the next; an onset does, and an extra note left out here gets
+   * folded into the written note before it and drags its median off.
+   */
+  extras?: ExtraOnset[];
+  /** The tempo the range was played at — the click's, not the score's. */
+  bpm: number;
+  /**
+   * Where the FIRST BEAT of the played range sits inside the dry stem, in ms
+   * from the instant that file starts.
+   *
+   * The one number everything else rests on. `OnsetResult` carries a
+   * deviation and not an absolute time, so when a note was played has to be
+   * reconstructed as "where it was due, plus how far off it was" — and
+   * "where it was due" only means anything against the buffer's own clock.
+   * Get this wrong and every note moves by the same amount, which looks like
+   * a tracker that cannot segment rather than a clock that is out.
+   */
+  startOffsetMs?: number;
+};
+
+/** Which note was that, for every note of the score in the played range. */
+export async function analyzeTakePitch(
+  request: AnalyzeTakePitchRequest,
+): Promise<NoteVerdict[]> {
+  return invoke<NoteVerdict[]>("analyze_take_pitch", { request });
 }
 
 /** Attempts at a song, oldest first. */
@@ -1441,25 +1563,29 @@ export async function saveJams(jams: Jam[]): Promise<void> {
 // ---------------------------------------------------------------------------
 
 /**
- * Songs get a store file of their own — `songs.json`, not `settings.json`.
+ * `songs.json` — where the library used to live, and no longer does.
  *
- * Everything else in the app shares one store, and songs deliberately do not,
- * because a song carries the bytes of the file it came from (`SONGS.md` A2:
- * the tab is drawn from the source). That is tens to hundreds of kilobytes
- * each, and `settings.json` is rewritten whole, with `autoSave` on, every
- * time anyone changes the volume. Putting scores in it would make every
- * unrelated setting write megabytes.
+ * Songs were given a store file of their own rather than `settings.json`,
+ * because a song carries the bytes of the file it came from (`SONGS.md` A2)
+ * and `settings.json` is rewritten whole every time anyone moves the volume
+ * slider. The right home was always W2's SQLite store, and that is where they
+ * are now: `src/songs/library.ts` reads and writes `scores` through
+ * `saveScore` / `listScores` / `getScore` / `deleteScore`.
  *
- * Only `src/songs/library.ts` calls these two — it is the interface the rest
- * of Songs goes through, so moving the library to W2's SQLite store is one
- * file rather than a search across the mode. That move is still the right
- * end state; this is the cheap way not to hurt in the meantime.
+ * These three remain for the one-time move, which is the only thing that
+ * calls them. The file is left on disk with its songs taken out — not
+ * deleted, because a file the user can see disappearing is a worse surprise
+ * than an empty one, and because a downgrade to the previous build should
+ * find a store it recognises rather than a missing one.
  *
  * Note there is no `load_score_schedule` wrapper here, on purpose:
  * `src/songs/engineBridge.ts` says why, and says to move it here when W1's
  * command exists.
  */
 const SONGS_KEY = "songs";
+
+/** Set once the songs in `songs.json` have been folded into the store. */
+const SONGS_MOVED_KEY = "movedToPracticeStore";
 
 let _songStore: Awaited<ReturnType<typeof load>> | null = null;
 async function getSongStore() {
@@ -1477,6 +1603,21 @@ export async function listSongs(): Promise<SongRecord[] | undefined> {
 export async function saveSongs(songs: SongRecord[]): Promise<void> {
   const store = await getSongStore();
   await store.set(SONGS_KEY, songs);
+}
+
+/**
+ * Whether the one-time move has already run. Recorded even when there was
+ * nothing to move — "we looked" is the fact worth keeping, the same way
+ * `db.rs` records the JSON history import.
+ */
+export async function songsMovedToStore(): Promise<boolean> {
+  const store = await getSongStore();
+  return (await store.get<boolean>(SONGS_MOVED_KEY)) === true;
+}
+
+export async function markSongsMovedToStore(): Promise<void> {
+  const store = await getSongStore();
+  await store.set(SONGS_MOVED_KEY, true);
 }
 
 /**

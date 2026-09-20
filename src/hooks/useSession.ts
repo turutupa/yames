@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getFinalSessionReport, stopEvaluation, getSessionHistory, saveSession, clearSession, coachGenerate, isCoachLoaded, ttsSpeak, onBeatFeedback, onAdaptiveEval, notifySettingsChange, clearCalibrationCacheEntry, onTtsSpeechStarted, onPracticeSegmentEnded } from "../ipc";
+import { getFinalSessionReport, stopEvaluation, getSessionHistory, queryHistory, saveSession, clearSession, coachGenerate, isCoachLoaded, ttsSpeak, onBeatFeedback, onAdaptiveEval, notifySettingsChange, clearCalibrationCacheEntry, onTtsSpeechStarted, onPracticeSegmentEnded } from "../ipc";
 import type { AdaptiveEvalRequest } from "../ipc";
 import type { BeatFeedback, BrainTier, FeedChip, FeedMessage, SessionReport, SessionSegment } from "../types";
 import type { useEvaluation } from "./useEvaluation";
@@ -1281,7 +1281,22 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     // ship the tier-4 ("cold") greeting and DO NOT replace it once
     // history finally arrives (avoids "greeting flicker" bug).
     const greetingId = crypto.randomUUID();
-    const history = await loadHistoryWithBudget(() => getSessionHistory());
+    // Two reads, one budget. The greeting is about the last thing the player
+    // did, whatever they did it on, so it keeps the thirty-session slice.
+    // Everything in `presetAwareness` is about THIS preset, and the slice was
+    // starving it: thirty sessions across every preset in the app routinely
+    // hold one or two of any given one, and its gates need three at the
+    // preset and three inside a BPM band before they say anything at all. So
+    // a player who alternates two exercises could practise the same wall for
+    // a month and never be told it was a wall. `queryHistory` asks the store
+    // the question the coach is actually asking (W2, ROADMAP 1.1); both are
+    // started before either is awaited so the 500 ms budget is shared rather
+    // than spent twice.
+    const historyLoad = loadHistoryWithBudget(() => getSessionHistory());
+    const presetHistoryLoad = presetId
+      ? loadHistoryWithBudget(() => queryHistory({ presetId }))
+      : Promise.resolve(undefined);
+    const [history, presetHistory] = await Promise.all([historyLoad, presetHistoryLoad]);
 
     // Phase 5 — pull the best score from the most-recent saved session
     // (preset-matched when available) so chips like
@@ -1294,7 +1309,10 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     // ── Real-time tip seed ────────────────────────────────────────
     // Arm stamina, pace-coaching, and grid-lost tips from history.
     // All state lives in useRealtimeTips; resets fired-gates too.
-    seedRealtimeTips(presetId, presetName, history);
+    // This preset's whole history, not the last thirty of everything —
+    // stamina needs five sessions at the preset and the pace line needs four
+    // in one BPM band.
+    seedRealtimeTips(presetId, presetName, presetHistory);
 
     // ── Preset-ceiling seed (ROADMAP 1.7) ─────────────────────────
     // Same source as the pace line, different half of the range: this
@@ -1302,8 +1320,8 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     // band, where `useRealtimeTips` takes over with a suggestion. The
     // gatekeeper applies the split (`PRESET_CEILING_MAX_SESSIONS`).
     presetCeilingRef.current = (() => {
-      if (!presetId || !history) return undefined;
-      const summary = summarizePreset(presetId, presetName, history);
+      if (!presetId || !presetHistory) return undefined;
+      const summary = summarizePreset(presetId, presetName, presetHistory);
       const { bpmCeiling } = detectRecurringIssues(summary);
       return bpmCeiling ?? undefined;
     })();
@@ -1321,7 +1339,7 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
     // prior-session summary when history is available; falls back to
     // a generic note. The seed line is always preserved across
     // truncation per the plan.
-    const priorSummary = buildPriorSummary(history, presetId, presetName);
+    const priorSummary = buildPriorSummary(history, presetHistory, presetId, presetName);
     narrativeRef.current = createNarrative({
       bpm: playBpmRef.current,
       presetId,
@@ -1751,7 +1769,11 @@ export function useSession({ evaluation, isPlaying, bpm, timeSignature, beatGrou
         let historyContext = "";
         if (presetId) {
           try {
-            const history = await getSessionHistory();
+            // This preset's whole history. The thirty-session slice used to
+            // be the source here, and a player asking "am I getting better
+            // at this?" was answered from whatever rows of it happened to
+            // belong to the exercise they were sitting at.
+            const history = await queryHistory({ presetId });
             const summary = summarizePreset(presetId, presetName, history);
             if (summary.sessionCount > 0) {
               const issues = detectRecurringIssues(summary);
@@ -2117,6 +2139,7 @@ function pickPreviousSessionScore(
  */
 function buildPriorSummary(
   history: import("../types").SavedSession[] | undefined,
+  presetHistory: import("../types").SavedSession[] | undefined,
   presetId?: string,
   presetName?: string,
 ): string | undefined {
@@ -2134,8 +2157,10 @@ function buildPriorSummary(
   const acc = scored > 0 ? accuracyPct(candidate.report) : null;
   const accFrag = acc != null ? `${acc}% ` : "";
   let line = `last session: ${accFrag}at ${candidate.bpm} BPM, score ${candidate.report.score}`;
-  if (presetId) {
-    const summary = summarizePreset(presetId, presetName, history);
+  // The hint half of the line reads the preset's own history, which is
+  // deeper than the thirty rows the "last session" half is drawn from.
+  if (presetId && presetHistory && presetHistory.length > 0) {
+    const summary = summarizePreset(presetId, presetName, presetHistory);
     const issues = detectRecurringIssues(summary);
     if (issues.bpmCeiling) {
       line += `; preset ceiling ~${issues.bpmCeiling.bpmLow}-${issues.bpmCeiling.bpmHigh - 1} BPM`;

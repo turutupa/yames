@@ -131,6 +131,7 @@ const DEFAULT_INVOKE_MAP: Record<string, InvokeFn> = {
     ((args?.score as { id?: string } | undefined)?.id ?? "score-id"),
   list_scores: () => [],
   get_score: () => null,
+  get_score_source: () => null,
   delete_score: () => undefined,
   save_attempt: () => undefined,
   query_attempts: () => [],

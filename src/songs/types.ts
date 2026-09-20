@@ -146,3 +146,140 @@ export type OnsetResult = {
 };
 
 export type ExtraOnset = { beat: number; pass: number };
+
+// ---------------------------------------------------------------------------
+// What the coach found — the mirror of `src-tauri/src/findings.rs`
+//
+// Rules decide and the model narrates (`ROADMAP.md` principle 3), so this is
+// the shape of a decision rather than of a sentence: the numbers a sentence
+// can be built from, and a fix the app can set up in one tap. Every field is
+// pinned on the Rust side by `a_finding_goes_over_the_wire_in_camel_case` and
+// `every_fix_is_a_tagged_object`.
+// ---------------------------------------------------------------------------
+
+/**
+ * What the coach found. The order here is the order of the ranking
+ * (`COACH_UX.md` A4): a passage you consistently miss, then a tendency, then
+ * the tempo ceiling, then praise.
+ */
+export type FindingKind =
+  | "consistentMiss"
+  | "rushing"
+  | "dragging"
+  | "afterShift"
+  | "fallsApart"
+  | "extras"
+  | "uneven"
+  | "beatPositionBias"
+  | "subdivisionWeak"
+  | "drift"
+  | "tempoCeiling"
+  | "improved"
+  | "clean";
+
+/**
+ * Something the app can set up in one tap (`COACH_UX.md` A5).
+ *
+ * Bars are played-bar indices — `SongScore.bars[i].index`, not the number on
+ * the page; the page number rides along in `Evidence.printedBars` for the
+ * sentence to quote. They are optional only because the free-play half of the
+ * rules has no bars to name.
+ */
+export type Fix =
+  | { type: "loopBars"; start: number; end: number; tempoPercent: number }
+  | {
+      type: "ramp";
+      start: number | null;
+      end: number | null;
+      fromPercent: number;
+      toPercent: number;
+    }
+  | {
+      type: "clickSubdivision";
+      start: number | null;
+      end: number | null;
+      subdivision: number;
+    }
+  | { type: "comeBack"; days: number };
+
+/**
+ * The numbers a sentence is built from.
+ *
+ * Everything optional is ABSENT rather than zero, so a narrator never quotes
+ * a number nobody measured — the Rust side skips the field rather than
+ * writing a null, and `undefined` is how TypeScript says the same thing.
+ */
+export type Evidence = {
+  /** Expected onsets this finding is drawn from, counting every pass. */
+  onsets: number;
+  hits: number;
+  hitRate: number;
+  /** Signed, in ms. Negative is early. */
+  meanDeviationMs: number;
+  /** The same number as a fraction of a beat — "about a sixteenth early". */
+  deviationBeats: number;
+  /** Median absolute deviation, ms. */
+  spreadMs: number;
+  passes: number;
+  passesAffected: number;
+  /** The BPM that 100 % means for this finding's fix. */
+  referenceBpm?: number;
+  /** The same bars as `Finding.bars`, as they are numbered on the page. */
+  printedBars?: [number, number];
+  /** 1 quarters, 2 eighths, 3 triplets, 4 sixteenths, 6 sextuplets. */
+  subdivision?: number;
+  /** Free play: which beat of the bar, 1-based. */
+  beatPosition?: number;
+  /** Free play: which position inside the beat, 0-based, out of how many. */
+  subdivisionPosition?: [number, number];
+  /** (the tempo it holds, the tempo it collapses at), in BPM. */
+  bpmBand?: [number, number];
+  /** Notes played that are not written, inside this finding's bars. */
+  extras?: number;
+  hitRateDelta?: number;
+  spreadDeltaMs?: number;
+};
+
+/** One thing the coach found. `findings[0]` is the headline. */
+export type Finding = {
+  kind: FindingKind;
+  /** Played bars, inclusive. Absent for free play, which has no score. */
+  bars?: [number, number];
+  /** The notes it is about, by `SongNote.id`, so the tab can colour them. */
+  noteIds: number[];
+  /** 0..1. Only ever compared inside one tier of the ranking. */
+  severity: number;
+  evidence: Evidence;
+  fix?: Fix;
+};
+
+// ---------------------------------------------------------------------------
+// Which note was that — the mirror of `src-tauri/src/pitch.rs`
+// ---------------------------------------------------------------------------
+
+/**
+ * What the tracker says about one note of the score.
+ *
+ * `notAssessed` is the honest one (`SONGS.md` S0.5): a chord, or a soft
+ * onset the contract says must not be scored. A monophonic tracker asked
+ * about three notes at one tick answers about whichever of them won, and
+ * reporting that as two wrong notes would be worse than saying nothing.
+ */
+export type NoteState = "right" | "wrong" | "octave" | "unheard" | "notAssessed";
+
+export type NoteVerdict = {
+  noteId: number;
+  onsetId: number;
+  expectedMidi: number;
+  /** What was heard, as a float MIDI number. `null` when nothing was. */
+  heardMidi: number | null;
+  /**
+   * How far off, in cents, signed, sharp positive. For an octave error this
+   * is the WHOLE distance including the octave: the fact is that a note
+   * twelve semitones out was played.
+   */
+  centsOff: number | null;
+  state: NoteState;
+  /** The tracker's own confidence in the note it heard. */
+  confidence: number;
+};

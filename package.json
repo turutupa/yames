@@ -32,6 +32,7 @@
     "tauri": "node scripts/tauri.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
+    "coach:blocks": "node scripts/coach-blocks.mjs",
     "test:layout": "playwright test",
     "test:layout:ui": "playwright test --ui",
     "test:rust": "node scripts/rust-test.mjs --lib --no-default-features",

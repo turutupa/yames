@@ -16,7 +16,7 @@ import {
   deleteSong as deleteFromList,
   newSongRecord,
   renameSong as renameInList,
-  storeLibrary,
+  songLibrary,
 } from "../../../songs/library";
 import type { SongLibrary, SongRecord } from "../../../songs/library";
 import { buildSchedule, clampRange, rangeTempo, wholeSong } from "../../../songs/schedule";
@@ -71,7 +71,7 @@ export interface SongsSession {
   pushSchedule: () => Promise<boolean>;
 }
 
-export function useSongsSession(library: SongLibrary = storeLibrary): SongsSession {
+export function useSongsSession(library: SongLibrary = songLibrary): SongsSession {
   const [songs, setSongs] = useState<SongRecord[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [range, setRangeState] = useState<BarRange>({ startBar: 0, endBar: 0 });

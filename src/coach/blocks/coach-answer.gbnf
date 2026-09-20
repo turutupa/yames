@@ -61,6 +61,6 @@ block-action ::= "{" ws "\"type\"" ws ":" ws block-action-type-value ws "," ws "
 # Terminals.
 chord-name ::= "\"" chord-root chord-quality? "\""
 chord-root ::= "A#" | "Ab" | "Bb" | "C#" | "D#" | "Db" | "Eb" | "F#" | "G#" | "Gb" | "A" | "B" | "C" | "D" | "E" | "F" | "G"
-chord-quality ::= "m(add9)" | "m(maj7)" | "7sus2" | "7sus4" | "9sus4" | "maj13" | "add9" | "dim7" | "m7b5" | "maj7" | "maj9" | "sus2" | "sus4" | "7#5" | "7#9" | "7b9" | "aug" | "dim" | "m11" | "m13" | "11" | "13" | "69" | "m6" | "m7" | "m9" | "5" | "6" | "7" | "9" | "m"
+chord-quality ::= "m(add9)" | "m(maj7)" | "7sus2" | "7sus4" | "9sus4" | "maj13" | "add9" | "dim7" | "m7b5" | "maj7" | "maj9" | "sus2" | "sus4" | "6/9" | "7#5" | "7#9" | "7b9" | "aug" | "dim" | "m11" | "m13" | "11" | "13" | "m6" | "m7" | "m9" | "5" | "6" | "7" | "9" | "m"
 sentence-char ::= [^"\\\r\n]
 ws ::= [ \t\n]*

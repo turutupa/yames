@@ -973,8 +973,50 @@ fn a_file_replaced_within_the_same_second_is_a_different_key() {
 /// on, which is what the app runs. So the number to quote is the one from
 /// `--release` and the number to gate on is the one that catches a decode
 /// that went quadratic. Both are printed.
+///
+/// **What it asserts is a SHAPE, not a duration.** This test used to hold a
+/// wall-clock ceiling and nothing else, and it failed on a laptop running
+/// four workers while passing on the same laptop alone — a measurement of
+/// the scheduler wearing a decode's name, and the worst kind of test there
+/// is. The margin it had went when the shipped kits became FLAC, which is
+/// how it was noticed.
+///
+/// So the assertions are ratios of measurements taken in the same run, which
+/// a busy machine moves together and therefore cannot spoil:
+///
+/// * a kit twelve times the size costs no more than `LINEAR_SLACK` times
+///   twelve — a decode that went quadratic costs a hundred and forty-four;
+/// * resampling costs no more than eight times not resampling.
+///
+/// The clock survives as a hang-catcher with an order of magnitude of room
+/// in it, and as the number the report quotes. Both are printed.
 #[test]
 fn the_decode_is_quick_enough_to_run_on_the_command_thread() {
+    /// How far off linear the big decode may be before the shape is wrong.
+    /// Three, because the small kit pays the same fixed cost — the directory
+    /// walk, the manifest — over a twelfth of the audio, so the honest
+    /// measured ratio is BELOW twelve rather than above it.
+    const LINEAR_SLACK: f64 = 3.0;
+
+    // The reference: the same kit shape, one layer and one round robin, so
+    // the only thing that differs is how much audio there is to decode.
+    let small = Scratch::new("timing-1x1");
+    for v in KitVoice::ALL {
+        write_sine(
+            &small.path().join(format!("{}.1.1.wav", v.file_name())),
+            48_000,
+            2,
+            16,
+            false,
+            220.0,
+            0.3,
+            0.5,
+        );
+    }
+    let small_start = std::time::Instant::now();
+    let small_bank = load(small.path(), 48_000).expect("a 1 x 1 stereo kit loads");
+    let small_ms = small_start.elapsed().as_secs_f64() * 1000.0;
+
     let scratch = Scratch::new("timing");
     // Four layers, three round robins, eleven voices, stereo at 48 kHz: the
     // shape `club` and `studio` arrive in. Short hits, because the length is
@@ -1018,13 +1060,35 @@ fn the_decode_is_quick_enough_to_run_on_the_command_thread() {
         let voice = bank.voice(v).expect("every voice");
         assert_eq!((voice.layers(), voice.rr()), (4, 3));
     }
-    let gate = if cfg!(debug_assertions) { 12_000.0 } else { 1_500.0 };
+    eprintln!(
+        "[kit] the 1 x 1 reference ({:.1} MB decoded): {small_ms:.0} ms",
+        small_bank.bytes as f64 / (1024.0 * 1024.0),
+    );
+
+    // THE SHAPE. Twelve times the audio may cost `LINEAR_SLACK` times twelve
+    // and no more; a decode that went quadratic costs a hundred and
+    // forty-four. Both numbers come out of the same run, so load that moves
+    // one moves the other and the ratio stands.
+    // Four layers times three round robins, and every file the same length,
+    // so this is exactly how much more audio the big kit holds.
+    let files_ratio = 4.0 * 3.0;
+    let ratio = millis / small_ms.max(1.0);
+    assert!(
+        ratio < files_ratio * LINEAR_SLACK,
+        "a kit {files_ratio:.0}x the size took {ratio:.1}x as long to decode \
+         ({millis:.0} ms against {small_ms:.0} ms) — that is not linear, and a \
+         decode that stopped being linear is a decode that went quadratic"
+    );
+
+    // And the clock, with an order of magnitude of room, so a hang or a
+    // catastrophe still fails rather than running to the harness's timeout.
+    let gate = if cfg!(debug_assertions) { 60_000.0 } else { 15_000.0 };
     for (what, took) in [("at its own rate", millis), ("resampled", resampled)] {
         assert!(
             took < gate,
-            "a 4 x 3 stereo kit took {took:.0} ms to decode {what}, against a gate \
-             of {gate:.0} — that is not a window anybody would call responsive, and \
-             it is far enough over to be a decode that went quadratic"
+            "a 4 x 3 stereo kit took {took:.0} ms to decode {what}, against a \
+             ceiling of {gate:.0} — this is the catastrophe gate, not the \
+             responsiveness one, so something is very wrong"
         );
     }
     // THE RESAMPLE IS NOT AN ORDER OF MAGNITUDE. It was, before the kernel

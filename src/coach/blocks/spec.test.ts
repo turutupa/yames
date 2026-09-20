@@ -121,7 +121,23 @@ describe("the chord spellings", () => {
     }
   });
 
-  it("accepts every chord name the app writes, but one", () => {
+  it("accepts every chord name the app writes", () => {
+    /*
+     * Every one of them, with no exception any more.
+     *
+     * There was one: the six-nine. `chordSuffix("69")` writes "6/9" and
+     * `parseChordName` read the slash as a bass note — "D/F#" is a D — so it
+     * dropped the "/9" and handed back a plain sixth. The catalogue worked
+     * around it by offering "69" and refusing "6/9" outright, because a
+     * spelling the model can write and the app then resolves to a DIFFERENT
+     * chord is the exact failure D3 rule 1 exists to prevent: an unknown
+     * reference renders as nothing, and a wrong one that resolves is worse
+     * than either.
+     *
+     * The parser was fixed (`src/jam/harmony.ts`), so the workaround is gone
+     * and the app writes one spelling everywhere. This list being empty is
+     * what says so.
+     */
     const pattern = new RegExp(chordNamePattern());
     const refused = new Set<string>();
     for (let root = 0; root < 12; root++) {
@@ -129,34 +145,13 @@ describe("the chord spellings", () => {
         if (!pattern.test(chordName(root, quality))) refused.add(quality);
       }
     }
-    // The six-nine chord, and only it. The test below says why.
-    expect([...refused]).toEqual(["69"]);
+    expect([...refused]).toEqual([]);
   });
 
-  it("spells the six-nine chord the way the parser reads it, not the way the app writes it", () => {
-    /*
-     * A found defect in `src/jam/harmony.ts`, worked around here rather than
-     * fixed (it is not this worker's file this wave).
-     *
-     * `chordSuffix("69")` writes "6/9", and `parseChordName` reads a slash as
-     * a bass note — "D/F#" is a D — so it drops the "/9" and hands back a
-     * plain sixth. The right root and the wrong chord.
-     *
-     * So the catalogue offers "69", which the parser reads correctly, and the
-     * grammar does not allow "6/9" at all. Allowing it would let a model name
-     * a six-nine and have the app quietly draw a sixth, which is the exact
-     * failure D3 rule 1 exists to prevent: an unknown reference must render
-     * as nothing, never as a guess — and a WRONG reference that resolves is
-     * worse than either.
-     *
-     * If harmony.ts ever learns to read "6/9", delete this and let
-     * `CHORD_SUFFIXES` use `chordSuffix` unchanged.
-     */
+  it("offers the six-nine chord under the spelling the app writes", () => {
     expect(chordSuffix("69")).toBe("6/9");
-    expect(parseChordName("C6/9")?.quality).toBe("6");
-    expect(parseChordName("C69")?.quality).toBe("69");
-    expect(CHORD_SUFFIXES).toContain("69");
-    expect(CHORD_SUFFIXES).not.toContain("6/9");
+    expect(parseChordName("C6/9")?.quality).toBe("69");
+    expect(CHORD_SUFFIXES).toContain("6/9");
   });
 
   it("refuses a chord the app cannot spell", () => {
@@ -168,7 +163,7 @@ describe("the chord spellings", () => {
 
   it("agrees with the parser about what a chord is", () => {
     const pattern = new RegExp(chordNamePattern());
-    const samples = ["Am7", "Bb", "F#dim7", "C", "G7sus4", "Ebm(maj7)", "D69"];
+    const samples = ["Am7", "Bb", "F#dim7", "C", "G7sus4", "Ebm(maj7)", "D6/9"];
     for (const text of samples) {
       const parsed: Chord | null = parseChordName(text);
       expect(pattern.test(text), `the pattern refused ${text}`).toBe(true);
