@@ -595,6 +595,25 @@
   padding-bottom: 4px;
 }
 
+/* ...except while the verdict is up (W25).
+ *
+ * The strip is "what you reach for with the guitar on", and reading a verdict
+ * is the one moment on this screen when the guitar is down. At the smallest
+ * window the app opens it is 256 px of a 552 px column — so the review, which
+ * is the whole point of having stopped, got 181 px of it and the picture, the
+ * tape and the bars the coach pointed at were all below the fold. Nothing on
+ * the strip is unreachable meanwhile: the fix is a button in the review's own
+ * pinned head, and play is on the transport, which is shell furniture and
+ * always there. It comes back the instant the review goes.
+ *
+ * `display: none` rather than a height of zero, so it costs nothing to lay
+ * out and nothing to hit-test. The tab behind the review keeps its WIDTH
+ * either way — that is the measurement alphaTab engraves against — so no
+ * score is re-drawn when the strip leaves or returns. */
+.songs-view[data-review] .songs-strip {
+  display: none;
+}
+
 .songs-strip-group {
   display: flex;
   align-items: center;

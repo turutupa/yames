@@ -42,6 +42,22 @@
  * - **Reduced motion**: the entrance is a stylesheet animation and
  *   `songs.css` turns it off under `prefers-reduced-motion`. Nothing here
  *   animates in JavaScript, which is what makes that possible.
+ *
+ * ## The one thing is PINNED, and the rest scrolls (2026-09-20, W25)
+ *
+ * A4 says the verdict is one sentence with its fix as a button. That was true
+ * of the words and not of the screen: the sentence was the first of the
+ * headline's blocks inside the body, under the picture — so at the smallest
+ * window the app opens (480×780) the player saw a sliver of their own hands
+ * and had to scroll to find out what the coach had said.
+ *
+ * So the headline answer is split where A4 splits it. The `text` and the
+ * `action` — what a teacher SAYS and what they hand you to press — go in the
+ * pinned head. The bars it is about, the tape and the picture stay in the
+ * body, which is A4's "everything else is there if you open it". Both halves
+ * are drawn by `CoachBlocks` from the same resolved answer, so there is still
+ * one renderer and one catalogue, and a model that one day writes the answer
+ * changes neither half.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -286,6 +302,27 @@ export function SongReview({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [headline, score, review.scoreId, context, progressFor, video, t]);
 
+  /**
+   * The headline, split where A4 splits it.
+   *
+   * `said` is the sentence and the button — the verdict, pinned in the head.
+   * `shown` is everything the sentence POINTS at: the bars, the excerpt, the
+   * tape button, the progress line. They are one resolved answer and one
+   * renderer; only the box they are drawn in differs, and the order inside
+   * each half is the order `blocksFor` chose.
+   *
+   * A `filter` rather than a second resolve: re-resolving would draw a
+   * different variant of the same sentence, and the bag exists to stop that.
+   */
+  const said = useMemo(
+    () => (answer?.blocks ?? []).filter((b) => b.type === "text" || b.type === "action"),
+    [answer],
+  );
+  const shown = useMemo(
+    () => (answer?.blocks ?? []).filter((b) => b.type !== "text" && b.type !== "action"),
+    [answer],
+  );
+
   const others = useMemo(
     () =>
       rest.map((finding) => ({
@@ -392,6 +429,17 @@ export function SongReview({
         <button type="button" className="songs-btn songs-review-back" onClick={onDismiss}>
           {t("songs.stage.backToTab")}
         </button>
+
+        {/* The one thing, and the thing to press (A4/A5), on a row of their
+            own inside the pinned head. On screen at every window height the
+            app opens — which is what it means for the coach to have said it. */}
+        {headline && said.length > 0 && (
+          <CoachBlocks
+            blocks={said}
+            onAction={handlerFor(headline)}
+            className="songs-review-said"
+          />
+        )}
       </header>
 
       {/* The head is pinned and the rest scrolls under it.
@@ -421,9 +469,11 @@ export function SongReview({
         />
       )}
 
-      {answer && headline && answer.blocks.length > 0 && (
+      {/* What the sentence in the head is pointing AT. The sentence and its
+          button are up there; these are the bars, and the way to watch them. */}
+      {headline && shown.length > 0 && (
         <CoachBlocks
-          blocks={answer.blocks}
+          blocks={shown}
           onAction={handlerFor(headline)}
           slots={{ tabExcerpt: TabExcerpt, take: TakeSlot }}
           className="songs-review-answer"

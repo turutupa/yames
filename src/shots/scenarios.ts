@@ -235,6 +235,17 @@ export interface Shot {
   width: number;
   height: number;
   /**
+   * Build the scene at this size, then narrow to `width`×`height` (W25).
+   *
+   * The scenes here are driven the way a person drives the app — a library
+   * row is CLICKED — and below about 900 px the rail collapses and there is
+   * no library to click, so a scene born at 480 px never finishes building.
+   * `tests/layout/fits.ts` has always done this; a shot of the smallest
+   * window the app opens needs the same, and it is the truer test anyway: a
+   * window is a thing people drag.
+   */
+  buildAt?: { width: number; height: number };
+  /**
    * Capture only this element's box rather than the viewport.
    *
    * The floating widget is a transparent window with the pill drawn inside
@@ -614,6 +625,34 @@ export const SHOTS: Shot[] = [
     width: 1400,
     height: 900,
     settleMs: 900,
+  },
+  {
+    id: "songs-camera-small",
+    suffix: "songs-camera-small",
+    window: "main",
+    tab: "songs",
+    // W25 item 1 — the same review, at the smallest window the app will open
+    // (`tauri.conf.json`: 480×780). The one the strip used to leave 181px of,
+    // and the picture the layout suite's restored rule is argued from.
+    songs: { row: 0, review: "rushing", camera: true },
+    buildAt: { width: 1440, height: 900 },
+    width: 480,
+    height: 780,
+    settleMs: 900,
+  },
+  {
+    id: "songs-camera-armed",
+    suffix: "songs-camera-armed",
+    window: "main",
+    tab: "songs",
+    // The stage with the camera OPEN and nothing recorded yet: the little
+    // mirror over the tab, the switch lit, the strip still a strip. It is
+    // what "the camera costs the strip no height" is measured against, now
+    // that a review takes the strip's room (W25 item 1).
+    songs: { row: 0, camera: true },
+    width: 1100,
+    height: 720,
+    settleMs: 600,
   },
   {
     id: "songs-picker",

@@ -471,6 +471,14 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
     <div
       className="songs-view"
       ref={stageRef}
+      /* W25 — while the verdict is up, the strip stands down and the review
+         has the stage. At 480×780 the strip is 256 px of a 552 px column, so
+         the review got 181 px and the picture, the tape and everything the
+         coach pointed at were a scroll away. Nothing on the strip is reached
+         while reading a verdict — the fix is a button in the head, and play
+         is on the transport — and it comes straight back when the review
+         does. See `songs.css`. */
+      data-review={reviewShowing ? "" : undefined}
       data-dragging={dragging ? "" : undefined}
       onDragOver={(e) => {
         e.preventDefault();

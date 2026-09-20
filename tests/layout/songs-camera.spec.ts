@@ -77,26 +77,23 @@ test.describe("the review with a picture", () => {
       expect(tape, `no tape at ${size.width}px`).not.toBeNull();
 
       /*
-       * The vertical rule applies where there is a frame to fit into.
+       * The vertical rule, at every size — the skip is gone (W25 item 1).
        *
-       * At 480×780 there is not: the stage's header and strip leave the review
-       * a 139px panel with a 15px scrolling body, and nothing at all — not the
-       * coach's own sentence either — is above that fold. That is W18's layout
-       * at the minimum window and it is reported rather than worked around
-       * here. Where the frame has room, the picture has to fit it and the tape
-       * has to START inside it, which is what makes them the first thing the
-       * player sees.
+       * W21 had to skip this at 480×780, because the stage's head and strip
+       * left the review a 181px panel and nothing at all was above that fold.
+       * The strip now stands down while a verdict is up (`songs.css`), which
+       * gives the review the whole column, and the coach's sentence moved into
+       * the review's own pinned head — so there is a frame to fit into at
+       * every window the app opens, and this asks about all of them.
        */
-      if (frame!.height >= 120) {
-        expect(
-          picture!.y + picture!.height,
-          `the picture ends below the frame at ${size.width}px`,
-        ).toBeLessThanOrEqual(bottom + 1);
-        expect(
-          tape!.y,
-          `the tape starts below the frame at ${size.width}px — it is a scroll away`,
-        ).toBeLessThanOrEqual(bottom - 8);
-      }
+      expect(
+        picture!.y + picture!.height,
+        `the picture ends below the frame at ${size.width}px`,
+      ).toBeLessThanOrEqual(bottom + 1);
+      expect(
+        tape!.y,
+        `the tape starts below the frame at ${size.width}px — it is a scroll away`,
+      ).toBeLessThanOrEqual(bottom - 8);
 
       // And both inside the window on either side: a percentage-positioned
       // strip wider than its parent is a tape whose marks point at the wrong
@@ -113,6 +110,49 @@ test.describe("the review with a picture", () => {
       }
     });
   }
+
+  /**
+   * The verdict itself is on screen at the smallest window the app opens.
+   *
+   * W25 item 1, and the point of the whole change: the coach's sentence, the
+   * button that acts on it, and the top of the player's own hands, all inside
+   * a 480×780 window with nothing scrolled. Measured against the VIEWPORT
+   * rather than against a frame — this is the "is it above the fold" question,
+   * and the fold is the window.
+   */
+  test("shows the sentence, the fix and the picture at the smallest window", async ({ page }) => {
+    const size = { width: 480, height: 780 };
+    await openShot(page, "songs-camera", size);
+
+    for (const [selector, what] of [
+      [".songs-review-said .coach-block-sentence", "the coach's sentence"],
+      [".songs-review-said .coach-block-button", "the fix"],
+    ] as const) {
+      const box = await page.locator(selector).first().boundingBox();
+      expect(box, `${what} is not on the review`).not.toBeNull();
+      expect(box!.y, `${what} starts below the window`).toBeLessThanOrEqual(size.height);
+      expect(
+        box!.y + box!.height,
+        `${what} ends ${Math.round(box!.y + box!.height - size.height)}px below the window`,
+      ).toBeLessThanOrEqual(size.height);
+      expect(box!.x, `${what} starts off the left`).toBeGreaterThanOrEqual(-1);
+      expect(box!.x + box!.width, `${what} runs past the right`).toBeLessThanOrEqual(size.width + 1);
+    }
+
+    // And the top of the picture, which is the reward (`ECHORA.md` E0.7). Its
+    // TOP, not its whole height: the body scrolls, and what matters is that a
+    // player who stops sees their own hands without asking for them.
+    const picture = await page.locator(".songs-take-video-stage").boundingBox();
+    expect(picture, "no picture").not.toBeNull();
+    expect(
+      picture!.y,
+      `the picture starts ${Math.round(picture!.y - size.height)}px below the window`,
+    ).toBeLessThan(size.height);
+
+    // Nothing above had to be scrolled to.
+    const scrolled = await page.$eval(".songs-review-body", (node) => node.scrollTop);
+    expect(scrolled, "the review's body was already scrolled").toBe(0);
+  });
 
   /**
    * The picture is the first thing in the review's body.
@@ -231,13 +271,17 @@ test.describe("the camera on the stage", () => {
    */
   test("puts the preview over the tab and not in the strip", async ({ page }) => {
     const size = { width: 1100, height: 720 };
-    await openShot(page, "songs-camera", size);
+    // Both scenes are of a stage being PLAYED rather than reviewed: a verdict
+    // takes the strip's room now (W25 item 1), so the strip is not drawn on
+    // either review scene and comparing two absences proves nothing. The
+    // camera is open in the first and has never been opened in the second,
+    // which is the difference this is about.
+    await openShot(page, "songs-camera-armed", size);
+    const preview = await page.locator(".songs-camera-preview").boundingBox();
+    expect(preview, "no preview on the armed stage").not.toBeNull();
 
-    // The scene ends on the review, where the preview is gone with the camera
-    // — so this measures the strip's height there against the same stage with
-    // no camera at all. A difference is the camera having taken a row.
     const withCamera = await page.locator(".songs-strip").boundingBox();
-    await openShot(page, "songs-review-rushing", size);
+    await openShot(page, "songs", size);
     const without = await page.locator(".songs-strip").boundingBox();
     expect(withCamera, "no strip on the camera scene").not.toBeNull();
     expect(without, "no strip on the plain scene").not.toBeNull();
