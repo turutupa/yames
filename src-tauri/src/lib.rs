@@ -127,6 +127,8 @@ use commands::{
     get_system_memory_mb,
     // W2 — the practice store (ROADMAP 1.1).
     get_score_source, list_scores, query_attempts, query_history, save_attempt, save_score,
+    // W14 — "come back to this", off settings.json and onto migration three.
+    clear_due, list_due, save_due,
     // W10 — the door to the coach's judgement (findings.rs) and its ears (pitch.rs).
     analyze_attempt, analyze_take_pitch,
     get_waveform, is_coach_loaded, list_audio_input_devices, list_audio_output_devices,
@@ -755,6 +757,10 @@ pub fn run() {
             delete_score,
             save_attempt,
             query_attempts,
+            // W14 — the promise the coach's fourth button makes.
+            save_due,
+            list_due,
+            clear_due,
             // W10 — the coach's judgement and its ears.
             analyze_attempt,
             analyze_take_pitch,

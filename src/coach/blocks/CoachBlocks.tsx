@@ -77,8 +77,16 @@ function spellingOf(name: string): "sharp" | "flat" {
   return name[1] === "b" ? "flat" : "sharp";
 }
 
-function passageTitle(t: Translate, score: ScoreRef, fromBar: number, toBar: number): string {
-  return t("coachBlocks.passage.bars", { from: fromBar, to: toBar, title: score.title });
+/**
+ * "Bars 9-16 of Blackbird", in the numbers on the page.
+ *
+ * PRINTED bars, always. A block names played bars because that is what the
+ * app acts on, and `resolve.ts` looks up what the page calls them - so a
+ * heading, a sentence and a button about one passage all say the same pair
+ * even on a song whose first eight bars repeat.
+ */
+function passageTitle(t: Translate, score: ScoreRef, printedFrom: number, printedTo: number): string {
+  return t("coachBlocks.passage.bars", { from: printedFrom, to: printedTo, title: score.title });
 }
 
 function BlockHeading({ title, note }: { title: string; note?: string | null }) {
@@ -260,7 +268,7 @@ function Block({
       return (
         <>
           <BlockHeading
-            title={passageTitle(t, block.score, block.fromBar, block.toBar)}
+            title={passageTitle(t, block.score, block.printedFrom, block.printedTo)}
             note={block.attempt ? t("coachBlocks.tab.attempt") : t("coachBlocks.tab.plain")}
           />
           <Tab
@@ -278,10 +286,13 @@ function Block({
       const last = block.points[block.points.length - 1];
       return (
         <>
-          <BlockHeading title={passageTitle(t, block.score, block.fromBar, block.toBar)} />
+          <BlockHeading title={passageTitle(t, block.score, block.printedFrom, block.printedTo)} />
           <ProgressChart
             points={block.points}
-            label={t("coachBlocks.progress.aria", { from: block.fromBar, to: block.toBar })}
+            label={t("coachBlocks.progress.aria", {
+              from: block.printedFrom,
+              to: block.printedTo,
+            })}
           />
           <p className="coach-block-caption">
             {t("coachBlocks.progress.caption", {
@@ -301,9 +312,9 @@ function Block({
       const title =
         block.score === null
           ? t("coachBlocks.take.any")
-          : block.fromBar === null || block.toBar === null
+          : block.printedFrom === null || block.printedTo === null
             ? t("coachBlocks.take.whole", { title: block.score.title })
-            : passageTitle(t, block.score, block.fromBar, block.toBar);
+            : passageTitle(t, block.score, block.printedFrom, block.printedTo);
       return (
         <>
           <BlockHeading title={title} />

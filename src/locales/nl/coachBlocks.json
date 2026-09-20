@@ -16,8 +16,7 @@
       "loadJam": "Play along with {{name}}",
       "comeBack": {
         "tomorrow": "Come back to this tomorrow",
-        "nextSession": "Come back to this next time",
-        "inThreeDays": "Come back to this in three days"
+        "inDays": "Kom hier over {{days}} dagen op terug"
       }
     },
     "fretboard": {

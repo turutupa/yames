@@ -40,6 +40,17 @@ export function megabytes(bytes: number): number {
   return Math.round(bytes / (1024 * 1024));
 }
 
+/**
+ * The store key that says the first-run dialog has been read.
+ *
+ * The APP's, not the jam's and not the song's: what a take is only has to be
+ * explained once, and a per-record flag would ask again for every jam in the
+ * library — which reads as the app not trusting the answer you already gave.
+ * It lives here rather than in either screen's hook because Songs records
+ * takes too, and the promise made by that dialog is one promise.
+ */
+export const TAKES_INTRO_KEY = "jam.takesIntroSeen";
+
 /** `4:07`. The same clock the transport writes, so the two agree on screen. */
 export function takeLength(durationSec: number): string {
   const s = Math.max(0, Math.round(durationSec));

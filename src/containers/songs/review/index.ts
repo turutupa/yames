@@ -27,6 +27,8 @@ export type { SongActions, SongActionsInput, SongRamp } from "./useSongActions";
 export { useLiveNoteLights, markFromFeedback, onsetsInBeat } from "./useLiveNoteLights";
 export type { LiveLights } from "./useLiveNoteLights";
 
+export { useSongProgress } from "./useSongProgress";
+
 export { useSongTakePitch, takePitchFor } from "./useSongTakePitch";
 export type { SongTake } from "./useSongTakePitch";
 

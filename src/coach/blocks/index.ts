@@ -48,7 +48,6 @@ export type {
   CoachAnswer,
   CoachBlock,
   CoachBlockType,
-  ComeBackWhen,
   NeckPosition,
   NeckSubject,
 } from "./types";

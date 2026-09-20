@@ -29,13 +29,25 @@ import "../../styles/global.css";
 // A world for the references to point at
 // ---------------------------------------------------------------------------
 
+/**
+ * Sixty-four bars, played straight through.
+ *
+ * No `printedBars`, and deliberately: a score with no repeats in it prints
+ * the bars it plays, so the gallery reads the way the owner expects and the
+ * two-numberings case is pinned where it belongs, in the tests.
+ */
 const SCORE = { id: "wish-you-were-here", title: "Wish You Were Here", bars: 64 };
+
+export const OLDER = "0a3f1c62-1d64-4c2e-9d31-3f9a2b5c7e01";
+export const NEWER = "5b8e2d47-9c10-4a55-8f2b-7d4c6e1a9b33";
 
 export const GALLERY_CONTEXT: CoachBlockContext = {
   scores: [SCORE],
   attempts: [
-    { id: 411, scoreId: SCORE.id, playedAt: "2026-09-12" },
-    { id: 412, scoreId: SCORE.id, playedAt: "2026-09-19" },
+    // The ids the store gives an attempt: UUIDs the frontend mints, not row
+    // numbers. The catalogue believed otherwise until W14.
+    { id: "0a3f1c62-1d64-4c2e-9d31-3f9a2b5c7e01", scoreId: SCORE.id, playedAt: "2026-09-12" },
+    { id: "5b8e2d47-9c10-4a55-8f2b-7d4c6e1a9b33", scoreId: SCORE.id, playedAt: "2026-09-19" },
   ],
   presets: [{ id: "warmup", name: "Warm-up" }],
   jams: [{ id: "slow-blues-a", name: "Slow blues in A" }],
@@ -63,7 +75,7 @@ export const GALLERY_SCENES: Scene[] = [
           type: "text",
           text: "The last four bars ran ahead three times out of four — about a sixteenth early each time.",
         },
-        { type: "tabExcerpt", score: SCORE.id, fromBar: 17, toBar: 20, attempt: 412 },
+        { type: "tabExcerpt", score: SCORE.id, fromBar: 17, toBar: 20, attempt: NEWER },
         {
           type: "action",
           action: { kind: "loopBars", score: SCORE.id, fromBar: 17, toBar: 20, bpm: 96 },
@@ -107,8 +119,8 @@ export const GALLERY_SCENES: Scene[] = [
       blocks: [
         { type: "text", text: "A month ago this passage topped out at 61. Today you held 94." },
         { type: "progress", score: SCORE.id, fromBar: 17, toBar: 20 },
-        { type: "take", attempt: 412, fromBar: 17, toBar: 20 },
-        { type: "compare", attempts: [411, 412] },
+        { type: "take", attempt: NEWER, fromBar: 17, toBar: 20 },
+        { type: "compare", attempts: [OLDER, NEWER] },
       ],
     },
   },
@@ -122,7 +134,7 @@ export const GALLERY_SCENES: Scene[] = [
         { type: "action", action: { kind: "clickSubdivision", subdivision: 2 } },
         { type: "action", action: { kind: "loadPreset", preset: "warmup" } },
         { type: "action", action: { kind: "loadJam", jam: "slow-blues-a" } },
-        { type: "action", action: { kind: "comeBack", when: "tomorrow" } },
+        { type: "action", action: { kind: "comeBack", days: 1 } },
       ],
     },
   },
@@ -137,7 +149,7 @@ export const GALLERY_SCENES: Scene[] = [
         { type: "fretboard", show: { of: "scale", root: "C", scale: "minorPentatonic" }, position: "rootOn6", instrument: "bass" },
         { type: "tabExcerpt", score: SCORE.id, fromBar: 60, toBar: 300 },
         { type: "tabExcerpt", score: "a-song-nobody-imported", fromBar: 1, toBar: 4 },
-        { type: "compare", attempts: [412, 412] },
+        { type: "compare", attempts: [NEWER, NEWER] },
       ],
     },
   },

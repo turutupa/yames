@@ -74,6 +74,20 @@ describe("reading back what was stored", () => {
   it("keeps only lanes that exist", () => {
     expect(readMixSetting({ muted: ["drums", "trombone"] }).muted).toEqual(["drums"]);
   });
+
+  /**
+   * The microphone's switch has one safe default and this is it. `takes` is
+   * read off a file a person can edit and an older build wrote, so anything
+   * that is not the literal `true` leaves the mic alone.
+   */
+  it("records only when the file says exactly true", () => {
+    expect(readMixSetting(undefined).takes).toBe(false);
+    expect(readMixSetting({}).takes).toBe(false);
+    for (const value of ["true", "yes", 1, {}, null]) {
+      expect(readMixSetting({ takes: value }).takes, JSON.stringify(value)).toBe(false);
+    }
+    expect(readMixSetting({ takes: true }).takes).toBe(true);
+  });
 });
 
 describe("where it is kept", () => {

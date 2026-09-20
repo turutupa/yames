@@ -2012,6 +2012,47 @@ pub fn query_attempts(
     store.read_or(Vec::new(), |db| db.query_attempts(&query))
 }
 
+// -- come back to this (COACH_UX A5) ---------------------------------------
+//
+// The promise the coach's fourth button makes. It lived in `settings.json`
+// until the store had a table for it, which `src/songs/due.ts` said at the
+// time was where it belonged until there was a schema; migration three is
+// that schema, and `due.ts` moves what it finds across once.
+
+/// Write a promise down, or move the day of one already made.
+#[tauri::command(async)]
+pub fn save_due(
+    due: crate::db::ScoreDue,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<(), String> {
+    store.with(|db| db.save_due(&due))
+}
+
+/// Every promise on file, the soonest due first.
+///
+/// The whole list rather than "what is due today": the day is a question
+/// about the player's own calendar and the store would have to answer it in
+/// UTC. A player in Auckland practising at 09:00 is on a different day from
+/// one in Vancouver at the same instant, and it is their calendar the
+/// promise is about.
+#[tauri::command(async)]
+pub fn list_due(
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Vec<crate::db::ScoreDue> {
+    store.read_or(Vec::new(), |db| db.list_due())
+}
+
+/// Forget one — the player played it, or does not want the reminder.
+#[tauri::command(async)]
+pub fn clear_due(
+    score_id: String,
+    start_bar: i64,
+    end_bar: i64,
+    store: State<'_, crate::db::SharedPracticeStore>,
+) -> Result<(), String> {
+    store.with(|db| db.clear_due(&score_id, start_bar, end_bar))
+}
+
 // ---------------------------------------------------------------------------
 // The coach's judgement, and its ears — the door to `findings.rs` and
 // `pitch.rs`
@@ -2420,10 +2461,11 @@ fn stored_attempt_to_passes(row: &crate::db::Attempt) -> AttemptPasses {
                     state,
                     deviation_ms: o.deviation_ms,
                     pass: o.pass.max(0) as u32,
-                    // The store does not keep accents yet (they arrived
-                    // the same night as this command), so an earlier
-                    // attempt read back has nothing to say about them.
-                    accent_heard: None,
+                    // The store keeps accents from migration three on, so an
+                    // earlier attempt carries what was heard. `None` from a
+                    // row written before that column existed, which is the
+                    // same `None` as "there was nothing to say".
+                    accent_heard: o.accent_heard,
                 })
             })
             .collect(),

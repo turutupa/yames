@@ -284,10 +284,10 @@
           "description": "The last bar of the passage, and not before the first."
         },
         "attempt": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 999999999,
-          "description": "Which attempt to colour it by. Left out, the plain notes."
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "description": "Which attempt to colour it by, by its id. Left out, the plain notes."
         }
       }
     },
@@ -346,10 +346,10 @@
           "description": "Which block."
         },
         "attempt": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 999999999,
-          "description": "Which attempt the take belongs to."
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "description": "Which attempt the take belongs to, by its id."
         },
         "fromBar": {
           "type": "integer",
@@ -386,11 +386,11 @@
           "minItems": 2,
           "maxItems": 2,
           "items": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 999999999
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
           },
-          "description": "The two attempts, the older one first."
+          "description": "The ids of the two attempts, the older one first."
         }
       }
     },
@@ -559,7 +559,7 @@
               "additionalProperties": false,
               "required": [
                 "kind",
-                "when"
+                "days"
               ],
               "properties": {
                 "kind": {
@@ -569,14 +569,11 @@
                   ],
                   "description": "Leave it for another day."
                 },
-                "when": {
-                  "type": "string",
-                  "enum": [
-                    "tomorrow",
-                    "nextSession",
-                    "inThreeDays"
-                  ],
-                  "description": "When to bring it up again."
+                "days": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 14,
+                  "description": "How many days from now to bring it up again."
                 }
               }
             }

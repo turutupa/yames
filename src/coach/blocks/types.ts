@@ -37,8 +37,15 @@ export type NeckSubject =
   | { of: "scale"; root: string; scale: ScaleId }
   | { of: "chord"; chord: string };
 
-/** When to bring something up again. The date is the app's to work out. */
-export type ComeBackWhen = "tomorrow" | "nextSession" | "inThreeDays";
+/**
+ * Bars a block names are PLAYED bars, counted from 1.
+ *
+ * A block is an instruction to the app, and everything that acts on bars —
+ * the transport, the range, the schedule, the excerpt — works in played
+ * bars. The printed numbers are looked up from the score by `resolve.ts` and
+ * are what the renderer shows, so the app and the player can never be talking
+ * about two different bar 9s on a song with repeats.
+ */
 
 /**
  * The button (A5: "the fix is always an action").
@@ -53,7 +60,13 @@ export type CoachAction =
   | { kind: "clickSubdivision"; subdivision: number }
   | { kind: "loadPreset"; preset: string }
   | { kind: "loadJam"; jam: string }
-  | { kind: "comeBack"; when: ComeBackWhen };
+  /**
+   * Days, not one of three named occasions. `findings.rs` decides out of
+   * `srs.rs`'s ladder and its `Fix::ComeBack` carries a number of days, so
+   * three words could not hold it: a two-day promise went out as "tomorrow"
+   * and came back as one day.
+   */
+  | { kind: "comeBack"; days: number };
 
 export type TextBlock = { type: "text"; text: string };
 
@@ -76,14 +89,15 @@ export type TabExcerptBlock = {
   score: string;
   fromBar: number;
   toBar: number;
-  attempt?: number;
+  /** The id of the attempt to colour by — a UUID the store gave it. */
+  attempt?: string;
 };
 
 export type ProgressBlock = { type: "progress"; score: string; fromBar: number; toBar: number };
 
-export type TakeBlock = { type: "take"; attempt: number; fromBar?: number; toBar?: number };
+export type TakeBlock = { type: "take"; attempt: string; fromBar?: number; toBar?: number };
 
-export type CompareBlock = { type: "compare"; attempts: number[] };
+export type CompareBlock = { type: "compare"; attempts: string[] };
 
 export type ActionBlock = { type: "action"; action: CoachAction };
 

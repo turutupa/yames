@@ -206,28 +206,25 @@ function severityOf(kind: FindingKind): "encouragement" | "correction" {
 // ---------------------------------------------------------------------------
 
 /**
- * How `ComeBack { days }` and the catalogue's three words line up.
+ * `Fix::ComeBack { days }` and the catalogue now say the same thing.
  *
- * The catalogue names occasions, not day counts, because "come back to this
- * in two days" is not something a teacher says. `findings.rs` only ever asks
- * for two days (after something improved) or three (after a clean pass at
- * full tempo), so the round trip below is exact for everything that exists
- * today, and `comeBackDays` is what the notebook stores rather than the word.
+ * The catalogue used to name three occasions — tomorrow, next session, in
+ * three days — and this file mapped a number of days onto the nearest of
+ * them and back. That round trip was lossy in one direction and silently
+ * wrong in the other: `findings.rs` asks for whatever `srs.rs`'s ladder
+ * returns, and the moment that was four days it came back out as three.
+ * The action carries the number, and the BUTTON is where the words go —
+ * `resolve.ts` says "tomorrow" for one day and counts for the rest.
+ *
+ * The clamp is the catalogue's own bound, so a fix outside it loses its
+ * button rather than producing a block the resolver drops.
  */
-const COME_BACK_DAYS: Record<string, number> = {
-  tomorrow: 1,
-  nextSession: 2,
-  inThreeDays: 3,
-};
+const MAX_COME_BACK = 14;
 
-export function comeBackDays(when: string): number {
-  return COME_BACK_DAYS[when] ?? 1;
-}
-
-function comeBackWhen(days: number): "tomorrow" | "nextSession" | "inThreeDays" {
-  if (days <= 1) return "tomorrow";
-  if (days <= 2) return "nextSession";
-  return "inThreeDays";
+function comeBackDaysOf(days: number): number | null {
+  if (!Number.isFinite(days)) return null;
+  const whole = Math.round(days);
+  return whole >= 1 && whole <= MAX_COME_BACK ? whole : null;
 }
 
 /** A percentage of the reference tempo, as a BPM the button can say. */
@@ -278,8 +275,10 @@ export function actionFor(finding: Finding, scoreId: string | null): CoachAction
     }
     case "clickSubdivision":
       return { kind: "clickSubdivision", subdivision: fix.subdivision };
-    case "comeBack":
-      return { kind: "comeBack", when: comeBackWhen(fix.days) };
+    case "comeBack": {
+      const days = comeBackDaysOf(fix.days);
+      return days === null ? null : { kind: "comeBack", days };
+    }
   }
 }
 
@@ -315,8 +314,8 @@ export type BlocksOptions = {
   /** The song in the library, so `tabExcerpt` and `loopBars` have something
    *  to point at. Null for free play, where neither resolves and both go. */
   scoreId: string | null;
-  /** The attempt the colours come from, when it has been saved. */
-  attemptNumber?: number;
+  /** The attempt the colours come from, by the id the store gave it. */
+  attemptId?: string;
   /** Whether this passage has a history worth drawing (C3). */
   withProgress?: boolean;
 };
@@ -348,7 +347,9 @@ export function blocksFor(t: Translate, finding: Finding, score: SongScore | nul
       score: opts.scoreId,
       fromBar,
       toBar,
-      ...(opts.attemptNumber === undefined ? {} : { attempt: opts.attemptNumber }),
+      ...(opts.attemptId === undefined || opts.attemptId === ""
+        ? {}
+        : { attempt: opts.attemptId }),
     });
   }
 

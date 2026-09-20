@@ -299,6 +299,57 @@
   opacity: 1;
 }
 
+/* ── The notes light while you play (SONGS.md A7) ─────────────────────── */
+
+/* alphaTab writes its colours as SVG presentation attributes — `fill="#…"` on
+   every path and text it draws — and a presentation attribute loses to any
+   stylesheet rule at all. So these four rules repaint a beat without alphaTab
+   knowing, and stop the moment the attribute comes off.
+ *
+ * Quiet on purpose: the tab is the thing being read and a bar of traffic
+ * lights is harder to play from than a bar of notes. The colour is the
+ * theme's own feedback token at four fifths, and the mark under the fret
+ * number is the same glyph language the review uses — `MARK_GLYPH`, so a
+ * player never has to learn two alphabets for one verdict, and so the two
+ * low-contrast themes still say which side of the beat a note fell on. */
+.songs-tab-host [data-song-light] path,
+.songs-tab-host [data-song-light] text {
+  fill: var(--songs-light-tone);
+  stroke: var(--songs-light-tone);
+  opacity: 0.82;
+}
+
+.songs-tab-host [data-song-light="onTime"] {
+  --songs-light-tone: var(--feedback-perfect);
+}
+
+.songs-tab-host [data-song-light="slightlyEarly"],
+.songs-tab-host [data-song-light="slightlyLate"] {
+  --songs-light-tone: var(--feedback-good);
+}
+
+.songs-tab-host [data-song-light="early"],
+.songs-tab-host [data-song-light="late"] {
+  --songs-light-tone: var(--feedback-ok);
+}
+
+.songs-tab-host [data-song-light="missed"] {
+  --songs-light-tone: var(--feedback-miss);
+}
+
+.songs-tab-host [data-song-light="notAssessed"] {
+  --songs-light-tone: var(--text-faint);
+}
+
+/* The mark itself. Smaller than the fret number beside it and in the theme's
+   own face, so it reads as an annotation rather than as something the
+   engraver wrote. */
+.songs-tab-host .songs-note-light-glyph {
+  font-family: var(--font-family);
+  font-size: 10px;
+  opacity: 1;
+}
+
 .songs-tab-status {
   position: absolute;
   inset: 0;
@@ -456,6 +507,158 @@
   font-size: 11px;
   font-variant-numeric: tabular-nums;
   color: var(--text-tertiary);
+}
+
+/* ── Recording the pass, and the shelf under the song ─────────────────── */
+
+/* The same surface Jam's takes have, in this mode's class names, because
+   songs.css does not reach into jam.css (see the header) and a stylesheet a
+   mode does not load is a mode whose controls draw unstyled. The behaviour
+   and every sentence are Jam's — `SongTakes.tsx` says why. */
+
+.songs-record-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+}
+
+/* Filled while it is actually writing. The word beside it does not change
+   width, so a button being reached for does not move under the finger. */
+.songs-record-dot[data-live] {
+  border-color: var(--feedback-miss);
+  background: var(--feedback-miss);
+}
+
+.songs-chip[data-recording] {
+  border-color: var(--feedback-miss);
+}
+
+.songs-takes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+}
+
+.songs-takes-empty,
+.songs-takes-size {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.songs-takes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.songs-take {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+}
+
+.songs-take:hover {
+  background: var(--surface-hover);
+}
+
+.songs-take[data-playing] {
+  border-color: var(--accent);
+}
+
+.songs-take-play {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.songs-take-play.playing {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.songs-take-play:disabled,
+.songs-take-delete:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.songs-take-when {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.songs-take-length,
+.songs-take-bandoff {
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.songs-take-spacer {
+  flex: 1 1 auto;
+}
+
+.songs-take-confirm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.songs-take-confirm-ask {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.songs-take-confirm button,
+.songs-take-delete {
+  padding: 2px 8px;
+  font-size: 11px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.songs-take-confirm-yes {
+  color: var(--feedback-miss);
+}
+
+/* Jam's consent dialog is shared rather than copied, so the one rule that
+   shapes its card has to be reachable from a screen that does not load
+   jam.css. Two lines, against two copies of a promise about a microphone. */
+.songs-view .jam-takes-card {
+  max-width: 420px;
+}
+
+.songs-view .jam-takes-card .unsaved-body p {
+  margin: 0 0 8px;
+}
+
+.songs-view .jam-takes-card .unsaved-body p:last-child {
+  margin-bottom: 0;
 }
 
 /* ── Counting you in ──────────────────────────────────────────────────── */

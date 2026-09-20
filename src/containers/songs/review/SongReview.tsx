@@ -35,14 +35,6 @@ import { printedBarNumber } from "../../../songs/position";
 import type { Finding, NoteVerdict } from "../../../songs/types";
 import "../../../styles/songs-review.css";
 
-/**
- * The attempt number the blocks on this screen point at.
- *
- * The catalogue numbers attempts from one and the store names them with a
- * string, so there is no id to share: on a review screen there is exactly one
- * attempt and it is this one.
- */
-const THIS_ATTEMPT = 1;
 
 export type SongReviewProps = {
   review: SongAttemptReview;
@@ -95,20 +87,39 @@ export function SongReview({ review, pitch, onAction, onDismiss, progressFor }: 
   /**
    * What the blocks are allowed to point at.
    *
-   * One song and one attempt, because that is what this review is about. The
-   * catalogue numbers attempts and the store names them with a string, so the
-   * attempt in here is `1` — "the one you just played"; the catalogue counts
-   * them from one, the way the store's rows are numbered. A block asking
-   * for any other number resolves to nothing, which is correct: there is no
-   * other attempt on this screen.
+   * One song and one attempt, because that is what this review is about, and
+   * the attempt is named by its OWN id — the UUID the store gave it. The
+   * catalogue used to number attempts from one on the strength of a comment
+   * saying the store numbered its rows, which it never did; a block naming
+   * any other id resolves to nothing, which is correct, and one naming this
+   * id now resolves against the row that is actually on disk.
+   *
+   * `printedBars` is what the page calls each played bar. It travels on the
+   * score so the renderer can show printed numbers while the blocks and the
+   * transport go on working in played ones — a song whose first eight bars
+   * repeat otherwise has a heading and a sentence pointing at two different
+   * bar 9s.
    */
   const context = useMemo<CoachBlockContext>(
     () => ({
-      scores: [{ id: review.scoreId, title: score.title, bars: score.bars.length }],
-      attempts: [{ id: THIS_ATTEMPT, scoreId: review.scoreId, playedAt: new Date(review.startedAt).toISOString() }],
+      scores: [
+        {
+          id: review.scoreId,
+          title: score.title,
+          bars: score.bars.length,
+          printedBars: score.bars.map((bar) => bar.printedBar + 1),
+        },
+      ],
+      attempts: [
+        {
+          id: review.attemptId,
+          scoreId: review.scoreId,
+          playedAt: new Date(review.startedAt).toISOString(),
+        },
+      ],
       ...(progressFor ? { progressFor } : {}),
     }),
-    [review.scoreId, review.startedAt, score, progressFor],
+    [review.scoreId, review.attemptId, review.startedAt, score, progressFor],
   );
 
   /** The `tabExcerpt` slot's real component, at last (`slots.tsx`). */
@@ -143,7 +154,7 @@ export function SongReview({ review, pitch, onAction, onDismiss, progressFor }: 
           score,
           {
             scoreId: review.scoreId || null,
-            attemptNumber: THIS_ATTEMPT,
+            attemptId: review.attemptId,
             withProgress: progressFor !== undefined,
           },
           bag.current,
@@ -166,7 +177,7 @@ export function SongReview({ review, pitch, onAction, onDismiss, progressFor }: 
               t,
               finding,
               score,
-              { scoreId: review.scoreId || null, attemptNumber: THIS_ATTEMPT },
+              { scoreId: review.scoreId || null, attemptId: review.attemptId },
               bag.current,
             ),
           },

@@ -57,7 +57,7 @@ pub const DB_FILE_NAME: &str = "practice.db";
 /// Schema version this build writes and understands. A database whose
 /// `PRAGMA user_version` is higher was written by a newer Yames: refuse
 /// it (see `DbError::Newer`) rather than guess at columns that moved.
-pub const SCHEMA_VERSION: i64 = 2;
+pub const SCHEMA_VERSION: i64 = 3;
 
 /// How long a command waits for the store to finish opening before it
 /// gives up and answers as though there were no history. Opening is a
@@ -199,6 +199,38 @@ pub struct AttemptOnset {
     pub state: String,
     pub deviation_ms: Option<f64>,
     pub pass: i64,
+    /// Whether an accent the page wrote actually came out louder.
+    ///
+    /// `None` is the honest and the common answer — no accent was written,
+    /// the note was not played, the amplitudes around it were unusable — and
+    /// is what every row stored before this column existed says. Skipped when
+    /// absent so a row with nothing to report does not grow a null on the
+    /// wire. Reported and never scored while `LP C3` is open.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub accent_heard: Option<bool>,
+}
+
+/// A promise the coach made: come back to this passage on this day.
+///
+/// One per passage — the same song and the same two bar numbers — because
+/// pressing "come back to this" twice on the same bars moves the date rather
+/// than growing a list. A promise about bars 17–24 is not a promise about
+/// bars 17–20; the coach made each of them about something it had judged.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ScoreDue {
+    pub score_id: String,
+    /// Played-bar indices, inclusive — the numbering the transport takes.
+    pub range_start_bar: i64,
+    pub range_end_bar: i64,
+    /// Days since the Unix epoch, in the player's own local time. `srs.rs`'s
+    /// unit: "due today" is a question about a calendar, and an item due at
+    /// 09:00 that somebody picks up at 08:45 is due.
+    pub due_day: i64,
+    /// Why the coach asked, as the finding's own kind. `None` when nothing
+    /// said — an older row, or a promise made by hand.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
 }
 
 /// An onset the player produced that the score did not ask for.
@@ -457,6 +489,48 @@ ALTER TABLE scores ADD COLUMN display_name TEXT;
 ALTER TABLE scores ADD COLUMN source_b64   TEXT;
 "#;
 
+/// v3 — what the coach heard, and what it promised.
+///
+/// Two things, both of which had nowhere to live and were being kept
+/// somewhere that could not hold them.
+///
+/// `attempt_onsets.accent_heard` is the scorer's own verdict on an accent the
+/// page wrote (`score.rs`, `ACCENT_LOUDER_BY`): `1` it came out louder, `0` it
+/// did not, and NULL when there was nothing to say — no accent written, the
+/// note was not played, the amplitudes around it were unusable. Nullable for
+/// that reason and not for the storage: "I did not hear it" and "there was
+/// nothing to hear" are different facts and a review that drew a quiet mark
+/// for the second would be accusing a player of missing an accent nobody
+/// wrote. Every row already on disk is NULL, which is exactly right — the
+/// store did not keep accents when they were written.
+///
+/// `score_due` is "come back to this" (`COACH_UX.md` A5). It was four keys in
+/// `settings.json`, which `src/songs/due.ts` said at the time was where it
+/// belonged until there was a schema; this is the schema. One promise per
+/// passage, so the primary key is the passage: pressing the button twice on
+/// the same bars moves the date rather than growing a list nobody asked for,
+/// and the database enforces that rather than the frontend remembering to.
+/// `reason` is why the coach asked — the finding's own kind — so the
+/// notebook (C1) can one day say what the promise was about rather than only
+/// when it falls due.
+///
+/// Its own migration. One and two are left exactly as they shipped: v1 and v2
+/// databases exist on this machine already.
+const MIGRATION_V3: &str = r#"
+ALTER TABLE attempt_onsets ADD COLUMN accent_heard INTEGER;
+
+CREATE TABLE score_due (
+    score_id        TEXT NOT NULL REFERENCES scores(id) ON DELETE CASCADE,
+    range_start_bar INTEGER NOT NULL,
+    range_end_bar   INTEGER NOT NULL,
+    due_day         INTEGER NOT NULL,
+    reason          TEXT,
+    PRIMARY KEY (score_id, range_start_bar, range_end_bar)
+);
+-- "What is due today or overdue", which is the only question the library asks.
+CREATE INDEX score_due_day ON score_due(due_day);
+"#;
+
 // ---------------------------------------------------------------------------
 // The store
 // ---------------------------------------------------------------------------
@@ -527,6 +601,9 @@ impl Db {
         }
         if from < 2 {
             tx.execute_batch(MIGRATION_V2).map_err(DbError::from)?;
+        }
+        if from < 3 {
+            tx.execute_batch(MIGRATION_V3).map_err(DbError::from)?;
         }
         // `user_version` is a pragma, not a statement, so it is set on the
         // connection rather than inside the batch — but still before the
@@ -991,8 +1068,9 @@ impl Db {
         {
             let mut stmt = tx
                 .prepare(
-                    "INSERT INTO attempt_onsets (attempt_id, onset_id, pass, state, deviation_ms)
-                     VALUES (?1, ?2, ?3, ?4, ?5)",
+                    "INSERT INTO attempt_onsets
+                         (attempt_id, onset_id, pass, state, deviation_ms, accent_heard)
+                     VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
                 )
                 .map_err(DbError::from)?;
             for o in &attempt.onsets {
@@ -1001,7 +1079,8 @@ impl Db {
                     o.id,
                     o.pass,
                     o.state,
-                    o.deviation_ms
+                    o.deviation_ms,
+                    o.accent_heard,
                 ])
                 .map_err(DbError::from)?;
             }
@@ -1069,7 +1148,8 @@ impl Db {
         let mut onsets: HashMap<String, Vec<AttemptOnset>> = HashMap::new();
         {
             let sql = format!(
-                "SELECT attempt_id, onset_id, pass, state, deviation_ms FROM attempt_onsets
+                "SELECT attempt_id, onset_id, pass, state, deviation_ms, accent_heard
+                 FROM attempt_onsets
                  WHERE attempt_id IN ({placeholders}) ORDER BY pass ASC, onset_id ASC"
             );
             let mut stmt = self.conn.prepare(&sql).map_err(DbError::from)?;
@@ -1082,6 +1162,7 @@ impl Db {
                             pass: r.get(2)?,
                             state: r.get(3)?,
                             deviation_ms: r.get(4)?,
+                            accent_heard: r.get(5)?,
                         },
                     ))
                 })
@@ -1121,6 +1202,72 @@ impl Db {
             attempt.extra_onsets = extras.remove(&attempt.id).unwrap_or_default();
         }
         Ok(())
+    }
+
+    // -- come back to this -------------------------------------------------
+
+    /// Write a promise down, or move the day of one already made.
+    ///
+    /// Upsert on the passage rather than insert, because the passage is what
+    /// a promise is about: the coach asking twice about bars 17–24 means the
+    /// second date, not two reminders.
+    pub fn save_due(&mut self, due: &ScoreDue) -> DbResult<()> {
+        self.conn
+            .execute(
+                "INSERT INTO score_due
+                     (score_id, range_start_bar, range_end_bar, due_day, reason)
+                 VALUES (?1, ?2, ?3, ?4, ?5)
+                 ON CONFLICT(score_id, range_start_bar, range_end_bar) DO UPDATE SET
+                     due_day = excluded.due_day, reason = excluded.reason",
+                rusqlite::params![
+                    due.score_id,
+                    due.range_start_bar,
+                    due.range_end_bar,
+                    due.due_day,
+                    due.reason,
+                ],
+            )
+            .map(|_| ())
+            .map_err(DbError::from)
+    }
+
+    /// Every promise on file, the soonest due first.
+    ///
+    /// The whole list rather than "what is due today": the caller knows what
+    /// day it is in the player's own timezone and the database does not, and
+    /// a store that decided would be deciding in UTC.
+    pub fn list_due(&self) -> DbResult<Vec<ScoreDue>> {
+        let mut stmt = self
+            .conn
+            .prepare(
+                "SELECT score_id, range_start_bar, range_end_bar, due_day, reason
+                 FROM score_due ORDER BY due_day ASC, score_id ASC",
+            )
+            .map_err(DbError::from)?;
+        let rows = stmt
+            .query_map([], |r| {
+                Ok(ScoreDue {
+                    score_id: r.get(0)?,
+                    range_start_bar: r.get(1)?,
+                    range_end_bar: r.get(2)?,
+                    due_day: r.get(3)?,
+                    reason: r.get(4)?,
+                })
+            })
+            .map_err(DbError::from)?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(DbError::from)
+    }
+
+    /// Forget one — the player played it, or does not want the reminder.
+    pub fn clear_due(&mut self, score_id: &str, start_bar: i64, end_bar: i64) -> DbResult<()> {
+        self.conn
+            .execute(
+                "DELETE FROM score_due
+                 WHERE score_id = ?1 AND range_start_bar = ?2 AND range_end_bar = ?3",
+                rusqlite::params![score_id, start_bar, end_bar],
+            )
+            .map(|_| ())
+            .map_err(DbError::from)
     }
 }
 
@@ -1419,18 +1566,23 @@ mod tests {
                     state: "hit".into(),
                     deviation_ms: Some(-3.0),
                     pass: 0,
+                    // An accent the page wrote that did come out louder.
+                    accent_heard: Some(true),
                 },
                 AttemptOnset {
                     id: 1,
                     state: "miss".into(),
                     deviation_ms: None,
                     pass: 0,
+                    // Nothing to say: the note was not played at all.
+                    accent_heard: None,
                 },
                 AttemptOnset {
                     id: 2,
                     state: "softAbsent".into(),
                     deviation_ms: None,
                     pass: 1,
+                    accent_heard: Some(false),
                 },
             ],
             extra_onsets: vec![AttemptExtra {
@@ -1462,6 +1614,7 @@ mod tests {
             "attempts",
             "attempt_onsets",
             "attempt_extras",
+            "score_due",
         ] {
             let found: i64 = db
                 .conn
@@ -1770,6 +1923,166 @@ mod tests {
         assert_eq!(list[0].name, None);
         assert_eq!(db.get_score_source("old").unwrap(), None);
         assert!(db.get_score("old").unwrap().is_some());
+    }
+
+    /// The v3 things arrive on a database that already has attempts in it.
+    ///
+    /// This is the upgrade every machine that ran the earlier builds of this
+    /// wave will do, and the fact worth pinning is the NULL: an attempt
+    /// scored before the column existed has nothing to say about accents, and
+    /// must not come back claiming one was missed.
+    #[test]
+    fn a_v2_database_gains_the_accents_and_the_promises_and_keeps_its_attempts() {
+        let conn = Connection::open_in_memory().unwrap();
+        conn.execute_batch(MIGRATION_V1).unwrap();
+        conn.execute_batch(MIGRATION_V2).unwrap();
+        conn.pragma_update(None, "user_version", 2).unwrap();
+        conn.execute(
+            "INSERT INTO scores (id, title, artist, source_file, format,
+                                 track_index, track_name, imported_at, json)
+             VALUES ('old', 'Blackbird', 'The Beatles', 'b.gp5', 'gp', 0, 'Acoustic', 7, ?1)",
+            [sample_score("old").to_string()],
+        )
+        .unwrap();
+        conn.execute(
+            "INSERT INTO attempts (id, score_id, started_at, range_start_bar, range_end_bar,
+                                   tempo_percent, passes, score, hits, misses, extras,
+                                   mean_dev_ms, mad_ms)
+             VALUES ('a1', 'old', 10, 0, 7, 100, 1, 80, 8, 0, 0, 0, 0)",
+            [],
+        )
+        .unwrap();
+        conn.execute(
+            "INSERT INTO attempt_onsets (attempt_id, onset_id, pass, state, deviation_ms)
+             VALUES ('a1', 0, 0, 'hit', -3.0)",
+            [],
+        )
+        .unwrap();
+
+        let mut db = Db::from_connection(conn, PathBuf::from(":memory:")).unwrap();
+        let v: i64 = db
+            .conn
+            .pragma_query_value(None, "user_version", |r| r.get(0))
+            .unwrap();
+        assert_eq!(v, SCHEMA_VERSION);
+
+        let found = db
+            .query_attempts(&AttemptQuery {
+                score_id: "old".into(),
+                include_onsets: true,
+                ..Default::default()
+            })
+            .unwrap();
+        assert_eq!(found.len(), 1);
+        assert_eq!(found[0].onsets.len(), 1);
+        assert_eq!(
+            found[0].onsets[0].accent_heard, None,
+            "an attempt scored before the column existed has nothing to say about accents"
+        );
+
+        // And the promises table is there and usable on the same database.
+        db.save_due(&ScoreDue {
+            score_id: "old".into(),
+            range_start_bar: 16,
+            range_end_bar: 23,
+            due_day: 20_000,
+            reason: Some("rushing".into()),
+        })
+        .unwrap();
+        assert_eq!(db.list_due().unwrap().len(), 1);
+    }
+
+    #[test]
+    fn an_accent_that_was_heard_survives_the_store() {
+        let mut db = Db::open_in_memory().unwrap();
+        db.save_score(&sample_score("s1"), None, None, 1).unwrap();
+        db.save_attempt(&sample_attempt("a1", "s1", 100, 0, 7))
+            .unwrap();
+
+        let found = db
+            .query_attempts(&AttemptQuery {
+                score_id: "s1".into(),
+                include_onsets: true,
+                ..Default::default()
+            })
+            .unwrap();
+        let onsets = &found[0].onsets;
+        // Three different things, and the store must not flatten them into
+        // two: heard, not heard, and nothing to say.
+        assert_eq!(onsets[0].accent_heard, Some(true));
+        assert_eq!(onsets[1].accent_heard, None);
+        assert_eq!(onsets[2].accent_heard, Some(false));
+    }
+
+    /// A row with nothing to report does not grow a `null` on the wire — the
+    /// same rule `score.rs` keeps for `OnsetResult`.
+    #[test]
+    fn an_onset_with_nothing_to_say_about_accents_says_nothing() {
+        let quiet = AttemptOnset {
+            id: 0,
+            state: "hit".into(),
+            deviation_ms: Some(1.0),
+            pass: 0,
+            accent_heard: None,
+        };
+        let json = serde_json::to_string(&quiet).unwrap();
+        assert!(!json.contains("accentHeard"), "{json}");
+        let loud = AttemptOnset {
+            accent_heard: Some(false),
+            ..quiet
+        };
+        assert!(serde_json::to_string(&loud).unwrap().contains("\"accentHeard\":false"));
+    }
+
+    // -- come back to this ------------------------------------------------
+
+    #[test]
+    fn one_promise_per_passage_and_the_second_moves_the_day() {
+        let mut db = Db::open_in_memory().unwrap();
+        db.save_score(&sample_score("s1"), None, None, 1).unwrap();
+        let due = |start: i64, end: i64, day: i64| ScoreDue {
+            score_id: "s1".into(),
+            range_start_bar: start,
+            range_end_bar: end,
+            due_day: day,
+            reason: Some("rushing".into()),
+        };
+
+        db.save_due(&due(16, 23, 20_010)).unwrap();
+        db.save_due(&due(16, 23, 20_003)).unwrap();
+        // A promise about bars 17–24 is not a promise about bars 17–20.
+        db.save_due(&due(16, 19, 20_007)).unwrap();
+
+        let all = db.list_due().unwrap();
+        assert_eq!(all.len(), 2, "the same passage twice is one promise");
+        // Soonest first, which is the order the library reads them in.
+        assert_eq!(all[0].due_day, 20_003);
+        assert_eq!(all[0].range_end_bar, 23);
+        assert_eq!(all[1].due_day, 20_007);
+
+        db.clear_due("s1", 16, 23).unwrap();
+        let left = db.list_due().unwrap();
+        assert_eq!(left.len(), 1);
+        assert_eq!(left[0].range_end_bar, 19);
+    }
+
+    /// Forgetting a song forgets what was promised about it. A reminder to
+    /// come back to a piece that is no longer in the library is a mark on a
+    /// row that does not exist.
+    #[test]
+    fn deleting_a_song_takes_its_promises_with_it() {
+        let mut db = Db::open_in_memory().unwrap();
+        db.save_score(&sample_score("s1"), None, None, 1).unwrap();
+        db.save_due(&ScoreDue {
+            score_id: "s1".into(),
+            range_start_bar: 0,
+            range_end_bar: 3,
+            due_day: 20_000,
+            reason: None,
+        })
+        .unwrap();
+        db.delete_score("s1").unwrap();
+        assert_eq!(db.list_due().unwrap().len(), 0);
     }
 
     #[test]

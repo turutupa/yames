@@ -58,11 +58,32 @@ export { checkBlockShape } from "./validate";
 // What the app knows, and can be pointed at
 // ---------------------------------------------------------------------------
 
-/** A song the player has imported. `bars` is how many bars it has, as played. */
-export type ScoreRef = { id: string; title: string; bars: number };
+/**
+ * A song the player has imported. `bars` is how many bars it has, as played.
+ *
+ * `printedBars` is the number PRINTED on the page for each played bar, in
+ * played order, counted the way a page counts — so `printedBars[8]` is what
+ * the ninth bar of the performance is called on the score. Optional, because
+ * a caller that has no score to hand (the gallery, a test) has nothing to
+ * look up; without it the printed numbers are the played ones, which is the
+ * truth for every song that has no repeats in it.
+ */
+export type ScoreRef = {
+  id: string;
+  title: string;
+  bars: number;
+  printedBars?: readonly number[];
+};
 
-/** One run at a song, as the store keeps it. */
-export type AttemptRef = { id: number; scoreId: string; playedAt?: string };
+/**
+ * One run at a song, as the store keeps it.
+ *
+ * `id` is a STRING. `attempts.id` is a UUID the frontend mints
+ * (`newAttemptId`), not a row number, and this type said `number` on the
+ * strength of a comment in `spec.ts` that claimed otherwise — so no block
+ * naming an attempt could ever have resolved against a real store.
+ */
+export type AttemptRef = { id: string; scoreId: string; playedAt?: string };
 
 /** A preset or a jam: something with a name a player gave it. */
 export type NamedRef = { id: string; name: string };
@@ -145,13 +166,37 @@ export type ResolvedChordShape = {
   count: number;
 };
 
+/**
+ * The bars a resolved block carries, both ways.
+ *
+ * `fromBar` / `toBar` are PLAYED and are what the slots act on — the
+ * transport, the range, the excerpt. `printedFrom` / `printedTo` are what the
+ * page calls them and are the only pair the renderer shows. Both are here so
+ * that a heading and a sentence about the same passage cannot disagree, which
+ * is what happened when each side decided for itself.
+ */
+export type ResolvedBars = {
+  fromBar: number;
+  toBar: number;
+  printedFrom: number;
+  printedTo: number;
+};
+
 export type ResolvedBlock =
   | { type: "text"; text: string }
   | ResolvedFretboard
   | ResolvedChordShape
-  | { type: "tabExcerpt"; score: ScoreRef; fromBar: number; toBar: number; attempt: AttemptRef | null }
-  | { type: "progress"; score: ScoreRef; fromBar: number; toBar: number; points: ProgressPoint[] }
-  | { type: "take"; attempt: AttemptRef; score: ScoreRef | null; fromBar: number | null; toBar: number | null }
+  | ({ type: "tabExcerpt"; score: ScoreRef; attempt: AttemptRef | null } & ResolvedBars)
+  | ({ type: "progress"; score: ScoreRef; points: ProgressPoint[] } & ResolvedBars)
+  | {
+      type: "take";
+      attempt: AttemptRef;
+      score: ScoreRef | null;
+      fromBar: number | null;
+      toBar: number | null;
+      printedFrom: number | null;
+      printedTo: number | null;
+    }
   | { type: "compare"; older: AttemptRef; newer: AttemptRef; score: ScoreRef | null }
   | { type: "action"; action: CoachAction; label: ActionLabel };
 
@@ -254,8 +299,32 @@ function findScore(ctx: CoachBlockContext, id: string): ScoreRef | null {
   return ctx.scores?.find((score) => score.id === id) ?? null;
 }
 
-function findAttempt(ctx: CoachBlockContext, id: number): AttemptRef | null {
+function findAttempt(ctx: CoachBlockContext, id: string): AttemptRef | null {
   return ctx.attempts?.find((attempt) => attempt.id === id) ?? null;
+}
+
+/**
+ * What a played bar is called on the page.
+ *
+ * The one place the two numberings meet. A block names played bars because
+ * that is what the app acts on; a player reads printed numbers off the tab,
+ * and a piece whose first eight bars repeat has played bar 9 printed as bar
+ * 1. Without the score's own mapping the answer is the played number, which
+ * is right for every song without repeats and is the only honest guess for
+ * one whose score is not loaded.
+ */
+function printedBar(score: ScoreRef, playedBar: number): number {
+  return score.printedBars?.[playedBar - 1] ?? playedBar;
+}
+
+/** A passage, in both numberings, so the renderer never has to choose. */
+function barsOf(score: ScoreRef, fromBar: number, toBar: number): ResolvedBars {
+  return {
+    fromBar,
+    toBar,
+    printedFrom: printedBar(score, fromBar),
+    printedTo: printedBar(score, toBar),
+  };
 }
 
 /** The bars run the right way round and both land inside the song. */
@@ -280,17 +349,16 @@ function resolveAction(
       if (!score) return { reason: "unknownScore", detail: `no song with the id "${action.score}"` };
       const wrong = barsFit(score, action.fromBar, action.toBar);
       if (wrong) return { reason: "barsOutsideScore", detail: wrong };
+      // The BUTTON says the printed numbers, because that is what the player
+      // is looking at; the action it carries keeps the played ones, because
+      // that is what the transport takes.
+      const from = printedBar(score, action.fromBar);
+      const to = printedBar(score, action.toBar);
       return {
         label:
           action.bpm === undefined
-            ? {
-                key: "coachBlocks.action.loopBars",
-                values: { from: action.fromBar, to: action.toBar },
-              }
-            : {
-                key: "coachBlocks.action.loopBarsAt",
-                values: { from: action.fromBar, to: action.toBar, bpm: action.bpm },
-              },
+            ? { key: "coachBlocks.action.loopBars", values: { from, to } }
+            : { key: "coachBlocks.action.loopBarsAt", values: { from, to, bpm: action.bpm } },
       };
     }
 
@@ -324,7 +392,11 @@ function resolveAction(
     }
 
     case "comeBack":
-      return { label: { key: `coachBlocks.action.comeBack.${action.when}`, values: {} } };
+      // One day has its own word in every language this app speaks, and
+      // "come back to this in 1 days" is not a sentence a teacher says.
+      return action.days === 1
+        ? { label: { key: "coachBlocks.action.comeBack.tomorrow", values: {} } }
+        : { label: { key: "coachBlocks.action.comeBack.inDays", values: { days: action.days } } };
   }
 }
 
@@ -388,7 +460,14 @@ function resolveBlock(
             detail: `attempt ${block.attempt} is not a run at "${score.title}"`,
           };
       }
-      return { block: { type: "tabExcerpt", score, fromBar: block.fromBar, toBar: block.toBar, attempt } };
+      return {
+        block: {
+          type: "tabExcerpt",
+          score,
+          ...barsOf(score, block.fromBar, block.toBar),
+          attempt,
+        },
+      };
     }
 
     case "progress": {
@@ -404,7 +483,12 @@ function resolveBlock(
           detail: `bars ${block.fromBar}–${block.toBar} of "${score.title}" have been played ${points?.length ?? 0} time(s)`,
         };
       return {
-        block: { type: "progress", score, fromBar: block.fromBar, toBar: block.toBar, points: [...points] },
+        block: {
+          type: "progress",
+          score,
+          ...barsOf(score, block.fromBar, block.toBar),
+          points: [...points],
+        },
       };
     }
 
@@ -415,7 +499,17 @@ function resolveBlock(
       const score = findScore(ctx, attempt.scoreId);
       const wantsBars = block.fromBar !== undefined || block.toBar !== undefined;
       if (!wantsBars)
-        return { block: { type: "take", attempt, score, fromBar: null, toBar: null } };
+        return {
+          block: {
+            type: "take",
+            attempt,
+            score,
+            fromBar: null,
+            toBar: null,
+            printedFrom: null,
+            printedTo: null,
+          },
+        };
       // Asking for part of a take means the part has to be checkable, and it
       // is the song that says how many bars there are.
       if (!score)
@@ -427,7 +521,7 @@ function resolveBlock(
       const toBar = block.toBar ?? score.bars;
       const wrong = barsFit(score, fromBar, toBar);
       if (wrong) return { reason: "barsOutsideScore", detail: wrong };
-      return { block: { type: "take", attempt, score, fromBar, toBar } };
+      return { block: { type: "take", attempt, score, ...barsOf(score, fromBar, toBar) } };
     }
 
     case "compare": {

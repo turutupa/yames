@@ -69,6 +69,8 @@ export interface SongEngine {
   setGain: (lane: SongLane, value: number) => void;
   setMute: (lane: SongLane, muted: boolean) => void;
   setCountInBars: (bars: number) => void;
+  /** Turn recording on or off for the loaded song. Remembered per song. */
+  setTakes: (takes: boolean) => void;
   /** Only the band's rows this file actually has, in playing order. */
   lanes: SongRole[];
   /** Tracks in the file this band has nobody to play, by name. */
@@ -334,11 +336,30 @@ export function useSongEngine({
     [songId],
   );
 
+  /**
+   * Record takes of this song, or stop.
+   *
+   * Stored beside the band because it is the same kind of fact — something
+   * the player decided about this piece — and because a second store key for
+   * one boolean is a second thing to keep in step. The microphone is never
+   * opened by this: it is a switch, and `useSongTakes` is what acts on it.
+   */
+  const setTakes = useCallback(
+    (takes: boolean) =>
+      setMixSetting((current) => {
+        const next = { ...current, takes };
+        if (songId) void saveMixSetting(songId, next).catch(() => {});
+        return next;
+      }),
+    [songId],
+  );
+
   return {
     mixSetting,
     setGain,
     setMute,
     setCountInBars,
+    setTakes,
     lanes,
     leftOut: band?.leftOut ?? [],
     loaded,

@@ -12,7 +12,7 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CoachBlocks } from "./CoachBlocks";
-import { GALLERY_CONTEXT, GALLERY_SCENES } from "./gallery";
+import { GALLERY_CONTEXT, GALLERY_SCENES, NEWER as GALLERY_NEWER, OLDER as GALLERY_OLDER } from "./gallery";
 import { resolveCoachAnswer } from "./resolve";
 import { BLOCK_TYPES } from "./spec";
 import type { CoachAction } from "./types";
@@ -36,6 +36,25 @@ describe("every block in the catalogue", () => {
       [...document.querySelectorAll("[data-block]")].map((n) => n.getAttribute("data-block")),
     );
     expect([...drawn].sort()).toEqual([...BLOCK_TYPES].sort());
+  });
+
+  /**
+   * A gallery scene is written as `unknown`, so the compiler cannot tell it
+   * when the catalogue changes underneath it. This can. W14 changed
+   * `comeBack` from three named occasions to a number of days and the "All
+   * six actions" scene went on saying `when: "tomorrow"` — it silently drew
+   * five blocks instead of six, and the only thing that noticed was a
+   * Playwright test counting boxes.
+   */
+  it("keeps every scene but the one about dropping, whole", () => {
+    for (const scene of GALLERY_SCENES) {
+      const { dropped } = resolveCoachAnswer(scene.answer, GALLERY_CONTEXT);
+      if (scene.name === "What gets dropped") {
+        expect(dropped.length, scene.name).toBeGreaterThan(0);
+        continue;
+      }
+      expect(dropped.map((d) => `${String(d.type)}: ${d.detail}`), scene.name).toEqual([]);
+    }
   });
 });
 
@@ -73,14 +92,47 @@ describe("what the blocks are drawn with", () => {
     });
     expect(screen.getByText(/Bars 17–20 of Wish You Were Here/)).toBeInTheDocument();
   });
+
+  /**
+   * The heading says the numbers on the PAGE. The block named played bars
+   * 9–12 — which is what the transport and the excerpt take — and on a song
+   * whose first eight bars are played twice, the page calls them 1–4.
+   */
+  it("says the bars the page calls them, not the ones the app counts", () => {
+    const repeated = {
+      scores: [
+        {
+          id: "repeat",
+          title: "Round Twice",
+          bars: 16,
+          printedBars: [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8],
+        },
+      ],
+    };
+    const { blocks } = resolveCoachAnswer(
+      { blocks: [{ type: "tabExcerpt", score: "repeat", fromBar: 9, toBar: 12 }] },
+      repeated,
+    );
+    render(
+      <CoachBlocks
+        blocks={blocks}
+        slots={{
+          tabExcerpt: ({ fromBar, toBar }) => <b data-testid="real-tab">{`${fromBar}-${toBar}`}</b>,
+        } as Partial<CoachBlockSlots> as CoachBlockSlots}
+      />,
+    );
+    expect(screen.getByText(/Bars 1–4 of Round Twice/)).toBeInTheDocument();
+    // And the slot still got the played ones, because that is what it loops.
+    expect(screen.getByTestId("real-tab")).toHaveTextContent("9-12");
+  });
 });
 
 describe("the three drawings still being built", () => {
   const answer = {
     blocks: [
       { type: "tabExcerpt", score: "wish-you-were-here", fromBar: 1, toBar: 4 },
-      { type: "take", attempt: 412 },
-      { type: "compare", attempts: [411, 412] },
+      { type: "take", attempt: GALLERY_NEWER },
+      { type: "compare", attempts: [GALLERY_OLDER, GALLERY_NEWER] },
     ],
   };
 
@@ -93,11 +145,11 @@ describe("the three drawings still being built", () => {
     // A take of a song that is not open has no title to use, and an id is a
     // filename, not something a player reads.
     const { blocks } = resolveCoachAnswer(
-      { blocks: [{ type: "take", attempt: 7 }, { type: "compare", attempts: [7, 8] }] },
+      { blocks: [{ type: "take", attempt: "a7" }, { type: "compare", attempts: ["a7", "a8"] }] },
       {
         attempts: [
-          { id: 7, scoreId: "some-file-id" },
-          { id: 8, scoreId: "some-file-id" },
+          { id: "a7", scoreId: "some-file-id" },
+          { id: "a8", scoreId: "some-file-id" },
         ],
       },
     );

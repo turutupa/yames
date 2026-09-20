@@ -1168,6 +1168,50 @@ export async function queryAttempts(query: AttemptQuery): Promise<Attempt[]> {
 }
 
 // ---------------------------------------------------------------------------
+// "Come back to this" (COACH_UX A5)
+//
+// The promise the coach's fourth button makes. It was four keys in
+// `settings.json` until migration three gave it a table; `src/songs/due.ts`
+// moves what it finds across once and reads from here afterwards.
+// ---------------------------------------------------------------------------
+
+/** One passage of one song, and the day to look at it again. */
+export type ScoreDue = {
+  scoreId: string;
+  /** Played-bar indices, inclusive — the numbering the transport takes. */
+  rangeStartBar: number;
+  rangeEndBar: number;
+  /** Days since the Unix epoch, in the player's own local time. */
+  dueDay: number;
+  /** Why the coach asked, as the finding's own kind. */
+  reason?: string;
+};
+
+/** Write one down, or move the day of one already made. */
+export async function saveDue(due: ScoreDue): Promise<void> {
+  return invoke("save_due", { due });
+}
+
+/**
+ * Every promise on file, the soonest due first.
+ *
+ * The whole list rather than "what is due today": the day is a question about
+ * the player's own calendar, and a store that answered it would answer in UTC.
+ */
+export async function listDue(): Promise<ScoreDue[]> {
+  return invoke<ScoreDue[]>("list_due");
+}
+
+/** Forget one — the player played it, or does not want the reminder. */
+export async function clearDue(
+  scoreId: string,
+  startBar: number,
+  endBar: number,
+): Promise<void> {
+  return invoke("clear_due", { scoreId, startBar, endBar });
+}
+
+// ---------------------------------------------------------------------------
 // Drill runs (UI_DECISIONS U3.3)
 //
 // Their own store, not a field on SavedSession: a saved session needs a

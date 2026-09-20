@@ -13,6 +13,7 @@ import {
   takesDirSize,
 } from "../../../ipc";
 import { sortTakes } from "../../../jam";
+import { TAKES_INTRO_KEY } from "../../../jam/takes";
 import type { Jam, JamTake } from "../../../jam";
 
 /**
@@ -104,15 +105,6 @@ interface UseJamTakesArgs {
   /** Write `Jam.takes` on the loaded jam. The record owns the switch. */
   onSetTakes: (next: boolean) => void;
 }
-
-/**
- * The store key that says the dialog has been read.
- *
- * The APP's, not the jam's: what a take is only has to be explained once, and
- * a per-jam flag would ask again for every jam in the library — which reads
- * as the app not trusting the answer you already gave.
- */
-const TAKES_INTRO_KEY = "jam.takesIntroSeen";
 
 export function useJamTakes({
   jam,
