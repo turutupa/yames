@@ -14,7 +14,7 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 
 echo "==> regenerating"
-npm run tauri -- ios init --skip-targets-install
+bash "$(dirname "$0")/ios-generate-project.sh"
 
 # A build leaves its own output inside the project directory; only tracked
 # files are the question here.

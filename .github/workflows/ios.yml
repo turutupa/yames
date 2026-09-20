@@ -149,7 +149,7 @@ jobs:
 
       - name: Generate the Xcode project
         if: steps.project.outputs.committed == 'no'
-        run: npm run tauri -- ios init --skip-targets-install
+        run: bash scripts/ci/ios-generate-project.sh
 
       - name: Upload the generated project
         if: steps.project.outputs.committed == 'no'
