@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   accuracyPct,
   accuracyRatio,
+  bandForScore,
   commentForScore,
   computeLegacyScore,
+  feedbackToneForScore,
   gradeForScore,
   scoredBeats,
 } from "./reportStats";
@@ -250,5 +252,65 @@ describe("commentForScore", () => {
       commentForScore(20, 50),
     ]);
     expect(comments.size).toBe(7);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// One table for what a score means (ROADMAP 1.7, P3-COACH-3)
+// ---------------------------------------------------------------------------
+
+describe("bandForScore", () => {
+  it("puts each boundary in the band that starts at it", () => {
+    expect(bandForScore(100)).toBe("flawless");
+    expect(bandForScore(95)).toBe("flawless");
+    expect(bandForScore(94)).toBe("strong");
+    expect(bandForScore(85)).toBe("strong");
+    expect(bandForScore(84)).toBe("solid");
+    expect(bandForScore(70)).toBe("solid");
+    expect(bandForScore(69)).toBe("fair");
+    expect(bandForScore(55)).toBe("fair");
+    expect(bandForScore(54)).toBe("building");
+    expect(bandForScore(40)).toBe("building");
+    expect(bandForScore(39)).toBe("early");
+    expect(bandForScore(0)).toBe("early");
+  });
+
+  it("never disagrees with the letter grade the Rust report uses", () => {
+    // `gradeForScore` is pinned to `session.rs::report`. If these two
+    // drift, the coach is saying two things about one session.
+    const expected: Record<string, string> = {
+      flawless: "S",
+      strong: "A",
+      solid: "B",
+      fair: "C",
+      building: "D",
+      early: "F",
+    };
+    for (let score = 0; score <= 100; score++) {
+      expect(gradeForScore(score), `score ${score}`).toBe(expected[bandForScore(score)]);
+    }
+  });
+});
+
+describe("feedbackToneForScore", () => {
+  it("collapses six bands onto the four beat colours, in order", () => {
+    expect(feedbackToneForScore(96)).toBe("perfect");
+    expect(feedbackToneForScore(85)).toBe("perfect");
+    expect(feedbackToneForScore(84)).toBe("good");
+    expect(feedbackToneForScore(70)).toBe("good");
+    expect(feedbackToneForScore(69)).toBe("ok");
+    expect(feedbackToneForScore(55)).toBe("ok");
+    expect(feedbackToneForScore(54)).toBe("miss");
+    expect(feedbackToneForScore(0)).toBe("miss");
+  });
+
+  it("is monotonic — a better score never gets a worse colour", () => {
+    const rank = { miss: 0, ok: 1, good: 2, perfect: 3 };
+    let previous = -1;
+    for (let score = 0; score <= 100; score++) {
+      const current = rank[feedbackToneForScore(score)];
+      expect(current, `score ${score}`).toBeGreaterThanOrEqual(previous);
+      previous = current;
+    }
   });
 });

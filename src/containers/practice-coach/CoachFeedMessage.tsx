@@ -4,7 +4,7 @@ import { FEEDBACK_COLORS } from "../../hooks/useEvaluation";
 import { SessionNarrativeView } from "../../coach/SessionNarrativeView";
 import type { FeedAffordance, FeedChip, FeedMessage, SessionReport, SessionSegment } from "../../types";
 import { formatTime, formatDuration } from "./coachCardHelpers";
-import { accuracyPct, scoredBeats } from "../../coach/reportStats";
+import { accuracyPct, bandForScore, scoredBeats } from "../../coach/reportStats";
 import { HintCard } from "../onboarding/hints/HintCard";
 import { useFirstTimeHint } from "../onboarding/hints/useFirstTimeHint";
 import { shouldHintCoachAsk } from "../onboarding/hints/triggers";
@@ -314,11 +314,20 @@ function TtsThinkingSpinner() {
 
 function EndReportSummary({ report }: { report: SessionReport }) {
   const { t } = useTranslation();
-  const scoreQualifier = (score: number): string =>
-    score >= 90 ? t("coachReport.qualifier.excellent") :
-    score >= 75 ? t("coachReport.qualifier.good") :
-    score >= 55 ? t("coachReport.qualifier.fair") :
-    t("coachReport.qualifier.keepPracticing");
+  // One word for the whole session, on the same boundaries as the ring
+  // beside it and the narrative below it. It used to break at 90/75/55
+  // of its own accord, so a 72 was called "Fair" under a ring coloured
+  // good and over a paragraph that began "72 is a real foundation".
+  // ROADMAP 1.7, P3-COACH-3.
+  const scoreQualifier = (score: number): string => {
+    switch (bandForScore(score)) {
+      case "flawless":
+      case "strong": return t("coachReport.qualifier.excellent");
+      case "solid": return t("coachReport.qualifier.good");
+      case "fair": return t("coachReport.qualifier.fair");
+      default: return t("coachReport.qualifier.keepPracticing");
+    }
+  };
 
   // In Default mode with subdivision > 1, show accent (downbeat) accuracy:
   // only the quarter-beat positions count toward the score. For Pro mode
