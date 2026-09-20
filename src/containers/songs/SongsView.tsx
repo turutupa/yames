@@ -123,6 +123,9 @@ const TEMPO_STEPS = [50, 60, 70, 80, 90, 100];
 /** The four English ordinals have their own keys; everything else is `other`. */
 const ORDINAL_KEYS = ["one", "two", "few"];
 
+/** One run of bars, as a value two chips can be compared on. */
+const rangeKey = (startBar: number, endBar: number) => `${String(startBar)}:${String(endBar)}`;
+
 /**
  * "3rd time round" — which key says it in this language.
  *
@@ -351,6 +354,12 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
 
   const meter = score ? meterAt(score, range.startBar) : null;
   const barsInRange = range.endBar - range.startBar + 1;
+
+  /** The bar runs the player has already given a name of their own. */
+  const named = useMemo(
+    () => new Set(session.portions.map((p) => rangeKey(p.startBar, p.endBar))),
+    [session.portions],
+  );
 
   return (
     <div
@@ -674,7 +683,17 @@ export function SongsView({ session, currentBeat, isPlaying, themeId }: SongsVie
                 <div className="songs-section-chips">
                   {score.sections.map((section, i) => {
                     const chosen =
-                      range.startBar === section.startBar && range.endBar === section.endBar;
+                      range.startBar === section.startBar &&
+                      range.endBar === section.endBar &&
+                      // One chip lights for one set of bars. A player who
+                      // saved the chorus under a name of their own has two
+                      // chips over exactly those bars, and both used to come
+                      // on together — which says the range is two things.
+                      // The name they chose wins: it is the more particular
+                      // of the two, and it carries its own speed. The
+                      // section stays on the row, unlit, because it is still
+                      // a way in and it is what the file called the passage.
+                      !named.has(rangeKey(section.startBar, section.endBar));
                     return (
                       <button
                         key={`${section.name}-${i}`}

@@ -375,6 +375,29 @@ test.describe("the chosen portion, on the tab", () => {
     await expect(page.locator(".songs-loop-chip")).toHaveAttribute("aria-pressed", "false");
   });
 
+  /**
+   * One chip lights for one set of bars (W22 item 4).
+   *
+   * The shot's saved portion is "The chorus" over bars 5–8, which is exactly
+   * what the file calls Chorus — so the stage had two chips lit over the same
+   * four bars, which says the range is two things. The name the player chose
+   * wins; the section stays on the row, unlit, because it is still a way in.
+   */
+  test("lights one chip when a saved portion covers a section's own bars", async ({ page }) => {
+    await openShot(page, "songs-portion", { width: 1400, height: 900 });
+
+    const lit = page.locator(".songs-strip-sections [aria-pressed='true']");
+    await expect(lit, "two chips are lit over the same bars").toHaveCount(1);
+    await expect(lit, "the section lit instead of the name the player gave it").toHaveText(
+      "The chorus",
+    );
+
+    // The section is still there to press, and pressing it still works.
+    const section = page.getByRole("button", { name: "Chorus", exact: true });
+    await expect(section, "the file's own section went off the row").toHaveCount(1);
+    await expect(section).toHaveAttribute("aria-pressed", "false");
+  });
+
   /** A portion kept under a name sits beside the sections and comes back. */
   test("keeps a named portion beside the sections", async ({ page }) => {
     await openShot(page, "songs-portion", { width: 1400, height: 900 });
