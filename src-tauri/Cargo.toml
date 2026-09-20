@@ -97,6 +97,15 @@ rusqlite = { version = "0.37", features = ["bundled"] }
 # under tauri itself, so this adds NO package to Cargo.lock and NOTHING to
 # the installer. MIT OR Apache-2.0.
 base64 = "0.22"
+# One Yames at a time, so that double-clicking a Guitar Pro file while the app
+# is already open hands the path to the running window instead of starting a
+# second copy — which would fight the first for the audio device and the
+# settings store. Windows uses a named mutex and WM_COPYDATA, Linux a
+# Unix-domain socket, macOS nothing at all (LaunchServices already forwards to
+# the running app, and the plugin is a no-op there). A few kilobytes of code
+# and no transitive downloads: everything it needs is already in the graph
+# under tauri. Apache-2.0 OR MIT, like Tauri itself.
+tauri-plugin-single-instance = "2"
 
 [features]
 default = []

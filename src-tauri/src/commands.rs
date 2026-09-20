@@ -4223,6 +4223,206 @@ pub fn read_offered_file(
 }
 
 // ---------------------------------------------------------------------------
+// W19 — the file opens with Yames
+//
+// Two ways in, and they are genuinely different: a COLD START, where the path
+// is in `std::env::args()` before a window exists, and a RUNNING app, where
+// Windows or the desktop hands the path to a second process and
+// `tauri-plugin-single-instance` forwards its argv to the one already open.
+// Both land here, and after that they are the same thing.
+//
+// The webview never supplies a path. It asks whether the OS handed one over,
+// and gets back the bytes of a file THIS PROCESS was told to open — which is
+// why there is no guard here like `downloads::check_offer`: there is nothing
+// for a caller to point somewhere else.
+// ---------------------------------------------------------------------------
+
+/// Files the OS asked Yames to open, oldest first, not yet collected.
+///
+/// A queue and not one slot: `yames.exe a.gp5 b.gp5` is a thing a file
+/// manager will do when two files are selected, and dropping one silently
+/// would be worse than asking twice.
+#[derive(Default)]
+pub struct PendingOpenState(pub Mutex<Vec<std::path::PathBuf>>);
+
+/// One file the OS handed over, on its way to the importer.
+#[derive(Debug, Clone, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OpenedFile {
+    pub file_name: String,
+    /// The bytes, base64 — the shape `decodeSource` on the other side takes.
+    pub base64: String,
+}
+
+/// Take the paths out of a command line and remember the ones we can open.
+///
+/// Returns how many were taken, so the caller knows whether to bring the
+/// window forward. `argv[0]` is the executable and is skipped; everything
+/// else is a candidate, and anything that is not a song file we understand is
+/// ignored rather than complained about — a flag or a stray argument is not
+/// the player asking for anything.
+pub fn queue_opened_paths(state: &PendingOpenState, argv: &[String]) -> usize {
+    let mut queued = 0;
+    let mut held = state.0.lock().unwrap();
+    for arg in argv.iter().skip(1) {
+        let path = std::path::PathBuf::from(arg);
+        let openable = path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .map(crate::downloads::is_openable)
+            .unwrap_or(false);
+        if !openable || !path.is_file() {
+            continue;
+        }
+        if held.iter().any(|p| p == &path) {
+            continue;
+        }
+        held.push(path);
+        queued += 1;
+    }
+    queued
+}
+
+/// A second Yames was launched on a file while one was already running, or
+/// this one was started with a path. Bring the window forward and say so.
+pub fn announce_opened_paths(app: &AppHandle, argv: &[String]) {
+    let queued = queue_opened_paths(&app.state::<PendingOpenState>(), argv);
+    if queued == 0 {
+        return;
+    }
+    // The player double-clicked a file: the window they expect to see is the
+    // main one, not the widget they left running in a corner.
+    if let Some(floating) = app.get_webview_window("floating") {
+        let _ = floating.hide();
+    }
+    if let Some(main) = app.get_webview_window("main") {
+        let _ = main.show();
+        let _ = main.unminimize();
+        let _ = main.set_focus();
+    }
+    let _ = app.emit("songs-open-file", ());
+}
+
+/// The next file the OS asked Yames to open, read.
+///
+/// `None` when there is nothing waiting, which is the ordinary case on every
+/// launch that was not a double-click. The frontend asks once on mount and
+/// again whenever `songs-open-file` arrives.
+#[tauri::command(async)]
+pub fn take_pending_open(
+    pending: State<'_, PendingOpenState>,
+) -> Result<Option<OpenedFile>, String> {
+    use base64::Engine as _;
+    let path = {
+        let mut held = pending.0.lock().unwrap();
+        if held.is_empty() {
+            return Ok(None);
+        }
+        held.remove(0)
+    };
+    let file_name = path
+        .file_name()
+        .map(|n| n.to_string_lossy().into_owned())
+        .unwrap_or_default();
+    // Sixty-four megabytes, the same ceiling a caught download gets and for
+    // the same reason: a song is kilobytes, and a disk image is not a song.
+    let meta = std::fs::metadata(&path).map_err(|e| format!("{file_name}: {e}"))?;
+    if meta.len() > crate::downloads::MAX_OFFER_BYTES {
+        return Err(format!("{file_name} is too big to be a song"));
+    }
+    let bytes = std::fs::read(&path).map_err(|e| format!("{file_name}: {e}"))?;
+    Ok(Some(OpenedFile {
+        file_name,
+        base64: base64::engine::general_purpose::STANDARD.encode(bytes),
+    }))
+}
+
+#[cfg(test)]
+mod opened_paths_tests {
+    use super::{queue_opened_paths, PendingOpenState};
+    use std::path::PathBuf;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    /// A temp directory of this test's own. Never a real data directory.
+    fn temp_dir(tag: &str) -> PathBuf {
+        let nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let dir = std::env::temp_dir().join(format!("yames-w19-open-{tag}-{nanos}"));
+        std::fs::create_dir_all(&dir).unwrap();
+        dir
+    }
+
+    #[test]
+    fn takes_the_song_files_off_a_command_line_and_nothing_else() {
+        let dir = temp_dir("argv");
+        for name in ["riff.gp5", "score.musicxml", "notes.txt"] {
+            std::fs::write(dir.join(name), b"bytes").unwrap();
+        }
+        let state = PendingOpenState::default();
+        let argv: Vec<String> = vec![
+            dir.join("yames.exe").to_string_lossy().into_owned(),
+            dir.join("riff.gp5").to_string_lossy().into_owned(),
+            // Not a song file.
+            dir.join("notes.txt").to_string_lossy().into_owned(),
+            // A song file that is not there.
+            dir.join("ghost.gp5").to_string_lossy().into_owned(),
+            // A flag, which is not a path at all.
+            "--some-flag".into(),
+            dir.join("score.musicxml").to_string_lossy().into_owned(),
+        ];
+
+        assert_eq!(queue_opened_paths(&state, &argv), 2);
+        let held = state.0.lock().unwrap();
+        let names: Vec<_> = held
+            .iter()
+            .map(|p| p.file_name().unwrap().to_string_lossy().into_owned())
+            .collect();
+        assert_eq!(names, ["riff.gp5", "score.musicxml"]);
+        drop(held);
+
+        // `argv[0]` is the executable, and would be a song file only if
+        // somebody renamed Yames to `riff.gp5`. It is skipped either way.
+        let state = PendingOpenState::default();
+        assert_eq!(
+            queue_opened_paths(
+                &state,
+                &[dir.join("riff.gp5").to_string_lossy().into_owned()],
+            ),
+            0,
+        );
+
+        std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn the_same_file_twice_is_queued_once() {
+        let dir = temp_dir("twice");
+        std::fs::write(dir.join("riff.gp5"), b"bytes").unwrap();
+        let state = PendingOpenState::default();
+        let argv: Vec<String> = vec![
+            "yames.exe".into(),
+            dir.join("riff.gp5").to_string_lossy().into_owned(),
+            dir.join("riff.gp5").to_string_lossy().into_owned(),
+        ];
+        assert_eq!(queue_opened_paths(&state, &argv), 1);
+        // And again from a second launch, while the first is still waiting to
+        // be collected: two double-clicks on one file are one file.
+        assert_eq!(queue_opened_paths(&state, &argv), 0);
+        assert_eq!(state.0.lock().unwrap().len(), 1);
+        std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn an_ordinary_launch_queues_nothing() {
+        let state = PendingOpenState::default();
+        assert_eq!(queue_opened_paths(&state, &["yames.exe".to_string()]), 0);
+        assert!(state.0.lock().unwrap().is_empty());
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Tests — the pure halves of the beat-group / free-mode commands. The
 // `#[tauri::command]` wrappers need a live `State` + `AppHandle`, so the
 // validation and the FREE-mode invariant are extracted above and tested here.

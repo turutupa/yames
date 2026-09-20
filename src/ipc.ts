@@ -1217,6 +1217,36 @@ export function onDownloadOffer(callback: (offer: DownloadOffer) => void) {
 }
 
 // ---------------------------------------------------------------------------
+// The file opens with Yames (W19, `plans/SONGS.md` S0.9)
+//
+// "Open with Yames" on a Guitar Pro or MusicXML file, from a cold start or
+// while Yames is already running. The webview never names a path: it asks
+// whether the OS handed this process one, and gets the bytes back.
+// ---------------------------------------------------------------------------
+
+/** A file the OS asked Yames to open. */
+export type OpenedFile = {
+  fileName: string;
+  /** The bytes, base64 — `decodeSource` turns it back into a file. */
+  base64: string;
+};
+
+/**
+ * The next file the OS asked Yames to open, or null.
+ *
+ * Null on every launch that was not a double-click, which is nearly all of
+ * them. Taking it empties the queue, so a file is only ever opened once.
+ */
+export async function takePendingOpen(): Promise<OpenedFile | null> {
+  return invoke<OpenedFile | null>("take_pending_open");
+}
+
+/** Yames was asked to open a file while it was already running. */
+export function onOpenFile(callback: () => void) {
+  return listen("songs-open-file", () => callback());
+}
+
+// ---------------------------------------------------------------------------
 // "Come back to this" (COACH_UX A5)
 //
 // The promise the coach's fourth button makes. It was four keys in

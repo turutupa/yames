@@ -154,7 +154,7 @@ use commands::{
     clear_song, load_song, set_song_mix, set_song_range,
     // W19 — the download is caught, and the file opens with Yames (S0.9).
     default_downloads_dir, dismiss_download_offer, read_offered_file, start_download_watch,
-    stop_download_watch,
+    stop_download_watch, take_pending_open,
     EngineState, JamGainState, JamKitState, JamVoiceState, SongSourceState, TakeState,
 };
 use engine::MetronomeEngine;
@@ -204,6 +204,16 @@ pub fn run() {
     // tauri_plugin_decorum is Win/Linux only — its init() panics on macOS (cocoa null ptr).
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default()
+        // W19 — one Yames at a time, and it MUST be the first plugin
+        // registered (the plugin's own documentation is explicit about it).
+        //
+        // Double-clicking a Guitar Pro file while Yames is open starts a
+        // second process; this hands that process's command line to the
+        // window already running and exits it, rather than letting two
+        // copies fight over the audio device and `settings.json`.
+        .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
+            commands::announce_opened_paths(app, &argv);
+        }))
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_updater::Builder::new().build())
         // The native folder picker behind `pick_kit_folder`. Only the
@@ -400,6 +410,21 @@ pub fn run() {
             // open. `None` here is the whole of "off": no thread, no folder
             // listed, and `read_offered_file` with nothing to read.
             app.manage(downloads::WatchState::default());
+            // W19 — and the files the OS asked Yames to open. Managed before
+            // the cold-start command line is read into it, below.
+            app.manage(commands::PendingOpenState::default());
+
+            // The cold start: `yames.exe "C:\...\riff.gp5"`, which is what
+            // "Open with Yames" does when nothing is running yet. Read here
+            // rather than in the frontend because `std::env::args()` is the
+            // process's, and the webview has no process. The window is not
+            // brought forward — it is about to open anyway — so this only
+            // fills the queue; `take_pending_open` is what empties it, once
+            // React has mounted and can put the track picker up.
+            {
+                let argv: Vec<String> = std::env::args().collect();
+                commands::queue_opened_paths(&app.state::<commands::PendingOpenState>(), &argv);
+            }
 
             // Start audio output device polling
             engine::start_audio_device_polling(app.handle().clone());
@@ -716,6 +741,7 @@ pub fn run() {
             stop_download_watch,
             dismiss_download_offer,
             read_offered_file,
+            take_pending_open,
             pick_kit_folder,
             inspect_kit_folder,
             start_take,

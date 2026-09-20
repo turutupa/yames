@@ -232,6 +232,30 @@ pub fn is_watched(name: &str) -> bool {
     }
 }
 
+/// Extensions Yames will open a file for when the OS hands it one — "Open
+/// with Yames", or a path on the command line.
+///
+/// Wider than [`WATCHED_EXTENSIONS`] by three, and the difference is consent.
+/// The watcher offers files nobody asked it about, so it stays off anything
+/// ambiguous; this list answers a file the player deliberately chose, and
+/// refusing their `.xml` because it MIGHT be a bank statement would be
+/// refusing to do the thing they just asked for. If it does not parse, the
+/// importer says so in a sentence.
+pub const OPENABLE_EXTENSIONS: [&str; 10] = [
+    "gp", "gp3", "gp4", "gp5", "gpx", "musicxml", "mxl", "xml", "alphatex", "tex",
+];
+
+/// True for a file the player has explicitly asked Yames to open.
+pub fn is_openable(name: &str) -> bool {
+    match name.rsplit_once('.') {
+        Some((stem, ext)) if !stem.is_empty() => {
+            let ext = ext.to_ascii_lowercase();
+            OPENABLE_EXTENSIONS.contains(&ext.as_str())
+        }
+        _ => false,
+    }
+}
+
 /// Epoch milliseconds, saturating at zero. `SystemTime` before the epoch is a
 /// clock somebody has set wrongly, not a reason to panic in a watcher.
 pub fn epoch_ms(time: SystemTime) -> i64 {
@@ -456,6 +480,22 @@ mod tests {
         // Windows writes what the site sent it, capitals and all.
         assert!(is_watched("Riff.GP5"));
         assert!(is_watched("Riff.MusicXML"));
+    }
+
+    #[test]
+    fn opening_a_file_takes_three_the_watcher_will_not_offer() {
+        // The player chose this one, so the ambiguity that keeps `.xml` out
+        // of the watcher does not apply.
+        for good in ["riff.xml", "riff.alphatex", "riff.tex", "riff.gp5", "riff.MXL"] {
+            assert!(is_openable(good), "{good} should open");
+        }
+        for bad in ["riff.pdf", "riff", ".gp5", "riff.gp5.part", ""] {
+            assert!(!is_openable(bad), "{bad} should not open");
+        }
+        // Everything the watcher offers, Yames will also open.
+        for ext in WATCHED_EXTENSIONS {
+            assert!(is_openable(&format!("riff.{ext}")), "{ext}");
+        }
     }
 
     #[test]
