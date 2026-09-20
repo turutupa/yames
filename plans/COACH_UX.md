@@ -104,6 +104,39 @@ a score and a memory. This document is about manners.
   rush there?", "what should I do tomorrow?", "show me that bar"). A text
   box exists but is not the front door. Every answer is grounded in
   computed facts, and says so when it has none.
+- **D3 — The coach answers in components, not paragraphs.** *open; the
+  owner's idea, 2026-09-20:* "a JSON renderer for generative UI … feed the
+  AI the available components … guitar shapes, fretboards and what not."
+  A teacher points at the neck; they do not describe it. So an answer is a
+  short list of **blocks** from a fixed catalogue, as JSON, and one
+  renderer draws them wherever the coach speaks (the card, the review, the
+  arrival line):
+  `text` · `fretboard` (scale or notes on the neck, a position
+  highlighted) · `chordShape` · `tabExcerpt` (bars of the loaded score,
+  coloured by how they were played) · `progress` (this passage over time)
+  · `take` (play back these bars of that take) · `compare` (two takes side
+  by side) · `action` (the A5 button: loop, ramp, load, remind).
+  Three rules keep it honest:
+  1. **Blocks carry references, never content.** `{ "type": "chordShape",
+     "chord": "Am7", "shape": 2 }`, `{ "type": "tabExcerpt", "score": "…",
+     "bars": [17, 20], "attempt": 412 }`. The theory code, the score and the
+     store fill in the frets, the notes and the colours. A model never
+     writes a fret number (roadmap principle 3); an unknown reference
+     renders as nothing, not as a guess.
+  2. **The output is constrained.** The catalogue is a JSON schema the
+     model is held to (grammar-constrained locally, schema-constrained on a
+     hosted model), so the renderer never sees a malformed answer and a
+     bigger model only chooses better, never differently shaped.
+  3. **The rules speak the same language.** The rule-computed verdict
+     (`SONGS.md` S0.6) is emitted as the same blocks. One renderer, one
+     catalogue, and the coach looks identical with no model loaded — the
+     model only widens what can be asked.
+  Proposed default: yes, and the review screen in the second Songs wave is
+  the first thing built on it (`text` + `tabExcerpt` + `action`), which
+  means the renderer and the catalogue exist before any model work starts.
+  Most of the drawings already exist as components (chord diagrams and the
+  neck in Jam's cheat sheet, the tab from Songs); they need a props shape a
+  block can name.
 - **D2 — The model, and who runs it.** *deferred* to the tier rewrite
   (`SONGS.md` S0.7): heavier local models are the direction, with an
   optional paid tier for players whose machine cannot run one. The
