@@ -1694,6 +1694,55 @@ pub fn clear_score_schedule(timing_analyzer: State<SharedTimingAnalyzer>) -> Res
     Ok(())
 }
 
+/// The bands the review colours a note by — the scorer's own, not the
+/// review's.
+///
+/// `score.rs` judges a deviation against `window_thresholds` of a
+/// `tempo_aware_window_ms` taken over the schedule's SMALLEST GAP: a piece of
+/// sixteenths is judged on a sixteenth's tolerance, at the tempo it was
+/// actually played. A review that drew its own boundaries would colour a note
+/// green that the same pass scored as an "ok", and the player would be right
+/// to believe neither.
+///
+/// So the numbers come from here, computed the one way they are computed
+/// anywhere. Nothing is decided in this function; it is `score.rs`'s two
+/// lines, reachable from the frontend.
+#[derive(Debug, Clone, Copy, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TimingBands {
+    /// The matching window itself, in ms — anything past it is a miss.
+    pub window_ms: f64,
+    /// Absolute deviation, in ms: inside this is dead on.
+    pub perfect: f64,
+    /// …inside this is a shade early or late…
+    pub good: f64,
+    /// …and inside this is early or late enough to feel.
+    pub ok: f64,
+    /// The gap the window was taken over, in quarter notes. Reported so a
+    /// caller can say "judged on sixteenths" rather than guess.
+    pub smallest_gap_beats: f64,
+}
+
+#[tauri::command]
+pub fn score_timing_bands(
+    schedule: crate::score::ScoreSchedule,
+    quarter_ms: f64,
+) -> Result<TimingBands, String> {
+    if !quarter_ms.is_finite() || quarter_ms <= 0.0 {
+        return Err("a pass cannot be judged against a beat of no length".into());
+    }
+    let gap = crate::score::smallest_gap_beats(&schedule.onsets).unwrap_or(1.0);
+    let window_ms = crate::timing::tempo_aware_window_ms(quarter_ms * gap);
+    let t = crate::timing::window_thresholds(window_ms);
+    Ok(TimingBands {
+        window_ms,
+        perfect: t.perfect,
+        good: t.good,
+        ok: t.ok,
+        smallest_gap_beats: gap,
+    })
+}
+
 #[tauri::command]
 pub async fn get_session_report(
     session_acc: State<'_, SharedSessionAccumulator>,
@@ -3964,6 +4013,64 @@ mod sound_type_tests {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// A schedule of onsets `gap` quarter notes apart, which is all
+    /// `score_timing_bands` reads out of one.
+    fn evenly_spaced(count: u32, gap: f64) -> crate::score::ScoreSchedule {
+        crate::score::ScoreSchedule {
+            onsets: (0..count)
+                .map(|i| crate::score::ExpectedOnset {
+                    id: i,
+                    beat: f64::from(i) * gap,
+                    note_ids: vec![i],
+                    soft: false,
+                    accent: false,
+                })
+                .collect(),
+            length_beats: f64::from(count) * gap,
+            loops: false,
+        }
+    }
+
+    /// The review's colours are the scorer's, or they are a second opinion
+    /// the player has no way to reconcile with the number on screen.
+    #[test]
+    fn the_review_gets_the_same_bands_the_scorer_used() {
+        // 120 BPM, a piece of sixteenths: quarter 500 ms, gap 0.25.
+        let bands = score_timing_bands(evenly_spaced(8, 0.25), 500.0).unwrap();
+        let expected_window = crate::timing::tempo_aware_window_ms(500.0 * 0.25);
+        let expected = crate::timing::window_thresholds(expected_window);
+        assert!((bands.window_ms - expected_window).abs() < 1e-9);
+        assert!((bands.perfect - expected.perfect).abs() < 1e-9);
+        assert!((bands.good - expected.good).abs() < 1e-9);
+        assert!((bands.ok - expected.ok).abs() < 1e-9);
+        assert!((bands.smallest_gap_beats - 0.25).abs() < 1e-9);
+    }
+
+    /// A schedule of quarter notes is judged on a quarter's tolerance, and a
+    /// schedule of sixteenths on a sixteenth's. The two must differ, or the
+    /// "smallest gap" half of the rule is not being applied at all.
+    #[test]
+    fn a_denser_passage_is_judged_more_tightly() {
+        let quarters = score_timing_bands(evenly_spaced(8, 1.0), 500.0).unwrap();
+        let sixteenths = score_timing_bands(evenly_spaced(8, 0.25), 500.0).unwrap();
+        assert!(sixteenths.window_ms < quarters.window_ms);
+        assert!(sixteenths.ok < quarters.ok);
+    }
+
+    /// One onset has no gap. The fallback is a quarter note, which is what
+    /// `score.rs` falls back to, rather than a window of nothing.
+    #[test]
+    fn a_schedule_with_nothing_to_measure_falls_back_to_a_quarter() {
+        let bands = score_timing_bands(evenly_spaced(1, 1.0), 500.0).unwrap();
+        assert!((bands.smallest_gap_beats - 1.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn a_tempo_of_nothing_is_refused_rather_than_divided_by() {
+        assert!(score_timing_bands(evenly_spaced(4, 0.5), 0.0).is_err());
+        assert!(score_timing_bands(evenly_spaced(4, 0.5), f64::NAN).is_err());
+    }
 
     #[test]
     fn validate_beat_groups_accepts_a_full_16_beat_free_bar() {
